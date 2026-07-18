@@ -67,6 +67,7 @@ internal static class FilePathHelper
 
         var markdownFiles = Directory
             .EnumerateFiles(sourceDirectory, "*.md", SearchOption.AllDirectories)
+            .Where(filePath => !IsInHiddenDirectory(filePath, sourceDirectory))
             .OrderBy(path => path, StringComparer.OrdinalIgnoreCase)
             .ToArray();
 
@@ -114,6 +115,16 @@ internal static class FilePathHelper
         var pathSegments = path.Split(['/', '\\'], StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries);
 
         return pathSegments.Any(segment => string.Equals(segment, "..", StringComparison.Ordinal));
+    }
+
+    private static bool IsInHiddenDirectory(string filePath, string sourceDirectory)
+    {
+        var relativePath = NormalizePath(Path.GetRelativePath(sourceDirectory, filePath));
+        var directorySegments = relativePath.Split('/', StringSplitOptions.RemoveEmptyEntries);
+
+        return directorySegments
+            .Take(directorySegments.Length - 1)
+            .Any(segment => segment.StartsWith('.'));
     }
 
     private static string AppendDirectorySeparator(string path)

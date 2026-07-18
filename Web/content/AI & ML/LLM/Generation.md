@@ -1,8 +1,8 @@
 ---
 publish: true
 created: 2026-07-13T18:39:40.427Z
-modified: 2026-07-13T18:39:40.427Z
-published: 2026-07-13T18:39:40.427Z
+modified: 2026-07-18T11:30:02.610Z
+published: 2026-07-18T11:30:02.610Z
 topic:
   - AI & ML
 subtopic:
@@ -13,8 +13,6 @@ level:
 priority: High
 status: Done
 ---
-
-# Intro
 
 Generation is where the model produces output from a prompt and optional context. The engineering challenge is not getting any output — it is getting reliable, grounded, correctly formatted output at the right cost and latency. This requires controlling three things: how the model samples tokens (parameters), what evidence constrains the output (grounding), and what shape the output takes (structured output).
 
@@ -29,7 +27,7 @@ flowchart LR
     T --> O[Output]
 ```
 
-## Generation Parameters
+# Generation Parameters
 
 Generation parameters control how the model selects the next token from the predicted distribution. They shape randomness, repetition, length, and reproducibility.
 
@@ -51,7 +49,7 @@ Generation parameters control how the model selects the next token from the pred
 
 Note: some reasoning-focused models do not support certain sampling parameters or treat them as fixed. Check model-specific API docs before sending `temperature` or `top_p` — unsupported values may be silently ignored or cause request rejection depending on the provider.
 
-## Grounding and Citations
+# Grounding and Citations
 
 Grounding constrains model output to evidence from provided context rather than parametric memory. A model can produce fluent, confident text that is entirely fabricated — grounding makes the evidence link explicit and testable. See [[Hallucinations]] for broader coverage of why models fabricate.
 
@@ -70,7 +68,7 @@ The grounding contract defines the rules the model must follow:
 
 Grounding is especially critical in [[AI & ML/LLM/Context Engineering/RAG/RAG|RAG]] pipelines where the model must stay faithful to retrieved documents, but the same principles apply to any context-augmented generation: tool outputs, database results, or user-provided documents.
 
-## Context Assembly
+# Context Assembly
 
 Context assembly determines what evidence enters the prompt and in what order — the core of [[Context Engineering]]. Research on how models use long contexts ("Lost in the Middle", Liu et al. 2023) shows a U-shaped performance curve: models attend most to information at the beginning and end of the context, and least to information in the middle.
 
@@ -84,7 +82,7 @@ Practical implications:
 
 For RAG-specific context assembly patterns, see [[AI & ML/LLM/Context Engineering/RAG/RAG|RAG]].
 
-## Structured Output
+# Structured Output
 
 Structured output ensures the model returns data in a machine-parsable format (JSON, function calls, enums) rather than free text. Three mechanisms exist, in order of reliability:
 
@@ -96,33 +94,33 @@ Structured output ensures the model returns data in a machine-parsable format (J
 
 Decision rule: use constrained decoding (Structured Outputs) when you need a specific schema enforced. Use function calling when the model must choose among multiple tools. Use JSON mode only as a fallback when neither is available.
 
-## Pitfalls
+# Pitfalls
 
-### Temperature Miscalibration
+## Temperature Miscalibration
 
 Setting temperature too high for factual tasks introduces token-level randomness that manifests as hallucinated details, inconsistent formatting, and unreliable structured output. Setting it too low for creative tasks produces repetitive, generic output. Teams often set temperature once during prototyping and never revisit it.
 
 Mitigation: evaluate output quality at multiple temperature values on your specific task before locking in a production value. Monitor output quality over time — model updates can shift the effective behavior at the same temperature.
 
-### Lost-in-the-Middle Attention Failure
+## Lost-in-the-Middle Attention Failure
 
 When relevant evidence lands in the middle of a long context, the model underweights it relative to evidence at the start or end. This causes the model to miss critical information even though it was provided. The effect is strongest with 10+ context chunks.
 
 Mitigation: order chunks by relevance (most relevant first). For high-stakes queries, place key evidence at both the start and end of the context. Reduce context size by filtering lower-quality chunks rather than including everything.
 
-### Grounding Bypass Under Conflicting Evidence
+## Grounding Bypass Under Conflicting Evidence
 
 When retrieved sources contain conflicting information, models often silently pick one version instead of flagging the conflict. The output appears grounded but omits the contradiction. This is especially dangerous when sources from different time periods or jurisdictions disagree.
 
 Mitigation: instruct the model explicitly to surface conflicts rather than resolve them silently. Add a post-generation check that compares claims against all provided sources, not just the one the model cited.
 
-### Structured Output Schema Mismatch
+## Structured Output Schema Mismatch
 
 The model produces valid JSON that passes schema validation but contains semantically wrong values — wrong field mappings, hallucinated enum values that happen to be valid strings, or arrays with the right structure but wrong content. Schema compliance does not guarantee correctness.
 
 Mitigation: validate semantic content in addition to schema compliance. For critical fields, add explicit value constraints or post-generation checks. Test with adversarial inputs where the model must distinguish between structurally similar but semantically different schemas.
 
-## Tradeoffs
+# Tradeoffs
 
 | Factor | Low temperature with strict grounding | High temperature with loose grounding | Structured output | Free-text output |
 | --- | --- | --- | --- | --- |
@@ -132,7 +130,7 @@ Mitigation: validate semantic content in addition to schema compliance. For crit
 | Cost and latency | Higher if using verification pass | Lower -- single generation | Higher -- constrained decoding adds overhead | Lowest -- single unconstrained generation |
 | Best for | Factual QA and RAG and compliance | Brainstorming and creative writing and exploration | API responses and data extraction and tool integration | Conversational and explanatory and long-form |
 
-## Questions
+# Questions
 
 > [!QUESTION]- Why is adjusting temperature and top\_p simultaneously discouraged?
 > Both reshape the same token probability distribution but through different mechanisms. Temperature scales the logit distribution (sharpening or flattening), while top\_p truncates it to a cumulative mass threshold. Changing both creates unpredictable interactions — a low temperature already concentrates probability mass, so a low top\_p on top of it may have no additional effect, while a high temperature with a low top\_p creates conflicting signals. Tuning one while keeping the other at default keeps behavior predictable.
@@ -143,7 +141,7 @@ Mitigation: validate semantic content in addition to schema compliance. For crit
 > [!QUESTION]- When should constrained decoding be preferred over JSON mode for structured output?
 > Constrained decoding enforces a specific JSON schema at the token level during generation — the output is structurally compliant by construction. JSON mode only guarantees valid JSON without schema enforcement, so the model can return any valid JSON structure. Use constrained decoding when downstream systems depend on a specific schema (API contracts, database inserts, tool arguments). Use JSON mode when you want parsable output but the structure is flexible or exploratory.
 
-## References
+# References
 
 - [Chat Completions API — generation parameters reference (OpenAI)](https://platform.openai.com/docs/api-reference/chat/create)
 - [Messages API — temperature, top\_p, top\_k, stop\_sequences (Anthropic)](https://docs.anthropic.com/en/api/messages)

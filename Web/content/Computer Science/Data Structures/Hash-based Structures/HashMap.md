@@ -1,8 +1,8 @@
 ---
 publish: true
 created: 2026-07-12T14:27:20.419Z
-modified: 2026-07-12T14:27:20.419Z
-published: 2026-07-12T14:27:20.419Z
+modified: 2026-07-18T11:30:05.151Z
+published: 2026-07-18T11:30:05.151Z
 topic:
   - Computer Science
 subtopic:
@@ -14,8 +14,6 @@ priority: Medium
 status: Ready to Repeat
 ---
 
-# Intro
-
 A cache holds 50K active sessions and repeatedly looks up one session by its ID. Storing the pairs in a list forces an `O(n)` scan on every lookup, inspecting 25K entries on average. A hash map derives a bucket index directly from the key, so the lookup jumps to the one bucket that could hold it and compares only the entries there. Insert, lookup, and delete become `O(1)` on average.
 
 The structure remembers a mapping from key to value and nothing else. It does not retain insertion order, sort order, or the sequence in which resizes moved entries around. Two keys that hash to the same bucket coexist there, distinguished only by an equality check.
@@ -25,7 +23,7 @@ The structure remembers a mapping from key to value and nothing else. It does no
 > [!NOTE] Visualization pending
 > Planned StepTrace: a hash-table card showing a bucket array with keys hashed to slots, a collision landing two keys in one bucket (chained), and a resize rehashing every entry into a larger array. No matching renderer exists in `engine.js` yet.
 
-## Representation and invariants
+# Representation and invariants
 
 Two things define the structure: a backing array of buckets and a hash function that maps a key to an index into it, usually `hash(key) mod capacity`. When several keys map to the same index, a collision-resolution strategy keeps them apart:
 
@@ -42,7 +40,7 @@ Three invariants define a valid state:
 2. Keys that compare equal must hash equal — the `GetHashCode`/`Equals` contract. If it breaks, equal keys can land in different buckets and both survive as separate entries.
 3. A lookup recomputes the bucket, then resolves the collision by equality within it. Correctness depends on both the hash (which bucket) and equality (which entry).
 
-## Complexity
+# Complexity
 
 Bounds are per operation. The average column assumes a hash function that distributes keys close to uniformly and a load factor kept bounded by resizing; the worst column is what happens when that assumption fails.
 
@@ -57,7 +55,7 @@ The `O(1)` average bounds rest on two assumptions stated together: a good hash k
 
 Insert is amortized, not strictly `O(1)`. Any single insert can trip the load-factor threshold and rehash the whole array in `O(n)`. Spread across the inserts that grew the map to that size, the rehash cost averages to `O(1)` each — an amortized-sequence guarantee, distinct from the single-op worst case sitting in the next column. Filling a 1M-entry map from default capacity rehashes roughly 20 times along the way; pre-sizing with `new Dictionary<TKey,TValue>(expectedCount)` skips that churn.
 
-## Where the representation breaks
+# Where the representation breaks
 
 Each boundary traces back to the bucket-and-hash mechanism.
 
@@ -71,7 +69,7 @@ Each boundary traces back to the bucket-and-hash mechanism.
 
 **Open addressing adds clustering and tombstones.** Probe sequences pile entries into runs (primary clustering) that lengthen every probe, and a delete cannot simply empty a slot — that would truncate a probe chain — so it leaves a tombstone that later lookups must skip and that only a rebuild reclaims.
 
-## Reference drawer
+# Reference drawer
 
 > [!ABSTRACT]- Bucket array with chaining
 >
@@ -106,7 +104,7 @@ Each boundary traces back to the bucket-and-hash mechanism.
 >
 > `Dictionary<TKey, TValue>` is the default map in modern .NET. `ConcurrentDictionary` covers concurrent writes (a plain map corrupts its bucket array under a data race), `FrozenDictionary` optimizes build-once/read-many hot paths, and `SortedDictionary` trades `O(1)` for ordered iteration. Passing an initial `capacity` pre-sizes the array and skips the grow-and-rehash cycles.
 
-## Questions
+# Questions
 
 > [!QUESTION]- What assumptions make hash-map operations `O(1)` on average?
 > A hash function that distributes keys close to uniformly, so buckets stay short, and a load factor bounded by resizing, so buckets do not fill up. Both must hold. Without them, keys concentrate in a few buckets and each operation walks a long chain toward `O(n)`.
@@ -120,7 +118,7 @@ Each boundary traces back to the bucket-and-hash mechanism.
 > [!QUESTION]- When is a balanced tree preferable to a hash map?
 > When the workload needs ordered iteration, range queries, or nearest-key lookups. A hash map scatters keys across buckets and cannot answer those without a full scan and sort; a balanced tree keeps keys sorted at `O(log n)` per operation, which is the price for that ordering.
 
-## References
+# References
 
 - [`Dictionary<TKey, TValue>` class (Microsoft Learn)](https://learn.microsoft.com/en-us/dotnet/api/system.collections.generic.dictionary-2) — API reference for the primary .NET hash map, with the hash-contract requirements and capacity semantics.
 - [`Dictionary.cs` in dotnet/runtime](https://github.com/dotnet/runtime/blob/main/src/libraries/System.Private.CoreLib/src/System/Collections/Generic/Dictionary.cs) — runtime source showing the `buckets[]`/`entries[]` chaining layout, prime-based resize, and per-entry `next` indices.

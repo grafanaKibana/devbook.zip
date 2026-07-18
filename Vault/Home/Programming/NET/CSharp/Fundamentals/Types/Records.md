@@ -10,13 +10,11 @@ priority: Medium
 status: Ready to Repeat
 publish: true
 ---
-# Intro
-
 Records are C# types (introduced in C# 9 for classes, C# 10 for structs) designed for data-centric models. The compiler generates value-based equality (`Equals`, `GetHashCode`, `==`, `!=`), a human-readable `ToString`, deconstruction, and `with`-expression support. Records eliminate the boilerplate of writing equality and formatting for DTOs, events, messages, and other types whose identity is defined by their content rather than their reference.
 
-## Deeper Explanation
+# Deeper Explanation
 
-### What the Compiler Generates
+## What the Compiler Generates
 
 For a positional record:
 
@@ -38,7 +36,7 @@ The compiler produces:
 
 You can override any of these. Adding extra properties or methods is free — the generated members incorporate them.
 
-### Positional vs Nominal Syntax
+## Positional vs Nominal Syntax
 
 ```csharp
 // Positional — primary constructor, auto-generated properties and Deconstruct
@@ -55,7 +53,7 @@ public record Order
 
 Both get the same equality, `ToString`, and `with` support. Use positional for simple data carriers; nominal when you need validation, computed properties, or custom accessors.
 
-### with-expressions
+## with-expressions
 
 Non-destructive mutation — creates a new instance with selected properties changed:
 
@@ -70,9 +68,9 @@ Console.WriteLine(ReferenceEquals(p1, p2)); // False
 
 Under the hood, `with` calls the copy constructor and then sets the changed properties. Works on both `record class` and `record struct`.
 
-## Record Variants
+# Record Variants
 
-### record class (default)
+## record class (default)
 
 `record` or `record class` — a reference type allocated on the heap with value-based equality.
 
@@ -87,7 +85,7 @@ Console.WriteLine(ReferenceEquals(p1, p2)); // False — different heap objects
 
 Positional properties are `get`/`init` by default — the type is immutable after construction.
 
-### abstract record
+## abstract record
 
 Cannot be instantiated directly. Subrecords must provide implementations for abstract members. Used to define a record hierarchy with a shared base:
 
@@ -112,7 +110,7 @@ public record Truck(string Make, double PayloadTons) : Vehicle(Make)
 
 The `EqualityContract` in each derived record ensures that a `Car` and `Truck` with the same `Make` are never considered equal.
 
-### sealed record
+## sealed record
 
 Cannot be further derived. Useful for leaf types in a record hierarchy or when you want to lock down the equality contract:
 
@@ -121,7 +119,7 @@ public sealed record ApiKey(string Value, DateTime CreatedAt);
 // record DerivedKey(...) : ApiKey(...) { }  // Compile error
 ```
 
-### record struct
+## record struct
 
 Value-type record. Positional properties are `get`/`set` by default (mutable):
 
@@ -134,7 +132,7 @@ c.Lat = 51.50;  // Allowed — record struct positional properties are mutable
 
 Use when you want value-based equality and `with`-expressions but need stack allocation and no GC pressure.
 
-### readonly record struct
+## readonly record struct
 
 Immutable value-type record. Positional properties become `get`/`init`:
 
@@ -148,7 +146,7 @@ var pink = red with { R = 255, G = 182, B = 193 };
 
 This is the recommended default when you want a small, immutable data carrier with value equality and no heap allocation.
 
-### partial record
+## partial record
 
 Same as partial classes — splits the record definition across files. Commonly used with source generators:
 
@@ -163,7 +161,7 @@ public partial record UserDto
 }
 ```
 
-### Modifier Compatibility
+## Modifier Compatibility
 
 | Modifier combination | record class | record struct |
 |---|---|---|
@@ -174,7 +172,7 @@ public partial record UserDto
 | `readonly` | N/A | Yes (`readonly record struct`) |
 | `ref` | No | No |
 
-## Record Inheritance
+# Record Inheritance
 
 Only `record class` types support inheritance, and only from other `record class` types (not from plain classes or structs):
 
@@ -192,7 +190,7 @@ Key rules:
 - `with`-expressions work across the hierarchy — the copy constructor is virtual.
 - Positional parameters from the base must be forwarded in the derived constructor.
 
-## Records vs C# 12 Primary Constructors
+# Records vs C# 12 Primary Constructors
 
 C# 12 added primary constructors to **plain** classes and structs, which looks like record syntax but behaves differently — a common point of confusion:
 
@@ -201,7 +199,7 @@ C# 12 added primary constructors to **plain** classes and structs, which looks l
 
 Use a record when you want the data-carrier machinery; use a class primary constructor purely to cut constructor boilerplate (e.g. injecting dependencies).
 
-## `required` and Validation
+# `required` and Validation
 
 - Combine records with **`required`** to force a nominal property without a positional parameter: `public record User { public required string Email { get; init; } }`.
 - Validate by adding logic in a property initializer or a body block on a positional parameter:
@@ -216,7 +214,7 @@ Use a record when you want the data-carrier machinery; use a class primary const
 
 - **System.Text.Json** binds JSON to a record's primary constructor by parameter name (use `[JsonConstructor]` to disambiguate when there are multiple constructors).
 
-## Pitfalls
+# Pitfalls
 
 1. **Record struct mutability by default** — Unlike `record class` (which uses `init` setters), `record struct` positional properties are `get`/`set`. This catches people off guard. Always prefer `readonly record struct` unless you explicitly need mutation.
 
@@ -236,7 +234,7 @@ Console.WriteLine(a.Items.Count); // 3 — same list instance
 
 5. **ToString performance** — The generated `ToString` uses reflection in Debug builds and can be slow for logging in hot paths. Override `ToString` if you need high-throughput string representation.
 
-## Questions
+# Questions
 
 > [!QUESTION]- In `record Wrapper(List<int> Items)`, if `var b = a with { };` and an item is added to `b.Items`, does `a` observe the change, and why?
 > Yes — `a` sees the change. `with` performs a *shallow copy*: it copies references, not the underlying objects. Both `a.Items` and `b.Items` point to the same `List<int>` instance. Furthermore, `a == b` was `true` before the mutation (same reference in both), but the equality check still uses `List<T>.Equals` which is reference equality — so it remains `true` even after the content changes. To get proper deep value semantics, use immutable collections (`ImmutableList<T>`, `ImmutableArray<T>`) or override `Equals` to compare content.
@@ -261,9 +259,9 @@ Console.WriteLine(a.Items.Count); // 3 — same list instance
 > - **Mutable record structs** — if a key is mutated after insertion, its hash code changes and it becomes unreachable in the dictionary. Use `readonly record struct` for keys.
 > - **Reference-type properties** — if the record struct contains a reference-type property (e.g. `string[]`), the generated `GetHashCode` calls that property's `GetHashCode`, which for arrays is reference-based (not content-based). Two structurally identical keys with different array instances will hash differently. Override `GetHashCode` or use immutable value-semantic collections.
 
-## Links
+# References
 
-- [Records - C# reference](https://learn.microsoft.com/dotnet/csharp/language-reference/builtin-types/record)
+- [Records - C# reference](https://learn.microsoft.com/dotnet/csharp/language-reference/builtin-types/record) — authoritative syntax and semantics for record classes, record structs, value equality, and nondestructive mutation.
 - [Create record types - C# tutorial](https://learn.microsoft.com/dotnet/csharp/whats-new/tutorials/records)
 - [Positional syntax for property definition](https://learn.microsoft.com/dotnet/csharp/language-reference/builtin-types/record#positional-syntax-for-property-definition)
 - [Equality in record types - C# spec](https://learn.microsoft.com/dotnet/csharp/language-reference/builtin-types/record#equality-in-inheritance-hierarchies)

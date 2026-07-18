@@ -13,8 +13,6 @@ publish: true
 status: Creation
 ---
 
-# Intro
-
 Google Cloud Platform (GCP) is a public cloud platform known for its data analytics, machine learning, and Kubernetes capabilities (Google invented Kubernetes). For .NET engineers, GCP offers strong managed services for data-intensive and AI workloads.
 
 ```bash
@@ -29,9 +27,9 @@ const { FolderStructureMap } = await dc.require("Assets/components/devbook-folde
 return FolderStructureMap;
 ```
 
-## Compute
+# Compute
 
-### Cloud Functions
+## Cloud Functions
 Serverless, event-driven functions. Triggers: HTTP, Pub/Sub, Cloud Storage events, Firestore events. Scales to zero. Gen 2 functions run on Cloud Run under the hood.
 
 **When to reach for it**: Lightweight event handlers, webhooks, and data transformation pipelines. Equivalent to AWS Lambda and Azure Functions. For longer-running or containerized workloads, use Cloud Run instead.
@@ -41,9 +39,9 @@ Serverless, event-driven functions. Triggers: HTTP, Pub/Sub, Cloud Storage event
 gcloud functions deploy my-function --runtime dotnet8 --trigger-http --allow-unauthenticated
 ```
 
-## Storage
+# Storage
 
-### Cloud Storage
+## Cloud Storage
 Object storage for any file type. Globally distributed. Storage classes: Standard (hot), Nearline (monthly access), Coldline (quarterly), Archive (yearly). Equivalent to AWS S3 and Azure Blob Storage.
 
 **When to reach for it**: ML datasets, model artifacts, backups, static assets. Default object storage on GCP. Lifecycle policies automatically move objects to cheaper storage classes as they age.
@@ -55,9 +53,9 @@ gsutil cp ./data.csv gs://my-bucket/data/data.csv
 gsutil -m rsync -r ./data/ gs://my-bucket/data/
 ```
 
-## Databases
+# Databases
 
-### BigQuery
+## BigQuery
 Serverless, columnar data warehouse for analytics. Petabyte-scale. SQL interface. Pay per query (TB scanned) or flat-rate slots. Built-in ML (BigQuery ML) for training models with SQL.
 
 **When to reach for it**: Ad-hoc analytics, business intelligence, and large-scale data processing. Not for OLTP workloads — use Cloud Spanner or Firestore for transactional data. Equivalent to AWS Redshift and Azure Synapse Analytics.
@@ -67,17 +65,17 @@ Serverless, columnar data warehouse for analytics. Petabyte-scale. SQL interface
 bq query --use_legacy_sql=false 'SELECT COUNT(*) FROM `my-project.my-dataset.my-table`'
 ```
 
-### Cloud Spanner
+## Cloud Spanner
 Globally distributed, strongly consistent relational database. Combines the horizontal scalability of NoSQL with the ACID guarantees of SQL. Unique: external consistency across regions.
 
 **When to reach for it**: Global financial systems, inventory management, or any workload that needs both horizontal scale and strong consistency. Expensive — minimum ~$0.90/hour per node. Equivalent to Azure Cosmos DB (with strong consistency) or CockroachDB.
 
-### Firebase
+## Firebase
 Mobile and web application platform. Includes: Firestore (real-time NoSQL document database), Authentication, Hosting, Cloud Messaging (push notifications), and Analytics.
 
 **When to reach for it**: Mobile apps and web apps that need real-time data sync, offline support, and built-in authentication. Firestore is the primary database — it syncs data to clients in real time. Not suitable for complex server-side workloads.
 
-## References
+# References
 
 - [Google Cloud documentation](https://cloud.google.com/docs) — GCP official docs hub; covers all services with quickstarts and API references
 - [Google Cloud .NET client libraries](https://cloud.google.com/dotnet/docs/reference) — .NET integration guide for GCP services

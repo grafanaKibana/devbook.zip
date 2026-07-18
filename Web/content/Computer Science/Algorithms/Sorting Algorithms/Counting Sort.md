@@ -1,8 +1,8 @@
 ---
 publish: true
 created: 2026-07-12T14:27:20.413Z
-modified: 2026-07-12T14:27:20.413Z
-published: 2026-07-12T14:27:20.413Z
+modified: 2026-07-18T11:30:04.404Z
+published: 2026-07-18T11:30:04.404Z
 topic:
   - Computer Science
 subtopic:
@@ -14,8 +14,6 @@ priority: Medium
 status: Creation
 ---
 
-# Intro
-
 Ten million exam scores all fall in the range 0–100. A comparison sort orders them in `Θ(n log n)` because comparing two keys is its only source of information, and distinguishing the `n!` possible orderings takes `log₂(n!) ≈ n log n` yes/no answers. Counting Sort throws comparison out: a score of 73 is never ranked against its neighbours — its value _is_ an address. The algorithm tallies how many keys hold each value across `[0, k]`, turns those tallies into end positions with a running sum, then writes each element straight into the slot its value names. Indexing by value sidesteps the `Ω(n log n)` lower bound — that bound governs only sorts whose sole move is comparing pairs — and drops the cost to `Θ(n + k)`. The price is a hard domain assumption: keys must be integers, or map to them, over a range `k` small enough that an array of `k` counters is affordable.
 
 A trace of Counting Sort would run over `[2, 5, 3, 0, 2, 3, 0, 3]` with `k = 5`.
@@ -25,7 +23,7 @@ A trace of Counting Sort would run over `[2, 5, 3, 0, 2, 3, 0, 3]` with `k = 5`.
 
 **Core condition:** integer keys over a known range `[0, k]` → index by value instead of comparing → `Θ(n + k)` time and `Θ(n + k)` auxiliary space, stable.
 
-## Why the value is an address
+# Why the value is an address
 
 Three linear passes, none of them a comparison:
 
@@ -39,7 +37,7 @@ Stability falls out of the placement direction. Equal keys share one block, and 
 
 No arrangement of the input alters this. The two `Θ(n)` scans and the `Θ(k)` prefix sum run identically whether the data arrives sorted, reversed, or random; the work is fixed by `n` and `k` alone. Whatever can go wrong is therefore a property of `k`, not of the data's order.
 
-## Complexity
+# Complexity
 
 | Case | Time | Auxiliary space | Cause |
 | --- | --- | --- | --- |
@@ -49,7 +47,7 @@ No arrangement of the input alters this. The two `Θ(n)` scans and the `Θ(k)` p
 
 The bound is tight in every case, so `Θ` rather than `O` is the honest notation. Auxiliary space splits into the `k`-cell count array and the `n`-cell output buffer, so Counting Sort is **not in-place**: placement reads the original keys while writing a separate array. Done as above — prefix sum followed by tail-first placement — it is **stable**.
 
-## When indexing by value breaks
+# When indexing by value breaks
 
 Every failure traces to the same assumption: the key can serve as an array index.
 
@@ -59,7 +57,7 @@ Every failure traces to the same assumption: the key can serve as an array index
 
 **Negative keys index before the array starts.** A key of `-3` addresses `count[-3]` and throws, or corrupts memory in a language that permits it. The fix is an offset: size `count` at `max - min + 1` and index `count[key - min]`, shifting the domain so its minimum maps to zero. Omitting the offset does not sort incorrectly — it faults on the first negative key.
 
-## Reference drawer
+# Reference drawer
 
 > [!ABSTRACT]- Three passes
 >
@@ -101,7 +99,7 @@ Every failure traces to the same assumption: the key can serve as an array index
 >
 > The `k + 1` sizing includes the endpoint value `k`. For a nonzero minimum, subtract `min` on every index and size the array `max - min + 1`.
 
-## Questions
+# Questions
 
 > [!QUESTION]- Why does Counting Sort avoid the `Ω(n log n)` comparison lower bound?
 > The bound counts the yes/no answers a comparison sort needs to separate `n!` orderings, and a pairwise comparison is its only source of information. Counting Sort never compares keys — it reads each key's value directly as an array index — so the argument does not apply to it. That indexing costs `Θ(n + k)` and only works for integer keys over a bounded range.
@@ -115,7 +113,7 @@ Every failure traces to the same assumption: the key can serve as an array index
 > [!QUESTION]- When does a small `n` still make Counting Sort the wrong choice?
 > When `k ≫ n`. The count array holds one cell per representable key value, not per element, so sorting eight 64-bit integers by raw value needs a `2^64`-cell array. The `+ k` term dominates and the allocation fails. Radix Sort keeps each digit pass's range small; a comparison sort removes the range dependence altogether.
 
-## References
+# References
 
 - [Counting sort (Wikipedia)](https://en.wikipedia.org/wiki/Counting_sort) — the prefix-sum construction, the stability argument for tail-first placement, and its role as a radix sort subroutine.
 - [Radix and counting sort (Princeton Algorithms)](https://algs4.cs.princeton.edu/51radix/) — key-indexed counting presented as the stable building block of LSD and MSD radix sorts.

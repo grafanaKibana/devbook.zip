@@ -1,8 +1,8 @@
 ---
 publish: true
 created: 2026-07-12T06:27:34.380Z
-modified: 2026-07-12T06:27:34.381Z
-published: 2026-07-12T06:27:34.381Z
+modified: 2026-07-18T11:30:03.663Z
+published: 2026-07-18T11:30:03.663Z
 topic:
   - Computer Science
 subtopic:
@@ -13,8 +13,6 @@ level:
 priority: Medium
 status: Creation
 ---
-
-# Intro
 
 A directed network carries a divisible resource — water, bandwidth, matched pairs — from a source `s` to a sink `t`. Every edge `u → v` has a **capacity** bounding what it can carry, and a valid flow obeys two constraints: no edge exceeds its capacity, and every vertex other than `s` and `t` sends out exactly what it takes in (conservation). The **maximum-flow** problem asks for the greatest total rate leaving `s` and arriving at `t`.
 
@@ -27,19 +25,19 @@ The transition worth animating is a backward arc in the residual graph retractin
 > [!NOTE] Visualization pending
 > Planned StepTrace: a flow-network card showing augmenting paths found in the residual graph, each pushing bottleneck flow until no augmenting path remains, with the set reachable from `s` marking the min cut that equals the max flow. No matching renderer exists in `engine.js` yet.
 
-## Why the residual graph makes greedy exact
+# Why the residual graph makes greedy exact
 
 Take the unit-capacity network `s→a, s→b, a→b, a→t, b→t`; its maximum flow is 2, since only `s→a` and `s→b` leave the source. A greedy first augmentation along `s → a → b → t` saturates all three of its edges and reports flow 1. Every remaining forward path is now blocked — `s→a` and `b→t` are full — so a forward-only algorithm stops one unit short.
 
 The residual graph reopens the choice. Sending one unit `a → b` created a backward arc `b → a` with residual 1. The path `s → b → a → t` uses that backward arc: `b → a` retracts the earlier `a → b` unit and reroutes it, so `a → b` returns to zero while `s→a→t` and `s→b→t` each carry one unit. Flow reaches 2. The backward arc is the entire reason a locally-committed, wrong routing decision can be undone; forward-only residuals leave no legal move to reach that state, which is exactly why greedy-without-residuals returns a value below the maximum.
 
-## Termination and the min cut
+# Termination and the min cut
 
 An `s`-`t` **cut** splits the vertices into `S` (containing `s`) and `T` (containing `t`); its capacity is the total capacity of the original edges crossing `S → T`. Any flow value is bounded by any cut capacity, because everything reaching `t` must cross the partition. The **max-flow min-cut theorem** sharpens that to equality: the maximum flow equals the minimum cut capacity.
 
 The theorem also names the cut. When no augmenting path remains, let `S` be the vertices still reachable from `s` in the final residual graph; `t ∉ S`, or a path would exist. Every original edge from `S` to `T` is saturated — an unsaturated one would keep a forward residual arc and extend reachability — and no flow crosses back from `T` to `S`, so the cut capacity equals the flow value. Reachability in the residual graph is therefore a checkable optimality certificate: it both proves the flow is maximal and reads off the bottleneck edges. The cut side `S` comes from the _residual_ reachable set, but the reported edges are the _original_ forward edges out of `S`.
 
-## Complexity
+# Complexity
 
 The three named algorithms differ only in how they choose the augmenting path, and that choice sets the iteration count.
 
@@ -51,7 +49,7 @@ The three named algorithms differ only in how they choose the augmenting path, a
 
 `|f|` is the max-flow value; the Ford–Fulkerson bound is finite only for integer or rational capacities. On unit-capacity graphs and the bipartite-matching reduction, Dinic tightens to `O(E·√V)`. The `O(V + E)` auxiliary space in every row holds the residual adjacency structure plus the BFS/DFS frontier; Dinic adds a per-vertex level and iteration pointer, still `O(V)`. The matrix reference implementation below trades this for `O(V²)` in exchange for readability.
 
-## Where the guarantees break
+# Where the guarantees break
 
 Two failure modes both trace back to the residual mechanism.
 
@@ -59,7 +57,7 @@ Two failure modes both trace back to the residual mechanism.
 
 **Omitting the backward arcs.** A forward-only residual graph cannot undo. On the `s→a→b→t` network above, dropping the paired reverse arcs leaves the algorithm stalled at flow 1 instead of 2, because `s → b → a → t` never becomes available — the wrong state is a plausible, silently-suboptimal answer, not a crash. In code the usual cause is storing an edge without its reverse; the standard guard keeps edges in an array and accesses the reverse of edge `i` as `i XOR 1`, so `+f` on one arc always applies `−f` to its partner.
 
-## Reference drawer
+# Reference drawer
 
 > [!ABSTRACT]- Augmenting-path loop
 >
@@ -130,7 +128,7 @@ Two failure modes both trace back to the residual mechanism.
 >
 > The `residual[v, u] += bottleneck` line is the back-edge update; without it the forward-only version stops below the maximum. On return, the vertices still reachable from `source` in the last BFS form the min-cut side `S`. The adjacency-matrix form costs `O(V²)` space and assumes no antiparallel edges (both `u→v` and `v→u` present in the input would share one cell and corrupt the residual); an adjacency-list residual with `XOR 1` reverse edges avoids that and brings space to `O(V + E)`.
 
-## Comparison
+# Comparison
 
 | Algorithm | Time | Path / technique | Stronger case | Weaker case |
 | --- | --- | --- | --- | --- |
@@ -141,7 +139,7 @@ Two failure modes both trace back to the residual mechanism.
 
 Edmonds–Karp is the simplest polynomial answer and the right baseline when the graph is small or the code has to stay obviously correct; it pays for that with an `E²` term that hurts once the graph is dense. Dinic keeps the same augmenting-path model but batches work into `O(V)` phases, and its `O(E·√V)` unit-capacity bound makes it the standard engine for bipartite matching — the practical default when performance matters. Push–relabel abandons `s→t` paths for local pushes and overtakes Dinic on dense graphs, where `O(V²·√E)` / `O(V³)` beat `O(V²·E)`, at the cost of a less transparent min-cut recovery and heavier implementation. Ford–Fulkerson remains the model to reason from rather than the one to ship: its value-dependent bound and non-termination on irrational capacities rule it out whenever capacities are large or not integral.
 
-## Questions
+# Questions
 
 > [!QUESTION]- Why do residual back-edges make greedy augmenting paths exact?
 > A greedy first path can commit flow to an edge the optimum routes around, and conservation then blocks every forward correction. Each unit sent `u → v` creates a residual back-arc `v → u` of equal capacity, and a later augmenting path can traverse it to retract and reroute that flow. The loop therefore cannot stop until no `s → t` path remains — which, by max-flow min-cut, is the maximum. Without the back-arcs the algorithm can wedge strictly below it.
@@ -155,7 +153,7 @@ Edmonds–Karp is the simplest polynomial answer and the right baseline when the
 > [!QUESTION]- When does Dinic or push–relabel earn its extra complexity over Edmonds–Karp?
 > Dinic wins whenever the graph is large or the workload is bipartite matching: same model, `O(V)` phases instead of `O(V·E)` augmentations, and an `O(E·√V)` unit-capacity bound. Push–relabel wins on dense graphs, where its `O(V²·√E)` / `O(V³)` bounds beat Dinic's `O(V²·E)`, accepting a harder implementation and a less direct min-cut readout.
 
-## References
+# References
 
 - [Maximum flow problem (Wikipedia)](https://en.wikipedia.org/wiki/Maximum_flow_problem) — flow-network definition, the augmenting-path family, and the reductions (bipartite matching, project selection, segmentation).
 - [Maximum flow: Ford–Fulkerson and Edmonds–Karp (cp-algorithms)](https://cp-algorithms.com/graph/edmonds_karp.html) — residual graphs and both augmenting-path algorithms, built on a capacity/flow adjacency matrix like the drawer's reference implementation.

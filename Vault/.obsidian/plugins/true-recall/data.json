@@ -1,0 +1,246 @@
+{
+  "enableDeviceSync": false,
+  "providerType": "openrouter",
+  "customBaseUrl": "http://localhost:11434/v1",
+  "customModel": "",
+  "lmStudioBaseUrl": "http://localhost:1234/v1",
+  "lmStudioModel": "",
+  "lmStudioGenerationModel": "",
+  "lmStudioCardPolishModel": "",
+  "openRouterApiKey": "",
+  "aiModel": "google/gemini-2.5-flash",
+  "aiTier": "byok",
+  "generationLanguage": "auto",
+  "generationNoteTypeId": null,
+  "fsrsRequestRetention": 0.9,
+  "fsrsMaximumInterval": 36500,
+  "newCardsPerDay": 20,
+  "reviewsPerDay": 200,
+  "learningSteps": [
+    1,
+    10
+  ],
+  "relearningSteps": [
+    10
+  ],
+  "fsrsWeights": null,
+  "lastOptimization": null,
+  "reviewMode": "fullscreen",
+  "reviewContentWidth": "default",
+  "showNextReviewTime": true,
+  "autoAdvance": false,
+  "showReviewHeader": true,
+  "showReviewHeaderStats": true,
+  "continuousCustomReviews": true,
+  "ignoreDailyLimitsForNoteStudy": true,
+  "showDashboardHeader": true,
+  "reviewKeybindings": {
+    "revealAndGood": " ",
+    "again": "1",
+    "hard": "2",
+    "easy": "4"
+  },
+  "removeFlashcardContentAfterCollect": false,
+  "newCardOrder": "random",
+  "reviewOrder": "due-date",
+  "newReviewMix": "mix-with-reviews",
+  "dayStartHour": 4,
+  "autoBackupOnLoad": false,
+  "maxBackups": 10,
+  "periodicBackupEnabled": true,
+  "backupIntervalMinutes": 60,
+  "activityTriggeredBackup": false,
+  "reviewsBeforeBackup": 50,
+  "retentionPolicy": {
+    "hourlyBackupsToKeep": 24,
+    "dailyBackupsToKeep": 7,
+    "weeklyBackupsToKeep": 4
+  },
+  "copilotAutoContext": false,
+  "loadBalanceEnabled": false,
+  "loadBalanceTarget": 100,
+  "loadBalanceMaxDeviation": 20,
+  "loadBalanceMaxShiftDays": 3,
+  "loadBalanceBulkDays": 30,
+  "easyDays": {
+    "recurringDays": [],
+    "specificDates": []
+  },
+  "easyDaysMultiplier": 0.5,
+  "siblingMinInterval": 3,
+  "siblingDisperseEnabled": false,
+  "lastOptimizationReviewCount": null,
+  "lastOptimizationMetrics": null,
+  "scheduledBreaks": [],
+  "sessionPresets": [],
+  "fsrsPresets": [
+    {
+      "id": "default",
+      "name": "Default",
+      "requestRetention": 0.9,
+      "maximumInterval": 36500,
+      "weights": null,
+      "enableFuzz": true,
+      "learningSteps": [
+        1,
+        10
+      ],
+      "relearningSteps": [
+        10
+      ],
+      "newCardsPerDay": 20,
+      "reviewsPerDay": 200,
+      "createdAt": 1784060393238,
+      "lastOptimization": null,
+      "lastOptimizationReviewCount": null,
+      "lastOptimizationMetrics": null,
+      "leechThreshold": 8,
+      "leechAction": "tag-only",
+      "newCardOrder": "random",
+      "reviewOrder": "due-date",
+      "newReviewMix": "mix-with-reviews"
+    }
+  ],
+  "defaultPresetId": "default",
+  "showLinkStatusIndicators": true,
+  "showDonutsInPanel": true,
+  "showDonutsInReview": true,
+  "showStatusBarWidget": true,
+  "defaultTypeInMode": "off",
+  "noteReviewShowFrontmatter": false,
+  "editorToolbarButtons": [
+    {
+      "id": "preset:builtin-basic-flashcards",
+      "enabled": true
+    },
+    {
+      "id": "preset:builtin-basic-pro-flashcards",
+      "enabled": true
+    },
+    {
+      "id": "io",
+      "enabled": true
+    },
+    {
+      "id": "edit",
+      "enabled": true
+    },
+    {
+      "id": "quick-add",
+      "enabled": true
+    },
+    {
+      "id": "highlight",
+      "enabled": true
+    },
+    {
+      "id": "copy",
+      "enabled": true
+    },
+    {
+      "id": "new-note",
+      "enabled": true
+    }
+  ],
+  "globalToolbarButtons": [
+    {
+      "id": "preset:builtin-basic-flashcards",
+      "enabled": true
+    },
+    {
+      "id": "preset:builtin-basic-pro-flashcards",
+      "enabled": true
+    },
+    {
+      "id": "edit",
+      "enabled": true
+    },
+    {
+      "id": "quick-add",
+      "enabled": true
+    },
+    {
+      "id": "copy",
+      "enabled": true
+    },
+    {
+      "id": "new-note",
+      "enabled": true
+    },
+    {
+      "id": "append",
+      "enabled": true
+    }
+  ],
+  "imageToolbarButtons": [
+    {
+      "id": "io",
+      "enabled": true
+    },
+    {
+      "id": "edit",
+      "enabled": true
+    },
+    {
+      "id": "quick-add",
+      "enabled": true
+    }
+  ],
+  "enableLocalApi": true,
+  "apiPort": 27182,
+  "ragEnabled": false,
+  "ragEmbeddingModel": "baai/bge-m3",
+  "ragIncludeFolders": [],
+  "ragExcludeFolders": [
+    ".true-recall",
+    "templates"
+  ],
+  "ragIndexFlashcards": true,
+  "ragAutoIndex": true,
+  "ragChunkMaxTokens": 400,
+  "ragDailyNotesFolder": "",
+  "ragDailyNoteExcludeHeadings": [
+    "Thoughts",
+    "Journal",
+    "Reflections",
+    "Random"
+  ],
+  "ragChatConfig": {
+    "presetId": "default",
+    "customInstruction": "",
+    "responseLength": "medium"
+  },
+  "languageNoteTypeId": null,
+  "languageSource": "",
+  "languageTarget": "",
+  "generationPresets": [
+    {
+      "id": "builtin-basic-flashcards",
+      "name": "Basic Flashcards",
+      "prompt": "Generate atomic Q/A flashcards from the provided text. Each card has Front (a clear, specific question) and Back (a concise, accurate answer).",
+      "noteTypeId": "builtin-basic",
+      "requiresPro": false,
+      "builtin": true,
+      "isDefault": true,
+      "createdAt": 0,
+      "updatedAt": 0
+    },
+    {
+      "id": "builtin-basic-pro-flashcards",
+      "name": "Basic Flashcards (Pro)",
+      "prompt": "[ROLE]\nYou are an expert in formulating atomic spaced-repetition flashcards from source material. You follow the SuperMemo 20 Rules of Formulating Knowledge and the Universe of Memory principles (Bartek Czekała). Your goal is to turn the user's SELECTED TEXT into high-retention Q/A flashcards that a learner can answer without re-reading the source.\n\n[TASK]\nGenerate flashcards ONLY from facts present in the selected text. Do NOT reference the note's structure, point numbers, author organization, headings, or layout. Return a JSON array in the exact format specified below. No markdown fences. No explanation.\n\n[CORE RULES]\nR1 Minimum Information. One atomic fact per card. The answer is a single name, concept, term, or short phrase (1–3 words for non-definitional answers).\nR2 Precision. Each question MUST have exactly one correct answer given the source. If more than one correct answer exists, either split into multiple cards or add a disambiguating superscript hint per R5.\nR3 No meta-questions. The following patterns are BANNED:\n  - \"Co autor wspomina w punkcie X\" / \"What does the author mention in point X\"\n  - \"Jaka jest jedna z...\" / \"Which of the...\"\n  - \"Jaka jest inna...\" / \"What is another...\"\n  - \"Wymień wszystkie...\" / \"List all...\" — EXCEPT the bounded-list exception in R4 below\n  - \"O czym mówi autor...\" / \"What does the author say about...\"\n  - Any question referring to note layout, headings, numbering, or organization.\nR4 Enumeration handling. When the source contains a list of N parallel items:\n  - PREFER the direction CONDITION -> CATEGORY (given the condition text, identify the category). NEVER ask CATEGORY -> WHICH OF THE N.\n  - Exception: if the list itself is bounded and integral (e.g., \"the three phases of X\"), ONE aggregate card is allowed, with all items listed vertically in the answer.\nR5 Interference. If two concepts risk being confused (two proteins, two synonyms, two dates), add a disambiguating superscript hint in the question. Example: \"Poziom której proteiny kluczowej dla Alzheimera zwiększa brak snu? ᵗᵃᵘ\" with answer \"beta-amyloid\".\nR6 Source fidelity. NEVER invent terms, labels, or categories that are not present in the selected text. Do not substitute world-knowledge synonyms for source phrases. The answer must be literal to the source.\nR7 Quality over quantity. There is no target count. Skip trivial facts. If the selected text adds nothing new beyond what is already covered by existing cards (see below), return [].\n\n[EXISTING CARDS FOR THIS NOTE]\n{{EXISTING_CARDS}}\n\nDo not reproduce, paraphrase, or merely re-word the cards above. If every atomic fact in the selected text is already covered, return [].\n\n[FEW-SHOT EXAMPLES]\nExample 1 — Meta-question (BANNED by R3).\nSelected text: \"Trzy heurystyki wskazujące wejście w fazę 2: (a) ostatnie 20% nakładu dało <5% wyniku; (b) poprawa jednego wskaźnika zbiega się z pogorszeniem innego; (c) 'więcej' wymaga rosnących wysiłków kontrolnych.\"\n[BAD]\n[\n  {\"Front\": \"Jaka jest jedna z heurystyk wskazujących na fazę 2?\", \"Back\": \"Jeśli ostatnie 20% nakładu dało <5% wyniku\"}\n]\n[GOOD]\n[\n  {\"Front\": \"Co zachodzi, gdy ostatnie 20% nakładu daje <5% wyniku?\", \"Back\": \"Jesteś blisko fazy 2\"}\n]\n[WHY]\nDirection reversed per R4: CONDITION -> CATEGORY. The front is now uniquely identifiable — a learner can answer it without guessing \"which of the three\". \"Jedna z heurystyk\" collapses three distinct cards into indistinguishable fronts.\n\nExample 2 — Enumeration aggregate (R4 exception).\nSelected text: same three heuristics as Example 1.\n[BAD]\n[\n  {\"Front\": \"Jaka jest pierwsza heurystyka wskazująca na fazę 2?\", \"Back\": \"...\"},\n  {\"Front\": \"Jaka jest druga heurystyka wskazująca na fazę 2?\", \"Back\": \"...\"},\n  {\"Front\": \"Jaka jest trzecia heurystyka wskazująca na fazę 2?\", \"Back\": \"...\"}\n]\n[GOOD]\n[\n  {\"Front\": \"Trzy heurystyki sygnalizujące wejście w fazę malejącej wartości marginalnej (wymień wszystkie)\", \"Back\": \"- Ostatnie 20% nakładu daje <5% wyniku\\n- Poprawa jednego wskaźnika zbiega się z pogorszeniem innego\\n- 'Więcej' wymaga rosnących wysiłków kontrolnych\"}\n]\n[WHY]\nWhen the full bounded list is itself the concept, an aggregate card is allowed per R4 exception. The default for lists remains CONDITION -> CATEGORY; use aggregate only when the learner needs to recall the whole set as a unit.\n\nExample 3 — Interference (R5).\nSelected text: \"Brak snu zwiększa poziom beta-amyloidu i białka tau, kluczowych dla choroby Alzheimera.\"\n[BAD]\n[\n  {\"Front\": \"Poziom której proteiny kluczowej dla Alzheimera zwiększa brak snu?\", \"Back\": \"beta-amyloid\"}\n]\n[GOOD]\n[\n  {\"Front\": \"Poziom której proteiny kluczowej dla Alzheimera zwiększa brak snu? ᵗᵃᵘ\", \"Back\": \"beta-amyloid\"},\n  {\"Front\": \"Poziom której proteiny kluczowej dla Alzheimera zwiększa brak snu? ᵇᵉᵗᵃ⁻ᵃᵐʸˡᵒⁱᵈ\", \"Back\": \"tau\"}\n]\n[WHY]\nTwo correct answers violate R2. Split into two cards; each card names the OTHER answer in superscript as a disambiguator. The learner's memory path still has to produce the missing term, but interference between the two is eliminated.\n\nExample 4 — Positive baseline.\nSelected text: \"Rosacea manifests as intense skin reddening.\"\n[GOOD]\n[\n  {\"type\": \"basic\", \"Front\": \"What is rosacea?\", \"Back\": \"Intense skin reddening\", \"source\": \"Rosacea manifests as intense skin reddening.\"}\n]\n[WHY]\nSingle atomic fact, unambiguous front, literal source phrase in the answer, one-sentence verbatim source.\n\nExample 5 — Cross-generation duplicate (R7 empty return).\n[EXISTING CARDS FOR THIS NOTE]\n- Q: Co zachodzi, gdy ostatnie 20% nakładu daje <5% wyniku? | A: Jesteś blisko fazy 2\nSelected text: \"Gdy ostatnie 20% wysiłku przekłada się na zaledwie kilka procent rezultatu, zbliżasz się do fazy 2.\"\n[BAD]\n[\n  {\"Front\": \"Jaka jest parafraza warunku dla fazy 2?\", \"Back\": \"Gdy ostatnie 20% wysiłku daje zaledwie kilka procent rezultatu\"}\n]\n[GOOD]\n[]\n[WHY]\nR7: the atomic fact is already covered by an existing card. Paraphrasing creates a near-duplicate and accelerates deck rot. Return [].\n\nExample 6 — Hallucination prevention (R6).\nSelected text: \"Jeśli 'więcej' wymaga coraz większych wysiłków kontrolnych żeby nie rozwalić systemu — faza 3.\"\n[BAD]\n[\n  {\"Front\": \"Jaka zasada ekonomiczna opisuje fazę 3?\", \"Back\": \"Prawo malejących przychodów w systemach złożonych\"}\n]\n[GOOD]\n[\n  {\"Front\": \"Co zachodzi, gdy 'więcej' wymaga coraz większych wysiłków kontrolnych, by nie rozwalić systemu?\", \"Back\": \"Jesteś w fazie 3\"}\n]\n[WHY]\nR6 is absolute. \"Prawo malejących przychodów\" is the model's world-knowledge label, not a term present in the source. Answers must be literal to the selected text.\n\n[OUTPUT FORMAT]\nReturn a JSON array of objects with this shape:\n[\n  {\"type\": \"basic\", \"Front\": \"<question>\", \"Back\": \"<answer>\", \"source\": \"<character-perfect copy of one sentence from the selected text>\"}\n]\n\n- The \"source\" field must be a character-perfect copy-paste of one sentence from the selected text (used by the editor for exact substring matching to highlight). If even one character differs, the highlight breaks silently — when in doubt, copy a shorter fragment rather than risk any modification.\n- Use the exact same language as the source text.\n- No markdown code fences. Plain JSON only.\n- If the text contains no new atomic facts worth learning, return [].",
+      "noteTypeId": "builtin-basic",
+      "requiresPro": true,
+      "builtin": true,
+      "isDefault": false,
+      "createdAt": 0,
+      "updatedAt": 0
+    }
+  ],
+  "defaultGenerationPresetId": "builtin-basic-flashcards",
+  "attachmentFolder": "",
+  "defaultAnkiImportFolder": "",
+  "defaultProjectFolder": "",
+  "lastSeenVersion": "1.9.10",
+  "archiveCascadeMigrated": true
+}

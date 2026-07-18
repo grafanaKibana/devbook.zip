@@ -1,8 +1,8 @@
 ---
 publish: true
 created: 2026-07-12T14:27:20.420Z
-modified: 2026-07-12T14:27:20.420Z
-published: 2026-07-12T14:27:20.420Z
+modified: 2026-07-18T11:30:05.225Z
+published: 2026-07-18T11:30:05.225Z
 topic:
   - Computer Science
 subtopic:
@@ -14,8 +14,6 @@ priority: Medium
 status: Done
 ---
 
-# Intro
-
 A sequence needs to keep growing at the tail while still supporting `O(1)` access by position. A fixed [[Arrays|array]] gives the cheap indexing but has a hard capacity; allocating a fresh array on every append and copying the old contents would make each append `O(n)`. A dynamic array keeps the contiguous backing buffer but over-allocates it, so most appends write into spare room already reserved and only an occasional append pays for growth.
 
 The representation is a backing array plus two counters: a `count` of live elements and a `capacity` of allocated slots. What it gives up relative to a raw array is a stable buffer address — a growth event moves every element to a new allocation — and cheap edits away from the tail, since keeping the elements contiguous forces a shift on any front or middle insert.
@@ -25,7 +23,7 @@ The representation is a backing array plus two counters: a `count` of live eleme
 > [!NOTE] Visualization pending
 > Planned StepTrace: a growing-array card showing a backing buffer filling to capacity, an overflow event that allocates a larger buffer and copies every element across, then appends resuming into the new spare slots in `O(1)`. No matching renderer exists in `engine.js` yet.
 
-## Representation and growth
+# Representation and growth
 
 Three fields define the state. The backing array holds the elements in index order; `count` is the logical size the caller sees; `capacity` is the physical length of the backing array. The two counters are distinct on purpose: `capacity - count` is the reserved slack that lets an append skip allocation.
 
@@ -38,7 +36,7 @@ Geometric growth is the whole reason append stays cheap on average. If the buffe
 
 In .NET this structure is `List<T>`; other ecosystems call it a _vector_ or _array list_. `List<T>` doubles the capacity on overflow and exposes `Count` and `Capacity` directly, so `new List<T>(capacity)` pre-reserves the buffer and skips the intermediate resizes when the final size is known.
 
-## Complexity
+# Complexity
 
 Bounds are per operation and assume geometric (doubling) growth of the backing array.
 
@@ -53,7 +51,7 @@ The amortized `O(1)` on append is a sequence-level guarantee, not a per-call one
 
 Space is `O(n)` but with slack: immediately after a doubling the buffer is half empty, so a dynamic array can hold up to roughly `2×` its live elements in allocated slots.
 
-## Boundaries tied to the backing array
+# Boundaries tied to the backing array
 
 The resize is an `O(n)` **latency spike**, not just an accounting curiosity. A real-time loop or a very large array can stall on the single append that copies millions of elements, so a steady-state `O(1)` throughput hides a tail-latency outlier at each power-of-two boundary. Pre-sizing with a known capacity removes those spikes entirely.
 
@@ -63,7 +61,7 @@ The growth `FACTOR` is a direct memory-versus-copy trade. A factor of `2` wastes
 
 Editing away from the tail is `O(n)` because contiguity must be preserved. `Insert(0, x)` shifts every existing element one slot right; `RemoveAt(0)` shifts every element left. A [[Deque]] avoids this by giving `O(1)` insertion and removal at both ends. And because a resize allocates a fresh buffer, any reference, index-derived pointer, or iterator bound to the old backing array is invalidated the moment the array grows — mutating a dynamic array while iterating it is unsound for exactly this reason.
 
-## Reference drawer
+# Reference drawer
 
 > [!ABSTRACT]- Append with overflow
 >
@@ -125,7 +123,7 @@ Editing away from the tail is `O(n)` because contiguity must be preserved. `Inse
 >
 > The `Append` fast path is a single store; the grow branch runs only when `Count == Capacity`. `Insert` always shifts the suffix, which is what makes non-tail insertion `O(n)` regardless of capacity.
 
-## Questions
+# Questions
 
 > [!QUESTION]- Why is append amortized `O(1)` even though a resize copies every element?
 > Doubling the buffer makes resizes exponentially rarer as the array grows. Over `n` appends the resizes copy `1 + 2 + 4 + … + n < 2n` elements total — fewer than two copies per element — so the average cost per append is constant. The individual append that triggers a resize is still `O(n)`; the constant bound is a property of the whole sequence, not any single call.
@@ -136,7 +134,7 @@ Editing away from the tail is `O(n)` because contiguity must be preserved. `Inse
 > [!QUESTION]- Why does a resize invalidate held references and iterators?
 > Growth allocates a new backing array and copies elements into it, then drops the old buffer. Any pointer, cached index target, or iterator bound to the old array now refers to a stale allocation, which is why appending during iteration is unsound.
 
-## References
+# References
 
 - [`List<T>` class](https://learn.microsoft.com/en-us/dotnet/api/system.collections.generic.list-1) — .NET's dynamic array, with remarks separating `Count` from `Capacity` and describing capacity-doubling on growth.
 - [`List<T>` source in dotnet/runtime](https://github.com/dotnet/runtime/blob/main/src/libraries/System.Private.CoreLib/src/System/Collections/Generic/List.cs) — the `EnsureCapacity`/`Grow` logic showing the doubling factor and the array copy on resize.

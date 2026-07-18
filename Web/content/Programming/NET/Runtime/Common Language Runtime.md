@@ -1,8 +1,8 @@
 ---
 publish: true
-created: 2026-07-11T21:45:03.477Z
-modified: 2026-07-11T21:45:03.477Z
-published: 2026-07-11T21:45:03.477Z
+created: 2026-07-15T06:02:06.813Z
+modified: 2026-07-18T11:30:13.032Z
+published: 2026-07-18T11:30:13.032Z
 topic:
   - Programming
 subtopic:
@@ -14,13 +14,11 @@ priority: High
 status: Ready to Repeat
 ---
 
-# Intro
-
 The CLR (Common Language Runtime) is the execution engine of .NET. It takes the CPU-independent bytecode (IL) produced by language compilers and turns it into native machine code at runtime, while also providing memory management, type safety, exception handling, threading, and interoperability services. Every C#, F#, and VB.NET program runs inside the CLR — it is the reason .NET code is portable across platforms and why you do not manage memory manually.
 
 The key insight: .NET compilers do not produce native binaries. They produce **assemblies** containing **IL (Intermediate Language)** plus metadata. The CLR loads those assemblies and compiles IL to native code on the target machine using **JIT (Just-In-Time) compilation** or, for ahead-of-time scenarios, **AOT (Ahead-of-Time) compilation** (ReadyToRun, NativeAOT).
 
-## How It Works
+# How It Works
 
 ```mermaid
 flowchart TB
@@ -63,7 +61,7 @@ flowchart TB
 | Thread pool | Manages worker and I/O completion threads |
 | Interop | P/Invoke and COM interop for calling native code |
 
-## Managed vs Unmanaged Code
+# Managed vs Unmanaged Code
 
 **Managed code** runs under the CLR. The runtime provides:
 
@@ -83,7 +81,7 @@ static extern bool Beep(uint dwFreq, uint dwDuration);
 Beep(440, 500); // A4 note for 500ms
 ```
 
-## JIT vs AOT
+# JIT vs AOT
 
 | Mode | When compiled | Startup | Peak throughput | Binary size |
 |---|---|---|---|---|
@@ -93,7 +91,7 @@ Beep(440, 500); // A4 note for 500ms
 
 **Decision rule**: use JIT for most server workloads (tiered compilation optimizes hot paths). Use NativeAOT for CLI tools, serverless cold-start-sensitive functions, or embedded scenarios where startup time and binary size matter.
 
-### Tiered Compilation
+## Tiered Compilation
 
 "JIT optimizes hot paths" works because the JIT compiles each method **twice**:
 
@@ -102,15 +100,15 @@ Beep(440, 500); // A4 note for 500ms
 - **OSR (On-Stack Replacement)** lets a long-running loop that started in Tier 0 jump to optimized code _mid-execution_, without waiting for the next call — important for `Main`-style hot loops.
 - **Dynamic PGO** (default in .NET 8) instruments Tier 0 code to gather real call/branch data, then feeds it into Tier 1 for guided devirtualization and inlining. `ReadyToRun` images participate as a pre-baked Tier-0-equivalent.
 
-### Assembly Loading and the Type System
+## Assembly Loading and the Type System
 
-The loader resolves and loads assemblies (IL + metadata) into an **`AssemblyLoadContext`**. A _collectible_ `AssemblyLoadContext` can be unloaded, which is how plugin hosts load and later drop assemblies without recycling the process. At the type-system level the CLR represents each loaded type by a **MethodTable** (vtable, interface map, type flags); every reference-type object carries an **object header** (sync-block index used for `lock`/hash code) plus a MethodTable pointer. Generics are instantiated lazily: the runtime shares one JIT-compiled body across all reference-type arguments but generates a specialized body per value-type argument (why `List<int>` is as fast as hand-written code — see [[Generics]]).
+The loader resolves and loads assemblies (IL + metadata) into an **`AssemblyLoadContext`**. A _collectible_ `AssemblyLoadContext` can be unloaded, which is how plugin hosts load and later drop assemblies without recycling the process. At the type-system level the CLR represents each loaded type by a **MethodTable** (vtable, interface map, type flags); every reference-type object carries an **object header** (sync-block index used for `lock`/hash code) plus a MethodTable pointer. [[Generics]] are instantiated lazily: the runtime shares one JIT-compiled body across all reference-type arguments but generates a specialized body per value-type argument (why `List<int>` is as fast as hand-written code).
 
-### Memory Model and Exceptions
+## Memory Model and Exceptions
 
 The CLR defines a memory model that governs how writes become visible across threads; `volatile`, `Interlocked`, and explicit memory barriers (`Thread.MemoryBarrier`) are the tools for ordering guarantees the JIT/CPU would otherwise be free to reorder. Exceptions use a **two-pass model**: a first pass walks up the stack evaluating `catch`/`when` filters to _select_ a handler (the stack is still intact, which is why filters see the original state), then a second pass unwinds, running `finally` blocks on the way to the chosen handler.
 
-## Pitfalls
+# Pitfalls
 
 **Assuming JIT is free** — the first call to a method triggers JIT compilation. In latency-sensitive scenarios (serverless cold starts, first request after deploy), this adds measurable overhead. Mitigate with ReadyToRun or NativeAOT publishing, or warm-up requests.
 
@@ -118,7 +116,7 @@ The CLR defines a memory model that governs how writes become visible across thr
 
 **Finalizer abuse** — objects with finalizers are promoted to the next GC generation before collection, increasing memory pressure. Prefer `IDisposable` + `using` for deterministic cleanup; use finalizers only as a safety net for unmanaged resources.
 
-## Questions
+# Questions
 
 > [!QUESTION]- What is managed vs unmanaged code? Why does unmanaged interop require careful lifetime management?
 > Managed code runs under the .NET runtime (CLR) and benefits from runtime services like type safety checks, exception handling, garbage collection, and JIT/AOT compilation.
@@ -140,7 +138,7 @@ The CLR defines a memory model that governs how writes become visible across thr
 > [!QUESTION]- Why does the GC use generations?
 > Most objects die young (short-lived allocations like request-scoped objects). Generational GC exploits this by collecting Gen 0 (newest, smallest) most frequently and cheaply. Long-lived objects are promoted to Gen 1 and Gen 2, which are collected less often. This reduces the cost of GC for the common case while still reclaiming long-lived garbage.
 
-## Links
+# References
 
 - [Common Language Runtime (CLR) overview — Microsoft Learn](https://learn.microsoft.com/en-us/dotnet/standard/clr) — official overview of CLR responsibilities, managed execution, and assembly loading.
 - [.NET Runtime architecture — Microsoft Learn](https://learn.microsoft.com/en-us/dotnet/core/introduction) — covers the relationship between CLR, BCL, and the SDK.

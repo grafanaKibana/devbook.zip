@@ -1,8 +1,8 @@
 ---
 publish: true
 created: 2026-07-12T14:27:20.423Z
-modified: 2026-07-12T14:27:20.424Z
-published: 2026-07-12T14:27:20.424Z
+modified: 2026-07-18T11:30:05.513Z
+published: 2026-07-18T11:30:05.513Z
 topic:
   - Computer Science
 subtopic:
@@ -14,15 +14,13 @@ priority: Medium
 status: Ready to Repeat
 ---
 
-# Intro
-
 An array of scores changes as players climb a leaderboard, and each change is followed by a query like "what is the running total up to rank _i_?" A plain [[Prefix Sum]] array answers that query in `O(1)`, but a single score change forces every later prefix to be rebuilt in `O(n)`. A [[Segment Tree]] restores both directions to `O(log n)`, at the cost of roughly `4n` slots and a recursive body. A Fenwick tree — the binary indexed tree, BIT — keeps the `O(log n)` update and prefix query while storing exactly one `int` per element and looping over a single flat array.
 
 The compactness comes from a specific division of labour. In a 1-indexed array, slot `i` is responsible for the block of `i & -i` elements ending at `i`, where `i & -i` isolates the lowest set bit of the index. Slot `12` (`1100₂`) covers four elements, positions 9 through 12; slot `8` (`1000₂`) covers eight, positions 1 through 8. No slot stores an individual element in isolation, so the structure answers prefix questions directly and reconstructs a range only by subtracting two prefixes — which is why the aggregate has to be invertible.
 
 **Core shape:** 1-indexed array → slot `i` sums the `i & -i` elements ending at `i` → a prefix query clears low bits downward, a point update adds the low bit upward → invertible aggregate only → `O(n)` storage.
 
-## State across operations
+# State across operations
 
 No StepTrace renderer covers this structure yet.
 
@@ -36,7 +34,7 @@ Both operations move through the array by editing one bit of the index at a time
 
 The two walks are inverses of each other over the low-bit structure: a query descends by removing set bits, an update ascends by carrying one in.
 
-## Representation and invariants
+# Representation and invariants
 
 The tree is implicit; nothing but an `int[tree]` of length `n + 1` exists, and the 1-based indexing is load-bearing rather than cosmetic. Index `0` has no lowest set bit, so `0 & -0 == 0` and the update loop would never advance from it — a `0`-based layout stalls immediately.
 
@@ -48,7 +46,7 @@ Three facts define a valid state:
 
 Only the slots on an update path change; the rest of the array is untouched. The structure records aggregates, not the original values, so recovering `a[i]` alone means `Prefix(i) − Prefix(i − 1)` rather than a direct read.
 
-## Complexity
+# Complexity
 
 | Operation | Time | Space | Cause |
 | --- | --- | --- | --- |
@@ -59,7 +57,7 @@ Only the slots on an update path change; the rest of the array is untouched. The
 
 Every bound is worst-case and deterministic — there is no amortization or balancing assumption, because the number of slots touched is fixed by the bit pattern of the index. Constants are small: each step is one array read or write plus one `i & -i`, with no recursion, child-index arithmetic, or pointer chasing.
 
-## When the structure stops fitting
+# When the structure stops fitting
 
 The prefix-subtraction mechanism sets the hard boundary: `RangeSum(l, r) = Prefix(r) − Prefix(l − 1)` only reconstructs `[l..r]` when the aggregate has an inverse. Sum, count, and XOR qualify (subtraction, subtraction, XOR-again); a product over a group works when every element is invertible. Minimum and maximum have no inverse — knowing `min(1..r)` and `min(1..l−1)` says nothing about `min(l..r)` — so range-min/max queries need a [[Segment Tree]] instead. A "prefix max" Fenwick tree exists but is valid only when values never decrease, so it cannot survive point _updates_ that lower a value.
 
@@ -67,7 +65,7 @@ The plain layout also supports point update with range query, not the reverse. R
 
 Two mechanical traps recur. The `Update` contract takes a **delta**, not an assignment: setting position `i` to `v` requires passing `v − current[i]` and tracking current values separately, which trips implementations ported from a segment tree's assign-style update. And the 1-indexed low-bit identity is unforgiving — a stray `0` index stalls the walk, and `i & -i` relies on two's-complement negation, so it needs a fixed-width integer type. Arbitrary-precision integers (where `-i` is not a wrapped bit pattern) or a width mismatch between the index and the loop bound break the low-bit extraction.
 
-## Reference drawer
+# Reference drawer
 
 > [!ABSTRACT]- Responsibility blocks for n = 8
 >
@@ -131,7 +129,7 @@ Two mechanical traps recur. The `Update` contract takes a **delta**, not an assi
 >
 > `Update` applies a delta rather than assigning a value; setting position `i` to `v` means `Update(i, v - current[i])` with `current` tracked by the caller. An `O(n)` in-place build replaces `n` calls to `Update` by adding each finished slot into its parent `i + (i & -i)`.
 
-## Questions
+# Questions
 
 > [!QUESTION]- What determines how many slots a Fenwick tree operation touches?
 > The set bits of the index. `Prefix(i)` reads one slot per set bit of `i` (`popcount(i)`), clearing the lowest set bit each step; `Update(i, …)` visits one slot per higher bit while adding the lowest set bit. Both are bounded by `⌊log₂ n⌋ + 1`, and the bound is deterministic rather than amortized.
@@ -145,7 +143,7 @@ Two mechanical traps recur. The `Update` contract takes a **delta**, not an assi
 > [!QUESTION]- How does a Fenwick tree handle a range update with a point query?
 > Not with the plain layout. It is built over a difference array: `Update(l, +delta)` and `Update(r + 1, -delta)` record the range increment, and a point query at `i` becomes `Prefix(i)`. Range update with range query extends this to two BITs run in parallel.
 
-## References
+# References
 
 - [Fenwick tree](https://cp-algorithms.com/data_structures/fenwick.html) — prefix and range queries, the `O(n)` build, one-based indexing, and the range-update variants built on difference arrays.
 - Peter M. Fenwick, [A new data structure for cumulative frequency tables (1994)](https://doi.org/10.1002/spe.4380240306) — the original paper, framed around arithmetic-coding frequency tables and the binary-indexed decomposition.

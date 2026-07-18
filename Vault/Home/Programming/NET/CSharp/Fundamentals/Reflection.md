@@ -11,11 +11,9 @@ status: Ready to Repeat
 publish: true
 ---
 
-# Intro
-
 Reflection is runtime metadata inspection and dynamic member access through `System.Reflection`. It is the mechanism behind many framework features (DI containers, serializers, test discovery, plugin loading), but it trades compile-time guarantees for runtime flexibility. In practice, use reflection when the target type/member is unknown until runtime, and avoid it on hot paths unless you cache metadata or compile delegates.
 
-## How It Works
+# How It Works
 
 At runtime, the CLR exposes assembly/type/member metadata via objects like `Type`, `MethodInfo`, `PropertyInfo`, and `ConstructorInfo`.
 
@@ -40,7 +38,7 @@ foreach (var m in publicInstanceMethods)
 }
 ```
 
-## Common Patterns
+# Common Patterns
 
 - Attribute-driven behavior: scan types/members and read attributes to decide routing, validation, serialization, or registration.
 - Dynamic activation: create objects from discovered types (for example, plugin types implementing an interface).
@@ -75,7 +73,7 @@ var method = typeof(Jobs)
 method?.Invoke(target, null);
 ```
 
-## From Slow Reflection to Fast Access
+# From Slow Reflection to Fast Access
 
 `MethodInfo.Invoke` is slow because every call re-marshals arguments and does runtime checks. When you call the same member repeatedly, **do the reflection once and cache a delegate**:
 
@@ -92,19 +90,19 @@ For runtime code generation there's `System.Reflection.Emit` / `DynamicMethod` (
 
 To reach **private members**, the old way is `BindingFlags.NonPublic` (slow, breaks encapsulation, fragile under trimming). On **.NET 8+** use **`[UnsafeAccessor]`** — a zero-overhead, AOT-safe, statically-checked way to call a private method or access a private field without reflection at all.
 
-## Pitfalls
+# Pitfalls
 
 - Reflection is slower than direct calls because it does metadata lookup, boxing, and runtime checks; repeated uncached lookups (`GetMethod`/`GetProperty` in loops) can become a major throughput bottleneck. Cache `MemberInfo` and prefer compiled delegates for hot paths.
 - `BindingFlags` mistakes often return empty results or surprising member sets (for example, missing `Instance`/`Static` or `Public`/`NonPublic` combinations). Always specify flags explicitly and test inherited/non-public scenarios.
 - Reflection-heavy code can fail under trimming/AOT when required members are removed because the linker cannot infer dynamic access. For types known at compile time, use linker annotations like `DynamicallyAccessedMembers`; for truly dynamic scenarios (for example plugin type names from config), expect `RequiresUnreferencedCode` warnings and consider explicit registration or source generation.
 
-## Tradeoffs
+# Tradeoffs
 
 - Reflection vs interfaces/generics: reflection is more flexible for unknown types, while interfaces/generics are faster, safer, and easier to refactor.
 - Reflection invocation vs compiled delegates: `MethodInfo.Invoke` is simpler but slower; delegate compilation has upfront complexity but pays off for repeated calls.
 - Runtime discovery vs source generation: runtime discovery minimizes build-time setup, while source generation improves startup/performance and is more trim/AOT friendly.
 
-## Questions
+# Questions
 
 > [!QUESTION]- Why is reflection often a bad default in performance-critical code?
 > Reflection shifts work from compile time to runtime: member discovery, argument handling, and dynamic dispatch all add overhead compared to direct calls.
@@ -121,7 +119,7 @@ To reach **private members**, the old way is `BindingFlags.NonPublic` (slow, bre
 > Prefer interfaces/generics when contracts are known at compile time because they provide stronger safety and better performance.
 > Prefer source generators in reflection-heavy infrastructure when you need predictable startup, high throughput, or trim/AOT compatibility.
 
-## Links
+# References
 
 - [Reflection overview (.NET)](https://learn.microsoft.com/dotnet/fundamentals/reflection/overview) - Official conceptual model and API surface summary.
 - [Reflection and attributes (C#)](https://learn.microsoft.com/dotnet/csharp/advanced-topics/reflection-and-attributes/) - Attribute-focused usage patterns in C# code.

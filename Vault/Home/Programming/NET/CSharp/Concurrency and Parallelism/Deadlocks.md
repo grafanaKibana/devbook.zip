@@ -10,22 +10,20 @@ priority: High
 status: Ready to Repeat
 publish: true
 ---
-# Intro
-
 A deadlock happens when two or more execution paths wait forever on resources held by each other. In .NET systems, deadlocks appear both in classic lock-based code and in async flows that block on tasks. They are high-severity failures because throughput can drop to zero without obvious crashes — the process stays alive but stops making progress.
 
-## How Deadlocks Form — Coffman Conditions
+# How Deadlocks Form — Coffman Conditions
 
 Deadlocks require all four Coffman conditions simultaneously:
 
-1. **Mutual exclusion** — a resource cannot be shared (e.g., a `lock`/monitor). Protects correctness but introduces contention risk.
+1. **Mutual exclusion** — a resource cannot be shared (e.g., a [[Locking|lock]] or monitor). Protects correctness but introduces contention risk.
 2. **Hold and wait** — a thread holds one resource while waiting for another. The common trigger in nested locking.
 3. **No preemption** — a resource cannot be forcibly taken; the owner must release it. Blocked threads can wait forever without a timeout or cancellation path.
 4. **Circular wait** — the wait graph has a cycle (A waits for B, B waits for A). The easiest condition to break with deterministic lock ordering.
 
 Break any one condition and the deadlock cannot happen.
 
-## Classic Lock Deadlock
+# Classic Lock Deadlock
 
 ```csharp
 private static readonly object LockA = new();
@@ -63,7 +61,7 @@ public void Second()
 4. T2 tries to acquire `LockA` — blocked (owned by T1).
 5. Neither thread can continue: circular wait.
 
-## Async Deadlock (Sync-Over-Async)
+# Async Deadlock (Sync-Over-Async)
 
 A subtler deadlock pattern in async code: blocking on a `Task` inside a `SynchronizationContext`.
 
@@ -89,7 +87,7 @@ private async Task<string> LoadDataAsync()
 - The `await` inside `LoadDataAsync` captured the `SynchronizationContext` and needs that same thread to resume.
 - Neither can proceed.
 
-## Prevention Patterns
+# Prevention Patterns
 
 **1. Consistent lock ordering**
 Always acquire locks in the same global order across all code paths. This breaks circular wait.
@@ -147,7 +145,7 @@ var result = await _http.GetStringAsync(url);
 lock (_lock) { _cache[key] = result; }
 ```
 
-## ThreadPool-Starvation Deadlock
+# ThreadPool-Starvation Deadlock
 
 This is the deadlock that *does* strike ASP.NET Core (no `SynchronizationContext` required). Each request that blocks on `.Result`/`.Wait()` parks a pool thread. The continuation it's waiting on needs a pool thread to run — but under load every thread is parked the same way, and the pool injects new threads only slowly (~1 per 500ms). The app hangs even though no single-thread cycle exists; throughput collapses to near zero.
 
@@ -158,12 +156,12 @@ public IActionResult Get() => Ok(_service.LoadAsync().Result); // never block �
 
 The fix is the same as the classic case — **async all the way up** — but the failure mode is different (resource exhaustion, not a wait cycle). See [[ThreadPool]].
 
-## Related Failure Modes
+# Related Failure Modes
 
 - **Livelock** — threads are not blocked but make no progress because they keep reacting to each other (e.g. two `Monitor.TryEnter`/back-off loops that always collide). Add randomized back-off (jitter) to break the symmetry.
 - **Lock convoy** — many threads serialize through one hot lock; no deadlock, but throughput craters and latency spikes as threads queue and context-switch. Reduce lock scope, shard the lock, or use a lock-free/`Interlocked` structure.
 
-## Pitfalls
+# Pitfalls
 
 **Async deadlock is invisible in logs**
 The process stays alive and healthy from the outside. No exception is thrown. The only signal is a hung request or frozen UI. Use thread dump analysis or `dotnet-dump` to identify blocked threads.
@@ -186,15 +184,15 @@ public async Task UpdateAsync()
 > **`SemaphoreSlim` is not reentrant.** Unlike `Monitor`/`lock` (and `Mutex`), it has no thread affinity and no recursion count. If a method that already holds the gate calls another method that tries to acquire the *same* 1-permit semaphore, it **self-deadlocks**. Don't make `WaitAsync`-guarded methods call each other; restructure so the lock is taken once at the top.
 
 **`lock` on a shared/public object**
-Never `lock(this)`, `lock(typeof(X))`, or lock on an interned `string`. These objects are visible to other code that may lock on the same instance, creating cross-component lock-ordering cycles you can't see. Always lock on a `private readonly object _gate = new();` (or use `System.Threading.Lock` in .NET 9+).
+Never `lock(this)`, `lock(typeof(X))`, or lock on an interned `string`. These objects are visible to other code that may lock on the same instance, creating cross-component lock-ordering cycles you can't see. Always lock on a `private readonly object _gate = new();` (or a `private readonly Lock` in .NET 9+).
 
 **Nested locks in library code**
 Third-party libraries may acquire internal locks. Calling library methods while holding your own lock can create unexpected lock ordering dependencies you cannot control.
 
 **Database deadlocks are a separate layer**
-The DB engine has its own lock manager: two transactions touching rows/indexes in opposite order deadlock, and the engine kills one as the *deadlock victim* (SQL Server error 1205). Fix with consistent access order, smaller transactions, and retry-on-1205 — not with CLR locks. See [[Home/Data Persistence/SQL/SQL|SQL]].
+The DB engine has its own lock manager: two transactions touching rows/indexes in opposite order deadlock, and the engine kills one as the *deadlock victim* (SQL Server error 1205). Fix with consistent access order, smaller transactions, and retry-on-1205 — not with CLR locks. See [[Database Locks]].
 
-## Questions
+# Questions
 
 > [!QUESTION]- What are the four Coffman conditions and which is easiest to break in practice?
 > Mutual exclusion, hold-and-wait, no preemption, circular wait. Circular wait is easiest to break: enforce a global lock acquisition order across all code paths. This requires discipline but no runtime overhead.
@@ -209,7 +207,7 @@ The DB engine has its own lock manager: two transactions touching rows/indexes i
 > Capture a process dump with `dotnet-dump collect` or `procdump`. Analyze with `dotnet-dump analyze` and `clrthreads`/`syncblk` commands to find threads blocked on monitors. For async deadlocks, look for threads blocked in `.Result` or `.Wait()` while holding a `SynchronizationContext`.
 > Cost: dump capture briefly pauses the process; plan for a maintenance window or use a non-blocking snapshot tool.
 
-## References
+# References
 
 - [Managed threading best practices (Microsoft Learn)](https://learn.microsoft.com/en-us/dotnet/standard/threading/managed-threading-best-practices) — official guidance on avoiding deadlocks, race conditions, and starvation in .NET.
 - [Monitor class and synchronization (Microsoft Learn)](https://learn.microsoft.com/en-us/dotnet/fundamentals/runtime-libraries/system-threading-monitor) — `Monitor.TryEnter` with timeout as a deadlock-prevention tool.

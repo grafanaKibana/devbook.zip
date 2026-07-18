@@ -10,7 +10,7 @@ body = """
 ## Unreleased
 {% endif %}\
 {% for group, commits in commits | group_by(attribute="group") %}
-### {{ group | upper_first }}
+### {{ group | striptags | trim | upper_first }}
 {% for commit in commits %}\
 - {{ commit.message | upper_first }}{% if commit.scope %} _(scope: {{ commit.scope }})_{% endif %}
 {% endfor %}\
@@ -19,21 +19,36 @@ body = """
 trim = true
 footer = ""
 
+[remote.github]
+owner = "grafanaKibana"
+repo = "devbook.zip"
+
 [git]
 conventional_commits = true
 filter_unconventional = true   # drop non-Conventional commits (e.g. "vault backup:")
 filter_commits = true
+protect_breaking_commits = true
 split_commits = false
 topo_order = false
 sort_commits = "newest"
 tag_pattern = "v[0-9]+\\.[0-9]+\\.[0-9]+"
 
+# Link PR numbers to GitHub before grouping.
+commit_preprocessors = [
+  { pattern = "\\(#(\\d+)\\)", replace = "([#${1}](https://github.com/grafanaKibana/devbook.zip/pull/${1}))" },
+]
+
+# Canonical types: feature | fix | notes | docs | maintenance.
+# feat/bug/chore/refactor are legacy aliases kept so history still renders.
 commit_parsers = [
   { message = "^vault backup", skip = true },
   { message = "^Merge ", skip = true },
-  { message = "^feature!?:", group = "Platform — Features" },
-  { message = "^(bug|fix)!?:", group = "Platform — Fixes" },
-  { message = "^notes!?:", group = "Notes" },
-  { message = "^docs!?:", group = "Documentation" },
-  { message = "^maintenance!?:", group = "Maintenance" },
+  { message = "^(Published|Deleted) \\d+ file", skip = true },   # Quartz Syncer sync commits
+  { breaking = true, group = "<!-- 0 -->Breaking" },
+  { message = "^(feature|feat)!?(\\(.*\\))?:", group = "<!-- 1 -->Platform — Features" },
+  { message = "^(bug|fix)!?(\\(.*\\))?:", group = "<!-- 2 -->Platform — Fixes" },
+  { message = "^notes!?(\\(.*\\))?:", group = "<!-- 3 -->Notes" },
+  { message = "^docs!?(\\(.*\\))?:", group = "<!-- 4 -->Documentation" },
+  { message = "^(maintenance|chore|refactor)!?(\\(.*\\))?:", group = "<!-- 5 -->Maintenance" },
+  { message = ".*", group = "<!-- 6 -->Uncategorized" },          # visible catch-all, nothing silently lost
 ]

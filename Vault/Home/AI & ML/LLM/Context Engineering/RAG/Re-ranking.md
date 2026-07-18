@@ -11,8 +11,6 @@ status: Done
 publish: true
 ---
 
-# Intro
-
 Re-ranking is a second-stage scoring pass that takes the candidate set from [[Retrieval]] and reorders it using a more expensive, more accurate model before context reaches the generator. Retrieval optimizes for recall at speed — find plausible candidates from millions of chunks. Re-ranking optimizes for precision — push the most relevant candidates to the top of a small list.
 
 The mechanism: first-stage retrieval (dense, sparse, or hybrid) returns a candidate set of 20–100 chunks ranked by approximate similarity. The reranker then scores each candidate against the query using a model that can read both query and document together (joint encoding), producing a more accurate relevance score. The reranked top-k goes to the generator.
@@ -31,9 +29,9 @@ sequenceDiagram
 
 Example: a hybrid retrieval returns 50 candidates for "what are the SLA penalties for tier-2 partners." Ten candidates mention SLAs generally, three mention tier-2 specifically, and the rest are noise about partner onboarding. A cross-encoder reranker reads each candidate alongside the query and pushes the three tier-2 SLA documents to positions 1–3, where the generator uses them. Without reranking, the generator might receive mostly generic SLA content and produce a vague answer.
 
-## Reranking Approaches
+# Reranking Approaches
 
-### Cross-Encoder Reranking
+## Cross-Encoder Reranking
 
 A cross-encoder takes the query and a single document as a concatenated input, passes them through a transformer together, and outputs a relevance score. Unlike bi-encoders (which embed query and document independently), cross-encoders perform full token-level attention between query and document. This joint encoding captures fine-grained interactions — negation, qualifier scope, entity co-reference — that independent embeddings miss.
 
@@ -43,7 +41,7 @@ SBERT provides pretrained cross-encoder models across a speed-quality spectrum. 
 
 **Cohere Rerank** offers cross-encoder reranking as a managed API. Models like `rerank-v3.5` and the `rerank-v4.0` family accept JSON and semi-structured data natively, handle multilingual queries, and require no infrastructure. The tradeoff is per-query API cost and network latency.
 
-### Late Interaction — ColBERT
+## Late Interaction — ColBERT
 
 ColBERT (Contextualized Late Interaction over BERT) encodes query and document independently into per-token embeddings, then scores relevance using MaxSim: for each query token, find the maximum cosine similarity to any document token, then sum across all query tokens. This is "late interaction" — token representations are pre-computed independently, but scoring considers token-level alignment.
 
@@ -53,7 +51,7 @@ ColBERTv2 adds residual compression that reduces per-document storage by 6–10x
 
 The tradeoff: ColBERT requires multi-vector storage (one vector per token per document), which standard single-vector stores do not support natively. Dedicated engines like PLAID (ColBERTv2's retrieval engine) or vector stores with multi-vector support are needed.
 
-### BM25 Lexical Reranking
+## BM25 Lexical Reranking
 
 BM25 scores a document by matching query terms against document terms, then adjusting for term frequency, inverse document frequency, and document length. In RAG pipelines it is usually a first-stage sparse retriever, but it can also act as a cheap second-stage lexical reranker over dense retrieval results when exact terminology matters.
 
@@ -61,7 +59,7 @@ Example: a user asks for "SOC 2 Type II retention exception." Dense retrieval ma
 
 The strength is precision on named entities, error codes, product SKUs, legal terms, and acronyms. The weakness is vocabulary brittleness: BM25 does not understand that "customer-managed key" and "CMK" may refer to the same concept unless both terms appear or the query is expanded. Use BM25 as a lexical guardrail beside dense retrieval, not as the only relevance signal for semantic questions.
 
-### MMR — Maximal Marginal Relevance
+## MMR — Maximal Marginal Relevance
 
 Maximal Marginal Relevance reranks candidates by balancing relevance to the query against novelty relative to documents already selected. Instead of taking the top-k most similar chunks, MMR picks the next chunk that is both relevant and not redundant with the chunks already in the context window.
 
@@ -71,7 +69,7 @@ Example: retrieval returns ten chunks from the same incident report because all 
 
 MMR is most useful when chunk overlap, template-heavy documents, or near-duplicate pages crowd out coverage. The cost is that diversity can demote the single most relevant supporting chunk if lambda is too low. Start with MMR when the generator receives repetitive context; avoid it when the answer requires multiple adjacent chunks from the same source.
 
-### LLM-as-Reranker
+## LLM-as-Reranker
 
 An LLM-as-reranker asks a language model to judge candidate relevance directly, usually by scoring each chunk or choosing the best chunks from a small candidate set. Compared with a cross-encoder, it can follow domain-specific instructions: "prefer current policy over archived policy," "penalize snippets without dollar amounts," or "rank implementation guidance above marketing copy."
 
@@ -88,7 +86,7 @@ Return JSON with relevance scores from 0 to 5 and a one-sentence reason for each
 
 The advantage is judgment flexibility: the model can apply business rules, read longer evidence than small cross-encoders, and explain why a chunk was selected. The tradeoff is latency, cost, and variance. LLM reranking is best for low-volume or high-stakes queries where transparent ranking decisions matter; for high-QPS search, use a trained reranker or managed rerank API and reserve LLM judging for evaluation or difficult fallback cases.
 
-### Score Fusion — RRF and Alternatives
+## Score Fusion — RRF and Alternatives
 
 Score fusion combines ranked lists from multiple retrievers into a single ordering. This is not reranking in the cross-encoder sense — no new model scores relevance — but it serves the same purpose of improving ranking quality before generation.
 
@@ -109,33 +107,33 @@ The formula: `RRF_score = sum of 1 / (k + rank_i)` where k=60 is the standard co
 
 When to use which: RRF is the safer default because it only depends on rank ordering, not score distributions. Linear combination is worth trying when one retriever is consistently more reliable than the other and you want to weight it explicitly. In both cases, score fusion is a complement to model-based reranking, not a replacement — fuse first, then rerank the fused list.
 
-## Pitfalls
+# Pitfalls
 
-### Latency Budget Exhaustion
+## Latency Budget Exhaustion
 
 Cross-encoder reranking adds 50–200ms per query depending on candidate count and model size. In a pipeline with a 500ms total SLA, reranking can consume 10–40% of the budget. Teams add reranking for quality, then discover that p95 latency exceeds the SLA under production load.
 
 Mitigation: set a hard candidate cap (20–50 documents) and choose the reranker model size based on your latency budget, not just quality benchmarks. Profile reranking latency under realistic batch sizes and concurrency, not just single-query benchmarks.
 
-### Candidate Count Reduction Under Load
+## Candidate Count Reduction Under Load
 
 Under traffic pressure, teams reduce the candidate count passed to the reranker (from 100 to 20) to stay within latency budgets. This silently kills recall — if the relevant document was at position 35 in the first-stage results, reducing to top-20 means the reranker never sees it.
 
 Detection: monitor first-stage recall@N at the candidate count you actually pass to the reranker, not the theoretical maximum. If recall@20 is significantly lower than recall@100, the candidate cut is the bottleneck, not the reranker.
 
-### Reranker-Retriever Distribution Mismatch
+## Reranker-Retriever Distribution Mismatch
 
 A reranker trained on MS MARCO (short web passages, English) may underperform on your domain (long technical documents, multilingual). The reranker's relevance judgments are calibrated to its training distribution — out-of-distribution documents get unreliable scores.
 
 Mitigation: evaluate the reranker on your own query-document pairs before committing. If domain-specific recall degrades after reranking (reranker demotes relevant documents), the reranker is hurting, not helping. Consider domain-adapted or multilingual reranker models.
 
-### Over-Reliance on Reranking to Fix Retrieval
+## Over-Reliance on Reranking to Fix Retrieval
 
 Reranking can only reorder what retrieval found. If the relevant document is not in the candidate set at all (recall failure), no amount of reranking will surface it. Teams sometimes add rerankers expecting them to fix retrieval coverage problems, when the actual fix is better [[Chunking]], [[Embeddings|embedding model selection]], or query expansion.
 
 Diagnostic: if reranking improves precision but not recall, the pipeline has a first-stage recall problem, not a ranking problem.
 
-## Tradeoffs
+# Tradeoffs
 
 | Approach | Quality | Latency per query | Infrastructure | Best for |
 | --- | --- | --- | --- | --- |
@@ -151,7 +149,7 @@ Diagnostic: if reranking improves precision but not recall, the pipeline has a f
 
 Decision rule: start without reranking and measure retrieval quality. Add BM25 or RRF when lexical and dense signals complement each other. Add MMR when the prompt contains redundant chunks. Add model-based reranking only when precision failures at the top of the ranked list are the dominant error mode — not when recall is the problem. Use LLM-as-reranker selectively when business judgment or explainability is worth the extra latency and cost.
 
-## Questions
+# Questions
 
 > [!QUESTION]- Why can reranking improve offline [[Monitoring#Retrieval Quality Metrics|nDCG]] without visible quality improvement for end users?
 > The improvement may be in ranking positions that the generator does not use. If the generator only reads the top-3 chunks, improvements at positions 4–5 are invisible to users. Evaluate whether the reranker changes the top-k composition that actually enters the prompt, not just overall [[Monitoring#Retrieval Quality Metrics|nDCG]]. Also verify that the eval set reflects production query distribution — gains on eval-set query types may not represent the queries users actually send.
@@ -162,7 +160,7 @@ Decision rule: start without reranking and measure retrieval quality. Add BM25 o
 > [!QUESTION]- Why is ColBERT faster than a cross-encoder at query time despite also using token-level scoring?
 > ColBERT pre-computes per-token document embeddings at index time and stores them. At query time, only the query tokens need encoding (one forward pass regardless of candidate count). Scoring is a MaxSim matrix operation over pre-stored vectors, not a full transformer forward pass per document. Cross-encoders must run a complete forward pass for each query-document pair because they jointly encode the concatenated input. The tradeoff is that ColBERT needs multi-vector storage, which uses more space and requires specialized indexes.
 
-## References
+# References
 
 - [Retrieve and rerank pipeline — bi-encoder retrieval plus cross-encoder reranking (SBERT)](https://sbert.net/examples/applications/retrieve_rerank/README.html)
 - [Pretrained cross-encoder models — speed and quality benchmarks (SBERT)](https://sbert.net/docs/cross_encoder/pretrained_models.html)

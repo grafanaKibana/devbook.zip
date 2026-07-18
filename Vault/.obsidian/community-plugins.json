@@ -9,7 +9,6 @@
   "advanced-canvas",
   "obsidian-git",
   "obsidian-icon-folder",
-  "pretty-properties",
   "homepage",
   "digitalgarden",
   "obsidian-style-settings",
@@ -17,5 +16,6 @@
   "obsidian-excalidraw-plugin",
   "hot-reload",
   "quartz-syncer",
-  "steptrace"
+  "steptrace",
+  "true-recall"
 ]

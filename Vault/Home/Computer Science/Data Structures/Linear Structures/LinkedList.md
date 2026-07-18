@@ -11,8 +11,6 @@ status: Done
 publish: true
 ---
 
-# Intro
-
 A sequence needs frequent insertions and removals in its interior, and the code already holds a reference to the element next to each edit. A contiguous array pays `O(n)` to shift the tail on every such edit. A linked list drops contiguity: each element lives in its own separately allocated node, and the structure stores only the links between nodes. Splicing a node in or out then rewires a constant number of adjacent pointers (two on a removal, up to four on a doubly-linked insert) and touches no other element.
 
 The cost of that freedom is addressing. Because nodes are scattered across the heap rather than laid out in one block, there is no arithmetic that maps an index to an address. Reaching the *k*-th element means starting at a head reference and following *k* `next` pointers. A `LinkedListNode<T>` holds a value plus `Next` (singly linked) or both `Next` and `Prev` (doubly linked); the list keeps `First`/`Last` handles and a count, and many implementations wrap the ends with a sentinel node so the head and tail cases need no branch.
@@ -22,7 +20,7 @@ The cost of that freedom is addressing. Because nodes are scattered across the h
 > [!NOTE] Visualization pending
 > Planned StepTrace: a linked-list card showing a node spliced out of a doubly linked chain — the removed node's neighbours re-point `next`/`prev` across the gap while every other node stays exactly where it was in memory. No matching renderer exists in `engine.js` yet.
 
-## Representation and invariants
+# Representation and invariants
 
 The list itself stores almost nothing: a `First` reference, usually a `Last` reference, and a count. All content lives in the nodes, and each node is an independent heap allocation reachable only through its neighbours' pointers.
 
@@ -38,7 +36,7 @@ Three invariants define a valid state:
 
 An insertion or removal at a held node mutates only a constant number of adjacent pointers (two on a removal, up to four on a doubly-linked insert) plus the count. No index is recomputed and no element is copied, which is the property that makes the edit `O(1)`. Nothing about ordering is derived from position — position exists only as the path of pointers, so there is no random access to recover.
 
-## Complexity
+# Complexity
 
 | Operation | Best time | Typical time | Worst time | Structure space | Cause |
 | --- | --- | --- | --- | --- | --- |
@@ -50,7 +48,7 @@ An insertion or removal at a held node mutates only a constant number of adjacen
 
 The `O(1)` splice is a guarantee only when the node reference is already in hand. As soon as the node must be found by index or value, the `O(n)` traversal dominates and the whole operation is `O(n)` — the same asymptotic class as shifting an array, but with worse constants. Space is `O(n)` in element count, but the constant is larger than a contiguous array: every element carries at least one extra pointer plus the per-object allocation header, and each node is a separate allocation the garbage collector must track.
 
-## When the layout stops paying
+# When the layout stops paying
 
 Random access is the hard boundary. There is no `list[k]` in `O(1)`; indexing walks the chain, so any algorithm that repeatedly addresses elements by position turns each access into an `O(n)` traversal. A workload that looks index-light on paper can hide this cost inside a `foreach` that repeatedly searches before it edits.
 
@@ -58,7 +56,7 @@ Cache behaviour is the boundary that surprises people. Because consecutive nodes
 
 Per-node allocation is the third boundary. Every insert allocates a node object and every removal produces garbage, so an insert-heavy linked-list workload generates allocation and GC pressure that an amortized-growth array avoids by reusing one backing buffer. Detached or foreign nodes are also invalid anchors: passing a `LinkedListNode<T>` that belongs to another list (or was already removed) to `AddAfter`/`Remove` throws, because node identity is scoped to its owning list.
 
-## Reference drawer
+# Reference drawer
 
 > [!ABSTRACT]- Doubly linked chain with head and tail
 > ```mermaid
@@ -88,12 +86,12 @@ Per-node allocation is the third boundary. Every insert allocates a node object 
 > ```
 > `AddAfter(a, "B")` is `O(1)` because `a` is held. `Remove("C")` is `O(n)` because it searches first — the unlink itself is `O(1)`. A node from another list passed to `AddAfter`/`Remove` throws: node identity is scoped to its owning list.
 
-## Questions
+# Questions
 
 > [!QUESTION]- Why does the `Prev` ↔ `Next` invariant matter during a removal?
 > Adjacency is stored twice: `a.Next == b` must agree with `b.Prev == a`. A removal must re-point both directions across the gap. Updating only one leaves a half-linked chain where forward and backward traversal disagree about membership, corrupting the list.
 
-## References
+# References
 
 - [`LinkedList<T>` class](https://learn.microsoft.com/en-us/dotnet/api/system.collections.generic.linkedlist-1) — .NET's doubly linked list: node-based `AddBefore`/`AddAfter`/`Remove` contracts, `First`/`Last` handles, and the rule that a node belongs to exactly one list.
 - [`LinkedListNode<T>` class](https://learn.microsoft.com/en-us/dotnet/api/system.collections.generic.linkedlistnode-1) — the node type exposing `Value`, `Next`, `Prev`, and `List`, which defines the held-reference `O(1)` edit surface.

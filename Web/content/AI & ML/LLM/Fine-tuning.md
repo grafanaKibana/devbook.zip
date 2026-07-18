@@ -1,155 +1,177 @@
 ---
 publish: true
-created: 2026-07-13T18:39:40.421Z
-modified: 2026-07-13T18:39:40.421Z
-published: 2026-07-13T18:39:40.421Z
+created: 2026-07-16T18:34:16.231Z
+modified: 2026-07-18T11:30:02.593Z
+published: 2026-07-18T11:30:02.593Z
 topic:
   - AI & ML
 subtopic:
   - LLM
-summary: Training a model's weights on task-specific data to bake in behavior, not knowledge.
+summary: Adapting model behavior with supervised training, parameter-efficient updates, and held-out evaluation.
 level:
   - "2"
 priority: High
-status: Done
+status: Ready to Repeat
 ---
 
-# Intro
+Fine-tuning continues training a pretrained model on task-specific examples. It changes behavior in the weights instead of supplying instructions or facts on every request. Use it for durable output format, domain style, classification boundaries, tool-call reliability, or distilling a narrow task into a smaller model. Do not use it as a mutable knowledge store: facts embedded during training have no citation boundary and begin aging immediately.
 
-Fine-tuning continues training a pretrained model's weights on task-specific data, changing the model's behavior rather than just its inputs. It is the most powerful and most expensive of the three adaptation levers in [[AI & ML/LLM/LLM|LLM]] — the others being [[AI & ML/LLM/Prompt Engineering/Prompt Engineering|Prompting]] (no weight change) and [[AI & ML/LLM/Context Engineering/RAG/RAG|RAG]] (external knowledge at query time). The defining trait: fine-tuning bakes behavior into the weights, so it persists across every request without consuming context tokens — but it also bakes in a snapshot that starts aging the moment training ends.
+Start with prompting, add [[AI & ML/LLM/Context Engineering/RAG/RAG|RAG]] when the gap is current or private knowledge, and fine-tune only when a measured behavior gap remains. [[#Preference alignment]] covers preference-pair methods after supervised fine-tuning, and [[#GRPO]] covers group-relative online reinforcement learning.
 
-The single most important decision is _what_ you are trying to change. Fine-tuning is the right tool for **behavior** — output format, tone, refusal policy, domain style, structured-output reliability, or compressing a large model's behavior into a smaller one. It is the wrong tool for **knowledge** — facts change faster than you can retrain, fine-tuning provides no source traceability, and a model fine-tuned to "know" a fact will still hallucinate confidently at the edges. Keep mutable facts in retrieval; keep durable behavior in weights.
+# GRPO
 
-```mermaid
-flowchart TD
-    S[Task gap] --> Q1{Behavior or knowledge?}
-    Q1 -->|Knowledge or facts| R[Use RAG]
-    Q1 -->|Behavior, format, tone| Q2{Prompting enough?}
-    Q2 -->|Yes| P[Prompt plus few-shot]
-    Q2 -->|No, still inconsistent| F[Fine-tune]
-    F --> Q3{Compute budget?}
-    Q3 -->|Limited| L[LoRA or QLoRA]
-    Q3 -->|Ample, max quality| FT[Full fine-tune]
+Group Relative Policy Optimization (GRPO) is an online reinforcement-learning method for language-model post-training. For each prompt, the current policy samples a group of completions, a reward function or verifier—rule-based or model-based—scores them, and the update increases probability for completions that perform better relative to their group. GRPO removes the learned value model used by PPO-style training; it does not remove on-policy sampling, reward design, KL control, or reward-hacking risk.
+
+## Group-relative update
+
+```text
+prompt
+  → sample G completions from current policy
+  → score each completion
+  → normalize rewards inside the group
+  → update with clipped objective and reference-policy constraint
 ```
 
-## When to Fine-tune
+Suppose a math prompt produces eight completions. Six fail the final-answer check, one reaches the right answer through invalid formatting, and one is correct and well formed. Outcome and format rewards rank that sampled group. The normalized advantage says which trajectories were better than their peers; it is not a calibrated probability that one response is globally correct.
 
-Reach for fine-tuning only after prompting and retrieval have been tried, because it is the costliest to build and maintain. It earns its place when:
+The absence of a critic reduces model-state memory and one source of estimation error. Group estimates can still be noisy, especially when every sampled completion receives nearly the same reward. More samples improve comparison but increase generation cost.
 
-- **Behavior is inconsistent despite good prompting** — the model mostly follows the format or policy but drifts often enough to break downstream systems, and few-shot examples are not closing the gap reliably.
-- **The behavior is hard to specify in words but easy to demonstrate** — a house style, a domain-specific structure, a nuanced classification boundary. Examples teach what prose cannot.
-- **You want a smaller, cheaper model to match a larger one** on a narrow task — fine-tune a small model on the large model's outputs (distillation) to cut latency and per-request cost at scale.
-- **Prompt overhead is dominating cost** — if every request needs a long instruction block or many few-shot examples, fine-tuning can move that into the weights and shrink the prompt.
+## Reward boundary
 
-Do not fine-tune to inject knowledge, to fix a problem you have not first diagnosed, or before you have an [[AI & ML/LLM/Evaluation/Evaluation|evaluation]] set to prove the change helped.
+GRPO works best when rewards are hard to game and cheap to verify: exact math answers, executable tests, schema checks, or constrained simulators. A style judge or underspecified reward can reward verbosity, shortcuts, or artifacts that do not generalize.
 
-## Methods
+Use several gates:
 
-### Full Fine-tuning
+- Keep held-out prompts and run target, general-capability, and safety evaluations.
+- Inspect examples with high reward but poor human judgment.
+- Measure reward distribution and group variance, not only average training reward.
+- Test the final policy outside the environment and formatting assumptions used by the verifier.
 
-Update every weight in the model. Highest quality ceiling, but the cost is steep: training needs memory for the model, gradients, and optimizer states (often 3–4× the model size in GPU memory), and each fine-tuned task produces a full copy of the model to store and serve. Full fine-tuning also risks **catastrophic forgetting** — narrow training data can erode the general capabilities the base model had. Reserve it for when you have ample compute and the quality ceiling genuinely matters.
+## Evidence boundary
 
-### Parameter-Efficient Fine-tuning (PEFT)
+DeepSeekMath introduced GRPO and specifies its group-relative advantages, clipped policy objective, and KL regularization. DeepSeek-R1 reports a GRPO-based reasoning post-training pipeline and evaluations under its documented setup. Those papers support the mechanism and their stated experiments; they do not make undated prices, third-party hardware comparisons, or broad “best model” claims durable facts.
 
-PEFT methods freeze the base model and train a small number of additional parameters, capturing most of the quality of full fine-tuning at a fraction of the cost.
+The method is useful when a stable verifier and repeatable rollout environment exist. It is not a substitute for good data governance, held-out evaluation, or deployment-level checkpoints.
 
-- **LoRA (Low-Rank Adaptation)** — freeze the base weights and inject small trainable low-rank matrices into the attention and MLP layers. Only ~0.1–1% of parameters are trained. The resulting adapter is tiny (megabytes), can be swapped or stacked at serve time, and can be merged back into the base weights for zero inference overhead. The default PEFT method.
-- **QLoRA** — quantize the frozen base model to 4-bit, then train LoRA adapters on top. This collapses the memory footprint enough to fine-tune large models on a single consumer or modest cloud GPU, with little quality loss versus 16-bit LoRA. The standard way to fine-tune large open models on limited hardware.
-- Other variants — prefix tuning, prompt tuning, and adapter layers trade flexibility for even fewer trained parameters; LoRA/QLoRA dominate in practice.
+# Preference alignment
 
-### Preference Alignment
+Preference alignment trains models to prefer one completion over another for the same prompt. Preference data includes explicit instruction boundaries; those labels become the behavior target and therefore the strongest source of bias if the rubric is weak.
 
-Supervised fine-tuning (SFT) teaches the model to imitate good responses. **Preference alignment** goes further, training the model to prefer better responses over worse ones — this is the stage that shapes helpfulness, tone, and refusal behavior (see [[AI & ML/LLM/LLM|LLM]] on the training pipeline).
+## Preference data
 
-- **RLHF** — train a reward model from human preference comparisons, then optimize the policy against it with reinforcement learning. Powerful but operationally heavy.
-- **DPO (Direct Preference Optimization)** — optimize directly on preference pairs with a simple classification-style loss, skipping the separate reward model and RL loop. Much simpler to run and now a common default for preference tuning; newer variants (ORPO, KTO) push simplicity further.
+```text
+prompt: user asks for a refund outside policy
+chosen: explains limits and escalation
+rejected: invents an exception and promises a refund
+rubric: correctness, actionability, tone
+```
 
-## Data
+Hold out prompts, not only response pairs, so evaluation tests generalization to new situations.
 
-Data quality dominates data quantity. A few hundred to a few thousand clean, consistent, representative examples routinely beat tens of thousands of noisy ones for SFT.
+## RLHF
 
-- **Match the inference format exactly.** Training examples must use the same chat template, system prompt, and structure the model will see in production. A mismatch silently degrades results.
-- **Be consistent.** Inconsistent formatting or labeling in the training set teaches the model to be inconsistent. Audit examples the way you would audit few-shot demonstrations.
-- **Hold out an evaluation split.** Reserve representative cases the model never trains on, and evaluate the fine-tune against the base model on both that split and your [[Golden Test Set and Regression Runs|golden set]] — training loss going down is not proof of task improvement.
+In the InstructGPT-style pipeline, human comparisons train a reward model. Reinforcement learning then updates the language-model policy to increase that learned reward while constraining drift from a reference policy. This supports online sampling from the current policy, but adds a reward-model lifecycle and reinforcement-learning instability.
 
-## Pitfalls
+Reward increases are not the product objective. The policy can exploit blind spots in the reward model, so held-out human evaluation and safety checks remain release gates.
 
-### Fine-tuning to Inject Knowledge
+## DPO
 
-**What goes wrong**: a team fine-tunes on a corpus of documents expecting the model to "learn the facts," then it hallucinates confidently on anything near the edges of that corpus and silently goes stale as the facts change.
+Direct Preference Optimization derives a classification-style objective from preference pairs and a reference policy. It avoids training a separate reward model and an online RL loop, making the pipeline simpler. It still depends on pair quality, reference choice, loss settings, and coverage; simpler does not mean immune to over-optimization or distribution shift.
 
-**Why it happens**: fine-tuning shifts behavior and style far more reliably than it implants retrievable facts, and it bakes a snapshot with no source traceability.
+Use DPO when a fixed preference set is already available and stable. Use online methods such as [[#GRPO]] when you need reward scoring over sampled candidates and can defend the verifier under shift.
 
-**How to avoid it**: use [[AI & ML/LLM/Context Engineering/RAG/RAG|RAG]] for knowledge. Fine-tune for how the model should behave with that knowledge, not to store the knowledge itself.
+Measure pairwise win rate with blinded raters, task correctness, refusal precision and recall, calibration, and safety slices. Keep a separate set for regressions in general capability. If response length differs, control or report it: raters and judges can prefer longer answers even when they are not more correct.
 
-### Catastrophic Forgetting
+# When fine-tuning earns its cost
 
-**What goes wrong**: after fine-tuning on a narrow task, the model gets better at that task but measurably worse at general reasoning, instruction following, or other tasks it used to handle.
+- The model understands the task but inconsistently follows a format or policy after good prompting and few-shot examples.
+- The target behavior is easier to demonstrate than specify, and representative examples can be labeled consistently.
+- A high-volume narrow task justifies distilling a larger model’s behavior into a smaller one.
+- Long repeated instructions dominate context and inference cost, and training can encode that stable behavior.
 
-**Why it happens**: full fine-tuning on a narrow distribution overwrites general capability. The narrower the data and the more weights updated, the worse the erosion.
+Do not begin without a held-out evaluation set and a baseline from the exact base model. Training loss proves fit to training examples, not improvement on production behavior.
 
-**How to avoid it**: prefer LoRA/QLoRA (the frozen base preserves general capability), mix some general-purpose data into the training set, and evaluate on a broad held-out set, not only the target task.
+# Full fine-tuning
 
-### Overfitting a Small Dataset
+Full fine-tuning updates every model weight. Its memory footprint is not a fixed multiple of a published model size. Training may hold model weights, gradients, optimizer states, activations, temporary buffers, and communication shards, each at a precision chosen by the implementation. Adam-style optimizers can keep multiple state tensors; activation memory grows with batch size, sequence length, layer shape, and checkpointing policy. Quantization, mixed precision, ZeRO/FSDP sharding, CPU offload, and optimizer choice change each component.
 
-**What goes wrong**: the model memorizes the training examples — strong on them, poor on anything slightly different.
+Plan capacity from a component-level estimate for the exact model and training stack, then measure a short run. Reserve full tuning for cases where broader weight updates beat PEFT on held-out quality enough to justify distributed compute and a full derived checkpoint.
 
-**Why it happens**: too many epochs or too high a learning rate on a small set drives memorization rather than generalization.
+# Parameter-efficient fine-tuning
 
-**How to avoid it**: hold out an eval split, use early stopping, lower the learning rate and epoch count, and add more diverse examples before training harder on the few you have.
+## LoRA
 
-### Skipping Evaluation Against the Base
+Low-Rank Adaptation freezes the base weights and trains low-rank update matrices in selected layers. The adapter is small, can be stored separately, swapped, or merged for serving. Separation improves recoverability: disabling the adapter restores base-model behavior because the original weights did not change.
 
-**What goes wrong**: the team ships the fine-tune because training loss dropped, without confirming it actually beats the base model on the real task — sometimes it is worse.
+That does not make an active LoRA adapter immune to catastrophic forgetting or regressions. The adapter changes the effective computation and can bias the deployed model away from general instruction following, safety behavior, or capabilities absent from narrow training data. Evaluate the base-plus-adapter system on both target and broad holdouts. “Frozen base” describes storage and update mechanics, not guaranteed behavior while the adapter is active.
 
-**Why it happens**: training loss measures fit to the training data, not task performance or generalization.
+## QLoRA
 
-**How to avoid it**: always compare fine-tune vs base on a held-out eval and golden set before shipping. Treat the fine-tuned model like any other release gated by [[AI & ML/LLM/Evaluation/Evaluation|evaluation]].
+QLoRA stores the frozen base in 4-bit NormalFloat form and trains LoRA adapters through that quantized representation. The QLoRA paper reports fine-tuning models up to 65B parameters on a single 48 GB GPU under its stated configurations; that is evidence for those experiments, not a promise that any large model fits any consumer GPU.
 
-## Tradeoffs
+Feasibility still depends on model architecture, sequence length, batch and accumulation settings, adapter targets, optimizer state, activation checkpointing, attention kernels, and available device memory. Quality must be verified for the chosen base, quantization settings, task, and evaluation set. Use a memory estimator and a short measured run before committing to hardware.
 
-| Approach | Quality ceiling | Compute / cost | Knowledge freshness | Best for |
-| --- | --- | --- | --- | --- |
-| Prompting / few-shot | Low–medium — bounded by base model | None — inference only | N/A (use RAG) | Fast iteration, no training pipeline, most tasks |
-| RAG | Medium — depends on retrieval | Retrieval + index ops | High — reindex to update | Current or private facts, citation, freshness |
-| LoRA / QLoRA | High — near full fine-tune | Low — single GPU, tiny adapters | Low — snapshot in weights | Behavior, format, style; limited hardware |
-| Full fine-tuning | Highest | High — full copy, heavy memory | Low — snapshot in weights | Max quality when compute is ample |
-| Preference alignment (DPO/RLHF) | High — shapes behavior/policy | Medium–high | N/A | Tone, helpfulness, refusal behavior |
+# Data
 
-**Decision rule**: start with prompting; add RAG when the gap is knowledge; fine-tune only when the gap is behavior that prompting cannot stabilize. When you do fine-tune, default to LoRA/QLoRA and reserve full fine-tuning for cases where the quality ceiling justifies the cost. Use DPO when the goal is preference and policy shaping rather than imitation. The strongest production pattern is to combine them — fine-tune for behavior, RAG for current facts.
+Data quality and coverage matter more than raw count.
 
-## Questions
+- Match the production chat template, system role, tool schema, and output format exactly.
+- Remove contradictory labels and near-duplicate examples that over-weight one phrasing.
+- Cover ordinary cases, boundary cases, refusals, and negative examples in the proportions expected at inference.
+- Keep a held-out split that is never used for training or prompt iteration.
+- Record the base checkpoint, tokenizer, data version, hyperparameters, and adapter targets so the run is reproducible.
 
-> [!QUESTION]- When should you fine-tune instead of using RAG or prompting?
->
-> - Fine-tune when the gap is **behavioral** — format, tone, refusal policy, domain style, or structured-output reliability that prompting cannot stabilize
-> - Use **RAG** when the gap is **knowledge** — facts that change, need citation, or are too large to fit in context; fine-tuning bakes a stale, untraceable snapshot
-> - Use **prompting** first for everything: it is the cheapest to iterate and solves most tasks without a training pipeline
-> - The best systems combine them: fine-tune behavior into the weights, retrieve current facts at query time
-> - Decision test: if the model retrieves the right information but presents it wrong, fine-tune; if it presents things well but lacks the facts, use RAG
+# Evaluation
 
-> [!QUESTION]- Why is LoRA the default fine-tuning method rather than full fine-tuning?
->
-> - LoRA freezes the base model and trains tiny low-rank adapters (~0.1–1% of parameters), capturing most of full fine-tuning's quality at a fraction of the compute and memory
-> - Adapters are megabytes, not gigabytes — cheap to store, swap, stack, or merge into the base weights for zero inference overhead
-> - Because the base weights are frozen, LoRA largely avoids the catastrophic forgetting that narrow full fine-tuning causes
-> - QLoRA extends this by quantizing the base to 4-bit, making large-model fine-tuning feasible on a single modest GPU
-> - Full fine-tuning is reserved for when the absolute quality ceiling matters and compute is ample
+Compare base and fine-tuned candidates on the same target set, a broad capability set, and safety guardrails. Report effect sizes by slice instead of only one average. A format gain that causes a reasoning or refusal regression is not a free improvement.
 
-> [!QUESTION]- What are the main ways a fine-tuning project fails even when training loss looks good?
->
-> - Trying to inject knowledge: the model hallucinates at the edges and goes stale — that is a RAG problem
-> - Catastrophic forgetting: narrow data erodes general capability, invisible unless you evaluate broadly
-> - Overfitting a small set: memorization instead of generalization, from too many epochs or too high a learning rate
-> - Format mismatch: training examples that do not match the production chat template silently degrade results
-> - The common thread: training loss measures fit to training data, not task performance — always evaluate the fine-tune against the base model on a held-out and golden set
+During training, validation loss and early stopping detect memorization, but shipping still depends on task metrics and production confirmation through [[AI & ML/LLM/Evaluation/Online Evaluation and AB Tests|online evaluation and A/B tests]]. Keep the base checkpoint deployable so rollback is an operational action, not a retraining project.
 
-## References
+# Pitfalls
 
-- [LoRA: Low-Rank Adaptation of Large Language Models (Hu et al., 2021)](https://arxiv.org/abs/2106.09685) — the parameter-efficient method behind most modern fine-tuning.
-- [QLoRA: Efficient Finetuning of Quantized LLMs (Dettmers et al., 2023)](https://arxiv.org/abs/2305.14314) — 4-bit base + LoRA adapters, enabling large-model fine-tuning on a single GPU.
-- [Direct Preference Optimization (Rafailov et al., 2023)](https://arxiv.org/abs/2305.18290) — preference alignment without a separate reward model or RL loop.
-- [Training language models to follow instructions with human feedback (Ouyang et al., 2022)](https://arxiv.org/abs/2203.02155) — the SFT + RLHF recipe; foundational context for preference alignment.
-- [Hugging Face PEFT documentation](https://huggingface.co/docs/peft) — practical reference for LoRA, QLoRA, and other PEFT methods.
-- [Fine-tuning guide (OpenAI)](https://platform.openai.com/docs/guides/fine-tuning) — provider guidance on when fine-tuning helps, data preparation, and evaluation.
-- [When to fine-tune vs RAG (Azure AI Foundry)](https://learn.microsoft.com/en-us/azure/ai-foundry/concepts/fine-tuning-considerations) — decision framing for fine-tuning versus retrieval in production.
+**Injecting knowledge** — a model trained on a document corpus may reproduce facts but cannot guarantee retrieval, freshness, or citation. Store changing facts in RAG and train only the behavior for using them.
+
+**Format mismatch** — different chat templates or tool schemas between training and serving teach a distribution the runtime never presents.
+
+**Narrow-only evaluation** — target gains can hide losses in general reasoning, multilingual behavior, or safety. Evaluate the effective deployed model, including its active adapter.
+
+**Capacity estimates from one multiplier** — model-file size is not training memory. Estimate weights, gradients, optimizer states, activations, and sharding separately for the actual configuration.
+
+# Tradeoffs
+
+| Approach | Main benefit | Main cost | Best fit |
+| --- | --- | --- | --- |
+| Prompting | Fast iteration, no training | Repeated context and inconsistent behavior | Most new tasks |
+| RAG | Fresh, attributable knowledge | Retrieval and indexing system | Changing or private facts |
+| LoRA | Small separable updates | Active adapter can still regress capabilities | Stable behavior on limited compute |
+| QLoRA | Lower base-weight memory during tuning | Hardware fit and quality are configuration-specific | PEFT when full-precision base storage is the constraint |
+| Full tuning | Broadest update capacity | Highest memory, compute, and checkpoint cost | Proven quality gap that PEFT cannot close |
+
+# Questions
+
+> [!QUESTION]- Why can LoRA still cause forgetting if the base weights are frozen?
+> The deployed output comes from the base plus the adapter’s updates. Narrow adapter training can steer that effective model away from capabilities outside the training distribution. The frozen base makes rollback easy; it does not guarantee unchanged behavior while the adapter is enabled.
+
+> [!QUESTION]- How should you estimate full fine-tuning memory?
+> Account separately for weights, gradients, optimizer states, activations, temporary buffers, precision, and sharding. Sequence length, batch, checkpointing, and optimizer choice can move the total enough that a generic multiplier is not a safe capacity plan.
+
+> [!QUESTION]- What does GRPO remove compared with PPO-style language-model training?
+> It removes the separately learned value model by estimating relative advantage from a group of sampled completions. It retains policy sampling, reward computation, clipped updates, and a reference-policy constraint.
+
+> [!QUESTION]- What is DPO’s operational advantage over reward-model RLHF?
+> It trains directly from preference pairs without a separate learned reward model or online policy-optimization loop. The tradeoff is that it cannot explore and score fresh outputs during the update.
+
+# References
+
+- [LoRA: Low-Rank Adaptation of Large Language Models](https://arxiv.org/abs/2106.09685) — the primary paper defining frozen base weights and trainable low-rank updates.
+- [QLoRA: Efficient Finetuning of Quantized LLMs](https://arxiv.org/abs/2305.14314) — the primary 4-bit fine-tuning method and the hardware/configuration evidence behind its memory claims.
+- [ZeRO: Memory Optimizations Toward Training Trillion Parameter Models](https://arxiv.org/abs/1910.02054) — primary decomposition of model-state memory and distributed partitioning.
+- [DeepSeekMath](https://arxiv.org/abs/2402.03300) — the primary paper introducing GRPO and its objective.
+- [DeepSeek-R1](https://arxiv.org/abs/2501.12948) — primary report for a GRPO-based reasoning post-training pipeline and its stated evaluation setup.
+- [Proximal Policy Optimization Algorithms](https://arxiv.org/abs/1707.06347) — the primary clipped-policy optimization work that provides the comparison point for GRPO.
+- [Direct Preference Optimization](https://arxiv.org/abs/2305.18290) — the primary derivation and evaluation of preference training without a separate reward model.
+- [Training language models to follow instructions with human feedback](https://arxiv.org/abs/2203.02155) — the primary InstructGPT SFT, reward-model, and RLHF pipeline.
+- [Discovering Language Model Behaviors with Model-Written Evaluations](https://arxiv.org/abs/2212.09251) — primary evidence on behavioral evaluation and risks such as sycophancy that alignment must measure explicitly.
+- [Fine-tuning guide](https://platform.openai.com/docs/guides/fine-tuning) — provider guidance on data preparation, supervised tuning, and evaluation.
+- [Fine-tuning considerations](https://learn.microsoft.com/en-us/azure/ai-foundry/concepts/fine-tuning-considerations) — production decision framing for fine-tuning versus retrieval and prompting.
+- [ByteByteGo source snapshot: DeepSeek one-pager](https://github.com/ByteByteGoHq/system-design-101/blob/b28380a4710c5ec9638ec037d4168e288f334cba/data/guides/deepseek-1-pager.md) — the pinned secondary summary reconciled here by retaining the GRPO mechanism and excluding volatile cost, hardware, and benchmark comparisons.

@@ -11,8 +11,6 @@ status: Ready to Repeat
 publish: true
 ---
 
-# Intro
-
 `foreach` is the most common way to iterate a sequence in C#. It works with types that provide an enumerator (typically via `IEnumerable` / `IEnumerable<T>`), and the compiler rewrites the loop into an enumerator-based pattern.
 
 You can use `foreach` with:
@@ -50,7 +48,7 @@ The `finally`/`Dispose` is the part people forget: it's what runs the `finally` 
 
 **Struct enumerators and boxing.** `List<T>`, arrays, and `Span<T>` expose a **struct** enumerator, so `foreach` over them allocates nothing (the JIT also elides bounds checks on `Span<T>`/arrays). But if you access the collection through `IEnumerable<T>`, `GetEnumerator()` returns the enumerator **boxed** to the interface — reintroducing the allocation. Iterate the concrete type on hot paths.
 
-## Iterators and yield
+# Iterators and yield
 
 `yield return` and `yield break` let you write iterator methods: methods that produce a sequence lazily, one element at a time.
 
@@ -83,20 +81,20 @@ Two iterator gotchas:
 - **Deferred execution moves exceptions.** Because the body doesn't run until enumeration starts, an argument check inside an iterator method throws *when the caller starts iterating*, not at the call site. For eager validation, split a public wrapper (validate, then return) from a private iterator (`yield`).
 - **`yield` can't live inside a `try` with a `catch`** (only `try`/`finally` is allowed), and not inside a `lock`/`unsafe` block. If you need catch semantics around yielded work, wrap the consumption, not the production.
 
-## Pitfalls
+# Pitfalls
 
 **Modifying the collection during iteration**: Mutating a `List<T>` or `Dictionary<TKey,TValue>` inside a `foreach` over it throws `InvalidOperationException`. The enumerator tracks an internal version counter and detects the change. Fix by iterating a snapshot (`collection.ToList()`) or collecting mutations in a separate list and applying them after the loop.
 
 **Closure variable capture**: Lambdas created inside `foreach` capture the loop variable by reference unless you shadow it into a local. Before C# 5, all lambdas in a `foreach` could close over the same `item` variable and see only the last value. Best practice: always copy to a local inside the lambda body if lifetimes extend beyond the iteration: `var current = item; tasks.Add(() => Process(current));`.
 
-## Tradeoffs
+# Tradeoffs
 
 - **`foreach` vs `for`**: `foreach` is idiomatic and works on any enumerable. `for` is faster on arrays and `List<T>` because the JIT can eliminate bounds checks when iterating from 0 to `Count`. Use `for` in tight inner loops over known-length collections; `foreach` everywhere else.
 - **`foreach` vs LINQ**: LINQ chains are composable and readable but allocate per-operator. `foreach` over the source directly allocates less. Use LINQ for readability on non-hot paths; `foreach` (or `Span<T>`) for hot paths where allocation matters.
 - **`foreach` vs `Span<T>` iteration**: for CPU-bound loops over memory you own, iterating a `Span<T>` or `ReadOnlySpan<T>` eliminates enumerator overhead and enables bounds-check elimination. Typical microbenchmark improvement is 20–30% on large arrays.
 
 
-## Questions
+# Questions
 
 > [!QUESTION]- What types can you use in `foreach`?
 > Any type that implements `IEnumerable` / `IEnumerable<T>`, or any type that provides the enumerator pattern (`GetEnumerator()` + `Current` + `MoveNext()`).
@@ -110,7 +108,7 @@ Two iterator gotchas:
 > [!QUESTION]- Why and when should you use `yield return` instead of returning a materialized collection like `List<T>`?
 > Use `yield return` for deferred execution and streaming when consumers may stop early or the sequence is large, because it lowers peak memory usage. Materialize (`ToList()` / `ToArray()`) when you need a snapshot, random access or `Count`, or repeated enumeration without rerunning expensive or side-effectful generation logic.
 
-## Links
+# References
 
 - [Iteration statements (foreach)](https://learn.microsoft.com/dotnet/csharp/language-reference/statements/iteration-statements#the-foreach-statement) — language reference for `foreach` syntax, duck-typing pattern, and async enumeration.
 - [C# language specification: iteration statements](https://learn.microsoft.com/dotnet/csharp/language-reference/language-specification/statements#139-iteration-statements) — formal spec defining the enumerator pattern the compiler targets.

@@ -11,15 +11,13 @@ status: Done
 publish: true
 ---
 
-# Intro
-
 LLM-as-a-judge is an evaluation pattern where one model grades another model's output against an explicit rubric. It's useful for scalable, semantics-aware regression testing when human labels are expensive or slow. The judge reads the question, the candidate answer, and optionally a reference context, then returns a structured verdict.
 
 Two judging modes cover most use cases. **Absolute scoring** (rubric scorecards) assigns a numeric score per dimension, like correctness 0-2 or groundedness 0-5. **Relative preference** (pairwise comparisons) shows the judge two candidate answers side-by-side and asks which is better. Absolute scoring works when you need hard pass/fail thresholds. Pairwise works when quality is subjective or you're iterating quickly and care about "better than baseline" more than a specific number.
 
 The core workflow: define a rubric, write a judge prompt that enforces it, run the judge at scale, and periodically spot-check its verdicts against human labels to catch drift.
 
-## Rubric Scorecards
+# Rubric Scorecards
 
 Rubric scorecards measure multiple dimensions of an LLM output using a small, consistent scale with clear scoring anchors. Each dimension gets its own score so you can see exactly where a response fails.
 
@@ -57,7 +55,7 @@ Safety:
 2: safe
 ```
 
-## Pairwise Comparisons
+# Pairwise Comparisons
 
 Pairwise comparisons evaluate two candidate outputs side-by-side and pick the better one. Humans and judge models are generally better at relative preference than absolute scores, which makes pairwise more reliable when quality is subjective or multi-dimensional.
 
@@ -79,7 +77,7 @@ Priority order: correctness > groundedness > safety > clarity.
 Output JSON only: {"winner": "A", "rationale": "..."}  (winner must be "A", "B", or "tie")
 ```
 
-## Judge Prompt Design
+# Judge Prompt Design
 
 The judge prompt is the most important lever. A vague prompt produces noisy, unreliable scores. A well-structured prompt locks in the rubric, specifies the output format, and gives the judge the reference context it needs to evaluate groundedness.
 
@@ -110,7 +108,7 @@ Calibration tips:
 - Reduce noise by running multiple judgments (different seeds or models) and aggregating with median or majority vote.
 - Defend against gaming by keeping rubrics specific and including reference context for groundedness checks.
 
-## Pitfalls
+# Pitfalls
 
 **Verbosity bias** — judge models prefer longer, more detailed answers even when a shorter answer is correct and sufficient. Zheng et al. (2023) demonstrated this with a "repetitive list" attack: padding an answer with rephrased duplicates of its own content fooled GPT-3.5 and Claude-v1 judges into scoring it higher, and even GPT-4 was not fully immune. Mitigation: add a conciseness dimension to the rubric, include calibration examples where short answers score full marks, and cap acceptable length in the judge prompt.
 
@@ -122,7 +120,7 @@ Calibration tips:
 
 **Calibration drift** — judge behavior shifts when the underlying model receives updates: a provider-side model change can make the judge stricter or looser on dimensions like formatting, so an unchanged golden set suddenly produces different scores. Mitigation: maintain a fixed gold dataset with known human labels and re-run calibration after every model update. Alert if agreement with human labels drops below 80% on binary pass/fail.
 
-## Questions
+# Questions
 
 > [!QUESTION]- When should I prefer LLM-as-a-judge over classic metrics, and how do I know the judge is trustworthy?
 > Expected answer:
@@ -148,7 +146,7 @@ Calibration tips:
 > - Calibration drift: judge behavior shifts as the underlying model is updated. Maintain a gold dataset and re-run calibration periodically.
 > - Why: these biases are systematic, not random — they silently corrupt your eval signal and can cause you to ship regressions.
 
-## References
+# References
 
 - [Judging LLM-as-a-Judge with MT-Bench and Chatbot Arena (Zheng et al., NeurIPS 2023)](https://arxiv.org/abs/2306.05685) — the paper that established LLM-as-judge and documented its systematic biases: position, verbosity, and self-enhancement.
 - [LLM-as-a-judge evals guide (OpenAI API Docs)](https://developers.openai.com/api/docs/guides/evals) — practical guide to building judge-based eval pipelines.

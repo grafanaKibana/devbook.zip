@@ -1,12 +1,12 @@
 ---
 publish: true
 title: Credits
-icon: heart
 created: 2026-07-12T14:27:08.519Z
-modified: 2026-07-12T14:27:08.519Z
-published: 2026-07-12T14:27:08.519Z
+modified: 2026-07-18T11:51:52.905Z
+published: 2026-07-18T11:51:52.905Z
 tags:
   - MetricsIgnore
+icon: heart
 ---
 
 # Welcome to my software engineering notebook

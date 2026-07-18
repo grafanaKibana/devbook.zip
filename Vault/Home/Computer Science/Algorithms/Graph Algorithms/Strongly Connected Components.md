@@ -11,8 +11,6 @@ status: Creation
 publish: true
 ---
 
-# Intro
-
 A package manager resolves a directed dependency graph. When two packages depend on each other, directly or through a longer cycle, no install order separates them — they form one unit that has to be reasoned about together. Discovering every such unit by running a fresh reachability search from each vertex costs `O(V · (V + E))`.
 
 A **strongly connected component** (SCC) is a maximal set of vertices in which every vertex reaches every other: for any `u, v` in the set there is a path `u → v` **and** a path `v → u`. Mutual reachability partitions a digraph into disjoint SCCs, and a single [[DFS BFS|depth-first traversal]] recovers all of them in `O(V + E)` — the cost of one search rather than `V` of them. Collapsing each SCC to a single node yields the **condensation**, which is always a DAG: a cycle between two components would make their vertices mutually reachable, merging them into one. That property makes SCC decomposition the standard preprocessing for cyclic digraphs — 2-SAT, deadlock and dependency analysis, and any dataflow that wants a [[Topological Sort|topological order]] but has cycles in the way.
@@ -26,7 +24,7 @@ The event that decides a component is the pop, the moment a root vertex's low-li
 > [!NOTE] Visualization pending
 > Planned StepTrace: a graph card showing a DFS that assigns each vertex a discovery index and a low-link, and pops the active stack to emit one SCC whenever a root vertex's low-link equals its discovery index. No matching renderer exists in `engine.js` yet.
 
-## Tarjan's single pass
+# Tarjan's single pass
 
 Tarjan computes every SCC in one DFS by recording, for each vertex, when it was discovered and how far back the search can climb from its subtree.
 
@@ -63,7 +61,7 @@ A done: low[A]=0 == disc[A]=0      -> ROOT, pop to A  => SCC {C, B, A}
 
 The components leave the stack in reverse topological order of the condensation — `{D, E}` before `{A, B, C}` — a byproduct Tarjan shares with a DFS-based [[Topological Sort]].
 
-## Kosaraju's two passes
+# Kosaraju's two passes
 
 Kosaraju reaches the same partition with two plain DFS runs and no low-link bookkeeping.
 
@@ -73,7 +71,7 @@ Kosaraju reaches the same partition with two plain DFS runs and no low-link book
 
 Finish order is a reverse topological order of the condensation: the last vertex to finish lies in a *source* SCC, one with no incoming condensation edges. Reversing every edge turns that source into a *sink* — a component reachable from the start vertex but with no edge leading out to a not-yet-emitted component. The second DFS therefore fills exactly one SCC and stalls, then the next stack vertex opens the next sink. Drop either the finish order or the transpose and the one-tree-per-component guarantee collapses.
 
-## Complexity
+# Complexity
 
 | Algorithm | Time | Auxiliary space | Cause |
 | --- | --- | --- | --- |
@@ -82,7 +80,7 @@ Finish order is a reverse topological order of the condensation: the last vertex
 
 Neither bound has a best/average/worst split: every vertex and edge is processed a fixed number of times regardless of input shape, so `Θ(V + E)` is tight in all cases. The recursive form of either algorithm adds call-stack space bounded by the longest DFS path, up to `O(V)`.
 
-## Reference drawer
+# Reference drawer
 
 > [!ABSTRACT]- Structural view
 > ```mermaid
@@ -173,7 +171,7 @@ Neither bound has a best/average/worst split: every vertex and edge is processed
 > ```
 > The `onStack[w]` guard paired with `disc[w]` — never `low[w]` — for the non-tree edge is what keeps separate components apart; `Components()` returns them in reverse topological order of the condensation.
 
-## When the decomposition goes wrong
+# When the decomposition goes wrong
 
 The fatal Tarjan mistake is dropping the `onStack[w]` guard on the second update, `low[v] = min(low[v], disc[w])`. A cross edge can point at a vertex `w` that already belongs to a *finished, popped* component — a subtree the search can never climb back through. Folding its `disc[w]` into `low[v]` anyway drags `low[v]` below `disc[v]`, so `v` fails the `low == disc` root test and two independent components fuse into one, producing too few SCCs. The `onStack` check is exactly what excludes those already-emitted vertices. Substituting `low[w]` for `disc[w]` *inside* the guarded on-stack branch is a different matter: it still yields the correct partition, because that update fires only when `w` is on the stack, which means `w`'s root is an active ancestor of `v` and the two already share a component — so no low-link ever crosses a component boundary. It merely departs from the strict low-link definition ("at most one edge to an on-stack vertex") and is a common, correct variant.
 
@@ -181,7 +179,7 @@ Direction is a hard precondition. SCCs are defined by two-way reachability, whic
 
 Kosaraju's isolation guarantee comes entirely from running the second DFS on `Gᵀ`. Reusing `G` returns, for each start vertex, everything it can reach — fusing every downstream component into the first tree. The transpose must be materialized, or an explicit reversed adjacency view supplied; this is the `O(V + E)` memory that Tarjan's single pass avoids.
 
-## Comparison
+# Comparison
 
 | Algorithm | Time | Auxiliary space | Passes | Distinguishing mechanism | Stronger case |
 | --- | --- | --- | --- | --- | --- |
@@ -191,7 +189,7 @@ Kosaraju's isolation guarantee comes entirely from running the second DFS on `G�
 
 All three are linear, so the choice turns on constant factor and which failure mode is easier to avoid. Tarjan's single pass with no reversed graph is the efficient default, and it hands back a reverse-topological ordering of the condensation for free. Kosaraju pays an extra pass and an `O(V + E)` transpose but is the easiest to reconstruct correctly, since each half is an ordinary DFS. Gabow matches Tarjan's cost and single pass while replacing the low-link array with a second stack, which removes the exact cross-edge update that most often gets Tarjan wrong. Because every condensation is a DAG, any of them can feed a [[Topological Sort]] directly — the DFS-based variants already emit components in reverse topological order.
 
-## Questions
+# Questions
 
 > [!QUESTION]- In Tarjan's algorithm, what does `low[v] == disc[v]` mean, and why does it identify an SCC root?
 > `disc[v]` is `v`'s discovery index; `low[v]` is the smallest discovery index reachable from `v`'s subtree through tree edges and at most one edge to an on-stack vertex. Equality means nothing in the subtree found a route back to a vertex discovered before `v`, so `v` is the entry point of its component. Popping the stack down to `v` emits exactly that SCC.
@@ -205,7 +203,7 @@ All three are linear, so the choice turns on constant factor and which failure m
 > [!QUESTION]- Why is the condensation of a digraph always a DAG, and what does that buy?
 > Each SCC is a maximal mutually reachable set. A cycle between two distinct components would make every vertex in both mutually reachable, so they would already be one component — a contradiction. With no cycles left, the condensation admits a topological order, which lets DAG-only techniques (topological sort, DAG dynamic programming, 2-SAT implication solving) run on graphs that originally contained cycles.
 
-## References
+# References
 
 - [Depth-First Search and Linear Graph Algorithms](https://epubs.siam.org/doi/10.1137/0201010) — Robert Tarjan's 1972 paper introducing the discovery/low-link DFS and the single-pass SCC procedure.
 - [Finding strongly connected components](https://cp-algorithms.com/graph/strongly-connected-components.html) — Kosaraju's two-pass algorithm with the transpose, the condensation, and a correctness argument.

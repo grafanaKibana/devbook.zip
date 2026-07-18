@@ -1,8 +1,8 @@
 ---
 publish: true
 created: 2026-07-13T19:10:44.994Z
-modified: 2026-07-13T19:10:44.994Z
-published: 2026-07-13T19:10:44.994Z
+modified: 2026-07-18T11:30:02.727Z
+published: 2026-07-18T11:30:02.727Z
 topic:
   - AI & ML
 subtopic:
@@ -13,8 +13,6 @@ level:
 priority: Low
 status: Done
 ---
-
-# Intro
 
 A multi-agentic system coordinates two or more LLM agents — each with its own context window, tools, and instructions — to solve a task that a single agent handles poorly. The [[AI & ML/LLM/Agents/Agents|Agents]] page covers what agents are, the augmented LLM building block, and autonomous agent design, and the [[AI & ML/LLM/Agents/Workflow Patterns|Workflow Patterns]] note catalogs the five single-orchestrator patterns (prompt chaining through orchestrator-workers). This page covers what changes when multiple agents must coordinate: communication patterns, coordination structures, and the failure modes specific to multi-agent systems.
 
@@ -28,7 +26,7 @@ If none of these apply, a single well-prompted agent with good [[Tools]] outperf
 
 The key design principle is **context-centric decomposition**: split agents along context boundaries, not problem boundaries. An agent handling a feature should also handle its tests — it already has the context. Only introduce a new agent when one genuinely cannot hold the relevant context in its window. Problem-centric splits (one agent writes code, another writes tests, a third reviews) force constant coordination and lose information at each handoff — a "telephone game" where fidelity drops with every transfer.
 
-## Communication Patterns
+# Communication Patterns
 
 Agents must share context to coordinate. Three mechanisms dominate production systems, each with a different fidelity-cost tradeoff.
 
@@ -38,7 +36,7 @@ Agents must share context to coordinate. Three mechanisms dominate production sy
 
 **Shared external state (blackboard).** A central store — vector database, Redis, filesystem — holds system state. Agents read and write independently without direct messaging. The blackboard pattern works best for non-linear problems where the step sequence is unknown upfront. Agents don't know about each other, only the shared state. The tradeoff: race conditions on concurrent writes and no built-in ordering guarantees.
 
-## Multi-Agent Coordination
+# Multi-Agent Coordination
 
 Beyond the [[AI & ML/LLM/Agents/Workflow Patterns|workflow patterns]] — of which orchestrator-workers is the dominant multi-agent topology — multi-agent systems use three structural patterns for organizing agent interactions.
 
@@ -90,9 +88,9 @@ When an agent calls a handoff tool, control transfers with the conversation hist
 
 **Swarm (peer-to-peer).** Agents communicate directly without central control. Each agent independently decides when and where to transfer. Rarely used in production — the lack of central coordination makes debugging and error recovery significantly harder. Most teams eventually add a supervisor.
 
-## Pitfalls
+# Pitfalls
 
-### Context Loss at Handoffs
+## Context Loss at Handoffs
 
 Information clear to Agent A gets compressed, omitted, or distorted when passed to Agent B. Sequential chains are worst — earlier messages get compressed at each hop, eroding fidelity progressively.
 
@@ -100,7 +98,7 @@ Information clear to Agent A gets compressed, omitted, or distorted when passed 
 
 **Mitigation**: use the filesystem artifact pattern — agents write structured outputs to external storage and pass lightweight references. Define explicit output schemas for inter-agent communication. Validate agent output before passing to the next agent — reject low-confidence or malformed responses.
 
-### Coordination Cost Explosion
+## Coordination Cost Explosion
 
 Interaction complexity scales as n(n−1)/2: 2 agents = 1 interaction, 4 = 6, 10 = 45. A task costing $0.10 for a single agent may cost $1.50 for multi-agent after coordination overhead and context duplication. Multi-agent systems use roughly 15× more tokens than equivalent chat interactions.
 
@@ -108,7 +106,7 @@ Interaction complexity scales as n(n−1)/2: 2 agents = 1 interaction, 4 = 6, 10
 
 **Mitigation**: use structured output types between agents instead of free-form conversation. Set `max_turns` on every agent. Monitor per-run token usage and alert on outliers. Add agents only when you can demonstrate measurable improvement over fewer.
 
-### Deadlocks and Infinite Loops
+## Deadlocks and Infinite Loops
 
 Circular dependencies — A waits on B, B waits on C, C waits on A — hang silently, burning budgets without crashing. Maker-checker loops without iteration caps refine indefinitely.
 
@@ -116,7 +114,7 @@ Circular dependencies — A waits on B, B waits on C, C waits on A — hang sile
 
 **Mitigation**: lease-lock patterns with TTL on agent-to-agent waiting. Single orchestrator owning state transitions. Explicit iteration caps on every loop with fallback behavior — escalate to human or return best result with a quality warning. Circuit breaker patterns for agent dependencies.
 
-### Cascading Errors
+## Cascading Errors
 
 An error in one agent propagates through the system, amplified at each step. A hallucinated fact from Agent A becomes trusted input for Agent B, which builds further conclusions on it. If those conclusions reach persistent memory, they contaminate future runs.
 
@@ -124,7 +122,7 @@ An error in one agent propagates through the system, amplified at each step. A h
 
 **Mitigation**: validate outputs at each agent boundary before passing downstream. Use independent verification agents for high-stakes decisions. Enforce guardrails at the infrastructure layer (network egress, filesystem permissions, execution budgets) rather than the prompt layer — agents can reason around app-level restrictions but cannot bypass environment-level enforcement.
 
-## Tradeoffs
+# Tradeoffs
 
 | Factor | Single Agent | Multi-Agent |
 |---|---|---|
@@ -137,7 +135,7 @@ An error in one agent propagates through the system, amplified at each step. A h
 
 The "bitter lesson" of multi-agent: elaborate coordination architectures built to work around current model limitations risk obsolescence. A 10-agent system may be outperformed by a single next-generation model with a larger context window. Build multi-agent only when the coordination cost is justified by measurable improvement today — not as speculative architecture for tomorrow's problems.
 
-## Questions
+# Questions
 
 > [!QUESTION]- When is multi-agent coordination justified over a single agent with more tools?
 >
@@ -162,7 +160,7 @@ The "bitter lesson" of multi-agent: elaborate coordination architectures built t
 > - Known anti-pattern: two agents entering a politeness loop, each thanking the other, consuming budget without task progress — correct behavior per agent, catastrophic in combination
 > - Key tradeoff: multi-agent gains specialization but loses the single-trace debuggability that makes single-agent failures straightforward to fix
 
-## References
+# References
 
 - [Multi-Agent Research System — Engineering (Anthropic)](https://www.anthropic.com/engineering/multi-agent-research-system)
 - [Building Effective Agents (Anthropic Engineering)](https://www.anthropic.com/engineering/building-effective-agents)

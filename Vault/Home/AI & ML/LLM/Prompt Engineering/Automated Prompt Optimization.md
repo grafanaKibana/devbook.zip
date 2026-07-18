@@ -11,17 +11,15 @@ status: Done
 publish: true
 ---
 
-# Intro
-
 Manual prompt engineering is effective for small projects, but it becomes slow and brittle when you need to tune many tasks, models, or domains. A team maintaining 15 classification prompts across 3 models spends days on each model migration, manually adjusting wording that worked for GPT-4 but fails on Claude. Automated prompt optimization moves part of that work into repeatable loops: generate candidates, evaluate them against a validation set, and keep the best-performing variant. These methods are still mostly research-stage for typical product teams, but they show where prompting is heading — from craft to engineering workflow with measurable iteration cycles. This page surveys four representative approaches and when each is worth the setup cost.
 
-## Automatic Prompt Engineer (APE)
+# Automatic Prompt Engineer (APE)
 
 Zhou et al. (2022) frame instruction discovery as a search problem: use an LLM to generate many instruction candidates, score each candidate on a validation set, and keep the highest-scoring prompt. Conceptually, this treats prompt writing like program synthesis, where the prompt is the program and task accuracy is the objective.
 
 One notable result is that APE found a stronger zero-shot reasoning trigger than the widely used "Let's think step by step." The discovered prompt, "Let's work this out in a step by step way to be sure we have the right answer," improved results on benchmarks like MultiArith and GSM8K.
 
-## Active-Prompt
+# Active-Prompt
 
 Diao et al. (2023) observe that standard CoT often reuses fixed demonstrations, even when those examples are not the most informative for a given task distribution. Active-Prompt instead asks: which examples is the model most uncertain about?
 
@@ -33,13 +31,13 @@ The loop is:
 
 The core idea is annotation efficiency: spend labeling effort where model uncertainty is highest, not where examples are merely available.
 
-## Directional Stimulus Prompting
+# Directional Stimulus Prompting
 
 Li et al. (2023) propose Directional Stimulus Prompting (DSP), where a smaller trainable policy model generates hints (directional stimuli) that steer a larger frozen LLM toward better outputs. Instead of asking the base LLM to discover all guidance implicitly, DSP adds targeted signals such as key terms or directional cues.
 
 Mechanistically, this is a two-model setup: optimize a lightweight controller for guidance generation, then feed that guidance into a stronger black-box model for final generation.
 
-## Program-Aided Language Models (PAL)
+# Program-Aided Language Models (PAL)
 
 Gao et al. (2022) shift reasoning from natural-language scratchpads to executable code. The model reads the problem, emits a program (typically Python), and the interpreter executes it to produce the answer.
 
@@ -80,7 +78,7 @@ best_prompt = candidates[scores.index(max(scores))]
 ```
 
 
-## Pitfalls
+# Pitfalls
 
 **Optimizing without a stable evaluation set** — a team runs APE-style search but uses a 15-example validation set. The winning prompt scores 93% on that set by chance (variance on 15 samples is plus or minus 12%), not because it generalizes. In production, quality is no better than the original. Mitigation: use at least 50 validation examples, representative of real task distribution, held fixed throughout the optimization run. Statistical significance matters — a 3% improvement on 50 examples might not be real; on 200 examples, it probably is.
 
@@ -91,7 +89,7 @@ best_prompt = candidates[scores.index(max(scores))]
 **Overfitting the meta-loop to failure examples** — meta-prompting that refines prompts against 5 specific failure cases can regress on the other 95% of inputs. The refined prompt adds so many constraints to handle edge cases that it confuses the model on straightforward inputs. Mitigation: always evaluate refined prompts against a held-out set that includes both the failure cases and a representative sample of normal cases. Version prompts in source control with rollback criteria.
 
 
-## Tradeoffs
+# Tradeoffs
 
 | Approach | Core benefit | Main requirement | Practical limitation |
 | --- | --- | --- | --- |
@@ -102,7 +100,7 @@ best_prompt = candidates[scores.index(max(scores))]
 
 For most practitioners, strong manual prompting plus meta-prompting covers most needs. These approaches become attractive when you hit scale limits: many tasks, repeated retuning cycles, or measurable error patterns that justify optimization overhead.
 
-## Questions
+# Questions
 
 > [!QUESTION]- When is automated prompt optimization worth the setup cost?
 > Expected answer:
@@ -120,7 +118,7 @@ For most practitioners, strong manual prompting plus meta-prompting covers most 
 > - It naturally connects to tool-use agents that route subtasks to calculators, Python, or external systems.
 > Why this matters: it separates language understanding from computation for better reliability.
 
-## References
+# References
 
 - [Zhou et al. 2022 - Large Language Models Are Human-Level Prompt Engineers (APE)](https://arxiv.org/abs/2211.01910) — original APE paper; frames instruction discovery as a search problem and shows LLM-generated prompts can match or beat human-written ones.
 - [Diao et al. 2023 - Active Prompting with Chain-of-Thought for Large Language Models](https://arxiv.org/abs/2302.12246) — Active-Prompt paper; introduces uncertainty-based example selection to improve annotation efficiency.

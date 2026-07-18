@@ -1,8 +1,8 @@
 ---
 publish: true
 created: 2026-07-12T14:27:20.419Z
-modified: 2026-07-12T14:27:20.419Z
-published: 2026-07-12T14:27:20.419Z
+modified: 2026-07-18T11:30:05.091Z
+published: 2026-07-18T11:30:05.091Z
 topic:
   - Computer Science
 subtopic:
@@ -14,8 +14,6 @@ priority: Medium
 status: Ready to Repeat
 ---
 
-# Intro
-
 A pipeline emits 500K event IDs and needs to drop the ones it has already seen. Rescanning a list for each incoming ID is `O(n)` per check and turns the pass quadratic. A hash set keeps only the question "is this element present?" answerable directly: each ID is hashed to a bucket, and membership is decided by probing that one bucket instead of the whole collection.
 
 The structure stores a set of **unique** elements backed by a hash table. It is effectively a [[HashMap]] that keeps only keys and discards the associated value — the same bucket array, hash function, collision resolution, load factor, and resize behavior. What a set adds on top is the uniqueness contract: a second `Add` of an equal element is rejected, so the collection can never hold two members that compare equal. What it retains is exactly which elements are present; what it discards is insertion order, per-element counts, and any value a map would have carried.
@@ -25,7 +23,7 @@ The structure stores a set of **unique** elements backed by a hash table. It is 
 > [!NOTE] Visualization pending
 > Planned StepTrace: a hash-table card showing an element hashed into a bucket, a membership probe hitting or missing that bucket, and a duplicate `Add` being rejected because an equal member already occupies the slot. No matching renderer exists in `engine.js` yet.
 
-## Representation and the uniqueness contract
+# Representation and the uniqueness contract
 
 The physical layout is a hash table, identical to a [[HashMap]] with the value slot removed: a bucket array whose length is a prime (or a power of two, depending on the runtime), a hash function mapping each element to a bucket index, and a collision-resolution scheme — separate chaining (a linked list or slot chain per bucket) or open addressing (probing to the next free slot). A **load factor** (elements ÷ buckets) bounds the average chain length; crossing its threshold triggers a **resize**, allocating a larger array and rehashing every element into new buckets.
 
@@ -35,7 +33,7 @@ The membership contract is **exact**. `Contains(x)` hashes `x`, probes its bucke
 
 Two properties are deliberately not retained. Iteration order reflects bucket layout and rehash history, not insertion sequence, and can change after any `Add`/`Remove` or across runtime versions. And because the set stores presence rather than occurrence, it cannot answer "how many times" — an element is either in or out.
 
-## Complexity
+# Complexity
 
 | Operation | Best time | Amortized/average time | Worst time | Structure space | Aux space per op |
 | --- | --- | --- | --- | --- | --- |
@@ -46,7 +44,7 @@ Two properties are deliberately not retained. Iteration order reflects bucket la
 
 The `O(1)` average bounds assume two things: the hash function distributes elements roughly uniformly across buckets, and the load factor is capped so the expected chain length is a small constant. Under those assumptions a probe touches a constant number of members regardless of set size. Both can fail. If many elements collide into one bucket — a weak `hashCode` or adversarially chosen keys — that bucket becomes a linear list and `Add`/`Contains`/`Remove` degrade to `O(n)`. A resize is `O(n)` for the single insert that triggers it, but growth is geometric, so the cost amortizes to `O(1)` per insert across a sequence.
 
-## When the structure stops fitting
+# When the structure stops fitting
 
 Three boundaries follow directly from "hash to a bucket, compare for equality":
 
@@ -56,7 +54,7 @@ Three boundaries follow directly from "hash to a bucket, compare for equality":
 
 A resize also produces a latency spike: one unlucky `Add` pays the full `O(n)` rehash while every other add is constant-time. Pre-sizing the set to the expected count avoids the intermediate resizes.
 
-## Reference drawer
+# Reference drawer
 
 > [!ABSTRACT]- Bucket layout
 >
@@ -89,7 +87,7 @@ A resize also produces a latency spike: one unlucky `Add` pays the full `O(n)` r
 >
 > `HashSet<T>` stores keys only; `UnionWith`/`IntersectWith`/`ExceptWith` are in-place `O(n)` mutations, and passing an explicit `capacity` pre-sizes the bucket array to avoid intermediate rehashes.
 
-## Questions
+# Questions
 
 > [!QUESTION]- Why is the `O(1)` membership bound an average rather than a guarantee?
 > It assumes the hash spreads elements roughly uniformly and the load factor caps expected chain length at a constant. When many elements collide into one bucket — weak `hashCode` or adversarial keys — that bucket becomes a linear list and `Contains`/`Add`/`Remove` degrade to `O(n)`.
@@ -97,7 +95,7 @@ A resize also produces a latency spike: one unlucky `Add` pays the full `O(n)` r
 > [!QUESTION]- Why can a member become unreachable after insertion?
 > Membership routes an element to a bucket via `hashCode`, then confirms with `Equals`. Mutating a field that participates in `hashCode` after adding leaves the element in its original bucket while lookups probe the new one, so `Contains` returns `false` on an element that is still stored.
 
-## References
+# References
 
 - [`HashSet<T>` class](https://learn.microsoft.com/en-us/dotnet/api/system.collections.generic.hashset-1) — .NET set API, including the `UnionWith`/`IntersectWith`/`ExceptWith` set-algebra methods and capacity constructor.
 - [`HashSet<T>` in dotnet/runtime](https://github.com/dotnet/runtime/blob/main/src/libraries/System.Private.CoreLib/src/System/Collections/Generic/HashSet.cs) — source for the bucket-and-slot layout, load-factor threshold, and rehash-on-resize path shared with `Dictionary<TKey,TValue>`.

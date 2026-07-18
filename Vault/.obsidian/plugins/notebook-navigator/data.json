@@ -132,7 +132,7 @@
     "featureImagePixelSize": "synced",
     "uiScale": "synced"
   },
-  "createNewNotesInNewTab": false,
+  "createNewNotesInNewTab": true,
   "autoRevealActiveFile": true,
   "autoRevealShortestPath": true,
   "autoRevealIgnoreRightSidebar": true,
@@ -158,7 +158,7 @@
   "showTooltips": false,
   "showTooltipPath": true,
   "showTooltipWordCount": false,
-  "desktopBackground": "primary",
+  "desktopBackground": "separate",
   "desktopScale": 1,
   "mobileScale": 1,
   "useFloatingToolbars": true,
@@ -168,17 +168,17 @@
       "expandCollapse": false,
       "calendar": true,
       "hiddenItems": false,
-      "rootReorder": true,
-      "newFolder": true
+      "rootReorder": false,
+      "newFolder": false
     },
     "list": {
       "back": false,
       "search": false,
       "reveal": false,
-      "descendants": true,
-      "sort": true,
+      "descendants": false,
+      "sort": false,
       "appearance": false,
-      "newNote": true
+      "newNote": false
     }
   },
   "interfaceIcons": {},
@@ -198,14 +198,14 @@
   "separateNoteCounts": true,
   "showIndentGuides": false,
   "navCountLeaderStyle": "none",
-  "rootLevelSpacing": 4,
-  "navIndent": 12,
+  "rootLevelSpacing": 3,
+  "navIndent": 16,
   "navItemHeight": 24,
   "navItemHeightScaleText": true,
   "collapseBehavior": "all",
   "smartCollapse": true,
   "excludeVaultRootFromCollapse": true,
-  "collapseOtherBranchesOnExpand": false,
+  "collapseOtherBranchesOnExpand": true,
   "autoSelectFirstFileOnFocusChange": true,
   "autoExpandNavItems": true,
   "springLoadedFolders": true,
@@ -551,7 +551,8 @@
   "fileBackgroundColors": {},
   "folderIcons": {
     "Assets": "book-image",
-    "Templates": "book-dashed"
+    "Templates": "book-dashed",
+    "Home": "home"
   },
   "folderColors": {},
   "folderBackgroundColors": {},

@@ -3,107 +3,105 @@ topic:
   - Security
 subtopic:
   - Authentication
-summary: "Requires two independent factors so a stolen password alone can't authenticate."
+summary: "How independent factors, TOTP, WebAuthn, and recovery change account-takeover risk."
 level:
   - "3"
 priority: High
 status: Ready to Repeat
-
 publish: true
 ---
 
-# Two-Factor Authentication (2FA)
+Two-factor authentication (2FA) requires evidence from exactly two independent factor categories: knowledge, possession, or inherence. MFA means two or more. A password plus a second password is still one factor; a password plus a TOTP authenticator combines knowledge and possession.
 
-Two-factor authentication (2FA) requires users to prove their identity with two independent factors: something they know (password) and something they have (OTP device, phone) or are (biometrics). Even if a password is stolen, the attacker cannot authenticate without the second factor.
+The engineering boundary includes enrollment and recovery. A phishing-resistant authenticator does not protect an account whose help desk can remove it after answering weak questions.
 
-## TOTP (Time-Based One-Time Passwords)
+# Method tradeoffs
 
-TOTP (RFC 6238) generates a 6-digit code that changes every 30 seconds. The server and authenticator app share a secret key. Both compute `HMAC-SHA1(secret, floor(time/30))` and compare the result.
+| Method | Proof | Phishing and replay | Recovery boundary | Choose it when |
+| --- | --- | --- | --- | --- |
+| SMS OTP | Control of a phone-number delivery path | Code is phishable; SIM swap and carrier interception add risk | Phone-number recovery can transfer control | Existing users/devices make a stronger factor unavailable |
+| [[Home/Security/Authentication/TOTP\|TOTP]] | Possession of a shared authenticator secret | Code is phishable and valid inside the accepted time window | Backup codes or replacement authenticator must be protected | Broad offline authenticator compatibility matters |
+| Push approval | Control of an enrolled app/device | Generic approve/deny prompts enable fatigue attacks | Device enrollment and support reset are critical | Enterprise context/number matching is enforced |
+| WebAuthn security key | Private key unlocked on an external authenticator | Origin-bound signature over a fresh challenge | Spare key or controlled reenrollment is needed | High-assurance, portable phishing resistance matters |
+| Synced passkey | Discoverable WebAuthn credential available through a platform account | Same origin binding; sync-provider account becomes part of recovery trust | Platform sync and account recovery restore credentials | Consumer passwordless UX across devices matters |
 
-**Apps**: Google Authenticator, Microsoft Authenticator, Authy.
+Default to passkeys/WebAuthn when the client population supports them. Keep TOTP as a compatibility fallback when needed, and protect fallback and recovery at least as carefully as primary enrollment. Avoid SMS for new high-value systems.
 
-```csharp
-// ASP.NET Core Identity: enable 2FA with TOTP
-// In Program.cs:
-builder.Services.AddIdentity<ApplicationUser, IdentityRole>(options =>
-{
-    options.SignIn.RequireConfirmedAccount = true;
-})
-.AddEntityFrameworkStores<ApplicationDbContext>()
-.AddDefaultTokenProviders();
+# TOTP
 
-// Generate TOTP secret for a user:
-var key = await _userManager.GetAuthenticatorKeyAsync(user);
-if (string.IsNullOrEmpty(key))
-{
-    await _userManager.ResetAuthenticatorKeyAsync(user);
-    key = await _userManager.GetAuthenticatorKeyAsync(user);
-}
-// Display key as QR code for the user to scan with their authenticator app
+TOTP derives a short code from a shared secret and a time-step counter. The server accepts only a small clock-skew window, rate-limits guesses, and records the last accepted step to reject replay. See [[Home/Security/Authentication/TOTP|TOTP]] for provisioning, validation, secret storage, and recovery mechanics.
+
+# FIDO2 and WebAuthn
+
+WebAuthn defines the browser/API ceremony between a relying party (RP), client, and authenticator. CTAP defines communication with roaming authenticators such as security keys. A passkey is a WebAuthn discoverable credential: the authenticator can identify an account without the user first typing a username.
+
+## Registration ceremony
+
+```text
+RP -> Browser: challenge, rp.id, user.id, credential options
+Browser: enforce the caller-origin / RP-ID relationship and collect user consent/verification.
+Authenticator: create a credential key pair scoped to rp.id
+Authenticator -> Browser: authenticator data + attestation statement
+Browser -> RP:
+  credential ID
+  response.clientDataJSON containing type, challenge, and origin
+  response.attestationObject containing fmt, authData (authenticatorData), and attStmt
+RP: validate challenge, origin, RP ID hash, flags, algorithm, and credential public key
+RP: validate the attestation statement and trust path only when attestation policy requires it
+RP: store credential ID, public key, user binding, and metadata
 ```
 
-## FIDO2 / WebAuthn
+The attested credential data inside `authenticatorData` carries the credential ID and credential public key. With `none` attestation, the attestation statement can be empty and no attestation signature is returned; the RP still validates the client data, authenticator data, and public key. Other attestation formats may sign the authenticator data plus the hash of `clientDataJSON`, but the RP verifies that evidence only when its enrollment policy asks for attestation. The private key remains under authenticator control. The RP stores a public key, so a database leak does not directly reveal a reusable authentication secret. Registration must be authorized by a recent trusted session; otherwise an attacker who briefly controls an account can enroll their own credential.
 
-FIDO2 (Fast Identity Online) uses public-key cryptography with hardware security keys (YubiKey) or platform authenticators (Windows Hello, Touch ID). The private key never leaves the device. Phishing-resistant — the key is bound to the origin domain.
+## Authentication ceremony
 
-**When to use**: High-security applications (banking, enterprise admin access). More secure than TOTP but requires hardware or platform support.
-
-> [!NOTE]
-> **Passkeys** are the consumer branding of FIDO2/WebAuthn *discoverable credentials* — synced across devices (iCloud Keychain, Google Password Manager) so you sign in with just Face ID/fingerprint and **no password**. Being phishing-resistant by design (bound to the origin), a passkey serves as first *and* second factor at once, which is why the industry is pushing passwordless. Terminology: **2FA** is exactly two factors; **MFA** is two *or more*.
-
-```csharp
-// FIDO2 / WebAuthn with Fido2NetLib (server-side assertion verification)
-// 1. During registration: store the credential public key per user
-// 2. During login: verify the signed assertion
-
-var fido2 = new Fido2(new Fido2Configuration
-{
-    ServerDomain = "example.com",
-    ServerName = "My App",
-    Origins = new HashSet<string> { "https://example.com" }
-});
-
-// Verify assertion (login step)
-var result = await fido2.MakeAssertionAsync(
-    clientResponse,          // JSON from navigator.credentials.get()
-    options,                  // stored assertion options from session
-    storedPublicKey,          // credential public key from registration
-    storedSignCount,          // replay attack counter
-    isUserHandleOwnerOfCredential);
-
-// result.Status == "ok" means authentication succeeded
-// result.Counter must be > storedSignCount (replay protection)
+```text
+RP -> Browser: fresh unpredictable challenge + rp.id + allowed credentials or discoverable request
+Browser: enforce the caller-origin / RP-ID relationship, build clientDataJSON, and invoke an authenticator for rp.id
+Authenticator: verify user presence/verification, build authenticatorData with the RP-ID hash, and sign authenticatorData + SHA-256(clientDataJSON)
+Browser -> RP: credential ID, authenticatorData, clientDataJSON, signature, optional user handle
+RP: validate clientDataJSON type/challenge/origin, authenticatorData RP-ID hash/flags, signature, and credential/user binding
+RP: consume the challenge once and create or elevate a session
 ```
 
-## Pitfalls
+Origin and RP-ID binding give WebAuthn its phishing resistance: a credential registered for `example.com` will not sign a challenge for `examp1e.com`. The fresh challenge and one-time server state stop replay. User verification such as a device PIN or biometric unlocks the authenticator; the biometric is not sent to the website.
 
-- **TOTP clock skew**: TOTP codes are time-based. If the server and client clocks differ by more than 30 seconds, valid codes are rejected. Mitigation: accept codes from the previous and next 30-second window (±1 window tolerance).
-- **SMS 2FA is phishable**: SMS codes can be intercepted via SIM swapping or SS7 attacks. For high-security applications, use TOTP or FIDO2 instead of SMS.
-- **Backup codes stored insecurely**: Backup codes are one-time recovery codes. If stored in plaintext or emailed, they become a single point of failure. Hash them like passwords.
+![[Security/Security-Two-Factor Auth-18120000.png]]
 
-## Tradeoffs
+# Passkey, sync, and attestation choices
 
-| Method | Phishing Resistance | Hardware Required | Implementation Complexity | Use when |
-|--------|-------------------|-----------------|--------------------------|----------|
-| SMS OTP | None (SIM swap, SS7) | No | Minimal | Legacy systems; low-security consumer apps where UX matters most |
-| TOTP (Google Authenticator) | Low (code can be phished) | Authenticator app | Low | Most applications; good balance of security and UX |
-| Push notification (Duo, Okta) | Low (MFA fatigue attacks) | Smartphone | Medium | Enterprise SSO; users are trained to verify context before approving |
-| FIDO2 / WebAuthn | High (origin-bound) | Security key or platform authenticator | High | High-assurance scenarios: banking, admin access, NIST AAL3 |
+| Choice | Benefit | Cost / trust introduced |
+| --- | --- | --- |
+| Device-bound credential | Key does not leave one authenticator | Lost device requires another credential or recovery |
+| Synced passkey | Works across devices and survives device replacement | Platform account, encrypted sync, and its recovery become part of the trust model |
+| Discoverable credential | Username-less account selection | Account-discovery UX and privacy need deliberate design |
+| Attestation required | Can restrict enrollment to approved authenticator models in managed environments | Reduces consumer compatibility and can add identifying metadata |
+| Attestation not required | Broad compatibility and less device metadata | RP cannot enforce a hardware provenance policy |
 
-**Decision rule**: default to TOTP for most applications — it is widely supported, requires no hardware, and is significantly more secure than SMS. Use FIDO2 when phishing resistance is a hard requirement (financial services, privileged access). Avoid SMS OTP for new systems; it is the weakest 2FA method and vulnerable to SIM swapping.
+Attestation says something about the authenticator at registration; it does not establish the human's legal identity and is not required for ordinary consumer passkeys. Decide it from the relying party's assurance policy, not from a blanket belief that more attestation is always safer.
 
+# Failure and recovery behavior
 
-## Questions
+- Expire and consume WebAuthn challenges once, and bind them to the initiating session and intended ceremony.
+- Validate `origin` and RP ID on the server through a maintained WebAuthn library; never trust client-provided account identity without matching the stored credential binding.
+- Signature counters can signal some cloned authenticators, but zero or non-increasing counters are valid for some implementations. Treat counter anomalies according to authenticator behavior and risk policy, not as the sole replay defense.
+- Require recent strong authentication to add or remove a credential. Notify the user and expose named-device/credential revocation.
+- Offer multiple credentials or protected recovery codes before loss occurs. A TOTP/SMS fallback restores the fallback's phishing resistance, not WebAuthn's.
+- After high-risk recovery, revoke sessions, rotate recovery material, and apply a delay or additional review to sensitive actions where appropriate.
 
-> [!QUESTION]- Why is FIDO2/WebAuthn more secure than TOTP?
-> TOTP codes can be phished — an attacker can trick a user into entering their code on a fake site. FIDO2 keys are bound to the origin domain: the browser only uses the key for the exact domain it was registered on, making phishing impossible. The private key also never leaves the device.
+# Questions
 
-> [!QUESTION]- When should you use TOTP vs FIDO2?
-> TOTP is simpler to implement and works on any device with an authenticator app — use it for most applications. FIDO2 is phishing-resistant and required for high-assurance scenarios (banking, admin access, NIST AAL3). The cost is hardware dependency and more complex enrollment flow.
+> [!QUESTION]- Why does WebAuthn resist a real-time phishing proxy better than TOTP?
+> TOTP is a transferable number that a proxy can relay before it expires. WebAuthn signs data bound to the browser-observed origin and RP ID, so a credential for the real site will not produce a valid assertion for the phishing origin.
 
+> [!QUESTION]- Is a synced passkey the same trust model as a hardware security key?
+> No. Both use WebAuthn origin-bound public-key credentials, but a synced passkey relies on a platform account and encrypted synchronization/recovery, while a device-bound security key keeps the private key on one authenticator and needs a separate backup path.
 
-## References
+# References
 
-- [NIST SP 800-63B — Digital Identity Guidelines](https://pages.nist.gov/800-63-3/sp800-63b.html) — NIST's authoritative guide on authentication assurance levels and MFA requirements
-- [Microsoft — Two-factor authentication with ASP.NET Core](https://learn.microsoft.com/en-us/aspnet/core/security/authentication/2fa) — official guide for implementing 2FA with ASP.NET Core Identity
-- [FIDO Alliance — WebAuthn](https://fidoalliance.org/fido2/) — the FIDO2/WebAuthn standard for phishing-resistant authentication
+- [W3C Web Authentication Level 3](https://www.w3.org/TR/webauthn-3/) — registration/authentication ceremonies, RP binding, discoverable credentials, attestation, and verification rules.
+- [FIDO Alliance — Passkeys](https://fidoalliance.org/passkeys/) — passkey terminology, device-bound and synced credential models, and deployment material.
+- [NIST SP 800-63B](https://pages.nist.gov/800-63-4/sp800-63b.html) — authenticator assurance, phishing resistance, recovery, and lifecycle guidance.
+- [OWASP Multifactor Authentication Cheat Sheet](https://cheatsheetseries.owasp.org/cheatsheets/Multifactor_Authentication_Cheat_Sheet.html) — factor selection, reset, recovery, and bypass controls.
+- [Microsoft — Enable QR code generation for TOTP authenticator apps in ASP.NET Core](https://learn.microsoft.com/en-us/aspnet/core/security/authentication/identity-enable-qrcodes) — official ASP.NET Core TOTP enrollment mechanics.
+- [ByteByteGo — Is Passkey Shaping a Passwordless Future?](https://github.com/ByteByteGoHq/system-design-101/blob/b28380a4710c5ec9638ec037d4168e288f334cba/data/guides/is-passkey-shaping-a-passwordless-future.md) — source passkey overview expanded with complete ceremonies, trust choices, and recovery risk.

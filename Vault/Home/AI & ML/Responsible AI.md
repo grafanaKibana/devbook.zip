@@ -10,13 +10,11 @@ status: Done
 publish: true
 ---
 
-# Intro
-
 Responsible AI is the practice of designing, building, and operating AI systems so their failures are bounded, their decisions are explainable, and their impact on people is fair. It matters for engineers — not only policy teams — because every principle below maps to concrete engineering work: dataset audits, access controls, logging, evaluation slices, and human-review gates. Most industry frameworks (Microsoft's Responsible AI Standard, Google's AI Principles, NIST's AI Risk Management Framework) converge on the same six principles.
 
-## The Six Principles
+# The Six Principles
 
-### Fairness
+## Fairness
 
 AI systems should treat similarly situated people consistently. In high-impact contexts — medical triage, loan applications, hiring — the system should give the same recommendation to people with the same relevant attributes, regardless of protected characteristics.
 
@@ -27,13 +25,13 @@ Engineering practices that operationalize fairness:
 - Apply mitigation techniques where gaps appear: rebalancing, adversarial debiasing, or post-hoc score adjustments.
 - Monitor performance per user segment in production and keep an override path for decisions flagged as unfair.
 
-### Reliability and Safety
+## Reliability and Safety
 
 AI systems should behave as designed, respond safely to unexpected inputs, and resist harmful manipulation. Reliability means consistent behavior without unwanted variability; safety means minimizing unintended harm — physical, emotional, or financial — when the system is wrong.
 
 In practice this means testing beyond the happy path (adversarial inputs, out-of-distribution data, degraded dependencies), defining fallback behavior for low-confidence cases, and deploying through staged rollouts — see [[Spectrum Of Automations]] for the shadow-mode-to-full-automation progression.
 
-### Privacy and Security
+## Privacy and Security
 
 AI systems should protect the data they are trained on and the data they process. The engineering baseline:
 
@@ -44,7 +42,7 @@ AI systems should protect the data they are trained on and the data they process
 
 For LLM-specific data exposure risks (training data leakage, retrieval over-scoping, prompt-based exfiltration), see [[OWASP vulnerabilities on AI LLM]] and [[Guardrails]].
 
-### Inclusiveness
+## Inclusiveness
 
 AI systems should work for everyone, including groups that are historically underrepresented in training data and product design. Inclusive systems:
 
@@ -53,17 +51,17 @@ AI systems should work for everyone, including groups that are historically unde
 - Remain usable under constrained connectivity and hardware, not only flagship devices in well-connected regions.
 - Are designed with input from diverse communities rather than tested on them after the fact.
 
-### Transparency
+## Transparency
 
 AI systems should be understandable to the people who operate them and the people affected by them. AI creators should be able to explain how the system works, justify design choices, and be honest about capabilities and limitations. Operationally, transparency means documenting data and models (datasheets, model cards), building explanatory interfaces for consequential decisions, and enabling auditability through logging and reporting.
 
 Transparency is the precondition for the other principles: without it, fairness cannot be verified and accountability cannot be assigned.
 
-### Accountability
+## Accountability
 
 People — not models — are accountable for AI system behavior. Teams deploying AI must monitor system performance continuously, mitigate risks as they surface, and own the consequences of automated decisions. This principle pushes back against "the algorithm decided" as a defense: someone must be able to explain, correct, and if necessary roll back any automated decision. Human-in-the-loop review for high-stakes actions and clear escalation ownership are the standard mechanisms.
 
-## Questions
+# Questions
 
 > [!QUESTION]- How do the six principles translate into concrete engineering work?
 > - Fairness → slice-based evaluation, dataset audits, per-segment production monitoring
@@ -80,7 +78,7 @@ People — not models — are accountable for AI system behavior. Teams deployin
 > - The fix is slice-based evaluation: measure the same metrics per demographic segment and treat a large gap as a defect, even when the aggregate looks healthy
 > - This mirrors the segmentation principle used elsewhere in monitoring: averages lie
 
-## References
+# References
 
 - [Microsoft Responsible AI Standard](https://www.microsoft.com/en-us/ai/responsible-ai) — a leading framework for the six principles, with implementation guidance per principle.
 - [AI Risk Management Framework (NIST)](https://www.nist.gov/itl/ai-risk-management-framework) — vendor-neutral framework for identifying, measuring, and managing AI risk.

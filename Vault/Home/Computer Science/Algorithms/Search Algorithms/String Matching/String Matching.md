@@ -13,8 +13,6 @@ level:
 status: Creation
 ---
 
-# Intro
-
 String matching finds occurrences of a pattern inside a text without the naive `O(n·m)` rescan that re-examines characters after every mismatch. The whole family exists to reuse the work a mismatch reveals: once you know a suffix of what you scanned equals a prefix of the pattern, you can shift by more than one character and never look back.
 
 Two axes separate the members. The first is **how many patterns** you search for at once — one pattern ([[KMP (Knuth-Morris-Pratt) Algorithm|KMP]], [[Z-Algorithm]], [[Boyer-Moore]]) versus a whole set in a single pass ([[Aho-Corasick]]). The second is **what you preprocess**: most methods preprocess the *pattern* into a failure function or shift table, while [[Rabin Karp Search|Rabin–Karp]] preprocesses nothing structural and instead fingerprints the *text* with a rolling hash. That hashing angle is what lets Rabin–Karp scale to many equal-length patterns or extend to 2-D matching where the automaton methods do not.
@@ -24,7 +22,7 @@ const { FolderStructureMap } = await dc.require("Assets/components/devbook-folde
 return FolderStructureMap;
 ```
 
-## Diagram
+# Diagram
 
 ```mermaid
 flowchart TD
@@ -38,7 +36,7 @@ flowchart TD
   B -->|Many equal-length, or 2-D, or rolling| I[Rabin-Karp]
 ```
 
-## The family
+# The family
 
 | Algorithm | Patterns | Preprocesses | Time | Worst case | Aux space | Weaker case | Reach for it when |
 | --- | --- | --- | --- | --- | --- | --- | --- |
@@ -50,7 +48,7 @@ flowchart TD
 
 The two linear single-pattern methods, [[KMP (Knuth-Morris-Pratt) Algorithm|KMP]] and [[Z-Algorithm]], are two views of the same prefix structure: both preprocess the pattern in `O(m)`, guarantee `O(n)` scans, and are interconvertible. [[Boyer-Moore]] gives up the worst-case simplicity to win the *average* case by skipping ahead — the longer the pattern and the larger the alphabet, the bigger its shifts. [[Aho-Corasick]] is KMP generalised from one pattern to a set: the trie holds every pattern and the failure links are the multi-pattern equivalent of KMP's failure function. [[Rabin Karp Search|Rabin–Karp]] stands apart — it never builds an automaton, so it stays correct only up to hash collisions, which is exactly why it generalises to problems the automaton methods can't reach cheaply.
 
-## Questions
+# Questions
 
 > [!QUESTION]- Why does KMP never re-examine a text character after a mismatch?
 > Its prefix (failure) function records, for every pattern position, the length of the longest proper prefix that is also a suffix. On a mismatch the pattern shifts so that this already-matched prefix aligns, so the text pointer only ever advances. That is what turns the naive `O(n·m)` scan into `O(n + m)`.
@@ -64,7 +62,7 @@ The two linear single-pattern methods, [[KMP (Knuth-Morris-Pratt) Algorithm|KMP]
 > [!QUESTION]- How is Aho-Corasick related to KMP?
 > It is KMP lifted from a single pattern to a set. The patterns are stored in a trie, and each node's failure link points to the longest proper suffix that is a prefix of some pattern — the multi-pattern analogue of KMP's failure function. One pass over the text then reports every occurrence of every pattern in `O(n + Σmᵢ + matches)`.
 
-## References
+# References
 
 - [String-searching algorithm (Wikipedia)](https://en.wikipedia.org/wiki/String-searching_algorithm) — taxonomy of single- and multi-pattern methods and their complexity.
 - [Prefix function (CP-Algorithms)](https://cp-algorithms.com/string/prefix-function.html) — KMP's prefix function and its matching applications with implementations.

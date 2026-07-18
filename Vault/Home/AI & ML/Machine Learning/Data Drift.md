@@ -10,11 +10,9 @@ priority: Low
 status: Done
 publish: true
 ---
-# Intro
-
 Data drift is when the statistical properties of your input data change over time compared to the data your model was trained on. It matters because ML models assume training and serving data come from the same distribution — when that stops being true, predictions can become less reliable without any obvious error. A fraud model trained on last year's purchase behavior silently degrades when new payment methods emerge; a vision model deployed to a new camera produces worse results due to different lighting.
 
-## Types of Drift
+# Types of Drift
 
 | Type | What changes | Example |
 |------|-------------|---------|
@@ -25,7 +23,7 @@ Data drift is when the statistical properties of your input data change over tim
 
 **Concept drift is the most dangerous** — the model's learned relationship is no longer valid, so retraining on new data is the only fix. Data drift may be benign if the model generalizes well to the new distribution.
 
-## Detection Methods
+# Detection Methods
 
 **Population Stability Index (PSI)** — measures how much a feature's distribution has shifted. Commonly used in credit scoring and finance.
 
@@ -56,7 +54,7 @@ def psi(expected, actual, bins=10, eps=1e-6):
 
 **Jensen-Shannon divergence** — symmetric measure of distribution distance. Bounded [0, 1], easier to interpret than KL divergence.
 
-## Monitoring Workflow
+# Monitoring Workflow
 
 ```text
 1. Define baseline
@@ -84,7 +82,7 @@ def psi(expected, actual, bins=10, eps=1e-6):
    └── Route to manual review for high-risk cases
 ```
 
-## Pitfalls
+# Pitfalls
 
 **Drift without performance drop**
 Drift in a feature the model does not rely on heavily may not affect predictions. Always check model performance metrics (if labels are available) before triggering a retrain. Unnecessary retraining wastes resources and can introduce instability.
@@ -98,9 +96,9 @@ For many production systems, ground truth labels arrive days or weeks after pred
 **Treating all drift as concept drift**
 Data drift (P(X) changes) does not always require retraining — the model may generalize. Concept drift (P(Y|X) changes) always requires retraining. Distinguish between them before deciding on a response.
 
-## Tradeoffs
+# Tradeoffs
 
-### Detection Method Selection
+## Detection Method Selection
 
 | Method | Feature type | Sensitivity | Interpretability | Use when |
 |--------|------------|------------|-----------------|----------|
@@ -112,7 +110,7 @@ Data drift (P(X) changes) does not always require retraining — the model may g
 
 **Decision rule**: use PSI for numeric features in regulated domains (finance, healthcare) where thresholds are well-established. Use KS test for general numeric monitoring. Use model performance metrics when labels are available — they are the most direct signal. Use proxy metrics (escalation rate, confidence distributions) when labels are delayed.
 
-### Retraining Strategy
+## Retraining Strategy
 
 | Strategy | Trigger | Cost | Risk | Use when |
 |----------|---------|------|------|----------|
@@ -124,7 +122,7 @@ Data drift (P(X) changes) does not always require retraining — the model may g
 **Decision rule**: start with scheduled retraining (weekly or monthly) for most models. Add drift-triggered alerts as a safety net. Move to drift-triggered retraining only when scheduled retraining is too slow to respond to real-world changes.
 
 
-## Questions
+# Questions
 
 > [!QUESTION]- What is the difference between data drift and concept drift?
 > Data drift: the input distribution P(X) changes (users ask different questions, new product categories appear). The model's learned relationship P(Y|X) may still be valid.
@@ -134,7 +132,7 @@ Data drift (P(X) changes) does not always require retraining — the model may g
 > [!QUESTION]- How do you detect drift when labels are delayed?
 > Use proxy metrics: escalation rate, user complaints, re-contact rate, or model confidence distributions. Monitor input feature distributions (PSI, KS test) as an early warning signal. When labels arrive, compute actual performance metrics and compare to baseline.
 
-## References
+# References
 
 - [Data drift in machine learning models (Evidently AI)](https://www.evidentlyai.com/ml-in-production/data-drift) — practitioner guide to drift types, detection methods, and monitoring workflows with Python examples.
 - [Population Stability Index (PSI) explained](https://www.listendata.com/2015/05/population-stability-index.html) — detailed explanation of PSI calculation, interpretation thresholds, and use in credit scoring.

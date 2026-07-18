@@ -1,5 +1,8 @@
 public
 node_modules
 .quartz-cache
+.omc
+content
+quartz
 # Generated artifacts are verified byte-for-byte by `npm run steptrace:check`.
 custom/steptrace/generated

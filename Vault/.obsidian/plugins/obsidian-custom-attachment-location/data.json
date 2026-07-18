@@ -12,7 +12,7 @@
   "emptyFolderBehavior": "DeleteWithEmptyParents",
   "excludePaths": [],
   "excludePathsFromAttachmentCollecting": [],
-  "generatedAttachmentFileName": "${noteFolderName:{pick:{from:'start',index:1}}}-${noteFileName}-${date:{momentJsFormat:'YYYYMMDDHHmmssSSS'}}",
+  "generatedAttachmentFileName": "${noteFolderName:{pick:{from:'start',index:1}}}-${noteFileName}-${date:{momentJsFormat:'DDHHmmss'}}",
   "includePaths": [],
   "jpegQuality": 0.8,
   "markdownUrlFormat": "",
@@ -30,5 +30,5 @@
   "treatAsAttachmentExtensions": [
     ".excalidraw.md"
   ],
-  "version": "11.1.1"
+  "version": "11.2.0"
 }

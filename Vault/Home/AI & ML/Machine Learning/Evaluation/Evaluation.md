@@ -13,8 +13,6 @@ level:
 status: Done
 ---
 
-# Intro
-
 Evaluation is how you measure whether a model actually solves the problem it was built for, under the conditions it will face in production. The gap between offline metrics and real-world usefulness is where most ML projects fail silently. A senior engineer needs to pick the right metric for the decision, understand what each curve and score hides, and connect evaluation to business outcomes and deployment gates. This hub orients the family of metrics; the dedicated pages — [[Classification Evaluation]], [[ROC-AUC and PR-AUC]], and [[Calibration]] — carry the depth.
 
 ```datacorejsx
@@ -22,7 +20,7 @@ const { FolderStructureMap } = await dc.require("Assets/components/devbook-folde
 return FolderStructureMap;
 ```
 
-## The Evaluation Discipline
+# The Evaluation Discipline
 
 Four decisions matter more than the choice of metric itself:
 
@@ -33,11 +31,11 @@ Four decisions matter more than the choice of metric itself:
 
 The recurring failure across all four is the **offline–online gap**: a metric that improves on a static test set but does not move (or reverses) on real traffic. Treat offline metrics as a gate, not as proof — confirm with production monitoring and, where possible, a controlled experiment.
 
-## Metric Families
+# Metric Families
 
 Pick the family from the decision, not from habit: threshold metrics (precision, recall, F1) for a fixed operating point, ranking metrics (ROC-AUC, PR-AUC) for comparing models before a threshold exists, and calibration metrics (Brier, ECE) when downstream logic consumes probabilities rather than labels. For ranking items within a retrieved list (NDCG, MAP, MRR), see [[Home/AI & ML/LLM/Context Engineering/RAG/Monitoring#Retrieval Quality Metrics\|RAG Monitoring]]. Regression targets get their own family, covered below.
 
-### Regression Metrics
+## Regression Metrics
 
 For continuous targets:
 
@@ -48,7 +46,7 @@ For continuous targets:
 
 Decision rule: default to RMSE when large errors hurt most and MAE when they should not dominate; report both, since a large gap between them signals heavy-tailed errors. Use MAPE only for stakeholder communication on strictly positive targets, and quantile loss when the product needs intervals, not point estimates.
 
-## Pitfalls
+# Pitfalls
 
 **Optimizing the metric instead of the outcome.** A metric is a proxy. Driving a single offline number up can degrade the real objective — a recommender tuned purely for click-through can surface clickbait that lowers retention. Pair every optimization target with a guardrail metric for the outcome it is supposed to serve.
 
@@ -56,7 +54,7 @@ Decision rule: default to RMSE when large errors hurt most and MAE when they sho
 
 **Threshold chosen on the same data it is reported on.** Selecting the operating point and reporting precision/recall on the same split overstates performance. Choose the threshold on a validation split, then report on a separate test split.
 
-## Questions
+# Questions
 
 > [!QUESTION]- When should you distrust a single evaluation metric?
 > - When the metric does not encode the cost asymmetry of the decision, for example accuracy on imbalanced classes
@@ -70,7 +68,7 @@ Decision rule: default to RMSE when large errors hurt most and MAE when they sho
 > - Leakage, non-representative splits, and metric-proxy mismatch all widen the gap silently
 > - The mitigation is layered: offline metrics as a release gate, production monitoring to catch drift, and controlled experiments to confirm a real effect before trusting it
 
-## References
+# References
 
 - [scikit-learn model evaluation](https://scikit-learn.org/stable/modules/model_evaluation.html)
 - [ML.NET model evaluation metrics](https://learn.microsoft.com/dotnet/machine-learning/resources/metrics)

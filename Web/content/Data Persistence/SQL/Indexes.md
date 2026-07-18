@@ -1,234 +1,171 @@
 ---
 publish: true
-created: 2026-07-11T21:46:51.917Z
-modified: 2026-07-11T21:46:51.917Z
-published: 2026-07-11T21:46:51.917Z
+created: 2026-07-16T15:14:44.878Z
+modified: 2026-07-18T11:59:15.657Z
+published: 2026-07-18T11:59:15.657Z
 topic:
   - Data Persistence
 subtopic:
   - SQL
-summary: A sorted B+ tree that avoids full table scans, trading write and storage overhead.
+summary: Index structures across database engines and the operators, storage layouts, and mutation costs each structure serves.
 level:
   - "4"
 priority: High
 status: Ready to Repeat
 ---
 
-# Intro
+An index is an auxiliary access structure that lets a database locate or order data without scanning every base row. “Add an index” is incomplete advice: B+ trees, hash tables, inverted indexes, spatial trees, block summaries, LSM-based layouts, and columnstores accelerate different operators and impose different write, memory, and maintenance costs.
 
-An index is a sorted auxiliary structure that helps the SQL engine avoid full table scans for many read queries. In SQL Server, indexes are implemented as B+ trees, so lookup cost grows much slower than row count (`O(log n)` instead of `O(n)` for many lookup patterns). The tradeoff is write overhead and extra storage.
+Start from the operator in the measured query plan. Equality probes, ordered ranges, text terms, containment, nearest-neighbor search, and large analytical scans do not share one best structure. Rowstore and columnstore designs therefore remain parallel sections: one optimizes selective navigation and ordering, while the other compresses columns for broad analytical work. Statistics and physical maintenance follow only after the plan identifies which boundary is failing.
 
-## When indexes help and when they hurt
+# Structure Inventory
 
-- Indexes help when queries filter, join, or sort on selective columns.
-- Indexes hurt write-heavy tables because inserts, updates, and deletes also maintain index pages.
-- Indexes consume extra disk space; wider keys and many indexes increase storage and memory pressure.
+| Structure | Physical idea | Strong query fit | Cost or boundary |
+|---|---|---|---|
+| B-tree / B+ tree | Balanced, ordered pages | Equality, ranges, prefix order, ordered scans | Page splits and write amplification across every maintained index |
+| Hash | Key-to-bucket mapping | Equality probes when the engine and workload support it | No useful key ordering or range scan; collisions and resizing still cost work |
+| Inverted index / GIN | Term or element to posting list | Full text, arrays, document containment | Larger posting structures and expensive updates |
+| GiST / SP-GiST | Extensible spatial or partitioned search tree | Geometry, nearest neighbor, ranges, tries | Behavior depends on the operator class; candidates may require recheck |
+| BRIN | Summary per consecutive heap-page range | Very large tables correlated with physical order | Weak pruning when row order is uncorrelated with the indexed value |
+| LSM tree | Buffer, flush, and compact sorted runs | Sustained writes with point/range reads through run indexes and filters | Compaction and read amplification; it is a storage organization, not a PostgreSQL index method |
+| Columnstore | Compressed values grouped by column | Large scans and aggregates over a subset of columns | Point updates and single-row OLTP access |
 
-![03 Data Persistence-Indexes-20260705173633411](Assets/03 Data Persistence/03 Data Persistence-Indexes-20260705173633411.png)
+![[Assets/Data Persistence/Data Persistence-Indexes-18120000.jpg]]
 
-## Mental model: how index pages are organized
+The image is a vocabulary map, not a universal engine diagram. Bloom filters answer probable membership rather than locating a row; an LSM tree includes several cooperating structures; and products expose spatial and inverted behavior through engine-specific operator classes.
 
-### Heap
+# B+ Tree Boundary
 
-**A heap** is a table without a clustered index. Rows are not kept in key order, so search typically requires scanning pages sequentially.
+Conventional SQL Server disk-based clustered and nonclustered rowstore indexes use B+ trees. Root and intermediate pages contain separator keys and child-page pointers. Leaf pages contain the table rows for a clustered index, or nonclustered keys plus row locators and included values for a nonclustered index. A heap has no clustered key order; its nonclustered indexes locate base rows by RID.
 
-### Index structure
+An index on `(TenantId, CreatedAt)` is ordered first by tenant and then by time within each tenant. It can seek an equality tenant and scan a time range without sorting the entire table. It is not an efficient general index for `CreatedAt` across all tenants because the leading key is missing.
 
-An index is a tree-like, sorted on-disk structure where key values guide navigation to smaller and smaller ranges of data.
+PostgreSQL also defaults to B-tree for equality and ordering operators, but its heap and index implementation differs from SQL Server's clustered-rowstore model. Do not transfer SQL Server leaf-layout or key-lookup claims to another engine without checking that engine's plan and storage documentation.
 
-The B+ tree has three logical levels:
+# Rowstore Indexes
 
-1. Root node
-   1. Stores key ranges and pointers to intermediate nodes
-2. Intermediate level
-   1. Stores key ranges and pointers to leaf nodes
-3. Leaf level
-   1. Contains the final entries for the range (data rows for clustered indexes, row locators for nonclustered indexes)
-
-### Clustered index
-
-In a clustered index, leaf pages are the table's real data pages.
-
-- Root rows store key values and pointers to intermediate pages.
-- Intermediate rows store key values and pointers further down.
-- Pages at each level are linked as a doubly linked list for range scans.
-- A table can have only one clustered index because table rows can be physically ordered only one way at a time.
-
-#### Diagram: Clustered index page hierarchy
-
-![[Assets/03 Data Persistence/03 Data Persistence-Indexes-20260705173633411-1.png]]
-
-This diagram shows the clustered index B+ tree shape: one root page points to intermediate index pages, and the leaf level contains the actual table rows linked left-to-right for range scans.
-
-#### Diagram: Clustered index seek path
-
-![[Assets/03 Data Persistence/03 Data Persistence-Indexes-20260705173633411-2.png]]
-
-This diagram shows an index seek path through key ranges: the engine starts at the root, chooses the matching intermediate branch, and reaches the leaf page that holds the target row.
-
-### Nonclustered index
-
-The leaf level of a nonclustered index stores key columns plus a pointer to actual table data.
-
-#### With a clustered index on the table
-
-Leaf entries store the clustered key value (key lookup path).
-
-![[Assets/03 Data Persistence/03 Data Persistence-Indexes-20260705173633411-3.png]]
-
-#### Without a clustered index (heap)
-
-Leaf entries store a row identifier (RID): file, page, and slot location.
-
-![[Assets/03 Data Persistence/03 Data Persistence-Indexes-20260705173633411-4.png]]
-
-## Simplified seek example
-
-Assume a clustered index on `ID` with values from `1` to `5000`. We need `ID = 1456`.
-
-1. At the root, pick the branch for `1251..2500`.
-2. In that intermediate page, pick the leaf page for `1251..1500`.
-3. Scan inside that leaf page to find `1456`.
-
-The search space drops from 5000 rows to one small page range (illustrative page sizing).
-
-## Covering Indexes and Included Columns
-
-A covering index satisfies a query entirely from the index without touching the base table. When a nonclustered index seek finds a matching row but the query needs columns not in the index, SQL Server performs a **Key Lookup** back to the clustered index for each row. On large result sets this becomes expensive fast.
-
-The `INCLUDE` clause adds columns to the leaf level only, not to the B-tree navigation nodes. This means they don't participate in seeks or ordering, but they're available at the leaf so the engine never needs to follow the key lookup path.
+Rowstore index design translates a recurring query shape into an ordered B+ tree. Key columns determine navigation and order; included columns exist at the nonclustered leaf to cover output; a filter limits which rows exist in the index. The target is the smallest index that supports the required predicates and ordering while paying for its write cost.
 
 ```sql
--- Without covering: index seek + key lookup per row for Email and LastLogin
-CREATE INDEX IX_Users_Status ON Users (Status);
+SELECT OrderNumber, Total, CreatedAt
+FROM Orders
+WHERE TenantId = @tenantId
+  AND Status = @status
+  AND CreatedAt >= @from
+ORDER BY CreatedAt DESC;
 
--- Covering: leaf stores Status (key) + Email + LastLogin (included)
-CREATE INDEX IX_Users_Status_Covering
-    ON Users (Status)
-    INCLUDE (Email, LastLogin);
+CREATE INDEX IX_Orders_Tenant_Status_CreatedAt
+    ON Orders (TenantId, Status, CreatedAt DESC)
+    INCLUDE (OrderNumber, Total);
 ```
 
-**Key rules:**
+The equality predicates establish a tenant/status prefix, `CreatedAt` bounds the range and supplies output order, and the included values cover the projection without widening upper tree levels. The index cannot efficiently serve a general `Status` query because that query omits the leading tenant key.
 
-- SARGable columns (used in `WHERE`, `JOIN`, `GROUP BY`, `ORDER BY`) go in the key.
-- SELECT-only columns go in `INCLUDE`. They bypass the 1700-byte nonclustered key size limit (900-byte for clustered) and the 32-column key limit (SQL Server 2016+).
-- Eliminating Key Lookups is the primary index tuning lever. Check execution plans for "Key Lookup" operators; each one is a candidate for an INCLUDE column.
+## SARGability and key order
 
-## Composite Indexes and the Leftmost-Prefix Rule
+SARGability means the optimizer can turn a predicate into a search argument. `CreatedAt >= @from` normally supplies a range; `YEAR(CreatedAt) = @year` usually does not unless the expression is rewritten as a date interval or exposed through an indexable computed column.
 
-Column **order** in a multi-column index is not cosmetic — it determines which queries can seek. A B-tree on `(A, B, C)` is sorted by A, then B within equal A, then C. The optimizer can use it only for a **leftmost prefix** of the key:
+- Put columns that bound a seek or preserve required order in the key.
+- Equality predicates usually precede the first range predicate.
+- “Most selective first” is not universal. Prefer prefixes reused by important queries, tenant or partition boundaries, and required ordering, then verify estimates.
+- A `GROUP BY`, `ORDER BY`, or join column belongs in the key only when its position supplies useful navigation or order.
 
-| Query predicate | Index `(A, B, C)` usable? |
-|---|---|
-| `WHERE A = ?` | ✅ seek |
-| `WHERE A = ? AND B = ?` | ✅ seek |
-| `WHERE A = ? AND B = ? AND C = ?` | ✅ seek |
-| `WHERE B = ?` (skips A) | ❌ no seek — usually a scan |
-| `WHERE A = ? AND C = ?` | ⚠️ seeks on A, then _residual_ filter on C (B gap) |
+## Covering and filtered indexes
+
+A nonclustered index covers a query when all required values can be returned from the index. Use `INCLUDE` for output or residual values whose order does not help a seek, join, grouping, or sort. Included values still widen leaf rows, consume cache, and add write work.
+
+A filtered index stores only rows satisfying a stable predicate:
 
 ```sql
--- Serves WHERE TenantId=? , and WHERE TenantId=? AND Status=? , and ORDER BY ... within a tenant
-CREATE INDEX IX_Orders_Tenant_Status_Date ON Orders (TenantId, Status, CreatedAt);
--- Does NOT efficiently serve  WHERE Status = ?  alone (TenantId is the leftmost key)
+CREATE INDEX IX_Orders_Open_CreatedAt
+    ON Orders (TenantId, CreatedAt DESC)
+    INCLUDE (OrderNumber, Total)
+    WHERE Status = 'Open';
 ```
 
-Practical ordering rules: put **equality** predicates before **range** predicates (a range "opens" the key, so columns after it can't seek), and put the most selective/most-common equality column first. This left-to-right matching is also why one well-ordered composite index often replaces several single-column ones.
+This works when open orders are a small, frequently queried subset. The query predicate must imply the filter, and parameterization can prevent the optimizer from proving that implication. Verify actual and estimated rows, logical reads, lookups, sorts, write rate, size, and overlap with existing prefixes before keeping the index.
 
-## Index Types Beyond the B+ Tree
+# Columnstore Indexes
 
-The B+ tree is the default for a reason (ordered, range-friendly, balanced), but other engines/structures fit other access patterns:
-
-- **Hash index** — O(1) _equality_ lookups, but **no range or ordering** support. Used by SQL Server memory-optimized tables and PostgreSQL `USING hash`.
-- **Bitmap index** — one bitmap per distinct value; superb for **low-cardinality** columns and `AND`/`OR` combinations in data warehouses (Oracle/Postgres analytics), poor for high-churn OLTP.
-- **GIN / GiST (PostgreSQL)** — inverted/generalized indexes for **full-text search, JSONB containment, arrays, and geospatial** (`@>`, nearest-neighbor) queries a B-tree can't answer.
-- **Spatial / R-tree** — multidimensional range queries (bounding boxes, "points within this region").
-
-The takeaway: when a query type (text search, JSON, geo, pure equality at scale) is slow despite a B-tree, the fix may be a _different kind of index_, not a bigger one.
-
-## Columnstore Indexes
-
-Columnstore indexes store data column-by-column rather than row-by-row, compressed into **row groups** of up to ~1 million rows each. The engine reads only the columns a query touches, skipping the rest entirely.
-
-Batch execution mode processes rows in groups of up to ~900 at a time rather than one row at a time, which is why columnstore queries on large aggregations are significantly faster than equivalent rowstore queries on the same data.
-
-Two variants:
-
-- **Clustered columnstore**: the entire table is stored as columnstore. Ideal for data warehouse fact tables where you always aggregate large ranges.
-- **Nonclustered columnstore**: a secondary index on a rowstore table, enabling HTAP (hybrid transactional/analytical) workloads without a separate DW.
-
-Columnstore is not a replacement for B+ tree indexes. OLTP point lookups, small range seeks, and frequent single-row updates still belong on rowstore. Use columnstore when queries scan millions of rows and aggregate.
-
-## Filtered Indexes
-
-A filtered index is a nonclustered index with a `WHERE` predicate. It indexes only the rows matching that predicate.
+A SQL Server columnstore stores each column separately in compressed rowgroups and can execute eligible operators in batches. Broad queries that scan millions of rows but project a few columns read less data; point lookups, narrow seeks, and frequent single-row updates remain rowstore work.
 
 ```sql
--- Only index active users; 95% of rows are inactive and irrelevant
-CREATE INDEX IX_Users_Active
-    ON Users (LastLogin, Email)
-    WHERE IsActive = 1;
+CREATE CLUSTERED COLUMNSTORE INDEX CCI_SalesFact
+ON dbo.SalesFact;
+
+SELECT ProductCategory, SUM(Revenue)
+FROM dbo.SalesFact
+WHERE OrderDate >= '2026-01-01'
+GROUP BY ProductCategory;
 ```
 
-Best for: columns with many NULLs (add `WHERE Col IS NOT NULL` to exclude them from the index), sparse active subsets, or status columns where one value dominates. The index is smaller, cheaper to maintain, and often fits entirely in the buffer pool. The query's `WHERE` clause must be compatible with the filter predicate for the optimizer to use it.
+A clustered columnstore is the table's primary storage. A nonclustered columnstore is an analytical copy over a rowstore table. Segment metadata can eliminate rowgroups whose value ranges cannot satisfy a predicate, and batch mode moves groups of values through eligible operators.
 
-## Index Maintenance
+| Workload | Better default | Reason |
+| --- | --- | --- |
+| Warehouse fact table with large scans | Clustered columnstore | Compression, segment elimination, and batch aggregates |
+| OLTP table with occasional analytics | Rowstore plus selective nonclustered columnstore | Preserves the point-write path while adding an analytical copy |
+| Primary-key lookup and small update | Rowstore B+ tree | Direct seek and cheaper single-row maintenance |
 
-**Fragmentation** happens when page splits leave pages partially empty or out of logical order. Two metrics matter: logical fragmentation (out-of-order pages) and page density (how full each page is).
+Small inserts first land in delta stores, background tuple movement compresses closed rowgroups, and updates become delete-plus-insert work. Use columnstore only when measured analytical savings pay those costs.
 
-On modern SSD and cloud storage, random I/O is cheap, so logical fragmentation has less impact than it did on spinning disks, especially for point lookups. For large range scans, page density still matters: sparse pages mean more I/O to read the same data.
+# Index Maintenance
 
-Two maintenance operations:
+Maintenance should repair a measured problem, not follow a universal fragmentation threshold. Page density, logical fragmentation, statistics quality, query shape, storage, and the maintenance operation's own cost all matter.
 
-- **REORGANIZE**: online, leaf-level only, compacts pages in place. Does not update statistics.
-- **REBUILD**: recreates the index from scratch, updates statistics with a full scan. Can be offline or online (online rebuild availability depends on SQL Server edition and index type; it's supported in Azure SQL Database and SQL Server Enterprise).
+Logical fragmentation measures whether leaf pages follow key order. Page density measures how full those pages are. On SSD and cloud storage, sparse pages can matter more than out-of-order reads because a range scan must read more pages. A rebuild may appear to fix a plan only because it refreshed statistics; test that hypothesis first:
 
-**The statistics trap:** performance often improves after a rebuild not because fragmentation was the problem, but because the implicit `FULLSCAN` statistics update gave the optimizer accurate cardinality estimates. Before scheduling a rebuild, try `UPDATE STATISTICS ... WITH FULLSCAN` first. If that fixes the query plan, fragmentation was never the issue.
+```sql
+UPDATE STATISTICS dbo.Orders IX_Orders_Customer_CreatedAt
+WITH FULLSCAN;
+```
 
-**Fill factor** controls how full pages are when an index is built or rebuilt. Only lower it for indexes that suffer frequent page splits, typically GUID or random keys. For sequential keys (identity, date), the default (0 = 100%) is fine.
+| Operation | What it changes | Cost or limit |
+| --- | --- | --- |
+| `REORGANIZE` | Incrementally compacts and orders leaf pages | Does not refresh statistics |
+| `REBUILD` | Recreates the index and refreshes its statistics | Log, CPU, I/O, locking, and online-operation limits |
+| `UPDATE STATISTICS` | Refreshes cardinality distribution | Does not repair page density or ordering |
 
-## Tradeoffs
+Fill factor reserves free space during build or rebuild. Lower it only when measured page splits on non-sequential inserts justify permanently reading and caching more pages. The decision sequence is: capture the slow plan and reads, compare estimates with actuals, refresh relevant statistics, measure density and fragmentation for the used partition, then reorganize or rebuild only when the expected read benefit exceeds log, blocking, CPU, and I/O cost.
 
-- **Benefits**: faster lookups, faster ordered reads, better range filtering.
-- **Costs**: slower writes, extra storage, low-selectivity columns often give little benefit.
+# Choose from the Operator
 
-## Design recommendations
+Use the narrowest structure that supports the dominant operator and proves a net workload benefit:
 
-- Keep indexes minimal on frequently updated tables.
-- Add more indexes on large, read-heavy tables after measuring query plans.
-- Prefer short, stable, and selective clustered keys (often the primary key).
-- Put high-impact `WHERE` columns first in composite indexes.
-- Prefer high-cardinality columns where possible.
-- Index computed columns only when expressions are deterministic.
+1. Capture the actual plan, row estimates, logical reads, elapsed time, and write rate.
+2. Identify the operator that dominates cost: scan, lookup, sort, text match, containment, or aggregation.
+3. Choose an engine-supported structure for that operator.
+4. Re-measure reads and writes. An index that speeds one query but doubles write cost or duplicates an existing prefix may be a net loss.
 
-## Questions
+Low cardinality alone does not disqualify an index. A filtered index on a rare status, a covering ordered scan, or a bitmap-capable plan can still be useful. Conversely, a high-cardinality column is not automatically useful when queries do not filter, join, or order by it. Distribution, correlation, result size, and the surrounding plan determine whether the optimizer prefers the index.
 
-> [!QUESTION]- What is an index and what types exist?
->
-> - An index is an auxiliary on-disk structure (usually a B+ tree) that lets the engine seek to rows without scanning the whole table.
-> - Common types: clustered, nonclustered, unique, composite, filtered, covering (nonclustered with INCLUDE), and columnstore.
-> - Clustered defines physical row order; nonclustered is a separate structure with a pointer back to the row.
-> - Columnstore stores data column-by-column for analytics; rowstore B+ tree is for OLTP.
+# Tradeoffs
 
-> [!QUESTION]- When should a column go in INCLUDE rather than the index key?
->
-> - Key columns participate in B-tree navigation and are subject to the 1700-byte nonclustered key size limit (900-byte for clustered) and the 32-column key limit (SQL Server 2016+).
-> - INCLUDE columns live only at the leaf level. They bypass both limits and don't affect seek/sort behavior.
-> - Rule: SARGable columns (used in `WHERE`, `JOIN`, `GROUP BY`, `ORDER BY`) go in the key; SELECT-only columns go in INCLUDE.
-> - The goal is eliminating Key Lookup operators in execution plans. Each lookup is a round-trip to the clustered index per row.
+- Every secondary index consumes storage and makes inserts, deletes, and indexed-column updates maintain another structure.
+- A narrow index may require base-row lookups; a wide covering index reduces lookups but increases leaf size, cache pressure, and write cost.
+- Statistics and physical condition affect plan choice. A rebuild can appear to fix a query because it refreshed statistics; verify the cause before scheduling maintenance.
+- Specialized structures narrow the supported operator set. The advantage is worthwhile only when the workload repeatedly uses that operator.
 
-> [!QUESTION]- Why can an index rebuild appear to fix a slow query, and how do you verify whether statistics were the real cause?
->
-> - Rebuilding implicitly runs a FULLSCAN statistics update, giving the optimizer accurate cardinality estimates.
-> - Stale statistics causing a bad plan is a far more common culprit than fragmentation on SSD/cloud storage.
-> - Test first: run `UPDATE STATISTICS ... WITH FULLSCAN` without rebuilding. If that fixes the plan, fragmentation was never the issue.
-> - Rebuilding indexes purely for fragmentation on modern storage is often wasted maintenance work and causes unnecessary blocking.
+# Questions
 
-## Links
+> [!QUESTION]- Why is “use a hash index because lookup is O(1)” incomplete database advice?
+> The engine must support the hash index for the target table and operator, equality is the only useful ordering relation, and collisions, bucket growth, concurrency, durability, and cache behavior still affect cost. A B+ tree often wins for mixed equality and range work because one structure supports both.
 
-- [SQL Server and Azure SQL index architecture and design guide](https://learn.microsoft.com/sql/relational-databases/sql-server-index-design-guide?view=sql-server-ver17) — comprehensive reference covering B-tree internals, fill factor, included columns, and index design principles.
-- [Clustered and nonclustered indexes described](https://learn.microsoft.com/sql/relational-databases/indexes/clustered-and-nonclustered-indexes-described?view=sql-server-ver17) — official explanation of the structural difference between clustered and nonclustered indexes with diagrams.
-- [Optimize index maintenance to improve query performance](https://learn.microsoft.com/sql/relational-databases/indexes/reorganize-and-rebuild-indexes?view=sql-server-ver17) — guidance on when to reorganize vs rebuild, fragmentation thresholds, and online vs offline operations.
-- [Columnstore indexes overview](https://learn.microsoft.com/sql/relational-databases/indexes/columnstore-indexes-overview?view=sql-server-ver17) — covers columnar storage, batch mode execution, and when columnstore outperforms rowstore for analytics.
-- [Use The Index, Luke — The B-Tree](https://use-the-index-luke.com/sql/anatomy/the-tree) — practitioner deep-dive into B-tree structure, leaf nodes, and how the optimizer uses indexes; vendor-neutral.
-- [The Clustered Index Debate (Kimberly Tripp / SQLskills)](https://www.sqlskills.com/blogs/kimberly/the-clustered-index-debate-continues/) — expert analysis of clustered index key selection, GUIDs vs integers, and fragmentation implications.
-- [Erin Stellato — Index Maintenance Myths (SQLskills)](https://www.sqlskills.com/blogs/erin/index-maintenance-myths-misconceptions-and-realities/) — debunks common misconceptions about fragmentation thresholds and maintenance schedules with real benchmark data.
+> [!QUESTION]- Why can a low-cardinality column still participate in a useful index?
+> A filtered index can store only the rare subset, a composite key can use the column after a useful leading prefix, and a covering index can avoid base-row reads. Measure the complete query plan; cardinality is evidence, not a standalone rule.
+
+# References
+
+- [SQL Server and Azure SQL index architecture and design guide](https://learn.microsoft.com/sql/relational-databases/sql-server-index-design-guide?view=sql-server-ver17) — primary guide to SQL Server rowstore layout, clustered and nonclustered keys, included columns, filtered indexes, and workload-driven design.
+- [PostgreSQL index types](https://www.postgresql.org/docs/current/indexes-types.html) — primary reference for PostgreSQL B-tree, hash, GiST, SP-GiST, GIN, and BRIN operator support.
+- [PostgreSQL multicolumn indexes](https://www.postgresql.org/docs/current/indexes-multicolumn.html) — explains leading-column behavior and skip-scan boundaries for PostgreSQL index methods.
+- [SQL Server columnstore indexes overview](https://learn.microsoft.com/sql/relational-databases/indexes/columnstore-indexes-overview?view=sql-server-ver17) — primary description of rowgroups, segments, compression, and analytical execution.
+- [Columnstore index architecture](https://learn.microsoft.com/sql/relational-databases/indexes/columnstore-indexes-described?view=sql-server-ver17) — describes segments, dictionaries, rowgroups, and the delete bitmap.
+- [Create indexes with included columns](https://learn.microsoft.com/sql/relational-databases/indexes/create-indexes-with-included-columns?view=sql-server-ver17) — official `INCLUDE` semantics, limitations, and covering-index guidance.
+- [Create filtered indexes](https://learn.microsoft.com/sql/relational-databases/indexes/create-filtered-indexes?view=sql-server-ver17) — official requirements, benefits, and predicate limitations for SQL Server filtered indexes.
+- [Get started with columnstore for operational analytics](https://learn.microsoft.com/sql/relational-databases/indexes/get-started-with-columnstore-for-real-time-operational-analytics?view=sql-server-ver17) — adding nonclustered columnstore to a transactional rowstore table.
+- [Optimize index maintenance](https://learn.microsoft.com/sql/relational-databases/indexes/reorganize-and-rebuild-indexes?view=sql-server-ver17) — decision guidance for page density, fragmentation, reorganize, rebuild, and resource cost.
+- [Statistics](https://learn.microsoft.com/sql/relational-databases/statistics/statistics?view=sql-server-ver17) — histograms, density, automatic updates, and optimizer estimates.
+- [Specify fill factor](https://learn.microsoft.com/sql/relational-databases/indexes/specify-fill-factor-for-an-index?view=sql-server-ver17) — tradeoff between page splits and permanently lower page density.
+- [Tune nonclustered indexes with missing-index suggestions](https://learn.microsoft.com/sql/relational-databases/indexes/tune-nonclustered-missing-index-suggestions?view=sql-server-ver17) — explains how equality, inequality, and included-column suggestions must be reconciled with existing indexes and workload evidence.
+- [Eight data structures that power databases (ByteByteGo, pinned source)](https://github.com/ByteByteGoHq/system-design-101/blob/b28380a4710c5ec9638ec037d4168e288f334cba/data/guides/8-data-structures-that-power-your-databases.md) — broad structure inventory, bounded here by concrete engine and operator semantics.

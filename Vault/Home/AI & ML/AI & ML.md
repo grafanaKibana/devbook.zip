@@ -15,8 +15,6 @@ priority: High
 status: Creation
 ---
 
-# Intro
-
 AI & ML covers how learning systems are built, evaluated, and operated — from classic supervised models through large language models to the agent tooling that turns models into day-to-day engineering leverage. The unifying theme across all three branches: the model is rarely the hard part. Data quality, evaluation discipline, guardrails, and monitoring decide whether a system works in production, and that engineering work looks remarkably similar whether the model is a gradient-boosted tree or a frontier LLM.
 
 ```datacorejsx
@@ -24,7 +22,7 @@ const { FolderStructureMap } = await dc.require("Assets/components/devbook-folde
 return FolderStructureMap;
 ```
 
-## Questions
+# Questions
 
 > [!QUESTION]- When should you reach for classic ML instead of an LLM API?
 > - Classic ML wins when the task is a well-defined prediction with labeled data: classification, regression, ranking — millisecond latency and near-zero per-request cost at scale
@@ -38,7 +36,7 @@ return FolderStructureMap;
 > - A weaker model with solid evaluation and a feedback loop improves over time; a stronger model without them silently degrades
 > - This is why every branch of this section has its own evaluation pages: [[Home/AI & ML/Machine Learning/Evaluation/Evaluation|ML Evaluation]] and the general [[Home/AI & ML/LLM/Evaluation/Evaluation|LLM Evaluation]], which RAG and agents specialize in [[Home/AI & ML/LLM/Context Engineering/RAG/Evaluation/Evaluation|RAG Evaluation]] and [[Home/AI & ML/LLM/Agents/Evaluation/Evaluation|Agent Evaluation]]
 
-## References
+# References
 
 - [Rules of Machine Learning (Google for Developers)](https://developers.google.com/machine-learning/guides/rules-of-ml) — Google's practical guide to ML engineering, including when to use ML versus simpler approaches.
 - [Building Effective Agents (Anthropic Engineering)](https://www.anthropic.com/engineering/building-effective-agents) — the canonical guidance on choosing the simplest agentic pattern that solves the problem.

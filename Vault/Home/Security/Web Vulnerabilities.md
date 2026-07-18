@@ -11,11 +11,9 @@ status: Ready to Repeat
 publish: true
 ---
 
-# Common Web Vulnerabilities
-
 Three injection-family attacks account for an outsized share of real-world web breaches: **SQL Injection**, **Cross-Site Scripting (XSS)**, and **Cross-Site Request Forgery (CSRF)**. They sit behind several [[OWASP|OWASP Top 10]] categories (Injection, Broken Access Control). The unifying lesson: **never trust input, and never mix untrusted data into a command/markup/request without the right escaping or token**. This page covers how each works and the .NET defenses.
 
-## SQL Injection (SQLi)
+# SQL Injection (SQLi)
 
 The attacker smuggles SQL syntax through user input into a query that's built by string concatenation, changing what the query *means*.
 
@@ -40,7 +38,7 @@ await db.Database.ExecuteSqlInterpolatedAsync($"DELETE FROM Logs WHERE Id = {id}
 
 Parameterization is the *complete* fix for SQLi; input validation and least-privilege DB accounts are defense-in-depth, not substitutes. The one place parameters can't help is dynamic identifiers (table/column names) — allowlist those against a fixed set. NoSQL has the analogous **NoSQL injection** (e.g. passing an object where a string is expected), defended the same way: never interpolate untrusted input into a query.
 
-## Cross-Site Scripting (XSS)
+# Cross-Site Scripting (XSS)
 
 The attacker gets their JavaScript to run **in another user's browser**, in the victim site's origin — so it can read cookies, the DOM, and act as the user. Three flavours:
 
@@ -64,7 +62,7 @@ Layered defenses:
 - **Content-Security-Policy (CSP)** header — a strong backstop: disallow inline scripts so an injected `<script>` won't execute even if encoding is missed.
 - Store JWTs/session tokens in **HttpOnly cookies** so XSS can't read them (see [[JWT Bearer]]).
 
-## Cross-Site Request Forgery (CSRF)
+# Cross-Site Request Forgery (CSRF)
 
 CSRF abuses the fact that browsers **auto-attach cookies** to requests. A malicious page makes the victim's browser send a *state-changing* request to a site where the victim is logged in; the cookie rides along and the request is honored as the user. The attacker can't *read* the response (that's what the same-origin policy and CORS prevent) — but a fire-and-forget `POST /transfer` still does damage.
 
@@ -82,7 +80,7 @@ public IActionResult Transfer(TransferDto dto) { /* ... */ }
 > [!NOTE]
 > **Token-based APIs (JWT in an `Authorization` header) are largely CSRF-immune** because the browser doesn't auto-attach a header the way it does a cookie. CSRF is primarily a *cookie-authentication* problem — which is also why storing tokens in cookies (good for XSS) reintroduces CSRF and needs `SameSite` + anti-forgery.
 
-## Pitfalls
+# Pitfalls
 
 - **Blocklist filtering** — trying to strip `<script>` or `'` with regex. Attackers have endless encodings/variants; always use parameterization (SQLi) and contextual encoding/allowlist sanitization (XSS) instead.
 - **Validation mistaken for output encoding** — input validation reduces attack surface but is *not* the XSS/SQLi fix; the same data is safe in one context and dangerous in another. Encode/parameterize at the sink.
@@ -90,7 +88,7 @@ public IActionResult Transfer(TransferDto dto) { /* ... */ }
 - **Disabling anti-forgery "to make the SPA work"** — fix it with `SameSite` + token-in-header, don't switch the protection off.
 - **Reflected XSS in error pages / search results** — echoing the raw query string back is a common reflected-XSS sink.
 
-## Tradeoffs
+# Tradeoffs
 
 | Vulnerability | Root cause | Primary fix | Backstop |
 |---|---|---|---|
@@ -100,7 +98,7 @@ public IActionResult Transfer(TransferDto dto) { /* ... */ }
 
 **Decision rule**: parameterize *every* query, output-encode *every* untrusted value at the point of rendering, and protect *every* cookie-authenticated state-changing endpoint with an anti-forgery token plus `SameSite`. These three habits eliminate the most common and most damaging web vulnerabilities; treat CSP and least-privilege as defense-in-depth on top.
 
-## Questions
+# Questions
 
 > [!QUESTION]- Why does parameterizing a query fully prevent SQL injection, where input filtering does not?
 > A parameter is transmitted to the database **separately from the SQL text**, and the query is parsed/planned *before* the value is bound — so the value can never change the statement's structure, no matter what characters it contains. Filtering tries to anticipate every dangerous input and always misses encodings/edge cases. Parameterization removes the entire class of attack rather than playing whack-a-mole with payloads.
@@ -111,7 +109,7 @@ public IActionResult Transfer(TransferDto dto) { /* ... */ }
 > [!QUESTION]- Why are header-token (JWT) APIs less exposed to CSRF than cookie-session apps?
 > CSRF works because browsers automatically include cookies on cross-site requests without the attacker's page needing to read or set anything. A bearer token sent in the `Authorization` header is *not* auto-attached — JavaScript on the attacker's origin can't read your token (same-origin policy) and can't set the header on a forged cross-site request. So pure header-token APIs sidestep CSRF; the risk returns the moment you store the token in a cookie, which is why cookie storage (good against XSS) must be paired with `SameSite` + anti-forgery.
 
-## References
+# References
 
 - [OWASP SQL Injection Prevention Cheat Sheet](https://cheatsheetseries.owasp.org/cheatsheets/SQL_Injection_Prevention_Cheat_Sheet.html) — parameterization and defense-in-depth.
 - [OWASP XSS Prevention Cheat Sheet](https://cheatsheetseries.owasp.org/cheatsheets/Cross_Site_Scripting_Prevention_Cheat_Sheet.html) — contextual output-encoding rules.

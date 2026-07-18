@@ -10,11 +10,9 @@ priority: Medium
 status: Ready to Repeat
 publish: true
 ---
-# Intro
-
 A class is a reference type that defines a blueprint for objects allocated on the managed heap. Multiple variables can reference the same object, so mutations through one reference are visible through all others — a property that enables shared state but also creates aliasing bugs when callers don't expect it. Classes support single-class inheritance, virtual dispatch, finalizers, and the full range of access modifiers, making them the default choice for services, domain entities, and infrastructure types in C#. The key design decision is knowing when NOT to use a class: value-typed data carriers should be `record struct` or `readonly struct` (stack-allocated, no GC pressure), and pure data objects with value equality should be `record class` (auto-generated `Equals`/`GetHashCode`/`==`).
 
-## Deeper Explanation
+# Deeper Explanation
 
 Instances are heap-allocated and accessed through a reference stored on the stack (or inside another heap object). Assignment copies the reference, not the object:
 
@@ -32,9 +30,9 @@ b.Total = 0m;
 Console.WriteLine(a.Total); // 0 — both references share the object
 ```
 
-## Class Modifiers
+# Class Modifiers
 
-### abstract
+## abstract
 
 An `abstract` class cannot be instantiated directly — it exists only to be inherited. It may contain abstract members (no body, must be overridden) and concrete members (shared implementation).
 
@@ -69,7 +67,7 @@ Key rules:
 
 **Abstract vs Interface**: abstract classes carry state and shared implementation but lock you into single inheritance. Interfaces (especially with default interface methods in C# 8+) provide multiple implementation but cannot hold instance state.
 
-### sealed
+## sealed
 
 A `sealed` class cannot be inherited. The compiler can devirtualize method calls on sealed types, enabling small performance gains.
 
@@ -112,7 +110,7 @@ public class Middle : Base
 
 `string` is a sealed class in the BCL. All structs are implicitly sealed.
 
-### static
+## static
 
 A `static` class cannot be instantiated or inherited. It can only contain static members. The compiler enforces this — you cannot add instance fields, properties, or methods.
 
@@ -138,7 +136,7 @@ Key rules:
 
 **Gotcha**: static classes are singletons by nature. If they hold mutable state (`static` fields), you get global mutable state — hard to test and prone to race conditions.
 
-### partial
+## partial
 
 The `partial` keyword splits a class definition across multiple files. The compiler merges them into a single type. Commonly used for separating generated code from hand-written code.
 
@@ -165,7 +163,7 @@ Key rules:
 - Heavily used by source generators, EF Core scaffolding, WinForms/WPF designers, and Razor pages.
 - Also applies to structs, interfaces, and records.
 
-### Modifier Compatibility
+## Modifier Compatibility
 
 | Modifier combination | Allowed? |
 |---|---|
@@ -176,7 +174,7 @@ Key rules:
 | `abstract` + `partial` | Yes |
 | `sealed` + `partial` | Yes |
 
-## Modern Construction Features
+# Modern Construction Features
 
 - **Primary constructors (C# 12)** — declare constructor parameters on the class header; they're in scope for the whole body (field/property initializers, methods). Unlike record primary constructors, they do **not** auto-generate public properties — the parameters are captured as private state:
 
@@ -197,7 +195,7 @@ Key rules:
 - **Constructor chaining** with `: this(...)` reuses one constructor from another (and `: base(...)` calls the base). **Initialization order** matters: instance field initializers run *before* the constructor body; a **`static` constructor** runs once, lazily, before first use — and if it throws, the type is permanently unusable (`TypeInitializationException` on every later access).
 - **`file`-scoped types (C# 11)** (`file class X`) limit visibility to one source file — useful for source generators. The full access ladder is `private` → `private protected` → `protected`/`internal` → `protected internal` → `public`.
 
-## Pitfalls
+# Pitfalls
 
 1. **Reference equality surprise** — `==` compares references, not content. Two `new Order(...)` with identical fields are not equal unless you override `==`/`Equals`. Use records or implement `IEquatable<T>` for value-like equality.
 
@@ -209,7 +207,7 @@ Key rules:
 
 5. **Partial class hidden members** — Source generators can add fields, methods, and interface implementations to your partial class that you do not see in your source file. Name collisions produce confusing compiler errors pointing at generated code.
 
-## Tradeoffs
+# Tradeoffs
 
 | Decision | Option A | Option B | When A | When B |
 | --- | --- | --- | --- | --- |
@@ -219,7 +217,7 @@ Key rules:
 | **`static class` vs singleton** | Static class (no instance, no DI, no interface) | Singleton via DI (`services.AddSingleton<T>()`) | Pure utility functions with no state and no need for testing isolation | Needs DI injection, interface-based testing, or configuration-dependent behavior |
 
 **Decision rule**: default to `sealed class` for new types (prevents accidental inheritance, enables compiler optimizations). Use `record class` for immutable data carriers. Use `abstract class` only when you need shared instance state across a type hierarchy — otherwise prefer interfaces.
-## Questions
+# Questions
 
 > [!QUESTION]- What is the difference between `abstract class` and `interface` with default interface methods (C# 8+)? When would you still choose an abstract class?
 > Both can define contracts with shared implementation. Key differences:
@@ -272,9 +270,9 @@ Key rules:
 > [!QUESTION]- A static constructor throws an exception. What happens on subsequent accesses to that type?
 > The runtime marks the type as permanently broken. Every subsequent attempt to access any member of the type throws a `TypeInitializationException` wrapping the original exception — even if the condition that caused the failure has been resolved. The type cannot be re-initialized for the lifetime of the AppDomain (or AssemblyLoadContext in .NET Core). This is why static constructors should be kept minimal and defensive because failures are unrecoverable.
 
-## Links
+# References
 
-- [Classes - C# Programming Guide](https://learn.microsoft.com/dotnet/csharp/fundamentals/types/classes)
+- [Classes - C# Programming Guide](https://learn.microsoft.com/dotnet/csharp/fundamentals/types/classes) — Microsoft's overview of class declaration, construction, inheritance, members, and object lifetime.
 - [Abstract and sealed classes - C# reference](https://learn.microsoft.com/dotnet/csharp/programming-guide/classes-and-structs/abstract-and-sealed-classes-and-class-members)
 - [Static classes - C# Programming Guide](https://learn.microsoft.com/dotnet/csharp/programming-guide/classes-and-structs/static-classes-and-static-class-members)
 - [Partial classes and methods - C# reference](https://learn.microsoft.com/dotnet/csharp/programming-guide/classes-and-structs/partial-classes-and-methods)

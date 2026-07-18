@@ -1,8 +1,8 @@
 ---
 publish: true
 created: 2026-07-11T21:45:56.353Z
-modified: 2026-07-11T21:45:56.353Z
-published: 2026-07-11T21:45:56.353Z
+modified: 2026-07-18T11:30:03.157Z
+published: 2026-07-18T11:30:03.157Z
 topic:
   - AI & ML
 subtopic:
@@ -14,15 +14,13 @@ level:
 priority: Medium
 ---
 
-# Intro
-
 In AI coding agents, plugins are extension mechanisms that add capabilities the base model does not have on its own: external tools, data sources, and reusable workflows. They matter because agent output quality depends not only on model reasoning, but on what the runtime can execute and fetch during a task. Today, the dominant cross-tool plugin standard is [[Model Context Protocol]], which lets different clients connect to external servers through one protocol instead of bespoke integrations.
 
 The mechanism is capability discovery plus runtime invocation. A plugin server exposes three primitives: **tools** (callable functions), **resources** (readable context/data), and **prompts** (reusable templates). The agent client discovers these capabilities through the protocol, selects what is relevant for the current request, and invokes them during its loop.
 
-## Plugin Ecosystems
+# Plugin Ecosystems
 
-### MCP Servers
+## MCP Servers
 
 MCP servers are the fastest-growing plugin ecosystem for coding agents (Claude Code, Opencode, Cline, Cursor, and others). A server can expose:
 
@@ -32,15 +30,15 @@ MCP servers are the fastest-growing plugin ecosystem for coding agents (Claude C
 
 Common server examples include filesystem, GitHub, PostgreSQL, and web search servers. The practical advantage is portability: one server can be reused across multiple MCP-compatible clients.
 
-### VS Code Extensions
+## VS Code Extensions
 
 GitHub Copilot and Cline run as VS Code extensions, so they can integrate with editor-native extension APIs and workspace context. Copilot also supports extension APIs for custom chat participants, which lets teams add domain-specific assistant behavior directly inside the IDE experience.
 
-### Cursor Extensions
+## Cursor Extensions
 
 Cursor supports MCP servers and has its own extension/rules surface. In practice, teams often combine Cursor project rules with MCP servers so behavior control (rules) and external capabilities (plugins) stay decoupled.
 
-## Example
+# Example
 
 A typical project-level MCP configuration looks like this:
 
@@ -62,20 +60,20 @@ A typical project-level MCP configuration looks like this:
 
 This pattern keeps integration concerns in config instead of hardcoding service logic in prompts. For reusable loading and capability packaging patterns, see [[Skills]].
 
-## Pitfalls
+# Pitfalls
 
 - **Security exposure from untrusted servers:** MCP servers can run commands, access files, or call external systems; malicious or compromised servers can exfiltrate data or trigger unsafe actions. Mitigate with least privilege, sandboxing, and explicit approval gates for sensitive tools.
 - **Context dilution from oversized toolsets:** injecting too many tool schemas increases prompt size and selection ambiguity. In MCPGauge's benchmark (Song et al., 2025), testing 6 commercial LLMs across 30 MCP tool suites, researchers measured approximately 9.5% average accuracy degradation when models invoked MCP tools and integrated retrieved context — with code generation tasks showing the worst impact at −17%. Mitigate with tool filtering and on-demand tool retrieval.
 - **Supply chain risk in community packages:** many servers are installed from public package registries; typosquatting or compromised maintainers can introduce high-impact vulnerabilities. Mitigate with pinned versions, publisher allowlists, and code review for high-trust servers.
 
-## Tradeoffs
+# Tradeoffs
 
 | Strategy | Benefits | Costs | Best fit |
 |---|---|---|---|
 | Rich plugin ecosystem | Broad capability coverage, less custom glue code, faster feature unlocks | Higher context overhead, larger security surface, more operational complexity | Multi-tool teams with strong governance |
 | Minimal toolset | Faster prompts, lower cost, clearer tool selection, easier hardening | Reduced capability breadth, more manual steps, slower expansion | Small teams or high-security environments |
 
-## Questions
+# Questions
 
 > [!QUESTION]- Why does MCP reduce integration complexity for agent tooling ecosystems?
 >
@@ -91,7 +89,7 @@ This pattern keeps integration concerns in config instead of hardcoding service 
 > - When task scope is narrow and extra plugins create more selection noise than value
 > - Good practice is progressive enablement: start minimal, add only tools that measurably improve outcomes
 
-## References
+# References
 
 - [MCP Server Specification - tools, resources, prompts (Official)](https://modelcontextprotocol.io/specification/2025-11-25/server)
 - [MCP Architecture - host, client, server model (Official)](https://modelcontextprotocol.io/docs/learn/architecture)

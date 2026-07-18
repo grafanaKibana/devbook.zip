@@ -11,15 +11,13 @@ status: Creation
 publish: true
 ---
 
-# Intro
-
 CPython's `list.sort`/`sorted` and Java's `Arrays.sort` for object arrays lean on one fact about production data: it is rarely random. Log lines arrive mostly time-ordered, an appended list is sorted except at its tail, exported records come pre-grouped. A plain [[Merge Sort]] ignores that structure and pays `Θ(n log n)` comparisons on every input, re-discovering order that was already present.
 
 Tim sort is the *natural* merge sort both runtimes use. It reads the existing order first: it splits the array into maximal already-sorted stretches — **runs** — spends work only where order is missing, and merges the runs back together. On an input that is already a single ascending (or single descending) run it finishes in one `Θ(n)` pass; on unstructured input it degrades to the same `Θ(n log n)` as merge sort, staying stable throughout. The only precondition is that exploitable order exists: on uniformly random keys there are no long runs to find, and the extra machinery earns nothing over a plain merge.
 
 **Core shape:** partially ordered input → detect natural runs → pad short runs to `minrun` with binary insertion sort → merge under stack size invariants → `Θ(n)` on ordered input, `Θ(n log n)` worst, stable, `O(n)` merge buffer.
 
-## Decisive move
+# Decisive move
 
 Tim sort's turning point is the moment the run stack collapses two adjacent runs because their sizes have just violated the merge invariant. The intended animation would play that over a small partially-ordered array.
 
@@ -41,7 +39,7 @@ runs (lengths)                 contents
 
 The invariant `Z > Y + X` fails the instant `[8]` lands (`4 > 4 + 1` is false), so `Y` merges with the smaller neighbour `X` before the scan continues. Both `4`s keep their input order because every merge resolves ties toward the earlier run. The state that changed is the stack shape, not correctness: the collapse only ever merges *adjacent* runs, so the partition of the array stays contiguous and the eventual merges stay near-balanced.
 
-## Runs, minrun, and the merge stack
+# Runs, minrun, and the merge stack
 
 Four mechanisms carry the algorithm.
 
@@ -53,7 +51,7 @@ Four mechanisms carry the algorithm.
 
 **Merging and galloping.** A merge uses [[Merge Sort]]'s two-way merge into a temporary copy of the *smaller* run (hence `≤ n/2` extra space), resolving ties toward the earlier run to stay stable. When one run wins `MIN_GALLOP = 7` comparisons in a row, the merge switches to **galloping**: instead of comparing element by element it binary-searches how many of the winning run's elements can be block-copied at once, turning an `O(k)` linear advance into `O(log k)`. If galloping stops paying off it adaptively backs out to one-at-a-time merging.
 
-## Complexity
+# Complexity
 
 | Case | Time | Auxiliary space | Cause |
 | --- | --- | --- | --- |
@@ -63,7 +61,7 @@ Four mechanisms carry the algorithm.
 
 Tim sort is **stable** (every merge and the strict-descent reversal preserve equal-key order) and **adaptive** (existing order shortens run detection and cuts merge count). The best-case `Θ(n)` is the run-detection short-circuit, not a lucky pivot: a sorted *or* reverse-sorted array is one run. Implementations may pre-size a small merge buffer, but no per-element temporary storage is used when the input forms a single run.
 
-## When the merge policy breaks
+# When the merge policy breaks
 
 The run stack's merge policy is where Tim sort's sharp edges live.
 
@@ -73,7 +71,7 @@ The run stack's merge policy is where Tim sort's sharp edges live.
 
 **`O(n)` memory, not in place.** The merge buffer of up to `n/2` is pure overhead when stability is unobservable — for example sorting a huge primitive array whose elements have no identity beyond their value. That cost is precisely why Java sorts *primitives* with a dual-pivot [[Quick Sort]] and .NET sorts with [[Introsort]] rather than Tim sort.
 
-## Reference drawer
+# Reference drawer
 
 > [!ABSTRACT]- Control flow
 > ```mermaid
@@ -225,7 +223,7 @@ The run stack's merge policy is where Tim sort's sharp edges live.
 > ```
 > `MergeCollapse` carries the correctness contract: the second clause testing `runs[n - 2]` is the check the 2015 verification found missing. `MergeStable` buffers the left run and resolves ties toward it, which is what makes the whole sort stable.
 
-## Questions
+# Questions
 
 > [!QUESTION]- Why does Tim sort reach `Θ(n)` on some inputs while its worst case is still `Θ(n log n)`?
 > Run detection scans for maximal ascending or strictly-descending stretches and merges only across their boundaries. An already-ordered array (ascending, or descending and reversed in place) is a single run, so the scan finishes in one `Θ(n)` pass with no merges. Unstructured input yields `~n / minrun` short runs that still merge across `~log n` balanced levels, giving `Θ(n log n)`.
@@ -239,7 +237,7 @@ The run stack's merge policy is where Tim sort's sharp edges live.
 > [!QUESTION]- Why must descending-run detection use strict `>` rather than `>=`?
 > A descending run is reversed in place. If detection used `>=`, it would reverse stretches of equal keys and silently swap their relative order, breaking stability. Strict descent guarantees equal keys never sit inside a run that gets reversed, so the reversal preserves input order.
 
-## References
+# References
 
 - [CPython `listsort.txt` (Tim Peters)](https://github.com/python/cpython/blob/main/Objects/listsort.txt) — the original design note deriving run detection, `minrun`, galloping, and the merge-pattern rationale.
 - [OpenJDK `TimSort.java`](https://github.com/openjdk/jdk/blob/master/src/java.base/share/classes/java/util/TimSort.java) — production source for `mergeCollapse`, the run-length stack, and the `MIN_GALLOP` threshold, including the post-2015 invariant fix.

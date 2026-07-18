@@ -559,8 +559,7 @@ export const NavScopeDropdown: QuartzComponentConstructor = () => {
     const map: Record<string, { icon?: string; color?: string; order?: number; name?: string }> = {}
     for (const file of allFiles ?? []) {
       const fm = file?.frontmatter as
-        | { icon?: unknown; color?: unknown; order?: unknown; title?: unknown }
-        | undefined
+        { icon?: unknown; color?: unknown; order?: unknown; title?: unknown } | undefined
       const slug = file?.slug
       if (typeof slug !== "string" || !fm) continue
 

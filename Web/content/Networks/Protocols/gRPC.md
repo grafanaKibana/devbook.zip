@@ -1,8 +1,8 @@
 ---
 publish: true
 created: 2026-07-11T21:46:07.129Z
-modified: 2026-07-11T21:46:07.130Z
-published: 2026-07-11T21:46:07.130Z
+modified: 2026-07-18T11:37:07.142Z
+published: 2026-07-18T11:37:07.142Z
 topic:
   - Networks
 subtopic:
@@ -14,15 +14,13 @@ priority: High
 status: Ready to Repeat
 ---
 
-# Intro
-
 gRPC is a remote procedure call framework that runs over [[HTTP 2]] and uses Protocol Buffers for message serialization by default. You reach for it when you control both client and server and want strong contracts, fast binary payloads, and first-class streaming — the typical case for internal service-to-service communication in microservices. What makes gRPC distinct from REST is not just performance: it gives you code-generated clients in any language, four streaming patterns, built-in deadline propagation, and a contract-first workflow where the `.proto` file is the API specification.
 
 In production, gRPC design is about deadlines, load balancing awareness, proto versioning discipline, and observability — not just defining a service.
 
-## How It Works
+# How It Works
 
-### gRPC over HTTP/2
+## gRPC over HTTP/2
 
 Every gRPC call is an HTTP/2 **stream** — a bidirectional sequence of frames within a single TCP connection. Multiple calls multiplex over one connection without blocking each other (solving HTTP/1.1 head-of-line blocking).
 
@@ -40,13 +38,13 @@ sequenceDiagram
 
 Key mechanism: gRPC status codes travel in **trailing headers** (a second HEADERS frame at the end), not in the HTTP status line. This is why L4 load balancers cannot see gRPC errors — they operate at the TCP connection level and do not inspect HTTP/2 frames at all. It is also why gRPC-Web has to simulate trailers in the response body, since browsers cannot read HTTP trailers.
 
-### Flow Control and Backpressure
+## Flow Control and Backpressure
 
 HTTP/2 flow control operates at two levels: connection-wide and per-stream. When the receiver's buffer fills, it stops sending `WINDOW_UPDATE` frames, and the sender's `WriteAsync` blocks until the receiver drains data. This is the backpressure mechanism — a fast-producing server stream naturally slows down when the client cannot keep up.
 
 Default Kestrel stream window is 768 KB. For services that regularly exchange messages larger than this, increase `Http2Limits.InitialStreamWindowSize`. The connection window must always be greater than or equal to the stream window.
 
-## Streaming Patterns
+# Streaming Patterns
 
 | Pattern | Client Sends | Server Sends | Use Case |
 |---|---|---|---|
@@ -55,7 +53,7 @@ Default Kestrel stream window is 768 KB. For services that regularly exchange me
 | Client streaming | N messages | 1 message | Bulk ingestion, file upload, telemetry batching |
 | Bidirectional | N messages | N messages | Chat, real-time sync, replacing high-frequency unary calls |
 
-### Server Streaming Example
+## Server Streaming Example
 
 ```proto
 service OrderService {
@@ -87,9 +85,9 @@ await foreach (var order in call.ResponseStream.ReadAllAsync())
 
 **Thread safety note**: `RequestStream.WriteAsync` on client-streaming calls is not thread-safe. For multi-producer scenarios, serialize writes through a `Channel<T>` queue.
 
-## .NET Integration
+# .NET Integration
 
-### Channel Management
+## Channel Management
 
 A `GrpcChannel` wraps an `HttpClient` and maintains a pool of HTTP/2 connections. Channels are thread-safe — share one channel across the application and create lightweight client instances from it.
 
@@ -111,7 +109,7 @@ var client = new OrderService.OrderServiceClient(channel);
 
 `EnableMultipleHttp2Connections = true` opens additional TCP connections when the 100-stream-per-connection limit is hit, rather than queuing calls client-side. Keep-alive pings prevent idle connections from being closed by proxies — but the server must support them, or it will send `GOAWAY` and close the connection.
 
-### Deadline Propagation
+## Deadline Propagation
 
 gRPC has no default deadline. A call without one can hang indefinitely, consuming resources on every hop in a service chain. Always set deadlines explicitly.
 
@@ -129,7 +127,7 @@ services.AddGrpcClient<OrderServiceClient>(o =>
 
 `EnableCallContextPropagation` forwards both deadline and cancellation token to child calls. The framework always uses the minimum deadline — if the child call specifies a smaller value, it wins. The deadline is converted to a remaining timeout at each hop, which handles clock skew between servers.
 
-### Interceptors
+## Interceptors
 
 Interceptors inherit from `Interceptor` and operate at the typed message level — they see deserialized C# objects, not raw bytes. This distinguishes them from ASP.NET Core middleware, which runs earlier at the HTTP level.
 
@@ -138,7 +136,7 @@ Interceptors inherit from `Interceptor` and operate at the typed message level �
 
 Registration order matters: `channel.Intercept(A).Intercept(B).Intercept(C)` executes C → B → A (reverse of chaining order).
 
-### Error Model and Retries
+## Error Model and Retries
 
 gRPC has its own **status-code** model (not HTTP status codes) carried in the trailing `grpc-status`: `OK (0)`, `NOT_FOUND (5)`, `INVALID_ARGUMENT (3)`, `DEADLINE_EXCEEDED (4)`, `UNAVAILABLE (14)`, `RESOURCE_EXHAUSTED (8)`, etc. The server throws `RpcException(new Status(StatusCode.NotFound, "..."))`; the client catches `RpcException` and inspects `ex.StatusCode`. Rich, structured error details (field violations, retry hints) travel via the `google.rpc.Status` message in metadata rather than a string.
 
@@ -166,21 +164,21 @@ var channel = GrpcChannel.ForAddress(address, new GrpcChannelOptions
 
 Only retry **idempotent** methods on safe codes (`Unavailable`, `ResourceExhausted`) — retrying a non-idempotent write on an ambiguous failure can double-apply it (the [[RPC|RPC delivery-semantics]] problem). **Hedging** (fire parallel attempts, take the first success) is the latency-focused alternative for read-only calls.
 
-## Pitfalls
+# Pitfalls
 
-### 1) L4 Load Balancer Pins All Calls to One Backend
+## 1) L4 Load Balancer Pins All Calls to One Backend
 
 - **What goes wrong**: an L4 (transport-layer) load balancer distributes TCP connections, not HTTP/2 streams. Since gRPC multiplexes all calls over one TCP connection, every call from a client goes to the same backend — load distribution does not happen.
 - **Why it happens**: L4 operates below HTTP and cannot see individual streams within the multiplexed connection.
 - **Mitigation**: use an L7 proxy that understands HTTP/2 (Envoy, Linkerd, YARP) and distributes individual streams, or use client-side load balancing with service discovery (DNS round-robin, xDS protocol).
 
-### 2) Missing Deadlines Cause Cascading Resource Waste
+## 2) Missing Deadlines Cause Cascading Resource Waste
 
 - **What goes wrong**: Service A calls B with a 2-second deadline. B does 500ms of work, then calls C without propagating the deadline. A times out at 2s, but C continues processing — wasting resources on a result nobody will consume.
 - **Why it happens**: deadline propagation is not automatic unless explicitly configured. The server's `CancellationToken` is also not passed to downstream operations by default.
 - **Mitigation**: use `EnableCallContextPropagation()` in the gRPC client factory. Pass `ServerCallContext.CancellationToken` to all async operations (DB queries, HTTP calls) so they cancel promptly when the deadline passes.
 
-### 3) Proto Field Renumbering Silently Corrupts Data
+## 3) Proto Field Renumbering Silently Corrupts Data
 
 - **What goes wrong**: renumbering a field in a `.proto` file causes old clients to write data into the wrong field on updated servers. An old client sending field 3 has its value interpreted as the new field 3, which may be a completely different type.
 - **Why it happens**: protobuf binary encoding uses the field **number** as wire identity. Field names exist only in generated code — they are never on the wire.
@@ -194,13 +192,13 @@ message UserRequest {
 }
 ```
 
-### 4) gRPC-Web Cannot Do Client or Bidirectional Streaming
+## 4) gRPC-Web Cannot Do Client or Bidirectional Streaming
 
 - **What goes wrong**: teams build a gRPC API with bidirectional streaming, then discover browser clients cannot use it.
 - **Why it happens**: gRPC-Web can run over HTTP/1.1 or HTTP/2, but browser clients have protocol-level limitations that restrict them to unary and server streaming only. Client streaming and bidirectional streaming are not supported by the gRPC-Web protocol specification.
 - **Mitigation**: for browser clients, use gRPC JSON transcoding (ASP.NET Core 7+) which generates a REST/JSON facade from the same `.proto` file. Or restrict browser-facing services to unary and server streaming only.
 
-## Tradeoffs
+# Tradeoffs
 
 | Criterion | gRPC | REST/JSON |
 |---|---|---|
@@ -214,7 +212,7 @@ message UserRequest {
 
 **Decision rule**: use gRPC for internal service-to-service calls where you control both ends, need streaming, or benefit from codegen across languages. Use REST for public-facing APIs, browser clients, and when HTTP caching and broad tooling compatibility matter. Many production systems use gRPC internally and expose REST externally via a gateway.
 
-## Questions
+# Questions
 
 > [!QUESTION]- Why does gRPC not work well with L4 load balancers, and how do you fix it?
 > **Expected answer:**
@@ -247,9 +245,9 @@ message UserRequest {
 >
 > **Why this matters:** proto versioning is the contract management layer of gRPC; getting it wrong causes silent data corruption that is extremely hard to debug.
 
-## References
+# References
 
-- [gRPC Core Concepts](https://grpc.io/docs/what-is-grpc/core-concepts/)
+- [gRPC Core Concepts](https://grpc.io/docs/what-is-grpc/core-concepts/) — official explanation of services, RPC lifecycles, streaming modes, metadata, deadlines, and cancellation.
 - [gRPC HTTP/2 Protocol Spec](https://github.com/grpc/grpc/blob/master/doc/PROTOCOL-HTTP2.md)
 - [gRPC Deadlines Guide](https://grpc.io/docs/guides/deadlines/)
 - [Microsoft Learn — gRPC Performance Best Practices](https://learn.microsoft.com/aspnet/core/grpc/performance)

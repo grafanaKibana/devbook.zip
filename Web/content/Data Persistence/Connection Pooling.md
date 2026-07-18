@@ -1,8 +1,8 @@
 ---
 publish: true
 created: 2026-07-11T21:46:55.896Z
-modified: 2026-07-11T21:46:55.896Z
-published: 2026-07-11T21:46:55.896Z
+modified: 2026-07-18T11:30:06.037Z
+published: 2026-07-18T11:30:06.037Z
 topic:
   - Data Persistence
 subtopic: []
@@ -13,11 +13,9 @@ priority: High
 status: Ready to Repeat
 ---
 
-# Intro
-
 Opening a database connection is expensive: a TCP handshake, TLS negotiation, and server-side authentication and session setup that can take tens of milliseconds — far longer than the query itself. A connection pool keeps a set of already-open connections and **lends** them to requests, returning them to the pool instead of closing them. The result is that "opening a connection" becomes a cheap rent-from-pool, and the database is protected from being swamped by thousands of short-lived connections. In .NET this is on by default (ADO.NET / `SqlClient` / `Npgsql`); the skill is sizing and using it correctly.
 
-## How It Works
+# How It Works
 
 The pool sits in the application (client-side) and manages a bounded set of physical connections:
 
@@ -35,7 +33,7 @@ flowchart LR
 
 Connections are keyed by **connection string** — a different string (different database, user, or even option) gets its **own** pool. Pools also retire connections that have been idle too long or exceeded a max lifetime.
 
-## Example
+# Example
 
 The pattern that makes pooling work is **open late, dispose early** — hold the connection only for the query, never across I/O or user think-time:
 
@@ -51,7 +49,7 @@ var name = (string?)await cmd.ExecuteScalarAsync(ct);
 
 Pool size is configured in the connection string, e.g. `Maximum Pool Size=100;Minimum Pool Size=5;Connection Lifetime=300`.
 
-## Sizing the Pool
+# Sizing the Pool
 
 Bigger is **not** better. Each pooled connection consumes memory and a worker/backend on the database server, and past the point of CPU/disk saturation more concurrency just adds contention and latency. A useful starting heuristic (from the HikariCP project) is roughly:
 
@@ -59,7 +57,7 @@ Bigger is **not** better. Each pooled connection consumes memory and a worker/ba
 
 — often a _small_ number (e.g. 10–30) per app instance, not hundreds. Then **multiply by the number of app instances**: 50 pods × 100 max-pool = 5,000 connections hammering a database that handles maybe a few hundred well. Size the _total_ against the database's limit (`max_connections`), not each app in isolation.
 
-## Pitfalls
+# Pitfalls
 
 - **Pool exhaustion** — every connection is checked out and the next request blocks until the pool timeout, then throws ("timeout obtaining a connection from the pool"). Causes: pool too small for the load, or **leaked connections** (see below), or holding connections during slow I/O/transactions.
 - **Connection leaks** — forgetting to `Dispose()` (no `using`) keeps a connection checked out forever; under load the pool drains and the app hangs. Always scope connections with `using`/`await using`.
@@ -68,14 +66,14 @@ Bigger is **not** better. Each pooled connection consumes memory and a worker/ba
 - **Pool × instances overwhelms the DB** — autoscaling to N replicas multiplies your connection footprint by N; the database hits `max_connections` and rejects everyone. Account for fleet size when sizing.
 - **Serverless makes pooling hard** — short-lived functions (Lambda, Azure Functions) spin up many isolated instances, each with its own tiny pool and no sharing, easily exhausting the database. This is the main reason external proxies exist.
 
-## Server-Side Poolers
+# Server-Side Poolers
 
 When the _client_-side pool isn't enough — too many app instances, or serverless — put a pooler **in front of the database**:
 
 - **PgBouncer** (PostgreSQL) — a lightweight proxy that multiplexes thousands of client connections onto a small number of real ones. In **transaction mode** a backend connection is held only for the duration of a transaction, drastically cutting real connections (caveat: session-level features like prepared statements/`SET` need care).
 - **RDS Proxy / Azure SQL** — managed equivalents that also smooth failovers and protect the database from connection storms.
 
-## Tradeoffs
+# Tradeoffs
 
 | Concern | Small pool | Large pool |
 |---|---|---|
@@ -85,7 +83,7 @@ When the _client_-side pool isn't enough — too many app instances, or serverle
 
 **Decision rule**: start small (cores × 2-ish per instance), measure wait time and DB CPU, and grow only until the database — not the pool — is the limiter. If many instances or serverless functions push total connections past the DB's comfort zone, add a server-side pooler (PgBouncer / RDS Proxy) rather than enlarging client pools.
 
-## Questions
+# Questions
 
 > [!QUESTION]- Why is a bigger connection pool often worse, not better?
 > Each connection costs a server-side backend/worker plus memory, and once the database's CPU and disk are saturated, additional concurrent queries just contend and add latency — throughput can actually _drop_. The right size is a small multiple of the database's core count, sized against `max_connections` across the _whole fleet_, not maximized per app.
@@ -96,7 +94,7 @@ When the _client_-side pool isn't enough — too many app instances, or serverle
 > [!QUESTION]- Why is connection pooling hard in serverless environments?
 > Serverless platforms run many short-lived, isolated function instances that can't share an in-process pool, and each may open its own connections — so a spike spawns thousands of connections and exhausts the database. The standard remedy is an external pooler (RDS Proxy, PgBouncer) that all instances share, multiplexing them onto a small set of real connections.
 
-## References
+# References
 
 - [About connection pooling (ADO.NET, Microsoft Learn)](https://learn.microsoft.com/en-us/dotnet/framework/data/adonet/sql-server-connection-pooling) — how .NET pools by connection string, lifetime, and reset semantics.
 - [Npgsql connection string parameters (pooling)](https://www.npgsql.org/doc/connection-string-parameters.html) — Min/Max pool size, lifetime, and timeout tuning.

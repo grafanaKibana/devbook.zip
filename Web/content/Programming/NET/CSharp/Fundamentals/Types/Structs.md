@@ -1,8 +1,8 @@
 ---
 publish: true
 created: 2026-07-11T21:45:58.836Z
-modified: 2026-07-11T21:45:58.837Z
-published: 2026-07-11T21:45:58.837Z
+modified: 2026-07-18T11:30:12.611Z
+published: 2026-07-18T11:30:12.611Z
 topic:
   - Programming
 subtopic:
@@ -14,11 +14,9 @@ priority: Medium
 status: Ready to Repeat
 ---
 
-# Intro
-
 A struct is a value type in C#. Variables hold the value inline, so assignment copies the value rather than copying a reference. That makes structs a good fit for small, immutable data representing one logical value (coordinates, money amounts, date-time pairs). Struct values can still live on the heap when embedded in heap objects, captured/hoisted, or boxed. Structs implicitly derive from `System.ValueType`, are always `sealed`, and cannot participate in class inheritance.
 
-## Deeper Explanation
+# Deeper Explanation
 
 ```csharp
 public readonly struct Money
@@ -53,9 +51,9 @@ Key properties:
 - It is not frequently boxed.
 - You need to avoid heap allocation in a hot path.
 
-## Struct Modifiers
+# Struct Modifiers
 
-### readonly struct
+## readonly struct
 
 Fields must be `readonly`, and properties must be get-only or `init`-only. The compiler enforces immutability after construction, which reduces defensive copies when the struct is accessed through `in` parameters or `readonly` fields.
 
@@ -74,7 +72,7 @@ public readonly struct Vector2
 
 Without `readonly`, the compiler can make a defensive copy when a non-`readonly` member is called through a readonly receiver (for example, an `in` parameter), because it cannot prove the member is mutation-free. With `readonly struct` and `readonly` members, these hidden copies are avoided.
 
-### ref struct
+## ref struct
 
 A `ref struct` is stack-only — it cannot be boxed or stored on the managed heap. This enables safe, allocation-free wrappers over stack memory.
 
@@ -97,7 +95,7 @@ Key restrictions:
 
 C# 13 relaxes some restrictions: ref structs can now implement interfaces (with an `allows ref struct` anti-constraint) and appear in some generic contexts.
 
-### readonly ref struct
+## readonly ref struct
 
 Combines both: stack-only and fully immutable. The canonical example is `ReadOnlySpan<T>`:
 
@@ -112,7 +110,7 @@ ReadOnlySpan<char> slice = "Hello, World!".AsSpan(0, 5);
 
 This is the safest struct form — no heap escape, no mutation.
 
-### partial struct
+## partial struct
 
 Same as partial classes - splits a struct definition across multiple files, and the compiler merges all parts into one type:
 
@@ -130,7 +128,7 @@ public partial struct Measurement
 }
 ```
 
-### Modifier Compatibility
+## Modifier Compatibility
 
 | Modifier combination | Allowed? |
 |---|---|
@@ -141,7 +139,7 @@ public partial struct Measurement
 | `sealed` | Redundant — already implicit |
 | `static` | No |
 
-## Boxing — When a Value Type Lands on the Heap
+# Boxing — When a Value Type Lands on the Heap
 
 The whole point of a struct (no allocation) is lost the moment it's **boxed**. The implicit triggers are easy to miss:
 
@@ -151,16 +149,16 @@ The whole point of a struct (no allocation) is lost the moment it's **boxed**. T
 - String interpolation / `string.Format` of a struct (the value is boxed to call `object.ToString()` unless the type implements `ISpanFormattable`)
 - Calling a non-overridden `ToString()`/`Equals()`/`GetHashCode()` inherited from `object`
 
-## Memory Layout
+# Memory Layout
 
 A struct's size is the sum of its fields plus **padding** the runtime inserts for alignment (a `bool` + `long` field often occupies 16 bytes, not 9). That alignment cost is part of _why_ the "keep structs ≤16 bytes" heuristic exists — beyond that, copy cost outweighs the allocation you saved. `[StructLayout(LayoutKind.Sequential)]` (or `Explicit` with `[FieldOffset]`) controls layout for interop/SIMD; `[StructLayout(LayoutKind.Auto)]` lets the runtime reorder fields to minimize padding.
 
-## Modern Struct Features
+# Modern Struct Features
 
 - **Primary constructors (C# 12)** work on structs too: `public readonly struct Point(int x, int y) { public int X => x; }`.
 - **`ref` fields and `scoped` (C# 11)** let a `ref struct` _store_ a reference (this is how `Span<T>` holds a pointer into memory), with `scoped` constraining how long that reference may escape — the compiler enforces it can't outlive the data it points to.
 
-## Pitfalls
+# Pitfalls
 
 1. **Mutable structs** — Assigning a struct to a new variable or returning it from a property copies the value. Mutating the copy does not affect the original, which leads to silent bugs:
 
@@ -181,13 +179,13 @@ Mark structs `readonly` to make this class of bug impossible.
 
 5. **Default constructor gotcha** — Before C# 10, structs could not have an explicit parameterless constructor. Even in C# 10+, `default(T)` and array allocation still zero-initialize without calling the constructor, so the explicit parameterless constructor is not guaranteed to run in every path.
 
-## Tradeoffs
+# Tradeoffs
 
 - `struct` vs `class`: structs reduce heap allocations for small value-like data, but large structs increase copy cost and API complexity (`in`/`ref` usage everywhere).
 - `readonly struct` vs mutable struct: readonly structs prevent copy-mutation bugs and defensive-copy penalties, while mutable structs are easier to misuse and should be reserved for very specific low-level scenarios.
 - by-value vs `in`/`ref`: by-value is simpler and often fastest for small structs; `in`/`ref` helps large structs but can make call sites noisier and harder to maintain.
 
-## Questions
+# Questions
 
 > [!QUESTION]- For a high-throughput service processing 100k messages per second (Id, Timestamp, Status), would class or struct be the better model, and why?
 > A `readonly struct` (or `readonly record struct`) is the best fit:
@@ -211,7 +209,7 @@ Mark structs `readonly` to make this class of bug impossible.
 > - Using such structs as keys in dictionaries/sets amplifies the cost because equality and hashing are called frequently.
 > - Implement `IEquatable<T>` and override `Equals`/`GetHashCode` to define stable semantics and avoid hidden performance costs.
 
-## Links
+# References
 
 - [Structure types - C# reference](https://learn.microsoft.com/dotnet/csharp/language-reference/builtin-types/struct) - Core language rules and constraints.
 - [ref struct types - C# reference](https://learn.microsoft.com/dotnet/csharp/language-reference/builtin-types/ref-struct) - Stack-only semantics and restrictions.

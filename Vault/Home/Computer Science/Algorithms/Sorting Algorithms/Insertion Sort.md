@@ -10,15 +10,13 @@ priority: Low
 status: Ready to Repeat
 publish: true
 ---
-# Intro
-
 A mostly-ordered array arrives—a sorted log with a few late entries appended out of sequence. Re-sorting it with a general algorithm discards the order that is already present and pays the same cost as sorting random data. Insertion sort keeps that order: it treats the elements left of the current position as a sorted prefix and folds one more element into that prefix per step.
 
 Each incoming element—the key—is compared against the prefix from its right end leftward. Every element larger than the key copies one slot to the right, opening a gap; the key drops into the gap. Because the prefix was sorted before the key arrived, one leftward pass suffices: the walk stops at the first element that is not larger than the key, and everything it shifted was already in order relative to itself.
 
 **Core condition:** a sorted prefix and one incoming key → shift the larger prefix elements right until the key lands → `O(n)` when few elements move, `O(n²)` when every key crosses the whole prefix, `O(1)` auxiliary space.
 
-## One pass
+# One pass
 
 The trace sorts the eight-element array `[8, 3, 5, 1, 9, 2, 7, 4]`, extending the sorted prefix one key at a time.
 
@@ -28,7 +26,7 @@ The trace sorts the eight-element array `[8, 3, 5, 1, 9, 2, 7, 4]`, extending th
 
 The prefix left of the active index is sorted before each step and stays sorted after it. When a key is smaller than its left neighbour, every larger prefix element copies one position right until a smaller element—or the start of the array—halts the walk, and the key fills the vacated slot. A key that already fits, like `9` following `1, 3, 5, 8`, triggers no shift and the prefix simply grows by one. The number of shifts a key performs equals the count of larger elements standing to its left, so the further a key is out of place, the more work it does.
 
-## Why the sorted prefix holds
+# Why the sorted prefix holds
 
 Before iteration `j`, the subarray `a[0..j-1]` holds the first `j` elements in sorted order. The step copies `a[j]` into `key`, then scans left while `a[i] > key`, moving each such element into `a[i+1]`. The loop stops at the first `a[i] <= key` (or at `i = -1`) and writes `key` into `a[i+1]`. Nothing left of that slot exceeds `key`, and everything right of it was already shifted up, so `a[0..j]` is sorted—the invariant carries to the next iteration.
 
@@ -39,7 +37,7 @@ Two properties fall out of the shift-and-drop move:
 
 The cost of one step is its shift count, which equals the number of prefix elements greater than the key. On already-sorted input that count is zero everywhere: the inner loop tests one neighbour, fails, and advances, for `O(n)` total. This adaptivity is why insertion sort serves as the base case inside larger sorts—[[Merge Sort]]-based hybrids such as [[Tim Sort|Timsort]] sort short runs with it before merging, and [[Introsort]] falls back to it once a quicksort partition drops below roughly sixteen elements. At that size the guaranteed-small shift count beats the overhead of recursion and pivot selection.
 
-## Complexity
+# Complexity
 
 | Case | Time | Auxiliary space | Cause |
 | --- | --- | --- | --- |
@@ -49,13 +47,13 @@ The cost of one step is its shift count, which equals the number of prefix eleme
 
 The bound is set by element shifts, not comparisons. In the average and worst cases the two counts differ only by an additive `O(n)` term, so both are `Θ(n²)`; in the best case the comparisons stay `O(n)` while the shifts fall to zero. The shifts are the physical array movement, which is what makes them the deciding cost.
 
-## When shifts dominate
+# When shifts dominate
 
 Reverse-sorted input is the worst case because it maximizes shifts: the key at index `j` is smaller than all `j` elements to its left, so it walks the full prefix every time. Sorting `[5, 4, 3, 2, 1]` performs `4 + 3 + 2 + 1 = 10` shifts for five elements, the quadratic `n(n-1)/2` pattern. The result is never wrong, only slow.
 
 Cutting comparisons does not fix this. Since the prefix is sorted, [[Binary Search]] can locate the key's slot in `O(log j)` comparisons instead of a linear scan—binary insertion sort. But locating the slot is not the bottleneck: the elements between the slot and the key still shift right one at a time, so the array movement stays `O(n²)`. Binary insertion only pays off when a comparison costs far more than a move, such as ordering long strings through an expensive comparator.
 
-## Reference drawer
+# Reference drawer
 
 > [!ABSTRACT]- Control flow
 > ```mermaid
@@ -91,7 +89,7 @@ Cutting comparisons does not fix this. Since the prefix is sorted, [[Binary Sear
 > ```
 > The strict `a[i] > key` test is what makes the sort stable; relaxing it to `>=` would shift equal elements and reverse their original order.
 
-## Questions
+# Questions
 
 > [!QUESTION]- What keeps the prefix sorted after each insertion?
 > The inner loop shifts every prefix element greater than the key one slot right and stops at the first element `<= key`. The key is written into that gap, so nothing to its left is larger and everything to its right was already ordered; `a[0..j]` is sorted for the next step.
@@ -105,7 +103,7 @@ Cutting comparisons does not fix this. Since the prefix is sorted, [[Binary Sear
 > [!QUESTION]- Why do Timsort and Introsort fall back to insertion sort on small partitions?
 > On a few dozen elements the quadratic term is small and bounded, while insertion sort allocates nothing, accesses memory sequentially, and reaches `O(n)` on the nearly-sorted runs those algorithms produce. Below the crossover it beats the recursion and constant-factor overhead of an `O(n log n)` sort.
 
-## References
+# References
 
 - [Insertion sort (Wikipedia)](https://en.wikipedia.org/wiki/Insertion_sort) — the shift-based algorithm, the binary insertion variant, and the move-count analysis behind the `O(n²)` bound.
 - [`ArraySortHelper<T>` in dotnet/runtime](https://github.com/dotnet/runtime/blob/main/src/libraries/System.Private.CoreLib/src/System/Collections/Generic/ArraySortHelper.cs) — `Array.Sort`'s introspective sort switches to an `InsertionSort` routine for small partitions; the runtime's real base case.

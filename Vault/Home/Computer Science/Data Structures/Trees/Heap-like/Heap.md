@@ -11,22 +11,20 @@ status: Ready to Repeat
 publish: true
 ---
 
-# Intro
-
 A scheduler holds thousands of pending tasks and repeatedly needs the one with the earliest deadline while new tasks keep arriving. Keeping the whole collection sorted pays `O(n)` on every insert; scanning for the minimum pays `O(n)` on every extraction. A binary heap keeps only enough order to expose the single extreme element at a fixed position, so inserting a task and removing the current extreme both cost `O(log n)`.
 
 The structure buys that speed by remembering less than a sorted list. It guarantees that the root is the smallest (or largest) element and nothing more: siblings, cousins, and every element below the root sit in an arbitrary partial order. There is no cheap "next smallest" and no ordered iteration.
 
 **Core shape:** complete binary tree → heap-order property (min-heap: parent ≤ both children) → packed implicitly into an array → only the root is the extreme → `O(n)` storage.
 
-## Visualization
+# Visualization
 
 No StepTrace renderer animates heap operations, so the mechanism is described in prose below and drawn statically in the reference drawer.
 
 > [!NOTE] Visualization pending
 > Planned StepTrace: a heap card showing an insert appending at the end of the array and sifting up to its place, and an extract-min swapping the root with the last leaf and sifting down. No matching renderer exists in `engine.js` yet. The registered `heap-sort` trace animates the sort, not these insert/extract-min operations, so it is not a substitute here.
 
-## Representation and invariants
+# Representation and invariants
 
 A binary heap is a **complete** binary tree: every level is full except possibly the last, which fills left to right with no gaps. That completeness is what makes an implicit array representation valid — with no holes, the tree maps onto contiguous indices by arithmetic instead of pointers.
 
@@ -44,7 +42,7 @@ No per-node object, no child pointers, no allocation per element — just one ar
 
 The heap-order invariant is local: every parent is `≤` both of its children (min-heap; a max-heap reverses the comparison). Sift-up restores it along a single root-ward path after an append; sift-down restores it along a single leaf-ward path after the root is replaced. Because the tree is complete, both paths have length `⌊log₂ n⌋`, which bounds the work. The invariant says nothing about order *across* subtrees, which is exactly why the root is the only element whose rank is known.
 
-## Complexity
+# Complexity
 
 | Operation | Time | Space | Cause |
 | --- | --- | --- | --- |
@@ -59,7 +57,7 @@ The heap-order invariant is local: every parent is `≤` both of its children (m
 
 `decrease-key` costs `O(log n)` for the sift, but reaching the node is the catch: a plain heap has no way to find an arbitrary element without scanning. The `O(log n)` bound assumes an external element → index map maintained on every swap.
 
-## Boundaries
+# Boundaries
 
 Every boundary here traces back to the same fact: the array holds a partial order, not a sorted sequence.
 
@@ -67,7 +65,7 @@ Every boundary here traces back to the same fact: the array holds a partial orde
 - **Arbitrary delete and decrease-key need an external position map.** The operations touch a node by *position*, but the heap exposes elements only by heap-order, not by identity. Without a side table mapping each element to its current index (updated on every swap), there is no way to point at the node to remove or re-key. This is why `System.Collections.Generic.PriorityQueue` offers no `Remove` or `DecreaseKey`; the standard workaround is lazy deletion — re-enqueue with the new key and skip stale entries on dequeue.
 - **Merging two binary heaps is `O(n)`.** Two valid heaps concatenated do not form a valid heap, and no small set of swaps fixes the seam, because neither array segment carries ordering information about the other. The only general repair is to concatenate and run `build-heap` over the whole `O(n)` result. The mergeable heaps — [[Binomial Queues]], [[Leftist Heaps]], [[Skew Heaps]], [[Fibonacci Heaps]] — exist precisely to make union `O(log n)` or `O(1)` amortized by keeping a pointer-linked forest instead of one packed array.
 
-## Reference drawer
+# Reference drawer
 
 > [!ABSTRACT]- Array-backed min-heap (indices under values)
 > ```mermaid
@@ -169,7 +167,7 @@ Every boundary here traces back to the same fact: the array holds a partial orde
 > ```
 > `Build` starts sift-down at index `Count / 2 - 1` — the last internal node — because every index beyond it is a leaf that already satisfies heap order. A decrease-key or arbitrary remove would require a parallel `Dictionary<int, int>` mapping value to index, updated inside both sift loops.
 
-## Questions
+# Questions
 
 > [!QUESTION]- Why can a complete binary tree be stored without any pointers?
 > Completeness means levels fill left to right with no gaps, so node positions are contiguous. A node at index `i` therefore has children at `2i+1` and `2i+2` and a parent at `(i-1)/2`, computed arithmetically. A tree with holes would break that indexing and force explicit links.
@@ -180,7 +178,7 @@ Every boundary here traces back to the same fact: the array holds a partial orde
 > [!QUESTION]- Why does a plain binary heap need an external map to support decrease-key?
 > The heap exposes elements only by heap-order position, not by identity, and offers no way to locate an arbitrary value without an `O(n)` scan. A side table mapping each element to its current array index — updated on every swap — is required to point at the node before re-keying and sifting it in `O(log n)`.
 
-## References
+# References
 
 - [`PriorityQueue<TElement, TPriority>` class](https://learn.microsoft.com/en-us/dotnet/api/system.collections.generic.priorityqueue-2) — .NET's array-backed quaternary heap; note the absence of `Remove` and `DecreaseKey` and the resulting lazy-deletion pattern.
 - [`PriorityQueue` source in dotnet/runtime](https://github.com/dotnet/runtime/blob/main/src/libraries/System.Collections/src/System/Collections/Generic/PriorityQueue.cs) — the real sift-up/sift-down implementation over an implicit array.

@@ -11,16 +11,41 @@ status: Ready to Repeat
 publish: true
 ---
 
-# CI/CD Tools
-
 CI/CD pipelines automate the path from code commit to production deployment. CI (Continuous Integration) runs builds and tests on every commit to catch regressions early. CD (Continuous Delivery/Deployment) automates the release process so that every passing build can be deployed with minimal manual intervention.
 
-The three dominant tools for .NET teams are GitHub Actions, Azure DevOps Pipelines, and Jenkins. They solve the same problem with different tradeoffs around hosting, cost, and ecosystem integration.
+GitHub Actions, Azure Pipelines, and Jenkins are three representative choices for .NET teams. The right comparison is current hosting, governance, runner control, identity integration, and total operating cost—not a timeless popularity ranking.
 
 > [!NOTE]
 > **The two "CD"s are different.** *Continuous **Delivery*** means every passing build is *automatically made ready* to release, but a human clicks the button to push to production (a manual approval gate). *Continuous **Deployment*** removes that gate — every commit that passes the pipeline goes to production automatically. Deployment requires more trust in your tests, observability, and rollback (it pairs naturally with [[Home/DevOps/Deployment Strategies/Deployment Strategies|canary/blue-green deployments]] and feature flags). Most teams practice continuous *delivery*; continuous *deployment* is the further, optional step.
 
-## GitHub Actions
+# CI, Delivery, and Deployment
+
+Use one immutable artifact to make the boundary operational. A commit produces `checkout-api@sha256:8f31c20000000000000000000000000000000000000000000000000000000000`; CI compiles it, runs tests, scans dependencies, and publishes that exact digest. Continuous delivery promotes the same digest through staging and leaves production behind an approval gate. Continuous deployment removes that last human gate when automated checks, rollback, and on-call ownership are good enough. Rebuilding after approval breaks the evidence chain because production no longer runs the bytes that passed the earlier checks.
+
+![[DevOps/DevOps-CI CD tools-18120000-2.png]]
+
+# Commit-to-Production Stages and Gates
+
+| Stage | Input and output | Gate | Failure response |
+| --- | --- | --- | --- |
+| Build | Source commit to signed package or image digest | Reproducible build and provenance | Stop; do not publish a partial artifact |
+| Verify | Same digest plus unit, integration, security, and policy results | Required evidence passes | Fix the commit or explicitly accept tracked risk |
+| Deploy | Same digest plus environment configuration | Readiness and smoke checks | Remove the new instances from traffic |
+| Release | Healthy deployment plus traffic or feature policy | SLO and business guardrails | Shift traffic back or disable the feature |
+
+Build-time checks prove properties of the artifact. Deployment-time checks prove the artifact can start and serve in a particular environment. Before promotion, record the previous digest, backward-compatible database state, rollback command, and the metric threshold that stops the rollout. A pipeline that cannot identify the running digest or reverse its last traffic change is not ready for unattended deployment.
+
+![[DevOps/DevOps-CI CD tools-18120000-1.png]]
+
+# Netflix Delivery Pipeline Case Study
+
+Netflix's published pipeline is useful as a historical trace, not a current tool prescription. A Gradle build produced application packages; Bakery created an immutable Amazon Machine Image; Spinnaker coordinated deployment; Atlas supplied telemetry; Kayenta compared canary and baseline metrics; PagerDuty carried failed automation into incident response. Each boundary exchanged an immutable artifact or explicit evidence instead of rebuilding the application.
+
+The transferable rule is to separate packaging, rollout, analysis, and response. Adopt the named stack only when its operational cost fits; a smaller team can preserve the same boundaries with a container registry, a managed deployment service, an SLO query, and one paging system.
+
+![[DevOps/DevOps-CI CD tools-18120000.png]]
+
+# GitHub Actions
 
 **Architecture**: YAML workflows stored in `.github/workflows/`. Triggered by events (push, PR, schedule, manual). Runs on GitHub-hosted runners (Ubuntu, Windows, macOS) or self-hosted runners.
 
@@ -44,13 +69,13 @@ jobs:
     - run: dotnet test --no-build --verbosity normal
 ```
 
-**Strengths**: Zero infrastructure to manage. Tight GitHub integration (PR checks, branch protection, OIDC for cloud auth). Marketplace with 20k+ actions. Free for public repos; 2,000 minutes/month free for private repos.
+**Strengths**: GitHub-hosted runners remove runner infrastructure for supported workloads. Pull requests, checks, branch protection, environments, and OIDC integrate with the repository. Marketplace actions can reduce setup work but must be pinned and reviewed as third-party code.
 
 **Weaknesses**: GitHub-hosted runners have limited customization. Complex pipelines with many jobs can be slow to iterate on. Vendor lock-in to GitHub.
 
 **Best for**: Teams already on GitHub, open-source projects, and teams that want zero infrastructure overhead.
 
-## Azure DevOps Pipelines
+# Azure DevOps Pipelines
 
 **Architecture**: YAML pipelines stored in the repo or classic UI-based pipelines. Runs on Microsoft-hosted agents or self-hosted agents. Integrates with Azure Boards, Repos, Artifacts, and Test Plans.
 
@@ -67,11 +92,11 @@ steps:
     version: '8.0.x'
 - script: dotnet restore
 - script: dotnet build --no-restore
-- script: dotnet test --no-build
+- script: dotnet test --no-build --logger trx --results-directory $(Agent.TempDirectory)/TestResults
 - task: PublishTestResults@2
   inputs:
     testResultsFormat: 'VSTest'
-    testResultsFiles: '**/*.trx'
+    testResultsFiles: '$(Agent.TempDirectory)/TestResults/*.trx'
 ```
 
 **Strengths**: Deep Azure integration (deploy to AKS, App Service, Azure Functions natively). Built-in test result publishing and code coverage. Enterprise features (approvals, environments, deployment gates). Works with any git host.
@@ -80,9 +105,9 @@ steps:
 
 **Best for**: Enterprise .NET teams deploying to Azure, organizations that need approval gates and audit trails, teams using Azure Boards for work tracking.
 
-## Jenkins
+# Jenkins
 
-**Architecture**: Self-hosted Java application. Pipelines defined in `Jenkinsfile` (Groovy DSL). Massive plugin ecosystem (1,800+ plugins). Runs on your own infrastructure.
+**Architecture**: Self-hosted Java application. Pipelines are commonly defined in a `Jenkinsfile` with the Groovy-based Pipeline DSL and run on controller-managed agents. Plugins extend integrations, which makes plugin inventory, compatibility, and patching part of the operating cost.
 
 ```groovy
 pipeline {
@@ -103,21 +128,21 @@ pipeline {
 }
 ```
 
-**Strengths**: Full control over infrastructure. No per-minute costs. Runs anywhere (on-prem, air-gapped environments). Huge plugin ecosystem.
+**Strengths**: Full control over runner infrastructure and network placement. It can run on-premises and in air-gapped environments when dependencies are mirrored. There is no hosted-runner minute charge, but compute, storage, maintenance, and on-call labor remain.
 
-**Weaknesses**: High operational overhead (upgrades, plugin compatibility, security patches). Groovy DSL is verbose and error-prone. No built-in secret management. Requires dedicated DevOps expertise to maintain.
+**Weaknesses**: The team owns upgrades, backups, plugin compatibility, security patches, agent isolation, and availability. Jenkins commonly stores and injects credentials through its credentials subsystem and plugins, but it is not a replacement for an external secret manager and still depends on job permissions and masking behavior.
 
 **Best for**: On-premises or air-gapped environments, organizations with existing Jenkins investment, teams that need full infrastructure control.
 
-## Comparison
+# Comparison
 
 | Tool | Hosting | .NET Support | Docker Native | Cost Model | Best For |
 |------|---------|-------------|---------------|------------|----------|
-| GitHub Actions | Cloud (GitHub) | Excellent | Yes | Per-minute (free tier) | GitHub-native teams |
+| GitHub Actions | Cloud (GitHub) | Excellent | Yes | Hosted-runner usage and plan-specific included quotas; self-hosted runner cost | GitHub-native teams |
 | Azure DevOps | Cloud (Microsoft) | Excellent | Yes | Per-parallel-job | Enterprise Azure teams |
 | Jenkins | Self-hosted | Good (plugins) | Yes (plugin) | Infrastructure cost | On-prem, air-gapped |
 
-## Decision Rule
+# Decision Rule
 
 ```mermaid
 flowchart TD
@@ -127,17 +152,17 @@ flowchart TD
     C -->|No| E[Use GitHub Actions as the default]
 ```
 
-## Pitfalls
+# Pitfalls
 
-### Secret Leakage in Logs
+## Secret Leakage in Logs
 
 **What goes wrong**: a pipeline step prints environment variables or request bodies to the log, exposing API keys, connection strings, or tokens. CI logs are often accessible to all team members and sometimes public.
 
 **Why it happens**: debugging steps (`env`, `printenv`, verbose HTTP logging) are added during troubleshooting and not removed.
 
-**Mitigation**: use the CI platform's secret masking (GitHub Actions masks secrets automatically; Azure DevOps masks pipeline variables marked as secret). Never print environment variables in pipeline steps. Audit pipeline logs before making a repo public. **Better still, eliminate long-lived cloud credentials entirely with OIDC**: GitHub Actions and Azure DevOps can exchange a short-lived, workload-scoped token with AWS/Azure/GCP via federated identity (workload identity federation), so there's no static `AWS_SECRET_ACCESS_KEY` or service-principal secret stored in the repo to leak or rotate.
+**Mitigation**: register secrets through the platform so known values can be masked, but do not treat masking as a security boundary—encoded, transformed, short, or dynamically retrieved values can still leak. Never print the environment or request bodies in pipeline steps. Prefer OIDC/workload identity so the job exchanges its identity for a short-lived scoped cloud token instead of storing a long-lived access key.
 
-### Flaky Tests Blocking Deploys
+## Flaky Tests Blocking Deploys
 
 **What goes wrong**: a test that passes 90% of the time fails randomly in CI, blocking the deployment pipeline. The team learns to re-run the pipeline instead of fixing the test, eroding trust in CI.
 
@@ -145,21 +170,27 @@ flowchart TD
 
 **Mitigation**: quarantine flaky tests immediately (mark as skipped with a tracking issue). Fix the root cause: use test containers for external dependencies, mock time-dependent behavior, and isolate shared state between tests.
 
-### Config Drift Between Environments
+## Config Drift Between Environments
 
 **What goes wrong**: the pipeline deploys successfully to staging but fails in production because of a configuration difference (different connection string format, missing environment variable, different secret name).
 
 **Mitigation**: use infrastructure-as-code (Bicep, Terraform) to define environment configuration. Promote the same artifact through environments — never rebuild for production. Use environment-specific variable groups in Azure DevOps or environment secrets in GitHub Actions.
 
-## Questions
+# Questions
 
 > [!QUESTION]- What makes a CI pipeline 'good' vs 'fast but unreliable'?
-> A good CI pipeline: (1) runs in < 10 minutes (fast enough to not block the developer), (2) has zero flaky tests (every failure is a real failure), (3) masks secrets and never logs sensitive data, (4) promotes the same artifact through environments (no rebuilds), (5) has clear failure messages that point to the root cause. A fast but unreliable pipeline trains developers to ignore failures and re-run instead of fix — which defeats the purpose of CI.
+> A good CI pipeline returns feedback before developers stop attending to it; under ten minutes is a useful target for many change-validation paths, not a universal threshold. It quarantines and repairs flaky tests, does not print sensitive data, promotes the same verified artifact through environments, and produces failures that identify the broken boundary. Track queue time and execution time separately: a fast job behind a long runner queue is still slow feedback.
 
 
-## References
+# References
 
 - [GitHub Actions documentation](https://docs.github.com/en/actions) — official GitHub Actions docs; covers workflow syntax, runners, secrets, and OIDC authentication
 - [Azure DevOps Pipelines](https://learn.microsoft.com/en-us/azure/devops/pipelines/) — official Azure DevOps docs; covers YAML pipelines, environments, and Azure deployment tasks
-- [Martin Fowler — Continuous Integration](https://martinfowler.com/articles/continuousIntegration.html) — canonical CI definition and practices by the originator of the concept
+- [Martin Fowler — Continuous Integration](https://martinfowler.com/articles/continuousIntegration.html) — influential article that popularized and clarified CI practices; CI predates the article and was practiced in Extreme Programming.
 - [Jenkins documentation](https://www.jenkins.io/doc/) — official Jenkins docs; covers pipeline syntax, plugins, and administration
+- [SLSA provenance](https://slsa.dev/spec/v1.0/provenance) — the supply-chain specification for binding an artifact to its build inputs and process.
+- [Netflix: Spinnaker, global continuous delivery](https://netflixtechblog.com/spinnaker-global-continuous-delivery-a4f7578067b7) — primary description of Netflix's delivery platform and immutable-image flow.
+- [Netflix: Automated Canary Analysis with Kayenta](https://netflixtechblog.com/automated-canary-analysis-at-netflix-with-kayenta-3260bc7acc69) — primary explanation of metric-based canary analysis.
+- [ByteByteGo: CI/CD simplified](https://github.com/ByteByteGoHq/system-design-101/blob/b28380a4710c5ec9638ec037d4168e288f334cba/data/guides/cicd-simplified-visual-guide.md) — source contribution for the CI, delivery, and deployment boundary.
+- [ByteByteGo: CI/CD pipeline](https://github.com/ByteByteGoHq/system-design-101/blob/b28380a4710c5ec9638ec037d4168e288f334cba/data/guides/cicd-pipeline-explained-in-simple-terms.md) — source contribution for artifact lineage, stages, and gates.
+- [ByteByteGo: Netflix CI/CD pipeline](https://github.com/ByteByteGoHq/system-design-101/blob/b28380a4710c5ec9638ec037d4168e288f334cba/data/guides/netflix-tech-stack-cicd-pipeline.md) — source contribution for the bounded Netflix case study.

@@ -1,8 +1,8 @@
 ---
 publish: true
 created: 2026-07-11T21:45:11.521Z
-modified: 2026-07-11T21:45:11.521Z
-published: 2026-07-11T21:45:11.521Z
+modified: 2026-07-18T11:30:02.236Z
+published: 2026-07-18T11:30:02.236Z
 topic:
   - AI & ML
 subtopic:
@@ -14,17 +14,15 @@ priority: High
 status: Done
 ---
 
-# Intro
-
 A RAG pipeline repeats expensive work on every query: embedding the question, searching the index, and generating an answer from an LLM. Caching eliminates that repetition by storing results at each stage so subsequent queries can skip the computation entirely. The payoff is lower latency, lower cost, and reduced load on embedding models, vector databases, and LLMs.
 
 The correct model is layered caching — a separate cache at each pipeline stage with its own key design, TTL policy, and invalidation trigger. A single cache at one layer does not protect you; embedding costs are wasted if you only cache responses, and response caching alone misses the opportunity to serve sub-second retrievals.
 
 The hard part specific to RAG is that cache correctness is a security problem, not just a freshness problem. If cache keys omit authorization context, a query from an authorized user can populate the cache with evidence that a second, unauthorized user later receives. Every cache layer must include permission-scoping fields in its key.
 
-## Flow
+# Flow
 
-### Cache Hit Diagram
+## Cache Hit Diagram
 
 ```mermaid
 sequenceDiagram
@@ -45,7 +43,7 @@ sequenceDiagram
   LC-->>App: cached answer
 ```
 
-### Cache Miss Diagram
+## Cache Miss Diagram
 
 ```mermaid
 sequenceDiagram
@@ -78,7 +76,7 @@ sequenceDiagram
   App->>LC: store response
 ```
 
-## Embedding Cache
+# Embedding Cache
 
 How it works:
 
@@ -95,7 +93,7 @@ Main risk:
 
 - **Model version mismatch.** If the embedding model is upgraded but the cache key does not include model version, old vectors from the previous model are returned for text that was embedded before the upgrade. These vectors live in a different embedding space than the new model produces, so similarity scores become meaningless. Always include model version in the key and flush the cache on model change.
 
-## Retrieval Cache
+# Retrieval Cache
 
 How it works:
 
@@ -113,7 +111,7 @@ Main risk:
 - **Stale results after index update.** If index version is not part of the cache key, documents added or removed after the last index build are invisible to cached queries. The cache silently serves outdated candidate lists. Always bump index version on every index rebuild and include it in the key.
 - **Cross-tenant leakage.** If tenant ID or authorization context is missing from the key, a query from one tenant can populate the cache with results that a different tenant's query later receives. This is a data breach, not a staleness bug.
 
-## LLM Response Cache
+# LLM Response Cache
 
 LLM response caching operates at two levels that solve different problems.
 
@@ -140,14 +138,14 @@ Main risk:
 - **Response depends on mutable inputs.** Unlike embeddings (pure function of text + model), a response depends on the system prompt template, the retrieved evidence, the user's permissions, and the model version — all of which can change independently. A cached response becomes wrong when any of these change without invalidating the cache.
 - **Semantic cache false positives.** Returning a cached answer for a semantically similar but factually different question. Mitigation: tune thresholds conservatively (0.90-0.95), include conversation context in the cache key for multi-turn systems, and monitor false-positive rate.
 
-## Pitfalls
+# Pitfalls
 
 - **Cross-tenant leakage from missing authz fields in key.** If the retrieval or response cache key does not include tenant ID and authorization context hash, one user's cached results can be served to another user who lacks permission. This is not a performance bug — it is a data breach. Mitigation: include `tenant_id` and `authz_context_hash` in every cache key that touches document content or LLM responses. Validate tenant on cache read as a defense-in-depth check.
 - **Silent staleness when index version is not part of key.** Documents are added, updated, or deleted, but the retrieval cache keeps serving old candidate lists because the key does not change. Users see outdated or missing information with no error signal. Mitigation: include `index_version` in retrieval cache keys and bump it on every index rebuild or incremental update.
 - **Over-caching LLM responses while source freshness changes quickly.** If your corpus updates frequently (news, pricing, inventory) but the response cache TTL is long, users receive stale answers grounded in outdated evidence. Mitigation: tie response cache TTL to corpus update frequency. For fast-changing data, cache only embeddings and retrieval results, not final responses.
 - **Semantic cache threshold miscalibration.** Too loose a threshold returns wrong cached answers for different questions. Too tight a threshold reduces hit rate to near zero, making the cache infrastructure overhead for no benefit. Mitigation: calibrate thresholds on a held-out evaluation set per domain. Monitor false-positive rate in production. Start conservative (0.92-0.95) and loosen only with evidence.
 
-## Questions
+# Questions
 
 > [!QUESTION]- Why should retrieval cache keys be based on processed query text instead of raw embeddings?
 > Processed query text and transformation version are deterministic, auditable, and stable across embedding model upgrades. Raw embedding bytes are opaque, change with every model swap, and make cache invalidation on model upgrade impossible without full cache flush. Keying on processed text also aligns cache correctness with the query translation pipeline — if the translation changes, the key changes automatically.
@@ -158,7 +156,7 @@ Main risk:
 > [!QUESTION]- When is semantic caching safe to deploy, and when should it be avoided?
 > Semantic caching is safe when the domain is narrow, queries are repetitive, false positives have low cost, and you can calibrate a reliable similarity threshold on a held-out set. It should be avoided in high-stakes domains (medical, legal, financial) where a wrong cached answer causes harm, in multi-turn conversations where context changes the correct answer, and when the query distribution is too diverse to find a threshold that balances hit rate against false-positive rate.
 
-## References
+# References
 
 - [Prompt caching (OpenAI API docs)](https://developers.openai.com/docs/guides/prompt-caching) — official guide to OpenAI's prefix caching feature, covering eligible content, pricing, and cache hit rates.
 - [Prompt caching (Anthropic docs)](https://platform.claude.com/docs/en/build-with-claude/prompt-caching) — Anthropic's prompt caching documentation covering cache breakpoints, TTL, and cost reduction patterns.

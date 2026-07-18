@@ -1,9 +1,9 @@
 ---
 title: Credits
 publish: true
-icon: heart
 tags:
   - MetricsIgnore
+icon: heart
 ---
 
 # Welcome to my software engineering notebook

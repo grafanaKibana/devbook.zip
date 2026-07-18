@@ -1,8 +1,8 @@
 ---
 publish: true
 created: 2026-07-11T21:43:59.382Z
-modified: 2026-07-11T21:43:59.387Z
-published: 2026-07-11T21:43:59.387Z
+modified: 2026-07-18T11:30:02.978Z
+published: 2026-07-18T11:30:02.978Z
 topic:
   - AI & ML
 subtopic:
@@ -14,17 +14,15 @@ priority: Medium
 status: Done
 ---
 
-# Intro
-
 ROC-AUC means Receiver Operating Characteristic Area Under the Curve. PR-AUC means Precision Recall Area Under the Curve. Both are threshold-free metrics for binary classifiers.
 
 Use ROC-AUC for general ranking quality when classes are fairly balanced. Use PR-AUC for imbalanced data where false positives are expensive.
 
 This note fits the evaluation stage of [[AI & ML/Machine Learning/Machine Learning|Machine Learning]] and is most relevant for [[AI & ML/Machine Learning/Types/Types|learning types]] like binary classification and rare event detection.
 
-## Deeper Explanation
+# Deeper Explanation
 
-### Mental Model
+## Mental Model
 
 Both curves come from sweeping a score threshold from strict to loose.
 
@@ -82,7 +80,7 @@ Area under the curve is average performance across thresholds.
 
 In ML.NET, `BinaryClassificationMetrics` exposes both `AreaUnderRocCurve` and `AreaUnderPrecisionRecallCurve` directly after calling `mlContext.BinaryClassification.Evaluate`.
 
-### When to Use Which
+## When to Use Which
 
 Use this quick rule:
 
@@ -94,7 +92,7 @@ Why this matters in production:
 - On highly imbalanced data, ROC-AUC can still look good while your alert queue is noisy.
 - PR-AUC exposes that noise faster because false positives directly reduce precision.
 
-### Example
+## Example
 
 ML.NET example that prints ROC-AUC and PR-AUC side by side:
 
@@ -140,7 +138,7 @@ How to read the output:
 - High ROC-AUC with low PR-AUC means ranking is decent but positive predictions are noisy.
 - High accuracy alone is not enough on imbalanced datasets.
 
-### Reading the Curves
+## Reading the Curves
 
 Anchor points:
 
@@ -164,7 +162,7 @@ Practical threshold tuning pattern:
 - Start from a constraint like "precision must be at least 0.8" or "recall must be at least 0.9".
 - Sweep score thresholds and pick the one that meets your business constraint. In ML.NET you can iterate `predictions` and test cutoffs.
 
-## Pitfalls
+# Pitfalls
 
 - ROC-AUC can hide poor positive prediction quality on imbalanced data.
 - PR-AUC baseline depends on prevalence, so cross-dataset comparisons can mislead.
@@ -172,7 +170,7 @@ Practical threshold tuning pattern:
 - AUC does not measure [[Calibration]]; a high AUC model can still output bad probabilities.
 - Data leakage can inflate both metrics and fail in production.
 
-## Tradeoffs
+# Tradeoffs
 
 | Metric | Measures | Fits when | Misleads when |
 |---|---|---|---|
@@ -181,7 +179,7 @@ Practical threshold tuning pattern:
 | F1 | Single point tradeoff of precision and recall at one threshold | You have a chosen threshold and want a simple alert quality number | Threshold is not fixed, costs are asymmetric, you care about probability quality |
 | Log loss | Quality of predicted probabilities with heavy penalty for confident mistakes | You optimize calibrated probabilities, you compare probabilistic models | Labels are noisy, you only care about ranking not probability magnitude |
 
-## Questions
+# Questions
 
 > [!QUESTION]- What does ROC-AUC measure?
 >
@@ -198,7 +196,7 @@ Practical threshold tuning pattern:
 > - If negatives dominate, a model can predict mostly negatives and still get high accuracy.
 > - Check PR-AUC, precision, and recall to understand real positive-class performance.
 
-## References
+# References
 
 - [ML.NET BinaryClassificationMetrics](https://learn.microsoft.com/dotnet/api/microsoft.ml.data.binaryclassificationmetrics) — API reference for .NET binary classification evaluation metrics including AUC, accuracy, and F1.
 - [ML.NET evaluate binary classification model](https://learn.microsoft.com/dotnet/machine-learning/resources/metrics#evaluation-metrics-for-binary-classification) — guide to interpreting binary classification metrics in ML.NET with threshold selection guidance.

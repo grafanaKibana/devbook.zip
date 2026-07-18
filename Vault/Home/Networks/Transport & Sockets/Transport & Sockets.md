@@ -13,8 +13,6 @@ level:
   - '3'
 ---
 
-# Intro
-
 Transport and sockets are the practical interface to the network: ports, connections, streams, datagrams, and backpressure. Understanding TCP vs UDP and basic socket behavior prevents a lot of subtle production issues. Example: TCP guarantees ordered delivery but can amplify latency under loss; UDP trades guarantees for control and speed.
 
 ```datacorejsx
@@ -22,7 +20,7 @@ const { FolderStructureMap } = await dc.require("Assets/components/devbook-folde
 return FolderStructureMap;
 ```
 
-## TCP vs UDP
+# TCP vs UDP
 
 The two transports are the real choice at this layer; [[Sockets]] is the file-like API you program either one through, not a third option.
 
@@ -40,6 +38,7 @@ The two transports are the real choice at this layer; [[Sockets]] is the file-li
 
 Default to TCP: most applications need its ordered, reliable byte stream and can absorb the handshake cost. Reach for UDP when a late packet is worse than a lost one (real-time media, gaming), when the payload is a single small request/response (DNS), or when you need one-to-many fan-out — accepting that any reliability or ordering you still want must be built on top, as QUIC (HTTP/3) does.
 
-## References
+# References
 
+- [POSIX `socket()` specification](https://pubs.opengroup.org/onlinepubs/9799919799/functions/socket.html) — the authoritative socket-creation contract, including domains, types, protocols, and failure conditions.
 - [Network socket (Wikipedia)](https://en.wikipedia.org/wiki/Network_socket)

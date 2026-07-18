@@ -11,8 +11,6 @@ status: Ready to Repeat
 publish: true
 ---
 
-# Intro
-
 A service checks whether a key exists before running an expensive lookup — a disk read, a database round trip, a network call. Most of those keys are absent, so most of the expensive work is wasted. Holding the full key set in a [[Hash Set]] answers the question exactly but costs storage proportional to the keys themselves, which is the memory the caller was trying to avoid touching.
 
 A Bloom filter keeps only an *m*-bit array and *k* independent hash functions. Adding an element sets the *k* bits `h₁(x)..hₖ(x)` to 1; querying an element reports "possibly present" only if all *k* of those bits are 1, and "definitely absent" the moment any one of them is 0. The elements themselves are never stored — the structure discards identity and retains a fixed-width fingerprint of the whole set. That discard is what makes it small, and it is also why the filter cannot enumerate its members, return a stored value, or (in the standard form) delete. Two distinct elements can set overlapping bits, so a query can report "possibly present" for something never added: a false positive. A 0 bit, by contrast, can only exist for an element that was never added, so a false negative is impossible.
@@ -22,7 +20,7 @@ A Bloom filter keeps only an *m*-bit array and *k* independent hash functions. A
 > [!NOTE] Visualization pending
 > Planned StepTrace: an m-bit-array card showing adding an element setting *k* bits via *k* hash functions, then a query checking those *k* bits — any 0 means definitely absent, all 1 means probably present. No matching renderer exists in `engine.js` yet.
 
-## Representation and invariants
+# Representation and invariants
 
 The stored state is a single bit array of length *m* and a family of *k* hash functions, each mapping an element to an index in `[0, m)`. Nothing else persists — no keys, no counts, no insertion order.
 
@@ -37,7 +35,7 @@ Three properties follow directly from the fact that bits are only ever set, neve
 
 The representative state is therefore a compressed image of set membership, not the set. Identity, multiplicity, and order are gone the moment an element is folded into the bits.
 
-## Complexity
+# Complexity
 
 | Operation | Best time | Average time | Worst time | Structure space | Aux space per op |
 | --- | --- | --- | --- | --- | --- |
@@ -61,7 +59,7 @@ k = (m/n) · ln 2
 
 which drives roughly half the bits to 1. Increasing *m* lowers *p* by giving elements more room; *k* trades off between too few probes (weak discrimination) and too many (bits fill faster). These bits are the filter's whole footprint — there is no per-element allocation to grow alongside *n*.
 
-## When the structure stops fitting
+# When the structure stops fitting
 
 Deletion is the hard boundary. The standard filter cannot remove an element, because no bit is owned by a single element; clearing the bits for one key can strip a bit that another present key relies on, and the next query for that key would return "definitely absent" — a false negative the structure is defined never to produce. A **counting Bloom filter** replaces each bit with a small counter that increments on add and decrements on remove, which supports deletion at several times the space of a plain bit array.
 
@@ -71,7 +69,7 @@ Over-filling degrades the guarantee gradually rather than failing loudly. The ra
 
 Every one of these boundaries traces back to the same design choice: no elements are stored. The filter answers membership cheaply precisely because it threw away everything except the bits.
 
-## Reference drawer
+# Reference drawer
 
 > [!ABSTRACT]- Add and query over the bit array
 > ```mermaid
@@ -135,7 +133,7 @@ Every one of these boundaries traces back to the same design choice: no elements
 >
 > `MightContain` never allocates and never mutates state; `Add` only ever sets bits. There is no `Remove` — the counting-filter variant would replace `BitArray` with a `byte[]` of counters.
 
-## Questions
+# Questions
 
 > [!QUESTION]- Why can a Bloom filter produce false positives but never false negatives?
 > `Add` only ever sets bits to 1 and never clears them, so every bit a present element touched is still 1 and that element always passes its query — no false negatives. A queried element's *k* bits can all have been set to 1 by other elements, though, which makes a never-added element report "possibly present": a false positive.
@@ -149,7 +147,7 @@ Every one of these boundaries traces back to the same design choice: no elements
 > [!QUESTION]- Why is the space `O(m)` bits rather than `O(n)`?
 > The filter stores no elements — only the *m*-bit array and *k* hash functions. Its footprint is fixed at construction and does not grow with *n*, which is why it can track billions of keys in megabytes. The cost of discarding the keys is the false-positive rate and the loss of enumeration, retrieval, and deletion.
 
-## References
+# References
 
 - [Space/time trade-offs in hash coding with allowable errors (Bloom, 1970)](https://dl.acm.org/doi/10.1145/362686.362692) — the original paper introducing the bit-array membership filter and its error trade-off.
 - [Bloom filter (Wikipedia)](https://en.wikipedia.org/wiki/Bloom_filter) — derivation of the false-positive formula, the optimal *k*, and the counting and scalable variants.

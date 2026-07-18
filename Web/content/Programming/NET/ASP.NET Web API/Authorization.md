@@ -1,8 +1,8 @@
 ---
 publish: true
 created: 2026-07-11T21:44:31.074Z
-modified: 2026-07-11T21:44:31.074Z
-published: 2026-07-11T21:44:31.074Z
+modified: 2026-07-18T11:30:11.097Z
+published: 2026-07-18T11:30:11.097Z
 topic:
   - Programming
 subtopic:
@@ -14,11 +14,9 @@ priority: Medium
 status: Ready to Repeat
 ---
 
-# Authorization in ASP.NET Core
-
 Authorization determines _what_ an authenticated user is allowed to do. It runs after authentication (which establishes _who_ the user is) and evaluates whether the current `ClaimsPrincipal` has permission to access a resource or perform an action. ASP.NET Core supports three authorization models: **role-based**, **claims-based**, and **policy-based** (the most flexible). Resource-based authorization handles cases where the decision depends on the specific resource being accessed.
 
-## Role-Based Authorization
+# Role-Based Authorization
 
 The simplest model: restrict access to users with a specific role claim.
 
@@ -34,7 +32,7 @@ public IActionResult Reports() => Ok();
 
 Roles are stored as claims (`ClaimTypes.Role`) in the JWT or cookie. Role-based authorization is simple but inflexible — adding a new permission requires adding a new role or changing role assignments.
 
-## Policy-Based Authorization
+# Policy-Based Authorization
 
 Policies are named requirements evaluated against the `ClaimsPrincipal`. They decouple the authorization logic from the controller.
 
@@ -86,7 +84,7 @@ public sealed class MinimumAgeHandler : AuthorizationHandler<MinimumAgeRequireme
 builder.Services.AddSingleton<IAuthorizationHandler, MinimumAgeHandler>();
 ```
 
-## Resource-Based Authorization
+# Resource-Based Authorization
 
 When the authorization decision depends on the specific resource (e.g., "can this user edit _this_ document?"), inject `IAuthorizationService` and evaluate imperatively:
 
@@ -112,7 +110,7 @@ public sealed class DocumentsController(IAuthorizationService authz, IDocumentRe
 
 The `"CanEditDocument"` policy handler receives the `document` as the resource and can check ownership, team membership, or any other resource-specific condition.
 
-## Defaults, Fallback, and Advanced Hooks
+# Defaults, Fallback, and Advanced Hooks
 
 - **Secure-by-default with `FallbackPolicy`** — set a fallback that applies to any endpoint _without_ an explicit `[Authorize]`/`[AllowAnonymous]`, so forgetting an attribute fails closed:
 
@@ -130,9 +128,9 @@ The `"CanEditDocument"` policy handler receives the `document` as the resource a
 - **`IAuthorizationMiddlewareResultHandler`** — customize what a 403/forbidden actually returns (e.g. a Problem Details body) instead of the default empty response.
 - **Minimal APIs** — apply policies fluently: `app.MapGet("/admin", ...).RequireAuthorization("CanApproveOrders")`.
 
-## Pitfalls
+# Pitfalls
 
-### Returning 404 Instead of 403 for Unauthorized Resources
+## Returning 404 Instead of 403 for Unauthorized Resources
 
 **What goes wrong**: returning `NotFound()` when a user tries to access a resource they don't own leaks information about the resource's existence.
 
@@ -140,7 +138,7 @@ The `"CanEditDocument"` policy handler receives the `document` as the resource a
 
 **Mitigation**: for sensitive resources, return 404 consistently (don't reveal existence). For non-sensitive resources, return 403 Forbidden so the client knows the resource exists but access is denied. Be consistent within an API.
 
-### Authorization Logic in Controllers
+## Authorization Logic in Controllers
 
 **What goes wrong**: `if (user.Role == "Admin" || user.Id == resource.OwnerId)` scattered across controller actions. Logic is duplicated and hard to audit.
 
@@ -148,13 +146,13 @@ The `"CanEditDocument"` policy handler receives the `document` as the resource a
 
 **Mitigation**: move all authorization logic into policies and handlers. Controllers should only call `authz.AuthorizeAsync()` or use `[Authorize(Policy = "...")]` — never contain authorization logic directly.
 
-## Tradeoffs
+# Tradeoffs
 
 - **Role-based vs policy-based**: Role-based is simple and appropriate for coarse-grained access (admin vs user). Policy-based is more flexible — requirements are composable, testable, and decouple permission logic from controllers. Prefer policy-based for any production system beyond the simplest use case.
 - **Policy-based vs resource-based**: Use policy-based (attribute) when the decision is independent of the specific resource instance. Use resource-based (`IAuthorizationService.AuthorizeAsync`) when the decision depends on the resource's data (owner, state, team membership). Start with policy-based; add resource-based only where instance context is needed.
 - **Declarative (`[Authorize]`) vs imperative (`authz.AuthorizeAsync`)**: Declarative is cleaner and evaluated at routing level. Imperative is necessary when the resource is only available after a database query — you cannot load the resource before the action method runs.
 
-## Questions
+# Questions
 
 > [!QUESTION]- When should you return 403 Forbidden vs 404 Not Found for an unauthorized resource access?
 > Return 403 when the resource exists but the user lacks permission, and the resource's existence is not sensitive. Return 404 consistently when leaking the resource's existence is a security risk (e.g., private financial or health records).
@@ -165,7 +163,7 @@ The `"CanEditDocument"` policy handler receives the `document` as the resource a
 > [!QUESTION]- How do you implement OR logic across two authorization policies on a single endpoint?
 > Multiple `[Authorize]` attributes stack with AND semantics — all policies must pass. For OR logic, implement a single custom `IAuthorizationRequirement` that internally checks whether any of the conditions is met, then apply that single requirement via one policy.
 
-## References
+# References
 
 - [Authorization in ASP.NET Core (Microsoft Learn)](https://learn.microsoft.com/en-us/aspnet/core/security/authorization/introduction) — official overview of role-based, claims-based, and policy-based authorization.
 - [Policy-based authorization (Microsoft Learn)](https://learn.microsoft.com/en-us/aspnet/core/security/authorization/policies) — detailed guide to custom requirements, handlers, and policy registration.

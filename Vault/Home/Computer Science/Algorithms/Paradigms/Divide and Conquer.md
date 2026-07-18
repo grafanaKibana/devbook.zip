@@ -11,8 +11,6 @@ status: Creation
 publish: true
 ---
 
-# Intro
-
 Sorting a million elements, multiplying two very large integers, and locating a value in a sorted array share a structure: the input breaks into smaller instances of the identical problem, and the sub-answers reassemble into the whole. Divide-and-conquer is the control structure for that shape. It divides a size-`n` input into subproblems of the same kind, conquers each by recursing until a base case is small enough to solve directly, and combines the sub-results at cost `f(n)`.
 
 The subproblems have to be **independent** — each reads a disjoint slice of the input and never consults another's answer. That independence, not the recursion itself, separates the paradigm from [[Dynamic Programming]], whose subproblems overlap and must be cached. It also makes the analysis mechanical: every instance produces a recurrence `T(n) = a·T(n/b) + f(n)`, and the Master Theorem reads the bound off `a`, `b`, and the combine cost.
@@ -24,7 +22,7 @@ A paradigm has no single input to step through; the structure a renderer would a
 > [!NOTE] Visualization pending
 > Planned StepTrace: a recursion-tree card that splits a problem into independent subproblems, solves each branch, then combines the results on the way back up — the split-and-merge shape of merge sort. No matching renderer exists in `engine.js` yet.
 
-## Divide, conquer, combine
+# Divide, conquer, combine
 
 The paradigm is three steps and a stopping rule:
 
@@ -36,7 +34,7 @@ Which step carries the work varies by algorithm. [[Merge Sort]] splits at the mi
 
 The subproblems are independent: they read disjoint slices of the input and never need one another's results. Because the `a` recursive calls share no mutable state, they run on separate cores with no locking, which is why fork/join frameworks and map-style GPU kernels map onto divide-and-conquer directly. Overlapping subproblems would contend over shared state and lose that property.
 
-## Complexity via the Master Theorem
+# Complexity via the Master Theorem
 
 Because each subproblem is a scaled copy of the original, the running time satisfies `T(n) = a·T(n/b) + f(n)`: `a` subproblems, each `1/b` the size, plus `f(n)` to combine. The Master Theorem resolves it by comparing the combine cost `f(n)` against `n^(log_b a)`, the total work across the leaves of the recursion tree. The larger term dominates.
 
@@ -59,7 +57,7 @@ Karatsuba shows why `a` carries weight. Schoolbook multiplication is `4T(n/2)`, 
 
 Space is usually `O(log n)` for the recursion stack, plus whatever the combine allocates — `O(n)` for merge sort's auxiliary buffer, `O(1)` for in-place partitioning.
 
-## When the paradigm is the wrong fit
+# When the paradigm is the wrong fit
 
 Independence is a precondition, not a guarantee. If the subproblems overlap — calling each other's subcalls — plain recursion recomputes the shared work on every branch. Naive Fibonacci is the standard case: `fib(n-1)` and `fib(n-2)` both recompute `fib(n-3)` and below, an exponential blowup for a problem that is linear once the repeated calls are cached. The recursive *shape* is identical to merge sort's; the difference is that merge sort's slices are disjoint and never recur, so memoising it saves nothing. Overlapping subproblems are the signal to switch to [[Dynamic Programming]], whose entire purpose is to store and reuse them.
 
@@ -67,7 +65,7 @@ The combine step can dominate the recurrence. A "split in half" decomposition do
 
 The base case is a performance boundary, not only a mathematical one. Recursing all the way to `n = 1` spends more time on call frames than on useful work once a slice is small, and can overflow the stack on adversarial input. Production sorts stop well above the clean base case and hand small slices to [[Insertion Sort]], whose tight loop beats recursion below roughly 16–32 elements — the fallback [[Introsort]] and [[Tim Sort]] both use.
 
-## Reference drawer
+# Reference drawer
 
 > [!ABSTRACT]- Recursion structure
 > ```mermaid
@@ -101,7 +99,7 @@ The base case is a performance boundary, not only a mathematical one. Recursing 
 > ```
 > The subproblems in `parts` touch disjoint data, so the loop can be a parallel fork/join with no locking. `Cutoff` sets the constant factor; the cost of `Combine` sets the asymptotic case.
 
-## Questions
+# Questions
 
 > [!QUESTION]- How does the Master Theorem produce merge sort's `Θ(n log n)`?
 > Merge sort's recurrence is `2T(n/2) + Θ(n)`, so `a = 2`, `b = 2`, and the leaf work is `n^(log_2 2) = n`. The combine cost `f(n) = Θ(n)` matches the leaf term exactly — Case 2 — so every one of the `log n` levels costs `Θ(n)`, and the total is `Θ(n log n)`.
@@ -112,7 +110,7 @@ The base case is a performance boundary, not only a mathematical one. Recursing 
 > [!QUESTION]- Why do production divide-and-conquer sorts stop recursing above the base case?
 > Per-call overhead — stack frames and function-call cost — outweighs the algorithmic advantage once a slice is small, and deep recursion risks stack overflow on adversarial input. Below a threshold of roughly 16–32 elements, insertion sort's tight loop is faster, so hybrids such as Introsort and Tim Sort cut over to it there.
 
-## References
+# References
 
 - [Divide-and-conquer algorithm (Wikipedia)](https://en.wikipedia.org/wiki/Divide-and-conquer_algorithm) — the general schema, worked examples, and the parallelism that disjoint subproblems permit.
 - [Master theorem (Wikipedia)](https://en.wikipedia.org/wiki/Master_theorem_(analysis_of_algorithms)) — all three cases with the regularity condition and their derivations from the recursion tree.

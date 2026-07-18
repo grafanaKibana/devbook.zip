@@ -1,8 +1,8 @@
 ---
 publish: true
 created: 2026-07-12T14:27:20.426Z
-modified: 2026-07-12T14:27:20.426Z
-published: 2026-07-12T14:27:20.426Z
+modified: 2026-07-18T11:30:05.652Z
+published: 2026-07-18T11:30:05.652Z
 topic:
   - Computer Science
 subtopic:
@@ -14,8 +14,6 @@ priority: Medium
 status: Ready to Repeat
 ---
 
-# Intro
-
 A priority queue built on an array [[Heap]] answers find-min and extract-min cheaply, but melding two such heaps into one means rebuilding: `O(n)` work to reheapify the concatenation. When two priority queues must combine repeatedly — merging event streams, uniting sub-schedules — the melding cost dominates. A skew heap keeps only a heap-ordered binary tree and makes merge the primitive: two heaps combine by walking down their right spines, and insert and extract-min are defined in terms of that merge.
 
 The structure is the self-adjusting cousin of a [[Leftist Heaps|leftist heap]]. A leftist heap stores a null-path-length field per node and swaps children only when that field would be violated, buying a per-operation worst-case bound. A skew heap deletes the field entirely: after merging down a right spine it **swaps the two children at every touched node unconditionally** — no test, no bookkeeping. The blind swap moves a right path that just grew back to the left, where the next merge never looks. What can no longer be read off a node is its rank; balance exists only in the amortized aggregate, not as a checkable invariant.
@@ -25,7 +23,7 @@ The structure is the self-adjusting cousin of a [[Leftist Heaps|leftist heap]]. 
 > [!NOTE] Visualization pending
 > Planned StepTrace: a heap-merge card showing two heaps merged down their right spines, with the children swapped unconditionally after each link so the long right path folds to the left — no rank field, self-adjusting. No matching renderer exists in `engine.js` yet.
 
-## Why the blind swap balances
+# Why the blind swap balances
 
 Merge takes two heap roots and compares them. The smaller root becomes the result's root; its right subtree is merged recursively with the other whole heap; then the root's two children are swapped. Only the right spine is ever descended, so the recursion depth is the combined right-spine length of the two inputs.
 
@@ -33,7 +31,7 @@ Without the swap, that right spine only ever grows — repeated merges could sta
 
 The invariant that survives every operation is heap order alone: a parent key never exceeds a child key. There is no structural invariant on shape — a skew heap can momentarily be a long right chain. Insert merges a singleton node into the heap. Extract-min removes the root and merges its two children. Both inherit merge's cost profile exactly.
 
-## Complexity
+# Complexity
 
 | Operation | Best time | Amortized time | Worst single op | Space | Cause |
 | --- | --- | --- | --- | --- | --- |
@@ -46,7 +44,7 @@ The `O(log n)` figures are amortized over a sequence of operations, established 
 
 A single `Merge` can still cost `O(n)`: nothing prevents a momentarily long right spine from existing, and one call may descend all of it. The structure space is `O(n)` with only two child pointers and a key per node — the leftist heap's extra null-path-length field is exactly what the skew heap removes, its edge on memory and on merge code length.
 
-## Where amortized is not enough
+# Where amortized is not enough
 
 The bounds are amortized, so a single operation can spike to `O(n)`. On a latency-sensitive path where one extract-min must complete within a per-operation budget, that spike is a violation even though the sequence average is logarithmic — a [[Leftist Heaps|leftist heap]] holds `O(log n)` per operation as a worst-case guarantee, at the price of the stored rank field and the conditional swap, and fits that requirement where a skew heap does not.
 
@@ -54,7 +52,7 @@ Persistence exposes the same gap. Amortized accounting assumes each stored shape
 
 The unconditional swap is the whole mechanism, not a tunable detail. Making it conditional turns the structure back into a leftist heap (with the rank test) or, done wrong, into an unbalanced chain; dropping it removes the only force shortening the right spine and lets a sequence of merges degrade to `O(n)` each. There is no rank field to inspect, so the swap has to be blind and total for the potential argument to close.
 
-## Reference drawer
+# Reference drawer
 
 > [!ABSTRACT]- Merge folding the right spine
 >
@@ -124,12 +122,12 @@ The unconditional swap is the whole mechanism, not a tunable detail. Making it c
 >
 > The two swap-carrying lines are the entire self-adjustment: there is no rank field to update and no condition guarding the swap. Removing the swap, or making it conditional on stored metadata, produces a different data structure.
 
-## Questions
+# Questions
 
 > [!QUESTION]- How can `O(log n)` amortized hold when one merge can be `O(n)`?
 > A potential function counts heavy nodes — those whose right subtree outweighs their left. An expensive merge traverses many heavy nodes, but each unconditional swap makes a heavy node light. The costly traversal discharges potential accumulated by earlier cheap operations and leaves the heap cheap to merge again, so the per-operation cost averages to `O(log n)` even though a single call is not bounded by it.
 
-## References
+# References
 
 - [Sleator & Tarjan, "Self-Adjusting Heaps" (SIAM J. Comput. 1986)](https://www.cs.cmu.edu/~sleator/papers/adjusting-heaps.pdf) — the original skew heap with the amortized potential analysis.
 - [Skew heap (Wikipedia)](https://en.wikipedia.org/wiki/Skew_heap) — merge walkthrough and the `log_φ n` amortized bound.

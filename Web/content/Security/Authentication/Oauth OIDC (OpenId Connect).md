@@ -1,135 +1,141 @@
 ---
 publish: true
-created: 2026-07-11T21:44:30.384Z
-modified: 2026-07-11T21:44:30.385Z
-published: 2026-07-11T21:44:30.385Z
+created: 2026-07-16T07:35:20.805Z
+modified: 2026-07-18T11:30:13.281Z
+published: 2026-07-18T11:30:13.281Z
 topic:
   - Security
 subtopic:
   - Authentication
-summary: OAuth grants apps limited access without sharing credentials; OIDC adds an identity layer.
+summary: OAuth delegates API access; OpenID Connect adds an interoperable authentication result.
 level:
   - "3"
 priority: High
 status: Ready to Repeat
 ---
 
-# OAuth 2.0 and OpenID Connect
+OAuth 2.0 lets a client obtain bounded authority to call a resource server. It is an authorization framework, not a login protocol. OpenID Connect (OIDC) adds authentication by defining an ID token, issuer discovery, a UserInfo endpoint, and validation rules. "Sign in with Microsoft" uses OIDC to establish the user's identity; an access token authorizes a call to an API.
 
-OAuth 2.0 is an authorization framework that lets users grant third-party applications limited access to their resources without sharing credentials. OpenID Connect (OIDC) is an identity layer on top of OAuth 2.0 that adds authentication — it tells you who the user is, not just what they can access. Most modern web applications use the Authorization Code flow with PKCE: a user clicking "Sign in with Microsoft" on a SaaS dashboard triggers a redirect to Microsoft Entra ID, which returns an authorization code exchanged for an access token (API calls) and an ID token (user identity) — all without the application ever seeing the user's password.
+The distinction prevents a common failure: an API access token may be intended for another audience and does not, by itself, prove a login to the client. The client validates an ID token for its own `client_id`; the resource server validates an access token whose audience identifies that API.
 
-## OAuth 2.0 Flows
+# Roles and artifacts
 
-**Authorization Code Flow** (with PKCE): The standard flow for web apps and SPAs. The client redirects the user to the authorization server, receives an authorization code, exchanges it for tokens. PKCE (Proof Key for Code Exchange) prevents code interception attacks.
+| Item | Consumed by | What it means | Boundary to validate |
+| --- | --- | --- | --- |
+| Resource owner | Authorization server | The user who can approve access | Authentication and consent policy |
+| Client | Authorization server and resource server | The application requesting access | Registered redirect URIs and client identity |
+| Authorization server | Client and resource server | Issues tokens after policy evaluation | Exact issuer, signing keys, endpoints |
+| Resource server | Client | API holding protected resources | Access-token audience and scopes |
+| Authorization code | Token endpoint | Short-lived, one-time intermediate result | Client, redirect URI, PKCE verifier |
+| Access token | Resource server | Delegated authority for an audience and scope | Signature/introspection, issuer, audience, expiry |
+| ID token | OIDC client | Authentication result about a subject | Signature, issuer, audience, expiry, nonce |
+| Refresh token | Token endpoint | Authority to request replacement tokens | Client binding, rotation, replay detection |
+
+Scopes bound what the client asks to do, such as `calendar.read`. Consent records a user's approval where the authorization server requires it; it does not replace API-side authorization. The API must still check audience, scope, subject/tenant, and the requested resource.
+
+# Authorization Code with PKCE
+
+This is the default user-facing flow for web, native, and browser-based clients. PKCE binds the front-channel authorization code to a secret generated for this one request.
 
 ```text
-1. Client redirects user to: /authorize?response_type=code&client_id=...&code_challenge=...&scope=openid profile
-2. User authenticates and consents
-3. Auth server redirects back with: /callback?code=abc123
-4. Client exchanges code for tokens: POST /token {code, code_verifier, client_id, client_secret}
-5. Auth server returns: {access_token, id_token, refresh_token}
+Client -> Browser: redirect to /authorize
+  response_type=code
+  client_id=app-7
+  redirect_uri=https://app.example/callback
+  scope=openid profile calendar.read
+  state=<unpredictable browser-session binding>
+  nonce=<unpredictable OIDC replay binding>
+  code_challenge=BASE64URL(SHA-256(code_verifier))
+  code_challenge_method=S256
+
+Browser -> Authorization server: authenticate user and approve requested access
+Authorization server -> Browser -> Client: /callback?code=...&state=...
+Client -> Token endpoint: code + exact redirect_uri + code_verifier + client authentication when applicable
+Token endpoint -> Client: ID token + access token + optional refresh token
+Client: validate ID token, then create its own application session
+Client -> Resource server: Authorization: Bearer <access token>
+Resource server: validate issuer, audience, expiry, scope, and authorization policy
 ```
 
-**Client Credentials Flow**: Machine-to-machine authentication. No user involved. The client authenticates with its own credentials to get an access token.
+The client rejects a callback whose `state` does not match the initiating browser session. It validates the ID token's signature, exact issuer, audience (and `azp` when required), expiry, and `nonce`. PKCE stops an intercepted code from being redeemed without the `code_verifier`; it does not replace `state`, redirect URI validation, or client authentication.
+
+For a server-rendered browser application, keep tokens server-side and issue a hardened opaque session cookie to the browser. A SPA or native app cannot safely rely on a static client secret. It should use PKCE, short-lived tokens, platform-protected storage where available, refresh-token rotation, and a narrowly registered redirect URI.
+
+# Current flow selector
+
+| Situation | Flow | Why | Cost / failure boundary |
+| --- | --- | --- | --- |
+| Human uses web, SPA, or native app | Authorization Code with PKCE | Keeps tokens out of the authorization response and binds the code to the initiating client | Requires redirects, state/nonce storage, and a token exchange |
+| Service acts as itself | Client Credentials | No resource owner is involved; client receives its own bounded authority | Client credential or workload identity must be protected and rotated |
+| TV, CLI, or input-constrained device | Device Authorization | User completes authorization on a separate browser-capable device | Device must poll at the specified interval and expire/stop on denial |
+
+Do not use the Implicit grant: it returns tokens through the browser front channel, where leakage and injection are harder to contain. Do not use the Resource Owner Password Credentials grant: it teaches the client to collect the user's password and cannot support modern authentication ceremonies safely. OAuth 2.0 Security Best Current Practice deprecates both. Client Credentials is for confidential machine clients, not SPAs.
+
+# Device Authorization message flow
+
+```text
+Device -> Authorization server: client_id + requested scope
+Authorization server -> Device: device_code + user_code + verification_uri + expires_in + interval
+Device -> User: show URI and short code
+User -> Browser -> Authorization server: authenticate and approve code
+Device -> Token endpoint: poll with device_code, respecting interval
+Token endpoint -> Device: access token, or authorization_pending / slow_down / denied / expired
+```
+
+The `user_code` is designed for typing and is not the bearer credential. The device keeps `device_code` secret, stops when it expires, and slows polling when instructed.
+
+# Client Credentials example
 
 ```csharp
-// ASP.NET Core: get a token using client credentials
-var client = new HttpClient();
-var response = await client.PostAsync("https://login.microsoftonline.com/{tenant}/oauth2/v2.0/token",
+using var client = new HttpClient();
+var response = await client.PostAsync(
+    "https://issuer.example/oauth2/token",
     new FormUrlEncodedContent(new Dictionary<string, string>
     {
         ["grant_type"] = "client_credentials",
-        ["client_id"] = "my-client-id",
-        ["client_secret"] = "my-secret",
-        ["scope"] = "https://my-api/.default"
+        ["client_id"] = "invoice-worker",
+        ["client_secret"] = configuration["OAuth:ClientSecret"]!,
+        ["scope"] = "invoices.write"
     }));
+
+response.EnsureSuccessStatusCode();
 ```
 
-## The Four Roles
+Prefer a managed workload identity or asymmetric client authentication over a long-lived shared secret when the authorization server supports it. Never place the secret in source control or a public client.
 
-OAuth's vocabulary trips people up; four roles do all the work:
+# Failure modes
 
-- **Resource Owner** — the user who owns the data.
-- **Client** — the app requesting access on the user's behalf.
-- **Authorization Server** — issues tokens after authenticating the user (Entra ID, Auth0, Google).
-- **Resource Server** — the API that holds the protected data and accepts access tokens.
+- **Authorization response injection:** bind each code to the client's request with PKCE and reject mismatched `state`.
+- **Redirect abuse:** register exact redirect URIs and do not use an attacker-controlled continuation URL after callback.
+- **Token substitution:** an ID token is for the client; an access token is for the resource server. Validate each token's intended audience.
+- **Replay:** validate `nonce` for OIDC, rotate refresh tokens, reject reuse, keep access tokens short-lived, and sender-constrain high-value tokens where supported.
+- **Session confusion:** federated login ends when the client creates its local session. Rotate that session at login and define local, provider, and global logout separately.
+- **Token leakage:** do not put tokens in query strings, logs, browser history, or analytics. TLS protects transit, not storage or logs.
 
-And three tokens: an **access token** (a bearer credential to call the resource server — treat it like a password), an **ID token** (OIDC only — proves _who_ the user is, for the client to consume), and a **refresh token** (long-lived, used to get new access tokens without re-prompting).
+# Tradeoffs versus SAML
 
-## Choosing a Flow
+| Concern | OIDC | SAML 2.0 |
+| --- | --- | --- |
+| Authentication artifact | JSON/JWT ID token | XML assertion |
+| Typical client | Web, native, SPA, API-adjacent application | Browser-based enterprise application |
+| Trust configuration | Issuer discovery, client registration, redirect URIs, signing keys | IdP/SP metadata, entity IDs, endpoints, signing/encryption certificates |
+| Main implementation risk | OAuth/OIDC role or token confusion | XML signature/namespace handling and metadata drift |
+| Choose it when | Building a new application or mobile-capable federation | A required enterprise IdP or SaaS integration exposes only SAML |
 
-```mermaid
-flowchart TD
-    A{Is a human user involved} -->|No| B[Client Credentials]
-    A -->|Yes| C{Browserless or input-constrained device like TV or CLI}
-    C -->|Yes| D[Device Authorization Device Code]
-    C -->|No| E[Authorization Code plus PKCE]
-```
+# Questions
 
-The takeaway: **Authorization Code + PKCE for users, Client Credentials for machines** covers nearly everything; Device Code for constrained devices. Never use **Implicit** (tokens leak in URL fragments) or **Resource Owner Password / ROPC** (the app handles the password) in new systems, as both are deprecated. **Scopes** (`profile`, `mail.read`) bound what an access token may do; the **consent** screen is where the user grants them.
+> [!QUESTION]- Why can an access token not be used as an ID token?
+> The access token is issued for a resource server and carries delegated authority. Its format and claims are controlled by that API contract. The ID token is issued for the OIDC client and has explicit authentication claims and validation rules, including audience and nonce.
 
-## OIDC: Authentication Layer
+> [!QUESTION]- What do `state`, `nonce`, and PKCE each bind?
+> `state` binds the callback to the initiating browser session, `nonce` binds the ID token to the OIDC request, and PKCE binds the authorization code to the client instance that created the verifier. One does not substitute for the others.
 
-OIDC adds an **ID token** (a JWT) to the OAuth 2.0 response. The ID token contains claims about the authenticated user: `sub` (user ID), `email`, `name`, `iat`, `exp`.
+# References
 
-The difference: OAuth 2.0 gives you an access token to call APIs. OIDC gives you an ID token that tells you who the user is.
-
-## ASP.NET Core Integration
-
-```csharp
-// Program.cs: add OIDC authentication (e.g., with Microsoft Entra ID)
-builder.Services.AddAuthentication(options =>
-{
-    options.DefaultScheme = CookieAuthenticationDefaults.AuthenticationScheme;
-    options.DefaultChallengeScheme = OpenIdConnectDefaults.AuthenticationScheme;
-})
-.AddCookie()
-.AddOpenIdConnect(options =>
-{
-    options.Authority = "https://login.microsoftonline.com/{tenantId}/v2.0";
-    options.ClientId = "my-client-id";
-    options.ClientSecret = "my-secret";
-    options.ResponseType = "code";
-    options.Scope.Add("openid");
-    options.Scope.Add("profile");
-    options.Scope.Add("email");
-    options.UsePkce = true;
-});
-```
-
-## Pitfalls
-
-**Missing PKCE**: Without PKCE, authorization codes can be intercepted and exchanged by an attacker. A mobile app that used the Authorization Code flow without PKCE was vulnerable to a redirect URI interception attack — a malicious app registered the same custom URI scheme, intercepted the authorization code from the redirect, and exchanged it for tokens, gaining full access to 1,200 user accounts before the issue was detected. Always use PKCE for public clients (SPAs, mobile apps).
-
-**Token leakage in logs**: Access tokens and ID tokens in URL fragments or query parameters get logged by web servers and proxies. Always use the Authorization Code flow (tokens in the response body), never the Implicit flow (tokens in URL fragments).
-
-**Long-lived access tokens**: Access tokens should expire in 15-60 minutes. Use refresh tokens for long-lived sessions. Rotate refresh tokens on use.
-
-## Tradeoffs vs SAML
-
-| | OAuth 2.0 / OIDC | SAML 2.0 |
-|---|---|---|
-| Token format | JWT (JSON) | XML assertions |
-| Mobile/SPA support | Excellent | Poor |
-| Enterprise SSO | Good | Excellent (legacy) |
-| Complexity | Medium | High |
-
-**Use OIDC** for new applications. **Use SAML** only when integrating with legacy enterprise identity providers that do not support OIDC.
-
-## Questions
-
-> [!QUESTION]- What's the difference between OAuth 2.0 and OpenID Connect?
-> OAuth 2.0 is an **authorization** framework — it issues _access tokens_ that let an app call an API on the user's behalf, but it says nothing standard about _who_ the user is. OpenID Connect is a thin **authentication** layer on top that adds an _ID token_ (a JWT with verified identity claims: `sub`, `email`, `name`). Rule of thumb: "Sign in with…" needs OIDC; "let this app read my calendar" is OAuth. Using a raw OAuth access token as proof of login is a classic mistake.
-
-> [!QUESTION]- Why is PKCE required even for confidential clients now?
-> PKCE binds the authorization request to the token exchange via a one-time `code_verifier`/`code_challenge`, so an intercepted authorization code is useless without the verifier. It was designed for public clients (SPAs/mobile that can't keep a secret), but the OAuth 2.1 guidance now recommends it for **all** clients because it also defends confidential clients against code-injection/interception, at essentially no cost.
-
-> [!QUESTION]- Which flow do you use for a CLI tool or a smart TV, and why not Authorization Code?
-> The **Device Authorization (Device Code) flow**: the device shows a short code and a URL, the user authorizes on a phone/laptop, and the device polls the token endpoint until approved. Authorization Code assumes a browser redirect back to the app, which input-constrained or browserless devices can't do. (Implicit and ROPC are deprecated and shouldn't be used at all.)
-
-## References
-
-- [RFC 6749 — OAuth 2.0](https://datatracker.ietf.org/doc/html/rfc6749) — the authoritative OAuth 2.0 specification
-- [OpenID Connect spec](https://openid.net/specs/openid-connect-core-1_0.html) — OIDC layer on top of OAuth 2.0; defines ID tokens and UserInfo endpoint
-- [Microsoft Identity Platform docs](https://learn.microsoft.com/en-us/entra/identity-platform/) — ASP.NET Core integration guide for Microsoft Entra ID (Azure AD)
-- [RFC 7636 — PKCE](https://datatracker.ietf.org/doc/html/rfc7636) — Proof Key for Code Exchange; required for public clients
+- [RFC 9700 — OAuth 2.0 Security Best Current Practice](https://www.rfc-editor.org/rfc/rfc9700) — current flow security, PKCE, redirect, replay, and deprecated-grant guidance.
+- [RFC 7636 — Proof Key for Code Exchange](https://www.rfc-editor.org/rfc/rfc7636) — PKCE verifier and challenge protocol.
+- [RFC 8628 — OAuth 2.0 Device Authorization Grant](https://www.rfc-editor.org/rfc/rfc8628) — input-constrained device flow and polling behavior.
+- [OpenID Connect Core 1.0](https://openid.net/specs/openid-connect-core-1_0.html) — ID tokens, nonce, authentication flows, and validation rules.
+- [Microsoft identity platform OAuth 2.0 and OIDC protocols](https://learn.microsoft.com/en-us/entra/identity-platform/v2-protocols) — official Entra protocol endpoints and application guidance.
+- [ByteByteGo — OAuth 2.0 Flows](https://github.com/ByteByteGoHq/system-design-101/blob/b28380a4710c5ec9638ec037d4168e288f334cba/data/guides/oauth-20-flows.md) — source grant list corrected against current security guidance.
+- [ByteByteGo — OAuth 2.0 Explained with Simple Terms](https://github.com/ByteByteGoHq/system-design-101/blob/b28380a4710c5ec9638ec037d4168e288f334cba/data/guides/oauth-2-explained-with-siple-terms.md) — source roles separated into authorization and authentication boundaries.

@@ -1,8 +1,8 @@
 ---
 publish: true
 created: 2026-07-11T21:45:01.509Z
-modified: 2026-07-11T21:45:01.509Z
-published: 2026-07-11T21:45:01.509Z
+modified: 2026-07-18T11:30:02.439Z
+published: 2026-07-18T11:30:02.439Z
 topic:
   - AI & ML
 subtopic:
@@ -13,8 +13,6 @@ level:
 priority: High
 status: Done
 ---
-
-# Intro
 
 Retrieval is the stage that decides what evidence enters the prompt. In most RAG systems, generation quality plateaus at the quality of retrieval — no prompt engineering or model upgrade compensates for missing or wrong context. The goal is to balance recall (find everything relevant), precision (exclude everything irrelevant), and latency across query types: semantic paraphrases, exact identifiers, and multi-constraint requests.
 
@@ -32,9 +30,9 @@ flowchart LR
 
 Example: a user asks "rate limit error 429 behavior in partner tier." Vector search captures the semantic intent — rate limiting behavior — but may miss the exact token `429`. Keyword search catches `429` and `partner tier` via exact word match but misses semantically related content phrased differently. Running both in parallel and fusing results covers both failure modes. Though hybrid is the safe default, it is not universally better — see Pitfalls.
 
-## Retrieval Modes
+# Retrieval Modes
 
-### Dense Retrieval — Vector Search
+## Dense Retrieval — Vector Search
 
 How it works:
 
@@ -51,7 +49,7 @@ Main risk:
 
 - **Misses exact identifiers.** Embedding models learn to capture meaning, not specific tokens. Error codes, API paths, and version strings get lost in the vector representation. The retriever returns topically related but operationally wrong chunks — and unlike keyword search misses (which return obviously unrelated content), vector search misses look plausible, making them harder to catch.
 
-### Sparse Retrieval — Keyword Search (BM25)
+## Sparse Retrieval — Keyword Search (BM25)
 
 If you have used full-text search in PostgreSQL (`to_tsvector`/`to_tsquery`) or Elasticsearch, BM25 is the same core idea — it is the algorithm behind those search indexes. Think of it as `grep` with ranking: it finds documents containing your exact words, then sorts them by how distinctive those words are in the corpus. A query for `NullReferenceException` in a .NET codebase hits exactly the files that contain that string, and files where it appears in a focused context (short file, rare term) rank above a 10,000-line log dump that happens to mention it once.
 
@@ -70,7 +68,7 @@ Main risk:
 
 - **Weak on paraphrases.** BM25 cannot match "authentication failure" to a chunk about "credential validation errors" because the words do not overlap. Synonym expansion and stemming help marginally but do not close the gap with vector search on semantically varied queries.
 
-### Hybrid Retrieval — Vector + Keyword
+## Hybrid Retrieval — Vector + Keyword
 
 Hybrid retrieval is like running both a full-text search (`WHERE body @@ to_tsquery('error & 429')`) and a vector similarity search against the same query, then merging the two result sets. RRF merges by rank position — like taking two independently sorted result lists and boosting any item that appears near the top of both. If document A is #2 in vector search and #5 in keyword search, while document B is #1 in keyword search but #200 in vector search, RRF ranks A higher because both retrievers agree it is relevant. Linear combination is the same idea but lets you explicitly set how much you trust each retriever — like a weighted `UNION ALL` with a tunable ratio.
 
@@ -89,7 +87,7 @@ Main risk:
 - **Not universally better than single-mode.** On homogeneous corpora where one search mode dominates, the weaker one introduces noise into the fused results. In one production benchmark on scientific documents, vector-only achieved 69.2% hit rate versus hybrid's 63.5% — keyword search added noise, not signal. The "weakest link" phenomenon: adding a weak retrieval path to a hybrid system can degrade overall performance. Evaluate hybrid against single-mode baselines on your actual corpus.
 - **Over-retrieval noise when top-k is high.** Fusing two ranked lists with large top-k produces candidates with diminishing relevance. Without [[Re-ranking|reranking]] or deduplication, low-ranked fused candidates dilute generation context.
 
-## Indexing and Filtering
+# Indexing and Filtering
 
 The vector index determines the latency-recall tradeoff for vector search:
 
@@ -102,33 +100,33 @@ Metadata filtering is equally critical:
 - **Post-filtering** applies metadata constraints after vector search. Faster to implement but dangerous: if many top-k results are filtered out, the effective candidate set shrinks unpredictably and recall drops.
 - Keep index versioning explicit. Collection aliases enable instant rollback during index rebuilds.
 
-## Pitfalls
+# Pitfalls
 
-### Silent Recall Degradation at Scale
+## Silent Recall Degradation at Scale
 
 HNSW recall degrades as the corpus grows — no errors, no latency spike, just worse context fed to the LLM. At a fixed `ef_search` value, the index becomes less accurate as more vectors crowd the space. Infrastructure dashboards show healthy metrics while answer quality silently declines. Long-tail and rare-entity queries degrade first.
 
 Detection: maintain ground-truth query-chunk pairs and run [[Monitoring#Retrieval Quality Metrics|Recall@k]] checks on a schedule. Latency and error-rate monitoring alone will not catch recall regression.
 
-### Embedding Model Migration Debt
+## Embedding Model Migration Debt
 
 Embedding models produce incompatible vector spaces. Upgrading models means re-embedding the entire corpus — you cannot query a new model's vectors against an old model's index. At scale, this means parallel infrastructure costs, downtime risk, and potential regression even when benchmark scores improve. API providers (like OpenAI) can deprecate models on their schedule, forcing emergency re-embedding.
 
 Mitigation: treat embedding model selection as a long-term infrastructure decision. Store the model version alongside each vector. Set upgrade thresholds based on domain-specific metrics, not MTEB deltas. Use collection aliases and shadow traffic to validate before cutover.
 
-### Aggregate Metrics Hiding Segment Failures
+## Aggregate Metrics Hiding Segment Failures
 
 Overall recall of 70% can mask 5% recall on the query types that matter most (multi-hop, date-filtered, identifier-heavy). Without segmentation, you cannot distinguish inventory failures (data missing from corpus) from capability failures (data exists but retrieval cannot surface it).
 
 Detection: segment retrieval metrics by query type, tenant, locale, and domain. Alert on per-segment degradation, not just aggregate.
 
-### Vector Search Failing Silently on Identifiers
+## Vector Search Failing Silently on Identifiers
 
 Vector search returns topically related but operationally wrong chunks for identifier-heavy queries. Unlike keyword search misses that return obviously unrelated content, vector search misses look plausible — the LLM synthesizes a confident answer from wrong evidence.
 
 Mitigation: use hybrid retrieval for identifier-heavy corpora. Explicitly test retrieval on identifier-based queries during evaluation. If vector search is responsible for most failures in your pipeline, inspect fusion weights — identifier-heavy domains often need higher keyword weight.
 
-## Tradeoffs
+# Tradeoffs
 
 | Mode | Recall profile | Latency | Operational complexity | Best for |
 | --- | --- | --- | --- | --- |
@@ -139,7 +137,7 @@ Mitigation: use hybrid retrieval for identifier-heavy corpora. Explicitly test r
 
 Decision rule: start with hybrid retrieval (RRF) and conservative top-k (5-20). Evaluate against single-mode baselines on your actual corpus and query distribution — hybrid is the safe default but not always the winner. Add [[Re-ranking|reranking]] only after baseline retrieval is stable and precision at the top of the ranked list is the dominant error mode.
 
-## Questions
+# Questions
 
 > [!QUESTION]- Why can vector-only retrieval underperform on technical support workloads?
 > Technical support queries often include exact identifiers: error codes, version strings, API paths, and SKU IDs. Embedding models capture meaning, not specific tokens — a query for "error E4392 in v2.3" may retrieve content about error handling in general rather than the specific code. The failure is subtle because returned chunks are topically related, so the LLM synthesizes a plausible but wrong answer. Keyword search catches these exact tokens because they are rare in the corpus (high BM25 weight), which is why hybrid retrieval is essential for these workloads.
@@ -150,7 +148,7 @@ Decision rule: start with hybrid retrieval (RRF) and conservative top-k (5-20). 
 > [!QUESTION]- Why does HNSW recall degrade silently as the vector database grows?
 > HNSW navigates a graph to find approximate nearest neighbors, not an exhaustive scan. The `ef_search` parameter controls how many candidate nodes the search visits. At small corpus sizes, a moderate `ef_search` finds most true neighbors. As the corpus grows, the graph becomes denser and the same `ef_search` misses more true neighbors — the search path does not explore enough of the graph to find them. Latency stays stable because the search still visits the same number of candidates, and no errors are raised. The only signal is less relevant retrieved chunks. Detection requires explicit [[Monitoring#Retrieval Quality Metrics|Recall@k]] monitoring against a ground-truth test set.
 
-## References
+# References
 
 - [RAG techniques — retrieval and ranking overview (Azure AI Search)](https://learn.microsoft.com/en-us/azure/search/retrieval-augmented-generation-overview)
 - [Reciprocal Rank Fusion outperforms Condorcet and individual rank learning methods (SIGIR 2009)](https://plg.uwaterloo.ca/~gvcormac/cormacksigir09-rrf.pdf)

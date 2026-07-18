@@ -11,8 +11,6 @@ status: Creation
 publish: true
 ---
 
-# Intro
-
 Scanning a megabyte of source code for the literal `getUserById` means asking, at each of a million positions, whether the pattern starts there. The naive check compares left-to-right at every alignment, so a near-match that only fails on its final character still costs a comparison per position — `O(n·m)` in the worst case, and it never skips a byte it has not already read.
 
 Boyer-Moore reverses the comparison direction. It aligns the pattern under the text and compares from the pattern's *last* character backward. A mismatch there yields two facts: the offending text character, and how much of the pattern's tail already matched. That is enough to prove that a run of the following alignments cannot match, so the pattern jumps forward past them — and those positions are never read. On English text or source code the jump is frequently the full pattern length, so the scan touches only a fraction of the input.
@@ -26,7 +24,7 @@ A visualization would align the pattern under the text and step through the righ
 > [!NOTE] Visualization pending
 > Planned StepTrace: a string-matching card aligning the pattern under the text, comparing right-to-left, and jumping the pattern forward by the maximum of the bad-character and good-suffix shift on a mismatch. No matching renderer exists in `engine.js` yet.
 
-## Why a mismatch skips a block
+# Why a mismatch skips a block
 
 Each alignment fixes the pattern's last character over some text index and compares leftward until a character disagrees (or the whole pattern matches). Two independent rules each propose a shift; the algorithm advances by the larger.
 
@@ -38,7 +36,7 @@ The shift is `max(bad_char_shift, good_suffix_shift)`, which is always at least 
 
 Preprocessing builds both tables ahead of the scan. The bad-character table is keyed on each character's last position `i` in the pattern, but the implementation stores the resulting shift `m − 1 − i` directly rather than the raw index (`|Σ|` entries). The good-suffix table maps each mismatch position to a safe suffix-preserving shift; its construction is `Θ(m)` but the index arithmetic is delicate.
 
-### One alignment
+## One alignment
 
 Searching `TRUTH` (`m = 5`) inside `...WE VALUE TRUTH...`, where each character's last position in the pattern is `T→3, R→1, U→2, H→4`:
 
@@ -57,7 +55,7 @@ match right-to-left, and a hit is reported.
 
 Over English text most mismatching characters are absent from a short pattern, so each mismatch buys a near-maximal jump.
 
-## Complexity
+# Complexity
 
 | Case | Time | Auxiliary space | Cause |
 | --- | --- | --- | --- |
@@ -68,13 +66,13 @@ Over English text most mismatching characters are absent from a short pattern, s
 
 The tables persist through the scan, so search space stays `O(m + |Σ|)`; the loop itself keeps only a few indices beyond them. The plain-versus-Galil split matters: the sublinear `O(n/m)` is a property of large-alphabet inputs, not a guarantee. Without Galil's rule an adversarial input degrades to `O(n·m)`, and the guaranteed-linear bound requires the extra bookkeeping.
 
-## Where the skip disappears
+# Where the skip disappears
 
 On small alphabets the advantage evaporates. With `|Σ|` of 2 to 4 — binary, or DNA over `{A,C,G,T}` — the mismatching character is almost always present in the pattern, so the bad-character shift is usually one. Searching `AAAA` inside a long run of `A` lands in the `O(n·m)` worst case: every alignment is a full match over all `m` characters and the good-suffix rule then shifts by only one, so ~`n` alignments each cost `O(m)`. The shift buys nothing because there is no absent character to jump past. Boyer-Moore's edge grows with alphabet size, so DNA and binary streams are exactly where it stops helping.
 
 The good-suffix table is the part that breaks silently. Its "case 2" prefix fallback is easy to compute off by one, and a wrong entry produces either a missed match or a shift of zero that loops forever. Because the marginal speedup over the bad-character rule alone is small on real text, most production code ships **Boyer-Moore-Horspool** — bad-character rule only, keyed on the text character sitting under the pattern's last position — which drops the fragile table entirely and is nearly as fast on large-alphabet data. GNU `grep`'s fixed-string search and most editor find commands use this variant rather than the full two-rule algorithm; `glibc`'s `memmem` takes a different route entirely, using the Two-Way (Crochemore–Perrin) algorithm.
 
-## Reference drawer
+# Reference drawer
 
 > [!ABSTRACT]- Control flow
 > ```mermaid
@@ -174,7 +172,7 @@ The good-suffix table is the part that breaks silently. Its "case 2" prefix fall
 > ```
 > The `badChar` table assumes byte-range characters; Unicode text needs a `Dictionary<char,int>` (default `m`) instead of `int[256]`. Dropping `BuildGoodSuffixTable` and shifting by the bad-character rule alone yields Boyer-Moore-Horspool.
 
-## Questions
+# Questions
 
 > [!QUESTION]- Why does comparing right-to-left let Boyer-Moore skip characters it never reads?
 > A mismatch at the pattern's last position exposes a text character together with its offset. If that character is absent from the pattern, no alignment that places any pattern character over it can match, so the pattern jumps clear past it — up to `m` positions — without comparing the characters in between. Left-to-right scanning learns nothing about the text ahead, so it can never justify a jump larger than one on the same information.
@@ -185,7 +183,7 @@ The good-suffix table is the part that breaks silently. Its "case 2" prefix fall
 > [!QUESTION]- Why is the plain worst case `O(n·m)`, and what recovers a linear bound?
 > The sublinear behavior depends on frequent large skips, which vanish when text and pattern share long repeated runs — as with an all-equal pattern `aaaa` over `aaaa…a`, where every alignment is a full match over all `m` characters and the good-suffix rule then shifts by only one. Galil's rule remembers how much of the pattern is already known to match after a shift and skips re-comparing those positions, bounding total comparisons at `O(n)`.
 
-## References
+# References
 
 - [A Fast String Searching Algorithm](https://dl.acm.org/doi/10.1145/359842.359859) — Boyer and Moore's original 1977 CACM paper introducing right-to-left scanning with the two shift heuristics.
 - Charras & Lecroq, *Handbook of Exact String-Matching Algorithms* (King's College Publications, 2004) — the canonical bad-character, good-suffix, and `suffixes` preprocessing this note's implementation follows (also published as the online ESMAJ handbook).

@@ -11,8 +11,6 @@ status: Ready to Repeat
 publish: true
 ---
 
-# Intro
-
 A disk-resident index holds millions of ordered records and must answer two shapes of query cheaply: "find key `K`" and "read every key between `A` and `B` in order." A plain [[B-tree]] answers the point lookup in a handful of page reads, but the range query forces an in-order traversal that repeatedly climbs back into internal nodes to find the next key — random I/O proportional to the levels crossed, not to the rows returned.
 
 The B+ tree is the [[B-tree]] variant that reshapes the node layout for exactly that second query. Every `(key, value)` pair moves down to the leaves; internal nodes keep only keys, acting as a routing index whose separators point to the child subtree that owns a range. A separator can equal a key still living in a leaf — it is a signpost, not the record. Then the leaves are chained into a linked list (next, usually also previous), so once a descent lands on the first matching leaf, the scan walks the chain sequentially in key order without touching an internal node again.
@@ -24,7 +22,7 @@ Because internal nodes carry no values, each routing page packs far more separat
 > [!NOTE] Visualization pending
 > Planned StepTrace: a tree card showing internal nodes holding only routing keys, all values living in the leaves, and the leaves chained left-to-right so a range scan walks the leaf list after a single descent. No matching renderer exists in `engine.js` yet.
 
-## Representation
+# Representation
 
 Two node kinds share one page-sized layout:
 
@@ -39,7 +37,7 @@ Three invariants define a valid state:
 
 A point lookup compares against separators to pick a child at each level and always continues to a leaf, because that is the only place a value exists. A range scan `[A, B]` descends once to the leaf holding `A`, reads forward within the leaf, then follows `next` pointers until a key exceeds `B`. The descent cost is the tree height; the walk cost is proportional only to the number of matching entries.
 
-## Complexity
+# Complexity
 
 Bounds are counted in page I/Os with `m` the node fan-out (keys per page), which is large for disk pages, so the tree is shallow. `k` is the number of entries a range scan returns.
 
@@ -53,7 +51,7 @@ Bounds are counted in page I/Os with `m` the node fan-out (keys per page), which
 
 The `+ k` term is the whole point: the range scan pays the tree height once and then reads matches as a sequential walk of the linked leaves, so cost tracks result size rather than tree structure. A B-tree lacking leaf links pays roughly `O(k log_m n)` for the same range because it re-descends to locate each successor. High fan-out keeps `log_m n` at two to four levels for realistic table sizes, and the top levels stay in memory, so an isolated lookup often costs a single leaf read.
 
-## Boundaries
+# Boundaries
 
 A point lookup **always** reaches a leaf. A plain [[B-tree]] can find its value at an internal node and stop one or more levels early; the B+ tree cannot, because internal nodes hold no values. The trade is a slightly deeper worst-case path for a single key in exchange for uniform lookup latency — every key costs one full descent — and the cheap range scans the design exists to provide. Because the routing level is smaller and usually cached, the extra descent rarely translates into extra physical I/O.
 
@@ -61,7 +59,7 @@ Leaf-link maintenance rides on top of the ordinary split and merge logic. When a
 
 The same page-sizing constraint as a [[B-tree]] applies: node capacity is chosen so a node fills one storage page. Oversized keys or values lower fan-out, raise the tree, and erode the shallow-tree advantage. Variable-length keys and prefix compression in real implementations exist to keep separators small and fan-out high.
 
-## Reference drawer
+# Reference drawer
 
 > [!ABSTRACT]- Routing index over a linked leaf list
 > ```mermaid
@@ -135,7 +133,7 @@ The same page-sizing constraint as a [[B-tree]] applies: node capacity is chosen
 > ```
 > Insert and delete (leaf overflow splits, underflow merges, and the `Next` relinking each performs) are omitted; `Range` shows the invariant that makes the structure worthwhile — after `DescendToLeaf` it never returns to an internal node.
 
-## Questions
+# Questions
 
 > [!QUESTION]- What two structural changes turn a B-tree into a B+ tree, and which query do they serve?
 > All `(key, value)` pairs move to the leaves, leaving internal nodes as a pure routing key index, and the leaves are chained into a sorted linked list. Both changes serve the range scan: after one descent, matching keys are read by walking the leaf chain in order instead of re-ascending into internal nodes.
@@ -146,7 +144,7 @@ The same page-sizing constraint as a [[B-tree]] applies: node capacity is chosen
 > [!QUESTION]- Why does removing internal values raise fan-out, and why does that help on disk?
 > A separator is just a key and a child pointer, far smaller than a full record, so a routing page packs many more entries. Higher fan-out means fewer levels, and the small routing levels tend to stay in the buffer pool, so a lookup often costs a single physical read of the leaf.
 
-## References
+# References
 
 - Comer, [The Ubiquitous B-Tree (1979)](https://doi.org/10.1145/356770.356776) — the survey that canonically defines the B+ variant, its leaf-only data placement, and the leaf-chain design.
 - [MySQL InnoDB Index Types](https://dev.mysql.com/doc/refman/8.4/en/innodb-index-types.html) — clustered primary-key and secondary index behavior, with rows stored in the clustered leaf level.

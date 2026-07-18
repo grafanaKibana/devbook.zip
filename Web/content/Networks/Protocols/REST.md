@@ -1,233 +1,287 @@
 ---
 publish: true
-created: 2026-07-11T21:46:02.944Z
-modified: 2026-07-11T21:46:02.945Z
-published: 2026-07-11T21:46:02.945Z
+created: 2026-07-18T08:17:49.156Z
+modified: 2026-07-18T11:59:15.662Z
+published: 2026-07-18T11:59:15.662Z
 topic:
   - Networks
 subtopic:
   - Protocols
-summary: An architectural style for resources identified by URIs and manipulated over stateless HTTP.
+summary: A resource-oriented architectural style built from stateless messages and a uniform interface.
 level:
   - "3"
 priority: High
 status: Done
 ---
 
-# Intro
+REST is an architectural style for networked systems, not a synonym for JSON over HTTP. It constrains interactions around stable resource identities, a uniform interface, and explicit cache/representation behavior so clients, servers, and intermediaries can evolve with fewer assumptions.
 
-REST (Representational State Transfer) is an architectural style for networked systems defined by Roy Fielding, centered on resources identified by URIs and manipulated through representations (often JSON) over stateless client-server interactions, commonly via HTTP. It matters because it maps naturally to HTTP semantics, is broadly supported by infrastructure and tooling, and is one of the most common styles for HTTP APIs. You usually reach for REST when you have resource-centric, CRUD-heavy domains, browser/mobile clients, and teams that benefit from predictable HTTP behavior. In interviews, strong answers connect REST constraints to operational outcomes: scalability, cacheability, evolvability, and reliability.
+Use REST when the problem is broad interoperability, stable resource contracts, and cacheable reads. Use GraphQL when clients need flexible projections with a robust governance model, and gRPC when schema-coupled service-to-service contracts and streaming are the first-class need.
 
-## REST Constraints
+# Constraint and Method Boundaries
 
-Fielding defined six constraints. A system is RESTful when the required constraints are respected together (code-on-demand is optional).
+REST is mostly about the contract boundaries, not framework syntax:
 
-1. **Client-Server**
-   - Clients and servers evolve independently.
-   - In practice: UI concerns stay in the client, business/data concerns stay in the server.
-   - Benefit: cleaner separation of responsibilities and deploy cadence.
+- Client-server separation
+- Stateless request handling
+- Cacheable responses
+- Uniform interface and media semantics
+- Layered intermediaries
+- Optional code on demand
 
-2. **Stateless**
-   - Each request contains all context needed to process it.
-   - In practice: auth via bearer token/JWT, request-scoped correlation IDs, no sticky server session required.
-   - Benefit: easier horizontal scaling and simpler failover.
+```http
+PUT /orders/42 HTTP/1.1
+Content-Type: application/json
+If-Match: "order-v7"
 
-3. **Cacheable**
-   - Responses declare whether and how they may be cached.
-   - In practice: `Cache-Control`, `ETag`, `Last-Modified`, and `If-None-Match` support.
-   - Benefit: lower latency and lower backend load.
+{"id":42,"status":"shipped"}
+```
 
-4. **Uniform Interface**
-   - A consistent way to identify resources, manipulate state, and express intent.
-   - In practice: stable URIs, standard HTTP methods, media types, and status codes.
-   - Benefit: generic clients/proxies can interact without custom protocol knowledge.
+`PUT` is idempotent and may be retried after a communication failure. With `If-Match`, however, a successful first attempt can advance the entity tag so the retry returns `412 Precondition Failed`. That response does not prove the first attempt failed; reconcile the current representation before deciding the next action.
 
-5. **Layered System**
-   - A client does not need to know whether it is connected directly to the origin server.
-   - In practice: [[API Gateway|API gateways]], reverse proxies, CDNs, WAFs, service mesh sidecars.
-   - Benefit: security, scalability, and operability through composable layers.
+Use status contracts that describe the real boundary:
 
-6. **Code-on-Demand (optional)**
-   - Server can transfer executable code to client.
-   - In practice: rare in modern API design; historically JS downloaded by browsers is the common example.
-   - Benefit: client extensibility without pre-shipping behavior.
+- `201` plus `Location` for creation
+- `409` for state conflict
+- `412` for failed preconditions
+- `422` for instruction-valid but unprocessable content
+- `429`/`503` when retry policy applies
 
-## Uniform Interface Deep Dive
+# API Design and Compatibility Surface
 
-Uniform interface has four sub-constraints. This is where interviewers often go deeper.
+Resource naming is the external boundary; framework choice is local.
 
-### 1) Resource Identification via URI
-
-- Resources are named with stable URIs, not RPC verbs.
-- Prefer nouns and collections:
-  - `GET /api/orders/42`
-  - `POST /api/orders`
-- Avoid endpoint naming like `/createOrder` or `/processOrderNow` unless you are modeling an action resource explicitly.
-
-### 2) Resource Manipulation Through Representations
-
-- Clients send/receive representations (`application/json`) instead of direct object references.
-- The representation carries enough data to transition state.
-- Example: `PUT /api/orders/42` sends a full order representation for replacement semantics.
-
-### 3) Self-Descriptive Messages
-
-- Each message is understandable in isolation.
-- Meaning comes from method + URI + headers + media type + body + status code.
-- Example: `Content-Type: application/json`, `ETag`, `Location`, and `Retry-After` communicate behavior without out-of-band conventions.
-
-### 4) HATEOAS (Hypermedia as the Engine of Application State)
-
-- Responses include links/actions that describe valid next transitions.
-- Example order payload includes `cancel`, `pay`, or `track` links depending on state.
-- Many production APIs stop at Level 2 (no hypermedia), but understanding HATEOAS shows architectural depth.
-
-## HTTP Methods and Semantics
-
-| Method | Semantics | Idempotent? | Safe? |
-| --- | --- | --- | --- |
-| GET | Read resource representation | Yes | Yes |
-| POST | Create subordinate resource or trigger non-idempotent processing | No | No |
-| PUT | Replace target resource with supplied representation | Yes | No |
-| PATCH | Partially modify target resource | Usually no (can be designed idempotent) | No |
-| DELETE | Remove target resource | Yes | No |
-
-Interview shorthand:
-
-- **Safe** means no requested state mutation (`GET`, `HEAD`).
-- **Idempotent** means repeating the same request yields the same resulting state.
-- Retries are easiest for idempotent operations.
-
-## HTTP Status Codes in Practice
-
-| Group | Common Codes | Typical Use |
+| Intent | HTTP contract | Boundary rule |
 | --- | --- | --- |
-| 2xx Success | `200 OK`, `201 Created`, `204 No Content` | Read success, create success with `Location`, delete/update success without body |
-| 3xx Redirection/Cache | `301 Moved Permanently`, `304 Not Modified` | Resource moved permanently, conditional request hit cache validation |
-| 4xx Client Errors | `400 Bad Request`, `401 Unauthorized`, `403 Forbidden`, `404 Not Found`, `409 Conflict`, `422 Unprocessable Content`, `429 Too Many Requests` | Validation/auth/authorization/rate-limit/concurrency issues from caller side |
-| 5xx Server/Upstream Errors | `500 Internal Server Error`, `502 Bad Gateway`, `503 Service Unavailable` | Server bug, bad upstream response, temporary outage/overload |
+| Create a cart | `POST /carts` with `Idempotency-Key` | Persist idempotency key, request fingerprint, and prior result with the created resource |
+| Read a cart | `GET /carts/{cartId}` | Authorize the specific resource and emit validators like `ETag` |
+| Replace known data | `PUT /carts/{cartId}/items/{sku}` | Preserve intended meaning through idempotent contracts |
+| Patch mutable fields | `PATCH ...` with defined patch format and `If-Match` | Reject stale payloads with `412` |
+| Delete cart | `DELETE /carts/{cartId}` | Define idempotent behavior and tombstone policy |
+| Search carts | `GET /carts?owner=42&status=open&limit=50&after=...` | Bind pagination and filter state to authorization and principal |
 
-Guideline for senior-level API design:
+A creation response uses `201 Created` and `Location` when the server creates a resource. Error responses use `application/problem+json` with stable problem type identifiers and avoid leaking whether another tenant's resource exists.
 
-- Return the most specific status code you can defend.
-- Keep error bodies machine-readable (for example `application/problem+json`).
-- Document retry behavior for `409`, `429`, and `503` explicitly.
+Idempotency keys solve an ambiguous retry only when their store is durable and scoped. The server must reject the same key with a different request fingerprint, return the original result for a completed request, and define expiry longer than the client's maximum retry window.
 
-## C# Example (ASP.NET Core Minimal API)
+Compatibility strategy:
+
+Prefer additive fields, tolerant readers, and new optional capabilities before versioning. A version is earned when old and new contracts cannot coexist safely.
+
+| Strategy | Strength | Cost |
+|---|---|---|
+| Path version (`/v2/carts`) | Visible and easy to route | Duplicates resource lifetimes and links |
+| Media type or header | Keeps resource URI stable | Harder discovery, gateway, and cache configuration |
+| New resource or operation | Makes a genuinely new capability explicit | Clients may coordinate across old and new workflows |
+
+Pick one strategy per API surface and publish deprecation, migration, and removal dates. Do not add `v1` before a real breaking change exists.
+
+REST and GraphQL expose different control surfaces:
+
+| Dimension | REST | [[GraphQL]] |
+|---|---|---|
+| Contract owner | Server owns resources and representations | Server owns schema; clients own operation documents |
+| Cache key | Method, URL, and `Vary` work with generic caches | Arbitrary operations need persisted IDs or GraphQL-aware caches |
+| Authorization | Checked per endpoint and resource | Checked through nested field and object resolution |
+| Cost control | Endpoint work is comparatively predictable | Depth, aliases, list sizes, and resolver fan-out need budgets |
+| Strong fit | Stable resource interactions and broad HTTP reach | Multiple clients need different graph projections |
+
+Neither removes backend fan-out. Choose GraphQL only when selectable graph projections repay the schema governance and execution controls.
+
+![[Assets/Networks/Networks-REST-18120000.jpg]]
+
+The visual is a design prompt, not a protocol mandate. `POST` becomes retry-safe only with durable idempotency handling, path versioning is one compatibility option, and action resources are legitimate when the operation is not a collection mutation.
+
+# Pagination Contracts
+
+Pagination limits response size and does not imply snapshot consistency.
+
+Keyset traversal keeps cursor positions stable under concurrent writes when ordering is strict and total:
+
+```sql
+SELECT id, created_at, total
+FROM orders
+WHERE tenant_id = @tenantId
+  AND status = @status
+  AND (created_at, id) < (@createdAt, @id)
+ORDER BY created_at DESC, id DESC
+LIMIT 51;
+```
+
+```http
+GET /orders?status=open&limit=50&after=eyJjcmVhdGVkQWQiOiIyMDI2LTA3LTE2VDEwOjAwOjAwWiIsImlkIjo5MDF9.sig
+```
+
+Encode cursor scope and policy (tenant, sort order, direction, filters, page-size limits). A cursor from one query shape must not be reused for another.
+
+Fetch one extra row to determine whether another page exists. The unique `id` tie-breaker prevents an ambiguous boundary when rows share a timestamp. The index should begin with equality filters and then the ordered keys, for example `(tenant_id, status, created_at DESC, id DESC)`.
+
+Encode and integrity-protect the cursor rather than exposing an editable database token. Bind it to tenant, principal or authorization scope, filters, sort order, direction, page-size policy, and expiry.
+
+## Consistency contract
+
+A cursor identifies a position, not a snapshot. With live keyset traversal:
+
+- Later inserts before the cursor may not appear in subsequent pages.
+- Deletes can remove rows the client has not reached.
+- An update to the sort key can move a row across the boundary.
+
+If exact snapshot traversal matters, include a snapshot or version boundary, or query storage that can retain a snapshot for the traversal lifetime. That costs storage and retention and needs an expiry response when the snapshot is gone.
+
+For backward traversal, encode direction and boundary explicitly. Query in the direction that uses the index, then reverse returned rows if the presentation order requires it.
+
+| Need | Offset or page number | Keyset cursor |
+|---|---|---|
+| Direct jump to page 20 | Natural | Not natural |
+| Stable deep traversal under inserts | Rows can shift | Stable relative boundary |
+| Deep query cost | Often scans or skips earlier rows | Seeks from indexed boundary |
+| Human-readable navigation | Easy | Cursor is opaque |
+
+Use offset for small, stable administrative lists and approximate page jumps. Use keyset for large or changing collections. In both cases, cap page size and total backend work independently.
+
+# Implementation Boundary (ASP.NET Core)
+
+Framework mapping is mechanical; contract enforcement is architectural:
 
 ```csharp
-using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
-
-var builder = WebApplication.CreateBuilder(args);
-builder.Services.AddDbContext<AppDbContext>(options =>
-    options.UseSqlServer(builder.Configuration.GetConnectionString("Default")));
-
-var app = builder.Build();
-
-app.MapGet("/api/orders/{id:int}", async (int id, AppDbContext db, CancellationToken ct) =>
+app.MapGet("/api/orders/{id:int}", async (
+    int id,
+    AppDbContext db,
+    CancellationToken ct) =>
     await db.Orders.AsNoTracking().FirstOrDefaultAsync(o => o.Id == id, ct) is { } order
         ? Results.Ok(order)
         : Results.NotFound());
 
-app.MapPost("/api/orders", async ([FromBody] CreateOrderDto dto, AppDbContext db, CancellationToken ct) =>
+app.MapPost("/api/orders", async (
+    CreateOrderDto request,
+    AppDbContext db,
+    CancellationToken ct) =>
 {
     var order = new Order
     {
-        CustomerId = dto.CustomerId,
-        Total = dto.Total,
-        Currency = dto.Currency,
-        CreatedAtUtc = DateTime.UtcNow
+        CustomerId = request.CustomerId,
+        Total = request.Total,
+        Currency = request.Currency
     };
 
     db.Orders.Add(order);
     await db.SaveChangesAsync(ct);
-
     return Results.Created($"/api/orders/{order.Id}", order);
 });
+```
 
-app.Run();
+A missing resource returns `404`; creation returns `201` and a `Location` value. Production creation also needs authorization, input validation, problem details, and an idempotency contract before a caller may retry it.
 
-public sealed record CreateOrderDto(Guid CustomerId, decimal Total, string Currency);
-
-public sealed class Order
+```csharp
+app.MapPut("/api/orders/{id:int}", async (
+    int id,
+    UpdateOrder request,
+    HttpRequest http,
+    AppDbContext db,
+    CancellationToken ct) =>
 {
-    public int Id { get; set; }
-    public Guid CustomerId { get; set; }
-    public decimal Total { get; set; }
-    public string Currency { get; set; } = "USD";
-    public DateTime CreatedAtUtc { get; set; }
-}
+    if (!http.Headers.TryGetValue("If-Match", out var raw) ||
+        !long.TryParse(raw.ToString().Trim('"'), out var expectedVersion))
+    {
+        return Results.StatusCode(StatusCodes.Status428PreconditionRequired);
+    }
 
-public sealed class AppDbContext(DbContextOptions<AppDbContext> options) : DbContext(options)
+    var affected = await db.Database.ExecuteSqlInterpolatedAsync($"""
+        UPDATE orders
+        SET shipping_address = {request.ShippingAddress}, version = version + 1
+        WHERE id = {id} AND version = {expectedVersion}
+        """, ct);
+
+    return affected == 1
+        ? Results.NoContent()
+        : Results.StatusCode(StatusCodes.Status412PreconditionFailed);
+});
+```
+
+Optimistic concurrency is the server-side boundary. Zero rows changed means the caller must reread and reconcile before retry.
+
+Operational boundaries remain part of the resource contract:
+
+- Pass request cancellation through database and dependency calls.
+- Set request-body size and JSON-depth limits before deserialization work grows without bound.
+- Return RFC 9457 problem details without exception traces or secret values.
+- Measure dependency time and queue time separately from serialization time.
+- Keep retries in the caller or a clearly owned resilience layer; a handler must not replay a non-idempotent downstream operation blindly.
+
+# Uniform Interface and Richardson Levels
+
+The REST uniform interface has four parts:
+
+1. Stable URI references identify resources independently of one representation.
+2. A client manipulates a resource through a transferred representation.
+3. Method, target, fields, media type, content, and status make messages self-descriptive.
+4. Hypermedia controls can expose valid next transitions.
+
+```json
 {
-    public DbSet<Order> Orders => Set<Order>();
+  "id": 42,
+  "status": "awaiting-payment",
+  "links": [
+    { "rel": "self", "href": "/orders/42", "method": "GET" },
+    { "rel": "pay", "href": "/orders/42/payment", "method": "POST" },
+    { "rel": "cancel", "href": "/orders/42/cancellation", "method": "PUT" }
+  ]
 }
 ```
 
-Why this is interview-relevant:
+The client still needs the media type and link-relation contract. Hypermedia reduces hard-coded workflow URLs; it does not eliminate versioning, authorization, or schema evolution.
 
-- `GET` returns `404` when the resource does not exist.
-- `POST` returns `201 Created` plus a canonical resource URI.
-- URI models a resource (`/orders/{id}`), not an RPC command.
+The Richardson maturity model is a teaching model, not the definition of REST or a universal score:
 
-## REST Maturity Model (Richardson)
+| Level | Capability | Example | Missing boundary |
+|---|---|---|---|
+| 0 | One endpoint used as a message tunnel | `POST /api` with an action field | Resource identity and standard method semantics |
+| 1 | Resource-oriented URI references | `/orders` and `/orders/42` | Methods and statuses may still be used as a tunnel |
+| 2 | Methods, statuses, fields, and representations carry intent | `GET`, conditional `PUT`, `201`, `412` | Valid next transitions remain out-of-band |
+| 3 | Hypermedia controls advertise available transitions | `pay`, `cancel`, and `track` links by order state | Client and server still share media-type and relation semantics |
 
-| Level | Characteristics | Example |
-| --- | --- | --- |
-| Level 0 | Single URI + usually single verb (often POST everywhere) | `/api` with action in payload |
-| Level 1 | Introduces resource-oriented URIs | `/orders`, `/orders/{id}` |
-| Level 2 | Uses proper HTTP verbs and status codes | `GET/POST/PUT/DELETE` + 2xx/4xx/5xx semantics |
-| Level 3 | Adds hypermedia controls (HATEOAS) | Response contains actionable links for next valid states |
+Level 2 is common because it works with ordinary tooling and generated clients. Level 3 earns its cost when runtime discoverability, long-lived workflow evolution, or generic clients matter. A closed application whose client and server release together may get little value from hypermedia controls.
 
-Many production APIs are Level 2 because it balances interoperability and implementation cost. Level 3 is powerful for discoverability and workflow guidance, but it has ecosystem/tooling overhead many teams do not need.
+# Performance and Error Tradeoffs
 
-## Tradeoffs: REST vs gRPC vs GraphQL
+Performance gains are not free; each one adds a contract:
 
-| Style | Protocol | Format | Streaming | Browser Support | Best Fit |
-| --- | --- | --- | --- | --- | --- |
-| REST | HTTP/1.1 or HTTP/2 | Usually JSON (sometimes XML) | Limited with SSE/WebSocket adjuncts | Excellent (native HTTP, CDN-friendly) | Public APIs, CRUD-heavy services, broad interoperability |
-| [[gRPC]] | HTTP/2 | Protobuf (binary) | Strong bi-directional streaming | Limited direct browser support (typically gRPC-Web bridge) | Low-latency internal service-to-service calls with strict contracts |
-| GraphQL | HTTP (commonly POST) | JSON over typed schema | Subscriptions possible | Strong with modern web clients | Aggregation-heavy UIs needing client-controlled response shape |
+- Cache: speedups with freshness/invalidation cost
+- Compression: saves bandwidth, adds CPU
+- Asynchronous work: hides latency, increases eventual-consistency and duplicate risk
+- Queues/pools: control backpressure, require bounded retries and timeouts
 
-Decision heuristic:
+![[Assets/Networks/Networks-REST-18120000-1.png]]
 
-- Pick **REST** for stable resource models, caching, and broad external consumption.
-- Pick **gRPC** for high-throughput internal APIs and strict schema evolution discipline.
-- Pick **GraphQL** when frontend teams need query flexibility across many backends.
+Treat the visual as a technique inventory. Deep offset pagination can become slower, asynchronous logging needs a loss policy, caches need authorization-safe keys and invalidation, compression spends CPU, and pools need bounds and refresh behavior.
 
-## Pitfalls
+# API Style Comparison
 
-### 1) Chatty APIs
+| Style | Strong fit | Cost |
+|---|---|---|
+| REST | External or cross-team APIs with stable resources | Representation design, compatibility, and caching discipline |
+| [[GraphQL]] | Selective projections for evolving clients | Query cost control, resolver load, authorization complexity |
+| [[gRPC]] | Controlled service meshes with typed streaming | Schema/toolchain coupling and browser bridge needs |
 
-- **What goes wrong**: one screen requires many sequential calls (`/user`, `/orders`, `/recommendations`, `/limits`), causing high tail latency.
-- **Why it happens**: resource boundaries are too fine-grained for UI composition.
-- **Mitigation**: introduce a BFF (Backend-for-Frontend), composite read endpoints, or server-driven aggregation.
+No style removes governance; it changes where the cost is paid.
 
-### 2) Over-fetching and Under-fetching
+# Questions
 
-- **What goes wrong**: fixed resource shapes return too much unused data or miss fields requiring extra calls.
-- **Why it happens**: generic representations are optimized for reuse, not every consumer.
-- **Mitigation**: support sparse fieldsets (`fields=`), expansions (`include=`), projection endpoints, or GraphQL when flexibility dominates.
+> [!QUESTION]- What does a retry-time `412` mean for a conditional `PUT`?
+> The first request may already have succeeded and changed the entity tag. The retry is allowed because `PUT` is idempotent, but its `412` cannot distinguish a successful first attempt from another writer's update. Read the current representation and reconcile before choosing a new precondition.
 
-### 3) Ignoring Idempotency During Retries
+> [!QUESTION]- When should `POST` be idempotent in practice?
+> Only when the client sends a durable idempotency key and the server enforces dedupe boundaries; otherwise `POST` can create duplicates.
 
-- **What goes wrong**: client timeout on `POST /orders` triggers retry and creates duplicate orders.
-- **Why it happens**: transport uncertainty plus non-idempotent writes without deduplication contract.
-- **Mitigation**: idempotency keys, unique constraints, request fingerprint checks, and deterministic duplicate response handling.
+# References
 
-## Questions
-
-> [!QUESTION]- Explain `PUT` vs `PATCH` semantics and retry behavior.
-> `PUT` replaces the whole resource representation, so sending it twice lands the resource in the same state — it's idempotent, and a client can safely auto-retry it when a network blip leaves the outcome unknown. `PATCH` applies a partial update, and whether it's idempotent depends on the patch format: `set status = "shipped"` is, but `increment quantity by 1` isn't. So servers should document the patch media type and conflict rules (`409`/`422`). The upshot: retry `PUT` freely, but make `PATCH` safe with an idempotency key unless the operation is provably repeatable.
-
-> [!QUESTION]- Why do many teams stop at Richardson Level 2 instead of Level 3 HATEOAS?
-> Level 2 already buys most of what REST is good for — resource URIs, proper verbs, status codes, cacheability — and that's enough for the vast majority of APIs. Level 3 adds hypermedia: responses carry the links and actions valid for the current state. It's powerful for discoverability, but it needs clients that understand link relations plus the discipline and tooling to maintain them, and in a closed ecosystem clients already know the workflows, so the payoff shrinks. HATEOAS earns its cost when runtime discoverability and loose coupling are real goals; otherwise Level 2 is the pragmatic stopping point.
-
-## References
-
-- [What is a REST API? (IBM)](https://www.ibm.com/ru-ru/cloud/learn/rest-apis) — accessible overview of REST concepts, constraints, and HTTP method semantics.
-- [REST dissertation (Fielding)](https://www.ics.uci.edu/~fielding/pubs/dissertation/rest_arch_style.htm) — the original 2000 dissertation defining REST architectural constraints; chapter 5 is the canonical source.
-- [Create web APIs with ASP.NET Core](https://learn.microsoft.com/aspnet/core/web-api/) — official guide to building REST APIs with ASP.NET Core, covering controllers, routing, and content negotiation.
-- [Microsoft REST API Guidelines](https://github.com/microsoft/api-guidelines) — Microsoft's internal API design standards covering versioning, error responses, pagination, and naming conventions.
-- [Best Practices for Designing a Pragmatic RESTful API (Vinay Sahni)](https://www.vinaysahni.com/best-practices-for-a-pragmatic-restful-api) — practitioner guide covering URL design, HTTP status codes, versioning, and filtering with real-world examples.
+- [REST dissertation (Fielding)](https://www.ics.uci.edu/~fielding/pubs/dissertation/rest_arch_style.htm) — architectural constraints and uniform interface.
+- [HTTP Semantics (RFC 9110)](https://www.rfc-editor.org/rfc/rfc9110) — method, status, conditional, and header semantics for API contracts.
+- [Problem Details for HTTP APIs (RFC 9457)](https://www.rfc-editor.org/rfc/rfc9457) — machine-readable error payloads.
+- [Microsoft REST API Guidelines](https://github.com/microsoft/api-guidelines) — practical compatibility, pagination, and error conventions.
+- [Microsoft REST API Guidelines: Collections](https://github.com/microsoft/api-guidelines/blob/vNext/azure/Guidelines.md#collections) — cursor, continuation, page-size, and collection response guidance.
+- [PostgreSQL row constructor comparison](https://www.postgresql.org/docs/current/functions-comparisons.html#ROW-WISE-COMPARISON) — primary semantics for the composite boundary used in the SQL example.
+- [ASP.NET Core web APIs](https://learn.microsoft.com/aspnet/core/web-api/) — official routing, controllers, results, validation, and problem-details guidance.
+- [ASP.NET Core minimal APIs](https://learn.microsoft.com/aspnet/core/fundamentals/minimal-apis) — official endpoint mapping, binding, responses, and filters.
+- [Richardson Maturity Model (Martin Fowler)](https://martinfowler.com/articles/richardsonMaturityModel.html) — explains the four teaching levels with resource and hypermedia examples.
+- [Web Linking (RFC 8288)](https://www.rfc-editor.org/rfc/rfc8288) — standard relation and link representation model for typed links.

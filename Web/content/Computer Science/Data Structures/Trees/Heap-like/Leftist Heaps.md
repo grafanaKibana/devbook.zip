@@ -1,8 +1,8 @@
 ---
 publish: true
 created: 2026-07-12T14:27:20.426Z
-modified: 2026-07-12T14:27:20.426Z
-published: 2026-07-12T14:27:20.426Z
+modified: 2026-07-18T11:30:05.624Z
+published: 2026-07-18T11:30:05.624Z
 topic:
   - Computer Science
 subtopic:
@@ -13,8 +13,6 @@ level:
 priority: Medium
 status: Ready to Repeat
 ---
-
-# Intro
 
 Two priority queues need to become one. An array-backed [[Heap]] cannot do this cheaply: merging two heaps of size `n` means dumping both into a buffer and rebuilding, which is `O(n)`. A leftist heap stores the same heap-ordered keys as an explicit binary tree and adds one field per node so that melding two heaps touches only a logarithmic slice of each.
 
@@ -27,7 +25,7 @@ The tradeoff is shape. The tree is heap-ordered but deliberately left-heavy and 
 > [!NOTE] Visualization pending
 > Planned StepTrace: a mergeable-heap card showing two heaps merged by recursing down their right spines, comparing roots, then swapping children where the leftist rank demands it — keeping the right spine short. No matching renderer exists in `engine.js` yet.
 
-## Merge, and why the right spine stays short
+# Merge, and why the right spine stays short
 
 Every mutation is a merge of two heaps `a` and `b`:
 
@@ -42,7 +40,7 @@ Both right spines are `O(log n)`, and the recursion consumes one right-spine nod
 
 **insert** merges the heap with a one-node heap. **extract-min** returns the root and merges the root's left and right subtrees back together. A single correct merge yields the entire API, and every operation inherits its `O(log n)` worst-case bound. **find-min** just reads the root.
 
-## Complexity
+# Complexity
 
 Bounds are worst-case per operation and assume the leftist invariant is maintained after every merge step.
 
@@ -55,7 +53,7 @@ Bounds are worst-case per operation and assume the leftist invariant is maintain
 
 Structure space is `Θ(n)` for the nodes plus one integer npl per node; the pointer-based layout also carries two child references per node, unlike an array heap's implicit indexing. Auxiliary space is the recursion stack, proportional to the right-spine length; an iterative bottom-up merge that first collects both right spines can bring that to `O(1)` at the cost of more code.
 
-## Where the invariant is load-bearing
+# Where the invariant is load-bearing
 
 The child swap in step 4 is not cosmetic. Omit it and a sequence of merges can leave the right subtree consistently deeper than the left; the right spine then grows toward `O(n)`, and because merge walks that spine, every operation degrades to linear. The `O(log n)` guarantee is a direct consequence of restoring `npl(left) ≥ npl(right)` after each step, nothing else enforces it.
 
@@ -63,7 +61,7 @@ The npl bookkeeping must be updated on every merge, not lazily. The swap decisio
 
 These are worst-case bounds. That is the whole reason to pay for the npl field: a [[Skew Heaps|skew heap]] performs the same right-spine merge and unconditional swap without storing npl, and gets `O(log n)` only _amortized_ — an individual meld there can be linear, offset by cheaper later ones. A leftist heap trades that field for a per-operation guarantee.
 
-## Reference drawer
+# Reference drawer
 
 > [!ABSTRACT]- Leftist structure and the right spine
 >
@@ -123,7 +121,7 @@ These are worst-case bounds. That is the whole reason to pay for the npl field: 
 >
 > The swap and the `a.Npl` update are the two lines that keep the right spine short; dropping either forfeits the worst-case bound.
 
-## Questions
+# Questions
 
 > [!QUESTION]- What does the leftist invariant bound, and how does that make merge logarithmic?
 > `npl(left) ≥ npl(right)` at every node forces the right spine to length `≤ log(n + 1)`, since a right spine of length `r` requires at least `2^r − 1` nodes. Merge recurses only down the two right spines, so it does `O(log n)` work in the worst case.
@@ -134,7 +132,7 @@ These are worst-case bounds. That is the whole reason to pay for the npl field: 
 > [!QUESTION]- How do insert and extract-min reduce to merge?
 > Insert merges the heap with a single-node heap. Extract-min removes the root and merges its left and right subtrees. One correct merge implements the whole API and every operation inherits its `O(log n)` worst-case bound.
 
-## References
+# References
 
 - [Leftist tree (Wikipedia)](https://en.wikipedia.org/wiki/Leftist_tree) — s-value (npl) definition, the leftist invariant, and the right-spine length proof.
 - [Okasaki, _Purely Functional Data Structures_ (thesis, ch. 3)](https://www.cs.cmu.edu/~rwh/students/okasaki.pdf) — leftist heaps as the canonical persistent mergeable heap, with ML implementations and the merge-based API.
