@@ -209,7 +209,6 @@ return function QuestionsIndex() {
 
   return (
     <div class="dc-questions-index">
-      <h1>Table of Contents</h1>
       <h2>Total questions: {total}</h2>
       <ul>
         {sortedKeys(tree.children).map((h1Key) => {

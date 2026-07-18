@@ -913,6 +913,30 @@ body:not([data-slug="index"]) .page[data-frame="default"] > #quartz-body > .side
   }
 }
 
+// ============================================================================
+// Questions and Credits: no right rail.
+//
+// These two top-level pages don't want the graph / TOC / backlinks column. They
+// are ordinary content pages, so their right sidebar isn't :empty (the collapse
+// above doesn't catch them) — hide it explicitly at every breakpoint, and on
+// desktop reclaim its 320px column the same way the empty-sidebar rule does.
+// ============================================================================
+body[data-slug="questions"] .page[data-frame="default"] > #quartz-body > .sidebar.right,
+body[data-slug="credits"] .page[data-frame="default"] > #quartz-body > .sidebar.right {
+  display: none;
+}
+
+@media all and (min-width: 1201px) {
+  body[data-slug="questions"] .page[data-frame="default"] > #quartz-body,
+  body[data-slug="credits"] .page[data-frame="default"] > #quartz-body {
+    grid-template-columns: #{$sidePanelWidth} auto;
+    grid-template-areas:
+      "grid-sidebar-left grid-header"
+      "grid-sidebar-left grid-center"
+      "grid-sidebar-left grid-footer";
+  }
+}
+
 @media all and (min-width: 1201px) and (min-height: 36rem) {
   // Gated on [data-home-fit]: the HomepageFit controller owns the one-viewport
   // fill on desktop just as it does on tablet, so it can hide whole tiers
