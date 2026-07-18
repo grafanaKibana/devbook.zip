@@ -132,8 +132,7 @@ body {
 }
 
 // Header toggle + search icons pick up the title accent (--secondary, the
-// default link colour the page title uses) on hover. Their own component CSS
-// paints them --darkgray via fill/stroke, so override both.
+// default link colour the page title uses) on hover.
 .site-header-actions .darkmode,
 .site-header-actions .readermode,
 .site-header-search .search > .search-button {
@@ -144,12 +143,23 @@ body {
       color 0.15s ease,
       opacity 0.1s ease;
   }
+}
 
-  &:hover svg {
-    fill: var(--secondary);
-    stroke: var(--secondary);
-    color: var(--secondary);
-  }
+// Recolour each icon using ONLY the paint channel it uses at rest — adding the
+// other channel made them look bolder on hover: a stroke thickened the filled
+// sun/moon, and a fill flooded the outline search glass solid.
+//   • darkmode  — filled (fill:--darkgray, no stroke): recolour the fill.
+//   • readermode — filled + hair-line stroke: recolour both (weight unchanged).
+//   • search    — outline (.search-path stroke, fill:none): recolour the stroke.
+.site-header-actions .darkmode:hover svg {
+  fill: var(--secondary);
+}
+.site-header-actions .readermode:hover svg {
+  fill: var(--secondary);
+  stroke: var(--secondary);
+}
+.site-header-search .search > .search-button:hover svg .search-path {
+  stroke: var(--secondary);
 }
 
 // ---------------------------------------------------------------------------
@@ -325,8 +335,6 @@ body {
 // ============================================================================
 
 :root {
-  // Vertical breathing room between nav rows.
-  --explorer-item-gap: 0.25rem;
   // Folders stay heavier than files, but well short of the plugin's near-bold 600.
   --explorer-folder-weight: 500;
   // base.scss styles every `a` at $semiBoldWeight (600), which is also what the
@@ -337,20 +345,109 @@ body {
   // would otherwise sit flush against the screen edge. Matches the header bar's
   // 1.5rem so the tree lines up under the title.
   --explorer-panel-inset: 1.5rem;
+  // Nav rows read as pills (design: .db-ex-row): a small pad + radius so the
+  // hover and active washes hug each label instead of spanning edge-to-edge.
+  --explorer-row-pad: 0.18rem 0.35rem;
+  --explorer-row-radius: 5px;
+  // The row hover wash — a faint tint of the ink over the page fill.
+  --explorer-row-hover-bg: color-mix(in srgb, var(--dark) 5%, transparent);
 }
 
-// `.explorer` prefixes lift these over the plugin's own (unlayered) rules.
+// ---------------------------------------------------------------------------
+// Row chrome. Both the file link and the folder header are the interactive
+// "rows"; give each the same pad, radius and hover wash so the tree reads as a
+// stack of pills (design: .db-ex-row / .db-ex-row:hover). `.explorer` prefixes
+// lift these over the plugin's own (unlayered) rules.
+// ---------------------------------------------------------------------------
+.explorer .explorer-content ul li > a.nav-file-title,
+.explorer .explorer-content .folder-container {
+  box-sizing: border-box;
+  padding: var(--explorer-row-pad);
+  border-radius: var(--explorer-row-radius);
+  transition:
+    color 0.15s ease,
+    background-color 0.15s ease;
+}
+
+// The file link is inline by default, so its wash would only cover the text.
+// Make it a full-width flex line so the hover/active pill spans the whole row
+// and the icon + label sit centred.
+.explorer .explorer-content ul li > a.nav-file-title {
+  display: flex;
+  align-items: center;
+  width: 100%;
+}
+
+.explorer .explorer-content ul li > a.nav-file-title:hover,
+.explorer .explorer-content .folder-container:hover {
+  background-color: var(--explorer-row-hover-bg);
+}
+
+// ---------------------------------------------------------------------------
+// Folder rows. The accent lives on the book/topic glyph (decorated by
+// explorer-icons.tsx); the LABEL is plain ink and the collapse chevron is a
+// muted gray — the plugin paints both green, so pull them back to the design's
+// --dark / --gray (design: .db-ex-folder + .db-ex-chev-node).
+// ---------------------------------------------------------------------------
 .explorer .explorer-content .folder-container div > a,
 .explorer .explorer-content .folder-container div > button span {
   font-weight: var(--explorer-folder-weight);
+  color: var(--dark);
+}
+// Hover is carried by the row wash, not a label colour shift; hold the label
+// (and the button-form folder link) steady on --dark.
+.explorer .explorer-content .folder-container:hover div > a,
+.explorer .explorer-content .folder-container:hover div > button span {
+  color: var(--dark);
+}
+// The collapse chevron (.folder-icon) — kept small and thin like the design's
+// Lucide chevron, but inked in --darkgray (the breadcrumb-crumb tone) rather than
+// --gray so it stays clearly visible; holds that tone on hover (the plugin turns
+// it --tertiary).
+.explorer .explorer-content .folder-container > svg.folder-icon,
+.explorer .explorer-content .folder-container > svg.folder-icon:hover {
+  color: var(--darkgray);
+  width: 11px;
+  height: 11px;
+  stroke-width: 1.5;
 }
 
-.explorer .explorer-content ul li > a {
+// ---------------------------------------------------------------------------
+// File rows. Normal weight, solid --darkgray ink (the plugin dims idle files to
+// 0.75 opacity and --dark); the current page gets the green wash pill
+// (design: .db-ex-file / .db-ex-file.is-active).
+// ---------------------------------------------------------------------------
+.explorer .explorer-content ul li > a.nav-file-title {
   font-weight: var(--explorer-file-weight);
+  color: var(--darkgray);
+  opacity: 1;
+}
+.explorer .explorer-content ul li > a.nav-file-title:hover {
+  color: var(--dark);
+}
+.explorer .explorer-content ul li > a.nav-file-title.active {
+  color: var(--secondary);
+  background-color: var(--highlight);
+  font-weight: #{$semiBoldWeight};
+  opacity: 1;
 }
 
-.explorer .explorer-content ul li {
-  margin-block: var(--explorer-item-gap);
+// ---------------------------------------------------------------------------
+// "Topics" title. Header font, semibold, a hair of negative tracking, with the
+// fold chevron muted to --gray (design: .db-explorer-title + .db-ex-chev).
+// ---------------------------------------------------------------------------
+.explorer button.desktop-explorer h2 {
+  font-size: 0.95rem;
+  font-weight: #{$semiBoldWeight};
+  letter-spacing: -0.01em;
+  color: var(--dark);
+}
+.explorer button.desktop-explorer .fold {
+  color: var(--darkgray);
+  opacity: 1;
+  width: 13px;
+  height: 13px;
+  stroke-width: 1.5;
 }
 
 // ---------------------------------------------------------------------------
@@ -510,6 +607,61 @@ body {
   }
 }
 
+// ============================================================================
+// Breadcrumbs (note-page trail: Home › Topic › Note).
+//
+// The plugin renders
+//   <nav.breadcrumb-container>
+//     <div.breadcrumb-element><a href>Home</a><p> › </p></div>
+//     … <div.breadcrumb-element><a href="">Docker</a></div>   ← current page
+// Base styling paints every crumb link --secondary/600 (and the last crumb the
+// same). Remap onto the design (.db-breadcrumbs): gray links that warm to
+// --secondary on hover, a faint --lightgray separator, and a bold --darkgray
+// current crumb that isn't interactive.
+// ============================================================================
+.breadcrumb-container {
+  align-items: center;
+  gap: 0.35rem;
+  font-family: var(--bodyFont);
+  font-size: 0.85rem;
+  // A Lucide chevron-right, rendered as a mask so the separator matches the
+  // design's icon rather than a text glyph. Painted via background-color below.
+  --crumb-chevron: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23000' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m9 18 6-6-6-6'/%3E%3C/svg%3E");
+}
+
+// Non-current crumbs sit back — a muted gray that clearly yields to the bold
+// current crumb — and warm to the accent on hover.
+.breadcrumb-element a {
+  color: color-mix(in srgb, var(--gray) 62%, transparent);
+  font-weight: #{$normalWeight};
+  transition: color 0.15s ease;
+}
+.breadcrumb-element a:hover {
+  color: var(--secondary);
+}
+
+// The separator: a small, thin Lucide chevron-right (the plugin's spacer text is
+// zeroed and replaced by the masked icon). Sized below the crumb text, inked in
+// --gray so it's clearly visible while staying subordinate to the crumbs.
+.breadcrumb-element p {
+  margin-left: 0.3rem;
+  width: 0.7rem;
+  height: 0.7rem;
+  font-size: 0;
+  background-color: var(--gray);
+  -webkit-mask: var(--crumb-chevron) center / contain no-repeat;
+  mask: var(--crumb-chevron) center / contain no-repeat;
+}
+
+// The final crumb is the current page: bold ink, and inert (the design renders
+// it as plain text, not a link — the plugin still emits an empty-href <a>).
+.breadcrumb-element:last-child a {
+  color: var(--darkgray);
+  font-weight: #{$semiBoldWeight};
+  pointer-events: none;
+  cursor: default;
+}
+
 // ---------------------------------------------------------------------------
 // Site marquee: part of the fixed header — pinned just below the bar and
 // staying put while the page scrolls (it was absolute, so it used to scroll
@@ -646,11 +798,20 @@ body[data-slug="index"] {
   // Card chrome tightens as the viewport shrinks — one knob for both branches.
   --home-card-pad: clamp(0.7rem, 1.5vh, 1rem) clamp(0.8rem, 1.3vw, 1.1rem);
 
+  // Drop the article header on the home page: the "Welcome to DevBook!" title
+  // and its date / read-time content-meta subheading. The dashboard is the
+  // landing content, so it reads from the top under the fixed bar. Scoped to the
+  // header's own .popover-hint (the title+meta wrapper) so the fixed <header> bar
+  // and the dashboard <article> are untouched.
+  .page-header > .popover-hint {
+    display: none;
+  }
+
   // Drop the rule after the body. The afterBody block can't be display:none:
   // it now carries the position:fixed floating scroll buttons, and display:none
   // on this wrapper hides them too (fatal on the scrollable mobile homepage).
   // display:contents removes the empty footer box from layout while letting the
-  // fixed controls render. The page-header (article title + meta) stays.
+  // fixed controls render.
   .center > hr {
     display: none;
   }
@@ -744,6 +905,30 @@ body:not([data-slug="index"]) .page[data-frame="default"] > #quartz-body > .side
 // rule; the two-column areas are the base desktop grid minus grid-sidebar-right.
 @media all and (min-width: 1201px) {
   body:not([data-slug="index"]) .page[data-frame="default"] > #quartz-body:has(> .sidebar.right:empty) {
+    grid-template-columns: #{$sidePanelWidth} auto;
+    grid-template-areas:
+      "grid-sidebar-left grid-header"
+      "grid-sidebar-left grid-center"
+      "grid-sidebar-left grid-footer";
+  }
+}
+
+// ============================================================================
+// Questions and Credits: no right rail.
+//
+// These two top-level pages don't want the graph / TOC / backlinks column. They
+// are ordinary content pages, so their right sidebar isn't :empty (the collapse
+// above doesn't catch them) — hide it explicitly at every breakpoint, and on
+// desktop reclaim its 320px column the same way the empty-sidebar rule does.
+// ============================================================================
+body[data-slug="questions"] .page[data-frame="default"] > #quartz-body > .sidebar.right,
+body[data-slug="credits"] .page[data-frame="default"] > #quartz-body > .sidebar.right {
+  display: none;
+}
+
+@media all and (min-width: 1201px) {
+  body[data-slug="questions"] .page[data-frame="default"] > #quartz-body,
+  body[data-slug="credits"] .page[data-frame="default"] > #quartz-body {
     grid-template-columns: #{$sidePanelWidth} auto;
     grid-template-areas:
       "grid-sidebar-left grid-header"

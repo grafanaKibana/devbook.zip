@@ -255,7 +255,6 @@ export const QuestionsIndex: QuartzComponentConstructor = () => {
     return (
       <div class="questions-index">
         <div class="qi-toc">
-          <h2>Table of Contents</h2>
           <p class="qi-total">Total questions: {total}</p>
           <div class="qi-grid">
             {columns.map((col) => (
@@ -270,7 +269,7 @@ export const QuestionsIndex: QuartzComponentConstructor = () => {
   }
 
   Questions.css = `
-.questions-index .qi-toc .qi-total { color: var(--gray); margin-top: -0.4rem; }
+.questions-index .qi-toc .qi-total { color: var(--gray); margin-top: 0; }
 .questions-index .qi-toc hr { margin: 1.5rem 0; }
 
 /* Two independent masonry columns: each is its own flex stack, so opening a

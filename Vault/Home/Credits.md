@@ -1,6 +1,7 @@
 ---
 title: Credits
 publish: true
+icon: heart
 tags:
   - MetricsIgnore
 ---
