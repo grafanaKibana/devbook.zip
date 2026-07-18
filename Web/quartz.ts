@@ -1,5 +1,7 @@
+import { ExcalidrawEnhance } from "./custom/components/excalidraw-enhance"
 import { ExplorerIcons } from "./custom/components/explorer-icons"
 import { ExplorerOrder } from "./custom/components/explorer-order"
+import { FloatingButtons } from "./custom/components/floating-buttons"
 import { HomepageFit } from "./custom/components/homepage-fit"
 import { NavScopeDropdown } from "./custom/components/nav-scope-dropdown"
 import { QuestionsIndex } from "./custom/components/questions-index"
@@ -7,6 +9,7 @@ import { SiteHeader } from "./custom/components/site-header"
 import { SiteMarquee } from "./custom/components/site-marquee"
 import { Steptrace } from "./custom/components/steptrace"
 import { StepTraceStatic } from "./custom/emitters/steptrace-static"
+import { ClickableImages } from "./custom/transformers/clickable-images"
 import { QuestionCollector } from "./custom/transformers/question-collector"
 import { SyncerFixups } from "./custom/transformers/syncer-fixups"
 import { SteptraceBlock } from "./custom/transformers/steptrace-block"
@@ -56,6 +59,12 @@ config.plugins.transformers.push(QuestionCollector())
 // Steptrace component hydrates. Only touches lang=steptrace, so order-independent.
 config.plugins.transformers.push(SteptraceBlock())
 
+// Make content images click-to-zoom (issue #128). Appended after the built-in
+// transformers so it runs after LinkProcessing and each <img src> is the final
+// resolved URL; it only tags note-content images (skipping ones inside links)
+// and ships its themed overlay CSS/JS via externalResources.
+config.plugins.transformers.push(ClickableImages())
+
 // Emit the generated engine from the sanctioned custom/ surface. This avoids
 // placing DevBook-owned code under Quartz's upgrade-owned quartz/static tree.
 config.plugins.emitters.push(StepTraceStatic())
@@ -98,9 +107,29 @@ for (const pageLayout of Object.values(layout.byPageType)) {
 // selects the least-degraded tablet state that fits one viewport.
 const steptrace = Steptrace()
 const homepageFit = HomepageFit()
-layout.defaults.afterBody = [...(layout.defaults.afterBody ?? []), steptrace, homepageFit]
+const excalidrawEnhance = ExcalidrawEnhance()
+layout.defaults.afterBody = [
+  ...(layout.defaults.afterBody ?? []),
+  steptrace,
+  homepageFit,
+  excalidrawEnhance,
+]
 for (const pageLayout of Object.values(layout.byPageType)) {
-  pageLayout.afterBody = [...(pageLayout.afterBody ?? []), steptrace, homepageFit]
+  pageLayout.afterBody = [
+    ...(pageLayout.afterBody ?? []),
+    steptrace,
+    homepageFit,
+    excalidrawEnhance,
+  ]
+}
+
+// Floating scroll-to-top / scroll-to-bottom buttons (issue #129). afterBody is
+// dropped on canvas pages (MinimalFrame renders no afterBody) — an intended
+// exclusion: scroll-to-extremes is meaningless on a pan/zoom canvas.
+const floatingButtons = FloatingButtons()
+layout.defaults.afterBody = [...(layout.defaults.afterBody ?? []), floatingButtons]
+for (const pageLayout of Object.values(layout.byPageType)) {
+  pageLayout.afterBody = [...(pageLayout.afterBody ?? []), floatingButtons]
 }
 
 const content = { ...(layout.byPageType.content ?? {}) }

@@ -1,5 +1,4 @@
 ---
-publish: true
 created: 2026-07-15T11:47:56.135Z
 modified: 2026-07-15T11:47:56.135Z
 published: 2026-07-15T11:47:56.135Z
@@ -11,12 +10,13 @@ summary: Distributing incoming traffic across multiple service instances so no s
 level:
   - "2"
 priority: High
-status: Done
+status: Ready to Repeat
+publish: true
 ---
 
 # Intro
 
-Load balancing distributes incoming traffic across multiple service instances so one instance does not become a bottleneck or a single point of failure. In system design interviews, this is usually the first infrastructure building block because it enables [[Horizontal Scaling|horizontal scale]] without changing client behavior. It matters for availability, failure isolation, and predictable latency under burst traffic. Reach for it as soon as a service runs on more than one instance, especially for AI APIs where request cost varies by prompt size and model path.
+Load balancing distributes incoming traffic across multiple service instances so one instance does not become a bottleneck or a single point of failure. In system design interviews, this is usually the first infrastructure building block because it enables [[Home/Architecture/Distributed Systems/Scalability Patterns/Horizontal Scaling|horizontal scale]] without changing client behavior. It matters for availability, failure isolation, and predictable latency under burst traffic. Reach for it as soon as a service runs on more than one instance, especially for AI APIs where request cost varies by prompt size and model path.
 
 ## Mechanism
 

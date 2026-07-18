@@ -131,6 +131,27 @@ body {
   gap: 1rem;
 }
 
+// Header toggle + search icons pick up the title accent (--secondary, the
+// default link colour the page title uses) on hover. Their own component CSS
+// paints them --darkgray via fill/stroke, so override both.
+.site-header-actions .darkmode,
+.site-header-actions .readermode,
+.site-header-search .search > .search-button {
+  & svg {
+    transition:
+      fill 0.15s ease,
+      stroke 0.15s ease,
+      color 0.15s ease,
+      opacity 0.1s ease;
+  }
+
+  &:hover svg {
+    fill: var(--secondary);
+    stroke: var(--secondary);
+    color: var(--secondary);
+  }
+}
+
 // ---------------------------------------------------------------------------
 // Desktop / tablet (≥ 768px): title left · search centered · toggles right.
 // ---------------------------------------------------------------------------
@@ -626,11 +647,16 @@ body[data-slug="index"] {
   // Card chrome tightens as the viewport shrinks — one knob for both branches.
   --home-card-pad: clamp(0.7rem, 1.5vh, 1rem) clamp(0.8rem, 1.3vw, 1.1rem);
 
-  // Drop only the rule after the body and the (empty) afterBody block. The
-  // page-header (article title + meta) stays — it's the normal page header.
-  .center > hr,
-  .center > .page-footer {
+  // Drop the rule after the body. The afterBody block can't be display:none:
+  // it now carries the position:fixed floating scroll buttons, and display:none
+  // on this wrapper hides them too (fatal on the scrollable mobile homepage).
+  // display:contents removes the empty footer box from layout while letting the
+  // fixed controls render. The page-header (article title + meta) stays.
+  .center > hr {
     display: none;
+  }
+  .center > .page-footer {
+    display: contents;
   }
 
   .dc-topic-card {
@@ -688,6 +714,42 @@ body[data-slug="index"] {
     .page > #quartz-body > .sidebar.right {
       display: none;
     }
+  }
+}
+
+// ============================================================================
+// Collapse the empty right sidebar on default-frame index pages.
+//
+// Folder and tag pages set positions.right: [] (quartz.config.yaml), so
+// DefaultFrame emits a childless <div class="right sidebar">. Empty, it still
+// takes space at every breakpoint: on desktop the grid reserves its 320px
+// column; on tablet/mobile it's a flow row that keeps the sidebars' fixed-header
+// clearance padding (calc(--site-header-height + 1.25rem)), leaving an empty gap
+// above the footer. Hide the empty div everywhere so it reserves nothing.
+//
+// Content/leaf notes always keep graph + backlinks in the right slot
+// (condition: not-index), so their right sidebar is never :empty — only
+// folder/tag (right: []) match. Home is excluded ([data-slug="index"]); it owns
+// the bespoke dashboard grid above and already hides its own right sidebar per
+// breakpoint. Scoped to [data-frame="default"] so a future frame that reserves
+// an empty right column is unaffected.
+// ============================================================================
+body:not([data-slug="index"]) .page[data-frame="default"] > #quartz-body > .sidebar.right:empty {
+  display: none;
+}
+
+// Desktop additionally reserves the 320px right column in the grid template, so
+// drop it there — hiding the div alone won't reclaim a statically-sized column.
+// Tablet/mobile are already single-column, so the display:none above suffices.
+// Gated at ≥1201px (clearing the 1200px tablet/desktop overlap) like the home
+// rule; the two-column areas are the base desktop grid minus grid-sidebar-right.
+@media all and (min-width: 1201px) {
+  body:not([data-slug="index"]) .page[data-frame="default"] > #quartz-body:has(> .sidebar.right:empty) {
+    grid-template-columns: #{$sidePanelWidth} auto;
+    grid-template-areas:
+      "grid-sidebar-left grid-header"
+      "grid-sidebar-left grid-center"
+      "grid-sidebar-left grid-footer";
   }
 }
 
@@ -1065,3 +1127,173 @@ body[data-slug="index"][data-home-fit="bar-hidden"] {
 :is(code.mermaid, .mermaid-content) svg[aria-roledescription="xychart"] .background {
   fill: transparent !important;
 }
+
+// ============================================================================
+// Excalidraw (community plugin obsidian-plugin-excalidraw) — DevBook overrides.
+//
+// Styling policy — this section remaps ONLY:
+//   • container chrome: .excalidraw-controls buttons, the click-to-activate
+//     affordance + focus states, and the transcluded-embed frame, onto DevBook's
+//     existing Quartz tokens (--secondary/--tertiary/--lightgray/--darkgray/
+//     --light/--gray).
+//   • the container background, to honor an authored viewBackgroundColor.
+// The bounded --excalidraw-bg/--excalidraw-fg → --light/--darkgray palette
+// experiment was evaluated and NOT shipped (WCAG rationale in (b) below).
+// It NEVER touches per-element colors (authored --excalidraw-color-* palette),
+// custom hex strokes/fills, or fonts — those are authored semantics and stay
+// exactly as the plugin renders them. Every selector is scoped under
+// .excalidraw-* (or blockquote.transclude wrapping it); no global side effects.
+//
+// (1) Scroll-safe activation. The plugin sets `touch-action: none` on the
+// container, which traps native page scroll on touch even with the JS gate. Lift
+// it while inactive so a swipe scrolls the page; the plugin owns gestures only
+// once activated. (The wheel/touchmove JS trap is defeated separately by the
+// capture-phase gate in excalidraw-enhance.tsx.)
+// ============================================================================
+// (2) Authored background. excalidraw-enhance.tsx publishes a non-white/
+// non-transparent authored viewBackgroundColor as --exc-authored-bg on the
+// container; author !important beats the plugin's per-nav inline background-color
+// without a race, and the literal color renders the same in both themes.
+// Transparent/white scenes set no property and fall back to the plugin's own
+// theme-following value, preserving current behavior.
+.excalidraw-container {
+  background-color: var(--exc-authored-bg, var(--excalidraw-bg, var(--light))) !important;
+}
+
+.excalidraw-page:not(.excalidraw-active) .excalidraw-container {
+  touch-action: auto;
+  cursor: pointer;
+}
+
+.excalidraw-page.excalidraw-active .excalidraw-container {
+  touch-action: none;
+  outline: 2px solid var(--secondary);
+  outline-offset: -2px;
+}
+
+.excalidraw-container:focus-visible {
+  outline: 2px solid var(--secondary);
+  outline-offset: -2px;
+}
+
+// In a transcluded embed the diagram fills a rounded card; a square outline
+// doesn't follow the corner radius. Round the container to the card's inner
+// radius and draw the active/focus highlight as an inset ring, which — unlike
+// outline — hugs the rounded corners.
+.transclude .excalidraw-container {
+  border-radius: calc(var(--surface-radius, 8px) - 1px);
+}
+
+.transclude .excalidraw-page.excalidraw-active .excalidraw-container,
+.transclude .excalidraw-container:focus-visible {
+  outline: none;
+  box-shadow: inset 0 0 0 2px var(--secondary);
+}
+
+// Click-to-interact hint. Decorative only (the container itself is the
+// keyboard-reachable control), so it is inert to pointer + AT.
+.excalidraw-page .excalidraw-container::after {
+  content: "Click to pan & zoom";
+  position: absolute;
+  left: 0.6rem;
+  bottom: 0.6rem;
+  z-index: 5;
+  padding: 0.15rem 0.5rem;
+  border-radius: 4px;
+  font-size: 0.72rem;
+  font-family: var(--bodyFont, sans-serif);
+  color: var(--gray);
+  background: color-mix(in srgb, var(--light) 82%, transparent);
+  border: 1px solid var(--lightgray);
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity 0.12s ease;
+}
+
+.excalidraw-page:not(.excalidraw-active) .excalidraw-container:hover::after,
+.excalidraw-page:not(.excalidraw-active) .excalidraw-container:focus-visible::after {
+  opacity: 1;
+}
+
+.excalidraw-page.excalidraw-active .excalidraw-container::after {
+  content: "Esc to exit";
+  color: var(--darkgray);
+  opacity: 1;
+}
+
+// (a) Container chrome on DevBook tokens. These rules pin the control cluster to
+// the top-right, add a DevBook radius + --secondary hover/focus accent, and give
+// the injected "open original" link (excalidraw-enhance.tsx, embeds only) the same
+// box as the +/−/⟲ buttons so the whole cluster reads as one control group.
+.excalidraw-controls {
+  top: 0.5rem;
+  right: 0.5rem;
+  bottom: auto;
+}
+
+.excalidraw-controls a.excalidraw-open-original {
+  width: 2rem;
+  height: 2rem;
+  border: 1px solid var(--lightgray);
+  background: var(--light);
+  font-size: 1.05rem;
+  line-height: 1;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background-color 0.1s ease;
+  text-decoration: none;
+}
+
+.excalidraw-controls button,
+.excalidraw-controls a.excalidraw-open-original {
+  border-radius: var(--surface-radius, 6px);
+  color: var(--darkgray);
+
+  &:hover {
+    background: color-mix(in srgb, var(--secondary) 12%, var(--light));
+    border-color: color-mix(in srgb, var(--secondary) 40%, var(--lightgray));
+  }
+
+  &:focus-visible {
+    outline: 2px solid var(--secondary);
+    outline-offset: 2px;
+  }
+}
+
+// Header removed: the transcluded drawing shows only the diagram + controls, no
+// Quartz page-title bar and no default source-link footer (a "↗" control button
+// replaces the latter). Keep the contained card frame around the diagram.
+blockquote.transclude:has(.excalidraw-page) {
+  padding: 0;
+  border: 1px solid var(--lightgray);
+  border-radius: var(--surface-radius, 8px);
+  overflow: hidden;
+  background: var(--light);
+
+  > h1:first-child {
+    display: none;
+  }
+
+  > a.transclude-src {
+    display: none;
+  }
+}
+
+// (b) Bounded palette experiment — NOT shipped. Proposal: remap the canvas
+// surface tokens --excalidraw-bg → --light and --excalidraw-fg → --darkgray in
+// both themes so the diagram coheres with the site. WCAG-AA check of the plugin's
+// default palette (strokes measured for the 3:1 graphics floor, --excalidraw-fg
+// text for 4.5:1) against the proposed backgrounds:
+//   Dark theme  (bg --light #161618): fg 11.98:1; strokes black 12.07, red 7.60,
+//     green 5.02, blue 6.65, orange 4.12, violet 7.49, teal 6.24 — all pass.
+//   Light theme (bg --light #fafbf8): fg 13.16:1; strokes mostly pass BUT the
+//     default orange #f08c00 lands at 2.39:1 (< 3:1). This failure is inherent to
+//     the excalidraw palette on any near-white canvas (≈2.42:1 on the plugin's own
+//     #ffffff), so the remap neither causes nor cures it. Because AA does not hold
+//     for the full default palette, and because --light/--darkgray already sit
+//     within a hair of the plugin's own #ffffff/#121212 / #d3d3d3 defaults (so the
+//     cohesion gain is negligible), the override is intentionally withheld and the
+//     plugin's own --excalidraw-bg/--excalidraw-fg values are kept. Per-element
+//     --excalidraw-color-* variables are never touched regardless.
