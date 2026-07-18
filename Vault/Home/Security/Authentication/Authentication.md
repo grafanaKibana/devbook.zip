@@ -13,8 +13,6 @@ level:
 status: Ready to Repeat
 ---
 
-# Intro
-
 Authentication proves which user or workload is making a request. It does not decide what that principal may do; that is authorization. A production design also needs a credential, a ceremony that proves possession of it, a way to carry the result between requests, and a recovery path. Calling all of those pieces "authentication methods" hides the trust boundaries that fail in practice.
 
 For a browser application, one concrete design is OIDC Authorization Code with PKCE. The callback validates the authorization response and `state`, exchanges the code with the PKCE verifier, then validates the ID token signature, issuer, audience, expiry, and applicable nonce before creating an opaque server-side session. A `Secure; HttpOnly; SameSite=Lax` cookie carries only the session identifier, and the API still evaluates authorization on every request.
@@ -24,7 +22,7 @@ const { FolderStructureMap } = await dc.require("Assets/components/devbook-folde
 return FolderStructureMap;
 ```
 
-## Authentication factors, credentials, and protocols
+# Authentication factors, credentials, and protocols
 
 Factors describe what the claimant proves. Credentials are the concrete secrets or keys used to prove it. Protocols define the messages and the verifier. Tokens normally carry a result or delegated authority; possession of a bearer token authenticates the caller only as "whoever has this token."
 
@@ -39,7 +37,7 @@ Factors describe what the claimant proves. Credentials are the concrete secrets 
 
 Use independent factors for MFA: two passwords are still one knowledge factor. A passkey may provide user verification and device-bound public-key proof in one ceremony, but account recovery can still become the weaker path.
 
-## Separate the layers
+# Separate the layers
 
 These components combine; they are not alternatives on one ladder:
 
@@ -52,7 +50,7 @@ These components combine; they are not alternatives on one ladder:
 
 This distinction matters during incident response. Deleting a session revokes an opaque handle immediately. A signed self-contained token remains valid until expiry unless the resource server checks revocation or sender-constrains it.
 
-## Cookies and browser sessions
+# Cookies and browser sessions
 
 The server creates state with a response header such as:
 
@@ -71,7 +69,7 @@ An opaque random identifier should point to server-side state; do not put profil
 > [!WARNING] Non-normative source visual
 > Cookies use the browser's cookie store, not Web Storage. Omitting `Domain` creates a host-only cookie; a valid `Domain` can widen scope only to the current host's parent domain, never to an unrelated site or public suffix. `Path`, `Secure`, `HttpOnly`, and `SameSite` constrain delivery and access but do not encrypt the value.
 
-## Opaque sessions versus bearer tokens
+# Opaque sessions versus bearer tokens
 
 Compare complete architectures, not cookies against JWTs:
 
@@ -86,7 +84,7 @@ Compare complete architectures, not cookies against JWTs:
 
 Use an opaque session for a first-party browser application when immediate revocation and server control matter. Use short-lived OAuth access tokens across API/service boundaries when independent resource servers need verifiable delegated authority. In both cases validate expiry, bind the credential to the intended audience, rotate it, and assume replay after theft unless a sender-constrained mechanism is used.
 
-## Token and HMAC API authentication
+# Token and HMAC API authentication
 
 A bearer token is sufficient evidence for whoever possesses it. It must travel over TLS, target one audience, carry the smallest useful scope, expire quickly, and never appear in a URL or log.
 
@@ -106,7 +104,7 @@ The client computes `HMAC-SHA-256(secret, canonical-request)` and sends the key 
 
 The key ID is public metadata, not a public cryptographic key; both HMAC parties share the same secret. Resolve each key only within its intended API and environment, and reject a key ID presented to another API even if the underlying secret happens to match. Rotate secrets with overlapping key IDs, revoke compromised clients, and use SHA-256 or stronger. Do not use MD5 or HMAC-MD5 for a new request-authentication design: RFC 6151 specifically withdraws MD5 where collision resistance is required and says new protocol designs should not employ HMAC-MD5.
 
-## Choosing an Auth Approach
+# Choosing an Auth Approach
 
 Visualization pending
 
@@ -119,7 +117,7 @@ Visualization pending
 
 [[Home/Security/Authentication/SSO (Single Sign-On)|SSO]] federates login, [[Home/Security/Authentication/Two-Factor Auth|two-factor authentication]] strengthens the ceremony, and [[Home/Security/Authentication/Resource-based Auth|resource-based authorization]] applies authorization after the caller is known. None replaces the others.
 
-## References
+# References
 
 - [OWASP Authentication Cheat Sheet](https://cheatsheetseries.owasp.org/cheatsheets/Authentication_Cheat_Sheet.html) — credential, session, and reauthentication controls.
 - [OWASP Session Management Cheat Sheet](https://cheatsheetseries.owasp.org/cheatsheets/Session_Management_Cheat_Sheet.html) — session identifiers, cookie attributes, renewal, and expiration.

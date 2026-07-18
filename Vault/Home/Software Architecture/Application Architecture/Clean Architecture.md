@@ -10,13 +10,11 @@ priority: High
 status: Ready to Repeat
 publish: true
 ---
-# Intro
-
 Clean Architecture, popularized by Robert C Martin, organizes software so business policy is protected from technical details. The core rule is the Dependency Rule: source code dependencies point inward toward business rules, and inner layers know nothing about frameworks, databases, or UI. This matters because it keeps critical domain behavior testable and stable even when delivery technologies change. Reach for it when business logic is non-trivial and the system is expected to outlive current infrastructure choices.
 
-## Mechanism
+# Mechanism
 
-### The Dependency Rule in practice
+## The Dependency Rule in practice
 
 Inward means code at the center defines policy, and code farther out implements details. A use case can depend on an `IOrderRepository` abstraction, but the EF Core repository implementation must depend on that abstraction, not the other way around. This reverses the typical framework first dependency chain and keeps business rules independent from storage, web, or messaging tools.
 
@@ -25,7 +23,7 @@ If you enforce this consistently:
 - You can swap persistence from EF Core to Dapper or Cosmos without changing use case logic.
 - You can run fast unit tests over Entities and Use Cases without booting ASP NET Core.
 
-### Four concentric layers
+## Four concentric layers
 
 - **Entities**: Enterprise business rules and domain objects that capture invariants and core language.
 - **Use Cases Application**: Application specific rules that orchestrate entities and define input output boundaries.
@@ -41,11 +39,11 @@ graph LR
 
 The arrows point inward because outer circles implement details for inner policy. Inner layers can be compiled and reasoned about without referencing outer packages.
 
-## Clean Architecture vs simple Layered Architecture
+# Clean Architecture vs simple Layered Architecture
 
-Traditional layered systems often become UI to business to data access, where business logic ends up coupled to repository implementation details and ORM behavior. Clean Architecture keeps similar responsibilities but changes ownership of dependencies: domain and use cases define interfaces, outer infrastructure implements them. Interview shorthand: Layered often describes responsibility stacking, while Clean Architecture adds a strict dependency direction contract. See [[Layered Architecture]] for the baseline model this approach refines (and how Hexagonal/Onion/Clean are one family).
+Traditional layered systems often become UI to business to data access, where business logic ends up coupled to repository implementation details and ORM behavior. Clean Architecture keeps similar responsibilities but changes ownership of dependencies: domain and use cases define interfaces, outer infrastructure implements them. Interview shorthand: Layered often describes responsibility stacking, while Clean Architecture adds a strict dependency direction contract. See [[Home/Software Architecture/Application Architecture/Layered Architecture]] for the baseline model this approach refines (and how Hexagonal/Onion/Clean are one family).
 
-## .NET project structure
+# .NET project structure
 
 ```text
 src
@@ -72,7 +70,7 @@ The project references should follow this direction:
 - `Ordering Infrastructure` references `Ordering Application` and `Ordering Domain`.
 - `Ordering WebAPI` references `Ordering Application` and wires `Ordering Infrastructure` in DI.
 
-### C# use case example
+## C# use case example
 
 ```csharp
 namespace Ordering.Application.Abstractions;
@@ -208,33 +206,33 @@ public sealed class EfOrderRepository : IOrderRepository
 
 The dependency arrow is the key: `PlaceOrderUseCase` depends on `IOrderRepository`, while `EfOrderRepository` depends on Application and Domain contracts.
 
-## Pitfalls
+# Pitfalls
 
-### Over engineering simple CRUD
+## Over engineering simple CRUD
 
 - What goes wrong: teams add command objects use cases and ports for endpoints that only pass through to a single table.
 - Why it happens: architecture is applied as a rule instead of a response to domain complexity.
 - How to avoid it: start with a thinner design for low complexity services and introduce use case boundaries only where behavior and invariants justify the extra indirection.
 
-### Framework leakage into domain and use cases
+## Framework leakage into domain and use cases
 
 - What goes wrong: entities get EF mapping attributes and use cases accept ASP NET request models directly.
 - Why it happens: convenience shortcuts bypass adapter boundaries and import outer concerns into inner layers.
 - How to avoid it: keep mapping and transport concerns in Interface Adapters and Infrastructure, and enforce package reference rules so Domain and Application cannot reference web or ORM assemblies.
 
-### Treating clean architecture as folder naming
+## Treating clean architecture as folder naming
 
 - What goes wrong: projects are named Domain Application Infrastructure but business code still depends on EF Core or HTTP clients from inside use cases.
 - Why it happens: teams copy template folders without automated dependency checks.
 - How to avoid it: validate project references in CI and add **architecture tests** (e.g. **NetArchTest** or **ArchUnitNET**) that fail the build when inner layers reference outer packages — the dependency rule only holds if something enforces it.
 
-### Premature abstraction everywhere
+## Premature abstraction everywhere
 
 - What goes wrong: every class gets an interface even when only one stable implementation exists, creating noise and indirection.
 - Why it happens: dependency inversion is misunderstood as interface everything.
 - How to avoid it: introduce interfaces at boundaries where behavior varies across infrastructure or where test seams are needed, and keep internal implementation details concrete.
 
-## Tradeoffs
+# Tradeoffs
 
 | Criterion | Clean Architecture | Layered | Vertical Slice |
 |---|---|---|---|
@@ -247,7 +245,7 @@ The dependency arrow is the key: `PlaceOrderUseCase` depends on `IOrderRepositor
 
 Decision rule: start with Layered or Vertical Slice for simple domains, and move to Clean Architecture when policy complexity and longevity make framework independence and domain protection worth the indirection cost.
 
-## Questions
+# Questions
 
 > [!QUESTION]- How does Clean Architecture differ from traditional N Layer, and when does the extra indirection pay off
 > - N Layer often keeps downward dependencies from UI to business to data, while Clean Architecture enforces inward dependencies toward policy.
@@ -263,7 +261,7 @@ Decision rule: start with Layered or Vertical Slice for simple domains, and move
 > - A pragmatic approach is to keep boundaries light and evolve toward stricter clean boundaries only where invariants and integration volatility appear.
 > - Tradeoff statement: using full Clean Architecture too early protects against hypothetical future change while charging real present complexity.
 
-## References
+# References
 
 - [The Clean Architecture by Robert C Martin](https://blog.cleancoder.com/uncle-bob/2012/08/13/the-clean-architecture.html) — canonical definition of the dependency rule and concentric layers written by Uncle Bob.
 - [Common web application architectures](https://learn.microsoft.com/en-us/dotnet/architecture/modern-web-apps-azure/common-web-application-architectures) — Microsoft guidance comparing layered clean and other models in modern ASP NET Core systems.

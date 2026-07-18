@@ -14,13 +14,11 @@ publish: true
 status: Creation
 ---
 
-# Intro
-
 A version control system (VCS) records committed versions of tracked files so collaborators can branch, merge, compare, and restore states that exist in the repository history. It cannot recover an untracked file or an uncommitted edit that was never captured by Git, and local recovery records such as the reflog expire.
 
 Git is a distributed VCS: a normal clone receives the objects reachable from the refs it fetches, while shallow clones intentionally omit older history and partial clones can defer selected objects until needed. Workflows such as GitFlow or trunk-based development define how teams coordinate changes; they are conventions layered on Git rather than properties of its object model.
 
-## Working Tree, Index, Repository, and Remote
+# Working Tree, Index, Repository, and Remote
 
 Git moves snapshots through distinct states. The working tree is what tools edit. The index is the proposed next snapshot. A commit stores that snapshot and parent links in the local object database. Branches are movable refs to commits; remote-tracking refs are the last fetched view of another repository. `fetch` updates remote-tracking refs without integrating them; `pull` fetches and then merges or rebases according to configuration.
 
@@ -34,7 +32,7 @@ Use `restore` for working-tree/index content and `switch` for branches. `reset` 
 
 ![[System Design 101/a75942f9f705cbdaf6901c22d5c21b4db1323060c05f111d67e2f23c61a15180.jpg]]
 
-## Essential Git Commands
+# Essential Git Commands
 
 | Intent | Command | Safety boundary |
 | --- | --- | --- |
@@ -48,13 +46,13 @@ Use `restore` for working-tree/index content and `switch` for branches. `reset` 
 
 A flat command list hides the state transition. Name the source state, destination state, and whether the operation discards data before running it.
 
-## Git vs Hosting Platforms
+# Git vs Hosting Platforms
 
 Git defines objects, commits, refs, remotes, and transfer protocols. GitHub, GitLab, and Azure DevOps host repositories and add identity, permissions, pull requests, protected branches, issues, automation, and marketplaces. A repository can move between hosts without changing Git's commit graph; platform workflows, permissions, and automation do not move automatically.
 
 Choose a host for governance, integration, compliance, and operator cost. Do not describe a GitHub pull request or Actions workflow as a Git feature, and do not treat a local Git clone as a backup of host-side issues or branch protections.
 
-## Repository Strategy
+# Repository Strategy
 
 | Boundary | Monorepo | Multirepo |
 | --- | --- | --- |
@@ -66,7 +64,7 @@ Choose a host for governance, integration, compliance, and operator cost. Do not
 
 Use a monorepo when atomic cross-component changes and one dependency/build policy justify investing in an affected-build graph and path ownership. Use multiple repositories when access isolation and independent lifecycle dominate. Company logos are not evidence: measure clone/fetch size, CI fan-out, cross-repo coordination, and release coupling in the actual system.
 
-## Narrow CI Fetches Before Tuning Depth
+# Narrow CI Fetches Before Tuning Depth
 
 `--depth=1` limits history reachable from fetched refs; it does not stop a broad refspec from advertising or fetching every branch. First request only the ref needed by the job, suppress tags if they are unnecessary, then consider shallow history, partial clone filters, sparse checkout, and a local object cache. Measure negotiated objects and bytes before and after.
 
@@ -77,7 +75,7 @@ git -c remote.origin.fetch='+refs/heads/main:refs/remotes/origin/main' \
 
 Narrowing refs can break jobs that discover release branches or calculate versions from tags. Make each job declare the history and refs it needs rather than applying one aggressive checkout globally.
 
-## Semantic Versioning and the Release Contract
+# Semantic Versioning and the Release Contract
 
 SemVer only works after the project defines its public API. `MAJOR.MINOR.PATCH` means incompatible API change, backward-compatible functionality, and backward-compatible fix. `0.y.z` signals unstable public API. Prerelease identifiers sort below the corresponding normal version; build metadata does not affect precedence.
 
@@ -93,7 +91,7 @@ const { FolderStructureMap } = await dc.require("Assets/components/devbook-folde
 return FolderStructureMap;
 ```
 
-## References
+# References
 
 - [Pro Git book](https://git-scm.com/book/en/v2) — explains Git's object model, index, refs, remotes, and everyday state transitions.
 - [Pro Git — Branching Workflows](https://git-scm.com/book/en/v2/Git-Branching-Branching-Workflows) — compares long-running, topic, and integration branches as collaboration conventions layered on Git.

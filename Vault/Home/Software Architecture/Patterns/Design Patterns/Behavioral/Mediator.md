@@ -10,8 +10,6 @@ priority: High
 status: Ready to Repeat
 publish: true
 ---
-# Mediator
-
 Air traffic control is a Mediator. Planes don’t talk to each other directly — a pilot about to land doesn’t radio every other plane in the area. All communication goes through the control tower, which knows the positions, altitudes, and intentions of every aircraft. Adding a new plane to the airspace doesn’t require every existing plane to know about it — only the tower needs updating.
 
 The Mediator pattern defines an object that encapsulates how a set of components interact. Instead of components referring to each other directly (creating a many-to-many dependency web), they communicate through the mediator, reducing dependencies to one-to-many. In .NET, **MediatR is the canonical implementation** — `IMediator.Send(command)` routes a request to its registered handler without the sender knowing the handler. The checkout controller sends `CheckoutCommand`; the mediator finds and invokes `CheckoutHandler`. Adding a new operation means adding a new command and handler pair, not editing the controller.
@@ -26,7 +24,7 @@ flowchart TD
     InventoryHandler -.->|no direct coupling| PaymentHandler
 ```
 
-## Problem
+# Problem
 
 `CheckoutController` directly calls 4 services — all coupled through the controller, which becomes a god class:
 
@@ -60,7 +58,7 @@ public class CheckoutController(
 
 Here's what breaks when requirements change: adding fraud detection requires editing every controller that processes orders — web, mobile, B2B API all have the same coordination logic duplicated.
 
-## Solution
+# Solution
 
 `CheckoutCommand` is sent to the mediator; the handler coordinates the services:
 
@@ -122,7 +120,7 @@ builder.Services.AddMediatR(cfg => cfg.RegisterServicesFromAssembly(typeof(Progr
 
 Adding fraud detection now means adding a MediatR pipeline behavior — the controller and handler never change.
 
-## You Already Use This
+# You Already Use This
 
 **MediatR `IMediator`** — the canonical .NET Mediator. `mediator.Send(command)` routes to the registered `IRequestHandler<TCommand, TResult>`. Pipeline behaviors add cross-cutting concerns (validation, logging, caching) without touching handlers.
 
@@ -130,15 +128,15 @@ Adding fraud detection now means adding a MediatR pipeline behavior — the cont
 
 **MassTransit / NServiceBus** — message buses act as mediators between services. Publishing a `CheckoutCompletedEvent` routes to all registered consumers without the publisher knowing the consumers.
 
-## Tradeoffs
+# Tradeoffs
 
 **Use it when**: many components interact in a tangled many-to-many web and you want to collapse it to one-to-many through a hub; or (the dominant .NET use) you want thin controllers and a CQRS-style command/handler split via MediatR, with pipeline behaviors for cross-cutting concerns.
 
 **Don't reach for it when**: a direct method call would do — wrapping a two-class app in MediatR is ceremony and adds indirection that makes "what handles this request?" harder to trace. Watch for the mediator itself becoming a **god object** if coordination logic accretes in it instead of in handlers.
 
-**vs related**: **Mediator routes one request → one handler** (`Send`); an **[[Event Bus]]** / **[[Observer]]** fans **one event → many** subscribers (`Publish`). A **[[Facade]]** is a one-way simplifying entry point to a subsystem (no routing/coordination); a Mediator coordinates peers bidirectionally.
+**vs related**: **Mediator routes one request → one handler** (`Send`); an **[[Home/Software Architecture/Patterns/Event Bus]]** / **[[Home/Software Architecture/Patterns/Design Patterns/Behavioral/Observer]]** fans **one event → many** subscribers (`Publish`). A **[[Home/Software Architecture/Patterns/Design Patterns/Structural/Facade]]** is a one-way simplifying entry point to a subsystem (no routing/coordination); a Mediator coordinates peers bidirectionally.
 
-## Questions
+# Questions
 
 > [!QUESTION]- When does Mediator become a bottleneck or anti-pattern?
 > When the mediator becomes a god class that knows too much — if `CheckoutCommandHandler` grows to 300 lines with complex branching, the complexity moved from the controller to the handler without being reduced. The mediator pattern reduces coupling but doesn't reduce complexity. Also avoid Mediator when the interaction is simple and direct: if `OrderService` only ever calls `InventoryService`, a direct dependency is clearer than routing through a mediator. The signal: if you can't explain what the mediator does without listing all its handlers, it's too complex.
@@ -146,7 +144,7 @@ Adding fraud detection now means adding a MediatR pipeline behavior — the cont
 > [!QUESTION]- How do MediatR pipeline behaviors implement the Chain of Responsibility pattern?
 > Each `IPipelineBehavior<TRequest, TResponse>` wraps the next behavior in the pipeline. `Handle(request, next, ct)` calls `next()` to continue or returns early to short-circuit. Behaviors are registered in order; the outermost runs first. This is exactly Chain of Responsibility: each behavior decides whether to pass the request along. The difference from a manual chain: MediatR's pipeline is configured via DI registration order, not explicit `SetNext()` calls. The tradeoff: DI-based ordering is less explicit but easier to configure.
 
-## References
+# References
 
 - [Mediator — refactoring.guru](https://refactoring.guru/design-patterns/mediator) — canonical pattern description with component/mediator diagram and C# example
 - [MediatR — GitHub](https://github.com/jbogard/MediatR) — the standard .NET Mediator implementation with pipeline behaviors

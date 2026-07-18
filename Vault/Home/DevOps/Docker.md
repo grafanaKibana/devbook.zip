@@ -11,11 +11,9 @@ status: Ready to Repeat
 publish: true
 ---
 
-# Intro
-
 Docker builds OCI-compatible images and runs containers from them. Pinning the application, runtime, and filesystem reduces environment drift, but it does not guarantee identical behavior across development, CI, and production. The host kernel and CPU architecture, resource limits, network and DNS path, mounts, injected configuration and secrets, security policy, and external dependencies remain part of the runtime contract.
 
-## How Containers Work
+# How Containers Work
 
 A container is not a VM. A Linux container is a host process isolated with Linux namespaces and constrained through cgroups. Docker can also run Windows containers, which use Windows kernel isolation mechanisms, and Docker Desktop commonly runs Linux containers inside a Linux VM on macOS or Windows. An image must match the target OS and CPU architecture unless a multi-platform manifest supplies a compatible variant.
 
@@ -23,7 +21,7 @@ A Docker **image** combines filesystem layers with image configuration. Filesyst
 
 A **container** is a running instance of an image. Multiple containers can run from the same image simultaneously, each with its own writable layer.
 
-## Dockerfile for a .NET 8 App
+# Dockerfile for a .NET 8 App
 
 Multi-stage builds are the standard pattern for .NET — they produce small production images by separating the build environment from the runtime environment:
 
@@ -47,7 +45,7 @@ ENTRYPOINT ["dotnet", "MyApp.dll"]
 
 The SDK stage contains compilers and build tooling. The final stage starts from the ASP.NET runtime image and receives only the published output, so build-only tools are absent from the runtime image. Measure the resulting digest for the selected tag and architecture; image sizes change across .NET versions, base variants, and platforms.
 
-## Reproducible and Least-Privilege Images
+# Reproducible and Least-Privilege Images
 
 A production image should be reproducible from a small context, contain only runtime output, and run without root privileges. Pin the base by version and, where the threat model requires reproducible bytes, by digest. Put stable restore inputs before frequently changing source so the layer cache stays useful. Generate labels and an SBOM in CI, scan the final digest, and promote that same digest rather than rebuilding it per environment.
 
@@ -73,7 +71,7 @@ Keep `.git`, `bin`, `obj`, local secrets, and test output out of the build conte
 > [!WARNING] Non-normative source visual
 > The Node 14 tags and `docker scan` command are obsolete examples. Build from a supported, pinned base image, scan the final immutable digest with the scanner enforced by CI, run as a non-root user, and inject secrets through runtime secret mounts rather than ordinary environment variables.
 
-## Key Commands
+# Key Commands
 
 ```bash
 # Build an image tagged as myapp:latest
@@ -98,7 +96,7 @@ docker logs <container-id>
 docker exec -it <container-id> /bin/bash
 ```
 
-## Docker Compose
+# Docker Compose
 
 Compose defines multi-container applications in a single YAML file. Useful for local development with a database, cache, and app running together:
 
@@ -136,7 +134,7 @@ volumes:
   pgdata:
 ```
 
-## Pitfalls
+# Pitfalls
 
 **Running as root**: By default, containers run as root inside the container. If the container is compromised, the attacker has root access to the container filesystem. Fix: add `USER app` to your Dockerfile after creating a non-root user.
 
@@ -148,7 +146,7 @@ volumes:
 
 **Ignoring health checks**: Kubernetes and load balancers need to know when a container is ready. Without a health check, traffic is routed to containers that are still starting up. Fix: add `HEALTHCHECK` in Dockerfile or configure liveness/readiness probes in Kubernetes.
 
-## Tradeoffs
+# Tradeoffs
 
 | | Docker | Podman | Bare Metal |
 |---|---|---|---|
@@ -161,7 +159,7 @@ volumes:
 
 **Docker Compose vs Kubernetes**: Compose is a good fit for local development and can run bounded single-host production workloads when host failure, manual rollout, and limited orchestration are acceptable. Kubernetes fits multi-node workloads that need scheduling, controlled rollout, autoscaling, and reconciliation. Compose is not an HA orchestrator; the boundary is the workload requirement, not the word "production."
 
-## Questions
+# Questions
 
 > [!QUESTION]- Why use multi-stage builds for .NET applications?
 > - The .NET SDK stage includes compilers and build tools that the running application usually does not need.
@@ -177,7 +175,7 @@ volumes:
 > - In Kubernetes, mount Secrets or external-secret-provider volumes as files and restrict access with RBAC.
 > - Tradeoff: runtime injection adds operational complexity but is the only safe approach.
 
-## References
+# References
 
 - [Docker documentation](https://docs.docker.com/) — official Docker docs; covers Dockerfile reference, Compose, networking, and volumes
 - [Docker multi-stage builds](https://docs.docker.com/build/building/multi-stage/) — official guide to multi-stage builds; essential for .NET production images

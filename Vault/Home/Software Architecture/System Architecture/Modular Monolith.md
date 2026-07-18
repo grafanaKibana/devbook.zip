@@ -11,10 +11,9 @@ status: Ready to Repeat
 publish: true
 ---
 
-# Intro
-A modular monolith is a single deployable application that is intentionally split into strict modules with explicit boundaries. It matters because you get most of the practical benefits people want from [[Microservices]] - clear ownership, clean contracts, and safer parallel development - without paying the full distributed systems tax on day one. Reach for it when your product is growing, domain boundaries are becoming clear, and your team does not want the operational overhead of many services yet. For most product teams, it is the pragmatic default: improve boundaries first, then distribute only where pressure proves it is worth it.
+A modular monolith is a single deployable application that is intentionally split into strict modules with explicit boundaries. It matters because you get most of the practical benefits people want from [[Home/Software Architecture/System Architecture/Microservices]] - clear ownership, clean contracts, and safer parallel development - without paying the full distributed systems tax on day one. Reach for it when your product is growing, domain boundaries are becoming clear, and your team does not want the operational overhead of many services yet. For most product teams, it is the pragmatic default: improve boundaries first, then distribute only where pressure proves it is worth it.
 
-## Mechanism
+# Mechanism
 Each module owns its own domain model, use cases, persistence rules, and public contract.
 
 - **Boundary shape**: a module exposes only contracts such as interfaces, commands, events, and DTOs from its contracts assembly.
@@ -40,7 +39,7 @@ flowchart LR
 > [!IMPORTANT]
 > **Data isolation makes the transaction boundary explicit.** Separate `DbContext` types or schemas can still share one local ACID transaction when they use the same relational database, connection, and provider transaction. The boundary becomes asynchronous when modules use separate databases, brokers, or resources that cannot participate in the same supported transaction. Then keep each local change atomic and publish reliably through an outbox instead of assuming all modules committed together.
 
-## .NET implementation
+# .NET implementation
 
 Separate projects make forbidden references visible to the compiler and architecture tests:
 
@@ -130,7 +129,7 @@ public sealed class PlaceOrderHandler(
 
 `IUnitOfWork` is valid here only because both module adapters enlist in the same local database transaction. If Inventory moves behind a network boundary, this handler must become a durable workflow with idempotent reservation and compensation rather than pretending a local transaction still spans both modules.
 
-### Module-owned registration
+## Module-owned registration
 
 Each infrastructure assembly owns its persistence registration and migrations history. The host composes modules without reaching into their domain or persistence types.
 
@@ -171,7 +170,7 @@ app.MapOrdersEndpoints();
 app.Run();
 ```
 
-### Shared transaction when the resource is shared
+## Shared transaction when the resource is shared
 
 Two `DbContext` instances can commit atomically when they use the same open relational connection and provider transaction:
 
@@ -206,7 +205,7 @@ await transaction.CommitAsync(cancellationToken);
 
 Different schemas do not prevent this transaction because PostgreSQL is still one transactional resource. When a module moves to another database, uses a provider that cannot share the transaction, or publishes to a broker, persist an outbox record with the local change and expose the cross-module workflow as observable asynchronous state.
 
-## Extraction path to microservices
+# Extraction path to microservices
 
 Clean boundaries make extraction bounded, not transparent. Keeping call sites behind a contract such as `IInventoryGateway` can preserve the use-case shape, but the new network boundary must become visible in the design:
 
@@ -218,7 +217,7 @@ Clean boundaries make extraction bounded, not transparent. Keeping call sites be
 
 The interface may remain familiar, but its contract now includes partial failure and eventual consistency. That is still safer than extracting tangled code: module ownership and data isolation narrow the migration surface without pretending a local method call and a remote operation are equivalent.
 
-## Collocation and scale cases
+# Collocation and scale cases
 
 Collocation pays when stages always change together, share one scaling profile, and exchange large intermediate data. Prime Video's monitoring team reported that moving one tightly ordered video-analysis pipeline into one process removed remote orchestration and transfer costs. The result was specific to that workload, not a general comparison between monoliths and services.
 
@@ -226,13 +225,13 @@ Stack Overflow's documented 2016 architecture shows a different mechanism: a sta
 
 Use these cases as boundary tests. Collocate modules when their changes, data movement, and scaling remain coupled. Extract a service only when independent deployment, failure isolation, or asymmetric scaling repeatedly pays for the new network and operating boundary.
 
-## Pitfalls
+# Pitfalls
 
 - **Boundary erosion**: direct table reads, internal project references, and cross-module joins turn folders into decoration. Contracts-only references, table ownership, and architecture tests must fail the build when a shortcut crosses the boundary.
 - **Shared database coupling**: one database can preserve local ACID transactions, but shared tables and unowned migrations couple modules. Give each module a schema and `DbContext`; exchange data through contracts or events.
 - **Premature partitioning**: too many modules around unstable domains create constant boundary churn. Start with a few bounded contexts and split when ownership, change frequency, or scaling evidence makes the boundary durable.
 
-## Tradeoffs
+# Tradeoffs
 | Criterion | Traditional Monolith | Modular Monolith | Microservices |
 |---|---|---|---|
 | Deployment | Single unit | Single unit | Independent service deployments |
@@ -244,14 +243,14 @@ Use these cases as boundary tests. Collocate modules when their changes, data mo
 
 Decision rule: default to modular monolith for most product teams, choose traditional monolith only for very small or short lived systems, and move to microservices only when independent deployment or scaling constraints are repeatedly blocking delivery.
 
-## Questions
+# Questions
 > [!QUESTION]- How do you enforce module boundaries in a modular monolith to prevent it from degrading into a traditional monolith?
 > Split each module into contracts, core, and infrastructure assemblies; allow cross-module references only to contracts. Give tables an owner, block cross-module joins, and use architecture tests to fail CI on forbidden project or namespace dependencies. The friction is intentional: a boundary that cannot reject a shortcut is only documentation.
 
 > [!QUESTION]- When would you choose a modular monolith over microservices, and what signals tell you it is time to extract?
 > Choose the modular monolith while domains can be owned as modules and one deployment remains reliable. Extract when a module repeatedly needs independent scaling, release cadence, security isolation, or reliability posture. Before cutover, preserve the domain contract but redesign the interaction for remote deadlines, retries, observability, and transaction boundaries.
 
-## References
+# References
 - [Modular Monolith with DDD repository by Kamil Grzybek](https://github.com/kgrzybek/modular-monolith-with-ddd) - Anchor practitioner codebase showing strict module boundaries, integration events, and architecture tests in a real .NET solution.
 - [Kamil Grzybek Modular Monolith Primer](https://www.kamilgrzybek.com/blog/posts/modular-monolith-primer) - Conceptual explanation of module boundaries, communication patterns, and why modular monolith is a strategic step before service extraction.
 - [Modular Monolith Communication Patterns by Milan Jovanovic](https://www.milanjovanovic.tech/blog/modular-monolith-communication-patterns) - Practitioner guidance on in process communication choices and contract based module interaction in .NET.

@@ -10,11 +10,9 @@ priority: Medium
 status: Ready to Repeat
 publish: true
 ---
-# Intro
-
 UDP (User Datagram Protocol) is a connectionless transport protocol that sends independent datagrams with no delivery guarantees. There is no handshake, no acknowledgment, no retransmission, and no ordering. You reach for it when lower connection-establishment and transport-retransmission overhead matters and the workload can define its own recovery: DNS retries lost queries, critical game or telemetry events add sequencing, acknowledgments, and bounded retries, while stale media or state samples can be dropped.
 
-## How It Works
+# How It Works
 
 UDP adds a minimal 8-byte header (source port, destination port, length, checksum) to the payload and sends it. The receiver either gets it or doesn't. No state is maintained between sender and receiver.
 
@@ -29,7 +27,7 @@ sequenceDiagram
   Sender->>Receiver: Datagram 4
 ```
 
-## When to Use UDP
+# When to Use UDP
 
 **Real-time audio/video:** a retransmitted audio packet from 200ms ago is useless — the conversation has moved on. Applications implement their own loss concealment (interpolation, FEC) rather than waiting for TCP retransmission.
 
@@ -41,7 +39,7 @@ sequenceDiagram
 
 **Multicast / broadcast:** UDP can send **one datagram to many receivers** — *broadcast* to a whole subnet, or *multicast* to a group that subscribed to a multicast address (`224.0.0.0/4`). TCP is strictly point-to-point and cannot do this. It's used for service discovery (mDNS/Bonjour, SSDP), IPTV, and market-data feeds where one stream fans out to thousands of subscribers without the sender tracking each.
 
-## UDP Workloads and Their Recovery Layer
+# UDP Workloads and Their Recovery Layer
 
 "Uses UDP" says nothing about how a workload handles loss:
 
@@ -54,7 +52,7 @@ sequenceDiagram
 
 Generic "video streaming uses UDP" is too broad. RTP/WebRTC and QUIC-based delivery do; HLS and DASH segments are commonly fetched over HTTP on reliable transports. The reviewed use-case visual is excluded because it erases that distinction and labels a FIX client path as UDP multicast.
 
-## Reliability above UDP
+# Reliability above UDP
 
 A game can use two logical channels over one UDP socket:
 
@@ -70,7 +68,7 @@ Snapshots are unreliable and replaceable. The receiver keeps a small sequence wi
 
 Reliability does not excuse an unpaced sender. Measure RTT and loss, cap bytes in flight, reduce the sending rate on congestion, and bound retransmissions. Also keep datagrams below the path MTU; IP fragmentation turns one missing fragment into a lost whole datagram. Use QUIC when you need secure, congestion-controlled reliable streams plus independent ordering. Use TCP when one reliable ordered byte stream is enough and UDP traversal or a custom protocol would add complexity without a latency benefit.
 
-## C# Example
+# C# Example
 
 ```csharp
 // Sender
@@ -85,7 +83,7 @@ var message = Encoding.UTF8.GetString(result.Buffer);
 Console.WriteLine($"Received: {message} from {result.RemoteEndPoint}");
 ```
 
-## Pitfalls
+# Pitfalls
 
 **No congestion control**
 UDP does not back off under network congestion. A UDP sender that floods the network can starve TCP connections sharing the same link. Applications using UDP for high-throughput transfers should implement their own congestion control (as QUIC does).
@@ -99,7 +97,7 @@ UDP has no authentication or encryption. Use DTLS (Datagram TLS) for encrypted U
 **Amplification / reflection attacks**
 Because UDP is connectionless, the source address is trivially **spoofed** — there's no handshake to prove the sender. An attacker sends a small query with the victim's IP as the source to a server that returns a large response (DNS, NTP, memcached), and the server unwittingly floods the victim. The *amplification factor* (response ÷ request size) can be 50× or more, making UDP the basis of the largest DDoS attacks. Mitigations: rate-limit responses, disable open recursion/`monlist`, and deploy source-address validation (BCP 38) at the network edge.
 
-## Questions
+# Questions
 
 > [!QUESTION]- When is UDP preferable to TCP, and what reliability mechanisms do applications add on top?
 > UDP is preferable when the application benefits from lower connection-establishment and transport-retransmission overhead and can own recovery. DNS retries lost queries; games and telemetry can sequence, acknowledge, and retry critical events; stale media or state samples can be dropped. Applications may also add FEC (Forward Error Correction) for loss recovery. QUIC is the canonical example — it builds reliable ordered streams on UDP while avoiding TCP's head-of-line blocking.
@@ -110,7 +108,7 @@ Because UDP is connectionless, the source address is trivially **spoofed** — t
 > [!QUESTION]- What is QUIC and why is it built on UDP rather than TCP?
 > QUIC (HTTP/3) implements reliable, ordered, multiplexed streams on top of UDP. It's built on UDP to avoid TCP's head-of-line blocking (a lost TCP segment blocks all streams; QUIC streams are independent), to enable faster connection establishment (0-RTT resumption), and to allow protocol evolution without OS kernel changes. TLS 1.3 is built into QUIC — there's no separate TLS handshake.
 
-## References
+# References
 
 - [UDP specification (RFC 768)](https://www.rfc-editor.org/rfc/rfc768) — the original 3-page UDP specification; notable for its brevity.
 - [UDP Usage Guidelines (RFC 8085)](https://www.rfc-editor.org/rfc/rfc8085) — IETF requirements for congestion control, message sizing, reliability, checksums, and middlebox behavior.

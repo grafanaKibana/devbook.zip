@@ -11,13 +11,11 @@ status: Creation
 publish: true
 ---
 
-# Vertical Scaling
-
 Vertical scaling (scale-up) means giving a single node more resources: more CPU cores, more RAM, faster disks, or higher network throughput. The mechanism is direct: a process that was CPU-starved gets more cores and can run more threads concurrently; a database that was spilling to disk gets enough RAM to keep the working set in memory. No code changes, no topology changes. That simplicity makes it the right first move for monoliths and managed databases where adding nodes would require significant re-architecture. For the broader context of scaling strategies, see [[Home/Software Architecture/Distributed Systems/Scalability Patterns/Scalability Patterns|Scalability Patterns]].
 
-You reach for it when: the bottleneck is clearly resource-bound on a single node, the workload doesn't parallelize cleanly across nodes, or the cost of [[Horizontal Scaling]] complexity (sharding, distributed coordination, eventual consistency) outweighs the cost of a larger machine.
+You reach for it when: the bottleneck is clearly resource-bound on a single node, the workload doesn't parallelize cleanly across nodes, or the cost of [[Home/Software Architecture/Distributed Systems/Scalability Patterns/Horizontal Scaling]] complexity (sharding, distributed coordination, eventual consistency) outweighs the cost of a larger machine.
 
-## How It Works
+# How It Works
 
 The effect of scaling up depends on what the bottleneck actually is.
 
@@ -29,7 +27,7 @@ The effect of scaling up depends on what the bottleneck actually is.
 
 When you scale up a VM in Azure, the hypervisor migrates the instance to a host with the target hardware profile. For Azure App Service, changing the plan tier resizes the underlying compute. For Azure SQL, changing the service tier (e.g., General Purpose to Business Critical) moves the database to different hardware with more vCores and a higher memory-to-core ratio.
 
-## Example: Scaling Up Azure SQL and App Service
+# Example: Scaling Up Azure SQL and App Service
 
 A .NET API backed by Azure SQL starts hitting CPU limits at peak load. The first diagnostic step is checking `sys.dm_exec_query_stats` and Azure Monitor metrics to confirm CPU is the bottleneck, not missing indexes.
 
@@ -68,7 +66,7 @@ resource sqlDatabase 'Microsoft.Sql/servers/databases@2022-05-01-preview' = {
 }
 ```
 
-## Pitfalls
+# Pitfalls
 
 **Hard ceiling on machine size.** Every cloud provider has a maximum VM SKU. Azure's largest general-purpose VM (Standard_M416ms_v2) has 416 vCores and 11.4 TB RAM. Once you hit it, vertical scaling is exhausted. Workloads that grow beyond that ceiling have no escape except horizontal scaling, which may require significant re-architecture if the system was designed assuming a single node.
 
@@ -78,7 +76,7 @@ resource sqlDatabase 'Microsoft.Sql/servers/databases@2022-05-01-preview' = {
 
 **Non-linear cost curve.** Doubling resources rarely doubles cost. Moving from 4 to 8 vCores on Azure SQL General Purpose roughly doubles the compute cost, but moving from 8 to 16 vCores on Business Critical tier can be 3-4x more expensive due to the premium hardware and built-in HA. Always model cost at the target tier before committing.
 
-## Tradeoffs
+# Tradeoffs
 
 | Dimension | Vertical Scaling | Horizontal Scaling |
 |---|---|---|
@@ -92,7 +90,7 @@ resource sqlDatabase 'Microsoft.Sql/servers/databases@2022-05-01-preview' = {
 
 The practical decision rule: start vertical, switch to horizontal when you hit the cost curve inflection point or when the single-node failure risk becomes unacceptable for your SLA.
 
-## Questions
+# Questions
 
 > [!QUESTION]- When is vertical scaling the right first move over horizontal scaling?
 > **Expected answer:**
@@ -118,10 +116,10 @@ The practical decision rule: start vertical, switch to horizontal when you hit t
 > - Vertical scaling increases capacity but does nothing for availability.
 > - Mitigation: pair with redundancy (active-passive failover, read replicas, multi-AZ deployment).
 > - Azure SQL Business Critical tier includes a built-in secondary replica for reads and failover.
-> - This is distinct from [[Horizontal Scaling]], which inherently distributes failure across nodes.
+> - This is distinct from [[Home/Software Architecture/Distributed Systems/Scalability Patterns/Horizontal Scaling]], which inherently distributes failure across nodes.
 > **Why this is strong:** It shows the candidate distinguishes capacity from availability — a common interview blind spot.
 
-## References
+# References
 
 - [Azure SQL Database service tiers](https://learn.microsoft.com/en-us/azure/azure-sql/database/service-tiers-general-purpose-business-critical) — official docs on vCore tiers, hardware generations, and scaling behavior
 - [Azure App Service plan overview](https://learn.microsoft.com/en-us/azure/app-service/overview-hosting-plans) — plan tiers, scaling options, and compute characteristics

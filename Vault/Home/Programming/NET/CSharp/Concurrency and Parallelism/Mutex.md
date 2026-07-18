@@ -11,11 +11,9 @@ status: Ready to Repeat
 publish: true
 ---
 
-# Intro
-
 `Mutex` is an OS-backed synchronization primitive that enforces single-owner access to a critical section. In .NET it is most useful for **cross-process coordination** via named mutexes — for example, ensuring only one instance of a Windows service writes to a shared log file, or preventing concurrent database migrations from two deployment slots. For purely in-process code, `lock` or `SemaphoreSlim` is a better default because they avoid the kernel transition overhead that makes `Mutex` one to two orders of magnitude slower than `Monitor.Enter` for uncontended acquisitions.
 
-## How It Works
+# How It Works
 
 `Mutex` derives from `WaitHandle` (it wraps an OS handle exposed through `SafeWaitHandle`), and has ownership semantics:
 
@@ -35,7 +33,7 @@ m.ReleaseMutex(); // count = 1 — still owned
 m.ReleaseMutex(); // count = 0 — now released for other threads
 ```
 
-### Acquiring multiple handles
+## Acquiring multiple handles
 
 Because `Mutex` is a `WaitHandle`, you can acquire several at once with `WaitHandle.WaitAll` (atomic — avoids the lock-ordering deadlocks of nested `WaitOne` calls) or race them with `WaitAny`:
 
@@ -50,7 +48,7 @@ mutexA.ReleaseMutex();
 > [!WARNING]
 > `WaitAll` is not supported on an STA thread (e.g. a WinForms/WPF UI thread) and throws `NotSupportedException` there.
 
-## Example
+# Example
 
 ```csharp
 using var mutex = new Mutex(initiallyOwned: false, name: "MyApp.SingleWriter");
@@ -92,7 +90,7 @@ finally
 }
 ```
 
-## Pitfalls
+# Pitfalls
 
 - **Kernel transition overhead on hot paths** — `Mutex.WaitOne` is a kernel call that costs 1-5 µs per uncontended acquisition, versus 20-50 ns for `lock` (which uses `Monitor.Enter` with a user-mode spin before escalating). An API endpoint using `Mutex` for in-process synchronization at 10K req/s adds 10-50 ms of cumulative wait time per second. Use `lock` for in-process, `Mutex` only when cross-process is required.
 - **Release from wrong thread throws** — calling `ReleaseMutex` from a thread that does not own it throws `ApplicationException`. In async code where continuations can run on different threads, this is a landmine. Keep `WaitOne`/`ReleaseMutex` in the same synchronous method scope; for async patterns, use `SemaphoreSlim.WaitAsync` instead.
@@ -100,7 +98,7 @@ finally
 - **Security on shared machines** — named mutexes are not automatically restricted to your process or user context. On Windows, another process can open your named mutex and interfere with coordination. Use `MutexAccessRule`/`MutexSecurity` to restrict access. On Linux, named mutexes use shared memory files with no ACL support — avoid named mutexes on multi-tenant machines.
 - **Named-mutex lifetime is not the same across platforms** — on Windows a named mutex is a kernel object that survives as long as a handle is open. On Linux/macOS, .NET backs named mutexes with shared-memory files under `/tmp` (or `TMPDIR`) that are tied to the process/boot lifetime, not kernel-persistent; the `Global\`/`Local\` session prefixes are also Windows-only concepts. Don't assume identical cross-machine semantics — for distributed single-instance guards use a real distributed lock (database row lock, Redis `SETNX`, lease), not a named `Mutex`.
 
-## Tradeoffs
+# Tradeoffs
 
 - `Mutex` vs `lock`: mutex supports cross-process coordination, while `lock` is faster and simpler for in-process synchronization.
 - `Mutex` vs `Semaphore`: mutex serializes to one owner; semaphore allows bounded parallel entrants.
@@ -108,7 +106,7 @@ finally
 
 **Use `lock` in-process, `Mutex` only across processes on one machine.** The kernel transition is the whole cost of a `Mutex`, so paying it for in-process work is waste when a [[Locking|lock]] would do. And if the coordination has to cross *machines*, neither works: reach for a distributed lock (a database row lock, a Redis lease), as the named-mutex pitfall above spells out.
 
-## Questions
+# Questions
 
 > [!QUESTION]- When is a named `Mutex` the right tool in .NET?
 > When you need to coordinate access across multiple processes on the same machine (for example single-writer protection for shared file/database artifacts).
@@ -119,7 +117,7 @@ finally
 > [!QUESTION]- What does `AbandonedMutexException` signal?
 > A previous owner exited without releasing the mutex, which means exclusive ownership was recovered but shared state may be inconsistent and must be validated.
 
-## References
+# References
 
 - [Mutex class (Microsoft Learn)](https://learn.microsoft.com/en-us/dotnet/api/system.threading.mutex) — ownership semantics, `ReleaseMutex`, `AbandonedMutexException`, and the named-mutex constructor.
 - [Overview of synchronization primitives (Microsoft Learn)](https://learn.microsoft.com/en-us/dotnet/standard/threading/overview-of-synchronization-primitives) — where `Mutex` sits relative to `lock`/`Monitor` and `SemaphoreSlim`, and when the kernel object is worth its cost.

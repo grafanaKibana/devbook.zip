@@ -13,8 +13,6 @@ level:
 status: Creation
 ---
 
-# Intro
-
 Not everything in .NET fits cleanly into language/runtime buckets. This folder captures ecosystem topics that are important in practice but often context-dependent, such as legacy web hosting abstractions and real-time communication stacks. Example: use SignalR for server-push real-time updates, and study OWIN mainly for legacy ASP.NET maintenance or migration work.
 
 ```datacorejsx
@@ -22,7 +20,7 @@ const { FolderStructureMap } = await dc.require("Assets/components/devbook-folde
 return FolderStructureMap;
 ```
 
-## Questions
+# Questions
 
 > [!QUESTION]- When should you use SignalR versus polling or server-sent events?
 > Use SignalR when you need bidirectional real-time communication (chat, live dashboards, collaborative editing). SignalR abstracts the transport layer (WebSockets with SSE and long polling as fallbacks).
@@ -32,7 +30,7 @@ return FolderStructureMap;
 > OWIN matters for teams maintaining or migrating legacy ASP.NET Framework applications. Understanding the OWIN middleware pipeline model helps when migrating to ASP.NET Core's similar but distinct middleware pipeline, and when troubleshooting Katana-hosted services still running in production.
 
 
-## References
+# References
 
 - [.NET documentation (Microsoft Learn)](https://learn.microsoft.com/en-us/dotnet/) — Platform overview and official references.
 - [ASP.NET Core documentation (Microsoft Learn)](https://learn.microsoft.com/en-us/aspnet/core/) — Modern web stack guidance for middleware and real-time features.

@@ -12,15 +12,13 @@ status: Done
 publish: true
 ---
 
-# Intro
-
 CAP theorem says that in a distributed data system, once a network partition happens, you can guarantee at most one of **strong consistency** or **availability** (while still tolerating the partition). This matters because real systems eventually hit partial failures: links drop, regions isolate, packets reorder, and suddenly nodes cannot communicate reliably. A partition is not "the whole system is down"; it is specifically "some nodes can still process requests, but they cannot exchange enough messages to maintain a single, current view of data." You reach for CAP when deciding failure behavior in system design: do we reject some operations to protect correctness, or accept operations and repair divergence later?
 
-## What CAP Actually Means
+# What CAP Actually Means
 
-### Definitions in operational terms
+## Definitions in operational terms
 
-- **Consistency (C)**: every successful read sees the most recent successful write (or an error), as if there is one up-to-date value. *(This is **linearizability** — replicas agreeing. It is **not** the "C" in [[ACID]], which means constraint/invariant preservation within one node. A system can be ACID and AP, or CP and non-ACID — the two C's are unrelated.)*
+- **Consistency (C)**: every successful read sees the most recent successful write (or an error), as if there is one up-to-date value. *(This is **linearizability** — replicas agreeing. It is **not** the "C" in [[Home/Data Persistence/ACID]], which means constraint/invariant preservation within one node. A system can be ACID and AP, or CP and non-ACID — the two C's are unrelated.)*
 - **Availability (A)**: every request to a non-failed node receives a non-error response in finite time.
 - **Partition tolerance (P)**: the system continues operating despite message loss/delay between node groups.
 
@@ -31,7 +29,7 @@ The common "pick any 2 of 3" slogan is a simplification that often causes wrong 
 
 When there is **no** partition, many systems can provide both consistency and availability for normal operation.
 
-## Mechanism: Why You Cannot Have C and A During Partition
+# Mechanism: Why You Cannot Have C and A During Partition
 
 Imagine two replicas, `R1` and `R2`, serving the same key.
 
@@ -56,9 +54,9 @@ flowchart TD
     I --> J[Reconcile later via repair or conflict resolution]
 ```
 
-## CP vs AP With Concrete Systems
+# CP vs AP With Concrete Systems
 
-### CP behavior (consistency-first during partition)
+## CP behavior (consistency-first during partition)
 
 Representative systems: ZooKeeper / etcd style coordination services, majority-quorum relational deployments.
 
@@ -73,7 +71,7 @@ Concrete effect:
 
 ZooKeeper-style mindset: "If I cannot prove this write is globally safe, I will not accept it."
 
-### AP behavior (availability-first during partition)
+## AP behavior (availability-first during partition)
 
 Representative systems: the original Amazon Dynamo design, Cassandra configurations that accept on reachable replicas, and other explicitly availability-first multi-writer topologies.
 
@@ -88,7 +86,7 @@ Concrete effect:
 
 Dynamo-style mindset: "Keep accepting traffic now, converge state later."
 
-## CAP Is About Partition Time, Not Normal Time
+# CAP Is About Partition Time, Not Normal Time
 
 This is one of the most important interview points:
 
@@ -98,7 +96,7 @@ This is one of the most important interview points:
 
 Practical implication: ask "What happens in the bad 0.1% network case?" rather than evaluating only happy-path latency graphs.
 
-### Partition-time choice and the false CA option
+## Partition-time choice and the false CA option
 
 | Partitioned operation | Preserve CAP consistency | Preserve CAP availability |
 |---|---|---|
@@ -109,7 +107,7 @@ Practical implication: ask "What happens in the bad 0.1% network case?" rather t
 
 CAP availability is also stricter than an uptime SLO. It requires every request to every non-failed node to receive a non-error response in finite time. A service can meet `99.99%` monthly uptime while rejecting the small set of partitioned writes needed to protect consistency; that makes the operation CP under CAP, not an operationally "unavailable service" in the usual dashboard sense.
 
-## Normal-time tradeoffs
+# Normal-time tradeoffs
 
 CAP constrains partition-time behavior. PACELC adds the normal case: if there is a partition, choose availability or consistency; else, choose latency or consistency. Database configuration changes both failure behavior and everyday request latency, so classify an operation and its selected consistency level instead of labeling an entire product `CP` or `AP`.
 
@@ -124,27 +122,27 @@ Product names do not fix these choices. SQL Server Availability Groups with sync
 
 For a multi-region profile service, writes can go to the primary region and return a session token. The next read carries that token, preserving read-your-writes without waiting for every region. Anonymous recommendation reads use the nearest region and tolerate a five-minute freshness window. One product therefore occupies two PACELC positions for two operations.
 
-## Pitfalls
+# Pitfalls
 
-### Pitfall 1: "CAP means pick two of three"
+## Pitfall 1: "CAP means pick two of three"
 
 - **What goes wrong**: teams assume they can permanently choose C and A while ignoring P.
 - **Why it is wrong**: once replication spans unreliable networks, partitions will happen; P is not optional in practice.
 - **How to avoid it**: restate CAP as "during partition, choose C or A" and design explicit failure policy for each critical operation.
 
-### Pitfall 2: Treating CAP choice as system-wide and static
+## Pitfall 2: Treating CAP choice as system-wide and static
 
 - **What goes wrong**: architecture docs label entire platform "CP" or "AP," then apply one rule to all endpoints.
 - **Why it is risky**: different endpoints have different correctness and UX budgets.
 - **How to avoid it**: classify operations by business invariants and allowed stale window, then pick per-operation consistency/availability behavior.
 
-### Pitfall 3: Ignoring reconciliation design in AP paths
+## Pitfall 3: Ignoring reconciliation design in AP paths
 
 - **What goes wrong**: system accepts writes under partition but has weak conflict strategy.
 - **Why it is risky**: silent data corruption appears later as duplicate orders or lost preference updates.
-- **How to avoid it**: define merge policy, [[Idempotency|idempotency keys]], causality/version metadata, and repair observability from day one.
+- **How to avoid it**: define merge policy, [[Home/Software Architecture/Distributed Systems/Idempotency|idempotency keys]], causality/version metadata, and repair observability from day one.
 
-## Questions
+# Questions
 
 > [!QUESTION]- Is a system "CP" or "AP" as a whole?
 > Don't think of it system-wide — decide per operation, because different endpoints have different correctness budgets. A `PlaceOrder` or ledger write wants CP: refuse it under partition rather than risk split-brain or a double charge. A `GetRecommendations` read wants AP: keep serving slightly stale data because availability beats freshness there. A profile read might only need session consistency. So the same system is CP on some paths and AP on others; labeling the whole platform and applying one rule everywhere is the mistake. Map each operation to its business invariant and its allowed staleness window.
@@ -152,7 +150,7 @@ For a multi-region profile service, writes can go to the primary region and retu
 > [!QUESTION]- Why is "pick two of three" a misleading way to state CAP?
 > Because in any system that replicates data across machines, partition tolerance isn't something you opt out of — networks drop packets and isolate nodes whether you like it or not. So "CA" isn't really on the menu: the moment a partition hits, a system that didn't plan for it just stops being correct or stops responding. The honest framing is that P is a given, and the real decision is what you do *during* a partition — sacrifice consistency to stay available (AP), or sacrifice availability to stay consistent (CP). With no partition you can have both; CAP only forces the choice inside the failure window.
 
-## References
+# References
 
 - [Brewer, "Towards Robust Distributed Systems" (PODC 2000 keynote)](https://people.eecs.berkeley.edu/~brewer/cs262b-2004/PODC-keynote.pdf) — the original CAP conjecture presentation by Eric Brewer.
 - [Gilbert and Lynch, "Brewer's Conjecture and the Feasibility of Consistent, Available, Partition-Tolerant Web Services"](https://groups.csail.mit.edu/tds/papers/Lynch/jacm.pdf) — the formal proof of the CAP theorem with precise definitions of consistency and availability.

@@ -11,8 +11,6 @@ status: Ready to Repeat
 
 publish: true
 ---
-# Intro
-
 ASP.NET Core middleware are components that form the HTTP request pipeline. Each middleware wraps the next like nested layers, processing requests on the way in and responses on the way out. You reach for middleware when a concern must apply to all (or most) requests regardless of which controller or endpoint handles them — logging, authentication, CORS, compression, and exception handling are canonical examples.
 
 Each middleware receives an `HttpContext` and a `RequestDelegate` (`next`). On the way **in**, it can inspect or modify the request before calling `next`. On the way **out**, it can inspect or modify the response. Any middleware can **short-circuit** by returning a response without calling `next` — for example, `UseAuthentication` can reject an unauthenticated request before it ever reaches routing.
@@ -58,7 +56,7 @@ app.UseAuthorization();
 app.MapControllers();
 ```
 
-## Writing Custom Middleware
+# Writing Custom Middleware
 
 The simplest form is an inline lambda:
 
@@ -116,7 +114,7 @@ app.UseMiddleware<CorrelationIdMiddleware>();
 > [!WARNING]
 > **Convention-based middleware is constructed once (singleton).** The `CorrelationIdMiddleware` instance above is created a single time at startup, so its constructor must only take singleton-lifetime dependencies. To use a **scoped** service, inject it as a parameter of `InvokeAsync` instead (the framework resolves it per request): `public async Task InvokeAsync(HttpContext ctx, IOrderService orders)`. If you need a fully per-request middleware object, implement the **factory-based `IMiddleware`** interface and register the type in DI with the lifetime you want.
 
-## Branching the Pipeline
+# Branching the Pipeline
 
 Beyond the linear chain, you can fork the pipeline:
 
@@ -130,7 +128,7 @@ app.UseWhen(
     api => api.UseMiddleware<ApiKeyMiddleware>()); // only /api gets the API-key check
 ```
 
-## Pitfalls
+# Pitfalls
 
 **Wrong registration order** — placing `UseAuthorization` before `UseAuthentication` means the identity is never populated, so all requests appear anonymous. The canonical order (exception handler → HSTS → static files → routing → CORS → auth → authorization → endpoints) exists for a reason.
 
@@ -142,7 +140,7 @@ app.UseWhen(
 
 **Reading endpoint metadata too early** — routing only *selects* the endpoint at `UseRouting`. Middleware placed **between `UseRouting` and the endpoint** can inspect the chosen endpoint via `context.GetEndpoint()` (e.g. to read `[Authorize]`/custom metadata); middleware before `UseRouting` always sees `null`. Order your middleware accordingly when it depends on which endpoint will run.
 
-## Tradeoffs
+# Tradeoffs
 
 | Option | Best for | Weakness |
 |---|---|---|
@@ -152,7 +150,7 @@ app.UseWhen(
 
 **Decision rule**: use middleware when the concern must apply before routing or to all request types. Use filters when you need `ActionExecutingContext`, action arguments, or action result wrapping.
 
-## Questions
+# Questions
 
 > [!QUESTION]- Action filter vs middleware: what is the difference?
 > Middleware is pipeline-level and can apply to all requests (before routing/MVC, around endpoint execution). Action filters are MVC-level and run only for MVC actions, with access to action context, model binding, and results; they are a better fit for cross-cutting concerns that are specific to controller actions.
@@ -166,7 +164,7 @@ app.UseWhen(
 > [!QUESTION]- What is the ASP.NET request processing pipeline?
 > A request is received by the host (for example, Kestrel) and then flows through an ordered chain of middleware. Middleware can add features (routing, authN/authZ, CORS, compression, etc.), select an endpoint, and finally execute the endpoint (MVC action, Minimal API handler, etc.). On the way back out, the middleware chain unwinds, allowing post-processing of the response.
 
-## References
+# References
 
 - [Middleware in ASP.NET Core](https://learn.microsoft.com/en-us/aspnet/core/fundamentals/middleware/) — official guide covering pipeline order, built-in middleware, and writing custom components.
 - [Handle errors in ASP.NET Core](https://learn.microsoft.com/en-us/aspnet/core/fundamentals/error-handling) — covers `UseExceptionHandler`, `UseDeveloperExceptionPage`, and Problem Details.

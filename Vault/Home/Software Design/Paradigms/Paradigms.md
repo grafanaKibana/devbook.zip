@@ -13,13 +13,11 @@ level:
 priority: Medium
 ---
 
-# Intro
-
 A programming paradigm is a set of choices about where state lives, how control moves, and what unit composes into a larger program. C# is multi-paradigm: a service can model an order as an object, transform its lines with pure functions, react to events, and coordinate concurrent work without committing the entire codebase to one style.
 
-The useful question is not “which paradigm wins?” It is “which model makes the state transitions and effects easiest to see?” Use [[OOP]] when identity and invariants dominate, [[Functional Programming]] for deterministic transformations, event-driven code when control should follow events, and imperative code when an explicit sequence is the clearest description.
+The useful question is not “which paradigm wins?” It is “which model makes the state transitions and effects easiest to see?” Use [[Home/Software Design/Paradigms/OOP]] when identity and invariants dominate, [[Home/Software Design/Paradigms/Functional Programming]] for deterministic transformations, event-driven code when control should follow events, and imperative code when an explicit sequence is the clearest description.
 
-## Programming paradigms by state, control, effects, and concurrency
+# Programming paradigms by state, control, effects, and concurrency
 
 | Style | Control flow | State model | Composition unit | Effects | Concurrency semantics | Representative support |
 | --- | --- | --- | --- | --- | --- | --- |
@@ -35,7 +33,7 @@ Event-driven describes how control is triggered and how producers are decoupled 
 
 Concurrency is about overlapping progress; parallelism is about simultaneous execution on multiple cores. An async HTTP request is concurrent while the thread is free to do other work, even if no two instructions run at once. A CPU-bound `Parallel.For` is parallel when iterations execute on different cores. Treating the terms as synonyms leads to the wrong synchronization and capacity assumptions.
 
-## Imperative, functional, and object-oriented styles
+# Imperative, functional, and object-oriented styles
 
 All three examples reject negative invoice lines and total the rest. The result is identical; the ownership of state and behavior changes.
 
@@ -97,7 +95,7 @@ const { FolderStructureMap } = await dc.require("Assets/components/devbook-folde
 return FolderStructureMap;
 ```
 
-## References
+# References
 
 - [C# language specification: statements](https://learn.microsoft.com/en-us/dotnet/csharp/language-reference/language-specification/statements) — the normative statement and control-flow rules behind imperative C#.
 - [Task-based asynchronous pattern](https://learn.microsoft.com/en-us/dotnet/standard/asynchronous-programming-patterns/task-based-asynchronous-pattern-tap) — Microsoft's contract for task-based concurrency and asynchronous completion.

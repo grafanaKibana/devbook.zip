@@ -11,13 +11,11 @@ status: Ready to Repeat
 publish: true
 ---
 
-# Authorization Models
-
 Authorization evaluates a request such as `(alice, read, invoice-42, current context)` and returns permit or deny. Authentication establishes that the caller is Alice; authorization still has to prove that Alice may read this invoice. Enforce that decision on every request, close to the resource, and deny when no rule matches.
 
 The common models are not mutually exclusive. An application can use RBAC to grant coarse capabilities, ABAC to add tenant and risk conditions, and an ACL to record exceptions on one document.
 
-## Compare on the Same Axes
+# Compare on the Same Axes
 
 | Model | Decision input | Who controls policy | Good fit | Main cost |
 | --- | --- | --- | --- | --- |
@@ -30,7 +28,7 @@ The common models are not mutually exclusive. An application can use RBAC to gra
 
 ![[System Design 101/33eb2481c303f602a085c9bfc109ad203a3639ee5ad5573c7dc949ae5f8b8c37.png]]
 
-## One Invoice, Three Decisions
+# One Invoice, Three Decisions
 
 Suppose `GET /invoices/42` is requested by a signed-in billing agent.
 
@@ -40,7 +38,7 @@ Suppose `GET /invoices/42` is requested by a signed-in billing agent.
 
 The endpoint must load invoice 42 and authorize that exact object. Hiding the identifier or checking only the UI menu leaves an insecure direct object reference: changing `/42` to `/43` bypasses the intended boundary.
 
-## ASP.NET Core Mapping
+# ASP.NET Core Mapping
 
 ASP.NET Core roles are a direct RBAC tool. Policies can combine claims and custom requirements for ABAC-like checks. Resource-based authorization passes the loaded object to a handler, which is the right place for ownership and relationship decisions.
 
@@ -59,7 +57,7 @@ return decision.Succeeded ? Ok(invoice) : Forbid();
 
 Keep policy decisions deterministic and observable: record the policy and rule that denied a request, but do not log sensitive attributes or tokens. Test explicit allow, explicit deny, missing attributes, stale relationships, and the default-deny path. See [[Home/Security/Authentication/Resource-based Auth|resource-based authorization]] for the handler mechanics.
 
-## References
+# References
 
 - [ByteByteGo — Designing a Permission System](https://github.com/ByteByteGoHq/system-design-101/blob/b28380a4710c5ec9638ec037d4168e288f334cba/data/guides/how-do-we-design-a-permission-system.md) — the pinned source comparison that prompted this model-oriented rewrite.
 - [OWASP Authorization Cheat Sheet](https://cheatsheetseries.owasp.org/cheatsheets/Authorization_Cheat_Sheet.html) — least privilege, deny-by-default, per-request validation, testing, and logging guidance.

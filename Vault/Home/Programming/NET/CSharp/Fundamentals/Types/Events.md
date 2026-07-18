@@ -10,8 +10,6 @@ priority: Medium
 status: Ready to Repeat
 publish: true
 ---
-# Intro
-
 An event is a restricted delegate member that implements publisher-subscriber communication. Outside the declaring type, consumers can only subscribe (`+=`) and unsubscribe (`-=`); they cannot invoke or replace the delegate invocation list. This encapsulation is why events are preferred over raw public delegates in APIs.
 
 The standard .NET event signature uses `EventHandler` or `EventHandler<TEventArgs>`.
@@ -41,7 +39,7 @@ public sealed class PriceChangedEventArgs : EventArgs
 }
 ```
 
-### Why `event` Instead of Public Delegate Field
+# Why `event` Instead of Public Delegate Field
 
 With a public delegate field, any caller can do dangerous operations like:
 
@@ -52,7 +50,7 @@ With a public delegate field, any caller can do dangerous operations like:
 `event` blocks these operations for external code and exposes only subscription semantics.
 
 
-### Custom `add` and `remove`
+# Custom `add` and `remove`
 
 You can define explicit accessors for advanced scenarios (thread-safe collections, weak subscriptions, deduplication):
 
@@ -78,7 +76,7 @@ public event EventHandler Tick
 > [!INFO]
 > **The default (field-like) event is already thread-safe to subscribe/unsubscribe.** When you write `public event EventHandler Tick;`, the compiler generates `add`/`remove` accessors that update the backing delegate with a lock-free `Interlocked.CompareExchange` loop. So you only need a custom `add`/`remove` (like above) for *extra* behavior — weak references, deduplication, logging — not merely for thread safety. Note this protects the subscription list, not the *raising* of the event.
 
-## Pitfalls
+# Pitfalls
 
 1. **Memory leaks via long-lived publishers**: subscribers stay alive while subscribed.
 2. **Forgotten unsubscribe**: common in UI/view-model/service lifetimes.
@@ -106,14 +104,14 @@ public sealed class Listener : IDisposable
 ```
 
 
-## Tradeoffs
+# Tradeoffs
 
 - **Events vs public delegate fields**: A public delegate field lets any external caller replace, null out, or directly invoke the handler. The `event` keyword restricts external callers to `+=`/`-=` only, preserving publisher control. Always use `event` in public APIs.
 - **Events vs `IObservable<T>` (Rx)**: Events are synchronous, single-publisher, multicast notifications with no composition support. `IObservable<T>` from Reactive Extensions supports filtering, merging, debouncing, retrying, and async continuations — at the cost of a dependency and a steeper learning curve. Use `IObservable<T>` when you need stream operators; events for simple point-to-point notifications.
 - **Custom `add`/`remove` overhead**: The default event implementation stores handlers in a multicast delegate (immutable; every `+=`/`-=` allocates a new list). In high-frequency subscribe/unsubscribe scenarios, custom accessors backed by a `ConcurrentDictionary` or locked collection reduce per-operation allocation.
 
 
-## Questions
+# Questions
 
 > [!QUESTION]- How is an event different from a delegate field in terms of access control?
 > An event exposes only `add`/`remove` from outside the declaring type. A delegate field can be invoked, replaced, or nulled by external callers. Events preserve publisher ownership of invocation.
@@ -124,7 +122,7 @@ public sealed class Listener : IDisposable
 > [!QUESTION]- How do you handle exceptions in event subscribers without losing later handlers?
 > Copy the invocation list using `GetInvocationList()` and invoke handlers individually in `try/catch`. Direct event invocation stops at first exception.
 
-## References
+# References
 
 - [Standard .NET event patterns](https://learn.microsoft.com/dotnet/csharp/event-pattern) — official guide to `EventHandler<T>`, `EventArgs`, and the raise/subscribe pattern.
 - [Events - .NET guide](https://learn.microsoft.com/dotnet/standard/events/) — conceptual overview of the event model, delegates, and multicast invocation.

@@ -12,11 +12,9 @@ status: Ready to Repeat
 publish: true
 ---
 
-# JWT Bearer Authentication
-
 JWT (JSON Web Token) is a compact claims format that can be signed and/or encrypted. In JWT Bearer authentication, a client sends a bearer access token in the `Authorization` header and the API validates it under rules fixed for that token use. Local validation can avoid a per-request token-store lookup, but revocation, reference data, authorization, or key discovery may still require shared state.
 
-## JWT Structure
+# JWT Structure
 
 A compact signed JWT is three base64url-encoded segments separated by dots: `header.payload.signature`. This complete RFC example is safe to decode for study but long expired and must not be accepted as a live credential:
 
@@ -47,7 +45,7 @@ Validation is a gate, not authorization. The API must verify the signature, issu
 
 ![[System Design 101/dfbab78d0029e2e6d02f6fe35b26d296a0a7b961256c1c41b1c70736a76f2e68.png]]
 
-## Signing Algorithms
+# Signing Algorithms
 
 **HS256 (HMAC-SHA256)**: Symmetric — the same secret key creates and verifies the MAC. Every validator can therefore mint tokens. Use it only when that shared trust and key-distribution boundary is deliberate.
 
@@ -55,7 +53,7 @@ Validation is a gate, not authorization. The API must verify the signature, issu
 
 **ES256 (ECDSA-SHA256)**: Asymmetric like RS256 and produces smaller keys and signatures. Choose it when the issuer, validators, libraries, and key-management path all support its exact JOSE representation.
 
-## ASP.NET Core Integration
+# ASP.NET Core Integration
 
 ```csharp
 // Program.cs
@@ -81,7 +79,7 @@ app.UseAuthorization();
 
 The middleware retrieves the OpenID Connect discovery document for the configured authority, reads its `jwks_uri`, and fetches and caches that issuer's verification keys. Keep the discovery issuer, metadata address, and key set bound to the expected authority: a token's `kid` may select a key only inside that trusted issuer-bound set, and token-controlled `jku` or `x5u` URLs must not introduce another key source.
 
-## Pitfalls
+# Pitfalls
 
 **`alg: none` attack**: Some early JWT libraries accepted tokens with `alg: none` in the header, bypassing signature verification. Fix: always explicitly specify allowed algorithms in `TokenValidationParameters.ValidAlgorithms`. Never accept `none`.
 
@@ -93,7 +91,7 @@ The middleware retrieves the OpenID Connect discovery document for the configure
 
 **Missing audience validation**: Without audience validation, a JWT issued for Service A can be used against Service B. Fix: always validate `aud` claim. Set `ValidateAudience = true` and specify `ValidAudiences`.
 
-## Tradeoffs
+# Tradeoffs
 
 | Decision axis | Locally validated JWT | Opaque reference token |
 | --- | --- | --- |
@@ -106,7 +104,7 @@ The middleware retrieves the OpenID Connect discovery document for the configure
 
 **Use an opaque token** when central session control, current authorization data, or immediate invalidation matters enough to pay for an online lookup.
 
-## Questions
+# Questions
 
 > [!QUESTION]- What is a JWT token and why is it not encrypted by default?
 > - JWT is a compact token format: `header.payload.signature` (base64url encoded).
@@ -120,7 +118,7 @@ The middleware retrieves the OpenID Connect discovery document for the configure
 > - Refresh tokens or another renewal credential need stronger storage, rotation, replay detection, and revocation than access tokens.
 > - Choose the lifetime from the operation's impact and the system's ability to detect and terminate compromise, not a universal minute value.
 
-## References
+# References
 
 - [ByteByteGo — Explaining JWT](https://github.com/ByteByteGoHq/system-design-101/blob/b28380a4710c5ec9638ec037d4168e288f334cba/data/guides/explaining-json-web-token-jwt-to-a-10-year-old-kid.md) — the pinned recovered source and exact adopted visual for the structure explanation.
 - [RFC 8725 — JWT Best Current Practices](https://datatracker.ietf.org/doc/html/rfc8725) — algorithm verification, issuer and audience validation, explicit typing, and cross-JWT confusion defenses.

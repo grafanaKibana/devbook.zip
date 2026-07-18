@@ -10,8 +10,6 @@ status: Creation
 publish: true
 ---
 
-# Intro
-
 A memory hierarchy places small, fast storage close to the CPU and progressively larger, slower storage farther away. A CPU load may be satisfied by a register, an L1/L2/L3 cache, or DRAM; a page fault can additionally bring file-backed or swapped data from a local SSD or HDD into DRAM. Each layer exists because no single technology simultaneously provides register latency, DRAM capacity, and storage durability at an acceptable cost.
 
 The layers are not independent boxes. Hardware moves fixed-size cache lines between CPU caches and DRAM. The operating system maps virtual pages to physical frames and uses spare DRAM for the filesystem page cache. Local storage keeps data across power loss; DRAM and CPU caches do not. A miss consults the next backing layer defined for that mechanism, not every row in the table: a CPU-cache miss reaches DRAM, while a page fault can perform a cheap mapping operation or read local file/swap backing. Object storage is outside that automatic path. An application or filesystem client reaches it through a network API and may then populate local memory or disk caches.
@@ -25,7 +23,7 @@ The layers are not independent boxes. Hardware moves fixed-size cache lines betw
 | Local SSD/HDD | Filesystem and block driver | Filesystem block / device sector | Durable; a file-backed or swapped page fault can wait on this I/O |
 | Object storage | Application, filesystem client, and remote service | Network request / object | Durable remote service; accessed explicitly over a network, not as the CPU or page-fault hierarchy's automatic next layer |
 
-## Locality is the lever software controls
+# Locality is the lever software controls
 
 Temporal locality means recently accessed data is likely to be accessed again. Spatial locality means nearby addresses are likely to follow. Contiguous arrays exploit both; pointer-rich structures trade that locality for cheaper structural updates.
 
@@ -33,7 +31,7 @@ For example, summing a `int[]` walks adjacent values that share cache lines. Wal
 
 The operating-system mechanisms behind virtual pages, TLBs, and page faults live in [[Operating Systems/Memory Management|Memory Management]]. The hierarchy here is the cross-layer model: identify which layer serves the access, what unit moves, and whether a miss performs computation, memory traffic, or durable I/O.
 
-## References
+# References
 
 - [Linux kernel documentation — Memory Management Concepts](https://www.kernel.org/doc/html/latest/admin-guide/mm/concepts.html) — primary documentation for virtual memory, physical pages, and the page cache in Linux.
 - [Intel 64 and IA-32 Architectures Software Developer Manuals](https://www.intel.com/content/www/us/en/developer/articles/technical/intel-sdm.html) — primary architecture reference for processor caches, memory ordering, and address translation.

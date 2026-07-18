@@ -13,8 +13,6 @@ level:
 status: Creation
 ---
 
-# Intro
-
 The relational model organizes data into tables, relates rows through keys, and enforces constraints at the database boundary. SQL describes the result you want; the optimizer chooses scans, seeks, join order, and physical operators that preserve that result. Relational databases are the default when integrity constraints, multi-row transactions, and ad-hoc joins matter more than storing one access pattern in its final read shape.
 
 ```datacorejsx
@@ -22,11 +20,11 @@ const { FolderStructureMap } = await dc.require("Assets/components/devbook-folde
 return FolderStructureMap;
 ```
 
-## Relational Boundary
+# Relational Boundary
 
 Keep data relational when the database must reject invalid relationships, commit several row changes atomically, or support new query combinations without rebuilding the storage model. Denormalization can remove expensive joins from a hot path, but it creates duplicate state and a write-side consistency obligation; [[Home/Data Persistence/SQL/Normalization Denormalization|normalization and denormalization]] owns that decision.
 
-## Query Processing and Joins
+# Query Processing and Joins
 
 SQL has a logical meaning and a separate physical plan. The common logical order is `FROM`/`JOIN` → `WHERE` → `GROUP BY` → `HAVING` → `SELECT` → `ORDER BY` → `LIMIT`/`TOP`. The optimizer may push predicates or reorder joins physically only when duplicates, `NULL`, and the final result remain equivalent.
 
@@ -48,7 +46,7 @@ graph LR
 
 Cardinality estimates connect the optimizer to storage. If a predicate is estimated at 10 rows but returns 1,000,000, a nested loop or join order that looked cheap can spill or repeat millions of probes. The SQL remains correct while the plan is expensive.
 
-## Join Semantics
+# Join Semantics
 
 Assume `customers` contains Ada and Lin, while `orders` contains two rows for Ada and none for Lin. A left join returns Ada twice and extends Lin's missing order columns with `NULL`; joins do not deduplicate.
 
@@ -78,11 +76,11 @@ Putting `o.total >= 50` in `ON` preserves Lin as an unmatched left row. Putting 
 
 No join operator is universally fastest. Row counts, ordering, widths, indexes, memory, and cache state determine the plan.
 
-## Transactions and Scale
+# Transactions and Scale
 
 [[Home/Data Persistence/SQL/Database Locks|Database locks]] and MVCC enforce isolation inside one database; the same note contrasts pessimistic locks with optimistic version predicates for stale application writes. [[Home/Data Persistence/SQL/Replication|Replication]] copies data for availability and read scale, while [[Home/Data Persistence/SQL/Sharding|sharding]] partitions ownership when one primary can no longer handle the write or storage load.
 
-## Questions
+# Questions
 
 > [!QUESTION]- What is the difference between WHERE and HAVING?
 > `WHERE` filters rows before grouping and cannot use aggregate results. `HAVING` filters groups after `GROUP BY` and can use aggregates such as `COUNT(*)`. Put non-aggregate predicates in `WHERE` so fewer rows enter grouping.
@@ -96,7 +94,7 @@ No join operator is universally fastest. Row counts, ordering, widths, indexes, 
 > [!QUESTION]- What are SQL Server transaction isolation levels?
 > SQL Server provides `READ UNCOMMITTED`, `READ COMMITTED`, `REPEATABLE READ`, `SERIALIZABLE`, and `SNAPSHOT`. Read Committed Snapshot Isolation changes `READ COMMITTED` reads to statement-level row versions. `NOLOCK` is not a performance switch: it permits rolled-back, missing, and duplicate observations.
 
-## References
+# References
 
 - [Relational database design](https://learn.microsoft.com/azure/architecture/data-guide/relational-data/) — Microsoft guidance on relational structure, integrity, transactions, and workload fit.
 - [Query processing architecture guide](https://learn.microsoft.com/sql/relational-databases/query-processing-architecture-guide?view=sql-server-ver17) — SQL Server's parse, bind, optimize, and execute pipeline.

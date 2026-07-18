@@ -11,8 +11,6 @@ status: Ready to Repeat
 publish: true
 ---
 
-# Intro
-
 An ordered collection has to answer key lookups and stay open to inserts and deletes. A plain [[Binary Search Tree]] does both in `O(h)`, where `h` is the height, but height is at the mercy of insertion order: feed it keys that are already sorted and every node becomes a right child, so the tree degrades into a length-`n` chain and every search walks the whole thing.
 
 An AVL tree is a binary search tree that refuses to let this happen. Each node additionally stores its subtree height (or the derived balance factor), and after every insert or delete the structure enforces the **AVL invariant**: for every node, `|height(left) − height(right)| ≤ 1`. Whenever a modification pushes some node's balance factor to ±2, a **rotation** restores the invariant. Because no node's two subtrees can differ by more than one level, the whole tree stays at height ≤ ~1.44·log₂ n — a million keys sit in at most ~29 levels rather than a million.
@@ -24,7 +22,7 @@ What the structure gives up for that guarantee is written into every write: it c
 > [!NOTE] Visualization pending
 > Planned StepTrace: a balanced-BST card showing an insert descending to a leaf, a node's balance factor leaving `{−1, 0, +1}`, and a rotation (single or double) restoring `|balance| ≤ 1`. No matching renderer exists in `engine.js` yet.
 
-## Representation and rebalancing
+# Representation and rebalancing
 
 An AVL node holds a key, left and right child pointers, and one extra integer — its height, from which the balance factor is derived:
 
@@ -47,7 +45,7 @@ The double cases (LR, RL) exist because a single rotation on a zig-zag shape onl
 
 Insert and delete diverge in how far the repair travels. After an insert, a single rebalancing operation (one single or one double rotation) restores the invariant for the *entire* tree — the rebalanced subtree regains its pre-insert height, so nothing above it changed. After a delete, the rotated subtree can end up one level *shorter* than before, which can itself unbalance a node further up, so rebalancing may cascade all the way to the root.
 
-## Complexity
+# Complexity
 
 | Operation | Time | Extra space | Cause |
 | --- | --- | --- | --- |
@@ -58,7 +56,7 @@ Insert and delete diverge in how far the repair travels. After an insert, a sing
 
 Structure space is `O(n)`: one node per key, each carrying the constant-size key, two child pointers, and the height/balance field. The height cap is not an average — it is a worst case that follows from the invariant. The sparsest tree the invariant allows is a *Fibonacci tree*, whose minimum node count for height `h` obeys `N(h) = N(h−1) + N(h−2) + 1`; inverting that recurrence yields the `1.4405·log₂(n + 2) − 0.328` bound.
 
-## Where strict balance costs
+# Where strict balance costs
 
 The strict `|balance| ≤ 1` target is exactly what makes AVL fast to read and comparatively expensive to write, and every boundary below traces back to it.
 
@@ -68,7 +66,7 @@ The per-node bookkeeping is a second, quieter cost of the invariant. Every inser
 
 Rotation-case selection is the classic implementation bug, and it too is a consequence of demanding an exact `|balance| ≤ 1`. Applying a single rotation to a Left-Right or Right-Left (zig-zag) shape leaves the tree just as unbalanced, mirrored to the opposite side, because only the double rotation moves the inner node out first. Getting the four-case dispatch wrong produces a tree that still parses as a BST but no longer honors the height bound.
 
-## Reference drawer
+# Reference drawer
 
 > [!ABSTRACT]- Left-Left case and its single right rotation
 > ```mermaid
@@ -165,7 +163,7 @@ Rotation-case selection is the classic implementation bug, and it too is a conse
 > ```
 > `Rebalance` is applied to every node on the way back up the recursion. Deletion reuses the same `Recompute` + `Rebalance` pair; because it can shorten a subtree, the rebalancing must continue past the first fix rather than stopping like insertion does.
 
-## Questions
+# Questions
 
 > [!QUESTION]- What is the AVL invariant and when is it checked?
 > For every node, `height(left) − height(right)` must stay in `{−1, 0, +1}`. It is checked on the way back up after an insert or delete: each node's stored height is recomputed along the touched path, and the first node whose balance factor reaches ±2 is rotated.
@@ -176,7 +174,7 @@ Rotation-case selection is the classic implementation bug, and it too is a conse
 > [!QUESTION]- Why do the Left-Right and Right-Left cases require a double rotation?
 > A single rotation on a zig-zag shape only mirrors the imbalance to the other side. The inner (median) node has to be rotated outward into a straight chain first, after which a single rotation lifts it to the top.
 
-## References
+# References
 
 - [Adelson-Velsky & Landis, "An algorithm for the organization of information" (1962)](https://zhjwpku.com/assets/pdf/AED2-10-avl-paper.pdf) — the original paper (translated); primary source for the invariant and the height proof.
 - [AVL tree (Wikipedia)](https://en.wikipedia.org/wiki/AVL_tree) — the four rotation cases with diagrams, the Fibonacci-tree height derivation, and the rebalancing-after-delete analysis.

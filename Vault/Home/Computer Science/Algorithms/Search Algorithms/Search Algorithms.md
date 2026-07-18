@@ -13,8 +13,6 @@ level:
 status: Creation
 ---
 
-# Intro
-
 Search algorithms find target values in collections, trees, graphs, or text while minimizing work. Choosing the right search approach depends on data ordering, data shape, and whether you need worst-case guarantees or best average speed.
 
 Concrete example: in a sorted list of product ids, Binary Search gives fast lookups with logarithmic time. In graph traversal, BFS finds the shortest path by edge count in unweighted graphs. In text processing, KMP and Rabin Karp avoid naive full rescans.
@@ -24,7 +22,7 @@ const { FolderStructureMap } = await dc.require("Assets/components/devbook-folde
 return FolderStructureMap;
 ```
 
-## Diagram
+# Diagram
 
 ```mermaid
 flowchart TD
@@ -43,9 +41,9 @@ flowchart TD
   H -->|No| J[Use linear scan or indexing structure]
 ```
 
-## Algorithm Selection
+# Algorithm Selection
 
-### Searching an array
+## Searching an array
 
 | Data shape | Algorithm | Time | Precondition |
 | --- | --- | --- | --- |
@@ -58,7 +56,7 @@ flowchart TD
 
 Binary Search also serves range and insertion-point queries — lower-bound / upper-bound, first/last match — because it keeps the data in sorted order rather than building a separate index.
 
-### Searching text
+## Searching text
 
 Text/pattern matching is its own sub-family — see [[String Matching]] for the full comparison.
 
@@ -70,14 +68,14 @@ Text/pattern matching is its own sub-family — see [[String Matching]] for the 
 | Text + many patterns at once | [[Aho-Corasick]] | O(n + matches) after build | Build cost is sum of pattern lengths |
 | Text + rolling / multi-pattern hashing | [[Rabin Karp Search\|Rabin–Karp]] | O(n + m) avg | Good hash to avoid collisions |
 
-### Searching a graph
+## Searching a graph
 
 | Data shape | Algorithm | Time | Precondition |
 | --- | --- | --- | --- |
 | Graph (unweighted) | [[DFS BFS\|BFS / DFS]] | O(V + E) | — |
 | Graph (weighted) | See [[Graph Algorithms]] | — | [[Dijkstra]], [[A-Star Search\|A* Search]], [[Bellman-Ford]] |
 
-## Questions
+# Questions
 
 > [!QUESTION]- What is the first decision before picking a search algorithm?
 > - Check whether data is sorted, because that immediately enables Binary Search.
@@ -97,7 +95,7 @@ Text/pattern matching is its own sub-family — see [[String Matching]] for the 
 > - Indexes (hash maps, B-trees) trade memory and write cost for fast reads.
 > - Preprocessing front-loads cost and memory to make repeated queries cheap, so justify it by query volume, not by instinct.
 
-## References
+# References
 
 - [Search algorithm (Wikipedia)](https://en.wikipedia.org/wiki/Search_algorithm) — Overview of search algorithm categories.
 - [BinarySearch method (.NET API)](https://learn.microsoft.com/en-us/dotnet/api/system.array.binarysearch) — Official .NET binary search reference with usage examples.

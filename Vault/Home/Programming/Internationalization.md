@@ -10,11 +10,9 @@ status: Creation
 publish: true
 ---
 
-# Intro
-
 Internationalization makes one system capable of serving different languages, scripts, regions, time zones, currencies, address conventions, and legal regimes without forking the core application. Localization supplies the resources and configuration for a particular market. The design boundary matters: a locale can choose how to display `1234.50 CAD`, but it must not decide which currency was charged or which tax rule applies.
 
-## Separate the Axes
+# Separate the Axes
 
 | Concern | Store or transmit | Presentation or policy decision |
 | --- | --- | --- |
@@ -33,7 +31,7 @@ Do not build messages by concatenating translated fragments. Translators need th
 
 The diagram usefully separates localized frontends from core and market-specific services, but “UTC time” is not a sufficient data model. Store an instant for when something happened. Also store an IANA time-zone identifier when the user means a recurring local time such as “09:00 Europe/Kyiv,” because future offsets can change. Keep translation, formatting, foreign exchange, settlement, accounting, and legal-entity rules as different responsibilities.
 
-## .NET Boundary
+# .NET Boundary
 
 ```csharp
 static string FormatMoney(
@@ -60,7 +58,7 @@ public sealed record Money(decimal Amount, string Currency);
 
 Test with structurally different cases, not only translated English: Arabic RTL layout, Serbian script variants, a daylight-saving gap and overlap, currencies with different minor units, long German labels, and an address that lacks the fields your home-country form assumes.
 
-## References
+# References
 
 - [Unicode Locale Data Markup Language (UTS #35)](https://www.unicode.org/reports/tr35/) — primary locale identifiers, plural categories, number/currency patterns, dates, and time-zone formatting data.
 - [Localization in .NET (Microsoft Learn)](https://learn.microsoft.com/en-us/dotnet/core/extensions/localization) — resource separation, culture fallback, and `.resx` naming behavior.

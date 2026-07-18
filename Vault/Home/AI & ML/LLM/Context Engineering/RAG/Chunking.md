@@ -11,13 +11,11 @@ status: Done
 publish: true
 ---
 
-# Intro
-
 Chunking decides the unit of retrieval. If chunks are too wide, retrieval returns noisy context that dilutes the answer; if chunks are too narrow, critical constraints get split across fragments and the model answers from incomplete evidence. The goal is to create chunks that are semantically coherent, operationally efficient, and traceable back to their source section.
 
 Example: a policy doc states "Keep logs for 90 days. Exception: security investigations require 365 days." Splitting by raw character count can place the rule and exception in separate chunks. A retriever pulls only the first chunk, and the model answers without the exception clause — factually wrong, silently confident.
 
-## How to Choose a Strategy
+# How to Choose a Strategy
 
 Use retrieval failures, not preference, to pick a strategy.
 
@@ -29,9 +27,9 @@ Use retrieval failures, not preference, to pick a strategy.
 | Need a fast, predictable baseline now | Recursive | Better boundaries than fixed-size with low implementation cost | Quality plateaus on mixed-format or highly structured corpora |
 | Tight latency and simple homogeneous corpus | Fixed-size | Most operationally predictable ingestion | Faithfulness drops from boundary cuts |
 
-## Chunking Strategies
+# Chunking Strategies
 
-### Fixed-Size Chunking
+## Fixed-Size Chunking
 
 How it works:
 
@@ -57,7 +55,7 @@ Main risk:
 - **Boundary cuts through logical units.** A policy clause, code block, or table row gets split at an arbitrary token offset. The retriever returns a fragment that looks relevant but is incomplete, and the model generates a confidently wrong answer. Mitigate by increasing overlap and auditing retrieval on structured documents.
 - **No awareness of document structure.** Headers, sections, and paragraphs are invisible to the splitter. A chunk may start mid-paragraph and end mid-sentence. This hurts both retrieval precision (partial matches) and generation quality (decontextualized evidence).
 
-### Recursive Chunking
+## Recursive Chunking
 
 How it works:
 
@@ -85,7 +83,7 @@ Main risk:
 - **Tables and code blocks can still be split** if the separator hierarchy is text-centric. A markdown table has no `\n\n` between rows, so the splitter treats the whole table as continuous text and may cut mid-row. Add custom separators for table and code block delimiters, or pre-extract these as atomic units before recursive splitting.
 - **Separator ordering is format-dependent.** The default hierarchy assumes markdown-style headings. HTML, PDF-extracted text, or Slack exports need different separator lists. A wrong hierarchy degrades to character-level splitting silently.
 
-### Structure-Aware Chunking
+## Structure-Aware Chunking
 
 How it works:
 
@@ -112,7 +110,7 @@ Main risk:
 - **Oversized chunks from large structural units.** A single section with 2000 tokens becomes one chunk that exceeds embedding model context or dilutes retrieval precision. Set a max chunk size and recursively split oversized blocks internally while preserving the structural metadata.
 - **Parser complexity and maintenance.** Each document format needs its own parser or extraction pipeline. Budget for ongoing parser updates as source formats evolve.
 
-### Semantic Chunking
+## Semantic Chunking
 
 How it works:
 
@@ -140,7 +138,7 @@ Main risk:
 - **Ingestion cost.** Every span needs an embedding call during chunking (not just at retrieval time). For large corpora, this can be significantly slower and more expensive than rule-based strategies. Batch embedding calls and cache results.
 - **Embedding model sensitivity.** Different embedding models produce different similarity distributions for the same text. Switching models requires re-tuning thresholds and potentially re-chunking the entire corpus.
 
-### Parent-Child Chunking
+## Parent-Child Chunking
 
 How it works:
 
@@ -169,7 +167,7 @@ Main risk:
 - **Storage overhead.** Storing both parent and child chunks roughly doubles storage per document. For large corpora, this affects vector DB cost and indexing time.
 - **Orchestration complexity.** The retrieval pipeline needs a post-retrieval expansion step that maps children to parents, deduplicates overlapping parents, and assembles final context. This adds latency and code to maintain.
 
-### Agentic Chunking
+## Agentic Chunking
 
 How it works:
 
@@ -196,14 +194,14 @@ Main risk:
 - **Cost at scale.** Every document requires LLM inference during ingestion (not just at query time). For large corpora, this can be orders of magnitude more expensive than rule-based chunking. Budget accordingly and reserve for high-value documents.
 - **Prompt sensitivity.** Small changes to the chunking prompt can shift boundaries across the corpus. Treat the prompt as production code: version it, test it on a sample set, and monitor chunk quality metrics after changes.
 
-## Practical Baselines
+# Practical Baselines
 
 - Start with recursive chunking at 300-800 tokens and 10-20% overlap. This handles most document types well enough to establish baseline retrieval metrics.
 - Track per-source retrieval failure modes before switching strategy. Aggregate metrics hide format-specific problems — a retriever can perform well on prose while consistently breaking on table-heavy docs.
 - Always store metadata with each chunk: source document ID, section path, ingestion timestamp, and ACL scope. Metadata enables filtering at retrieval time and is much cheaper to add during ingestion than to backfill later.
 - Re-evaluate strategy when corpus format changes (e.g., prose-heavy docs to table-heavy docs) or when retrieval metrics plateau despite query translation improvements.
 
-## Tradeoffs
+# Tradeoffs
 
 | Strategy | Retrieval precision | Ingestion cost | Implementation complexity | Best corpus type |
 | --- | --- | --- | --- | --- |
@@ -216,7 +214,7 @@ Main risk:
 
 The table compares steady-state characteristics. In practice, most teams start with recursive chunking to establish baseline metrics, then upgrade specific source types based on observed retrieval failures rather than switching the entire corpus at once.
 
-## Questions
+# Questions
 
 > [!QUESTION]- Why does parent-child chunking often improve answer completeness over child-only retrieval?
 > Child chunks maximize retrieval precision — small, focused units match specific queries well. But child-only context can miss adjacent constraints that the answer depends on (e.g., a policy rule in one child and its exception in a sibling). Parent expansion restores the surrounding context during generation, reducing partial or decontextualized answers. The tradeoff is increased context size and potential noise from the broader parent span.
@@ -227,7 +225,7 @@ The table compares steady-state characteristics. In practice, most teams start w
 > [!QUESTION]- Why is semantic chunking not always superior to simpler rule-based approaches?
 > Semantic chunking places boundaries at actual topic shifts, which sounds ideal. But it requires embedding every span during ingestion (high cost), the similarity threshold is sensitive to embedding model and domain (tuning burden), and threshold instability can cause over-fragmentation or oversized chunks. For documents with reliable structural markers (headings, sections), recursive or structure-aware chunking achieves similar boundary quality at a fraction of the ingestion cost.
 
-## References
+# References
 
 - [Chunking and integrated vectorization (Azure AI Search)](https://learn.microsoft.com/en-us/azure/search/vector-search-how-to-chunk-documents)
 - [Text splitters (LangChain docs)](https://python.langchain.com/docs/concepts/text_splitters/)

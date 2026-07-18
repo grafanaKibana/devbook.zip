@@ -11,8 +11,6 @@ status: Ready to Repeat
 publish: true
 ---
 
-# Intro
-
 Filters in ASP.NET Core let you run logic before and after specific stages of controller action execution.
 They are useful for cross-cutting concerns that are tightly coupled to MVC actions, such as action-level validation, response shaping, and controller-scoped auditing — for example, an action filter that validates an `X-Correlation-Id` header on every inbound request and returns a 400 if missing, saving you from duplicating that check across 80+ controller actions.
 This matters because putting all of that logic inside actions quickly creates duplication and inconsistent behavior.
@@ -28,7 +26,7 @@ Filters run inside the MVC pipeline after routing selects an action.
 
 Execution order is determined by scope (global, controller, action) and optionally by `IOrderedFilter`.
 
-## Example
+# Example
 
 Use an async action filter to require a custom header for selected endpoints:
 
@@ -89,7 +87,7 @@ public sealed class ApiExceptionFilter(ILogger<ApiExceptionFilter> logger) : IAs
 
 Register globally: `builder.Services.AddControllers(opts => opts.Filters.Add<ApiExceptionFilter>());`
 
-## Applying Filters: `[ServiceFilter]` vs `[TypeFilter]` vs `IFilterFactory`
+# Applying Filters: `[ServiceFilter]` vs `[TypeFilter]` vs `IFilterFactory`
 
 How you attach a filter that has constructor dependencies matters:
 
@@ -100,13 +98,13 @@ How you attach a filter that has constructor dependencies matters:
 
 Note that **`[Authorize]` is itself an authorization filter** — which is why authorization runs first in the filter order (Authorization → Resource → Action → Exception → Result), and why duplicating auth logic in an action filter is redundant. Within a stage, execution order is global → controller → action, refined by `IOrderedFilter.Order`. Also: implement either the sync (`IActionFilter`) **or** async (`IAsyncActionFilter`) interface of a pair, never both — if you implement both, the async one wins and the sync one is ignored.
 
-## Pitfalls
+# Pitfalls
 
 - Running blocking I/O inside sync filters can hurt throughput because request threads are blocked; use async filters for I/O work. A sync `IActionFilter` that calls a remote validation API with `.Result` instead of using `IAsyncActionFilter` with `await` blocked thread-pool threads under load — at 200 concurrent requests, thread starvation caused p99 latency to spike from 50ms to 12 seconds and triggered 503 responses.
 - Putting authentication or authorization checks into custom action filters often duplicates policy logic and causes drift; prefer built-in `AddAuthentication`, `AddAuthorization`, and `[Authorize]` policies.
 - Expecting exception filters to handle everything is risky; they only catch exceptions thrown during action execution (action method, action filters, and result execution). Exceptions in middleware, model binding before action selection, or authorization filters bypass exception filters entirely — a `JsonException` during `[FromBody]` deserialization returned a raw 500 instead of the structured error the team expected because the exception filter never fired.
 
-## Tradeoffs
+# Tradeoffs
 
 | Option | Best for | Weakness |
 |---|---|---|
@@ -114,7 +112,7 @@ Note that **`[Authorize]` is itself an authorization filter** — which is why a
 | MVC filters | Concerns tied to controllers/actions and model/action context | Only applies to MVC pipeline |
 | Endpoint filters | Minimal API endpoint-scoped behavior | Not used by MVC controllers |
 
-## Questions
+# Questions
 
 > [!QUESTION]- Explain when to choose middleware over an MVC action filter.
 > Expected answer:
@@ -139,7 +137,7 @@ Note that **`[Authorize]` is itself an authorization filter** — which is why a
 > - Avoid `RequestServices.GetService` inside filter bodies unless absolutely necessary.
 > Why this matters: DI misuse in filters causes brittle code and testing pain.
 
-## References
+# References
 
 - [Filters in ASP.NET Core](https://learn.microsoft.com/en-us/aspnet/core/mvc/controllers/filters?view=aspnetcore-8.0) — official reference covering all filter types, execution order, DI registration, and cancellation.
 - [Middleware in ASP.NET Core](https://learn.microsoft.com/en-us/aspnet/core/fundamentals/middleware?view=aspnetcore-8.0) — use alongside this page to understand when middleware is the better choice.

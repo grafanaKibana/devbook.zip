@@ -13,13 +13,11 @@ priority: High
 status: Creation
 ---
 
-# Intro
-
 A data structure organizes data for efficient access, mutation, and iteration. In .NET, the standard library provides production-ready implementations of the most common structures — `List<T>`, `Dictionary<TKey, TValue>`, `HashSet<T>`, `Queue<T>`, `Stack<T>`, `LinkedList<T>`, `SortedSet<T>`, and `PriorityQueue<TElement, TPriority>`. Choosing the right collection usually has a bigger impact on performance than micro-optimizing the code that uses it.
 
 The key decision is matching operations to complexity guarantees: random access by index → array or `List<T>`; fast lookup by key → `Dictionary<TKey, TValue>`; membership tests → `HashSet<T>`; ordered traversal → `SortedSet<T>` or sorted array; FIFO processing → `Queue<T>`. Most production performance issues with collections come from using the wrong structure (for example, searching a `List<T>` linearly when a `HashSet<T>` gives expected O(1) lookups) rather than from the structure's implementation being slow.
 
-## Choose by workload and access pattern
+# Choose by workload and access pattern
 
 Start from the operation that dominates the workload, then account for ordering, memory layout, and concurrency. A structure with the right asymptotic lookup can still lose when it adds indirection to a small, scan-heavy collection.
 
@@ -46,7 +44,7 @@ const { FolderStructureMap } = await dc.require("Assets/components/devbook-folde
 return FolderStructureMap;
 ```
 
-## Questions
+# Questions
 
 > [!QUESTION]- What is a data structure? Which ones do you know? Which of them exist in .NET?
 > A data structure is a way to organize related data into a collection-like object. Examples include arrays, lists, queues, stacks, linked lists, dictionaries/hash tables, hash sets, graphs, and trees. .NET provides built-in implementations for many of these (for example `Array`, `List<T>`, `Queue<T>`, `Stack<T>`, `LinkedList<T>`, `Dictionary<TKey, TValue>`, `HashSet<T>`).
@@ -63,7 +61,7 @@ return FolderStructureMap;
 > Almost never in practice. `List<T>` (backed by a contiguous array) has better cache locality, lower memory overhead per element, and faster iteration. `LinkedList<T>` only wins when you need frequent insertions/deletions in the middle of a very large collection and already hold a reference to the node.
 > In most .NET code, `List<T>` is the correct default.
 
-## References
+# References
 
 - [System.Collections.Generic namespace](https://learn.microsoft.com/en-us/dotnet/api/system.collections.generic) — primary .NET API contracts for generic lists, dictionaries, sets, queues, stacks, linked lists, and priority queues.
 - [Collections and data structures](https://learn.microsoft.com/en-us/dotnet/standard/collections/) — official .NET guidance on collection characteristics, generic versus non-generic APIs, and selecting a collection by operation.

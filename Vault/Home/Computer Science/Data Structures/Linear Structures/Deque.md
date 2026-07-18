@@ -11,15 +11,13 @@ status: Ready to Repeat
 publish: true
 ---
 
-# Intro
-
 An algorithm maintains a sequence that grows and shrinks at *both* ends: a sliding window that admits new elements at the back while expiring old ones at the front, or a scheduler where the owner takes work from one end and thieves take it from the other. A [[Dynamic Array]] answers this badly — appending at the tail is `O(1)`, but every front insert or remove shifts all `n` elements. A double-ended queue keeps `O(1)` insert and `O(1)` remove at *each* end by tracking a front index and a live count over one wrapping array, so either end can advance without shifting the other.
 
 The structure generalizes two narrower ones. A [[Stack]] mutates a single end; a [[Queue]] inserts at one end and removes at the opposite end. A deque supports every combination of those, and pays for it by giving up cheap access to the *middle*: there is no held position between the ends, so an insert or remove that is not at an end costs `O(n)`.
 
 **Core shape:** elements → a ring buffer tracking a `head` index and a `count` (the back position derived mod capacity) → both ends `O(1)` amortized → no efficient middle → `O(n)` storage.
 
-## Visualization
+# Visualization
 
 No StepTrace renderer covers a double-ended queue yet.
 
@@ -28,7 +26,7 @@ No StepTrace renderer covers a double-ended queue yet.
 
 The salient state is a `head` index and a `count`; the back position is derived as `(head + count - 1) % capacity` rather than stored. Representation below owns the index mechanics.
 
-## Representation and invariants
+# Representation and invariants
 
 Two backings satisfy the same interface with different tradeoffs.
 
@@ -45,7 +43,7 @@ Invariants that define a valid state (ring-buffer form):
 
 The `head` index and `count` are internal identity, not domain values: a resize renumbers every physical slot while preserving the logical front-to-back order.
 
-## Complexity
+# Complexity
 
 Bounds are for the growable ring buffer unless the row names the linked backing.
 
@@ -59,7 +57,7 @@ Bounds are for the growable ring buffer unless the row names the linked backing.
 
 The amortized `O(1)` on the ring buffer assumes geometric growth: doubling on overflow spreads the `O(n)` copy across the `n` cheap pushes that preceded it, so a run of `m` pushes costs `O(m)` total. A single push that lands on a full buffer is still `O(n)` in isolation, which matters for latency-sensitive paths even when throughput is fine. The linked backing removes that spike entirely at the cost of an allocation per element and no `O(1)` index.
 
-## When the structure stops fitting
+# When the structure stops fitting
 
 The middle is the hard boundary, and it follows directly from the both-ends design. Both backings optimize the two ends: the ring buffer keeps only `head` and `count`, and the linked list caches only head and tail. Neither holds a position between them, so inserting or removing at an interior offset is `O(n)` — shifting a block of the array, or walking to the node first. A workload dominated by middle splices at positions it already holds wants a plain doubly-[[LinkedList|linked list]] with retained node references, or a balanced tree; a deque has thrown that information away.
 
@@ -67,7 +65,7 @@ The ring buffer's resize is a latency boundary rather than a throughput one. Amo
 
 Sliding-window *maximum* is a common target, but a raw deque does not provide it — the technique is a **monotonic** deque, covered in [[Monotonic Stack and Queue]]. The deque holds candidate indices whose values stay ordered because each push first pops dominated elements off the back; the both-ends interface is what makes that possible (evict stale maxima from the back, expire out-of-window indices from the front), but the ordering invariant lives in the algorithm, not the container.
 
-## Reference drawer
+# Reference drawer
 
 > [!ABSTRACT]- Ring-buffer layout
 > ```mermaid
@@ -141,7 +139,7 @@ Sliding-window *maximum* is a common target, but a raw deque does not provide it
 > ```
 > The BCL ships no `Deque<T>`. `Queue<T>` is already a ring buffer but exposes only one end for insertion; `LinkedList<T>` supplies `AddFirst`/`AddLast`/`RemoveFirst`/`RemoveLast` as a ready doubly-linked deque at the cost of a node per element.
 
-## Questions
+# Questions
 
 > [!QUESTION]- How do a `head` index and a `count` let a ring-buffer deque touch both ends in `O(1)`?
 > The occupied slots are `head` through `(head + count - 1) % cap`. `PushBack` writes at `(head + count) % cap` and increments `count`; `PushFront` decrements `head` (mod capacity), writes there, and increments `count`; each pop reads an end slot and adjusts `head` or `count`. Because every access wraps modulo capacity and only `head` and `count` change, no element is ever shifted.
@@ -152,7 +150,7 @@ Sliding-window *maximum* is a common target, but a raw deque does not provide it
 > [!QUESTION]- Ring buffer versus doubly-linked list as the deque backing — how do they differ?
 > The ring buffer stores elements contiguously: `O(1)` index, good locality, no per-element allocation, but an occasional `O(n)` resize. The linked list gives unconditional `O(1)` ends with no resize spike, at the cost of a node allocation (~40 bytes overhead on x64) per element, no `O(1)` index, and pointer-chasing traversal. The ring buffer is the default; the linked list fits when worst-case per-op latency or `O(1)` removal of held interior nodes matters more than locality.
 
-## References
+# References
 
 - [Double-ended queue (Wikipedia)](https://en.wikipedia.org/wiki/Double-ended_queue) — operation set and the ring-buffer versus linked-list implementations with their complexity summary.
 - [`collections.deque` (CPython docs)](https://docs.python.org/3/library/collections.html#collections.deque) — a production deque backed by a doubly-linked list of fixed-size blocks, with the `O(1)` end operations and `O(n)` middle indexing spelled out.

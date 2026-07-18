@@ -11,8 +11,6 @@ status: Creation
 publish: true
 ---
 
-# Intro
-
 Scanning a text of length `n` for every occurrence of a pattern of length `m` by restarting the comparison at each position re-reads characters an earlier partial match already covered, costing `O(nm)`. The Z-algorithm removes that rescan by computing, in one left-to-right pass over a string `S`, the **Z-array**: `z[i]` is the length of the longest substring starting at index `i` that also matches a prefix of `S`.
 
 For `S = "aabaab"`, `z = [·, 1, 0, 3, 1, 0]`. The block starting at index 3 (`"aab"`) matches the prefix `"aab"` for three characters, so `z[3] = 3`; index 1 shares only the leading `a`, so `z[1] = 1`. (`z[0]` spans the whole string and is left undefined or set to `n` by convention.) The array records, for every suffix, how far it agrees with the prefix — the same prefix-overlap information [[KMP (Knuth-Morris-Pratt) Algorithm|KMP]]'s failure function encodes, expressed as a forward match length rather than a recursive fallback.
@@ -26,7 +24,7 @@ A step trace over `S = "aabxaabxay"` would show each `z[i]` being copied or exte
 > [!NOTE] Visualization pending
 > Planned StepTrace: a string-matching card showing the `[l, r]` Z-box sliding along the string, each position's Z-value either read from a prior box or computed by extending a prefix match. No matching renderer exists in `engine.js` yet.
 
-## How the Z-box avoids rescanning
+# How the Z-box avoids rescanning
 
 The pass carries one interval, the box `[l, r]`: the match with the largest right endpoint proven equal to a prefix, so `S[l..r] == S[0..r-l]`. Processing index `i` takes one of two paths.
 
@@ -58,11 +56,11 @@ Z = [10, 1, 0, 0, 5, 1, 0, 0, 1, 0]
 
 Indices 5, 6, and 7 spend zero comparisons: their values are copied from the mirror inside `[4, 8]`. That reuse is what keeps the total linear rather than quadratic.
 
-## Matching a pattern by concatenation
+# Matching a pattern by concatenation
 
 Single-pattern search reduces to one Z-array. Build `S = P + sep + T`, where `sep` is a character occurring in neither `P` nor `T`, and compute `z` over `S`. Any index `i` in the `T` region with `z[i] >= |P|` marks an occurrence: the substring at `i` reproduces the whole pattern prefix in `|P|` characters that lie entirely inside `T`. A proper separator caps every text-region Z-value at `|P|` — no match can run across the boundary — so here `>=` and `==` coincide. With `|P| = m` and `|T| = n`, `|S| = n + m + 1`, giving `Θ(n + m)` time and `Θ(n + m)` space.
 
-## Complexity
+# Complexity
 
 | Computation | Time | Auxiliary space | Cause |
 | --- | --- | --- | --- |
@@ -71,7 +69,7 @@ Single-pattern search reduces to one Z-array. Build `S = P + sep + T`, where `se
 
 Best, average, and worst cases coincide: the pass is `Θ(|S|)` whether the string is all-distinct or highly periodic, because the box bounds total comparisons independently of content. The linear bound is unconditional — unlike [[Rabin Karp Search|Rabin-Karp]], whose expected-linear scan can degrade to `O(nm)` when hash collisions force full verifications.
 
-## When the assumptions stop holding
+# When the assumptions stop holding
 
 **A separator drawn from the alphabet — and why `>=` survives it.** A separator outside the input alphabet caps every text-region `z[i]` at `m`: exceeding `m` would require matching `S[m]`, the separator, against a text character, which cannot happen. That cap keeps `z[i] == m` and `z[i] >= m` equivalent and stops any match from spanning the `P`/`T` boundary. Let the separator back into the alphabet and the cap is gone. Searching for `P = "ab"` in `T = "aba"` with `sep = 'a'` builds `"ab" + "a" + "aba" = "abaaba"`, whose Z-array is `[6, 0, 1, 3, 0, 1]`. The real occurrence of `"ab"` at text position 0 lands at index 3, where the match runs on through the separator-turned-`a` into the prefix and gives `z[3] = 3`. A strict `z[i] == m` test checks for `2` and misses it — a genuine hit dropped. The shipped `FindAll` uses `z[i] >= m`, which is robust: any text-region index (scanned from `m + 1` on) with `z[i] >= m` has `S[i..i+m-1]` equal to `P` in `m` consecutive characters lying wholly inside `T` — an occurrence whatever `sep` is. So the separator's job is narrower than correctness: with `>=`, an in-alphabet separator costs only the `== m` equivalence, not the result. A sentinel outside the alphabet — a `\0` byte, or `-1` over an integer sequence — keeps the two tests interchangeable.
 
@@ -79,7 +77,7 @@ Best, average, and worst cases coincide: the pass is `Θ(|S|)` whether the strin
 
 **The extra array is the cost KMP avoids.** Matching materializes `S` and its Z-array over the full `n + m + 1` characters — `Θ(n + m)` scratch memory that exists only to be scanned once. KMP builds an `O(m)` table over the pattern alone and streams `T` in place, so on a large text under tight memory its footprint is smaller for the same linear time.
 
-## Reference drawer
+# Reference drawer
 
 > [!ABSTRACT]- Control flow
 > ```mermaid
@@ -145,7 +143,7 @@ Best, average, and worst cases coincide: the pass is `Θ(|S|)` whether the strin
 > ```
 > `FindAll` scans from `m + 1`, so every index it tests lies in `T`; a text-region `z[i] >= m` means `m` characters of `T` reproduce `P`, a genuine occurrence for any separator. With a separator outside both arguments the cap makes `z[i] >= m` fire only at exactly `m`; `\0` suits ordinary text but must change if the input can contain it. Should the separator leak into the alphabet, `>= m` still reports correctly — only a stricter `== m` test would start dropping hits.
 
-## Questions
+# Questions
 
 > [!QUESTION]- What does `z[i]` measure, and why does the Z-box keep the whole pass linear?
 > `z[i]` is the length of the longest substring starting at index `i` that also matches a prefix of the string. The box `[l, r]` is the match interval with the largest `r`; a position inside it copies its value from the mirror `z[i-l]` when that mirror ends before the edge, spending no comparisons. Direct comparisons occur only while extending past `r`, and each either fails once or pushes `r` one step right. Since `r` never retreats and stops at `|S| - 1`, total comparisons are `Θ(|S|)`.
@@ -156,7 +154,7 @@ Best, average, and worst cases coincide: the pass is `Θ(|S|)` whether the strin
 > [!QUESTION]- Inside the box, when can `z[i]` be copied from the mirror, and when must it be recomputed?
 > When `z[i-l] < r - i + 1` the mirrored match ends strictly before the box edge, so it is fully verified and `z[i] = z[i-l]`. When `z[i-l] >= r - i + 1` the mirror only guarantees a match up to `r`; the characters past `r` were never compared, so `z[i]` is reset to the box remainder `r - i + 1` and extended from `r + 1`.
 
-## References
+# References
 
 - [Z-function](https://cp-algorithms.com/string/z-function.html) — derivation of the box-based linear algorithm and the `P + sep + T` matching reduction, with the amortized `O(n)` argument.
 - [Competitive Programmer's Handbook](https://cses.fi/book/book.pdf) — Antti Laaksonen; the string chapter covers the Z-array alongside the prefix function and their shared applications.

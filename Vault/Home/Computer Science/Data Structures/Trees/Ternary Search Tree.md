@@ -10,8 +10,6 @@ status: Ready to Repeat
 publish: true
 ---
 
-# Intro
-
 A [[Trie]] answers prefix queries in `O(L)`, but pays for it in memory: an array-backed node reserves one child slot per alphabet symbol `σ`, so a table keyed on Unicode allocates thousands of mostly-empty pointers at every node. Swapping the array for a `Dictionary<char, Node>` fixes the waste but hashes a character on every step and throws away the sorted order the array gave for free. A ternary search tree (TST) keeps the trie's shape while storing each node's children as a small **binary search tree keyed on the next character** — three pointers per node instead of `σ`, and the ordering survives.
 
 Each node carries one split character and three links: `lo` for keys whose current character is smaller, `hi` for larger, and `eq` for equal — and *only* the `eq` link advances to the next character of the key. Walking a key alternates two motions: descend the per-position BST via `lo`/`hi` until the split character matches, then step forward one character down `eq`. The path that spells a key is still there, threaded through the `eq` links; the `lo`/`hi` links are the trie's "which child" decision turned into a comparison tree rather than an array index.
@@ -23,7 +21,7 @@ What it buys over a plain trie is memory proportional to the characters actually
 > [!NOTE] Visualization pending
 > Planned StepTrace: a card that spells a key by alternating two moves — a `lo`/`hi` descent through the BST of alternatives at one string position, then an `eq` step that advances to the next character — and lights an end-of-key flag when the final `eq` node is reached. No matching renderer exists in `engine.js` yet.
 
-## Representation and invariants
+# Representation and invariants
 
 A node holds a split character, an end-of-key flag, and three child links:
 
@@ -42,7 +40,7 @@ Three invariants hold:
 
 The whole contract lives in the difference between "matched the split and there is more key" (follow `eq`) and "the character is smaller or larger" (follow `lo`/`hi` without advancing).
 
-## Complexity
+# Complexity
 
 Bounds are in the key length `L`, the number of stored keys `n`, and the alphabet size `σ`. The per-position BST is what adds a logarithmic term the plain trie does not have.
 
@@ -56,7 +54,7 @@ Bounds are in the key length `L`, the number of stored keys `n`, and the alphabe
 
 The memory column is the reason to choose a TST over an array-backed trie: it scales with the characters present, not with `σ × nodes`. The `O(L + log n)` lookup is the price — slightly slower per character than a trie's array indexing, but with none of the empty-slot overhead and with sorted order retained. Insertion order still matters: keys inserted in sorted order build a degenerate per-position BST, so shuffling the input (or balancing) keeps the `log` term honest.
 
-## Where the three-way split earns its place
+# Where the three-way split earns its place
 
 The `lo`/`eq`/`hi` structure is not just a memory trick — it makes queries that a hash-map trie cannot answer cheaply fall out naturally.
 
@@ -66,7 +64,7 @@ The `lo`/`eq`/`hi` structure is not just a memory trick — it makes queries tha
 
 Where it breaks is balance. Inserting keys in sorted order turns a per-position BST into a linked list, so a search that collides there degrades to `O(L + n)` — the same failure a plain [[Binary Search Tree]] has, now inside one string position. Randomising insertion order, or rebuilding the BSTs balanced, restores the `log` factor. And like any prefix structure, a TST only pays off when keys share prefixes and have a meaningful character sequence; opaque integer or float keys gain nothing from it.
 
-## Reference drawer
+# Reference drawer
 
 > [!ABSTRACT]- TST holding `cat`, `car`, `cup`, `bat`
 > ```mermaid
@@ -133,7 +131,7 @@ Where it breaks is balance. Inserting keys in sorted order turns a per-position 
 > ```
 > Only the `else` branch — a matched character with more key remaining — recurses on `Eq` and advances `d`. `Contains` and `StartsWith` share the same walk; `Contains` additionally demands the terminal node's `IsEnd` flag.
 
-## Comparison
+# Comparison
 
 Every structure below stores a set of string keys; they differ in the per-node child representation and what that costs.
 
@@ -147,7 +145,7 @@ Every structure below stores a set of string keys; they differ in the per-node c
 
 A TST is the trie to reach for when the alphabet is large or unknown (Unicode, arbitrary bytes) so the array trie's `σ`-wide slots are unaffordable, and you still want sorted output and near-neighbour queries that a hash-map trie can't do cheaply — it accepts an `O(L + log n)` lookup and a sensitivity to insertion order in exchange. An array-backed trie wins on a small fixed alphabet where flat `O(L)` and cache-friendly array indexing beat the pointer chasing. A radix trie wins when node count is the constraint and keys are long and sparse. A balanced BST keyed on whole strings is the choice when there are no shared prefixes to exploit and total order over complete keys is all that's needed.
 
-## Questions
+# Questions
 
 > [!QUESTION]- Why does only the `eq` link advance to the next character?
 > `Lo` and `Hi` answer "is the current character smaller or larger than this node's split?" — they move sideways within the BST of alternatives *at the same string position*. `Eq` fires only when the character matches the split, meaning that position is resolved, so it is the one link that steps forward to the next character. Counting `eq` links from the root gives a node's character position exactly.
@@ -161,7 +159,7 @@ A TST is the trie to reach for when the alphabet is large or unknown (Unicode, a
 > [!QUESTION]- What can a TST do that a `Dictionary`-backed trie cannot do cheaply?
 > Emit keys in sorted order without a separate sort (in-order `lo`/`eq`/`hi` traversal), and run near-neighbour queries — partial-match wildcards and edit-distance-one spell-check — by descending `lo`, `eq`, and `hi` together at a mismatch position. A hash-map trie has no ordering among children, so both require extra work it doesn't natively support.
 
-## References
+# References
 
 - [Fast Algorithms for Sorting and Searching Strings](https://www.cs.princeton.edu/~rs/strings/) — Bentley and Sedgewick's paper introducing the ternary search tree, its `lo`/`eq`/`hi` node layout, and the partial-match and near-neighbour search algorithms.
 - [Ternary search tree (Wikipedia)](https://en.wikipedia.org/wiki/Ternary_search_tree) — the three-link representation, the `O(L + log n)` analysis, and comparison against tries and hash tables.

@@ -11,13 +11,11 @@ status: Ready to Repeat
 publish: true
 ---
 
-# CQS — Command-Query Separation
-
 Command-Query Separation (CQS) is a design principle that says every method should be either a **command** (changes state, returns void) or a **query** (returns data, has no side effects) — never both. Coined by Bertrand Meyer, it makes code easier to reason about: if a method returns a value, you can call it freely without worrying about side effects; if it changes state, you know it won't return data you depend on. In a 200-endpoint e-commerce API, applying CQS to the repository layer made it immediately clear which methods could be safely retried, cached, or called in parallel (queries) and which required idempotency guards and transaction boundaries (commands) — cutting the time to diagnose a double-charge bug from hours of tracing to minutes of checking command call sites.
 
-CQS is a method-level principle. [[CQRS]] (Command-Query Responsibility Segregation) applies the same idea at the architectural level — separate read and write models, separate data stores, separate code paths.
+CQS is a method-level principle. [[Home/Software Architecture/Patterns/Architectural Patterns/CQRS]] (Command-Query Responsibility Segregation) applies the same idea at the architectural level — separate read and write models, separate data stores, separate code paths.
 
-## The Principle in Practice
+# The Principle in Practice
 
 ```csharp
 // VIOLATES CQS: changes state AND returns data
@@ -43,7 +41,7 @@ public Order GetOrder(OrderId id)          // query: returns data, no side effec
 
 The caller places the order, then queries for it separately if needed. This is slightly more verbose but makes each method's contract explicit.
 
-## When CQS Is Pragmatically Relaxed
+# When CQS Is Pragmatically Relaxed
 
 Strict CQS is sometimes impractical. Common exceptions:
 
@@ -53,7 +51,7 @@ Strict CQS is sometimes impractical. Common exceptions:
 
 The principle is a guideline, not a law. Apply it where it improves clarity; relax it where strict adherence creates awkward APIs.
 
-## CQS vs CQRS
+# CQS vs CQRS
 
 | | CQS | CQRS |
 |---|---|---|
@@ -62,9 +60,9 @@ The principle is a guideline, not a law. Apply it where it improves clarity; rel
 | Data store | Single shared store | Often separate read/write stores |
 | Complexity | Low | High |
 
-CQS is a prerequisite mindset for CQRS. If you're applying CQRS, you're already following CQS at the method level. See [[CQRS]] for the architectural pattern.
+CQS is a prerequisite mindset for CQRS. If you're applying CQRS, you're already following CQS at the method level. See [[Home/Software Architecture/Patterns/Architectural Patterns/CQRS]] for the architectural pattern.
 
-## CQS in a Repository
+# CQS in a Repository
 
 A CQS-compliant repository separates read and write methods with explicit contracts:
 
@@ -89,9 +87,9 @@ public interface IOrderRepository
 The query methods can be called freely in any order without side effects. The command methods are the only paths that change state — making it easy to audit what can mutate the system.
 
 
-## Pitfalls
+# Pitfalls
 
-### Violating CQS in Repository Methods
+## Violating CQS in Repository Methods
 
 **What goes wrong**: `repository.Add(entity)` returns the saved entity with its generated ID. This is a command (changes state) that also returns data — a CQS violation. In one codebase, a `CreateOrderAsync` method that returned the full `Order` entity was called by two API consumers: one retried on timeout, creating duplicate orders because the caller treated the returned entity as idempotent confirmation. Separating into a void command + separate query would have made the retry-safety question obvious.
 
@@ -100,7 +98,7 @@ The query methods can be called freely in any order without side effects. The co
 **Mitigation**: document the exception explicitly. For new code, prefer returning only the generated ID from commands (not the full entity), then let the caller query if they need the full state.
 
 
-## Questions
+# Questions
 
 > [!QUESTION]- Why does CQS make code easier to reason about?
 > When a method returns a value, you know it has no side effects — you can call it freely, cache its result, or call it multiple times without changing state. When a method returns void, you know it changes state but produces no data you depend on. This separation eliminates the need to read the implementation to understand whether a call is safe to repeat or reorder. It also makes testing easier: queries can be tested without checking state changes; commands can be tested without checking return values.
@@ -109,8 +107,8 @@ The query methods can be called freely in any order without side effects. The co
 > Three common justified exceptions: (1) Stack.Pop() — splitting into Peek() + Remove() introduces a race condition in concurrent code. (2) Repository.Add() returning the generated ID — the ID is produced by the database; returning it avoids an extra round-trip. (3) Async I/O methods — `Task<T>` methods that perform I/O and return a result are idiomatic in .NET even when they have side effects. The principle is a guideline: apply it where it improves clarity, relax it where strict adherence creates awkward APIs.
 
 
-## References
+# References
 
 - [CommandQuerySeparation (Martin Fowler)](https://martinfowler.com/bliki/CommandQuerySeparation.html) — concise explanation of CQS with the Stack.Pop() exception and the relationship to CQRS.
-- [[CQRS]] — the architectural extension of CQS: separate read and write models, often with separate data stores and optimized query paths.
+- [[Home/Software Architecture/Patterns/Architectural Patterns/CQRS]] — the architectural extension of CQS: separate read and write models, often with separate data stores and optimized query paths.
 - [Object-Oriented Software Construction (Bertrand Meyer)](https://www.eiffel.com/values/design-by-contract/introduction/) — the original source of CQS; Meyer coined the principle in the context of Design by Contract and the Eiffel language.

@@ -14,8 +14,6 @@ publish: true
 status: Creation
 ---
 
-# Intro
-
 ASP.NET Core Web API runs each HTTP request through a middleware pipeline, then dispatches it to an endpoint (a Minimal API handler or a controller action).
 In practice, you design a Web API by choosing where logic lives (middleware vs filters vs endpoint code), how you validate and map inputs, and how you handle errors and auth.
 This matters because most production issues come from cross-cutting concerns: auth, validation, versioning, serialization, and observability.
@@ -25,7 +23,7 @@ const { FolderStructureMap } = await dc.require("Assets/components/devbook-folde
 return FolderStructureMap;
 ```
 
-### Example
+# Request Flow
 
 ```mermaid
 sequenceDiagram
@@ -41,7 +39,7 @@ sequenceDiagram
   Middleware->>Client: Response
 ```
 
-### Example
+# Endpoint Examples
 
 Minimal API:
 
@@ -65,15 +63,15 @@ public sealed class OrdersController : ControllerBase
 }
 ```
  
-## Questions
+# Questions
 
 > [!QUESTION]- Where should authentication and authorization live in an ASP.NET Core API?
 > Put authentication and authorization in the pipeline so endpoints can assume an authenticated principal.
 > Use middleware for auth and use endpoint metadata and policies to decide access per endpoint.
 
-## References
+# References
 
-- [ASP.NET Core web API docs](https://learn.microsoft.com/en-us/aspnet/core/web-api/?view=aspnetcore-8.0)
+- [ASP.NET Core web API docs](https://learn.microsoft.com/en-us/aspnet/core/web-api/?view=aspnetcore-8.0) — official guidance for controller-based APIs, routing, binding, validation, and response handling.
 - [ASP.NET Core middleware](https://learn.microsoft.com/aspnet/core/fundamentals/middleware/?view=aspnetcore-10.0)
 - [Routing in ASP.NET Core](https://learn.microsoft.com/aspnet/core/fundamentals/routing?view=aspnetcore-10.0)
 - [Filters in ASP.NET Core](https://learn.microsoft.com/aspnet/core/mvc/controllers/filters?view=aspnetcore-10.0)

@@ -13,8 +13,6 @@ level:
 priority: Medium
 ---
 
-# Intro
-
 AI development tooling is the practical layer that turns large language models into day-to-day engineering leverage: faster implementation, wider codebase understanding, and lower friction for repetitive work. This category matters because the value is not just "generate code"; it is orchestration around your repo, terminal, CI checks, and team rules. In practice, tool choice determines how reliably an assistant can plan work, edit files safely, run verification, and follow project conventions.
 
 The landscape now breaks into three operational buckets: coding agents that can execute multi-step tasks, review agents that focus on pull-request quality, and IDE extensions that blend autocomplete, chat, and limited automation in the editor. Across all buckets, the same control surfaces show up repeatedly: **skills** (reusable capability packs), **plugins** (integrations and extensions), **hooks** (automation triggers before/after actions), and **agent instructions** (repo-scoped rules such as `AGENTS.md`, `CLAUDE.md`, or tool-specific rules files).
@@ -24,21 +22,21 @@ const { FolderStructureMap } = await dc.require("Assets/components/devbook-folde
 return FolderStructureMap;
 ```
 
-## Categories
+# Categories
 
-### Coding agents
+## Coding agents
 
 Coding agents are the most autonomous class. They can inspect project files, propose plans, apply edits, run commands, and iterate based on test or lint output. Common tools include Claude Code, Cursor, GitHub Copilot (agent mode), Cline, Aider, Windsurf, and Opencode. See [[Coding Agents]] for mechanism details and tradeoffs.
 
-### Code review agents
+## Code review agents
 
 Code review agents optimize a narrower loop: pull-request analysis, risky change detection, and actionable review comments. A representative tool is CodeRabbit, which integrates into GitHub/GitLab workflows and provides automated review feedback so humans can focus on architecture and business correctness.
 
-### IDE extensions
+## IDE extensions
 
 IDE extensions prioritize in-flow assistance: inline completion, chat panes, refactor suggestions, and basic command execution from the editor. This category includes Copilot extension workflows and extension-backed agents such as Cline. Compared with terminal-first agents, IDE integrations usually reduce context switching but can hide execution details if the tool does not expose a clear action log.
 
-## Questions
+# Questions
 
 > [!QUESTION]- How do you choose between a terminal-first coding agent and an IDE-first coding agent?
 > - Start with team workflow: terminal-first fits script-heavy and CI-centric teams, IDE-first fits interactive editing-heavy teams
@@ -58,7 +56,7 @@ IDE extensions prioritize in-flow assistance: inline completion, chat panes, ref
 > - They complement each other: one increases delivery speed, the other protects quality and maintainability
 > - Mature teams use both to keep throughput high without lowering merge standards
 
-## References
+# References
 
 - [Claude Code overview (Anthropic Docs)](https://docs.anthropic.com/en/docs/agents-and-tools/claude-code/overview)
 - [Cursor Docs](https://docs.cursor.com/)

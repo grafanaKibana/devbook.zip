@@ -13,8 +13,6 @@ tags:
 status: Creation
 ---
 
-# Intro
-
 Scalability is a system's ability to keep serving requests as load grows by adding resources, without a proportional drop in reliability or latency. In interviews, this matters because most "works at 1k RPS" designs fail when asked "how does this reach 10x?" The goal is not just to survive spikes, but to scale in a way that is cost-efficient and operationally predictable. You start thinking about scalability as soon as you can identify request volume, traffic shape, data growth, and the first likely bottleneck.
 
 Concrete interview lens: if checkout traffic grows from 1,000 RPS to 10,000 RPS, a good answer is not "add more servers" but "measure where saturation appears first, then apply the right pattern for that bottleneck."
@@ -24,14 +22,14 @@ const { FolderStructureMap } = await dc.require("Assets/components/devbook-folde
 return FolderStructureMap;
 ```
 
-## Core Patterns
+# Core Patterns
 
 | Pattern | Primary bottleneck addressed | How it helps | Tradeoff and interview caveat |
 |---|---|---|---|
-| Horizontal scaling (stateless services behind LB, see [[Load Balancing]]) | App CPU and request concurrency | Add service instances behind a load balancer to increase throughput and availability | Requires stateless handlers; sticky sessions can hurt elasticity |
+| Horizontal scaling (stateless services behind LB, see [[Home/Software Architecture/Distributed Systems/Load Balancing]]) | App CPU and request concurrency | Add service instances behind a load balancer to increase throughput and availability | Requires stateless handlers; sticky sessions can hurt elasticity |
 | Database read replicas | Read-heavy relational load | Offload read queries from primary to replicas | Replica lag can break read-after-write expectations |
 | Database sharding | Write throughput and dataset size | Partition data by key so writes and storage spread across shards | Rebalancing, cross-shard queries, and hotspot keys add major complexity |
-| CQRS (see [[CQRS]]) | Read/write contention with different query needs | Separate write model from read model to optimize each independently | Eventual consistency and projection maintenance must be explicit |
+| CQRS (see [[Home/Software Architecture/Patterns/Architectural Patterns/CQRS]]) | Read/write contention with different query needs | Separate write model from read model to optimize each independently | Eventual consistency and projection maintenance must be explicit |
 | Caching (see [[Home/Data Persistence/Caching\|Caching]]) | Repeated expensive reads | Serve hot data from in-memory cache to reduce DB/API pressure | Cache invalidation and staleness policy drive correctness risk |
 | CDN | Static asset latency and origin egress | Move static content to edge locations close to users | Cache-control mistakes can serve stale or private content |
 | Async processing and message queues (see [[Home/Software Architecture/Distributed Systems/Message Queues/Message Queues\|Message Queues]]) | Synchronous dependency latency and burst traffic | Buffer work, decouple producers/consumers, smooth spikes | Requires idempotency, retry policy, and dead-letter handling |
@@ -39,7 +37,7 @@ return FolderStructureMap;
 | Event-Driven Architecture (see [[Home/Software Architecture/System Architecture/Event-Driven Architecture\|Event-Driven Architecture]]) | Tight coupling between services | Publish events so services scale and evolve independently | Ordering, duplication, and schema evolution must be designed upfront |
 | Load shedding and rate limiting | Overload collapse during spikes | Reject or defer excess traffic early to protect critical paths | Requires clear priority rules and client retry behavior |
 
-### Pattern Walkthrough (Quick Explanations)
+## Pattern Walkthrough (Quick Explanations)
 
 1. Horizontal scale works best when each request can be handled by any instance, so session and cache state must be externalized.
 2. Read replicas are usually your first database scale step for read-heavy APIs, but you must call out replication lag.
@@ -51,7 +49,7 @@ return FolderStructureMap;
 8. Connection pooling is usually low-effort, high-impact hygiene before more dramatic architecture changes.
 9. Event-driven design scales team autonomy and workload isolation, but consistency guarantees must be explicit.
 
-## Measurement and bottleneck migration
+# Measurement and bottleneck migration
 
 ![[System Design 101/78cc77c1ac6e94aa62c92b43e52db37d4c4d1fd6a999cbb7ce4f21e2ad845c43.png]]
 
@@ -67,7 +65,7 @@ The strategies in the visual solve different measured bottlenecks; they are not 
 Define success before the test: `2x ASP.NET Core instances should deliver at least 1.7x completed checkout throughput, p99 below 400 ms, errors below 0.1%, and database connections below 80% of the limit for 30 minutes`.
 
 At 1,000 RPS, increase load in steps while recording request rate, completed orders, latency, errors, CPU, allocations, thread-pool queue, database connections, lock wait, cache hit ratio, dependency latency, and queue age. If application CPU reaches 85% and throughput rises when instances double, horizontal scale addressed the current bottleneck. If database lock wait dominates at 2,500 RPS, more application replicas now increase contention. Apply one change, verify the expected capacity gain, then locate the next bottleneck.
-## Scaling Decision Framework
+# Scaling Decision Framework
 
 Start with telemetry and saturation, not architecture fashion.
 
@@ -87,12 +85,12 @@ flowchart TD
 ```
 
 
-## .NET operating guidance
+# .NET operating guidance
 
 Use `dotnet-counters` for runtime counters, OpenTelemetry for request and dependency traces and metrics, and the database's own wait and query telemetry. A low application CPU value does not prove spare capacity when threads are blocked on connections. Platform scaling features are useful only when their signal matches the saturated resource; CPU-based autoscaling does not fix a database lock or third-party quota.
 
 Track cost per completed operation, not only instance count. Cache, replicas, queues, and sharding move cost into invalidation, replication, backlog, and routing. Keep a rollback threshold when a change worsens tail latency or errors, and re-run the same workload after each change because the bottleneck moves.
-## Tradeoffs
+# Tradeoffs
 
 | Choice | Better when | Worse when |
 |---|---|---|
@@ -101,7 +99,7 @@ Track cost per completed operation, not only instance count. Cache, replicas, qu
 | Sharding vs larger primary DB | Write throughput and data size exceed one node limits | Team is small and cross-shard operations are frequent |
 | Sync calls vs queue-based async | User needs immediate result and latency budget allows it | Dependency is slow or rate-limited and bursty traffic is expected |
 
-## Pitfalls
+# Pitfalls
 
 1. **Scaling before finding the real bottleneck**  
    What goes wrong: teams add app instances while p95 remains high.  
@@ -123,7 +121,7 @@ Track cost per completed operation, not only instance count. Cache, replicas, qu
    Why: DB CPU, locks, or connection limits were already near saturation.  
    Mitigation: profile queries, add indexes, tune pools, use read replicas, then scale app tier.
 
-## Questions
+# Questions
 
 > [!QUESTION]- When would you choose read replicas instead of CQRS for a scaling problem?
 > **Expected answer:**
@@ -133,7 +131,7 @@ Track cost per completed operation, not only instance count. Cache, replicas, qu
 > - Mention complexity: replicas are simpler operationally than full CQRS/event projection pipelines.
 > **Why this is strong:** It balances architecture fit, consistency, and operational cost.
 
-## References
+# References
 
 - [System Design Primer - Scalability](https://github.com/donnemartin/system-design-primer#scalability)
 - [Azure Architecture Center - Design to scale out](https://learn.microsoft.com/azure/architecture/guide/design-principles/scale-out)
@@ -146,7 +144,7 @@ Track cost per completed operation, not only instance count. Cache, replicas, qu
 - [.NET diagnostic tools](https://learn.microsoft.com/dotnet/core/diagnostics/) — official counters, traces, dumps, and performance-investigation tools.
 - [Azure load testing](https://learn.microsoft.com/azure/app-testing/load-testing/overview-what-is-azure-load-testing) — official distributed load-test and monitoring workflow.
 
-### ByteByteGo provenance
+## ByteByteGo provenance
 
 - [Scalability strategies](https://github.com/ByteByteGoHq/system-design-101/blob/b28380a4710c5ec9638ec037d4168e288f334cba/data/guides/8-must-know-scalability-strategies.md) — provenance for the strategy visual, used as a bottleneck map rather than a checklist.
 - [System design cheat sheet](https://github.com/ByteByteGoHq/system-design-101/blob/b28380a4710c5ec9638ec037d4168e288f334cba/data/guides/system-design-cheat-sheet.md) — editorial lead for the operational definitions; its defective scalability and availability visual was rejected.

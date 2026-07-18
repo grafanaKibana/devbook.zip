@@ -13,8 +13,6 @@ level:
   - "4"
 ---
 
-# Intro
-
 Concurrency is a property of program **structure** — composing a program out of independently executing tasks that can be *dealt with* in overlapping time periods. Parallelism is a property of **execution** — actually *doing* several of them in the same instant, which requires multiple cores. A single-core machine runs concurrent programs perfectly well by interleaving them, with zero parallelism; concurrent design enables parallelism without requiring it. The practical consequence is the split this hub is organized around: concurrency is what keeps I/O-bound work from blocking threads, and parallelism is what makes CPU-bound work finish faster on multiple cores.
 
 ```datacorejsx
@@ -22,7 +20,7 @@ const { FolderStructureMap } = await dc.require("Assets/components/devbook-folde
 return FolderStructureMap;
 ```
 
-## Composition versus simultaneous execution
+# Composition versus simultaneous execution
 
 A single thread can compose overlapping I/O without running two instructions at once:
 
@@ -50,16 +48,16 @@ That is useful only when `Sharpen` does enough computation to repay partitioning
 > [!WARNING] Non-normative source visual
 > The “not concurrent, parallel” quadrant is invalid under these definitions: work executing simultaneously on multiple cores is necessarily concurrent. Use the visual only to contrast interleaved composition with simultaneous execution, not as a four-state taxonomy.
 
-## Deeper Explanation
+# Deeper Explanation
 
-### Mental model
+## Mental model
 
 - If work waits on I/O, prefer async (`Task`, `await`) to avoid blocking threads.
 - If work burns CPU, use controlled parallelism (`Parallel.ForEachAsync`, PLINQ, partitioning).
 - If work can be canceled, thread cancellation through the full call chain.
 - If shared state exists, design locking strategy first, then optimize.
 
-### Choosing options for the same requirement
+## Choosing options for the same requirement
 
 Use requirement-first decisions instead of primitive-first decisions.
 
@@ -71,7 +69,7 @@ Use requirement-first decisions instead of primitive-first decisions.
 | Stop work on timeout or caller disconnect | Caller token only, `CancelAfter`, linked tokens | Caller token by default; linked token when combining caller cancellation and local SLA timeout | Creating nested linked token sources inside tight loops |
 | Run work beyond request lifetime | `Task.Run`, in-process queue (`Channel<T>` + `BackgroundService`), external broker queue | In-process queue for moderate reliability needs; external broker for durability/retries/scale-out | Fire-and-forget `Task.Run` where failure/ordering/retry guarantees matter |
 
-## Coordination Patterns
+# Coordination Patterns
 
 The mechanism should expose the workload's ownership and failure boundary, not just make a race disappear.
 
@@ -86,9 +84,9 @@ The mechanism should expose the workload's ownership and failure boundary, not j
 
 [[Home/Programming/NET/CSharp/Concurrency and Parallelism/Semaphore|`SemaphoreSlim`]] belongs beside this table when the requirement is a concurrency limit rather than exclusive ownership. [[Home/Programming/NET/CSharp/Concurrency and Parallelism/Mutex|Mutex]] pays an operating-system handle cost when ownership must cross a process boundary. Neither adds queue durability or makes a multi-lock design safe from deadlock.
 
-### Decision walkthroughs
+## Decision walkthroughs
 
-#### Same requirement: "fan out 500 HTTP calls quickly"
+### Same requirement: "fan out 500 HTTP calls quickly"
 
 - If dependency and infrastructure allow high concurrency, use bounded `Task.WhenAll` with an explicit limit.
 - If each call is tiny and independent, start with a conservative cap (for example 16-64), then tune with telemetry.
@@ -119,19 +117,19 @@ public async Task<IReadOnlyList<UserDto>> LoadUsersBoundedAsync(
 }
 ```
 
-#### Same requirement: "improve throughput of CPU transforms"
+### Same requirement: "improve throughput of CPU transforms"
 
 - Use `Parallel.ForEachAsync` when you need bounded workers and cancellation with straightforward code.
 - Use PLINQ for pure data transforms where query readability is better than imperative loops.
 - If CPU work competes with request handling, move it to background workers with queue-based backpressure.
 
-#### Same requirement: "protect state and stay async"
+### Same requirement: "protect state and stay async"
 
 - For tiny in-memory critical sections, a [[Home/Programming/NET/CSharp/Concurrency and Parallelism/Locking|lock]] is simplest.
 - For async sections that must `await`, prefer `SemaphoreSlim.WaitAsync`.
 - If contention is high and order matters, move state mutation behind a single-consumer [[Home/Programming/NET/CSharp/Concurrency and Parallelism/Channels|channel]].
 
-## Questions
+# Questions
 
 > [!QUESTION]- What is the difference between concurrency and parallelism in practice?
 > Concurrency is structure — a program composed of independently executing tasks that can be dealt with in overlapping time periods. Parallelism is execution — those tasks actually running in the same instant, which takes multiple cores. A single-core machine is perfectly capable of concurrency (it interleaves) and incapable of parallelism.
@@ -149,7 +147,7 @@ public async Task<IReadOnlyList<UserDto>> LoadUsersBoundedAsync(
 > [!QUESTION]- For one requirement ("update shared state safely"), when do you choose `lock` vs `SemaphoreSlim` vs `Channel<T>`?
 > Use `lock` for short synchronous sections, `SemaphoreSlim` for async flows that need awaiting, and `Channel<T>` when you also need queueing, ordering, or backpressure.
 
-## References
+# References
 
 - [Concurrency Is Not Parallelism (Rob Pike, 2012)](https://go.dev/talks/2012/concurrency.slide) — the talk this distinction comes from; argues concurrency is about program structure, parallelism about execution.
 - [Asynchronous programming with async and await (Microsoft Learn)](https://learn.microsoft.com/en-us/dotnet/csharp/asynchronous-programming/) — the C# task-based asynchronous model, continuations, and guidance for I/O-bound work.

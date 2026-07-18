@@ -10,15 +10,13 @@ priority: Medium
 status: Ready to Repeat
 publish: true
 ---
-# Intro
-
 A program receives a stream of merge and connectivity requests: `union(a, b)` joins two groups, `find(x)` reports which group `x` belongs to, and two elements are connected when their finds agree. The cost that dominates is the walk `find` performs up a parent chain toward its set's root. Left unmanaged, that chain grows to length `n` and every query degrades to `O(n)`.
 
 Two heuristics keep the forest shallow so the walk stays short. Union by rank controls how two trees combine; path compression rewrites the chain each `find` traverses. Together they drop the amortized cost of a query to `O(α(n))`, where α is the inverse Ackermann function and stays below 5 for any `n` that fits in memory. The [[Disjoint Set]] note covers the parent-array forest these operations run over; this page is about the heuristics and their analysis.
 
 **Core condition:** merges only accumulate → each `find` walks toward a root → the two heuristics keep that walk near-constant amortized → `O(α(n))` per operation with `O(n)` storage.
 
-## The two operations
+# The two operations
 
 A trace over seven singleton nodes exercises both operations and the flattening they depend on.
 
@@ -28,7 +26,7 @@ A trace over seven singleton nodes exercises both operations and the flattening 
 
 A `union` resolves both arguments to their roots and links one root beneath the other; an interior node is never linked directly, since that would strand the rest of its set. A `find` walks parent pointers until it reaches a self-parented root, then path-compresses the walked nodes so each points straight at that root. The first deep `find` on a chain is what pays for every shallow `find` after it.
 
-## Why the walk stays short
+# Why the walk stays short
 
 Each heuristic attacks tree height from a different direction.
 
@@ -38,7 +36,7 @@ Each heuristic attacks tree height from a different direction.
 
 Neither heuristic alone reaches near-constant time: rank bounds how tall a tree can grow, while compression guarantees each tall path is walked only a few times before it flattens. Combined, the total over `m` operations is `O(m α(n))`. The bound is amortized — a single `find` can still traverse `O(log n)` parents, and it is the compression it performs that makes later finds cheap.
 
-## Complexity
+# Complexity
 
 | Operation | Best time | Amortized time | Worst single operation | Space |
 | --- | --- | --- | --- | --- |
@@ -49,13 +47,13 @@ Neither heuristic alone reaches near-constant time: rank bounds how tall a tree 
 
 The amortized column assumes both heuristics. Union by rank *alone* keeps tree height at `O(log n)`, so every operation is `O(log n)` in both the amortized and single-operation sense. With *neither* heuristic a chain can grow to length `n`, turning `find`, `union`, and `connected` into `O(n)` operations. `α(n)` is a guarantee over a sequence, not a promise about any one call: the single-operation worst case stays `O(log n)` because a cold `find` may still walk a full bounded-height path before compressing it.
 
-## Where the bound and the interface stop
+# Where the bound and the interface stop
 
 Path compression trades reversibility for speed. Once a `find` rewrites the parents it walked, the pre-compression shape is gone, so a merge cannot be undone. Rollback DSU keeps union by rank and *drops* compression precisely to preserve that history: each `union` records the single parent-and-rank change it made and can pop it. That is how an offline problem with edge deletions is solved — process the sequence in reverse so every deletion becomes an addition, undoing merges as it unwinds ([rollback DSU](https://cp-algorithms.com/data_structures/deleting_in_log_n.html)).
 
 The interface only grows sets. There is no split, and no removal of an element from a set — the parent forest records membership, not the edges that produced it, so a merged component cannot be separated back into its pre-merge pieces. That limit belongs to the [[Disjoint Set]] page as its own boundary; the algorithmic consequence here is that any workload with removals needs either a rollback variant run offline or a fully dynamic connectivity structure.
 
-## Reference drawer
+# Reference drawer
 
 > [!ABSTRACT]- Operation flow
 > ```mermaid
@@ -95,7 +93,7 @@ The interface only grows sets. There is no split, and no removal of an element f
 > ```
 > `DisjointSet` is the rank + path-compression forest defined on the [[Disjoint Set]] page; only its `Union` return value drives the cycle test.
 
-## Comparison
+# Comparison
 
 | Strategy | `find` | `union` | Worst per op | Structural property |
 | --- | --- | --- | --- | --- |
@@ -108,7 +106,7 @@ Rank plus path compression is the standard near-constant-time structure for incr
 
 The same forest answers several graph questions: the [[Minimum Spanning Tree]] cycle test in Kruskal's algorithm, incremental connected-component queries, and cycle detection while streaming edges — in each, `union` merges endpoints and `find` reports whether an edge would close a loop.
 
-## Questions
+# Questions
 
 > [!QUESTION]- Why does union by rank alone bound tree height at `O(log n)`?
 > A root's rank increases only when two trees of equal rank merge, so a tree of rank `r` holds at least `2^r` nodes. With `n` nodes, no rank — and therefore no height — can exceed `log₂ n`. Attaching the lower-rank root under the higher one never lengthens the taller tree's longest path.
@@ -122,7 +120,7 @@ The same forest answers several graph questions: the [[Minimum Spanning Tree]] c
 > [!QUESTION]- How does the variant chosen change the cost of `union` and `find`?
 > Quick-find gives `O(1)` finds but `O(n)` unions; plain quick-union is `O(n)` for both in the worst case; union by rank alone makes both `O(log n)`; rank plus path compression drops both to `O(α(n))` amortized while leaving the single-operation worst case at `O(log n)`.
 
-## References
+# References
 
 - [Efficiency of a Good But Not Linear Set Union Algorithm](https://dl.acm.org/doi/10.1145/321879.321884) — Tarjan's original amortized analysis proving the inverse-Ackermann bound for path compression with weighted union.
 - [Union-Find](https://algs4.cs.princeton.edu/15uf/) — Princeton Algorithms, tracing the progression from quick-find and quick-union to weighted union and path compression with cost measurements for each.

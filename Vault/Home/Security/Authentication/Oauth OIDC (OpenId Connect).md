@@ -11,13 +11,11 @@ status: Ready to Repeat
 publish: true
 ---
 
-# OAuth 2.0 and OpenID Connect
-
 OAuth 2.0 lets a client obtain bounded authority to call a resource server. It is an authorization framework, not a login protocol. OpenID Connect (OIDC) adds authentication by defining an ID token, issuer discovery, a UserInfo endpoint, and validation rules. "Sign in with Microsoft" uses OIDC to establish the user's identity; an access token authorizes a call to an API.
 
 The distinction prevents a common failure: an API access token may be intended for another audience and does not, by itself, prove a login to the client. The client validates an ID token for its own `client_id`; the resource server validates an access token whose audience identifies that API.
 
-## Roles and artifacts
+# Roles and artifacts
 
 | Item | Consumed by | What it means | Boundary to validate |
 | --- | --- | --- | --- |
@@ -32,7 +30,7 @@ The distinction prevents a common failure: an API access token may be intended f
 
 Scopes bound what the client asks to do, such as `calendar.read`. Consent records a user's approval where the authorization server requires it; it does not replace API-side authorization. The API must still check audience, scope, subject/tenant, and the requested resource.
 
-## Authorization Code with PKCE
+# Authorization Code with PKCE
 
 This is the default user-facing flow for web, native, and browser-based clients. PKCE binds the front-channel authorization code to a secret generated for this one request.
 
@@ -60,7 +58,7 @@ The client rejects a callback whose `state` does not match the initiating browse
 
 For a server-rendered browser application, keep tokens server-side and issue a hardened opaque session cookie to the browser. A SPA or native app cannot safely rely on a static client secret. It should use PKCE, short-lived tokens, platform-protected storage where available, refresh-token rotation, and a narrowly registered redirect URI.
 
-## Current flow selector
+# Current flow selector
 
 | Situation | Flow | Why | Cost / failure boundary |
 | --- | --- | --- | --- |
@@ -70,7 +68,7 @@ For a server-rendered browser application, keep tokens server-side and issue a h
 
 Do not use the Implicit grant: it returns tokens through the browser front channel, where leakage and injection are harder to contain. Do not use the Resource Owner Password Credentials grant: it teaches the client to collect the user's password and cannot support modern authentication ceremonies safely. OAuth 2.0 Security Best Current Practice deprecates both. Client Credentials is for confidential machine clients, not SPAs.
 
-## Device Authorization message flow
+# Device Authorization message flow
 
 ```text
 Device -> Authorization server: client_id + requested scope
@@ -83,7 +81,7 @@ Token endpoint -> Device: access token, or authorization_pending / slow_down / d
 
 The `user_code` is designed for typing and is not the bearer credential. The device keeps `device_code` secret, stops when it expires, and slows polling when instructed.
 
-## Client Credentials example
+# Client Credentials example
 
 ```csharp
 using var client = new HttpClient();
@@ -102,7 +100,7 @@ response.EnsureSuccessStatusCode();
 
 Prefer a managed workload identity or asymmetric client authentication over a long-lived shared secret when the authorization server supports it. Never place the secret in source control or a public client.
 
-## Failure modes
+# Failure modes
 
 - **Authorization response injection:** bind each code to the client's request with PKCE and reject mismatched `state`.
 - **Redirect abuse:** register exact redirect URIs and do not use an attacker-controlled continuation URL after callback.
@@ -111,7 +109,7 @@ Prefer a managed workload identity or asymmetric client authentication over a lo
 - **Session confusion:** federated login ends when the client creates its local session. Rotate that session at login and define local, provider, and global logout separately.
 - **Token leakage:** do not put tokens in query strings, logs, browser history, or analytics. TLS protects transit, not storage or logs.
 
-## Tradeoffs versus SAML
+# Tradeoffs versus SAML
 
 | Concern | OIDC | SAML 2.0 |
 | --- | --- | --- |
@@ -121,7 +119,7 @@ Prefer a managed workload identity or asymmetric client authentication over a lo
 | Main implementation risk | OAuth/OIDC role or token confusion | XML signature/namespace handling and metadata drift |
 | Choose it when | Building a new application or mobile-capable federation | A required enterprise IdP or SaaS integration exposes only SAML |
 
-## Questions
+# Questions
 
 > [!QUESTION]- Why can an access token not be used as an ID token?
 > The access token is issued for a resource server and carries delegated authority. Its format and claims are controlled by that API contract. The ID token is issued for the OIDC client and has explicit authentication claims and validation rules, including audience and nonce.
@@ -129,7 +127,7 @@ Prefer a managed workload identity or asymmetric client authentication over a lo
 > [!QUESTION]- What do `state`, `nonce`, and PKCE each bind?
 > `state` binds the callback to the initiating browser session, `nonce` binds the ID token to the OIDC request, and PKCE binds the authorization code to the client instance that created the verifier. One does not substitute for the others.
 
-## References
+# References
 
 - [RFC 9700 — OAuth 2.0 Security Best Current Practice](https://www.rfc-editor.org/rfc/rfc9700) — current flow security, PKCE, redirect, replay, and deprecated-grant guidance.
 - [RFC 7636 — Proof Key for Code Exchange](https://www.rfc-editor.org/rfc/rfc7636) — PKCE verifier and challenge protocol.

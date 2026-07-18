@@ -11,8 +11,6 @@ status: Creation
 publish: true
 ---
 
-# Intro
-
 A sorted sequence arrives without a known length — a forward-read file, a paginated API that is indexable but not measurable, a lazily materialized list — and a lookup still has to land on one value. [[Binary Search]] cannot begin: its first midpoint needs a right endpoint, and there is none to compute. Exponential search manufactures that endpoint by probing outward. It reads index `1`, then `2, 4, 8, 16, …`, doubling the probe until `a[bound] >= target` or the probe runs off the end. Every earlier probe was still below the target, so at the stopping point the target — if present — must sit between the previous probe and this one. The gallop has produced a bounded window `[bound/2, min(bound, n − 1)]`, and Binary Search finishes inside it.
 
 Doubling reaches or passes the target's position `i` after about `log i` steps, and the window it brackets holds fewer than `i` elements, so the closing binary search is another `O(log i)`. The total cost tracks `i`, the *position of the answer*, not the array length. When the target sits near the front, `i ≪ n`, and `O(log i)` is strictly below Binary Search's `O(log n)`; when the length is simply unknown, the gallop is what makes any bisection possible at all.
@@ -24,7 +22,7 @@ The doubling gallop and the binary search that closes it have no registered rend
 > [!NOTE] Visualization pending
 > Planned StepTrace: a search card doubling a probe index `1, 2, 4, 8, …` until `a[bound] >= target` or the array end, then a binary search within the bracket `[bound/2, bound]`. No matching renderer exists in `engine.js` yet.
 
-## Why doubling brackets the target
+# Why doubling brackets the target
 
 The gallop maintains one fact through every iteration: as long as the loop continues, `a[bound] < target`, so the target's position lies strictly to the right of `bound`. Doubling therefore never steps over the answer — it only advances a boundary that is provably still too small. The loop stops for exactly one of two reasons:
 
@@ -35,7 +33,7 @@ Either way the window is `[bound/2, min(bound, n − 1)]`, and its lower end sat
 
 The gallop never references `n`. It generates the indices it probes (`1, 2, 4, …`) and asks only "is `a[bound]` still below the target?" That is why it runs on an unbounded source: drop the `bound < n` guard and let `a[bound] >= target` — or an end-of-stream signal from the probe — stop the doubling. Index `0` is handled before the loop, since `bound` starts at `1`: if `a[0] == target`, the answer is `0`.
 
-## Complexity
+# Complexity
 
 | Case | Time | Auxiliary space | Cause |
 | --- | --- | --- | --- |
@@ -45,7 +43,7 @@ The gallop never references `n`. It generates the indices it probes (`1, 2, 4, �
 
 The bound is expressed in `i`, the target's position, which is what makes it beat Binary Search when `i ≪ n`; it degrades to `O(log n)` only when the target is near the end, never worse. Auxiliary space is `O(1)` for the iterative binary search below. A recursive binary search over the bracket would add `O(log i)` call-stack space without changing the time bound.
 
-## When the assumptions stop holding
+# When the assumptions stop holding
 
 The headline use case is unknown-length input, but a loop guarded on `bound < n` silently reintroduces the requirement it was meant to avoid. On a genuine stream that guard cannot be evaluated; removing it without an alternative stop condition lets the doubling index past the last element and read out of bounds. A streaming implementation must instead treat "probe returned past the end" as a terminating signal alongside `a[bound] >= target`, and clamp the eventual high bound to the last valid index.
 
@@ -53,7 +51,7 @@ On a bounded array the doubling overshoots by design: `bound` is the first power
 
 The bracket is only as trustworthy as the ordering. The gallop's `a[bound] < target` test assumes sorted input; on `[2, 100, 3, 4, 5]` a search for `100` stops doubling at the first probe where the value happens to meet the target and brackets a window that need not contain the real match — the same plausible false negative Binary Search produces on unsorted data, now inherited by both phases. Exponential search buys range discovery, not freedom from the sorting precondition.
 
-## Reference drawer
+# Reference drawer
 
 > [!ABSTRACT]- Two-phase control flow
 > ```mermaid
@@ -104,7 +102,7 @@ The bracket is only as trustworthy as the ordering. The gallop's `a[bound] < tar
 >
 > `Math.Min(bound, n - 1)` clamps the overshoot from the last doubling; an unbounded variant drops the `bound < n` guard and stops on an end-of-stream probe instead.
 
-## Questions
+# Questions
 
 > [!QUESTION]- Why is exponential search `O(log i)` rather than `O(log n)`?
 > Doubling stops as soon as `bound` reaches or passes the target's position `i`, after about `log i` steps, and the bracket it leaves spans fewer than `i` elements, so the closing binary search is another `O(log i)`. Neither phase inspects the whole array, so the cost tracks the answer's position, not the array length — strictly better than `O(log n)` when the target is near the front and no worse when it is near the end.
@@ -112,7 +110,7 @@ The bracket is only as trustworthy as the ordering. The gallop's `a[bound] < tar
 > [!QUESTION]- Why must the high end of the bracket be clamped, and what breaks without it?
 > The final doubling makes `bound` the first power of two at or beyond the target, so it can land past the last valid index. Bisecting `[bound/2, bound]` without clamping the upper end to `min(bound, n − 1)` reads outside the array; on an unbounded source the same overshoot indexes past end-of-stream. `bound *= 2` can also overflow a 32-bit index into a negative probe.
 
-## References
+# References
 
 - [An almost optimal algorithm for unbounded searching](https://doi.org/10.1016/0020-0190%2876%2990071-5) — Bentley and Yao's original doubling-search analysis for searching an ordered sequence of unknown length.
 - [Exponential search (Wikipedia)](https://en.wikipedia.org/wiki/Exponential_search) — the doubling-then-binary-search scheme and its unbounded-array motivation.

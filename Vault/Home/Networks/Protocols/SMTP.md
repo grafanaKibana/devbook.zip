@@ -11,11 +11,9 @@ status: Ready to Repeat
 publish: true
 ---
 
-# Intro
-
 SMTP is the transfer protocol for sending outbound mail from clients and between servers. It is not mailbox retrieval (IMAP/POP3); those are separate protocols.
 
-## Flow and Boundaries
+# Flow and Boundaries
 
 A common path is:
 
@@ -35,7 +33,7 @@ Timeouts are ambiguous: a server can accept a message then drop the response, so
 
 ![[System Design 101/422fcc82e0fee953f75cac96e0678fdb576821151928df2de6a00a1a5287a356.jpg]]
 
-## Email Authentication
+# Email Authentication
 
 Email has two sender identities. The SMTP envelope sender (`MAIL FROM`, later exposed as Return-Path) receives bounces; the message's header `From` is what users see. SPF authenticates infrastructure for the envelope identity, DKIM authenticates signed message fields for a signing domain, and DMARC asks whether at least one passing identity aligns with the header From domain.
 
@@ -67,7 +65,7 @@ Roll authentication out as an observed migration:
 
 Receiver requirements are not universal. Providers publish different requirements for personal mail, bulk senders, and high-volume traffic, and those policies change. Treat the strictest important receiver as a deployment requirement and verify its current primary documentation. Authentication is necessary for many sending programs but still competes with reputation, complaint rate, content, list hygiene, and unsubscribe handling.
 
-## .NET Sending: Direct Protocol vs Provider APIs
+# .NET Sending: Direct Protocol vs Provider APIs
 
 `System.Net.Mail.SmtpClient` is usable but legacy; it is not Microsoft-recommended for new systems that need modern reliability.
 
@@ -92,7 +90,7 @@ await client.DisconnectAsync(true, ct);
 
 Do not keep passwords in code or configuration files. Prefer short-lived tokens or a secret store, validate the server certificate, and set connect/send timeouts at the application boundary.
 
-### Submission and acceptance contract
+## Submission and acceptance contract
 
 An SMTP `250` after DATA means the receiving submission server accepted responsibility under its policy; it does not mean the recipient read the message or that another domain accepted it. HTTP `202 Accepted` only means a provider accepted the request for processing. It proves durable queueing only when that provider's documented contract says so, and it never proves final delivery.
 
@@ -109,17 +107,17 @@ Compare approaches:
 
 Choose from delivery and compliance requirements rather than assuming one path for every production system.
 
-## Operational Notes
+# Operational Notes
 
 - `System.Net.Mail.SmtpClient` can work for simple internal scenarios but misses modern transport-control expectations.
 - For high-volume sending, managed platforms often simplify deliverability and event-driven suppression.
 
-## Questions
+# Questions
 
 > [!QUESTION]- Why does SPF/DKIM/DMARC improve delivery but not guarantee it?
 > They verify different authenticity and alignment properties, but inbox placement still depends on reputation, engagement, anti-abuse decisions, and content quality.
 
-## References
+# References
 
 - [SMTP (RFC 5321)](https://www.rfc-editor.org/rfc/rfc5321) — protocol commands, response model, and delivery contracts.
 - [Message Submission (RFC 6409)](https://www.rfc-editor.org/rfc/rfc6409) — authenticated submission boundary.

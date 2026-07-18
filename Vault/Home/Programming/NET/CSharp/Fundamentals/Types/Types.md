@@ -13,8 +13,6 @@ level:
   - '4'
 ---
 
-# Intro
-
 A C# type defines shape, behavior, and assignment semantics.
 A common source of bugs is value semantics versus reference semantics: value types copy the value, while reference types copy object references.
 That nuance matters for correctness, allocations, and API design, especially when code crosses boundaries such as collections, interfaces, and async flows.
@@ -24,25 +22,25 @@ const { FolderStructureMap } = await dc.require("Assets/components/devbook-folde
 return FolderStructureMap;
 ```
 
-## How It Works
+# How It Works
 
 - **Assignment:** assigning a value type copies the value (including any reference-type fields, which remain shared references); assigning a reference type copies a pointer-like reference to the same object.
 - **Parameter passing default:** C# passes arguments by value unless you use `ref`, `out`, or `in`. For reference types, the copied value is still the reference, so object mutation is visible to both callers.
 - **Storage model:** "stack vs heap" is a runtime placement detail. Value types can live inside heap objects, and references can be stored in stack frames.
 - **Boxing boundary:** converting a value type to `object` or an interface boxes it (heap allocation + copy). Repeated boxing in hot paths can create avoidable GC pressure.
 
-## Pitfalls
+# Pitfalls
 
 - Assuming reference types are always safe to pass around can create hidden shared-mutation bugs. This happens when multiple aliases point to one mutable object. Mitigate by preferring immutability for shared models or cloning at ownership boundaries.
 - Using large or mutable structs can hurt both performance and correctness. A common failure mode is mutating a struct returned from a property or in a `foreach`, because you often mutate a copy, not the original value. Mitigate by keeping structs small and immutable (`readonly struct` where possible), and by avoiding APIs that expose mutable struct state through copying boundaries.
 
-## Tradeoffs
+# Tradeoffs
 
 - **`class` vs `struct`:** `class` avoids large copy costs and supports inheritance; `struct` can reduce allocations for small value-like data but is sensitive to copy/boxing overhead.
 - **`record class` vs `class`:** records improve value-based equality and concise modeling, but default equality semantics may be wrong for identity-based domain entities.
 - **Interface abstraction with value types:** interfaces improve design flexibility, but passing structs through interface-typed APIs may introduce boxing unless generic constraints keep calls strongly typed.
 
-## Examples
+# Examples
 
 ```csharp
 public struct Counter
@@ -69,7 +67,7 @@ h.Counter = c;
 Console.WriteLine(h.Counter.Value); // 1
 ```
 
-## Questions
+# Questions
 
 > [!QUESTION]- Why can updating a value-type item inside `foreach` fail to persist, and what are safe fixes?
 > - The loop variable was a copy of a value type, so mutations were applied to the copy.
@@ -89,9 +87,9 @@ Console.WriteLine(h.Counter.Value); // 1
 > - Use `record class` for data-centric models where value-based equality improves correctness.
 > - Validate the choice against mutation rules, size/copy costs, and equality requirements.
 
-## References
+# References
 
-- [C# type system overview](https://learn.microsoft.com/en-us/dotnet/csharp/fundamentals/types/)
+- [C# type system overview](https://learn.microsoft.com/en-us/dotnet/csharp/fundamentals/types/) — Microsoft's overview of value and reference types, conversions, generics, nullable types, and compile-time type safety.
 - [Value types (C# reference)](https://learn.microsoft.com/en-us/dotnet/csharp/language-reference/builtin-types/value-types)
 - [Reference types (C# reference)](https://learn.microsoft.com/en-us/dotnet/csharp/language-reference/keywords/reference-types)
 - [Boxing and unboxing (C# guide)](https://learn.microsoft.com/en-us/dotnet/csharp/programming-guide/types/boxing-and-unboxing)

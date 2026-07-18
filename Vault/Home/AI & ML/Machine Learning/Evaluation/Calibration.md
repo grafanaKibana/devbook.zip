@@ -11,8 +11,6 @@ status: Done
 publish: true
 ---
 
-# Intro
-
 Calibration measures whether a model's predicted probabilities match observed reality: among all predictions of 0.7, a calibrated model is correct about 70% of the time. This is a different property from discrimination — the ability to rank positives above negatives that [[ROC-AUC and PR-AUC|ROC-AUC]] measures. A model can rank perfectly (AUC 1.0) while being badly miscalibrated, because AUC depends only on the order of scores, not their magnitude. Conversely a model can be well-calibrated but discriminate poorly.
 
 Calibration matters whenever downstream logic consumes the probability itself rather than just the predicted label: expected-value thresholds ("act if `p × value > cost`"), cost-sensitive decisions, abstention policies, risk scores shown to humans, and probability averaging in ensembles. Feed a miscalibrated 0.9 into an expected-value calculation and the decision is wrong even though the ranking was fine. Modern neural networks are a notorious case — they tend to be **overconfident**, reporting 0.99 on predictions that are right far less often (Guo et al., 2017).
@@ -34,7 +32,7 @@ xychart-beta
 
 The gray diagonal is perfect calibration — predicted probability equals observed frequency. The red curve sits below it: at a predicted 0.75 the model is actually right only ~0.55 of the time, the signature of an overconfident model. A curve above the diagonal means underconfidence.
 
-## Reliability Diagrams
+# Reliability Diagrams
 
 A reliability diagram (calibration curve) is the primary diagnostic. Bin predictions by their predicted probability, then for each bin plot mean predicted probability (x) against the observed positive rate (y). Perfect calibration lands every bin on the diagonal.
 
@@ -44,7 +42,7 @@ A reliability diagram (calibration curve) is the primary diagnostic. Bin predict
 
 Read the diagram alongside a histogram of prediction confidence: a bin near the diagonal is meaningless if almost no predictions fall in it. Sparse bins are why single-number calibration metrics can mislead.
 
-## Calibration Metrics
+# Calibration Metrics
 
 **Brier score** — the mean squared error between the predicted probability and the actual 0/1 outcome. Range 0 to 1, lower is better. It is a *proper scoring rule*: it is minimized only by reporting the true probabilities, so it cannot be gamed by hedging. The Brier score decomposes into calibration and refinement (sharpness) terms, so it rewards being both calibrated *and* decisive — a model that predicts the base rate for every input is perfectly calibrated but useless, and the Brier score penalizes it on the refinement term.
 
@@ -60,7 +58,7 @@ Read the diagram alongside a histogram of prediction confidence: a bin near the 
 | Log loss | Calibration with heavy penalty for confident mistakes | Explodes on a single confident wrong prediction; needs clipping |
 | Reliability diagram | Where and how calibration fails | Bins with few samples look misleading |
 
-## Post-hoc Calibration Methods
+# Post-hoc Calibration Methods
 
 Calibration is usually fixed *after* training, by fitting a small mapping from raw model scores to calibrated probabilities on a held-out calibration set (never the training or test set).
 
@@ -70,7 +68,7 @@ Calibration is usually fixed *after* training, by fitting a small mapping from r
 
 For LLMs, the analogous signal is token-level [[Generation|logprobs]] used as a confidence estimate — those are also often miscalibrated, and the same diagnostics apply before trusting them as a gate.
 
-## Pitfalls
+# Pitfalls
 
 **Trusting AUC as evidence of good probabilities.** AUC is rank-based and invariant to any monotonic transform of the scores, so it says nothing about calibration. A model with AUC 0.92 can still report 0.95 on cases that are right 60% of the time. If downstream logic uses the probability, measure calibration explicitly — AUC will not catch the problem.
 
@@ -80,7 +78,7 @@ For LLMs, the analogous signal is token-level [[Generation|logprobs]] used as a 
 
 **Assuming calibration survives distribution shift.** Calibration is a property of the model *on a distribution*. When inputs drift (see [[Data Drift]]), a previously calibrated model becomes miscalibrated even if its ranking holds. Re-check calibration on shifted data and recalibrate rather than assuming the original mapping still holds.
 
-## Tradeoffs
+# Tradeoffs
 
 | Method | Data needed | Flexibility | Effect on accuracy | Best for |
 | --- | --- | --- | --- | --- |
@@ -91,7 +89,7 @@ For LLMs, the analogous signal is token-level [[Generation|logprobs]] used as a 
 
 **Decision rule**: start by measuring — plot a reliability diagram and compute Brier score and ECE on a held-out set. If the model only needs to rank (search, recommendation shortlist), calibration may not matter and ROC-AUC is enough. If a downstream decision consumes the probability, calibrate: temperature scaling for neural nets, Platt for small data, isotonic when you have enough data and the distortion is not sigmoidal. Recalibrate after any model update or detected distribution shift.
 
-## Questions
+# Questions
 
 > [!QUESTION]- Why can a model with high ROC-AUC still produce unusable probabilities?
 > - ROC-AUC measures ranking — whether positives score above negatives — and is invariant to any monotonic transform of the scores
@@ -111,7 +109,7 @@ For LLMs, the analogous signal is token-level [[Generation|logprobs]] used as a 
 > - Because it preserves the argmax, accuracy is unchanged — you fix probabilities without touching the model's decisions
 > - It needs only a small held-out set and one parameter, so it rarely overfits; the limitation is that it cannot repair calibration that varies by region or class
 
-## References
+# References
 
 - [On Calibration of Modern Neural Networks (Guo et al., ICML 2017)](https://arxiv.org/abs/1706.04599) — shows modern deep nets are overconfident and introduces temperature scaling as the standard fix.
 - [Predicting Good Probabilities With Supervised Learning (Niculescu-Mizil & Caruana, ICML 2005)](https://www.cs.cornell.edu/~alexn/papers/calibration.icml05.crc.rev3.pdf) — foundational comparison of Platt scaling and isotonic regression across model families.

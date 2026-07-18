@@ -11,11 +11,9 @@ status: Done
 publish: true
 ---
 
-# Intro
-
 Standard prompting often fails on tasks that require multi-step reasoning, such as arithmetic word problems, logic puzzles, or constrained planning. Reasoning-focused prompts improve reliability by making intermediate steps explicit, which reduces shortcut errors and forces the model to keep track of state across steps. A practical progression is: Chain-of-Thought (one explicit reasoning path), Self-Consistency (many sampled paths with voting), and Tree of Thoughts (branching search with evaluation and backtracking). You can think of this as moving from single-pass reasoning to probabilistic ensemble reasoning and finally to explicit search.
 
-## Chain-of-Thought Prompting
+# Chain-of-Thought Prompting
 
 Chain-of-Thought (CoT) prompting was introduced by Wei et al. (2022) as a way to elicit intermediate reasoning steps before the final answer. In practice, teams use two variants:
 
@@ -41,7 +39,7 @@ Final answer: 10  (correct)
 
 In production terms, CoT usually improves accuracy on arithmetic, symbolic manipulation, and rule-following tasks, but it can still fail when the model commits to a wrong intermediate assumption and never revisits it.
 
-## Self-Consistency
+# Self-Consistency
 
 Self-Consistency (Wang et al. 2022) replaces one greedy CoT path with multiple sampled CoT paths and selects the most frequent final answer. Mechanically, you run CoT decoding at temperature greater than zero, collect N independent reasoning traces, then aggregate by majority vote (or weighted vote if you add confidence scoring).
 
@@ -59,7 +57,7 @@ Majority vote -> 67 (correct)
 
 Tradeoff: this costs roughly N model calls instead of 1, so latency and token spend scale up with sample count.
 
-## Tree of Thoughts
+# Tree of Thoughts
 
 Tree of Thoughts (ToT), proposed by Yao et al. (2023), generalizes CoT from one linear chain to a branching reasoning tree. At each step, the model proposes multiple candidate thoughts, evaluates their promise, and then explores selected branches further using BFS or DFS. Because exploration is explicit, the process can backtrack from dead ends instead of being trapped in the first plausible chain.
 
@@ -78,7 +76,7 @@ flowchart TD
 
 ToT is most useful when the solution space is large and non-linear (planning, puzzle solving, constrained search). For straightforward math or extraction tasks, the search overhead is usually unnecessary.
 
-## Tradeoffs
+# Tradeoffs
 
 | Technique | Calls | Accuracy profile | Best use case | Main downside |
 | --- | --- | --- | --- | --- |
@@ -92,7 +90,7 @@ Decision rule:
 2. If error rate is still too high and answers are verifiable, move to self-consistency with a small N.
 3. Use ToT only when the problem genuinely requires search (not just calculation).
 
-## Questions
+# Questions
 
 > [!QUESTION]- When does Chain-of-Thought usually help, and when can it hurt?
 > **Expected answer:**
@@ -118,7 +116,7 @@ Decision rule:
 > - Choose search strategy (BFS/DFS/beam) based on branching factor, depth, and compute budget.
 > **Why:** this evaluates whether the candidate can map algorithmic search cost to task difficulty.
 
-## References
+# References
 
 - [Chain-of-Thought Prompting Elicits Reasoning in Large Language Models (Wei et al., 2022)](https://arxiv.org/abs/2201.11903) — original CoT paper showing that few-shot examples with reasoning steps dramatically improve performance on arithmetic and symbolic tasks.
 - [Large Language Models are Zero-Shot Reasoners (Kojima et al., 2022)](https://arxiv.org/abs/2205.11916) — introduces zero-shot CoT via the "Let's think step by step" prompt, enabling reasoning without few-shot examples.

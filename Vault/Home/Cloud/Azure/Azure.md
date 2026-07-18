@@ -13,8 +13,6 @@ tags:
 publish: true
 ---
 
-# Intro
-
 Azure is Microsoft's public cloud platform. A .NET workload can use the Azure SDK, `DefaultAzureCredential`, and Microsoft Entra workload identities to call managed services without storing long-lived credentials. Those integrations can reduce identity and operations work when the organization already uses Azure, but they do not make Azure the automatic choice; region, service contract, portability, compliance, and total operating cost still decide.
 
 ```bash
@@ -29,7 +27,7 @@ const { FolderStructureMap } = await dc.require("Assets/components/devbook-folde
 return FolderStructureMap;
 ```
 
-## Choose Services by Capability
+# Choose Services by Capability
 
 Start with the workload contract, not the product list. Decide how much runtime control the team needs, whether data is operational or analytical, the delivery semantics between components, regional availability, private-network requirements, and how much provider-specific API surface is acceptable.
 
@@ -50,9 +48,9 @@ Use this page to translate capability needs into Azure product names. Provider-n
 
 The visual is an orientation aid. Product names, retirement state, regional availability, quotas, and feature contracts must be checked against current Microsoft documentation. Portability is also a per-capability decision: container images can move more easily than Cosmos DB consistency or Service Bus settlement semantics.
 
-## Compute
+# Compute
 
-### Azure Functions
+## Azure Functions
 Azure Functions hosts event-driven code for HTTP, timer, queue, blob, Event Hubs, and Service Bus triggers. Scaling, idle capacity, billing, networking, and timeout depend on the hosting plan: Flex Consumption, Premium, Dedicated, legacy Consumption, and Container Apps are not interchangeable. Use asynchronous handoff or Durable Functions for long-running workflows rather than holding an HTTP request open, and make handlers safe for the trigger's retry and duplicate-delivery behavior.
 
 ```bash
@@ -61,9 +59,9 @@ func new --name Hello --template "HTTP trigger" --authlevel Anonymous
 func start  # local dev
 ```
 
-## Storage
+# Storage
 
-### Azure Storage
+## Azure Storage
 Azure Storage is a family of distinct contracts: Blob Storage for objects, Azure Files for SMB/NFS shares, Queue Storage for simple queues, and Table Storage for key-value data. Choose by access semantics rather than treating the account as one generic store. [[Home/Data Persistence/Object Storage|Object Storage]] owns the object-key, multipart, lifecycle, and publication boundaries.
 
 ```bash
@@ -71,46 +69,46 @@ az storage account create --name mystorageacct --resource-group my-rg --sku Stan
 az storage blob upload --account-name mystorageacct --container-name mycontainer --file ./data.csv --name data.csv
 ```
 
-### Azure Cosmos DB
+## Azure Cosmos DB
 Azure Cosmos DB is a distributed database family with several APIs and configurable consistency and multi-region write behavior. Reach for it only after fixing partition keys, query patterns, consistency, transactional scope, indexing, and request-unit cost. API compatibility does not make the service operationally identical to MongoDB, Cassandra, Gremlin, or another provider's document database.
 
 ```bash
 az cosmosdb create --name my-cosmos --resource-group my-rg --default-consistency-level Session
 ```
 
-## AI & ML
+# AI & ML
 
-### Azure OpenAI
+## Azure OpenAI
 Azure-hosted OpenAI models with enterprise controls such as RBAC, private networking, content filtering, and quota management. The v1 surface supports OpenAI clients with small code changes, but it is not endpoint-transparent: Azure uses an Azure resource endpoint, supports Azure-specific key or Microsoft Entra authentication, and requires the deployment name in the `model` parameter rather than only the underlying model name.
 
 **When to reach for it**: Choose Azure OpenAI when the workload needs Azure-specific identity, private networking, policy, or governance integration, or supported residency and compliance controls. Verify that the chosen model, deployment type, feature, and Azure region satisfy those requirements; availability and compliance scope are not implied by selecting the service.
 
-### Microsoft Foundry
+## Microsoft Foundry
 Microsoft Foundry, formerly Azure AI Foundry, is the unified Azure platform for building, evaluating, and operating AI applications. It groups model deployments, agents, tools, evaluators, tracing, monitoring, and governance under shared project and resource controls.
 
 **When to reach for it**: Building RAG pipelines, agent systems, or any AI app that needs evaluation and safety controls. Replaces the older Azure AI Studio.
 
-### Azure Machine Learning
+## Azure Machine Learning
 MLOps platform for training, tracking, evaluating, registering, and deploying ML models. Core concepts: Workspace (system of record), Compute (clusters/instances), Jobs (reproducible training runs), Model Registry (versioned promotion), Online Endpoints (real-time inference).
 
 **When to reach for it**: Training custom ML models at scale, managing model lifecycle (train → evaluate → register → deploy → monitor), or running batch inference pipelines.
 
-### Azure AI Content Safety
+## Azure AI Content Safety
 Content filtering and safety controls for AI applications. Features include harmful-content classification, Prompt Shields, protected-material detection, and groundedness detection where the selected surface supports them. PII detection is a separate Azure Language in Foundry Tools capability; for supported LLM output filtering, Microsoft Foundry also exposes a distinct personal-information filter.
 
 **When to reach for it**: Any production AI app that processes user input or generates user-facing content. Implement as a layer in your AI pipeline, not as an afterthought.
 
-### Azure Machine Learning Data Labeling
+## Azure Machine Learning Data Labeling
 Managed labeling workflows within Azure Machine Learning. Supports image classification, object detection, text classification, and NER labeling tasks. Exported labels become CSV, COCO, or Azure MLTable data, depending on the project type. Register the export as a versioned data asset and pass that asset to training jobs; lineage records which jobs or pipelines consumed the data asset, while those jobs produce model artifacts separately.
 
 **When to reach for it**: When you need to produce labeled training or evaluation data at scale with audit trails and quality controls.
 
-### Microsoft Foundry Evaluation and Observability
+## Microsoft Foundry Evaluation and Observability
 Microsoft Foundry provides evaluation runs, tracing, and monitoring for models and agents. Validate the availability and release status of each evaluator and observability feature in the target project type and region before making it a production gate.
 
 **When to reach for it**: Before deploying any AI feature to production (offline evaluation), and continuously in production (online monitoring for drift and safety regressions).
 
-## References
+# References
 
 - [Azure documentation](https://learn.microsoft.com/en-us/azure/) — Microsoft's official Azure docs hub; starting point for any Azure service
 - [Azure SDK for .NET](https://learn.microsoft.com/en-us/dotnet/azure/) — .NET integration guide for Azure services; covers authentication, SDK packages, and samples

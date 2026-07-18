@@ -10,8 +10,6 @@ priority: High
 status: Ready to Repeat
 publish: true
 ---
-# Composite
-
 A military command structure is a natural Composite. A general gives an order to a division, which passes it to brigades, which pass it to battalions, down to individual soldiers. Whether you command one soldier or an entire army, the interface is the same: "execute this order." The hierarchy handles the recursion — the general doesn’t need to know whether a unit is a single person or ten thousand.
 
 The Composite pattern composes objects into tree structures and lets clients treat individual objects and compositions uniformly through a shared interface. Leaf nodes (single items) implement the interface directly. Composite nodes (containers) implement the same interface but delegate to their children recursively. In an e-commerce system, a `SingleProduct` has a price. A `ProductBundle` also has a price — calculated by summing its children, which can themselves be products or nested bundles. The client calls `GetPrice()` on either without knowing or caring which type it holds.
@@ -37,7 +35,7 @@ classDiagram
     ProductBundle o--> IOrderComponent : contains children
 ```
 
-## Problem
+# Problem
 
 `PricingService` has separate logic for individual products, simple bundles, and nested bundles. Three code paths, recursive logic scattered in the service:
 
@@ -80,7 +78,7 @@ public class PricingService
 
 Here's what breaks when requirements change: adding a `SubscriptionProduct` type requires editing every method that type-checks items — `GetBundlePrice`, `GetCartTotal`, and any future pricing methods.
 
-## Solution
+# Solution
 
 Define `IOrderComponent` — both `SingleProduct` and `ProductBundle` implement it. Pricing is recursive and uniform:
 
@@ -166,7 +164,7 @@ Console.WriteLine($"Items: {workstationBundle.GetItemCount()}");
 
 Adding a `SubscriptionProduct` now means one new class implementing `IOrderComponent` — `ProductBundle` and `PricingService` never change.
 
-## You Already Use This
+# You Already Use This
 
 **`IConfiguration` with multiple providers** — `IConfiguration` is a Composite. The root configuration is a tree of `IConfigurationSection` nodes. JSON file, environment variables, and user secrets are leaf providers; the root `IConfigurationRoot` is the composite that merges them. `configuration["ConnectionStrings:Default"]` traverses the tree uniformly.
 
@@ -176,7 +174,7 @@ Adding a `SubscriptionProduct` now means one new class implementing `IOrderCompo
 
 **Blazor component tree** — every Blazor component is a composite. `RenderFragment` children are composed into a tree; the renderer traverses it uniformly without knowing whether a node is a leaf component or a layout with children.
 
-## Pitfalls
+# Pitfalls
 
 **Treating all components uniformly when some operations only apply to composites** — `IOrderComponent` doesn't expose `Add()`/`Remove()` because leaves don't support children. If you add these to the interface, leaves must throw `NotSupportedException` — a violation of the Liskov Substitution Principle. Keep the component interface to operations that make sense for both leaves and composites. Expose child management only on the `ProductBundle` class directly.
 
@@ -184,7 +182,7 @@ Adding a `SubscriptionProduct` now means one new class implementing `IOrderCompo
 
 **Performance on deep trees** — `GetPrice()` traverses the entire tree on every call. For large catalogs with deep nesting, cache the computed price and invalidate when the tree changes. EF Core's `IConfiguration` tree is read-only after build for this reason.
 
-## Tradeoffs
+# Tradeoffs
 
 | Concern | Composite | Type-checking in service |
 |---|---|---|
@@ -196,7 +194,7 @@ Adding a `SubscriptionProduct` now means one new class implementing `IOrderCompo
 
 **Decision rule**: Use Composite when you have a genuine part-whole hierarchy where clients need to treat leaves and composites uniformly, and you expect new leaf types to be added. If the hierarchy is fixed (always just products and bundles, never new types), the extra abstraction may not be worth it. The signal is when you find yourself writing `if (item is X) ... else if (item is Y)` in multiple places.
 
-## Questions
+# Questions
 
 > [!QUESTION]- How does Composite relate to the Visitor pattern?
 > They're complementary. Composite defines the tree structure and uniform traversal. Visitor adds new operations to the tree without modifying the node classes. Example: `TaxVisitor`, `ShippingVisitor`, and `DiscountVisitor` can each traverse the same `IOrderComponent` tree without adding methods to `SingleProduct` or `ProductBundle`. Use Composite when the structure varies; use Visitor when the operations vary. Together, they handle both dimensions of variation.
@@ -204,7 +202,7 @@ Adding a `SubscriptionProduct` now means one new class implementing `IOrderCompo
 > [!QUESTION]- When does a Composite tree become a performance problem?
 > When the tree is large, deep, or frequently traversed. `GetPrice()` on a bundle with 10,000 SKUs traverses all 10,000 nodes on every call. Mitigations: (1) cache computed values and invalidate on mutation, (2) use lazy evaluation (compute only when accessed), (3) denormalize — store the precomputed total and update it incrementally. The signal: profiling shows `GetPrice()` appearing in hot paths. The cost of caching: stale values if the tree is mutated without invalidation.
 
-## References
+# References
 
 - [Composite Pattern — Christopher Okhravi](https://www.youtube.com/watch?v=EWDmWbJ4wRA&list=PLrhzvIcii6GNjpARdnO4ueTUAVR9eMBpc&index=14) — video walkthrough of the Composite pattern with OOP examples
 - [Composite — refactoring.guru](https://refactoring.guru/design-patterns/composite) — canonical pattern description with tree structure diagram and C# example

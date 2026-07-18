@@ -11,11 +11,9 @@ status: Done
 
 publish: true
 ---
-# Intro
-
 CQRS (Command Query Responsibility Segregation) separates the part of the system that changes state from the part that serves read data. It matters because read and write workloads usually have different shapes: writes care about consistency and invariants, while reads care about latency and query flexibility. With CQRS, you can scale and optimize these paths independently instead of forcing one model to serve both. Reach for it when your domain rules are non-trivial, your query surface is broad, or your read:write ratio is high enough that a denormalized read model pays off.
 
-## Mechanism
+# Mechanism
 
 At the core, CQRS uses two different models with different responsibilities:
 
@@ -32,7 +30,7 @@ Bridge options between write and read models:
 
 In interviews, emphasize that CQRS is about **separating responsibilities and optimization goals**, not automatically about adding message brokers or multiple databases.
 
-## Write and Read Models
+# Write and Read Models
 
 ```mermaid
 graph LR
@@ -69,7 +67,7 @@ graph LR
 
 The key insight: the **write model** is normalized and enforces business rules, while the **read model** is denormalized and shaped for fast queries. They can use different databases, different schemas, or even different technologies. The trade-off is **eventual consistency** between the two sides.
 
-## ASP.NET Core Example (EF Core writes + Dapper reads)
+# ASP.NET Core Example (EF Core writes + Dapper reads)
 This sample uses MediatR for handler wiring; CQRS itself is library-agnostic. MediatR has community and commercial licensing options, so verify current terms at [mediatr.io](https://mediatr.io/). Alternatives include direct DI-wired command/query handlers with custom interfaces.
 Write side: command handler validates invariants and persists normalized state.
 
@@ -190,8 +188,8 @@ public sealed class OrderSummaryProjection : INotificationHandler<OrderPlaced>
 }
 ```
 
-## CQRS and Event Sourcing
-CQRS pairs naturally with [[Event Sourcing]] because events are already the canonical change stream that can project into one or many read models. This makes rebuilding read views and supporting new query shapes easier.
+# CQRS and Event Sourcing
+CQRS pairs naturally with [[Home/Software Architecture/Patterns/Architectural Patterns/Event Sourcing]] because events are already the canonical change stream that can project into one or many read models. This makes rebuilding read views and supporting new query shapes easier.
 Important distinction for interviews: **CQRS does not require Event Sourcing**.
 
 - CQRS without Event Sourcing: write model persists current state (for example, relational tables), and emits events only as integration/projection signals.
@@ -199,14 +197,14 @@ Important distinction for interviews: **CQRS does not require Event Sourcing**.
 
 Use both when auditability, temporal debugging, replay, and multiple read projections are first-class requirements.
 
-## Pitfalls
+# Pitfalls
 - **Eventual consistency surprises users**: a command succeeds but the read model has not caught up, so users see stale dashboards. Use UX hints ("updating..."), projection lag monitoring, and read-your-own-write for critical paths (serve the immediate follow-up read from the write model for that user/session).
 - **Overkill for simple CRUD**: if the same model can handle reads and writes with acceptable performance, CQRS adds architecture tax without clear payoff.
 - **Two models double maintenance**: schema evolution, testing, and observability now span command flow, events, and projections. A common failure is non-idempotent projections duplicating or corrupting read rows because brokers are usually at-least-once: a consumer can write, crash before ack, then process the same event again. Use upserts, store processed event IDs to skip duplicates, and run replay tests.
 - **Projection and write are not atomic by default**: if you save state and then project in-process, a handler failure can leave write and read models temporarily divergent. Use the outbox pattern when atomic event capture is required, then project asynchronously with retries.
 - **"CQRS everywhere" anti-pattern**: applying CQRS globally increases complexity and cognitive load. Use it selectively per bounded context where constraints justify it.
 
-## Tradeoffs: CQRS vs Simple CRUD
+# Tradeoffs: CQRS vs Simple CRUD
 | Criterion | Simple CRUD model | CQRS model |
 |---|---|---|
 | Read/write ratio close to 1:1 | Usually sufficient | Often unnecessary complexity |
@@ -215,19 +213,19 @@ Use both when auditability, temporal debugging, replay, and multiple read projec
 | Operational complexity | Lower | Higher (projections, lag, retries, idempotency) |
 | Independent scaling | Limited | Strong, especially with separate stores |
 Decision rule: CQRS is usually worth it when at least two are true at once: high read:write ratio, complex query requirements, and clear need to scale read/write paths independently.
-## Questions
+# Questions
 
 > [!QUESTION]- When is CQRS worth the operational complexity, and when is it an anti-pattern?
 > CQRS earns its complexity when the read and write sides genuinely want different shapes — a high read:write ratio, broad or expensive queries, real invariants on the write side, and a need to scale the two paths independently. Then a denormalized read model serves screens cheaply while the write model stays focused on enforcing rules. It's an anti-pattern for ordinary CRUD at low scale: the projection pipelines, eventual-consistency handling, and two models to evolve and test are pure tax when one model would have served both. Apply it per bounded context where the constraints justify it, never as a global default.
 
 > [!QUESTION]- Does CQRS require Event Sourcing or two databases?
-> No — and conflating them is the most common CQRS misconception. CQRS is only about separating the command model from the query model, and that can be two classes against the same database. Separate stores, message brokers, and [[Event Sourcing]] are options you add when scale or auditability demands them, not requirements. You can run CQRS on a single relational database, projecting into a denormalized view table inside the same transaction. Start with the cheapest separation that solves the problem and add infrastructure only when a real constraint forces it.
+> No — and conflating them is the most common CQRS misconception. CQRS is only about separating the command model from the query model, and that can be two classes against the same database. Separate stores, message brokers, and [[Home/Software Architecture/Patterns/Architectural Patterns/Event Sourcing]] are options you add when scale or auditability demands them, not requirements. You can run CQRS on a single relational database, projecting into a denormalized view table inside the same transaction. Start with the cheapest separation that solves the problem and add infrastructure only when a real constraint forces it.
 
 > [!QUESTION]- How do you handle eventual consistency between the write and read models?
 > With asynchronous projection a command can succeed before the read model catches up, so the user who just acted sees stale data. The pragmatic fixes: serve that user's immediate follow-up read from the write model (read-your-own-writes for the session), show a soft "updating…" state, and monitor projection lag so you notice drift. Underneath, make projections idempotent — brokers are at-least-once, so a projector can see the same event twice — using upserts and a record of handled event IDs. Eventual consistency is a UX-and-idempotency problem, not a reason to abandon the split.
 
-## References
-- [Microsoft Learn - CQRS pattern](https://learn.microsoft.com/azure/architecture/patterns/cqrs)
+# References
+- [Microsoft Learn - CQRS pattern](https://learn.microsoft.com/azure/architecture/patterns/cqrs) — official architecture guidance covering separate read/write models, synchronization costs, scaling, and when CQRS is a poor fit.
 - [Martin Fowler - CQRS](https://martinfowler.com/bliki/CQRS.html)
 - [Microservices.io - CQRS pattern](https://microservices.io/patterns/data/cqrs.html)
 - [Chris Richardson - Idempotent Consumer pattern](https://microservices.io/post/microservices/patterns/2020/10/16/idempotent-consumer.html)

@@ -11,11 +11,9 @@ status: Ready to Repeat
 publish: true
 ---
 
-# SOLID Principles
-
 SOLID is a mnemonic for five design principles that govern how classes relate to each other — who knows about whom, who changes when, and where new behavior gets added. Think of a large enterprise codebase as a city: SOLID principles are zoning laws that prevent a chemical factory from opening next to a kindergarten. Violating them does not cause an immediate explosion — it causes slow rot where tests require 14 dependencies, features take two sprints because one change breaks three classes, and onboarding stretches to months because every file does four unrelated things.
 
-## S — Single Responsibility Principle
+# S — Single Responsibility Principle
 
 **One class, one reason to change.** "Reason to change" means one actor or stakeholder whose requirements drive modifications to that class.
 
@@ -95,7 +93,7 @@ public class InvoiceGenerator
 
 **Detection:** If describing a class requires the word "and" ("it saves orders *and* sends emails *and* generates invoices"), it has multiple responsibilities. If two different teams file tickets that touch the same class, SRP is violated.
 
-## O — Open/Closed Principle
+# O — Open/Closed Principle
 
 **Open for extension, closed for modification.** Add new behavior by adding new code — not by editing existing code that already works.
 
@@ -156,7 +154,7 @@ public class ShippingCostCalculator
 
 **Detection:** Count the number of times a file appears in `git log` across unrelated feature branches. If the same file is modified for every new variant of a behavior, OCP is violated.
 
-## L — Liskov Substitution Principle
+# L — Liskov Substitution Principle
 
 **Subtypes must honor the contract of their base type.** If calling code works with a base class reference, swapping in any derived class must not break correctness — no surprises, no silent behavioral changes, no weakened guarantees.
 
@@ -239,7 +237,7 @@ public class CachedProductRepository : IProductRepository
 
 **Detection:** Search for `override` methods that do not call `base.Method()` when the base established a side effect. Search for `is` or `as` type checks in consuming code — they often indicate that the caller cannot trust the base type contract and is compensating.
 
-## I — Interface Segregation Principle
+# I — Interface Segregation Principle
 
 **No client should be forced to depend on methods it does not use.** Prefer small, focused interfaces over large "fat" interfaces.
 
@@ -315,7 +313,7 @@ public class NotificationHandler : IOrderNotifier
 
 **Detection:** Count `throw new NotSupportedException()` or `throw new NotImplementedException()` in interface implementations. Each one signals a method that the class was forced to "implement" but does not actually support.
 
-## D — Dependency Inversion Principle
+# D — Dependency Inversion Principle
 
 **High-level modules should not depend on low-level modules. Both should depend on abstractions.** The direction of source-code dependency should point toward the business policy, not toward the implementation detail.
 
@@ -394,7 +392,7 @@ flowchart LR
 
 **Detection:** Look for `new ConcreteClass()` inside business logic classes. If a high-level class directly instantiates a low-level dependency, DIP is violated. In ASP.NET Core, check whether all infrastructure dependencies are registered in DI and injected via constructors.
 
-## How the Principles Reinforce Each Other
+# How the Principles Reinforce Each Other
 
 SOLID principles are not independent checkboxes — violating one typically cascades into violating others.
 
@@ -406,7 +404,7 @@ SOLID principles are not independent checkboxes — violating one typically casc
 
 The practical implication: when debugging a SOLID violation, look one level deeper. The visible symptom (a class that is hard to extend) often has a root cause in a different principle (it depends on concrete types instead of abstractions).
 
-## Tradeoffs
+# Tradeoffs
 
 | Principle | Benefit | Cost | When to relax |
 |-----------|---------|------|---------------|
@@ -418,7 +416,7 @@ The practical implication: when debugging a SOLID violation, look one level deep
 
 **Decision rule:** Apply SOLID where you have evidence of coupling pain — code that is hard to test, hard to change, or hard to understand. Do not apply it speculatively to code that has not yet caused problems. The cost of over-engineering (47 single-method interfaces for a 20-endpoint CRUD app) is as real as the cost of under-engineering (a 2,000-line `OrderService` that nobody dares touch).
 
-## Pitfalls
+# Pitfalls
 
 **Over-abstraction theater.** A team applies ISP so aggressively to a 20-endpoint internal tool that they create 47 single-method interfaces. Navigating the codebase requires tracing through 3-4 layers of indirection for every feature. New developers take 2 weeks to onboard on what should be a simple CRUD application. **Why it happens:** Mechanical rule-following without assessing whether the abstraction serves a real need. **Mitigation:** An interface should exist because two or more consumers need different implementations, not because "SOLID says so."
 
@@ -430,7 +428,7 @@ The practical implication: when debugging a SOLID violation, look one level deep
 
 **Interface explosion from ISP.** Splitting interfaces too granularly creates a combinatorial explosion of types that are harder to discover, harder to mock in tests, and harder to compose in DI registration. **Why it happens:** Applying ISP mechanically to every interface without checking whether any client actually suffers from the fat interface. **Mitigation:** Split only when you find a concrete client that is forced to depend on methods it does not call.
 
-## Questions
+# Questions
 
 > [!QUESTION]- Which SOLID principles does a typical Singleton violate, and why does it matter in a microservice?
 > - **DIP**: consuming code depends on a concrete global instance (`Singleton.Instance`) instead of an abstraction injected via DI. This makes it impossible to swap implementations per-tenant or per-environment.
@@ -454,7 +452,7 @@ The practical implication: when debugging a SOLID violation, look one level deep
 > - **Decision heuristic**: apply SOLID when you have evidence — when tests are hard to write, when unrelated teams edit the same file, when adding a feature requires modifying code that already works. Do not apply it to prevent hypothetical future problems.
 > - Every SOLID application trades simplicity for flexibility. The real question is never "should I apply SOLID" but "does the flexibility outweigh the complexity it adds right now?"
 
-## References
+# References
 
 - [Architectural Principles — Microsoft Learn](https://learn.microsoft.com/en-us/dotnet/architecture/modern-web-apps-azure/architectural-principles) — SOLID principles in the context of ASP.NET Core architecture with dependency injection examples and real .NET guidance from the Microsoft architecture team
 - [Clean Architecture (Robert C. Martin)](https://www.oreilly.com/library/view/clean-architecture-a/9780134494272/) — the book that extends SOLID into architectural-level principles including component cohesion, coupling metrics, and the dependency rule that underpins DIP

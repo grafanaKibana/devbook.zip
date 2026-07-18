@@ -11,13 +11,11 @@ status: Ready to Repeat
 publish: true
 ---
 
-# Repository and Unit of Work
-
 The **Repository** pattern provides a collection-like interface for accessing domain objects, hiding the persistence mechanism from the domain layer. The **Unit of Work** pattern tracks all changes made during a business operation and commits them as a single atomic transaction. Together they decouple domain logic from data access technology and make persistence testable.
 
 In EF Core, `DbContext` already implements both patterns: it acts as a repository-like gateway (you query through `DbSet<T>`) and as a Unit of Work (change tracking + `SaveChangesAsync()`). Wrapping EF Core in additional Repository/UoW abstractions is optional — justified when you need to swap persistence technology or enforce strict domain boundaries.
 
-## Repository Pattern
+# Repository Pattern
 
 A Repository exposes domain-oriented methods (`FindById`, `FindByCustomer`, `Save`) rather than raw SQL or LINQ. The domain layer depends on the interface; the infrastructure layer provides the implementation.
 
@@ -52,7 +50,7 @@ public sealed class EfOrderRepository(AppDbContext db) : IOrderRepository
 
 Note: `Add` and `Remove` don't call `SaveChanges` — that's the Unit of Work's responsibility.
 
-## Unit of Work Pattern
+# Unit of Work Pattern
 
 The Unit of Work tracks all changes within a business operation and commits them atomically. In EF Core, `DbContext` is the Unit of Work:
 
@@ -81,7 +79,7 @@ public sealed class PlaceOrderHandler(IOrderRepository orders, IUnitOfWork uow)
 }
 ```
 
-## When to Add the Abstraction
+# When to Add the Abstraction
 
 EF Core's `DbContext` already gives you Repository + UoW behavior. Adding explicit interfaces is justified when:
 
@@ -91,7 +89,7 @@ EF Core's `DbContext` already gives you Repository + UoW behavior. Adding explic
 
 When NOT to add the abstraction: if you're building a simple CRUD service and the only consumer is EF Core, the extra interfaces add indirection without benefit. Inject `DbContext` directly.
 
-## The Specification Pattern
+# The Specification Pattern
 
 There's a real tension in repository design: exposing `IQueryable<T>` leaks EF Core (bad), but adding a method per query (`FindByCustomer`, `FindPendingOlderThan`, `FindByStatusAndDateRange`…) explodes the interface. The **Specification pattern** resolves it by encapsulating query criteria as a first-class object that the repository translates:
 
@@ -113,9 +111,9 @@ Task<IReadOnlyList<Order>> ListAsync(ISpecification<Order> spec, CancellationTok
 
 The spec is a plain object (unit-testable without a DB), the repository keeps one `ListAsync`, and EF Core leakage stays inside infrastructure. Libraries like **Ardalis.Specification** provide this for .NET. Use it when query variety would otherwise bloat the repository; skip it for a handful of fixed queries.
 
-## Pitfalls
+# Pitfalls
 
-### Repository That Returns `IQueryable<T>`
+## Repository That Returns `IQueryable<T>`
 
 **What goes wrong**: the repository leaks EF Core's `IQueryable<T>` to the application layer. Callers add `.Where()` and `.Include()` outside the repository, coupling the application layer to EF Core.
 
@@ -123,7 +121,7 @@ The spec is a plain object (unit-testable without a DB), the repository keeps on
 
 **Mitigation**: return `IReadOnlyList<T>` or `IEnumerable<T>`. Add specific query methods to the repository interface (`FindByCustomer`, `FindPendingOlderThan`) rather than exposing raw queryable.
 
-### Generic Repository Anti-Pattern
+## Generic Repository Anti-Pattern
 
 **What goes wrong**: a single `IRepository<T>` with `GetById`, `GetAll`, `Add`, `Update`, `Delete` is used for every entity. It forces every aggregate to expose the same interface, including operations that don't make sense for that aggregate.
 
@@ -131,7 +129,7 @@ The spec is a plain object (unit-testable without a DB), the repository keeps on
 
 **Mitigation**: use aggregate-specific repositories (`IOrderRepository`, `ICustomerRepository`) with methods that reflect the domain's actual access patterns. Generic repositories are fine as a base implementation, but the interface should be domain-specific.
 
-## Tradeoffs
+# Tradeoffs
 
 | Approach | Strengths | Weaknesses | When to use |
 |---|---|---|---|
@@ -140,7 +138,7 @@ The spec is a plain object (unit-testable without a DB), the repository keeps on
 
 **Decision rule**: start with direct `DbContext` injection. Add Repository/UoW interfaces when you need to unit-test application services without a real database, or when the domain layer must not reference EF Core. Don't add the abstraction speculatively.
 
-## Questions
+# Questions
 
 > [!QUESTION]- Why does EF Core's DbContext already implement the Unit of Work pattern?
 > - `DbContext` tracks all changes to loaded entities in its change tracker.
@@ -154,9 +152,9 @@ The spec is a plain object (unit-testable without a DB), the repository keeps on
 > - It often leaks `IQueryable<T>`, coupling callers to EF Core.
 > - Better: aggregate-specific interfaces with domain-meaningful methods. Use a generic base class for the implementation, but expose a specific interface.
 
-## References
+# References
 
 - [Repository pattern (Martin Fowler)](https://martinfowler.com/eaaCatalog/repository.html) — original pattern definition from Patterns of Enterprise Application Architecture; explains the collection metaphor and when to use it.
 - [Unit of Work pattern (Martin Fowler)](https://martinfowler.com/eaaCatalog/unitOfWork.html) — original definition; explains change tracking and the commit boundary.
 - [Repository pattern in ASP.NET Core (Microsoft Learn)](https://learn.microsoft.com/en-us/aspnet/mvc/overview/older-versions/getting-started-with-ef-5-using-mvc-4/implementing-the-repository-and-unit-of-work-patterns-in-an-asp-net-mvc-application) — practical implementation guide with EF Core, including the UoW interface and DI registration.
-- [[Domain-Driven Design]] — DDD context for Repositories: they should be defined per Aggregate Root and expose domain-meaningful query methods.
+- [[Home/Software Architecture/Patterns/Architectural Patterns/Domain-Driven Design]] — DDD context for Repositories: they should be defined per Aggregate Root and expose domain-meaningful query methods.

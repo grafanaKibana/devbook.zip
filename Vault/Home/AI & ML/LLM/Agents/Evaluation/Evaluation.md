@@ -13,8 +13,6 @@ tags:
 publish: true
 ---
 
-# Intro
-
 Evaluating an [[Home/AI & ML/LLM/Agents/Agents|agent]] is harder than evaluating a single LLM call because the unit under test is a *trajectory*, not one response: the agent chooses tools, reads results, and decides the next step in a loop, so the same task can succeed by many different paths and fail in the middle of a plausible-looking one. A single output score cannot tell you whether the agent solved the task, took a wasteful route to get there, or got lucky after three wrong tool calls. Agent evaluation therefore measures two things separately — the **outcome** (did the task get done) and the **process** (was the path correct and efficient).
 
 This folder holds only what is specific to agents. The general machinery — [[LLM-as-a-Judge]] (here used to grade a whole trajectory), [[Deterministic Checks]] (here applied to each tool call's schema and arguments), [[Building an Evaluation Set|building the task set]], and the [[Online Evaluation and AB Tests|online/A-B loop]] — is shared with every other LLM system and lives under [[Home/AI & ML/LLM/Evaluation/Evaluation|LLM Evaluation]].
@@ -24,7 +22,7 @@ const { FolderStructureMap } = await dc.require("Assets/components/devbook-folde
 return FolderStructureMap;
 ```
 
-## What to measure
+# What to measure
 
 ```mermaid
 flowchart TD
@@ -48,7 +46,7 @@ A subtle but critical point for agents: **measure reliability, not just average 
 
 To calibrate against the field — and to understand why public scores rarely predict your own results — [[Agent Benchmarks]] covers the major public suites (SWE-bench, tau-bench, GAIA, WebArena) and how to read a leaderboard without being misled.
 
-## Example
+# Example
 
 A per-task scorecard for a customer-support agent (one task, run k=5 times):
 
@@ -68,7 +66,7 @@ Process (per trajectory):
 Reliability: solved on 5/5 runs  (pass^5 = 1.0)
 ```
 
-## Tradeoffs
+# Tradeoffs
 
 | Approach | What it catches | Cost | When to rely on it |
 | --- | --- | --- | --- |
@@ -79,7 +77,7 @@ Reliability: solved on 5/5 runs  (pass^5 = 1.0)
 
 Decision rule: gate releases on **verifiable task success plus efficiency guardrails** — they are cheap and objective. Add LLM-judge trajectory scoring for open-ended tasks where many paths are valid and outcome alone cannot distinguish a clean solve from a lucky one. Reserve hand-built reference trajectories for the few high-stakes tasks where one correct path genuinely dominates; they are too expensive to maintain at breadth.
 
-## Questions
+# Questions
 
 > [!QUESTION]- Why is outcome-only scoring insufficient for evaluating an agent, and what do you add?
 > - A correct final state can be reached by a wasteful or wrong path — three failed tool calls before a lucky success scores identically to a clean solve
@@ -95,7 +93,7 @@ Decision rule: gate releases on **verifiable task success plus efficiency guardr
 > - Mitigation: enforce step and cost caps, add progress checks, and make the agent's plan explicit so a judge can see where it stalled
 > - Tight caps cut runaway cost but can truncate genuinely hard tasks — set caps from the step-count distribution of known-good runs, not a round number
 
-## References
+# References
 
 - [tau-bench -- a benchmark for tool-agent-user interaction with pass^k reliability (Yao et al., Sierra, 2024)](https://arxiv.org/abs/2406.12045)
 - [Building Effective Agents -- measurement and the simplest-pattern principle (Anthropic Engineering)](https://www.anthropic.com/engineering/building-effective-agents)

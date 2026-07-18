@@ -11,13 +11,11 @@ status: Ready to Repeat
 publish: true
 ---
 
-# Service-Oriented Architecture
-
 Service-Oriented Architecture (SOA) structures a system as a collection of loosely coupled services that communicate over a network, typically via standardized protocols (SOAP/WSDL historically, REST or messaging today). Each service exposes a well-defined interface and can be developed, deployed, and scaled independently. SOA emerged in the 2000s as a way to integrate heterogeneous enterprise systems — SAP, Salesforce, custom ERP, mainframe CICS — without rewriting them. The Enterprise Service Bus (ESB) acted as the central nervous system: routing messages, transforming schemas, and orchestrating workflows between services that knew nothing about each other.
 
 SOA and microservices share the same decomposition philosophy but differ in scope, governance, and communication style. Understanding the distinction matters for interviews and architecture decisions.
 
-## SOA vs Microservices
+# SOA vs Microservices
 
 | Dimension | SOA | Microservices |
 |---|---|---|
@@ -31,9 +29,9 @@ SOA and microservices share the same decomposition philosophy but differ in scop
 **Key distinction**: SOA uses an ESB as a central integration hub; microservices prefer "smart endpoints, dumb pipes" — the services contain the logic, the message broker is just a transport.
 
 > [!NOTE]
-> The ESB didn't vanish — it **evolved and decomposed**. Its routing/auth/rate-limiting concerns moved to a thin edge **[[API Gateway]]**, its async transport to a **[[Home/Software Architecture/Distributed Systems/Message Queues/Message Queues|message broker]]** (Kafka/RabbitMQ), and its orchestration to either the services themselves (**choreography**) or a dedicated workflow engine. The microservices "dumb pipe" is the lesson learned from ESBs accreting too much logic.
+> The ESB didn't vanish — it **evolved and decomposed**. Its routing/auth/rate-limiting concerns moved to a thin edge **[[Home/Software Architecture/Distributed Systems/API Gateway]]**, its async transport to a **[[Home/Software Architecture/Distributed Systems/Message Queues/Message Queues|message broker]]** (Kafka/RabbitMQ), and its orchestration to either the services themselves (**choreography**) or a dedicated workflow engine. The microservices "dumb pipe" is the lesson learned from ESBs accreting too much logic.
 
-## When SOA Still Applies
+# When SOA Still Applies
 
 SOA remains relevant in enterprise contexts where:
 
@@ -41,7 +39,7 @@ SOA remains relevant in enterprise contexts where:
 - **Shared services**: a single "Customer Service" used by multiple business units, where the overhead of microservice decomposition isn't justified.
 - **Regulated industries**: where centralized governance, audit trails, and schema contracts are required.
 
-## Example: SOA Service Contract
+# Example: SOA Service Contract
 
 In classic SOA, services expose contracts via WSDL (SOAP) or OpenAPI (REST). A service consumer depends only on the contract, not the implementation:
 
@@ -73,7 +71,7 @@ var response = await client.PlaceOrderAsync(new PlaceOrderRequest
 The contract boundary is the key SOA discipline: services communicate through published interfaces, not shared code or shared databases.
 
 
-## Pitfalls
+# Pitfalls
 
 **ESB as a God Object** — the Enterprise Service Bus accumulates business logic: routing rules, data transformations, orchestration, error handling. A real example: a logistics company's ESB grew to 2,400 routing rules and 180 XSLT transformations over 5 years. A single schema change in the "Shipment" service required updating 47 ESB transformations, a 3-week effort. The ESB became the most complex and fragile component in the system — every change required the ESB team's involvement. Mitigation: keep the ESB as a dumb transport. Business logic belongs in the services. If the ESB is doing domain decisions, refactor them into the services.
 
@@ -81,7 +79,7 @@ The contract boundary is the key SOA discipline: services communicate through pu
 
 **Contract versioning hell** — WSDL/SOAP contracts are rigid: adding an optional field can break consumers that validate strictly against the schema. After 3 years, a financial services SOA had 6 concurrent versions of the "Account" service contract, each with a different subset of consumers. Mitigation: design contracts for backward compatibility (additive-only changes), use versioned endpoints (`/v1/`, `/v2/`), and set sunset dates with deprecation warnings.
 
-## Tradeoffs
+# Tradeoffs
 
 | Decision | SOA | Microservices | When SOA | When Microservices |
 | --- | --- | --- | --- | --- |
@@ -92,16 +90,16 @@ The contract boundary is the key SOA discipline: services communicate through pu
 
 **Decision rule**: start with SOA when integrating existing enterprise systems that can't be rewritten. Move to microservices when team autonomy and independent deployment velocity matter more than centralized governance. Many organizations run both — SOA for legacy integration, microservices for new product development.
 
-## Questions
+# Questions
 
 > [!QUESTION]- When is SOA still the right choice over microservices?
 > SOA remains appropriate for enterprise integration scenarios: connecting heterogeneous legacy systems (SAP, Salesforce, custom ERP) via a shared integration layer, shared services used by multiple business units where microservice decomposition overhead isn't justified, and regulated industries requiring centralized governance and audit trails. Microservices are better for greenfield cloud-native systems where teams can own independent services end-to-end.
 
 
-## References
+# References
 
 - [Service-oriented architecture (Wikipedia)](https://en.wikipedia.org/wiki/Service-oriented_architecture) — historical context, ESB patterns, and the evolution from SOA to microservices.
 - [Microservices vs SOA (Martin Fowler)](https://martinfowler.com/articles/microservices.html#MicroservicesAndSOA) — Fowler's comparison of the two approaches, explaining why microservices emerged as a reaction to SOA's centralized governance model.
-- [[Microservices]] — the modern evolution of SOA: fine-grained services, decentralized data, independent deployment, and "smart endpoints, dumb pipes."
+- [[Home/Software Architecture/System Architecture/Microservices]] — the modern evolution of SOA: fine-grained services, decentralized data, independent deployment, and "smart endpoints, dumb pipes."
 - [Azure Integration Services overview (Microsoft Learn)](https://learn.microsoft.com/en-us/azure/architecture/reference-architectures/enterprise-integration/basic-enterprise-integration) — Microsoft's modern SOA integration reference architecture using API Management, Logic Apps, and Service Bus as the integration layer.
 - [SOA Manifesto](http://www.soa-manifesto.org/) — the original SOA design principles: service contracts, loose coupling, abstraction, reusability, autonomy, statelessness, discoverability, and composability.

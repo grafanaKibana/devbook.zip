@@ -11,8 +11,6 @@ status: Creation
 publish: true
 ---
 
-# Intro
-
 Processes do not share an address space by default. Inter-process communication (IPC) supplies an explicit data path or synchronization primitive across that boundary. The right mechanism follows from data shape, addressing, lifetime, throughput, and failure handling—not from a universal speed ranking.
 
 | Mechanism | Data and addressing | Lifetime / failure boundary | Good fit |
@@ -27,7 +25,7 @@ Processes do not share an address space by default. Inter-process communication 
 
 Shared memory avoids copying application payloads through a pipe or socket, but it does not make a protocol safe. The processes still need ownership rules, memory ordering, bounds checks, and a recovery strategy if one participant dies while updating shared state. A socket often wins when message framing, access control, and independent restart matter more than the last copy.
 
-## Local request/response in .NET
+# Local request/response in .NET
 
 `NamedPipeServerStream` provides a local IPC endpoint without opening a network port:
 
@@ -49,7 +47,7 @@ await server.WriteAsync(buffer.AsMemory(0, received));
 
 Production code must define framing for multiple messages, restrict endpoint access, handle partial reads and receiver-side message fragmentation, and set cancellation or timeouts. Named-pipe behavior differs by platform, so protocol tests must run on every deployment target.
 
-## References
+# References
 
 - [Interprocess communications (Windows)](https://learn.microsoft.com/windows/win32/ipc/interprocess-communications) — mechanism inventory and platform-level boundaries for pipes, shared memory, sockets, RPC, and synchronization.
 - [NamedPipeServerStream](https://learn.microsoft.com/dotnet/api/system.io.pipes.namedpipeserverstream?view=net-10.0) — .NET server endpoint and asynchronous pipe API used by the example.

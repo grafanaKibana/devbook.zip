@@ -11,8 +11,6 @@ status: Creation
 publish: true
 ---
 
-# Intro
-
 A fleet must clear a queue of packages within `D` days, and the unknown is the smallest ship capacity that still finishes on time. Capacity is a number in a range: at least `max(weight)` so no single package is stranded, at most `sum(weights)` so one day suffices. Checking a single candidate capacity is cheap — a greedy pass fills days at that capacity and counts them — but the range can span millions of values, and testing each in turn is `O(range · n)`.
 
 The range collapses because feasibility is **monotone**: a larger capacity never needs *more* days, so once some capacity clears the backlog in `D` days, every larger one does too. Read across the range, the predicate `feasible(x)` is `false, …, false, true, …, true` with a single flip. Locating that flip is exactly what binary search does — except the probe at `mid` is not a comparison against a stored array element but a call to `feasible(mid)` that does real work over the input. This is [[Binary Search]] generalised from "find a value in a sorted array" to "find the boundary of a monotone predicate over a value space."
@@ -22,7 +20,7 @@ The range collapses because feasibility is **monotone**: a larger capacity never
 > [!NOTE] Visualization pending
 > Planned StepTrace: an answer-space card showing a candidate value swept over a numeric range, each midpoint coloured by a monotone `feasible(mid)` predicate, and the discarded half of the range as the boundary is cornered. No matching renderer exists in `engine.js` yet.
 
-## Why halving the answer works
+# Why halving the answer works
 
 At the start of every iteration the true answer — the smallest feasible `x` — lies inside the current range `[lo, hi]`. Evaluating the predicate at the midpoint preserves that invariant:
 
@@ -33,7 +31,7 @@ Each probe discards at least half of the remaining values, so the range reaches 
 
 The step that separates this from array search is the probe itself. In [[Binary Search]] the value at `mid` is already stored and the comparison is `O(1)`. Here `mid` is a *candidate answer*, and `feasible(mid)` reconstructs enough of the problem to decide it — a greedy pass, a counting sweep, sometimes a full simulation. The family covers minimise-the-maximum (ship packages within `D` days, split an array to minimise the largest subarray sum, Koko eating bananas at the slowest speed that finishes in time), maximise-the-minimum (place resources to maximise the smallest gap), and degenerate numeric cases such as integer `sqrt(x)`, where `feasible(m)` is just `m * m <= x`.
 
-## Complexity
+# Complexity
 
 The cost factors into how many candidates are probed and what each probe pays. There is no early exit: unlike array search, hitting the boundary early does not stop the loop, so the probe count is the full `log(range)` in every case.
 
@@ -46,7 +44,7 @@ The cost factors into how many candidates are probed and what each probe pays. T
 
 The log factor is over the *numeric range of the answer*, not the input size, so an answer space as wide as `10^18` costs only about 60 probes. When `feasible` is itself super-linear — say it runs a DP — its cost replaces the `O(n)` term. For a real-valued answer the probe count is fixed by the iteration bound (below) rather than `log(range)`.
 
-## When the predicate is not actually monotone
+# When the predicate is not actually monotone
 
 Monotonicity is the whole precondition, and its absence is the classic failure. If `feasible` flips true and false more than once across the range, there is no single boundary to find. Binary search still runs and still returns a value, but each probe assumes the discarded half cannot contain the answer — an assumption that only holds under monotonicity. On a predicate that is `false, true, false, true`, a `true` at `mid` discards the upper half even though a later `true` region lived there, and the returned `lo` is confidently wrong. The precondition is proved by argument, not code: show that increasing `x` can only make the condition easier to satisfy (or only harder), never reverse it. If that argument fails, this pattern does not apply.
 
@@ -56,7 +54,7 @@ Three further boundaries follow from the same mechanism:
 - **Integer versus real domain.** Over integers, `lo < hi` with `mid + 1` terminates exactly. Over reals the interval never collapses to a single value, so termination comes from a **fixed iteration count** (about 100 halvings drives the interval below double precision) rather than an `eps` comparison, which is problem-dependent and can stall on floating-point rounding.
 - **Returning the correct side of the flip.** The template returns the first `x` where the predicate becomes true — a `lower_bound`-style boundary. Minimise-the-maximum wants that value; maximise-the-minimum wants the last `true` before the flip, which needs the mirrored update and a high-biased midpoint. Mixing the update direction with the wrong midpoint bias either loops forever on `lo == mid` or returns the neighbour of the intended answer.
 
-## Reference drawer
+# Reference drawer
 
 > [!ABSTRACT]- Control flow
 > ```mermaid
@@ -108,7 +106,7 @@ Three further boundaries follow from the same mechanism:
 >
 > `CanShip` is the monotone predicate: a larger `cap` never increases `used`, so feasibility flips false→true exactly once over `[max(weights), sum(weights)]`. Split-array-largest-sum is the same predicate with `days` read as the allowed number of subarrays.
 
-## Comparison
+# Comparison
 
 | Approach | Time | Requires | Stronger case | Weaker case |
 | --- | --- | --- | --- | --- |
@@ -120,7 +118,7 @@ Three further boundaries follow from the same mechanism:
 
 Binary search on the answer is the `O(n · log(range))` tool when the answer is numeric and feasibility is monotone; its cost is one full predicate sweep per probe. A closed-form greedy or DP beats it whenever the optimum can be constructed directly instead of searched for — split-array-largest-sum runs `O(n log sum)` by search versus `O(n²k)` by DP, but a problem with an `O(1)` formula never justifies the log factor. Plain [[Binary Search]] is the special case where the predicate is `a[mid] < target` over stored data. [[Ternary Search]] answers the neighbouring shape — a unimodal objective with no monotone predicate — and is not interchangeable: its precondition is a single extremum, not a single boundary.
 
-## Questions
+# Questions
 
 > [!QUESTION]- What precondition makes binary search on the answer valid, and how is it checked?
 > The feasibility predicate must be monotone in `x`: `feasible` flips exactly once — false→true (or true→false) — across the answer range. That single boundary is what the search locates. It is verified by argument, not code: show that increasing the candidate can only make the condition easier (or only harder) to satisfy, so it never reverses. If the predicate can flip back and forth, no boundary exists and the search discards the half that holds the answer.
@@ -134,7 +132,7 @@ Binary search on the answer is the `O(n · log(range))` tool when the answer is 
 > [!QUESTION]- Why does ternary search not substitute for this pattern?
 > Ternary search optimises a unimodal objective — a value that rises then falls (or the reverse) with one extremum — by discarding an outer third each step. Binary search on the answer needs a monotone yes/no predicate with one boundary. The preconditions differ: a monotone predicate has no peak to find, and a unimodal objective has no single true/false flip, so neither reduction applies to the other's input.
 
-## References
+# References
 
 - [Binary search (CP Algorithms)](https://cp-algorithms.com/num_methods/binary_search.html) — the "binary search on the answer" section and the monotone-predicate framing behind `lower_bound`-style boundaries.
 - [Capacity To Ship Packages Within D Days (LeetCode #1011)](https://leetcode.com/problems/capacity-to-ship-packages-within-d-days/) — the minimise-the-maximum instance whose predicate is the reference implementation above.

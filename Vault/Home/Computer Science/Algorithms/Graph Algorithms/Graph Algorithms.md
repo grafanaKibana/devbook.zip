@@ -13,8 +13,6 @@ status: Creation
 priority: High
 ---
 
-# Intro
-
 Graphs model relationships: networks, dependencies, routes, permissions, and many real-world system structures. Graph algorithms help you traverse, rank, and optimize those relationships efficiently. Example: shortest-path algorithms answer "what's the cheapest route" while BFS/DFS answer "what's reachable".
 
 ```datacorejsx
@@ -22,7 +20,7 @@ const { FolderStructureMap } = await dc.require("Assets/components/devbook-folde
 return FolderStructureMap;
 ```
 
-## Diagram
+# Diagram
 
 ```mermaid
 flowchart TD
@@ -42,9 +40,9 @@ flowchart TD
   H -->|Throughput through a capacitated network| L[Maximum Flow]
 ```
 
-## Algorithm Selection
+# Algorithm Selection
 
-### Shortest path
+## Shortest path
 
 | Algorithm | Solves | Time | Constraint |
 | --- | --- | --- | --- |
@@ -57,7 +55,7 @@ flowchart TD
 | [[Bellman-Ford]] | Single-source shortest path | O(V·E) | Handles negative edges; detects negative cycles |
 | [[Floyd-Warshall]] | All-pairs shortest path | O(V³) time, Θ(V²) space | Small/dense graphs; detects negative cycles |
 
-### Structure and connectivity
+## Structure and connectivity
 
 | Algorithm | Solves | Time | Constraint |
 | --- | --- | --- | --- |
@@ -71,7 +69,7 @@ flowchart TD
 > [!NOTE]
 > Not every graph problem admits a polynomial algorithm. [[Hamiltonian Cycle]] — visit every vertex exactly once and return to the start — is **NP-complete**, so it sits outside the selection tables above: there is no known efficient algorithm to choose, only exponential search and heuristics.
 
-## Questions
+# Questions
 
 > [!QUESTION]- When do you pick BFS over DFS?
 > - BFS is preferred for shortest path by edge count in unweighted graphs.
@@ -91,7 +89,7 @@ flowchart TD
 > - In .NET, `Dictionary<T, List<T>>` is a common adjacency-list implementation.
 > - The list saves memory and speeds traversal on sparse graphs; the matrix trades O(V²) memory for constant-time edge checks, so reach for it only on dense graphs or edge-query-heavy workloads.
 
-## References
+# References
 
 - [Graph algorithm (Wikipedia)](https://en.wikipedia.org/wiki/Graph_algorithm)
 - [Introduction to algorithms graph lectures MIT](https://ocw.mit.edu/courses/6-006-introduction-to-algorithms-spring-2020/pages/lecture-notes/)

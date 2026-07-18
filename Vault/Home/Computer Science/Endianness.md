@@ -10,8 +10,6 @@ status: Creation
 publish: true
 ---
 
-# Intro
-
 Endianness is the order in which a machine or format stores the bytes of a multi-byte value. It does not reverse the bits inside each byte. For the 32-bit value `0x12345678`, the bytes are `12`, `34`, `56`, and `78`; only their address order changes.
 
 | Address | Big-endian byte | Little-endian byte |
@@ -23,7 +21,7 @@ Endianness is the order in which a machine or format stores the bytes of a multi
 
 Big-endian puts the most significant byte at the lowest address. Little-endian puts the least significant byte there. The distinction matters when bytes cross a boundary: a network protocol, binary file, device register, or foreign-function interface. Within a process, ordinary integer operations hide the storage order.
 
-## Make the boundary explicit
+# Make the boundary explicit
 
 Never serialize by copying the in-memory representation of an integer and assuming the receiver uses the same order. Define the order in the format and use an API that names it:
 
@@ -39,13 +37,13 @@ uint swapped = BinaryPrimitives.ReadUInt32LittleEndian(frame); // 0x78563412
 
 Many Internet protocols use network byte order, which is big-endian. File formats are free to choose either order, and some carry a byte-order marker. CPU families are not a reliable protocol contract: an architecture can support more than one mode, while an operating-system ABI normally chooses one. `BitConverter.IsLittleEndian` reports the current runtime's convention when native layout genuinely matters; it is not a substitute for an explicit wire format.
 
-## Pitfalls
+# Pitfalls
 
 - Text has character encoding, not integer endianness, until a text encoding defines multi-byte code units or a byte-order marker.
 - Hex dumps show bytes in increasing address order. A little-endian integer can therefore look “reversed” even though the dump is correct.
 - A struct's byte layout also includes alignment and padding. Matching byte order alone does not make raw struct serialization portable.
 
-## References
+# References
 
 - [System.Buffers.Binary.BinaryPrimitives](https://learn.microsoft.com/en-us/dotnet/api/system.buffers.binary.binaryprimitives) — the .NET APIs that explicitly read and write primitive values in big- or little-endian order.
 - [BitConverter.IsLittleEndian](https://learn.microsoft.com/en-us/dotnet/api/system.bitconverter.islittleendian) — the runtime check for the machine representation used by `BitConverter`.
