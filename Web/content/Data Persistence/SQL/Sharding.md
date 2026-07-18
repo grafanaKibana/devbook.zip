@@ -1,8 +1,8 @@
 ---
 publish: true
 created: 2026-07-16T15:17:15.738Z
-modified: 2026-07-17T05:50:01.455Z
-published: 2026-07-17T05:50:01.455Z
+modified: 2026-07-18T08:16:58.522Z
+published: 2026-07-18T08:16:58.522Z
 topic:
   - Data Persistence
 subtopic:
@@ -18,7 +18,7 @@ status: Ready to Repeat
 
 Sharding is horizontal partitioning across independent database instances: each shard owns a non-overlapping subset of rows. Unlike table partitioning inside one server, sharding distributes storage, writes, backups, and failure domains across machines. Reach for it only when a measured write or storage ceiling remains after vertical scaling, query/index repair, read replicas, caching, and in-engine partitioning. Those alternatives preserve cross-table queries and transaction boundaries with less operational machinery.
 
-The shard key is the long-lived decision. It must distribute load, appear in routed operations, keep transactions that must be atomic together, and remain stable enough that moving ownership is exceptional. [[Data Persistence/SQL/Shard Routing and Rebalancing|Shard Routing and Rebalancing]] owns the map and migration protocol. [[Data Persistence/SQL/Cross-Shard Operations|Cross-Shard Operations]] owns the fan-out, transaction, and global-constraint costs created when work crosses shard keys.
+The shard key is the long-lived decision. It must distribute load, appear in routed operations, keep transactions that must be atomic together, and remain stable enough that moving ownership is exceptional. The complete design also needs a versioned ownership map, a fenced migration protocol, and explicit behavior for fan-out queries, distributed workflows, and global constraints.
 
 ## Strategy Overview
 
@@ -59,15 +59,59 @@ Figma first separated PostgreSQL tables by product area so independent workloads
 
 The picture is an escalation map, not proof that partitioning alone creates 100× headroom. Capacity came from decomposition, routing, migration tooling, and operational controls together.
 
-## Operational Boundary
+## Routing and Ownership Maps
 
-Sharding is complete only when the system can answer three questions:
+Shard routing turns a key into the one current owner allowed to serve the operation. Assume 4,096 logical buckets:
 
-1. Which map version owns this key, and what happens when a caller has a stale map?
-2. How is a range or bucket copied, caught up, cut over, and cleaned without two writable owners?
-3. What is the explicit behavior for queries, transactions, and uniqueness checks that span shards?
+```text
+bucket = hash(tenant_id) % 4096
+map[v17][bucket 730] = shard-c
+```
 
-[[Data Persistence/SQL/Shard Routing and Rebalancing|Shard Routing and Rebalancing]] answers the first two with versioned maps, ownership fencing, copy/catch-up, cutover, and rollback. [[Data Persistence/SQL/Cross-Shard Operations|Cross-Shard Operations]] answers the third with scatter-gather limits, single-shard transaction design, coordination choices, and idempotent repair.
+Every operation carries the shard key. The router computes bucket 730, reads map version 17, connects to shard C, and still includes `tenant_id` in the query. The destination rejects a write when it no longer owns that bucket or the caller's map version is stale. This prevents an old application instance from writing to the previous owner after cutover.
+
+The map may be cached outside the synchronous request path only if stale versions fail closed and refresh. A directory uses the same contract without hashing: `tenant 42 → shard C` is an explicit ownership entry.
+
+| Routing location | Advantage | Boundary to own |
+| --- | --- | --- |
+| Application | Full query and consistency context, no extra hop | Every client must refresh maps and implement identical fencing |
+| Proxy or coordinator | Central topology and connection management | Query routing does not imply migration or distributed transactions |
+| Database-native | One logical endpoint | Routing, movement, and transaction costs move into the engine contract |
+
+## Rebalancing Protocol
+
+Moving bucket 730 from shard C to shard E is an ownership state machine:
+
+1. Publish a migration record with source, destination, map version, and rollback boundary.
+2. Copy a consistent snapshot while C remains the writer.
+3. Stream later changes until E reaches the required source position.
+4. Fence writes on C, drain in-flight work, apply the final delta, then atomically publish a map version that makes E the sole writer.
+5. Verify reads, writes, counts, and lag while retaining the old copy for a bounded rollback window.
+6. Remove the old copy only after no supported router version can address it.
+
+Dual writes create two authorities and two retry paths. Prefer one writer plus change capture, or an engine's documented online-resharding protocol. Limit copy bandwidth and concurrency so movement cannot exhaust the serving workload. Rollback is another fenced ownership transition, not a DNS switch back to a stale copy.
+
+Modulo hashing with `N` in the divisor remaps most buckets when `N` changes. Stable virtual buckets keep `hash(key) % B` fixed and move selected bucket-map entries instead. Balanced consistent hashing still needs the same copy, catch-up, fencing, and verification protocol; limited movement is not safe movement by itself.
+
+## Cross-Shard Operations
+
+Cross-shard work starts when one operation cannot be routed to one owner. A coordinator must fan out reads, coordinate commits, or enforce a global constraint outside any shard.
+
+For a request for the newest 100 orders across 32 shards, each shard can return its local top 100 and a coordinator can merge the 3,200 candidates. The operation needs a deadline, per-shard concurrency limit, deterministic tie-breaker, and an explicit partial-result policy. Pagination needs per-shard progress; a single global offset becomes increasingly expensive. A global secondary index can narrow candidates, but it is another distributed data product with lag and repair obligations.
+
+### Transactions and workflows
+
+- **Distributed commit** gives one atomic decision only when every participant and coordinator support durable prepare and recovery. It adds coordination latency and can leave prepared work waiting during failures.
+- **Saga or workflow** commits local steps and compensates later. Intermediate states remain visible; compensation and retries need stable operation identities.
+- **Ownership redesign** co-locates the invariant or reserves inventory/funds through one authority. This is usually the simplest hot-path design.
+
+A cross-shard value transfer cannot be two unrelated updates. Use a documented distributed transaction or a durable transfer workflow with one operation ID, balanced ledger entries, retry-safe steps, and reconciliation.
+
+### Global constraints
+
+A local unique index proves uniqueness only inside one shard. Route a globally unique name to a reservation authority, allocate disjoint ranges, or use globally unique identifiers when semantic uniqueness is unnecessary. Foreign keys across independent shard databases also need co-location, an owning service, or asynchronous repair.
+
+Retry shard requests only when the operation is idempotent or deduplicated. Record which participants committed, bound fan-out concurrency, label partial results as partial, and reconcile from durable operation state rather than an in-memory retry loop.
 
 ## Tradeoffs
 
@@ -102,6 +146,10 @@ Sharding is complete only when the system can answer three questions:
 
 - [Horizontal, vertical, and functional data partitioning](https://learn.microsoft.com/azure/architecture/best-practices/data-partitioning) — Azure Architecture Center guidance on partitioning strategies and their consistency, query, and operational tradeoffs.
 - [Sharding pattern](https://learn.microsoft.com/azure/architecture/patterns/sharding) — Azure Architecture Center pattern covering shard-key selection, routing, scaling, and rebalancing.
+- [Compensating transaction pattern](https://learn.microsoft.com/azure/architecture/patterns/compensating-transaction) — recording, retrying, and compensating eventually consistent workflow steps.
+- [Vitess distributed transactions](https://vitess.io/docs/reference/features/distributed-transaction/) — official multi-shard transaction modes and their availability and latency costs.
+- [Vitess resharding](https://vitess.io/docs/user-guides/configuration-advanced/resharding/) — official workflow for copying, switching traffic, reversing traffic, and completing a live reshard.
+- [Citus shard rebalancer](https://docs.citusdata.com/en/stable/admin_guide/cluster_management.html#rebalance-shards-without-downtime) — coordinator and online shard-movement behavior for Citus clusters.
 - [Sharding Pinterest: How We Scaled Our MySQL Fleet](https://medium.com/pinterest-engineering/sharding-pinterest-how-we-scaled-our-mysql-fleet-3f341e96ca6f) — production case study on range-based sharding, placement, and migration at scale.
 - [Scaling Etsy Payments with Vitess, Part 1](https://www.etsy.com/codeascraft/scaling-etsy-payments-with-vitess-part-1--the-data-model) — production account of a payments-system migration to Vitess and its data-model constraints.
 - [Designing Data-Intensive Applications, Ch. 6: Partitioning](https://www.oreilly.com/library/view/designing-data-intensive-applications/9781098119058/) — treatment of partitioning, secondary indexes, routing, and rebalancing algorithms.

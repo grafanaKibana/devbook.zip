@@ -1,8 +1,8 @@
 ---
 publish: true
 created: 2026-07-15T11:47:57.152Z
-modified: 2026-07-16T17:42:36.460Z
-published: 2026-07-16T17:42:36.460Z
+modified: 2026-07-18T09:50:14.689Z
+published: 2026-07-18T09:50:14.689Z
 topic:
   - Software Architecture
 subtopic:
@@ -67,7 +67,21 @@ flowchart LR
 
 ## Implementation and operations
 
-An independently deployable service can run in a container, virtual machine, managed application platform, or function/container service. Docker and Kubernetes are optional delivery mechanisms, not defining properties of microservices. [[Microservices Operations]] owns the .NET hosting, deployment, health, discovery, telemetry, rollback, and Kubernetes guidance.
+An independently deployable service can run in a container, virtual machine, managed application platform, or function/container service. Docker and Kubernetes are optional delivery mechanisms, not defining properties of microservices.
+
+For each service, record the minimum operating contract:
+
+- owner, escalation path, and supported API or event versions;
+- build artifact, deployment, and rollback procedure;
+- service-level indicators and alert thresholds;
+- logs, metrics, traces, and correlation across synchronous and asynchronous calls;
+- request deadlines, bounded retries, circuit breaking, and load shedding;
+- configuration and secret delivery with audit history;
+- datastore ownership, migration order, backup, and restore evidence.
+
+A platform should make this the default path without forcing one topology onto every service. A low-volume internal API can run on App Service, a partitioned consumer fleet may benefit from Kubernetes, and a scheduled job can run as a managed container task.
+
+Kubernetes supplies declarative rollout, service discovery, probes, and resource controls; it does not create correct service boundaries, retry budgets, or database migrations. Set resource requests from measured use, a disruption budget from required availability, readiness from instance-specific serving ability, and a rollout gate from the service's latency and error objectives. Avoid making every shared dependency a readiness check: a common database outage can remove all pods even though routing elsewhere cannot improve the result.
 
 ## Microservices vs monolith vs modular monolith
 
@@ -84,7 +98,46 @@ An independently deployable service can run in a container, virtual machine, man
 
 ## Migration boundary
 
-[[Microservices Migration]] owns the staged extraction path, data cutover, rollback gates, and evidence required to prove delivery independence. The action visuals remain here as provenance for the historical Airbnb case.
+A migration should remove a measured constraint, not merely distribute the same coupling. Start with a capability whose ownership is clear, whose data can be isolated, and whose release or scaling pressure already costs the organization. Avoid the most central workflow as the first extraction because it maximizes unknown dependencies and makes rollback hardest.
+
+### Staged extraction
+
+1. **Measure the pressure.** Record deployment wait time, change collisions, asymmetric load, and incidents caused by the candidate boundary.
+2. **Create an in-process seam.** Put the capability behind a contract inside the monolith and block direct table or internal-code access.
+3. **Assign data ownership.** Move writes behind that contract. Replace cross-boundary joins with explicit queries, replicated read models, or events.
+4. **Introduce the remote implementation.** Route a controlled cohort through HTTP, gRPC, or messaging while the old path remains available.
+5. **Prove independent operation.** Deploy and roll back the service alone, exercise dependency failure, and verify traces and alerts.
+6. **Retire the old path.** Remove duplicate code and tables only after traffic, reconciliation, and rollback windows show the new owner is stable.
+
+This is a strangler migration: replacement grows around a working system rather than requiring a big-bang rewrite.
+
+### Extraction gate
+
+Extract `Billing` from `Orders` only when Billing owns payment-intent state and a versioned contract, Orders no longer reads or writes Billing tables, and either service can release without a lockstep deployment. Declare whether an outage makes Orders reject, queue, or degrade; connect synchronous and asynchronous work with trace and causation identifiers; and provide reconciliation for orders whose payment state does not converge. If these conditions do not hold, keep the boundary in-process or finish the isolation before extracting another service.
+
+### Data migration
+
+Prefer one writer during transition:
+
+1. Backfill the new store from a consistent snapshot.
+2. Capture later changes through an outbox or change-data-capture stream.
+3. Compare counts and business invariants between stores.
+4. Route reads to the new owner for a small cohort.
+5. Switch writes only when lag is zero and rollback can replay the retained change stream.
+6. Stop the old writer, then remove its tables after the recovery window.
+
+Uncontrolled dual writes create two sources of truth. If temporary dual writing is unavoidable, name the authoritative store and build reconciliation before the first production write.
+
+### Migration evidence
+
+| Claim | Evidence before extraction | Evidence after extraction |
+| --- | --- | --- |
+| Faster delivery | Candidate changes wait on shared pipeline | Service releases without monolith release |
+| Independent scaling | Candidate saturates while rest is idle | Service scales without multiplying whole app |
+| Better isolation | Candidate incidents affect whole deploy | Failure drill contains impact at contract boundary |
+| Clear ownership | Multiple teams modify same internals | One team owns contract, data, SLO, and pager |
+
+Stop extracting when the next candidate lacks a measurable constraint. A mixed architecture with one monolith and a few services is often the stable destination. The action visuals remain here as provenance for the historical Airbnb case.
 
 ![[Assets/System Design 101/b9f01827e4bd9750c1373fc521401b109579dc9ea8ad15ec341d2cc393c70e1a.png]]
 
@@ -104,7 +157,7 @@ This capability map is a menu, not a mandatory topology. Gateways, meshes, conta
 
 ![[Assets/System Design 101/4f307656dcd815ca1f070bfefab9e30ed94e2c0db32ffd2866710c13d0efc179.png]]
 
-Ownership, explicit failure behavior, and cross-boundary telemetry are the baseline. [[Microservices Operations]] owns the deployment, discovery, health, rollback, and observability contract.
+Ownership, explicit failure behavior, and cross-boundary telemetry are the baseline; the operating contract above makes those responsibilities concrete for every service.
 
 ## Production platform capabilities are conditional
 
@@ -181,11 +234,14 @@ A concrete stop rule: if extracting `Catalog` creates a separate pipeline, datas
 - [Microservices Pattern: Microservice Architecture](https://microservices.io/patterns/microservices.html) — core microservices patterns and decomposition guidance.
 - [Microservices — Martin Fowler](https://martinfowler.com/articles/microservices.html) — original definition and key characteristics.
 - [.NET Microservices: Architecture for Containerized .NET Applications](https://learn.microsoft.com/en-us/dotnet/architecture/microservices/) — official Microsoft .NET guidance.
-- [Default ASP.NET Core port changed from 80 to 8080](https://learn.microsoft.com/en-us/dotnet/core/compatibility/containers/8.0/aspnet-port) — container port behavior in modern ASP.NET Core images.
 - [Building Microservices (2nd Edition) — Sam Newman](https://samnewman.io/books/building_microservices_2nd_edition/) — practical production lessons on boundaries and migration.
 - [Decompose by business capability](https://microservices.io/patterns/decomposition/decompose-by-business-capability.html) — pattern reference for assigning cohesive business ownership instead of splitting by technical layer.
 - [Strangler Fig pattern](https://learn.microsoft.com/en-us/azure/architecture/patterns/strangler-fig) — Microsoft guidance for incremental replacement while the existing system keeps serving traffic.
+- [Monolith First](https://martinfowler.com/bliki/MonolithFirst.html) — Martin Fowler's argument for learning domain boundaries before distributing them.
+- [How to break a monolith into microservices](https://martinfowler.com/articles/break-monolith-into-microservices.html) — dependency-driven extraction strategies and sequencing.
 - [OpenTelemetry context propagation](https://opentelemetry.io/docs/concepts/context-propagation/) — official trace-context model for correlating work across service and messaging boundaries.
+- [Kubernetes deployments](https://kubernetes.io/docs/concepts/workloads/controllers/deployment/) — primary rollout, scaling, and revision behavior.
+- [Google SRE service-level objectives](https://sre.google/sre-book/service-level-objectives/) — primary SLI/SLO and error-budget operating model.
 - [Saga distributed transactions](https://learn.microsoft.com/en-us/azure/architecture/reference-architectures/saga/saga) — Microsoft reference for orchestration, choreography, compensation, and their operational tradeoffs.
 - [Airbnb's Great Migration](https://www.infoq.com/presentations/airbnb-services/) — Jessica Tai's case study of Airbnb's service migration and the organizational constraints behind it.
 

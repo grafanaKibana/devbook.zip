@@ -1,8 +1,8 @@
 ---
 publish: true
 created: 2026-07-16T18:34:16.231Z
-modified: 2026-07-16T18:34:16.231Z
-published: 2026-07-16T18:34:16.231Z
+modified: 2026-07-18T09:09:07.090Z
+published: 2026-07-18T09:09:07.090Z
 topic:
   - AI & ML
 subtopic:
@@ -18,7 +18,71 @@ status: Ready to Repeat
 
 Fine-tuning continues training a pretrained model on task-specific examples. It changes behavior in the weights instead of supplying instructions or facts on every request. Use it for durable output format, domain style, classification boundaries, tool-call reliability, or distilling a narrow task into a smaller model. Do not use it as a mutable knowledge store: facts embedded during training have no citation boundary and begin aging immediately.
 
-Start with prompting, add [[AI & ML/LLM/Context Engineering/RAG/RAG|RAG]] when the gap is current or private knowledge, and fine-tune only when a measured behavior gap remains. [[Preference Alignment]] covers preference-pair methods after supervised fine-tuning; [[GRPO]] covers group-relative online reinforcement learning.
+Start with prompting, add [[AI & ML/LLM/Context Engineering/RAG/RAG|RAG]] when the gap is current or private knowledge, and fine-tune only when a measured behavior gap remains. [[#Preference alignment]] covers preference-pair methods after supervised fine-tuning, and [[#GRPO]] covers group-relative online reinforcement learning.
+
+## GRPO
+
+Group Relative Policy Optimization (GRPO) is an online reinforcement-learning method for language-model post-training. For each prompt, the current policy samples a group of completions, a reward function or verifier—rule-based or model-based—scores them, and the update increases probability for completions that perform better relative to their group. GRPO removes the learned value model used by PPO-style training; it does not remove on-policy sampling, reward design, KL control, or reward-hacking risk.
+
+### Group-relative update
+
+```text
+prompt
+  → sample G completions from current policy
+  → score each completion
+  → normalize rewards inside the group
+  → update with clipped objective and reference-policy constraint
+```
+
+Suppose a math prompt produces eight completions. Six fail the final-answer check, one reaches the right answer through invalid formatting, and one is correct and well formed. Outcome and format rewards rank that sampled group. The normalized advantage says which trajectories were better than their peers; it is not a calibrated probability that one response is globally correct.
+
+The absence of a critic reduces model-state memory and one source of estimation error. Group estimates can still be noisy, especially when every sampled completion receives nearly the same reward. More samples improve comparison but increase generation cost.
+
+### Reward boundary
+
+GRPO works best when rewards are hard to game and cheap to verify: exact math answers, executable tests, schema checks, or constrained simulators. A style judge or underspecified reward can reward verbosity, shortcuts, or artifacts that do not generalize.
+
+Use several gates:
+
+- Keep held-out prompts and run target, general-capability, and safety evaluations.
+- Inspect examples with high reward but poor human judgment.
+- Measure reward distribution and group variance, not only average training reward.
+- Test the final policy outside the environment and formatting assumptions used by the verifier.
+
+### Evidence boundary
+
+DeepSeekMath introduced GRPO and specifies its group-relative advantages, clipped policy objective, and KL regularization. DeepSeek-R1 reports a GRPO-based reasoning post-training pipeline and evaluations under its documented setup. Those papers support the mechanism and their stated experiments; they do not make undated prices, third-party hardware comparisons, or broad “best model” claims durable facts.
+
+The method is useful when a stable verifier and repeatable rollout environment exist. It is not a substitute for good data governance, held-out evaluation, or deployment-level checkpoints.
+
+## Preference alignment
+
+Preference alignment trains models to prefer one completion over another for the same prompt. Preference data includes explicit instruction boundaries; those labels become the behavior target and therefore the strongest source of bias if the rubric is weak.
+
+### Preference data
+
+```text
+prompt: user asks for a refund outside policy
+chosen: explains limits and escalation
+rejected: invents an exception and promises a refund
+rubric: correctness, actionability, tone
+```
+
+Hold out prompts, not only response pairs, so evaluation tests generalization to new situations.
+
+### RLHF
+
+In the InstructGPT-style pipeline, human comparisons train a reward model. Reinforcement learning then updates the language-model policy to increase that learned reward while constraining drift from a reference policy. This supports online sampling from the current policy, but adds a reward-model lifecycle and reinforcement-learning instability.
+
+Reward increases are not the product objective. The policy can exploit blind spots in the reward model, so held-out human evaluation and safety checks remain release gates.
+
+### DPO
+
+Direct Preference Optimization derives a classification-style objective from preference pairs and a reference policy. It avoids training a separate reward model and an online RL loop, making the pipeline simpler. It still depends on pair quality, reference choice, loss settings, and coverage; simpler does not mean immune to over-optimization or distribution shift.
+
+Use DPO when a fixed preference set is already available and stable. Use online methods such as [[#GRPO]] when you need reward scoring over sampled candidates and can defend the verifier under shift.
+
+Measure pairwise win rate with blinded raters, task correctness, refusal precision and recall, calibration, and safety slices. Keep a separate set for regressions in general capability. If response length differs, control or report it: raters and judges can prefer longer answers even when they are not more correct.
 
 ## When fine-tuning earns its cost
 
@@ -63,7 +127,7 @@ Data quality and coverage matter more than raw count.
 
 Compare base and fine-tuned candidates on the same target set, a broad capability set, and safety guardrails. Report effect sizes by slice instead of only one average. A format gain that causes a reasoning or refusal regression is not a free improvement.
 
-During training, validation loss and early stopping detect memorization, but shipping still depends on task metrics and production confirmation through [[Online Evaluation and AB Tests]]. Keep the base checkpoint deployable so rollback is an operational action, not a retraining project.
+During training, validation loss and early stopping detect memorization, but shipping still depends on task metrics and production confirmation through [[AI & ML/LLM/Evaluation/Online Evaluation and AB Tests|online evaluation and A/B tests]]. Keep the base checkpoint deployable so rollback is an operational action, not a retraining project.
 
 ## Pitfalls
 
@@ -93,10 +157,23 @@ During training, validation loss and early stopping detect memorization, but shi
 > [!QUESTION]- How should you estimate full fine-tuning memory?
 > Account separately for weights, gradients, optimizer states, activations, temporary buffers, precision, and sharding. Sequence length, batch, checkpointing, and optimizer choice can move the total enough that a generic multiplier is not a safe capacity plan.
 
+> [!QUESTION]- What does GRPO remove compared with PPO-style language-model training?
+> It removes the separately learned value model by estimating relative advantage from a group of sampled completions. It retains policy sampling, reward computation, clipped updates, and a reference-policy constraint.
+
+> [!QUESTION]- What is DPO’s operational advantage over reward-model RLHF?
+> It trains directly from preference pairs without a separate learned reward model or online policy-optimization loop. The tradeoff is that it cannot explore and score fresh outputs during the update.
+
 ## References
 
 - [LoRA: Low-Rank Adaptation of Large Language Models](https://arxiv.org/abs/2106.09685) — the primary paper defining frozen base weights and trainable low-rank updates.
 - [QLoRA: Efficient Finetuning of Quantized LLMs](https://arxiv.org/abs/2305.14314) — the primary 4-bit fine-tuning method and the hardware/configuration evidence behind its memory claims.
 - [ZeRO: Memory Optimizations Toward Training Trillion Parameter Models](https://arxiv.org/abs/1910.02054) — primary decomposition of model-state memory and distributed partitioning.
+- [DeepSeekMath](https://arxiv.org/abs/2402.03300) — the primary paper introducing GRPO and its objective.
+- [DeepSeek-R1](https://arxiv.org/abs/2501.12948) — primary report for a GRPO-based reasoning post-training pipeline and its stated evaluation setup.
+- [Proximal Policy Optimization Algorithms](https://arxiv.org/abs/1707.06347) — the primary clipped-policy optimization work that provides the comparison point for GRPO.
+- [Direct Preference Optimization](https://arxiv.org/abs/2305.18290) — the primary derivation and evaluation of preference training without a separate reward model.
+- [Training language models to follow instructions with human feedback](https://arxiv.org/abs/2203.02155) — the primary InstructGPT SFT, reward-model, and RLHF pipeline.
+- [Discovering Language Model Behaviors with Model-Written Evaluations](https://arxiv.org/abs/2212.09251) — primary evidence on behavioral evaluation and risks such as sycophancy that alignment must measure explicitly.
 - [Fine-tuning guide](https://platform.openai.com/docs/guides/fine-tuning) — provider guidance on data preparation, supervised tuning, and evaluation.
 - [Fine-tuning considerations](https://learn.microsoft.com/en-us/azure/ai-foundry/concepts/fine-tuning-considerations) — production decision framing for fine-tuning versus retrieval and prompting.
+- [ByteByteGo source snapshot: DeepSeek one-pager](https://github.com/ByteByteGoHq/system-design-101/blob/b28380a4710c5ec9638ec037d4168e288f334cba/data/guides/deepseek-1-pager.md) — the pinned secondary summary reconciled here by retaining the GRPO mechanism and excluding volatile cost, hardware, and benchmark comparisons.

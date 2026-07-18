@@ -1,8 +1,8 @@
 ---
 publish: true
 created: 2026-07-16T18:15:23.782Z
-modified: 2026-07-16T18:16:45.034Z
-published: 2026-07-16T18:16:45.034Z
+modified: 2026-07-18T09:43:34.940Z
+published: 2026-07-18T09:43:34.940Z
 topic:
   - Computer Science
 subtopic:
@@ -25,11 +25,11 @@ With 4 KiB pages, the low 12 address bits are the offset. For virtual address `0
 A page fault is a controlled CPU exception, not automatically a disk read. The kernel may:
 
 - create a first anonymous page on demand;
-- copy a shared page because a process writes after `fork`;
+- copy a shared page when one process writes to a copy-on-write mapping;
 - load a file-backed page from the page cache or storage;
-- reject the access with a segmentation fault because the address or permission is invalid.
+- raise a protection or page-fault exception because the address or permission is invalid; Unix-like systems may deliver `SIGSEGV`, while Windows normally reports an access violation.
 
-When memory pressure evicts a dirty file-backed page, the kernel must write it back before reuse. Anonymous memory can be reclaimed only by discarding reconstructable state, compressing it, or writing it to swap. The [[Memory Hierarchy]] explains where those bytes move; this note explains how the operating system names and protects them.
+When memory pressure evicts a dirty file-backed page, the kernel must write it back before reuse. Anonymous memory can be reclaimed only by discarding reconstructable state, compressing it, or writing it to swap. The [[Computer Science/Memory Hierarchy|memory hierarchy]] explains where those bytes move; this note explains how the operating system names and protects them.
 
 ## Paging and segmentation solve different problems
 
@@ -41,7 +41,6 @@ These mechanisms can coexist: an architecture can select a segment and then tran
 
 ## References
 
-- [Linux kernel documentation — Page Tables](https://docs.kernel.org/mm/page_tables.html) — primary Linux documentation for multi-level translation, entries, and TLBs.
-- [Linux kernel documentation — Memory Management Concepts](https://www.kernel.org/doc/html/latest/admin-guide/mm/concepts.html) — primary overview of virtual memory, physical pages, anonymous memory, and the page cache.
+- [Virtual address spaces (Windows)](https://learn.microsoft.com/windows-hardware/drivers/gettingstarted/virtual-address-spaces) — concrete operating-system explanation of per-process virtual addresses and kernel mappings.
 - [Intel 64 and IA-32 Architectures Software Developer Manuals](https://www.intel.com/content/www/us/en/developer/articles/technical/intel-sdm.html) — primary architecture reference for segmentation, paging, translation, and protection.
 - [ByteByteGo System Design 101 — Paging vs segmentation](https://github.com/ByteByteGoHq/system-design-101/blob/b28380a4710c5ec9638ec037d4168e288f334cba/data/guides/what-are-the-differences-between-paging-and-segmentation.md) — editorial comparison used for provenance; its internally inconsistent frame-count and segmentation source diagram is intentionally excluded.

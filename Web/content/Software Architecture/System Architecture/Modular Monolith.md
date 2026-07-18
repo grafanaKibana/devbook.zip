@@ -1,8 +1,8 @@
 ---
 publish: true
 created: 2026-07-15T11:47:56.091Z
-modified: 2026-07-17T09:22:57.725Z
-published: 2026-07-17T09:22:57.725Z
+modified: 2026-07-18T10:15:46.546Z
+published: 2026-07-18T10:15:46.546Z
 topic:
   - Software Architecture
 subtopic:
@@ -43,11 +43,173 @@ flowchart LR
 ```
 
 > [!IMPORTANT]
-> **Data isolation makes the transaction boundary explicit.** Separate `DbContext` types or schemas can still share one local ACID transaction when they use the same relational database, connection, and provider transaction. The boundary becomes asynchronous when modules use separate databases, brokers, or resources that cannot participate in the same supported transaction. Then keep each local change atomic and publish reliably through an outbox instead of assuming all modules committed together. [[Modular Monolith in NET]] shows both cases.
+> **Data isolation makes the transaction boundary explicit.** Separate `DbContext` types or schemas can still share one local ACID transaction when they use the same relational database, connection, and provider transaction. The boundary becomes asynchronous when modules use separate databases, brokers, or resources that cannot participate in the same supported transaction. Then keep each local change atomic and publish reliably through an outbox instead of assuming all modules committed together.
 
 ## .NET implementation
 
-[[Modular Monolith in NET]] contains the project layout, contracts-only dependency rule, concrete module registration, module-owned EF Core persistence, and a shared-transaction example for two `DbContext` instances using one relational resource.
+Separate projects make forbidden references visible to the compiler and architecture tests:
+
+```text
+src/
+  Modules/
+    Orders/
+      Orders.Contracts/
+      Orders.Core/
+      Orders.Infrastructure/
+    Inventory/
+      Inventory.Contracts/
+      Inventory.Core/
+      Inventory.Infrastructure/
+  Host/
+  Shared.Kernel/
+```
+
+`Orders.Core` may reference `Inventory.Contracts`; it must not reference `Inventory.Core` or `Inventory.Infrastructure`. The contracts assembly exposes the narrow cross-module boundary:
+
+```csharp
+namespace Inventory.Contracts;
+
+public sealed record ReserveStockRequest(
+    Guid ProductId,
+    int Quantity,
+    Guid OrderId);
+
+public sealed record ReserveStockResult(bool Success, string? FailureCode);
+
+public interface IInventoryGateway
+{
+    Task<ReserveStockResult> ReserveAsync(
+        ReserveStockRequest request,
+        CancellationToken cancellationToken);
+}
+```
+
+An Orders handler depends on that contract rather than Inventory internals:
+
+```csharp
+public interface IUnitOfWork
+{
+    Task<T> ExecuteAsync<T>(
+        Func<CancellationToken, Task<T>> operation,
+        CancellationToken cancellationToken);
+}
+
+public sealed class PlaceOrderHandler(
+    IInventoryGateway inventory,
+    IOrderRepository orders,
+    IUnitOfWork unitOfWork)
+{
+    public Task<Result> HandleAsync(
+        PlaceOrderCommand command,
+        CancellationToken cancellationToken)
+    {
+        if (command.Quantity <= 0)
+        {
+            return Result.Failure("orders.invalid_quantity");
+        }
+
+        return unitOfWork.ExecuteAsync(async transactionToken =>
+        {
+            var reservation = await inventory.ReserveAsync(
+                new ReserveStockRequest(
+                    command.ProductId,
+                    command.Quantity,
+                    command.OrderId),
+                transactionToken);
+
+            if (!reservation.Success)
+            {
+                return Result.Failure(
+                    reservation.FailureCode ?? "inventory.unavailable");
+            }
+
+            await orders.AddAsync(
+                Order.Create(command.OrderId, command.CustomerId),
+                transactionToken);
+
+            return Result.Success();
+        }, cancellationToken);
+    }
+}
+```
+
+`IUnitOfWork` is valid here only because both module adapters enlist in the same local database transaction. If Inventory moves behind a network boundary, this handler must become a durable workflow with idempotent reservation and compensation rather than pretending a local transaction still spans both modules.
+
+### Module-owned registration
+
+Each infrastructure assembly owns its persistence registration and migrations history. The host composes modules without reaching into their domain or persistence types.
+
+```csharp
+public static class InventoryModuleExtensions
+{
+    public static IServiceCollection AddInventoryModule(
+        this IServiceCollection services,
+        IConfiguration configuration)
+    {
+        var connectionString = configuration.GetConnectionString("Application")
+            ?? throw new InvalidOperationException(
+                "Connection string 'Application' is required.");
+
+        services.AddDbContext<InventoryDbContext>(options =>
+            options.UseNpgsql(
+                connectionString,
+                postgres => postgres.MigrationsHistoryTable(
+                    "__EFMigrationsHistory",
+                    "inventory")));
+
+        services.AddScoped<IInventoryGateway, InventoryGateway>();
+        services.AddScoped<IInventoryRepository, InventoryRepository>();
+
+        return services;
+    }
+}
+```
+
+```csharp
+var builder = WebApplication.CreateBuilder(args);
+
+builder.Services.AddOrdersModule(builder.Configuration);
+builder.Services.AddInventoryModule(builder.Configuration);
+
+var app = builder.Build();
+app.MapOrdersEndpoints();
+app.Run();
+```
+
+### Shared transaction when the resource is shared
+
+Two `DbContext` instances can commit atomically when they use the same open relational connection and provider transaction:
+
+```csharp
+await using var connection = new NpgsqlConnection(connectionString);
+await connection.OpenAsync(cancellationToken);
+
+var ordersOptions = new DbContextOptionsBuilder<OrdersDbContext>()
+    .UseNpgsql(connection)
+    .Options;
+
+var inventoryOptions = new DbContextOptionsBuilder<InventoryDbContext>()
+    .UseNpgsql(connection)
+    .Options;
+
+await using var orders = new OrdersDbContext(ordersOptions);
+await using var inventory = new InventoryDbContext(inventoryOptions);
+await using var transaction = await orders.Database.BeginTransactionAsync(
+    cancellationToken);
+
+await inventory.Database.UseTransactionAsync(
+    transaction.GetDbTransaction(),
+    cancellationToken);
+
+orders.Orders.Add(order);
+inventory.Reservations.Add(reservation);
+
+await orders.SaveChangesAsync(cancellationToken);
+await inventory.SaveChangesAsync(cancellationToken);
+await transaction.CommitAsync(cancellationToken);
+```
+
+Different schemas do not prevent this transaction because PostgreSQL is still one transactional resource. When a module moves to another database, uses a provider that cannot share the transaction, or publishes to a broker, persist an outbox record with the local change and expose the cross-module workflow as observable asynchronous state.
 
 ## Extraction path to microservices
 
@@ -104,3 +266,5 @@ Decision rule: default to modular monolith for most product teams, choose tradit
 - [.NET Microservices Architecture guide](https://learn.microsoft.com/en-us/dotnet/architecture/microservices/) - Microsoft architecture anchor describing service boundaries, independent deployment, and distributed systems tradeoffs.
 - [Prime Video monitoring service](https://www.primevideotech.com/video-streaming/scaling-up-the-prime-video-audio-video-monitoring-service-and-reducing-costs-by-90) — primary case describing the transfer and orchestration costs removed by collocation.
 - [Stack Overflow architecture, 2016](https://nickcraver.com/blog/2016/02/17/stack-overflow-the-architecture-2016-edition/) — primary historical account of the application tier, data systems, traffic, and capacity headroom.
+- [Sharing transactions across DbContext instances](https://learn.microsoft.com/ef/core/saving/transactions#share-connection-and-transaction) - Official EF Core requirements for sharing a connection and `DbTransaction`.
+- [Transactional Outbox pattern](https://microservices.io/patterns/data/transactional-outbox.html) - Local transaction plus reliable asynchronous publication when resources cannot share one transaction.

@@ -1,8 +1,8 @@
 ---
 publish: true
 created: 2026-07-15T11:47:56.174Z
-modified: 2026-07-16T17:34:22.922Z
-published: 2026-07-16T17:34:22.922Z
+modified: 2026-07-18T08:14:41.387Z
+published: 2026-07-18T08:14:41.387Z
 topic:
   - Software Architecture
 subtopic:
@@ -194,9 +194,7 @@ A simple work queue with per-message priorities, arbitrary routing, or short ret
 
 ## Schema evolution
 
-![[Assets/System Design 101/d5bf9b9c1d4a6ca3ec04fe50401d2a1d12503a07179326a2abd3d6d62d2ae050.png]]
-
-Kafka records commonly carry a schema identifier rather than an Avro object-container header. [[Kafka Schema Evolution]] owns writer/reader resolution, registry compatibility modes, retained-record replay, and breaking-change migrations.
+Kafka retains old records while producers and consumers deploy independently. [[Software Architecture/Distributed Systems/Event Schema Evolution|Event Schema Evolution]] owns writer/reader resolution, compatibility policy, registry behavior, retained-record replay, and breaking-change migrations. Kafka's schema identifier and registry integration are one implementation of that broader contract.
 
 ## Why Kafka achieves high throughput
 
@@ -212,7 +210,43 @@ Each mechanism has a cost. Larger batches improve throughput but add linger late
 
 ## .NET consumer boundary
 
-[[Kafka in NET]] owns the Confluent .NET consumer loop, manual offset rules, idempotent effects, poison-record quarantine, replay, and lag telemetry. The offset advances only after the business effect or quarantine record is durable.
+The Confluent .NET client exposes Kafka's group, partition, and offset model through a poll loop. Advance the offset only after the business effect or an owned quarantine path is durable:
+
+```csharp
+using Confluent.Kafka;
+
+var config = new ConsumerConfig
+{
+    BootstrapServers = "kafka:9092",
+    GroupId = "billing-v1",
+    EnableAutoCommit = false,
+    AutoOffsetReset = AutoOffsetReset.Earliest
+};
+
+using var consumer = new ConsumerBuilder<string, string>(config).Build();
+consumer.Subscribe("orders.v1");
+
+while (!cancellationToken.IsCancellationRequested)
+{
+    var record = consumer.Consume(cancellationToken);
+
+    try
+    {
+        var order = OrderPlaced.Parse(record.Message.Value);
+        await handler.HandleAsync(order, cancellationToken);
+        consumer.Commit(record);
+    }
+    catch (InvalidOrderEventException error)
+    {
+        await quarantine.PublishAsync(record, error.Code, cancellationToken);
+        consumer.Commit(record);
+    }
+}
+```
+
+The quarantine record must retain the original topic, partition, offset, key, payload, schema identifier, and stable reason before the source offset advances. Transient failures leave the offset uncommitted and use bounded retry or pause/resume. Business handlers remain idempotent because a crash can happen after the effect but before the commit.
+
+Track lag by group and partition, oldest-record age, rebalance duration, quarantine rate, processing latency, and commit failures. Lag measures work not yet acknowledged; it does not prove that a projection is correct.
 
 ## Pitfalls
 
@@ -261,7 +295,7 @@ kafka-consumer-groups.sh --bootstrap-server localhost:9092 --group orders-worker
 - [Kafka design](https://kafka.apache.org/documentation/#design) — Apache's design reference for the log, batching, page cache, replication, and consumer groups.
 - [Kafka producer configuration](https://kafka.apache.org/documentation/#producerconfigs) — official definitions for `acks`, idempotence, retries, batching, and compression.
 - [Kafka consumer configuration](https://kafka.apache.org/documentation/#consumerconfigs) — official offset-commit and isolation settings that shape delivery behavior.
-- [Apache Avro specification](https://avro.apache.org/docs/current/specification/) — authoritative writer/reader schema resolution and object container file format.
+- [Confluent poison pill handling](https://www.confluent.io/blog/spring-kafka-can-your-kafka-consumers-handle-a-poison-pill/) — practical quarantine and deserialization-failure handling; the boundary applies beyond the Java example.
 
 ### ByteByteGo provenance
 

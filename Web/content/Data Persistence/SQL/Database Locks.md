@@ -1,8 +1,8 @@
 ---
 publish: true
 created: 2026-07-15T09:08:04.268Z
-modified: 2026-07-17T05:49:07.709Z
-published: 2026-07-17T05:49:07.709Z
+modified: 2026-07-18T09:43:35.115Z
+published: 2026-07-18T09:43:35.115Z
 topic:
   - Data Persistence
 subtopic:
@@ -78,11 +78,53 @@ Notably, **PostgreSQL does not escalate locks at all.** Row locks live in the tu
 
 ## Latch vs lock
 
-Latches and locks are easy to confuse because both serialize access, but they operate at different layers and different timescales. A **lock** is _logical_: it protects a row or table as a transactional resource and is registered in the lock manager. Its duration depends on mode and isolation: write locks normally last to transaction end, while a shared read lock under `READ COMMITTED` can be released after the statement. A **latch** is _physical_: a lightweight, short-lived primitive that protects an **in-memory structure** (a buffer-pool page, an index's internal node) only for the duration of the physical operation touching it — reading bytes out of a page, splitting an index node. A latch is held for microseconds, is never tied to your transaction's lifetime, and exists to keep memory internally consistent while a page is being read or modified. When you see _lock_ waits you are looking at transactional contention (isolation); when you see _latch_ waits you are looking at memory-structure contention (physical throughput).
+Latches and locks are easy to confuse because both serialize access, but they operate at different layers and different timescales. A **lock** is _logical_: it protects a row or table as a transactional resource and is registered in the lock manager. Its duration depends on mode and isolation: write locks normally last to transaction end, while a shared read lock under `READ COMMITTED` can be released after the statement. A **latch** is _physical_: a lightweight, short-lived primitive that protects an **in-memory structure** (a buffer-pool page, an index's internal node) only for the duration of the physical operation touching it — reading bytes out of a page, splitting an index node. A latch is designed to be held briefly, often for microseconds, but scheduling stalls, contention, or slow physical work can extend the hold; latch wait time can be much longer still. It is never tied to your transaction's lifetime and exists to keep memory internally consistent while a page is being read or modified. When you see _lock_ waits you are looking at transactional contention (isolation); when you see _latch_ waits you are looking at memory-structure contention (physical throughput).
 
-## Pessimistic and Optimistic Conflict Control
+## Optimistic Concurrency Control
 
-Pessimistic control reserves the data before making a decision; optimistic control lets callers work concurrently and rejects a stale conditional write. Both can prevent lost updates, but they move the waiting and retry cost to different places. [[Data Persistence/SQL/Optimistic Concurrency Control|Optimistic Concurrency Control]] owns the version predicate, conflict workflow, and concrete comparison. The database still takes a short row lock while executing an optimistic `UPDATE`; “optimistic” describes the application protocol, not a lock-free engine.
+Pessimistic control reserves data before a decision; optimistic control lets callers work concurrently and rejects a stale conditional write. Both can prevent lost updates, but they put the cost in different places. The database still takes a short row lock while executing an optimistic `UPDATE`; “optimistic” describes the application protocol, not a lock-free engine.
+
+Suppose an order starts at `quantity = 5`, `version = 17`. Two callers read it. The first update succeeds and advances the version; the second affects zero rows because its predicate is stale:
+
+```sql
+UPDATE orders
+SET quantity = 6,
+    version = version + 1
+WHERE id = 42
+  AND version = 17;
+```
+
+Exactly one writer can change version 17. The loser must reload, merge, reject, or recompute; zero affected rows is a conflict result, not a successful no-op.
+
+The application workflow is explicit:
+
+1. Return the version with the resource, often as an HTTP `ETag`.
+2. Require it on mutation, for example through `If-Match`.
+3. Execute one conditional `UPDATE` containing the identity and version predicate.
+4. Treat zero affected rows as a conflict.
+5. Recompute from current state or return `409 Conflict` / `412 Precondition Failed` so the caller can merge.
+
+Blind retry is safe only for an idempotent operation or a calculation rerun from fresh state. Replaying “set quantity to 6” after another writer changed the business state can overwrite a valid decision.
+
+```sql
+BEGIN;
+SELECT quantity
+FROM orders
+WHERE id = 42
+FOR UPDATE;
+
+UPDATE orders SET quantity = 6 WHERE id = 42;
+COMMIT;
+```
+
+`FOR UPDATE` makes the second writer wait before deciding. This fits frequent conflicts or expensive recomputation, but the transaction must remain short.
+
+| Boundary | Pessimistic | Optimistic |
+| --- | --- | --- |
+| Conflict timing | Wait before the write decision | Detect at the conditional write |
+| Strong fit | Frequent conflicts, costly recomputation | Rare conflicts, cheap recomputation |
+| Main failure cost | Blocking and deadlocks | Wasted work and retry storms |
+| Engine locking | Holds a reservation while work proceeds | Still locks briefly during the `UPDATE` |
 
 ## Blocking vs deadlock
 
@@ -106,5 +148,6 @@ A **deadlock** is the pathological case: a **cycle** in the wait-for graph — A
 - [Transaction locking and row versioning guide (Microsoft Learn)](https://learn.microsoft.com/en-us/sql/relational-databases/sql-server-transaction-locking-and-row-versioning-guide) — SQL Server's authoritative reference for lock modes (S/U/X, the IS/IX/SIX intent hierarchy), lockable resource granularities, lock escalation thresholds, and the latch-vs-lock distinction; the primary source for most of this note.
 - [Explicit Locking (PostgreSQL docs)](https://www.postgresql.org/docs/current/explicit-locking.html) — PostgreSQL's table-level and row-level lock modes, their compatibility rules, why an MVCC engine takes so few read locks, and the fact that it performs no lock escalation.
 - [Transaction isolation (PostgreSQL docs)](https://www.postgresql.org/docs/current/transaction-iso.html) — primary reference for concurrent-update behavior and serialization failures that applications must retry.
+- [HTTP conditional requests](https://www.rfc-editor.org/rfc/rfc9110.html#name-conditional-requests) — validator semantics such as `ETag` and `If-Match` at an API boundary.
 - [Differences among database locks (ByteByteGo, pinned source)](https://github.com/ByteByteGoHq/system-design-101/blob/b28380a4710c5ec9638ec037d4168e288f334cba/data/guides/what-are-the-differences-among-database-locks.md) — editorial lock-mode comparison; its inconsistent infographic is intentionally not reproduced.
 - [Pessimistic versus optimistic locking (ByteByteGo, pinned source)](https://github.com/ByteByteGoHq/system-design-101/blob/b28380a4710c5ec9638ec037d4168e288f334cba/data/guides/pessimistic-vs-optimistic-locking.md) — editorial comparison used for the policy boundary; its false-absolute infographic is intentionally omitted.

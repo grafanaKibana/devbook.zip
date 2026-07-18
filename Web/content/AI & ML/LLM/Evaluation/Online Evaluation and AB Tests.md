@@ -1,8 +1,8 @@
 ---
 publish: true
 created: 2026-07-16T18:32:50.723Z
-modified: 2026-07-16T18:38:51.738Z
-published: 2026-07-16T18:38:51.738Z
+modified: 2026-07-18T09:09:06.869Z
+published: 2026-07-18T09:09:06.869Z
 topic:
   - AI & ML
 subtopic:
@@ -16,7 +16,7 @@ status: Ready to Repeat
 
 # Intro
 
-Online evaluation measures an LLM application on real traffic. An A/B test randomly assigns independent units such as users or accounts to control and treatment, then estimates how a prompt, model, retrieval, or tool change affects outcomes. It catches distribution shifts and multi-turn behavior that a fixed offline set misses, but only when assignment, exposure, metrics, and analysis describe the same experiment. The infrastructure that keeps those contracts aligned is covered in [[Experiment Platform Architecture]].
+Online evaluation measures an LLM application on real traffic. An A/B test randomly assigns independent units such as users or accounts to control and treatment, then estimates how a prompt, model, retrieval, or tool change affects outcomes. It catches distribution shifts and multi-turn behavior that a fixed offline set misses, but only when assignment, exposure, metrics, and analysis describe the same experiment. The infrastructure that keeps those contracts aligned is covered in [[#Experiment platform architecture]].
 
 Define the primary outcome and guardrails before traffic starts. A response-length increase is not success if resolution rate falls; a resolution lift is not shippable if safety incidents or p95 latency cross an abort threshold.
 
@@ -79,6 +79,49 @@ Segments should be defined before analysis when they drive decisions. Geography,
 
 Monitoring catches provider updates, drift, and outages. Randomization estimates causality for an intentional change. One cannot substitute for the other.
 
+## Experiment platform architecture
+
+An experiment platform makes a randomized decision reproducible. Its control plane binds hypothesis, eligibility, assignment, exposure, metrics, and analysis rules to one immutable experiment version. Without that contract, a dashboard can compare users who were never exposed, move one user between variants, or recompute the primary metric under rules that did not exist when traffic ran.
+
+![[Assets/System Design 101/04eb4d4688ce484b8d1e506683ed1b40b71256783c43868e05d172234e7617ee.jpg]]
+
+### Configuration lifecycle
+
+An experiment definition contains the hypothesis, owner, eligibility rule, variants and weights, assignment unit, primary metric, guardrails, ramp, and stop policy. Treat a running definition as immutable; changing it creates a new version so exposures collected under different rules remain distinguishable.
+
+```text
+draft → approved → running → stopped → analyzed → archived
+```
+
+A kill switch can stop new assignments immediately, but it must not delete the historical definition or exposure log needed for audit and analysis.
+
+### Deterministic assignment
+
+Hashing a stable identifier gives the same unit the same variant on every service instance:
+
+```text
+bucket = Hash(experimentId, version, accountId, salt) mod 10_000
+
+0..4_999     → control
+5_000..9_999 → treatment
+```
+
+The assignment unit is part of the product decision. Use an account when users within one account influence each other; use a device only when identity is unavailable and cross-device inconsistency is acceptable. Salt and version prevent accidental reuse of an old allocation.
+
+### Exposure, not eligibility
+
+Assignment is not evidence that treatment affected a response. Record an exposure only where the selected variant can change behavior. Include experiment version, assignment-unit ID, variant, timestamp, and the request or surface needed for attribution. Join outcomes to exposure so eligible-but-never-exposed units do not dilute the estimate.
+
+Log exposure idempotently or deduplicate it in analysis. Duplicate events must not turn one account into several independent observations.
+
+### Metric and analysis contracts
+
+Analysis must use the metric definition approved at launch and check data quality before estimating treatment effects. Sample-ratio mismatch is a gate: a material 62/38 allocation in a planned 50/50 split is evidence of an eligibility, hashing, logging, or filtering defect—not a surprising treatment effect. Stop interpretation until the mismatch is explained. Also check missing exposure fields, duplicate units, delayed outcomes, and guardrail freshness.
+
+The platform should return an estimate, confidence interval, sample counts at the assignment unit, and predefined decision criteria. Dashboards visualize that record; they do not invent a new analysis after launch.
+
+Centralization adds schema governance and launch ceremony. That cost is justified when several teams run experiments or when decisions affect safety, revenue, or policy. A small product can begin with a versioned config, stable hashing library, exposure table, and reviewed analysis notebook, but those four contracts still need one owner.
+
 ## Questions
 
 > [!QUESTION]- What does low statistical power mean?
@@ -87,9 +130,14 @@ Monitoring catches provider updates, drift, and outages. Randomization estimates
 > [!QUESTION]- Why must analysis follow the assignment unit?
 > Randomization makes assigned units independent across variants. Repeated events within one unit remain correlated, so counting them as independent understates uncertainty and can create a confident-looking result from little independent evidence.
 
+> [!QUESTION]- Why keep assignment and exposure separate?
+> Assignment records intent; exposure records that the variant could affect behavior. Joining outcomes to actual exposure avoids attributing an effect to users who qualified but never reached the changed surface.
+
 ## References
 
 - [Practical Guide to Controlled Experiments on the Web](https://exp-platform.com/Documents/GuideControlledExperiments.pdf) — Kohavi and colleagues’ primary guide to randomization, metrics, power, and trustworthy analysis.
 - [Online Experimentation at Microsoft](https://www.microsoft.com/en-us/research/publication/online-experimentation-at-microsoft/) — primary account of large-scale experimentation infrastructure and organizational practice.
+- [Diagnosing sample-ratio mismatch in online controlled experiments](https://www.microsoft.com/en-us/research/publication/diagnosing-sample-ratio-mismatch-in-online-controlled-experiments-a-taxonomy-and-rules-of-thumb-for-practitioners/) — Microsoft Research’s primary taxonomy of SRM causes and investigation rules.
 - [The ASA statement on p-values](https://doi.org/10.1080/00031305.2016.1154108) — primary statistical guidance explaining why a threshold alone does not measure effect size or practical importance.
 - [Beyond Power Calculations](https://doi.org/10.1177/1745691614551642) — Gelman and Carlin’s primary treatment of Type S errors and exaggerated Type M estimates under low-power designs.
+- [ByteByteGo source snapshot: possible experiment platform architecture](https://github.com/ByteByteGoHq/system-design-101/blob/b28380a4710c5ec9638ec037d4168e288f334cba/data/guides/possible-experiment-platform-architecture.md) — the pinned architecture source reconciled here with deterministic assignment, actual-exposure logging, immutable versions, and analysis gates.

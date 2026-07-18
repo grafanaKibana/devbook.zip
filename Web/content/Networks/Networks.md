@@ -1,8 +1,8 @@
 ---
 publish: true
 created: 2026-07-12T14:27:20.431Z
-modified: 2026-07-18T07:07:48.133Z
-published: 2026-07-18T07:07:48.133Z
+modified: 2026-07-18T11:06:07.313Z
+published: 2026-07-18T11:06:07.313Z
 tags:
   - FolderNote
 icon: network
@@ -15,7 +15,7 @@ summary: Protocols, latency, and reliability of how machines communicate over a 
 priority: High
 level:
   - "3"
-status: Creation
+status: Done
 ---
 
 # Intro

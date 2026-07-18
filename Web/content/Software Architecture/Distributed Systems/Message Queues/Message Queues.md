@@ -1,8 +1,8 @@
 ---
 publish: true
 created: 2026-07-15T11:47:56.398Z
-modified: 2026-07-18T07:07:48.133Z
-published: 2026-07-18T07:07:48.133Z
+modified: 2026-07-18T11:06:07.312Z
+published: 2026-07-18T11:06:07.312Z
 tags:
   - FolderNote
 topic:
@@ -12,7 +12,7 @@ subtopic:
 summary: Message queues decouple producers from consumers by buffering messages until consumers are ready, absorbing spikes and isolating failures.
 priority: High
 level:
-  - "3"
+  - "2"
 status: Done
 ---
 
@@ -20,7 +20,7 @@ status: Done
 
 Message queues decouple producers from consumers by buffering messages until consumers are ready. They absorb spikes, isolate failures, and keep systems working when downstream services slow. Use queues for webhook ingestion and background work.
 
-<nav style="--card-accent: 234, 179, 8;" class="folder-structure-map" aria-label="Message Queues section map"><div class="folder-map-children"><article class="db-card folder-map-node"><div class="db-card-body"><div class="folder-map-node-heading"><span class="folder-map-node-title-group"><span class="db-card-icon" aria-hidden="true"><svg xmlns="http://www.w3.org/2000/svg" stroke-linejoin="round" stroke-linecap="round" stroke-width="2" stroke="currentColor" fill="none" viewBox="0 0 24 24"><path d="M14.5 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7.5L14.5 2z"/><polyline points="14 2 14 8 20 8"/><line y2="13" y1="13" x2="8" x1="16"/><line y2="17" y1="17" x2="8" x1="16"/><line y2="9" y1="9" x2="8" x1="10"/></svg></span><span class="db-card-title" title="Kafka">Kafka</span></span></div><p class="db-card-summary">Distributed event streaming platform built on an append-only commit log, giving durability, high throughput, and replayable per-key ordering.</p></div><span class="db-card-hit"><a class="internal-link" href="Home/Software Architecture/Distributed Systems/Message Queues/Kafka.md" data-tooltip-position="top" aria-label="Kafka">Kafka</a></span></article><article class="db-card folder-map-node"><div class="db-card-body"><div class="folder-map-node-heading"><span class="folder-map-node-title-group"><span class="db-card-icon" aria-hidden="true"><svg xmlns="http://www.w3.org/2000/svg" stroke-linejoin="round" stroke-linecap="round" stroke-width="2" stroke="currentColor" fill="none" viewBox="0 0 24 24"><path d="M14.5 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7.5L14.5 2z"/><polyline points="14 2 14 8 20 8"/><line y2="13" y1="13" x2="8" x1="16"/><line y2="17" y1="17" x2="8" x1="16"/><line y2="9" y1="9" x2="8" x1="10"/></svg></span><span class="db-card-title" title="Kafka in NET">Kafka in NET</span></span></div><p class="db-card-summary">Operating .NET Kafka consumers with manual offsets, idempotency, poison-record quarantine, and lag telemetry.</p></div><span class="db-card-hit"><a class="internal-link" href="Home/Software Architecture/Distributed Systems/Message Queues/Kafka in NET.md" data-tooltip-position="top" aria-label="Kafka in NET">Kafka in NET</a></span></article><article class="db-card folder-map-node"><div class="db-card-body"><div class="folder-map-node-heading"><span class="folder-map-node-title-group"><span class="db-card-icon" aria-hidden="true"><svg xmlns="http://www.w3.org/2000/svg" stroke-linejoin="round" stroke-linecap="round" stroke-width="2" stroke="currentColor" fill="none" viewBox="0 0 24 24"><path d="M14.5 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7.5L14.5 2z"/><polyline points="14 2 14 8 20 8"/><line y2="13" y1="13" x2="8" x1="16"/><line y2="17" y1="17" x2="8" x1="16"/><line y2="9" y1="9" x2="8" x1="10"/></svg></span><span class="db-card-title" title="Kafka Schema Evolution">Kafka Schema Evolution</span></span></div><p class="db-card-summary">Evolving Kafka event schemas while retained old records and independently deployed consumers remain readable.</p></div><span class="db-card-hit"><a class="internal-link" href="Home/Software Architecture/Distributed Systems/Message Queues/Kafka Schema Evolution.md" data-tooltip-position="top" aria-label="Kafka Schema Evolution">Kafka Schema Evolution</a></span></article><article class="db-card folder-map-node"><div class="db-card-body"><div class="folder-map-node-heading"><span class="folder-map-node-title-group"><span class="db-card-icon" aria-hidden="true"><svg xmlns="http://www.w3.org/2000/svg" stroke-linejoin="round" stroke-linecap="round" stroke-width="2" stroke="currentColor" fill="none" viewBox="0 0 24 24"><path d="M14.5 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7.5L14.5 2z"/><polyline points="14 2 14 8 20 8"/><line y2="13" y1="13" x2="8" x1="16"/><line y2="17" y1="17" x2="8" x1="16"/><line y2="9" y1="9" x2="8" x1="10"/></svg></span><span class="db-card-title" title="Message Broker Selection">Message Broker Selection</span></span></div><p class="db-card-summary">Selecting a message broker from delivery, replay, routing, ordering, and operating constraints.</p></div><span class="db-card-hit"><a class="internal-link" href="Home/Software Architecture/Distributed Systems/Message Queues/Message Broker Selection.md" data-tooltip-position="top" aria-label="Message Broker Selection">Message Broker Selection</a></span></article><article class="db-card folder-map-node"><div class="db-card-body"><div class="folder-map-node-heading"><span class="folder-map-node-title-group"><span class="db-card-icon" aria-hidden="true"><svg xmlns="http://www.w3.org/2000/svg" stroke-linejoin="round" stroke-linecap="round" stroke-width="2" stroke="currentColor" fill="none" viewBox="0 0 24 24"><path d="M14.5 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7.5L14.5 2z"/><polyline points="14 2 14 8 20 8"/><line y2="13" y1="13" x2="8" x1="16"/><line y2="17" y1="17" x2="8" x1="16"/><line y2="9" y1="9" x2="8" x1="10"/></svg></span><span class="db-card-title" title="MSMQ">MSMQ</span></span></div><p class="db-card-summary">Windows-native, disk-durable message queuing for reliable asynchronous messaging in on-premise environments; now a legacy technology.</p></div><span class="db-card-hit"><a class="internal-link" href="Home/Software Architecture/Distributed Systems/Message Queues/MSMQ.md" data-tooltip-position="top" aria-label="MSMQ">MSMQ</a></span></article><article class="db-card folder-map-node"><div class="db-card-body"><div class="folder-map-node-heading"><span class="folder-map-node-title-group"><span class="db-card-icon" aria-hidden="true"><svg xmlns="http://www.w3.org/2000/svg" stroke-linejoin="round" stroke-linecap="round" stroke-width="2" stroke="currentColor" fill="none" viewBox="0 0 24 24"><path d="M14.5 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7.5L14.5 2z"/><polyline points="14 2 14 8 20 8"/><line y2="13" y1="13" x2="8" x1="16"/><line y2="17" y1="17" x2="8" x1="16"/><line y2="9" y1="9" x2="8" x1="10"/></svg></span><span class="db-card-title" title="NET Message Queue Workers">NET Message Queue Workers</span></span></div><p class="db-card-summary">A durable .NET message worker boundary with acknowledgement, idempotency, retry, and dead-letter behavior.</p></div><span class="db-card-hit"><a class="internal-link" href="Home/Software Architecture/Distributed Systems/Message Queues/NET Message Queue Workers.md" data-tooltip-position="top" aria-label="NET Message Queue Workers">NET Message Queue Workers</a></span></article><article class="db-card folder-map-node"><div class="db-card-body"><div class="folder-map-node-heading"><span class="folder-map-node-title-group"><span class="db-card-icon" aria-hidden="true"><svg xmlns="http://www.w3.org/2000/svg" stroke-linejoin="round" stroke-linecap="round" stroke-width="2" stroke="currentColor" fill="none" viewBox="0 0 24 24"><path d="M14.5 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7.5L14.5 2z"/><polyline points="14 2 14 8 20 8"/><line y2="13" y1="13" x2="8" x1="16"/><line y2="17" y1="17" x2="8" x1="16"/><line y2="9" y1="9" x2="8" x1="10"/></svg></span><span class="db-card-title" title="RabbitMQ">RabbitMQ</span></span></div><p class="db-card-summary">Open-source AMQP 0-9-1 broker routing messages from exchanges to queues via bindings, decoupling producers from consumers.</p></div><span class="db-card-hit"><a class="internal-link" href="Home/Software Architecture/Distributed Systems/Message Queues/RabbitMQ.md" data-tooltip-position="top" aria-label="RabbitMQ">RabbitMQ</a></span></article></div><style>.db-card { position: relative; box-sizing: border-box; border: 1px solid var(--background-modifier-border, var(--lightgray, #d8dee9)); border-radius: var(--radius-m, 0.55rem); background-color: var(--background-primary, var(--light, #ffffff)); box-shadow: 0 0 0 rgba(0, 0, 0, 0); transition: border-color 150ms ease, background-color 150ms ease, box-shadow 150ms ease, transform 150ms ease; } .db-card::before { content: ""; position: absolute; inset: 0; border-radius: inherit; pointer-events: none; background: radial-gradient( ellipse 150% 175% at -22% -38%, rgba(var(--card-accent, 125, 125, 125), 0.09) 0%, rgba(var(--card-accent, 125, 125, 125), 0.04) 38%, rgba(var(--card-accent, 125, 125, 125), 0.014) 66%, transparent 90% ); opacity: 0.78; transition: opacity 150ms ease; } .db-card:hover, .db-card:focus-within { border-color: rgba(var(--card-accent, 125, 125, 125), 0.55); background-color: color-mix(in srgb, rgb(var(--card-accent, 125, 125, 125)) 2.5%, var(--background-primary, var(--light, #ffffff))); box-shadow: 0 0.45rem 1.1rem rgba(0, 0, 0, 0.08); transform: translateY(-0.125rem); } .db-card:hover::before, .db-card:focus-within::before { opacity: 1; } .db-card-body { position: relative; z-index: 0; box-sizing: border-box; display: flex; flex-direction: column; padding: var(--db-card-pad, 0.85rem 0.9rem); } .db-card-icon { display: flex; width: 1.1rem; height: 1.1rem; flex: 0 0 auto; color: rgb(var(--card-accent, 125, 125, 125)); } .db-card-icon svg { display: block; width: 100%; height: 100%; } .db-card-title { display: block; margin: 0; color: var(--text-normal, var(--dark, #1f2937)); font-size: 1rem; font-weight: 700; line-height: 1.25; } p.db-card-summary { margin: 0.45rem 0 0; color: var(--text-muted, var(--darkgray, #5f6b7a)); font-size: 0.875rem; line-height: 1.45; } .db-card-hit { position: absolute; inset: 0; z-index: 1; } .db-card-hit a { position: absolute; inset: 0; min-width: 2.75rem; min-height: 2.75rem; border-radius: var(--radius-m, 0.55rem); background: transparent !important; font-size: 0; } .db-card-hit a:focus-visible { outline: 2px solid rgb(var(--card-accent, 125, 125, 125)); outline-offset: -0.3rem; } @media (prefers-reduced-motion: reduce) { .db-card { transition: none; } .db-card::before { transition: none; } .db-card:hover, .db-card:focus-within { transform: none; } } .folder-structure-map { --card-accent: 16, 185, 129; --map-gap: 0.75rem; width: 100%; box-sizing: border-box; margin: 0.5rem 0 0.75rem; container-name: folder-map; container-type: inline-size; } .folder-map-children { display: flex; flex-wrap: wrap; gap: var(--map-gap); } .folder-map-node { flex: 1 1 12rem; min-height: 2.75rem; --db-card-pad: 0.5rem 0.75rem; } .folder-map-node .db-card-body { min-height: 2.75rem; justify-content: center; } .folder-map-node-heading { display: flex; align-items: center; justify-content: space-between; gap: 0.75rem; } .folder-map-node-title-group { display: flex; align-items: center; gap: 0.5rem; } .folder-map-node .db-card-title { white-space: nowrap; } .folder-map-node-count { display: block; flex: 0 0 auto; color: var(--text-muted, var(--darkgray, #5f6b7a)); font-size: 0.875rem; white-space: nowrap; } .folder-map-node .db-card-summary { display: none; } .folder-map-node-empty { cursor: default; } .folder-map-node-empty:hover, .folder-map-node-empty:focus-within { border-color: var(--background-modifier-border, var(--lightgray, #d8dee9)); background-color: var(--background-primary, var(--light, #ffffff)); box-shadow: 0 0 0 rgba(0, 0, 0, 0); transform: none; } .folder-map-node-empty:hover::before, .folder-map-node-empty:focus-within::before { opacity: 0.78; } .folder-structure-map .folder-map-node-empty .db-card-body { justify-content: center; align-items: center; text-align: center; } .folder-map-empty-text { color: var(--text-normal, var(--dark, #1f2937)); font-size: 1rem; font-weight: 400; font-style: normal; line-height: 1.25; } @container folder-map (min-width: 40rem) { .folder-map-node { min-height: 6rem; --db-card-pad: 0.85rem 0.9rem; } .folder-map-node .db-card-body { min-height: 6rem; justify-content: flex-start; } .folder-map-node .db-card-summary { display: block; } } @container folder-map (min-width: 64rem) { .folder-map-node, .folder-map-node .db-card-body { min-height: 6.75rem; } }</style></nav>
+<nav style="--card-accent: 234, 179, 8;" class="folder-structure-map" aria-label="Message Queues section map"><div class="folder-map-children"><article class="db-card folder-map-node"><div class="db-card-body"><div class="folder-map-node-heading"><span class="folder-map-node-title-group"><span class="db-card-icon" aria-hidden="true"><svg xmlns="http://www.w3.org/2000/svg" stroke-linejoin="round" stroke-linecap="round" stroke-width="2" stroke="currentColor" fill="none" viewBox="0 0 24 24"><path d="M14.5 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7.5L14.5 2z"/><polyline points="14 2 14 8 20 8"/><line y2="13" y1="13" x2="8" x1="16"/><line y2="17" y1="17" x2="8" x1="16"/><line y2="9" y1="9" x2="8" x1="10"/></svg></span><span class="db-card-title" title="Kafka">Kafka</span></span></div><p class="db-card-summary">Distributed event streaming platform built on an append-only commit log, giving durability, high throughput, and replayable per-key ordering.</p></div><span class="db-card-hit"><a class="internal-link" href="Home/Software Architecture/Distributed Systems/Message Queues/Kafka.md" data-tooltip-position="top" aria-label="Kafka">Kafka</a></span></article><article class="db-card folder-map-node"><div class="db-card-body"><div class="folder-map-node-heading"><span class="folder-map-node-title-group"><span class="db-card-icon" aria-hidden="true"><svg xmlns="http://www.w3.org/2000/svg" stroke-linejoin="round" stroke-linecap="round" stroke-width="2" stroke="currentColor" fill="none" viewBox="0 0 24 24"><path d="M14.5 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7.5L14.5 2z"/><polyline points="14 2 14 8 20 8"/><line y2="13" y1="13" x2="8" x1="16"/><line y2="17" y1="17" x2="8" x1="16"/><line y2="9" y1="9" x2="8" x1="10"/></svg></span><span class="db-card-title" title="MSMQ">MSMQ</span></span></div><p class="db-card-summary">Windows-native, disk-durable message queuing for reliable asynchronous messaging in on-premise environments; now a legacy technology.</p></div><span class="db-card-hit"><a class="internal-link" href="Home/Software Architecture/Distributed Systems/Message Queues/MSMQ.md" data-tooltip-position="top" aria-label="MSMQ">MSMQ</a></span></article><article class="db-card folder-map-node"><div class="db-card-body"><div class="folder-map-node-heading"><span class="folder-map-node-title-group"><span class="db-card-icon" aria-hidden="true"><svg xmlns="http://www.w3.org/2000/svg" stroke-linejoin="round" stroke-linecap="round" stroke-width="2" stroke="currentColor" fill="none" viewBox="0 0 24 24"><path d="M14.5 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7.5L14.5 2z"/><polyline points="14 2 14 8 20 8"/><line y2="13" y1="13" x2="8" x1="16"/><line y2="17" y1="17" x2="8" x1="16"/><line y2="9" y1="9" x2="8" x1="10"/></svg></span><span class="db-card-title" title="RabbitMQ">RabbitMQ</span></span></div><p class="db-card-summary">Open-source AMQP 0-9-1 broker routing messages from exchanges to queues via bindings, decoupling producers from consumers.</p></div><span class="db-card-hit"><a class="internal-link" href="Home/Software Architecture/Distributed Systems/Message Queues/RabbitMQ.md" data-tooltip-position="top" aria-label="RabbitMQ">RabbitMQ</a></span></article></div><style>.db-card { position: relative; box-sizing: border-box; border: 1px solid var(--background-modifier-border, var(--lightgray, #d8dee9)); border-radius: var(--radius-m, 0.55rem); background-color: var(--background-primary, var(--light, #ffffff)); box-shadow: 0 0 0 rgba(0, 0, 0, 0); transition: border-color 150ms ease, background-color 150ms ease, box-shadow 150ms ease, transform 150ms ease; } .db-card::before { content: ""; position: absolute; inset: 0; border-radius: inherit; pointer-events: none; background: radial-gradient( ellipse 150% 175% at -22% -38%, rgba(var(--card-accent, 125, 125, 125), 0.09) 0%, rgba(var(--card-accent, 125, 125, 125), 0.04) 38%, rgba(var(--card-accent, 125, 125, 125), 0.014) 66%, transparent 90% ); opacity: 0.78; transition: opacity 150ms ease; } .db-card:hover, .db-card:focus-within { border-color: rgba(var(--card-accent, 125, 125, 125), 0.55); background-color: color-mix(in srgb, rgb(var(--card-accent, 125, 125, 125)) 2.5%, var(--background-primary, var(--light, #ffffff))); box-shadow: 0 0.45rem 1.1rem rgba(0, 0, 0, 0.08); transform: translateY(-0.125rem); } .db-card:hover::before, .db-card:focus-within::before { opacity: 1; } .db-card-body { position: relative; z-index: 0; box-sizing: border-box; display: flex; flex-direction: column; padding: var(--db-card-pad, 0.85rem 0.9rem); } .db-card-icon { display: flex; width: 1.1rem; height: 1.1rem; flex: 0 0 auto; color: rgb(var(--card-accent, 125, 125, 125)); } .db-card-icon svg { display: block; width: 100%; height: 100%; } .db-card-title { display: block; margin: 0; color: var(--text-normal, var(--dark, #1f2937)); font-size: 1rem; font-weight: 700; line-height: 1.25; } p.db-card-summary { margin: 0.45rem 0 0; color: var(--text-muted, var(--darkgray, #5f6b7a)); font-size: 0.875rem; line-height: 1.45; } .db-card-hit { position: absolute; inset: 0; z-index: 1; } .db-card-hit a { position: absolute; inset: 0; min-width: 2.75rem; min-height: 2.75rem; border-radius: var(--radius-m, 0.55rem); background: transparent !important; font-size: 0; } .db-card-hit a:focus-visible { outline: 2px solid rgb(var(--card-accent, 125, 125, 125)); outline-offset: -0.3rem; } @media (prefers-reduced-motion: reduce) { .db-card { transition: none; } .db-card::before { transition: none; } .db-card:hover, .db-card:focus-within { transform: none; } } .folder-structure-map { --card-accent: 16, 185, 129; --map-gap: 0.75rem; width: 100%; box-sizing: border-box; margin: 0.5rem 0 0.75rem; container-name: folder-map; container-type: inline-size; } .folder-map-children { display: flex; flex-wrap: wrap; gap: var(--map-gap); } .folder-map-node { flex: 1 1 12rem; min-height: 2.75rem; --db-card-pad: 0.5rem 0.75rem; } .folder-map-node .db-card-body { min-height: 2.75rem; justify-content: center; } .folder-map-node-heading { display: flex; align-items: center; justify-content: space-between; gap: 0.75rem; } .folder-map-node-title-group { display: flex; align-items: center; gap: 0.5rem; } .folder-map-node .db-card-title { white-space: nowrap; } .folder-map-node-count { display: block; flex: 0 0 auto; color: var(--text-muted, var(--darkgray, #5f6b7a)); font-size: 0.875rem; white-space: nowrap; } .folder-map-node .db-card-summary { display: none; } .folder-map-node-empty { cursor: default; } .folder-map-node-empty:hover, .folder-map-node-empty:focus-within { border-color: var(--background-modifier-border, var(--lightgray, #d8dee9)); background-color: var(--background-primary, var(--light, #ffffff)); box-shadow: 0 0 0 rgba(0, 0, 0, 0); transform: none; } .folder-map-node-empty:hover::before, .folder-map-node-empty:focus-within::before { opacity: 0.78; } .folder-structure-map .folder-map-node-empty .db-card-body { justify-content: center; align-items: center; text-align: center; } .folder-map-empty-text { color: var(--text-normal, var(--dark, #1f2937)); font-size: 1rem; font-weight: 400; font-style: normal; line-height: 1.25; } @container folder-map (min-width: 40rem) { .folder-map-node { min-height: 6rem; --db-card-pad: 0.85rem 0.9rem; } .folder-map-node .db-card-body { min-height: 6rem; justify-content: flex-start; } .folder-map-node .db-card-summary { display: block; } } @container folder-map (min-width: 64rem) { .folder-map-node, .folder-map-node .db-card-body { min-height: 6.75rem; } }</style></nav>
 
 ## Core concepts
 
@@ -104,7 +104,46 @@ flowchart LR
 
 ## .NET worker implementation
 
-[[NET Message Queue Workers]] owns the full receive-handle-acknowledge boundary, including idempotent state changes, bounded retry, shutdown, and dead-letter ordering. The durable rule is short: acknowledge only after the business effect or owned quarantine record is committed.
+A worker acknowledges only after the business effect or an owned quarantine record is durable:
+
+```csharp
+public sealed class InvoiceWorker(
+    IQueueConsumer consumer,
+    IInvoiceHandler handler,
+    IDeadLetterPublisher deadLetters) : BackgroundService
+{
+    protected override async Task ExecuteAsync(
+        CancellationToken stoppingToken)
+    {
+        await foreach (var delivery in consumer.ReadAllAsync(stoppingToken))
+        {
+            try
+            {
+                await handler.HandleAsync(
+                    delivery.Message,
+                    stoppingToken);
+                await delivery.AckAsync(stoppingToken);
+            }
+            catch (InvalidMessageException error)
+            {
+                await deadLetters.PublishAsync(
+                    delivery,
+                    error.Code,
+                    stoppingToken);
+                await delivery.AckAsync(stoppingToken);
+            }
+            catch (TransientDependencyException)
+            {
+                await delivery.RetryAsync(stoppingToken);
+            }
+        }
+    }
+}
+```
+
+`HandleAsync` should reserve a unique message or business-operation key in the same transaction as its state change. A crash after that commit but before `AckAsync` then produces a harmless redelivery. Dead-letter or quarantine publication must succeed before the original delivery is acknowledged.
+
+Bound concurrency by downstream capacity, stop intake during shutdown, and track oldest-message age, in-flight count, handler latency, retries, dead-letter rate, and idempotency conflicts. A short queue can still be unhealthy when one old message never completes.
 
 ## .NET platform choices
 
@@ -149,7 +188,23 @@ Patterns combine. A video upload can publish a claim-check message to a competin
 
 ![[Assets/System Design 101/6cfe944116519663da3149d9783b6dfb18c7051528250a9d2143433efe5446c9.png]]
 
-Choose from replay, routing, ordering, delivery, retention, managed-service, and operating requirements. [[Message Broker Selection]] compares [[Kafka]], [[RabbitMQ]], [[MSMQ]], and managed alternatives without treating broker families as a supersession sequence.
+Choose from replay, routing, ordering, delivery, retention, managed-service, and operating requirements rather than popularity.
+
+| Need | [[RabbitMQ]] classic/quorum queues | [[Kafka]] | [[MSMQ]] |
+| --- | --- | --- | --- |
+| Work distribution | Strong fit with acknowledgements and exchanges | Possible through consumer groups, but retained-log semantics dominate | Strong fit for legacy Windows workflows |
+| Replay | Consumed messages normally leave the queue; replay needs republishing or a retained design | Native offset replay within retention | Not a retained event-log model |
+| Routing | Exchanges, bindings, topics, and headers | Topic and partition selection | Queue-oriented Windows integration |
+| Ordering | Per queue, affected by redelivery and competing consumers | Per partition | Per queue under constrained delivery patterns |
+| Operations | Queue depth, unacked messages, redelivery, node health | Partitions, replication, rebalances, lag, retention | Windows administration and legacy platform constraints |
+
+### RabbitMQ Streams
+
+RabbitMQ Streams adds a replicated append-only log with non-destructive consumers and offset/timestamp replay. A super stream partitions traffic and preserves order only within each partition. Choose Streams when RabbitMQ is already the operational center and the workload needs large fan-out, replay, or large backlogs. Choose Kafka when retained logs, partitioned consumer groups, and its ecosystem are the primary model.
+
+Use RabbitMQ classic or quorum queues for `GenerateInvoice` jobs that need acknowledgements and flexible routing. Use Kafka for `OrderPlaced` events consumed by billing, fraud, analytics, and replayable projections. Keep MSMQ only when an existing Windows estate depends on its transactional integration and migration cost exceeds current value.
+
+Managed services such as Azure Service Bus, Amazon SQS/SNS, and Google Pub/Sub are often better when the team does not want to operate brokers. Compare their exact ordering, deduplication, dead-letter, size, retention, and throughput contracts rather than assuming open-source semantics.
 
 ## Pitfalls
 
@@ -187,29 +242,14 @@ Choose from replay, routing, ordering, delivery, retention, managed-service, and
 
 ## Questions
 
-- **1) In at-least-once processing, how do you prevent loss and duplicate side effects when a consumer crashes?**
+> [!QUESTION]- In at-least-once processing, how do you prevent loss and duplicate side effects when a consumer crashes?
+> Acknowledge only after the business commit. A crash before acknowledgement then causes redelivery rather than loss. Reserve the message or business idempotency key atomically, bound retries, and route persistent failures to a dead-letter queue.
 
-- Expected answer:
-  - Use manual ack only after successful business commit.
-  - If crash happens before ack, rely on broker redelivery.
-  - Use atomic idempotency reservation (unique key or transactional insert).
-  - Bound retries and route persistent failures to DLQ.
+> [!QUESTION]- When do you choose Kafka over RabbitMQ for a .NET service?
+> Choose Kafka for high-throughput, replayable event streams and RabbitMQ for low-latency work queues or routing-key patterns. In either case, define the ordering boundary per partition or queue key and include operational complexity and team experience in the decision.
 
-- **2) When do you choose Kafka over RabbitMQ for a .NET service?**
-
-- Expected answer:
-  - Choose Kafka for replayable event streams with high throughput.
-  - Choose RabbitMQ for low-latency work queues and routing-key patterns.
-  - Consider ordering constraints per partition/queue key.
-  - Compare operational complexity and team experience.
-
-- **3) Which metrics should page you first in queue-driven systems?**
-
-- Expected answer:
-  - Queue depth and age of oldest message.
-  - Consumer lag or unacked in-flight count.
-  - DLQ rate and retry rate.
-  - End-to-end processing latency and failure ratio.
+> [!QUESTION]- Which metrics should page you first in queue-driven systems?
+> Page on the age of the oldest message and end-to-end processing latency because depth alone can hide one permanently stuck item. Correlate those with consumer lag or unacknowledged work, retry rate, dead-letter rate, and failure ratio.
 
 ## References
 
@@ -221,10 +261,17 @@ Choose from replay, routing, ordering, delivery, retention, managed-service, and
 - [RabbitMQ Documentation - Dead Letter Exchanges](https://www.rabbitmq.com/docs/dlx) — official dead-letter routing and policy behavior.
 - [RabbitMQ Documentation - Time-to-Live and Expiration](https://www.rabbitmq.com/docs/ttl) — official per-message and per-queue expiration behavior.
 - [Martin Kleppmann - Should You Put Several Event Types in the Same Kafka Topic?](https://martin.kleppmann.com/2018/01/18/event-types-in-kafka-topic.html) — tradeoffs for topic boundaries, ordering, and consumer subscription.
-- [RabbitMQ consumer acknowledgements](https://www.rabbitmq.com/docs/confirms) — official acknowledgement, redelivery, and publisher-confirm boundaries.
+- [RabbitMQ consumer acknowledgements](https://www.rabbitmq.com/docs/confirms#consumer-acks) — official acknowledgement and redelivery boundaries.
 - [Amazon SQS visibility timeout](https://docs.aws.amazon.com/AWSSimpleQueueService/latest/SQSDeveloperGuide/sqs-visibility-timeout.html) — official explanation of redelivery when processing outlives or loses a visibility lease.
 - [Azure Architecture Center messaging choices](https://learn.microsoft.com/en-us/azure/architecture/guide/technology-choices/messaging) — requirements-based comparison of queues, streams, and managed messaging services.
 - [Enterprise Integration Patterns](https://www.enterpriseintegrationpatterns.com/patterns/messaging/) — canonical definitions for competing consumers, request/reply, dead-letter channel, and claim check.
+- [RabbitMQ reliability guide](https://www.rabbitmq.com/docs/reliability) — official connection, acknowledgement, confirm, and recovery behavior.
+- [RabbitMQ Streams and super streams](https://www.rabbitmq.com/docs/streams) — official replay, retention, partitioning, ordering, protocol, and operational constraints.
+- [Apache Kafka design](https://kafka.apache.org/documentation/#design) — official retained-log, partition, ordering, and consumer-group design.
+- [MSMQ documentation](https://learn.microsoft.com/previous-versions/windows/desktop/msmq/ms711472\(v=vs.85\)) — official Windows Message Queuing model and feature set.
+- [Azure messaging comparison](https://learn.microsoft.com/azure/service-bus-messaging/compare-messaging-services) — official comparison of Service Bus, Event Hubs, and Event Grid.
+- [Worker services in .NET](https://learn.microsoft.com/dotnet/core/extensions/workers) — official `BackgroundService`, hosting, and cancellation model.
+- [Hosted services in ASP.NET Core](https://learn.microsoft.com/aspnet/core/fundamentals/host/hosted-services) — official queued background-task and shutdown guidance.
 
 ### ByteByteGo provenance
 

@@ -1,8 +1,8 @@
 ---
 publish: true
 created: 2026-07-16T18:35:14.819Z
-modified: 2026-07-16T18:35:14.819Z
-published: 2026-07-16T18:35:14.819Z
+modified: 2026-07-18T09:10:00.141Z
+published: 2026-07-18T09:10:00.141Z
 topic:
   - AI & ML
 subtopic:
@@ -18,7 +18,7 @@ status: Ready to Repeat
 
 Model selection chooses which model may serve a workload; routing chooses per request among approved candidates. Larger or frontier models often perform better on difficult tasks, while smaller models often cost less and respond faster, but these are tendencies rather than contracts. A smaller specialized or fine-tuned model can win on a narrow task, and a frontier model can miss a latency SLA or regress after a provider update. The production rule is empirical: choose the least expensive candidate that clears task evaluation, safety, reliability, and latency gates on your traffic.
 
-This note covers application-level routing between complete models. Token-level routing among experts inside one sparse model is a different mechanism covered in [[Mixture of Experts]].
+This note covers application-level routing between complete models. Token-level routing among experts inside one sparse model is a different mechanism covered in [[AI & ML/LLM/LLM#Mixture-of-experts|mixture-of-experts routing]].
 
 ## Selection criteria
 
