@@ -1,8 +1,8 @@
 ---
 publish: true
 created: 2026-07-16T07:57:59.169Z
-modified: 2026-07-18T11:30:06.076Z
-published: 2026-07-18T11:30:06.076Z
+modified: 2026-07-18T11:59:15.656Z
+published: 2026-07-18T11:59:15.656Z
 topic:
   - Data Persistence
 subtopic: []
@@ -17,7 +17,7 @@ Erasure coding protects data by turning an object into `k` data shards plus `m` 
 
 A `4+2` layout for a 1 GiB object produces four 256 MiB data shards and two 256 MiB coding shards. The six shards consume 1.5 GiB, an overhead factor of `(4 + 2) / 4 = 1.5`. Three-copy replication consumes 3 GiB for the same logical object. The saving is bought with encoding work on writes and reconstruction work after failures.
 
-![[Assets/System Design 101/3977a046e208bb3d879161d73c64b9cb1962e0e8f3d59962df271589723bec54.png]]
+![[Assets/Data Persistence/Data Persistence-Erasure Coding-18120000.png]]
 
 # Write and Reconstruction Path
 

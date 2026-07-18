@@ -1,8 +1,8 @@
 ---
 publish: true
 created: 2026-07-12T14:27:20.399Z
-modified: 2026-07-18T11:30:03.300Z
-published: 2026-07-18T11:30:03.300Z
+modified: 2026-07-18T11:59:15.653Z
+published: 2026-07-18T11:59:15.653Z
 tags:
   - FolderNote
 icon: cloud
@@ -75,13 +75,13 @@ Timestream for LiveAnalytics closed to new AWS customers on June 20, 2025. New w
 
 # Cloud Cost Loop
 
-![[Assets/System Design 101/877ac6b7b01095b5d70802541b9e3bb154989931a8508a233e0fab3e428ce309.png]]
+![[Assets/Cloud/Cloud-Cloud-18120000.png]]
 
 Run cost work in dependency order: allocate and measure, eliminate idle resources, right-size from utilization and reliability data, schedule variable demand, then commit only the stable baseline. Buying a reservation before removing waste discounts the wrong architecture. [[Cloud/Cloud Cost Management|Cloud Cost Management]] develops the loop into allocation rules, anomaly handling, and unit economics.
 
 # Cloud-Native Anti-Patterns
 
-![[Assets/System Design 101/9804d3f9208a05336ae9de0fa80da20fee41ad45e9c7236d182a8f57f1d5510d.png]]
+![[Assets/Cloud/Cloud-Cloud-18120000-1.png]]
 
 > [!WARNING] Non-normative source visual
 > The labels are prompts to inspect operational coupling, not universal anti-patterns. A modular monolith or stateful component can be the simpler correct design when its ownership, lifecycle, and failure boundary are explicit.

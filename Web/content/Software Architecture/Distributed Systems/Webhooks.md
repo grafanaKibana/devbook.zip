@@ -1,8 +1,8 @@
 ---
 publish: true
 created: 2026-07-15T11:47:57.041Z
-modified: 2026-07-18T11:38:38.704Z
-published: 2026-07-18T11:38:38.704Z
+modified: 2026-07-18T11:59:15.671Z
+published: 2026-07-18T11:59:15.671Z
 topic:
   - Software Architecture
 subtopic:
@@ -85,7 +85,7 @@ Adapt the signed payload to the provider contract: many providers sign `timestam
 
 # Polling interval versus durable webhook delivery contract
 
-![[Assets/System Design 101/3381182ee93536fc7fa7f386859a9d426c239e650375751c49b5ca6d196d7b49.png]]
+![[Assets/Software Architecture/Software Architecture-Webhooks-18120000.png]]
 
 The visual shows the direction difference, not a reliability guarantee. Polling can be cheap when the interval is long or conditional requests return no body; webhooks can be expensive when retries storm or endpoints are slow.
 

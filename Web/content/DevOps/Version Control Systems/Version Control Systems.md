@@ -1,8 +1,8 @@
 ---
 publish: true
 created: 2026-07-11T21:42:28.457Z
-modified: 2026-07-18T11:30:06.665Z
-published: 2026-07-18T11:30:06.665Z
+modified: 2026-07-18T11:59:15.661Z
+published: 2026-07-18T11:59:15.661Z
 tags:
   - FolderNote
 topic:
@@ -32,7 +32,7 @@ local refs --git push--> remote refs
 
 Use `restore` for working-tree/index content and `switch` for branches. `reset` moves a ref and may also replace index or working-tree state, so check its mode before using it. For a published mistake, create a reverting commit; do not rewrite the shared ref.
 
-![[Assets/System Design 101/a75942f9f705cbdaf6901c22d5c21b4db1323060c05f111d67e2f23c61a15180.jpg]]
+![[Assets/DevOps/DevOps-Version Control Systems-18120000-1.jpg]]
 
 # Essential Git Commands
 
@@ -83,7 +83,7 @@ SemVer only works after the project defines its public API. `MAJOR.MINOR.PATCH` 
 
 Compatibility needs evidence: API diff, consumer tests, migration checks, and a deprecation window. This repository derives minor/patch release intent from typed commit/PR policy and reserves a breaking marker on the PR title for a major. The mechanism is repository-specific, while SemVer precedence is not.
 
-![[Assets/System Design 101/5d69e3bea8f155cadd70ff3bb104f9bac12b75f546eee1c61ffc8b9bb7a2c692.png]]
+![[Assets/DevOps/DevOps-Version Control Systems-18120000.png]]
 
 > [!WARNING] Non-normative source visual
 > The Alpha → Beta → RC sequence is one release convention, not a SemVer requirement. SemVer permits arbitrary dot-separated prerelease identifiers and defines how they compare; each project defines its own stages, promotion gates, and compatibility evidence.

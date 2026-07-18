@@ -1,8 +1,8 @@
 ---
 publish: true
 created: 2026-07-16T14:10:17.836Z
-modified: 2026-07-18T11:30:06.107Z
-published: 2026-07-18T11:30:06.107Z
+modified: 2026-07-18T11:59:15.656Z
+published: 2026-07-18T11:59:15.656Z
 topic:
   - Data Persistence
 subtopic:
@@ -82,7 +82,7 @@ The tenant filter is a correctness boundary, not only a performance hint. Every 
 
 # Use Cases
 
-![[Assets/System Design 101/b0f1f2bf4d89cf435d58fff195a785390a11a3b6ab28d60fea574c72dd4a80fa.png]]
+![[Assets/Data Persistence/Data Persistence-Elasticsearch-18120000.png]]
 
 > [!WARNING] Near-real-time and product-specific features
 > Elasticsearch search visibility follows refresh, so the visual's “real-time” label means near real-time. Flink, Beats, Logstash, Kibana, machine-learning, and SIEM capabilities are separate components or licensed features whose availability and subscription terms must be checked for the deployed distribution and version.

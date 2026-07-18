@@ -1,8 +1,8 @@
 ---
 publish: true
 created: 2026-07-11T21:46:04.955Z
-modified: 2026-07-18T11:30:09.783Z
-published: 2026-07-18T11:30:09.783Z
+modified: 2026-07-18T11:59:15.663Z
+published: 2026-07-18T11:59:15.663Z
 topic:
   - Networks
 subtopic:
@@ -101,7 +101,7 @@ Most apps use a higher-level layer instead of raw frames — **[[SignalR]]** add
 | Server-Sent Events | Long-lived server→client UTF-8 event stream | Native browser `EventSource`; HTTP-friendly, but buffering proxies must be disabled | Browser reconnects and sends `Last-Event-ID`; server needs replay retention; API has no explicit consumer-demand signal | One long response and server buffers/heartbeats per client |
 | WebSocket | Long-lived full-duplex framed messages | Native browser API after HTTP handshake; some proxies impose idle limits | Application owns reconnect, resume tokens, acknowledgements, and queue bounds; browser API has limited backpressure | One stateful connection, heartbeat, subscription state, and outbound queue per client |
 
-![[Assets/System Design 101/6b9090f69a3cab81616fa9b01e057c633e35d1569d5227b020758999f9157bbd.jpg]]
+![[Assets/Networks/Networks-WebSockets-18120000.jpg]]
 
 Choose short polling for low-frequency state where seconds of staleness are fine. Choose long polling as a compatibility bridge, not a default. Choose SSE for ordered server-to-browser updates with a replay cursor. Choose WebSockets when both sides must send low-latency messages. In .NET, reach for **SignalR** rather than raw WebSockets unless wire-level control matters; it provides transport fallback and reconnection helpers, but the application still owns durable resume and overload policy.
 

@@ -1,8 +1,8 @@
 ---
 publish: true
 created: 2026-07-15T11:47:56.174Z
-modified: 2026-07-18T11:23:15.398Z
-published: 2026-07-18T11:23:15.398Z
+modified: 2026-07-18T11:59:15.669Z
+published: 2026-07-18T11:59:15.669Z
 topic:
   - Software Architecture
 subtopic:
@@ -163,7 +163,7 @@ Design strategies:
 
 # Producer, broker, and consumer loss windows
 
-![[Assets/System Design 101/ffe24e0289421d68d1c1570a2dcab55f04b478c581581754f9a6ad45b25d1341.png]]
+![[Assets/Software Architecture/Software Architecture-Kafka-18120000.png]]
 
 Message loss is not one failure mode. Locate the acknowledgement boundary first:
 

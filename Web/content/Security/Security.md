@@ -1,8 +1,8 @@
 ---
 publish: true
 created: 2026-07-14T05:35:00.396Z
-modified: 2026-07-18T11:30:13.677Z
-published: 2026-07-18T11:30:13.677Z
+modified: 2026-07-18T11:59:15.666Z
+published: 2026-07-18T11:59:15.666Z
 tags:
   - FolderNote
 icon: lock
@@ -46,7 +46,7 @@ Start with one abuse case, not a catalog of controls. For a payroll export, iden
 7. **Detection:** record authentication, authorization, administrative, and sensitive-data events with safe metadata; alert on an attack pattern rather than one expected denial.
 8. **Response and recovery:** assign incident owners, preserve evidence, revoke compromised access, communicate under the applicable obligations, and restore from a tested recovery path.
 
-![[Assets/System Design 101/2b9f4fcdd81dd3863dfa544dea92f4acd9eb1f86459d1245e8aa5ce86295f435.png]]
+![[Assets/Security/Security-Security-18120000.png]]
 
 A checklist is complete only when its failure paths have been exercised. Test that the payroll export rejects another tenant, a missing policy, a revoked job identity, a stale signing key, a logging outage, and a restore whose backup predates the incident.
 

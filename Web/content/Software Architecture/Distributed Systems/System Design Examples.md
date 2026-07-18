@@ -1,8 +1,8 @@
 ---
 publish: true
 created: 2026-07-18T08:24:10.022Z
-modified: 2026-07-18T11:30:14.403Z
-published: 2026-07-18T11:30:14.403Z
+modified: 2026-07-18T11:59:15.671Z
+published: 2026-07-18T11:59:15.671Z
 topic:
   - Software Architecture
 subtopic:
@@ -50,7 +50,7 @@ Persist before fan-out. Online devices receive the event through their gateway; 
 
 A user with a phone and laptop needs per-device delivery cursors but usually one user-level read position. On reconnect, request `after_sequence=1084`, replay the gap, then switch to live events.
 
-![[Assets/System Design 101/af1396dad150982f48911cf4bdaf15397ea7c2fdb58a0ac0261942bc55929a41.jpg]]
+![[Assets/Software Architecture/Software Architecture-System Design Examples-18120000-2.jpg]]
 
 The topology does not define duplicate suppression or partition ownership. Presence remains soft state: a heartbeat can renew `user_7/device_phone -> gateway_3` for 45 seconds, but a network pause can make an online user look offline. Presence can guide fan-out; it cannot decide whether a message exists. Last-seen data also needs a privacy policy.
 
@@ -90,7 +90,7 @@ notification_73 ORDER_SHIPPED user_9 expires=18:00Z
 
 Separate queues by channel or priority when one slow provider would block urgent work. Workers use stable provider idempotency keys where supported, cap exponential backoff by the intent expiry, and move permanent failures into an owned dead-letter workflow.
 
-![[Assets/System Design 101/97264dc591aef8addc6e2966867ee6da1d3b5a9f6c0793a278843fab044e5313.png]]
+![[Assets/Software Architecture/Software Architecture-System Design Examples-18120000-1.png]]
 
 Treat a device token as a rotating route scoped to one app installation, not a user identity. Keep multiple tokens per user, remove tokens only after documented terminal responses, and keep provider credentials out of clients. TTL decides whether stale pushes remain useful; collapse identifiers replace obsolete provider messages, not duplicate business intents.
 
@@ -98,7 +98,7 @@ Provider acceptance proves only that the provider accepted the request. It does 
 
 # Priority Fan-Out Case Study
 
-![[Assets/System Design 101/45d7eec93eada432ea175e69f3bb1b41d90486031c35afa0916c43842cde54de.png]]
+![[Assets/Software Architecture/Software Architecture-System Design Examples-18120000.png]]
 
 Netflix described an event-management layer feeding priority queues and processing clusters, followed by provider-specific adapters. The separation is useful when security or account events must not wait behind bulk recommendations. It does not establish exactly-once delivery or current product internals; every adapter still needs TTL, retry, receipt, and deduplication rules.
 
@@ -118,7 +118,7 @@ retry -> [(doc_7, title, 1), (doc_12, body, 4)]
 
 Shard by document ID for balanced writes, query every relevant shard, and merge the local top candidates into a distributed top-k. Replicas add read capacity and availability; they do not remove the need to bind a response to a consistent index version during rollout.
 
-![[Assets/System Design 101/e1fe892c6bae3f8a4ef467ddcc74610a64c0fea336080704e927103e825bd354.png]]
+![[Assets/Software Architecture/Software Architecture-System Design Examples-18120000-5.png]]
 
 At query time, normalize the query, apply versioned spelling or synonym rules, retrieve candidates, enforce access filters, score, and return the index version. Cache only after tenant, locale, permissions, query rules, and index version are part of the key; otherwise cached results cross policy boundaries.
 
@@ -142,7 +142,7 @@ An accepted order carries participant, instrument, side, type, price, quantity, 
 
 Replay the same input journal into the same engine version and configuration to reproduce the book and executions. Admission remains idempotent: a reconnect retry with the same participant and client-order ID cannot create a second order.
 
-![[Assets/System Design 101/d2ef300c5b094c7a49cb1c4415d820aec581312416a00ead1868cb3ba0eff2e1.png]]
+![[Assets/Software Architecture/Software Architecture-System Design Examples-18120000-3.png]]
 
 The visual separates the critical order path from market-data and reporting flows. Broker examples and component placement are illustrative; the venue protocol and operating rules define the actual participants and controls.
 
@@ -150,7 +150,7 @@ The visual separates the critical order path from market-data and reporting flow
 
 Every network hop, serialization boundary, lock, and cache miss spends latency and adds jitter. A single-threaded matching loop can outperform a shared concurrent book because it removes lock arbitration and makes order deterministic. Collocated processes and memory-mapped transport reduce transfer cost when one failure domain is acceptable.
 
-![[Assets/System Design 101/df4c729bc881ce42086508e2b7c59e027f2ce26525ca01576040afdc6a5a6ec5.jpg]]
+![[Assets/Software Architecture/Software Architecture-System Design Examples-18120000-4.jpg]]
 
 This topology is not universal. One physical host raises availability and recovery stakes. Durable input journaling, replicated recovery state, tested failover, clock discipline, capacity headroom, and deterministic replay remain necessary. Keep blocking reporting and database writes off the matching loop, but never acknowledge beyond the durability guarantee the venue publishes.
 

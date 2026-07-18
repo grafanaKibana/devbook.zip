@@ -1,8 +1,8 @@
 ---
 publish: true
 created: 2026-07-16T07:38:11.775Z
-modified: 2026-07-18T11:30:13.407Z
-published: 2026-07-18T11:30:13.407Z
+modified: 2026-07-18T11:59:15.666Z
+published: 2026-07-18T11:59:15.666Z
 topic:
   - Security
 subtopic:
@@ -69,7 +69,7 @@ RP: consume the challenge once and create or elevate a session
 
 Origin and RP-ID binding give WebAuthn its phishing resistance: a credential registered for `example.com` will not sign a challenge for `examp1e.com`. The fresh challenge and one-time server state stop replay. User verification such as a device PIN or biometric unlocks the authenticator; the biometric is not sent to the website.
 
-![[Assets/System Design 101/982d589bf15322ffe45e26e3298943717d1e15de9ff55cfe4e30e93bd91ccad4.png]]
+![[Assets/Security/Security-Two-Factor Auth-18120000.png]]
 
 # Passkey, sync, and attestation choices
 

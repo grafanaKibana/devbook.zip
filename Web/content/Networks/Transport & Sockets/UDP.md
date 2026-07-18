@@ -1,8 +1,8 @@
 ---
 publish: true
 created: 2026-07-12T14:27:20.432Z
-modified: 2026-07-18T11:30:10.813Z
-published: 2026-07-18T11:30:10.813Z
+modified: 2026-07-18T11:59:15.664Z
+published: 2026-07-18T11:59:15.664Z
 topic:
   - Networks
 subtopic:
@@ -68,7 +68,7 @@ event:    id=580                         duplicate after retry; acknowledge, do 
 
 Snapshots are unreliable and replaceable. The receiver keeps a small sequence window, rejects packets older than the window, and interpolates through isolated gaps. Critical events are reliable but need not share one global order: sequence numbers expose gaps, selective ACKs report which events arrived, retransmission deadlines stop stale work, and stable event IDs make retries idempotent. If every event must be ordered, delivery pauses behind a missing earlier event—the same head-of-line cost TCP provides.
 
-![[Assets/System Design 101/71fb31cb1a78141deecaae87754ebc91398de7a288ca4a728caa5e0e8a53f23a.png]]
+![[Assets/Networks/Networks-UDP-18120000.png]]
 
 Reliability does not excuse an unpaced sender. Measure RTT and loss, cap bytes in flight, reduce the sending rate on congestion, and bound retransmissions. Also keep datagrams below the path MTU; IP fragmentation turns one missing fragment into a lost whole datagram. Use QUIC when you need secure, congestion-controlled reliable streams plus independent ordering. Use TCP when one reliable ordered byte stream is enough and UDP traversal or a custom protocol would add complexity without a latency benefit.
 

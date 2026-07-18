@@ -1,8 +1,8 @@
 ---
 publish: true
 created: 2026-07-11T21:40:40.549Z
-modified: 2026-07-18T11:30:03.249Z
-published: 2026-07-18T11:30:03.249Z
+modified: 2026-07-18T11:59:15.652Z
+published: 2026-07-18T11:59:15.652Z
 tags:
   - FolderNote
 topic:
@@ -43,7 +43,7 @@ The catalog is not a design method. Start with control, workload shape, data mod
 
 Use this page to translate workload capabilities into AWS names. The provider-neutral mechanisms live in [[Data Persistence/Object Storage|Object Storage]], [[Data Persistence/NoSQL/NoSQL|NoSQL]], [[Networks/Networks|Networks]], [[Software Architecture/Distributed Systems/Message Queues/Message Queues|Message Queues]], [[Software Architecture/System Architecture/Event-Driven Architecture|Event-Driven Architecture]], and [[DevOps/Kubernetes|Kubernetes]]. Those notes own the durable design tradeoffs; AWS documentation owns the current regional, quota, pricing, and lifecycle contract.
 
-![[Assets/System Design 101/d863fbffc5675c925dfd9ea7ff6c96638c0919e416b40c9b59845db932380e6b.png]]
+![[Assets/Cloud/Cloud-AWS-18120000-1.png]]
 
 The visual is an orientation aid, not a lifecycle guarantee. Confirm current service status, regional support, quotas, and pricing in the official service documentation before adopting one.
 
@@ -68,7 +68,7 @@ Lambda runs event-triggered functions in managed execution environments. Synchro
 
 Reserved concurrency isolates and caps capacity; provisioned concurrency prepares environments to reduce initialization latency but adds idle cost. Use Lambda for bursty bounded work when managed scaling is worth runtime limits and variable initialization latency. Prefer a continuously running container or VM for sustained work that needs long-lived processes, specialized host control, or stable low-latency execution.
 
-![[Assets/System Design 101/03a0fa5987095ab9dd4c73cfbd13e79b33de4e1df7c1ead9fe296305107744f1.jpg]]
+![[Assets/Cloud/Cloud-AWS-18120000.jpg]]
 
 # Storage
 
@@ -85,7 +85,7 @@ aws s3 sync ./data/ s3://my-bucket/data/
 
 Multipart upload makes large transfers independently retriable, but unfinished parts accrue charges until aborted or removed by lifecycle policy. [[Data Persistence/Object Storage|Object Storage]] owns the multipart, checksum, lifecycle, and multi-object publication mechanisms; use S3 documentation for current limits and API behavior.
 
-![[Assets/System Design 101/d94d95b4b0e8bab46e58b81b9cdc493760dfeebf89cda8c28920e9d2acba97e4.png]]
+![[Assets/Cloud/Cloud-AWS-18120000-2.png]]
 
 # Databases
 

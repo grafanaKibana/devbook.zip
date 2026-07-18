@@ -1,8 +1,8 @@
 ---
 publish: true
 created: 2026-07-15T11:47:54.747Z
-modified: 2026-07-18T11:38:38.697Z
-published: 2026-07-18T11:38:38.697Z
+modified: 2026-07-18T11:59:15.667Z
+published: 2026-07-18T11:59:15.667Z
 tags:
   - FolderNote
 topic:
@@ -48,7 +48,7 @@ Search is a read projection, not the source of truth. Logging and monitoring obs
 
 # Trigger-action integration platforms
 
-![[Assets/System Design 101/0656594b2ae42485f69ceb03be53f4e31e8caff6659d45de070c45da40f29717.png]]
+![[Assets/Software Architecture/Software Architecture-Application Architecture-18120000.png]]
 
 The branded example is dated, but the mechanism is stable: a connector observes a trigger, normalizes it, evaluates filters, and invokes one or more actions with stored credentials.
 

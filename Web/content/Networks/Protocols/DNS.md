@@ -1,8 +1,8 @@
 ---
 publish: true
 created: 2026-07-18T08:17:57.591Z
-modified: 2026-07-18T11:30:08.029Z
-published: 2026-07-18T11:30:08.029Z
+modified: 2026-07-18T11:59:15.662Z
+published: 2026-07-18T11:59:15.662Z
 topic:
   - Networks
 subtopic:
@@ -38,7 +38,7 @@ sequenceDiagram
 
 If a name is a CNAME, the resolver follows the chain and returns the terminal record set subject to TTL and loop limits. NXDOMAIN and NODATA can be negative-cached for SOA-derived intervals, so disappearance is not instant.
 
-![[Assets/System Design 101/dfaafd9073b0a72bc05c758dc1162a3f470a0cf903a50156e6d6107f79f1fdd0.png]]
+![[Assets/Networks/Networks-DNS-18120000-1.png]]
 
 # Resolution and Transport
 
@@ -56,7 +56,7 @@ Classic DNS commonly uses UDP for ordinary queries, while TCP is an equally vali
 | `PTR` | Reversed name → host | Domain name | `42.113.0.203.in-addr.arpa → api.example.com` |
 | `SRV` | Service locator | Target, port, priority | `_sip._tcp.example.com → 10 5 5060 sip1.example.com` |
 
-![[Assets/System Design 101/cf648ed0a8c256e338b080a139796886987b527a7e761d913b98e38092984af0.png]]
+![[Assets/Networks/Networks-DNS-18120000.png]]
 
 # Cache Windows, Failover, and Traffic Steering
 

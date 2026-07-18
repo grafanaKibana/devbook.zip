@@ -1,8 +1,8 @@
 ---
 publish: true
 created: 2026-07-12T14:27:20.433Z
-modified: 2026-07-18T11:30:13.125Z
-published: 2026-07-18T11:30:13.125Z
+modified: 2026-07-18T11:59:15.665Z
+published: 2026-07-18T11:59:15.665Z
 tags:
   - FolderNote
 icon: code-2
@@ -48,7 +48,7 @@ Widget widget = await widgets.GetAsync(id, cancellationToken: ct);
 
 The short call did not remove HTTP. The SDK still chooses a base URL, sends credentials, serializes parameters, maps non-success responses, and deserializes the representation. Good SDKs leave escape hatches for response headers, cancellation, raw errors, custom transports, and new server fields.
 
-![[Assets/System Design 101/70ce86f7d519d885776ab629c8ed3f676ad57604ce7042d824d8cd5ecd924444.png]]
+![[Assets/Programming/Programming-Programming-18120000.png]]
 
 The visual shows a common HTTP API and client-toolkit relationship, not a definition. APIs are not limited to HTTP, and an SDK may wrap several APIs, local libraries, emulators, generators, and tools. The contract remains the authority; the SDK is one packaged consumer surface.
 

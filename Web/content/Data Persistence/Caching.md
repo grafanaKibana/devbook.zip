@@ -1,8 +1,8 @@
 ---
 publish: true
 created: 2026-07-15T09:07:59.299Z
-modified: 2026-07-18T11:30:06.016Z
-published: 2026-07-18T11:30:06.016Z
+modified: 2026-07-18T11:59:15.655Z
+published: 2026-07-18T11:59:15.655Z
 topic:
   - Data Persistence
 subtopic: []
@@ -61,7 +61,7 @@ The five common strategies differ in who owns an origin request and what an ackn
 
 Write-around fits write-heavy data that is rarely read back: it avoids filling the cache with entries that may never be read, at the cost of making the first later read a miss.
 
-![[Assets/System Design 101/4432553bc930f9667bf6c2b428d1c3ecfba4ee743ca3c7aafacd778422d928a4.png]]
+![[Assets/Data Persistence/Data Persistence-Caching-18120000-1.png]]
 
 Cache-aside with `IDistributedCache`:
 
@@ -117,7 +117,7 @@ Before selecting a client library, decide whether the workload has reuse, how st
 
 Track hit ratio by route and key class, miss latency, origin requests caused by misses, eviction and expiration rates, invalidation lag, timeouts, and stale-read or version-mismatch counts.
 
-![[Assets/System Design 101/0cb71aee6eed509539fbd5ac91a9efc9bd345bc0855cb10d048f11413785373c.png]]
+![[Assets/Data Persistence/Data Persistence-Caching-18120000.png]]
 
 # Invalidation Strategies
 
@@ -249,7 +249,7 @@ Netflix's EVCache illustrates four distinct contracts that can share an in-memor
 | Precomputed primary read store | An offline job publishes a generated data version | Retain or regenerate the last good generation before replacement |
 | Distribution plane | A publisher derives UI strings or translations from an upstream authority | Readers need versioned publication, rollback, and partial-generation handling |
 
-![[Assets/System Design 101/99db2205a756cc262763e054b626babd0b0033a72a64d2ae5d97dfbcfed2f6b0.png]]
+![[Assets/Data Persistence/Data Persistence-Caching-18120000-3.png]]
 
 # Redis as a cache or system of record
 
@@ -287,7 +287,7 @@ Expiration, admission, and capacity eviction answer different questions: whether
 
 `IMemoryCache` is not bounded unless entries provide sizes and the cache has a `SizeLimit`. Redis uses `maxmemory-policy`; a pure cache commonly starts with an all-keys LRU or LFU policy, while `noeviction` rejects memory-growing writes. Choose from measured reuse distance, skew, object size, and miss cost, then watch eviction rate with hit ratio and origin load.
 
-![[Assets/System Design 101/52d213d56a791a27e9df7511d0ed57607da81e3871713417d123ae49a1f9d2c7.png]]
+![[Assets/Data Persistence/Data Persistence-Caching-18120000-2.png]]
 
 # Other pitfalls
 
@@ -297,7 +297,7 @@ Unbounded high-cardinality keys, missing tenant or authorization dimensions, lar
 
 Absent-key traffic follows `request → cache miss → origin not found`. Validate impossible keys, use a short negative TTL for repeated misses, consider a [[Computer Science/Data Structures/Hash-based Structures/Bloom Filter|Bloom Filter]] when membership is known, and rate-limit by principal. Negative entries must be invalidated on creation; Bloom false positives still reach the origin; versioned keys still need TTLs so obsolete versions do not grow without bound.
 
-![[Assets/System Design 101/dd576de44a045b089cf394d57e9116f7a362faf8c98734bca86bf0756fa9de37.png]]
+![[Assets/Data Persistence/Data Persistence-Caching-18120000-4.png]]
 
 # Questions
 

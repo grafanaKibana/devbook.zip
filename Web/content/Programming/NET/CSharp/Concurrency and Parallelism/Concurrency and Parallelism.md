@@ -1,8 +1,8 @@
 ---
 publish: true
 created: 2026-07-15T06:12:10.153Z
-modified: 2026-07-18T11:30:11.515Z
-published: 2026-07-18T11:30:11.515Z
+modified: 2026-07-18T11:59:15.664Z
+published: 2026-07-18T11:59:15.664Z
 tags:
   - FolderNote
 topic:
@@ -43,7 +43,7 @@ Parallel.For(
 
 That is useful only when `Sharpen` does enough computation to repay partitioning and scheduling overhead. For socket waits, adding worker threads consumes resources without making the remote service respond sooner.
 
-![[Assets/System Design 101/94cb521042378272fee362356d5dd9e423c3ee58e758b6ba9c753974d666ab96.png]]
+![[Assets/Programming/Programming-Concurrency and Parallelism-18120000.png]]
 
 > [!WARNING] Non-normative source visual
 > The “not concurrent, parallel” quadrant is invalid under these definitions: work executing simultaneously on multiple cores is necessarily concurrent. Use the visual only to contrast interleaved composition with simultaneous execution, not as a four-state taxonomy.

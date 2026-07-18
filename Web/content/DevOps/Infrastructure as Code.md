@@ -1,8 +1,8 @@
 ---
 publish: true
 created: 2026-07-11T21:47:11.231Z
-modified: 2026-07-18T11:30:06.577Z
-published: 2026-07-18T11:30:06.577Z
+modified: 2026-07-18T11:59:15.659Z
+published: 2026-07-18T11:59:15.659Z
 topic:
   - DevOps
 subtopic: []
@@ -56,7 +56,7 @@ Terraform first refreshes its view of remote objects, builds a dependency graph 
 
 Store state in a remote backend with encryption, access control, versioning, and locking. State is operational data and can contain secrets; it is not ordinary source code. If an apply is interrupted, inspect the real resource and state before retrying. Use `import`, `state mv`, or provider-specific recovery only after backing up state. Never “fix” drift by editing the state JSON by hand.
 
-![[Assets/System Design 101/2a1a0f16507f0b03cd0a5bc0ace96681a01eeec3f6632c4d0385bdac95ab5c12.png]]
+![[Assets/DevOps/DevOps-Infrastructure as Code-18120000-1.png]]
 
 Declarative tools track what they've created in a **state file** that maps your code to real cloud resources. The workflow:
 
@@ -94,7 +94,7 @@ State is the crux of Terraform-style tools (Bicep/ARM and CloudFormation keep st
 
 Tools overlap, so classify the state they own before choosing one. Terraform can configure bootstrap data, Kubernetes can provision cloud resources through controllers, and Ansible can create resources, but overlapping ownership creates competing reconcilers. One resource should have one authoritative controller.
 
-![[Assets/System Design 101/203c7f1d0a6b3d00a4748c5334399f9d20b32194e8e766300bfc7a23313485df.png]]
+![[Assets/DevOps/DevOps-Infrastructure as Code-18120000.png]]
 
 # Pitfalls
 

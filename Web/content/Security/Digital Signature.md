@@ -1,8 +1,8 @@
 ---
 publish: true
 created: 2026-07-11T21:48:29.585Z
-modified: 2026-07-18T11:30:13.467Z
-published: 2026-07-18T11:30:13.467Z
+modified: 2026-07-18T11:59:15.666Z
+published: 2026-07-18T11:59:15.666Z
 topic:
   - Security
 subtopic:
@@ -67,7 +67,7 @@ bool isValid = ecdsa.VerifyData(message, signature, HashAlgorithmName.SHA256);
 
 HMAC authenticates a message between parties that share one secret. Either party can generate the same MAC, so it does not provide a digital signature's asymmetric attribution. Request-authentication protocols add canonical request bytes, a timestamp, and a nonce with server-side replay state; those protocol details belong to [[Security/Authentication/Authentication|API authentication]]. The signature-specific boundary here is trust: a digital signature separates a private signer from public verifiers, while every HMAC verifier is also able to create a valid tag.
 
-![[Assets/System Design 101/43c5215844c4ce07c9aeda7a92da6da06d810aa7e33e2f4810071f2eaf0cb262.png]]
+![[Assets/Security/Security-Digital Signature-18120000.png]]
 
 # Pitfalls
 

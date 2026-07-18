@@ -1,8 +1,8 @@
 ---
 publish: true
 created: 2026-07-11T21:40:45.828Z
-modified: 2026-07-18T11:30:03.267Z
-published: 2026-07-18T11:30:03.267Z
+modified: 2026-07-18T11:59:15.653Z
+published: 2026-07-18T11:59:15.653Z
 tags:
   - FolderNote
 topic:
@@ -44,7 +44,7 @@ Start with the workload contract, not the product list. Decide how much runtime 
 
 Use this page to translate capability needs into Azure product names. Provider-neutral mechanisms live in [[Data Persistence/Object Storage|Object Storage]], [[Data Persistence/NoSQL/NoSQL|NoSQL]], [[Networks/Networks|Networks]], [[Software Architecture/Distributed Systems/Message Queues/Message Queues|Message Queues]], [[Software Architecture/System Architecture/Event-Driven Architecture|Event-Driven Architecture]], and [[DevOps/Kubernetes|Kubernetes]]. Azure documentation owns current hosting plans, regional availability, quotas, pricing, and retirement state.
 
-![[Assets/System Design 101/986b32e436b26b34cd1ce5632418a2c11a99bd275c5b75d278e20c630440a9e7.png]]
+![[Assets/Cloud/Cloud-Azure-18120000.png]]
 
 The visual is an orientation aid. Product names, retirement state, regional availability, quotas, and feature contracts must be checked against current Microsoft documentation. Portability is also a per-capability decision: container images can move more easily than Cosmos DB consistency or Service Bus settlement semantics.
 

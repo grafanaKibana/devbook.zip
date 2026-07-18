@@ -1,8 +1,8 @@
 ---
 publish: true
 created: 2026-07-15T11:47:55.653Z
-modified: 2026-07-18T11:38:38.752Z
-published: 2026-07-18T11:38:38.752Z
+modified: 2026-07-18T11:59:15.672Z
+published: 2026-07-18T11:59:15.672Z
 topic:
   - Software Architecture
 subtopic:
@@ -105,7 +105,7 @@ sequenceDiagram
 
 CRUD stores the latest accepted state. Event Sourcing stores the ordered facts that produced it. For an order changing from `Pending` to `Paid` to `Shipped`, a CRUD row answers "what is the status now?" An event stream also answers when each transition happened, which command caused it, and what the state was at an earlier revision.
 
-![[Assets/System Design 101/b5745367294e9ee1ae1ec3ed8c12ee79c27c489c00dfc9a9d4d6f6a9443103f8.jpg]]
+![[Assets/Software Architecture/Software Architecture-Event Sourcing-18120000.jpg]]
 
 The image's rebuild arrow is conditional, not automatic. Replay is trustworthy only when events have a stable order, handlers are deterministic, historical schemas remain readable through versioning or upcasters, and projections isolate external side effects. If replay calls today's tax API or reads the current clock, the same stream can produce a different result. Snapshots shorten replay but do not replace the event stream as the source of truth.
 

@@ -1,8 +1,8 @@
 ---
 publish: true
 created: 2026-07-15T11:47:56.202Z
-modified: 2026-07-18T11:38:38.728Z
-published: 2026-07-18T11:38:38.728Z
+modified: 2026-07-18T11:59:15.673Z
+published: 2026-07-18T11:59:15.673Z
 topic:
   - Software Architecture
 subtopic:
@@ -86,11 +86,11 @@ The cost of premature microservices is high: distributed systems complexity, eve
 
 # Collocation provenance visuals
 
-![[Assets/System Design 101/ca82d79e2ef18b6b3dd26780a6d65322ca281b766d5aa2e2100fb623f578ff9f.jpg]]
+![[Assets/Software Architecture/Software Architecture-Monolith Architecture-18120000-1.jpg]]
 
 Prime Video's monitoring pipeline and Stack Overflow's historical application tier are provenance cases, not architecture targets. [[Software Architecture/System Architecture/Modular Monolith]] owns the reusable comparison of collocation, scaling, and boundary decisions.
 
-![[Assets/System Design 101/95ba5ef6bdaa94d2e0794e5d311431f0f14f8883038cb662100f5cebe0231125.png]]
+![[Assets/Software Architecture/Software Architecture-Monolith Architecture-18120000.png]]
 
 # Pitfalls
 

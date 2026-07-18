@@ -1,8 +1,8 @@
 ---
 publish: true
 created: 2026-07-16T15:14:44.878Z
-modified: 2026-07-18T11:30:06.323Z
-published: 2026-07-18T11:30:06.323Z
+modified: 2026-07-18T11:59:15.657Z
+published: 2026-07-18T11:59:15.657Z
 topic:
   - Data Persistence
 subtopic:
@@ -30,7 +30,7 @@ Start from the operator in the measured query plan. Equality probes, ordered ran
 | LSM tree | Buffer, flush, and compact sorted runs | Sustained writes with point/range reads through run indexes and filters | Compaction and read amplification; it is a storage organization, not a PostgreSQL index method |
 | Columnstore | Compressed values grouped by column | Large scans and aggregates over a subset of columns | Point updates and single-row OLTP access |
 
-![[Assets/System Design 101/1405b68c4f060961d25aa5a629a060c516cb1e10f0aac41b4358037ed3065cdb.jpg]]
+![[Assets/Data Persistence/Data Persistence-Indexes-18120000.jpg]]
 
 The image is a vocabulary map, not a universal engine diagram. Bloom filters answer probable membership rather than locating a row; an LSM tree includes several cooperating structures; and products expose spatial and inverted behavior through engine-specific operator classes.
 

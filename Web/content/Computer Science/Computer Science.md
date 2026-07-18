@@ -1,8 +1,8 @@
 ---
 publish: true
 created: 2026-07-12T20:39:23.959Z
-modified: 2026-07-18T11:30:04.833Z
-published: 2026-07-18T11:30:04.833Z
+modified: 2026-07-18T11:59:15.654Z
+published: 2026-07-18T11:59:15.654Z
 tags:
   - FolderNote
 icon: flask-round
@@ -36,7 +36,7 @@ The useful question is not whether a paper is famous; it is which design mechani
 | DeCandia et al., _Dynamo_ (2007) | Quorums, consistent hashing, and reconciliation trade strict coordination for availability | [[Software Architecture/Distributed Systems/CAP theorem\|CAP and distributed storage]] |
 | Vaswani et al., _Attention Is All You Need_ (2017) | Self-attention replaces recurrence with parallel token-to-token interaction | [[AI & ML/Machine Learning/Machine Learning\|machine learning]] |
 
-![[Assets/System Design 101/b5b681658b3d7403f2670e7737f2ac279026a0736f33d48cf8e283661e663acc.png]]
+![[Assets/Computer Science/Computer Science-Computer Science-18120000.png]]
 
 The diagram is a reading map, not an authority or a required sequence. Start with the mechanism closest to the system you are building, then read the original paper to see the assumptions and failure model the summary leaves out.
 

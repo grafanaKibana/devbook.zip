@@ -1,8 +1,8 @@
 ---
 publish: true
 created: 2026-07-15T08:54:29.815Z
-modified: 2026-07-18T11:30:06.163Z
-published: 2026-07-18T11:30:06.163Z
+modified: 2026-07-18T11:59:15.656Z
+published: 2026-07-18T11:59:15.656Z
 topic:
   - Data Persistence
 subtopic:
@@ -51,7 +51,7 @@ Rows are identified by a partition key and hold a flexible, sparse set of column
 
 Discord's message store shows the rule under real load. Messages are read by channel and time, so the storage key must keep that access path local instead of scattering one channel across the cluster. Discord moved from Cassandra to ScyllaDB after operational pain around hot partitions, garbage collection, and repairs; the lesson is not that one wide-column engine always wins, but that partition shape and node behavior dominate at trillions of rows.
 
-![[Assets/System Design 101/e6cc56c88d16cbc5e9987e3b83be6913c9b4f0b07880ad80cb59248242f23d62.png]]
+![[Assets/Data Persistence/Data Persistence-NoSQL Database Types-18120000.png]]
 
 ## Graph
 

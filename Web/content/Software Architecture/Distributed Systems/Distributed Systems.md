@@ -1,8 +1,8 @@
 ---
 publish: true
 created: 2026-07-15T11:47:55.961Z
-modified: 2026-07-18T11:38:38.711Z
-published: 2026-07-18T11:38:38.711Z
+modified: 2026-07-18T11:59:15.668Z
+published: 2026-07-18T11:59:15.668Z
 tags:
   - FolderNote
 topic:
@@ -22,7 +22,7 @@ Distributed systems are hard because the network is unreliable and time is messy
 
 # Quality attributes and measurable targets
 
-![[Assets/System Design 101/7fbb3588d967cd7b05cbb658f23cb5b34df18067d8be6eedbe58ca89b57b3eb1.png]]
+![[Assets/Software Architecture/Software Architecture-Distributed Systems-18120000-2.png]]
 
 The four labels are an orientation mnemonic, not independent boxes. Logging does not create reliability, and load balancing alone does not create availability. Turn each attribute into a workload, target, failure model, and measurement window:
 
@@ -37,7 +37,7 @@ Targets conflict. Synchronous multi-region replication may improve durability an
 
 # Map symptoms to mechanisms, then test the tradeoff
 
-![[Assets/System Design 101/19e6e41c6f45bfaadff482d71bfe2d84a784c4a26c8354aca996d53a7b6bea86.png]]
+![[Assets/Software Architecture/Software Architecture-Distributed Systems-18120000.png]]
 
 Treat the visual as diagnostic prompts, not prescriptions:
 
@@ -84,7 +84,7 @@ Use [[Software Architecture/Distributed Systems/Unique ID Generation]] for the f
 
 # Pattern Map
 
-![[Assets/System Design 101/205a022f29aa3226f1bcb69e5a6fa2172b203ab51cbc6ce34be66a3e541646d0.png]]
+![[Assets/Software Architecture/Software Architecture-Distributed Systems-18120000-1.png]]
 
 The visual mixes patterns from different layers. Use this linked map to keep the problem and cost visible:
 

@@ -1,8 +1,8 @@
 ---
 publish: true
 created: 2026-07-18T08:18:13.137Z
-modified: 2026-07-18T11:30:09.457Z
-published: 2026-07-18T11:30:09.457Z
+modified: 2026-07-18T11:59:15.663Z
+published: 2026-07-18T11:59:15.663Z
 topic:
   - Networks
 subtopic:
@@ -34,7 +34,7 @@ SMTP response classes:
 
 Timeouts are ambiguous: a server can accept a message then drop the response, so duplicate detection must exist.
 
-![[Assets/System Design 101/422fcc82e0fee953f75cac96e0678fdb576821151928df2de6a00a1a5287a356.jpg]]
+![[Assets/Networks/Networks-SMTP-18120000.jpg]]
 
 # Email Authentication
 

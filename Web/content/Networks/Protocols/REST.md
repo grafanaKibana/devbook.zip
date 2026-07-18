@@ -1,8 +1,8 @@
 ---
 publish: true
 created: 2026-07-18T08:17:49.156Z
-modified: 2026-07-18T11:30:09.236Z
-published: 2026-07-18T11:30:09.236Z
+modified: 2026-07-18T11:59:15.662Z
+published: 2026-07-18T11:59:15.662Z
 topic:
   - Networks
 subtopic:
@@ -88,7 +88,7 @@ REST and GraphQL expose different control surfaces:
 
 Neither removes backend fan-out. Choose GraphQL only when selectable graph projections repay the schema governance and execution controls.
 
-![[Assets/System Design 101/5032baef84adef8c53504b673533fcf11649adebbf0883b66d5199c997aca764.jpg]]
+![[Assets/Networks/Networks-REST-18120000.jpg]]
 
 The visual is a design prompt, not a protocol mandate. `POST` becomes retry-safe only with durable idempotency handling, path versioning is one compatibility option, and action resources are legitimate when the operation is not a collection mutation.
 
@@ -251,7 +251,7 @@ Performance gains are not free; each one adds a contract:
 - Asynchronous work: hides latency, increases eventual-consistency and duplicate risk
 - Queues/pools: control backpressure, require bounded retries and timeouts
 
-![[Assets/System Design 101/74ee33387257a7a7e92285e69d60e6c69cc5c9166bc2277d8ccf94fe6806fc5b.png]]
+![[Assets/Networks/Networks-REST-18120000-1.png]]
 
 Treat the visual as a technique inventory. Deep offset pagination can become slower, asynchronous logging needs a loss policy, caches need authorization-safe keys and invalidation, compression spends CPU, and pools need bounds and refresh behavior.
 

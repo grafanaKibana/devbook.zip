@@ -1,8 +1,8 @@
 ---
 publish: true
 created: 2026-07-18T08:17:54.512Z
-modified: 2026-07-18T11:38:38.724Z
-published: 2026-07-18T11:38:38.724Z
+modified: 2026-07-18T11:59:15.670Z
+published: 2026-07-18T11:59:15.670Z
 topic:
   - Software Architecture
 subtopic:
@@ -57,7 +57,7 @@ Also model `DECLINED`, `CANCELED`, `EXPIRED`, and rail-specific return states. T
 
 A card payment coordinates the merchant, gateway or PSP, acquirer, card network, and issuer. One company may bundle several roles, but bundling does not collapse the lifecycle.
 
-![[Assets/System Design 101/6edace788c2b754e70b48b8e29525f9d4d002051476ac99d36a8bc96e6d11b63.png]]
+![[Assets/Software Architecture/Software Architecture-Payment Systems-18120000-4.png]]
 
 Store the operation, amount, currency, attempt ID, provider reference, and evidence behind each transition. “The PSP approved it” is too vague to decide whether goods can ship, funds can be paid out, or a dispute needs a new journal.
 
@@ -77,7 +77,7 @@ The adopted participant visual is useful for role boundaries, but fixed timing i
 
 Bank rails do not share one success contract. ACH processes file-based credits and debits with later returns, UPI routes instant account-to-account instructions through participating banks, SWIFT carries financial messages rather than settling them, and foreign exchange adds quote and liquidity legs.
 
-![[Assets/System Design 101/d6433f826dcebfd6175486e97b6c27d27d97890de0478bb43c08c1de691dc57e.png]]
+![[Assets/Software Architecture/Software Architecture-Payment Systems-18120000-5.png]]
 
 The industry map is a scope check: regulatory authorities, central banks, commercial banks, non-bank providers, clearing networks, and settlement systems vary by market. A provider adapter can normalize transport details, but it must retain each rail's acknowledgement, posting, return, settlement, liquidity, and reconciliation states.
 
@@ -97,7 +97,7 @@ Bind the NPCI or bank reference to the internal intent. An ambiguous timeout fol
 
 SWIFT validates and transports standardized financial messages and reports. Store-and-forward delivery and network acknowledgements prove facts about the message path. They do not prove that the receiver accepted the business instruction, posted a customer account, or completed clearing and settlement.
 
-![[Assets/System Design 101/627ea74b051057b557fff49852525ae0a9f5590448b7002a818570464fdcee6a.png]]
+![[Assets/Software Architecture/Software Architecture-Payment Systems-18120000-3.png]]
 
 Persist the instruction ID, sender, receiver, message type and version, network acknowledgement, business status, settlement reference, and reconciliation result. A negative acknowledgement can be corrected and retried. A positive network acknowledgement without business confirmation remains an exception. ISO 20022 defines messages across initiation, clearing, settlement, and cash management; the business process decides which evidence closes each state.
 
@@ -105,7 +105,7 @@ Persist the instruction ID, sender, receiver, message type and version, network 
 
 Cross-currency payments carry at least presentment, conversion, and settlement amounts. Record the quote ID, source and destination currencies, rate, fee, expiration, rounding rule, and who bears slippage. Reject or requote after expiry; silently using a new rate changes the customer's contract.
 
-![[Assets/System Design 101/edc5a3fba02ab42a17b79453d45a26df72be0628447dc0c1c6b53d0e0adc9064.png]]
+![[Assets/Software Architecture/Software Architecture-Payment Systems-18120000-8.png]]
 
 Suppose a provider prefunds USD and EUR accounts, collects `100.00 USD`, locks `0.88 EUR per USD`, and posts an `88.00 EUR` payable. Collection, conversion, inventory transfer, and recipient settlement each need a status and journal. If collection succeeds but conversion or payout fails, retain the collected liability and expose a recoverable state; do not mark the payment failed and forget held funds.
 
@@ -165,7 +165,7 @@ Route before creating the attempt and persist the rule version. Inputs can inclu
 
 Trip circuit breakers on technical failure and saturation, not issuer declines. Bound calls by the checkout latency budget, isolate pools, cap concurrent attempts, and shed load before queues exhaust the database.
 
-![[Assets/System Design 101/1adb865f841a8c5c151bbe3f1e971ed5a58335ff6ddbda5d983c0ba7152b8953.png]]
+![[Assets/Software Architecture/Software Architecture-Payment Systems-18120000-1.png]]
 
 Measure latency, traffic, technical errors, declines by reason, unknown outcomes, saturation, webhook lag, and reconciliation breaks. Load tests need retries and callback bursts because those paths amplify incidents.
 
@@ -179,7 +179,7 @@ A duplicate success event must not fulfill twice. If a handler commits a transit
 
 Provider state and accounting state answer different questions. A PSP records what it observed on a rail; the ledger records what the platform owns or owes; settlement files and bank statements show what moved externally. Keep the records linked but independent so fees, returns, disputes, payout failures, and missing callbacks have an honest place to land.
 
-![[Assets/System Design 101/dfeeea5e79a61224470de2ecd8d703a0bb26a602fda2bac03ff5f9c3b6dd0bea.jpg]]
+![[Assets/Software Architecture/Software Architecture-Payment Systems-18120000-7.jpg]]
 
 A marketplace order split across three sellers creates three stable allocation records or payment orders. Recomputing the split only in memory lets a retry charge or credit every seller again.
 
@@ -187,7 +187,7 @@ A marketplace order split across three sellers creates three stable allocation r
 
 Clearing exchanges and validates transaction information and determines obligations. Netting reduces multiple obligations to a smaller set of positions. Settlement discharges those obligations. Merchant funding and payout can occur on another schedule.
 
-![[Assets/System Design 101/d6f78f4ec016cfa7a08a83d29b3b45ed87fc423ef849968bac2af537cf2b7fa4.jpg]]
+![[Assets/Software Architecture/Software Architecture-Payment Systems-18120000-6.jpg]]
 
 For a captured `100.00 USD` payment with a `3.00 USD` processor fee:
 
@@ -213,7 +213,7 @@ Settlement is not payout. Provider funds can move from `pending` to `available`,
 
 Reconciliation compares independently produced intents, attempts, journals, PSP exports, settlement batches, payout reports, and bank statements. It detects errors that API idempotency cannot: missing callbacks, duplicate provider operations, fees on another date, late returns, and cut-off mismatches.
 
-![[Assets/System Design 101/324f75cc04635ee4a220ea741e4dd81b38c04660eb0ec99de9a952953fa1b777.jpg]]
+![[Assets/Software Architecture/Software Architecture-Payment Systems-18120000-2.jpg]]
 
 Use an owned break workflow:
 
@@ -249,7 +249,7 @@ Presentation direction does not determine whether the rail is debit, credit, car
 
 # Scan-to-Pay Example
 
-![[Assets/System Design 101/17273442bd87d4a601cec61990c96bd932a966ce9118ff90e92dd6c8a34fb0ca.png]]
+![[Assets/Software Architecture/Software Architecture-Payment Systems-18120000.png]]
 
 1. Checkout creates an expiring payment intent and signed QR payload.
 2. The wallet displays the canonical merchant and amount and obtains user authorization.

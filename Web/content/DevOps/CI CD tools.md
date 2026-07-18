@@ -1,8 +1,8 @@
 ---
 publish: true
 created: 2026-07-11T21:43:58.302Z
-modified: 2026-07-18T11:30:06.499Z
-published: 2026-07-18T11:30:06.499Z
+modified: 2026-07-18T11:59:15.658Z
+published: 2026-07-18T11:59:15.658Z
 topic:
   - DevOps
 subtopic: []
@@ -24,7 +24,7 @@ GitHub Actions, Azure Pipelines, and Jenkins are three representative choices fo
 
 Use one immutable artifact to make the boundary operational. A commit produces `checkout-api@sha256:8f31c20000000000000000000000000000000000000000000000000000000000`; CI compiles it, runs tests, scans dependencies, and publishes that exact digest. Continuous delivery promotes the same digest through staging and leaves production behind an approval gate. Continuous deployment removes that last human gate when automated checks, rollback, and on-call ownership are good enough. Rebuilding after approval breaks the evidence chain because production no longer runs the bytes that passed the earlier checks.
 
-![[Assets/System Design 101/f804ed9753569b53ead6d128845cb77c151b4b3482a716fd05ae267e1bb60175.png]]
+![[Assets/DevOps/DevOps-CI CD tools-18120000-2.png]]
 
 # Commit-to-Production Stages and Gates
 
@@ -37,7 +37,7 @@ Use one immutable artifact to make the boundary operational. A commit produces `
 
 Build-time checks prove properties of the artifact. Deployment-time checks prove the artifact can start and serve in a particular environment. Before promotion, record the previous digest, backward-compatible database state, rollback command, and the metric threshold that stops the rollout. A pipeline that cannot identify the running digest or reverse its last traffic change is not ready for unattended deployment.
 
-![[Assets/System Design 101/809457b84cae7c3fc6f3d613b0868c197439c85837613e6c3ed314485f4608a4.png]]
+![[Assets/DevOps/DevOps-CI CD tools-18120000-1.png]]
 
 # Netflix Delivery Pipeline Case Study
 
@@ -45,7 +45,7 @@ Netflix's published pipeline is useful as a historical trace, not a current tool
 
 The transferable rule is to separate packaging, rollout, analysis, and response. Adopt the named stack only when its operational cost fits; a smaller team can preserve the same boundaries with a container registry, a managed deployment service, an SLO query, and one paging system.
 
-![[Assets/System Design 101/150184c4075c71457db5a4e85b4cfc57410246975c11291af2560a7228efd2d5.png]]
+![[Assets/DevOps/DevOps-CI CD tools-18120000.png]]
 
 # GitHub Actions
 

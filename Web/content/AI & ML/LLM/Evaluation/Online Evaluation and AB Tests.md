@@ -1,8 +1,8 @@
 ---
 publish: true
 created: 2026-07-16T18:32:50.723Z
-modified: 2026-07-18T11:30:02.571Z
-published: 2026-07-18T11:30:02.571Z
+modified: 2026-07-18T11:59:15.652Z
+published: 2026-07-18T11:59:15.652Z
 topic:
   - AI & ML
 subtopic:
@@ -81,7 +81,7 @@ Monitoring catches provider updates, drift, and outages. Randomization estimates
 
 An experiment platform makes a randomized decision reproducible. Its control plane binds hypothesis, eligibility, assignment, exposure, metrics, and analysis rules to one immutable experiment version. Without that contract, a dashboard can compare users who were never exposed, move one user between variants, or recompute the primary metric under rules that did not exist when traffic ran.
 
-![[Assets/System Design 101/04eb4d4688ce484b8d1e506683ed1b40b71256783c43868e05d172234e7617ee.jpg]]
+![[Assets/AI & ML/AI & ML-Online Evaluation and AB Tests-18120000.jpg]]
 
 ## Configuration lifecycle
 

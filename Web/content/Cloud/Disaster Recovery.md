@@ -1,8 +1,8 @@
 ---
 publish: true
 created: 2026-07-16T07:10:34.939Z
-modified: 2026-07-18T11:30:03.318Z
-published: 2026-07-18T11:30:03.318Z
+modified: 2026-07-18T11:59:15.653Z
+published: 2026-07-18T11:59:15.653Z
 topic:
   - Cloud
 subtopic: []
@@ -36,7 +36,7 @@ A sound design usually combines them: replicas reduce outage duration, backups p
 
 # Strategy Traces
 
-![[Assets/System Design 101/7f4fad70b0565b06fef7b24377381758c0bd26d48ee573917ec03f70e7443eef.png]]
+![[Assets/Cloud/Cloud-Disaster Recovery-18120000.png]]
 
 ## Backup and Restore
 

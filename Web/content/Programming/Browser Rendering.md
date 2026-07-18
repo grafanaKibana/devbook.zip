@@ -1,8 +1,8 @@
 ---
 publish: true
 created: 2026-07-16T18:11:01.616Z
-modified: 2026-07-18T11:30:10.879Z
-published: 2026-07-18T11:30:10.879Z
+modified: 2026-07-18T11:59:15.664Z
+published: 2026-07-18T11:59:15.664Z
 topic:
   - Programming
 subtopic: []
@@ -24,7 +24,7 @@ Browser rendering is a dependency pipeline, not a one-time conversion of HTML in
 5. Paint records visual operations such as text, backgrounds, borders, and shadows. Rasterization turns those operations into pixels for one or more layers.
 6. Compositing assembles the layers in z-order and submits the frame for display. A transform or opacity animation can often reuse existing rasterized layers, while animating `width` usually returns to layout.
 
-![[Assets/System Design 101/c4e221a4e203ab9755bf392dbc00741c354a6040af1dd27336365ad9b6d7ab80.png]]
+![[Assets/Programming/Programming-Browser Rendering-18120000.png]]
 
 The diagram is a useful first-pass dependency order, not a sequence that runs exactly once. Modern engines pipeline work, render before every resource has arrived, and repeat style, layout, paint, raster, or compositing for the smallest invalidated region they can isolate.
 

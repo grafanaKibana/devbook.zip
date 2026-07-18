@@ -1,8 +1,8 @@
 ---
 publish: true
 created: 2026-07-15T08:54:36.059Z
-modified: 2026-07-18T11:30:06.358Z
-published: 2026-07-18T11:30:06.358Z
+modified: 2026-07-18T11:59:15.657Z
+published: 2026-07-18T11:59:15.657Z
 topic:
   - Data Persistence
 subtopic:
@@ -70,7 +70,7 @@ Asynchronous acknowledgement means the leader does not wait for a standby before
 
 Single-leader replication can offload reads only when routing preserves the request's contract. Writes, write-capable transactions, and unclassified work stay on the primary. An explicitly read-only transaction pins one eligible replica, while a read that must observe a prior commit uses the primary or a replica whose replay position has reached that commit token. A proxy can classify statements, but the application usually owns the causal requirement.
 
-![[Assets/System Design 101/fad9c0171b8080e840a469ddf29a9f82d932eb2687a8d62fdb013bf9c3014ece.png]]
+![[Assets/Data Persistence/Data Persistence-Replication-18120000-1.png]]
 
 The diagram shows the middleware topology, not the lag or transaction boundary. The routing contract is stricter:
 
@@ -97,7 +97,7 @@ replica  = 0/16B6D10  -> eligible
 
 WAL positions are ordered values, not strings to compare lexicographically. A later `pg_current_wal_lsn()` is a conservative token if concurrent commits advance it; `pg_last_wal_replay_lsn()` reports a standby's replay boundary.
 
-![[Assets/System Design 101/316dec0dba2634be6b17aa4254ec3ffe23cf58fa2964464e4bb956609f664728.png]]
+![[Assets/Data Persistence/Data Persistence-Replication-18120000.png]]
 
 The topology image still omits the causal condition: a replica is eligible for a read-after-write request only after replay reaches that request's token.
 

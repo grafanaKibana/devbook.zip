@@ -1,8 +1,8 @@
 ---
 publish: true
 created: 2026-07-11T21:47:07.438Z
-modified: 2026-07-18T11:30:06.595Z
-published: 2026-07-18T11:30:06.595Z
+modified: 2026-07-18T11:59:15.659Z
+published: 2026-07-18T11:59:15.659Z
 topic:
   - DevOps
 subtopic: []
@@ -112,7 +112,7 @@ spec:
 
 The application still owns graceful shutdown, readiness, idempotency, resource behavior, and data correctness. Kubernetes owns declared scheduling and reconciliation. For example, a retrying Job can execute a payment twice unless the handler supplies an idempotency key; no controller pattern repairs that application contract.
 
-![[Assets/System Design 101/ff0fd16f200a584a387f01419836e0a53423563e36655d15a092756d679a1a64.png]]
+![[Assets/DevOps/DevOps-Kubernetes-18120000-1.png]]
 
 # Service Exposure
 
@@ -120,7 +120,7 @@ The application still owns graceful shutdown, readiness, idempotency, resource b
 
 Use ClusterIP for service-to-service traffic. Use LoadBalancer for a small number of direct L4 entry points. Use Ingress or Gateway API when many HTTP services need shared TLS, host/path routing, and policy. Check health-check behavior, source-IP preservation, network boundaries, and provider cost; a Service type alone does not define those semantics. ExternalName can surprise clients that validate the original hostname or do not handle CNAMEs as expected.
 
-![[Assets/System Design 101/fe9b9f07a89e5640074e47e05dc2d3600a5ab8406b147a7934590a0f326d7af7.png]]
+![[Assets/DevOps/DevOps-Kubernetes-18120000.png]]
 
 > [!WARNING] Non-normative source visual
 > The `ExternalName` panel is incorrect: an `ExternalName` Service returns a DNS CNAME and has no selector, EndpointSlices, or data-plane proxy to Pods. The other panels are conceptual summaries; provider integrations still determine the external load-balancer path.

@@ -1,8 +1,8 @@
 ---
 publish: true
 created: 2026-07-18T08:26:04.118Z
-modified: 2026-07-18T11:30:07.069Z
-published: 2026-07-18T11:30:07.069Z
+modified: 2026-07-18T11:59:15.661Z
+published: 2026-07-18T11:59:15.661Z
 topic:
   - Networks
 subtopic:
@@ -18,7 +18,7 @@ A proxy terminates one connection and opens another on behalf of a represented p
 
 For concrete implementation patterns and configuration tradeoffs, see [[Nginx]].
 
-![[Assets/System Design 101/0f72173713c3c8ef79a66db657ea539fb25b758b396d5561f28e7728e28bf1ff.png]]
+![[Assets/Networks/Networks-Forward and Reverse Proxies-18120000.png]]
 
 # Trust and Scope
 

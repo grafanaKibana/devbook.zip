@@ -1,8 +1,8 @@
 ---
 publish: true
 created: 2026-07-16T18:15:23.600Z
-modified: 2026-07-18T11:30:05.955Z
-published: 2026-07-18T11:30:05.955Z
+modified: 2026-07-18T11:59:15.655Z
+published: 2026-07-18T11:59:15.655Z
 topic:
   - Computer Science
 subtopic:
@@ -16,7 +16,7 @@ status: Creation
 
 A process is a resource and isolation boundary. It owns a virtual address space, credentials, and references to kernel objects such as file descriptors. A thread is a schedulable execution context inside that process: it has its own instruction pointer, register state, and stack while sharing the process's code, heap, and open resources with peer threads.
 
-![[Assets/System Design 101/3581c2ad15495200f20850f0056513ac93cd5c037e22209d35d3b4bdcccef580.png]]
+![[Assets/Computer Science/Computer Science-Processes and Threads-18120000.png]]
 
 A program is executable code on storage; executing it creates or replaces a process image; one or more threads run that image. The visual captures that relationship, while the operating-system details below define the boundaries.
 

@@ -1,8 +1,8 @@
 ---
 publish: true
 created: 2026-07-15T11:47:57.137Z
-modified: 2026-07-18T11:38:38.735Z
-published: 2026-07-18T11:38:38.735Z
+modified: 2026-07-18T11:59:15.672Z
+published: 2026-07-18T11:59:15.672Z
 topic:
   - Software Architecture
 subtopic:
@@ -154,7 +154,7 @@ The outbox closes a local database-to-broker gap. It does not turn the broker an
 
 # Governance and data pipelines
 
-![[Assets/System Design 101/f24452c55f5c2b1ab8dd95a948c020cece30080b79520b91667967513014c20e.png]]
+![[Assets/Software Architecture/Software Architecture-Event-Driven Architecture-18120000-1.png]]
 
 The governance visual is one organization-specific topology. The reusable boundary is centralized compatibility and telemetry guardrails with domain-owned event meaning:
 
@@ -166,7 +166,7 @@ The governance visual is one organization-specific topology. The reusable bounda
 
 For `MenuItemPriceChanged`, the Restaurant domain owns semantics and its producer SLO. CI checks the schema against the registry. Regional brokers keep local consumers running during a remote outage; a global consumer accepts delayed and duplicate replicated events. [[Software Architecture/Distributed Systems/Event Schema Evolution]] covers compatibility across retained messages and independently deployed consumers.
 
-![[Assets/System Design 101/95696d28879b34b489342eb0f5aabbfa21c5929f6a13785fe1ea91712ad2dac8.png]]
+![[Assets/Software Architecture/Software Architecture-Event-Driven Architecture-18120000.png]]
 
 The pipeline visual names conceptual stages; real batch and streaming paths can combine or skip them. Trace `checkout-42` through the reusable stages:
 

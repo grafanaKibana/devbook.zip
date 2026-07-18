@@ -1,8 +1,8 @@
 ---
 publish: true
 created: 2026-07-15T11:47:56.936Z
-modified: 2026-07-18T11:38:38.740Z
-published: 2026-07-18T11:38:38.740Z
+modified: 2026-07-18T11:59:15.670Z
+published: 2026-07-18T11:59:15.670Z
 tags:
   - FolderNote
 topic:
@@ -51,7 +51,7 @@ Concrete interview lens: if checkout traffic grows from 1,000 RPS to 10,000 RPS,
 
 # Measurement and bottleneck migration
 
-![[Assets/System Design 101/78cc77c1ac6e94aa62c92b43e52db37d4c4d1fd6a999cbb7ce4f21e2ad845c43.png]]
+![[Assets/Software Architecture/Software Architecture-Scalability Patterns-18120000.png]]
 
 The strategies in the visual solve different measured bottlenecks; they are not a checklist. Use an explicit measurement contract:
 
