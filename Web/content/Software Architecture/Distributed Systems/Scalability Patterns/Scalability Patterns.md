@@ -1,8 +1,8 @@
 ---
 publish: true
 created: 2026-07-15T11:47:56.936Z
-modified: 2026-07-16T17:10:51.002Z
-published: 2026-07-16T17:10:51.002Z
+modified: 2026-07-18T07:07:48.132Z
+published: 2026-07-18T07:07:48.132Z
 tags:
   - FolderNote
 topic:
@@ -11,7 +11,7 @@ subtopic:
   - Distributed Systems
 summary: A system's ability to keep serving requests as load grows by adding resources.
 level:
-  - "2"
+  - "3"
 priority: High
 status: Creation
 ---
@@ -121,12 +121,6 @@ flowchart TD
 > - Mention consistency behavior: replicas have lag; CQRS read models are eventually consistent by design.
 > - Mention complexity: replicas are simpler operationally than full CQRS/event projection pipelines.
 >   **Why this is strong:** It balances architecture fit, consistency, and operational cost.
-
-## Links
-
-- [[Horizontal Scaling]]
-- [[Scalability Operations]]
-- [[Vertical Scaling]]
 
 ## References
 

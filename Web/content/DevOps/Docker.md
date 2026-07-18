@@ -1,8 +1,8 @@
 ---
 publish: true
 created: 2026-07-11T21:47:05.936Z
-modified: 2026-07-16T12:34:48.046Z
-published: 2026-07-16T12:34:48.046Z
+modified: 2026-07-17T05:53:58.469Z
+published: 2026-07-17T05:53:58.469Z
 topic:
   - DevOps
 subtopic: []
@@ -13,18 +13,15 @@ priority: High
 status: Ready to Repeat
 ---
 
-# Docker
+# Intro
 
-Docker packages an application and its dependencies into a container — an isolated process that runs identically across dev, CI, and production. The core value is eliminating environment drift: if it runs in the container locally, it runs the same way in production. Docker is the de facto standard for containerizing .NET applications before deploying to Kubernetes or Azure Container Apps.
+Docker builds OCI-compatible images and runs containers from them. Pinning the application, runtime, and filesystem reduces environment drift, but it does not guarantee identical behavior across development, CI, and production. The host kernel and CPU architecture, resource limits, network and DNS path, mounts, injected configuration and secrets, security policy, and external dependencies remain part of the runtime contract.
 
 ## How Containers Work
 
-A container is not a VM. It is a process on the host OS that uses two Linux kernel features:
+A container is not a VM. A Linux container is a host process isolated with Linux namespaces and constrained through cgroups. Docker can also run Windows containers, which use Windows kernel isolation mechanisms, and Docker Desktop commonly runs Linux containers inside a Linux VM on macOS or Windows. An image must match the target OS and CPU architecture unless a multi-platform manifest supplies a compatible variant.
 
-- **Namespaces**: isolate what the process can see (filesystem, network, PIDs, users)
-- **cgroups**: limit what the process can use (CPU, memory, I/O)
-
-A Docker **image** is a read-only layered filesystem built from a `Dockerfile`. Each instruction (`FROM`, `COPY`, `RUN`) adds a layer. Layers are cached and shared across images, so a base layer (e.g., `mcr.microsoft.com/dotnet/aspnet:8.0`) is downloaded once and reused.
+A Docker **image** combines filesystem layers with image configuration. Filesystem-changing build instructions such as `RUN`, `COPY`, and `ADD` produce layer changes; metadata instructions such as `CMD`, `ENTRYPOINT`, and `ENV` update image configuration and do not each imply a new filesystem payload. BuildKit can also reuse cached results without making "one Dockerfile line equals one stored layer" a safe mental model.
 
 A **container** is a running instance of an image. Multiple containers can run from the same image simultaneously, each with its own writable layer.
 
@@ -50,7 +47,7 @@ EXPOSE 8080
 ENTRYPOINT ["dotnet", "MyApp.dll"]
 ```
 
-The SDK image (~800MB) is used only for building. The final image uses the ASP.NET runtime (~200MB). The published artifact is copied between stages.
+The SDK stage contains compilers and build tooling. The final stage starts from the ASP.NET runtime image and receives only the published output, so build-only tools are absent from the runtime image. Measure the resulting digest for the selected tag and architecture; image sizes change across .NET versions, base variants, and platforms.
 
 ## Reproducible and Least-Privilege Images
 
@@ -147,7 +144,7 @@ volumes:
 
 **Secrets in image layers or tracked configuration**: `ENV MY_SECRET=abc`, a literal connection string in Compose, or a committed `appsettings` password leaves recoverable credentials in image or Git history. Keep ordinary configuration in environment variables, but mount credentials at runtime from Docker secrets or a platform secret-provider volume. Keep the source secret files out of Git.
 
-**Image bloat**: Including the SDK in the final image adds ~600MB unnecessarily. Fix: always use multi-stage builds. Also use `.dockerignore` to exclude `bin/`, `obj/`, `.git/` from the build context.
+**Image bloat**: Shipping the SDK and build context in the runtime image adds tools and bytes that production does not need. Use a multi-stage build when build-time and runtime dependencies differ, and use `.dockerignore` to exclude `bin/`, `obj/`, `.git/`, and local artifacts from the build context. Verify the final image contents and size instead of relying on a generic reduction percentage.
 
 **State tied to one container**: A container's writable layer survives a stop and start of that same container, but it is deleted when the container is removed and does not follow a replacement container. Use volumes or bind mounts for database files and other durable state that must survive redeployment.
 
@@ -164,15 +161,15 @@ volumes:
 
 **Docker vs Podman**: Docker has the broader Compose, Build, Desktop, and integration ecosystem. Podman uses a daemonless architecture and supports rootless workflows, with a Docker-compatible CLI and API where the required features are implemented. For Linux containers, choose the workflow your build and deployment tooling actually supports. For Windows containers, validate a Windows-capable runtime and orchestrator stack; Docker is one option, not the container contract.
 
-**Docker Compose vs Kubernetes**: Compose is for local development and simple single-host deployments. Kubernetes is for production multi-node orchestration. Do not use Compose in production for anything that needs scaling, rolling updates, or self-healing.
+**Docker Compose vs Kubernetes**: Compose is a good fit for local development and can run bounded single-host production workloads when host failure, manual rollout, and limited orchestration are acceptable. Kubernetes fits multi-node workloads that need scheduling, controlled rollout, autoscaling, and reconciliation. Compose is not an HA orchestrator; the boundary is the workload requirement, not the word "production."
 
 ## Questions
 
 > [!QUESTION]- Why use multi-stage builds for .NET applications?
 >
-> - The .NET SDK image (~800MB) includes compilers and build tools not needed at runtime.
-> - The ASP.NET runtime image (~200MB) is sufficient for running the published app.
-> - Multi-stage builds copy only the published output to the final image, reducing size by ~75%.
+> - The .NET SDK stage includes compilers and build tools that the running application usually does not need.
+> - The runtime stage can start from the ASP.NET runtime image and copy only the published output.
+> - This separates build credentials and tooling from the production filesystem and usually reduces transfer and scan surface; measure the actual result for the chosen tags and architecture.
 > - Smaller images mean faster pulls, less attack surface, and lower registry storage costs.
 > - Cost: slightly more complex Dockerfile; worth it for any production workload.
 

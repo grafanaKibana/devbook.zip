@@ -1,8 +1,8 @@
 ---
 publish: true
 created: 2026-07-16T07:57:59.530Z
-modified: 2026-07-16T07:57:59.531Z
-published: 2026-07-16T07:57:59.531Z
+modified: 2026-07-17T05:44:58.243Z
+published: 2026-07-17T05:44:58.243Z
 topic:
   - Data Persistence
 subtopic: []
@@ -13,9 +13,9 @@ priority: Medium
 status: Ready to Repeat
 ---
 
-# Serverless Databases
+# Intro
 
-A serverless database is a managed database whose compute capacity adjusts within configured bounds and is billed from measured usage rather than one permanently sized instance. "Serverless" removes capacity provisioning from the application team; it does not remove servers, schema design, query plans, connections, transactions, backups, or service limits.
+This note uses **serverless database** in the narrower managed relational sense represented by Aurora Serverless v2 and Azure SQL Database serverless: compute capacity adjusts within configured bounds while the service preserves a SQL engine and separately managed storage. The broader label also covers products with different architectures, including request-billed document and key-value databases; their partitioning, consistency, transaction, and scaling contracts must be evaluated separately. "Serverless" removes some capacity provisioning from the application team; it does not remove servers, schema design, query plans, connections, transactions, backups, or service limits.
 
 Use it for variable or intermittent demand when idle capacity would dominate the bill. Prefer provisioned capacity for a steady high baseline, latency-sensitive traffic that cannot absorb scale or resume delay, or a workload whose connection and memory working set must remain warm.
 

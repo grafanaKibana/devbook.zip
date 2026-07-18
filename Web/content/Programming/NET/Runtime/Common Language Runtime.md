@@ -1,8 +1,8 @@
 ---
 publish: true
 created: 2026-07-15T06:02:06.813Z
-modified: 2026-07-15T06:02:06.813Z
-published: 2026-07-15T06:02:06.813Z
+modified: 2026-07-17T19:00:25.971Z
+published: 2026-07-17T19:00:25.971Z
 topic:
   - Programming
 subtopic:
@@ -140,7 +140,7 @@ The CLR defines a memory model that governs how writes become visible across thr
 > [!QUESTION]- Why does the GC use generations?
 > Most objects die young (short-lived allocations like request-scoped objects). Generational GC exploits this by collecting Gen 0 (newest, smallest) most frequently and cheaply. Long-lived objects are promoted to Gen 1 and Gen 2, which are collected less often. This reduces the cost of GC for the common case while still reclaiming long-lived garbage.
 
-## Links
+## References
 
 - [Common Language Runtime (CLR) overview — Microsoft Learn](https://learn.microsoft.com/en-us/dotnet/standard/clr) — official overview of CLR responsibilities, managed execution, and assembly loading.
 - [.NET Runtime architecture — Microsoft Learn](https://learn.microsoft.com/en-us/dotnet/core/introduction) — covers the relationship between CLR, BCL, and the SDK.

@@ -1,8 +1,8 @@
 ---
 publish: true
 created: 2026-07-11T21:45:56.970Z
-modified: 2026-07-11T21:45:56.971Z
-published: 2026-07-11T21:45:56.971Z
+modified: 2026-07-17T19:00:24.756Z
+published: 2026-07-17T19:00:24.756Z
 topic:
   - Programming
 subtopic:
@@ -115,7 +115,7 @@ For hot paths, avoid materializing intermediate strings:
 > - Use culture-aware comparison only for user-facing natural-language text where locale behavior is expected.
 > - Keep the comparison policy explicit and consistent across reads/writes to avoid cross-locale bugs.
 
-## Links
+## References
 
 - [System.String class](https://learn.microsoft.com/en-us/dotnet/api/system.string) - API reference and core behavior.
 - [How to: Use StringBuilder in C#](https://learn.microsoft.com/en-us/dotnet/standard/base-types/stringbuilder) - Official guidance for incremental text construction.

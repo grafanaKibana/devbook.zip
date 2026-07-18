@@ -1,8 +1,8 @@
 ---
 publish: true
 created: 2026-07-11T21:47:09.440Z
-modified: 2026-07-16T11:20:32.083Z
-published: 2026-07-16T11:20:32.083Z
+modified: 2026-07-17T06:07:17.559Z
+published: 2026-07-17T06:07:17.559Z
 topic:
   - DevOps
 subtopic: []
@@ -120,7 +120,9 @@ The source visual for this comparison was rejected because its topology did not 
 
 ## Collection-to-Action Pipeline
 
-Telemetry moves through six boundaries: emit, collect, buffer/transform, store, query, and act. The application emits a stable schema; an agent or OpenTelemetry Collector batches and retries; the backend enforces retention and indexing; queries power dashboards and alerts; automation creates a ticket, pages an owner, or applies a safe remediation. Backpressure belongs at collectors and buffers, not in the request path. A queue protects against a short backend outage, but once full it must shed telemetry rather than take production down.
+Telemetry moves through six boundaries: emit, collect, buffer/transform, store, query, and act. The application emits a stable schema; an agent or OpenTelemetry Collector batches and retries; the backend enforces retention and indexing; queries power dashboards and alerts; automation creates a ticket, pages an owner, or applies a safe remediation. Best-effort diagnostic telemetry should apply backpressure at collectors and buffers, then sample or shed according to an explicit priority policy rather than take the production request path down.
+
+Audit, security, financial, or regulatory records can be part of a durable or fail-closed business contract rather than disposable telemetry. Route those records through a separately capacity-planned durable log or transaction/outbox path, define acknowledgement and recovery semantics, and fail the protected operation when policy requires the record to be retained. Do not silently drop them under the generic telemetry-shedding rule.
 
 Choose retention by investigation window and compliance, not habit. Make alert ownership explicit and alert on a user-visible symptom or an exhausted error budget. A dashboard with no decision or owner is decoration.
 
@@ -139,9 +141,9 @@ Use pull as the default for long-running discoverable services. Use push when to
 
 ## Focused Runbooks and Implementation
 
-Use [[CPU Saturation Runbook]] to separate utilization, runnable work, I/O wait, cgroup throttling, allocation pressure, and hot code before changing capacity. It includes a bounded Linux and .NET evidence sequence and keeps the rejected source visual out of the diagnostic model.
+Use [[DevOps/CPU Saturation Runbook|CPU Saturation Runbook]] to separate utilization, runnable work, I/O wait, cgroup throttling, allocation pressure, and hot code before changing capacity. It includes a bounded Linux and .NET evidence sequence and keeps the rejected source visual out of the diagnostic model.
 
-Use [[NET Observability]] for OpenTelemetry registration, ASP.NET Core instrumentation, custom `Meter` and `ActivitySource` signals, Prometheus or OTLP export, and structured logging examples. Keep signal names and bounded dimensions stable so the backend remains replaceable.
+Use [[DevOps/NET Observability|NET Observability]] for OpenTelemetry registration, ASP.NET Core instrumentation, custom `Meter` and `ActivitySource` signals, Prometheus or OTLP export, and structured logging examples. Keep signal names and bounded dimensions stable so the backend remains replaceable.
 
 ## Pitfalls
 
@@ -189,11 +191,11 @@ If thresholds are too sensitive or static, teams get constant false positives an
 
 ## References
 
-- [OpenTelemetry for .NET (official docs)](https://opentelemetry.io/docs/languages/dotnet/)
-- [ASP.NET Core observability example with OpenTelemetry and Prometheus (Microsoft Learn)](https://learn.microsoft.com/dotnet/core/diagnostics/observability-prgrja-example)
-- [W3C Trace Context (traceparent and tracestate)](https://www.w3.org/TR/trace-context/)
-- [Prometheus ASP.NET Core exporter README (OpenTelemetry .NET)](https://github.com/open-telemetry/opentelemetry-dotnet/tree/main/src/OpenTelemetry.Exporter.Prometheus.AspNetCore)
-- [Google SRE Book: Monitoring Distributed Systems (practitioner)](https://sre.google/sre-book/monitoring-distributed-systems/)
+- [OpenTelemetry for .NET (official docs)](https://opentelemetry.io/docs/languages/dotnet/) — documents the .NET SDK, instrumentation, exporters, and signal-specific setup.
+- [ASP.NET Core observability example with OpenTelemetry and Prometheus (Microsoft Learn)](https://learn.microsoft.com/dotnet/core/diagnostics/observability-prgrja-example) — supplies an end-to-end .NET metrics and tracing example with Prometheus collection.
+- [W3C Trace Context](https://www.w3.org/TR/trace-context/) — defines the interoperable `traceparent` and `tracestate` headers used for cross-service correlation.
+- [Prometheus ASP.NET Core exporter README (OpenTelemetry .NET)](https://github.com/open-telemetry/opentelemetry-dotnet/tree/main/src/OpenTelemetry.Exporter.Prometheus.AspNetCore) — documents the exporter endpoint, registration, and hosting constraints for ASP.NET Core.
+- [Google SRE Book — Monitoring Distributed Systems](https://sre.google/sre-book/monitoring-distributed-systems/) — grounds alerting and dashboard design in user-visible symptoms, actionable signals, and the four golden signals.
 - [OpenTelemetry signals](https://opentelemetry.io/docs/concepts/signals/) — official definitions and relationships for traces, metrics, and logs.
 - [Prometheus: when to use the Pushgateway](https://prometheus.io/docs/practices/pushing/) — official limits and lifecycle risks of pushed metrics.
 - [OpenTelemetry Collector](https://opentelemetry.io/docs/collector/) — official receive, process, and export pipeline boundaries.

@@ -1,8 +1,8 @@
 ---
 publish: true
 created: 2026-07-12T14:27:20.431Z
-modified: 2026-07-16T07:40:32.108Z
-published: 2026-07-16T07:40:32.108Z
+modified: 2026-07-18T07:07:48.133Z
+published: 2026-07-18T07:07:48.133Z
 tags:
   - FolderNote
 icon: network
@@ -15,7 +15,7 @@ summary: Protocols, latency, and reliability of how machines communicate over a 
 priority: High
 level:
   - "3"
-status: Done
+status: Creation
 ---
 
 # Intro
@@ -51,10 +51,6 @@ The destination address determines who may receive an IP packet. The transport p
 Anycast is not "send to every copy." Routing selects one current path, and a path change can move later packets to another site. Stateful services therefore keep sessions short, replicate state, or terminate behind a stable edge. Multicast is the opposite cardinality: routers replicate packets toward joined receivers, but membership and multicast routing must exist end to end. IPv6 has multicast and anycast, but no broadcast; Neighbor Discovery and service discovery use scoped multicast instead.
 
 The useful diagnostic question is "who owns this destination?" A unicast outage is usually endpoint or route specific. Broadcast trouble stays inside a link. Multicast can fail because receivers never joined or routers lack multicast state. Anycast can fail only from some networks because BGP selected a bad advertisement.
-
-## Links
-
-- [[Network Data Path]]
 
 ## Questions
 

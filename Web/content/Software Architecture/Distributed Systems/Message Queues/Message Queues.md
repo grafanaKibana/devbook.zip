@@ -1,8 +1,8 @@
 ---
 publish: true
 created: 2026-07-15T11:47:56.398Z
-modified: 2026-07-16T17:12:23.081Z
-published: 2026-07-16T17:12:23.081Z
+modified: 2026-07-18T07:07:48.133Z
+published: 2026-07-18T07:07:48.133Z
 tags:
   - FolderNote
 topic:
@@ -12,7 +12,7 @@ subtopic:
 summary: Message queues decouple producers from consumers by buffering messages until consumers are ready, absorbing spikes and isolating failures.
 priority: High
 level:
-  - "2"
+  - "3"
 status: Done
 ---
 
@@ -210,16 +210,6 @@ Choose from replay, routing, ordering, delivery, retention, managed-service, and
   - Consumer lag or unacked in-flight count.
   - DLQ rate and retry rate.
   - End-to-end processing latency and failure ratio.
-
-## Links
-
-- [[Kafka]]
-- [[Kafka in NET]]
-- [[Kafka Schema Evolution]]
-- [[Message Broker Selection]]
-- [[MSMQ]]
-- [[NET Message Queue Workers]]
-- [[RabbitMQ]]
 
 ## References
 

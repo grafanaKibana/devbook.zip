@@ -1,19 +1,18 @@
 ---
 publish: true
 created: 2026-07-16T07:10:34.939Z
-modified: 2026-07-16T07:10:34.939Z
-published: 2026-07-16T07:10:34.939Z
+modified: 2026-07-17T05:56:46.172Z
+published: 2026-07-17T05:56:46.172Z
 topic:
   - Cloud
-subtopic:
-  - Cloud
+subtopic: []
 level:
   - "2"
 priority: High
 status: Ready to Repeat
 ---
 
-# Disaster Recovery
+# Intro
 
 Disaster recovery (DR) is the tested ability to restore a business flow after a severe failure, corruption event, or regional outage. Start with the business limit, not a topology. If checkout may lose at most 10 minutes of accepted orders and must return within 45 minutes, its recovery point objective is 10 minutes and its recovery time objective is 45 minutes. Those targets determine replication, backup frequency, standby capacity, automation, and cost.
 

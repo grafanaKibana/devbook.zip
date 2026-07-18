@@ -1,8 +1,8 @@
 ---
 publish: true
 created: 2026-07-11T21:45:19.765Z
-modified: 2026-07-11T21:45:19.766Z
-published: 2026-07-11T21:45:19.766Z
+modified: 2026-07-17T19:00:23.416Z
+published: 2026-07-17T19:00:23.416Z
 topic:
   - Programming
 subtopic:
@@ -124,7 +124,7 @@ To reach **private members**, the old way is `BindingFlags.NonPublic` (slow, bre
 > Prefer interfaces/generics when contracts are known at compile time because they provide stronger safety and better performance.
 > Prefer source generators in reflection-heavy infrastructure when you need predictable startup, high throughput, or trim/AOT compatibility.
 
-## Links
+## References
 
 - [Reflection overview (.NET)](https://learn.microsoft.com/dotnet/fundamentals/reflection/overview) - Official conceptual model and API surface summary.
 - [Reflection and attributes (C#)](https://learn.microsoft.com/dotnet/csharp/advanced-topics/reflection-and-attributes/) - Attribute-focused usage patterns in C# code.

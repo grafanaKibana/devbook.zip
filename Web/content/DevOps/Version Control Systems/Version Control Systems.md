@@ -1,8 +1,8 @@
 ---
 publish: true
 created: 2026-07-11T21:42:28.457Z
-modified: 2026-07-16T11:18:03.672Z
-published: 2026-07-16T11:18:03.672Z
+modified: 2026-07-17T06:07:17.844Z
+published: 2026-07-17T06:07:17.844Z
 tags:
   - FolderNote
 topic:
@@ -18,8 +18,9 @@ status: Creation
 
 # Intro
 
-A version control system (VCS) tracks changes to files over time, enabling collaboration, branching, merging, and the ability to revert to any previous state.
-Git is the dominant distributed VCS, where every developer holds a full copy of the repository history, and workflows like git-flow or trunk-based development define how teams coordinate changes.
+A version control system (VCS) records committed versions of tracked files so collaborators can branch, merge, compare, and restore states that exist in the repository history. It cannot recover an untracked file or an uncommitted edit that was never captured by Git, and local recovery records such as the reflog expire.
+
+Git is a distributed VCS: a normal clone receives the objects reachable from the refs it fetches, while shallow clones intentionally omit older history and partial clones can defer selected objects until needed. Workflows such as GitFlow or trunk-based development define how teams coordinate changes; they are conventions layered on Git rather than properties of its object model.
 
 ## Working Tree, Index, Repository, and Remote
 
@@ -93,10 +94,10 @@ Compatibility needs evidence: API diff, consumer tests, migration checks, and a 
 
 ## References
 
-- [Pro Git book](https://git-scm.com/book/en/v2)
-- [Branching workflows](https://git-scm.com/book/en/v2/Git-Branching-Branching-Workflows)
-- [Trunk based development](https://trunkbaseddevelopment.com/)
-- [git-flow cheatsheet](https://danielkummer.github.io/git-flow-cheatsheet/index.ru_RU.html)
+- [Pro Git book](https://git-scm.com/book/en/v2) — explains Git's object model, index, refs, remotes, and everyday state transitions.
+- [Pro Git — Branching Workflows](https://git-scm.com/book/en/v2/Git-Branching-Branching-Workflows) — compares long-running, topic, and integration branches as collaboration conventions layered on Git.
+- [Trunk Based Development](https://trunkbaseddevelopment.com/) — documents frequent trunk integration, short-lived branches, and incremental release techniques.
+- [git-flow cheatsheet](https://danielkummer.github.io/git-flow-cheatsheet/index.ru_RU.html) — provides the concrete command sequence for GitFlow feature, release, and hotfix branches.
 - [Git glossary](https://git-scm.com/docs/gitglossary) — official definitions for objects, refs, index, working tree, and remote-tracking branches.
 - [Git partial clone](https://git-scm.com/docs/partial-clone) — official object filtering behavior and limitations.
 - [Semantic Versioning 2.0.0](https://semver.org/spec/v2.0.0.html) — normative precedence and compatibility contract.

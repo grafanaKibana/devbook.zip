@@ -1,8 +1,8 @@
 ---
 publish: true
 created: 2026-07-11T21:45:58.836Z
-modified: 2026-07-11T21:45:58.837Z
-published: 2026-07-11T21:45:58.837Z
+modified: 2026-07-17T19:00:24.975Z
+published: 2026-07-17T19:00:24.975Z
 topic:
   - Programming
 subtopic:
@@ -211,7 +211,7 @@ Mark structs `readonly` to make this class of bug impossible.
 > - Using such structs as keys in dictionaries/sets amplifies the cost because equality and hashing are called frequently.
 > - Implement `IEquatable<T>` and override `Equals`/`GetHashCode` to define stable semantics and avoid hidden performance costs.
 
-## Links
+## References
 
 - [Structure types - C# reference](https://learn.microsoft.com/dotnet/csharp/language-reference/builtin-types/struct) - Core language rules and constraints.
 - [ref struct types - C# reference](https://learn.microsoft.com/dotnet/csharp/language-reference/builtin-types/ref-struct) - Stack-only semantics and restrictions.

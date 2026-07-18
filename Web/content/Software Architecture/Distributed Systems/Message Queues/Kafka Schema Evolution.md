@@ -1,8 +1,8 @@
 ---
 publish: true
 created: 2026-07-16T16:57:19.930Z
-modified: 2026-07-16T16:57:19.930Z
-published: 2026-07-16T16:57:19.930Z
+modified: 2026-07-17T09:22:57.195Z
+published: 2026-07-17T09:22:57.195Z
 topic:
   - Software Architecture
 subtopic:
@@ -16,7 +16,7 @@ status: Ready to Repeat
 
 # Intro
 
-Kafka retains records, so a schema change must work not only with today's producers and consumers but also with old data replayed months later. A schema registry records versions and enforces a compatibility policy before deployment. Avro commonly resolves a writer schema stored with the record against the reader schema used by the consumer.
+Kafka retains records, so a schema change must work not only with today's producers and consumers but also with old data replayed months later. A schema registry records versions and enforces a compatibility policy before deployment. Registry-aware serializers attach a schema identifier to each record rather than embedding the full schema: Confluent's wire format uses a magic byte followed by a four-byte schema ID, while newer header mode carries a schema GUID in Kafka headers. The consumer extracts that ID or GUID, resolves and caches the writer schema from the registry, then Avro reconciles it with the consumer's reader schema.
 
 ## Writer and reader schemas
 
@@ -34,6 +34,8 @@ Version two adds an optional field with a default:
 
 An old record remains readable by the new consumer because the reader supplies the default. A new record can remain readable by an old consumer when the reader ignores fields it does not know. Renaming or changing the type of `orderId` is breaking unless aliases or a migration strategy preserve resolution.
 
+The lookup is part of the deserialize path, but it should not become a registry call per message. Client serializers and deserializers cache schemas by identifier; after the first lookup, records using the same writer schema resolve locally. Registry availability still matters for cold consumers and newly introduced schema versions, so deploy and failure-test it as shared messaging infrastructure.
+
 ## Compatibility policy
 
 - **Backward:** new consumers can read records produced by the prior schema.
@@ -47,4 +49,4 @@ Use full transitive compatibility for long-retained contracts when independent c
 
 - [Apache Avro specification: schema resolution](https://avro.apache.org/docs/current/specification/#schema-resolution) — primary writer/reader resolution rules and defaults.
 - [Confluent Schema Registry compatibility](https://docs.confluent.io/platform/current/schema-registry/fundamentals/schema-evolution.html) — official compatibility modes and operational examples.
-- [Apache Kafka protocol serialization](https://kafka.apache.org/documentation/#serialization) — official producer and consumer serialization boundary.
+- [Confluent serializers and wire format](https://docs.confluent.io/platform/current/schema-registry/fundamentals/serdes-develop/overview.html) — official schema ID/GUID placement, writer-schema lookup, and serializer/deserializer behavior.

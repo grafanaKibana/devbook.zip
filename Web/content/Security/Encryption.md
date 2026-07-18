@@ -1,8 +1,8 @@
 ---
 publish: true
 created: 2026-07-11T21:48:33.493Z
-modified: 2026-07-16T08:59:28.498Z
-published: 2026-07-16T08:59:28.498Z
+modified: 2026-07-17T05:46:26.501Z
+published: 2026-07-17T05:46:26.501Z
 topic:
   - Security
 subtopic:
@@ -16,7 +16,7 @@ status: Ready to Repeat
 
 # Encryption
 
-Encryption transforms readable data (plaintext) into ciphertext using a key. Only parties with the decryption key should recover it. Encryption by itself targets confidentiality; modern authenticated encryption also detects ciphertext or authenticated-metadata tampering. It does not attribute a message to a public identity—the job of a [[Digital Signature]]. In .NET, these operations live under `System.Security.Cryptography`.
+Encryption transforms readable data (plaintext) into ciphertext using a key. Only parties with the decryption key should recover it. Encryption by itself targets confidentiality; modern authenticated encryption also detects ciphertext or authenticated-metadata tampering. It does not attribute a message to a public identity—the job of a [[Security/Digital Signature|digital signature]]. In .NET, these operations live under `System.Security.Cryptography`.
 
 ## Symmetric, Public-Key, and Hybrid Cryptography
 
@@ -44,18 +44,11 @@ aes.Encrypt(nonce, plaintext, ciphertext, tag);
 
 Hybrid or envelope encryption uses a random data-encryption key for the payload and protects that key with a key-encryption key or recipient public key. The payload stays on the fast symmetric path, while recipients and rotation operate on small wrapped keys. Public-key cryptography does not remove key management: the system still has to authenticate public keys, protect private keys, and preserve old decryption keys for retained ciphertext. Algorithm agility requires versioned ciphertext metadata, an approved-algorithm policy, and a tested migration path; it must not let untrusted input select any installed primitive.
 
-## Hashing Is Not Encryption (and Password Storage)
+## Hashing Is Not Encryption
 
-The single most common crypto confusion: **encryption is reversible** (you hold a key and _decrypt_ back to plaintext); a **cryptographic hash is one-way** (SHA-256 — no key, no way to "un-hash"). Encoding (Base64) is _neither_ — reversible with no secret at all, so it gives **zero** confidentiality. Pick by intent: confidentiality → encrypt; integrity/fingerprint → hash; "make it ASCII-safe" → encode.
+Encryption is reversible with a decryption key; a cryptographic hash is one-way, and encoding such as Base64 is reversible without any secret. Pick by intent: confidentiality → encryption; integrity or fingerprinting → hashing; transport representation → encoding. Password verifiers need a purpose-built, salted password-hashing scheme rather than encryption or a fast general-purpose hash; [[Security/Password Storage|Password Storage]] covers the algorithms and migration policy.
 
-**Passwords must be _hashed_, never encrypted.** Encrypt them and a leaked key exposes every password; a one-way hash can't be reversed even if stolen. But a _fast_ hash (SHA-256) is brute-forceable at billions/sec, so use a **slow, salted password hash** built for it: **Argon2** (preferred), **bcrypt**, or **PBKDF2**. The per-user salt defeats rainbow tables; the deliberate slowness defeats brute force.
-
-```csharp
-// ASP.NET Core Identity hashes with PBKDF2 by default; for new code prefer Argon2 (e.g. Konscious.Security.Cryptography).
-// NEVER store SHA256(password) — far too fast, and unsalted = rainbow-table-able.
-```
-
-For integrity between parties sharing a secret, use an **HMAC** (keyed hash). A [[Digital Signature]] can support attribution, but cryptography alone does not provide non-repudiation: the system also needs authenticated identity, evidenced key custody, compromise and revocation handling, trustworthy timestamps and audit records, and legal or operational procedures that connect the signing key to the claimed act. See [[Hashing]] for the full treatment of hash functions, HMAC, and password hashing.
+For integrity between parties sharing a secret, use an **HMAC** (keyed hash). A [[Security/Digital Signature|digital signature]] can support attribution, but cryptography alone does not provide non-repudiation: the system also needs authenticated identity, evidenced key custody, compromise and revocation handling, trustworthy timestamps and audit records, and legal or operational procedures that connect the signing key to the claimed act. See [[Security/Hashing|Hashing]] for hash functions and HMAC.
 
 ## Encoding, Encryption, and Tokenization
 
@@ -65,11 +58,11 @@ For integrity between parties sharing a secret, use an **HMAC** (keyed hash). A 
 | Encryption | Hide plaintext and detect tampering when AEAD is used | A holder of the decryption key | Managed cryptographic key | Any workload with the key can recover the data |
 | Tokenization | Replace a sensitive value with a surrogate | The token vault or authorized detokenization service | Vault mapping and service credentials | Consumers outside the vault can operate without the original value |
 
-Base64-encoding an API credential changes its alphabet, not its confidentiality. Encrypting a card number protects a stolen database page, but every analytics worker given the decryption key can still recover it. Tokenizing the card number lets analytics use a transaction token while only the payment boundary can detokenize, reducing the number of systems in sensitive-data scope. That concentration makes vault availability, authorization, and audit design essential. See [[Sensitive Data]].
+Base64 changes representation, encryption protects data only from workloads without the key, and tokenization keeps consumers outside the detokenization boundary. Token-vault availability, authorization, and audit become part of the design; [[Security/Sensitive Data|Sensitive Data]] covers the resulting scope decision.
 
 ## TLS — Encryption in Transit
 
-TLS combines authenticated key agreement with symmetric record protection. In TLS 1.3, an ephemeral (EC)DHE exchange establishes fresh traffic secrets, the server normally authenticates the handshake transcript with a certificate signature, and an AEAD cipher protects application records. The protocol does not send an AES session key encrypted by the certificate's RSA key.
+TLS combines authenticated key agreement with symmetric record protection. In the normal certificate-based TLS 1.3 handshake on the public web, an ephemeral (EC)DHE exchange establishes fresh traffic secrets, the server authenticates the handshake transcript with a certificate signature, and an AEAD cipher protects application records. TLS 1.3 also defines PSK-only modes that omit certificate authentication and can omit (EC)DHE; their peer authentication and forward-secrecy properties depend on the selected PSK mode. The protocol does not send an AES session key encrypted by the certificate's RSA key.
 
 In .NET, TLS is handled automatically by `HttpClient` and ASP.NET Core. Enforce HTTPS with `app.UseHttpsRedirection()` and `app.UseHsts()`.
 

@@ -1,8 +1,8 @@
 ---
 publish: true
 created: 2026-07-14T05:35:00.396Z
-modified: 2026-07-16T08:35:04.890Z
-published: 2026-07-16T08:35:04.890Z
+modified: 2026-07-17T18:11:43.330Z
+published: 2026-07-17T18:11:43.330Z
 tags:
   - FolderNote
 icon: lock
@@ -31,7 +31,7 @@ Most security work reduces to a few recurring goals defended in layers. The clas
 Two distinctions run through everything below:
 
 - **Authentication vs authorization** — authn proves _who_ you are (passwords, tokens, MFA); authz decides _what_ you may do (roles, scopes, ownership checks). Conflating them is a common source of access bugs.
-- **Encoding vs hashing vs encryption** — encoding is reversible and not secret; hashing is one-way (passwords, integrity); encryption is reversible _with a key_ (confidentiality). Using the wrong one — "encrypting" a password, say — is itself a vulnerability class.
+- **Encoding, password hashing, integrity, and encryption** — encoding is reversible and not secret; passwords need a slow, salted password-hashing function; a plain hash can detect accidental change but cannot prove integrity against an attacker who can replace both data and digest; active-attack integrity needs a MAC or digital signature; encryption is reversible _with a key_ and protects confidentiality. Using the wrong primitive — encrypting a password, for example — is itself a vulnerability class.
 
 Most incidents start small: a missing authorization check, a secret in a log, weak password handling, or a missing rate limit. The specifics live in the notes above.
 
@@ -39,11 +39,11 @@ Most incidents start small: a missing authorization check, a secret in a log, we
 
 Start with one abuse case, not a catalog of controls. For a payroll export, identify the employee records as assets, payroll staff and the export worker as actors, and the browser, API, job queue, object store, and third-party delivery service as separate trust boundaries. Then make each control answer a concrete path through those boundaries.
 
-1. **Assets and actors:** classify the data and operations, name legitimate actors, and describe what an attacker gains. See [[Sensitive Data]].
+1. **Assets and actors:** classify the data and operations, name legitimate actors, and describe what an attacker gains. See [[Security/Sensitive Data|Sensitive Data]].
 2. **Trust boundaries:** draw where identities, data, and administrative control cross processes, networks, tenants, and vendors.
-3. **Identity and access:** authenticate each actor, authorize the exact resource and action, deny by default, and keep privileges narrow. See [[Authentication]] and [[Authorization Models]].
-4. **Secure defaults:** expose only required endpoints and methods, close unused ports, reject unknown input, and make a missing policy fail closed. See [[Firewall]], [[OWASP]], and [[Web Vulnerabilities]].
-5. **Secrets and keys:** keep credentials out of code and telemetry, use managed key storage, separate key and data administration, and test rotation. See [[Secrets Management]] and [[Encryption]].
+3. **Identity and access:** authenticate each actor, authorize the exact resource and action, deny by default, and keep privileges narrow. See [[Security/Authentication/Authentication|Authentication]] and [[Security/Authorization Models|Authorization Models]].
+4. **Secure defaults:** expose only required endpoints and methods, close unused ports, reject unknown input, and make a missing policy fail closed. See [[Security/Firewall|Firewall]], [[Security/OWASP|OWASP]], and [[Security/Web Vulnerabilities|Web Vulnerabilities]].
+5. **Secrets and keys:** keep credentials out of code and telemetry, use managed key storage, separate key and data administration, and test rotation. See [[Security/Secrets Management|Secrets Management]] and [[Security/Encryption|Encryption]].
 6. **Dependencies and delivery:** pin and verify build inputs, scan deployed artifacts, protect CI identities, and keep a current inventory of components and public APIs.
 7. **Detection:** record authentication, authorization, administrative, and sensitive-data events with safe metadata; alert on an attack pattern rather than one expected denial.
 8. **Response and recovery:** assign incident owners, preserve evidence, revoke compromised access, communicate under the applicable obligations, and restore from a tested recovery path.
@@ -51,23 +51,6 @@ Start with one abuse case, not a catalog of controls. For a payroll export, iden
 ![[Assets/System Design 101/2b9f4fcdd81dd3863dfa544dea92f4acd9eb1f86459d1245e8aa5ce86295f435.png]]
 
 A checklist is complete only when its failure paths have been exercised. Test that the payroll export rejects another tenant, a missing policy, a revoked job identity, a stale signing key, a logging outage, and a restore whose backup predates the incident.
-
-## Links
-
-- [[Authentication]]
-- [[Authorization Models]]
-- [[Block-chain]]
-- [[Digital Signature]]
-- [[Encryption]]
-- [[Firewall]]
-- [[Hashing]]
-- [[JWT Bearer]]
-- [[OWASP]]
-- [[Password Managers]]
-- [[Password Storage]]
-- [[Secrets Management]]
-- [[Sensitive Data]]
-- [[Web Vulnerabilities]]
 
 ## Questions
 

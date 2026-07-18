@@ -1,15 +1,15 @@
 ---
 publish: true
 created: 2026-07-11T21:40:45.828Z
-modified: 2026-07-16T07:46:11.224Z
-published: 2026-07-16T07:46:11.224Z
+modified: 2026-07-17T05:51:21.080Z
+published: 2026-07-17T05:51:21.080Z
 tags:
   - FolderNote
 topic:
   - Cloud
 subtopic:
   - Azure
-summary: Microsoft's public cloud, a natural home for .NET and AI workloads.
+summary: Azure capability map for .NET, data, integration, and AI workloads.
 level:
   - "3"
 priority: Medium
@@ -18,7 +18,7 @@ status: Creation
 
 # Intro
 
-Azure is Microsoft's public cloud platform. For .NET and AI engineers, Azure is the natural home for workloads that integrate with Microsoft Entra ID and the Microsoft AI ecosystem. This page covers the Azure services most relevant to .NET/AI development.
+Azure is Microsoft's public cloud platform. A .NET workload can use the Azure SDK, `DefaultAzureCredential`, and Microsoft Entra workload identities to call managed services without storing long-lived credentials. Those integrations can reduce identity and operations work when the organization already uses Azure, but they do not make Azure the automatic choice; region, service contract, portability, compliance, and total operating cost still decide.
 
 ```bash
 # List subscriptions
@@ -44,6 +44,8 @@ Start with the workload contract, not the product list. Decide how much runtime 
 | Analytics | Fabric, Databricks, Data Explorer, Stream Analytics, Power BI | Is the stage ingestion, transformation, real-time analytics, governed warehouse/lakehouse, or presentation? |
 | Networking | Virtual Network, Load Balancer, Application Gateway, Front Door, Private Link, VPN Gateway, ExpressRoute | Is traffic regional or global, public or private, layer 4 or layer 7, and hybrid or cloud-only? |
 
+Use this page to translate capability needs into Azure product names. Provider-neutral mechanisms live in [[Data Persistence/Object Storage|Object Storage]], [[Data Persistence/NoSQL/NoSQL|NoSQL]], [[Networks/Networks|Networks]], [[Software Architecture/Distributed Systems/Message Queues/Message Queues|Message Queues]], [[Software Architecture/System Architecture/Event-Driven Architecture|Event-Driven Architecture]], and [[DevOps/Kubernetes|Kubernetes]]. Azure documentation owns current hosting plans, regional availability, quotas, pricing, and retirement state.
+
 ![[Assets/System Design 101/986b32e436b26b34cd1ce5632418a2c11a99bd275c5b75d278e20c630440a9e7.png]]
 
 The visual is an orientation aid. Product names, retirement state, regional availability, quotas, and feature contracts must be checked against current Microsoft documentation. Portability is also a per-capability decision: container images can move more easily than Cosmos DB consistency or Service Bus settlement semantics.
@@ -52,11 +54,7 @@ The visual is an orientation aid. Product names, retirement state, regional avai
 
 ### Azure Functions
 
-Azure Functions hosts event-driven code for HTTP, timer, queue, blob, Event Hubs, and Service Bus triggers. Its scaling, idle capacity, billing, and execution timeout depend on the hosting plan. Flex Consumption is the recommended serverless plan: it can scale to zero when no always-ready instances are configured and bills executions plus any always-ready capacity. The legacy Consumption plan also scales to zero and bills executions, but caps a function execution at 10 minutes.
-
-Premium keeps at least one prewarmed instance and bills provisioned core/memory capacity; Dedicated runs on paid App Service capacity and does not event-scale automatically. Functions on Container Apps can scale to zero according to its scale rules and billing plan. Flex Consumption, Premium, Dedicated, and Container Apps allow an unbounded configured function timeout where documented, but scale-in/platform grace periods still apply and an HTTP response through Azure Load Balancer is limited to 230 seconds. Use asynchronous handoff or Durable Functions for long-running workflows rather than holding an HTTP request open.
-
-**When to reach for it**: Short-lived event handlers, background processing, webhooks, and scheduled jobs. Choose Flex Consumption for variable serverless demand, Premium for prewarmed event scaling and shared capacity, Dedicated when existing App Service capacity should host the app, or Container Apps when container packaging and its scaling model are required.
+Azure Functions hosts event-driven code for HTTP, timer, queue, blob, Event Hubs, and Service Bus triggers. Scaling, idle capacity, billing, networking, and timeout depend on the hosting plan: Flex Consumption, Premium, Dedicated, legacy Consumption, and Container Apps are not interchangeable. Use asynchronous handoff or Durable Functions for long-running workflows rather than holding an HTTP request open, and make handlers safe for the trigger's retry and duplicate-delivery behavior.
 
 ```bash
 func init MyFuncApp --dotnet && cd MyFuncApp
@@ -68,9 +66,7 @@ func start  # local dev
 
 ### Azure Storage
 
-Family of storage services: **Blobs** (object storage, like S3), **Files** (SMB/NFS shares), **Queues** (simple messaging), **Tables** (key-value NoSQL).
-
-**When to reach for it**: Blob storage for any unstructured data (images, documents, ML datasets, backups). Files for lift-and-shift of on-prem file shares. Queues for simple decoupling without Service Bus overhead.
+Azure Storage is a family of distinct contracts: Blob Storage for objects, Azure Files for SMB/NFS shares, Queue Storage for simple queues, and Table Storage for key-value data. Choose by access semantics rather than treating the account as one generic store. [[Data Persistence/Object Storage|Object Storage]] owns the object-key, multipart, lifecycle, and publication boundaries.
 
 ```bash
 az storage account create --name mystorageacct --resource-group my-rg --sku Standard_LRS
@@ -79,9 +75,7 @@ az storage blob upload --account-name mystorageacct --container-name mycontainer
 
 ### Azure Cosmos DB
 
-Globally distributed, multi-model database. APIs: NoSQL (document), MongoDB, Cassandra, Gremlin (graph), Table. Single-digit millisecond reads/writes. Multi-region active-active replication.
-
-**When to reach for it**: Global apps needing low-latency reads/writes across regions. Flexible schema (document model). Avoid for complex relational queries — use Azure SQL instead. Cost scales with RU/s provisioning.
+Azure Cosmos DB is a distributed database family with several APIs and configurable consistency and multi-region write behavior. Reach for it only after fixing partition keys, query patterns, consistency, transactional scope, indexing, and request-unit cost. API compatibility does not make the service operationally identical to MongoDB, Cassandra, Gremlin, or another provider's document database.
 
 ```bash
 az cosmosdb create --name my-cosmos --resource-group my-rg --default-consistency-level Session

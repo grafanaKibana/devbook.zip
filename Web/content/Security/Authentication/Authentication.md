@@ -1,8 +1,8 @@
 ---
 publish: true
 created: 2026-07-16T07:34:20.894Z
-modified: 2026-07-16T11:18:06.612Z
-published: 2026-07-16T11:18:06.612Z
+modified: 2026-07-17T18:11:43.051Z
+published: 2026-07-17T18:11:43.051Z
 tags:
   - FolderNote
 topic:
@@ -94,7 +94,7 @@ Keyed request authentication instead proves possession of a shared secret for ea
 
 ```text
 POST
-/payments/42
+https://api.example.com/payments/42?currency=USD&expand=receipt
 content-type:application/json
 x-key-id:merchant-7
 x-nonce:e1d0...
@@ -102,9 +102,9 @@ x-timestamp:2026-07-16T08:30:00Z
 SHA-256(request-body)
 ```
 
-The client computes `HMAC-SHA-256(secret, canonical-request)` and sends the key ID, timestamp, nonce, and MAC. The server resolves the secret by key ID, rebuilds the canonical request from received bytes, compares the MAC in constant time, rejects timestamps outside a short window, and records accepted nonces until that window closes. Without the nonce/timestamp checks, a captured valid request can be replayed. Canonicalization must define URI encoding, header selection, whitespace, and body hashing exactly or legitimate requests will fail across proxies and SDKs.
+The client computes `HMAC-SHA-256(secret, canonical-request)` and sends the key ID, timestamp, nonce, and MAC. The server resolves the secret by key ID, rebuilds the canonical request from received bytes, compares the MAC in constant time, rejects timestamps outside a short window, and records accepted nonces until that window closes. Without the nonce/timestamp checks, a captured valid request can be replayed. The canonical target must bind the HTTP method, authority, path, and normalized query—or one normalized absolute target URI—so an attacker cannot replay a valid MAC against another host or change a query argument. The signing profile must define URI normalization, query ordering and encoding, header selection, whitespace, and body hashing exactly; a reverse proxy must preserve or supply the original target components used by both parties.
 
-The key ID is public metadata, not a public cryptographic key; both HMAC parties share the same secret. Rotate secrets with overlapping key IDs, revoke compromised clients, and use SHA-256 or stronger. Do not use MD5 or HMAC-MD5 for a new request-authentication design: RFC 6151 specifically withdraws MD5 where collision resistance is required and says new protocol designs should not employ HMAC-MD5.
+The key ID is public metadata, not a public cryptographic key; both HMAC parties share the same secret. Resolve each key only within its intended API and environment, and reject a key ID presented to another API even if the underlying secret happens to match. Rotate secrets with overlapping key IDs, revoke compromised clients, and use SHA-256 or stronger. Do not use MD5 or HMAC-MD5 for a new request-authentication design: RFC 6151 specifically withdraws MD5 where collision resistance is required and says new protocol designs should not employ HMAC-MD5.
 
 ## Choosing an Auth Approach
 
@@ -117,16 +117,7 @@ Visualization pending
 | Service workload | Managed workload identity or certificate | Requires issuer and rotation infrastructure; HMAC is simpler for a small fixed partner set |
 | Partner webhook/API | HMAC-signed requests with timestamp and nonce | Shared-secret lifecycle grows poorly; use asymmetric client authentication at larger trust scale |
 
-[[SSO (Single Sign-On)]] federates login, [[Two-Factor Auth]] strengthens the ceremony, and [[Resource-based Auth]] applies authorization after the caller is known. None replaces the others.
-
-## Links
-
-- [[Basic Auth]]
-- [[Oauth OIDC (OpenId Connect)]]
-- [[Resource-based Auth]]
-- [[SSO (Single Sign-On)]]
-- [[TOTP]]
-- [[Two-Factor Auth]]
+[[Security/Authentication/SSO (Single Sign-On)|SSO]] federates login, [[Security/Authentication/Two-Factor Auth|two-factor authentication]] strengthens the ceremony, and [[Security/Authentication/Resource-based Auth|resource-based authorization]] applies authorization after the caller is known. None replaces the others.
 
 ## References
 
@@ -134,6 +125,7 @@ Visualization pending
 - [OWASP Session Management Cheat Sheet](https://cheatsheetseries.owasp.org/cheatsheets/Session_Management_Cheat_Sheet.html) — session identifiers, cookie attributes, renewal, and expiration.
 - [RFC 6265 — HTTP State Management Mechanism](https://www.rfc-editor.org/rfc/rfc6265) — normative cookie storage and matching behavior.
 - [RFC 2104 — HMAC](https://www.rfc-editor.org/rfc/rfc2104) — historical construction and security requirements for keyed message authentication.
+- [RFC 9421 — HTTP Message Signatures](https://www.rfc-editor.org/rfc/rfc9421.html) — standard covered-component model for binding method, authority, target URI or query components, content, and signature metadata to an HTTP request.
 - [RFC 6151 — Updated Security Considerations for MD5 and HMAC-MD5](https://www.rfc-editor.org/rfc/rfc6151) — deprecates MD5 where collision resistance is required and rules out HMAC-MD5 for new protocol designs.
 - [ByteByteGo — Top 4 Authentication Mechanisms](https://github.com/ByteByteGoHq/system-design-101/blob/b28380a4710c5ec9638ec037d4168e288f334cba/data/guides/top-4-forms-of-authentication-mechanisms.md) — source taxonomy corrected into factors, credentials, protocols, and delegation.
 - [ByteByteGo — Session, Cookie, JWT, Token, SSO, and OAuth 2.0](https://github.com/ByteByteGoHq/system-design-101/blob/b28380a4710c5ec9638ec037d4168e288f334cba/data/guides/session-cookie-jwt-token-sso-and-oauth-2.md) — source comparison separated into orthogonal layers.

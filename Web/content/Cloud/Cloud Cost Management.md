@@ -1,19 +1,18 @@
 ---
 publish: true
 created: 2026-07-16T07:10:34.187Z
-modified: 2026-07-16T07:10:34.187Z
-published: 2026-07-16T07:10:34.187Z
+modified: 2026-07-17T05:56:46.027Z
+published: 2026-07-17T05:56:46.027Z
 topic:
   - Cloud
-subtopic:
-  - Cloud
+subtopic: []
 level:
   - "2"
 priority: High
 status: Ready to Repeat
 ---
 
-# Cloud Cost Management
+# Intro
 
 Cloud cost management ties a bill back to the workload behavior that produced it, then changes that behavior without breaking reliability. The useful unit is rarely the monthly total. A team running an image pipeline should track cost per 1,000 successfully processed images: compute, storage, requests, network transfer, observability, and support divided by successful output. If the bill rises 20% while successful output rises 40%, the system became cheaper per unit even though the invoice grew.
 

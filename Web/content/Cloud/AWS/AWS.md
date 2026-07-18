@@ -1,8 +1,8 @@
 ---
 publish: true
 created: 2026-07-11T21:40:40.549Z
-modified: 2026-07-16T07:37:36.713Z
-published: 2026-07-16T07:37:36.713Z
+modified: 2026-07-17T05:50:53.164Z
+published: 2026-07-17T05:50:53.164Z
 tags:
   - FolderNote
 topic:
@@ -43,6 +43,8 @@ The catalog is not a design method. Start with control, workload shape, data mod
 | Analytics | Glue, EMR, Athena, Redshift, OpenSearch Service, QuickSight | Is the stage ingestion, transformation, interactive query, warehouse, search, or presentation? |
 | Integration | Step Functions, AppFlow, API Gateway | Is the workflow code-first, stateful orchestration, managed data movement, or an HTTP API boundary? |
 
+Use this page to translate workload capabilities into AWS names. The provider-neutral mechanisms live in [[Data Persistence/Object Storage|Object Storage]], [[Data Persistence/NoSQL/NoSQL|NoSQL]], [[Networks/Networks|Networks]], [[Software Architecture/Distributed Systems/Message Queues/Message Queues|Message Queues]], [[Software Architecture/System Architecture/Event-Driven Architecture|Event-Driven Architecture]], and [[DevOps/Kubernetes|Kubernetes]]. Those notes own the durable design tradeoffs; AWS documentation owns the current regional, quota, pricing, and lifecycle contract.
+
 ![[Assets/System Design 101/d863fbffc5675c925dfd9ea7ff6c96638c0919e416b40c9b59845db932380e6b.png]]
 
 The visual is an orientation aid, not a lifecycle guarantee. Confirm current service status, regional support, quotas, and pricing in the official service documentation before adopting one.
@@ -64,27 +66,17 @@ aws ec2 run-instances --image-id resolve:ssm:/aws/service/ami-amazon-linux-lates
 
 ### Lambda
 
-Lambda runs event-triggered functions in isolated execution environments. An environment moves through initialization, invocation, and shutdown; after an invocation Lambda may freeze it and reuse it, so initialization outside the handler can reduce repeated work but must not hold correctness-critical per-request state.
+Lambda runs event-triggered functions in managed execution environments. Synchronous invocation leaves retries with the caller; asynchronous invocation and event-source mappings have source-specific queueing, retry, ordering, batch, and failure-destination behavior. Handlers need idempotent side effects because duplicate delivery and ambiguous outcomes are normal at those boundaries.
 
-Invocation mode changes the failure contract:
-
-- A synchronous caller receives the function result or error and owns retry policy.
-- Asynchronous invocation queues the event inside Lambda and uses configurable retry and failure destinations.
-- An event source mapping polls a stream or queue in batches; ordering, visibility timeouts, partial-batch handling, retry, and discard behavior depend on the source.
-
-Concurrency is the number of active execution environments. Reserved concurrency isolates capacity and caps a function; provisioned concurrency prepares environments to reduce initialization latency but adds idle cost. Observe duration, errors, throttles, concurrent executions, iterator age for streams, and destination/DLQ depth. Make handlers idempotent because retries and duplicate delivery are normal failure behavior.
+Reserved concurrency isolates and caps capacity; provisioned concurrency prepares environments to reduce initialization latency but adds idle cost. Use Lambda for bursty bounded work when managed scaling is worth runtime limits and variable initialization latency. Prefer a continuously running container or VM for sustained work that needs long-lived processes, specialized host control, or stable low-latency execution.
 
 ![[Assets/System Design 101/03a0fa5987095ab9dd4c73cfbd13e79b33de4e1df7c1ead9fe296305107744f1.jpg]]
-
-Use Lambda for event-driven, bursty, bounded work when managed scaling is worth runtime limits and variable initialization latency. Prefer a continuously running container or VM for sustained workloads that require long-lived processes, specialized host control, or stable low-latency execution.
 
 ## Storage
 
 ### S3 (Simple Storage Service)
 
-Object storage for any file type. Virtually unlimited capacity. 11 nines durability. Versioning, lifecycle policies, and event notifications built in.
-
-**When to reach for it**: Any unstructured data storage — ML datasets, model artifacts, backups, static website assets, application logs. The default choice for object storage on AWS. Equivalent to Azure Blob Storage.
+S3 stores objects addressed by bucket, key, and optional version ID. It is a fit for immutable or replace-as-a-whole payloads such as media, backups, artifacts, and data-lake files. Strong single-object and listing consistency does not create a multi-object transaction, and an ETag is not a universal content checksum.
 
 ```bash
 # Upload a file
@@ -93,23 +85,7 @@ aws s3 cp ./model.pkl s3://my-bucket/models/model.pkl
 aws s3 sync ./data/ s3://my-bucket/data/
 ```
 
-### S3 Object Model and Request Path
-
-An S3 object is addressed by bucket, key, and optionally version ID. It contains bytes plus system and user-defined metadata; a bucket is the policy, namespace, region, and configuration boundary. A request is authenticated and authorized through IAM, bucket/access-point policies, and related controls before S3 applies the object operation. Do not model ByteByteGo's illustrative metadata store and data store as AWS's documented internal topology: AWS publishes the service contract, not that implementation.
-
-After a successful write, S3 provides strong read-after-write consistency for object PUT and DELETE operations and for relevant listing operations. Use a supported checksum through the API or SDK to validate payload integrity. The ETag is an HTTP entity tag, not a universal content checksum: multipart objects and some encryption modes do not yield a whole-object MD5.
-
-### S3 Multipart Uploads
-
-Multipart upload separates a large object into independently retriable parts:
-
-1. `CreateMultipartUpload` returns an upload ID and fixes upload options such as encryption and checksum algorithm.
-2. The client uploads numbered parts, usually with bounded parallelism, and records each returned ETag/checksum.
-3. It retries only failed parts with backoff and preserves their part numbers.
-4. `CompleteMultipartUpload` submits the ordered part list; S3 assembles the object.
-5. On cancellation or unrecoverable failure, `AbortMultipartUpload` removes uploaded parts. Incomplete parts keep accruing storage charges until aborted or removed by a lifecycle rule.
-
-Except for the final part, each part must be at least 5 MiB; S3 accepts at most 10,000 parts. Choose a part size that stays below that count, and cap parallel requests so client memory, connection pools, upstream bandwidth, and S3 request rates remain controlled. Prefer the SDK's checksum support and validate the stored checksum rather than comparing the final ETag with a local MD5.
+Multipart upload makes large transfers independently retriable, but unfinished parts accrue charges until aborted or removed by lifecycle policy. [[Data Persistence/Object Storage|Object Storage]] owns the multipart, checksum, lifecycle, and multi-object publication mechanisms; use S3 documentation for current limits and API behavior.
 
 ![[Assets/System Design 101/d94d95b4b0e8bab46e58b81b9cdc493760dfeebf89cda8c28920e9d2acba97e4.png]]
 
@@ -117,9 +93,7 @@ Except for the final part, each part must be at least 5 MiB; S3 accepts at most 
 
 ### DynamoDB
 
-Fully managed NoSQL key-value and document database. Single-digit millisecond performance at any scale. On-demand or provisioned capacity. Global tables for multi-region replication.
-
-**When to reach for it**: High-throughput, low-latency key-value access patterns. Session stores, user profiles, IoT data, gaming leaderboards. Avoid for complex relational queries or ad-hoc analytics — use RDS or Redshift instead. Equivalent to Azure Cosmos DB.
+DynamoDB is a managed key-value and document database with on-demand or provisioned capacity and optional global tables. Reach for it when partition-key and sort-key access patterns are known up front and its per-operation consistency, transaction, indexing, capacity, and multi-Region contracts fit. Do not treat Cosmos DB or another document store as behaviorally equivalent because the capability category is similar.
 
 ```bash
 # Get an item by primary key
@@ -128,7 +102,7 @@ aws dynamodb get-item --table-name Users --key '{"UserId": {"S": "user-123"}}'
 
 ## Networking
 
-Choose an AWS path from the communicating endpoints, then check routing, addressing, transitivity, DNS, bandwidth, failure domain, and price.
+Choose an AWS path from the communicating endpoints, then check routing, addressing, transitivity, DNS, bandwidth, failure domain, and price. Internet gateways, NAT gateways, VPC peering, Transit Gateway, PrivateLink endpoints, VPN, and Direct Connect solve different paths; none is a generic "private networking" switch. [[Networks/Networks|Networks]] owns the provider-neutral routing and transport concepts.
 
 | Need | Path | Contract to verify |
 | --- | --- | --- |
@@ -146,9 +120,7 @@ The source diagram combines valid service names with shortcuts that can misstate
 
 ### SQS (Simple Queue Service)
 
-Fully managed message queue. Standard queues provide at-least-once delivery and best-effort ordering. FIFO queues preserve strict order within each `MessageGroupId`; different groups can be processed concurrently and have no global order relative to one another. FIFO deduplication suppresses repeated sends with the same deduplication ID during the five-minute deduplication interval, which is the scope of SQS's exactly-once claim. Consumers still need idempotent side effects and must delete a processed message before its visibility timeout because a failed or timed-out consumer can receive it again. Dead-letter queues isolate messages that exhaust the configured receive policy.
-
-**When to reach for it**: Decoupling producers from consumers. Background job processing. Buffer between high-throughput producers and slower consumers. Equivalent to Azure Storage Queues (simple) or Azure Service Bus (FIFO/advanced).
+SQS is a managed queue. Standard queues provide at-least-once delivery and best-effort ordering. FIFO queues order within a `MessageGroupId`; their five-minute send-deduplication window does not make downstream side effects exactly once. Consumers still need idempotency, visibility-timeout handling, bounded retries, and dead-letter policy. [[Software Architecture/Distributed Systems/Message Queues/Message Queues|Message Queues]] owns those mechanisms; compare SQS with SNS, EventBridge, Kinesis, and MSK by queue, fan-out, routing, ordering, and replay requirements.
 
 ```bash
 # Send a message

@@ -1,8 +1,8 @@
 ---
 publish: true
 created: 2026-07-11T21:45:12.067Z
-modified: 2026-07-11T21:45:12.067Z
-published: 2026-07-11T21:45:12.067Z
+modified: 2026-07-17T19:00:22.574Z
+published: 2026-07-17T19:00:22.574Z
 topic:
   - Programming
 subtopic:
@@ -112,7 +112,7 @@ Two iterator gotchas:
 > [!QUESTION]- Why and when should you use `yield return` instead of returning a materialized collection like `List<T>`?
 > Use `yield return` for deferred execution and streaming when consumers may stop early or the sequence is large, because it lowers peak memory usage. Materialize (`ToList()` / `ToArray()`) when you need a snapshot, random access or `Count`, or repeated enumeration without rerunning expensive or side-effectful generation logic.
 
-## Links
+## References
 
 - [Iteration statements (foreach)](https://learn.microsoft.com/dotnet/csharp/language-reference/statements/iteration-statements#the-foreach-statement) — language reference for `foreach` syntax, duck-typing pattern, and async enumeration.
 - [C# language specification: iteration statements](https://learn.microsoft.com/dotnet/csharp/language-reference/language-specification/statements#139-iteration-statements) — formal spec defining the enumerator pattern the compiler targets.

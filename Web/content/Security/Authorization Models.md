@@ -1,8 +1,8 @@
 ---
 publish: true
 created: 2026-07-16T08:23:57.651Z
-modified: 2026-07-16T08:28:54.854Z
-published: 2026-07-16T08:28:54.854Z
+modified: 2026-07-17T05:46:26.002Z
+published: 2026-07-17T05:46:26.002Z
 topic:
   - Security
 subtopic:
@@ -60,7 +60,7 @@ var decision = await authorizationService.AuthorizeAsync(
 return decision.Succeeded ? Ok(invoice) : Forbid();
 ```
 
-Keep policy decisions deterministic and observable: record the policy and rule that denied a request, but do not log sensitive attributes or tokens. Test explicit allow, explicit deny, missing attributes, stale relationships, and the default-deny path. See [[Resource-based Auth]] for the handler mechanics.
+Keep policy decisions deterministic and observable: record the policy and rule that denied a request, but do not log sensitive attributes or tokens. Test explicit allow, explicit deny, missing attributes, stale relationships, and the default-deny path. See [[Security/Authentication/Resource-based Auth|resource-based authorization]] for the handler mechanics.
 
 ## References
 

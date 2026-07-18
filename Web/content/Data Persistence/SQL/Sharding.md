@@ -1,8 +1,8 @@
 ---
 publish: true
 created: 2026-07-16T15:17:15.738Z
-modified: 2026-07-16T15:17:15.738Z
-published: 2026-07-16T15:17:15.738Z
+modified: 2026-07-17T05:50:01.455Z
+published: 2026-07-17T05:50:01.455Z
 topic:
   - Data Persistence
 subtopic:
@@ -18,7 +18,7 @@ status: Ready to Repeat
 
 Sharding is horizontal partitioning across independent database instances: each shard owns a non-overlapping subset of rows. Unlike table partitioning inside one server, sharding distributes storage, writes, backups, and failure domains across machines. Reach for it only when a measured write or storage ceiling remains after vertical scaling, query/index repair, read replicas, caching, and in-engine partitioning. Those alternatives preserve cross-table queries and transaction boundaries with less operational machinery.
 
-The shard key is the long-lived decision. It must distribute load, appear in routed operations, keep transactions that must be atomic together, and remain stable enough that moving ownership is exceptional. [[Shard Routing and Rebalancing]] owns the map and migration protocol. [[Cross-Shard Operations]] owns the fan-out, transaction, and global-constraint costs created when work crosses shard keys.
+The shard key is the long-lived decision. It must distribute load, appear in routed operations, keep transactions that must be atomic together, and remain stable enough that moving ownership is exceptional. [[Data Persistence/SQL/Shard Routing and Rebalancing|Shard Routing and Rebalancing]] owns the map and migration protocol. [[Data Persistence/SQL/Cross-Shard Operations|Cross-Shard Operations]] owns the fan-out, transaction, and global-constraint costs created when work crosses shard keys.
 
 ## Strategy Overview
 
@@ -67,7 +67,7 @@ Sharding is complete only when the system can answer three questions:
 2. How is a range or bucket copied, caught up, cut over, and cleaned without two writable owners?
 3. What is the explicit behavior for queries, transactions, and uniqueness checks that span shards?
 
-[[Shard Routing and Rebalancing]] answers the first two with versioned maps, ownership fencing, copy/catch-up, cutover, and rollback. [[Cross-Shard Operations]] answers the third with scatter-gather limits, single-shard transaction design, coordination choices, and idempotent repair.
+[[Data Persistence/SQL/Shard Routing and Rebalancing|Shard Routing and Rebalancing]] answers the first two with versioned maps, ownership fencing, copy/catch-up, cutover, and rollback. [[Data Persistence/SQL/Cross-Shard Operations|Cross-Shard Operations]] answers the third with scatter-gather limits, single-shard transaction design, coordination choices, and idempotent repair.
 
 ## Tradeoffs
 

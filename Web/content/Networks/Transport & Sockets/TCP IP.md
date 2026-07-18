@@ -1,8 +1,8 @@
 ---
 publish: true
 created: 2026-07-11T21:46:14.260Z
-modified: 2026-07-16T07:51:47.192Z
-published: 2026-07-16T07:51:47.192Z
+modified: 2026-07-17T05:45:13.986Z
+published: 2026-07-17T05:45:13.986Z
 topic:
   - Networks
 subtopic:
@@ -16,7 +16,7 @@ status: Ready to Repeat
 
 # TCP/IP
 
-TCP/IP is the foundational protocol suite of the internet. **IP** (Internet Protocol) operates at the Internet layer and handles addressing and routing between networks. **TCP** (Transmission Control Protocol) operates at the Transport layer on top of IP and provides reliable, ordered, connection-oriented byte-stream delivery. They are distinct layers in the TCP/IP suite that application protocols such as HTTP, gRPC, and database protocols depend on.
+TCP/IP is the foundational protocol suite of the internet. **IP** (Internet Protocol) operates at the Internet layer and handles addressing and routing between networks. **TCP** (Transmission Control Protocol) operates at the Transport layer on top of IP and provides reliable, ordered, connection-oriented byte-stream delivery. They are distinct layers: the IP sections below explain addressing, NAT, and IPv4/IPv6 operation; the TCP sections explain one transport that runs over IP. Application protocols such as HTTP, gRPC, and database protocols then depend on that transport.
 
 Understanding TCP/IP matters for debugging latency, connection issues, and designing systems that handle network failures correctly.
 
@@ -31,14 +31,14 @@ Link Layer          Ethernet, Wi-Fi (physical transmission)
 
 Each layer adds a header and passes the packet down. On the receiving end, each layer strips its header and passes the payload up.
 
-## IP Addressing, Ports, and NAT
+## IP Addressing and NAT
 
 The "IP" half of TCP/IP is addressing. An **IP address** identifies an interface; a **port** (16-bit, 0–65535) selects a transport endpoint on that machine. TCP identifies a connection by the 4-tuple `(src IP, src port, dst IP, dst port)` within its protocol namespace.
 
 - **IPv4** — 32-bit addresses (~4.3 billion), written `192.168.1.10`. Exhausted, which is why **NAT** exists.
 - **IPv6** — 128-bit addresses, written `2001:db8::1`. Its address space removes address-conservation as a reason for NAT, but does not remove firewall policy or every translation-based transition mechanism.
 - **Private ranges** (`10.0.0.0/8`, `172.16.0.0/12`, `192.168.0.0/16`) are non-routable on the public internet.
-- **Ports** split into well-known (0–1023, e.g. 80/443), registered, and **ephemeral** (the dynamic client-side ports that `TIME_WAIT` can exhaust).
+- **Transport ports** split into well-known (0–1023, e.g. 80/443), registered, and **ephemeral** client-side ports. A client can exhaust usable source tuples when many recently closed TCP connections target the same remote endpoint.
 
 NAPT, the common many-to-one form of NAT, rewrites both an address and a port. If `10.0.0.7:53000` sends to `203.0.113.20:443`, a gateway might record this state:
 
@@ -52,7 +52,7 @@ NAT is translation, not firewall policy. A stateful firewall decides which packe
 
 The NAT diagram from the reviewed source is intentionally absent: it links an unrelated HTTP-header image.
 
-## IPv4 and IPv6
+## IP Layer: IPv4 and IPv6
 
 | Concern | IPv4 | IPv6 | Operational consequence |
 |---|---|---|---|
@@ -94,7 +94,7 @@ TCP detects loss and preserves an ordered byte stream while the connection remai
 - **Duplicate ACKs / Fast Retransmit**: three duplicate ACKs signal a lost segment; TCP retransmits without waiting for the timeout.
 
 > [!WARNING]
-> **Head-of-line (HOL) blocking** is the price of in-order delivery: if segment #5 is lost, segments #6–#10 sit in the receive buffer and **cannot be delivered to the application** until #5 is retransmitted — even though they arrived fine. This is exactly why HTTP/2's many streams over one TCP connection can stall together on a single lost packet, and why **QUIC/HTTP/3** moves multiplexing into independent UDP-based streams. See [[UDP]].
+> **Head-of-line (HOL) blocking** is the price of in-order delivery: if segment #5 is lost, segments #6–#10 sit in the receive buffer and **cannot be delivered to the application** until #5 is retransmitted — even though they arrived fine. This is exactly why HTTP/2's many streams over one TCP connection can stall together on a single lost packet, and why **QUIC/HTTP/3** moves multiplexing into independent UDP-based streams. See [[Networks/Transport & Sockets/UDP|UDP]].
 
 ## MTU, MSS, and Keep-Alive
 
@@ -118,7 +118,7 @@ Client → Server: ACK
 ── Connection closed ──
 ```
 
-The `TIME_WAIT` state keeps the connection in memory for 2×MSL (Maximum Segment Lifetime, typically 60s) to handle delayed packets. High-throughput servers can exhaust ephemeral ports if connections are closed too frequently — use connection pooling and `SO_REUSEADDR`.
+The actively closing endpoint enters `TIME_WAIT` long enough to prevent delayed packets from an old connection being mistaken for a new one. A client that repeatedly opens short-lived connections to the same destination can exhaust usable source tuples; connection pooling and bounded connection creation are the default remedies. `SO_REUSEADDR` controls listener bind/restart behavior under operating-system-specific rules. It does not expand the outbound ephemeral-port space.
 
 ## Pitfalls
 
@@ -137,11 +137,11 @@ socket.NoDelay = true;  // disables Nagle's algorithm
 
 ### TIME\_WAIT Port Exhaustion
 
-**What goes wrong**: a high-throughput service opens and closes many short-lived connections. The OS runs out of ephemeral ports because they're all in `TIME_WAIT`.
+**What goes wrong**: a service opens and actively closes many short-lived outbound connections to the same destination. The OS cannot allocate another usable source tuple because too many recent connections remain in `TIME_WAIT`.
 
-**Why it happens**: each closed connection holds its port for 60s in `TIME_WAIT`.
+**Why it happens**: TCP retains recently closed connection identity so delayed segments cannot corrupt a later connection. The exact retention time and tuple-reuse rules are platform and kernel specific; NAT gateways can impose a separate translated-port limit.
 
-**Mitigation**: use connection pooling (HTTP clients, database connection pools) to reuse connections instead of closing them. On Linux, tune `net.ipv4.tcp_tw_reuse = 1` to allow reuse of `TIME_WAIT` sockets for new connections.
+**Mitigation**: reuse connections through `HttpClient`, database pools, or another protocol-aware pool, and bound connection churn. Confirm exhaustion with socket-state, source-port, and NAT telemetry before changing kernel behavior. Linux `net.ipv4.tcp_tw_reuse` semantics vary by kernel version and do not generalize to other platforms; treat it as a diagnosed expert action for a specific client workload, not a default mitigation. `SO_REUSEADDR` helps a listening server rebind under platform rules and does not solve outbound tuple exhaustion.
 
 ## TCP vs UDP
 

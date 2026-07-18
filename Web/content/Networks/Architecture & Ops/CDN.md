@@ -1,8 +1,8 @@
 ---
 publish: true
 created: 2026-07-11T21:46:23.928Z
-modified: 2026-07-16T11:18:04.830Z
-published: 2026-07-16T11:18:04.830Z
+modified: 2026-07-17T05:45:13.605Z
+published: 2026-07-17T05:45:13.605Z
 topic:
   - Networks
 subtopic:
@@ -20,7 +20,7 @@ A CDN (Content Delivery Network) is a globally distributed network of caching se
 
 ## How It Works
 
-A user's request resolves — usually via [[DNS]] (GeoDNS/anycast) — to the nearest edge node rather than the origin:
+A user's request resolves — usually via [[Networks/Protocols/DNS|DNS]] (GeoDNS/anycast) — to the nearest edge node rather than the origin:
 
 ```mermaid
 flowchart LR
@@ -33,7 +33,7 @@ flowchart LR
 - **Cache hit** — the edge has a fresh copy and returns it immediately (most requests).
 - **Cache miss** — the edge fetches from the **origin**, stores it per the caching headers, and serves it. Subsequent users in that region hit the warm cache.
 
-Edge selection is typically **anycast** (one IP announced from many locations; the network routes to the closest) or **GeoDNS** (DNS returns the nearest edge's address) — see [[DNS|DNS as a traffic director]].
+Edge selection is typically **anycast** (one IP announced from many locations; the network routes to the closest) or **GeoDNS** (DNS returns the nearest edge's address) — see [[Networks/Protocols/DNS|DNS as a traffic director]].
 
 ![[Assets/System Design 101/236c3f5559f26e6876eb8353fe96affd6deca63fba459c7a2ad7340101e273bd.png]]
 
@@ -78,7 +78,7 @@ The hard part, as always, is invalidation. Two strategies:
 
 - **Dynamic acceleration** — even uncacheable responses benefit: the CDN terminates TLS at the edge and reuses warm, optimized backbone connections to the origin, cutting handshake and routing latency.
 - **Edge compute** — run code at the edge (Cloudflare Workers, Lambda@Edge, Fastly Compute) for auth, A/B testing, redirects, personalization, and API responses — close to the user, off the origin.
-- **Security** — CDNs are a natural place for **TLS termination**, **DDoS absorption** (huge distributed capacity soaks up [[UDP|volumetric floods]]), **WAF**, and bot mitigation.
+- **Security** — CDNs are a natural place for **TLS termination**, **DDoS absorption** (huge distributed capacity soaks up [[Networks/Transport & Sockets/UDP|volumetric UDP floods]]), **WAF**, and bot mitigation.
 
 ## Pitfalls
 

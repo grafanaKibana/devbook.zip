@@ -1,8 +1,8 @@
 ---
 publish: true
 created: 2026-07-16T07:57:59.169Z
-modified: 2026-07-16T07:57:59.169Z
-published: 2026-07-16T07:57:59.169Z
+modified: 2026-07-17T05:44:56.951Z
+published: 2026-07-17T05:44:56.951Z
 topic:
   - Data Persistence
 subtopic: []
@@ -13,9 +13,9 @@ priority: Medium
 status: Ready to Repeat
 ---
 
-# Erasure Coding
+# Intro
 
-Erasure coding protects data by turning an object into `k` data shards plus `m` coding shards. Any `k` surviving shards can reconstruct the original object, so the system can lose up to `m` shards without losing data. It is a storage-efficiency choice for large, durable data sets; it is not a faster form of replication.
+Erasure coding protects data by turning an object into `k` data shards plus `m` coding shards. With a maximum-distance-separable code such as Reed-Solomon configured as `(k, m)`, any `k` surviving shards can reconstruct the original object, so the system can lose up to `m` shards without losing data. Other erasure-code families and implementations can have different recoverable shard combinations. It is a storage-efficiency choice for large, durable data sets; it is not a faster form of replication.
 
 A `4+2` layout for a 1 GiB object produces four 256 MiB data shards and two 256 MiB coding shards. The six shards consume 1.5 GiB, an overhead factor of `(4 + 2) / 4 = 1.5`. Three-copy replication consumes 3 GiB for the same logical object. The saving is bought with encoding work on writes and reconstruction work after failures.
 
@@ -47,7 +47,7 @@ That makes erasure coding a good fit for immutable objects, backups, media, and 
 | Concern | `4+2` erasure coding | Three-copy replication |
 | --- | --- | --- |
 | Storage for 1 GiB logical data | 1.5 GiB | 3 GiB |
-| Concurrent shard/copy losses tolerated | Any two of six shards, if failures are independent | Any two copies, if failures are independent |
+| Concurrent shard/copy losses tolerated | Any two of six shards for this Reed-Solomon `4+2` layout, if failures are independent | Any two copies, if failures are independent |
 | Healthy read | Usually reads data shards; implementation may reconstruct around slow shards | Reads one complete copy |
 | Write path | Encode and place six shards | Write three complete copies |
 | Degraded read and repair | Read multiple surviving shards and decode | Read one surviving copy and copy it |

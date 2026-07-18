@@ -1,8 +1,8 @@
 ---
 publish: true
 created: 2026-07-11T21:44:36.607Z
-modified: 2026-07-11T21:44:36.611Z
-published: 2026-07-11T21:44:36.611Z
+modified: 2026-07-17T19:00:22.058Z
+published: 2026-07-17T19:00:22.058Z
 topic:
   - Programming
 subtopic:
@@ -145,7 +145,7 @@ Note that **`[Authorize]` is itself an authorization filter** — which is why a
 > - Avoid `RequestServices.GetService` inside filter bodies unless absolutely necessary.
 >   Why this matters: DI misuse in filters causes brittle code and testing pain.
 
-## Links
+## References
 
 - [Filters in ASP.NET Core](https://learn.microsoft.com/en-us/aspnet/core/mvc/controllers/filters?view=aspnetcore-8.0) — official reference covering all filter types, execution order, DI registration, and cancellation.
 - [Middleware in ASP.NET Core](https://learn.microsoft.com/en-us/aspnet/core/fundamentals/middleware?view=aspnetcore-8.0) — use alongside this page to understand when middleware is the better choice.

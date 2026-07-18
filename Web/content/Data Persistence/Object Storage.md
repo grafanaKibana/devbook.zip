@@ -1,8 +1,8 @@
 ---
 publish: true
 created: 2026-07-16T07:57:59.340Z
-modified: 2026-07-16T08:10:34.169Z
-published: 2026-07-16T08:10:34.169Z
+modified: 2026-07-17T05:44:57.942Z
+published: 2026-07-17T05:44:57.942Z
 topic:
   - Data Persistence
 subtopic: []
@@ -13,7 +13,7 @@ priority: High
 status: Ready to Repeat
 ---
 
-# Object Storage
+# Intro
 
 Object storage keeps an opaque byte sequence, a key, and metadata as one addressable object inside a bucket or container. Applications use an API to put, get, list, copy, and delete objects; they do not mount raw blocks or edit arbitrary filesystem sectors. Reach for it when data is large, mostly replaced as a whole, and must outgrow one machine: media, backups, build artifacts, logs, and data-lake files are typical fits.
 

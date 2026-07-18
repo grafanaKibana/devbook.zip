@@ -1,8 +1,8 @@
 ---
 publish: true
 created: 2026-07-11T21:48:29.585Z
-modified: 2026-07-16T11:07:22.817Z
-published: 2026-07-16T11:07:22.817Z
+modified: 2026-07-17T05:51:14.922Z
+published: 2026-07-17T05:51:14.922Z
 topic:
   - Security
 subtopic:
@@ -35,16 +35,15 @@ using System.Text;
 
 // Sign a message
 using var rsa = RSA.Create(2048);
-var privateKey = rsa.ExportRSAPrivateKey();
 var publicKey = rsa.ExportRSAPublicKey();
 
 var message = Encoding.UTF8.GetBytes("Transfer $1000 to account 12345");
-var signature = rsa.SignData(message, HashAlgorithmName.SHA256, RSASignaturePadding.Pkcs1);
+var signature = rsa.SignData(message, HashAlgorithmName.SHA256, RSASignaturePadding.Pss);
 
 // Verify the signature
 using var verifier = RSA.Create();
 verifier.ImportRSAPublicKey(publicKey, out _);
-bool isValid = verifier.VerifyData(message, signature, HashAlgorithmName.SHA256, RSASignaturePadding.Pkcs1);
+bool isValid = verifier.VerifyData(message, signature, HashAlgorithmName.SHA256, RSASignaturePadding.Pss);
 ```
 
 ECDSA P-256 produces smaller signatures than RSA-2048 and is supported by protocols such as JOSE. Use it only when the protocol specifies the curve, hash, and signature encoding and every verifier supports that profile:
@@ -61,29 +60,14 @@ bool isValid = ecdsa.VerifyData(message, signature, HashAlgorithmName.SHA256);
 
 ## Use Cases
 
-- **JWT signing**: The identity provider signs the JWT with its private key; APIs verify with the public key (JWKS endpoint). See [[JWT Bearer]].
+- **JWT signing**: The identity provider signs the JWT with its private key; APIs verify with the public key (JWKS endpoint). See [[Security/JWT Bearer|JWT Bearer authentication]].
 - **Code signing**: Software publishers sign executables so users can verify the binary has not been tampered with.
 - **Document signing**: PDF signatures, contract signing (DocuSign uses digital signatures under the hood).
 - **TLS certificates**: after issuance validation, a CA signature attests the binding between a certificate identity, such as a DNS name, and its public key.
 
-## HMAC-Signed API Requests and Replay Windows
+## Related Construction: HMAC
 
-HMAC authenticates a message between parties that share one secret. An access or key ID selects the secret; it is not a public key, and the secret is not a private key. Either party can generate the same MAC, so HMAC does not provide a digital signature's asymmetric attribution.
-
-A client can canonicalize and authenticate these request components:
-
-```text
-POST
-/v1/transfers
-content-digest: sha-256=:LPJNul+wow4m6DsqxbninhsWHlwfp0JecwQzYpOLmCQ=:
-x-client-id: client-42
-x-created: 1710000000
-x-nonce: a4e90b0c1f5a4de3
-```
-
-The client computes `HMAC-SHA-256(secret, canonical-request)` and sends the result with the key ID. The server reconstructs the same bytes, resolves the secret, verifies the MAC with a constant-time comparison, checks that the creation time is inside a short acceptance window, and atomically marks `(key ID, nonce)` as used until that window expires.
-
-A timestamp alone limits how long a captured request is useful but does not stop replay inside the window. A nonce without server-side acceptance state is only extra text. Cover the method, authority, path, relevant query values, body digest, and replay parameters so an attacker cannot transplant a valid MAC onto a different operation.
+HMAC authenticates a message between parties that share one secret. Either party can generate the same MAC, so it does not provide a digital signature's asymmetric attribution. Request-authentication protocols add canonical request bytes, a timestamp, and a nonce with server-side replay state; those protocol details belong to [[Security/Authentication/Authentication|API authentication]]. The signature-specific boundary here is trust: a digital signature separates a private signer from public verifiers, while every HMAC verifier is also able to create a valid tag.
 
 ![[Assets/System Design 101/43c5215844c4ce07c9aeda7a92da6da06d810aa7e33e2f4810071f2eaf0cb262.png]]
 

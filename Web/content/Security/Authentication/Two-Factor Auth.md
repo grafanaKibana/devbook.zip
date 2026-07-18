@@ -1,8 +1,8 @@
 ---
 publish: true
 created: 2026-07-16T07:38:11.775Z
-modified: 2026-07-16T08:08:04.155Z
-published: 2026-07-16T08:08:04.155Z
+modified: 2026-07-17T05:46:25.833Z
+published: 2026-07-17T05:46:25.833Z
 topic:
   - Security
 subtopic:
@@ -25,7 +25,7 @@ The engineering boundary includes enrollment and recovery. A phishing-resistant 
 | Method | Proof | Phishing and replay | Recovery boundary | Choose it when |
 | --- | --- | --- | --- | --- |
 | SMS OTP | Control of a phone-number delivery path | Code is phishable; SIM swap and carrier interception add risk | Phone-number recovery can transfer control | Existing users/devices make a stronger factor unavailable |
-| [[TOTP]] | Possession of a shared authenticator secret | Code is phishable and valid inside the accepted time window | Backup codes or replacement authenticator must be protected | Broad offline authenticator compatibility matters |
+| [[Security/Authentication/TOTP\|TOTP]] | Possession of a shared authenticator secret | Code is phishable and valid inside the accepted time window | Backup codes or replacement authenticator must be protected | Broad offline authenticator compatibility matters |
 | Push approval | Control of an enrolled app/device | Generic approve/deny prompts enable fatigue attacks | Device enrollment and support reset are critical | Enterprise context/number matching is enforced |
 | WebAuthn security key | Private key unlocked on an external authenticator | Origin-bound signature over a fresh challenge | Spare key or controlled reenrollment is needed | High-assurance, portable phishing resistance matters |
 | Synced passkey | Discoverable WebAuthn credential available through a platform account | Same origin binding; sync-provider account becomes part of recovery trust | Platform sync and account recovery restore credentials | Consumer passwordless UX across devices matters |
@@ -34,7 +34,7 @@ Default to passkeys/WebAuthn when the client population supports them. Keep TOTP
 
 ## TOTP
 
-TOTP derives a short code from a shared secret and a time-step counter. The server accepts only a small clock-skew window, rate-limits guesses, and records the last accepted step to reject replay. See [[TOTP]] for provisioning, validation, secret storage, and recovery mechanics.
+TOTP derives a short code from a shared secret and a time-step counter. The server accepts only a small clock-skew window, rate-limits guesses, and records the last accepted step to reject replay. See [[Security/Authentication/TOTP|TOTP]] for provisioning, validation, secret storage, and recovery mechanics.
 
 ## FIDO2 and WebAuthn
 

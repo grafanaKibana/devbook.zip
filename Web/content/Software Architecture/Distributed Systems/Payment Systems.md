@@ -1,8 +1,8 @@
 ---
 publish: true
 created: 2026-07-16T11:20:02.792Z
-modified: 2026-07-16T12:33:33.857Z
-published: 2026-07-16T12:33:33.857Z
+modified: 2026-07-17T05:47:33.450Z
+published: 2026-07-17T05:47:33.450Z
 topic:
   - Software Architecture
 subtopic:
@@ -24,11 +24,11 @@ The durable model keeps four facts separate: what the customer requested, what e
 
 | Design question | Focused note | Decision boundary |
 | --- | --- | --- |
-| What do authorization, capture, clearing, settlement, refund, and chargeback mean? | [[Card Payments]] | Card roles and financial transitions; a provider response never proves every downstream state. |
-| What happens after timeout, retry, duplicate callback, or PSP outage? | [[Payment Reliability]] | Unknown outcomes, durable idempotency, verified webhooks, and failover only after the first attempt is resolved. |
-| Where is the authoritative balance and how are breaks found? | [[Payment Ledgers and Reconciliation]] | Append-only balanced journals, settlement evidence, payout state, and independent reconciliation. |
-| How do device wallets, QR codes, custodial balances, and self-custody differ? | [[Wallet and QR Payments]] | Token and presentation mechanisms do not replace authorization, ledger, or settlement contracts. |
-| How do ACH, UPI, SWIFT, and foreign exchange change the workflow? | [[Bank and Foreign Exchange Payments]] | Each rail has its own acknowledgement, return, settlement, liquidity, and reconciliation semantics. |
+| What do authorization, capture, clearing, settlement, refund, and chargeback mean? | [[Software Architecture/Distributed Systems/Card Payments\|Card Payments]] | Card roles and financial transitions; a provider response never proves every downstream state. |
+| What happens after timeout, retry, duplicate callback, or PSP outage? | [[Software Architecture/Distributed Systems/Payment Reliability\|Payment Reliability]] | Unknown outcomes, durable idempotency, verified webhooks, and failover only after the first attempt is resolved. |
+| Where is the authoritative balance and how are breaks found? | [[Software Architecture/Distributed Systems/Payment Ledgers and Reconciliation\|Payment Ledgers and Reconciliation]] | Append-only balanced journals, settlement evidence, payout state, and independent reconciliation. |
+| How do device wallets, QR codes, custodial balances, and self-custody differ? | [[Software Architecture/Distributed Systems/Wallet and QR Payments\|Wallet and QR Payments]] | Token and presentation mechanisms do not replace authorization, ledger, or settlement contracts. |
+| How do ACH, UPI, SWIFT, and foreign exchange change the workflow? | [[Software Architecture/Distributed Systems/Bank and Foreign Exchange Payments\|Bank and Foreign Exchange Payments]] | Each rail has its own acknowledgement, return, settlement, liquidity, and reconciliation semantics. |
 
 Start with one rail and one provider unless measured availability, authorization, or cost gains justify more routes. Put the internal intent and ledger ahead of provider-specific status. When an external result is ambiguous, show `PROCESSING` or `UNKNOWN`; resolve it through provider lookup, verified callbacks, and reconciliation rather than inventing certainty.
 

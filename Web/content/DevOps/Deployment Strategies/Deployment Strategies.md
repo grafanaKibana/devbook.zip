@@ -1,8 +1,8 @@
 ---
 publish: true
 created: 2026-07-11T21:42:40.773Z
-modified: 2026-07-16T07:27:12.031Z
-published: 2026-07-16T07:27:12.031Z
+modified: 2026-07-17T06:03:26.554Z
+published: 2026-07-17T06:03:26.554Z
 tags:
   - FolderNote
 topic:
@@ -10,18 +10,17 @@ topic:
 subtopic:
   - Deployment Strategies
 summary: How new versions reach production, balancing risk, cost, and rollback speed.
-status:
-  - Ready to Repeat
+status: Ready to Repeat
 priority: Medium
 level:
   - "2"
 ---
 
-# Deployment Strategies
+# Intro
 
 Deployment strategies control how new versions of software reach production. The right strategy balances risk tolerance, infrastructure cost, and rollback speed. A strategy is only as good as your monitoring — without metrics and alerts, you cannot detect a bad deploy fast enough to stop it.
 
-The five main strategies differ on one axis: **how much of your fleet runs the new version at any given moment** during the rollout.
+The strategies differ across several axes: whether old and new artifacts coexist, whether traffic moves separately from deployment, how much spare capacity is required, how quickly rollback changes exposure, and whether progression is time-driven or evidence-driven. Treating them as one blast-radius scale hides those operational differences.
 
 ## Deployment, Traffic, Experiment, and Feature Boundaries
 
@@ -35,7 +34,7 @@ These controls solve different problems and should be composed deliberately:
 | A/B experiment | Stable cohorts receive different experiences | A causal product hypothesis | End assignment or select a winner |
 | Feature flag | Code path exposure inside a deployed artifact | Controlled release independent of deployment | Disable the flag |
 
-Every rollout needs backward-compatible database changes, enough spare capacity for overlap, a previous artifact that still works, and an SLO threshold with an observation window. Clean up old ReplicaSets, environments, experiment assignments, and flags after the decision; otherwise the safety mechanisms become permanent operational state.
+Every rollout needs a recoverable previous artifact, compatible data/recovery steps, and a health threshold with an observation window. Strategies that run old and new versions together also need backward-compatible interfaces and enough spare capacity for that overlap. Recreate can avoid overlap capacity by accepting downtime. Clean up old ReplicaSets, environments, experiment assignments, and flags after the decision; otherwise the safety mechanisms become permanent operational state.
 
 ## All-at-Once (Big Bang)
 
@@ -62,7 +61,7 @@ strategy:
 
 Replace instances one at a time (or in small batches), keeping the rest serving traffic.
 
-**Mechanism**: Take one instance out of the load balancer → deploy new version → health check → put back in → repeat. Kubernetes `RollingUpdate` with `maxUnavailable: 1` and `maxSurge: 1` does this natively.
+**Mechanism**: Take one instance out of the load balancer → deploy new version → wait for readiness → put it back in → repeat. For a Kubernetes Deployment with ten desired replicas, `maxUnavailable: 1` permits at least nine available Pods during the rollout and `maxSurge: 1` permits up to eleven total Pods. It does not mean exactly nine serve at every instant; readiness failures, terminating Pods, disruption, and controller timing change the observed count.
 
 ```yaml
 strategy:
@@ -72,7 +71,7 @@ strategy:
     maxSurge: 1
 ```
 
-**Scenario**: A SaaS app with 10 pods. Rolling update replaces pods one by one over ~5 minutes. At any point, 9 pods serve traffic. Users see no downtime.
+**Scenario**: A SaaS app with ten Pods uses the policy above. The controller can create one extra Pod and must keep at least nine available according to Kubernetes readiness. Avoiding user-visible downtime still depends on a correct readiness probe, graceful termination, compatible old/new versions, and enough capacity in those available Pods.
 
 **Risks**:
 
@@ -123,7 +122,7 @@ strategy:
     - setWeight: 100
 ```
 
-**Scenario**: An e-commerce platform with 500k daily users. A new checkout flow is deployed to 5% of users. After 10 minutes, error rate on the canary is 0.3% vs 0.1% baseline — automated rollback triggers. Only 25k users were exposed to the bug.
+**Scenario**: An e-commerce platform handles 500,000 checkout attempts per day. If attempts were uniform, ten minutes would contain about 3,472 attempts and a 5% canary about 174—not 25,000. Size the observation window from actual traffic and the minimum sample needed to detect the regression; a tiny canary can be statistically inconclusive.
 
 **Risks**:
 
@@ -151,7 +150,7 @@ Increase traffic to the new version in fixed increments on a fixed schedule (e.g
 
 **Mechanism**: Same as canary but automated and time-driven rather than metric-driven. AWS CodeDeploy's `Linear10PercentEvery10Minutes` is the canonical implementation.
 
-**Scenario**: A Lambda function update. CodeDeploy shifts 10% of invocations to the new version every 10 minutes. After 100 minutes, 100% of traffic is on the new version. CloudWatch alarms trigger automatic rollback if error rate spikes.
+**Scenario**: A Lambda function update uses CodeDeploy's `Linear10PercentEvery10Minutes`. The first 10% shift happens at deployment start, followed by nine ten-minute increments, so full traffic is reached after roughly 90 minutes plus deployment overhead. CloudWatch alarms can stop and roll back the deployment when configured thresholds breach.
 
 **Risks**:
 
@@ -163,26 +162,26 @@ Increase traffic to the new version in fixed increments on a fixed schedule (e.g
 
 ## Comparison
 
-| Strategy | Downtime | Rollback Speed | Infra Cost | Risk Level | Best For |
-|----------|----------|----------------|------------|------------|----------|
-| All-at-Once | Full | Slow (redeploy) | Lowest | Highest | Dev/staging, internal tools |
-| In-Place (Rolling) | None | Slow (re-roll) | Low | Medium | Default for most web services |
-| Blue-Green | None | Instant (flip) | 2× during deploy | Low | High-availability, payment flows |
-| Canary | None | Fast (re-weight) | Low–medium | Lowest | High-traffic, user-facing features |
-| Linear | None | Fast (re-weight) | Low | Low | Lambda, AWS CodeDeploy workloads |
+| Strategy | Availability condition | Rollback path | Overlap cost | Exposure shape |
+|----------|------------------------|---------------|--------------|----------------|
+| All-at-Once | Downtime is expected during replacement | Redeploy the previous artifact | Lowest | Entire workload changes together |
+| In-Place (Rolling) | Avoids downtime only with readiness, capacity, and compatible versions | Roll the previous revision forward through the fleet | Configured surge or temporarily reduced capacity | One instance or batch at a time |
+| Blue-Green | Avoids downtime when green is healthy and the traffic switch succeeds | Reweight to blue while it remains compatible and available | Near-duplicate environment during transition | Full traffic moves at cutover |
+| Canary | Avoids downtime while the old fleet remains healthy | Reweight away from the canary | Incremental new-version capacity and analysis tooling | Measured cohort grows from a small share |
+| Linear | Same conditions as other weighted shifts | Reweight or redeploy through the platform | Incremental new-version capacity | Fixed traffic increments on a schedule |
 
 ## Decision Rule
 
 ```mermaid
 flowchart TD
-    A{Deploying AWS Lambda functions} -->|Yes| B[Use Linear]
-    A -->|No| C{Downtime acceptable and infra cost is the primary constraint}
-    C -->|Yes| D[Use All-at-Once]
-    C -->|No| E{Rollback speed critical or must validate full environment before cutover}
-    E -->|Yes| F[Use Blue-Green]
-    E -->|No| G{Over 10k daily users with traffic splitting and SLO-based rollback}
-    G -->|Yes| H[Use Canary]
-    G -->|No| I[Use In-Place Rolling as the default]
+    A{Downtime acceptable and overlap capacity not justified} -->|Yes| B[Use all-at-once]
+    A -->|No| C{Need a pre-provisioned environment and fast traffic reversal}
+    C -->|Yes| D[Use blue-green]
+    C -->|No| E{Can split traffic and evaluate a representative cohort}
+    E -->|Yes| F{Progress from health evidence or a fixed schedule}
+    F -->|Evidence| G[Use canary]
+    F -->|Schedule| H[Use linear]
+    E -->|No| I[Use rolling with readiness and compatibility gates]
 ```
 
 ## References

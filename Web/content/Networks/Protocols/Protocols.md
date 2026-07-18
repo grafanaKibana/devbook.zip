@@ -1,8 +1,8 @@
 ---
 publish: true
 created: 2026-07-12T14:27:20.431Z
-modified: 2026-07-16T15:17:20.857Z
-published: 2026-07-16T15:17:20.857Z
+modified: 2026-07-18T07:07:48.133Z
+published: 2026-07-18T07:07:48.133Z
 tags:
   - FolderNote
 topic:
@@ -13,7 +13,7 @@ summary: The agreed rules that let machines communicate, with each layer's proto
 priority: High
 level:
   - "3"
-status: Done
+status: Creation
 ---
 
 # Intro
@@ -45,37 +45,14 @@ Several of these protocols are interchangeable _styles_ for client–server APIs
 
 Default to REST for an external resource API with broad reach and useful HTTP caching. Choose GraphQL when independently evolving clients genuinely need selectable graph projections and the organization can govern one schema. Choose gRPC for controlled service-to-service contracts and streaming. Choose WebSockets only for low-latency bidirectional traffic; use webhooks when the receiver can expose an HTTP endpoint and eventual delivery is enough.
 
-## Links
-
-- [[API Design]]
-- [[API Pagination]]
-- [[Common Ports]]
-- [[DNS]]
-- [[DNS Operations]]
-- [[DNS Security]]
-- [[Email Authentication]]
-- [[GraphQL]]
-- [[HTTP]]
-- [[HTTP 2]]
-- [[HTTP Caching]]
-- [[HTTP Semantics]]
-- [[HTTPS and TLS]]
-- [[Live Streaming]]
-- [[NET Email Sending]]
-- [[NET HTTP Clients]]
-- [[NET REST APIs]]
-- [[REST]]
-- [[REST Maturity Model]]
-- [[RPC]]
-- [[SMTP]]
-- [[SSH]]
-- [[URL]]
-- [[WebSockets]]
-- [[gRPC]]
-
 ## References
 
 - [RFC 3986: Uniform Resource Identifier (URI): Generic Syntax](https://datatracker.ietf.org/doc/html/rfc3986) — defines URI components, relative resolution, normalization, and percent-encoding.
 - [MDN: URL](https://developer.mozilla.org/en-US/docs/Web/API/URL) — browser-facing guide to parsing and manipulating URLs with the platform `URL` API.
+- [Fielding dissertation, Chapter 5 — REST](https://ics.uci.edu/~fielding/pubs/dissertation/rest_arch_style.htm) — defines REST's resource, representation, uniform-interface, statelessness, cache, and layered-system constraints and their tradeoffs.
+- [GraphQL Specification](https://spec.graphql.org/September2025/) — normative schema, operation, selection-set, execution, and response semantics behind client-selected graph projections.
+- [gRPC Core Concepts](https://grpc.io/docs/what-is-grpc/core-concepts/) — official service-definition, generated-client, unary, and streaming RPC model.
+- [RFC 6455 — The WebSocket Protocol](https://www.rfc-editor.org/rfc/rfc6455.html) — standard opening handshake, bidirectional framing, connection lifecycle, and security model.
+- [Stripe Webhooks](https://docs.stripe.com/webhooks) — an authoritative provider example of signed event delivery, automatic retries, duplicate handling, and non-guaranteed event ordering.
 - [ByteByteGo: Eight network protocols](https://github.com/ByteByteGoHq/system-design-101/blob/b28380a4710c5ec9638ec037d4168e288f334cba/data/guides/explaining-8-popular-network-protocols-in-1-diagram.md) — source map corrected here for the HTTP/3, QUIC, UDP, HTTPS, and TLS boundaries.
 - [ByteByteGo: API architectural styles](https://github.com/ByteByteGoHq/system-design-101/blob/b28380a4710c5ec9638ec037d4168e288f334cba/data/guides/a-cheatsheet-on-comparing-api-architectural-styles.md) — source selector reframed around interaction, contract, reach, cacheability, and coupling rather than popularity.

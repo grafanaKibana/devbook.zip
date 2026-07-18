@@ -1,8 +1,8 @@
 ---
 publish: true
 created: 2026-07-15T08:54:36.059Z
-modified: 2026-07-16T15:34:07.491Z
-published: 2026-07-16T15:34:07.491Z
+modified: 2026-07-17T06:03:26.104Z
+published: 2026-07-17T06:03:26.104Z
 topic:
   - Data Persistence
 subtopic:
@@ -42,9 +42,9 @@ In SQL Server peer-to-peer transactional replication, the recommended practice i
 
 ### Leaderless (Dynamo-style)
 
-Any node accepts reads and writes. Consistency is achieved through quorums: with N replicas, a write must succeed on W nodes and a read must query R nodes, where W + R > N. Used by Cassandra, DynamoDB, and Riak.
+In Dynamo-style systems such as the original Amazon Dynamo, Cassandra, and Riak, several replicas can accept an operation and the client or coordinator can use tunable `N`, `W`, and `R` quorums. `W + R > N` creates overlap between the acknowledged write and read sets, but overlap alone does not serialize concurrent writes or prove linearizability; version reconciliation, sloppy quorums, membership changes, and failure handling still matter. Read repair and anti-entropy reconcile divergent replicas under product-specific rules.
 
-Divergence between nodes is reconciled by two background processes: read repair (a read that detects a stale replica pushes the latest value back) and anti-entropy (a background process continuously compares and syncs nodes). Quorum does not guarantee strong consistency if writes overlap. Two concurrent writes can each reach a different quorum majority.
+Do not infer Amazon DynamoDB's contract from the Dynamo name. DynamoDB does not expose client-selected `R` and `W` values. Its API documents eventual or strongly consistent reads per operation for supported single-Region resources, transactional operations with their own contract, and separate consistency/replication choices for global tables. Treat those documented operations and multi-Region modes as the boundary rather than applying the generic quorum formula.
 
 ### Model Comparison
 
@@ -54,7 +54,7 @@ Divergence between nodes is reconciled by two background processes: read repair 
 | Conflict handling | Leader orders writes; failover still needs fencing | Mandatory | Version/conflict handling plus repair |
 | Acknowledgement and reads | Sync acknowledgement can protect commit durability; replica observation still depends on replay and routing | Cross-leader acknowledgement and conflict policy are separate | Quorum settings influence overlap but do not remove concurrent-write reconciliation |
 | Failover complexity | Election, endpoint ownership, and fencing | Per-leader failure and conflict recovery | No leader election, but membership and quorum availability still matter |
-| Typical use | PostgreSQL, SQL Server AG | CouchDB, geo-distributed | Cassandra, DynamoDB |
+| Typical use | PostgreSQL, SQL Server AG | CouchDB, geo-distributed write topologies | Cassandra, Riak, original Dynamo-style systems |
 
 ## Replication Lag
 
@@ -62,9 +62,9 @@ Asynchronous acknowledgement means the leader does not wait for a standby before
 
 **1. Read-your-writes**: a user submits a form, then immediately reloads the page. The read hits a stale replica and the user sees their own write disappear. Fix: route reads to the leader for a short window after a write, or track the LSN of the last write and wait for the replica to catch up. PostgreSQL has no built-in `pg_wait_for_lsn`; application or custom database logic must poll and compare `pg_last_wal_replay_lsn()` (or an equivalent replay-position signal) with the required commit LSN. MongoDB exposes causal consistency tokens for the same boundary.
 
-**2. Monotonic reads**: a user refreshes twice and sees newer data on the first refresh, then older data on the second (two requests hit different replicas). Fix: sticky sessions. Pin a user to the same replica for the duration of a session.
+**2. Monotonic reads**: a user refreshes twice and sees newer data on the first refresh, then older data on the second. Carry the highest observed commit/replay position or a product causal token, then route to the primary or wait for a replica that has reached at least that position. Sticky routing is only an optimization while the selected replica remains available and never moves backward; by itself it does not preserve monotonicity across failover or topology change.
 
-**3. Consistent prefix reads**: causally related writes appear out of order on a replica. A reply appears before the original message. Fix: route causally related writes to the same partition so they're applied in order.
+**3. Consistent prefix reads**: causally related writes appear out of order on a replica. A reply appears before the original message. Preserve the dependency through one ordered commit stream or explicit causal metadata, and read from a replica whose applied position includes the prerequisite. Routing related writes to one partition helps only when that partition supplies the required ordering and failover preserves it; the partition key alone is not a causal guarantee.
 
 **Sync vs async tradeoff**: synchronous acknowledgement means the leader waits for the configured standby acknowledgement before confirming the write. With the right `synchronous_commit`, standby selection, and storage settings, that acknowledgement protects commit durability across failover to an eligible standby. It does not make reads from every replica linearizable: WAL can be durable but not yet replayed on a readable standby. A read that must observe the commit still needs the primary or a replica whose replay position has reached the commit token. In asynchronous acknowledgement mode, the leader confirms the write without waiting for a standby. A replica may be caught up or lagging; if the leader fails, an acknowledged commit is at risk only when no eligible surviving node received it.
 
@@ -74,13 +74,13 @@ Single-leader replication can offload reads only when routing preserves the requ
 
 ![[Assets/System Design 101/fad9c0171b8080e840a469ddf29a9f82d932eb2687a8d62fdb013bf9c3014ece.png]]
 
-The diagram shows the middleware topology, not the lag or transaction boundary. [[Replica Read Routing]] owns position tokens, transaction pinning, topology refresh, bounded waits, failover timelines, and overload behavior.
+The diagram shows the middleware topology, not the lag or transaction boundary. [[Data Persistence/SQL/Replica Read Routing|Replica Read Routing]] owns position tokens, transaction pinning, topology refresh, bounded waits, failover timelines, and overload behavior.
 
 ## CAP and PACELC
 
 The sync/async and leader-model choices above are all instances of one theorem. **CAP** says that when a network **P**artition splits your replicas, you must choose between **C**onsistency (reject reads/writes that can't be coordinated) and **A**vailability (keep serving, accept divergence) — you cannot have both _during a partition_. A single-leader system that refuses writes when it can't reach a quorum is **CP**; a leaderless Dynamo-style system that keeps accepting writes and reconciles later is **AP**.
 
-CAP only describes the partition case, which is why **PACELC** also asks whether normal operation favors latency or coordination. Synchronous commit pays latency for acknowledged durability; it is not by itself a linearizable-replica-read protocol. Strong observation additionally requires routing to the primary or waiting until the chosen replica has replayed the required position. See [[CAP theorem]] for the theorem's full boundary.
+CAP only describes the partition case, which is why **PACELC** also asks whether normal operation favors latency or coordination. Synchronous commit pays latency for acknowledged durability; it is not by itself a linearizable-replica-read protocol. Strong observation additionally requires routing to the primary or waiting until the chosen replica has replayed the required position. See [[Software Architecture/Distributed Systems/CAP theorem|CAP theorem]] for the theorem's full boundary.
 
 ## Tradeoffs
 
@@ -94,7 +94,7 @@ Replication and sharding solve different problems. Reaching for sharding before 
 | Operational complexity | Medium | High |
 | When to reach for | Read bottleneck, HA requirement | Write or storage bottleneck |
 
-Typical scaling progression: vertical scale → read replicas → caching layer → CQRS (separate read/write models) → sharding. Most applications never need sharding.
+Choose each mechanism from the measured bottleneck and required consistency boundary. Read replicas scale eligible reads; a cache removes repeated origin work with a freshness cost; sharding distributes ownership and creates cross-shard work. They are not mandatory stages of one progression.
 
 ## Pitfalls
 
@@ -113,8 +113,8 @@ Typical scaling progression: vertical scale → read replicas → caching layer 
 > [!QUESTION]- What are the three replication lag anomalies, and how do you mitigate each?
 >
 > - **Read-your-writes**: user writes then reads from a stale replica and sees their write missing. Fix: route post-write reads to the leader for a short window, or use LSN/timestamp tracking to wait for the replica to catch up.
-> - **Monotonic reads**: user sees newer data on one request, then older data on the next (different replicas). Fix: sticky sessions. Pin the user to the same replica.
-> - **Consistent prefix reads**: causally related writes appear out of order (a reply before the original message). Fix: route causally related writes to the same partition so ordering is preserved.
+> - **Monotonic reads**: user sees newer data, then an older replica. Carry the highest observed position or causal token and require the next source to have reached it; stickiness alone fails after replica failover.
+> - **Consistent prefix reads**: a dependent write appears before its prerequisite. Preserve one ordered stream or causal dependency token and read from a position that includes the prerequisite; a shared partition key helps only when its ordering contract covers the failover path.
 
 > [!QUESTION]- When would you choose synchronous vs asynchronous replication?
 >
@@ -133,6 +133,8 @@ Typical scaling progression: vertical scale → read replicas → caching layer 
 - [Types of SQL Server replication](https://learn.microsoft.com/sql/relational-databases/replication/types-of-replication?view=sql-server-ver17) — official overview of snapshot, transactional, and merge replication with use-case guidance.
 - [Always On availability groups overview](https://learn.microsoft.com/sql/database-engine/availability-groups/windows/overview-of-always-on-availability-groups-sql-server?view=sql-server-ver17) — covers synchronous vs asynchronous commit modes, failover behavior, and readable secondaries.
 - [Cosmos DB consistency levels](https://learn.microsoft.com/azure/cosmos-db/consistency-levels) — explains the five consistency levels (strong, bounded staleness, session, consistent prefix, eventual) with latency and availability tradeoffs.
+- [DynamoDB read consistency](https://docs.aws.amazon.com/amazondynamodb/latest/developerguide/HowItWorks.ReadConsistency.html) — per-operation eventual and strong read contracts; DynamoDB does not expose client-selected quorum values.
+- [DynamoDB global table consistency](https://docs.aws.amazon.com/amazondynamodb/latest/developerguide/V2globaltables_HowItWorks.html) — multi-Region replication and consistency modes, which are separate from single-Region read selection.
 - [PostgreSQL High Availability and Replication](https://www.postgresql.org/docs/15/high-availability.html) — official docs covering streaming replication, WAL shipping, and standby configuration.
 - [PostgreSQL backup control functions](https://www.postgresql.org/docs/current/functions-admin.html#FUNCTIONS-ADMIN-BACKUP) — primary definitions for current and replay WAL-location functions used by position-aware routing.
 - [Designing Data-Intensive Applications, Ch. 5: Replication (Martin Kleppmann)](https://www.oreilly.com/library/view/designing-data-intensive-applications/9781098119058/) — deep-dive into leader-follower, multi-leader, and leaderless replication with replication lag and consistency analysis.

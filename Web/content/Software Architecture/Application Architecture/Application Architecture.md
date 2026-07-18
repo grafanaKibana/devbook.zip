@@ -1,8 +1,8 @@
 ---
 publish: true
 created: 2026-07-15T11:47:54.747Z
-modified: 2026-07-16T16:59:56.013Z
-published: 2026-07-16T16:59:56.013Z
+modified: 2026-07-17T18:59:26.754Z
+published: 2026-07-17T18:59:26.754Z
 tags:
   - FolderNote
 topic:
@@ -63,14 +63,6 @@ For `new CRM deal -> create invoice -> notify account channel`:
 5. The notification action runs only after the invoice result is recorded; failures expose retry and replay state.
 
 This is not an API gateway. A gateway governs inbound traffic to APIs you own; an integration platform coordinates workflows across external applications. Connector breadth accelerates delivery but inherits each vendor's schema churn, quotas, retry semantics, OAuth token lifecycle, and credential blast radius. Keep high-value business invariants in an owned service and use the integration platform for replaceable coordination.
-
-## Links
-
-- [[Clean Architecture]]
-- [[Layered Architecture]]
-- [[MVC MVVM]]
-- [[Plug-in Architecture (MicroKernel)]]
-- [[Presentation Architecture Variants]]
 
 ## References
 

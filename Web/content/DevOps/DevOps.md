@@ -1,8 +1,8 @@
 ---
 publish: true
 created: 2026-07-12T14:27:20.430Z
-modified: 2026-07-16T11:18:02.528Z
-published: 2026-07-16T11:18:02.528Z
+modified: 2026-07-18T07:07:48.131Z
+published: 2026-07-18T07:07:48.131Z
 tags:
   - FolderNote
 icon: skull
@@ -15,7 +15,7 @@ summary: Automation, observability, and delivery practices that move changes to 
 priority: High
 level:
   - "4"
-status: Done
+status: Creation
 ---
 
 # Intro
@@ -56,17 +56,11 @@ Severity alone is not a release rule. Include exploitability, reachability, asse
 
 ![[Assets/System Design 101/277c9e9f3612e5a3efb07d8ff2d60541efec423fc7d8aaadf6ef917d06508906.png]]
 
-## Links
-
-- [[Observability]]
-- [[CPU Saturation Runbook]]
-- [[NET Observability]]
-
 ## Questions
 
 > [!QUESTION]- What does DevOps actually optimize, beyond tooling?
 >
-> - The target is flow: short lead time from commit to production and fast recovery when something breaks — the DORA metrics (deploy frequency, lead time, change-fail rate, MTTR) name this directly
+> - The target is delivery throughput and instability. DORA's current five metrics are change lead time, deployment frequency, failed deployment recovery time, change fail rate, and deployment rework rate.
 > - Automation (CI/CD, infrastructure as code) exists to make releases boring and repeatable, removing the manual steps where humans introduce variance
 > - Observability (logs, metrics, traces) exists so failures are visible before users report them and diagnosable without a redeploy
 > - Ownership closes the loop: the team that ships a change runs it, so production feedback shapes the next change
@@ -80,7 +74,7 @@ Severity alone is not a release rule. Include exploitability, reachability, asse
 
 ## References
 
-- [DORA / Accelerate research](https://dora.dev/) — evidence-based measures of software delivery performance and the practices that drive them.
+- [DORA software delivery performance metrics](https://dora.dev/guides/dora-metrics/) — current primary definition of the five metrics, including failed deployment recovery time and deployment rework rate.
 - [Google SRE Book](https://sre.google/sre-book/table-of-contents/) — the canonical text on running production systems: SLOs, error budgets, and incident response.
 - [The Twelve-Factor App](https://12factor.net/) — foundational methodology for building deployable, scalable services.
 - [Google SRE Workbook: Implementing SLOs](https://sre.google/workbook/implementing-slos/) — primary SRE operating mechanics for objectives and error budgets.

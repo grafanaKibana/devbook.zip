@@ -1,12 +1,11 @@
 ---
 publish: true
 created: 2026-07-15T08:55:49.824Z
-modified: 2026-07-16T08:59:14.312Z
-published: 2026-07-16T08:59:14.312Z
+modified: 2026-07-17T05:56:46.323Z
+published: 2026-07-17T05:56:46.323Z
 topic:
   - Data Persistence
-subtopic:
-  - SQL
+subtopic: []
 summary: Four properties (Atomicity, Consistency, Isolation, Durability) guaranteeing reliable database transactions.
 level:
   - "3"
@@ -14,7 +13,7 @@ priority: High
 status: Ready to Repeat
 ---
 
-# ACID
+# Intro
 
 ACID names four properties a database transaction can provide: Atomicity, Consistency, Isolation, and Durability. A **transaction** groups reads and writes behind one commit decision. The engine can roll the group back, constrain concurrent histories, and recover committed state after a crash, but only within the database and durability settings actually used.
 
@@ -70,7 +69,7 @@ This table states the SQL standard's minimum guarantees, not a portable predicti
 
 #### MVCC and snapshot isolation
 
-Isolation is implemented with **locking**, **MVCC/versioning**, or both. See [[Database Locks]] for lock modes, granularity, and escalation. Under MVCC, writes create row versions and a snapshot decides which versions a statement may see. PostgreSQL Read Committed takes a new snapshot per statement; Repeatable Read and Serializable use a transaction snapshot. SQL Server uses row versioning for `READ_COMMITTED_SNAPSHOT` and `SNAPSHOT` when configured.
+Isolation is implemented with **locking**, **MVCC/versioning**, or both. See [[Data Persistence/SQL/Database Locks|Database Locks]] for lock modes, granularity, and escalation. Under MVCC, writes create row versions and a snapshot decides which versions a statement may see. PostgreSQL Read Committed takes a new snapshot per statement; Repeatable Read and Serializable use a transaction snapshot. SQL Server uses row versioning for `READ_COMMITTED_SNAPSHOT` and `SNAPSHOT` when configured.
 
 MVCC reduces ordinary reader-writer blocking; it does not mean reads and writes can never block. Writers still conflict with writers, explicit locks can block readers, schema changes need stronger locks, and old versions must be retained while a snapshot can still see them. PostgreSQL reclaims dead tuples through `VACUUM`; SQL Server stores row versions in its version store.
 
@@ -91,7 +90,7 @@ Each transaction preserved "someone else is on call" in its snapshot; together t
 Once a transaction commits under the engine's durable configuration, its changes survive a database or operating-system crash. With write-ahead logging (WAL), the engine records enough redo information before the corresponding data pages are written. A strict commit waits until the commit record reaches durable storage; recovery replays committed WAL after a crash.
 
 > [!NOTE]
-> Durability is a configured contract. Group commit can preserve local durability while several transactions share one log flush. PostgreSQL `synchronous_commit = off` may acknowledge before local WAL is flushed and accepts a bounded crash-loss window for lower commit latency. Replication is a separate choice about surviving node loss and availability: asynchronous replicas may lag, while synchronous replication adds a remote acknowledgement to the commit path. See [[Replication]].
+> Durability is a configured contract. Group commit can preserve local durability while several transactions share one log flush. PostgreSQL `synchronous_commit = off` may acknowledge before local WAL is flushed and accepts a bounded crash-loss window for lower commit latency. Replication is a separate choice about surviving node loss and availability: asynchronous replicas may lag, while synchronous replication adds a remote acknowledgement to the commit path. See [[Data Persistence/SQL/Replication|Replication]].
 
 A committed row can still disappear when storage hardware lies about flush completion, the filesystem or controller is misconfigured, or the operator restores an older backup. ACID describes the database protocol; the end-to-end durability claim also depends on the storage stack and recovery procedure.
 
@@ -99,10 +98,10 @@ A committed row can still disappear when storage hardware lies about flush compl
 
 ACID guarantees are easy _within one database engine_. The moment a unit of work spans **two databases or services**, atomicity is no longer free:
 
-- **Two-Phase Commit (2PC)** — a coordinator asks every participant to _prepare_ (vote), then _commit_ or _abort_ all together. It preserves atomicity across resources but is slow and **blocks if the coordinator dies mid-protocol** (participants hold locks waiting), so it's avoided in high-scale systems.
-- **Saga pattern** — instead of one distributed transaction, run a sequence of _local_ ACID transactions, each with a **compensating action** to undo it if a later step fails. You trade atomicity for eventual consistency and explicit rollback logic. This is the dominant approach in microservices. See [[Distributed Transactions]].
+- **Two-Phase Commit (2PC)** — a coordinator asks every participant to _prepare_ (vote), then _commit_ or _abort_ all together. A participant that has prepared but cannot learn the coordinator's decision may have to retain locks and recovery state until the decision becomes available. Presumed-abort/commit variants, replicated coordinators, and timeout policies change the operational boundary but do not let a prepared participant decide independently.
+- **Saga pattern** — instead of one distributed transaction, run a sequence of _local_ ACID transactions, each with a compensating action or forward-recovery step when later work fails. You trade one atomic commit for explicit intermediate states, idempotency, compensation limits, and eventual completion. Choose it only when the business operation can tolerate those semantics. See [[Software Architecture/Distributed Systems/Distributed Transactions|Distributed Transactions]].
 
-Also note that concurrent transactions can produce **deadlocks** (two transactions each holding a lock the other needs); the engine picks a victim and rolls it back, so transactional code must be retry-safe — see [[Deadlocks]]. Retrying is safe only when the application can also resolve an ambiguous commit result without applying the business operation twice.
+Also note that concurrent transactions can produce **deadlocks** (two transactions each holding a lock the other needs); the engine picks a victim and rolls it back, so transactional code must be retry-safe — see [[Programming/NET/CSharp/Concurrency and Parallelism/Deadlocks|Deadlocks]]. Retrying is safe only when the application can also resolve an ambiguous commit result without applying the business operation twice.
 
 ## Pitfalls
 

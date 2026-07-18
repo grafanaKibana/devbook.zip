@@ -1,8 +1,8 @@
 ---
 publish: true
 created: 2026-07-11T21:48:23.931Z
-modified: 2026-07-16T08:59:28.828Z
-published: 2026-07-16T08:59:28.828Z
+modified: 2026-07-17T05:47:33.107Z
+published: 2026-07-17T05:47:33.107Z
 topic:
   - Security
 subtopic:
@@ -44,7 +44,7 @@ A compromised package, build action, registry, or signing identity reaches produ
 
 ### A04: Cryptographic Failures
 
-Sensitive data is exposed because protection is absent or the primitive, parameters, nonce, key, or trust model is wrong. Plain SHA-256 password hashes and a reused AES-GCM nonce are different failures with the same root: cryptography was applied outside its required construction. Use approved libraries, [[Password Storage]], [[Encryption]], and managed key lifecycles.
+Sensitive data is exposed because protection is absent or the primitive, parameters, nonce, key, or trust model is wrong. Plain SHA-256 password hashes and a reused AES-GCM nonce are different failures with the same root: cryptography was applied outside its required construction. Use approved libraries, [[Security/Password Storage|password-storage schemes]], [[Security/Encryption|authenticated encryption]], and managed key lifecycles.
 
 ### A05: Injection
 
@@ -78,57 +78,17 @@ Unexpected states, timeouts, resource exhaustion, partial failure, or exception 
 
 ## API Threats and Controls
 
-An API checklist is useful only when each control names the threat it prevents and the signal that reveals failure. Apply authorization at the object, property, and function levels; a valid token does not prove that the caller may read object `42` or set its `isAdmin` property.
+For an API, apply the same Top 10 categories at the object, property, and function levels. A valid token does not prove that the caller may read object `42`, set its `isAdmin` property, or invoke an administrative operation. Load the exact resource, authorize each action, bind writable schemas, reject unknown fields, parameterize interpreter inputs, and bound payload size, concurrency, and workflow retries.
 
-| Threat | Preventive control | Detective control |
-| --- | --- | --- |
-| Traffic interception or modification | TLS on every external and service boundary; authenticated upstreams | Certificate and handshake failures; unexpected plaintext listeners |
-| Stolen or replayed credentials | Appropriate authentication, short-lived scoped tokens, issuer/audience validation, replay controls where the protocol supports them | Token reuse from new devices or regions; authentication anomalies |
-| Object or property access bypass | Load the exact resource, authorize every operation, bind writable schemas, deny unknown fields | Denied cross-tenant identifiers; writes to protected fields |
-| Injection and malformed input | Typed schemas, bounds, parameterized queries, safe interpreters | Validation-failure rates; database and process errors without raw payload logging |
-| Resource and business-flow abuse | Per-identity quotas, concurrency and payload limits, idempotency, workflow-specific anti-automation controls | Cost, latency, queue depth, and conversion anomalies by caller and operation |
-| Secret exposure | Dedicated secret storage, narrow workload identities, redaction before telemetry | Secret scanning and access audit events |
-| Error disclosure | Stable external error contracts; no stack traces or internal identifiers | Error-shape tests and production response sampling |
-| Stale or shadow APIs | Owned inventory of hosts, routes, versions, and retirement dates | Discovery results that do not match the inventory |
-| Vulnerable components or unsafe upstream data | Verified dependencies, patched runtimes, validate third-party responses as untrusted input | Software inventory alerts and upstream contract violations |
-
-### Keep Identity and Protocol Roles Separate
-
-- **Basic authentication** is an HTTP credential scheme. It sends a reusable user ID and password encoding on each request and therefore requires TLS and careful scope; it is not categorically repaired by changing the credential to a JWT.
-- **JWT** is a token format. A signed JWT may carry an ID token, access token, or another assertion, and each use needs distinct issuer, audience, type, algorithm, and claim validation.
-- **OAuth** is an authorization framework for obtaining scoped access to a protected resource. It does not by itself authenticate the end user; OpenID Connect adds an identity layer for that use case.
-- **HMAC JWT secrets** require enough random key material and safe distribution to every verifier. Asymmetric verification or opaque tokens may be a better trust boundary; “use a random symmetric secret” is not universal architecture guidance.
-
-Do not log tokens, passwords, API keys, card data, or request bodies merely because monitoring is a control. Log safe identifiers, decision outcomes, policy names, latency, and bounded failure categories so defenders can detect abuse without creating another sensitive-data store.
+Pair preventive controls with evidence: denied cross-tenant identifiers for access control, validation-failure rates for malformed input, inventory drift for shadow endpoints, and cost or queue-depth anomalies for resource abuse. Do not log tokens, passwords, API keys, card data, or request bodies to obtain that evidence. Basic authentication, JWT, OAuth, and OpenID Connect also remain different protocol roles; changing token format does not repair a missing authorization or trust check.
 
 ## Pitfalls
 
 ### Checklist Security (False Sense of Compliance)
 
-**What goes wrong**: a team works through the OWASP Top 10 as a checklist, marks each item 'done,' and considers the application secure. The Top 10 is a minimum baseline, not a comprehensive security program.
+**What goes wrong**: a team marks each broad risk class "done" and treats the result as proof of security, even though the list cannot identify this application's assets, trust boundaries, business rules, or chained abuse cases.
 
-**Why it matters**: the Top 10 names broad risk classes, not every exploit path in a particular application. A business-logic bypass or supply-chain compromise may fall under a listed class, but the document cannot identify the application's assets, trust boundaries, workflows, or concrete abuse cases.
-
-**Mitigation**: use the Top 10 as a starting point. Add threat modeling, penetration testing, and security code review. Treat security as a continuous process, not a one-time audit.
-
-### Stale Dependency Scanning
-
-**What goes wrong**: `dotnet list package --vulnerable` is run once during setup and never again. New CVEs are published daily; a package that was safe last month may be vulnerable today.
-
-**Mitigation**: automate dependency scanning in CI (GitHub Dependabot, OWASP Dependency-Check). Set up alerts for new CVEs in your dependency tree. Pin dependency versions and review updates regularly.
-
-## Tradeoffs
-
-**Security scanning depth vs CI speed**
-
-| Approach | Coverage | CI Impact | When to use |
-|----------|----------|-----------|-------------|
-| SAST (static analysis) | Code patterns, known vulnerabilities | Low (seconds) | Every PR |
-| DAST (dynamic analysis) | Runtime vulnerabilities, auth bypasses | High (minutes) | Nightly or pre-release |
-| Penetration testing | Business logic, chained vulnerabilities | Very high (days) | Quarterly or pre-launch |
-| Dependency scanning | Known CVEs in dependencies | Low (seconds) | Every PR |
-
-**Decision rule**: run SAST and dependency scanning on every PR (fast, automated). Run DAST nightly against a staging environment. Schedule penetration testing quarterly or before major releases. Do not skip DAST because it is slow — it catches vulnerabilities that static analysis cannot.
+**Mitigation**: use the Top 10 to seed threat models and verification. Add architecture-specific abuse cases, security review, dependency monitoring, runtime testing, and penetration testing according to the system's exposure and release risk.
 
 ## Questions
 

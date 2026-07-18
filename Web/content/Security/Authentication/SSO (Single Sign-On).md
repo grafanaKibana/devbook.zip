@@ -1,8 +1,8 @@
 ---
 publish: true
 created: 2026-07-16T07:36:21.597Z
-modified: 2026-07-16T08:08:03.973Z
-published: 2026-07-16T08:08:03.973Z
+modified: 2026-07-17T05:46:25.660Z
+published: 2026-07-17T05:46:25.660Z
 topic:
   - Security
 subtopic:
@@ -20,7 +20,7 @@ Single Sign-On (SSO) lets several applications rely on one identity provider (Id
 
 The main operational benefit is centralized authentication policy and account lifecycle. The matching cost is concentration: an IdP outage blocks new logins, and an IdP compromise can reach every relying application.
 
-See [[Oauth OIDC (OpenId Connect)|OAuth/OIDC]] for the underlying OAuth roles and token rules.
+See [[Security/Authentication/Oauth OIDC (OpenId Connect)|OAuth/OIDC]] for the underlying OAuth roles and token rules.
 
 ## Federated browser flow
 

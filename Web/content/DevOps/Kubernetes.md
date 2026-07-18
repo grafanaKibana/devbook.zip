@@ -1,8 +1,8 @@
 ---
 publish: true
 created: 2026-07-11T21:47:07.438Z
-modified: 2026-07-16T12:34:48.202Z
-published: 2026-07-16T12:34:48.202Z
+modified: 2026-07-17T05:55:07.558Z
+published: 2026-07-17T05:55:07.558Z
 topic:
   - DevOps
 subtopic: []
@@ -13,7 +13,7 @@ priority: High
 status: Ready to Repeat
 ---
 
-# Kubernetes
+# Intro
 
 Kubernetes (K8s) is a container orchestration platform that automates deployment, scaling, and self-healing of containerized workloads built from OCI-compatible images. Kubelets ask a Container Runtime Interface (CRI)-compatible runtime, such as containerd or CRI-O, to create containers; Kubernetes does not require Docker Engine. The core value proposition: declare the desired state of your system, and Kubernetes continuously reconciles reality to match it.
 
@@ -65,10 +65,20 @@ spec:
             cpu: "500m"
         livenessProbe:
           httpGet:
-            path: /health
+            path: /health/live
             port: 8080
-          initialDelaySeconds: 10
           periodSeconds: 15
+        readinessProbe:
+          httpGet:
+            path: /health/ready
+            port: 8080
+          periodSeconds: 5
+        startupProbe:
+          httpGet:
+            path: /health/startup
+            port: 8080
+          periodSeconds: 5
+          failureThreshold: 30
         env:
         - name: ConnectionStrings__Default
           valueFrom:
@@ -121,7 +131,7 @@ Use ClusterIP for service-to-service traffic. Use LoadBalancer for a small numbe
 
 **Unmeasured resource policy**: Requests are scheduler reservations used for placement and capacity planning, not hints. Set CPU and memory requests from observed demand plus headroom. A CPU limit enforces a quota by throttling; a memory limit bounds usage by making the container eligible for an OOM kill. Use limits deliberately for fairness and containment—blanket CPU limits can create latency through throttling—and enforce team defaults with `LimitRange` or policy where needed.
 
-**Liveness probe misconfiguration**: A liveness probe that fails during startup causes Kubernetes to restart the pod in a loop (CrashLoopBackOff). Fix: set `initialDelaySeconds` to be longer than your app's startup time, or use a `startupProbe` for slow-starting apps.
+**Probe misconfiguration**: A liveness probe that fails during startup restarts the container, while a readiness probe that reports healthy too early sends traffic before dependencies are ready. Use a `startupProbe` to gate liveness and readiness during slow initialization, a readiness probe to control Service endpoints, and a liveness probe only for states that require a restart. Keep readiness independent of optional downstreams that would otherwise remove every replica during their outage.
 
 **Secrets are not encrypted at rest by default**: Kubernetes Secrets are base64-encoded, not encrypted. Anyone with etcd access can read them. Fix: enable etcd encryption at rest, or use external secret management (Azure Key Vault with the Secrets Store CSI driver, or Sealed Secrets).
 
@@ -137,11 +147,11 @@ Use ClusterIP for service-to-service traffic. Use LoadBalancer for a small numbe
 | Upgrade effort | Low | High | N/A |
 | Control-plane cost | Provider fee or plan varies; workers, networking, storage, and operations remain | Control-plane infrastructure plus engineering and on-call work | VM and runtime costs plus application operations |
 | Scale | Multi-node, auto-scale | Multi-node | Single host |
-| Production fit | Yes | Yes (with expertise) | No |
+| Production fit | Multi-node workloads with platform operations | Multi-node workloads with platform expertise | Bounded single-host workloads without HA requirements |
 
 **Managed vs self-hosted**: Use managed K8s unless regulatory, edge, platform-control, or provider constraints justify self-hosting. Compare current provider pricing with worker, network, storage, upgrade, support, and on-call costs. A self-hosted control plane may avoid a provider fee while costing more in infrastructure and operator time; there is no universal hourly price.
 
-**K8s vs Docker Compose**: Compose is for local development and simple single-host deployments. K8s is for production multi-node workloads that need rolling updates, auto-scaling, and self-healing. Do not use Compose in production for anything that needs HA.
+**K8s vs Docker Compose**: Compose is a good fit for local development and can run bounded single-host production workloads when host failure and manual rollout are acceptable. Kubernetes fits multi-node workloads that need scheduling, controlled rollout, autoscaling, and reconciliation. Compose does not supply high availability; Kubernetes adds mechanisms for it but still requires sound application probes, capacity, disruption policy, and failure-domain design.
 
 ## Questions
 
@@ -151,7 +161,7 @@ Use ClusterIP for service-to-service traffic. Use LoadBalancer for a small numbe
 > - Deployment: manages a set of identical pods; handles rolling updates and scaling.
 > - Service: stable network endpoint (DNS name + IP) that load-balances across pods.
 > - Pods are ephemeral (new IP on restart); Services provide stable addressing.
-> - Tradeoff: Deployments add a layer of abstraction over pods, but that abstraction enables zero-downtime updates.
+> - A Deployment supports controlled rolling replacement, but does not guarantee zero downtime. Readiness, graceful shutdown, compatible versions, disruption budgets, and enough spare capacity must all hold.
 
 > [!QUESTION]- Why do Kubernetes Secrets need additional protection beyond base64 encoding?
 >
@@ -175,6 +185,7 @@ Use ClusterIP for service-to-service traffic. Use LoadBalancer for a small numbe
 - [Kubernetes Security Best Practices](https://kubernetes.io/docs/concepts/security/security-checklist/) — official security checklist covering RBAC, network policies, and secret management
 - [Kubernetes workload management](https://kubernetes.io/docs/concepts/workloads/controllers/) — official controller lifecycle and reconciliation behavior.
 - [Kubernetes Services](https://kubernetes.io/docs/concepts/services-networking/service/) — official ClusterIP, NodePort, LoadBalancer, ExternalName, endpoint, and source-IP semantics.
+- [Kubernetes probes](https://kubernetes.io/docs/concepts/configuration/liveness-readiness-startup-probes/) — primary liveness, readiness, and startup gating semantics.
 - [Gateway API](https://gateway-api.sigs.k8s.io/) — Kubernetes SIG project for role-oriented traffic configuration.
 - [ByteByteGo: Kubernetes patterns](https://github.com/ByteByteGoHq/system-design-101/blob/b28380a4710c5ec9638ec037d4168e288f334cba/data/guides/top-10-k8s-design-patterns.md) — source contribution for the application/controller pattern map.
 - [ByteByteGo: Kubernetes Service types](https://github.com/ByteByteGoHq/system-design-101/blob/b28380a4710c5ec9638ec037d4168e288f334cba/data/guides/top-4-kubernetes-service-types-in-one-diagram.md) — source contribution for the service-exposure selector.

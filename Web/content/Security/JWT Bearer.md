@@ -1,8 +1,8 @@
 ---
 publish: true
 created: 2026-07-11T21:48:35.037Z
-modified: 2026-07-16T08:59:28.663Z
-published: 2026-07-16T08:59:28.663Z
+modified: 2026-07-17T05:46:26.705Z
+published: 2026-07-17T05:46:26.705Z
 topic:
   - Security
 subtopic:
@@ -113,7 +113,7 @@ The middleware retrieves the OpenID Connect discovery document for the configure
 > [!QUESTION]- What is a JWT token and why is it not encrypted by default?
 >
 > - JWT is a compact token format: `header.payload.signature` (base64url encoded).
-> - Signed (JWS) means the signature proves integrity and issuer, but the payload is readable by anyone with the token.
+> - Signed (JWS) means the signature proves integrity and authenticity under the selected trusted key; issuer validation binds that key and token to the expected issuer. The payload is still readable by anyone with the token.
 > - Encryption (JWE) is a separate standard that wraps the JWT in an encrypted envelope.
 > - Tradeoff: signed-only JWTs are simpler and faster to validate; JWE adds encryption overhead and key management complexity.
 

@@ -1,8 +1,8 @@
 ---
 publish: true
 created: 2026-07-12T14:27:20.429Z
-modified: 2026-07-16T11:14:28.297Z
-published: 2026-07-16T11:14:28.297Z
+modified: 2026-07-17T18:59:25.691Z
+published: 2026-07-17T18:59:25.691Z
 tags:
   - FolderNote
 icon: database
@@ -43,7 +43,7 @@ Most systems combine a relational system of record with a cache, search index, o
 
 These storage types differ by the unit an application controls. The provider name matters less than the access contract exposed to the workload:
 
-| Concern | Block storage | File storage | [[Object Storage]] |
+| Concern | Block storage | File storage | [[Data Persistence/Object Storage\|Object Storage]] |
 | --- | --- | --- | --- |
 | Access unit | Addressed blocks presented as a volume | Files and directories through a filesystem protocol | Whole objects addressed by bucket/container and key |
 | Namespace owner | Attached host or storage-aware application formats and manages it | Filesystem manages hierarchical paths, permissions, and locks | Service manages a flat keyspace; clients emulate folders with prefixes |
@@ -64,9 +64,9 @@ Start with the slow request and follow its time, not a list of fashionable remed
 1. Split request time into pool wait, query execution, lock wait, network, serialization, and downstream calls. Correlate the same interval with CPU, memory, IOPS, connection count, cache hit rate, rows scanned, and replication lag.
 2. Capture the actual SQL and representative parameters. Use the engine's plan tooling, such as PostgreSQL `EXPLAIN (ANALYZE, BUFFERS)`, to compare estimated rows, actual rows, scans, joins, spills, and I/O.
 3. Fix the smallest demonstrated cause: return fewer columns/rows, remove an N+1 path, add or correct an index, shorten a transaction, or change a schema/query shape. Re-run the same trace and load.
-4. If requests wait for connections while the database is healthy, correct leaks and size [[Connection Pooling|the pool]] against the whole fleet. A larger pool does not repair saturated storage or lock contention.
-5. Add [[Caching]] or a materialized read model only when repeated reads tolerate a declared freshness window. Add [[Replication|read replicas]] when reads dominate and replica lag is acceptable.
-6. Scale the node after the query path is sound. Partition or [[Sharding|shard]] only when one node's measured capacity, data size, or failure/recovery boundary remains the limiter.
+4. If requests wait for connections while the database is healthy, correct leaks and size [[Data Persistence/Connection Pooling|the pool]] against the whole fleet. A larger pool does not repair saturated storage or lock contention.
+5. Add the persistence-layer [[Data Persistence/Caching|cache]] or a materialized read model only when repeated reads tolerate a declared freshness window. Add [[Data Persistence/SQL/Replication|read replicas]] when reads dominate and replica lag is acceptable.
+6. Scale the node after the query path is sound. Partition or [[Data Persistence/SQL/Sharding|shard]] only when one node's measured capacity, data size, or failure/recovery boundary remains the limiter.
 
 ![[Assets/System Design 101/94d4e3977b26995fbd3441f34132d0998e82a30cd432be335971b7dc50cf3975.png]]
 
@@ -81,9 +81,9 @@ Move down the ladder only when the previous step no longer meets a concrete load
 | Query and access-path repair | High rows scanned, bad estimates, N+1 calls, lock waits, or unnecessary payload | More capacity from the existing system without changing its consistency model | Indexes add write/storage cost; query/schema changes need regression tests |
 | Materialized view or denormalized read model | Stable expensive join/aggregate dominates reads | Precomputed reads with predictable shape | Refresh logic, duplicate data, and a freshness boundary |
 | Vertical scaling | CPU, RAM, or storage throughput is saturated after query repair | Same data model and transaction boundary on a larger node | Higher failure concentration, finite ceiling, and larger restart/recovery events |
-| [[Caching]] | Repeated reads tolerate staleness and origin load is the bottleneck | Lower read latency and fewer origin requests | Invalidation, stampedes, eviction, and stale answers |
-| [[Replication\|Read replicas]] | Reads dominate; primary writes are healthy | More read capacity and additional failover options | Replication lag, read-your-writes routing, promotion, and replica cost |
-| [[Sharding]] | One writer or data set exceeds the largest acceptable node | Horizontal write/storage distribution | Shard-key constraints, resharding, hot shards, and cross-shard transaction/query work |
+| [[Data Persistence/Caching\|Caching]] | Repeated reads tolerate staleness and origin load is the bottleneck | Lower read latency and fewer origin requests | Invalidation, stampedes, eviction, and stale answers |
+| [[Data Persistence/SQL/Replication\|Read replicas]] | Reads dominate; primary writes are healthy | More read capacity and additional failover options | Replication lag, read-your-writes routing, promotion, and replica cost |
+| [[Data Persistence/SQL/Sharding\|Sharding]] | One writer or data set exceeds the largest acceptable node | Horizontal write/storage distribution | Shard-key constraints, resharding, hot shards, and cross-shard transaction/query work |
 
 Combining steps is normal, but their guarantees do not compose for free. A cached read from a lagging replica now has two freshness delays; a denormalized view across shards needs an explicit delivery and replay protocol.
 
@@ -91,24 +91,16 @@ Combining steps is normal, but their guarantees do not compose for free. A cache
 
 | Need | Pattern | Mechanism | Cost to accept |
 | --- | --- | --- | --- |
-| Lower latency for repeated reads | [[Caching\|Cache-aside]] | Read cache first; load from the source on miss; invalidate after source writes | Staleness window, miss storms, eviction, and another failure mode |
+| Lower latency for repeated reads | [[Data Persistence/Caching\|Cache-aside]] | Read cache first; load from the source on miss; invalidate after source writes | Staleness window, miss storms, eviction, and another failure mode |
 | Precompute expensive derived reads | Materialized view | Store a query result or projection and refresh it on a schedule or change | Refresh lag, extra storage, and failed/duplicate update handling |
 | Separate read and write models | [[Software Architecture/Patterns/Architectural Patterns/CQRS\|CQRS]] | Commands update a write model; queries use an independently shaped read model | Synchronization, messaging, and consistency boundaries |
 | Keep historical source of truth | [[Software Architecture/Patterns/Architectural Patterns/Event Sourcing\|Event Sourcing]] | Append events and rebuild current state by replay or snapshots | Schema evolution, replay cost, idempotency, and irreversible event history |
-| Support an alternate lookup | [[SQL/Indexes\|Index table or secondary index]] | Maintain another key-to-record path for a known query | Every write must update it; rebuilds and uniqueness need a protocol |
-| Distribute data and write load | [[Sharding]] | Route each partition key to one shard | Cross-shard work, resharding, skew, and hot keys |
+| Support an alternate lookup | [[Data Persistence/SQL/Indexes\|Index table or secondary index]] | Maintain another key-to-record path for a known query | Every write must update it; rebuilds and uniqueness need a protocol |
+| Distribute data and write load | [[Data Persistence/SQL/Sharding\|Sharding]] | Route each partition key to one shard | Cross-shard work, resharding, skew, and hot keys |
 
 ![[Assets/System Design 101/19667e3708ba5576460f25e9457a0ba8d8789b65092caa933a5a0d16317d0942.png]]
 
 The categories overlap: CQRS can use materialized views, event sourcing can feed them, and shards can each maintain local indexes. Name the problem first. Event sourcing is not a cache strategy, and a secondary index is not a substitute for partitioning a write bottleneck.
-
-## Links
-
-- [[Caching Operations]]
-- [[Caching Systems]]
-- [[Erasure Coding]]
-- [[Object Storage]]
-- [[Serverless Databases]]
 
 ## Questions
 
@@ -118,13 +110,6 @@ The categories overlap: CQRS can use materialized views, event sourcing can feed
 > - Reach for NoSQL when a specific access pattern dominates and relational cost is real: key-value or document stores for simple high-throughput lookups, wide-column for massive write volume, graph stores for relationship-heavy traversal
 > - The honest driver is usually the data model and query pattern, not scale — most services never outgrow a well-indexed relational database, and "web-scale" is rarely the actual constraint
 > - Combining them is common and often better than committing everything to one model: a relational system of record with a document or cache layer for a hot read path
-
-> [!QUESTION]- When is an ORM the right abstraction, and when should you drop to raw SQL?
->
-> - ORMs earn their keep for CRUD and domain mapping: they remove boilerplate, keep queries type-safe, and handle change tracking and migrations — most application code is better with one than without
-> - They hurt when they hide cost: the N+1 query problem, accidental full-table loads, and opaque generated SQL turn a one-line query into a performance incident
-> - Drop to raw SQL (or a hand-tuned query) for reporting, bulk operations, and hot paths where you need index control and a predictable query plan
-> - The durable skill is reading the SQL the ORM emits — treat it as a productivity default, not a reason to stop understanding the database underneath
 
 ## References
 

@@ -1,8 +1,8 @@
 ---
 publish: true
 created: 2026-07-14T19:22:41.324Z
-modified: 2026-07-16T06:36:27.886Z
-published: 2026-07-16T06:36:27.886Z
+modified: 2026-07-17T05:45:14.282Z
+published: 2026-07-17T05:45:14.282Z
 topic:
   - Programming
 subtopic:
@@ -24,7 +24,7 @@ status: Creation
 
 - `WriteAsync` follows the configured full-buffer policy. In the default `Wait` mode, it completes after the item is accepted and suspends the producer on a full channel until space frees up, without parking a thread. In `DropWrite` mode, completion does not prove acceptance: a full buffer can discard the incoming item. **Waiting in `Wait` mode is the backpressure.**
 - `TryWrite` returns `false` immediately instead of waiting; `WaitToWriteAsync` awaits capacity, returning `false` once the channel is completed. Looping the two avoids per-item await machinery on hot paths.
-- `reader.ReadAllAsync()` returns an `IAsyncEnumerable<T>`, so a consumer is an `await foreach`. Items come out **FIFO** — the ordering [[Semaphore|SemaphoreSlim]] does not guarantee.
+- `reader.ReadAllAsync()` returns an `IAsyncEnumerable<T>`, so a consumer is an `await foreach`. Items come out **FIFO** — the ordering [[Programming/NET/CSharp/Concurrency and Parallelism/Semaphore|SemaphoreSlim]] does not guarantee.
 - `writer.Complete()` says _no more items_: the reader drains the buffer, `ReadAllAsync` ends the loop, `reader.Completion` completes. Without it the reader cannot know the stream ended.
 
 `BoundedChannelFullMode`, fixed at construction, is the entire backpressure decision:
