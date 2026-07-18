@@ -42,7 +42,33 @@ Write-side aggregates enforce invariants; read-side models optimize querying.
 Read models are disposable when they are derived only from replayable event history and can be rebuilt deterministically.
 ### Snapshots
 
-Snapshots cache aggregate state at a known stream version so loading can replay only the tail. They are disposable performance artifacts, not the source of truth. [[Event Store Operations]] owns snapshot compatibility, projection rebuilds, checkpoints, and replay isolation.
+Snapshots cache aggregate state at a known stream version so loading can replay only the tail. They are disposable performance artifacts, not the source of truth. Validate the snapshot type and version, then replay the tail; if it is incompatible, discard it and rebuild from the stream.
+
+Preserve old event meaning. Prefer additive schema changes, upcasters from historical representations, or new event types. Never rewrite history merely to make today's class deserialize.
+
+### Append and projection operations
+
+Load stream `order-123` at version 17, rebuild the aggregate, and append new events with expected version 17. The store atomically accepts the batch as versions 18 and 19 or rejects it because another writer already advanced the stream. Every stored event needs a stable event ID, stream version, event type, schema version, and occurred-at timestamp.
+
+```csharp
+public interface IEventStore
+{
+    Task<IReadOnlyList<StoredEvent>> ReadAsync(
+        string streamId,
+        long fromVersion,
+        CancellationToken ct);
+
+    Task AppendAsync(
+        string streamId,
+        long expectedVersion,
+        IReadOnlyList<DomainEvent> events,
+        CancellationToken ct);
+}
+```
+
+A projector stores its checkpoint separately from the read model or commits both atomically when the storage technology allows it. Handlers must be deterministic and idempotent because a crash can replay the last batch. During a rebuild, write to a new projection version, validate counts and business invariants, then switch readers. Do not delete the working projection first.
+
+Replay must not call today's payment provider, send email, or read the current clock. Isolate external effects behind live-delivery handlers that are disabled during rebuild.
 ### Request-to-projection sequence
 ```mermaid
 sequenceDiagram
@@ -80,7 +106,71 @@ The image's rebuild arrow is conditional, not automatic. Replay is trustworthy o
 
 ## .NET aggregate example
 
-[[Event-Sourced Aggregate in NET]] contains the replayable `Order` aggregate, its command invariants, uncommitted-event handling, and the expected-version append boundary. Keeping the implementation separate leaves this note focused on when an event stream should be the source of truth.
+An event-sourced aggregate never mutates fields directly from a command. It raises an event, applies the same handler used during replay, and records that event for the store to append.
+
+```csharp
+public sealed class Order
+{
+    private readonly List<IDomainEvent> _uncommitted = [];
+    private readonly List<(string Sku, int Quantity, decimal UnitPrice)> _items = [];
+
+    public Guid Id { get; private set; }
+    public bool IsPlaced { get; private set; }
+    public bool IsShipped { get; private set; }
+    public IReadOnlyCollection<IDomainEvent> UncommittedEvents => _uncommitted;
+
+    public static Order FromHistory(IEnumerable<IDomainEvent> history)
+    {
+        var order = new Order();
+
+        foreach (var @event in history)
+        {
+            order.Apply(@event);
+        }
+
+        return order;
+    }
+
+    public void AddItem(string sku, int quantity, decimal unitPrice, DateTime utcNow)
+    {
+        if (!IsPlaced || IsShipped || quantity <= 0 || unitPrice < 0)
+        {
+            throw new InvalidOperationException("Item cannot be added.");
+        }
+
+        Raise(new ItemAdded(Id, sku, quantity, unitPrice, utcNow));
+    }
+
+    public void ClearUncommittedEvents() => _uncommitted.Clear();
+
+    private void Raise(IDomainEvent @event)
+    {
+        Apply(@event);
+        _uncommitted.Add(@event);
+    }
+
+    private void Apply(IDomainEvent @event)
+    {
+        switch (@event)
+        {
+            case OrderPlaced placed:
+                Id = placed.OrderId;
+                IsPlaced = true;
+                break;
+            case ItemAdded added:
+                _items.Add((added.Sku, added.Quantity, added.UnitPrice));
+                break;
+            case OrderShipped:
+                IsShipped = true;
+                break;
+            default:
+                throw new NotSupportedException(@event.GetType().Name);
+        }
+    }
+}
+```
+
+`FromHistory` applies events without adding them to `UncommittedEvents`; command methods call `Raise`, which applies and records the new fact. A concrete write loads `Order-42` at version 7, replays it, calls `AddItem("SSD-1TB", 1, 89.00m, utcNow)`, and appends `ItemAdded` with expected version 7. If another writer already produced version 8, the store rejects the append and the command retries against fresh history. After a successful append, clear the uncommitted collection. The aggregate validates the state it was given; the store proves that state was still current.
 
 ## Event Sourcing + CQRS
 Event Sourcing and [[CQRS]] solve different concerns and complement each other well.
@@ -103,7 +193,7 @@ For a payment ledger, immutable state transitions and temporal reconstruction ca
 
 ## Operating boundary
 
-Event schema evolution, stream growth, projection lag, checkpoints, and replay side effects are operational concerns covered by [[Event Store Operations]]. The core rule here is that the ordered event stream remains authoritative and aggregate replay remains deterministic.
+Event schema evolution, stream growth, projection lag, checkpoints, and replay side effects are part of the pattern, not later storage details. The core rule is that the ordered event stream remains authoritative, aggregate replay remains deterministic, and rebuilt projections cannot repeat live external effects.
 ## Tradeoffs
 | Concern | Event Sourcing | Traditional CRUD |
 |---|---|---|
@@ -130,7 +220,7 @@ Decision rule: prefer CRUD by default; choose Event Sourcing only when immutable
 > - Introduce upcasters/adapters for old payloads.
 > - Keep integration tests that replay production-like historical streams.
 > - Treat event contracts as long-lived public interfaces.
-> - Schema evolution is the most common production failure mode in event-sourced systems — especially when teams skip compatibility testing across historical streams.
+> - Schema evolution is a common production failure mode in event-sourced systems — especially when teams skip compatibility testing across historical streams.
 ## References
 - [Event Sourcing - Greg Young FAQ](https://cqrs.nu/faq/event-sourcing) — primary practitioner FAQ on streams, replay, and event-sourced aggregates.
 - [SimpleCQRS - Greg Young sample repository](https://github.com/gregoryyoung/m-r) — compact reference implementation of command handling, aggregates, event streams, and projections.
@@ -140,3 +230,6 @@ Decision rule: prefer CRUD by default; choose Event Sourcing only when immutable
 - [Turning the database inside out with Apache Samza - Martin Kleppmann](https://www.confluent.io/blog/turning-the-database-inside-out-with-apache-samza/) — practitioner explanation of logs, materialized views, replay, and state reconstruction.
 - [Differences in Event Sourcing system design -- ByteByteGo comparison of current-state persistence and event-history reconstruction](https://github.com/ByteByteGoHq/system-design-101/blob/b28380a4710c5ec9638ec037d4168e288f334cba/data/guides/differences-in-event-sourcing-system-design.md)
 - [How do we incorporate Event Sourcing into systems? -- ByteByteGo flow used here to distinguish an authoritative event store from CDC and integration messaging](https://github.com/ByteByteGoHq/system-design-101/blob/b28380a4710c5ec9638ec037d4168e288f334cba/data/guides/how-do-we-incorporate-event-sourcing-into-the-systems.md)
+- [EventStoreDB streams](https://developers.eventstore.com/clients/grpc/appending-events.html) — official expected-revision and append behavior for an event store.
+- [Apache Samza state management](https://samza.apache.org/learn/documentation/latest/container/state-management.html) — operational checkpoint and replay concepts for stateful stream processing.
+- [Implementing Domain-Driven Design](https://www.oreilly.com/library/view/implementing-domain-driven-design/9780133039900/) - Vaughn Vernon's treatment of aggregates, domain events, and consistency boundaries.

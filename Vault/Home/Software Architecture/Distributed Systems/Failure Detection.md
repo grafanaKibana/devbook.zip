@@ -13,7 +13,7 @@ publish: true
 
 # Intro
 
-In an asynchronous network, a timeout cannot distinguish a crashed node from a slow node, a paused process, or a partition. A failure detector produces suspicion from observations. The system then decides whether suspicion is strong enough to stop routing, replace ownership, or page an operator.
+In an asynchronous network, a timeout cannot distinguish a crashed node from a slow node, a paused process, or a partition. A failure detector produces suspicion from observations. The system then decides whether suspicion is strong enough to stop routing, replace ownership, or page an operator. [[Health Checks]] defines bounded service signals and their consumer actions; failure detection owns uncertainty, distributed observation, and coordination after suspicion.
 
 ## Observation and Decision Are Separate
 
@@ -33,8 +33,6 @@ Do not transfer ownership on the first failed health check. Confirm through mult
 Probe from outside the failure domain being tested. A node checking itself cannot detect a rack or zone partition. Monitor dependency and quorum health separately from application liveness. Quorum is a condition for making a safe decision, not another heartbeat detector.
 
 False positives are part of the budget. Record detection latency, suspicion reversals, failover success, and the time until capacity is restored. Test packet loss, long garbage-collection pauses, asymmetric partitions, and flapping nodes.
-
-The source visual remains rejected because it claims pull heartbeat reduces traffic without a polling comparison and conflates quorum decisions with heartbeat detection.
 
 ## References
 

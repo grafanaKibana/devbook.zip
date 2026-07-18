@@ -1,170 +1,1380 @@
 {
-	"nodes":[
-		{"id":"n_d17a9f6109","type":"text","text":"# [[Home/AI & ML/AI & ML|AI & ML]]","x":0,"y":0,"width":340,"height":80,"color":"2"},
-		{"id":"n_4d06010d24","type":"text","text":"# [[Home/AI & ML/LLM/LLM|LLM]]","x":420,"y":0,"width":340,"height":80,"color":"2"},
-		{"id":"n_44d28f3f57","type":"text","text":"# [[Home/AI & ML/LLM/Agents/Agents|Agents]]","x":840,"y":120,"width":340,"height":80,"color":"2"},
-		{"id":"n_91d77e108f","type":"text","text":"# [[Home/AI & ML/LLM/Agents/Evaluation/Evaluation|Evaluation]]","x":1260,"y":240,"width":340,"height":80,"color":"4"},
-		{"id":"n_11f4da711b","type":"text","text":"# [[Home/AI & ML/LLM/Context Engineering/Context Engineering|Context Engineering]]","x":840,"y":360,"width":340,"height":80,"color":"4"},
-		{"id":"n_f406a2cfec","type":"text","text":"# [[Home/AI & ML/LLM/Context Engineering/RAG/RAG|RAG]]","x":1260,"y":480,"width":340,"height":80,"color":"4"},
-		{"id":"n_573a17f31c","type":"text","text":"# [[Home/AI & ML/LLM/Context Engineering/RAG/Evaluation/Evaluation|Evaluation]]","x":1680,"y":600,"width":340,"height":80,"color":"4"},
-		{"id":"n_dcca9436f1","type":"text","text":"# [[Home/AI & ML/LLM/Evaluation/Evaluation|Evaluation]]","x":840,"y":720,"width":340,"height":80,"color":"1"},
-		{"id":"n_227c21ea6d","type":"text","text":"# [[Home/AI & ML/LLM/Harness Engineering/Harness Engineering|Harness Engineering]]","x":840,"y":840,"width":340,"height":80,"color":"4"},
-		{"id":"n_fad5d6266d","type":"text","text":"# [[Home/AI & ML/LLM/Loop Engineering/Loop Engineering|Loop Engineering]]","x":840,"y":960,"width":340,"height":80,"color":"4"},
-		{"id":"n_7766e6618c","type":"text","text":"# [[Home/AI & ML/LLM/Prompt Engineering/Prompt Engineering|Prompt Engineering]]","x":840,"y":1080,"width":340,"height":80,"color":"4"},
-		{"id":"n_161004bfd0","type":"text","text":"# [[Home/AI & ML/LLM/Safety/Safety|Safety]]","x":840,"y":1200,"width":340,"height":80,"color":"4"},
-		{"id":"n_175648160a","type":"text","text":"# [[Home/AI & ML/Machine Learning/Machine Learning|Machine Learning]]","x":-420,"y":0,"width":340,"height":80,"color":"4"},
-		{"id":"n_9ddd68cc06","type":"text","text":"# [[Home/AI & ML/Machine Learning/Evaluation/Evaluation|Evaluation]]","x":-840,"y":120,"width":340,"height":80,"color":"4"},
-		{"id":"n_059ba1103e","type":"text","text":"# [[Home/AI & ML/Machine Learning/Types/Types|Types]]","x":-840,"y":240,"width":340,"height":80,"color":"4"},
-		{"id":"n_59996232f4","type":"text","text":"# [[Home/AI & ML/Tooling/Tooling|Tooling]]","x":-420,"y":360,"width":340,"height":80,"color":"4"},
-		{"id":"n_8ac2c781f7","type":"text","text":"# [[Home/Cloud/Cloud|Cloud]]","x":0,"y":1480,"width":340,"height":80,"color":"1"},
-		{"id":"n_cafbd1a60a","type":"text","text":"# [[Home/Cloud/AWS/AWS|AWS]]","x":420,"y":1480,"width":340,"height":80,"color":"2"},
-		{"id":"n_58f1808cdd","type":"text","text":"# [[Home/Cloud/Azure/Azure|Azure]]","x":-420,"y":1480,"width":340,"height":80,"color":"2"},
-		{"id":"n_fb668430ee","type":"text","text":"# [[Home/Cloud/Google Cloud/Google Cloud|Google Cloud]]","x":420,"y":1600,"width":340,"height":80,"color":"2"},
-		{"id":"n_fb4b199c6d","type":"text","text":"# [[Home/Computer Science/Computer Science|Computer Science]]","x":0,"y":1880,"width":340,"height":80,"color":"2"},
-		{"id":"n_a02abba51f","type":"text","text":"# [[Home/Computer Science/Algorithms/Algorithms|Algorithms]]","x":420,"y":1880,"width":340,"height":80,"color":"2"},
-		{"id":"n_eb8a617fef","type":"text","text":"# [[Home/Computer Science/Algorithms/Graph Algorithms/Graph Algorithms|Graph Algorithms]]","x":840,"y":2000,"width":340,"height":80,"color":"2"},
-		{"id":"n_9592276565","type":"text","text":"# [[Home/Computer Science/Algorithms/Paradigms/Paradigms|Paradigms]]","x":840,"y":2120,"width":340,"height":80,"color":"2"},
-		{"id":"n_52cc5b3048","type":"text","text":"# [[Home/Computer Science/Algorithms/Patterns/Patterns|Patterns]]","x":840,"y":2240,"width":340,"height":80,"color":"2"},
-		{"id":"n_178f915b99","type":"text","text":"# [[Home/Computer Science/Algorithms/Search Algorithms/Search Algorithms|Search Algorithms]]","x":840,"y":2360,"width":340,"height":80,"color":"2"},
-		{"id":"n_dcfc79b8a4","type":"text","text":"# [[Home/Computer Science/Algorithms/Search Algorithms/String Matching/String Matching|String Matching]]","x":1260,"y":2480,"width":340,"height":80,"color":"2"},
-		{"id":"n_9b15d1a3c2","type":"text","text":"# [[Home/Computer Science/Algorithms/Sorting Algorithms/Sorting Algorithms|Sorting Algorithms]]","x":840,"y":2600,"width":340,"height":80,"color":"2"},
-		{"id":"n_57749fcd3f","type":"text","text":"# [[Home/Computer Science/Data Structures/Data Structures|Data Structures]]","x":-420,"y":1880,"width":340,"height":80,"color":"2"},
-		{"id":"n_07ea717d20","type":"text","text":"# [[Home/Computer Science/Data Structures/Composite Structures/Composite Structures|Composite Structures]]","x":-840,"y":2000,"width":340,"height":80,"color":"1"},
-		{"id":"n_698e7f804a","type":"text","text":"# [[Home/Computer Science/Data Structures/Graph Structures/Graph Structures|Graph Structures]]","x":-840,"y":2120,"width":340,"height":80,"color":"1"},
-		{"id":"n_0431c3093f","type":"text","text":"# [[Home/Computer Science/Data Structures/Hash-based Structures/Hash-based Structures|Hash-based Structures]]","x":-840,"y":2240,"width":340,"height":80,"color":"1"},
-		{"id":"n_2494188de0","type":"text","text":"# [[Home/Computer Science/Data Structures/Linear Structures/Linear Structures|Linear Structures]]","x":-840,"y":2360,"width":340,"height":80,"color":"1"},
-		{"id":"n_40e1c30750","type":"text","text":"# [[Home/Computer Science/Data Structures/Trees/Trees|Trees]]","x":-840,"y":2480,"width":340,"height":80,"color":"2"},
-		{"id":"n_8232cabc14","type":"text","text":"# [[Home/Computer Science/Data Structures/Trees/Heap-like/Heap-like|Heap-like]]","x":-1260,"y":2600,"width":340,"height":80,"color":"1"},
-		{"id":"n_af20eb8585","type":"text","text":"# [[Home/Computer Science/Operating Systems/Operating Systems|Operating Systems]]","x":420,"y":2720,"width":340,"height":80,"color":"2"},
-		{"id":"n_8902c507c0","type":"text","text":"# [[Home/Data Persistence/Data Persistence|Data Persistence]]","x":0,"y":3000,"width":340,"height":80,"color":"2"},
-		{"id":"n_332c392774","type":"text","text":"# [[Home/Data Persistence/NoSQL/NoSQL|NoSQL]]","x":420,"y":3000,"width":340,"height":80,"color":"2"},
-		{"id":"n_41893888b4","type":"text","text":"# [[Home/Data Persistence/ORMs/ORMs|ORMs]]","x":-420,"y":3000,"width":340,"height":80,"color":"1"},
-		{"id":"n_80dc191cc3","type":"text","text":"# [[Home/Data Persistence/SQL/SQL|SQL]]","x":420,"y":3120,"width":340,"height":80,"color":"2"},
-		{"id":"n_05f2128b75","type":"text","text":"# [[Home/DevOps/DevOps|DevOps]]","x":0,"y":3400,"width":340,"height":80,"color":"2"},
-		{"id":"n_5b22d5a91e","type":"text","text":"# [[Home/DevOps/Deployment Strategies/Deployment Strategies|Deployment Strategies]]","x":420,"y":3400,"width":340,"height":80,"color":"6"},
-		{"id":"n_7a4a503bf9","type":"text","text":"# [[Home/DevOps/Version Control Systems/Version Control Systems|Version Control Systems]]","x":-420,"y":3400,"width":340,"height":80,"color":"1"},
-		{"id":"n_b2bfdc08f5","type":"text","text":"# [[Home/Networks/Networks|Networks]]","x":0,"y":3680,"width":340,"height":80,"color":"2"},
-		{"id":"n_48cc0f0446","type":"text","text":"# [[Home/Networks/Architecture & Ops/Architecture & Ops|Architecture & Ops]]","x":420,"y":3680,"width":340,"height":80,"color":"1"},
-		{"id":"n_bba3e489e8","type":"text","text":"# [[Home/Networks/Protocols/Protocols|Protocols]]","x":-420,"y":3680,"width":340,"height":80,"color":"2"},
-		{"id":"n_2dd5700c51","type":"text","text":"# [[Home/Networks/Transport & Sockets/Transport & Sockets|Transport & Sockets]]","x":420,"y":3800,"width":340,"height":80,"color":"1"},
-		{"id":"n_4a92798426","type":"text","text":"# [[Home/Programming/Programming|Programming]]","x":0,"y":4080,"width":340,"height":80,"color":"2"},
-		{"id":"n_94165b6a1a","type":"text","text":"# [[Home/Programming/NET/NET|NET]]","x":420,"y":4080,"width":340,"height":80,"color":"2"},
-		{"id":"n_d5754aed6e","type":"text","text":"# [[Home/Programming/NET/ASP.NET Web API/ASP.NET Web API|ASP.NET Web API]]","x":840,"y":4200,"width":340,"height":80,"color":"1"},
-		{"id":"n_2cf4e55139","type":"text","text":"# [[Home/Programming/NET/CSharp/CSharp|CSharp]]","x":840,"y":4320,"width":340,"height":80,"color":"2"},
-		{"id":"n_e7cba1ac01","type":"text","text":"# [[Home/Programming/NET/CSharp/Concurrency and Parallelism/Concurrency and Parallelism|Concurrency and Parallelism]]","x":1260,"y":4440,"width":340,"height":80,"color":"2"},
-		{"id":"n_6cafba7b0e","type":"text","text":"# [[Home/Programming/NET/CSharp/Fundamentals/Fundamentals|Fundamentals]]","x":1260,"y":4560,"width":340,"height":80,"color":"1"},
-		{"id":"n_45cda74957","type":"text","text":"# [[Home/Programming/NET/CSharp/Fundamentals/Types/Types|Types]]","x":1680,"y":4680,"width":340,"height":80,"color":"1"},
-		{"id":"n_f4c58f9fd1","type":"text","text":"# [[Home/Programming/NET/Other/Other|Other]]","x":840,"y":4800,"width":340,"height":80,"color":"1"},
-		{"id":"n_158b3542d7","type":"text","text":"# [[Home/Programming/NET/Runtime/Runtime|Runtime]]","x":840,"y":4920,"width":340,"height":80,"color":"1"},
-		{"id":"n_2537584d69","type":"text","text":"# [[Home/Security/Security|Security]]","x":0,"y":5200,"width":340,"height":80,"color":"1"},
-		{"id":"n_159ffae3a7","type":"text","text":"# [[Home/Security/Authentication/Authentication|Authentication]]","x":420,"y":5200,"width":340,"height":80,"color":"1"},
-		{"id":"n_16934d26a8","type":"text","text":"# [[Home/Software Architecture/Software Architecture|Software Architecture]]","x":0,"y":5480,"width":340,"height":80,"color":"2"},
-		{"id":"n_6a035b170e","type":"text","text":"# [[Home/Software Architecture/Application Architecture/Application Architecture|Application Architecture]]","x":420,"y":5480,"width":340,"height":80,"color":"1"},
-		{"id":"n_6dcd699f72","type":"text","text":"# [[Home/Software Architecture/Distributed Systems/Distributed Systems|Distributed Systems]]","x":-420,"y":5480,"width":340,"height":80,"color":"2"},
-		{"id":"n_0167c4d855","type":"text","text":"# [[Home/Software Architecture/Distributed Systems/Message Queues/Message Queues|Message Queues]]","x":-840,"y":5600,"width":340,"height":80,"color":"1"},
-		{"id":"n_8da15308f5","type":"text","text":"# [[Home/Software Architecture/Distributed Systems/Scalability Patterns/Scalability Patterns|Scalability Patterns]]","x":-840,"y":5720,"width":340,"height":80,"color":"2"},
-		{"id":"n_093077d2dd","type":"text","text":"# [[Home/Software Architecture/Patterns/Patterns|Patterns]]","x":420,"y":5600,"width":340,"height":80,"color":"1"},
-		{"id":"n_2439fc8c0f","type":"text","text":"# [[Home/Software Architecture/Patterns/Architectural Patterns/Architectural Patterns|Architectural Patterns]]","x":840,"y":5720,"width":340,"height":80,"color":"1"},
-		{"id":"n_a762225665","type":"text","text":"# [[Home/Software Architecture/Patterns/Design Patterns/Design Patterns|Design Patterns]]","x":840,"y":5840,"width":340,"height":80,"color":"1"},
-		{"id":"n_e843d54366","type":"text","text":"# [[Home/Software Architecture/Patterns/Design Patterns/Behavioral/Behavioral|Behavioral]]","x":1260,"y":5960,"width":340,"height":80,"color":"1"},
-		{"id":"n_017c2809aa","type":"text","text":"# [[Home/Software Architecture/Patterns/Design Patterns/Creational/Creational|Creational]]","x":1260,"y":6080,"width":340,"height":80,"color":"4"},
-		{"id":"n_60b5a16f5b","type":"text","text":"# [[Home/Software Architecture/Patterns/Design Patterns/Structural/Structural|Structural]]","x":1260,"y":6200,"width":340,"height":80,"color":"1"},
-		{"id":"n_f935a39e47","type":"text","text":"# [[Home/Software Architecture/Patterns/Resilience Patterns/Resilience Patterns|Resilience Patterns]]","x":840,"y":6320,"width":340,"height":80,"color":"1"},
-		{"id":"n_0ae487368c","type":"text","text":"# [[Home/Software Architecture/System Architecture/System Architecture|System Architecture]]","x":-420,"y":5840,"width":340,"height":80,"color":"1"},
-		{"id":"n_c6d186ab86","type":"text","text":"# [[Home/Software Design/Software Design|Software Design]]","x":0,"y":6600,"width":340,"height":80,"color":"1"},
-		{"id":"n_4b31efd91c","type":"text","text":"# [[Home/Software Design/Paradigms/Paradigms|Paradigms]]","x":420,"y":6600,"width":340,"height":80,"color":"1"},
-		{"id":"n_ac034f9f6f","type":"text","text":"# [[Home/Software Design/Principles/Principles|Principles]]","x":-420,"y":6600,"width":340,"height":80,"color":"1"},
-		{"id":"n_34d7eacccf","type":"text","text":"# [[Home/Software Design/Testing/Testing|Testing]]","x":420,"y":6720,"width":340,"height":80,"color":"1"},
-		{"id":"n_328ae87cd7","type":"group","label":"Legend","x":-1880,"y":-20,"width":540,"height":530},
-		{"id":"n_b0ac2236f9","type":"text","text":"#### Roadmap legend\n**Generated:** Jul 16 2026 | 09:56PM","x":-1860,"y":0,"width":500,"height":110},
-		{"id":"n_4a66490dd9","type":"text","text":"Not-Started: 31","x":-1800,"y":126,"width":380,"height":60,"color":"1"},
-		{"id":"n_c1cf7bc196","type":"text","text":"Creation: 30","x":-1800,"y":202,"width":380,"height":60,"color":"2"},
-		{"id":"n_a434510472","type":"text","text":"Repetition: 0","x":-1800,"y":278,"width":380,"height":60,"color":"5"},
-		{"id":"n_6de0caeeec","type":"text","text":"Ready To Repeat: 0","x":-1800,"y":354,"width":380,"height":60},
-		{"id":"n_0e6324d0db","type":"text","text":"Done: 13","x":-1800,"y":430,"width":380,"height":60,"color":"4"}
-	],
-	"edges":[
-		{"id":"e_ad46500ea9","fromNode":"n_d17a9f6109","fromSide":"right","toNode":"n_4d06010d24","toSide":"left"},
-		{"id":"e_14004a739e","fromNode":"n_4d06010d24","fromSide":"right","toNode":"n_44d28f3f57","toSide":"left"},
-		{"id":"e_3066d15047","fromNode":"n_44d28f3f57","fromSide":"right","toNode":"n_91d77e108f","toSide":"left"},
-		{"id":"e_ecd0e69a51","fromNode":"n_4d06010d24","fromSide":"right","toNode":"n_11f4da711b","toSide":"left"},
-		{"id":"e_1e3d5ec666","fromNode":"n_11f4da711b","fromSide":"right","toNode":"n_f406a2cfec","toSide":"left"},
-		{"id":"e_11908c99ff","fromNode":"n_f406a2cfec","fromSide":"right","toNode":"n_573a17f31c","toSide":"left"},
-		{"id":"e_0f615b6a0f","fromNode":"n_4d06010d24","fromSide":"right","toNode":"n_dcca9436f1","toSide":"left"},
-		{"id":"e_9a288b23d0","fromNode":"n_4d06010d24","fromSide":"right","toNode":"n_227c21ea6d","toSide":"left"},
-		{"id":"e_fcfb9e2370","fromNode":"n_4d06010d24","fromSide":"right","toNode":"n_fad5d6266d","toSide":"left"},
-		{"id":"e_db99485631","fromNode":"n_4d06010d24","fromSide":"right","toNode":"n_7766e6618c","toSide":"left"},
-		{"id":"e_87c5cd9ce8","fromNode":"n_4d06010d24","fromSide":"right","toNode":"n_161004bfd0","toSide":"left"},
-		{"id":"e_72c7c8570f","fromNode":"n_d17a9f6109","fromSide":"left","toNode":"n_175648160a","toSide":"right"},
-		{"id":"e_8ee84bf0d6","fromNode":"n_175648160a","fromSide":"left","toNode":"n_9ddd68cc06","toSide":"right"},
-		{"id":"e_3cad2aa972","fromNode":"n_175648160a","fromSide":"left","toNode":"n_059ba1103e","toSide":"right"},
-		{"id":"e_e58936c6b6","fromNode":"n_d17a9f6109","fromSide":"left","toNode":"n_59996232f4","toSide":"right"},
-		{"id":"e_58133ff221","fromNode":"n_d17a9f6109","fromSide":"bottom","toNode":"n_8ac2c781f7","toSide":"top"},
-		{"id":"e_2c0b91abb5","fromNode":"n_8ac2c781f7","fromSide":"right","toNode":"n_cafbd1a60a","toSide":"left"},
-		{"id":"e_db9b0d5d1f","fromNode":"n_8ac2c781f7","fromSide":"left","toNode":"n_58f1808cdd","toSide":"right"},
-		{"id":"e_8371ff08a5","fromNode":"n_8ac2c781f7","fromSide":"right","toNode":"n_fb668430ee","toSide":"left"},
-		{"id":"e_da73837651","fromNode":"n_8ac2c781f7","fromSide":"bottom","toNode":"n_fb4b199c6d","toSide":"top"},
-		{"id":"e_0d3cc6dda2","fromNode":"n_fb4b199c6d","fromSide":"right","toNode":"n_a02abba51f","toSide":"left"},
-		{"id":"e_d35105e185","fromNode":"n_a02abba51f","fromSide":"right","toNode":"n_eb8a617fef","toSide":"left"},
-		{"id":"e_b7d2f3f22f","fromNode":"n_a02abba51f","fromSide":"right","toNode":"n_9592276565","toSide":"left"},
-		{"id":"e_7b0ce18902","fromNode":"n_a02abba51f","fromSide":"right","toNode":"n_52cc5b3048","toSide":"left"},
-		{"id":"e_e1a515e247","fromNode":"n_a02abba51f","fromSide":"right","toNode":"n_178f915b99","toSide":"left"},
-		{"id":"e_a232dbbf66","fromNode":"n_178f915b99","fromSide":"right","toNode":"n_dcfc79b8a4","toSide":"left"},
-		{"id":"e_2fc55208bc","fromNode":"n_a02abba51f","fromSide":"right","toNode":"n_9b15d1a3c2","toSide":"left"},
-		{"id":"e_edad50cddf","fromNode":"n_fb4b199c6d","fromSide":"left","toNode":"n_57749fcd3f","toSide":"right"},
-		{"id":"e_73dcc065e4","fromNode":"n_57749fcd3f","fromSide":"left","toNode":"n_07ea717d20","toSide":"right"},
-		{"id":"e_d7b46c4260","fromNode":"n_57749fcd3f","fromSide":"left","toNode":"n_698e7f804a","toSide":"right"},
-		{"id":"e_21650ef8a5","fromNode":"n_57749fcd3f","fromSide":"left","toNode":"n_0431c3093f","toSide":"right"},
-		{"id":"e_34a738ccc9","fromNode":"n_57749fcd3f","fromSide":"left","toNode":"n_2494188de0","toSide":"right"},
-		{"id":"e_34ecd49c40","fromNode":"n_57749fcd3f","fromSide":"left","toNode":"n_40e1c30750","toSide":"right"},
-		{"id":"e_cd1e34d027","fromNode":"n_40e1c30750","fromSide":"left","toNode":"n_8232cabc14","toSide":"right"},
-		{"id":"e_5a672f7202","fromNode":"n_fb4b199c6d","fromSide":"right","toNode":"n_af20eb8585","toSide":"left"},
-		{"id":"e_a8a712b3e9","fromNode":"n_fb4b199c6d","fromSide":"bottom","toNode":"n_8902c507c0","toSide":"top"},
-		{"id":"e_0ab891d24c","fromNode":"n_8902c507c0","fromSide":"right","toNode":"n_332c392774","toSide":"left"},
-		{"id":"e_3d9968fd76","fromNode":"n_8902c507c0","fromSide":"left","toNode":"n_41893888b4","toSide":"right"},
-		{"id":"e_76ae0e78cc","fromNode":"n_8902c507c0","fromSide":"right","toNode":"n_80dc191cc3","toSide":"left"},
-		{"id":"e_e879b67ea6","fromNode":"n_8902c507c0","fromSide":"bottom","toNode":"n_05f2128b75","toSide":"top"},
-		{"id":"e_a38769d407","fromNode":"n_05f2128b75","fromSide":"right","toNode":"n_5b22d5a91e","toSide":"left"},
-		{"id":"e_1ef464558d","fromNode":"n_05f2128b75","fromSide":"left","toNode":"n_7a4a503bf9","toSide":"right"},
-		{"id":"e_ce8221f2a2","fromNode":"n_05f2128b75","fromSide":"bottom","toNode":"n_b2bfdc08f5","toSide":"top"},
-		{"id":"e_0f8df35926","fromNode":"n_b2bfdc08f5","fromSide":"right","toNode":"n_48cc0f0446","toSide":"left"},
-		{"id":"e_6e7841577e","fromNode":"n_b2bfdc08f5","fromSide":"left","toNode":"n_bba3e489e8","toSide":"right"},
-		{"id":"e_0e94d48069","fromNode":"n_b2bfdc08f5","fromSide":"right","toNode":"n_2dd5700c51","toSide":"left"},
-		{"id":"e_e35482ca2c","fromNode":"n_b2bfdc08f5","fromSide":"bottom","toNode":"n_4a92798426","toSide":"top"},
-		{"id":"e_b95b413eda","fromNode":"n_4a92798426","fromSide":"right","toNode":"n_94165b6a1a","toSide":"left"},
-		{"id":"e_00c59f6206","fromNode":"n_94165b6a1a","fromSide":"right","toNode":"n_d5754aed6e","toSide":"left"},
-		{"id":"e_67e4fba8f6","fromNode":"n_94165b6a1a","fromSide":"right","toNode":"n_2cf4e55139","toSide":"left"},
-		{"id":"e_a572240182","fromNode":"n_2cf4e55139","fromSide":"right","toNode":"n_e7cba1ac01","toSide":"left"},
-		{"id":"e_7c9f26a921","fromNode":"n_2cf4e55139","fromSide":"right","toNode":"n_6cafba7b0e","toSide":"left"},
-		{"id":"e_dcd28eb35e","fromNode":"n_6cafba7b0e","fromSide":"right","toNode":"n_45cda74957","toSide":"left"},
-		{"id":"e_b41ef0e6bf","fromNode":"n_94165b6a1a","fromSide":"right","toNode":"n_f4c58f9fd1","toSide":"left"},
-		{"id":"e_99f32d2ceb","fromNode":"n_94165b6a1a","fromSide":"right","toNode":"n_158b3542d7","toSide":"left"},
-		{"id":"e_3fd4a44110","fromNode":"n_4a92798426","fromSide":"bottom","toNode":"n_2537584d69","toSide":"top"},
-		{"id":"e_072272c7bf","fromNode":"n_2537584d69","fromSide":"right","toNode":"n_159ffae3a7","toSide":"left"},
-		{"id":"e_b39d41abf2","fromNode":"n_2537584d69","fromSide":"bottom","toNode":"n_16934d26a8","toSide":"top"},
-		{"id":"e_defef8b92b","fromNode":"n_16934d26a8","fromSide":"right","toNode":"n_6a035b170e","toSide":"left"},
-		{"id":"e_6c4ea9f0a8","fromNode":"n_16934d26a8","fromSide":"left","toNode":"n_6dcd699f72","toSide":"right"},
-		{"id":"e_9c6c1e4b67","fromNode":"n_6dcd699f72","fromSide":"left","toNode":"n_0167c4d855","toSide":"right"},
-		{"id":"e_04b30d71c8","fromNode":"n_6dcd699f72","fromSide":"left","toNode":"n_8da15308f5","toSide":"right"},
-		{"id":"e_f1d22dafe8","fromNode":"n_16934d26a8","fromSide":"right","toNode":"n_093077d2dd","toSide":"left"},
-		{"id":"e_d07a535621","fromNode":"n_093077d2dd","fromSide":"right","toNode":"n_2439fc8c0f","toSide":"left"},
-		{"id":"e_3f19d30ecc","fromNode":"n_093077d2dd","fromSide":"right","toNode":"n_a762225665","toSide":"left"},
-		{"id":"e_5d079eed44","fromNode":"n_a762225665","fromSide":"right","toNode":"n_e843d54366","toSide":"left"},
-		{"id":"e_a77e288f92","fromNode":"n_a762225665","fromSide":"right","toNode":"n_017c2809aa","toSide":"left"},
-		{"id":"e_492ce22ffe","fromNode":"n_a762225665","fromSide":"right","toNode":"n_60b5a16f5b","toSide":"left"},
-		{"id":"e_ba428596b5","fromNode":"n_093077d2dd","fromSide":"right","toNode":"n_f935a39e47","toSide":"left"},
-		{"id":"e_fc236c30ea","fromNode":"n_16934d26a8","fromSide":"left","toNode":"n_0ae487368c","toSide":"right"},
-		{"id":"e_1696a5ee51","fromNode":"n_16934d26a8","fromSide":"bottom","toNode":"n_c6d186ab86","toSide":"top"},
-		{"id":"e_d18307097e","fromNode":"n_c6d186ab86","fromSide":"right","toNode":"n_4b31efd91c","toSide":"left"},
-		{"id":"e_db68737221","fromNode":"n_c6d186ab86","fromSide":"left","toNode":"n_ac034f9f6f","toSide":"right"},
-		{"id":"e_299e64e6e8","fromNode":"n_c6d186ab86","fromSide":"right","toNode":"n_34d7eacccf","toSide":"left"},
-		{"id":"e_0c4030c72b","fromNode":"n_4a66490dd9","fromSide":"right","toNode":"n_c1cf7bc196","toSide":"right","color":"1"},
-		{"id":"e_1ca3e47d87","fromNode":"n_c1cf7bc196","fromSide":"left","toNode":"n_a434510472","toSide":"left","color":"2"},
-		{"id":"e_cf423710c3","fromNode":"n_a434510472","fromSide":"right","toNode":"n_6de0caeeec","toSide":"right","color":"5"},
-		{"id":"e_32f0f6280f","fromNode":"n_6de0caeeec","fromSide":"left","toNode":"n_0e6324d0db","toSide":"left"}
-	],
-	"metadata":{
-		"version":"1.0-1.0",
-		"frontmatter":{"publish":true,"permalink":"/roadmap/","title":"Roadmap"}
-	}
+  "nodes": [
+    {
+      "id": "n_d17a9f6109",
+      "type": "text",
+      "text": "# [[Home/AI & ML/AI & ML|AI & ML]]",
+      "x": 0,
+      "y": 0,
+      "width": 340,
+      "height": 80,
+      "color": "2"
+    },
+    {
+      "id": "n_4d06010d24",
+      "type": "text",
+      "text": "# [[Home/AI & ML/LLM/LLM|LLM]]",
+      "x": 420,
+      "y": 0,
+      "width": 340,
+      "height": 80,
+      "color": "2"
+    },
+    {
+      "id": "n_44d28f3f57",
+      "type": "text",
+      "text": "# [[Home/AI & ML/LLM/Agents/Agents|Agents]]",
+      "x": 840,
+      "y": 120,
+      "width": 340,
+      "height": 80,
+      "color": "2"
+    },
+    {
+      "id": "n_91d77e108f",
+      "type": "text",
+      "text": "# [[Home/AI & ML/LLM/Agents/Evaluation/Evaluation|Evaluation]]",
+      "x": 1260,
+      "y": 240,
+      "width": 340,
+      "height": 80,
+      "color": "4"
+    },
+    {
+      "id": "n_11f4da711b",
+      "type": "text",
+      "text": "# [[Home/AI & ML/LLM/Context Engineering/Context Engineering|Context Engineering]]",
+      "x": 840,
+      "y": 360,
+      "width": 340,
+      "height": 80,
+      "color": "4"
+    },
+    {
+      "id": "n_f406a2cfec",
+      "type": "text",
+      "text": "# [[Home/AI & ML/LLM/Context Engineering/RAG/RAG|RAG]]",
+      "x": 1260,
+      "y": 480,
+      "width": 340,
+      "height": 80,
+      "color": "4"
+    },
+    {
+      "id": "n_573a17f31c",
+      "type": "text",
+      "text": "# [[Home/AI & ML/LLM/Context Engineering/RAG/Evaluation/Evaluation|Evaluation]]",
+      "x": 1680,
+      "y": 600,
+      "width": 340,
+      "height": 80,
+      "color": "4"
+    },
+    {
+      "id": "n_dcca9436f1",
+      "type": "text",
+      "text": "# [[Home/AI & ML/LLM/Evaluation/Evaluation|Evaluation]]",
+      "x": 840,
+      "y": 720,
+      "width": 340,
+      "height": 80,
+      "color": "1"
+    },
+    {
+      "id": "n_227c21ea6d",
+      "type": "text",
+      "text": "# [[Home/AI & ML/LLM/Harness Engineering/Harness Engineering|Harness Engineering]]",
+      "x": 840,
+      "y": 840,
+      "width": 340,
+      "height": 80,
+      "color": "4"
+    },
+    {
+      "id": "n_fad5d6266d",
+      "type": "text",
+      "text": "# [[Home/AI & ML/LLM/Loop Engineering/Loop Engineering|Loop Engineering]]",
+      "x": 840,
+      "y": 960,
+      "width": 340,
+      "height": 80,
+      "color": "4"
+    },
+    {
+      "id": "n_7766e6618c",
+      "type": "text",
+      "text": "# [[Home/AI & ML/LLM/Prompt Engineering/Prompt Engineering|Prompt Engineering]]",
+      "x": 840,
+      "y": 1080,
+      "width": 340,
+      "height": 80,
+      "color": "4"
+    },
+    {
+      "id": "n_161004bfd0",
+      "type": "text",
+      "text": "# [[Home/AI & ML/LLM/Safety/Safety|Safety]]",
+      "x": 840,
+      "y": 1200,
+      "width": 340,
+      "height": 80,
+      "color": "4"
+    },
+    {
+      "id": "n_175648160a",
+      "type": "text",
+      "text": "# [[Home/AI & ML/Machine Learning/Machine Learning|Machine Learning]]",
+      "x": -420,
+      "y": 0,
+      "width": 340,
+      "height": 80,
+      "color": "4"
+    },
+    {
+      "id": "n_9ddd68cc06",
+      "type": "text",
+      "text": "# [[Home/AI & ML/Machine Learning/Evaluation/Evaluation|Evaluation]]",
+      "x": -840,
+      "y": 120,
+      "width": 340,
+      "height": 80,
+      "color": "4"
+    },
+    {
+      "id": "n_059ba1103e",
+      "type": "text",
+      "text": "# [[Home/AI & ML/Machine Learning/Types/Types|Types]]",
+      "x": -840,
+      "y": 240,
+      "width": 340,
+      "height": 80,
+      "color": "4"
+    },
+    {
+      "id": "n_59996232f4",
+      "type": "text",
+      "text": "# [[Home/AI & ML/Tooling/Tooling|Tooling]]",
+      "x": -420,
+      "y": 360,
+      "width": 340,
+      "height": 80,
+      "color": "4"
+    },
+    {
+      "id": "n_8ac2c781f7",
+      "type": "text",
+      "text": "# [[Home/Cloud/Cloud|Cloud]]",
+      "x": 0,
+      "y": 1480,
+      "width": 340,
+      "height": 80,
+      "color": "1"
+    },
+    {
+      "id": "n_cafbd1a60a",
+      "type": "text",
+      "text": "# [[Home/Cloud/AWS/AWS|AWS]]",
+      "x": 420,
+      "y": 1480,
+      "width": 340,
+      "height": 80,
+      "color": "2"
+    },
+    {
+      "id": "n_58f1808cdd",
+      "type": "text",
+      "text": "# [[Home/Cloud/Azure/Azure|Azure]]",
+      "x": -420,
+      "y": 1480,
+      "width": 340,
+      "height": 80,
+      "color": "2"
+    },
+    {
+      "id": "n_fb668430ee",
+      "type": "text",
+      "text": "# [[Home/Cloud/Google Cloud/Google Cloud|Google Cloud]]",
+      "x": 420,
+      "y": 1600,
+      "width": 340,
+      "height": 80,
+      "color": "2"
+    },
+    {
+      "id": "n_fb4b199c6d",
+      "type": "text",
+      "text": "# [[Home/Computer Science/Computer Science|Computer Science]]",
+      "x": 0,
+      "y": 1880,
+      "width": 340,
+      "height": 80,
+      "color": "2"
+    },
+    {
+      "id": "n_a02abba51f",
+      "type": "text",
+      "text": "# [[Home/Computer Science/Algorithms/Algorithms|Algorithms]]",
+      "x": 420,
+      "y": 1880,
+      "width": 340,
+      "height": 80,
+      "color": "2"
+    },
+    {
+      "id": "n_eb8a617fef",
+      "type": "text",
+      "text": "# [[Home/Computer Science/Algorithms/Graph Algorithms/Graph Algorithms|Graph Algorithms]]",
+      "x": 840,
+      "y": 2000,
+      "width": 340,
+      "height": 80,
+      "color": "2"
+    },
+    {
+      "id": "n_9592276565",
+      "type": "text",
+      "text": "# [[Home/Computer Science/Algorithms/Paradigms/Paradigms|Paradigms]]",
+      "x": 840,
+      "y": 2120,
+      "width": 340,
+      "height": 80,
+      "color": "2"
+    },
+    {
+      "id": "n_52cc5b3048",
+      "type": "text",
+      "text": "# [[Home/Computer Science/Algorithms/Patterns/Patterns|Patterns]]",
+      "x": 840,
+      "y": 2240,
+      "width": 340,
+      "height": 80,
+      "color": "2"
+    },
+    {
+      "id": "n_178f915b99",
+      "type": "text",
+      "text": "# [[Home/Computer Science/Algorithms/Search Algorithms/Search Algorithms|Search Algorithms]]",
+      "x": 840,
+      "y": 2360,
+      "width": 340,
+      "height": 80,
+      "color": "2"
+    },
+    {
+      "id": "n_dcfc79b8a4",
+      "type": "text",
+      "text": "# [[Home/Computer Science/Algorithms/Search Algorithms/String Matching/String Matching|String Matching]]",
+      "x": 1260,
+      "y": 2480,
+      "width": 340,
+      "height": 80,
+      "color": "2"
+    },
+    {
+      "id": "n_9b15d1a3c2",
+      "type": "text",
+      "text": "# [[Home/Computer Science/Algorithms/Sorting Algorithms/Sorting Algorithms|Sorting Algorithms]]",
+      "x": 840,
+      "y": 2600,
+      "width": 340,
+      "height": 80,
+      "color": "2"
+    },
+    {
+      "id": "n_57749fcd3f",
+      "type": "text",
+      "text": "# [[Home/Computer Science/Data Structures/Data Structures|Data Structures]]",
+      "x": -420,
+      "y": 1880,
+      "width": 340,
+      "height": 80,
+      "color": "2"
+    },
+    {
+      "id": "n_07ea717d20",
+      "type": "text",
+      "text": "# [[Home/Computer Science/Data Structures/Composite Structures/Composite Structures|Composite Structures]]",
+      "x": -840,
+      "y": 2000,
+      "width": 340,
+      "height": 80,
+      "color": "1"
+    },
+    {
+      "id": "n_698e7f804a",
+      "type": "text",
+      "text": "# [[Home/Computer Science/Data Structures/Graph Structures/Graph Structures|Graph Structures]]",
+      "x": -840,
+      "y": 2120,
+      "width": 340,
+      "height": 80,
+      "color": "1"
+    },
+    {
+      "id": "n_0431c3093f",
+      "type": "text",
+      "text": "# [[Home/Computer Science/Data Structures/Hash-based Structures/Hash-based Structures|Hash-based Structures]]",
+      "x": -840,
+      "y": 2240,
+      "width": 340,
+      "height": 80,
+      "color": "1"
+    },
+    {
+      "id": "n_2494188de0",
+      "type": "text",
+      "text": "# [[Home/Computer Science/Data Structures/Linear Structures/Linear Structures|Linear Structures]]",
+      "x": -840,
+      "y": 2360,
+      "width": 340,
+      "height": 80,
+      "color": "1"
+    },
+    {
+      "id": "n_40e1c30750",
+      "type": "text",
+      "text": "# [[Home/Computer Science/Data Structures/Trees/Trees|Trees]]",
+      "x": -840,
+      "y": 2480,
+      "width": 340,
+      "height": 80,
+      "color": "2"
+    },
+    {
+      "id": "n_8232cabc14",
+      "type": "text",
+      "text": "# [[Home/Computer Science/Data Structures/Trees/Heap-like/Heap-like|Heap-like]]",
+      "x": -1260,
+      "y": 2600,
+      "width": 340,
+      "height": 80,
+      "color": "1"
+    },
+    {
+      "id": "n_af20eb8585",
+      "type": "text",
+      "text": "# [[Home/Computer Science/Operating Systems/Operating Systems|Operating Systems]]",
+      "x": 420,
+      "y": 2720,
+      "width": 340,
+      "height": 80,
+      "color": "2"
+    },
+    {
+      "id": "n_8902c507c0",
+      "type": "text",
+      "text": "# [[Home/Data Persistence/Data Persistence|Data Persistence]]",
+      "x": 0,
+      "y": 3000,
+      "width": 340,
+      "height": 80,
+      "color": "2"
+    },
+    {
+      "id": "n_332c392774",
+      "type": "text",
+      "text": "# [[Home/Data Persistence/NoSQL/NoSQL|NoSQL]]",
+      "x": 420,
+      "y": 3000,
+      "width": 340,
+      "height": 80,
+      "color": "2"
+    },
+    {
+      "id": "n_41893888b4",
+      "type": "text",
+      "text": "# [[Home/Data Persistence/ORMs/ORMs|ORMs]]",
+      "x": -420,
+      "y": 3000,
+      "width": 340,
+      "height": 80,
+      "color": "1"
+    },
+    {
+      "id": "n_80dc191cc3",
+      "type": "text",
+      "text": "# [[Home/Data Persistence/SQL/SQL|SQL]]",
+      "x": 420,
+      "y": 3120,
+      "width": 340,
+      "height": 80,
+      "color": "2"
+    },
+    {
+      "id": "n_05f2128b75",
+      "type": "text",
+      "text": "# [[Home/DevOps/DevOps|DevOps]]",
+      "x": 0,
+      "y": 3400,
+      "width": 340,
+      "height": 80,
+      "color": "1"
+    },
+    {
+      "id": "n_5b22d5a91e",
+      "type": "text",
+      "text": "# [[Home/DevOps/Deployment Strategies/Deployment Strategies|Deployment Strategies]]",
+      "x": 420,
+      "y": 3400,
+      "width": 340,
+      "height": 80,
+      "color": "6"
+    },
+    {
+      "id": "n_7a4a503bf9",
+      "type": "text",
+      "text": "# [[Home/DevOps/Version Control Systems/Version Control Systems|Version Control Systems]]",
+      "x": -420,
+      "y": 3400,
+      "width": 340,
+      "height": 80,
+      "color": "1"
+    },
+    {
+      "id": "n_b2bfdc08f5",
+      "type": "text",
+      "text": "# [[Home/Networks/Networks|Networks]]",
+      "x": 0,
+      "y": 3680,
+      "width": 340,
+      "height": 80,
+      "color": "1"
+    },
+    {
+      "id": "n_48cc0f0446",
+      "type": "text",
+      "text": "# [[Home/Networks/Architecture & Ops/Architecture & Ops|Architecture & Ops]]",
+      "x": 420,
+      "y": 3680,
+      "width": 340,
+      "height": 80,
+      "color": "1"
+    },
+    {
+      "id": "n_bba3e489e8",
+      "type": "text",
+      "text": "# [[Home/Networks/Protocols/Protocols|Protocols]]",
+      "x": -420,
+      "y": 3680,
+      "width": 340,
+      "height": 80,
+      "color": "1"
+    },
+    {
+      "id": "n_2dd5700c51",
+      "type": "text",
+      "text": "# [[Home/Networks/Transport & Sockets/Transport & Sockets|Transport & Sockets]]",
+      "x": 420,
+      "y": 3800,
+      "width": 340,
+      "height": 80,
+      "color": "1"
+    },
+    {
+      "id": "n_4a92798426",
+      "type": "text",
+      "text": "# [[Home/Programming/Programming|Programming]]",
+      "x": 0,
+      "y": 4080,
+      "width": 340,
+      "height": 80,
+      "color": "2"
+    },
+    {
+      "id": "n_94165b6a1a",
+      "type": "text",
+      "text": "# [[Home/Programming/NET/NET|NET]]",
+      "x": 420,
+      "y": 4080,
+      "width": 340,
+      "height": 80,
+      "color": "2"
+    },
+    {
+      "id": "n_d5754aed6e",
+      "type": "text",
+      "text": "# [[Home/Programming/NET/ASP.NET Web API/ASP.NET Web API|ASP.NET Web API]]",
+      "x": 840,
+      "y": 4200,
+      "width": 340,
+      "height": 80,
+      "color": "1"
+    },
+    {
+      "id": "n_2cf4e55139",
+      "type": "text",
+      "text": "# [[Home/Programming/NET/CSharp/CSharp|CSharp]]",
+      "x": 840,
+      "y": 4320,
+      "width": 340,
+      "height": 80,
+      "color": "2"
+    },
+    {
+      "id": "n_e7cba1ac01",
+      "type": "text",
+      "text": "# [[Home/Programming/NET/CSharp/Concurrency and Parallelism/Concurrency and Parallelism|Concurrency and Parallelism]]",
+      "x": 1260,
+      "y": 4440,
+      "width": 340,
+      "height": 80,
+      "color": "2"
+    },
+    {
+      "id": "n_6cafba7b0e",
+      "type": "text",
+      "text": "# [[Home/Programming/NET/CSharp/Fundamentals/Fundamentals|Fundamentals]]",
+      "x": 1260,
+      "y": 4560,
+      "width": 340,
+      "height": 80,
+      "color": "1"
+    },
+    {
+      "id": "n_45cda74957",
+      "type": "text",
+      "text": "# [[Home/Programming/NET/CSharp/Fundamentals/Types/Types|Types]]",
+      "x": 1680,
+      "y": 4680,
+      "width": 340,
+      "height": 80,
+      "color": "1"
+    },
+    {
+      "id": "n_f4c58f9fd1",
+      "type": "text",
+      "text": "# [[Home/Programming/NET/Other/Other|Other]]",
+      "x": 840,
+      "y": 4800,
+      "width": 340,
+      "height": 80,
+      "color": "1"
+    },
+    {
+      "id": "n_158b3542d7",
+      "type": "text",
+      "text": "# [[Home/Programming/NET/Runtime/Runtime|Runtime]]",
+      "x": 840,
+      "y": 4920,
+      "width": 340,
+      "height": 80,
+      "color": "1"
+    },
+    {
+      "id": "n_2537584d69",
+      "type": "text",
+      "text": "# [[Home/Security/Security|Security]]",
+      "x": 0,
+      "y": 5200,
+      "width": 340,
+      "height": 80,
+      "color": "1"
+    },
+    {
+      "id": "n_159ffae3a7",
+      "type": "text",
+      "text": "# [[Home/Security/Authentication/Authentication|Authentication]]",
+      "x": 420,
+      "y": 5200,
+      "width": 340,
+      "height": 80,
+      "color": "1"
+    },
+    {
+      "id": "n_16934d26a8",
+      "type": "text",
+      "text": "# [[Home/Software Architecture/Software Architecture|Software Architecture]]",
+      "x": 0,
+      "y": 5480,
+      "width": 340,
+      "height": 80,
+      "color": "2"
+    },
+    {
+      "id": "n_6a035b170e",
+      "type": "text",
+      "text": "# [[Home/Software Architecture/Application Architecture/Application Architecture|Application Architecture]]",
+      "x": 420,
+      "y": 5480,
+      "width": 340,
+      "height": 80,
+      "color": "1"
+    },
+    {
+      "id": "n_6dcd699f72",
+      "type": "text",
+      "text": "# [[Home/Software Architecture/Distributed Systems/Distributed Systems|Distributed Systems]]",
+      "x": -420,
+      "y": 5480,
+      "width": 340,
+      "height": 80,
+      "color": "2"
+    },
+    {
+      "id": "n_0167c4d855",
+      "type": "text",
+      "text": "# [[Home/Software Architecture/Distributed Systems/Message Queues/Message Queues|Message Queues]]",
+      "x": -840,
+      "y": 5600,
+      "width": 340,
+      "height": 80,
+      "color": "1"
+    },
+    {
+      "id": "n_8da15308f5",
+      "type": "text",
+      "text": "# [[Home/Software Architecture/Distributed Systems/Scalability Patterns/Scalability Patterns|Scalability Patterns]]",
+      "x": -840,
+      "y": 5720,
+      "width": 340,
+      "height": 80,
+      "color": "2"
+    },
+    {
+      "id": "n_093077d2dd",
+      "type": "text",
+      "text": "# [[Home/Software Architecture/Patterns/Patterns|Patterns]]",
+      "x": 420,
+      "y": 5600,
+      "width": 340,
+      "height": 80,
+      "color": "1"
+    },
+    {
+      "id": "n_2439fc8c0f",
+      "type": "text",
+      "text": "# [[Home/Software Architecture/Patterns/Architectural Patterns/Architectural Patterns|Architectural Patterns]]",
+      "x": 840,
+      "y": 5720,
+      "width": 340,
+      "height": 80,
+      "color": "1"
+    },
+    {
+      "id": "n_a762225665",
+      "type": "text",
+      "text": "# [[Home/Software Architecture/Patterns/Design Patterns/Design Patterns|Design Patterns]]",
+      "x": 840,
+      "y": 5840,
+      "width": 340,
+      "height": 80,
+      "color": "1"
+    },
+    {
+      "id": "n_e843d54366",
+      "type": "text",
+      "text": "# [[Home/Software Architecture/Patterns/Design Patterns/Behavioral/Behavioral|Behavioral]]",
+      "x": 1260,
+      "y": 5960,
+      "width": 340,
+      "height": 80,
+      "color": "1"
+    },
+    {
+      "id": "n_017c2809aa",
+      "type": "text",
+      "text": "# [[Home/Software Architecture/Patterns/Design Patterns/Creational/Creational|Creational]]",
+      "x": 1260,
+      "y": 6080,
+      "width": 340,
+      "height": 80,
+      "color": "4"
+    },
+    {
+      "id": "n_60b5a16f5b",
+      "type": "text",
+      "text": "# [[Home/Software Architecture/Patterns/Design Patterns/Structural/Structural|Structural]]",
+      "x": 1260,
+      "y": 6200,
+      "width": 340,
+      "height": 80,
+      "color": "1"
+    },
+    {
+      "id": "n_f935a39e47",
+      "type": "text",
+      "text": "# [[Home/Software Architecture/Patterns/Resilience Patterns/Resilience Patterns|Resilience Patterns]]",
+      "x": 840,
+      "y": 6320,
+      "width": 340,
+      "height": 80,
+      "color": "1"
+    },
+    {
+      "id": "n_0ae487368c",
+      "type": "text",
+      "text": "# [[Home/Software Architecture/System Architecture/System Architecture|System Architecture]]",
+      "x": -420,
+      "y": 5840,
+      "width": 340,
+      "height": 80,
+      "color": "1"
+    },
+    {
+      "id": "n_c6d186ab86",
+      "type": "text",
+      "text": "# [[Home/Software Design/Software Design|Software Design]]",
+      "x": 0,
+      "y": 6600,
+      "width": 340,
+      "height": 80,
+      "color": "1"
+    },
+    {
+      "id": "n_4b31efd91c",
+      "type": "text",
+      "text": "# [[Home/Software Design/Paradigms/Paradigms|Paradigms]]",
+      "x": 420,
+      "y": 6600,
+      "width": 340,
+      "height": 80,
+      "color": "1"
+    },
+    {
+      "id": "n_ac034f9f6f",
+      "type": "text",
+      "text": "# [[Home/Software Design/Principles/Principles|Principles]]",
+      "x": -420,
+      "y": 6600,
+      "width": 340,
+      "height": 80,
+      "color": "1"
+    },
+    {
+      "id": "n_34d7eacccf",
+      "type": "text",
+      "text": "# [[Home/Software Design/Testing/Testing|Testing]]",
+      "x": 420,
+      "y": 6720,
+      "width": 340,
+      "height": 80,
+      "color": "1"
+    },
+    {
+      "id": "n_328ae87cd7",
+      "type": "group",
+      "label": "Legend",
+      "x": -1880,
+      "y": -20,
+      "width": 540,
+      "height": 530
+    },
+    {
+      "id": "n_b0ac2236f9",
+      "type": "text",
+      "text": "#### Roadmap legend\n**Generated:** Jul 18 2026 | 11:47AM",
+      "x": -1860,
+      "y": 0,
+      "width": 500,
+      "height": 110
+    },
+    {
+      "id": "n_4a66490dd9",
+      "type": "text",
+      "text": "Not-Started: 34",
+      "x": -1800,
+      "y": 126,
+      "width": 380,
+      "height": 60,
+      "color": "1"
+    },
+    {
+      "id": "n_c1cf7bc196",
+      "type": "text",
+      "text": "Creation: 27",
+      "x": -1800,
+      "y": 202,
+      "width": 380,
+      "height": 60,
+      "color": "2"
+    },
+    {
+      "id": "n_a434510472",
+      "type": "text",
+      "text": "Repetition: 0",
+      "x": -1800,
+      "y": 278,
+      "width": 380,
+      "height": 60,
+      "color": "5"
+    },
+    {
+      "id": "n_6de0caeeec",
+      "type": "text",
+      "text": "Ready To Repeat: 0",
+      "x": -1800,
+      "y": 354,
+      "width": 380,
+      "height": 60
+    },
+    {
+      "id": "n_0e6324d0db",
+      "type": "text",
+      "text": "Done: 13",
+      "x": -1800,
+      "y": 430,
+      "width": 380,
+      "height": 60,
+      "color": "4"
+    }
+  ],
+  "edges": [
+    {
+      "id": "e_ad46500ea9",
+      "fromNode": "n_d17a9f6109",
+      "fromSide": "right",
+      "toNode": "n_4d06010d24",
+      "toSide": "left"
+    },
+    {
+      "id": "e_14004a739e",
+      "fromNode": "n_4d06010d24",
+      "fromSide": "right",
+      "toNode": "n_44d28f3f57",
+      "toSide": "left"
+    },
+    {
+      "id": "e_3066d15047",
+      "fromNode": "n_44d28f3f57",
+      "fromSide": "right",
+      "toNode": "n_91d77e108f",
+      "toSide": "left"
+    },
+    {
+      "id": "e_ecd0e69a51",
+      "fromNode": "n_4d06010d24",
+      "fromSide": "right",
+      "toNode": "n_11f4da711b",
+      "toSide": "left"
+    },
+    {
+      "id": "e_1e3d5ec666",
+      "fromNode": "n_11f4da711b",
+      "fromSide": "right",
+      "toNode": "n_f406a2cfec",
+      "toSide": "left"
+    },
+    {
+      "id": "e_11908c99ff",
+      "fromNode": "n_f406a2cfec",
+      "fromSide": "right",
+      "toNode": "n_573a17f31c",
+      "toSide": "left"
+    },
+    {
+      "id": "e_0f615b6a0f",
+      "fromNode": "n_4d06010d24",
+      "fromSide": "right",
+      "toNode": "n_dcca9436f1",
+      "toSide": "left"
+    },
+    {
+      "id": "e_9a288b23d0",
+      "fromNode": "n_4d06010d24",
+      "fromSide": "right",
+      "toNode": "n_227c21ea6d",
+      "toSide": "left"
+    },
+    {
+      "id": "e_fcfb9e2370",
+      "fromNode": "n_4d06010d24",
+      "fromSide": "right",
+      "toNode": "n_fad5d6266d",
+      "toSide": "left"
+    },
+    {
+      "id": "e_db99485631",
+      "fromNode": "n_4d06010d24",
+      "fromSide": "right",
+      "toNode": "n_7766e6618c",
+      "toSide": "left"
+    },
+    {
+      "id": "e_87c5cd9ce8",
+      "fromNode": "n_4d06010d24",
+      "fromSide": "right",
+      "toNode": "n_161004bfd0",
+      "toSide": "left"
+    },
+    {
+      "id": "e_72c7c8570f",
+      "fromNode": "n_d17a9f6109",
+      "fromSide": "left",
+      "toNode": "n_175648160a",
+      "toSide": "right"
+    },
+    {
+      "id": "e_8ee84bf0d6",
+      "fromNode": "n_175648160a",
+      "fromSide": "left",
+      "toNode": "n_9ddd68cc06",
+      "toSide": "right"
+    },
+    {
+      "id": "e_3cad2aa972",
+      "fromNode": "n_175648160a",
+      "fromSide": "left",
+      "toNode": "n_059ba1103e",
+      "toSide": "right"
+    },
+    {
+      "id": "e_e58936c6b6",
+      "fromNode": "n_d17a9f6109",
+      "fromSide": "left",
+      "toNode": "n_59996232f4",
+      "toSide": "right"
+    },
+    {
+      "id": "e_58133ff221",
+      "fromNode": "n_d17a9f6109",
+      "fromSide": "bottom",
+      "toNode": "n_8ac2c781f7",
+      "toSide": "top"
+    },
+    {
+      "id": "e_2c0b91abb5",
+      "fromNode": "n_8ac2c781f7",
+      "fromSide": "right",
+      "toNode": "n_cafbd1a60a",
+      "toSide": "left"
+    },
+    {
+      "id": "e_db9b0d5d1f",
+      "fromNode": "n_8ac2c781f7",
+      "fromSide": "left",
+      "toNode": "n_58f1808cdd",
+      "toSide": "right"
+    },
+    {
+      "id": "e_8371ff08a5",
+      "fromNode": "n_8ac2c781f7",
+      "fromSide": "right",
+      "toNode": "n_fb668430ee",
+      "toSide": "left"
+    },
+    {
+      "id": "e_da73837651",
+      "fromNode": "n_8ac2c781f7",
+      "fromSide": "bottom",
+      "toNode": "n_fb4b199c6d",
+      "toSide": "top"
+    },
+    {
+      "id": "e_0d3cc6dda2",
+      "fromNode": "n_fb4b199c6d",
+      "fromSide": "right",
+      "toNode": "n_a02abba51f",
+      "toSide": "left"
+    },
+    {
+      "id": "e_d35105e185",
+      "fromNode": "n_a02abba51f",
+      "fromSide": "right",
+      "toNode": "n_eb8a617fef",
+      "toSide": "left"
+    },
+    {
+      "id": "e_b7d2f3f22f",
+      "fromNode": "n_a02abba51f",
+      "fromSide": "right",
+      "toNode": "n_9592276565",
+      "toSide": "left"
+    },
+    {
+      "id": "e_7b0ce18902",
+      "fromNode": "n_a02abba51f",
+      "fromSide": "right",
+      "toNode": "n_52cc5b3048",
+      "toSide": "left"
+    },
+    {
+      "id": "e_e1a515e247",
+      "fromNode": "n_a02abba51f",
+      "fromSide": "right",
+      "toNode": "n_178f915b99",
+      "toSide": "left"
+    },
+    {
+      "id": "e_a232dbbf66",
+      "fromNode": "n_178f915b99",
+      "fromSide": "right",
+      "toNode": "n_dcfc79b8a4",
+      "toSide": "left"
+    },
+    {
+      "id": "e_2fc55208bc",
+      "fromNode": "n_a02abba51f",
+      "fromSide": "right",
+      "toNode": "n_9b15d1a3c2",
+      "toSide": "left"
+    },
+    {
+      "id": "e_edad50cddf",
+      "fromNode": "n_fb4b199c6d",
+      "fromSide": "left",
+      "toNode": "n_57749fcd3f",
+      "toSide": "right"
+    },
+    {
+      "id": "e_73dcc065e4",
+      "fromNode": "n_57749fcd3f",
+      "fromSide": "left",
+      "toNode": "n_07ea717d20",
+      "toSide": "right"
+    },
+    {
+      "id": "e_d7b46c4260",
+      "fromNode": "n_57749fcd3f",
+      "fromSide": "left",
+      "toNode": "n_698e7f804a",
+      "toSide": "right"
+    },
+    {
+      "id": "e_21650ef8a5",
+      "fromNode": "n_57749fcd3f",
+      "fromSide": "left",
+      "toNode": "n_0431c3093f",
+      "toSide": "right"
+    },
+    {
+      "id": "e_34a738ccc9",
+      "fromNode": "n_57749fcd3f",
+      "fromSide": "left",
+      "toNode": "n_2494188de0",
+      "toSide": "right"
+    },
+    {
+      "id": "e_34ecd49c40",
+      "fromNode": "n_57749fcd3f",
+      "fromSide": "left",
+      "toNode": "n_40e1c30750",
+      "toSide": "right"
+    },
+    {
+      "id": "e_cd1e34d027",
+      "fromNode": "n_40e1c30750",
+      "fromSide": "left",
+      "toNode": "n_8232cabc14",
+      "toSide": "right"
+    },
+    {
+      "id": "e_5a672f7202",
+      "fromNode": "n_fb4b199c6d",
+      "fromSide": "right",
+      "toNode": "n_af20eb8585",
+      "toSide": "left"
+    },
+    {
+      "id": "e_a8a712b3e9",
+      "fromNode": "n_fb4b199c6d",
+      "fromSide": "bottom",
+      "toNode": "n_8902c507c0",
+      "toSide": "top"
+    },
+    {
+      "id": "e_0ab891d24c",
+      "fromNode": "n_8902c507c0",
+      "fromSide": "right",
+      "toNode": "n_332c392774",
+      "toSide": "left"
+    },
+    {
+      "id": "e_3d9968fd76",
+      "fromNode": "n_8902c507c0",
+      "fromSide": "left",
+      "toNode": "n_41893888b4",
+      "toSide": "right"
+    },
+    {
+      "id": "e_76ae0e78cc",
+      "fromNode": "n_8902c507c0",
+      "fromSide": "right",
+      "toNode": "n_80dc191cc3",
+      "toSide": "left"
+    },
+    {
+      "id": "e_e879b67ea6",
+      "fromNode": "n_8902c507c0",
+      "fromSide": "bottom",
+      "toNode": "n_05f2128b75",
+      "toSide": "top"
+    },
+    {
+      "id": "e_a38769d407",
+      "fromNode": "n_05f2128b75",
+      "fromSide": "right",
+      "toNode": "n_5b22d5a91e",
+      "toSide": "left"
+    },
+    {
+      "id": "e_1ef464558d",
+      "fromNode": "n_05f2128b75",
+      "fromSide": "left",
+      "toNode": "n_7a4a503bf9",
+      "toSide": "right"
+    },
+    {
+      "id": "e_ce8221f2a2",
+      "fromNode": "n_05f2128b75",
+      "fromSide": "bottom",
+      "toNode": "n_b2bfdc08f5",
+      "toSide": "top"
+    },
+    {
+      "id": "e_0f8df35926",
+      "fromNode": "n_b2bfdc08f5",
+      "fromSide": "right",
+      "toNode": "n_48cc0f0446",
+      "toSide": "left"
+    },
+    {
+      "id": "e_6e7841577e",
+      "fromNode": "n_b2bfdc08f5",
+      "fromSide": "left",
+      "toNode": "n_bba3e489e8",
+      "toSide": "right"
+    },
+    {
+      "id": "e_0e94d48069",
+      "fromNode": "n_b2bfdc08f5",
+      "fromSide": "right",
+      "toNode": "n_2dd5700c51",
+      "toSide": "left"
+    },
+    {
+      "id": "e_e35482ca2c",
+      "fromNode": "n_b2bfdc08f5",
+      "fromSide": "bottom",
+      "toNode": "n_4a92798426",
+      "toSide": "top"
+    },
+    {
+      "id": "e_b95b413eda",
+      "fromNode": "n_4a92798426",
+      "fromSide": "right",
+      "toNode": "n_94165b6a1a",
+      "toSide": "left"
+    },
+    {
+      "id": "e_00c59f6206",
+      "fromNode": "n_94165b6a1a",
+      "fromSide": "right",
+      "toNode": "n_d5754aed6e",
+      "toSide": "left"
+    },
+    {
+      "id": "e_67e4fba8f6",
+      "fromNode": "n_94165b6a1a",
+      "fromSide": "right",
+      "toNode": "n_2cf4e55139",
+      "toSide": "left"
+    },
+    {
+      "id": "e_a572240182",
+      "fromNode": "n_2cf4e55139",
+      "fromSide": "right",
+      "toNode": "n_e7cba1ac01",
+      "toSide": "left"
+    },
+    {
+      "id": "e_7c9f26a921",
+      "fromNode": "n_2cf4e55139",
+      "fromSide": "right",
+      "toNode": "n_6cafba7b0e",
+      "toSide": "left"
+    },
+    {
+      "id": "e_dcd28eb35e",
+      "fromNode": "n_6cafba7b0e",
+      "fromSide": "right",
+      "toNode": "n_45cda74957",
+      "toSide": "left"
+    },
+    {
+      "id": "e_b41ef0e6bf",
+      "fromNode": "n_94165b6a1a",
+      "fromSide": "right",
+      "toNode": "n_f4c58f9fd1",
+      "toSide": "left"
+    },
+    {
+      "id": "e_99f32d2ceb",
+      "fromNode": "n_94165b6a1a",
+      "fromSide": "right",
+      "toNode": "n_158b3542d7",
+      "toSide": "left"
+    },
+    {
+      "id": "e_3fd4a44110",
+      "fromNode": "n_4a92798426",
+      "fromSide": "bottom",
+      "toNode": "n_2537584d69",
+      "toSide": "top"
+    },
+    {
+      "id": "e_072272c7bf",
+      "fromNode": "n_2537584d69",
+      "fromSide": "right",
+      "toNode": "n_159ffae3a7",
+      "toSide": "left"
+    },
+    {
+      "id": "e_b39d41abf2",
+      "fromNode": "n_2537584d69",
+      "fromSide": "bottom",
+      "toNode": "n_16934d26a8",
+      "toSide": "top"
+    },
+    {
+      "id": "e_defef8b92b",
+      "fromNode": "n_16934d26a8",
+      "fromSide": "right",
+      "toNode": "n_6a035b170e",
+      "toSide": "left"
+    },
+    {
+      "id": "e_6c4ea9f0a8",
+      "fromNode": "n_16934d26a8",
+      "fromSide": "left",
+      "toNode": "n_6dcd699f72",
+      "toSide": "right"
+    },
+    {
+      "id": "e_9c6c1e4b67",
+      "fromNode": "n_6dcd699f72",
+      "fromSide": "left",
+      "toNode": "n_0167c4d855",
+      "toSide": "right"
+    },
+    {
+      "id": "e_04b30d71c8",
+      "fromNode": "n_6dcd699f72",
+      "fromSide": "left",
+      "toNode": "n_8da15308f5",
+      "toSide": "right"
+    },
+    {
+      "id": "e_f1d22dafe8",
+      "fromNode": "n_16934d26a8",
+      "fromSide": "right",
+      "toNode": "n_093077d2dd",
+      "toSide": "left"
+    },
+    {
+      "id": "e_d07a535621",
+      "fromNode": "n_093077d2dd",
+      "fromSide": "right",
+      "toNode": "n_2439fc8c0f",
+      "toSide": "left"
+    },
+    {
+      "id": "e_3f19d30ecc",
+      "fromNode": "n_093077d2dd",
+      "fromSide": "right",
+      "toNode": "n_a762225665",
+      "toSide": "left"
+    },
+    {
+      "id": "e_5d079eed44",
+      "fromNode": "n_a762225665",
+      "fromSide": "right",
+      "toNode": "n_e843d54366",
+      "toSide": "left"
+    },
+    {
+      "id": "e_a77e288f92",
+      "fromNode": "n_a762225665",
+      "fromSide": "right",
+      "toNode": "n_017c2809aa",
+      "toSide": "left"
+    },
+    {
+      "id": "e_492ce22ffe",
+      "fromNode": "n_a762225665",
+      "fromSide": "right",
+      "toNode": "n_60b5a16f5b",
+      "toSide": "left"
+    },
+    {
+      "id": "e_ba428596b5",
+      "fromNode": "n_093077d2dd",
+      "fromSide": "right",
+      "toNode": "n_f935a39e47",
+      "toSide": "left"
+    },
+    {
+      "id": "e_fc236c30ea",
+      "fromNode": "n_16934d26a8",
+      "fromSide": "left",
+      "toNode": "n_0ae487368c",
+      "toSide": "right"
+    },
+    {
+      "id": "e_1696a5ee51",
+      "fromNode": "n_16934d26a8",
+      "fromSide": "bottom",
+      "toNode": "n_c6d186ab86",
+      "toSide": "top"
+    },
+    {
+      "id": "e_d18307097e",
+      "fromNode": "n_c6d186ab86",
+      "fromSide": "right",
+      "toNode": "n_4b31efd91c",
+      "toSide": "left"
+    },
+    {
+      "id": "e_db68737221",
+      "fromNode": "n_c6d186ab86",
+      "fromSide": "left",
+      "toNode": "n_ac034f9f6f",
+      "toSide": "right"
+    },
+    {
+      "id": "e_299e64e6e8",
+      "fromNode": "n_c6d186ab86",
+      "fromSide": "right",
+      "toNode": "n_34d7eacccf",
+      "toSide": "left"
+    },
+    {
+      "id": "e_0c4030c72b",
+      "fromNode": "n_4a66490dd9",
+      "fromSide": "right",
+      "toNode": "n_c1cf7bc196",
+      "toSide": "right",
+      "color": "1"
+    },
+    {
+      "id": "e_1ca3e47d87",
+      "fromNode": "n_c1cf7bc196",
+      "fromSide": "left",
+      "toNode": "n_a434510472",
+      "toSide": "left",
+      "color": "2"
+    },
+    {
+      "id": "e_cf423710c3",
+      "fromNode": "n_a434510472",
+      "fromSide": "right",
+      "toNode": "n_6de0caeeec",
+      "toSide": "right",
+      "color": "5"
+    },
+    {
+      "id": "e_32f0f6280f",
+      "fromNode": "n_6de0caeeec",
+      "fromSide": "left",
+      "toNode": "n_0e6324d0db",
+      "toSide": "left"
+    }
+  ],
+  "metadata": {
+    "version": "1.0-1.0",
+    "frontmatter": {
+      "publish": true,
+      "permalink": "/roadmap/",
+      "title": "Roadmap"
+    }
+  }
 }

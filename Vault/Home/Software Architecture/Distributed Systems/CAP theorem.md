@@ -111,7 +111,18 @@ CAP availability is also stricter than an uptime SLO. It requires every request 
 
 ## Normal-time tradeoffs
 
-CAP constrains partition-time behavior. [[PACELC and Distributed Database Tradeoffs]] extends the analysis to normal operation, where replica coordination trades latency against consistency, and maps those choices to concrete database configurations. Classify guarantees per operation rather than labeling an entire product CP or AP.
+CAP constrains partition-time behavior. PACELC adds the normal case: if there is a partition, choose availability or consistency; else, choose latency or consistency. Database configuration changes both failure behavior and everyday request latency, so classify an operation and its selected consistency level instead of labeling an entire product `CP` or `AP`.
+
+| Operation | Correctness requirement | Reasonable posture |
+| --- | --- | --- |
+| Reserve inventory | Do not confirm overlapping reservations | Quorum or leader confirmation; reject when safety cannot be proved |
+| Read product recommendations | A stale result is acceptable | Read a nearby replica and repair asynchronously |
+| Read own profile after update | The user should see their write | Session guarantee without global linearizability |
+| Append a ledger entry | Preserve ordering and uniqueness | Strong write coordination, idempotency, and an authoritative store |
+
+Product names do not fix these choices. SQL Server Availability Groups with synchronous commit lean toward consistency for protected writes, but failover mode and read routing change operation behavior. Cosmos DB exposes several consistency levels. Cassandra quorum values and topology decide whether requests favor local latency, overlapping read/write replica sets, or continued service during failures. Redis used as a cache commonly accepts staleness because an authoritative database repairs truth. Record the concrete topology, quorum, read mode, region, and fallback policy.
+
+For a multi-region profile service, writes can go to the primary region and return a session token. The next read carries that token, preserving read-your-writes without waiting for every region. Anonymous recommendation reads use the nearest region and tolerate a five-minute freshness window. One product therefore occupies two PACELC positions for two operations.
 
 ## Pitfalls
 
@@ -148,4 +159,6 @@ CAP constrains partition-time behavior. [[PACELC and Distributed Database Tradeo
 - [Azure Cosmos DB consistency levels](https://learn.microsoft.com/azure/cosmos-db/consistency-levels) — practical example of a production system offering five tunable consistency levels, illustrating CAP tradeoffs in a real product.
 - [Amazon Dynamo paper (SOSP 2007)](https://www.allthingsdistributed.com/files/amazon-dynamo-sosp2007.pdf) — canonical AP system design paper showing how Amazon chose availability over consistency and the engineering consequences.
 - [Abadi, "Consistency Tradeoffs in Modern Distributed Database System Design: CAP is only part of the story" (PACELC)](https://www.cs.umd.edu/~abadi/papers/abadi-pacelc.pdf) — extends CAP with the PACELC model, adding latency vs consistency tradeoffs during normal operation.
+- [SQL Server availability modes](https://learn.microsoft.com/sql/database-engine/availability-groups/windows/availability-modes-always-on-availability-groups) — official synchronous and asynchronous commit behavior.
+- [Apache Cassandra consistency](https://cassandra.apache.org/doc/latest/cassandra/architecture/dynamo.html#tunable-consistency) — official quorum and tunable-consistency model.
 - [CAP theorem: one of the most misunderstood terms](https://github.com/ByteByteGoHq/system-design-101/blob/b28380a4710c5ec9638ec037d4168e288f334cba/data/guides/cap-theorem-one-of-the-most-misunderstood-terms.md) — ByteByteGo provenance for the partition-time prompt; its false CA-choice visual was rejected.

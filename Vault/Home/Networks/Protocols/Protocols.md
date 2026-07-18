@@ -10,7 +10,7 @@ publish: true
 priority: High
 level:
   - "3"
-status: Creation
+status: Done
 ---
 
 # Intro
@@ -26,6 +26,8 @@ Protocols are the agreed-upon rules that let machines communicate: what to send,
 
 When an API times out, locate the boundary before changing application code: name resolution can fail in DNS, connection establishment in TCP or QUIC, peer authentication in TLS or SSH, and message semantics in HTTP or the API style above it.
 
+For registered service ports and what they usually imply, see [[Ports]].
+
 ```datacorejsx
 const { FolderStructureMap } = await dc.require("Assets/components/devbook-folder-map.jsx");
 return FolderStructureMap;
@@ -33,7 +35,7 @@ return FolderStructureMap;
 
 ## Choosing an API Style
 
-Several of these protocols are interchangeable *styles* for client–server APIs, so the real decision is between them. ([[DNS]] and [[SMTP]] are single-purpose protocols, not API styles; [[HTTP]] and [[HTTP 2]] are the transport substrate the styles below run over.)
+Several of these protocols are interchangeable *styles* for client–server APIs, so the real decision is between them. [[DNS]] and [[SMTP]] are single-purpose protocols rather than API styles. [[HTTP]] and [[HTTP 2]] provide the HTTP application-protocol substrate used by REST, GraphQL, and gRPC; WebSocket begins with an HTTP opening handshake and then switches to its own bidirectional framing protocol.
 
 | Style | Interaction | Contract and payload | Browser/cache boundary | Operational coupling |
 | --- | --- | --- | --- | --- |

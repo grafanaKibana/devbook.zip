@@ -17,7 +17,7 @@ priority: High
 
 Algorithms are step-by-step procedures for solving problems with predictable behavior as input grows. In practice, algorithm choice is a tradeoff between runtime, memory usage, implementation complexity, and failure modes under real workloads.
 
-Complexity analysis ([[Big O Notation|Big O]]) is the primary tool for comparing algorithms without benchmarking. It captures growth rate: O(n log n) sorting scales to millions of items where O(n²) does not. But Big O ignores constant factors, cache behavior, and real-world input distributions — so production decisions combine theoretical analysis with profiling on representative data.
+Complexity analysis ([[Home/Computer Science/Big O Notation|Big O]]) is the primary tool for comparing algorithms without benchmarking. It captures growth rate: O(n log n) sorting scales to millions of items where O(n²) does not. But Big O ignores constant factors, cache behavior, and real-world input distributions — so production decisions combine theoretical analysis with profiling on representative data.
 
 Concrete example: for repeated membership checks in a large list of ids, sorting once and using binary search gives fast lookups with low memory overhead. For one-off checks on unsorted data, a linear scan is usually simpler and can be faster overall because there is no preprocessing cost.
 
@@ -28,13 +28,13 @@ System-design diagrams often hide the algorithm inside a box labelled “cache,�
 | Mechanism | System use | Cost or failure boundary |
 | --- | --- | --- |
 | Hashing | Cache keys, partition selection, deduplication | Collisions require equality checks; changing a naive modulo shard count remaps most keys |
-| Consistent hashing | Distributing keys across changing node sets | Reduces remapping but still needs virtual nodes and load observation for skew |
+| Consistent hashing | Distributing keys across changing node sets | Reduces remapping; virtual nodes or another weighted ownership scheme can reduce skew, which still requires load observation |
 | Trees and prefix search | Database indexes, routing tables, autocomplete | Shape and storage model determine update cost and range behavior |
 | Graph traversal | Dependency analysis, routing, recommendations | Cycles require visited-state; dense graphs can dominate memory |
 | Heap-backed priority queues | Scheduling, timers, top-k selection | Efficient best-item access does not provide sorted iteration |
 | Bloom filters | Skipping absent database or object-store reads | False positives perform unnecessary work; false negatives are forbidden by construction |
 | Token buckets | Rate limiting with bounded bursts | A shared bucket needs atomic coordination; per-node buckets only approximate a global limit |
-| Consensus | Replicated metadata and leader election | Safety requires quorum communication, so partitions sacrifice either availability or progress |
+| Consensus | Replicated metadata and leader election | Safety requires quorum communication; a partition that cannot form a quorum loses progress while the quorum side can continue |
 
 ![[System Design 101/06a50eddfed4615e1bfd8c65bfd61dbe7d4ce0c405fa587317803bd8ea2262f2.jpg]]
 

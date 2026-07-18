@@ -61,24 +61,9 @@ For AI inference endpoints, request duration and compute cost vary heavily, so p
 
 ## Health Checks
 
-Health checks decide whether an instance should stay in the active pool.
+Load balancing consumes health signals to decide whether a destination is eligible for new requests. It should select an algorithm only after filtering out destinations that fail the routing contract. [[Health Checks]] owns liveness, readiness, startup, active/passive observation, dependency scope, and failure-amplification rules.
 
-- **Active health checks**
-  - The load balancer probes endpoints such as `/health/live` and `/health/ready` on a fixed interval.
-  - It uses threshold logic, for example three consecutive failures means out of rotation.
-  - It can use timeout budgets to detect hung instances.
-- **Passive health checks**
-  - The load balancer watches real request failures like timeouts and TCP resets, and L7 proxies or gateways can also track elevated HTTP 5xx rates when configured.
-  - Useful when synthetic probes pass but real traffic fails.
-
-Typical state transition:
-
-1. Instance fails probes or exceeds passive error thresholds.
-2. LB marks it unhealthy and removes it from new request routing.
-3. Existing requests are drained, failed, or retried according to policy.
-4. Instance must pass recovery criteria before re-entry.
-
-Important implementation point: readiness must reflect whether routing away from this instance can improve service. Check instance-local initialization and selectively check dependencies; a globally shared dependency in every probe can remove the whole fleet at once.
+For routing, readiness must answer whether another destination can serve more successfully. Removing every instance because one shared database is unavailable replaces controlled application failures with an empty pool. Recovery thresholds and slow-start ramp-up prevent a flapping or cold instance from receiving full traffic immediately.
 
 ## Cloud load-balancer capability mapping
 
@@ -107,9 +92,6 @@ Only then map to a service. Azure Load Balancer is an L4 family with regional pu
 
 Do not bundle these under "add a load balancer." For a stateless API, enable health-aware distribution and TLS at the documented trust boundary, leave affinity off, and decide cross-zone routing from failure tests and egress cost. For a stateful legacy application, affinity can be a migration bridge, but shared state is the durable fix.
 
-## .NET health boundary
-
-ASP.NET Core exposes liveness and readiness through health checks, but the signal must match the routing decision. [[NET Health Checks]] contains the focused implementation and explains why a globally shared dependency in every readiness probe can evict the whole fleet during one shared outage.
 ## Pitfalls
 
 ### Sticky sessions can defeat balancing goals

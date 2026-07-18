@@ -101,7 +101,7 @@ Even with idempotent methods, distributed replicas can still show temporary dive
 
 ## Payment implementation boundary
 
-Payment endpoints need a durable local attempt and a provider that honors the same idempotency key. The provider call must run outside local database transactions, and timeouts must be represented as unknown outcomes rather than rolled-back evidence. [[Payment Idempotency]] owns the complete reserve-call-reconcile sequence and the narrow effect guarantee.
+Payment endpoints need a durable local attempt and a provider that honors the same idempotency key. The provider call must run outside local database transactions, and timeouts must be represented as unknown outcomes rather than rolled-back evidence. [[Payment Systems#Durable Idempotency|Payment Systems]] owns the complete reserve-call-reconcile sequence and the narrow effect guarantee.
 ## Common Applications
 
 | Case | Operation identity | Duplicate effect to prevent | Dedupe and atomic boundary | Returned result | Retention |
@@ -161,7 +161,7 @@ Decision rule: start with database uniqueness for core entities, add idempotency
 > - Stronger idempotency guarantees cost extra storage, key lifecycle management, and stricter request validation.
 
 > [!QUESTION]- How do you implement idempotency for a payment endpoint that processes charges through a third party provider?
-> Reserve a durable local attempt, commit, then call a provider that honors the same key outside the database transaction. A timeout becomes an unknown outcome that is reconciled with the same provider key; it is not evidence that no charge happened. [[Payment Idempotency]] contains the complete sequence and its boundary-specific guarantee.
+> Reserve a durable local attempt, commit, then call a provider that honors the same key outside the database transaction. A timeout becomes an unknown outcome that is reconciled with the same provider key; it is not evidence that no charge happened. [[Payment Systems#Durable Idempotency|Payment Systems]] contains the complete sequence and its boundary-specific guarantee.
 
 ## References
 

@@ -59,7 +59,7 @@ These eight principles are the character of the writing. Apply them as judgment,
 
 **Code fences:** every fence needs a language (MD040, enforced on commit); use `text` when nothing fits. Obsidian-specific langs allowed: `mermaid` and `datacorejsx` — Datacore is the vault's one query engine; the legacy Dataview (`dataview`/`dataviewjs`) blocks have been migrated out, so don't add new ones.
 
-**Reviewer gate (mandatory).** After creating or updating any note under `Vault/Home/`, spawn the **note-reviewer** subagent before calling the work done. It is suggest-only (never edits), and completion is blocked until it returns `CLEAN`. It checks: frontmatter + structure, accuracy, a real example, reference quality, MD040, scope-to-depth fit, the voice tells above, and a **Split Suggestion** (recommend a split, or justify none, when a note exceeds ~1200 words or ~12 headings and covers 2+ separable concepts).
+**Reviewer gate (mandatory).** After creating or updating any note under `Vault/Home/`, spawn the **note-reviewer** subagent before calling the work done. It is suggest-only (never edits), and completion is blocked until it returns `CLEAN`. It checks: frontmatter + structure, accuracy, a real example, reference quality, MD040, scope-to-depth fit, the voice tells above, and a **Split Suggestion** (recommend a split, or justify none, when a note exceeds ~12 headings and covers 2+ separable concepts).
 
 ---
 

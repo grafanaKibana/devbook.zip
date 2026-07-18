@@ -5,7 +5,7 @@ subtopic:
   - Distributed Systems
 summary: "A system's ability to keep serving requests as load grows by adding resources."
 level:
-  - "3"
+  - "2"
 priority: High
 publish: true
 tags:
@@ -55,7 +55,18 @@ return FolderStructureMap;
 
 ![[System Design 101/78cc77c1ac6e94aa62c92b43e52db37d4c4d1fd6a999cbb7ce4f21e2ad845c43.png]]
 
-The strategies in the visual solve different measured bottlenecks; they are not a checklist. [[Scalability Operations]] defines offered load, completed throughput, latency distributions, capacity, saturation, marginal cost, and a repeatable .NET load-test workflow. Apply one change, verify the expected capacity gain, then locate the next bottleneck.
+The strategies in the visual solve different measured bottlenecks; they are not a checklist. Use an explicit measurement contract:
+
+- **Offered load:** work presented to the system.
+- **Throughput:** completed useful work per unit time.
+- **Latency:** a distribution such as p50, p95, and p99.
+- **Capacity:** highest sustained offered load that still meets latency, error, and resource limits.
+- **Saturation:** constrained resource or queue that stops throughput from rising.
+- **Scalability:** how capacity and unit cost change after adding resources or changing architecture.
+
+Define success before the test: `2x ASP.NET Core instances should deliver at least 1.7x completed checkout throughput, p99 below 400 ms, errors below 0.1%, and database connections below 80% of the limit for 30 minutes`.
+
+At 1,000 RPS, increase load in steps while recording request rate, completed orders, latency, errors, CPU, allocations, thread-pool queue, database connections, lock wait, cache hit ratio, dependency latency, and queue age. If application CPU reaches 85% and throughput rises when instances double, horizontal scale addressed the current bottleneck. If database lock wait dominates at 2,500 RPS, more application replicas now increase contention. Apply one change, verify the expected capacity gain, then locate the next bottleneck.
 ## Scaling Decision Framework
 
 Start with telemetry and saturation, not architecture fashion.
@@ -78,7 +89,9 @@ flowchart TD
 
 ## .NET operating guidance
 
-[[Scalability Operations]] owns the .NET counters, traces, database waits, load-test gates, and cost-per-completed-operation checks. Platform scaling features are useful only when their signal matches the saturated resource; CPU-based autoscaling does not fix a database lock or third-party quota.
+Use `dotnet-counters` for runtime counters, OpenTelemetry for request and dependency traces and metrics, and the database's own wait and query telemetry. A low application CPU value does not prove spare capacity when threads are blocked on connections. Platform scaling features are useful only when their signal matches the saturated resource; CPU-based autoscaling does not fix a database lock or third-party quota.
+
+Track cost per completed operation, not only instance count. Cache, replicas, queues, and sharding move cost into invalidation, replication, backlog, and routing. Keep a rollback threshold when a change worsens tail latency or errors, and re-run the same workload after each change because the bottleneck moves.
 ## Tradeoffs
 
 | Choice | Better when | Worse when |
@@ -129,6 +142,9 @@ flowchart TD
 - [ASP.NET Core distributed caching guidance](https://learn.microsoft.com/aspnet/core/performance/caching/distributed?view=aspnetcore-10.0)
 - [Google SRE: Service Level Objectives](https://sre.google/sre-book/service-level-objectives/) — defines measurable service indicators, objectives, and evaluation windows for availability and latency.
 - [Google SRE: Monitoring Distributed Systems](https://sre.google/sre-book/monitoring-distributed-systems/) — primary guidance for latency, traffic, errors, and saturation signals used to locate bottlenecks.
+- [OpenTelemetry metrics](https://opentelemetry.io/docs/concepts/signals/metrics/) — official metric instruments and aggregation model.
+- [.NET diagnostic tools](https://learn.microsoft.com/dotnet/core/diagnostics/) — official counters, traces, dumps, and performance-investigation tools.
+- [Azure load testing](https://learn.microsoft.com/azure/app-testing/load-testing/overview-what-is-azure-load-testing) — official distributed load-test and monitoring workflow.
 
 ### ByteByteGo provenance
 

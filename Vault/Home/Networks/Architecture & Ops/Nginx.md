@@ -13,23 +13,24 @@ publish: true
 
 # Intro
 
-NGINX is a web server and general-purpose HTTP reverse proxy. A master process owns configuration and worker lifecycle; worker processes handle connections through non-blocking event loops. That design lets a small worker set keep many sockets in flight without assigning one thread or process to every connection.
+NGINX is an event-driven HTTP web server and reverse proxy. A master process handles global config and worker lifecycle; workers keep request state on sockets.
 
-Reach for NGINX when the work is infrastructure-shaped: serve static files, terminate TLS, route by host or path, buffer slow clients, cache public responses, or balance across upstreams. Prefer a managed load balancer or ingress service when operating the proxy fleet would add no product value. Prefer YARP when routing, transforms, or authorization must be composed directly with ASP.NET Core code.
+Use NGINX for commodity edge behavior: path/host routing, TLS termination, buffering, caching, and upstream balancing. Prefer managed ingress or platform edge services when operations ownership already exists and product requirements are not edge-specific.
 
 ![[System Design 101/bc36232ffdb4e6260e2e16a8ed32a50504fe57d8a6812e2fd2d6c30d3c66c506.png]]
 
-The diagram's “cache memory” label is shorthand. Proxy-cache response bodies are file-backed under the path configured by `proxy_cache_path`; the shared-memory zone holds cache keys and metadata.
+The diagram's “cache memory” label is shorthand: response bodies are file-backed under `proxy_cache_path`, while the shared-memory zone holds keys and metadata.
 
-## Process and Connection Lifecycle
+## Reverse-Proxy Boundary
 
-The master process reads configuration, performs privileged setup such as binding configured ports, and starts workers. A worker accepts connections and advances each ready socket through the request state machine. Waiting for one upstream does not block the worker from processing other ready connections.
+When a public request enters NGINX:
 
-A configuration reload sends the master a signal. NGINX validates the new configuration, starts new workers, and asks old workers to finish existing requests before exiting. A valid reload therefore changes routing without dropping all in-flight traffic; a bad configuration is rejected and the old workers continue.
+1. The proxy accepts or reuses a connection.
+2. It applies host/path/header policy.
+3. It opens upstream connection(s).
+4. It forwards, buffers, and returns a response.
 
-The event loop does not make blocking work free. Slow upstreams still consume connections and buffers, disk-backed buffering can add I/O, and CPU-heavy modules stall a worker. Capacity planning still needs connection limits, upstream timeouts, file-descriptor limits, and observability at both proxy and origin.
-
-## Concrete Reverse-Proxy Path
+The origin sees proxy-origin traffic as client traffic. If app identity needs to include user identity, only trust proxy-authenticated forwarding headers from known and controlled edge nodes.
 
 ```nginx
 upstream orders_api {
@@ -59,30 +60,35 @@ server {
 }
 ```
 
-For `GET https://api.example.com/orders/42`, NGINX completes the client TLS handshake, chooses the least-busy upstream, forwards an HTTP request over a separate connection, buffers the response by default, and relays it to the client. `/assets/logo.svg` never reaches the application: NGINX reads it from the configured static root.
+If upstream uses TLS, verify certificate policy separately at that hop. A plain proxy-to-origin channel can reduce latency but lowers transport isolation.
 
-TLS termination exposes HTTP to routing and logging. The upstream hop in this example is plaintext, so it belongs only on a trusted network. Use an HTTPS upstream with certificate verification when that boundary requires encryption; terminating client TLS does not secure the second hop automatically.
+## Forward Proxy vs Reverse Proxy
 
-## Buffering, Caching, and Load Balancing
+Both are intermediaries but represent different trust models:
 
-- **Buffering** decouples a fast upstream from a slow client. It protects application connections but consumes memory or temporary-file I/O. Disable it deliberately for streaming or low-latency incremental responses.
-- **Caching** is opt-in through `proxy_cache_path` and `proxy_cache`. Cache only responses whose keys, authorization rules, and freshness semantics are understood; NGINX is not an application-data cache by default.
-- **Load balancing** uses round robin by default, with alternatives such as `least_conn` and hashing. Passive failure handling can try another upstream, but retries need method semantics: replaying a non-idempotent request can duplicate work.
+- Forward proxy: represents client egress and policy, may tunnel with `CONNECT`.
+- Reverse proxy: represents the origin side and handles inbound public entry.
 
-If every client depends on one NGINX instance, the proxy is the outage. Use multiple instances behind independent traffic steering, test graceful reloads, and monitor upstream connection errors, timeout classes, response codes, and saturation. A `502` usually means NGINX could not obtain a valid upstream response; a `504` means the configured gateway timeout expired. Those codes locate the failed boundary but do not prove the root cause.
+For forward proxy scenarios (egress controls, filtering, TLS inspection), enforce strict policy for `CONNECT`, authentication, and trusted CA trust-path assumptions.
 
-## NGINX, Managed Proxies, and YARP
+## Observability and Failure Codes
 
-Use NGINX for stable, declarative edge behavior and efficient static or proxy I/O. A cloud-managed proxy or Kubernetes ingress surface is the better default when the platform already owns certificates, health checks, upgrades, and high availability. It removes host maintenance at the cost of provider-specific controls and pricing.
+- `502`: upstream response was invalid for the proxy.
+- `504`: request hit gateway timeout before upstream completion.
+- `503`: capacity or protection boundary reached.
 
-YARP is a .NET library, not a drop-in NGINX configuration. Choose it when proxy policy must share ASP.NET Core middleware, dependency injection, authorization, or custom C# routing. That flexibility also puts proxy correctness and deployment inside the application team's failure domain. Do not add YARP merely to reproduce commodity TLS termination or path routing that the platform already supplies.
+Design retries and failover upstreams based on this boundary, not on the application alone.
+
+## Why NGINX for This Layer
+
+NGINX remains strong for stable declarative edge behavior and static/off-path optimization. For service-specific logic, policy, auth, and custom routing composition inside an app stack, YARP inside ASP.NET Core can reduce operational fragmentation.
 
 ## References
 
-- [Why is NGINX so Popular? (ByteByteGo snapshot)](https://github.com/ByteByteGoHq/system-design-101/blob/b28380a4710c5ec9638ec037d4168e288f334cba/data/guides/why-is-nginx-so-popular.md) — the reviewed source for the master-worker overview, feature set, and adopted diagram.
-- [NGINX Beginner's Guide](https://nginx.org/en/docs/beginners_guide.html) — official configuration, static serving, proxying, and master/worker process introduction.
-- [Controlling NGINX](https://nginx.org/en/docs/control.html) — official signal and graceful configuration-reload behavior.
-- [NGINX HTTP proxy module](https://nginx.org/en/docs/http/ngx_http_proxy_module.html) — authoritative directives for upstream forwarding, buffering, timeouts, retries, and cache activation.
-- [NGINX HTTP upstream module](https://nginx.org/en/docs/http/ngx_http_upstream_module.html) — load-balancing algorithms and upstream failure controls.
-- [NGINX TLS module](https://nginx.org/en/docs/http/ngx_http_ssl_module.html) — certificate, protocol, and session configuration for TLS termination.
-- [YARP overview](https://learn.microsoft.com/en-us/aspnet/core/fundamentals/servers/yarp/yarp-overview?view=aspnetcore-10.0) — Microsoft documentation for the .NET reverse-proxy boundary and customization model.
+- [Why is NGINX so Popular? (ByteByteGo)](https://github.com/ByteByteGoHq/system-design-101/blob/b28380a4710c5ec9638ec037d4168e288f334cba/data/guides/why-is-nginx-so-popular.md) — process and proxy feature baseline.
+- [NGINX Beginner's Guide](https://nginx.org/en/docs/beginners_guide.html) — configuration and proxy basics.
+- [Controlling NGINX](https://nginx.org/en/docs/control.html) — lifecycle and graceful reload behavior.
+- [NGINX HTTP proxy module](https://nginx.org/en/docs/http/ngx_http_proxy_module.html) — directives for forwarding and buffering.
+- [NGINX HTTP upstream module](https://nginx.org/en/docs/http/ngx_http_upstream_module.html) — load balancing and upstream options.
+- [NGINX TLS module](https://nginx.org/en/docs/http/ngx_http_ssl_module.html) — TLS protocol and certificate behavior.
+- [YARP overview](https://learn.microsoft.com/aspnet/core/fundamentals/servers/yarp/yarp-overview) — .NET-native proxy alternative.

@@ -25,7 +25,7 @@ A program is executable code on storage; executing it creates or replaces a proc
 | --- | --- | --- |
 | Address space | Separate by default | Shared with peer threads |
 | Stack and registers | Contains at least one thread's state | Private per thread |
-| Communication | Explicit [[Inter-Process Communication]] | Shared memory plus synchronization |
+| Communication | Explicit [[Home/Computer Science/Operating Systems/Inter-Process Communication|inter-process communication]] | Shared memory plus synchronization |
 | Creation/context-switch cost | Usually higher | Usually lower within one process |
 | Failure blast radius | Kernel isolation usually contains memory corruption | Corruption or an unhandled fatal failure can terminate the whole process |
 
@@ -39,7 +39,6 @@ Use a dedicated `Thread` only when thread identity or lifetime is itself require
 
 ## References
 
-- [pthreads(7)](https://man7.org/linux/man-pages/man7/pthreads.7.html) — authoritative Linux/POSIX thread model and shared process attributes.
-- [proc_pid_maps(5)](https://www.man7.org/linux/man-pages/man5/proc_pid_maps.5.html) — primary Linux interface for observing a process's mapped address space.
+- [Processes and threads (Windows)](https://learn.microsoft.com/windows/win32/procthread/processes-and-threads) — concrete operating-system reference for process resources, thread execution state, scheduling, and isolation.
 - [System.Threading.Tasks.Task](https://learn.microsoft.com/en-us/dotnet/api/system.threading.tasks.task?view=net-10.0) — .NET task representation, scheduling, and continuation API.
 - [ByteByteGo System Design 101 — Process vs thread](https://github.com/ByteByteGoHq/system-design-101/blob/b28380a4710c5ec9638ec037d4168e288f334cba/data/guides/what-is-the-difference-between-process-and-thread.md) — editorial relationship overview and embedded visual; primary OS and .NET references supply the execution semantics.

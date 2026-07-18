@@ -17,7 +17,7 @@ status: Ready to Repeat
 
 Authentication proves which user or workload is making a request. It does not decide what that principal may do; that is authorization. A production design also needs a credential, a ceremony that proves possession of it, a way to carry the result between requests, and a recovery path. Calling all of those pieces "authentication methods" hides the trust boundaries that fail in practice.
 
-For a browser application, one concrete design is: OIDC Authorization Code with PKCE authenticates the user, the callback validates the ID token, the application creates an opaque server-side session, and a `Secure; HttpOnly; SameSite=Lax` cookie carries only the session identifier. The API still evaluates authorization on every request.
+For a browser application, one concrete design is OIDC Authorization Code with PKCE. The callback validates the authorization response and `state`, exchanges the code with the PKCE verifier, then validates the ID token signature, issuer, audience, expiry, and applicable nonce before creating an opaque server-side session. A `Secure; HttpOnly; SameSite=Lax` cookie carries only the session identifier, and the API still evaluates authorization on every request.
 
 ```datacorejsx
 const { FolderStructureMap } = await dc.require("Assets/components/devbook-folder-map.jsx");
@@ -123,6 +123,8 @@ Visualization pending
 
 - [OWASP Authentication Cheat Sheet](https://cheatsheetseries.owasp.org/cheatsheets/Authentication_Cheat_Sheet.html) — credential, session, and reauthentication controls.
 - [OWASP Session Management Cheat Sheet](https://cheatsheetseries.owasp.org/cheatsheets/Session_Management_Cheat_Sheet.html) — session identifiers, cookie attributes, renewal, and expiration.
+- [OpenID Connect Core 1.0](https://openid.net/specs/openid-connect-core-1_0-final.html) — authorization response, code flow, nonce, and ID-token validation requirements.
+- [RFC 7636 — Proof Key for Code Exchange](https://www.rfc-editor.org/rfc/rfc7636) — PKCE verifier and challenge binding for authorization-code exchange.
 - [RFC 6265 — HTTP State Management Mechanism](https://www.rfc-editor.org/rfc/rfc6265) — normative cookie storage and matching behavior.
 - [RFC 2104 — HMAC](https://www.rfc-editor.org/rfc/rfc2104) — historical construction and security requirements for keyed message authentication.
 - [RFC 9421 — HTTP Message Signatures](https://www.rfc-editor.org/rfc/rfc9421.html) — standard covered-component model for binding method, authority, target URI or query components, content, and signature metadata to an HTTP request.

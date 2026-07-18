@@ -11,7 +11,7 @@ status: Ready to Repeat
 publish: true
 ---
 
-# Serverless Architecture
+# Intro
 
 Serverless architecture delegates capacity provisioning, patching, and much of the availability control plane to a provider. It includes FaaS, serverless containers, managed queues and event buses, object storage, and databases whose billing and scaling are service-defined. It does not mean every service scales to zero, has no idle charge, or bills only per invocation.
 
@@ -44,7 +44,35 @@ HTTP, timers, queues, object notifications, and event buses are common function 
 
 ![[System Design 101/aae14f041eec7ebaf0b4ed863793f574fd3b11dfc73ccf0b2f29dd8f4d5a539e.png]]
 
-The visual is a dated fleet model, not an AWS compatibility contract. The stable behavior is isolated execution environments that may be initialized, reused, frozen, reset, or removed. [[Serverless Runtime Internals]] owns the lifecycle, cold-start variables, client reuse, snapshots, and connection constraints.
+The visual is a dated fleet model, not an AWS compatibility contract. The stable behavior is isolated execution environments that may be initialized, reused, frozen, reset, or removed.
+
+### Execution lifecycle
+
+An AWS Lambda environment has initialization, invocation, and shutdown or reset phases. Azure Functions has analogous host and worker initialization governed by its hosting plan. Providers may freeze an idle environment and resume it later, replace it after an error, or add environments to handle concurrency.
+
+```csharp
+public sealed class Function
+{
+    private static readonly HttpClient Http = new();
+
+    public async Task<Response> HandleAsync(Request request, CancellationToken ct)
+    {
+        using var response = await Http.GetAsync(
+            $"https://catalog.internal/items/{request.ItemId}", ct);
+        return new Response(response.IsSuccessStatusCode);
+    }
+}
+```
+
+Reusing `HttpClient` reduces connection churn when the process is warm. Correctness cannot depend on the static field surviving; durable state belongs in an external database, queue, or object store.
+
+### Cold-start controls
+
+Cold-start time includes environment allocation, runtime boot, code loading, and application initialization. It varies by platform, runtime, package size, networking, and configuration, so measure the chosen plan and region rather than relying on a universal range. Provisioned or minimum instances trade fixed cost for predictable latency. Snapshot and restore features can reduce initialization for supported runtimes, but restored state needs checks for stale connections, random values, credentials, and uniqueness. Native AOT may reduce .NET startup cost when library and reflection constraints are acceptable.
+
+### Concurrency and connections
+
+Scale-out creates independent client pools. Cap per-environment database connections and use a server-side proxy or pooler when fan-out could exceed database limits. Warm environments may retain cached data, so entries need expiry and cannot be the source of truth.
 ## Pitfalls
 
 ### Cold Start Latency
@@ -69,7 +97,7 @@ The visual is a dated fleet model, not an AWS compatibility contract. The stable
 
 **Why it happens**: each execution environment has its own pool. Warm invocations can reuse that local pool, but rapid scale-out multiplies the number of pools and connections.
 
-**Mitigation**: front the database with a **server-side pooler** that all instances share (RDS Proxy, Azure SQL, PgBouncer) and cap per-instance pool size. See [[Connection Pooling]] — this is the canonical serverless data gotcha.
+**Mitigation**: front the database with a **server-side pooler** that all instances share, such as RDS Proxy for supported AWS databases or PgBouncer for PostgreSQL, and cap per-instance client pool size. See [[Connection Pooling]] — this is the canonical serverless data gotcha.
 
 > [!NOTE]
 > Serverless container products are not interchangeable. Cloud Run and Azure Container Apps can scale to zero under supported configurations. AWS Fargate supplies serverless task compute but does not itself promise automatic scale-to-zero for an ECS service. Billing follows each product's allocated-resource and minimum-instance rules.
@@ -101,9 +129,11 @@ The visual is a dated fleet model, not an AWS compatibility contract. The stable
 - [Azure Functions overview (Microsoft Learn)](https://learn.microsoft.com/en-us/azure/azure-functions/functions-overview) — official overview of Azure Functions triggers, bindings, hosting plans, and scaling behavior.
 - [Serverless architectures (Martin Fowler)](https://martinfowler.com/articles/serverless.html) — practitioner article covering the tradeoffs of serverless, when it fits, and the operational challenges (cold starts, observability, testing).
 - [Azure Functions performance and reliability (Microsoft Learn)](https://learn.microsoft.com/en-us/azure/azure-functions/functions-best-practices) — best practices for cold start mitigation, connection reuse, and scaling configuration.
-- [Cold starts in Azure Functions (Microsoft Learn)](https://learn.microsoft.com/en-us/azure/azure-functions/functions-scale#cold-start-behavior) — explains cold start behavior across hosting plans and mitigation options including Premium Plan and Provisioned Concurrency.
+- [Cold starts in Azure Functions (Microsoft Learn)](https://learn.microsoft.com/en-us/azure/azure-functions/functions-scale#cold-start-behavior) — explains cold-start behavior across hosting plans and mitigation through always-ready and prewarmed instances.
 - [Understanding the Lambda execution environment lifecycle](https://docs.aws.amazon.com/lambda/latest/dg/lambda-runtime-environment.html) — official Init, Invoke, freeze/reuse, reset, and Shutdown behavior.
 - [Improving startup performance with Lambda SnapStart](https://docs.aws.amazon.com/lambda/latest/dg/snapstart.html) — current supported runtimes, snapshot lifecycle, and restore-time constraints.
+- [Azure Functions hosting options](https://learn.microsoft.com/azure/azure-functions/functions-scale) — official scaling, instance, cold-start, and hosting-plan behavior.
+- [.NET Native AOT deployment](https://learn.microsoft.com/dotnet/core/deploying/native-aot/) — official startup, size, and compatibility tradeoffs.
 - [Firecracker: Lightweight Virtualization for Serverless Applications](https://www.usenix.org/conference/nsdi20/presentation/agache) — peer-reviewed architecture paper for the microVM isolation mechanism used by Lambda.
 
 ### ByteByteGo provenance

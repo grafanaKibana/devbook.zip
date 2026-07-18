@@ -100,17 +100,58 @@ Benefit:
 
 ### BFF (Backend for Frontend)
 
-Separate gateways or route sets per client type only when payload, authentication, latency, or ownership needs have materially diverged. [[Backend for Frontend and API Federation]] owns the client-specific composition and federated ownership tradeoffs.
+Separate gateways or route sets per client type only when payload, authentication, latency, release cadence, or ownership needs have materially diverged. A mobile checkout BFF can fetch order, inventory, loyalty, and payment-method data in parallel and return one payload sized for a constrained network.
+
+Keep domain decisions out of the BFF. `CanRefundOrder` belongs to Orders or Payments, not to a client adapter; otherwise mobile, web, and partner clients acquire different business rules.
 
 ### Netflix API evolution: aggregation to federation
 
 ![[System Design 101/3e1b2b8d87fdc6b1e589b34ba270f8497c314218e558b304c60ad21a3bcaec42.png]]
 
-The visual compresses distinct systems into an evolution story. The durable point is that federation redistributes schema and resolver ownership toward domains while a shared registry and graph gateway retain composition and execution responsibilities. See [[Backend for Frontend and API Federation]] for the full boundary and operating tradeoffs.
+The visual compresses distinct systems into an evolution story. Federation redistributes schema and resolver ownership toward domains while a shared registry and graph gateway retain composition and execution responsibilities. Each domain owns its schema contribution and resolver behavior; composition checks compatibility before a change reaches the gateway.
+
+Federation does not remove network cost. A query crossing five subgraphs can still create fan-out latency or an N+1 pattern, so the boundary needs query limits, tracing, batching, and ownership metadata. A BFF and federation can coexist when they solve different ownership problems: the BFF follows a client, while federation follows domains. Do not stack them unless each layer has a distinct owner and measured value.
 
 ## .NET gateway implementation
 
-YARP provides configurable routes, clusters, transforms, destination health, and ASP.NET Core extension points. [[YARP API Gateway]] contains the focused configuration and production boundary; the gateway pattern itself is independent of the chosen proxy library.
+YARP provides configurable routes, clusters, transforms, destination health, and ASP.NET Core extension points:
+
+```csharp
+var builder = WebApplication.CreateBuilder(args);
+
+builder.Services
+    .AddReverseProxy()
+    .LoadFromConfig(builder.Configuration.GetSection("ReverseProxy"));
+
+var app = builder.Build();
+app.MapReverseProxy();
+app.Run();
+```
+
+```json
+{
+  "ReverseProxy": {
+    "Routes": {
+      "orders": {
+        "ClusterId": "orders-cluster",
+        "Match": { "Path": "/api/orders/{**catch-all}" },
+        "Transforms": [{ "PathRemovePrefix": "/api" }]
+      }
+    },
+    "Clusters": {
+      "orders-cluster": {
+        "Destinations": {
+          "orders-a": { "Address": "https://orders.internal/" }
+        }
+      }
+    }
+  }
+}
+```
+
+Authenticate before proxying and authorize by route or endpoint metadata. Forward trace context without logging bearer tokens or bodies by default. Apply client-facing rate limits at the edge, use destination health only when it distinguishes one backend from the fleet, and retry only replayable requests. An uncertain `POST` needs an end-to-end idempotency contract.
+
+The gateway pattern remains independent of YARP. If gateway code starts deciding payment state, order eligibility, or inventory invariants, move that logic to the owning service.
 
 ## Gateway vs Service Mesh
 
@@ -168,6 +209,12 @@ Rule of thumb:
 - [Ocelot documentation](https://ocelot.readthedocs.io/en/latest/) — configuration reference for the Ocelot .NET API gateway including routing, authentication, and rate limiting.
 - [Microservices.io — API Gateway pattern (Chris Richardson)](https://microservices.io/patterns/apigateway.html) — pattern catalog entry covering API gateway vs BFF, forces, and consequences in microservices architectures.
 - [How Netflix scales its API with GraphQL Federation](https://medium.com/netflix-techblog/how-netflix-scales-its-api-with-graphql-federation-part-1-ae3557c187e2) — Netflix's primary account of the unified aggregation layer, domain graph services, schema registry, and graph gateway.
+- [Backends for Frontends](https://samnewman.io/patterns/architectural/bff/) — Sam Newman's client-specific ownership model and caution against unnecessary BFF proliferation.
+- [Apollo Federation architecture](https://www.apollographql.com/docs/federation/) — official subgraph, composition, and graph-router model.
+- [GraphQL specification](https://spec.graphql.org/) — primary language and execution contract underlying federated GraphQL APIs.
+- [YARP configuration files](https://learn.microsoft.com/aspnet/core/fundamentals/servers/yarp/config-files) — official route, cluster, destination, and transform schema.
+- [YARP health checks](https://learn.microsoft.com/aspnet/core/fundamentals/servers/yarp/dests-health-checks) — official active and passive destination-health behavior.
+- [ASP.NET Core rate limiting](https://learn.microsoft.com/aspnet/core/performance/rate-limit) — official middleware and policy model for edge quotas.
 
 ### ByteByteGo provenance
 

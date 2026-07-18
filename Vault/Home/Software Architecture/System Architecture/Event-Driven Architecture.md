@@ -101,17 +101,81 @@ Use when workflow visibility, explicit state handling, and compensation logic ar
 
 ## .NET messaging boundary
 
-[[NET Event-Driven Messaging]] contains the MassTransit producer and consumer path with Entity Framework transactional outbox and inbox semantics. The important boundary is local atomicity: business state and outgoing messages commit together, while each consumer commits its state with durable duplicate tracking. This closes local failure gaps without claiming a global exactly-once transaction.
+A broker can deliver an integration event only after the producer places it on the transport. Saving business state and publishing in two independent operations leaves a failure gap: the database can commit while the publish fails. A transactional outbox stores the business change and outgoing message through the same local `DbContext` transaction, then a delivery service forwards it to the broker.
+
+```csharp
+public sealed record OrderPlacedIntegrationEvent(
+    Guid EventId,
+    Guid OrderId,
+    Guid CustomerId,
+    decimal Total,
+    DateTime OccurredAtUtc);
+```
+
+```csharp
+builder.Services.AddMassTransit(bus =>
+{
+    bus.AddEntityFrameworkOutbox<OrdersDbContext>(outbox =>
+    {
+        outbox.UsePostgres();
+        outbox.UseBusOutbox();
+    });
+
+    bus.UsingRabbitMq((context, rabbit) =>
+        rabbit.ConfigureEndpoints(context));
+});
+```
+
+With `UseBusOutbox`, a scoped `IPublishEndpoint` captures the event in `OrdersDbContext`; one `SaveChangesAsync` commits the order and outbox row together. Broker delivery happens afterward and can retry without losing the event.
+
+Consumers face the inverse gap: a handler can commit its business change and crash before acknowledging the message. Configure the Entity Framework consumer outbox so inbox state and the consumer's changes share a local transaction. Put a unique constraint on the business idempotency key as well, such as one `PaymentIntent` per `OrderId`; inbox state suppresses redelivery of one message identity, while the domain constraint protects the invariant if the same fact arrives under another identity.
+
+```csharp
+bus.AddConsumer<OrderPlacedConsumer>();
+bus.AddEntityFrameworkOutbox<BillingDbContext>(outbox =>
+    outbox.UsePostgres());
+
+rabbit.ReceiveEndpoint("billing-order-placed", endpoint =>
+{
+    endpoint.UseEntityFrameworkOutbox<BillingDbContext>(context);
+    endpoint.ConfigureConsumer<OrderPlacedConsumer>(context);
+});
+```
+
+| Failure | Durable state | Recovery |
+| --- | --- | --- |
+| Process stops before producer save | Neither order nor message committed | Client may retry with an idempotency key |
+| Process stops after producer save | Order and outbox row committed | Outbox delivery service publishes later |
+| Broker redelivers after consumer commit | Consumer change and inbox state committed | Duplicate delivery is suppressed |
+| Consumer permanently rejects schema or data | Message remains unprocessed | Dead-letter with alert and replay procedure |
+
+The outbox closes a local database-to-broker gap. It does not turn the broker and every downstream database into one global exactly-once transaction.
 
 ## Governance and data pipelines
 
 ![[System Design 101/f24452c55f5c2b1ab8dd95a948c020cece30080b79520b91667967513014c20e.png]]
 
-The governance visual is one organization-specific topology. The reusable boundary is centralized compatibility and telemetry guardrails with domain-owned event meaning.
+The governance visual is one organization-specific topology. The reusable boundary is centralized compatibility and telemetry guardrails with domain-owned event meaning:
+
+- **Registry:** schema versions, owner, compatibility mode, lifecycle, and data classification.
+- **SDK:** a narrow paved road for envelopes, trace context, serialization, and telemetry without hiding broker semantics.
+- **Gateway:** optional ingress for authentication, quotas, and routing; internal producers do not all need an extra hop.
+- **Domain ownership:** producers own event meaning and availability; the platform owns guardrails and shared infrastructure.
+- **Regional isolation:** replication declares lag, ordering, conflict, residency, and failover behavior.
+
+For `MenuItemPriceChanged`, the Restaurant domain owns semantics and its producer SLO. CI checks the schema against the registry. Regional brokers keep local consumers running during a remote outage; a global consumer accepts delayed and duplicate replicated events. [[Event Schema Evolution]] covers compatibility across retained messages and independently deployed consumers.
 
 ![[System Design 101/95696d28879b34b489342eb0f5aabbfa21c5929f6a13785fe1ea91712ad2dac8.png]]
 
-The pipeline visual names conceptual stages; real batch and streaming paths can combine or skip them. [[Event-Driven Governance and Data Pipelines]] owns schema registries, SDK/gateway boundaries, regional replication, lineage, checkpoints, and analytical freshness.
+The pipeline visual names conceptual stages; real batch and streaming paths can combine or skip them. Trace `checkout-42` through the reusable stages:
+
+1. **Collect:** checkout emits an event ID, trace ID, schema ID, tenant, and event time.
+2. **Ingest:** the broker assigns partition and offset and exposes lag.
+3. **Store:** object storage writes immutable raw records partitioned by event date and schema version.
+4. **Compute:** a stateful job checkpoints offsets and derives `DailyRevenue`; malformed records enter an owned quarantine path.
+5. **Consume:** warehouse and alerting outputs declare separate freshness and correctness SLOs.
+
+Preserve source event IDs in derived records and publish lineage from input dataset through job to output. Low broker lag does not prove a warehouse table is fresh or correct. "Exactly once" must name a boundary: a stream processor may atomically checkpoint input offsets and write one managed sink, while an external email or payment call remains at-least-once and needs idempotency.
 ## Pitfalls
 
 ### 1) Event Ordering
@@ -162,6 +226,10 @@ The pipeline visual names conceptual stages; real batch and streaming paths can 
 - [CloudEvents specification](https://github.com/cloudevents/spec/blob/main/cloudevents/spec.md) — CNCF event-envelope attributes for portable identity, source, type, time, and data references.
 - [Apache Flink checkpointing](https://nightlies.apache.org/flink/flink-docs-stable/docs/ops/state/checkpoints/) — official recovery boundary for stateful stream-processing jobs.
 - [OpenLineage specification](https://openlineage.io/docs/spec/) — open model for connecting datasets, jobs, and runs across a data pipeline.
+- [MassTransit transactional outbox](https://masstransit.io/documentation/patterns/transactional-outbox) - Bus outbox and consumer outbox behavior with Entity Framework Core.
+- [MassTransit Entity Framework outbox](https://masstransit.io/documentation/configuration/middleware/outbox) - Storage configuration, delivery service, and inbox state.
+- [Transactional Outbox pattern](https://microservices.io/patterns/data/transactional-outbox.html) - Failure gap closed by persisting messages with local business state.
+- [Idempotent Consumer pattern](https://microservices.io/post/microservices/patterns/2020/10/16/idempotent-consumer.html) - Why at-least-once delivery requires durable duplicate handling.
 
 ### ByteByteGo provenance
 

@@ -11,9 +11,9 @@ status: Ready to Repeat
 publish: true
 ---
 
-# Domain-Driven Design
+# Intro
 
-Domain-Driven Design (DDD) centers software design on the business domain — its language, rules, and boundaries — rather than on technical infrastructure. Strategic patterns such as Bounded Contexts and Ubiquitous Language prevent one ambiguous shared model from forcing different business meanings into the same type. Tactical implementation patterns are covered separately in [[Tactical Domain-Driven Design]].
+Domain-Driven Design (DDD) centers software design on the business domain — its language, rules, and boundaries — rather than on technical infrastructure. Strategic patterns such as Bounded Contexts and Ubiquitous Language prevent one ambiguous shared model from forcing different business meanings into the same type. Tactical patterns then make one context's invariants explicit in code.
 
 DDD is most valuable in complex domains with rich business rules. For CRUD-heavy systems with little domain logic, the overhead is not justified.
 
@@ -66,14 +66,53 @@ The map is a *strategic* deliverable: it tells you where to put ACLs, which inte
 
 ## Tactical modeling
 
-[[Tactical Domain-Driven Design]] owns entities, value objects, aggregates, domain services, events, repositories, and their .NET examples. Prefer one aggregate per transaction as a guideline because it keeps consistency local; a multi-aggregate transaction can still be correct when one immediate invariant requires it and the storage boundary supports atomic commit.
+- **Entity:** identified across time, such as `Order` with `OrderId`.
+- **Value object:** identified by its values and normally immutable, such as `Money(Amount, Currency)`.
+- **Aggregate:** a consistency boundary reached through one root.
+- **Domain service:** domain behavior that does not fit one entity or value object.
+- **Domain event:** a fact produced by a successful domain transition.
+- **Repository:** a collection-like boundary for loading and saving aggregate roots.
+
+The aggregate root protects invariants before state can change:
+
+```csharp
+public sealed class Order
+{
+    private readonly List<OrderLine> _lines = [];
+
+    public Guid Id { get; }
+    public IReadOnlyList<OrderLine> Lines => _lines;
+
+    public void AddLine(Guid productId, int quantity, Money unitPrice)
+    {
+        if (quantity <= 0)
+        {
+            throw new ArgumentOutOfRangeException(nameof(quantity));
+        }
+
+        if (unitPrice.Amount < 0)
+        {
+            throw new ArgumentOutOfRangeException(nameof(unitPrice));
+        }
+
+        _lines.Add(new OrderLine(productId, quantity, unitPrice));
+    }
+}
+```
+
+Prefer changing one aggregate per transaction because it keeps lock and consistency boundaries local. This is a design guideline, not a law: a transaction spanning several aggregates can be correct when one immediate invariant truly crosses them and the storage model supports atomic commit. If it happens frequently, reconsider whether the aggregate or bounded-context boundary is wrong.
+
+An anemic model exposes setters while application services implement every rule; the domain vocabulary disappears into orchestration. An oversized aggregate loads and locks too much state, while an undersized aggregate pushes a truly immediate invariant into unreliable coordination. Draw the boundary around facts that must be consistent at commit time, then use events for consequences that can follow later.
+
+When query needs diverge from the aggregate's command model, [[CQRS]] can keep invariant enforcement on the write side while serving purpose-built read models.
+
 ## Tradeoffs
 
 | Approach | Strengths | Weaknesses | When to use |
 |---|---|---|---|
 | Full DDD (Aggregates, Bounded Contexts) | Rich domain model, enforces invariants, scales with complexity | High upfront investment, overkill for simple domains | Complex business rules, multiple teams, long-lived systems |
 | Transaction Script | Simple, fast to write | Logic scattered in services, hard to maintain as complexity grows | Simple CRUD, scripts, prototypes |
-| Anemic model + services | Familiar to most developers | No invariant enforcement, business rules leak everywhere | Short-lived projects, simple domains |
+| Anemic model + services | Familiar to most developers | Invariants are procedural and dispersed across services, so they are easier to bypass or duplicate | Short-lived projects, simple domains |
 
 **Decision rule**: apply DDD tactical patterns (Aggregates, Value Objects, Domain Events) when the domain has non-trivial invariants and multiple teams. Apply strategic patterns (Bounded Contexts) when the system is large enough that a single shared model becomes a coordination bottleneck. For simple CRUD, skip DDD — the overhead is not justified.
 
@@ -87,5 +126,7 @@ The map is a *strategic* deliverable: it tells you where to put ACLs, which inte
 - [Domain-Driven Design: Tackling Complexity in the Heart of Software (Eric Evans)](https://www.oreilly.com/library/view/domain-driven-design-tackling/0321125215/) — the original DDD book; dense but authoritative. Read Part II (Building Blocks) for tactical patterns.
 - [Implementing Domain-Driven Design (Vaughn Vernon)](https://www.oreilly.com/library/view/implementing-domain-driven-design/9780133039900/) — more practical than Evans; covers Aggregate design, Domain Events, and Bounded Context integration with code examples.
 - [CQRS.nu DDD FAQ](https://cqrs.nu/faq/Domain%20Driven%20Design) — concise Q&A on DDD concepts, Aggregates, and how DDD relates to CQRS and Event Sourcing.
-- [[CQRS]] — architectural pattern that pairs naturally with DDD: commands map to Aggregate operations, queries bypass the domain model for read efficiency.
 - [8 key concepts in DDD -- ByteByteGo vocabulary overview; the table above tightens its entity, repository, and aggregate-boundary definitions](https://github.com/ByteByteGoHq/system-design-101/blob/b28380a4710c5ec9638ec037d4168e288f334cba/data/guides/8-key-concepts-in-ddd.md)
+- [Domain-Driven Design Reference](https://www.domainlanguage.com/ddd/reference/) — Eric Evans' concise definitions of entities, value objects, services, aggregates, factories, repositories, and events.
+- [Implementing Domain-Driven Design](https://vaughnvernon.com/?page_id=168) — Vaughn Vernon's detailed aggregate and tactical-pattern guidance.
+- [Domain events: design and implementation](https://learn.microsoft.com/dotnet/architecture/microservices/microservice-ddd-cqrs-patterns/domain-events-design-implementation) — Microsoft .NET guidance for domain events and transaction boundaries.

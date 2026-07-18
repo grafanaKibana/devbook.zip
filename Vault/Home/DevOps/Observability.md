@@ -112,8 +112,6 @@ sequenceDiagram
 
 Propagate W3C trace context, attach the trace ID to structured logs, and derive exemplars or links from metrics to traces where the backend supports them. Never put unbounded request, user, or container IDs in metric labels. Sampling should preserve the rare failures the system exists to explain; uniform head sampling can discard them before their outcome is known.
 
-The source visual for this comparison was rejected because its topology did not match the verified OpenTelemetry signal model; the table is rebuilt from primary specifications.
-
 ## Collection-to-Action Pipeline
 
 Telemetry moves through six boundaries: emit, collect, buffer/transform, store, query, and act. The application emits a stable schema; an agent or OpenTelemetry Collector batches and retries; the backend enforces retention and indexing; queries power dashboards and alerts; automation creates a ticket, pages an owner, or applies a safe remediation. Best-effort diagnostic telemetry should apply backpressure at collectors and buffers, then sample or shed according to an explicit priority policy rather than take the production request path down.
@@ -124,9 +122,6 @@ Choose retention by investigation window and compliance, not habit. Make alert o
 
 ![[System Design 101/c17b0fea47b51ea2363baad05c7a519ce318cc777a53004fbfb824c888601983.png]]
 
-> [!WARNING] Non-normative source visual
-> The provider names and category groupings are historical and should not drive a product choice. Use the visual only for the emit → collect → buffer/transform → store → query → act flow, then verify current product names, supported signals, retention, and alerting contracts in provider documentation.
-
 ## Push versus Pull Metrics
 
 Prometheus pull works when targets are discoverable and the collector can reach them: each scrape also proves target reachability, while the server owns retry pace and backpressure. Push works across restrictive network boundaries or for event-driven delivery, but the sender now owns retry, queueing, authentication, and stale-series cleanup. For short-lived batch jobs, push only job-level terminal metrics to a Pushgateway; do not turn it into a general event store.
@@ -135,11 +130,161 @@ Use pull as the default for long-running discoverable services. Use push when to
 
 ![[System Design 101/51d727bf3bda3570c7c7f0e5fe2cb6b95e4c69072df19e58e5ad7575499dbcdb.png]]
 
-## Focused Runbooks and Implementation
+## Diagnosing CPU and Runtime Pressure
 
-Use [[Home/DevOps/CPU Saturation Runbook|CPU Saturation Runbook]] to separate utilization, runnable work, I/O wait, cgroup throttling, allocation pressure, and hot code before changing capacity. It includes a bounded Linux and .NET evidence sequence and keeps the rejected source visual out of the diagnostic model.
+High processor utilization means work is consuming CPU time, but the percentage alone does not identify whether the work is useful. I/O blocking is different: a request can be slow while CPU remains low because threads are waiting for a socket, disk, database connection, or lock. Classify the signals before changing code or capacity.
 
-Use [[Home/DevOps/NET Observability|NET Observability]] for OpenTelemetry registration, ASP.NET Core instrumentation, custom `Meter` and `ActivitySource` signals, Prometheus or OTLP export, and structured logging examples. Keep signal names and bounded dimensions stable so the backend remains replaceable.
+| Evidence | Likely interpretation | Next check |
+| --- | --- | --- |
+| High CPU and rising request rate | More useful work or overload | Throughput, queue depth, latency, and CPU per request |
+| High CPU, flat traffic, one hot method | Algorithmic loop or unexpectedly expensive path | Time-bounded CPU trace and recent code changes |
+| High CPU with allocation rate and GC time rising | Allocation-driven processor work | Allocation profile, object lifetime, and Gen 2 collections |
+| Low CPU with rising latency and thread-pool queue | Blocking I/O, sync-over-async, or downstream saturation | Thread stacks, dependency spans, and connection-pool metrics |
+| High CPU with lock or spin frames | Contention or busy waiting | Lock profile, thread dump, and critical-section ownership |
+
+### Bounded Evidence Sequence
+
+Collect runtime counters first to classify the interval, then capture a short trace that includes the same request mix:
+
+```bash
+dotnet-counters monitor --process-id <pid> \
+  --duration 00:00:30 \
+  --refresh-interval 1 \
+  --counters System.Runtime Microsoft.AspNetCore.Hosting
+
+dotnet-trace collect --process-id <pid> \
+  --duration 00:00:30 \
+  --format speedscope \
+  --output checkout.nettrace
+```
+
+Record UTC start and end timestamps for both captures. Compare them with request rate, p95/p99 latency, dependency latency, allocation rate, time in GC, thread-pool queue length, and process CPU from the same load-test or incident window. A counter captured during a quiet period and a trace captured during a burst do not describe the same failure.
+
+Allocation rate and GC time separate useful application work from runtime work. Rising allocations with more Gen 2 collections can make CPU climb even when request rate is flat. A low CPU percentage with long database spans points elsewhere: the process is waiting, not consuming a full processor.
+
+### Checkout Serialization Decision
+
+Suppose checkout p99 rises from 180 ms to 1.4 s while traffic stays flat. The aligned counter window shows CPU rising from 0.8 to 1.9 cores, allocation rate tripling, and more time in GC. The trace attributes most samples and allocations to JSON serialization.
+
+Benchmark a serializer change under the same request payloads and concurrency. Source-generated `System.Text.Json` metadata or reusable serialization options are justified if CPU per request, allocation rate, and p99 all fall in the comparison window. Extra capacity may relieve the symptom, but it does not establish that capacity was the cause. Change one variable and compare the same measurements.
+
+### Failure Boundaries
+
+- Do not treat a single process snapshot as a trend; compare rates over a fixed interval.
+- Do not infer processor pressure from latency alone; blocked I/O can be slow while CPU stays low.
+- Do not assume more replicas help when every request waits on the same database, lock, or partition.
+- Do not capture an unbounded production trace; define duration, destination, access policy, and cleanup.
+- Do not optimize the hottest method until the trace covers the user-visible slowdown and the measurements share a window.
+
+## .NET Observability
+
+OpenTelemetry gives .NET services stable signal APIs and an interoperable export protocol. It reduces backend-specific re-instrumentation, but changing backends can still require exporter, collector, query, dashboard, sampling, and semantic-convention work.
+
+The following `Program.cs` registers automatic ASP.NET Core, `HttpClient`, gRPC client, Entity Framework Core, and runtime instrumentation. It also registers the custom `ActivitySource` and `Meter` that the endpoint uses, emits bounded metric dimensions, and writes structured JSON logs with trace and span IDs in logging scopes.
+
+```csharp
+using System.Diagnostics;
+using System.Diagnostics.Metrics;
+using Microsoft.Extensions.Logging;
+using OpenTelemetry.Metrics;
+using OpenTelemetry.Resources;
+using OpenTelemetry.Trace;
+
+const string serviceName = "checkout-api";
+const string instrumentationName = "Checkout.Api";
+
+using var activitySource = new ActivitySource(instrumentationName);
+using var meter = new Meter(instrumentationName, "1.0.0");
+
+var checkoutRequests = meter.CreateCounter<long>(
+    "checkout.requests",
+    unit: "{request}",
+    description: "Number of completed checkout requests.");
+var checkoutDuration = meter.CreateHistogram<double>(
+    "checkout.duration",
+    unit: "s",
+    description: "Checkout request duration.");
+
+var builder = WebApplication.CreateBuilder(args);
+
+builder.Logging.ClearProviders();
+builder.Logging.Configure(options =>
+    options.ActivityTrackingOptions =
+        ActivityTrackingOptions.TraceId |
+        ActivityTrackingOptions.SpanId);
+builder.Logging.AddJsonConsole(options => options.IncludeScopes = true);
+
+builder.Services
+    .AddOpenTelemetry()
+    .ConfigureResource(resource => resource.AddService(serviceName))
+    .WithTracing(tracing => tracing
+        .AddAspNetCoreInstrumentation()
+        .AddHttpClientInstrumentation()
+        .AddGrpcClientInstrumentation()
+        .AddEntityFrameworkCoreInstrumentation()
+        .AddSource(instrumentationName)
+        .AddOtlpExporter())
+    .WithMetrics(metrics => metrics
+        .AddAspNetCoreInstrumentation()
+        .AddHttpClientInstrumentation()
+        .AddRuntimeInstrumentation()
+        .AddMeter(instrumentationName)
+        .AddOtlpExporter());
+
+var app = builder.Build();
+
+app.MapPost(
+    "/checkout",
+    async (CheckoutRequest request, ILoggerFactory loggerFactory,
+        CancellationToken cancellationToken) =>
+    {
+        var logger = loggerFactory.CreateLogger("Checkout");
+        var startedAt = Stopwatch.GetTimestamp();
+        var outcome = "accepted";
+
+        using var activity = activitySource.StartActivity("checkout.create");
+        activity?.SetTag("checkout.item_count", request.Items.Count);
+
+        try
+        {
+            await Task.Delay(TimeSpan.FromMilliseconds(5), cancellationToken);
+
+            var orderId = Guid.NewGuid();
+            logger.LogInformation(
+                "Checkout accepted for {ItemCount} items as {OrderId}",
+                request.Items.Count,
+                orderId);
+
+            return Results.Accepted(
+                $"/orders/{orderId}",
+                new CheckoutResult(orderId, "accepted"));
+        }
+        catch (OperationCanceledException)
+        {
+            outcome = "cancelled";
+            activity?.SetStatus(ActivityStatusCode.Error, "cancelled");
+            throw;
+        }
+        finally
+        {
+            var tags = new TagList { { "outcome", outcome } };
+            checkoutRequests.Add(1, tags);
+            checkoutDuration.Record(
+                Stopwatch.GetElapsedTime(startedAt).TotalSeconds,
+                tags);
+        }
+    });
+
+app.Run();
+
+internal sealed record CheckoutRequest(IReadOnlyList<CheckoutItem> Items);
+internal sealed record CheckoutItem(string Sku, int Quantity);
+internal sealed record CheckoutResult(Guid OrderId, string Status);
+```
+
+`outcome` is bounded, so it is safe as a metric dimension. `ItemCount` is a small aggregate suitable for a span tag or log property. Order IDs, customer IDs, raw URLs, request bodies, authentication tokens, and SKUs should not become metric dimensions. Put identifiers in access-controlled logs only when the investigation and retention policy requires them; do not emit secrets at all.
+
+OTLP is the default in the example because a collector gives the platform one place for authentication, batching, retries, sampling, and backend routing. Direct Prometheus scraping is reasonable when the scraper can reach each service and the deployment accepts an application-owned scrape endpoint. In that case, replace the metrics `.AddOtlpExporter()` with `.AddPrometheusExporter()` and call `app.MapPrometheusScrapingEndpoint()`. This changes only the metrics path; traces still need OTLP or another trace exporter.
 
 ## Pitfalls
 
@@ -177,17 +322,20 @@ If thresholds are too sensitive or static, teams get constant false positives an
 ## Questions
 
 > [!QUESTION]- How do you diagnose an intermittent p95/p99 latency bottleneck in a multi-service system?
-> Start from traces and filter to the slow requests — the p99, not the average — to see which span dominates. Correlate with per-service RED metrics to tell whether the latency is isolated or systemic, then walk the dependency spans (DB, cache, external API) to find where it originates. Pull structured logs by the same trace ID to check for edge-case payloads or retries on those requests. The point is using all three pillars together: traces locate it, metrics size it, logs explain it — guessing from one dashboard is how you waste an hour.
+> Start from traces and filter to the slow requests — the p99, not the average — to see which span dominates. Correlate with per-service RED metrics to tell whether the latency is isolated or systemic, then walk the dependency spans (DB, cache, external API) to find where it originates. Pull structured logs by the same trace ID to check for edge-case payloads or retries on those requests. Traces locate the delay, metrics size its effect, and logs expose the state around it.
 
 > [!QUESTION]- When should you use RED vs USE?
 > RED — Rate, Errors, Duration — is for customer-facing endpoints and request pipelines: it tells you what users are experiencing. USE — Utilization, Saturation, Errors — is for the resources underneath: CPU, thread pools, queue depth, DB connection pools. You want both, because they pair causally: RED is the symptom at the service boundary, USE is the pressure source beneath it. A rising p99 traced to a saturated connection pool is the canonical chain.
 
 > [!QUESTION]- Why instrument with OpenTelemetry from day one instead of adding observability later?
-> Instrumenting early bakes telemetry into your contracts and code paths before the system is complex enough to need it — and before an incident, when there's no time to add it. Retrofitting is worse than it sounds: no historical baselines to compare against, and invasive changes across many services at once, usually under pressure. Going vendor-neutral with OpenTelemetry also keeps your backend choice open, so you can switch APMs without re-instrumenting. The telemetry you never emitted is exactly the data you'll wish you had at 3am.
+> Instrumenting early establishes telemetry contracts and historical baselines before the system becomes difficult to change. Retrofitting during an incident requires invasive changes across several services and still cannot recover signals that were never emitted. OpenTelemetry also reduces the application changes needed to switch backends, although exporters, collector routing, queries, dashboards, and sampling policies may still change.
 
 ## References
 
 - [OpenTelemetry for .NET (official docs)](https://opentelemetry.io/docs/languages/dotnet/) — documents the .NET SDK, instrumentation, exporters, and signal-specific setup.
+- [dotnet-counters diagnostic tool](https://learn.microsoft.com/en-us/dotnet/core/diagnostics/dotnet-counters) — Microsoft reference for observing runtime counters such as allocation rate, GC activity, and thread-pool behavior.
+- [dotnet-trace diagnostic tool](https://learn.microsoft.com/en-us/dotnet/core/diagnostics/dotnet-trace) — Microsoft reference for collecting bounded .NET runtime traces and converting them for profile analysis.
+- [.NET metrics instrumentation](https://learn.microsoft.com/en-us/dotnet/core/diagnostics/metrics-instrumentation) — Microsoft guidance for `Meter`, counters, histograms, dimensions, and custom instrumentation.
 - [ASP.NET Core observability example with OpenTelemetry and Prometheus (Microsoft Learn)](https://learn.microsoft.com/dotnet/core/diagnostics/observability-prgrja-example) — supplies an end-to-end .NET metrics and tracing example with Prometheus collection.
 - [W3C Trace Context](https://www.w3.org/TR/trace-context/) — defines the interoperable `traceparent` and `tracestate` headers used for cross-service correlation.
 - [Prometheus ASP.NET Core exporter README (OpenTelemetry .NET)](https://github.com/open-telemetry/opentelemetry-dotnet/tree/main/src/OpenTelemetry.Exporter.Prometheus.AspNetCore) — documents the exporter endpoint, registration, and hosting constraints for ASP.NET Core.
@@ -196,8 +344,8 @@ If thresholds are too sensitive or static, teams get constant false positives an
 - [Prometheus: when to use the Pushgateway](https://prometheus.io/docs/practices/pushing/) — official limits and lifecycle risks of pushed metrics.
 - [OpenTelemetry Collector](https://opentelemetry.io/docs/collector/) — official receive, process, and export pipeline boundaries.
 - [Elastic ingestion tools](https://www.elastic.co/guide/en/observability/current/ingest-logs-metrics-uptime.html) — official Elastic ingestion and indexing paths.
-- [ByteByteGo: logs, traces, and metrics](https://github.com/ByteByteGoHq/system-design-101/blob/b28380a4710c5ec9638ec037d4168e288f334cba/data/guides/logging-tracing-metrics.md) — source contribution for signal comparison; its visual was rejected by the audit.
+- [ByteByteGo: logs, traces, and metrics](https://github.com/ByteByteGoHq/system-design-101/blob/b28380a4710c5ec9638ec037d4168e288f334cba/data/guides/logging-tracing-metrics.md) — provides a compact comparison of the three signal types.
 - [ByteByteGo: push versus pull metrics](https://github.com/ByteByteGoHq/system-design-101/blob/b28380a4710c5ec9638ec037d4168e288f334cba/data/guides/push-vs-pull-in-metrics-collecting-systems.md) — source contribution for the collection selector.
 - [ByteByteGo: cloud monitoring](https://github.com/ByteByteGoHq/system-design-101/blob/b28380a4710c5ec9638ec037d4168e288f334cba/data/guides/cloud-monitoring-cheat-sheet.md) — source contribution for the collection-to-action pipeline.
-- [ByteByteGo: high CPU cases](https://github.com/ByteByteGoHq/system-design-101/blob/b28380a4710c5ec9638ec037d4168e288f334cba/data/guides/top-9-cases-behind-100-cpu-usage.md) — source contribution for the evidence-first CPU runbook; its visual was rejected by the audit.
+- [ByteByteGo: high CPU cases](https://github.com/ByteByteGoHq/system-design-101/blob/b28380a4710c5ec9638ec037d4168e288f334cba/data/guides/top-9-cases-behind-100-cpu-usage.md) — surveys application and runtime causes of high processor utilization.
 - [ByteByteGo: ELK](https://github.com/ByteByteGoHq/system-design-101/blob/b28380a4710c5ec9638ec037d4168e288f334cba/data/guides/what-is-elk-stack-and-why-is-it-so-popular-for-log-management.md) — source contribution for the log-ingestion example.

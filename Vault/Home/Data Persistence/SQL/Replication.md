@@ -71,11 +71,51 @@ Single-leader replication can offload reads only when routing preserves the requ
 
 ![[System Design 101/fad9c0171b8080e840a469ddf29a9f82d932eb2687a8d62fdb013bf9c3014ece.png]]
 
-The diagram shows the middleware topology, not the lag or transaction boundary. [[Home/Data Persistence/SQL/Replica Read Routing|Replica Read Routing]] owns position tokens, transaction pinning, topology refresh, bounded waits, failover timelines, and overload behavior.
+The diagram shows the middleware topology, not the lag or transaction boundary. The routing contract is stricter:
+
+- A read-only transaction pins one eligible replica until commit or rollback; its statements never hop between nodes.
+- Staleness-tolerant reads may use a healthy replica inside the configured lag budget.
+- A read that must observe a prior write uses the primary or a replica whose replay position reaches the request token.
+- The application or API marks the causal requirement because a SQL proxy usually cannot infer it from statement text.
+
+## Position Token
+
+A fixed time window guesses at lag. A position token states the actual boundary:
+
+1. Commit the write on the primary.
+2. Return a token at or after that commit's WAL position.
+3. Carry the token with the next read.
+4. Compare each standby's replay position with the required position.
+5. If replay is behind, wait within a strict budget, route to the primary, or return an explicit consistency failure.
+
+```text
+required = 0/16B6C50
+replica  = 0/16B6A20  -> wait or primary
+replica  = 0/16B6D10  -> eligible
+```
+
+WAL positions are ordered values, not strings to compare lexicographically. A later `pg_current_wal_lsn()` is a conservative token if concurrent commits advance it; `pg_last_wal_replay_lsn()` reports a standby's replay boundary.
+
+![[System Design 101/316dec0dba2634be6b17aa4254ec3ffe23cf58fa2964464e4bb956609f664728.png]]
+
+The topology image still omits the causal condition: a replica is eligible for a read-after-write request only after replay reaches that request's token.
+
+## Failover and Overload
+
+A token from an old PostgreSQL timeline may not be directly comparable after promotion. The protocol must translate the boundary through failover metadata or route consistency-sensitive reads to the new primary until eligibility can be proved.
+
+Keep waits bounded. An unbounded standby wait turns lag into request exhaustion; routing every lagged read to the primary can overload the node needed for recovery. Track lag, wait duration, primary fallback, and rejected consistency-sensitive reads separately.
+
+| Failure | Required behavior |
+| --- | --- |
+| Replica behind token | Bounded wait, primary fallback, or explicit consistency failure |
+| Replica fails during an idempotent read | Retry another eligible replica with the same token and retry budget |
+| Primary changes during a transaction | Fail the pinned transaction; retry the whole transaction only when safe |
+| Commit acknowledgement is lost | Treat the result as unknown; resolve by idempotency key or reconciliation |
 
 ## CAP and PACELC
 
-The sync/async and leader-model choices above are all instances of one theorem. **CAP** says that when a network **P**artition splits your replicas, you must choose between **C**onsistency (reject reads/writes that can't be coordinated) and **A**vailability (keep serving, accept divergence) — you cannot have both *during a partition*. A single-leader system that refuses writes when it can't reach a quorum is **CP**; a leaderless Dynamo-style system that keeps accepting writes and reconciles later is **AP**.
+**CAP** applies when a network **P**artition splits replicas: the system must choose between **C**onsistency (reject operations that cannot be coordinated) and **A**vailability (keep serving and accept divergence) during that partition. A single-leader system that refuses writes when it cannot reach a quorum is **CP**; a leaderless Dynamo-style system that keeps accepting writes and reconciles later is **AP**. Synchronous versus asynchronous durability acknowledgement is a separate contract.
 
 CAP only describes the partition case, which is why **PACELC** also asks whether normal operation favors latency or coordination. Synchronous commit pays latency for acknowledged durability; it is not by itself a linearizable-replica-read protocol. Strong observation additionally requires routing to the primary or waiting until the chosen replica has replayed the required position. See [[Home/Software Architecture/Distributed Systems/CAP theorem|CAP theorem]] for the theorem's full boundary.
 
@@ -131,6 +171,7 @@ Choose each mechanism from the measured bottleneck and required consistency boun
 - [DynamoDB global table consistency](https://docs.aws.amazon.com/amazondynamodb/latest/developerguide/V2globaltables_HowItWorks.html) — multi-Region replication and consistency modes, which are separate from single-Region read selection.
 - [PostgreSQL High Availability and Replication](https://www.postgresql.org/docs/15/high-availability.html) — official docs covering streaming replication, WAL shipping, and standby configuration.
 - [PostgreSQL backup control functions](https://www.postgresql.org/docs/current/functions-admin.html#FUNCTIONS-ADMIN-BACKUP) — primary definitions for current and replay WAL-location functions used by position-aware routing.
+- [PostgreSQL warm standby](https://www.postgresql.org/docs/current/warm-standby.html) — streaming replication, hot-standby delay, and failover behavior.
 - [Designing Data-Intensive Applications, Ch. 5: Replication (Martin Kleppmann)](https://www.oreilly.com/library/view/designing-data-intensive-applications/9781098119058/) — deep-dive into leader-follower, multi-leader, and leaderless replication with replication lag and consistency analysis.
 - [Read-your-writes on replicas: PostgreSQL WAIT FOR LSN and MongoDB causal consistency](https://dev.to/franckpachot/read-your-writes-on-replicas-postgresql-wait-for-lsn-and-mongodb-causal-consistency-4he2) — practitioner post on implementing read-your-writes consistency across replicas in PostgreSQL and MongoDB.
 - [Amazon RDS read replicas](https://docs.aws.amazon.com/AmazonRDS/latest/UserGuide/USER_ReadRepl.html) — official docs on provisioning read replicas and directing read traffic to them; the primary source for the managed read/write-split pattern.

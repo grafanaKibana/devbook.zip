@@ -17,7 +17,7 @@ Caching stores a copy of data closer to where it is consumed — in process memo
 
 Some systems deliberately layer an in-process cache (L1) over a shared out-of-process cache (L2). L1 avoids serialization and a network hop but is duplicated per process and disappears with that process. L2 can be shared across instances and survive an application restart, but every lookup crosses a client, network, and backend boundary. Whether L2 survives a cache-node failure depends on the selected product's persistence and replication contract. Use both tiers only when measurements show that the extra invalidation and capacity boundaries are worth the saved origin work.
 
-The cache read path is simple; its correctness is not. Invalidation is a common risk, but incomplete keys, serialization drift, and security boundaries can be worse: omitting the tenant from a key can leak data across accounts. This note owns request patterns and freshness semantics. [[Home/Data Persistence/Caching Operations|Caching Operations]] owns outage, stampede, admission, eviction, and capacity controls; [[Home/Data Persistence/Caching Systems|Caching Systems]] owns product-specific Redis, Memcached, and EVCache contracts.
+The cache read path is simple; its correctness is not. Invalidation is a common risk, but incomplete keys, serialization drift, and security boundaries can be worse: omitting the tenant from a key can leak data across accounts. A complete design therefore covers the request pattern, freshness contract, outage behavior, capacity policy, and the selected product's loss boundary together.
 
 ```mermaid
 flowchart TD
@@ -102,11 +102,22 @@ public class UserService(HybridCache cache)
 }
 ```
 
-## Operating decisions
+## Operating contract
 
 Before selecting a client library, decide whether the workload has reuse, how stale each data class may be, who owns a miss, what an acknowledged write means, what happens at capacity, and how each request class degrades when the cache is unavailable. Measure hit ratio by route and key class rather than relying on one fleet-wide percentage: a 95% aggregate hit ratio can still hide an endpoint whose misses dominate database load.
 
-The detailed signals, outage boundaries, eviction choices, and miss-abuse controls live in [[Home/Data Persistence/Caching Operations|Caching Operations]].
+| Question | Concrete decision | Signal that the decision is wrong |
+| --- | --- | --- |
+| Does the workload have reuse? | Measure request-key frequency and working-set size | Hit ratio remains low after warm-up |
+| How stale may a value be? | Assign a freshness budget per data type and derive TTL or invalidation latency | Stale-read incidents or constant revalidation |
+| Who owns misses? | Choose an application loader, read-through loader, or background publisher; coalesce concurrent loads | Origin requests per miss rise above one for a hot key |
+| What does an acknowledged write mean? | Name whether the origin, cache, queue, or replicas have accepted it | Duplicate effects or acknowledged data loss on failure |
+| What happens at capacity? | Set a memory limit, admission rule, and eviction policy separately from TTL | Evictions spike, hit ratio collapses, or writes fail under `noeviction` |
+| What happens when the cache is down? | Choose bypass, stale serve, partial degradation, or fail closed per data class | A cache outage becomes an uncontrolled origin outage |
+
+Track hit ratio by route and key class, miss latency, origin requests caused by misses, eviction and expiration rates, invalidation lag, timeouts, and stale-read or version-mismatch counts.
+
+![[System Design 101/0cb71aee6eed509539fbd5ac91a9efc9bd345bc0855cb10d048f11413785373c.png]]
 
 ## Invalidation Strategies
 
@@ -201,13 +212,52 @@ Notes:
 - Soft TTL is a latency contract. Hard TTL is a safety contract.
 - This dictionary and `HybridCache` coalesce only within one process. `IDistributedCache` does not provide atomic singleflight across instances; fleet-wide coordination needs a backend-aware lease or another distributed ownership protocol.
 
-## Stampede and Failure Boundary
+## Stampede and failure modes
 
-A stampede starts when many callers miss the same expensive key and independently load the origin. Coalesce refreshes, jitter expirations, and decide per data class whether an outage may serve stale, bypass under a rate limit, or must fail closed. The concrete request traces, signals, eviction choices, and overload safeguards live in [[Home/Data Persistence/Caching Operations|Caching Operations]].
+A stampede starts when many callers miss the same expensive key and independently load the origin. Coalesce refreshes, jitter expirations, and decide per data class whether an outage may serve stale, bypass under a rate limit, or must fail closed.
 
-## Product Boundary
+| Failure | Request trace | Safe boundary |
+| --- | --- | --- |
+| Synchronized expiry | Many keys expire together, producing a fleet-wide origin burst | TTL jitter, staged warm-up, coalescing, and origin rate limits |
+| Hot-key expiry | One popular key expires and every caller recomputes it | One refresh owner, soft/hard TTL, proactive refresh, and bounded stale serve |
+| Penetration | Random absent keys repeatedly miss and reach the origin | Key-space validation, short negative TTL, membership filter when applicable, and per-principal limits |
+| Cache outage | Cache timeouts make every request bypass | Short cache timeouts, circuit breaker, rate-limited bypass, stale serve for eligible data, and fail closed for authorization or quota state |
 
-Redis, Memcached, and EVCache are not interchangeable merely because they can serve values from memory. Decide whether values are disposable, which acknowledgement and persistence settings define loss, and how capacity eviction affects the origin. [[Home/Data Persistence/Caching Systems|Caching Systems]] carries those product comparisons and failure contracts.
+Retries remain bounded and apply only to idempotent operations. An unbounded origin retry after a cache timeout multiplies load exactly when the dependency is weakest.
+
+## Redis and Memcached
+
+Redis, Memcached, and EVCache are not interchangeable merely because they can serve values from memory. Decide whether values are disposable, which acknowledgement and persistence settings define loss, and how capacity eviction affects the origin.
+
+| Dimension | Memcached | Redis |
+| --- | --- | --- |
+| Core model | Ephemeral opaque values distributed in memory | Typed in-memory structures with atomic commands |
+| Capacity behavior | Slab classes and segmented LRU reclaim expired or unexpired items | Configurable `maxmemory-policy`; `noeviction` rejects memory-growing writes at the limit |
+| Persistence and failover | Loss is a miss and the application repopulates | Optional RDB/AOF plus asynchronous replication; the loss window depends on configuration |
+| Coordination features | CAS for compare-and-set of a cached value | Atomic commands, scripts, streams, Pub/Sub, replication, Sentinel, and Cluster |
+
+Use Memcached for a plain disposable object cache. Use Redis when server-side structures or atomic operations justify its persistence, replication, and cluster choices. Redis command atomicity is not a relational transaction across arbitrary operations.
+
+## Netflix EVCache: four data contracts
+
+Netflix's EVCache illustrates four distinct contracts that can share an in-memory implementation:
+
+| Role | Authority and rebuild path | Loss and freshness contract |
+| --- | --- | --- |
+| Lookaside cache | Database or backend service remains authoritative | Eviction is expected; TTL and invalidation bound staleness |
+| Transient session state | The cache may hold the only short-lived coordination value | Loss changes session behavior, so clients need an explicit recovery path |
+| Precomputed primary read store | An offline job publishes a generated data version | Retain or regenerate the last good generation before replacement |
+| Distribution plane | A publisher derives UI strings or translations from an upstream authority | Readers need versioned publication, rollback, and partial-generation handling |
+
+![[System Design 101/99db2205a756cc262763e054b626babd0b0033a72a64d2ae5d97dfbcfed2f6b0.png]]
+
+## Redis as a cache or system of record
+
+For authoritative Redis data, eviction must not discard keys and the acknowledgement boundary must name its loss window. RDB can lose writes since the last snapshot; AOF durability depends on `appendfsync`; replication is asynchronous by default; `WAIT` narrows but does not eliminate failover risk. Pub/Sub has no replay, while Streams retains entries and consumer-group state under the same persistence and replication configuration. Test process loss, host loss, and replica promotion against the exact deployment rather than inferring durability from an enabled setting.
+
+## Why Redis is fast—and when it stalls
+
+Redis is fast because the working set stays in memory, clients are multiplexed, and most commands execute through a mostly serialized path. That same path makes large-key traversal, `O(N)` commands, Lua or module work, persistence fork pressure, AOF flushing, swapping, and network queues visible as tail latency. Measure the actual command and payload mix; watch slow commands, big keys, memory, persistence, and replication lag.
 
 ## Tradeoffs
 
@@ -223,9 +273,31 @@ Redis, Memcached, and EVCache are not interchangeable merely because they can se
 
 Decision rule: start with `HybridCache` for new .NET 9+ projects — it handles L1/L2 layering, stampede protection, and serialization out of the box. Fall back to `IDistributedCache` when you need explicit control over cache writes, or `IMemoryCache` for single-instance scenarios where distributed state is unnecessary.
 
-## Eviction and Miss Abuse
+## Eviction under memory pressure
 
-Expiration, admission, and capacity eviction answer different questions: whether an entry is too old, whether a candidate should enter, and which resident value leaves when memory is full. Absent-key traffic is another boundary; validate impossible keys, consider short negative caching or a [[Home/Computer Science/Data Structures/Hash-based Structures/Bloom Filter|Bloom Filter]] when membership is known, and rate-limit by principal. [[Home/Data Persistence/Caching Operations|Caching Operations]] owns the policy comparison and the signals that show when it is wrong.
+Expiration, admission, and capacity eviction answer different questions: whether an entry is too old, whether a candidate should enter, and which resident value leaves when memory is full.
+
+| Capacity policy | Fits | Fails when |
+| --- | --- | --- |
+| LRU | Recent access predicts reuse | A sequential scan displaces the established hot set |
+| LFU | A stable popularity skew should survive bursts | Old hot keys never age out |
+| SLRU | One-hit entries should prove reuse before entering a protected segment | Segment sizes do not match the workload |
+| FIFO | Insertion order is a useful proxy and simplicity matters | Old frequently used entries are evicted |
+| Random | Metadata must be minimal and reuse is roughly uniform | Popularity is highly skewed |
+
+`IMemoryCache` is not bounded unless entries provide sizes and the cache has a `SizeLimit`. Redis uses `maxmemory-policy`; a pure cache commonly starts with an all-keys LRU or LFU policy, while `noeviction` rejects memory-growing writes. Choose from measured reuse distance, skew, object size, and miss cost, then watch eviction rate with hit ratio and origin load.
+
+![[System Design 101/52d213d56a791a27e9df7511d0ed57607da81e3871713417d123ae49a1f9d2c7.png]]
+
+## Other pitfalls
+
+Unbounded high-cardinality keys, missing tenant or authorization dimensions, large serialized payloads, format drift, and cold deploys can erase the latency benefit or serve incorrect data. Bound the key space, version cached envelopes, measure serialization cost, and roll out gradually enough that origin load remains inside its capacity budget.
+
+### Cache penetration (missing-key floods)
+
+Absent-key traffic follows `request → cache miss → origin not found`. Validate impossible keys, use a short negative TTL for repeated misses, consider a [[Home/Computer Science/Data Structures/Hash-based Structures/Bloom Filter|Bloom Filter]] when membership is known, and rate-limit by principal. Negative entries must be invalidated on creation; Bloom false positives still reach the origin; versioned keys still need TTLs so obsolete versions do not grow without bound.
+
+![[System Design 101/dd576de44a045b089cf394d57e9116f7a362faf8c98734bca86bf0756fa9de37.png]]
 
 ## Questions
 
