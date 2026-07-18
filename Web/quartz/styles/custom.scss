@@ -392,12 +392,13 @@ body {
 .explorer .explorer-content .folder-container:hover div > button span {
   color: var(--dark);
 }
-// The collapse chevron (.folder-icon) — muted gray, and stays gray on hover
-// (the plugin turns it --tertiary). Smaller and thinner-stroked than the
-// plugin's chunky default so it reads like the design's delicate Lucide chevron.
+// The collapse chevron (.folder-icon) — kept small and thin like the design's
+// Lucide chevron, but inked in --darkgray (the breadcrumb-crumb tone) rather than
+// --gray so it stays clearly visible; holds that tone on hover (the plugin turns
+// it --tertiary).
 .explorer .explorer-content .folder-container > svg.folder-icon,
 .explorer .explorer-content .folder-container > svg.folder-icon:hover {
-  color: var(--gray);
+  color: var(--darkgray);
   width: 11px;
   height: 11px;
   stroke-width: 1.5;
@@ -438,7 +439,7 @@ body {
   color: var(--dark);
 }
 .explorer button.desktop-explorer .fold {
-  color: var(--gray);
+  color: var(--darkgray);
   opacity: 1;
   width: 13px;
   height: 13px;
@@ -636,13 +637,14 @@ body {
 }
 
 // The separator: a small, thin Lucide chevron-right (the plugin's spacer text is
-// zeroed and replaced by the masked icon). Sized below the crumb text.
+// zeroed and replaced by the masked icon). Sized below the crumb text, inked in
+// --gray so it's clearly visible while staying subordinate to the crumbs.
 .breadcrumb-element p {
   margin-left: 0.3rem;
   width: 0.7rem;
   height: 0.7rem;
   font-size: 0;
-  background-color: var(--lightgray);
+  background-color: var(--gray);
   -webkit-mask: var(--crumb-chevron) center / contain no-repeat;
   mask: var(--crumb-chevron) center / contain no-repeat;
 }
