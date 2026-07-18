@@ -1,8 +1,8 @@
 ---
 publish: true
-created: 2026-07-15T11:49:57.319Z
-modified: 2026-07-18T11:30:15.447Z
-published: 2026-07-18T11:30:15.447Z
+created: 2026-07-18T14:02:44.189Z
+modified: 2026-07-18T14:02:44.189Z
+published: 2026-07-18T14:02:44.189Z
 tags:
   - FolderNote
 icon: building-2

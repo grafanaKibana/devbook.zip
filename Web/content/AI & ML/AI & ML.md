@@ -1,8 +1,8 @@
 ---
 publish: true
-created: 2026-07-13T18:39:40.396Z
-modified: 2026-07-18T11:30:02.070Z
-published: 2026-07-18T11:30:02.070Z
+created: 2026-07-18T14:02:43.883Z
+modified: 2026-07-18T14:02:43.884Z
+published: 2026-07-18T14:02:43.884Z
 tags:
   - FolderNote
 icon: brain

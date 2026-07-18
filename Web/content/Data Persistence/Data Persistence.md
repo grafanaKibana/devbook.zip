@@ -1,8 +1,8 @@
 ---
 publish: true
-created: 2026-07-12T14:27:20.429Z
-modified: 2026-07-18T11:59:15.656Z
-published: 2026-07-18T11:59:15.656Z
+created: 2026-07-18T14:02:44.059Z
+modified: 2026-07-18T14:02:44.059Z
+published: 2026-07-18T14:02:44.059Z
 tags:
   - FolderNote
 icon: database

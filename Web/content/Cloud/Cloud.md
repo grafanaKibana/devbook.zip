@@ -1,8 +1,8 @@
 ---
 publish: true
-created: 2026-07-12T14:27:20.399Z
-modified: 2026-07-18T11:59:15.653Z
-published: 2026-07-18T11:59:15.653Z
+created: 2026-07-18T14:02:43.932Z
+modified: 2026-07-18T14:02:43.933Z
+published: 2026-07-18T14:02:43.933Z
 tags:
   - FolderNote
 icon: cloud

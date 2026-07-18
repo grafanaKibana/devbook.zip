@@ -1,8 +1,8 @@
 ---
 publish: true
-created: 2026-07-12T14:27:20.433Z
-modified: 2026-07-18T11:59:15.665Z
-published: 2026-07-18T11:59:15.665Z
+created: 2026-07-18T14:02:44.128Z
+modified: 2026-07-18T14:02:44.128Z
+published: 2026-07-18T14:02:44.128Z
 tags:
   - FolderNote
 icon: code-2
