@@ -393,10 +393,14 @@ body {
   color: var(--dark);
 }
 // The collapse chevron (.folder-icon) — muted gray, and stays gray on hover
-// (the plugin turns it --tertiary).
+// (the plugin turns it --tertiary). Smaller and thinner-stroked than the
+// plugin's chunky default so it reads like the design's delicate Lucide chevron.
 .explorer .explorer-content .folder-container > svg.folder-icon,
 .explorer .explorer-content .folder-container > svg.folder-icon:hover {
   color: var(--gray);
+  width: 11px;
+  height: 11px;
+  stroke-width: 1.5;
 }
 
 // ---------------------------------------------------------------------------
@@ -436,6 +440,9 @@ body {
 .explorer button.desktop-explorer .fold {
   color: var(--gray);
   opacity: 1;
+  width: 13px;
+  height: 13px;
+  stroke-width: 1.5;
 }
 
 // ---------------------------------------------------------------------------
@@ -612,10 +619,15 @@ body {
   gap: 0.35rem;
   font-family: var(--bodyFont);
   font-size: 0.85rem;
+  // A Lucide chevron-right, rendered as a mask so the separator matches the
+  // design's icon rather than a text glyph. Painted via background-color below.
+  --crumb-chevron: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23000' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m9 18 6-6-6-6'/%3E%3C/svg%3E");
 }
 
+// Non-current crumbs sit back — a muted gray that clearly yields to the bold
+// current crumb — and warm to the accent on hover.
 .breadcrumb-element a {
-  color: var(--gray);
+  color: color-mix(in srgb, var(--gray) 62%, transparent);
   font-weight: #{$normalWeight};
   transition: color 0.15s ease;
 }
@@ -623,10 +635,16 @@ body {
   color: var(--secondary);
 }
 
-// The separator glyph between crumbs.
+// The separator: a small, thin Lucide chevron-right (the plugin's spacer text is
+// zeroed and replaced by the masked icon). Sized below the crumb text.
 .breadcrumb-element p {
-  margin-left: 0.35rem;
-  color: var(--lightgray);
+  margin-left: 0.3rem;
+  width: 0.7rem;
+  height: 0.7rem;
+  font-size: 0;
+  background-color: var(--lightgray);
+  -webkit-mask: var(--crumb-chevron) center / contain no-repeat;
+  mask: var(--crumb-chevron) center / contain no-repeat;
 }
 
 // The final crumb is the current page: bold ink, and inert (the design renders

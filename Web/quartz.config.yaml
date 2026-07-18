@@ -201,9 +201,9 @@ plugins:
   - source: github:quartz-community/breadcrumbs
     enabled: true
     options:
-      # Thin chevron to match the design's chevron-right separator (the plugin
-      # default is a heavy "❯"). Styled --lightgray in custom.scss.
-      spacerSymbol: "›"
+      # The separator is rendered as a masked Lucide chevron in custom.scss, so
+      # the text spacer is a blank space (its glyph is zeroed out there).
+      spacerSymbol: " "
     layout:
       position: beforeBody
       priority: 5

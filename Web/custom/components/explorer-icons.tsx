@@ -95,7 +95,46 @@ const script = `
     return name && ICONS[name] ? name : null;
   }
 
-  function decorateFolders(explorer, map) {
+  // slug -> topic colour (a CSS colour string), inlined by the component from the
+  // topic folder-notes' \`color:\` frontmatter — the same value the scope selector
+  // tints its chip with.
+  function readColorMap() {
+    const el = document.querySelector(".ec-color-map");
+    if (!el) return {};
+    try {
+      const m = JSON.parse(el.textContent || "{}");
+      return m && typeof m === "object" ? m : {};
+    } catch (e) {
+      return {};
+    }
+  }
+
+  // The top-level <li> a node lives under (a direct child of .explorer-ul).
+  function topLevelLi(el) {
+    let li = el.closest("li");
+    while (li) {
+      const parent = li.parentElement;
+      if (parent && parent.classList.contains("explorer-ul")) return li;
+      li = parent ? parent.closest("li") : null;
+    }
+    return null;
+  }
+
+  // The topic tint for a node: the colour of its top-level topic folder, so a
+  // whole subtree shares that topic's hue (matching the design, where each topic
+  // folder's glyph carries its colour). Returns null to fall back to the accent.
+  function topicColor(el, colorMap) {
+    const top = topLevelLi(el);
+    if (!top) return null;
+    const fc = top.querySelector(":scope > .folder-container");
+    if (!fc || fc.dataset.folderpath == null) return null;
+    const slug = normalizeSlug(fc.dataset.folderpath);
+    return (
+      colorMap[slug] || colorMap[slug + "/index"] || colorMap[slug.replace(/\\/index$/, "")] || null
+    );
+  }
+
+  function decorateFolders(explorer, map, colorMap) {
     explorer.querySelectorAll(".folder-container").forEach(function (c) {
       if (c.dataset.ec) return;
       c.dataset.ec = "1";
@@ -106,6 +145,10 @@ const script = `
       const span = document.createElement("span");
       span.className = "ec-ico ec-folder-ico" + (name ? " ec-assigned" : "");
       span.innerHTML = svg(closed, "ec-folder-closed") + svg(open, "ec-folder-open");
+      // Tint the glyph to its topic's colour (the design puts the accent on the
+      // folder icon); nested folders inherit their top-level topic's hue.
+      const color = topicColor(c, colorMap);
+      if (color) span.style.setProperty("--ec-topic", color);
       const chevron = c.querySelector(".folder-icon");
       if (chevron && chevron.nextSibling) c.insertBefore(span, chevron.nextSibling);
       else if (chevron) c.appendChild(span);
@@ -136,8 +179,9 @@ const script = `
       const explorers = document.querySelectorAll("div.explorer");
       if (!explorers.length) return;
       const map = readMap();
+      const colorMap = readColorMap();
       explorers.forEach(function (ex) {
-        decorateFolders(ex, map);
+        decorateFolders(ex, map, colorMap);
         decorateFiles(ex, map);
       });
     } finally {
@@ -173,14 +217,24 @@ export const ExplorerIcons: QuartzComponentConstructor = () => {
     // frontmatter. Every referenced icon (plus the folder/file defaults) is
     // resolved from lucide-static, so any `icon:` a note uses renders; unresolved
     // names are absent and the browser script falls back to the default icon.
+    // Also inline a slug -> topic-colour map from the topic folder-notes' `color:`
+    // frontmatter, so the browser script can tint each folder glyph to its topic's
+    // hue (the same colour the scope selector uses).
     const iconNames = new Set<string>(Object.values(DEFAULTS))
     const map: Record<string, string> = {}
+    const colorMap: Record<string, string> = {}
     for (const file of allFiles ?? []) {
-      const name = (file?.frontmatter as { icon?: unknown } | undefined)?.icon
+      const fm = file?.frontmatter as { icon?: unknown; color?: unknown } | undefined
       const slug = file?.slug
-      if (typeof name === "string" && typeof slug === "string") {
+      if (typeof slug !== "string") continue
+      const name = fm?.icon
+      if (typeof name === "string") {
         map[slug] = name
         iconNames.add(name)
+      }
+      const color = fm?.color
+      if (typeof color === "string" && color.trim() !== "") {
+        colorMap[slug] = color
       }
     }
     const icons = lucideMap(iconNames)
@@ -192,6 +246,12 @@ export const ExplorerIcons: QuartzComponentConstructor = () => {
           class="ec-icon-map"
           // JSON is inert data (never executed); keys/values are slugs/icon names.
           dangerouslySetInnerHTML={{ __html: JSON.stringify(map) }}
+        />
+        <script
+          type="application/json"
+          class="ec-color-map"
+          // JSON is inert data (never executed); keys/values are slugs/topic colours.
+          dangerouslySetInnerHTML={{ __html: JSON.stringify(colorMap) }}
         />
         <script
           type="application/json"
@@ -223,7 +283,7 @@ export const ExplorerIcons: QuartzComponentConstructor = () => {
    open-state hook (.folder-outer.open) via :has(), matching how it rotates the
    collapse chevron. An assigned icon (.ec-assigned) is the same in both states. */
 .explorer .ec-folder-ico {
-  color: var(--secondary);
+  color: var(--ec-topic, var(--secondary));
 }
 .explorer .ec-folder-open {
   display: none;
