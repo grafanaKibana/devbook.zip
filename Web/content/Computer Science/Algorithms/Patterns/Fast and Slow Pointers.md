@@ -1,8 +1,8 @@
 ---
 publish: true
 created: 2026-07-12T06:27:34.385Z
-modified: 2026-07-12T06:27:34.385Z
-published: 2026-07-12T06:27:34.385Z
+modified: 2026-07-18T11:30:03.929Z
+published: 2026-07-18T11:30:03.929Z
 topic:
   - Computer Science
 subtopic:
@@ -14,8 +14,6 @@ priority: Medium
 status: Creation
 ---
 
-# Intro
-
 A linked list is handed over with no length and no guarantee it terminates: some tail node may point back into the middle, forming a cycle that turns any naive traversal into an infinite loop. Recording every visited node in a hash set answers "does it loop?" in one pass but pays `O(n)` memory for the bookkeeping. Fast and slow pointers — Floyd's tortoise-and-hare — replace that memory with a speed differential. Two pointers walk the same `next` chain, one advancing a single node per step and the other advancing two. The fast pointer gains exactly one node on the slow pointer every step, so if the chain ever loops, the gap between them shrinks by one each step until it hits zero and they land on the same node; if the fast pointer instead reaches `null`, the chain is acyclic. No extra structure is allocated.
 
 The technique needs only one property of the input: each element has exactly one successor to follow — `node.next` for a list, or `i → nums[i]` for an integer sequence read as a functional graph.
@@ -25,7 +23,7 @@ The technique needs only one property of the input: each element has exactly one
 > [!NOTE] Visualization pending
 > Planned StepTrace: a two-pointer-on-a-linked-cycle card showing the hare gaining one node per step and lapping the tortoise inside the loop until both occupy the same node, then the phase-two reset from the head converging on the cycle entry. No matching renderer exists in `engine.js` yet.
 
-## Why the pointers meet, and where
+# Why the pointers meet, and where
 
 Detection is the first phase. Both pointers start at the head. Each step advances `slow` by one node and `fast` by two. Once both pointers are inside a cycle of length `λ`, the fast pointer's lead over the slow pointer increases by one node per step; measured modulo `λ` that lead cycles through `0`, so within at most `λ` steps the lead is a multiple of `λ` and the two references coincide. If the chain is acyclic the fast pointer reaches `null` first and the loop ends with no meeting. The meeting therefore proves a cycle and running off the end proves acyclicity — a biconditional with no false result either way.
 
@@ -37,7 +35,7 @@ Cycle length falls out for free once a meeting exists: hold one pointer fixed an
 
 The same two-phase mechanism handles two other single-successor problems. The **middle of a list** is where the slow pointer stands when the fast pointer reaches the end — the fast pointer covers `2×` the distance, so the slow pointer is at the halfway node in one pass. The **nth node from the end** uses a fixed gap instead of a speed difference: advance one pointer `n` nodes ahead, then move both at speed one until the leader hits the end, leaving the follower on the target.
 
-## Complexity
+# Complexity
 
 | Case | Time | Auxiliary space | Cause |
 | --- | --- | --- | --- |
@@ -47,7 +45,7 @@ The same two-phase mechanism handles two other single-successor problems. The **
 
 Every case is linear in the node count and holds two pointers regardless of input size. The contrast is with the hash-set-of-visited-nodes detector, which matches the `O(n)` time but stores one entry per visited node for `O(n)` auxiliary space; Floyd's method trades that table for the second, slower pointer.
 
-## Boundaries
+# Boundaries
 
 The method needs a _traversable_ successor: a `next` pointer, an index-to-index map, or any deterministic "given x, the one next x." It does not apply to a general graph where a node has several outgoing edges, because "advance twice" is undefined when the successor is ambiguous. Functional graphs — where every node has exactly one out-edge — and integer sequences qualify. This is why the same code detects a repeat in the **happy-number** sequence `n → sum of squares of digits`, and why **Find the Duplicate Number** (LeetCode 287) reads an array of `n + 1` values in `[1..n]` as edges `i → nums[i]`: two indices sharing a value create two edges into one node, forcing a cycle whose _entry_ is the duplicate.
 
@@ -57,7 +55,7 @@ Dereferencing the fast pointer without guarding both hops is the other failure. 
 
 This same-direction, different-speed configuration is distinct from [[LinkedList|linked-list]] traversal patterns and from [[Two Pointers]], where two pointers start at opposite ends of a _sorted array_ and converge toward the middle. That pattern exploits sorted order to decide which end to move; this one exploits a speed differential to close a gap inside a loop. They share the name "two pointers" and nothing of the mechanism.
 
-## Reference drawer
+# Reference drawer
 
 > [!ABSTRACT]- Cycle shape and the two meeting points
 >
@@ -97,7 +95,7 @@ This same-direction, different-speed configuration is distinct from [[LinkedList
 >
 > The loop guard is the invariant that keeps the double hop safe; the phase-two walk is the distance argument (`μ` from the head equals the remaining distance from the meeting node) turned into code.
 
-## Comparison
+# Comparison
 
 | Approach | Time | Auxiliary space | Requires | Stronger case | Weaker case |
 | --- | --- | --- | --- | --- | --- |
@@ -107,7 +105,7 @@ This same-direction, different-speed configuration is distinct from [[LinkedList
 
 Floyd's fast/slow is the `O(1)`-space cycle detector for linked structures and functional sequences: it pays a second pass to name the entry but never allocates. A visited set is the simpler code and hands back the entry as the first repeat, at the cost of `O(n)` memory and hashable identity — the fit when that set is needed anyway. Brent's algorithm keeps the same `O(1)` space while cutting the constant factor and yielding the cycle length as a by-product, so it wins in hot loops where the extra implementation complexity is justified.
 
-## Questions
+# Questions
 
 > [!QUESTION]- Why is a meeting between the pointers equivalent to the existence of a cycle?
 > Once both pointers are inside a loop, the fast pointer gains one node per step, so their separation modulo the cycle length runs through zero and they must coincide. With no loop the fast pointer reaches `null` and the walk ends with no meeting. Neither direction admits a false result, so a meeting is exactly a cycle.
@@ -121,7 +119,7 @@ Floyd's fast/slow is the `O(1)`-space cycle detector for linked structures and f
 > [!QUESTION]- When is a hash set of visited nodes the better choice than fast/slow?
 > Both detect a cycle in `O(n)` time; the set costs `O(n)` space and Floyd costs `O(1)`. The set returns the entry as the first repeated node with no second phase and gives the full set of visited nodes for free. It wins when that memory is affordable and the visited set or immediate entry is wanted; Floyd wins when memory is tight or the structure is read-only.
 
-## References
+# References
 
 - [Cycle detection (Wikipedia)](https://en.wikipedia.org/wiki/Cycle_detection) — Floyd's and Brent's algorithms with correctness proofs and the entry-point derivation.
 - [Floyd's tortoise and hare (cp-algorithms)](https://cp-algorithms.com/others/tortoise_and_hare.html) — the cycle-finding method and its length and entry extensions.

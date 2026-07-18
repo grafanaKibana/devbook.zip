@@ -1,8 +1,8 @@
 ---
 publish: true
 created: 2026-07-15T12:03:14.879Z
-modified: 2026-07-15T12:03:14.880Z
-published: 2026-07-15T12:03:14.880Z
+modified: 2026-07-18T11:30:14.888Z
+published: 2026-07-18T11:30:14.888Z
 topic:
   - Software Architecture
 subtopic:
@@ -13,8 +13,6 @@ level:
 priority: High
 status: Done
 ---
-
-# Builder
 
 Ordering a custom sandwich at a sub shop is a Builder in action. You start with bread, add meat, choose veggies, pick a sauce, decide on a size — step by step, in any order, skipping what you don’t want. At the end, the sandwich artist assembles everything into a finished product. You never see a constructor that takes twelve arguments for bread-type, meat-type, lettuce-yes-no, tomato-yes-no.
 
@@ -30,7 +28,7 @@ flowchart LR
     Director -->|drives build steps| Builder
 ```
 
-## Problem
+# Problem
 
 `OrderService.CreateOrder()` takes a growing parameter list. Every new requirement adds another parameter:
 
@@ -80,7 +78,7 @@ var order = orderService.CreateOrder(customer, items, shipping, null, "SAVE10",
 
 Here's what breaks when requirements change: adding a "priority shipping" flag means a 13th parameter, and every existing call site must be updated even if they don't use priority shipping.
 
-## Solution
+# Solution
 
 `OrderBuilder` accumulates configuration through named methods and validates on `Build()`:
 
@@ -203,7 +201,7 @@ var order = new OrderBuilder(customer)
 
 Adding priority shipping now means one new `WithPriorityShipping()` method — existing call sites are unaffected.
 
-## You Already Use This
+# You Already Use This
 
 **`WebApplicationBuilder` / `IHostBuilder`** — the canonical .NET Builder. `builder.Services.AddDbContext<>()`, `builder.Configuration.AddJsonFile()`, `builder.Logging.AddConsole()` accumulate configuration; `builder.Build()` assembles the `WebApplication`. The director pattern is implicit: `Program.cs` is the director.
 
@@ -213,7 +211,7 @@ Adding priority shipping now means one new `WithPriorityShipping()` method — e
 
 **`UriBuilder`** — builds `Uri` objects from scheme, host, port, path, and query components without string manipulation.
 
-## Pitfalls
+# Pitfalls
 
 **Over-engineering simple objects** — if an object has 3-4 required fields and no validation logic, a Builder adds indirection for no benefit. Use C# `required` properties with object initializers: `new Order { Customer = customer, Items = items, Total = total }`. The compiler enforces required fields at the call site.
 
@@ -221,7 +219,7 @@ Adding priority shipping now means one new `WithPriorityShipping()` method — e
 
 **Missing validation on `Build()`** — builders that don't validate produce invalid objects silently. Validate all invariants in `Build()`, not in individual setter methods (where partial state is expected). The builder's job is to accumulate; `Build()`'s job is to validate and assemble.
 
-## Tradeoffs
+# Tradeoffs
 
 | Concern | Builder | Object initializer (`required`/`init`) | Telescoping constructors |
 |---|---|---|---|
@@ -234,7 +232,7 @@ Adding priority shipping now means one new `WithPriorityShipping()` method — e
 
 **Decision rule**: Start with `required` properties and object initializers for new objects. Introduce Builder when: (1) construction requires multi-step validation, (2) computed fields depend on multiple inputs, (3) the same assembly process produces different representations, or (4) a director needs to drive construction programmatically. The signal is when `Build()` does real work beyond assignment.
 
-## Questions
+# Questions
 
 > [!QUESTION]- When does Builder's `Build()` method justify its existence over a constructor?
 > When `Build()` does work a constructor shouldn't: cross-field validation (gift wrap requires a message), computed fields (total = subtotal - discount), default derivation (billing = shipping if not set), or async initialization. Constructors should be fast and never throw business logic exceptions. `Build()` is the right place for invariant enforcement that spans multiple fields. The tradeoff: `Build()` can throw at runtime; `required` properties fail at compile time. Use `required` when all fields are independent; use Builder when fields interact.
@@ -245,7 +243,7 @@ Adding priority shipping now means one new `WithPriorityShipping()` method — e
 > [!QUESTION]- Why does `WebApplicationBuilder` use a builder instead of a constructor with parameters?
 > Because `WebApplication` construction is a multi-step process where each step can affect subsequent steps: adding a service can change how middleware behaves; configuration sources are layered in priority order; logging providers must be registered before the host starts. A constructor can't express this ordering or allow conditional registration. The builder accumulates all configuration, then `Build()` wires everything together in the correct dependency order. The cost: `Build()` can fail at runtime if configuration is invalid — there's no compile-time guarantee that all required services are registered.
 
-## References
+# References
 
 - [Builder — refactoring.guru](https://refactoring.guru/design-patterns/builder) — canonical pattern description with structure diagram and C# example
 - [WebApplicationBuilder — Microsoft Learn](https://learn.microsoft.com/en-us/dotnet/api/microsoft.aspnetcore.builder.webapplicationbuilder) — .NET's primary Builder in production use

@@ -1,8 +1,8 @@
 ---
 publish: true
 created: 2026-07-15T11:47:54.948Z
-modified: 2026-07-15T11:47:54.949Z
-published: 2026-07-15T11:47:54.949Z
+modified: 2026-07-18T11:37:57.229Z
+published: 2026-07-18T11:37:57.229Z
 topic:
   - Software Architecture
 subtopic:
@@ -14,15 +14,13 @@ priority: High
 status: Done
 ---
 
-# Intro
-
 Dependency Injection (DI) is a design pattern where objects receive dependencies from an external source instead of creating them internally, which is a practical form of Inversion of Control (IoC). It matters because it improves testability, keeps components loosely coupled, and makes systems composable as they grow. In modern .NET, DI is not optional architecture flavor: ASP.NET Core uses the built-in container as the default composition root for wiring the application.
 
-## How It Works
+# How It Works
 
 The container lifecycle is three steps: register, resolve, dispose.
 
-### 1) Registration (`builder.Services.Add*`)
+## 1) Registration (`builder.Services.Add*`)
 
 You describe what the container can build and the service lifetime.
 
@@ -37,7 +35,7 @@ builder.Services.AddTransient<IEmailSender, SmtpEmailSender>();
 
 The container stores service descriptors (service type, implementation, lifetime). Most services are not instantiated at registration time.
 
-### 2) Resolution (constructor injection, `[FromServices]`, `IServiceProvider`)
+## 2) Resolution (constructor injection, `[FromServices]`, `IServiceProvider`)
 
 At runtime, the container builds an object graph and injects dependencies.
 
@@ -59,7 +57,7 @@ app.MapGet("/time", ([FromServices] IClock clock) => Results.Ok(clock.UtcNow));
 
 Constructor injection is the default for business logic because dependencies stay explicit. `IServiceProvider` is acceptable in factories/middleware/scope-bound infrastructure code, but not as a default style for domain/application services.
 
-### 3) Disposal
+## 3) Disposal
 
 The container manages `IDisposable` and `IAsyncDisposable` based on lifetime boundaries:
 
@@ -69,9 +67,9 @@ The container manages `IDisposable` and `IAsyncDisposable` based on lifetime bou
 
 This is why manually disposing injected services in controllers/services is usually wrong.
 
-## Service Lifetimes (Mechanics + Usage)
+# Service Lifetimes (Mechanics + Usage)
 
-### Transient
+## Transient
 
 `AddTransient<TService, TImpl>()`: new instance every resolution.
 
@@ -85,7 +83,7 @@ Mechanism details:
 - Every resolve call gets a fresh instance.
 - If a singleton captures a transient field during construction, that instance effectively behaves like singleton state for that singleton instance.
 
-### Scoped
+## Scoped
 
 `AddScoped<TService, TImpl>()`: one instance per scope.
 
@@ -100,7 +98,7 @@ Mechanism details:
 - All scoped resolutions in the same request share the same object.
 - Background services have no automatic request scope; create one explicitly.
 
-### Singleton
+## Singleton
 
 `AddSingleton<TService, TImpl>()`: one instance for app lifetime.
 
@@ -116,7 +114,7 @@ Mechanism details:
 - Must be thread-safe.
 - Must not hold scoped dependencies.
 
-## Lifetime Scope Diagram
+# Lifetime Scope Diagram
 
 ```mermaid
 flowchart TD
@@ -142,7 +140,7 @@ flowchart TD
 
 Singleton is rooted once, scoped is request-local, transient is created fresh each resolution.
 
-## Captive Dependency (Critical Pitfall)
+# Captive Dependency (Critical Pitfall)
 
 Captive dependency happens when a long-lived service (usually singleton) captures a shorter-lived service (usually scoped).
 
@@ -155,7 +153,7 @@ Why it is dangerous:
 
 In ASP.NET Core Development, this usually surfaces as `InvalidOperationException` when scope validation is enabled (`ValidateScopes`).
 
-### Anti-pattern: singleton directly depends on scoped service
+## Anti-pattern: singleton directly depends on scoped service
 
 ```csharp
 public sealed class CacheWarmupService(AppDbContext db) : IHostedService
@@ -170,7 +168,7 @@ public sealed class CacheWarmupService(AppDbContext db) : IHostedService
 }
 ```
 
-### Fix: inject `IServiceScopeFactory` and resolve scoped inside explicit scope
+## Fix: inject `IServiceScopeFactory` and resolve scoped inside explicit scope
 
 ```csharp
 public sealed class CacheWarmupService(IServiceScopeFactory scopeFactory) : IHostedService
@@ -186,7 +184,7 @@ public sealed class CacheWarmupService(IServiceScopeFactory scopeFactory) : IHos
 }
 ```
 
-## Service Locator Anti-pattern
+# Service Locator Anti-pattern
 
 Service Locator means pulling dependencies from `IServiceProvider` inside business logic (`GetService<T>()` / `GetRequiredService<T>()`) instead of declaring constructor dependencies.
 
@@ -217,7 +215,7 @@ When acceptable:
 - Middleware/infrastructure activation code
 - Explicit scope management in background jobs
 
-## Keyed Services (.NET 8+)
+# Keyed Services (.NET 8+)
 
 Keyed services support multiple implementations for one abstraction with explicit keys.
 
@@ -233,38 +231,38 @@ app.MapGet("/cache/ping", ([FromKeyedServices("redis")] ICache cache) =>
 
 Use this when selection is explicit and stable; avoid turning keys into hidden runtime condition trees in core domain code.
 
-## Pitfalls
+# Pitfalls
 
-### 1) Captive dependency
+## 1) Captive dependency
 
 - What goes wrong: singleton holds scoped dependency.
 - Why: lifetime mismatch (long-lived object captures short-lived state).
 - Mitigation: resolve scoped dependencies inside temporary scopes via `IServiceScopeFactory`.
 
-### 2) Service Locator anti-pattern
+## 2) Service Locator anti-pattern
 
 - What goes wrong: hidden dependencies, runtime-only failures, brittle tests.
 - Why: dependencies are fetched ad hoc from container instead of explicit contracts.
 - Mitigation: constructor injection for business logic; constrain locator usage to infrastructure.
 
-### 3) Registering `DbContext` as singleton
+## 3) Registering `DbContext` as singleton
 
 - What goes wrong: stale tracking state, threading issues, and potential connection pool exhaustion.
 - Why: `DbContext` is not thread-safe and is designed for short unit-of-work scope.
 - Mitigation: keep `DbContext` scoped (`AddDbContext<TContext>()` default), create per-operation scopes in workers.
 
-### 4) Circular dependencies (`A -> B -> A`)
+## 4) Circular dependencies (`A -> B -> A`)
 
 - What goes wrong: container cannot construct object graph and throws.
 - Why: bidirectional service orchestration and poor boundary design.
 - Mitigation: redesign boundaries, split responsibilities, or introduce event/mediator flow.
 
-## Tradeoffs
+# Tradeoffs
 
 - Built-in container vs external container: built-in is usually enough and operationally simpler; external containers may offer advanced features but add complexity.
 - Constructor injection vs method/locator resolution: constructor injection maximizes explicitness and testability; method injection (`[FromServices]`) is fine at endpoint boundaries; locator resolution should stay in infrastructure code.
 
-## Questions
+# Questions
 
 > [!QUESTION]- Explain `Transient`, `Scoped`, and `Singleton` lifetimes with a safe production example each.
 > The three differ by how long the container keeps one instance. Transient is a fresh instance per resolution — fine for lightweight stateless services like mappers or formatters. Scoped is one instance per scope, which in ASP.NET Core means per HTTP request; the canonical case is `DbContext`, where one unit of work per request keeps tracking and transactions coherent. Singleton is one instance for the app's lifetime — good for thread-safe shared state like a cache, an `IClock`, or `IHttpClientFactory` — but it must be thread-safe and must never capture a scoped dependency. The thing to get right: lifetime is about shared state and thread-safety, not performance.
@@ -275,9 +273,9 @@ Use this when selection is explicit and stable; avoid turning keys into hidden r
 > [!QUESTION]- What is a captive dependency, and how do you fix it?
 > It's when a longer-lived service captures a shorter-lived one — classically a singleton or `IHostedService` holding a scoped `DbContext`. The scoped object then outlives its intended request boundary, giving you stale state, broken EF Core change tracking, and disposal at the wrong time. In Development the scope validator catches it and throws `InvalidOperationException`; in Production it just misbehaves quietly. The fix is to not inject the scoped service at all: inject `IServiceScopeFactory`, open a short scope where you need the work, resolve inside it, and let it dispose. The tell to watch for is a singleton constructor asking for anything request-scoped.
 
-## References
+# References
 
-- [Dependency injection in .NET](https://learn.microsoft.com/en-us/dotnet/core/extensions/dependency-injection)
+- [Dependency injection in .NET](https://learn.microsoft.com/en-us/dotnet/core/extensions/dependency-injection) — Microsoft's container model, registration API, resolution behavior, and service lifetimes.
 - [Dependency injection guidelines - .NET](https://learn.microsoft.com/en-us/dotnet/core/extensions/dependency-injection-guidelines)
 - [Understanding scopes in ASP.NET Core - Andrew Lock](https://andrewlock.net/understanding-scopes-in-asp-net-core/)
 - [Service Locator is an Anti-Pattern - Steve Smith](https://ardalis.com/service-locator-is-an-anti-pattern/)

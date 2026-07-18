@@ -1,8 +1,8 @@
 ---
 publish: true
 created: 2026-07-12T14:27:20.417Z
-modified: 2026-07-12T14:27:20.418Z
-published: 2026-07-12T14:27:20.418Z
+modified: 2026-07-18T11:30:04.945Z
+published: 2026-07-18T11:30:04.945Z
 topic:
   - Computer Science
 subtopic:
@@ -14,15 +14,13 @@ priority: Medium
 status: Ready to Repeat
 ---
 
-# Intro
-
 A network receives connections over time and repeatedly asks whether two nodes belong to the same connected component. Running a graph traversal for every query revisits edges whose connectivity was already established. A disjoint set keeps only the partition of nodes into components, so a merge and a connectivity check become nearly constant-time operations.
 
 The structure is narrower than a graph representation. It remembers which elements belong together, but not the edges, paths, or order that produced each component. Sets can merge; they cannot be split efficiently afterward.
 
 **Core shape:** elements → parent-index forest → one root per set → shared root means shared membership → `O(n)` storage.
 
-## State across operations
+# State across operations
 
 The trace starts with seven singleton sets. The first three unions deliberately create the chain `0 → 1 → 2 → 3`; `find(0)` then rewrites the visited parents to point directly at root `3`.
 
@@ -34,7 +32,7 @@ Only roots are linked during a union. Linking an arbitrary interior node would d
 
 The trace uses direct root linking to make a deep chain and its compression visible. The reference implementation also stores rank, preventing that chain from becoming deep in the first place.
 
-## Representation and invariants
+# Representation and invariants
 
 Each element is mapped to an integer index. Two parallel arrays hold the state:
 
@@ -50,7 +48,7 @@ Four invariants define a valid state:
 
 Path compression rewrites parent indices but preserves set membership. Union by rank changes which root represents the merged set but preserves every previous connectivity result. The representative is therefore an internal identity, not a stable domain value.
 
-## Complexity
+# Complexity
 
 | Operation | Best time | Amortized time | Worst single operation | Peak space |
 | --- | --- | --- | --- | --- |
@@ -65,7 +63,7 @@ These bounds assume path compression and union by rank. Rank alone keeps tree he
 
 The recursive implementation uses stack space proportional to the current tree height. An iterative path-halving implementation reduces auxiliary space to `O(1)` while keeping the same amortized time bound.
 
-## When the structure stops fitting
+# When the structure stops fitting
 
 Deletion is the hard boundary. After several unions and path-compressing finds, the structure no longer records which original edge caused a component to form. Removing an edge therefore cannot identify whether the component should stay connected or split. Fully dynamic connectivity needs a graph representation plus a more complex dynamic structure; a known offline sequence can use rollback DSU without path compression.
 
@@ -73,7 +71,7 @@ Connectivity also carries no route information. `Connected(a, b)` can return `tr
 
 The array representation assumes dense integer IDs from `0` through `n - 1`. Strings, GUIDs, and sparse numeric IDs need a `Dictionary<T, int>` mapping before they can enter the structure. That mapping adds memory and makes identity management part of the API boundary.
 
-## Reference drawer
+# Reference drawer
 
 > [!ABSTRACT]- Parent forest
 >
@@ -144,7 +142,7 @@ The array representation assumes dense integer IDs from `0` through `n - 1`. Str
 >
 > `Union` returns `false` when both values already have the same representative. That result is enough for cycle detection while processing graph edges.
 
-## Comparison
+# Comparison
 
 | Representation | Connectivity query | Add connection / merge | Removal | Information retained | Stronger case |
 | --- | --- | --- | --- | --- | --- |
@@ -156,7 +154,7 @@ The disjoint set occupies a specific point in this comparison: it gives up graph
 
 The related [[Union-Find]] note covers the operation heuristics and their analysis. This page remains centered on stored state, invariants, and the boundary of the data structure itself.
 
-## Questions
+# Questions
 
 > [!QUESTION]- How is a disjoint set represented in memory?
 > A parent array stores a forest: `parent[i]` is the next index toward the representative, and each root points to itself. Rank or size is stored in a parallel array for roots. No linked node objects are required.
@@ -167,7 +165,7 @@ The related [[Union-Find]] note covers the operation heuristics and their analys
 > [!QUESTION]- Why is the useful bound amortized rather than worst-case constant time?
 > One `Find` can still traverse several parent indices. Path compression pays extra writes during that operation so later finds become shorter. Across a sequence, the total work is `O(m α(n))` for `m` operations, even though a particular operation is not guaranteed to be constant time.
 
-## References
+# References
 
 - [Efficiency of a Good But Not Linear Set Union Algorithm](https://dl.acm.org/doi/10.1145/321879.321884) — Robert Tarjan's original amortized analysis of path compression with weighted union.
 - [Union-Find](https://algs4.cs.princeton.edu/15uf/) — Princeton Algorithms implementations showing the progression from quick-find and quick-union to weighted, compressed forests.

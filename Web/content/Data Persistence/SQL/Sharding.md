@@ -1,8 +1,8 @@
 ---
 publish: true
 created: 2026-07-16T15:17:15.738Z
-modified: 2026-07-18T08:16:58.522Z
-published: 2026-07-18T08:16:58.522Z
+modified: 2026-07-18T11:59:15.658Z
+published: 2026-07-18T11:59:15.658Z
 topic:
   - Data Persistence
 subtopic:
@@ -14,13 +14,11 @@ priority: High
 status: Ready to Repeat
 ---
 
-# Intro
-
 Sharding is horizontal partitioning across independent database instances: each shard owns a non-overlapping subset of rows. Unlike table partitioning inside one server, sharding distributes storage, writes, backups, and failure domains across machines. Reach for it only when a measured write or storage ceiling remains after vertical scaling, query/index repair, read replicas, caching, and in-engine partitioning. Those alternatives preserve cross-table queries and transaction boundaries with less operational machinery.
 
 The shard key is the long-lived decision. It must distribute load, appear in routed operations, keep transactions that must be atomic together, and remain stable enough that moving ownership is exceptional. The complete design also needs a versioned ownership map, a fenced migration protocol, and explicit behavior for fan-out queries, distributed workflows, and global constraints.
 
-## Strategy Overview
+# Strategy Overview
 
 | Strategy | Ownership rule | Strong fit | Rebalancing boundary |
 |---|---|---|---|
@@ -32,11 +30,11 @@ The shard key is the long-lived decision. It must distribute load, appear in rou
 
 The strategy is the ownership algorithm; the application, proxy, coordinator, or database-native layer is the routing location. For example, `tenant_id = 42` can map to logical bucket 2, while a versioned bucket map says bucket 2 currently lives on shard C. The query must still carry `tenant_id = 42` so the destination can enforce the ownership boundary.
 
-![[Assets/System Design 101/0d322006a6931952121e8e420eb793b7231859da4805c1a29a2e7eef30b87985.png]]
+![[Assets/Data Persistence/Data Persistence-Sharding-18120000.png]]
 
 Consistent hashing limits movement compared with changing a modulo divisor. If `N` equal-capacity nodes own balanced shares and one equal node is added, the new node's expected final share—and therefore the expected movement—is about `1 / (N + 1)` of keys. A ring with sparse or uneven tokens can move much more or less; virtual nodes make the balanced assumption closer to reality. The arithmetic does not provide a safe cutover protocol.
 
-## Vertical and Horizontal Partitioning
+# Vertical and Horizontal Partitioning
 
 Vertical partitioning splits columns, tables, or business functions; horizontal sharding splits rows by key. They solve different contention.
 
@@ -51,15 +49,15 @@ Vertical partitioning splits columns, tables, or business functions; horizontal 
 
 Vertical scaling adds CPU, memory, or I/O to one server. Replication copies the same ownership domain. Neither is vertical partitioning, and neither distributes writes across independent row owners.
 
-## Figma's Escalation Path
+# Figma's Escalation Path
 
 Figma first separated PostgreSQL tables by product area so independent workloads stopped competing in one database. Large tables later exceeded one instance, so the team added horizontal sharding, a database proxy, and hash-derived shard keys. The sequence matters: functional decomposition reduced coupling and bought time; sharding addressed the remaining per-table ceiling.
 
-![[Assets/System Design 101/10523f7ffd572d47bbdbd6c827e8621c056df49da3430f74f67520dd7a971d1c.png]]
+![[Assets/Data Persistence/Data Persistence-Sharding-18120000-1.png]]
 
 The picture is an escalation map, not proof that partitioning alone creates 100× headroom. Capacity came from decomposition, routing, migration tooling, and operational controls together.
 
-## Routing and Ownership Maps
+# Routing and Ownership Maps
 
 Shard routing turns a key into the one current owner allowed to serve the operation. Assume 4,096 logical buckets:
 
@@ -78,7 +76,7 @@ The map may be cached outside the synchronous request path only if stale version
 | Proxy or coordinator | Central topology and connection management | Query routing does not imply migration or distributed transactions |
 | Database-native | One logical endpoint | Routing, movement, and transaction costs move into the engine contract |
 
-## Rebalancing Protocol
+# Rebalancing Protocol
 
 Moving bucket 730 from shard C to shard E is an ownership state machine:
 
@@ -93,13 +91,13 @@ Dual writes create two authorities and two retry paths. Prefer one writer plus c
 
 Modulo hashing with `N` in the divisor remaps most buckets when `N` changes. Stable virtual buckets keep `hash(key) % B` fixed and move selected bucket-map entries instead. Balanced consistent hashing still needs the same copy, catch-up, fencing, and verification protocol; limited movement is not safe movement by itself.
 
-## Cross-Shard Operations
+# Cross-Shard Operations
 
 Cross-shard work starts when one operation cannot be routed to one owner. A coordinator must fan out reads, coordinate commits, or enforce a global constraint outside any shard.
 
 For a request for the newest 100 orders across 32 shards, each shard can return its local top 100 and a coordinator can merge the 3,200 candidates. The operation needs a deadline, per-shard concurrency limit, deterministic tie-breaker, and an explicit partial-result policy. Pagination needs per-shard progress; a single global offset becomes increasingly expensive. A global secondary index can narrow candidates, but it is another distributed data product with lag and repair obligations.
 
-### Transactions and workflows
+## Transactions and workflows
 
 - **Distributed commit** gives one atomic decision only when every participant and coordinator support durable prepare and recovery. It adds coordination latency and can leave prepared work waiting during failures.
 - **Saga or workflow** commits local steps and compensates later. Intermediate states remain visible; compensation and retries need stable operation identities.
@@ -107,13 +105,13 @@ For a request for the newest 100 orders across 32 shards, each shard can return 
 
 A cross-shard value transfer cannot be two unrelated updates. Use a documented distributed transaction or a durable transfer workflow with one operation ID, balanced ledger entries, retry-safe steps, and reconciliation.
 
-### Global constraints
+## Global constraints
 
 A local unique index proves uniqueness only inside one shard. Route a globally unique name to a reservation authority, allocate disjoint ranges, or use globally unique identifiers when semantic uniqueness is unnecessary. Foreign keys across independent shard databases also need co-location, an owning service, or asynchronous repair.
 
 Retry shard requests only when the operation is idempotent or deduplicated. Record which participants committed, bound fan-out concurrency, label partial results as partial, and reconcile from durable operation state rather than an in-memory retry loop.
 
-## Tradeoffs
+# Tradeoffs
 
 | Dimension | Sharding | Simpler alternative |
 |---|---|---|
@@ -123,7 +121,7 @@ Retry shard requests only when the operation is idempotent or deduplicated. Reco
 | Operations | Map versioning, migrations, per-shard backups, skew monitoring | One topology is easier to deploy and recover |
 | Reversal | Data and callers must be recombined | Scaling down a replica or cache is usually simpler |
 
-## Pitfalls
+# Pitfalls
 
 - **Hot shard.** Range boundaries or uneven tenant sizes concentrate CPU and storage. Monitor per-shard load, not only fleet averages.
 - **Hot key.** One celebrity or enterprise tenant can exceed one shard even under a balanced hash. Split that entity's workload deliberately or isolate it on a dedicated shard.
@@ -131,7 +129,7 @@ Retry shard requests only when the operation is idempotent or deduplicated. Reco
 - **Modulo resharding.** Changing `hash(key) % N` moves most keys. Use a stable bucket indirection or a well-balanced consistent-hash scheme when membership changes are expected.
 - **Operational multiplication.** Schema changes, backups, restore tests, and incidents scale with shard count. Build automation before the topology requires it.
 
-## Questions
+# Questions
 
 > [!QUESTION]- When should you shard a database?
 > After evidence shows that write throughput or storage exceeds one ownership domain and simpler measures cannot remove the ceiling. Read replicas help reads, caches remove repeated reads, and in-engine partitioning improves manageability without creating cross-database transactions.
@@ -142,7 +140,7 @@ Retry shard requests only when the operation is idempotent or deduplicated. Reco
 > [!QUESTION]- What makes a useful shard key?
 > It distributes bytes and request load, appears in the dominant operations, co-locates data that must transact together, and remains stable. High cardinality is useful only when the traffic and tenant-size distribution are also balanced.
 
-## References
+# References
 
 - [Horizontal, vertical, and functional data partitioning](https://learn.microsoft.com/azure/architecture/best-practices/data-partitioning) — Azure Architecture Center guidance on partitioning strategies and their consistency, query, and operational tradeoffs.
 - [Sharding pattern](https://learn.microsoft.com/azure/architecture/patterns/sharding) — Azure Architecture Center pattern covering shard-key selection, routing, scaling, and rebalancing.

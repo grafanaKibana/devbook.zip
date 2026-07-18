@@ -1,8 +1,8 @@
 ---
 publish: true
 created: 2026-07-11T21:45:50.902Z
-modified: 2026-07-17T19:00:23.849Z
-published: 2026-07-17T19:00:23.849Z
+modified: 2026-07-18T11:37:05.574Z
+published: 2026-07-18T11:37:05.574Z
 topic:
   - Programming
 subtopic:
@@ -13,8 +13,6 @@ level:
 priority: Medium
 status: Ready to Repeat
 ---
-
-# Intro
 
 A delegate is a type-safe function pointer in C#. It lets you treat methods as values: store them in variables, pass them to other methods, compose invocation lists, and invoke them later. Delegates are foundational for callbacks, LINQ, strategy-style APIs, and events.
 
@@ -29,7 +27,7 @@ PriceCalculator calc = StandardPrice;
 var total = calc(3, 19.99m); // 59.97
 ```
 
-### Built-in generic delegates
+# Built-in generic delegates
 
 - `Action<T...>`: returns `void`
 - `Func<T..., TResult>`: returns a value
@@ -41,7 +39,7 @@ Action<string> log = s => Console.WriteLine(s);
 Predicate<int> isEven = n => n % 2 == 0;
 ```
 
-### Multicast Delegates
+# Multicast Delegates
 
 Delegates can hold an invocation list (`+=`, `-=`). Calling the delegate invokes handlers in registration order.
 
@@ -59,7 +57,7 @@ Important runtime behavior:
 - For non-`void` delegates, only the last handler's return value is returned.
 - `-=` removes the last matching handler from the invocation list.
 
-### Variance
+# Variance
 
 Delegates support covariance and contravariance:
 
@@ -77,7 +75,7 @@ Action<Animal> inspectAnimal = a => Console.WriteLine(a.GetType().Name);
 Action<Dog> inspectDog = inspectAnimal;   // contravariance
 ```
 
-### Anonymous Methods and Lambdas
+# Anonymous Methods and Lambdas
 
 Anonymous methods (`delegate(...) { ... }`) and lambdas (`(...) => ...`) compile to delegate instances. Both can capture local variables (closures).
 
@@ -88,7 +86,7 @@ Func<int, bool> greaterThanThreshold = x => x > threshold;
 
 Captured variables are references to closure state, not a one-time value copy.
 
-### Closures
+# Closures
 
 A closure is the runtime state created when a lambda or anonymous method captures variables from an outer scope. The captured variable is shared, so updates to that variable are observed by all delegates that close over it.
 
@@ -119,7 +117,7 @@ handlers.ForEach(h => h()); // 0, 1, 2
 
 Use this pattern when the captured variable would otherwise be shared and mutated after handler creation (most commonly `for` loop indices).
 
-## Allocation, Captures, and Function Pointers
+# Allocation, Captures, and Function Pointers
 
 - **Delegates are immutable.** `+=` and `-=` don't mutate the delegate in place — they allocate a **new** multicast delegate with an updated invocation list (`Delegate.Combine`/`Remove` under the hood). Frequent subscribe/unsubscribe on a hot path therefore allocates.
 - **A capturing lambda allocates a closure object** plus the delegate. To prevent accidental captures, mark a lambda **`static` (C# 9)** — the compiler then errors if it tries to capture state, and can cache the delegate instance.
@@ -127,14 +125,14 @@ Use this pattern when the captured variable would otherwise be shared and mutate
 - **`DynamicInvoke`** invokes a delegate via reflection (slow, boxes args) — avoid it in favor of a typed invoke. Delegates are also "open" or "closed": a closed delegate binds a target instance; an open delegate leaves the receiver as the first argument.
 - **Function pointers `delegate*` (C# 9)** are the zero-allocation alternative for `unsafe`/interop hot paths — a raw managed function pointer with no delegate object at all (`delegate*<int,int>`), optionally `unmanaged`.
 
-## Pitfalls
+# Pitfalls
 
 - **Multicast stops at first exception**: direct invocation of a multicast delegate exits when one handler throws, so later handlers are skipped. Mitigation: iterate `GetInvocationList()`, invoke each handler in its own `try/catch`, and log or aggregate failures.
 - **Non-`void` multicast returns only one value**: only the last handler's return value is surfaced, so earlier results are lost. Mitigation: enumerate handlers explicitly and collect results into a list.
 - **Loop variable capture can produce wrong values**: closures capture variables, not snapshots, so all handlers can see a final mutated value (for example `for` loop index). Mitigation: create a per-iteration local copy before capturing.
 - **Legacy async delegate pattern is unsupported on modern .NET**: calling delegate `BeginInvoke`/`EndInvoke` throws `PlatformNotSupportedException` on modern runtimes. Mitigation: use `Task`-based async APIs.
 
-## Questions
+# Questions
 
 > [!QUESTION]- What does a delegate compile to in IL/runtime terms?
 > A delegate declaration becomes a sealed type derived from `System.MulticastDelegate` with `Invoke`, `BeginInvoke`, and `EndInvoke` metadata. Delegate instances carry a target object (or null for static methods), a method pointer, and optionally an invocation list. In modern .NET (6+), calling delegate `BeginInvoke`/`EndInvoke` is not supported and throws `PlatformNotSupportedException`.
@@ -145,7 +143,7 @@ Use this pattern when the captured variable would otherwise be shared and mutate
 > [!QUESTION]- Why is using `Func<Task>` in multicast pipelines often wrong for async fan-out?
 > Direct multicast invocation returns only the last task, so earlier handlers can run unobserved. For async fan-out, iterate `GetInvocationList()` and await each task explicitly (sequentially or with `Task.WhenAll`), depending on ordering requirements.
 
-## References
+# References
 
 - [Delegates - C# Programming Guide](https://learn.microsoft.com/dotnet/csharp/programming-guide/delegates/) — official overview of delegate declaration, instantiation, and multicast behavior.
 - [Using delegates - C# Programming Guide](https://learn.microsoft.com/dotnet/csharp/programming-guide/delegates/using-delegates) — practical examples of passing methods as arguments and combining delegates.

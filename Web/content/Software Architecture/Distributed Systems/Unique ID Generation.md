@@ -1,8 +1,8 @@
 ---
 publish: true
 created: 2026-07-16T14:07:22.449Z
-modified: 2026-07-16T14:07:22.449Z
-published: 2026-07-16T14:07:22.449Z
+modified: 2026-07-18T11:30:14.426Z
+published: 2026-07-18T11:30:14.426Z
 topic:
   - Software Architecture
 subtopic:
@@ -14,11 +14,9 @@ priority: High
 status: Ready to Repeat
 ---
 
-# Unique ID Generation
-
 Choose an identifier by its required guarantees: uniqueness scope, sort order, opacity, coordination, index locality, and behavior when clocks or allocators fail. “Globally unique and ordered” is incomplete until the system defines the namespace and ordering boundary.
 
-## Common Designs
+# Common Designs
 
 | Design | Coordination | Order and locality | Failure boundary |
 | --- | --- | --- | --- |
@@ -30,7 +28,7 @@ Choose an identifier by its required guarantees: uniqueness scope, sort order, o
 
 UUID uniqueness is probabilistic but extremely strong with correct randomness; it is not “non-unique.” Database and Redis allocators are not automatically single points of failure—their availability follows the deployed replication and failover design. The planned comparison visual is rejected because it states those properties as absolutes.
 
-## .NET Example
+# .NET Example
 
 .NET exposes RFC 9562 UUIDv7 generation:
 
@@ -42,7 +40,7 @@ Use UUIDv7 when independent writers need roughly time-ordered opaque IDs. Do not
 
 For a Snowflake-style 64-bit layout, document the custom epoch, timestamp bits, worker bits, and per-tick sequence bits. Persist or coordinate worker assignment and stop generation on unhandled clock rollback. If IDs leave the trust boundary, remember that time and worker fields leak operational information.
 
-## References
+# References
 
 - [RFC 9562: UUIDs](https://www.rfc-editor.org/rfc/rfc9562) — IETF UUID versions, uniqueness model, layouts, monotonicity, and security considerations.
 - [Twitter Snowflake](https://github.com/twitter-archive/snowflake) — original public implementation and 64-bit timestamp, worker, and sequence layout.

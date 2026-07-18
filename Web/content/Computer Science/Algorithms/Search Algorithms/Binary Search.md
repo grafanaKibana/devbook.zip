@@ -1,8 +1,8 @@
 ---
 publish: true
 created: 2026-07-12T14:27:20.408Z
-modified: 2026-07-12T14:27:20.408Z
-published: 2026-07-12T14:27:20.408Z
+modified: 2026-07-18T11:30:04.067Z
+published: 2026-07-18T11:30:04.067Z
 topic:
   - Computer Science
 subtopic:
@@ -14,15 +14,13 @@ priority: Medium
 status: Done
 ---
 
-# Intro
-
 A sorted array contains one million user IDs. Locating one ID with a linear scan may inspect every entry; Binary Search needs at most 20 probes because each comparison removes half of the remaining range.
 
 The reduction depends on two properties: the values are ordered, and the middle element is directly accessible by index. Without ordering, a comparison cannot prove which half is irrelevant. Without cheap random access, reaching the middle can cost as much as scanning the range.
 
 **Core condition:** sorted, indexable input → one comparison removes half of the candidates → `O(log n)` lookup with `O(1)` auxiliary space.
 
-## One search
+# One search
 
 The trace searches for `83` in a sorted 16-element array.
 
@@ -34,7 +32,7 @@ The first probe inspects `38` at index 7. Because `38 < 83` and the array is sor
 
 Binary Search does not make an individual comparison cheaper than [[Linear Search]]. Its advantage comes from eliminating exponentially more future work with each comparison.
 
-## Why the range shrinks
+# Why the range shrinks
 
 At the start of every loop, the target—if it exists—must lie inside the inclusive range `[left, right]`. The middle comparison preserves that invariant:
 
@@ -46,7 +44,7 @@ The range strictly shrinks after every miss. After `k` probes, roughly `n / 2^k`
 
 Compute the midpoint as `left + (right - left) / 2`. It is algebraically equivalent to `(left + right) / 2`, but it never forms the potentially overflowing sum.
 
-## Complexity
+# Complexity
 
 | Case | Time | Auxiliary space | Shape of the search |
 | --- | --- | --- | --- |
@@ -56,7 +54,7 @@ Compute the midpoint as `left + (right - left) / 2`. It is algebraically equival
 
 The table describes the iterative implementation below. A recursive implementation keeps the same time bounds but uses `O(log n)` call-stack space in the average and worst cases.
 
-## When the assumptions stop holding
+# When the assumptions stop holding
 
 On `[2, 100, 3, 4, 5]`, a search for `100` begins at `3`, moves right, and permanently discards the half containing the target. Nothing crashes; unsorted input produces a plausible false negative. Sorting first costs `O(n log n)`, which only pays back when later searches reuse that ordering.
 
@@ -64,7 +62,7 @@ Duplicates create a different ambiguity. Searching `[2, 5, 5, 5, 9]` may return 
 
 Boundary conventions remain paired. This version uses an inclusive range, so its loop is `left <= right` and its updates exclude the inspected element with `mid + 1` or `mid - 1`. Combining those updates with a half-open range can skip elements or prevent the range from shrinking.
 
-## Reference drawer
+# Reference drawer
 
 > [!ABSTRACT]- Control flow
 >
@@ -116,7 +114,7 @@ Boundary conventions remain paired. This version uses an inclusive range, so its
 >
 > This implementation uses an inclusive search range and returns `-1` when the target is absent. .NET's `Array.BinarySearch` instead returns the bitwise complement of the insertion index.
 
-## Questions
+# Questions
 
 > [!QUESTION]- Why does Binary Search require sorted data?
 > The comparison at `mid` must prove that an entire half cannot contain the target. Ordering supplies that proof: if `a[mid] < target`, every earlier value is also too small. Without ordering, moving either boundary is a guess and can discard the answer.
@@ -127,7 +125,7 @@ Boundary conventions remain paired. This version uses an inclusive range, so its
 > [!QUESTION]- When is a hash lookup a better fit?
 > Hash-based lookup fits repeated exact-match searches where ordering is irrelevant and the additional memory is acceptable. Binary Search retains an advantage when sorted order already exists or supports adjacent operations such as lower bounds, insertion points, and range queries.
 
-## References
+# References
 
 - [`Array.BinarySearch` method](https://learn.microsoft.com/en-us/dotnet/api/system.array.binarysearch) — .NET's built-in array search contract, including its insertion-point encoding for missing values.
 - [`ArraySortHelper<T>` in dotnet/runtime](https://github.com/dotnet/runtime/blob/main/src/libraries/System.Private.CoreLib/src/System/Collections/Generic/ArraySortHelper.cs) — runtime source for the generic array-search implementation and its internal comparison loop.

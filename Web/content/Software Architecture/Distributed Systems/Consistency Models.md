@@ -1,8 +1,8 @@
 ---
 publish: true
 created: 2026-07-15T11:47:56.083Z
-modified: 2026-07-18T08:33:37.067Z
-published: 2026-07-18T08:33:37.067Z
+modified: 2026-07-18T11:38:38.727Z
+published: 2026-07-18T11:38:38.727Z
 topic:
   - Software Architecture
 subtopic:
@@ -14,16 +14,14 @@ priority: High
 status: Done
 ---
 
-# Intro
-
 Consistency models define what value a read is allowed to return relative to writes in a distributed system.
 They matter because every replication, partition-tolerance, and caching decision is also a consistency decision.
 You think about consistency when selecting storage, designing leader/replica topology, and deciding whether stale reads are acceptable.
 In interviews, the important skill is mapping each business invariant to the weakest model that still preserves correctness.
 
-## Models
+# Models
 
-### Strong or Linearizable
+## Strong or Linearizable
 
 - **Guarantee:** reads behave as if operations happen in one real-time order.
 - **Read rule:** if write `W2` completes before read `R1` starts, `R1` cannot return pre-`W2` data.
@@ -31,7 +29,7 @@ In interviews, the important skill is mapping each business invariant to the wea
 - **Example:** single-leader PostgreSQL for order state.
 - **Cost:** highest coordination overhead and latency; availability drops during partitions.
 
-### Sequential
+## Sequential
 
 - **Guarantee:** all operations appear in one total order that preserves each client's program order.
 - **Difference from linearizable:** order must be globally consistent, but not tied to wall-clock completion time.
@@ -40,7 +38,7 @@ In interviews, the important skill is mapping each business invariant to the wea
 - **Example:** ZooKeeper exposes linearizable writes and sequentially consistent reads, so designs often separate write-path correctness from read freshness.
 - **Cost:** still coordination-heavy, but weaker real-time freshness than linearizable.
 
-### Causal
+## Causal
 
 - **Guarantee:** causally related operations must be seen in order.
 - **Concurrency rule:** unrelated concurrent operations can appear in different orders.
@@ -49,7 +47,7 @@ In interviews, the important skill is mapping each business invariant to the wea
 - **Example:** collaborative edits preserve dependency chains while merging concurrent edits.
 - **Cost:** lower latency than strict global ordering, but extra dependency metadata.
 
-### Eventual
+## Eventual
 
 - **Guarantee:** if no new writes occur, replicas converge.
 - **Mechanism:** asynchronous replication plus conflict resolution policy.
@@ -58,7 +56,7 @@ In interviews, the important skill is mapping each business invariant to the wea
 - **Cost:** cheapest coordination model, but stale reads are expected.
 - **Design impact:** application code must tolerate temporary divergence.
 
-### Read-your-writes or Session
+## Read-your-writes or Session
 
 - **Guarantee:** a client sees its own successful writes in its session.
 - **Mechanism:** session token, sticky routing, or dependency-aware replica selection.
@@ -77,7 +75,7 @@ A product may provide only a subset, so name the required guarantee instead of r
 
 For example, a shipping-address update returns token `region-a:1842`. The checkout read carries that token and cannot use a replica still at `region-a:1839`, although other users may still see older data. The token must survive load balancing; keeping it only in one web server's memory breaks the guarantee when the next request reaches another instance.
 
-## Eventual consistency mechanisms and user-visible guarantees
+# Eventual consistency mechanisms and user-visible guarantees
 
 "Eventual" states only that replicas converge after writes stop. The mechanism determines what users can observe and how conflicts are repaired.
 
@@ -91,7 +89,7 @@ For example, a shipping-address update returns token `region-a:1842`. The checko
 
 Example: an order API commits `OrderPlaced` in the authoritative store and returns `202 Pending`. A projection updates order history asynchronously, while a saga reserves inventory and captures payment. The UI uses read-your-writes against the authoritative order version until the projection catches up. A failed reservation becomes an explicit compensation state; CQRS did not perform the compensation, and messaging alone did not define the consistency guarantee.
 
-## Tradeoffs
+# Tradeoffs
 
 | Model | Guarantee | Example Use Case | Cost |
 | --- | --- | --- | --- |
@@ -101,7 +99,7 @@ Example: an order API commits `OrderPlaced` in the authoritative store and retur
 | Session | Client sees own writes | Profile/settings updates | Low-medium cost, session token plumbing |
 | Eventual | Converges after writes stop | Catalog/cache/reference data | Lowest coordination, stale reads expected |
 
-## Tunable product consistency
+# Tunable product consistency
 
 Some databases expose several positions in this taxonomy. Azure Cosmos DB offers five consistency levels, each with a different observable promise:
 
@@ -117,7 +115,7 @@ Choose from the operation's invariant and user experience, not from a product-wi
 
 The .NET SDK captures session tokens from responses and sends them on later requests made through the same client. Reuse a singleton `CosmosClient`; creating one per request discards connection pools and makes session behavior harder to preserve. When a session crosses services, explicitly propagate the relevant token only when the API contract owns that guarantee.
 
-## Pitfalls
+# Pitfalls
 
 - **Assuming strong when behavior is eventual:** stale reads cause duplicate actions, confusing UI, and contradictory confirmations.
   - **Cause:** implicit read-after-write assumptions in asynchronously replicated paths.
@@ -139,15 +137,15 @@ The .NET SDK captures session tokens from responses and sends them on later requ
 - For each endpoint, set an explicit freshness budget (for example: "up to 2 seconds stale").
 - Model partition behavior up front: which operations fail closed vs continue degraded.
 - Add observability for replica lag, cache age, and stale-read rate.
-- Use [[Idempotency]] keys on writes so retries are safe when consistency is weaker.
+- Use [[Software Architecture/Distributed Systems/Idempotency]] keys on writes so retries are safe when consistency is weaker.
 - Test failure modes with delayed replication and partial-region outages.
 - Keep consistency decisions visible in architecture docs and API contracts.
 
-## Optimistic write protection
+# Optimistic write protection
 
 The [[Networks/Protocols/HTTP#Fields, Content, and Conditional Requests|HTTP conditional-request contract]] prevents lost updates by requiring `If-Match`, returning `428` when absent, and enforcing the validator with one atomic compare-and-swap write. An application-side check followed by an unconditional save is still racy.
 
-## Questions
+# Questions
 
 > [!QUESTION]- How do you guarantee read-your-writes when writes go to a strong store but reads come from an eventually consistent cache?
 > The problem is the gap between a committed write and a cache that hasn't caught up. The cleanest fix is to route that user's immediate post-write reads past the cache to a strong or session-consistent path, just while freshness matters. Pair it with write-through or explicit invalidation on update so the cache converges quickly, and carry a version or timestamp so you can reject a stale follow-up write. Keep the writes idempotent so a retry is harmless. You don't need global strong consistency — only read-your-writes for the one user who just acted.
@@ -158,7 +156,7 @@ The [[Networks/Protocols/HTTP#Fields, Content, and Conditional Requests|HTTP con
 > [!QUESTION]- Why can linearizability reduce availability during a network partition, and how do you contain the blast radius?
 > Linearizable operations need a quorum to agree on one order, and a partition can cut a node off from that quorum. To stop two sides committing conflicting truths, the isolated side must reject or delay those operations — that refusal is the availability you lose (the CP corner of CAP). Contain the blast radius by scoping strong consistency to the writes that truly need it — payments, inventory decrements — and serving everything else from weaker models with explicit degraded-mode behavior. Partition tolerance isn't optional; the real choice is which operations fail closed and which keep serving.
 
-## References
+# References
 
 - [Jepsen - Consistency Models](https://jepsen.io/consistency) — the definitive practitioner reference for consistency model taxonomy, with formal definitions and real-world database analysis.
 - [ZooKeeper Internals](https://zookeeper.apache.org/doc/current/zookeeperInternals.html) — explains ZooKeeper's linearizable writes + sequentially consistent reads model.

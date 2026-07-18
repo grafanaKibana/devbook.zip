@@ -1,8 +1,8 @@
 ---
 publish: true
 created: 2026-07-11T21:45:45.905Z
-modified: 2026-07-11T21:45:45.905Z
-published: 2026-07-11T21:45:45.905Z
+modified: 2026-07-18T11:30:02.175Z
+published: 2026-07-18T11:30:02.175Z
 topic:
   - AI & ML
 subtopic:
@@ -14,13 +14,11 @@ priority: High
 status: Done
 ---
 
-# Intro
-
 Trajectory evaluation scores the whole path an agent took — the ordered sequence of tool calls, observations, and reasoning steps from task to result — rather than any single step or the final answer alone. It exists because two agents can reach the same correct end state by very different routes: one in four clean steps, the other after wandering through six wrong tool calls and recovering by luck. Outcome scoring rates them equally; [[Tool-Call Evaluation|tool-call scoring]] rates each call in isolation; only trajectory evaluation answers "was the _path_ reasonable."
 
 Two families do this, and they trade off precision against coverage. **Reference-trajectory match** compares the agent's path against a known-good one. **LLM-as-judge over the trace** reads the whole transcript and rates it against a rubric. The judge machinery is the general [[LLM-as-a-Judge]] applied to a trajectory; the modes below are agent-specific.
 
-## Reference-trajectory match
+# Reference-trajectory match
 
 You curate a reference path — the tool sequence a correct solve should take — and score how the agent's actual path compares. The comparison mode decides how strict that is:
 
@@ -31,7 +29,7 @@ You curate a reference path — the tool sequence a correct solve should take �
 
 Reference matching is precise and cheap to run, but brittle: it can only credit paths you anticipated, and for open-ended tasks the space of valid paths is too large to enumerate. It also says nothing about _quality_ within an allowed path — a superset match passes a bloated trajectory as long as it contains the required steps.
 
-## LLM-as-judge over the trace
+# LLM-as-judge over the trace
 
 When no single path is correct, give a judge the full transcript and a rubric: did the agent form a sensible plan, choose appropriate tools, avoid needless steps, and recover when a tool failed? The judge handles the open-ended "reasonableness" that reference matching cannot, at the cost of a model call per trajectory and the judge's biases — amplified here because a trajectory is long.
 
@@ -44,11 +42,11 @@ flowchart LR
     J --> SC
 ```
 
-## Step-level vs episode-level
+# Step-level vs episode-level
 
 Decide what a "score" attaches to. **Episode-level** rates the trajectory as a whole (one pass/fail or one rubric score per run) — cheap, but a failure tells you the run was bad, not where. **Step-level** scores each decision point (was _this_ the right next action given the state so far) — far more diagnostic for finding where a long agent derailed, but it costs a judgment per step and needs per-step ground truth or a judge with the running context. Start episode-level for release gating; add step-level only on the trajectories that fail, to localize the break.
 
-## Example
+# Example
 
 Two evaluations of the same support task, run as reference-match plus judge:
 
@@ -66,7 +64,7 @@ Agent B path: search_orders -> lookup_order -> lookup_order -> issue_refund -> s
 Same outcome, same superset verdict; the judge separates the clean path from the wasteful one.
 ```
 
-## Tradeoffs
+# Tradeoffs
 
 | Approach | Catches | Cost | Breaks when |
 | --- | --- | --- | --- |
@@ -76,21 +74,21 @@ Same outcome, same superset verdict; the judge separates the clean path from the
 
 Decision rule: use reference matching where the task has a small, knowable set of correct paths and you want a cheap, objective gate — subset mode is especially good as a _safety_ check (never touched a forbidden tool). Switch to a judge for open-ended tasks, and pair it with the cheap outcome and efficiency metrics from [[AI & ML/LLM/Agents/Evaluation/Evaluation|Agent Evaluation]] so a high judge score on a failed task is impossible to miss.
 
-## Pitfalls
+# Pitfalls
 
-### Reference brittleness penalizes valid alternate paths
+## Reference brittleness penalizes valid alternate paths
 
 A strict reference match marks a correct solve wrong because it used `search` then `filter` instead of a single `query` call. The metric is now measuring conformance to your guessed path, not task quality, and will rank a rigid agent above a smarter flexible one. Loosen to a more permissive mode (unordered or superset), or move to a judge, whenever more than one path is genuinely correct.
 
-### Judge degrades on long traces
+## Judge degrades on long traces
 
 LLM judges lose reliability as the transcript grows — they skim the middle, anchor on the first and last steps, and reward verbosity. A 40-step trajectory is exactly where you most need step localization and least trust a single episode-level judgment. Mitigation: summarize or chunk the trace, score key decision points step-level, and validate judge scores against human labels on long runs specifically.
 
-### Outcome leakage inflates path scores
+## Outcome leakage inflates path scores
 
 If the judge can see that the task succeeded, it rationalizes the path as good regardless of how messy it was. Withhold the outcome from the trajectory judge, or score path and outcome with separate calls, so a lucky success through a bad path is not laundered into a high path score.
 
-## Questions
+# Questions
 
 > [!QUESTION]- When do you use reference-trajectory matching versus an LLM judge over the trace?
 >
@@ -108,7 +106,7 @@ If the judge can see that the task succeeded, it rationalizes the path as good r
 > - Pair the judge with objective efficiency counters (steps, cost, redundant calls) that a biased judge cannot launder
 > - Separate, calibrated, step-localized judging costs more calls, so spend it on the long, high-stakes trajectories where path quality actually matters
 
-## References
+# References
 
 - [Trajectory evaluations -- reference-match modes and LLM-judge scoring of agent trajectories (LangSmith docs)](https://docs.langchain.com/langsmith/trajectory-evals) — practitioner how-to for both families, including the strict/unordered/subset/superset match modes.
 - [AgentBench -- evaluating LLMs as agents across eight interactive environments (Liu et al., 2023)](https://arxiv.org/abs/2308.03688) — multi-environment agent benchmark and a reference point for trajectory-level success measurement.

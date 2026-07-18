@@ -1,8 +1,8 @@
 ---
 publish: true
 created: 2026-07-16T08:23:57.844Z
-modified: 2026-07-16T08:23:57.845Z
-published: 2026-07-16T08:23:57.845Z
+modified: 2026-07-18T11:30:13.622Z
+published: 2026-07-18T11:30:13.622Z
 topic:
   - Security
 subtopic:
@@ -14,11 +14,9 @@ priority: High
 status: Ready to Repeat
 ---
 
-# Password Storage
-
 A service does not need the original password after enrollment. It needs a verifier that can confirm a later attempt while making each offline guess expensive after a database leak. Store the output of a password-specific key derivation function (KDF), not plaintext, reversible ciphertext, or a fast hash such as SHA-256.
 
-## Store a Self-Describing Verifier
+# Store a Self-Describing Verifier
 
 Use Argon2id for new systems. Start from the current OWASP floor—at the referenced revision, `m=19 MiB`, `t=2`, `p=1`—then benchmark a higher cost that the authentication tier can sustain. Use scrypt when Argon2id is unavailable. Use PBKDF2-HMAC-SHA-256 when a validated FIPS implementation is a constraint. Bcrypt belongs mainly in compatible legacy systems because of its input limit and weaker resistance to parallel hardware.
 
@@ -30,7 +28,7 @@ $argon2id$v=19$m=19456,t=2,p=1$<unique-salt>$<derived-output>
 
 The algorithm, version, parameters, and salt are not secrets. Keeping them with the derived output lets verification reproduce the KDF and lets a future login identify an old cost that needs upgrading. Let a mature library generate the random salt and encode the record; a hand-built `hash(password + salt)` construction is not a password KDF.
 
-## Verification and Migration
+# Verification and Migration
 
 1. Parse the stored algorithm, parameters, salt, and expected output.
 2. Apply the same KDF to the candidate password.
@@ -41,7 +39,7 @@ This makes migration incremental. An account still using PBKDF2 can move to Argo
 
 An optional pepper is a separate, shared secret applied in addition to per-user salts. Keep it in a secrets manager or HSM, never in the password table. A pepper can make a database-only theft harder, but rotation normally requires the user's password or a forced reset. It does not repair a weak KDF.
 
-## Failure and Breach Paths
+# Failure and Breach Paths
 
 - Rate-limit online verification independently of the KDF. A slow hash raises offline cost; it does not stop distributed credential stuffing.
 - Bound concurrent KDF work so an attacker cannot turn expensive verification into memory exhaustion.
@@ -50,7 +48,7 @@ An optional pepper is a separate, shared secret applied in addition to per-user 
 
 The breach boundary is concrete: a stolen table gives the attacker a verifier for unlimited offline guesses. The KDF's measured cost, the users' password quality, and any separately protected pepper determine how quickly those guesses become accounts.
 
-## References
+# References
 
 - [ByteByteGo — Storing Passwords Safely](https://github.com/ByteByteGoHq/system-design-101/blob/b28380a4710c5ec9638ec037d4168e288f334cba/data/guides/how-to-store-passwords-in-the-database.md) — the pinned source; its plain salted-hash visual is intentionally not reused because it omits a password KDF.
 - [OWASP Password Storage Cheat Sheet](https://cheatsheetseries.owasp.org/cheatsheets/Password_Storage_Cheat_Sheet.html) — current algorithm order, minimum work factors, salt, pepper, and migration guidance.

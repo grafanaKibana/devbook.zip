@@ -1,8 +1,8 @@
 ---
 publish: true
 created: 2026-07-15T12:03:33.446Z
-modified: 2026-07-15T12:03:33.449Z
-published: 2026-07-15T12:03:33.449Z
+modified: 2026-07-18T11:37:57.586Z
+published: 2026-07-18T11:37:57.586Z
 topic:
   - Software Architecture
 subtopic:
@@ -14,22 +14,20 @@ level:
 status: Done
 ---
 
-# Intro
-
 Rate limiting controls how many requests a client can make in a period of time so one caller cannot exhaust shared resources. It matters because it protects reliability, reduces abuse, and keeps cost predictable when downstream work is expensive, especially LLM inference and embedding calls billed per request or token. In system design interviews, rate limiting is usually a quota protection mechanism, not just a security feature: it keeps latency stable for well-behaved users when traffic spikes. Reach for it on public APIs, shared multi-tenant services, and any endpoint that fans out to costly dependencies.
 
 In .NET systems, rate limiting is often a layered decision: edge gateway limits, app-level per-tenant limits, and provider-level limits from dependencies like OpenAI or Stripe. The algorithm you choose defines failure behavior under burst traffic, memory usage, and fairness.
 
-## Why It Matters in Senior Design Discussions
+# Why It Matters in Senior Design Discussions
 
 - Reliability: shields thread pools, DB connections, and downstream APIs from overload.
 - Cost control: caps spend for metered dependencies such as LLM completions and vector search.
 - Fairness: prevents a noisy tenant from starving others in shared infrastructure.
 - Backpressure signal: explicit `429 Too Many Requests` tells clients when and how to retry.
 
-## Core Algorithms
+# Core Algorithms
 
-### Token Bucket
+## Token Bucket
 
 Token bucket maintains a bucket with capacity `B` tokens. Tokens are added at a refill rate `R` over time, and each request consumes one or more tokens. If tokens are available, the request is allowed; if not, it is rejected or queued.
 
@@ -59,7 +57,7 @@ flowchart LR
     Consume --> Bucket
 ```
 
-### Sliding Window Log
+## Sliding Window Log
 
 Sliding window log stores timestamps of recent requests per key and removes entries older than the window size. A new request is allowed only if the count of timestamps in the active window is below the limit.
 
@@ -78,7 +76,7 @@ When to prefer it:
 - Low to moderate traffic where precision is more important than memory.
 - Compliance-sensitive quotas where approximation is not acceptable.
 
-### Sliding Window Counter
+## Sliding Window Counter
 
 Sliding window counter approximates rolling windows using two adjacent fixed buckets (current and previous), then weights the previous bucket based on elapsed time. It estimates requests in the active rolling window without storing every timestamp.
 
@@ -97,7 +95,7 @@ When to prefer it:
 - High-throughput APIs that need near-rolling accuracy with controlled cost.
 - Distributed rate limits where you want better fairness without log storage.
 
-### Fixed Window Counter
+## Fixed Window Counter
 
 Fixed window tracks a simple counter per key for each discrete window (for example, one minute). Counter resets when the window changes.
 
@@ -116,7 +114,7 @@ When to prefer it:
 - Internal services with predictable traffic.
 - Early implementation where simplicity is the dominant requirement.
 
-## Quick Comparison
+# Quick Comparison
 
 | Algorithm | Burst support | Accuracy | Memory cost | Operational complexity | Typical fit |
 | --- | --- | --- | --- | --- | --- |
@@ -125,7 +123,7 @@ When to prefer it:
 | Sliding Window Counter | Medium | Medium to high | Medium | Medium | Balanced general purpose API limits |
 | Token Bucket | Strong and controlled | Medium to high | Medium | Medium | Public APIs and tenant burst tolerance |
 
-## ASP.NET Core Example
+# ASP.NET Core Example
 
 ASP.NET Core has first-class middleware support via `Microsoft.AspNetCore.RateLimiting`. You register policies in `AddRateLimiter` and attach a policy globally or per endpoint.
 
@@ -170,7 +168,7 @@ app.MapGet("/api/admin", () => Results.Ok("ok"))
 app.Run();
 ```
 
-### Per Tenant Partitioning
+## Per Tenant Partitioning
 
 For multi-tenant APIs, partition by tenant or API key, not only by IP address. ASP.NET Core supports partitioning with `PartitionedRateLimiter` so each key gets its own limiter state.
 
@@ -205,7 +203,7 @@ builder.Services.AddRateLimiter(options =>
 
 Design note: partition key choice is part of domain design. For B2B SaaS, tenant key is usually correct for fairness and billing. For public anonymous APIs, IP plus user agent or a gateway-issued client ID can be more robust than raw IP alone.
 
-## Distributed Rate Limiting
+# Distributed Rate Limiting
 
 In-memory limiter state works only per process. With multiple instances behind a load balancer, each instance sees only a subset of requests, so a "100 req/min" limit can become roughly `100 x instance_count` if state is not shared.
 
@@ -232,9 +230,9 @@ GET rl:tenant:{tenantId}:bucket:{previousBucket}
 EXEC
 ```
 
-## Pitfalls
+# Pitfalls
 
-### 1) Fixed window boundary spike
+## 1) Fixed window boundary spike
 
 What goes wrong: with a limit of 100/minute, a client can send 100 requests at 12:00:59 and another 100 at 12:01:00, effectively 200 in two seconds.
 
@@ -242,7 +240,7 @@ Why it happens: counters reset on hard boundaries rather than rolling time.
 
 Mitigation: prefer token bucket or sliding window counter for edge-exposed endpoints.
 
-### 2) Wrong partition key
+## 2) Wrong partition key
 
 What goes wrong: limiting by IP can unfairly throttle many users behind one NAT, while bad actors rotate IPs to evade limits.
 
@@ -250,7 +248,7 @@ Why it happens: key does not reflect identity or billing unit.
 
 Mitigation: choose key by business objective (API key, tenant, user, or composite key). Align limiter key with quota ownership.
 
-### 3) Clock skew in distributed limiters
+## 3) Clock skew in distributed limiters
 
 What goes wrong: nodes disagree on current time, leading to inconsistent window calculations and unfair accepts/rejects.
 
@@ -258,7 +256,7 @@ Why it happens: window math depends on timestamps from different hosts.
 
 Mitigation: centralize time decisions in Redis scripts when possible, run NTP everywhere, and avoid client-provided timestamps.
 
-### 4) Missing response metadata
+## 4) Missing response metadata
 
 What goes wrong: clients receive `429` without actionable retry guidance, causing aggressive blind retries and more load.
 
@@ -266,7 +264,7 @@ Why it happens: only status code is returned, no quota context.
 
 Mitigation: include `Retry-After` and useful quota headers such as `X-RateLimit-Remaining`, `X-RateLimit-Limit`, and `X-RateLimit-Reset`.
 
-## Interview Questions
+# Interview Questions
 
 > [!question] Your AI service wraps OpenAI APIs with per-tenant limits and runs on 4 instances. How do you enforce limits accurately, and which algorithm do you choose?
 > **Expected answer**
@@ -299,9 +297,9 @@ Mitigation: include `Retry-After` and useful quota headers such as `X-RateLimit-
 >   **Why this question matters**
 > - It tests operational judgment and explicit risk tradeoff reasoning.
 
-## References
+# References
 
-- [Rate limiting in ASP.NET Core](https://learn.microsoft.com/aspnet/core/performance/rate-limit)
+- [Rate limiting in ASP.NET Core](https://learn.microsoft.com/aspnet/core/performance/rate-limit) — official middleware guidance for fixed-window, sliding-window, token-bucket, and concurrency limiters.
 - [System.Threading.RateLimiting namespace](https://learn.microsoft.com/dotnet/api/system.threading.ratelimiting)
 - [Redis transactions (MULTI and EXEC)](https://redis.io/docs/latest/develop/interact/transactions/)
 - [Scaling your API with rate limiters (Stripe Engineering)](https://stripe.com/blog/rate-limiters)

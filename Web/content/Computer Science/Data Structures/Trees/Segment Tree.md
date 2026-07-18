@@ -1,8 +1,8 @@
 ---
 publish: true
 created: 2026-07-12T14:27:20.427Z
-modified: 2026-07-12T14:27:20.428Z
-published: 2026-07-12T14:27:20.428Z
+modified: 2026-07-18T11:30:05.713Z
+published: 2026-07-18T11:30:05.713Z
 topic:
   - Computer Science
 subtopic:
@@ -14,8 +14,6 @@ priority: Medium
 status: Ready to Repeat
 ---
 
-# Intro
-
 A mutable array of one million latency samples must answer "maximum value in `a[l..r]`" while new samples keep overwriting old slots. A raw scan costs `O(n)` per query. A [[Prefix Sum]] array answers in `O(1)` but only for invertible aggregates, and every write invalidates `O(n)` prefixes — so it collapses the moment updates interleave with queries, and it never supported max in the first place.
 
 A segment tree keeps the array's index order but overlays a binary hierarchy of **intervals** on top of it. Each node owns a contiguous range `[l, r]` and stores one aggregate over that range; a parent's value is `merge(leftChild, rightChild)` for any associative `merge` — sum, min, max, gcd. Because a parent already summarizes its whole subtree, an arbitrary query range splits into a handful of already-computed nodes instead of touching every leaf. What the structure gives up is the raw per-element view: a node knows its range's aggregate, not which element produced it, so anything depending on the merge being invertible (an average from a running count, a subtractive prefix trick) has to be reconstructed rather than read off.
@@ -25,7 +23,7 @@ A segment tree keeps the array's index order but overlays a binary hierarchy of 
 > [!NOTE] Visualization pending
 > Planned StepTrace: an interval-tree card showing a range query fracturing `[l, r]` into its `O(log n)` canonical covering nodes, then a point update walking a single leaf-to-root path and re-merging each ancestor. No matching renderer exists in `engine.js` yet.
 
-## Representation and invariants
+# Representation and invariants
 
 The tree is stored heap-style in a flat array, not as linked nodes. With the root at index `1`, node `i` has children `2i` and `2i + 1`, so navigation is arithmetic and the whole structure is one contiguous allocation. A recursive build over an arbitrary `n` can reach index `4n − 1` in the worst case (an unbalanced right spine of a non-power-of-two range), so `4 * n` slots is the standard safe bound; a power-of-two `n` fits in `2n`.
 
@@ -37,7 +35,7 @@ Each node covers a fixed range decided at build time. The root covers `[0, n-1]`
 
 Lazy propagation adds a second per-node field: a pending tag describing a deferred range operation ("add `x` to this whole range"). The tag is applied to the node's own aggregate immediately but **pushed down** to children only when a later query or update descends past that node. This keeps a range update from having to rewrite every leaf under it — the tag records the intent and settles the debt lazily, so range update and range query both stay `O(log n)`.
 
-## Complexity
+# Complexity
 
 | Operation | Time | Space | Cause |
 | --- | --- | --- | --- |
@@ -48,7 +46,7 @@ Lazy propagation adds a second per-node field: a pending tag describing a deferr
 
 Structure space is `O(n)` overall but with a constant near `4` — materially larger than a Fenwick tree's exact `n`. The `O(log n)` per-operation space is recursion-stack depth; an iterative bottom-up variant reduces it to `O(1)` for point-update/query trees, though lazy propagation is awkward to express iteratively.
 
-## When the structure stops fitting
+# When the structure stops fitting
 
 The range is fixed at build. Because every node's `[lo, hi]` is decided during construction, the structure is not a resizable array — appending an element past `n` means rebuilding. A dynamic (implicit) segment tree that allocates nodes on demand over a huge or sparse coordinate space exists, but it trades the flat array for pointer nodes and more memory per used range.
 
@@ -56,7 +54,7 @@ Lazy propagation is where correctness slips. The deferred-tag machinery has to c
 
 Memory is the standing cost. The `≈4n` slots and, for lazy trees, a parallel tag array roughly double the footprint of a Fenwick tree that could answer the same sum query — the price paid for supporting non-invertible aggregates and range updates the Fenwick structure cannot represent.
 
-## Reference drawer
+# Reference drawer
 
 > [!ABSTRACT]- Interval tree for `[3, 4, 1, 7, 2, 6]` (range sum)
 >
@@ -126,7 +124,7 @@ Memory is the standing cost. The `≈4n` slots and, for lazy trees, a parallel t
 >
 > Swapping the three `// merge` sites and the outside-identity for `Math.Min`/`int.MaxValue` turns this into a range-min tree with no structural change. Range updates require a parallel `_lazy[]` array plus a push-down step before each descent — the deferred-tag layer omitted here.
 
-## Questions
+# Questions
 
 > [!QUESTION]- How is a segment tree laid out in memory, and why `4n` slots?
 > A flat array indexed heap-style: the root at `1`, node `i`'s children at `2i` and `2i + 1`. A recursive build over a non-power-of-two `n` can reach index `4n − 1` on an unbalanced spine, so `4 * n` is the safe allocation; a power-of-two `n` needs only `2n`.
@@ -137,7 +135,7 @@ Memory is the standing cost. The `≈4n` slots and, for lazy trees, a parallel t
 > [!QUESTION]- What does lazy propagation defer, and how does that failure show up?
 > A range update stores a pending tag on each covering node instead of rewriting its whole subtree; the tag is pushed to children only when a later operation descends past that node. Forgetting a push-down returns a stale aggregate — a plausibly-wrong number, not a crash — which makes it the bug-prone part of the structure.
 
-## References
+# References
 
 - [Segment tree](https://cp-algorithms.com/data_structures/segment_tree.html) — recursive construction, range query, point and lazy range updates, and the `4n` sizing argument.
 - [Efficient and easy segment trees (Codeforces, Al.Cash)](https://codeforces.com/blog/entry/18051) — the iterative bottom-up variant that stores exactly `2n` slots for point-update trees.

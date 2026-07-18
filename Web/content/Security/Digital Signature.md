@@ -1,8 +1,8 @@
 ---
 publish: true
 created: 2026-07-11T21:48:29.585Z
-modified: 2026-07-17T05:51:14.922Z
-published: 2026-07-17T05:51:14.922Z
+modified: 2026-07-18T11:59:15.666Z
+published: 2026-07-18T11:59:15.666Z
 topic:
   - Security
 subtopic:
@@ -14,11 +14,9 @@ priority: Medium
 status: Ready to Repeat
 ---
 
-# Digital Signature
-
 A digital signature proves that a message matches a private signing key (authenticity) and has not been modified since signing (integrity). Unlike encryption, signing does not hide the content. An ASP.NET Core API commonly verifies RS256 or ES256 tokens with a public key from the issuer's JWKS endpoint; that result is meaningful only after the issuer and key source are authenticated. HMAC-protected JWTs use a shared-secret MAC instead, so either secret holder can generate them.
 
-## How It Works
+# How It Works
 
 1. The signature algorithm encodes the message, normally through an approved hash and algorithm-specific preparation.
 2. The signer applies the private signing operation and emits a signature.
@@ -27,7 +25,7 @@ A digital signature proves that a message matches a private signing key (authent
 
 “Encrypt the hash with the private key” is not a portable model. RSA-PSS, ECDSA, and EdDSA have different signing mathematics, and none should be implemented by composing raw encryption and hashing operations.
 
-## Example in .NET
+# Example in .NET
 
 ```csharp
 using System.Security.Cryptography;
@@ -58,34 +56,34 @@ bool isValid = ecdsa.VerifyData(message, signature, HashAlgorithmName.SHA256);
 // ECDSA P-256 signature: 64 bytes vs RSA-2048: 256 bytes
 ```
 
-## Use Cases
+# Use Cases
 
 - **JWT signing**: The identity provider signs the JWT with its private key; APIs verify with the public key (JWKS endpoint). See [[Security/JWT Bearer|JWT Bearer authentication]].
 - **Code signing**: Software publishers sign executables so users can verify the binary has not been tampered with.
 - **Document signing**: PDF signatures, contract signing (DocuSign uses digital signatures under the hood).
 - **TLS certificates**: after issuance validation, a CA signature attests the binding between a certificate identity, such as a DNS name, and its public key.
 
-## Related Construction: HMAC
+# Related Construction: HMAC
 
 HMAC authenticates a message between parties that share one secret. Either party can generate the same MAC, so it does not provide a digital signature's asymmetric attribution. Request-authentication protocols add canonical request bytes, a timestamp, and a nonce with server-side replay state; those protocol details belong to [[Security/Authentication/Authentication|API authentication]]. The signature-specific boundary here is trust: a digital signature separates a private signer from public verifiers, while every HMAC verifier is also able to create a valid tag.
 
-![[Assets/System Design 101/43c5215844c4ce07c9aeda7a92da6da06d810aa7e33e2f4810071f2eaf0cb262.png]]
+![[Assets/Security/Security-Digital Signature-18120000.png]]
 
-## Pitfalls
+# Pitfalls
 
-### Treating RSA Signing as RSA Encryption
+## Treating RSA Signing as RSA Encryption
 
 **What goes wrong**: code applies raw RSA operations to a hand-built hash encoding because signing was described as “encrypting with the private key.” Verification then depends on non-standard parsing and may accept malformed encodings.
 
 **Mitigation**: call the platform's signature API with a specified scheme and parameters. Prefer RSA-PSS for a new RSA-based protocol; use PKCS#1 v1.5 signatures only where the protocol requires compatibility. The Bleichenbacher padding oracle concerns PKCS#1 v1.5 **encryption**, not a reason to describe every PKCS#1 v1.5 signature as decryptable ciphertext.
 
-### Trusting Signatures Without Certificate Validation
+## Trusting Signatures Without Certificate Validation
 
 **What goes wrong**: verifying a signature with a public key proves the message was signed by whoever holds the corresponding private key — but not that the key belongs to who you think it does. Without certificate validation (chain of trust to a trusted CA), an attacker can substitute their own key pair.
 
 **Mitigation**: authenticate the key through the trust model the protocol defines, such as a validated X.509 chain or an issuer-bound JWKS document. In JWT, `kid` is only a selector among keys already obtained for the expected issuer; it does not authenticate the issuer or authorize a new key source. Reject an unknown or ambiguous `kid`, and never let an untrusted `kid`, `jku`, or `x5u` value redirect verification to an arbitrary key.
 
-## Tradeoffs
+# Tradeoffs
 
 | Algorithm | Typical public-key size | Signature representation | Use when |
 | --- | --- | --- | --- |
@@ -95,7 +93,7 @@ HMAC authenticates a message between parties that share one secret. Either party
 
 Choose the algorithm the protocol specifies and the complete client set can verify. Algorithm agility means storing an algorithm or key identifier, supporting a controlled migration, and rejecting unapproved algorithms; it does not mean trusting an unverified message to choose its verifier.
 
-## Questions
+# Questions
 
 > [!QUESTION]- Why does signing use the private key to encrypt the hash, not the public key?
 > Signing does not generally encrypt a hash. A signature scheme uses the private key to create a value that anyone with the public key can verify for the exact message. The asymmetry makes creation exclusive to the private-key holder while leaving verification public.
@@ -106,7 +104,7 @@ Choose the algorithm the protocol specifies and the complete client set can veri
 > [!QUESTION]- How do you choose between ECDSA and RSA?
 > Follow the protocol's allowed algorithms and encodings, then check every signer, verifier, HSM, and rotation path. ECDSA P-256 offers shorter keys and signatures; RSA often has broader compatibility with existing infrastructure. Neither should be selected by an untrusted message or treated as a universal default.
 
-## References
+# References
 
 - [ByteByteGo — A Cheat Sheet for API Designs](https://github.com/ByteByteGoHq/system-design-101/blob/b28380a4710c5ec9638ec037d4168e288f334cba/data/guides/a-cheat-sheet-for-api-designs.md) — the pinned HMAC-request source, with its key terminology and replay handling corrected here.
 - [RFC 9421 — HTTP Message Signatures](https://datatracker.ietf.org/doc/html/rfc9421) — canonical component coverage, timestamps, expiry, nonce parameters, and replay considerations.

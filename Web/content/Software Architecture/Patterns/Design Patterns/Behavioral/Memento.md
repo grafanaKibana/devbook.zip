@@ -1,8 +1,8 @@
 ---
 publish: true
 created: 2026-07-15T11:47:55.223Z
-modified: 2026-07-15T11:47:55.225Z
-published: 2026-07-15T11:47:55.225Z
+modified: 2026-07-18T11:38:38.765Z
+published: 2026-07-18T11:38:38.765Z
 topic:
   - Software Architecture
 subtopic:
@@ -13,8 +13,6 @@ level:
 priority: High
 status: Ready to Repeat
 ---
-
-# Memento
 
 Save points in a video game are Mementos. Before a boss fight, the game captures your exact state — health, inventory, position, quest progress — into a save file. If you die, you restore from the save point and try again. The save file captures everything needed to recreate the moment without exposing the game’s internal data structures to the save system.
 
@@ -33,7 +31,7 @@ sequenceDiagram
     Memento->>Cart: Restore previous state
 ```
 
-## Problem
+# Problem
 
 A shopping cart has no undo. Removing an item by accident is permanent, and abandoned cart recovery requires external DB snapshots with no clean abstraction:
 
@@ -64,7 +62,7 @@ public class CartController
 
 Here's what breaks when requirements change: adding "undo last change" requires retrofitting state tracking into the cart — a significant refactor.
 
-## Solution
+# Solution
 
 `CartMemento` captures cart state; `CartHistory` stores snapshots:
 
@@ -137,7 +135,7 @@ if (history.CanUndo)
 
 Abandoned cart recovery now uses `CartHistory.Serialize()` — the same snapshot mechanism, no separate DB schema needed.
 
-## You Already Use This
+# You Already Use This
 
 **EF Core `ChangeTracker.OriginalValues`** — EF Core stores the original database values for each tracked entity. `entry.OriginalValues["Total"]` returns the value before any in-memory changes. `entry.CurrentValues.SetValues(entry.OriginalValues)` restores the entity to its original state — a Memento restore.
 
@@ -145,15 +143,15 @@ Abandoned cart recovery now uses `CartHistory.Serialize()` — the same snapshot
 
 **`DataSet.GetChanges()` / `RejectChanges()`** — `DataSet.GetChanges()` returns a memento of all modified rows. `RejectChanges()` restores the dataset to its original state.
 
-## Tradeoffs
+# Tradeoffs
 
 **Use it when**: you need undo/redo, checkpoints, or rollback of _in-memory_ state **without breaking encapsulation** — the caretaker holds opaque snapshots and can't peek inside. Good for editors, wizards, shopping carts, and game saves.
 
-**Don't reach for it when**: the state is large — every snapshot **copies the whole state**, so memory grows with history depth. There, prefer **command-based undo** (store the _inverse_ operation, far cheaper) or, for a full audit trail, [[Event Sourcing]] (which reconstructs state from a log and snapshots only periodically).
+**Don't reach for it when**: the state is large — every snapshot **copies the whole state**, so memory grows with history depth. There, prefer **command-based undo** (store the _inverse_ operation, far cheaper) or, for a full audit trail, [[Software Architecture/Patterns/Architectural Patterns/Event Sourcing]] (which reconstructs state from a log and snapshots only periodically).
 
 **vs Command undo**: a **Command** remembers _how to reverse one action_ (delta); a **Memento** remembers _the entire prior state_ (snapshot). Command is leaner for big state with small changes; Memento is simpler when changes are complex or scattered. Also mind **deep-copy correctness** — a shallow snapshot that shares mutable references silently corrupts on restore.
 
-## Questions
+# Questions
 
 > [!QUESTION]- How do you prevent the memento from growing unbounded in memory?
 > Limit the history depth: keep only the last N mementos (a bounded stack). For long-running sessions, serialize mementos to Redis or a database instead of keeping them in memory. For abandoned cart recovery, store only the latest snapshot (not the full history). The tradeoff: deeper history = more undo steps but more memory. For most UX scenarios, 10-20 undo steps is sufficient. For audit/compliance scenarios, store all snapshots in a database with a TTL.
@@ -161,7 +159,7 @@ Abandoned cart recovery now uses `CartHistory.Serialize()` — the same snapshot
 > [!QUESTION]- When is Memento overkill compared to simpler approaches?
 > When the state is small and the undo operation is simple. If "undo remove item" just means re-adding the item, store the removed item directly — no need for a full cart snapshot. Memento earns its complexity when: (1) the state is complex and interrelated (discount + items + shipping options all affect each other), (2) you need multiple undo levels, or (3) you need to restore state across sessions (abandoned cart). For single-step undo of simple operations, store the delta (what changed) rather than the full snapshot.
 
-## References
+# References
 
 - [Memento — refactoring.guru](https://refactoring.guru/design-patterns/memento) — canonical pattern description with originator/caretaker diagram and C# example
 - [ChangeTracker — EF Core — Microsoft Learn](https://learn.microsoft.com/en-us/ef/core/change-tracking/) — EF Core's built-in Memento for entity state tracking

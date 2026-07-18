@@ -1,8 +1,8 @@
 ---
 publish: true
 created: 2026-07-15T12:03:14.885Z
-modified: 2026-07-15T12:03:14.886Z
-published: 2026-07-15T12:03:14.886Z
+modified: 2026-07-18T11:38:38.758Z
+published: 2026-07-18T11:38:38.758Z
 topic:
   - Software Architecture
 subtopic:
@@ -13,8 +13,6 @@ level:
 priority: High
 status: Done
 ---
-
-# Factory Method
 
 A restaurant kitchen has one menu, but different stations prepare the same dish their own way — the Italian station makes pasta, the French station makes a soufflé. The customer orders "the special" without knowing which station handles it. The ordering process is the same; the creation varies by station.
 
@@ -38,9 +36,9 @@ flowchart LR
 ```
 
 > [!NOTE] Factory Method vs Abstract Factory
-> Factory Method creates **one product** via inheritance — the subclass decides. [[Abstract Factory]] creates a **family of related products** via composition. If you only need one object type, Factory Method is simpler.
+> Factory Method creates **one product** via inheritance — the subclass decides. [[Software Architecture/Patterns/Design Patterns/Creational/Abstract Factory]] creates a **family of related products** via composition. If you only need one object type, Factory Method is simpler.
 
-## Problem
+# Problem
 
 An `OrderService` needs to send notifications after order events. The naive approach hardcodes channel creation inline:
 
@@ -76,7 +74,7 @@ public class OrderService
 
 Here's what breaks when requirements change: adding a Slack notification for B2B customers requires editing `OrderService`, touching production code that already works, and risking regressions in email/SMS paths.
 
-## Solution
+# Solution
 
 Extract notification creation into a factory method. Each channel gets its own creator:
 
@@ -156,7 +154,7 @@ public class OrderService(NotificationCreator notificationCreator)
 
 Adding a Slack channel now means a new `SlackNotificationCreator` class — zero changes to `OrderService` or any existing creator.
 
-## You Already Use This
+# You Already Use This
 
 **`ILoggerFactory.CreateLogger<T>()`** — `ILoggerFactory` is the creator; `CreateLogger<T>()` is the factory method. The concrete factory (`LoggerFactory`) decides which `ILogger` implementation to return based on registered providers (Console, Serilog, Application Insights).
 
@@ -164,7 +162,7 @@ Adding a Slack channel now means a new `SlackNotificationCreator` class — zero
 
 **`Task.FromResult<T>()`** — a factory method that creates a completed `Task<T>` without allocating a state machine. The static method decides the concrete `Task` subtype based on the value.
 
-## Questions
+# Questions
 
 > [!QUESTION]- When does Factory Method become the wrong choice?
 > When you need to create a **family of related objects** that must stay compatible — use Abstract Factory instead. Factory Method creates one product type; if `PaymentProcessor` and `ReceiptGenerator` must always come from the same provider (Stripe or PayPal), a single factory method can't enforce that constraint. Also avoid Factory Method when the creation logic is trivial and unlikely to vary — the extra abstraction adds indirection without benefit.
@@ -172,7 +170,7 @@ Adding a Slack channel now means a new `SlackNotificationCreator` class — zero
 > [!QUESTION]- How does Factory Method support the Open/Closed Principle?
 > The creator class is closed for modification: its `NotifyOrderConfirmedAsync` algorithm never changes. It's open for extension: adding a new channel means a new subclass of `NotificationCreator`, not an edit to existing code. The tradeoff is class proliferation — each new product type requires a new creator subclass. For many variants, Abstract Factory or a registry-based approach scales better.
 
-## References
+# References
 
 - [Factory Method Pattern — Christopher Okhravi](https://www.youtube.com/watch?v=EcFVTgRHJLM\&list=PLrhzvIcii6GNjpARdnO4ueTUAVR9eMBpc\&index=4) — video walkthrough of the Factory Method pattern with OOP examples
 - [Factory Method — refactoring.guru](https://refactoring.guru/design-patterns/factory-method) — canonical pattern description with structure diagram and C# example

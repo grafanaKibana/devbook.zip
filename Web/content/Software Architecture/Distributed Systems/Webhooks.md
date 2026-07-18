@@ -1,8 +1,8 @@
 ---
 publish: true
 created: 2026-07-15T11:47:57.041Z
-modified: 2026-07-18T10:18:46.163Z
-published: 2026-07-18T10:18:46.163Z
+modified: 2026-07-18T11:59:15.671Z
+published: 2026-07-18T11:59:15.671Z
 topic:
   - Software Architecture
 subtopic:
@@ -13,8 +13,6 @@ level:
 priority: Medium
 status: Done
 ---
-
-# Intro
 
 A webhook is an HTTP callback: when an event occurs in a producer system, it sends an HTTP POST with event data to a URL the consumer registered in advance. This inverts the communication direction compared to polling — instead of the consumer repeatedly asking "anything new?", the producer pushes notifications in near real-time. You reach for webhooks when you need low-latency, push-based integration between systems that communicate over HTTP, especially across organizational boundaries where shared message brokers are impractical (payment providers, source control platforms, SaaS integrations).
 
@@ -34,9 +32,9 @@ sequenceDiagram
     Note over Producer: Apply the documented timeout and retry policy
 ```
 
-Webhooks complement [[Event-Driven Architecture]] — they are the HTTP-native way to deliver events between systems that do not share a message broker. For internal service-to-service communication within the same platform, [[Software Architecture/Distributed Systems/Message Queues/Message Queues|Message Queues]] are usually a better fit because they provide built-in durability, fan-out, and back-pressure.
+Webhooks complement [[Software Architecture/System Architecture/Event-Driven Architecture]] — they are the HTTP-native way to deliver events between systems that do not share a message broker. For internal service-to-service communication within the same platform, [[Software Architecture/Distributed Systems/Message Queues/Message Queues|Message Queues]] are usually a better fit because they provide built-in durability, fan-out, and back-pressure.
 
-## ASP.NET Core receiver
+# ASP.NET Core receiver
 
 Authenticate the provider's exact raw request bytes before parsing JSON. Reserializing a payload can change whitespace or property ordering and invalidate the signature.
 
@@ -85,9 +83,9 @@ app.MapPost("/webhooks/provider", async (
 
 Adapt the signed payload to the provider contract: many providers sign `timestamp + "." + rawBody`, not the body alone. Validate timestamp skew, store the provider event ID under a unique constraint, and commit the inbox record or durable queue message before returning success. Background processing can happen afterward.
 
-## Polling interval versus durable webhook delivery contract
+# Polling interval versus durable webhook delivery contract
 
-![[Assets/System Design 101/3381182ee93536fc7fa7f386859a9d426c239e650375751c49b5ca6d196d7b49.png]]
+![[Assets/Software Architecture/Software Architecture-Webhooks-18120000.png]]
 
 The visual shows the direction difference, not a reliability guarantee. Polling can be cheap when the interval is long or conditional requests return no body; webhooks can be expensive when retries storm or endpoints are slow.
 
@@ -110,7 +108,7 @@ A durable webhook contract needs more than `POST`:
 
 For an hourly billing export, polling may be simpler and more controllable. For `PaymentCaptured`, use a signed webhook for low latency, then poll `GET /events?after=<cursor>` periodically as a correctness safety net. Push handles the common path; pull repairs the gaps.
 
-## Tradeoffs: Webhooks vs Polling vs SSE vs WebSockets
+# Tradeoffs: Webhooks vs Polling vs SSE vs WebSockets
 
 | Approach | Direction | Latency | Complexity | Connection | Best fit |
 | --- | --- | --- | --- | --- | --- |
@@ -126,33 +124,33 @@ Decision heuristic:
 - Pick **SSE** when you need server-to-browser push without the complexity of WebSockets.
 - Pick **WebSockets** when you need bidirectional real-time communication (client sends and receives).
 
-## Pitfalls
+# Pitfalls
 
-### 1) At-Least-Once Delivery Without Idempotency
+## 1) At-Least-Once Delivery Without Idempotency
 
 - **What goes wrong**: the producer retries after a timeout and the consumer processes the same event twice — double-charging a payment, sending duplicate notifications, or creating duplicate records.
 - **Why it happens**: network timeouts, producer retries, and load balancer replays mean the same webhook may arrive more than once. Exactly-once delivery over HTTP is not achievable.
 - **Mitigation**: use the delivery ID (e.g., `X-GitHub-Delivery`, Stripe `event.id`) as an idempotency key. Store processed IDs in durable storage and check before processing. Make state transitions conditional (`UPDATE ... WHERE status = 'pending'`).
 
-### 2) Slow Processing Causes Timeout and Retry Storm
+## 2) Slow Processing Causes Timeout and Retry Storm
 
 - **What goes wrong**: the consumer does heavy work synchronously in the webhook handler, exceeds the producer's timeout (typically 5-30 seconds), and triggers retries that compound the load.
 - **Why it happens**: inline database writes, external API calls, or computation in the request path.
 - **Mitigation**: authenticate and durably store the inbox/queue record, then return `2xx` without running downstream business work inline. A background worker performs the business logic.
 
-### 3) Missing or Weak Signature Verification
+## 3) Missing or Weak Signature Verification
 
 - **What goes wrong**: an attacker sends forged webhook payloads to the endpoint, triggering unauthorized actions (fraudulent refunds, fake deployment triggers, data manipulation).
 - **Why it happens**: the endpoint accepts any POST without verifying the provider's signature, or an HMAC-based integration uses a non-constant-time comparison vulnerable to timing attacks.
 - **Mitigation**: verify the provider-defined signature over the exact documented input. For HMAC, use a constant-time comparison. Reject missing or invalid signatures and enforce the provider's signed-timestamp tolerance to limit replay.
 
-### 4) Endpoint Availability and Missed Events
+## 4) Endpoint Availability and Missed Events
 
 - **What goes wrong**: if the consumer is down during delivery and the producer exhausts its retry budget, events are permanently lost.
 - **Why it happens**: webhook producers typically retry for a limited window (hours to days) and then give up.
 - **Mitigation**: implement a reconciliation mechanism — periodically poll the producer's event API to detect gaps. Monitor webhook delivery metrics. Some producers offer event replay or dead-letter inspection (use them).
 
-## Questions
+# Questions
 
 > [!QUESTION]- How do you design webhook consumers to prevent event loss and duplicate processing?
 > Verify the provider-defined signature or MAC over its documented input and enforce its replay-protection contract. Store the provider event ID and inbox/queue payload durably before returning an accepted response, then process it idempotently in a worker. Since the producer can exhaust its retry window while the consumer is unavailable, reconcile against the provider's event-list API or replay facility.
@@ -163,7 +161,7 @@ Decision heuristic:
 > [!QUESTION]- How do you protect a webhook endpoint against replay attacks?
 > Follow the provider's replay-protection contract: it may sign a timestamp, use a nonce, or issue short-lived asymmetric signatures. For an HMAC contract with a signed timestamp, verify the MAC over the exact documented payload and timestamp, reject requests outside the permitted clock window, and compare the MAC in constant time. A durable delivery ID still catches duplicate deliveries inside that window.
 
-## References
+# References
 
 - [Validating webhook deliveries (GitHub Docs)](https://docs.github.com/webhooks/using-webhooks/validating-webhook-deliveries) — official guide to HMAC-SHA256 signature verification for GitHub webhooks, with language-specific examples.
 - [Webhook best practices (GitHub Docs)](https://docs.github.com/en/webhooks/using-webhooks/best-practices-for-using-webhooks) — Production checklist: respond fast, use async processing, handle redeliveries, monitor failures.

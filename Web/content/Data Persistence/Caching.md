@@ -1,8 +1,8 @@
 ---
 publish: true
 created: 2026-07-15T09:07:59.299Z
-modified: 2026-07-18T08:23:23.455Z
-published: 2026-07-18T08:23:23.455Z
+modified: 2026-07-18T11:59:15.655Z
+published: 2026-07-18T11:59:15.655Z
 topic:
   - Data Persistence
 subtopic: []
@@ -12,8 +12,6 @@ level:
 priority: High
 status: Ready to Repeat
 ---
-
-# Intro
 
 Caching stores a copy of data closer to where it is consumed — in process memory, in a shared out-of-process store like Redis, or both — so that repeated reads skip the slower origin. The mechanism is simple: check the cache first; on a miss, fetch from the source, store the result, and return it. On a hit, return the stored copy without touching the source at all.
 
@@ -30,13 +28,13 @@ flowchart TD
   E --> F[Return]
 ```
 
-## Measure the Actual Path
+# Measure the Actual Path
 
 CPU cache, process memory, storage I/O, and an application request are different measurement layers. A CPU L1-cache latency is not the latency of an `IMemoryCache` lookup, and a network round trip does not include Redis command execution, queueing, serialization, TLS, retries, or client-pool waits. Hardware generation, topology, payload size, and contention also change the ratios, so a fixed ladder is not a design contract.
 
 Measure end-to-end hit and miss latency for the deployed path, plus origin load and hit ratio by key class. A cache is justified when avoided origin work improves a named latency or capacity target after accounting for miss cost, invalidation, and failure behavior. An L1 tier is justified separately when its measured gain exceeds the cost of per-process duplication and another freshness boundary.
 
-## Cache, retained log, or index?
+# Cache, retained log, or index?
 
 "Faster copy" is the useful boundary. A cache entry is derivable or replaceable from an authority, so losing it should cost latency and origin load—not correctness or permanent data. Nearby systems may accelerate reads without being caches:
 
@@ -49,7 +47,7 @@ Measure end-to-end hit and miss latency for the deployed path, plus origin load 
 
 Before adopting a cache product, write down the authoritative source and the rebuild path. If neither exists, the component is acting as a system of record regardless of its name.
 
-## Cache Patterns
+# Cache Patterns
 
 The five common strategies differ in who owns an origin request and what an acknowledged write means:
 
@@ -63,7 +61,7 @@ The five common strategies differ in who owns an origin request and what an ackn
 
 Write-around fits write-heavy data that is rarely read back: it avoids filling the cache with entries that may never be read, at the cost of making the first later read a miss.
 
-![[Assets/System Design 101/4432553bc930f9667bf6c2b428d1c3ecfba4ee743ca3c7aafacd778422d928a4.png]]
+![[Assets/Data Persistence/Data Persistence-Caching-18120000-1.png]]
 
 Cache-aside with `IDistributedCache`:
 
@@ -104,7 +102,7 @@ public class UserService(HybridCache cache)
 }
 ```
 
-## Operating contract
+# Operating contract
 
 Before selecting a client library, decide whether the workload has reuse, how stale each data class may be, who owns a miss, what an acknowledged write means, what happens at capacity, and how each request class degrades when the cache is unavailable. Measure hit ratio by route and key class rather than relying on one fleet-wide percentage: a 95% aggregate hit ratio can still hide an endpoint whose misses dominate database load.
 
@@ -119,9 +117,9 @@ Before selecting a client library, decide whether the workload has reuse, how st
 
 Track hit ratio by route and key class, miss latency, origin requests caused by misses, eviction and expiration rates, invalidation lag, timeouts, and stale-read or version-mismatch counts.
 
-![[Assets/System Design 101/0cb71aee6eed509539fbd5ac91a9efc9bd345bc0855cb10d048f11413785373c.png]]
+![[Assets/Data Persistence/Data Persistence-Caching-18120000.png]]
 
-## Invalidation Strategies
+# Invalidation Strategies
 
 Invalidation strategy is a correctness decision, not an optimization detail. Start by writing down your staleness contract, then pick the simplest strategy that meets it.
 
@@ -144,7 +142,7 @@ flowchart TD
   G -->|No| I[Simple cache-aside]
 ```
 
-## Correctness and Staleness
+# Correctness and Staleness
 
 Treat cached data as a replica with its own consistency model.
 
@@ -214,7 +212,7 @@ Notes:
 - Soft TTL is a latency contract. Hard TTL is a safety contract.
 - This dictionary and `HybridCache` coalesce only within one process. `IDistributedCache` does not provide atomic singleflight across instances; fleet-wide coordination needs a backend-aware lease or another distributed ownership protocol.
 
-## Stampede and failure modes
+# Stampede and failure modes
 
 A stampede starts when many callers miss the same expensive key and independently load the origin. Coalesce refreshes, jitter expirations, and decide per data class whether an outage may serve stale, bypass under a rate limit, or must fail closed.
 
@@ -227,7 +225,7 @@ A stampede starts when many callers miss the same expensive key and independentl
 
 Retries remain bounded and apply only to idempotent operations. An unbounded origin retry after a cache timeout multiplies load exactly when the dependency is weakest.
 
-## Redis and Memcached
+# Redis and Memcached
 
 Redis, Memcached, and EVCache are not interchangeable merely because they can serve values from memory. Decide whether values are disposable, which acknowledgement and persistence settings define loss, and how capacity eviction affects the origin.
 
@@ -240,7 +238,7 @@ Redis, Memcached, and EVCache are not interchangeable merely because they can se
 
 Use Memcached for a plain disposable object cache. Use Redis when server-side structures or atomic operations justify its persistence, replication, and cluster choices. Redis command atomicity is not a relational transaction across arbitrary operations.
 
-## Netflix EVCache: four data contracts
+# Netflix EVCache: four data contracts
 
 Netflix's EVCache illustrates four distinct contracts that can share an in-memory implementation:
 
@@ -251,17 +249,17 @@ Netflix's EVCache illustrates four distinct contracts that can share an in-memor
 | Precomputed primary read store | An offline job publishes a generated data version | Retain or regenerate the last good generation before replacement |
 | Distribution plane | A publisher derives UI strings or translations from an upstream authority | Readers need versioned publication, rollback, and partial-generation handling |
 
-![[Assets/System Design 101/99db2205a756cc262763e054b626babd0b0033a72a64d2ae5d97dfbcfed2f6b0.png]]
+![[Assets/Data Persistence/Data Persistence-Caching-18120000-3.png]]
 
-## Redis as a cache or system of record
+# Redis as a cache or system of record
 
 For authoritative Redis data, eviction must not discard keys and the acknowledgement boundary must name its loss window. RDB can lose writes since the last snapshot; AOF durability depends on `appendfsync`; replication is asynchronous by default; `WAIT` narrows but does not eliminate failover risk. Pub/Sub has no replay, while Streams retains entries and consumer-group state under the same persistence and replication configuration. Test process loss, host loss, and replica promotion against the exact deployment rather than inferring durability from an enabled setting.
 
-## Why Redis is fast—and when it stalls
+# Why Redis is fast—and when it stalls
 
 Redis is fast because the working set stays in memory, clients are multiplexed, and most commands execute through a mostly serialized path. That same path makes large-key traversal, `O(N)` commands, Lua or module work, persistence fork pressure, AOF flushing, swapping, and network queues visible as tail latency. Measure the actual command and payload mix; watch slow commands, big keys, memory, persistence, and replication lag.
 
-## Tradeoffs
+# Tradeoffs
 
 | Dimension | IMemoryCache (L1) | IDistributedCache (L2) | HybridCache (.NET 9+) |
 | --- | --- | --- | --- |
@@ -275,7 +273,7 @@ Redis is fast because the working set stays in memory, clients are multiplexed, 
 
 Decision rule: start with `HybridCache` for new .NET 9+ projects — it handles L1/L2 layering, stampede protection, and serialization out of the box. Fall back to `IDistributedCache` when you need explicit control over cache writes, or `IMemoryCache` for single-instance scenarios where distributed state is unnecessary.
 
-## Eviction under memory pressure
+# Eviction under memory pressure
 
 Expiration, admission, and capacity eviction answer different questions: whether an entry is too old, whether a candidate should enter, and which resident value leaves when memory is full.
 
@@ -289,24 +287,24 @@ Expiration, admission, and capacity eviction answer different questions: whether
 
 `IMemoryCache` is not bounded unless entries provide sizes and the cache has a `SizeLimit`. Redis uses `maxmemory-policy`; a pure cache commonly starts with an all-keys LRU or LFU policy, while `noeviction` rejects memory-growing writes. Choose from measured reuse distance, skew, object size, and miss cost, then watch eviction rate with hit ratio and origin load.
 
-![[Assets/System Design 101/52d213d56a791a27e9df7511d0ed57607da81e3871713417d123ae49a1f9d2c7.png]]
+![[Assets/Data Persistence/Data Persistence-Caching-18120000-2.png]]
 
-## Other pitfalls
+# Other pitfalls
 
 Unbounded high-cardinality keys, missing tenant or authorization dimensions, large serialized payloads, format drift, and cold deploys can erase the latency benefit or serve incorrect data. Bound the key space, version cached envelopes, measure serialization cost, and roll out gradually enough that origin load remains inside its capacity budget.
 
-### Cache penetration (missing-key floods)
+## Cache penetration (missing-key floods)
 
 Absent-key traffic follows `request → cache miss → origin not found`. Validate impossible keys, use a short negative TTL for repeated misses, consider a [[Computer Science/Data Structures/Hash-based Structures/Bloom Filter|Bloom Filter]] when membership is known, and rate-limit by principal. Negative entries must be invalidated on creation; Bloom false positives still reach the origin; versioned keys still need TTLs so obsolete versions do not grow without bound.
 
-![[Assets/System Design 101/dd576de44a045b089cf394d57e9116f7a362faf8c98734bca86bf0756fa9de37.png]]
+![[Assets/Data Persistence/Data Persistence-Caching-18120000-4.png]]
 
-## Questions
+# Questions
 
 > [!QUESTION]- How do you reduce cache stampede?
 > Add jitter to expirations so hot keys do not all expire simultaneously. Use request coalescing (singleflight pattern) so only one caller recomputes while others await the result. Consider stale-while-revalidate or background refresh to avoid blocking on recomputation entirely. `HybridCache` in .NET 9+ handles coalescing automatically.
 
-## References
+# References
 
 - [HybridCache library in ASP.NET Core (.NET 9+)](https://learn.microsoft.com/aspnet/core/performance/caching/hybrid) — documents the two-tier API, serialization, expiration, and per-process stampede protection used in the examples.
 - [Overview of caching in ASP.NET Core](https://learn.microsoft.com/aspnet/core/performance/caching/overview) — compares in-memory, distributed, output, and hybrid caching surfaces in ASP.NET Core.

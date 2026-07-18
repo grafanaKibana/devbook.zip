@@ -1,8 +1,8 @@
 ---
 publish: true
 created: 2026-07-12T06:27:34.386Z
-modified: 2026-07-12T06:27:34.386Z
-published: 2026-07-12T06:27:34.386Z
+modified: 2026-07-18T11:30:04.018Z
+published: 2026-07-18T11:30:04.018Z
 topic:
   - Computer Science
 subtopic:
@@ -14,15 +14,13 @@ priority: Medium
 status: Ready to Repeat
 ---
 
-# Intro
-
 A report needs the largest total of any 30 consecutive daily readings across a series of 100,000. Summing each of the ~100,000 windows independently rescans 30 values every time — `O(n·k)` work that mostly re-adds numbers the previous sum already held. The sliding window keeps one running total and a pair of boundaries: advancing the right boundary adds the entering value, advancing the left boundary subtracts the leaving value, so each successive window costs one addition and one subtraction instead of a full rescan.
 
 The technique applies whenever the answer concerns a contiguous sub-array or substring and the quantity tracked over that range — a sum, a count, a distinct-symbol frequency map — can be updated in `O(1)` as one element enters and one leaves. The order of the elements does not matter; contiguity and an incrementally maintainable aggregate do.
 
 **Core condition:** contiguous range + an aggregate that updates in `O(1)` on element entry and exit → one linear pass replaces per-window recomputation → `O(n)` time.
 
-## Shrinking to the shortest window
+# Shrinking to the shortest window
 
 The trace searches `[2, 3, 1, 2, 4, 3]` for the shortest contiguous sub-array whose sum reaches `7`.
 
@@ -32,13 +30,13 @@ The trace searches `[2, 3, 1, 2, 4, 3]` for the shortest contiguous sub-array wh
 
 The right boundary advances first, adding each entering element to a running sum in `O(1)`, until the sum reaches `7` and a valid window exists. The left boundary then advances, subtracting the leaving element in `O(1)`; each contraction that keeps the sum at or above `7` produces a shorter candidate. Because non-negative values only raise the sum on entry and lower it on exit, once no shorter valid window is reachable from the current left the left boundary never moves back. Two consecutive windows differ only in their boundary elements, so the running sum is adjusted by those two elements rather than rebuilt from the window's contents.
 
-## Why the window never recomputes
+# Why the window never recomputes
 
 Every index is added to the aggregate exactly once, when the right boundary passes it, and removed at most once, when the left boundary passes it. The right boundary advances `n` times over the whole run; the left boundary advances at most `n` times and never overtakes the right. Total boundary movement is bounded by `2n`, and each movement does `O(1)` aggregate maintenance — hence `O(n)`, independent of window width.
 
 The bound holds only while the aggregate is incrementally maintainable: adding the entering element and removing the leaving element must each be `O(1)` and must, together, fully determine the new window's value. A running sum qualifies (`sum += entering; sum -= leaving`); a count of elements qualifies; a frequency map keyed by symbol qualifies, because a single key's count is incremented on entry and decremented on exit. An aggregate that cannot be reconstructed from a single leaving element — a window maximum, for instance — does not qualify, and forces a different structure.
 
-## Complexity
+# Complexity
 
 | Approach | Time | Auxiliary space | Cause |
 | --- | --- | --- | --- |
@@ -48,7 +46,7 @@ The bound holds only while the aggregate is incrementally maintainable: adding t
 
 The two sliding-window rows share the `O(n)` time bound; the space difference is entirely the aggregate's representation. The brute-force row is the same problem without incremental maintenance — `k` is the window width for a fixed window and grows toward `n` for a variable one, which is where the `O(n²)` comes from.
 
-## Where the incremental aggregate fails
+# Where the incremental aggregate fails
 
 A fixed-size window contracts on a schedule: every element the right boundary adds, the left boundary removes exactly one, holding the width at `k`. A variable-size window contracts conditionally — the left boundary advances only while the window violates (or, for a minimizing problem, still satisfies) the constraint, so a single right step can trigger several left steps or none. Applying the fixed rule to a variable problem pins the width and never explores shorter or longer ranges; applying the variable rule without a stopping condition shrinks past validity.
 
@@ -56,7 +54,7 @@ The removal step must rebuild the new aggregate from the leaving element alone. 
 
 Negative numbers break the contraction rule even though the sum still updates in `O(1)`. "Shrink while the sum exceeds the target" assumes the window sum rises on every entry and falls on every removal, which makes the smallest valid length monotone as the right boundary moves. With negatives present a longer window can carry a smaller sum, so a window that fails the constraint can become valid again by extending — incremental maintainability of the sum is intact, but the decision of _when_ to contract no longer has a valid basis. Sum-with-negatives problems (a sub-array summing to exactly `k`, say) drop the moving window for [[Prefix Sum|prefix sums]] plus a hash map, which locates any range with a target sum without assuming monotone length.
 
-## Reference drawer
+# Reference drawer
 
 > [!ABSTRACT]- Variable-window control flow
 >
@@ -108,7 +106,7 @@ Negative numbers break the contraction rule even though the sum still updates in
 >
 > The fixed form maintains a scalar sum; the variable form maintains a frequency map (`lastSeen`) whose per-key update is what keeps the pass `O(n)`.
 
-## Comparison
+# Comparison
 
 | Technique | Time | Space | Required input | Stronger case | Weaker case |
 | --- | --- | --- | --- | --- | --- |
@@ -120,7 +118,7 @@ Negative numbers break the contraction rule even though the sum still updates in
 
 Sliding window is the `O(n)` default for a contiguous-range answer whose aggregate updates incrementally as one element enters and one leaves — it pays for that speed with the requirement that removal be reversible and the constraint be monotone in window length. When two ends converge instead of trailing in the same direction, the shape is [[Two Pointers]]. When the queries are static ranges, or negatives break monotonicity, prefix sums answer any range in `O(1)` after an `O(n)` build. When the aggregate is a non-reversible max or min, a [[Monotonic Stack and Queue|monotonic deque]] restores the once-in-once-out accounting a scalar cannot.
 
-## Questions
+# Questions
 
 > [!QUESTION]- Why is a sliding window `O(n)` and not `O(n·k)`?
 > Each index is added to the aggregate once, when the right boundary passes it, and removed at most once, when the left boundary passes it. Total boundary movement is bounded by `2n` and each move is `O(1)`, so window width never enters the cost — the aggregate is adjusted by its two boundary elements rather than rescanned.
@@ -131,7 +129,7 @@ Sliding window is the `O(n)` default for a contiguous-range answer whose aggrega
 > [!QUESTION]- Why do negative numbers break sum-based sliding windows?
 > The contraction rule "shrink while the sum exceeds the target" relies on the sum rising on every entry and falling on every removal, which makes the smallest valid window length monotone as the right boundary advances. Negatives remove that monotonicity — a longer window can carry a smaller sum — so a failed window can become valid by extending. Those problems use prefix sums plus a hash map rather than a moving window.
 
-## References
+# References
 
 - [Window Sliding Technique](https://www.geeksforgeeks.org/window-sliding-technique/) — GeeksforGeeks walkthrough of fixed and variable windows with the incremental-update derivation.
 - [Longest Substring Without Repeating Characters (LeetCode #3)](https://leetcode.com/problems/longest-substring-without-repeating-characters/) — canonical variable-window problem backed by a frequency map.

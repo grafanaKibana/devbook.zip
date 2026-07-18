@@ -1,8 +1,8 @@
 ---
 publish: true
 created: 2026-07-12T14:27:20.428Z
-modified: 2026-07-12T14:27:20.428Z
-published: 2026-07-12T14:27:20.428Z
+modified: 2026-07-18T11:30:05.730Z
+published: 2026-07-18T11:30:05.730Z
 topic:
   - Computer Science
 subtopic:
@@ -13,8 +13,6 @@ priority: Medium
 status: Creation
 ---
 
-# Intro
-
 An ordered dictionary may receive a strongly uneven access stream: a small working set is touched repeatedly while most keys stay cold. A balanced [[Binary Search Tree]] gives every access the same `O(log n)` height guarantee, but it does not adapt when key `42` is requested a thousand times in a row.
 
 A splay tree is a binary search tree that moves the last accessed node to the root. Search first follows the ordinary BST ordering; then **splaying** rotates the accessed node upward. The tree stores no height, color, or balance factor. Its shape is allowed to become temporarily skewed, so one operation can cost `O(n)`. Starting from an empty tree, a sequence of `m` operations while the tree contains at most `n` keys costs `O(m log n)`; an arbitrary initial tree adds its initial structural potential to that sequence bound.
@@ -24,7 +22,7 @@ The structure retains key order and parent-child topology, but not a fixed balan
 > [!NOTE] Visualization pending
 > Planned StepTrace: search for a deep key, then show the `zig`, `zig-zig`, and `zig-zag` rotations that move it to the root while preserving in-order key order.
 
-## State after an access
+# State after an access
 
 Suppose the search path is `100 → 50 → 75 → 60`. Accessing `60` does not stop after finding it. Because `60` is the left child of `75` and `75` is the right child of `50`, the path forms a zig-zag. A right rotation around `75`, followed by a left rotation around `50`, lifts `60` two levels. The remaining zig rotation around `100` makes `60` the root.
 
@@ -40,7 +38,7 @@ The three cases are determined by the accessed node `x`, its parent `p`, and gra
 
 Insert places a key as in a plain BST and splays the new node. Delete splays the target to the root, removes it, then joins the remaining left and right trees by splaying the maximum key of the left tree and attaching the right tree.
 
-## Complexity
+# Complexity
 
 | Operation | Best time | Amortized time | Worst time | Persistent space | Auxiliary space |
 | --- | --- | --- | --- | --- | --- |
@@ -51,13 +49,13 @@ Insert places a key as in a plain BST and splays the new node. Delete splays the
 
 The amortized bound applies to a sequence, not to each operation independently. A chain-shaped tree can still force a full linear walk, but the rotations pay down structural potential so too many expensive operations cannot occur without many cheap ones around them.
 
-## Where adaptation costs
+# Where adaptation costs
 
 Read operations mutate the tree. A lookup cannot safely run under a shared read lock because it rewrites parent and child pointers on the search path. Iterators also become invalid when another access splays a node, even if no key was inserted or removed.
 
 The missing height guarantee matters for latency-sensitive code. An [[AVL Tree]] bounds every lookup by `O(log n)`; a splay tree only bounds the average cost across a sequence. This makes the splay tree a poor fit when one `O(n)` request is unacceptable, but a strong fit when locality and total sequence cost matter more than individual latency.
 
-## References
+# References
 
 - [Self-Adjusting Binary Search Trees](https://www.cs.cmu.edu/~sleator/papers/self-adjusting.pdf) — Sleator and Tarjan's original paper, including splaying cases, the access lemma, and amortized bounds.
 - [Self-Adjusting Binary Search Trees: What Makes Them Tick?](https://arxiv.org/abs/1503.03105) — a later analysis of the structural properties behind the access lemma.

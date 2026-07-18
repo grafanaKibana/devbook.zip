@@ -1,8 +1,8 @@
 ---
 publish: true
 created: 2026-07-16T07:37:19.033Z
-modified: 2026-07-16T11:18:07.073Z
-published: 2026-07-16T11:18:07.073Z
+modified: 2026-07-18T11:59:15.665Z
+published: 2026-07-18T11:59:15.665Z
 topic:
   - Security
 subtopic:
@@ -14,13 +14,11 @@ priority: High
 status: Ready to Repeat
 ---
 
-# Time-Based One-Time Passwords
-
 TOTP is a possession-factor protocol: an authenticator and a server share a secret, derive the same time-step counter, and use HMAC plus dynamic truncation to produce a short decimal code. The code changes without network access. TOTP improves on a password alone, but it is still phishable and replayable within the server's acceptance window.
 
 Use TOTP where broad authenticator compatibility matters and passkeys are not yet viable. Prefer WebAuthn/passkeys when phishing resistance is the requirement.
 
-## Provisioning
+# Provisioning
 
 1. After fresh primary authentication, the server generates a random secret for this account and device.
 2. It stores the secret encrypted under a separately managed key. The verifier needs the original bytes, so a one-way password hash cannot replace encryption.
@@ -39,12 +37,12 @@ otpauth://totp/DevBook:alice@example.com
 
 The QR code contains the shared secret. Treat screenshots, analytics, browser history, support logs, and backup exports as credential-exfiltration paths. Require reauthentication to display or replace it, and invalidate the previous secret when rotation completes.
 
-![[Assets/System Design 101/7191a3aa019a55b0fac84365a1c820af7f245dfce5dba89a0f83bd30c489ab37.jpg]]
+![[Assets/Security/Security-TOTP-18120000.jpg]]
 
 > [!WARNING] Non-normative source visual
 > TOTP does not concatenate a secret and timestamp. It converts time to a moving counter, computes HMAC over the encoded counter, applies dynamic truncation, and reduces the result to the configured number of digits; the verifier accepts only a bounded time-step window.
 
-## Moving factor and code generation
+# Moving factor and code generation
 
 For Unix time `t`, start time `T0`, and step size `X`, TOTP derives the moving factor:
 
@@ -58,7 +56,7 @@ code = binary mod 10^digits, left-padded with zeroes
 
 The common interoperable profile is a 30-second step and six digits. RFC 6238 permits HMAC-SHA-1, SHA-256, or SHA-512; changing algorithm, digit count, or period requires both parties to use the same parameters. SHA-1 here is the HMAC primitive specified by the widespread profile, not a password hash or digital signature.
 
-## Validation
+# Validation
 
 The server never accepts a code merely because it has six digits. It loads the enrolled secret, derives the current time step, evaluates a small configured window, compares candidate codes in constant time, and applies account-level rate limits.
 
@@ -77,7 +75,7 @@ A ±1 window tolerates modest clock skew but triples the valid code set. With si
 
 Store the last accepted time step per authenticator so the same code cannot be replayed during its remaining lifetime. Define concurrency behavior: two simultaneous requests with one code must race through one atomic compare-and-update, leaving at most one accepted. Keep server clocks synchronized and monitor drift rather than widening the window indefinitely.
 
-## Recovery and lifecycle
+# Recovery and lifecycle
 
 - Require a recent strong authentication before enrolling, replacing, or removing TOTP.
 - Notify the account through an independent channel when a factor changes.
@@ -88,7 +86,7 @@ Store the last accepted time step per authenticator so the same code cannot be r
 
 The shared secret is present at both ends, so a server database/key compromise can clone every affected authenticator. WebAuthn instead stores a public key at the server and produces an origin-bound signature over a fresh challenge. That is why passkeys resist real-time phishing better than TOTP, even though their sync and account-recovery providers introduce different trust decisions.
 
-## Tradeoffs
+# Tradeoffs
 
 | Method | Verifier stores | Phishing/replay boundary | Recovery cost | Use when |
 | --- | --- | --- | --- | --- |
@@ -96,7 +94,7 @@ The shared secret is present at both ends, so a server database/key compromise c
 | TOTP | Decryptable shared secret | Phishable; replayable inside accepted window unless step is recorded | Requires backup codes or additional authenticators | Offline, broadly compatible app factor is needed |
 | WebAuthn/passkey | Public key and credential metadata | Origin-bound challenge/response; no reusable server secret | Depends on device, sync, and account recovery model | Phishing resistance or passwordless login matters |
 
-## Questions
+# Questions
 
 > [!QUESTION]- Why can the server not hash a TOTP secret like a password?
 > Verification requires the server to compute HMAC with the same secret as the authenticator. Store it encrypted with a separately protected key, restrict decrypt access, and rotate it after suspected exposure.
@@ -104,7 +102,7 @@ The shared secret is present at both ends, so a server database/key compromise c
 > [!QUESTION]- Why remember the last accepted time step?
 > A code remains mathematically valid for its entire accepted window. Recording the step and updating it atomically turns a valid captured code into a single-use value at that verifier.
 
-## References
+# References
 
 - [RFC 6238 — TOTP](https://www.rfc-editor.org/rfc/rfc6238) — time-step derivation, algorithms, validation windows, and test vectors.
 - [RFC 4226 — HOTP](https://www.rfc-editor.org/rfc/rfc4226) — HMAC computation and dynamic truncation used by TOTP.

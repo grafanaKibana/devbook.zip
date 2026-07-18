@@ -1,8 +1,8 @@
 ---
 publish: true
 created: 2026-07-12T06:27:34.386Z
-modified: 2026-07-12T06:27:34.387Z
-published: 2026-07-12T06:27:34.387Z
+modified: 2026-07-18T11:30:04.034Z
+published: 2026-07-18T11:30:04.034Z
 topic:
   - Computer Science
 subtopic:
@@ -14,8 +14,6 @@ priority: Medium
 status: Creation
 ---
 
-# Intro
-
 A feed produces millions of latency samples and a dashboard needs the ten slowest. Sorting the whole feed answers the question in `O(n log n)` and forces every sample into memory at once, yet nine hundred and ninety-nine of every thousand comparisons order values that never appear in the result. The task only needs a fixed `k`, not a full ranking.
 
 Keeping a size-`k` heap while scanning removes that waste. To surface the `k` **largest** values the heap is a **min**-heap: its root is the smallest of the `k` best elements seen so far — the weakest survivor. A new element only matters if it beats that root, and when it does the root is evicted and the newcomer inserted, so the heap size never leaves `k`. After one pass the heap holds exactly the `k` largest, and it held no more than `k` elements at any moment, so the input can arrive as a stream. The symmetric problem — the `k` smallest — uses a max-heap the same way.
@@ -25,7 +23,7 @@ Keeping a size-`k` heap while scanning removes that waste. To surface the `k` **
 > [!NOTE] Visualization pending
 > Planned StepTrace: a size-k min-heap card showing each input element compared against the heap's smallest and replacing it when larger, so the heap always holds the k largest seen so far. No matching renderer exists in `engine.js` yet.
 
-## Why a min-heap holds the largest
+# Why a min-heap holds the largest
 
 The invariant carried across the scan is that the heap contains the `k` largest of every element seen so far, with the `k`-th largest at the root. The first `k` elements fill the heap outright. Each later element `x` faces one comparison against the root:
 
@@ -38,7 +36,7 @@ Because the heap never exceeds `k` entries, each insert and evict is `O(log k)` 
 
 For a static, in-memory array where the order among the top `k` is irrelevant, [[Quick Sort|Quickselect]] partitions around a pivot and recurses into only the side holding the `k`-th position, discarding the other half. The problem size falls geometrically, giving `O(n)` average time, at the cost of mutating the array and holding all of it in memory.
 
-## Complexity
+# Complexity
 
 Finding the `k` largest of `n` elements:
 
@@ -50,7 +48,7 @@ Finding the `k` largest of `n` elements:
 
 Quickselect's space is `O(1)` extra beyond the input it mutates in place; its average bound assumes a randomized or otherwise non-adversarial pivot. The heap's `O(k)` is the only column that stays bounded when `n` is unbounded, which is why it is the streaming choice.
 
-## When the assumptions stop holding
+# When the assumptions stop holding
 
 Using a max-heap for the `k` largest inverts the mechanism. A max-heap of all `n` elements — pop `k` times — does return the right answer, but it holds every element, so its `O(n)` resident set defeats the whole point of the pattern: no streaming, and no memory saving over materializing the input. Its time is not the problem — heapify builds in `O(n)` and `k` extractions cost `O(k log n)`, so the total is `O(n + k log n)`, which for `k ≪ n` is roughly `O(n)` and actually beats a full sort. The space is what disqualifies it against the size-`k` heap's `O(k)`. A size-`k` _max_-heap is worse still: its root is the strongest retained element, so the comparison keeps the wrong side and the scan collects the `k` _smallest_. The result passes symmetric test data and fails everything else.
 
@@ -58,7 +56,7 @@ Using a max-heap for the `k` largest inverts the mechanism. A max-heap of all `n
 
 Quickselect cannot run on a stream. It needs the whole array addressable to partition it, and it reorders that array as a side effect, so an input that arrives incrementally or must stay immutable rules it out. Its `O(n²)` worst case is a second constraint: a naive pivot on already-sorted or adversarial input barely shrinks the problem each step, the same degradation as [[Quick Sort]]. A randomized pivot makes that improbable; median-of-medians makes it impossible at a higher constant.
 
-## Reference drawer
+# Reference drawer
 
 > [!ABSTRACT]- Streaming min-heap for the k largest
 >
@@ -128,7 +126,7 @@ Quickselect cannot run on a stream. It needs the whole array addressable to part
 >
 > `KLargest` returns the top `k` in unspecified order; a caller needing them ranked sorts the `k`-element result. `QuickSelectKthLargest` returns a single order statistic — the top `k` are then the elements left of `target` after the loop, already partitioned but unsorted.
 
-## Comparison
+# Comparison
 
 Selecting the `k` largest of `n` elements:
 
@@ -140,7 +138,7 @@ Selecting the `k` largest of `n` elements:
 
 A size-`k` heap is the fit for streaming input or `k ≪ n`: it pays a `log k` factor per element to keep the resident set at `O(k)`, the only cost model that survives an unbounded feed. Quickselect is faster for a static in-memory array when the order among the top `k` does not matter, trading stream support and a worst-case guarantee for a linear average. A full sort wins only when the complete ordering is part of the result, since it does strictly more work than either selection method to produce it.
 
-## Questions
+# Questions
 
 > [!QUESTION]- To find the `k` largest elements, why is the heap a min-heap rather than a max-heap?
 > The size-`k` min-heap keeps its root as the smallest of the `k` best elements seen so far — the weakest survivor. A new element is relevant only when it beats that root, which a min-heap exposes as an `O(1)` peek, and when it does the root is the correct element to evict. A max-heap would surface the largest retained element, which is never the one to drop, so it cannot drive the scan.
@@ -151,7 +149,7 @@ A size-`k` heap is the fit for streaming input or `k ≪ n`: it pays a `log k` f
 > [!QUESTION]- What disqualifies Quickselect for a top-`k` problem, and what is its worst case?
 > Quickselect needs the entire array addressable and mutates it in place, so a streaming or immutable input rules it out. On a static array it is `O(n)` average from geometric partition shrink, but degrades to `O(n²)` when pivots are consistently bad, such as a naive pivot on sorted input. A randomized pivot makes that improbable; median-of-medians guarantees `O(n)` worst case at a larger constant.
 
-## References
+# References
 
 - [Kth Largest Element in an Array (LeetCode #215)](https://leetcode.com/problems/kth-largest-element-in-an-array/) — the canonical problem contrasting the size-`k` heap with Quickselect.
 - [Quickselect](https://en.wikipedia.org/wiki/Quickselect) — average and worst-case analysis and pivot strategies for partition-based selection.

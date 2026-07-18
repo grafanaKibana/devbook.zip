@@ -1,8 +1,8 @@
 ---
 publish: true
 created: 2026-07-11T21:45:52.264Z
-modified: 2026-07-11T21:45:52.272Z
-published: 2026-07-11T21:45:52.272Z
+modified: 2026-07-18T11:30:03.087Z
+published: 2026-07-18T11:30:03.087Z
 topic:
   - AI & ML
 subtopic:
@@ -14,13 +14,11 @@ level:
 priority: Medium
 ---
 
-# Intro
-
 Agent instruction files are project-level configuration documents that tell AI coding agents how to behave inside a specific repository. They encode the local contract: coding conventions, architectural boundaries, tool preferences, and domain language. This pattern emerged because generic models become much more reliable when they are grounded in how a particular codebase actually works.
 
 Mechanically, the agent loads instruction files when a session starts (and in some tools, while traversing directories). The content is injected into the agent's operating context, so it influences every decision: which files to edit, what patterns to follow, what commands to run, and how to validate changes. This is why a concise, accurate file improves output quality across all tasks, while stale or contradictory rules degrade it.
 
-## Instruction File Landscape
+# Instruction File Landscape
 
 | Tool | Filename | Scope behavior |
 |---|---|---|
@@ -32,7 +30,7 @@ Mechanically, the agent loads instruction files when a session starts (and in so
 | Windsurf | `.windsurfrules` (legacy), `.windsurf/rules/*.md` (current) | Legacy single-file convention plus current workspace rules directory |
 | Aider | `.aider.conf.yml` | YAML config for default behavior, model settings, and workflow preferences |
 
-## What Good Instruction Files Include
+# What Good Instruction Files Include
 
 - **Tech stack and versions:** runtime, framework, package manager, and build/test commands the agent should use first
 - **Coding conventions:** naming, error handling, logging, testing expectations, and formatting policy
@@ -42,7 +40,7 @@ Mechanically, the agent loads instruction files when a session starts (and in so
 
 For modular, reusable behavior packs that complement instruction files, see [[Skills]].
 
-## Example
+# Example
 
 Minimal but effective `AGENTS.md` for a .NET API project:
 
@@ -62,21 +60,21 @@ This works because it sets: execution defaults (stack, verification command), da
 
 **Anti-pattern** — a 500-line instruction file that describes ideal architecture, coding philosophy, and team values. This consumes prompt budget, dilutes critical rules, and creates contradictions when the codebase does not match the aspirational description. Keep the core under 30 rules; link to deeper docs for reference.
 
-## Pitfalls
+# Pitfalls
 
 - **Instruction bloat:** very long files consume prompt budget and dilute high-priority rules. Keep a short core and link to deeper docs only when needed.
 - **Contradictory hierarchy:** root and subdirectory files that disagree cause unstable behavior (for example, two different testing commands). Define precedence and eliminate overlaps.
 - **Aspirational, not actual, guidance:** rules that describe an ideal architecture instead of the current repository state lead to wrong edits. Write what is true now, then migrate gradually.
 - **Stale rules:** codebase evolves faster than instructions; outdated commands or paths create repeated failures. Treat instruction files as living operational docs and update with major repo changes.
 
-## Tradeoffs
+# Tradeoffs
 
 | Strategy | Benefits | Costs | Best fit |
 |---|---|---|---|
 | Detailed instruction files | Higher consistency, better architectural alignment, fewer repeated prompt clarifications | Higher context cost, ongoing maintenance burden, more chance of drift | Large repos with multiple contributors and strict standards |
 | Minimal instruction files | Low maintenance, small context footprint, easier onboarding | More variability in agent decisions, heavier reliance on codebase inference | Small repos or rapidly changing prototypes |
 
-## Questions
+# Questions
 
 > [!QUESTION]- Why do hierarchical instruction files often outperform a single giant root file?
 >
@@ -99,7 +97,7 @@ This works because it sets: execution defaults (stack, verification command), da
 > - Teams that cannot maintain rule quality yet; stale detail is worse than concise accurate guidance
 > - As complexity grows, move from minimal to layered instructions before inconsistency becomes expensive
 
-## References
+# References
 
 - [Manage Claude Code memory (`CLAUDE.md`, project and user scope) (Anthropic)](https://docs.anthropic.com/en/docs/claude-code/memory)
 - [Adding repository custom instructions for GitHub Copilot (`.github/copilot-instructions.md`) (GitHub Docs)](https://docs.github.com/en/copilot/customizing-copilot/adding-repository-custom-instructions-for-github-copilot)

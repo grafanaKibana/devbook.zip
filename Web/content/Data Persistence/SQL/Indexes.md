@@ -1,8 +1,8 @@
 ---
 publish: true
 created: 2026-07-16T15:14:44.878Z
-modified: 2026-07-18T08:46:01.274Z
-published: 2026-07-18T08:46:01.274Z
+modified: 2026-07-18T11:59:15.657Z
+published: 2026-07-18T11:59:15.657Z
 topic:
   - Data Persistence
 subtopic:
@@ -14,13 +14,11 @@ priority: High
 status: Ready to Repeat
 ---
 
-# Intro
-
 An index is an auxiliary access structure that lets a database locate or order data without scanning every base row. “Add an index” is incomplete advice: B+ trees, hash tables, inverted indexes, spatial trees, block summaries, LSM-based layouts, and columnstores accelerate different operators and impose different write, memory, and maintenance costs.
 
 Start from the operator in the measured query plan. Equality probes, ordered ranges, text terms, containment, nearest-neighbor search, and large analytical scans do not share one best structure. Rowstore and columnstore designs therefore remain parallel sections: one optimizes selective navigation and ordering, while the other compresses columns for broad analytical work. Statistics and physical maintenance follow only after the plan identifies which boundary is failing.
 
-## Structure Inventory
+# Structure Inventory
 
 | Structure | Physical idea | Strong query fit | Cost or boundary |
 |---|---|---|---|
@@ -32,11 +30,11 @@ Start from the operator in the measured query plan. Equality probes, ordered ran
 | LSM tree | Buffer, flush, and compact sorted runs | Sustained writes with point/range reads through run indexes and filters | Compaction and read amplification; it is a storage organization, not a PostgreSQL index method |
 | Columnstore | Compressed values grouped by column | Large scans and aggregates over a subset of columns | Point updates and single-row OLTP access |
 
-![[Assets/System Design 101/1405b68c4f060961d25aa5a629a060c516cb1e10f0aac41b4358037ed3065cdb.jpg]]
+![[Assets/Data Persistence/Data Persistence-Indexes-18120000.jpg]]
 
 The image is a vocabulary map, not a universal engine diagram. Bloom filters answer probable membership rather than locating a row; an LSM tree includes several cooperating structures; and products expose spatial and inverted behavior through engine-specific operator classes.
 
-## B+ Tree Boundary
+# B+ Tree Boundary
 
 Conventional SQL Server disk-based clustered and nonclustered rowstore indexes use B+ trees. Root and intermediate pages contain separator keys and child-page pointers. Leaf pages contain the table rows for a clustered index, or nonclustered keys plus row locators and included values for a nonclustered index. A heap has no clustered key order; its nonclustered indexes locate base rows by RID.
 
@@ -44,7 +42,7 @@ An index on `(TenantId, CreatedAt)` is ordered first by tenant and then by time 
 
 PostgreSQL also defaults to B-tree for equality and ordering operators, but its heap and index implementation differs from SQL Server's clustered-rowstore model. Do not transfer SQL Server leaf-layout or key-lookup claims to another engine without checking that engine's plan and storage documentation.
 
-## Rowstore Indexes
+# Rowstore Indexes
 
 Rowstore index design translates a recurring query shape into an ordered B+ tree. Key columns determine navigation and order; included columns exist at the nonclustered leaf to cover output; a filter limits which rows exist in the index. The target is the smallest index that supports the required predicates and ordering while paying for its write cost.
 
@@ -63,7 +61,7 @@ CREATE INDEX IX_Orders_Tenant_Status_CreatedAt
 
 The equality predicates establish a tenant/status prefix, `CreatedAt` bounds the range and supplies output order, and the included values cover the projection without widening upper tree levels. The index cannot efficiently serve a general `Status` query because that query omits the leading tenant key.
 
-### SARGability and key order
+## SARGability and key order
 
 SARGability means the optimizer can turn a predicate into a search argument. `CreatedAt >= @from` normally supplies a range; `YEAR(CreatedAt) = @year` usually does not unless the expression is rewritten as a date interval or exposed through an indexable computed column.
 
@@ -72,7 +70,7 @@ SARGability means the optimizer can turn a predicate into a search argument. `Cr
 - “Most selective first” is not universal. Prefer prefixes reused by important queries, tenant or partition boundaries, and required ordering, then verify estimates.
 - A `GROUP BY`, `ORDER BY`, or join column belongs in the key only when its position supplies useful navigation or order.
 
-### Covering and filtered indexes
+## Covering and filtered indexes
 
 A nonclustered index covers a query when all required values can be returned from the index. Use `INCLUDE` for output or residual values whose order does not help a seek, join, grouping, or sort. Included values still widen leaf rows, consume cache, and add write work.
 
@@ -87,7 +85,7 @@ CREATE INDEX IX_Orders_Open_CreatedAt
 
 This works when open orders are a small, frequently queried subset. The query predicate must imply the filter, and parameterization can prevent the optimizer from proving that implication. Verify actual and estimated rows, logical reads, lookups, sorts, write rate, size, and overlap with existing prefixes before keeping the index.
 
-## Columnstore Indexes
+# Columnstore Indexes
 
 A SQL Server columnstore stores each column separately in compressed rowgroups and can execute eligible operators in batches. Broad queries that scan millions of rows but project a few columns read less data; point lookups, narrow seeks, and frequent single-row updates remain rowstore work.
 
@@ -111,7 +109,7 @@ A clustered columnstore is the table's primary storage. A nonclustered columnsto
 
 Small inserts first land in delta stores, background tuple movement compresses closed rowgroups, and updates become delete-plus-insert work. Use columnstore only when measured analytical savings pay those costs.
 
-## Index Maintenance
+# Index Maintenance
 
 Maintenance should repair a measured problem, not follow a universal fragmentation threshold. Page density, logical fragmentation, statistics quality, query shape, storage, and the maintenance operation's own cost all matter.
 
@@ -130,7 +128,7 @@ WITH FULLSCAN;
 
 Fill factor reserves free space during build or rebuild. Lower it only when measured page splits on non-sequential inserts justify permanently reading and caching more pages. The decision sequence is: capture the slow plan and reads, compare estimates with actuals, refresh relevant statistics, measure density and fragmentation for the used partition, then reorganize or rebuild only when the expected read benefit exceeds log, blocking, CPU, and I/O cost.
 
-## Choose from the Operator
+# Choose from the Operator
 
 Use the narrowest structure that supports the dominant operator and proves a net workload benefit:
 
@@ -141,14 +139,14 @@ Use the narrowest structure that supports the dominant operator and proves a net
 
 Low cardinality alone does not disqualify an index. A filtered index on a rare status, a covering ordered scan, or a bitmap-capable plan can still be useful. Conversely, a high-cardinality column is not automatically useful when queries do not filter, join, or order by it. Distribution, correlation, result size, and the surrounding plan determine whether the optimizer prefers the index.
 
-## Tradeoffs
+# Tradeoffs
 
 - Every secondary index consumes storage and makes inserts, deletes, and indexed-column updates maintain another structure.
 - A narrow index may require base-row lookups; a wide covering index reduces lookups but increases leaf size, cache pressure, and write cost.
 - Statistics and physical condition affect plan choice. A rebuild can appear to fix a query because it refreshed statistics; verify the cause before scheduling maintenance.
 - Specialized structures narrow the supported operator set. The advantage is worthwhile only when the workload repeatedly uses that operator.
 
-## Questions
+# Questions
 
 > [!QUESTION]- Why is “use a hash index because lookup is O(1)” incomplete database advice?
 > The engine must support the hash index for the target table and operator, equality is the only useful ordering relation, and collisions, bucket growth, concurrency, durability, and cache behavior still affect cost. A B+ tree often wins for mixed equality and range work because one structure supports both.
@@ -156,7 +154,7 @@ Low cardinality alone does not disqualify an index. A filtered index on a rare s
 > [!QUESTION]- Why can a low-cardinality column still participate in a useful index?
 > A filtered index can store only the rare subset, a composite key can use the column after a useful leading prefix, and a covering index can avoid base-row reads. Measure the complete query plan; cardinality is evidence, not a standalone rule.
 
-## References
+# References
 
 - [SQL Server and Azure SQL index architecture and design guide](https://learn.microsoft.com/sql/relational-databases/sql-server-index-design-guide?view=sql-server-ver17) — primary guide to SQL Server rowstore layout, clustered and nonclustered keys, included columns, filtered indexes, and workload-driven design.
 - [PostgreSQL index types](https://www.postgresql.org/docs/current/indexes-types.html) — primary reference for PostgreSQL B-tree, hash, GiST, SP-GiST, GIN, and BRIN operator support.

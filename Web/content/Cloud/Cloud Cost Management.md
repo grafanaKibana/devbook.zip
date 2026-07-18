@@ -1,8 +1,8 @@
 ---
 publish: true
 created: 2026-07-16T07:10:34.187Z
-modified: 2026-07-17T05:56:46.027Z
-published: 2026-07-17T05:56:46.027Z
+modified: 2026-07-18T11:30:03.283Z
+published: 2026-07-18T11:30:03.283Z
 topic:
   - Cloud
 subtopic: []
@@ -12,11 +12,9 @@ priority: High
 status: Ready to Repeat
 ---
 
-# Intro
-
 Cloud cost management ties a bill back to the workload behavior that produced it, then changes that behavior without breaking reliability. The useful unit is rarely the monthly total. A team running an image pipeline should track cost per 1,000 successfully processed images: compute, storage, requests, network transfer, observability, and support divided by successful output. If the bill rises 20% while successful output rises 40%, the system became cheaper per unit even though the invoice grew.
 
-## Where the Bill Comes From
+# Where the Bill Comes From
 
 Cloud services combine several meters. A resource can be idle and still accrue fixed time-based charges, while an active request can add usage charges elsewhere.
 
@@ -30,7 +28,7 @@ Cloud services combine several meters. A resource can be idle and still accrue f
 
 Do not copy prices into design assumptions. Provider prices, free tiers, regions, and billing dimensions change. Link the exact pricing page in the architecture decision and recalculate it for the deployment region.
 
-## The Operating Loop
+# The Operating Loop
 
 1. **Allocate and measure.** Map accounts, subscriptions, projects, and resource tags to a product and owner. Include shared platform costs through a documented allocation rule instead of hiding them in a central account.
 2. **Remove waste.** Delete idle resources and their dependents: unattached disks, old snapshots, abandoned IP addresses, stale logs, incomplete multipart uploads, and test environments with no owner.
@@ -39,7 +37,7 @@ Do not copy prices into design assumptions. Provider prices, free tiers, regions
 5. **Commit the stable baseline.** Buy reservations or savings plans only for demand that remains after waste removal and right-sizing. Keep burst capacity elastic.
 6. **Repeat.** Budgets and anomaly alerts detect drift; unit-cost trends show whether the change improved the product rather than merely shifting a charge.
 
-## Allocation, Guardrails, and Unit Economics
+# Allocation, Guardrails, and Unit Economics
 
 An allocation record needs enough information to answer three questions: who owns the resource, which product or flow benefits, and how a shared cost is divided. Tags are one input, not the whole model; account hierarchy, subscription, Kubernetes labels, and telemetry can supply missing ownership.
 
@@ -55,14 +53,14 @@ cost_per_1_000_jobs =
 
 Track the numerator and denominator separately. A falling unit cost caused by dropping failed jobs is not an improvement if customer-visible success also fell.
 
-## Tradeoffs
+# Tradeoffs
 
 - **Redundancy costs money on purpose.** Remove duplicated capacity only after proving it is not required for the recovery objective.
 - **Compression trades compute for storage and transfer.** It helps when bytes dominate and hurts when CPU or latency is the tighter constraint.
 - **Managed services trade operational labor for provider rates and lock-in.** Compare the fully loaded cost of operating an alternative, not only its infrastructure line item.
 - **Commitments trade a lower rate for demand risk.** Apply them to the measured floor, never to the forecast peak.
 
-## References
+# References
 
 - [FinOps Framework — Allocation](https://www.finops.org/framework/capabilities/allocation/) — defines ownership, tagging, hierarchy, and shared-cost allocation practices.
 - [FinOps Framework — Unit Economics](https://www.finops.org/framework/capabilities/unit-economics/) — connects technology spend to product and business output metrics.

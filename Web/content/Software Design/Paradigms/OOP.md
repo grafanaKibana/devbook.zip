@@ -1,8 +1,8 @@
 ---
 publish: true
 created: 2026-07-18T09:13:12.902Z
-modified: 2026-07-18T09:13:12.902Z
-published: 2026-07-18T09:13:12.902Z
+modified: 2026-07-18T11:30:15.728Z
+published: 2026-07-18T11:30:15.728Z
 topic:
   - Software Design
 subtopic:
@@ -14,11 +14,9 @@ priority: Medium
 status: Ready to Repeat
 ---
 
-# Intro
-
 Object-oriented programming models a system as objects that own state and expose behavior. Its main value is not class syntax or inheritance: it is putting each invariant beside the operations allowed to change it. Interfaces define capabilities, composition assembles independently varying behavior, and runtime dispatch lets callers use a contract without knowing the concrete type. Inheritance is optional and earns its place only when a genuine subtype shares stable invariants and implementation.
 
-## Abstraction and invariants
+# Abstraction and invariants
 
 An object should make invalid transitions difficult to express. A bank account exposes `Deposit` and `Withdraw`; it does not expose a public balance setter that any caller can bypass.
 
@@ -66,7 +64,7 @@ public sealed class CheckoutService(IPaymentGateway gateway)
 
 The caller depends on a payment capability, while a Stripe or bank implementation owns protocol details. C# interfaces can include default members, but a default must have semantics valid for every implementer. A meaningless fallback signals that the interface has grown beyond one coherent capability.
 
-## Inheritance and composition
+# Inheritance and composition
 
 Inheritance binds a derived type to a base type’s contract and implementation. Composition binds an object to a collaborator’s contract and delegates work to it. Use inheritance when the relationship is a genuine subtype with stable shared invariants; use composition when behavior varies independently or may change at runtime. Reuse alone is not enough to justify a type hierarchy.
 
@@ -105,7 +103,7 @@ A derived class can depend on undocumented call order, protected state, or a vir
 
 Deep hierarchies multiply this risk. If an override suppresses base behavior, throws for a supported operation, or needs knowledge of base internals, the subtype is probably false. Flatten the hierarchy into capability interfaces and composed policies.
 
-## Subtyping and polymorphism
+# Subtyping and polymorphism
 
 Inheritance or interface implementation creates a type-system subtype in C#. Sound design additionally requires behavioral substitutability: a value used through the base contract must preserve the expectations of callers that know only that contract.
 
@@ -162,7 +160,7 @@ Overloading is different: the compiler selects an overload from static argument 
 
 Polymorphism helps when each implementation owns coherent behavior and new implementations arrive independently. A closed `switch` over three states can be clearer when the cases form one finite workflow. Splitting a small closed decision across types can hide the state machine without adding useful extensibility.
 
-## Pitfalls
+# Pitfalls
 
 **Anemic domain model** — a type with public setters while all rules live in services is procedural code wearing class syntax. A public `Order.Status` setter lets any caller skip payment checks; an `Order.Ship()` method can reject an illegal transition at the mutation boundary.
 
@@ -172,7 +170,7 @@ Polymorphism helps when each implementation owns coherent behavior and new imple
 
 **Assignable but not substitutable** — a subtype that throws for a base operation or strengthens its preconditions satisfies the method shape while breaking the behavioral contract.
 
-## Tradeoffs
+# Tradeoffs
 
 | Choice | Cost | Use it when |
 | --- | --- | --- |
@@ -185,7 +183,7 @@ Polymorphism helps when each implementation owns coherent behavior and new imple
 
 Most production C# systems mix styles: objects protect domain invariants, while records, LINQ, and pure functions handle transformations. Use the smallest boundary that makes ownership and failure modes clearer.
 
-## Questions
+# Questions
 
 > [!QUESTION]- Why is “composition over inheritance” a preference rather than a ban?
 > Framework base classes and genuine domain taxonomies can provide stable lifecycle and invariants. The rule rejects inheritance used only to borrow implementation, because that creates a public subtype contract the design did not intend.
@@ -196,7 +194,7 @@ Most production C# systems mix styles: objects protect domain invariants, while 
 > [!QUESTION]- When does polymorphism beat a conditional?
 > Use it when behavior varies behind a stable capability and new implementations are expected. Keep a conditional when the cases are closed, local, and easier to inspect together than through several types.
 
-## References
+# References
 
 - [C# object-oriented programming](https://learn.microsoft.com/en-us/dotnet/csharp/fundamentals/tutorials/oop) — Microsoft’s overview of encapsulation, inheritance, and polymorphism in C#.
 - [Inheritance in C#](https://learn.microsoft.com/en-us/dotnet/csharp/fundamentals/object-oriented/inheritance) — official mechanics for base classes, overrides, sealing, and constructor behavior.

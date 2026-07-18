@@ -1,8 +1,8 @@
 ---
 publish: true
 created: 2026-07-11T21:46:00.416Z
-modified: 2026-07-11T21:46:00.416Z
-published: 2026-07-11T21:46:00.416Z
+modified: 2026-07-18T11:30:11.446Z
+published: 2026-07-18T11:30:11.446Z
 topic:
   - Programming
 subtopic:
@@ -14,13 +14,11 @@ priority: High
 status: Ready to Repeat
 ---
 
-# Intro
-
 `async` and `await` are .NET's default model for non-blocking I/O. The goal is responsiveness and scalability: while code waits on network, disk, or database I/O, the thread is released so it can do other work. This is why async code keeps UIs responsive and helps servers handle more concurrent requests without proportionally more threads.
 
 The most important mental model: **async is not the same as "run on another thread"**. In many cases, no thread is actively executing your method while an awaited I/O operation is in flight. The thread is returned to the pool and reclaimed when the I/O completes.
 
-## How It Works — The State Machine
+# How It Works — The State Machine
 
 The C# compiler transforms every `async` method into a state machine struct. Each `await` point becomes a state transition. At compile time, this code:
 
@@ -50,7 +48,7 @@ This is why `await` differs from `Task.Result` and `Task.Wait()`: those block th
 
 Default to `Task` and only reach for these once profiling shows async allocation is a real cost.
 
-## ConfigureAwait
+# ConfigureAwait
 
 By default, `await` captures the current `SynchronizationContext` (or `TaskScheduler`) and resumes on it. In a UI app, this means the continuation runs on the UI thread — useful for updating controls. In ASP.NET Core, there is no `SynchronizationContext`, so this is a no-op.
 
@@ -66,14 +64,14 @@ var data = await _repo.GetAsync(id).ConfigureAwait(false);
 - Library code: always use `ConfigureAwait(false)` to avoid context capture overhead and deadlock risk.
 - Application code (controllers, view models): omit it — you usually want to resume on the original context.
 
-### `ExecutionContext` vs `SynchronizationContext`
+## `ExecutionContext` vs `SynchronizationContext`
 
 These are two different ambient mechanisms, and conflating them is a common source of bugs:
 
 - **`SynchronizationContext`** controls _where_ (which thread/scheduler) the continuation resumes. This is what `ConfigureAwait(false)` opts out of.
 - **`ExecutionContext`** carries _ambient state_ — `AsyncLocal<T>` values, the security/impersonation context — and **always flows across `await`, even with `ConfigureAwait(false)`**. So `ConfigureAwait(false)` does _not_ drop your `AsyncLocal` values; it only changes the resumption thread. To stop `ExecutionContext` from flowing (rare), use `ExecutionContext.SuppressFlow()`.
 
-### `ConfigureAwaitOptions` (.NET 8)
+## `ConfigureAwaitOptions` (.NET 8)
 
 .NET 8 added an overload `ConfigureAwait(ConfigureAwaitOptions)` with composable flags beyond the old boolean:
 
@@ -81,7 +79,7 @@ These are two different ambient mechanisms, and conflating them is a common sour
 - `SuppressThrowing` — await a `Task` purely for completion, ignoring faults/cancellation (useful for "fire and observe completion only").
 - `ForceYielding` — always yield, even if the awaitable is already complete (handy to break up synchronous re-entrancy).
 
-## Example
+# Example
 
 ```csharp
 public async Task<OrderDto?> LoadOrderAsync(
@@ -101,7 +99,7 @@ public async Task<OrderDto?> LoadOrderAsync(
 
 The method does not hold a thread while waiting on network I/O. The continuation runs only when the response is available.
 
-## Async Streams (IAsyncEnumerable)
+# Async Streams (IAsyncEnumerable)
 
 For data that arrives incrementally (paged APIs, streamed query results, message consumers), `IAsyncEnumerable<T>` lets a producer `yield return` values asynchronously and a consumer pull them with `await foreach` — each item can suspend without buffering the whole sequence in memory.
 
@@ -128,7 +126,7 @@ await foreach (var order in StreamOrdersAsync(ct).WithCancellation(ct).Configure
 
 Note the `[EnumeratorCancellation]` attribute (so a token passed via `.WithCancellation(ct)` reaches the iterator) and `await using` / `IAsyncDisposable` for resources whose cleanup is itself asynchronous (e.g. `DbDataReader`, network streams).
 
-## Pitfalls
+# Pitfalls
 
 **Sync-over-async deadlock**
 Calling `.Result` or `.Wait()` on a task inside a method that runs under a `SynchronizationContext` (UI thread, legacy ASP.NET) causes a deadlock. The blocking call holds the context thread; the continuation needs that same thread to resume. Neither can proceed.
@@ -173,7 +171,7 @@ Fix: `await` the async method directly.
 **Only the first exception surfaces from an awaited task**
 A `Task` can hold multiple exceptions (e.g. a faulted `Task.WhenAll`), but `await` rethrows only the **first** one — it unwraps the `AggregateException` for ergonomics. To see all of them, inspect `task.Exception` (an `AggregateException`) directly after the await. Internally the runtime preserves the original throw-site stack with `ExceptionDispatchInfo.Capture(ex).Throw()`, which is why an awaited exception shows the real failure location rather than the resumption point.
 
-## Questions
+# Questions
 
 > [!QUESTION]- How is asynchrony different from multithreading?
 > Asynchrony is about not blocking while waiting (especially for I/O). An `async` method can release the current thread while awaiting, and continue later — potentially on the same thread.
@@ -195,7 +193,7 @@ A `Task` can hold multiple exceptions (e.g. a faulted `Task.WhenAll`), but `awai
 > [!QUESTION]- When should you use `Task.Run` with async code?
 > For CPU-bound work that you intentionally offload to a pool thread (e.g., image processing, heavy computation). Do not use it to wrap already-async I/O APIs — that wastes a thread for no benefit.
 
-## References
+# References
 
 - [Async programming scenarios (Microsoft Learn)](https://learn.microsoft.com/en-us/dotnet/csharp/asynchronous-programming/async-scenarios) — official overview of async/await patterns with examples for I/O and CPU-bound work.
 - [Await, UI, and deadlocks (Stephen Toub, Microsoft)](https://devblogs.microsoft.com/dotnet/await-and-ui-and-deadlocks-oh-my/) — deep dive into how `SynchronizationContext` causes deadlocks and how `ConfigureAwait(false)` prevents them.

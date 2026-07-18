@@ -1,8 +1,8 @@
 ---
 publish: true
 created: 2026-07-11T21:46:04.955Z
-modified: 2026-07-16T15:17:19.972Z
-published: 2026-07-16T15:17:19.972Z
+modified: 2026-07-18T11:59:15.663Z
+published: 2026-07-18T11:59:15.663Z
 topic:
   - Networks
 subtopic:
@@ -14,11 +14,9 @@ priority: High
 status: Ready to Repeat
 ---
 
-# Intro
-
 WebSocket (RFC 6455) is a full-duplex, message-oriented application protocol for long-lived browser/server communication. The common handshake upgrades an HTTP/1.1 connection; HTTP/2 can establish WebSockets with Extended CONNECT, carrying frames inside one multiplexed stream. WebSocket is one browser transport for chat, dashboards, games, and collaborative editing—not the only bidirectional option: WebRTC data channels and WebTransport expose different reliability, peer, and QUIC-based contracts.
 
-## WebSocket vs Raw Socket vs HTTP
+# WebSocket vs Raw Socket vs HTTP
 
 | | Raw [[Sockets\|TCP socket]] | WebSocket | HTTP request/response |
 |---|---|---|---|
@@ -30,7 +28,7 @@ WebSocket (RFC 6455) is a full-duplex, message-oriented application protocol for
 
 The key distinction: a raw socket is an unframed byte pipe for a custom protocol; WebSocket standardizes the opening handshake, message framing, masking, ping/pong, and close behavior and is exposed through the browser `WebSocket` API.
 
-## How It Works
+# How It Works
 
 The common HTTP/1.1 opening handshake upgrades a connection in place:
 
@@ -53,7 +51,7 @@ Server → Client:
 
 After `101 Switching Protocols`, the connection exchanges WebSocket text, binary, and control frames. With HTTP/2 Extended CONNECT, the client sends `:method = CONNECT` and `:protocol = websocket`; a successful `2xx` response opens one stream for the same WebSocket frame protocol without switching the entire HTTP/2 connection. `ws://` is plaintext; use `wss://` across untrusted networks.
 
-## Example (.NET)
+# Example (.NET)
 
 ASP.NET Core handles WebSockets without a separate server:
 
@@ -86,7 +84,7 @@ app.Map("/ws", async context =>
 
 Most apps use a higher-level layer instead of raw frames — **[[SignalR]]** adds automatic reconnection, fallback transports, groups, and backplane scale-out on top of WebSockets.
 
-## Pitfalls
+# Pitfalls
 
 - **No automatic reconnection.** The connection can drop (network blip, proxy idle-timeout, server restart) and the protocol won't reconnect for you. Clients must implement reconnect-with-backoff and the server must tolerate resubscription — or use SignalR, which does this.
 - **Idle connections get culled.** Load balancers and proxies drop connections with no traffic. A server or non-browser client can send WebSocket `ping` control frames and observe `pong`. The browser `WebSocket` API exposes neither control, so browser applications need an application-level heartbeat message and timeout policy. A heartbeat proves recent application-path progress; it is not the same contract as TCP keep-alive.
@@ -94,7 +92,7 @@ Most apps use a higher-level layer instead of raw frames — **[[SignalR]]** add
 - **No built-in request/response correlation.** WebSocket is a message stream, not RPC; if you need "call and await a reply," you add your own correlation IDs (or use a protocol designed for it).
 - **Security: validate `Origin` and authenticate.** The browser sends an `Origin` header but does **not** enforce same-origin on WebSockets — a malicious page can open a `wss://` to your server (**Cross-Site WebSocket Hijacking**) and it will carry the user's cookies. Check `Origin` server-side and authenticate the connection (token in the first message or a short-lived ticket), since custom headers can't be set on the browser handshake.
 
-## Polling, SSE, and WebSockets
+# Polling, SSE, and WebSockets
 
 | Transport | Direction and lifetime | Intermediaries and browser support | Reconnect, resume, and backpressure | Per-client cost |
 |---|---|---|---|---|
@@ -103,13 +101,13 @@ Most apps use a higher-level layer instead of raw frames — **[[SignalR]]** add
 | Server-Sent Events | Long-lived server→client UTF-8 event stream | Native browser `EventSource`; HTTP-friendly, but buffering proxies must be disabled | Browser reconnects and sends `Last-Event-ID`; server needs replay retention; API has no explicit consumer-demand signal | One long response and server buffers/heartbeats per client |
 | WebSocket | Long-lived full-duplex framed messages | Native browser API after HTTP handshake; some proxies impose idle limits | Application owns reconnect, resume tokens, acknowledgements, and queue bounds; browser API has limited backpressure | One stateful connection, heartbeat, subscription state, and outbound queue per client |
 
-![[Assets/System Design 101/6b9090f69a3cab81616fa9b01e057c633e35d1569d5227b020758999f9157bbd.jpg]]
+![[Assets/Networks/Networks-WebSockets-18120000.jpg]]
 
 Choose short polling for low-frequency state where seconds of staleness are fine. Choose long polling as a compatibility bridge, not a default. Choose SSE for ordered server-to-browser updates with a replay cursor. Choose WebSockets when both sides must send low-latency messages. In .NET, reach for **SignalR** rather than raw WebSockets unless wire-level control matters; it provides transport fallback and reconnection helpers, but the application still owns durable resume and overload policy.
 
 Backpressure must be explicit in every long-lived option. Bound the per-client queue, coalesce replaceable state, disconnect consumers that cannot keep up, and retain only enough history to honor documented resume tokens. An unbounded queue turns one slow browser into server memory growth.
 
-## Questions
+# Questions
 
 > [!QUESTION]- How is a WebSocket different from a raw TCP socket?
 > A raw socket is an OS-level endpoint where the application defines framing and handshakes, and ordinary browser JavaScript cannot open one. WebSocket standardizes messages and control frames and is exposed through the browser `WebSocket` API. It commonly uses HTTP/1.1 Upgrade over TCP and can also use HTTP/2 Extended CONNECT.
@@ -120,7 +118,7 @@ Backpressure must be explicit in every long-lived option. Bound the per-client q
 > [!QUESTION]- When would you choose Server-Sent Events over WebSockets?
 > When you only need **server→client** push (live feeds, notifications, progress updates) and not a client→server channel. SSE runs over plain HTTP, is simpler, and has automatic reconnection built into the browser `EventSource` API. Choose WebSockets when you need true bidirectional, low-latency messaging.
 
-## References
+# References
 
 - [The WebSocket Protocol (RFC 6455)](https://www.rfc-editor.org/rfc/rfc6455) — handshake, framing, and control frames.
 - [Bootstrapping WebSockets with HTTP/2 (RFC 8441)](https://www.rfc-editor.org/rfc/rfc8441) — defines the Extended CONNECT mechanism for carrying WebSocket frames on one HTTP/2 stream.

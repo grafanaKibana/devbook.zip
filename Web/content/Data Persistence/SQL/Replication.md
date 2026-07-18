@@ -1,8 +1,8 @@
 ---
 publish: true
 created: 2026-07-15T08:54:36.059Z
-modified: 2026-07-18T09:50:13.895Z
-published: 2026-07-18T09:50:13.895Z
+modified: 2026-07-18T11:59:15.657Z
+published: 2026-07-18T11:59:15.657Z
 topic:
   - Data Persistence
 subtopic:
@@ -14,13 +14,11 @@ priority: High
 status: Ready to Repeat
 ---
 
-# Intro
-
 Replication means keeping copies of the same data on multiple nodes. You do it for three reasons: spread read load across replicas, survive node failures without downtime, and recover from disasters by having data in a separate region. The hard part isn't copying a static snapshot. It's propagating every subsequent write to all replicas correctly while nodes crash, networks partition, and clients read concurrently. Get it wrong and you get stale reads, lost writes, or two nodes that both think they're the primary.
 
-## Replication Models
+# Replication Models
 
-### Single-Leader (Leader-Follower)
+## Single-Leader (Leader-Follower)
 
 All writes go to one designated node (the leader). Replicas receive a stream of changes and apply them in order, serving read traffic. This is the default model for PostgreSQL (streaming replication), MySQL (binlog replication), SQL Server Always On Availability Groups (AG replicates transaction log records to secondaries; WSFC provides health detection, quorum, and failover orchestration), and MongoDB replica sets.
 
@@ -28,7 +26,7 @@ Reads can be routed to replicas using `ApplicationIntent=ReadOnly` in SQL Server
 
 Failover requires electing a new leader. SQL Server uses Windows Server Failover Clustering (WSFC) quorum; PostgreSQL commonly relies on an external manager such as Patroni or repmgr. A voting quorum prevents two candidates in the same voting configuration from both winning a majority. It does not stop an isolated former leader from continuing to serve stale endpoints or accept writes; leases, endpoint ownership, and fencing must revoke that old leader before the replacement is writable.
 
-### Multi-Leader
+## Multi-Leader
 
 Multiple nodes accept writes independently and propagate changes to each other. Used by CouchDB, and SQL Server's peer-to-peer transactional replication. The benefit is write availability across datacenters: a write to the EU node doesn't wait for the US node to acknowledge.
 
@@ -40,13 +38,13 @@ The cost is mandatory conflict resolution. If two leaders accept a write to the 
 
 In SQL Server peer-to-peer transactional replication, the recommended practice is write partitioning (each node owns a non-overlapping subset of rows). Peer-to-peer replication offers conflict detection but is not a general-purpose conflict resolution platform like CRDTs; avoiding same-row writes across nodes is the primary design constraint.
 
-### Leaderless (Dynamo-style)
+## Leaderless (Dynamo-style)
 
 In Dynamo-style systems such as the original Amazon Dynamo, Cassandra, and Riak, several replicas can accept an operation and the client or coordinator can use tunable `N`, `W`, and `R` quorums. `W + R > N` creates overlap between the acknowledged write and read sets, but overlap alone does not serialize concurrent writes or prove linearizability; version reconciliation, sloppy quorums, membership changes, and failure handling still matter. Read repair and anti-entropy reconcile divergent replicas under product-specific rules.
 
 Do not infer Amazon DynamoDB's contract from the Dynamo name. DynamoDB does not expose client-selected `R` and `W` values. Its API documents eventual or strongly consistent reads per operation for supported single-Region resources, transactional operations with their own contract, and separate consistency/replication choices for global tables. Treat those documented operations and multi-Region modes as the boundary rather than applying the generic quorum formula.
 
-### Model Comparison
+## Model Comparison
 
 | Dimension | Single-Leader | Multi-Leader | Leaderless |
 |---|---|---|---|
@@ -56,7 +54,7 @@ Do not infer Amazon DynamoDB's contract from the Dynamo name. DynamoDB does not 
 | Failover complexity | Election, endpoint ownership, and fencing | Per-leader failure and conflict recovery | No leader election, but membership and quorum availability still matter |
 | Typical use | PostgreSQL, SQL Server AG | CouchDB, geo-distributed write topologies | Cassandra, Riak, original Dynamo-style systems |
 
-## Replication Lag
+# Replication Lag
 
 Asynchronous acknowledgement means the leader does not wait for a standby before confirming a write. A replica may be caught up at that instant or may lag behind the leader. When lag exists, it creates three canonical anomalies (from DDIA Ch. 5):
 
@@ -68,11 +66,11 @@ Asynchronous acknowledgement means the leader does not wait for a standby before
 
 **Sync vs async tradeoff**: synchronous acknowledgement means the leader waits for the configured standby acknowledgement before confirming the write. With the right `synchronous_commit`, standby selection, and storage settings, that acknowledgement protects commit durability across failover to an eligible standby. It does not make reads from every replica linearizable: WAL can be durable but not yet replayed on a readable standby. A read that must observe the commit still needs the primary or a replica whose replay position has reached the commit token. In asynchronous acknowledgement mode, the leader confirms the write without waiting for a standby. A replica may be caught up or lagging; if the leader fails, an acknowledged commit is at risk only when no eligible surviving node received it.
 
-## Replica Read Boundary
+# Replica Read Boundary
 
 Single-leader replication can offload reads only when routing preserves the request's contract. Writes, write-capable transactions, and unclassified work stay on the primary. An explicitly read-only transaction pins one eligible replica, while a read that must observe a prior commit uses the primary or a replica whose replay position has reached that commit token. A proxy can classify statements, but the application usually owns the causal requirement.
 
-![[Assets/System Design 101/fad9c0171b8080e840a469ddf29a9f82d932eb2687a8d62fdb013bf9c3014ece.png]]
+![[Assets/Data Persistence/Data Persistence-Replication-18120000-1.png]]
 
 The diagram shows the middleware topology, not the lag or transaction boundary. The routing contract is stricter:
 
@@ -81,7 +79,7 @@ The diagram shows the middleware topology, not the lag or transaction boundary. 
 - A read that must observe a prior write uses the primary or a replica whose replay position reaches the request token.
 - The application or API marks the causal requirement because a SQL proxy usually cannot infer it from statement text.
 
-## Position Token
+# Position Token
 
 A fixed time window guesses at lag. A position token states the actual boundary:
 
@@ -99,11 +97,11 @@ replica  = 0/16B6D10  -> eligible
 
 WAL positions are ordered values, not strings to compare lexicographically. A later `pg_current_wal_lsn()` is a conservative token if concurrent commits advance it; `pg_last_wal_replay_lsn()` reports a standby's replay boundary.
 
-![[Assets/System Design 101/316dec0dba2634be6b17aa4254ec3ffe23cf58fa2964464e4bb956609f664728.png]]
+![[Assets/Data Persistence/Data Persistence-Replication-18120000.png]]
 
 The topology image still omits the causal condition: a replica is eligible for a read-after-write request only after replay reaches that request's token.
 
-## Failover and Overload
+# Failover and Overload
 
 A token from an old PostgreSQL timeline may not be directly comparable after promotion. The protocol must translate the boundary through failover metadata or route consistency-sensitive reads to the new primary until eligibility can be proved.
 
@@ -116,13 +114,13 @@ Keep waits bounded. An unbounded standby wait turns lag into request exhaustion;
 | Primary changes during a transaction | Fail the pinned transaction; retry the whole transaction only when safe |
 | Commit acknowledgement is lost | Treat the result as unknown; resolve by idempotency key or reconciliation |
 
-## CAP and PACELC
+# CAP and PACELC
 
 **CAP** applies when a network **P**artition splits replicas: the system must choose between **C**onsistency (reject operations that cannot be coordinated) and **A**vailability (keep serving and accept divergence) during that partition. A single-leader system that refuses writes when it cannot reach a quorum is **CP**; a leaderless Dynamo-style system that keeps accepting writes and reconciles later is **AP**. Synchronous versus asynchronous durability acknowledgement is a separate contract.
 
 CAP only describes the partition case, which is why **PACELC** also asks whether normal operation favors latency or coordination. Synchronous commit pays latency for acknowledged durability; it is not by itself a linearizable-replica-read protocol. Strong observation additionally requires routing to the primary or waiting until the chosen replica has replayed the required position. See [[Software Architecture/Distributed Systems/CAP theorem|CAP theorem]] for the theorem's full boundary.
 
-## Tradeoffs
+# Tradeoffs
 
 Replication and sharding solve different problems. Reaching for sharding before exhausting replication is a common over-engineering mistake.
 
@@ -136,7 +134,7 @@ Replication and sharding solve different problems. Reaching for sharding before 
 
 Choose each mechanism from the measured bottleneck and required consistency boundary. Read replicas scale eligible reads; a cache removes repeated origin work with a freshness cost; sharding distributes ownership and creates cross-shard work. They are not mandatory stages of one progression.
 
-## Pitfalls
+# Pitfalls
 
 **Split-brain**: a network partition leaves the old primary accepting writes while a new primary is promoted elsewhere. A voting quorum limits who can be elected in the current configuration; fencing is the separate act that revokes the old leader's ability to write. Promotion must couple both boundaries.
 
@@ -148,7 +146,7 @@ Choose each mechanism from the measured bottleneck and required consistency boun
 
 **Last-write-wins data loss**: in multi-leader or leaderless setups using LWW, concurrent writes to the same key silently discard one of them. No error is returned to the client. Mitigation: use CRDTs for data shapes that support them, or implement application-level conflict detection (version vectors, conditional writes) for critical data like account balances or inventory counts.
 
-## Questions
+# Questions
 
 > [!QUESTION]- What are the three replication lag anomalies, and how do you mitigate each?
 >
@@ -168,7 +166,7 @@ Choose each mechanism from the measured bottleneck and required consistency boun
 > - A majority vote prevents two candidates in the same voting configuration from both being elected. Fencing separately terminates or revokes the old primary before the new one accepts writes.
 > - WSFC uses quorum witnesses; Patroni uses distributed coordination in systems such as etcd or Consul. Without endpoint revocation or fencing, election quorum alone is insufficient because a slow former leader can keep serving writes after losing authority.
 
-## References
+# References
 
 - [Types of SQL Server replication](https://learn.microsoft.com/sql/relational-databases/replication/types-of-replication?view=sql-server-ver17) — official overview of snapshot, transactional, and merge replication with use-case guidance.
 - [Always On availability groups overview](https://learn.microsoft.com/sql/database-engine/availability-groups/windows/overview-of-always-on-availability-groups-sql-server?view=sql-server-ver17) — covers synchronous vs asynchronous commit modes, failover behavior, and readable secondaries.

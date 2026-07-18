@@ -1,8 +1,8 @@
 ---
 publish: true
 created: 2026-07-16T14:07:21.550Z
-modified: 2026-07-16T17:34:23.942Z
-published: 2026-07-16T17:34:23.942Z
+modified: 2026-07-18T11:59:15.668Z
+published: 2026-07-18T11:59:15.668Z
 topic:
   - Software Architecture
 subtopic:
@@ -14,11 +14,9 @@ priority: High
 status: Ready to Repeat
 ---
 
-# Intro
-
 Consistent hashing maps both nodes and keys into the same circular hash space. A key belongs to the first node clockwise from its position. When membership changes, only the adjacent ranges move instead of recomputing every key with `hash(key) % node_count`.
 
-## Exact Remapping Example
+# Exact Remapping Example
 
 Use a ring from 0 to 99 with nodes `A=20`, `B=50`, and `C=80`:
 
@@ -31,11 +29,11 @@ Use a ring from 0 to 99 with nodes `A=20`, `B=50`, and `C=80`:
 
 Add node `D=40`. Only keys in `(20, 40]` move from B to D, so key 30 moves while 10, 60, and 90 stay put. If `N` equally loaded nodes exist before the join, the new node receives an expected `1 / (N + 1)` of all keys. Removing one node from a ring of `N` equally loaded nodes moves its expected `1 / N` share to its clockwise successor or replica owners. Small samples, uneven token placement, and weighted nodes change the observed fraction.
 
-![[Assets/System Design 101/854eceb50eaf3df8202198d8f9c4986136ca6fd259f672b3fdd6f416f373ac4b.png]]
+![[Assets/Software Architecture/Software Architecture-Consistent Hashing-18120000.png]]
 
 The visual illustrates clockwise ownership and a new node taking one range. It does not define replication, failure detection, or how concurrent membership views converge.
 
-## Virtual Nodes and Capacity
+# Virtual Nodes and Capacity
 
 Assign many independently hashed tokens to each physical node. This spreads a node across the ring, reduces variance, and lets a larger node own more tokens. Token count is an operational choice: more tokens improve balance but enlarge routing metadata and recovery fan-out.
 
@@ -43,7 +41,7 @@ Consistent hashing does not split a hot key, guarantee uniform application traff
 
 Use rendezvous hashing when selecting the highest-scoring nodes for a key is simpler than maintaining a ring. Both approaches need the same membership and replication discipline.
 
-## References
+# References
 
 - [Consistent hashing and random trees](https://doi.org/10.1145/258533.258660) — original paper defining consistent hashing and bounded remapping under membership changes.
 - [Dynamo: Amazon's highly available key-value store](https://www.allthingsdistributed.com/files/amazon-dynamo-sosp2007.pdf) — primary design using consistent hashing, virtual nodes, replication, and preference lists.

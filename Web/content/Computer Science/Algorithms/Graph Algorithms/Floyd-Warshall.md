@@ -1,8 +1,8 @@
 ---
 publish: true
 created: 2026-07-12T14:27:20.402Z
-modified: 2026-07-12T14:27:20.403Z
-published: 2026-07-12T14:27:20.403Z
+modified: 2026-07-18T11:30:03.564Z
+published: 2026-07-18T11:30:03.564Z
 topic:
   - Computer Science
 subtopic:
@@ -13,8 +13,6 @@ level:
 priority: Medium
 status: Creation
 ---
-
-# Intro
 
 A weighted directed graph of `V` vertices, and the question is not one shortest path but the distance between every ordered pair — a full `V×V` table. Running a single-source algorithm from each vertex answers it, yet on a dense graph that repeats most of the work, and a negative edge weight rules out the fastest single-source choice outright.
 
@@ -27,7 +25,7 @@ The decisive step is a single relaxation sweeping the whole distance matrix for 
 > [!NOTE] Visualization pending
 > Planned StepTrace: a matrix card showing a `V×V` distance table updated across each intermediate vertex `k`, with `dist[i][j]` relaxed by `dist[i][k] + dist[k][j]`. No matching renderer exists in `engine.js` yet.
 
-## Why one intermediate at a time works
+# Why one intermediate at a time works
 
 The state is a single `V×V` matrix `dist`, initialized so `dist[i][j]` is the direct edge weight, `dist[i][i]` is `0`, and every other entry is `∞`. Stage `k` runs one relaxation over the whole matrix:
 
@@ -55,7 +53,7 @@ dist after init:            final all-pairs distances:
 
 `dist[0][3]` holds the direct edge `7` until vertex `2` becomes admissible at stage `k = 2`, where `0→2→3` costs `5 + 1 = 6` and wins. `dist[1][3]` first drops to `15` through vertex `0` at `k = 0`, then to `3` at `k = 2` via `1→2→3`. No diagonal entry ends negative, so the graph carries no negative cycle.
 
-## Reference drawer
+# Reference drawer
 
 > [!ABSTRACT]- Staged relaxation
 >
@@ -136,7 +134,7 @@ dist after init:            final all-pairs distances:
 >
 > `next[i, j]` stores the first hop of the current best `i`→`j` route and is rewritten to `next[i, k]` on each improving relaxation, so `Path` walks the successors without re-reading the distance matrix.
 
-## Complexity
+# Complexity
 
 | Case | Time | Space | Cause |
 | --- | --- | --- | --- |
@@ -144,7 +142,7 @@ dist after init:            final all-pairs distances:
 
 Best, average, and worst coincide because nothing in the data shortens the sweep — a complete graph and an edgeless one both take the same `V³` steps. The single honest bound is `Θ(V³)`. Path reconstruction adds a second `Θ(V²)` `next` matrix; the true auxiliary cost beyond the output matrix stays `O(1)` without it. The naive layered DP that keeps one matrix per stage would need `Θ(V³)` space, which the in-place argument above removes.
 
-## When the reported distances are wrong
+# When the reported distances are wrong
 
 A negative edge is fine on its own — a stage relaxes through it and the invariant still holds. A negative cycle is not: looping it lowers the total without bound, so the true shortest distance is `−∞`, while the sweep stops at whatever finite value its relaxations happened to reach. The signal lives on the diagonal. Any `dist[i][i] < 0` means vertex `i` sits on a negative cycle, since the only way back to `i` with negative weight is around one. Every off-diagonal `dist[u][v]` whose route can pass through such an `i` — both `dist[u][i]` and `dist[i][v]` finite — is equally invalid and belongs marked `−∞` rather than read as a number.
 
@@ -152,7 +150,7 @@ Reordering the loops so `i` or `j` is outermost still compiles, runs, and termin
 
 Overflow is the other silent corruptor. With `int.MaxValue` as `∞`, the unconditional `dist[i][k] + dist[k][j]` wraps to a large negative number whenever both operands are the sentinel, and that phantom shortcut then propagates through the rest of the sweep. Skipping the relaxation when either operand is `∞`, or using a sentinel such as `long.MaxValue / 4` that tolerates one addition, closes it.
 
-## Questions
+# Questions
 
 > [!QUESTION]- Why is the `k`-loop the outermost of the three?
 > After stage `k`, `dist[i][j]` is defined as the shortest `i`→`j` path using intermediates only from `{0..k}`, so `k` names a stage that must complete over the entire matrix before the next begins. The relaxation reads `dist[i][k]` and `dist[k][j]` expecting the previous stage's values; with `i` or `j` outermost those cells belong to an unfinished stage, and the recurrence consumes half-updated data. The output is still finite and still returned, so the error is silent.
@@ -163,7 +161,7 @@ Overflow is the other silent corruptor. With `int.MaxValue` as `∞`, the uncond
 > [!QUESTION]- How does Floyd-Warshall surface a negative cycle, and how does that differ from Bellman-Ford?
 > After the sweep, any `dist[i][i] < 0` means a negative-weight path leaves `i` and returns to it — a negative cycle through `i` — reported for all vertices at once with no extra pass. Bellman-Ford instead runs one additional relaxation from a chosen source and can walk predecessors to extract the concrete cycle, which is what arbitrage-style problems need.
 
-## References
+# References
 
 - [Floyd-Warshall algorithm (Wikipedia)](https://en.wikipedia.org/wiki/Floyd%E2%80%93Warshall_algorithm) — DP formulation, path reconstruction via the successor matrix, and negative-cycle handling.
 - [All-pairs shortest paths, Floyd-Warshall (cp-algorithms)](https://cp-algorithms.com/graph/all-pair-shortest-path-floyd-warshall.html) — implementation, the in-place correctness argument, and route reconstruction.

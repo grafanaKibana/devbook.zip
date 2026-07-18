@@ -1,8 +1,8 @@
 ---
 publish: true
 created: 2026-07-15T08:55:49.824Z
-modified: 2026-07-17T05:56:46.323Z
-published: 2026-07-17T05:56:46.323Z
+modified: 2026-07-18T11:30:05.994Z
+published: 2026-07-18T11:30:05.994Z
 topic:
   - Data Persistence
 subtopic: []
@@ -13,15 +13,13 @@ priority: High
 status: Ready to Repeat
 ---
 
-# Intro
-
 ACID names four properties a database transaction can provide: Atomicity, Consistency, Isolation, and Durability. A **transaction** groups reads and writes behind one commit decision. The engine can roll the group back, constrain concurrent histories, and recover committed state after a crash, but only within the database and durability settings actually used.
 
 Understanding ACID is essential for designing systems that handle money, inventory, or any data where partial updates are unacceptable.
 
-## The Four Properties
+# The Four Properties
 
-### Atomicity
+## Atomicity
 
 All operations in a transaction succeed together, or none of them take effect. There is no partial commit.
 
@@ -44,13 +42,13 @@ The useful test is a failure trace, not the happy path:
 
 Atomicity does not make the transfer request safe to repeat. If the client times out after the server commits, retrying the same transaction can transfer another \$100. Store an idempotency key or transfer ID under a uniqueness constraint so a retry returns the first result instead of applying the business operation again.
 
-### Consistency
+## Consistency
 
 A committed transaction moves the database from one valid state to another according to the invariants the system enforces. The database can enforce a `CHECK (balance >= 0)`, a foreign key, a uniqueness constraint, or a trigger. It cannot infer application rules that were never encoded, such as "the sum of the two ledger entries must be zero" or "only one active booking may exist across these rows." Those invariants need constraints, locked rows or predicates, or a serializable transaction that performs the complete check and write.
 
 **Note**: consistency in ACID is about database-level rules (constraints, foreign keys, triggers). It is different from the "C" in CAP theorem, which refers to distributed consistency.
 
-### Isolation
+## Isolation
 
 Isolation controls which effects of concurrent transactions may be observed and which histories the engine permits. It is not an absolute ban on intermediate states: SQL Read Uncommitted may expose uncommitted writes, while stronger levels restrict dirty reads, non-repeatable reads, phantom reads, and broader serialization anomalies. The configured **isolation level** and engine implementation define the contract:
 
@@ -67,13 +65,13 @@ Isolation controls which effects of concurrent transactions may be observed and 
 
 This table states the SQL standard's minimum guarantees, not a portable prediction of every engine. PostgreSQL maps Read Uncommitted to Read Committed and its Repeatable Read implementation also prevents phantoms, yet still permits serialization anomalies. SQL Server can implement Read Committed with locks or row versioning depending on configuration. Always read the target engine's isolation documentation before choosing a level.
 
-#### MVCC and snapshot isolation
+### MVCC and snapshot isolation
 
 Isolation is implemented with **locking**, **MVCC/versioning**, or both. See [[Data Persistence/SQL/Database Locks|Database Locks]] for lock modes, granularity, and escalation. Under MVCC, writes create row versions and a snapshot decides which versions a statement may see. PostgreSQL Read Committed takes a new snapshot per statement; Repeatable Read and Serializable use a transaction snapshot. SQL Server uses row versioning for `READ_COMMITTED_SNAPSHOT` and `SNAPSHOT` when configured.
 
 MVCC reduces ordinary reader-writer blocking; it does not mean reads and writes can never block. Writers still conflict with writers, explicit locks can block readers, schema changes need stronger locks, and old versions must be retained while a snapshot can still see them. PostgreSQL reclaims dead tuples through `VACUUM`; SQL Server stores row versions in its version store.
 
-#### Write skew — the anomaly the table misses
+### Write skew — the anomaly the table misses
 
 The dirty/non-repeatable/phantom list does not capture every bad history. **Snapshot isolation can permit write skew**:
 
@@ -85,7 +83,7 @@ The dirty/non-repeatable/phantom list does not capture every bad history. **Snap
 
 Each transaction preserved "someone else is on call" in its snapshot; together they leave nobody on call. Lock every row or range that carries the invariant, encode the invariant as a database constraint where possible, or use true Serializable isolation. In PostgreSQL, Serializable detects a dangerous read/write dependency and aborts one transaction with SQLSTATE `40001`. Retry the **whole** transaction—including the reads and decisions—with bounded backoff; retrying only the final `UPDATE` reuses a decision made from a stale snapshot.
 
-### Durability
+## Durability
 
 Once a transaction commits under the engine's durable configuration, its changes survive a database or operating-system crash. With write-ahead logging (WAL), the engine records enough redo information before the corresponding data pages are written. A strict commit waits until the commit record reaches durable storage; recovery replays committed WAL after a crash.
 
@@ -94,7 +92,7 @@ Once a transaction commits under the engine's durable configuration, its changes
 
 A committed row can still disappear when storage hardware lies about flush completion, the filesystem or controller is misconfigured, or the operator restores an older backup. ACID describes the database protocol; the end-to-end durability claim also depends on the storage stack and recovery procedure.
 
-## Beyond a Single Database
+# Beyond a Single Database
 
 ACID guarantees are easy _within one database engine_. The moment a unit of work spans **two databases or services**, atomicity is no longer free:
 
@@ -103,9 +101,9 @@ ACID guarantees are easy _within one database engine_. The moment a unit of work
 
 Also note that concurrent transactions can produce **deadlocks** (two transactions each holding a lock the other needs); the engine picks a victim and rolls it back, so transactional code must be retry-safe — see [[Programming/NET/CSharp/Concurrency and Parallelism/Deadlocks|Deadlocks]]. Retrying is safe only when the application can also resolve an ambiguous commit result without applying the business operation twice.
 
-## Pitfalls
+# Pitfalls
 
-### Choosing the Wrong Isolation Level
+## Choosing the Wrong Isolation Level
 
 **What goes wrong**: using Read Committed for financial calculations allows non-repeatable reads — a balance check and a debit in the same transaction can see different values if another transaction commits between them.
 
@@ -113,7 +111,7 @@ Also note that concurrent transactions can produce **deadlocks** (two transactio
 
 **Mitigation**: Repeatable Read stabilizes repeated reads and, depending on the engine, may protect a same-row update. For a decision spanning multiple rows or a predicate, use Serializable, explicitly lock every row or range that carries the invariant, or validate optimistic version tokens for every protected record before committing.
 
-### Long-Running Transactions
+## Long-Running Transactions
 
 **What goes wrong**: a transaction holds locks for seconds or minutes, blocking other transactions and causing timeouts.
 
@@ -121,7 +119,7 @@ Also note that concurrent transactions can produce **deadlocks** (two transactio
 
 **Mitigation**: keep transactions short. Do all I/O outside the transaction. Only open the transaction for the database operations themselves.
 
-## Tradeoffs
+# Tradeoffs
 
 **Transaction semantics**
 
@@ -166,7 +164,7 @@ public sealed class Account
 await db.SaveChangesAsync();
 ```
 
-## Questions
+# Questions
 
 > [!QUESTION]- What isolation level should you use for a read-modify-write transaction, and why?
 > Match the protection to the invariant. Repeatable Read stabilizes repeated reads and may protect a same-row update under the engine's semantics, but it does not generically prevent write skew. For a financial or inventory decision spanning rows or a predicate, use Serializable or explicitly lock the full invariant set. Optimistic row-version checks are a lower-contention option only when the transaction validates every record whose version informed the decision.
@@ -174,7 +172,7 @@ await db.SaveChangesAsync();
 > [!QUESTION]- How does write-ahead logging (WAL) implement durability?
 > Before a changed data page may reach durable storage, the database must flush the WAL records needed to reconstruct it. Under a strict commit setting, the commit record is also flushed before success is acknowledged. Recovery replays WAL so committed changes missing from data pages are restored; engine-specific transaction metadata keeps uncommitted changes from becoming visible. Sequential log writes and group commit let data-page writes happen later without placing every commit behind a random page write.
 
-## References
+# References
 
 - [Transaction isolation (PostgreSQL docs)](https://www.postgresql.org/docs/current/transaction-iso.html) — SQL phenomena versus PostgreSQL's actual Read Committed, Repeatable Read, and Serializable behavior.
 - [Serialization failure handling (PostgreSQL docs)](https://www.postgresql.org/docs/current/mvcc-serialization-failure-handling.html) — SQLSTATE `40001` and why the complete transaction must be retried.

@@ -1,8 +1,8 @@
 ---
 publish: true
 created: 2026-07-16T07:38:11.775Z
-modified: 2026-07-17T05:46:25.833Z
-published: 2026-07-17T05:46:25.833Z
+modified: 2026-07-18T11:59:15.666Z
+published: 2026-07-18T11:59:15.666Z
 topic:
   - Security
 subtopic:
@@ -14,13 +14,11 @@ priority: High
 status: Ready to Repeat
 ---
 
-# Two-Factor Authentication
-
 Two-factor authentication (2FA) requires evidence from exactly two independent factor categories: knowledge, possession, or inherence. MFA means two or more. A password plus a second password is still one factor; a password plus a TOTP authenticator combines knowledge and possession.
 
 The engineering boundary includes enrollment and recovery. A phishing-resistant authenticator does not protect an account whose help desk can remove it after answering weak questions.
 
-## Method tradeoffs
+# Method tradeoffs
 
 | Method | Proof | Phishing and replay | Recovery boundary | Choose it when |
 | --- | --- | --- | --- | --- |
@@ -32,15 +30,15 @@ The engineering boundary includes enrollment and recovery. A phishing-resistant 
 
 Default to passkeys/WebAuthn when the client population supports them. Keep TOTP as a compatibility fallback when needed, and protect fallback and recovery at least as carefully as primary enrollment. Avoid SMS for new high-value systems.
 
-## TOTP
+# TOTP
 
 TOTP derives a short code from a shared secret and a time-step counter. The server accepts only a small clock-skew window, rate-limits guesses, and records the last accepted step to reject replay. See [[Security/Authentication/TOTP|TOTP]] for provisioning, validation, secret storage, and recovery mechanics.
 
-## FIDO2 and WebAuthn
+# FIDO2 and WebAuthn
 
 WebAuthn defines the browser/API ceremony between a relying party (RP), client, and authenticator. CTAP defines communication with roaming authenticators such as security keys. A passkey is a WebAuthn discoverable credential: the authenticator can identify an account without the user first typing a username.
 
-### Registration ceremony
+## Registration ceremony
 
 ```text
 RP -> Browser: challenge, rp.id, user.id, credential options
@@ -58,7 +56,7 @@ RP: store credential ID, public key, user binding, and metadata
 
 The attested credential data inside `authenticatorData` carries the credential ID and credential public key. With `none` attestation, the attestation statement can be empty and no attestation signature is returned; the RP still validates the client data, authenticator data, and public key. Other attestation formats may sign the authenticator data plus the hash of `clientDataJSON`, but the RP verifies that evidence only when its enrollment policy asks for attestation. The private key remains under authenticator control. The RP stores a public key, so a database leak does not directly reveal a reusable authentication secret. Registration must be authorized by a recent trusted session; otherwise an attacker who briefly controls an account can enroll their own credential.
 
-### Authentication ceremony
+## Authentication ceremony
 
 ```text
 RP -> Browser: fresh unpredictable challenge + rp.id + allowed credentials or discoverable request
@@ -71,9 +69,9 @@ RP: consume the challenge once and create or elevate a session
 
 Origin and RP-ID binding give WebAuthn its phishing resistance: a credential registered for `example.com` will not sign a challenge for `examp1e.com`. The fresh challenge and one-time server state stop replay. User verification such as a device PIN or biometric unlocks the authenticator; the biometric is not sent to the website.
 
-![[Assets/System Design 101/982d589bf15322ffe45e26e3298943717d1e15de9ff55cfe4e30e93bd91ccad4.png]]
+![[Assets/Security/Security-Two-Factor Auth-18120000.png]]
 
-## Passkey, sync, and attestation choices
+# Passkey, sync, and attestation choices
 
 | Choice | Benefit | Cost / trust introduced |
 | --- | --- | --- |
@@ -85,7 +83,7 @@ Origin and RP-ID binding give WebAuthn its phishing resistance: a credential reg
 
 Attestation says something about the authenticator at registration; it does not establish the human's legal identity and is not required for ordinary consumer passkeys. Decide it from the relying party's assurance policy, not from a blanket belief that more attestation is always safer.
 
-## Failure and recovery behavior
+# Failure and recovery behavior
 
 - Expire and consume WebAuthn challenges once, and bind them to the initiating session and intended ceremony.
 - Validate `origin` and RP ID on the server through a maintained WebAuthn library; never trust client-provided account identity without matching the stored credential binding.
@@ -94,7 +92,7 @@ Attestation says something about the authenticator at registration; it does not 
 - Offer multiple credentials or protected recovery codes before loss occurs. A TOTP/SMS fallback restores the fallback's phishing resistance, not WebAuthn's.
 - After high-risk recovery, revoke sessions, rotate recovery material, and apply a delay or additional review to sensitive actions where appropriate.
 
-## Questions
+# Questions
 
 > [!QUESTION]- Why does WebAuthn resist a real-time phishing proxy better than TOTP?
 > TOTP is a transferable number that a proxy can relay before it expires. WebAuthn signs data bound to the browser-observed origin and RP ID, so a credential for the real site will not produce a valid assertion for the phishing origin.
@@ -102,7 +100,7 @@ Attestation says something about the authenticator at registration; it does not 
 > [!QUESTION]- Is a synced passkey the same trust model as a hardware security key?
 > No. Both use WebAuthn origin-bound public-key credentials, but a synced passkey relies on a platform account and encrypted synchronization/recovery, while a device-bound security key keeps the private key on one authenticator and needs a separate backup path.
 
-## References
+# References
 
 - [W3C Web Authentication Level 3](https://www.w3.org/TR/webauthn-3/) — registration/authentication ceremonies, RP binding, discoverable credentials, attestation, and verification rules.
 - [FIDO Alliance — Passkeys](https://fidoalliance.org/passkeys/) — passkey terminology, device-bound and synced credential models, and deployment material.

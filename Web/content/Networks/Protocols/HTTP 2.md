@@ -1,8 +1,8 @@
 ---
 publish: true
 created: 2026-07-11T21:46:11.960Z
-modified: 2026-07-16T15:32:53.584Z
-published: 2026-07-16T15:32:53.584Z
+modified: 2026-07-18T11:30:08.247Z
+published: 2026-07-18T11:30:08.247Z
 topic:
   - Networks
 subtopic:
@@ -14,13 +14,11 @@ priority: Medium
 status: Ready to Repeat
 ---
 
-# Intro
-
 HTTP/2 is the second major version of the HTTP protocol, standardized in 2015 (RFC 7540, superseded by RFC 9113). It runs over a TCP connection and multiplexes many request/response pairs simultaneously, eliminating HTTP/1.1's application-layer head-of-line blocking without eliminating TCP's ordered-delivery blocking. The result is lower latency and less connection overhead for applications that make many concurrent requests — without changing the HTTP semantics (methods, headers, status codes) that applications already use.
 
 See [[HTTP]] for the foundational HTTP concepts that HTTP/2 builds on.
 
-## What HTTP/1.1 Got Wrong
+# What HTTP/1.1 Got Wrong
 
 HTTP/1.1 has two fundamental performance problems:
 
@@ -28,7 +26,7 @@ HTTP/1.1 has two fundamental performance problems:
 
 2. **Verbose headers:** HTTP/1.1 headers are plain text and sent in full with every request. A typical request has 500–800 bytes of headers. For small API calls, headers can be larger than the payload.
 
-## How HTTP/2 Works
+# How HTTP/2 Works
 
 **Binary framing layer**
 HTTP/2 replaces the text-based HTTP/1.1 format with a binary framing layer. Messages are split into frames (the smallest unit of communication), each tagged with a stream ID.
@@ -49,7 +47,7 @@ flowchart TD
 **HPACK header compression**
 Headers are compressed using a static table and a connection-specific dynamic table. Sensitive values such as `Authorization` credentials must use the never-indexed representation rather than entering the dynamic table, because dynamic compression state is shared across messages and can leak secrets through size observations. The header name can still use a static-table index; the credential value is sent as a literal and is not reduced to a one-byte dynamic-table reference.
 
-## Server Push and Prioritization Caveats
+# Server Push and Prioritization Caveats
 
 HTTP/2 still specifies server push: a server can send a promised request and response before the client asks. The mechanism was difficult to operate well because the server lacks the browser's complete cache state, pushed bytes compete with more urgent responses, and intermediaries handle push inconsistently. Chrome removed HTTP/2 push support, and other major browsers no longer make it a dependable web optimization. This is browser-product behavior, not an HTTP/3 deprecation of the concept; HTTP/3 also defines push.
 
@@ -57,13 +55,13 @@ Prefer preload hints and ordinary cacheable responses for web delivery. They let
 
 The original HTTP/2 dependency tree allowed clients to express stream relationships and weights, but deployments implemented it inconsistently. RFC 9218 defines the simpler extensible-priority scheme using urgency and incremental delivery. A priority signal is advice, not a guarantee: the server, proxy, and congestion controller still decide scheduling. Test the full path before relying on it for user-visible ordering.
 
-## How HTTP/2 Is Negotiated (ALPN)
+# How HTTP/2 Is Negotiated (ALPN)
 
 A client and server don't just "speak HTTP/2" — they have to agree to. For HTTPS (the only mode browsers allow), this happens **during the TLS handshake via ALPN** (Application-Layer Protocol Negotiation): the `ClientHello` lists supported protocols (`h2`, `http/1.1`) and the server picks one in its reply — **zero extra round-trips**. This is why HTTP/2 is "TLS-required in practice": ALPN rides along on the handshake that's already happening.
 
 Cleartext HTTP/2 (**h2c**) exists via an HTTP/1.1 `Upgrade` header, but browsers don't support it; it's mostly used **server-to-server** (e.g. behind a load balancer, or [[gRPC]], which runs on HTTP/2 and relies on this multiplexing).
 
-## HTTP/2 vs HTTP/1.1
+# HTTP/2 vs HTTP/1.1
 
 | Feature | HTTP/1.1 | HTTP/2 |
 |---------|----------|--------|
@@ -74,7 +72,7 @@ Cleartext HTTP/2 (**h2c**) exists via an HTTP/1.1 `Upgrade` header, but browsers
 | Head-of-line blocking | Application layer | TCP layer only |
 | TLS requirement | Optional | Required in practice (browsers enforce) |
 
-## HTTP/2 in .NET
+# HTTP/2 in .NET
 
 ASP.NET Core supports HTTP/2 natively via Kestrel. Enable it in `appsettings.json` or `Program.cs`:
 
@@ -99,7 +97,7 @@ var client = new HttpClient
 };
 ```
 
-## Pitfalls
+# Pitfalls
 
 **TCP head-of-line blocking remains**
 HTTP/2 eliminates HTTP/1.1's ordered-response head-of-line blocking but not TCP-layer blocking. A single lost packet can delay data for all streams on the connection until TCP retransmits it. Under high packet loss, HTTP/2 can perform worse than HTTP/1.1 with multiple connections. HTTP/3 uses QUIC streams so loss on one request stream does not block unrelated request streams at the transport layer; ordered delivery still blocks later bytes within the affected stream.
@@ -110,7 +108,7 @@ HTTP/1.1 uses multiple connections, so congestion on one does not affect others.
 **Server push cache invalidation**
 Pushed resources may already be in the client's cache. The server has no way to know, so it wastes bandwidth pushing resources the client doesn't need. Most production deployments disable server push.
 
-## HTTP/3 Boundary
+# HTTP/3 Boundary
 
 HTTP/3 keeps HTTP semantics but replaces HTTP/2's framing-over-TCP with HTTP framing over QUIC. QUIC uses UDP datagrams while providing its own reliable streams, congestion control, connection IDs, and TLS 1.3 handshake.
 
@@ -120,7 +118,7 @@ HTTP/3 keeps HTTP semantics but replaces HTTP/2's framing-over-TCP with HTTP fra
 - UDP-blocking networks, middleboxes, observability tooling, CPU cost, and server/CDN support can force fallback to HTTP/2.
 - HTTP/2 server push is not a reason to migrate: major browsers removed or disabled it, and HTTP/3 also has a push mechanism that applications should not assume is useful.
 
-## Questions
+# Questions
 
 > [!QUESTION]- What problem does HTTP/2 multiplexing solve compared to HTTP/1.1?
 > HTTP/1.1 has no independent request streams. Optional pipelining permits multiple outstanding requests on one connection, but responses must return in request order, so a slow earlier response delays later ones. Browsers typically work around this with 6–8 parallel connections. HTTP/2 multiplexes independent streams on one connection, removing that response-order dependency and reducing connection overhead.
@@ -132,7 +130,7 @@ HTTP/3 keeps HTTP semantics but replaces HTTP/2's framing-over-TCP with HTTP fra
 > [!QUESTION]- When would you choose HTTP/1.1 over HTTP/2?
 > When the network has high packet loss (mobile, satellite) and you cannot use HTTP/3 — multiple HTTP/1.1 connections isolate packet loss better than a single HTTP/2 connection. Also when connecting to legacy servers or proxies that don't support HTTP/2.
 
-## References
+# References
 
 - [HTTP/2 (RFC 9113)](https://www.rfc-editor.org/rfc/rfc9113) — the current HTTP/2 specification, superseding RFC 7540.
 - [Evolution of HTTP (MDN)](https://developer.mozilla.org/en-US/docs/Web/HTTP/Basics_of_HTTP/Evolution_of_HTTP#http2) — accessible history of HTTP versions with clear explanations of what each version improved.

@@ -1,8 +1,8 @@
 ---
 publish: true
 created: 2026-07-12T14:27:20.429Z
-modified: 2026-07-12T14:27:20.429Z
-published: 2026-07-12T14:27:20.429Z
+modified: 2026-07-18T11:30:05.806Z
+published: 2026-07-18T11:30:05.806Z
 topic:
   - Computer Science
 subtopic:
@@ -13,8 +13,6 @@ level:
 priority: Medium
 status: Ready to Repeat
 ---
-
-# Intro
 
 An autocomplete box holds a set of strings and must answer a different question than "is this exact word present?": given the typed fragment `lap`, which stored keys begin with it? A [[HashMap]] hashes the whole key, so it can confirm exact membership but has no notion of a shared prefix — answering the fragment query means scanning all `n` keys. A trie (prefix tree) keys the set on the _sequence_ of characters instead of a hash of the whole string, so the prefix becomes a location in the structure rather than a filter over every entry.
 
@@ -27,7 +25,7 @@ What the structure gives up is compactness. Because every node reserves room for
 > [!NOTE] Visualization pending
 > Planned StepTrace: a prefix-tree card spelling characters along the edges from the root, showing two words sharing a prefix follow the same path until they diverge, and an end-of-word flag lighting up as each complete key is inserted. No matching renderer exists in `engine.js` yet.
 
-## Representation and invariants
+# Representation and invariants
 
 A node holds two pieces of state and nothing else:
 
@@ -44,7 +42,7 @@ Three invariants hold in a valid trie:
 
 The distinction between reaching a node and reaching a _flagged_ node is the whole contract: exact search checks the flag, prefix search does not.
 
-## Complexity
+# Complexity
 
 Every bound is stated in the key length `L` and, for the collection variant, the number of matching descendants `m`. The stored-key count `n` does not appear in any per-operation time bound.
 
@@ -58,7 +56,7 @@ Every bound is stated in the key length `L` and, for the collection variant, the
 
 The length-not-count property is the reason a trie is chosen: adding millions more keys never lengthens the walk for an existing query, because the path is fixed by the query string alone. The cost is paid in the space column — the `σ`-wide child slot at every node makes the structure memory-heavy in exchange for that flat lookup.
 
-## When the per-symbol layout hurts
+# When the per-symbol layout hurts
 
 The wasted memory is structural, not incidental. An array-backed node reserves `σ` child slots even when a node has one child, so a long chain of single-character branches — the tail of a rare word — allocates a nearly empty array at every step. A **radix (PATRICIA) trie** collapses each such single-child chain into one edge labelled with the whole substring, cutting node count sharply on sparse, long keys while preserving the same `O(L)` walk.
 
@@ -68,7 +66,7 @@ A trie also only applies to keys with a meaningful sequence — strings, byte se
 
 Deletion is the operation that exposes the shared-path invariant. Removing `car` when `card` is also present must clear the `r` node's `IsEnd` flag but leave the node itself, because `d` still hangs off it. Pruning may only remove nodes that have become both unflagged and childless, walking back up until that condition fails. Implementations that skip the prune and merely tombstone the flag leak nodes under churn.
 
-## Reference drawer
+# Reference drawer
 
 > [!ABSTRACT]- Shared-prefix paths for `car`, `card`, `care`
 >
@@ -136,7 +134,7 @@ Deletion is the operation that exposes the shared-path invariant. Removing `car`
 >
 > `Search` and `StartsWith` share the same walk; the only difference is that `Search` requires the terminal node's `IsEnd` flag while `StartsWith` accepts any reached node. A `Dictionary` child map keeps memory proportional to actual branches; a `Node[26]` array is faster per step but reserves all slots.
 
-## Comparison
+# Comparison
 
 Every structure below stores a set of keys; they differ in whether prefixes and ordering survive, and in memory.
 
@@ -149,7 +147,7 @@ Every structure below stores a set of keys; they differ in whether prefixes and 
 
 A trie is the structure when prefixes are the query — autocomplete, longest-prefix routing, shared-prefix key sets — because its `O(L)` lookup stays flat as `n` grows and the tree already enumerates completions and sorted order for free. A [[HashMap]] wins when only exact membership matters and memory is tight: it drops prefix and ordering entirely but costs a fraction of the space. A radix tree is the trie to pick when the plain trie's node count is the problem — it compresses single-child chains without changing the query semantics. [[Aho-Corasick]] extends the trie with failure links to scan one text against many patterns at once, a different workload from single-key lookup.
 
-## Questions
+# Questions
 
 > [!QUESTION]- Why is a trie lookup `O(L)` and not affected by the number of stored keys?
 > The walk follows one labelled edge per character of the query, so the work equals the key length `L`. The path a query traces is fixed by the query string; adding more keys creates other branches but never lengthens that path. A comparison tree, by contrast, reads the key `O(log n)` times as `n` grows.
@@ -163,7 +161,7 @@ A trie is the structure when prefixes are the query — autocomplete, longest-pr
 > [!QUESTION]- What does a radix (PATRICIA) trie change about the representation, and why?
 > It collapses each chain of single-child nodes into one edge labelled with the whole substring. The plain trie reserves a `σ`-wide child slot at every node, so long sparse keys waste memory on near-empty arrays; compressing the chains cuts node count while keeping the `O(L)` walk and the same prefix and ordering queries.
 
-## References
+# References
 
 - [Trie (Wikipedia)](https://en.wikipedia.org/wiki/Trie) — formal definition, the array-versus-map node layout, and the radix/PATRICIA compression variant.
 - [PATRICIA — Practical Algorithm To Retrieve Information Coded In Alphanumeric](https://dl.acm.org/doi/10.1145/321479.321481) — Donald Morrison's original path-compressed trie, the basis of the radix tree.

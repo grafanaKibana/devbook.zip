@@ -1,8 +1,8 @@
 ---
 publish: true
 created: 2026-07-16T14:12:14.666Z
-modified: 2026-07-16T14:12:14.666Z
-published: 2026-07-16T14:12:14.666Z
+modified: 2026-07-18T11:30:09.584Z
+published: 2026-07-18T11:30:09.584Z
 topic:
   - Networks
 subtopic:
@@ -13,8 +13,6 @@ level:
 priority: High
 status: Ready to Repeat
 ---
-
-# Intro
 
 SSH provides an encrypted, integrity-protected connection for remote shells, command execution, file transfer, and forwarding. It separates three jobs that are often confused: the transport protocol negotiates algorithms and authenticates the server host; the user-authentication protocol proves which user may enter; the connection protocol multiplexes shells, commands, and forwarded streams over the protected transport.
 
@@ -27,13 +25,13 @@ TCP connect
   -> open shell/exec/forwarding channels
 ```
 
-## Host Authenticity and Key Exchange
+# Host Authenticity and Key Exchange
 
 During key exchange, both sides derive fresh symmetric keys. The server signs exchange-bound data with its host private key; the client checks that public host key against `known_hosts`, a host certificate authority, or another trusted bootstrap. Accepting an unexpected fingerprint without investigation defeats server authentication and permits a machine-in-the-middle attack.
 
 The negotiated session keys encrypt bulk traffic. Neither the user's public key nor the server host key encrypts every packet. Modern ephemeral Diffie-Hellman key exchange also provides forward secrecy: stealing a long-term host key later does not decrypt captured sessions.
 
-## User Authentication
+# User Authentication
 
 Public-key authentication proves possession by signing data bound to the current SSH session. The server verifies the signature against an authorized public key. It does not encrypt a random challenge with the user's public key and ask the client to decrypt it.
 
@@ -45,7 +43,7 @@ ssh -o IdentitiesOnly=yes -i ~/.ssh/id_ed25519_work deploy@app.example.com
 
 Use separate keys for separate trust domains, protect private keys with a passphrase, and keep agent forwarding off unless a hop genuinely requires it. An agent can sign on the user's behalf; forwarding its socket lets a compromised remote host request signatures while the session is open. See [[Security]], [[Secrets Management]], and [[Digital Signature]] for the surrounding key-handling model.
 
-## Channels and Forwarding
+# Channels and Forwarding
 
 One SSH connection can carry several independent channels: an interactive shell, an `exec` request, SFTP, and forwarded TCP streams. Flow control is per channel, so a large transfer and a shell share the encrypted connection without becoming one undifferentiated byte stream.
 
@@ -55,14 +53,14 @@ One SSH connection can carry several independent channels: an interactive shell,
 
 Forwarding extends network reach. Restrict `AllowTcpForwarding`, destination policy, and bastion accounts instead of treating encryption as authorization.
 
-## Common Failures
+# Common Failures
 
 - `REMOTE HOST IDENTIFICATION HAS CHANGED`: investigate a legitimate rebuild, DNS/routing error, or interception before removing the old key.
 - `Permission denied (publickey)`: inspect offered identities with `ssh -vv`, file ownership/modes, server authorization, and algorithm policy.
 - Works interactively but not in automation: the agent, passphrase prompt, host-key prompt, or different `HOME` is part of the hidden dependency.
 - Tunnel connects but the service fails: the SSH server must be able to reach the forwarding destination; `localhost` is evaluated on the side named by the forwarding rule.
 
-## References
+# References
 
 - [RFC 4251: SSH Protocol Architecture](https://www.rfc-editor.org/rfc/rfc4251) — defines the transport, user-authentication, and connection protocol boundaries.
 - [RFC 4253: SSH Transport Layer Protocol](https://www.rfc-editor.org/rfc/rfc4253) — specifies key exchange, server authentication, encryption, and integrity.

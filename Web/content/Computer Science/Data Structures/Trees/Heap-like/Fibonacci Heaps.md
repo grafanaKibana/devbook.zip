@@ -1,8 +1,8 @@
 ---
 publish: true
 created: 2026-07-12T14:27:20.424Z
-modified: 2026-07-12T14:27:20.424Z
-published: 2026-07-12T14:27:20.424Z
+modified: 2026-07-18T11:30:05.561Z
+published: 2026-07-18T11:30:05.561Z
 topic:
   - Computer Science
 subtopic:
@@ -13,8 +13,6 @@ level:
 priority: Medium
 status: Ready to Repeat
 ---
-
-# Intro
 
 [[Dijkstra]] and Prim's [[Minimum Spanning Tree]] spend most of their time on one operation: lowering the tentative key of a vertex already in the frontier. Each relaxed edge triggers a decrease-key, so a dense graph performs up to `E` of them against only `V` extract-mins. A binary [[Heap]] charges `O(log n)` for every decrease-key, which dominates the total and pins Dijkstra at `O(E log V)`.
 
@@ -27,7 +25,7 @@ The bound is amortized, not worst-case. The forest can hold many trees and many 
 > [!NOTE] Visualization pending
 > Planned StepTrace: a lazy-forest heap card showing insert dropping a root into the root list, decrease-key cutting a node out (cascading up through an already-marked parent), and extract-min consolidating trees of equal degree until the degrees are distinct. No matching renderer exists in `engine.js` yet.
 
-## Representation and invariants
+# Representation and invariants
 
 Each node holds a key, its **degree** (number of children), a **mark** bit, and four pointers: to its parent, to one child, and to its left and right siblings. Siblings — including the roots — form circular doubly-linked lists, so splicing a node in or out is a constant number of pointer writes with no boundary case for the list ends. The heap itself stores only the pointer to the minimum root and the total node count.
 
@@ -45,7 +43,7 @@ Which fields each operation may change:
 - **Decrease-key** — rewrites one node's key; if that breaks heap order with its parent, cuts the node to the root list (clearing its mark, since roots are unmarked), then cascades: while the parent was already marked, cut it too, upward. Degrees of cut parents drop by one.
 - **Extract-min** — removes the min root, promotes its children to roots, then consolidates by repeatedly linking two roots of equal degree (the larger key becomes a child of the smaller) until every root degree is distinct, and finally rescans the root list to reset the min pointer.
 
-## Complexity
+# Complexity
 
 Bounds assume the mark-and-cascading-cut discipline; without it decrease-key stays `O(1)` but consolidation is no longer bounded by `O(log n)`.
 
@@ -63,7 +61,7 @@ The two `O(n)` worst singles are the direct cost of laziness. A single extract-m
 
 Structurally the heap is `O(n)` nodes, but the per-node overhead is high: four pointers plus an integer degree and a mark bit, versus a binary heap's single flat array with no per-element pointers at all.
 
-## Where laziness and amortization stop paying
+# Where laziness and amortization stop paying
 
 The advertised `O(1)` decrease-key is amortized and only wins when decrease-key vastly outnumbers extract-min. That is exactly the dense-graph shape of [[Dijkstra]] and Prim's [[Minimum Spanning Tree]], where `E` relaxations dwarf `V` removals and the `O(E + V log V)` bound is genuinely optimal. On sparse graphs, or any workload where extract-min is a constant fraction of operations, the deferred consolidation is paid often enough that the asymptotic edge evaporates.
 
@@ -71,7 +69,7 @@ The constant factors and memory layout usually erase the win regardless of asymp
 
 The mark-and-cascading-cut machinery is intricate and error-prone: forgetting to clear a mark on promotion to root, or to stop the cascade at an unmarked parent, silently breaks the degree bound and quietly degrades consolidation without any crash. And because a single extract-min or a single cascading decrease-key can be `O(n)`, the structure is unsuitable anywhere per-operation latency matters, such as real-time scheduling — the guarantees hold only in aggregate.
 
-## Reference drawer
+# Reference drawer
 
 > [!ABSTRACT]- Root list and a cascading cut
 >
@@ -174,7 +172,7 @@ The mark-and-cascading-cut machinery is intricate and error-prone: forgetting to
 >
 > The invariant carriers are `Cut` (clears the mark because a root is always unmarked) and `CascadingCut` (stops at the first unmarked ancestor, otherwise cuts upward). Consolidation is elided; it is the standard degree-indexed linking pass that pays the deferred cost.
 
-## Questions
+# Questions
 
 > [!QUESTION]- What does the laziness actually defer, and to where?
 > Insert, merge, and decrease-key avoid any tree reorganization: insert and merge only splice into the root list, and decrease-key cuts the node loose instead of sifting it. The deferred work — linking trees so degrees become distinct — is done once by the next extract-min during consolidation, so many cheap operations prepay one expensive cleanup.
@@ -185,7 +183,7 @@ The mark-and-cascading-cut machinery is intricate and error-prone: forgetting to
 > [!QUESTION]- Why is find-min O(1) but extract-min O(log n)?
 > Heap order forces the global minimum to be a root, and the heap keeps a direct pointer to it, so find-min is a single read. Extract-min must remove that root, promote its children, and then consolidate the whole root list — linking equal-degree roots until degrees are distinct — which costs `O(log n)` amortized because the maximum degree is `O(log n)`.
 
-## References
+# References
 
 - [Fredman & Tarjan, "Fibonacci heaps and their uses in improved network optimization algorithms" (JACM 1987)](https://dl.acm.org/doi/10.1145/28869.28874) — the original structure, potential-function analysis, and the resulting Dijkstra/Prim bounds.
 - [Fibonacci heap (Wikipedia)](https://en.wikipedia.org/wiki/Fibonacci_heap) — the amortized proof, the `F(k + 2)` degree bound, and the cascading-cut argument in full.

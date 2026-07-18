@@ -1,8 +1,8 @@
 ---
 publish: true
 created: 2026-07-15T11:47:55.378Z
-modified: 2026-07-15T11:47:55.378Z
-published: 2026-07-15T11:47:55.378Z
+modified: 2026-07-18T11:38:38.771Z
+published: 2026-07-18T11:38:38.771Z
 topic:
   - Software Architecture
 subtopic:
@@ -13,8 +13,6 @@ level:
 priority: High
 status: Ready to Repeat
 ---
-
-# Bridge
 
 Think of remote controls and TVs. Any remote — basic, smart, universal — can operate any TV — Samsung, LG, Sony. The remote is the abstraction (what you want to do: power, volume, channel), the TV is the implementation (how it actually gets done). Adding a new TV brand doesn’t require redesigning any remote. Adding a new remote type doesn’t require changing any TV. The two hierarchies vary independently because they’re connected by a bridge, not welded together by inheritance.
 
@@ -50,9 +48,9 @@ classDiagram
 ```
 
 > [!NOTE] Bridge vs Adapter
-> [[Adapter]] is a **retrofit** — you adapt an existing interface you can't change. Bridge is **designed upfront** — you plan the abstraction/implementation split from the start. If you're integrating a legacy system, use Adapter. If you're designing a new system with multiple dimensions of variation, use Bridge.
+> [[Software Architecture/Patterns/Design Patterns/Structural/Adapter]] is a **retrofit** — you adapt an existing interface you can't change. Bridge is **designed upfront** — you plan the abstraction/implementation split from the start. If you're integrating a legacy system, use Adapter. If you're designing a new system with multiple dimensions of variation, use Bridge.
 
-## Problem
+# Problem
 
 `PaymentService` has methods per provider. Adding a new payment type (subscription) AND a new provider (BankTransfer) causes a combinatorial explosion:
 
@@ -76,7 +74,7 @@ public class PaymentService
 
 Here's what breaks when requirements change: adding a "partial refund" payment type requires implementing it for every provider. Adding a new provider requires implementing every payment type. The two dimensions are locked together.
 
-## Solution
+# Solution
 
 Separate the payment type abstraction from the provider implementation:
 
@@ -174,7 +172,7 @@ var paypalCharge = new SingleChargePayment(paypalGateway);
 
 Adding a new payment type now means one new `PaymentOperation` subclass that works with all existing gateways. Adding a new provider means one new `IPaymentGateway` implementation that works with all existing payment types.
 
-## You Already Use This
+# You Already Use This
 
 **ADO.NET `DbConnection` / `DbCommand`** — the canonical .NET Bridge. `DbConnection` is the abstraction; `SqlConnection`, `NpgsqlConnection`, `MySqlConnection` are the implementations. `DbCommand` is another abstraction; `SqlCommand`, `NpgsqlCommand` are implementations. You can write provider-agnostic data access code against `DbConnection`/`DbCommand`.
 
@@ -182,7 +180,7 @@ Adding a new payment type now means one new `PaymentOperation` subclass that wor
 
 **`IDistributedCache`** — the abstraction for distributed caching. `StackExchangeRedisCache`, `SqlServerCache`, and `MemoryDistributedCache` are implementations. Application code depends on `IDistributedCache`; the provider is swapped via DI registration.
 
-## Pitfalls
+# Pitfalls
 
 **Premature abstraction when only one implementation exists** — if you only have Stripe today and no concrete plans for PayPal, the Bridge adds two class hierarchies for no current benefit. Start with a direct implementation; introduce Bridge when the second dimension of variation appears. The cost of premature Bridge: extra indirection, harder to trace execution, more classes to maintain.
 
@@ -190,7 +188,7 @@ Adding a new payment type now means one new `PaymentOperation` subclass that wor
 
 **Misidentifying the two dimensions** — Bridge requires two genuinely orthogonal dimensions. If payment type and provider are actually coupled (subscriptions only work with Stripe), Bridge creates false flexibility. Verify that every combination of abstraction × implementation is valid before committing to the pattern.
 
-## Tradeoffs
+# Tradeoffs
 
 | Concern | Bridge | Monolithic class hierarchy |
 |---|---|---|
@@ -202,7 +200,7 @@ Adding a new payment type now means one new `PaymentOperation` subclass that wor
 
 **Decision rule**: Use Bridge when you have 2+ implementations today AND expect 2+ abstractions, or vice versa. The break-even is roughly 2×2 = 4 combinations. Below that, a simpler approach (strategy, direct implementation) is less overhead. The signal is when you find yourself writing the same logic in multiple methods that differ only in the provider they call.
 
-## Questions
+# Questions
 
 > [!QUESTION]- How do you decide whether to use Bridge or Strategy for payment provider selection?
 > Strategy selects an algorithm at runtime — the client chooses which strategy to inject. Bridge separates two dimensions of variation that both need to evolve independently. If you only need to swap payment providers (one dimension), Strategy is sufficient: inject `IPaymentGateway` and let the client choose. Bridge adds value when you also need payment types to vary independently — when both dimensions grow. The structural difference: Strategy has one interface; Bridge has two (abstraction + implementation). Use Strategy first; introduce Bridge when the second dimension appears.
@@ -213,7 +211,7 @@ Adding a new payment type now means one new `PaymentOperation` subclass that wor
 > [!QUESTION]- What's the difference between Bridge and Dependency Injection?
 > DI is a mechanism for providing dependencies; Bridge is a structural pattern for organizing class hierarchies. They're complementary: you use DI to inject the `IPaymentGateway` implementation into the `PaymentOperation` abstraction. DI doesn't tell you how to structure the classes — Bridge does. Without Bridge, DI would inject a single `IPaymentService` that handles both dimensions; with Bridge, DI injects the gateway into the abstraction, and the abstraction handles the payment type logic. Bridge defines the structure; DI wires it together.
 
-## References
+# References
 
 - [Bridge Pattern — Christopher Okhravi](https://www.youtube.com/watch?v=F1YQ7YRjttI\&list=PLrhzvIcii6GNjpARdnO4ueTUAVR9eMBpc\&index=11) — video walkthrough of the Bridge pattern with OOP examples
 - [Bridge — refactoring.guru](https://refactoring.guru/design-patterns/bridge) — canonical pattern description with structure diagram and C# example

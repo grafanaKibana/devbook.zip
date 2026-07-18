@@ -1,8 +1,8 @@
 ---
 publish: true
 created: 2026-07-11T21:46:14.260Z
-modified: 2026-07-17T05:45:13.986Z
-published: 2026-07-17T05:45:13.986Z
+modified: 2026-07-18T11:59:15.663Z
+published: 2026-07-18T11:59:15.663Z
 topic:
   - Networks
 subtopic:
@@ -14,13 +14,11 @@ priority: Medium
 status: Ready to Repeat
 ---
 
-# TCP/IP
-
 TCP/IP is the foundational protocol suite of the internet. **IP** (Internet Protocol) operates at the Internet layer and handles addressing and routing between networks. **TCP** (Transmission Control Protocol) operates at the Transport layer on top of IP and provides reliable, ordered, connection-oriented byte-stream delivery. They are distinct layers: the IP sections below explain addressing, NAT, and IPv4/IPv6 operation; the TCP sections explain one transport that runs over IP. Application protocols such as HTTP, gRPC, and database protocols then depend on that transport.
 
 Understanding TCP/IP matters for debugging latency, connection issues, and designing systems that handle network failures correctly.
 
-## The TCP/IP Stack
+# The TCP/IP Stack
 
 ```text
 Application Layer   HTTP, gRPC, WebSocket, SMTP, DNS
@@ -31,7 +29,7 @@ Link Layer          Ethernet, Wi-Fi (physical transmission)
 
 Each layer adds a header and passes the packet down. On the receiving end, each layer strips its header and passes the payload up.
 
-## IP Addressing and NAT
+# IP Addressing and NAT
 
 The "IP" half of TCP/IP is addressing. An **IP address** identifies an interface; a **port** (16-bit, 0–65535) selects a transport endpoint on that machine. TCP identifies a connection by the 4-tuple `(src IP, src port, dst IP, dst port)` within its protocol namespace.
 
@@ -52,7 +50,7 @@ NAT is translation, not firewall policy. A stateful firewall decides which packe
 
 The NAT diagram from the reviewed source is intentionally absent: it links an unrelated HTTP-header image.
 
-## IP Layer: IPv4 and IPv6
+# IP Layer: IPv4 and IPv6
 
 | Concern | IPv4 | IPv6 | Operational consequence |
 |---|---|---|---|
@@ -64,9 +62,9 @@ The NAT diagram from the reviewed source is intentionally absent: it links an un
 
 Do not declare dual stack universally best. It gives native reachability during migration, but it doubles policy, observability, DNS, and failure surfaces: an `AAAA` record can send clients down a broken IPv6 path while IPv4 remains healthy. Use dual stack when both paths are operated and tested. IPv6-only with DNS64/NAT64 can be simpler inside controlled client networks; IPv4-only remains a compatibility constraint, not an end state.
 
-![[Assets/System Design 101/1a2b1ca4763c8fe5a07b020a13be48328cb31ca47be3bf4a964ee3ca7a61466e.png]]
+![[Assets/Networks/Networks-TCP IP-18120000.png]]
 
-## TCP Connection: Three-Way Handshake
+# TCP Connection: Three-Way Handshake
 
 Before data flows, TCP establishes a connection with a three-way handshake:
 
@@ -84,7 +82,7 @@ Client → Server: DATA
 
 This handshake adds one round-trip before an ordinary TCP connection can carry application data. Connection reuse and HTTP/2 multiplexing amortize that cost. QUIC combines transport security and connection establishment; a new connection still takes a round trip, while a previously authenticated session may send replayable 0-RTT data.
 
-## Reliability Mechanisms
+# Reliability Mechanisms
 
 TCP detects loss and preserves an ordered byte stream while the connection remains viable through:
 
@@ -96,19 +94,19 @@ TCP detects loss and preserves an ordered byte stream while the connection remai
 > [!WARNING]
 > **Head-of-line (HOL) blocking** is the price of in-order delivery: if segment #5 is lost, segments #6–#10 sit in the receive buffer and **cannot be delivered to the application** until #5 is retransmitted — even though they arrived fine. This is exactly why HTTP/2's many streams over one TCP connection can stall together on a single lost packet, and why **QUIC/HTTP/3** moves multiplexing into independent UDP-based streams. See [[Networks/Transport & Sockets/UDP|UDP]].
 
-## MTU, MSS, and Keep-Alive
+# MTU, MSS, and Keep-Alive
 
 - **MTU (Maximum Transmission Unit)** — the largest packet a link carries, typically **1500 bytes** for an Ethernet IP payload. **MSS (Maximum Segment Size)** is the TCP payload that fits in one unfragmented packet (MTU minus IP+TCP headers, commonly ~1460 for IPv4 without options). IPv4 routers may fragment packets unless prohibited; IPv6 routers never do. **Path MTU Discovery** uses ICMP feedback to find the largest packet the path accepts. Filtering that feedback can create a black hole where small packets work and large transfers repeatedly time out.
 - **TCP keep-alive** sends periodic probes on an idle connection to detect a peer that vanished without a FIN (crash, cable pull). Without it, a half-open connection can sit "established" forever. Tune intervals (`SO_KEEPALIVE`) for long-lived connections behind NAT/load balancers, which silently drop idle flows.
 - **Window scaling / bandwidth-delay product** — on high-latency, high-bandwidth links ("long fat networks"), the default receive window caps throughput; the window-scaling option (and a window ≥ bandwidth × RTT) is needed to keep the pipe full.
 
-## Flow Control and Congestion Control
+# Flow Control and Congestion Control
 
 **Flow control** prevents the sender from overwhelming the receiver. The receiver advertises a **receive window** (how many bytes it can buffer). The sender cannot have more unacknowledged bytes in flight than the window size.
 
 **Congestion control** prevents the sender from overwhelming the network. TCP starts with a small **congestion window** and grows it exponentially (slow start) until it detects packet loss, then backs off. Algorithms: CUBIC (Linux default), BBR (Google, latency-optimized).
 
-## Connection Teardown: Four-Way Handshake
+# Connection Teardown: Four-Way Handshake
 
 ```text
 Client → Server: FIN
@@ -120,9 +118,9 @@ Client → Server: ACK
 
 The actively closing endpoint enters `TIME_WAIT` long enough to prevent delayed packets from an old connection being mistaken for a new one. A client that repeatedly opens short-lived connections to the same destination can exhaust usable source tuples; connection pooling and bounded connection creation are the default remedies. `SO_REUSEADDR` controls listener bind/restart behavior under operating-system-specific rules. It does not expand the outbound ephemeral-port space.
 
-## Pitfalls
+# Pitfalls
 
-### Nagle's Algorithm Causing Latency
+## Nagle's Algorithm Causing Latency
 
 **What goes wrong**: small writes (e.g., sending a 10-byte command) are buffered by Nagle's algorithm until the buffer fills or an ACK arrives. This adds 40–200ms latency for interactive protocols.
 
@@ -135,7 +133,7 @@ var socket = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolT
 socket.NoDelay = true;  // disables Nagle's algorithm
 ```
 
-### TIME\_WAIT Port Exhaustion
+## TIME\_WAIT Port Exhaustion
 
 **What goes wrong**: a service opens and actively closes many short-lived outbound connections to the same destination. The OS cannot allocate another usable source tuple because too many recent connections remain in `TIME_WAIT`.
 
@@ -143,7 +141,7 @@ socket.NoDelay = true;  // disables Nagle's algorithm
 
 **Mitigation**: reuse connections through `HttpClient`, database pools, or another protocol-aware pool, and bound connection churn. Confirm exhaustion with socket-state, source-port, and NAT telemetry before changing kernel behavior. Linux `net.ipv4.tcp_tw_reuse` semantics vary by kernel version and do not generalize to other platforms; treat it as a diagnosed expert action for a specific client workload, not a default mitigation. `SO_REUSEADDR` helps a listening server rebind under platform rules and does not solve outbound tuple exhaustion.
 
-## TCP vs UDP
+# TCP vs UDP
 
 | | TCP | UDP |
 |---|---|---|
@@ -155,7 +153,7 @@ socket.NoDelay = true;  // disables Nagle's algorithm
 
 **Decision rule**: default to TCP when one reliable ordered byte stream fits the workload (web APIs, databases, file transfer), while still setting deadlines and handling connection failure. Use UDP when the application defines its own loss/recovery behavior, needs datagram boundaries or multicast, or builds a different transport such as QUIC.
 
-## Questions
+# Questions
 
 > [!QUESTION]- Why does TCP's three-way handshake exist, and when does its latency cost become a real problem?
 >
@@ -173,7 +171,7 @@ socket.NoDelay = true;  // disables Nagle's algorithm
 > - Tuning only one side causes problems: a large receive window with aggressive congestion control still causes network drops; a small receive window with conservative congestion control wastes available bandwidth.
 > - Flow control is endpoint-local and deterministic; congestion control is network-wide and heuristic — tune them together or one silently caps the other.
 
-## References
+# References
 
 - [Internet Protocol, Version 6 specification (RFC 8200)](https://www.rfc-editor.org/rfc/rfc8200) — IPv6 base header, extension headers, packet-size, and fragmentation rules.
 - [IPv6 Addressing Architecture (RFC 4291)](https://www.rfc-editor.org/rfc/rfc4291) — address representation, compression, scopes, unicast, anycast, and multicast.
