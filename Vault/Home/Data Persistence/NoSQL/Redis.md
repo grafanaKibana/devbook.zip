@@ -36,7 +36,7 @@ XADD orders * orderId o-1842 status accepted
 
 These commands are atomic individually. They do not create a relational transaction across an external database, and a successful response says nothing about disk or replica acknowledgement unless the deployment contract adds those guarantees.
 
-![[System Design 101/528232f8e61f43a19e791b2974ea16b7cd0f15889889d7ccd0688c070eda94f1.png]]
+![[Data Persistence/Data Persistence-Redis-18120000.png]]
 
 > [!WARNING] Use-case inventory, not a safety contract
 > The visual maps structures to possible workloads, but a string does not by itself make a safe distributed lock or global ID service, and a list is not a durable queue contract. Use fencing for coordination, define durability and replay for messaging, and test every workload against failover and eviction.

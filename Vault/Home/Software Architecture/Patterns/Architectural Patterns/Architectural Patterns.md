@@ -21,7 +21,7 @@ The three patterns here compose naturally: [[Home/Software Architecture/Patterns
 
 First identify what must vary. An API gateway, request-response call, and publish-subscribe topology decide how components interact. Streaming, batching, and ETL decide how data moves and when it becomes visible. Event Sourcing decides how state is recorded and reconstructed. Orchestration decides who owns a multi-step workflow. They can coexist; treating the nine labels below as mutually exclusive choices mixes different design layers.
 
-![[System Design 101/d30877cca1cf14c114193def61bd92ce992a3de792e6b89a9728c8a4aaf2d790.png]]
+![[Software Architecture/Software Architecture-Architectural Patterns-18120000-1.png]]
 
 | Need | Prefer | Coupling and ordering | Failure owner | Operational cost |
 |---|---|---|---|---|
@@ -38,7 +38,7 @@ The selection rule is failure ownership: choose the shape whose operator can exp
 
 The families below also overlap. A service can use hexagonal boundaries internally, publish events, expose a client-server API, and deploy as one monolith or several services. A diagram labels a dominant organizing idea; it does not grant independent deployment or fault tolerance by itself.
 
-![[System Design 101/c58a6b26dd9cf23b5092059b468034533d1e581268af310f71fc65a664e8d100.png]]
+![[Software Architecture/Software Architecture-Architectural Patterns-18120000.png]]
 
 | Pattern | Primary boundary | Change cost it reduces | Cost it introduces | Use when |
 |---|---|---|---|---|

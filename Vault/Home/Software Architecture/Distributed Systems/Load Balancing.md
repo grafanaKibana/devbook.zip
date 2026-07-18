@@ -51,7 +51,7 @@ Consistent hashing | Maps keys to a hash ring with minimal remapping when nodes 
 Least latency or least response time | Uses measured latency, often combined with in-flight work. | Backends have variable network or processing time and measurements are timely. | Noisy or stale measurements can chase transient winners and oscillate traffic.
 Session affinity | Reuses a cookie or key-to-backend mapping; this is a constraint layered on an algorithm. | A legacy service still holds session state locally. | Reduces failover freedom and can preserve hotspots after capacity changes.
 
-![[System Design 101/6ffd8fc456eddf8c90190c14b087f823d3a664693903428b8879d65b3c2106fc.png]]
+![[Software Architecture/Software Architecture-Load Balancing-18120000.png]]
 
 The visual is an orientation map. "Sticky round robin" means affinity over a base algorithm, and IP or URL hashing is not the same as a consistent-hash ring. Whatever algorithm is selected, health eligibility comes first: choose only among ready backends, then apply weights, connection counts, latency, or hashing. A perfect algorithm still routes failures if readiness is wrong.
 

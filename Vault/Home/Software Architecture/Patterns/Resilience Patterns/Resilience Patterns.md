@@ -19,7 +19,7 @@ The two foundational patterns here are [[Home/Software Architecture/Patterns/Res
 
 # Choose a response by failure and overload
 
-![[System Design 101/3bd4751a389d429287b23198ee7fbd906f1c994ec01b88dd3d079bc1a5e6d64f.jpg]]
+![[Software Architecture/Software Architecture-Resilience Patterns-18120000.jpg]]
 
 | Signal | Response | Failure contained | New cost |
 |---|---|---|---|

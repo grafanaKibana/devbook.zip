@@ -26,7 +26,7 @@ Use a ring from 0 to 99 with nodes `A=20`, `B=50`, and `C=80`:
 
 Add node `D=40`. Only keys in `(20, 40]` move from B to D, so key 30 moves while 10, 60, and 90 stay put. If `N` equally loaded nodes exist before the join, the new node receives an expected `1 / (N + 1)` of all keys. Removing one node from a ring of `N` equally loaded nodes moves its expected `1 / N` share to its clockwise successor or replica owners. Small samples, uneven token placement, and weighted nodes change the observed fraction.
 
-![[System Design 101/854eceb50eaf3df8202198d8f9c4986136ca6fd259f672b3fdd6f416f373ac4b.png]]
+![[Software Architecture/Software Architecture-Consistent Hashing-18120000.png]]
 
 The visual illustrates clockwise ownership and a new node taking one range. It does not define replication, failure detection, or how concurrent membership views converge.
 

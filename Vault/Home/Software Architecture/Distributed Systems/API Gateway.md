@@ -49,7 +49,7 @@ Routing and policy are common gateway duties. Composition, response caching, tra
 
 ## Reverse proxy, gateway, and load balancer capability overlap
 
-![[System Design 101/f8408b96b2c46ddbccb453ca0dff9728562f83739c8511892d4f9e081b8935e8.png]]
+![[Software Architecture/Software Architecture-API Gateway-18120000-1.png]]
 
 The image shows archetypal roles, not mutually exclusive products. NGINX, Envoy, YARP, and cloud gateways can combine several columns.
 
@@ -104,7 +104,7 @@ Keep domain decisions out of the BFF. `CanRefundOrder` belongs to Orders or Paym
 
 ## Netflix API evolution: aggregation to federation
 
-![[System Design 101/3e1b2b8d87fdc6b1e589b34ba270f8497c314218e558b304c60ad21a3bcaec42.png]]
+![[Software Architecture/Software Architecture-API Gateway-18120000.png]]
 
 The visual compresses distinct systems into an evolution story. Federation redistributes schema and resolver ownership toward domains while a shared registry and graph gateway retain composition and execution responsibilities. Each domain owns its schema contribution and resolver behavior; composition checks compatibility before a change reaches the gateway.
 

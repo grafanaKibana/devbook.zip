@@ -17,7 +17,7 @@ Change data capture (CDC) converts committed database changes into a resumable s
 
 For one committed transaction, emit a stable source position, transaction ID, table, key, operation, before/after data where available, and schema version. Preserve commit order within the documented source partition. A connector stores its last acknowledged log position only after the broker accepts the record.
 
-![[System Design 101/2d1f2117686f231fe86f8ac8255dcd6a1aa5e7aca7d65faee159e330c142927f.png]]
+![[Software Architecture/Software Architecture-Change Data Capture-18120000.png]]
 
 The visual shows a common Debezium-to-broker-to-sink path. The database log is the source boundary; snapshot bootstrapping, schema changes, deletes, retention, and duplicate delivery need separate rules.
 

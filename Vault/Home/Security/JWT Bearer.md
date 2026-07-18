@@ -43,7 +43,7 @@ The signature covers the encoded header and payload. It can establish integrity 
 
 Validation is a gate, not authorization. The API must verify the signature, issuer, audience, expiry and not-before times, and the token type or mutually exclusive validation rules for its use. It must then authorize the requested resource and action. A valid token saying `is_root: true` grants nothing unless the issuer is trusted for that claim and the API's policy deliberately maps it to the operation.
 
-![[System Design 101/dfbab78d0029e2e6d02f6fe35b26d296a0a7b961256c1c41b1c70736a76f2e68.png]]
+![[Security/Security-JWT Bearer-18120000.png]]
 
 # Signing Algorithms
 

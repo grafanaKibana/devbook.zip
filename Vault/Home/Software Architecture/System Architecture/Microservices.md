@@ -128,11 +128,11 @@ Uncontrolled dual writes create two sources of truth. If temporary dual writing 
 
 Stop extracting when the next candidate lacks a measurable constraint. A mixed architecture with one monolith and a few services is often the stable destination. The action visuals remain here as provenance for the historical Airbnb case.
 
-![[System Design 101/b9f01827e4bd9750c1373fc521401b109579dc9ea8ad15ec341d2cc393c70e1a.png]]
+![[Software Architecture/Software Architecture-Microservices-18120000-3.png]]
 
 Airbnb's multi-year evolution supports incremental extraction under measured organizational and scaling pressure, not a fixed service-count target.
 
-![[System Design 101/e02d3f2aec1fc038ce099b7ff1093637040adf8f701e7cb6585bd6b805c05754.jpg]]
+![[Software Architecture/Software Architecture-Microservices-18120000-4.jpg]]
 
 Later use of both microservices and larger macroservices reinforces that service size follows ownership and change coupling.
 
@@ -140,17 +140,17 @@ Later use of both microservices and larger macroservices reinforces that service
 
 A service boundary is credible only when one team can change, test, deploy, roll back, and operate it without a lockstep release. Shared writable tables, paired deployments, or a mandatory long synchronous chain produce a distributed monolith even when processes run separately.
 
-![[System Design 101/3d6ca99f3ca6f859b57019017474ce9cef54b0d9a9c3cd7d9c100db2ed4bd707.png]]
+![[Software Architecture/Software Architecture-Microservices-18120000.png]]
 
 This capability map is a menu, not a mandatory topology. Gateways, meshes, containers, and separate databases support particular operating constraints; they do not create sound domain boundaries.
 
-![[System Design 101/4f307656dcd815ca1f070bfefab9e30ed94e2c0db32ffd2866710c13d0efc179.png]]
+![[Software Architecture/Software Architecture-Microservices-18120000-2.png]]
 
 Ownership, explicit failure behavior, and cross-boundary telemetry are the baseline; the operating contract above makes those responsibilities concrete for every service.
 
 # Production platform capabilities are conditional
 
-![[System Design 101/3fb5b89e47761e9fe1da86003020b0a6e6d8fe57ff21e0955ef2869573abd33a.png]]
+![[Software Architecture/Software Architecture-Microservices-18120000-1.png]]
 
 The pictured components are optional capabilities selected by observed failure modes and platform constraints. They are not prerequisites for calling a system microservices.
 

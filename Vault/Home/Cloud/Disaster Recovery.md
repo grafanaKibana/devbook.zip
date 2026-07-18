@@ -33,7 +33,7 @@ A sound design usually combines them: replicas reduce outage duration, backups p
 
 # Strategy Traces
 
-![[System Design 101/7f4fad70b0565b06fef7b24377381758c0bd26d48ee573917ec03f70e7443eef.png]]
+![[Cloud/Cloud-Disaster Recovery-18120000.png]]
 
 ## Backup and Restore
 

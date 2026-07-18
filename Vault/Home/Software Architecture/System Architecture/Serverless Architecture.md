@@ -40,7 +40,7 @@ HTTP, timers, queues, object notifications, and event buses are common function 
 
 # AWS Lambda execution orientation
 
-![[System Design 101/aae14f041eec7ebaf0b4ed863793f574fd3b11dfc73ccf0b2f29dd8f4d5a539e.png]]
+![[Software Architecture/Software Architecture-Serverless Architecture-18120000.png]]
 
 The visual is a dated fleet model, not an AWS compatibility contract. The stable behavior is isolated execution environments that may be initialized, reused, frozen, reset, or removed.
 

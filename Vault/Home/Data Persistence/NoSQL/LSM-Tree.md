@@ -74,7 +74,7 @@ This is a cross-area comparison, so it lives here rather than in the [[Home/Comp
 
 Neither is strictly better: a B-tree wins read-heavy and range-scan-heavy workloads with predictable latency; an LSM-Tree wins write-heavy ingest and gets better on-disk compression from its dense, immutable files.
 
-![[System Design 101/d08e8d5089282057718210907663b5c7a522978f4a356bc91cae9b30c8cd3a9a.png]]
+![[Data Persistence/Data Persistence-LSM-Tree-18120000.png]]
 
 # Complexity
 

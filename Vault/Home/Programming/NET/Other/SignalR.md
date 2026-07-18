@@ -86,7 +86,7 @@ A Redis backplane solves cross-node routing; it does not make chat messages dura
 4. Alice renders the message and invokes an explicit `Ack(messageId)`. The server records the acknowledgement independently. Completion of `Clients.User(...).SendAsync(...)` means the server-side send path completed, not that Alice displayed or persisted the message.
 5. After a disconnect, Alice queries durable storage from her last acknowledged sequence and catches up. Redis Pub/Sub cannot replay anything published while node B or Alice was unavailable.
 
-![[System Design 101/71bfda81fdab5f6bd0bc5da137a853e99122045f1a85a5cf1431d057f11f9363.jpg]]
+![[Programming/Programming-SignalR-18120000.jpg]]
 
 The diagram combines Pub/Sub and Redis data structures in one product. A SignalR Redis backplane specifically uses transient Pub/Sub; message history needs a separate durable design. Redis Streams or another broker/store can provide persistence, but that is not the behavior of the backplane configured by `AddStackExchangeRedis`.
 

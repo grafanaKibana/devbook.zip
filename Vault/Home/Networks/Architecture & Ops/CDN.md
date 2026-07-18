@@ -30,7 +30,7 @@ flowchart LR
 
 Edge selection is typically **anycast** (one IP announced from many locations; the network routes to the closest) or **GeoDNS** (DNS returns the nearest edge's address) — see [[Home/Networks/Protocols/DNS|DNS as a traffic director]].
 
-![[System Design 101/236c3f5559f26e6876eb8353fe96affd6deca63fba459c7a2ad7340101e273bd.png]]
+![[Networks/Networks-CDN-18120000.png]]
 
 > [!WARNING] Non-normative source visual
 > The provider list is historical—Google Stadia is discontinued—and it mixes general regional serverless products such as Azure Functions with edge runtimes. Treat edge compute as code executed at or near a provider point of presence under that product's documented placement, state, latency, and runtime limits.
@@ -48,7 +48,7 @@ An origin outage therefore affects misses differently from hits. Fresh cached ob
 
 A slippy map turns a viewport and zoom level into versioned tile coordinates such as `/tiles/v2026-07/12/1204/1538.webp`. Panning requests adjacent coordinates; zooming changes the level segment. Including the dataset version makes each URL immutable, so public tiles are good CDN objects: the edge either returns the exact tile or fetches it from object storage through the origin path.
 
-![[System Design 101/3f09384035d8d45d4c310f3020f6c741c8f20d5191d929cd62402f4e321003f6.png]]
+![[Networks/Networks-CDN-18120000-1.png]]
 
 The CDN does not geocode an address, select a route, or rank traffic-aware alternatives. Those are separate services whose results tell the client which tiles and overlays to request. Keeping that boundary explicit prevents a cache layer from becoming an imaginary navigation service.
 

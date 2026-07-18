@@ -66,7 +66,7 @@ ENTRYPOINT ["dotnet", "MyApp.dll"]
 
 Keep `.git`, `bin`, `obj`, local secrets, and test output out of the build context with `.dockerignore`. Environment variables are configuration transport, not secret storage: inject secrets at runtime from the platform, and use BuildKit secret mounts for private package feeds during build. A smaller image reduces transfer and attack surface, but removing diagnostics can slow incidents; keep a separate debug image or ephemeral debugging workflow.
 
-![[System Design 101/fd62a54fcf46c885b6e5dfa40f7ac7800ba0acc656e8b2209c984dadb1bc1625.png]]
+![[DevOps/DevOps-Docker-18120000.png]]
 
 > [!WARNING] Non-normative source visual
 > The Node 14 tags and `docker scan` command are obsolete examples. Build from a supported, pinned base image, scan the final immutable digest with the scanner enforced by CI, run as a non-root user, and inject secrets through runtime secret mounts rather than ordinary environment variables.

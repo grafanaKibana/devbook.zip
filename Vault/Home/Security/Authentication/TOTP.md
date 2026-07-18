@@ -34,7 +34,7 @@ otpauth://totp/DevBook:alice@example.com
 
 The QR code contains the shared secret. Treat screenshots, analytics, browser history, support logs, and backup exports as credential-exfiltration paths. Require reauthentication to display or replace it, and invalidate the previous secret when rotation completes.
 
-![[System Design 101/7191a3aa019a55b0fac84365a1c820af7f245dfce5dba89a0f83bd30c489ab37.jpg]]
+![[Security/Security-TOTP-18120000.jpg]]
 
 > [!WARNING] Non-normative source visual
 > TOTP does not concatenate a secret and timestamp. It converts time to a moving counter, computes HMAC over the encoded counter, applies dynamic truncation, and reduces the result to the configured number of digits; the verifier accepts only a bounded time-step window.

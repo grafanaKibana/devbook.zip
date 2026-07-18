@@ -59,7 +59,7 @@ The NAT diagram from the reviewed source is intentionally absent: it links an un
 
 Do not declare dual stack universally best. It gives native reachability during migration, but it doubles policy, observability, DNS, and failure surfaces: an `AAAA` record can send clients down a broken IPv6 path while IPv4 remains healthy. Use dual stack when both paths are operated and tested. IPv6-only with DNS64/NAT64 can be simpler inside controlled client networks; IPv4-only remains a compatibility constraint, not an end state.
 
-![[System Design 101/1a2b1ca4763c8fe5a07b020a13be48328cb31ca47be3bf4a964ee3ca7a61466e.png]]
+![[Networks/Networks-TCP IP-18120000.png]]
 
 # TCP Connection: Three-Way Handshake
 

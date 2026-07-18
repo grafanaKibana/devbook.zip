@@ -39,7 +39,7 @@ Insert, search, and delete all follow the quadrant containing the target down to
 
 A [[Home/Computer Science/Data Structures/Geohash|Geohash]] encodes a point into a fixed-grid, sortable prefix; a PR or region quadtree is an adaptive tree whose cells subdivide only where the workload requires more resolution. Geohash is the better fit when an existing sorted index, cache, or shard key should produce spatial candidates. A PR or region quadtree is the better fit for mutable in-memory workloads that benefit from explicit region bounds, local subdivision, collision broad-phase, or sparse raster compression.
 
-![[System Design 101/a0d8f8de511d1c23c9b85c7125994affbb45028b1115fe676bbee9cdffa61fbd.jpg]]
+![[Computer Science/Computer Science-Quadtree-18120000.jpg]]
 
 The boundary cost differs. Adjacent points can fall into different geohash prefixes, so a proximity query must inspect neighboring cells and filter candidates by exact geometry or distance. An adaptive PR quadtree avoids one fixed global cell size but still needs a maximum depth or minimum cell size for coincident and near-coincident points. For paged durable storage, prefer the database's spatial index unless the fixed-prefix key is itself the requirement. [[Home/Computer Science/Data Structures/Geohash|Geohash]] carries the encoding, Redis and Elasticsearch examples, boundary algorithm, and R-tree/GiST comparison; [[Home/Data Persistence/SQL/Indexes|Indexes]] covers the broader database-index tradeoff.
 

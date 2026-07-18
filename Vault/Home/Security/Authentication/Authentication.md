@@ -62,9 +62,9 @@ The browser stores the cookie and later sends it only when domain, path, expiry,
 
 An opaque random identifier should point to server-side state; do not put profile or authorization decisions in an unsigned cookie. Rotate the identifier after login and privilege changes to stop session fixation. Expire it both in the browser and in the session store. `SameSite=Lax` is useful defense in depth, but state-changing requests still need CSRF protection where cross-site cookie delivery remains possible.
 
-![[System Design 101/c580728270ac4d4335284a4fd3177cd812d1017f7a4aec2faa79691900c38a0e.png]]
+![[Security/Security-Authentication-18120000-1.png]]
 
-![[System Design 101/7878570c158346c721ac2e1d90ee65a4ab4f62c73047f71e5e432d41ac43e9c9.png]]
+![[Security/Security-Authentication-18120000.png]]
 
 > [!WARNING] Non-normative source visual
 > Cookies use the browser's cookie store, not Web Storage. Omitting `Domain` creates a host-only cookie; a valid `Domain` can widen scope only to the current host's parent domain, never to an unrelated site or public suffix. `Path`, `Secure`, `HttpOnly`, and `SameSite` constrain delivery and access but do not encrypt the value.

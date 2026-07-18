@@ -19,7 +19,7 @@ High availability is the probability that a service satisfies its contract when 
 
 Place redundant capacity across the failure domains the service must tolerate. Health detection removes unhealthy endpoints; failover transfers ownership; fencing stops the old owner; capacity headroom absorbs the surviving load. Test the entire sequence, including failed failover.
 
-![[System Design 101/b14df3e5df7252a7bd685375568d9546bf823d65ef0fc866f7e64c3a2038f539.jpg]]
+![[Software Architecture/Software Architecture-High Availability-18120000.jpg]]
 
 The visual is a vocabulary aid, not a correctness guarantee. A “backup” must be promoted before writes, a read replica may lag, and active-active writers require conflict or ownership rules. Shared dependencies can defeat every pictured topology.
 

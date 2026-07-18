@@ -15,7 +15,7 @@ A proxy terminates one connection and opens another on behalf of a represented p
 
 For concrete implementation patterns and configuration tradeoffs, see [[Nginx]].
 
-![[System Design 101/0f72173713c3c8ef79a66db657ea539fb25b758b396d5561f28e7728e28bf1ff.png]]
+![[Networks/Networks-Forward and Reverse Proxies-18120000.png]]
 
 # Trust and Scope
 

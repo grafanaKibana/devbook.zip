@@ -13,7 +13,7 @@ publish: true
 
 Presentation patterns separate rendering from the state and decisions that drive it. They differ in who receives input, who owns presentation state, how the view is updated, and where navigation lives. Pick the smallest pattern that keeps domain behavior outside the UI framework; the patterns are alternatives for different interaction models, not a maturity ladder.
 
-![[System Design 101/8aa1acfad654b14fa9e37888735e16583b5dc841968bdf139337637682bd0e69.png]]
+![[Software Architecture/Software Architecture-Presentation Architecture Variants-18120000.png]]
 
 # Responsibility map
 

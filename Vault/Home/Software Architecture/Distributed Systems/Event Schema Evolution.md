@@ -42,7 +42,7 @@ Use full transitive compatibility when retained records outlive several applicat
 
 A registry is one way to distribute schema identity and enforce policy. A system can instead publish versioned contracts with the application, but it still needs deterministic writer/reader resolution and deployment checks.
 
-![[System Design 101/d5bf9b9c1d4a6ca3ec04fe50401d2a1d12503a07179326a2abd3d6d62d2ae050.png]]
+![[Software Architecture/Software Architecture-Event Schema Evolution-18120000.png]]
 
 In one Kafka implementation, serializers attach a schema identifier to each record. Confluent's legacy wire format uses a magic byte followed by a four-byte schema ID, while header mode can carry a schema GUID. The consumer resolves and caches the writer schema, then applies the reader schema. Avoid a registry request per message, but treat registry availability as a dependency for cold consumers and newly introduced versions.
 

@@ -159,7 +159,7 @@ Patterns combine. A video upload can publish a claim-check message to a competin
 
 # Choosing a broker
 
-![[System Design 101/6cfe944116519663da3149d9783b6dfb18c7051528250a9d2143433efe5446c9.png]]
+![[Software Architecture/Software Architecture-Message Queues-18120000.png]]
 
 Choose from replay, routing, ordering, delivery, retention, managed-service, and operating requirements rather than popularity.
 

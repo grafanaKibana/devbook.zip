@@ -26,7 +26,7 @@ The common models are not mutually exclusive. An application can use RBAC to gra
 | ABAC | Subject, resource, action, and environment attributes evaluated by policy | Central policy owners plus attribute authorities | Multi-tenant and context-sensitive decisions | Stale attributes and opaque policies make failures difficult to explain |
 | ReBAC | Relationships in a graph, such as owner, member, parent, or viewer | Relationship owners plus central constraints | Documents, repositories, teams, and nested collaboration | Graph traversal, caching, and relationship consistency become security boundaries |
 
-![[System Design 101/33eb2481c303f602a085c9bfc109ad203a3639ee5ad5573c7dc949ae5f8b8c37.png]]
+![[Security/Security-Authorization Models-18120000.png]]
 
 # One Invoice, Three Decisions
 

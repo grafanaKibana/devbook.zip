@@ -15,7 +15,7 @@ NGINX is an event-driven HTTP web server and reverse proxy. A master process han
 
 Use NGINX for commodity edge behavior: path/host routing, TLS termination, buffering, caching, and upstream balancing. Prefer managed ingress or platform edge services when operations ownership already exists and product requirements are not edge-specific.
 
-![[System Design 101/bc36232ffdb4e6260e2e16a8ed32a50504fe57d8a6812e2fd2d6c30d3c66c506.png]]
+![[Networks/Networks-Nginx-18120000.png]]
 
 The diagram's “cache memory” label is shorthand: response bodies are file-backed under `proxy_cache_path`, while the shared-memory zone holds keys and metadata.
 

@@ -161,7 +161,7 @@ Design strategies:
 
 # Producer, broker, and consumer loss windows
 
-![[System Design 101/ffe24e0289421d68d1c1570a2dcab55f04b478c581581754f9a6ad45b25d1341.png]]
+![[Software Architecture/Software Architecture-Kafka-18120000.png]]
 
 Message loss is not one failure mode. Locate the acknowledgement boundary first:
 

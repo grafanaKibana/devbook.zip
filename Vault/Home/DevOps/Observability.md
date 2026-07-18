@@ -66,7 +66,7 @@ An ELK implementation makes the boundaries concrete: applications emit structure
 
 Normalize timestamps, service identity, severity, trace ID, and schema version before indexing. Drop or redact secrets and regulated fields at the earliest boundary. Use a durable buffer for bursts, a dead-letter path for malformed events, index lifecycle policies for retention, and explicit handling when downstream storage is unavailable. Indexing every field increases cost and mapping risk; index only fields used for filtering or aggregation and retain the original event according to policy.
 
-![[System Design 101/e02dde606c2771cde74766a7b33faf462ab59e9f13eb474645bdfade8c75995d.jpg]]
+![[DevOps/DevOps-Observability-18120000-2.jpg]]
 
 ## Traces
 
@@ -118,7 +118,7 @@ Audit, security, financial, or regulatory records can be part of a durable or fa
 
 Choose retention by investigation window and compliance, not habit. Make alert ownership explicit and alert on a user-visible symptom or an exhausted error budget. A dashboard with no decision or owner is decoration.
 
-![[System Design 101/c17b0fea47b51ea2363baad05c7a519ce318cc777a53004fbfb824c888601983.png]]
+![[DevOps/DevOps-Observability-18120000-1.png]]
 
 # Push versus Pull Metrics
 
@@ -126,7 +126,7 @@ Prometheus pull works when targets are discoverable and the collector can reach 
 
 Use pull as the default for long-running discoverable services. Use push when topology makes pull impossible or the protocol is already an authenticated telemetry stream, then define expiration and failed-delivery behavior. Neither model permits unbounded labels.
 
-![[System Design 101/51d727bf3bda3570c7c7f0e5fe2cb6b95e4c69072df19e58e5ad7575499dbcdb.png]]
+![[DevOps/DevOps-Observability-18120000.png]]
 
 # Diagnosing CPU and Runtime Pressure
 

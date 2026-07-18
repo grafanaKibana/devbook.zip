@@ -51,7 +51,7 @@ return FolderStructureMap;
 
 # Measurement and bottleneck migration
 
-![[System Design 101/78cc77c1ac6e94aa62c92b43e52db37d4c4d1fd6a999cbb7ce4f21e2ad845c43.png]]
+![[Software Architecture/Software Architecture-Scalability Patterns-18120000.png]]
 
 The strategies in the visual solve different measured bottlenecks; they are not a checklist. Use an explicit measurement contract:
 

@@ -27,7 +27,7 @@ Internationalization makes one system capable of serving different languages, sc
 
 Do not build messages by concatenating translated fragments. Translators need the complete sentence because word order, agreement, and plural forms vary. English has `one` and `other`; other languages select more categories, and the category is not a direct synonym for the number.
 
-![[System Design 101/7d47f45928b641724dbc4adf2513cdaa5aaa92df5a51cc65803eb2fa5087b943.jpg]]
+![[Programming/Programming-Internationalization-18120000.jpg]]
 
 The diagram usefully separates localized frontends from core and market-specific services, but “UTC time” is not a sufficient data model. Store an instant for when something happened. Also store an IANA time-zone identifier when the user means a recurring local time such as “09:00 Europe/Kyiv,” because future offsets can change. Keep translation, formatting, foreign exchange, settlement, accounting, and legal-entity rules as different responsibilities.
 

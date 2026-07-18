@@ -127,7 +127,7 @@ strategy:
 
 Netflix combined failure-seeking operational practice with automated progressive delivery. Spinnaker controlled the rollout, Atlas provided time-series measurements, and Kayenta scored the canary against a baseline before traffic advanced. The useful mechanism is the closed loop: an explicit cohort, comparable telemetry, a pass/fail rule, and an automatic traffic reversal. The tool names are historical evidence, not a recommendation to reproduce Netflix's stack.
 
-![[System Design 101/150184c4075c71457db5a4e85b4cfc57410246975c11291af2560a7228efd2d5.png]]
+![[DevOps/DevOps-Deployment Strategies-18120000.png]]
 
 # Shadow Traffic and A/B Experiments
 

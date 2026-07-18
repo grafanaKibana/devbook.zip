@@ -34,7 +34,7 @@ System-design diagrams often hide the algorithm inside a box labelled â€œcache,â
 | Token buckets | Rate limiting with bounded bursts | A shared bucket needs atomic coordination; per-node buckets only approximate a global limit |
 | Consensus | Replicated metadata and leader election | Safety requires quorum communication; a partition that cannot form a quorum loses progress while the quorum side can continue |
 
-![[System Design 101/06a50eddfed4615e1bfd8c65bfd61dbe7d4ce0c405fa587317803bd8ea2262f2.jpg]]
+![[Computer Science/Computer Science-Algorithms-18120000.jpg]]
 
 The visual is a topic inventory. Its priority stars are editorial, not a workload-independent ranking; use the mechanism, invariant, and failure boundary above to decide what a design actually needs.
 

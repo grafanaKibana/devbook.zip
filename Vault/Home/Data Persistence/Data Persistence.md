@@ -51,7 +51,7 @@ These storage types differ by the unit an application controls. The provider nam
 | Application responsibility | Filesystem, snapshots, replication, and recovery | Path/permission design, lock behavior, and shared throughput | Keys, metadata, checksums, lifecycle, versioning, and multi-object publication protocol |
 | Typical fit | Database pages, VM disks, transactional logs | Shared home directories, content tooling, lift-and-shift applications | Media, backups, artifacts, data lakes, immutable large values |
 
-![[System Design 101/8a2da94ce6de3809613dac1b2dc87acf91fbcce68ec6c62d90068027962384ae.png]]
+![[Data Persistence/Data Persistence-Data Persistence-18120000-1.png]]
 
 A database volume needs low-latency random I/O and crash ordering, so block storage normally wins. A render farm that opens and locks shared project files needs file semantics. A service that writes immutable 500 MiB videos and serves them through a CDN needs object scale and lifecycle controls. Calling all cloud storage "object storage" hides the failure boundary the application actually depends on.
 
@@ -66,7 +66,7 @@ Start with the slow request and follow its time, not a list of fashionable remed
 5. Add the persistence-layer [[Home/Data Persistence/Caching|cache]] or a materialized read model only when repeated reads tolerate a declared freshness window. Add [[Home/Data Persistence/SQL/Replication|read replicas]] when reads dominate and replica lag is acceptable.
 6. Scale the node after the query path is sound. Partition or [[Home/Data Persistence/SQL/Sharding|shard]] only when one node's measured capacity, data size, or failure/recovery boundary remains the limiter.
 
-![[System Design 101/94d4e3977b26995fbd3441f34132d0998e82a30cd432be335971b7dc50cf3975.png]]
+![[Data Persistence/Data Persistence-Data Persistence-18120000-2.png]]
 
 This order preserves evidence. Jumping directly to cache, replicas, or shards can reduce one graph while adding stale reads, duplicated writes, and failure modes that obscure the original defect.
 
@@ -96,7 +96,7 @@ Combining steps is normal, but their guarantees do not compose for free. A cache
 | Support an alternate lookup | [[Home/Data Persistence/SQL/Indexes|Index table or secondary index]] | Maintain another key-to-record path for a known query | Every write must update it; rebuilds and uniqueness need a protocol |
 | Distribute data and write load | [[Home/Data Persistence/SQL/Sharding|Sharding]] | Route each partition key to one shard | Cross-shard work, resharding, skew, and hot keys |
 
-![[System Design 101/19667e3708ba5576460f25e9457a0ba8d8789b65092caa933a5a0d16317d0942.png]]
+![[Data Persistence/Data Persistence-Data Persistence-18120000.png]]
 
 The categories overlap: CQRS can use materialized views, event sourcing can feed them, and shards can each maintain local indexes. Name the problem first. Event sourcing is not a cache strategy, and a secondary index is not a substitute for partitioning a write bottleneck.
 

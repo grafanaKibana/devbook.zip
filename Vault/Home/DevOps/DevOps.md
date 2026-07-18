@@ -28,7 +28,7 @@ DevOps is the organizational and technical practice of shortening delivery feedb
 
 Use SRE when reliability work needs an explicit operating model and measurable budget. Build a platform when several teams repeatedly solve the same paved-road problem and will actually adopt the product. Neither creates a handoff back to an operations silo: application teams still own service behavior, while SRE or platform teams supply policy, expertise, and reusable mechanisms. A platform with no product owner becomes another ticket queue; SRE without authority over reliability priorities becomes incident cleanup.
 
-![[System Design 101/1815272240aecfbb634de2883298da184c692bbeca2a5795365f05988c319bb1.png]]
+![[DevOps/DevOps-DevOps-18120000.png]]
 
 > [!WARNING] Non-normative source visual
 > The illustrated SRE “handoff” is not the ownership model used here. The application team remains accountable for service behavior; SRE and platform teams provide reliability policy, expertise, and reusable mechanisms without becoming a downstream operations silo.
@@ -52,7 +52,7 @@ Translate those constraints into current mechanics: build one image, attach envi
 
 Severity alone is not a release rule. Include exploitability, reachability, asset criticality, compensating controls, owner, and expiry. False positives need a documented suppression tied to the exact rule and artifact, not a global disable. Signing an artifact proves identity and integrity; it does not prove the code is safe.
 
-![[System Design 101/277c9e9f3612e5a3efb07d8ff2d60541efec423fc7d8aaadf6ef917d06508906.png]]
+![[DevOps/DevOps-DevOps-18120000-1.png]]
 
 # Questions
 
