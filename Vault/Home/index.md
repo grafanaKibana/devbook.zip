@@ -3,7 +3,6 @@ title: Welcome to DevBook!
 tags:
   - FolderNote
   - MetricsIgnore
-  - Template
 publish: true
 icon: home
 ---
