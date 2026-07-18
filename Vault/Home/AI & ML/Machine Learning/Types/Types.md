@@ -13,8 +13,6 @@ level:
   - "1"
 ---
 
-# Intro
-
 Machine learning types describe how a model learns from data and feedback. Choosing the wrong type is expensive: it changes your data requirements, training loop, evaluation criteria, and operational complexity from day one. The decision is driven by what signal you have, not by what architecture is fashionable.
 
 ```datacorejsx
@@ -22,7 +20,7 @@ const { FolderStructureMap } = await dc.require("Assets/components/devbook-folde
 return FolderStructureMap;
 ```
 
-## Supervised Learning
+# Supervised Learning
 
 Train on labeled input-output pairs and optimize prediction quality directly against known targets.
 
@@ -36,7 +34,7 @@ Train on labeled input-output pairs and optimize prediction quality directly aga
 
 **When to use**: Any time you have reliable labels and an explicit prediction target. Default choice for classification, regression, and ranking.
 
-## Unsupervised Learning
+# Unsupervised Learning
 
 Find structure in data without target labels — segmentation, anomaly detection, or compact representations.
 
@@ -50,7 +48,7 @@ Find structure in data without target labels — segmentation, anomaly detection
 
 **When to use**: Exploratory analysis, anomaly detection, dimensionality reduction before a supervised task, or when labeling is infeasible.
 
-## Self-Supervised Learning
+# Self-Supervised Learning
 
 Build supervision from raw data by creating proxy prediction tasks. Pretrain on unlabeled corpora, then fine-tune on small labeled datasets.
 
@@ -64,7 +62,7 @@ Build supervision from raw data by creating proxy prediction tasks. Pretrain on 
 
 **When to use**: Language, vision, and multimodal systems where labels are scarce but unlabeled data is abundant. Foundation of modern LLMs and vision transformers.
 
-## Semi-Supervised Learning
+# Semi-Supervised Learning
 
 Combine a small labeled dataset with a larger unlabeled dataset to reduce labeling cost while maintaining supervised-level performance.
 
@@ -78,7 +76,7 @@ Combine a small labeled dataset with a larger unlabeled dataset to reduce labeli
 
 **When to use**: When labeling is expensive but you have abundant unlabeled data and a clear target variable. Common in NLP, medical imaging, and content moderation.
 
-## Reinforcement Learning
+# Reinforcement Learning
 
 Train an agent to choose actions that maximize long-term reward through interaction with an environment.
 
@@ -92,7 +90,7 @@ Train an agent to choose actions that maximize long-term reward through interact
 
 **When to use**: Sequential decision-making where outcome quality depends on multiple steps and delayed feedback. Avoid for one-step prediction problems where supervised learning works — RL adds operational risk without benefit.
 
-## Comparison
+# Comparison
 
 | Type | Labeled Data | Compute Cost | Typical Applications | Key Libraries |
 |------|-------------|--------------|---------------------|---------------|
@@ -102,7 +100,7 @@ Train an agent to choose actions that maximize long-term reward through interact
 | Semi-Supervised | Small labeled + large unlabeled | Medium | NLP, medical imaging, moderation | scikit-learn, PyTorch |
 | Reinforcement | Reward signal only | Very high | Robotics, game AI, recommendation | Stable Baselines3, RLlib |
 
-## Decision Rule
+# Decision Rule
 
 ```mermaid
 flowchart TD
@@ -120,7 +118,7 @@ flowchart TD
 
 Start with supervised learning whenever you have reliable labels and an explicit target; it is the simplest to evaluate, debug, and operate. Drop to unsupervised when there are no labels, self-supervised when unlabeled data is abundant but labels are scarce (especially language and vision), and semi-supervised when labeling is expensive but a clear target exists. Reserve reinforcement learning for genuinely sequential, delayed-reward problems, since it adds reward design complexity, exploration risk, and operational overhead rarely justified for single-step decisions.
 
-## References
+# References
 
 - [Google ML Intro — What is ML?](https://developers.google.com/machine-learning/intro-to-ml/what-is-ml) — Google's canonical intro to ML types with clear definitions and examples
 - [scikit-learn — Supervised learning](https://scikit-learn.org/stable/supervised_learning.html) — practical supervised learning reference with algorithms, parameters, and use-case guidance

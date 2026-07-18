@@ -13,8 +13,6 @@ publish: true
 status: Done
 ---
 
-# Intro
-
 Linear structures store elements in a sequence. The academic category is about access order and position, not one concrete memory layout: arrays give index arithmetic and locality; linked lists trade locality for node-local edits; stacks, queues, deques, and circular buffers restrict which end can be read or written.
 
 .NET's everyday defaults lean array-backed: `T[]`, `List<T>`, `Stack<T>`, and `Queue<T>` all use contiguous storage internally. `LinkedList<T>` lives here as the contrast case. It answers the same "ordered sequence" question, but pays pointer overhead and poor cache locality to avoid shifting elements during node-local edits.
@@ -24,7 +22,7 @@ const { FolderStructureMap } = await dc.require("Assets/components/devbook-folde
 return FolderStructureMap;
 ```
 
-## The Family at a Glance
+# The Family at a Glance
 
 Every structure in this folder is an answer to two questions: *where can you touch the sequence* (any index, one end, both ends) and *what backs it* (one contiguous array, or nodes). Contiguous backing wins locality and allocation-free steady state; nodes win only when you hold a reference into the middle.
 
@@ -39,7 +37,7 @@ Every structure in this folder is an answer to two questions: *where can you tou
 | [[Circular Buffer]] | FIFO, fixed capacity, O(1) worst-case | Ring, wraps in place; zero steady-state allocation | Full ⇒ reject or overwrite oldest | hand-rolled; inside `Channel<T>` |
 | [[Span]] | Any index — a *view*, owns nothing | Points at existing memory | Stack-only, can't cross `await` | `Span<T>` / `Memory<T>` |
 
-## Choosing
+# Choosing
 
 Start from the access pattern, not the structure:
 
@@ -58,7 +56,7 @@ Wrap any contiguous sequence in [[Span]] to slice without copying. [[Stack]] and
 
 The recurring theme: contiguous beats linked unless you can prove otherwise with a profiler. Cache locality is the dominant constant factor (the [[Home/Data Persistence/Caching#Latency ladder|latency ladder]] shows why: a main-memory miss is ~100× an L1 hit), and every "O(1) insert" claim for linked nodes quietly assumes you already found the node.
 
-## References
+# References
 
 - [Collections and data structures (Microsoft Learn)](https://learn.microsoft.com/en-us/dotnet/standard/collections/) — overview of .NET collection families with complexity notes.
 - [Selecting a collection class (Microsoft Learn)](https://learn.microsoft.com/en-us/dotnet/standard/collections/selecting-a-collection-class) — Microsoft's own decision guide across the linear (and other) collection types.

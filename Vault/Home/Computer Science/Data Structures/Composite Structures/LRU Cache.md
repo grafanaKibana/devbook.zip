@@ -11,8 +11,6 @@ status: Ready to Repeat
 publish: true
 ---
 
-# Intro
-
 A cache holds a bounded number of entries and must answer two questions on every access: where is the value for key `k`, and if the cache is full, which entry should leave. A plain [[HashMap]] answers the first in `O(1)` but has no notion of which entry is stalest, so choosing a victim means scanning every entry. Ordering the entries by recency in an array or list makes the victim obvious but turns lookup back into a scan.
 
 An LRU (Least Recently Used) cache resolves the tension by storing the same entries in two structures at once. A [[HashMap]] maps `key → the list node holding that key`, giving `O(1)` lookup. A doubly-[[LinkedList|linked list]] threads those same nodes in recency order: most-recently-used at the head, least-recently-used at the tail. A `get` finds the node through the map, unlinks it, and splices it to the head. A `put` over capacity removes the tail node and deletes its key from the map. What can no longer be recovered is insertion order or access frequency — the list records only "how recently," and only for entries still resident.
@@ -22,7 +20,7 @@ An LRU (Least Recently Used) cache resolves the tension by storing the same entr
 > [!NOTE] Visualization pending
 > Planned StepTrace: a hash-map-plus-recency-list card showing a `get` locating a node through the map and splicing it to the head, then a `put` over capacity evicting the tail node and deleting its map entry in the same step. No matching renderer exists in `engine.js` yet.
 
-## Representation and invariants
+# Representation and invariants
 
 Two structures hold the same set of entries, indexed differently:
 
@@ -38,7 +36,7 @@ Three invariants define a valid state:
 
 `get(k)` reads the map, unlinks the node from between its current neighbours, and splices it after `head`. Its value and key are unchanged; only four pointers move. `put(k, v)` updates the node in place and moves it to the head when `k` is resident; otherwise it creates a node, adds it to the map, splices it after `head`, and — if invariant 3 would break — unlinks the node before `tail` and removes that node's key from the map. The recency order is an internal artifact: two caches that received the same accesses in the same order hold identical contents, but the pointer layout is not a domain value.
 
-## Complexity
+# Complexity
 
 | Operation | Best time | Worst time | Structure space | Aux space per op | Cause |
 | --- | --- | --- | --- | --- | --- |
@@ -49,7 +47,7 @@ Three invariants define a valid state:
 
 Every bound is genuine worst-case constant time, not amortized: no operation ever traverses the list, because the map turns "find this node" into a hash lookup and the tail turns "find the victim" into a pointer read. The worst-case constant assumes the map's own lookup is `O(1)`, which degrades to `O(n)` under adversarial hash collisions — the same caveat that applies to the underlying [[HashMap]]. Structure space is `O(capacity)`: the map holds one entry per resident key and the list holds one node per resident key, so the two structures together are a constant factor over the entries themselves.
 
-## When the composite breaks
+# When the composite breaks
 
 The failure modes all stem from the map and the list being two views that must agree.
 
@@ -61,7 +59,7 @@ Capacity is what forces an eviction *policy* to exist at all. An unbounded [[Has
 
 The composite is not atomic. A `get` performs a map read followed by several pointer writes; a concurrent `put` interleaving between them can splice against neighbours the `get` already moved, corrupting the list. LRU needs external locking (or a sharded/striped design) — neither the map nor the list provides safe concurrent mutation on its own.
 
-## Reference drawer
+# Reference drawer
 
 > [!ABSTRACT]- Map into a recency-ordered list
 > ```mermaid
@@ -121,7 +119,7 @@ The composite is not atomic. A `get` performs a map read followed by several poi
 > ```
 > `LinkedList<T>` is doubly linked, so `Remove(node)` is `O(1)` given the node. The tuple carries the `Key` so eviction can delete the map entry starting from the tail node alone, with no reverse lookup.
 
-## Comparison
+# Comparison
 
 | Cache | Eviction victim | Lookup | Ordering kept | Stronger case | Weaker case |
 | --- | --- | --- | --- | --- | --- |
@@ -133,7 +131,7 @@ The composite is not atomic. A `get` performs a map read followed by several poi
 
 An LRU cache is the `O(1)` recency-eviction cache: it pays for two synchronized structures and gives constant-time lookup, promotion, and eviction in return, and it fits workloads where recent access is the best available predictor of reuse. An LFU cache becomes stronger when frequency predicts reuse better than recency — a stable set of popular keys that a one-off scan should not dislodge. A FIFO or [[Circular Buffer]] cache is simpler still but blind to reuse, fitting only age-based expiry. A plain [[HashMap]] is the right structure precisely when the working set is unbounded and no entry ever needs to leave.
 
-## Questions
+# Questions
 
 > [!QUESTION]- Why must the recency list be doubly linked rather than singly linked?
 > A `get` promotes a node from the middle of the list to the head, which means unlinking it in `O(1)`. Splicing a node out needs its predecessor. A doubly-linked node exposes `prev` directly, so the rewrite is constant time. A singly-linked list would scan from the head to find the predecessor — `O(n)` — collapsing the cache's constant-time guarantee.
@@ -147,7 +145,7 @@ An LRU cache is the `O(1)` recency-eviction cache: it pays for two synchronized 
 > [!QUESTION]- Why is every LRU operation worst-case `O(1)` rather than amortized, and where does that break down?
 > No operation traverses the list: the map turns lookup into a hash probe and the tail sentinel makes the victim a pointer read, so each op is a fixed number of rewrites. The one dependency is the map's own lookup, which degrades to `O(n)` under adversarial hash collisions — the same caveat as the underlying hash map.
 
-## References
+# References
 
 - [Cache replacement policies](https://en.wikipedia.org/wiki/Cache_replacement_policies) — LRU, LFU, FIFO, and adaptive policies compared, including the scan-resistance weakness of plain LRU.
 - [LRU Cache (LeetCode #146)](https://leetcode.com/problems/lru-cache/) — the canonical exercise requiring `O(1)` `get`/`put`, which forces the hash-map-plus-doubly-linked-list composition.

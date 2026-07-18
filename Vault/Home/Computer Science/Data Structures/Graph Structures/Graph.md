@@ -11,8 +11,6 @@ status: Ready to Repeat
 publish: true
 ---
 
-# Intro
-
 A dependency system holds a set of entities and a set of connections between them, and it repeatedly asks two different questions: does a direct link exist between `u` and `v`, and what are all the neighbors of `u`. The connections carry no inherent order and no single root, so there is nothing to sort or index the way an array allows. What must persist is the *incidence* structure — which vertex connects to which, in which direction, at what weight — and the storage choice decides which of those two questions is cheap and which is linear.
 
 A graph has no single canonical layout. The same set of vertices and edges can be stored as an **adjacency list** (per-vertex neighbor lists), an **adjacency matrix** (a `V × V` table of presence or weight), or an **edge list** (a flat sequence of `(u, v[, w])` tuples). All three retain the full topology, and all three can encode direction and weight; they differ in what they make constant-time versus what they force a scan. The list answers "who are `u`'s neighbors" directly but tests a specific edge in `O(deg u)`; the matrix answers "is `u–v` present" in `O(1)` but spends `O(V²)` even when almost no edges exist; the edge list stores nothing but the edges and is fast only when every edge is streamed at once.
@@ -22,7 +20,7 @@ A graph has no single canonical layout. The same set of vertices and edges can b
 > [!NOTE] Visualization pending
 > Planned StepTrace: a graph-representation card showing one small graph rendered three ways — adjacency list, adjacency matrix, and edge list — with a single edge added to each so the differing storage cost of the same mutation is visible side by side. No matching renderer exists in `engine.js` yet.
 
-## Representation and invariants
+# Representation and invariants
 
 Each representation stores the same edge set in a different physical shape.
 
@@ -38,7 +36,7 @@ Three invariants hold across all three:
 2. Undirected symmetry is a stored property, not a derived one: the mirrored list entries or the symmetric matrix cells must be maintained together, or the graph silently becomes directed.
 3. The vertex identifier is an internal index. The array and matrix forms assume dense integer IDs `0 … V − 1`; strings, GUIDs, or sparse numeric IDs need a `Dictionary<T, int>` mapping first, which adds memory and makes ID management part of the API boundary — the same constraint the [[Disjoint Set]] array representation carries.
 
-## Complexity
+# Complexity
 
 The bounds are per operation and per representation; `deg u` is the number of edges incident to `u`.
 
@@ -52,7 +50,7 @@ The bounds are per operation and per representation; `deg u` is the number of ed
 
 The matrix's `O(1)` edge test and the list's `O(deg u)` neighbor scan are the two bounds that drive the choice. `add-edge` is constant everywhere, so mutation cost separates the representations only at the vertex level, where the matrix's fixed `V × V` footprint forces an `O(V²)` copy. The `O(1)` amortized bound on list `add-vertex` assumes a growable backing array (`List<T>` doubling); a preallocated fixed-size list is `O(1)` worst case but caps `V`.
 
-## When one representation stops fitting
+# When one representation stops fitting
 
 Density is the dividing line. A **dense** graph where `E ≈ V²` loses nothing to the matrix — the `O(V²)` space is already the edge count, and every algorithm gets `O(1)` edge tests and a compact per-row bitset. A **sparse** graph is where the matrix fails: 10 000 vertices with 50 000 edges costs the list roughly 60 000 entries but costs an `int[V, V]` matrix 100 million cells (~400 MB), almost all of them the sentinel. The matrix charges `O(V²)` whether or not the edges exist.
 
@@ -62,7 +60,7 @@ Dynamic vertex insertion splits the same way. Adding a vertex to an adjacency li
 
 None of these are crashes. A matrix on a sparse graph runs correctly; it simply pays memory the workload never uses, and an edge list backing a traversal returns correct neighbors after scanning far more than it needed.
 
-## Reference drawer
+# Reference drawer
 
 > [!ABSTRACT]- Same graph, three stored forms
 > ```mermaid
@@ -104,7 +102,7 @@ None of these are crashes. A matrix on a sparse graph runs correctly; it simply 
 > ```
 > `HasEdge` is `O(deg from)` because the neighbor list is unordered; swapping the inner `List<int>` for a `HashSet<int>` makes it `O(1)` at the cost of ordered iteration and higher per-edge memory. An undirected edge is two stored entries, so removal must touch both lists.
 
-## Comparison
+# Comparison
 
 | Representation | Space | `has-edge(u,v)` | Iterate neighbors of `u` | Add vertex | Stronger workload |
 | --- | --- | --- | --- | --- | --- |
@@ -114,7 +112,7 @@ None of these are crashes. A matrix on a sparse graph runs correctly; it simply 
 
 The adjacency list is the general default: real graphs are usually sparse, its space tracks the actual edge count, and it enumerates neighbors — the operation traversal repeats — in output-sized time. The matrix pays `O(V²)` space unconditionally, which is only free on dense graphs, and buys `O(1)` edge tests plus tight per-row bitsets in return; it becomes the stronger choice when the graph is near-complete or the workload is dominated by "is `u–v` connected" rather than "walk `u`'s neighbors". The edge list retains the least accessible structure and fits exactly the algorithms that never ask about one edge in isolation but sweep all of them.
 
-## Questions
+# Questions
 
 > [!QUESTION]- Why does the adjacency list make neighbor iteration cheap but the adjacency matrix make edge existence cheap?
 > The list physically stores only `u`'s actual neighbors, so enumerating them is `O(deg u)` with nothing wasted, but confirming a specific edge means scanning that list. The matrix reserves a fixed cell for every ordered pair, so `[u, v]` is a single `O(1)` index, but reading all of `u`'s neighbors means scanning a full row of `V` cells, most of them empty on a sparse graph.
@@ -128,7 +126,7 @@ The adjacency list is the general default: real graphs are usually sparse, its s
 > [!QUESTION]- When is an edge list the right storage despite its `O(E)` edge test?
 > When the algorithm consumes every edge in a single pass and never queries an individual edge — relaxing all edges in Bellman-Ford, or sorting edges by weight for Kruskal's MST. Both want a flat, iterable edge set; neither benefits from per-vertex indexing, so the edge list's weakness never triggers.
 
-## References
+# References
 
 - [Graph (abstract data type)](https://en.wikipedia.org/wiki/Graph_(abstract_data_type)) — the adjacency-list, adjacency-matrix, and edge-list representations with their operation costs side by side.
 - [Graph representation](https://cp-algorithms.com/graph/graph-representation.html) — practical comparison of the storage forms and when sparse versus dense density favors each.

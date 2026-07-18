@@ -13,8 +13,6 @@ status: Creation
 priority: High
 ---
 
-# Intro
-
 An agentic system is any system where an LLM controls part of the workflow — calling tools, making decisions, or directing other LLMs. The term "agent" gets used loosely, but there is a practical distinction that matters for system design:
 
 - **Workflows** are systems where LLMs and tools are orchestrated through predefined code paths. The developer controls the sequence; the LLM handles individual steps.
@@ -29,19 +27,19 @@ const { FolderStructureMap } = await dc.require("Assets/components/devbook-folde
 return FolderStructureMap;
 ```
 
-## The Augmented LLM
+# The Augmented LLM
 
 The building block of every agentic system is an LLM enhanced with retrieval, [[Tools]], and memory. The model generates its own search queries, selects appropriate tools, and decides what information to retain. Before building multi-step systems, invest in making this single building block work well — choose the right model, tune the prompts, and ensure tools have clear, well-documented interfaces.
 
 [[Model Context Protocol|Model Context Protocol (MCP)]] standardizes how an augmented LLM connects to external tools and data sources.
 
-## Workflow Patterns
+# Workflow Patterns
 
 When one augmented LLM is not enough but full autonomy is overkill, five reusable workflow patterns cover the middle ground — **prompt chaining**, **routing**, **parallelization**, **orchestrator-workers**, and **evaluator-optimizer**. They form a progression of increasing complexity; start with the simplest that solves the problem. Orchestrator-workers, where the subtasks are decided at runtime, is the dominant pattern for complex coding and research and the bridge into [[Multi-Agentic Systems]].
 
 See [[Home/AI & ML/LLM/Agents/Workflow Patterns|Workflow Patterns]] for the full catalog — each pattern with its diagram and when-to-use guidance.
 
-## Autonomous Agents
+# Autonomous Agents
 
 When the task is genuinely open-ended — you cannot predict the number of steps, and no fixed workflow covers the problem — use an autonomous agent. An agent is an LLM using tools in a loop: observe results, decide next action, execute, repeat.
 
@@ -67,7 +65,7 @@ Where agents work well today: coding tasks (verifiable via tests), customer supp
 
 For patterns on coordinating multiple agents, see [[Multi-Agentic Systems]].
 
-## Questions
+# Questions
 
 > [!QUESTION]- When should you use a workflow instead of an autonomous agent?
 > - Use a workflow when the task decomposes into predictable steps with clear inputs and outputs at each stage
@@ -82,7 +80,7 @@ For patterns on coordinating multiple agents, see [[Multi-Agentic Systems]].
 > [!QUESTION]- What makes a task a good fit for an autonomous agent?
 > Two things together: the task is genuinely open-ended — you can't predict the number of steps or write a fixed workflow for it — and it has a clear, checkable success signal the agent can use to judge its own progress. That's why coding works (tests pass or fail), customer support works (the issue is resolved or not), and research works (claims trace back to sources). Tasks with vague or delayed success criteria are where agents flail, because there's no feedback to correct the compounding error. If you can't define what "done" and "correct" look like in a way the system can check, the task isn't ready for an agent yet.
 
-## References
+# References
 
 - [Building Effective Agents (Anthropic Engineering)](https://www.anthropic.com/engineering/building-effective-agents) — the source of the workflow-pattern taxonomy and the "simplest pattern that works" principle.
 - [Patterns for Basic Agent Workflows — cookbook (Anthropic)](https://platform.claude.com/cookbook/patterns-agents-basic-workflows) — runnable implementations of chaining, routing, and parallelization.

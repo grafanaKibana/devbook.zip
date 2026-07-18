@@ -11,11 +11,9 @@ status: Done
 publish: true
 ---
 
-# Intro
-
 Complex tasks can exceed what a single prompt handles reliably, especially when correctness depends on intermediate decisions that need validation before the next step. Prompt composition techniques improve reliability by decomposing work into multiple LLM calls, enriching context before answering, or iteratively improving the prompt itself. The practical benefit is debuggability: when a support bot misclassifies a customer's intent and generates the wrong response, a single-prompt system gives you one opaque failure point; a chained system shows you exactly where the breakdown happened (extraction? classification? generation?) and lets you fix that specific stage. Three common patterns are prompt chaining, generated knowledge prompting, and meta prompting.
 
-## Prompt Chaining
+# Prompt Chaining
 
 Prompt chaining breaks a complex task into simpler subtasks, where each step output becomes input to the next step. The mechanism is straightforward: each prompt has a smaller scope, so the model has less room to drift; then you validate intermediate outputs before they affect the final answer.
 
@@ -50,7 +48,7 @@ flowchart LR
     E --> F[Step three generate response]
 ```
 
-## Generated Knowledge Prompting
+# Generated Knowledge Prompting
 
 Generated knowledge prompting (sometimes paraphrased as generate knowledge prompting) asks the model to produce relevant background facts before answering the main question. In Liu et al. (2022), the generated facts are then fed back into the answer prompt. The mechanism is that parametric knowledge becomes explicit text in the prompt context, which can make final reasoning more reliable than relying on implicit recall alone.
 
@@ -71,7 +69,7 @@ Use only the statements you generated above. Answer yes or no, then explain in 2
 
 In practice, this can improve accuracy because the model first surfaces a factual scaffold like "fewer strokes is better" and then answers against that scaffold. The risk is that generated knowledge can be wrong or partially hallucinated, so for high-stakes outputs pair this pattern with externally verified context that you provide.
 
-## Meta Prompting
+# Meta Prompting
 
 Meta prompting uses an LLM to write, critique, or improve prompts themselves. The mechanism is that prompts are plain text artifacts, so the model can analyze them for ambiguity, missing constraints, or weak output requirements.
 
@@ -90,7 +88,7 @@ Concrete prompt refinement example:
 
 This page covers the human-guided version. For fully automated loops, see [[Automated Prompt Optimization]].
 
-## Pitfalls
+# Pitfalls
 
 **Chaining error propagation** — a bad extraction in step one corrupts every downstream step because later prompts trust earlier outputs. Example: a support bot extracts `error_code: null` from a message that contains ERR-42 inside a quoted block the model ignored. The classification step sees no error code and routes to general inquiry instead of technical issue, generating an irrelevant response. Mitigation: add schema validation between steps (reject outputs missing required fields), set confidence thresholds, and implement fail-fast stop rules that escalate to a human when intermediate outputs fail validation.
 
@@ -98,7 +96,7 @@ This page covers the human-guided version. For fully automated loops, see [[Auto
 
 **Meta prompting overfitting** — prompt revisions tuned to a small set of failure examples can regress on unseen inputs. A summarization prompt refined against a handful of failure cases can accumulate so many extra constraints that it starts confusing the model on ordinary inputs that previously worked. Mitigation: always evaluate refined prompts against a held-out set (not just the failure examples), version prompts in source control, and set rollback criteria.
 
-## Tradeoffs
+# Tradeoffs
 
 | Choice | Prefer Option A | Prefer Option B |
 | --- | --- | --- |
@@ -106,7 +104,7 @@ This page covers the human-guided version. For fully automated loops, see [[Auto
 | Generated knowledge prompting vs direct answer prompting | Generated knowledge prompting when the model tends to miss background facts | Direct answer prompting when the task is simple and stable |
 | Manual prompt edits vs meta prompting | Manual edits for stable prompts with clear, isolated issues | Meta prompting for fast iteration when you have concrete failure examples to optimize against |
 
-## Questions
+# Questions
 
 > [!QUESTION]- When should you choose prompt chaining instead of a single large prompt?
 > - Choose chaining when the task has clear stages with different goals.
@@ -129,7 +127,7 @@ This page covers the human-guided version. For fully automated loops, see [[Auto
 > - Evaluate on a held-out test set, not only the examples used for revision.
 > - Version prompts and keep rollback criteria if quality regresses.
 
-## References
+# References
 
 - [Prompt Chaining - Prompt Engineering Guide](https://www.promptingguide.ai/techniques/prompt_chaining)
 - [Generated Knowledge Prompting - Prompt Engineering Guide](https://www.promptingguide.ai/techniques/knowledge)

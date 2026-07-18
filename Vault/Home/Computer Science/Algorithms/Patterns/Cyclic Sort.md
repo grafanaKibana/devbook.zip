@@ -11,8 +11,6 @@ status: Creation
 publish: true
 ---
 
-# Intro
-
 An array holds `n` integers that are a permutation of `1..n`, and a query asks which value is missing, which is duplicated, or where the first gap in the sequence falls. Sorting the array to read the answer costs `O(n log n)`, and a boolean or counting array answers in `O(n)` time but allocates a second `O(n)` buffer. The permutation itself removes the need for either: value `v` has exactly one correct home, index `v − 1`, so a value can be routed to its slot without any comparison against its neighbours.
 
 Cyclic Sort walks the array and, at each position, swaps whatever value sits there into its home index, repeating until the value that belongs at the current position arrives. Every swap drops at least one value into its permanent home, so the whole pass finishes in `O(n)` despite the nested-looking swap loop, and it rearranges in place. Once the array is placed, the answer reads off directly: at the first index `i` whose value is not `i + 1`, the missing value is `i + 1` and the value parked there, `a[i]`, is the duplicate.
@@ -22,7 +20,7 @@ Cyclic Sort walks the array and, at each position, swaps whatever value sits the
 > [!NOTE] Visualization pending
 > Planned StepTrace: a placement card showing each element repeatedly swapped to its home index (value `k` → index `k − 1`) until every position holds the value that belongs there. No matching renderer exists in `engine.js` yet.
 
-## Why each swap finalises an element
+# Why each swap finalises an element
 
 The placement rule at index `i` is a single decision. Let `v = a[i]` and `home = v − 1`:
 
@@ -33,7 +31,7 @@ The inner loop can re-process a single index several times, which makes the code
 
 The comparison inside the guard is against the *value* at `home`, not the index. `a[home] != v` stops the moment a duplicate would swap into a slot already holding its equal — that is both the termination guard and the mechanism that surfaces a duplicate.
 
-## Complexity
+# Complexity
 
 | Case | Time | Auxiliary space | Cause |
 | --- | --- | --- | --- |
@@ -43,7 +41,7 @@ The comparison inside the guard is against the *value* at `home`, not the index.
 
 The bound is an amortised accounting argument rather than a per-iteration one: an individual position may be visited more than once, yet the number of swaps is capped by the number of elements because each swap retires a value for good. There is no recursion, so no stack space enters the table.
 
-## When the range assumption breaks
+# When the range assumption breaks
 
 The `O(n)` argument holds only because every value has exactly one home index inside `[0, n − 1]`. Two situations violate that.
 
@@ -53,7 +51,7 @@ Duplicates share a home. On `[1, 3, 3, 4]`, once `3` sits at index 2 the second 
 
 Neither case is a general sort. Cyclic Sort cannot order arbitrary integers, floats, or keys with no index correspondence; strip the value-equals-index mapping and the swap target is undefined.
 
-## Reference drawer
+# Reference drawer
 
 > [!ABSTRACT]- Placement decision at index `i`
 > ```mermaid
@@ -119,7 +117,7 @@ Neither case is a general sort. Cyclic Sort cannot order arbitrary integers, flo
 > ```
 > The guard tests `a[i] != a[home]` on values, not `i != home` on indices — that is what stops a duplicate from swapping forever and what lets the final scan report the anomaly.
 
-## Comparison
+# Comparison
 
 | Strategy | Time | Auxiliary space | Required input | Stronger case | Weaker case |
 | --- | --- | --- | --- | --- | --- |
@@ -130,7 +128,7 @@ Neither case is a general sort. Cyclic Sort cannot order arbitrary integers, flo
 
 Cyclic Sort is the in-place, `O(1)`-space tool for problems whose values already index the array — the standard way to find a missing or duplicate number without allocating. [[Counting Sort]] handles any small integer range and keeps counts, but pays `O(n + k)` memory; a comparison sort accepts any keys at `O(n log n)`; a hash set or boolean array answers missing/duplicate over a wider domain but spends the `O(n)` space that cyclic sort exists to avoid. When the input is read-only, none of the in-place swap logic applies and [[Fast and Slow Pointers]] recovers a duplicate by treating the array as a linked list.
 
-## Questions
+# Questions
 
 > [!QUESTION]- Why is Cyclic Sort `O(n)` despite an inner loop that can revisit an index?
 > A swap fires only when it moves a value into a home that did not already hold it, and a placed value never moves again. With `n` values, at most `n − 1` swaps occur across the whole run; the outer walk adds `n` steps. Amortising over "each swap finalises one element" gives `O(n)`, not `O(n²)`.
@@ -141,7 +139,7 @@ Cyclic Sort is the in-place, `O(1)`-space tool for problems whose values already
 > [!QUESTION]- What makes the guard `a[home] != v` rather than `i != home`?
 > When a duplicate exists its home already holds an equal value. Comparing values recognises that slot as satisfied, which both terminates the loop and marks the duplicate. Comparing indices never sees the slot as done, so the two equal values swap forever.
 
-## References
+# References
 
 - [Find All Numbers Disappeared in an Array (LeetCode #448)](https://leetcode.com/problems/find-all-numbers-disappeared-in-an-array/) — the canonical cyclic-sort application; every slot should hold `index + 1`.
 - [First Missing Positive (LeetCode #41)](https://leetcode.com/problems/first-missing-positive/) — cyclic sort with out-of-range values guarded and skipped.

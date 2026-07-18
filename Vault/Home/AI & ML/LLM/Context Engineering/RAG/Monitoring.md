@@ -11,8 +11,6 @@ status: Done
 publish: true
 ---
 
-# Intro
-
 RAG monitoring is the continuous observation of a deployed RAG pipeline to detect quality regressions, performance degradation, and data staleness before users notice. Offline [[Home/AI & ML/LLM/Context Engineering/RAG/Evaluation/Evaluation|Evaluation]] validates a pipeline before deployment — it answers "is this version good enough to ship?" Monitoring validates it after — it answers "is it still working as expected right now?" The distinction matters because production traffic exposes failure modes that static eval sets cannot anticipate: new query patterns, corpus drift, model behavior changes after provider updates, and load-dependent latency spikes.
 
 The mechanism: each request flows through multiple stages — query translation, embedding, retrieval, reranking, context assembly, generation — and each stage can degrade independently. Monitoring instruments each stage with metrics and traces, samples a fraction of responses for quality scoring via [[LLM-as-a-Judge|LLM-as-judge]], and fires alerts when metrics breach thresholds relative to a rolling baseline. Without per-stage instrumentation, teams observe "answers got worse" but cannot tell whether retrieval stopped finding relevant documents, the reranker misordered them, or the generator hallucinated despite good context.
@@ -34,7 +32,7 @@ flowchart TD
     V --> P
 ```
 
-## Instrumentation
+# Instrumentation
 
 How you instrument determines what you can observe. OpenTelemetry's GenAI semantic conventions (v1.40+) provide a standard attribute schema for LLM operations — `gen_ai.client.token.usage`, `gen_ai.client.operation.duration`, `gen_ai.server.time_to_first_token` — with provider-specific extensions for OpenAI, Anthropic, AWS Bedrock, and Azure AI Inference. Building on this standard avoids lock-in to a single observability vendor.
 
@@ -42,11 +40,11 @@ Each pipeline stage — query translation, embedding, retrieval, reranking, cont
 
 For each request, capture: the raw and translated query, retrieved document IDs with relevance scores, token counts (input and output via `gen_ai.usage.input_tokens` / `gen_ai.usage.output_tokens`), and model metadata. Logging the full prompt and response for every request is expensive at scale. A common pattern is to log full traces for a configurable sample (5–20%) and log only structured metadata (latency, token count, document IDs, scores) for 100%.
 
-## Quality Metrics
+# Quality Metrics
 
 Quality metrics split into two categories: deterministic metrics that require no model calls, and semantic metrics that require an LLM-as-judge.
 
-### Deterministic Metrics
+## Deterministic Metrics
 
 Compute these on every request — they are free and instant.
 
@@ -68,7 +66,7 @@ Compute these on every request — they are free and instant.
 | Abstention rate | Is the system refusing correctly? | Spikes (over-refusal) or drops with low-evidence queries |
 | Response length | Is context assembly behaving normally? | p95 shifts abruptly in either direction |
 
-### Retrieval Quality Metrics
+## Retrieval Quality Metrics
 
 Retrieval quality metrics require a labeled evaluation set — a set of queries with known relevant documents. Unlike deterministic metrics that run on every request, these are computed on a scheduled basis (nightly or on every deployment) against a golden query set. They complement real-time signals by answering "is retrieval finding the right documents?" rather than just "is it returning documents at all?"
 
@@ -95,7 +93,7 @@ Retrieval quality metrics require a labeled evaluation set — a set of queries 
 
 Track all six on a nightly schedule against your golden query set. Gate deployments primarily on Recall@k and nDCG@k; use MRR and HitRate for fast diagnosis when those signals drop.
 
-### LLM-as-Judge Metrics
+## LLM-as-Judge Metrics
 
 For semantic quality, run an LLM judge asynchronously on a sampled fraction of production traffic. Use binary pass/fail judgments rather than numeric scales — binary judgments reduce calibration noise and inter-judge variance, and correlate better with domain expert assessment than 1–5 scores. Use a smaller, cheaper model (GPT-4o-mini, Claude Haiku) as the production judge and reserve the expensive model for weekly calibration runs where you compare cheap-judge scores against expensive-judge scores on the same sample to track judge agreement drift.
 
@@ -126,7 +124,7 @@ For semantic quality, run an LLM judge asynchronously on a sampled fraction of p
 | Noise Sensitivity | Does noisy context introduce fabricated claims? | Yes |
 | Context Entities Recall | Are required named entities present in context? | Yes |
 
-### Performance and Cost Metrics
+## Performance and Cost Metrics
 
 **Per-stage latency** — p50, p95, p99 for each pipeline stage separately. A p95 spike in reranking is invisible in end-to-end latency if other stages are fast — per-stage breakdown is required to localize it.
 
@@ -146,7 +144,7 @@ For semantic quality, run an LLM judge asynchronously on a sampled fraction of p
 | Cache hit rate | Is caching working correctly? | Sustained drop on a stable corpus |
 | Error rate | Are pipeline stages failing? | Exceeds historical baseline per stage |
 
-### Data Health Metrics
+## Data Health Metrics
 
 **Index freshness lag** — time between a document being updated in the source system and its new embedding being available in the index. Track as a distribution, not just an average — a median lag of 2 hours is fine, but a p99 lag of 3 days means some documents are silently stale.
 
@@ -160,7 +158,7 @@ For semantic quality, run an LLM judge asynchronously on a sampled fraction of p
 | Ingestion failure rate | Are documents being lost silently? | Exceeds 1% of scheduled ingestions |
 | Corpus size | Is the index growing or shrinking as expected? | Unexpected drop (deletion or pipeline failure) |
 
-## Segmentation
+# Segmentation
 
 Global aggregate metrics hide localized regressions. A pipeline change that improves average faithfulness by 2% can simultaneously degrade faithfulness by 20% for a specific tenant whose documents use a different format.
 
@@ -173,7 +171,7 @@ Segment every metric by at least:
 
 Segmentation is not optional. Without it, you are monitoring the average, and the average lies.
 
-## Alerting
+# Alerting
 
 Effective RAG alerting uses relative thresholds anchored to a rolling baseline, not absolute values. Absolute thresholds ("faithfulness must be above 0.9") are brittle — they break across corpus changes, model updates, and seasonal query shifts. Relative thresholds ("faithfulness must not drop more than 5% from the 7-day rolling baseline") adapt automatically because the baseline tracks the current system state.
 
@@ -187,33 +185,33 @@ Effective RAG alerting uses relative thresholds anchored to a rolling baseline, 
 
 Recompute baselines after any intentional pipeline change (model swap, prompt update, index rebuild). See the same baseline principle in [[Home/AI & ML/LLM/Context Engineering/RAG/Evaluation/Evaluation|Evaluation]].
 
-## Pitfalls
+# Pitfalls
 
-### Monitoring Only Latency While Quality Degrades
+## Monitoring Only Latency While Quality Degrades
 
 A system meets latency SLOs consistently while serving increasingly ungrounded answers. This happens when a model API becomes faster but less accurate (cheaper model silently substituted by the provider), or when cache hit rates increase but cached responses are stale. Latency-only SLOs create a false sense of health.
 
 Mitigation: always pair latency metrics with sampled quality metrics. A dashboard that says "latency is fine, faithfulness dropped 8% in the legal-docs segment" is more actionable than "all systems nominal."
 
-### Judge Drift Without Calibration
+## Judge Drift Without Calibration
 
 The LLM judge used for production scoring drifts over time — either because the judge model is updated by the provider, or because the distribution of inputs changes. Faithfulness scores shift gradually but nobody notices because the absolute numbers still look reasonable.
 
 Mitigation: maintain a small calibration set (50–100 examples) with human-labeled ground truth. Run the judge against this set weekly. Track judge-human agreement rate. If agreement drops below 80%, recalibrate the judge prompt or switch to a different judge model. This is the monitoring-side counterpart to the LLM-as-judge bias problem described in [[LLM-as-a-Judge]].
 
-### Alerting on Global Aggregates Instead of Segments
+## Alerting on Global Aggregates Instead of Segments
 
 The most common monitoring failure in multi-tenant RAG. Global faithfulness is 0.92. One tenant's faithfulness is 0.68. The alert never fires because the global metric is above threshold. The tenant discovers the problem before the engineering team does.
 
 Mitigation: fire alerts at the segment level, not the global level. If segment-level alerting creates too many alerts, implement a tiered system — alert immediately on high-priority segments (large tenants, high-risk domains), batch low-priority segments into a daily digest.
 
-### Sampling Bias in Quality Scoring
+## Sampling Bias in Quality Scoring
 
 If the sampling strategy for LLM-as-judge evaluation is uniform random, it under-represents rare but important query types (multi-hop questions, negation queries, edge-case domains). These rare queries are often the ones that fail most.
 
 Mitigation: use stratified sampling. Allocate a fixed fraction of the judge budget to each query cluster, ensuring that small clusters still get scored. Alternatively, over-sample queries where deterministic signals suggest risk — low retrieval scores, unusually high token counts, or long response latency.
 
-## Tradeoffs
+# Tradeoffs
 
 | Approach | Coverage | Cost | Latency impact | Reliability |
 | --- | --- | --- | --- | --- |
@@ -225,7 +223,7 @@ Mitigation: use stratified sampling. Allocate a fixed fraction of the judge budg
 
 Decision rule: combine deterministic metrics on 100% of traffic (fast, free), sampled LLM-as-judge on 5–20% (quality coverage), and periodic human review for calibration. Use embedding drift detection as an early warning for retrieval degradation between judge scoring cycles.
 
-## Questions
+# Questions
 
 > [!QUESTION]- Why is sampled LLM-as-judge scoring preferred over scoring every response in production?
 > - Scoring every response doubles per-request cost and adds latency if synchronous.
@@ -252,7 +250,7 @@ Decision rule: combine deterministic metrics on 100% of traffic (fast, free), sa
 > - The feedback loop connects them: failing production traces identified by monitoring get added to the eval set, preventing recurrence in future releases.
 > - Monitoring alone catches problems only after users feel them; evaluation alone misses production-specific failures. You need both.
 
-## References
+# References
 
 - [OpenTelemetry GenAI semantic conventions — metrics, spans, and events for LLM operations (OpenTelemetry)](https://opentelemetry.io/docs/specs/semconv/gen-ai/)
 - [RAGAS metrics reference — faithfulness, context precision, answer relevancy formulas (RAGAS docs)](https://docs.ragas.io/en/stable/concepts/metrics/available_metrics/)

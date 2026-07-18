@@ -10,8 +10,6 @@ status: Ready to Repeat
 publish: true
 ---
 
-# Intro
-
 A social graph has 10M users and an edge for every friendship. "Which users belong to the same cluster as Ann?" and "how many disconnected clusters are there?" are the same question: find the **connected components**. A component is a maximal set of vertices in which every pair is joined by *some* path — in an undirected graph, reachability is symmetric, so "u reaches v" and "u and v are in the same component" mean the same thing. That symmetry is what separates this from the directed case: [[Strongly Connected Components]] needs paths *both ways* and a two-pass or low-link algorithm; here one ordinary traversal suffices.
 
 Two mechanisms solve it, and they fit different shapes of the problem. A **traversal** ([[DFS BFS|DFS or BFS]]) floods outward from an unvisited vertex, stamping every vertex it reaches with a component id, then restarts from the next still-unvisited vertex — one linear `O(V + E)` sweep labels the whole graph. **[[Union-Find|Union-find]]** instead merges the endpoints of each edge into the same set; the number of distinct sets is the component count. The traversal wants the graph already built and in memory; union-find answers connectivity *as edges arrive* and interleaves `connected(a, b)` queries with additions, which is why streaming and incremental workloads reach for it.
@@ -23,7 +21,7 @@ The decisive detail is the outer loop: a single DFS from one source finds only *
 > [!NOTE] Visualization pending
 > Planned StepTrace: a graph card that floods one component at a time — each unvisited vertex starts a new colour, the flood stamps every reachable vertex that colour, and the colour count is the component total. No matching renderer exists in `engine.js` yet.
 
-## Labelling by traversal
+# Labelling by traversal
 
 Keep a `component[]` array initialised to "unlabelled". Scan vertices in any order; when one is still unlabelled, it must start a new component, so flood the entire set reachable from it — via a stack (DFS) or queue (BFS) — stamping each vertex with the current id, then increment the id. The traversal marks a vertex the instant it is discovered, so no vertex is stamped twice and the total work is one visit per vertex plus one inspection per edge.
 
@@ -45,13 +43,13 @@ v=6 unlabelled -> flood id 3: reach 6       component = [0,0,0,1,1,2,3]  id -> 4
 
 The final `id` is the component count, and `component[u] == component[v]` answers "same component?" in `O(1)` after the sweep. DFS and BFS produce identical labels — the partition does not depend on visit order, only on which vertices are mutually reachable — so the choice between them is the usual [[DFS BFS|memory trade-off]]: DFS uses `O(h)` stack depth, BFS an `O(V)` frontier.
 
-## Merging by union-find
+# Merging by union-find
 
 When edges arrive over time, or connectivity queries interleave with edge additions, rebuilding a traversal after every change is wasteful. [[Union-Find|Union-find]] maintains the partition incrementally: start with every vertex its own singleton, and for each edge `union` its endpoints. Two vertices are in the same component exactly when they share a root, so `connected(a, b)` is a pair of `find`s. The component count starts at `V` and drops by one on every `union` that actually merges two distinct sets.
 
 This is the same [[Disjoint Set]] forest that drives Kruskal's [[Minimum Spanning Tree|MST]] cycle test — an edge whose endpoints already share a root would close a cycle, which for component-counting just means the edge is redundant. With union by rank and path compression each operation is `O(α(V))`, effectively constant, so the whole pass is `O(V + E · α(V))`. What union-find gives up is the explicit component *contents*: it answers "same component?" and "how many?" in near-constant time, but enumerating a component's members needs a final grouping pass over the roots.
 
-## Complexity
+# Complexity
 
 | Approach | Time | Auxiliary space | Best fit |
 | --- | --- | --- | --- |
@@ -60,7 +58,7 @@ This is the same [[Disjoint Set]] forest that drives Kruskal's [[Minimum Spannin
 
 Traversal is a tight `Θ(V + E)`: every vertex and edge is touched a fixed number of times regardless of graph shape. Union-find's `α(V)` is the inverse-Ackermann factor — below 5 for any `V` that fits in memory — so it is constant in practice but is an *amortised* guarantee over a sequence, not a per-operation bound. Neither has a best/average/worst split in time; the real difference is *when* the edges are available. If the graph is fixed, traversal's single sweep and its ready-made labels win; if edges stream, union-find avoids re-traversing after each change.
 
-## Reference drawer
+# Reference drawer
 
 > [!ABSTRACT]- Four components in an undirected graph
 > ```mermaid
@@ -119,7 +117,7 @@ Traversal is a tight `Θ(V + E)`: every vertex and edge is touched a fixed numbe
 > ```
 > The outer loop is the part that turns a single traversal into a component decomposition: each unlabelled vertex it lands on is provably in a component nothing before it reached, so it earns a fresh id.
 
-## Comparison
+# Comparison
 
 | Method | Time | Gives labels | Gives members | Incremental | Distinguishing property |
 | --- | --- | --- | --- | --- | --- |
@@ -130,7 +128,7 @@ Traversal is a tight `Θ(V + E)`: every vertex and edge is touched a fixed numbe
 
 On a static, in-memory undirected graph, DFS or BFS labelling is the direct answer — one sweep, per-vertex ids, and component membership fall out together; pick BFS when depth could overflow a recursive stack and its `O(V)` frontier is affordable. Union-find is the choice when edges arrive incrementally or connectivity queries are interleaved with additions, since it merges in near-constant amortised time without ever re-scanning the graph, at the cost of not directly listing a component's members. Reserve [[Strongly Connected Components]] for directed graphs: on an undirected graph its extra machinery collapses to exactly these connected components, so it is wasted effort here.
 
-## Questions
+# Questions
 
 > [!QUESTION]- Why does finding all components need an outer loop over every vertex?
 > A single DFS or BFS from one source only reaches that source's component. In a disconnected graph, vertices in other components are never touched by that flood. Scanning every vertex and starting a new flood from each still-unlabelled one is what guarantees full coverage; each such vertex is provably in a component no earlier flood reached, so it starts a new component id.
@@ -141,7 +139,7 @@ On a static, in-memory undirected graph, DFS or BFS labelling is the direct answ
 > [!QUESTION]- Why do DFS and BFS produce the same components but different from strongly connected components?
 > Connected components depend only on which vertices are mutually reachable, which is order-independent, so DFS and BFS partition identically. Strongly connected components are defined on *directed* graphs and require a path each way between every pair; a single undirected-style traversal cannot detect that, which is why the directed case needs Tarjan's or Kosaraju's two-way-reachability algorithm.
 
-## References
+# References
 
 - [Connected component (graph theory) (Wikipedia)](https://en.wikipedia.org/wiki/Component_(graph_theory)) — definition of a component as a maximal connected subgraph and the linear-time labelling procedure.
 - [Undirected graphs (Sedgewick & Wayne, Algorithms 4th ed.)](https://algs4.cs.princeton.edu/41graph/) — the `CC` class computing component ids with DFS, plus the connectivity query it enables.

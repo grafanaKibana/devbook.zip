@@ -12,15 +12,13 @@ status: Ready to Repeat
 publish: true
 ---
 
-# Resource-Based Authorization
-
 Resource-based authorization checks whether the current user has permission to perform an action on a specific resource instance — not just a resource type. It answers: "Can this user edit this specific document?" rather than "Can this user edit documents?"
 
-## When to Use
+# When to Use
 
 Role-based authorization (`[Authorize(Roles = "Admin")]`) checks what type of user you are. Resource-based authorization checks ownership or relationship to a specific resource. Use it when authorization depends on data — for example, only the document owner can edit it.
 
-### Where it sits among authorization models
+## Where it sits among authorization models
 
 Resource-based auth is one point on a spectrum of access-control models:
 
@@ -30,7 +28,7 @@ Resource-based auth is one point on a spectrum of access-control models:
 
 Resource-based authorization is the *implementation mechanism* (evaluate a rule against a specific resource instance) that ABAC and ReBAC require — in ASP.NET Core it's expressed as policy handlers given the resource. It complements RBAC rather than replacing it: use roles for coarse gates and resource-based checks for per-instance ownership. See [[Authorization|ASP.NET Authorization]].
 
-## ASP.NET Core Implementation
+# ASP.NET Core Implementation
 
 ```csharp
 // 1. Define a requirement
@@ -69,7 +67,7 @@ public async Task<IActionResult> Edit(int id)
 }
 ```
 
-## Testing Authorization Handlers
+# Testing Authorization Handlers
 
 Authorization handlers are plain classes and easy to unit test without spinning up ASP.NET Core:
 
@@ -117,9 +115,9 @@ public class DocumentOwnerHandlerTests
 ```
 
 
-## Pitfalls
+# Pitfalls
 
-### Missing Authorization Check After Fetching Resource
+## Missing Authorization Check After Fetching Resource
 
 **What goes wrong**: the controller fetches the resource and returns it without checking ownership. Any authenticated user can access any resource by guessing the ID (Insecure Direct Object Reference, OWASP A01).
 
@@ -127,14 +125,14 @@ public class DocumentOwnerHandlerTests
 
 **Mitigation**: always call `IAuthorizationService.AuthorizeAsync(User, resource, policy)` after fetching the resource and before returning it. Return `403 Forbidden` (not `404 Not Found`) when the resource exists but the user lacks permission — unless you want to hide resource existence.
 
-### Returning 404 vs 403
+## Returning 404 vs 403
 
 **What goes wrong**: returning `404 Not Found` for unauthorized access hides resource existence but can confuse legitimate users who have the wrong ID.
 
 **Decision rule**: return `403 Forbidden` when the resource exists and the user is authenticated but lacks permission. Return `404 Not Found` only when you intentionally want to hide resource existence from unauthorized users (e.g., private content).
 
 
-## Questions
+# Questions
 
 > [!QUESTION]- What is the difference between role-based and resource-based authorization?
 > Role-based authorization checks what type of user you are (e.g., Admin, Editor). Resource-based authorization checks your relationship to a specific resource instance (e.g., are you the owner of this document?). Use role-based for coarse-grained access control; use resource-based when the decision depends on data.
@@ -143,7 +141,7 @@ public class DocumentOwnerHandlerTests
 > `IAuthorizationService` centralizes authorization logic in handlers, making it testable and reusable across controllers. Direct ownership checks in controllers scatter authorization logic, making it easy to miss a check or apply it inconsistently. The handler pattern also supports multiple requirements composing into a single policy.
 
 
-## References
+# References
 
 - [Microsoft — Resource-based authorization in ASP.NET Core](https://learn.microsoft.com/en-us/aspnet/core/security/authorization/resourcebased) — official guide with full implementation example including handler registration and controller usage
 - [Microsoft — Policy-based authorization](https://learn.microsoft.com/en-us/aspnet/core/security/authorization/policies) — how to define and use authorization policies; covers requirement composition and handler ordering

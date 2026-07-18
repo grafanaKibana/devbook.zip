@@ -11,11 +11,9 @@ status: Creation
 publish: true
 ---
 
-# Intro
-
 `Channel<T>` in `System.Threading.Channels` is an in-memory queue for the **Producer-Consumer** pattern: producers hand items to consumers inside one process, and both ends wait asynchronously instead of blocking a thread. Reach for it when work arrives faster than it is processed and the buffer between them needs a *limit* — an endpoint that returns `202` while a `BackgroundService` renders the upload, or one stage of an ingestion pipeline feeding the next.
 
-## How It Works
+# How It Works
 
 `Channel.CreateBounded<T>(capacity)` gives a fixed buffer; `Channel.CreateUnbounded<T>()` one that grows without limit. The channel exposes two façades, `channel.Writer` and `channel.Reader`, so each end can be handed to a different component.
 
@@ -35,7 +33,7 @@ publish: true
 
 Either you slow the producer or you throw data away; choosing a capacity is choosing which. `SingleReader`/`SingleWriter` are promises about how many threads touch each end — the channel takes a cheaper path when you make them, and breaks when you lie.
 
-### Blocking, lock-free, starvation-free, and wait-free progress
+## Blocking, lock-free, starvation-free, and wait-free progress
 
 API waiting and implementation progress answer different questions. On a full bounded channel, `WriteAsync` deliberately suspends until capacity exists: that is backpressure, even though no thread is blocked. `TryWrite` reports the admission decision immediately, but `false` means only *not accepted now*; it does not define the channel as formally non-blocking.
 
@@ -43,7 +41,7 @@ A lock-free queue can update its head or tail with compare-and-swap (CAS). When 
 
 `Channel<T>` exposes waiting and drop semantics, not a wait-free guarantee. Its progress properties depend on the runtime implementation and the options used. Treat bounded capacity as an overload contract, and use the formal progress terms only when the chosen data structure documents them.
 
-## Example
+# Example
 
 ```csharp
 builder.Services.AddSingleton(_ => Channel.CreateBounded<ThumbnailJob>(
@@ -87,14 +85,14 @@ public sealed class ThumbnailWorker(
 }
 ```
 
-## Pitfalls
+# Pitfalls
 
 - **Unbounded is a memory leak with extra steps** — `CreateUnbounded` applies no backpressure; writes always succeed. A consumer that falls behind grows the buffer until the process OOMs. Use it only when something else already rate-limits the producer.
 - **No `writer.Complete()`, no end** — `ReadAllAsync` waits for an item or for completion, so the consumer loop and any shutdown awaiting `reader.Completion` hang forever. Complete the writer in `StopAsync`, or a `finally` around production.
 - **`BlockingCollection<T>` parks a ThreadPool thread** — `Take()`/`Add()` block the caller, so in async code the thread sits doing nothing. Enough of them and thread-pool starvation shows up as latency on *every* endpoint, not just this one.
 - **Drop modes lose data silently** — under `DropOldest`/`DropWrite`, `TryWrite` still returns `true`. Nothing throws, nothing logs. Fine for sampled telemetry; wrong for payment events. Pick one on purpose, and count the drops.
 
-## Tradeoffs
+# Tradeoffs
 
 | Option | Full buffer | Blocks the caller | Async API | FIFO |
 |---|---|---|---|---|
@@ -107,7 +105,7 @@ public sealed class ThumbnailWorker(
 
 What flips it: `ConcurrentQueue<T>` when nobody waits — the consumer runs on a timer and an empty queue just means nothing to do. `BlockingCollection<T>` when the consumer is a dedicated long-running `Thread` and blocking it is the point. `lock` + `Queue<T>` when you must inspect or mutate queued items (dedupe, reprioritise), because `Channel<T>` never exposes its buffer. If the work must survive a crash, none of the four qualify: the buffer dies with the process, so use a durable broker.
 
-## Questions
+# Questions
 
 > [!QUESTION]- What does a bounded `Channel<T>` give you that `SemaphoreSlim` does not?
 > FIFO ordering and a buffer. `SemaphoreSlim` throttles concurrent entrants with no fairness guarantee; a channel queues the work, hands it out in arrival order, and pushes back on producers when full.
@@ -118,7 +116,7 @@ What flips it: `ConcurrentQueue<T>` when nobody waits — the consumer runs on a
 > [!QUESTION]- When is `BoundedChannelFullMode.DropOldest` acceptable?
 > When newer data supersedes older and losing items is cheaper than stalling the producer: live metrics, a progress feed, sensor samples. Never for events with business meaning, and always with a counter on the drops.
 
-## References
+# References
 
 - [System.Threading.Channels namespace (Microsoft Learn)](https://learn.microsoft.com/en-us/dotnet/api/system.threading.channels) — the API surface, including every `BoundedChannelFullMode` value.
 - [An Introduction to System.Threading.Channels (.NET Blog)](https://devblogs.microsoft.com/dotnet/an-introduction-to-system-threading-channels/) — design rationale for the writer/reader split and the `SingleReader`/`SingleWriter` fast paths.

@@ -15,8 +15,6 @@ level:
 status: Done
 ---
 
-# Intro
-
 Networking is how software becomes a system: protocols, latency, reliability, and the failure modes between machines. Most production bugs are distributed bugs in disguise, so a solid network model is a force multiplier. Example: an HTTP timeout can be caused by DNS, TCP congestion, TLS negotiation, or the application itself.
 
 ```datacorejsx
@@ -24,7 +22,7 @@ const { FolderStructureMap } = await dc.require("Assets/components/devbook-folde
 return FolderStructureMap;
 ```
 
-## The Layer Model
+# The Layer Model
 
 Networking is easiest to reason about as a stack of layers, each depending on the one below. A single request touches all of them, so knowing which layer owns a symptom is half of debugging:
 
@@ -37,7 +35,7 @@ Networking is easiest to reason about as a stack of layers, each depending on th
 
 TLS sits between transport and application, and DNS is an application-layer lookup most requests pay for first — which is why "the site is slow" so often turns out to be resolution or handshake cost, not the payload.
 
-## Delivery Modes
+# Delivery Modes
 
 The destination address determines who may receive an IP packet. The transport protocol does not change that fact: UDP supports all four patterns where the network does, while a TCP connection is still a unicast conversation between two endpoints.
 
@@ -52,7 +50,7 @@ Anycast is not "send to every copy." Routing selects one current path, and a pat
 
 The useful diagnostic question is "who owns this destination?" A unicast outage is usually endpoint or route specific. Broadcast trouble stays inside a link. Multicast can fail because receivers never joined or routers lack multicast state. Anycast can fail only from some networks because BGP selected a bad advertisement.
 
-## Questions
+# Questions
 
 > [!QUESTION]- How do you choose between REST/HTTP, gRPC, and WebSockets for service-to-service communication?
 > - REST over HTTP is the default for public and cross-team APIs: cacheable, debuggable with ordinary tools, and universally supported, at the cost of verbose payloads and request/response-only semantics
@@ -60,7 +58,7 @@ The useful diagnostic question is "who owns this destination?" A unicast outage 
 > - WebSockets fit genuinely bidirectional workloads like chat and collaborative editing; Server-Sent Events fit one-way server push — live updates, notifications — where the alternative is the client polling
 > - The deciding questions are audience (public vs internal), traffic shape (request/response vs streaming), and whether human-debuggable payloads are worth the extra bytes
 
-## References
+# References
 
 - [Host Extensions for IP Multicasting (RFC 1112)](https://www.rfc-editor.org/rfc/rfc1112) — defines IPv4 multicast group membership and delivery semantics.
 - [IPv6 Addressing Architecture (RFC 4291)](https://www.rfc-editor.org/rfc/rfc4291) — defines IPv6 unicast, anycast, and multicast addressing and explicitly omits broadcast.

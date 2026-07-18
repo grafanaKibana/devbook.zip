@@ -11,15 +11,13 @@ status: Ready to Repeat
 publish: true
 ---
 
-# Intro
-
 Placing eight queens on a chessboard so that none attacks another has 4,426,165,368 ways to drop eight pieces onto 64 squares, and only 92 of them are solutions. Generating every arrangement and then testing it spends almost all of its work on boards that a single early queen already invalidated.
 
 Backtracking removes that waste by building a candidate one choice at a time and checking it against the constraints after each choice. A queen is committed to a row; if it shares a column or diagonal with a queen placed above, no completion of the remaining rows can succeed, so every board extending that partial placement is discarded without being generated. The reduction rests on one property: the constraint must be testable on a partial candidate — a prefix — not only on a finished one. Fixing one queen per row already narrows the space to `8! = 40,320` column orderings; rejecting diagonal conflicts as each queen lands prunes the boards actually examined far below that.
 
 **Core shape:** incremental candidate, one choice per level → a feasibility test that rejects an unextendable prefix → the pruned subtree is never enumerated → `O(depth)` auxiliary space over an exponential search tree.
 
-## The 4-Queens search
+# The 4-Queens search
 
 The trace solves 4-Queens, placing one queen per row and rejecting any square already attacked along a column or diagonal.
 
@@ -29,7 +27,7 @@ The trace solves 4-Queens, placing one queen per row and rejecting any square al
 
 The decisive event is a rejection. When the queen in the current row has no safe column, the partial board cannot be extended, so the search abandons it and returns to the previous row to advance that queen to its next column — every board that would have grown beneath the failed placement is pruned unexamined. Starting the first queen in column 0 leads to exactly this dead end: each of its completions collides, the whole subtree under column 0 is exhausted, and the search retreats to row 0, lifts that queen, and only the column-1 start extends to the arrangement `(1, 3, 0, 2)`. Depth in the tree is the row index, so a rejection at row `k` discards every placement of rows `k+1…n` beneath it at once.
 
-## How a rejected prefix prunes a subtree
+# How a rejected prefix prunes a subtree
 
 A candidate is a sequence of choices, one per level of a search tree. At each node the algorithm extends the partial candidate by one choice and tests the constraints its prefix can already decide:
 
@@ -41,7 +39,7 @@ Rejecting a partial candidate at depth `k` eliminates every candidate sharing th
 
 When a node's children are all exhausted, the algorithm undoes its own choice, restoring the shared partial candidate to the state its parent expects, and returns to the next sibling. The traversal is depth-first, so only one root-to-node path and its pending siblings exist at any instant, which bounds live state to the depth of the tree rather than its size.
 
-## Complexity
+# Complexity
 
 Let `b` be the number of choices at each level and `d` the depth (for n-queens, `b = d = n`). Cost is the number of tree nodes visited, each paying `c` for its feasibility test.
 
@@ -53,7 +51,7 @@ Let `b` be the number of choices at each level and `d` the depth (for n-queens, 
 
 Auxiliary space is the recursion stack (depth `d`) plus the partial candidate (length ≤ `d`); the collected solutions are output, counted separately. Pruning changes the constant factor and the number of nodes a real input touches, not the worst-case class. A problem whose feasibility can only be judged at a complete candidate gives backtracking the same `O(b^d)` work as brute force.
 
-## When pruning stops helping
+# When pruning stops helping
 
 The advantage lives entirely in the prefix test, and three mechanism details decide whether it materializes.
 
@@ -63,7 +61,7 @@ The partial candidate is one shared mutable buffer, so a choice that is not undo
 
 Recording a solution by appending the live buffer stores a reference that subsequent choices overwrite, leaving the result full of identical copies of the final buffer state — a leaf must snapshot (copy) the candidate. With repeated input elements, equal sibling choices generate identical subtrees, so the same solution appears more than once unless equal siblings at a level are skipped.
 
-## Reference drawer
+# Reference drawer
 
 > [!ABSTRACT]- Pruned search tree
 > ```mermaid
@@ -106,7 +104,7 @@ Recording a solution by appending the live buffer stores a reference that subseq
 > ```
 > The `used[i]` guard is the prefix feasibility test; a constraint problem such as n-queens replaces it with an `IsSafe(row, col)` check that reads the columns and diagonals already occupied. The `used[i] = false` line is the undo that keeps sibling branches independent.
 
-## Questions
+# Questions
 
 > [!QUESTION]- What turns brute-force enumeration into backtracking?
 > A feasibility test applied to a partial candidate. Brute force builds every complete configuration and tests it at the end; backtracking tests the prefix after each choice and, on a violation, discards every configuration sharing that prefix without generating them.
@@ -117,7 +115,7 @@ Recording a solution by appending the live buffer stores a reference that subseq
 > [!QUESTION]- Why is the worst-case class still exponential despite pruning?
 > Pruning removes subtrees but does not shrink the complete search tree, which has `O(b^d)` nodes. When no prefix can be rejected before a leaf, every candidate is still visited. Pruning improves the constant and the practical node count, not the asymptotic class.
 
-## References
+# References
 
 - [Backtracking](https://en.wikipedia.org/wiki/Backtracking) — formal definition of the method as a depth-first walk of a candidate tree with a partial-candidate rejection test.
 - [Dancing Links](https://arxiv.org/abs/cs/0011047) — Donald Knuth's technique for efficient backtracking over exact-cover problems (n-queens, Sudoku), with `O(1)` undo of each choice.

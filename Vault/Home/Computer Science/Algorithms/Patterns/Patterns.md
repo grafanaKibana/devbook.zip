@@ -13,8 +13,6 @@ level:
 status: Creation
 ---
 
-# Intro
-
 Patterns are reusable problem-solving idioms — not full named algorithms like Dijkstra, but recurring *techniques* you apply to turn a brute-force solution into an efficient one. Recognising the pattern is usually the hard part of a coding problem; once you see "this is a sliding window," the implementation follows. They differ from [[Home/Computer Science/Algorithms/Paradigms/Paradigms|paradigms]] (DP, greedy, backtracking), which are broader *design philosophies* — patterns are the concrete moves.
 
 ```datacorejsx
@@ -22,7 +20,7 @@ const { FolderStructureMap } = await dc.require("Assets/components/devbook-folde
 return FolderStructureMap;
 ```
 
-## Algorithm Selection
+# Algorithm Selection
 
 | Pattern | The move | Tells you to reach for it | Typical win |
 |---|---|---|---|
@@ -42,7 +40,7 @@ return FolderStructureMap;
 
 A few of these are close relatives, and the distinction is worth holding onto. [[Sliding Window]] needs all-positive values to keep its monotonic shrink valid; [[Prefix Sum]] plus a hashmap handles the same "subarray summing to k" question when negatives are allowed. [[Fast and Slow Pointers]] is the speed-differential member of the [[Two Pointers]] family rather than a separate idea. And [[Binary Search on Answer]] is not really a search over data at all — it borrows only the halving mechanic from [[Binary Search]].
 
-## References
+# References
 
 - [14 patterns to ace coding interviews (educative)](https://www.educative.io/blog/coding-interview-patterns) — the broader catalogue these belong to.
 - [Competitive Programmer's Handbook (Laaksonen)](https://cses.fi/book/book.pdf) — free book covering these techniques with proofs and exercises.

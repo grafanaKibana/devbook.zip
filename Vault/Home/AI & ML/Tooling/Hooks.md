@@ -11,8 +11,6 @@ level:
 priority: Medium
 ---
 
-# Intro
-
 In coding agents, hooks are lifecycle callbacks that run custom logic at defined execution points without modifying the agent core. They are the control layer for guardrails, formatting, compliance, and operational automation. Mechanically, the agent reaches a trigger point, pauses the main loop, passes event context as structured JSON to one or more registered handlers, and uses the handler result to continue, modify, or abort the operation. This is the same interceptor pattern as Git hooks and CI pipeline steps, adapted to the agent loop where the unit of work is a tool call rather than a commit.
 
 ```mermaid
@@ -27,7 +25,7 @@ flowchart LR
 
 For reusable instruction bundles that shape agent behavior, see [[Skills]]. For MCP tool extensions, see [[Plugins]].
 
-## How Hooks Work
+# How Hooks Work
 
 The hook system has three layers: **events** define when hooks fire, **matchers** filter which firings are relevant, and **handlers** execute the logic.
 
@@ -52,7 +50,7 @@ The hook system has three layers: **events** define when hooks fire, **matchers*
 
 **Exit code semantics** for command hooks on block-capable events like PreToolUse: `0` allows execution, `2` denies and blocks the tool call, other non-zero codes signal an error. Post-execution events like PostToolUse cannot retroactively undo completed actions.
 
-## Hooks Across Tools
+# Hooks Across Tools
 
 **Claude Code** has the most mature hook implementation: 17 event types, 4 handler types, regex matchers, async execution, and configuration at user, project, managed-policy, plugin, and skill scope. JSON config lives in settings.json files at each scope level.
 
@@ -62,7 +60,7 @@ The hook system has three layers: **events** define when hooks fire, **matchers*
 
 **Git hooks** are the foundational model. `pre-commit` and `commit-msg` enforce standards before history is written; `post-commit` and server-side hooks support notifications and policy checks. Agents without native hooks typically fall back to git hooks for quality gates.
 
-## Concrete Example
+# Concrete Example
 
 A two-stage Claude Code policy: block edits to protected files up front, then auto-format accepted writes immediately after execution.
 
@@ -97,27 +95,27 @@ A two-stage Claude Code policy: block edits to protected files up front, then au
 
 Cursor uses a similar structure in `.cursor/hooks.json` with event names like `afterFileEdit` instead of `PostToolUse`.
 
-## Pitfalls
+# Pitfalls
 
-### Slow Hooks Stall the Agent Loop
+## Slow Hooks Stall the Agent Loop
 
 - **What goes wrong**: heavyweight commands (full test suites, whole-repo lint) run synchronously on every tool call, inflating loop latency.
 - **Why it happens**: hooks are blocking by default and developers add broad checks without scoping them to changed files.
 - **How to avoid it**: scope checks to changed files only, use matchers to limit which tools trigger which hooks, and mark non-critical hooks as async where the runtime supports it.
 
-### Silent Failures Pass Violations Through
+## Silent Failures Pass Violations Through
 
 - **What goes wrong**: the hook script exits 0 even when it should have blocked, or writes errors to stderr that the agent runtime ignores.
 - **Why it happens**: scripts swallow non-zero exit codes in pipelines, or error handling defaults to continue instead of fail closed.
 - **How to avoid it**: test hooks against known-bad inputs, ensure the error path explicitly returns exit code 2, and mirror critical hook logic in CI as a safety net.
 
-### Post-Hooks Race with Agent Edits
+## Post-Hooks Race with Agent Edits
 
 - **What goes wrong**: a PostToolUse formatter rewrites a file the agent is about to read or edit again in the next loop iteration, creating conflicting diffs or stale reads.
 - **Why it happens**: the agent does not re-read files after post-hooks run, or the formatter changes semantics beyond whitespace.
 - **How to avoid it**: limit post-hooks to deterministic formatters (Prettier, Black) that produce semantically equivalent output, and verify the agent re-reads modified files after hook execution.
 
-## Tradeoffs
+# Tradeoffs
 
 | Choice | Option A | Option B | Decision criteria |
 | --- | --- | --- | --- |
@@ -125,7 +123,7 @@ Cursor uses a similar structure in `.cursor/hooks.json` with event names like `a
 | Hook scope | Broad checks on every tool call | Targeted checks scoped by matcher | Broad gives complete coverage but makes the agent slow and brittle. Default to targeted; broaden only when you find gaps in coverage. |
 | Handler type | Command via shell script | Prompt or Agent via LLM evaluation | Commands are fast, deterministic, and debuggable. LLM handlers evaluate nuance but add inference latency and non-determinism. Use commands for clear policy rules; use LLM hooks for subjective judgment calls on high-stakes decisions. |
 
-## Questions
+# Questions
 
 > [!QUESTION]- Why should destructive-operation controls live in PreToolUse rather than PostToolUse?
   > - PreToolUse is the last decision point before side effects execute.
@@ -148,7 +146,7 @@ Cursor uses a similar structure in `.cursor/hooks.json` with event names like `a
   > - Reserve LLM hooks for high-stakes, ambiguous decisions where a false negative is expensive.
   > - Deterministic hooks are fast and predictable but rigid; LLM hooks handle nuance at the cost of latency and non-determinism, so spend them only where a missed violation outweighs occasional false positives.
 
-## References
+# References
 
 - [Hooks reference -- full event schema, configuration, JSON I/O, exit codes, async and HTTP hooks (Claude Code Docs)](https://docs.anthropic.com/en/docs/claude-code/hooks) -- comprehensive reference for the most mature hook implementation.
 - [Automate workflows with hooks -- quickstart guide with practical examples (Claude Code Docs)](https://docs.anthropic.com/en/docs/claude-code/hooks-guide) -- step-by-step guide for common hook patterns.

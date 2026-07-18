@@ -12,8 +12,6 @@ status: Ready to Repeat
 publish: true
 ---
 
-# Intro
-
 The Garbage Collector (GC) is the CLR's automatic memory manager. Every `new` allocates on the managed heap; the GC periodically identifies objects no longer reachable from GC roots (static fields, stack variables, CPU registers, GC handles, finalization queue), reclaims their memory, and compacts survivors to reduce fragmentation. You never call `free` — but you pay for that convenience in pause time and throughput overhead, so understanding the GC's internals is essential for writing latency-sensitive .NET services. The CLR *traces* reachability from those roots rather than *counting* references per object: that is why two objects referencing each other are collected like any other garbage, with no cycle detection needed, and why the cost arrives as an occasional pause instead of a refcount update on every reference assignment. (Reference writes are not free — they run a write barrier — but a card-dirtying store is far cheaper than an atomic refcount; see [[#Card tables and write barriers]].)
 
 The GC uses a **generational model** based on the empirical observation that most objects die young. Gen 0 holds newly allocated objects and collects in under 1 ms on modern hardware. Objects that survive promote to Gen 1 (a buffer between short- and long-lived), then to Gen 2 (application-lifetime objects like singletons and static caches). The Large Object Heap (LOH, ≥85 KB by default) is collected alongside Gen 2 but is **not compacted by default** — allocations leave gaps that fragment the address space over time.
@@ -22,7 +20,7 @@ A collection runs in three phases: **mark** (walk from roots, flag reachable obj
 
 For unmanaged resources (file handles, database connections, native memory), the GC provides no help — you must implement `IDisposable` and use `using` statements. Objects with finalizers get queued on the finalization thread, which delays their collection by at least one GC cycle and serializes all finalizer execution on a single thread.
 
-## Managed heap
+# Managed heap
 
 After the garbage collector is initialized, the CLR allocates a segment of memory for storing and managing objects. This memory is called the managed heap, as opposed to the operating system's native heap.
 
@@ -47,13 +45,13 @@ You can think of the heap as consisting of two heaps: the [Large Object Heap](ht
 > [!TIP]
 > You can [**configure the threshold size**](https://learn.microsoft.com/en-us/dotnet/core/runtime-config/garbage-collector#large-object-heap-threshold) for objects placed on the Large Object Heap.
 
-## Reclaiming memory
+# Reclaiming memory
 
 The GC optimization mechanism determines the best time to run a collection based on allocation activity. When the GC runs, it reclaims memory allocated for objects that are no longer used by the application. It determines which objects are no longer used by analyzing the application's *roots*. Application roots include static fields, local variables on thread stacks, CPU registers, GC handles, and the finalization queue. Each root either references an object on the managed heap or has a NULL value. The GC can ask the rest of the runtime for these roots. The GC uses this list to build a graph containing all objects reachable from the roots.
 
 Objects that are not in the graph are unreachable from the application's roots. The GC considers unreachable objects to be garbage and reclaims the memory allocated for them. During a collection, the GC inspects the managed heap, looking for blocks of address space occupied by unreachable objects. When it finds unreachable objects, it computes each survivor's new address, rewrites every reference so it points there, and only then copies the survivors down over the space the unreachable objects occupied. It also sets the managed heap pointer to the position after the last reachable object.
 
-### Conditions that trigger garbage collection
+## Conditions that trigger garbage collection
 
 Garbage collection occurs when one of the following conditions is met:
 
@@ -61,7 +59,7 @@ Garbage collection occurs when one of the following conditions is met:
 - The amount of memory used by objects allocated on the managed heap exceeds an acceptable threshold. This threshold is continuously adjusted during process execution.
 - The [GC.Collect](https://learn.microsoft.com/en-us/dotnet/api/system.gc.collect) method is called. In almost all cases you should not call this method, because the GC runs automatically. It is primarily used for special scenarios and testing.
 
-## GC execution model
+# GC execution model
 
 ```mermaid
 graph TD
@@ -104,7 +102,7 @@ graph TD
     MARK --> RELOCATE --> COMPACT
 ```
 
-### Generational Heap
+## Generational Heap
 
 ```mermaid
 graph LR
@@ -141,7 +139,7 @@ Most objects die young in Gen 0 and never promote. A Gen 0 collection typically 
     1. **Sliding survivors together:** The GC copies live objects down over the space the unreachable ones occupied. The gaps close, and allocation resumes from a bump pointer at the end of the live data.
     2. **Sweep, the non-compacting alternative:** Instead of moving anything, the GC can reclaim dead space *in place* onto a free list — no relocation, no copy cost, but the heap stays fragmented. This is what the LOH gets by default (copying 85 KB+ arrays rarely pays) and what a heap pinned down by `fixed`/`GCHandle` falls back to.
 
-## Root objects
+# Root objects
 
 To understand how the garbage collector decides when an object is no longer needed, you need to know what *application roots* are. Simply put, a *root* is a memory slot that contains a reference to an object located on the heap.
 
@@ -154,7 +152,7 @@ Strictly speaking, roots can include:
 - References to an object awaiting *finalization*.
 - Any CPU registers that reference an object.
 
-## Object generations
+# Object generations
 
 When trying to find unreachable objects, the CLR does not literally inspect every object on the heap each time. Obviously, that would take a lot of time, especially in large projects.
 
@@ -173,15 +171,15 @@ For example, a class defined in the main window of a desktop application may rem
 
 The GC first analyzes all objects that belong to generation 0. If, after collecting Gen 0, there is enough memory, all surviving objects are promoted to Gen 1. If Gen 0 has been collected but additional space is still required, the GC will also collect Gen 1. Objects that survive Gen 1 become Gen 2 objects. If the GC still needs memory, it will perform a Gen 2 collection. Since there are no generations above Gen 2, the generation of surviving objects does not increase further. From this, you can conclude that newer objects tend to be collected faster than older ones.
 
-### Card tables and write barriers
+## Card tables and write barriers
 
 A Gen 0 collection must *not* scan all of Gen 2 to find roots — that would defeat the point of generations. But an old object can reference a young one (e.g. a long-lived cache holding a freshly created entry). The GC solves this with a **write barrier**: every reference-type field assignment runs a tiny piece of JIT-emitted code that marks the corresponding **card** (a small range of the old heap) as dirty in a **card table**. An ephemeral (Gen 0/1) collection then scans only the dirty cards for old→young references, treating them as extra roots. This is why reference assignments cost slightly more than value writes, and why allocation-heavy code with many old→young links raises GC cost.
 
-### Boxing as a hidden allocation source
+## Boxing as a hidden allocation source
 
 Every time a value type is converted to `object` or an interface (`object o = 42;`, `IComparable c = myStruct;`, non-generic collections, `params object[]`, string-interpolating a struct) the runtime **boxes** it — a Gen 0 heap allocation. In hot loops this is a common, invisible source of GC pressure; prefer generics/`Span<T>` to keep value types unboxed.
 
-### Latency modes and low-pause regions
+## Latency modes and low-pause regions
 
 Beyond Workstation/Server/Background, the GC exposes runtime controls:
 
@@ -190,7 +188,7 @@ Beyond Workstation/Server/Background, the GC exposes runtime controls:
 - **DATAS** (Dynamic Adaptation To Application Sizes, on by default for Server GC in .NET 8/9) auto-tunes heap count to the actual load, so you rarely need to hand-set `HeapCount` anymore.
 - **Frozen/NonGC heap** (.NET 8) holds objects the GC never scans or moves (e.g. readonly statics), shaving work off every collection.
 
-## Questions
+# Questions
 
 > [!QUESTION]- How does .NET's generational GC work? Why does it use generations, and what are the main tuning tradeoffs?
 > The GC is the .NET runtime's automatic memory manager for managed objects. It periodically finds objects that are no longer reachable from GC roots, reclaims their memory, and (on the SOH) typically compacts surviving objects to reduce fragmentation.
@@ -203,7 +201,7 @@ Beyond Workstation/Server/Background, the GC exposes runtime controls:
 > The SOH stores most objects (typically smaller than ~85,000 bytes) and is compacted regularly.
 > The LOH stores large allocations (typically 85,000 bytes and above, often large arrays). It is collected with Gen 2 and can become fragmented; compaction behavior differs from the SOH and is more expensive.
 
-## Pitfalls
+# Pitfalls
 
 **LOH fragmentation causing OutOfMemoryException** — the LOH is not compacted by default, so repeated allocation and deallocation of large byte arrays (common in image processing, file upload buffers, serialization) creates gaps. Over hours of steady traffic, free space fragments until no contiguous block can satisfy a new allocation, even though total free memory is sufficient. Mitigation: enable `GCSettings.LargeObjectHeapCompactionMode = CompactOnce` before a forced GC during low-traffic windows, or use `ArrayPool<byte>.Shared` to reuse buffers instead of allocating.
 
@@ -213,7 +211,7 @@ Beyond Workstation/Server/Background, the GC exposes runtime controls:
 
 **Pinned objects preventing compaction** — `fixed` blocks and `GCHandle.Alloc(obj, GCHandleType.Pinned)` prevent the GC from moving objects during compaction, creating fragmentation holes identical to the LOH problem but on the SOH. Heavy P/Invoke interop or native buffer passing can pin thousands of objects. Mitigation: minimize pin duration, use `Memory<T>` / `MemoryPool<T>` with pinnable buffers, and in .NET 5+ consider `POH` (Pinned Object Heap) which isolates pinned allocations from the compactable SOH.
 
-## Tradeoffs
+# Tradeoffs
 
 | GC Mode | Throughput | Pause Time | Memory | Best For |
 | --- | --- | --- | --- | --- |
@@ -224,7 +222,7 @@ Beyond Workstation/Server/Background, the GC exposes runtime controls:
 
 **Decision rule**: start with Server GC + Background (the ASP.NET Core default). If p99 latency spikes correlate with GC pauses (`dotnet-counters` shows Gen 2 count increasing), reduce allocation rate first (pooling, `Span<T>`, fewer LINQ allocations). Switch to `SustainedLowLatency` only during known critical windows and always reset afterward — running it permanently leads to OOM.
 
-## References
+# References
 
 - [Fundamentals of garbage collection (Microsoft Learn)](https://learn.microsoft.com/en-us/dotnet/standard/garbage-collection/fundamentals) — official reference covering managed heap, generations, LOH, and collection triggers.
 - [Garbage collection and performance (Microsoft Learn)](https://learn.microsoft.com/en-us/dotnet/standard/garbage-collection/performance) — guidance on reducing GC pressure: allocation patterns, LOH fragmentation, and server vs workstation GC modes.

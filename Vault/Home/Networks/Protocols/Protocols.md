@@ -13,8 +13,6 @@ level:
 status: Done
 ---
 
-# Intro
-
 Protocols are the agreed-upon rules that let machines communicate: what to send, in what order, and what to do when things go wrong. Every layer of the stack (link, network, transport, application) has its own protocol set, and production debugging often means knowing which layer broke the contract. Example: an HTTP 502 can mean the upstream is down, or it can mean a TLS version mismatch between proxy and origin that never shows up in application logs.
 
 | Layer in this vault | What it provides | Examples |
@@ -33,7 +31,7 @@ const { FolderStructureMap } = await dc.require("Assets/components/devbook-folde
 return FolderStructureMap;
 ```
 
-## Choosing an API Style
+# Choosing an API Style
 
 Several of these protocols are interchangeable *styles* for client–server APIs, so the real decision is between them. [[DNS]] and [[SMTP]] are single-purpose protocols rather than API styles. [[HTTP]] and [[HTTP 2]] provide the HTTP application-protocol substrate used by REST, GraphQL, and gRPC; WebSocket begins with an HTTP opening handshake and then switches to its own bidirectional framing protocol.
 
@@ -47,7 +45,7 @@ Several of these protocols are interchangeable *styles* for client–server APIs
 
 Default to REST for an external resource API with broad reach and useful HTTP caching. Choose GraphQL when independently evolving clients genuinely need selectable graph projections and the organization can govern one schema. Choose gRPC for controlled service-to-service contracts and streaming. Choose WebSockets only for low-latency bidirectional traffic; use webhooks when the receiver can expose an HTTP endpoint and eventual delivery is enough.
 
-## References
+# References
 
 - [RFC 3986: Uniform Resource Identifier (URI): Generic Syntax](https://datatracker.ietf.org/doc/html/rfc3986) — defines URI components, relative resolution, normalization, and percent-encoding.
 - [MDN: URL](https://developer.mozilla.org/en-US/docs/Web/API/URL) — browser-facing guide to parsing and manipulating URLs with the platform `URL` API.

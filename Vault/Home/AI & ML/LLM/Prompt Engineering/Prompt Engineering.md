@@ -13,8 +13,6 @@ publish: true
 priority: Medium
 ---
 
-# Intro
-
 Prompt engineering is the practice of turning a vague user intention into a precise model task. It matters because LLMs are probabilistic generators: small wording and setting changes can shift correctness, style, and reliability. In production, a prompt is part of your system interface, so you should treat it like code: explicit, testable, and versioned. This hub covers the foundations, while child pages in this folder go deeper into in-context learning, reasoning, prompt composition, and automated optimization.
 
 ```datacorejsx
@@ -22,7 +20,7 @@ const { FolderStructureMap } = await dc.require("Assets/components/devbook-folde
 return FolderStructureMap;
 ```
 
-## Prompt Anatomy
+# Prompt Anatomy
 
 Most effective prompts combine four elements:
 
@@ -42,7 +40,7 @@ Output indicator: Return JSON with fields risk, impact, mitigation.
 
 Mechanically, each element removes uncertainty: instruction narrows behavior, context biases interpretation, input anchors the specific case, and output indicator constrains format.
 
-## LLM Settings
+# LLM Settings
 
 Prompt text controls intent, while generation settings control sampling behavior and output boundaries.
 
@@ -61,7 +59,7 @@ Starting ranges below are heuristics, not universal defaults. Validate them with
 
 Practical rule: tune `temperature` first, keep `top-p` near default unless you have a measured reason to change both.
 
-## Instruction Prompting
+# Instruction Prompting
 
 Instruction prompting is direct natural-language control: tell the model exactly what to do, how to do it, and how to format the result. It works best when instructions are specific, observable, and testable.
 
@@ -91,7 +89,7 @@ Input: "Hi John, call me at 410-805-2345."
 
 If outputs drift, tighten the output indicator before adding complexity.
 
-## Role Prompting
+# Role Prompting
 
 Role prompting assigns a perspective that shapes style, depth, and framing. It does not replace task instructions; it modifies how the model executes them.
 
@@ -108,7 +106,7 @@ Role-based: You are a food critic writing for a city newspaper. Write a review o
 
 The role-based version typically yields richer domain vocabulary and better evaluative structure because the model has a clearer perspective prior.
 
-## Choosing a Technique
+# Choosing a Technique
 
 Use this quick decision flow for first-pass prompt design:
 
@@ -132,13 +130,13 @@ flowchart TD
 
 For deeper implementation patterns, use targeted follow-ups such as [[In-Context Learning]] when format consistency is weak and [[Prompt Composition]] when one prompt is not enough. Prefer verifiable outputs over eliciting hidden reasoning traces.
 
-## Pitfalls
+# Pitfalls
 
 - **Indirect prompt injection from retrieved content**: if documents, web pages, or tool results include malicious instructions, the model may treat them as higher-priority guidance and perform unsafe actions. This happens when instruction and data channels are mixed. Mitigate by isolating trusted instructions, treating retrieved text as untrusted input, and enforcing tool allowlists and output validation.
 - **Valid-looking but wrong structured output**: an answer can match your JSON or table format while containing incorrect fields or invented values. This happens because structure constraints do not guarantee factual correctness. Mitigate with schema validation plus semantic checks (required fields, value ranges, and source-grounded assertions).
 - **Token budget collapse in multi-step prompts**: long context plus verbose generations can truncate critical instructions or examples, causing silent quality drops. This happens when `max tokens` and context size are not managed together. Mitigate by trimming context, using stop sequences, and monitoring completion length and truncation rate.
 
-## Questions
+# Questions
 
 > [!QUESTION]- Why do prompt anatomy and model settings have to be designed together?
 > - Prompt text defines intent and constraints, settings define sampling behavior.
@@ -158,7 +156,7 @@ For deeper implementation patterns, use targeted follow-ups such as [[In-Context
 > - Keep `temperature` low for deterministic concise tasks.
 > - Evaluate token usage and failure rate after each change.
 
-## References
+# References
 
 - [Prompt Engineering Guide - Basics](https://www.promptingguide.ai/introduction/basics)
 - [Prompt Engineering Guide - Prompt Elements](https://www.promptingguide.ai/introduction/elements)

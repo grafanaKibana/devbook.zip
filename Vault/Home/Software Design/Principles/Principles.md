@@ -13,13 +13,11 @@ level:
 status: Creation
 ---
 
-# Intro
-
 Principles like SOLID, DRY, KISS, and YAGNI are decision checks, not a scoring system. Their value is operational: standards make code predictable, tests expose awkward boundaries, dependency control limits the blast radius of change, refactoring keeps those boundaries honest, and security rules constrain what the design is allowed to expose.
 
 Applying single responsibility usually means splitting a module at a stable reason to change, not splitting every method. Likewise, DRY does not require a shared abstraction for two lines that merely look alike. A principle earns its cost only when it removes a concrete change or failure risk.
 
-## Code quality as an operating discipline
+# Code quality as an operating discipline
 
 Consider an endpoint that charges a card and records an order. The first version constructs an HTTP client, calls the payment provider, writes SQL, catches every exception, and logs the request body in one method. Each quality practice repairs a different failure surface:
 
@@ -43,7 +41,7 @@ const { FolderStructureMap } = await dc.require("Assets/components/devbook-folde
 return FolderStructureMap;
 ```
 
-## References
+# References
 
 - [.NET Framework Design Guidelines](https://learn.microsoft.com/en-us/dotnet/standard/design-guidelines/) — Microsoft's design rules for consistent, usable public .NET APIs.
 - [.NET code-quality analysis overview](https://learn.microsoft.com/en-us/dotnet/fundamentals/code-analysis/quality-rules/) — the official analyzer rule families that turn maintainability, reliability, performance, and design concerns into executable checks.

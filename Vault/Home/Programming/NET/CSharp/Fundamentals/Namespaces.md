@@ -11,8 +11,6 @@ status: Ready to Repeat
 publish: true
 ---
 
-# Intro
-
 A namespace is a logical scope for organizing types (classes, structs, interfaces, enums, delegates) in C#. It prevents naming collisions and makes large solutions easier to navigate by grouping related code into a clear, discoverable API surface. Encapsulation and versioning boundaries come from assemblies and access modifiers, not namespaces.
 
 Namespaces provide:
@@ -43,7 +41,7 @@ public static class MathUtility
 }
 ```
 
-## using Directives and Aliases
+# using Directives and Aliases
 
 `using` brings names into scope; it has several flavours beyond the basic import:
 
@@ -54,12 +52,12 @@ public static class MathUtility
 
 Name resolution searches from the **most-nested** namespace outward, so a type in the current namespace shadows a same-named type in an outer one.
 
-### Project-level conventions
+## Project-level conventions
 
 - **`<ImplicitUsings>enable</ImplicitUsings>`** auto-adds a set of `global using`s (System, Linq, Collections.Generic, …) for the SDK, removing boilerplate from every file.
 - **`<RootNamespace>`** sets the default namespace the templates/`dotnet new` use; the compiler does **not** force namespace to match folder structure, but most teams keep `Namespace == folder path` by convention for navigability.
 
-## Pitfalls
+# Pitfalls
 
 **Namespace collision between libraries** — when two NuGet packages define the same fully qualified type name, the compiler reports ambiguity. A real case: migrating from `System.Data.SqlClient` to `Microsoft.Data.SqlClient` while both packages are referenced causes every `SqlConnection` usage to error. Fix with `extern alias` in the project file, or complete the migration before removing the old package.
 
@@ -68,17 +66,17 @@ Name resolution searches from the **most-nested** namespace outward, so a type i
 **Namespace/assembly mismatch** — the compiler does not enforce alignment between namespace name and assembly name. A type in `MyApp.Utilities` can live in `MyApp.Core.dll`. Misaligned namespaces cause autocompletion to mislead developers about which assembly to reference and make `dotnet add package` discovery harder.
 
 
-## Tradeoffs
+# Tradeoffs
 
 - File-scoped namespaces reduce indentation and noise for one-namespace-per-file layouts, which improves readability in modern codebases.
 - Block-scoped namespaces are still useful when a file intentionally contains multiple namespace blocks or mixed declarations.
 
-## Questions
+# Questions
 
 > [!QUESTION]- When should you prefer file-scoped namespaces over block-scoped namespaces?
 > Prefer file-scoped namespaces when a file contains one namespace and regular type declarations, because it reduces indentation and visual noise. Use block-scoped form when a file needs multiple namespace blocks or unusual nesting patterns.
 
-## References
+# References
 
 - [Declare namespaces to organize types](https://learn.microsoft.com/dotnet/csharp/fundamentals/types/namespaces) — official overview and best-practice guidance for namespace declaration and usage.
 - [namespace keyword](https://learn.microsoft.com/dotnet/csharp/language-reference/keywords/namespace) — exact language rules and syntax variants including file-scoped form.

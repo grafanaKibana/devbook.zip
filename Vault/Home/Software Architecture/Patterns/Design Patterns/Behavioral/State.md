@@ -10,8 +10,6 @@ priority: High
 status: Done
 publish: true
 ---
-# State
-
 Think of a vending machine. Press the same button and you get different results depending on what state the machine is in — idle shows a prompt, has-money dispenses a drink, out-of-stock shows an error. The button doesn’t change. The machine’s response changes because its internal state changed. That’s the State pattern.
 
 The State pattern extracts state-specific behavior into separate state classes. The context object — your `Order` — holds a reference to its current state object and delegates all behavior to it. When the order transitions from Pending to Paid, the context swaps its state object, and suddenly `Ship()` does something different without any switch statement. The state objects themselves drive transitions: `PaidState.Ship()` changes the context’s state to `ShippedState`. This is key — the **object decides** its next state, not the caller. In C#, the compiler implements exactly this pattern for every `async` method: **`async`/`await` generates an `IAsyncStateMachine`** where each `await` point is a state transition.
@@ -29,9 +27,9 @@ stateDiagram-v2
 ```
 
 > [!NOTE] State vs Strategy
-> Identical class structure, different intent. **State** transitions are **driven by the object** — the order changes its own state from Pending to Paid. **Strategy** selection is **driven by the client** — the caller chooses which shipping algorithm to inject. If the object decides which "algorithm" to use next, it's State. If the caller decides, it's Strategy. See [[Strategy]].
+> Identical class structure, different intent. **State** transitions are **driven by the object** — the order changes its own state from Pending to Paid. **Strategy** selection is **driven by the client** — the caller chooses which shipping algorithm to inject. If the object decides which "algorithm" to use next, it's State. If the caller decides, it's Strategy. See [[Home/Software Architecture/Patterns/Design Patterns/Behavioral/Strategy]].
 
-## Problem
+# Problem
 
 `Order.Ship()`, `Order.Cancel()`, `Order.Refund()` each have a massive switch on `Status` — scattered validation, easy to miss a transition:
 
@@ -78,7 +76,7 @@ public class Order
 
 Here's what breaks when requirements change: adding `OrderStatus.OnHold` requires editing `Ship()`, `Cancel()`, `Refund()`, and `Deliver()` — four methods, each with its own switch.
 
-## Solution
+# Solution
 
 Each state becomes a class that knows its valid transitions:
 
@@ -175,7 +173,7 @@ public class Order
 
 Adding `OnHoldState` now means one new class — existing states never change.
 
-## You Already Use This
+# You Already Use This
 
 **`async`/`await` compiler-generated `IAsyncStateMachine`** — every `async` method is compiled into a class implementing `IAsyncStateMachine`. The `MoveNext()` method is a state machine with states for each `await` point. The compiler implements the State pattern for you: the method's execution state transitions from one `await` to the next. This is the State pattern at the language level.
 
@@ -183,7 +181,7 @@ Adding `OnHoldState` now means one new class — existing states never change.
 
 **`TaskStatus` enum + `Task` state transitions** — a `Task` transitions through `Created → WaitingForActivation → Running → RanToCompletion/Faulted/Cancelled`. Each status represents a state with different behavior for `Wait()`, `Result`, and `ContinueWith()`.
 
-## Pitfalls
+# Pitfalls
 
 **State explosion** — if you have 10 states and 8 operations, that's 80 methods to implement. Many will throw `InvalidOperationException`. Consider using a default base class that throws for all operations, with concrete states overriding only valid transitions. Or use a state machine library (`Stateless`) that defines transitions declaratively.
 
@@ -191,7 +189,7 @@ Adding `OnHoldState` now means one new class — existing states never change.
 
 **Serializing state** — if `Order` is persisted to a database, the current state must be serializable. Store the state name as a string and reconstruct the state object on load. Don't store the state object directly — it creates a tight coupling between the persistence model and the state class hierarchy.
 
-## Tradeoffs
+# Tradeoffs
 
 | Concern | State pattern | Enum + switch |
 |---|---|---|
@@ -203,7 +201,7 @@ Adding `OnHoldState` now means one new class — existing states never change.
 
 **Decision rule**: Use State when you have 4+ states and 3+ operations, and the valid transitions differ significantly per state. For 2-3 states with simple transitions, an enum + switch is less overhead. The signal is when you find yourself copying the same switch statement into multiple methods. The `Stateless` library provides a declarative alternative that avoids the class proliferation.
 
-## Questions
+# Questions
 
 > [!QUESTION]- How does the `async`/`await` compiler implement the State pattern?
 > The compiler transforms an `async` method into a struct implementing `IAsyncStateMachine`. The struct has a `state` field (an integer) representing the current position in the method. `MoveNext()` is a switch on `state`: each case resumes execution from the last `await` point. When an `await` suspends, the state is saved and `MoveNext()` returns. When the awaited task completes, `MoveNext()` is called again with the next state. Local variables become fields on the struct (captured state). This is exactly the State pattern: the method's execution state drives behavior, and transitions happen automatically at each `await`.
@@ -214,7 +212,7 @@ Adding `OnHoldState` now means one new class — existing states never change.
 > [!QUESTION]- How do you handle state transitions that require async operations (e.g., sending a refund on cancel)?
 > Make `TransitionTo()` async and await the side effects before completing the transition. Or use the Observer pattern: raise a `StatusChanged` event after transitioning, and let async observers handle side effects. The second approach keeps state transitions synchronous and side effects decoupled. The tradeoff: synchronous transitions are simpler but can't await side effects; event-based side effects are decoupled but harder to reason about ordering and failure handling.
 
-## References
+# References
 
 - [State Pattern — Christopher Okhravi](https://www.youtube.com/watch?v=N12L5D78MAA&list=PLrhzvIcii6GNjpARdnO4ueTUAVR9eMBpc&index=17) — video walkthrough of the State pattern with OOP examples
 - [State — refactoring.guru](https://refactoring.guru/design-patterns/state) — canonical pattern description with context/state diagram and C# example

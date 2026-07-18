@@ -11,8 +11,6 @@ status: Creation
 publish: true
 ---
 
-# Intro
-
 A database lock is one mechanism a storage engine uses to serialize conflicting access so concurrent transactions satisfy the selected [[Home/Data Persistence/ACID|ACID]] isolation level. In a lock-based read path, an incompatible reader or writer waits; an MVCC read may instead use a committed version while writers still take locks. Exclusive data locks normally survive to transaction end. Shared-lock duration is engine and mode specific: SQL Server's locking `READ COMMITTED` usually releases read locks after the statement, while `REPEATABLE READ` and `SERIALIZABLE` retain the relevant protection to transaction end. Row-versioned `READ COMMITTED`, PostgreSQL MVCC reads, and serializable schemes based on dependency detection do not follow that shared-lock timeline.
 
 Three contrasts frame the whole topic:
@@ -21,7 +19,7 @@ Three contrasts frame the whole topic:
 - **Pessimistic vs optimistic conflict handling.** Pessimistic code acquires a lock before the protected change. Optimistic code proceeds without that preemptive lock, then detects a conflicting version at write or commit and retries or rejects the change. Either policy can run on an MVCC engine.
 - **Engine locks vs in-process locks.** This note is about the *database-engine* layer: a lock manager inside the server, shared by every client connection, protecting rows and tables. That is a different layer from the in-process `lock`/`Monitor` story in [[Home/Programming/NET/CSharp/Concurrency and Parallelism/Locking|Locking]], which protects in-memory objects inside a single .NET process. A CLR `lock` never crosses the process boundary; a database lock is the engine's own bookkeeping and is invisible to your application code except as waiting.
 
-## Lock modes
+# Lock modes
 
 A lock mode encodes *what* a transaction intends to do, and the engine grants a new lock only if its mode is **compatible** with every lock already held on that resource. Three basic modes cover reads and writes, and an intent hierarchy makes coarse-grained checks cheap.
 
@@ -41,7 +39,7 @@ The basic SQL Server compatibility that makes U work, in one matrix (rows = held
 
 PostgreSQL exposes a parallel but differently named vocabulary. Its **table-level** modes run from `ACCESS SHARE` (taken by a plain `SELECT`) up to `ACCESS EXCLUSIVE` (taken by `DROP`, `TRUNCATE`, and many `ALTER TABLE` forms), and its **row-level** modes are requested explicitly—`FOR SHARE`, `FOR KEY SHARE`, `FOR NO KEY UPDATE`, `FOR UPDATE`. The compatibility model is comparable, but PostgreSQL does not expose SQL Server's U mode or intent-lock hierarchy under those names.
 
-## Granularity
+# Granularity
 
 The engine can lock at several sizes, and the choice is a direct trade of concurrency against overhead:
 
@@ -52,7 +50,7 @@ The engine can lock at several sizes, and the choice is a direct trade of concur
 
 Fine-grained locking maximizes concurrency at the price of many small locks (memory + management cost); coarse-grained locking is cheap to track but forces unrelated transactions to contend. The engine starts fine and coarsens only when the fine-grained bookkeeping gets expensive — which is exactly what escalation does.
 
-## Concurrent schedule and predicate protection
+# Concurrent schedule and predicate protection
 
 With lock-based `READ COMMITTED`, one conflicting row schedule looks like this:
 
@@ -65,7 +63,7 @@ With lock-based `READ COMMITTED`, one conflicting row schedule looks like this:
 
 Row locks cover rows that already exist, but a serializable predicate also has to protect the *gaps*. If A reads `WHERE account_id BETWEEN 100 AND 199`, B must not insert account 150 and create a phantom before A commits. Engines enforce that boundary with key-range or predicate protection, or detect the dangerous dependency through a serializable MVCC scheme. Locking only the rows returned by the first read is insufficient.
 
-## Lock escalation
+# Lock escalation
 
 SQL Server acquires fine-grained locks first, then **escalates** many of them into a single coarse lock when a statement holds too many. The default trigger is roughly **5,000 locks on one object in a single statement**, or when total lock memory crosses a server-wide threshold. Escalation converts thousands of row/page locks on a table into one table-level lock: it slashes the memory and management cost of holding all those tiny locks.
 
@@ -73,11 +71,11 @@ The danger is the **concurrency cliff**. The instant those 5,000 row locks becom
 
 Notably, **PostgreSQL does not escalate locks at all.** Row locks live in the tuple itself (in the `xmax` field), so holding a million of them costs no shared-memory lock entries; heavier locks live in a fixed-size shared lock table bounded by `max_locks_per_transaction`. The design choice is the mirror image: PostgreSQL never surprises you with a table lock, but a transaction that takes an unusual number of *object-level* locks can exhaust the shared lock table instead.
 
-## Latch vs lock
+# Latch vs lock
 
 Latches and locks are easy to confuse because both serialize access, but they operate at different layers and different timescales. A **lock** is *logical*: it protects a row or table as a transactional resource and is registered in the lock manager. Its duration depends on mode and isolation: write locks normally last to transaction end, while a shared read lock under `READ COMMITTED` can be released after the statement. A **latch** is *physical*: a lightweight, short-lived primitive that protects an **in-memory structure** (a buffer-pool page, an index's internal node) only for the duration of the physical operation touching it — reading bytes out of a page, splitting an index node. A latch is designed to be held briefly, often for microseconds, but scheduling stalls, contention, or slow physical work can extend the hold; latch wait time can be much longer still. It is never tied to your transaction's lifetime and exists to keep memory internally consistent while a page is being read or modified. When you see *lock* waits you are looking at transactional contention (isolation); when you see *latch* waits you are looking at memory-structure contention (physical throughput).
 
-## Optimistic Concurrency Control
+# Optimistic Concurrency Control
 
 Pessimistic control reserves data before a decision; optimistic control lets callers work concurrently and rejects a stale conditional write. Both can prevent lost updates, but they put the cost in different places. The database still takes a short row lock while executing an optimistic `UPDATE`; “optimistic” describes the application protocol, not a lock-free engine.
 
@@ -123,13 +121,13 @@ COMMIT;
 | Main failure cost | Blocking and deadlocks | Wasted work and retry storms |
 | Engine locking | Holds a reservation while work proceeds | Still locks briefly during the `UPDATE` |
 
-## Blocking vs deadlock
+# Blocking vs deadlock
 
 **Blocking** is the normal consequence of locking: transaction B requests a lock incompatible with one A already holds, so B waits. It is not necessarily temporary or self-resolving. An abandoned session or open transaction can retain the lock indefinitely until the client commits or rolls back, a lock or statement timeout or cancellation fires, the connection is terminated, or an operator intervenes. Monitor blocker age and transaction age, not only waiter count.
 
 A **deadlock** is the pathological case: a **cycle** in the wait-for graph — A holds a lock B needs while B holds a lock A needs — so neither can ever proceed and no amount of waiting resolves it. The engine detects the cycle and chooses a victim. SQL Server raises error 1205 and rolls back the victim transaction. PostgreSQL reports `deadlock detected`, aborts the transaction, and rejects later statements until the application rolls it back; retry the whole transaction, not only the failed statement. That failure mode — detection, victim selection, and consistent access ordering — is owned by [[Home/Programming/NET/CSharp/Concurrency and Parallelism/Deadlocks|Deadlocks]].
 
-## Questions
+# Questions
 
 > [!QUESTION]- When would you use an Update (U) lock instead of a Shared (S) lock?
 > During the *search phase* of a read-then-write operation such as an `UPDATE` or `DELETE` that must scan to find the row it will modify. If that scan took an S lock, two transactions could both hold S on the target row and then both try to upgrade S→X, each blocked by the other's S — an instant deadlock. A U lock prevents it: only one transaction may hold U on a resource at a time (so the upgrade race can't form), yet U is compatible with existing S locks (so it doesn't block concurrent readers during the scan). When the write finally happens, U converts to X.
@@ -140,7 +138,7 @@ A **deadlock** is the pathological case: a **cycle** in the wait-for graph — A
 > [!QUESTION]- Why do intent locks exist, and what does lock escalation trade away?
 > Intent locks (IS/IX/SIX) let a hierarchical lock manager detect conflicts *across granularities* cheaply: before locking a row, a transaction places an intent lock on the table above it, so a request for a table-level lock can check that single intent lock instead of scanning every row lock. Lock escalation goes the other way — it collapses thousands of fine row/page locks into one coarse table lock to reclaim lock-manager memory. The trade is concurrency: the escalated transaction now holds the whole table, so unrelated transactions that only wanted other rows suddenly block — the "concurrency cliff."
 
-## References
+# References
 
 - [Transaction locking and row versioning guide (Microsoft Learn)](https://learn.microsoft.com/en-us/sql/relational-databases/sql-server-transaction-locking-and-row-versioning-guide) — SQL Server's authoritative reference for lock modes (S/U/X, the IS/IX/SIX intent hierarchy), lockable resource granularities, lock escalation thresholds, and the latch-vs-lock distinction; the primary source for most of this note.
 - [Explicit Locking (PostgreSQL docs)](https://www.postgresql.org/docs/current/explicit-locking.html) — PostgreSQL's table-level and row-level lock modes, their compatibility rules, why an MVCC engine takes so few read locks, and the fact that it performs no lock escalation.

@@ -13,8 +13,6 @@ priority: Medium
 status: Done
 ---
 
-# Intro
-
 Safety is the concern of keeping an LLM system safe, secure, and truthful — and unlike [[Home/AI & ML/LLM/Prompt Engineering/Prompt Engineering|Prompt Engineering]], [[Context Engineering]], [[Harness Engineering]], and [[Loop Engineering]], it is not a rung on the steering ladder but a lens applied across all of them. Every rung introduces its own failure surface (an injected instruction in the prompt, poisoned evidence in the context, an over-powered tool in the harness, an unbounded action in the loop), so safety is designed in at each layer rather than bolted on at the end. Like [[Home/AI & ML/LLM/Evaluation/Evaluation|Evaluation]], it spans the whole section.
 
 The three notes in this folder are three faces of one problem, split along a **security-versus-reliability** line:
@@ -30,7 +28,7 @@ const { FolderStructureMap } = await dc.require("Assets/components/devbook-folde
 return FolderStructureMap;
 ```
 
-## Where Safety Attaches to the Ladder
+# Where Safety Attaches to the Ladder
 
 Safety is not enforced in one place — each rung owns part of it, which is why the concern is cross-cutting rather than a single note:
 
@@ -39,11 +37,11 @@ Safety is not enforced in one place — each rung owns part of it, which is why 
 - **Loop** — human-approval boundaries and the escape hatches for actions the system cannot safely verify are a runtime decision ([[Loop Engineering]]).
 - **Measurement** — whether any of it works is answered by [[Home/AI & ML/LLM/Evaluation/Evaluation|Evaluation]]; safety controls are only as good as the tests that exercise them.
 
-## Defense in Depth
+# Defense in Depth
 
 The organizing principle across all three children is defense in depth: no single filter is sufficient, and critical controls are enforced in code and infrastructure rather than by asking the model to behave. A prompt-level rule ("do not reveal the system prompt", "never call `delete`") is advisory — it fails under [[OWASP vulnerabilities on AI LLM|prompt injection]] or a poisoned tool description. The durable controls are structural: validate inputs, isolate untrusted content, gate privileged actions, check outputs before they reach downstream systems, and assume any single layer can be bypassed. The goal is not a perfect system but one whose failures are bounded, detectable, and recoverable.
 
-## Questions
+# Questions
 
 > [!QUESTION]- How do security failures and reliability failures differ, and why does the distinction matter?
 > - Security failures ([[OWASP vulnerabilities on AI LLM|OWASP Top 10]]) have an adversary crafting input — prompt injection, data exfiltration, excessive agency; they are bounded by controls, isolation, and least privilege
@@ -61,7 +59,7 @@ The organizing principle across all three children is defense in depth: no singl
 > - Loop: place human-approval boundaries around irreversible or low-confidence actions
 > - Safety is orthogonal — it is designed into every rung and measured by [[Home/AI & ML/LLM/Evaluation/Evaluation|Evaluation]], not handled at one step
 
-## References
+# References
 
 - [OWASP Top 10 for LLM Applications](https://owasp.org/www-project-top-10-for-large-language-model-applications/) — the canonical threat taxonomy for LLM systems; the source for the [[OWASP vulnerabilities on AI LLM|OWASP LLM Top 10]] child.
 - [OWASP LLM Prompt Injection Prevention Cheat Sheet](https://cheatsheetseries.owasp.org/cheatsheets/LLM_Prompt_Injection_Prevention_Cheat_Sheet.html) — practical, layered controls for the top-ranked risk.

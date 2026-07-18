@@ -10,8 +10,6 @@ priority: High
 status: Done
 publish: true
 ---
-# Singleton
-
 A country has exactly one president at a time. Everyone refers to "the president" — there’s a single instance that serves the entire nation. You don’t create a new president when you need one; you access the existing one through a well-known entry point. If two departments tried to independently elect their own president, you’d have chaos.
 
 The Singleton pattern ensures a class has only one instance and provides a global access point to it. In modern .NET, **`services.AddSingleton<T>()`** is the correct implementation — it’s testable, injectable, and lifetime-controlled by the DI container. The classical form (static instance, private constructor, double-checked locking) is largely obsolete in DI-based applications: it creates hidden global state, makes testing difficult, and introduces captive dependency bugs when a singleton captures a scoped service. Understand the classical form to recognize it in legacy code; use DI-managed singletons for all new work.
@@ -30,7 +28,7 @@ flowchart TD
     end
 ```
 
-## Problem
+# Problem
 
 Multiple `AppConfig` instances read the same config file independently, wasting resources and risking inconsistent state:
 
@@ -83,7 +81,7 @@ public class OrderService
 
 Here's what breaks when requirements change: unit testing `OrderService` requires the real `AppConfig` (which reads environment variables), making tests environment-dependent. You can't inject a test double.
 
-## Solution
+# Solution
 
 Use DI-managed singleton — the container controls the lifetime, and the dependency is explicit:
 
@@ -145,7 +143,7 @@ public class ExpensiveConnectionPool
 }
 ```
 
-## You Already Use This
+# You Already Use This
 
 **`services.AddSingleton<T>()`** — the DI container creates one instance per application lifetime and injects it wherever the type is requested. This is the recommended Singleton in modern .NET: testable, injectable, and lifetime-managed.
 
@@ -157,7 +155,7 @@ public class ExpensiveConnectionPool
 
 **`IConfiguration`** — the configuration root is a singleton. All `IOptions<T>` instances derive from it.
 
-## Pitfalls
+# Pitfalls
 
 **Captive dependency** — the most common production failure. A singleton that depends on a scoped service (e.g., `DbContext`) captures the scoped instance for the application's lifetime, causing stale data, connection leaks, and concurrency bugs. The DI container throws `InvalidOperationException` at startup if you try to inject a scoped service into a singleton — but only if you use `ValidateScopes = true` (enabled by default in development, not always in production). Always validate scopes in all environments.
 
@@ -165,7 +163,7 @@ public class ExpensiveConnectionPool
 
 **Thread safety in classical form** — double-checked locking is subtle and easy to get wrong. `Lazy<T>` with `LazyThreadSafetyMode.ExecutionAndPublication` (the default) is the correct thread-safe lazy initialization pattern. Don't write double-checked locking manually.
 
-## Questions
+# Questions
 
 > [!QUESTION]- Why is the classical Singleton considered an anti-pattern in DI-based applications?
 > Three reasons: (1) **Hidden dependency** — `AppConfig.Instance` doesn't appear in the constructor, so the dependency is invisible to callers and can't be mocked. (2) **Testability** — tests can't inject a different implementation; they're forced to use the real singleton, making tests environment-dependent. (3) **Lifetime control** — the class controls its own lifetime, bypassing the DI container's lifetime management. The DI-managed singleton solves all three: the dependency is explicit, injectable, and mockable. The tradeoff: DI-managed singletons require a DI container; classical singletons work without one (useful in library code or console apps without a host).
@@ -176,7 +174,7 @@ public class ExpensiveConnectionPool
 > [!QUESTION]- When is the classical Singleton still appropriate?
 > In library code without a DI container, or when you need a truly global, immutable resource that must be accessible without injection (e.g., a logging sink initialized before the DI container starts). `Lazy<T>` is the correct implementation in these cases. Also appropriate for value objects that are expensive to construct and inherently stateless (e.g., a compiled `Regex` pattern). The signal: if the singleton holds mutable state or has dependencies, use DI. If it's an immutable, stateless resource, classical form is acceptable.
 
-## References
+# References
 
 - [Singleton Pattern — Christopher Okhravi](https://www.youtube.com/watch?v=hUE_j6q0LTQ&list=PLrhzvIcii6GNjpARdnO4ueTUAVR9eMBpc&index=6) — video walkthrough of the Singleton pattern with OOP examples
 - [Singleton — refactoring.guru](https://refactoring.guru/design-patterns/singleton) — canonical pattern description with thread-safety discussion and C# examples

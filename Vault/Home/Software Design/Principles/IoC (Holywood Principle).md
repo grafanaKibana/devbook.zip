@@ -11,13 +11,11 @@ status: Ready to Repeat
 publish: true
 ---
 
-# Inversion of Control (Hollywood Principle)
-
 Inversion of Control (IoC) is a design principle where the flow of control is inverted: instead of your code creating and managing its dependencies, an external mechanism (a framework or container) coordinates object creation and composition. The name comes from the phrase *Don't call us, we'll call you* — your code defines what it needs, and the framework provides it. In practice, IoC is what makes ASP.NET Core's `builder.Services.AddScoped<IOrderRepository, SqlOrderRepository>()` work: the framework reads the registrations, inspects constructor signatures, and wires everything together at request time. Without IoC, every class would `new` its own dependencies, creating a tightly coupled object graph that cannot be tested or reconfigured without editing source code.
 
 IoC is the principle; **Dependency Injection (DI)** is the most common technique for implementing it. See [[Home/Software Architecture/Patterns/Dependency Injection|Dependency Injection]] for the full treatment of DI patterns, service lifetimes, and ASP.NET Core's DI container.
 
-## How It Works
+# How It Works
 
 Without IoC, a class creates its own dependencies:
 
@@ -46,7 +44,7 @@ builder.Services.AddSingleton<IEmailSender, SmtpEmailSender>();
 
 The container calls `OrderService` with the right implementations — "don't call us, we'll call you."
 
-## IoC vs Dependency Inversion Principle (DIP)
+# IoC vs Dependency Inversion Principle (DIP)
 
 These are related but distinct:
 
@@ -55,9 +53,9 @@ These are related but distinct:
 
 DIP is the *why* (depend on interfaces); IoC/DI is the *how* (let the container wire the concrete implementations). You can follow DIP without a DI container (manual wiring in `Main`), but a container makes it practical at scale.
 
-## Pitfalls
+# Pitfalls
 
-### Service Locator Anti-Pattern
+## Service Locator Anti-Pattern
 
 **What goes wrong**: instead of injecting dependencies, a class calls a global `ServiceLocator.Get<IOrderRepository>()` to resolve them. This is IoC in name only — the class still controls its own dependency resolution.
 
@@ -65,7 +63,7 @@ DIP is the *why* (depend on interfaces); IoC/DI is the *how* (let the container 
 
 **Mitigation**: always use constructor injection. The constructor signature is the contract — it makes dependencies explicit and testable.
 
-### Over-Injection (Constructor Bloat)
+## Over-Injection (Constructor Bloat)
 
 **What goes wrong**: a class has 8+ constructor parameters. Every new feature adds another dependency. The constructor becomes a sign that the class has too many responsibilities.
 
@@ -73,7 +71,7 @@ DIP is the *why* (depend on interfaces); IoC/DI is the *how* (let the container 
 
 **Mitigation**: treat a constructor with more than 4-5 parameters as a design smell. Extract a new service or aggregate related dependencies into a parameter object. The root cause is usually an SRP violation.
 
-### Circular Dependencies
+## Circular Dependencies
 
 **What goes wrong**: `ServiceA` depends on `ServiceB`, which depends on `ServiceA`. The DI container throws at startup.
 
@@ -81,7 +79,7 @@ DIP is the *why* (depend on interfaces); IoC/DI is the *how* (let the container 
 
 **Mitigation**: introduce an interface or event to break the cycle. If `A` needs to notify `B`, have `A` publish an event that `B` subscribes to — no direct dependency.
 
-## Tradeoffs
+# Tradeoffs
 
 | Decision | Option A | Option B | When A | When B |
 | --- | --- | --- | --- | --- |
@@ -92,7 +90,7 @@ DIP is the *why* (depend on interfaces); IoC/DI is the *how* (let the container 
 **Decision rule**: use constructor injection via the built-in ASP.NET Core DI container as the default. Question the pattern only when constructors have more than 5 parameters (SRP violation signal) or when you are writing infrastructure that genuinely needs property injection.
 
 
-## Questions
+# Questions
 
 > [!QUESTION]- What is the difference between IoC and Dependency Injection?
 > IoC is the principle: the framework controls object creation and wiring instead of your code. Dependency Injection is the most common technique for implementing IoC: dependencies are passed in (injected) rather than created internally. You can implement IoC without DI (e.g., using a service locator or factory), but constructor injection via a DI container is the idiomatic .NET approach. IoC is the what; DI is the how.
@@ -101,10 +99,10 @@ DIP is the *why* (depend on interfaces); IoC/DI is the *how* (let the container 
 > DIP (SOLID 'D') is a design rule: high-level modules should depend on abstractions, not concrete implementations. IoC is a runtime mechanism: the framework wires concrete implementations to those abstractions. DIP is the why (depend on interfaces); IoC/DI is the how (let the container provide the concrete class). You can follow DIP without a DI container by manually wiring dependencies in Main, but a container makes it practical at scale.
 
 
-## References
+# References
 
 - [Inversion of Control Containers and the Dependency Injection pattern (Martin Fowler)](https://martinfowler.com/articles/injection.html) — the canonical article that named and defined IoC containers and DI; explains the Hollywood Principle and compares constructor, setter, and interface injection.
 - [[Home/Software Architecture/Patterns/Dependency Injection|Dependency Injection]] — full treatment of DI patterns, ASP.NET Core service lifetimes (Singleton/Scoped/Transient), and common pitfalls like captive dependencies.
-- [[SOLID]] — covers the Dependency Inversion Principle (DIP) in context with the other SOLID principles.
+- [[Home/Software Design/Principles/SOLID]] — covers the Dependency Inversion Principle (DIP) in context with the other SOLID principles.
 - [Dependency injection in ASP.NET Core (Microsoft Learn)](https://learn.microsoft.com/en-us/aspnet/core/fundamentals/dependency-injection) — official guide to ASP.NET Core's built-in DI container: service registration, lifetimes, and constructor injection patterns.
 - [Service Locator is an Anti-Pattern (Mark Seemann)](https://blog.ploeh.dk/2010/02/03/ServiceLocatorisanAnti-Pattern/) — practitioner post explaining why Service Locator violates the explicit dependency principle and how to replace it with constructor injection.

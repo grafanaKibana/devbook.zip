@@ -13,13 +13,11 @@ level:
 status: Done
 ---
 
-# Intro
-
 Resilience patterns protect distributed systems from cascading failures by controlling how services behave when dependencies degrade. The core insight is that partial failure is the normal state — something is always slow, overloaded, or down — and uncontrolled failure propagation turns a single slow dependency into a system-wide outage. Without explicit resilience boundaries, threads, sockets, and retries pile up until healthy parts of the system also degrade.
 
-The two foundational patterns here are [[Circuit Breaker]] (stop calling a failing dependency and fail fast instead of waiting) and [[Rate Limiting]] (cap request volume so one caller cannot exhaust shared resources). In production .NET systems, these compose into a resilience stack together with timeouts, retries with exponential backoff, and fallbacks — each layer handling a different failure mode. Polly and `Microsoft.Extensions.Http.Resilience` wire these layers into a single `HttpClient` pipeline.
+The two foundational patterns here are [[Home/Software Architecture/Patterns/Resilience Patterns/Circuit Breaker]] (stop calling a failing dependency and fail fast instead of waiting) and [[Home/Software Architecture/Patterns/Resilience Patterns/Rate Limiting]] (cap request volume so one caller cannot exhaust shared resources). In production .NET systems, these compose into a resilience stack together with timeouts, retries with exponential backoff, and fallbacks — each layer handling a different failure mode. Polly and `Microsoft.Extensions.Http.Resilience` wire these layers into a single `HttpClient` pipeline.
 
-## Choose a response by failure and overload
+# Choose a response by failure and overload
 
 ![[System Design 101/3bd4751a389d429287b23198ee7fbd906f1c994ec01b88dd3d079bc1a5e6d64f.jpg]]
 
@@ -27,15 +25,15 @@ The two foundational patterns here are [[Circuit Breaker]] (stop calling a faili
 |---|---|---|---|
 | One call exceeds its latency budget | Timeout | Releases caller capacity and bounds tail latency | Can abandon work that still completes downstream |
 | A safe operation fails transiently | Retry with capped exponential backoff and jitter | Hides brief transport or overload faults | Adds load and latency; can duplicate unsafe writes |
-| A dependency fails persistently | [[Circuit Breaker]] | Stops repeated calls and lets the dependency recover | Fast failures during the open interval |
+| A dependency fails persistently | [[Home/Software Architecture/Patterns/Resilience Patterns/Circuit Breaker]] | Stops repeated calls and lets the dependency recover | Fast failures during the open interval |
 | One workload exhausts shared resources | Bulkhead | Preserves capacity for other workloads | Reserved capacity may sit idle |
-| Incoming demand exceeds safe throughput | [[Rate Limiting]] or load shedding | Rejects work before queues and latency grow without bound | Some valid work receives `429` or degraded service |
+| Incoming demand exceeds safe throughput | [[Home/Software Architecture/Patterns/Resilience Patterns/Rate Limiting]] or load shedding | Rejects work before queues and latency grow without bound | Some valid work receives `429` or degraded service |
 | Producer outruns consumer | Backpressure | Makes demand follow downstream capacity | Propagates slowdown or requires bounded buffering |
 | Optional capability fails | Fallback or graceful degradation | Keeps the critical path available | Stale, partial, or lower-quality output |
 
 "Let it crash" is a supervision choice, not permission to ignore a dependency failure. It is safe only when a supervisor restarts an isolated unit, state recovery is defined, crash loops are bounded, and the caller still receives a controlled outcome.
 
-## Map mechanisms to failure domain and recovery
+# Map mechanisms to failure domain and recovery
 
 Fault tolerance starts by naming the unit that may fail and the recovery objective:
 
@@ -55,7 +53,7 @@ const { FolderStructureMap } = await dc.require("Assets/components/devbook-folde
 return FolderStructureMap;
 ```
 
-## References
+# References
 
 - [Release It! Second Edition -- foundational patterns for production resilience covering circuit breakers, bulkheads, timeouts, and steady-state design (Michael Nygard, Pragmatic Bookshelf)](https://pragprog.com/titles/mnee2/release-it-second-edition/)
 - [Resiliency patterns -- cloud design patterns for retry, circuit breaker, bulkhead, and health endpoint monitoring (Microsoft Learn)](https://learn.microsoft.com/en-us/azure/architecture/patterns/category/resiliency)

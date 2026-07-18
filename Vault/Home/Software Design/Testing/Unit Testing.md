@@ -11,13 +11,11 @@ status: Ready to Repeat
 publish: true
 ---
 
-# Unit Testing
-
 A unit test verifies a small, isolated piece of behavior — typically a single method or class — quickly and deterministically. "Isolated" means all external dependencies (database, HTTP, filesystem, clock) are replaced with test doubles so the test exercises only the logic under test. Unit tests are the foundation of a fast feedback loop: a suite of hundreds of unit tests should run in under a second, catching regressions the moment they are introduced.
 
 The primary value of unit tests is not coverage — it is **design pressure**. Code that is hard to unit-test is usually poorly designed: too many dependencies, too much responsibility, or hidden coupling to global state.
 
-## Anatomy of a Unit Test (AAA Pattern)
+# Anatomy of a Unit Test (AAA Pattern)
 
 Every unit test follows **Arrange → Act → Assert**:
 
@@ -51,7 +49,7 @@ public class DiscountServiceTests
 
 **Naming convention**: `MethodName_StateUnderTest_ExpectedBehavior` or a plain English description. The test name is the first thing you read when a test fails — make it diagnostic.
 
-## Test Doubles: Stubs vs Mocks
+# Test Doubles: Stubs vs Mocks
 
 | Type | Purpose | Example |
 |---|---|---|
@@ -75,16 +73,16 @@ emailSender.Verify(e => e.Send("c1", It.IsAny<string>()), Times.Once);
 
 **Rule of thumb**: stub dependencies that provide data; mock dependencies that represent side effects (email, SMS, audit log). Over-mocking — mocking every dependency including internal ones — produces brittle tests that break on every refactor.
 
-### Two schools: classicist vs mockist
+## Two schools: classicist vs mockist
 
 How much you mock isn't just taste — it's two named philosophies, and knowing them resolves most "should I mock this?" arguments:
 
 - **Classicist / Detroit / "solitary-ish but sociable"** — mock only at true system boundaries (DB, HTTP, clock); let a unit use its *real* collaborators (real value objects, real domain services). Tests assert on **observable state/results**. Tests survive refactors because they don't know internal call structure, but a failure can implicate several classes.
 - **Mockist / London / "outside-in"** — isolate the unit by mocking **all** collaborators and assert on the **interactions** between them. Tests pinpoint the exact class and drive interface design top-down, but they couple to implementation and break when you reshuffle internals (the over-mocking brittleness above).
 
-Most pragmatic suites lean **classicist** — mock the boundary, use the real thing inside — precisely to avoid that brittleness, reaching for interaction verification only for genuine side effects. The same split shows up in [[Test-Driven Development|TDD]] as inside-out (Detroit) vs outside-in (London).
+Most pragmatic suites lean **classicist** — mock the boundary, use the real thing inside — precisely to avoid that brittleness, reaching for interaction verification only for genuine side effects. The same split shows up in [[Home/Software Design/Testing/Test-Driven Development|TDD]] as inside-out (Detroit) vs outside-in (London).
 
-## xUnit in .NET
+# xUnit in .NET
 
 xUnit is the standard .NET unit testing framework. Key attributes:
 
@@ -110,9 +108,9 @@ public void DiscountCalculation(int orderCount, decimal price, decimal expected)
 }
 ```
 
-## Pitfalls
+# Pitfalls
 
-### Testing Implementation, Not Behavior
+## Testing Implementation, Not Behavior
 
 **What goes wrong**: tests assert on private state or verify every internal method call. When you refactor the implementation, tests break even though behavior is unchanged.
 
@@ -120,7 +118,7 @@ public void DiscountCalculation(int orderCount, decimal price, decimal expected)
 
 **Mitigation**: test through the public interface only. Assert on return values and observable side effects. If a refactor breaks a test without changing behavior, the test was testing the wrong thing.
 
-### Shared Mutable State Between Tests
+## Shared Mutable State Between Tests
 
 **What goes wrong**: tests pass individually but fail when run together because one test mutates a static field or shared object that another test reads.
 
@@ -128,7 +126,7 @@ public void DiscountCalculation(int orderCount, decimal price, decimal expected)
 
 **Mitigation**: create fresh instances in each test's Arrange step. Use `IClassFixture<T>` only for expensive but immutable setup (e.g., starting a test server). Never share mutable state across tests.
 
-### Slow Tests from Real I/O
+## Slow Tests from Real I/O
 
 **What goes wrong**: a "unit" test hits a real database or filesystem, making the suite take minutes instead of seconds.
 
@@ -136,7 +134,7 @@ public void DiscountCalculation(int orderCount, decimal price, decimal expected)
 
 **Mitigation**: inject all I/O dependencies as interfaces. Use fakes or in-memory implementations in unit tests. Reserve real I/O for integration tests.
 
-## Tradeoffs
+# Tradeoffs
 
 | Approach | Strengths | Weaknesses | When to use |
 |---|---|---|---|
@@ -146,7 +144,7 @@ public void DiscountCalculation(int orderCount, decimal price, decimal expected)
 
 **Decision rule**: write unit tests for all domain logic and anything with branching. Add integration tests for the infrastructure layer (DB, HTTP, queues). Don't try to unit-test infrastructure — mock it at the boundary and test the real thing in integration tests.
 
-## Questions
+# Questions
 
 > [!QUESTION]- What is the difference between a stub and a mock?
 > - A stub provides canned return values so the test can proceed — it answers questions ("what orders does customer X have?").
@@ -168,7 +166,7 @@ public void DiscountCalculation(int orderCount, decimal price, decimal expected)
 > - Exploratory spike code — write the spike without tests, learn from it, then delete it before it becomes production code.
 > - Tradeoff: every test has a maintenance cost. Tests that don't catch real bugs are pure overhead. Focus unit tests on logic with branching, edge cases, and business rules.
 
-## References
+# References
 
 - [Unit testing best practices in .NET (Microsoft Learn)](https://learn.microsoft.com/en-us/dotnet/core/testing/unit-testing-best-practices) — Microsoft's official guidance on naming, AAA pattern, avoiding anti-patterns, and test isolation.
 - [xUnit.net documentation](https://xunit.net/docs/getting-started/netcore/cmdline) — getting started guide and reference for `[Fact]`, `[Theory]`, fixtures, and parallelism in xUnit.

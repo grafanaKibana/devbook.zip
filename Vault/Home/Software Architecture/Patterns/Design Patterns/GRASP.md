@@ -11,11 +11,9 @@ status: Ready to Repeat
 publish: true
 ---
 
-# GRASP
-
 GRASP (General Responsibility Assignment Software Patterns) is a set of nine principles for deciding which class or object should be responsible for a given behavior. Introduced by Craig Larman, GRASP answers the question "who should do this?" in object-oriented design. The principles don't prescribe specific class structures — they provide heuristics for assigning responsibilities in a way that keeps designs cohesive, loosely coupled, and understandable.
 
-## The Nine Principles
+# The Nine Principles
 
 **Information Expert** — assign responsibility to the class that has the information needed to fulfill it. If `Order` knows its line items and prices, `Order` should calculate its total — not a separate `OrderCalculator`.
 
@@ -35,7 +33,7 @@ GRASP (General Responsibility Assignment Software Patterns) is a set of nine pri
 
 **Protected Variations** — identify points of variation and assign responsibilities to create a stable interface around them. If the payment provider might change, hide it behind `IPaymentGateway` so the rest of the system is protected from that variation.
 
-## Example: Applying Information Expert
+# Example: Applying Information Expert
 
 ```csharp
 // BAD: OrderService calculates total by reaching into Order's data
@@ -56,9 +54,9 @@ public sealed class Order
 
 The `Order` class has the information (line items, prices, quantities) — it should own the calculation.
 
-## Pitfalls
+# Pitfalls
 
-### Misapplying Information Expert (Anemic Domain Model)
+## Misapplying Information Expert (Anemic Domain Model)
 
 **What goes wrong**: domain classes hold only data (properties) while all behavior lives in service classes. This is the Anemic Domain Model anti-pattern — it violates Information Expert by separating data from the behavior that operates on it.
 
@@ -67,7 +65,7 @@ The `Order` class has the information (line items, prices, quantities) — it sh
 **Mitigation**: ask 'which class has the information needed to fulfill this responsibility?' If `Order` has the line items and prices, `Order.CalculateTotal()` belongs on `Order`, not on `OrderService`.
 
 
-## Tradeoffs
+# Tradeoffs
 
 | Decision | Option A | Option B | When A | When B |
 | --- | --- | --- | --- | --- |
@@ -77,7 +75,7 @@ The `Order` class has the information (line items, prices, quantities) — it sh
 
 **Decision rule**: use GRASP principles to make initial responsibility assignments. When two principles conflict (Information Expert says class A, Low Coupling says class B), prefer the assignment that keeps the most change-prone behavior behind the fewest interfaces. GRASP answers who; GoF answers how.
 
-## Example: Polymorphism Replacing Conditionals
+# Example: Polymorphism Replacing Conditionals
 
 ```csharp
 // BAD: type-switch violates Polymorphism principle
@@ -108,7 +106,7 @@ public sealed class CsvReportGenerator : IReportGenerator
 ```
 
 
-## Questions
+# Questions
 
 > [!QUESTION]- What is the Information Expert principle and why does it reduce coupling?
 > Information Expert assigns responsibility to the class that has the information needed to fulfill it. This keeps related data and behavior together, reducing the need for one class to reach into another to get data. The result is lower coupling and higher cohesion — each class does what it knows.
@@ -117,9 +115,9 @@ public sealed class CsvReportGenerator : IReportGenerator
 > GRASP focuses on responsibility assignment — which class should own a behavior or data. SOLID focuses on design principles for maintainability (single responsibility, open/closed, etc.). They are complementary: GRASP guides initial design decisions; SOLID guides refactoring and long-term maintainability.
 
 
-## References
+# References
 
 - [GRASP (Wikipedia)](https://en.wikipedia.org/wiki/GRASP_(object-oriented_design)) — overview of all nine principles with definitions and examples.
 - [Applying UML and Patterns (Craig Larman)](https://www.oreilly.com/library/view/applying-uml-and/0131489062/) — the book that introduced GRASP; covers all nine principles with detailed worked examples in the context of iterative OO design.
-- [[OOP]] — object-oriented programming fundamentals that GRASP principles build on: encapsulation, polymorphism, and responsibility assignment.
+- [[Home/Software Design/Paradigms/OOP]] — object-oriented programming fundamentals that GRASP principles build on: encapsulation, polymorphism, and responsibility assignment.
 - [GRASP Patterns Explained (Baeldung)](https://www.baeldung.com/java-grasp-patterns) — practical walkthrough of all nine GRASP principles with code examples; Java-based but the responsibility assignment concepts apply directly to C#.

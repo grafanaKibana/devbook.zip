@@ -11,8 +11,6 @@ status: Done
 publish: true
 ---
 
-# Intro
-
 A service accepts jobs faster than a single worker drains them, and fairness requires that the earliest arrival is served first. Storing arrivals in a plain array and always removing index `0` re-shifts every remaining element on each removal — an `O(n)` cost that grows with the backlog. A queue keeps the same arrival order while making both the arrival and the departure `O(1)`: new items enter at the back, the oldest leaves from the front, and nothing in between moves.
 
 The structure records only order of arrival. It cannot reach the middle by position, and it cannot promote an urgent item ahead of an older one — retrieval by priority needs [[Heap|a priority queue]], not a FIFO queue. What it retains is exactly the front-to-back sequence and nothing more.
@@ -22,7 +20,7 @@ The structure records only order of arrival. It cannot reach the middle by posit
 > [!NOTE] Visualization pending
 > Planned StepTrace: a ring-buffer card showing head and tail indices advancing modulo capacity as enqueue and dequeue wrap the live region around the backing array, plus the resize that copies into a larger array with head reset to `0`. No matching renderer exists in `engine.js` yet.
 
-## Representation and invariants
+# Representation and invariants
 
 Two competing physical layouts back the same FIFO contract.
 
@@ -38,7 +36,7 @@ Three facts hold across every operation:
 
 A growable circular buffer adds one more rule: when the live region fills the whole array, the next enqueue allocates a larger array, copies the elements in front-to-back order, and resets `head` to `0`. That copy is `O(n)`, but it happens once per doubling, so its cost spreads across the many `O(1)` enqueues that triggered it.
 
-## Complexity
+# Complexity
 
 | Operation | Best time | Amortized time | Worst single operation | Structure space |
 | --- | --- | --- | --- | --- |
@@ -48,7 +46,7 @@ A growable circular buffer adds one more rule: when the live region fills the wh
 
 The `O(1)` bounds assume a circular-buffer or linked-list backing. The naive alternative — an array that removes from index `0` — makes `Dequeue` `O(n)`, because every surviving element shifts one slot toward the front; that single failure is the reason the circular buffer exists. For a growable circular buffer, only enqueue carries a worst case: the resize copy is `O(n)` for that one operation but amortizes to `O(1)` across the sequence of enqueues that filled the array. A fixed-capacity circular queue has no resize and therefore no `O(n)` spike, but it can reject an enqueue when full.
 
-## When the FIFO shape stops fitting
+# When the FIFO shape stops fitting
 
 Random access and priority both fall outside the contract. The queue exposes only the front for removal and the back for insertion; there is no index into the middle and no way to serve the smallest key first. A workload that must dequeue by priority rather than by arrival needs [[Heap|a priority queue]], which pays `O(log n)` per operation to keep the extremum reachable.
 
@@ -56,7 +54,7 @@ The naive array implementation fails specifically at the front. Because dequeue 
 
 A fixed-capacity circular queue has a hard ceiling. Once the live region occupies every slot, `head` has wrapped to meet `tail` and there is nowhere to write; the next enqueue must either block, drop the item, or overwrite the oldest, depending on the chosen policy. This bounded design is deliberate — it caps memory and applies backpressure — and it is the direct trade against an unbounded queue that accepts every arrival and risks unbounded memory growth when producers outpace consumers.
 
-## Reference drawer
+# Reference drawer
 
 > [!ABSTRACT]- Circular-buffer layout
 > ```mermaid
@@ -87,7 +85,7 @@ A fixed-capacity circular queue has a hard ceiling. Once the live region occupie
 > ```
 > `Queue<T>` is the growable circular buffer described above; `Dequeue` and `Peek` throw `InvalidOperationException` when empty, so a `Count` guard or the `Try*` variants are required at boundaries where the queue can drain.
 
-## Questions
+# Questions
 
 > [!QUESTION]- Why does a queue use a circular buffer or linked list instead of a plain array?
 > A plain array that dequeues from index `0` must shift every remaining element down one slot, making each dequeue `O(n)` and a full drain `Θ(n²)`. A circular buffer moves a `head` index modulo capacity instead of moving data, and a linked list unlinks a node — both keep dequeue `O(1)` while preserving arrival order.
@@ -98,7 +96,7 @@ A fixed-capacity circular queue has a hard ceiling. Once the live region occupie
 > [!QUESTION]- When is a queue the wrong structure, and what replaces it?
 > When the next item must be chosen by priority rather than by arrival time, a FIFO queue would serve an older low-priority item ahead of an urgent newer one. A priority queue backed by a [[Heap]] restores correct order at `O(log n)` per operation. When both ends must be read and written, a [[Deque]] fits instead.
 
-## References
+# References
 
 - [`Queue<T>` class](https://learn.microsoft.com/en-us/dotnet/api/system.collections.generic.queue-1) — .NET API contract for Enqueue, Dequeue, Peek, and the growable circular-buffer semantics.
 - [`Queue<T>` source in dotnet/runtime](https://github.com/dotnet/runtime/blob/main/src/libraries/System.Private.CoreLib/src/System/Collections/Generic/Queue.cs) — the `_head`, `_tail`, `_array`, and `SetCapacity` fields implementing the wrap-around ring and its resize.

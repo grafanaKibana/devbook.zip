@@ -13,15 +13,13 @@ status: Creation
 priority: High
 ---
 
-# Intro
-
 Algorithms are step-by-step procedures for solving problems with predictable behavior as input grows. In practice, algorithm choice is a tradeoff between runtime, memory usage, implementation complexity, and failure modes under real workloads.
 
 Complexity analysis ([[Home/Computer Science/Big O Notation|Big O]]) is the primary tool for comparing algorithms without benchmarking. It captures growth rate: O(n log n) sorting scales to millions of items where O(n²) does not. But Big O ignores constant factors, cache behavior, and real-world input distributions — so production decisions combine theoretical analysis with profiling on representative data.
 
 Concrete example: for repeated membership checks in a large list of ids, sorting once and using binary search gives fast lookups with low memory overhead. For one-off checks on unsorted data, a linear scan is usually simpler and can be faster overall because there is no preprocessing cost.
 
-## Algorithms as system-design mechanisms
+# Algorithms as system-design mechanisms
 
 System-design diagrams often hide the algorithm inside a box labelled “cache,” “scheduler,” or “database.” Naming the mechanism exposes the cost you are accepting:
 
@@ -45,7 +43,7 @@ const { FolderStructureMap } = await dc.require("Assets/components/devbook-folde
 return FolderStructureMap;
 ```
 
-## Questions
+# Questions
 
 > [!QUESTION]- What is an algorithm? How is its efficiency measured?
 > - An algorithm is a finite, ordered set of steps that transforms input into the required output.
@@ -62,7 +60,7 @@ return FolderStructureMap;
 > Worst-case guarantees behavior under adversarial or degenerate inputs (important for security and SLAs). Average-case describes typical behavior under random inputs. Amortized complexity describes cost spread over a sequence of operations (e.g., dynamic array resizing is O(1) amortized even though individual resizes are O(n)).
 > Choose based on whether you control the input distribution and whether tail latency matters.
 
-## References
+# References
 
 - [Big O notation (Wikipedia)](https://en.wikipedia.org/wiki/Big_O_notation) — orientation to asymptotic upper bounds and the related big-Omega and big-Theta notation; useful terminology reference, not the primary algorithm authority.
 - [Algorithm design and analysis (MIT OpenCourseWare)](https://ocw.mit.edu/courses/6-006-introduction-to-algorithms-spring-2020/) — primary course lectures, notes, and exercises for designing and analyzing search, sorting, graph, and dynamic-programming algorithms.

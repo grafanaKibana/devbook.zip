@@ -11,13 +11,11 @@ status: Ready to Repeat
 publish: true
 ---
 
-# Intro
-
 A payment system turns one business intent into external instructions, internal accounting, and evidence that money reached the expected destination. Those events are not one transaction. An issuer can authorize a card while the merchant has no settled funds; a timeout can hide a successful capture; a bank can return a transfer after the application displayed success.
 
 Keep four records separate: what the customer requested, what each execution attempt reported, what the ledger posted, and what settlement or reconciliation later proved. A `100.00 USD` checkout can be `CAPTURED` at the PSP, represented as a `100.00 USD` processor receivable in the ledger, absent from today's settlement file, and therefore unavailable for payout. One mutable `PAID` flag cannot represent those facts without losing recovery evidence.
 
-## Payment State Is Evidence, Not One Status
+# Payment State Is Evidence, Not One Status
 
 Use stable identities across the lifecycle:
 
@@ -52,7 +50,7 @@ PENDING -> UNKNOWN -> RESOLVED | RECONCILIATION_BREAK
 
 Also model `DECLINED`, `CANCELED`, `EXPIRED`, and rail-specific return states. Transitions should be conditional and monotonic for the evidence they represent. An `AUTHORIZED` callback arriving after `CAPTURED` is useful duplicate evidence, not permission to move backward.
 
-## Card Payments
+# Card Payments
 
 A card payment coordinates the merchant, gateway or PSP, acquirer, card network, and issuer. One company may bundle several roles, but bundling does not collapse the lifecycle.
 
@@ -60,19 +58,19 @@ A card payment coordinates the merchant, gateway or PSP, acquirer, card network,
 
 Store the operation, amount, currency, attempt ID, provider reference, and evidence behind each transition. “The PSP approved it” is too vague to decide whether goods can ship, funds can be paid out, or a dispute needs a new journal.
 
-### Authorization and Capture Are Business Decisions
+## Authorization and Capture Are Business Decisions
 
 Separate authorization from capture when fulfillment occurs later. A hotel can authorize `300.00 USD`, capture `247.50 USD` after checkout, and cancel the unused hold. A merchant that fulfills immediately can capture with authorization and avoid the extra failure window.
 
 An uncaptured authorization is reversed or expires. Once captured, returning value is a refund linked to the original operation. A chargeback is not a refund: the cardholder disputes through the issuer, the scheme opens a case, and the merchant may lose funds while evidence is reviewed. Preserve the original capture and post reversals, refunds, and disputes as new operations. Rewriting `CAPTURED` to `FAILED` destroys the accounting lineage.
 
-### Fulfillment Boundary
+## Fulfillment Boundary
 
 Do not fulfill from a browser redirect or payer screen. The customer can close the tab after approval but before the redirect reaches the merchant. Fulfill from a verified server event or provider lookup, and make fulfillment itself idempotent. A later refund or dispute changes the financial position; it does not mean fulfillment never happened.
 
 The adopted participant visual is useful for role boundaries, but fixed timing is not part of the model. Capture, clearing, interbank settlement, merchant funding, and payout schedules vary by merchant, acquirer, network, region, and exception path.
 
-## Bank and Foreign Exchange Payments
+# Bank and Foreign Exchange Payments
 
 Bank rails do not share one success contract. ACH processes file-based credits and debits with later returns, UPI routes instant account-to-account instructions through participating banks, SWIFT carries financial messages rather than settling them, and foreign exchange adds quote and liquidity legs.
 
@@ -80,19 +78,19 @@ Bank rails do not share one success contract. ACH processes file-based credits a
 
 The industry map is a scope check: regulatory authorities, central banks, commercial banks, non-bank providers, clearing networks, and settlement systems vary by market. A provider adapter can normalize transport details, but it must retain each rail's acknowledgement, posting, return, settlement, liquidity, and reconciliation states.
 
-### ACH Batch Clearing
+## ACH Batch Clearing
 
 ACH moves U.S. credit and debit entries through an originator, an Originating Depository Financial Institution, an ACH Operator, and a Receiving Depository Financial Institution. Files are validated and processed in network windows; settlement and account posting follow network rules. Same Day ACH adds faster windows, not an atomic request-response guarantee.
 
 Track `SUBMITTED`, `OPERATOR_ACCEPTED`, `SETTLEMENT_PENDING`, `POSTED`, `RETURN_PENDING`, `RETURNED`, and `RECONCILED`. Reconcile file control totals, trace numbers, settlement dates, and bank postings. Do not encode fixed overnight timing or describe the rail as only a “next-day system”; schedules and exception paths are more nuanced.
 
-### UPI Routing and Posting
+## UPI Routing and Posting
 
 UPI is an interoperable instant-payment system operated by NPCI. An app or PSP resolves a Virtual Payment Address, routes through participating banks and NPCI, obtains payer authorization, and receives a transaction response. Address resolution, authentication, switch routing, debit posting, credit posting, acknowledgement, disputes, reconciliation, and participant settlement remain different records.
 
 Bind the NPCI or bank reference to the internal intent. An ambiguous timeout follows `UNKNOWN -> query -> reconcile`, and duplicate callbacks pass through idempotent transitions. NPCI routes and coordinates the payment; the participating banks own account posting.
 
-## SWIFT Messaging Is Not Settlement
+# SWIFT Messaging Is Not Settlement
 
 SWIFT validates and transports standardized financial messages and reports. Store-and-forward delivery and network acknowledgements prove facts about the message path. They do not prove that the receiver accepted the business instruction, posted a customer account, or completed clearing and settlement.
 
@@ -100,7 +98,7 @@ SWIFT validates and transports standardized financial messages and reports. Stor
 
 Persist the instruction ID, sender, receiver, message type and version, network acknowledgement, business status, settlement reference, and reconciliation result. A negative acknowledgement can be corrected and retried. A positive network acknowledgement without business confirmation remains an exception. ISO 20022 defines messages across initiation, clearing, settlement, and cash management; the business process decides which evidence closes each state.
 
-## Foreign Exchange and Liquidity
+# Foreign Exchange and Liquidity
 
 Cross-currency payments carry at least presentment, conversion, and settlement amounts. Record the quote ID, source and destination currencies, rate, fee, expiration, rounding rule, and who bears slippage. Reject or requote after expiry; silently using a new rate changes the customer's contract.
 
@@ -110,9 +108,9 @@ Suppose a provider prefunds USD and EUR accounts, collects `100.00 USD`, locks `
 
 Multi-currency settlement avoids conversion when presentment and configured settlement currencies match. It costs more bank accounts, liquidity management, and reconciliation per currency. Automatic conversion reduces that surface but makes rate, fee, expiry, and rounding evidence part of every transaction.
 
-## Durable Idempotency
+# Durable Idempotency
 
-Payment idempotency needs two contracts: a durable local attempt keyed to the merchant operation and a provider that honors the same key for repeated calls. The generic mechanism and its database race boundaries belong in [[Idempotency]]; the payment-specific sequence is reserve, call, then reconcile.
+Payment idempotency needs two contracts: a durable local attempt keyed to the merchant operation and a provider that honors the same key for repeated calls. The generic mechanism and its database race boundaries belong in [[Home/Software Architecture/Distributed Systems/Idempotency]]; the payment-specific sequence is reserve, call, then reconcile.
 
 1. In a short transaction, insert a `PENDING` attempt with a unique `(merchant, provider, idempotency_key)` constraint, the request fingerprint, and a stable attempt ID.
 2. If the attempt is `COMPLETED`, replay its stored response. If it is `PENDING` or `UNKNOWN`, return the current state or enter resolution; never allocate another provider key.
@@ -139,7 +137,7 @@ Reusing the key with `12000 USD` must return a conflict. A duplicate with the sa
 
 The defensible claim is one durable effect at the declared boundary. A provider can guarantee one charge per key while the local database guarantees one completed attempt per key. Ledger posting, fulfillment, email, and downstream events need their own conditional transition, inbox, or outbox.
 
-## Unknown Outcomes
+# Unknown Outcomes
 
 A five-second timeout after capture submission has three explanations: the PSP never received the request, accepted it before the response was lost, or is still processing it. Treat timeout as evidence of uncertainty:
 
@@ -152,7 +150,7 @@ A five-second timeout after capture submission has three explanations: the PSP n
 
 Blind failover converts uncertainty into a probable double charge.
 
-## PSP Routing and Failure Isolation
+# PSP Routing and Failure Isolation
 
 Route before creating the attempt and persist the rule version. Inputs can include currency, country, method, merchant contract, provider health, cost, and measured authorization rate.
 
@@ -168,13 +166,13 @@ Trip circuit breakers on technical failure and saturation, not issuer declines. 
 
 Measure latency, traffic, technical errors, declines by reason, unknown outcomes, saturation, webhook lag, and reconciliation breaks. Load tests need retries and callback bursts because those paths amplify incidents.
 
-## Verified Webhooks
+# Verified Webhooks
 
-[[Webhooks]] are asynchronous evidence, not trusted commands. Verify the signature over the exact raw body and signed timestamp, reject stale timestamps, and store `(provider, event_id)` under a unique constraint. Persist the event before returning `2xx`, then process it asynchronously.
+[[Home/Software Architecture/Distributed Systems/Webhooks]] are asynchronous evidence, not trusted commands. Verify the signature over the exact raw body and signed timestamp, reject stale timestamps, and store `(provider, event_id)` under a unique constraint. Persist the event before returning `2xx`, then process it asynchronously.
 
 A duplicate success event must not fulfill twice. If a handler commits a transition but fails before acknowledging its queue message, the retry observes the applied event and becomes a no-op. Retrieval APIs and scheduled reconciliation recover callbacks that never arrive.
 
-## Intent, Attempt, Journal, and Settlement Evidence
+# Intent, Attempt, Journal, and Settlement Evidence
 
 Provider state and accounting state answer different questions. A PSP records what it observed on a rail; the ledger records what the platform owns or owes; settlement files and bank statements show what moved externally. Keep the records linked but independent so fees, returns, disputes, payout failures, and missing callbacks have an honest place to land.
 
@@ -182,7 +180,7 @@ Provider state and accounting state answer different questions. A PSP records wh
 
 A marketplace order split across three sellers creates three stable allocation records or payment orders. Recomputing the split only in memory lets a retry charge or credit every seller again.
 
-## Clearing, Settlement, and Fund Flow
+# Clearing, Settlement, and Fund Flow
 
 Clearing exchanges and validates transaction information and determines obligations. Netting reduces multiple obligations to a smaller set of positions. Settlement discharges those obligations. Merchant funding and payout can occur on another schedule.
 
@@ -208,7 +206,7 @@ Every journal balances and retains the currency. A refund, return, reserve, or c
 
 Settlement is not payout. Provider funds can move from `pending` to `available`, then a payout can be initiated, reported paid, and later returned by the destination bank. Each state needs its own evidence.
 
-## Reconciliation
+# Reconciliation
 
 Reconciliation compares independently produced intents, attempts, journals, PSP exports, settlement batches, payout reports, and bank statements. It detects errors that API idempotency cannot: missing callbacks, duplicate provider operations, fees on another date, late returns, and cut-off mismatches.
 
@@ -225,7 +223,7 @@ Use an owned break workflow:
 
 An internal capture at `23:59:55 UTC` can appear in the next provider file at `00:00:30 UTC`. Carry it through one tolerance window. If it remains missing, open an owned exception with the amount at risk; do not post a correction while timing alone explains the break.
 
-## Mobile Wallet Tokenization
+# Mobile Wallet Tokenization
 
 “Wallet” can mean a device presents a tokenized card credential, an operator maintains a custodial account, or a user controls a blockchain private key. Keep five mobile-wallet concepts separate:
 
@@ -237,7 +235,7 @@ An internal capture at `23:59:55 UTC` can appear in the next provider file at `0
 
 Apple documents an encrypted payment token produced with Secure Element participation. Google Pay can return PAN-based data or a device token with a cryptogram; direct integrations must verify, decrypt, expire, and protect the payload. Tokenization reduces PAN exposure but does not automatically remove PCI DSS scope. Prefer hosted or gateway-tokenized integration unless direct payload handling is a product requirement.
 
-## QR Presentation and Replay Safety
+# QR Presentation and Replay Safety
 
 | Presentation | Static | Dynamic |
 | --- | --- | --- |
@@ -246,7 +244,7 @@ Apple documents an encrypted payment token produced with Secure Element particip
 
 Presentation direction does not determine whether the rail is debit, credit, card, or account-to-account. For a dynamic merchant code, sign or MAC `intent_id`, merchant, amount, currency, expiration, and nonce. The server loads the canonical intent, rejects expiry or merchant mismatch, and accepts one idempotent confirmation. A static QR resolves only merchant identity; the server creates a fresh attempt after the payer confirms the amount.
 
-## Scan-to-Pay Example
+# Scan-to-Pay Example
 
 ![[System Design 101/17273442bd87d4a601cec61990c96bd932a966ce9118ff90e92dd6c8a34fb0ca.png]]
 
@@ -259,7 +257,7 @@ Presentation direction does not determine whether the rail is debit, credit, car
 
 The visual shows participants, not replay prevention, ledger posting, callback verification, or reconciliation. A client-side “paid” screen is never settlement evidence.
 
-## Custodial Accounts and Self-Custody
+# Custodial Accounts and Self-Custody
 
 | Question | Custodial ledger account | Self-custodied blockchain wallet |
 | --- | --- | --- |
@@ -270,9 +268,9 @@ The visual shows participants, not replay prevention, ledger posting, callback v
 
 Choose custody when the product needs regulated account controls, reversible support operations, and bank or card integration. Choose self-custody only when user-controlled keys and protocol transfer semantics justify the recovery and chain risks. An Ethereum externally owned account address is derived from the public key; it is not the public key itself.
 
-## References
+# References
 
-### Provenance
+## Provenance
 
 - [How scan to pay works](https://github.com/ByteByteGoHq/system-design-101/blob/b28380a4710c5ec9638ec037d4168e288f334cba/data/guides/how-does-scan-to-pay-work.md) — participant flow reconciled with signed intents, replay prevention, server verification, unknown outcomes, and reconciliation.
 - [How Apple Pay and Google Pay work](https://github.com/ByteByteGoHq/system-design-101/blob/b28380a4710c5ec9638ec037d4168e288f334cba/data/guides/how-applegoogle-pay-works.md) — provisioning, payment tokens, device credentials, cryptograms, and merchant processing.
@@ -290,7 +288,7 @@ Choose custody when the product needs regulated account controls, reversible sup
 - [Unified Payments Interface](https://github.com/ByteByteGoHq/system-design-101/blob/b28380a4710c5ec9638ec037d4168e288f334cba/data/guides/unified-payments-interface-upi-in-india.md) — routing, authorization, bank posting, acknowledgement, reconciliation, and participant settlement.
 - [How to learn payments](https://github.com/ByteByteGoHq/system-design-101/blob/b28380a4710c5ec9638ec037d4168e288f334cba/data/guides/how-to-learn-payments.md) — scope across authorities, banks, non-bank providers, clearing systems, and settlement systems.
 
-### Primary and implementation sources
+## Primary and implementation sources
 
 - [CPMI glossary](https://www.bis.org/cpmi/glossary.pdf) — primary terminology for payment instructions, clearing, settlement, netting, reconciliation, and participant roles.
 - [Principles for financial market infrastructures](https://www.bis.org/cpmi/publ/d101a.pdf) — primary risk-management standard covering settlement finality, liquidity, operational resilience, and default management.

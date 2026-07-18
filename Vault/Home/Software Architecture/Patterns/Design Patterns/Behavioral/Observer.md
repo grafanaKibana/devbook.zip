@@ -10,8 +10,6 @@ priority: High
 status: Done
 publish: true
 ---
-# Observer
-
 A newspaper subscription is the Observer pattern in everyday life. You subscribe once, and the publisher delivers every new issue to your mailbox automatically. You didn’t ask for each specific issue — you registered your interest, and the publisher notifies all subscribers whenever there’s something new. Unsubscribe anytime, and the deliveries stop. The publisher doesn’t need to know what you do with the newspaper.
 
 The Observer pattern defines a one-to-many dependency: when one object (the **subject** or **publisher**) changes state, all its dependents (**observers** or **subscribers**) are notified automatically. The subject maintains a subscriber list and calls each observer when state changes. Observers register and unregister independently — the subject doesn’t know how many observers exist or what they do. In C#, **`event` and `delegate` ARE the Observer pattern** — the language has it built in. `order.StatusChanged += handler` is subscribe; `order.StatusChanged -= handler` is unsubscribe; raising the event is notify.
@@ -29,7 +27,7 @@ sequenceDiagram
     Order->>Warehouse: StatusChanged - Shipped
 ```
 
-## Problem
+# Problem
 
 `OrderService.UpdateStatus()` directly calls every subscriber — adding a new subscriber means editing the service:
 
@@ -59,7 +57,7 @@ public class OrderService
 
 Here's what breaks when requirements change: adding a push notification subscriber requires editing `OrderService` — a class that should only know about order state, not notification channels.
 
-## Solution
+# Solution
 
 Two approaches: C# `event` (language-native) and explicit subscriber list (more control):
 
@@ -142,7 +140,7 @@ builder.Services.AddScoped<IOrderStatusObserver, PushNotifier>();
 
 Adding a push notification subscriber now means a new class registered in DI — `Order` and `OrderService` never change.
 
-## You Already Use This
+# You Already Use This
 
 **C# `event` / `delegate`** — the language-native Observer. Every `event` in .NET is an Observer pattern implementation. `button.Click += handler` subscribes; `button.Click -= handler` unsubscribes. The event publisher doesn't know the subscribers.
 
@@ -154,7 +152,7 @@ Adding a push notification subscriber now means a new class registered in DI —
 
 **`IChangeToken` / `ChangeToken.OnChange()`** — ASP.NET Core's Observer for configuration changes. `IConfiguration.GetReloadToken()` returns a token that fires when configuration is reloaded.
 
-## Pitfalls
+# Pitfalls
 
 **Memory leaks from unsubscribed event handlers** — if a short-lived subscriber subscribes to a long-lived publisher's event and never unsubscribes, the publisher holds a reference to the subscriber, preventing garbage collection. Classic example: a view subscribes to a ViewModel's event; the view is closed but the ViewModel lives on. Always unsubscribe in `Dispose()` or use weak event patterns (`WeakEventManager`).
 
@@ -162,7 +160,7 @@ Adding a push notification subscriber now means a new class registered in DI —
 
 **Ordering dependencies between observers** — if `WarehouseNotifier` must run before `ShippingNotifier`, you have an implicit ordering dependency. The Observer pattern doesn't guarantee order. Make the dependency explicit: use a Chain of Responsibility or a sequenced event pipeline instead.
 
-## Tradeoffs
+# Tradeoffs
 
 | Concern | C# `event` | Explicit `IOrderStatusObserver` list |
 |---|---|---|
@@ -174,7 +172,7 @@ Adding a push notification subscriber now means a new class registered in DI —
 
 **Decision rule**: Use C# `event` for synchronous, UI-oriented notifications where `async void` is acceptable (WPF/MAUI event handlers). Use explicit `IObserver` interface for async, server-side notifications where error handling and ordering matter. Use `IObservable<T>` (Rx) when you need stream operators (filter, throttle, combine).
 
-## Questions
+# Questions
 
 > [!QUESTION]- Why does subscribing to an event with `async void` cause problems?
 > `async void` event handlers can't be awaited. If the handler throws, the exception propagates to the synchronization context (often crashing the app) rather than being catchable by the publisher. If the handler does async work, the publisher doesn't know when it completes — the event returns before the async work finishes. Use `async void` only for top-level event handlers in UI frameworks where the framework expects it. For server-side observers, use an explicit `Task`-returning interface and `await Task.WhenAll(observers.Select(o => o.OnStatusChangedAsync(...)))`.
@@ -185,7 +183,7 @@ Adding a push notification subscriber now means a new class registered in DI —
 > [!QUESTION]- When should you use `IObservable<T>` (Rx) instead of plain events?
 > When you need stream operators: filtering (`Where`), transformation (`Select`), throttling (`Throttle`), combining multiple streams (`Merge`, `CombineLatest`), or backpressure. Plain events are push-only with no composition. Rx adds a rich operator library over the observable stream. Use Rx when: you're processing a stream of events with complex filtering or timing requirements (e.g., "notify only if status changes twice within 5 seconds"). The cost: Rx has a steep learning curve and adds a dependency. For simple one-to-many notification, plain events or explicit interfaces are sufficient.
 
-## References
+# References
 
 - [Observer Pattern — Christopher Okhravi](https://www.youtube.com/watch?v=_BpmfnqjgzQ&list=PLrhzvIcii6GNjpARdnO4ueTUAVR9eMBpc&index=2) — video walkthrough of the Observer pattern with OOP examples
 - [Observer — refactoring.guru](https://refactoring.guru/design-patterns/observer) — canonical pattern description with subject/observer diagram and C# example

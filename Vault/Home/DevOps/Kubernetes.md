@@ -11,11 +11,9 @@ status: Ready to Repeat
 publish: true
 ---
 
-# Intro
-
 Kubernetes (K8s) is a container orchestration platform that automates deployment, scaling, and self-healing of containerized workloads built from OCI-compatible images. Kubelets ask a Container Runtime Interface (CRI)-compatible runtime, such as containerd or CRI-O, to create containers; Kubernetes does not require Docker Engine. The core value proposition: declare the desired state of your system, and Kubernetes continuously reconciles reality to match it.
 
-## Core Concepts
+# Core Concepts
 
 **Pod**: The smallest deployable unit. A pod wraps one or more containers that share a network namespace and storage. In practice, most pods contain a single container.
 
@@ -29,7 +27,7 @@ Kubernetes (K8s) is a container orchestration platform that automates deployment
 
 **Namespace**: A scope for names and policy attachment, not a hard isolation boundary. Use namespaces to separate environments or teams, then enforce the boundary with RBAC, NetworkPolicy, ResourceQuota or LimitRange, admission policy, and service-account and secret controls. Use separate clusters when workloads cross a stronger trust boundary.
 
-## Deploying a .NET App
+# Deploying a .NET App
 
 A minimal Kubernetes deployment for a .NET 8 API:
 
@@ -98,7 +96,7 @@ spec:
   type: ClusterIP
 ```
 
-## Application and Controller Patterns
+# Application and Controller Patterns
 
 | Pattern | Kubernetes mechanism | Ownership and cost |
 | --- | --- | --- |
@@ -114,7 +112,7 @@ The application still owns graceful shutdown, readiness, idempotency, resource b
 
 ![[System Design 101/ff0fd16f200a584a387f01419836e0a53423563e36655d15a092756d679a1a64.png]]
 
-## Service Exposure
+# Service Exposure
 
 `ClusterIP` is the default: a stable virtual IP and DNS name reachable inside the cluster, with EndpointSlices selecting ready Pods. `NodePort` exposes a port on every node and is usually an implementation detail beneath another load balancer. `LoadBalancer` asks an integration to provision an external balancer. `ExternalName` returns a DNS CNAME and creates no proxy or endpoints.
 
@@ -125,7 +123,7 @@ Use ClusterIP for service-to-service traffic. Use LoadBalancer for a small numbe
 > [!WARNING] Non-normative source visual
 > The `ExternalName` panel is incorrect: an `ExternalName` Service returns a DNS CNAME and has no selector, EndpointSlices, or data-plane proxy to Pods. The other panels are conceptual summaries; provider integrations still determine the external load-balancer path.
 
-## Pitfalls
+# Pitfalls
 
 **Unmeasured resource policy**: Requests are scheduler reservations used for placement and capacity planning, not hints. Set CPU and memory requests from observed demand plus headroom. A CPU limit enforces a quota by throttling; a memory limit bounds usage by making the container eligible for an OOM kill. Use limits deliberately for fairness and containment—blanket CPU limits can create latency through throttling—and enforce team defaults with `LimitRange` or policy where needed.
 
@@ -137,7 +135,7 @@ Use ClusterIP for service-to-service traffic. Use LoadBalancer for a small numbe
 
 **Treating namespaces as isolation**: Namespaces let you attach different RBAC rules, resource quotas, and network policies, but they enforce none of those controls by themselves. Create namespaces deliberately, then apply and test the policies that establish the intended boundary.
 
-## Tradeoffs
+# Tradeoffs
 
 | | Managed K8s (AKS/EKS/GKE) | Self-hosted K8s | Docker Compose |
 |---|---|---|---|
@@ -151,7 +149,7 @@ Use ClusterIP for service-to-service traffic. Use LoadBalancer for a small numbe
 
 **K8s vs Docker Compose**: Compose is a good fit for local development and can run bounded single-host production workloads when host failure and manual rollout are acceptable. Kubernetes fits multi-node workloads that need scheduling, controlled rollout, autoscaling, and reconciliation. Compose does not supply high availability; Kubernetes adds mechanisms for it but still requires sound application probes, capacity, disruption policy, and failure-domain design.
 
-## Questions
+# Questions
 
 > [!QUESTION]- What is the difference between a Pod, Deployment, and Service?
 > - Pod: the smallest unit; wraps one or more containers sharing a network namespace.
@@ -172,7 +170,7 @@ Use ClusterIP for service-to-service traffic. Use LoadBalancer for a small numbe
 > - Debug: `kubectl logs <pod> --previous` (logs from the crashed instance), `kubectl describe pod <pod>` (events and exit codes), `kubectl exec -it <pod> -- /bin/sh` (if the container starts briefly).
 > - Tradeoff: liveness probes are essential for self-healing but misconfigured probes cause the problem they are meant to solve.
 
-## References
+# References
 
 - [Kubernetes documentation](https://kubernetes.io/docs/home/) — official K8s docs; covers all concepts, API reference, and tutorials
 - [AKS documentation](https://learn.microsoft.com/en-us/azure/aks/) — Azure Kubernetes Service guide; covers cluster creation, scaling, monitoring, and .NET deployment

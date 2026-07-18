@@ -13,8 +13,6 @@ status: Done
 publish: true
 ---
 
-# Intro
-
 Context engineering is the practice of deliberately deciding what goes into the model's context window — instructions, examples, retrieved evidence, conversation history, tool definitions, and tool results — and in what order, to maximize useful signal within a finite, attention-limited budget. It is the discipline [[Home/AI & ML/LLM/Prompt Engineering/Prompt Engineering|Prompting]] grows into once a system involves retrieval, tools, and memory: the prompt is no longer a single authored string but an assembled payload, and assembling it well is what separates a reliable agent from a flaky one. On the [[Home/AI & ML/LLM/LLM|engineering ladder]] it is the second rung: prompt engineering shapes the single instruction, context engineering decides what the model *sees*, [[Harness Engineering]] decides what it *can do*, and [[Loop Engineering]] decides how it behaves over time.
 
 The core constraint is that the context window is finite and attention across it is uneven. More context is not better. Two findings drive the whole discipline: models attend most to the beginning and end of the context and least to the middle ("lost in the middle", Liu et al. 2023), and answer quality degrades as the input grows even when the extra tokens are relevant — the model's attention dilutes across the material (often called context rot). The engineering goal is therefore the smallest, highest-signal, best-ordered context that answers the task.
@@ -41,7 +39,7 @@ const { FolderStructureMap } = await dc.require("Assets/components/devbook-folde
 return FolderStructureMap;
 ```
 
-## The Context Budget
+# The Context Budget
 
 Everything competes for the same window: the system prompt, the running conversation history, retrieved documents, tool schemas, tool results, and the space reserved for the output all draw from one token budget. Treat it like a memory budget — account for each component, and when the total approaches the limit, decide what to cut rather than letting the runtime truncate arbitrarily (which usually drops the oldest, and often most important, instructions).
 
@@ -51,7 +49,7 @@ Practical accounting:
 - Tool schemas are not free. Each connected tool's name, description, and parameter schema is sent every request; large toolsets consume thousands of tokens before any work happens (see [[Tools]] on context degradation from large toolsets).
 - History grows unboundedly. Every turn appends the model's reasoning, tool calls, and results — without management this is the component that silently fills the window in long [[Agent Loop|agent loops]].
 
-## Techniques
+# Techniques
 
 **Ordering and positioning.** Place the most important evidence at the start and end of the context to exploit primacy and recency; bury nothing critical in the middle. For ranked retrieval, put the highest-ranked chunks first. This is the context-assembly guidance from [[Generation]] applied as a deliberate lever.
 
@@ -67,9 +65,9 @@ Practical accounting:
 
 **Caching stable prefixes.** When a long prefix (system prompt, tool definitions, fixed context) repeats across requests, prompt caching makes it cheap and fast to re-send rather than re-engineer it away. See [[Home/AI & ML/LLM/Context Engineering/RAG/Caching|Caching]].
 
-## Pitfalls
+# Pitfalls
 
-### More Context, Worse Answers
+## More Context, Worse Answers
 
 **What goes wrong**: a team adds more retrieved documents or a longer system prompt expecting better answers, and quality drops or latency spikes for no visible reason.
 
@@ -77,7 +75,7 @@ Practical accounting:
 
 **How to avoid it**: optimize for signal density, not volume. Rerank and filter to fewer, higher-quality chunks; order by relevance; measure answer quality as you vary context size rather than assuming more is better.
 
-### Unbounded History Growth
+## Unbounded History Growth
 
 **What goes wrong**: a long conversation or agent run keeps appending turns until the window fills, then the runtime truncates the oldest messages — often the original instructions — and behavior degrades or the request is rejected.
 
@@ -85,7 +83,7 @@ Practical accounting:
 
 **How to avoid it**: summarize or prune older turns, cap tool-result size, and track cumulative tokens per iteration — terminate or compact before the limit (see [[Agent Loop]] on token explosion).
 
-### Context Poisoning
+## Context Poisoning
 
 **What goes wrong**: a hallucinated fact or an injected instruction enters the history once and persists, getting treated as trusted context on every subsequent turn and compounding.
 
@@ -93,7 +91,7 @@ Practical accounting:
 
 **How to avoid it**: validate tool results and model claims before they re-enter context, keep untrusted retrieved/tool content structurally separated from instructions, and enforce critical controls in code rather than relying on the prompt (see [[Guardrails]]).
 
-### Tool-Schema Bloat
+## Tool-Schema Bloat
 
 **What goes wrong**: connecting many tools "for flexibility" inflates every request's token count and measurably lowers task accuracy as the model sifts dozens of irrelevant schemas.
 
@@ -101,7 +99,7 @@ Practical accounting:
 
 **How to avoid it**: expose only the tools the current task needs, use on-demand tool search or filtering, and consolidate related operations (see [[Tools]] on large-toolset degradation).
 
-## Tradeoffs
+# Tradeoffs
 
 | Lever | What it buys | What it costs | Best when |
 | --- | --- | --- | --- |
@@ -113,7 +111,7 @@ Practical accounting:
 
 **Decision rule**: default to the smallest context that answers the task. Bound what enters with retrieval and reranking, keep the window clean with compaction and minimal tool results, exploit ordering for the evidence that must be there, and reach for offloading or isolation only when a single focused window genuinely cannot hold the work. Validate by measuring quality against context size — if adding context does not measurably help, it is hurting.
 
-## Questions
+# Questions
 
 > [!QUESTION]- Why does adding more context often make answers worse, not better?
 > - Model attention is uneven: it concentrates on the start and end of the window and underweights the middle ("lost in the middle"), so critical evidence placed there is effectively ignored
@@ -128,7 +126,7 @@ Practical accounting:
 > - Selection and ordering: retrieve few high-signal chunks and place the most important evidence at the start and end
 > - Accounting: track cumulative tokens per iteration and compact or terminate before the window fills, rather than letting the runtime truncate the oldest (often most important) messages
 
-## References
+# References
 
 - [Lost in the Middle: How Language Models Use Long Contexts (Liu et al., 2023)](https://arxiv.org/abs/2307.03172) — the U-shaped attention finding that motivates ordering and selection.
 - [Effective context engineering for AI agents (Anthropic Engineering)](https://www.anthropic.com/engineering/effective-context-engineering-for-ai-agents) — practitioner guidance on context as a managed, finite resource for agents.

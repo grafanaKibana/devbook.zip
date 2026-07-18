@@ -15,8 +15,6 @@ level:
   - "2"
 ---
 
-# Intro
-
 Cloud computing is renting capabilities (compute, storage, networking) with managed building blocks and pay-as-you-go economics. The engineering work is choosing the right abstraction level and designing for failure, cost, and scale. Example: using a managed database can eliminate ops toil, but you must understand limits, backups, and recovery.
 
 ```datacorejsx
@@ -24,7 +22,7 @@ const { FolderStructureMap } = await dc.require("Assets/components/devbook-folde
 return FolderStructureMap;
 ```
 
-## Cross-Provider Comparison
+# Cross-Provider Comparison
 
 The three major providers expose analogous capability categories under different names. The products are not equivalent: APIs, consistency, regional topology, failure modes, quotas, and prices differ. Use the table to translate a requirement into candidates, then follow the provider hub and current documentation for the actual contract.
 
@@ -42,7 +40,7 @@ The three major providers expose analogous capability categories under different
 
 These map capabilities, not guarantees. Spanner commits writes through synchronous Paxos quorum replication within the selected instance configuration; replication crosses regions only for dual-region and multi-region configurations. Aurora Global and Azure geo-replication instead use asynchronous primary + replica designs.
 
-## Data Pipeline Capability Map
+# Data Pipeline Capability Map
 
 A data pipeline is easier to reason about as stages than as a provider catalog. Pick a service only after fixing the stage's contract: delivery semantics, replay window, schema evolution, latency, data volume, query shape, and ownership.
 
@@ -56,7 +54,7 @@ A data pipeline is easier to reason about as stages than as a provider catalog. 
 
 This is a capability map, not a claim of service equivalence. Cosmos DB, for example, is an operational distributed database rather than Azure's data-warehouse stage. The original source visual is therefore not embedded.
 
-## Managed Database Capability Map
+# Managed Database Capability Map
 
 Choose the data model and access pattern before the provider product. A managed label removes some operational work; it does not make consistency, indexing, partitioning, backup, or portability decisions disappear.
 
@@ -75,13 +73,13 @@ The rejected source visual aligned managed products with open-source engines as 
 
 Timestream for LiveAnalytics closed to new AWS customers on June 20, 2025. New workloads should evaluate Timestream for InfluxDB or a different time-series path against their query language, retention, scale, and operating requirements rather than treating LiveAnalytics as generally adoptable.
 
-## Cloud Cost Loop
+# Cloud Cost Loop
 
 ![[System Design 101/877ac6b7b01095b5d70802541b9e3bb154989931a8508a233e0fab3e428ce309.png]]
 
 Run cost work in dependency order: allocate and measure, eliminate idle resources, right-size from utilization and reliability data, schedule variable demand, then commit only the stable baseline. Buying a reservation before removing waste discounts the wrong architecture. [[Home/Cloud/Cloud Cost Management|Cloud Cost Management]] develops the loop into allocation rules, anomaly handling, and unit economics.
 
-## Cloud-Native Anti-Patterns
+# Cloud-Native Anti-Patterns
 
 ![[System Design 101/9804d3f9208a05336ae9de0fa80da20fee41ad45e9c7236d182a8f57f1d5510d.png]]
 
@@ -90,7 +88,7 @@ Run cost work in dependency order: allocate and measure, eliminate idle resource
 
 Cloud abstractions move complexity; they do not remove it. A small system split into many services replaces local calls with fallible network calls and distributed ownership. A managed service per feature adds another IAM model, meter, quota, failure mode, and portability boundary. Treating every process as stateless merely moves durable state into databases, queues, object stores, and idempotency protocols. Keep a modular monolith, shared database, or explicit colocated state while one ownership and failure boundary remains the simpler correct design; split only when independent scale, release, security, or recovery requirements justify the distributed work.
 
-## Questions
+# Questions
 
 > [!QUESTION]- How do you choose a compute abstraction — VMs, containers, or serverless?
 > - Serverless functions minimize ops for spiky, event-driven work; billing usually combines request count with execution duration and allocated resources, while cold starts, duration limits, and runtime constraints reduce control
@@ -98,7 +96,7 @@ Cloud abstractions move complexity; they do not remove it. A small system split 
 > - VMs are the escape hatch for legacy workloads, specialized OS/kernel needs, or lift-and-shift: most control, most ops
 > - Decide by workload shape, runtime limits, scaling model, and which layer the team is prepared to operate; the container image alone does not imply Kubernetes or VM-level operations
 
-## References
+# References
 
 - [NIST definition of cloud computing (SP 800-145)](https://nvlpubs.nist.gov/nistpubs/Legacy/SP/nistspecialpublication800-145.pdf) — the standard vendor-neutral definition of cloud service and deployment models.
 - [AWS Well-Architected Framework](https://aws.amazon.com/architecture/well-architected/) — the reliability, cost, security, and operational-excellence pillars of cloud design (broadly applicable beyond AWS).

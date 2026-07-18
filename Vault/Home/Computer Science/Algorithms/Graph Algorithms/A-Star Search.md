@@ -11,8 +11,6 @@ status: Creation
 publish: true
 ---
 
-# Intro
-
 To find the shortest route to one destination on a road graph, [[Dijkstra]] settles nodes in expanding rings of cost-from-source: reaching a target 10 km east, it also settles nodes 10 km north, west, and south first. Almost none of that work touches the optimal path. A* keeps the same cost accounting but reorders the frontier by an estimate of *total* path cost, `f(n) = g(n) + h(n)` — `g(n)` is the exact cost already paid to reach `n`, and `h(n)` is a heuristic estimate of the cost still remaining to the goal. Popping the smallest-`f` node first pulls the search toward the target, collapsing that settled disc into a narrow corridor.
 
 The saving holds only when `h` never overestimates the remaining cost. A heuristic that underestimates keeps A* honest; one that overestimates can make it commit to a node that looks close but is not, and return a longer path with no error raised. [[Dijkstra]] is the degenerate case `h ≡ 0` — no goal information, uniform rings, still optimal.
@@ -24,7 +22,7 @@ The decisive step is which node leaves the frontier next, and how `h` skews that
 > [!NOTE] Visualization pending
 > Planned StepTrace: a frontier ordered by `f = g + h`, expanding the lowest-`f` node first, the heuristic biasing expansion toward the goal. The decisive frame is a node with small `g` but large `h` losing its turn to a node deeper along the goal direction. No matching renderer exists in `engine.js` yet.
 
-## Why `f = g + h` stays optimal
+# Why `f = g + h` stays optimal
 
 Each iteration pops the frontier node with the smallest `f`, relaxes its outgoing edges, and pushes any neighbor whose `g` improves; `g[source] = 0` and `f[source] = h(source)` seed the search. Two properties of `h` decide whether the result is correct.
 
@@ -34,7 +32,7 @@ Each iteration pops the frontier node with the smallest `f`, relaxes its outgoin
 
 The pull is concrete: on a 4-connected grid with Manhattan `h`, a node reached in `g = 3` that sits toward the goal (`h = 2`, `f = 5`) is popped before an equal-cost node reached in `g = 3` that faces away (`h = 5`, `f = 8`). Dijkstra ranks both by `g` alone and expands the second as readily as the first. That `h` term is the whole difference between a corridor and a disc, and setting `h ≡ 0` erases it — which is exactly what turns A* back into [[Dijkstra]].
 
-## Complexity
+# Complexity
 
 | Case | Time (node expansions) | Auxiliary space | Cause |
 | --- | --- | --- | --- |
@@ -44,7 +42,7 @@ The pull is concrete: on a 4-connected grid with Manhattan `h`, a node reached i
 
 Each expansion also does a heap pop plus edge relaxations, a `log(frontier)` factor over the raw expansion counts. On an *explicit* finite graph those counts are capped by the graph itself: a consistent heuristic expands each of the `V` nodes at most once, giving `O((V + E) log V)` — precisely Dijkstra's bound, which is what `h ≡ 0` reduces to. The exponential figures belong to *implicit* state spaces generated on the fly, where quality of `h` is the only thing bounding the search. Space is the operational limit in either setting: A* retains every generated node across the open and closed sets, so memory, not time, is what fails first on large maps.
 
-## When the heuristic breaks the guarantee
+# When the heuristic breaks the guarantee
 
 An **inadmissible** `h` overestimates the remaining cost for at least one node somewhere in the graph. That overestimate is harmless where it lands off the optimal path and never wins a pop. Optimality breaks only when an inflated `f` pre-empts the true optimal path — a node on that path (or one whose `f` should have been popped before the goal) is delayed, so A* pops the goal through a cheaper-looking detour first. It returns *a* path, just not the cheapest, and signals nothing. Weighted A* makes exactly this trade deliberately: `f = g + ε·h` with `ε > 1` scales the heuristic up, expanding far fewer nodes for a path guaranteed within a factor `ε` of optimal. `ε = 1` is exact A*; `ε → ∞` approaches greedy behavior.
 
@@ -52,7 +50,7 @@ An admissible but **inconsistent** `h` keeps optimality for the tree-search form
 
 The binding limit is memory. A* holds every generated node across the open frontier and the closed set, `O(nodes stored)`, and on a large state space that exhausts memory long before time. IDA* trades it back: an iterative-deepening variant that keeps only the current path (`O(L)` memory) and re-expands nodes across successive `f`-cost thresholds. Weighted A* attacks the same limit from the other side, shrinking the frontier by biasing toward the goal at a bounded loss of optimality.
 
-## Reference drawer
+# Reference drawer
 
 > [!ABSTRACT]- Control flow
 > ```mermaid
@@ -125,7 +123,7 @@ The binding limit is memory. A* holds every generated node across the open front
 > ```
 > .NET's `PriorityQueue<TElement, TPriority>` has no decrease-key, so an improved node is enqueued again rather than updated; the `closed` guard discards the stale higher-`f` copy when it later surfaces. Dropping that guard — reopening — is what an inconsistent heuristic requires to stay optimal.
 
-## Questions
+# Questions
 
 > [!QUESTION]- What does admissibility guarantee, and what does consistency add on top?
 > Admissibility (`h(n)` never exceeds the true remaining cost) makes A* return an optimal path: when the goal is popped its `f` equals its actual cost, and every frontier node's `f` is a lower bound on any path through it, so nothing cheaper is hidden. Consistency (`h(n) ≤ cost(n, n') + h(n')`) additionally forces `f` to be non-decreasing along a path, so a node's first pop is already optimal — graph-search A* can close it and never reopen it, expanding each node at most once.
@@ -136,7 +134,7 @@ The binding limit is memory. A* holds every generated node across the open front
 > [!QUESTION]- Why is memory the usual failure mode, and what do IDA* and weighted A* trade for it?
 > A* keeps every generated node in the open frontier and closed set, `O(nodes stored)`, which on a large state space exhausts memory before running out of time. IDA* keeps only the current path (`O(L)` memory) and re-expands nodes across rising `f`-cost thresholds, paying repeated work for a small footprint. Weighted A* keeps A*'s structure but scales `h` to shrink the frontier, trading a bounded loss of optimality for fewer stored nodes.
 
-## References
+# References
 
 - [A* search algorithm (Wikipedia)](https://en.wikipedia.org/wiki/A*_search_algorithm) — formal definition, the admissibility and consistency proofs, and weighted and memory-bounded variants.
 - [Amit's A* Pages (Stanford, Amit Patel)](https://theory.stanford.edu/~amitp/GameProgramming/) — the practical reference for grid heuristics (Manhattan, Chebyshev, octile, Euclidean) and matching `h` to the movement model.

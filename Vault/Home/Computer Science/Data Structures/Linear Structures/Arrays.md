@@ -11,8 +11,6 @@ status: Ready to Repeat
 publish: true
 ---
 
-# Intro
-
 A program holds an ordered collection of same-typed values and needs to reach the i-th one directly, not by walking from the front. An array stores those values as a contiguous block of equal-size slots, so the address of element `i` is `base + i * elementSize` — a single multiply-and-add that lands on the element regardless of how large `i` is. That same contiguity places neighbors in the sequence next to each other in RAM, which is what makes a scan cache-friendly.
 
 The block is what other linear structures are built on: `List<T>` wraps one, `Stack<T>` and `Queue<T>` wrap one, `Dictionary<TKey,TValue>` keeps its entries in one. The cost of contiguity is rigidity — the size is fixed at allocation, so growth means allocating a new block and copying, and inserting in the middle shifts every later element to keep the slots packed. Growable capacity belongs to [[Dynamic Array]]; a zero-copy view over an existing block belongs to [[Span]].
@@ -24,7 +22,7 @@ The decisive behaviors are an index jump and a middle-insert shift.
 > [!NOTE] Visualization pending
 > Planned StepTrace: a contiguous-memory card showing an index resolve to `base + i·stride` in a single jump to element `i`, then a middle insert shifting the tail one slot to the right to keep the block packed. No matching renderer exists in `engine.js` yet.
 
-## Representation and layout
+# Representation and layout
 
 The elements sit back-to-back in one allocation. Because every slot is the same width, the offset of element `i` is purely arithmetic: `address(a[i]) = base + i * elementSize`. Nothing before element `i` needs to be inspected, so `a[5_000_000]` costs exactly what `a[0]` costs. Equal element size is the precondition — variable-width elements would make the offset depend on everything preceding the target, which is the linked, pointer-chasing model instead.
 
@@ -34,7 +32,7 @@ For a value type the values live in the block itself — `new int[1000]` is one 
 
 Contiguity is worth more than the complexity table shows. A CPU pulls memory in 64-byte cache lines, so one miss brings in a line of neighbors for free (16 elements for 4-byte ints), and the hardware prefetcher recognizes a sequential scan and streams the next lines ahead. That hides the gap between an L1 hit (~1 ns) and main memory (~100 ns) — the top rungs of the [[Home/Data Persistence/Caching#Latency ladder|latency ladder]]. A [[LinkedList]] node is a separate allocation at an unpredictable address, so every `Next` is a potential full-latency miss the prefetcher cannot anticipate — the same `n` and the same `O(n)` can run an order of magnitude slower. This is the physical reason .NET's default collections are array-backed.
 
-## Complexity
+# Complexity
 
 | Operation | Time | Aux space | Cause |
 | --- | --- | --- | --- |
@@ -47,7 +45,7 @@ Contiguity is worth more than the complexity table shows. A CPU pulls memory in 
 
 Every bound follows from the layout. `O(1)` access is the address formula; `O(n)` middle mutation is the shift that contiguity forces; the absence of a cheap append is the fixed size. The `O(1)` auxiliary space on access and mutation is real — an in-place shift needs no scratch buffer — but a resize is a separate `O(n)` allocate-and-copy, which is why it is not an array operation at all.
 
-## Boundaries tied to contiguity
+# Boundaries tied to contiguity
 
 Fixed capacity is the hard one. The size is chosen at allocation, and there is no room to append. Growing means allocating a larger block, copying every element, and abandoning the old one; doing that on each insert is an accidental, quadratic re-implementation of [[Dynamic Array]], whose growth strategy makes append amortized `O(1)`.
 
@@ -57,7 +55,7 @@ Out-of-bounds access has no natural floor or ceiling in the arithmetic itself: `
 
 The cache-locality advantage is not a rounding error. For small `n`, a contiguous scan routinely beats an asymptotically better structure — a tree or hash table whose nodes are scattered — because the constant factor is memory latency, not operation count. The crossover where the better big-O wins can sit well past the sizes a given workload ever reaches.
 
-## Reference drawer
+# Reference drawer
 
 > [!ABSTRACT]- Contiguous block and index arithmetic
 > ```mermaid
@@ -89,7 +87,7 @@ The cache-locality advantage is not a rounding error. For small `n`, a contiguou
 > ```
 > A true insert cannot grow the block; `InsertAt` overwrites the last element because the capacity was fixed at allocation. Preserving every element is a resize, which allocates a new array — the job of [[Dynamic Array]].
 
-## Questions
+# Questions
 
 > [!QUESTION]- Why is array indexing `O(1)` and independent of the index?
 > The element address is computed directly as `base + i * elementSize` — a multiply and an add — so `a[i]` costs the same for any `i`. This works only because every element is the same width and the block is contiguous, which lets the offset be pure arithmetic instead of a walk.
@@ -103,7 +101,7 @@ The cache-locality advantage is not a rounding error. For small `n`, a contiguou
 > [!QUESTION]- Why can an array scan beat an asymptotically better structure at small `n`?
 > Contiguity keeps neighbors in the same cache lines, and the prefetcher streams the next lines ahead of a sequential scan, so most accesses hit L1 (~1 ns) rather than main memory (~100 ns). A scattered structure pays a near-full miss per node. Big-O counts operations; the array's constant factor is far smaller, so the crossover where a better bound wins can sit past the sizes a workload reaches.
 
-## References
+# References
 
 - [System.Array class (Microsoft Learn)](https://learn.microsoft.com/en-us/dotnet/api/system.array) — API surface plus remarks on single-dimensional, multidimensional, and jagged array layout.
 - [Arrays — C# reference](https://learn.microsoft.com/en-us/dotnet/csharp/language-reference/builtin-types/arrays) — element access, row-major multidimensional semantics, and jagged array syntax.

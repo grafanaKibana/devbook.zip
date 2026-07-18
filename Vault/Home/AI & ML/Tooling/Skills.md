@@ -11,13 +11,11 @@ level:
 priority: Medium
 ---
 
-# Intro
-
 In coding agents, skills are reusable instruction packages that make the model behave like it has specialized domain expertise for a task. Instead of repeating the same guidance in every prompt, you encode conventions once and load them at session start or on demand. Mechanically, a skill is usually a markdown file with structured instructions; when loaded, its content is injected into the agent context (often the system prompt or tool-visible context), which changes tool choice, code style, and decision rules. Tool access control is platform-specific: Claude Code skills can include `allowed-tools`, while OpenCode keeps skill permission policy in `opencode.json`.
 
 For the broader project-level instruction pattern, see [[Agent Instructions]]. For tool/plugin integration patterns skills often rely on, see [[Plugins]].
 
-## How Skills Work Across Tools
+# How Skills Work Across Tools
 
 - **Claude Code / OpenCode**: skills are `SKILL.md` files in project and global directories. OpenCode discovers project skills from `.opencode/skills`, `.claude/skills`, `.agents/skills`, plus global paths like `~/.config/opencode/skills`, `~/.claude/skills`, and `~/.agents/skills`. In OpenCode, skills are loaded on demand through the `skill` tool; in Claude Code, skills can auto-trigger from descriptions or be invoked directly via slash command.
 - **Scope model**: project-scoped skills encode repository conventions; user/global skills encode your personal defaults; built-in skills provide core operational behaviors.
@@ -25,7 +23,7 @@ For the broader project-level instruction pattern, see [[Agent Instructions]]. F
 - **GitHub Copilot**: `.github/copilot-instructions.md` acts as repository-wide instruction context (single-file baseline), with optional path-specific instruction files.
 - **Cline**: `.clinerules` moved from a text-box model to version-controlled instruction files, making rule updates shareable and reviewable.
 
-## Minimal Skill Structure
+# Minimal Skill Structure
 
 Claude Code example (`allowed-tools` is Claude-specific frontmatter):
 
@@ -52,39 +50,39 @@ OpenCode note: OpenCode requires `name` and `description`, and supports `license
 
 This format keeps selection metadata in frontmatter and keeps behavioral constraints in markdown, which is easier for teams to review in pull requests.
 
-## Practical Example
+# Practical Example
 
 Assume your team has strict API error contracts and logging conventions. Without a skill, the agent may generate mixed error shapes (`{ error: "..." }` in one file, RFC 7807 in another), omit correlation IDs, and forget retry-safe patterns. With a `company-api-conventions` skill loaded, the model consistently applies your contract, calls your API schema tools first, and produces code that passes internal review with fewer manual corrections.
 
-## Pitfalls
+# Pitfalls
 
-### Skills That Are Too Broad
+## Skills That Are Too Broad
 
 **What goes wrong**: a skill named `coding-conventions` tries to cover error handling, logging, API design, testing, and naming conventions in one file. The model loads it for every task, consuming context budget even when only one convention is relevant.
 
 **Mitigation**: split broad skills into focused, single-concern files. A `api-error-contracts` skill and a `logging-conventions` skill are each loaded only when relevant, reducing token cost and improving precision.
 
-### Stale Skills Not Reviewed Like Code
+## Stale Skills Not Reviewed Like Code
 
 **What goes wrong**: a skill was written six months ago for an older API version. The team has since migrated to a new SDK, but the skill still references deprecated methods. The agent follows the skill and generates code that fails to compile.
 
 **Mitigation**: treat skills as code artifacts. Version-control them, review changes in pull requests, and include them in the same update cycle as the code they govern. Add a `last-reviewed` date in the frontmatter as a lightweight staleness signal.
 
-### Conflicting Project and Global Skills
+## Conflicting Project and Global Skills
 
 **What goes wrong**: a user-global skill sets a personal preference (e.g., always use `var` in C#) that conflicts with a project skill requiring explicit types. The agent receives both and produces inconsistent output.
 
 **Mitigation**: project-scoped skills take precedence over user-global skills for repository-specific conventions. Document the precedence rule in the project skill's frontmatter. Avoid encoding team conventions in user-global skills.
 
 
-## Tradeoffs
+# Tradeoffs
 
 | Choice | Option A | Option B | Decision criteria |
 |---|---|---|---|
 | Scope | Project-specific skills | User-global skills | Use project scope for repo rules that must be consistent for everyone; use global scope for personal defaults that should not leak into team repos. |
 | Detail level | Detailed, procedural skills | Lightweight high-level rules | Detailed skills reduce ambiguity but increase context/token cost; lightweight rules are faster but can under-specify non-obvious standards. |
 
-## Questions
+# Questions
 
 > [!QUESTION]- Why do skills usually improve agent reliability more than repeating instructions in every prompt?
 > - Skills are persistent and reusable, so important constraints are present every time instead of being forgotten in ad-hoc prompts
@@ -98,7 +96,7 @@ Assume your team has strict API error contracts and logging conventions. Without
 > - Use user-global skills for personal productivity preferences that should not override team policy
 > - If a rule would surprise teammates in a PR review, it should be project-scoped, not global
 
-## References
+# References
 
 - [Extend Claude with skills (Claude Code Docs)](https://code.claude.com/docs/en/skills) — official Claude Code documentation on skill file format, frontmatter fields, and allowed-tools configuration.
 - [Agent Skills (OpenCode Docs)](https://opencode.ai/docs/skills/) — OpenCode's skill system documentation covering discovery paths, frontmatter schema, and loading behavior.

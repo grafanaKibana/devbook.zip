@@ -15,8 +15,6 @@ level:
 status: Creation
 ---
 
-# Intro
-
 Data persistence is how software survives a restart: storing, retrieving, and protecting state across processes and machines. The choice between SQL, NoSQL, and caching layers shapes every system's consistency guarantees, latency profile, and operational cost. Example: picking the wrong isolation level can silently corrupt data under concurrency, while an unnecessary cache adds a stale-read failure mode that did not exist before.
 
 ```datacorejsx
@@ -24,7 +22,7 @@ const { FolderStructureMap } = await dc.require("Assets/components/devbook-folde
 return FolderStructureMap;
 ```
 
-## Storage Options at a Glance
+# Storage Options at a Glance
 
 Different stores optimize for different access patterns. Default to relational storage because constraints, transactions, joins, and ad-hoc queries preserve options while a service is still changing. Add or replace it only when a measured access pattern earns a narrower contract:
 
@@ -39,7 +37,7 @@ Different stores optimize for different access patterns. Default to relational s
 
 Most systems combine a relational system of record with a cache, search index, or specialized read store on one proven hot path. That polyglot design adds synchronization, backup, security, and operational work for every extra store, so the specialized store should have a named workload and success metric.
 
-## Block, File, and Object Storage by Access Contract
+# Block, File, and Object Storage by Access Contract
 
 These storage types differ by the unit an application controls. The provider name matters less than the access contract exposed to the workload:
 
@@ -57,7 +55,7 @@ These storage types differ by the unit an application controls. The provider nam
 
 A database volume needs low-latency random I/O and crash ordering, so block storage normally wins. A render farm that opens and locks shared project files needs file semantics. A service that writes immutable 500 MiB videos and serves them through a CDN needs object scale and lifecycle controls. Calling all cloud storage "object storage" hides the failure boundary the application actually depends on.
 
-## Database Performance Diagnosis before Scaling
+# Database Performance Diagnosis before Scaling
 
 Start with the slow request and follow its time, not a list of fashionable remedies. Suppose `GET /orders/42` regresses from 80 ms to 600 ms at p95:
 
@@ -72,7 +70,7 @@ Start with the slow request and follow its time, not a list of fashionable remed
 
 This order preserves evidence. Jumping directly to cache, replicas, or shards can reduce one graph while adding stale reads, duplicated writes, and failure modes that obscure the original defect.
 
-## Database Scaling Escalation Ladder
+# Database Scaling Escalation Ladder
 
 Move down the ladder only when the previous step no longer meets a concrete load, latency, or recovery target:
 
@@ -87,7 +85,7 @@ Move down the ladder only when the previous step no longer meets a concrete load
 
 Combining steps is normal, but their guarantees do not compose for free. A cached read from a lagging replica now has two freshness delays; a denormalized view across shards needs an explicit delivery and replay protocol.
 
-## Data Management Pattern Map
+# Data Management Pattern Map
 
 | Need | Pattern | Mechanism | Cost to accept |
 | --- | --- | --- | --- |
@@ -102,7 +100,7 @@ Combining steps is normal, but their guarantees do not compose for free. A cache
 
 The categories overlap: CQRS can use materialized views, event sourcing can feed them, and shards can each maintain local indexes. Name the problem first. Event sourcing is not a cache strategy, and a secondary index is not a substitute for partitioning a write bottleneck.
 
-## Questions
+# Questions
 
 > [!QUESTION]- How should you choose between SQL and NoSQL for a new service?
 > - Default to a relational database: mature tooling, ACID transactions, flexible ad-hoc queries, and joins cover the majority of workloads and let the schema enforce invariants
@@ -110,7 +108,7 @@ The categories overlap: CQRS can use materialized views, event sourcing can feed
 > - The honest driver is usually the data model and query pattern, not scale — most services never outgrow a well-indexed relational database, and "web-scale" is rarely the actual constraint
 > - Combining them is common and often better than committing everything to one model: a relational system of record with a document or cache layer for a hot read path
 
-## References
+# References
 
 - [Designing Data-Intensive Applications (Martin Kleppmann)](https://dataintensive.net/) — the definitive book on storage engines, replication, partitioning, and consistency tradeoffs.
 - [Use The Index, Luke (Markus Winand)](https://use-the-index-luke.com/) — practical, database-agnostic guide to SQL indexing and query performance.

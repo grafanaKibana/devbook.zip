@@ -11,11 +11,9 @@ status: Ready to Repeat
 publish: true
 ---
 
-# Hashing
-
 A cryptographic hash function maps data of any size to a fixed-size value (a *digest*) in a way that is **one-way** (you cannot recover the input from the digest) and **collision-resistant** (you can't feasibly find two inputs with the same digest). Hashing is the workhorse behind integrity checks, digital signatures, password storage, deduplication, and content addressing. The defining contrast with [[Encryption]]: encryption is *reversible* with a key; hashing is *deliberately irreversible* and keyless.
 
-## Properties of a Cryptographic Hash
+# Properties of a Cryptographic Hash
 
 A function like SHA-256 is built to guarantee:
 
@@ -32,7 +30,7 @@ byte[] digest = SHA256.HashData(Encoding.UTF8.GetBytes("hello"));
 string hex = Convert.ToHexString(digest);   // 64 hex chars, 256 bits
 ```
 
-## Hashing vs Encryption vs Encoding
+# Hashing vs Encryption vs Encoding
 
 The three are constantly confused; pick by *intent*:
 
@@ -44,7 +42,7 @@ The three are constantly confused; pick by *intent*:
 
 Base64 "looks scrambled" but provides no protection — it's reversible by anyone. If you need secrecy, encrypt; if you need a tamper-evident fingerprint, hash.
 
-## Integrity: Plain Hash vs HMAC vs Signature
+# Integrity: Plain Hash vs HMAC vs Signature
 
 To prove data wasn't altered, the mechanism depends on *who you're defending against*:
 
@@ -59,7 +57,7 @@ byte[] tag = HMACSHA256.HashData(key: sharedSecret, source: payload);
 bool ok = CryptographicOperations.FixedTimeEquals(tag, receivedTag);
 ```
 
-## Password Hashing Is a Special Case
+# Password Hashing Is a Special Case
 
 Storing passwords is the most common hashing task — and a plain SHA-256 is the **wrong** tool. General-purpose hashes are designed to be *fast*, so an attacker with a stolen database can try billions of guesses per second. Password hashing needs the opposite: deliberate slowness plus a per-user salt.
 
@@ -73,7 +71,7 @@ Storing passwords is the most common hashing task — and a plain SHA-256 is the
 // NEVER: store SHA256(password) — far too fast, and unsalted = rainbow-table-able.
 ```
 
-## Pitfalls
+# Pitfalls
 
 - **Using MD5/SHA-1 for security** — both have practical collisions; only acceptable as non-adversarial checksums.
 - **Using a fast hash for passwords** — SHA-256(password) is brute-forceable at billions/sec; use Argon2/bcrypt/PBKDF2 with a salt.
@@ -82,7 +80,7 @@ Storing passwords is the most common hashing task — and a plain SHA-256 is the
 - **Confusing a plain hash with authentication** — a bare hash sent alongside data proves nothing against an attacker; use HMAC or a signature.
 - **Hashing to "encrypt"** — hashing is one-way; if you need the value back, you need encryption, not hashing.
 
-## Tradeoffs
+# Tradeoffs
 
 | Need | Use | Why |
 |---|---|---|
@@ -93,7 +91,7 @@ Storing passwords is the most common hashing task — and a plain SHA-256 is the
 
 **Decision rule**: reach for SHA-256 for fingerprints/integrity, an **HMAC** when a shared secret should gate verification, a **digital signature** when you need public verification and non-repudiation, and a **slow salted KDF (Argon2id)** — never a general-purpose hash — for passwords. Compare secret-derived values in constant time.
 
-## Questions
+# Questions
 
 > [!QUESTION]- Why can't you use SHA-256 directly to store passwords?
 > SHA-256 is engineered to be *fast*, which is exactly wrong for passwords: an attacker who steals the hash database can compute billions of guesses per second and crack weak/common passwords quickly, and without a salt they can use precomputed rainbow tables. Password hashing needs a **slow, memory-hard, salted** function (Argon2id, bcrypt, scrypt, PBKDF2) with a tunable work factor so each guess is expensive and every user's hash is unique.
@@ -104,7 +102,7 @@ Storing passwords is the most common hashing task — and a plain SHA-256 is the
 > [!QUESTION]- What does a salt protect against, and why must it be unique per user?
 > A salt is a per-password random value stored with the hash. It defeats **rainbow tables** (precomputed digest→password lookups can't be built without knowing each salt) and ensures that two users who pick the same password produce *different* stored hashes, so a cracker can't crack many accounts at once or spot shared passwords. A single global salt would still let one rainbow table target the whole database — uniqueness per user is what forces the attacker to attack each hash individually.
 
-## References
+# References
 
 - [Cryptographic hashing in .NET (Microsoft Learn)](https://learn.microsoft.com/en-us/dotnet/standard/security/ensuring-data-integrity-with-hash-codes) — SHA family and integrity verification.
 - [OWASP Password Storage Cheat Sheet](https://cheatsheetseries.owasp.org/cheatsheets/Password_Storage_Cheat_Sheet.html) — Argon2/bcrypt/PBKDF2 selection, salting, peppering, work factors.

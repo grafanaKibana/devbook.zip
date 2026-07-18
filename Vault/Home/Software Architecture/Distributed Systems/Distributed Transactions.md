@@ -11,13 +11,11 @@ status: Ready to Repeat
 publish: true
 ---
 
-# Distributed Transactions
-
 A distributed transaction coordinates a change that spans multiple services or databases, ensuring all participants either commit or roll back together. The challenge: unlike a local database transaction, there is no single transaction manager that can atomically commit across network boundaries. A network partition or crash between steps leaves the system in an inconsistent state unless you design for it explicitly.
 
 Two main approaches exist: **Two-Phase Commit (2PC)** for strong consistency with synchronous coordination, and **Saga** for eventual consistency with compensating transactions. The Outbox pattern is a reliability primitive used alongside both.
 
-## Two-Phase Commit (2PC)
+# Two-Phase Commit (2PC)
 
 2PC uses a coordinator to drive all participants through two phases:
 
@@ -37,7 +35,7 @@ Coordinator → Participant B: COMMIT
 
 **Why it fails in microservices**: the coordinator is a single point of failure. If it crashes after sending PREPARE but before COMMIT, participants hold locks indefinitely. Network latency between services makes the prepare-to-commit window long, increasing lock contention. Most modern services (HTTP APIs, NoSQL stores) don't support XA.
 
-## Saga Pattern
+# Saga Pattern
 
 A Saga breaks a distributed transaction into a sequence of local transactions, each with a **compensating transaction** that undoes its effect if a later step fails.
 
@@ -89,7 +87,7 @@ public class OrderSaga : ISaga
 }
 ```
 
-## Outbox Pattern
+# Outbox Pattern
 
 The Outbox pattern solves the "publish after commit" reliability problem: writing an event to the database in the same transaction as the domain change, then publishing from the outbox asynchronously.
 
@@ -109,13 +107,13 @@ await tx.CommitAsync(ct);
 
 Without the Outbox: if the broker publish fails after the DB commit, the event is lost. With the Outbox: the event is durable in the DB and will be published eventually.
 
-## Sagas Sacrifice Isolation
+# Sagas Sacrifice Isolation
 
-The subtlety most people miss: a Saga trades away the **I** in ACID, not just the easy atomicity. Because each step commits its *local* transaction immediately, a saga's **intermediate state is visible to everyone else** before the saga finishes — another transaction can read an order that's been placed but whose payment will later be compensated (a "dirty read" across the saga). 2PC holds locks to prevent exactly this; sagas can't. The countermeasures from the saga literature are **semantic locks** (a status flag like `PENDING` that other operations must check), **commutative updates**, and **re-read/version before acting**. Idempotent, retry-safe steps are mandatory — see [[Idempotency]]. Net: a saga buys atomicity-via-compensation and availability at the cost of isolation and a window of observable inconsistency ([[CAP theorem|CAP/PACELC]]).
+The subtlety most people miss: a Saga trades away the **I** in ACID, not just the easy atomicity. Because each step commits its *local* transaction immediately, a saga's **intermediate state is visible to everyone else** before the saga finishes — another transaction can read an order that's been placed but whose payment will later be compensated (a "dirty read" across the saga). 2PC holds locks to prevent exactly this; sagas can't. The countermeasures from the saga literature are **semantic locks** (a status flag like `PENDING` that other operations must check), **commutative updates**, and **re-read/version before acting**. Idempotent, retry-safe steps are mandatory — see [[Home/Software Architecture/Distributed Systems/Idempotency]]. Net: a saga buys atomicity-via-compensation and availability at the cost of isolation and a window of observable inconsistency ([[Home/Software Architecture/Distributed Systems/CAP theorem|CAP/PACELC]]).
 
-## Pitfalls
+# Pitfalls
 
-### Compensating Transactions That Cannot Undo
+## Compensating Transactions That Cannot Undo
 
 **What goes wrong**: a compensation step fails or is impossible — e.g., you cannot "un-send" an email or "un-charge" a card if the payment provider has no refund API.
 
@@ -123,7 +121,7 @@ The subtlety most people miss: a Saga trades away the **I** in ACID, not just th
 
 **Mitigation**: design compensations before implementing the forward path. For irreversible side effects (emails, SMS), use idempotent "cancel" semantics (send a cancellation email) rather than true undo. Accept that some compensations are best-effort.
 
-### Saga State Lost on Crash
+## Saga State Lost on Crash
 
 **What goes wrong**: the orchestrator crashes mid-saga. On restart, it doesn't know which steps completed and which need compensation.
 
@@ -131,7 +129,7 @@ The subtlety most people miss: a Saga trades away the **I** in ACID, not just th
 
 **Mitigation**: persist saga state to a database after each step. Use a saga framework (MassTransit, NServiceBus) that handles state persistence and retry automatically.
 
-## Tradeoffs
+# Tradeoffs
 
 | Approach | Consistency | Complexity | Latency | When to use |
 |---|---|---|---|---|
@@ -141,7 +139,7 @@ The subtlety most people miss: a Saga trades away the **I** in ACID, not just th
 
 **Decision rule**: avoid 2PC in microservices — the lock contention and coordinator SPOF make it impractical. Use Saga with choreography for simple 2-3 step flows. Use Saga with orchestration when you need explicit state tracking, retries, and visibility into long-running workflows. Always pair with the Outbox pattern for reliable event publishing.
 
-## Questions
+# Questions
 
 > [!QUESTION]- Why is 2PC problematic in microservices?
 > - 2PC requires all participants to hold locks during the prepare-to-commit window. In microservices, this window spans network calls, making lock duration unpredictable.
@@ -156,7 +154,7 @@ The subtlety most people miss: a Saga trades away the **I** in ACID, not just th
 > - Consumers must be idempotent to handle duplicate events.
 > - Tradeoff: adds a background worker and an extra DB table. The cost is worth it for any event that must not be lost.
 
-## References
+# References
 
 - [Saga distributed transactions pattern (Azure Architecture Center)](https://learn.microsoft.com/en-us/azure/architecture/reference-architectures/saga/saga) — Microsoft's reference architecture for Saga with choreography and orchestration examples, including failure handling.
 - [Transactional Outbox pattern (Azure Architecture Center)](https://learn.microsoft.com/en-us/azure/architecture/best-practices/transactional-outbox-cosmos) — detailed Outbox pattern explanation with implementation guidance and reliability guarantees.

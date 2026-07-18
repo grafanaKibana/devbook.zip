@@ -11,13 +11,11 @@ status: Ready to Repeat
 publish: true
 ---
 
-# Intro
-
 SignalR is ASP.NET Core's real-time communication framework for bidirectional server/client messaging over persistent connections. It is the default choice when the server must push updates immediately (chat, live dashboards, collaborative workflows, notifications) without polling-heavy architectures. Suppose a stock dashboard has 50,000 concurrent browser clients and otherwise polls every five seconds: that polling design creates 10,000 requests per second before accounting for retries or headers. SignalR can replace those repeated requests with pushed updates, but a target such as sub-100 ms delivery is a workload-specific service objective to measure under load, not a framework guarantee. SignalR hides transport negotiation details behind hubs, but production success still depends on scaling, connection lifecycle handling, and clear authorization boundaries.
 
-## How It Works
+# How It Works
 
-### Mental Model
+## Mental Model
 
 ```mermaid
 sequenceDiagram
@@ -33,7 +31,7 @@ sequenceDiagram
 
 SignalR negotiates the best available transport (WebSockets first, then fallback options). Hub methods are invoked per call on transient hub instances, and outbound messages are routed through `Clients.*` targets (`All`, `User`, `Group`, etc.).
 
-### Example
+## Example
 
 Hub:
 
@@ -57,7 +55,7 @@ app.MapHub<ChatHub>("/hubs/chat");
 app.Run();
 ```
 
-### Pushing from outside a hub
+## Pushing from outside a hub
 
 Most real apps push messages from a controller or background service, not from inside a hub method. Inject **`IHubContext<THub>`** to do that:
 
@@ -69,16 +67,16 @@ public sealed class PriceUpdater(IHubContext<PriceHub> hub)
 }
 ```
 
-### Streaming and client results
+## Streaming and client results
 
 - **Streaming**: a hub method returning `IAsyncEnumerable<T>` (or accepting a `ChannelReader<T>`) streams items incrementally instead of one big payload — good for live feeds and large transfers with backpressure.
 - **Client results (.NET 7+)**: the server can *invoke a method on a client and await its return value* with `Clients.Client(id).InvokeAsync<T>(...)` — turning the normally fire-and-forget push into a request/response.
 
-### Connection lifecycle
+## Connection lifecycle
 
 Override `OnConnectedAsync` / `OnDisconnectedAsync` to manage group membership and presence. The client supports **automatic reconnect** (`.WithAutomaticReconnect()`), but reconnection assigns a **new `ConnectionId`**, so re-add the connection to its groups on reconnect. SignalR has no built-in durable replay: a message sent while a client is disconnected is not replayed when it returns. Delivery guarantees depend on the configured path; the Redis Pub/Sub transport used by the Redis backplane is formally at-most-once and loses messages that a subscriber misses during a disconnect or outage. Persist anything that must survive a disconnect (DB/queue) and replay it explicitly.
 
-### Redis backplane request and delivery path
+## Redis backplane request and delivery path
 
 A Redis backplane solves cross-node routing; it does not make chat messages durable. One scale-out path is:
 
@@ -92,7 +90,7 @@ A Redis backplane solves cross-node routing; it does not make chat messages dura
 
 The diagram combines Pub/Sub and Redis data structures in one product. A SignalR Redis backplane specifically uses transient Pub/Sub; message history needs a separate durable design. Redis Streams or another broker/store can provide persistence, but that is not the behavior of the backplane configured by `AddStackExchangeRedis`.
 
-## Pitfalls
+# Pitfalls
 
 - Assuming hub instances are stateful leads to lost data because hubs are transient per invocation; keep connection/session state in `Context.Items` or external stores. For example, if a team stores a shopping cart in a hub field, the next invocation receives a new hub instance and observes an empty cart. The defect can remain hidden until a multi-call workflow or reconnect path exercises it.
 - Skipping `await` on `SendAsync` can drop messages when hub execution completes before send operations finish.
@@ -100,13 +98,13 @@ The diagram combines Pub/Sub and Redis data structures in one product. A SignalR
 - Multi-node deployments fail unpredictably without a scale-out plan (Azure SignalR Service or backplane) and correct session-affinity assumptions. A 4-node deployment without a backplane delivers messages only to clients connected to the originating node — roughly 75% of connected clients silently miss every broadcast, and the bug only manifests under load when connections distribute across nodes. The fix is a **backplane** (`AddStackExchangeRedis(...)`) that fans every message out to all nodes, **or** Azure SignalR Service which offloads connections entirely. Either way self-hosted SignalR needs **sticky sessions** (ARR affinity), because the initial negotiate and the transport connection must land on the same node — unless you disable the negotiate step or use the managed service.
 - Forgetting that the transport **falls back** (WebSockets → Server-Sent Events → Long Polling) when WebSockets are unavailable. Long Polling especially amplifies the sticky-session requirement and the cost of a missing backplane; verify your proxy/load balancer allows WebSocket upgrades so you actually get the fast transport.
 
-## Tradeoffs
+# Tradeoffs
 
 - SignalR vs polling: SignalR gives lower latency and better network efficiency for frequent updates, while polling is simpler for low-frequency/eventually-consistent scenarios.
 - Azure SignalR Service vs self-managed backplane: managed service reduces operational burden and sticky-session complexity, while self-managed options provide more infrastructure control.
 - JSON vs MessagePack protocol: JSON is easier to debug and interoperate with, while MessagePack reduces payload size for high-throughput workloads.
 
-## Questions
+# Questions
 
 > [!QUESTION]- When is SignalR a good fit?
 > - Use SignalR when clients need server-pushed updates with low latency (chat, collaboration, live telemetry).
@@ -123,7 +121,7 @@ The diagram combines Pub/Sub and Redis data structures in one product. A SignalR
 > - Membership can change/rejoin over reconnect paths, so relying on groups alone risks privilege drift.
 > - Enforce security with authentication and policy/role-based authorization on hub methods.
 
-## References
+# References
 
 - [ASP.NET Core SignalR](https://learn.microsoft.com/aspnet/core/signalr/introduction?view=aspnetcore-10.0) - Official architecture and transport overview.
 - [Use hubs in SignalR for ASP.NET Core](https://learn.microsoft.com/aspnet/core/signalr/hubs?view=aspnetcore-10.0) - Hub lifecycle, targeting APIs, and error handling.

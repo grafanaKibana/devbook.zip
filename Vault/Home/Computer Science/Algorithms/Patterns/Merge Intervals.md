@@ -11,8 +11,6 @@ status: Creation
 publish: true
 ---
 
-# Intro
-
 A calendar holds a list of `[start, end]` ranges in arbitrary order, some of them overlapping, and the task is to collapse the overlaps into a minimal set of blocks. Comparing every interval against every other to decide which ones touch costs `O(n²)`, and the pairs that overlap can sit anywhere in the list. Sorting the intervals by start coordinate removes that scatter: once the starts ascend, any interval that overlaps a given block must be the next one in the order, so a single left-to-right sweep with one comparison per interval resolves the whole list. The sort sets the cost at `O(n log n)`; the sweep that follows is `O(n)`.
 
 **Core condition:** intervals sorted by start → `next.start` compared against the current block's end decides overlap in one test → `O(n log n)` merge dominated by the sort.
@@ -20,7 +18,7 @@ A calendar holds a list of `[start, end]` ranges in arbitrary order, some of the
 > [!NOTE] Visualization pending
 > Planned StepTrace: an intervals card showing intervals sorted by start and swept left to right, each interval either extending the current accumulated block when it overlaps or opening a new block when a gap appears. No matching renderer exists in `engine.js` yet.
 
-## Why sorting makes overlap local
+# Why sorting makes overlap local
 
 The sweep carries one piece of state: `current`, the interval being accumulated, initialised to the first interval after sorting. For each following `next`:
 
@@ -29,7 +27,7 @@ The sweep carries one piece of state: `current`, the interval being accumulated,
 
 The reason one comparison suffices is the sort. After ascending starts, every interval later in the list starts at or after `next.start`. If `next` does not reach `current.end`, no interval after it can reach back either, so `current` is final the moment a gap appears. The invariant that survives each step is that `current.end` holds the furthest right edge of every interval merged into the current block, which is exactly the value the next overlap test needs.
 
-## Variants that reuse the sweep
+# Variants that reuse the sweep
 
 The same sort-then-sweep skeleton answers the rest of the interval family, each specialising the emit/extend step:
 
@@ -37,7 +35,7 @@ The same sort-then-sweep skeleton answers the rest of the interval family, each 
 - **Intersect two sorted lists** — a [[Two Pointers]] sweep advances the pointer whose interval ends first and emits `[max(starts), min(ends)]` whenever the current pair overlaps. Ordering on both sides is what keeps it linear.
 - **Minimum meeting rooms** — the goal is peak concurrency rather than merged ranges, so instead of one `current` the sweep keeps a min-heap of the end times of active meetings. Each meeting in start order pops every end `<= its start` (rooms freed) and pushes its own end; the largest heap size reached is the room count. The sort still supplies the order; the heap replaces the single accumulator because several intervals can be active at once.
 
-## Complexity
+# Complexity
 
 The table describes the `Array.Sort`-based implementation in the drawer, a comparison sort.
 
@@ -51,13 +49,13 @@ Every case is `O(n log n)` because the comparison sort is the floor and the swee
 
 Replacing the comparison sort with a counting or radix sort drops the whole algorithm to `O(n)`, but only when the coordinates are integers drawn from a range polynomial in `n`; on unbounded or non-integer starts the `O(n log n)` comparison sort remains the floor.
 
-## When the convention or order breaks
+# When the convention or order breaks
 
 **The overlap definition is a decision, not a default.** Whether `[1,2]` and `[2,3]` merge depends on closed versus half-open semantics. Closed intervals share the point `2` and merge into `[1,3]`; half-open `[1,2)` and `[2,3)` touch nothing and stay separate. The choice maps straight onto the comparison operator — `<=` for closed, `<` for half-open — and getting it wrong produces off-by-one merges that pass small tests and fail exactly on boundary-touching inputs. Meeting-room problems almost always want half-open so a meeting ending at `2` and one starting at `2` share the room.
 
 **Unsorted input silently produces wrong merges.** The "overlap is local" guarantee is the sort's, not the sweep's. On `[[1,3],[6,8],[2,5]]` an unsorted sweep sees `[1,3]` then `[6,8]`, finds a gap, emits `[1,3]`, and never reconsiders it — so the overlapping `[2,5]` merges against the wrong block or opens a spurious one, and `[1,5]` is never formed. Nothing crashes; the output is simply incorrect. Sorting by end rather than start breaks the same guarantee for the same reason.
 
-## Reference drawer
+# Reference drawer
 
 > [!ABSTRACT]- Sweep control flow
 > ```mermaid
@@ -109,7 +107,7 @@ Replacing the comparison sort with a counting or radix sort drops the whole algo
 > ```
 > `Merge` mutates `current[1]` in place; the `max` guards against an interval nested inside the block. `MinMeetingRooms` keeps `active.Count` equal to the number of concurrent meetings, so its peak is the room count.
 
-## Comparison
+# Comparison
 
 | Strategy | Time | Preprocessing | Stronger case | Weaker case | Semantic property |
 | --- | --- | --- | --- | --- | --- |
@@ -120,7 +118,7 @@ Replacing the comparison sort with a counting or radix sort drops the whole algo
 
 Sort-then-merge is the `O(n log n)` default when a fixed set of intervals is collapsed once and the merged ranges are the output. A sweep-line over separated start and end events pays the same asymptotic cost but tracks a concurrency count instead of ranges, which is what max-overlap and minimum-rooms questions need. An interval tree carries a higher build cost and more machinery, and earns it only when intervals are inserted and queried dynamically rather than processed in a single batch.
 
-## Questions
+# Questions
 
 > [!QUESTION]- Why does sorting by start reduce merging to a single linear sweep?
 > After ascending starts, every interval later in the list starts at or after the current one. If `next.start > current.end`, no later interval can reach back to `current` either, so `current` is final and can be emitted. One comparison per interval decides overlap, turning an `O(n²)` all-pairs check into an `O(n)` pass on top of the `O(n log n)` sort.
@@ -134,7 +132,7 @@ Sort-then-merge is the `O(n log n)` default when a fixed set of intervals is col
 > [!QUESTION]- When does a sweep-line over events or an interval tree replace sort-then-merge?
 > A sweep-line over separated start/end events is needed when the answer is a concurrency count — maximum overlap or minimum rooms — rather than merged ranges. An interval tree replaces both when intervals are inserted and queried dynamically, trading an `O(n log n)` build for `O(log n)` overlap queries against a changing set.
 
-## References
+# References
 
 - [Merge Intervals (LeetCode #56)](https://leetcode.com/problems/merge-intervals/) — the canonical sort-and-sweep merge problem.
 - [Insert Interval (LeetCode #57)](https://leetcode.com/problems/insert-interval/) — inserting into an already-sorted list without a full re-sort.

@@ -11,8 +11,6 @@ status: Creation
 publish: true
 ---
 
-# Intro
-
 Sorting ten million 32-bit integers with [[Quick Sort]] or [[Merge Sort]] spends its whole runtime comparing pairs of keys, and any sort whose only primitive is *compare two elements* needs `Ω(n log n)` of them. Radix Sort never compares two keys. It reads each key as a sequence of digits in some radix `b` and distributes keys into buckets by one digit at a time, so its work scales with the *width* of the keys, not with the number of pairwise comparisons.
 
 That move is only available when a key decomposes into a bounded number of digits `d`: a 32-bit integer is four base-256 digits, a fixed five-character string is five base-256 digits. Given that decomposition, the whole sort costs `Θ(d · (n + b))` — `d` passes, each touching every key once and every bucket once.
@@ -25,7 +23,7 @@ The trace below would run LSD radix sort on `[170, 45, 75, 90, 802, 24, 2, 66]`,
 > Planned StepTrace: a bucket-pass card showing keys distributed by one digit into base-b buckets, gathered
 > in order, repeated per digit from least significant to most. No matching renderer exists in `engine.js` yet.
 
-## Why the passes compose
+# Why the passes compose
 
 LSD (least-significant-digit) radix sort runs one pass per digit position, from the rightmost digit up to the leftmost. Each pass is a single **stable** [[Counting Sort]] keyed on that one digit — no other part of the key is examined. After the pass over the most significant digit, the array is fully ordered, and it inherits counting sort's non-comparison nature: no two keys are ever ranked against each other.
 
@@ -42,7 +40,7 @@ hundreds →     2  24  45  66  75   90  170  802    fully ordered
 
 `170` and `75` both carry `7` in the tens place. The tens pass reads only that digit, so it leaves them in the order the ones pass produced — `170` before `75` — and the hundreds pass, comparing `170`'s `1` against `75`'s `0`, moves `75` ahead of `170` without re-examining the lower digits. Every tie survives to the next pass because every pass is stable.
 
-## Complexity
+# Complexity
 
 | Case | Time | Auxiliary space | Cause |
 | --- | --- | --- | --- |
@@ -54,7 +52,7 @@ hundreds →     2  24  45  66  75   90  170  802    fully ordered
 
 The `Θ(n + b)` auxiliary space is the counting sort's output buffer (`n`) plus the per-digit count array (`b`). Radix Sort is therefore **stable but not in-place**; it cannot sort within the input array alone. For variable-length or string keys, the MSD (most-significant-digit) variant recurses per bucket from the leftmost digit and can stop once a prefix is unique — it handles ragged key lengths that LSD cannot.
 
-## Where the linear bound stops applying
+# Where the linear bound stops applying
 
 **Variable-length keys.** LSD processes a fixed digit position across every key, counted from the right. Keys of unequal width have no shared notion of "position 3," so a three-digit key and a six-digit key line up at misaligned digits and order incorrectly. The fixes are to pad every key to a common width with a sentinel below any real digit, or to switch to MSD radix, which recurses left-to-right and absorbs ragged lengths naturally.
 
@@ -66,7 +64,7 @@ The `Θ(n + b)` auxiliary space is the counting sort's output buffer (`n`) plus 
 
 **Unsigned reads.** Each pass treats its digit as an unsigned quantity, so raw two's-complement negatives sort after positives, and raw IEEE-754 bit patterns scatter negatives in reverse. A monotonic transform beforehand — flip the sign bit of integers; for floats flip all bits of negatives and only the sign bit of positives — restores true numeric order, reversed after sorting.
 
-## Reference drawer
+# Reference drawer
 
 > [!ABSTRACT]- Per-digit pass loop
 > ```mermaid
@@ -120,7 +118,7 @@ The `Θ(n + b)` auxiliary space is the counting sort's output buffer (`n`) plus 
 > ```
 > The backward final loop is load-bearing: reversing it turns the inner sort unstable and corrupts every prior pass. Signed or floating-point keys must first go through the unsigned transform from the boundaries above.
 
-## Questions
+# Questions
 
 > [!QUESTION]- Why must each per-digit pass be stable?
 > Each pass sorts on one digit and trusts that ties on that digit are already ordered by the less-significant digits sorted in earlier passes. A stable counting sort preserves that established order; an unstable one reorders the ties and destroys the work of every prior pass, producing output that is sorted only on the final digit. Stability is a correctness requirement here, not an optimization.
@@ -128,7 +126,7 @@ The `Θ(n + b)` auxiliary space is the counting sort's output buffer (`n`) plus 
 > [!QUESTION]- When does a comparison sort beat Radix Sort?
 > When keys are wide, variable-length without a bound, or not decomposable into digits. The `d` passes carry a real cost, so once `d` grows relative to `log₂ n` — long strings, big integers — a tuned [[Quick Sort]] wins on wall-clock time. Keys exposed only through a comparator have no digit to bucket on, so radix does not apply at all.
 
-## References
+# References
 
 - [Radix sort (Wikipedia)](https://en.wikipedia.org/wiki/Radix_sort) — LSD and MSD variants, the `Θ(d·(n+b))` derivation, and history.
 - [Radix sorts (Princeton Algorithms)](https://algs4.cs.princeton.edu/51radix/) — Sedgewick and Wayne on key-indexed counting and LSD/MSD string sorts, with the stability argument stated directly.

@@ -11,15 +11,13 @@ status: Ready to Repeat
 publish: true
 ---
 
-# Intro
-
 Computing the nth Fibonacci number straight from the definition `f(n) = f(n-1) + f(n-2)` grows a recursion tree that re-derives the same values exponentially often: `fib(5)` evaluates `f(2)` three separate times, and `fib(50)` makes over 40 billion calls for a quantity the recurrence defines at only 51 distinct points. The subproblems overlap heavily — few distinct ones exist — yet the plain recursion has no memory of having solved any of them.
 
 Dynamic programming removes that redundancy: solve each distinct subproblem once, store the result, and return the stored value wherever the subproblem recurs. It applies when a problem has **optimal substructure** — an optimal solution is assembled from optimal solutions to subproblems — and **overlapping subproblems** — the same subproblem recurs across the recursion. Optimal substructure is what makes composing sub-answers valid; overlap is what makes storing them pay.
 
 **Core condition:** optimal substructure + overlapping subproblems → each distinct state solved once and reused → `(number of distinct states) × (work per state)` time.
 
-## Where the repeated work goes
+# Where the repeated work goes
 
 The trace expands naive `fib(5)`, one node per recursive call.
 
@@ -37,7 +35,7 @@ The second trace fills the longest-common-subsequence table for `AGCAT` and `GAC
 
 Each cell `dp[i][j]` holds the LCS length of the prefixes `a[0..i)` and `b[0..j)`, and it is filled only from cells already present. On a character match it takes the diagonal `dp[i-1][j-1] + 1`; on a mismatch it takes `max(dp[i-1][j], dp[i][j-1])`, the better of the top and left sub-answers. That transition is optimal substructure made concrete — the optimum for a prefix pair is built from the optima of shorter prefix pairs. Because every cell depends only on neighbours that already exist, one row-by-row sweep visits each of the `m·n` states exactly once.
 
-## Mechanism — state, recurrence, and the two forms
+# Mechanism — state, recurrence, and the two forms
 
 Once the state and recurrence are fixed, DP takes one of two equivalent shapes.
 
@@ -46,7 +44,7 @@ Once the state and recurrence are fixed, DP takes one of two equivalent shapes.
 
 The difficulty is neither form; it is **state design** — choosing the arguments that uniquely identify a subproblem. The state has to capture everything that affects the answer, or two genuinely different subproblems collide on one cache slot and the answer is wrong; and nothing more, or the table's size, and the running time, inflate. For LCS the state is a pair of prefix lengths `(i, j)`; for 0/1 knapsack it is `(item index, remaining capacity)`; for edit distance it is again a pair of prefix lengths. The recurrence states how a cell is composed from smaller states, and the base cases pin down the smallest ones.
 
-## Complexity
+# Complexity
 
 DP's running time is structural: the number of distinct states multiplied by the work to combine each state from its sub-states. LCS makes both factors concrete.
 
@@ -60,7 +58,7 @@ DP's running time is structural: the number of distinct states multiplied by the
 
 The rolling-array reduction works because each cell reads its own row and the previous row only; keeping two rows — indexed on the shorter string — is enough to compute the length. Recovering the actual subsequence rather than its length needs the full table or a re-derivation, so the space reduction trades away the traceback.
 
-## Boundaries
+# Boundaries
 
 Both prerequisites are load-bearing, and each failure has a distinct signature.
 
@@ -69,7 +67,7 @@ Both prerequisites are load-bearing, and each failure has a distinct signature.
 - **State space too large to tabulate.** The time bound is also the memory bound. A knapsack with capacity `10⁹` has `10⁹` states per item; the `states × work` product that is polynomial in one parameter can still be exponential in the input's bit length (0/1 knapsack is NP-hard). Memoising only the reached states, or redefining the state, is the escape.
 - **Wrong state definition.** Omitting a dimension the answer depends on maps two different subproblems to the same slot, and the second read returns a stale value with no error. Bottom-up, the analogous defect is filling a cell before its dependencies and reading uninitialised sub-answers. Both are silent: nothing crashes, the table just answers the wrong question.
 
-## One task, greedy versus DP — coin change
+# One task, greedy versus DP — coin change
 
 The clearest way to see what DP buys is a task where the cheaper paradigm gets the wrong answer. **Minimum coin change:** make an amount `W` from denominations `{1, 3, 4}` using as few coins as possible.
 
@@ -118,7 +116,7 @@ Filling the table left to right for `{1, 3, 4}`:
 
 The deciding question is not "is DP better" but "does the greedy-choice property hold". On canonical currencies `{1, 5, 10, 25}` it does, so greedy is optimal *and* cheaper — reach for DP only when a local rule can be globally wrong, which the [[Greedy Algorithms]] note works through from the other side.
 
-## Reference drawer
+# Reference drawer
 
 > [!ABSTRACT]- When DP applies, and its two forms
 > ```mermaid
@@ -171,7 +169,7 @@ The deciding question is not "is DP better" but "does the greedy-choice property
 > ```
 > Both return the LCS length. Keeping two rows instead of the full `dp` drops space to `O(min(m, n))` but removes the table needed to reconstruct the subsequence itself.
 
-## Questions
+# Questions
 
 > [!QUESTION]- What two properties must hold for DP to apply, and what does each guarantee?
 > Optimal substructure — an optimal solution is composed of optimal solutions to subproblems — makes combining sub-answers valid. Overlapping subproblems — the same subproblem recurs — makes caching worthwhile. Without the first, the recurrence yields a wrong optimum; without the second, a memo never gets a second hit and only adds overhead, which is the divide-and-conquer regime.
@@ -182,7 +180,7 @@ The deciding question is not "is DP better" but "does the greedy-choice property
 > [!QUESTION]- How can a correct recurrence still produce wrong answers once implemented?
 > If the state omits an argument the answer depends on, two different subproblems map to the same cache slot and the second read returns a stale value with no error raised. Bottom-up, the analogous failure is filling a cell before its dependencies, reading uninitialised sub-answers.
 
-## References
+# References
 
 - [Dynamic programming (Wikipedia)](https://en.wikipedia.org/wiki/Dynamic_programming) — formal definition, Bellman's origin of the term, and the optimal-substructure / overlapping-subproblems conditions.
 - [Longest common subsequence (Wikipedia)](https://en.wikipedia.org/wiki/Longest_common_subsequence) — the `O(m·n)` table recurrence used here as the running example, plus traceback and the rolling-array space reduction.

@@ -13,8 +13,6 @@ level:
 status: Creation
 ---
 
-# Intro
-
 Sorting is a foundational operation that impacts performance all over the stack: databases, UIs, pipelines, and in-memory processing. The important part is not memorizing algorithms, but understanding stability, memory tradeoffs, and typical runtime behavior. Example: mergesort is stable and predictable, while quicksort is often fast in practice but has worst-case pitfalls.
 
 ```datacorejsx
@@ -22,7 +20,7 @@ const { FolderStructureMap } = await dc.require("Assets/components/devbook-folde
 return FolderStructureMap;
 ```
 
-## Diagram
+# Diagram
 
 ```mermaid
 flowchart TD
@@ -41,9 +39,9 @@ flowchart TD
   G -->|No| J[Selection Sort or Bubble Sort for learning]
 ```
 
-## Algorithm Selection
+# Algorithm Selection
 
-### Comparison sorts — bounded below by `O(n log n)`
+## Comparison sorts — bounded below by `O(n log n)`
 
 | Algorithm | Average | Worst | Space | Stable | Reach for it when |
 | --- | --- | --- | --- | --- | --- |
@@ -58,7 +56,7 @@ flowchart TD
 | [[Tim Sort]] | O(n log n) | O(n log n) | O(n) | Yes | Real-world partly-ordered data (Python, Java) |
 | [[Introsort]] | O(n log n) | O(n log n) | O(log n) | No | Quicksort's speed without its O(n²) tail (C++, .NET) |
 
-### Non-comparison sorts — beat the bound by reading key structure
+## Non-comparison sorts — beat the bound by reading key structure
 
 | Algorithm | Time | Space | Stable | Precondition |
 | --- | --- | --- | --- | --- |
@@ -66,7 +64,7 @@ flowchart TD
 | [[Radix Sort]] | O(d · (n + b)) | O(n + b) | Yes | Fixed-width keys; needs a stable inner sort |
 | [[Bucket Sort]] | O(n + k) avg, O(n²) worst | O(n + k) | If inner sort is | Keys roughly uniform over a known range |
 
-## Questions
+# Questions
 
 > [!QUESTION]- How do you choose between Merge Sort and Quick Sort in production?
 > - Merge sort gives reliable `O(n log n)` worst-case behavior and stable ordering.
@@ -84,7 +82,7 @@ flowchart TD
 > .NET uses an introspective sort (IntroSort): it starts with Quick Sort for fast average performance, switches to Heap Sort when recursion depth exceeds a threshold (to guarantee O(n log n) worst case), and uses Insertion Sort for small partitions (to exploit its low overhead on nearly-sorted data).
 > This hybrid approach demonstrates why production sort implementations combine multiple algorithms rather than using a single one.
 
-## References
+# References
 
 - [Sorting algorithm (Wikipedia)](https://en.wikipedia.org/wiki/Sorting_algorithm)
 - [Array Sort method .NET](https://learn.microsoft.com/dotnet/api/system.array.sort)

@@ -15,8 +15,6 @@ level:
 status: Done
 ---
 
-# Intro
-
 DevOps is about shortening the path from change to production safely: automation, observability, and ownership of runtime behavior. The goal is not tools; it is predictable delivery and fast recovery when things break. Example: a good pipeline makes rollback boring and makes failures visible before users notice.
 
 ```datacorejsx
@@ -24,7 +22,7 @@ const { FolderStructureMap } = await dc.require("Assets/components/devbook-folde
 return FolderStructureMap;
 ```
 
-## DevOps, SRE, and Platform Engineering
+# DevOps, SRE, and Platform Engineering
 
 DevOps is the organizational and technical practice of shortening delivery feedback loops while the team that changes a service remains accountable for its runtime behavior. SRE applies software engineering to operations and makes reliability explicit through SLOs, error budgets, automation, and limits on toil. Platform engineering builds an internal product—a supported self-service path—that reduces repeated cognitive and operational load for application teams.
 
@@ -35,13 +33,13 @@ Use SRE when reliability work needs an explicit operating model and measurable b
 > [!WARNING] Non-normative source visual
 > The illustrated SRE “handoff” is not the ownership model used here. The application team remains accountable for service behavior; SRE and platform teams provide reliability policy, expertise, and reusable mechanisms without becoming a downstream operations silo.
 
-## Twelve-Factor Application and Deployment Contract
+# Twelve-Factor Application and Deployment Contract
 
 The durable Twelve-Factor constraints are one codebase per deployable app, explicit dependencies, configuration outside code, attached resources behind replaceable bindings, separate build/release/run stages, stateless share-nothing processes, self-contained service binding, horizontal process scaling, fast startup and graceful shutdown, development/production parity, event-stream logs, and admin tasks run as one-off processes.
 
 Translate those constraints into current mechanics: build one image, attach environment configuration and secret references to form a release, run disposable replicas, stream structured events, and execute migrations as bounded jobs. The method does not specify containers, Kubernetes, service meshes, zero trust, supply-chain provenance, or modern telemetry; add those controls when the threat model and platform require them instead of pretending the original twelve factors cover them.
 
-## DevSecOps Security Gates
+# DevSecOps Security Gates
 
 | Boundary | Evidence | Blocking rule |
 | --- | --- | --- |
@@ -56,7 +54,7 @@ Severity alone is not a release rule. Include exploitability, reachability, asse
 
 ![[System Design 101/277c9e9f3612e5a3efb07d8ff2d60541efec423fc7d8aaadf6ef917d06508906.png]]
 
-## Questions
+# Questions
 
 > [!QUESTION]- What does DevOps actually optimize, beyond tooling?
 > - The target is delivery throughput and instability. DORA's current five metrics are change lead time, deployment frequency, failed deployment recovery time, change fail rate, and deployment rework rate.
@@ -70,7 +68,7 @@ Severity alone is not a release rule. Include exploitability, reachability, asse
 > - Small, frequent deploys are easier to reason about and roll back than large batched ones — big-bang releases are where irreversible failures hide
 > - Design the pipeline so the *undo* path is as tested as the *deploy* path
 
-## References
+# References
 
 - [DORA software delivery performance metrics](https://dora.dev/guides/dora-metrics/) — current primary definition of the five metrics, including failed deployment recovery time and deployment rework rate.
 - [Google SRE Book](https://sre.google/sre-book/table-of-contents/) — the canonical text on running production systems: SLOs, error budgets, and incident response.

@@ -13,8 +13,6 @@ status: Done
 priority: High
 ---
 
-# Intro
-
 Evaluation measures whether an LLM application satisfies product, grounding, safety, and operational requirements. Because open-ended output has several valid forms, one assertion cannot cover the system. A useful evaluation combines a versioned regression corpus, exact predicates, semantic rubrics, human calibration, and production outcomes.
 
 The corpus and the scoring techniques are different things. A [[Golden Test Set and Regression Runs|golden test set]] is the versioned dataset that supplies inputs, expected facts or invariants, rubrics, and slice metadata. [[Deterministic Checks]] and [[LLM-as-a-Judge|judges]] score candidate outputs produced from those cases. Regression logic then compares the candidate with a pinned baseline or threshold.
@@ -24,7 +22,7 @@ const { FolderStructureMap } = await dc.require("Assets/components/devbook-folde
 return FolderStructureMap;
 ```
 
-## Evaluation system
+# Evaluation system
 
 ```mermaid
 flowchart TD
@@ -55,7 +53,7 @@ Those checks have no classification error when the predicate and implementation 
 
 Semantic dimensions such as correctness, groundedness, and actionability need a rubric. An LLM judge scales that rubric, while blinded human samples measure judge agreement and reveal systematic bias. Keep judge model, prompt, rubric, and sampling settings versioned with the result.
 
-## Example
+# Example
 
 One customer-support case can carry both exact and semantic expectations:
 
@@ -80,13 +78,13 @@ heuristic signals:
 
 A schema failure is exact. “Possible payment-card number” remains a detector result until its precision and recall are established for this traffic.
 
-## Dataset lifecycle and overfitting
+# Dataset lifecycle and overfitting
 
 Give every corpus version immutable case identifiers, provenance, expected behavior, slice labels, and a reason for inclusion. New production failures enter through triage, not by silently editing an existing case. Keep a development set for iteration and a frozen holdout for release decisions.
 
 Repeatedly tuning prompts or judge rubrics against the holdout turns it into training data. A rising holdout score with flat [[Online Evaluation and AB Tests|online outcomes]] is evidence of evaluation overfitting. Rotate or add independently sourced cases, inspect slice-level effects, and retain human review for disputed decisions.
 
-## Questions
+# Questions
 
 > [!QUESTION]- Is a golden test set a scoring stage?
 > No. It is a versioned regression dataset. Exact predicates, semantic judges, and human raters score outputs generated from its cases; the regression gate compares those results with a pinned baseline or threshold.
@@ -97,7 +95,7 @@ Repeatedly tuning prompts or judge rubrics against the holdout turns it into tra
 > [!QUESTION]- Why is a strong offline score insufficient to ship?
 > A fixed corpus cannot reproduce every traffic shift, multi-turn interaction, or user outcome. Use offline regression as a release gate, then estimate production impact with monitoring and controlled online experiments.
 
-## References
+# References
 
 - [OpenAI evaluation best practices](https://developers.openai.com/api/docs/guides/evaluation-best-practices) — provider guidance for task-specific criteria, datasets, graders, and continuous evaluation loops.
 - [OpenAI evals guide](https://developers.openai.com/api/docs/guides/evals) — primary API documentation for defining, running, and inspecting evaluation jobs.

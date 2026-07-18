@@ -10,8 +10,6 @@ priority: High
 status: Done
 publish: true
 ---
-# Decorator
-
 Stacking toppings on a pizza is a Decorator in everyday life. Start with plain dough, add sauce, add cheese, add pepperoni, add mushrooms. Each topping wraps the previous pizza without changing what’s underneath, and you can add or remove any topping independently. A pepperoni pizza and a mushroom pizza share the same base — the toppings are layered on, not baked in.
 
 The Decorator pattern works the same way: it attaches additional responsibilities to an object dynamically by wrapping it in decorator objects that implement the same interface. Each decorator holds a reference to the wrapped object, calls it, and adds behavior before or after the call. Decorators compose freely — you can stack `LoggingHandler(ValidationHandler(MetricsHandler(CoreHandler)))` in any order. Each decorator is independently testable and deployable. The client sees a single `IOrderHandler` and doesn’t know (or care) how many decorators are wrapping the core.
@@ -47,9 +45,9 @@ classDiagram
 ```
 
 > [!NOTE] Decorator vs Proxy
-> Both wrap the same interface. **Decorator ADDS new behavior** — logging, caching, validation. [[Proxy]] **CONTROLS ACCESS** to the real object — lazy loading, auth checks, remote calls. The structural difference is intent: Decorator enriches; Proxy restricts or defers.
+> Both wrap the same interface. **Decorator ADDS new behavior** — logging, caching, validation. [[Home/Software Architecture/Patterns/Design Patterns/Structural/Proxy]] **CONTROLS ACCESS** to the real object — lazy loading, auth checks, remote calls. The structural difference is intent: Decorator enriches; Proxy restricts or defers.
 
-## Problem
+# Problem
 
 `OrderProcessor.ProcessOrder()` has growing cross-cutting concerns mixed with core logic:
 
@@ -98,7 +96,7 @@ public class OrderProcessor
 
 Here's what breaks when requirements change: adding idempotency checking (skip duplicate orders) requires editing `ProcessOrderAsync` — touching code that already works and risking regressions in logging, metrics, and validation.
 
-## Solution
+# Solution
 
 Each concern becomes a decorator that wraps the next handler:
 
@@ -205,7 +203,7 @@ builder.Services.Decorate<IOrderHandler, ValidationOrderHandler>(); // outermost
 
 Adding idempotency checking now means one new `IdempotencyOrderHandler` class — existing decorators and the core handler never change.
 
-## You Already Use This
+# You Already Use This
 
 **`Stream` chain** — the canonical .NET Decorator. `new GZipStream(new CryptoStream(new BufferedStream(fileStream), encryptor, CryptoStreamMode.Write), CompressionMode.Compress)` stacks three decorators. Each wraps the next, adding compression, encryption, and buffering. All implement `Stream`.
 
@@ -215,7 +213,7 @@ Adding idempotency checking now means one new `IdempotencyOrderHandler` class �
 
 **Scrutor `Decorate<T>()`** — a DI extension that registers decorators without manual wiring. `services.Decorate<IOrderHandler, LoggingOrderHandler>()` wraps the existing `IOrderHandler` registration with the logging decorator.
 
-## Pitfalls
+# Pitfalls
 
 **Decorator ordering matters** — validation before logging means invalid orders are rejected before being logged. Logging before validation means every invalid order attempt is logged. The order is a business decision, not a technical one. Document the intended order and enforce it in the composition root.
 
@@ -223,7 +221,7 @@ Adding idempotency checking now means one new `IdempotencyOrderHandler` class �
 
 **Decorator state leaking between requests** — if a decorator holds mutable state (e.g., a counter), it must be scoped correctly. Singleton decorators with request-scoped state cause concurrency bugs. Register decorators with the same lifetime as the component they wrap.
 
-## Tradeoffs
+# Tradeoffs
 
 | Concern | Decorator chain | Monolithic method | AOP (PostSharp/Castle) |
 |---|---|---|---|
@@ -235,7 +233,7 @@ Adding idempotency checking now means one new `IdempotencyOrderHandler` class �
 
 **Decision rule**: Use Decorator when you have 3+ cross-cutting concerns that need to be independently testable and composable in different orders. For 1-2 concerns, adding them directly to the class is simpler. For concerns that span many classes (not just one), AOP or middleware is more appropriate than per-class decorators.
 
-## Questions
+# Questions
 
 > [!QUESTION]- How does ASP.NET Core Middleware implement the Decorator pattern?
 > Each middleware is a decorator over `RequestDelegate next`. `app.UseAuthentication()` registers a middleware that calls `next(context)` after authenticating. The pipeline is built by composing these decorators at startup: each `Use()` call wraps the current pipeline in a new decorator. The outermost middleware runs first. This is exactly the Decorator pattern: each middleware implements the same interface (`RequestDelegate`), holds a reference to the next, and adds behavior before/after. The cost: middleware ordering bugs are runtime errors, not compile-time errors.
@@ -246,7 +244,7 @@ Adding idempotency checking now means one new `IdempotencyOrderHandler` class �
 > [!QUESTION]- What's the performance cost of a deep decorator chain?
 > Each decorator adds one virtual dispatch and one async state machine (if async). For a 5-layer chain, that's 5 virtual calls and 5 async allocations per request. In practice, this is negligible compared to I/O (DB queries, HTTP calls). Profile before optimizing. If the chain is genuinely hot (millions of calls/second with no I/O), consider collapsing the chain into a single class for that specific path. The tradeoff: performance vs maintainability. Premature optimization of decorator chains is a common mistake.
 
-## References
+# References
 
 - [Decorator Pattern — Christopher Okhravi](https://www.youtube.com/watch?v=GCraGHx6gso&list=PLrhzvIcii6GNjpARdnO4ueTUAVR9eMBpc&index=3) — video walkthrough of the Decorator pattern with OOP examples
 - [Decorator — refactoring.guru](https://refactoring.guru/design-patterns/decorator) — canonical pattern description with wrapper chain diagram and C# example

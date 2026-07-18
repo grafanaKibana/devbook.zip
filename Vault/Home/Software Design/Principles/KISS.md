@@ -10,13 +10,11 @@ priority: High
 status: Ready to Repeat
 publish: true
 ---
-# Intro
-
 KISS (Keep It Simple, Stupid) means prefer the simplest solution that meets the actual requirements. Simple is not the same as "quick hack" — simple means fewer moving parts, fewer hidden assumptions, and clear failure modes. You reach for KISS when complexity is added "just in case" or when abstractions obscure the real behavior. A startup built a full event-sourced CQRS system with a Kafka message bus for what was a 3-table CRUD application serving 50 users — the team spent 60% of engineering time maintaining infrastructure instead of shipping features, and eventually rewrote it as a simple ASP.NET Core API with EF Core in two weeks.
 
 Complexity has ongoing cost: bugs, onboarding time, testing, and operations. Every abstraction layer you add must earn its keep by solving a proven problem.
 
-## Violation vs Fix
+# Violation vs Fix
 
 **Over-engineered:**
 
@@ -46,7 +44,7 @@ public class UserService
 
 The second version is boring, obvious, and correct. Add the event sourcing when you have a proven need for audit history or temporal queries — not before.
 
-## When KISS Is the Wrong Choice
+# When KISS Is the Wrong Choice
 
 KISS does not mean "ignore requirements." Some complexity is mandatory:
 
@@ -56,7 +54,7 @@ KISS does not mean "ignore requirements." Some complexity is mandatory:
 
 The principle is: add complexity only to solve a proven problem, not a hypothetical one.
 
-## KISS in Distributed Systems
+# KISS in Distributed Systems
 
 Distributed systems are where KISS violations are most costly. Each added component (message broker, cache, service mesh, saga orchestrator) multiplies operational complexity: more failure modes, more observability requirements, more deployment dependencies.
 
@@ -70,7 +68,7 @@ Distributed systems are where KISS violations are most costly. Each added compon
 The simplest distributed system that meets current requirements is almost always the right starting point. Add complexity when you hit a proven constraint, not before.
 
 
-## Pitfalls
+# Pitfalls
 
 **Confusing simple with no structure**
 A 2,000-line `Program.cs` with no separation of concerns is not simple — it is unstructured. A production outage at a fintech company was traced to a 3,400-line `Startup.cs` where middleware ordering, DI registration, and configuration validation were interleaved — a developer reordered two middleware registrations during a refactor and broke authentication for all endpoints, and the bug passed code review because no one could reason about the file's structure. KISS means simple design, not absence of design.
@@ -81,7 +79,7 @@ Refusing to extract a shared abstraction to "keep it simple" leads to duplicatio
 **Premature simplification**
 Removing a safety mechanism (retry logic, circuit breaker, idempotency key) because it "adds complexity" creates a system that fails in production in non-obvious ways.
 
-## Questions
+# Questions
 
 > [!QUESTION]- How do you distinguish 'simple' from 'simplistic' in a design review?
 > Simple: the design has the minimum number of moving parts needed to meet the current requirements, with clear failure modes and no hidden assumptions. Simplistic: the design ignores real requirements (edge cases, error handling, security) to appear simple. The test: can you explain every component's purpose? If a component exists 'just in case' or 'for future flexibility,' it is probably over-engineering. If a component is missing and the system fails in production, it was simplistic.
@@ -93,7 +91,7 @@ Removing a safety mechanism (retry logic, circuit breaker, idempotency key) beca
 > They are complementary: YAGNI says don't build features you don't need yet; DRY says don't duplicate knowledge; KISS says keep the implementation simple. Tension arises when DRY requires an abstraction that adds complexity (KISS violation) for a single use case (YAGNI violation). Resolution: apply the Rule of Three — abstract when you have two concrete use cases, not one. One use case is speculation; two give you enough information to design a simple abstraction.
 
 
-## References
+# References
 
 - [KISS principle (Wikipedia)](https://en.wikipedia.org/wiki/KISS_principle) — origin of the term, examples from engineering and software design.
 - [The Pragmatic Programmer (Hunt & Thomas)](https://pragprog.com/titles/tpp20/the-pragmatic-programmer-20th-anniversary-edition/) — Chapter on "Good Enough Software" and avoiding over-engineering.

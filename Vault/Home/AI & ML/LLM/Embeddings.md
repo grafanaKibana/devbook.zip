@@ -11,8 +11,6 @@ status: Done
 publish: true
 ---
 
-# Intro
-
 Embeddings map text into a dense vector space where semantic similarity becomes geometric proximity — similar meanings land near each other, unrelated meanings land far apart. This is what lets retrieval match a query like "throttle partner API traffic" against a document about "rate limiting for partner plan" even though no keywords overlap.
 
 The mechanism: an encoder model (a transformer trained with contrastive objectives) reads a text span and produces a fixed-length vector. During training, the model learns to push semantically similar pairs closer together and dissimilar pairs apart in vector space. At query time, the system embeds the query with the same model, then finds the nearest stored vectors using cosine similarity or dot product. The closest vectors correspond to the most semantically relevant chunks.
@@ -33,9 +31,9 @@ sequenceDiagram
 
 The engineering decision is not just model quality — it is a tradeoff across recall, latency, cost, and domain fit under your corpus and SLA. A model that tops the MTEB leaderboard may still miss your internal terminology.
 
-## Embedding Model Selection
+# Embedding Model Selection
 
-### Model Families
+## Model Families
 
 Three categories dominate production RAG systems:
 
@@ -45,7 +43,7 @@ Three categories dominate production RAG systems:
 
 **Domain-finetuned models** — When general-purpose models underperform on internal terminology, finetuning a base model on your corpus can close the gap. Databricks showed that finetuning `gte-large-en-v1.5` (0.4B params) on synthetic domain data beat `text-embedding-3-large` on FinanceBench retrieval ([[Monitoring#Retrieval Quality Metrics|Recall@10]]: 0.552 vs 0.44). Two common approaches: continued pre-training with MLM for vocabulary adaptation, and contrastive finetuning with synthetic query-document pairs.
 
-### Dimensionality
+## Dimensionality
 
 Higher dimensions give the model more room to represent fine-grained distinctions. But higher dimensions also mean more storage (4 bytes × dimensions per vector), more compute for similarity search, and higher ANN index memory.
 
@@ -53,7 +51,7 @@ Matryoshka Representation Learning (MRL) trains models so that any prefix of the
 
 A practical pattern: index at reduced dimensions for the initial ANN search (fast, cheap), then re-rank the top candidates using full-dimensional vectors or a cross-encoder.
 
-### Similarity Metrics
+## Similarity Metrics
 
 The choice of similarity metric determines how "closeness" is calculated in vector space:
 
@@ -65,9 +63,9 @@ The choice of similarity metric determines how "closeness" is calculated in vect
 
 For most RAG systems: use cosine similarity unless the model documentation specifically recommends dot product.
 
-## Pitfalls
+# Pitfalls
 
-### Distribution Shift on Internal Terminology
+## Distribution Shift on Internal Terminology
 
 A model that scores well on MTEB benchmarks may still fail on your domain. MTEB evaluates on general web text — if your corpus uses internal acronyms, product names, or domain jargon absent from the model's training data, embeddings for those terms will be noisy. Queries and documents containing the same jargon may land far apart in vector space.
 
@@ -75,23 +73,23 @@ Detection: compare recall@k on a held-out set of domain-specific queries vs gene
 
 Mitigation: finetune with domain data (GPL or continued pre-training on your corpus), or supplement embeddings with keyword search in a [[Retrieval|hybrid retrieval]] setup where BM25 handles exact lexical matches.
 
-### Embedding Model Swap Invalidation
+## Embedding Model Swap Invalidation
 
 Changing the embedding model — even a minor version — invalidates every stored vector. The new model produces vectors in a different geometric space. Cosine similarity between old and new vectors is meaningless.
 
 This means re-embedding the entire corpus: for a 10M-chunk index at $0.02/1M tokens and 500 tokens/chunk average, that is ~$100 and hours of ingestion time. Key the [[Home/AI & ML/LLM/Context Engineering/RAG/Caching|embedding cache]] by model name + version to prevent serving stale vectors.
 
-### Benchmark Leaderboard Overfitting
+## Benchmark Leaderboard Overfitting
 
 MTEB aggregates scores across multiple task families — retrieval, STS, classification, clustering, bitext mining, and others — each containing many individual datasets. A model ranked #1 overall can rank poorly on retrieval-specific datasets because STS, classification, and clustering scores inflate the average. Always filter MTEB by the `Retrieval` task category when selecting for RAG, and validate on your own evaluation set.
 
-### Multilingual Embedding Collapse
+## Multilingual Embedding Collapse
 
 Models trained primarily on English text cluster non-English content into a smaller region of vector space, reducing separation between distinct concepts. A Spanish query about "seguridad informática" and one about "seguridad alimentaria" may land closer together than they should because the model undertrained on Spanish semantic distinctions.
 
 Mitigation: use models with explicit multilingual training (Cohere `embed-v3`, SBERT multilingual variants), and evaluate recall per language separately.
 
-## Tradeoffs
+# Tradeoffs
 
 | Factor | Proprietary API | Open-Source Self-Hosted | Domain-Finetuned |
 | --- | --- | --- | --- |
@@ -105,7 +103,7 @@ Mitigation: use models with explicit multilingual training (Cohere `embed-v3`, S
 
 Decision rule: start with a proprietary API model to establish baseline recall. Measure per-query-type performance. Switch to domain-finetuning only when domain-specific recall failures dominate over chunking or retrieval issues — finetuning the embedding model cannot fix bad chunks.
 
-## Questions
+# Questions
 
 > [!QUESTION]- How can Matryoshka dimensionality reduction lower embedding storage costs without significant recall loss?
 > Use the `dimensions` parameter to truncate vectors to 256 or 512 dimensions. Models trained with Matryoshka objectives produce vectors where any prefix is independently meaningful. Truncation to 256 dims reduces storage by ~6x and speeds up ANN search proportionally. Validate by comparing recall@k on your evaluation set at 256, 512, and full dimensions — MRL models can retain strong retrieval quality at reduced dimensions, but the actual degradation is model-specific and corpus-dependent. If recall drops unacceptably, use a two-stage approach: retrieve at reduced dimensions, then re-rank candidates using full-dimensional vectors.
@@ -116,7 +114,7 @@ Decision rule: start with a proprietary API model to establish baseline recall. 
 > [!QUESTION]- When is domain-finetuning the embedding model justified over improving chunking or retrieval?
 > Finetuning is justified when retrieval failures are specifically caused by semantic mismatches on domain terminology — queries and relevant documents contain the same domain concepts but land far apart in vector space. If failures trace to split logical units (chunking issue), missing metadata filters (retrieval pipeline issue), or query ambiguity (query translation issue), finetuning the embedding model will not help. Diagnose by examining the top-k retrieved chunks for failed queries: if semantically relevant chunks exist but rank low, the embedding model is the bottleneck.
 
-## References
+# References
 
 - [Embeddings guide — text-embedding-3 models and MRL (OpenAI)](https://platform.openai.com/docs/guides/embeddings)
 - [MTEB leaderboard — filter by Retrieval task (Hugging Face)](https://huggingface.co/spaces/mteb/leaderboard)

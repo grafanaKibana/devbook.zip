@@ -10,13 +10,11 @@ status: Ready to Repeat
 publish: true
 ---
 
-# Intro
-
 Object storage keeps an opaque byte sequence, a key, and metadata as one addressable object inside a bucket or container. Applications use an API to put, get, list, copy, and delete objects; they do not mount raw blocks or edit arbitrary filesystem sectors. Reach for it when data is large, mostly replaced as a whole, and must outgrow one machine: media, backups, build artifacts, logs, and data-lake files are typical fits.
 
 A key such as `customers/42/invoices/2026-07.pdf` looks hierarchical, but in a conventional object bucket the slashes are part of a flat key. Clients create the folder view by listing a prefix. That distinction matters when renaming a "directory": the application generally copies and deletes every matching object rather than changing one directory entry.
 
-## Access Contract
+# Access Contract
 
 An object write supplies bytes plus system and application metadata such as content type, checksum, encryption parameters, retention policy, or domain tags. A successful `PUT` replaces the value at one key atomically in Amazon S3: readers see the old object or the new object, not half of either. That single-key guarantee does not make a set of keys one transaction. Publishing a data-set version therefore needs an application protocol, for example immutable versioned keys followed by one manifest pointer update.
 
@@ -28,13 +26,13 @@ Object storage loses to other contracts when the application needs:
 - shared POSIX paths, file locks, and in-place edits: use a file service;
 - multi-record constraints, joins, or transactional queries over metadata: keep that state in a database and store only the large payload in the object store.
 
-## Multipart Write Example
+# Multipart Write Example
 
 Consider an 8 GiB video uploaded over an unreliable link. A single request that fails at 7.9 GiB has to restart the whole transfer. A multipart upload can divide it into 128 parts of 64 MiB, upload several parts in parallel, and retry only a failed part. Completion assembles the parts into one object; until then the application must retain the upload ID.
 
 The failure boundary shifts to lifecycle management. An initiated upload does not expire automatically in S3, and uploaded parts continue to incur storage charges until the client completes or aborts it. A bucket lifecycle rule should remove incomplete multipart uploads after the recovery window. The client should also attach and verify checksums instead of treating a successful transport response as end-to-end integrity proof.
 
-## Lifecycle Tiers and Use Cases
+# Lifecycle Tiers and Use Cases
 
 Lifecycle rules can transition eligible objects from a frequent-access class to colder, cheaper tiers, expire obsolete versions, or abort abandoned multipart uploads. The application must account for minimum storage durations, retrieval charges, and restore delay. A backup that takes hours to restore cannot satisfy a 15-minute recovery-time objective merely because its bytes are durable.
 
@@ -49,7 +47,7 @@ The common use cases are conditions, not blanket recommendations:
 | IoT history | Raw batches can be retained cheaply for later analytics | Live time-window queries belong in a time-series or streaming system |
 | Backup and recovery | Versioned immutable copies can be isolated from the primary system | Recovery objectives require a warm replica in addition to object backups |
 
-## References
+# References
 
 - [What is Amazon S3?](https://docs.aws.amazon.com/AmazonS3/latest/userguide/Welcome.html) — official object, bucket, key, metadata, API, and strong-consistency contract.
 - [Uploading objects with multipart upload](https://docs.aws.amazon.com/AmazonS3/latest/userguide/mpuoverview.html) — defines initiation, part upload, completion, retry, checksum, and abandoned-upload behavior.

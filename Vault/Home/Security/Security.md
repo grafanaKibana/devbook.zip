@@ -15,8 +15,6 @@ level:
 status: Done
 ---
 
-# Intro
-
 Security is a production feature: protecting users, data, and systems against realistic threats and mistakes. These notes focus on practical engineering security: authn/authz, cryptography basics, and common vulnerability classes. Example: most incidents start with a small gap like weak password handling, missing rate limits, or overly-permissive access checks.
 
 ```datacorejsx
@@ -24,7 +22,7 @@ const { FolderStructureMap } = await dc.require("Assets/components/devbook-folde
 return FolderStructureMap;
 ```
 
-## The Shape of the Problem
+# The Shape of the Problem
 
 Most security work reduces to a few recurring goals defended in layers. The classic frame is the **CIA triad** — Confidentiality (only the right people see data), Integrity (data isn't tampered with), Availability (the system stays up) — pursued through **defense in depth**: no single control is trusted, so a failure at one layer is caught by the next.
 
@@ -35,7 +33,7 @@ Two distinctions run through everything below:
 
 Most incidents start small: a missing authorization check, a secret in a log, weak password handling, or a missing rate limit. The specifics live in the notes above.
 
-## Secure System Design Checklist
+# Secure System Design Checklist
 
 Start with one abuse case, not a catalog of controls. For a payroll export, identify the employee records as assets, payroll staff and the export worker as actors, and the browser, API, job queue, object store, and third-party delivery service as separate trust boundaries. Then make each control answer a concrete path through those boundaries.
 
@@ -52,7 +50,7 @@ Start with one abuse case, not a catalog of controls. For a payroll export, iden
 
 A checklist is complete only when its failure paths have been exercised. Test that the payroll export rejects another tenant, a missing policy, a revoked job identity, a stale signing key, a logging outage, and a restore whose backup predates the incident.
 
-## Questions
+# Questions
 
 > [!QUESTION]- What is the practical difference between authentication and authorization, and why do bugs cluster at the boundary?
 > - Authentication establishes identity (who); authorization enforces permission (what) — a system can authenticate perfectly and still leak data through a missing authz check
@@ -66,7 +64,7 @@ A checklist is complete only when its failure paths have been exercised. Test th
 > - Keep secrets out of source, logs, and config: use a secrets manager, rotate them, and scope them narrowly
 > - Assume any secret that reaches a log or an error message is compromised — design so it never does
 
-## References
+# References
 
 - [ByteByteGo — How to Design a Secure System](https://github.com/ByteByteGoHq/system-design-101/blob/b28380a4710c5ec9638ec037d4168e288f334cba/data/guides/how-do-we-design-a-secure-system.md) — the pinned checklist source, reorganized here around threats, boundaries, and testable failure paths.
 - [OWASP Top 10](https://owasp.org/www-project-top-ten/) — the standard reference for the most critical web application security risks.

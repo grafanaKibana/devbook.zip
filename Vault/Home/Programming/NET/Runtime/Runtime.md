@@ -13,8 +13,6 @@ level:
   - '4'
 ---
 
-# Intro
-
 The .NET runtime (Common Language Runtime / CLR) is the execution engine that makes managed code work: it compiles IL to native code via JIT, manages memory through garbage collection, enforces type safety, and handles threading. Understanding the runtime matters for any senior .NET developer because most production performance issues — latency spikes, memory growth, thread pool starvation — are runtime problems, not application logic bugs.
 
 Three areas are covered here: the **CLR itself** (how code gets compiled and executed), **garbage collection** (how memory is managed, GC modes, and tuning levers), and **memory leaks** (how managed code still leaks and how to diagnose it). The common thread is that the runtime automates most things, but the edge cases where automation breaks down are exactly the scenarios that cause production incidents.
@@ -26,7 +24,7 @@ const { FolderStructureMap } = await dc.require("Assets/components/devbook-folde
 return FolderStructureMap;
 ```
 
-## Questions
+# Questions
 
 > [!QUESTION]- What does the CLR do when your application starts, and why does startup behavior matter?
 > The CLR loads assemblies, verifies IL safety, JIT-compiles methods on first call (or uses tiered compilation to optimize hot paths later), sets up the GC, and initializes the thread pool.
@@ -41,7 +39,7 @@ return FolderStructureMap;
 > Yes. Common causes: event handler subscriptions never unsubscribed, static collections that grow indefinitely, closures capturing references unexpectedly, and finalizer queue stalls blocking reclamation.
 > These are not OS-level leaks but logical leaks — the GC cannot collect objects that are still reachable through a live reference chain, even if the application no longer needs them.
 
-## References
+# References
 
 - [.NET runtime overview (Microsoft Learn)](https://learn.microsoft.com/en-us/dotnet/standard/clr) — CLR architecture and execution model.
 - [Garbage collection fundamentals (Microsoft Learn)](https://learn.microsoft.com/en-us/dotnet/standard/garbage-collection/fundamentals) — GC generations, modes, and behavior.

@@ -11,17 +11,15 @@ status: Done
 
 publish: true
 ---
-# Intro
-
 Event-Driven Architecture (EDA) is a style where components publish facts such as `OrderPlaced`, `PaymentFailed`, or `InventoryReserved`, and consumers react without the producer naming them directly. It reduces temporal coupling when reactions can happen asynchronously. Event-driven components commonly coexist with synchronous APIs for queries and decisions that need an immediate answer.
 
 In interview terms: EDA is not "just using a queue". It is a contract-driven communication model where events represent state changes, subscribers own their reaction logic, and consistency is typically eventual rather than immediate.
 
 Durable cross-process EDA usually uses [[Home/Software Architecture/Distributed Systems/Message Queues/Message Queues|messaging]] or a retained log, but a broker is not definitional. In-process event dispatch, database change streams, and HTTP webhooks can also carry events with different durability and coupling contracts.
 
-## Core Concepts
+# Core Concepts
 
-### Event Types
+## Event Types
 
 **Domain Event**
 
@@ -44,7 +42,7 @@ Durable cross-process EDA usually uses [[Home/Software Architecture/Distributed 
 - Example: `CatalogItemChanged { ItemId, ChangedAt }`.
 - Scope: low payload fan-out scenarios, cache invalidation, or trigger-based processing.
 
-### Difference at a Glance
+## Difference at a Glance
 
 | Type | Primary purpose | Payload style | Typical audience |
 | --- | --- | --- | --- |
@@ -54,9 +52,9 @@ Durable cross-process EDA usually uses [[Home/Software Architecture/Distributed 
 
 Practical rule: model domain events first, then map only the externally relevant subset into integration events.
 
-## Patterns
+# Patterns
 
-### Choreography
+## Choreography
 
 In choreography, each service reacts to events independently. No central coordinator tells services what to do next.
 
@@ -72,7 +70,7 @@ flowchart LR
 
 Use when teams want autonomy and workflows can be decomposed into independent reactions.
 
-### Orchestration
+## Orchestration
 
 In orchestration, a central component (process manager/saga orchestrator) directs the workflow and issues commands.
 
@@ -94,12 +92,12 @@ sequenceDiagram
 
 Use when workflow visibility, explicit state handling, and compensation logic are first-class requirements.
 
-### Tradeoffs
+## Tradeoffs
 
 - **Choreography**: looser coupling and easier service autonomy, but harder to trace global flow and reason about emergent behavior as subscriptions grow.
 - **Orchestration**: clearer process control, easier audit/debug per workflow instance, but introduces a central dependency that can become a bottleneck or single point of operational complexity.
 
-## .NET messaging boundary
+# .NET messaging boundary
 
 A broker can deliver an integration event only after the producer places it on the transport. Saving business state and publishing in two independent operations leaves a failure gap: the database can commit while the publish fails. A transactional outbox stores the business change and outgoing message through the same local `DbContext` transaction, then a delivery service forwards it to the broker.
 
@@ -151,7 +149,7 @@ rabbit.ReceiveEndpoint("billing-order-placed", endpoint =>
 
 The outbox closes a local database-to-broker gap. It does not turn the broker and every downstream database into one global exactly-once transaction.
 
-## Governance and data pipelines
+# Governance and data pipelines
 
 ![[System Design 101/f24452c55f5c2b1ab8dd95a948c020cece30080b79520b91667967513014c20e.png]]
 
@@ -163,7 +161,7 @@ The governance visual is one organization-specific topology. The reusable bounda
 - **Domain ownership:** producers own event meaning and availability; the platform owns guardrails and shared infrastructure.
 - **Regional isolation:** replication declares lag, ordering, conflict, residency, and failover behavior.
 
-For `MenuItemPriceChanged`, the Restaurant domain owns semantics and its producer SLO. CI checks the schema against the registry. Regional brokers keep local consumers running during a remote outage; a global consumer accepts delayed and duplicate replicated events. [[Event Schema Evolution]] covers compatibility across retained messages and independently deployed consumers.
+For `MenuItemPriceChanged`, the Restaurant domain owns semantics and its producer SLO. CI checks the schema against the registry. Regional brokers keep local consumers running during a remote outage; a global consumer accepts delayed and duplicate replicated events. [[Home/Software Architecture/Distributed Systems/Event Schema Evolution]] covers compatibility across retained messages and independently deployed consumers.
 
 ![[System Design 101/95696d28879b34b489342eb0f5aabbfa21c5929f6a13785fe1ea91712ad2dac8.png]]
 
@@ -176,33 +174,33 @@ The pipeline visual names conceptual stages; real batch and streaming paths can 
 5. **Consume:** warehouse and alerting outputs declare separate freshness and correctness SLOs.
 
 Preserve source event IDs in derived records and publish lineage from input dataset through job to output. Low broker lag does not prove a warehouse table is fresh or correct. "Exactly once" must name a boundary: a stream processor may atomically checkpoint input offsets and write one managed sink, while an external email or payment call remains at-least-once and needs idempotency.
-## Pitfalls
+# Pitfalls
 
-### 1) Event Ordering
+## 1) Event Ordering
 
 - **What goes wrong**: consumers may process `OrderCancelled` before `OrderPlaced` (or receive updates in different order across partitions/queues).
 - **Why**: distributed brokers and parallel consumers do not guarantee global ordering.
 - **Mitigation**: design handlers for per-aggregate ordering where needed (partition by aggregate key), include version/sequence in events, and detect stale events.
 
-### 2) Idempotency
+## 2) Idempotency
 
 - **What goes wrong**: duplicate delivery causes duplicate side effects (double charge, duplicate email, repeated inventory decrement).
 - **Why**: at-least-once delivery is common in real systems.
 - **Mitigation**: use deterministic idempotency keys (`EventId`), store processed-message fingerprints, and make state transitions conditional.
 
-### 3) Event Schema Evolution
+## 3) Event Schema Evolution
 
 - **What goes wrong**: a producer ships a breaking payload change and multiple consumers fail.
 - **Why**: integration events are shared contracts with independent deployment cycles.
 - **Mitigation**: version events, evolve contracts backward-compatibly (additive first), and validate in contract tests before release.
 
-### 4) Distributed Flow Debugging
+## 4) Distributed Flow Debugging
 
 - **What goes wrong**: incidents are hard to reconstruct across many async hops.
 - **Why**: no single request thread shows full workflow.
 - **Mitigation**: propagate correlation/causation IDs, instrument with OpenTelemetry traces/metrics/logs, and keep searchable event audit logs.
 
-## Questions
+# Questions
 
 > [!QUESTION]- When would you choose orchestration over choreography in an event-driven workflow?
 > Orchestrate when the workflow is long-running and needs real ordering or compensation — a checkout that charges payment, reserves inventory, then ships. A central process manager keeps that flow easy to follow and roll back, at the cost of one more component that can bottleneck. Choreography fits loosely-related reactions, like "order placed" fanning out to email, analytics, and search: autonomous and decoupled, but no single place knows the whole story, so tracing gets harder as subscriptions grow. Rule of thumb — orchestrate transactions you must reason about end to end; choreograph independent reactions.
@@ -213,7 +211,7 @@ Preserve source event IDs in derived records and publish lineage from input data
 > [!QUESTION]- How do you process events reliably under at-least-once delivery?
 > Duplicates and reordering are normal, so consumers need durable idempotency keys and conditional state changes. An outbox closes the local database-to-publish gap; per-key partitioning plus sequence numbers protects scoped order. An exactly-once claim is valid only for an explicit transactional boundary, such as a processor atomically checkpointing offsets and writing one supported sink. External calls still need their own idempotency contract.
 
-## References
+# References
 
 - [Martin Fowler - What do you mean by Event-Driven?](https://martinfowler.com/articles/201701-event-driven.html) — distinguishes event notification, event-carried state transfer, Event Sourcing, and event-driven processing.
 - [Microsoft Learn - Asynchronous messaging options](https://learn.microsoft.com/azure/architecture/guide/technology-choices/messaging) — requirements-based selection across queues, publish/subscribe, streams, and managed services.
@@ -231,7 +229,7 @@ Preserve source event IDs in derived records and publish lineage from input data
 - [Transactional Outbox pattern](https://microservices.io/patterns/data/transactional-outbox.html) - Failure gap closed by persisting messages with local business state.
 - [Idempotent Consumer pattern](https://microservices.io/post/microservices/patterns/2020/10/16/idempotent-consumer.html) - Why at-least-once delivery requires durable duplicate handling.
 
-### ByteByteGo provenance
+## ByteByteGo provenance
 
 - [McDonald's event-driven architecture](https://github.com/ByteByteGoHq/system-design-101/blob/b28380a4710c5ec9638ec037d4168e288f334cba/data/guides/mcdonald%27s-event-driven-architecture.md) — editorial lead for the registry, SDK, gateway, domain, and regional governance case.
 - [Data pipelines overview](https://github.com/ByteByteGoHq/system-design-101/blob/b28380a4710c5ec9638ec037d4168e288f334cba/data/guides/data-pipelines-overview.md) — provenance for the conceptual pipeline stages and record trace.

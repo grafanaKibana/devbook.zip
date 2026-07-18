@@ -13,13 +13,11 @@ level:
 status: Done
 ---
 
-# Intro
-
 Architectural patterns define how a system's components are organized, how data flows between them, and where the boundaries of responsibility lie. They matter because choosing the wrong boundary or data flow shape creates problems that no amount of refactoring within a component can fix — the pain shows up as coupling, consistency bugs, and scaling walls.
 
-The three patterns here compose naturally: [[Domain-Driven Design]] establishes bounded contexts and a shared language so the code matches the business domain. [[CQRS]] separates the read path from the write path so each can be optimized independently. [[Event Sourcing]] stores state as an immutable event stream, giving you audit trails, temporal queries, and the ability to rebuild read models from history. You can use DDD without CQRS, and CQRS without Event Sourcing, but in complex domains teams often adopt all three because each one solves a problem the others expose.
+The three patterns here compose naturally: [[Home/Software Architecture/Patterns/Architectural Patterns/Domain-Driven Design]] establishes bounded contexts and a shared language so the code matches the business domain. [[Home/Software Architecture/Patterns/Architectural Patterns/CQRS]] separates the read path from the write path so each can be optimized independently. [[Home/Software Architecture/Patterns/Architectural Patterns/Event Sourcing]] stores state as an immutable event stream, giving you audit trails, temporal queries, and the ability to rebuild read models from history. You can use DDD without CQRS, and CQRS without Event Sourcing, but in complex domains teams often adopt all three because each one solves a problem the others expose.
 
-## Integration and data-flow patterns by failure and coupling
+# Integration and data-flow patterns by failure and coupling
 
 First identify what must vary. An API gateway, request-response call, and publish-subscribe topology decide how components interact. Streaming, batching, and ETL decide how data moves and when it becomes visible. Event Sourcing decides how state is recorded and reconstructed. Orchestration decides who owns a multi-step workflow. They can coexist; treating the nine labels below as mutually exclusive choices mixes different design layers.
 
@@ -31,12 +29,12 @@ First identify what must vary. An API gateway, request-response call, and publis
 | One fact delivered to many consumers | Publish-subscribe | Producers know the contract, not consumers; per-key ordering is broker-specific | Broker and each consumer own delivery, lag, and idempotency | Medium: topics, schemas, replay, and dead letters |
 | Continuous high-volume processing | Streaming | Consumers depend on stream contracts and partitioning | Pipeline owns checkpoints, backpressure, and replay | High: state stores, lag, and repartitioning |
 | Periodic bounded processing | Batching or ETL | Jobs couple to input/output schemas, not request latency | Scheduler owns retries and partial-run recovery | Medium: windows, staging, and reruns |
-| Auditable state reconstructed from history | [[Event Sourcing]] | Aggregate depends on ordered immutable events | Event store owns append order; projectors own replay | High: schema evolution and projections |
+| Auditable state reconstructed from history | [[Home/Software Architecture/Patterns/Architectural Patterns/Event Sourcing]] | Aggregate depends on ordered immutable events | Event store owns append order; projectors own replay | High: schema evolution and projections |
 | Coordinated multi-step business process | Orchestration | Steps couple to an explicit workflow contract | Orchestrator owns compensation and progress | Medium to high: durable state and recovery |
 
 The selection rule is failure ownership: choose the shape whose operator can explain where a failed item waits, who retries it, whether order matters, and how processing resumes without duplicating side effects.
 
-## Architecture selection matrix
+# Architecture selection matrix
 
 The families below also overlap. A service can use hexagonal boundaries internally, publish events, expose a client-server API, and deploy as one monolith or several services. A diagram labels a dominant organizing idea; it does not grant independent deployment or fault tolerance by itself.
 
@@ -56,7 +54,7 @@ const { FolderStructureMap } = await dc.require("Assets/components/devbook-folde
 return FolderStructureMap;
 ```
 
-## References
+# References
 
 - [Patterns of Enterprise Application Architecture -- foundational catalog of enterprise patterns covering domain logic, data source, and distribution patterns (Martin Fowler)](https://martinfowler.com/eaaCatalog/)
 - [Cloud design patterns -- Azure architecture center catalog covering CQRS, Event Sourcing, and related cloud-native patterns (Microsoft Learn)](https://learn.microsoft.com/en-us/azure/architecture/patterns/)

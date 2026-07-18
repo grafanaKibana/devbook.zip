@@ -12,8 +12,6 @@ level:
   - "3"
 status: Done
 ---
-# Intro
-
 GoF (Gang of Four) Design Patterns are 23 reusable solutions to recurring object-oriented design problems, first documented in *Design Patterns: Elements of Reusable Object-Oriented Software* (1994) by Gamma, Helm, Johnson, and Vlissides. They provide a shared vocabulary for design intent — when a team says "let's use a Strategy here," everyone immediately understands the tradeoffs without long explanations. Patterns are not copy-paste code; they're templates for solving classes of problems. This section covers all 23 GoF patterns organized by category, each with production C# examples showing the problem without the pattern, the transformation with it, and the .NET built-ins that already implement it — connecting new knowledge to things you use daily.
 
 ```datacorejsx
@@ -21,23 +19,23 @@ const { FolderStructureMap } = await dc.require("Assets/components/devbook-folde
 return FolderStructureMap;
 ```
 
-## Choose a pattern by intent and cost
+# Choose a pattern by intent and cost
 
 Start from the pressure in the code, not a pattern name. Introduce the smallest pattern that makes a real variation or responsibility boundary explicit.
 
 | Pressure | Candidate | What it buys | What it costs | Reject it when |
 |---|---|---|---|---|
-| Construction selects among related product families | [[Abstract Factory]] | Keeps compatible products and construction policy together | Factory interfaces multiply with product families | There is one concrete family |
-| Construction has many ordered or optional inputs | [[Builder]] | Names construction steps and protects invariants | Extra builder type and duplicated API surface | A constructor or options record stays readable |
-| Existing interface does not match a consumer | [[Adapter]] | Localizes translation at one boundary | Another abstraction to test and maintain | You control both sides and can align the contract directly |
-| Add behavior around one object without subclass combinations | [[Decorator]] | Composes responsibilities at runtime | Nested wrappers obscure execution order | One direct implementation has no meaningful variants |
-| Choose one interchangeable algorithm | [[Strategy]] | Makes policy selection explicit and testable | More types or delegates | A small conditional is stable and clearer |
-| Notify unknown dependents about state changes | [[Observer]] | Decouples publisher from subscriber set | Ordering, lifetime, and error handling become indirect | There is one required caller that should invoke directly |
-| Encapsulate a request for queuing, undo, or dispatch | [[Command]] | Turns an operation into data with explicit execution | Boilerplate around simple method calls | No delayed, logged, retried, or reversible execution exists |
+| Construction selects among related product families | [[Home/Software Architecture/Patterns/Design Patterns/Creational/Abstract Factory]] | Keeps compatible products and construction policy together | Factory interfaces multiply with product families | There is one concrete family |
+| Construction has many ordered or optional inputs | [[Home/Software Architecture/Patterns/Design Patterns/Creational/Builder]] | Names construction steps and protects invariants | Extra builder type and duplicated API surface | A constructor or options record stays readable |
+| Existing interface does not match a consumer | [[Home/Software Architecture/Patterns/Design Patterns/Structural/Adapter]] | Localizes translation at one boundary | Another abstraction to test and maintain | You control both sides and can align the contract directly |
+| Add behavior around one object without subclass combinations | [[Home/Software Architecture/Patterns/Design Patterns/Structural/Decorator]] | Composes responsibilities at runtime | Nested wrappers obscure execution order | One direct implementation has no meaningful variants |
+| Choose one interchangeable algorithm | [[Home/Software Architecture/Patterns/Design Patterns/Behavioral/Strategy]] | Makes policy selection explicit and testable | More types or delegates | A small conditional is stable and clearer |
+| Notify unknown dependents about state changes | [[Home/Software Architecture/Patterns/Design Patterns/Behavioral/Observer]] | Decouples publisher from subscriber set | Ordering, lifetime, and error handling become indirect | There is one required caller that should invoke directly |
+| Encapsulate a request for queuing, undo, or dispatch | [[Home/Software Architecture/Patterns/Design Patterns/Behavioral/Command]] | Turns an operation into data with explicit execution | Boilerplate around simple method calls | No delayed, logged, retried, or reversible execution exists |
 
 Patterns can share structure while serving different intent. Proxy and Decorator both wrap an interface, but Proxy controls access to another object while Decorator adds responsibility. State and Strategy both delegate behavior, but State transitions internally while Strategy is selected as a policy. Name the intent and deletion condition in the design review; if the second variation disappears, collapse the abstraction.
 
-## Questions
+# Questions
 
 > [!QUESTION]- How do you decide which GoF category a pattern belongs to?
 > Creational if the problem is about object construction — hiding how, when, or which type to instantiate. Structural if the problem is about composing classes or adapting interfaces into larger, more convenient structures. Behavioral if the problem is about assigning responsibility or defining the communication flow between objects.
@@ -51,7 +49,7 @@ Patterns can share structure while serving different intent. Proxy and Decorator
 > - Most common offenders: Singleton hiding shared mutable state, Factory Method for a class that never has variants, Builder for objects with 2 properties.
 > - Tradeoff: patterns pay off through repeated variation but cost upfront complexity. Refactor when recurring evidence makes the abstraction cheaper than another duplication, not merely because a second example exists.
 
-## References
+# References
 
 - [Design Patterns playlist by Christopher Okharavi](https://www.youtube.com/playlist?list=PLrhzvIcii6GNjpARdnO4ueTUAVR9eMBpc) — must watch playlist for the design patterns.
 - [Refactoring.Guru — Design Patterns](https://refactoring.guru/design-patterns) — comprehensive pattern catalog with intent, problem, solution, and C# examples for 22 GoF patterns (excludes Interpreter).

@@ -13,8 +13,6 @@ level:
 status: Creation
 ---
 
-# Intro
-
 Testing is both a verification discipline and a design tool. **Unit tests** exercise a single class or method in isolation, fast and deterministically; **integration tests** wire real dependencies together to catch the bugs that isolation hides. The **test pyramid** is a cost model, not a rule: prefer many cheap unit tests, fewer slow integration tests, and a thin layer of end-to-end checks — inverting it makes the suite slow and flaky. TDD closes the loop by writing the test first, which pressures the code toward small, decoupled units before any implementation exists.
 
 ```datacorejsx
@@ -22,7 +20,7 @@ const { FolderStructureMap } = await dc.require("Assets/components/devbook-folde
 return FolderStructureMap;
 ```
 
-## API Testing by Failure Mode
+# API Testing by Failure Mode
 
 “API test” describes a boundary, not a single test type. Choose the narrowest test that can expose the risk. A contract test catches a renamed field without booting the full system; an integration test proves the database and authentication wiring; a load test proves the latency budget under concurrency. Running nine peer categories on every endpoint creates cost without evidence.
 
@@ -39,7 +37,7 @@ Assume `POST /orders` accepts an idempotency key, validates inventory, charges a
 
 Smoke tests answer a smaller question: “is the deployed API reachable and is one critical path alive?” They are deployment checks, not substitutes for the risk-focused tests above. UI tests are appropriate only when the browser-to-API interaction is itself the contract under test.
 
-### A minimal ASP.NET Core integration test
+## A minimal ASP.NET Core integration test
 
 `WebApplicationFactory<TEntryPoint>` runs the real middleware and endpoint pipeline in memory. Replace only the external payment boundary, keep serialization, authentication, routing, and persistence behavior as real as the risk requires.
 
@@ -65,14 +63,14 @@ public sealed class OrderApiTests(OrderApiFactory factory)
 
 The test is worth its higher cost because the invariant crosses HTTP binding, middleware, application logic, and persistence. Pure price calculations should stay in fast unit tests.
 
-## Questions
+# Questions
 
 > [!QUESTION]- Why is the test pyramid shaped the way it is?
 > - It is a cost model: unit tests are fast, isolated, and cheap to run and maintain, so you can afford thousands of them; integration and end-to-end tests are slower, flakier, and more expensive, so you keep them few and targeted
 > - Inverting it (an "ice-cream cone" of mostly E2E tests) yields a suite that is slow to run and brittle to change, eroding the fast feedback that makes tests worth having
 > - The point is coverage of *risk*, not lines: push logic-heavy verification down to units and reserve higher tiers for wiring, contracts, and critical user paths
 
-## References
+# References
 
 - [The Practical Test Pyramid (Martin Fowler / Ham Vocke)](https://martinfowler.com/articles/practical-test-pyramid.html) — the canonical explanation of the pyramid as a cost/feedback model, with unit vs service vs UI tiers.
 - [UnitTest (Martin Fowler)](https://martinfowler.com/bliki/UnitTest.html) — clarifies the sociable-vs-solitary distinction and what "unit" actually means in practice.

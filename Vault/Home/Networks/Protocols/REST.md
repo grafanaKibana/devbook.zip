@@ -11,13 +11,11 @@ status: Done
 publish: true
 ---
 
-# Intro
-
 REST is an architectural style for networked systems, not a synonym for JSON over HTTP. It constrains interactions around stable resource identities, a uniform interface, and explicit cache/representation behavior so clients, servers, and intermediaries can evolve with fewer assumptions.
 
 Use REST when the problem is broad interoperability, stable resource contracts, and cacheable reads. Use GraphQL when clients need flexible projections with a robust governance model, and gRPC when schema-coupled service-to-service contracts and streaming are the first-class need.
 
-## Constraint and Method Boundaries
+# Constraint and Method Boundaries
 
 REST is mostly about the contract boundaries, not framework syntax:
 
@@ -46,7 +44,7 @@ Use status contracts that describe the real boundary:
 - `422` for instruction-valid but unprocessable content
 - `429`/`503` when retry policy applies
 
-## API Design and Compatibility Surface
+# API Design and Compatibility Surface
 
 Resource naming is the external boundary; framework choice is local.
 
@@ -91,7 +89,7 @@ Neither removes backend fan-out. Choose GraphQL only when selectable graph proje
 
 The visual is a design prompt, not a protocol mandate. `POST` becomes retry-safe only with durable idempotency handling, path versioning is one compatibility option, and action resources are legitimate when the operation is not a collection mutation.
 
-## Pagination Contracts
+# Pagination Contracts
 
 Pagination limits response size and does not imply snapshot consistency.
 
@@ -117,7 +115,7 @@ Fetch one extra row to determine whether another page exists. The unique `id` ti
 
 Encode and integrity-protect the cursor rather than exposing an editable database token. Bind it to tenant, principal or authorization scope, filters, sort order, direction, page-size policy, and expiry.
 
-### Consistency contract
+## Consistency contract
 
 A cursor identifies a position, not a snapshot. With live keyset traversal:
 
@@ -138,7 +136,7 @@ For backward traversal, encode direction and boundary explicitly. Query in the d
 
 Use offset for small, stable administrative lists and approximate page jumps. Use keyset for large or changing collections. In both cases, cap page size and total backend work independently.
 
-## Implementation Boundary (ASP.NET Core)
+# Implementation Boundary (ASP.NET Core)
 
 Framework mapping is mechanical; contract enforcement is architectural:
 
@@ -207,7 +205,7 @@ Operational boundaries remain part of the resource contract:
 - Measure dependency time and queue time separately from serialization time.
 - Keep retries in the caller or a clearly owned resilience layer; a handler must not replay a non-idempotent downstream operation blindly.
 
-## Uniform Interface and Richardson Levels
+# Uniform Interface and Richardson Levels
 
 The REST uniform interface has four parts:
 
@@ -241,7 +239,7 @@ The Richardson maturity model is a teaching model, not the definition of REST or
 
 Level 2 is common because it works with ordinary tooling and generated clients. Level 3 earns its cost when runtime discoverability, long-lived workflow evolution, or generic clients matter. A closed application whose client and server release together may get little value from hypermedia controls.
 
-## Performance and Error Tradeoffs
+# Performance and Error Tradeoffs
 
 Performance gains are not free; each one adds a contract:
 
@@ -254,7 +252,7 @@ Performance gains are not free; each one adds a contract:
 
 Treat the visual as a technique inventory. Deep offset pagination can become slower, asynchronous logging needs a loss policy, caches need authorization-safe keys and invalidation, compression spends CPU, and pools need bounds and refresh behavior.
 
-## API Style Comparison
+# API Style Comparison
 
 | Style | Strong fit | Cost |
 |---|---|---|
@@ -264,7 +262,7 @@ Treat the visual as a technique inventory. Deep offset pagination can become slo
 
 No style removes governance; it changes where the cost is paid.
 
-## Questions
+# Questions
 
 > [!QUESTION]- What does a retry-time `412` mean for a conditional `PUT`?
 > The first request may already have succeeded and changed the entity tag. The retry is allowed because `PUT` is idempotent, but its `412` cannot distinguish a successful first attempt from another writer's update. Read the current representation and reconcile before choosing a new precondition.
@@ -272,7 +270,7 @@ No style removes governance; it changes where the cost is paid.
 > [!QUESTION]- When should `POST` be idempotent in practice?
 > Only when the client sends a durable idempotency key and the server enforces dedupe boundaries; otherwise `POST` can create duplicates.
 
-## References
+# References
 
 - [REST dissertation (Fielding)](https://www.ics.uci.edu/~fielding/pubs/dissertation/rest_arch_style.htm) — architectural constraints and uniform interface.
 - [HTTP Semantics (RFC 9110)](https://www.rfc-editor.org/rfc/rfc9110) — method, status, conditional, and header semantics for API contracts.

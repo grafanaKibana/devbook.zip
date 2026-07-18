@@ -13,13 +13,11 @@ tags:
   - FolderNote
 ---
 
-# Intro
-
 Deployment strategies control how new versions of software reach production. The right strategy balances risk tolerance, infrastructure cost, and rollback speed. A strategy is only as good as your monitoring — without metrics and alerts, you cannot detect a bad deploy fast enough to stop it.
 
 The strategies differ across several axes: whether old and new artifacts coexist, whether traffic moves separately from deployment, how much spare capacity is required, how quickly rollback changes exposure, and whether progression is time-driven or evidence-driven. Treating them as one blast-radius scale hides those operational differences.
 
-## Deployment, Traffic, Experiment, and Feature Boundaries
+# Deployment, Traffic, Experiment, and Feature Boundaries
 
 These controls solve different problems and should be composed deliberately:
 
@@ -33,7 +31,7 @@ These controls solve different problems and should be composed deliberately:
 
 Every rollout needs a recoverable previous artifact, compatible data/recovery steps, and a health threshold with an observation window. Strategies that run old and new versions together also need backward-compatible interfaces and enough spare capacity for that overlap. Recreate can avoid overlap capacity by accepting downtime. Clean up old ReplicaSets, environments, experiment assignments, and flags after the decision; otherwise the safety mechanisms become permanent operational state.
 
-## All-at-Once (Big Bang)
+# All-at-Once (Big Bang)
 
 Replace every instance simultaneously. The old version stops; the new version starts.
 
@@ -53,7 +51,7 @@ strategy:
 
 **When to use**: Internal tools, dev/staging environments, or services where brief downtime is contractually acceptable and infrastructure cost matters more than availability.
 
-## In-Place (Rolling)
+# In-Place (Rolling)
 
 Replace instances one at a time (or in small batches), keeping the rest serving traffic.
 
@@ -76,7 +74,7 @@ strategy:
 
 **When to use**: Default strategy for most web services. Works well when you can guarantee API backward compatibility between adjacent versions.
 
-## Blue-Green
+# Blue-Green
 
 Maintain two identical environments (blue = current, green = new). Switch traffic atomically by updating the load balancer.
 
@@ -98,7 +96,7 @@ aws elbv2 modify-listener \
 
 **When to use**: High-availability services where rollback speed matters more than infrastructure cost. Ideal when you have stateless services and an external session/state store.
 
-## Canary
+# Canary
 
 Route a small percentage of real traffic to the new version, monitor, then gradually increase.
 
@@ -125,19 +123,19 @@ strategy:
 
 **When to use**: High-traffic services where you want real-user validation before full rollout. Pairs well with feature flags and automated rollback on SLO breach.
 
-### Netflix Canary Case Study
+## Netflix Canary Case Study
 
 Netflix combined failure-seeking operational practice with automated progressive delivery. Spinnaker controlled the rollout, Atlas provided time-series measurements, and Kayenta scored the canary against a baseline before traffic advanced. The useful mechanism is the closed loop: an explicit cohort, comparable telemetry, a pass/fail rule, and an automatic traffic reversal. The tool names are historical evidence, not a recommendation to reproduce Netflix's stack.
 
 ![[System Design 101/150184c4075c71457db5a4e85b4cfc57410246975c11291af2560a7228efd2d5.png]]
 
-## Shadow Traffic and A/B Experiments
+# Shadow Traffic and A/B Experiments
 
 Kubernetes Deployments directly implement `Recreate` and `RollingUpdate`; they do not by themselves provide blue-green, canary analysis, shadowing, or experiment assignment. Those need traffic infrastructure such as a gateway, service mesh, progressive-delivery controller, or application feature system.
 
 Shadow requests must not create production side effects: suppress writes, payments, messages, and emails, or route them to isolated dependencies. A/B assignment must be sticky and measured long enough for statistical power. Use shadowing to validate technical behavior, canary to protect reliability, and A/B only after the candidate is operationally safe.
 
-## Linear
+# Linear
 
 Increase traffic to the new version in fixed increments on a fixed schedule (e.g., +10% every 10 minutes).
 
@@ -152,7 +150,7 @@ Increase traffic to the new version in fixed increments on a fixed schedule (e.g
 
 **When to use**: Serverless functions and AWS Lambda deployments where CodeDeploy integration is native. Good when you want predictable rollout timelines over adaptive ones.
 
-## Comparison
+# Comparison
 
 | Strategy | Availability condition | Rollback path | Overlap cost | Exposure shape |
 |----------|------------------------|---------------|--------------|----------------|
@@ -162,7 +160,7 @@ Increase traffic to the new version in fixed increments on a fixed schedule (e.g
 | Canary | Avoids downtime while the old fleet remains healthy | Reweight away from the canary | Incremental new-version capacity and analysis tooling | Measured cohort grows from a small share |
 | Linear | Same conditions as other weighted shifts | Reweight or redeploy through the platform | Incremental new-version capacity | Fixed traffic increments on a schedule |
 
-## Decision Rule
+# Decision Rule
 
 ```mermaid
 flowchart TD
@@ -176,7 +174,7 @@ flowchart TD
     E -->|No| I[Use rolling with readiness and compatibility gates]
 ```
 
-## References
+# References
 
 - [Martin Fowler — BlueGreenDeployment](https://martinfowler.com/bliki/BlueGreenDeployment.html) — canonical definition of blue-green by the originator; explains the environment swap pattern and database migration considerations
 - [Martin Fowler — CanaryRelease](https://martinfowler.com/bliki/CanaryRelease.html) — canonical canary definition; covers traffic splitting, monitoring requirements, and when canary is worth the complexity
@@ -189,7 +187,7 @@ flowchart TD
 - [ByteByteGo: Kubernetes deployment strategies](https://github.com/ByteByteGoHq/system-design-101/blob/b28380a4710c5ec9638ec037d4168e288f334cba/data/guides/kubernetes-deployment-strategies.md) — source contribution for the Kubernetes boundary and shadow/A/B distinction; its visual was rejected by the audit.
 - [ByteByteGo: Netflix CI/CD pipeline](https://github.com/ByteByteGoHq/system-design-101/blob/b28380a4710c5ec9638ec037d4168e288f334cba/data/guides/netflix-tech-stack-cicd-pipeline.md) — source contribution for the historical Netflix canary case study.
 
-## Questions
+# Questions
 
 > [!QUESTION]- When would you choose canary over blue-green deployment?
 > - Blue-green gives instant rollback by switching traffic back to the old environment, but requires running two full environments simultaneously.

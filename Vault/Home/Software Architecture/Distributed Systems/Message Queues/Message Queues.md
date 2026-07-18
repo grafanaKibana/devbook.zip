@@ -13,8 +13,6 @@ level:
 status: Done
 ---
 
-# Intro
-
 Message queues decouple producers from consumers by buffering messages until consumers are ready. They absorb spikes, isolate failures, and keep systems working when downstream services slow. Use queues for webhook ingestion and background work.
 
 ```datacorejsx
@@ -22,7 +20,7 @@ const { FolderStructureMap } = await dc.require("Assets/components/devbook-folde
 return FolderStructureMap;
 ```
 
-## Core concepts
+# Core concepts
 
 - **Queue vs Topic**
 - `Queue` (point-to-point): one message is consumed by one worker in a competing-consumer group.
@@ -51,7 +49,7 @@ flowchart LR
 - Retries/redelivery and competing consumers can reorder events.
 - Kafka rebalances can cause duplicate processing when offsets were not committed; out-of-order effects usually come from multi-partition reads or concurrent handlers.
 
-## Reliability patterns
+# Reliability patterns
 
 - **DLQ for poison messages**
 - Use DLQ when messages repeatedly fail and block healthy traffic.
@@ -78,7 +76,7 @@ flowchart LR
 - Limit in-flight work using prefetch/QoS.
 - Track queue depth, lag, and oldest-message age to avoid memory and latency collapse.
 
-## .NET worker implementation
+# .NET worker implementation
 
 A worker acknowledges only after the business effect or an owned quarantine record is durable:
 
@@ -120,21 +118,21 @@ public sealed class InvoiceWorker(
 `HandleAsync` should reserve a unique message or business-operation key in the same transaction as its state change. A crash after that commit but before `AckAsync` then produces a harmless redelivery. Dead-letter or quarantine publication must succeed before the original delivery is acknowledged.
 
 Bound concurrency by downstream capacity, stop intake during shutdown, and track oldest-message age, in-flight count, handler latency, retries, dead-letter rate, and idempotency conflicts. A short queue can still be unhealthy when one old message never completes.
-## .NET platform choices
+# .NET platform choices
 
-Use [[RabbitMQ]] for routing-heavy queues and latency-sensitive tasks. Use [[Kafka]] for replayable event streams. Use Azure Service Bus for managed messaging with queues/topics and dead-lettering.
+Use [[Home/Software Architecture/Distributed Systems/Message Queues/RabbitMQ]] for routing-heavy queues and latency-sensitive tasks. Use [[Home/Software Architecture/Distributed Systems/Message Queues/Kafka]] for replayable event streams. Use Azure Service Bus for managed messaging with queues/topics and dead-lettering.
 
 | Option | Strengths | Tradeoffs | Typical .NET fit |
 |---|---|---|---|
-| [[RabbitMQ]] | Rich routing, easy work queues, low latency | Cluster ops are your responsibility unless managed | Background jobs, webhook pipelines, command dispatch |
-| [[Kafka]] | High throughput, durable log, strong replay | Partition model and ops complexity | Event streaming, analytics, event sourcing feeds |
+| [[Home/Software Architecture/Distributed Systems/Message Queues/RabbitMQ]] | Rich routing, easy work queues, low latency | Cluster ops are your responsibility unless managed | Background jobs, webhook pipelines, command dispatch |
+| [[Home/Software Architecture/Distributed Systems/Message Queues/Kafka]] | High throughput, durable log, strong replay | Partition model and ops complexity | Event streaming, analytics, event sourcing feeds |
 | Azure Service Bus | Fully managed with enterprise messaging features | Cost and platform coupling | Azure-native workflows and integration |
-| [[MSMQ]] | Durable, transactional (MSDTC), Windows-native | Windows-only, no containers, legacy; `System.Messaging` absent in .NET 5+ | Existing on-prem Windows systems only |
+| [[Home/Software Architecture/Distributed Systems/Message Queues/MSMQ]] | Durable, transactional (MSDTC), Windows-native | Windows-only, no containers, legacy; `System.Messaging` absent in .NET 5+ | Existing on-prem Windows systems only |
 
 - `IDistributedCache` is not a queue.
 - Cache stores key-value state; queues store ordered work items/events with ack/retry semantics.
 
-## Delivery attempts, processing effects, and idempotency
+# Delivery attempts, processing effects, and idempotency
 
 Broker guarantees describe delivery attempts at a boundary; they do not automatically guarantee business effects. An at-least-once broker may redeliver after a consumer commits `ChargeCustomer` but crashes before acknowledgement. The second attempt is correct broker behavior and a dangerous duplicate unless the charge operation uses a stable idempotency key.
 
@@ -146,7 +144,7 @@ Broker guarantees describe delivery attempts at a boundary; they do not automati
 
 For `InvoicePaid { EventId = 91, InvoiceId = 42 }`, reserve `EventId=91` with a unique constraint in the same database transaction that marks invoice 42 paid. A redelivery then observes the completed reservation and acknowledges without applying the transition twice. This produces one durable effect even though delivery was attempted more than once.
 
-## Messaging patterns
+# Messaging patterns
 
 Choose a pattern from ownership and fan-out, not from broker terminology:
 
@@ -159,13 +157,13 @@ Choose a pattern from ownership and fan-out, not from broker terminology:
 
 Patterns combine. A video upload can publish a claim-check message to a competing-consumer queue, then emit `VideoProcessed` to multiple subscribers.
 
-## Choosing a broker
+# Choosing a broker
 
 ![[System Design 101/6cfe944116519663da3149d9783b6dfb18c7051528250a9d2143433efe5446c9.png]]
 
 Choose from replay, routing, ordering, delivery, retention, managed-service, and operating requirements rather than popularity.
 
-| Need | [[RabbitMQ]] classic/quorum queues | [[Kafka]] | [[MSMQ]] |
+| Need | [[Home/Software Architecture/Distributed Systems/Message Queues/RabbitMQ]] classic/quorum queues | [[Home/Software Architecture/Distributed Systems/Message Queues/Kafka]] | [[Home/Software Architecture/Distributed Systems/Message Queues/MSMQ]] |
 | --- | --- | --- | --- |
 | Work distribution | Strong fit with acknowledgements and exchanges | Possible through consumer groups, but retained-log semantics dominate | Strong fit for legacy Windows workflows |
 | Replay | Consumed messages normally leave the queue; replay needs republishing or a retained design | Native offset replay within retention | Not a retained event-log model |
@@ -173,14 +171,14 @@ Choose from replay, routing, ordering, delivery, retention, managed-service, and
 | Ordering | Per queue, affected by redelivery and competing consumers | Per partition | Per queue under constrained delivery patterns |
 | Operations | Queue depth, unacked messages, redelivery, node health | Partitions, replication, rebalances, lag, retention | Windows administration and legacy platform constraints |
 
-### RabbitMQ Streams
+## RabbitMQ Streams
 
 RabbitMQ Streams adds a replicated append-only log with non-destructive consumers and offset/timestamp replay. A super stream partitions traffic and preserves order only within each partition. Choose Streams when RabbitMQ is already the operational center and the workload needs large fan-out, replay, or large backlogs. Choose Kafka when retained logs, partitioned consumer groups, and its ecosystem are the primary model.
 
 Use RabbitMQ classic or quorum queues for `GenerateInvoice` jobs that need acknowledgements and flexible routing. Use Kafka for `OrderPlaced` events consumed by billing, fraud, analytics, and replayable projections. Keep MSMQ only when an existing Windows estate depends on its transactional integration and migration cost exceeds current value.
 
 Managed services such as Azure Service Bus, Amazon SQS/SNS, and Google Pub/Sub are often better when the team does not want to operate brokers. Compare their exact ordering, deduplication, dead-letter, size, retention, and throughput contracts rather than assuming open-source semantics.
-## Pitfalls
+# Pitfalls
 
 - **1) Ordering assumptions across partitions**
 - What goes wrong: teams assume global ordering and break business invariants.
@@ -202,7 +200,7 @@ Managed services such as Azure Service Bus, Amazon SQS/SNS, and Google Pub/Sub a
 - Why: weak observability and missing backpressure/autoscaling.
 - Mitigation: alert on depth, oldest-message age, lag, and in-flight count.
 
-## Questions
+# Questions
 
 > [!QUESTION]- In at-least-once processing, how do you prevent loss and duplicate side effects when a consumer crashes?
 > Acknowledge only after the business commit. A crash before acknowledgement then causes redelivery rather than loss. Reserve the message or business idempotency key atomically, bound retries, and route persistent failures to a dead-letter queue.
@@ -213,7 +211,7 @@ Managed services such as Azure Service Bus, Amazon SQS/SNS, and Google Pub/Sub a
 > [!QUESTION]- Which metrics should page you first in queue-driven systems?
 > Page on the age of the oldest message and end-to-end processing latency because depth alone can hide one permanently stuck item. Correlate those with consumer lag or unacknowledged work, retry rate, dead-letter rate, and failure ratio.
 
-## References
+# References
 
 - [RabbitMQ Documentation](https://www.rabbitmq.com/docs) — official queue, exchange, acknowledgement, routing, and operation model.
 - [Apache Kafka Documentation](https://kafka.apache.org/documentation/) — official topic, partition, replication, consumer-group, and retention model.
@@ -234,7 +232,7 @@ Managed services such as Azure Service Bus, Amazon SQS/SNS, and Google Pub/Sub a
 - [Azure messaging comparison](https://learn.microsoft.com/azure/service-bus-messaging/compare-messaging-services) — official comparison of Service Bus, Event Hubs, and Event Grid.
 - [Worker services in .NET](https://learn.microsoft.com/dotnet/core/extensions/workers) — official `BackgroundService`, hosting, and cancellation model.
 - [Hosted services in ASP.NET Core](https://learn.microsoft.com/aspnet/core/fundamentals/host/hosted-services) — official queued background-task and shutdown guidance.
-### ByteByteGo provenance
+## ByteByteGo provenance
 
 - [Delivery semantics](https://github.com/ByteByteGoHq/system-design-101/blob/b28380a4710c5ec9638ec037d4168e288f334cba/data/guides/delivery-semantics.md) — editorial lead for separating delivery attempts from durable effects; its misleading visual was rejected.
 - [Types of message queue](https://github.com/ByteByteGoHq/system-design-101/blob/b28380a4710c5ec9638ec037d4168e288f334cba/data/guides/types-of-message-queue.md) — provenance for workload-first broker selection; its defective taxonomy visual was rejected.

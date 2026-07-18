@@ -10,8 +10,6 @@ priority: High
 status: Ready to Repeat
 publish: true
 ---
-# Flyweight
-
 A printing press uses shared letter stamps instead of casting a unique metal letter for every character in a book. The "A" stamp is reused thousands of times across every page — only its position (extrinsic state) changes. The shape of the letter (intrinsic state) is shared. Without this, printing a book would require millions of unique metal pieces instead of a few dozen reusable stamps.
 
 The Flyweight pattern reduces memory usage by sharing common state across many fine-grained objects. It splits an object’s data into **intrinsic state** (shared, immutable — stored in the flyweight) and **extrinsic state** (unique per use — passed in by the caller). A flyweight factory returns the same instance for objects with identical intrinsic state. In an e-commerce catalog, 100,000 products might share only 50 category definitions — each product stores a category ID, not a full copy of tax rates, display rules, and shipping constraints.
@@ -33,7 +31,7 @@ flowchart TD
     FlyweightFactory -->|returns shared instance| Food
 ```
 
-## Problem
+# Problem
 
 Each of 100,000 `Product` instances stores its own copy of category metadata — tax rates, display rules, shipping constraints — even though thousands of products share the same category:
 
@@ -57,7 +55,7 @@ public class Product
 
 Here's what breaks when requirements change: updating the tax rate for "Electronics" requires updating 40,000 `Product` instances in memory. A category rule change requires a full product reload.
 
-## Solution
+# Solution
 
 Extract shared category data into a flyweight. Products store only a category ID:
 
@@ -121,7 +119,7 @@ var products = productData.Select(p => new Product
 
 Updating the Electronics tax rate now means updating one `CategoryFlyweight` instance — all 40,000 electronics products reflect the change immediately.
 
-## You Already Use This
+# You Already Use This
 
 **`string.Intern()`** — the CLR string intern pool is a Flyweight factory. `string.Intern("Electronics")` returns the same `string` instance for every call with the same value. Useful when the same string appears thousands of times (e.g., category names, status codes).
 
@@ -129,7 +127,7 @@ Updating the Electronics tax rate now means updating one `CategoryFlyweight` ins
 
 **`ObjectPool<T>` (ASP.NET Core)** — pools expensive-to-create objects (e.g., `StringBuilder`, regex matchers). The pooled object is the flyweight; the content processed by it is extrinsic.
 
-## Tradeoffs
+# Tradeoffs
 
 **Use it when**: you have a *very large* number of objects whose state cleanly splits into shared-immutable **intrinsic** state and per-instance **extrinsic** state, and memory (not CPU) is the bottleneck. The win scales with the duplication ratio — 100k products over 50 categories is a 2000× saving on that data.
 
@@ -137,7 +135,7 @@ Updating the Electronics tax rate now means updating one `CategoryFlyweight` ins
 
 **vs a cache**: both reuse instances, but a Flyweight specifically shares **immutable intrinsic** state to cut memory across many fine-grained objects, whereas a [[Home/Data Persistence/Caching|cache]] stores *any* expensive-to-recompute value for latency. In modern .NET you often get Flyweight for free — `string.Intern`, an interned `record`, or a small dictionary cache — without building an explicit factory.
 
-## Questions
+# Questions
 
 > [!QUESTION]- How do you identify intrinsic vs extrinsic state?
 > Intrinsic state is the same for all objects in a group — it doesn't change based on context. Extrinsic state is unique per object or changes based on context. For `Product`: `TaxRate` is intrinsic (same for all Electronics); `Price` is extrinsic (unique per SKU). The test: if two objects can share a piece of state without one affecting the other, it's intrinsic. If sharing would cause one object's change to affect another, it's extrinsic. The tradeoff: the more state you classify as intrinsic, the more memory you save, but the flyweight becomes less flexible.
@@ -145,7 +143,7 @@ Updating the Electronics tax rate now means updating one `CategoryFlyweight` ins
 > [!QUESTION]- When is Flyweight not worth the complexity?
 > When the memory savings are negligible relative to the system's total memory use, or when the shared objects are already small. Flyweight adds a factory, a cache, and the intrinsic/extrinsic split — meaningful complexity. Profile first: if 100,000 products each hold a 50-byte category struct, that's 5MB — probably not worth the pattern. If each holds a 10KB category object with images and rules, that's 1GB — Flyweight is justified. The signal: memory profiler shows many identical large objects.
 
-## References
+# References
 
 - [Flyweight — refactoring.guru](https://refactoring.guru/design-patterns/flyweight) — canonical pattern description with intrinsic/extrinsic state diagram and C# example
 - [`ArrayPool<T>` — Microsoft Learn](https://learn.microsoft.com/en-us/dotnet/api/system.buffers.arraypool-1) — .NET's built-in Flyweight for buffer reuse

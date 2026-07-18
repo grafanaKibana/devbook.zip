@@ -10,8 +10,6 @@ priority: High
 status: Ready to Repeat
 publish: true
 ---
-# Template Method
-
 Making tea and making coffee follow the same recipe: boil water, brew the drink, pour into a cup, add condiments. The steps are identical; only the brewing and condiment details differ — tea steeps leaves and adds lemon, coffee uses grounds and adds sugar. The recipe template is fixed; specific steps are customized.
 
 The Template Method pattern defines the skeleton of an algorithm in a base class, letting subclasses override specific steps without changing the overall structure. The base class declares a template method that calls a fixed sequence of steps — some concrete (shared by all subclasses), some abstract or virtual (customized by each subclass). In an e-commerce system, `ReportGenerator.Generate()` always follows fetch data → validate → format → write. The PDF, CSV, and Excel subclasses override only `FormatReport()` and `WriteOutput()` while sharing the orchestration logic.
@@ -29,7 +27,7 @@ sequenceDiagram
     Sub-->>Client: Report complete
 ```
 
-## Problem
+# Problem
 
 `PdfReportGenerator`, `CsvReportGenerator`, and `ExcelReportGenerator` each independently implement the same fetch → validate → format → write lifecycle, duplicating orchestration logic:
 
@@ -71,7 +69,7 @@ public class CsvReportGenerator
 
 Here's what breaks when requirements change: adding a new audit field to the report generation lifecycle requires editing every generator class.
 
-## Solution
+# Solution
 
 `ReportGenerator` base class defines the algorithm skeleton; subclasses override only the format-specific steps:
 
@@ -161,7 +159,7 @@ public class ExcelReportGenerator(IOrderRepository repository, IAuditLog auditLo
 
 Adding an Excel generator now means one new subclass — the fetch, validate, and audit logic is inherited automatically.
 
-## You Already Use This
+# You Already Use This
 
 **`BackgroundService.ExecuteAsync()`** — the template method for hosted services. `BackgroundService` defines the lifecycle: start → execute → stop. `ExecuteAsync(CancellationToken)` is the abstract step you override. The base class handles registration, cancellation, and error handling.
 
@@ -171,15 +169,15 @@ Adding an Excel generator now means one new subclass — the fetch, validate, an
 
 **`AuthenticationHandler<T>.HandleAuthenticateAsync()`** — ASP.NET Core authentication handlers use Template Method. The base class handles scheme registration, result caching, and challenge/forbid responses. `HandleAuthenticateAsync()` is the abstract step you implement.
 
-## Tradeoffs
+# Tradeoffs
 
-**Use it when**: several variants share one fixed algorithm skeleton and differ only in a few steps, and you want the shared orchestration in exactly one place. It's an inversion-of-control mechanism — the base class calls *down* to your overridden steps (the "Hollywood Principle," see [[IoC (Holywood Principle)|IoC]]).
+**Use it when**: several variants share one fixed algorithm skeleton and differ only in a few steps, and you want the shared orchestration in exactly one place. It's an inversion-of-control mechanism — the base class calls *down* to your overridden steps (the "Hollywood Principle," see [[Home/Software Design/Principles/IoC (Holywood Principle)|IoC]]).
 
 **Don't reach for it when**: the varying steps need to change **at runtime**, or you'd be forcing an inheritance hierarchy just to share code — Template Method locks each variant into a single base class and is vulnerable to the **fragile base class** problem.
 
-**vs Strategy**: this is the key comparison. **Template Method = inheritance** (compile-time; subclasses *override* steps within a fixed skeleton). **[[Strategy]] = composition** (runtime; *inject* the varying behavior as an interface/delegate). Prefer Strategy when you want to swap behavior at runtime or follow "composition over inheritance"; prefer Template Method when the base genuinely owns most of the algorithm and variants only fill gaps. If two dimensions vary independently, that's **[[Bridge]]**, not a deepening inheritance tree.
+**vs Strategy**: this is the key comparison. **Template Method = inheritance** (compile-time; subclasses *override* steps within a fixed skeleton). **[[Home/Software Architecture/Patterns/Design Patterns/Behavioral/Strategy]] = composition** (runtime; *inject* the varying behavior as an interface/delegate). Prefer Strategy when you want to swap behavior at runtime or follow "composition over inheritance"; prefer Template Method when the base genuinely owns most of the algorithm and variants only fill gaps. If two dimensions vary independently, that's **[[Home/Software Architecture/Patterns/Design Patterns/Structural/Bridge]]**, not a deepening inheritance tree.
 
-## Questions
+# Questions
 
 > [!QUESTION]- When should you use Template Method vs Strategy for algorithm variation?
 > Template Method uses inheritance — the variation is in a subclass. Strategy uses composition — the variation is in an injected object. Use Template Method when: the algorithm skeleton is stable, the variations are tightly coupled to the base class, and you don't need to swap algorithms at runtime. Use Strategy when: you need to swap algorithms at runtime, the algorithm is independent of the class using it, or you want to avoid inheritance. The tradeoff: Template Method is simpler (no extra interface) but creates tight inheritance coupling; Strategy is more flexible but requires an extra interface and injection.
@@ -187,7 +185,7 @@ Adding an Excel generator now means one new subclass — the fetch, validate, an
 > [!QUESTION]- What's the "Hollywood Principle" and how does Template Method implement it?
 > "Don't call us, we'll call you." The base class calls the subclass's methods (abstract steps), not the other way around. The subclass doesn't control when its methods are called — the template method does. This inverts the typical inheritance relationship: instead of the subclass calling `super.method()`, the base class calls `this.abstractStep()`. The benefit: the algorithm's structure is controlled by the base class; subclasses can't accidentally skip steps or change the order. The cost: subclasses are tightly coupled to the base class's algorithm structure.
 
-## References
+# References
 
 - [Template Method Pattern — Christopher Okhravi](https://www.youtube.com/watch?v=7ocpwK9uesw&list=PLrhzvIcii6GNjpARdnO4ueTUAVR9eMBpc&index=13) — video walkthrough of the Template Method pattern with OOP examples
 - [Template Method — refactoring.guru](https://refactoring.guru/design-patterns/template-method) — canonical pattern description with base/subclass diagram and C# example

@@ -11,8 +11,6 @@ status: Creation
 publish: true
 ---
 
-# Intro
-
 An undirected network needs to know which routers or cables are single points of failure: remove that one vertex or edge and some pair of nodes can no longer reach each other. Checking candidates one at a time — delete it, re-run a connectivity scan, see whether the component count grew — costs `O(V·(V+E))`, a full traversal per vertex or edge.
 
 A single depth-first traversal finds all of them at once. As DFS explores an undirected graph it builds a tree whose only non-tree edges are back edges to ancestors — undirectedness forbids cross edges — and each back edge is an alternate route that survives removing the tree edge or vertex above it. Recording, per vertex, how far back its subtree can escape turns "does removing this disconnect anything?" into a local numeric comparison at every edge.
@@ -26,7 +24,7 @@ The decisive transition is a DFS tree annotated with `disc`/`low`, where each ch
 > [!NOTE] Visualization pending
 > Planned StepTrace: a DFS-tree card showing discovery and low-link values propagating up from the leaves, marking a vertex as a cut vertex when a child's subtree cannot reach above it and an edge as a bridge when a child's low-link strictly exceeds the parent's discovery time. No matching renderer exists in `engine.js` yet.
 
-## What `disc` and `low` measure
+# What `disc` and `low` measure
 
 DFS runs from any unvisited vertex and repeats until every component is covered. Two integers are stored per vertex:
 
@@ -41,7 +39,7 @@ DFS runs from any unvisited vertex and repeats until every component is covered.
 
 Worked example: a triangle `0-1-2` with a tail `2-3-4`. DFS from `0` discovers `0, 1, 2` around the cycle; the edge `2-0` is a back edge, so `low` across the triangle collapses to `0` and none of `0, 1, 2` is cut inside it. The tail carries no back edge, so `low[3] = 3 > disc[2] = 2` and `low[4] = 4 > disc[3] = 3`: edges `2-3` and `3-4` are bridges, and vertices `2` and `3` are cut vertices — each is the sole link to what hangs below it. Removing any of them raises the connected-component count, which is the property each rule certifies locally.
 
-## Complexity
+# Complexity
 
 | Measure | Bound | Cause |
 | --- | --- | --- |
@@ -50,7 +48,7 @@ Worked example: a triangle `0-1-2` with a tail `2-3-4`. DFS from `0` discovers `
 
 There is one honest bound, not a best/average/worst spread: the traversal always visits the whole graph regardless of where the cuts fall, so all three cases coincide at `O(V + E)`.
 
-## Boundaries
+# Boundaries
 
 **Directed graphs.** The rules assume the DFS tree holds only tree and back edges. Undirectedness guarantees that — every non-tree edge points to an ancestor, and a back edge is a genuine two-way alternate route. On a directed graph DFS also produces cross and forward edges, and a back edge no longer implies a return path, so `low[v]` stops measuring a real escape route and both tests silently report wrong cuts. Directed connectivity is a different decomposition, [[Strongly Connected Components]].
 
@@ -60,7 +58,7 @@ There is one honest bound, not a best/average/worst spread: the traversal always
 
 **Parallel edges (multigraphs).** The usual guard skips the parent by vertex: `if (v == parent) continue;`. With two edges between `u` and `v` it discards both, so `v`'s subtree appears to have no route up and `(u, v)` is reported as a bridge — although the duplicate edge is itself the route keeping them connected. The escape exists in the graph but not in `low[v]`, because the second edge was never examined. Skipping only the specific parent edge by its id leaves the duplicate as a back edge that lowers `low[v]` and cancels the false bridge.
 
-## Reference drawer
+# Reference drawer
 
 > [!ABSTRACT]- DFS tree of the triangle-with-tail example
 > ```mermaid
@@ -130,7 +128,7 @@ There is one honest bound, not a best/average/worst spread: the traversal always
 > ```
 > Adjacency stores an edge id per neighbor so the parent *edge* — not the parent vertex — is skipped, which is what keeps parallel edges correct.
 
-## Relations
+# Relations
 
 Cut vertices and bridges are the boundary markers of two connectivity decompositions, and both reuse the same low-link DFS.
 
@@ -142,7 +140,7 @@ Cut vertices and bridges are the boundary markers of two connectivity decomposit
 
 One `disc`/`low` DFS finds every cut vertex and bridge in `O(V + E)`, against `O(V·(V+E))` for remove-and-recheck, and the same pass — with an edge stack — emits the biconnected components those cut vertices separate. The directed reachability question is a separate decomposition, [[Strongly Connected Components]], built on the same low-link idea but where a back edge no longer certifies a two-way route, so the cut-vertex reasoning does not carry over. For undirected reliability analysis — which node or link is the single point of failure — this one DFS is the whole answer.
 
-## Questions
+# Questions
 
 > [!QUESTION]- What is the articulation-point rule for a non-root vertex versus the DFS root, and why do they differ?
 > A non-root `u` is a cut vertex when it has a tree child `v` with `low[v] >= disc[u]`: nothing in `v`'s subtree reaches above `u`, so `u` is that subtree's only exit. The root has no ancestor, so the same inequality is vacuously true for its first child and would over-report. The root is a cut vertex only when it has two or more tree children, since those subtrees can reach each other only through the root.
@@ -153,7 +151,7 @@ One `disc`/`low` DFS finds every cut vertex and bridge in `O(V + E)`, against `O
 > [!QUESTION]- How do parallel edges break the usual parent check, and what corrects it?
 > The common guard `if (v == parent) continue;` skips every edge back to the parent vertex. With two parallel edges between `u` and `v`, it discards the second edge too, so `v`'s subtree appears to have no route up and `(u, v)` is reported as a bridge — although the duplicate edge is itself the route keeping them connected. Skipping only the specific parent edge by id leaves the duplicate as a back edge that lowers `low[v]` and cancels the false bridge.
 
-## References
+# References
 
 - [Biconnected component (Wikipedia)](https://en.wikipedia.org/wiki/Biconnected_component) — articulation points, the low-link DFS, and decomposition into biconnected blocks.
 - [Bridge (graph theory) (Wikipedia)](https://en.wikipedia.org/wiki/Bridge_(graph_theory)) — cut edges, 2-edge-connectivity, and the bridge-finding condition.

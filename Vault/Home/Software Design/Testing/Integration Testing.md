@@ -11,13 +11,11 @@ status: Ready to Repeat
 publish: true
 ---
 
-# Integration Testing
-
 An integration test verifies that multiple components work correctly together — including real infrastructure like databases, HTTP clients, message queues, and configuration. Where unit tests replace dependencies with fakes to isolate logic, integration tests use real (or realistic test-instance) dependencies to validate wiring, configuration, and cross-boundary behavior.
 
 Integration tests catch a class of bugs that unit tests cannot: wrong SQL queries, misconfigured DI registrations, broken serialization contracts, and middleware ordering issues. The tradeoff is speed and flakiness — integration tests are slower and more sensitive to environment state.
 
-## ASP.NET Core Integration Testing with `WebApplicationFactory`
+# ASP.NET Core Integration Testing with `WebApplicationFactory`
 
 The standard approach in .NET is `Microsoft.AspNetCore.Mvc.Testing.WebApplicationFactory<T>`, which boots the real application in-process with a test HTTP client:
 
@@ -59,7 +57,7 @@ public class OrdersApiTests : IClassFixture<WebApplicationFactory<Program>>
 
 This tests the full request pipeline: routing, middleware, controller, service, repository, and database — all in one test without spinning up a real server.
 
-## When to Use Real Infrastructure vs In-Memory Substitutes
+# When to Use Real Infrastructure vs In-Memory Substitutes
 
 | Dependency | Test approach | Reason |
 |---|---|---|
@@ -87,15 +85,15 @@ public class DatabaseFixture : IAsyncLifetime
 > [!WARNING]
 > **EF Core In-Memory is officially discouraged for testing.** Microsoft's own guidance says it is *not* a relational database — it ignores constraints, transactions, concurrency tokens, raw SQL, and most provider-specific behavior, so it gives **false confidence**. Prefer **SQLite in-memory** (a real relational engine, still fast and Docker-free) for lightweight DB tests, and **Testcontainers** with the actual database when you need full fidelity. Reserve EF In-Memory for the rare case where you truly only exercise LINQ-to-objects.
 
-## Where Integration Tests Sit: the Test Pyramid
+# Where Integration Tests Sit: the Test Pyramid
 
 The **test pyramid** (Mike Cohn) is the standard model for *how many* of each test to write: a wide base of fast **unit** tests, fewer **integration** tests in the middle, and a thin top of slow **end-to-end** tests. The ratios follow from cost — unit tests are cheap and pinpoint failures; E2E tests are slow, flaky, and hard to diagnose. Integration tests are the pragmatic middle: enough to prove the wiring (DB, HTTP, serialization, DI) without the brittleness of a full E2E suite.
 
 The classic anti-pattern is the **"ice-cream cone"** — inverting the pyramid with mostly manual/E2E tests and few unit tests, producing a slow, flaky, expensive-to-maintain suite. Aim for many unit, some integration, few E2E.
 
-## Pitfalls
+# Pitfalls
 
-### Shared Database State Between Tests
+## Shared Database State Between Tests
 
 **What goes wrong**: test A inserts a row; test B reads it and gets unexpected results. Tests pass in isolation but fail when run together.
 
@@ -103,7 +101,7 @@ The classic anti-pattern is the **"ice-cream cone"** — inverting the pyramid w
 
 **Mitigation**: wrap each test in a transaction and roll back at the end, or recreate the database schema before each test class. With Testcontainers, use a fresh container per test class.
 
-### Testing Too Much in One Integration Test
+## Testing Too Much in One Integration Test
 
 **What goes wrong**: a single test exercises 10 endpoints and 5 services. When it fails, the failure message doesn't tell you which component broke.
 
@@ -111,7 +109,7 @@ The classic anti-pattern is the **"ice-cream cone"** — inverting the pyramid w
 
 **Mitigation**: one behavior per test. The setup cost is paid by `IClassFixture<T>` — share the expensive infrastructure, not the test logic.
 
-### Slow CI from Unparallelized Integration Tests
+## Slow CI from Unparallelized Integration Tests
 
 **What goes wrong**: 200 integration tests run sequentially and take 15 minutes in CI.
 
@@ -119,7 +117,7 @@ The classic anti-pattern is the **"ice-cream cone"** — inverting the pyramid w
 
 **Mitigation**: use separate databases per test class (Testcontainers makes this cheap). Avoid `[Collection]` unless tests genuinely share state that cannot be isolated.
 
-## Tradeoffs
+# Tradeoffs
 
 | Approach | Strengths | Weaknesses | When to use |
 |---|---|---|---|
@@ -129,7 +127,7 @@ The classic anti-pattern is the **"ice-cream cone"** — inverting the pyramid w
 
 **Decision rule**: start with `WebApplicationFactory` + EF In-Memory for API-level tests. Add Testcontainers for the repository layer when you need real SQL behavior (constraints, `RETURNING`, CTEs). Reserve full E2E tests for post-deploy smoke checks only.
 
-## Questions
+# Questions
 
 > [!QUESTION]- What does `WebApplicationFactory` test that unit tests cannot?
 > - DI registration: if a service is missing from the container, the integration test fails at startup.
@@ -144,7 +142,7 @@ The classic anti-pattern is the **"ice-cream cone"** — inverting the pyramid w
 > - When a bug was caused by SQL behavior that the in-memory provider masked.
 > - Tradeoff: Testcontainers requires Docker in CI and adds 5-15 seconds of container startup per test class. The cost is worth it when in-memory tests give false confidence.
 
-## References
+# References
 
 - [Integration tests in ASP.NET Core (Microsoft Learn)](https://learn.microsoft.com/en-us/aspnet/core/test/integration-tests) — official guide to `WebApplicationFactory`, test server setup, and replacing services for testing.
 - [Testcontainers for .NET](https://dotnet.testcontainers.org/) — library for spinning up real Docker containers (Postgres, Redis, RabbitMQ) in integration tests; includes pre-built modules for common databases.

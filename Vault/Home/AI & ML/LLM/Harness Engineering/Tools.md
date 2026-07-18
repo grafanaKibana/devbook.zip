@@ -12,8 +12,6 @@ status: Done
 publish: true
 ---
 
-# Intro
-
 Tools are the interface between an LLM's reasoning and the external world — they let the model read data, perform computations, and trigger side effects that text generation alone cannot accomplish. In agentic systems, tools determine what the agent can actually *do*: without well-designed tools, even a strong model with perfect reasoning produces useless output. Anthropic's SWE-bench agent team found that tool quality had more impact on task success than prompt quality — switching from relative to absolute file paths in one tool eliminated an entire class of failures.
 
 The mechanism is function calling: the model receives JSON schemas describing available tools (name, description, parameters), and when it decides a tool is needed, it emits a structured call instead of text. The runtime executes the function, returns the result, and the model continues reasoning. This cycle repeats inside the [[Agent Loop]] until the model produces a final answer.
@@ -39,7 +37,7 @@ The model never executes tools directly — it only predicts *which* tool to cal
 
 For how tools are standardized across clients via a shared protocol, see [[Model Context Protocol]]. For how the model selects and calls tools within a reasoning loop, see [[Agent Loop]].
 
-## Tool Design Principles
+# Tool Design Principles
 
 Tool design is API design for an LLM consumer. The same principles that make an API easy for a junior developer apply — but with tighter constraints, because the model cannot read source code, ask clarifying questions, or debug at runtime.
 
@@ -85,7 +83,7 @@ AIAgent agent = new ChatClientAgent(chatClient, new ChatClientAgentOptions
 
 The `Description` attributes become the tool schema the model reads to decide whether and how to call this function. Investing time in descriptions pays more dividends than prompt engineering.
 
-## Versatility
+# Versatility
 
 A versatile tool handles varied inputs gracefully rather than failing on anything outside the happy path. In agentic systems, the model generates inputs — you cannot predict the exact format or phrasing it will use. Design tools to accept reasonable variations and normalize internally.
 
@@ -97,7 +95,7 @@ Concrete patterns:
 
 The principle: the more rigid a tool's interface, the more likely the model misuses it. Each failure costs a loop iteration, tokens, latency, and sometimes a cascading series of wrong decisions. Validation should correct, not just reject.
 
-## Fault Tolerance
+# Fault Tolerance
 
 Tools in agentic systems run inside a loop where failures compound — one failed tool call can derail an entire multi-step plan. Design tools to degrade gracefully, never silently.
 
@@ -109,7 +107,7 @@ Tools in agentic systems run inside a loop where failures compound — one faile
 
 **Input validation before execution.** Validate tool arguments *before* performing any side effect. A tool that sends an email should validate the address format before making the API call, not after. Return validation errors as structured feedback so the model can fix and retry.
 
-## Caching
+# Caching
 
 Caching reduces latency, cost, and token waste in agent loops. There are two layers to consider:
 
@@ -119,21 +117,21 @@ Caching reduces latency, cost, and token waste in agent loops. There are two lay
 
 **Staleness trade-off.** Cache read-only tools aggressively. Caching state-mutating tools is dangerous — if the model calls `create_ticket` and gets a cached "success" response, no ticket was actually created. Only cache tools whose results are deterministic for the given arguments within the cache TTL.
 
-## Pitfalls
+# Pitfalls
 
-### Over-Parameterized Tools
+## Over-Parameterized Tools
 
 A tool with 15 parameters gives the model 15 opportunities to hallucinate an argument. Each optional parameter increases the surface area for errors. Prefer multiple focused tools over one Swiss-army-knife tool. A `search_by_name(name)` and `search_by_department(dept)` pair is more reliable than `search(name?, dept?, role?, location?, start_date?, ...)`.
 
-### Poor Descriptions That Mislead the Model
+## Poor Descriptions That Mislead the Model
 
 Vague descriptions like "Processes data" or "Handles requests" give the model no basis for deciding when to use the tool. The model selects tools by matching descriptions to its current subgoal — if the description does not clearly state what the tool does, when to use it, and what it returns, the model will either skip it when needed or misuse it.
 
-### Tools with Hidden Side Effects
+## Tools with Hidden Side Effects
 
 A tool named `get_user_profile` that also logs an analytics event and updates a "last accessed" timestamp has hidden side effects the model cannot reason about. If the model calls it exploratively during planning, the side effects fire unintentionally. Keep read tools read-only. Separate queries from commands — this is [[CQRS]] applied to tool design.
 
-### Context Degradation from Large Toolsets
+## Context Degradation from Large Toolsets
 
 Adding more tools does not just cost tokens — it actively degrades accuracy. MCPGauge (Song et al., 2025) tested 6 commercial LLMs with 30 MCP tool suites and measured an average **9.5% accuracy drop** when tools were present, with code generation worst-hit at −17%. Token overhead ranged from 3.25× to 236.5× input tokens. A single GitHub MCP server (26 tools) consumes over 4,600 tokens in schema definitions alone; the full MCP ecosystem (2,797 tools) would consume 248K tokens.
 
@@ -155,7 +153,7 @@ Three mechanisms compound:
 | **Code generation** | Replace N tool schemas with a single `execute_code` tool + API docs. The model writes code that calls your APIs. | Open-ended data/code tasks |
 | **Structured output routing** | Model returns a structured action JSON; your code dispatches. No tool schemas needed. | Fixed action types |
 
-## Tradeoffs
+# Tradeoffs
 
 | Design choice | Option A | Option B | Decision criteria |
 |---|---|---|---|
@@ -164,7 +162,7 @@ Three mechanisms compound:
 | **Caching strategy** | Aggressive — cache all tool results with TTL | Conservative — execute every call fresh | Aggressive caching cuts latency and cost but risks stale data. Cache read-only tools with short TTLs; never cache state-mutating tools. |
 | **Return verbosity** | Full result payload | Minimal fields needed for next step | Minimal returns save context tokens and reduce attention dilution. Full returns are only justified when the model needs to branch on fields that are hard to predict upfront. |
 
-## Questions
+# Questions
 
 > [!QUESTION]- Why is tool design often more impactful than prompt engineering in agentic systems?
 > - In a single LLM call, the prompt is the entire interface — prompt quality is everything
@@ -188,7 +186,7 @@ Three mechanisms compound:
 > - Critical failure mode: caching a write operation returns cached "success" without executing — silent data inconsistency
 > - Tradeoff: cache hit rate and latency savings versus freshness and correctness guarantees
 
-## References
+# References
 
 - [Tool use overview — Anthropic](https://docs.anthropic.com/en/docs/build-with-claude/tool-use/overview)
 - [Tool use best practices — Anthropic](https://docs.anthropic.com/en/docs/build-with-claude/tool-use/best-practices)
