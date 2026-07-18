@@ -17,6 +17,24 @@
 }
 
 // ============================================================================
+// Graph panel — accent frame + faint top-down glow keyed to --secondary
+// (overrides the plugin's flat --lightgray border).
+// ============================================================================
+.graph > .graph-outer {
+  border: 1px solid color-mix(in srgb, var(--secondary) 18%, var(--lightgray));
+  // Opaque --light base (as the scope dropdown's .ns-menu panel uses) so the page
+  // dot-grid doesn't show through, with a faint top-down accent glow layered over.
+  background:
+    radial-gradient(
+      120% 120% at 50% 0%,
+      color-mix(in srgb, var(--secondary) 3.5%, transparent),
+      transparent 60%
+    ),
+    var(--light);
+  //box-shadow: inset 0 0 40px color-mix(in srgb, var(--secondary) 4%, transparent);
+}
+
+// ============================================================================
 // Quieter callouts
 // ============================================================================
 .callout[data-callout] {
@@ -427,7 +445,6 @@ body {
 }
 .explorer .explorer-content ul li > a.nav-file-title.active {
   color: var(--secondary);
-  background-color: var(--highlight);
   font-weight: #{$semiBoldWeight};
   opacity: 1;
 }

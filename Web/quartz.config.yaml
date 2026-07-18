@@ -155,9 +155,14 @@ plugins:
       localGraph:
         drag: false
         zoom: false
+        depth: 3
         showTags: false
+        focusOnHover: true
+        enableRadial: false
       globalGraph:
         showTags: false
+        enableRadial: false
+        linkDistance: 20
     layout:
       position: right
       priority: 10
