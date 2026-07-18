@@ -27,6 +27,16 @@
   max-block-size: 85dvh !important;
 }
 
+/* Content images fit the viewport the same way Mermaid diagrams do: a tall
+ * image scales down to the visible height instead of forcing a long scroll.
+ * height:auto keeps the aspect ratio; a fixed width from Obsidian's own resize
+ * (`![[img|400]]`) is left untouched. */
+.markdown-rendered img {
+  height: auto;
+  max-inline-size: 100%;
+  max-block-size: 85dvh;
+}
+
 .markdown-rendered :is(.block-language-mermaid, .mermaid) > svg[aria-roledescription="xychart"] {
   display: block;
   width: auto !important;
