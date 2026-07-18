@@ -200,6 +200,10 @@ plugins:
     # Enabled (installed + registered) but no `layout`: rendered by SiteHeader.
   - source: github:quartz-community/breadcrumbs
     enabled: true
+    options:
+      # Thin chevron to match the design's chevron-right separator (the plugin
+      # default is a heavy "❯"). Styled --lightgray in custom.scss.
+      spacerSymbol: "›"
     layout:
       position: beforeBody
       priority: 5

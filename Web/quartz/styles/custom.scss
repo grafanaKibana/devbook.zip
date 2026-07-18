@@ -337,20 +337,105 @@ body {
   // would otherwise sit flush against the screen edge. Matches the header bar's
   // 1.5rem so the tree lines up under the title.
   --explorer-panel-inset: 1.5rem;
+  // Nav rows read as pills (design: .db-ex-row): a small pad + radius so the
+  // hover and active washes hug each label instead of spanning edge-to-edge.
+  --explorer-row-pad: 0.18rem 0.35rem;
+  --explorer-row-radius: 5px;
+  // The row hover wash — a faint tint of the ink over the page fill.
+  --explorer-row-hover-bg: color-mix(in srgb, var(--dark) 5%, transparent);
 }
 
-// `.explorer` prefixes lift these over the plugin's own (unlayered) rules.
+// ---------------------------------------------------------------------------
+// Row chrome. Both the file link and the folder header are the interactive
+// "rows"; give each the same pad, radius and hover wash so the tree reads as a
+// stack of pills (design: .db-ex-row / .db-ex-row:hover). `.explorer` prefixes
+// lift these over the plugin's own (unlayered) rules.
+// ---------------------------------------------------------------------------
+.explorer .explorer-content ul li > a.nav-file-title,
+.explorer .explorer-content .folder-container {
+  box-sizing: border-box;
+  padding: var(--explorer-row-pad);
+  border-radius: var(--explorer-row-radius);
+  transition:
+    color 0.15s ease,
+    background-color 0.15s ease;
+}
+
+// The file link is inline by default, so its wash would only cover the text.
+// Make it a full-width flex line so the hover/active pill spans the whole row
+// and the icon + label sit centred.
+.explorer .explorer-content ul li > a.nav-file-title {
+  display: flex;
+  align-items: center;
+  width: 100%;
+}
+
+.explorer .explorer-content ul li > a.nav-file-title:hover,
+.explorer .explorer-content .folder-container:hover {
+  background-color: var(--explorer-row-hover-bg);
+}
+
+// ---------------------------------------------------------------------------
+// Folder rows. The accent lives on the book/topic glyph (decorated by
+// explorer-icons.tsx); the LABEL is plain ink and the collapse chevron is a
+// muted gray — the plugin paints both green, so pull them back to the design's
+// --dark / --gray (design: .db-ex-folder + .db-ex-chev-node).
+// ---------------------------------------------------------------------------
 .explorer .explorer-content .folder-container div > a,
 .explorer .explorer-content .folder-container div > button span {
   font-weight: var(--explorer-folder-weight);
+  color: var(--dark);
+}
+// Hover is carried by the row wash, not a label colour shift; hold the label
+// (and the button-form folder link) steady on --dark.
+.explorer .explorer-content .folder-container:hover div > a,
+.explorer .explorer-content .folder-container:hover div > button span {
+  color: var(--dark);
+}
+// The collapse chevron (.folder-icon) — muted gray, and stays gray on hover
+// (the plugin turns it --tertiary).
+.explorer .explorer-content .folder-container > svg.folder-icon,
+.explorer .explorer-content .folder-container > svg.folder-icon:hover {
+  color: var(--gray);
 }
 
-.explorer .explorer-content ul li > a {
+// ---------------------------------------------------------------------------
+// File rows. Normal weight, solid --darkgray ink (the plugin dims idle files to
+// 0.75 opacity and --dark); the current page gets the green wash pill
+// (design: .db-ex-file / .db-ex-file.is-active).
+// ---------------------------------------------------------------------------
+.explorer .explorer-content ul li > a.nav-file-title {
   font-weight: var(--explorer-file-weight);
+  color: var(--darkgray);
+  opacity: 1;
+}
+.explorer .explorer-content ul li > a.nav-file-title:hover {
+  color: var(--dark);
+}
+.explorer .explorer-content ul li > a.nav-file-title.active {
+  color: var(--secondary);
+  background-color: var(--highlight);
+  font-weight: #{$semiBoldWeight};
+  opacity: 1;
 }
 
 .explorer .explorer-content ul li {
   margin-block: var(--explorer-item-gap);
+}
+
+// ---------------------------------------------------------------------------
+// "Topics" title. Header font, semibold, a hair of negative tracking, with the
+// fold chevron muted to --gray (design: .db-explorer-title + .db-ex-chev).
+// ---------------------------------------------------------------------------
+.explorer button.desktop-explorer h2 {
+  font-size: 0.95rem;
+  font-weight: #{$semiBoldWeight};
+  letter-spacing: -0.01em;
+  color: var(--dark);
+}
+.explorer button.desktop-explorer .fold {
+  color: var(--gray);
+  opacity: 1;
 }
 
 // ---------------------------------------------------------------------------
@@ -508,6 +593,49 @@ body {
     transform: translateX(0);
     visibility: visible;
   }
+}
+
+// ============================================================================
+// Breadcrumbs (note-page trail: Home › Topic › Note).
+//
+// The plugin renders
+//   <nav.breadcrumb-container>
+//     <div.breadcrumb-element><a href>Home</a><p> › </p></div>
+//     … <div.breadcrumb-element><a href="">Docker</a></div>   ← current page
+// Base styling paints every crumb link --secondary/600 (and the last crumb the
+// same). Remap onto the design (.db-breadcrumbs): gray links that warm to
+// --secondary on hover, a faint --lightgray separator, and a bold --darkgray
+// current crumb that isn't interactive.
+// ============================================================================
+.breadcrumb-container {
+  align-items: center;
+  gap: 0.35rem;
+  font-family: var(--bodyFont);
+  font-size: 0.85rem;
+}
+
+.breadcrumb-element a {
+  color: var(--gray);
+  font-weight: #{$normalWeight};
+  transition: color 0.15s ease;
+}
+.breadcrumb-element a:hover {
+  color: var(--secondary);
+}
+
+// The separator glyph between crumbs.
+.breadcrumb-element p {
+  margin-left: 0.35rem;
+  color: var(--lightgray);
+}
+
+// The final crumb is the current page: bold ink, and inert (the design renders
+// it as plain text, not a link — the plugin still emits an empty-href <a>).
+.breadcrumb-element:last-child a {
+  color: var(--darkgray);
+  font-weight: #{$semiBoldWeight};
+  pointer-events: none;
+  cursor: default;
 }
 
 // ---------------------------------------------------------------------------
