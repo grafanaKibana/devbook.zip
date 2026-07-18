@@ -1,5 +1,6 @@
 ---
 publish: true
+icon: circle-help
 created: 2026-07-11T16:49:43.050Z
 modified: 2026-07-11T16:49:43.050Z
 published: 2026-07-11T16:49:43.050Z

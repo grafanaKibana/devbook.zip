@@ -794,11 +794,20 @@ body[data-slug="index"] {
   // Card chrome tightens as the viewport shrinks — one knob for both branches.
   --home-card-pad: clamp(0.7rem, 1.5vh, 1rem) clamp(0.8rem, 1.3vw, 1.1rem);
 
+  // Drop the article header on the home page: the "Welcome to DevBook!" title
+  // and its date / read-time content-meta subheading. The dashboard is the
+  // landing content, so it reads from the top under the fixed bar. Scoped to the
+  // header's own .popover-hint (the title+meta wrapper) so the fixed <header> bar
+  // and the dashboard <article> are untouched.
+  .page-header > .popover-hint {
+    display: none;
+  }
+
   // Drop the rule after the body. The afterBody block can't be display:none:
   // it now carries the position:fixed floating scroll buttons, and display:none
   // on this wrapper hides them too (fatal on the scrollable mobile homepage).
   // display:contents removes the empty footer box from layout while letting the
-  // fixed controls render. The page-header (article title + meta) stays.
+  // fixed controls render.
   .center > hr {
     display: none;
   }

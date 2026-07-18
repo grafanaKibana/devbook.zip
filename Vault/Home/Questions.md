@@ -3,6 +3,7 @@ tags:
   - FolderNote
   - MetricsIgnore
 publish: true
+icon: circle-help
 ---
 
 ```datacorejsx

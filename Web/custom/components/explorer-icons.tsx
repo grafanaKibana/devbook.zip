@@ -35,6 +35,14 @@ const DEFAULTS = {
   fileActive: "file-text",
 }
 
+// Icons for pages that can't carry an `icon:` in their own frontmatter — Obsidian
+// canvases are JSON, so their icons (assigned in Obsidian's notebook-navigator)
+// are mirrored here by slug. Keyed by the emitted slug (canvas slugs keep the
+// `.canvas` suffix). A note that *can* use frontmatter should use it instead.
+const MANUAL_ICONS: Record<string, string> = {
+  "roadmap.canvas": "map",
+}
+
 // Browser script. Reads the inlined slug -> icon map (`.ec-icon-map`) and
 // decorates the Explorer's client-built tree. Idempotent; state is CSS-driven.
 const script = `
@@ -235,6 +243,14 @@ export const ExplorerIcons: QuartzComponentConstructor = () => {
       const color = fm?.color
       if (typeof color === "string" && color.trim() !== "") {
         colorMap[slug] = color
+      }
+    }
+    // Fold in the manual icons for frontmatter-less pages (e.g. canvases), unless
+    // the note already declared one itself.
+    for (const [slug, name] of Object.entries(MANUAL_ICONS)) {
+      if (!map[slug]) {
+        map[slug] = name
+        iconNames.add(name)
       }
     }
     const icons = lucideMap(iconNames)
