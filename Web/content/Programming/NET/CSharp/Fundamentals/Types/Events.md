@@ -1,8 +1,8 @@
 ---
 publish: true
 created: 2026-07-11T21:45:52.944Z
-modified: 2026-07-11T21:45:52.944Z
-published: 2026-07-11T21:45:52.944Z
+modified: 2026-07-17T19:00:24.212Z
+published: 2026-07-17T19:00:24.212Z
 topic:
   - Programming
 subtopic:
@@ -125,7 +125,7 @@ public sealed class Listener : IDisposable
 > [!QUESTION]- How do you handle exceptions in event subscribers without losing later handlers?
 > Copy the invocation list using `GetInvocationList()` and invoke handlers individually in `try/catch`. Direct event invocation stops at first exception.
 
-## Links
+## References
 
 - [Standard .NET event patterns](https://learn.microsoft.com/dotnet/csharp/event-pattern) — official guide to `EventHandler<T>`, `EventArgs`, and the raise/subscribe pattern.
 - [Events - .NET guide](https://learn.microsoft.com/dotnet/standard/events/) — conceptual overview of the event model, delegates, and multicast invocation.

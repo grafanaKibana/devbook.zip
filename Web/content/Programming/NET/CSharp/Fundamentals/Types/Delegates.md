@@ -1,8 +1,8 @@
 ---
 publish: true
 created: 2026-07-11T21:45:50.902Z
-modified: 2026-07-11T21:45:50.909Z
-published: 2026-07-11T21:45:50.909Z
+modified: 2026-07-17T19:00:23.849Z
+published: 2026-07-17T19:00:23.849Z
 topic:
   - Programming
 subtopic:
@@ -145,7 +145,7 @@ Use this pattern when the captured variable would otherwise be shared and mutate
 > [!QUESTION]- Why is using `Func<Task>` in multicast pipelines often wrong for async fan-out?
 > Direct multicast invocation returns only the last task, so earlier handlers can run unobserved. For async fan-out, iterate `GetInvocationList()` and await each task explicitly (sequentially or with `Task.WhenAll`), depending on ordering requirements.
 
-## Links
+## References
 
 - [Delegates - C# Programming Guide](https://learn.microsoft.com/dotnet/csharp/programming-guide/delegates/) — official overview of delegate declaration, instantiation, and multicast behavior.
 - [Using delegates - C# Programming Guide](https://learn.microsoft.com/dotnet/csharp/programming-guide/delegates/using-delegates) — practical examples of passing methods as arguments and combining delegates.

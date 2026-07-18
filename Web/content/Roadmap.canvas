@@ -78,7 +78,7 @@
       "y": 720,
       "width": 340,
       "height": 80,
-      "color": "4"
+      "color": "1"
     },
     {
       "id": "n_227c21ea6d",
@@ -351,11 +351,21 @@
       "color": "1"
     },
     {
+      "id": "n_af20eb8585",
+      "type": "text",
+      "text": "# [[Home/Computer Science/Operating Systems/Operating Systems|Operating Systems]]",
+      "x": 420,
+      "y": 2720,
+      "width": 340,
+      "height": 80,
+      "color": "2"
+    },
+    {
       "id": "n_8902c507c0",
       "type": "text",
       "text": "# [[Home/Data Persistence/Data Persistence|Data Persistence]]",
       "x": 0,
-      "y": 2880,
+      "y": 3000,
       "width": 340,
       "height": 80,
       "color": "2"
@@ -365,7 +375,7 @@
       "type": "text",
       "text": "# [[Home/Data Persistence/NoSQL/NoSQL|NoSQL]]",
       "x": 420,
-      "y": 2880,
+      "y": 3000,
       "width": 340,
       "height": 80,
       "color": "2"
@@ -375,7 +385,7 @@
       "type": "text",
       "text": "# [[Home/Data Persistence/ORMs/ORMs|ORMs]]",
       "x": -420,
-      "y": 2880,
+      "y": 3000,
       "width": 340,
       "height": 80,
       "color": "1"
@@ -385,7 +395,7 @@
       "type": "text",
       "text": "# [[Home/Data Persistence/SQL/SQL|SQL]]",
       "x": 420,
-      "y": 3000,
+      "y": 3120,
       "width": 340,
       "height": 80,
       "color": "2"
@@ -395,7 +405,7 @@
       "type": "text",
       "text": "# [[Home/DevOps/DevOps|DevOps]]",
       "x": 0,
-      "y": 3280,
+      "y": 3400,
       "width": 340,
       "height": 80,
       "color": "1"
@@ -405,7 +415,7 @@
       "type": "text",
       "text": "# [[Home/DevOps/Deployment Strategies/Deployment Strategies|Deployment Strategies]]",
       "x": 420,
-      "y": 3280,
+      "y": 3400,
       "width": 340,
       "height": 80,
       "color": "6"
@@ -415,7 +425,7 @@
       "type": "text",
       "text": "# [[Home/DevOps/Version Control Systems/Version Control Systems|Version Control Systems]]",
       "x": -420,
-      "y": 3280,
+      "y": 3400,
       "width": 340,
       "height": 80,
       "color": "1"
@@ -425,7 +435,7 @@
       "type": "text",
       "text": "# [[Home/Networks/Networks|Networks]]",
       "x": 0,
-      "y": 3560,
+      "y": 3680,
       "width": 340,
       "height": 80,
       "color": "1"
@@ -435,7 +445,7 @@
       "type": "text",
       "text": "# [[Home/Networks/Architecture & Ops/Architecture & Ops|Architecture & Ops]]",
       "x": 420,
-      "y": 3560,
+      "y": 3680,
       "width": 340,
       "height": 80,
       "color": "1"
@@ -445,7 +455,7 @@
       "type": "text",
       "text": "# [[Home/Networks/Protocols/Protocols|Protocols]]",
       "x": -420,
-      "y": 3560,
+      "y": 3680,
       "width": 340,
       "height": 80,
       "color": "1"
@@ -455,7 +465,7 @@
       "type": "text",
       "text": "# [[Home/Networks/Transport & Sockets/Transport & Sockets|Transport & Sockets]]",
       "x": 420,
-      "y": 3680,
+      "y": 3800,
       "width": 340,
       "height": 80,
       "color": "1"
@@ -465,7 +475,7 @@
       "type": "text",
       "text": "# [[Home/Programming/Programming|Programming]]",
       "x": 0,
-      "y": 3960,
+      "y": 4080,
       "width": 340,
       "height": 80,
       "color": "2"
@@ -475,7 +485,7 @@
       "type": "text",
       "text": "# [[Home/Programming/NET/NET|NET]]",
       "x": 420,
-      "y": 3960,
+      "y": 4080,
       "width": 340,
       "height": 80,
       "color": "2"
@@ -485,7 +495,7 @@
       "type": "text",
       "text": "# [[Home/Programming/NET/ASP.NET Web API/ASP.NET Web API|ASP.NET Web API]]",
       "x": 840,
-      "y": 4080,
+      "y": 4200,
       "width": 340,
       "height": 80,
       "color": "1"
@@ -495,7 +505,7 @@
       "type": "text",
       "text": "# [[Home/Programming/NET/CSharp/CSharp|CSharp]]",
       "x": 840,
-      "y": 4200,
+      "y": 4320,
       "width": 340,
       "height": 80,
       "color": "2"
@@ -505,7 +515,7 @@
       "type": "text",
       "text": "# [[Home/Programming/NET/CSharp/Concurrency and Parallelism/Concurrency and Parallelism|Concurrency and Parallelism]]",
       "x": 1260,
-      "y": 4320,
+      "y": 4440,
       "width": 340,
       "height": 80,
       "color": "2"
@@ -515,7 +525,7 @@
       "type": "text",
       "text": "# [[Home/Programming/NET/CSharp/Fundamentals/Fundamentals|Fundamentals]]",
       "x": 1260,
-      "y": 4440,
+      "y": 4560,
       "width": 340,
       "height": 80,
       "color": "1"
@@ -525,7 +535,7 @@
       "type": "text",
       "text": "# [[Home/Programming/NET/CSharp/Fundamentals/Types/Types|Types]]",
       "x": 1680,
-      "y": 4560,
+      "y": 4680,
       "width": 340,
       "height": 80,
       "color": "1"
@@ -535,7 +545,7 @@
       "type": "text",
       "text": "# [[Home/Programming/NET/Other/Other|Other]]",
       "x": 840,
-      "y": 4680,
+      "y": 4800,
       "width": 340,
       "height": 80,
       "color": "1"
@@ -545,7 +555,7 @@
       "type": "text",
       "text": "# [[Home/Programming/NET/Runtime/Runtime|Runtime]]",
       "x": 840,
-      "y": 4800,
+      "y": 4920,
       "width": 340,
       "height": 80,
       "color": "1"
@@ -555,7 +565,7 @@
       "type": "text",
       "text": "# [[Home/Security/Security|Security]]",
       "x": 0,
-      "y": 5080,
+      "y": 5200,
       "width": 340,
       "height": 80,
       "color": "1"
@@ -565,7 +575,7 @@
       "type": "text",
       "text": "# [[Home/Security/Authentication/Authentication|Authentication]]",
       "x": 420,
-      "y": 5080,
+      "y": 5200,
       "width": 340,
       "height": 80,
       "color": "1"
@@ -575,7 +585,7 @@
       "type": "text",
       "text": "# [[Home/Software Architecture/Software Architecture|Software Architecture]]",
       "x": 0,
-      "y": 5360,
+      "y": 5480,
       "width": 340,
       "height": 80,
       "color": "2"
@@ -585,7 +595,7 @@
       "type": "text",
       "text": "# [[Home/Software Architecture/Application Architecture/Application Architecture|Application Architecture]]",
       "x": 420,
-      "y": 5360,
+      "y": 5480,
       "width": 340,
       "height": 80,
       "color": "1"
@@ -595,7 +605,7 @@
       "type": "text",
       "text": "# [[Home/Software Architecture/Distributed Systems/Distributed Systems|Distributed Systems]]",
       "x": -420,
-      "y": 5360,
+      "y": 5480,
       "width": 340,
       "height": 80,
       "color": "2"
@@ -605,7 +615,7 @@
       "type": "text",
       "text": "# [[Home/Software Architecture/Distributed Systems/Message Queues/Message Queues|Message Queues]]",
       "x": -840,
-      "y": 5480,
+      "y": 5600,
       "width": 340,
       "height": 80,
       "color": "1"
@@ -615,7 +625,7 @@
       "type": "text",
       "text": "# [[Home/Software Architecture/Distributed Systems/Scalability Patterns/Scalability Patterns|Scalability Patterns]]",
       "x": -840,
-      "y": 5600,
+      "y": 5720,
       "width": 340,
       "height": 80,
       "color": "2"
@@ -625,7 +635,7 @@
       "type": "text",
       "text": "# [[Home/Software Architecture/Patterns/Patterns|Patterns]]",
       "x": 420,
-      "y": 5480,
+      "y": 5600,
       "width": 340,
       "height": 80,
       "color": "1"
@@ -635,7 +645,7 @@
       "type": "text",
       "text": "# [[Home/Software Architecture/Patterns/Architectural Patterns/Architectural Patterns|Architectural Patterns]]",
       "x": 840,
-      "y": 5600,
+      "y": 5720,
       "width": 340,
       "height": 80,
       "color": "1"
@@ -645,7 +655,7 @@
       "type": "text",
       "text": "# [[Home/Software Architecture/Patterns/Design Patterns/Design Patterns|Design Patterns]]",
       "x": 840,
-      "y": 5720,
+      "y": 5840,
       "width": 340,
       "height": 80,
       "color": "1"
@@ -655,7 +665,7 @@
       "type": "text",
       "text": "# [[Home/Software Architecture/Patterns/Design Patterns/Behavioral/Behavioral|Behavioral]]",
       "x": 1260,
-      "y": 5840,
+      "y": 5960,
       "width": 340,
       "height": 80,
       "color": "1"
@@ -665,7 +675,7 @@
       "type": "text",
       "text": "# [[Home/Software Architecture/Patterns/Design Patterns/Creational/Creational|Creational]]",
       "x": 1260,
-      "y": 5960,
+      "y": 6080,
       "width": 340,
       "height": 80,
       "color": "4"
@@ -675,7 +685,7 @@
       "type": "text",
       "text": "# [[Home/Software Architecture/Patterns/Design Patterns/Structural/Structural|Structural]]",
       "x": 1260,
-      "y": 6080,
+      "y": 6200,
       "width": 340,
       "height": 80,
       "color": "1"
@@ -685,7 +695,7 @@
       "type": "text",
       "text": "# [[Home/Software Architecture/Patterns/Resilience Patterns/Resilience Patterns|Resilience Patterns]]",
       "x": 840,
-      "y": 6200,
+      "y": 6320,
       "width": 340,
       "height": 80,
       "color": "1"
@@ -695,7 +705,7 @@
       "type": "text",
       "text": "# [[Home/Software Architecture/System Architecture/System Architecture|System Architecture]]",
       "x": -420,
-      "y": 5720,
+      "y": 5840,
       "width": 340,
       "height": 80,
       "color": "1"
@@ -705,7 +715,7 @@
       "type": "text",
       "text": "# [[Home/Software Design/Software Design|Software Design]]",
       "x": 0,
-      "y": 6480,
+      "y": 6600,
       "width": 340,
       "height": 80,
       "color": "1"
@@ -715,7 +725,7 @@
       "type": "text",
       "text": "# [[Home/Software Design/Paradigms/Paradigms|Paradigms]]",
       "x": 420,
-      "y": 6480,
+      "y": 6600,
       "width": 340,
       "height": 80,
       "color": "1"
@@ -725,7 +735,7 @@
       "type": "text",
       "text": "# [[Home/Software Design/Principles/Principles|Principles]]",
       "x": -420,
-      "y": 6480,
+      "y": 6600,
       "width": 340,
       "height": 80,
       "color": "1"
@@ -735,7 +745,7 @@
       "type": "text",
       "text": "# [[Home/Software Design/Testing/Testing|Testing]]",
       "x": 420,
-      "y": 6600,
+      "y": 6720,
       "width": 340,
       "height": 80,
       "color": "1"
@@ -752,7 +762,7 @@
     {
       "id": "n_b0ac2236f9",
       "type": "text",
-      "text": "#### Roadmap legend\n**Generated:** Jul 15 2026 | 02:59PM",
+      "text": "#### Roadmap legend\n**Generated:** Jul 18 2026 | 11:47AM",
       "x": -1860,
       "y": 0,
       "width": 500,
@@ -761,7 +771,7 @@
     {
       "id": "n_4a66490dd9",
       "type": "text",
-      "text": "Not-Started: 33",
+      "text": "Not-Started: 34",
       "x": -1800,
       "y": 126,
       "width": 380,
@@ -771,7 +781,7 @@
     {
       "id": "n_c1cf7bc196",
       "type": "text",
-      "text": "Creation: 26",
+      "text": "Creation: 27",
       "x": -1800,
       "y": 202,
       "width": 380,
@@ -800,7 +810,7 @@
     {
       "id": "n_0e6324d0db",
       "type": "text",
-      "text": "Done: 14",
+      "text": "Done: 13",
       "x": -1800,
       "y": 430,
       "width": 380,
@@ -1046,6 +1056,13 @@
       "fromSide": "left",
       "toNode": "n_8232cabc14",
       "toSide": "right"
+    },
+    {
+      "id": "e_5a672f7202",
+      "fromNode": "n_fb4b199c6d",
+      "fromSide": "right",
+      "toNode": "n_af20eb8585",
+      "toSide": "left"
     },
     {
       "id": "e_a8a712b3e9",

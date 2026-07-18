@@ -1,13 +1,13 @@
 ---
 publish: true
-created: 2026-07-11T21:46:18.865Z
-modified: 2026-07-11T21:46:18.866Z
-published: 2026-07-11T21:46:18.866Z
+created: 2026-07-18T08:18:05.488Z
+modified: 2026-07-18T09:25:35.607Z
+published: 2026-07-18T09:25:35.607Z
 topic:
   - Networks
 subtopic:
   - Protocols
-summary: A stateless request-response protocol carrying almost all web and API traffic.
+summary: A stateless request-response protocol carrying web and API messages across reusable connections.
 level:
   - "3"
 priority: High
@@ -16,216 +16,255 @@ status: Ready to Repeat
 
 # Intro
 
-HTTP (Hypertext Transfer Protocol) is a stateless request-response protocol that carries nearly all web and API traffic in modern systems. You reach for it every time a client talks to a server over the network — browser page loads, REST APIs, webhooks, health checks, file downloads. Understanding HTTP mechanics — connection lifecycle, caching semantics, status codes, and TLS — directly affects the latency, reliability, and security of every service you build. In .NET, HTTP is the transport underneath `HttpClient`, ASP.NET Core, and gRPC (over HTTP/2), making it foundational knowledge for senior .NET work.
+HTTP is the message contract behind browsers, APIs, webhooks, and service health checks. Requests carry methods, headers, and a representation body. Responses return status, metadata, and data boundaries.
 
-## Request-Response Lifecycle
+Think of HTTP as semantics + transport; versions and connection behavior are separate concerns.
 
-An HTTP/1.1 exchange follows this sequence:
+## Methods, Statuses, and Retry Boundaries
 
-```mermaid
-sequenceDiagram
-  participant Client
-  participant Server
+| Method | Intended semantics | Safe | Idempotent | Retry decision |
+|---|---|---|---|---|
+| `GET` | Transfer a current representation | Yes | Yes | Retry within the request deadline when replay is acceptable |
+| `HEAD` | Transfer GET metadata without response content | Yes | Yes | Same boundary as `GET` |
+| `POST` | Process content according to the target resource | No | No | Retry only with explicit dedupe/idempotency or proof it was not processed |
+| `PUT` | Create or replace the target state with the supplied representation | No | Yes | Preserve preconditions and reconcile an unknown first outcome |
+| `PATCH` | Apply a media-type-defined patch | No | Depends on patch | Retry only when the patch operation is idempotent or deduplicated |
+| `DELETE` | Remove the target association | No | Yes | Define repeat responses and reconcile uncertain completions |
 
-  Client->>Server: TCP handshake SYN SYN-ACK ACK
-  Client->>Server: TLS handshake if HTTPS
-  Client->>Server: HTTP request method path headers body
-  Server->>Client: HTTP response status headers body
-  Note over Client,Server: Connection stays open via keep-alive
-  Client->>Server: Next request reuses connection
+Idempotency describes the intended server effect of repeated identical requests, not identical responses or freedom from races. If a conditional `PUT` commits but its response is lost, an identical retry can return `412 Precondition Failed` because the first request advanced the entity tag. The client should fetch or otherwise reconcile current state rather than remove `If-Match` and overwrite a concurrent change.
+
+| Status | Boundary meaning |
+|---|---|
+| 201 Created | New resource and optional `Location` target |
+| 400 Bad Request | Request malformed or invalid framing |
+| 401 Unauthorized | Challenge required |
+| 403 Forbidden | Request understood, denied |
+| 409 Conflict | Current resource state conflicts |
+| 412 Precondition Failed | `If-Match`/state precondition violated |
+| 422 Unprocessable Content | Syntax is understood, but the instructions cannot be processed |
+| 429 Too Many Requests | Apply retry policy and any `Retry-After` |
+| 502 Bad Gateway | Gateway cannot consume upstream response |
+| 503 Service Unavailable | Temporary overload/backoff situation |
+
+Unknown statuses should be handled by class, but clients must not invent retry or security meaning from an unregistered value. Log the raw code and the intermediary or product that generated it.
+
+## Connection Models and Versions
+
+| Version | Transport | What changes |
+|---|---|---|
+| HTTP/1.1 | TCP | Persistent connections; limited request ordering in practice |
+| HTTP/2 | TCP + streams | Multiplexed streams with flow-control and scheduling |
+| HTTP/3 | QUIC + streams | Removes transport-level HOL for independent streams |
+
+## Fields, Content, and Conditional Requests
+
+Header responsibilities:
+
+- representation metadata: `Content-Type` and content-coding fields
+- routing and identity: `Host`, `Location`, and explicitly trusted forwarding fields
+- negotiation: `Accept`, `Accept-Encoding`, and `Accept-Language`
+- validators: `ETag`, `If-Match`, `If-None-Match`
+- response semantics: status, challenge headers, `Range` + `Content-Range`
+
+HTTP/1.1 uses `Content-Length`, chunked transfer coding, or connection closure to delimit content according to its message rules. HTTP/2 and HTTP/3 carry content in frames instead. Range requests combine `Range`, `206 Partial Content`, and `Content-Range` for resumable downloads and media seeking.
+
+Connection-specific fields are scoped to one hop. A proxy must remove fields named by `Connection` and must not forward HTTP/1.1-only connection metadata into HTTP/2 or HTTP/3.
+
+Optimistic concurrency belongs to this header contract:
+
+- A `GET /orders/42` response returns a validator such as `ETag: "17"`.
+- The client sends `If-Match: "17"` with the state-changing request.
+- The server returns `428 Precondition Required` when the validator is missing and `412 Precondition Failed` when another writer has advanced the version.
+- The storage write performs the same comparison atomically; an application-side read, comparison, then unconditional save still has a race.
+
+```csharp
+app.MapPut("/orders/{id:long}", async (
+    long id,
+    UpdateOrder request,
+    HttpRequest http,
+    OrdersDb db,
+    CancellationToken ct) =>
+{
+    if (!http.Headers.TryGetValue("If-Match", out var raw) ||
+        !long.TryParse(raw.ToString().Trim('"'), out var expectedVersion))
+    {
+        return Results.StatusCode(StatusCodes.Status428PreconditionRequired);
+    }
+
+    var affected = await db.Database.ExecuteSqlInterpolatedAsync($"""
+        UPDATE orders
+        SET shipping_address = {request.ShippingAddress}, version = version + 1
+        WHERE id = {id} AND version = {expectedVersion}
+        """, ct);
+
+    return affected == 1
+        ? Results.NoContent()
+        : Results.StatusCode(StatusCodes.Status412PreconditionFailed);
+});
 ```
 
-### Persistent Connections
+Zero modified rows means the caller must re-read and merge deliberately before retrying. A stale payload is not made safe by replaying it with the new version.
 
-HTTP/1.0 opened a new TCP connection per request — catastrophically expensive. HTTP/1.1 made persistent connections the default: the same TCP socket is reused for multiple request-response cycles. The `Connection: keep-alive` header controls idle timeout and max requests. Idle connections still consume server-side file descriptors and memory, so servers close them after a configurable timeout.
+## Caching Boundaries
 
-### Head-of-Line Blocking
+HTTP caching reuses a stored response only when the request matches its cache key and the response is fresh or validates successfully. The performance win is avoiding origin work and transfer; the cost is a correctness contract around staleness, authorization, representation variants, and invalidation.
 
-HTTP/1.1 processes requests sequentially on each connection: the response to request #1 must complete before request #2 begins. If request #1 triggers a slow database query, requests #2 and #3 wait behind it. Browsers work around this by opening up to 6 parallel TCP connections per origin, but this wastes resources and still hits limits. [[HTTP 2]] solves this with stream multiplexing.
+### Freshness policy
 
-**Pipelining** was an HTTP/1.1 attempt to fix HOL blocking by sending multiple requests without waiting for responses. It failed in practice because responses still had to arrive in order, and buggy intermediary proxies mishandled pipelined responses. Browsers disabled it by default.
+```http
+Cache-Control: public, max-age=60, s-maxage=300, must-revalidate
+```
 
-## HTTPS and TLS
+| Directive | Effect |
+|---|---|
+| `max-age=60` | A cache can reuse the response for 60 seconds from its calculated age |
+| `s-maxage=300` | A shared cache uses 300 seconds instead of `max-age` |
+| `no-cache` | Storage is allowed, but every reuse requires successful validation |
+| `no-store` | The cache must not store the response |
+| `private` | Shared caches must not store the response; a private cache may |
+| `must-revalidate` | A stale response cannot be reused without successful validation, except where the specification explicitly permits it |
 
-HTTPS is HTTP over TLS. It provides confidentiality (encryption), integrity (tamper detection), and server authentication via certificates. Plain HTTP has no protection against eavesdropping or manipulation.
+If explicit freshness is absent, a cache can apply heuristic freshness to eligible responses. APIs should state the intended policy rather than rely on inference.
 
-### TLS 1.2 Handshake (2 RTTs)
+### Validators and preconditions
+
+```http
+GET /catalog/42 HTTP/1.1
+If-None-Match: "catalog-v9"
+
+HTTP/1.1 304 Not Modified
+ETag: "catalog-v9"
+Cache-Control: private, max-age=0, must-revalidate
+```
+
+`304 Not Modified` carries no representation content; the cache updates stored metadata and reuses its prior content. `If-None-Match` takes precedence over `If-Modified-Since` when both are present. Weak entity tags can validate semantic equivalence for caching but are unsuitable for `If-Match` lost-update protection.
+
+### Cache keys and `Vary`
+
+The primary cache key includes the target URI and method according to cache rules. `Vary` adds selected request fields:
+
+```http
+Vary: Accept-Encoding, Accept-Language
+```
+
+Omitting a relevant field can cross-serve the wrong representation. Adding a high-cardinality field such as raw `User-Agent` can fragment the cache until reuse disappears. Normalize only according to an explicit application or intermediary contract; arbitrary query sorting or decoding can change resource identity.
+
+A shared cache normally cannot reuse a response to a request carrying `Authorization` unless the response explicitly permits shared reuse under RFC 9111. Even then, its key and representation must not mix identities. Keep private user data in a private cache, or use `no-store` when storage itself is unacceptable.
+
+Caching pitfalls are contract failures rather than tuning details:
+
+- `no-cache` does not provide secrecy because it permits storage.
+- Some error responses are heuristically cacheable; transient failures need an explicit short policy or `no-store`.
+- Long freshness windows require versioned URLs, purge controls, or an accepted stale window with clear invalidation ownership.
+
+## HTTPS, TLS, and Transport Trust
+
+HTTPS is HTTP carried through TLS. TLS authenticates the server certificate, establishes symmetric traffic keys, and protects HTTP bytes from undetected modification or passive reading. It does not authenticate the application user, make the origin trustworthy, or prevent an authorized endpoint from logging plaintext.
+
+### TLS 1.3 handshake
 
 ```text
-Client → Server: ClientHello (supported ciphers, random)
-Server → Client: ServerHello, Certificate, ServerHelloDone
-Client → Server: ClientKeyExchange, ChangeCipherSpec, Finished
-Server → Client: ChangeCipherSpec, Finished
-→ Application data begins (2 RTTs after TCP handshake)
+ClientHello: versions, key share, cipher suites, SNI, ALPN
+ServerHello: selected version, key share, cipher suite
+[encrypted] EncryptedExtensions, Certificate, CertificateVerify, Finished
+[encrypted] client Finished
+application data
 ```
 
-The client validates the certificate chain: leaf cert → intermediate CA(s) → trusted root CA. Each cert is verified for signature validity, expiry, revocation status (OCSP or CRL), and hostname match against the SAN (Subject Alternative Name) field.
+The ClientHello and ServerHello remain visible because they negotiate the shared secret and protocol. After ServerHello, handshake traffic keys protect the server certificate and most remaining handshake metadata. An observer can still infer endpoints, timing, sizes, and any unencrypted ClientHello fields; encrypted client hello is a separate deployment capability.
 
-### TLS 1.3 (1 RTT)
+The client validates the certificate chain to a trusted root, the requested hostname against the leaf certificate's subject alternative names, the validity interval, and applicable revocation or policy signals. A successful handshake proves control of the certificate's private key under the client's trust policy, not ownership of a business identity.
 
-TLS 1.3 (RFC 8446) reduced the handshake to 1 RTT and eliminated weak primitives:
+### Resumption and 0-RTT
 
-- All cipher suites provide **forward secrecy** — ephemeral Diffie-Hellman only, no static RSA key exchange
-- Handshake messages are **encrypted** — the certificate is not visible to network observers
-- **0-RTT resumption** for repeat connections, but replay-vulnerable — safe only for idempotent requests
-- Removed RC4, 3DES, CBC mode, and RSA key exchange entirely
+TLS 1.3 resumption can send early application data before the server completes the new handshake. An attacker can replay captured 0-RTT data to another accepting server instance. Reject early data or restrict it to operations whose replay is harmless under the complete application contract.
 
-### .NET TLS Guidance
+HTTP method idempotency alone is insufficient. A repeated `GET` can consume a one-time token, emit an audit event, or trigger billing even though GET is defined as safe. Keep authentication, purchases, state transitions, and one-time links out of 0-RTT unless the application has explicit anti-replay state.
 
-Use `SslProtocols.None` to defer TLS version selection to the OS — never hardcode `SslProtocols.Tls12`. The legacy `SslProtocols.Default` maps to SSL3 + TLS 1.0, which is insecure. `ServicePointManager.SecurityProtocol` is process-global and affects all `HttpClient` instances — a footgun in shared libraries that silently downgrades TLS for the entire process.
+### HSTS and the first visit
 
-## Methods and Semantics
+`Strict-Transport-Security` tells a browser that received the header over valid HTTPS to rewrite future HTTP attempts to HTTPS for the stated `max-age`. `includeSubDomains` extends the policy, so enable it only when every covered host supports HTTPS.
 
-| Method | Semantics | Idempotent | Safe |
-|---|---|---|---|
-| GET | Read resource representation | Yes | Yes |
-| HEAD | Same as GET but response has no body | Yes | Yes |
-| POST | Create resource or trigger processing | No | No |
-| PUT | Replace target resource entirely | Yes | No |
-| PATCH | Partial modification | Depends on implementation | No |
-| DELETE | Remove target resource | Yes | No |
-| OPTIONS | Describe communication options and CORS preflight | Yes | Yes |
+HSTS cannot protect the first visit before the browser knows the policy. Browser preload lists close that gap for accepted domains, but preload is a long-lived operational commitment with removal delay. Redirect HTTP to HTTPS, send HSTS only over HTTPS, and treat preload readiness as a separate rollout gate.
 
-**Safe** means the request does not change server state. **Idempotent** means repeating the same request produces the same resulting state — not the same response, but the same server-side outcome. Clients can safely auto-retry idempotent methods on ambiguous network failure, which is why `PUT` and `DELETE` are preferable over `POST` when the operation allows it.
+### Interception boundary
 
-## Status Codes
+An enterprise or debugging proxy can inspect HTTPS only when the client trusts a CA controlled by that proxy. The proxy terminates one TLS connection and creates a second connection to the origin; the connections have different traffic keys. Hostname validation succeeds because the proxy issues a matching leaf certificate from the installed root.
 
-### Commonly Misused Codes
+Treat trust-store modification as privileged configuration. Certificate pinning can narrow trust for controlled clients, but it increases rotation and recovery risk and is not a general browser defense.
 
-| Code | Correct Use | Common Mistake |
-|---|---|---|
-| 200 vs 204 | 204 for success with no body (DELETE, PUT acknowledgment) | Returning 200 with empty body wastes a Content-Length round-trip |
-| 201 Created | Resource created; include `Location` header pointing to new resource | Using 200 for POST that creates a resource |
-| 301 vs 308 | 308 preserves HTTP method on redirect | Using 301 for non-GET redirects; browsers may change POST to GET |
-| 400 vs 422 | 400 for malformed syntax; 422 for valid syntax but invalid semantics | Using 400 for all validation errors |
-| 401 vs 403 | 401 = not authenticated (must include `WWW-Authenticate`); 403 = authenticated but not authorized | Confusing authentication with authorization |
-| 409 Conflict | Optimistic concurrency failure, duplicate resource | Using 400 for state conflicts |
-| 429 Too Many Requests | Rate limited; include `Retry-After` header | Using 503 for rate limiting |
-| 502 vs 503 | 502 = upstream returned invalid response; 503 = this server is overloaded or in maintenance | Treating them interchangeably; monitoring tools distinguish them for different alerting |
+## .NET HTTP Client Boundaries
 
-## Caching
+`HttpClient` is a request API over a connection pool owned by `SocketsHttpHandler`. Correct operation depends less on disposing the client than on bounding connection lifetime, concurrency, timeouts, and retries. Reusing a client avoids repeated TCP/TLS setup and ephemeral-port exhaustion; rotating pooled connections lets DNS changes take effect.
 
-HTTP caching prevents redundant data transfer by storing responses and reusing them for matching requests.
+### Lifetime and DNS
 
-### Cache-Control
+Create long-lived clients directly or through `IHttpClientFactory`. Do not create and dispose one client per request: destroying pools forces new connections while closed TCP connections remain in `TIME_WAIT`.
 
-```http
-Cache-Control: max-age=3600, must-revalidate, public
+```csharp
+var handler = new SocketsHttpHandler
+{
+    PooledConnectionLifetime = TimeSpan.FromMinutes(5),
+    MaxConnectionsPerServer = 100,
+    ConnectTimeout = TimeSpan.FromSeconds(3)
+};
+
+var client = new HttpClient(handler)
+{
+    Timeout = TimeSpan.FromSeconds(10),
+    DefaultRequestVersion = HttpVersion.Version20,
+    DefaultVersionPolicy = HttpVersionPolicy.RequestVersionOrLower
+};
 ```
 
-Key directives:
+DNS TTL does not close an established connection. `PooledConnectionLifetime` limits how long a connection remains eligible for reuse; the next connection resolves the hostname again. Pick the lifetime from endpoint-change behavior and connection-setup cost rather than copying a universal value.
 
-- `max-age=N` — fresh for N seconds; no revalidation until expired
-- `no-cache` — store the response but **always revalidate** before serving (does NOT mean "don't cache")
-- `no-store` — never store the response anywhere (for sensitive data like banking pages)
-- `private` — only browser cache, not shared or CDN caches
-- `public` — storable in shared caches (required when `Authorization` header is present and caching is intended)
-- `immutable` — content will never change; skip revalidation even on reload (use with cache-busted URLs like `app.abc123.js`)
+`IHttpClientFactory` centralizes named or typed client configuration and rotates handlers. Its default handler lifetime is an implementation default, not a DNS guarantee: active connections and application retry behavior still determine when traffic leaves an old endpoint.
 
-**Heuristic caching trap**: if no `Cache-Control` is set, RFC 9111 allows caches to apply heuristic freshness (~10% of `Last-Modified` age). Always set explicit `Cache-Control` headers — especially on API responses.
+### HTTP version policy
 
-### Conditional Requests and ETag
+The default request version remains HTTP/1.1. Set both the desired version and `HttpVersionPolicy` when the application requires a specific negotiation boundary:
 
-```http
-# Server sends ETag with original response
-ETag: "33a64df5"
+| Policy | Behavior |
+|---|---|
+| `RequestVersionExact` | Fail when the requested version cannot be used |
+| `RequestVersionOrLower` | Prefer the requested version and fall back |
+| `RequestVersionOrHigher` | Use the requested version or negotiate upward |
 
-# Client revalidates later
-If-None-Match: "33a64df5"
+HTTP/2 and HTTP/3 support also depends on TLS/ALPN, operating system, server, proxy, and runtime capabilities. Record the negotiated response version when protocol behavior matters.
 
-# Server responds 304 if unchanged — no body transferred
-HTTP/1.1 304 Not Modified
-```
+### Timeout, retry, and concurrency contract
 
-ETags are preferred over `Last-Modified` because `Last-Modified` has only 1-second granularity and distributed servers struggle to synchronize file timestamps. `If-None-Match` takes precedence over `If-Modified-Since` when both are present (RFC 9110).
+Separate connect, request, and caller cancellation budgets. A single broad timeout hides whether time was spent waiting for a pool slot, connecting, receiving headers, or streaming content.
 
-### Vary Header
+Retry policy is a contract:
 
-`Vary: Accept-Encoding` tells caches to key on both URL and the listed request headers. Without it, a CDN might serve a gzip-compressed response to a client that only accepts brotli. `Vary: User-Agent` is a cache-killing anti-pattern — thousands of User-Agent variants effectively disable caching.
+- Retry transient failures within one end-to-end deadline.
+- An idempotent method reduces state risk but does not prove replay safety; request bodies, one-time credentials, downstream effects, and unknown commit results still matter.
+- Non-idempotent operations need an application idempotency key with durable deduplication before automatic retry.
 
-## Body Transfer: Length, Chunking, Ranges, Compression
+Dispose `HttpResponseMessage` and stream large bodies with `HttpCompletionOption.ResponseHeadersRead` so connections return to the pool after content consumption. Bound concurrency: an unbounded caller queue can overload the destination even when the handler limits open connections.
 
-How the body is delimited and moved matters as much as the headers:
+## HTTP API Interoperability
 
-- **`Content-Length`** tells the receiver exactly how many bytes to read. When the size isn't known up front (generated/streamed responses), HTTP/1.1 uses **`Transfer-Encoding: chunked`** — the body is sent as a series of length-prefixed chunks terminated by a zero-length chunk. This is what enables streaming responses and Server-Sent Events without buffering the whole body.
-- **Range requests** let a client fetch part of a resource: `Range: bytes=0-1023` → the server replies **`206 Partial Content`** with `Content-Range`, or `416 Range Not Satisfiable`. This powers video seeking, resumable downloads, and parallel chunked downloads; `Accept-Ranges: bytes` advertises support.
-- **Content negotiation**: the client states preferences (`Accept`, `Accept-Encoding`, `Accept-Language`) and the server picks a representation, echoing the choice (`Content-Type`, `Content-Encoding`) — and **must** add the corresponding `Vary` header so caches don't cross-serve. Compression (`gzip`, `br`) is negotiated this way.
-
-> [!NOTE]
-> **HSTS** (`Strict-Transport-Security`) is a response header that tells browsers "only ever reach me over HTTPS" for a max-age, eliminating the initial plaintext request an attacker could hijack (SSL-strip). It's the security-header complement to the TLS section above.
-
-## Pitfalls
-
-### 1) HttpClient Socket Exhaustion in .NET
-
-- **What goes wrong**: creating a new `HttpClient` per request exhausts sockets. `Dispose()` does not immediately release the underlying socket — the OS holds it in `TIME_WAIT` state (~4 minutes on Windows). Under load, ephemeral ports run out → `SocketException`.
-- **Why it happens**: `HttpClient` wraps a connection pool in `SocketsHttpHandler`. Disposing the client tears down the pool, but the OS keeps TCP sockets in `TIME_WAIT` for reliable connection termination.
-- **Mitigation**: use `IHttpClientFactory` (default handler lifetime: 2 minutes, handles both pooling and DNS refresh) or a singleton `HttpClient` with `SocketsHttpHandler.PooledConnectionLifetime` set to force periodic connection recycling.
-
-### 2) DNS Staleness with Singleton HttpClient
-
-- **What goes wrong**: a singleton `HttpClient` resolves DNS once and caches the IP for the lifetime of the connection. In Kubernetes where pod IPs change on redeploy, requests route to terminated pods.
-- **Why it happens**: the connection pool reuses established TCP connections without re-resolving DNS. There is no mechanism to honor DNS TTL at the connection level.
-- **Mitigation**: set `PooledConnectionLifetime = TimeSpan.FromMinutes(2)` on `SocketsHttpHandler` to force connection recycling and DNS re-resolution. `IHttpClientFactory` does this automatically via handler lifetime rotation.
-
-### 3) Heuristic Caching Surprises
-
-- **What goes wrong**: API responses without explicit `Cache-Control` headers get cached by intermediate proxies using heuristic rules, serving stale data to clients.
-- **Why it happens**: RFC 9111 permits caches to infer freshness from `Last-Modified` when no explicit freshness directive is present.
-- **Mitigation**: always set explicit `Cache-Control` headers on API responses. Use `no-store` for sensitive data, `no-cache` when revalidation is acceptable, or a specific `max-age` when staleness is tolerable.
-
-## Tradeoffs
-
-| Aspect | HTTP/1.1 | HTTP/2 | HTTP/3 via QUIC |
-|---|---|---|---|
-| Multiplexing | No; one request per connection at a time | Yes; many streams per TCP connection | Yes; streams per QUIC connection |
-| Head-of-line blocking | Application-level and TCP-level | TCP-level only; a single lost packet stalls all streams | None; streams are independent at transport level |
-| Header compression | None | HPACK | QPACK |
-| Transport | TCP | TCP | UDP with QUIC |
-| Adoption | Universal | Widespread | Growing |
-
-**Decision rule**: HTTP/1.1 for maximum compatibility and simplicity. Upgrade to HTTP/2 when multiplexing and header compression matter (most modern services benefit). HTTP/3 for latency-sensitive, loss-prone networks like mobile clients and global CDN edges.
-
-## Questions
-
-> [!QUESTION]- Why is creating a new HttpClient per request dangerous in .NET, and what are the two correct alternatives?
-> **Expected answer:**
->
-> - `HttpClient.Dispose()` does not immediately release sockets — the OS holds them in `TIME_WAIT` for ~4 minutes.
-> - Under load, this exhausts the ephemeral port range → `SocketException`.
-> - Fix 1: `IHttpClientFactory` with default 2-minute handler lifetime — handles both socket pooling and DNS re-resolution.
-> - Fix 2: singleton `HttpClient` with `SocketsHttpHandler.PooledConnectionLifetime` set to force periodic connection recycling.
-> - Even the singleton approach has a DNS staleness trap without `PooledConnectionLifetime`.
->
-> **Why this matters:** the most common HTTP production failure in .NET; tests understanding of socket lifecycle and connection pool mechanics.
-
-> [!QUESTION]- What is the difference between Cache-Control no-cache and no-store?
-> **Expected answer:**
->
-> - `no-cache` means the response CAN be stored, but the cache MUST revalidate with the origin server before every use via conditional request (`If-None-Match` or `If-Modified-Since`).
-> - `no-store` means the response MUST NOT be stored at all — not in browser cache, not in CDN, not on disk.
-> - `no-cache` is appropriate for content that changes but benefits from 304 responses (saves bandwidth when content has not changed). `no-store` is for sensitive data like banking pages or PII.
-> - The naming is misleading — `no-cache` does not mean "don't cache."
->
-> **Why this matters:** the most commonly misunderstood HTTP caching directive; wrong choice either leaks sensitive data or kills performance.
-
-> [!QUESTION]- Explain the difference between 401 and 403 status codes.
-> **Expected answer:**
->
-> - 401 Unauthorized means the client is not authenticated — no credentials were provided, or they are invalid. The response MUST include a `WWW-Authenticate` header.
-> - 403 Forbidden means the client IS authenticated but not authorized — the server knows who you are, but you lack permission for this resource.
-> - 401 tells the client to retry with valid credentials. 403 tells the client that retrying with the same identity is pointless.
-> - Security consideration: some APIs return 404 instead of 403 to avoid revealing resource existence to unauthorized users.
->
-> **Why this matters:** authentication vs authorization is a fundamental security distinction; misusing these codes breaks client auth flows and retry logic.
+Use [[REST]] for resource APIs with broad HTTP interoperability and caching semantics. Choose gRPC when schema-first contracts and streaming dominate, and GraphQL when clients need graph projection control with governance.
 
 ## References
 
-- [RFC 9110 — HTTP Semantics](https://www.rfc-editor.org/rfc/rfc9110)
-- [RFC 9111 — HTTP Caching](https://www.rfc-editor.org/rfc/rfc9111)
-- [RFC 8446 — TLS 1.3](https://datatracker.ietf.org/doc/html/rfc8446)
-- [MDN — HTTP Caching](https://developer.mozilla.org/en-US/docs/Web/HTTP/Guides/Caching)
-- [MDN — Connection Management in HTTP/1.x](https://developer.mozilla.org/en-US/docs/Web/HTTP/Guides/Connection_management_in_HTTP_1.x)
-- [Microsoft Learn — Guidelines for Using HttpClient](https://learn.microsoft.com/dotnet/fundamentals/networking/http/httpclient-guidelines)
-- [Microsoft Learn — IHttpClientFactory](https://learn.microsoft.com/dotnet/core/extensions/httpclient-factory)
-- [You're Using HttpClient Wrong (ASP.NET Monsters)](https://aspnetmonsters.com/2016/08/2016-08-27-httpclientwrong/)
+- [RFC 9110 — HTTP Semantics](https://www.rfc-editor.org/rfc/rfc9110) — methods, status, fields, conditions, and message framing behavior.
+- [RFC 9111 — HTTP Caching](https://www.rfc-editor.org/rfc/rfc9111) — cache keys, validation, and freshness.
+- [MDN HTTP caching guide](https://developer.mozilla.org/en-US/docs/Web/HTTP/Guides/Caching) — practical browser and shared-cache examples for freshness and validation.
+- [RFC 9112 — HTTP/1.1](https://www.rfc-editor.org/rfc/rfc9112) — framing and connection semantics.
+- [RFC 9113 — HTTP/2](https://www.rfc-editor.org/rfc/rfc9113) — stream-level multiplexing on TCP.
+- [RFC 9114 — HTTP/3](https://www.rfc-editor.org/rfc/rfc9114) — stream and QUIC transport behavior.
+- [TLS 1.3 (RFC 8446)](https://www.rfc-editor.org/rfc/rfc8446) — TLS handshake and security boundary.
+- [HTTP Strict Transport Security (RFC 6797)](https://www.rfc-editor.org/rfc/rfc6797) — HTTPS upgrade policy mechanics.
+- [Chromium HSTS preload submission](https://hstspreload.org/) — browser preload requirements, consequences, and removal process.
+- [HttpClient guidelines](https://learn.microsoft.com/dotnet/fundamentals/networking/http/httpclient-guidelines) — pooling and timeout control.
+- [HTTP version selection](https://learn.microsoft.com/dotnet/fundamentals/networking/http/httpclient-migrate-from-httpwebrequest#http-version-selection) — request versions and `HttpVersionPolicy` behavior.
+- [IHttpClientFactory](https://learn.microsoft.com/dotnet/core/extensions/httpclient-factory) — named/typed clients and handler-lifetime configuration.
+- [IANA HTTP Status Code Registry](https://www.iana.org/assignments/http-status-codes/http-status-codes.xhtml) — registered, provisional, and reserved status values.
+- [Problem Details for HTTP APIs (RFC 9457)](https://www.rfc-editor.org/rfc/rfc9457) — standard machine-readable error representation and extension rules.
+- [RFC 9110: If-Match](https://www.rfc-editor.org/rfc/rfc9110#name-if-match) — validator semantics for preventing lost updates.
+- [RFC 6585: 428 Precondition Required](https://www.rfc-editor.org/rfc/rfc6585#section-3) — status definition for requiring conditional requests.
+- [EF Core concurrency conflicts](https://learn.microsoft.com/ef/core/saving/concurrency) — optimistic-concurrency tokens and compare-on-update behavior.

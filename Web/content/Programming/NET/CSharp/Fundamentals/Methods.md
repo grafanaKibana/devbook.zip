@@ -1,8 +1,8 @@
 ---
 publish: true
 created: 2026-07-11T21:45:16.088Z
-modified: 2026-07-11T21:45:16.088Z
-published: 2026-07-11T21:45:16.088Z
+modified: 2026-07-17T19:00:22.990Z
+published: 2026-07-17T19:00:22.990Z
 topic:
   - Programming
 subtopic:
@@ -242,7 +242,7 @@ Console.WriteLine(asDog.Category());    // Dog
 > [!QUESTION]- A base method is not marked `virtual`, but you need derived-specific behavior. What are your options?
 > Option 1: Change the base API to `virtual` (best if you own the base type and want polymorphism). Option 2: Hide with `new` (works, but no polymorphism and can confuse callers). Option 3: Redesign with composition/strategy if inheritance is not a good fit.
 
-## Links
+## References
 
 - [Method parameters and modifiers (ref/in/out)](https://learn.microsoft.com/dotnet/csharp/language-reference/keywords/method-parameters#reference-parameters) — official reference for all parameter modifiers with semantics and examples.
 - [C# 13: params collections](https://learn.microsoft.com/dotnet/csharp/whats-new/csharp-13#params-collections) — explains the C# 13 extension of `params` to any collection type, not just arrays.

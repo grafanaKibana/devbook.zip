@@ -2,10 +2,11 @@
 publish: true
 title: Credits
 created: 2026-07-12T14:27:08.519Z
-modified: 2026-07-12T14:27:08.519Z
-published: 2026-07-12T14:27:08.519Z
+modified: 2026-07-15T14:09:33.588Z
+published: 2026-07-15T14:09:33.588Z
 tags:
   - MetricsIgnore
+icon: badge-info
 ---
 
 # Welcome to my software engineering notebook

@@ -1,13 +1,13 @@
 ---
 publish: true
-created: 2026-07-11T21:48:22.026Z
-modified: 2026-07-11T21:48:22.027Z
-published: 2026-07-11T21:48:22.027Z
+created: 2026-07-16T07:36:21.597Z
+modified: 2026-07-17T05:46:25.660Z
+published: 2026-07-17T05:46:25.660Z
 topic:
   - Security
 subtopic:
   - Authentication
-summary: Authenticate once with a central Identity Provider, then access many applications.
+summary: Federated login through an identity provider, with separate sessions and trust at every application.
 level:
   - "3"
 priority: High
@@ -16,114 +16,93 @@ status: Ready to Repeat
 
 # Intro
 
-Single Sign-On (SSO) lets a user authenticate once with a central Identity Provider (IdP) and then access multiple applications without re-entering credentials. The IdP issues tokens or assertions that each application validates independently. In modern systems, SSO is implemented with OpenID Connect (OIDC) on top of OAuth 2.0. The core engineering work is session management, token validation, and handling failure modes safely.
+Single Sign-On (SSO) lets several applications rely on one identity provider (IdP) for authentication. The user authenticates to the IdP once; each application still validates its own assertion or ID token, applies its own authorization policy, and creates its own local session. SSO removes repeated login ceremonies, not application-level security boundaries.
 
-See [[Oauth OIDC (OpenId Connect)|OAuth OIDC]] for the underlying protocol details.
+The main operational benefit is centralized authentication policy and account lifecycle. The matching cost is concentration: an IdP outage blocks new logins, and an IdP compromise can reach every relying application.
 
-## How It Works — OIDC Flow
+See [[Security/Authentication/Oauth OIDC (OpenId Connect)|OAuth/OIDC]] for the underlying OAuth roles and token rules.
 
-```mermaid
-sequenceDiagram
-  participant Browser
-  participant App as Application (Relying Party)
-  participant IdP as Identity Provider
+## Federated browser flow
 
-  Browser->>App: Access protected resource
-  App->>Browser: Redirect to IdP (with client_id, redirect_uri, state, nonce)
-  Browser->>IdP: User authenticates
-  IdP->>Browser: Redirect back with authorization code
-  Browser->>App: Send authorization code
-  App->>IdP: Exchange code for ID token + access token
-  IdP->>App: Tokens (signed JWT)
-  App->>App: Validate ID token (signature, issuer, audience, expiry, nonce)
-  App->>Browser: Create application session (cookie)
+```text
+Browser -> Application: GET /reports
+Application -> Browser: redirect to the trusted IdP /authorize endpoint
+  client_id=reports-app
+  redirect_uri=https://reports.example/callback
+  response_type=code
+  scope=openid profile
+  state=<browser-session binding>
+  nonce=<ID-token replay binding>
+  code_challenge=<PKCE challenge>
+
+Browser -> IdP: authenticate, or reuse the existing IdP session
+IdP -> Browser -> Application: callback with authorization code + state
+Application -> IdP: exchange code + PKCE verifier
+IdP -> Application: signed ID token + optional access token
+Application: validate issuer, signature, audience, expiry, nonce, and policy claims
+Application -> Browser: set a new application-session cookie
 ```
 
-**Key points:**
+The browser crosses three distinct trust boundaries: the application's session, the IdP's session, and the signed federation result. A valid IdP session can make the second application login silent, but each relying party still creates and controls its own local session. Cookie delivery is scoped by a host-only or `Domain` match and `Path`, then constrained by attributes such as `Secure` and `SameSite`; the port and full origin are not cookie isolation boundaries. Relying parties should use narrowly scoped, distinct session cookies so sibling applications do not share them accidentally.
 
-- The application never sees the user's password — only tokens from the IdP.
-- The `state` parameter prevents CSRF attacks on the redirect.
-- The `nonce` prevents replay attacks on the ID token.
-- Each application creates its own session after validating the token — SSO does not mean a shared session.
+## Trust configuration
 
-## SAML vs OIDC
+The application pins an expected issuer and obtains its authorization/token endpoints and signing-key set from trusted discovery metadata. It registers exact redirect URIs and a `client_id`. On callback it must:
 
-| Aspect | SAML 2.0 | OIDC (OAuth 2.0) |
-|--------|----------|-----------------|
-| Format | XML assertions | JSON Web Tokens (JWT) |
-| Transport | HTTP POST/Redirect | HTTP redirects + REST |
-| Age | 2005 (enterprise legacy) | 2014 (modern web/mobile) |
-| Mobile support | Poor (XML, browser-only) | Excellent (native apps, SPAs) |
-| Complexity | High (XML signatures, metadata) | Lower (JSON, standard libraries) |
-| Adoption | Enterprise (Okta, ADFS, Salesforce) | Cloud-native (Azure AD, Google, GitHub) |
+1. Match `state` to the browser session that initiated the flow.
+2. Validate the ID token signature using a current key for the configured issuer.
+3. Require the exact issuer and an audience containing this application's `client_id`.
+4. Check expiry, issued-at constraints, and `nonce`; apply `azp` rules when multiple audiences are present.
+5. Map the stable issuer-plus-`sub` pair to a local principal. Email is mutable and is not a globally stable identifier.
+6. Create a fresh local session and apply local authorization; do not forward the ID token as an API credential.
 
-**Decision rule:** use OIDC for new systems. Use SAML only when integrating with legacy enterprise IdPs that don't support OIDC (e.g., older ADFS deployments, some SaaS products).
+The same model applies to SAML: the service provider trusts configured IdP metadata and validates the assertion's signature, issuer, audience, recipient, time bounds, and correlation with the request before creating a local session.
 
-## ASP.NET Core Integration
+## Sessions and logout
 
-```csharp
-// Program.cs — configure OIDC with Azure AD
-builder.Services.AddAuthentication(options =>
-{
-    options.DefaultScheme = CookieAuthenticationDefaults.AuthenticationScheme;
-    options.DefaultChallengeScheme = OpenIdConnectDefaults.AuthenticationScheme;
-})
-.AddCookie()
-.AddOpenIdConnect(options =>
-{
-    options.Authority = "https://login.microsoftonline.com/{tenant-id}/v2.0";
-    options.ClientId = builder.Configuration["AzureAd:ClientId"];
-    options.ClientSecret = builder.Configuration["AzureAd:ClientSecret"];
-    options.ResponseType = OpenIdConnectResponseType.Code;
-    options.SaveTokens = true;
-    options.Scope.Add("openid");
-    options.Scope.Add("profile");
-    options.Scope.Add("email");
-});
-```
+| Event | IdP session | Application A | Application B |
+| --- | --- | --- | --- |
+| User signs in to A | Created or reused | New local session | Unchanged |
+| User opens B | Reused for silent authentication | Unchanged | New local session after token validation |
+| User logs out of A locally | Usually remains | Deleted | Unchanged |
+| IdP session is revoked | Deleted | May remain until local expiry/back-channel event | May remain until local expiry/back-channel event |
 
-The middleware handles the redirect, code exchange, token validation, and cookie creation automatically.
+"Log out everywhere" therefore needs an explicit design. Local logout deletes one application session. Provider logout ends the IdP browser session but cannot assume every relying party session disappeared. Front-channel logout depends on browser navigation and cookie behavior; back-channel logout delivers a signed server-to-server event but requires reliable endpoint handling. High-risk applications should also keep local sessions short and respond to account-disable or session-revocation events.
 
-## Token Validation Checklist
+## OIDC versus SAML
 
-When accepting an ID token from an IdP, validate:
+| Concern | OIDC | SAML 2.0 |
+| --- | --- | --- |
+| Artifact | JSON/JWT ID token through an OAuth-based flow | XML assertion through browser bindings |
+| Trust setup | Issuer discovery, client registration, redirect URIs, JWKS | IdP/SP metadata, entity IDs, endpoints, certificates |
+| Client fit | Web, native, and modern cloud applications | Browser-centric enterprise federation |
+| Validation risk | Token type/audience confusion and redirect mistakes | XML signature, canonicalization, audience, and recipient mistakes |
+| Operational cost | Key rotation and client metadata | Certificate and metadata rotation, larger XML payloads |
 
-1. **Signature** — verify using the IdP's public key (fetched from `/.well-known/openid-configuration`).
-2. **Issuer (`iss`)** — must match the expected IdP URL.
-3. **Audience (`aud`)** — must include your application's `client_id`.
-4. **Expiry (`exp`)** — token must not be expired.
-5. **Nonce** — must match the nonce sent in the authorization request (prevents replay).
-6. **Redirect URI** — must match the registered redirect URI exactly.
+Use OIDC for new applications. Use SAML when the required enterprise IdP or SaaS product exposes only SAML, and use a mature library rather than parsing or validating XML signatures yourself.
 
-## Pitfalls
+## Failure modes
 
-**Shared session vs federated identity**
-SSO does not mean all applications share one session cookie. Each application creates its own session after validating the IdP token. If the IdP session expires, users may need to re-authenticate — but this is transparent if the application handles token refresh.
-
-**Single point of failure**
-If the IdP is unavailable, users cannot authenticate to any SSO-protected application. Mitigate with IdP high availability (Azure AD, Okta have SLAs) and graceful degradation for non-critical paths.
-
-**Token leakage**
-ID tokens contain user claims (email, name, roles). Logging tokens or passing them in URLs exposes PII. Always transmit tokens over HTTPS and store them in secure, HttpOnly cookies.
-
-**Logout complexity**
-Logging out of one application does not automatically log out of the IdP or other applications. Implement front-channel logout (IdP notifies all applications) or back-channel logout (server-to-server) for complete logout.
+- **Login CSRF:** an attacker starts a login for their own account and tricks the victim into completing the callback. Bind callback to the initiating browser with `state` and correlate the transaction server-side.
+- **Token replay:** validate `nonce`, one-time authorization codes, expiry, issuer, and audience. A token valid for Application A must not create a session at B.
+- **Open redirect:** register exact callback URIs and validate any post-login return path as a local relative destination.
+- **Claim drift:** groups, roles, and email can change. Treat federation claims as input to local policy and define how removals propagate.
+- **IdP outage:** existing local sessions may continue under policy, but new logins and token renewal fail. Design explicit degraded behavior; do not bypass authentication.
+- **Account recovery downgrade:** central recovery now unlocks every relying application. Require stronger checks and notify/revoke sessions after sensitive recovery.
 
 ## Questions
 
-> [!QUESTION]- What problem does SSO solve and what does it not solve?
-> SSO eliminates repeated interactive logins across applications — users authenticate once and access many services. It does not replace per-application authorization (what the user can do) or per-application session management (how long the session lasts). Each application still manages its own session and access control.
+> [!QUESTION]- Why does SSO not mean one shared session?
+> The IdP and each relying application remain distinct session and security boundaries. The IdP session can make authentication at another application silent, but that application must validate a new federation result and issue its own session.
 
-> [!QUESTION]- What must you validate when accepting an ID token from an IdP?
-> Signature (using IdP's public key), issuer, audience (your client\_id), expiry, and nonce. Also validate the redirect URI matches the registered value. Missing any of these opens the door to token forgery, replay attacks, or open redirect vulnerabilities.
-
-> [!QUESTION]- When would you choose SAML over OIDC?
-> When integrating with legacy enterprise IdPs that only support SAML (older ADFS, some SaaS products). For new systems, OIDC is simpler, better supported on mobile/SPA, and has a richer ecosystem of libraries. The cost of SAML: XML parsing complexity, larger message sizes, and harder debugging.
+> [!QUESTION]- Which identity should a relying party store?
+> Store the pair of configured issuer and stable `sub` claim. Email and display names can change or be reassigned; they are attributes, not durable federation keys.
 
 ## References
 
-- [OpenID Connect on ASP.NET Core (Microsoft Learn)](https://learn.microsoft.com/en-us/aspnet/core/security/authentication/openid-connect) — official guide to configuring OIDC authentication in ASP.NET Core with Azure AD.
-- [OpenID Connect Core 1.0 (OpenID Foundation)](https://openid.net/specs/openid-connect-core-1_0.html) — the OIDC specification covering authentication flows, token validation, and claims.
-- [OAuth 2.0 (RFC 6749)](https://www.rfc-editor.org/rfc/rfc6749) — the underlying authorization framework that OIDC builds on.
-- [NIST Digital Identity Guidelines (SP 800-63)](https://pages.nist.gov/800-63-3/) — authoritative guidance on identity assurance levels, federation, and token validation requirements.
-- [SAML vs OIDC (Okta)](https://developer.okta.com/docs/concepts/saml-vs-oidc/) — practitioner comparison of SAML and OIDC with migration guidance.
+- [OpenID Connect Core 1.0](https://openid.net/specs/openid-connect-core-1_0.html) — relying-party flow, ID-token claims, nonce, and validation rules.
+- [OpenID Connect Discovery 1.0](https://openid.net/specs/openid-connect-discovery-1_0.html) — issuer metadata, endpoints, and signing-key discovery.
+- [OpenID Connect Back-Channel Logout 1.0](https://openid.net/specs/openid-connect-backchannel-1_0.html) — server-to-server logout token semantics.
+- [Microsoft — Secure an ASP.NET Core Blazor Web App with OIDC](https://learn.microsoft.com/en-us/aspnet/core/blazor/security/blazor-web-app-with-oidc) — official server-side OIDC and cookie boundary guidance.
+- [OASIS SAML 2.0 Technical Overview](https://docs.oasis-open.org/security/saml/Post2.0/sstc-saml-tech-overview-2.0.html) — authoritative SAML roles, assertions, and browser SSO profiles.
+- [ByteByteGo — What Is SSO?](https://github.com/ByteByteGoHq/system-design-101/blob/b28380a4710c5ec9638ec037d4168e288f334cba/data/guides/v1what-is-sso-single-sign-on.md) — source flow rebuilt around IdP, relying-party, session, token, and logout boundaries.

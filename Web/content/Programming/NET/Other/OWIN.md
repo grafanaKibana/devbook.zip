@@ -1,8 +1,8 @@
 ---
 publish: true
 created: 2026-07-11T21:44:25.510Z
-modified: 2026-07-11T21:44:25.511Z
-published: 2026-07-11T21:44:25.511Z
+modified: 2026-07-17T19:00:25.726Z
+published: 2026-07-17T19:00:25.726Z
 topic:
   - Programming
 subtopic:
@@ -92,7 +92,7 @@ For the incremental path, Microsoft's current tooling does the heavy lifting: **
 > - Prefer rewrite when current architecture blocks critical goals (performance, security posture, operability) and business can fund a transition window.
 > - Decide with hard constraints: SLA tolerance, test coverage quality, team expertise, and ability to run parallel environments safely.
 
-## Links
+## References
 
 - [OWIN 1.0 specification](https://github.com/owin/owin/blob/master/owin.md) - Canonical spec text for environment and app delegate contracts.
 - [Microsoft OWIN and Katana overview](https://learn.microsoft.com/aspnet/aspnet/overview/owin-and-katana/) - Official architecture overview for legacy ASP.NET.

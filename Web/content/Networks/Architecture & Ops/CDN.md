@@ -1,8 +1,8 @@
 ---
 publish: true
 created: 2026-07-11T21:46:23.928Z
-modified: 2026-07-11T21:46:23.929Z
-published: 2026-07-11T21:46:23.929Z
+modified: 2026-07-17T05:45:13.605Z
+published: 2026-07-17T05:45:13.605Z
 topic:
   - Networks
 subtopic:
@@ -20,7 +20,7 @@ A CDN (Content Delivery Network) is a globally distributed network of caching se
 
 ## How It Works
 
-A user's request resolves — usually via [[DNS]] (GeoDNS/anycast) — to the nearest edge node rather than the origin:
+A user's request resolves — usually via [[Networks/Protocols/DNS|DNS]] (GeoDNS/anycast) — to the nearest edge node rather than the origin:
 
 ```mermaid
 flowchart LR
@@ -33,7 +33,29 @@ flowchart LR
 - **Cache hit** — the edge has a fresh copy and returns it immediately (most requests).
 - **Cache miss** — the edge fetches from the **origin**, stores it per the caching headers, and serves it. Subsequent users in that region hit the warm cache.
 
-Edge selection is typically **anycast** (one IP announced from many locations; the network routes to the closest) or **GeoDNS** (DNS returns the nearest edge's address) — see [[DNS|DNS as a traffic director]].
+Edge selection is typically **anycast** (one IP announced from many locations; the network routes to the closest) or **GeoDNS** (DNS returns the nearest edge's address) — see [[Networks/Protocols/DNS|DNS as a traffic director]].
+
+![[Assets/System Design 101/236c3f5559f26e6876eb8353fe96affd6deca63fba459c7a2ad7340101e273bd.png]]
+
+> [!WARNING] Non-normative source visual
+> The provider list is historical—Google Stadia is discontinued—and it mixes general regional serverless products such as Azure Functions with edge runtimes. Treat edge compute as code executed at or near a provider point of presence under that product's documented placement, state, latency, and runtime limits.
+
+For `GET https://static.example.com/app.9f2c1.js`, the concrete path is:
+
+1. DNS resolves the CDN hostname, and routing brings the client to an available edge. "Nearest" is a routing decision, not a guarantee of the geographically closest building.
+2. The edge derives a cache key. A fresh entry returns immediately with an `Age` value: the origin does no work.
+3. On a miss, the edge opens or reuses an origin connection, fetches the object, and stores it only if the response permits shared caching.
+4. A purge removes the cached key eventually; a content-hashed replacement avoids that race because the new bytes have a new URL.
+
+An origin outage therefore affects misses differently from hits. Fresh cached objects can still be served, while uncached objects fail unless the CDN has an explicitly configured stale-response policy. A second origin, origin shield, and tested stale limits address different parts of that failure path.
+
+## Map Tiles: a Cache-Key Example
+
+A slippy map turns a viewport and zoom level into versioned tile coordinates such as `/tiles/v2026-07/12/1204/1538.webp`. Panning requests adjacent coordinates; zooming changes the level segment. Including the dataset version makes each URL immutable, so public tiles are good CDN objects: the edge either returns the exact tile or fetches it from object storage through the origin path.
+
+![[Assets/System Design 101/3f09384035d8d45d4c310f3020f6c741c8f20d5191d929cd62402f4e321003f6.png]]
+
+The CDN does not geocode an address, select a route, or rank traffic-aware alternatives. Those are separate services whose results tell the client which tiles and overlays to request. Keeping that boundary explicit prevents a cache layer from becoming an imaginary navigation service.
 
 ## What the CDN Caches and For How Long
 
@@ -56,7 +78,7 @@ The hard part, as always, is invalidation. Two strategies:
 
 - **Dynamic acceleration** — even uncacheable responses benefit: the CDN terminates TLS at the edge and reuses warm, optimized backbone connections to the origin, cutting handshake and routing latency.
 - **Edge compute** — run code at the edge (Cloudflare Workers, Lambda@Edge, Fastly Compute) for auth, A/B testing, redirects, personalization, and API responses — close to the user, off the origin.
-- **Security** — CDNs are a natural place for **TLS termination**, **DDoS absorption** (huge distributed capacity soaks up [[UDP|volumetric floods]]), **WAF**, and bot mitigation.
+- **Security** — CDNs are a natural place for **TLS termination**, **DDoS absorption** (huge distributed capacity soaks up [[Networks/Transport & Sockets/UDP|volumetric UDP floods]]), **WAF**, and bot mitigation.
 
 ## Pitfalls
 
@@ -95,3 +117,5 @@ The hard part, as always, is invalidation. Two strategies:
 - [HTTP caching (RFC 9111)](https://www.rfc-editor.org/rfc/rfc9111) — the freshness/validation model CDNs implement (`s-maxage`, `ETag`, `Vary`).
 - [Caching best practices & cache-busting (Jake Archibald)](https://jakearchibald.com/2016/caching-best-practices/) — the immutable-URL + content-hash strategy explained.
 - [Amazon CloudFront / cache behaviors (AWS)](https://docs.aws.amazon.com/AmazonCloudFront/latest/DeveloperGuide/Introduction.html) — a production CDN's cache-key, TTL, and invalidation model.
+- [A Beginner's Guide to CDN (ByteByteGo snapshot)](https://github.com/ByteByteGoHq/system-design-101/blob/b28380a4710c5ec9638ec037d4168e288f334cba/data/guides/a-beginner%27s-guide-to-cdn-content-delivery-network.md) — the reviewed source diagram and high-level edge-delivery model; its guest-post claims are leads rather than authority.
+- [Design Google Maps (ByteByteGo snapshot)](https://github.com/ByteByteGoHq/system-design-101/blob/b28380a4710c5ec9638ec037d4168e288f334cba/data/guides/design-google-maps.md) — the reviewed source for the static tile/CDN example and the boundary with location and navigation services.

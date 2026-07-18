@@ -1,8 +1,8 @@
 ---
 publish: true
 created: 2026-07-11T21:45:18.007Z
-modified: 2026-07-11T21:45:18.007Z
-published: 2026-07-11T21:45:18.007Z
+modified: 2026-07-17T19:00:23.178Z
+published: 2026-07-17T19:00:23.178Z
 topic:
   - Programming
 subtopic:
@@ -81,7 +81,7 @@ Name resolution searches from the **most-nested** namespace outward, so a type i
 > [!QUESTION]- When should you prefer file-scoped namespaces over block-scoped namespaces?
 > Prefer file-scoped namespaces when a file contains one namespace and regular type declarations, because it reduces indentation and visual noise. Use block-scoped form when a file needs multiple namespace blocks or unusual nesting patterns.
 
-## Links
+## References
 
 - [Declare namespaces to organize types](https://learn.microsoft.com/dotnet/csharp/fundamentals/types/namespaces) — official overview and best-practice guidance for namespace declaration and usage.
 - [namespace keyword](https://learn.microsoft.com/dotnet/csharp/language-reference/keywords/namespace) — exact language rules and syntax variants including file-scoped form.

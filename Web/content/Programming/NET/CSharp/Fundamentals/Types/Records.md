@@ -1,8 +1,8 @@
 ---
 publish: true
 created: 2026-07-11T21:45:54.821Z
-modified: 2026-07-11T21:45:54.822Z
-published: 2026-07-11T21:45:54.822Z
+modified: 2026-07-17T19:00:24.488Z
+published: 2026-07-17T19:00:24.488Z
 topic:
   - Programming
 subtopic:
@@ -269,7 +269,7 @@ Console.WriteLine(a.Items.Count); // 3 — same list instance
 > - **Mutable record structs** — if a key is mutated after insertion, its hash code changes and it becomes unreachable in the dictionary. Use `readonly record struct` for keys.
 > - **Reference-type properties** — if the record struct contains a reference-type property (e.g. `string[]`), the generated `GetHashCode` calls that property's `GetHashCode`, which for arrays is reference-based (not content-based). Two structurally identical keys with different array instances will hash differently. Override `GetHashCode` or use immutable value-semantic collections.
 
-## Links
+## References
 
 - [Records - C# reference](https://learn.microsoft.com/dotnet/csharp/language-reference/builtin-types/record)
 - [Create record types - C# tutorial](https://learn.microsoft.com/dotnet/csharp/whats-new/tutorials/records)

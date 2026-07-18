@@ -1,8 +1,8 @@
 ---
 publish: true
 created: 2026-07-11T21:44:23.936Z
-modified: 2026-07-11T21:44:23.937Z
-published: 2026-07-11T21:44:23.937Z
+modified: 2026-07-17T19:00:25.363Z
+published: 2026-07-17T19:00:25.363Z
 topic:
   - Programming
 subtopic:
@@ -97,7 +97,7 @@ var buffer = new byte[256];
 > - Prefer adding it as part of multi-targeting (`net8.0;netstandard2.0`) instead of making it your only target for new libraries.
 > - If all known consumers are modern .NET, target modern `netX` directly.
 
-## Links
+## References
 
 - [.NET Standard](https://learn.microsoft.com/dotnet/standard/net-standard) - Official contract model, version support matrix, and current guidance.
 - [Cross-platform targeting for .NET libraries](https://learn.microsoft.com/dotnet/standard/library-guidance/cross-platform-targeting) - Practical targeting and multi-targeting decision rules.
