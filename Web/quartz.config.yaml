@@ -204,6 +204,10 @@ plugins:
     # Enabled (installed + registered) but no `layout`: rendered by SiteHeader.
   - source: github:quartz-community/breadcrumbs
     enabled: true
+    options:
+      # The separator is rendered as a masked Lucide chevron in custom.scss, so
+      # the text spacer is a blank space (its glyph is zeroed out there).
+      spacerSymbol: " "
     layout:
       position: beforeBody
       priority: 5

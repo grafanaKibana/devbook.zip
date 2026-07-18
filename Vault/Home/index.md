@@ -204,7 +204,7 @@ ${spanRules("dsk")}
           {STATUS_RAMP.map((seg) => (
             <span class="dc-topic-legend-item">
               <span class="dc-topic-legend-sw" style={{ background: tint(seg.mix) }} />
-              <span>{seg.label} · {seg.weight}%</span>
+              <span>{seg.label} · {oTotal > 0 ? Math.round(((oByStatus[seg.key] ?? 0) / oTotal) * 100) : 0}%</span>
             </span>
           ))}
         </div>
