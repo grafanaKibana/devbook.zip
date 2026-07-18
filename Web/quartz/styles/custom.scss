@@ -132,8 +132,7 @@ body {
 }
 
 // Header toggle + search icons pick up the title accent (--secondary, the
-// default link colour the page title uses) on hover. Their own component CSS
-// paints them --darkgray via fill/stroke, so override both.
+// default link colour the page title uses) on hover.
 .site-header-actions .darkmode,
 .site-header-actions .readermode,
 .site-header-search .search > .search-button {
@@ -144,12 +143,23 @@ body {
       color 0.15s ease,
       opacity 0.1s ease;
   }
+}
 
-  &:hover svg {
-    fill: var(--secondary);
-    stroke: var(--secondary);
-    color: var(--secondary);
-  }
+// Recolour each icon using ONLY the paint channel it uses at rest — adding the
+// other channel made them look bolder on hover: a stroke thickened the filled
+// sun/moon, and a fill flooded the outline search glass solid.
+//   • darkmode  — filled (fill:--darkgray, no stroke): recolour the fill.
+//   • readermode — filled + hair-line stroke: recolour both (weight unchanged).
+//   • search    — outline (.search-path stroke, fill:none): recolour the stroke.
+.site-header-actions .darkmode:hover svg {
+  fill: var(--secondary);
+}
+.site-header-actions .readermode:hover svg {
+  fill: var(--secondary);
+  stroke: var(--secondary);
+}
+.site-header-search .search > .search-button:hover svg .search-path {
+  stroke: var(--secondary);
 }
 
 // ---------------------------------------------------------------------------
@@ -325,8 +335,6 @@ body {
 // ============================================================================
 
 :root {
-  // Vertical breathing room between nav rows.
-  --explorer-item-gap: 0.25rem;
   // Folders stay heavier than files, but well short of the plugin's near-bold 600.
   --explorer-folder-weight: 500;
   // base.scss styles every `a` at $semiBoldWeight (600), which is also what the
@@ -422,10 +430,6 @@ body {
   background-color: var(--highlight);
   font-weight: #{$semiBoldWeight};
   opacity: 1;
-}
-
-.explorer .explorer-content ul li {
-  margin-block: var(--explorer-item-gap);
 }
 
 // ---------------------------------------------------------------------------
