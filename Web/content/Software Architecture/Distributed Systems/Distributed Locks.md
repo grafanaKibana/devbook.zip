@@ -1,8 +1,8 @@
 ---
 publish: true
 created: 2026-07-16T14:07:21.875Z
-modified: 2026-07-16T17:34:24.198Z
-published: 2026-07-16T17:34:24.198Z
+modified: 2026-07-18T11:30:13.955Z
+published: 2026-07-18T11:30:13.955Z
 topic:
   - Software Architecture
 subtopic:
@@ -14,11 +14,9 @@ priority: High
 status: Ready to Repeat
 ---
 
-# Intro
-
 A distributed lock is usually a lease: exclusive ownership for a bounded time, not permanent mutual exclusion. A process can pause longer than its lease, resume, and still believe it owns the resource. Correct designs make stale owners harmless.
 
-## Lease, Ownership, and Fencing
+# Lease, Ownership, and Fencing
 
 Acquire the lease from a linearizable store with an owner token, expiry, and monotonically increasing fencing token. Renew only while the owner token still matches. Release by compare-and-delete, never by deleting a key solely by name.
 
@@ -31,7 +29,7 @@ A resumes and sends write with fence 41 -> storage rejects 41 < 42
 
 The protected resource must remember the highest accepted fence. Without that check, the lease service can exclude current holders while a stale holder still corrupts the resource. A quorum or consensus-backed store improves the ownership decision; it does not remove process pauses or make an unfenced downstream write safe.
 
-## Prefer a Native Invariant
+# Prefer a Native Invariant
 
 Use a unique database constraint to prevent duplicate order creation, optimistic concurrency to reject stale document updates, idempotency keys to suppress retries, and partition ownership to serialize queue work. These mechanisms protect the actual data invariant and are often safer than a separate lock.
 
@@ -39,7 +37,7 @@ Use a distributed lease when the resource has no stronger atomic primitive and d
 
 The source visual remains rejected because it presents mutual exclusion as sufficient and recommends locks for cases better served by constraints, idempotency, or partition ownership.
 
-## References
+# References
 
 - [The Chubby lock service](https://research.google/pubs/the-chubby-lock-service-for-loosely-coupled-distributed-systems/) — primary design for coarse-grained distributed locking, sessions, sequencers, and failure semantics.
 - [etcd concurrency API](https://etcd.io/docs/v3.6/dev-guide/api_concurrency_reference_v3/) — official lease, mutex, election, and session interfaces backed by etcd consensus.

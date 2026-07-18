@@ -1,8 +1,8 @@
 ---
 publish: true
 created: 2026-07-12T14:27:20.421Z
-modified: 2026-07-12T14:27:20.421Z
-published: 2026-07-12T14:27:20.421Z
+modified: 2026-07-18T11:30:05.319Z
+published: 2026-07-18T11:30:05.319Z
 topic:
   - Computer Science
 subtopic:
@@ -14,8 +14,6 @@ priority: Medium
 status: Done
 ---
 
-# Intro
-
 Parsing a 4 KB network buffer routinely needs to hand a middle section to another method. Passing `buffer[100..200]` as a `byte[]` allocates a fresh array and copies 100 bytes; doing that per packet turns parsing into a stream of short-lived allocations the garbage collector must later reclaim. A `Span<T>` describes that same section as a (reference, length) pair over the original buffer, so the sub-view costs nothing to create and shares the bytes it points at.
 
 A span owns nothing. It is a small value type — a managed reference to the first element in view plus an `int` length — laid over memory that lives elsewhere: a managed array, a `stackalloc` block, or native memory. Slicing returns another span over the same backing store with a shifted reference and a new length; no element is copied, which is why a write through a slice is visible in the original buffer. Being a `ref struct` confines it to the stack, so it can never outlive the memory it describes.
@@ -25,7 +23,7 @@ A span owns nothing. It is a small value type — a managed reference to the fir
 > [!NOTE] Visualization pending
 > Planned StepTrace: a (pointer, length) window card laid over part of an existing array, where slicing produces a narrower window over the same memory — no copy — and a write through the slice mutates the shared backing element. No matching renderer exists in `engine.js` yet.
 
-## Representation and non-ownership
+# Representation and non-ownership
 
 A `Span<T>` holds two fields: a managed reference (`ref T`) to the first element in view and an `int` length. It stores none of the elements itself, so its footprint is constant whether the window covers 2 elements or 2 million. Indexing `span[i]` dereferences `first + i` after checking `0 <= i < length`, giving array-style access with a bounds check and no hop through an owner object.
 
@@ -37,7 +35,7 @@ Three properties follow from the design:
 - **Stack-only.** `Span<T>` is a `ref struct`. The runtime keeps it on the stack and forbids every move to the heap, which is what stops a window from outliving the buffer beneath it.
 - **Read-only variant.** `ReadOnlySpan<T>` is the same window with writes removed, so it can wrap immutable data such as a `string` (as `ReadOnlySpan<char>`). `Span<T>` converts implicitly to it; the reverse is disallowed.
 
-## Complexity
+# Complexity
 
 | Operation | Time | Heap allocation | Aux space |
 | --- | --- | --- | --- |
@@ -47,7 +45,7 @@ Three properties follow from the design:
 
 The defining column is allocation: every operation is constant time and copies nothing. A span is two fields, so its own footprint is `O(1)` independent of the window length; the elements live in memory it does not own. Producing the same sub-view as a distinct array — `array[100..200]` typed as `byte[]` — instead costs `O(n)` time and an `O(n)` allocation for the copied elements.
 
-## Where the stack-only window breaks down
+# Where the stack-only window breaks down
 
 The restrictions all follow from one rule: a non-owning window must never outlive its buffer, so the runtime pins it to the stack and refuses every path to the heap.
 
@@ -57,7 +55,7 @@ Lifetime still binds even inside the stack. A span over a `stackalloc` buffer is
 
 `ReadOnlySpan<T>` narrows these rules rather than lifting them: it still cannot escape to the heap, and it additionally rejects writes, so an attempt to mutate through a `ReadOnlySpan<char>` obtained from a `string` fails to compile rather than corrupting an interned literal.
 
-## Reference drawer
+# Reference drawer
 
 > [!ABSTRACT]- Window over a backing array
 >
@@ -85,7 +83,7 @@ Lifetime still binds even inside the stack. A span over a `stackalloc` buffer is
 >
 > `tail` and `values` alias the same buffer, so the write through `tail` is observable through `values`. `AsSpan` produces a `ReadOnlySpan<char>` over the string's characters without copying them.
 
-## Comparison
+# Comparison
 
 | Type | Sub-view cost | Heap-storable | Crosses `await` / lives in a field | Backing store | Stronger case |
 | --- | --- | --- | --- | --- | --- |
@@ -95,7 +93,7 @@ Lifetime still binds even inside the stack. A span over a `stackalloc` buffer is
 
 `Span<T>` is the zero-copy, zero-allocation view for synchronous code that touches contiguous memory — parsing, formatting, buffer manipulation — and it pays for that speed by being unable to leave the stack. `Memory<T>` accepts one level of indirection to become heap-storable and async-safe, which is the deciding factor whenever a view must sit in a field or survive an `await`. `ArraySegment<T>` fills the same heap-storable niche for managed arrays only and predates both. A real copy — a fresh array — is warranted just once: when the data must outlive the buffer it came from.
 
-## Questions
+# Questions
 
 > [!QUESTION]- How is a `Span<T>` represented, and why is its size independent of the window length?
 > It is a value type holding two fields — a managed reference to the first element in view and an integer length. The elements stay in the memory it points at, so the span itself is two machine words whether it covers 2 elements or 2 million.
@@ -109,7 +107,7 @@ Lifetime still binds even inside the stack. A span over a `stackalloc` buffer is
 > [!QUESTION]- When is a copy into a fresh array required instead of a span or `Memory<T>`?
 > When the data must outlive the buffer it came from. A span or `Memory<T>` only references existing memory; once that backing store is freed or reused, the view is invalid, so surviving data has to be copied into an owned array.
 
-## References
+# References
 
 - [`Span<T>` struct](https://learn.microsoft.com/en-us/dotnet/api/system.span-1) — API reference for the constructors, `Slice`, and the `ref struct` constraints that keep it on the stack.
 - [Memory and spans](https://learn.microsoft.com/en-us/dotnet/standard/memory-and-spans/) — Microsoft's ownership, lifetime, and consumption rules covering when a view should be `Span<T>` versus `Memory<T>`.

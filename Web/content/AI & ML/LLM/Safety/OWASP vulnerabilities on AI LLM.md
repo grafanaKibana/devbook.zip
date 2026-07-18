@@ -1,8 +1,8 @@
 ---
 publish: true
 created: 2026-07-13T18:39:40.445Z
-modified: 2026-07-13T18:39:40.446Z
-published: 2026-07-13T18:39:40.446Z
+modified: 2026-07-18T11:30:02.878Z
+published: 2026-07-18T11:30:02.878Z
 topic:
   - AI & ML
 subtopic:
@@ -14,11 +14,9 @@ priority: Medium
 status: Done
 ---
 
-# Intro
-
 The OWASP Top 10 for LLM Applications (2025 edition) catalogs the highest-impact security failures in systems that integrate large language models. Unlike the classic OWASP Top 10, this list focuses on a mixed boundary: natural-language inputs interpreted probabilistically by a model, then translated into deterministic actions like tool calls, retrieval, and API execution. This matters because prompts can act as both data and instructions, model outputs are untrusted by default, and agent architectures often grant implicit authority over tools and data. The 2025 refresh keeps Prompt Injection as the top risk and expands it to multimodal vectors. It also adds System Prompt Leakage (LLM07), Vector and Embedding Weaknesses (LLM08), and Misinformation (LLM09) to reflect production incidents and modern RAG and agent behavior.
 
-## The 2025 List
+# The 2025 List
 
 | ID | Vulnerability | One-line description |
 | --- | --- | --- |
@@ -33,9 +31,9 @@ The OWASP Top 10 for LLM Applications (2025 edition) catalogs the highest-impact
 | LLM09 | Misinformation | Model generates false content that passes through without verification |
 | LLM10 | Unbounded Consumption | Denial-of-wallet or resource exhaustion via crafted queries |
 
-## Critical Vulnerabilities
+# Critical Vulnerabilities
 
-### Prompt Injection (LLM01)
+## Prompt Injection (LLM01)
 
 **Mechanism**: The model receives attacker instructions in the same natural-language channel as legitimate instructions, so it may follow malicious text even when system guidance says not to. **Direct injection** is the obvious case (`Ignore previous instructions and ...`) entered in a user prompt. **Indirect injection** is more dangerous in production: the attacker plants instructions in content that gets retrieved through [[AI & ML/LLM/Context Engineering/RAG/RAG|RAG]] or browsing. **Multimodal injection** (new in 2025) extends this to hidden instructions in images or audio that multimodal models process.
 
@@ -43,7 +41,7 @@ The OWASP Top 10 for LLM Applications (2025 edition) catalogs the highest-impact
 
 **Mitigations**: use input and output filtering, enforce privilege separation so the LLM cannot access unnecessary data, apply Spotlighting-style delimiting between trusted instructions and untrusted content, and constrain tool invocation through strict structured schemas.
 
-### Sensitive Information Disclosure (LLM02)
+## Sensitive Information Disclosure (LLM02)
 
 **Mechanism**: LLM systems can disclose sensitive data through memorized training artifacts, unsafe prompt and context assembly, or overly broad retrieval scope. Leaks include PII, credentials, and proprietary internal material.
 
@@ -51,7 +49,7 @@ The OWASP Top 10 for LLM Applications (2025 edition) catalogs the highest-impact
 
 **Mitigations**: add output filtering and redaction for sensitive entities, use differential privacy during training where applicable, enforce strict RBAC at retrieval time, and instruct the system prompt to never echo credentials.
 
-### Excessive Agency (LLM06)
+## Excessive Agency (LLM06)
 
 **Mechanism**: The model is connected to tools (email, databases, files, APIs) with broader permissions than required. Prompt injection then becomes an authority escalation path because the attacker effectively acts through the model's permissions.
 
@@ -59,7 +57,7 @@ The OWASP Top 10 for LLM Applications (2025 edition) catalogs the highest-impact
 
 **Mitigations**: apply least privilege to every tool, separate read and write tools, require human approval for destructive actions, and rate-limit tool invocation to reduce automation abuse.
 
-### Improper Output Handling (LLM05)
+## Improper Output Handling (LLM05)
 
 **Mechanism**: Teams trust model output and pass it directly into shells, SQL, HTML rendering, or external APIs without sanitization. This recreates classic injection classes (XSS, SQLi, command injection), but now the immediate source is model output rather than direct user text.
 
@@ -67,33 +65,33 @@ The OWASP Top 10 for LLM Applications (2025 edition) catalogs the highest-impact
 
 **Mitigations**: treat every LLM response as untrusted input; parameterize database access, encode output for rendering context, and run risky execution paths in sandboxed environments. See [[Guardrails]].
 
-## Remaining Vulnerabilities
+# Remaining Vulnerabilities
 
-### Supply Chain Vulnerabilities (LLM03)
+## Supply Chain Vulnerabilities (LLM03)
 
 Compromise can occur in base models, fine-tuning datasets, plugins, or other dependencies that feed model behavior. Treat model and plugin provenance as a first-class security control: verify origin, pin versions, and audit third-party extensions.
 
-### Data and Model Poisoning (LLM04)
+## Data and Model Poisoning (LLM04)
 
 Adversaries can inject biased or malicious data during training or fine-tuning so model behavior degrades or shifts over time. Federated learning and public datasets are particularly exposed because trust and data quality boundaries are weak; monitor post-training behavior drift.
 
-### System Prompt Leakage (LLM07)
+## System Prompt Leakage (LLM07)
 
 New in 2025, this risk captures adversarial extraction of the system prompt itself, including business rules, guardrail logic, and tool definitions. Treat system prompts as discoverable artifacts, not hidden secrets.
 
-### Vector and Embedding Weaknesses (LLM08)
+## Vector and Embedding Weaknesses (LLM08)
 
 New in 2025, this risk targets retrieval layers: poisoned corpus documents and adversarial embeddings can make irrelevant or malicious content rank highly. Monitor embedding distribution drift, validate document provenance, and harden [[AI & ML/LLM/Context Engineering/RAG/RAG|RAG]] ingestion pipelines.
 
-### Misinformation (LLM09)
+## Misinformation (LLM09)
 
 New in 2025, this frames plausible false generation as a security issue when adversaries exploit model confidence to spread false claims. This overlaps with [[Hallucinations]], but the emphasis here is exploitability and downstream impact.
 
-### Unbounded Consumption (LLM10)
+## Unbounded Consumption (LLM10)
 
 Adversaries can trigger denial-of-wallet by forcing high token usage, oversized contexts, or tool-call loops. Apply hard budget caps, per-request token limits, and agent-loop circuit breakers.
 
-## What Is New vs Familiar
+# What Is New vs Familiar
 
 | LLM Risk | Traditional Analog | What is Genuinely New |
 | --- | --- | --- |
@@ -105,9 +103,9 @@ Adversaries can trigger denial-of-wallet by forcing high token usage, oversized 
 | System Prompt Leakage | Source Code Disclosure | Reliable prevention of extraction is not realistic; assume discoverability |
 | Vector and Embedding Weaknesses | No direct analog | Retrieval ranking becomes a new attack surface in RAG architectures |
 
-## Pitfalls
+# Pitfalls
 
-### Prompt Injection Has No Complete Fix
+## Prompt Injection Has No Complete Fix
 
 **What goes wrong**: teams deploy a single control, such as input filtering, and declare prompt injection solved.
 
@@ -115,7 +113,7 @@ Adversaries can trigger denial-of-wallet by forcing high token usage, oversized 
 
 **How to avoid it**: design layered defenses as a baseline: filtering for known patterns, privilege separation to limit blast radius, and monitoring for exploit behavior.
 
-### LLM Output Treated as Trusted
+## LLM Output Treated as Trusted
 
 **What goes wrong**: model output is passed directly into shells, SQL, or HTML contexts without sanitization.
 
@@ -123,7 +121,7 @@ Adversaries can trigger denial-of-wallet by forcing high token usage, oversized 
 
 **How to avoid it**: enforce the same controls used for external input: parameterized queries, context-appropriate encoding, and sandboxed execution.
 
-### Security by System Prompt Instruction
+## Security by System Prompt Instruction
 
 **What goes wrong**: critical controls are delegated to natural-language instructions such as "never reveal secrets" or "never perform unauthorized actions."
 
@@ -131,7 +129,7 @@ Adversaries can trigger denial-of-wallet by forcing high token usage, oversized 
 
 **How to avoid it**: move enforcement to deterministic code paths: RBAC, tool permission boundaries, and output filtering.
 
-## Tradeoffs
+# Tradeoffs
 
 | Defense Layer | Coverage | Cost | Risk |
 | --- | --- | --- | --- |
@@ -143,7 +141,7 @@ Adversaries can trigger denial-of-wallet by forcing high token usage, oversized 
 
 **Decision rule**: Start with privilege separation as a non-negotiable baseline. Add output sanitization on every downstream interface. Layer filtering for known attack patterns. Use human approval only for high-stakes destructive actions. Monitor all tool and retrieval pathways for exploit signals.
 
-## Questions
+# Questions
 
 > [!QUESTION]- Why is prompt injection fundamentally harder to prevent than SQL injection?
 >
@@ -169,7 +167,7 @@ Adversaries can trigger denial-of-wallet by forcing high token usage, oversized 
 > - Deterministic enforcement belongs in RBAC, output filtering, and tool permission architecture.
 > - This shifts effort from prompt wording to code-level controls — more work upfront, but far more auditable and durable.
 
-## References
+# References
 
 - [OWASP Top 10 for LLM Applications 2025 — official project page with full vulnerability descriptions and mitigations (OWASP Foundation)](https://genai.owasp.org/resource/owasp-top-10-for-llm-applications-2025/)
 - [Not what you have signed up for — indirect prompt injection attacks on LLM-integrated applications (Greshake et al., 2023)](https://arxiv.org/abs/2302.12173) — foundational paper that demonstrates indirect injection through retrieved documents.

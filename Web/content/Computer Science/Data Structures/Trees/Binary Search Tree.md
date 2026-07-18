@@ -1,8 +1,8 @@
 ---
 publish: true
 created: 2026-07-12T14:27:20.423Z
-modified: 2026-07-12T14:27:20.423Z
-published: 2026-07-12T14:27:20.423Z
+modified: 2026-07-18T11:30:05.487Z
+published: 2026-07-18T11:30:05.487Z
 topic:
   - Computer Science
 subtopic:
@@ -14,8 +14,6 @@ priority: Medium
 status: Ready to Repeat
 ---
 
-# Intro
-
 An ordered collection of keys needs three things at once: fast lookup, fast insertion, and ordered access — min, max, "the next key after 40", every key in `[10, 90)`. A sorted array answers ordered queries in `O(log n)` but pays `O(n)` to shift elements on every insert. A [[HashMap]] inserts and looks up in `O(1)` but stores keys in hash order, so it cannot answer any of the ordered queries without first sorting. A binary search tree stores keys in a shape that keeps both: each key sits at a node with two children, and the position of every key is fixed by comparison against its ancestors.
 
 The binding rule is the **ordering invariant**: for any node, every key in its left subtree is smaller than the node's key, and every key in its right subtree is larger. That invariant is what lets a search discard one whole subtree at each comparison, and it is what makes an in-order traversal emit the keys already sorted. What the tree does not carry is any bound on its own height — the invariant fixes left-versus-right, not depth.
@@ -25,7 +23,7 @@ The binding rule is the **ordering invariant**: for any node, every key in its l
 > [!NOTE] Visualization pending
 > Planned StepTrace: a tree card showing the decisive transition to animate — a search descending left or right by comparison, an insert falling through to the leaf where the search runs off, and a sorted-insert sequence stretching the tree into a right-leaning chain. No matching renderer exists in `engine.js` yet.
 
-## Representation and invariants
+# Representation and invariants
 
 Each node holds a `key`, a `Left` child, a `Right` child, and optionally a `Parent` back-pointer. There are no arrays or indices — the structure is a graph of node objects reachable from a single `root`. An empty tree is `root == null`; a leaf is a node whose `Left` and `Right` are both null.
 
@@ -37,7 +35,7 @@ The ordering invariant is global, not local. It is not enough that a node's imme
 
 Insert and delete change parent/child links; search and traversal read them without mutation. The resulting shape — which key ends up at the root, how deep a subtree runs — is an artifact of insertion order, not of the key set. Two trees holding `{1,2,3}` can be a balanced triangle or a three-node chain depending on the order the keys arrived.
 
-## Complexity
+# Complexity
 
 Every operation cost is a function of the height `h`. A balanced tree has `h = O(log n)`; a degenerate one has `h = O(n)`.
 
@@ -50,7 +48,7 @@ Every operation cost is a function of the height `h`. A balanced tree has `h = O
 
 Structure storage is `O(n)` overall — one node per key, plus the child pointers. The per-operation Space column above is auxiliary space on top of that: a recursive walk consumes `O(h)` call-stack frames, while an iterative walk keeps it at `O(1)`. None of these bounds assume balancing, which is precisely the gap the boundaries below expose.
 
-## When the shape stops cooperating
+# When the shape stops cooperating
 
 A plain BST does not self-balance. Inserting keys in sorted order — `1, 2, 3, 4, 5` — sends every insert down the right child, because each new key is larger than everything already present. The result satisfies the ordering invariant perfectly and is still an `O(n)` chain indistinguishable in cost from a [[LinkedList]]:
 
@@ -68,7 +66,7 @@ Deletion is the operation with real cases, and each is a consequence of keeping 
 
 Order queries by _rank_ — "the 7th smallest key" — are not `O(log n)` on a plain BST. Reaching them requires counting nodes along the way, which is `O(n)` unless each node is augmented with a subtree-size field. The base structure stores order but not position.
 
-## Reference drawer
+# Reference drawer
 
 > [!ABSTRACT]- Balanced vs. degenerate shape
 >
@@ -168,7 +166,7 @@ Order queries by _rank_ — "the 7th smallest key" — are not `O(log n)` on a p
 >
 > `Find` is iterative so a degenerate chain of a million nodes cannot overflow the stack; the recursive `Insert`/`Delete` are safe only because production keys go into a balanced variant. .NET ships no plain BST — `SortedSet<T>` and `SortedDictionary<TKey, TValue>` are red-black trees.
 
-## Comparison
+# Comparison
 
 | Structure | Search | Insert | Ordered queries | Worst-case guarantee | Stronger case |
 | --- | --- | --- | --- | --- | --- |
@@ -178,7 +176,7 @@ Order queries by _rank_ — "the 7th smallest key" — are not `O(log n)` on a p
 
 A plain BST is the simplest structure that keeps keys ordered while supporting cheap insertion, and it behaves well on random or already-balanced input. It pays for that simplicity with no worst-case guarantee — holding `O(log n)` on adversarial or sorted input needs a self-balancing variant ([[AVL Tree]], [[Red-Black Tree]]). A hash map is faster still for point lookups but discards ordering entirely, so it cannot answer range or successor queries; a sorted array matches the search cost but cannot absorb insertions cheaply.
 
-## Questions
+# Questions
 
 > [!QUESTION]- Why does an in-order traversal of a BST produce sorted keys?
 > The ordering invariant places every smaller key in the left subtree and every larger key in the right. Visiting left, then the node, then right therefore reaches the smallest key first and the largest last, in strictly increasing order — the invariant made observable.
@@ -192,7 +190,7 @@ A plain BST is the simplest structure that keeps keys ordered while supporting c
 > [!QUESTION]- When does a hash map beat a BST despite the BST's ordered access?
 > When the workload is purely exact-match lookup and insertion with no need for range queries, successors, min/max, or sorted iteration. The hash map delivers `O(1)` average operations; the ordering a BST maintains is pure overhead if nothing queries it.
 
-## References
+# References
 
 - [Binary Search Trees (Princeton Algorithms)](https://algs4.cs.princeton.edu/32bst/) — Sedgewick's canonical treatment: the ordering invariant, Hibbard deletion, and expected-height analysis under random insertion.
 - [`SortedSet<T>` class](https://learn.microsoft.com/en-us/dotnet/api/system.collections.generic.sortedset-1) — .NET's production ordered set, a self-balancing red-black tree, contrasting with the unbalanced base structure.

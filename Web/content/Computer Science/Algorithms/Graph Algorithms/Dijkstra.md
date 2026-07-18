@@ -1,8 +1,8 @@
 ---
 publish: true
 created: 2026-07-12T14:27:20.402Z
-modified: 2026-07-12T14:27:20.402Z
-published: 2026-07-12T14:27:20.402Z
+modified: 2026-07-18T11:30:03.542Z
+published: 2026-07-18T11:30:03.542Z
 topic:
   - Computer Science
 subtopic:
@@ -14,15 +14,13 @@ priority: Medium
 status: Done
 ---
 
-# Intro
-
 A weighted graph assigns each edge a non-negative cost — travel time, latency, price — and the question is the cheapest total cost from one source node to every other node. Enumerating routes is exponential, and re-deriving a node's best cost every time a shorter approach appears repeats work already done. Dijkstra's algorithm keeps a single tentative distance per node, improves it only through edge relaxation, and commits nodes to a final distance in increasing order of that distance.
 
 The commit order is what makes it cheap. Each step removes the unsettled node with the smallest tentative distance from a min-priority-queue and marks it settled; its distance can no longer change. Relaxing its outgoing edges can only lower still-unsettled neighbours, never a node already behind the frontier. Non-negative weights are the precondition: they guarantee that leaving a settled node and returning through a longer detour cannot arrive cheaper.
 
 **Core condition:** non-negative edge weights → settle nodes in nondecreasing distance order → `O((V + E) log V)` with a binary heap and `O(V)` auxiliary space.
 
-## One run from a source
+# One run from a source
 
 The trace runs a single source from `A` over an undirected weighted graph, settling one node per step until `F` is reached.
 
@@ -32,7 +30,7 @@ The trace runs a single source from `A` over an undirected weighted graph, settl
 
 The first extraction settles `A` at distance 0 and relaxes its edges, giving `B` a tentative 2 and `C` a tentative 5. The decisive move is the next extraction: it takes the smallest tentative value, `B` at 2 — not `C` at 5 — settles it, and relaxing `B→C` lowers `C` from 5 to 3. `C` is now final at 3. Every remaining route to `C` must leave through a node whose tentative distance is already at least 2, and every edge adds a non-negative amount, so no later step can undercut the value `C` settles at. Nodes turn final in the order they leave the queue; the frontier holds only the tentative distances still open to a cheaper approach.
 
-## Why settled distances stay final
+# Why settled distances stay final
 
 The loop maintains one invariant: when a node leaves the priority queue, its tentative distance already equals its true shortest-path distance.
 
@@ -40,7 +38,7 @@ Suppose node `u` is popped with tentative distance `d[u]`, and assume for contra
 
 The single step that makes the argument valid is that the tail from `y` to `u` cannot be negative. With a negative edge that tail could subtract from the cost, `d[y]` would no longer bound the full path, and a node could settle at a distance a later path beats.
 
-## Complexity
+# Complexity
 
 Every variant visits each vertex once and inspects each edge once; what differs is the cost of `extract-min` and of lowering a neighbour's key, which is set by the priority queue.
 
@@ -52,7 +50,7 @@ Every variant visits each vertex once and inspects each edge once; what differs 
 
 Auxiliary space is `O(V)` for the `dist` and `settled` arrays plus `O(V)` for the queue in a decrease-key model. With the lazy-deletion approach below, the binary heap can transiently hold up to `O(E)` stale entries, since each relaxation pushes rather than updates.
 
-## Where the invariant breaks
+# Where the invariant breaks
 
 A single negative edge violates settle-once. Take edges `A→B = 2`, `A→C = 3`, and `C→B = −2`. Dijkstra relaxes `A` to reach `B` at 2 and `C` at 3, extracts and settles `B` at 2, then extracts `C` at 3 and relaxes `C→B` to `3 + (−2) = 1`. `B` is already settled, so that improvement is discarded and `B` is reported at 2, while the true shortest distance `A→C→B` is 1. Nothing throws — the output is simply not a shortest-path tree. Weights that can be negative need [[Bellman-Ford]], which relaxes all edges `V − 1` times and drops the finalization assumption.
 
@@ -60,7 +58,7 @@ A negative _cycle_ has no shortest path at all: a route can loop it repeatedly t
 
 The second boundary is internal to the implementation. Standard binary heaps (including .NET's `PriorityQueue<TElement, TPriority>`) offer no `decrease-key`, so a relaxation pushes a fresh `(distance, node)` pair and leaves the older, larger one in the heap. When such a stale pair is later popped for a node that was already settled through a cheaper entry, it must be skipped — the `if settled[node] continue` guard at the top of the loop. Omitting it re-relaxes that node's edges from an out-of-date distance and can corrupt neighbours still on the frontier.
 
-## Reference drawer
+# Reference drawer
 
 > [!ABSTRACT]- Control flow
 >
@@ -117,7 +115,7 @@ The second boundary is internal to the implementation. Standard binary heaps (in
 >
 > The `settled` array replaces `decrease-key`: relaxation always pushes a new pair, and the guard discards the outdated ones on pop. A parallel `parent[]` array, written whenever `dist[to]` is lowered, reconstructs a path by walking backward from the target.
 
-## Questions
+# Questions
 
 > [!QUESTION]- Why does the settle-once rule require non-negative edge weights?
 > When a node is popped it is treated as final. The proof that this is safe relies on the tail of any alternative path — from the first unsettled node it reaches onward — having non-negative length, so that first node's tentative distance already bounds the whole path. A negative edge lets that tail subtract cost, so a later path can beat a node's settled distance and the reported distance is wrong.
@@ -128,7 +126,7 @@ The second boundary is internal to the implementation. Standard binary heaps (in
 > [!QUESTION]- Why can an array scan beat a binary heap on a dense graph?
 > With a heap, each of the `E` relaxations may cost `O(log V)`, giving `O((V + E) log V)`. On a dense graph `E ≈ V²`, so the heap term dominates at `O(V² log V)`. Scanning all vertices to pick the minimum is `O(V)` per step and `O(V²)` overall, which drops the `log V` factor entirely.
 
-## References
+# References
 
 - [A Note on Two Problems in Connexion with Graphs](https://doi.org/10.1007/BF01386390) — Dijkstra's 1959 paper introducing the algorithm and its greedy minimum-distance selection.
 - [Dijkstra — finding shortest paths from given vertex](https://cp-algorithms.com/graph/dijkstra.html) — adjacency-list implementation with a binary heap and the lazy-deletion (skip-stale) pattern for sparse graphs.

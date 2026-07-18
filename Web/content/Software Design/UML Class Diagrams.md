@@ -1,8 +1,8 @@
 ---
 publish: true
 created: 2026-07-16T18:10:15.768Z
-modified: 2026-07-16T18:17:10.442Z
-published: 2026-07-16T18:17:10.442Z
+modified: 2026-07-18T11:30:16.296Z
+published: 2026-07-18T11:30:16.296Z
 topic:
   - Software Design
 subtopic:
@@ -14,13 +14,11 @@ priority: Medium
 status: Ready to Repeat
 ---
 
-# Intro
-
 A UML class diagram is a static map of types, their members, and the relationships between their instances. Use it to make a domain model or public contract discussable before implementation. It does not show runtime order, database tables, or object allocation by itself; a sequence diagram, data model, or code is needed for those questions.
 
 The diagram is useful only when the arrows carry precise meaning. Association says objects know about one another. Shared aggregation adds a weak whole–part hint but does not define lifecycle. Composition says the whole owns each part exclusively and the part has no independent lifecycle in that model. Generalization and realization describe type contracts, not object ownership.
 
-## Notation and relationship semantics with a C# example
+# Notation and relationship semantics with a C# example
 
 | Mark | Meaning | Example |
 | --- | --- | --- |
@@ -33,7 +31,7 @@ The diagram is useful only when the arrows carry precise meaning. Association sa
 | Solid line with hollow triangle | Generalization | `CardPayment` is a `Payment` |
 | Dashed line with hollow triangle | Realization | `CardPayment` implements `IPayment` |
 
-### C# domain example
+## C# domain example
 
 ```mermaid
 classDiagram
@@ -75,7 +73,7 @@ public sealed record OrderLine(string Sku, int Quantity, decimal UnitPrice);
 
 The private collection makes composition visible in code: callers cannot attach a line to two orders or bypass `AddLine` and its invariants. C# has no aggregation keyword; association, aggregation, and composition are design semantics enforced by ownership and APIs.
 
-## Pitfalls
+# Pitfalls
 
 **Using aggregation as decoration.** A hollow diamond does not automatically define who creates, updates, or deletes a part. If the lifecycle rule is not specific, use a plain association.
 
@@ -83,7 +81,7 @@ The private collection makes composition visible in code: callers cannot attach 
 
 **Treating inheritance as reuse.** The triangle promises substitutability. If a subtype disables a base operation or strengthens its preconditions, the diagram is hiding a broken contract; prefer composition or a narrower interface.
 
-## References
+# References
 
 - [OMG Unified Modeling Language 2.5.1](https://www.omg.org/spec/UML/2.5.1/PDF) — the normative UML specification for classifiers, associations, aggregation, composition, generalization, and realization.
 - [Mermaid class diagrams](https://mermaid.js.org/syntax/classDiagram.html) — the syntax used for the Obsidian/Quartz-compatible example.

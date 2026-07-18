@@ -1,8 +1,8 @@
 ---
 publish: true
 created: 2026-07-16T16:55:26.602Z
-modified: 2026-07-18T09:40:42.866Z
-published: 2026-07-18T09:40:42.866Z
+modified: 2026-07-18T11:30:13.826Z
+published: 2026-07-18T11:30:13.826Z
 topic:
   - Software Architecture
 subtopic:
@@ -14,13 +14,11 @@ priority: Medium
 status: Ready to Repeat
 ---
 
-# Intro
-
 Presentation patterns separate rendering from the state and decisions that drive it. They differ in who receives input, who owns presentation state, how the view is updated, and where navigation lives. Pick the smallest pattern that keeps domain behavior outside the UI framework; the patterns are alternatives for different interaction models, not a maturity ladder.
 
 ![[Assets/System Design 101/8aa1acfad654b14fa9e37888735e16583b5dc841968bdf139337637682bd0e69.png]]
 
-## Responsibility map
+# Responsibility map
 
 | Pattern | State and decisions | View update | Navigation | Good fit |
 | --- | --- | --- | --- | --- |
@@ -31,7 +29,7 @@ Presentation patterns separate rendering from the state and decisions that drive
 | MVVM-C | View-model owns screen state; coordinator owns flow | Binding | Coordinator | Stateful clients with non-trivial navigation graphs |
 | VIPER | Interactor owns use cases; presenter maps display state | Presenter calls a view interface | Router | Large client modules where independent seams repay the ceremony |
 
-## MVC
+# MVC
 
 MVC maps naturally to a server request: the controller accepts input, invokes application behavior, and selects a view. The model remains independent of HTTP and rendering.
 
@@ -58,7 +56,7 @@ public sealed class ProductsController(IProductService service) : Controller
 
 The controller translates the request and result. Pricing rules, retries, and side effects belong in application or domain services; putting them in the controller makes HTTP concerns the accidental business boundary.
 
-## MVVM
+# MVVM
 
 MVVM fits a long-lived view whose controls bind to observable state and commands. The view-model exposes presentation behavior without referencing the view.
 
@@ -117,7 +115,7 @@ public sealed class ProductDetailsViewModel : INotifyPropertyChanged
 
 Small view-only adapters can remain in code-behind. Presentation state and business decisions stay behind the binding boundary so they can be tested without constructing the UI.
 
-## MVC and MVVM compared
+# MVC and MVVM compared
 
 | Dimension | MVC | MVVM |
 | --- | --- | --- |
@@ -129,7 +127,7 @@ Small view-only adapters can remain in code-behind. Presentation state and busin
 
 The binding convenience in MVVM is not free. Two-way bindings can hide control flow, and notification mistakes leave the screen stale without a compile-time failure. MVC keeps the request path explicit, but a controller that performs business decisions, provider calls, and response composition becomes a hard-to-test transaction script. In both patterns, the useful seam is the boundary around presentation behavior, not the pattern name.
 
-## Additional variants
+# Additional variants
 
 Use MVP when a passive view interface is the natural test seam. Use MVU when explicit state transitions and one-way flow matter more than binding convenience. Add a coordinator when navigation has branching logic that should not live in a view-model. Use VIPER only when a large client module benefits from independently testable view, presentation, use-case, and routing boundaries.
 
@@ -145,23 +143,23 @@ MVVM-C keeps the bound screen state in `CheckoutViewModel` but reports `Checkout
 
 Blazor supports binding, but its component state, event callbacks, and render cycle are closer to a component model with unidirectional-flow options than to classic WPF MVVM. A component can use a view-model without making MVVM the framework's required architecture.
 
-## Decision rule
+# Decision rule
 
 Use MVC for server-rendered request/response applications. Use MVVM for stateful clients whose binding infrastructure already supplies observable state and commands. Use MVP for a passive-view seam, MVU for deterministic state transitions, and a coordinator for navigation with its own branching policy. Do not add VIPER-sized separation to a small form whose state and navigation are already legible.
 
 Switch because a boundary has failed, not because a file crossed a size threshold. In WPF or .NET MAUI, move code-behind behavior into a view-model when it starts duplicating presentation state, coordinating asynchronous operations, or making business decisions; event wiring that only adapts a control can stay in the view. In ASP.NET Core MVC, a growing controller usually does not require a new presentation pattern: move application behavior and domain rules into services first. Consider Razor Pages or a different UI shape when controller-and-view routing itself adds ceremony to page-focused interactions.
 
-## Pitfalls
+# Pitfalls
 
-### Massive controllers
+## Massive controllers
 
 A controller becomes difficult to test when it accumulates provider calls, retry policy, and notification side effects. Keep it to input validation, one application operation, result mapping, and response selection.
 
-### Fat view-models
+## Fat view-models
 
 A view-model becomes a second controller when it owns data access, domain rules, and navigation. Keep observable state and commands there; inject application services for business behavior and a coordinator or navigation service for flow.
 
-## Questions
+# Questions
 
 > [!QUESTION]- What is the key difference between MVC and MVVM?
 > MVC uses a controller to handle a request and select a view. MVVM exposes observable state and commands that a long-lived view binds to. MVVM pays for binding infrastructure; MVC fits stateless request/response rendering with less ceremony.
@@ -169,7 +167,7 @@ A view-model becomes a second controller when it owns data access, domain rules,
 > [!QUESTION]- When does a coordinator earn its place?
 > Add one when navigation has branching policy that must be tested independently of screen state, such as checkout flows that can continue to confirmation, authentication, or payment recovery.
 
-## References
+# References
 
 - [ASP.NET Core MVC overview](https://learn.microsoft.com/en-us/aspnet/core/mvc/overview) — official controller, view, and model responsibilities in ASP.NET Core MVC.
 - [Data binding in WPF](https://learn.microsoft.com/en-us/dotnet/desktop/wpf/data/) — official binding, notification, and command infrastructure used by MVVM.

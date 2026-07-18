@@ -1,8 +1,8 @@
 ---
 publish: true
 created: 2026-07-12T14:27:20.400Z
-modified: 2026-07-12T14:27:20.400Z
-published: 2026-07-12T14:27:20.400Z
+modified: 2026-07-18T11:30:03.450Z
+published: 2026-07-18T11:30:03.450Z
 topic:
   - Computer Science
 subtopic:
@@ -13,8 +13,6 @@ level:
 priority: Medium
 status: Creation
 ---
-
-# Intro
 
 A weighted digraph carries a single source and edge weights that may be negative — a currency graph, a distance-vector routing table, a cost network where some transitions refund more than they charge. [[Dijkstra]] settles one vertex at a time and never revisits it, so a negative edge discovered later, one that could still lower an already-final distance, breaks its greedy invariant. Bellman-Ford drops the settle-once rule: it relaxes every edge once per round and repeats the sweep, letting any distance keep falling for as many rounds as it takes.
 
@@ -27,7 +25,7 @@ No StepTrace renderer is registered for Bellman-Ford, so the round-by-round rela
 > [!NOTE] Visualization pending
 > Planned StepTrace: a graph card relaxing every edge once per round, distances settling over `V−1` rounds, with a `V`-th round that still relaxes flagging a reachable negative cycle. No matching renderer exists in `engine.js` yet.
 
-## Why V−1 rounds settle every distance
+# Why V−1 rounds settle every distance
 
 A round relaxes every edge once: for edge `(u, v, w)`, if `dist[u] + w < dist[v]`, then `dist[v]` drops to `dist[u] + w` and `pred[v]` becomes `u`. The order of edges within a round changes the intermediate values but never the round's guarantee.
 
@@ -51,7 +49,7 @@ Round 4   (V-th) no edge relaxes -> no negative cycle; distances final
 
 Round 2 is the decisive transition: the negative edge `1→2` pulls `dist[2]` below the direct `0→2` estimate of `5`, and round 3 propagates that gain to `dist[3]`. A shortest-path-ordered sweep would have converged in a single round; the adverse order is what exposes the per-round frontier and the `V−1` bound. The `V`-th round changes nothing, which is exactly the negative-cycle check coming up empty.
 
-## Complexity
+# Complexity
 
 | Case | Time | Auxiliary space | Cause |
 | --- | --- | --- | --- |
@@ -61,13 +59,13 @@ Round 2 is the decisive transition: the negative edge `1→2` pulls `dist[2]` be
 
 The `O(V)` auxiliary space holds the `dist` and `pred` arrays, and the iterative sweep uses no recursion stack. On a dense graph where `E ≈ V²` the bound becomes `O(V³)`, which matches [[Floyd-Warshall]] for a single source and is why all-pairs work usually switches algorithms.
 
-## When distances stop being defined
+# When distances stop being defined
 
 A reachable negative cycle has no shortest path: each lap around it lowers the total, so the infimum is `−∞`. The `V−1`-round distances into that region are a snapshot taken mid-descent, not an answer. Code that prints them reports finite numbers that mean nothing, and the failure is silent because the arrays are fully populated and no exception fires. A correct report distinguishes three states: a finite distance, `+∞` for a vertex with no path at all, and `−∞` for a vertex reachable through a negative cycle — the last set found by marking every vertex that relaxed on the `V`-th round and everything reachable from it.
 
 Overflow is the second silent failure. Because a round relaxes every edge, including edges leaving vertices not yet reached, computing `dist[u] + w` while `dist[u]` is still the infinity sentinel can wrap a fixed-width integer into a small or negative value and invent a shortest path. Skipping any edge whose source is still at the sentinel (`if (dist[u] == INF) continue;`) removes it; [[Dijkstra]] never hits this because it only expands vertices it has already settled.
 
-## Reference drawer
+# Reference drawer
 
 > [!ABSTRACT]- Round and detection flow
 >
@@ -131,7 +129,7 @@ Overflow is the second silent failure. Because a round relaxes every edge, inclu
 >
 > `long.MaxValue` marks an unreached vertex and is skipped as a relaxation source, so no `int`-width sentinel wraps. Recording `pred[to] = from` alongside each update is what later makes the negative cycle walkable.
 
-## Questions
+# Questions
 
 > [!QUESTION]- Why exactly `V−1` rounds, and what does a relaxation on the `V`-th round prove?
 > Without a negative cycle, every shortest path is simple and spans at most `V−1` edges. Round `k` finalizes every shortest path of at most `k` edges, so `V−1` rounds finalize all of them. A relaxation still possible on the `V`-th round means a path is shortening past that `V−1`-edge limit, which only a negative cycle permits, so the extra round is the negative-cycle detector rather than wasted work.
@@ -142,7 +140,7 @@ Overflow is the second silent failure. Because a round relaxes every edge, inclu
 > [!QUESTION]- After a reachable negative cycle is detected, what are the correct distances?
 > Vertices reachable through the cycle have distance `−∞`, because each lap lowers the total without bound; vertices with no path have `+∞`; the rest are finite. The `V−1`-round numbers for the `−∞` region are a mid-descent snapshot, so reporting them as finite distances is the common bug.
 
-## References
+# References
 
 - [Bellman–Ford algorithm (Wikipedia)](https://en.wikipedia.org/wiki/Bellman%E2%80%93Ford_algorithm) — correctness, the `V−1`-round bound, and negative-cycle detection.
 - [Bellman-Ford (cp-algorithms)](https://cp-algorithms.com/graph/bellman_ford.html) — implementation with the early-exit optimization and cycle retrieval.

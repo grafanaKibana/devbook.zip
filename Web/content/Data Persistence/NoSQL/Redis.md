@@ -1,8 +1,8 @@
 ---
 publish: true
 created: 2026-07-16T14:10:17.673Z
-modified: 2026-07-16T14:47:46.724Z
-published: 2026-07-16T14:47:46.724Z
+modified: 2026-07-18T11:30:06.201Z
+published: 2026-07-18T11:30:06.201Z
 topic:
   - Data Persistence
 subtopic:
@@ -14,13 +14,11 @@ priority: High
 status: Ready to Repeat
 ---
 
-# Redis
-
 Redis keeps a working data set in memory and exposes atomic commands over typed values such as strings, hashes, sets, sorted sets, streams, and bitmaps. That makes a `GET`, counter increment, or leaderboard update cheap, but memory speed is not a durability or consistency guarantee. Before choosing Redis, name which system is authoritative, what an acknowledged write means, what may be lost during failover, and how the application behaves when the cluster is unavailable.
 
 A product catalog can treat Redis as a disposable [[Data Persistence/Caching|cache]] because a miss reloads PostgreSQL. A checkout idempotency key is different: losing it can repeat a payment. The second workload needs a deliberate persistence, replication, expiry, and recovery contract even if both use the same `SET` command.
 
-## Data Structures and Workload Contracts
+# Data Structures and Workload Contracts
 
 | Workload | Redis structure or command | Contract to make explicit |
 | --- | --- | --- |
@@ -46,7 +44,7 @@ These commands are atomic individually. They do not create a relational transact
 > [!WARNING] Use-case inventory, not a safety contract
 > The visual maps structures to possible workloads, but a string does not by itself make a safe distributed lock or global ID service, and a list is not a durable queue contract. Use fencing for coordination, define durability and replay for messaging, and test every workload against failover and eviction.
 
-## Persistence
+# Persistence
 
 Redis supports four broad modes:
 
@@ -61,7 +59,7 @@ RDB is a backup-friendly snapshot, not a continuous log. AOF is appended after R
 
 Background does not mean free. `BGSAVE` and AOF rewrite fork a child. Fork latency grows with page-table size, and writes during the child process trigger copy-on-write pages. A large write or delete still consumes main-thread time, network bandwidth, allocator work, and AOF buffer capacity before any background `fsync`. Monitor `latest_fork_usec`, `rdb_bgsave_in_progress`, `aof_rewrite_in_progress`, copy-on-write bytes, disk latency, and memory headroom.
 
-### AOF persistence and big keys
+## AOF persistence and big keys
 
 A five-megabyte value makes several costs visible at once: the client sends and Redis parses a large command; the main thread mutates a large object; the AOF path copies a large command into buffers; replication sends it again; and a rewrite or snapshot may copy additional memory pages. `appendfsync everysec` moves the durability flush off the request path, but it does not remove those costs.
 
@@ -69,7 +67,7 @@ Prefer bounded values and incremental structures. Inspect `MEMORY USAGE`, `--big
 
 Persistence is local durability, replication is another copy, and backup is a recoverable historical artifact. None substitutes for the other. Keep tested off-host backups when Redis owns non-reconstructable state.
 
-## Topology and Availability
+# Topology and Availability
 
 **Replication** streams commands from one primary to replicas asynchronously. A replica can be behind when the primary fails. `WAIT` asks for replica acknowledgements and reduces the loss window, but Redis documents that it does not turn asynchronous replication into a strongly consistent consensus system.
 
@@ -84,7 +82,7 @@ Persistence is local durability, replication is another copy, and backup is a re
 | Memory/write scale beyond one primary | Redis Cluster | Slot-aware keys, resharding, cross-slot limits, and per-shard failover |
 | No acknowledged-write loss | A consensus-backed durable system of record | Higher latency and a different operating model; Redis replication alone is insufficient |
 
-## Pitfalls
+# Pitfalls
 
 - **Mixing disposable and authoritative keys under one eviction policy.** A pure cache can use `allkeys-lfu`; authoritative workflow state cannot tolerate eviction. Separate deployments or enforce non-evicting capacity controls.
 - **No expiry on unbounded key spaces.** Sessions, idempotency keys, and versioned cache keys accumulate until `maxmemory` causes eviction or writes fail.
@@ -92,7 +90,7 @@ Persistence is local durability, replication is another copy, and backup is a re
 - **Unsafe distributed locks.** A client can pause past its lease and continue writing after another client acquires it. Use fencing tokens at the protected resource or choose a consensus system.
 - **Cross-slot surprises.** A script that works on one node fails with `CROSSSLOT` after clustering unless its keys share a slot.
 
-## Questions
+# Questions
 
 > [!QUESTION]- When is Redis safe as a system of record?
 > Only when the deployment's eviction, persistence acknowledgement, replication/failover loss window, backup, restore, and capacity contracts meet the data's requirements. Enabling AOF is not enough: asynchronous failover can still lose acknowledged writes, disk and rewrite failures still need handling, and `maxmemory` must not evict authoritative keys.
@@ -100,7 +98,7 @@ Persistence is local durability, replication is another copy, and backup is a re
 > [!QUESTION]- Why can a big key hurt Redis even with `appendfsync everysec`?
 > The main thread still receives, parses, mutates, and copies the large command into AOF and replication buffers. Background `fsync` removes one disk wait from the request path; it does not remove network, allocator, serialization, copy-on-write, rewrite, or deletion work.
 
-## References
+# References
 
 - [Redis data types](https://redis.io/docs/latest/develop/data-types/) — official command and structure semantics for strings, hashes, sets, sorted sets, bitmaps, and streams.
 - [Redis persistence](https://redis.io/docs/latest/operate/oss_and_stack/management/persistence/) — official RDB, multipart AOF, fsync, rewrite, backup, restart, and data-loss tradeoffs.

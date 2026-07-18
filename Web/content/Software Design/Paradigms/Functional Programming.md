@@ -1,8 +1,8 @@
 ---
 publish: true
 created: 2026-07-15T11:47:56.762Z
-modified: 2026-07-15T11:47:56.762Z
-published: 2026-07-15T11:47:56.762Z
+modified: 2026-07-18T11:30:15.694Z
+published: 2026-07-18T11:30:15.694Z
 topic:
   - Software Design
 subtopic:
@@ -14,15 +14,13 @@ priority: Medium
 status: Ready to Repeat
 ---
 
-# Functional Programming
-
 Functional programming (FP) is a paradigm that models computation as the evaluation of pure functions over immutable data. Instead of describing _how_ to mutate state step by step (imperative), you describe _what_ to compute through function composition and data transformations. The payoff: code that is easier to reason about, test in isolation, and parallelize — because a pure function with the same inputs always produces the same output and never touches shared state.
 
 C# is not a pure FP language, but it has absorbed enough FP features (LINQ, records, pattern matching, lambdas, `ImmutableList<T>`) that senior .NET engineers are expected to apply FP thinking selectively alongside OOP.
 
-## Core Concepts
+# Core Concepts
 
-### Pure Functions
+## Pure Functions
 
 A pure function has no side effects and is referentially transparent — you can replace a call with its return value without changing program behavior.
 
@@ -40,7 +38,7 @@ static decimal CalculateTaxImpure(decimal amount)
 
 **Why it matters**: pure functions are trivially unit-testable (no mocks needed), safe to cache (memoize), and safe to run in parallel.
 
-### Immutability
+## Immutability
 
 Immutable data cannot be changed after creation. Mutations produce new values instead of modifying existing ones.
 
@@ -54,7 +52,7 @@ var paid  = order with { Status = "Paid" };  // new instance; original unchanged
 
 **Why it matters**: eliminates a whole class of bugs caused by shared mutable state — race conditions, unexpected aliasing, and hard-to-trace mutations.
 
-### Higher-Order Functions
+## Higher-Order Functions
 
 Functions that take other functions as arguments or return functions. LINQ is built entirely on this idea.
 
@@ -69,7 +67,7 @@ decimal highValueTotal = orders
 // Result: (100 * 1.1) + (200 * 1.1) = 330
 ```
 
-### Function Composition
+## Function Composition
 
 Building complex behavior by chaining small, single-purpose functions. Each function does one thing; composition wires them together.
 
@@ -84,7 +82,7 @@ Console.WriteLine(isValidInput("  Hello123  ")); // true
 Console.WriteLine(isValidInput("  Hi  "));       // false (length < 3 after trim)
 ```
 
-### Pattern Matching and Discriminated Unions
+## Pattern Matching and Discriminated Unions
 
 C# pattern matching (switch expressions, `is` patterns) approximates the algebraic data types common in pure FP languages like F# or Haskell.
 
@@ -103,9 +101,9 @@ static double Area(Shape shape) => shape switch
 
 The compiler warns if you miss a case — exhaustive matching eliminates null-check bugs.
 
-## Pitfalls
+# Pitfalls
 
-### Overusing Immutability in Hot Paths
+## Overusing Immutability in Hot Paths
 
 **What goes wrong**: replacing every `List<T>` with `ImmutableList<T>` in a tight loop causes O(n) allocations per operation and GC pressure.
 
@@ -113,7 +111,7 @@ The compiler warns if you miss a case — exhaustive matching eliminates null-ch
 
 **Mitigation**: use immutable collections at domain boundaries (DTOs, events, value objects). Inside algorithms or builders, use mutable structures and expose an immutable snapshot at the end.
 
-### Chaining LINQ Without Understanding Deferred Execution
+## Chaining LINQ Without Understanding Deferred Execution
 
 **What goes wrong**: a LINQ chain is evaluated multiple times (e.g., `Count()` then `foreach`) causing double enumeration — or worse, double database queries.
 
@@ -131,7 +129,7 @@ var items = query.ToList();
 var count = items.Count;
 ```
 
-### Ignoring Exceptions in Functional Pipelines
+## Ignoring Exceptions in Functional Pipelines
 
 **What goes wrong**: a pure-looking LINQ chain throws mid-pipeline, leaving partial state or swallowing errors silently.
 
@@ -139,7 +137,7 @@ var count = items.Count;
 
 **Mitigation**: for error-prone pipelines, use a `Result<T, TError>` pattern (or a library like `LanguageExt`) to make failure a first-class value rather than an exception.
 
-## Tradeoffs
+# Tradeoffs
 
 | Approach | Strengths | Weaknesses | When to use |
 |---|---|---|---|
@@ -149,7 +147,7 @@ var count = items.Count;
 
 **Decision rule**: default to immutable records and LINQ pipelines for domain logic and data transformations. Switch to mutable structures only when profiling shows a real allocation bottleneck. Never mix mutation and FP-style pipelines in the same method — pick one style per scope.
 
-## Questions
+# Questions
 
 > [!QUESTION]- What makes a function "pure" and why does purity matter for testing?
 >
@@ -174,7 +172,7 @@ var count = items.Count;
 > - Key risk with LINQ: deferred execution — materializing with `.ToList()` at the right point is non-obvious and a common source of double-query bugs.
 > - Tradeoff: LINQ is more declarative and composable; loops are more explicit about control flow and allocation. In hot paths (>10k iterations/sec), benchmark both.
 
-## References
+# References
 
 - [Functional programming concepts in C# (Microsoft Learn)](https://learn.microsoft.com/en-us/dotnet/csharp/fundamentals/functional/) — official overview of FP features in C#: LINQ, records, pattern matching, immutability.
 - [LINQ documentation (Microsoft Learn)](https://learn.microsoft.com/en-us/dotnet/csharp/linq/) — complete reference for LINQ operators, deferred execution, and query syntax.

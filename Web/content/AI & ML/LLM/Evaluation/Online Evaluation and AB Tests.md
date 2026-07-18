@@ -1,8 +1,8 @@
 ---
 publish: true
 created: 2026-07-16T18:32:50.723Z
-modified: 2026-07-18T09:09:06.869Z
-published: 2026-07-18T09:09:06.869Z
+modified: 2026-07-18T11:30:02.571Z
+published: 2026-07-18T11:30:02.571Z
 topic:
   - AI & ML
 subtopic:
@@ -14,13 +14,11 @@ priority: Medium
 status: Ready to Repeat
 ---
 
-# Intro
-
 Online evaluation measures an LLM application on real traffic. An A/B test randomly assigns independent units such as users or accounts to control and treatment, then estimates how a prompt, model, retrieval, or tool change affects outcomes. It catches distribution shifts and multi-turn behavior that a fixed offline set misses, but only when assignment, exposure, metrics, and analysis describe the same experiment. The infrastructure that keeps those contracts aligned is covered in [[#Experiment platform architecture]].
 
 Define the primary outcome and guardrails before traffic starts. A response-length increase is not success if resolution rate falls; a resolution lift is not shippable if safety incidents or p95 latency cross an abort threshold.
 
-## What to measure
+# What to measure
 
 | Metric type | Examples | Role |
 | --- | --- | --- |
@@ -32,7 +30,7 @@ Define the primary outcome and guardrails before traffic starts. A response-leng
 
 A metric contract names the numerator, denominator, attribution window, exclusions, and aggregation unit. “Resolution rate” is ambiguous until it says whether one user, conversation, or message contributes an observation.
 
-## Running a safe A/B test
+# Running a safe A/B test
 
 ```text
 Hypothesis: prompt v2 improves account-level resolution rate.
@@ -58,17 +56,17 @@ Choose the estimator from the metric and design:
 
 Pre-register the minimum detectable effect, sample size, stopping rule, and segmentation plan. A `p < 0.05` result can still be too small to matter operationally; report the effect estimate and confidence interval, not only a threshold crossing.
 
-## Power and uncertainty
+# Power and uncertainty
 
 An underpowered experiment has a high probability of missing a real effect: a false negative. It does not inherently create more false positives when the significance level and stopping rule are respected. The subtler failure is conditional: among the few underpowered studies that do reach significance, the observed effect is often exaggerated because only unusually large estimates cross the threshold. Treat that as an estimate-selection problem, not evidence of a large product win.
 
 Repeatedly peeking and stopping on the first significant result does inflate false positives. Use the predeclared fixed horizon or a valid sequential design when continuous monitoring is required.
 
-## Segmentation
+# Segmentation
 
 Segments should be defined before analysis when they drive decisions. Geography, language, plan, and device can expose a treatment that improves the average while harming a smaller population. Exploratory slices are useful for finding hypotheses, but many post-hoc comparisons also create false discoveries; label them exploratory and confirm important findings in a later test.
 
-## Monitoring versus experimentation
+# Monitoring versus experimentation
 
 | Aspect | Continuous monitoring | A/B test |
 | --- | --- | --- |
@@ -79,13 +77,13 @@ Segments should be defined before analysis when they drive decisions. Geography,
 
 Monitoring catches provider updates, drift, and outages. Randomization estimates causality for an intentional change. One cannot substitute for the other.
 
-## Experiment platform architecture
+# Experiment platform architecture
 
 An experiment platform makes a randomized decision reproducible. Its control plane binds hypothesis, eligibility, assignment, exposure, metrics, and analysis rules to one immutable experiment version. Without that contract, a dashboard can compare users who were never exposed, move one user between variants, or recompute the primary metric under rules that did not exist when traffic ran.
 
 ![[Assets/System Design 101/04eb4d4688ce484b8d1e506683ed1b40b71256783c43868e05d172234e7617ee.jpg]]
 
-### Configuration lifecycle
+## Configuration lifecycle
 
 An experiment definition contains the hypothesis, owner, eligibility rule, variants and weights, assignment unit, primary metric, guardrails, ramp, and stop policy. Treat a running definition as immutable; changing it creates a new version so exposures collected under different rules remain distinguishable.
 
@@ -95,7 +93,7 @@ draft → approved → running → stopped → analyzed → archived
 
 A kill switch can stop new assignments immediately, but it must not delete the historical definition or exposure log needed for audit and analysis.
 
-### Deterministic assignment
+## Deterministic assignment
 
 Hashing a stable identifier gives the same unit the same variant on every service instance:
 
@@ -108,13 +106,13 @@ bucket = Hash(experimentId, version, accountId, salt) mod 10_000
 
 The assignment unit is part of the product decision. Use an account when users within one account influence each other; use a device only when identity is unavailable and cross-device inconsistency is acceptable. Salt and version prevent accidental reuse of an old allocation.
 
-### Exposure, not eligibility
+## Exposure, not eligibility
 
 Assignment is not evidence that treatment affected a response. Record an exposure only where the selected variant can change behavior. Include experiment version, assignment-unit ID, variant, timestamp, and the request or surface needed for attribution. Join outcomes to exposure so eligible-but-never-exposed units do not dilute the estimate.
 
 Log exposure idempotently or deduplicate it in analysis. Duplicate events must not turn one account into several independent observations.
 
-### Metric and analysis contracts
+## Metric and analysis contracts
 
 Analysis must use the metric definition approved at launch and check data quality before estimating treatment effects. Sample-ratio mismatch is a gate: a material 62/38 allocation in a planned 50/50 split is evidence of an eligibility, hashing, logging, or filtering defect—not a surprising treatment effect. Stop interpretation until the mismatch is explained. Also check missing exposure fields, duplicate units, delayed outcomes, and guardrail freshness.
 
@@ -122,7 +120,7 @@ The platform should return an estimate, confidence interval, sample counts at th
 
 Centralization adds schema governance and launch ceremony. That cost is justified when several teams run experiments or when decisions affect safety, revenue, or policy. A small product can begin with a versioned config, stable hashing library, exposure table, and reviewed analysis notebook, but those four contracts still need one owner.
 
-## Questions
+# Questions
 
 > [!QUESTION]- What does low statistical power mean?
 > A real effect often fails to reach the decision threshold, producing a false negative. If an underpowered result is significant, its estimate may be unusually large because only extreme samples crossed the threshold; confirm both practical size and uncertainty.
@@ -133,7 +131,7 @@ Centralization adds schema governance and launch ceremony. That cost is justifie
 > [!QUESTION]- Why keep assignment and exposure separate?
 > Assignment records intent; exposure records that the variant could affect behavior. Joining outcomes to actual exposure avoids attributing an effect to users who qualified but never reached the changed surface.
 
-## References
+# References
 
 - [Practical Guide to Controlled Experiments on the Web](https://exp-platform.com/Documents/GuideControlledExperiments.pdf) — Kohavi and colleagues’ primary guide to randomization, metrics, power, and trustworthy analysis.
 - [Online Experimentation at Microsoft](https://www.microsoft.com/en-us/research/publication/online-experimentation-at-microsoft/) — primary account of large-scale experimentation infrastructure and organizational practice.

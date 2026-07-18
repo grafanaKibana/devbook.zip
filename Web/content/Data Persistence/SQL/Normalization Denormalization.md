@@ -1,8 +1,8 @@
 ---
 publish: true
 created: 2026-07-11T21:46:49.851Z
-modified: 2026-07-11T21:46:49.851Z
-published: 2026-07-11T21:46:49.851Z
+modified: 2026-07-18T11:30:06.340Z
+published: 2026-07-18T11:30:06.340Z
 topic:
   - Data Persistence
 subtopic:
@@ -14,13 +14,11 @@ priority: High
 status: Done
 ---
 
-# Intro
-
 Normalization is the process of structuring a relational database to eliminate redundancy and ensure data integrity. It works by decomposing tables so each fact is stored exactly once, which prevents update anomalies: if a customer's address lives in one place, you can't accidentally update it in three rows and miss a fourth. The tradeoff is read performance: fully normalized schemas require joins, and joins cost CPU and I/O.
 
 Most production OLTP systems stop at 3NF or BCNF. Higher normal forms (4NF, 5NF, 6NF) address increasingly rare anomalies involving multivalued or join dependencies, and the decomposition overhead rarely pays off outside temporal or analytical databases. The decision of where to stop is driven by write-to-read ratio: the more writes dominate, the more normalization pays off (fewer places to update); the more reads dominate, the more joins hurt and denormalization becomes attractive.
 
-## First Normal Form
+# First Normal Form
 
 A relation is in 1NF if all its attributes are simple and all domains used contain only atomic values. Each cell must hold a single value, not a list or set (no repeating groups).
 
@@ -41,7 +39,7 @@ The 1NF violation occurs for the Audi row because a single cell contains a comma
 | Audi | TT |
 | Infiniti | Q50 |
 
-## Second Normal Form
+# Second Normal Form
 
 A relation is in 2NF if it is in 1NF and every non-key attribute depends irreducibly on every attribute of the Primary Key (PK).
 
@@ -70,11 +68,11 @@ The table is in 1NF but not in 2NF. The car price depends on both model and make
 | Audi | 5% |
 | Infiniti | 10% |
 
-## Third Normal Form
+# Third Normal Form
 
 A relation is in 3NF when it is in 2NF and every non-key attribute depends on the primary key non-transitively.
 
-### What are transitive functional dependencies?
+## What are transitive functional dependencies?
 
 A transitive functional dependency means changing one non-key column can imply a change in another non-key column.
 
@@ -109,7 +107,7 @@ As a result of decomposing the original relation, we get two relations that are 
 | Audi | Real Auto |
 | Nissan | Next Auto |
 
-## Boyce-Codd Normal Form (BCNF)
+# Boyce-Codd Normal Form (BCNF)
 
 _(A stricter variant of 3NF.)_
 
@@ -171,7 +169,7 @@ You can improve the structure by decomposing the relation into two and adding th
 | Premium B | 12:00 | 14:00 |
 | Premium A | 15:00 | 18:00 |
 
-## Fourth Normal Form
+# Fourth Normal Form
 
 A relation is in 4NF if it is in BCNF and all non-trivial multivalued dependencies are in fact functional dependencies on its candidate keys.
 
@@ -191,7 +189,7 @@ To prevent the anomaly, you need to decompose the relation by placing independen
 
 However, if you add an attribute that functionally depends on the full candidate key, for example a delivery-inclusive price ({Restaurant, Pizza type, Delivery area} -> Price), the new attribute does not remove the independent multivalued dependencies. Whether the resulting relation satisfies 4NF depends on whether those MVDs are still non-trivial. In practice, the safe approach is to decompose first (eliminating the MVDs) and add the price-dependent attribute to the appropriate decomposed relation.
 
-## Fifth Normal Form
+# Fifth Normal Form
 
 A relation is in 5NF (also called PJ/NF, Projection-Join Normal Form) if it is in 4NF and every join dependency is implied by its candidate keys. In other words, the relation cannot be losslessly decomposed into smaller projections unless those projections are defined by candidate keys.
 
@@ -203,7 +201,7 @@ The decomposition produces three binary relations: `SupplierProduct(Supplier, Pr
 
 Fifth Normal Form focuses on join dependencies. Such join dependencies among three attributes are very rare. Join dependencies among four, five, or more attributes are practically impossible to specify.
 
-## Domain-key normal form
+# Domain-key normal form
 
 A relation variable is in DKNF if and only if every constraint on it is a logical consequence of domain constraints and key constraints imposed on that relation variable.
 
@@ -213,7 +211,7 @@ A key constraint is a constraint stating that some attribute or combination of a
 
 Any relation variable in DKNF is necessarily in 5NF. However, not every relation variable can be transformed into DKNF.
 
-## Sixth Normal Form
+# Sixth Normal Form
 
 A relation variable is in Sixth Normal Form if and only if it satisfies all non-trivial join dependencies. From the definition it follows that a relation variable is in 6NF if and only if it is irreducible, i.e., it cannot be further decomposed losslessly. Every relation variable that is in 6NF is also in 5NF.
 
@@ -245,7 +243,7 @@ The "Employees" relation variable is not in 6NF and can be decomposed into the r
 | 6575 | 01-01-2000:10-02-2003 | Lenin St, 10 |
 | 6575 | 11-02-2003:15-06-2006 | Soviet St, 22 |
 
-## Denormalization
+# Denormalization
 
 Denormalization is the deliberate introduction of redundancy to speed up reads. Where normalization splits data across tables to eliminate duplication, denormalization collapses it back together to avoid expensive joins at query time.
 
@@ -273,7 +271,7 @@ SELECT Name, TotalOrderAmount FROM Customers;
 
 The tradeoff is real: reads get faster, but every write to `Orders` must also update `TotalOrderAmount` on `Customers`. Miss one update and the data is inconsistent. Denormalization shifts complexity from reads to writes and requires explicit consistency management.
 
-## Pitfalls
+# Pitfalls
 
 **Over-normalizing into join hell** — a schema in 5NF or 6NF is theoretically clean but forces multi-way joins for simple queries. A real example: a SaaS app normalized `Users`, `Addresses`, `PhoneNumbers`, `Emails`, and `Preferences` into separate tables. Loading a user profile required a 5-table JOIN that took 12 ms at 100K rows. After the table grew to 10M rows, the same query took 340 ms even with proper indexes, because each join multiplied the working set. They denormalized `Addresses` and `Preferences` back onto `Users`, dropping the query to 8 ms. Rule of thumb: if a query joins 4+ tables and runs on every request, measure it under production load before committing to that schema.
 
@@ -283,7 +281,7 @@ The tradeoff is real: reads get faster, but every write to `Orders` must also up
 
 **Schema migration pain from over-normalization** — highly decomposed schemas make `ALTER TABLE` migrations harder because foreign key chains cascade through many tables. Adding a column to a core entity might require updating 8 JOINs in application code, modifying 4 stored procedures, and rebuilding indexes on related tables. In PostgreSQL, `ALTER TABLE ADD COLUMN` with a default value rewrites the entire table (pre-v11), and with FK constraints this can lock dependent tables. Plan schema changes with `pg_repack` or online DDL tools, and keep normalization pragmatic — theoretical purity that creates operational risk isn't worth it.
 
-## Tradeoffs
+# Tradeoffs
 
 | Decision | Option A | Option B | When to Choose A | When to Choose B |
 | --- | --- | --- | --- | --- |
@@ -294,7 +292,7 @@ The tradeoff is real: reads get faster, but every write to `Orders` must also up
 
 **Decision rule**: start at 3NF for new OLTP schemas. Promote to BCNF only when you identify overlapping composite candidate keys. Denormalize only after `EXPLAIN ANALYZE` proves a specific query is bottlenecked on joins and indexes can't help. For every denormalized column, document which write paths must maintain it and add a reconciliation check (scheduled query comparing the denormalized value against the computed value).
 
-## Questions
+# Questions
 
 > [!QUESTION]- What is normalization and why do most systems stop at 3NF/BCNF?
 > Normalization eliminates redundancy by decomposing tables so each fact is stored once, preventing update anomalies. Most production OLTP systems stop at 3NF or BCNF because higher forms (4NF, 5NF) address rare anomalies (multivalued and join dependencies) at the cost of more tables and more joins. The decomposition overhead rarely pays off outside temporal or analytical databases.
@@ -305,7 +303,7 @@ The tradeoff is real: reads get faster, but every write to `Orders` must also up
 > [!QUESTION]- What is the difference between 2NF and 3NF, and how would you recognize a violation of each?
 > 2NF eliminates partial dependencies: every non-key attribute must depend on the entire composite primary key, not just part of it. A violation looks like a column that depends on only one column of a multi-column PK. 3NF eliminates transitive dependencies: non-key attributes must depend directly on the PK, not through another non-key attribute. A violation looks like column A depending on the PK, column B depending on A (not on the PK directly). Fixing both involves decomposing the offending columns into separate tables.
 
-## References
+# References
 
 For a deeper study of the topic, the book ["Introduction to Database Systems" by Chris J. Date](https://www.oreilly.com/library/view/an-introduction-to/9780132874281/) is recommended.
 

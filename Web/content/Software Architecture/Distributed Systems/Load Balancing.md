@@ -1,8 +1,8 @@
 ---
 publish: true
 created: 2026-07-15T11:47:56.135Z
-modified: 2026-07-18T08:16:21.624Z
-published: 2026-07-18T08:16:21.624Z
+modified: 2026-07-18T11:38:38.705Z
+published: 2026-07-18T11:38:38.705Z
 topic:
   - Software Architecture
 subtopic:
@@ -14,11 +14,9 @@ priority: High
 status: Done
 ---
 
-# Intro
+Load balancing distributes incoming traffic across multiple service instances so one instance does not become a bottleneck or a single point of failure. In system design interviews, this is usually the first infrastructure building block because it enables [[Software Architecture/Distributed Systems/Scalability Patterns/Horizontal Scaling|horizontal scale]] without changing client behavior. It matters for availability, failure isolation, and predictable latency under burst traffic. Reach for it as soon as a service runs on more than one instance, especially for AI APIs where request cost varies by prompt size and model path.
 
-Load balancing distributes incoming traffic across multiple service instances so one instance does not become a bottleneck or a single point of failure. In system design interviews, this is usually the first infrastructure building block because it enables [[Horizontal Scaling|horizontal scale]] without changing client behavior. It matters for availability, failure isolation, and predictable latency under burst traffic. Reach for it as soon as a service runs on more than one instance, especially for AI APIs where request cost varies by prompt size and model path.
-
-## Mechanism
+# Mechanism
 
 Load balancers can operate at different layers, and that layer choice drives what routing decisions are possible.
 
@@ -42,7 +40,7 @@ flowchart LR
 
 Practical interview rule: pick L4 for high-throughput generic transport routing, pick L7 when business routing logic depends on request content.
 
-## Algorithms
+# Algorithms
 
 No single algorithm is best; choose based on workload shape and fairness goals.
 
@@ -62,13 +60,13 @@ The visual is an orientation map. "Sticky round robin" means affinity over a bas
 
 For AI inference endpoints, request duration and compute cost vary heavily, so pick the algorithm by measuring p95 and p99 latency, error rate, and backend saturation under representative load instead of assuming one default winner.
 
-## Health Checks
+# Health Checks
 
-Load balancing consumes health signals to decide whether a destination is eligible for new requests. It should select an algorithm only after filtering out destinations that fail the routing contract. [[Health Checks]] owns liveness, readiness, startup, active/passive observation, dependency scope, and failure-amplification rules.
+Load balancing consumes health signals to decide whether a destination is eligible for new requests. It should select an algorithm only after filtering out destinations that fail the routing contract. [[Software Architecture/Distributed Systems/Health Checks]] owns liveness, readiness, startup, active/passive observation, dependency scope, and failure-amplification rules.
 
 For routing, readiness must answer whether another destination can serve more successfully. Removing every instance because one shared database is unavailable replaces controlled application failures with an empty pool. Recovery thresholds and slow-start ramp-up prevent a flapping or cold instance from receiving full traffic immediately.
 
-## Cloud load-balancer capability mapping
+# Cloud load-balancer capability mapping
 
 Select capabilities before provider product names:
 
@@ -83,7 +81,7 @@ Select capabilities before provider product names:
 
 Only then map to a service. Azure Load Balancer is an L4 family with regional public/internal variants and a cross-region global tier; Application Gateway is regional L7, while Front Door is a global HTTP edge. Similar provider names do not imply identical health, source-IP, cross-zone, or failover semantics; verify the selected SKU and test a backend failure.
 
-## Health, routing, TLS, zones, and affinity are separate controls
+# Health, routing, TLS, zones, and affinity are separate controls
 
 | Control | Problem solved | Cost introduced |
 |---|---|---|
@@ -95,33 +93,33 @@ Only then map to a service. Azure Load Balancer is an L4 family with regional pu
 
 Do not bundle these under "add a load balancer." For a stateless API, enable health-aware distribution and TLS at the documented trust boundary, leave affinity off, and decide cross-zone routing from failure tests and egress cost. For a stateful legacy application, affinity can be a migration bridge, but shared state is the durable fix.
 
-## Pitfalls
+# Pitfalls
 
-### Sticky sessions can defeat balancing goals
+## Sticky sessions can defeat balancing goals
 
 - **What goes wrong**: load concentrates on a subset of instances while others stay underused.
 - **Why**: affinity preserves client-to-instance mapping even as traffic patterns change.
 - **Mitigation**: externalize session state, shorten affinity TTL, and apply affinity only when strictly required.
 
-### Readiness does not represent routing eligibility
+## Readiness does not represent routing eligibility
 
 - **What goes wrong**: an instance that cannot serve stays in rotation, or a shared dependency outage evicts every replica.
 - **Why**: one `/health` endpoint is used for process restart, routing, and dependency monitoring.
 - **Mitigation**: keep liveness dependency-free; make readiness instance-specific and include a dependency only when another replica can serve successfully. Monitor shared dependencies separately.
 
-### Thundering herd when recovering instances
+## Thundering herd when recovering instances
 
 - **What goes wrong**: a recovered instance receives too much traffic too quickly and fails again.
 - **Why**: immediate full reintroduction with cold caches and cold code paths.
 - **Mitigation**: use slow-start ramp-up, pre-warm caches and model clients, and cap concurrent requests during warmup.
 
-### TLS termination in the wrong place
+## TLS termination in the wrong place
 
 - **What goes wrong**: security boundaries become unclear or latency increases unexpectedly.
 - **Why**: inconsistent decisions between edge termination, re-encryption, and passthrough.
 - **Mitigation**: define trust boundaries early, document where certificates live, and use mTLS internally when compliance requires it.
 
-## Tradeoffs
+# Tradeoffs
 
 Decision | Option A | Option B | How to choose
 \--- | --- | --- | ---
@@ -130,7 +128,7 @@ Session model | Sticky sessions | Stateless with shared store | Migration speed 
 TLS strategy | Terminate at LB | End-to-end encryption to service | Operational simplicity versus stricter east-west security requirements
 Health model | Active only | Active plus passive | Simplicity versus better detection of real user-facing failures
 
-## Questions
+# Questions
 
 > [!QUESTION]- How do you pick a load-balancing algorithm for requests with highly variable duration, like AI inference?
 > Round robin is the right default when instances are similar and requests cost about the same, but it falls apart when duration varies — exactly the inference case, where one long completion ties up an instance while round robin keeps handing it new work. Least-connections handles that better by routing to the instance with the fewest in-flight requests, which tracks real load when durations are uneven. The catch is that connection count doesn't capture per-request CPU cost, so a few short-but-expensive prompts can still skew it. For inference you validate the choice by measuring p95/p99 latency and backend saturation under representative load rather than trusting any default.
@@ -141,7 +139,7 @@ Health model | Active only | Active plus passive | Simplicity versus better dete
 > [!QUESTION]- Why must readiness checks differ from liveness checks behind a load balancer?
 > They drive different actions. Liveness asks whether the process can make progress and commonly triggers restart, so it stays local and dependency-free. Readiness asks whether this instance should receive new traffic. It can include instance-specific initialization or a dependency failure unique to this replica, but blindly checking a database shared by every replica can evict the entire fleet. Keep shared-dependency health observable and put it in readiness only when routing elsewhere can help.
 
-## References
+# References
 
 - [Azure Load Balancer overview](https://learn.microsoft.com/azure/load-balancer/load-balancer-overview) — official docs covering L4 vs L7 load balancing, health probes, and SKU differences in Azure.
 - [ASP.NET Core health checks](https://learn.microsoft.com/aspnet/core/host-and-deploy/health-checks) — how to implement health check endpoints that load balancers and orchestrators use for routing decisions.
@@ -152,7 +150,7 @@ Health model | Active only | Active plus passive | Simplicity versus better dete
 - [AWS Elastic Load Balancing product comparison](https://docs.aws.amazon.com/elasticloadbalancing/latest/userguide/what-is-load-balancing.html) — official distinction among application, network, gateway, and classic load balancers.
 - [Google Cloud load balancing overview](https://cloud.google.com/load-balancing/docs/load-balancing-overview) — official mapping of global/regional, internal/external, proxy/pass-through, L4/L7 capabilities.
 
-### ByteByteGo provenance
+## ByteByteGo provenance
 
 - [Top load-balancing algorithms](https://github.com/ByteByteGoHq/system-design-101/blob/b28380a4710c5ec9638ec037d4168e288f334cba/data/guides/top-6-load-balancing-algorithms.md) — provenance for the algorithm visual; affinity and hashing caveats are made explicit.
 - [Cloud load-balancer cheat sheet](https://github.com/ByteByteGoHq/system-design-101/blob/b28380a4710c5ec9638ec037d4168e288f334cba/data/guides/cloud-load-balancer-cheat-sheet.md) — editorial lead for capability selection; its dated and incorrect provider mapping was rejected.

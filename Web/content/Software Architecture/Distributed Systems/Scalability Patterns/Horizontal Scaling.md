@@ -1,8 +1,8 @@
 ---
 publish: true
 created: 2026-07-15T11:47:56.917Z
-modified: 2026-07-15T11:47:56.918Z
-published: 2026-07-15T11:47:56.918Z
+modified: 2026-07-18T11:38:38.740Z
+published: 2026-07-18T11:38:38.740Z
 topic:
   - Software Architecture
 subtopic:
@@ -14,13 +14,11 @@ priority: High
 status: Creation
 ---
 
-# Horizontal Scaling
+Horizontal scaling (scale-out) means adding more instances of a service and distributing incoming load across all of them, rather than making a single instance bigger (see [[Software Architecture/Distributed Systems/Scalability Patterns/Vertical Scaling]] for the alternative). It's the standard long-term strategy for stateless services because it offers near-linear capacity growth, fault tolerance through redundancy, and no single-instance ceiling. The catch: it only works when the service is genuinely stateless, all shared state lives outside the instance (database, cache, queue), and a [[Software Architecture/Distributed Systems/Load Balancing|load balancer]] sits in front to route traffic. Without those prerequisites, adding instances doesn't increase capacity — it creates inconsistency. For the broader context, see [[Software Architecture/Distributed Systems/Scalability Patterns/Scalability Patterns|Scalability Patterns]].
 
-Horizontal scaling (scale-out) means adding more instances of a service and distributing incoming load across all of them, rather than making a single instance bigger (see [[Vertical Scaling]] for the alternative). It's the standard long-term strategy for stateless services because it offers near-linear capacity growth, fault tolerance through redundancy, and no single-instance ceiling. The catch: it only works when the service is genuinely stateless, all shared state lives outside the instance (database, cache, queue), and a [[Load Balancing|load balancer]] sits in front to route traffic. Without those prerequisites, adding instances doesn't increase capacity — it creates inconsistency. For the broader context, see [[Software Architecture/Distributed Systems/Scalability Patterns/Scalability Patterns|Scalability Patterns]].
+# How It Works
 
-## How It Works
-
-### Prerequisites
+## Prerequisites
 
 Before you can scale out, three things must be true:
 
@@ -28,15 +26,15 @@ Before you can scale out, three things must be true:
 
 2. **Externalized state.** Sessions go to Redis or a distributed cache. Files go to blob storage (Azure Blob, S3). Locks go to a distributed lock service. The database is the source of truth, not the instance's memory.
 
-3. **Load balancer in front.** A [[Load Balancing]] layer (Azure Load Balancer, NGINX, Kubernetes Service) distributes traffic across instances. Without it, all traffic still hits one node.
+3. **Load balancer in front.** A [[Software Architecture/Distributed Systems/Load Balancing]] layer (Azure Load Balancer, NGINX, Kubernetes Service) distributes traffic across instances. Without it, all traffic still hits one node.
 
-### Scale-Out and Scale-In
+## Scale-Out and Scale-In
 
 During **scale-out**, the orchestrator (Kubernetes, Azure App Service, AWS Auto Scaling) detects a trigger — CPU above 70%, request queue depth, custom metric — and provisions new instances. The load balancer's health checks confirm readiness before traffic is routed to the new instance. Cold start latency matters here: a .NET app that takes 10 seconds to warm up will not absorb a traffic spike instantly.
 
 During **scale-in**, instances are drained (existing connections finish), then terminated. If scale-in is too aggressive, you oscillate: scale out, scale in, scale out again. This is the thundering herd problem at the infrastructure level.
 
-### Distributed-Systems Costs
+## Distributed-Systems Costs
 
 Horizontal scaling introduces coordination overhead that vertical scaling avoids:
 
@@ -45,7 +43,7 @@ Horizontal scaling introduces coordination overhead that vertical scaling avoids
 - **Deployment complexity.** Rolling deploys, blue/green, or canary releases become necessary. You can't just restart one process.
 - **Connection pool pressure.** Each instance opens its own connection pool to the database. Ten instances with a pool size of 100 means 1,000 potential connections — most databases have hard limits.
 
-## Example: ASP.NET Core on Kubernetes with HPA
+# Example: ASP.NET Core on Kubernetes with HPA
 
 A typical setup: an ASP.NET Core API is stateless, sessions are stored in Redis, and Kubernetes Horizontal Pod Autoscaler (HPA) manages instance count.
 
@@ -101,7 +99,7 @@ spec:
 
 The `stabilizationWindowSeconds: 300` on scale-down prevents the thundering herd: the HPA waits 5 minutes of sustained low CPU before removing instances, avoiding rapid oscillation.
 
-## Pitfalls
+# Pitfalls
 
 **Stateful services that can't actually scale out.** An ASP.NET Core app using in-memory `IDistributedCache` or `TempData` backed by in-memory storage will silently break when scaled to 2+ instances. User A's session is on pod 1; their next request hits pod 2 and finds nothing. The fix is replacing in-memory providers with Redis before scaling out, not after.
 
@@ -113,7 +111,7 @@ The `stabilizationWindowSeconds: 300` on scale-down prevents the thundering herd
 
 **Cold-start amplification.** In .NET, JIT compilation and DI container initialization add startup latency. Under load, a new pod that's still warming up will have high response times, which can cause the load balancer to mark it unhealthy and remove it before it's useful. Use readiness probes that check actual application health (a `/health/ready` endpoint that verifies Redis and DB connectivity), not just process liveness.
 
-## Tradeoffs
+# Tradeoffs
 
 | Dimension | Horizontal Scaling | Vertical Scaling |
 |---|---|---|
@@ -127,14 +125,14 @@ The `stabilizationWindowSeconds: 300` on scale-down prevents the thundering herd
 
 Vertical scaling is the right first move for a stateful service you can't refactor, or when you need a quick fix with minimal risk. Horizontal scaling is the right long-term strategy for any service that needs to survive instance failures and grow beyond a single machine's limits.
 
-## Questions
+# Questions
 
 > [!QUESTION]- What architectural prerequisites must be met before horizontal scaling works?
 > **Expected answer:**
 >
 > - Service must be stateless — no in-memory session or local file state.
 > - All shared state externalized (Redis for cache/session, blob storage for files, database for persistent data).
-> - A [[Load Balancing|load balancer]] must distribute traffic across instances.
+> - A [[Software Architecture/Distributed Systems/Load Balancing|load balancer]] must distribute traffic across instances.
 > - Without statelessness, adding instances creates inconsistency rather than capacity.
 > - Without a load balancer, all traffic still hits one node.
 >   **Why this is strong:** It shows horizontal scaling is an architectural property, not just an ops action. Many engineers think "add more servers" is always safe.
@@ -149,7 +147,7 @@ Vertical scaling is the right first move for a stateful service you can't refact
 > - Connection pool or thread pool saturation before CPU becomes the bottleneck.
 >   **Why this is strong:** It demonstrates awareness that scaling one tier shifts the bottleneck downstream — a classic distributed-systems trap.
 
-## References
+# References
 
 - [Kubernetes Horizontal Pod Autoscaler](https://kubernetes.io/docs/tasks/run-application/horizontal-pod-autoscale/) — official HPA docs covering metrics, behavior tuning, and scaling algorithms
 - [Azure App Service autoscale](https://learn.microsoft.com/en-us/azure/app-service/manage-scale-up) — Azure-specific scale-out configuration and limits

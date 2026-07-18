@@ -1,8 +1,8 @@
 ---
 publish: true
 created: 2026-07-16T07:57:59.169Z
-modified: 2026-07-17T05:44:56.951Z
-published: 2026-07-17T05:44:56.951Z
+modified: 2026-07-18T11:30:06.076Z
+published: 2026-07-18T11:30:06.076Z
 topic:
   - Data Persistence
 subtopic: []
@@ -13,15 +13,13 @@ priority: Medium
 status: Ready to Repeat
 ---
 
-# Intro
-
 Erasure coding protects data by turning an object into `k` data shards plus `m` coding shards. With a maximum-distance-separable code such as Reed-Solomon configured as `(k, m)`, any `k` surviving shards can reconstruct the original object, so the system can lose up to `m` shards without losing data. Other erasure-code families and implementations can have different recoverable shard combinations. It is a storage-efficiency choice for large, durable data sets; it is not a faster form of replication.
 
 A `4+2` layout for a 1 GiB object produces four 256 MiB data shards and two 256 MiB coding shards. The six shards consume 1.5 GiB, an overhead factor of `(4 + 2) / 4 = 1.5`. Three-copy replication consumes 3 GiB for the same logical object. The saving is bought with encoding work on writes and reconstruction work after failures.
 
 ![[Assets/System Design 101/3977a046e208bb3d879161d73c64b9cb1962e0e8f3d59962df271589723bec54.png]]
 
-## Write and Reconstruction Path
+# Write and Reconstruction Path
 
 For a full-object write, the storage system follows four boundaries:
 
@@ -36,13 +34,13 @@ Suppose disks holding `d3` and `d4` fail in the `4+2` example. A reader can fetc
 
 The reconstruction cost is visible on the network and healthy disks. Restoring one missing 256 MiB shard can require reading four surviving 256 MiB shards, decoding 1 GiB, and writing the replacement. During a large failure, that work competes with foreground reads and writes. Repair bandwidth, failure-domain count, and time exposed in degraded mode matter as much as the nominal `m` value.
 
-## Small Writes and Rebuild Cost
+# Small Writes and Rebuild Cost
 
 A small in-place update is awkward because each coding shard describes a stripe, not one independent field. Depending on the storage engine, changing a few kilobytes may require a read-modify-write cycle: read the affected data/coding shards, calculate the parity delta, and write multiple shards. Full-stripe writes avoid some of this amplification.
 
 That makes erasure coding a good fit for immutable objects, backups, media, and colder data written in large units. Metadata, indexes, journals, and latency-sensitive small random writes often remain replicated even when their bulk data uses erasure coding.
 
-## Erasure Coding versus Replication
+# Erasure Coding versus Replication
 
 | Concern | `4+2` erasure coding | Three-copy replication |
 | --- | --- | --- |
@@ -55,7 +53,7 @@ That makes erasure coding a good fit for immutable objects, backups, media, and 
 
 Neither policy supplies a durability number by itself. Correlated rack failures, latent corruption, placement mistakes, repair time, and operational response determine whether the theoretical tolerance holds. Backups still protect against deletion, bad writes, and failures that all replicas or shards faithfully preserve.
 
-## References
+# References
 
 - [Ceph erasure-code documentation](https://docs.ceph.com/en/latest/rados/operations/erasure-code/) — defines `k`, `m`, failure-domain placement, space amplification, overwrite constraints, and recovery behavior in a production storage system.
 - [Ceph CRUSH maps](https://docs.ceph.com/en/latest/rados/operations/crush-map/) — documents how device and rack topology controls placement across independent failure domains.

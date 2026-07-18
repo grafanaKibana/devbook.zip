@@ -1,8 +1,8 @@
 ---
 publish: true
 created: 2026-07-16T07:36:21.597Z
-modified: 2026-07-17T05:46:25.660Z
-published: 2026-07-17T05:46:25.660Z
+modified: 2026-07-18T11:30:13.343Z
+published: 2026-07-18T11:30:13.343Z
 topic:
   - Security
 subtopic:
@@ -14,15 +14,13 @@ priority: High
 status: Ready to Repeat
 ---
 
-# Intro
-
 Single Sign-On (SSO) lets several applications rely on one identity provider (IdP) for authentication. The user authenticates to the IdP once; each application still validates its own assertion or ID token, applies its own authorization policy, and creates its own local session. SSO removes repeated login ceremonies, not application-level security boundaries.
 
 The main operational benefit is centralized authentication policy and account lifecycle. The matching cost is concentration: an IdP outage blocks new logins, and an IdP compromise can reach every relying application.
 
 See [[Security/Authentication/Oauth OIDC (OpenId Connect)|OAuth/OIDC]] for the underlying OAuth roles and token rules.
 
-## Federated browser flow
+# Federated browser flow
 
 ```text
 Browser -> Application: GET /reports
@@ -45,7 +43,7 @@ Application -> Browser: set a new application-session cookie
 
 The browser crosses three distinct trust boundaries: the application's session, the IdP's session, and the signed federation result. A valid IdP session can make the second application login silent, but each relying party still creates and controls its own local session. Cookie delivery is scoped by a host-only or `Domain` match and `Path`, then constrained by attributes such as `Secure` and `SameSite`; the port and full origin are not cookie isolation boundaries. Relying parties should use narrowly scoped, distinct session cookies so sibling applications do not share them accidentally.
 
-## Trust configuration
+# Trust configuration
 
 The application pins an expected issuer and obtains its authorization/token endpoints and signing-key set from trusted discovery metadata. It registers exact redirect URIs and a `client_id`. On callback it must:
 
@@ -58,7 +56,7 @@ The application pins an expected issuer and obtains its authorization/token endp
 
 The same model applies to SAML: the service provider trusts configured IdP metadata and validates the assertion's signature, issuer, audience, recipient, time bounds, and correlation with the request before creating a local session.
 
-## Sessions and logout
+# Sessions and logout
 
 | Event | IdP session | Application A | Application B |
 | --- | --- | --- | --- |
@@ -69,7 +67,7 @@ The same model applies to SAML: the service provider trusts configured IdP metad
 
 "Log out everywhere" therefore needs an explicit design. Local logout deletes one application session. Provider logout ends the IdP browser session but cannot assume every relying party session disappeared. Front-channel logout depends on browser navigation and cookie behavior; back-channel logout delivers a signed server-to-server event but requires reliable endpoint handling. High-risk applications should also keep local sessions short and respond to account-disable or session-revocation events.
 
-## OIDC versus SAML
+# OIDC versus SAML
 
 | Concern | OIDC | SAML 2.0 |
 | --- | --- | --- |
@@ -81,7 +79,7 @@ The same model applies to SAML: the service provider trusts configured IdP metad
 
 Use OIDC for new applications. Use SAML when the required enterprise IdP or SaaS product exposes only SAML, and use a mature library rather than parsing or validating XML signatures yourself.
 
-## Failure modes
+# Failure modes
 
 - **Login CSRF:** an attacker starts a login for their own account and tricks the victim into completing the callback. Bind callback to the initiating browser with `state` and correlate the transaction server-side.
 - **Token replay:** validate `nonce`, one-time authorization codes, expiry, issuer, and audience. A token valid for Application A must not create a session at B.
@@ -90,7 +88,7 @@ Use OIDC for new applications. Use SAML when the required enterprise IdP or SaaS
 - **IdP outage:** existing local sessions may continue under policy, but new logins and token renewal fail. Design explicit degraded behavior; do not bypass authentication.
 - **Account recovery downgrade:** central recovery now unlocks every relying application. Require stronger checks and notify/revoke sessions after sensitive recovery.
 
-## Questions
+# Questions
 
 > [!QUESTION]- Why does SSO not mean one shared session?
 > The IdP and each relying application remain distinct session and security boundaries. The IdP session can make authentication at another application silent, but that application must validate a new federation result and issue its own session.
@@ -98,7 +96,7 @@ Use OIDC for new applications. Use SAML when the required enterprise IdP or SaaS
 > [!QUESTION]- Which identity should a relying party store?
 > Store the pair of configured issuer and stable `sub` claim. Email and display names can change or be reassigned; they are attributes, not durable federation keys.
 
-## References
+# References
 
 - [OpenID Connect Core 1.0](https://openid.net/specs/openid-connect-core-1_0.html) — relying-party flow, ID-token claims, nonce, and validation rules.
 - [OpenID Connect Discovery 1.0](https://openid.net/specs/openid-connect-discovery-1_0.html) — issuer metadata, endpoints, and signing-key discovery.

@@ -1,8 +1,8 @@
 ---
 publish: true
 created: 2026-07-18T08:18:21.211Z
-modified: 2026-07-18T08:38:20.448Z
-published: 2026-07-18T08:38:20.448Z
+modified: 2026-07-18T11:30:07.150Z
+published: 2026-07-18T11:30:07.150Z
 topic:
   - Networks
 subtopic:
@@ -14,8 +14,6 @@ priority: Medium
 status: Ready to Repeat
 ---
 
-# Intro
-
 NGINX is an event-driven HTTP web server and reverse proxy. A master process handles global config and worker lifecycle; workers keep request state on sockets.
 
 Use NGINX for commodity edge behavior: path/host routing, TLS termination, buffering, caching, and upstream balancing. Prefer managed ingress or platform edge services when operations ownership already exists and product requirements are not edge-specific.
@@ -24,7 +22,7 @@ Use NGINX for commodity edge behavior: path/host routing, TLS termination, buffe
 
 The diagram's “cache memory” label is shorthand: response bodies are file-backed under `proxy_cache_path`, while the shared-memory zone holds keys and metadata.
 
-## Reverse-Proxy Boundary
+# Reverse-Proxy Boundary
 
 When a public request enters NGINX:
 
@@ -65,7 +63,7 @@ server {
 
 If upstream uses TLS, verify certificate policy separately at that hop. A plain proxy-to-origin channel can reduce latency but lowers transport isolation.
 
-## Forward Proxy vs Reverse Proxy
+# Forward Proxy vs Reverse Proxy
 
 Both are intermediaries but represent different trust models:
 
@@ -74,7 +72,7 @@ Both are intermediaries but represent different trust models:
 
 For forward proxy scenarios (egress controls, filtering, TLS inspection), enforce strict policy for `CONNECT`, authentication, and trusted CA trust-path assumptions.
 
-## Observability and Failure Codes
+# Observability and Failure Codes
 
 - `502`: upstream response was invalid for the proxy.
 - `504`: request hit gateway timeout before upstream completion.
@@ -82,11 +80,11 @@ For forward proxy scenarios (egress controls, filtering, TLS inspection), enforc
 
 Design retries and failover upstreams based on this boundary, not on the application alone.
 
-## Why NGINX for This Layer
+# Why NGINX for This Layer
 
 NGINX remains strong for stable declarative edge behavior and static/off-path optimization. For service-specific logic, policy, auth, and custom routing composition inside an app stack, YARP inside ASP.NET Core can reduce operational fragmentation.
 
-## References
+# References
 
 - [Why is NGINX so Popular? (ByteByteGo)](https://github.com/ByteByteGoHq/system-design-101/blob/b28380a4710c5ec9638ec037d4168e288f334cba/data/guides/why-is-nginx-so-popular.md) — process and proxy feature baseline.
 - [NGINX Beginner's Guide](https://nginx.org/en/docs/beginners_guide.html) — configuration and proxy basics.

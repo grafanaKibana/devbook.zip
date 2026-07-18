@@ -1,8 +1,8 @@
 ---
 publish: true
 created: 2026-07-11T21:40:40.549Z
-modified: 2026-07-17T05:50:53.164Z
-published: 2026-07-17T05:50:53.164Z
+modified: 2026-07-18T11:30:03.249Z
+published: 2026-07-18T11:30:03.249Z
 tags:
   - FolderNote
 topic:
@@ -16,8 +16,6 @@ priority: Medium
 status: Creation
 ---
 
-# Intro
-
 AWS (Amazon Web Services) is a public cloud platform with managed compute, storage, networking, data, integration, and AI services. For .NET engineers, its SDK and identity tooling make provider APIs available without hiding their consistency, retry, cost, or failure contracts. This page organizes representative services by the capability a workload needs.
 
 ```bash
@@ -29,7 +27,7 @@ aws s3 ls
 
 <nav style="--card-accent: 59, 130, 246;" class="folder-structure-map" aria-label="AWS section map"><div class="folder-map-children"><article class="db-card folder-map-node folder-map-node-empty"><div class="db-card-body"><span class="folder-map-empty-text">No notes in this section yet.</span></div></article></div><style>.db-card { position: relative; box-sizing: border-box; border: 1px solid var(--background-modifier-border, var(--lightgray, #d8dee9)); border-radius: var(--radius-m, 0.55rem); background-color: var(--background-primary, var(--light, #ffffff)); box-shadow: 0 0 0 rgba(0, 0, 0, 0); transition: border-color 150ms ease, background-color 150ms ease, box-shadow 150ms ease, transform 150ms ease; } .db-card::before { content: ""; position: absolute; inset: 0; border-radius: inherit; pointer-events: none; background: radial-gradient( ellipse 150% 175% at -22% -38%, rgba(var(--card-accent, 125, 125, 125), 0.09) 0%, rgba(var(--card-accent, 125, 125, 125), 0.04) 38%, rgba(var(--card-accent, 125, 125, 125), 0.014) 66%, transparent 90% ); opacity: 0.78; transition: opacity 150ms ease; } .db-card:hover, .db-card:focus-within { border-color: rgba(var(--card-accent, 125, 125, 125), 0.55); background-color: color-mix(in srgb, rgb(var(--card-accent, 125, 125, 125)) 2.5%, var(--background-primary, var(--light, #ffffff))); box-shadow: 0 0.45rem 1.1rem rgba(0, 0, 0, 0.08); transform: translateY(-0.125rem); } .db-card:hover::before, .db-card:focus-within::before { opacity: 1; } .db-card-body { position: relative; z-index: 0; box-sizing: border-box; display: flex; flex-direction: column; padding: var(--db-card-pad, 0.85rem 0.9rem); } .db-card-icon { display: flex; width: 1.1rem; height: 1.1rem; flex: 0 0 auto; color: rgb(var(--card-accent, 125, 125, 125)); } .db-card-icon svg { display: block; width: 100%; height: 100%; } .db-card-title { display: block; margin: 0; color: var(--text-normal, var(--dark, #1f2937)); font-size: 1rem; font-weight: 700; line-height: 1.25; } p.db-card-summary { margin: 0.45rem 0 0; color: var(--text-muted, var(--darkgray, #5f6b7a)); font-size: 0.875rem; line-height: 1.45; } .db-card-hit { position: absolute; inset: 0; z-index: 1; } .db-card-hit a { position: absolute; inset: 0; min-width: 2.75rem; min-height: 2.75rem; border-radius: var(--radius-m, 0.55rem); background: transparent !important; font-size: 0; } .db-card-hit a:focus-visible { outline: 2px solid rgb(var(--card-accent, 125, 125, 125)); outline-offset: -0.3rem; } @media (prefers-reduced-motion: reduce) { .db-card { transition: none; } .db-card::before { transition: none; } .db-card:hover, .db-card:focus-within { transform: none; } } .folder-structure-map { --card-accent: 16, 185, 129; --map-gap: 0.75rem; width: 100%; box-sizing: border-box; margin: 0.5rem 0 0.75rem; container-name: folder-map; container-type: inline-size; } .folder-map-children { display: flex; flex-wrap: wrap; gap: var(--map-gap); } .folder-map-node { flex: 1 1 12rem; min-height: 2.75rem; --db-card-pad: 0.5rem 0.75rem; } .folder-map-node .db-card-body { min-height: 2.75rem; justify-content: center; } .folder-map-node-heading { display: flex; align-items: center; justify-content: space-between; gap: 0.75rem; } .folder-map-node-title-group { display: flex; align-items: center; gap: 0.5rem; } .folder-map-node .db-card-title { white-space: nowrap; } .folder-map-node-count { display: block; flex: 0 0 auto; color: var(--text-muted, var(--darkgray, #5f6b7a)); font-size: 0.875rem; white-space: nowrap; } .folder-map-node .db-card-summary { display: none; } .folder-map-node-empty { cursor: default; } .folder-map-node-empty:hover, .folder-map-node-empty:focus-within { border-color: var(--background-modifier-border, var(--lightgray, #d8dee9)); background-color: var(--background-primary, var(--light, #ffffff)); box-shadow: 0 0 0 rgba(0, 0, 0, 0); transform: none; } .folder-map-node-empty:hover::before, .folder-map-node-empty:focus-within::before { opacity: 0.78; } .folder-structure-map .folder-map-node-empty .db-card-body { justify-content: center; align-items: center; text-align: center; } .folder-map-empty-text { color: var(--text-normal, var(--dark, #1f2937)); font-size: 1rem; font-weight: 400; font-style: normal; line-height: 1.25; } @container folder-map (min-width: 40rem) { .folder-map-node { min-height: 6rem; --db-card-pad: 0.85rem 0.9rem; } .folder-map-node .db-card-body { min-height: 6rem; justify-content: flex-start; } .folder-map-node .db-card-summary { display: block; } } @container folder-map (min-width: 64rem) { .folder-map-node, .folder-map-node .db-card-body { min-height: 6.75rem; } }</style></nav>
 
-## Choose Services by Capability
+# Choose Services by Capability
 
 The catalog is not a design method. Start with control, workload shape, data model, delivery semantics, regional availability, and portability, then choose the narrowest managed capability that satisfies them.
 
@@ -51,9 +49,9 @@ The visual is an orientation aid, not a lifecycle guarantee. Confirm current ser
 
 Amazon Timestream for LiveAnalytics closed to new customers on June 20, 2025. Existing customers can continue using it, but new time-series workloads should evaluate Timestream for InfluxDB or another database whose ingestion, query, retention, and operational model fits the workload.
 
-## Compute
+# Compute
 
-### EC2 (Elastic Compute Cloud)
+## EC2 (Elastic Compute Cloud)
 
 Virtual machines in the cloud. Choose instance type (CPU/memory/GPU), OS, and networking. The foundation of most AWS workloads.
 
@@ -64,7 +62,7 @@ Virtual machines in the cloud. Choose instance type (CPU/memory/GPU), OS, and ne
 aws ec2 run-instances --image-id resolve:ssm:/aws/service/ami-amazon-linux-latest/al2023-ami-kernel-default-x86_64 --instance-type t3.micro --key-name my-key
 ```
 
-### Lambda
+## Lambda
 
 Lambda runs event-triggered functions in managed execution environments. Synchronous invocation leaves retries with the caller; asynchronous invocation and event-source mappings have source-specific queueing, retry, ordering, batch, and failure-destination behavior. Handlers need idempotent side effects because duplicate delivery and ambiguous outcomes are normal at those boundaries.
 
@@ -72,9 +70,9 @@ Reserved concurrency isolates and caps capacity; provisioned concurrency prepare
 
 ![[Assets/System Design 101/03a0fa5987095ab9dd4c73cfbd13e79b33de4e1df7c1ead9fe296305107744f1.jpg]]
 
-## Storage
+# Storage
 
-### S3 (Simple Storage Service)
+## S3 (Simple Storage Service)
 
 S3 stores objects addressed by bucket, key, and optional version ID. It is a fit for immutable or replace-as-a-whole payloads such as media, backups, artifacts, and data-lake files. Strong single-object and listing consistency does not create a multi-object transaction, and an ETag is not a universal content checksum.
 
@@ -89,9 +87,9 @@ Multipart upload makes large transfers independently retriable, but unfinished p
 
 ![[Assets/System Design 101/d94d95b4b0e8bab46e58b81b9cdc493760dfeebf89cda8c28920e9d2acba97e4.png]]
 
-## Databases
+# Databases
 
-### DynamoDB
+## DynamoDB
 
 DynamoDB is a managed key-value and document database with on-demand or provisioned capacity and optional global tables. Reach for it when partition-key and sort-key access patterns are known up front and its per-operation consistency, transaction, indexing, capacity, and multi-Region contracts fit. Do not treat Cosmos DB or another document store as behaviorally equivalent because the capability category is similar.
 
@@ -100,7 +98,7 @@ DynamoDB is a managed key-value and document database with on-demand or provisio
 aws dynamodb get-item --table-name Users --key '{"UserId": {"S": "user-123"}}'
 ```
 
-## Networking
+# Networking
 
 Choose an AWS path from the communicating endpoints, then check routing, addressing, transitivity, DNS, bandwidth, failure domain, and price. Internet gateways, NAT gateways, VPC peering, Transit Gateway, PrivateLink endpoints, VPN, and Direct Connect solve different paths; none is a generic "private networking" switch. [[Networks/Networks|Networks]] owns the provider-neutral routing and transport concepts.
 
@@ -116,9 +114,9 @@ Choose an AWS path from the communicating endpoints, then check routing, address
 
 The source diagram combines valid service names with shortcuts that can misstate gateway-endpoint support and path details, so it is not embedded. Build the actual map from the VPC route tables, endpoint type, DNS answers, and the source/destination pair.
 
-## Messaging
+# Messaging
 
-### SQS (Simple Queue Service)
+## SQS (Simple Queue Service)
 
 SQS is a managed queue. Standard queues provide at-least-once delivery and best-effort ordering. FIFO queues order within a `MessageGroupId`; their five-minute send-deduplication window does not make downstream side effects exactly once. Consumers still need idempotency, visibility-timeout handling, bounded retries, and dead-letter policy. [[Software Architecture/Distributed Systems/Message Queues/Message Queues|Message Queues]] owns those mechanisms; compare SQS with SNS, EventBridge, Kinesis, and MSK by queue, fan-out, routing, ordering, and replay requirements.
 
@@ -129,7 +127,7 @@ aws sqs send-message --queue-url https://sqs.us-east-1.amazonaws.com/123456789/m
 aws sqs receive-message --queue-url https://sqs.us-east-1.amazonaws.com/123456789/my-queue
 ```
 
-## References
+# References
 
 - [AWS Documentation](https://docs.aws.amazon.com/) — AWS official docs hub; covers all services with API references and tutorials
 - [AWS SDK for .NET](https://docs.aws.amazon.com/sdk-for-net/v3/developer-guide/welcome.html) — .NET integration guide; covers authentication, service clients, and async patterns

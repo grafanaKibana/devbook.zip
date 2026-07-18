@@ -1,8 +1,8 @@
 ---
 publish: true
 created: 2026-07-16T18:11:01.951Z
-modified: 2026-07-16T18:28:57.241Z
-published: 2026-07-16T18:28:57.241Z
+modified: 2026-07-18T11:30:13.146Z
+published: 2026-07-18T11:30:13.146Z
 topic:
   - Programming
 subtopic: []
@@ -13,11 +13,9 @@ priority: Medium
 status: Creation
 ---
 
-# Intro
-
 WebAssembly (Wasm) is a compact binary instruction format for a typed stack machine. A host validates a module, compiles or interprets it for the current CPU, supplies explicit imports, and invokes its exports. Browsers are one host; a Wasm module has no built-in DOM, files, sockets, clock, or process access. Reach for it when an existing Rust/C/C++ computation must run in a browser, a plugin needs a narrow sandboxed boundary, or one portable module must run under multiple capable hosts.
 
-## Module and Host Boundary
+# Module and Host Boundary
 
 A module contains functions, tables, globals, and optionally one or more linear memories. Validation proves that instruction types and stack effects are well formed before execution. It does not prove the algorithm correct, nor does it stop unsafe source code from corrupting data inside its own linear-memory region.
 
@@ -44,19 +42,19 @@ Numbers cross this boundary directly. Strings, arrays, and objects usually requi
 
 The image captures the compile-and-host relationship but oversimplifies both sides. Modern JavaScript engines also interpret and optimize/JIT code; C++ and Rust are compiled into Wasm instructions, not browser-native machine code shipped unchanged. Wasm can approach native throughput for suitable compute kernels, but it is not automatically faster than JavaScript.
 
-## Browser Wasm versus WASI
+# Browser Wasm versus WASI
 
 The WebAssembly core specification defines execution, not operating-system APIs. The browser embedding adds JavaScript and Web APIs under browser security rules. WASI is a separate family of standard host interfaces for non-browser and component-model workloads. A WASI runtime grants capabilities such as selected directories, streams, clocks, or network access; the module begins without ambient authority and receives only what the host grants.
 
 That sandbox is a boundary, not a complete security argument. Host imports can be overpowered, denial of service still needs resource limits, and modules share whatever data the embedding exposes.
 
-## Transfer, Startup, and .NET
+# Transfer, Startup, and .NET
 
 Wasm's binary format supports streaming validation and compilation, but total startup includes network transfer, decompression, compilation, module instantiation, data initialization, and language-runtime startup. Small JavaScript can beat a large Wasm toolchain output before the first useful result. Measure cold start and transferred bytes as well as steady-state CPU time.
 
 Blazor WebAssembly downloads the app, its dependencies, and a .NET runtime into the browser. Razor components and their event handling execute on the browser UI thread, so CPU-heavy work on that path can freeze updates. In .NET 10, a Blazor WebAssembly app can boot a separate .NET runtime in a Web Worker and invoke exported C# methods there, moving suitable computation off the UI thread. That worker has no direct DOM access, adds startup and message-serialization cost, and does not make the component model implicitly multithreaded. Publish compression, trimming, lazy loading, and optional ahead-of-time compilation trade build size and startup against runtime throughput.
 
-## References
+# References
 
 - [WebAssembly Core Specification](https://webassembly.github.io/spec/core/) — normative validation, execution, module, instruction, binary, and text formats.
 - [WebAssembly JavaScript Interface](https://webassembly.github.io/spec/js-api/) — normative JavaScript objects, compilation, instantiation, imports, exports, and memory integration.

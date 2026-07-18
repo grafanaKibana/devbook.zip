@@ -1,8 +1,8 @@
 ---
 publish: true
 created: 2026-07-16T07:34:20.894Z
-modified: 2026-07-18T09:40:43.267Z
-published: 2026-07-18T09:40:43.267Z
+modified: 2026-07-18T11:30:13.228Z
+published: 2026-07-18T11:30:13.228Z
 tags:
   - FolderNote
 topic:
@@ -16,15 +16,13 @@ level:
 status: Ready to Repeat
 ---
 
-# Intro
-
 Authentication proves which user or workload is making a request. It does not decide what that principal may do; that is authorization. A production design also needs a credential, a ceremony that proves possession of it, a way to carry the result between requests, and a recovery path. Calling all of those pieces "authentication methods" hides the trust boundaries that fail in practice.
 
 For a browser application, one concrete design is OIDC Authorization Code with PKCE. The callback validates the authorization response and `state`, exchanges the code with the PKCE verifier, then validates the ID token signature, issuer, audience, expiry, and applicable nonce before creating an opaque server-side session. A `Secure; HttpOnly; SameSite=Lax` cookie carries only the session identifier, and the API still evaluates authorization on every request.
 
 <nav style="--card-accent: 14, 165, 233;" class="folder-structure-map" aria-label="Authentication section map"><div class="folder-map-children"><article class="db-card folder-map-node"><div class="db-card-body"><div class="folder-map-node-heading"><span class="folder-map-node-title-group"><span class="db-card-icon" aria-hidden="true"><svg xmlns="http://www.w3.org/2000/svg" stroke-linejoin="round" stroke-linecap="round" stroke-width="2" stroke="currentColor" fill="none" viewBox="0 0 24 24"><path d="M14.5 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7.5L14.5 2z"/><polyline points="14 2 14 8 20 8"/><line y2="13" y1="13" x2="8" x1="16"/><line y2="17" y1="17" x2="8" x1="16"/><line y2="9" y1="9" x2="8" x1="10"/></svg></span><span class="db-card-title" title="Basic Auth">Basic Auth</span></span></div><p class="db-card-summary">The simplest HTTP scheme: Base64-encoded credentials in the Authorization header (RFC 7617).</p></div><span class="db-card-hit"><a class="internal-link" href="Home/Security/Authentication/Basic Auth.md" data-tooltip-position="top" aria-label="Basic Auth">Basic Auth</a></span></article><article class="db-card folder-map-node"><div class="db-card-body"><div class="folder-map-node-heading"><span class="folder-map-node-title-group"><span class="db-card-icon" aria-hidden="true"><svg xmlns="http://www.w3.org/2000/svg" stroke-linejoin="round" stroke-linecap="round" stroke-width="2" stroke="currentColor" fill="none" viewBox="0 0 24 24"><path d="M14.5 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7.5L14.5 2z"/><polyline points="14 2 14 8 20 8"/><line y2="13" y1="13" x2="8" x1="16"/><line y2="17" y1="17" x2="8" x1="16"/><line y2="9" y1="9" x2="8" x1="10"/></svg></span><span class="db-card-title" title="Oauth OIDC (OpenId Connect)">Oauth OIDC (OpenId Connect)</span></span></div><p class="db-card-summary">OAuth delegates API access; OpenID Connect adds an interoperable authentication result.</p></div><span class="db-card-hit"><a class="internal-link" href="Home/Security/Authentication/Oauth OIDC (OpenId Connect).md" data-tooltip-position="top" aria-label="Oauth OIDC (OpenId Connect)">Oauth OIDC (OpenId Connect)</a></span></article><article class="db-card folder-map-node"><div class="db-card-body"><div class="folder-map-node-heading"><span class="folder-map-node-title-group"><span class="db-card-icon" aria-hidden="true"><svg xmlns="http://www.w3.org/2000/svg" stroke-linejoin="round" stroke-linecap="round" stroke-width="2" stroke="currentColor" fill="none" viewBox="0 0 24 24"><path d="M14.5 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7.5L14.5 2z"/><polyline points="14 2 14 8 20 8"/><line y2="13" y1="13" x2="8" x1="16"/><line y2="17" y1="17" x2="8" x1="16"/><line y2="9" y1="9" x2="8" x1="10"/></svg></span><span class="db-card-title" title="Resource-based Auth">Resource-based Auth</span></span></div><p class="db-card-summary">Checks whether a user may act on a specific resource instance, not just a type.</p></div><span class="db-card-hit"><a class="internal-link" href="Home/Security/Authentication/Resource-based Auth.md" data-tooltip-position="top" aria-label="Resource-based Auth">Resource-based Auth</a></span></article><article class="db-card folder-map-node"><div class="db-card-body"><div class="folder-map-node-heading"><span class="folder-map-node-title-group"><span class="db-card-icon" aria-hidden="true"><svg xmlns="http://www.w3.org/2000/svg" stroke-linejoin="round" stroke-linecap="round" stroke-width="2" stroke="currentColor" fill="none" viewBox="0 0 24 24"><path d="M14.5 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7.5L14.5 2z"/><polyline points="14 2 14 8 20 8"/><line y2="13" y1="13" x2="8" x1="16"/><line y2="17" y1="17" x2="8" x1="16"/><line y2="9" y1="9" x2="8" x1="10"/></svg></span><span class="db-card-title" title="SSO (Single Sign-On)">SSO (Single Sign-On)</span></span></div><p class="db-card-summary">Federated login through an identity provider, with separate sessions and trust at every application.</p></div><span class="db-card-hit"><a class="internal-link" href="Home/Security/Authentication/SSO (Single Sign-On).md" data-tooltip-position="top" aria-label="SSO (Single Sign-On)">SSO (Single Sign-On)</a></span></article><article class="db-card folder-map-node"><div class="db-card-body"><div class="folder-map-node-heading"><span class="folder-map-node-title-group"><span class="db-card-icon" aria-hidden="true"><svg xmlns="http://www.w3.org/2000/svg" stroke-linejoin="round" stroke-linecap="round" stroke-width="2" stroke="currentColor" fill="none" viewBox="0 0 24 24"><path d="M14.5 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7.5L14.5 2z"/><polyline points="14 2 14 8 20 8"/><line y2="13" y1="13" x2="8" x1="16"/><line y2="17" y1="17" x2="8" x1="16"/><line y2="9" y1="9" x2="8" x1="10"/></svg></span><span class="db-card-title" title="TOTP">TOTP</span></span></div><p class="db-card-summary">How time-based one-time passwords are provisioned, generated, validated, and recovered.</p></div><span class="db-card-hit"><a class="internal-link" href="Home/Security/Authentication/TOTP.md" data-tooltip-position="top" aria-label="TOTP">TOTP</a></span></article><article class="db-card folder-map-node"><div class="db-card-body"><div class="folder-map-node-heading"><span class="folder-map-node-title-group"><span class="db-card-icon" aria-hidden="true"><svg xmlns="http://www.w3.org/2000/svg" stroke-linejoin="round" stroke-linecap="round" stroke-width="2" stroke="currentColor" fill="none" viewBox="0 0 24 24"><path d="M14.5 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7.5L14.5 2z"/><polyline points="14 2 14 8 20 8"/><line y2="13" y1="13" x2="8" x1="16"/><line y2="17" y1="17" x2="8" x1="16"/><line y2="9" y1="9" x2="8" x1="10"/></svg></span><span class="db-card-title" title="Two-Factor Auth">Two-Factor Auth</span></span></div><p class="db-card-summary">How independent factors, TOTP, WebAuthn, and recovery change account-takeover risk.</p></div><span class="db-card-hit"><a class="internal-link" href="Home/Security/Authentication/Two-Factor Auth.md" data-tooltip-position="top" aria-label="Two-Factor Auth">Two-Factor Auth</a></span></article></div><style>.db-card { position: relative; box-sizing: border-box; border: 1px solid var(--background-modifier-border, var(--lightgray, #d8dee9)); border-radius: var(--radius-m, 0.55rem); background-color: var(--background-primary, var(--light, #ffffff)); box-shadow: 0 0 0 rgba(0, 0, 0, 0); transition: border-color 150ms ease, background-color 150ms ease, box-shadow 150ms ease, transform 150ms ease; } .db-card::before { content: ""; position: absolute; inset: 0; border-radius: inherit; pointer-events: none; background: radial-gradient( ellipse 150% 175% at -22% -38%, rgba(var(--card-accent, 125, 125, 125), 0.09) 0%, rgba(var(--card-accent, 125, 125, 125), 0.04) 38%, rgba(var(--card-accent, 125, 125, 125), 0.014) 66%, transparent 90% ); opacity: 0.78; transition: opacity 150ms ease; } .db-card:hover, .db-card:focus-within { border-color: rgba(var(--card-accent, 125, 125, 125), 0.55); background-color: color-mix(in srgb, rgb(var(--card-accent, 125, 125, 125)) 2.5%, var(--background-primary, var(--light, #ffffff))); box-shadow: 0 0.45rem 1.1rem rgba(0, 0, 0, 0.08); transform: translateY(-0.125rem); } .db-card:hover::before, .db-card:focus-within::before { opacity: 1; } .db-card-body { position: relative; z-index: 0; box-sizing: border-box; display: flex; flex-direction: column; padding: var(--db-card-pad, 0.85rem 0.9rem); } .db-card-icon { display: flex; width: 1.1rem; height: 1.1rem; flex: 0 0 auto; color: rgb(var(--card-accent, 125, 125, 125)); } .db-card-icon svg { display: block; width: 100%; height: 100%; } .db-card-title { display: block; margin: 0; color: var(--text-normal, var(--dark, #1f2937)); font-size: 1rem; font-weight: 700; line-height: 1.25; } p.db-card-summary { margin: 0.45rem 0 0; color: var(--text-muted, var(--darkgray, #5f6b7a)); font-size: 0.875rem; line-height: 1.45; } .db-card-hit { position: absolute; inset: 0; z-index: 1; } .db-card-hit a { position: absolute; inset: 0; min-width: 2.75rem; min-height: 2.75rem; border-radius: var(--radius-m, 0.55rem); background: transparent !important; font-size: 0; } .db-card-hit a:focus-visible { outline: 2px solid rgb(var(--card-accent, 125, 125, 125)); outline-offset: -0.3rem; } @media (prefers-reduced-motion: reduce) { .db-card { transition: none; } .db-card::before { transition: none; } .db-card:hover, .db-card:focus-within { transform: none; } } .folder-structure-map { --card-accent: 16, 185, 129; --map-gap: 0.75rem; width: 100%; box-sizing: border-box; margin: 0.5rem 0 0.75rem; container-name: folder-map; container-type: inline-size; } .folder-map-children { display: flex; flex-wrap: wrap; gap: var(--map-gap); } .folder-map-node { flex: 1 1 12rem; min-height: 2.75rem; --db-card-pad: 0.5rem 0.75rem; } .folder-map-node .db-card-body { min-height: 2.75rem; justify-content: center; } .folder-map-node-heading { display: flex; align-items: center; justify-content: space-between; gap: 0.75rem; } .folder-map-node-title-group { display: flex; align-items: center; gap: 0.5rem; } .folder-map-node .db-card-title { white-space: nowrap; } .folder-map-node-count { display: block; flex: 0 0 auto; color: var(--text-muted, var(--darkgray, #5f6b7a)); font-size: 0.875rem; white-space: nowrap; } .folder-map-node .db-card-summary { display: none; } .folder-map-node-empty { cursor: default; } .folder-map-node-empty:hover, .folder-map-node-empty:focus-within { border-color: var(--background-modifier-border, var(--lightgray, #d8dee9)); background-color: var(--background-primary, var(--light, #ffffff)); box-shadow: 0 0 0 rgba(0, 0, 0, 0); transform: none; } .folder-map-node-empty:hover::before, .folder-map-node-empty:focus-within::before { opacity: 0.78; } .folder-structure-map .folder-map-node-empty .db-card-body { justify-content: center; align-items: center; text-align: center; } .folder-map-empty-text { color: var(--text-normal, var(--dark, #1f2937)); font-size: 1rem; font-weight: 400; font-style: normal; line-height: 1.25; } @container folder-map (min-width: 40rem) { .folder-map-node { min-height: 6rem; --db-card-pad: 0.85rem 0.9rem; } .folder-map-node .db-card-body { min-height: 6rem; justify-content: flex-start; } .folder-map-node .db-card-summary { display: block; } } @container folder-map (min-width: 64rem) { .folder-map-node, .folder-map-node .db-card-body { min-height: 6.75rem; } }</style></nav>
 
-## Authentication factors, credentials, and protocols
+# Authentication factors, credentials, and protocols
 
 Factors describe what the claimant proves. Credentials are the concrete secrets or keys used to prove it. Protocols define the messages and the verifier. Tokens normally carry a result or delegated authority; possession of a bearer token authenticates the caller only as "whoever has this token."
 
@@ -39,7 +37,7 @@ Factors describe what the claimant proves. Credentials are the concrete secrets 
 
 Use independent factors for MFA: two passwords are still one knowledge factor. A passkey may provide user verification and device-bound public-key proof in one ceremony, but account recovery can still become the weaker path.
 
-## Separate the layers
+# Separate the layers
 
 These components combine; they are not alternatives on one ladder:
 
@@ -52,7 +50,7 @@ These components combine; they are not alternatives on one ladder:
 
 This distinction matters during incident response. Deleting a session revokes an opaque handle immediately. A signed self-contained token remains valid until expiry unless the resource server checks revocation or sender-constrains it.
 
-## Cookies and browser sessions
+# Cookies and browser sessions
 
 The server creates state with a response header such as:
 
@@ -71,7 +69,7 @@ An opaque random identifier should point to server-side state; do not put profil
 > [!WARNING] Non-normative source visual
 > Cookies use the browser's cookie store, not Web Storage. Omitting `Domain` creates a host-only cookie; a valid `Domain` can widen scope only to the current host's parent domain, never to an unrelated site or public suffix. `Path`, `Secure`, `HttpOnly`, and `SameSite` constrain delivery and access but do not encrypt the value.
 
-## Opaque sessions versus bearer tokens
+# Opaque sessions versus bearer tokens
 
 Compare complete architectures, not cookies against JWTs:
 
@@ -86,7 +84,7 @@ Compare complete architectures, not cookies against JWTs:
 
 Use an opaque session for a first-party browser application when immediate revocation and server control matter. Use short-lived OAuth access tokens across API/service boundaries when independent resource servers need verifiable delegated authority. In both cases validate expiry, bind the credential to the intended audience, rotate it, and assume replay after theft unless a sender-constrained mechanism is used.
 
-## Token and HMAC API authentication
+# Token and HMAC API authentication
 
 A bearer token is sufficient evidence for whoever possesses it. It must travel over TLS, target one audience, carry the smallest useful scope, expire quickly, and never appear in a URL or log.
 
@@ -106,7 +104,7 @@ The client computes `HMAC-SHA-256(secret, canonical-request)` and sends the key 
 
 The key ID is public metadata, not a public cryptographic key; both HMAC parties share the same secret. Resolve each key only within its intended API and environment, and reject a key ID presented to another API even if the underlying secret happens to match. Rotate secrets with overlapping key IDs, revoke compromised clients, and use SHA-256 or stronger. Do not use MD5 or HMAC-MD5 for a new request-authentication design: RFC 6151 specifically withdraws MD5 where collision resistance is required and says new protocol designs should not employ HMAC-MD5.
 
-## Choosing an Auth Approach
+# Choosing an Auth Approach
 
 Visualization pending
 
@@ -119,7 +117,7 @@ Visualization pending
 
 [[Security/Authentication/SSO (Single Sign-On)|SSO]] federates login, [[Security/Authentication/Two-Factor Auth|two-factor authentication]] strengthens the ceremony, and [[Security/Authentication/Resource-based Auth|resource-based authorization]] applies authorization after the caller is known. None replaces the others.
 
-## References
+# References
 
 - [OWASP Authentication Cheat Sheet](https://cheatsheetseries.owasp.org/cheatsheets/Authentication_Cheat_Sheet.html) — credential, session, and reauthentication controls.
 - [OWASP Session Management Cheat Sheet](https://cheatsheetseries.owasp.org/cheatsheets/Session_Management_Cheat_Sheet.html) — session identifiers, cookie attributes, renewal, and expiration.

@@ -1,8 +1,8 @@
 ---
 publish: true
 created: 2026-07-15T11:47:55.200Z
-modified: 2026-07-15T11:47:55.200Z
-published: 2026-07-15T11:47:55.200Z
+modified: 2026-07-18T11:38:38.774Z
+published: 2026-07-18T11:38:38.774Z
 topic:
   - Software Architecture
 subtopic:
@@ -13,8 +13,6 @@ level:
 priority: High
 status: Ready to Repeat
 ---
-
-# Proxy
 
 A security guard at a building entrance is a Proxy. The guard has the same "enter" interface as an open door, but checks your badge before letting you through. Some proxies are lazy — like an automatic door that only powers on when someone approaches. Some are protective — checking credentials before granting access. Some are virtual — an intercom that represents someone who isn’t physically present. In every case, the proxy stands in front of the real thing and controls access to it.
 
@@ -42,9 +40,9 @@ classDiagram
 ```
 
 > [!NOTE] Proxy vs Decorator
-> Both wrap the same interface. **Proxy CONTROLS ACCESS** — lazy loading, caching, auth. [[Decorator]] **ADDS BEHAVIOR** — logging, metrics, validation. The structural difference is intent: Proxy restricts or defers; Decorator enriches. A caching proxy that also logs is a Proxy with a Decorator concern mixed in — keep them separate.
+> Both wrap the same interface. **Proxy CONTROLS ACCESS** — lazy loading, caching, auth. [[Software Architecture/Patterns/Design Patterns/Structural/Decorator]] **ADDS BEHAVIOR** — logging, metrics, validation. The structural difference is intent: Proxy restricts or defers; Decorator enriches. A caching proxy that also logs is a Proxy with a Decorator concern mixed in — keep them separate.
 
-## Problem
+# Problem
 
 `ProductService` loads full product details (high-res images, reviews, related products) on every request — slow and wasteful for catalog browsing:
 
@@ -69,7 +67,7 @@ public class ProductService(IProductRepository repository)
 
 Here's what breaks when requirements change: adding a "recently viewed" feature that loads 10 products per page makes the page 5 seconds slower because every product loads all related data.
 
-## Solution
+# Solution
 
 Three proxy variants for the same `IProductService` interface:
 
@@ -178,7 +176,7 @@ builder.Services.AddScoped<IProductService>(sp =>
 
 Adding a rate-limiting proxy now means one new class implementing `IProductService` — the real service and existing proxies never change.
 
-## You Already Use This
+# You Already Use This
 
 **EF Core lazy-loading proxies** — `UseLazyLoadingProxies()` generates a proxy class for each entity. `order.Customer` returns a proxy; the proxy loads the `Customer` from the database on first property access. The proxy implements the same interface as the real entity.
 
@@ -186,7 +184,7 @@ Adding a rate-limiting proxy now means one new class implementing `IProductServi
 
 **`IHttpClientFactory` + `DelegatingHandler`** — each `DelegatingHandler` in the `HttpClient` pipeline is a proxy over the inner handler. Retry handlers, auth handlers, and circuit breakers are all protection/virtual proxies over the HTTP call.
 
-## Pitfalls
+# Pitfalls
 
 **Proxy hiding performance problems** — a caching proxy can mask a slow underlying service. If the cache is cold (first request, cache miss), the caller experiences the full latency. Monitor cache hit rates; a low hit rate means the proxy isn't helping and the underlying service needs optimization.
 
@@ -194,7 +192,7 @@ Adding a rate-limiting proxy now means one new class implementing `IProductServi
 
 **EF Core lazy-loading N+1 problem** — lazy-loading proxies load related entities one at a time. Loading 100 orders and accessing `order.Customer` for each triggers 100 separate DB queries. Use `Include()` for known access patterns; reserve lazy loading for genuinely unpredictable access.
 
-## Tradeoffs
+# Tradeoffs
 
 | Concern | Proxy | Direct access |
 |---|---|---|
@@ -206,7 +204,7 @@ Adding a rate-limiting proxy now means one new class implementing `IProductServi
 
 **Decision rule**: Use a caching proxy when the same data is read frequently and changes infrequently (product catalog, configuration). Use a virtual proxy when initialization is expensive and the object may not always be needed. Use a protection proxy when access control must be enforced consistently across all callers. Avoid proxy chains deeper than 3 — the interaction effects become hard to reason about.
 
-## Questions
+# Questions
 
 > [!QUESTION]- How does EF Core's lazy-loading proxy differ from a manually written virtual proxy?
 > EF Core generates the proxy class at runtime using Castle DynamicProxy — you don't write it. The proxy overrides every virtual navigation property; accessing the property triggers a DB query if the value isn't loaded. The difference from a manual proxy: EF Core's proxy is generated per entity type, not per instance; it uses the same `DbContext` that loaded the entity. A manual proxy is written once and works for all instances. The tradeoff: EF Core's proxy is automatic but requires virtual properties and a parameterless constructor; a manual proxy is explicit but requires more code.
@@ -217,7 +215,7 @@ Adding a rate-limiting proxy now means one new class implementing `IProductServi
 > [!QUESTION]- What's the difference between a Proxy and a Decorator in terms of intent?
 > Intent is the key difference — the structure is identical. A Proxy controls access: it decides whether to forward the call at all (protection proxy), when to forward it (virtual proxy), or whether to use a cached result instead (caching proxy). A Decorator always forwards the call and adds behavior around it. A logging decorator always calls `next.HandleAsync(order)` — it never skips the call. A protection proxy may throw before calling the real service. If the wrapper can prevent the call from reaching the real object, it's a Proxy. If it always calls through and adds behavior, it's a Decorator.
 
-## References
+# References
 
 - [Proxy Pattern — Christopher Okhravi](https://www.youtube.com/watch?v=NwaabHqPHeM\&list=PLrhzvIcii6GNjpARdnO4ueTUAVR9eMBpc\&index=10) — video walkthrough of the Proxy pattern with OOP examples
 - [Proxy — refactoring.guru](https://refactoring.guru/design-patterns/proxy) — canonical pattern description with virtual/caching/protection variants and C# example

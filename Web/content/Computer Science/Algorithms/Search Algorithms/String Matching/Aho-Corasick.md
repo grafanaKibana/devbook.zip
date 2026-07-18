@@ -1,8 +1,8 @@
 ---
 publish: true
 created: 2026-07-12T14:27:20.409Z
-modified: 2026-07-12T14:27:20.410Z
-published: 2026-07-12T14:27:20.410Z
+modified: 2026-07-18T11:30:04.172Z
+published: 2026-07-18T11:30:04.172Z
 topic:
   - Computer Science
 subtopic:
@@ -13,8 +13,6 @@ level:
 priority: Medium
 status: Creation
 ---
-
-# Intro
 
 A signature engine scans a byte stream — packets, log lines, a file — against a fixed dictionary of `k` patterns and must report every occurrence of every pattern. Running a single-pattern matcher such as [[KMP (Knuth-Morris-Pratt) Algorithm|KMP]] once per pattern reads the whole text `k` times, so the cost is `O(k·n)` and grows with the dictionary even though the text never changes.
 
@@ -27,7 +25,7 @@ A future trace would follow the automaton over one short text.
 > [!NOTE] Visualization pending
 > Planned StepTrace: a string-automaton card showing a trie of the pattern set with its failure links, consuming the text one character at a time as the automaton transitions on each character and emits every pattern that ends at the arrived state. No matching renderer exists in `engine.js` yet.
 
-## Trie, failure links, output links
+# Trie, failure links, output links
 
 The automaton is a trie of the pattern set plus two kinds of back-edge.
 
@@ -39,7 +37,7 @@ The automaton is a trie of the pattern set plus two kinds of back-edge.
 
 **Construction.** Failure and output links are filled by one breadth-first pass from the root. A node's failure target always sits at strictly smaller depth, so it is finalized before the node needs it; a depth-first order would read unfinished links. The root's direct children fail to the root.
 
-## One pass over "ushers"
+# One pass over "ushers"
 
 The dictionary `{ he, she, his, hers }` compiles to a trie with a handful of failure and output links. Two are decisive: the state for `she` fails to the state for `he` — its longest proper suffix that is also a prefix in the trie — and because `he` ends a pattern, `she`'s output link points there.
 
@@ -47,7 +45,7 @@ Reading `ushers` left to right, the automaton stays at the root through `u`, the
 
 The invariant makes each of those steps legal: after reading `i` characters the automaton is always at the state whose string is the longest suffix of the first `i` characters that is still a prefix of some pattern. Every pattern occurrence ending at position `i` is a suffix of that state's string, and the output chain lists exactly those. That is why a single left-to-right pass, with no rewinding of the text, sees every match.
 
-## Complexity
+# Complexity
 
 Let `M = Σmᵢ` be the total length of all patterns — an upper bound on the trie's node count — and `σ` the alphabet size.
 
@@ -58,7 +56,7 @@ Let `M = Σmᵢ` be the total length of all patterns — an upper bound on the t
 
 The `Θ(M·σ)` (dense) or `Θ(M)` (sparse) figure is the automaton itself, allocated once and reused across every text. A search adds only a current-state index and an output-walk cursor, so its per-pass auxiliary space is `O(1)` — the automaton is structure space, not per-operation space. The dense-versus-sparse choice trades that automaton memory against a constant-factor transition cost, and is the main space decision on wide alphabets.
 
-## Where it stops fitting
+# Where it stops fitting
 
 **Automaton memory on wide alphabets.** A dense `σ`-wide transition row per node makes each lookup a single array index but allocates `Θ(M·σ)` slots, most of them empty — for byte or Unicode alphabets over a large dictionary that is the dominant cost. A hash map per node (or a double-array trie) stores only the edges that exist, cutting space to `Θ(M)` at the price of a hashed lookup per transition. Both representations compute identical matches; only memory and constant factors differ.
 
@@ -66,7 +64,7 @@ The `Θ(M·σ)` (dense) or `Θ(M)` (sparse) figure is the automaton itself, allo
 
 **A fixed dictionary.** Failure and output links are global properties of the whole pattern set, resolved by the single construction BFS. Adding a pattern changes suffix relationships throughout the trie, so the links must be recomputed — an insertion after construction means rebuilding the automaton, or maintaining a more complex dynamic variant. The algorithm therefore fits a dictionary compiled once and reused across many texts; a set that changes on every query pays the `Θ(M)` build repeatedly and loses its edge over rerunning a single-pattern matcher.
 
-## Reference drawer
+# Reference drawer
 
 > [!ABSTRACT]- Construction and search control flow
 >
@@ -175,7 +173,7 @@ The `Θ(M·σ)` (dense) or `Θ(M)` (sparse) figure is the automaton itself, allo
 >
 > `Build` runs once after the final `Add`. `Search` yields `(endIndex, patternId)` for every occurrence; the inner `for` walks the output chain, so overlapping and nested matches are all emitted. A dense `char`-indexed array could replace `Dictionary<char, int>` to trade memory for a faster transition.
 
-## Questions
+# Questions
 
 > [!QUESTION]- Why is search cost `Θ(n + z)` independent of the number of patterns?
 > All patterns share one trie, so common prefixes collapse into shared paths and the text drives a single walk through the automaton. Each character makes one forward move plus failure hops that amortize to `O(1)` over the whole scan, and the output walk emits exactly the `z` matches found. Nothing in the loop scales with `k`, the pattern count, so a thousand signatures cost the same per character as one.
@@ -189,7 +187,7 @@ The `Θ(M·σ)` (dense) or `Θ(M)` (sparse) figure is the automaton itself, allo
 > [!QUESTION]- Why does adding a pattern after construction force a rebuild?
 > Failure and output links encode suffix relationships across the entire pattern set and are resolved together by the single construction BFS. A new pattern can change the longest-suffix target of many existing states, so the links are no longer valid and must be recomputed. That is why the automaton fits a dictionary built once and reused across texts rather than one that changes per query.
 
-## References
+# References
 
 - [Efficient String Matching: An Aid to Bibliographic Search](https://dl.acm.org/doi/10.1145/360825.360855) — Aho and Corasick's original 1975 paper (CACM), introducing the goto/failure/output construction and its linear-time search bound.
 - [Aho-Corasick algorithm (cp-algorithms)](https://cp-algorithms.com/string/aho_corasick.html) — trie plus suffix (failure) links, the BFS construction, the dictionary-link walk, and a reference implementation with complexity discussion.

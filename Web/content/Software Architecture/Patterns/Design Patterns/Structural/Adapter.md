@@ -1,8 +1,8 @@
 ---
 publish: true
 created: 2026-07-15T12:03:14.907Z
-modified: 2026-07-15T12:03:14.908Z
-published: 2026-07-15T12:03:14.908Z
+modified: 2026-07-18T11:38:38.773Z
+published: 2026-07-18T11:38:38.773Z
 topic:
   - Software Architecture
 subtopic:
@@ -13,8 +13,6 @@ level:
 priority: High
 status: Done
 ---
-
-# Adapter
 
 Traveling abroad with a US laptop charger, you discover your plug doesn’t fit the European outlet. You buy a power adapter at the airport. The adapter doesn’t change your charger or rewire the outlet — it sits between them and translates one shape into another. Both sides keep working exactly as before.
 
@@ -42,9 +40,9 @@ classDiagram
 ```
 
 > [!NOTE] Adapter vs Facade vs Bridge
-> **Adapter** makes an existing incompatible interface work — it's a retrofit. [[Facade]] creates a new simplified interface over a complex subsystem — it's about convenience. [[Bridge]] is designed upfront to separate abstraction from implementation — it's not a retrofit at all.
+> **Adapter** makes an existing incompatible interface work — it's a retrofit. [[Software Architecture/Patterns/Design Patterns/Structural/Facade]] creates a new simplified interface over a complex subsystem — it's about convenience. [[Software Architecture/Patterns/Design Patterns/Structural/Bridge]] is designed upfront to separate abstraction from implementation — it's not a retrofit at all.
 
-## Problem
+# Problem
 
 `OrderService` directly calls a legacy SOAP/XML inventory system. The legacy interface leaks into the order domain:
 
@@ -92,7 +90,7 @@ public class OrderService
 
 Here's what breaks when requirements change: replacing the legacy system with a modern REST API requires rewriting `OrderService` — the XML parsing and legacy error codes are embedded throughout.
 
-## Solution
+# Solution
 
 Introduce `IInventoryService` and an adapter that translates between the modern interface and the legacy system:
 
@@ -171,7 +169,7 @@ builder.Services.AddScoped<IInventoryService, ModernInventoryRestAdapter>();
 
 Replacing the legacy system now means writing a new adapter class — `OrderService` never changes.
 
-## You Already Use This
+# You Already Use This
 
 **`StreamReader` / `StreamWriter`** — adapts the byte-oriented `Stream` interface to a text-oriented API. `new StreamReader(fileStream)` wraps a `FileStream` (which speaks bytes) and exposes `ReadLine()`, `ReadToEnd()` (which speak strings). The adapter translates between the two interfaces.
 
@@ -179,11 +177,11 @@ Replacing the legacy system now means writing a new adapter class — `OrderServ
 
 **`DelegatingHandler` subclasses** — wrap `HttpMessageHandler` to add behavior (auth headers, retry logic, logging) while adapting the `HttpRequestMessage`/`HttpResponseMessage` interface. Each handler in the chain adapts the request/response before passing it along.
 
-## Pitfalls
+# Pitfalls
 
 **Leaky abstraction** — if the legacy system has quirks (rate limits, specific error codes, ordering requirements), the adapter may expose these through the target interface. Example: `IInventoryService.ReserveAsync` returning a legacy-specific error code string. Keep the target interface clean; map all legacy concepts to domain concepts inside the adapter.
 
-## Questions
+# Questions
 
 > [!QUESTION]- How do you test code that uses an Adapter?
 > Test the consumer (`OrderService`) by injecting a mock `IInventoryService` — the adapter is invisible to the test. Test the adapter itself with integration tests against the real legacy system (or a recorded response). Unit-testing the adapter with a mock `LegacyInventorySystem` is valid but limited — the real value is verifying the XML translation is correct, which requires the actual legacy format. The tradeoff: integration tests are slower and environment-dependent; unit tests are fast but may miss translation bugs.
@@ -191,7 +189,7 @@ Replacing the legacy system now means writing a new adapter class — `OrderServ
 > [!QUESTION]- When does an Adapter become a Facade?
 > When the adapter starts simplifying the interface rather than just translating it. An Adapter preserves the full capability of the adaptee — every method on `IInventoryService` maps to a corresponding legacy operation. A Facade intentionally hides complexity, exposing only a subset of the subsystem's capabilities. If your "adapter" only exposes 3 of the legacy system's 20 operations and adds orchestration logic, it's a Facade. The distinction matters for maintenance: an Adapter should be a thin translation layer; a Facade can contain business logic.
 
-## References
+# References
 
 - [Adapter Pattern — Christopher Okhravi](https://www.youtube.com/watch?v=2PKQtcJjYvc\&list=PLrhzvIcii6GNjpARdnO4ueTUAVR9eMBpc\&index=8) — video walkthrough of the Adapter pattern with OOP examples
 - [Adapter — refactoring.guru](https://refactoring.guru/design-patterns/adapter) — canonical pattern description with object and class adapter variants, C# example

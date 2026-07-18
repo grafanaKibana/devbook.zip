@@ -1,8 +1,8 @@
 ---
 publish: true
 created: 2026-07-11T21:44:31.402Z
-modified: 2026-07-11T21:44:31.402Z
-published: 2026-07-11T21:44:31.402Z
+modified: 2026-07-18T11:30:02.777Z
+published: 2026-07-18T11:30:02.777Z
 topic:
   - AI & ML
 subtopic:
@@ -14,11 +14,9 @@ priority: Medium
 status: Done
 ---
 
-# Intro
-
 In-context learning is the ability of an LLM to adapt to a task from the prompt context itself, without updating model weights. Mechanically, the model is still doing next-token prediction at inference time; the examples in the prompt change what token sequences are most probable next, so behavior changes without training. The key control is shot count: zero-shot (no examples), one-shot (one example), or few-shot (multiple examples). More shots can improve task steering, but they also consume context window budget.
 
-## Zero-Shot Prompting
+# Zero-Shot Prompting
 
 Zero-shot prompting asks the model to perform a task with no demonstrations, relying on instruction quality and prior training.
 
@@ -43,7 +41,7 @@ Typical output:
 Neutral
 ```
 
-## One-Shot Prompting
+# One-Shot Prompting
 
 One-shot prompting is the minimal demonstration setting: one complete input-output example plus a new input to solve. Use it when zero-shot mostly works but output format or decision boundaries are still inconsistent.
 
@@ -64,7 +62,7 @@ Possible output:
 {"customer":"Ava","issue":"password reset fails after SSO migration","severity":"high"}
 ```
 
-## Few-Shot Prompting
+# Few-Shot Prompting
 
 Few-shot prompting provides multiple demonstrations so the model can copy task structure, label space, and output format. In practice, a small number of examples often improves stability on noisier inputs compared with one-shot.
 
@@ -96,7 +94,7 @@ Possible output:
 {"customer":"Ava","issue":"password reset fails after SSO migration","severity":"high"}
 ```
 
-## Design Principles
+# Design Principles
 
 - keep example formatting strictly consistent (same separators, casing, field order)
 - cover the real label space in demonstrations, including edge classes
@@ -106,7 +104,7 @@ Possible output:
 - if accuracy is unstable, first fix schema clarity and demonstration distribution before increasing shot count
 - random labels in a consistent format can still help structure-following (Min et al., 2022), but use correct labels in production prompts for reliability and auditability
 
-## Limitations
+# Limitations
 
 - few-shot can be brittle on tasks with long dependency chains or strict global constraints
 - examples cannot inject knowledge the model does not have; they only condition behavior in-context
@@ -115,27 +113,27 @@ Possible output:
 
 When this pattern is not enough for reasoning-heavy tasks, continue with [[Reasoning Techniques]].
 
-## Pitfalls
+# Pitfalls
 
-### Recency Bias in Example Ordering
+## Recency Bias in Example Ordering
 
 **What goes wrong**: the last example in a few-shot prompt has disproportionate influence on the output. If the last example is a rare edge case, the model over-applies that pattern to normal inputs.
 
 **Mitigation**: test multiple orderings of your demonstration set. Place the most representative examples last, or randomize order across requests to average out the bias.
 
-### Adding More Shots Instead of Fixing the Root Cause
+## Adding More Shots Instead of Fixing the Root Cause
 
 **What goes wrong**: the model produces inconsistent output, so the team adds more examples. The real problem is ambiguous instructions or inconsistent example formatting. More shots amplify the inconsistency rather than fixing it.
 
 **Mitigation**: before increasing shot count, audit example consistency (same separators, same field order, same casing). Fix formatting first. Add shots only when the schema is clean and failures are about coverage, not consistency.
 
-### Context Window Pressure
+## Context Window Pressure
 
 **What goes wrong**: a few-shot prompt with 10 long examples consumes 3,000 tokens, leaving little room for the actual user input. For long documents or multi-turn conversations, the demonstrations crowd out the content.
 
 **Mitigation**: keep examples short and representative. For long-context tasks, use one-shot or zero-shot with precise instructions. Measure token cost of the demonstration block and set a budget.
 
-## Tradeoffs
+# Tradeoffs
 
 | Approach | Token cost | Format control | Knowledge injection | Use when |
 |----------|-----------|---------------|-------------------|----------|
@@ -147,7 +145,7 @@ When this pattern is not enough for reasoning-heavy tasks, continue with [[Reaso
 
 **Decision rule**: start zero-shot. Move to one-shot when output format is inconsistent. Move to few-shot when class boundaries are ambiguous. Move to fine-tuning only when few-shot is too expensive at scale or the task requires knowledge injection. Use RAG when the task requires external facts.
 
-## Questions
+# Questions
 
 > [!QUESTION]- When should you start with zero-shot versus few-shot?
 > Expected answer:
@@ -175,7 +173,7 @@ When this pattern is not enough for reasoning-heavy tasks, continue with [[Reaso
 > - Poor transfer when task needs external facts not present in model knowledge.
 >   Why this matters: these limits tell you when to pivot to other techniques instead of adding more shots.
 
-## References
+# References
 
 - [Prompt Engineering Guide - Zero-Shot Prompting](https://www.promptingguide.ai/techniques/zeroshot) — practitioner guide to zero-shot patterns and when they work.
 - [Prompt Engineering Guide - Few-Shot Prompting](https://www.promptingguide.ai/techniques/fewshot) — practitioner guide to few-shot design, example selection, and common failure modes.

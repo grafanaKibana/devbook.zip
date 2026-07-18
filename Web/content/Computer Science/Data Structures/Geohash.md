@@ -1,8 +1,8 @@
 ---
 publish: true
 created: 2026-07-16T18:39:22.013Z
-modified: 2026-07-16T18:52:20.728Z
-published: 2026-07-16T18:52:20.728Z
+modified: 2026-07-18T11:30:04.925Z
+published: 2026-07-18T11:30:04.925Z
 topic:
   - Computer Science
 subtopic:
@@ -14,13 +14,11 @@ priority: Medium
 status: Creation
 ---
 
-# Intro
-
 A geohash converts a longitude/latitude point into a base-32 string whose prefixes name progressively smaller rectangular cells. It is an encoding and query-partitioning technique, not a distance metric or a complete spatial index. The practical advantage is that a two-dimensional location can become a one-dimensional key for a sorted index, cache, partition key, or aggregation bucket.
 
 Reach for geohash when fixed grid precision and ordinary key infrastructure are useful. Do not reach for it merely because data has coordinates: exact containment, nearest-neighbor ranking, polygons, and error-critical distance usually belong in a spatial engine that understands geometry.
 
-## Encoding and query path
+# Encoding and query path
 
 The encoder repeatedly bisects longitude and latitude ranges, records which half contains the point, interleaves the resulting bits, and maps each five-bit group to a base-32 character. Each additional character adds five bits of resolution, so truncating characters produces a larger ancestor cell.
 
@@ -40,7 +38,7 @@ A radius query therefore has two phases:
 
 Scanning only the center prefix creates false negatives at cell edges. Skipping the final distance check creates false positives from the rectangular cover. Higher precision reduces candidates per cell but increases the number of ranges needed for a large region; lower precision does the opposite.
 
-## Real systems use the encoding differently
+# Real systems use the encoding differently
 
 **Redis GEO** stores members in a sorted set using an interleaved 52-bit geospatial score. `GEOSEARCH` covers the requested radius or box with score ranges and filters results; Redis documents spherical Haversine distance and a possible error that is unsuitable for error-critical applications. The standard geohash string returned by `GEOHASH` is a representation of that location, while the internal index uses Redis's numeric variant.
 
@@ -55,7 +53,7 @@ The first command indexes one driver near Kyiv. The second asks Redis to generat
 
 These examples expose the boundary: “uses geohash” can mean a sorted numeric candidate index, a textual interchange encoding, or a result aggregation grid. Verify which one a product implements before reasoning about complexity or durability.
 
-## Geohash, quadtree, and database spatial indexes
+# Geohash, quadtree, and database spatial indexes
 
 | Mechanism | Partition shape | Storage fit | Main cost |
 | --- | --- | --- | --- |
@@ -65,14 +63,14 @@ These examples expose the boundary: “uses geohash” can mean a sorted numeric
 
 For a durable database, start with its native spatial type and index. PostGIS, for example, uses GiST-backed R-tree behavior to index geometry bounding boxes and can accelerate predicates such as `ST_Intersects` and `ST_DWithin`. Choose geohash instead when the prefix itself is useful for sharding, caching, coarse aggregation, or interoperability. Choose a quadtree when adaptive subdivision is the data structure you need rather than an encoding layered onto an existing index.
 
-## Pitfalls
+# Pitfalls
 
 - Longitude wraps at the antimeridian, latitude converges toward the poles, and rectangular cells do not represent equal surface areas.
 - Prefix length is precision, not accuracy. It cannot recover error already present in the source coordinate.
 - Lexicographic proximity is not physical distance. Nearby hashes are candidates for a geometric check, not a nearest-neighbor ordering.
 - Changing precision changes the cell identity. Store the original coordinates when queries or reindexing need more than the chosen prefix preserves.
 
-## References
+# References
 
 - [Redis GEOADD](https://redis.io/docs/latest/commands/geoadd/) — primary documentation for the 52-bit interleaved score, sorted-set ranges, neighboring-area cover, and Haversine filtering.
 - [Redis GEOHASH](https://redis.io/docs/latest/commands/geohash/) — primary documentation for standard geohash strings, prefix truncation, and the fact that different prefixes can still be nearby.

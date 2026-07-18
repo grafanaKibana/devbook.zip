@@ -1,8 +1,8 @@
 ---
 publish: true
 created: 2026-07-12T14:27:20.419Z
-modified: 2026-07-12T14:27:20.420Z
-published: 2026-07-12T14:27:20.420Z
+modified: 2026-07-18T11:30:05.188Z
+published: 2026-07-18T11:30:05.188Z
 topic:
   - Computer Science
 subtopic:
@@ -13,8 +13,6 @@ level:
 priority: Medium
 status: Ready to Repeat
 ---
-
-# Intro
 
 A stream produces items faster than a consumer drains them, and only a bounded window of recent items needs to survive: the last N log lines, one frame of audio samples, packets waiting for a socket. A plain [[Queue]] built on a growable [[Dynamic Array]] would keep allocating and shifting as the window slides; a circular buffer keeps one fixed array and moves two indices instead of the data.
 
@@ -27,7 +25,7 @@ What it gives up is growth and history: capacity is chosen once, and once the ri
 > [!NOTE] Visualization pending
 > Planned StepTrace: a ring-buffer card showing a fixed-size array with head and tail indices that wrap modulo capacity, with a full-buffer write overwriting the oldest element as `head` is dragged forward. No matching renderer exists in `engine.js` yet.
 
-## Representation and invariants
+# Representation and invariants
 
 Four fields hold the entire state:
 
@@ -45,7 +43,7 @@ The invariant that needs a deliberate design decision is the **`head == tail` am
 
 A monotonic-counter variant (never-wrapped 64-bit `head`/`tail`, masked to the array on access) achieves the same disambiguation because `tail - head` is the true count; power-of-two capacities then replace `% capacity` with `& (capacity - 1)`. Whichever scheme is chosen, enqueue and dequeue may change only the cursor they own plus `count`; no operation touches or relocates a slot that another element still occupies.
 
-## Complexity
+# Complexity
 
 | Operation | Time | Aux space per op | Cause |
 | --- | --- | --- | --- |
@@ -56,7 +54,7 @@ A monotonic-counter variant (never-wrapped 64-bit `head`/`tail`, masked to the a
 
 Structure space is `O(capacity)` and fixed at construction — the array is sized up front and never reallocated, so steady-state operation allocates nothing and produces no per-element garbage. That is the property that separates it from a growable queue: the bounds above are true worst-case per operation, not amortized over resizes, because no resize ever happens.
 
-## When the capacity is reached
+# When the capacity is reached
 
 Every boundary here follows from the two design commitments — a fixed array and wrap arithmetic.
 
@@ -66,7 +64,7 @@ The **empty-vs-full ambiguity** becomes a real failure when neither a `count` no
 
 The ring **does not grow**. Reaching capacity never triggers a resize — that is the point of a bounded footprint. A "growable" ring is a different structure: it allocates a larger array and re-linearizes the wrapped contents (copying the `head…end` segment then the `0…tail` segment into contiguous order), an `O(count)` operation that reintroduces the allocation spikes a fixed ring exists to avoid.
 
-## Reference drawer
+# Reference drawer
 
 > [!ABSTRACT]- Index layout of a wrapped ring
 >
@@ -131,7 +129,7 @@ The ring **does not grow**. Reaching capacity never triggers a resize — that i
 >
 > The `count` field is what disambiguates `head == tail`. Nulling the dequeued slot matters only for reference types: without it the array pins objects that are logically gone, a slow leak in a long-lived ring.
 
-## Questions
+# Questions
 
 > [!QUESTION]- Why do a full ring and an empty ring both satisfy `head == tail`, and how is the collision resolved?
 > Empty rings put the read and write cursors on the same slot with nothing between them; a full ring wraps `tail` all the way around until it lands back on `head`. The index pair is identical in both states. Resolutions: store an explicit `count` (empty is `0`, full is `capacity`), or leave one slot unused so full becomes `(tail + 1) % capacity == head` while empty stays `head == tail`.
@@ -145,7 +143,7 @@ The ring **does not grow**. Reaching capacity never triggers a resize — that i
 > [!QUESTION]- Why must a reference-type ring null out dequeued slots?
 > The backing array holds references for every physical slot, including ones whose logical element was already dequeued. Until a slot is overwritten by a later enqueue, its stale reference keeps the object alive, so a long-lived ring can pin objects long after they left the queue. Assigning `default` on dequeue releases the reference for collection.
 
-## References
+# References
 
 - [Circular buffer (Wikipedia)](https://en.wikipedia.org/wiki/Circular_buffer) — index schemes, the full-versus-empty disambiguation, and the mirroring/sacrificial-slot techniques.
 - [System.Threading.Channels](https://learn.microsoft.com/en-us/dotnet/core/extensions/channels) — .NET's bounded channel is a ring-backed producer/consumer queue with explicit full-mode policies (wait, drop-oldest, drop-newest) mirroring the overwrite/reject choice.

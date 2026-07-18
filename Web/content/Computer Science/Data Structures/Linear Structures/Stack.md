@@ -1,8 +1,8 @@
 ---
 publish: true
 created: 2026-07-12T14:27:20.421Z
-modified: 2026-07-12T14:27:20.422Z
-published: 2026-07-12T14:27:20.422Z
+modified: 2026-07-18T11:30:05.358Z
+published: 2026-07-18T11:30:05.358Z
 topic:
   - Computer Science
 subtopic:
@@ -14,8 +14,6 @@ priority: Medium
 status: Done
 ---
 
-# Intro
-
 A bracket matcher, an expression evaluator, and a depth-first traversal share one requirement: each time the work descends into a nested item, the item currently in progress has to be set aside and resumed later, and the one resumed first is always the most recently suspended. A general list can hold those pending items, but locating "the most recent one" and removing it is a discipline the list does not enforce.
 
 A stack enforces it structurally. All access is fixed to a single end called the top: `push` adds an element there, `pop` removes and returns it, `peek` reads it without removing. Because every operation touches only that one end, the last element pushed is the first popped (LIFO), and all three operations are constant-time. The cost is that nothing else is reachable — no index, no bottom, no search. Reaching a buried element means popping everything above it.
@@ -25,7 +23,7 @@ A stack enforces it structurally. All access is fixed to a single end called the
 > [!NOTE] Visualization pending
 > Planned StepTrace: a linear-container card showing push then pop acting only at the top — several pushes grow the top end, then pops return them in reverse (LIFO), with the interior never touched. No matching renderer exists in `engine.js` yet.
 
-## Representation and invariants
+# Representation and invariants
 
 A stack is an interface — push/pop/peek at one end — that admits two common backings.
 
@@ -39,7 +37,7 @@ Two invariants define a valid state regardless of backing:
 
 The structure deliberately discards random access, bottom access, and search — the same information a plain array keeps. That discard is what buys the constant-time top operations; a query that needs any of it belongs on a different structure.
 
-## Complexity
+# Complexity
 
 | Operation | Array backing | Linked backing | Cause |
 | --- | --- | --- | --- |
@@ -49,7 +47,7 @@ The structure deliberately discards random access, bottom access, and search —
 
 Structure space is `O(n)` for both backings. Auxiliary space per operation is `O(1)`, with one exception: an array-backed `Push` that triggers a resize momentarily holds both the old and doubled arrays, an `O(n)` spike on that single call. The `O(1)` on array push is therefore amortized, not worst-case — doubling makes any sequence of `n` pushes cost `O(n)` total, so the per-push average is constant even though an individual resize is linear. The linked backing gives a true per-call `O(1)` but pays a heap allocation and pointer-chasing cache cost on every push.
 
-## Where the discipline bites
+# Where the discipline bites
 
 Each of these follows directly from fixing access to one end.
 
@@ -61,7 +59,7 @@ Each of these follows directly from fixing access to one end.
 
 **The hardware call stack is a stack too.** Each function call pushes a frame (locals, return address) and each return pops it, following the same LIFO discipline on a fixed-size region. Deep or unbounded recursion overflows it — `StackOverflowException`, uncatchable. Converting the recursion to an explicit `Stack<T>` moves those frames to the heap, where depth is bounded by available memory rather than the fixed call-stack size; the traversal logic is unchanged (push instead of recurse, pop instead of return).
 
-## Reference drawer
+# Reference drawer
 
 > [!ABSTRACT]- Top-of-stack view
 >
@@ -92,7 +90,7 @@ Each of these follows directly from fixing access to one end.
 >
 > `Pop`/`Peek` throw `InvalidOperationException` on an empty stack; `TryPop`/`TryPeek` return `false` instead. `new Stack<T>(capacity)` pre-sizes the backing array to avoid resize spikes when the depth is known.
 
-## Questions
+# Questions
 
 > [!QUESTION]- Why is only the top of a stack reachable, and what does that buy?
 > Every operation is fixed to a single end, so there is no addressing scheme for interior or bottom elements. That restriction is what keeps push, pop, and peek at `O(1)` — no shifting, no search, no index arithmetic. Reaching a buried element requires popping everything above it, which is the information the stack trades away.
@@ -103,7 +101,7 @@ Each of these follows directly from fixing access to one end.
 > [!QUESTION]- Why convert deep recursion into an explicit stack?
 > The call stack is itself a LIFO stack on a fixed-size memory region; deep enough recursion overflows it with an uncatchable `StackOverflowException`. An explicit `Stack<T>` holds the same pending frames on the heap, where depth is bounded by available memory instead. The logic maps directly: push where the recursion would call, pop where it would return.
 
-## References
+# References
 
 - [`Stack<T>` class](https://learn.microsoft.com/en-us/dotnet/api/system.collections.generic.stack-1) — the .NET LIFO contract: `Push`, `Pop`, `Peek`, `TryPop`/`TryPeek`, and enumeration from top to bottom.
 - [`Stack<T>` source in dotnet/runtime](https://github.com/dotnet/runtime/blob/main/src/libraries/System.Private.CoreLib/src/System/Collections/Generic/Stack.cs) — the array-plus-`_size` backing and the doubling resize logic behind amortized push.

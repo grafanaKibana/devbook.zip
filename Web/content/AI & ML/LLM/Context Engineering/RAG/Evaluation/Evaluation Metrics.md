@@ -1,8 +1,8 @@
 ---
 publish: true
 created: 2026-07-13T18:39:40.489Z
-modified: 2026-07-13T18:39:40.489Z
-published: 2026-07-13T18:39:40.489Z
+modified: 2026-07-18T11:30:02.290Z
+published: 2026-07-18T11:30:02.290Z
 topic:
   - AI & ML
 subtopic:
@@ -14,15 +14,13 @@ priority: High
 status: Done
 ---
 
-# Intro
-
 Three metric layers answer three different questions. Retrieval metrics ask whether the right evidence reached the generator; generation metrics ask whether the output is faithful to that evidence and actually answers the question; end-to-end metrics ask whether the user's task got solved. The separation is what makes a regression diagnosable — a pipeline can have perfect retrieval but poor generation (the model ignores its context), or perfect generation but poor retrieval (the model faithfully summarizes irrelevant documents), and the fix is different in each case.
 
 All of these metrics assume a labeled set — see [[Retrieval Evaluation Sets]] for how to label one for retrieval, which builds on the general [[Building an Evaluation Set]] technique. When a metric moves, the metric alone does not tell you which upstream stage caused it; [[Component-Level Evaluation]] isolates chunking, embedding, and index effects.
 
 Example: a support bot returns the correct policy document (retrieval passes) but the model misreads a date constraint and answers with the wrong deadline (generation fails). Without layer separation, the team would chase retrieval improvements that cannot fix a generation problem.
 
-## Retrieval Metrics
+# Retrieval Metrics
 
 Retrieval metrics evaluate whether the relevant documents reached the generator. All assume a labeled set where each query has known relevant documents. The full definitions, worked examples, and alerting guidance live in [[Monitoring#Retrieval Quality Metrics|Monitoring — Retrieval Quality Metrics]]; this table summarizes what each metric answers and when to prefer it.
 
@@ -38,7 +36,7 @@ Retrieval metrics evaluate whether the relevant documents reached the generator.
 
 Two evaluation-side facts matter beyond the definitions. First, a recall failure is a hard ceiling on answer quality — the generator cannot use evidence it never sees, so no generation-side fix compensates for missing context. Second, track [[Monitoring#Deterministic Metrics|empty-result rate]] separately: even a small rate signals coverage gaps in the index, and aggregate recall hides it.
 
-## Generation Metrics
+# Generation Metrics
 
 Generation metrics evaluate the quality of the model's output given the retrieved context. Most are computed using an [[LLM-as-a-Judge|LLM-as-judge]] pattern — a separate model scores the output against the context and query. Full definitions live in [[Monitoring#LLM-as-Judge Metrics|Monitoring — LLM-as-Judge Metrics]]; the four core dimensions:
 
@@ -47,7 +45,7 @@ Generation metrics evaluate the quality of the model's output given the retrieve
 - **[[Monitoring#LLM-as-Judge Metrics|Citation validity]]** — does each citation actually support the claim it is attached to? Stricter than faithfulness: an answer can be grounded overall while a specific citation points to an irrelevant passage.
 - **[[Monitoring#LLM-as-Judge Metrics|Response completeness]]** — does the answer cover all aspects of the query? "Compare A and B" expects coverage of both; partial answers score lower.
 
-## RAGAS Framework
+# RAGAS Framework
 
 [RAGAS](https://docs.ragas.io/) (Retrieval-Augmented Generation Assessment) implements the retrieval and generation concepts above as four named, runnable scores. Each uses [[LLM-as-a-Judge|LLM-as-judge]] evaluation and isolates a specific failure mode in the pipeline.
 
@@ -60,7 +58,7 @@ Generation metrics evaluate the quality of the model's output given the retrieve
 
 Faithfulness and Response Relevancy are fully reference-free — they run without labeled ground truth. Context Recall always requires a reference answer. Context Precision has both a reference-required variant and a reference-free variant (`ContextUtilization`) that uses the generated response as a relevance proxy. Bootstrapping evaluation without a labeled set is possible with Faithfulness + Response Relevancy + ContextUtilization, but Context Recall — the retrieval ceiling metric — requires investing in a golden set.
 
-### Diagnostic Combinations
+## Diagnostic Combinations
 
 Individual scores identify symptoms. Reading two scores together identifies root causes — this is the primary diagnostic value of the framework.
 
@@ -75,14 +73,14 @@ Individual scores identify symptoms. Reading two scores together identifies root
 | Low | High | Noise — retrieval finds relevant docs but drowns them in irrelevant chunks | Re-ranking, tighter metadata filters, reduce k |
 | High | Low | Incomplete — retrieved set is clean but missing relevant evidence | Expand k, add [[AI & ML/LLM/Context Engineering/RAG/Retrieval#Hybrid Retrieval — Vector + Keyword\|hybrid search]], improve chunk boundaries |
 
-### Additional RAGAS Metrics
+## Additional RAGAS Metrics
 
 RAGAS v0.4+ adds two metrics beyond the original four:
 
 - **[[Monitoring#LLM-as-Judge Metrics|Noise Sensitivity]]** — measures incorrect claims introduced when retrieved context contains irrelevant chunks. Catches a gap the original four miss: the model hallucinating claims consistent with noisy context rather than ground truth. Requires reference. Lower is better.
 - **[[Monitoring#LLM-as-Judge Metrics|Context Entities Recall]]** — compares named entities in the reference answer against entities in retrieved context. Useful for entity-heavy domains (legal, medical, financial) where missing a specific name, date, or identifier is a hard failure even when general topic recall is adequate.
 
-## Tradeoffs
+# Tradeoffs
 
 Scoring methods trade coverage against cost and reliability. The right mix depends on how much ground truth you have and how much semantic nuance the metric must catch.
 
@@ -96,21 +94,21 @@ Scoring methods trade coverage against cost and reliability. The right mix depen
 
 Decision rule: combine deterministic checks (format, citation presence, length) as fast gates, LLM-as-judge for semantic quality (faithfulness, correctness), and human evaluation for calibration and edge-case discovery. Use end-to-end user metrics as the ultimate validation but never as the only evaluation.
 
-## Pitfalls
+# Pitfalls
 
-### Aggregate Metrics Mask Segment Regressions
+## Aggregate Metrics Mask Segment Regressions
 
 A pipeline change improves average Recall@5 by 2% but degrades recall by 15% on a specific tenant's query cluster. The aggregate looks great, the tenant files a support ticket. This happens because RAG workloads are heterogeneous — different query types, document formats, and languages have different retrieval characteristics.
 
 Detection: always slice metrics by meaningful segments — tenant, language, query cluster, document source type. If any segment degrades beyond the threshold, treat it as a regression even if the aggregate improves.
 
-### LLM-as-Judge Bias in Generation Metrics
+## LLM-as-Judge Bias in Generation Metrics
 
 LLM judges exhibit positional bias (scoring the first response higher in pairwise comparisons), verbosity bias (rewarding longer answers regardless of correctness), and self-preference bias (scoring outputs from the same model family higher). For RAG specifically, judges are also sensitive to evaluation prompt wording — small changes in how you ask "is this answer faithful" can shift scores across the entire eval set.
 
 Mitigation: use binary pass/fail judgments instead of numeric scales (reduces calibration noise). Run the same evaluation with varied prompt phrasings and check consistency. Validate judge outputs against a small human-labeled set and track agreement rate over time. See [[LLM-as-a-Judge]] for deeper coverage of judge reliability.
 
-## Questions
+# Questions
 
 > [!QUESTION]- Why can aggregate retrieval metrics improve while individual user segments degrade?
 >
@@ -131,7 +129,7 @@ Mitigation: use binary pass/fail judgments instead of numeric scales (reduces ca
 > - After retrieval fix, re-measure both: if faithfulness drops as recall improves, the additional context is confusing the model — add re-ranking or improve prompt grounding
 > - Improving recall often decreases precision (more chunks = more noise), so pair recall improvements with re-ranking to maintain context quality
 
-## References
+# References
 
 - [RAGAS metrics reference -- faithfulness, context precision, answer correctness (RAGAS docs)](https://docs.ragas.io/en/stable/concepts/metrics/available_metrics/)
 - [RAG evaluators -- groundedness, relevance, completeness (Azure AI Foundry)](https://learn.microsoft.com/en-us/azure/ai-foundry/concepts/evaluation-evaluators/rag-evaluators)

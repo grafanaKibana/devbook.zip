@@ -1,8 +1,8 @@
 ---
 publish: true
 created: 2026-07-16T14:10:17.836Z
-modified: 2026-07-16T14:10:17.836Z
-published: 2026-07-16T14:10:17.836Z
+modified: 2026-07-18T11:30:06.107Z
+published: 2026-07-18T11:30:06.107Z
 topic:
   - Data Persistence
 subtopic:
@@ -14,13 +14,11 @@ priority: High
 status: Ready to Repeat
 ---
 
-# Elasticsearch
-
 Elasticsearch is a distributed search and analytics engine built on Apache Lucene. It earns a place beside the system of record when the read path needs relevance-ranked full-text search, faceting, geospatial predicates, or aggregations over indexed events. The application writes JSON documents; mappings define field types, analyzers turn text into terms, and Lucene builds immutable segments whose inverted indexes map terms to matching document identifiers.
 
 Elasticsearch is normally a derived read store. If the cluster is lost, an ingestion pipeline should be able to rebuild it from PostgreSQL, an object store, or a retained log. Treating the index as authoritative changes the backup, durability, concurrency, and recovery problem substantially.
 
-## Mapping and Analysis
+# Mapping and Analysis
 
 A mapping decides how every field is indexed and queried. `text` fields are analyzed for full-text search; `keyword` fields retain one exact value for filters, sorting, and aggregations. Numeric, date, boolean, `geo_point`, nested, and vector fields each have different storage and query behavior. Dynamic mapping is convenient during exploration but can turn an accidental field shape or unbounded field names into a production mapping explosion.
 
@@ -42,7 +40,7 @@ PUT products
 
 An analyzer runs a character-filter, tokenizer, and token-filter pipeline at index time and again at search time. For `"Running Shoes"`, a standard analyzer may emit `running` and `shoes`; a language analyzer may also lowercase, remove stop words, or stem terms. Analyzer changes alter the indexed term space, so they usually require a new index and reindexing behind an alias rather than an in-place mapping edit.
 
-## Segments, Refresh, and Shards
+# Segments, Refresh, and Shards
 
 Each Elasticsearch index has primary shards; every primary is one Lucene index. A document ID is routed to one primary shard, indexed there, then copied to configured replica shards. More shards increase parallelism and distribution options, but every shard has heap, file-handle, metadata, recovery, and merge cost. Choose shard count from measured data size, indexing rate, recovery target, and node capacity—not from node count alone.
 
@@ -57,7 +55,7 @@ Lucene segments are immutable. New and updated documents first enter in-memory i
 
 The source learning visual is not embedded because it describes the term dictionary as an LSM tree. Lucene uses immutable segments and specialized term dictionaries/postings structures; the lifecycle resembles append-and-merge storage, but calling the term dictionary itself an LSM tree obscures the actual boundary.
 
-## Query, Filter, and Aggregation
+# Query, Filter, and Aggregation
 
 **Query context** computes a relevance score, for example a `match` query over analyzed text. **Filter context** asks a yes/no question without scoring, for example tenant, status, or date predicates, and is the right default for exact constraints. Aggregations bucket and summarize the matching documents, but high-cardinality terms, large bucket counts, and cross-shard reduction can consume substantial heap and network bandwidth.
 
@@ -82,7 +80,7 @@ GET products/_search
 
 The tenant filter is a correctness boundary, not only a performance hint. Every search, aggregation, autocomplete, and export path must apply it, or documents can leak across accounts.
 
-## Use Cases
+# Use Cases
 
 ![[Assets/System Design 101/b0f1f2bf4d89cf435d58fff195a785390a11a3b6ab28d60fea574c72dd4a80fa.png]]
 
@@ -100,7 +98,7 @@ The tenant filter is a correctness boundary, not only a performance hint. Every 
 
 Use PostgreSQL full-text search when one relational data set needs modest search and transactionally current results. Use Elasticsearch when relevance, language analysis, faceting, log/event scale, or geospatial search justifies a separate derived system. Keep a rebuild path either way.
 
-## Operational Boundaries
+# Operational Boundaries
 
 - **Mapping explosion:** unbounded dynamic fields consume cluster state and heap. Use explicit templates, `dynamic: strict` where practical, and flatten truly arbitrary key/value payloads.
 - **Oversharding:** many tiny shards waste heap and make recovery slow. Rollover by measured size/age and consolidate cold data.
@@ -109,7 +107,7 @@ Use PostgreSQL full-text search when one relational data set needs modest search
 - **Disk watermarks:** merge and recovery need free space. A cluster near disk capacity can stop allocating shards or block writes before raw bytes reach 100%.
 - **Schema changes:** field types generally cannot be changed in place. Create a new versioned index, reindex, validate, then switch an alias.
 
-## Questions
+# Questions
 
 > [!QUESTION]- Why can a successful Elasticsearch write be invisible to search briefly?
 > The primary has accepted the operation and recorded it in its indexing/translog path, but search runs against opened Lucene segments. A refresh publishes recent segments to search. Durability acknowledgement and search visibility are separate boundaries.
@@ -117,7 +115,7 @@ Use PostgreSQL full-text search when one relational data set needs modest search
 > [!QUESTION]- Why use both `text` and `keyword` for one field?
 > `text` is analyzed into terms for relevance-ranked full-text matching. `keyword` keeps the exact value for equality filters, sorting, and aggregations. One representation cannot efficiently provide both semantics.
 
-## References
+# References
 
 - [Elasticsearch mapping](https://www.elastic.co/guide/en/elasticsearch/reference/current/mapping.html) — official field-type, dynamic mapping, and schema behavior.
 - [Elasticsearch analysis](https://www.elastic.co/guide/en/elasticsearch/reference/current/analysis.html) — analyzer, tokenizer, and token-filter mechanics.

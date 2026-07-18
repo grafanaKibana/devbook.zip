@@ -1,8 +1,8 @@
 ---
 publish: true
 created: 2026-07-11T21:45:14.092Z
-modified: 2026-07-17T19:00:22.746Z
-published: 2026-07-17T19:00:22.746Z
+modified: 2026-07-18T11:30:12.185Z
+published: 2026-07-18T11:30:12.185Z
 topic:
   - Programming
 subtopic:
@@ -14,8 +14,6 @@ priority: Medium
 status: Ready to Repeat
 ---
 
-# Intro
-
 Generics let you write type-safe, reusable code without duplicating logic per type. Instead of accepting `object` and casting later, you keep strong compile-time guarantees and better IDE support. In .NET, generics also matter for performance because collections like `List<int>` avoid boxing that older non-generic APIs caused.
 
 - `T` is a placeholder for a type chosen by the caller.
@@ -23,14 +21,14 @@ Generics let you write type-safe, reusable code without duplicating logic per ty
 - Constraints (`where T : ...`) are capability contracts that unlock members safely.
 - Generic code is checked at compile time, then JIT-optimized per runtime type usage.
 
-## Use Cases
+# Use Cases
 
 - Collections: `List<T>`, `Dictionary<TKey, TValue>`, and `HashSet<T>` provide reusable containers with strong typing.
 - Reusable algorithms: sorting, filtering, and comparison helpers can work across many types with constraints.
 - Repository/service abstractions: patterns like `IRepository<TEntity>` avoid repeating CRUD interfaces per entity.
 - Result wrappers: types like `Result<T>` or `ApiResponse<T>` let you model success payloads consistently.
 
-## Constraints
+# Constraints
 
 Constraints define what operations are legal on `T` and protect APIs from invalid type arguments.
 
@@ -42,7 +40,7 @@ Constraints define what operations are legal on `T` and protect APIs from invali
 - `where T : BaseType` - `T` must inherit from a specific base type.
 - `where T : ISomeInterface` - `T` must implement a specific interface.
 
-## Variance
+# Variance
 
 Variance controls assignment compatibility between constructed generic types.
 
@@ -62,7 +60,7 @@ List<string> list = new();
 // List<object> invalid = list; // does not compile (invariance)
 ```
 
-## Example
+# Example
 
 ```csharp
 public static T CreateAndValidate<T>()
@@ -74,7 +72,7 @@ public static T CreateAndValidate<T>()
 }
 ```
 
-## Generic Math (.NET 7+)
+# Generic Math (.NET 7+)
 
 For years you couldn't write a generic `Sum<T>` because `T` had no way to express "supports `+`." **Static abstract interface members** fixed that: interfaces like `INumber<T>` declare static operators, so the constraint `where T : INumber<T>` (the "curiously recurring" self-referencing pattern) unlocks arithmetic on the type parameter.
 
@@ -89,7 +87,7 @@ public static T Sum<T>(ReadOnlySpan<T> values) where T : INumber<T>
 
 This is also the mechanism behind `IParsable<T>`, `ISpanFormattable`, and other "static contract" interfaces.
 
-## Reflection over Generics
+# Reflection over Generics
 
 An _open_ generic (`List<>`) can't be instantiated until its type arguments are supplied at runtime via `MakeGenericType` (and `MakeGenericMethod` for methods):
 
@@ -100,7 +98,7 @@ var list = Activator.CreateInstance(closed);
 
 Newer constraints worth knowing: `where T : struct, Enum` (enum-only generics), `where T : unmanaged`, and **`allows ref struct`** (C# 13) which lets `Span<T>` flow through generic code.
 
-## Pitfalls
+# Pitfalls
 
 - Unconstrained `T` blocks member/operator usage because the compiler cannot prove capabilities, which pushes unsafe casts and weakens API clarity; add the smallest constraint set (`where T : IFoo`, `where T : struct`, etc.) that encodes what the algorithm really needs.
 - **Static members are per-closed-type.** A `static` field in `Cache<T>` is _not_ shared across `Cache<int>` and `Cache<string>` — each closed type gets its own copy of the static state. Handy for per-type caches, but a classic surprise if you expected one shared counter.
@@ -108,13 +106,13 @@ Newer constraints worth knowing: `where T : struct, Enum` (enum-only generics), 
 - `default(T)` can hide correctness bugs because reference and nullable types become `null` while value types become zeroed data, which may be interpreted as valid business values; model absence explicitly (for example, `Try` pattern, `Option`, or nullable annotations) and validate before use.
 - Over-constraining (`where T : class, SomeConcreteType`) couples generic APIs to one hierarchy, which prevents reuse and forces duplicate implementations later; prefer interface-based constraints that describe behavior instead of concrete inheritance chains.
 
-## Tradeoffs
+# Tradeoffs
 
 - **Generics vs `object` (boxing)**: Non-generic collections (`ArrayList`, `Hashtable`) store value types as `object`, boxing them on every add and unboxing on every read. `List<int>` avoids boxing entirely — the JIT generates a specialized implementation per value type. The performance difference is measurable in allocation-heavy loops on value types like `int`, `Guid`, or `DateTime`.
 - **Generics vs inheritance for polymorphism**: Generics express static (compile-time) polymorphism — the type argument is resolved at JIT time. Inheritance expresses dynamic (runtime) polymorphism via virtual dispatch. Use generics when the concrete type is always known at the call site (algorithm or container); use inheritance when the concrete type is determined at runtime (strategy, plugin, handler).
 - **CLR generic specialization**: The CLR generates separate JIT-compiled bodies for each value-type argument (`List<int>`, `List<double>` each get their own code) but shares one compiled body for all reference-type arguments (`List<string>` and `List<object>` share JIT output). This means value-type generics are as fast as hand-typed code, while reference-type generics share an efficient single body with a small type-pointer indirection.
 
-## Questions
+# Questions
 
 > [!QUESTION]- Why does `IEnumerable<string>` assign to `IEnumerable<object>`, but `List<string>` does not assign to `List<object>`?
 > `IEnumerable<out T>` is covariant, so it is safe to upcast because it only produces `T` values.
@@ -131,7 +129,7 @@ Newer constraints worth knowing: `where T : struct, Enum` (enum-only generics), 
 > Repeated fallback usage can spread bad state across caches, persistence, or downstream services before detection.
 > Prefer explicit failure paths (`TryXxx`, exceptions, discriminated result types) and validate invariants at boundaries.
 
-## References
+# References
 
 - [Generics in C#](https://learn.microsoft.com/dotnet/csharp/programming-guide/generics/) — official guide covering generic classes, methods, interfaces, and delegates with examples.
 - [Constraints on type parameters](https://learn.microsoft.com/dotnet/csharp/programming-guide/generics/constraints-on-type-parameters) — full list of constraint keywords and their semantics.

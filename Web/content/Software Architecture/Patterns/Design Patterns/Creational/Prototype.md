@@ -1,8 +1,8 @@
 ---
 publish: true
 created: 2026-07-15T12:03:14.892Z
-modified: 2026-07-15T12:03:14.892Z
-published: 2026-07-15T12:03:14.892Z
+modified: 2026-07-18T11:30:14.961Z
+published: 2026-07-18T11:30:14.961Z
 topic:
   - Software Architecture
 subtopic:
@@ -13,8 +13,6 @@ level:
 priority: High
 status: Done
 ---
-
-# Prototype
 
 Photocopying a filled-out form is a Prototype in everyday life. Instead of filling out a new form from scratch, you copy the existing one and change just the name or address. The copy carries all the original structure and most of the original data — you only modify what differs.
 
@@ -31,7 +29,7 @@ flowchart LR
     Copy3 -.->|modify size and color| Copy3
 ```
 
-## Problem
+# Problem
 
 Creating product variants (same base product, different size/color/region pricing) by manually copying properties is error-prone:
 
@@ -61,7 +59,7 @@ public class ProductService
 
 Here's what breaks when requirements change: adding a `ShippingConstraints` property to `Product` requires finding every manual copy site and adding the assignment — a maintenance burden that grows with the object's complexity.
 
-## Solution
+# Solution
 
 Use `record with {}` for the modern approach, or an explicit copy constructor for classes:
 
@@ -127,7 +125,7 @@ draftOrder.Customer = currentCustomer;
 
 Adding a new field to `Product` record automatically includes it in `with` copies — no manual update needed.
 
-## You Already Use This
+# You Already Use This
 
 **`record with {}` expression (C# 9+)** — the language-native Prototype. Every `record` type gets a compiler-generated copy constructor and `with` expression support. This is the recommended approach for new code: it's shallow by default, explicit about what changes, and the compiler keeps it in sync with the type definition.
 
@@ -137,13 +135,13 @@ Adding a new field to `Product` record automatically includes it in `with` copie
 
 **`DataTable.Copy()`** — deep copies a `DataTable` including schema and data. `DataTable.Clone()` copies only the schema (shallow). The naming inconsistency is a classic `ICloneable` ambiguity problem.
 
-## Pitfalls
+# Pitfalls
 
 **Shallow copy sharing mutable state** — `record with {}` is shallow by default. If `Product.Tags` is a `List<string>` (mutable), the copy shares the same list instance. Mutating `variant.Tags` mutates `baseProduct.Tags`. Use immutable collections (`IReadOnlyList<T>`, `ImmutableList<T>`) or explicitly copy mutable fields in the `with` expression.
 
 **Forgetting to update copy logic when adding fields** — with explicit copy constructors or manual `MemberwiseClone()` overrides, adding a new field to the class requires updating the copy method. `record with {}` avoids this: the compiler-generated copy constructor always includes all fields. This is the primary reason to prefer `record` for Prototype scenarios.
 
-## Questions
+# Questions
 
 > [!QUESTION]- When should you use Prototype instead of just calling `new`?
 > When construction is expensive (loading from DB, computing derived fields) and you need many similar objects. Prototype amortizes the construction cost: build one template, clone it N times with small variations. Also use it when the exact type isn't known at compile time — `prototype.Clone()` works without knowing the concrete type. The tradeoff: cloning can be as expensive as construction if the object graph is deep; profile before assuming it's faster.
@@ -151,7 +149,7 @@ Adding a new field to `Product` record automatically includes it in `with` copie
 > [!QUESTION]- What's the difference between shallow and deep copy, and when does it matter?
 > Shallow copy duplicates the object's fields but shares reference-type values. Deep copy recursively duplicates the entire object graph. It matters when the copied object contains mutable reference types: two shallow copies sharing a `List<OrderItem>` will interfere with each other. Use deep copy when the clone must be fully independent. Use shallow copy when shared references are intentional (e.g., `Customer` is shared across orders — that's correct). The cost of deep copy scales with graph depth; for large graphs, consider serialization-based cloning (`JsonSerializer.Deserialize(JsonSerializer.Serialize(obj))`).
 
-## References
+# References
 
 - [Prototype — refactoring.guru](https://refactoring.guru/design-patterns/prototype) — canonical pattern description with shallow/deep copy discussion and C# example
 - [Records (C# reference) — Microsoft Learn](https://learn.microsoft.com/en-us/dotnet/csharp/language-reference/builtin-types/record) — `record with {}` as the modern C# Prototype

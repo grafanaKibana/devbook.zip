@@ -1,8 +1,8 @@
 ---
 publish: true
 created: 2026-07-12T14:27:20.427Z
-modified: 2026-07-12T14:27:20.427Z
-published: 2026-07-12T14:27:20.427Z
+modified: 2026-07-18T11:30:05.695Z
+published: 2026-07-18T11:30:05.695Z
 topic:
   - Computer Science
 subtopic:
@@ -14,8 +14,6 @@ priority: Medium
 status: Ready to Repeat
 ---
 
-# Intro
-
 An order book holds 100K price levels and an exchange feed inserts and removes thousands of entries per second, all while ordered iteration and min/max must stay fast. A plain [[Binary Search Tree]] keeps the order but degrades to `O(n)` height on adversarial or already-sorted insertion — exactly the pattern a live feed produces. An [[AVL Tree]] fixes that with a strict ±1 height balance, but pays for it with more rotations on every write. A red-black tree keeps the sorted structure balanced enough for logarithmic queries while capping the structural work per write to a small constant.
 
 The state it persists is a [[Binary Search Tree]] plus one color bit per node — red or black — governed by a set of color rules rather than measured heights. The rules are looser than AVL's, so the tree can grow to twice its minimum height, but that slack is what lets an insert repair a violation with at most two rotations and a delete with at most three. The order and the key set are retained; the coloring itself is an internal artifact with no domain meaning, and it cannot be reconstructed from the keys alone once the mutation history is gone.
@@ -25,7 +23,7 @@ The state it persists is a [[Binary Search Tree]] plus one color bit per node �
 > [!NOTE] Visualization pending
 > Planned StepTrace: a tree card showing an insert colored red, a red-red violation fixed by a recolor, and a case where recoloring is not enough so a rotation restores the black-height invariant. No matching renderer exists in `engine.js` yet.
 
-## Representation and invariants
+# Representation and invariants
 
 Each node stores its key, left/right/parent pointers, and a single color bit. `nil` leaves are treated as black sentinels, which lets every real node have two children and removes the null-check special cases from the fixup logic — this also folds in the classic fifth property (every `nil` leaf is black) as a property of the sentinel rather than a separate rule. Four invariants then define a valid state:
 
@@ -43,7 +41,7 @@ An insert colors the new node red and attaches it as a normal BST leaf. Red can 
 
 The unbounded part of the work — recoloring up the tree — touches only color bits. The bounded part — rotation, the pointer surgery that actually reshapes the tree — is capped at two. Delete is the harder direction: removing a black node drops a black from one path and violates invariant 4, producing the "double-black" cases resolved by up to three rotations plus recoloring, but the same asymmetry holds — structural change stays near-constant.
 
-## Complexity
+# Complexity
 
 | Operation | Worst-case time | Rotations | Recolorings | Aux space | Cause |
 | --- | --- | --- | --- | --- | --- |
@@ -55,7 +53,7 @@ Structure space is `O(n)` for the nodes plus one color bit each — a single bit
 
 The rotation caps and the height bound both hold unconditionally — no averaging, no amortization over a sequence, and no dependence on insertion order. The `O(log n)` recolorings are single-field writes, so the expensive structural operation stays constant while the cheap one absorbs the height.
 
-## Where the looser balance shows
+# Where the looser balance shows
 
 The slack that makes repairs cheap has a cost on reads. A red-black tree can reach 2·log₂(n+1) height where an AVL tree stays under 1.44·log₂ n, so a lookup can visit up to ~40% more nodes. On a read-dominated, mutation-rare workload that difference is the whole trade — the color invariants deliberately allow a taller tree in exchange for fewer rotations that will never happen.
 
@@ -63,7 +61,7 @@ Delete is where the invariants turn hostile to the implementer. An insert only e
 
 Every mutation must re-establish all four invariants before it returns. A partial fixup that repairs invariant 3 but leaves two paths with different black counts produces a structurally valid BST whose balance guarantee no longer holds, and the defect surfaces only later as an unexpectedly deep path.
 
-## Reference drawer
+# Reference drawer
 
 > [!ABSTRACT]- A valid coloring and its paths
 >
@@ -125,7 +123,7 @@ Every mutation must re-establish all four invariants before it returns. A partia
 >
 > Delete follows the mirror shape but branches on a `nil`-or-black "double-black" node and its sibling's colors across four cases; production code (`std::map`, `TreeMap`, `SortedSet<T>`) implements it in full rather than the sketch above.
 
-## Questions
+# Questions
 
 > [!QUESTION]- Why is a red-black tree's height at most 2·log₂(n+1)?
 > Equal black counts on every root-to-leaf path (invariant 4) make the all-black skeleton balanced, and "no red parent with a red child" (invariant 3) means reds can at most double a path by interleaving between blacks. The longest path is therefore at most twice the shortest, so height stays within 2·log₂(n+1).
@@ -139,7 +137,7 @@ Every mutation must re-establish all four invariants before it returns. A partia
 > [!QUESTION]- What makes red-black delete more error-prone than insert?
 > Insert only ever repairs a local red-red violation. Delete can remove a black node and break the black-height invariant along a whole path, producing "double-black" cases that branch on the sibling's color and its children's colors. A subtle mistake leaves BST order intact — so lookups still return correct results — while silently losing the height guarantee.
 
-## References
+# References
 
 - [Guibas & Sedgewick, "A dichromatic framework for balanced trees" (1978)](https://sedgewick.io/wp-content/themes/sedgewick/papers/1978Dichromatic.pdf) — the paper introducing the red-black formulation and its invariants; primary source.
 - [Red-Black BSTs (Princeton Algorithms)](https://algs4.cs.princeton.edu/33balanced/) — Sedgewick's left-leaning variant with a clear walkthrough of insert fixup and the 2-3 tree correspondence.

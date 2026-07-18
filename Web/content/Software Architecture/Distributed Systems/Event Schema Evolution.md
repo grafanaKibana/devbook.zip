@@ -1,8 +1,8 @@
 ---
 publish: true
 created: 2026-07-18T08:14:41.559Z
-modified: 2026-07-18T08:14:41.559Z
-published: 2026-07-18T08:14:41.559Z
+modified: 2026-07-18T11:30:14.031Z
+published: 2026-07-18T11:30:14.031Z
 topic:
   - Software Architecture
 subtopic:
@@ -14,11 +14,9 @@ priority: High
 status: Ready to Repeat
 ---
 
-# Intro
-
 Event schema evolution keeps old records readable while producers and consumers deploy independently. The contract is broader than any broker or registry: define how a reader interprets a writer's version, which changes CI accepts, how schemas are identified, and how a consumer behaves when it cannot resolve or understand a version.
 
-## Writer and reader schemas
+# Writer and reader schemas
 
 Suppose version one writes:
 
@@ -34,7 +32,7 @@ Version two adds an optional field with a default:
 
 An old record remains readable by the new consumer because its reader schema supplies the default. A new record remains readable by an old consumer when that reader ignores fields it does not know. Renaming or changing the type of `orderId` is breaking unless aliases or a migration preserve resolution.
 
-## Compatibility policy
+# Compatibility policy
 
 - **Backward:** new consumers can read records produced by the previous schema.
 - **Forward:** old consumers can read records produced by the new schema.
@@ -43,7 +41,7 @@ An old record remains readable by the new consumer because its reader schema sup
 
 Use full transitive compatibility when retained records outlive several application versions or independent consumers can lag for months. Compatibility labels still depend on the serialization format and configured subject/version strategy; they are not universal guarantees across every event system.
 
-## Registry and transport boundary
+# Registry and transport boundary
 
 A registry is one way to distribute schema identity and enforce policy. A system can instead publish versioned contracts with the application, but it still needs deterministic writer/reader resolution and deployment checks.
 
@@ -53,7 +51,7 @@ In one Kafka implementation, serializers attach a schema identifier to each reco
 
 For an intentional breaking change, publish a new event type or channel and run both contracts through a migration window. Quarantine an unsupported version with its event ID, schema identity, and source position; silently dropping unknown fields or records makes replay unverifiable.
 
-## References
+# References
 
 - [Apache Avro schema resolution](https://avro.apache.org/docs/current/specification/#schema-resolution) — primary writer/reader resolution, aliases, defaults, and compatibility rules for Avro data.
 - [AsyncAPI specification](https://www.asyncapi.com/docs/reference/specification/latest) — implementation-neutral contract model for channels, messages, and reusable schemas.

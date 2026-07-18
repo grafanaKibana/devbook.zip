@@ -1,8 +1,8 @@
 ---
 publish: true
 created: 2026-07-16T07:40:32.284Z
-modified: 2026-07-16T07:43:33.509Z
-published: 2026-07-16T07:43:33.509Z
+modified: 2026-07-18T11:30:07.718Z
+published: 2026-07-18T11:30:07.718Z
 topic:
   - Networks
 subtopic: []
@@ -13,13 +13,11 @@ priority: Medium
 status: Ready to Repeat
 ---
 
-# Intro
-
 A network write does not travel directly from one process to another. The application hands bytes to a socket; the operating system frames them as transport segments and IP packets, queues and routes them, and gives descriptors to a NIC that reads packet bytes with DMA. The receiver performs the same work in reverse before its application can read anything.
 
 This path explains failures that an application log cannot: a successful `send()` can still be waiting in a socket buffer, a packet larger than the path MTU can disappear, and a receiver that stops reading eventually pushes back through TCP to the sender.
 
-## One TCP Write across the Path
+# One TCP Write across the Path
 
 Suppose a service writes a 4 KiB response to an established TCP socket:
 
@@ -35,7 +33,7 @@ Suppose a service writes a 4 KiB response to an established TCP socket:
 
 The 4 KiB write is not a 4 KiB packet. With a 1500-byte Ethernet MTU, IPv4 and TCP headers usually leave an MSS near 1460 bytes, so TCP sends several segments. Options, tunnels, IPv6, or a smaller downstream MTU reduce that payload. Path MTU Discovery is preferable to IP fragmentation because losing one fragment discards the whole original packet.
 
-## Backpressure Is End to End
+# Backpressure Is End to End
 
 Backpressure begins when the receiver consumes data more slowly than it arrives:
 
@@ -52,13 +50,13 @@ That chain is a feature: it bounds memory and makes overload visible. Raising bu
 
 UDP has no receive-window feedback. If the receiver or NIC ring cannot keep up, datagrams are dropped. A UDP application must pace the sender, measure loss, and define whether to discard, retry, or reconstruct missing data.
 
-## Failure Trace
+# Failure Trace
 
 Consider a 1500-byte packet sent through a tunnel whose effective path MTU is 1400 bytes. If the packet cannot be fragmented and the ICMP "Packet Too Big" feedback is filtered, TCP keeps retransmitting a segment that never fits. Small requests work, but larger responses stall: a classic PMTU black hole. A packet capture at the sender shows retransmissions; interface counters may remain clean because the drop occurs later in the path.
 
 The repair is to restore PMTU feedback or clamp TCP MSS at the tunnel boundary, not to increase an application timeout. The layer that first violates the packet-size contract owns the fix.
 
-## References
+# References
 
 - [TCP specification (RFC 9293)](https://www.rfc-editor.org/rfc/rfc9293) — current TCP state machine, sequence, acknowledgment, flow-control, and retransmission requirements.
 - [Path MTU Discovery for IPv6 (RFC 8201)](https://www.rfc-editor.org/rfc/rfc8201) — explains packet-too-big feedback and how endpoints learn a usable path MTU.

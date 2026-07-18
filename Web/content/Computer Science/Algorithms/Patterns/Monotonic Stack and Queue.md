@@ -1,8 +1,8 @@
 ---
 publish: true
 created: 2026-07-12T14:27:20.407Z
-modified: 2026-07-12T14:27:20.407Z
-published: 2026-07-12T14:27:20.407Z
+modified: 2026-07-18T11:30:03.963Z
+published: 2026-07-18T11:30:03.963Z
 topic:
   - Computer Science
 subtopic:
@@ -13,8 +13,6 @@ level:
 priority: Medium
 status: Creation
 ---
-
-# Intro
 
 An array of daily temperatures needs, for every day, the number of days until a warmer one. Comparing each day against all later days is `O(n^2)`: most of that work re-scans stretches already known to be colder. The redundancy has structure. Once a warmer day arrives, every earlier colder day pending an answer is resolved at once and never consulted again.
 
@@ -27,7 +25,7 @@ A monotonic deque generalises this to a moving window. It stores window candidat
 > [!NOTE] Visualization pending
 > Planned StepTrace: a monotonic-stack card showing a stack kept monotonic — before pushing an element, all elements that violate the order are popped, so each element enters and leaves once. No matching renderer exists in `engine.js` yet.
 
-## Why the pops are free
+# Why the pops are free
 
 The stack answers "next greater element" for every index in one pass. Scanning left to right it holds indices whose values _decrease_ from bottom to top. Before pushing index `i`, every index whose value is less than `a[i]` is popped, because `a[i]` is the next greater element each of them was waiting for. Index `i` is then pushed. Indices still on the stack when the scan ends have no greater element to their right.
 
@@ -37,7 +35,7 @@ The deque keeps the same monotone contents but adds a second exit. Values decrea
 
 The cost argument is a charging scheme. Each index is pushed exactly once and popped at most once across the entire scan, so the inner "pop while" runs at most `n` times _in total_, not per outer step. Charging each pop to the unique element that performed it bounds the whole run at `O(n)` — the same amortised accounting behind [[Union-Find]] and dynamic-array growth.
 
-## Complexity
+# Complexity
 
 | Case | Time | Auxiliary space | Cause |
 | --- | --- | --- | --- |
@@ -47,7 +45,7 @@ The cost argument is a charging scheme. Each index is pushed exactly once and po
 
 The `O(n)` bound is amortized, not per-operation: a single push can trigger a run of pops, but those pops are elements charged only once each. Stack space is the peak occupancy — a decreasing input for a decreasing stack, e.g. `[5, 4, 3, 2, 1]`, satisfies the pop condition on no push (no element has a next-greater to its right), so every index stays resident and gives the `O(n)` worst case. The deque is capped at `k` by front eviction and never reaches `O(n)`.
 
-## When the invariant is set wrong
+# When the invariant is set wrong
 
 The monotone direction must match the query. A _decreasing_ stack yields the next _greater_ element; flip the pop comparison and it yields the next _smaller_. Choosing the direction backwards produces a plausible, fully populated result array that answers the opposite question — nothing crashes, and no-duplicate test inputs may even look right.
 
@@ -57,7 +55,7 @@ The deque must store indices, not values. A window maximum is a _distance_-aware
 
 Sliding-window maximum is the exact case a scalar [[Sliding Window]] aggregate fails. A running sum is reversible — subtract the departing element and the invariant holds in `O(1)`. A maximum has no inverse: when the current max leaves the window, the next-largest is unknown without rescanning. The monotonic deque restores `O(n)` by keeping every "still possibly maximal" index instead of a single collapsed scalar, so the answer survives a removal.
 
-## Reference drawer
+# Reference drawer
 
 > [!ABSTRACT]- Next-greater control flow
 >
@@ -111,7 +109,7 @@ Sliding-window maximum is the exact case a scalar [[Sliding Window]] aggregate f
 >
 > The pop comparison (`<` vs `<=`) sets tie handling; both examples store indices so distances and window eviction stay recoverable.
 
-## Comparison
+# Comparison
 
 | Approach | Time | Space | Required input | Stronger case | Weaker case |
 | --- | --- | --- | --- | --- | --- |
@@ -123,7 +121,7 @@ Sliding-window maximum is the exact case a scalar [[Sliding Window]] aggregate f
 
 A monotonic stack is the `O(n)` tool for next-greater and next-smaller spans, paying `O(n)` space to keep unanswered candidates live; brute force is preferable only when `n` is trivially small. A monotonic deque is the `O(n)` sliding-window max/min that beats a [[Heap]]'s `O(n log k)` — the heap earns its log factor only when the window needs an order statistic the deque cannot expose. A sparse table or [[Segment Tree]] answers _arbitrary_ ranges rather than a moving window, and its `O(n log n)` build pays back only under repeated ad-hoc range queries.
 
-## Questions
+# Questions
 
 > [!QUESTION]- Why is a monotonic stack `O(n)` when the code reads as a nested loop?
 > Every index is pushed exactly once and popped at most once, so the total number of pops across the whole scan is bounded by `n`. The inner "pop while" therefore does `O(n)` work summed over all outer iterations, not `O(n)` per iteration. Charging each pop to the unique element that performed it gives the amortized linear bound.
@@ -134,7 +132,7 @@ A monotonic stack is the `O(n)` tool for next-greater and next-smaller spans, pa
 > [!QUESTION]- How does the monotone direction relate to which query is answered?
 > The direction of the stack fixes the query. A decreasing stack (values fall bottom to top) resolves each popped index against the arriving larger value, yielding the next _greater_ element; reversing the pop comparison makes the stack increasing and yields the next _smaller_ element. Choosing the direction backwards produces a fully populated result that answers the opposite question.
 
-## References
+# References
 
 - [Sliding Window Maximum (LeetCode #239)](https://leetcode.com/problems/sliding-window-maximum/) — the canonical monotonic-deque problem, with the index-based window-eviction requirement.
 - [Largest Rectangle in Histogram (LeetCode #84)](https://leetcode.com/problems/largest-rectangle-in-histogram/) — the previous-smaller / next-smaller boundary application of a monotonic stack.

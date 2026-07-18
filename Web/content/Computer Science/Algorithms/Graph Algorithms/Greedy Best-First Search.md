@@ -1,8 +1,8 @@
 ---
 publish: true
 created: 2026-07-12T14:27:20.403Z
-modified: 2026-07-12T14:27:20.403Z
-published: 2026-07-12T14:27:20.403Z
+modified: 2026-07-18T11:30:03.604Z
+published: 2026-07-18T11:30:03.604Z
 topic:
   - Computer Science
 subtopic:
@@ -13,8 +13,6 @@ level:
 priority: Medium
 status: Creation
 ---
-
-# Intro
 
 A grid pathfinder has to reach a goal cell and cares more about producing _a_ route quickly than about producing the shortest one. A cost-aware search like [[Dijkstra]] weighs the distance already travelled and fans out in every direction, so most of its expansions land on cells that point away from the goal. Greedy Best-First Search discards the accumulated cost and orders its frontier by the heuristic `h(n)` alone — the estimated remaining distance to the goal — so it always expands whichever node currently looks closest and drives almost straight at the target.
 
@@ -27,7 +25,7 @@ The decisive behaviour is the moment the heuristic selects a node that looks clo
 > [!NOTE] Visualization pending
 > Planned StepTrace: a graph-search card showing a frontier ordered by the heuristic `h` alone — always expanding the node that looks closest to the goal, sometimes down a misleading path. No matching renderer exists in `engine.js` yet.
 
-## Ordering by the estimate
+# Ordering by the estimate
 
 The frontier is a priority queue keyed by `h(n)`. Each iteration pops the node with the smallest estimate, and if it is not the goal, pushes every unvisited neighbor keyed by that neighbor's own `h`. The edge weight `w(u, v)` is available but never read; a visited set stops a node from entering the queue twice.
 
@@ -35,7 +33,7 @@ The only property this maintains is that the next node expanded is the one the h
 
 One framing makes the family relationship exact: [[A-Star Search|A*]] expands by `f = g + h`. Setting `g` to zero collapses `f` to `h`, which is precisely Greedy Best-First — the case where a node's history counts for nothing.
 
-## Complexity
+# Complexity
 
 | Case | Time | Auxiliary space | Cause |
 | --- | --- | --- | --- |
@@ -45,7 +43,7 @@ One framing makes the family relationship exact: [[A-Star Search|A*]] expands by
 
 `b` is the branching factor and `m` the maximum depth of the search space. Every bound is governed by heuristic quality: a strong `h` keeps the frontier small and the path close to direct, while a weak one distinguishes no better than an uninformed traversal. Like A\*, Greedy Best-First holds every generated node in memory, so space tracks the number of nodes generated and is usually the binding limit before time is.
 
-## When the estimate misleads
+# When the estimate misleads
 
 The h-only ordering fails in three distinct ways, all traceable to the missing `g` term.
 
@@ -55,7 +53,7 @@ The h-only ordering fails in three distinct ways, all traceable to the missing `
 
 **A poor heuristic collapses to uninformed search.** If `h` returns near-constant or weakly correlated values, the priority queue no longer separates directions and expansion degrades to an uninformed fan-out, paying the full `O(b^m)`. The concave obstacle is the common concrete case: a wall cupping the goal gives every cell inside the pocket a tempting low `h`, so the search thrashes along the barrier — re-committing to the blocked heading because those cells keep scoring lowest — before it discovers the way around.
 
-## Reference drawer
+# Reference drawer
 
 > [!ABSTRACT]- Control flow
 >
@@ -123,7 +121,7 @@ The h-only ordering fails in three distinct ways, all traceable to the missing `
 >
 > The priority key is `heuristic(v)` with no `g` term, so the frontier orders by estimated distance to the goal alone. `visited` guarantees termination on a finite graph but says nothing about path length.
 
-## Questions
+# Questions
 
 > [!QUESTION]- Why is Greedy Best-First Search neither optimal nor complete?
 > It orders the frontier by `h(n)` alone and never accounts for `g(n)`, the cost already spent. A neighbor that is close in straight-line distance but reached by a long detour is expanded before a farther-looking neighbor that sits beside the goal, so the returned path can be far from shortest — not optimal. On an infinite graph a monotonically improving `h` can lead expansion down a branch that never reaches the goal — not complete. A finite graph with a visited set terminates, but the path it returns can still be long.
@@ -134,7 +132,7 @@ The h-only ordering fails in three distinct ways, all traceable to the missing `
 > [!QUESTION]- What does the visited set guarantee, and what does it not fix?
 > It stops a node from being enqueued twice, which prevents cycles from looping forever and guarantees termination on a finite graph. It does not make the returned path optimal, and it cannot bound an infinite graph where `h` keeps improving down a fruitless branch.
 
-## References
+# References
 
 - [Best-first search (Wikipedia)](https://en.wikipedia.org/wiki/Best-first_search) — greedy best-first as the `f = h` special case of best-first search, with its optimality and completeness caveats.
 - [Heuristics (Amit's A\* Pages, Stanford)](https://theory.stanford.edu/~amitp/GameProgramming/Heuristics.html) — how the heuristic weight slides a search between Dijkstra, A\*, and greedy behaviour.

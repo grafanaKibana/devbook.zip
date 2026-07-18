@@ -1,8 +1,8 @@
 ---
 publish: true
 created: 2026-07-16T08:23:58.021Z
-modified: 2026-07-16T08:28:56.887Z
-published: 2026-07-16T08:28:56.887Z
+modified: 2026-07-18T11:30:13.695Z
+published: 2026-07-18T11:30:13.695Z
 topic:
   - Security
 subtopic:
@@ -14,11 +14,9 @@ priority: High
 status: Ready to Repeat
 ---
 
-# Sensitive Data
-
 Sensitive data is information whose disclosure, alteration, loss, or misuse would harm a person or the organization. The label includes personal, health, financial, authentication, legal, and intellectual-property data, but the control comes from classification: a field needs an owner, purpose, allowed consumers, retention period, and deletion path before it enters the system.
 
-## Classify Before Choosing Controls
+# Classify Before Choosing Controls
 
 A useful scheme is small enough that engineers apply it consistently:
 
@@ -31,7 +29,7 @@ A useful scheme is small enough that engineers apply it consistently:
 
 Classification is not a substitute for legal review. Data location, data-subject rights, contractual promises, sector rules, and cross-border transfers can change the required purpose, retention, and incident process.
 
-## Lifecycle Controls
+# Lifecycle Controls
 
 ```mermaid
 flowchart LR
@@ -50,7 +48,7 @@ flowchart LR
 6. **Retain and delete:** enforce expiry in primary stores, indexes, caches, data lakes, and derived exports. Define how backups age out rather than claiming immediate erasure from immutable recovery media.
 7. **Respond:** know which data class and subjects were affected, revoke access, rotate exposed keys or tokens, preserve evidence, and follow the jurisdiction-specific notification process.
 
-## Transformations Change Different Boundaries
+# Transformations Change Different Boundaries
 
 - **Encryption** is reversible with a key. It protects confidentiality against storage or transport exposure but not against a workload that is authorized to decrypt.
 - **Tokenization** replaces a value with a token and moves the sensitive mapping into a vault. It can reduce the number of systems that handle the original value, but the vault and detokenization API become concentrated targets.
@@ -59,7 +57,7 @@ flowchart LR
 
 For example, an analytics job does not need raw card numbers. A payment service can retain the provider token, publish a non-sensitive transaction identifier, and deny the analytics identity any detokenization permission. Encrypting the same raw card column would still expose it whenever that job receives the decryption key.
 
-## References
+# References
 
 - [ByteByteGo — Managing Sensitive Data](https://github.com/ByteByteGoHq/system-design-101/blob/b28380a4710c5ec9638ec037d4168e288f334cba/data/guides/how-do-we-manage-sensitive-data-in-a-system.md) — the pinned source inventory; its cryptography visual is intentionally replaced by the lifecycle model above.
 - [NIST Privacy Framework 1.0](https://www.nist.gov/privacy-framework/privacy-framework) — a risk-based framework for data processing, governance, control, communication, and protection.

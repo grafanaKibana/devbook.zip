@@ -1,8 +1,8 @@
 ---
 publish: true
 created: 2026-07-11T21:45:18.006Z
-modified: 2026-07-11T21:45:18.007Z
-published: 2026-07-11T21:45:18.007Z
+modified: 2026-07-18T11:30:02.272Z
+published: 2026-07-18T11:30:02.272Z
 topic:
   - AI & ML
 subtopic:
@@ -14,13 +14,11 @@ priority: High
 status: Done
 ---
 
-# Intro
-
 End-to-end retrieval and generation metrics measure layer quality — whether the right chunks arrived and whether the answer is faithful — but they do not isolate which upstream component caused a failure. A drop in Recall@5 could come from bad chunking (evidence split across boundaries), weak embeddings (model misrepresents domain vocabulary), or poor ANN approximation (index too lossy). Component-level evaluation isolates each layer so fixes target the actual bottleneck.
 
 The methodology is ablation: change one component while holding all others constant, then measure the retrieval metric delta. If the delta is within noise, that component is not the bottleneck. The metrics these ablations move — Recall@k, nDCG@10, Faithfulness — are defined in [[Evaluation Metrics]], and the labeled query sets, qrels, and token-span ground truth they consume come from [[Retrieval Evaluation Sets]].
 
-## Chunking Evaluation
+# Chunking Evaluation
 
 There is no standalone "chunking quality" metric in most RAG frameworks. Chunking is evaluated through its downstream impact on retrieval. Two approaches exist.
 
@@ -34,7 +32,7 @@ Token IoU is more informative than end-to-end Recall@k because it captures chunk
 
 **Ablation via retrieval metrics** is the practical alternative when building token-level ground truth is too expensive. Run the same evaluation query set through the pipeline with different chunking strategies, holding the embedding model, vector index, and retriever constant. Use a fill-to-budget retrieval policy — retrieve chunks until a token budget is filled, in rank order — rather than fixed top-k, which biases the comparison toward smaller chunks. Measure Recall@k and Faithfulness across strategies. Two patterns emerge consistently across ablation studies: chunk overlap (10-20%) shows diminishing returns when sentence-preserving splitting is already in use because the splitter already handles boundary cases, and overlap primarily inflates index size without proportional quality gains. Additionally, answer quality tends to degrade when context exceeds a few thousand tokens — the generator's attention dilutes across too much material, regardless of how well chunked it is.
 
-## Embedding Evaluation
+# Embedding Evaluation
 
 Embedding models are evaluated by treating retrieval quality as a proxy for embedding quality. Cosine similarity scores alone do not tell you whether an embedding model is good for your domain — you need retrieval-based metrics against a labeled evaluation set.
 
@@ -44,7 +42,7 @@ Embedding models are evaluated by treating retrieval quality as a proxy for embe
 
 **Drift monitoring.** Track three signals as a nightly heartbeat job: **JS divergence** between baseline and current embedding cluster distributions (cluster embeddings into k bins, compare histograms — set alert thresholds empirically by measuring divergence during known-good and known-bad deployments), **nearest-neighbor overlap** on a golden query set (what fraction of top-k neighbors changed between deployments — significant drops indicate the embedding space has shifted), and **behavioral signals** (CTR drop on retrieved documents, query reformulation rate spike). Gate deployments on golden Recall@k. When switching embedding models, use shadow indexes to validate before cutover — build the new index in parallel, compare golden recall and JS divergence, then ramp traffic gradually.
 
-## Vector Search (ANN) Evaluation
+# Vector Search (ANN) Evaluation
 
 ANN Recall@k measures a different quantity than the retrieval Recall@k defined above. Retrieval Recall@k asks "of all relevant documents, how many appeared in top-k?" ANN Recall@k asks "of the true k nearest neighbors found by exact brute-force search, how many did the approximate index return?" It measures the index's approximation quality in isolation — see [[Retrieval]] for how index parameters (HNSW `ef_search`, IVF `nprobe`) and filtered search affect retrieval mechanics.
 
@@ -56,7 +54,7 @@ Ground truth is established by running brute-force (exact) search over the full 
 
 **Production monitoring.** Run ANN recall checks on a golden query set daily or after major ingestion events. Track infrastructure proxy signals: rising `nprobe` requirements to maintain recall (indicates IVF centroid collapse), shard load skew ratio exceeding 3-5× (hot shard from semantic clustering), and embedding distribution shift via KL divergence on pairwise distance distributions.
 
-## Questions
+# Questions
 
 > [!QUESTION]- Why does ANN recall degrade silently as the corpus grows while latency stays flat?
 >
@@ -76,7 +74,7 @@ Ground truth is established by running brute-force (exact) search over the full 
 > - Use IoU when context budget or generator attention dilution matters; fall back to ablation via Recall@k and Faithfulness when building token-span ground truth is too expensive
 > - IoU needs `(query, gold_span)` labels, which cost more to produce than binary relevance — invest only where chunk efficiency materially affects cost or answer quality
 
-## References
+# References
 
 - [Evaluating chunking strategies for retrieval -- token-level IoU methodology and benchmark (Chroma Research)](https://research.trychroma.com/evaluating-chunking)
 - [A practical guide to selecting HNSW hyperparameters -- portfolio learning across 15 datasets (OpenSearch)](https://opensearch.org/blog/a-practical-guide-to-selecting-hnsw-hyperparameters/)

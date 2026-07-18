@@ -1,8 +1,8 @@
 ---
 publish: true
 created: 2026-07-16T18:11:01.616Z
-modified: 2026-07-16T18:28:56.679Z
-published: 2026-07-16T18:28:56.679Z
+modified: 2026-07-18T11:30:10.879Z
+published: 2026-07-18T11:30:10.879Z
 topic:
   - Programming
 subtopic: []
@@ -13,11 +13,9 @@ priority: Medium
 status: Creation
 ---
 
-# Intro
-
 Browser rendering is a dependency pipeline, not a one-time conversion of HTML into pixels. The browser streams bytes, discovers subresources, builds the DOM and CSSOM, computes styles and geometry, paints drawing commands, rasterizes layers, and composites a frame. JavaScript can interrupt or invalidate that work at several points. Reach for this model when a page shows content late, an interaction stutters, or a harmless-looking DOM read turns into a long main-thread task.
 
-## From Bytes to a Frame
+# From Bytes to a Frame
 
 1. The HTML parser decodes bytes into tokens and incrementally builds the DOM. A preload scanner can discover scripts, stylesheets, fonts, and images before the parser reaches them.
 2. A classic script without `async` or `defer` blocks HTML parsing while it is fetched and executed. Stylesheets normally do not stop DOM construction, but blocking stylesheets delay rendering. A parser-blocking classic script also waits for blocking stylesheets discovered before it, even when the script never reads computed styles.
@@ -30,7 +28,7 @@ Browser rendering is a dependency pipeline, not a one-time conversion of HTML in
 
 The diagram is a useful first-pass dependency order, not a sequence that runs exactly once. Modern engines pipeline work, render before every resource has arrived, and repeat style, layout, paint, raster, or compositing for the smallest invalidated region they can isolate.
 
-## Reflow, Repaint, and Jank
+# Reflow, Repaint, and Jank
 
 A DOM or style mutation marks rendering data dirty. Reading geometry immediately afterward can force the browser to finish pending style and layout synchronously:
 
@@ -56,7 +54,7 @@ At 60 Hz, frames begin about every 16.7 ms; at 120 Hz, about every 8.3 ms. Input
 
 Measure the browser trace before changing code. The useful distinction is which stage became expensive and what invalidated it, not whether the symptom is generically called “reflow” or “jank.”
 
-## References
+# References
 
 - [Populating the page: how browsers work (MDN)](https://developer.mozilla.org/en-US/docs/Web/Performance/Guides/How_browsers_work) — end-to-end parsing, DOM/CSSOM, layout, paint, raster, and compositing mechanics.
 - [Critical rendering path (MDN)](https://developer.mozilla.org/en-US/docs/Web/Performance/Guides/Critical_rendering_path) — render-blocking resources, repeated layout, and measurement-driven optimization.

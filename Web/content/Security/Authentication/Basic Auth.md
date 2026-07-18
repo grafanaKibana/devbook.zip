@@ -1,8 +1,8 @@
 ---
 publish: true
 created: 2026-07-11T21:48:18.423Z
-modified: 2026-07-11T21:48:18.423Z
-published: 2026-07-11T21:48:18.423Z
+modified: 2026-07-18T11:30:13.260Z
+published: 2026-07-18T11:30:13.260Z
 topic:
   - Security
 subtopic:
@@ -14,11 +14,9 @@ priority: High
 status: Ready to Repeat
 ---
 
-# Basic Authentication
-
 Basic Authentication is the simplest HTTP authentication scheme. The client sends credentials (username:password) encoded as Base64 in the `Authorization` header on every request. It is defined in RFC 7617.
 
-## Mechanism
+# Mechanism
 
 1. Client sends: `Authorization: Basic base64(username:password)`
 2. Server decodes the Base64 string, splits on `:`, and validates the credentials
@@ -26,7 +24,7 @@ Basic Authentication is the simplest HTTP authentication scheme. The client send
 
 **Important**: Base64 is encoding, not encryption. The credentials are trivially decodable. Basic Auth MUST be used over HTTPS only — over HTTP, credentials are sent in plaintext.
 
-## ASP.NET Core Example
+# ASP.NET Core Example
 
 ```csharp
 // Middleware to validate Basic Auth credentials
@@ -63,7 +61,7 @@ httpClient.DefaultRequestHeaders.Authorization =
 var response = await httpClient.GetAsync("/api/internal/data");
 ```
 
-## When to Use
+# When to Use
 
 - Internal APIs between trusted services where simplicity matters more than security sophistication
 - Development and testing environments
@@ -71,21 +69,21 @@ var response = await httpClient.GetAsync("/api/internal/data");
 
 **Avoid** for user-facing authentication. Use OAuth 2.0 / JWT Bearer for APIs and ASP.NET Core Identity for user login.
 
-## Pitfalls
+# Pitfalls
 
-### Credentials on Every Request
+## Credentials on Every Request
 
 **What goes wrong**: Basic Auth sends credentials with every HTTP request. If any request is intercepted (misconfigured proxy, logging middleware that logs headers), credentials are exposed.
 
 **Mitigation**: always use HTTPS. Never log the `Authorization` header. Rotate service account credentials regularly.
 
-### No Token Revocation
+## No Token Revocation
 
 **What goes wrong**: Basic Auth has no concept of token expiry or revocation. If credentials are compromised, the only remediation is changing the password, which requires updating all clients.
 
 **Mitigation**: for user-facing authentication, use OAuth 2.0 / JWT Bearer with short-lived tokens and refresh token rotation. For service-to-service, use client credentials flow or API keys with rotation support.
 
-## Tradeoffs
+# Tradeoffs
 
 | Scheme | Complexity | Revocation | User-facing | Use when |
 |---|---|---|---|---|
@@ -96,7 +94,7 @@ var response = await httpClient.GetAsync("/api/internal/data");
 
 **Decision rule**: use Basic Auth only for internal service-to-service calls over HTTPS where simplicity is the priority. For user-facing authentication or any external-facing API, use JWT Bearer or OAuth 2.0.
 
-## Questions
+# Questions
 
 > [!QUESTION]- Why is Basic Auth unsafe over HTTP?
 > Base64 is encoding, not encryption — it is trivially reversible. Over HTTP, the `Authorization` header is sent in plaintext and visible to any network observer. Over HTTPS, the header is encrypted by TLS, making Basic Auth safe to use.
@@ -104,7 +102,7 @@ var response = await httpClient.GetAsync("/api/internal/data");
 > [!QUESTION]- When is Basic Auth acceptable in production?
 > For machine-to-machine calls between trusted services on an internal network over HTTPS, Basic Auth is acceptable when simplicity matters and the credential is a service account (not a user password). For user-facing authentication, use OAuth 2.0 / JWT Bearer — Basic Auth requires sending credentials on every request, which increases exposure.
 
-## References
+# References
 
 - [RFC 7617 — HTTP Basic Authentication](https://datatracker.ietf.org/doc/html/rfc7617) — the authoritative specification for Basic Auth, including the `charset` parameter and interaction with TLS
 - [Microsoft — ASP.NET Core Authentication](https://learn.microsoft.com/en-us/aspnet/core/security/authentication/) — overview of ASP.NET Core authentication schemes and middleware pipeline

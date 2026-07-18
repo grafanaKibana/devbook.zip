@@ -1,8 +1,8 @@
 ---
 publish: true
 created: 2026-07-16T08:23:58.731Z
-modified: 2026-07-16T08:28:55.538Z
-published: 2026-07-16T08:28:55.538Z
+modified: 2026-07-18T11:30:13.506Z
+published: 2026-07-18T11:30:13.506Z
 topic:
   - Security
 subtopic:
@@ -14,11 +14,9 @@ priority: High
 status: Ready to Repeat
 ---
 
-# Firewall
-
 A firewall permits or denies traffic at a defined boundary. It reduces reachable attack surface and limits lateral movement; it does not authenticate users, repair a vulnerable service, or make an allowed connection trustworthy. The design question is therefore not “do we have a firewall?” but “which identity, protocol, direction, and zone transition is allowed at each boundary?”
 
-## Where the Control Sits
+# Where the Control Sits
 
 | Control | Sees | Good fit | Blind spot |
 | --- | --- | --- | --- |
@@ -31,7 +29,7 @@ A firewall permits or denies traffic at a defined boundary. It reduces reachable
 
 Use layers. An Internet-facing reverse proxy may accept TLS on 443, a network policy may allow only the proxy identity to reach the API, and the API host may accept the application port only on its private interface. A direct request to the private API address is then denied even if DNS or routing information leaks.
 
-## Rule and Inspection Models
+# Rule and Inspection Models
 
 **Stateless rules** evaluate each packet independently from tuples such as source, destination, protocol, and port. They are predictable and fast, but return traffic needs explicit policy and spoofed or fragmented traffic needs careful handling.
 
@@ -50,7 +48,7 @@ deny  *          -> payments-api *        log=sampled
 
 Specify direction and source/destination zones; “allow 8443” is incomplete. Give rules owners and expiry dates, test both the intended path and nearby denied paths, and alert on meaningful denial changes rather than logging every dropped Internet packet. For encrypted traffic, choose deliberately between metadata-only filtering, termination at a controlled proxy, and end-to-end encryption. A firewall that cannot decrypt TLS cannot validate the HTTP body; a firewall that terminates TLS now holds keys and sees sensitive data.
 
-## References
+# References
 
 - [ByteByteGo — Firewall Explained](https://github.com/ByteByteGoHq/system-design-101/blob/b28380a4710c5ec9638ec037d4168e288f334cba/data/guides/firewall-explained-to-kids-and-adults.md) — the pinned source for firewall placement and inspection types.
 - [ByteByteGo — Top 6 Firewall Use Cases](https://github.com/ByteByteGoHq/system-design-101/blob/b28380a4710c5ec9638ec037d4168e288f334cba/data/guides/top-6-firewall-use-cases.md) — the pinned source for tuple, time, state, and application rule examples.

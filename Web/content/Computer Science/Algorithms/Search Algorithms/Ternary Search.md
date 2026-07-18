@@ -1,8 +1,8 @@
 ---
 publish: true
 created: 2026-07-12T14:27:20.411Z
-modified: 2026-07-12T14:27:20.411Z
-published: 2026-07-12T14:27:20.411Z
+modified: 2026-07-18T11:30:04.331Z
+published: 2026-07-18T11:30:04.331Z
 topic:
   - Computer Science
 subtopic:
@@ -13,8 +13,6 @@ level:
 priority: Medium
 status: Creation
 ---
-
-# Intro
 
 A ball launched at angle `θ` carries farther as `θ` climbs toward the optimum, then falls off as the angle steepens past it: the range is a single-peaked function of `θ` with no closed-form optimum once drag enters the model. Locating that peak means sampling the function and narrowing toward it, which needs a rule for deciding which samples to keep. [[Binary Search]] cannot supply the rule — there is no order to compare a target against, only a value that rises then falls.
 
@@ -29,7 +27,7 @@ No StepTrace renderer covers this search yet.
 > [!NOTE] Visualization pending
 > Planned StepTrace: a card placing two probes at the third-points of the range on a unimodal function, discarding the third that cannot contain the maximum each step. No matching renderer exists in `engine.js` yet.
 
-## Why a third can be dropped
+# Why a third can be dropped
 
 The interval `[lo, hi]` holds the peak `p` at the start of every step, and the discard rule preserves that. Let `m1 < m2` be the third-point probes. Strict unimodality means `f` increases on `[lo, p]` and decreases on `[p, hi]`.
 
@@ -41,7 +39,7 @@ Each step keeps `2/3` of the width, so `k` steps leave `(2/3)^k · (hi − lo)`.
 
 Golden-section search sharpens the constant without changing the shape: placing the probes at the golden ratio makes one probe of the next step coincide with a probe already evaluated, so every step after the first spends one new evaluation instead of two. The saving matters when `f` is a simulation or a physical measurement rather than an array read.
 
-## Complexity
+# Complexity
 
 The cost is deterministic in the interval width rather than data-dependent, so the table is organized by quantity, not by best/average/worst.
 
@@ -54,7 +52,7 @@ The cost is deterministic in the interval width rather than data-dependent, so t
 
 The `Θ(log n)` bound and the `2·log₃ n` comparison count describe the same asymptotic class, so the deciding difference between ternary and binary search is the constant factor — and on monotone data it always favours binary search.
 
-## When unimodality fails
+# When unimodality fails
 
 Strict unimodality is the entire precondition, and it is easy to violate.
 
@@ -66,7 +64,7 @@ The discrete domain needs a different stopping rule. With integer bounds and int
 
 For membership in a sorted array the boundary is simpler still: binary search dominates. Same `O(log n)` class, fewer comparisons, one probe per step instead of two.
 
-## Reference drawer
+# Reference drawer
 
 > [!ABSTRACT]- Control flow (maximizing form)
 >
@@ -109,7 +107,7 @@ For membership in a sorted array the boundary is simpler still: binary search do
 >
 > Flipping the comparison to `f(m1) > f(m2)` minimizes instead. `eps` must stay above the machine resolution of `double`, or `hi - lo` never crosses it and the loop spins; bounding the iteration count is the safe guard.
 
-## Questions
+# Questions
 
 > [!QUESTION]- Why does the smaller of the two probe values mark a discardable third?
 > Under strict unimodality `f` rises to the peak then falls. The probe returning the smaller value sits farther down a slope, on the side away from the peak, so the interval beyond it lies entirely on that slope and cannot contain the maximum. Two probes are needed because a single point on a non-monotone function cannot reveal which side the peak is on.
@@ -120,7 +118,7 @@ For membership in a sorted array the boundary is simpler still: binary search do
 > [!QUESTION]- What input makes the discard rule return a wrong answer?
 > A non-unimodal function or a flat plateau. With two humps, probes straddling the valley can discard the third holding the global maximum and return a local one. A plateau makes `f(m1) == f(m2)` uninformative, so a bound can move past part of the optimal set. Strict increase-then-decrease is the precondition that excludes both.
 
-## References
+# References
 
 - [Ternary search (Wikipedia)](https://en.wikipedia.org/wiki/Ternary_search) — definition, the unimodality requirement, and the iteration-count derivation.
 - [Ternary search (cp-algorithms)](https://cp-algorithms.com/num_methods/ternary_search.html) — continuous and integer forms with correctness reasoning and the `hi − lo > 2` stopping rule.

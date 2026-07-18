@@ -1,8 +1,8 @@
 ---
 publish: true
 created: 2026-07-18T08:18:26.491Z
-modified: 2026-07-18T09:27:42.420Z
-published: 2026-07-18T09:27:42.420Z
+modified: 2026-07-18T11:30:09.008Z
+published: 2026-07-18T11:30:09.008Z
 topic:
   - Networks
 subtopic:
@@ -13,8 +13,6 @@ level:
 priority: Low
 status: Ready to Repeat
 ---
-
-# Intro
 
 A port number selects a service endpoint within an IP host. IANA registrations provide interoperable defaults; they do not force a deployment to listen there, prove which application owns a socket, or bypass firewall policy. Diagnose the actual listener and negotiated protocol before treating a familiar number as evidence.
 
@@ -45,7 +43,7 @@ nc -vz db.internal.example 5432
 openssl s_client -connect api.example.com:443 -servername api.example.com
 ```
 
-## References
+# References
 
 - [IANA Service Name and Port Number Registry](https://www.iana.org/assignments/service-names-port-numbers/service-names-port-numbers.xhtml) — authoritative assigned service-port mapping.
 - [ByteByteGo: 18 common ports](https://github.com/ByteByteGoHq/system-design-101/blob/b28380a4710c5ec9638ec037d4168e288f334cba/data/guides/18-common-ports-worth-knowing.md) — concise list with common caveats.

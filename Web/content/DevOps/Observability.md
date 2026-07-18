@@ -1,8 +1,8 @@
 ---
 publish: true
 created: 2026-07-11T21:47:09.440Z
-modified: 2026-07-18T09:40:41.580Z
-published: 2026-07-18T09:40:41.580Z
+modified: 2026-07-18T11:30:06.612Z
+published: 2026-07-18T11:30:06.612Z
 topic:
   - DevOps
 subtopic: []
@@ -13,15 +13,13 @@ priority: High
 status: Done
 ---
 
-# Intro
-
 Observability is the ability to understand a system's internal state from its external outputs: metrics, logs, and traces. In distributed systems, failures are emergent, cross service boundaries, and rarely show up as a single obvious exception, so observability is how you move from symptoms to causes quickly. You cannot fix what you cannot see, and you cannot scale what you cannot measure. Reach for observability from day one: retrofitting it after incidents and growth is significantly harder because the missing telemetry was never emitted.
 
-## The Three Pillars
+# The Three Pillars
 
 The three pillars are complementary signals, not competing tools.
 
-### Metrics
+## Metrics
 
 Metrics are numeric measurements over time that answer "how much" and "how often".
 
@@ -48,7 +46,7 @@ Core interview metrics you should always name for APIs:
 - Latency p50/p95/p99
 - Saturation signals (CPU, thread pool queue, DB pool exhaustion)
 
-### Logs
+## Logs
 
 Logs are structured event records that answer "what exactly happened" at a point in time.
 
@@ -66,7 +64,7 @@ Use log levels intentionally:
 
 In distributed systems, correlation IDs are essential in practice: every service should log the same request identifier so operators can reconstruct one end-to-end user request across many log streams.
 
-#### Log Ingestion and Indexing Pipeline
+### Log Ingestion and Indexing Pipeline
 
 An ELK implementation makes the boundaries concrete: applications emit structured events; Beats or Elastic Agent collect them; Logstash can buffer and transform; Elasticsearch indexes selected fields; Kibana queries and visualizes them. OpenTelemetry Collector is an alternative vendor-neutral collection and routing layer, not another name for Elasticsearch.
 
@@ -74,7 +72,7 @@ Normalize timestamps, service identity, severity, trace ID, and schema version b
 
 ![[Assets/System Design 101/e02dde606c2771cde74766a7b33faf462ab59e9f13eb474645bdfade8c75995d.jpg]]
 
-### Traces
+## Traces
 
 Traces represent a single request journey across services and dependencies.
 
@@ -106,7 +104,7 @@ sequenceDiagram
     deactivate A
 ```
 
-## Signal Shape and Correlation
+# Signal Shape and Correlation
 
 | Signal | Shape | Correlation and cardinality | Retention and sampling | Best question |
 | --- | --- | --- | --- | --- |
@@ -116,7 +114,7 @@ sequenceDiagram
 
 Propagate W3C trace context, attach the trace ID to structured logs, and derive exemplars or links from metrics to traces where the backend supports them. Never put unbounded request, user, or container IDs in metric labels. Sampling should preserve the rare failures the system exists to explain; uniform head sampling can discard them before their outcome is known.
 
-## Collection-to-Action Pipeline
+# Collection-to-Action Pipeline
 
 Telemetry moves through six boundaries: emit, collect, buffer/transform, store, query, and act. The application emits a stable schema; an agent or OpenTelemetry Collector batches and retries; the backend enforces retention and indexing; queries power dashboards and alerts; automation creates a ticket, pages an owner, or applies a safe remediation. Best-effort diagnostic telemetry should apply backpressure at collectors and buffers, then sample or shed according to an explicit priority policy rather than take the production request path down.
 
@@ -126,7 +124,7 @@ Choose retention by investigation window and compliance, not habit. Make alert o
 
 ![[Assets/System Design 101/c17b0fea47b51ea2363baad05c7a519ce318cc777a53004fbfb824c888601983.png]]
 
-## Push versus Pull Metrics
+# Push versus Pull Metrics
 
 Prometheus pull works when targets are discoverable and the collector can reach them: each scrape also proves target reachability, while the server owns retry pace and backpressure. Push works across restrictive network boundaries or for event-driven delivery, but the sender now owns retry, queueing, authentication, and stale-series cleanup. For short-lived batch jobs, push only job-level terminal metrics to a Pushgateway; do not turn it into a general event store.
 
@@ -134,7 +132,7 @@ Use pull as the default for long-running discoverable services. Use push when to
 
 ![[Assets/System Design 101/51d727bf3bda3570c7c7f0e5fe2cb6b95e4c69072df19e58e5ad7575499dbcdb.png]]
 
-## Diagnosing CPU and Runtime Pressure
+# Diagnosing CPU and Runtime Pressure
 
 High processor utilization means work is consuming CPU time, but the percentage alone does not identify whether the work is useful. I/O blocking is different: a request can be slow while CPU remains low because threads are waiting for a socket, disk, database connection, or lock. Classify the signals before changing code or capacity.
 
@@ -146,7 +144,7 @@ High processor utilization means work is consuming CPU time, but the percentage 
 | Low CPU with rising latency and thread-pool queue | Blocking I/O, sync-over-async, or downstream saturation | Thread stacks, dependency spans, and connection-pool metrics |
 | High CPU with lock or spin frames | Contention or busy waiting | Lock profile, thread dump, and critical-section ownership |
 
-### Bounded Evidence Sequence
+## Bounded Evidence Sequence
 
 Collect runtime counters first to classify the interval, then capture a short trace that includes the same request mix:
 
@@ -166,13 +164,13 @@ Record UTC start and end timestamps for both captures. Compare them with request
 
 Allocation rate and GC time separate useful application work from runtime work. Rising allocations with more Gen 2 collections can make CPU climb even when request rate is flat. A low CPU percentage with long database spans points elsewhere: the process is waiting, not consuming a full processor.
 
-### Checkout Serialization Decision
+## Checkout Serialization Decision
 
 Suppose checkout p99 rises from 180 ms to 1.4 s while traffic stays flat. The aligned counter window shows CPU rising from 0.8 to 1.9 cores, allocation rate tripling, and more time in GC. The trace attributes most samples and allocations to JSON serialization.
 
 Benchmark a serializer change under the same request payloads and concurrency. Source-generated `System.Text.Json` metadata or reusable serialization options are justified if CPU per request, allocation rate, and p99 all fall in the comparison window. Extra capacity may relieve the symptom, but it does not establish that capacity was the cause. Change one variable and compare the same measurements.
 
-### Failure Boundaries
+## Failure Boundaries
 
 - Do not treat a single process snapshot as a trend; compare rates over a fixed interval.
 - Do not infer processor pressure from latency alone; blocked I/O can be slow while CPU stays low.
@@ -180,7 +178,7 @@ Benchmark a serializer change under the same request payloads and concurrency. S
 - Do not capture an unbounded production trace; define duration, destination, access policy, and cleanup.
 - Do not optimize the hottest method until the trace covers the user-visible slowdown and the measurements share a window.
 
-## .NET Observability
+# .NET Observability
 
 OpenTelemetry gives .NET services stable signal APIs and an interoperable export protocol. It reduces backend-specific re-instrumentation, but changing backends can still require exporter, collector, query, dashboard, sampling, and semantic-convention work.
 
@@ -290,25 +288,25 @@ internal sealed record CheckoutResult(Guid OrderId, string Status);
 
 OTLP is the default in the example because a collector gives the platform one place for authentication, batching, retries, sampling, and backend routing. Direct Prometheus scraping is reasonable when the scraper can reach each service and the deployment accepts an application-owned scrape endpoint. In that case, replace the metrics `.AddOtlpExporter()` with `.AddPrometheusExporter()` and call `app.MapPrometheusScrapingEndpoint()`. This changes only the metrics path; traces still need OTLP or another trace exporter.
 
-## Pitfalls
+# Pitfalls
 
-### Logging Everything or Logging Nothing
+## Logging Everything or Logging Nothing
 
 Logging every payload and every debug event explodes storage and query cost; logging almost nothing leaves teams blind during incidents. Use strategic sampling and retain high-value structured events at 100% while sampling noisy verbose events.
 
-### Unstructured Logs You Cannot Query
+## Unstructured Logs You Cannot Query
 
 Free-form text logs block fast incident response because operators cannot reliably filter by tenant, endpoint, or correlation key. Prefer structured logs with stable property names and consistent schema across services.
 
-### Missing Correlation IDs Across Services
+## Missing Correlation IDs Across Services
 
 Without propagated trace and correlation IDs, each service log appears correct in isolation but impossible to stitch into one request narrative. Ensure incoming IDs are accepted, propagated, and included in all logs and spans.
 
-### Alert Fatigue from Noisy Metrics
+## Alert Fatigue from Noisy Metrics
 
 If thresholds are too sensitive or static, teams get constant false positives and start ignoring alerts. Define SLO-based thresholds, use burn-rate style alerting where possible, and segment alerts by service criticality.
 
-## Tradeoffs
+# Tradeoffs
 
 - **High-cardinality labels on metrics**
   - Benefit: better drill-down during incident analysis.
@@ -323,7 +321,7 @@ If thresholds are too sensitive or static, teams get constant false positives an
   - Cost or risk: compliance and storage burden.
   - Decision rule: keep raw logs for short retention and archive aggregates longer.
 
-## Questions
+# Questions
 
 > [!QUESTION]- How do you diagnose an intermittent p95/p99 latency bottleneck in a multi-service system?
 > Start from traces and filter to the slow requests — the p99, not the average — to see which span dominates. Correlate with per-service RED metrics to tell whether the latency is isolated or systemic, then walk the dependency spans (DB, cache, external API) to find where it originates. Pull structured logs by the same trace ID to check for edge-case payloads or retries on those requests. Traces locate the delay, metrics size its effect, and logs expose the state around it.
@@ -334,7 +332,7 @@ If thresholds are too sensitive or static, teams get constant false positives an
 > [!QUESTION]- Why instrument with OpenTelemetry from day one instead of adding observability later?
 > Instrumenting early establishes telemetry contracts and historical baselines before the system becomes difficult to change. Retrofitting during an incident requires invasive changes across several services and still cannot recover signals that were never emitted. OpenTelemetry also reduces the application changes needed to switch backends, although exporters, collector routing, queries, dashboards, and sampling policies may still change.
 
-## References
+# References
 
 - [OpenTelemetry for .NET (official docs)](https://opentelemetry.io/docs/languages/dotnet/) — documents the .NET SDK, instrumentation, exporters, and signal-specific setup.
 - [dotnet-counters diagnostic tool](https://learn.microsoft.com/en-us/dotnet/core/diagnostics/dotnet-counters) — Microsoft reference for observing runtime counters such as allocation rate, GC activity, and thread-pool behavior.

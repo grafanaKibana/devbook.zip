@@ -1,8 +1,8 @@
 ---
 publish: true
 created: 2026-07-11T21:45:07.941Z
-modified: 2026-07-11T21:45:07.941Z
-published: 2026-07-11T21:45:07.941Z
+modified: 2026-07-18T11:37:06.123Z
+published: 2026-07-18T11:37:06.123Z
 topic:
   - Programming
 subtopic:
@@ -14,8 +14,6 @@ priority: High
 status: Ready to Repeat
 ---
 
-# Intro
-
 In garbage-collected environments, "memory leak" means objects that are no longer useful but remain reachable from GC roots — so the collector never reclaims them. The process RSS grows monotonically until an `OutOfMemoryException` crashes the service or the container hits its memory limit and gets OOM-killed. In production, this typically manifests as a slow climb in memory usage over days, with periodic restarts masking the underlying issue until traffic increases and the leak accelerates.
 
 There are two categories. **Managed leaks**: objects held alive by forgotten references (event subscriptions, static caches, closures capturing `this`). The GC works correctly — it just can't collect objects that are technically still reachable. **Unmanaged leaks**: native memory allocated via `Marshal.AllocHGlobal`, P/Invoke, or wrapped OS handles that are never freed, because the GC doesn't manage memory outside the managed heap.
@@ -24,7 +22,7 @@ The diagnostic workflow: capture a memory dump (`dotnet-dump collect`), load it 
 
 Below are 8 of the most common causes. The first 6 are managed leaks; the remaining 2 are unmanaged.
 
-### Event handlers
+# Event handlers
 
 Events in .NET are notorious for causing memory leaks. The reason is simple: after you subscribe to an event on some object, it will keep a reference to your class where the handler is defined (unless you used an anonymous method that does not capture any members of the class).
 
@@ -55,7 +53,7 @@ What can you do in this situation? The [article](https://michaelscodingspot.com/
 2. Use weak event patterns ([Weak Event Pattern](https://docs.microsoft.com/en-us/dotnet/desktop/wpf/advanced/weak-event-patterns?view=netframeworkdesktop-4.8)).
 3. If possible, subscribe using anonymous methods that do not capture other members of the class.
 
-### Capturing class members in anonymous methods
+# Capturing class members in anonymous methods
 
 It is fairly obvious that using an instance method as an event handler creates a reference from the handler to the object that owns the method. What is much less obvious is that the same thing happens when a class member is captured in an anonymous method.
 
@@ -114,7 +112,7 @@ If you copy the value into a local variable, the class member will not be captur
 
 _**Note:** if the root cause of the leak in this case is not entirely clear, take a look at [this comment](https://habr.com/ru/post/589005/#comment_23709379)._
 
-### Static variables
+# Static variables
 
 Some developers consider static variables to be a bad practice. Nevertheless, when talking about memory leaks, they are important to mention.
 
@@ -141,7 +139,7 @@ public class MyClass
 
 If you write the code above for some reason, any `MyClass` instance will remain in memory forever, causing a leak.
 
-### Caching
+# Caching
 
 Developers love caching. After all, why perform an operation twice if you can do it once and store the result, right?
 
@@ -179,7 +177,7 @@ To address this, you can use the following practices:
 2. Limit the cache size.
 3. Use `WeakReference` to store cached objects. `WeakReference` allows the garbage collector to clean up the cache on its own, which in some cases may not be a bad idea. The GC will promote objects that are still in use to older generations so they stay in memory longer. This means frequently used objects will remain in the cache longer, while unused ones will be collected without your explicit involvement.
 
-### Incorrect data binding in WPF
+# Incorrect data binding in WPF
 
 Data binding in WPF can also cause memory leaks. The main rule to prevent leaks is to always use `DependencyObject` or `INotifyPropertyChanged`. If you do not, WPF creates a so-called strong reference to the object, causing a memory leak ([more detailed explanation](https://stackoverflow.com/a/18543350/1229063)).
 
@@ -233,7 +231,7 @@ _Memory leaks occur only when the binding mode is_ `OneWay` _or_ `TwoWay`_. If t
 
 Memory leaks in WPF can also happen when binding collections. If the collection does not implement `INotifyCollectionChanged`, you will get a memory leak. You can avoid the problem by using `ObservableCollection`, which implements this interface.
 
-### Threads that never stop
+# Threads that never stop
 
 We already discussed how the garbage collector works and what GC roots are. I mentioned that a thread stack is considered a root. A thread stack includes all local variables as well as call stack frames.
 
@@ -254,7 +252,7 @@ public class MyClass
 
 If you do not stop the timer, it will keep running indefinitely on a separate thread, holding a reference to `MyClass` and preventing it from being collected.
 
-### Unreleased unmanaged memory
+# Unreleased unmanaged memory
 
 So far, we have only talked about managed memory, which is reclaimed by the garbage collector. Unmanaged memory is a different story. Instead of just avoiding references to unneeded objects, you must explicitly free the memory.
 
@@ -295,7 +293,7 @@ public class SomeClass : IDisposable
 
 _Unmanaged memory leaks can be even worse than managed leaks due to [fragmentation](https://stackoverflow.com/questions/3770457/what-is-memory-fragmentation). The GC can defragment managed memory by moving surviving objects next to each other to free space for new allocations. Unmanaged memory, on the other hand, stays tied to the location where it was allocated._
 
-### Dispose not called
+# Dispose not called
 
 In the previous example we added a `Dispose` method to release unmanaged resources when they are no longer needed. That is great, but what happens if someone uses the class and never calls `Dispose`?
 
@@ -373,7 +371,7 @@ Using this pattern helps ensure that even if `Dispose` is not called explicitly,
 
 But keep in mind that Microsoft's `Dispose` pattern is not a silver bullet. If you do not call `Dispose` manually and the object is not collected because of a managed leak, the unmanaged resources will not be released either.
 
-### More modern leak sources (ASP.NET Core era)
+# More modern leak sources (ASP.NET Core era)
 
 The classic eight above predate today's stacks. The leaks (and pseudo-leaks) most teams actually hit now:
 
@@ -384,13 +382,13 @@ The classic eight above predate today's stacks. The leaks (and pseudo-leaks) mos
 - **Tasks that never complete** — an `await`ed `TaskCompletionSource` that is never `SetResult`/`SetCanceled` keeps the entire async state machine (and everything it captured) alive forever. Always complete or time out every TCS.
 - **`ConditionalWeakTable<TKey,TValue>`** is the right tool when you must attach state to an object _without_ keeping it alive — the value is collected once the key is unreachable (also how weak-event patterns avoid the event-handler leak above).
 
-### Diagnosing in production
+# Diagnosing in production
 
 - **`dotnet-gcdump collect`** captures a managed heap graph cheaply (no full process dump). The high-signal workflow is a **two-snapshot delta**: take one gcdump, apply load, take a second, and compare retained-type counts — the types that grew are your leak.
 - **`dotnet-counters monitor System.Runtime`** to watch `gc-heap-size`, `gen-2-gc-count`, and GC-handle counts climb in real time; alert before OOM.
 - **`dotnet-trace`** for allocation/event tracing when you need to find _where_ the allocations originate, then `gcroot <address>` (in `dotnet-dump analyze`) to trace a leaked instance back to the root that holds it — the root is where the fix goes.
 
-## Tradeoffs
+# Tradeoffs
 
 | Decision | Option A | Option B | When A | When B |
 | --- | --- | --- | --- | --- |
@@ -401,7 +399,7 @@ The classic eight above predate today's stacks. The leaks (and pseudo-leaks) mos
 
 **Decision rule**: treat every `IDisposable` as a potential leak. Use `using` statements for all disposable objects. For caches, always set size limits and TTLs — unbounded caches are the number one managed leak pattern in production .NET services.
 
-## Questions
+# Questions
 
 > [!QUESTION]- What is a memory leak? Is it possible in .NET? How?
 > A memory leak is memory that is no longer needed but cannot be reclaimed, so the process keeps growing over time.
@@ -426,7 +424,7 @@ The classic eight above predate today's stacks. The leaks (and pseudo-leaks) mos
 > A standard way to implement `IDisposable` so both explicit cleanup (`Dispose()`) and (optionally) finalization are supported.
 > Typical shape: `Dispose()` calls `Dispose(true)` and then `GC.SuppressFinalize(this)`; a finalizer (if needed) calls `Dispose(false)`; `Dispose(bool disposing)` releases unmanaged resources and, when `disposing` is true, also disposes managed fields.
 
-## References
+# References
 
 - [Garbage collection fundamentals (Microsoft Learn)](https://learn.microsoft.com/en-us/dotnet/standard/garbage-collection/fundamentals) — explains GC roots, reachability, and why managed leaks are possible despite automatic memory management.
 - [Implementing a Dispose method (Microsoft Learn)](https://learn.microsoft.com/en-us/dotnet/standard/garbage-collection/implementing-dispose) — official pattern for deterministic cleanup of managed and unmanaged resources.

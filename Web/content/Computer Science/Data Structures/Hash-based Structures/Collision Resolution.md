@@ -1,8 +1,8 @@
 ---
 publish: true
 created: 2026-07-12T20:39:23.959Z
-modified: 2026-07-12T20:39:23.959Z
-published: 2026-07-12T20:39:23.959Z
+modified: 2026-07-18T11:30:05.058Z
+published: 2026-07-18T11:30:05.058Z
 topic:
   - Computer Science
 subtopic:
@@ -12,8 +12,6 @@ level:
 priority: Medium
 status: Ready to Repeat
 ---
-
-# Intro
 
 Every hash table maps a key to a bucket with `hash(key) mod capacity`, and the pigeonhole principle guarantees that two distinct keys eventually land in the same bucket. What a table does at that moment — the **collision-resolution strategy** — is the single decision that sets its memory layout, its delete semantics, its cache behaviour, and how it degrades under load. The [[HashMap]] note covers .NET's `Dictionary` as one concrete table; this note is about the three families it could have been built on and the terminology that makes them hard to talk about.
 
@@ -32,7 +30,7 @@ Read it as two questions. _Is the storage open-ended or closed?_ Chaining's list
 > [!NOTE] Visualization pending
 > Planned StepTrace: a hash-table card inserting a run of colliding keys three ways side by side — a chain growing off one bucket, a probe sequence walking to the next free slot, and a fixed bucket filling then overflowing — with the load factor annotated as each fills. No matching renderer exists in `engine.js` yet.
 
-## Open hashing — separate chaining (closed addressing)
+# Open hashing — separate chaining (closed addressing)
 
 Each array slot holds a pointer to a secondary container — classically a linked list — of every entry that hashed there. A collision appends to that bucket's list; a lookup hashes to the bucket and scans its list with an equality check. The array slot is a fixed _address_ for the key (hence "closed addressing"), but the storage behind it is open-ended (hence "open hashing").
 
@@ -42,7 +40,7 @@ Each array slot holds a pointer to a secondary container — classically a linke
 
 Chaining is the forgiving default: it tolerates a mediocre hash and a load factor above 1, and it never has to reserve empty slots. The price is a pointer (or index) per entry and, in the naive form, poor cache behaviour.
 
-## Closed hashing — open addressing (probing)
+# Closed hashing — open addressing (probing)
 
 Every entry lives directly in the bucket array; there are no external lists. On a collision the table follows a deterministic **probe sequence** to the next candidate slot until it finds an empty one (for insert) or the key (for lookup). The storage is closed (a fixed array), but a key's final _address_ is open — it may sit far from its home slot.
 
@@ -60,7 +58,7 @@ The probe sequence is the whole design:
 
 Open addressing wins on speed when the load factor is controlled: one contiguous array, no per-entry pointer, and cache-friendly probing. It demands a good hash and a disciplined resize policy, and it pays for deletes.
 
-## Bucketed hashing (closed addressing, fixed blocks)
+# Bucketed hashing (closed addressing, fixed blocks)
 
 A hybrid: the array holds fixed-size **buckets**, each a small block of `B` slots, and the home bucket is `hash(key) mod bucketCount`. A key fills the first free slot _within_ its bucket; only when the bucket is full does an overflow strategy kick in — an overflow chain, or probing to the next bucket. It is closed addressing at bucket granularity with open placement inside the bucket.
 
@@ -70,7 +68,7 @@ A hybrid: the array holds fixed-size **buckets**, each a small block of `B` slot
 
 Bucketing is the design when memory or disk locality dominates — you amortise one expensive access over `B` entries — and it degrades to whatever overflow strategy you picked once buckets fill.
 
-## Complexity
+# Complexity
 
 All three are `O(1)` average and `O(n)` worst per operation; the differences that matter are the constants and the failure modes.
 
@@ -82,7 +80,7 @@ All three are `O(1)` average and `O(n)` worst per operation; the differences tha
 
 The worst case is `O(n)` for all three and fires the same way — a hash that collapses every key into one bucket — which is why the [[HashMap]] hash-flooding pitfall applies across the family regardless of resolution strategy. What differs is the _average_ under load: chaining degrades linearly in `α` and survives `α > 1`; open addressing degrades hyperbolically and must resize before the array fills; bucketing pushes the cliff back by a factor of the bucket size and keeps the work in one cache line.
 
-## Reference drawer
+# Reference drawer
 
 > [!ABSTRACT]- The three strategies on a collision at slot 1
 >
@@ -157,7 +155,7 @@ The worst case is `O(n)` for all three and fires the same way — a hash that co
 >
 > A delete would set `Tombstone` (not clear the slot) so `TryGet`'s probe loop still crosses it; `Resize` is where tombstones are finally discarded. Clearing the slot outright would truncate the chain and hide any key that probed past it.
 
-## Comparison
+# Comparison
 
 The strategies answer the same question — where does a colliding key go — with different trade-offs.
 
@@ -169,7 +167,7 @@ The strategies answer the same question — where does a colliding key go — wi
 
 Chaining is the safe default and the one to teach first, which is why closed-addressing variants back most standard-library maps' conceptual model (.NET's `Dictionary` is index-based chaining). Open addressing is the performance choice once you can guarantee a good hash and a bounded load factor — the regime where its locality and pointer-free layout dominate, accepting tombstoned deletes. Bucketing is the specialisation for when a single memory or disk access is the expensive operation: database indexes make a bucket a page, and cache-optimised libraries make it a SIMD word. In practice the fastest modern in-memory tables combine them — bucketed open addressing — taking locality from buckets and pointer-free storage from open addressing.
 
-## Questions
+# Questions
 
 > [!QUESTION]- Why do "open hashing" and "open addressing" mean opposite things?
 > They name different axes. "Open hashing" describes the _storage_: chaining's per-bucket lists grow open-endedly outside the array. "Open addressing" describes the _key's address_: the key may land in a slot other than its home, so its address is open. Chaining is open hashing but _closed_ addressing (the bucket is fixed); probing is closed hashing (fixed array) but _open_ addressing (the slot drifts).
@@ -183,7 +181,7 @@ Chaining is the safe default and the one to teach first, which is why closed-add
 > [!QUESTION]- What makes bucketed hashing fast for on-disk and SIMD tables?
 > The bucket is sized to the expensive access unit — a disk page or a cache line — so one I/O or memory fetch brings in `B` slots at once and scanning them is nearly free. A bucket also absorbs up to `B` collisions before any overflow logic runs, so local hot spots that would cause long probe runs in a flat table stay contained in one block.
 
-## References
+# References
 
 - [Hash table (Wikipedia)](https://en.wikipedia.org/wiki/Hash_table) — the separate-chaining vs open-addressing split, the open/closed terminology clash, and load-factor analysis for each.
 - [Open addressing (Wikipedia)](https://en.wikipedia.org/wiki/Open_addressing) — linear, quadratic, and double-hashing probe sequences with their clustering behaviour and the tombstone deletion problem.

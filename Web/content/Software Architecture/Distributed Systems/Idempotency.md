@@ -1,8 +1,8 @@
 ---
 publish: true
 created: 2026-07-15T11:47:56.874Z
-modified: 2026-07-18T08:18:37.544Z
-published: 2026-07-18T08:18:37.544Z
+modified: 2026-07-18T11:38:38.726Z
+published: 2026-07-18T11:38:38.726Z
 topic:
   - Software Architecture
 subtopic:
@@ -14,22 +14,20 @@ priority: High
 status: Ready to Repeat
 ---
 
-# Intro
-
 Idempotency means applying the same logical operation multiple times produces the same final state as applying it once. In distributed systems this is not optional because retries, timeouts, dropped acknowledgments, and at least once delivery are normal operating conditions, not edge cases. You reach for idempotency on any retriable operation such as API writes, message consumers, payment captures, and order creation. Without it, retries become dangerous and can double charge customers, create duplicate orders, or drift state across services.
 
-## Mechanism
+# Mechanism
 
 Idempotency is implemented at the boundary where duplicates can enter the system, then reinforced at persistence boundaries so duplicates cannot corrupt state.
 
-### Natural idempotency
+## Natural idempotency
 
 - `SET balance = 100` is idempotent because repeating it keeps the same result.
 - `INCREMENT balance by 100` is not idempotent because each retry changes state again.
 - HTTP `PUT` and `DELETE` are idempotent by semantics.
 - HTTP `POST` is not idempotent by default because each call usually creates a new server side effect.
 
-### Idempotency keys
+## Idempotency keys
 
 For non-idempotent operations, the client sends a unique key per logical operation in `Idempotency-Key`.
 
@@ -44,7 +42,7 @@ Server flow:
 
 This turns ambiguous network outcomes into deterministic behavior for retries.
 
-### Database level techniques
+## Database level techniques
 
 - **UPSERT**: `INSERT ... ON CONFLICT DO UPDATE` protects read model and projection handlers from duplicate writes.
 - **Unique constraints**: enforce one row per business identity such as `merchant_id + client_operation_id`.
@@ -88,9 +86,9 @@ sequenceDiagram
     Api-->>Client: Return cached result
 ```
 
-Idempotency is especially important for [[Software Architecture/Distributed Systems/Message Queues/Message Queues|Message Queues]] consumers and for multi step workflows like [[Distributed Transactions]] where partial failures are expected.
+Idempotency is especially important for [[Software Architecture/Distributed Systems/Message Queues/Message Queues|Message Queues]] consumers and for multi step workflows like [[Software Architecture/Distributed Systems/Distributed Transactions]] where partial failures are expected.
 
-## HTTP Methods and Idempotency
+# HTTP Methods and Idempotency
 
 - **Idempotent by spec**: `GET`, `PUT`, `DELETE`, `HEAD`, `OPTIONS`.
 - **Not idempotent by default**: `POST`, `PATCH`.
@@ -100,13 +98,13 @@ Interview critical distinction:
 - `PUT` is idempotent because it replaces the representation with a full target state.
 - `PATCH` applies a delta, and applying the same delta repeatedly can compound side effects unless the patch document itself is designed to be idempotent.
 
-Even with idempotent methods, distributed replicas can still show temporary divergence depending on [[Consistency Models]], so method semantics and system consistency level are separate concerns.
+Even with idempotent methods, distributed replicas can still show temporary divergence depending on [[Software Architecture/Distributed Systems/Consistency Models]], so method semantics and system consistency level are separate concerns.
 
-## Payment implementation boundary
+# Payment implementation boundary
 
-Payment endpoints need a durable local attempt and a provider that honors the same idempotency key. The provider call must run outside local database transactions, and timeouts must be represented as unknown outcomes rather than rolled-back evidence. [[Payment Systems#Durable Idempotency|Payment Systems]] owns the complete reserve-call-reconcile sequence and the narrow effect guarantee.
+Payment endpoints need a durable local attempt and a provider that honors the same idempotency key. The provider call must run outside local database transactions, and timeouts must be represented as unknown outcomes rather than rolled-back evidence. [[Software Architecture/Distributed Systems/Payment Systems#Durable Idempotency|Payment Systems]] owns the complete reserve-call-reconcile sequence and the narrow effect guarantee.
 
-## Common Applications
+# Common Applications
 
 | Case | Operation identity | Duplicate effect to prevent | Dedupe and atomic boundary | Returned result | Retention |
 |---|---|---|---|---|---|
@@ -119,33 +117,33 @@ Payment endpoints need a durable local attempt and a provider that honors the sa
 
 HTTP method semantics are only a starting point. `PUT` and `DELETE` are idempotent in the protocol's intended effect, but triggers, audit events, and external calls can still repeat unless the implementation shares an operation identity and atomic boundary. `POST` can be made idempotent with a key and stored result. Retention is part of the guarantee: deleting the key before a late retry makes the same request new again.
 
-## Pitfalls
+# Pitfalls
 
-### Message handlers not idempotent under at least once delivery
+## Message handlers not idempotent under at least once delivery
 
 - **What goes wrong**: duplicate events apply side effects multiple times, such as multiple shipment records.
 - **Why it happens**: brokers redeliver when ack is lost or consumer crashes after processing.
 - **How to avoid it**: persist processed message ids, use upserts, and make handlers safe to replay.
 
-### Idempotency key scope set incorrectly
+## Idempotency key scope set incorrectly
 
 - **What goes wrong**: broad scope blocks legitimate operations or narrow scope fails to deduplicate retries.
 - **Why it happens**: key design ignores tenant and operation boundaries.
 - **How to avoid it**: scope keys by business boundary like tenant plus operation id and enforce payload hash checks.
 
-### Check then process race window
+## Check then process race window
 
 - **What goes wrong**: two concurrent duplicates both pass pre check and both charge.
 - **Why it happens**: non atomic check then execute logic without a uniqueness barrier.
 - **How to avoid it**: move gate into atomic insert or unique constraint with transaction and conflict handling.
 
-### Idempotent is not safe
+## Idempotent is not safe
 
 - **What goes wrong**: teams assume idempotent operations have no side effects.
 - **Why it happens**: confusion between HTTP safe and HTTP idempotent semantics.
 - **How to avoid it**: remember `DELETE` is idempotent but still mutates state and can require authorization and auditing.
 
-## Tradeoffs
+# Tradeoffs
 
 | Approach | Benefit | Cost | Use when |
 |---|---|---|---|
@@ -155,7 +153,7 @@ HTTP method semantics are only a starting point. `PUT` and `DELETE` are idempote
 
 Decision rule: start with database uniqueness for core entities, add idempotency keys for externally visible `POST` operations and third party side effects, then use optimistic concurrency for high contention aggregate updates.
 
-## Questions
+# Questions
 
 > [!QUESTION]- Why is idempotency essential for reliable retry strategies, and what happens without it?
 >
@@ -166,9 +164,9 @@ Decision rule: start with database uniqueness for core entities, add idempotency
 > - Stronger idempotency guarantees cost extra storage, key lifecycle management, and stricter request validation.
 
 > [!QUESTION]- How do you implement idempotency for a payment endpoint that processes charges through a third party provider?
-> Reserve a durable local attempt, commit, then call a provider that honors the same key outside the database transaction. A timeout becomes an unknown outcome that is reconciled with the same provider key; it is not evidence that no charge happened. [[Payment Systems#Durable Idempotency|Payment Systems]] contains the complete sequence and its boundary-specific guarantee.
+> Reserve a durable local attempt, commit, then call a provider that honors the same key outside the database transaction. A timeout becomes an unknown outcome that is reconciled with the same provider key; it is not evidence that no charge happened. [[Software Architecture/Distributed Systems/Payment Systems#Durable Idempotency|Payment Systems]] contains the complete sequence and its boundary-specific guarantee.
 
-## References
+# References
 
 - [Stripe API docs Idempotent requests](https://docs.stripe.com/api/idempotent_requests) - Anchor source with concrete semantics for key reuse, result caching, TTL, and retry behavior.
 - [Stripe engineering blog Designing robust and predictable APIs with idempotency](https://stripe.com/blog/idempotency) - Practitioner writeup on failure modes and retry design tradeoffs from production payment APIs.

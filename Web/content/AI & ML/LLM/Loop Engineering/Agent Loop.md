@@ -1,8 +1,8 @@
 ---
 publish: true
 created: 2026-07-11T21:45:30.463Z
-modified: 2026-07-11T21:45:30.471Z
-published: 2026-07-11T21:45:30.471Z
+modified: 2026-07-18T11:30:02.693Z
+published: 2026-07-18T11:30:02.693Z
 topic:
   - AI & ML
 subtopic:
@@ -13,8 +13,6 @@ level:
 priority: Medium
 status: Done
 ---
-
-# Intro
 
 The agent loop is the execution cycle that turns an LLM from a single-shot text generator into an autonomous problem solver. Instead of one prompt producing one response, the model runs in a loop: reason about the current state, call a tool, observe the result, then decide whether to continue or stop. This is the ReAct pattern (Reasoning + Acting), introduced by Yao et al. (ICLR 2023), and many production agent frameworks — Microsoft Agent Framework, LangChain, LangGraph — use ReAct-like think-act-observe loops as their core execution model.
 
@@ -39,7 +37,7 @@ The critical insight from the ReAct paper: interleaving reasoning traces with to
 
 For the broader context of when an agent loop is the right choice versus simpler [[AI & ML/LLM/Agents/Agents|workflow patterns]], see the Agents hub page.
 
-## How It Works in Practice
+# How It Works in Practice
 
 The loop maps directly to the chat completions API contract. Here is what happens at each step, concretely:
 
@@ -109,9 +107,9 @@ while True:
 
 Both examples implement the same four-step cycle. The framework version hides the loop; the raw version makes every step explicit.
 
-## Pitfalls
+# Pitfalls
 
-### Infinite Loops and Tool Spam
+## Infinite Loops and Tool Spam
 
 The model enters a cycle where it repeatedly calls the same tool or alternates between two tools without making progress toward an answer. A production case documented by Hugo Nogueira: one agent run made 369 tool calls, consumed 9.7M tokens, and cost \$2.74 — without ever reaching an answer. The model kept searching for information it had already retrieved because its reasoning trace lost track of prior observations.
 
@@ -119,7 +117,7 @@ The model enters a cycle where it repeatedly calls the same tool or alternates b
 
 **Mitigation**: set a hard cap on loop iterations (the Agent Framework's `FunctionInvokingChatClient` exposes `MaximumIterationsPerRequest`; LangGraph exposes `recursion_limit`). Add explicit stop instructions in the system prompt: "If you have called the same tool twice with the same arguments, stop and answer with what you have." Monitor tool call counts per request and alert on outliers.
 
-### Token Explosion
+## Token Explosion
 
 Each loop iteration appends messages to the conversation history — the model's reasoning, the tool call, and the tool result. After 5–10 iterations, the accumulated context can reach thousands of tokens. Large tool responses — full API payloads, search results with multiple documents — accelerate this. Eventually the context window fills, and the model either truncates critical information or the API rejects the request.
 
@@ -127,7 +125,7 @@ Each loop iteration appends messages to the conversation history — the model's
 
 **Mitigation**: keep tool return values compact — return only the fields the model needs. Set `max_tokens` on the model response to limit reasoning verbosity. For long-running agents, summarize or truncate older tool results before re-sending. Track cumulative token usage per loop iteration and terminate early if approaching the context limit.
 
-### Hallucinated Tool Calls
+## Hallucinated Tool Calls
 
 The model invokes a function that does not exist, passes arguments that do not match the schema, or fabricates parameter values. This is especially common when tool schemas are ambiguous or when the model confuses similar function names across plugins.
 
@@ -135,7 +133,7 @@ The model invokes a function that does not exist, passes arguments that do not m
 
 **Mitigation**: use self-explanatory function names and explicit parameter descriptions. Validate tool call arguments against the schema before execution — reject and return a clear error message so the model can self-correct on the next iteration. Keep schemas flat and simple. Anthropic's SWE-bench agent team found that switching from relative to absolute file paths in tool parameters eliminated an entire class of hallucinated arguments.
 
-## Questions
+# Questions
 
 > [!QUESTION]- Why does the ReAct pattern outperform chain-of-thought reasoning alone for tasks requiring external knowledge?
 > Chain-of-thought generates reasoning traces but has no mechanism to verify claims against external reality. When the model encounters a factual question it must rely on parametric memory, which produces confident but fabricated answers. ReAct interleaves reasoning with tool calls — the model can search, look up, or compute before continuing its chain. This grounds each step in real data, cutting hallucination. The original paper showed this on HotpotQA: CoT alone frequently hallucinated intermediate facts, while ReAct retrieved them. The tradeoff is latency and cost — each tool call adds a round trip and tokens.
@@ -147,7 +145,7 @@ The model invokes a function that does not exist, passes arguments that do not m
 > [!QUESTION]- When is a simple prompt chain preferable to an agent loop?
 > When the task decomposes into a fixed, predictable sequence of steps. A prompt chain — step A then validate then step B then validate then step C — is cheaper, faster, more debuggable, and produces more consistent results. The agent loop adds value only when you cannot predict the steps in advance: the model must decide dynamically which tools to call and in what order based on intermediate results. Most production systems that call themselves agents are actually prompt chains, and that is the right choice for the majority of use cases.
 
-## References
+# References
 
 - [ReAct: Synergizing Reasoning and Acting in Language Models — Yao et al. ICLR 2023](https://arxiv.org/abs/2210.03629)
 - [Using function tools with an agent — Microsoft Agent Framework (Microsoft Learn)](https://learn.microsoft.com/en-us/agent-framework/agents/tools/function-tools)

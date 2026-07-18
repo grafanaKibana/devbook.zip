@@ -1,8 +1,8 @@
 ---
 publish: true
 created: 2026-07-15T11:47:55.653Z
-modified: 2026-07-18T09:50:14.532Z
-published: 2026-07-18T09:50:14.532Z
+modified: 2026-07-18T11:38:38.752Z
+published: 2026-07-18T11:38:38.752Z
 topic:
   - Software Architecture
 subtopic:
@@ -14,13 +14,11 @@ priority: High
 status: Done
 ---
 
-# Intro
+Event Sourcing stores each aggregate's state as an ordered stream of domain events instead of saving only the latest row snapshot. That event history gives you a built-in audit trail, enables temporal queries like "what did we believe at 10:15 yesterday", and allows replay when you need to rebuild read models or recover from projection bugs. You usually reach for it when business value depends on immutable history, traceability, and intent-level debugging, not just current state reads. In .NET systems, it often appears together with [[Software Architecture/Patterns/Architectural Patterns/CQRS]] so writes persist events and reads consume projections optimized for query use cases.
 
-Event Sourcing stores each aggregate's state as an ordered stream of domain events instead of saving only the latest row snapshot. That event history gives you a built-in audit trail, enables temporal queries like "what did we believe at 10:15 yesterday", and allows replay when you need to rebuild read models or recover from projection bugs. You usually reach for it when business value depends on immutable history, traceability, and intent-level debugging, not just current state reads. In .NET systems, it often appears together with [[CQRS]] so writes persist events and reads consume projections optimized for query use cases.
+# Mechanism
 
-## Mechanism
-
-### Core flow
+## Core flow
 
 1. A command reaches the write model (`PlaceOrder`, `AddItem`, `ShipOrder`).
 2. The aggregate loads its prior event stream and replays events to rebuild current in-memory state.
@@ -28,14 +26,14 @@ Event Sourcing stores each aggregate's state as an ordered stream of domain even
 4. New domain event(s) are appended to an append-only event store.
 5. Projection handlers consume appended events and update one or more read models.
 
-### Why append-only matters
+## Why append-only matters
 
 - **Immutability**: old facts are never updated in place, so history stays trustworthy.
 - **Auditability**: every state transition is explainable by concrete business events.
 - **Temporal analysis**: you can rehydrate state as-of a version or timestamp.
 - **Operational recovery**: if a projection is corrupted, rebuild it by replaying events.
 
-### State reconstruction by replay
+## State reconstruction by replay
 
 At load time, you fetch events for a stream (for example `order-123`) and apply them in sequence.
 
@@ -44,7 +42,7 @@ At load time, you fetch events for a stream (for example `order-123`) and apply 
 - `OrderShipped` flips lifecycle status and shipment metadata.
   Your aggregate is deterministic if applying the same ordered events always yields the same state.
 
-### Projections and read models
+## Projections and read models
 
 Write-side aggregates enforce invariants; read-side models optimize querying.
 
@@ -53,13 +51,13 @@ Write-side aggregates enforce invariants; read-side models optimize querying.
 - A third can drive search indexing.
   Read models are disposable when they are derived only from replayable event history and can be rebuilt deterministically.
 
-### Snapshots
+## Snapshots
 
 Snapshots cache aggregate state at a known stream version so loading can replay only the tail. They are disposable performance artifacts, not the source of truth. Validate the snapshot type and version, then replay the tail; if it is incompatible, discard it and rebuild from the stream.
 
 Preserve old event meaning. Prefer additive schema changes, upcasters from historical representations, or new event types. Never rewrite history merely to make today's class deserialize.
 
-### Append and projection operations
+## Append and projection operations
 
 Load stream `order-123` at version 17, rebuild the aggregate, and append new events with expected version 17. The store atomically accepts the batch as versions 18 and 19 or rejects it because another writer already advanced the stream. Every stored event needs a stable event ID, stream version, event type, schema version, and occurred-at timestamp.
 
@@ -83,7 +81,7 @@ A projector stores its checkpoint separately from the read model or commits both
 
 Replay must not call today's payment provider, send email, or read the current clock. Isolate external effects behind live-delivery handlers that are disabled during rebuild.
 
-### Request-to-projection sequence
+## Request-to-projection sequence
 
 ```mermaid
 sequenceDiagram
@@ -103,7 +101,7 @@ sequenceDiagram
     P->>RM: Upsert projection
 ```
 
-## Event Sourcing vs CRUD
+# Event Sourcing vs CRUD
 
 CRUD stores the latest accepted state. Event Sourcing stores the ordered facts that produced it. For an order changing from `Pending` to `Paid` to `Shipped`, a CRUD row answers "what is the status now?" An event stream also answers when each transition happened, which command caused it, and what the state was at an earlier revision.
 
@@ -119,7 +117,7 @@ The image's rebuild arrow is conditional, not automatic. Replay is trustworthy o
 | How is a read model repaired? | Recompute from available current data or backups | Replay into a new deterministic projection |
 | Main operational risk | Lost history and in-place update mistakes | Schema evolution, replay cost, and projection lag |
 
-## .NET aggregate example
+# .NET aggregate example
 
 An event-sourced aggregate never mutates fields directly from a command. It raises an event, applies the same handler used during replay, and records that event for the store to append.
 
@@ -187,16 +185,16 @@ public sealed class Order
 
 `FromHistory` applies events without adding them to `UncommittedEvents`; command methods call `Raise`, which applies and records the new fact. A concrete write loads `Order-42` at version 7, replays it, calls `AddItem("SSD-1TB", 1, 89.00m, utcNow)`, and appends `ItemAdded` with expected version 7. If another writer already produced version 8, the store rejects the append and the command retries against fresh history. After a successful append, clear the uncommitted collection. The aggregate validates the state it was given; the store proves that state was still current.
 
-## Event Sourcing + CQRS
+# Event Sourcing + CQRS
 
-Event Sourcing and [[CQRS]] solve different concerns and complement each other well.
+Event Sourcing and [[Software Architecture/Patterns/Architectural Patterns/CQRS]] solve different concerns and complement each other well.
 
 - **Write side**: command handlers persist validated domain events to the event store.
 - **Bridge**: those events become the integration boundary between write and read models.
 - **Read side**: projectors consume events and maintain query-optimized denormalized views.
   You can do CQRS without Event Sourcing, and Event Sourcing without strict CQRS separation, but pairing them usually gives the cleanest model when auditability and replay are first-class requirements.
 
-## Where Event Sourcing Fits
+# Where Event Sourcing Fits
 
 Use Event Sourcing at an aggregate boundary when the event stream is the authoritative record of state transitions. Do not infer Event Sourcing merely because a system publishes events:
 
@@ -208,11 +206,11 @@ Use Event Sourcing at an aggregate boundary when the event stream is the authori
 
 For a payment ledger, immutable state transitions and temporal reconstruction can justify Event Sourcing. For a product description edited occasionally, CRUD plus an audit table is usually cheaper. For a CRUD order service that emits `OrderUpdated` through an outbox, the outbox makes delivery reliable; it does not change the order database into an event store.
 
-## Operating boundary
+# Operating boundary
 
 Event schema evolution, stream growth, projection lag, checkpoints, and replay side effects are part of the pattern, not later storage details. The core rule is that the ordered event stream remains authoritative, aggregate replay remains deterministic, and rebuilt projections cannot repeat live external effects.
 
-## Tradeoffs
+# Tradeoffs
 
 | Concern | Event Sourcing | Traditional CRUD |
 |---|---|---|
@@ -224,7 +222,7 @@ Event schema evolution, stream growth, projection lag, checkpoints, and replay s
 | Operational model | Needs idempotency/replay tooling | Simpler operational story |
 Decision rule: prefer CRUD by default; choose Event Sourcing only when immutable audit history, temporal reconstruction, or replay-based recovery are explicit and valuable requirements.
 
-## Questions
+# Questions
 
 > [!QUESTION]- When does Event Sourcing justify its complexity over CRUD plus an audit-log table?
 >
@@ -244,7 +242,7 @@ Decision rule: prefer CRUD by default; choose Event Sourcing only when immutable
 > - Treat event contracts as long-lived public interfaces.
 > - Schema evolution is a common production failure mode in event-sourced systems — especially when teams skip compatibility testing across historical streams.
 
-## References
+# References
 
 - [Event Sourcing - Greg Young FAQ](https://cqrs.nu/faq/event-sourcing) — primary practitioner FAQ on streams, replay, and event-sourced aggregates.
 - [SimpleCQRS - Greg Young sample repository](https://github.com/gregoryyoung/m-r) — compact reference implementation of command handling, aggregates, event streams, and projections.

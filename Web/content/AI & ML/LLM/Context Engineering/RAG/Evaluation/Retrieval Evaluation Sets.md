@@ -1,8 +1,8 @@
 ---
 publish: true
 created: 2026-07-11T21:45:21.953Z
-modified: 2026-07-11T21:45:21.953Z
-published: 2026-07-11T21:45:21.953Z
+modified: 2026-07-18T11:30:02.331Z
+published: 2026-07-18T11:30:02.331Z
 topic:
   - AI & ML
 subtopic:
@@ -14,13 +14,11 @@ priority: High
 status: Done
 ---
 
-# Intro
-
 A retrieval eval set is the labeled data the [[Evaluation Metrics|retrieval metrics]] run against: a set of queries, each with its known-relevant chunks. The general machinery for building any eval set — example structure, LLM-driven synthetic generation, golden-set curation, sizing for statistical power — lives in [[Building an Evaluation Set]]. This page covers only the two parts that are specific to retrieval and have no analogue in a single-shot LLM or agent eval: how you label _which_ chunks count as relevant, and how chunk-anchored synthetic generation distorts retrieval scores.
 
 Both come down to one fact: a query rarely maps to exactly one chunk. Get the labeling wrong and the metric punishes a correct retriever or passes a broken one, regardless of how clean the rest of the eval harness is.
 
-## Multiple relevant chunks per query
+# Multiple relevant chunks per query
 
 The simplest eval labels one relevant chunk per query, but most real queries have several, and how you label and score them depends on _why_ multiple chunks are relevant. Conflating the two cases below produces metrics that punish a correct retriever or pass a broken one.
 
@@ -38,7 +36,7 @@ The simplest eval labels one relevant chunk per query, but most real queries hav
 
 **Set k from what the generator actually consumes**, not a borrowed default. If the prompt packs the top 5 chunks into context, evaluate at k=5. For the substitutable case a small k (HitRate@3) is enough. For the complementary case, k must be at least the number of required chunks, or recall is capped below 1.0 by construction and the metric measures the eval design rather than the retriever. See [[Monitoring#Retrieval Quality Metrics|Monitoring — Retrieval Quality Metrics]] for the full metric definitions.
 
-## Chunk-anchored synthetic generation
+# Chunk-anchored synthetic generation
 
 The general synthetic-generation technique — prompt an LLM to write the questions a passage answers — is covered in [[Building an Evaluation Set]]. Applied to retrieval it has a specific shape: sample N chunks, and for each, prompt the model for the questions a real user would ask that this chunk answers. The chunk becomes the ground-truth relevant document for every query it produced — inverting the expensive direction of labeling. One batch yields thousands of `(query, relevant_chunk)` pairs with no human in the loop for the first pass.
 
@@ -59,7 +57,7 @@ This produces exactly the structure the retrieval metrics consume: the query is 
 - **False negatives in ground truth.** The synthesized query is frequently answerable by _other_ chunks you never labeled — duplicated policy text, an overview paragraph, a near-identical FAQ entry. The retriever returns a genuinely relevant chunk, but because only the source chunk is marked relevant, Precision@k and MRR penalize it as a miss. This deflates scores and can rank a _better_ retriever lower than a worse one. Mitigation: after generation, run a second pass (the retriever itself, or an LLM judge over the top-k) to find other chunks that also answer the query and either label them relevant too or drop ambiguous queries. This is the single most common reason synthetic retrieval numbers look worse than production reality.
 - **Lexical leakage.** LLMs lift exact phrasing from the source chunk, producing queries that share rare tokens with the answer. These favor BM25 and exact match, overstating retrieval quality on a query distribution real users never type. Mitigation: instruct the model to paraphrase and to ask realistically underspecified questions; spot-check token overlap between query and source.
 
-## Questions
+# Questions
 
 > [!QUESTION]- When several chunks are relevant to one query, how do you decide which retrieval metric to score with?
 >
@@ -79,7 +77,7 @@ This produces exactly the structure the retrieval metrics consume: the query is 
 > - Secondary cause: lexical leakage — the LLM copies rare phrasing from the source chunk, inflating exact-match and BM25 scores on queries no real user would type
 > - The dedup/judge pass does add LLM cost per query and some noise of its own, but without it synthetic retrieval metrics are systematically pessimistic and unreliable for ranking pipelines
 
-## References
+# References
 
 - [RAGAS synthetic test data generation -- chunk-to-query generation, query types, and labeling (RAGAS docs)](https://docs.ragas.io/en/stable/concepts/test_data_generation/rag/)
 - [BEIR -- heterogeneous zero-shot retrieval benchmark with qrels-style relevance judgments (NeurIPS 2021)](https://arxiv.org/abs/2104.08663)

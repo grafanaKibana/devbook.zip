@@ -1,8 +1,8 @@
 ---
 publish: true
 created: 2026-07-11T21:47:11.231Z
-modified: 2026-07-17T05:54:48.313Z
-published: 2026-07-17T05:54:48.313Z
+modified: 2026-07-18T11:30:06.577Z
+published: 2026-07-18T11:30:06.577Z
 topic:
   - DevOps
 subtopic: []
@@ -13,11 +13,9 @@ priority: High
 status: Ready to Repeat
 ---
 
-# Intro
-
 Infrastructure as Code (IaC) defines infrastructure—VMs, networks, databases, load balancers, DNS, and clusters—in version-controlled machine-readable files. That makes intended changes reviewable and repeatable within the declared inputs, provider version, credentials, quotas, and external service state. It does not make development and production identical: regions, data, capacity, policy, and provider-side defaults can still differ.
 
-## Why IaC
+# Why IaC
 
 - **Bounded reproducibility** — the definition records intended resources and inputs; lock providers and modules, then verify plans because external APIs, defaults, quotas, and existing data still affect the result.
 - **Version control** — infrastructure changes go through Git: diffs, code review, blame, and rollback to a known-good state.
@@ -25,7 +23,7 @@ Infrastructure as Code (IaC) defines infrastructure—VMs, networks, databases, 
 - **Disaster recovery and scale** — definitions can recreate managed resources and repeated node shapes, provided data recovery, secrets, regional dependencies, and capacity are handled separately.
 - **Documentation by definition** — the code is the always-current source of truth for what exists.
 
-## Declarative vs Imperative
+# Declarative vs Imperative
 
 The central distinction in IaC tools:
 
@@ -52,7 +50,7 @@ resource storage 'Microsoft.Storage/storageAccounts@2023-01-01' = {
 }
 ```
 
-## State and the Plan/Apply Loop
+# State and the Plan/Apply Loop
 
 Terraform first refreshes its view of remote objects, builds a dependency graph from configuration and provider relationships, and produces a plan. Review that plan as an executable change set: replacements, deletes, and provider-version changes deserve explicit attention. Apply the saved plan, not a freshly recomputed one, when the approval must bind to exact operations.
 
@@ -70,7 +68,7 @@ State is the crux of Terraform-style tools (Bicep/ARM and CloudFormation keep st
 - **Remote, locked state** — store state in a shared backend with access control, versioning, and supported locking. For Terraform's S3 backend, set `use_lockfile = true`; DynamoDB-based locking is deprecated. Never commit `terraform.tfstate` to Git because it contains resource details and can contain secrets.
 - **Drift** — if someone changes a resource in the console, real state diverges from the file; the next plan shows the drift so you can re-converge.
 
-## The Tool Landscape
+# The Tool Landscape
 
 | Tool | Scope | Language | Notes |
 |---|---|---|---|
@@ -83,7 +81,7 @@ State is the crux of Terraform-style tools (Bicep/ARM and CloudFormation keep st
 > [!NOTE]
 > **Provisioning vs configuration management.** Terraform/Bicep _provision_ infrastructure (create the VM, network, DB). Tools like Ansible/Chef/Puppet _configure_ what's inside (install packages, set files). They're complementary — provision with one, configure with the other — though containers + Kubernetes increasingly fold configuration into immutable images.
 
-## Provisioning, Configuration, Orchestration, and GitOps
+# Provisioning, Configuration, Orchestration, and GitOps
 
 | Boundary | Declared result | Typical failure | Decision rule |
 | --- | --- | --- | --- |
@@ -98,7 +96,7 @@ Tools overlap, so classify the state they own before choosing one. Terraform can
 
 ![[Assets/System Design 101/203c7f1d0a6b3d00a4748c5334399f9d20b32194e8e766300bfc7a23313485df.png]]
 
-## Pitfalls
+# Pitfalls
 
 - **Committing state or secrets** — the state file can contain plaintext secrets and full resource maps; keep it in a locked remote backend, never in Git. Don't hard-code secrets in IaC — reference a [[Security/Secrets Management|secret store]].
 - **Manual console changes ("ClickOps")** — editing resources by hand creates drift the code doesn't know about; a later apply may revert or conflict. Make _all_ changes through code.
@@ -107,7 +105,7 @@ Tools overlap, so classify the state they own before choosing one. Terraform can
 - **No plan review** — applying without reading the plan can silently destroy/recreate a database. Treat the plan as a mandatory review gate, ideally in [[DevOps/CI CD tools|CI]].
 - **Hand-rolled credentials in CI** — authenticate the pipeline to the cloud with **OIDC/workload identity**, not a long-lived stored key.
 
-## Tradeoffs
+# Tradeoffs
 
 | | IaC | Manual / ClickOps |
 |---|---|---|
@@ -119,7 +117,7 @@ Tools overlap, so classify the state they own before choosing one. Terraform can
 
 **Decision rule**: use IaC for shared or long-lived infrastructure where review, repeatability, and recovery justify maintaining definitions and state. Choose the tool from provider/resource coverage, state and policy model, language, operator skill, and lifecycle ownership. Keep Terraform state remote and locked, review a saved plan when approval must bind to exact actions, and route emergency console changes back into code after the incident.
 
-## Questions
+# Questions
 
 > [!QUESTION]- What is the difference between declarative and imperative IaC?
 > **Declarative** IaC describes the desired end state and computes a diff. Reapplying should be a no-op only when inputs and observed external state are unchanged and the provider implements the operation safely. **Imperative** IaC specifies commands; it can still be idempotent when the program checks and converges state explicitly. The practical advantage of declarative tooling is an inspectable model and plan, not an unconditional safety guarantee.
@@ -130,7 +128,7 @@ Tools overlap, so classify the state they own before choosing one. Terraform can
 > [!QUESTION]- What is configuration drift and how does IaC address it?
 > Drift is when observed infrastructure differs from the declared definition. Refresh and plan can surface drift for attributes the provider reads and manages; apply can reconcile those fields. Ignored attributes, external systems, provider defaults, and emergency changes still require explicit handling, so IaC bounds drift rather than proving none exists.
 
-## References
+# References
 
 - [What is Infrastructure as Code? (Microsoft Learn / DevOps)](https://learn.microsoft.com/en-us/devops/deliver/what-is-infrastructure-as-code) — concepts, declarative vs imperative, drift.
 - [Terraform documentation (HashiCorp)](https://developer.hashicorp.com/terraform/intro) — state, plan/apply, modules, providers.

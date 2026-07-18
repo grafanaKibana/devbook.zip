@@ -1,8 +1,8 @@
 ---
 publish: true
 created: 2026-07-15T11:47:56.302Z
-modified: 2026-07-18T09:50:14.372Z
-published: 2026-07-18T09:50:14.372Z
+modified: 2026-07-18T11:38:38.753Z
+published: 2026-07-18T11:38:38.753Z
 topic:
   - Software Architecture
 subtopic:
@@ -14,21 +14,19 @@ priority: High
 status: Ready to Repeat
 ---
 
-# Intro
-
 Domain-Driven Design (DDD) centers software design on the business domain — its language, rules, and boundaries — rather than on technical infrastructure. Strategic patterns such as Bounded Contexts and Ubiquitous Language prevent one ambiguous shared model from forcing different business meanings into the same type. Tactical patterns then make one context's invariants explicit in code.
 
 DDD is most valuable in complex domains with rich business rules. For CRUD-heavy systems with little domain logic, the overhead is not justified.
 
-## Strategic Patterns
+# Strategic Patterns
 
-### Ubiquitous Language
+## Ubiquitous Language
 
 A shared vocabulary used by both developers and domain experts in conversations, code, and documentation. When the code uses the same terms as the business ("Order", "Shipment", "Fulfillment"), there is no translation layer where meaning gets lost.
 
 **In practice**: if a domain expert says "an order is fulfilled when all line items are shipped," the code should have an `Order` with a `Fulfill()` method that checks `LineItems.All(li => li.IsShipped)` — not a `ProcessOrderStatusUpdate()` method that sets `StatusId = 3`.
 
-### Bounded Context
+## Bounded Context
 
 A Bounded Context is an explicit boundary within which a particular domain model applies. The same word can mean different things in different contexts: "Customer" in the Sales context (prospect, contact info, deal history) is different from "Customer" in the Billing context (payment method, invoice address, credit limit).
 
@@ -45,7 +43,7 @@ Customer               Customer
 OrderPlaced event ──→  BillingService.CreateInvoice()
 ```
 
-### Subdomains: where to invest
+## Subdomains: where to invest
 
 Not all of the domain deserves equal effort. DDD classifies subdomains so you spend modeling energy where it pays off:
 
@@ -55,7 +53,7 @@ Not all of the domain deserves equal effort. DDD classifies subdomains so you sp
 
 The mistake is lavishing DDD tactical patterns on a generic subdomain while under-modeling the core.
 
-### Context Mapping
+## Context Mapping
 
 Bounded contexts don't live in isolation — **context maps** describe the _relationships_ between them and how their models integrate:
 
@@ -67,7 +65,7 @@ Bounded contexts don't live in isolation — **context maps** describe the _rela
 
 The map is a _strategic_ deliverable: it tells you where to put ACLs, which integrations are risky (Shared Kernel), and where team coordination is required.
 
-## Tactical modeling
+# Tactical modeling
 
 - **Entity:** identified across time, such as `Order` with `OrderId`.
 - **Value object:** identified by its values and normally immutable, such as `Money(Amount, Currency)`.
@@ -107,9 +105,9 @@ Prefer changing one aggregate per transaction because it keeps lock and consiste
 
 An anemic model exposes setters while application services implement every rule; the domain vocabulary disappears into orchestration. An oversized aggregate loads and locks too much state, while an undersized aggregate pushes a truly immediate invariant into unreliable coordination. Draw the boundary around facts that must be consistent at commit time, then use events for consequences that can follow later.
 
-When query needs diverge from the aggregate's command model, [[CQRS]] can keep invariant enforcement on the write side while serving purpose-built read models.
+When query needs diverge from the aggregate's command model, [[Software Architecture/Patterns/Architectural Patterns/CQRS]] can keep invariant enforcement on the write side while serving purpose-built read models.
 
-## Tradeoffs
+# Tradeoffs
 
 | Approach | Strengths | Weaknesses | When to use |
 |---|---|---|---|
@@ -119,12 +117,12 @@ When query needs diverge from the aggregate's command model, [[CQRS]] can keep i
 
 **Decision rule**: apply DDD tactical patterns (Aggregates, Value Objects, Domain Events) when the domain has non-trivial invariants and multiple teams. Apply strategic patterns (Bounded Contexts) when the system is large enough that a single shared model becomes a coordination bottleneck. For simple CRUD, skip DDD — the overhead is not justified.
 
-## Questions
+# Questions
 
 > [!QUESTION]- What makes a Bounded Context boundary real?
 > A context owns a coherent model and language. Integrations translate through explicit contracts or an anti-corruption layer rather than sharing one ambiguous domain model. Separate schemas, deployments, and aligned teams can reinforce that boundary, but none is mandatory by itself.
 
-## References
+# References
 
 - [Domain-Driven Design (Martin Fowler)](https://martinfowler.com/tags/domain%20driven%20design.html) — Fowler's collection of DDD articles covering Aggregates, Bounded Contexts, and the Ubiquitous Language with practical examples.
 - [Domain-Driven Design: Tackling Complexity in the Heart of Software (Eric Evans)](https://www.oreilly.com/library/view/domain-driven-design-tackling/0321125215/) — the original DDD book; dense but authoritative. Read Part II (Building Blocks) for tactical patterns.
