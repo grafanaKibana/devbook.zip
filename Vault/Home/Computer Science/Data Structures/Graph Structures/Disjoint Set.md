@@ -156,9 +156,6 @@ The related [[Union-Find]] note covers the operation heuristics and their analys
 > [!QUESTION]- Why does `Union` link roots rather than the original elements?
 > A root represents an entire existing set. Linking one root under another merges both complete sets. Re-parenting an interior node can move only its subtree and leave other members behind, breaking the partition semantics.
 
-> [!QUESTION]- Why is the useful bound amortized rather than worst-case constant time?
-> One `Find` can still traverse several parent indices. Path compression pays extra writes during that operation so later finds become shorter. Across a sequence, the total work is `O(m α(n))` for `m` operations, even though a particular operation is not guaranteed to be constant time.
-
 # References
 
 - [Efficiency of a Good But Not Linear Set Union Algorithm](https://dl.acm.org/doi/10.1145/321879.321884) — Robert Tarjan's original amortized analysis of path compression with weighted union.

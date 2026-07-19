@@ -129,12 +129,6 @@ The CLR defines a memory model that governs how writes become visible across thr
 > NativeAOT eliminates JIT entirely by compiling to native code at publish time — fastest startup, smallest working set, but no runtime code generation (limits reflection, dynamic assembly loading, and some serialization patterns).
 > JIT with tiered compilation is the right default for long-running server workloads; NativeAOT wins for CLI tools, serverless cold-start SLAs, and embedded scenarios where startup and binary size matter more than runtime flexibility.
 
-> [!QUESTION]- When would you choose NativeAOT over JIT compilation?
-> NativeAOT eliminates JIT startup cost and produces a self-contained native binary — ideal for CLI tools, serverless functions with cold-start SLAs, or embedded scenarios. The cost is longer publish time, larger binary, and loss of runtime reflection-heavy features (dynamic code generation, some serialization patterns). For long-running server workloads, JIT with tiered compilation typically wins on peak throughput.
-
-> [!QUESTION]- Why does the GC use generations?
-> Most objects die young (short-lived allocations like request-scoped objects). Generational GC exploits this by collecting Gen 0 (newest, smallest) most frequently and cheaply. Long-lived objects are promoted to Gen 1 and Gen 2, which are collected less often. This reduces the cost of GC for the common case while still reclaiming long-lived garbage.
-
 # References
 
 - [Common Language Runtime (CLR) overview — Microsoft Learn](https://learn.microsoft.com/en-us/dotnet/standard/clr) — official overview of CLR responsibilities, managed execution, and assembly loading.

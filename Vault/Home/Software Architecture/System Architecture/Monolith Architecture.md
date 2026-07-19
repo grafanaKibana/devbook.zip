@@ -103,12 +103,7 @@ Prime Video's monitoring pipeline and Stack Overflow's historical application ti
 
 **Mitigation**: partition the database by module even within a monolith. Each module owns its tables and accesses other modules' data only through service interfaces, not direct SQL joins. This is the modular monolith approach and is a prerequisite for eventual microservice extraction.
 
-
 # Questions
-
-> [!QUESTION]- What is a modular monolith and when is it better than microservices?
-> A modular monolith enforces explicit module boundaries (clear interfaces, no internal coupling) within a single deployment. It gives you maintainability and team autonomy without distributed systems complexity. It is better than microservices when independent deployment is not yet a hard requirement — which is most early-stage products.
-> Cost: requires discipline to maintain module boundaries; without enforcement, it degrades into a big ball of mud.
 
 > [!QUESTION]- When do microservices become justified over a monolith?
 > When independent deployment is a hard requirement and the team can support the operational complexity (distributed tracing, network failures, eventual consistency, service mesh). The signal is usually: teams are blocked by each other's deployments, or a specific component needs independent scaling that the monolith cannot provide.

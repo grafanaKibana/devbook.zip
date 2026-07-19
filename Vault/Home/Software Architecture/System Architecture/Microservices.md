@@ -203,13 +203,6 @@ A concrete stop rule: if extracting `Catalog` creates a separate pipeline, datas
 > - Use outbox/inbox and idempotent handlers to survive retries and duplicates.
 > - Accept eventual consistency and make process state observable.
 
-> [!QUESTION]- How do you decide between monolith, modular monolith, and microservices for a new product?
-> - Decide from team size, release pressure, domain volatility, and ops maturity.
-> - One team in discovery phase usually benefits most from monolith speed.
-> - Clear domains with limited platform capacity often fit modular monolith.
-> - Choose microservices when independent deploy/scale constraints are proven.
-> - Re-evaluate architecture periodically as constraints change.
-
 # References
 - [Microservices Pattern: Microservice Architecture](https://microservices.io/patterns/microservices.html) — core microservices patterns and decomposition guidance.
 - [Microservices — Martin Fowler](https://martinfowler.com/articles/microservices.html) — original definition and key characteristics.

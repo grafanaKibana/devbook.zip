@@ -223,9 +223,6 @@ Console.WriteLine(asDog.Category());    // Dog
 > [!QUESTION]- What is an `in` parameter used for?
 > To pass an argument by readonly reference: avoid copies for large structs and communicate that the method should not modify the argument.
 
-> [!QUESTION]- What are optional parameters in methods?
-> Parameters with default values that callers can omit; the default is substituted at compile time at the call site.
-
 > [!QUESTION]- In a hierarchy where `Animal a = new Dog();`, how can you make `a.Category()` return the derived value, and what does that imply for API design?
 > Mark the base member as `virtual` and the derived member as `override`. That enables polymorphic dispatch by runtime type. It also means the base API explicitly supports extensibility and behavioral substitution.
 

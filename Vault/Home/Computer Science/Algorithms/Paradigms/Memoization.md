@@ -101,9 +101,6 @@ Memoization is the fit when the recurrence is natural to write recursively, the 
 > [!QUESTION]- Why must a memoised function be pure, and what breaks if it isn't?
 > The cache returns a stored result for repeated arguments without re-running the function. If the output also depends on hidden state — a global, the clock, an I/O read — a cache hit hands back a value computed under conditions that may no longer hold, and side effects the caller expected simply don't happen on a hit. Only same-input-same-output, side-effect-free functions are safe to memoise.
 
-> [!QUESTION]- What is the most common correctness bug when memoising a recurrence?
-> An incomplete cache key. If the key omits an argument the result depends on — caching a `(i, capacity)` knapsack state on `i` alone — two different subproblems map to the same slot and the second read returns a stale value, silently. The key must be the full state, the same requirement DP calls state design.
-
 > [!QUESTION]- When should a memoised recurrence be rewritten as bottom-up tabulation?
 > When the recursion is deep enough to risk a stack overflow (a long chain of dependencies), when essentially every state gets visited so laziness saves nothing, or when a rolling-array reduction can cut memory that the recursive form can't exploit. Tabulation runs in tight iterative loops with `O(1)` stack, at the cost of computing states a lazy memo might have skipped.
 

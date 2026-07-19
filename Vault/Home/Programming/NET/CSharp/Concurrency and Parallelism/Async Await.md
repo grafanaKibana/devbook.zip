@@ -185,9 +185,6 @@ A `Task` can hold multiple exceptions (e.g. a faulted `Task.WhenAll`), but `awai
 > [!QUESTION]- If async does not always use extra threads, why does it improve scalability?
 > Because waiting time is no longer paid by tying up worker threads. Released threads can process other requests while I/O is pending. A server with 100 threads can handle thousands of concurrent I/O-bound requests if each thread is released during the wait.
 
-> [!QUESTION]- When should you use `Task.Run` with async code?
-> For CPU-bound work that you intentionally offload to a pool thread (e.g., image processing, heavy computation). Do not use it to wrap already-async I/O APIs — that wastes a thread for no benefit.
-
 # References
 
 - [Async programming scenarios (Microsoft Learn)](https://learn.microsoft.com/en-us/dotnet/csharp/asynchronous-programming/async-scenarios) — official overview of async/await patterns with examples for I/O and CPU-bound work.

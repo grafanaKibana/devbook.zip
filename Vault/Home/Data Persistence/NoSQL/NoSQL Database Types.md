@@ -90,9 +90,6 @@ A time-series workload is append-heavy and reads ordered ranges by series and ti
 > [!QUESTION]- How do you choose between the four NoSQL families?
 > By access pattern. **Key-value** when you only ever fetch by a single key (cache, session). **Document** when data forms self-contained aggregates with flexible schema (profiles, catalogs). **Wide-column** when you need extreme write throughput along a known partition key (time-series, logs). **Graph** when queries traverse relationships many hops deep (social, recommendations, fraud). The query shape, not the data size, drives the choice.
 
-> [!QUESTION]- Why is NoSQL data modeling "query-first" instead of normalized?
-> There are no joins, so you can't assemble data from many tables at read time cheaply. Instead you store data pre-shaped for each read — often duplicating it across multiple "tables"/documents (one per query). You trade storage and write-time duplication for fast, single-lookup reads. This is the opposite of relational [[Normalization Denormalization|normalization]].
-
 > [!QUESTION]- What does "polyglot persistence" mean and why is it common?
 > Using different databases for different jobs within one system — e.g. PostgreSQL as the system of record, Redis for caching/sessions, Elasticsearch for search, Neo4j for a recommendation graph. No single store is best at everything, so mature systems combine them, accepting the operational cost of running several.
 

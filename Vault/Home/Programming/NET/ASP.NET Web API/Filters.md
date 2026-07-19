@@ -114,14 +114,6 @@ Note that **`[Authorize]` is itself an authorization filter** — which is why a
 
 # Questions
 
-> [!QUESTION]- Explain when to choose middleware over an MVC action filter.
-> Expected answer:
-> - Middleware when concern is app-wide and independent of controller/action internals.
-> - Action filter when concern needs `ActionExecutingContext`, action arguments, or action result wrapping.
-> - Middleware runs earlier in pipeline and can affect all endpoints.
-> - Filters are more granular for controller/action scope.
-> Why this matters: this is a common architecture tradeoff in API design interviews.
-
 > [!QUESTION]- What is the execution order of ASP.NET Core filter types?
 > Expected answer:
 > - Authorization -> Resource -> Action -> Exception -> Result (with before/after phases where applicable).

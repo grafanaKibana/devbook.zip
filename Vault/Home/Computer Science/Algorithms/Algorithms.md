@@ -45,13 +45,6 @@ return FolderStructureMap;
 
 # Questions
 
-> [!QUESTION]- What is an algorithm? How is its efficiency measured?
-> - An algorithm is a finite, ordered set of steps that transforms input into the required output.
-> - Time complexity describes how runtime grows as input size increases.
-> - Space complexity describes extra memory needed as input grows.
-> - Big O notation is used to compare growth classes independent of hardware details.
-> - Why it matters: complexity awareness helps avoid implementations that fail under production scale.
-
 > [!QUESTION]- Why is Big O not enough to choose the fastest algorithm in practice?
 > Big O describes asymptotic growth and ignores constant factors, cache locality, branch prediction, and real input distributions. Quick Sort is O(n log n) average like Merge Sort but often faster on arrays due to cache-friendly in-place partitioning.
 > Measure on representative data after narrowing candidates by complexity class.

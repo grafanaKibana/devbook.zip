@@ -239,9 +239,6 @@ public sealed record Order(string OrderId, string CustomerId, decimal Amount);
 > [!QUESTION]- How do you implement at-least-once delivery, and what new risk appears?
 > At-least-once is four settings working together: a durable queue, persistent messages (`DeliveryMode = 2`), publisher confirms so the producer knows the broker accepted the message, and manual consumer ack so a message isn't removed until processing succeeds. If a consumer crashes before acking, the broker redelivers. The risk that buys you is duplicates — a redelivery can race an ack — so consumers must be [[Home/Software Architecture/Distributed Systems/Idempotency|idempotent]], keyed on a stable message ID with a dedupe store. You trade the possibility of loss for the certainty of occasional duplicates, which is the far easier problem to make safe.
 
-> [!QUESTION]- When would you choose RabbitMQ over Kafka?
-> Choose RabbitMQ when you want a smart broker doing the routing — direct, topic, fanout, and header exchanges, per-message TTL, priorities, dead-lettering — for task queues, request-reply, and command dispatch where low latency and flexible routing matter more than retention. Choose [[Home/Software Architecture/Distributed Systems/Message Queues/Kafka]] when you need a durable, replayable log: high-throughput event streams, ordering per partition, and multiple independent consumers re-reading history by offset. The rough line is that RabbitMQ moves a message and forgets it, while Kafka stores an event history. If you keep wishing you could re-consume past messages, you actually wanted Kafka.
-
 # References
 
 - [RabbitMQ Documentation](https://www.rabbitmq.com/docs) — official reference covering exchanges, queues, bindings, durability, and clustering.

@@ -86,9 +86,6 @@ A resize also produces a latency spike: one unlucky `Add` pays the full `O(n)` r
 > [!QUESTION]- Why is the `O(1)` membership bound an average rather than a guarantee?
 > It assumes the hash spreads elements roughly uniformly and the load factor caps expected chain length at a constant. When many elements collide into one bucket — weak `hashCode` or adversarial keys — that bucket becomes a linear list and `Contains`/`Add`/`Remove` degrade to `O(n)`.
 
-> [!QUESTION]- Why can a member become unreachable after insertion?
-> Membership routes an element to a bucket via `hashCode`, then confirms with `Equals`. Mutating a field that participates in `hashCode` after adding leaves the element in its original bucket while lookups probe the new one, so `Contains` returns `false` on an element that is still stored.
-
 # References
 
 - [`HashSet<T>` class](https://learn.microsoft.com/en-us/dotnet/api/system.collections.generic.hashset-1) — .NET set API, including the `UnionWith`/`IntersectWith`/`ExceptWith` set-algebra methods and capacity constructor.

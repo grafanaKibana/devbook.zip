@@ -120,12 +120,6 @@ Both tests pass. Now Refactor: the logic is already clean, so nothing to change.
 > - Test-after doesn't provide this signal — the implementation already exists and the test is shaped around it.
 > - Tradeoff: TDD's design benefit requires discipline. Skipping the Red step (writing a test that already passes) eliminates the feedback loop.
 
-> [!QUESTION]- When is TDD not worth the overhead?
-> - Exploratory/spike code: you don't know the right design yet. Write the spike without tests, learn from it, then delete it and rebuild with TDD.
-> - UI rendering logic: visual behavior is hard to unit-test meaningfully; use snapshot tests or manual QA instead.
-> - Trivial CRUD with no branching: a single-line property setter doesn't need a test-first cycle.
-> - Tradeoff: TDD overhead is ~20-30% more time upfront. The payback is faster debugging and safer refactoring over the life of the codebase. For short-lived code, the payback never arrives.
-
 > [!QUESTION]- How do you handle external dependencies (DB, HTTP) in TDD?
 > - Inject dependencies as interfaces. In tests, provide a fake or in-memory implementation.
 > - For repositories: use an in-memory implementation (e.g., `Dictionary<Guid, Order>`) rather than mocking every method.

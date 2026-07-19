@@ -53,14 +53,6 @@ Ground truth is established by running brute-force (exact) search over the full 
 
 # Questions
 
-> [!QUESTION]- Why does ANN recall degrade silently as the corpus grows while latency stays flat?
-> - At fixed `ef_search`/`nprobe`, the search explores a constant amount of work regardless of corpus size
-> - As more vectors crowd the graph, that fixed search path covers a proportionally smaller fraction of it, so true neighbors are missed more often
-> - Latency is driven by the search budget, not corpus size, so it stays constant and gives no signal that recall has dropped
-> - Detection requires explicit ANN recall checks against brute-force ground truth on a scheduled query set — dashboards watching only latency will not catch it
-> - Fix: re-tune `ef_search`/`nprobe` as the corpus grows, or move to a parameterization that scales the search budget with index size
-> - Raising the search budget restores recall but increases p99 latency — pick the knee of the recall-vs-latency curve rather than maxing either
-
 > [!QUESTION]- Why is token-level IoU more informative than Recall@k when comparing chunking strategies?
 > - Recall@k only asks whether a relevant chunk appeared; it ignores how much irrelevant text rode along inside that chunk
 > - A strategy can hit high Recall@k by returning large, noisy chunks that waste context-window tokens on irrelevant content

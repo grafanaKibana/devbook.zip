@@ -149,9 +149,6 @@ Four layers with interfaces and DI for a 3-endpoint CRUD API adds ceremony witho
 > All source code dependencies must point inward — toward higher-level policies (domain). Outer layers (infrastructure, UI) depend on inner layers; inner layers never depend on outer layers. This means you can change databases, frameworks, or delivery mechanisms without touching business rules.
 > Cost: requires defining interfaces in inner layers and wiring implementations in outer layers — more upfront structure.
 
-> [!QUESTION]- What is the difference between traditional layered and Onion/Clean Architecture?
-> Traditional layered: UI → Business Logic → Data Access → Database. Changing the DB affects everything above. Onion/Clean: Infrastructure → Application → Domain. The Domain has zero dependencies; Infrastructure implements Domain interfaces. The key difference is dependency inversion at the data access boundary.
-
 # References
 
 - [Multitier architecture (Wikipedia)](https://en.wikipedia.org/wiki/Multitier_architecture) — overview of n-tier patterns, layer responsibilities, and historical context.

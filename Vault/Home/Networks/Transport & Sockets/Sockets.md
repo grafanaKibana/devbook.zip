@@ -133,9 +133,6 @@ Console.WriteLine($"Received {result.Buffer.Length} bytes from {result.RemoteEnd
 > [!QUESTION]- What is the difference between `Socket`, `TcpClient`, and `TcpListener`?
 > `Socket` is the low-level OS abstraction supporting TCP, UDP, and other protocols. `TcpClient` wraps a TCP socket and exposes a `NetworkStream` for stream-based I/O. `TcpListener` wraps a server-side TCP socket and provides `AcceptTcpClientAsync` for accepting connections. Use `TcpClient`/`TcpListener` for most TCP work; drop to `Socket` when you need protocol-level control.
 
-> [!QUESTION]- When would you choose UDP over TCP for a production system?
-> When latency matters more than delivery guarantees and the application can tolerate or recover from packet loss. Examples: real-time game state updates (stale frames are discarded anyway), DNS queries (fast retry is cheaper than TCP handshake), telemetry/metrics (occasional loss is acceptable). The application must implement its own reliability if needed.
-
 # References
 
 - [System.Net.Sockets namespace](https://learn.microsoft.com/dotnet/api/system.net.sockets) — API reference for Socket, TcpClient, TcpListener, UdpClient, and NetworkStream.

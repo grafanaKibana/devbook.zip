@@ -249,9 +249,6 @@ Key rules:
 > ```
 > The `new` method is completely invisible to polymorphic code. This is almost always a design smell — if you need to change behavior, the method should not have been sealed, or you should use composition instead.
 
-> [!QUESTION]- Can you have an abstract sealed class? What about in IL?
-> In C# source code, you cannot write `abstract sealed class` — the compiler rejects it as contradictory. However, at the IL level, **static classes** compile to exactly `abstract sealed`. The CLR treats `abstract sealed` as "cannot be instantiated and cannot be inherited." So every `static class` in C# is literally an `abstract sealed` class in metadata. You can verify this with `ildasm` or reflection: `typeof(Math).IsAbstract && typeof(Math).IsSealed` is `true`.
-
 > [!QUESTION]- Why can `partial` be dangerous with source generators? Give a concrete scenario.
 > Partial classes merge at compile time, and source generators can add members to your type that you do not see in your source file. Dangers:
 > - **Name collisions**: a generator adds a method `Validate()` and you also write `Validate()` — compile error with a confusing message pointing at generated code.

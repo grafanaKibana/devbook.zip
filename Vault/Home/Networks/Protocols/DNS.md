@@ -102,7 +102,6 @@ DNS security has two different channels. DNSSEC authenticates signed record sets
 
 An authoritative zone signs record sets with a zone-signing key. The resolver obtains the corresponding DNSKEY record and validates a chain of DS delegations from a configured trust anchor, normally the DNS root. A valid signature proves that the signed answer came from the key owner and was not changed; it does not hide the queried name or make the returned service trustworthy.
 
-
 ```text
 root trust anchor
   -> DS for .com
@@ -141,9 +140,6 @@ After that hop, the resolver still performs recursion and contacts authoritative
 
 > [!QUESTION]- Why does DNS migration feel delayed?
 > Because recursive and client caches hold old TTLs; lowering TTL at cutover does not rewrite already-cached answers instantly.
-
-> [!QUESTION]- Why can authoritative data be correct while clients still use old IPs?
-> Those clients or resolvers still hold old cached records; the old value remains valid until TTL expiry and resolver policies permit refresh.
 
 # References
 

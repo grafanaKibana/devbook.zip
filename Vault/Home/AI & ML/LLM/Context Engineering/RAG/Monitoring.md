@@ -234,14 +234,6 @@ Decision rule: combine deterministic metrics on 100% of traffic (fast, free), sa
 > - Full scoring is reserved for offline evaluation runs against labeled eval sets.
 > - Lower sample rates cut cost but raise the odds of missing a localized regression in a small query cluster; start at 10–20% and reduce only once the distribution looks stable.
 
-> [!QUESTION]- Why should RAG alerting use relative regression thresholds instead of absolute quality targets?
-> - Absolute thresholds ("faithfulness > 0.9") are brittle across corpus changes, model updates, and query distribution shifts.
-> - A threshold calibrated at launch becomes meaningless after the corpus doubles or query mix evolves.
-> - Relative thresholds ("no more than 5% drop from 7-day rolling baseline") adapt automatically because the baseline tracks current system state.
-> - Relative thresholds prevent the failure mode where a team sets an ambitious absolute target, cannot reach it consistently, and silently disables the alert.
-> - Baselines must be recomputed after intentional pipeline changes (model swap, prompt update, index rebuild) to avoid false alarms on expected shifts.
-> - Relative thresholds can miss slow drift that stays inside the rolling window, so pair them with a periodic absolute floor check — a monthly look at whether the baseline itself is still acceptable.
-
 > [!QUESTION]- How does monitoring differ from evaluation in a RAG system, and why do you need both?
 > - Evaluation validates a pipeline configuration against a labeled dataset before deployment — it gates releases.
 > - Monitoring validates the pipeline continuously against live traffic after deployment — it catches production regressions.

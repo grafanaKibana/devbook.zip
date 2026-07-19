@@ -140,15 +140,11 @@ The container **owns disposal of the instances it creates**: when a scope ends i
 
 # Questions
 
-> [!QUESTION]- What is a captive dependency and why is it dangerous?
-> A captive dependency occurs when a long-lived service (Singleton) captures a shorter-lived service (Scoped or Transient) at construction time. The shorter-lived service then lives as long as the Singleton, violating its intended lifetime. For DbContext, this causes a single database context to be shared across all requests, leading to data corruption and race conditions.
-
 > [!QUESTION]- How do you use a Scoped service inside a Singleton without a captive dependency?
 > Inject `IServiceScopeFactory` into the Singleton and call `scopeFactory.CreateScope()` at the point of use. Resolve the Scoped service from the new scope and dispose the scope when done. This ensures the Scoped service lives within a controlled scope, not captured inside the Singleton.
 
 > [!QUESTION]- What is the difference between `GetService<T>` and `GetRequiredService<T>`?
 > `GetService<T>` returns null if the service is not registered; `GetRequiredService<T>` throws `InvalidOperationException`. Use `GetRequiredService<T>` in production code where a missing registration is a programming error that should fail loudly at startup rather than silently return null at call time.
-
 
 # References
 
