@@ -1,8 +1,8 @@
 ---
 publish: true
-created: 2026-07-12T14:27:20.430Z
-modified: 2026-07-18T11:59:15.659Z
-published: 2026-07-18T11:59:15.659Z
+created: 2026-07-18T14:02:44.071Z
+modified: 2026-07-18T14:02:44.071Z
+published: 2026-07-18T14:02:44.071Z
 tags:
   - FolderNote
 icon: skull

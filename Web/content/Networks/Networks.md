@@ -1,8 +1,8 @@
 ---
 publish: true
-created: 2026-07-12T14:27:20.431Z
-modified: 2026-07-18T11:30:07.879Z
-published: 2026-07-18T11:30:07.879Z
+created: 2026-07-18T14:02:44.081Z
+modified: 2026-07-18T14:02:44.082Z
+published: 2026-07-18T14:02:44.082Z
 tags:
   - FolderNote
 icon: network

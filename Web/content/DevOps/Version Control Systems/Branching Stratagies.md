@@ -1,8 +1,8 @@
 ---
 publish: true
-created: 2026-07-11T21:44:08.056Z
-modified: 2026-07-18T11:30:06.630Z
-published: 2026-07-18T11:30:06.630Z
+created: 2026-07-18T14:02:44.073Z
+modified: 2026-07-18T14:02:44.074Z
+published: 2026-07-18T14:02:44.074Z
 topic:
   - DevOps
 subtopic:

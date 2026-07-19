@@ -1,8 +1,8 @@
 ---
 publish: true
-created: 2026-07-12T14:27:20.406Z
-modified: 2026-07-18T11:30:03.778Z
-published: 2026-07-18T11:30:03.778Z
+created: 2026-07-18T14:02:43.951Z
+modified: 2026-07-19T08:37:56.319Z
+published: 2026-07-19T08:37:56.319Z
 topic:
   - Computer Science
 subtopic:
@@ -20,10 +20,11 @@ The subproblems have to be **independent** — each reads a disjoint slice of th
 
 **Core shape:** input → `a` independent subproblems of size `n/b` → recurse to a base case → combine at cost `f(n)` → `T(n) = a·T(n/b) + f(n)`.
 
-A paradigm has no single input to step through; the structure a renderer would animate is the recursion tree itself.
+A paradigm has no single input to step through; the structure to animate is the recursion tree itself. Merge sort over `[8, 3, 5, 1]` makes the split and return phases concrete: each card keeps its original range and values while the active call path descends to single-element base cases, then sorted results travel back up and merge.
 
-> [!NOTE] Visualization pending
-> Planned StepTrace: a recursion-tree card that splits a problem into independent subproblems, solves each branch, then combines the results on the way back up — the split-and-merge shape of merge sort. No matching renderer exists in `engine.js` yet.
+```steptrace
+{ "algorithm": "divide-and-conquer", "array": [8, 3, 5, 1] }
+```
 
 # Divide, conquer, combine
 

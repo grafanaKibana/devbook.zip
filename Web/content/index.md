@@ -1,9 +1,9 @@
 ---
 publish: true
 title: Welcome to DevBook!
-created: 2026-07-18T13:25:45.641Z
-modified: 2026-07-18T13:29:14.433Z
-published: 2026-07-18T13:29:14.433Z
+created: 2026-07-18T14:02:44.198Z
+modified: 2026-07-18T14:02:44.199Z
+published: 2026-07-18T14:02:44.199Z
 tags:
   - FolderNote
   - MetricsIgnore

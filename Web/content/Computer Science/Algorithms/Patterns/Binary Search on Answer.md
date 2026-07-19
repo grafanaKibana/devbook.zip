@@ -1,8 +1,8 @@
 ---
 publish: true
-created: 2026-07-12T06:27:34.384Z
-modified: 2026-07-18T11:30:03.873Z
-published: 2026-07-18T11:30:03.873Z
+created: 2026-07-18T14:02:43.963Z
+modified: 2026-07-18T22:08:47.683Z
+published: 2026-07-18T22:08:47.683Z
 topic:
   - Computer Science
 subtopic:
@@ -16,12 +16,17 @@ status: Creation
 
 A fleet must clear a queue of packages within `D` days, and the unknown is the smallest ship capacity that still finishes on time. Capacity is a number in a range: at least `max(weight)` so no single package is stranded, at most `sum(weights)` so one day suffices. Checking a single candidate capacity is cheap — a greedy pass fills days at that capacity and counts them — but the range can span millions of values, and testing each in turn is `O(range · n)`.
 
-The range collapses because feasibility is **monotone**: a larger capacity never needs _more_ days, so once some capacity clears the backlog in `D` days, every larger one does too. Read across the range, the predicate `feasible(x)` is `false, …, false, true, …, true` with a single flip. Locating that flip is exactly what binary search does — except the probe at `mid` is not a comparison against a stored array element but a call to `feasible(mid)` that does real work over the input. This is [[Binary Search]] generalised from "find a value in a sorted array" to "find the boundary of a monotone predicate over a value space."
+The range collapses because feasibility is **monotone**: a larger capacity never needs _more_ days, so once some capacity clears the backlog in `D` days, every larger one does too. Read across a range whose upper bound is feasible, the predicate `feasible(x)` is a possibly empty false prefix followed by a non-empty true suffix. Binary search locates the first true value, which may be the lower bound when every candidate is already feasible. The probe at `mid` is not a comparison against a stored array element but a call to `feasible(mid)` that does real work over the input. This is [[Binary Search]] generalised from "find a value in a sorted array" to "find the boundary of a monotone predicate over a value space."
 
 **Core condition:** a numeric answer range `[lo, hi]` with a monotone `feasible(x)` → each probe evaluates `feasible(mid)` instead of comparing an array element → `O(n · log(range))` time, `O(1)` auxiliary space beyond the check.
 
-> [!NOTE] Visualization pending
-> Planned StepTrace: an answer-space card showing a candidate value swept over a numeric range, each midpoint coloured by a monotone `feasible(mid)` predicate, and the discarded half of the range as the boundary is cornered. No matching renderer exists in `engine.js` yet.
+# Trace
+
+Six packages with weights `[3, 2, 2, 4, 1, 4]` must ship within three days. The candidate bars cover capacities `4 … 16`; each probe runs the greedy schedule, reports its day count, and discards the half that cannot contain the smallest feasible capacity. The boundary settles at capacity `6`.
+
+```steptrace
+{"algorithm":"binary-search-on-answer","weights":[3,2,2,4,1,4],"days":3}
+```
 
 # Why halving the answer works
 
@@ -30,7 +35,7 @@ At the start of every iteration the true answer — the smallest feasible `x` �
 - `feasible(mid)` is `true`: the boundary is at or below `mid`, because monotonicity guarantees nothing above `mid` can be the _smallest_ feasible value. The range becomes `[lo, mid]`.
 - `feasible(mid)` is `false`: `mid` and everything below it fail, so the boundary is strictly above `mid`. The range becomes `[mid + 1, hi]`.
 
-Each probe discards at least half of the remaining values, so the range reaches a single element in `⌈log₂(hi − lo)⌉` steps, at which point `lo == hi` is the smallest feasible answer. The half-open update (`hi = mid` on success, `lo = mid + 1` on failure, with `mid` biased low) pairs the midpoint with the boundary move so the range always shrinks. The maximise-the-minimum mirror flips the predicate direction and biases `mid` high.
+Each probe discards at least half of the remaining values, so the inclusive range reaches a single element in at most `⌈log₂(hi − lo + 1)⌉` steps, at which point `lo == hi` is the smallest feasible answer. The half-open update (`hi = mid` on success, `lo = mid + 1` on failure, with `mid` biased low) pairs the midpoint with the boundary move so the range always shrinks. The maximise-the-minimum mirror flips the predicate direction and biases `mid` high.
 
 The step that separates this from array search is the probe itself. In [[Binary Search]] the value at `mid` is already stored and the comparison is `O(1)`. Here `mid` is a _candidate answer_, and `feasible(mid)` reconstructs enough of the problem to decide it — a greedy pass, a counting sweep, sometimes a full simulation. The family covers minimise-the-maximum (ship packages within `D` days, split an array to minimise the largest subarray sum, Koko eating bananas at the slowest speed that finishes in time), maximise-the-minimum (place resources to maximise the smallest gap), and degenerate numeric cases such as integer `sqrt(x)`, where `feasible(m)` is just `m * m <= x`.
 
@@ -40,7 +45,7 @@ The cost factors into how many candidates are probed and what each probe pays. T
 
 | Component | Cost | Cause |
 | --- | --- | --- |
-| Probes over the range | `O(log(hi − lo))` | each probe halves the answer interval `[lo, hi]` |
+| Probes over the range | `O(log(hi − lo + 1))` | each probe halves the inclusive answer interval `[lo, hi]` |
 | One `feasible` check | `O(n)` typical | a single greedy or counting pass over the input |
 | Total time | `O(n · log(range))` | probe count × per-check cost |
 | Auxiliary space | `O(1)` | three integer bounds beyond whatever `feasible` allocates |
@@ -109,7 +114,7 @@ Three further boundaries follow from the same mechanism:
 > }
 > ```
 >
-> `CanShip` is the monotone predicate: a larger `cap` never increases `used`, so feasibility flips false→true exactly once over `[max(weights), sum(weights)]`. Split-array-largest-sum is the same predicate with `days` read as the allowed number of subarrays.
+> `CanShip` is the monotone predicate: a larger `cap` never increases `used`, so feasibility never flips back to false. The first feasible capacity may be `max(weights)` itself. Split-array-largest-sum is the same predicate with `days` read as the allowed number of subarrays.
 
 # Comparison
 
@@ -126,10 +131,10 @@ Binary search on the answer is the `O(n · log(range))` tool when the answer is 
 # Questions
 
 > [!QUESTION]- What precondition makes binary search on the answer valid, and how is it checked?
-> The feasibility predicate must be monotone in `x`: `feasible` flips exactly once — false→true (or true→false) — across the answer range. That single boundary is what the search locates. It is verified by argument, not code: show that increasing the candidate can only make the condition easier (or only harder) to satisfy, so it never reverses. If the predicate can flip back and forth, no boundary exists and the search discards the half that holds the answer.
+> The feasibility predicate must be monotone in `x`, and the supplied upper bound must be feasible. For the minimizing form, `feasible` has a possibly empty false prefix followed by a true suffix; the search returns the first true value, even when it is `lo`. Monotonicity is verified by argument, not code: show that increasing the candidate can only make the condition easier to satisfy, so it never reverses. If the predicate can flip back and forth, no boundary exists and the search can discard the half that holds the answer.
 
 > [!QUESTION]- Why is the time `O(n · log(range))` rather than tied to the input length the usual way?
-> The log factor counts probes over the numeric answer interval `[lo, hi]`, each halving it, so `log(hi − lo)` probes. Every probe runs `feasible`, typically an `O(n)` pass over the input, giving `O(n · log(range))`. The log is over the value range, so a `10^18`-wide answer space is still only about 60 probes — which is why the search wins when checking a candidate is far cheaper than computing the optimum directly.
+> The log factor counts probes over the `hi − lo + 1` integer candidates in `[lo, hi]`, halving that count each time. Every probe runs `feasible`, typically an `O(n)` pass over the input, giving `O(n · log(range))`. The log is over the value range, so a `10^18`-wide answer space is still only about 60 probes — which is why the search wins when checking a candidate is far cheaper than computing the optimum directly.
 
 > [!QUESTION]- How does the termination differ between an integer answer and a real-valued one?
 > Over integers, `lo < hi` with the `mid + 1` update collapses the interval to one value and stops exactly. Over reals the interval never reaches a single point, so termination comes from a fixed iteration count — roughly 100 halvings drops the interval below double precision — instead of an `eps` comparison, whose correct value is problem-dependent and can stall on floating-point rounding.

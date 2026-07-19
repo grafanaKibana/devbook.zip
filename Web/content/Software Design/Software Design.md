@@ -1,8 +1,8 @@
 ---
 publish: true
-created: 2026-07-15T11:53:27.615Z
-modified: 2026-07-18T11:30:16.113Z
-published: 2026-07-18T11:30:16.113Z
+created: 2026-07-18T14:02:44.196Z
+modified: 2026-07-18T14:02:44.196Z
+published: 2026-07-18T14:02:44.196Z
 tags:
   - FolderNote
 icon: ruler-dimension-line

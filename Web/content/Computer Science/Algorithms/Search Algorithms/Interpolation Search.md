@@ -1,8 +1,8 @@
 ---
 publish: true
-created: 2026-07-12T14:27:20.408Z
-modified: 2026-07-18T11:30:04.100Z
-published: 2026-07-18T11:30:04.100Z
+created: 2026-07-18T14:02:43.980Z
+modified: 2026-07-18T22:08:47.851Z
+published: 2026-07-18T22:08:47.851Z
 topic:
   - Computer Science
 subtopic:
@@ -26,8 +26,13 @@ To find `950` in `[0 … 1000]` it probes near index `95%`, not `50%` — the sa
 
 The distinguishing step is where the first probe lands.
 
-> [!NOTE] Visualization pending
-> Planned StepTrace: a search card probing at a position estimated from the target's value relative to the range endpoints — linear interpolation, not the midpoint — then narrowing the range. No matching renderer exists in `engine.js` yet.
+# Trace
+
+The trace searches for `80` in evenly spaced values from `0` through `100`. Because `80` lies 80% across the value span, the interpolation estimate lands directly on index `8`; the blue search icon shows that first probe.
+
+```steptrace
+{"algorithm":"interpolation-search","array":[0,10,20,30,40,50,60,70,80,90,100],"target":80}
+```
 
 # Why the range collapses faster
 
@@ -49,11 +54,11 @@ The average bound is inseparable from its assumption: on keys that are not close
 
 # When the distribution stops cooperating
 
-Non-uniform data destroys the analysis rather than merely slowing it. Feed exponentially growing values `1, 2, 4, 8, …, 2^k`: the single largest element dwarfs the rest of the span, so `a[hi] - a[lo]` is essentially `a[hi]` alone. When one endpoint value dwarfs the rest of the span like this, any target that is only a small fraction of that maximum makes `(target - a[lo]) / (a[hi] - a[lo])` near zero, so every estimate collapses toward `lo` and the boundary advances by about one element per probe. Such a target sits deep in the array by index — around `n − Θ(log n)`, since the values only reach a small fraction of the maximum near the very end — so crawling out to its true position costs `O(n)` probes, slower than the `O(log n)` Binary Search that was given up. Clustered timestamps and Zipfian frequency tables produce the same collapse for the same reason.
+Non-uniform data destroys the analysis rather than merely slowing it. Let `a[i] = 2^i` over `n` positions and search for `a[n − 1 − ⌈log₂ n⌉]`, a target roughly `max/n` that still sits at index `n − 1 − Θ(log n)`. The maximum dominates the value span, so the interpolation fraction starts near `1/n` and early estimates land close to `lo`; the boundary advances only a few positions at a time while the target remains near the far end by index. Isolating it can therefore take `Θ(n)` probes, slower than the `O(log n)` Binary Search that was given up. Clustered timestamps and Zipfian frequency tables can produce the same collapse when value ratios poorly predict index ratios.
 
 The probe also requires keys with meaningful arithmetic. `(target - a[lo]) * (hi - lo) / (a[hi] - a[lo])` needs subtraction and a ratio, not just an ordering. Strings under a custom comparator, GUIDs, or opaque records support comparison but not a numeric offset, so the position cannot be estimated at all; those inputs are restricted to comparison-based search such as Binary Search.
 
-The denominator fails when `a[hi] == a[lo]`. A run of equal values, or a range that has collapsed to one element, makes the value span zero. Unguarded, the division throws or yields an out-of-range index that reads arbitrary memory positions. Detecting the flat block and resolving it with a direct equality check keeps the loop valid — the same category of defensive guard as computing a midpoint that cannot overflow.
+The denominator fails when `a[hi] == a[lo]`. A run of equal values, or a range that has collapsed to one element, makes the value span zero. The C# integer implementation below throws `DivideByZeroException`; floating-point variants produce a non-finite estimate that cannot be used as an index. Detecting the flat block and resolving it with a direct equality check keeps the loop valid — the same category of defensive guard as computing a midpoint that cannot overflow.
 
 # Reference drawer
 
@@ -120,7 +125,7 @@ The denominator fails when `a[hi] == a[lo]`. A run of equal values, or a range t
 # Questions
 
 > [!QUESTION]- What property of a value distribution forces the linear worst case?
-> A single endpoint value that dwarfs the rest of the span — as with exponentially growing keys, clustered timestamps, or Zipfian counts. Once the maximum is far larger than most values, any target that is only a small fraction of that maximum interpolates to a position near `lo`, so each estimate advances the boundary by about one element instead of shrinking the range geometrically, and isolating the target costs `O(n)`.
+> A value distribution where ratios do not predict index ratios. In `a[i] = 2^i`, choosing the target near `max/n` places it at index `n − 1 − Θ(log n)` while the first interpolation fraction is only about `1/n`, so early probes stay near `lo`. The range then advances by only a few positions per probe and can require `Θ(n)` work.
 
 > [!QUESTION]- Why can it not run on arbitrary comparable keys?
 > The probe computes `(target - a[lo]) * (hi - lo) / (a[hi] - a[lo])`, which needs subtraction and a ratio with numeric meaning. Ordering-only types such as strings under a custom comparator support comparison but not that arithmetic, so no position can be estimated and only comparison-based search applies.
