@@ -648,6 +648,18 @@ body {
   -webkit-backdrop-filter: blur(4px);
 }
 
+// When the overlay is open it must cover the whole viewport, including the fixed
+// Explorer hamburger. The overlay (z-index 999) is trapped inside `.site-header`'s
+// stacking context (z-index 100), so at the root it carries only the header's
+// 100 — which loses to the hamburger's `.sidebar.left` (z-index 101). The
+// hamburger then pokes through the overlay, unblurred and still clickable, unlike
+// the title/search/toggles (which sit inside the header and are covered). While
+// search is active, lift the whole header — overlay included — one step above the
+// hamburger so it's covered and inert like every other header element.
+.site-header:has(.search > .search-container.active) {
+  z-index: 102;
+}
+
 // ============================================================================
 // Breadcrumbs (note-page trail: Home › Topic › Note).
 //
