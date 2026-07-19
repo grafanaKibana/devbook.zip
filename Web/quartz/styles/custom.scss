@@ -648,16 +648,28 @@ body {
   -webkit-backdrop-filter: blur(4px);
 }
 
-// When the overlay is open it must cover the whole viewport, including the fixed
-// Explorer hamburger. The overlay (z-index 999) is trapped inside `.site-header`'s
-// stacking context (z-index 100), so at the root it carries only the header's
-// 100 — which loses to the hamburger's `.sidebar.left` (z-index 101). The
-// hamburger then pokes through the overlay, unblurred and still clickable, unlike
-// the title/search/toggles (which sit inside the header and are covered). While
-// search is active, lift the whole header — overlay included — one step above the
-// hamburger so it's covered and inert like every other header element.
-.site-header:has(.search > .search-container.active) {
-  z-index: 102;
+// When the overlay is open the fixed Explorer hamburger must read like the other
+// header controls: frosted and inert, not sharp-and-clickable, and not gone. The
+// overlay (`.search-container`, z-index 999) is `position: fixed` inside the fixed
+// `.site-header`, so it's trapped in the header's stacking context (root z-index
+// 100) — which the hamburger's `.sidebar.left` (z-index 101) outranks, leaving it
+// poking through. Raising the header above the hamburger instead buries it behind
+// the header's opaque bar (so it seemed to vanish). So leave the hamburger on top
+// and give it the overlay's own frosting directly: blur it and drop pointer events
+// while the modal is open. Scoped to the breakpoints where `.sidebar.left` is the
+// fixed hamburger corner; on desktop the in-flow sidebar already sits under the
+// overlay and is blurred by it.
+@media all and not ($desktop) {
+  .page:has(.search > .search-container.active) > #quartz-body > .sidebar.left,
+  // The plugin re-enables hit-testing on its glyphs (`.explorer svg {
+  // pointer-events: all }`), which would leak clicks back to the hamburger
+  // through the parent's `none`; neutralize the whole corner's descendants too.
+  .page:has(.search > .search-container.active) > #quartz-body > .sidebar.left * {
+    pointer-events: none;
+  }
+  .page:has(.search > .search-container.active) > #quartz-body > .sidebar.left {
+    filter: blur(4px);
+  }
 }
 
 // ============================================================================
