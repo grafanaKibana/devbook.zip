@@ -1,7 +1,7 @@
 {
   "settingsSchemaVersion": 2,
   "gitRemoteUrl": "https://github.com/grafanaKibana/devbook.zip.git",
-  "gitBranch": "notes/sync",
+  "gitBranch": "notes/dsa-visualisation",
   "gitCorsProxyUrl": "",
   "gitAuthType": "basic",
   "gitAuthUsername": "grafanaKibana",

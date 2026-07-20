@@ -4,7 +4,9 @@
       "id": "default",
       "name": "Default",
       "fileVisibility": "supported",
-      "hiddenFolders": [],
+      "hiddenFolders": [
+        "/Assets/components"
+      ],
       "hiddenTags": [],
       "hiddenFileNames": [],
       "hiddenFileTags": [],

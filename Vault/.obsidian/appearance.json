@@ -10,7 +10,8 @@
   "theme": "system",
   "baseFontSize": 16,
   "enabledCssSnippets": [
-    "markdown-max-width"
+    "markdown-max-width",
+    "hide-components"
   ],
   "monospaceFontFamily": "IBM Plex Mono"
 }

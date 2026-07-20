@@ -155,7 +155,7 @@ plugins:
       localGraph:
         drag: false
         zoom: false
-        depth: 3
+        depth: 2
         showTags: false
         focusOnHover: true
         enableRadial: false
