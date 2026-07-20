@@ -62,9 +62,11 @@ function FolderStructureMap() {
       return directNote || directFolder;
     })
     .sort((a, b) => {
+      const folderA = hasTag(a, "FolderNote") ? 0 : 1;
+      const folderB = hasTag(b, "FolderNote") ? 0 : 1;
       const orderA = Number(a.value("order") ?? Number.MAX_SAFE_INTEGER);
       const orderB = Number(b.value("order") ?? Number.MAX_SAFE_INTEGER);
-      return orderA - orderB || a.$name.localeCompare(b.$name);
+      return folderA - folderB || orderA - orderB || a.$name.localeCompare(b.$name);
     });
 
   const conceptNotesFor = (entry) => {

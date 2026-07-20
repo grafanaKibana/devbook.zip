@@ -63,7 +63,7 @@
     "explorer": true,
     "path": true
   },
-  "settingsTab": "general",
+  "settingsTab": "file_explorer",
   "supportedFileTypes": [
     "md",
     "canvas",
@@ -116,7 +116,7 @@
   "deleteFilesAction": "trash",
   "openSidebar": {
     "mobile": false,
-    "desktop": true
+    "desktop": false
   },
   "highlightFolder": true,
   "persistentSettingsTab": {
