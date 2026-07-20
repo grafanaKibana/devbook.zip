@@ -1378,6 +1378,25 @@ body[data-slug="index"][data-home-fit="bar-hidden"] {
   fill: transparent !important;
 }
 
+// ---------------------------------------------------------------------------
+// Content images — keep them inside the viewport
+//
+// base.scss caps only the width (`img { max-width: 100% }`), so a tall portrait
+// image renders at full intrinsic height and runs past the viewport, forcing a
+// long scroll past a single figure. Mirror the Mermaid fix (the
+// markdown-max-width.css Obsidian snippet, `max-block-size: 85dvh`): cap the
+// height too and let the image scale down uniformly to fit both axes with its
+// aspect ratio intact. Click-to-zoom (ClickableImages) still opens the full-size
+// image in the lightbox. Scoped to article content so site chrome/icons are left
+// alone, and the body-appended lightbox <img> keeps its own 90vh cap.
+// ---------------------------------------------------------------------------
+.center article img {
+  width: auto;
+  height: auto;
+  max-width: 100%;
+  max-height: 85dvh;
+}
+
 // ============================================================================
 // Excalidraw (community plugin obsidian-plugin-excalidraw) — DevBook overrides.
 //
