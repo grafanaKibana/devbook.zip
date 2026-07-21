@@ -1,5 +1,5 @@
 ---
-icon: brain
+icon: astroid
 order: 70
 color: "#10b981"
 topic:
