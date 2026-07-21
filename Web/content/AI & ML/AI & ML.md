@@ -1,11 +1,11 @@
 ---
 publish: true
 created: 2026-07-18T14:02:43.883Z
-modified: 2026-07-18T14:02:43.884Z
-published: 2026-07-18T14:02:43.884Z
+modified: 2026-07-21T11:39:27.609Z
+published: 2026-07-21T11:39:27.609Z
 tags:
   - FolderNote
-icon: brain
+icon: astroid
 order: 70
 color: "#10b981"
 topic:
