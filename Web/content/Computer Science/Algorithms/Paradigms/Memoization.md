@@ -1,8 +1,8 @@
 ---
 publish: true
 created: 2026-07-19T15:05:27.752Z
-modified: 2026-07-19T15:05:27.752Z
-published: 2026-07-19T15:05:27.752Z
+modified: 2026-07-21T18:40:18.509Z
+published: 2026-07-21T18:40:18.509Z
 topic:
   - Computer Science
 subtopic:
@@ -13,35 +13,40 @@ priority: Medium
 status: Ready to Repeat
 ---
 
+# Intro
+
 Naive recursive `fib(50)` makes over 40 billion calls to compute a value the recurrence defines at only 51 points, because the plain recursion has no memory that it already solved `fib(48)` the last time it needed it. Memoization gives it that memory: cache each call's result keyed on its arguments, and every repeat returns the stored value instead of re-entering the subtree beneath it. `fib(50)` collapses from `O(2ⁿ)` to `O(n)` — one computation per distinct argument, the rest cache hits.
 
-The technique is narrow and mechanical: wrap a **pure** function — same inputs always produce the same output, no observable side effects — so its first call for a given argument computes and stores, and later calls with that argument read the store. It is the **top-down** face of [[Dynamic Programming]]: write the natural recurrence, then bolt a cache onto it. The difference from bottom-up tabulation is _when and what_ gets computed — memoization is lazy and recursion-driven, evaluating only the states the recursion actually reaches; tabulation is eager and iterative, filling every cell in dependency order.
+The technique is narrow and mechanical: wrap a **pure** function — same inputs always produce the same output, no observable side effects — so its first call for a given argument computes and stores, and later calls with that argument read the store. For recursive algorithms, it is the **top-down** form of [[Computer Science/Algorithms/Paradigms/Dynamic Programming|dynamic programming]]: write the natural recurrence, then add a cache. The difference from bottom-up tabulation is _when and what_ gets computed — memoization is lazy and recursion-driven, evaluating only the states the recursion actually reaches; tabulation is eager and iterative, filling every cell in dependency order.
 
-Memoization only _pays_ when calls repeat — the same overlapping-subproblems condition DP needs. On a function whose every call has distinct arguments (a plain [[Divide and Conquer|divide-and-conquer]] split, an already-unique key), the cache never gets a second hit and adds pure overhead. The technique reaches beyond algorithms, too: caching an expensive pure computation, a `Lazy<T>` field, a UI framework's memoised render — all the same idea.
+Memoization only _pays_ when calls repeat. On a function whose every call has distinct arguments, as in many [[Computer Science/Algorithms/Paradigms/Divide and Conquer|divide-and-conquer]] splits with unique subproblem states, the cache never gets a second hit and adds pure overhead. The technique reaches beyond algorithms, too: caching an expensive pure computation, a `Lazy<T>` field, a UI framework's memoised render — all the same idea.
 
 **Core shape:** pure function + a cache keyed on the full argument set → first call computes and stores, repeats read the store → time drops to `(distinct arguments) × (work per call)` when calls actually repeat.
 
-> [!NOTE] Visualization pending
-> Planned StepTrace: a recursion-tree card where each node's first evaluation writes a cache cell and every later occurrence of that argument returns immediately, greying out the entire subtree it would have re-expanded. No matching renderer exists in `engine.js` yet.
+The trace keeps the full `fib(5)` call tree in place. The first visit to an argument stores its result; when the same argument appears again, the cache hit returns it immediately and greys out the work that call would otherwise repeat.
 
-# Mechanism — what the cache keys on and what it needs
+```steptrace
+{ "algorithm": "fibonacci", "n": 5 }
+```
+
+## Mechanism — what the cache keys on and what it needs
 
 The cache is a map from _arguments_ to _result_. Three properties have to hold or the cache silently returns wrong answers:
 
 - **Purity.** The function's output must depend only on its arguments, with no side effects a caller could observe. Memoise a function that reads mutable global state or the clock, and a cache hit returns a value computed under conditions that no longer hold.
-- **A complete, hashable key.** The key must capture _every_ input that affects the result. Omit one — memoise a two-argument recurrence on only the first argument — and two genuinely different calls collide on one cache slot, and the second read is stale. This is exactly DP's [[Dynamic Programming|state-design]] problem: the key _is_ the state.
+- **A complete, hashable key.** The key must capture _every_ input that affects the result. Omit one — memoise a two-argument recurrence on only the first argument — and two genuinely different calls collide on one cache slot, and the second read is stale. This is exactly DP's [[Computer Science/Algorithms/Paradigms/Dynamic Programming|state-design]] problem: the key _is_ the state.
 - **Equality and hashing that match value identity.** For a struct or record key the default value equality is right; for a reference type, a `GetHashCode`/`Equals` that reflects the meaningful fields is required, or logically-equal arguments miss the cache.
 
 For a recursive function, the recursion must call _through_ the memoised entry point, not the raw function — otherwise the inner calls bypass the cache and the exponential tree returns. That is why the idiomatic form nests a local function that calls itself and shares one `memo` dictionary across the whole call graph.
 
-# Where memoization breaks or costs
+## Where memoization breaks or costs
 
-- **Unbounded cache growth.** A long-lived memoised function accumulates one entry per distinct argument forever — a memory leak dressed as an optimisation. Bounded caches evict; an [[LRU Cache]] is the standard policy, and .NET's `MemoryCache` adds size and time limits. The trade is that an eviction can turn a would-be hit back into a recompute.
-- **The overlap has to be real.** No repeated arguments means no hits, so the cache is dead weight — the [[Divide and Conquer]] regime, where subproblems are disjoint by construction.
+- **Unbounded cache growth.** A long-lived memoised function accumulates one entry per distinct argument forever — a memory leak dressed as an optimisation. Bounded caches evict; an [[Computer Science/Data Structures/Composite Structures/LRU Cache|LRU cache]] is the standard policy, and .NET's `MemoryCache` adds size and time limits. The trade is that an eviction can turn a would-be hit back into a recompute.
+- **The overlap has to be real.** No repeated states means no hits, so the cache is dead weight. This is common in [[Computer Science/Algorithms/Paradigms/Divide and Conquer|divide-and-conquer]] algorithms whose branches receive unique, non-overlapping subproblem states. State overlap is not storage overlap: two subproblems can read the same immutable input or adjacent regions of one array without representing the same cached state.
 - **Recursion depth.** Top-down memoization inherits the call stack of the underlying recursion; a chain-shaped dependency 100k deep overflows the stack where a bottom-up loop would not. This is the main reason to convert a hot memoised recurrence to tabulation.
 - **Concurrency.** A plain `Dictionary` cache corrupts under concurrent writes. `ConcurrentDictionary.GetOrAdd` is thread-safe for the store but can run the factory more than once for the same key under a race; `Lazy<T>` values in the dictionary fix that when the computation must run exactly once.
 
-# Reference drawer
+## Reference drawer
 
 > [!ABSTRACT]- First call computes, repeat reads the store
 >
@@ -58,11 +63,14 @@ For a recursive function, the recursion must call _through_ the memoised entry p
 > // Top-down Fibonacci: the inner Go calls itself, so every level shares one memo.
 > public static long Fib(int n)
 > {
->     var memo = new Dictionary<int, long>();
+>     var memo = new Dictionary<int, long>
+>     {
+>         [0] = 0,
+>         [1] = 1
+>     };
 >
 >     long Go(int k)
 >     {
->         if (k < 2) return k;
 >         if (memo.TryGetValue(k, out var cached)) return cached;
 >         return memo[k] = Go(k - 1) + Go(k - 2);   // recurse through the cache
 >     }
@@ -84,9 +92,9 @@ For a recursive function, the recursion must call _through_ the memoised entry p
 > }
 > ```
 >
-> `Fib` recurses through `Go`, so an argument computed once is never re-entered. `Memoize` works only for a genuinely pure `f`; for a multi-argument recurrence the key becomes a tuple or record so it captures the full state.
+> `Fib` seeds the base cases and recurses through `Go`, so every argument is computed at most once; later visits return from `memo`. `Memoize` works only for a genuinely pure `f`; for a multi-argument recurrence the key becomes a tuple or record so it captures the full state.
 
-# Comparison
+## Comparison
 
 Memoization sits next to the other ways of not redoing work; the axis is _when_ results are computed and _what_ is kept.
 
@@ -97,12 +105,12 @@ Memoization sits next to the other ways of not redoing work; the axis is _when_ 
 | Plain result caching | On demand, then reused | Whatever the app decides to keep | Yes | None | Keys aren't pure; staleness on data change |
 | No cache | Every call | Nothing | — | Recursion depth | Overlapping subproblems recompute exponentially |
 
-Memoization is the fit when the recurrence is natural to write recursively, the reachable state space is a small fraction of the whole table, and stack depth is bounded — it evaluates only what's needed and mirrors the maths directly. [[Dynamic Programming|Tabulation]] wins when nearly all states are visited anyway (so laziness buys nothing), when a rolling array can shrink memory, or when the recursion would be too deep for the stack. Plain caching is memoization's generalisation outside recurrences — an expensive pure call cached for reuse — carrying the same purity and key-completeness obligations plus an invalidation problem when the underlying data changes.
+Memoization is the fit when the recurrence is natural to write recursively, the reachable state space is a small fraction of the whole table, and stack depth is bounded — it evaluates only what's needed and mirrors the maths directly. [[Computer Science/Algorithms/Paradigms/Dynamic Programming|Tabulation]] wins when nearly all states are visited anyway (so laziness buys nothing), when a rolling array can shrink memory, or when the recursion would be too deep for the stack. Plain caching is memoization's generalisation outside recurrences — an expensive pure call cached for reuse — carrying the same purity and key-completeness obligations plus an invalidation problem when the underlying data changes.
 
-# Questions
+## Questions
 
 > [!QUESTION]- What is the relationship between memoization and dynamic programming?
-> Memoization is the top-down _implementation_ of DP: write the recurrence, cache each subproblem's result. Bottom-up tabulation is the other implementation. Both require overlapping subproblems (or the cache never hits) and optimal substructure (or the recurrence is wrong). Memoization additionally evaluates only the states the recursion reaches, where tabulation fills the whole table.
+> Memoization is DP's top-down implementation: write the recurrence and cache each subproblem's result. Bottom-up tabulation is the iterative alternative. Repeated, overlapping states are what make memoization useful; without them, the cache adds overhead but does not make the recurrence incorrect. Optimal substructure is a separate requirement for optimization problems: an optimal solution must be constructible from optimal solutions to its subproblems. Memoization additionally evaluates only the states recursion reaches, while tabulation usually fills the planned table in dependency order.
 
 > [!QUESTION]- Why must a memoised function be pure, and what breaks if it isn't?
 > The cache returns a stored result for repeated arguments without re-running the function. If the output also depends on hidden state — a global, the clock, an I/O read — a cache hit hands back a value computed under conditions that may no longer hold, and side effects the caller expected simply don't happen on a hit. Only same-input-same-output, side-effect-free functions are safe to memoise.
@@ -113,7 +121,7 @@ Memoization is the fit when the recurrence is natural to write recursively, the 
 > [!QUESTION]- When should a memoised recurrence be rewritten as bottom-up tabulation?
 > When the recursion is deep enough to risk a stack overflow (a long chain of dependencies), when essentially every state gets visited so laziness saves nothing, or when a rolling-array reduction can cut memory that the recursive form can't exploit. Tabulation runs in tight iterative loops with `O(1)` stack, at the cost of computing states a lazy memo might have skipped.
 
-# References
+## References
 
 - [Memoization (Wikipedia)](https://en.wikipedia.org/wiki/Memoization) — definition, the purity requirement, and the distinction from general caching.
 - [Dynamic programming (MIT 6.006)](https://ocw.mit.edu/courses/6-006-introduction-to-algorithms-spring-2020/) — frames DP as "recursion plus memoisation" and works through top-down versus bottom-up on the same recurrences.
