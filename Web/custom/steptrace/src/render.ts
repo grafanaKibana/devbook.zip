@@ -7,8 +7,8 @@
 
 // ---- sort view: value-in-bar + tracked i/j pin markers (no hat) ----
 // shared bar scaffold for sort + binary-search: bottom-aligned bars, each a
-// coloured fill with the value BELOW and a white check INSIDE (revealed via
-// CSS on the finalised state). Returns [{ bar, fill, num, check }].
+// coloured fill with the value BELOW and centered state icons for finalised /
+// probe states (revealed via CSS). Returns [{ bar, fill, num, check, probe }].
 function makeBars(stage, n) {
   const bars = []
   for (let k = 0; k < n; k++) {
@@ -17,20 +17,56 @@ function makeBars(stage, n) {
     const check = el("div", "steptrace__check")
     check.innerHTML = ICON.check
     check.setAttribute("aria-hidden", "true")
+    const probe = el("div", "steptrace__probe")
+    probe.innerHTML = ICON.search
+    probe.setAttribute("aria-hidden", "true")
     const cue = el("div", "steptrace__bar-cue")
     cue.innerHTML = ICON.compare + ICON.swap
     cue.setAttribute("aria-hidden", "true")
-    fill.append(check, cue)
+    fill.append(check, probe, cue)
     const num = el("div", "steptrace__num")
     bar.append(fill, num)
     stage.append(bar)
-    bars.push({ bar, fill, num, check, cue })
+    bars.push({ bar, fill, num, check, probe, cue })
   }
   return bars
 }
 
-// ---- sort view: shared bars + tracked i/j pin markers (no hat) ----
-export function makeSortView(frames) {
+export function barHeightStyle(value, maxValue, minimumRem = 1.8) {
+  const ratio = Math.max(0, Math.min(1, Number(value) / Math.max(Number(maxValue), 1)))
+  return `calc(${ratio * 100}% + ${(1 - ratio) * minimumRem}rem)`
+}
+
+export function resolveLegacySortFrame(frame) {
+  const active = frame.active || []
+  const isMove = frame.type === "swap" || (frame.type === "overwrite" && frame.range)
+  const movements = []
+  if (frame.type === "swap" && active.length === 2) {
+    movements.push([active[0], active[1]], [active[1], active[0]])
+  } else if (frame.type === "overwrite" && frame.from != null && active.length === 1) {
+    movements.push([active[0], frame.from])
+  }
+  return {
+    activeIndices: active,
+    activeRole: active.length ? (isMove ? "move" : "compare") : null,
+    markerIndices: [active[0] ?? frame.candidate ?? null, active[1] ?? null],
+    movements,
+    laneIndices: null,
+    holeIndex: null,
+    heldToken: null,
+  }
+}
+
+export const legacySortViewSemantics = {
+  markerLabels: ["i", "j"],
+  movementLabel: "swaps",
+  resolveFrame: resolveLegacySortFrame,
+  watchRows(_frame, _visual) {
+    return []
+  },
+}
+
+export function makeSortView(frames, semantics = legacySortViewSemantics) {
   const maxVal = Math.max(...frames[0].array, 1)
   const n = frames[0].array.length
   // A card either narrates a recursive range (quick/merge/heap) or it does not
@@ -40,27 +76,33 @@ export function makeSortView(frames) {
 
   const stage = el("div", "steptrace__stage steptrace__stage--pins")
   const bars = makeBars(stage, n)
-  const pinI = makePin("i", "a")
-  const pinJ = makePin("j", "b")
-  stage.append(pinI.el, pinJ.el)
+  const pinI = makeMarker(semantics.markerLabels[0], "a")
+  const pinJ = makeMarker(semantics.markerLabels[1], "b")
+  const hasHeldToken = frames.some((frame) => semantics.resolveFrame(frame).heldToken)
+  const heldMarker = hasHeldToken ? makeMarker("", "held") : null
+  const markers = heldMarker ? [pinI, pinJ, heldMarker] : [pinI, pinJ]
+  stage.append(...markers.map((marker) => marker.el))
 
   const status = statusEl()
-  const tracker = createBarTracker(stage, bars, [pinI, pinJ])
+  const tracker = createBarTracker(stage, bars, markers)
+  const heldMarkerIndex = heldMarker ? markers.indexOf(heldMarker) : -1
+  let lastPaint = null
 
-  function paint(frame) {
+  function paint(frame, frameIndex) {
     const range = frame.range || null
+    const visual = semantics.resolveFrame(frame)
+    if (visual.laneIndices && visual.laneIndices.length) stage.dataset.lane = "1"
+    else delete stage.dataset.lane
     for (let k = 0; k < n; k++) {
       const b = bars[k]
       // data-driven geometry (value → height); colours come from data-state.
-      b.fill.style.height = `${Math.max(6, (frame.array[k] / maxVal) * 100)}%`
-      b.num.textContent = frame.array[k]
+      b.fill.style.height = visual.holeIndex === k ? "12px" : barHeightStyle(frame.array[k], maxVal)
+      b.num.textContent = visual.holeIndex === k ? "∅" : frame.array[k]
       let state = ""
       if (frame.sorted.includes(k)) state = "sorted"
       if (frame.candidate === k) state = "candidate"
-      // merge writeback (overwrite within a range) reuses the violet swap state;
-      // insertion shifts (overwrite, no range) stay blue as before.
-      if (frame.active.includes(k))
-        state = frame.type === "swap" || (frame.type === "overwrite" && range) ? "swap" : "compare"
+      if (visual.activeIndices.includes(k) && visual.activeRole)
+        state = visual.activeRole === "move" ? "swap" : "compare"
       b.bar.dataset.state = state
       // recursion overlays: dim bars outside the active range; mark the pivot.
       // Attribute toggles only (no DOM add/remove) — footer stays jitter-free.
@@ -68,6 +110,11 @@ export function makeSortView(frames) {
       else delete b.bar.dataset.outside
       if (frame.pivot != null && frame.pivot === k) b.bar.dataset.pivot = "1"
       else delete b.bar.dataset.pivot
+      if (visual.laneIndices)
+        b.bar.dataset.lane = visual.laneIndices.includes(k) ? "active" : "muted"
+      else delete b.bar.dataset.lane
+      if (visual.holeIndex === k) b.bar.dataset.hole = "1"
+      else delete b.bar.dataset.hole
       // clear any in-flight swap animation before (possibly) starting a new one
       b.bar.classList.remove("steptrace__bar--fly")
       b.bar.style.transform = ""
@@ -77,19 +124,8 @@ export function makeSortView(frames) {
     //   swap      — the pair trade places (bubble/selection/quick/heap)
     //   overwrite — one bar travels from frame.from (insertion shift, merge
     //               lifting a value out of a run head into the merged slot)
-    const fly = []
-    if (frame.type === "swap" && frame.active && frame.active.length === 2) {
-      fly.push([frame.active[0], frame.active[1]], [frame.active[1], frame.active[0]])
-    } else if (
-      frame.type === "overwrite" &&
-      frame.from != null &&
-      frame.active &&
-      frame.active.length === 1
-    ) {
-      fly.push([frame.active[0], frame.from])
-    }
     const starts = []
-    for (const [to, from] of fly) {
+    for (const [to, from] of visual.movements) {
       const bt = bars[to] && bars[to].bar
       const bf = bars[from] && bars[from].bar
       if (!bt || !bf || !bt.isConnected) continue
@@ -102,18 +138,36 @@ export function makeSortView(frames) {
       bt.classList.add("steptrace__bar--fly")
       bt.style.transform = ""
     }
-    // the active pair drives the i / j pins; fall back to the scan candidate.
-    const act = frame.active || []
-    tracker.set(act[0] != null ? act[0] : frame.candidate, act[1])
+    if (heldMarker) {
+      heldMarker.setLabel(visual.heldToken?.label || "")
+      heldMarker.el.dataset.placing = visual.heldToken?.placing ? "1" : "0"
+    }
+    const paintState = {
+      frameIndex: Number.isInteger(frameIndex) ? frameIndex : null,
+      tokenId: visual.heldToken?.id ?? null,
+    }
+    const resetHeldMarker = heldMarker && shouldResetHeldMarker(lastPaint, paintState)
+    if (resetHeldMarker) tracker.reset(heldMarkerIndex)
+    tracker.set(visual.markerIndices[0], visual.markerIndices[1], visual.heldToken?.index ?? null)
+    if (resetHeldMarker) tracker.renderNow()
+    lastPaint = paintState
   }
 
   function watch(frame) {
-    const act = frame.active || []
+    const visual = semantics.resolveFrame(frame)
     const rows = [
-      { k: "i", v: act[0] != null ? act[0] : "—", sw: "var(--_blue)" },
-      { k: "j", v: act[1] != null ? act[1] : "—", sw: "var(--_violet)" },
+      {
+        k: semantics.markerLabels[0],
+        v: visual.markerIndices[0] ?? "—",
+        sw: "var(--_blue)",
+      },
+      {
+        k: semantics.markerLabels[1],
+        v: visual.markerIndices[1] ?? "—",
+        sw: "var(--_violet)",
+      },
     ]
-    if (hasPivot)
+    if (hasPivot && !semantics.markerLabels.includes("pivot"))
       rows.push({
         k: "pivot",
         v: frame.pivot != null ? `[${frame.pivot}] = ${frame.array[frame.pivot]}` : "—",
@@ -125,34 +179,64 @@ export function makeSortView(frames) {
         v: frame.range ? `[${frame.range[0]}, ${frame.range[1]}]` : "—",
         sw: "var(--_neutral)",
       })
-    rows.push({ k: "swaps", v: frame.swaps, sw: "var(--_amber)" })
+    rows.push(...semantics.watchRows(frame, visual))
+    rows.push({ k: semantics.movementLabel, v: frame.swaps, sw: "var(--_amber)" })
     return rows
   }
 
   return { nodes: [stage, status], paint, watch, destroy: tracker.destroy }
 }
 
-// a single-path teardrop pin (no hat); one SVG shape so the translucent fill
-// never shows a seam. role "a" = blue, "b" = violet (coloured via CSS).
-function makePin(label, role) {
-  const wrap = el("div", "steptrace__pin steptrace__pin--" + role)
-  wrap.innerHTML =
-    '<svg class="steptrace__pin-svg" viewBox="0 0 24 30" aria-hidden="true"><path d="M12 1C6.201 1 1.5 5.701 1.5 11.5C1.5 19.5 12 29 12 29S22.5 19.5 22.5 11.5C22.5 5.701 17.799 1 12 1Z"/></svg>'
-  const lbl = el("span", "steptrace__pin-label")
+function makeMarker(label, role) {
+  const wrap = el("div", "steptrace__marker steptrace__marker--" + role)
+  const body = el("span", "steptrace__marker-body")
+  const lbl = el("span", "steptrace__marker-label")
   lbl.textContent = label
-  wrap.append(lbl)
-  return { el: wrap }
+  body.append(lbl)
+  wrap.append(body)
+  return {
+    el: wrap,
+    body,
+    role,
+    setLabel(value) {
+      lbl.textContent = value
+    },
+  }
 }
 
-// persistent tracker: each marker follows its target bar's live top-centre.
-// rAF for smoothness + a 16 ms interval fallback so it still runs in occluded/
-// headless render contexts (screenshot pipelines, hidden panes). x springs
-// between columns; y is a direct, lag-free read so a bar can never touch a pin.
+export function clampMarkerCenter(target, bodyWidth, stageWidth, padding = 2) {
+  const availableHalf = Math.max(0, stageWidth / 2 - padding)
+  const half = Math.min(Math.max(0, bodyWidth / 2), availableHalf)
+  const min = padding + half
+  const max = stageWidth - padding - half
+  return Math.min(max, Math.max(min, target))
+}
+
+export function stepMarkerSpring(current, target, elapsedMs, settleMs = 360) {
+  if (current == null || elapsedMs <= 0) return current == null ? target : current
+  const alpha = 1 - Math.exp((-5 * elapsedMs) / settleMs)
+  const next = current + (target - current) * alpha
+  return Math.abs(target - next) < 0.4 ? target : next
+}
+
+export function shouldResetHeldMarker(previous, next) {
+  if (!previous) return true
+  return previous.tokenId !== next.tokenId || next.frameIndex !== previous.frameIndex + 1
+}
+
+// Each marker follows its target bar through the primary rAF loop. A 50 ms
+// timer runs only when the document is hidden or rAF is stale. Legacy markers
+// keep their responsive per-frame x spring and direct y tracking; the held-key
+// marker uses time-based x/y easing so placement remains readable.
 function createBarTracker(stage, bars, markers) {
-  let targets = [null, null]
-  const sx = [null, null]
+  let targets = markers.map(() => null)
+  const sx = markers.map(() => null)
+  const sy = markers.map(() => null)
   const SPRING = 0.32
-  function frameStep() {
+  let lastStepAt = null
+  function frameStep(now) {
+    const elapsed = lastStepAt == null ? 0 : Math.max(0, now - lastStepAt)
+    lastStepAt = now
     const sr = stage.getBoundingClientRect()
     for (let m = 0; m < markers.length; m++) {
       const idx = targets[m]
@@ -161,29 +245,50 @@ function createBarTracker(stage, bars, markers) {
       if (!bar || !bar.isConnected) {
         mk.el.style.opacity = "0"
         sx[m] = null
+        sy[m] = null
         continue
       }
       const br = bar.getBoundingClientRect()
-      const tx = br.left + br.width / 2 - sr.left
-      const ty = br.top - sr.top
-      if (sx[m] == null) sx[m] = tx
+      const targetX = br.left + br.width / 2 - sr.left
+      const bodyWidth = mk.body.getBoundingClientRect().width
+      const tx = clampMarkerCenter(targetX, bodyWidth, sr.width)
+      mk.el.style.setProperty("--steptrace-marker-tip-offset", `${targetX - tx}px`)
+      const ty = mk.role === "held" && mk.el.dataset.placing !== "1" ? 34 : br.top - sr.top
+      const reduced = stage.closest(".steptrace--reduced")
+      if (sx[m] == null || reduced) sx[m] = tx
+      else if (mk.role === "held") sx[m] = stepMarkerSpring(sx[m], tx, elapsed)
       else {
         sx[m] += (tx - sx[m]) * SPRING
         if (Math.abs(tx - sx[m]) < 0.4) sx[m] = tx
       }
-      mk.el.style.transform = `translate(${sx[m].toFixed(2)}px, ${ty.toFixed(2)}px)`
+      if (sy[m] == null || reduced || mk.role !== "held") sy[m] = ty
+      else sy[m] = stepMarkerSpring(sy[m], ty, elapsed)
+      mk.el.style.transform = `translate(${sx[m].toFixed(2)}px, ${sy[m].toFixed(2)}px)`
       mk.el.style.opacity = "1"
     }
   }
-  function loop() {
-    frameStep()
+  let lastRafAt = 0
+  function loop(now) {
+    lastRafAt = now
+    frameStep(now)
     raf = requestAnimationFrame(loop)
   }
   let raf = requestAnimationFrame(loop)
-  const iv = setInterval(frameStep, 16)
+  const iv = setInterval(() => {
+    const now = performance.now()
+    if (document.hidden || now - lastRafAt > 100) frameStep(now)
+  }, 50)
   return {
-    set(a, b) {
-      targets = [a != null ? a : null, b != null ? b : null]
+    set(...indices) {
+      targets = markers.map((_, index) => indices[index] ?? null)
+    },
+    reset(index) {
+      if (index < 0 || index >= markers.length) return
+      sx[index] = null
+      sy[index] = null
+    },
+    renderNow() {
+      frameStep(performance.now())
     },
     destroy() {
       cancelAnimationFrame(raf)
@@ -192,35 +297,14 @@ function createBarTracker(stage, bars, markers) {
   }
 }
 
-// ---- binary-search view: shared bars with a live [lo, hi] range + probe ----
-export function makeSearchView(frames) {
-  const maxVal = Math.max(...frames[0].array, 1)
-  const n = frames[0].array.length
-
-  const stage = el("div", "steptrace__stage")
-  const bars = makeBars(stage, n)
-  const status = statusEl()
-
-  function paint(frame, i, total) {
-    for (let k = 0; k < n; k++) {
-      const b = bars[k]
-      b.fill.style.height = `${Math.max(6, (frame.array[k] / maxVal) * 100)}%`
-      b.num.textContent = frame.array[k]
-      let state = "range"
-      if (k < frame.lo || k > frame.hi) state = "eliminated"
-      if (frame.mid === k) state = "probe"
-      if (frame.found === k) state = "found"
-      b.bar.dataset.state = state
-    }
-    status.innerHTML =
-      escapeHtml(frame.message) +
-      ` <span class="steptrace__counts">· ${frame.comparisons} probe${frame.comparisons === 1 ? "" : "s"} · step ${i + 1}/${total}</span>`
-  }
-
-  // Constant 3-row watch in both modes (zero footer jitter). Linear search
-  // never eliminates, so a live [lo, hi] range is meaningless — it shows scan
-  // progress instead; binary search keeps the shrinking range.
-  function watch(frame) {
+export const legacySearchViewSemantics = {
+  stateForIndex(frame, index) {
+    if (frame.found === index) return "found"
+    if (frame.mid === index) return "probe"
+    if (index < frame.lo || index > frame.hi) return "eliminated"
+    return "range"
+  },
+  watchRows(frame, frames) {
     const target = { k: "target", v: String(frames[0].target), sw: "var(--_accent)" }
     const at = {
       k: "at",
@@ -243,6 +327,38 @@ export function makeSearchView(frames) {
       { k: "range", v: `[${frame.lo}, ${frame.hi}]`, sw: "var(--_neutral)" },
       { ...at, k: "mid" },
     ]
+  },
+}
+
+// ---- indexed-search view: shared bars with configurable range semantics ----
+export function makeSearchView(
+  frames,
+  semantics: {
+    stateForIndex(frame: any, index: number): string
+    watchRows(frame: any, frames: readonly any[]): any[]
+  } = legacySearchViewSemantics,
+) {
+  const maxVal = Math.max(...frames[0].array, 1)
+  const n = frames[0].array.length
+
+  const stage = el("div", "steptrace__stage")
+  const bars = makeBars(stage, n)
+  const status = statusEl()
+
+  function paint(frame, i, total) {
+    for (let k = 0; k < n; k++) {
+      const b = bars[k]
+      b.fill.style.height = barHeightStyle(frame.array[k], maxVal)
+      b.num.textContent = frame.array[k]
+      b.bar.dataset.state = semantics.stateForIndex(frame, k)
+    }
+    status.innerHTML =
+      escapeHtml(frame.message) +
+      ` <span class="steptrace__counts">· ${frame.comparisons} probe${frame.comparisons === 1 ? "" : "s"} · step ${i + 1}/${total}</span>`
+  }
+
+  function watch(frame) {
+    return semantics.watchRows(frame, frames)
   }
 
   return { nodes: [stage, status], paint, watch }
@@ -1187,6 +1303,8 @@ export const ICON = {
   compare:
     '<svg class="steptrace__cue-compare" viewBox="0 0 24 24" aria-hidden="true"><path d="m7 16-4-4 4-4"/><path d="M3 12h18"/><path d="m17 8 4 4-4 4"/></svg>',
   swap: '<svg class="steptrace__cue-swap" viewBox="0 0 24 24" aria-hidden="true"><path d="m2 9 3-3 3 3"/><path d="M13 18H7a2 2 0 0 1-2-2V6"/><path d="m22 15-3 3-3-3"/><path d="M11 6h6a2 2 0 0 1 2 2v10"/></svg>',
+  search:
+    '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="10.5" cy="10.5" r="6.5"/><path d="m15.2 15.2 4.8 4.8"/></svg>',
 }
 export function iconBtn(label, svg, extra = "") {
   const b = document.createElement("button")
@@ -1210,21 +1328,35 @@ export function buildMilestones(algorithm, kind, frames) {
     if (prev && (prev.i === i || prev.label === label)) return
     marks.push({ i, label })
   }
+  const firstGap = frames.find((frame) => Number.isInteger(frame.gap))?.gap
+  const familyProfile = frames[0]?.profile
   const initial =
     kind === "sort"
-      ? algorithm === "bubble-sort"
-        ? "Pass 1"
-        : algorithm === "insertion-sort"
-          ? "Prefix 1"
-          : algorithm === "selection-sort"
-            ? "Select 1"
-            : algorithm === "heap-sort"
-              ? "Build heap"
-              : algorithm === "merge-sort"
-                ? "Runs of 1"
-                : "Partition"
+      ? firstGap != null
+        ? `Gap ${firstGap}`
+        : familyProfile === "cyclic"
+          ? "Place values"
+          : familyProfile === "introsort"
+            ? "Quicksort"
+            : algorithm === "bubble-sort"
+              ? "Pass 1"
+              : algorithm === "insertion-sort"
+                ? "Prefix 1"
+                : algorithm === "selection-sort"
+                  ? "Select 1"
+                  : algorithm === "heap-sort"
+                    ? "Build heap"
+                    : algorithm === "merge-sort"
+                      ? "Runs of 1"
+                      : "Partition"
       : kind === "search"
-        ? "Search range"
+        ? familyProfile === "exponential"
+          ? "Gallop"
+          : familyProfile === "jump"
+            ? "Jump blocks"
+            : familyProfile === "ternary"
+              ? "Narrow peak"
+              : "Search range"
         : kind === "string"
           ? "Shift 0"
           : kind === "backtrack"
@@ -1234,12 +1366,22 @@ export function buildMilestones(algorithm, kind, frames) {
               : "Initialize"
   push(0, initial)
   let lastRange = ""
+  let lastGap = firstGap
   let lastRow = null
   let lastWindow = ""
   let lastDepth = null
   for (let i = 1; i < frames.length - 1; i++) {
     const f = frames[i]
     if (kind === "sort") {
+      if (familyProfile === "introsort" && f.type === "fallback") {
+        push(i, "Heap fallback")
+      } else if (familyProfile === "introsort" && f.type === "cleanup") {
+        push(i, "Insertion cleanup")
+      }
+      if (Number.isInteger(f.gap) && f.gap !== lastGap) {
+        push(i, `Gap ${f.gap}`)
+        lastGap = f.gap
+      }
       const range = f.range ? f.range.join(":") : ""
       if (range && range !== lastRange) {
         const word =
@@ -1248,11 +1390,13 @@ export function buildMilestones(algorithm, kind, frames) {
       } else if (f.type === "mark-sorted") {
         const fixed = f.sorted.length
         const word =
-          algorithm === "insertion-sort"
-            ? "Prefix"
-            : algorithm === "selection-sort"
-              ? "Select"
-              : "Fixed"
+          familyProfile === "cyclic"
+            ? "Placed"
+            : algorithm === "insertion-sort"
+              ? "Prefix"
+              : algorithm === "selection-sort"
+                ? "Select"
+                : "Fixed"
         const count =
           algorithm === "bubble-sort" || algorithm === "selection-sort"
             ? Math.min(fixed + 1, f.array.length)
@@ -1264,8 +1408,25 @@ export function buildMilestones(algorithm, kind, frames) {
       const word =
         algorithm === "dijkstra" ? "Settle" : algorithm === "topological-sort" ? "Output" : "Visit"
       push(i, `${word} ${f.current}`)
-    } else if (kind === "search" && f.type === "probe") {
-      push(i, `Probe ${f.mid}`)
+    } else if (kind === "search") {
+      if (familyProfile === "exponential" && f.type === "phase" && f.phase === "binary")
+        push(i, "Binary search")
+      else if (f.type === "phase" && f.phase === "scan")
+        push(i, familyProfile === "ternary" ? "Final scan" : "Linear scan")
+      else if (f.type === "phase" && f.phase === "ternary") push(i, "Ternary")
+      else if (f.type === "probe")
+        push(
+          i,
+          familyProfile === "ternary" && f.mid2 != null
+            ? `Probes ${f.mid}/${f.mid2}`
+            : `${
+                familyProfile === "exponential" && f.phase === "gallop"
+                  ? "Bound"
+                  : familyProfile === "jump" && f.phase === "jump"
+                    ? "Block end"
+                    : "Probe"
+              } ${f.mid}`,
+        )
     } else if (kind === "string") {
       if (
         (f.type === "slide" || f.type === "hash" || f.type === "match") &&
@@ -1334,10 +1495,13 @@ export function summaryFor(algorithm, kind, frame, graph) {
   if (kind === "sort") {
     if (algorithm === "merge-sort")
       return `Output [${frame.array.join(", ")}] · ${frame.swaps} writes.`
-    const unit = ["bubble-sort", "selection-sort", "quick-sort", "heap-sort"].includes(algorithm)
-      ? "swaps"
-      : "moves"
-    return `Output [${frame.array.join(", ")}] · ${frame.comparisons} comparisons · ${frame.swaps} ${unit}.`
+    const unit =
+      frame.movementUnit ||
+      (["bubble-sort", "selection-sort", "quick-sort", "heap-sort"].includes(algorithm)
+        ? "swaps"
+        : "moves")
+    const comparisons = frame.showComparisons === false ? "" : `${frame.comparisons} comparisons · `
+    return `Output [${frame.array.join(", ")}] · ${comparisons}${frame.swaps} ${unit}.`
   }
   if (kind === "graph") {
     if (algorithm === "dijkstra" && frame.target != null) {

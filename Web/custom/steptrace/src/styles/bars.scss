@@ -10,7 +10,7 @@
   gap: 8px;
 }
 .steptrace__stage--pins {
-  padding-top: 38px; /* headroom above the tallest bar for the pin markers */
+  padding-top: 42px;
 }
 .steptrace__bar {
   flex: 1 1 0;
@@ -25,7 +25,7 @@
 .steptrace__fill {
   position: relative;
   width: 100%;
-  min-height: 8px;
+  min-height: 1.8rem;
   border-radius: 3px 3px 1px 1px;
   background: var(--_neutral);
   opacity: 0.55;
@@ -61,17 +61,25 @@
   color: var(--_muted);
   font-variant-numeric: tabular-nums;
 }
-.steptrace__check {
+.steptrace__check,
+.steptrace__probe {
   display: none;
   position: absolute;
   left: 50%;
   top: 50%;
   transform: translate(-50%, -50%);
-  width: 0.95rem;
-  height: 0.95rem;
   color: #fff;
 }
-.steptrace__check svg {
+.steptrace__check {
+  width: 0.95rem;
+  height: 0.95rem;
+}
+.steptrace__probe {
+  width: 1rem;
+  height: 1rem;
+}
+.steptrace__check svg,
+.steptrace__probe svg {
   display: block;
   width: 100%;
   height: 100%;
@@ -142,54 +150,110 @@
 .steptrace__bar[data-outside="1"] .steptrace__num {
   opacity: 0.4;
 }
-/* pin marker: JS writes transform(x,y) to the anchor (bar top-centre); the
-   margins lift the teardrop so its tip floats ~6px above the bar top. */
-.steptrace__pin {
+.steptrace__stage[data-lane="1"] .steptrace__bar[data-lane="muted"] .steptrace__fill {
+  opacity: 0.24;
+  filter: saturate(0.35);
+}
+.steptrace__stage[data-lane="1"] .steptrace__bar[data-lane="muted"] .steptrace__num {
+  opacity: 0.58;
+}
+.steptrace__bar[data-lane="active"] .steptrace__num {
+  color: var(--_text);
+  font-weight: 750;
+}
+.steptrace__bar[data-hole="1"] .steptrace__fill {
+  background: transparent;
+  border: 2px dashed var(--_amber);
+  box-shadow: none;
+  opacity: 0.9;
+  min-height: 12px;
+}
+.steptrace__bar[data-hole="1"] .steptrace__bar-cue,
+.steptrace__bar[data-hole="1"] .steptrace__check,
+.steptrace__bar[data-hole="1"] .steptrace__probe {
+  display: none;
+}
+.steptrace__bar[data-hole="1"] .steptrace__num {
+  color: var(--_amber);
+}
+.steptrace__marker {
   position: absolute;
   left: 0;
   top: 0;
-  width: 22px;
-  height: 27px;
-  margin-left: -11px;
-  margin-top: -33px;
+  width: 0;
+  height: 0;
   pointer-events: none;
   opacity: 0;
   transition: opacity 0.2s ease;
   will-change: transform;
+  z-index: 2;
 }
-.steptrace__pin--a {
+.steptrace__marker--a {
   color: var(--_blue);
 }
-.steptrace__pin--b {
+.steptrace__marker--b {
   color: var(--_violet);
 }
-.steptrace__pin-svg {
-  position: absolute;
-  inset: 0;
-  width: 100%;
-  height: 100%;
-  overflow: visible;
-  display: block;
+.steptrace__marker--held {
+  color: var(--_held-bg);
+  z-index: 3;
 }
-.steptrace__pin-svg path {
-  fill: color-mix(in srgb, currentColor 88%, transparent);
-  stroke: currentColor;
-  stroke-width: 1.6px;
-  stroke-linejoin: round;
+.steptrace__marker--held .steptrace__marker-body {
+  background: var(--_held-bg);
 }
-.steptrace__pin-label {
+.steptrace__marker--held .steptrace__marker-label {
+  color: var(--_held-fg);
+}
+.steptrace__marker-body {
   position: absolute;
-  left: 50%;
-  top: 38%;
-  transform: translate(-50%, -50%);
-  font: 700 0.62rem/1 var(--_font-head);
+  left: 0;
+  top: 0;
+  display: inline-flex;
+  align-items: center;
+  min-height: 1.35rem;
+  padding: 0.18rem 0.42rem;
+  border: 1px solid currentColor;
+  border-radius: 0.38rem;
+  background: color-mix(in srgb, currentColor 88%, var(--_surface));
+  box-shadow: 0 2px 6px color-mix(in srgb, var(--_text) 18%, transparent);
+  transform: translate(-50%, calc(-100% - 7px));
+  white-space: nowrap;
+}
+.steptrace__marker-body::after {
+  content: "";
+  position: absolute;
+  left: calc(50% + var(--steptrace-marker-tip-offset, 0px));
+  bottom: -5px;
+  width: 8px;
+  height: 8px;
+  border-right: 1px solid currentColor;
+  border-bottom: 1px solid currentColor;
+  background: inherit;
+  transform: translateX(-50%) rotate(45deg);
+}
+.steptrace__marker-label {
+  font: 700 clamp(0.58rem, 1.8vw, 0.68rem) / 1 var(--_font-head);
   color: var(--_on-accent);
+}
+.steptrace__marker[data-placing="1"] .steptrace__marker-body {
+  box-shadow: 0 0 0 2px color-mix(in srgb, var(--_amber) 25%, transparent);
+}
+.steptrace--reduced .steptrace__marker,
+.steptrace--reduced .steptrace__marker-body {
+  transition: none;
 }
 
 /* ---- binary-search states (same shared bars as sort) ---- */
 .steptrace__bar[data-state="range"] .steptrace__fill {
   background: var(--_neutral);
   opacity: 0.7;
+}
+.steptrace__bar[data-state="unseen"] .steptrace__fill {
+  background: var(--_neutral);
+  opacity: 0.38;
+}
+.steptrace__bar[data-state="unseen"] .steptrace__num {
+  opacity: 0.65;
 }
 .steptrace__bar[data-state="eliminated"] .steptrace__fill {
   opacity: 0.22;
@@ -206,8 +270,8 @@
   background: var(--_blue);
   opacity: 1;
 }
-.steptrace__bar[data-state="probe"] .steptrace__fill::before {
-  content: "?";
+.steptrace__bar[data-state="probe"] .steptrace__probe {
+  display: block;
 }
 .steptrace__bar[data-state="found"] .steptrace__fill {
   background: var(--_green);

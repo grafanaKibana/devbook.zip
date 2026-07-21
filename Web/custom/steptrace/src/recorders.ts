@@ -120,6 +120,157 @@ export class SortRecorder {
   }
 }
 
+export class ArraySortRecorder extends SortRecorder {
+  constructor(array, profile = "shell") {
+    super(array)
+    this._profile = profile
+    this._movementUnit = profile === "shell" || profile === "introsort" ? "moves" : "swaps"
+    this._showComparisons = profile !== "cyclic"
+    this._gap = null
+    this._subsequence = null
+    this._passSwapped = null
+    this._cursor = null
+    this._home = null
+    this._keyOrigin = null
+    this._hole = null
+    this._tokenSerial = 0
+    this._tokenId = null
+    this._strategy = null
+    this._depthUsed = null
+    this._depthLimit = null
+    this._cutoff = null
+  }
+
+  _push(type, active, message) {
+    super._push(type, active, message)
+    const frame = this.frames[this.frames.length - 1]
+    this.frames[this.frames.length - 1] = Object.freeze({
+      ...frame,
+      profile: this._profile,
+      movementUnit: this._movementUnit,
+      showComparisons: this._showComparisons,
+      gap: this._gap,
+      subsequence: this._subsequence ? this._subsequence.slice() : null,
+      passSwapped: this._passSwapped,
+      cursor: this._cursor,
+      home: this._home,
+      keyOrigin: this._keyOrigin,
+      hole: this._hole,
+      tokenId: this._tokenId,
+      strategy: this._strategy,
+      depthUsed: this._depthUsed,
+      depthLimit: this._depthLimit,
+      cutoff: this._cutoff,
+    })
+  }
+
+  beginGap(gap, message) {
+    this._gap = gap
+    this._subsequence = null
+    this._passSwapped = false
+    this._push("gap", [], message)
+  }
+
+  selectSubsequence(indices, message) {
+    this._subsequence = indices.slice()
+    this._push("subsequence", indices, message)
+  }
+
+  compareGapPair(left, right, message) {
+    this._subsequence = [left, right]
+    this.compare(left, right, message)
+  }
+
+  swapGapPair(left, right, message) {
+    this._subsequence = [left, right]
+    this._passSwapped = true
+    this.swap(left, right, message)
+  }
+
+  endGap(swapped, message) {
+    this._passSwapped = swapped
+    this._subsequence = null
+    this._push("gap-complete", [], message)
+  }
+
+  inspectHome(cursor, home, message) {
+    this._cursor = cursor
+    this._home = home
+    this._push("home-check", [cursor, home], message)
+  }
+
+  swapHome(cursor, home, message) {
+    this._cursor = cursor
+    this._home = home
+    this.swap(cursor, home, message)
+  }
+
+  settleHome(index, message) {
+    this._cursor = index
+    this._home = index
+    this.markSorted([index], [index], message)
+  }
+
+  holdKeyAt(value, origin, message) {
+    this._key = value
+    this._keyOrigin = origin
+    this._hole = origin
+    this._tokenId = ++this._tokenSerial
+    this._push("hold-key", [], message)
+  }
+
+  compareHeldAt(index, message) {
+    this.comparisons++
+    this._push("compare-held", [index], message)
+  }
+
+  shiftHeld(to, from, message) {
+    this.a[to] = this.a[from]
+    this.swaps++
+    this._from = from
+    this._hole = from
+    this._push("shift-held", [to], message)
+    this._from = null
+  }
+
+  placeHeld(index, value, message) {
+    this.a[index] = value
+    this.swaps++
+    this._push("place-held", [index], message)
+  }
+
+  releaseHeldKey() {
+    this._key = null
+    this._keyOrigin = null
+    this._hole = null
+    this._tokenId = null
+  }
+
+  configureIntrosort(depthLimit, cutoff) {
+    this._depthLimit = depthLimit
+    this._cutoff = cutoff
+  }
+
+  introsortStrategy(strategy, depthUsed, type, message) {
+    this._strategy = strategy
+    this._depthUsed = depthUsed
+    this._push(type, [], message)
+  }
+
+  clearMarks() {
+    super.clearMarks()
+    this._subsequence = null
+    this._passSwapped = null
+    this._cursor = null
+    this._home = null
+    this._keyOrigin = null
+    this._hole = null
+    this._tokenId = null
+    this._strategy = null
+    this._depthUsed = null
+  }
+}
+
 // A GraphFrame snapshot: { type, visited[], frontier[], current|null,
 //   edge:{from,to}|null, dist:{id:number}, message }.
 export class GraphRecorder {
@@ -271,6 +422,100 @@ export class SearchRecorder {
   }
   done(message) {
     this._push("done", message)
+  }
+}
+
+export class IndexedSearchRecorder extends SearchRecorder {
+  constructor(config) {
+    super(config.array, config.target)
+    this._profile = config.profile
+    this._phase =
+      config.profile === "exponential"
+        ? "gallop"
+        : config.profile === "jump"
+          ? "jump"
+          : config.profile
+    this._goal = config.goal ?? null
+    this._blockSize = config.blockSize ?? null
+    this._bound = null
+    this._previousBound = -1
+    this._bracket = null
+    this._mid2 = null
+  }
+
+  _push(type, message) {
+    super._push(type, message)
+    const frame = this.frames[this.frames.length - 1]
+    this.frames[this.frames.length - 1] = Object.freeze({
+      ...frame,
+      profile: this._profile,
+      phase: this._phase,
+      bound: this._bound,
+      previousBound: this._previousBound,
+      bracket: this._bracket ? this._bracket.slice() : null,
+      mid2: this._mid2,
+      goal: this._goal,
+      blockSize: this._blockSize,
+    })
+  }
+
+  probe(lo, hi, mid, message) {
+    this._mid2 = null
+    super.probe(lo, hi, mid, message)
+  }
+
+  dualProbe(lo, hi, mid, mid2, message) {
+    this.lo = lo
+    this.hi = hi
+    this.mid = mid
+    this._mid2 = mid2
+    this.comparisons += 2
+    this._push("probe", message)
+  }
+
+  narrow(lo, hi, message) {
+    this._mid2 = null
+    super.narrow(lo, hi, message)
+  }
+
+  hit(mid, message) {
+    this._mid2 = null
+    super.hit(mid, message)
+  }
+
+  strideProbe(phase, previousBound, bound, message) {
+    this._phase = phase
+    this._previousBound = previousBound
+    this._bound = bound
+    this._mid2 = null
+    this.lo = Math.max(0, previousBound + 1)
+    this.hi = bound
+    this.mid = bound
+    this.comparisons++
+    this._push("probe", message)
+  }
+
+  gallopProbe(previousBound, bound, message) {
+    this.strideProbe("gallop", previousBound, bound, message)
+  }
+
+  jumpProbe(previousBound, bound, message) {
+    this.strideProbe("jump", previousBound, bound, message)
+  }
+
+  beginPhase(
+    lo,
+    hi,
+    message,
+    phase: "binary" | "scan" | "ternary" = "binary",
+  ) {
+    this._phase = phase
+    this._bracket = [lo, hi]
+    this.lo = lo
+    this.hi = hi
+    this.mid = null
+    this._mid2 = null
+    this._push("phase", message)
   }
 }
 

@@ -24,6 +24,8 @@ export type AlgorithmKind =
   | "backtrack"
   | "rectree"
 
+export type VisualFamilyId = "array-sort" | "indexed-array-search"
+
 export interface AlgorithmMeta {
   label: string
   frontierLabel?: string
@@ -55,6 +57,34 @@ export interface StepTraceConfig extends Partial<Omit<AlgorithmInput, "algorithm
   nodes?: RawGraphNode[]
   edges?: RawGraphEdge[]
   speed?: number
+  gaps?: number[]
+  shrinkFactor?: number
+  depthLimit?: number
+  smallPartitionThreshold?: number
+  values?: number[]
+  goal?: string
+  blockSize?: number
+}
+
+export interface StepTraceView<TFrame = unknown> {
+  nodes: HTMLElement[]
+  stageLayout?: "compact" | "fill"
+  paint(frame: TFrame): void
+  watch?(frame: TFrame): WatchRow[]
+  destroy?(): void
+}
+
+export interface WatchRow {
+  k: string
+  v: unknown
+  sw?: string
+  hint?: string
+}
+
+export interface VisualFamily<TConfig, TRecorder, TFrame> {
+  id: VisualFamilyId
+  createRecorder(config: TConfig): TRecorder
+  createView(frames: readonly TFrame[]): StepTraceView<TFrame>
 }
 
 interface AlgorithmDefinition<
@@ -69,6 +99,20 @@ interface AlgorithmDefinition<
 }
 
 export type SortAlgorithmDefinition = AlgorithmDefinition<"sort", SortRecorder>
+
+export interface FamilyAlgorithmDefinition<
+  TKind extends AlgorithmKind,
+  TConfig,
+  TRecorder,
+  TFrame,
+> {
+  id: string
+  kind: TKind
+  family: VisualFamily<TConfig, TRecorder, TFrame>
+  meta: AlgorithmMeta
+  parse(config: StepTraceConfig): TConfig
+  run(input: TConfig, recorder: TRecorder): void
+}
 export type GraphAlgorithmDefinition = AlgorithmDefinition<"graph", GraphRecorder, [StepTraceGraph]>
 export type SearchAlgorithmDefinition = AlgorithmDefinition<"search", SearchRecorder>
 export type StringAlgorithmDefinition = AlgorithmDefinition<"string", StringRecorder>
@@ -81,6 +125,7 @@ export type RecTreeAlgorithmDefinition = AlgorithmDefinition<"rectree", RecTreeR
 
 export type BuiltInAlgorithm =
   | SortAlgorithmDefinition
+  | FamilyAlgorithmDefinition<AlgorithmKind, unknown, unknown, unknown>
   | GraphAlgorithmDefinition
   | SearchAlgorithmDefinition
   | StringAlgorithmDefinition
@@ -94,6 +139,7 @@ export type BuiltInAlgorithm =
 export interface BuiltFrames {
   kind: AlgorithmKind
   frames: any[]
+  family?: VisualFamily<unknown, unknown, unknown>
   graph?: StepTraceGraph
   frontierLabel?: string
 }

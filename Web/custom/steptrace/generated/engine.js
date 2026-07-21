@@ -268,1181 +268,937 @@
     }
   };
 
-  // custom/steptrace/src/algorithms/dfs.ts
-  var dfs = {
-    id: "dfs",
-    kind: "graph",
-    meta: { label: "Depth-first search", frontierLabel: "Stack (bottom → top)" },
-    run: (input, ops, graph) => {
-      const adj = adjacency(graph);
-      const start = input.start;
-      const target = input.target != null && input.target !== start ? String(input.target) : null;
-      if (target) ops.target(target);
-      ops.init(
-        target ? `Depth-first search for ${target}, starting at ${start} — dive as deep as possible with a stack, backtracking at dead ends, until the target is popped.` : `Depth-first search from ${start} — dive as deep as possible using a stack, backtracking when a node has no unvisited neighbours.`
-      );
-      const stack = [start];
-      const seen = /* @__PURE__ */ new Set([start]);
-      ops.enqueue(start, 0, `Push the start node ${start} onto the stack.`);
-      while (stack.length) {
-        const u = stack.pop();
-        ops.visit(u, `Pop ${u} off the stack and mark it visited.`);
-        if (u === target) {
-          ops.done(
-            `Found ${target} after visiting only ${ops.visitedCount} nodes — but along a depth-${ops.dist(u)} path, with no shortest-path guarantee.`
-          );
-          return;
-        }
-        const neighbours = adj[u].slice().reverse();
-        for (const v of neighbours) {
-          if (seen.has(v)) continue;
-          ops.edge(u, v, `Explore edge ${u} → ${v}.`);
-          seen.add(v);
-          stack.push(v);
-          ops.enqueue(v, ops.dist(u) + 1, `Push ${v} onto the stack (depth ${ops.dist(u) + 1}).`);
-        }
-      }
-      ops.done(
-        target ? `${target} is not reachable from ${start} — the stack emptied after ${ops.visitedCount} nodes.` : `Depth-first search complete — visited ${ops.visitedCount} node${ops.visitedCount === 1 ? "" : "s"}.`
-      );
+  // custom/steptrace/src/recorders.ts
+  var SortRecorder = class {
+    constructor(array) {
+      this.a = array.slice();
+      this.frames = [];
+      this._sorted = /* @__PURE__ */ new Set();
+      this.comparisons = 0;
+      this.swaps = 0;
+      this._cand = null;
+      this._key = null;
+      this._range = null;
+      this._pivot = null;
     }
-  };
-
-  // custom/steptrace/src/algorithms/dijkstra.ts
-  var dijkstra = {
-    id: "dijkstra",
-    kind: "graph",
-    meta: { label: "Dijkstra", frontierLabel: "Frontier (settle nearest first)" },
-    run: (input, ops, graph) => {
-      const adj = {};
-      for (const nd of graph.nodes) adj[nd.id] = [];
-      for (const e of graph.edges) {
-        const w = e.weight == null ? 1 : e.weight;
-        adj[e.from].push({ to: e.to, w });
-        if (!graph.directed) adj[e.to].push({ to: e.from, w });
-      }
-      for (const id in adj) adj[id].sort((a, b) => a.to < b.to ? -1 : 1);
-      const start = input.start;
-      const target = input.target != null ? String(input.target) : null;
-      if (target) ops.target(target);
-      ops.init(
-        `Dijkstra from ${start} — repeatedly settle the nearest unsettled node, then relax its edges to shorten neighbours' distances.`
-      );
-      const dist = { [start]: 0 };
-      const pred = {};
-      const settled = /* @__PURE__ */ new Set();
-      const inQ = /* @__PURE__ */ new Set([start]);
-      ops.enqueue(start, 0, `Start ${start} at distance 0.`);
-      while (inQ.size) {
-        let u = null;
-        for (const id of inQ) if (u === null || dist[id] < dist[u]) u = id;
-        inQ.delete(u);
-        settled.add(u);
-        ops.visit(u, `Settle ${u} (distance ${dist[u]}) — its shortest distance is now final.`);
-        for (const { to: v, w } of adj[u]) {
-          if (settled.has(v)) continue;
-          ops.edge(u, v, `Explore edge ${u} → ${v} (weight ${w}).`);
-          const nd = dist[u] + w;
-          if (dist[v] === void 0 || nd < dist[v]) {
-            const had = dist[v] !== void 0;
-            dist[v] = nd;
-            pred[v] = u;
-            inQ.add(v);
-            ops.relax(
-              v,
-              nd,
-              had ? `Relax ${v}: a shorter path via ${u} improves its distance to ${nd}.` : `Relax ${v}: reach it via ${u} at distance ${nd}.`
-            );
-          }
-        }
-      }
-      if (target !== null) {
-        if (dist[target] === void 0) {
-          ops.done(`${target} is unreachable from ${start}.`);
-        } else {
-          const path = [target];
-          for (let cur = target; pred[cur] !== void 0; cur = pred[cur]) path.push(pred[cur]);
-          path.reverse();
-          for (let i = 0; i + 1 < path.length; i++)
-            ops.selectEdge(
-              path[i],
-              path[i + 1],
-              `Shortest path: keep edge ${path[i]}–${path[i + 1]} highlighted.`
-            );
-          ops.done(`Shortest path ${path.join(" → ")} — total cost ${dist[target]}.`);
-        }
-      } else {
-        const reached = graph.nodes.map((n) => n.id).filter((id) => id !== start && pred[id] !== void 0);
-        reached.sort();
-        for (const v of reached)
-          ops.selectEdge(pred[v], v, `Shortest-path tree: ${pred[v]}–${v} (distance ${dist[v]}).`);
-        ops.done(`Dijkstra complete — shortest-path tree from ${start} highlighted.`);
-      }
+    /** Current array as a defensive copy (algorithms read live values through this). */
+    get value() {
+      return this.a.slice();
     }
-  };
-
-  // custom/steptrace/src/algorithms/fibonacci.ts
-  var fibonacci = {
-    id: "fibonacci",
-    kind: "rectree",
-    meta: { label: "Fibonacci — recursion vs memo" },
-    run: (input, ops) => {
-      const N = Math.min(Math.max(Math.round(input.n ?? 5), 1), 6);
-      const FIB = [0, 1];
-      for (let i = 2; i <= N; i++) FIB[i] = FIB[i - 1] + FIB[i - 2];
-      let nextId = 0;
-      const all = [];
-      const build = (k, depth) => {
-        const node = { id: "c" + nextId++, k, depth, children: [] };
-        all.push(node);
-        if (k >= 2) {
-          node.children.push(build(k - 1, depth + 1));
-          node.children.push(build(k - 2, depth + 1));
-        }
-        return node;
+    _push(type, active, message) {
+      const frame = {
+        type,
+        array: this.a.slice(),
+        sorted: [...this._sorted].sort((x, y) => x - y),
+        active: active.slice(),
+        candidate: this._cand,
+        keyValue: this._key,
+        comparisons: this.comparisons,
+        swaps: this.swaps,
+        message
       };
-      const root = build(N, 0);
-      const ROW = 62;
-      const SP = 48;
-      let leaf = 0;
-      const layout = (node) => {
-        node.y = node.depth * ROW;
-        if (!node.children.length) {
-          node.x = leaf++ * SP;
-        } else {
-          node.children.forEach(layout);
-          node.x = (node.children[0].x + node.children[node.children.length - 1].x) / 2;
-        }
-      };
-      layout(root);
-      const descendants = (node) => {
-        const out = [];
-        for (const c of node.children) {
-          out.push(c.id);
-          out.push(...descendants(c));
-        }
-        return out;
-      };
-      const nodeList = all.map((n) => ({
-        id: n.id,
-        label: `f(${n.k})`,
-        x: Math.round(n.x),
-        y: n.y,
-        depth: n.depth
-      }));
-      const edges = [];
-      for (const n of all) for (const c of n.children) edges.push({ from: n.id, to: c.id });
-      ops.tree(
-        nodeList,
-        edges,
-        `Compute f(${N}) by plain recursion: every call spawns two more. The tree balloons because identical subproblems get recomputed from scratch.`
+      if (this._range) frame.range = this._range.slice();
+      if (this._pivot != null) frame.pivot = this._pivot;
+      if (this._from != null) frame.from = this._from;
+      this.frames.push(Object.freeze(frame));
+    }
+    init(message) {
+      this._push("init", [], message);
+    }
+    /** Compare index i with j (pass j=null for a one-sided compare vs a held key). */
+    compare(i, j, message) {
+      this.comparisons++;
+      this._push("compare", j == null ? [i] : [i, j], message);
+    }
+    swap(i, j, message) {
+      const a = this.a;
+      [a[i], a[j]] = [a[j], a[i]];
+      this.swaps++;
+      this._push("swap", [i, j], message);
+    }
+    /** Overwrite index i with value v (insertion-style shift); counts as a move.
+     *  `from` is the index the value travelled from — the view animates the bar
+     *  sliding along that path. Omit when the value has no on-screen origin. */
+    overwrite(i, v, message, from = null) {
+      this.a[i] = v;
+      this.swaps++;
+      this._from = from == null ? null : from;
+      this._push("overwrite", [i], message);
+      this._from = null;
+    }
+    /** Track a candidate index (running min / insertion target), or null to clear. */
+    candidate(i, message) {
+      this._cand = i;
+      this._push("select", i == null ? [] : [i], message);
+    }
+    /** Hold a value out of the array (insertion key); shows on subsequent frames. */
+    holdKey(v) {
+      this._key = v;
+    }
+    /** Set the active subarray [lo, hi] carried into later frames (pass lo=null to
+     *  clear). Emits no frame — state only, like holdKey. */
+    range(lo, hi = null) {
+      this._range = lo == null ? null : [lo, hi];
+    }
+    /** Set the pivot index carried into later frames (pass null to clear). Emits
+     *  no frame — state only. */
+    pivot(idx) {
+      this._pivot = idx == null ? null : idx;
+    }
+    markSorted(idxs, show, message) {
+      idxs.forEach((k) => this._sorted.add(k));
+      this._push("mark-sorted", show, message);
+    }
+    lockAll(idxs) {
+      idxs.forEach((k) => this._sorted.add(k));
+    }
+    // no frame; faithful terminal state
+    clearMarks() {
+      this._cand = null;
+      this._key = null;
+      this._range = null;
+      this._pivot = null;
+      this._from = null;
+    }
+    done(message) {
+      this.clearMarks();
+      this._push("done", [], message);
+    }
+  };
+  var ArraySortRecorder = class extends SortRecorder {
+    constructor(array, profile = "shell") {
+      super(array);
+      this._profile = profile;
+      this._movementUnit = profile === "shell" || profile === "introsort" ? "moves" : "swaps";
+      this._showComparisons = profile !== "cyclic";
+      this._gap = null;
+      this._subsequence = null;
+      this._passSwapped = null;
+      this._cursor = null;
+      this._home = null;
+      this._keyOrigin = null;
+      this._hole = null;
+      this._tokenSerial = 0;
+      this._tokenId = null;
+      this._strategy = null;
+      this._depthUsed = null;
+      this._depthLimit = null;
+      this._cutoff = null;
+    }
+    _push(type, active, message) {
+      super._push(type, active, message);
+      const frame = this.frames[this.frames.length - 1];
+      this.frames[this.frames.length - 1] = Object.freeze({
+        ...frame,
+        profile: this._profile,
+        movementUnit: this._movementUnit,
+        showComparisons: this._showComparisons,
+        gap: this._gap,
+        subsequence: this._subsequence ? this._subsequence.slice() : null,
+        passSwapped: this._passSwapped,
+        cursor: this._cursor,
+        home: this._home,
+        keyOrigin: this._keyOrigin,
+        hole: this._hole,
+        tokenId: this._tokenId,
+        strategy: this._strategy,
+        depthUsed: this._depthUsed,
+        depthLimit: this._depthLimit,
+        cutoff: this._cutoff
+      });
+    }
+    beginGap(gap, message) {
+      this._gap = gap;
+      this._subsequence = null;
+      this._passSwapped = false;
+      this._push("gap", [], message);
+    }
+    selectSubsequence(indices, message) {
+      this._subsequence = indices.slice();
+      this._push("subsequence", indices, message);
+    }
+    compareGapPair(left, right, message) {
+      this._subsequence = [left, right];
+      this.compare(left, right, message);
+    }
+    swapGapPair(left, right, message) {
+      this._subsequence = [left, right];
+      this._passSwapped = true;
+      this.swap(left, right, message);
+    }
+    endGap(swapped, message) {
+      this._passSwapped = swapped;
+      this._subsequence = null;
+      this._push("gap-complete", [], message);
+    }
+    inspectHome(cursor, home, message) {
+      this._cursor = cursor;
+      this._home = home;
+      this._push("home-check", [cursor, home], message);
+    }
+    swapHome(cursor, home, message) {
+      this._cursor = cursor;
+      this._home = home;
+      this.swap(cursor, home, message);
+    }
+    settleHome(index, message) {
+      this._cursor = index;
+      this._home = index;
+      this.markSorted([index], [index], message);
+    }
+    holdKeyAt(value, origin, message) {
+      this._key = value;
+      this._keyOrigin = origin;
+      this._hole = origin;
+      this._tokenId = ++this._tokenSerial;
+      this._push("hold-key", [], message);
+    }
+    compareHeldAt(index, message) {
+      this.comparisons++;
+      this._push("compare-held", [index], message);
+    }
+    shiftHeld(to, from, message) {
+      this.a[to] = this.a[from];
+      this.swaps++;
+      this._from = from;
+      this._hole = from;
+      this._push("shift-held", [to], message);
+      this._from = null;
+    }
+    placeHeld(index, value, message) {
+      this.a[index] = value;
+      this.swaps++;
+      this._push("place-held", [index], message);
+    }
+    releaseHeldKey() {
+      this._key = null;
+      this._keyOrigin = null;
+      this._hole = null;
+      this._tokenId = null;
+    }
+    configureIntrosort(depthLimit, cutoff) {
+      this._depthLimit = depthLimit;
+      this._cutoff = cutoff;
+    }
+    introsortStrategy(strategy, depthUsed, type, message) {
+      this._strategy = strategy;
+      this._depthUsed = depthUsed;
+      this._push(type, [], message);
+    }
+    clearMarks() {
+      super.clearMarks();
+      this._subsequence = null;
+      this._passSwapped = null;
+      this._cursor = null;
+      this._home = null;
+      this._keyOrigin = null;
+      this._hole = null;
+      this._tokenId = null;
+      this._strategy = null;
+      this._depthUsed = null;
+    }
+  };
+  var GraphRecorder = class {
+    constructor(graph) {
+      this.graph = graph;
+      this.frames = [];
+      this._visited = /* @__PURE__ */ new Set();
+      this._frontier = [];
+      this._dist = {};
+      this._current = null;
+      this._selected = [];
+      this._target = null;
+    }
+    /** Declare the node this traversal is searching for (call before init). */
+    target(id) {
+      this._target = id == null ? null : String(id);
+    }
+    get visitedCount() {
+      return this._visited.size;
+    }
+    dist(id) {
+      return this._dist[id];
+    }
+    _push(type, edge, message) {
+      this.frames.push(
+        Object.freeze({
+          type,
+          visited: [...this._visited],
+          frontier: [...this._frontier],
+          current: this._current,
+          edge: edge ? { from: edge.from, to: edge.to } : null,
+          dist: { ...this._dist },
+          selected: this._selected.map((s) => s.slice()),
+          target: this._target,
+          message
+        })
       );
-      ops.phase(
-        "naive",
-        `Phase 1 — plain recursion. Reveal each call in order; the running count IS the total work.`
+    }
+    init(message) {
+      this._push("init", null, message);
+    }
+    /** Discover a node: set its distance and append it to the queue (frontier). */
+    enqueue(node, d, message) {
+      this._frontier.push(node);
+      this._dist[node] = d;
+      this._push("frontier", null, message);
+    }
+    /** Relax a node to a shorter distance (Dijkstra): update its distance and
+     *  make sure it is shown in the frontier. */
+    relax(node, d, message) {
+      this._dist[node] = d;
+      if (this._frontier.indexOf(node) < 0) this._frontier.push(node);
+      this._push("relax", null, message);
+    }
+    /** Explore an edge u -> v (highlight only; no state change). */
+    edge(u, v, message) {
+      this._push("edge", { from: u, to: v }, message);
+    }
+    /** Add an edge to the built tree (MST) — it stays highlighted afterwards. */
+    selectEdge(u, v, message) {
+      this._selected.push([u, v]);
+      this._push("select", { from: u, to: v }, message);
+    }
+    /** Visit a node: dequeue it from the frontier and mark it visited. */
+    visit(node, message) {
+      this._current = node;
+      const i = this._frontier.indexOf(node);
+      if (i >= 0) this._frontier.splice(i, 1);
+      this._visited.add(node);
+      this._push("visit", null, message);
+    }
+    done(message) {
+      this._current = null;
+      this._push("done", null, message);
+    }
+  };
+  var SearchRecorder = class {
+    constructor(array, target) {
+      this.a = (array || []).slice();
+      this.target = target;
+      this.frames = [];
+      this.lo = 0;
+      this.hi = this.a.length - 1;
+      this.mid = null;
+      this.found = null;
+      this.comparisons = 0;
+      this.mode = "range";
+    }
+    get value() {
+      return this.a.slice();
+    }
+    _push(type, message) {
+      this.frames.push(
+        Object.freeze({
+          type,
+          array: this.a.slice(),
+          lo: this.lo,
+          hi: this.hi,
+          mid: this.mid,
+          found: this.found,
+          target: this.target,
+          comparisons: this.comparisons,
+          mode: this.mode,
+          message
+        })
       );
-      const naive = (node) => {
-        if (node.k < 2) {
-          ops.base(node.id, node.k, `f(${node.k}) = ${node.k} — base case, return at once.`);
-        } else {
-          ops.enter(
-            node.id,
-            `Call f(${node.k}); with no memory it must recompute f(${node.k - 1}) + f(${node.k - 2}) all over again.`
-          );
-          node.children.forEach(naive);
-        }
-      };
-      naive(root);
-      const naiveCalls = all.length;
-      ops.phase(
-        "memo",
-        `Phase 2 — memoise. Same tree, but keep a table of computed f(k); a repeat of any state is now a cache hit.`
+    }
+    init(message) {
+      this._push("init", message);
+    }
+    /** Probe the middle of the current [lo, hi] range. */
+    probe(lo, hi, mid, message) {
+      this.lo = lo;
+      this.hi = hi;
+      this.mid = mid;
+      this.comparisons++;
+      this._push("probe", message);
+    }
+    /** Narrow the range after a probe (discard a half). */
+    narrow(lo, hi, message) {
+      this.lo = lo;
+      this.hi = hi;
+      this.mid = null;
+      this._push("narrow", message);
+    }
+    /** Mark the target found at index mid. */
+    hit(mid, message) {
+      this.found = mid;
+      this.mid = mid;
+      this._push("found", message);
+    }
+    done(message) {
+      this._push("done", message);
+    }
+  };
+  var IndexedSearchRecorder = class extends SearchRecorder {
+    constructor(config) {
+      super(config.array, config.target);
+      this._profile = config.profile;
+      this._phase = config.profile === "exponential" ? "gallop" : config.profile === "jump" ? "jump" : config.profile;
+      this._goal = config.goal ?? null;
+      this._blockSize = config.blockSize ?? null;
+      this._bound = null;
+      this._previousBound = -1;
+      this._bracket = null;
+      this._mid2 = null;
+    }
+    _push(type, message) {
+      super._push(type, message);
+      const frame = this.frames[this.frames.length - 1];
+      this.frames[this.frames.length - 1] = Object.freeze({
+        ...frame,
+        profile: this._profile,
+        phase: this._phase,
+        bound: this._bound,
+        previousBound: this._previousBound,
+        bracket: this._bracket ? this._bracket.slice() : null,
+        mid2: this._mid2,
+        goal: this._goal,
+        blockSize: this._blockSize
+      });
+    }
+    probe(lo, hi, mid, message) {
+      this._mid2 = null;
+      super.probe(lo, hi, mid, message);
+    }
+    dualProbe(lo, hi, mid, mid2, message) {
+      this.lo = lo;
+      this.hi = hi;
+      this.mid = mid;
+      this._mid2 = mid2;
+      this.comparisons += 2;
+      this._push("probe", message);
+    }
+    narrow(lo, hi, message) {
+      this._mid2 = null;
+      super.narrow(lo, hi, message);
+    }
+    hit(mid, message) {
+      this._mid2 = null;
+      super.hit(mid, message);
+    }
+    strideProbe(phase, previousBound, bound, message) {
+      this._phase = phase;
+      this._previousBound = previousBound;
+      this._bound = bound;
+      this._mid2 = null;
+      this.lo = Math.max(0, previousBound + 1);
+      this.hi = bound;
+      this.mid = bound;
+      this.comparisons++;
+      this._push("probe", message);
+    }
+    gallopProbe(previousBound, bound, message) {
+      this.strideProbe("gallop", previousBound, bound, message);
+    }
+    jumpProbe(previousBound, bound, message) {
+      this.strideProbe("jump", previousBound, bound, message);
+    }
+    beginPhase(lo, hi, message, phase = "binary") {
+      this._phase = phase;
+      this._bracket = [lo, hi];
+      this.lo = lo;
+      this.hi = hi;
+      this.mid = null;
+      this._mid2 = null;
+      this._push("phase", message);
+    }
+  };
+  var StringRecorder = class {
+    constructor(text, pattern) {
+      this.text = String(text || "");
+      this.pattern = String(pattern || "");
+      this.frames = [];
+      this.shift = 0;
+      this.found = [];
+      this.hash = null;
+    }
+    _push(type, extra, message) {
+      this.frames.push(
+        Object.freeze({
+          type,
+          text: this.text,
+          pattern: this.pattern,
+          shift: this.shift,
+          cmpT: extra.cmpT == null ? null : extra.cmpT,
+          cmpP: extra.cmpP == null ? null : extra.cmpP,
+          cmpResult: extra.cmpResult || null,
+          found: this.found.slice(),
+          hash: this.hash,
+          message
+        })
       );
-      const seen = /* @__PURE__ */ new Set();
-      let memoCalls = 0;
-      let hits = 0;
-      const memo = (node) => {
-        memoCalls++;
-        if (seen.has(node.k)) {
-          hits++;
-          ops.hit(
-            node.id,
-            node.k,
-            FIB[node.k],
-            descendants(node),
-            `f(${node.k}) is already in the table → cache HIT, return ${FIB[node.k]}. Its whole subtree is skipped — that is an overlapping subproblem eliminated.`
-          );
-          return FIB[node.k];
-        }
-        seen.add(node.k);
-        if (node.k < 2) {
-          ops.miss(
-            node.id,
-            node.k,
-            node.k,
-            `f(${node.k}) = ${node.k} — first time seen, store it in the table.`
-          );
-        } else {
-          ops.miss(
-            node.id,
-            node.k,
-            FIB[node.k],
-            `f(${node.k}) is new → compute f(${node.k - 1}) + f(${node.k - 2}) once and store f(${node.k}) = ${FIB[node.k]}.`
-          );
-          node.children.forEach(memo);
-        }
-        return FIB[node.k];
-      };
-      memo(root);
-      ops.done(
-        `Naive f(${N}) makes ${naiveCalls} calls. Memoised: ${memoCalls} calls — ${hits} of them cache hits that skipped whole subtrees. Same answer, ${naiveCalls - memoCalls} calls saved.`
+    }
+    init(message) {
+      this._push("init", {}, message);
+    }
+    /** Compare text[ti] with pattern[pj] at alignment `shift`. */
+    compare(ti, pj, shift, isMatch, message) {
+      this.shift = shift;
+      this._push(
+        "compare",
+        { cmpT: ti, cmpP: pj, cmpResult: isMatch ? "match" : "mismatch" },
+        message
+      );
+    }
+    /** Slide the pattern to a new alignment. */
+    slide(shift, message) {
+      this.shift = shift;
+      this._push("slide", {}, message);
+    }
+    /** Record a full match starting at `shift`. */
+    matchAt(shift, message) {
+      this.shift = shift;
+      if (this.found.indexOf(shift) < 0) this.found.push(shift);
+      this._push("match", {}, message);
+    }
+    /** Rabin-Karp: show the window hash vs the pattern hash (stays visible after). */
+    hashStep(shift, windowHash, patternHash, message) {
+      this.shift = shift;
+      this.hash = { window: windowHash, pattern: patternHash };
+      this._push("hash", {}, message);
+    }
+    done(message) {
+      this._push("done", {}, message);
+    }
+  };
+  var PointerRecorder = class {
+    constructor(array) {
+      this.a = (array || []).slice();
+      this.frames = [];
+      this.pointers = {};
+      this.window = null;
+      this.marked = [];
+    }
+    get value() {
+      return this.a.slice();
+    }
+    _push(type, message) {
+      this.frames.push(
+        Object.freeze({
+          type,
+          array: this.a.slice(),
+          pointers: { ...this.pointers },
+          window: this.window ? this.window.slice() : null,
+          marked: this.marked.slice(),
+          message
+        })
+      );
+    }
+    init(message) {
+      this._push("init", message);
+    }
+    /** One logical step: update named pointers, the window span, and/or marks. */
+    step(update, message) {
+      update = update || {};
+      if (update.pointers) this.pointers = { ...update.pointers };
+      if ("window" in update) this.window = update.window ? update.window.slice() : null;
+      if (update.mark) this.marked = this.marked.concat(update.mark);
+      this._push(update.mark ? "match" : "step", message);
+    }
+    done(message) {
+      this._push("done", message);
+    }
+  };
+  var DPRecorder = class {
+    constructor() {
+      this.frames = [];
+      this.rowLabels = [];
+      this.colLabels = [];
+      this.grid = [];
+      this.cur = null;
+      this.deps = [];
+      this.path = [];
+    }
+    board(rowLabels, colLabels, message) {
+      this.rowLabels = rowLabels.slice();
+      this.colLabels = colLabels.slice();
+      this.grid = rowLabels.map(() => colLabels.map(() => null));
+      this._push("init", message);
+    }
+    set(r, c, val, deps, message) {
+      this.cur = [r, c];
+      this.deps = (deps || []).map((d) => d.slice());
+      this.grid[r][c] = val;
+      this._push("compute", message);
+    }
+    markPath(cells, message) {
+      this.path = cells.map((p) => p.slice());
+      this.cur = null;
+      this.deps = [];
+      this._push("trace", message);
+    }
+    done(message) {
+      this.cur = null;
+      this.deps = [];
+      this._push("done", message);
+    }
+    _push(type, message) {
+      this.frames.push(
+        Object.freeze({
+          type,
+          rowLabels: this.rowLabels.slice(),
+          colLabels: this.colLabels.slice(),
+          grid: this.grid.map((row) => row.slice()),
+          cur: this.cur ? this.cur.slice() : null,
+          deps: this.deps.map((d) => d.slice()),
+          path: this.path.map((p) => p.slice()),
+          message
+        })
       );
     }
   };
-
-  // custom/steptrace/src/algorithms/heap-sort.ts
-  var heapSort = {
-    id: "heap-sort",
-    kind: "sort",
-    meta: { label: "Heap sort" },
-    run: (input, ops) => {
-      const n = ops.value.length;
-      ops.init(
-        `Heap sort — build a max-heap (each parent ≥ its children), then repeatedly swap the root to the end and sift the new root down.`
+  var UnionFindRecorder = class {
+    constructor(n) {
+      this.n = n;
+      this.parent = Array.from({ length: n }, (_, i) => i);
+      this.frames = [];
+      this.highlight = [];
+      this.activeEdge = null;
+    }
+    _root(x) {
+      while (this.parent[x] !== x) x = this.parent[x];
+      return x;
+    }
+    _push(type, message) {
+      const roots = [];
+      for (let i = 0; i < this.n; i++) roots.push(this._root(i));
+      this.frames.push(
+        Object.freeze({
+          type,
+          n: this.n,
+          parent: this.parent.slice(),
+          roots,
+          highlight: this.highlight.slice(),
+          activeEdge: this.activeEdge ? this.activeEdge.slice() : null,
+          message
+        })
       );
-      function siftDown(lo, hi) {
-        let root = lo;
-        while (2 * root + 1 < hi) {
-          let child = 2 * root + 1;
-          if (child + 1 < hi) {
-            ops.compare(
-              child,
-              child + 1,
-              `Compare children ${ops.value[child]} and ${ops.value[child + 1]}.`
-            );
-            if (ops.value[child + 1] > ops.value[child]) child++;
-          }
-          ops.compare(
-            root,
-            child,
-            `Compare parent ${ops.value[root]} with its larger child ${ops.value[child]}.`
-          );
-          if (ops.value[root] >= ops.value[child]) break;
-          ops.swap(root, child, `Parent is smaller — sift it down.`);
-          root = child;
-        }
-      }
-      ops.range(0, n - 1);
-      for (let i = Math.floor(n / 2) - 1; i >= 0; i--) siftDown(i, n);
-      for (let end = n - 1; end > 0; end--) {
-        ops.swap(0, end, `Move the largest value (the root) to index ${end}.`);
-        ops.markSorted([end], [end], `Index ${end} now holds its final value.`);
-        ops.range(0, end - 1);
-        siftDown(0, end);
-      }
-      ops.range(null);
-      ops.lockAll([0]);
-      ops.markSorted([0], [0], `The remaining root is the smallest — done.`);
-      ops.done(`Sorted in ${ops.comparisons} comparisons and ${ops.swaps} swaps.`);
+    }
+    init(message) {
+      this._push("init", message);
+    }
+    /** Highlight the parent-pointer path root-ward from a node. */
+    findPath(path, message) {
+      this.highlight = path.slice();
+      this.activeEdge = null;
+      this._push("find", message);
+    }
+    /** Point `child` at `par` (a union link or path compression). */
+    setParent(child, par, message) {
+      this.parent[child] = par;
+      this.activeEdge = [child, par];
+      this._push("link", message);
+    }
+    /** Clear transient highlights. */
+    clear(message) {
+      this.highlight = [];
+      this.activeEdge = null;
+      this._push("clear", message);
+    }
+    done(message) {
+      this.highlight = [];
+      this.activeEdge = null;
+      this._push("done", message);
     }
   };
-
-  // custom/steptrace/src/algorithms/insertion-sort.ts
-  var insertionSort = {
-    id: "insertion-sort",
-    kind: "sort",
-    meta: { label: "Insertion sort" },
-    run: (input, ops) => {
-      const n = ops.value.length;
-      ops.init(
-        `Insertion sort — grow a sorted prefix on the left; take each next value and slide it left past larger values into place.`
-      );
-      ops.markSorted([0], [0], `The first element alone is a sorted prefix.`);
-      for (let i = 1; i < n; i++) {
-        const key = ops.value[i];
-        ops.holdKey(key);
-        ops.compare(i, i - 1, `Take ${key} (index ${i}) and compare it into the sorted prefix.`);
-        let j = i - 1;
-        while (j >= 0 && ops.value[j] > key) {
-          ops.overwrite(
-            j + 1,
-            ops.value[j],
-            `${ops.value[j]} > ${key}: shift it right into index ${j + 1}.`,
-            j
-          );
-          j--;
-          if (j >= 0) ops.compare(j, null, `Compare ${key} with ${ops.value[j]}.`);
-        }
-        ops.overwrite(j + 1, key, `Insert ${key} at index ${j + 1}.`);
-        ops.holdKey(null);
-        ops.markSorted(
-          Array.from({ length: i + 1 }, (_, k) => k),
-          [j + 1],
-          `Sorted prefix now spans indices 0..${i}.`
-        );
+  var BitsRecorder = class {
+    constructor(width) {
+      this.width = width;
+      this.mask = 2 ** width - 1;
+      this.frames = [];
+      this.a = this._lane();
+      this.b = this._lane();
+      this.r = this._lane();
+      this.a.live = true;
+      this.labels = { a: "x", b: "− 1", r: "&" };
+      this.value = 0;
+      this.sub = null;
+      this.low = -1;
+      this.pop = 0;
+      this.total = 0;
+      this.just = -1;
+      this._result = 0;
+    }
+    _lane() {
+      return { bits: Array(this.width).fill(0), state: Array(this.width).fill(""), live: false };
+    }
+    /** Zero-padded binary string, MSB-left, `width` chars. */
+    bin(x) {
+      return (x >>> 0 & this.mask).toString(2).padStart(this.width, "0");
+    }
+    /** Index of the lowest set bit (bits[0]=LSB), or -1 when x is zero. */
+    lowestSetBit(x) {
+      x = x >>> 0 & this.mask;
+      return x === 0 ? -1 : 31 - Math.clz32(x & -x);
+    }
+    /** Population count — the number of iterations (and the tally width). */
+    popcount(x) {
+      x = x >>> 0 & this.mask;
+      let c = 0;
+      while (x) {
+        x &= x - 1;
+        c++;
       }
-      ops.done(`Sorted in ${ops.comparisons} comparisons and ${ops.swaps} moves.`);
+      return c;
+    }
+    _fill(lane, x) {
+      x = x >>> 0 & this.mask;
+      for (let i = 0; i < this.width; i++) lane.bits[i] = x >> i & 1;
+    }
+    _snap(lane) {
+      return { bits: lane.bits.slice(), state: lane.state.slice(), live: lane.live };
+    }
+    _push(type, message) {
+      this.frames.push(
+        Object.freeze({
+          type,
+          width: this.width,
+          labels: { ...this.labels },
+          a: this._snap(this.a),
+          b: this._snap(this.b),
+          r: this._snap(this.r),
+          value: this.value,
+          sub: this.sub,
+          low: this.low,
+          pop: this.pop,
+          total: this.total,
+          just: this.just,
+          message
+        })
+      );
+    }
+    init(x, labels, message) {
+      this.value = x >>> 0 & this.mask;
+      if (labels) this.labels = { a: labels.a, b: labels.b, r: labels.r };
+      this.total = this.popcount(this.value);
+      this._fill(this.a, this.value);
+      this.a.state.fill("");
+      this.a.live = true;
+      this.b = this._lane();
+      this.r = this._lane();
+      this.low = -1;
+      this.sub = null;
+      this.pop = 0;
+      this.just = -1;
+      this._push("init", message);
+    }
+    /** Locate + decrement in one beat: in lane x the lowest 1 turns amber (it is
+     *  about to die); lane x−1 goes live showing that 1 flipped to 0 (amber) and
+     *  the zeros beneath it borrowed up to 1 (blue). */
+    subtract(sub, low, message) {
+      this.sub = sub >>> 0 & this.mask;
+      this.low = low;
+      this.just = -1;
+      this.a.state.fill("");
+      this.a.state[low] = "die";
+      this.b.live = true;
+      this._fill(this.b, this.sub);
+      this.b.state.fill("");
+      this.b.state[low] = "die";
+      for (let i = 0; i < low; i++) this.b.state[i] = "borrow";
+      this._push("subtract", message);
+    }
+    /** AND the two lanes: lane r goes live; bit `low` and everything under it are
+     *  struck out (gone), the surviving 1s above stay plain. Lane x keeps its
+     *  amber marker so the eye tracks the removed bit across the equation. */
+    and(res, low, message) {
+      this._result = res >>> 0 & this.mask;
+      this.low = low;
+      this.just = -1;
+      this.b.state.fill("");
+      this.r.live = true;
+      this._fill(this.r, this._result);
+      this.r.state.fill("");
+      for (let i = 0; i <= low; i++) this.r.state[i] = "gone";
+      this._push("and", message);
+    }
+    /** Commit x ← result: lane x becomes the survivors, lanes b/r dim back to
+     *  placeholders, and one more tally square fills (just = its index). */
+    commit(message) {
+      this.value = this._result;
+      this._fill(this.a, this.value);
+      this.a.state.fill("");
+      this.b = this._lane();
+      this.r = this._lane();
+      this.low = -1;
+      this.just = this.pop;
+      this.pop += 1;
+      this._push("commit", message);
+    }
+    done(message) {
+      this.low = -1;
+      this.just = -1;
+      this._push("done", message);
     }
   };
-
-  // custom/steptrace/src/algorithms/kernighan-popcount.ts
-  var kernighanPopcount = {
-    id: "kernighan-popcount",
-    kind: "bits",
-    meta: { label: "Kernighan population count" },
-    run: (input, ops) => {
-      let x = Number(input.value) >>> 0 & ops.mask;
-      const total = ops.popcount(x);
-      ops.init(
-        x,
-        { a: "x", b: "− 1", r: "&" },
-        `x = ${x} has ${total} one${total === 1 ? "" : "s"}. Each pass, x & (x−1) deletes the lowest 1 — so the loop runs ${total} time${total === 1 ? "" : "s"}, once per set bit.`
+  var BacktrackRecorder = class {
+    constructor() {
+      this.n = 0;
+      this.frames = [];
+      this._queens = [];
+      this.placed = 0;
+      this.pruned = 0;
+      this.depth = 0;
+      this._solved = false;
+    }
+    /** Committed placements, live (algorithm reads this for its conflict check). */
+    get queens() {
+      return this._queens.slice();
+    }
+    _push(type, cursor, conflict, message) {
+      this.frames.push(
+        Object.freeze({
+          type,
+          n: this.n,
+          queens: this._queens.slice(),
+          cursor,
+          conflict,
+          placed: this.placed,
+          pruned: this.pruned,
+          depth: this.depth,
+          solved: this._solved,
+          message
+        })
       );
-      let pop = 0;
-      while (x !== 0) {
-        const low = ops.lowestSetBit(x);
-        const sub = x - 1 & ops.mask;
-        ops.subtract(
-          sub,
-          low,
-          `Lowest 1 is at bit ${low}. Subtracting 1 flips it to 0 and turns every zero below it into a 1.`
-        );
-        const res = x & sub;
-        ops.and(
-          res,
-          low,
-          `AND the two: the survivors above stay, bit ${low} and everything under it are wiped — exactly one 1 gone.`
-        );
-        pop++;
-        x = res;
-        ops.commit(`x ← ${x}. ${pop} of ${total} ones cleared.`);
-      }
-      ops.done(
-        `x = 0 — every 1 is gone. It took ${total} pass${total === 1 ? "" : "es"}, so x had ${total} set bit${total === 1 ? "" : "s"}.`
+    }
+    board(n, message) {
+      this.n = n;
+      this._queens = Array(n).fill(null);
+      this._push("board", null, null, message);
+    }
+    /** Try (row,col) fails: it clashes with the queen already in `attackerRow`. */
+    reject(row, col, attackerRow, message) {
+      this.pruned++;
+      this._push(
+        "reject",
+        { row, col },
+        { row: attackerRow, col: this._queens[attackerRow] },
+        message
       );
+    }
+    place(row, col, message) {
+      this._queens[row] = col;
+      this.placed++;
+      this.depth++;
+      this._push("place", { row, col }, null, message);
+    }
+    /** Retreat: capture the square BEFORE clearing so the renderer flashes the tear-off. */
+    backtrack(row, message) {
+      const cursor = { row, col: this._queens[row] };
+      this._queens[row] = null;
+      this.depth--;
+      this._push("backtrack", cursor, null, message);
+    }
+    solved(message) {
+      this._solved = true;
+      this._push("solved", null, null, message);
+    }
+    done(message) {
+      this._push("done", null, null, message);
     }
   };
-
-  // custom/steptrace/src/algorithms/kmp.ts
-  var kmp = {
-    id: "kmp",
-    kind: "string",
-    meta: { label: "KMP" },
-    run: (input, ops) => {
-      const text = String(input.text || "");
-      const pattern = String(input.pattern || "");
-      const n = text.length;
-      const m = pattern.length;
-      ops.init(
-        `KMP search for "${pattern}" — on a mismatch, the failure function slides the pattern forward without re-checking characters already known to match.`
-      );
-      if (!m || m > n) {
-        ops.done("Nothing to search.");
-        return;
-      }
-      const lps = new Array(m).fill(0);
-      let len = 0;
-      for (let idx = 1; idx < m; ) {
-        if (pattern[idx] === pattern[len]) {
-          len++;
-          lps[idx] = len;
-          idx++;
-        } else if (len > 0) {
-          len = lps[len - 1];
-        } else {
-          lps[idx] = 0;
-          idx++;
-        }
-      }
-      let i = 0;
-      let j = 0;
-      while (i < n) {
-        const isMatch = text[i] === pattern[j];
-        ops.compare(
-          i,
-          j,
-          i - j,
-          isMatch,
-          `Compare text[${i}]='${text[i]}' with pattern[${j}]='${pattern[j]}' → ${isMatch ? "match" : "mismatch"}.`
-        );
-        if (isMatch) {
-          i++;
-          j++;
-          if (j === m) {
-            ops.matchAt(i - j, `Whole pattern matched — occurrence at index ${i - j}.`);
-            j = lps[j - 1];
-          }
-        } else if (j > 0) {
-          j = lps[j - 1];
-          ops.slide(
-            i - j,
-            `Mismatch — reuse the matched prefix: realign so ${j} char${j === 1 ? "" : "s"} already line up (no re-check).`
-          );
-        } else {
-          i++;
-          ops.slide(i, `Mismatch at the pattern start — slide forward by one.`);
-        }
-      }
-      ops.done(
-        ops.found.length ? `Found ${ops.found.length} occurrence(s): index ${ops.found.join(", ")}.` : `Pattern not found.`
+  var RecTreeRecorder = class {
+    constructor() {
+      this.frames = [];
+      this._nodes = Object.freeze([]);
+      this._edges = Object.freeze([]);
+      this._vis = /* @__PURE__ */ new Set();
+      this._state = {};
+      this._vals = {};
+      this._collapsed = /* @__PURE__ */ new Set();
+      this._memo = [];
+      this.calls = 0;
+      this.hits = 0;
+      this._phase = "naive";
+      this._active = null;
+    }
+    _push(type, message) {
+      this.frames.push(
+        Object.freeze({
+          type,
+          nodes: this._nodes,
+          edges: this._edges,
+          active: this._active,
+          vis: Object.freeze([...this._vis]),
+          state: Object.freeze({ ...this._state }),
+          vals: Object.freeze({ ...this._vals }),
+          collapsed: Object.freeze([...this._collapsed]),
+          memo: Object.freeze(this._memo.map((m) => Object.freeze({ ...m }))),
+          calls: this.calls,
+          hits: this.hits,
+          phase: this._phase,
+          message
+        })
       );
     }
-  };
-
-  // custom/steptrace/src/algorithms/lcs.ts
-  var lcs = {
-    id: "lcs",
-    kind: "dp",
-    meta: { label: "Longest common subsequence" },
-    run: (input, ops) => {
-      const A = String(input.a != null ? input.a : input.text || "");
-      const B = String(input.b != null ? input.b : input.pattern || "");
-      const m = A.length;
-      const n = B.length;
-      const rowLabels = ["∅", ...A.split("")];
-      const colLabels = ["∅", ...B.split("")];
-      ops.board(
-        rowLabels,
-        colLabels,
-        `Longest common subsequence of "${A}" and "${B}". Cell dp[i][j] holds the LCS length of the first i letters of "${A}" and the first j of "${B}".`
-      );
-      const dp = Array.from({ length: m + 1 }, () => Array(n + 1).fill(0));
-      for (let c2 = 0; c2 <= n; c2++) ops.set(0, c2, 0, [], `An empty first string has LCS 0.`);
-      for (let r2 = 1; r2 <= m; r2++) ops.set(r2, 0, 0, [], `An empty second string has LCS 0.`);
-      for (let r2 = 1; r2 <= m; r2++) {
-        for (let c2 = 1; c2 <= n; c2++) {
-          if (A[r2 - 1] === B[c2 - 1]) {
-            dp[r2][c2] = dp[r2 - 1][c2 - 1] + 1;
-            ops.set(
-              r2,
-              c2,
-              dp[r2][c2],
-              [[r2 - 1, c2 - 1]],
-              `'${A[r2 - 1]}' = '${B[c2 - 1]}' → take the diagonal + 1 = ${dp[r2][c2]}.`
-            );
-          } else {
-            dp[r2][c2] = Math.max(dp[r2 - 1][c2], dp[r2][c2 - 1]);
-            const better = dp[r2 - 1][c2] >= dp[r2][c2 - 1] ? "top" : "left";
-            ops.set(
-              r2,
-              c2,
-              dp[r2][c2],
-              [
-                [r2 - 1, c2],
-                [r2, c2 - 1]
-              ],
-              `'${A[r2 - 1]}' ≠ '${B[c2 - 1]}' → this letter can't extend the match, so the optimum here is inherited from an optimal sub-answer: the better of top (${dp[r2 - 1][c2]}) and left (${dp[r2][c2 - 1]}) = ${dp[r2][c2]} (from the ${better}).`
-            );
-          }
-        }
+    /** The full naive call tree — laid out once, reused (same frozen arrays) forever. */
+    tree(nodes, edges, message) {
+      this._nodes = Object.freeze(nodes.map((n) => Object.freeze({ ...n })));
+      this._edges = Object.freeze(edges.map((e) => Object.freeze({ ...e })));
+      this._active = null;
+      this._push("tree", message);
+    }
+    /** Enter a new phase: "memo" re-runs the SAME tree, so wipe reveal + counters. */
+    phase(name, message) {
+      this._phase = name;
+      if (name === "memo") {
+        this._vis = /* @__PURE__ */ new Set();
+        this._state = {};
+        this._vals = {};
+        this._collapsed = /* @__PURE__ */ new Set();
+        this._memo = [];
+        this.calls = 0;
+        this.hits = 0;
       }
-      let r = m;
-      let c = n;
-      const path = [];
-      while (r > 0 && c > 0) {
-        if (A[r - 1] === B[c - 1]) {
-          path.unshift([r, c]);
-          ops.markPath(
-            path,
-            `dp[${r}][${c}]: '${A[r - 1]}' = '${B[c - 1]}' — this cell was built from dp[${r - 1}][${c - 1}] + 1, so '${A[r - 1]}' joins the LCS. Step diagonally to that sub-answer.`
-          );
-          r--;
-          c--;
-        } else if (dp[r - 1][c] >= dp[r][c - 1]) {
-          ops.markPath(
-            path,
-            `dp[${r}][${c}]: '${A[r - 1]}' ≠ '${B[c - 1]}' — its optimum was inherited from the top sub-answer dp[${r - 1}][${c}]. Follow it upward; no letter added.`
-          );
-          r--;
-        } else {
-          ops.markPath(
-            path,
-            `dp[${r}][${c}]: '${A[r - 1]}' ≠ '${B[c - 1]}' — its optimum was inherited from the left sub-answer dp[${r}][${c - 1}]. Follow it leftward; no letter added.`
-          );
-          c--;
-        }
+      this._active = null;
+      this._push("phase", message);
+    }
+    /** naive: an internal call — recompute both children from scratch. */
+    enter(id, message) {
+      this._active = id;
+      this._vis.add(id);
+      this._state[id] = "compute";
+      this.calls++;
+      this._push("enter", message);
+    }
+    /** naive: a base case leaf (k < 2). */
+    base(id, val, message) {
+      this._active = id;
+      this._vis.add(id);
+      this._state[id] = "base";
+      this._vals[id] = val;
+      this.calls++;
+      this._push("base", message);
+    }
+    /** memo: first sight of f(k) — compute + store it. */
+    miss(id, k, val, message) {
+      this._active = id;
+      this._vis.add(id);
+      this._state[id] = "miss";
+      this._vals[id] = val;
+      this._memo.push({ k, v: val });
+      this.calls++;
+      this._push("miss", message);
+    }
+    /** memo: f(k) already stored — reuse it and collapse (dim) the subtree it saved. */
+    hit(id, k, val, subtreeIds, message) {
+      this._active = id;
+      this._vis.add(id);
+      this._state[id] = "hit";
+      this._vals[id] = val;
+      for (const s of subtreeIds) {
+        this._vis.add(s);
+        this._collapsed.add(s);
       }
-      const lcs2 = path.map((p) => A[p[0] - 1]).join("");
-      ops.markPath(
-        path,
-        `Traceback done: the ${path.length} diagonal step${path.length === 1 ? "" : "s"} spell the LCS "${lcs2}".`
-      );
-      ops.done(`LCS length = ${dp[m][n]} ("${lcs2}").`);
+      this.calls++;
+      this.hits++;
+      this._push("hit", message);
     }
-  };
-
-  // custom/steptrace/src/algorithms/linear-search.ts
-  var linearSearch = {
-    id: "linear-search",
-    kind: "search",
-    meta: { label: "Linear search" },
-    run: (input, ops) => {
-      const a = ops.value;
-      const target = input.target;
-      const n = a.length;
-      ops.mode = "scan";
-      ops.init(
-        `Linear search for ${target} — scan left to right, comparing every element until a match is found (or the array ends).`
-      );
-      for (let i = 0; i < n; i++) {
-        ops.probe(0, n - 1, i, `Check index ${i}: is ${a[i]} the target ${target}?`);
-        if (a[i] === target) {
-          ops.hit(i, `${a[i]} equals ${target} — found it at index ${i}.`);
-          ops.done(
-            `Found ${target} at index ${i} after ${ops.comparisons} comparison${ops.comparisons === 1 ? "" : "s"}.`
-          );
-          return;
-        }
-      }
-      ops.done(
-        `${target} is not in the array — scanned all ${n} elements (${ops.comparisons} comparisons).`
-      );
-    }
-  };
-
-  // custom/steptrace/src/algorithms/merge-sort.ts
-  var mergeSort = {
-    id: "merge-sort",
-    kind: "sort",
-    meta: { label: "Merge sort" },
-    run: (input, ops) => {
-      const n = ops.value.length;
-      ops.init(
-        `Merge sort — start with runs of length 1, then repeatedly merge adjacent runs into larger sorted runs (watch the sorted runs double).`
-      );
-      for (let width = 1; width < n; width *= 2) {
-        for (let lo = 0; lo < n; lo += 2 * width) {
-          const mid = Math.min(lo + width, n);
-          const hi = Math.min(lo + 2 * width, n);
-          if (mid >= hi) continue;
-          ops.range(lo, hi - 1);
-          const left = ops.value.slice(lo, mid);
-          const right = ops.value.slice(mid, hi);
-          ops.candidate(
-            null,
-            `Merge the left run [${lo}, ${mid - 1}] and the right run [${mid}, ${hi - 1}] into one sorted run [${lo}, ${hi - 1}].`
-          );
-          let i = 0;
-          let j = 0;
-          let k = lo;
-          while (i < left.length && j < right.length) {
-            if (left[i] <= right[j]) {
-              ops.overwrite(
-                k,
-                left[i],
-                `${left[i]} ≤ ${right[j]}: place ${left[i]} from the left half at index ${k}.`,
-                lo + i
-              );
-              i++;
-            } else {
-              ops.overwrite(
-                k,
-                right[j],
-                `${right[j]} < ${left[i]}: place ${right[j]} from the right half at index ${k}.`,
-                mid + j
-              );
-              j++;
-            }
-            k++;
-          }
-          while (i < left.length) {
-            ops.overwrite(
-              k,
-              left[i],
-              `Copy the remaining ${left[i]} from the left half at index ${k}.`,
-              lo + i
-            );
-            i++;
-            k++;
-          }
-          while (j < right.length) {
-            ops.overwrite(
-              k,
-              right[j],
-              `Copy the remaining ${right[j]} from the right half at index ${k}.`,
-              mid + j
-            );
-            j++;
-            k++;
-          }
-        }
-        ops.range(null);
-      }
-      ops.lockAll(Array.from({ length: n }, (_, k) => k));
-      ops.done(`Sorted in ${ops.swaps} writes.`);
-    }
-  };
-
-  // custom/steptrace/src/algorithms/n-queens.ts
-  var nQueens = {
-    id: "n-queens",
-    kind: "backtrack",
-    meta: { label: "N-Queens (backtracking)" },
-    run: (input, ops) => {
-      const n = Math.min(Math.max(input.n || 4, 4), 6);
-      ops.board(
-        n,
-        `Place ${n} queens on a ${n}×${n} board so none attack another. Fill one queen per row; retreat whenever a row has no safe square.`
-      );
-      const conflict = (row, col) => {
-        const q = ops.queens;
-        for (let r = 0; r < row; r++) if (q[r] === col || Math.abs(q[r] - col) === row - r) return r;
-        return -1;
-      };
-      let solved = false;
-      const solve = (row) => {
-        if (solved) return;
-        if (row === n) {
-          ops.solved(`All ${n} rows filled — no queen attacks another.`);
-          solved = true;
-          return;
-        }
-        for (let col = 0; col < n; col++) {
-          const bad = conflict(row, col);
-          if (bad >= 0) {
-            ops.reject(
-              row,
-              col,
-              bad,
-              `Row ${row}, column ${col} clashes with the queen in row ${bad} — prune this square.`
-            );
-            continue;
-          }
-          ops.place(row, col, `Column ${col} is safe — place a queen and descend to row ${row + 1}.`);
-          solve(row + 1);
-          if (solved) return;
-          ops.backtrack(
-            row,
-            `Row ${row + 1} had no safe square — remove the queen at (${row}, ${col}) and retreat.`
-          );
-        }
-      };
-      solve(0);
-      ops.done(solved ? `Solved — a valid ${n}-queens arrangement.` : `No solution for n = ${n}.`);
-    }
-  };
-
-  // custom/steptrace/src/algorithms/prim.ts
-  var prim = {
-    id: "prim",
-    kind: "graph",
-    meta: { label: "Prim's MST", frontierLabel: "Frontier" },
-    run: (input, ops, graph) => {
-      const adj = {};
-      for (const nd of graph.nodes) adj[nd.id] = [];
-      for (const e of graph.edges) {
-        const w = e.weight == null ? 1 : e.weight;
-        adj[e.from].push({ to: e.to, w });
-        if (!graph.directed) adj[e.to].push({ to: e.from, w });
-      }
-      const start = input.start;
-      ops.init(
-        `Prim's algorithm — grow a minimum spanning tree from ${start}, each step adding the cheapest edge that reaches a node not yet in the tree.`
-      );
-      const pairKey = (a, b) => a < b ? a + "|" + b : b + "|" + a;
-      const inTree = /* @__PURE__ */ new Set([start]);
-      const treeEdges = /* @__PURE__ */ new Set();
-      const skipped = /* @__PURE__ */ new Set();
-      ops.visit(start, `Start the tree at ${start}.`);
-      let total = 0;
-      while (inTree.size < graph.nodes.length) {
-        const cand = [];
-        const seenPair = /* @__PURE__ */ new Set();
-        for (const u of inTree)
-          for (const { to: v, w } of adj[u]) {
-            const key = pairKey(u, v);
-            if (seenPair.has(key)) continue;
-            seenPair.add(key);
-            cand.push({ u, v, w, key });
-          }
-        cand.sort((a, b) => a.w - b.w || (a.key < b.key ? -1 : 1));
-        let chosen = null;
-        for (const c of cand) {
-          if (inTree.has(c.v)) {
-            if (!treeEdges.has(c.key) && !skipped.has(c.key)) {
-              skipped.add(c.key);
-              ops.edge(
-                c.u,
-                c.v,
-                `${c.u}–${c.v} (weight ${c.w}) links two nodes already in the tree — skip it, adding it would make a cycle.`
-              );
-            }
-            continue;
-          }
-          chosen = c;
-          break;
-        }
-        if (!chosen) break;
-        ops.edge(
-          chosen.u,
-          chosen.v,
-          `Cheapest edge leaving the tree: ${chosen.u}–${chosen.v} (weight ${chosen.w}).`
-        );
-        ops.selectEdge(chosen.u, chosen.v, `Add ${chosen.u}–${chosen.v} to the tree.`);
-        treeEdges.add(chosen.key);
-        inTree.add(chosen.v);
-        ops.visit(chosen.v, `${chosen.v} joins the tree.`);
-        total += chosen.w;
-      }
-      ops.done(`Minimum spanning tree complete — total weight ${total}.`);
-    }
-  };
-
-  // custom/steptrace/src/algorithms/quick-sort.ts
-  var quickSort = {
-    id: "quick-sort",
-    kind: "sort",
-    meta: { label: "Quick sort" },
-    run: (input, ops) => {
-      const n = ops.value.length;
-      ops.init(
-        `Quick sort — pick a pivot, partition values so smaller ones go left and larger ones go right, then recurse on each side.`
-      );
-      function partition(lo, hi) {
-        const pivot = ops.value[hi];
-        ops.range(lo, hi);
-        ops.pivot(hi);
-        ops.candidate(
-          hi,
-          `Partition [${lo}, ${hi}]: pivot ${pivot} (index ${hi}) — send values < ${pivot} left, > ${pivot} right.`
-        );
-        let i = lo;
-        for (let j = lo; j < hi; j++) {
-          ops.compare(j, hi, `Compare ${ops.value[j]} with pivot ${pivot}.`);
-          if (ops.value[j] < pivot) {
-            if (i !== j)
-              ops.swap(
-                i,
-                j,
-                `${ops.value[j]} < ${pivot}: move it into the left region at index ${i}.`
-              );
-            i++;
-          }
-        }
-        if (i !== hi) ops.swap(i, hi, `Swap the pivot ${pivot} into index ${i}.`);
-        ops.pivot(i);
-        ops.candidate(
-          null,
-          `Pivot ${pivot} settles at index ${i} — everything left is < ${pivot}, everything right is > ${pivot}.`
-        );
-        ops.pivot(null);
-        ops.markSorted([i], [i], `Index ${i} is final — it never moves again.`);
-        ops.range(null);
-        return i;
-      }
-      function qs(lo, hi) {
-        if (lo > hi) return;
-        if (lo === hi) {
-          ops.markSorted([lo], [lo], `A single element at index ${lo} is already in place.`);
-          return;
-        }
-        const p = partition(lo, hi);
-        if (p - 1 - lo >= 1) {
-          ops.range(lo, p - 1);
-          ops.candidate(
-            null,
-            `Recurse into the left half [${lo}, ${p - 1}] (the values below the pivot).`
-          );
-        }
-        qs(lo, p - 1);
-        if (hi - (p + 1) >= 1) {
-          ops.range(p + 1, hi);
-          ops.candidate(
-            null,
-            `Recurse into the right half [${p + 1}, ${hi}] (the values above the pivot).`
-          );
-        }
-        qs(p + 1, hi);
-      }
-      qs(0, n - 1);
-      ops.done(`Sorted in ${ops.comparisons} comparisons and ${ops.swaps} swaps.`);
-    }
-  };
-
-  // custom/steptrace/src/algorithms/rabin-karp.ts
-  var rabinKarp = {
-    id: "rabin-karp",
-    kind: "string",
-    meta: { label: "Rabin-Karp" },
-    run: (input, ops) => {
-      const text = String(input.text || "");
-      const pattern = String(input.pattern || "");
-      const n = text.length;
-      const m = pattern.length;
-      const B = 256;
-      const MOD = 101;
-      const hash = (s) => {
-        let h = 0;
-        for (let k = 0; k < s.length; k++) h = (h * B + s.charCodeAt(k)) % MOD;
-        return h;
-      };
-      if (!m || m > n) {
-        ops.init(`Rabin-Karp for "${pattern}".`);
-        ops.done("Nothing to search.");
-        return;
-      }
-      const ph = hash(pattern);
-      ops.init(
-        `Rabin-Karp search for "${pattern}" — slide a window, compare its rolling hash to the pattern hash (${ph}), and only verify character-by-character when the hashes collide.`
-      );
-      let highPow = 1;
-      for (let k = 0; k < m - 1; k++) highPow = highPow * B % MOD;
-      let wh = hash(text.slice(0, m));
-      for (let s = 0; s <= n - m; s++) {
-        ops.hashStep(
-          s,
-          wh,
-          ph,
-          `Window [${s}, ${s + m - 1}]: hash ${wh} ${wh === ph ? "=" : "≠"} pattern hash ${ph}${wh === ph ? " — verify" : " — skip"}.`
-        );
-        if (wh === ph) {
-          let ok = true;
-          for (let j = 0; j < m; j++) {
-            const isMatch = text[s + j] === pattern[j];
-            ops.compare(
-              s + j,
-              j,
-              s,
-              isMatch,
-              `Hash hit — verify text[${s + j}]='${text[s + j]}' vs pattern[${j}]='${pattern[j]}'.`
-            );
-            if (!isMatch) {
-              ok = false;
-              break;
-            }
-          }
-          if (ok) ops.matchAt(s, `Verified — occurrence at index ${s}.`);
-        }
-        if (s < n - m) {
-          const removed = text.charCodeAt(s) * highPow % MOD;
-          wh = (wh - removed + MOD) % MOD;
-          wh = (wh * B + text.charCodeAt(s + m)) % MOD;
-        }
-      }
-      ops.done(
-        ops.found.length ? `Found ${ops.found.length} occurrence(s): index ${ops.found.join(", ")}.` : `Pattern not found.`
-      );
-    }
-  };
-
-  // custom/steptrace/src/algorithms/selection-sort.ts
-  var selectionSort = {
-    id: "selection-sort",
-    kind: "sort",
-    meta: { label: "Selection sort" },
-    run: (input, ops) => {
-      const n = ops.value.length;
-      ops.init(
-        `Selection sort — repeatedly find the smallest value in the unsorted region and swap it into the next sorted slot.`
-      );
-      for (let i = 0; i < n - 1; i++) {
-        let min = i;
-        ops.candidate(min, `Assume index ${i} (${ops.value[i]}) is the smallest of the rest.`);
-        for (let j = i + 1; j < n; j++) {
-          ops.compare(j, min, `Compare ${ops.value[j]} with the current smallest ${ops.value[min]}.`);
-          if (ops.value[j] < ops.value[min]) {
-            min = j;
-            ops.candidate(min, `New smallest: ${ops.value[min]} at index ${min}.`);
-          }
-        }
-        if (min !== i) ops.swap(i, min, `Swap the smallest (${ops.value[min]}) into index ${i}.`);
-        ops.candidate(null, `Index ${i} settled — scan the remaining region next.`);
-        ops.markSorted([i], [i], `Index ${i} now holds its final value.`);
-      }
-      ops.lockAll([n - 1]);
-      ops.markSorted([n - 1], [n - 1], `The last element is already in place.`);
-      ops.done(`Sorted in ${ops.comparisons} comparisons and ${ops.swaps} swaps.`);
-    }
-  };
-
-  // custom/steptrace/src/algorithms/sliding-window.ts
-  var slidingWindow = {
-    id: "sliding-window",
-    kind: "pointers",
-    meta: { label: "Sliding window" },
-    run: (input, ops) => {
-      const a = ops.value;
-      const target = input.target;
-      ops.init(
-        `Sliding window — find the shortest contiguous subarray with sum ≥ ${target}. Expand the window right to grow the sum; shrink from the left while it stays ≥ ${target}.`
-      );
-      let lo = 0;
-      let sum = 0;
-      let best = Infinity;
-      let bestRange = null;
-      for (let hi = 0; hi < a.length; hi++) {
-        sum += a[hi];
-        ops.step(
-          { pointers: { lo, hi }, window: [lo, hi] },
-          `Expand right to index ${hi}: window sum = ${sum}.`
-        );
-        while (sum >= target) {
-          if (hi - lo + 1 < best) {
-            best = hi - lo + 1;
-            bestRange = [lo, hi];
-          }
-          ops.step(
-            { pointers: { lo, hi }, window: [lo, hi] },
-            `Sum ${sum} ≥ ${target} (length ${hi - lo + 1}) — record it, then shrink from the left.`
-          );
-          sum -= a[lo];
-          lo++;
-        }
-      }
-      if (bestRange) {
-        const marks = [];
-        for (let k = bestRange[0]; k <= bestRange[1]; k++) marks.push(k);
-        ops.step(
-          { pointers: {}, window: bestRange, mark: marks },
-          `Shortest window: indices ${bestRange[0]}..${bestRange[1]} (length ${best}).`
-        );
-        ops.done(`Answer: the shortest qualifying length is ${best}.`);
-      } else {
-        ops.done(`No subarray reaches ${target}.`);
-      }
-    }
-  };
-
-  // custom/steptrace/src/algorithms/topological-sort.ts
-  var topologicalSort = {
-    id: "topological-sort",
-    kind: "graph",
-    meta: { label: "Topological sort (Kahn)", frontierLabel: "Ready queue (in-degree 0)" },
-    run: (input, ops, graph) => {
-      const adj = {};
-      const indeg = {};
-      for (const nd of graph.nodes) {
-        adj[nd.id] = [];
-        indeg[nd.id] = 0;
-      }
-      for (const e of graph.edges) {
-        adj[e.from].push(e.to);
-        indeg[e.to] = (indeg[e.to] || 0) + 1;
-      }
-      ops.init(
-        `Topological sort (Kahn's algorithm) — repeatedly take a node with no remaining prerequisites (in-degree 0) and append it to the order; removing it may make others ready.`
-      );
-      const ready = [];
-      for (const nd of graph.nodes) {
-        if (indeg[nd.id] === 0) {
-          ready.push(nd.id);
-          ops.enqueue(nd.id, null, `${nd.id} has in-degree 0 — ready.`);
-        }
-      }
-      const order = [];
-      while (ready.length) {
-        ready.sort();
-        const u = ready.shift();
-        ops.visit(u, `Output ${u} (position ${order.length + 1} in the order).`);
-        order.push(u);
-        for (const v of adj[u].slice().sort()) {
-          ops.edge(u, v, `Remove edge ${u}→${v}: in-degree of ${v} becomes ${indeg[v] - 1}.`);
-          indeg[v]--;
-          if (indeg[v] === 0) {
-            ready.push(v);
-            ops.enqueue(v, null, `${v} is now ready.`);
-          }
-        }
-      }
-      ops.done(
-        order.length === graph.nodes.length ? `Topological order: ${order.join(" → ")}.` : `A cycle remains (${graph.nodes.length - order.length} node(s) unresolved) — no valid ordering.`
-      );
-    }
-  };
-
-  // custom/steptrace/src/algorithms/two-pointers.ts
-  var twoPointers = {
-    id: "two-pointers",
-    kind: "pointers",
-    meta: { label: "Two pointers" },
-    run: (input, ops) => {
-      const a = ops.value;
-      const target = input.target;
-      ops.init(
-        `Two pointers on a sorted array — find a pair summing to ${target}. Move the left pointer right to raise the sum, the right pointer left to lower it.`
-      );
-      let l = 0;
-      let r = a.length - 1;
-      while (l < r) {
-        const sum = a[l] + a[r];
-        ops.step(
-          { pointers: { L: l, R: r }, window: [l, r] },
-          `a[${l}] + a[${r}] = ${a[l]} + ${a[r]} = ${sum}.`
-        );
-        if (sum === target) {
-          ops.step(
-            { pointers: { L: l, R: r }, window: [l, r], mark: [l, r] },
-            `${a[l]} + ${a[r]} = ${target} — found the pair.`
-          );
-          ops.done(`Found a pair at indices ${l} and ${r}.`);
-          return;
-        }
-        if (sum < target) l++;
-        else r--;
-      }
-      ops.done(`No pair sums to ${target}.`);
-    }
-  };
-
-  // custom/steptrace/src/algorithms/union-find.ts
-  var unionFind = {
-    id: "union-find",
-    kind: "unionfind",
-    meta: { label: "Union-Find" },
-    run: (input, ops) => {
-      const n = input.n || 7;
-      ops.init(
-        `Union-Find on ${n} elements — union merges two sets; find returns a set's representative (its root), flattening the path it walks (path compression).`
-      );
-      const operations = Array.isArray(input.ops) && input.ops.length ? input.ops : [
-        ["union", 0, 1],
-        ["union", 2, 3],
-        ["union", 4, 5],
-        ["union", 1, 2],
-        ["find", 3],
-        ["union", 6, 4]
-      ];
-      const findRoot = (x, why) => {
-        const pathToRoot = [x];
-        let c = x;
-        while (ops.parent[c] !== c) {
-          c = ops.parent[c];
-          pathToRoot.push(c);
-        }
-        ops.findPath(pathToRoot, `${why} follow ${pathToRoot.join(" → ")} to root ${c}.`);
-        for (const node of pathToRoot) {
-          if (node !== c && ops.parent[node] !== c)
-            ops.setParent(node, c, `Path compression: point ${node} straight at root ${c}.`);
-        }
-        return c;
-      };
-      for (const op of operations) {
-        if (op[0] === "union") {
-          const a = op[1];
-          const b = op[2];
-          const ra = findRoot(a, `Union(${a}, ${b}):`);
-          const rb = findRoot(b, `Union(${a}, ${b}):`);
-          if (ra === rb) ops.clear(`${a} and ${b} are already in the same set.`);
-          else ops.setParent(ra, rb, `Link root ${ra} under root ${rb} — the two sets merge.`);
-        } else if (op[0] === "find") {
-          const x = op[1];
-          const rt = findRoot(x, `Find(${x}):`);
-          ops.clear(`Find(${x}) = ${rt}.`);
-        }
-      }
-      const roots = /* @__PURE__ */ new Set();
-      for (let i = 0; i < n; i++) {
-        let c = i;
-        while (ops.parent[c] !== c) c = ops.parent[c];
-        roots.add(c);
-      }
-      ops.done(`Done — ${roots.size} disjoint set${roots.size === 1 ? "" : "s"} remain.`);
-    }
-  };
-
-  // custom/steptrace/src/algorithms/index.ts
-  var builtInAlgorithms = [
-    bubbleSort,
-    insertionSort,
-    selectionSort,
-    quickSort,
-    heapSort,
-    mergeSort,
-    bfs,
-    dfs,
-    dijkstra,
-    prim,
-    topologicalSort,
-    binarySearch,
-    linearSearch,
-    kmp,
-    rabinKarp,
-    twoPointers,
-    slidingWindow,
-    lcs,
-    unionFind,
-    kernighanPopcount,
-    nQueens,
-    fibonacci
-  ];
-
-  // custom/steptrace/src/player.ts
-  var Player = class {
-    constructor(frames, paint, speed) {
-      this.frames = frames;
-      this.paint = paint;
-      this.i = 0;
-      this.speed = speed || 1;
-      this.playing = false;
-      this.timer = null;
-      this.baseDelay = 780;
-      this.onState = () => {
-      };
-    }
-    render() {
-      this.paint(this.frames[this.i], this.i, this.frames.length);
-      this.onState();
-    }
-    _clear() {
-      if (this.timer) {
-        clearTimeout(this.timer);
-        this.timer = null;
-      }
-    }
-    _loop() {
-      if (!this.playing) return;
-      if (this.i >= this.frames.length - 1) {
-        this.playing = false;
-        this.onState();
-        return;
-      }
-      this.timer = setTimeout(() => {
-        this.i++;
-        this.render();
-        this._loop();
-      }, this.baseDelay / this.speed);
-    }
-    play() {
-      if (this.i >= this.frames.length - 1) this.i = 0;
-      this.playing = true;
-      this.render();
-      this.onState();
-      this._loop();
-    }
-    pause() {
-      this.playing = false;
-      this._clear();
-      this.onState();
-    }
-    toggle() {
-      this.playing ? this.pause() : this.play();
-    }
-    stepF() {
-      this.pause();
-      if (this.i < this.frames.length - 1) this.i++;
-      this.render();
-    }
-    stepB() {
-      this.pause();
-      if (this.i > 0) this.i--;
-      this.render();
-    }
-    seek(idx) {
-      this.pause();
-      this.i = Math.max(0, Math.min(this.frames.length - 1, idx | 0));
-      this.render();
-    }
-    reset() {
-      this.pause();
-      this.i = 0;
-      this.render();
-    }
-    setSpeed(s) {
-      this.speed = s;
-    }
-    destroy() {
-      this.playing = false;
-      this._clear();
+    done(message) {
+      this._active = null;
+      this._push("done", message);
     }
   };
 
@@ -1455,56 +1211,97 @@
       const check = el("div", "steptrace__check");
       check.innerHTML = ICON.check;
       check.setAttribute("aria-hidden", "true");
+      const probe = el("div", "steptrace__probe");
+      probe.innerHTML = ICON.search;
+      probe.setAttribute("aria-hidden", "true");
       const cue = el("div", "steptrace__bar-cue");
       cue.innerHTML = ICON.compare + ICON.swap;
       cue.setAttribute("aria-hidden", "true");
-      fill.append(check, cue);
+      fill.append(check, probe, cue);
       const num = el("div", "steptrace__num");
       bar.append(fill, num);
       stage.append(bar);
-      bars.push({ bar, fill, num, check, cue });
+      bars.push({ bar, fill, num, check, probe, cue });
     }
     return bars;
   }
-  function makeSortView(frames) {
+  function barHeightStyle(value, maxValue, minimumRem = 1.8) {
+    const ratio = Math.max(0, Math.min(1, Number(value) / Math.max(Number(maxValue), 1)));
+    return `calc(${ratio * 100}% + ${(1 - ratio) * minimumRem}rem)`;
+  }
+  function resolveLegacySortFrame(frame) {
+    const active = frame.active || [];
+    const isMove = frame.type === "swap" || frame.type === "overwrite" && frame.range;
+    const movements = [];
+    if (frame.type === "swap" && active.length === 2) {
+      movements.push([active[0], active[1]], [active[1], active[0]]);
+    } else if (frame.type === "overwrite" && frame.from != null && active.length === 1) {
+      movements.push([active[0], frame.from]);
+    }
+    return {
+      activeIndices: active,
+      activeRole: active.length ? isMove ? "move" : "compare" : null,
+      markerIndices: [active[0] ?? frame.candidate ?? null, active[1] ?? null],
+      movements,
+      laneIndices: null,
+      holeIndex: null,
+      heldToken: null
+    };
+  }
+  var legacySortViewSemantics = {
+    markerLabels: ["i", "j"],
+    movementLabel: "swaps",
+    resolveFrame: resolveLegacySortFrame,
+    watchRows(_frame, _visual) {
+      return [];
+    }
+  };
+  function makeSortView(frames, semantics = legacySortViewSemantics) {
     const maxVal = Math.max(...frames[0].array, 1);
     const n = frames[0].array.length;
     const hasRange = frames.some((f) => f.range);
     const hasPivot = frames.some((f) => f.pivot != null);
     const stage = el("div", "steptrace__stage steptrace__stage--pins");
     const bars = makeBars(stage, n);
-    const pinI = makePin("i", "a");
-    const pinJ = makePin("j", "b");
-    stage.append(pinI.el, pinJ.el);
+    const pinI = makeMarker(semantics.markerLabels[0], "a");
+    const pinJ = makeMarker(semantics.markerLabels[1], "b");
+    const hasHeldToken = frames.some((frame) => semantics.resolveFrame(frame).heldToken);
+    const heldMarker = hasHeldToken ? makeMarker("", "held") : null;
+    const markers = heldMarker ? [pinI, pinJ, heldMarker] : [pinI, pinJ];
+    stage.append(...markers.map((marker) => marker.el));
     const status = statusEl();
-    const tracker = createBarTracker(stage, bars, [pinI, pinJ]);
-    function paint(frame) {
+    const tracker = createBarTracker(stage, bars, markers);
+    const heldMarkerIndex = heldMarker ? markers.indexOf(heldMarker) : -1;
+    let lastPaint = null;
+    function paint(frame, frameIndex) {
       const range = frame.range || null;
+      const visual = semantics.resolveFrame(frame);
+      if (visual.laneIndices && visual.laneIndices.length) stage.dataset.lane = "1";
+      else delete stage.dataset.lane;
       for (let k = 0; k < n; k++) {
         const b = bars[k];
-        b.fill.style.height = `${Math.max(6, frame.array[k] / maxVal * 100)}%`;
-        b.num.textContent = frame.array[k];
+        b.fill.style.height = visual.holeIndex === k ? "12px" : barHeightStyle(frame.array[k], maxVal);
+        b.num.textContent = visual.holeIndex === k ? "∅" : frame.array[k];
         let state = "";
         if (frame.sorted.includes(k)) state = "sorted";
         if (frame.candidate === k) state = "candidate";
-        if (frame.active.includes(k))
-          state = frame.type === "swap" || frame.type === "overwrite" && range ? "swap" : "compare";
+        if (visual.activeIndices.includes(k) && visual.activeRole)
+          state = visual.activeRole === "move" ? "swap" : "compare";
         b.bar.dataset.state = state;
         if (range && (k < range[0] || k > range[1])) b.bar.dataset.outside = "1";
         else delete b.bar.dataset.outside;
         if (frame.pivot != null && frame.pivot === k) b.bar.dataset.pivot = "1";
         else delete b.bar.dataset.pivot;
+        if (visual.laneIndices)
+          b.bar.dataset.lane = visual.laneIndices.includes(k) ? "active" : "muted";
+        else delete b.bar.dataset.lane;
+        if (visual.holeIndex === k) b.bar.dataset.hole = "1";
+        else delete b.bar.dataset.hole;
         b.bar.classList.remove("steptrace__bar--fly");
         b.bar.style.transform = "";
       }
-      const fly = [];
-      if (frame.type === "swap" && frame.active && frame.active.length === 2) {
-        fly.push([frame.active[0], frame.active[1]], [frame.active[1], frame.active[0]]);
-      } else if (frame.type === "overwrite" && frame.from != null && frame.active && frame.active.length === 1) {
-        fly.push([frame.active[0], frame.from]);
-      }
       const starts = [];
-      for (const [to, from] of fly) {
+      for (const [to, from] of visual.movements) {
         const bt = bars[to] && bars[to].bar;
         const bf = bars[from] && bars[from].bar;
         if (!bt || !bf || !bt.isConnected) continue;
@@ -1517,16 +1314,35 @@
         bt.classList.add("steptrace__bar--fly");
         bt.style.transform = "";
       }
-      const act = frame.active || [];
-      tracker.set(act[0] != null ? act[0] : frame.candidate, act[1]);
+      if (heldMarker) {
+        heldMarker.setLabel(visual.heldToken?.label || "");
+        heldMarker.el.dataset.placing = visual.heldToken?.placing ? "1" : "0";
+      }
+      const paintState = {
+        frameIndex: Number.isInteger(frameIndex) ? frameIndex : null,
+        tokenId: visual.heldToken?.id ?? null
+      };
+      const resetHeldMarker = heldMarker && shouldResetHeldMarker(lastPaint, paintState);
+      if (resetHeldMarker) tracker.reset(heldMarkerIndex);
+      tracker.set(visual.markerIndices[0], visual.markerIndices[1], visual.heldToken?.index ?? null);
+      if (resetHeldMarker) tracker.renderNow();
+      lastPaint = paintState;
     }
     function watch(frame) {
-      const act = frame.active || [];
+      const visual = semantics.resolveFrame(frame);
       const rows = [
-        { k: "i", v: act[0] != null ? act[0] : "—", sw: "var(--_blue)" },
-        { k: "j", v: act[1] != null ? act[1] : "—", sw: "var(--_violet)" }
+        {
+          k: semantics.markerLabels[0],
+          v: visual.markerIndices[0] ?? "—",
+          sw: "var(--_blue)"
+        },
+        {
+          k: semantics.markerLabels[1],
+          v: visual.markerIndices[1] ?? "—",
+          sw: "var(--_violet)"
+        }
       ];
-      if (hasPivot)
+      if (hasPivot && !semantics.markerLabels.includes("pivot"))
         rows.push({
           k: "pivot",
           v: frame.pivot != null ? `[${frame.pivot}] = ${frame.array[frame.pivot]}` : "—",
@@ -1538,24 +1354,54 @@
           v: frame.range ? `[${frame.range[0]}, ${frame.range[1]}]` : "—",
           sw: "var(--_neutral)"
         });
-      rows.push({ k: "swaps", v: frame.swaps, sw: "var(--_amber)" });
+      rows.push(...semantics.watchRows(frame, visual));
+      rows.push({ k: semantics.movementLabel, v: frame.swaps, sw: "var(--_amber)" });
       return rows;
     }
     return { nodes: [stage, status], paint, watch, destroy: tracker.destroy };
   }
-  function makePin(label, role) {
-    const wrap = el("div", "steptrace__pin steptrace__pin--" + role);
-    wrap.innerHTML = '<svg class="steptrace__pin-svg" viewBox="0 0 24 30" aria-hidden="true"><path d="M12 1C6.201 1 1.5 5.701 1.5 11.5C1.5 19.5 12 29 12 29S22.5 19.5 22.5 11.5C22.5 5.701 17.799 1 12 1Z"/></svg>';
-    const lbl = el("span", "steptrace__pin-label");
+  function makeMarker(label, role) {
+    const wrap = el("div", "steptrace__marker steptrace__marker--" + role);
+    const body = el("span", "steptrace__marker-body");
+    const lbl = el("span", "steptrace__marker-label");
     lbl.textContent = label;
-    wrap.append(lbl);
-    return { el: wrap };
+    body.append(lbl);
+    wrap.append(body);
+    return {
+      el: wrap,
+      body,
+      role,
+      setLabel(value) {
+        lbl.textContent = value;
+      }
+    };
+  }
+  function clampMarkerCenter(target, bodyWidth, stageWidth, padding = 2) {
+    const availableHalf = Math.max(0, stageWidth / 2 - padding);
+    const half = Math.min(Math.max(0, bodyWidth / 2), availableHalf);
+    const min = padding + half;
+    const max = stageWidth - padding - half;
+    return Math.min(max, Math.max(min, target));
+  }
+  function stepMarkerSpring(current, target, elapsedMs, settleMs = 360) {
+    if (current == null || elapsedMs <= 0) return current == null ? target : current;
+    const alpha = 1 - Math.exp(-5 * elapsedMs / settleMs);
+    const next = current + (target - current) * alpha;
+    return Math.abs(target - next) < 0.4 ? target : next;
+  }
+  function shouldResetHeldMarker(previous, next) {
+    if (!previous) return true;
+    return previous.tokenId !== next.tokenId || next.frameIndex !== previous.frameIndex + 1;
   }
   function createBarTracker(stage, bars, markers) {
-    let targets = [null, null];
-    const sx = [null, null];
+    let targets = markers.map(() => null);
+    const sx = markers.map(() => null);
+    const sy = markers.map(() => null);
     const SPRING = 0.32;
-    function frameStep() {
+    let lastStepAt = null;
+    function frameStep(now) {
+      const elapsed = lastStepAt == null ? 0 : Math.max(0, now - lastStepAt);
+      lastStepAt = now;
       const sr = stage.getBoundingClientRect();
       for (let m = 0; m < markers.length; m++) {
         const idx = targets[m];
@@ -1564,29 +1410,50 @@
         if (!bar || !bar.isConnected) {
           mk.el.style.opacity = "0";
           sx[m] = null;
+          sy[m] = null;
           continue;
         }
         const br = bar.getBoundingClientRect();
-        const tx = br.left + br.width / 2 - sr.left;
-        const ty = br.top - sr.top;
-        if (sx[m] == null) sx[m] = tx;
+        const targetX = br.left + br.width / 2 - sr.left;
+        const bodyWidth = mk.body.getBoundingClientRect().width;
+        const tx = clampMarkerCenter(targetX, bodyWidth, sr.width);
+        mk.el.style.setProperty("--steptrace-marker-tip-offset", `${targetX - tx}px`);
+        const ty = mk.role === "held" && mk.el.dataset.placing !== "1" ? 34 : br.top - sr.top;
+        const reduced = stage.closest(".steptrace--reduced");
+        if (sx[m] == null || reduced) sx[m] = tx;
+        else if (mk.role === "held") sx[m] = stepMarkerSpring(sx[m], tx, elapsed);
         else {
           sx[m] += (tx - sx[m]) * SPRING;
           if (Math.abs(tx - sx[m]) < 0.4) sx[m] = tx;
         }
-        mk.el.style.transform = `translate(${sx[m].toFixed(2)}px, ${ty.toFixed(2)}px)`;
+        if (sy[m] == null || reduced || mk.role !== "held") sy[m] = ty;
+        else sy[m] = stepMarkerSpring(sy[m], ty, elapsed);
+        mk.el.style.transform = `translate(${sx[m].toFixed(2)}px, ${sy[m].toFixed(2)}px)`;
         mk.el.style.opacity = "1";
       }
     }
-    function loop() {
-      frameStep();
+    let lastRafAt = 0;
+    function loop(now) {
+      lastRafAt = now;
+      frameStep(now);
       raf = requestAnimationFrame(loop);
     }
     let raf = requestAnimationFrame(loop);
-    const iv = setInterval(frameStep, 16);
+    const iv = setInterval(() => {
+      const now = performance.now();
+      if (document.hidden || now - lastRafAt > 100) frameStep(now);
+    }, 50);
     return {
-      set(a, b) {
-        targets = [a != null ? a : null, b != null ? b : null];
+      set(...indices) {
+        targets = markers.map((_, index) => indices[index] ?? null);
+      },
+      reset(index) {
+        if (index < 0 || index >= markers.length) return;
+        sx[index] = null;
+        sy[index] = null;
+      },
+      renderNow() {
+        frameStep(performance.now());
       },
       destroy() {
         cancelAnimationFrame(raf);
@@ -1594,26 +1461,14 @@
       }
     };
   }
-  function makeSearchView(frames) {
-    const maxVal = Math.max(...frames[0].array, 1);
-    const n = frames[0].array.length;
-    const stage = el("div", "steptrace__stage");
-    const bars = makeBars(stage, n);
-    const status = statusEl();
-    function paint(frame, i, total) {
-      for (let k = 0; k < n; k++) {
-        const b = bars[k];
-        b.fill.style.height = `${Math.max(6, frame.array[k] / maxVal * 100)}%`;
-        b.num.textContent = frame.array[k];
-        let state = "range";
-        if (k < frame.lo || k > frame.hi) state = "eliminated";
-        if (frame.mid === k) state = "probe";
-        if (frame.found === k) state = "found";
-        b.bar.dataset.state = state;
-      }
-      status.innerHTML = escapeHtml(frame.message) + ` <span class="steptrace__counts">· ${frame.comparisons} probe${frame.comparisons === 1 ? "" : "s"} · step ${i + 1}/${total}</span>`;
-    }
-    function watch(frame) {
+  var legacySearchViewSemantics = {
+    stateForIndex(frame, index) {
+      if (frame.found === index) return "found";
+      if (frame.mid === index) return "probe";
+      if (index < frame.lo || index > frame.hi) return "eliminated";
+      return "range";
+    },
+    watchRows(frame, frames) {
       const target = { k: "target", v: String(frames[0].target), sw: "var(--_accent)" };
       const at = {
         k: "at",
@@ -1636,6 +1491,25 @@
         { k: "range", v: `[${frame.lo}, ${frame.hi}]`, sw: "var(--_neutral)" },
         { ...at, k: "mid" }
       ];
+    }
+  };
+  function makeSearchView(frames, semantics = legacySearchViewSemantics) {
+    const maxVal = Math.max(...frames[0].array, 1);
+    const n = frames[0].array.length;
+    const stage = el("div", "steptrace__stage");
+    const bars = makeBars(stage, n);
+    const status = statusEl();
+    function paint(frame, i, total) {
+      for (let k = 0; k < n; k++) {
+        const b = bars[k];
+        b.fill.style.height = barHeightStyle(frame.array[k], maxVal);
+        b.num.textContent = frame.array[k];
+        b.bar.dataset.state = semantics.stateForIndex(frame, k);
+      }
+      status.innerHTML = escapeHtml(frame.message) + ` <span class="steptrace__counts">· ${frame.comparisons} probe${frame.comparisons === 1 ? "" : "s"} · step ${i + 1}/${total}</span>`;
+    }
+    function watch(frame) {
+      return semantics.watchRows(frame, frames);
     }
     return { nodes: [stage, status], paint, watch };
   }
@@ -2429,7 +2303,8 @@
     kebab: '<svg viewBox="0 0 24 24"><circle cx="12" cy="5" r="1.5" fill="currentColor" stroke="none"/><circle cx="12" cy="12" r="1.5" fill="currentColor" stroke="none"/><circle cx="12" cy="19" r="1.5" fill="currentColor" stroke="none"/></svg>',
     check: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg>',
     compare: '<svg class="steptrace__cue-compare" viewBox="0 0 24 24" aria-hidden="true"><path d="m7 16-4-4 4-4"/><path d="M3 12h18"/><path d="m17 8 4 4-4 4"/></svg>',
-    swap: '<svg class="steptrace__cue-swap" viewBox="0 0 24 24" aria-hidden="true"><path d="m2 9 3-3 3 3"/><path d="M13 18H7a2 2 0 0 1-2-2V6"/><path d="m22 15-3 3-3-3"/><path d="M11 6h6a2 2 0 0 1 2 2v10"/></svg>'
+    swap: '<svg class="steptrace__cue-swap" viewBox="0 0 24 24" aria-hidden="true"><path d="m2 9 3-3 3 3"/><path d="M13 18H7a2 2 0 0 1-2-2V6"/><path d="m22 15-3 3-3-3"/><path d="M11 6h6a2 2 0 0 1 2 2v10"/></svg>',
+    search: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="10.5" cy="10.5" r="6.5"/><path d="m15.2 15.2 4.8 4.8"/></svg>'
   };
   function iconBtn(label, svg, extra = "") {
     const b = document.createElement("button");
@@ -2448,22 +2323,34 @@
       if (prev && (prev.i === i || prev.label === label)) return;
       marks.push({ i, label });
     };
-    const initial = kind === "sort" ? algorithm === "bubble-sort" ? "Pass 1" : algorithm === "insertion-sort" ? "Prefix 1" : algorithm === "selection-sort" ? "Select 1" : algorithm === "heap-sort" ? "Build heap" : algorithm === "merge-sort" ? "Runs of 1" : "Partition" : kind === "search" ? "Search range" : kind === "string" ? "Shift 0" : kind === "backtrack" ? "Depth 0" : kind === "rectree" ? "Call tree" : "Initialize";
+    const firstGap = frames.find((frame) => Number.isInteger(frame.gap))?.gap;
+    const familyProfile = frames[0]?.profile;
+    const initial = kind === "sort" ? firstGap != null ? `Gap ${firstGap}` : familyProfile === "cyclic" ? "Place values" : familyProfile === "introsort" ? "Quicksort" : algorithm === "bubble-sort" ? "Pass 1" : algorithm === "insertion-sort" ? "Prefix 1" : algorithm === "selection-sort" ? "Select 1" : algorithm === "heap-sort" ? "Build heap" : algorithm === "merge-sort" ? "Runs of 1" : "Partition" : kind === "search" ? familyProfile === "exponential" ? "Gallop" : familyProfile === "jump" ? "Jump blocks" : familyProfile === "ternary" ? "Narrow peak" : "Search range" : kind === "string" ? "Shift 0" : kind === "backtrack" ? "Depth 0" : kind === "rectree" ? "Call tree" : "Initialize";
     push(0, initial);
     let lastRange = "";
+    let lastGap = firstGap;
     let lastRow = null;
     let lastWindow = "";
     let lastDepth = null;
     for (let i = 1; i < frames.length - 1; i++) {
       const f = frames[i];
       if (kind === "sort") {
+        if (familyProfile === "introsort" && f.type === "fallback") {
+          push(i, "Heap fallback");
+        } else if (familyProfile === "introsort" && f.type === "cleanup") {
+          push(i, "Insertion cleanup");
+        }
+        if (Number.isInteger(f.gap) && f.gap !== lastGap) {
+          push(i, `Gap ${f.gap}`);
+          lastGap = f.gap;
+        }
         const range = f.range ? f.range.join(":") : "";
         if (range && range !== lastRange) {
           const word = algorithm === "merge-sort" ? "Merge" : algorithm === "heap-sort" ? "Heap" : "Range";
           push(i, `${word} ${f.range[0]}–${f.range[1]}`);
         } else if (f.type === "mark-sorted") {
           const fixed = f.sorted.length;
-          const word = algorithm === "insertion-sort" ? "Prefix" : algorithm === "selection-sort" ? "Select" : "Fixed";
+          const word = familyProfile === "cyclic" ? "Placed" : algorithm === "insertion-sort" ? "Prefix" : algorithm === "selection-sort" ? "Select" : "Fixed";
           const count = algorithm === "bubble-sort" || algorithm === "selection-sort" ? Math.min(fixed + 1, f.array.length) : fixed;
           push(i, algorithm === "bubble-sort" ? `Pass ${count}` : `${word} ${count}`);
         }
@@ -2471,8 +2358,17 @@
       } else if (kind === "graph" && f.type === "visit" && f.current != null) {
         const word = algorithm === "dijkstra" ? "Settle" : algorithm === "topological-sort" ? "Output" : "Visit";
         push(i, `${word} ${f.current}`);
-      } else if (kind === "search" && f.type === "probe") {
-        push(i, `Probe ${f.mid}`);
+      } else if (kind === "search") {
+        if (familyProfile === "exponential" && f.type === "phase" && f.phase === "binary")
+          push(i, "Binary search");
+        else if (f.type === "phase" && f.phase === "scan")
+          push(i, familyProfile === "ternary" ? "Final scan" : "Linear scan");
+        else if (f.type === "phase" && f.phase === "ternary") push(i, "Ternary");
+        else if (f.type === "probe")
+          push(
+            i,
+            familyProfile === "ternary" && f.mid2 != null ? `Probes ${f.mid}/${f.mid2}` : `${familyProfile === "exponential" && f.phase === "gallop" ? "Bound" : familyProfile === "jump" && f.phase === "jump" ? "Block end" : "Probe"} ${f.mid}`
+          );
       } else if (kind === "string") {
         if ((f.type === "slide" || f.type === "hash" || f.type === "match") && String(f.shift) !== lastWindow) {
           push(i, `Shift ${f.shift}`);
@@ -2534,8 +2430,9 @@
     if (kind === "sort") {
       if (algorithm === "merge-sort")
         return `Output [${frame.array.join(", ")}] · ${frame.swaps} writes.`;
-      const unit = ["bubble-sort", "selection-sort", "quick-sort", "heap-sort"].includes(algorithm) ? "swaps" : "moves";
-      return `Output [${frame.array.join(", ")}] · ${frame.comparisons} comparisons · ${frame.swaps} ${unit}.`;
+      const unit = frame.movementUnit || (["bubble-sort", "selection-sort", "quick-sort", "heap-sort"].includes(algorithm) ? "swaps" : "moves");
+      const comparisons = frame.showComparisons === false ? "" : `${frame.comparisons} comparisons · `;
+      return `Output [${frame.array.join(", ")}] · ${comparisons}${frame.swaps} ${unit}.`;
     }
     if (kind === "graph") {
       if (algorithm === "dijkstra" && frame.target != null) {
@@ -2589,15 +2486,2088 @@
     return stripTags(frame.message);
   }
 
+  // custom/steptrace/src/families/array-sort.ts
+  function resolveArraySortFrame(frame) {
+    if (frame.profile === "comb") return resolveCombSortFrame(frame);
+    if (frame.profile === "cyclic") return resolveCyclicSortFrame(frame);
+    if (frame.profile === "introsort") return resolveIntrosortFrame(frame);
+    const decorate = (visual) => ({
+      ...visual,
+      laneIndices: frame.subsequence,
+      holeIndex: frame.hole,
+      heldToken: frame.keyValue == null || frame.keyOrigin == null ? null : {
+        id: frame.tokenId,
+        index: frame.type === "place-held" ? frame.hole : frame.keyOrigin,
+        label: `held ${frame.keyValue}`,
+        placing: frame.type === "place-held"
+      }
+    });
+    if (frame.type === "gap" || frame.type === "subsequence") {
+      return decorate({
+        activeIndices: [],
+        activeRole: null,
+        markerIndices: [null, null],
+        movements: []
+      });
+    }
+    if (frame.type === "hold-key") {
+      return decorate({
+        activeIndices: [],
+        activeRole: null,
+        markerIndices: [null, null],
+        movements: []
+      });
+    }
+    if (frame.type === "compare-held") {
+      return decorate({
+        activeIndices: frame.active,
+        activeRole: "compare",
+        markerIndices: [frame.active[0] ?? null, null],
+        movements: []
+      });
+    }
+    if (frame.type === "shift-held") {
+      const to = frame.active[0] ?? null;
+      const from = frame.from ?? null;
+      return decorate({
+        activeIndices: to == null ? [] : [to],
+        activeRole: "move",
+        markerIndices: [null, from],
+        movements: to == null || from == null ? [] : [[to, from]]
+      });
+    }
+    if (frame.type === "place-held") {
+      return decorate({
+        activeIndices: [],
+        activeRole: null,
+        markerIndices: [null, null],
+        movements: []
+      });
+    }
+    return decorate(resolveLegacySortFrame(frame));
+  }
+  function resolveIntrosortFrame(frame) {
+    const visual = resolveLegacySortFrame(frame);
+    return {
+      ...visual,
+      laneIndices: null,
+      holeIndex: frame.hole,
+      heldToken: frame.keyValue == null || frame.keyOrigin == null ? null : {
+        id: frame.tokenId,
+        index: frame.type === "place-held" ? frame.hole : frame.keyOrigin,
+        label: `held ${frame.keyValue}`,
+        placing: frame.type === "place-held"
+      }
+    };
+  }
+  function resolveCombSortFrame(frame) {
+    const visual = resolveLegacySortFrame(frame);
+    return {
+      ...visual,
+      laneIndices: frame.subsequence,
+      holeIndex: null,
+      heldToken: null
+    };
+  }
+  function resolveCyclicSortFrame(frame) {
+    if (frame.type === "home-check") {
+      return {
+        activeIndices: frame.active,
+        activeRole: "compare",
+        markerIndices: [frame.cursor, frame.home],
+        movements: [],
+        laneIndices: null,
+        holeIndex: null,
+        heldToken: null
+      };
+    }
+    if (frame.type === "mark-sorted") {
+      return {
+        activeIndices: [],
+        activeRole: null,
+        markerIndices: [frame.cursor, frame.home],
+        movements: [],
+        laneIndices: null,
+        holeIndex: null,
+        heldToken: null
+      };
+    }
+    return resolveLegacySortFrame(frame);
+  }
+  var arraySortViewSemantics = {
+    markerLabels: ["at", "from"],
+    movementLabel: "moves",
+    resolveFrame: resolveArraySortFrame,
+    watchRows(frame) {
+      return [
+        { k: "held", v: frame.keyValue ?? "—", sw: "var(--_blue)" },
+        { k: "gap", v: frame.gap ?? "—", sw: "var(--_amber)" },
+        {
+          k: "lane",
+          v: frame.subsequence ? frame.subsequence.join(" → ") : "—",
+          sw: "var(--_violet)"
+        }
+      ];
+    }
+  };
+  var combSortViewSemantics = {
+    markerLabels: ["left", "right"],
+    movementLabel: "swaps",
+    resolveFrame: resolveArraySortFrame,
+    watchRows(frame) {
+      return [
+        { k: "gap", v: frame.gap ?? "—", sw: "var(--_amber)" },
+        {
+          k: "pass swapped",
+          v: frame.passSwapped == null ? "—" : frame.passSwapped ? "yes" : "no",
+          sw: frame.passSwapped ? "var(--_green)" : "var(--_neutral)",
+          hint: "Whether this gap pass made any swap."
+        }
+      ];
+    }
+  };
+  var cyclicSortViewSemantics = {
+    markerLabels: ["at", "home"],
+    movementLabel: "swaps",
+    resolveFrame: resolveArraySortFrame,
+    watchRows(frame) {
+      const value = frame.cursor == null ? null : frame.array[frame.cursor];
+      return [
+        {
+          k: "value",
+          v: value ?? "—",
+          sw: "var(--_blue)",
+          hint: "Value at the current cursor."
+        },
+        {
+          k: "placed",
+          v: `${frame.sorted.length}/${frame.array.length}`,
+          sw: "var(--_green)",
+          hint: "Values already fixed at their home index."
+        }
+      ];
+    }
+  };
+  var introsortViewSemantics = {
+    markerLabels: ["scan", "pivot"],
+    movementLabel: "moves",
+    resolveFrame: resolveArraySortFrame,
+    watchRows(frame) {
+      const depth = frame.depthUsed == null || frame.depthLimit == null ? "—" : `${frame.depthUsed}/${frame.depthLimit}`;
+      return [
+        {
+          k: "strategy",
+          v: frame.strategy ?? (frame.type === "done" ? "complete" : "—"),
+          sw: frame.strategy === "heap sort" ? "var(--_amber)" : frame.strategy === "insertion sort" ? "var(--_green)" : "var(--_blue)"
+        },
+        {
+          k: "depth",
+          v: depth,
+          sw: "var(--_violet)",
+          hint: "Quicksort levels used out of the depth limit."
+        },
+        { k: "cutoff", v: frame.cutoff == null ? "—" : `≤ ${frame.cutoff}`, sw: "var(--_neutral)" }
+      ];
+    }
+  };
+  function arraySortSemanticsFor(frames) {
+    switch (frames[0]?.profile) {
+      case "comb":
+        return combSortViewSemantics;
+      case "cyclic":
+        return cyclicSortViewSemantics;
+      case "introsort":
+        return introsortViewSemantics;
+      default:
+        return arraySortViewSemantics;
+    }
+  }
+  var arraySortFamily = {
+    id: "array-sort",
+    createRecorder(config) {
+      return new ArraySortRecorder(config.array, config.profile);
+    },
+    createView(frames) {
+      return makeSortView(frames, arraySortSemanticsFor(frames));
+    }
+  };
+
+  // custom/steptrace/src/algorithms/comb-sort.ts
+  function invalidConfig(message) {
+    throw new Error(`steptrace: comb-sort ${message}`);
+  }
+  function parseCombSortConfig(config) {
+    const { array } = config;
+    const shrinkFactor = config.shrinkFactor ?? 1.3;
+    if (!Array.isArray(array) || array.length < 2)
+      invalidConfig('requires an "array" with at least two numbers.');
+    if (!array.every((value) => typeof value === "number" && Number.isFinite(value)))
+      invalidConfig('requires every "array" value to be a finite number.');
+    if (typeof shrinkFactor !== "number" || !Number.isFinite(shrinkFactor) || shrinkFactor <= 1)
+      invalidConfig('requires "shrinkFactor" to be a finite number greater than 1.');
+    return { array: array.slice(), shrinkFactor, profile: "comb" };
+  }
+  var combSort = {
+    id: "comb-sort",
+    kind: "sort",
+    family: arraySortFamily,
+    meta: { label: "Comb sort" },
+    parse: parseCombSortConfig,
+    run(input, ops) {
+      ops.init(
+        `Comb sort — compare distant pairs, shrink the gap by ${input.shrinkFactor}, then finish with gap 1.`
+      );
+      let gap = ops.value.length;
+      let swapped = true;
+      while (gap > 1 || swapped) {
+        gap = Math.max(1, Math.floor(gap / input.shrinkFactor));
+        ops.beginGap(gap, `Gap ${gap}: sweep every pair whose indices are ${gap} apart.`);
+        swapped = false;
+        for (let left = 0; left + gap < ops.value.length; left++) {
+          const right = left + gap;
+          const leftValue = ops.value[left];
+          const rightValue = ops.value[right];
+          ops.compareGapPair(
+            left,
+            right,
+            `Compare ${leftValue} at index ${left} with ${rightValue} at index ${right}.`
+          );
+          if (leftValue <= rightValue) continue;
+          ops.swapGapPair(
+            left,
+            right,
+            `${leftValue} > ${rightValue}: swap the gap-${gap} pair.`
+          );
+          swapped = true;
+        }
+        ops.endGap(
+          swapped,
+          gap === 1 && !swapped ? "Gap 1 made no swap; no adjacent inversion remains." : `Gap ${gap} pass complete${swapped ? " with swaps" : " without a swap"}.`
+        );
+      }
+      ops.lockAll(Array.from({ length: ops.value.length }, (_, index) => index));
+      ops.done(`Sorted in ${ops.comparisons} comparisons and ${ops.swaps} swaps.`);
+    }
+  };
+
+  // custom/steptrace/src/algorithms/cyclic-sort.ts
+  function invalidConfig2(message) {
+    throw new Error(`steptrace: cyclic-sort ${message}`);
+  }
+  function parseCyclicSortConfig(config) {
+    const { array } = config;
+    if (!Array.isArray(array) || array.length < 2)
+      invalidConfig2('requires an "array" with at least two integers.');
+    if (!array.every((value) => Number.isInteger(value) && value >= 1 && value <= array.length))
+      invalidConfig2("requires every value to be an integer in the range 1..array.length.");
+    if (new Set(array).size !== array.length)
+      invalidConfig2("requires a permutation with no duplicate values.");
+    return { array: array.slice(), profile: "cyclic" };
+  }
+  var cyclicSort = {
+    id: "cyclic-sort",
+    kind: "sort",
+    family: arraySortFamily,
+    meta: { label: "Cyclic sort" },
+    parse: parseCyclicSortConfig,
+    run(_input, ops) {
+      ops.init("Cyclic sort — value v belongs at index v − 1; keep the cursor still until its value is home.");
+      let cursor = 0;
+      while (cursor < ops.value.length) {
+        const value = ops.value[cursor];
+        const home = value - 1;
+        ops.inspectHome(
+          cursor,
+          home,
+          `At index ${cursor}, value ${value} belongs at home index ${home}.`
+        );
+        if (cursor !== home) {
+          const displaced = ops.value[home];
+          ops.swapHome(
+            cursor,
+            home,
+            `Send ${value} home to index ${home}; ${displaced} returns to index ${cursor}.`
+          );
+          ops.settleHome(home, `Value ${value} is now fixed at its home index ${home}.`);
+          continue;
+        }
+        ops.settleHome(cursor, `Value ${value} is already home at index ${cursor}; advance.`);
+        cursor++;
+      }
+      ops.lockAll(Array.from({ length: ops.value.length }, (_, index) => index));
+      ops.done(`Placed all values with ${ops.swaps} swaps.`);
+    }
+  };
+
+  // custom/steptrace/src/algorithms/dfs.ts
+  var dfs = {
+    id: "dfs",
+    kind: "graph",
+    meta: { label: "Depth-first search", frontierLabel: "Stack (bottom → top)" },
+    run: (input, ops, graph) => {
+      const adj = adjacency(graph);
+      const start = input.start;
+      const target = input.target != null && input.target !== start ? String(input.target) : null;
+      if (target) ops.target(target);
+      ops.init(
+        target ? `Depth-first search for ${target}, starting at ${start} — dive as deep as possible with a stack, backtracking at dead ends, until the target is popped.` : `Depth-first search from ${start} — dive as deep as possible using a stack, backtracking when a node has no unvisited neighbours.`
+      );
+      const stack = [start];
+      const seen = /* @__PURE__ */ new Set([start]);
+      ops.enqueue(start, 0, `Push the start node ${start} onto the stack.`);
+      while (stack.length) {
+        const u = stack.pop();
+        ops.visit(u, `Pop ${u} off the stack and mark it visited.`);
+        if (u === target) {
+          ops.done(
+            `Found ${target} after visiting only ${ops.visitedCount} nodes — but along a depth-${ops.dist(u)} path, with no shortest-path guarantee.`
+          );
+          return;
+        }
+        const neighbours = adj[u].slice().reverse();
+        for (const v of neighbours) {
+          if (seen.has(v)) continue;
+          ops.edge(u, v, `Explore edge ${u} → ${v}.`);
+          seen.add(v);
+          stack.push(v);
+          ops.enqueue(v, ops.dist(u) + 1, `Push ${v} onto the stack (depth ${ops.dist(u) + 1}).`);
+        }
+      }
+      ops.done(
+        target ? `${target} is not reachable from ${start} — the stack emptied after ${ops.visitedCount} nodes.` : `Depth-first search complete — visited ${ops.visitedCount} node${ops.visitedCount === 1 ? "" : "s"}.`
+      );
+    }
+  };
+
+  // custom/steptrace/src/algorithms/dijkstra.ts
+  var dijkstra = {
+    id: "dijkstra",
+    kind: "graph",
+    meta: { label: "Dijkstra", frontierLabel: "Frontier (settle nearest first)" },
+    run: (input, ops, graph) => {
+      const adj = {};
+      for (const nd of graph.nodes) adj[nd.id] = [];
+      for (const e of graph.edges) {
+        const w = e.weight == null ? 1 : e.weight;
+        adj[e.from].push({ to: e.to, w });
+        if (!graph.directed) adj[e.to].push({ to: e.from, w });
+      }
+      for (const id in adj) adj[id].sort((a, b) => a.to < b.to ? -1 : 1);
+      const start = input.start;
+      const target = input.target != null ? String(input.target) : null;
+      if (target) ops.target(target);
+      ops.init(
+        `Dijkstra from ${start} — repeatedly settle the nearest unsettled node, then relax its edges to shorten neighbours' distances.`
+      );
+      const dist = { [start]: 0 };
+      const pred = {};
+      const settled = /* @__PURE__ */ new Set();
+      const inQ = /* @__PURE__ */ new Set([start]);
+      ops.enqueue(start, 0, `Start ${start} at distance 0.`);
+      while (inQ.size) {
+        let u = null;
+        for (const id of inQ) if (u === null || dist[id] < dist[u]) u = id;
+        inQ.delete(u);
+        settled.add(u);
+        ops.visit(u, `Settle ${u} (distance ${dist[u]}) — its shortest distance is now final.`);
+        for (const { to: v, w } of adj[u]) {
+          if (settled.has(v)) continue;
+          ops.edge(u, v, `Explore edge ${u} → ${v} (weight ${w}).`);
+          const nd = dist[u] + w;
+          if (dist[v] === void 0 || nd < dist[v]) {
+            const had = dist[v] !== void 0;
+            dist[v] = nd;
+            pred[v] = u;
+            inQ.add(v);
+            ops.relax(
+              v,
+              nd,
+              had ? `Relax ${v}: a shorter path via ${u} improves its distance to ${nd}.` : `Relax ${v}: reach it via ${u} at distance ${nd}.`
+            );
+          }
+        }
+      }
+      if (target !== null) {
+        if (dist[target] === void 0) {
+          ops.done(`${target} is unreachable from ${start}.`);
+        } else {
+          const path = [target];
+          for (let cur = target; pred[cur] !== void 0; cur = pred[cur]) path.push(pred[cur]);
+          path.reverse();
+          for (let i = 0; i + 1 < path.length; i++)
+            ops.selectEdge(
+              path[i],
+              path[i + 1],
+              `Shortest path: keep edge ${path[i]}–${path[i + 1]} highlighted.`
+            );
+          ops.done(`Shortest path ${path.join(" → ")} — total cost ${dist[target]}.`);
+        }
+      } else {
+        const reached = graph.nodes.map((n) => n.id).filter((id) => id !== start && pred[id] !== void 0);
+        reached.sort();
+        for (const v of reached)
+          ops.selectEdge(pred[v], v, `Shortest-path tree: ${pred[v]}–${v} (distance ${dist[v]}).`);
+        ops.done(`Dijkstra complete — shortest-path tree from ${start} highlighted.`);
+      }
+    }
+  };
+
+  // custom/steptrace/src/families/indexed-array-search.ts
+  function parseIndexedArraySearchConfig(config, algorithm, profile) {
+    const { array, target } = config;
+    if (!Array.isArray(array) || array.length === 0)
+      throw new Error(`steptrace: ${algorithm} requires a non-empty sorted "array".`);
+    if (!array.every((value) => typeof value === "number" && Number.isFinite(value)))
+      throw new Error(`steptrace: ${algorithm} requires every "array" value to be a finite number.`);
+    if (array.some((value, index) => index > 0 && value < array[index - 1]))
+      throw new Error(`steptrace: ${algorithm} requires "array" values in non-decreasing order.`);
+    if (typeof target !== "number" || !Number.isFinite(target))
+      throw new Error(`steptrace: ${algorithm} requires a finite numeric "target".`);
+    return { array: array.slice(), target, profile };
+  }
+  function resolveIndexedSearchState(frame, index) {
+    if (frame.found === index) return "found";
+    if (frame.mid === index || frame.mid2 === index) return "probe";
+    if (frame.phase === "gallop" || frame.phase === "jump") {
+      if (index <= frame.previousBound) return "eliminated";
+      if (frame.bound != null && index > frame.bound) return "unseen";
+      return "range";
+    }
+    if (index < frame.lo || index > frame.hi) return "eliminated";
+    return "range";
+  }
+  function phaseLabel(frame) {
+    switch (frame.phase) {
+      case "gallop":
+        return "gallop";
+      case "jump":
+        return "jump";
+      case "scan":
+        return frame.profile === "ternary" ? "final scan" : "linear scan";
+      case "ternary":
+        return "ternary";
+      default:
+        return "binary search";
+    }
+  }
+  function phaseColor(frame) {
+    if (frame.phase === "gallop") return "var(--_violet)";
+    if (frame.phase === "binary") return "var(--_green)";
+    if (frame.phase === "scan" || frame.phase === "jump") return "var(--_blue)";
+    return "var(--_amber)";
+  }
+  var indexedSearchViewSemantics = {
+    stateForIndex: resolveIndexedSearchState,
+    watchRows(frame, frames) {
+      const first = frames[0];
+      const profile = frame.profile;
+      const probe = frame.mid == null ? "—" : `[${frame.mid}] = ${frame.array[frame.mid]}`;
+      const range = frame.phase === "gallop" || frame.phase === "jump" ? frame.bound == null ? "discovering" : `[${Math.max(0, frame.previousBound + 1)}, ${frame.bound}]` : `[${frame.lo}, ${frame.hi}]`;
+      const rows = [
+        profile === "ternary" ? { k: "goal", v: frame.goal ?? "—", sw: "var(--_accent)" } : { k: "target", v: String(first.target), sw: "var(--_accent)" },
+        { k: "phase", v: phaseLabel(frame), sw: phaseColor(frame) },
+        { k: "range", v: range, sw: "var(--_neutral)" },
+        { k: profile === "ternary" ? "probe 1" : "probe", v: probe, sw: "var(--_blue)" }
+      ];
+      if (profile === "ternary") {
+        rows.push({
+          k: "probe 2",
+          v: frame.mid2 == null ? "—" : `[${frame.mid2}] = ${frame.array[frame.mid2]}`,
+          sw: "var(--_violet)"
+        });
+      } else if (profile === "jump") {
+        rows.push({ k: "block", v: String(frame.blockSize ?? "—"), sw: "var(--_blue)" });
+      }
+      return rows;
+    }
+  };
+  var indexedArraySearchFamily = {
+    id: "indexed-array-search",
+    createRecorder(config) {
+      return new IndexedSearchRecorder(config);
+    },
+    createView(frames) {
+      return makeSearchView(frames, indexedSearchViewSemantics);
+    }
+  };
+
+  // custom/steptrace/src/algorithms/exponential-search.ts
+  function parseExponentialSearchConfig(config) {
+    return parseIndexedArraySearchConfig(config, "exponential-search", "exponential");
+  }
+  var exponentialSearch = {
+    id: "exponential-search",
+    kind: "search",
+    family: indexedArraySearchFamily,
+    meta: { label: "Exponential search" },
+    parse: parseExponentialSearchConfig,
+    run(input, ops) {
+      const values = ops.value;
+      const { target } = input;
+      ops.init(
+        `Exponential search for ${target}: gallop by powers of two, then binary-search the bracket.`
+      );
+      ops.gallopProbe(-1, 0, `Check index 0 first: it holds ${values[0]}.`);
+      if (values[0] === target) {
+        ops.hit(0, `${target} is at index 0.`);
+        ops.done(`Found ${target} at index 0 after ${ops.comparisons} probe.`);
+        return;
+      }
+      if (values[0] > target) {
+        ops.done(`${target} is smaller than the first value, so it is not in the array.`);
+        return;
+      }
+      let previousBound = 0;
+      let bound = 1;
+      while (bound < values.length) {
+        ops.gallopProbe(
+          previousBound,
+          bound,
+          `Gallop to index ${bound}: ${values[bound]} ${values[bound] < target ? "is below" : "reaches or passes"} ${target}.`
+        );
+        if (values[bound] >= target) break;
+        previousBound = bound;
+        bound *= 2;
+      }
+      const lo = Math.floor(bound / 2);
+      const hi = Math.min(bound, values.length - 1);
+      ops.beginPhase(lo, hi, `The target is bracketed in [${lo}, ${hi}]; switch to binary search.`);
+      let left = lo;
+      let right = hi;
+      while (left <= right) {
+        const mid = Math.floor((left + right) / 2);
+        ops.probe(
+          left,
+          right,
+          mid,
+          `Binary-search [${left}, ${right}]: index ${mid} holds ${values[mid]}.`
+        );
+        if (values[mid] === target) {
+          ops.hit(mid, `${values[mid]} equals ${target} — found it at index ${mid}.`);
+          ops.done(`Found ${target} after ${ops.comparisons} probes.`);
+          return;
+        }
+        if (values[mid] < target) {
+          left = mid + 1;
+          ops.narrow(left, right, `${values[mid]} < ${target}: discard through index ${mid}.`);
+        } else {
+          right = mid - 1;
+          ops.narrow(left, right, `${values[mid]} > ${target}: discard from index ${mid}.`);
+        }
+      }
+      ops.done(`${target} is not in the array after ${ops.comparisons} probes.`);
+    }
+  };
+
+  // custom/steptrace/src/algorithms/fibonacci.ts
+  var fibonacci = {
+    id: "fibonacci",
+    kind: "rectree",
+    meta: { label: "Fibonacci — recursion vs memo" },
+    run: (input, ops) => {
+      const N = Math.min(Math.max(Math.round(input.n ?? 5), 1), 6);
+      const FIB = [0, 1];
+      for (let i = 2; i <= N; i++) FIB[i] = FIB[i - 1] + FIB[i - 2];
+      let nextId = 0;
+      const all = [];
+      const build = (k, depth) => {
+        const node = { id: "c" + nextId++, k, depth, children: [] };
+        all.push(node);
+        if (k >= 2) {
+          node.children.push(build(k - 1, depth + 1));
+          node.children.push(build(k - 2, depth + 1));
+        }
+        return node;
+      };
+      const root = build(N, 0);
+      const ROW = 62;
+      const SP = 48;
+      let leaf = 0;
+      const layout = (node) => {
+        node.y = node.depth * ROW;
+        if (!node.children.length) {
+          node.x = leaf++ * SP;
+        } else {
+          node.children.forEach(layout);
+          node.x = (node.children[0].x + node.children[node.children.length - 1].x) / 2;
+        }
+      };
+      layout(root);
+      const descendants = (node) => {
+        const out = [];
+        for (const c of node.children) {
+          out.push(c.id);
+          out.push(...descendants(c));
+        }
+        return out;
+      };
+      const nodeList = all.map((n) => ({
+        id: n.id,
+        label: `f(${n.k})`,
+        x: Math.round(n.x),
+        y: n.y,
+        depth: n.depth
+      }));
+      const edges = [];
+      for (const n of all) for (const c of n.children) edges.push({ from: n.id, to: c.id });
+      ops.tree(
+        nodeList,
+        edges,
+        `Compute f(${N}) by plain recursion: every call spawns two more. The tree balloons because identical subproblems get recomputed from scratch.`
+      );
+      ops.phase(
+        "naive",
+        `Phase 1 — plain recursion. Reveal each call in order; the running count IS the total work.`
+      );
+      const naive = (node) => {
+        if (node.k < 2) {
+          ops.base(node.id, node.k, `f(${node.k}) = ${node.k} — base case, return at once.`);
+        } else {
+          ops.enter(
+            node.id,
+            `Call f(${node.k}); with no memory it must recompute f(${node.k - 1}) + f(${node.k - 2}) all over again.`
+          );
+          node.children.forEach(naive);
+        }
+      };
+      naive(root);
+      const naiveCalls = all.length;
+      ops.phase(
+        "memo",
+        `Phase 2 — memoise. Same tree, but keep a table of computed f(k); a repeat of any state is now a cache hit.`
+      );
+      const seen = /* @__PURE__ */ new Set();
+      let memoCalls = 0;
+      let hits = 0;
+      const memo = (node) => {
+        memoCalls++;
+        if (seen.has(node.k)) {
+          hits++;
+          ops.hit(
+            node.id,
+            node.k,
+            FIB[node.k],
+            descendants(node),
+            `f(${node.k}) is already in the table → cache HIT, return ${FIB[node.k]}. Its whole subtree is skipped — that is an overlapping subproblem eliminated.`
+          );
+          return FIB[node.k];
+        }
+        seen.add(node.k);
+        if (node.k < 2) {
+          ops.miss(
+            node.id,
+            node.k,
+            node.k,
+            `f(${node.k}) = ${node.k} — first time seen, store it in the table.`
+          );
+        } else {
+          ops.miss(
+            node.id,
+            node.k,
+            FIB[node.k],
+            `f(${node.k}) is new → compute f(${node.k - 1}) + f(${node.k - 2}) once and store f(${node.k}) = ${FIB[node.k]}.`
+          );
+          node.children.forEach(memo);
+        }
+        return FIB[node.k];
+      };
+      memo(root);
+      ops.done(
+        `Naive f(${N}) makes ${naiveCalls} calls. Memoised: ${memoCalls} calls — ${hits} of them cache hits that skipped whole subtrees. Same answer, ${naiveCalls - memoCalls} calls saved.`
+      );
+    }
+  };
+
+  // custom/steptrace/src/algorithms/heap-sort.ts
+  var heapSort = {
+    id: "heap-sort",
+    kind: "sort",
+    meta: { label: "Heap sort" },
+    run: (input, ops) => {
+      const n = ops.value.length;
+      ops.init(
+        `Heap sort — build a max-heap (each parent ≥ its children), then repeatedly swap the root to the end and sift the new root down.`
+      );
+      function siftDown(lo, hi) {
+        let root = lo;
+        while (2 * root + 1 < hi) {
+          let child = 2 * root + 1;
+          if (child + 1 < hi) {
+            ops.compare(
+              child,
+              child + 1,
+              `Compare children ${ops.value[child]} and ${ops.value[child + 1]}.`
+            );
+            if (ops.value[child + 1] > ops.value[child]) child++;
+          }
+          ops.compare(
+            root,
+            child,
+            `Compare parent ${ops.value[root]} with its larger child ${ops.value[child]}.`
+          );
+          if (ops.value[root] >= ops.value[child]) break;
+          ops.swap(root, child, `Parent is smaller — sift it down.`);
+          root = child;
+        }
+      }
+      ops.range(0, n - 1);
+      for (let i = Math.floor(n / 2) - 1; i >= 0; i--) siftDown(i, n);
+      for (let end = n - 1; end > 0; end--) {
+        ops.swap(0, end, `Move the largest value (the root) to index ${end}.`);
+        ops.markSorted([end], [end], `Index ${end} now holds its final value.`);
+        ops.range(0, end - 1);
+        siftDown(0, end);
+      }
+      ops.range(null);
+      ops.lockAll([0]);
+      ops.markSorted([0], [0], `The remaining root is the smallest — done.`);
+      ops.done(`Sorted in ${ops.comparisons} comparisons and ${ops.swaps} swaps.`);
+    }
+  };
+
+  // custom/steptrace/src/algorithms/insertion-sort.ts
+  var insertionSort = {
+    id: "insertion-sort",
+    kind: "sort",
+    meta: { label: "Insertion sort" },
+    run: (input, ops) => {
+      const n = ops.value.length;
+      ops.init(
+        `Insertion sort — grow a sorted prefix on the left; take each next value and slide it left past larger values into place.`
+      );
+      ops.markSorted([0], [0], `The first element alone is a sorted prefix.`);
+      for (let i = 1; i < n; i++) {
+        const key = ops.value[i];
+        ops.holdKey(key);
+        ops.compare(i, i - 1, `Take ${key} (index ${i}) and compare it into the sorted prefix.`);
+        let j = i - 1;
+        while (j >= 0 && ops.value[j] > key) {
+          ops.overwrite(
+            j + 1,
+            ops.value[j],
+            `${ops.value[j]} > ${key}: shift it right into index ${j + 1}.`,
+            j
+          );
+          j--;
+          if (j >= 0) ops.compare(j, null, `Compare ${key} with ${ops.value[j]}.`);
+        }
+        ops.overwrite(j + 1, key, `Insert ${key} at index ${j + 1}.`);
+        ops.holdKey(null);
+        ops.markSorted(
+          Array.from({ length: i + 1 }, (_, k) => k),
+          [j + 1],
+          `Sorted prefix now spans indices 0..${i}.`
+        );
+      }
+      ops.done(`Sorted in ${ops.comparisons} comparisons and ${ops.swaps} moves.`);
+    }
+  };
+
+  // custom/steptrace/src/algorithms/introsort.ts
+  function invalidConfig3(message) {
+    throw new Error(`steptrace: introsort ${message}`);
+  }
+  function parseIntrosortConfig(config) {
+    const { array } = config;
+    if (!Array.isArray(array) || array.length < 2)
+      invalidConfig3('requires an "array" with at least two numbers.');
+    if (!array.every((value) => typeof value === "number" && Number.isFinite(value)))
+      invalidConfig3('requires every "array" value to be a finite number.');
+    const depthLimit = config.depthLimit ?? 2 * Math.floor(Math.log2(array.length));
+    const smallPartitionThreshold = config.smallPartitionThreshold ?? 16;
+    if (!Number.isInteger(depthLimit) || depthLimit < 0)
+      invalidConfig3('requires "depthLimit" to be a non-negative integer.');
+    if (!Number.isInteger(smallPartitionThreshold) || smallPartitionThreshold < 1)
+      invalidConfig3('requires "smallPartitionThreshold" to be a positive integer.');
+    return {
+      array: array.slice(),
+      profile: "introsort",
+      depthLimit,
+      smallPartitionThreshold
+    };
+  }
+  var introsort = {
+    id: "introsort",
+    kind: "sort",
+    family: arraySortFamily,
+    meta: { label: "Introsort" },
+    parse: parseIntrosortConfig,
+    run(input, ops) {
+      const n = ops.value.length;
+      ops.configureIntrosort(input.depthLimit, input.smallPartitionThreshold);
+      ops.init(
+        `Quicksort with depth limit ${input.depthLimit}, heap fallback, and insertion cutoff ${input.smallPartitionThreshold}.`
+      );
+      function partition(lo, hi, depthUsed) {
+        const pivot = ops.value[hi];
+        ops.range(lo, hi);
+        ops.pivot(hi);
+        ops.introsortStrategy(
+          "quicksort",
+          depthUsed,
+          "strategy",
+          `Quicksort [${lo}, ${hi}] at depth ${depthUsed}: use ${pivot} at index ${hi} as the pivot.`
+        );
+        let boundary = lo;
+        for (let scan = lo; scan < hi; scan++) {
+          ops.compare(scan, hi, `Compare ${ops.value[scan]} with pivot ${pivot}.`);
+          if (ops.value[scan] >= pivot) continue;
+          if (boundary !== scan)
+            ops.swap(
+              boundary,
+              scan,
+              `${ops.value[scan]} < ${pivot}: move it into the left partition.`
+            );
+          boundary++;
+        }
+        if (boundary !== hi) ops.swap(boundary, hi, `Place pivot ${pivot} at index ${boundary}.`);
+        ops.pivot(boundary);
+        ops.markSorted([boundary], [boundary], `Pivot ${pivot} is final at index ${boundary}.`);
+        ops.pivot(null);
+        return boundary;
+      }
+      function siftDown(lo, heapSize, root) {
+        let parent = root;
+        while (2 * parent + 1 < heapSize) {
+          let child = 2 * parent + 1;
+          if (child + 1 < heapSize) {
+            ops.compare(lo + child, lo + child + 1, "Choose the larger heap child.");
+            if (ops.value[lo + child + 1] > ops.value[lo + child]) child++;
+          }
+          ops.compare(lo + parent, lo + child, "Compare the heap parent with its larger child.");
+          if (ops.value[lo + parent] >= ops.value[lo + child]) return;
+          ops.swap(lo + parent, lo + child, "Sift the smaller parent down inside the fallback range.");
+          parent = child;
+        }
+      }
+      function heapSortRange(lo, hi) {
+        const length = hi - lo + 1;
+        for (let root = Math.floor(length / 2) - 1; root >= 0; root--) siftDown(lo, length, root);
+        for (let end = length - 1; end > 0; end--) {
+          ops.swap(lo, lo + end, `Move the fallback heap maximum to index ${lo + end}.`);
+          ops.markSorted([lo + end], [lo + end], `Index ${lo + end} is final.`);
+          siftDown(lo, end, 0);
+        }
+        ops.markSorted([lo], [lo], `The fallback range [${lo}, ${hi}] is sorted.`);
+      }
+      function introsortRange(lo, hi, remaining, depthUsed) {
+        if (lo > hi) return;
+        const size = hi - lo + 1;
+        ops.range(lo, hi);
+        if (size <= input.smallPartitionThreshold) {
+          ops.introsortStrategy(
+            "deferred",
+            depthUsed,
+            "defer",
+            `Defer [${lo}, ${hi}] (${size} values) to the final insertion pass; cutoff is ${input.smallPartitionThreshold}.`
+          );
+          return;
+        }
+        if (remaining === 0) {
+          ops.introsortStrategy(
+            "heap sort",
+            depthUsed,
+            "fallback",
+            `Depth limit ${input.depthLimit} reached on [${lo}, ${hi}]; heap-sort this range.`
+          );
+          heapSortRange(lo, hi);
+          return;
+        }
+        const pivot = partition(lo, hi, depthUsed);
+        introsortRange(lo, pivot - 1, remaining - 1, depthUsed + 1);
+        introsortRange(pivot + 1, hi, remaining - 1, depthUsed + 1);
+      }
+      introsortRange(0, n - 1, input.depthLimit, 0);
+      ops.range(0, n - 1);
+      ops.pivot(null);
+      ops.introsortStrategy(
+        "insertion sort",
+        0,
+        "cleanup",
+        `Insertion cleanup: finish ranges of at most ${input.smallPartitionThreshold} values.`
+      );
+      for (let index = 1; index < n; index++) {
+        const key = ops.value[index];
+        ops.holdKeyAt(key, index, `Lift ${key} from index ${index} for insertion cleanup.`);
+        let cursor = index - 1;
+        ops.compareHeldAt(cursor, `Compare held ${key} with ${ops.value[cursor]} at index ${cursor}.`);
+        while (cursor >= 0 && ops.value[cursor] > key) {
+          ops.shiftHeld(
+            cursor + 1,
+            cursor,
+            `${ops.value[cursor]} > ${key}: shift it right to index ${cursor + 1}.`
+          );
+          cursor--;
+          if (cursor >= 0)
+            ops.compareHeldAt(
+              cursor,
+              `Compare held ${key} with ${ops.value[cursor]} at index ${cursor}.`
+            );
+        }
+        ops.placeHeld(cursor + 1, key, `Place ${key} at index ${cursor + 1}.`);
+        ops.releaseHeldKey();
+      }
+      ops.lockAll(Array.from({ length: n }, (_, index) => index));
+      ops.done(`Sorted with ${ops.comparisons} comparisons and ${ops.swaps} moves.`);
+    }
+  };
+
+  // custom/steptrace/src/algorithms/jump-search.ts
+  function parseJumpSearchConfig(config) {
+    const parsed = parseIndexedArraySearchConfig(config, "jump-search", "jump");
+    const blockSize = config.blockSize ?? Math.max(1, Math.floor(Math.sqrt(parsed.array.length)));
+    if (!Number.isInteger(blockSize) || blockSize <= 0)
+      throw new Error('steptrace: jump-search requires "blockSize" to be a positive integer.');
+    return { ...parsed, blockSize };
+  }
+  var jumpSearch = {
+    id: "jump-search",
+    kind: "search",
+    family: indexedArraySearchFamily,
+    meta: { label: "Jump search" },
+    parse: parseJumpSearchConfig,
+    run(input, ops) {
+      const values = ops.value;
+      const { target } = input;
+      const step = input.blockSize;
+      ops.init(
+        `Jump search for ${target}: move in blocks of ${step}, then linearly scan the candidate block.`
+      );
+      let previousBound = -1;
+      let bound = Math.min(step - 1, values.length - 1);
+      while (true) {
+        ops.jumpProbe(
+          previousBound,
+          bound,
+          `Check block end ${bound}: ${values[bound]} ${values[bound] < target ? "is below" : "reaches or passes"} ${target}.`
+        );
+        if (values[bound] >= target || bound === values.length - 1) break;
+        previousBound = bound;
+        bound = Math.min(bound + step, values.length - 1);
+      }
+      if (values[bound] < target) {
+        ops.done(
+          `${target} is larger than the array maximum; not found after ${ops.comparisons} probes.`
+        );
+        return;
+      }
+      const lo = previousBound + 1;
+      const hi = bound;
+      ops.beginPhase(
+        lo,
+        hi,
+        `The target can only be in block [${lo}, ${hi}]; scan that block from the start.`,
+        "scan"
+      );
+      for (let i = lo; i <= hi && i < values.length; i++) {
+        ops.probe(lo, hi, i, `Linear scan in jump block [${lo}, ${hi}]: check index ${i}.`);
+        if (values[i] === target) {
+          ops.hit(i, `${values[i]} equals ${target}; found it at index ${i}.`);
+          ops.done(`Found ${target} at index ${i} after ${ops.comparisons} probes.`);
+          return;
+        }
+        if (values[i] > target) {
+          break;
+        }
+      }
+      ops.done(`${target} is not in the array after ${ops.comparisons} probes.`);
+    }
+  };
+
+  // custom/steptrace/src/algorithms/kernighan-popcount.ts
+  var kernighanPopcount = {
+    id: "kernighan-popcount",
+    kind: "bits",
+    meta: { label: "Kernighan population count" },
+    run: (input, ops) => {
+      let x = Number(input.value) >>> 0 & ops.mask;
+      const total = ops.popcount(x);
+      ops.init(
+        x,
+        { a: "x", b: "− 1", r: "&" },
+        `x = ${x} has ${total} one${total === 1 ? "" : "s"}. Each pass, x & (x−1) deletes the lowest 1 — so the loop runs ${total} time${total === 1 ? "" : "s"}, once per set bit.`
+      );
+      let pop = 0;
+      while (x !== 0) {
+        const low = ops.lowestSetBit(x);
+        const sub = x - 1 & ops.mask;
+        ops.subtract(
+          sub,
+          low,
+          `Lowest 1 is at bit ${low}. Subtracting 1 flips it to 0 and turns every zero below it into a 1.`
+        );
+        const res = x & sub;
+        ops.and(
+          res,
+          low,
+          `AND the two: the survivors above stay, bit ${low} and everything under it are wiped — exactly one 1 gone.`
+        );
+        pop++;
+        x = res;
+        ops.commit(`x ← ${x}. ${pop} of ${total} ones cleared.`);
+      }
+      ops.done(
+        `x = 0 — every 1 is gone. It took ${total} pass${total === 1 ? "" : "es"}, so x had ${total} set bit${total === 1 ? "" : "s"}.`
+      );
+    }
+  };
+
+  // custom/steptrace/src/algorithms/kmp.ts
+  var kmp = {
+    id: "kmp",
+    kind: "string",
+    meta: { label: "KMP" },
+    run: (input, ops) => {
+      const text = String(input.text || "");
+      const pattern = String(input.pattern || "");
+      const n = text.length;
+      const m = pattern.length;
+      ops.init(
+        `KMP search for "${pattern}" — on a mismatch, the failure function slides the pattern forward without re-checking characters already known to match.`
+      );
+      if (!m || m > n) {
+        ops.done("Nothing to search.");
+        return;
+      }
+      const lps = new Array(m).fill(0);
+      let len = 0;
+      for (let idx = 1; idx < m; ) {
+        if (pattern[idx] === pattern[len]) {
+          len++;
+          lps[idx] = len;
+          idx++;
+        } else if (len > 0) {
+          len = lps[len - 1];
+        } else {
+          lps[idx] = 0;
+          idx++;
+        }
+      }
+      let i = 0;
+      let j = 0;
+      while (i < n) {
+        const isMatch = text[i] === pattern[j];
+        ops.compare(
+          i,
+          j,
+          i - j,
+          isMatch,
+          `Compare text[${i}]='${text[i]}' with pattern[${j}]='${pattern[j]}' → ${isMatch ? "match" : "mismatch"}.`
+        );
+        if (isMatch) {
+          i++;
+          j++;
+          if (j === m) {
+            ops.matchAt(i - j, `Whole pattern matched — occurrence at index ${i - j}.`);
+            j = lps[j - 1];
+          }
+        } else if (j > 0) {
+          j = lps[j - 1];
+          ops.slide(
+            i - j,
+            `Mismatch — reuse the matched prefix: realign so ${j} char${j === 1 ? "" : "s"} already line up (no re-check).`
+          );
+        } else {
+          i++;
+          ops.slide(i, `Mismatch at the pattern start — slide forward by one.`);
+        }
+      }
+      ops.done(
+        ops.found.length ? `Found ${ops.found.length} occurrence(s): index ${ops.found.join(", ")}.` : `Pattern not found.`
+      );
+    }
+  };
+
+  // custom/steptrace/src/algorithms/lcs.ts
+  var lcs = {
+    id: "lcs",
+    kind: "dp",
+    meta: { label: "Longest common subsequence" },
+    run: (input, ops) => {
+      const A = String(input.a != null ? input.a : input.text || "");
+      const B = String(input.b != null ? input.b : input.pattern || "");
+      const m = A.length;
+      const n = B.length;
+      const rowLabels = ["∅", ...A.split("")];
+      const colLabels = ["∅", ...B.split("")];
+      ops.board(
+        rowLabels,
+        colLabels,
+        `Longest common subsequence of "${A}" and "${B}". Cell dp[i][j] holds the LCS length of the first i letters of "${A}" and the first j of "${B}".`
+      );
+      const dp = Array.from({ length: m + 1 }, () => Array(n + 1).fill(0));
+      for (let c2 = 0; c2 <= n; c2++) ops.set(0, c2, 0, [], `An empty first string has LCS 0.`);
+      for (let r2 = 1; r2 <= m; r2++) ops.set(r2, 0, 0, [], `An empty second string has LCS 0.`);
+      for (let r2 = 1; r2 <= m; r2++) {
+        for (let c2 = 1; c2 <= n; c2++) {
+          if (A[r2 - 1] === B[c2 - 1]) {
+            dp[r2][c2] = dp[r2 - 1][c2 - 1] + 1;
+            ops.set(
+              r2,
+              c2,
+              dp[r2][c2],
+              [[r2 - 1, c2 - 1]],
+              `'${A[r2 - 1]}' = '${B[c2 - 1]}' → take the diagonal + 1 = ${dp[r2][c2]}.`
+            );
+          } else {
+            dp[r2][c2] = Math.max(dp[r2 - 1][c2], dp[r2][c2 - 1]);
+            const better = dp[r2 - 1][c2] >= dp[r2][c2 - 1] ? "top" : "left";
+            ops.set(
+              r2,
+              c2,
+              dp[r2][c2],
+              [
+                [r2 - 1, c2],
+                [r2, c2 - 1]
+              ],
+              `'${A[r2 - 1]}' ≠ '${B[c2 - 1]}' → this letter can't extend the match, so the optimum here is inherited from an optimal sub-answer: the better of top (${dp[r2 - 1][c2]}) and left (${dp[r2][c2 - 1]}) = ${dp[r2][c2]} (from the ${better}).`
+            );
+          }
+        }
+      }
+      let r = m;
+      let c = n;
+      const path = [];
+      while (r > 0 && c > 0) {
+        if (A[r - 1] === B[c - 1]) {
+          path.unshift([r, c]);
+          ops.markPath(
+            path,
+            `dp[${r}][${c}]: '${A[r - 1]}' = '${B[c - 1]}' — this cell was built from dp[${r - 1}][${c - 1}] + 1, so '${A[r - 1]}' joins the LCS. Step diagonally to that sub-answer.`
+          );
+          r--;
+          c--;
+        } else if (dp[r - 1][c] >= dp[r][c - 1]) {
+          ops.markPath(
+            path,
+            `dp[${r}][${c}]: '${A[r - 1]}' ≠ '${B[c - 1]}' — its optimum was inherited from the top sub-answer dp[${r - 1}][${c}]. Follow it upward; no letter added.`
+          );
+          r--;
+        } else {
+          ops.markPath(
+            path,
+            `dp[${r}][${c}]: '${A[r - 1]}' ≠ '${B[c - 1]}' — its optimum was inherited from the left sub-answer dp[${r}][${c - 1}]. Follow it leftward; no letter added.`
+          );
+          c--;
+        }
+      }
+      const lcs2 = path.map((p) => A[p[0] - 1]).join("");
+      ops.markPath(
+        path,
+        `Traceback done: the ${path.length} diagonal step${path.length === 1 ? "" : "s"} spell the LCS "${lcs2}".`
+      );
+      ops.done(`LCS length = ${dp[m][n]} ("${lcs2}").`);
+    }
+  };
+
+  // custom/steptrace/src/algorithms/linear-search.ts
+  var linearSearch = {
+    id: "linear-search",
+    kind: "search",
+    meta: { label: "Linear search" },
+    run: (input, ops) => {
+      const a = ops.value;
+      const target = input.target;
+      const n = a.length;
+      ops.mode = "scan";
+      ops.init(
+        `Linear search for ${target} — scan left to right, comparing every element until a match is found (or the array ends).`
+      );
+      for (let i = 0; i < n; i++) {
+        ops.probe(0, n - 1, i, `Check index ${i}: is ${a[i]} the target ${target}?`);
+        if (a[i] === target) {
+          ops.hit(i, `${a[i]} equals ${target} — found it at index ${i}.`);
+          ops.done(
+            `Found ${target} at index ${i} after ${ops.comparisons} comparison${ops.comparisons === 1 ? "" : "s"}.`
+          );
+          return;
+        }
+      }
+      ops.done(
+        `${target} is not in the array — scanned all ${n} elements (${ops.comparisons} comparisons).`
+      );
+    }
+  };
+
+  // custom/steptrace/src/algorithms/merge-sort.ts
+  var mergeSort = {
+    id: "merge-sort",
+    kind: "sort",
+    meta: { label: "Merge sort" },
+    run: (input, ops) => {
+      const n = ops.value.length;
+      ops.init(
+        `Merge sort — start with runs of length 1, then repeatedly merge adjacent runs into larger sorted runs (watch the sorted runs double).`
+      );
+      for (let width = 1; width < n; width *= 2) {
+        for (let lo = 0; lo < n; lo += 2 * width) {
+          const mid = Math.min(lo + width, n);
+          const hi = Math.min(lo + 2 * width, n);
+          if (mid >= hi) continue;
+          ops.range(lo, hi - 1);
+          const left = ops.value.slice(lo, mid);
+          const right = ops.value.slice(mid, hi);
+          ops.candidate(
+            null,
+            `Merge the left run [${lo}, ${mid - 1}] and the right run [${mid}, ${hi - 1}] into one sorted run [${lo}, ${hi - 1}].`
+          );
+          let i = 0;
+          let j = 0;
+          let k = lo;
+          while (i < left.length && j < right.length) {
+            if (left[i] <= right[j]) {
+              ops.overwrite(
+                k,
+                left[i],
+                `${left[i]} ≤ ${right[j]}: place ${left[i]} from the left half at index ${k}.`,
+                lo + i
+              );
+              i++;
+            } else {
+              ops.overwrite(
+                k,
+                right[j],
+                `${right[j]} < ${left[i]}: place ${right[j]} from the right half at index ${k}.`,
+                mid + j
+              );
+              j++;
+            }
+            k++;
+          }
+          while (i < left.length) {
+            ops.overwrite(
+              k,
+              left[i],
+              `Copy the remaining ${left[i]} from the left half at index ${k}.`,
+              lo + i
+            );
+            i++;
+            k++;
+          }
+          while (j < right.length) {
+            ops.overwrite(
+              k,
+              right[j],
+              `Copy the remaining ${right[j]} from the right half at index ${k}.`,
+              mid + j
+            );
+            j++;
+            k++;
+          }
+        }
+        ops.range(null);
+      }
+      ops.lockAll(Array.from({ length: n }, (_, k) => k));
+      ops.done(`Sorted in ${ops.swaps} writes.`);
+    }
+  };
+
+  // custom/steptrace/src/algorithms/n-queens.ts
+  var nQueens = {
+    id: "n-queens",
+    kind: "backtrack",
+    meta: { label: "N-Queens (backtracking)" },
+    run: (input, ops) => {
+      const n = Math.min(Math.max(input.n || 4, 4), 6);
+      ops.board(
+        n,
+        `Place ${n} queens on a ${n}×${n} board so none attack another. Fill one queen per row; retreat whenever a row has no safe square.`
+      );
+      const conflict = (row, col) => {
+        const q = ops.queens;
+        for (let r = 0; r < row; r++) if (q[r] === col || Math.abs(q[r] - col) === row - r) return r;
+        return -1;
+      };
+      let solved = false;
+      const solve = (row) => {
+        if (solved) return;
+        if (row === n) {
+          ops.solved(`All ${n} rows filled — no queen attacks another.`);
+          solved = true;
+          return;
+        }
+        for (let col = 0; col < n; col++) {
+          const bad = conflict(row, col);
+          if (bad >= 0) {
+            ops.reject(
+              row,
+              col,
+              bad,
+              `Row ${row}, column ${col} clashes with the queen in row ${bad} — prune this square.`
+            );
+            continue;
+          }
+          ops.place(row, col, `Column ${col} is safe — place a queen and descend to row ${row + 1}.`);
+          solve(row + 1);
+          if (solved) return;
+          ops.backtrack(
+            row,
+            `Row ${row + 1} had no safe square — remove the queen at (${row}, ${col}) and retreat.`
+          );
+        }
+      };
+      solve(0);
+      ops.done(solved ? `Solved — a valid ${n}-queens arrangement.` : `No solution for n = ${n}.`);
+    }
+  };
+
+  // custom/steptrace/src/algorithms/prim.ts
+  var prim = {
+    id: "prim",
+    kind: "graph",
+    meta: { label: "Prim's MST", frontierLabel: "Frontier" },
+    run: (input, ops, graph) => {
+      const adj = {};
+      for (const nd of graph.nodes) adj[nd.id] = [];
+      for (const e of graph.edges) {
+        const w = e.weight == null ? 1 : e.weight;
+        adj[e.from].push({ to: e.to, w });
+        if (!graph.directed) adj[e.to].push({ to: e.from, w });
+      }
+      const start = input.start;
+      ops.init(
+        `Prim's algorithm — grow a minimum spanning tree from ${start}, each step adding the cheapest edge that reaches a node not yet in the tree.`
+      );
+      const pairKey = (a, b) => a < b ? a + "|" + b : b + "|" + a;
+      const inTree = /* @__PURE__ */ new Set([start]);
+      const treeEdges = /* @__PURE__ */ new Set();
+      const skipped = /* @__PURE__ */ new Set();
+      ops.visit(start, `Start the tree at ${start}.`);
+      let total = 0;
+      while (inTree.size < graph.nodes.length) {
+        const cand = [];
+        const seenPair = /* @__PURE__ */ new Set();
+        for (const u of inTree)
+          for (const { to: v, w } of adj[u]) {
+            const key = pairKey(u, v);
+            if (seenPair.has(key)) continue;
+            seenPair.add(key);
+            cand.push({ u, v, w, key });
+          }
+        cand.sort((a, b) => a.w - b.w || (a.key < b.key ? -1 : 1));
+        let chosen = null;
+        for (const c of cand) {
+          if (inTree.has(c.v)) {
+            if (!treeEdges.has(c.key) && !skipped.has(c.key)) {
+              skipped.add(c.key);
+              ops.edge(
+                c.u,
+                c.v,
+                `${c.u}–${c.v} (weight ${c.w}) links two nodes already in the tree — skip it, adding it would make a cycle.`
+              );
+            }
+            continue;
+          }
+          chosen = c;
+          break;
+        }
+        if (!chosen) break;
+        ops.edge(
+          chosen.u,
+          chosen.v,
+          `Cheapest edge leaving the tree: ${chosen.u}–${chosen.v} (weight ${chosen.w}).`
+        );
+        ops.selectEdge(chosen.u, chosen.v, `Add ${chosen.u}–${chosen.v} to the tree.`);
+        treeEdges.add(chosen.key);
+        inTree.add(chosen.v);
+        ops.visit(chosen.v, `${chosen.v} joins the tree.`);
+        total += chosen.w;
+      }
+      ops.done(`Minimum spanning tree complete — total weight ${total}.`);
+    }
+  };
+
+  // custom/steptrace/src/algorithms/quick-sort.ts
+  var quickSort = {
+    id: "quick-sort",
+    kind: "sort",
+    meta: { label: "Quick sort" },
+    run: (input, ops) => {
+      const n = ops.value.length;
+      ops.init(
+        `Quick sort — pick a pivot, partition values so smaller ones go left and larger ones go right, then recurse on each side.`
+      );
+      function partition(lo, hi) {
+        const pivot = ops.value[hi];
+        ops.range(lo, hi);
+        ops.pivot(hi);
+        ops.candidate(
+          hi,
+          `Partition [${lo}, ${hi}]: pivot ${pivot} (index ${hi}) — send values < ${pivot} left, > ${pivot} right.`
+        );
+        let i = lo;
+        for (let j = lo; j < hi; j++) {
+          ops.compare(j, hi, `Compare ${ops.value[j]} with pivot ${pivot}.`);
+          if (ops.value[j] < pivot) {
+            if (i !== j)
+              ops.swap(
+                i,
+                j,
+                `${ops.value[j]} < ${pivot}: move it into the left region at index ${i}.`
+              );
+            i++;
+          }
+        }
+        if (i !== hi) ops.swap(i, hi, `Swap the pivot ${pivot} into index ${i}.`);
+        ops.pivot(i);
+        ops.candidate(
+          null,
+          `Pivot ${pivot} settles at index ${i} — everything left is < ${pivot}, everything right is > ${pivot}.`
+        );
+        ops.pivot(null);
+        ops.markSorted([i], [i], `Index ${i} is final — it never moves again.`);
+        ops.range(null);
+        return i;
+      }
+      function qs(lo, hi) {
+        if (lo > hi) return;
+        if (lo === hi) {
+          ops.markSorted([lo], [lo], `A single element at index ${lo} is already in place.`);
+          return;
+        }
+        const p = partition(lo, hi);
+        if (p - 1 - lo >= 1) {
+          ops.range(lo, p - 1);
+          ops.candidate(
+            null,
+            `Recurse into the left half [${lo}, ${p - 1}] (the values below the pivot).`
+          );
+        }
+        qs(lo, p - 1);
+        if (hi - (p + 1) >= 1) {
+          ops.range(p + 1, hi);
+          ops.candidate(
+            null,
+            `Recurse into the right half [${p + 1}, ${hi}] (the values above the pivot).`
+          );
+        }
+        qs(p + 1, hi);
+      }
+      qs(0, n - 1);
+      ops.done(`Sorted in ${ops.comparisons} comparisons and ${ops.swaps} swaps.`);
+    }
+  };
+
+  // custom/steptrace/src/algorithms/rabin-karp.ts
+  var rabinKarp = {
+    id: "rabin-karp",
+    kind: "string",
+    meta: { label: "Rabin-Karp" },
+    run: (input, ops) => {
+      const text = String(input.text || "");
+      const pattern = String(input.pattern || "");
+      const n = text.length;
+      const m = pattern.length;
+      const B = 256;
+      const MOD = 101;
+      const hash = (s) => {
+        let h = 0;
+        for (let k = 0; k < s.length; k++) h = (h * B + s.charCodeAt(k)) % MOD;
+        return h;
+      };
+      if (!m || m > n) {
+        ops.init(`Rabin-Karp for "${pattern}".`);
+        ops.done("Nothing to search.");
+        return;
+      }
+      const ph = hash(pattern);
+      ops.init(
+        `Rabin-Karp search for "${pattern}" — slide a window, compare its rolling hash to the pattern hash (${ph}), and only verify character-by-character when the hashes collide.`
+      );
+      let highPow = 1;
+      for (let k = 0; k < m - 1; k++) highPow = highPow * B % MOD;
+      let wh = hash(text.slice(0, m));
+      for (let s = 0; s <= n - m; s++) {
+        ops.hashStep(
+          s,
+          wh,
+          ph,
+          `Window [${s}, ${s + m - 1}]: hash ${wh} ${wh === ph ? "=" : "≠"} pattern hash ${ph}${wh === ph ? " — verify" : " — skip"}.`
+        );
+        if (wh === ph) {
+          let ok = true;
+          for (let j = 0; j < m; j++) {
+            const isMatch = text[s + j] === pattern[j];
+            ops.compare(
+              s + j,
+              j,
+              s,
+              isMatch,
+              `Hash hit — verify text[${s + j}]='${text[s + j]}' vs pattern[${j}]='${pattern[j]}'.`
+            );
+            if (!isMatch) {
+              ok = false;
+              break;
+            }
+          }
+          if (ok) ops.matchAt(s, `Verified — occurrence at index ${s}.`);
+        }
+        if (s < n - m) {
+          const removed = text.charCodeAt(s) * highPow % MOD;
+          wh = (wh - removed + MOD) % MOD;
+          wh = (wh * B + text.charCodeAt(s + m)) % MOD;
+        }
+      }
+      ops.done(
+        ops.found.length ? `Found ${ops.found.length} occurrence(s): index ${ops.found.join(", ")}.` : `Pattern not found.`
+      );
+    }
+  };
+
+  // custom/steptrace/src/algorithms/selection-sort.ts
+  var selectionSort = {
+    id: "selection-sort",
+    kind: "sort",
+    meta: { label: "Selection sort" },
+    run: (input, ops) => {
+      const n = ops.value.length;
+      ops.init(
+        `Selection sort — repeatedly find the smallest value in the unsorted region and swap it into the next sorted slot.`
+      );
+      for (let i = 0; i < n - 1; i++) {
+        let min = i;
+        ops.candidate(min, `Assume index ${i} (${ops.value[i]}) is the smallest of the rest.`);
+        for (let j = i + 1; j < n; j++) {
+          ops.compare(j, min, `Compare ${ops.value[j]} with the current smallest ${ops.value[min]}.`);
+          if (ops.value[j] < ops.value[min]) {
+            min = j;
+            ops.candidate(min, `New smallest: ${ops.value[min]} at index ${min}.`);
+          }
+        }
+        if (min !== i) ops.swap(i, min, `Swap the smallest (${ops.value[min]}) into index ${i}.`);
+        ops.candidate(null, `Index ${i} settled — scan the remaining region next.`);
+        ops.markSorted([i], [i], `Index ${i} now holds its final value.`);
+      }
+      ops.lockAll([n - 1]);
+      ops.markSorted([n - 1], [n - 1], `The last element is already in place.`);
+      ops.done(`Sorted in ${ops.comparisons} comparisons and ${ops.swaps} swaps.`);
+    }
+  };
+
+  // custom/steptrace/src/algorithms/shell-sort.ts
+  function invalidConfig4(message) {
+    throw new Error(`steptrace: shell-sort ${message}`);
+  }
+  function parseShellSortConfig(config) {
+    const { array, gaps } = config;
+    if (!Array.isArray(array) || array.length < 2)
+      invalidConfig4('requires an "array" with at least two numbers.');
+    if (!array.every((value) => typeof value === "number" && Number.isFinite(value)))
+      invalidConfig4('requires every "array" value to be a finite number.');
+    if (!Array.isArray(gaps) || gaps.length === 0)
+      invalidConfig4('requires a non-empty "gaps" array ending in 1.');
+    if (!gaps.every((gap) => Number.isInteger(gap) && gap > 0 && gap < array.length))
+      invalidConfig4("requires every gap to be a positive integer smaller than the array length.");
+    if (gaps.at(-1) !== 1) invalidConfig4("requires the final gap to be 1.");
+    if (gaps.some((gap, index) => index > 0 && gap >= gaps[index - 1]))
+      invalidConfig4("requires gaps in strictly decreasing order.");
+    return { array: array.slice(), gaps: gaps.slice(), profile: "shell" };
+  }
+  var shellSort = {
+    id: "shell-sort",
+    kind: "sort",
+    family: arraySortFamily,
+    meta: { label: "Shell sort" },
+    parse: parseShellSortConfig,
+    run(input, ops) {
+      ops.init("Shell sort — insertion-sort interleaved subsequences, then shrink the gap to 1.");
+      for (const gap of input.gaps) {
+        ops.beginGap(gap, `Gap ${gap}: sort each subsequence whose indices are ${gap} apart.`);
+        for (let start = 0; start < gap; start++) {
+          const indices = [];
+          for (let index = start; index < ops.value.length; index += gap) indices.push(index);
+          if (indices.length < 2) continue;
+          ops.selectSubsequence(indices, `Gap ${gap}, subsequence ${indices.join(" → ")}.`);
+          for (let index = start + gap; index < ops.value.length; index += gap) {
+            const key = ops.value[index];
+            ops.holdKeyAt(
+              key,
+              index,
+              `Lift ${key} from index ${index}; index ${index} becomes the insertion hole.`
+            );
+            let cursor = index - gap;
+            ops.compareHeldAt(
+              cursor,
+              `Hold ${key} from index ${index}; compare it with ${ops.value[cursor]} at index ${cursor}.`
+            );
+            while (cursor >= start && ops.value[cursor] > key) {
+              ops.shiftHeld(
+                cursor + gap,
+                cursor,
+                `${ops.value[cursor]} > ${key}: shift it from ${cursor} to ${cursor + gap}.`
+              );
+              cursor -= gap;
+              if (cursor >= start)
+                ops.compareHeldAt(
+                  cursor,
+                  `Compare ${key} with ${ops.value[cursor]} at index ${cursor}.`
+                );
+            }
+            ops.placeHeld(cursor + gap, key, `Place ${key} at index ${cursor + gap}.`);
+            ops.releaseHeldKey();
+          }
+        }
+      }
+      ops.lockAll(Array.from({ length: ops.value.length }, (_, index) => index));
+      ops.done(`Sorted in ${ops.comparisons} comparisons and ${ops.swaps} gapped moves.`);
+    }
+  };
+
+  // custom/steptrace/src/algorithms/sliding-window.ts
+  var slidingWindow = {
+    id: "sliding-window",
+    kind: "pointers",
+    meta: { label: "Sliding window" },
+    run: (input, ops) => {
+      const a = ops.value;
+      const target = input.target;
+      ops.init(
+        `Sliding window — find the shortest contiguous subarray with sum ≥ ${target}. Expand the window right to grow the sum; shrink from the left while it stays ≥ ${target}.`
+      );
+      let lo = 0;
+      let sum = 0;
+      let best = Infinity;
+      let bestRange = null;
+      for (let hi = 0; hi < a.length; hi++) {
+        sum += a[hi];
+        ops.step(
+          { pointers: { lo, hi }, window: [lo, hi] },
+          `Expand right to index ${hi}: window sum = ${sum}.`
+        );
+        while (sum >= target) {
+          if (hi - lo + 1 < best) {
+            best = hi - lo + 1;
+            bestRange = [lo, hi];
+          }
+          ops.step(
+            { pointers: { lo, hi }, window: [lo, hi] },
+            `Sum ${sum} ≥ ${target} (length ${hi - lo + 1}) — record it, then shrink from the left.`
+          );
+          sum -= a[lo];
+          lo++;
+        }
+      }
+      if (bestRange) {
+        const marks = [];
+        for (let k = bestRange[0]; k <= bestRange[1]; k++) marks.push(k);
+        ops.step(
+          { pointers: {}, window: bestRange, mark: marks },
+          `Shortest window: indices ${bestRange[0]}..${bestRange[1]} (length ${best}).`
+        );
+        ops.done(`Answer: the shortest qualifying length is ${best}.`);
+      } else {
+        ops.done(`No subarray reaches ${target}.`);
+      }
+    }
+  };
+
+  // custom/steptrace/src/algorithms/topological-sort.ts
+  var topologicalSort = {
+    id: "topological-sort",
+    kind: "graph",
+    meta: { label: "Topological sort (Kahn)", frontierLabel: "Ready queue (in-degree 0)" },
+    run: (input, ops, graph) => {
+      const adj = {};
+      const indeg = {};
+      for (const nd of graph.nodes) {
+        adj[nd.id] = [];
+        indeg[nd.id] = 0;
+      }
+      for (const e of graph.edges) {
+        adj[e.from].push(e.to);
+        indeg[e.to] = (indeg[e.to] || 0) + 1;
+      }
+      ops.init(
+        `Topological sort (Kahn's algorithm) — repeatedly take a node with no remaining prerequisites (in-degree 0) and append it to the order; removing it may make others ready.`
+      );
+      const ready = [];
+      for (const nd of graph.nodes) {
+        if (indeg[nd.id] === 0) {
+          ready.push(nd.id);
+          ops.enqueue(nd.id, null, `${nd.id} has in-degree 0 — ready.`);
+        }
+      }
+      const order = [];
+      while (ready.length) {
+        ready.sort();
+        const u = ready.shift();
+        ops.visit(u, `Output ${u} (position ${order.length + 1} in the order).`);
+        order.push(u);
+        for (const v of adj[u].slice().sort()) {
+          ops.edge(u, v, `Remove edge ${u}→${v}: in-degree of ${v} becomes ${indeg[v] - 1}.`);
+          indeg[v]--;
+          if (indeg[v] === 0) {
+            ready.push(v);
+            ops.enqueue(v, null, `${v} is now ready.`);
+          }
+        }
+      }
+      ops.done(
+        order.length === graph.nodes.length ? `Topological order: ${order.join(" → ")}.` : `A cycle remains (${graph.nodes.length - order.length} node(s) unresolved) — no valid ordering.`
+      );
+    }
+  };
+
+  // custom/steptrace/src/algorithms/two-pointers.ts
+  var twoPointers = {
+    id: "two-pointers",
+    kind: "pointers",
+    meta: { label: "Two pointers" },
+    run: (input, ops) => {
+      const a = ops.value;
+      const target = input.target;
+      ops.init(
+        `Two pointers on a sorted array — find a pair summing to ${target}. Move the left pointer right to raise the sum, the right pointer left to lower it.`
+      );
+      let l = 0;
+      let r = a.length - 1;
+      while (l < r) {
+        const sum = a[l] + a[r];
+        ops.step(
+          { pointers: { L: l, R: r }, window: [l, r] },
+          `a[${l}] + a[${r}] = ${a[l]} + ${a[r]} = ${sum}.`
+        );
+        if (sum === target) {
+          ops.step(
+            { pointers: { L: l, R: r }, window: [l, r], mark: [l, r] },
+            `${a[l]} + ${a[r]} = ${target} — found the pair.`
+          );
+          ops.done(`Found a pair at indices ${l} and ${r}.`);
+          return;
+        }
+        if (sum < target) l++;
+        else r--;
+      }
+      ops.done(`No pair sums to ${target}.`);
+    }
+  };
+
+  // custom/steptrace/src/algorithms/union-find.ts
+  var unionFind = {
+    id: "union-find",
+    kind: "unionfind",
+    meta: { label: "Union-Find" },
+    run: (input, ops) => {
+      const n = input.n || 7;
+      ops.init(
+        `Union-Find on ${n} elements — union merges two sets; find returns a set's representative (its root), flattening the path it walks (path compression).`
+      );
+      const operations = Array.isArray(input.ops) && input.ops.length ? input.ops : [
+        ["union", 0, 1],
+        ["union", 2, 3],
+        ["union", 4, 5],
+        ["union", 1, 2],
+        ["find", 3],
+        ["union", 6, 4]
+      ];
+      const findRoot = (x, why) => {
+        const pathToRoot = [x];
+        let c = x;
+        while (ops.parent[c] !== c) {
+          c = ops.parent[c];
+          pathToRoot.push(c);
+        }
+        ops.findPath(pathToRoot, `${why} follow ${pathToRoot.join(" → ")} to root ${c}.`);
+        for (const node of pathToRoot) {
+          if (node !== c && ops.parent[node] !== c)
+            ops.setParent(node, c, `Path compression: point ${node} straight at root ${c}.`);
+        }
+        return c;
+      };
+      for (const op of operations) {
+        if (op[0] === "union") {
+          const a = op[1];
+          const b = op[2];
+          const ra = findRoot(a, `Union(${a}, ${b}):`);
+          const rb = findRoot(b, `Union(${a}, ${b}):`);
+          if (ra === rb) ops.clear(`${a} and ${b} are already in the same set.`);
+          else ops.setParent(ra, rb, `Link root ${ra} under root ${rb} — the two sets merge.`);
+        } else if (op[0] === "find") {
+          const x = op[1];
+          const rt = findRoot(x, `Find(${x}):`);
+          ops.clear(`Find(${x}) = ${rt}.`);
+        }
+      }
+      const roots = /* @__PURE__ */ new Set();
+      for (let i = 0; i < n; i++) {
+        let c = i;
+        while (ops.parent[c] !== c) c = ops.parent[c];
+        roots.add(c);
+      }
+      ops.done(`Done — ${roots.size} disjoint set${roots.size === 1 ? "" : "s"} remain.`);
+    }
+  };
+
+  // custom/steptrace/src/algorithms/ternary-search.ts
+  function parseTernarySearchConfig(config) {
+    const array = config.array ?? config.values;
+    if (!Array.isArray(array) || array.length < 3)
+      throw new Error('steptrace: ternary-search requires an "array" with at least three values.');
+    if (!array.every((value) => typeof value === "number" && Number.isFinite(value)))
+      throw new Error('steptrace: ternary-search requires every "array" value to be a finite number.');
+    if (config.goal !== "maximum")
+      throw new Error('steptrace: ternary-search requires goal: "maximum".');
+    let peak = 1;
+    while (peak < array.length && array[peak] > array[peak - 1]) peak++;
+    if (peak === 1 || peak === array.length || array.slice(peak).some((value, index) => value >= array[peak + index - 1]))
+      throw new Error(
+        "steptrace: ternary-search requires a strictly increasing then strictly decreasing array."
+      );
+    return { array: array.slice(), target: null, profile: "ternary", goal: "maximum" };
+  }
+  var ternarySearch = {
+    id: "ternary-search",
+    kind: "search",
+    family: indexedArraySearchFamily,
+    meta: { label: "Ternary search" },
+    parse: parseTernarySearchConfig,
+    run(input, ops) {
+      const values = ops.value;
+      ops.init("Ternary search for the maximum: compare two third-points and keep the rising side.");
+      ops.beginPhase(
+        0,
+        values.length - 1,
+        "Probe both third-points together; the larger value shows which side still contains the peak.",
+        "ternary"
+      );
+      let left = 0;
+      let right = values.length - 1;
+      while (right - left > 2) {
+        const third = Math.floor((right - left) / 3);
+        const mid1 = left + third;
+        const mid2 = right - third;
+        ops.dualProbe(
+          left,
+          right,
+          mid1,
+          mid2,
+          `Compare [${mid1}] = ${values[mid1]} with [${mid2}] = ${values[mid2]}.`
+        );
+        if (values[mid1] < values[mid2]) {
+          left = mid1 + 1;
+          ops.narrow(left, right, `The sequence is higher at ${mid2}; keep [${left}, ${right}].`);
+        } else if (values[mid1] > values[mid2]) {
+          right = mid2 - 1;
+          ops.narrow(left, right, `The sequence is higher at ${mid1}; keep [${left}, ${right}].`);
+        } else {
+          left = mid1 + 1;
+          right = mid2 - 1;
+          ops.narrow(
+            left,
+            right,
+            `Equal third-points place the strict peak inside [${left}, ${right}].`
+          );
+        }
+      }
+      ops.beginPhase(
+        left,
+        right,
+        `Only [${left}, ${right}] remains; scan these final values.`,
+        "scan"
+      );
+      let best = left;
+      for (let index = left; index <= right; index++) {
+        ops.probe(left, right, index, `Check final candidate [${index}] = ${values[index]}.`);
+        if (values[index] > values[best]) best = index;
+      }
+      ops.hit(best, `${values[best]} is the maximum at index ${best}.`);
+      ops.done(`Found the maximum ${values[best]} at index ${best} after ${ops.comparisons} probes.`);
+    }
+  };
+
+  // custom/steptrace/src/algorithms/index.ts
+  var builtInAlgorithms = [
+    bubbleSort,
+    insertionSort,
+    selectionSort,
+    quickSort,
+    heapSort,
+    mergeSort,
+    shellSort,
+    combSort,
+    cyclicSort,
+    introsort,
+    exponentialSearch,
+    jumpSearch,
+    ternarySearch,
+    bfs,
+    dfs,
+    dijkstra,
+    prim,
+    topologicalSort,
+    binarySearch,
+    linearSearch,
+    kmp,
+    rabinKarp,
+    twoPointers,
+    slidingWindow,
+    lcs,
+    unionFind,
+    kernighanPopcount,
+    nQueens,
+    fibonacci
+  ];
+
+  // custom/steptrace/src/player.ts
+  var Player = class {
+    constructor(frames, paint, speed) {
+      this.frames = frames;
+      this.paint = paint;
+      this.i = 0;
+      this.speed = speed || 1;
+      this.playing = false;
+      this.timer = null;
+      this.baseDelay = 780;
+      this.onState = () => {
+      };
+    }
+    render() {
+      this.paint(this.frames[this.i], this.i, this.frames.length);
+      this.onState();
+    }
+    _clear() {
+      if (this.timer) {
+        clearTimeout(this.timer);
+        this.timer = null;
+      }
+    }
+    _loop() {
+      if (!this.playing) return;
+      if (this.i >= this.frames.length - 1) {
+        this.playing = false;
+        this.onState();
+        return;
+      }
+      this.timer = setTimeout(() => {
+        this.i++;
+        this.render();
+        this._loop();
+      }, this.baseDelay / this.speed);
+    }
+    play() {
+      if (this.i >= this.frames.length - 1) this.i = 0;
+      this.playing = true;
+      this.render();
+      this.onState();
+      this._loop();
+    }
+    pause() {
+      this.playing = false;
+      this._clear();
+      this.onState();
+    }
+    toggle() {
+      this.playing ? this.pause() : this.play();
+    }
+    stepF() {
+      this.pause();
+      if (this.i < this.frames.length - 1) this.i++;
+      this.render();
+    }
+    stepB() {
+      this.pause();
+      if (this.i > 0) this.i--;
+      this.render();
+    }
+    seek(idx) {
+      this.pause();
+      this.i = Math.max(0, Math.min(this.frames.length - 1, idx | 0));
+      this.render();
+    }
+    reset() {
+      this.pause();
+      this.i = 0;
+      this.render();
+    }
+    setSpeed(s) {
+      this.speed = s;
+    }
+    destroy() {
+      this.playing = false;
+      this._clear();
+    }
+  };
+
+  // custom/steptrace/src/watch-hints.ts
+  var WATCH_HINTS = Object.freeze({
+    i: "First active array index.",
+    j: "Second active array index.",
+    at: "Array index currently being inspected.",
+    from: "Index a value moves from.",
+    pivot: "Pivot index and value for this partition.",
+    range: "Active search or sort index range.",
+    swaps: "Swaps completed so far.",
+    moves: "Value moves completed so far.",
+    held: "Value temporarily held outside the array.",
+    home: "Index where the current value belongs.",
+    gap: "Distance between compared array positions.",
+    lane: "Indices in the active gapped subsequence.",
+    target: "Value the algorithm is looking for.",
+    goal: "Result the algorithm is trying to optimize.",
+    phase: "Current stage of the algorithm.",
+    subproblem: "Range and values handled by the active recursive call.",
+    "call path": "Active calls from the root down to the current subproblem.",
+    result: "Sorted values returned by the active subproblem.",
+    probe: "Index and value currently being checked.",
+    "probe 1": "First third-point checked in the current range.",
+    "probe 2": "Second third-point checked in the current range.",
+    estimate: "Index predicted from the target's position in the value range.",
+    block: "Number of array positions in each jump.",
+    "days used": "Shipping days needed at the tested capacity.",
+    scanned: "Array positions inspected so far.",
+    mid: "Middle index and value of the current range.",
+    shift: "Pattern offset under the text.",
+    matches: "Matches found so far.",
+    hash: "Current window hash and pattern hash.",
+    l: "Left pointer index and value.",
+    left: "Left pointer index and value.",
+    lo: "Left boundary index and value.",
+    r: "Right pointer index and value.",
+    right: "Right pointer index and value.",
+    hi: "Right boundary index and value.",
+    cell: "Dynamic-programming cell being computed.",
+    value: "Value computed for the current cell.",
+    "stage k": "Intermediate vertex currently allowed in shortest paths.",
+    "dist[i][j]": "Distance entry currently being relaxed.",
+    "dist[i][k]": "Distance from the source to the permitted intermediate vertex.",
+    "dist[k][j]": "Distance from the permitted intermediate vertex to the destination.",
+    candidate: "Distance produced by routing through the permitted intermediate vertex.",
+    decision: "Whether the candidate improves the current distance or the current value is kept.",
+    "negative cycle": "Vertices whose diagonal distance became negative.",
+    sets: "Disjoint sets currently remaining.",
+    edge: "Edge currently being examined.",
+    x: "Current integer and its binary representation.",
+    "lowest 1": "Position of the lowest set bit.",
+    "1s cleared": "Set bits removed so far.",
+    depth: "Current recursion depth.",
+    trying: "Candidate position currently being tried.",
+    pruned: "Candidate branches rejected so far.",
+    calls: "Function calls made so far.",
+    memo: "Most recent cached result.",
+    event: "Current recursion or memoization event.",
+    queue: "Nodes waiting to be processed.",
+    visited: "Nodes already processed.",
+    strategy: "Sorting strategy active on the current range.",
+    cutoff: "Largest range deferred to insertion sort."
+  });
+  function watchHintFor(row) {
+    const override = row.hint?.trim();
+    if (override) return override;
+    const label = row.k.trim().toLowerCase();
+    return WATCH_HINTS[label] || `Current ${row.k.trim()} value.`;
+  }
+
   // custom/steptrace/src/mount.ts
   var LOG_ROWS = 10;
   var fadeFor = (age) => Math.max(0.1, 0.5 * Math.pow(0.62, age - 1));
+  var mountSerial = 0;
   function createMount(registry2) {
     const { kindOf, listAlgorithms, buildFrames } = registry2;
     return function mount2(root, config, host = {}) {
       root.classList.add("steptrace");
       root.setAttribute("role", "group");
       root.setAttribute("aria-label", "Algorithm visualizer");
+      const watchHintPrefix = `steptrace-watch-hint-${++mountSerial}`;
       const kind = kindOf(config.algorithm);
       if (!kind) {
         root.textContent = `steptrace: unknown algorithm "${config.algorithm}".`;
@@ -2939,8 +4909,17 @@
         const rows = currentView && currentView.watch ? currentView.watch(player.frames[player.i]) : null;
         watchEl.replaceChildren();
         if (!rows || !rows.length) return;
-        for (const r of rows) {
+        for (const [index, r] of rows.entries()) {
           const row = el("div", "steptrace__watch-row");
+          const hintId = `${watchHintPrefix}-${index}`;
+          const hint = el("span", "steptrace__watch-hint");
+          hint.id = hintId;
+          hint.setAttribute("role", "tooltip");
+          hint.textContent = watchHintFor(r);
+          row.tabIndex = 0;
+          row.setAttribute("role", "group");
+          row.setAttribute("aria-label", `${r.k}: ${String(r.v)}`);
+          row.setAttribute("aria-describedby", hintId);
           if (r.sw) {
             const sw = el("span", "steptrace__watch-sw");
             sw.style.background = r.sw;
@@ -2950,7 +4929,7 @@
           kk.textContent = r.k;
           const vv = el("span", "steptrace__watch-v");
           vv.textContent = r.v;
-          row.append(kk, vv);
+          row.append(kk, vv, hint);
           watchEl.append(row);
         }
       }
@@ -2990,26 +4969,18 @@
         if (player) player.destroy();
         if (currentView && currentView.destroy) currentView.destroy();
         const built = buildFrames({
+          ...state.config,
           algorithm: state.algorithm,
           array: state.array,
-          start: state.start,
-          target: state.config.target,
-          text: state.config.text,
-          pattern: state.config.pattern,
-          a: state.config.a,
-          b: state.config.b,
-          n: state.config.n,
-          value: state.config.value,
-          width: state.config.width,
-          ops: state.config.ops,
-          directed: state.config.directed,
-          nodes: state.config.nodes,
-          edges: state.config.edges
+          start: state.start
         });
+        if (built.family) root.dataset.visualFamily = built.family.id;
+        else delete root.dataset.visualFamily;
         currentGraph = built.graph || null;
         currentMilestones = buildMilestones(state.algorithm, built.kind, built.frames);
         let view;
-        if (built.kind === "graph")
+        if (built.family) view = built.family.createView(built.frames);
+        else if (built.kind === "graph")
           view = makeGraphView(built.frames, built.graph, built.frontierLabel);
         else if (built.kind === "search") view = makeSearchView(built.frames);
         else if (built.kind === "string") view = makeMatchView(built.frames);
@@ -3022,8 +4993,13 @@
         else view = makeSortView(built.frames);
         currentView = view;
         if (built.kind === "graph") syncStartOptions(built.graph);
-        stageCol.classList.toggle("steptrace__stage-col--bottom", built.kind !== "graph");
+        const fillStage = view.stageLayout === "fill";
+        stageCol.classList.toggle(
+          "steptrace__stage-col--bottom",
+          built.kind !== "graph" && !fillStage
+        );
         stageCol.classList.toggle("steptrace__stage-col--graph", built.kind === "graph");
+        stageCol.classList.toggle("steptrace__stage-col--fill", fillStage);
         const nodes = view.nodes.slice(0, -1);
         stageCol.replaceChildren(...nodes);
         player = new Player(built.frames, view.paint, state.speed);
@@ -3049,7 +5025,7 @@
           }
         }
         watchWrap.hidden = maxRows === 0;
-        watchEl.style.minHeight = maxRows ? `calc(${maxRows} * 1.44rem)` : "";
+        watchEl.style.setProperty("--steptrace-watch-rows", String(maxRows));
       }
       function syncStartOptions(graph) {
         if (!startMenu || startMenu.dataset.filled) {
@@ -3110,735 +5086,9 @@
     return pool.slice(0, n);
   }
 
-  // custom/steptrace/src/recorders.ts
-  var SortRecorder = class {
-    constructor(array) {
-      this.a = array.slice();
-      this.frames = [];
-      this._sorted = /* @__PURE__ */ new Set();
-      this.comparisons = 0;
-      this.swaps = 0;
-      this._cand = null;
-      this._key = null;
-      this._range = null;
-      this._pivot = null;
-    }
-    /** Current array as a defensive copy (algorithms read live values through this). */
-    get value() {
-      return this.a.slice();
-    }
-    _push(type, active, message) {
-      const frame = {
-        type,
-        array: this.a.slice(),
-        sorted: [...this._sorted].sort((x, y) => x - y),
-        active: active.slice(),
-        candidate: this._cand,
-        keyValue: this._key,
-        comparisons: this.comparisons,
-        swaps: this.swaps,
-        message
-      };
-      if (this._range) frame.range = this._range.slice();
-      if (this._pivot != null) frame.pivot = this._pivot;
-      if (this._from != null) frame.from = this._from;
-      this.frames.push(Object.freeze(frame));
-    }
-    init(message) {
-      this._push("init", [], message);
-    }
-    /** Compare index i with j (pass j=null for a one-sided compare vs a held key). */
-    compare(i, j, message) {
-      this.comparisons++;
-      this._push("compare", j == null ? [i] : [i, j], message);
-    }
-    swap(i, j, message) {
-      const a = this.a;
-      [a[i], a[j]] = [a[j], a[i]];
-      this.swaps++;
-      this._push("swap", [i, j], message);
-    }
-    /** Overwrite index i with value v (insertion-style shift); counts as a move.
-     *  `from` is the index the value travelled from — the view animates the bar
-     *  sliding along that path. Omit when the value has no on-screen origin. */
-    overwrite(i, v, message, from = null) {
-      this.a[i] = v;
-      this.swaps++;
-      this._from = from == null ? null : from;
-      this._push("overwrite", [i], message);
-      this._from = null;
-    }
-    /** Track a candidate index (running min / insertion target), or null to clear. */
-    candidate(i, message) {
-      this._cand = i;
-      this._push("select", i == null ? [] : [i], message);
-    }
-    /** Hold a value out of the array (insertion key); shows on subsequent frames. */
-    holdKey(v) {
-      this._key = v;
-    }
-    /** Set the active subarray [lo, hi] carried into later frames (pass lo=null to
-     *  clear). Emits no frame — state only, like holdKey. */
-    range(lo, hi = null) {
-      this._range = lo == null ? null : [lo, hi];
-    }
-    /** Set the pivot index carried into later frames (pass null to clear). Emits
-     *  no frame — state only. */
-    pivot(idx) {
-      this._pivot = idx == null ? null : idx;
-    }
-    markSorted(idxs, show, message) {
-      idxs.forEach((k) => this._sorted.add(k));
-      this._push("mark-sorted", show, message);
-    }
-    lockAll(idxs) {
-      idxs.forEach((k) => this._sorted.add(k));
-    }
-    // no frame; faithful terminal state
-    clearMarks() {
-      this._cand = null;
-      this._key = null;
-      this._range = null;
-      this._pivot = null;
-      this._from = null;
-    }
-    done(message) {
-      this.clearMarks();
-      this._push("done", [], message);
-    }
-  };
-  var GraphRecorder = class {
-    constructor(graph) {
-      this.graph = graph;
-      this.frames = [];
-      this._visited = /* @__PURE__ */ new Set();
-      this._frontier = [];
-      this._dist = {};
-      this._current = null;
-      this._selected = [];
-      this._target = null;
-    }
-    /** Declare the node this traversal is searching for (call before init). */
-    target(id) {
-      this._target = id == null ? null : String(id);
-    }
-    get visitedCount() {
-      return this._visited.size;
-    }
-    dist(id) {
-      return this._dist[id];
-    }
-    _push(type, edge, message) {
-      this.frames.push(
-        Object.freeze({
-          type,
-          visited: [...this._visited],
-          frontier: [...this._frontier],
-          current: this._current,
-          edge: edge ? { from: edge.from, to: edge.to } : null,
-          dist: { ...this._dist },
-          selected: this._selected.map((s) => s.slice()),
-          target: this._target,
-          message
-        })
-      );
-    }
-    init(message) {
-      this._push("init", null, message);
-    }
-    /** Discover a node: set its distance and append it to the queue (frontier). */
-    enqueue(node, d, message) {
-      this._frontier.push(node);
-      this._dist[node] = d;
-      this._push("frontier", null, message);
-    }
-    /** Relax a node to a shorter distance (Dijkstra): update its distance and
-     *  make sure it is shown in the frontier. */
-    relax(node, d, message) {
-      this._dist[node] = d;
-      if (this._frontier.indexOf(node) < 0) this._frontier.push(node);
-      this._push("relax", null, message);
-    }
-    /** Explore an edge u -> v (highlight only; no state change). */
-    edge(u, v, message) {
-      this._push("edge", { from: u, to: v }, message);
-    }
-    /** Add an edge to the built tree (MST) — it stays highlighted afterwards. */
-    selectEdge(u, v, message) {
-      this._selected.push([u, v]);
-      this._push("select", { from: u, to: v }, message);
-    }
-    /** Visit a node: dequeue it from the frontier and mark it visited. */
-    visit(node, message) {
-      this._current = node;
-      const i = this._frontier.indexOf(node);
-      if (i >= 0) this._frontier.splice(i, 1);
-      this._visited.add(node);
-      this._push("visit", null, message);
-    }
-    done(message) {
-      this._current = null;
-      this._push("done", null, message);
-    }
-  };
-  var SearchRecorder = class {
-    constructor(array, target) {
-      this.a = (array || []).slice();
-      this.target = target;
-      this.frames = [];
-      this.lo = 0;
-      this.hi = this.a.length - 1;
-      this.mid = null;
-      this.found = null;
-      this.comparisons = 0;
-      this.mode = "range";
-    }
-    get value() {
-      return this.a.slice();
-    }
-    _push(type, message) {
-      this.frames.push(
-        Object.freeze({
-          type,
-          array: this.a.slice(),
-          lo: this.lo,
-          hi: this.hi,
-          mid: this.mid,
-          found: this.found,
-          target: this.target,
-          comparisons: this.comparisons,
-          mode: this.mode,
-          message
-        })
-      );
-    }
-    init(message) {
-      this._push("init", message);
-    }
-    /** Probe the middle of the current [lo, hi] range. */
-    probe(lo, hi, mid, message) {
-      this.lo = lo;
-      this.hi = hi;
-      this.mid = mid;
-      this.comparisons++;
-      this._push("probe", message);
-    }
-    /** Narrow the range after a probe (discard a half). */
-    narrow(lo, hi, message) {
-      this.lo = lo;
-      this.hi = hi;
-      this.mid = null;
-      this._push("narrow", message);
-    }
-    /** Mark the target found at index mid. */
-    hit(mid, message) {
-      this.found = mid;
-      this.mid = mid;
-      this._push("found", message);
-    }
-    done(message) {
-      this._push("done", message);
-    }
-  };
-  var StringRecorder = class {
-    constructor(text, pattern) {
-      this.text = String(text || "");
-      this.pattern = String(pattern || "");
-      this.frames = [];
-      this.shift = 0;
-      this.found = [];
-      this.hash = null;
-    }
-    _push(type, extra, message) {
-      this.frames.push(
-        Object.freeze({
-          type,
-          text: this.text,
-          pattern: this.pattern,
-          shift: this.shift,
-          cmpT: extra.cmpT == null ? null : extra.cmpT,
-          cmpP: extra.cmpP == null ? null : extra.cmpP,
-          cmpResult: extra.cmpResult || null,
-          found: this.found.slice(),
-          hash: this.hash,
-          message
-        })
-      );
-    }
-    init(message) {
-      this._push("init", {}, message);
-    }
-    /** Compare text[ti] with pattern[pj] at alignment `shift`. */
-    compare(ti, pj, shift, isMatch, message) {
-      this.shift = shift;
-      this._push(
-        "compare",
-        { cmpT: ti, cmpP: pj, cmpResult: isMatch ? "match" : "mismatch" },
-        message
-      );
-    }
-    /** Slide the pattern to a new alignment. */
-    slide(shift, message) {
-      this.shift = shift;
-      this._push("slide", {}, message);
-    }
-    /** Record a full match starting at `shift`. */
-    matchAt(shift, message) {
-      this.shift = shift;
-      if (this.found.indexOf(shift) < 0) this.found.push(shift);
-      this._push("match", {}, message);
-    }
-    /** Rabin-Karp: show the window hash vs the pattern hash (stays visible after). */
-    hashStep(shift, windowHash, patternHash, message) {
-      this.shift = shift;
-      this.hash = { window: windowHash, pattern: patternHash };
-      this._push("hash", {}, message);
-    }
-    done(message) {
-      this._push("done", {}, message);
-    }
-  };
-  var PointerRecorder = class {
-    constructor(array) {
-      this.a = (array || []).slice();
-      this.frames = [];
-      this.pointers = {};
-      this.window = null;
-      this.marked = [];
-    }
-    get value() {
-      return this.a.slice();
-    }
-    _push(type, message) {
-      this.frames.push(
-        Object.freeze({
-          type,
-          array: this.a.slice(),
-          pointers: { ...this.pointers },
-          window: this.window ? this.window.slice() : null,
-          marked: this.marked.slice(),
-          message
-        })
-      );
-    }
-    init(message) {
-      this._push("init", message);
-    }
-    /** One logical step: update named pointers, the window span, and/or marks. */
-    step(update, message) {
-      update = update || {};
-      if (update.pointers) this.pointers = { ...update.pointers };
-      if ("window" in update) this.window = update.window ? update.window.slice() : null;
-      if (update.mark) this.marked = this.marked.concat(update.mark);
-      this._push(update.mark ? "match" : "step", message);
-    }
-    done(message) {
-      this._push("done", message);
-    }
-  };
-  var DPRecorder = class {
-    constructor() {
-      this.frames = [];
-      this.rowLabels = [];
-      this.colLabels = [];
-      this.grid = [];
-      this.cur = null;
-      this.deps = [];
-      this.path = [];
-    }
-    board(rowLabels, colLabels, message) {
-      this.rowLabels = rowLabels.slice();
-      this.colLabels = colLabels.slice();
-      this.grid = rowLabels.map(() => colLabels.map(() => null));
-      this._push("init", message);
-    }
-    set(r, c, val, deps, message) {
-      this.cur = [r, c];
-      this.deps = (deps || []).map((d) => d.slice());
-      this.grid[r][c] = val;
-      this._push("compute", message);
-    }
-    markPath(cells, message) {
-      this.path = cells.map((p) => p.slice());
-      this.cur = null;
-      this.deps = [];
-      this._push("trace", message);
-    }
-    done(message) {
-      this.cur = null;
-      this.deps = [];
-      this._push("done", message);
-    }
-    _push(type, message) {
-      this.frames.push(
-        Object.freeze({
-          type,
-          rowLabels: this.rowLabels.slice(),
-          colLabels: this.colLabels.slice(),
-          grid: this.grid.map((row) => row.slice()),
-          cur: this.cur ? this.cur.slice() : null,
-          deps: this.deps.map((d) => d.slice()),
-          path: this.path.map((p) => p.slice()),
-          message
-        })
-      );
-    }
-  };
-  var UnionFindRecorder = class {
-    constructor(n) {
-      this.n = n;
-      this.parent = Array.from({ length: n }, (_, i) => i);
-      this.frames = [];
-      this.highlight = [];
-      this.activeEdge = null;
-    }
-    _root(x) {
-      while (this.parent[x] !== x) x = this.parent[x];
-      return x;
-    }
-    _push(type, message) {
-      const roots = [];
-      for (let i = 0; i < this.n; i++) roots.push(this._root(i));
-      this.frames.push(
-        Object.freeze({
-          type,
-          n: this.n,
-          parent: this.parent.slice(),
-          roots,
-          highlight: this.highlight.slice(),
-          activeEdge: this.activeEdge ? this.activeEdge.slice() : null,
-          message
-        })
-      );
-    }
-    init(message) {
-      this._push("init", message);
-    }
-    /** Highlight the parent-pointer path root-ward from a node. */
-    findPath(path, message) {
-      this.highlight = path.slice();
-      this.activeEdge = null;
-      this._push("find", message);
-    }
-    /** Point `child` at `par` (a union link or path compression). */
-    setParent(child, par, message) {
-      this.parent[child] = par;
-      this.activeEdge = [child, par];
-      this._push("link", message);
-    }
-    /** Clear transient highlights. */
-    clear(message) {
-      this.highlight = [];
-      this.activeEdge = null;
-      this._push("clear", message);
-    }
-    done(message) {
-      this.highlight = [];
-      this.activeEdge = null;
-      this._push("done", message);
-    }
-  };
-  var BitsRecorder = class {
-    constructor(width) {
-      this.width = width;
-      this.mask = 2 ** width - 1;
-      this.frames = [];
-      this.a = this._lane();
-      this.b = this._lane();
-      this.r = this._lane();
-      this.a.live = true;
-      this.labels = { a: "x", b: "− 1", r: "&" };
-      this.value = 0;
-      this.sub = null;
-      this.low = -1;
-      this.pop = 0;
-      this.total = 0;
-      this.just = -1;
-      this._result = 0;
-    }
-    _lane() {
-      return { bits: Array(this.width).fill(0), state: Array(this.width).fill(""), live: false };
-    }
-    /** Zero-padded binary string, MSB-left, `width` chars. */
-    bin(x) {
-      return (x >>> 0 & this.mask).toString(2).padStart(this.width, "0");
-    }
-    /** Index of the lowest set bit (bits[0]=LSB), or -1 when x is zero. */
-    lowestSetBit(x) {
-      x = x >>> 0 & this.mask;
-      return x === 0 ? -1 : 31 - Math.clz32(x & -x);
-    }
-    /** Population count — the number of iterations (and the tally width). */
-    popcount(x) {
-      x = x >>> 0 & this.mask;
-      let c = 0;
-      while (x) {
-        x &= x - 1;
-        c++;
-      }
-      return c;
-    }
-    _fill(lane, x) {
-      x = x >>> 0 & this.mask;
-      for (let i = 0; i < this.width; i++) lane.bits[i] = x >> i & 1;
-    }
-    _snap(lane) {
-      return { bits: lane.bits.slice(), state: lane.state.slice(), live: lane.live };
-    }
-    _push(type, message) {
-      this.frames.push(
-        Object.freeze({
-          type,
-          width: this.width,
-          labels: { ...this.labels },
-          a: this._snap(this.a),
-          b: this._snap(this.b),
-          r: this._snap(this.r),
-          value: this.value,
-          sub: this.sub,
-          low: this.low,
-          pop: this.pop,
-          total: this.total,
-          just: this.just,
-          message
-        })
-      );
-    }
-    init(x, labels, message) {
-      this.value = x >>> 0 & this.mask;
-      if (labels) this.labels = { a: labels.a, b: labels.b, r: labels.r };
-      this.total = this.popcount(this.value);
-      this._fill(this.a, this.value);
-      this.a.state.fill("");
-      this.a.live = true;
-      this.b = this._lane();
-      this.r = this._lane();
-      this.low = -1;
-      this.sub = null;
-      this.pop = 0;
-      this.just = -1;
-      this._push("init", message);
-    }
-    /** Locate + decrement in one beat: in lane x the lowest 1 turns amber (it is
-     *  about to die); lane x−1 goes live showing that 1 flipped to 0 (amber) and
-     *  the zeros beneath it borrowed up to 1 (blue). */
-    subtract(sub, low, message) {
-      this.sub = sub >>> 0 & this.mask;
-      this.low = low;
-      this.just = -1;
-      this.a.state.fill("");
-      this.a.state[low] = "die";
-      this.b.live = true;
-      this._fill(this.b, this.sub);
-      this.b.state.fill("");
-      this.b.state[low] = "die";
-      for (let i = 0; i < low; i++) this.b.state[i] = "borrow";
-      this._push("subtract", message);
-    }
-    /** AND the two lanes: lane r goes live; bit `low` and everything under it are
-     *  struck out (gone), the surviving 1s above stay plain. Lane x keeps its
-     *  amber marker so the eye tracks the removed bit across the equation. */
-    and(res, low, message) {
-      this._result = res >>> 0 & this.mask;
-      this.low = low;
-      this.just = -1;
-      this.b.state.fill("");
-      this.r.live = true;
-      this._fill(this.r, this._result);
-      this.r.state.fill("");
-      for (let i = 0; i <= low; i++) this.r.state[i] = "gone";
-      this._push("and", message);
-    }
-    /** Commit x ← result: lane x becomes the survivors, lanes b/r dim back to
-     *  placeholders, and one more tally square fills (just = its index). */
-    commit(message) {
-      this.value = this._result;
-      this._fill(this.a, this.value);
-      this.a.state.fill("");
-      this.b = this._lane();
-      this.r = this._lane();
-      this.low = -1;
-      this.just = this.pop;
-      this.pop += 1;
-      this._push("commit", message);
-    }
-    done(message) {
-      this.low = -1;
-      this.just = -1;
-      this._push("done", message);
-    }
-  };
-  var BacktrackRecorder = class {
-    constructor() {
-      this.n = 0;
-      this.frames = [];
-      this._queens = [];
-      this.placed = 0;
-      this.pruned = 0;
-      this.depth = 0;
-      this._solved = false;
-    }
-    /** Committed placements, live (algorithm reads this for its conflict check). */
-    get queens() {
-      return this._queens.slice();
-    }
-    _push(type, cursor, conflict, message) {
-      this.frames.push(
-        Object.freeze({
-          type,
-          n: this.n,
-          queens: this._queens.slice(),
-          cursor,
-          conflict,
-          placed: this.placed,
-          pruned: this.pruned,
-          depth: this.depth,
-          solved: this._solved,
-          message
-        })
-      );
-    }
-    board(n, message) {
-      this.n = n;
-      this._queens = Array(n).fill(null);
-      this._push("board", null, null, message);
-    }
-    /** Try (row,col) fails: it clashes with the queen already in `attackerRow`. */
-    reject(row, col, attackerRow, message) {
-      this.pruned++;
-      this._push(
-        "reject",
-        { row, col },
-        { row: attackerRow, col: this._queens[attackerRow] },
-        message
-      );
-    }
-    place(row, col, message) {
-      this._queens[row] = col;
-      this.placed++;
-      this.depth++;
-      this._push("place", { row, col }, null, message);
-    }
-    /** Retreat: capture the square BEFORE clearing so the renderer flashes the tear-off. */
-    backtrack(row, message) {
-      const cursor = { row, col: this._queens[row] };
-      this._queens[row] = null;
-      this.depth--;
-      this._push("backtrack", cursor, null, message);
-    }
-    solved(message) {
-      this._solved = true;
-      this._push("solved", null, null, message);
-    }
-    done(message) {
-      this._push("done", null, null, message);
-    }
-  };
-  var RecTreeRecorder = class {
-    constructor() {
-      this.frames = [];
-      this._nodes = Object.freeze([]);
-      this._edges = Object.freeze([]);
-      this._vis = /* @__PURE__ */ new Set();
-      this._state = {};
-      this._vals = {};
-      this._collapsed = /* @__PURE__ */ new Set();
-      this._memo = [];
-      this.calls = 0;
-      this.hits = 0;
-      this._phase = "naive";
-      this._active = null;
-    }
-    _push(type, message) {
-      this.frames.push(
-        Object.freeze({
-          type,
-          nodes: this._nodes,
-          edges: this._edges,
-          active: this._active,
-          vis: Object.freeze([...this._vis]),
-          state: Object.freeze({ ...this._state }),
-          vals: Object.freeze({ ...this._vals }),
-          collapsed: Object.freeze([...this._collapsed]),
-          memo: Object.freeze(this._memo.map((m) => Object.freeze({ ...m }))),
-          calls: this.calls,
-          hits: this.hits,
-          phase: this._phase,
-          message
-        })
-      );
-    }
-    /** The full naive call tree — laid out once, reused (same frozen arrays) forever. */
-    tree(nodes, edges, message) {
-      this._nodes = Object.freeze(nodes.map((n) => Object.freeze({ ...n })));
-      this._edges = Object.freeze(edges.map((e) => Object.freeze({ ...e })));
-      this._active = null;
-      this._push("tree", message);
-    }
-    /** Enter a new phase: "memo" re-runs the SAME tree, so wipe reveal + counters. */
-    phase(name, message) {
-      this._phase = name;
-      if (name === "memo") {
-        this._vis = /* @__PURE__ */ new Set();
-        this._state = {};
-        this._vals = {};
-        this._collapsed = /* @__PURE__ */ new Set();
-        this._memo = [];
-        this.calls = 0;
-        this.hits = 0;
-      }
-      this._active = null;
-      this._push("phase", message);
-    }
-    /** naive: an internal call — recompute both children from scratch. */
-    enter(id, message) {
-      this._active = id;
-      this._vis.add(id);
-      this._state[id] = "compute";
-      this.calls++;
-      this._push("enter", message);
-    }
-    /** naive: a base case leaf (k < 2). */
-    base(id, val, message) {
-      this._active = id;
-      this._vis.add(id);
-      this._state[id] = "base";
-      this._vals[id] = val;
-      this.calls++;
-      this._push("base", message);
-    }
-    /** memo: first sight of f(k) — compute + store it. */
-    miss(id, k, val, message) {
-      this._active = id;
-      this._vis.add(id);
-      this._state[id] = "miss";
-      this._vals[id] = val;
-      this._memo.push({ k, v: val });
-      this.calls++;
-      this._push("miss", message);
-    }
-    /** memo: f(k) already stored — reuse it and collapse (dim) the subtree it saved. */
-    hit(id, k, val, subtreeIds, message) {
-      this._active = id;
-      this._vis.add(id);
-      this._state[id] = "hit";
-      this._vals[id] = val;
-      for (const s of subtreeIds) {
-        this._vis.add(s);
-        this._collapsed.add(s);
-      }
-      this.calls++;
-      this.hits++;
-      this._push("hit", message);
-    }
-    done(message) {
-      this._active = null;
-      this._push("done", message);
-    }
-  };
-
   // custom/steptrace/src/registry.ts
   function createRegistry(builtIns) {
+    const familyRegistry = /* @__PURE__ */ new Map();
     const sortRegistry = /* @__PURE__ */ new Map();
     const graphRegistry = /* @__PURE__ */ new Map();
     const searchRegistry = /* @__PURE__ */ new Map();
@@ -3882,9 +5132,13 @@
       },
       listAlgorithms(kind) {
         const registry2 = kind === "graph" ? graphRegistry : sortRegistry;
-        return [...registry2].map(([id, value]) => ({ id, label: value.meta.label }));
+        const legacy = [...registry2].map(([id, value]) => ({ id, label: value.meta.label }));
+        const families = [...familyRegistry].filter(([, definition]) => definition.kind === kind).map(([id, definition]) => ({ id, label: definition.meta.label }));
+        return [...legacy, ...families];
       },
       kindOf(id) {
+        const family = familyRegistry.get(id);
+        if (family) return family.kind;
         if (sortRegistry.has(id)) return "sort";
         if (graphRegistry.has(id)) return "graph";
         if (searchRegistry.has(id)) return "search";
@@ -3898,6 +5152,17 @@
         return null;
       },
       buildFrames(config) {
+        const familyAlgorithm = familyRegistry.get(config.algorithm);
+        if (familyAlgorithm) {
+          const input2 = familyAlgorithm.parse(config);
+          const recorder = familyAlgorithm.family.createRecorder(input2);
+          familyAlgorithm.run(input2, recorder);
+          return {
+            kind: familyAlgorithm.kind,
+            family: familyAlgorithm.family,
+            frames: recorder.frames
+          };
+        }
         const input = config;
         const sort = sortRegistry.get(config.algorithm);
         if (sort) {
@@ -3969,6 +5234,10 @@
       }
     };
     for (const definition of builtIns) {
+      if ("family" in definition) {
+        familyRegistry.set(definition.id, definition);
+        continue;
+      }
       switch (definition.kind) {
         case "sort":
           api.registerSort(definition.id, definition.meta, definition.run);

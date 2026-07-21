@@ -24,9 +24,11 @@ import {
 } from "./render"
 import type { RegistryApi } from "./registry"
 import type { MountHandle, StepTraceConfig, StepTraceHost } from "./types"
+import { watchHintFor } from "./watch-hints"
 
 const LOG_ROWS = 10
 const fadeFor = (age: number) => Math.max(0.1, 0.5 * Math.pow(0.62, age - 1))
+let mountSerial = 0
 
 // ==========================================================================
 //  7. MOUNT  —  assemble a card into `root` from a flat config, wire the
@@ -48,6 +50,7 @@ export function createMount(
     root.classList.add("steptrace")
     root.setAttribute("role", "group")
     root.setAttribute("aria-label", "Algorithm visualizer")
+    const watchHintPrefix = `steptrace-watch-hint-${++mountSerial}`
 
     const kind = kindOf(config.algorithm)
     if (!kind) {
@@ -442,8 +445,17 @@ export function createMount(
         currentView && currentView.watch ? currentView.watch(player.frames[player.i]) : null
       watchEl.replaceChildren()
       if (!rows || !rows.length) return
-      for (const r of rows) {
+      for (const [index, r] of rows.entries()) {
         const row = el("div", "steptrace__watch-row")
+        const hintId = `${watchHintPrefix}-${index}`
+        const hint = el("span", "steptrace__watch-hint")
+        hint.id = hintId
+        hint.setAttribute("role", "tooltip")
+        hint.textContent = watchHintFor(r)
+        row.tabIndex = 0
+        row.setAttribute("role", "group")
+        row.setAttribute("aria-label", `${r.k}: ${String(r.v)}`)
+        row.setAttribute("aria-describedby", hintId)
         if (r.sw) {
           const sw = el("span", "steptrace__watch-sw")
           sw.style.background = r.sw
@@ -453,7 +465,7 @@ export function createMount(
         kk.textContent = r.k
         const vv = el("span", "steptrace__watch-v")
         vv.textContent = r.v
-        row.append(kk, vv)
+        row.append(kk, vv, hint)
         watchEl.append(row)
       }
     }
@@ -496,26 +508,18 @@ export function createMount(
       if (player) player.destroy()
       if (currentView && currentView.destroy) currentView.destroy()
       const built = buildFrames({
+        ...state.config,
         algorithm: state.algorithm,
         array: state.array,
         start: state.start,
-        target: state.config.target,
-        text: state.config.text,
-        pattern: state.config.pattern,
-        a: state.config.a,
-        b: state.config.b,
-        n: state.config.n,
-        value: state.config.value,
-        width: state.config.width,
-        ops: state.config.ops,
-        directed: state.config.directed,
-        nodes: state.config.nodes,
-        edges: state.config.edges,
       })
+      if (built.family) root.dataset.visualFamily = built.family.id
+      else delete root.dataset.visualFamily
       currentGraph = built.graph || null
       currentMilestones = buildMilestones(state.algorithm, built.kind, built.frames)
       let view
-      if (built.kind === "graph")
+      if (built.family) view = built.family.createView(built.frames)
+      else if (built.kind === "graph")
         view = makeGraphView(built.frames, built.graph, built.frontierLabel)
       else if (built.kind === "search") view = makeSearchView(built.frames)
       else if (built.kind === "string") view = makeMatchView(built.frames)
@@ -528,9 +532,13 @@ export function createMount(
       else view = makeSortView(built.frames)
       currentView = view
       if (built.kind === "graph") syncStartOptions(built.graph)
-      // every kind but graph bottom-aligns its viz within the stage column
-      stageCol.classList.toggle("steptrace__stage-col--bottom", built.kind !== "graph")
+      const fillStage = view.stageLayout === "fill"
+      stageCol.classList.toggle(
+        "steptrace__stage-col--bottom",
+        built.kind !== "graph" && !fillStage,
+      )
       stageCol.classList.toggle("steptrace__stage-col--graph", built.kind === "graph")
+      stageCol.classList.toggle("steptrace__stage-col--fill", fillStage)
       // The view's LAST node is its own one-line status; the rail TRACE log
       // replaces it, so we keep it out of the DOM (paint still writes to it
       // harmlessly). Everything before it is the actual visualization.
@@ -564,8 +572,7 @@ export function createMount(
         }
       }
       watchWrap.hidden = maxRows === 0
-      // one row is `height: 2em` at `font-size: 0.72rem`
-      watchEl.style.minHeight = maxRows ? `calc(${maxRows} * 1.44rem)` : ""
+      watchEl.style.setProperty("--steptrace-watch-rows", String(maxRows))
     }
 
     function syncStartOptions(graph) {
