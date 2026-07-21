@@ -18,6 +18,11 @@ A version control system (VCS) records committed versions of tracked files so co
 
 Git is a distributed VCS: a normal clone receives the objects reachable from the refs it fetches, while shallow clones intentionally omit older history and partial clones can defer selected objects until needed. Workflows such as GitFlow or trunk-based development define how teams coordinate changes; they are conventions layered on Git rather than properties of its object model.
 
+```datacorejsx
+const { FolderStructureMap } = await dc.require("Assets/components/devbook-folder-map.jsx");
+return FolderStructureMap;
+```
+
 # Working Tree, Index, Repository, and Remote
 
 Git moves snapshots through distinct states. The working tree is what tools edit. The index is the proposed next snapshot. A commit stores that snapshot and parent links in the local object database. Branches are movable refs to commits; remote-tracking refs are the last fetched view of another repository. `fetch` updates remote-tracking refs without integrating them; `pull` fetches and then merges or rebases according to configuration.

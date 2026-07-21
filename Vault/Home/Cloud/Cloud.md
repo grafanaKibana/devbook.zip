@@ -1,5 +1,5 @@
 ---
-icon: cloud
+icon: cloudy
 order: 90
 color: "#3b82f6"
 topic:
