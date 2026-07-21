@@ -1,5 +1,5 @@
 ---
-icon: building-2
+icon: landmark
 order: 50
 color: "#eab308"
 topic:

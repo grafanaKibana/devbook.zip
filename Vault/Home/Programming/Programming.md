@@ -1,5 +1,5 @@
 ---
-icon: code-2
+icon: terminal
 order: 10
 color: "#f43f5e"
 topic:

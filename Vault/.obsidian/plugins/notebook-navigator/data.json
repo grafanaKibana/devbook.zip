@@ -264,6 +264,7 @@
   "showSelectedNavigationPills": false,
   "stickyGroupHeaders": true,
   "showFolderGroupPaths": true,
+  "showGroupHeaderItemCounts": false,
   "showCurrentFolderFilesAtBottom": false,
   "filterPinnedByFolder": false,
   "compactItemHeight": 24,
@@ -636,7 +637,7 @@
     "#404040",
     "#404040"
   ],
-  "lastShownVersion": "3.2.3",
+  "lastShownVersion": "3.2.4",
   "rootFolderOrder": [],
   "rootTagOrder": [],
   "rootPropertyOrder": []
