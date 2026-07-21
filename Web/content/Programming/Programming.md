@@ -1,11 +1,11 @@
 ---
 publish: true
 created: 2026-07-18T14:02:44.128Z
-modified: 2026-07-18T14:02:44.128Z
-published: 2026-07-18T14:02:44.128Z
+modified: 2026-07-21T14:44:49.344Z
+published: 2026-07-21T14:44:49.344Z
 tags:
   - FolderNote
-icon: code-2
+icon: terminal
 order: 10
 color: "#f43f5e"
 topic:

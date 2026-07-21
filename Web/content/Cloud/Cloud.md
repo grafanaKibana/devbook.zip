@@ -1,11 +1,11 @@
 ---
 publish: true
-created: 2026-07-18T14:02:43.932Z
-modified: 2026-07-18T14:02:43.933Z
-published: 2026-07-18T14:02:43.933Z
+created: 2026-07-21T14:46:57.601Z
+modified: 2026-07-21T14:47:00.712Z
+published: 2026-07-21T14:47:00.712Z
 tags:
   - FolderNote
-icon: cloud
+icon: cloudy
 order: 90
 color: "#3b82f6"
 topic:

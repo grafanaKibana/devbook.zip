@@ -1,11 +1,11 @@
 ---
 publish: true
 created: 2026-07-18T14:02:44.196Z
-modified: 2026-07-18T14:02:44.196Z
-published: 2026-07-18T14:02:44.196Z
+modified: 2026-07-21T14:32:43.018Z
+published: 2026-07-21T14:32:43.018Z
 tags:
   - FolderNote
-icon: ruler-dimension-line
+icon: ruler
 order: 60
 color: "#84cc16"
 topic:
