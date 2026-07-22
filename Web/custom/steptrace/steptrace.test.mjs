@@ -42,11 +42,23 @@ const cases = [
   "two-pointers",
   "sliding-window",
   "lcs",
+  "coin-change-greedy",
+  "coin-change-naive",
+  "coin-change-memoization",
+  "coin-change-tabulation",
+  "coin-change-top-down",
+  "coin-change-bottom-up",
+  "grid-path-greedy",
+  "grid-path-naive",
+  "grid-path-memoization",
+  "grid-path-tabulation",
+  "grid-path-top-down",
+  "grid-path-bottom-up",
   "floyd-warshall",
   "union-find",
   "kernighan-popcount",
   "n-queens",
-  "fibonacci",
+  "memoization",
 ]
 
 const commonConfig = {
@@ -103,6 +115,23 @@ function buildAbstractDivideAndConquer() {
   const recorder = divideAndConquer.family.createRecorder(config)
   divideAndConquer.run(config, recorder)
   return { config, family: divideAndConquer.family, frames: recorder.frames }
+}
+
+function buildAbstractMemoization() {
+  const { memoization } = loadStepTraceModule("src", "algorithms", "memoization.ts")
+  const config = memoization.parse({ algorithm: "memoization" })
+  const recorder = memoization.family.createRecorder(config)
+  memoization.run(config, recorder)
+  return { config, family: memoization.family, frames: recorder.frames }
+}
+
+function buildDynamicProgramming(name) {
+  const algorithms = loadStepTraceModule("src", "algorithms", "dynamic-programming.ts")
+  const algorithm = algorithms[name]
+  const config = algorithm.parse({ algorithm: algorithm.id })
+  const recorder = algorithm.family.createRecorder(config)
+  algorithm.run(config, recorder)
+  return { config, family: algorithm.family, frames: recorder.frames }
 }
 
 function contrastRatio(foreground, background) {
@@ -167,6 +196,91 @@ test("the public API and both host JavaScript contracts stay stable", () => {
   )
   assert.equal(typeof pluginModule.exports, "function")
   assert.equal(Object.getPrototypeOf(pluginModule.exports), Plugin)
+})
+
+test("tabbed blocks validate metadata and keep algorithm configs clean", () => {
+  const { isTabsConfig, normalizeTabsConfig } = loadStepTraceModule("src", "tabs.ts")
+  const legacy = { algorithm: "bubble-sort", array: [3, 1, 2] }
+  const tabbed = {
+    selected: 1,
+    tabs: [
+      {
+        name: "Example 1",
+        description: " First input. ",
+        algorithm: "bubble-sort",
+        array: [3, 1, 2],
+      },
+      {
+        name: "Example 2",
+        description: "Second input.",
+        algorithm: "bubble-sort",
+        array: [4, 2, 1],
+      },
+    ],
+  }
+
+  assert.equal(isTabsConfig(legacy), false)
+  assert.equal(isTabsConfig(tabbed), true)
+  assert.deepEqual(normalizeTabsConfig(tabbed), {
+    selected: 1,
+    tabs: [
+      {
+        name: "Example 1",
+        description: "First input.",
+        config: { algorithm: "bubble-sort", array: [3, 1, 2] },
+      },
+      {
+        name: "Example 2",
+        description: "Second input.",
+        config: { algorithm: "bubble-sort", array: [4, 2, 1] },
+      },
+    ],
+  })
+  assert.throws(() => normalizeTabsConfig({ tabs: [] }), /at least one tab/)
+  assert.throws(
+    () => normalizeTabsConfig({ tabs: [{ name: " ", algorithm: "bubble-sort" }] }),
+    /non-empty "name"/,
+  )
+  assert.throws(
+    () =>
+      normalizeTabsConfig({
+        tabs: [
+          { name: "Same", algorithm: "bubble-sort" },
+          { name: "same", algorithm: "insertion-sort" },
+        ],
+      }),
+    /duplicate tab name/,
+  )
+  assert.throws(
+    () => normalizeTabsConfig({ selected: 2, tabs: [{ name: "One", algorithm: "bubble-sort" }] }),
+    /"selected" must be an index/,
+  )
+})
+
+test("tabbed blocks use accessible shared chrome and preserve mounted tab state", () => {
+  const mountSource = readFileSync(join(here, "src", "mount.ts"), "utf8")
+  const styleEntry = readFileSync(join(here, "src", "styles", "index.scss"), "utf8")
+  const styles = readFileSync(join(here, "src", "styles", "tabs.scss"), "utf8")
+
+  assert.match(styleEntry, /@use "tabs";/)
+  assert.match(mountSource, /tablist\.setAttribute\("role", "tablist"\)/)
+  assert.match(mountSource, /button\.setAttribute\("role", "tab"\)/)
+  assert.match(mountSource, /panelShell\.setAttribute\("role", "tabpanel"\)/)
+  assert.match(mountSource, /handles\[activeIndex\]\?\.pause\?\.\(\)/)
+  assert.match(mountSource, /if \(!handles\[next\]\) handles\[next\] = mount/)
+  assert.match(mountSource, /for \(const handle of handles\) handle\?\.destroy\(\)/)
+  assert.match(mountSource, /event\.key === "ArrowLeft"/)
+  assert.match(mountSource, /event\.key === "ArrowRight"/)
+  assert.match(mountSource, /event\.key === "Home"/)
+  assert.match(mountSource, /event\.key === "End"/)
+  assert.match(styles, /min-height: 2rem/)
+  assert.match(styles, /border-radius: 0\.35rem/)
+  assert.match(styles, /\.steptrace__tabs-desc/)
+  assert.match(styles, /\.steptrace__tabpanel/)
+  assert.match(
+    readFileSync(join(here, "src", "styles", "shared.scss"), "utf8"),
+    /\.steptrace--tabs \.steptrace__tabpanel-body\.steptrace[\s\S]*?\.steptrace__body\s*\{[^}]*block-size: clamp\(14rem, calc\(100dvh - 12rem\), 28rem\);/,
+  )
 })
 
 test("styles are compiled from real SCSS without runtime injection", () => {
@@ -268,24 +382,30 @@ test("all built-in algorithms preserve their headless frame contract", () => {
             ? { gaps: [4, 2, 1] }
             : algorithm === "cyclic-sort"
               ? { array: [5, 3, 1, 4, 2] }
-          : algorithm === "floyd-warshall"
-            ? {
-                nodes: [0, 1, 2, 3],
-                edges: [
-                  [0, 1, 3],
-                  [0, 3, 7],
-                  [1, 0, 8],
-                  [1, 2, 2],
-                  [2, 0, 5],
-                  [2, 3, 1],
-                  [3, 0, 2],
-                ],
-              }
-            : ["exponential-search", "interpolation-search", "jump-search"].includes(algorithm)
-              ? { array: commonConfig.array.slice().sort((a, b) => a - b) }
-              : {}
+              : algorithm === "floyd-warshall"
+                ? {
+                    nodes: [0, 1, 2, 3],
+                    edges: [
+                      [0, 1, 3],
+                      [0, 3, 7],
+                      [1, 0, 8],
+                      [1, 2, 2],
+                      [2, 0, 5],
+                      [2, 3, 1],
+                      [3, 0, 2],
+                    ],
+                  }
+                : ["exponential-search", "interpolation-search", "jump-search"].includes(algorithm)
+                  ? { array: commonConfig.array.slice().sort((a, b) => a - b) }
+                  : {}
+    const input =
+      algorithm === "memoization" ||
+      algorithm.startsWith("coin-change-") ||
+      algorithm.startsWith("grid-path-")
+        ? {}
+        : commonConfig
     const result = api.buildFrames({
-      ...commonConfig,
+      ...input,
       algorithm,
       ...familyConfig,
     })
@@ -296,7 +416,7 @@ test("all built-in algorithms preserve their headless frame contract", () => {
 
   assert.equal(
     digest,
-    "6d84b867612a9b1a9ab45387b9e33dec29b005225d7257a7d845a866a2945e3f",
+    "163b664e9758784ee344391c8af2fa743b495f58aa57b0570daf2aadee75a9e9",
     "the headless StepTrace behavior changed",
   )
 })
@@ -405,7 +525,7 @@ test("execution-tree rendering keeps its SVG topology stable and its text altern
     const svg = wrap.children[0]
     const topology = svg.children.slice()
     const firstCard = svg.children.find((node) => node.tagName === "g")
-    const [ring, surface, label, , , badge] = firstCard.children
+    const [ring, surface, label, detail, result, badge] = firstCard.children
 
     view.paint(frames[0], 0, frames.length)
     assert.equal(svg.children.length, 2 + 6 + 7)
@@ -414,13 +534,16 @@ test("execution-tree rendering keeps its SVG topology stable and its text altern
     assert.equal(wrap.attributes.get("role"), "region")
     assert.equal(wrap.tabIndex, 0)
     assert.equal(legend.children.length, 4)
-    assert.equal(svg.attributes.get("viewBox"), "0 0 604 232")
-    assert.equal(svg.attributes.get("style:--steptrace-tree-min-width"), "560px")
+    assert.equal(svg.attributes.get("viewBox"), "0 0 588 224")
+    assert.equal(svg.attributes.get("style:--steptrace-tree-width"), "500px")
     assert.equal(surface.attributes.get("rx"), "7")
     assert.equal(ring.attributes.get("rx"), "9")
-    assert.equal(surface.attributes.get("width"), "100")
-    assert.equal(ring.attributes.get("width"), "104")
-    assert.equal(Number(label.attributes.get("y")) - Number(badge.attributes.get("y")), 12)
+    assert.equal(surface.attributes.get("width"), "84")
+    assert.equal(ring.attributes.get("width"), "88")
+    assert.equal(label.attributes.get("y"), "-4")
+    assert.equal(detail.attributes.get("y"), "9")
+    assert.equal(result.textContent, "")
+    assert.equal(badge.textContent, "")
     assert.ok(
       svg.children
         .filter((node) => node.tagName === "g")
@@ -435,16 +558,16 @@ test("execution-tree rendering keeps its SVG topology stable and its text altern
       /Active subproblem Problem; whole problem\. final result ready\./,
     )
     assert.equal(
-      svg.children.find((node) => node.tagName === "g").children[4].textContent,
-      "→ Final solution",
+      svg.children.find((node) => node.tagName === "g").children[3].textContent,
+      "Final solution",
     )
+    assert.equal(svg.children.find((node) => node.tagName === "g").children[4].textContent, "")
   } finally {
     globalThis.document = previousDocument
   }
 })
 
-test("execution-tree watch, legend, responsive styles, and legacy Fibonacci remain compatible", () => {
-  const api = loadEngine(readFileSync(join(here, "generated", "engine.js"), "utf8"))
+test("execution-tree watch, legend, and responsive styles remain compatible", () => {
   const { executionTreeViewDescriptor } = loadStepTraceModule(
     "src",
     "families",
@@ -456,8 +579,6 @@ test("execution-tree watch, legend, responsive styles, and legacy Fibonacci rema
   const mountSource = readFileSync(join(here, "src", "mount.ts"), "utf8")
   const hintsSource = readFileSync(join(here, "src", "watch-hints.ts"), "utf8")
   const divide = buildAbstractDivideAndConquer()
-  const fibonacci = api.buildFrames({ algorithm: "fibonacci", n: 4 })
-  const memoization = api.buildFrames({ algorithm: "fibonacci", n: 5 })
   const watch = executionTreeViewDescriptor.watchRows(divide.frames[7])
 
   assert.deepEqual(
@@ -473,9 +594,10 @@ test("execution-tree watch, legend, responsive styles, and legacy Fibonacci rema
   assert.match(hintsSource, /subproblem:/)
   assert.match(hintsSource, /result:/)
   assert.match(hintsSource, /phase: "Current stage of the algorithm\."/)
-  assert.equal(executionTreeViewDescriptor.nodeWidth, 100)
-  assert.equal(executionTreeViewDescriptor.nodeHeight, 48)
-  assert.equal(executionTreeViewDescriptor.minSvgWidth, 560)
+  assert.equal(executionTreeViewDescriptor.nodeWidth, 84)
+  assert.equal(executionTreeViewDescriptor.nodeHeight, 40)
+  assert.equal(executionTreeViewDescriptor.minSvgWidth, 500)
+  assert.equal(executionTreeViewDescriptor.canvasScale, 0.84)
   assert.match(mountSource, /root\.dataset\.visualFamily = built\.family\.id/)
   assert.match(
     sharedStyles,
@@ -485,23 +607,488 @@ test("execution-tree watch, legend, responsive styles, and legacy Fibonacci rema
     sharedStyles,
     /@container steptrace-wide-stage \(max-width: 64rem\)[\s\S]*?\[data-visual-family="monotone-boundary"\][\s\S]*?\.steptrace__body\s*\{[^}]*grid-template-columns: minmax\(0, 1fr\);/,
   )
+  const wideStageFamilies = sharedStyles.match(
+    /\.steptrace:is\(([^)]*)\)\s*\{\s*container: steptrace-wide-stage \/ inline-size;/,
+  )
+  assert.ok(wideStageFamilies)
+  assert.doesNotMatch(wideStageFamilies[1], /execution-tree/)
   assert.match(styles, /\.steptrace \.steptrace__rectree/)
   assert.match(styles, /overflow-x: auto/)
-  assert.match(styles, /min-inline-size: var\(--steptrace-tree-min-width, 40rem\)/)
+  assert.match(styles, /place-items: center/)
+  assert.match(styles, /inline-size: var\(--steptrace-tree-width, 100%\)/)
+  assert.match(styles, /min-inline-size: var\(--steptrace-tree-width, 100%\)/)
   assert.match(styles, /\.steptrace \.steptrace__rtsvg text/)
-  assert.match(styles, /\.steptrace__rtlabel[^}]*font: 600 9px\/1 var\(--_font-mono\);/s)
-  assert.match(styles, /\.steptrace__rtbadge[^}]*font: 600 6px\/1 var\(--_font-head\);/s)
+  assert.match(styles, /\.steptrace__rtlabel[^}]*font: 600 12px\/1 var\(--_font-mono\);/s)
+  assert.match(styles, /\.steptrace__rtdetail[^}]*font: 400 10\.5px\/1 var\(--_font-mono\);/s)
+  assert.match(styles, /\[data-shape="card"\] \.steptrace__rtval/)
+  assert.match(styles, /\.steptrace__rectree \+ \.steptrace__legend[^}]*margin-top: 0\.4rem;/s)
+  assert.match(styles, /\.steptrace__rtbadge[^}]*font: 600 7px\/1 var\(--_font-head\);/s)
   assert.doesNotMatch(styles, /glow|drop-shadow/)
   assert.match(renderSource, /svg\.setAttribute\("aria-labelledby"/)
   assert.match(renderSource, /group\.setAttribute\("focusable", "false"\)/)
-  assert.equal(fibonacci.family, undefined)
-  assert.equal(fibonacci.kind, "rectree")
-  assert.ok(fibonacci.frames.some((frame) => frame.type === "hit"))
-  assert.ok(fibonacci.frames.every((frame) => frame.nodes === fibonacci.frames[0].nodes))
-  assert.ok(fibonacci.frames.every((frame) => frame.edges === fibonacci.frames[0].edges))
-  assert.equal(memoization.frames.at(-1).vals.c0, 5)
-  assert.equal(memoization.frames.at(-1).memo.length, 6)
-  assert.ok(memoization.frames.some((frame) => frame.type === "hit" && frame.collapsed.length > 0))
+  assert.match(renderSource, /stageLayout: "fill"/)
+})
+
+test("memoization reuses the execution-tree family and collapses a repeated state", () => {
+  const { parseMemoizationConfig, memoizationTreeViewDescriptor } = loadStepTraceModule(
+    "src",
+    "families",
+    "execution-tree.ts",
+  )
+  const { buildMilestones, summaryFor } = loadStepTraceModule("src", "render.ts")
+  const result = buildAbstractMemoization()
+  const frames = result.frames
+  const storedD = frames.find((frame) => frame.type === "store" && frame.active === "d1")
+  const storedE = frames.find((frame) => frame.type === "store" && frame.active === "e")
+  const reusedD = frames.find((frame) => frame.type === "cache" && frame.active === "d2")
+  const reusedE = frames.find((frame) => frame.type === "cache" && frame.active === "e2")
+  const final = frames.at(-1)
+  const nodes = Object.fromEntries(frames[0].nodes.map((node) => [node.id, node]))
+
+  assert.deepEqual(result.config, { profile: "memoization" })
+  assert.equal(result.family.id, "execution-tree")
+  assert.throws(
+    () => parseMemoizationConfig({ algorithm: "memoization", n: 5 }),
+    /takes no data input/,
+  )
+  assert.ok(frames.every((frame) => frame.nodes === frames[0].nodes))
+  assert.ok(frames.every((frame) => frame.edges === frames[0].edges))
+  assert.deepEqual(storedD.cache, [{ key: "D", result: "result D" }])
+  assert.deepEqual(storedE.cache, [
+    { key: "D", result: "result D" },
+    { key: "E", result: "result E" },
+  ])
+  assert.ok(frames.indexOf(storedE) < frames.indexOf(reusedE))
+  assert.deepEqual(reusedD.collapsed, ["g2", "h2"])
+  assert.equal(reusedD.states.d2, "cache")
+  assert.equal(reusedD.results.d2, "result D")
+  assert.equal(reusedD.cache.filter((entry) => entry.key === "D").length, 1)
+  assert.deepEqual(reusedE.collapsed, ["g2", "h2"])
+  assert.equal(reusedE.states.e2, "cache")
+  assert.equal(reusedE.results.e2, "result E")
+  assert.ok(reusedE.cache.some((entry) => entry.key === "E"))
+  assert.equal(final.calls, 9)
+  assert.equal(final.pruned, 2)
+  assert.equal(final.results.a, "result A")
+  assert.ok(nodes.h1.x - nodes.g1.x > memoizationTreeViewDescriptor.nodeWidth)
+  assert.ok(nodes.h2.x - nodes.g2.x > memoizationTreeViewDescriptor.nodeWidth)
+  assert.equal(memoizationTreeViewDescriptor.nodeWidth, 84)
+  assert.equal(memoizationTreeViewDescriptor.nodeHeight, 40)
+  assert.equal(memoizationTreeViewDescriptor.minSvgWidth, 500)
+  assert.equal(memoizationTreeViewDescriptor.canvasScale, 0.84)
+  assert.deepEqual(
+    memoizationTreeViewDescriptor.legend.map((item) => item.state),
+    ["split", "base", "store", "cache"],
+  )
+  assert.deepEqual(
+    memoizationTreeViewDescriptor.watchRows(reusedD).map((row) => row.k),
+    ["phase", "state", "cache", "work"],
+  )
+  assert.deepEqual(
+    buildMilestones("memoization", "rectree", frames).map((mark) => mark.label),
+    [
+      "Empty cache",
+      "Split solve(A)",
+      "Split solve(B)",
+      "Split solve(D)",
+      "Combine solve(D)",
+      "Store solve(D)",
+      "Store solve(E)",
+      "Combine solve(B)",
+      "Store solve(B)",
+      "Split solve(C)",
+      "Reuse solve(D)",
+      "Reuse solve(E)",
+      "Combine solve(C)",
+      "Store solve(C)",
+      "Combine solve(A)",
+      "Store solve(A)",
+      "Result",
+    ],
+  )
+  assert.equal(
+    summaryFor("memoization", "rectree", final),
+    "Result A · 9 calls · 2 recursive calls skipped.",
+  )
+})
+
+test("coin change keeps the same counterexample across real-world and canonical views", () => {
+  const { summaryFor } = loadStepTraceModule("src", "render.ts")
+  const greedy = buildDynamicProgramming("coinChangeGreedy")
+  const naive = buildDynamicProgramming("coinChangeNaive")
+  const memoization = buildDynamicProgramming("coinChangeMemoization")
+  const tabulation = buildDynamicProgramming("coinChangeTabulation")
+  const topDown = buildDynamicProgramming("coinChangeTopDown")
+  const bottomUp = buildDynamicProgramming("coinChangeBottomUp")
+  const repeated = topDown.frames.find((frame) => frame.type === "cache")
+  const finalTable = bottomUp.frames.at(-1)
+
+  assert.deepEqual(greedy.config, {
+    profile: "dp-story",
+    problem: "coin-change",
+    approach: "greedy",
+  })
+  assert.equal(greedy.family.id, "dp-story")
+  assert.deepEqual(greedy.frames[0].coins, [50, 25, 10, 1])
+  assert.equal("unavailableCoins" in greedy.frames[0], false)
+  assert.equal(greedy.frames.at(-1).best, "3 coins (10¢ + 10¢ + 10¢)")
+  assert.ok(
+    naive.frames.some((frame) => frame.attempts.some((attempt) => attempt.state === "repeated")),
+  )
+  assert.ok(
+    memoization.frames.some((frame) =>
+      frame.memo.some((entry) => entry.key === "change(19¢)" && entry.state === "hit"),
+    ),
+  )
+  assert.deepEqual(tabulation.frames.at(-2).amountValues, [0, 1, 2, 3, 4, 5, 1, 6, 2, 1, 3])
+  assert.deepEqual(tabulation.frames.at(-2).amountPath, [0, 10, 20, 30])
+  assert.equal(
+    summaryFor("coin-change-memoization", "dp", memoization.frames.at(-1)),
+    "3 coins (10¢ + 10¢ + 10¢) · target 30¢.",
+  )
+  assert.equal(
+    summaryFor("coin-change-tabulation", "dp", tabulation.frames.at(-1)),
+    "3 coins (10¢ + 10¢ + 10¢) · target 30¢.",
+  )
+  assert.deepEqual(topDown.config, { profile: "coin-change-top-down" })
+  assert.equal(topDown.family.id, "execution-tree")
+  assert.equal(repeated.active, "c19b")
+  assert.deepEqual(repeated.collapsed, ["c9", "c18"])
+  assert.equal(repeated.results.c19b, "10 coins")
+  assert.equal(
+    topDown.frames.find((frame) => frame.active === "c28" && frame.type === "return").states.c28,
+    "return",
+  )
+  assert.deepEqual(bottomUp.config, { profile: "coin-change-bottom-up" })
+  assert.equal(bottomUp.family.id, "matrix-grid")
+  assert.deepEqual(finalTable.grid[0], ["0", "1", "2", "3", "4", "5", "1", "6", "2", "1", "3"])
+  assert.deepEqual(finalTable.path, [
+    [0, 0],
+    [0, 6],
+    [0, 8],
+    [0, 10],
+  ])
+
+  assert.deepEqual(
+    greedy.frames
+      .map((frame) => frame.selected.length)
+      .filter((count, index, counts) => count > 0 && count !== counts[index - 1]),
+    [1, 2, 3, 4, 5, 6],
+  )
+  assert.ok(
+    naive.frames.some(
+      (frame) =>
+        frame.remaining === 30 &&
+        frame.selected.length === 0 &&
+        frame.message.startsWith("Backtrack"),
+    ),
+  )
+  assert.ok(
+    memoization.frames.some(
+      (frame) =>
+        frame.remaining === 30 &&
+        frame.selected.length === 0 &&
+        frame.message.startsWith("Backtrack"),
+    ),
+  )
+})
+
+test("grid path keeps the warehouse costs across real-world and canonical views", () => {
+  const { summaryFor } = loadStepTraceModule("src", "render.ts")
+  const greedy = buildDynamicProgramming("gridPathGreedy")
+  const naive = buildDynamicProgramming("gridPathNaive")
+  const memoization = buildDynamicProgramming("gridPathMemoization")
+  const tabulation = buildDynamicProgramming("gridPathTabulation")
+  const topDown = buildDynamicProgramming("gridPathTopDown")
+  const bottomUp = buildDynamicProgramming("gridPathBottomUp")
+  const repeated = topDown.frames.find((frame) => frame.type === "cache")
+  const finalTable = bottomUp.frames.at(-1)
+
+  assert.equal(greedy.frames.at(-1).bestCost, 10)
+  assert.equal(greedy.frames.at(-1).routeCost, 10)
+  assert.ok(
+    naive.frames.some((frame) => frame.repeated.some(([row, column]) => row === 1 && column === 1)),
+  )
+  assert.ok(
+    memoization.frames.some((frame) =>
+      frame.repeated.some(([row, column]) => row === 1 && column === 1),
+    ),
+  )
+  assert.deepEqual(tabulation.frames.at(-2).gridValues, [
+    [10, 14, 13, 27],
+    [10, 15, 12, 18],
+    [8, 6, 11, 9],
+    [13, 4, 2, 0],
+  ])
+  assert.equal(
+    summaryFor("grid-path-memoization", "dp", memoization.frames.at(-1)),
+    "Minimum warehouse route cost 10.",
+  )
+  assert.equal(
+    summaryFor("grid-path-tabulation", "dp", tabulation.frames.at(-1)),
+    "Minimum warehouse route cost 10.",
+  )
+  assert.deepEqual(topDown.config, { profile: "grid-path-top-down" })
+  assert.equal(repeated.active, "r2c2b")
+  assert.deepEqual(repeated.collapsed, ["r2c3a", "r3c2a"])
+  assert.equal(repeated.results.r2c2b, "15")
+  assert.ok(
+    ["r1c3", "r3c1"].every((id) =>
+      topDown.frames.some(
+        (frame) => frame.active === id && frame.type === "return" && frame.states[id] === "return",
+      ),
+    ),
+  )
+  assert.deepEqual(finalTable.grid, [
+    ["10", "14", "13", "27"],
+    ["10", "15", "12", "18"],
+    ["8", "6", "11", "9"],
+    ["13", "4", "2", "0"],
+  ])
+  assert.deepEqual(finalTable.path, [
+    [0, 0],
+    [1, 0],
+    [2, 0],
+    [2, 1],
+    [3, 1],
+    [3, 2],
+    [3, 3],
+  ])
+
+  const naiveCoordinates = naive.frames
+    .filter((frame) => frame.current)
+    .map((frame) => frame.current.join(","))
+  assert.ok(naiveCoordinates.includes("0,0"))
+  assert.ok(naiveCoordinates.indexOf("2,0") < naiveCoordinates.lastIndexOf("2,1"))
+  const memoVisitR3C2 = memoization.frames.findIndex(
+    (frame) => frame.current?.join(",") === "2,1" && frame.gridValues[2][1] === null,
+  )
+  const memoStoreR3C2 = memoization.frames.findIndex((frame) => frame.gridValues[2][1] === 6)
+  const memoStoreR3C1 = memoization.frames.findIndex((frame) => frame.gridValues[2][0] === 8)
+  assert.ok(memoVisitR3C2 >= 0)
+  assert.ok(memoVisitR3C2 < memoStoreR3C2)
+  assert.ok(memoStoreR3C2 < memoStoreR3C1)
+})
+
+test("dynamic-programming story views expose accessible coin and warehouse structures", () => {
+  class FakeNode {
+    constructor(tagName, text = "") {
+      this.tagName = tagName
+      this.textContent = text
+      this.innerHTML = ""
+      this.children = []
+      this.attributes = new Map()
+      this.dataset = {}
+      this.className = ""
+      this.style = { setProperty() {} }
+    }
+    setAttribute(key, value) {
+      this.attributes.set(key, String(value))
+    }
+    append(...children) {
+      this.children.push(...children)
+    }
+    replaceChildren(...children) {
+      this.children = children
+    }
+  }
+  const previousDocument = globalThis.document
+  globalThis.document = {
+    createElement: (tagName) => new FakeNode(tagName),
+    createTextNode: (value) => new FakeNode("#text", value),
+  }
+  try {
+    const coin = buildDynamicProgramming("coinChangeGreedy")
+    const coinMemo = buildDynamicProgramming("coinChangeMemoization")
+    const coinTabulation = buildDynamicProgramming("coinChangeTabulation")
+    const grid = buildDynamicProgramming("gridPathNaive")
+    const gridMemo = buildDynamicProgramming("gridPathMemoization")
+    const gridTabulation = buildDynamicProgramming("gridPathTabulation")
+    const coinView = coin.family.createView(coin.frames)
+    const coinMemoView = coinMemo.family.createView(coinMemo.frames)
+    const coinTabulationView = coinTabulation.family.createView(coinTabulation.frames)
+    const gridView = grid.family.createView(grid.frames)
+    const gridMemoView = gridMemo.family.createView(gridMemo.frames)
+    const gridTabulationView = gridTabulation.family.createView(gridTabulation.frames)
+    const [coinRegion, coinLegend, coinStatus] = coinView.nodes
+    const [gridMatrix, gridLegend, gridStatus] = gridView.nodes
+
+    coinView.paint(coin.frames.at(-1), coin.frames.length - 1, coin.frames.length)
+    coinMemoView.paint(coinMemo.frames.at(-1), coinMemo.frames.length - 1, coinMemo.frames.length)
+    coinTabulationView.paint(
+      coinTabulation.frames.at(-1),
+      coinTabulation.frames.length - 1,
+      coinTabulation.frames.length,
+    )
+    gridView.paint(grid.frames.at(-1), grid.frames.length - 1, grid.frames.length)
+    gridMemoView.paint(gridMemo.frames.at(-1), gridMemo.frames.length - 1, gridMemo.frames.length)
+    gridTabulationView.paint(
+      gridTabulation.frames.at(-1),
+      gridTabulation.frames.length - 1,
+      gridTabulation.frames.length,
+    )
+
+    assert.equal(coinRegion.attributes.get("role"), "region")
+    assert.equal(coinRegion.attributes.get("aria-label"), "Coin change counter")
+    assert.equal(coinLegend.children.length, 4)
+    assert.match(coinStatus.innerHTML, /step \d+\/\d+/)
+    assert.equal(coinView.watch(coin.frames.at(-1)).length, 4)
+    assert.equal(coinView.stableStage, true)
+    assert.equal(coinMemoView.stableStage, true)
+    assert.equal(coinTabulationView.stableStage, true)
+
+    assert.equal(gridMatrix.tagName, "table")
+    assert.equal(gridMatrix.attributes.get("aria-label"), "Warehouse route cost matrix")
+    assert.equal(gridMatrix.children.at(-1).tagName, "tfoot")
+    assert.equal(gridLegend.children.length, 4)
+    assert.match(gridStatus.innerHTML, /step \d+\/\d+/)
+    assert.equal(gridView.watch(grid.frames.at(-1)).length, 4)
+    assert.equal(coinMemoView.watch(coinMemo.frames.at(-1)).length, 4)
+    assert.equal(coinTabulationView.watch(coinTabulation.frames.at(-1)).length, 4)
+    assert.equal(gridMemoView.watch(gridMemo.frames.at(-1)).length, 4)
+    assert.equal(gridTabulationView.watch(gridTabulation.frames.at(-1)).length, 4)
+  } finally {
+    globalThis.document = previousDocument
+  }
+})
+
+test("dynamic-programming problem families keep watch hints and canonical legends", () => {
+  const { dynamicProgrammingTreeViewDescriptor } = loadStepTraceModule(
+    "src",
+    "families",
+    "execution-tree.ts",
+  )
+  const { dpProblemTableSemantics, dpStoryConfig } = loadStepTraceModule(
+    "src",
+    "families",
+    "dp-problems.ts",
+  )
+  const coinTable = buildDynamicProgramming("coinChangeBottomUp")
+  const gridTable = buildDynamicProgramming("gridPathBottomUp")
+  const coinFrame = coinTable.frames.find((frame) => frame.cur?.join(",") === "0,10")
+  const gridFrame = gridTable.frames.find((frame) => frame.cur?.join(",") === "0,0")
+
+  assert.throws(
+    () =>
+      dpStoryConfig("coin-change", "greedy")({ algorithm: "coin-change-greedy", variant: "other" }),
+    /does not take a variant/,
+  )
+  assert.deepEqual(
+    dynamicProgrammingTreeViewDescriptor.legend.map((item) => item.state),
+    ["split", "base", "store", "cache"],
+  )
+  assert.equal(dynamicProgrammingTreeViewDescriptor.nodeWidth, 92)
+  assert.equal(dynamicProgrammingTreeViewDescriptor.nodeHeight, 44)
+  assert.equal(dynamicProgrammingTreeViewDescriptor.minSvgWidth, 500)
+  assert.equal(dynamicProgrammingTreeViewDescriptor.canvasScale, 1)
+  assert.equal(dynamicProgrammingTreeViewDescriptor.fitWidth, true)
+  assert.ok(
+    dynamicProgrammingTreeViewDescriptor
+      .watchRows(buildDynamicProgramming("coinChangeTopDown").frames.at(-1))
+      .every((row) => row.hint),
+  )
+  assert.deepEqual(
+    dpProblemTableSemantics.coin.watchRows(coinFrame).map((row) => row.k),
+    ["amount", "predecessors", "transition", "answer"],
+  )
+  assert.deepEqual(
+    dpProblemTableSemantics.grid.watchRows(gridFrame).map((row) => row.k),
+    ["tile", "reads", "transition", "best cost"],
+  )
+  assert.ok(dpProblemTableSemantics.coin.watchRows(coinFrame).every((row) => row.hint))
+  assert.ok(dpProblemTableSemantics.grid.watchRows(gridFrame).every((row) => row.hint))
+})
+
+test("dynamic-programming tabs and stable story stage keep the compact five-view contract", () => {
+  const note = readFileSync(
+    join(
+      repoRoot,
+      "Vault",
+      "Home",
+      "Computer Science",
+      "Algorithms",
+      "Paradigms",
+      "Dynamic Programming.md",
+    ),
+    "utf8",
+  )
+  const mountSource = readFileSync(join(here, "src", "mount.ts"), "utf8")
+  const renderSource = readFileSync(join(here, "src", "render.ts"), "utf8")
+  const sharedStyles = readFileSync(join(here, "src", "styles", "shared.scss"), "utf8")
+  const storyStyles = readFileSync(join(here, "src", "styles", "dp-story.scss"), "utf8")
+
+  assert.doesNotMatch(note, /Tabulation \(Raw\)/)
+  assert.match(mountSource, /steptrace--stable-stage/)
+  assert.match(
+    sharedStyles,
+    /\.steptrace--stable-stage,[\s\S]*?\.steptrace--tabs \.steptrace__tabpanel-body\.steptrace[\s\S]*?\.steptrace__body\s*\{[^}]*block-size: clamp\(14rem, calc\(100dvh - 12rem\), 28rem\);/,
+  )
+  assert.match(
+    sharedStyles,
+    /\.steptrace--stable-stage,[\s\S]*?\.steptrace--tabs \.steptrace__tabpanel-body\.steptrace[\s\S]*?\.steptrace__rail\s*\{[^}]*overflow-y: auto;/,
+  )
+  assert.match(
+    sharedStyles,
+    /\.steptrace__trace\s*\{[^}]*flex: 1 1 auto;[^}]*min-height: 0;[^}]*margin: 0 0 0\.9rem;/s,
+  )
+  assert.match(sharedStyles, /\.steptrace__watch-wrap\s*\{[^}]*flex: 0 0 auto;/s)
+  assert.match(sharedStyles, /\.steptrace__log\s*\{[^}]*flex: 1 1 auto;[^}]*min-height: 0;/s)
+  assert.match(mountSource, /log\.style\.minHeight = h/)
+  assert.match(
+    storyStyles,
+    /\.steptrace \.steptrace__dp-story-stage\s*\{[^}]*grid-auto-rows: max-content;[^}]*overflow: auto;/s,
+  )
+  assert.match(renderSource, /root\.dataset\.approach = first\.approach/)
+  assert.match(
+    storyStyles,
+    /\[data-approach="tabulation"\][\s\S]*?\.steptrace__dp-story-stage\s*\{[^}]*grid-template-rows: minmax\(0, 1fr\) auto;[^}]*align-content: stretch;/,
+  )
+  assert.match(
+    storyStyles,
+    /\[data-approach="tabulation"\][\s\S]*?\.steptrace__amount-board\s*\{[^}]*align-self: end;/,
+  )
+  assert.match(
+    storyStyles,
+    /\.steptrace \.steptrace__coin-attempt,[\s\S]*?\.steptrace \.steptrace__coin-memo-heading,[\s\S]*?\.steptrace \.steptrace__coin-memo-row\s*\{[^}]*padding: 0\.375rem 0\.625rem;[^}]*font-size: 0\.75rem;/,
+  )
+  assert.match(
+    storyStyles,
+    /\.steptrace \.steptrace__warehouse-matrix th,[\s\S]*?\.steptrace \.steptrace__warehouse-matrix td\s*\{[^}]*border-radius: 0 !important;[^}]*background-color: var\(--_story-cell\) !important;[^}]*vertical-align: middle !important;/,
+  )
+  assert.match(
+    storyStyles,
+    /\.steptrace \.steptrace__warehouse-matrix th\s*\{[^}]*background-color: var\(--_story-header\) !important;/,
+  )
+  for (const state of ["current", "path", "repeated", "dependency", "stored", "best"]) {
+    assert.match(
+      storyStyles,
+      new RegExp(
+        `\\.steptrace \\.steptrace__warehouse-matrix td\\[data-state="${state}"\\]\\s*\\{[^}]*background-color:[^;}]+\\) !important;`,
+      ),
+    )
+  }
+  assert.match(mountSource, /const probes = player\.frames\.map/)
+  assert.match(mountSource, /log\.append\(\.\.\.probes, resultProbe\)/)
+  assert.doesNotMatch(mountSource, /for \(const f of player\.frames\)[\s\S]*?pt\.textContent/)
+  assert.doesNotMatch(
+    storyStyles,
+    /\.steptrace \.steptrace__(?:coin-attempt|coin-memo-heading|coin-memo-row)[^{]*\{[^}]*min-height:/,
+  )
+  assert.match(renderSource, /wrap\.dataset\.fitWidth = descriptor\.fitWidth \? "true" : "false"/)
+  assert.match(
+    sharedStyles,
+    /\[data-visual-family="execution-tree"\] \.steptrace__body\s*\{[^}]*grid-template-columns: minmax\(0, 1fr\) minmax\(13rem, 15rem\);[^}]*gap: 0 1rem;/s,
+  )
+  const treeStyles = readFileSync(join(here, "src", "styles", "rectree.scss"), "utf8")
+  assert.match(
+    treeStyles,
+    /\.steptrace__rectree\[data-fit-width="true"\] \.steptrace__rtsvg\s*\{[^}]*inline-size: 100%;[^}]*min-inline-size: 0;[^}]*max-inline-size: var\(--steptrace-tree-width, 100%\);[^}]*margin-inline: auto;/s,
+  )
+  assert.match(
+    treeStyles,
+    /\.steptrace--tabs \.steptrace__tabpanel-body\.steptrace[\s\S]*?\.steptrace__rectree\[data-fit-width="true"\][\s\S]*?\.steptrace__rtsvg\s*\{[^}]*max-block-size: 100%;/,
+  )
+  assert.doesNotMatch(storyStyles, /unavailable|data-out/)
 })
 
 test("Floyd-Warshall records matrix relaxations through each permitted intermediate", () => {
@@ -1125,10 +1712,7 @@ test("binary search on answer finds the first feasible ship capacity", () => {
 test("binary search on answer has a dedicated monotone-boundary visual family", () => {
   const renderSource = readFileSync(join(here, "src", "render.ts"), "utf8")
   const styles = readFileSync(join(here, "src", "styles", "boundary.scss"), "utf8")
-  const family = readFileSync(
-    join(here, "src", "families", "monotone-boundary.ts"),
-    "utf8",
-  )
+  const family = readFileSync(join(here, "src", "families", "monotone-boundary.ts"), "utf8")
 
   assert.match(renderSource, /export function makeBoundarySearchView\(/)
   assert.match(renderSource, /frame\.maxInfeasible/)

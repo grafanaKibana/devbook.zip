@@ -1,10 +1,13 @@
-import { MatrixGridRecorder } from "../recorders"
+import { DPRecorder, MatrixGridRecorder } from "../recorders"
 import {
   makeDPView,
+  makeExecutionTreeView,
+  type ExecutionTreeViewDescriptor,
   type MatrixGridFooterModel,
   type MatrixGridRoleDescriptor,
   type MatrixGridViewSemantics,
 } from "../render"
+import { executionTreeCardMetrics } from "./execution-tree"
 import type { StepTraceConfig, StepTraceView, VisualFamily } from "../types"
 
 export interface MatrixGridConfig {
@@ -30,6 +33,59 @@ export interface MatrixGridFrame {
   operandB: number | null
   negativeCycle: number[]
   message: string
+}
+
+export interface DynamicProgrammingConfig {
+  profile: "dynamic-programming"
+  variant: "abstract" | "concrete"
+}
+
+interface DynamicProgrammingNode {
+  id: string
+  label: string
+  detail: string
+  x: number
+  y: number
+  depth: number
+}
+
+interface DynamicProgrammingEdge {
+  from: string
+  to: string
+}
+
+export interface DynamicProgrammingFrame {
+  type: "init" | "compute" | "trace" | "done"
+  profile: DynamicProgrammingConfig["profile"]
+  variant: DynamicProgrammingConfig["variant"]
+  rowLabels: string[]
+  colLabels: string[]
+  grid: Array<Array<string | null>>
+  cur: [number, number] | null
+  deps: Array<[number, number]>
+  path: Array<[number, number]>
+  nodes: DynamicProgrammingNode[]
+  edges: DynamicProgrammingEdge[]
+  formula: string | null
+  message: string
+}
+
+export interface DynamicProgrammingOperations {
+  board(
+    rowLabels: string[],
+    colLabels: string[],
+    message: string,
+    topology?: { nodes: DynamicProgrammingNode[]; edges: DynamicProgrammingEdge[] },
+  ): void
+  set(
+    row: number,
+    column: number,
+    value: string,
+    dependencies: Array<[number, number]>,
+    message: string,
+    formula?: string,
+  ): void
+  done(message: string): void
 }
 
 function invalidConfig(message: string): never {
@@ -62,6 +118,15 @@ export function parseMatrixGridConfig(config: StepTraceConfig): MatrixGridConfig
   })
 
   return { nodes: nodes.slice() as number[], edges: parsedEdges, profile: "floyd-warshall" }
+}
+
+export function parseDynamicProgrammingConfig(config: StepTraceConfig): DynamicProgrammingConfig {
+  if (config.array !== undefined || config.a !== undefined || config.b !== undefined)
+    throw new Error("steptrace: dynamic-programming uses its built-in comparison examples.")
+  const variant = config.variant || "abstract"
+  if (variant !== "abstract" && variant !== "concrete")
+    throw new Error('steptrace: dynamic-programming "variant" must be "abstract" or "concrete".')
+  return { profile: "dynamic-programming", variant }
 }
 
 function formatDistance(value: number | null) {
@@ -227,3 +292,193 @@ export const matrixGridFamily = {
     return makeDPView(frames, matrixGridViewSemantics) as StepTraceView<MatrixGridFrame>
   },
 } satisfies VisualFamily<MatrixGridConfig, MatrixGridRecorder, MatrixGridFrame>
+
+const dynamicProgrammingRoles = [
+  { role: "operand-a", badge: "A", label: "exclude current value" },
+  { role: "operand-b", badge: "B", label: "include current value" },
+  { role: "target", badge: "T", label: "prefix being solved" },
+  { role: "stored", badge: "✓", label: "stored result" },
+] satisfies readonly MatrixGridRoleDescriptor[]
+
+function dynamicProgrammingRolesForCell(
+  frame: DynamicProgrammingFrame,
+  row: number,
+  column: number,
+) {
+  const roles: string[] = []
+  if (frame.grid[row][column] != null) roles.push("stored")
+  if (frame.deps[0]?.[0] === row && frame.deps[0]?.[1] === column) roles.push("operand-a")
+  if (frame.deps[1]?.[0] === row && frame.deps[1]?.[1] === column) roles.push("operand-b")
+  if (frame.cur?.[0] === row && frame.cur?.[1] === column) roles.push("target")
+  return roles
+}
+
+export const concreteDynamicProgrammingViewSemantics: MatrixGridViewSemantics = {
+  tableLabel: "Maximum non-adjacent sum dynamic-programming table",
+  axisDescription: "Each column stores the best total for a longer prefix of the input values.",
+  cornerLabel: "prefix →",
+  stageLayout: "fill",
+  formatValue(value) {
+    return value == null ? "—" : String(value)
+  },
+  cellLabel(frame: DynamicProgrammingFrame, row, column) {
+    const value = frame.grid[row][column]
+    const roles = dynamicProgrammingRolesForCell(frame, row, column)
+    return `Prefix ${frame.colLabels[column]}: ${value ?? "not solved"}${roles.length ? `; roles: ${roles.join(", ")}` : ""}`
+  },
+  stateForCell(frame: DynamicProgrammingFrame, row, column) {
+    if (frame.cur?.[0] === row && frame.cur?.[1] === column) return "cur"
+    return frame.deps.some(([depRow, depColumn]) => depRow === row && depColumn === column)
+      ? "dep"
+      : ""
+  },
+  rolesForCell: dynamicProgrammingRolesForCell,
+  footerModel(frame: DynamicProgrammingFrame) {
+    if (frame.type === "init") {
+      return {
+        context: "Base prefix",
+        summary: { text: "dp[0] = 0" },
+      }
+    }
+    if (frame.type === "compute" && frame.cur) {
+      const column = frame.cur[1]
+      return {
+        context: `Solve prefix ${frame.colLabels[column]}`,
+        summary: {
+          text: frame.formula || `Store ${frame.grid[0][column]}`,
+        },
+      }
+    }
+    return {
+      context: "Best total",
+      summary: { text: "dp[6] = 20" },
+    }
+  },
+  roleLegend: dynamicProgrammingRoles,
+  watchRows(frame: DynamicProgrammingFrame) {
+    const currentColumn = frame.cur?.[1] ?? null
+    const current = currentColumn == null ? "—" : frame.colLabels[currentColumn]
+    const stored = frame.grid[0].filter((value) => value != null).length
+    return [
+      {
+        k: "prefix",
+        v: current,
+        sw: "var(--_blue)",
+        hint: "How many input values the current answer covers.",
+      },
+      {
+        k: "recurrence",
+        v: frame.formula || "—",
+        sw: "var(--_amber)",
+        hint: "The two valid choices: exclude the current value or include it and skip its neighbour.",
+      },
+      {
+        k: "stored result",
+        v: currentColumn == null ? "—" : frame.grid[0][currentColumn] || "—",
+        sw: "var(--_green)",
+        hint: "The best total for this prefix, stored for the next transitions.",
+      },
+      {
+        k: "table",
+        v: `${stored} / ${frame.colLabels.length} states ready`,
+        sw: "var(--_neutral)",
+        hint: "How much of the left-to-right table has been filled.",
+      },
+    ]
+  },
+}
+
+export const dynamicProgrammingViewSemantics = concreteDynamicProgrammingViewSemantics
+
+export const abstractDynamicProgrammingViewDescriptor: ExecutionTreeViewDescriptor = {
+  ariaLabel: "Dynamic-programming dependency graph",
+  ...executionTreeCardMetrics,
+  stateLabels: {
+    call: "pending",
+    base: "base",
+    store: "stored",
+  },
+  legend: [
+    { state: "call", label: "waiting for dependencies" },
+    { state: "base", label: "base state stored" },
+    { state: "store", label: "dependent state stored" },
+  ],
+  frameModel(frame: DynamicProgrammingFrame) {
+    const currentColumn = frame.cur?.[1] ?? null
+    const active = currentColumn == null ? null : frame.colLabels[currentColumn]
+    const results = Object.fromEntries(
+      frame.colLabels.flatMap((label, column) => {
+        const value = frame.grid[0][column]
+        return value == null ? [] : [[label, value]]
+      }),
+    )
+    const states = Object.fromEntries(
+      frame.nodes.map((node) => {
+        const column = frame.colLabels.indexOf(node.id)
+        const solved = column >= 0 && frame.grid[0][column] != null
+        const isBase = !frame.edges.some((edge) => edge.from === node.id)
+        return [node.id, solved ? (isBase ? "base" : "store") : "call"]
+      }),
+    )
+    const dependencies = frame.deps.map(([, column]) => frame.colLabels[column])
+    return {
+      phase:
+        frame.type === "done" ? "Target ready" : active ? `Solve ${active}` : "Dependency graph",
+      action: frame.message,
+      active,
+      path: active ? [active, ...dependencies] : [],
+      visible: frame.nodes.map((node) => node.id),
+      states,
+      results,
+      collapsed: [],
+    }
+  },
+  nodeLines(node: DynamicProgrammingNode) {
+    return [node.label, node.detail]
+  },
+  watchRows(frame: DynamicProgrammingFrame) {
+    const currentColumn = frame.cur?.[1] ?? null
+    const dependencies = frame.deps.map(([, column]) => frame.colLabels[column])
+    const stored = frame.grid[0].filter((value) => value != null).length
+    return [
+      {
+        k: "state",
+        v: currentColumn == null ? "—" : frame.colLabels[currentColumn],
+        sw: "var(--_blue)",
+        hint: "The state currently becoming available.",
+      },
+      {
+        k: "depends on",
+        v: dependencies.length ? dependencies.join(" + ") : "base state",
+        sw: "var(--_amber)",
+        hint: "States that must already be stored before this state can be solved.",
+      },
+      {
+        k: "stored result",
+        v: currentColumn == null ? "—" : frame.grid[0][currentColumn] || "—",
+        sw: "var(--_green)",
+        hint: "The result written once and reused by every outgoing dependency.",
+      },
+      {
+        k: "progress",
+        v: `${stored} / ${frame.colLabels.length} states ready`,
+        sw: "var(--_neutral)",
+        hint: "How many states have been solved in dependency order.",
+      },
+    ]
+  },
+}
+
+export const dynamicProgrammingFamily = {
+  id: "matrix-grid",
+  createRecorder(config) {
+    return new DPRecorder("dynamic-programming", config.variant)
+  },
+  createView(frames) {
+    return (
+      frames[0]?.variant === "abstract"
+        ? makeExecutionTreeView(frames, abstractDynamicProgrammingViewDescriptor)
+        : makeDPView(frames, concreteDynamicProgrammingViewSemantics)
+    ) as StepTraceView<DynamicProgrammingFrame>
+  },
+} satisfies VisualFamily<DynamicProgrammingConfig, DPRecorder, DynamicProgrammingFrame>

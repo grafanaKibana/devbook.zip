@@ -252,6 +252,16 @@
   background: color-mix(in srgb, var(--_violet) 7%, var(--_matrix-cell));
 }
 
+.steptrace .steptrace__dp td[data-roles~="stored"] {
+  background: color-mix(in srgb, var(--_green) 7%, var(--_matrix-cell));
+}
+
+.steptrace .steptrace__dp td[data-roles~="path"] {
+  background: color-mix(in srgb, var(--_green) 13%, var(--_matrix-cell));
+  color: var(--_green);
+  font-weight: 600 !important;
+}
+
 .steptrace .steptrace__dp td[data-roles~="operand-a"] {
   background: color-mix(in srgb, var(--_amber) 12%, var(--_matrix-cell));
 }
@@ -336,6 +346,10 @@
 
 .steptrace .steptrace__matrix-role-badge[data-role="keep"] {
   color: var(--_muted);
+}
+
+.steptrace .steptrace__matrix-role-badge[data-role="stored"] {
+  color: var(--_green);
 }
 
 .steptrace .steptrace__dp:not(.steptrace__dp--guided) td[data-state="dep"] {

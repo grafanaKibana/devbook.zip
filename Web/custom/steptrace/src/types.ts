@@ -26,6 +26,7 @@ export type AlgorithmKind =
 
 export type VisualFamilyId =
   | "array-sort"
+  | "dp-story"
   | "execution-tree"
   | "indexed-array-search"
   | "matrix-grid"
@@ -71,11 +72,25 @@ export interface StepTraceConfig extends Partial<Omit<AlgorithmInput, "algorithm
   weights?: number[]
   days?: number
   blockSize?: number
+  variant?: string
 }
+
+export interface StepTraceTabConfig extends StepTraceConfig {
+  name: string
+  description?: string
+}
+
+export interface StepTraceTabsConfig {
+  tabs: StepTraceTabConfig[]
+  selected?: number
+}
+
+export type StepTraceBlockConfig = StepTraceConfig | StepTraceTabsConfig
 
 export interface StepTraceView<TFrame = unknown> {
   nodes: HTMLElement[]
   stageLayout?: "compact" | "fill"
+  stableStage?: boolean
   paint(frame: TFrame): void
   watch?(frame: TFrame): WatchRow[]
   destroy?(): void
@@ -170,6 +185,7 @@ export interface StepTraceHost {
 }
 
 export interface MountHandle {
+  pause?(): void
   destroy(): void
 }
 
@@ -189,5 +205,5 @@ export interface StepTraceApi {
   kindOf(id: string): AlgorithmKind | null
   buildFrames(config: StepTraceConfig): BuiltFrames
   adjacency(graph: StepTraceGraph): Record<string, string[]>
-  mount(root: HTMLElement, config: StepTraceConfig, host?: StepTraceHost): MountHandle
+  mount(root: HTMLElement, config: StepTraceBlockConfig, host?: StepTraceHost): MountHandle
 }

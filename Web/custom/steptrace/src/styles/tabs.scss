@@ -1,0 +1,67 @@
+.steptrace--tabs {
+  gap: 0.9rem;
+}
+
+.steptrace .steptrace__tabs-shell {
+  display: grid;
+  gap: 0.6rem;
+}
+
+.steptrace .steptrace__tabs {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.25rem;
+  align-items: center;
+}
+
+.steptrace .steptrace__tab {
+  min-height: 2rem;
+  padding: 0.35rem 0.58rem;
+  border: 1px solid var(--_hair);
+  border-radius: 0.35rem;
+  background: var(--_surface);
+  color: var(--_muted);
+  font: 500 0.72rem/1.15 var(--_font-head);
+  transition:
+    background-color var(--_tween) ease,
+    border-color var(--_tween) ease,
+    color var(--_tween) ease,
+    transform var(--_tween) ease;
+}
+
+.steptrace .steptrace__tab:hover {
+  background: var(--_hover);
+  color: var(--_text);
+}
+
+.steptrace .steptrace__tab:focus-visible {
+  outline-offset: 2px;
+}
+
+.steptrace .steptrace__tab--selected,
+.steptrace .steptrace__tab[aria-selected="true"] {
+  background: color-mix(in srgb, var(--_accent) 10%, var(--_surface));
+  color: var(--_text);
+  border-color: color-mix(in srgb, var(--_accent) 55%, var(--_border));
+  box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--_accent) 22%, transparent);
+}
+
+.steptrace .steptrace__tabs-desc {
+  min-height: 1.45rem;
+  color: var(--_muted);
+  font: 400 0.82rem/1.45 var(--_font-body);
+}
+
+.steptrace .steptrace__tabpanel {
+  min-width: 0;
+}
+
+.steptrace .steptrace__tabpanel-body {
+  min-width: 0;
+}
+
+@media (max-width: 600px) {
+  .steptrace .steptrace__tab {
+    min-height: 2.75rem;
+  }
+}

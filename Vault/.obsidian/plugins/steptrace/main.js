@@ -865,25 +865,34 @@ var init_recorders = __esm({
       }
     };
     DPRecorder = class {
-      constructor() {
+      constructor(profile = "lcs", variant = null) {
         this.frames = [];
+        this.profile = profile;
+        this.variant = variant;
         this.rowLabels = [];
         this.colLabels = [];
         this.grid = [];
         this.cur = null;
         this.deps = [];
         this.path = [];
+        this.nodes = [];
+        this.edges = [];
+        this.formula = null;
       }
-      board(rowLabels, colLabels, message) {
+      board(rowLabels, colLabels, message, topology = null) {
         this.rowLabels = rowLabels.slice();
         this.colLabels = colLabels.slice();
         this.grid = rowLabels.map(() => colLabels.map(() => null));
+        this.nodes = (topology?.nodes || []).map((node) => ({ ...node }));
+        this.edges = (topology?.edges || []).map((edge) => ({ ...edge }));
+        this.formula = null;
         this._push("init", message);
       }
-      set(r, c, val, deps, message) {
+      set(r, c, val, deps, message, formula = null) {
         this.cur = [r, c];
         this.deps = (deps || []).map((d) => d.slice());
         this.grid[r][c] = val;
+        this.formula = formula;
         this._push("compute", message);
       }
       markPath(cells, message) {
@@ -895,18 +904,24 @@ var init_recorders = __esm({
       done(message) {
         this.cur = null;
         this.deps = [];
+        this.formula = null;
         this._push("done", message);
       }
       _push(type, message) {
         this.frames.push(
           Object.freeze({
             type,
+            profile: this.profile,
+            variant: this.variant,
             rowLabels: this.rowLabels.slice(),
             colLabels: this.colLabels.slice(),
             grid: this.grid.map((row) => row.slice()),
             cur: this.cur ? this.cur.slice() : null,
             deps: this.deps.map((d) => d.slice()),
             path: this.path.map((p) => p.slice()),
+            nodes: this.nodes.map((node) => Object.freeze({ ...node })),
+            edges: this.edges.map((edge) => Object.freeze({ ...edge })),
+            formula: this.formula,
             message
           })
         );
@@ -1460,19 +1475,36 @@ var init_recorders = __esm({
         this._push("combine", message);
       }
       cacheHit(id, path, key, result, subtreeIds, message) {
-        this.phase = "return";
+        this.phase = "cache";
         this.action = "reuse cached result";
         this._active = id;
         this._path = path.slice();
         this._visible.add(id);
         this._states[id] = "cache";
         this._results[id] = Array.isArray(result) ? result.slice() : result;
-        this._cache.push({ key, result: Array.isArray(result) ? result.join(", ") : result });
+        if (!this._cache.some((entry) => entry.key === key)) {
+          this._cache.push({ key, result: Array.isArray(result) ? result.join(", ") : result });
+        }
         for (const childId of subtreeIds) {
           this._visible.add(childId);
           this._collapsed.add(childId);
         }
+        this.pruned += subtreeIds.length;
         this._push("cache", message);
+      }
+      store(id, path, key, result, message) {
+        this.phase = "cache";
+        this.action = "store result";
+        this._active = id;
+        this._path = path.slice();
+        this._visible.add(id);
+        this._states[id] = "store";
+        this._results[id] = Array.isArray(result) ? result.slice() : result;
+        const cachedResult = Array.isArray(result) ? result.join(", ") : result;
+        const cached = this._cache.find((entry) => entry.key === key);
+        if (cached) cached.result = cachedResult;
+        else this._cache.push({ key, result: cachedResult });
+        this._push("store", message);
       }
       prune(id, path, subtreeIds, message) {
         this.phase = "conquer";
@@ -1776,9 +1808,7 @@ function boundaryTicks(lower, upper) {
   const span = upper - lower;
   if (span <= 12) return Array.from({ length: span + 1 }, (_, index) => lower + index);
   return [
-    ...new Set(
-      Array.from({ length: 13 }, (_, index) => Math.round(lower + span * index / 12))
-    )
+    ...new Set(Array.from({ length: 13 }, (_, index) => Math.round(lower + span * index / 12)))
   ];
 }
 function makeBoundarySearchView(frames, descriptor) {
@@ -2124,6 +2154,427 @@ function makeMatrixFooter(table, columnCount, descriptors) {
     row.setAttribute("aria-label", `${model.context}; ${model.summary.text}`);
   }
   return { paint };
+}
+function makeDPStoryView(frames) {
+  return frames[0].problem === "coin-change" ? makeCoinChangeStoryView(frames) : makeGridPathStoryView(frames);
+}
+function makeStoryLegend(items) {
+  const legend = el("div", "steptrace__legend");
+  for (const [state, label] of items) {
+    const row = el("div", "steptrace__legend-row");
+    const swatch = el("span", "steptrace__swatch steptrace__dp-story-swatch");
+    swatch.dataset.state = state;
+    row.append(swatch, document.createTextNode(label));
+    legend.append(row);
+  }
+  return legend;
+}
+function makeCoinChangeStoryView(frames) {
+  const first = frames[0];
+  const root = el("div", "steptrace__dp-story");
+  root.setAttribute("role", "region");
+  root.setAttribute("aria-label", "Coin change counter");
+  root.dataset.approach = first.approach;
+  const context = el("div", "steptrace__dp-story-context");
+  const contextStart = el("span", "steptrace__dp-story-context-start");
+  const contextEnd = el("span", "steptrace__dp-story-context-end");
+  context.append(contextStart, contextEnd);
+  const stage = el("div", "steptrace__dp-story-stage");
+  const rack = el("div", "steptrace__coin-rack");
+  const coinElements = first.coins.map((coin) => {
+    const element = el("span", "steptrace__coin");
+    element.textContent = `${coin}¢`;
+    element.dataset.coin = String(coin);
+    rack.append(element);
+    return element;
+  });
+  stage.append(rack);
+  root.append(context, stage);
+  const status = statusEl();
+  const tray = first.approach === "tabulation" ? null : el("div", "steptrace__coin-tray");
+  const attempts = ["greedy", "naive"].includes(first.approach) ? el("div", "steptrace__coin-attempts") : null;
+  const memo = first.approach === "memoization" ? el("div", "steptrace__coin-memo") : null;
+  const amountBoard = first.approach === "tabulation" ? el("div", "steptrace__amount-board") : null;
+  const amountCells = [];
+  if (tray) stage.append(tray);
+  if (attempts) stage.append(attempts);
+  if (memo) stage.append(memo);
+  if (amountBoard) {
+    amountBoard.style.setProperty("--steptrace-amount-count", String(first.amounts.length));
+    for (const amount of first.amounts) {
+      const cell = el("div", "steptrace__amount-cell");
+      const label = el("span", "steptrace__amount-label");
+      const value = el("span", "steptrace__amount-value");
+      label.textContent = `${amount}¢`;
+      value.textContent = "—";
+      cell.append(label, value);
+      amountBoard.append(cell);
+      amountCells.push({ cell, value, amount });
+    }
+    stage.append(amountBoard);
+  }
+  const legendItems = first.approach === "memoization" ? [
+    ["active", "coin being tried"],
+    ["selected", "current branch"],
+    ["stored", "saved remainder"],
+    ["hit", "answer reused"]
+  ] : first.approach === "tabulation" ? [
+    ["current", "amount being written"],
+    ["dependency", "smaller amount read"],
+    ["stored", "solved amount"],
+    ["best", "optimal amount chain"]
+  ] : [
+    ["active", "coin being tried"],
+    ["selected", "coins on the counter"],
+    ["repeated", "repeated subproblem"],
+    ["best", "best exact change"]
+  ];
+  const legend = makeStoryLegend(legendItems);
+  function paintTray(frame) {
+    if (!tray) return;
+    tray.replaceChildren();
+    const trayLabel = el("span", "steptrace__coin-tray-label");
+    trayLabel.textContent = frame.selected.length ? "on the counter" : "counter is empty";
+    tray.append(trayLabel);
+    for (const coin of frame.selected) {
+      const element = el("span", "steptrace__coin");
+      element.dataset.state = "selected";
+      element.textContent = `${coin}¢`;
+      tray.append(element);
+    }
+  }
+  function paintAttempts(frame) {
+    if (!attempts) return;
+    attempts.replaceChildren();
+    for (const attempt of frame.attempts) {
+      const row = el("div", "steptrace__coin-attempt");
+      row.dataset.state = attempt.state;
+      const label = el("span", "steptrace__coin-attempt-label");
+      const value = el("span", "steptrace__coin-attempt-value");
+      label.textContent = attempt.label;
+      value.textContent = attempt.value;
+      row.append(label, value);
+      attempts.append(row);
+    }
+  }
+  function paintMemo(frame) {
+    if (!memo) return;
+    memo.replaceChildren();
+    const heading = el("div", "steptrace__coin-memo-heading");
+    heading.textContent = "Saved remainder answers";
+    memo.append(heading);
+    for (const entry of frame.memo) {
+      const row = el("div", "steptrace__coin-memo-row");
+      row.dataset.state = entry.state;
+      const key = el("span", "steptrace__coin-memo-key");
+      const value = el("span", "steptrace__coin-memo-value");
+      key.textContent = entry.key;
+      value.textContent = entry.state === "hit" ? `${entry.value} · reused` : entry.value;
+      row.append(key, value);
+      memo.append(row);
+    }
+  }
+  function paintAmounts(frame) {
+    if (!amountBoard) return;
+    for (let index = 0; index < amountCells.length; index++) {
+      const { cell, value, amount } = amountCells[index];
+      const stored = frame.amountValues[index];
+      value.textContent = stored == null ? "—" : String(stored);
+      cell.setAttribute(
+        "aria-label",
+        stored == null ? `${amount}¢: unsolved` : `${amount}¢: ${stored} coin${stored === 1 ? "" : "s"}`
+      );
+      cell.dataset.state = amount === frame.amountCurrent ? "current" : frame.amountPath.includes(amount) ? "best" : frame.amountDependencies.includes(amount) ? "dependency" : stored != null ? "stored" : "";
+    }
+  }
+  return {
+    nodes: [root, legend, status],
+    stageLayout: "fill",
+    stableStage: true,
+    paint(frame, index, total) {
+      contextStart.textContent = frame.approach === "tabulation" ? "Build exact change from 0¢" : `Customer pays ${frame.target}¢`;
+      contextEnd.textContent = frame.approach === "tabulation" ? frame.amountCurrent == null ? frame.best || "amount board empty" : `writing ${frame.amountCurrent}¢` : `remaining ${frame.remaining}¢`;
+      for (const element of coinElements) {
+        const coin = Number(element.dataset.coin);
+        element.dataset.state = coin === frame.activeCoin ? "active" : "";
+      }
+      paintTray(frame);
+      paintAttempts(frame);
+      paintMemo(frame);
+      paintAmounts(frame);
+      status.innerHTML = escapeHtml(frame.message) + ` <span class="steptrace__counts">· step ${index + 1}/${total}</span>`;
+    },
+    watch(frame) {
+      const plan = frame.selected.length ? frame.selected.map((coin) => `${coin}¢`).join(" + ") : "—";
+      if (frame.approach === "memoization")
+        return [
+          {
+            k: "remaining",
+            v: `${frame.remaining}¢`,
+            sw: "var(--_blue)",
+            hint: "Remainder handled by the current recursive branch."
+          },
+          {
+            k: "plan",
+            v: plan,
+            sw: "var(--_amber)",
+            hint: "Coins chosen before the current remainder was reached."
+          },
+          {
+            k: "memo",
+            v: `${frame.memo.length} answers`,
+            sw: "var(--_violet)",
+            hint: "Remainder answers saved for later recursive calls."
+          },
+          {
+            k: "best",
+            v: frame.best || "—",
+            sw: "var(--_green)",
+            hint: `Fewest exact coins found for the ${frame.target}-cent payment.`
+          }
+        ];
+      if (frame.approach === "tabulation")
+        return [
+          {
+            k: "amount",
+            v: frame.amountCurrent == null ? "—" : `${frame.amountCurrent}¢`,
+            sw: "var(--_blue)",
+            hint: "Amount currently being written on the bottom-up board."
+          },
+          {
+            k: "reads",
+            v: frame.amountDependencies.length ? frame.amountDependencies.map((amount) => `${amount}¢`).join(", ") : "base",
+            sw: "var(--_amber)",
+            hint: "Smaller solved amounts read before writing the current amount."
+          },
+          {
+            k: "solved",
+            v: String(frame.amountValues.filter((value) => value != null).length),
+            sw: "var(--_violet)",
+            hint: "Amount answers already written and available for reuse."
+          },
+          {
+            k: "best",
+            v: frame.best || "—",
+            sw: "var(--_green)",
+            hint: `Fewest exact coins found for the ${frame.target}-cent payment.`
+          }
+        ];
+      return [
+        {
+          k: "remaining",
+          v: `${frame.remaining}¢`,
+          sw: "var(--_blue)",
+          hint: "Amount still owed after the coins currently on the counter."
+        },
+        {
+          k: "plan",
+          v: plan,
+          sw: "var(--_amber)",
+          hint: "Coins chosen by the current branch or strategy."
+        },
+        {
+          k: "attempts",
+          v: String(frame.attempts.length),
+          sw: "var(--_violet)",
+          hint: "Complete or partial change plans exposed so far."
+        },
+        {
+          k: "best",
+          v: frame.best || "—",
+          sw: "var(--_green)",
+          hint: `Fewest exact coins found for the ${frame.target}-cent payment.`
+        }
+      ];
+    }
+  };
+}
+function makeGridPathStoryView(frames) {
+  const first = frames[0];
+  const table = el("table", "steptrace__warehouse-matrix");
+  table.setAttribute("aria-label", "Warehouse route cost matrix");
+  const thead = document.createElement("thead");
+  const headerRow = document.createElement("tr");
+  const corner = document.createElement("th");
+  corner.setAttribute("scope", "col");
+  corner.textContent = "cost ↓ / tile →";
+  headerRow.append(corner);
+  for (let column = 0; column < first.costs[0].length; column++) {
+    const header = document.createElement("th");
+    header.setAttribute("scope", "col");
+    header.textContent = `C${column + 1}`;
+    headerRow.append(header);
+  }
+  thead.append(headerRow);
+  table.append(thead);
+  const tbody = document.createElement("tbody");
+  const cells = [];
+  for (let row = 0; row < first.costs.length; row++) {
+    const tableRow = document.createElement("tr");
+    const header = document.createElement("th");
+    header.setAttribute("scope", "row");
+    header.textContent = `R${row + 1}`;
+    tableRow.append(header);
+    const rowCells = [];
+    for (let column = 0; column < first.costs[row].length; column++) {
+      const cell = document.createElement("td");
+      const place = el("span", "steptrace__warehouse-cell-name");
+      const cost = el("span", "steptrace__warehouse-cell-cost");
+      const stored = el("span", "steptrace__warehouse-cell-stored");
+      place.textContent = row === 0 && column === 0 ? "START" : row === first.costs.length - 1 && column === first.costs[row].length - 1 ? "GOAL" : `R${row + 1}C${column + 1}`;
+      cost.textContent = `cost ${first.costs[row][column]}`;
+      cell.append(place, cost, stored);
+      tableRow.append(cell);
+      rowCells.push({ cell, stored });
+    }
+    cells.push(rowCells);
+    tbody.append(tableRow);
+  }
+  table.append(tbody);
+  const tfoot = document.createElement("tfoot");
+  const footerRow = document.createElement("tr");
+  const footerCell = document.createElement("td");
+  footerCell.colSpan = first.costs[0].length + 1;
+  const footer = el("div", "steptrace__warehouse-footer");
+  const footerStart = el("span", "steptrace__warehouse-footer-start");
+  const footerEnd = el("span", "steptrace__warehouse-footer-end");
+  footer.append(footerStart, footerEnd);
+  footerCell.append(footer);
+  footerRow.append(footerCell);
+  tfoot.append(footerRow);
+  table.append(tfoot);
+  const status = statusEl();
+  const legendItems = first.approach === "memoization" ? [
+    ["current", "tile being evaluated"],
+    ["stored", "saved remaining cost"],
+    ["repeated", "saved answer reused"],
+    ["best", "best complete route"]
+  ] : first.approach === "tabulation" ? [
+    ["current", "tile being written"],
+    ["dependency", "written neighbour read"],
+    ["stored", "remaining cost stored"],
+    ["best", "optimal route"]
+  ] : [
+    ["current", "tile being considered"],
+    ["path", "current route"],
+    ["repeated", "tile reached again"],
+    ["best", "best complete route"]
+  ];
+  const legend = makeStoryLegend(legendItems);
+  return {
+    nodes: [table, legend, status],
+    stageLayout: "fill",
+    paint(frame, index, total) {
+      const path = new Set(frame.path.map(([row, column]) => `${row},${column}`));
+      const repeated = new Set(frame.repeated.map(([row, column]) => `${row},${column}`));
+      const best = new Set(frame.bestPath.map(([row, column]) => `${row},${column}`));
+      const dependencies = new Set(
+        frame.gridDependencies.map(([row, column]) => `${row},${column}`)
+      );
+      let storedCount = 0;
+      for (let row = 0; row < cells.length; row++) {
+        for (let column = 0; column < cells[row].length; column++) {
+          const key = `${row},${column}`;
+          const value = frame.gridValues[row][column];
+          if (value != null) storedCount++;
+          cells[row][column].stored.textContent = value == null ? "" : `best ${value}`;
+          cells[row][column].cell.dataset.state = frame.current?.[0] === row && frame.current?.[1] === column ? "current" : best.has(key) ? "best" : repeated.has(key) ? "repeated" : dependencies.has(key) ? "dependency" : path.has(key) ? "path" : value != null ? "stored" : "";
+          cells[row][column].cell.setAttribute(
+            "aria-label",
+            `R${row + 1}C${column + 1}, cost ${frame.costs[row][column]}${value == null ? "" : `, best remaining cost ${value}`}`
+          );
+        }
+      }
+      footerStart.textContent = frame.approach === "greedy" ? "Greedy route" : frame.approach === "naive" ? "Recursive routes" : frame.approach === "memoization" ? "Memoized route" : "Fill from the goal";
+      footerEnd.textContent = frame.approach === "memoization" ? `${storedCount} answers saved` : frame.approach === "tabulation" ? `${storedCount}/${cells.length * cells[0].length} tiles written` : frame.bestCost == null ? `route cost ${frame.routeCost}` : `best route ${frame.bestCost}`;
+      footerRow.setAttribute("aria-label", `${footerStart.textContent}; ${footerEnd.textContent}`);
+      status.innerHTML = escapeHtml(frame.message) + ` <span class="steptrace__counts">· step ${index + 1}/${total}</span>`;
+    },
+    watch(frame) {
+      const current = frame.current ? `R${frame.current[0] + 1}C${frame.current[1] + 1}` : "—";
+      const stored = frame.gridValues.flat().filter((value) => value != null).length;
+      if (frame.approach === "memoization")
+        return [
+          {
+            k: "tile",
+            v: current,
+            sw: "var(--_blue)",
+            hint: "Warehouse tile handled by the current recursive call."
+          },
+          {
+            k: "route",
+            v: frame.routeLabel,
+            sw: "var(--_amber)",
+            hint: "Recursive route that reached the current tile."
+          },
+          {
+            k: "memo",
+            v: `${stored} tiles`,
+            sw: "var(--_violet)",
+            hint: "Solved remaining costs stored directly in the warehouse map."
+          },
+          {
+            k: "best cost",
+            v: frame.bestCost == null ? "—" : String(frame.bestCost),
+            sw: "var(--_green)",
+            hint: "Lowest complete travel cost found for the warehouse route."
+          }
+        ];
+      if (frame.approach === "tabulation")
+        return [
+          {
+            k: "tile",
+            v: current,
+            sw: "var(--_blue)",
+            hint: "Warehouse tile whose remaining cost is being written."
+          },
+          {
+            k: "reads",
+            v: frame.gridDependencies.length ? frame.gridDependencies.map(([row, column]) => `R${row + 1}C${column + 1}`).join(", ") : "base",
+            sw: "var(--_amber)",
+            hint: "Already-written right and down neighbours read by this tile."
+          },
+          {
+            k: "written",
+            v: `${stored}/${frame.costs.length * frame.costs[0].length}`,
+            sw: "var(--_violet)",
+            hint: "Warehouse tiles with a stored remaining-route cost."
+          },
+          {
+            k: "best cost",
+            v: frame.bestCost == null ? "—" : String(frame.bestCost),
+            sw: "var(--_green)",
+            hint: "Lowest complete travel cost found for the warehouse route."
+          }
+        ];
+      return [
+        {
+          k: "tile",
+          v: current,
+          sw: "var(--_blue)",
+          hint: "Warehouse tile currently entered or evaluated."
+        },
+        {
+          k: "route",
+          v: frame.routeLabel,
+          sw: "var(--_amber)",
+          hint: "Right/down route assembled so far from the loading bay."
+        },
+        {
+          k: "repeated",
+          v: String(frame.repeated.length),
+          sw: "var(--_violet)",
+          hint: "Coordinates reached by more than one recursive route."
+        },
+        {
+          k: "best cost",
+          v: frame.bestCost == null ? "—" : String(frame.bestCost),
+          sw: "var(--_green)",
+          hint: "Lowest complete travel cost found for the warehouse route."
+        }
+      ];
+    }
+  };
 }
 function makeDPView(frames, semantics = lcsMatrixGridSemantics) {
   const f0 = frames[0];
@@ -2528,7 +2979,8 @@ function makeExecutionTreeView(frames, descriptor) {
   svg.setAttribute("preserveAspectRatio", "xMidYMid meet");
   svg.setAttribute("role", "img");
   svg.setAttribute("aria-labelledby", `${title.id} ${description.id}`);
-  svg.style.setProperty("--steptrace-tree-min-width", `${descriptor.minSvgWidth}px`);
+  const canvasWidth = Math.max(descriptor.minSvgWidth, width * (descriptor.canvasScale || 1));
+  svg.style.setProperty("--steptrace-tree-width", `${canvasWidth}px`);
   svg.append(title, description);
   const edgeElements = [];
   for (const edge of f0.edges) {
@@ -2593,16 +3045,12 @@ function makeExecutionTreeView(frames, descriptor) {
       label.setAttribute("dominant-baseline", "central");
       result.setAttribute("y", String(halfHeight + 9));
     } else {
-      label.setAttribute("y", "-3");
+      label.setAttribute("y", "-4");
       detail.setAttribute("y", "9");
-      result.setAttribute("y", "20");
-      badge.setAttribute("x", String(-halfWidth + 7));
-      badge.setAttribute("y", String(-halfHeight + 9));
-      badge.setAttribute("text-anchor", "start");
     }
     group.append(ring, surface, label, detail, result, badge);
     svg.append(group);
-    nodeElements[node.id] = { group, result, badge };
+    nodeElements[node.id] = { group, detail, result, badge, secondaryLine };
   }
   const legend = el("div", "steptrace__legend");
   legend.setAttribute("aria-label", `${descriptor.ariaLabel} state legend`);
@@ -2616,6 +3064,7 @@ function makeExecutionTreeView(frames, descriptor) {
   const wrap = el("div", "steptrace__rectree");
   wrap.setAttribute("role", "region");
   wrap.setAttribute("aria-label", `${descriptor.ariaLabel} visualization`);
+  wrap.dataset.fitWidth = descriptor.fitWidth ? "true" : "false";
   wrap.tabIndex = 0;
   wrap.append(svg);
   const status = statusEl();
@@ -2636,8 +3085,15 @@ function makeExecutionTreeView(frames, descriptor) {
       elements.group.dataset.active = model.active === node.id ? "true" : "false";
       elements.group.dataset.path = path.has(node.id) ? "true" : "false";
       const value = model.results[node.id];
-      elements.result.textContent = Array.isArray(value) ? value.length ? `→ [${value.join(", ")}]` : "" : value == null ? "" : `→ ${value}`;
-      elements.badge.textContent = descriptor.stateLabels[state] || "";
+      const resultText = Array.isArray(value) ? value.length ? `[${value.join(", ")}]` : "" : value == null ? "" : String(value);
+      if (descriptor.shape === "card") {
+        elements.detail.textContent = resultText || elements.secondaryLine;
+        elements.result.textContent = "";
+        elements.badge.textContent = "";
+      } else {
+        elements.result.textContent = resultText ? `→ ${resultText}` : "";
+        elements.badge.textContent = descriptor.stateLabels[state] || "";
+      }
     }
     for (const edge of edgeElements) {
       edge.element.dataset.vis = visible.has(edge.to) ? "1" : "0";
@@ -2650,7 +3106,7 @@ function makeExecutionTreeView(frames, descriptor) {
     const model = descriptor.frameModel(frame);
     return descriptor.watchRows(frame, model);
   }
-  return { nodes: [wrap, legend, status], paint, watch };
+  return { nodes: [wrap, legend, status], stageLayout: "fill", paint, watch };
 }
 function makeRecTreeView(frames) {
   return makeExecutionTreeView(frames, legacyRecTreeDescriptor);
@@ -2862,7 +3318,7 @@ function buildMilestones(algorithm, kind, frames) {
   };
   const firstGap = frames.find((frame) => Number.isInteger(frame.gap))?.gap;
   const familyProfile = frames[0]?.profile;
-  const initial = kind === "sort" ? firstGap != null ? `Gap ${firstGap}` : familyProfile === "cyclic" ? "Place values" : familyProfile === "introsort" ? "Quicksort" : algorithm === "bubble-sort" ? "Pass 1" : algorithm === "insertion-sort" ? "Prefix 1" : algorithm === "selection-sort" ? "Select 1" : algorithm === "heap-sort" ? "Build heap" : algorithm === "merge-sort" ? "Runs of 1" : "Partition" : kind === "search" ? familyProfile === "exponential" ? "Gallop" : familyProfile === "interpolation" ? "Estimate" : familyProfile === "jump" ? "Jump blocks" : familyProfile === "ternary" ? "Narrow peak" : familyProfile === "shipping-capacity" ? "Answer range" : "Search range" : kind === "string" ? "Shift 0" : kind === "backtrack" ? "Depth 0" : kind === "rectree" ? familyProfile === "divide-and-conquer" ? "Whole problem" : "Call tree" : "Initialize";
+  const initial = kind === "sort" ? firstGap != null ? `Gap ${firstGap}` : familyProfile === "cyclic" ? "Place values" : familyProfile === "introsort" ? "Quicksort" : algorithm === "bubble-sort" ? "Pass 1" : algorithm === "insertion-sort" ? "Prefix 1" : algorithm === "selection-sort" ? "Select 1" : algorithm === "heap-sort" ? "Build heap" : algorithm === "merge-sort" ? "Runs of 1" : "Partition" : kind === "search" ? familyProfile === "exponential" ? "Gallop" : familyProfile === "interpolation" ? "Estimate" : familyProfile === "jump" ? "Jump blocks" : familyProfile === "ternary" ? "Narrow peak" : familyProfile === "shipping-capacity" ? "Answer range" : "Search range" : kind === "string" ? "Shift 0" : kind === "backtrack" ? "Depth 0" : kind === "rectree" ? familyProfile === "divide-and-conquer" ? "Whole problem" : familyProfile === "merge-sort" ? "Whole array" : familyProfile === "memoization" ? "Empty cache" : familyProfile === "coin-change-top-down" ? "Amount 30¢" : familyProfile === "grid-path-top-down" ? "Loading bay" : "Call tree" : "Initialize";
   push(0, initial);
   let lastRange = "";
   let lastGap = firstGap;
@@ -2923,6 +3379,8 @@ function buildMilestones(algorithm, kind, frames) {
     } else if (kind === "dp") {
       if (familyProfile === "floyd-warshall" && f.type === "stage") {
         push(i, `Stage k = ${f.k}`);
+      } else if (familyProfile === "dynamic-programming" && f.type === "compute" && f.cur) {
+        push(i, `${f.variant === "concrete" ? "Prefix" : "Solve"} ${f.colLabels[f.cur[1]]}`);
       } else if (f.type === "compute" && f.cur && f.cur[0] !== lastRow) {
         push(i, `Row ${f.rowLabels[f.cur[0]]}`);
         lastRow = f.cur[0];
@@ -2944,7 +3402,16 @@ function buildMilestones(algorithm, kind, frames) {
         push(i, `Split ${activeNode2?.label || "range"}`);
       } else if (f.type === "combine") {
         const activeNode2 = f.nodes.find((node) => node.id === f.active);
-        push(i, `Combine ${activeNode2?.label || "problem"}`);
+        push(
+          i,
+          `${f.profile === "merge-sort" ? "Merge" : "Combine"} ${activeNode2?.label || "problem"}`
+        );
+      } else if (f.type === "store") {
+        const activeNode2 = f.nodes.find((node) => node.id === f.active);
+        push(i, `Store ${activeNode2?.label || "state"}`);
+      } else if (f.type === "cache") {
+        const activeNode2 = f.nodes.find((node) => node.id === f.active);
+        push(i, `Reuse ${activeNode2?.label || "state"}`);
       } else if (f.type === "phase") {
         push(i, f.phase === "memo" ? "Memoized" : "Plain recursion");
       }
@@ -3024,6 +3491,24 @@ function summaryFor(algorithm, kind, frame, graph) {
     return values.length ? `Answer indices [${frame.marked.join(", ")}] · values [${values.join(", ")}].` : algorithm === "two-pointers" || algorithm === "sliding-window" ? `No qualifying range was found.` : `No committed result was recorded.`;
   }
   if (kind === "dp") {
+    if ([
+      "coin-change-greedy",
+      "coin-change-naive",
+      "coin-change-memoization",
+      "coin-change-tabulation"
+    ].includes(algorithm))
+      return `${frame.best || "Exact change pending"} · target ${frame.target}¢.`;
+    if ([
+      "grid-path-greedy",
+      "grid-path-naive",
+      "grid-path-memoization",
+      "grid-path-tabulation"
+    ].includes(algorithm))
+      return frame.bestCost == null ? `Warehouse route pending · current cost ${frame.routeCost}.` : `Minimum warehouse route cost ${frame.bestCost}.`;
+    if (algorithm === "coin-change-bottom-up")
+      return `Fewest coins for 30¢: ${frame.grid[0]?.at(-1)} · exact change 10¢ + 10¢ + 10¢.`;
+    if (algorithm === "grid-path-bottom-up")
+      return `Minimum warehouse route cost ${frame.grid[0]?.[0]} · ${frame.path.length} path tiles.`;
     if (algorithm === "floyd-warshall") {
       if (frame.negativeCycle?.length)
         return `Negative cycle through ${frame.negativeCycle.join(", ")}; shortest paths are undefined.`;
@@ -3031,6 +3516,13 @@ function summaryFor(algorithm, kind, frame, graph) {
         (row2, index) => `${frame.rowLabels[index]}: [${row2.map((value2) => value2 ?? "∞").join(", ")}]`
       ).join(" · ");
       return `All-pairs distances ${distances}.`;
+    }
+    if (algorithm === "dynamic-programming") {
+      const stored = frame.grid.flat().filter((value2) => value2 != null).length;
+      const target = frame.grid[0]?.[frame.grid[0].length - 1];
+      if (frame.variant === "concrete")
+        return `Best non-adjacent total ${target} · ${stored} prefixes solved once.`;
+      return `Target ${target} · ${stored} states solved once in dependency order.`;
     }
     const row = frame.grid[frame.grid.length - 1] || [];
     const value = row[row.length - 1];
@@ -3044,6 +3536,14 @@ function summaryFor(algorithm, kind, frame, graph) {
   if (kind === "backtrack")
     return frame.solved ? `Solved at depth ${frame.depth} · ${frame.placed} placements · ${frame.pruned} branches pruned.` : `No arrangement found · ${frame.pruned} branches pruned.`;
   if (kind === "rectree") {
+    if (algorithm === "coin-change-top-down")
+      return `Fewest coins for 30¢: ${frame.results?.c30 || "—"} · ${frame.pruned} recursive calls skipped.`;
+    if (algorithm === "grid-path-top-down")
+      return `Minimum warehouse route cost ${frame.results?.r1c1 || "—"} · ${frame.pruned} recursive calls skipped.`;
+    if (algorithm === "memoization") {
+      const memoResult = String(frame.results?.a || "ready").replace(/^result\s+/i, "");
+      return `Result ${memoResult} · ${frame.calls} calls · ${frame.pruned} recursive calls skipped.`;
+    }
     const result = frame.results?.root;
     if (Array.isArray(result)) return `Sorted result [${result.join(", ")}].`;
     return result ? `${result}.` : stripTags(frame.message);
@@ -3866,6 +4366,11 @@ function parseExecutionTreeConfig(config) {
     invalidConfig3('does not take an "array"; it animates the paradigm itself.');
   return { profile: "divide-and-conquer" };
 }
+function parseMemoizationConfig(config) {
+  if (config.array !== void 0 || config.n !== void 0)
+    throw new Error("steptrace: memoization animates abstract states and takes no data input.");
+  return { profile: "memoization" };
+}
 function frameModel(frame) {
   return {
     phase: frame.phase,
@@ -3885,7 +4390,7 @@ function pathLabel(frame) {
   const labels = frame.path.map((id) => frame.nodes.find((node) => node.id === id)?.label).filter(Boolean);
   return labels.length ? labels.join(" → ") : "—";
 }
-var stateLabels, executionTreeViewDescriptor, executionTreeFamily;
+var stateLabels, executionTreeCardMetrics, executionTreeViewDescriptor, memoizationTreeViewDescriptor, dynamicProgrammingTreeViewDescriptor, executionTreeFamily;
 var init_execution_tree = __esm({
   "custom/steptrace/src/families/execution-tree.ts"() {
     init_recorders();
@@ -3896,15 +4401,20 @@ var init_execution_tree = __esm({
       base: "base",
       return: "return",
       combine: "combine",
+      store: "stored",
       cache: "cached",
       prune: "pruned"
     };
+    executionTreeCardMetrics = {
+      shape: "card",
+      nodeWidth: 84,
+      nodeHeight: 40,
+      minSvgWidth: 500,
+      canvasScale: 0.84
+    };
     executionTreeViewDescriptor = {
       ariaLabel: "Execution tree",
-      shape: "card",
-      nodeWidth: 100,
-      nodeHeight: 48,
-      minSvgWidth: 560,
+      ...executionTreeCardMetrics,
       stateLabels,
       legend: [
         { state: "split", label: "split subproblem" },
@@ -3919,16 +4429,113 @@ var init_execution_tree = __esm({
       watchRows(frame) {
         const node = activeNode(frame);
         const result = node ? frame.results[node.id] : null;
+        const subproblemLabel = frame.profile === "merge-sort" ? "subarray" : "subproblem";
+        const pathLabelName = frame.profile === "merge-sort" ? "split path" : "call path";
         const resultLabel = Array.isArray(result) ? `[${result.join(", ")}]` : result || "—";
         return [
           { k: "phase", v: frame.phase, sw: "var(--_violet)" },
           {
-            k: "subproblem",
+            k: subproblemLabel,
             v: node ? `${node.label} · ${node.detail || `[${node.values.join(", ")}]`}` : "—",
             sw: "var(--_blue)"
           },
-          { k: "call path", v: pathLabel(frame), sw: "var(--_neutral)" },
+          { k: pathLabelName, v: pathLabel(frame), sw: "var(--_neutral)" },
           { k: "result", v: resultLabel, sw: "var(--_green)" }
+        ];
+      }
+    };
+    memoizationTreeViewDescriptor = {
+      ariaLabel: "Memoization call tree",
+      ...executionTreeCardMetrics,
+      stateLabels,
+      legend: [
+        { state: "split", label: "expand new state" },
+        { state: "base", label: "base result" },
+        { state: "store", label: "store first result" },
+        { state: "cache", label: "cache hit; skip branch" }
+      ],
+      frameModel,
+      nodeLines(node) {
+        return [node.label, node.detail || ""];
+      },
+      watchRows(frame) {
+        const node = activeNode(frame);
+        const cached = frame.cache.map((entry) => `${entry.key} → ${entry.result}`).join(" · ");
+        return [
+          {
+            k: "phase",
+            v: frame.phase,
+            sw: "var(--_violet)",
+            hint: "Whether the trace is expanding, solving, storing, or reusing a state."
+          },
+          {
+            k: "state",
+            v: node ? `${node.label} · ${node.detail || "no cache key"}` : "—",
+            sw: "var(--_blue)",
+            hint: "The active recursive state and the key used to recognize repeats."
+          },
+          {
+            k: "cache",
+            v: cached || "empty",
+            sw: "var(--_green)",
+            hint: "Results already computed once and available for immediate reuse."
+          },
+          {
+            k: "work",
+            v: `${frame.calls} calls · ${frame.pruned} skipped`,
+            sw: "var(--_neutral)",
+            hint: "Calls entered so far and recursive calls avoided by cache hits."
+          }
+        ];
+      }
+    };
+    dynamicProgrammingTreeViewDescriptor = {
+      ariaLabel: "Top-down dynamic-programming recursion tree",
+      ...executionTreeCardMetrics,
+      nodeWidth: 92,
+      nodeHeight: 44,
+      minSvgWidth: 500,
+      canvasScale: 1,
+      fitWidth: true,
+      stateLabels,
+      legend: [
+        { state: "split", label: "expand uncached state" },
+        { state: "base", label: "base case" },
+        { state: "store", label: "store result" },
+        { state: "cache", label: "reuse cached result" }
+      ],
+      frameModel,
+      nodeLines(node) {
+        return [node.label, node.detail || ""];
+      },
+      watchRows(frame) {
+        const node = activeNode(frame);
+        const cached = frame.cache.map((entry) => `${entry.key} → ${entry.result}`).join(" · ");
+        return [
+          {
+            k: "phase",
+            v: frame.phase,
+            sw: "var(--_violet)",
+            hint: "Whether recursion is expanding a new state, storing it, or reusing it."
+          },
+          {
+            k: "state",
+            v: node ? node.label : "—",
+            sw: "var(--_blue)",
+            hint: "The amount or warehouse coordinate currently being solved."
+          },
+          {
+            k: "memo",
+            v: cached || "empty",
+            sw: "var(--_green)",
+            hint: "Answers already computed once and available for immediate reuse."
+          },
+          {
+            k: "work",
+            v: `${frame.calls} calls · ${frame.pruned} skipped`,
+            sw: "var(--_neutral)",
+            hint: "Recursive calls entered and child calls avoided by cache hits."
+          }
         ];
       }
     };
@@ -3938,10 +4545,9 @@ var init_execution_tree = __esm({
         return new ExecutionTreeRecorder(config);
       },
       createView(frames) {
-        return makeExecutionTreeView(
-          frames,
-          executionTreeViewDescriptor
-        );
+        const profile = frames[0]?.profile;
+        const descriptor = profile === "memoization" ? memoizationTreeViewDescriptor : profile === "coin-change-top-down" || profile === "grid-path-top-down" ? dynamicProgrammingTreeViewDescriptor : executionTreeViewDescriptor;
+        return makeExecutionTreeView(frames, descriptor);
       }
     };
   }
@@ -4094,6 +4700,1272 @@ var init_divide_and_conquer = __esm({
         );
       }
     };
+  }
+});
+
+// custom/steptrace/src/dp-problem-data.ts
+var coinChangeProblem, gridPathProblem;
+var init_dp_problem_data = __esm({
+  "custom/steptrace/src/dp-problem-data.ts"() {
+    coinChangeProblem = {
+      target: 30,
+      coins: [50, 25, 10, 1],
+      amounts: [0, 1, 2, 3, 4, 5, 10, 15, 20, 25, 30],
+      bestCoins: [0, 1, 2, 3, 4, 5, 1, 6, 2, 1, 3]
+    };
+    gridPathProblem = {
+      costs: [
+        [0, 1, 1, 9],
+        [2, 9, 1, 9],
+        [2, 2, 9, 9],
+        [9, 2, 2, 0]
+      ],
+      greedyPath: [
+        [0, 0],
+        [0, 1],
+        [0, 2],
+        [1, 2],
+        [1, 3],
+        [2, 3],
+        [3, 3]
+      ],
+      optimalPath: [
+        [0, 0],
+        [1, 0],
+        [2, 0],
+        [2, 1],
+        [3, 1],
+        [3, 2],
+        [3, 3]
+      ],
+      bestRemaining: [
+        [10, 14, 13, 27],
+        [10, 15, 12, 18],
+        [8, 6, 11, 9],
+        [13, 4, 2, 0]
+      ],
+      greedyCost: 21,
+      optimalCost: 10
+    };
+  }
+});
+
+// custom/steptrace/src/families/dp-problems.ts
+function dpStoryConfig(problem, approach) {
+  return (config) => {
+    if (config.variant !== void 0)
+      throw new Error(`steptrace: ${problem}-${approach} does not take a variant.`);
+    return { profile: "dp-story", problem, approach };
+  };
+}
+function dpTableConfig(profile) {
+  return (config) => {
+    if (config.variant !== void 0)
+      throw new Error(`steptrace: ${profile} does not take a variant.`);
+    return { profile };
+  };
+}
+function rolesForCell(frame, row, column) {
+  const roles = [];
+  if (frame.grid[row][column] != null) roles.push("stored");
+  if (frame.deps.some(([depRow, depColumn]) => depRow === row && depColumn === column)) {
+    const depIndex = frame.deps.findIndex(
+      ([depRow, depColumn]) => depRow === row && depColumn === column
+    );
+    roles.push(depIndex === 1 ? "operand-b" : "operand-a");
+  }
+  if (frame.path.some(([pathRow, pathColumn]) => pathRow === row && pathColumn === column))
+    roles.push("path");
+  if (frame.cur?.[0] === row && frame.cur?.[1] === column) roles.push("target");
+  return roles;
+}
+var DPStoryRecorder, dpStoryFamily, coinRoles, gridRoles, coinTableSemantics, gridTableSemantics, dpProblemTableFamily;
+var init_dp_problems = __esm({
+  "custom/steptrace/src/families/dp-problems.ts"() {
+    init_recorders();
+    init_dp_problem_data();
+    init_render();
+    DPStoryRecorder = class {
+      frames = [];
+      config;
+      remaining = coinChangeProblem.target;
+      selected = [];
+      activeCoin = null;
+      attempts = [];
+      memo = [];
+      best = null;
+      amounts = coinChangeProblem.amounts.slice();
+      amountValues = this.amounts.map(() => null);
+      amountCurrent = null;
+      amountDependencies = [];
+      amountPath = [];
+      costs = gridPathProblem.costs;
+      gridValues = this.costs.map((row) => row.map(() => null));
+      gridDependencies = [];
+      current = null;
+      path = [];
+      repeated = [];
+      bestPath = [];
+      routeCost = 0;
+      routeLabel = "—";
+      bestCost = null;
+      constructor(config) {
+        this.config = config;
+      }
+      intro(message) {
+        this.push("init", message);
+      }
+      chooseCoin(coin, remaining, selected, message) {
+        this.activeCoin = coin;
+        this.remaining = remaining;
+        this.selected = selected.slice();
+        this.push("step", message);
+      }
+      backtrackCoins(remaining, selected, message) {
+        this.activeCoin = null;
+        this.remaining = remaining;
+        this.selected = selected.slice();
+        this.push("step", message);
+      }
+      coinAttempt(attempt, message) {
+        this.attempts.push({ ...attempt });
+        this.push("step", message);
+      }
+      coinMemo(key, value, state, message) {
+        const existing = this.memo.findIndex((entry2) => entry2.key === key);
+        const entry = { key, value, state };
+        if (existing === -1) this.memo.push(entry);
+        else this.memo[existing] = entry;
+        this.push("step", message);
+      }
+      fillAmount(amount, value, dependencies, message) {
+        const index = this.amounts.indexOf(amount);
+        if (index === -1) throw new Error(`steptrace: unsupported coin-change amount ${amount}.`);
+        this.amountValues[index] = value;
+        this.amountCurrent = amount;
+        this.amountDependencies = dependencies.slice();
+        this.push("step", message);
+      }
+      amountResult(path, best, selected, message) {
+        this.amountPath = path.slice();
+        this.best = best;
+        this.selected = selected.slice();
+        this.remaining = 0;
+        this.amountCurrent = null;
+        this.amountDependencies = [];
+        this.push("step", message);
+      }
+      coinResult(best, selected, message) {
+        this.best = best;
+        this.selected = selected.slice();
+        this.remaining = 0;
+        this.activeCoin = null;
+        this.push("step", message);
+      }
+      visitTile(current, path, routeCost, repeated, message) {
+        this.current = current.slice();
+        this.gridDependencies = [];
+        this.path = path.map((cell) => cell.slice());
+        this.repeated = repeated.map((cell) => cell.slice());
+        this.routeCost = routeCost;
+        this.routeLabel = this.path.map(([row, column]) => `R${row + 1}C${column + 1}`).join(" → ");
+        this.push("step", message);
+      }
+      storeTile(current, value, dependencies, message) {
+        this.current = current.slice();
+        this.gridValues[current[0]][current[1]] = value;
+        this.gridDependencies = dependencies.map((cell) => cell.slice());
+        this.push("step", message);
+      }
+      routeResult(bestCost, bestPath, routeLabel, message) {
+        this.bestCost = bestCost;
+        this.bestPath = bestPath.map((cell) => cell.slice());
+        this.path = this.bestPath.map((cell) => cell.slice());
+        this.current = null;
+        this.gridDependencies = [];
+        this.routeCost = bestCost;
+        this.routeLabel = routeLabel;
+        this.push("step", message);
+      }
+      done(message) {
+        this.activeCoin = null;
+        this.current = null;
+        this.amountCurrent = null;
+        this.amountDependencies = [];
+        this.gridDependencies = [];
+        this.push("done", message);
+      }
+      push(type, message) {
+        this.frames.push(
+          Object.freeze({
+            type,
+            profile: this.config.profile,
+            problem: this.config.problem,
+            approach: this.config.approach,
+            remaining: this.remaining,
+            selected: this.selected.slice(),
+            activeCoin: this.activeCoin,
+            coins: coinChangeProblem.coins.slice(),
+            target: coinChangeProblem.target,
+            attempts: this.attempts.map((attempt) => ({ ...attempt })),
+            memo: this.memo.map((entry) => ({ ...entry })),
+            best: this.best,
+            amounts: this.amounts.slice(),
+            amountValues: this.amountValues.slice(),
+            amountCurrent: this.amountCurrent,
+            amountDependencies: this.amountDependencies.slice(),
+            amountPath: this.amountPath.slice(),
+            costs: this.costs.map((row) => row.slice()),
+            gridValues: this.gridValues.map((row) => row.slice()),
+            gridDependencies: this.gridDependencies.map((cell) => cell.slice()),
+            current: this.current ? this.current.slice() : null,
+            path: this.path.map((cell) => cell.slice()),
+            repeated: this.repeated.map((cell) => cell.slice()),
+            bestPath: this.bestPath.map((cell) => cell.slice()),
+            routeCost: this.routeCost,
+            routeLabel: this.routeLabel,
+            bestCost: this.bestCost,
+            message
+          })
+        );
+      }
+    };
+    dpStoryFamily = {
+      id: "dp-story",
+      createRecorder(config) {
+        return new DPStoryRecorder(config);
+      },
+      createView(frames) {
+        return makeDPStoryView(frames);
+      }
+    };
+    coinRoles = [
+      { role: "operand-a", badge: "A", label: "predecessor amount" },
+      { role: "operand-b", badge: "B", label: "another predecessor" },
+      { role: "target", badge: "T", label: "amount being solved" },
+      { role: "path", badge: "✓", label: "optimal amount chain" }
+    ];
+    gridRoles = [
+      { role: "operand-a", badge: "R", label: "right neighbour" },
+      { role: "operand-b", badge: "D", label: "down neighbour" },
+      { role: "target", badge: "T", label: "tile being solved" },
+      { role: "path", badge: "✓", label: "optimal route" }
+    ];
+    coinTableSemantics = {
+      tableLabel: `Bottom-up coin-change table for a ${coinChangeProblem.target}-cent payment`,
+      axisDescription: "Each column stores the fewest coins needed for that amount.",
+      cornerLabel: "amount →",
+      stageLayout: "fill",
+      formatValue(value) {
+        return value == null ? "—" : String(value);
+      },
+      cellLabel(frame, row, column) {
+        const value = frame.grid[row][column];
+        return `${frame.colLabels[column]} needs ${value ?? "an unsolved number of"} coins`;
+      },
+      stateForCell(frame, row, column) {
+        if (frame.cur?.[0] === row && frame.cur?.[1] === column) return "cur";
+        return frame.deps.some(([depRow, depColumn]) => depRow === row && depColumn === column) ? "dep" : "";
+      },
+      rolesForCell,
+      footerModel(frame) {
+        const column = frame.cur?.[1];
+        if (column != null)
+          return {
+            context: `Solve ${frame.colLabels[column]}`,
+            summary: { text: frame.formula || `Store ${frame.grid[0][column]}` }
+          };
+        return frame.type === "init" ? { context: "Prepare amount table", summary: { text: "start at 0¢" } } : { context: "Exact change ready", summary: { text: "30¢ = 10¢ + 10¢ + 10¢" } };
+      },
+      roleLegend: coinRoles,
+      watchRows(frame) {
+        const column = frame.cur?.[1];
+        return [
+          {
+            k: "amount",
+            v: column == null ? "—" : frame.colLabels[column],
+            sw: "var(--_blue)",
+            hint: "Amount whose best exact change is being stored."
+          },
+          {
+            k: "predecessors",
+            v: frame.deps.length ? frame.deps.map(([, dependency]) => frame.colLabels[dependency]).join(", ") : "base",
+            sw: "var(--_amber)",
+            hint: "Smaller amounts reached after placing one allowed coin."
+          },
+          {
+            k: "transition",
+            v: frame.formula || "—",
+            sw: "var(--_violet)",
+            hint: "Fewest predecessor coins plus the new coin placed now."
+          },
+          {
+            k: "answer",
+            v: frame.grid[0].at(-1) || "—",
+            sw: "var(--_green)",
+            hint: `Fewest coins stored for the full ${coinChangeProblem.target}-cent payment.`
+          }
+        ];
+      }
+    };
+    gridTableSemantics = {
+      tableLabel: "Bottom-up minimum-cost warehouse path matrix",
+      axisDescription: "Each tile stores its cost plus the cheaper right or down neighbour.",
+      cornerLabel: "warehouse",
+      stageLayout: "fill",
+      formatValue(value) {
+        return value == null ? "—" : String(value);
+      },
+      cellLabel(frame, row, column) {
+        return `R${row + 1}C${column + 1}: ${frame.grid[row][column] ?? "not solved"}`;
+      },
+      stateForCell(frame, row, column) {
+        if (frame.cur?.[0] === row && frame.cur?.[1] === column) return "cur";
+        if (frame.path.some(([pathRow, pathColumn]) => pathRow === row && pathColumn === column))
+          return "path";
+        return frame.deps.some(([depRow, depColumn]) => depRow === row && depColumn === column) ? "dep" : "";
+      },
+      rolesForCell,
+      footerModel(frame) {
+        if (frame.type === "trace") return { context: "Optimal route", summary: { text: "cost 10" } };
+        if (frame.cur) {
+          const [row, column] = frame.cur;
+          return {
+            context: `Solve R${row + 1}C${column + 1}`,
+            summary: { text: frame.formula || `Store ${frame.grid[row][column]}` }
+          };
+        }
+        return frame.type === "init" ? { context: "Prepare warehouse matrix", summary: { text: "start at the goal" } } : { context: "Loading bay ready", summary: { text: "minimum cost 10" } };
+      },
+      roleLegend: gridRoles,
+      watchRows(frame) {
+        const tile = frame.cur ? `R${frame.cur[0] + 1}C${frame.cur[1] + 1}` : "—";
+        return [
+          {
+            k: "tile",
+            v: tile,
+            sw: "var(--_blue)",
+            hint: "Warehouse tile whose minimum remaining cost is being stored."
+          },
+          {
+            k: "reads",
+            v: frame.deps.length ? frame.deps.map(([row, column]) => `R${row + 1}C${column + 1}`).join(" or ") : "goal",
+            sw: "var(--_amber)",
+            hint: "Already-solved right and down neighbours available from this tile."
+          },
+          {
+            k: "transition",
+            v: frame.formula || "—",
+            sw: "var(--_violet)",
+            hint: "Current tile cost plus the cheaper reachable neighbour."
+          },
+          {
+            k: "best cost",
+            v: frame.grid[0]?.[0] || "—",
+            sw: "var(--_green)",
+            hint: "Minimum travel cost stored for the loading bay."
+          }
+        ];
+      }
+    };
+    dpProblemTableFamily = {
+      id: "matrix-grid",
+      createRecorder(config) {
+        return new DPRecorder(config.profile);
+      },
+      createView(frames) {
+        const semantics = frames[0]?.profile === "coin-change-bottom-up" ? coinTableSemantics : gridTableSemantics;
+        return makeDPView(frames, semantics);
+      }
+    };
+  }
+});
+
+// custom/steptrace/src/algorithms/dynamic-programming.ts
+function storyAlgorithm(id, label, parse, run) {
+  return { id, kind: "dp", family: dpStoryFamily, meta: { label }, parse, run };
+}
+function treeAlgorithm(id, label, profile, run) {
+  return {
+    id,
+    kind: "rectree",
+    family: executionTreeFamily,
+    meta: { label },
+    parse(config) {
+      if (config.variant !== void 0) throw new Error(`steptrace: ${id} does not take a variant.`);
+      return { profile };
+    },
+    run
+  };
+}
+function tableAlgorithm(id, label, profile, run) {
+  return {
+    id,
+    kind: "dp",
+    family: dpProblemTableFamily,
+    meta: { label },
+    parse: dpTableConfig(profile),
+    run
+  };
+}
+var greedyWarehousePath, optimalWarehousePath, coinAmounts, availableCoins, coinChangeGreedy, coinChangeNaive, coinChangeMemoization, coinChangeTabulation, coinChangeTopDown, coinChangeBottomUp, gridPathGreedy, gridPathNaive, gridPathMemoization, gridPathTabulation, gridPathTopDown, gridPathBottomUp, dynamicProgrammingAlgorithms;
+var init_dynamic_programming = __esm({
+  "custom/steptrace/src/algorithms/dynamic-programming.ts"() {
+    init_dp_problems();
+    init_execution_tree();
+    init_dp_problem_data();
+    greedyWarehousePath = gridPathProblem.greedyPath.map((cell) => cell.slice());
+    optimalWarehousePath = gridPathProblem.optimalPath.map((cell) => cell.slice());
+    coinAmounts = coinChangeProblem.amounts;
+    availableCoins = coinChangeProblem.coins;
+    coinChangeGreedy = storyAlgorithm(
+      "coin-change-greedy",
+      "Coin change — greedy",
+      dpStoryConfig("coin-change", "greedy"),
+      (_input, ops) => {
+        ops.intro("Return 30¢ using the real coins available in this drawer.");
+        ops.chooseCoin(25, 5, [25], "Greedy takes the largest usable coin: 25¢.");
+        ops.chooseCoin(1, 4, [25, 1], "The next available denomination is 1¢.");
+        ops.chooseCoin(1, 3, [25, 1, 1], "Another 1¢ coin leaves 3¢.");
+        ops.chooseCoin(1, 2, [25, 1, 1, 1], "Another 1¢ coin leaves 2¢.");
+        ops.chooseCoin(1, 1, [25, 1, 1, 1, 1], "Another 1¢ coin leaves 1¢.");
+        ops.chooseCoin(1, 0, [25, 1, 1, 1, 1, 1], "The fifth 1¢ coin completes the change.");
+        ops.coinAttempt(
+          { label: "greedy counter", value: "25¢ + 1¢ × 5 · 6 coins", state: "active" },
+          "The greedy plan is exact, but it uses six coins."
+        );
+        ops.coinAttempt(
+          { label: "better counter", value: "10¢ + 10¢ + 10¢ · 3 coins", state: "best" },
+          "Three 10¢ coins prove that the largest-first plan is not optimal."
+        );
+        ops.coinResult(
+          "3 coins (10¢ + 10¢ + 10¢)",
+          [25, 1, 1, 1, 1, 1],
+          "Greedy returns exact change, but uses twice as many coins as the optimum."
+        );
+        ops.done("Largest usable coin first gives 6 coins; the optimum uses 3.");
+      }
+    );
+    coinChangeNaive = storyAlgorithm(
+      "coin-change-naive",
+      "Coin change — naive recursion",
+      dpStoryConfig("coin-change", "naive"),
+      (_input, ops) => {
+        ops.intro("Naive recursion tries every usable coin and rebuilds repeated remainder questions.");
+        ops.chooseCoin(10, 20, [10], "Try a 10¢ coin, leaving change(20¢).");
+        ops.chooseCoin(1, 19, [10, 1], "That branch takes 1¢ and reaches change(19¢).");
+        ops.coinAttempt(
+          { label: "change(19¢)", value: "reached after 10¢ + 1¢", state: "active" },
+          "The first change(19¢) subtree is solved from scratch."
+        );
+        ops.backtrackCoins(30, [], "Backtrack to 30¢ and try a different first coin.");
+        ops.chooseCoin(1, 29, [1], "Try 1¢ first, leaving change(29¢).");
+        ops.chooseCoin(10, 19, [1, 10], "Then take 10¢ and reach change(19¢) again.");
+        ops.coinAttempt(
+          { label: "change(19¢)", value: "reached again after 1¢ + 10¢", state: "repeated" },
+          "Without a memo, the full change(19¢) subtree runs again."
+        );
+        ops.backtrackCoins(30, [], "Backtrack to compare complete exact-change branches.");
+        ops.chooseCoin(25, 5, [25], "The 25¢ branch leaves 5¢, so it must continue with pennies.");
+        ops.chooseCoin(1, 4, [25, 1], "Take the first of five 1¢ coins.");
+        ops.chooseCoin(1, 3, [25, 1, 1], "Take the second 1¢ coin.");
+        ops.chooseCoin(1, 2, [25, 1, 1, 1], "Take the third 1¢ coin.");
+        ops.chooseCoin(1, 1, [25, 1, 1, 1, 1], "Take the fourth 1¢ coin.");
+        ops.chooseCoin(1, 0, [25, 1, 1, 1, 1, 1], "The fifth 1¢ coin completes this branch.");
+        ops.coinAttempt(
+          { label: "25¢ branch", value: "25¢ + 1¢ × 5 · 6 coins", state: "dead" },
+          "The first complete branch returns six coins."
+        );
+        ops.backtrackCoins(30, [], "Backtrack once more and try the 10¢ branch.");
+        ops.chooseCoin(10, 20, [10], "The first 10¢ coin leaves 20¢.");
+        ops.chooseCoin(10, 10, [10, 10], "The second 10¢ coin leaves 10¢.");
+        ops.chooseCoin(10, 0, [10, 10, 10], "The third 10¢ coin completes the payment.");
+        ops.coinAttempt(
+          { label: "10¢ branch", value: "10¢ + 10¢ + 10¢ · 3 coins", state: "best" },
+          "Comparing completed branches finds the three-coin optimum."
+        );
+        ops.coinResult(
+          "3 coins (10¢ + 10¢ + 10¢)",
+          [10, 10, 10],
+          "Naive recursion is correct, but repeated remainders make it needlessly expensive."
+        );
+        ops.done("All valid branches agree that three 10¢ coins are the shortest exact change.");
+      }
+    );
+    coinChangeMemoization = storyAlgorithm(
+      "coin-change-memoization",
+      "Coin change — memoization",
+      dpStoryConfig("coin-change", "memoization"),
+      (_input, ops) => {
+        ops.intro("Solve change recursively, but keep each answered remainder beside the till.");
+        ops.coinMemo("change(0¢)", "0 coins", "stored", "Seed the exact-change base answer.");
+        ops.chooseCoin(10, 20, [10], "A 10¢ coin leaves change(20¢) to solve.");
+        ops.chooseCoin(1, 19, [10, 1], "The first child branch reaches change(19¢).");
+        ops.coinMemo(
+          "change(19¢)",
+          "10 coins",
+          "stored",
+          "Resolve the penny tail once and store change(19¢) = 10 coins."
+        );
+        ops.backtrackCoins(20, [10], "Return to change(20¢) and try its 10¢ child.");
+        ops.chooseCoin(10, 10, [10, 10], "The second 10¢ coin leaves change(10¢).");
+        ops.chooseCoin(10, 0, [10, 10, 10], "The third 10¢ coin reaches the exact-change base.");
+        ops.backtrackCoins(10, [10, 10], "Return the base answer to change(10¢).");
+        ops.coinMemo("change(10¢)", "1 coin", "stored", "Store change(10¢) = 1 coin.");
+        ops.backtrackCoins(20, [10], "Return the saved one-coin answer to change(20¢).");
+        ops.coinMemo("change(20¢)", "2 coins", "stored", "Store change(20¢) = 2 coins.");
+        ops.backtrackCoins(30, [], "Backtrack to change(30¢) and try the 1¢ branch.");
+        ops.chooseCoin(1, 29, [1], "A 1¢ coin leaves change(29¢).");
+        ops.chooseCoin(10, 19, [1, 10], "The next 10¢ coin reaches change(19¢) again.");
+        ops.coinMemo(
+          "change(19¢)",
+          "10 coins",
+          "hit",
+          "Read the saved change(19¢) answer instead of rebuilding its subtree."
+        );
+        ops.backtrackCoins(29, [1], "Return the cache hit to change(29¢).");
+        ops.coinMemo("change(29¢)", "5 coins", "stored", "Store the best answer for change(29¢).");
+        ops.backtrackCoins(30, [], "Return all branch answers to the requested change(30¢) state.");
+        ops.coinMemo("change(30¢)", "3 coins", "stored", "Store the requested three-coin answer.");
+        ops.coinResult(
+          "3 coins (10¢ + 10¢ + 10¢)",
+          [10, 10, 10],
+          "Memoization keeps recursion but answers repeated remainders from the saved slips."
+        );
+        ops.done("change(19¢) is solved once and reused when another branch asks for it.");
+      }
+    );
+    coinChangeTabulation = storyAlgorithm(
+      "coin-change-tabulation",
+      "Coin change — tabulation",
+      dpStoryConfig("coin-change", "tabulation"),
+      (_input, ops) => {
+        ops.intro("Start from 0¢, then build the shortest exact change for every larger amount.");
+        for (let index = 0; index < coinChangeProblem.amounts.length; index++) {
+          const amount = coinChangeProblem.amounts[index];
+          const dependencies = availableCoins.filter((coin) => coin <= amount).map((coin) => amount - coin).filter((predecessor) => coinAmounts.includes(predecessor));
+          ops.fillAmount(
+            amount,
+            coinChangeProblem.bestCoins[index],
+            dependencies,
+            amount === 0 ? "Write the base: 0¢ needs 0 coins." : `Read the solved smaller amounts, add one coin, and write ${amount}¢.`
+          );
+        }
+        ops.amountResult(
+          [0, 10, 20, 30],
+          "3 coins (10¢ + 10¢ + 10¢)",
+          [10, 10, 10],
+          "Follow 0¢ → 10¢ → 20¢ → 30¢ to reconstruct three 10¢ coins."
+        );
+        ops.done("The amount board reaches 30¢ with three coins and no recursive calls.");
+      }
+    );
+    coinChangeTopDown = treeAlgorithm(
+      "coin-change-top-down",
+      "Coin change — top-down DP",
+      "coin-change-top-down",
+      (_input, ops) => {
+        const nodes = [
+          { id: "c30", label: "change(30¢)", detail: "target", values: [], x: 300, y: 24, depth: 0 },
+          { id: "c5", label: "change(5¢)", detail: "after 25¢", values: [], x: 55, y: 88, depth: 1 },
+          { id: "c20", label: "change(20¢)", detail: "after 10¢", values: [], x: 215, y: 88, depth: 1 },
+          { id: "c29", label: "change(29¢)", detail: "after 1¢", values: [], x: 455, y: 88, depth: 1 },
+          {
+            id: "c10",
+            label: "change(10¢)",
+            detail: "after 10¢",
+            values: [],
+            x: 85,
+            y: 152,
+            depth: 2
+          },
+          {
+            id: "c19a",
+            label: "change(19¢)",
+            detail: "first visit",
+            values: [],
+            x: 215,
+            y: 152,
+            depth: 2
+          },
+          {
+            id: "c4",
+            label: "change(4¢)",
+            detail: "after 25¢",
+            values: [],
+            x: 340,
+            y: 152,
+            depth: 2
+          },
+          {
+            id: "c19b",
+            label: "change(19¢)",
+            detail: "same cache key",
+            values: [],
+            x: 465,
+            y: 152,
+            depth: 2
+          },
+          {
+            id: "c28",
+            label: "change(28¢)",
+            detail: "after 1¢",
+            values: [],
+            x: 585,
+            y: 152,
+            depth: 2
+          },
+          {
+            id: "c0",
+            label: "change(0¢)",
+            detail: "exact change",
+            values: [],
+            x: 85,
+            y: 216,
+            depth: 3
+          },
+          {
+            id: "c9",
+            label: "change(9¢)",
+            detail: "would repeat",
+            values: [],
+            x: 425,
+            y: 216,
+            depth: 3
+          },
+          {
+            id: "c18",
+            label: "change(18¢)",
+            detail: "would repeat",
+            values: [],
+            x: 520,
+            y: 216,
+            depth: 3
+          }
+        ];
+        const edges = [
+          { from: "c30", to: "c5" },
+          { from: "c30", to: "c20" },
+          { from: "c30", to: "c29" },
+          { from: "c20", to: "c10" },
+          { from: "c20", to: "c19a" },
+          { from: "c10", to: "c0" },
+          { from: "c29", to: "c4" },
+          { from: "c29", to: "c19b" },
+          { from: "c29", to: "c28" },
+          { from: "c19b", to: "c9" },
+          { from: "c19b", to: "c18" }
+        ];
+        ops.tree(nodes, edges, "c30", "Start with change(30¢) and an empty memo.");
+        ops.split(
+          "c30",
+          ["c30"],
+          ["c5", "c20", "c29"],
+          "The usable 25¢, 10¢, and 1¢ coins create three remainder states."
+        );
+        ops.returnResult(
+          "c5",
+          ["c30", "c5"],
+          "5 coins",
+          "The available denominations make change(5¢) return five pennies."
+        );
+        ops.store("c5", ["c30", "c5"], "5¢", "5 coins", "Store change(5¢) = 5 coins.");
+        ops.split("c20", ["c30", "c20"], ["c10", "c19a"], "Expand change(20¢) through 10¢ and 1¢.");
+        ops.split("c10", ["c30", "c20", "c10"], ["c0"], "A 10¢ coin reaches exact change.");
+        ops.base("c0", ["c30", "c20", "c10", "c0"], "0 coins", "change(0¢) needs no more coins.");
+        ops.combine("c10", ["c30", "c20", "c10"], "1 coin", "One 10¢ coin solves change(10¢).");
+        ops.store("c10", ["c30", "c20", "c10"], "10¢", "1 coin", "Store change(10¢) = 1 coin.");
+        ops.returnResult(
+          "c19a",
+          ["c30", "c20", "c19a"],
+          "10 coins",
+          "The compact penny tail returns 10 coins for change(19¢)."
+        );
+        ops.store("c19a", ["c30", "c20", "c19a"], "19¢", "10 coins", "Store change(19¢) = 10 coins.");
+        ops.combine("c20", ["c30", "c20"], "2 coins", "change(20¢) prefers two 10¢ coins.");
+        ops.store("c20", ["c30", "c20"], "20¢", "2 coins", "Store change(20¢) = 2 coins.");
+        ops.split(
+          "c29",
+          ["c30", "c29"],
+          ["c4", "c19b", "c28"],
+          "change(29¢) reaches the saved change(19¢) state."
+        );
+        ops.returnResult("c4", ["c30", "c29", "c4"], "4 coins", "Four pennies solve change(4¢).");
+        ops.store("c4", ["c30", "c29", "c4"], "4¢", "4 coins", "Store change(4¢) = 4 coins.");
+        ops.cacheHit(
+          "c19b",
+          ["c30", "c29", "c19b"],
+          "19¢",
+          "10 coins",
+          ["c9", "c18"],
+          "The memo returns change(19¢) and skips both child branches."
+        );
+        ops.returnResult(
+          "c28",
+          ["c30", "c29", "c28"],
+          "4 coins",
+          "The 25¢ branch plus three pennies solves change(28¢)."
+        );
+        ops.store("c28", ["c30", "c29", "c28"], "28¢", "4 coins", "Store change(28¢) = 4 coins.");
+        ops.combine("c29", ["c30", "c29"], "5 coins", "change(29¢) prefers 25¢ plus four pennies.");
+        ops.store("c29", ["c30", "c29"], "29¢", "5 coins", "Store change(29¢) = 5 coins.");
+        ops.combine("c30", ["c30"], "3 coins", "Compare 6, 3, and 6 coins: the 10¢ branch wins.");
+        ops.store("c30", ["c30"], "30¢", "3 coins", "Store the requested answer.");
+        ops.done(
+          "c30",
+          "3 coins",
+          "Top-down DP returns three 10¢ coins and solves each remainder at most once."
+        );
+      }
+    );
+    coinChangeBottomUp = tableAlgorithm(
+      "coin-change-bottom-up",
+      "Coin change — bottom-up DP",
+      "coin-change-bottom-up",
+      (_input, ops) => {
+        const amounts = coinAmounts;
+        const best = coinChangeProblem.bestCoins;
+        ops.board(
+          ["fewest coins"],
+          amounts.map((amount) => `${amount}¢`),
+          "Build exact change from 0¢ upward."
+        );
+        ops.set(0, 0, "0", [], "The base amount 0¢ needs no coins.", "dp[0¢] = 0");
+        for (let column = 1; column < amounts.length; column++) {
+          const amount = amounts[column];
+          const dependencies = availableCoins.filter((coin) => coin <= amount).map((coin) => [0, amounts.indexOf(amount - coin)]).filter(([, dependency]) => dependency >= 0);
+          const predecessorValues = dependencies.map(([, dependency]) => best[dependency]);
+          ops.set(
+            0,
+            column,
+            String(best[column]),
+            dependencies,
+            `Try one allowed coin after each solved predecessor amount for ${amount}¢.`,
+            `1 + min(${predecessorValues.join(", ")}) = ${best[column]}`
+          );
+        }
+        ops.markPath(
+          [
+            [0, 0],
+            [0, 6],
+            [0, 8],
+            [0, 10]
+          ],
+          "Trace 30¢ → 20¢ → 10¢ → 0¢: three 10¢ coins produce the stored optimum."
+        );
+        ops.done("The bottom-up table stores 3 coins for 30¢.");
+      }
+    );
+    gridPathGreedy = storyAlgorithm(
+      "grid-path-greedy",
+      "Grid path — greedy",
+      dpStoryConfig("grid-path", "greedy"),
+      (_input, ops) => {
+        ops.intro("Move only right or down from the loading bay to the dispatch door.");
+        let cost = 0;
+        for (let index = 0; index < greedyWarehousePath.length; index++) {
+          const [row, column] = greedyWarehousePath[index];
+          cost += gridPathProblem.costs[row][column];
+          ops.visitTile(
+            [row, column],
+            greedyWarehousePath.slice(0, index + 1),
+            cost,
+            [],
+            index < 4 ? "Choose the cheaper immediate neighbour without looking beyond it." : "The early cheap tiles now force the route through expensive shelves."
+          );
+        }
+        ops.routeResult(
+          10,
+          optimalWarehousePath,
+          "R1C1 → R2C1 → R3C1 → R3C2 → R4C2 → R4C3 → R4C4",
+          "A route costing 10 proves the greedy route costing 21 is not optimal."
+        );
+        ops.done("Greedy pays 21; the best route pays 10.");
+      }
+    );
+    gridPathNaive = storyAlgorithm(
+      "grid-path-naive",
+      "Grid path — naive recursion",
+      dpStoryConfig("grid-path", "naive"),
+      (_input, ops) => {
+        ops.intro("Naive recursion explores every right/down route from the loading bay.");
+        ops.visitTile(
+          [0, 1],
+          [
+            [0, 0],
+            [0, 1]
+          ],
+          1,
+          [],
+          "The first branch moves right."
+        );
+        ops.visitTile(
+          [1, 1],
+          [
+            [0, 0],
+            [0, 1],
+            [1, 1]
+          ],
+          10,
+          [],
+          "This branch reaches R2C2 after moving right then down."
+        );
+        ops.visitTile(
+          [2, 1],
+          [
+            [0, 0],
+            [0, 1],
+            [1, 1],
+            [2, 1]
+          ],
+          12,
+          [],
+          "The same branch continues to R3C2 before recursion backtracks."
+        );
+        ops.visitTile(
+          [0, 0],
+          [[0, 0]],
+          0,
+          [],
+          "Backtrack to the loading bay before exploring the downward branch."
+        );
+        ops.visitTile(
+          [1, 0],
+          [
+            [0, 0],
+            [1, 0]
+          ],
+          2,
+          [],
+          "A second branch restarts from the loading bay and moves down."
+        );
+        ops.visitTile(
+          [1, 1],
+          [
+            [0, 0],
+            [1, 0],
+            [1, 1]
+          ],
+          11,
+          [[1, 1]],
+          "R2C2 is reached again; its entire remaining-route search repeats."
+        );
+        ops.visitTile(
+          [2, 0],
+          [
+            [0, 0],
+            [1, 0],
+            [2, 0]
+          ],
+          4,
+          [[1, 1]],
+          "Continue down to R3C1 before the branch turns right."
+        );
+        ops.visitTile(
+          [2, 1],
+          [
+            [0, 0],
+            [1, 0],
+            [2, 0],
+            [2, 1]
+          ],
+          6,
+          [
+            [1, 1],
+            [2, 1]
+          ],
+          "Different prefixes keep converging on the same warehouse coordinates."
+        );
+        ops.routeResult(
+          10,
+          optimalWarehousePath,
+          "R1C1 → R2C1 → R3C1 → R3C2 → R4C2 → R4C3 → R4C4",
+          "After comparing all routes, recursion finds the cost-10 route."
+        );
+        ops.done("Naive recursion is correct, but recomputes the best route from repeated tiles.");
+      }
+    );
+    gridPathMemoization = storyAlgorithm(
+      "grid-path-memoization",
+      "Grid path — memoization",
+      dpStoryConfig("grid-path", "memoization"),
+      (_input, ops) => {
+        ops.intro("Explore routes recursively and write each solved tile directly into the map.");
+        ops.visitTile([0, 0], [[0, 0]], 0, [], "Start the recursive route at the loading bay.");
+        ops.visitTile(
+          [0, 1],
+          [
+            [0, 0],
+            [0, 1]
+          ],
+          1,
+          [],
+          "The first branch moves right."
+        );
+        ops.visitTile(
+          [0, 2],
+          [
+            [0, 0],
+            [0, 1],
+            [0, 2]
+          ],
+          2,
+          [],
+          "Continue to R1C3 before solving the remaining routes below it."
+        );
+        ops.storeTile(
+          [0, 2],
+          gridPathProblem.bestRemaining[0][2],
+          [
+            [0, 3],
+            [1, 2]
+          ],
+          "Store the best remaining cost from R1C3."
+        );
+        ops.visitTile(
+          [1, 1],
+          [
+            [0, 0],
+            [0, 1],
+            [1, 1]
+          ],
+          10,
+          [],
+          "Backtrack to R1C2, then enter R2C2 through its second child branch."
+        );
+        ops.storeTile(
+          [1, 1],
+          gridPathProblem.bestRemaining[1][1],
+          [
+            [1, 2],
+            [2, 1]
+          ],
+          "Store best(R2C2) = 15 after comparing its two exits."
+        );
+        ops.storeTile(
+          [0, 1],
+          gridPathProblem.bestRemaining[0][1],
+          [
+            [0, 2],
+            [1, 1]
+          ],
+          "The right branch returns 14 from R1C2."
+        );
+        ops.visitTile(
+          [1, 0],
+          [
+            [0, 0],
+            [1, 0]
+          ],
+          2,
+          [],
+          "The second branch restarts from the loading bay and moves down."
+        );
+        ops.visitTile(
+          [1, 1],
+          [
+            [0, 0],
+            [1, 0],
+            [1, 1]
+          ],
+          11,
+          [[1, 1]],
+          "R2C2 is already written, so return 15 without opening another route subtree."
+        );
+        ops.visitTile(
+          [2, 0],
+          [
+            [0, 0],
+            [1, 0],
+            [2, 0]
+          ],
+          4,
+          [[1, 1]],
+          "After the cache hit, continue down to solve R3C1."
+        );
+        ops.visitTile(
+          [2, 1],
+          [
+            [0, 0],
+            [1, 0],
+            [2, 0],
+            [2, 1]
+          ],
+          6,
+          [[1, 1]],
+          "R3C1 first asks for the saved remaining cost from R3C2."
+        );
+        ops.storeTile(
+          [2, 1],
+          gridPathProblem.bestRemaining[2][1],
+          [
+            [2, 2],
+            [3, 1]
+          ],
+          "Store best(R3C2) = 6 after comparing right with down."
+        );
+        ops.storeTile(
+          [2, 0],
+          gridPathProblem.bestRemaining[2][0],
+          [
+            [2, 1],
+            [3, 0]
+          ],
+          "Store best(R3C1) = 8."
+        );
+        ops.storeTile(
+          [1, 0],
+          gridPathProblem.bestRemaining[1][0],
+          [
+            [1, 1],
+            [2, 0]
+          ],
+          "R2C1 prefers the stored route through R3C1 and returns 10."
+        );
+        ops.storeTile(
+          [0, 0],
+          gridPathProblem.bestRemaining[0][0],
+          [
+            [0, 1],
+            [1, 0]
+          ],
+          "The loading bay compares the two saved branch totals and stores 10."
+        );
+        ops.routeResult(
+          gridPathProblem.optimalCost,
+          optimalWarehousePath,
+          "R1C1 → R2C1 → R3C1 → R3C2 → R4C2 → R4C3 → R4C4",
+          "The saved map reconstructs the cost-10 route."
+        );
+        ops.done("R2C2 is evaluated once; its saved answer stops the repeated branch.");
+      }
+    );
+    gridPathTabulation = storyAlgorithm(
+      "grid-path-tabulation",
+      "Grid path — tabulation",
+      dpStoryConfig("grid-path", "tabulation"),
+      (_input, ops) => {
+        ops.intro("Start at the dispatch door and write the cheapest remaining cost into every tile.");
+        for (let row = gridPathProblem.costs.length - 1; row >= 0; row--) {
+          for (let column = gridPathProblem.costs[row].length - 1; column >= 0; column--) {
+            const dependencies = [];
+            if (column < gridPathProblem.costs[row].length - 1) dependencies.push([row, column + 1]);
+            if (row < gridPathProblem.costs.length - 1) dependencies.push([row + 1, column]);
+            ops.storeTile(
+              [row, column],
+              gridPathProblem.bestRemaining[row][column],
+              dependencies,
+              dependencies.length ? "Read the written right and down tiles, then write the cheaper remaining cost." : "Write 0 at the dispatch door: no travel remains."
+            );
+          }
+        }
+        ops.routeResult(
+          gridPathProblem.optimalCost,
+          optimalWarehousePath,
+          "R1C1 → R2C1 → R3C1 → R3C2 → R4C2 → R4C3 → R4C4",
+          "Follow the cheapest written neighbour from the loading bay to the dispatch door."
+        );
+        ops.done("The completed warehouse map stores route cost 10 at the loading bay.");
+      }
+    );
+    gridPathTopDown = treeAlgorithm(
+      "grid-path-top-down",
+      "Grid path — top-down DP",
+      "grid-path-top-down",
+      (_input, ops) => {
+        const nodes = [
+          {
+            id: "r1c1",
+            label: "best(R1C1)",
+            detail: "loading bay",
+            values: [],
+            x: 300,
+            y: 24,
+            depth: 0
+          },
+          {
+            id: "r1c2",
+            label: "best(R1C2)",
+            detail: "move right",
+            values: [],
+            x: 155,
+            y: 88,
+            depth: 1
+          },
+          { id: "r2c1", label: "best(R2C1)", detail: "move down", values: [], x: 445, y: 88, depth: 1 },
+          {
+            id: "r1c3",
+            label: "best(R1C3)",
+            detail: "right child",
+            values: [],
+            x: 65,
+            y: 152,
+            depth: 2
+          },
+          {
+            id: "r2c2a",
+            label: "best(R2C2)",
+            detail: "first visit",
+            values: [],
+            x: 235,
+            y: 152,
+            depth: 2
+          },
+          {
+            id: "r2c2b",
+            label: "best(R2C2)",
+            detail: "same cache key",
+            values: [],
+            x: 375,
+            y: 152,
+            depth: 2
+          },
+          {
+            id: "r3c1",
+            label: "best(R3C1)",
+            detail: "down child",
+            values: [],
+            x: 535,
+            y: 152,
+            depth: 2
+          },
+          {
+            id: "r2c3a",
+            label: "best(R2C3)",
+            detail: "would repeat",
+            values: [],
+            x: 325,
+            y: 216,
+            depth: 3
+          },
+          {
+            id: "r3c2a",
+            label: "best(R3C2)",
+            detail: "would repeat",
+            values: [],
+            x: 425,
+            y: 216,
+            depth: 3
+          }
+        ];
+        const edges = [
+          { from: "r1c1", to: "r1c2" },
+          { from: "r1c1", to: "r2c1" },
+          { from: "r1c2", to: "r1c3" },
+          { from: "r1c2", to: "r2c2a" },
+          { from: "r2c1", to: "r2c2b" },
+          { from: "r2c1", to: "r3c1" },
+          { from: "r2c2b", to: "r2c3a" },
+          { from: "r2c2b", to: "r3c2a" }
+        ];
+        ops.tree(nodes, edges, "r1c1", "Ask for the cheapest route from the loading bay.");
+        ops.split(
+          "r1c1",
+          ["r1c1"],
+          ["r1c2", "r2c1"],
+          "The state compares moving right with moving down."
+        );
+        ops.split(
+          "r1c2",
+          ["r1c1", "r1c2"],
+          ["r1c3", "r2c2a"],
+          "Expand the two routes available from R1C2."
+        );
+        ops.returnResult(
+          "r1c3",
+          ["r1c1", "r1c2", "r1c3"],
+          "13",
+          "The compact branch returns the remaining cost from R1C3."
+        );
+        ops.store("r1c3", ["r1c1", "r1c2", "r1c3"], "R1C3", "13", "Store the best cost from R1C3.");
+        ops.combine(
+          "r2c2a",
+          ["r1c1", "r1c2", "r2c2a"],
+          "15",
+          "The best remaining cost from R2C2 is 15."
+        );
+        ops.store("r2c2a", ["r1c1", "r1c2", "r2c2a"], "R2C2", "15", "Store best(R2C2) = 15.");
+        ops.combine("r1c2", ["r1c1", "r1c2"], "14", "R1C2 stores its tile cost plus the cheaper child.");
+        ops.store("r1c2", ["r1c1", "r1c2"], "R1C2", "14", "Store best(R1C2) = 14.");
+        ops.split(
+          "r2c1",
+          ["r1c1", "r2c1"],
+          ["r2c2b", "r3c1"],
+          "The downward branch reaches R2C2 again."
+        );
+        ops.cacheHit(
+          "r2c2b",
+          ["r1c1", "r2c1", "r2c2b"],
+          "R2C2",
+          "15",
+          ["r2c3a", "r3c2a"],
+          "Reuse best(R2C2) = 15 and skip both of its child routes."
+        );
+        ops.returnResult(
+          "r3c1",
+          ["r1c1", "r2c1", "r3c1"],
+          "8",
+          "The compact branch returns best(R3C1) = 8."
+        );
+        ops.store("r3c1", ["r1c1", "r2c1", "r3c1"], "R3C1", "8", "Store best(R3C1) = 8.");
+        ops.combine("r2c1", ["r1c1", "r2c1"], "10", "R2C1 prefers the route through R3C1.");
+        ops.store("r2c1", ["r1c1", "r2c1"], "R2C1", "10", "Store best(R2C1) = 10.");
+        ops.combine("r1c1", ["r1c1"], "10", "The loading bay prefers down: min(14, 10) = 10.");
+        ops.store("r1c1", ["r1c1"], "R1C1", "10", "Store the requested route cost.");
+        ops.done(
+          "r1c1",
+          "10",
+          "Top-down DP returns cost 10 and avoids recomputing repeated coordinates."
+        );
+      }
+    );
+    gridPathBottomUp = tableAlgorithm(
+      "grid-path-bottom-up",
+      "Grid path — bottom-up DP",
+      "grid-path-bottom-up",
+      (_input, ops) => {
+        const best = gridPathProblem.bestRemaining;
+        ops.board(
+          ["R1", "R2", "R3", "R4"],
+          ["C1", "C2", "C3", "C4"],
+          "Fill the warehouse from the dispatch door back to the loading bay."
+        );
+        for (let row = 3; row >= 0; row--) {
+          for (let column = 3; column >= 0; column--) {
+            const dependencies = [];
+            if (column < 3) dependencies.push([row, column + 1]);
+            if (row < 3) dependencies.push([row + 1, column]);
+            const dependencyValues = dependencies.map(([depRow, depColumn]) => best[depRow][depColumn]);
+            const tileCost = gridPathProblem.costs[row][column];
+            const formula = dependencies.length ? `${tileCost} + min(${dependencyValues.join(", ")}) = ${best[row][column]}` : "goal = 0";
+            ops.set(
+              row,
+              column,
+              String(best[row][column]),
+              dependencies,
+              dependencies.length ? "Read the already-solved right and down neighbours, then store the cheaper route." : "The dispatch door is the base tile with no remaining travel cost.",
+              formula
+            );
+          }
+        }
+        ops.markPath(optimalWarehousePath, "Follow the cheaper stored neighbour from R1C1 to R4C4.");
+        ops.done("The bottom-up matrix stores the minimum route cost 10 at R1C1.");
+      }
+    );
+    dynamicProgrammingAlgorithms = [
+      coinChangeGreedy,
+      coinChangeNaive,
+      coinChangeMemoization,
+      coinChangeTabulation,
+      coinChangeTopDown,
+      coinChangeBottomUp,
+      gridPathGreedy,
+      gridPathNaive,
+      gridPathMemoization,
+      gridPathTabulation,
+      gridPathTopDown,
+      gridPathBottomUp
+    ];
   }
 });
 
@@ -4337,130 +6209,6 @@ var init_interpolation_search = __esm({
   }
 });
 
-// custom/steptrace/src/algorithms/fibonacci.ts
-var fibonacci;
-var init_fibonacci = __esm({
-  "custom/steptrace/src/algorithms/fibonacci.ts"() {
-    fibonacci = {
-      id: "fibonacci",
-      kind: "rectree",
-      meta: { label: "Fibonacci — recursion vs memo" },
-      run: (input, ops) => {
-        const N = Math.min(Math.max(Math.round(input.n ?? 5), 1), 6);
-        const FIB = [0, 1];
-        for (let i = 2; i <= N; i++) FIB[i] = FIB[i - 1] + FIB[i - 2];
-        let nextId = 0;
-        const all = [];
-        const build = (k, depth) => {
-          const node = { id: "c" + nextId++, k, depth, children: [] };
-          all.push(node);
-          if (k >= 2) {
-            node.children.push(build(k - 1, depth + 1));
-            node.children.push(build(k - 2, depth + 1));
-          }
-          return node;
-        };
-        const root = build(N, 0);
-        const ROW = 62;
-        const SP = 48;
-        let leaf = 0;
-        const layout = (node) => {
-          node.y = node.depth * ROW;
-          if (!node.children.length) {
-            node.x = leaf++ * SP;
-          } else {
-            node.children.forEach(layout);
-            node.x = (node.children[0].x + node.children[node.children.length - 1].x) / 2;
-          }
-        };
-        layout(root);
-        const descendants = (node) => {
-          const out = [];
-          for (const c of node.children) {
-            out.push(c.id);
-            out.push(...descendants(c));
-          }
-          return out;
-        };
-        const nodeList = all.map((n) => ({
-          id: n.id,
-          label: `f(${n.k})`,
-          x: Math.round(n.x),
-          y: n.y,
-          depth: n.depth
-        }));
-        const edges = [];
-        for (const n of all) for (const c of n.children) edges.push({ from: n.id, to: c.id });
-        ops.tree(
-          nodeList,
-          edges,
-          `Compute f(${N}) by plain recursion: every call spawns two more. The tree balloons because identical subproblems get recomputed from scratch.`
-        );
-        ops.phase(
-          "naive",
-          `Phase 1 — plain recursion. Reveal each call in order; the running count IS the total work.`
-        );
-        const naive = (node) => {
-          if (node.k < 2) {
-            ops.base(node.id, node.k, `f(${node.k}) = ${node.k} — base case, return at once.`);
-          } else {
-            ops.enter(
-              node.id,
-              `Call f(${node.k}); with no memory it must recompute f(${node.k - 1}) + f(${node.k - 2}) all over again.`
-            );
-            node.children.forEach(naive);
-          }
-        };
-        naive(root);
-        const naiveCalls = all.length;
-        ops.phase(
-          "memo",
-          `Phase 2 — memoise. Same tree, but keep a table of computed f(k); a repeat of any state is now a cache hit.`
-        );
-        const seen = /* @__PURE__ */ new Set();
-        let memoCalls = 0;
-        let hits = 0;
-        const memo = (node) => {
-          memoCalls++;
-          if (seen.has(node.k)) {
-            hits++;
-            ops.hit(
-              node.id,
-              node.k,
-              FIB[node.k],
-              descendants(node),
-              `f(${node.k}) is already in the table → cache HIT, return ${FIB[node.k]}. Its whole subtree is skipped — that is an overlapping subproblem eliminated.`
-            );
-            return FIB[node.k];
-          }
-          seen.add(node.k);
-          if (node.k < 2) {
-            ops.miss(
-              node.id,
-              node.k,
-              node.k,
-              `f(${node.k}) = ${node.k} — first time seen, store it in the table.`
-            );
-          } else {
-            ops.miss(
-              node.id,
-              node.k,
-              FIB[node.k],
-              `f(${node.k}) is new → compute f(${node.k - 1}) + f(${node.k - 2}) once and store f(${node.k}) = ${FIB[node.k]}.`
-            );
-            node.children.forEach(memo);
-          }
-          return FIB[node.k];
-        };
-        memo(root);
-        ops.done(
-          `Naive f(${N}) makes ${naiveCalls} calls. Memoised: ${memoCalls} calls — ${hits} of them cache hits that skipped whole subtrees. Same answer, ${naiveCalls - memoCalls} calls saved.`
-        );
-      }
-    };
-  }
-});
-
 // custom/steptrace/src/families/matrix-grid.ts
 function invalidConfig4(message) {
   throw new Error(`steptrace: floyd-warshall ${message}`);
@@ -4545,11 +6293,12 @@ function matrixGridFooterModel(frame) {
     summary: { text: `${nodeCount * nodeCount} distances ready` }
   };
 }
-var matrixGridRoleLegend, matrixGridViewSemantics, matrixGridFamily;
+var matrixGridRoleLegend, matrixGridViewSemantics, matrixGridFamily, abstractDynamicProgrammingViewDescriptor;
 var init_matrix_grid = __esm({
   "custom/steptrace/src/families/matrix-grid.ts"() {
     init_recorders();
     init_render();
+    init_execution_tree();
     matrixGridRoleLegend = [
       { role: "operand-a", badge: "A", label: "dist[i][k]" },
       { role: "operand-b", badge: "B", label: "dist[k][j]" },
@@ -4622,6 +6371,83 @@ var init_matrix_grid = __esm({
       },
       createView(frames) {
         return makeDPView(frames, matrixGridViewSemantics);
+      }
+    };
+    abstractDynamicProgrammingViewDescriptor = {
+      ariaLabel: "Dynamic-programming dependency graph",
+      ...executionTreeCardMetrics,
+      stateLabels: {
+        call: "pending",
+        base: "base",
+        store: "stored"
+      },
+      legend: [
+        { state: "call", label: "waiting for dependencies" },
+        { state: "base", label: "base state stored" },
+        { state: "store", label: "dependent state stored" }
+      ],
+      frameModel(frame) {
+        const currentColumn = frame.cur?.[1] ?? null;
+        const active = currentColumn == null ? null : frame.colLabels[currentColumn];
+        const results = Object.fromEntries(
+          frame.colLabels.flatMap((label, column) => {
+            const value = frame.grid[0][column];
+            return value == null ? [] : [[label, value]];
+          })
+        );
+        const states = Object.fromEntries(
+          frame.nodes.map((node) => {
+            const column = frame.colLabels.indexOf(node.id);
+            const solved = column >= 0 && frame.grid[0][column] != null;
+            const isBase = !frame.edges.some((edge) => edge.from === node.id);
+            return [node.id, solved ? isBase ? "base" : "store" : "call"];
+          })
+        );
+        const dependencies = frame.deps.map(([, column]) => frame.colLabels[column]);
+        return {
+          phase: frame.type === "done" ? "Target ready" : active ? `Solve ${active}` : "Dependency graph",
+          action: frame.message,
+          active,
+          path: active ? [active, ...dependencies] : [],
+          visible: frame.nodes.map((node) => node.id),
+          states,
+          results,
+          collapsed: []
+        };
+      },
+      nodeLines(node) {
+        return [node.label, node.detail];
+      },
+      watchRows(frame) {
+        const currentColumn = frame.cur?.[1] ?? null;
+        const dependencies = frame.deps.map(([, column]) => frame.colLabels[column]);
+        const stored = frame.grid[0].filter((value) => value != null).length;
+        return [
+          {
+            k: "state",
+            v: currentColumn == null ? "—" : frame.colLabels[currentColumn],
+            sw: "var(--_blue)",
+            hint: "The state currently becoming available."
+          },
+          {
+            k: "depends on",
+            v: dependencies.length ? dependencies.join(" + ") : "base state",
+            sw: "var(--_amber)",
+            hint: "States that must already be stored before this state can be solved."
+          },
+          {
+            k: "stored result",
+            v: currentColumn == null ? "—" : frame.grid[0][currentColumn] || "—",
+            sw: "var(--_green)",
+            hint: "The result written once and reused by every outgoing dependency."
+          },
+          {
+            k: "progress",
+            v: `${stored} / ${frame.colLabels.length} states ready`,
+            sw: "var(--_neutral)",
+            hint: "How many states have been solved in dependency order."
+          }
+        ];
       }
     };
   }
@@ -5260,7 +7086,7 @@ var init_merge_sort = __esm({
       run: (input, ops) => {
         const n = ops.value.length;
         ops.init(
-          `Merge sort — start with runs of length 1, then repeatedly merge adjacent runs into larger sorted runs (watch the sorted runs double).`
+          "Merge sort — start with runs of length 1, then repeatedly merge adjacent runs into larger sorted runs (watch the sorted runs double)."
         );
         for (let width = 1; width < n; width *= 2) {
           for (let lo = 0; lo < n; lo += 2 * width) {
@@ -5322,6 +7148,215 @@ var init_merge_sort = __esm({
         }
         ops.lockAll(Array.from({ length: n }, (_, k) => k));
         ops.done(`Sorted in ${ops.swaps} writes.`);
+      }
+    };
+  }
+});
+
+// custom/steptrace/src/algorithms/merge-sort-tree.ts
+function merge(left, right) {
+  const output = [];
+  let i = 0;
+  let j = 0;
+  while (i < left.length && j < right.length) {
+    output.push(left[i] <= right[j] ? left[i++] : right[j++]);
+  }
+  while (i < left.length) output.push(left[i++]);
+  while (j < right.length) output.push(right[j++]);
+  return output;
+}
+function buildTree(values, from, to, depth, x, y, id, nodes, edges, metas) {
+  const segment = values.slice(from, to);
+  const label = segment.length ? `[${from}…${to - 1}]` : "[]";
+  nodes.push({
+    id,
+    label,
+    values: segment,
+    x,
+    y,
+    depth
+  });
+  const meta = {
+    id,
+    label,
+    values: segment,
+    from,
+    to,
+    children: null
+  };
+  metas.set(id, meta);
+  if (segment.length <= 1) return meta;
+  const mid = Math.floor((from + to) / 2);
+  const leftId = `${id}-l`;
+  const rightId = `${id}-r`;
+  edges.push({ from: id, to: leftId }, { from: id, to: rightId });
+  const span = Math.max(1, values.length - 1);
+  const childShift = (span - depth * 0.6 + 1) * 20;
+  const leftMeta = buildTree(values, from, mid, depth + 1, x - childShift, y + 90, leftId, nodes, edges, metas);
+  const rightMeta = buildTree(values, mid, to, depth + 1, x + childShift, y + 90, rightId, nodes, edges, metas);
+  meta.children = [leftMeta.id, rightMeta.id];
+  return meta;
+}
+function emitFrames(id, path, metas, ops) {
+  const node = metas.get(id);
+  if (!node) return [];
+  const label = node.values.length ? `[${node.from}…${node.to - 1}]` : "[]";
+  if (node.values.length <= 1) {
+    const text = node.values.length ? `[${node.values[0]}]` : "[]";
+    ops.base(id, path, node.values, `${text} is already sorted.`);
+    return node.values.slice();
+  }
+  const [leftId, rightId] = node.children || [];
+  const left = metas.get(leftId);
+  const right = metas.get(rightId);
+  if (!left || !right) return node.values.slice();
+  ops.split(id, path, [leftId, rightId], `Split ${label} into ${left.label} and ${right.label}.`);
+  const leftPath = [...path, leftId];
+  const rightPath = [...path, rightId];
+  const leftResult = emitFrames(leftId, leftPath, metas, ops);
+  ops.returnResult(leftId, path, leftResult, `Return [${leftResult.join(", ")}] to ${label}.`);
+  const rightResult = emitFrames(rightId, rightPath, metas, ops);
+  ops.returnResult(rightId, path, rightResult, `Return [${rightResult.join(", ")}] to ${label}.`);
+  const merged = merge(leftResult, rightResult);
+  const combinePath = path.length > 1 ? path.slice(0, -1) : path;
+  ops.combine(id, combinePath, merged, `Merge ${left.label} and ${right.label} into [${merged.join(", ")}].`);
+  if (path.length > 1) {
+    ops.returnResult(id, combinePath, merged, `Return [${merged.join(", ")}] to parent call.`);
+  }
+  return merged;
+}
+function parseMergeSortTreeConfig(config) {
+  if (!Array.isArray(config.array) || config.array.length < 2)
+    throw new Error('steptrace: merge-sort-tree requires an "array" with at least two values.');
+  if (!config.array.every((value) => typeof value === "number" && Number.isFinite(value)))
+    throw new Error("steptrace: merge-sort-tree requires finite numeric values.");
+  return {
+    array: config.array.slice(),
+    profile: "divide-and-conquer"
+  };
+}
+var mergeSortTree;
+var init_merge_sort_tree = __esm({
+  "custom/steptrace/src/algorithms/merge-sort-tree.ts"() {
+    init_execution_tree();
+    mergeSortTree = {
+      id: "merge-sort-tree",
+      kind: "rectree",
+      family: executionTreeFamily,
+      meta: { label: "Merge sort (split tree)" },
+      parse: parseMergeSortTreeConfig,
+      run(input, ops) {
+        const values = input.array.slice();
+        const nodes = [];
+        const edges = [];
+        const metas = /* @__PURE__ */ new Map();
+        const rootId = "root";
+        const rootMeta = buildTree(
+          values,
+          0,
+          values.length,
+          0,
+          Math.max(1, values.length - 1) * 72,
+          30,
+          rootId,
+          nodes,
+          edges,
+          metas
+        );
+        rootMeta.from = 0;
+        rootMeta.to = values.length;
+        rootMeta.values = values.slice();
+        nodes[0].label = `[0…${values.length - 1}]`;
+        const message = `Merge sort ${values.join(", ")} by splitting into halves and merging sorted halves on return.`;
+        ops.tree(nodes, edges, rootId, message);
+        emitFrames(rootId, [rootId], metas, ops);
+        ops.done(rootId, values.slice().sort((a, b) => a - b), `Sorted result [${values.sort((a, b) => a - b).join(", ")}].`);
+      }
+    };
+  }
+});
+
+// custom/steptrace/src/algorithms/memoization.ts
+var memoization;
+var init_memoization = __esm({
+  "custom/steptrace/src/algorithms/memoization.ts"() {
+    init_execution_tree();
+    memoization = {
+      id: "memoization",
+      kind: "rectree",
+      family: executionTreeFamily,
+      meta: { label: "Memoization" },
+      parse: parseMemoizationConfig,
+      run(input, ops) {
+        const nodes = [
+          { id: "a", label: "solve(A)", detail: "key A", values: [], x: 300, y: 24, depth: 0 },
+          { id: "b", label: "solve(B)", detail: "key B", values: [], x: 165, y: 82, depth: 1 },
+          { id: "c", label: "solve(C)", detail: "key C", values: [], x: 435, y: 82, depth: 1 },
+          { id: "d1", label: "solve(D)", detail: "key D", values: [], x: 105, y: 140, depth: 2 },
+          { id: "e", label: "solve(E)", detail: "base key E", values: [], x: 225, y: 140, depth: 2 },
+          { id: "d2", label: "solve(D)", detail: "same key D", values: [], x: 375, y: 140, depth: 2 },
+          { id: "e2", label: "solve(E)", detail: "same key E", values: [], x: 495, y: 140, depth: 2 },
+          { id: "g1", label: "solve(G)", detail: "base key G", values: [], x: 55, y: 198, depth: 3 },
+          { id: "h1", label: "solve(H)", detail: "base key H", values: [], x: 155, y: 198, depth: 3 },
+          { id: "g2", label: "solve(G)", detail: "would repeat", values: [], x: 325, y: 198, depth: 3 },
+          { id: "h2", label: "solve(H)", detail: "would repeat", values: [], x: 425, y: 198, depth: 3 }
+        ];
+        const edges = [
+          { from: "a", to: "b" },
+          { from: "a", to: "c" },
+          { from: "b", to: "d1" },
+          { from: "b", to: "e" },
+          { from: "c", to: "d2" },
+          { from: "c", to: "e2" },
+          { from: "d1", to: "g1" },
+          { from: "d1", to: "h1" },
+          { from: "d2", to: "g2" },
+          { from: "d2", to: "h2" }
+        ];
+        ops.tree(nodes, edges, "a", "Begin at state A with an empty cache.");
+        ops.split("a", ["a"], ["b", "c"], "State A needs the results of states B and C.");
+        ops.split("b", ["a", "b"], ["d1", "e"], "State B needs states D and E.");
+        ops.split("d1", ["a", "b", "d1"], ["g1", "h1"], "State D is new, so expand it once.");
+        ops.base("g1", ["a", "b", "d1", "g1"], "result G", "State G is a base case.");
+        ops.base("h1", ["a", "b", "d1", "h1"], "result H", "State H is a base case.");
+        ops.combine("d1", ["a", "b", "d1"], "result D", "Combine the base results to finish state D.");
+        ops.store(
+          "d1",
+          ["a", "b", "d1"],
+          "D",
+          "result D",
+          "Store state D under its complete cache key."
+        );
+        ops.base("e", ["a", "b", "e"], "result E", "State E is a base case.");
+        ops.store("e", ["a", "b", "e"], "E", "result E", "Store state E for any later repeat.");
+        ops.combine("b", ["a", "b"], "result B", "Combine D and E to finish state B.");
+        ops.store("b", ["a", "b"], "B", "result B", "Store state B for any later repeat.");
+        ops.split("c", ["a", "c"], ["d2", "e2"], "State C reuses cached states D and E.");
+        ops.cacheHit(
+          "d2",
+          ["a", "c", "d2"],
+          "D",
+          "result D",
+          ["g2", "h2"],
+          "Key D is already cached: return result D without entering its two child calls."
+        );
+        ops.cacheHit(
+          "e2",
+          ["a", "c", "e2"],
+          "E",
+          "result E",
+          [],
+          "Key E is already cached: reuse the base result immediately."
+        );
+        ops.combine("c", ["a", "c"], "result C", "Combine the cached branches to finish state C.");
+        ops.store("c", ["a", "c"], "C", "result C", "Store state C.");
+        ops.combine("a", ["a"], "result A", "Combine B and C to finish the original state.");
+        ops.store("a", ["a"], "A", "result A", "Store the final state A.");
+        ops.done(
+          "a",
+          "result A",
+          "Memoization computed each cache key once and skipped repeated D and E branches."
+        );
       }
     };
   }
@@ -6010,9 +8045,9 @@ var init_algorithms = __esm({
     init_dfs();
     init_dijkstra();
     init_divide_and_conquer();
+    init_dynamic_programming();
     init_exponential_search();
     init_interpolation_search();
-    init_fibonacci();
     init_floyd_warshall();
     init_heap_sort();
     init_insertion_sort();
@@ -6023,6 +8058,8 @@ var init_algorithms = __esm({
     init_lcs();
     init_linear_search();
     init_merge_sort();
+    init_merge_sort_tree();
+    init_memoization();
     init_n_queens();
     init_prim();
     init_quick_sort();
@@ -6041,6 +8078,7 @@ var init_algorithms = __esm({
       quickSort,
       heapSort,
       mergeSort,
+      mergeSortTree,
       shellSort,
       combSort,
       cyclicSort,
@@ -6062,11 +8100,12 @@ var init_algorithms = __esm({
       twoPointers,
       slidingWindow,
       lcs,
+      ...dynamicProgrammingAlgorithms,
       floydWarshall,
       unionFind,
       kernighanPopcount,
       nQueens,
-      fibonacci,
+      memoization,
       divideAndConquer
     ];
   }
@@ -6157,6 +8196,49 @@ var init_player = __esm({
   }
 });
 
+// custom/steptrace/src/tabs.ts
+function isTabsConfig(config) {
+  return typeof config === "object" && config != null && "tabs" in config;
+}
+function normalizeTabsConfig(config) {
+  if (!Array.isArray(config.tabs) || config.tabs.length === 0) {
+    throw new Error("steptrace: tabs requires at least one tab.");
+  }
+  const names = /* @__PURE__ */ new Set();
+  const tabs = config.tabs.map((rawTab, index) => normalizeTab(rawTab, index, names));
+  const selected = config.selected ?? 0;
+  if (!Number.isInteger(selected) || selected < 0 || selected >= tabs.length) {
+    throw new Error(`steptrace: tabs "selected" must be an index from 0 to ${tabs.length - 1}.`);
+  }
+  return { selected, tabs };
+}
+function normalizeTab(rawTab, index, names) {
+  if (typeof rawTab !== "object" || rawTab == null || Array.isArray(rawTab)) {
+    throw new Error(`steptrace: tabs[${index}] must be an object.`);
+  }
+  const name = typeof rawTab.name === "string" ? rawTab.name.trim() : "";
+  if (!name) throw new Error(`steptrace: tabs[${index}] requires a non-empty "name".`);
+  const nameKey = name.toLocaleLowerCase();
+  if (names.has(nameKey)) throw new Error(`steptrace: duplicate tab name "${name}".`);
+  names.add(nameKey);
+  if (rawTab.description != null && typeof rawTab.description !== "string") {
+    throw new Error(`steptrace: tabs[${index}] "description" must be a string.`);
+  }
+  if (typeof rawTab.algorithm !== "string" || !rawTab.algorithm.trim()) {
+    throw new Error(`steptrace: tabs[${index}] requires a non-empty "algorithm".`);
+  }
+  const { name: _name, description: _description, ...algorithmConfig } = rawTab;
+  return {
+    name,
+    description: rawTab.description?.trim() || "",
+    config: algorithmConfig
+  };
+}
+var init_tabs = __esm({
+  "custom/steptrace/src/tabs.ts"() {
+  }
+});
+
 // custom/steptrace/src/watch-hints.ts
 function watchHintFor(row) {
   const override = row.hint?.trim();
@@ -6236,7 +8318,104 @@ var init_watch_hints = __esm({
 // custom/steptrace/src/mount.ts
 function createMount(registry2) {
   const { kindOf, listAlgorithms, buildFrames } = registry2;
-  return function mount2(root, config, host = {}) {
+  function mountTabs(root, config, host = {}) {
+    let normalized;
+    try {
+      normalized = normalizeTabsConfig(config);
+    } catch (error) {
+      root.textContent = error instanceof Error ? error.message : String(error);
+      return { destroy: () => root.replaceChildren() };
+    }
+    const { tabs } = normalized;
+    root.classList.add("steptrace", "steptrace--tabs");
+    root.setAttribute("role", "group");
+    root.setAttribute("aria-label", "Tabbed algorithm visualizer");
+    const tabsShell = el("div", "steptrace__tabs-shell");
+    const tablist = el("div", "steptrace__tabs");
+    tablist.setAttribute("role", "tablist");
+    tablist.setAttribute("aria-label", "Visualization variants");
+    const tabDesc = el("div", "steptrace__tabs-desc");
+    tabDesc.setAttribute("aria-live", "polite");
+    const panels = el("div", "steptrace__tabpanels");
+    const buttons = [];
+    const panelShells = [];
+    const panelMounts = [];
+    const handles = tabs.map(() => null);
+    let activeIndex = normalized.selected;
+    const showTab = (index, focus = false) => {
+      const next = Math.min(Math.max(index, 0), tabs.length - 1);
+      if (next === activeIndex && handles[next]) {
+        if (focus) buttons[next]?.focus();
+        return;
+      }
+      handles[activeIndex]?.pause?.();
+      activeIndex = next;
+      const tab = tabs[next];
+      tabDesc.textContent = tab.description || "";
+      buttons.forEach((button2, i) => {
+        const selected = i === next;
+        button2.setAttribute("aria-selected", String(selected));
+        button2.tabIndex = selected ? 0 : -1;
+        button2.classList.toggle("steptrace__tab--selected", selected);
+        panelShells[i].hidden = !selected;
+      });
+      if (!handles[next]) handles[next] = mount2(panelMounts[next], tab.config, host);
+      if (focus) buttons[next]?.focus();
+    };
+    tabs.forEach((tab, index) => {
+      const tabId = `steptrace-tab-${++mountSerial}`;
+      const panelId = `steptrace-panel-${++mountSerial}`;
+      const button2 = document.createElement("button");
+      button2.type = "button";
+      button2.className = "steptrace__tab";
+      button2.id = tabId;
+      button2.setAttribute("role", "tab");
+      button2.setAttribute("aria-controls", panelId);
+      button2.textContent = tab.name;
+      button2.tabIndex = index === activeIndex ? 0 : -1;
+      button2.addEventListener("click", () => showTab(index));
+      button2.addEventListener("keydown", (event) => {
+        if (event.key === "ArrowLeft" || event.key === "ArrowUp") {
+          event.preventDefault();
+          showTab((index - 1 + tabs.length) % tabs.length, true);
+        } else if (event.key === "ArrowRight" || event.key === "ArrowDown") {
+          event.preventDefault();
+          showTab((index + 1) % tabs.length, true);
+        } else if (event.key === "Home") {
+          event.preventDefault();
+          showTab(0, true);
+        } else if (event.key === "End") {
+          event.preventDefault();
+          showTab(tabs.length - 1, true);
+        }
+      });
+      buttons.push(button2);
+      tablist.append(button2);
+      const panelShell = el("div", "steptrace__tabpanel");
+      panelShell.id = panelId;
+      panelShell.hidden = index !== activeIndex;
+      panelShell.setAttribute("role", "tabpanel");
+      panelShell.setAttribute("aria-labelledby", tabId);
+      const panelMount = el("div", "steptrace__tabpanel-body");
+      panelShell.append(panelMount);
+      panelShells.push(panelShell);
+      panelMounts.push(panelMount);
+      panels.append(panelShell);
+    });
+    tabsShell.append(tablist, tabDesc);
+    root.replaceChildren(tabsShell, panels);
+    activeIndex = -1;
+    showTab(normalized.selected);
+    return {
+      destroy() {
+        for (const handle of handles) handle?.destroy();
+        root.replaceChildren();
+        root.classList.remove("steptrace", "steptrace--tabs", "steptrace--reduced");
+      }
+    };
+  }
+  function mount2(root, config, host = {}) {
+    if (isTabsConfig(config)) return mountTabs(root, config, host);
     root.classList.add("steptrace");
     root.setAttribute("role", "group");
     root.setAttribute("aria-label", "Algorithm visualizer");
@@ -6448,34 +8627,35 @@ function createMount(registry2) {
       if (!player) return;
       if (matchMedia("(max-width: 560px)").matches) {
         log.style.height = "auto";
+        log.style.minHeight = "0";
         return;
       }
       const PROBE = "position:absolute;visibility:hidden;pointer-events:none;left:0;right:0;height:auto";
       const tall = (node) => node.getBoundingClientRect().height;
-      const probe = el("li", "steptrace__log-line steptrace__log-line--cur");
-      probe.style.cssText = PROBE;
-      const pn = el("span", "steptrace__log-num");
-      pn.textContent = "00";
-      const pt = el("span", "steptrace__log-text");
-      probe.append(pn, pt);
-      log.append(probe);
-      let maxRow = 0;
-      for (const f of player.frames) {
-        pt.textContent = stripTags(f.message);
-        if (tall(probe) > maxRow) maxRow = tall(probe);
-      }
-      probe.remove();
+      const probes = player.frames.map((frame) => {
+        const probe = el("li", "steptrace__log-line steptrace__log-line--cur");
+        probe.style.cssText = PROBE;
+        const number = el("span", "steptrace__log-num");
+        number.textContent = "00";
+        const text = el("span", "steptrace__log-text");
+        text.textContent = stripTags(frame.message);
+        probe.append(number, text);
+        return probe;
+      });
       const resultProbe = insight.cloneNode(true);
       resultProbe.hidden = false;
       resultProbe.style.cssText = PROBE;
-      log.append(resultProbe);
-      if (tall(resultProbe) > maxRow) maxRow = tall(resultProbe);
+      log.append(...probes, resultProbe);
+      let maxRow = tall(resultProbe);
+      for (const probe of probes) maxRow = Math.max(maxRow, tall(probe));
+      for (const probe of probes) probe.remove();
       resultProbe.remove();
       const logCS = getComputedStyle(log);
       const gap = parseFloat(logCS.rowGap) || 0;
       const hist = (parseFloat(logCS.lineHeight) || 0) * 2;
       const h = Math.ceil(hist * 2 + gap * 2 + maxRow) + "px";
-      if (log.style.height !== h) log.style.height = h;
+      log.style.height = "auto";
+      if (log.style.minHeight !== h) log.style.minHeight = h;
     }
     function fitLog(terminal) {
       const budget = log.clientHeight;
@@ -6668,6 +8848,7 @@ function createMount(registry2) {
       currentView = view;
       if (built.kind === "graph") syncStartOptions(built.graph);
       const fillStage = view.stageLayout === "fill";
+      root.classList.toggle("steptrace--stable-stage", view.stableStage === true);
       stageCol.classList.toggle(
         "steptrace__stage-col--bottom",
         built.kind !== "graph" && !fillStage
@@ -6736,6 +8917,9 @@ function createMount(registry2) {
     root.addEventListener("keydown", onKey);
     applyMotion();
     return {
+      pause() {
+        if (player) player.pause();
+      },
       destroy() {
         if (player) player.destroy();
         if (currentView && currentView.destroy) currentView.destroy();
@@ -6745,10 +8929,11 @@ function createMount(registry2) {
         root.removeEventListener("keydown", onKey);
         document.removeEventListener("click", onDocClick);
         root.replaceChildren();
-        root.classList.remove("steptrace", "steptrace--reduced");
+        root.classList.remove("steptrace", "steptrace--reduced", "steptrace--stable-stage");
       }
     };
-  };
+  }
+  return mount2;
 }
 function randomArray(n = 12) {
   const pool = [];
@@ -6764,6 +8949,7 @@ var init_mount = __esm({
   "custom/steptrace/src/mount.ts"() {
     init_player();
     init_render();
+    init_tabs();
     init_watch_hints();
     LOG_ROWS = 10;
     fadeFor = (age) => Math.max(0.1, 0.5 * Math.pow(0.62, age - 1));

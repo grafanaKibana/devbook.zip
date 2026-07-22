@@ -3,7 +3,12 @@
  * code-block processor and tears mounted cards down with the render child.
  */
 
-import type { HostControlHandle, MountHandle, SpeedSliderOptions, StepTraceConfig } from "../types"
+import type {
+  HostControlHandle,
+  MountHandle,
+  SpeedSliderOptions,
+  StepTraceBlockConfig,
+} from "../types"
 
 const { Plugin, MarkdownRenderChild, Notice, SliderComponent } = require("obsidian")
 const { steptrace } = require("../engine") as typeof import("../engine")
@@ -62,7 +67,7 @@ class SteptracePlugin extends Plugin {
     this.registerMarkdownCodeBlockProcessor(
       "steptrace",
       (source: string, el: ObsidianElement, ctx: MarkdownContext) => {
-        let config: StepTraceConfig
+        let config: StepTraceBlockConfig
         try {
           config = JSON.parse(source)
         } catch (error) {

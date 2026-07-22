@@ -22,6 +22,9 @@ export type {
   AlgorithmMeta,
   MountHandle,
   StepTraceApi,
+  StepTraceBlockConfig,
   StepTraceConfig,
   StepTraceHost,
+  StepTraceTabConfig,
+  StepTraceTabsConfig,
 } from "./types"

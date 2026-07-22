@@ -376,9 +376,7 @@ function boundaryTicks(lower: number, upper: number) {
   const span = upper - lower
   if (span <= 12) return Array.from({ length: span + 1 }, (_, index) => lower + index)
   return [
-    ...new Set(
-      Array.from({ length: 13 }, (_, index) => Math.round(lower + (span * index) / 12)),
-    ),
+    ...new Set(Array.from({ length: 13 }, (_, index) => Math.round(lower + (span * index) / 12))),
   ]
 }
 
@@ -859,6 +857,516 @@ function makeMatrixFooter(
   return { paint }
 }
 
+export function makeDPStoryView(frames) {
+  return frames[0].problem === "coin-change"
+    ? makeCoinChangeStoryView(frames)
+    : makeGridPathStoryView(frames)
+}
+
+function makeStoryLegend(items) {
+  const legend = el("div", "steptrace__legend")
+  for (const [state, label] of items) {
+    const row = el("div", "steptrace__legend-row")
+    const swatch = el("span", "steptrace__swatch steptrace__dp-story-swatch")
+    swatch.dataset.state = state
+    row.append(swatch, document.createTextNode(label))
+    legend.append(row)
+  }
+  return legend
+}
+
+function makeCoinChangeStoryView(frames) {
+  const first = frames[0]
+  const root = el("div", "steptrace__dp-story")
+  root.setAttribute("role", "region")
+  root.setAttribute("aria-label", "Coin change counter")
+  root.dataset.approach = first.approach
+  const context = el("div", "steptrace__dp-story-context")
+  const contextStart = el("span", "steptrace__dp-story-context-start")
+  const contextEnd = el("span", "steptrace__dp-story-context-end")
+  context.append(contextStart, contextEnd)
+  const stage = el("div", "steptrace__dp-story-stage")
+  const rack = el("div", "steptrace__coin-rack")
+  const coinElements = first.coins.map((coin) => {
+    const element = el("span", "steptrace__coin")
+    element.textContent = `${coin}¢`
+    element.dataset.coin = String(coin)
+    rack.append(element)
+    return element
+  })
+  stage.append(rack)
+  root.append(context, stage)
+  const status = statusEl()
+  const tray = first.approach === "tabulation" ? null : el("div", "steptrace__coin-tray")
+  const attempts = ["greedy", "naive"].includes(first.approach)
+    ? el("div", "steptrace__coin-attempts")
+    : null
+  const memo = first.approach === "memoization" ? el("div", "steptrace__coin-memo") : null
+  const amountBoard = first.approach === "tabulation" ? el("div", "steptrace__amount-board") : null
+  const amountCells = []
+
+  if (tray) stage.append(tray)
+  if (attempts) stage.append(attempts)
+  if (memo) stage.append(memo)
+  if (amountBoard) {
+    amountBoard.style.setProperty("--steptrace-amount-count", String(first.amounts.length))
+    for (const amount of first.amounts) {
+      const cell = el("div", "steptrace__amount-cell")
+      const label = el("span", "steptrace__amount-label")
+      const value = el("span", "steptrace__amount-value")
+      label.textContent = `${amount}¢`
+      value.textContent = "—"
+      cell.append(label, value)
+      amountBoard.append(cell)
+      amountCells.push({ cell, value, amount })
+    }
+    stage.append(amountBoard)
+  }
+
+  const legendItems =
+    first.approach === "memoization"
+      ? [
+          ["active", "coin being tried"],
+          ["selected", "current branch"],
+          ["stored", "saved remainder"],
+          ["hit", "answer reused"],
+        ]
+      : first.approach === "tabulation"
+        ? [
+            ["current", "amount being written"],
+            ["dependency", "smaller amount read"],
+            ["stored", "solved amount"],
+            ["best", "optimal amount chain"],
+          ]
+        : [
+            ["active", "coin being tried"],
+            ["selected", "coins on the counter"],
+            ["repeated", "repeated subproblem"],
+            ["best", "best exact change"],
+          ]
+  const legend = makeStoryLegend(legendItems)
+
+  function paintTray(frame) {
+    if (!tray) return
+    tray.replaceChildren()
+    const trayLabel = el("span", "steptrace__coin-tray-label")
+    trayLabel.textContent = frame.selected.length ? "on the counter" : "counter is empty"
+    tray.append(trayLabel)
+    for (const coin of frame.selected) {
+      const element = el("span", "steptrace__coin")
+      element.dataset.state = "selected"
+      element.textContent = `${coin}¢`
+      tray.append(element)
+    }
+  }
+
+  function paintAttempts(frame) {
+    if (!attempts) return
+    attempts.replaceChildren()
+    for (const attempt of frame.attempts) {
+      const row = el("div", "steptrace__coin-attempt")
+      row.dataset.state = attempt.state
+      const label = el("span", "steptrace__coin-attempt-label")
+      const value = el("span", "steptrace__coin-attempt-value")
+      label.textContent = attempt.label
+      value.textContent = attempt.value
+      row.append(label, value)
+      attempts.append(row)
+    }
+  }
+
+  function paintMemo(frame) {
+    if (!memo) return
+    memo.replaceChildren()
+    const heading = el("div", "steptrace__coin-memo-heading")
+    heading.textContent = "Saved remainder answers"
+    memo.append(heading)
+    for (const entry of frame.memo) {
+      const row = el("div", "steptrace__coin-memo-row")
+      row.dataset.state = entry.state
+      const key = el("span", "steptrace__coin-memo-key")
+      const value = el("span", "steptrace__coin-memo-value")
+      key.textContent = entry.key
+      value.textContent = entry.state === "hit" ? `${entry.value} · reused` : entry.value
+      row.append(key, value)
+      memo.append(row)
+    }
+  }
+
+  function paintAmounts(frame) {
+    if (!amountBoard) return
+    for (let index = 0; index < amountCells.length; index++) {
+      const { cell, value, amount } = amountCells[index]
+      const stored = frame.amountValues[index]
+      value.textContent = stored == null ? "—" : String(stored)
+      cell.setAttribute(
+        "aria-label",
+        stored == null
+          ? `${amount}¢: unsolved`
+          : `${amount}¢: ${stored} coin${stored === 1 ? "" : "s"}`,
+      )
+      cell.dataset.state =
+        amount === frame.amountCurrent
+          ? "current"
+          : frame.amountPath.includes(amount)
+            ? "best"
+            : frame.amountDependencies.includes(amount)
+              ? "dependency"
+              : stored != null
+                ? "stored"
+                : ""
+    }
+  }
+
+  return {
+    nodes: [root, legend, status],
+    stageLayout: "fill",
+    stableStage: true,
+    paint(frame, index, total) {
+      contextStart.textContent =
+        frame.approach === "tabulation"
+          ? "Build exact change from 0¢"
+          : `Customer pays ${frame.target}¢`
+      contextEnd.textContent =
+        frame.approach === "tabulation"
+          ? frame.amountCurrent == null
+            ? frame.best || "amount board empty"
+            : `writing ${frame.amountCurrent}¢`
+          : `remaining ${frame.remaining}¢`
+      for (const element of coinElements) {
+        const coin = Number(element.dataset.coin)
+        element.dataset.state = coin === frame.activeCoin ? "active" : ""
+      }
+      paintTray(frame)
+      paintAttempts(frame)
+      paintMemo(frame)
+      paintAmounts(frame)
+      status.innerHTML =
+        escapeHtml(frame.message) +
+        ` <span class="steptrace__counts">· step ${index + 1}/${total}</span>`
+    },
+    watch(frame) {
+      const plan = frame.selected.length
+        ? frame.selected.map((coin) => `${coin}¢`).join(" + ")
+        : "—"
+      if (frame.approach === "memoization")
+        return [
+          {
+            k: "remaining",
+            v: `${frame.remaining}¢`,
+            sw: "var(--_blue)",
+            hint: "Remainder handled by the current recursive branch.",
+          },
+          {
+            k: "plan",
+            v: plan,
+            sw: "var(--_amber)",
+            hint: "Coins chosen before the current remainder was reached.",
+          },
+          {
+            k: "memo",
+            v: `${frame.memo.length} answers`,
+            sw: "var(--_violet)",
+            hint: "Remainder answers saved for later recursive calls.",
+          },
+          {
+            k: "best",
+            v: frame.best || "—",
+            sw: "var(--_green)",
+            hint: `Fewest exact coins found for the ${frame.target}-cent payment.`,
+          },
+        ]
+      if (frame.approach === "tabulation")
+        return [
+          {
+            k: "amount",
+            v: frame.amountCurrent == null ? "—" : `${frame.amountCurrent}¢`,
+            sw: "var(--_blue)",
+            hint: "Amount currently being written on the bottom-up board.",
+          },
+          {
+            k: "reads",
+            v: frame.amountDependencies.length
+              ? frame.amountDependencies.map((amount) => `${amount}¢`).join(", ")
+              : "base",
+            sw: "var(--_amber)",
+            hint: "Smaller solved amounts read before writing the current amount.",
+          },
+          {
+            k: "solved",
+            v: String(frame.amountValues.filter((value) => value != null).length),
+            sw: "var(--_violet)",
+            hint: "Amount answers already written and available for reuse.",
+          },
+          {
+            k: "best",
+            v: frame.best || "—",
+            sw: "var(--_green)",
+            hint: `Fewest exact coins found for the ${frame.target}-cent payment.`,
+          },
+        ]
+      return [
+        {
+          k: "remaining",
+          v: `${frame.remaining}¢`,
+          sw: "var(--_blue)",
+          hint: "Amount still owed after the coins currently on the counter.",
+        },
+        {
+          k: "plan",
+          v: plan,
+          sw: "var(--_amber)",
+          hint: "Coins chosen by the current branch or strategy.",
+        },
+        {
+          k: "attempts",
+          v: String(frame.attempts.length),
+          sw: "var(--_violet)",
+          hint: "Complete or partial change plans exposed so far.",
+        },
+        {
+          k: "best",
+          v: frame.best || "—",
+          sw: "var(--_green)",
+          hint: `Fewest exact coins found for the ${frame.target}-cent payment.`,
+        },
+      ]
+    },
+  }
+}
+
+function makeGridPathStoryView(frames) {
+  const first = frames[0]
+  const table = el("table", "steptrace__warehouse-matrix")
+  table.setAttribute("aria-label", "Warehouse route cost matrix")
+  const thead = document.createElement("thead")
+  const headerRow = document.createElement("tr")
+  const corner = document.createElement("th")
+  corner.setAttribute("scope", "col")
+  corner.textContent = "cost ↓ / tile →"
+  headerRow.append(corner)
+  for (let column = 0; column < first.costs[0].length; column++) {
+    const header = document.createElement("th")
+    header.setAttribute("scope", "col")
+    header.textContent = `C${column + 1}`
+    headerRow.append(header)
+  }
+  thead.append(headerRow)
+  table.append(thead)
+  const tbody = document.createElement("tbody")
+  const cells = []
+  for (let row = 0; row < first.costs.length; row++) {
+    const tableRow = document.createElement("tr")
+    const header = document.createElement("th")
+    header.setAttribute("scope", "row")
+    header.textContent = `R${row + 1}`
+    tableRow.append(header)
+    const rowCells = []
+    for (let column = 0; column < first.costs[row].length; column++) {
+      const cell = document.createElement("td")
+      const place = el("span", "steptrace__warehouse-cell-name")
+      const cost = el("span", "steptrace__warehouse-cell-cost")
+      const stored = el("span", "steptrace__warehouse-cell-stored")
+      place.textContent =
+        row === 0 && column === 0
+          ? "START"
+          : row === first.costs.length - 1 && column === first.costs[row].length - 1
+            ? "GOAL"
+            : `R${row + 1}C${column + 1}`
+      cost.textContent = `cost ${first.costs[row][column]}`
+      cell.append(place, cost, stored)
+      tableRow.append(cell)
+      rowCells.push({ cell, stored })
+    }
+    cells.push(rowCells)
+    tbody.append(tableRow)
+  }
+  table.append(tbody)
+  const tfoot = document.createElement("tfoot")
+  const footerRow = document.createElement("tr")
+  const footerCell = document.createElement("td")
+  footerCell.colSpan = first.costs[0].length + 1
+  const footer = el("div", "steptrace__warehouse-footer")
+  const footerStart = el("span", "steptrace__warehouse-footer-start")
+  const footerEnd = el("span", "steptrace__warehouse-footer-end")
+  footer.append(footerStart, footerEnd)
+  footerCell.append(footer)
+  footerRow.append(footerCell)
+  tfoot.append(footerRow)
+  table.append(tfoot)
+  const status = statusEl()
+  const legendItems =
+    first.approach === "memoization"
+      ? [
+          ["current", "tile being evaluated"],
+          ["stored", "saved remaining cost"],
+          ["repeated", "saved answer reused"],
+          ["best", "best complete route"],
+        ]
+      : first.approach === "tabulation"
+        ? [
+            ["current", "tile being written"],
+            ["dependency", "written neighbour read"],
+            ["stored", "remaining cost stored"],
+            ["best", "optimal route"],
+          ]
+        : [
+            ["current", "tile being considered"],
+            ["path", "current route"],
+            ["repeated", "tile reached again"],
+            ["best", "best complete route"],
+          ]
+  const legend = makeStoryLegend(legendItems)
+
+  return {
+    nodes: [table, legend, status],
+    stageLayout: "fill",
+    paint(frame, index, total) {
+      const path = new Set(frame.path.map(([row, column]) => `${row},${column}`))
+      const repeated = new Set(frame.repeated.map(([row, column]) => `${row},${column}`))
+      const best = new Set(frame.bestPath.map(([row, column]) => `${row},${column}`))
+      const dependencies = new Set(
+        frame.gridDependencies.map(([row, column]) => `${row},${column}`),
+      )
+      let storedCount = 0
+      for (let row = 0; row < cells.length; row++) {
+        for (let column = 0; column < cells[row].length; column++) {
+          const key = `${row},${column}`
+          const value = frame.gridValues[row][column]
+          if (value != null) storedCount++
+          cells[row][column].stored.textContent = value == null ? "" : `best ${value}`
+          cells[row][column].cell.dataset.state =
+            frame.current?.[0] === row && frame.current?.[1] === column
+              ? "current"
+              : best.has(key)
+                ? "best"
+                : repeated.has(key)
+                  ? "repeated"
+                  : dependencies.has(key)
+                    ? "dependency"
+                    : path.has(key)
+                      ? "path"
+                      : value != null
+                        ? "stored"
+                        : ""
+          cells[row][column].cell.setAttribute(
+            "aria-label",
+            `R${row + 1}C${column + 1}, cost ${frame.costs[row][column]}${value == null ? "" : `, best remaining cost ${value}`}`,
+          )
+        }
+      }
+      footerStart.textContent =
+        frame.approach === "greedy"
+          ? "Greedy route"
+          : frame.approach === "naive"
+            ? "Recursive routes"
+            : frame.approach === "memoization"
+              ? "Memoized route"
+              : "Fill from the goal"
+      footerEnd.textContent =
+        frame.approach === "memoization"
+          ? `${storedCount} answers saved`
+          : frame.approach === "tabulation"
+            ? `${storedCount}/${cells.length * cells[0].length} tiles written`
+            : frame.bestCost == null
+              ? `route cost ${frame.routeCost}`
+              : `best route ${frame.bestCost}`
+      footerRow.setAttribute("aria-label", `${footerStart.textContent}; ${footerEnd.textContent}`)
+      status.innerHTML =
+        escapeHtml(frame.message) +
+        ` <span class="steptrace__counts">· step ${index + 1}/${total}</span>`
+    },
+    watch(frame) {
+      const current = frame.current ? `R${frame.current[0] + 1}C${frame.current[1] + 1}` : "—"
+      const stored = frame.gridValues.flat().filter((value) => value != null).length
+      if (frame.approach === "memoization")
+        return [
+          {
+            k: "tile",
+            v: current,
+            sw: "var(--_blue)",
+            hint: "Warehouse tile handled by the current recursive call.",
+          },
+          {
+            k: "route",
+            v: frame.routeLabel,
+            sw: "var(--_amber)",
+            hint: "Recursive route that reached the current tile.",
+          },
+          {
+            k: "memo",
+            v: `${stored} tiles`,
+            sw: "var(--_violet)",
+            hint: "Solved remaining costs stored directly in the warehouse map.",
+          },
+          {
+            k: "best cost",
+            v: frame.bestCost == null ? "—" : String(frame.bestCost),
+            sw: "var(--_green)",
+            hint: "Lowest complete travel cost found for the warehouse route.",
+          },
+        ]
+      if (frame.approach === "tabulation")
+        return [
+          {
+            k: "tile",
+            v: current,
+            sw: "var(--_blue)",
+            hint: "Warehouse tile whose remaining cost is being written.",
+          },
+          {
+            k: "reads",
+            v: frame.gridDependencies.length
+              ? frame.gridDependencies
+                  .map(([row, column]) => `R${row + 1}C${column + 1}`)
+                  .join(", ")
+              : "base",
+            sw: "var(--_amber)",
+            hint: "Already-written right and down neighbours read by this tile.",
+          },
+          {
+            k: "written",
+            v: `${stored}/${frame.costs.length * frame.costs[0].length}`,
+            sw: "var(--_violet)",
+            hint: "Warehouse tiles with a stored remaining-route cost.",
+          },
+          {
+            k: "best cost",
+            v: frame.bestCost == null ? "—" : String(frame.bestCost),
+            sw: "var(--_green)",
+            hint: "Lowest complete travel cost found for the warehouse route.",
+          },
+        ]
+      return [
+        {
+          k: "tile",
+          v: current,
+          sw: "var(--_blue)",
+          hint: "Warehouse tile currently entered or evaluated.",
+        },
+        {
+          k: "route",
+          v: frame.routeLabel,
+          sw: "var(--_amber)",
+          hint: "Right/down route assembled so far from the loading bay.",
+        },
+        {
+          k: "repeated",
+          v: String(frame.repeated.length),
+          sw: "var(--_violet)",
+          hint: "Coordinates reached by more than one recursive route.",
+        },
+        {
+          k: "best cost",
+          v: frame.bestCost == null ? "—" : String(frame.bestCost),
+          sw: "var(--_green)",
+          hint: "Lowest complete travel cost found for the warehouse route.",
+        },
+      ]
+    },
+  }
+}
+
 // ---- dp view: a 2-D table that fills in cell by cell ----
 export function makeDPView(frames, semantics = lcsMatrixGridSemantics) {
   const f0 = frames[0]
@@ -1290,6 +1798,8 @@ export interface ExecutionTreeViewDescriptor {
   nodeWidth: number
   nodeHeight: number
   minSvgWidth: number
+  canvasScale?: number
+  fitWidth?: boolean
   stateLabels: Record<string, string>
   legend: ReadonlyArray<{ state: string; label: string }>
   frameModel(frame: any): {
@@ -1334,7 +1844,8 @@ export function makeExecutionTreeView(frames, descriptor: ExecutionTreeViewDescr
   svg.setAttribute("preserveAspectRatio", "xMidYMid meet")
   svg.setAttribute("role", "img")
   svg.setAttribute("aria-labelledby", `${title.id} ${description.id}`)
-  svg.style.setProperty("--steptrace-tree-min-width", `${descriptor.minSvgWidth}px`)
+  const canvasWidth = Math.max(descriptor.minSvgWidth, width * (descriptor.canvasScale || 1))
+  svg.style.setProperty("--steptrace-tree-width", `${canvasWidth}px`)
   svg.append(title, description)
 
   const edgeElements = []
@@ -1403,16 +1914,12 @@ export function makeExecutionTreeView(frames, descriptor: ExecutionTreeViewDescr
       label.setAttribute("dominant-baseline", "central")
       result.setAttribute("y", String(halfHeight + 9))
     } else {
-      label.setAttribute("y", "-3")
+      label.setAttribute("y", "-4")
       detail.setAttribute("y", "9")
-      result.setAttribute("y", "20")
-      badge.setAttribute("x", String(-halfWidth + 7))
-      badge.setAttribute("y", String(-halfHeight + 9))
-      badge.setAttribute("text-anchor", "start")
     }
     group.append(ring, surface, label, detail, result, badge)
     svg.append(group)
-    nodeElements[node.id] = { group, result, badge }
+    nodeElements[node.id] = { group, detail, result, badge, secondaryLine }
   }
 
   const legend = el("div", "steptrace__legend")
@@ -1428,6 +1935,7 @@ export function makeExecutionTreeView(frames, descriptor: ExecutionTreeViewDescr
   const wrap = el("div", "steptrace__rectree")
   wrap.setAttribute("role", "region")
   wrap.setAttribute("aria-label", `${descriptor.ariaLabel} visualization`)
+  wrap.dataset.fitWidth = descriptor.fitWidth ? "true" : "false"
   wrap.tabIndex = 0
   wrap.append(svg)
   const status = statusEl()
@@ -1449,14 +1957,21 @@ export function makeExecutionTreeView(frames, descriptor: ExecutionTreeViewDescr
       elements.group.dataset.active = model.active === node.id ? "true" : "false"
       elements.group.dataset.path = path.has(node.id) ? "true" : "false"
       const value = model.results[node.id]
-      elements.result.textContent = Array.isArray(value)
+      const resultText = Array.isArray(value)
         ? value.length
-          ? `→ [${value.join(", ")}]`
+          ? `[${value.join(", ")}]`
           : ""
         : value == null
           ? ""
-          : `→ ${value}`
-      elements.badge.textContent = descriptor.stateLabels[state] || ""
+          : String(value)
+      if (descriptor.shape === "card") {
+        elements.detail.textContent = resultText || elements.secondaryLine
+        elements.result.textContent = ""
+        elements.badge.textContent = ""
+      } else {
+        elements.result.textContent = resultText ? `→ ${resultText}` : ""
+        elements.badge.textContent = descriptor.stateLabels[state] || ""
+      }
     }
     for (const edge of edgeElements) {
       edge.element.dataset.vis = visible.has(edge.to) ? "1" : "0"
@@ -1473,7 +1988,7 @@ export function makeExecutionTreeView(frames, descriptor: ExecutionTreeViewDescr
     return descriptor.watchRows(frame, model)
   }
 
-  return { nodes: [wrap, legend, status], paint, watch }
+  return { nodes: [wrap, legend, status], stageLayout: "fill", paint, watch }
 }
 
 const legacyRecTreeDescriptor: ExecutionTreeViewDescriptor = {
@@ -1833,9 +2348,17 @@ export function buildMilestones(algorithm, kind, frames) {
           : kind === "backtrack"
             ? "Depth 0"
             : kind === "rectree"
-            ? familyProfile === "divide-and-conquer"
-              ? "Whole problem"
-              : "Call tree"
+              ? familyProfile === "divide-and-conquer"
+                ? "Whole problem"
+                : familyProfile === "merge-sort"
+                  ? "Whole array"
+                  : familyProfile === "memoization"
+                    ? "Empty cache"
+                    : familyProfile === "coin-change-top-down"
+                      ? "Amount 30¢"
+                      : familyProfile === "grid-path-top-down"
+                        ? "Loading bay"
+                        : "Call tree"
               : "Initialize"
   push(0, initial)
   let lastRange = ""
@@ -1920,6 +2443,8 @@ export function buildMilestones(algorithm, kind, frames) {
     } else if (kind === "dp") {
       if (familyProfile === "floyd-warshall" && f.type === "stage") {
         push(i, `Stage k = ${f.k}`)
+      } else if (familyProfile === "dynamic-programming" && f.type === "compute" && f.cur) {
+        push(i, `${f.variant === "concrete" ? "Prefix" : "Solve"} ${f.colLabels[f.cur[1]]}`)
       } else if (f.type === "compute" && f.cur && f.cur[0] !== lastRow) {
         push(i, `Row ${f.rowLabels[f.cur[0]]}`)
         lastRow = f.cur[0]
@@ -1941,7 +2466,16 @@ export function buildMilestones(algorithm, kind, frames) {
         push(i, `Split ${activeNode?.label || "range"}`)
       } else if (f.type === "combine") {
         const activeNode = f.nodes.find((node) => node.id === f.active)
-        push(i, `Combine ${activeNode?.label || "problem"}`)
+        push(
+          i,
+          `${f.profile === "merge-sort" ? "Merge" : "Combine"} ${activeNode?.label || "problem"}`,
+        )
+      } else if (f.type === "store") {
+        const activeNode = f.nodes.find((node) => node.id === f.active)
+        push(i, `Store ${activeNode?.label || "state"}`)
+      } else if (f.type === "cache") {
+        const activeNode = f.nodes.find((node) => node.id === f.active)
+        push(i, `Reuse ${activeNode?.label || "state"}`)
       } else if (f.type === "phase") {
         push(i, f.phase === "memo" ? "Memoized" : "Plain recursion")
       }
@@ -2048,6 +2582,30 @@ export function summaryFor(algorithm, kind, frame, graph) {
         : `No committed result was recorded.`
   }
   if (kind === "dp") {
+    if (
+      [
+        "coin-change-greedy",
+        "coin-change-naive",
+        "coin-change-memoization",
+        "coin-change-tabulation",
+      ].includes(algorithm)
+    )
+      return `${frame.best || "Exact change pending"} · target ${frame.target}¢.`
+    if (
+      [
+        "grid-path-greedy",
+        "grid-path-naive",
+        "grid-path-memoization",
+        "grid-path-tabulation",
+      ].includes(algorithm)
+    )
+      return frame.bestCost == null
+        ? `Warehouse route pending · current cost ${frame.routeCost}.`
+        : `Minimum warehouse route cost ${frame.bestCost}.`
+    if (algorithm === "coin-change-bottom-up")
+      return `Fewest coins for 30¢: ${frame.grid[0]?.at(-1)} · exact change 10¢ + 10¢ + 10¢.`
+    if (algorithm === "grid-path-bottom-up")
+      return `Minimum warehouse route cost ${frame.grid[0]?.[0]} · ${frame.path.length} path tiles.`
     if (algorithm === "floyd-warshall") {
       if (frame.negativeCycle?.length)
         return `Negative cycle through ${frame.negativeCycle.join(", ")}; shortest paths are undefined.`
@@ -2058,6 +2616,13 @@ export function summaryFor(algorithm, kind, frame, graph) {
         )
         .join(" · ")
       return `All-pairs distances ${distances}.`
+    }
+    if (algorithm === "dynamic-programming") {
+      const stored = frame.grid.flat().filter((value) => value != null).length
+      const target = frame.grid[0]?.[frame.grid[0].length - 1]
+      if (frame.variant === "concrete")
+        return `Best non-adjacent total ${target} · ${stored} prefixes solved once.`
+      return `Target ${target} · ${stored} states solved once in dependency order.`
     }
     const row = frame.grid[frame.grid.length - 1] || []
     const value = row[row.length - 1]
@@ -2077,6 +2642,14 @@ export function summaryFor(algorithm, kind, frame, graph) {
       ? `Solved at depth ${frame.depth} · ${frame.placed} placements · ${frame.pruned} branches pruned.`
       : `No arrangement found · ${frame.pruned} branches pruned.`
   if (kind === "rectree") {
+    if (algorithm === "coin-change-top-down")
+      return `Fewest coins for 30¢: ${frame.results?.c30 || "—"} · ${frame.pruned} recursive calls skipped.`
+    if (algorithm === "grid-path-top-down")
+      return `Minimum warehouse route cost ${frame.results?.r1c1 || "—"} · ${frame.pruned} recursive calls skipped.`
+    if (algorithm === "memoization") {
+      const memoResult = String(frame.results?.a || "ready").replace(/^result\s+/i, "")
+      return `Result ${memoResult} · ${frame.calls} calls · ${frame.pruned} recursive calls skipped.`
+    }
     const result = frame.results?.root
     if (Array.isArray(result)) return `Sorted result [${result.join(", ")}].`
     return result ? `${result}.` : stripTags(frame.message)

@@ -8,9 +8,9 @@ import { cyclicSort } from "./cyclic-sort"
 import { dfs } from "./dfs"
 import { dijkstra } from "./dijkstra"
 import { divideAndConquer } from "./divide-and-conquer"
+import { dynamicProgrammingAlgorithms } from "./dynamic-programming"
 import { exponentialSearch } from "./exponential-search"
 import { interpolationSearch } from "./interpolation-search"
-import { fibonacci } from "./fibonacci"
 import { floydWarshall } from "./floyd-warshall"
 import { heapSort } from "./heap-sort"
 import { insertionSort } from "./insertion-sort"
@@ -21,6 +21,8 @@ import { kmp } from "./kmp"
 import { lcs } from "./lcs"
 import { linearSearch } from "./linear-search"
 import { mergeSort } from "./merge-sort"
+import { mergeSortTree } from "./merge-sort-tree"
+import { memoization } from "./memoization"
 import { nQueens } from "./n-queens"
 import { prim } from "./prim"
 import { quickSort } from "./quick-sort"
@@ -40,6 +42,7 @@ export const builtInAlgorithms = [
   quickSort,
   heapSort,
   mergeSort,
+  mergeSortTree,
   shellSort,
   combSort,
   cyclicSort,
@@ -61,10 +64,11 @@ export const builtInAlgorithms = [
   twoPointers,
   slidingWindow,
   lcs,
+  ...dynamicProgrammingAlgorithms,
   floydWarshall,
   unionFind,
   kernighanPopcount,
   nQueens,
-  fibonacci,
+  memoization,
   divideAndConquer,
 ] satisfies readonly BuiltInAlgorithm[]

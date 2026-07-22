@@ -526,12 +526,7 @@ export class IndexedSearchRecorder extends SearchRecorder {
     this.strideProbe("jump", previousBound, bound, message)
   }
 
-  beginPhase(
-    lo,
-    hi,
-    message,
-    phase: "binary" | "scan" | "interpolation" | "ternary" = "binary",
-  ) {
+  beginPhase(lo, hi, message, phase: "binary" | "scan" | "interpolation" | "ternary" = "binary") {
     this._phase = phase
     this._bracket = [lo, hi]
     this.lo = lo
@@ -732,25 +727,34 @@ export class PointerRecorder {
 //   cell, the cells it reads (deps), and the final backtrack path.
 export class DPRecorder {
   [key: string]: any
-  constructor() {
+  constructor(profile = "lcs", variant = null) {
     this.frames = []
+    this.profile = profile
+    this.variant = variant
     this.rowLabels = []
     this.colLabels = []
     this.grid = []
     this.cur = null
     this.deps = []
     this.path = []
+    this.nodes = []
+    this.edges = []
+    this.formula = null
   }
-  board(rowLabels, colLabels, message) {
+  board(rowLabels, colLabels, message, topology = null) {
     this.rowLabels = rowLabels.slice()
     this.colLabels = colLabels.slice()
     this.grid = rowLabels.map(() => colLabels.map(() => null))
+    this.nodes = (topology?.nodes || []).map((node) => ({ ...node }))
+    this.edges = (topology?.edges || []).map((edge) => ({ ...edge }))
+    this.formula = null
     this._push("init", message)
   }
-  set(r, c, val, deps, message) {
+  set(r, c, val, deps, message, formula = null) {
     this.cur = [r, c]
     this.deps = (deps || []).map((d) => d.slice())
     this.grid[r][c] = val
+    this.formula = formula
     this._push("compute", message)
   }
   markPath(cells, message) {
@@ -762,18 +766,24 @@ export class DPRecorder {
   done(message) {
     this.cur = null
     this.deps = []
+    this.formula = null
     this._push("done", message)
   }
   _push(type, message) {
     this.frames.push(
       Object.freeze({
         type,
+        profile: this.profile,
+        variant: this.variant,
         rowLabels: this.rowLabels.slice(),
         colLabels: this.colLabels.slice(),
         grid: this.grid.map((row) => row.slice()),
         cur: this.cur ? this.cur.slice() : null,
         deps: this.deps.map((d) => d.slice()),
         path: this.path.map((p) => p.slice()),
+        nodes: this.nodes.map((node) => Object.freeze({ ...node })),
+        edges: this.edges.map((edge) => Object.freeze({ ...edge })),
+        formula: this.formula,
         message,
       }),
     )
@@ -1363,19 +1373,36 @@ export class ExecutionTreeRecorder {
     this._push("combine", message)
   }
   cacheHit(id, path, key, result, subtreeIds, message) {
-    this.phase = "return"
+    this.phase = "cache"
     this.action = "reuse cached result"
     this._active = id
     this._path = path.slice()
     this._visible.add(id)
     this._states[id] = "cache"
     this._results[id] = Array.isArray(result) ? result.slice() : result
-    this._cache.push({ key, result: Array.isArray(result) ? result.join(", ") : result })
+    if (!this._cache.some((entry) => entry.key === key)) {
+      this._cache.push({ key, result: Array.isArray(result) ? result.join(", ") : result })
+    }
     for (const childId of subtreeIds) {
       this._visible.add(childId)
       this._collapsed.add(childId)
     }
+    this.pruned += subtreeIds.length
     this._push("cache", message)
+  }
+  store(id, path, key, result, message) {
+    this.phase = "cache"
+    this.action = "store result"
+    this._active = id
+    this._path = path.slice()
+    this._visible.add(id)
+    this._states[id] = "store"
+    this._results[id] = Array.isArray(result) ? result.slice() : result
+    const cachedResult = Array.isArray(result) ? result.join(", ") : result
+    const cached = this._cache.find((entry) => entry.key === key)
+    if (cached) cached.result = cachedResult
+    else this._cache.push({ key, result: cachedResult })
+    this._push("store", message)
   }
   prune(id, path, subtreeIds, message) {
     this.phase = "conquer"
