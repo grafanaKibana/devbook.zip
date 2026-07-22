@@ -5,10 +5,10 @@ import type {
 } from "@quartz-community/types"
 import { simplifySlug } from "@quartz-community/utils"
 import { lucideInner } from "../lib/lucide-icons"
-import styles from "./styles/page-contribute.scss"
 
-// Per-page "Edit / Report" contribution footer (issue #145). Two GitHub-native
-// SSR anchors — no backend, works with JS disabled.
+// Per-page "Edit / Report" contribution links (issue #145). Two GitHub-native
+// SSR anchors — no backend, works with JS disabled. Rendered on the article's
+// content-meta row by ContentMetaRow, which owns the styling (.page-contribute).
 //
 // The repo identity is hard-coded: a rename silently breaks every link and is
 // not derivable from cfg.baseUrl, so keep it in one place. "Edit" targets the
@@ -78,6 +78,5 @@ export const PageContribute: QuartzComponentConstructor = () => {
     )
   }
 
-  Component.css = styles
   return Component
 }

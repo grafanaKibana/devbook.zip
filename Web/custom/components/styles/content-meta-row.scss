@@ -1,11 +1,25 @@
-.page-contribute {
+.content-meta-row {
   display: flex;
+  align-items: baseline;
+  justify-content: space-between;
   flex-wrap: wrap;
+  gap: 0.25rem 1.5rem;
+
+  &:empty {
+    display: none;
+  }
+
+  .content-meta {
+    margin: 0;
+  }
+}
+
+.page-contribute {
+  display: inline-flex;
   align-items: center;
-  justify-content: center;
-  gap: 0.5rem 1.5rem;
-  margin: 0;
-  font-size: 0.8rem;
+  flex-wrap: wrap;
+  gap: 0.5rem 2rem;
+  font-size: 0.9rem;
   color: var(--gray);
 
   a {

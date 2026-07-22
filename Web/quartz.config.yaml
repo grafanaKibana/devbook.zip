@@ -181,13 +181,10 @@ plugins:
       priority: 10
   - source: github:quartz-community/content-meta
     enabled: true
-    layout:
-      position: beforeBody
-      priority: 20
-      # The home page is the one-viewport dashboard; the date/reading-time line
-      # only costs it vertical room the HomepageFit controller needs for card
-      # summaries on ~900px-tall laptops.
-      condition: not-index
+    # Enabled (installed + registered) but no `layout`: rendered by ContentMetaRow
+    # (custom/components/content-meta-row.tsx) on the article meta row, paired with
+    # the Edit/Report contribution links. That wrapper excludes the home dashboard
+    # (one-viewport layout needs the vertical room), replacing `condition: not-index`.
   - source: github:quartz-community/tag-list
     enabled: false
     layout:
