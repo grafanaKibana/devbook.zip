@@ -1,0 +1,33 @@
+.page-contribute {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem 1.5rem;
+  margin: 0;
+  font-size: 0.8rem;
+  color: var(--gray);
+
+  a {
+    color: var(--gray);
+    text-decoration: none;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.3rem;
+    transition: color 0.2s ease;
+
+    &:hover {
+      color: var(--secondary);
+    }
+    &:focus-visible {
+      outline: 2px solid var(--secondary);
+      outline-offset: 2px;
+      border-radius: 2px;
+    }
+  }
+
+  svg {
+    width: 1em;
+    height: 1em;
+  }
+}

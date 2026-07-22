@@ -1566,3 +1566,17 @@ blockquote.transclude:has(.excalidraw-page) {
 //     cohesion gain is negligible), the override is intentionally withheld and the
 //     plugin's own --excalidraw-bg/--excalidraw-fg values are kept. Per-element
 //     --excalidraw-color-* variables are never touched regardless.
+
+// Tighten the separator ahead of the per-page contribution footer
+// (page-contribute.tsx): halve the engine's 2rem rule and drop the page-footer's
+// stock top margin so the contribute row sits directly under it. Scoped to the
+// DefaultFrame separator (a direct child of .center) so in-content <hr> keep 2rem;
+// the home dashboard's own `body[data-slug="index"]` rules stay more specific.
+.center > hr {
+  margin-top: 1rem;
+  margin-bottom: 1rem;
+}
+
+.center > hr + .page-footer {
+  margin-top: 0;
+}
