@@ -6,8 +6,10 @@ import { combSort } from "./comb-sort"
 import { cyclicSort } from "./cyclic-sort"
 import { dfs } from "./dfs"
 import { dijkstra } from "./dijkstra"
+import { divideAndConquer } from "./divide-and-conquer"
 import { exponentialSearch } from "./exponential-search"
 import { fibonacci } from "./fibonacci"
+import { floydWarshall } from "./floyd-warshall"
 import { heapSort } from "./heap-sort"
 import { insertionSort } from "./insertion-sort"
 import { introsort } from "./introsort"
@@ -55,8 +57,10 @@ export const builtInAlgorithms = [
   twoPointers,
   slidingWindow,
   lcs,
+  floydWarshall,
   unionFind,
   kernighanPopcount,
   nQueens,
   fibonacci,
+  divideAndConquer,
 ] satisfies readonly BuiltInAlgorithm[]

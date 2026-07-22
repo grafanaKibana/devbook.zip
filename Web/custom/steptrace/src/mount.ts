@@ -61,6 +61,8 @@ export function createMount(
     const mq = matchMedia("(prefers-reduced-motion: reduce)")
     const applyMotion = () => root.classList.toggle("steptrace--reduced", mq.matches)
     mq.addEventListener("change", applyMotion)
+    const shouldIncludeArray =
+      Array.isArray(config.array) || kind === "sort" || kind === "search" || kind === "pointers"
 
     const state = {
       algorithm: config.algorithm,
@@ -510,7 +512,7 @@ export function createMount(
       const built = buildFrames({
         ...state.config,
         algorithm: state.algorithm,
-        array: state.array,
+        ...(shouldIncludeArray ? { array: state.array } : {}),
         start: state.start,
       })
       if (built.family) root.dataset.visualFamily = built.family.id

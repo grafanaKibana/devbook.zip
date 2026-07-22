@@ -24,7 +24,8 @@ export type AlgorithmKind =
   | "backtrack"
   | "rectree"
 
-export type VisualFamilyId = "array-sort" | "indexed-array-search"
+export type VisualFamilyId =
+  "array-sort" | "execution-tree" | "indexed-array-search" | "matrix-grid"
 
 export interface AlgorithmMeta {
   label: string
@@ -54,8 +55,8 @@ export interface AlgorithmInput {
 
 export interface StepTraceConfig extends Partial<Omit<AlgorithmInput, "algorithm">> {
   algorithm: string
-  nodes?: RawGraphNode[]
-  edges?: RawGraphEdge[]
+  nodes?: Array<RawGraphNode | number>
+  edges?: Array<RawGraphEdge | [number, number, number]>
   speed?: number
   gaps?: number[]
   shrinkFactor?: number

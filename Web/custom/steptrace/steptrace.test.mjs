@@ -40,6 +40,7 @@ const cases = [
   "two-pointers",
   "sliding-window",
   "lcs",
+  "floyd-warshall",
   "union-find",
   "kernighan-popcount",
   "n-queens",
@@ -92,6 +93,14 @@ function loadStepTraceModule(...segments) {
   const module = { exports: {} }
   new Function("module", "exports", result.outputFiles[0].text)(module, module.exports)
   return module.exports
+}
+
+function buildAbstractDivideAndConquer() {
+  const { divideAndConquer } = loadStepTraceModule("src", "algorithms", "divide-and-conquer.ts")
+  const config = divideAndConquer.parse({ algorithm: "divide-and-conquer" })
+  const recorder = divideAndConquer.family.createRecorder(config)
+  divideAndConquer.run(config, recorder)
+  return { config, family: divideAndConquer.family, frames: recorder.frames }
 }
 
 function contrastRatio(foreground, background) {
@@ -178,10 +187,18 @@ test("styles are compiled from real SCSS without runtime injection", () => {
   assert.match(obsidianCss, /--st-page: var\(--background-primary\)/)
   assert.match(obsidianCss, /--st-held-bg: #92400e/)
   assert.match(obsidianCss, /--st-held-fg: #ffffff/)
+  assert.match(obsidianCss, /--st-table-cell: var\(--background-primary\)/)
+  assert.match(obsidianCss, /--st-table-header: var\(--background-secondary\)/)
+  assert.match(obsidianCss, /--st-table-border: var\(--background-modifier-border\)/)
+  assert.match(obsidianCss, /--st-table-text: var\(--text-normal\)/)
   assert.match(obsidianCss, /--st-held-bg: #fbbf24/)
   assert.match(obsidianCss, /--st-held-fg: #1f2937/)
   assert.match(quartzHostStyles, /--st-held-bg: #92400e/)
   assert.match(quartzHostStyles, /--st-held-fg: #ffffff/)
+  assert.match(quartzHostStyles, /--st-table-cell: var\(--light\)/)
+  assert.match(quartzHostStyles, /--st-table-header: var\(--lightgray\)/)
+  assert.match(quartzHostStyles, /--st-table-border: var\(--gray\)/)
+  assert.match(quartzHostStyles, /--st-table-text: var\(--darkgray\)/)
   assert.match(quartzHostStyles, /--st-held-bg: #fbbf24/)
   assert.match(quartzHostStyles, /--st-held-fg: #1f2937/)
   assert.doesNotMatch(engine, /steptrace-engine-style|const STYLES|injectStyle/)
@@ -247,6 +264,19 @@ test("all built-in algorithms preserve their headless frame contract", () => {
           ? { gaps: [4, 2, 1] }
           : algorithm === "cyclic-sort"
             ? { array: [5, 3, 1, 4, 2] }
+          : algorithm === "floyd-warshall"
+            ? {
+                nodes: [0, 1, 2, 3],
+                edges: [
+                  [0, 1, 3],
+                  [0, 3, 7],
+                  [1, 0, 8],
+                  [1, 2, 2],
+                  [2, 0, 5],
+                  [2, 3, 1],
+                  [3, 0, 2],
+                ],
+              }
             : ["exponential-search", "jump-search"].includes(algorithm)
               ? { array: commonConfig.array.slice().sort((a, b) => a - b) }
               : {}
@@ -262,9 +292,426 @@ test("all built-in algorithms preserve their headless frame contract", () => {
 
   assert.equal(
     digest,
-    "ee0315779ec86617d90dbbd9c7adfb760f29c97cadf47addb5eb01bd8b8743fb",
+    "203df517843d8741d3277a74923305488eb2d727295731c79d02ca15c15e29e8",
     "the headless StepTrace behavior changed",
   )
+})
+
+test("divide-and-conquer uses the typed execution-tree family without algorithm input", () => {
+  const { parseExecutionTreeConfig } = loadStepTraceModule("src", "families", "execution-tree.ts")
+  const typesSource = readFileSync(join(here, "src", "types.ts"), "utf8")
+  const familySource = readFileSync(join(here, "src", "families", "execution-tree.ts"), "utf8")
+  const mountSource = readFileSync(join(here, "src", "mount.ts"), "utf8")
+  const result = buildAbstractDivideAndConquer()
+
+  assert.deepEqual(result.config, { profile: "divide-and-conquer" })
+  assert.equal(result.family.id, "execution-tree")
+  assert.deepEqual(parseExecutionTreeConfig({ algorithm: "divide-and-conquer" }), {
+    profile: "divide-and-conquer",
+  })
+  assert.throws(
+    () => parseExecutionTreeConfig({ algorithm: "divide-and-conquer", array: [8, 3, 5, 1] }),
+    /does not take an "array"/,
+  )
+  assert.match(typesSource, /\| "execution-tree"/)
+  assert.match(familySource, /satisfies VisualFamily<ExecutionTreeConfig/)
+  assert.match(familySource, /cacheHit\(/)
+  assert.match(familySource, /prune\(/)
+  assert.match(mountSource, /\.\.\.\(shouldIncludeArray \? \{ array: state\.array \} : \{\}\)/)
+})
+
+test("divide-and-conquer frames expose split, base, return, and combine semantics on one topology", () => {
+  const { buildMilestones, summaryFor } = loadStepTraceModule("src", "render.ts")
+  const result = buildAbstractDivideAndConquer()
+  const frames = result.frames
+  const leftSplit = frames.find((frame) => frame.type === "split" && frame.active === "left")
+  const firstBase = frames.find((frame) => frame.type === "base" && frame.active === "a")
+  const leftCombine = frames.find((frame) => frame.type === "combine" && frame.active === "left")
+  const final = frames.at(-1)
+
+  assert.equal(frames.length, 18)
+  assert.ok(frames.every((frame) => frame.nodes === frames[0].nodes))
+  assert.ok(frames.every((frame) => frame.edges === frames[0].edges))
+  assert.equal(frames[0].nodes.length, 7)
+  assert.equal(frames[0].edges.length, 6)
+  assert.deepEqual(leftSplit.path, ["root", "left"])
+  assert.deepEqual(leftSplit.visible, ["root", "left", "right", "a", "b"])
+  assert.equal(firstBase.states.a, "base")
+  assert.equal(firstBase.results.a, "base result A1")
+  assert.equal(leftCombine.states.left, "combine")
+  assert.equal(leftCombine.results.left, "Result A")
+  assert.equal(final.results.root, "Final solution")
+  assert.equal(final.calls, 7)
+  assert.equal(final.pruned, 0)
+  assert.deepEqual(final.collapsed, [])
+  assert.deepEqual(
+    buildMilestones("divide-and-conquer", "rectree", frames).map((mark) => mark.label),
+    [
+      "Whole problem",
+      "Split Problem",
+      "Split Subproblem A",
+      "Combine Subproblem A",
+      "Split Subproblem B",
+      "Combine Subproblem B",
+      "Combine Problem",
+      "Result",
+    ],
+  )
+  assert.equal(summaryFor("divide-and-conquer", "rectree", final), "Final solution.")
+  assert.doesNotMatch(JSON.stringify(frames), /\b(?:array|sort|merge)\b/i)
+})
+
+test("execution-tree rendering keeps its SVG topology stable and its text alternative dynamic", () => {
+  class FakeNode {
+    constructor(tagName, text = "") {
+      this.tagName = tagName
+      this.textContent = text
+      this.innerHTML = ""
+      this.children = []
+      this.attributes = new Map()
+      this.dataset = {}
+      this.style = { setProperty: (key, value) => this.attributes.set(`style:${key}`, value) }
+      this.className = ""
+      this.id = ""
+      this.tabIndex = -1
+    }
+    setAttribute(key, value) {
+      this.attributes.set(key, String(value))
+    }
+    append(...children) {
+      this.children.push(...children)
+    }
+  }
+  const previousDocument = globalThis.document
+  globalThis.document = {
+    createElement: (tagName) => new FakeNode(tagName),
+    createElementNS: (_namespace, tagName) => new FakeNode(tagName),
+    createTextNode: (value) => new FakeNode("#text", value),
+  }
+  try {
+    const { makeExecutionTreeView } = loadStepTraceModule("src", "render.ts")
+    const { executionTreeViewDescriptor } = loadStepTraceModule(
+      "src",
+      "families",
+      "execution-tree.ts",
+    )
+    const { frames } = buildAbstractDivideAndConquer()
+    const view = makeExecutionTreeView(frames, executionTreeViewDescriptor)
+    const [wrap, legend] = view.nodes
+    const svg = wrap.children[0]
+    const topology = svg.children.slice()
+    const firstCard = svg.children.find((node) => node.tagName === "g")
+    const [ring, surface, label, , , badge] = firstCard.children
+
+    view.paint(frames[0], 0, frames.length)
+    assert.equal(svg.children.length, 2 + 6 + 7)
+    assert.equal(svg.attributes.get("role"), "img")
+    assert.match(svg.attributes.get("aria-labelledby"), /title.*description/)
+    assert.equal(wrap.attributes.get("role"), "region")
+    assert.equal(wrap.tabIndex, 0)
+    assert.equal(legend.children.length, 4)
+    assert.equal(svg.attributes.get("viewBox"), "0 0 604 232")
+    assert.equal(svg.attributes.get("style:--steptrace-tree-min-width"), "560px")
+    assert.equal(surface.attributes.get("rx"), "7")
+    assert.equal(ring.attributes.get("rx"), "9")
+    assert.equal(surface.attributes.get("width"), "100")
+    assert.equal(ring.attributes.get("width"), "104")
+    assert.equal(Number(label.attributes.get("y")) - Number(badge.attributes.get("y")), 12)
+    assert.ok(
+      svg.children
+        .filter((node) => node.tagName === "g")
+        .every((node) => node.attributes.get("focusable") === "false"),
+    )
+
+    view.paint(frames.at(-1), frames.length - 1, frames.length)
+    assert.deepEqual(svg.children, topology)
+    assert.equal(svg.children[0].textContent, "Execution tree: complete")
+    assert.match(
+      svg.children[1].textContent,
+      /Active subproblem Problem; whole problem\. final result ready\./,
+    )
+    assert.equal(
+      svg.children.find((node) => node.tagName === "g").children[4].textContent,
+      "→ Final solution",
+    )
+  } finally {
+    globalThis.document = previousDocument
+  }
+})
+
+test("execution-tree watch, legend, responsive styles, and legacy Fibonacci remain compatible", () => {
+  const api = loadEngine(readFileSync(join(here, "generated", "engine.js"), "utf8"))
+  const { executionTreeViewDescriptor } = loadStepTraceModule(
+    "src",
+    "families",
+    "execution-tree.ts",
+  )
+  const styles = readFileSync(join(here, "src", "styles", "rectree.scss"), "utf8")
+  const sharedStyles = readFileSync(join(here, "src", "styles", "shared.scss"), "utf8")
+  const renderSource = readFileSync(join(here, "src", "render.ts"), "utf8")
+  const mountSource = readFileSync(join(here, "src", "mount.ts"), "utf8")
+  const hintsSource = readFileSync(join(here, "src", "watch-hints.ts"), "utf8")
+  const divide = buildAbstractDivideAndConquer()
+  const fibonacci = api.buildFrames({ algorithm: "fibonacci", n: 4 })
+  const memoization = api.buildFrames({ algorithm: "fibonacci", n: 5 })
+  const watch = executionTreeViewDescriptor.watchRows(divide.frames[7])
+
+  assert.deepEqual(
+    watch.map((row) => row.k),
+    ["phase", "subproblem", "call path", "result"],
+  )
+  assert.equal(watch.at(-1).v, "Result A")
+  assert.deepEqual(
+    executionTreeViewDescriptor.legend.map((item) => item.state),
+    ["split", "base", "return", "combine"],
+  )
+  assert.match(hintsSource, /"call path":/)
+  assert.match(hintsSource, /subproblem:/)
+  assert.match(hintsSource, /result:/)
+  assert.match(hintsSource, /phase: "Current stage of the algorithm\."/)
+  assert.equal(executionTreeViewDescriptor.nodeWidth, 100)
+  assert.equal(executionTreeViewDescriptor.nodeHeight, 48)
+  assert.equal(executionTreeViewDescriptor.minSvgWidth, 560)
+  assert.match(mountSource, /root\.dataset\.visualFamily = built\.family\.id/)
+  assert.match(
+    sharedStyles,
+    /\.steptrace:is\(\[data-visual-family="execution-tree"\], \[data-visual-family="matrix-grid"\]\)\s*\{\s*container: steptrace-wide-stage \/ inline-size;/,
+  )
+  assert.match(
+    sharedStyles,
+    /@container steptrace-wide-stage \(max-width: 64rem\)[\s\S]*\.steptrace:is\(\[data-visual-family="execution-tree"\], \[data-visual-family="matrix-grid"\]\)[\s\S]*\.steptrace__body\s*\{[^}]*grid-template-columns: minmax\(0, 1fr\);/,
+  )
+  assert.match(styles, /\.steptrace \.steptrace__rectree/)
+  assert.match(styles, /overflow-x: auto/)
+  assert.match(styles, /min-inline-size: var\(--steptrace-tree-min-width, 40rem\)/)
+  assert.match(styles, /\.steptrace \.steptrace__rtsvg text/)
+  assert.match(styles, /\.steptrace__rtlabel[^}]*font: 600 9px\/1 var\(--_font-mono\);/s)
+  assert.match(styles, /\.steptrace__rtbadge[^}]*font: 600 6px\/1 var\(--_font-head\);/s)
+  assert.doesNotMatch(styles, /glow|drop-shadow/)
+  assert.match(renderSource, /svg\.setAttribute\("aria-labelledby"/)
+  assert.match(renderSource, /group\.setAttribute\("focusable", "false"\)/)
+  assert.equal(fibonacci.family, undefined)
+  assert.equal(fibonacci.kind, "rectree")
+  assert.ok(fibonacci.frames.some((frame) => frame.type === "hit"))
+  assert.ok(fibonacci.frames.every((frame) => frame.nodes === fibonacci.frames[0].nodes))
+  assert.ok(fibonacci.frames.every((frame) => frame.edges === fibonacci.frames[0].edges))
+  assert.equal(memoization.frames.at(-1).vals.c0, 5)
+  assert.equal(memoization.frames.at(-1).memo.length, 6)
+  assert.ok(memoization.frames.some((frame) => frame.type === "hit" && frame.collapsed.length > 0))
+})
+
+test("Floyd-Warshall records matrix relaxations through each permitted intermediate", () => {
+  const api = loadEngine(readFileSync(join(here, "generated", "engine.js"), "utf8"))
+  const result = api.buildFrames({
+    algorithm: "floyd-warshall",
+    nodes: [0, 1, 2, 3],
+    edges: [
+      [0, 1, 3],
+      [0, 3, 7],
+      [1, 0, 8],
+      [1, 2, 2],
+      [2, 0, 5],
+      [2, 3, 1],
+      [3, 0, 2],
+    ],
+  })
+  const { matrixGridFooterModel, matrixGridRolesForCell, matrixGridViewSemantics } =
+    loadStepTraceModule("src", "families", "matrix-grid.ts")
+  const { buildMilestones } = loadStepTraceModule("src", "render.ts")
+  const improve = result.frames.find(
+    (frame) => frame.type === "relax" && frame.k === 1 && frame.cur?.join(",") === "0,2",
+  )
+  const stage = result.frames.find((frame) => frame.type === "stage" && frame.k === 1)
+  const keep = result.frames.find(
+    (frame) => frame.type === "relax" && frame.k === 0 && frame.cur?.join(",") === "1,0",
+  )
+  const final = result.frames.at(-1)
+  const milestones = buildMilestones("floyd-warshall", "dp", result.frames).map(
+    (mark) => mark.label,
+  )
+  const watch = matrixGridViewSemantics.watchRows(improve)
+
+  assert.equal(result.family.id, "matrix-grid")
+  assert.equal(improve.decision, "improve")
+  assert.equal(improve.candidate, 5)
+  assert.equal(improve.previous, null)
+  assert.equal(improve.result, 5)
+  assert.equal(improve.operandA, 3)
+  assert.equal(improve.operandB, 2)
+  assert.deepEqual(improve.deps, [
+    [0, 1],
+    [1, 2],
+  ])
+  assert.deepEqual(final.grid, [
+    [0, 3, 5, 6],
+    [5, 0, 2, 3],
+    [3, 6, 0, 1],
+    [2, 5, 7, 0],
+  ])
+  assert.ok(milestones.includes("Stage k = 0"))
+  assert.ok(milestones.includes("Stage k = 3"))
+  assert.equal(watch.find((row) => row.k === "stage k")?.v, "1")
+  assert.match(
+    String(watch.find((row) => row.k === "dist[i][j]")?.v),
+    /dist\[0\]\[2\] = ∞ before this relaxation/,
+  )
+  assert.equal(watch.find((row) => row.k === "candidate")?.v, "3 + 2 = 5")
+  assert.equal(watch.find((row) => row.k === "decision")?.v, "write ∞ → 5")
+  assert.deepEqual(matrixGridFooterModel(improve), {
+    context: "Stage k = 1",
+    summary: { role: "write", text: "Write 5 · ∞ → 5" },
+  })
+  assert.deepEqual(matrixGridFooterModel(result.frames[0]), {
+    context: "Initialize distance matrix",
+    summary: { text: "Seed diagonal, edges, and ∞" },
+  })
+  assert.deepEqual(matrixGridFooterModel(stage), {
+    context: "Stage k = 1",
+    summary: { text: "Compare 16 pairs through node 1" },
+  })
+  assert.deepEqual(matrixGridFooterModel(keep), {
+    context: "Stage k = 0",
+    summary: { role: "keep", text: "Keep 8 · via 0 is not shorter" },
+  })
+  assert.deepEqual(matrixGridFooterModel(final), {
+    context: "All stages complete",
+    summary: { text: "16 distances ready" },
+  })
+
+  const coincident = result.frames.find(
+    (frame) => frame.type === "relax" && frame.k === 0 && frame.cur?.join(",") === "0,0",
+  )
+  assert.deepEqual(matrixGridRolesForCell(coincident, 0, 0), [
+    "stage-axis",
+    "operand-a",
+    "operand-b",
+    "target",
+  ])
+  assert.match(
+    matrixGridViewSemantics.cellLabel(improve, 0, 2),
+    /previous ∞; candidate 5; decision improve; result 5/,
+  )
+})
+
+test("Floyd-Warshall rejects malformed matrix inputs and reports negative cycles", () => {
+  const api = loadEngine(readFileSync(join(here, "generated", "engine.js"), "utf8"))
+
+  assert.throws(
+    () => api.buildFrames({ algorithm: "floyd-warshall", nodes: [], edges: [] }),
+    /non-empty numeric "nodes"/,
+  )
+  assert.throws(
+    () => api.buildFrames({ algorithm: "floyd-warshall", nodes: [0, 0], edges: [] }),
+    /unique "nodes"/,
+  )
+  assert.throws(
+    () => api.buildFrames({ algorithm: "floyd-warshall", nodes: [0, 1], edges: [[0, 1]] }),
+    /finite \[from, to, weight\] tuple/,
+  )
+  assert.throws(
+    () => api.buildFrames({ algorithm: "floyd-warshall", nodes: [0, 1], edges: [[0, 2, 1]] }),
+    /reference nodes declared/,
+  )
+
+  const cycle = api.buildFrames({
+    algorithm: "floyd-warshall",
+    nodes: [0, 1],
+    edges: [
+      [0, 1, 1],
+      [1, 0, -3],
+    ],
+  })
+  const cycleFrame = cycle.frames.find((frame) => frame.type === "negative-cycle")
+  const { matrixGridFooterModel } = loadStepTraceModule("src", "families", "matrix-grid.ts")
+  assert.ok(cycleFrame)
+  assert.ok(cycle.frames.at(-1).message.includes("negative cycle"))
+  assert.deepEqual(matrixGridFooterModel(cycleFrame), {
+    context: "Negative cycle",
+    summary: { text: "Cycle paths are unbounded" },
+  })
+})
+
+test("LCS keeps the default matrix-grid behavior and accessible table semantics", () => {
+  const api = loadEngine(readFileSync(join(here, "generated", "engine.js"), "utf8"))
+  const result = api.buildFrames({ algorithm: "lcs", a: "ABCBDAB", b: "BDCABA" })
+  const renderSource = readFileSync(join(here, "src", "render.ts"), "utf8")
+  const { lcsMatrixGridSemantics } = loadStepTraceModule("src", "render.ts")
+
+  assert.equal(result.family, undefined)
+  assert.equal(result.frames.at(-1).grid.at(-1).at(-1), 4)
+  assert.equal(lcsMatrixGridSemantics.stageLayout, undefined)
+  assert.match(
+    renderSource,
+    /export function makeDPView\(frames, semantics = lcsMatrixGridSemantics\)/,
+  )
+  assert.match(renderSource, /table\.setAttribute\("aria-label", semantics\.tableLabel\)/)
+  assert.match(renderSource, /th\.setAttribute\("scope", "col"\)/)
+  assert.match(renderSource, /th\.setAttribute\("scope", "row"\)/)
+  assert.equal(
+    lcsMatrixGridSemantics.stateForCell({ cur: [0, 0], deps: [[0, 0]], path: [[0, 0]] }, 0, 0),
+    "cur",
+  )
+})
+
+test("Floyd-Warshall keeps one stable semantic footer inside its matrix table", () => {
+  const renderSource = readFileSync(join(here, "src", "render.ts"), "utf8")
+  const styles = readFileSync(join(here, "src", "styles", "dp.scss"), "utf8")
+  const sharedStyles = readFileSync(join(here, "src", "styles", "shared.scss"), "utf8")
+  const { matrixGridViewSemantics } = loadStepTraceModule("src", "families", "matrix-grid.ts")
+  const { lcsMatrixGridSemantics } = loadStepTraceModule("src", "render.ts")
+
+  assert.equal(matrixGridViewSemantics.stageLayout, "fill")
+  assert.ok(matrixGridViewSemantics.footerModel)
+  assert.equal(lcsMatrixGridSemantics.footerModel, undefined)
+  assert.match(renderSource, /function makeMatrixFooter\(/)
+  assert.match(renderSource, /document\.createElement\("tfoot"\)/)
+  assert.match(renderSource, /cell\.colSpan = columnCount/)
+  assert.match(renderSource, /table\.append\(root\)/)
+  assert.match(
+    renderSource,
+    /const footer = semantics\.footerModel \? makeMatrixFooter\(table, C \+ 1, roleLegend\) : null/,
+  )
+  assert.match(
+    renderSource,
+    /if \(footer && semantics\.footerModel\) footer\.paint\(semantics\.footerModel\(frame\)\)/,
+  )
+  assert.match(renderSource, /if \(stage\) stage\.append\(wrap\)/)
+  assert.doesNotMatch(
+    renderSource,
+    /makeMatrixComparison|lensModel|matrix-comparison|summaryBadge|formula\.kind === "via"/,
+  )
+  assert.match(
+    styles,
+    /\.steptrace \.steptrace__dp tfoot\s*\{\s*display: table-footer-group !important;/,
+  )
+  assert.match(
+    styles,
+    /\.steptrace \.steptrace__matrix-footer > tr > td\s*\{[^}]*height: 2\.75rem;[^}]*border-top: 1px solid var\(--_matrix-border-color\) !important;[^}]*background: var\(--_matrix-header\);/s,
+  )
+  assert.match(
+    styles,
+    /\.steptrace \.steptrace__matrix-footer-row\s*\{[^}]*grid-template-columns: minmax\(0, 1fr\) auto;[^}]*font: 400 var\(--_type-small\) \/ 1\.2 var\(--_font-head\);/s,
+  )
+  assert.match(renderSource, /steptrace__matrix-footer-context/)
+  assert.match(renderSource, /steptrace__matrix-footer-summary/)
+  assert.doesNotMatch(renderSource, /steptrace__matrix-footer-(?:label|formula|output)/)
+  assert.match(
+    styles,
+    /\.steptrace \.steptrace__matrix-footer-context\s*\{[^}]*justify-self: start;[^}]*text-align: left;/s,
+  )
+  assert.doesNotMatch(
+    styles,
+    /tbody tr:last-child td:last-child\[data-roles~="target"\]::before[^}]*border-bottom-right-radius/s,
+  )
+  assert.match(
+    styles,
+    /\.steptrace \.steptrace__dp-wrap\s*\{[^}]*overflow-x: auto;[^}]*overflow-y: hidden;/s,
+  )
+  assert.match(
+    sharedStyles,
+    /\[data-visual-family="matrix-grid"\][\s\S]*@container steptrace-wide-stage \(max-width: 64rem\)/,
+  )
+  assert.doesNotMatch(styles, /\.steptrace__matrix-comparison|comparison-band|comparison-summary/)
 })
 
 test("Quartz StepTrace hydration inspects added subtrees and restores removed stylesheets", () => {

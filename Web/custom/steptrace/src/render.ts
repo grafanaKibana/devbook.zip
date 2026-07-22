@@ -538,58 +538,229 @@ export function makePointerView(frames) {
   return { nodes: [wrap, status], paint, watch }
 }
 
+export interface MatrixGridViewSemantics {
+  tableLabel: string
+  axisDescription?: string
+  cornerLabel?: string
+  stageLayout?: "compact" | "fill"
+  formatValue(value: unknown): string
+  cellLabel(frame: any, row: number, column: number): string
+  stateForCell(frame: any, row: number, column: number): string
+  decisionForCell?(frame: any, row: number, column: number): string
+  rolesForCell?(frame: any, row: number, column: number): string[]
+  headerRole?(frame: any, axis: "row" | "column", index: number): string
+  footerModel?(frame: any): MatrixGridFooterModel
+  roleLegend?: readonly MatrixGridRoleDescriptor[]
+  watchRows(frame: any): Array<{ k: string; v: unknown; sw?: string; hint?: string }>
+}
+
+export interface MatrixGridRoleDescriptor {
+  role: string
+  badge: string
+  label: string
+}
+
+export interface MatrixGridFooterModel {
+  context: string
+  summary: {
+    text: string
+    role?: "keep" | "write"
+  }
+}
+
+export const lcsMatrixGridSemantics: MatrixGridViewSemantics = {
+  tableLabel: "Dynamic-programming table",
+  formatValue(value) {
+    return value == null ? "" : String(value)
+  },
+  cellLabel(frame, row, column) {
+    const value = frame.grid[row][column]
+    return `Cell ${frame.rowLabels[row]}, ${frame.colLabels[column]}: ${value == null ? "empty" : value}`
+  },
+  stateForCell(frame, row, column) {
+    const key = `${row},${column}`
+    const curKey = frame.cur ? frame.cur.join(",") : null
+    const depSet = new Set((frame.deps || []).map((dependency) => dependency.join(",")))
+    const pathSet = new Set((frame.path || []).map((cell) => cell.join(",")))
+    if (curKey === key) return "cur"
+    if (pathSet.has(key)) return "path"
+    if (depSet.has(key)) return "dep"
+    return ""
+  },
+  watchRows(frame) {
+    const cur = frame.cur
+    const value = cur ? frame.grid[cur[0]][cur[1]] : null
+    return [
+      { k: "cell", v: cur ? `[${cur[0]}, ${cur[1]}]` : "—", sw: "var(--_blue)" },
+      { k: "value", v: value == null ? "—" : String(value), sw: "var(--_green)" },
+    ]
+  },
+}
+
+function paintMatrixRoleBadge(element: HTMLElement, descriptor: MatrixGridRoleDescriptor) {
+  element.dataset.role = descriptor.role
+  element.textContent = descriptor.badge
+  element.title = descriptor.label
+}
+
+export function makeMatrixRoleBadge(descriptor: MatrixGridRoleDescriptor) {
+  const badge = el("span", "steptrace__matrix-role-badge")
+  badge.setAttribute("aria-hidden", "true")
+  paintMatrixRoleBadge(badge, descriptor)
+  return badge
+}
+
+function roleDescriptor(
+  descriptors: readonly MatrixGridRoleDescriptor[],
+  role: string,
+): MatrixGridRoleDescriptor {
+  const descriptor = descriptors.find((candidate) => candidate.role === role)
+  if (!descriptor) throw new Error(`steptrace: matrix role "${role}" is not described.`)
+  return descriptor
+}
+
+export function makeMatrixRoleLegend(descriptors: readonly MatrixGridRoleDescriptor[]) {
+  const root = el("aside", "steptrace__legend-wrap steptrace__matrix-role-legend")
+  root.setAttribute("aria-label", "Matrix role legend")
+  const items = el("ul", "steptrace__legend steptrace__matrix-role-legend-items")
+  for (const descriptor of descriptors) {
+    const item = el("li", "steptrace__legend-row steptrace__matrix-role-legend-item")
+    const label = el("span", "steptrace__matrix-role-legend-label")
+    label.textContent = descriptor.label
+    item.append(makeMatrixRoleBadge(descriptor), label)
+    items.append(item)
+  }
+  root.append(items)
+  return root
+}
+
+function makeMatrixFooter(
+  table: HTMLTableElement,
+  columnCount: number,
+  descriptors: readonly MatrixGridRoleDescriptor[],
+) {
+  const root = document.createElement("tfoot")
+  root.className = "steptrace__matrix-footer"
+  root.setAttribute("aria-label", "Current matrix stage")
+  const row = document.createElement("tr")
+  const cell = document.createElement("td")
+  cell.colSpan = columnCount
+  const content = el("div", "steptrace__matrix-footer-row")
+  const context = el("span", "steptrace__matrix-footer-context")
+  const summary = el("span", "steptrace__matrix-footer-summary")
+  content.append(context, summary)
+  cell.append(content)
+  row.append(cell)
+  root.append(row)
+  table.append(root)
+
+  function paint(model: MatrixGridFooterModel) {
+    context.textContent = model.context
+    summary.replaceChildren()
+    if (model.summary.role) {
+      summary.append(makeMatrixRoleBadge(roleDescriptor(descriptors, model.summary.role)))
+    }
+    summary.append(document.createTextNode(model.summary.text))
+    row.setAttribute("aria-label", `${model.context}; ${model.summary.text}`)
+  }
+
+  return { paint }
+}
+
 // ---- dp view: a 2-D table that fills in cell by cell ----
-export function makeDPView(frames) {
+export function makeDPView(frames, semantics = lcsMatrixGridSemantics) {
   const f0 = frames[0]
   const R = f0.rowLabels.length
   const C = f0.colLabels.length
-  const table = el("table", "steptrace__dp")
+  const guided = semantics.stageLayout === "fill"
+  const roleLegend = semantics.roleLegend || []
+  const table = el("table", `steptrace__dp${guided ? " steptrace__dp--guided" : ""}`)
+  table.setAttribute("aria-label", semantics.tableLabel)
+  const caption = document.createElement("caption")
+  caption.className = "steptrace__dp-caption"
+  caption.textContent = semantics.axisDescription || semantics.tableLabel
+  table.append(caption)
   const thead = document.createElement("thead")
   const htr = document.createElement("tr")
-  htr.append(document.createElement("th"))
+  const corner = document.createElement("th")
+  corner.setAttribute("scope", "col")
+  corner.className = "steptrace__dp-corner"
+  corner.textContent = semantics.cornerLabel || ""
+  htr.append(corner)
+  const columnHeaders = []
   for (let c = 0; c < C; c++) {
     const th = document.createElement("th")
     th.textContent = f0.colLabels[c]
+    th.setAttribute("scope", "col")
     htr.append(th)
+    columnHeaders.push(th)
   }
   thead.append(htr)
   table.append(thead)
   const tbody = document.createElement("tbody")
   const cellEls = []
+  const rowHeaders = []
   for (let r = 0; r < R; r++) {
     const tr = document.createElement("tr")
     const th = document.createElement("th")
     th.textContent = f0.rowLabels[r]
+    th.setAttribute("scope", "row")
     tr.append(th)
+    rowHeaders.push(th)
     const rowCells = []
     for (let c = 0; c < C; c++) {
       const td = document.createElement("td")
+      if (guided) {
+        const value = el("span", "steptrace__dp-value")
+        const markers = el("span", "steptrace__dp-markers")
+        markers.setAttribute("aria-hidden", "true")
+        const operandA = makeMatrixRoleBadge(roleDescriptor(roleLegend, "operand-a"))
+        const operandB = makeMatrixRoleBadge(roleDescriptor(roleLegend, "operand-b"))
+        const target = makeMatrixRoleBadge(roleDescriptor(roleLegend, "target"))
+        markers.append(operandA, operandB, target)
+        td.append(value, markers)
+        rowCells.push({ td, value, target })
+      } else {
+        rowCells.push({ td, value: td, target: null })
+      }
       tr.append(td)
-      rowCells.push(td)
     }
     cellEls.push(rowCells)
     tbody.append(tr)
   }
   table.append(tbody)
-  const wrap = el("div", "steptrace__dp-wrap")
+  const footer = semantics.footerModel ? makeMatrixFooter(table, C + 1, roleLegend) : null
+  const wrap = el("div", `steptrace__dp-wrap${guided ? " steptrace__dp-wrap--guided" : ""}`)
   wrap.append(table)
+  const legend = roleLegend.length ? makeMatrixRoleLegend(roleLegend) : null
+  const stage = guided ? el("div", "steptrace__dp-stage steptrace__dp-stage--guided") : null
+  if (stage) stage.append(wrap)
   const status = statusEl()
+  const nodes = stage ? [stage, ...(legend ? [legend] : []), status] : [wrap, status]
 
   function paint(frame, i, total) {
-    const curKey = frame.cur ? frame.cur.join(",") : null
-    const depSet = new Set((frame.deps || []).map((d) => d.join(",")))
-    const pathSet = new Set((frame.path || []).map((p) => p.join(",")))
+    if (footer && semantics.footerModel) footer.paint(semantics.footerModel(frame))
+    for (let r = 0; r < R; r++) {
+      rowHeaders[r].dataset.role = semantics.headerRole?.(frame, "row", r) || ""
+    }
+    for (let c = 0; c < C; c++) {
+      columnHeaders[c].dataset.role = semantics.headerRole?.(frame, "column", c) || ""
+    }
     for (let r = 0; r < R; r++) {
       for (let c = 0; c < C; c++) {
-        const td = cellEls[r][c]
+        const { td, value, target } = cellEls[r][c]
         const v = frame.grid[r][c]
-        td.textContent = v == null ? "" : v
-        const key = r + "," + c
-        let state = ""
-        if (depSet.has(key)) state = "dep"
-        if (pathSet.has(key)) state = "path"
-        if (curKey === key) state = "cur"
-        td.dataset.state = state
+        value.textContent = semantics.formatValue(v)
+        td.dataset.state = semantics.stateForCell(frame, r, c)
+        td.dataset.roles = (semantics.rolesForCell?.(frame, r, c) || []).join(" ")
+        const decision = semantics.decisionForCell?.(frame, r, c) || ""
+        if (decision) td.dataset.decision = decision
+        else delete td.dataset.decision
+        if (target) {
+          const role = decision === "improve" ? "write" : decision === "keep" ? "keep" : "target"
+          paintMatrixRoleBadge(target, roleDescriptor(roleLegend, role))
+        }
+        td.setAttribute("aria-label", semantics.cellLabel(frame, r, c))
       }
     }
     status.innerHTML =
@@ -597,15 +768,15 @@ export function makeDPView(frames) {
   }
 
   function watch(frame) {
-    const cur = frame.cur
-    const v = cur ? frame.grid[cur[0]][cur[1]] : null
-    return [
-      { k: "cell", v: cur ? `[${cur[0]}, ${cur[1]}]` : "—", sw: "var(--_blue)" },
-      { k: "value", v: v == null ? "—" : String(v), sw: "var(--_green)" },
-    ]
+    return semantics.watchRows(frame)
   }
 
-  return { nodes: [wrap, status], paint, watch }
+  return {
+    nodes,
+    stageLayout: semantics.stageLayout || "compact",
+    paint,
+    watch,
+  }
 }
 
 // ---- union-find view: a row of elements with parent-pointer arcs above ----
@@ -919,137 +1090,241 @@ export function makeBacktrackView(frames) {
   return { nodes: [wrap, status], paint, watch }
 }
 
-// ---- rectree view: an SVG recursion tree (naive) that collapses into a memo
-//  DAG. Cloned from makeGraphView: the viewBox is derived ONCE from the full
-//  node set and EVERY node/edge is placed on frame 0. paint() only toggles
-//  data-* and rewrites value text — never inserts/removes DOM — so the stage
-//  height is identical on every frame. ----
-const RT_R = 16 // rectree node radius
-export function makeRecTreeView(frames) {
+let executionTreeViewSerial = 0
+
+export interface ExecutionTreeViewDescriptor {
+  ariaLabel: string
+  shape: "circle" | "card"
+  nodeWidth: number
+  nodeHeight: number
+  minSvgWidth: number
+  stateLabels: Record<string, string>
+  legend: ReadonlyArray<{ state: string; label: string }>
+  frameModel(frame: any): {
+    phase: string
+    action: string
+    active: string | null
+    path: string[]
+    visible: string[]
+    states: Record<string, string>
+    results: Record<string, unknown>
+    collapsed: string[]
+  }
+  nodeLines(node: any): [string, string]
+  watchRows(frame: any, model: ReturnType<ExecutionTreeViewDescriptor["frameModel"]>): any[]
+}
+
+export function makeExecutionTreeView(frames, descriptor: ExecutionTreeViewDescriptor) {
   const f0 = frames[0]
   const nodes = f0.nodes
-  const pad = 26
-  const xs = nodes.map((n) => n.x)
-  const ys = nodes.map((n) => n.y)
+  const halfWidth = descriptor.nodeWidth / 2
+  const halfHeight = descriptor.nodeHeight / 2
+  const padX = halfWidth + 12
+  const padY = halfHeight + 12
+  const xs = nodes.map((node) => node.x)
+  const ys = nodes.map((node) => node.y)
   const minX = Math.min(...xs)
   const minY = Math.min(...ys)
-  const w = Math.max(...xs) - minX + pad * 2
-  const h = Math.max(...ys) - minY + pad * 2
-  const pos = Object.fromEntries(
-    nodes.map((n) => [n.id, { x: n.x - minX + pad, y: n.y - minY + pad }]),
+  const width = Math.max(...xs) - minX + padX * 2
+  const height = Math.max(...ys) - minY + padY * 2
+  const position = Object.fromEntries(
+    nodes.map((node) => [node.id, { x: node.x - minX + padX, y: node.y - minY + padY }]),
   )
 
   const svg = document.createElementNS(SVGNS, "svg")
+  const title = document.createElementNS(SVGNS, "title")
+  const description = document.createElementNS(SVGNS, "desc")
+  const accessibleId = `steptrace-execution-tree-${++executionTreeViewSerial}`
+  title.id = `${accessibleId}-title`
+  description.id = `${accessibleId}-description`
   svg.setAttribute("class", "steptrace__rtsvg")
-  svg.setAttribute("viewBox", `0 0 ${w} ${h}`)
+  svg.setAttribute("viewBox", `0 0 ${width} ${height}`)
+  svg.setAttribute("preserveAspectRatio", "xMidYMid meet")
   svg.setAttribute("role", "img")
-  svg.setAttribute("aria-label", "Recursion tree")
+  svg.setAttribute("aria-labelledby", `${title.id} ${description.id}`)
+  svg.style.setProperty("--steptrace-tree-min-width", `${descriptor.minSvgWidth}px`)
+  svg.append(title, description)
 
-  // edges first (under nodes); each fades in with its child node
-  const edgeEls = []
-  for (const e of f0.edges) {
-    const a = pos[e.from]
-    const b = pos[e.to]
+  const edgeElements = []
+  for (const edge of f0.edges) {
+    const from = position[edge.from]
+    const to = position[edge.to]
     const line = document.createElementNS(SVGNS, "line")
     line.setAttribute("class", "steptrace__rtedge")
-    line.setAttribute("x1", a.x)
-    line.setAttribute("y1", a.y)
-    line.setAttribute("x2", b.x)
-    line.setAttribute("y2", b.y)
+    line.setAttribute("x1", String(from.x))
+    line.setAttribute("y1", String(from.y + halfHeight))
+    line.setAttribute("x2", String(to.x))
+    line.setAttribute("y2", String(to.y - halfHeight))
+    line.setAttribute("aria-hidden", "true")
+    line.setAttribute("focusable", "false")
     svg.append(line)
-    edgeEls.push({ el: line, to: e.to })
+    edgeElements.push({ element: line, from: edge.from, to: edge.to })
   }
 
-  const nodeEls = {}
-  for (const n of nodes) {
-    const p = pos[n.id]
-    const g = document.createElementNS(SVGNS, "g")
-    g.setAttribute("class", "steptrace__rtnode")
-    const ring = document.createElementNS(SVGNS, "circle")
+  const nodeElements = {}
+  for (const node of nodes) {
+    const point = position[node.id]
+    const group = document.createElementNS(SVGNS, "g")
+    group.setAttribute("class", "steptrace__rtnode")
+    group.setAttribute("transform", `translate(${point.x} ${point.y})`)
+    group.setAttribute("aria-hidden", "true")
+    group.setAttribute("focusable", "false")
+    group.dataset.shape = descriptor.shape
+
+    const ring = document.createElementNS(SVGNS, descriptor.shape === "circle" ? "circle" : "rect")
     ring.setAttribute("class", "steptrace__rtring")
-    ring.setAttribute("cx", p.x)
-    ring.setAttribute("cy", p.y)
-    ring.setAttribute("r", String(RT_R + 3))
-    const back = document.createElementNS(SVGNS, "circle")
-    back.setAttribute("class", "steptrace__rtback")
-    back.setAttribute("cx", p.x)
-    back.setAttribute("cy", p.y)
-    back.setAttribute("r", String(RT_R))
-    const circ = document.createElementNS(SVGNS, "circle")
-    circ.setAttribute("class", "steptrace__rtcirc")
-    circ.setAttribute("cx", p.x)
-    circ.setAttribute("cy", p.y)
-    circ.setAttribute("r", String(RT_R))
+    const surface = document.createElementNS(
+      SVGNS,
+      descriptor.shape === "circle" ? "circle" : "rect",
+    )
+    surface.setAttribute("class", "steptrace__rtcirc")
+    if (descriptor.shape === "circle") {
+      ring.setAttribute("r", String(halfWidth + 3))
+      surface.setAttribute("r", String(halfWidth))
+    } else {
+      surface.setAttribute("x", String(-halfWidth))
+      surface.setAttribute("y", String(-halfHeight))
+      surface.setAttribute("width", String(descriptor.nodeWidth))
+      surface.setAttribute("height", String(descriptor.nodeHeight))
+      surface.setAttribute("rx", "7")
+      ring.setAttribute("x", String(-halfWidth - 2))
+      ring.setAttribute("y", String(-halfHeight - 2))
+      ring.setAttribute("width", String(descriptor.nodeWidth + 4))
+      ring.setAttribute("height", String(descriptor.nodeHeight + 4))
+      ring.setAttribute("rx", "9")
+    }
+
     const label = document.createElementNS(SVGNS, "text")
+    const detail = document.createElementNS(SVGNS, "text")
+    const result = document.createElementNS(SVGNS, "text")
+    const badge = document.createElementNS(SVGNS, "text")
     label.setAttribute("class", "steptrace__rtlabel")
-    label.setAttribute("x", p.x)
-    label.setAttribute("y", p.y)
-    label.setAttribute("text-anchor", "middle")
-    label.setAttribute("dominant-baseline", "central")
-    label.textContent = n.label
-    const val = document.createElementNS(SVGNS, "text")
-    val.setAttribute("class", "steptrace__rtval")
-    val.setAttribute("x", p.x)
-    val.setAttribute("y", p.y + RT_R + 9)
-    val.setAttribute("text-anchor", "middle")
-    g.append(ring, back, circ, label, val)
-    svg.append(g)
-    nodeEls[n.id] = { g, val }
+    detail.setAttribute("class", "steptrace__rtdetail")
+    result.setAttribute("class", "steptrace__rtval")
+    badge.setAttribute("class", "steptrace__rtbadge")
+    for (const element of [label, detail, result]) element.setAttribute("text-anchor", "middle")
+    const [primaryLine, secondaryLine] = descriptor.nodeLines(node)
+    label.textContent = primaryLine
+    detail.textContent = secondaryLine
+    if (descriptor.shape === "circle") {
+      label.setAttribute("y", "0")
+      label.setAttribute("dominant-baseline", "central")
+      result.setAttribute("y", String(halfHeight + 9))
+    } else {
+      label.setAttribute("y", "-3")
+      detail.setAttribute("y", "9")
+      result.setAttribute("y", "20")
+      badge.setAttribute("x", String(-halfWidth + 7))
+      badge.setAttribute("y", String(-halfHeight + 9))
+      badge.setAttribute("text-anchor", "start")
+    }
+    group.append(ring, surface, label, detail, result, badge)
+    svg.append(group)
+    nodeElements[node.id] = { group, result, badge }
   }
 
   const legend = el("div", "steptrace__legend")
-  for (const [word, key] of [
-    ["compute", "current"],
-    ["store (miss)", "frontier"],
-    ["reuse (hit)", "visited"],
-  ]) {
+  legend.setAttribute("aria-label", `${descriptor.ariaLabel} state legend`)
+  for (const item of descriptor.legend) {
     const row = el("div", "steptrace__legend-row")
-    row.append(
-      el("span", "steptrace__swatch steptrace__swatch--" + key),
-      document.createTextNode(word),
-    )
+    const swatch = el("span", "steptrace__swatch steptrace__rtswatch")
+    swatch.dataset.state = item.state
+    row.append(swatch, document.createTextNode(item.label))
     legend.append(row)
   }
 
   const wrap = el("div", "steptrace__rectree")
+  wrap.setAttribute("role", "region")
+  wrap.setAttribute("aria-label", `${descriptor.ariaLabel} visualization`)
+  wrap.tabIndex = 0
   wrap.append(svg)
   const status = statusEl()
 
-  function paint(frame, i, total) {
-    const vis = new Set(frame.vis)
-    const collapsed = new Set(frame.collapsed)
-    const state = frame.state
-    const vals = frame.vals
-    for (const n of nodes) {
-      const ne = nodeEls[n.id]
-      ne.g.dataset.vis = vis.has(n.id) ? "1" : "0"
-      ne.g.dataset.collapsed = collapsed.has(n.id) ? "true" : "false"
-      ne.g.dataset.state = state[n.id] || ""
-      ne.g.dataset.active = frame.active === n.id ? "true" : "false"
-      const v = vals[n.id]
-      ne.val.textContent = v == null ? "" : "= " + v
+  function paint(frame, index, total) {
+    const model = descriptor.frameModel(frame)
+    const visible = new Set(model.visible)
+    const collapsed = new Set(model.collapsed)
+    const path = new Set(model.path)
+    const activeNode = nodes.find((node) => node.id === model.active)
+    title.textContent = `${descriptor.ariaLabel}: ${model.phase}`
+    description.textContent = `${model.phase}. Active subproblem ${activeNode ? descriptor.nodeLines(activeNode).join("; ") : "none"}. ${model.action}.`
+    for (const node of nodes) {
+      const elements = nodeElements[node.id]
+      const state = model.states[node.id] || ""
+      elements.group.dataset.vis = visible.has(node.id) ? "1" : "0"
+      elements.group.dataset.collapsed = collapsed.has(node.id) ? "true" : "false"
+      elements.group.dataset.state = state
+      elements.group.dataset.active = model.active === node.id ? "true" : "false"
+      elements.group.dataset.path = path.has(node.id) ? "true" : "false"
+      const value = model.results[node.id]
+      elements.result.textContent = Array.isArray(value)
+        ? value.length
+          ? `→ [${value.join(", ")}]`
+          : ""
+        : value == null
+          ? ""
+          : `→ ${value}`
+      elements.badge.textContent = descriptor.stateLabels[state] || ""
     }
-    for (const e of edgeEls) {
-      e.el.dataset.vis = vis.has(e.to) ? "1" : "0"
-      e.el.dataset.collapsed = collapsed.has(e.to) ? "true" : "false"
+    for (const edge of edgeElements) {
+      edge.element.dataset.vis = visible.has(edge.to) ? "1" : "0"
+      edge.element.dataset.collapsed = collapsed.has(edge.to) ? "true" : "false"
+      edge.element.dataset.path = path.has(edge.from) && path.has(edge.to) ? "true" : "false"
     }
     status.innerHTML =
-      escapeHtml(frame.message) + ` <span class="steptrace__counts">· step ${i + 1}/${total}</span>`
+      escapeHtml(frame.message) +
+      ` <span class="steptrace__counts">· step ${index + 1}/${total}</span>`
   }
 
-  // exactly 3 rows every frame ⇒ constant footer height
   function watch(frame) {
+    const model = descriptor.frameModel(frame)
+    return descriptor.watchRows(frame, model)
+  }
+
+  return { nodes: [wrap, legend, status], paint, watch }
+}
+
+const legacyRecTreeDescriptor: ExecutionTreeViewDescriptor = {
+  ariaLabel: "Recursion tree",
+  shape: "circle",
+  nodeWidth: 32,
+  nodeHeight: 32,
+  minSvgWidth: 320,
+  stateLabels: {},
+  legend: [
+    { state: "compute", label: "compute" },
+    { state: "miss", label: "store (miss)" },
+    { state: "hit", label: "reuse (hit)" },
+  ],
+  frameModel(frame) {
+    return {
+      phase: frame.phase === "memo" ? "Memoized recursion" : "Plain recursion",
+      action: frame.message,
+      active: frame.active,
+      path: frame.active ? [frame.active] : [],
+      visible: frame.vis,
+      states: frame.state,
+      results: frame.vals,
+      collapsed: frame.collapsed,
+    }
+  },
+  nodeLines(node) {
+    return [node.label, ""]
+  },
+  watchRows(frame) {
     const last = frame.memo.length ? frame.memo[frame.memo.length - 1] : null
-    const ev =
+    const event =
       frame.type === "miss" || frame.type === "hit" || frame.type === "base" ? frame.type : "—"
     return [
       { k: "calls", v: String(frame.calls), sw: "var(--_blue)" },
       { k: "memo", v: last ? `f(${last.k}) = ${last.v}` : "—", sw: "var(--_green)" },
-      { k: "event", v: ev, sw: "var(--_violet)" },
+      { k: "event", v: event, sw: "var(--_violet)" },
     ]
-  }
+  },
+}
 
-  return { nodes: [wrap, legend, status], paint, watch }
+export function makeRecTreeView(frames) {
+  return makeExecutionTreeView(frames, legacyRecTreeDescriptor)
 }
 
 // ---- graph view: svg ----
@@ -1362,7 +1637,9 @@ export function buildMilestones(algorithm, kind, frames) {
           : kind === "backtrack"
             ? "Depth 0"
             : kind === "rectree"
-              ? "Call tree"
+            ? familyProfile === "divide-and-conquer"
+              ? "Whole problem"
+              : "Call tree"
               : "Initialize"
   push(0, initial)
   let lastRange = ""
@@ -1442,7 +1719,9 @@ export function buildMilestones(algorithm, kind, frames) {
         lastWindow = win
       }
     } else if (kind === "dp") {
-      if (f.type === "compute" && f.cur && f.cur[0] !== lastRow) {
+      if (familyProfile === "floyd-warshall" && f.type === "stage") {
+        push(i, `Stage k = ${f.k}`)
+      } else if (f.type === "compute" && f.cur && f.cur[0] !== lastRow) {
         push(i, `Row ${f.rowLabels[f.cur[0]]}`)
         lastRow = f.cur[0]
       } else if (f.type === "trace" && frames[i - 1].type !== "trace") {
@@ -1457,8 +1736,16 @@ export function buildMilestones(algorithm, kind, frames) {
         push(i, `Depth ${f.depth}`)
         lastDepth = f.depth
       }
-    } else if (kind === "rectree" && f.type === "phase") {
-      push(i, f.phase === "memo" ? "Memoized" : "Plain recursion")
+    } else if (kind === "rectree") {
+      if (f.type === "split") {
+        const activeNode = f.nodes.find((node) => node.id === f.active)
+        push(i, `Split ${activeNode?.label || "range"}`)
+      } else if (f.type === "combine") {
+        const activeNode = f.nodes.find((node) => node.id === f.active)
+        push(i, `Combine ${activeNode?.label || "problem"}`)
+      } else if (f.type === "phase") {
+        push(i, f.phase === "memo" ? "Memoized" : "Plain recursion")
+      }
     }
   }
   push(frames.length - 1, "Result")
@@ -1559,6 +1846,17 @@ export function summaryFor(algorithm, kind, frame, graph) {
         : `No committed result was recorded.`
   }
   if (kind === "dp") {
+    if (algorithm === "floyd-warshall") {
+      if (frame.negativeCycle?.length)
+        return `Negative cycle through ${frame.negativeCycle.join(", ")}; shortest paths are undefined.`
+      const distances = frame.grid
+        .map(
+          (row, index) =>
+            `${frame.rowLabels[index]}: [${row.map((value) => value ?? "∞").join(", ")}]`,
+        )
+        .join(" · ")
+      return `All-pairs distances ${distances}.`
+    }
     const row = frame.grid[frame.grid.length - 1] || []
     const value = row[row.length - 1]
     const sequence = (frame.path || []).map((p) => frame.rowLabels[p[0]]).join("")
@@ -1576,6 +1874,10 @@ export function summaryFor(algorithm, kind, frame, graph) {
     return frame.solved
       ? `Solved at depth ${frame.depth} · ${frame.placed} placements · ${frame.pruned} branches pruned.`
       : `No arrangement found · ${frame.pruned} branches pruned.`
-  if (kind === "rectree") return stripTags(frame.message)
+  if (kind === "rectree") {
+    const result = frame.results?.root
+    if (Array.isArray(result)) return `Sorted result [${result.join(", ")}].`
+    return result ? `${result}.` : stripTags(frame.message)
+  }
   return stripTags(frame.message)
 }

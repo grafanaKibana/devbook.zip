@@ -849,6 +849,98 @@
       );
     }
   };
+  var MatrixGridRecorder = class {
+    constructor(config) {
+      this.frames = [];
+      this.nodes = config.nodes.slice();
+      this.rowLabels = this.nodes.map(String);
+      this.colLabels = this.nodes.map(String);
+      this.grid = [];
+      this.cur = null;
+      this.deps = [];
+      this.k = null;
+      this.candidate = null;
+      this.decision = null;
+      this.previous = null;
+      this.result = null;
+      this.operandA = null;
+      this.operandB = null;
+      this.negativeCycle = [];
+    }
+    board(grid, message) {
+      this.grid = grid.map((row) => row.slice());
+      this._push("init", message);
+    }
+    stage(k, message) {
+      this.k = k;
+      this.cur = null;
+      this.deps = [];
+      this.candidate = null;
+      this.decision = null;
+      this.previous = null;
+      this.result = null;
+      this.operandA = null;
+      this.operandB = null;
+      this._push("stage", message);
+    }
+    relax(r, c, deps, candidate, decision, value, message) {
+      this.cur = [r, c];
+      this.deps = deps.map((dep) => dep.slice());
+      this.candidate = candidate;
+      this.decision = decision;
+      this.previous = this.grid[r][c];
+      this.result = value;
+      this.operandA = this.grid[deps[0][0]][deps[0][1]];
+      this.operandB = this.grid[deps[1][0]][deps[1][1]];
+      this.grid[r][c] = value;
+      this._push("relax", message);
+    }
+    reportNegativeCycle(nodes, message) {
+      this.negativeCycle = nodes.slice();
+      this.cur = null;
+      this.deps = [];
+      this.candidate = null;
+      this.decision = null;
+      this.previous = null;
+      this.result = null;
+      this.operandA = null;
+      this.operandB = null;
+      this._push("negative-cycle", message);
+    }
+    done(message) {
+      this.cur = null;
+      this.deps = [];
+      this.candidate = null;
+      this.decision = null;
+      this.previous = null;
+      this.result = null;
+      this.operandA = null;
+      this.operandB = null;
+      this._push("done", message);
+    }
+    _push(type, message) {
+      this.frames.push(
+        Object.freeze({
+          type,
+          profile: "floyd-warshall",
+          rowLabels: this.rowLabels.slice(),
+          colLabels: this.colLabels.slice(),
+          grid: this.grid.map((row) => row.slice()),
+          cur: this.cur ? this.cur.slice() : null,
+          deps: this.deps.map((dep) => dep.slice()),
+          k: this.k,
+          candidate: this.candidate,
+          decision: this.decision,
+          previous: this.previous,
+          result: this.result,
+          operandA: this.operandA,
+          operandB: this.operandB,
+          negativeCycle: this.negativeCycle.slice(),
+          message
+        })
+      );
+    }
+  };
   var UnionFindRecorder = class {
     constructor(n) {
       this.n = n;
@@ -1198,6 +1290,148 @@
     }
     done(message) {
       this._active = null;
+      this._push("done", message);
+    }
+  };
+  var ExecutionTreeRecorder = class {
+    constructor(config) {
+      this.frames = [];
+      this.profile = config.profile;
+      this.phase = "divide";
+      this.action = "initialize";
+      this._nodes = Object.freeze([]);
+      this._edges = Object.freeze([]);
+      this._visible = /* @__PURE__ */ new Set();
+      this._states = {};
+      this._results = {};
+      this._collapsed = /* @__PURE__ */ new Set();
+      this._path = [];
+      this._active = null;
+      this._cache = [];
+      this.calls = 0;
+      this.pruned = 0;
+    }
+    _push(type, message) {
+      this.frames.push(
+        Object.freeze({
+          type,
+          profile: this.profile,
+          phase: this.phase,
+          action: this.action,
+          nodes: this._nodes,
+          edges: this._edges,
+          active: this._active,
+          path: Object.freeze(this._path.slice()),
+          visible: Object.freeze([...this._visible]),
+          states: Object.freeze({ ...this._states }),
+          results: Object.freeze(
+            Object.fromEntries(
+              Object.entries(this._results).map(([id, values]) => [
+                id,
+                Array.isArray(values) ? Object.freeze(values.slice()) : values
+              ])
+            )
+          ),
+          collapsed: Object.freeze([...this._collapsed]),
+          cache: Object.freeze(this._cache.map((entry) => Object.freeze({ ...entry }))),
+          calls: this.calls,
+          pruned: this.pruned,
+          message
+        })
+      );
+    }
+    tree(nodes, edges, rootId, message) {
+      this._nodes = Object.freeze(
+        nodes.map((node) => Object.freeze({ ...node, values: Object.freeze(node.values.slice()) }))
+      );
+      this._edges = Object.freeze(edges.map((edge) => Object.freeze({ ...edge })));
+      this._active = rootId;
+      this._path = [rootId];
+      this._visible.add(rootId);
+      this._states[rootId] = "call";
+      this.calls = 1;
+      this._push("tree", message);
+    }
+    split(id, path, childIds, message) {
+      this.phase = "divide";
+      this.action = "split";
+      this._active = id;
+      this._path = path.slice();
+      this._visible.add(id);
+      this._states[id] = "split";
+      for (const childId of childIds) {
+        if (!this._visible.has(childId)) this.calls++;
+        this._visible.add(childId);
+        this._states[childId] = "call";
+      }
+      this._push("split", message);
+    }
+    base(id, path, result, message) {
+      this.phase = "conquer";
+      this.action = "base case";
+      this._active = id;
+      this._path = path.slice();
+      this._visible.add(id);
+      this._states[id] = "base";
+      this._results[id] = Array.isArray(result) ? result.slice() : result;
+      this._push("base", message);
+    }
+    returnResult(id, path, result, message) {
+      this.phase = "return";
+      this.action = "return";
+      this._active = id;
+      this._path = path.slice();
+      this._visible.add(id);
+      this._states[id] = "return";
+      this._results[id] = Array.isArray(result) ? result.slice() : result;
+      this._push("return", message);
+    }
+    combine(id, path, result, message) {
+      this.phase = "combine";
+      this.action = "combine results";
+      this._active = id;
+      this._path = path.slice();
+      this._visible.add(id);
+      this._states[id] = "combine";
+      this._results[id] = Array.isArray(result) ? result.slice() : result;
+      this._push("combine", message);
+    }
+    cacheHit(id, path, key, result, subtreeIds, message) {
+      this.phase = "return";
+      this.action = "reuse cached result";
+      this._active = id;
+      this._path = path.slice();
+      this._visible.add(id);
+      this._states[id] = "cache";
+      this._results[id] = Array.isArray(result) ? result.slice() : result;
+      this._cache.push({ key, result: Array.isArray(result) ? result.join(", ") : result });
+      for (const childId of subtreeIds) {
+        this._visible.add(childId);
+        this._collapsed.add(childId);
+      }
+      this._push("cache", message);
+    }
+    prune(id, path, subtreeIds, message) {
+      this.phase = "conquer";
+      this.action = "prune branch";
+      this._active = id;
+      this._path = path.slice();
+      this._visible.add(id);
+      this._states[id] = "prune";
+      for (const childId of subtreeIds) {
+        this._visible.add(childId);
+        this._collapsed.add(childId);
+      }
+      this.pruned++;
+      this._push("prune", message);
+    }
+    done(rootId, result, message) {
+      this.phase = "complete";
+      this.action = "final result ready";
+      this._active = rootId;
+      this._path = [rootId];
+      this._states[rootId] = "combine";
+      this._results[rootId] = Array.isArray(result) ? result.slice() : result;
       this._push("done", message);
     }
   };
@@ -1655,69 +1889,195 @@
     }
     return { nodes: [wrap, status], paint, watch };
   }
-  function makeDPView(frames) {
+  var lcsMatrixGridSemantics = {
+    tableLabel: "Dynamic-programming table",
+    formatValue(value) {
+      return value == null ? "" : String(value);
+    },
+    cellLabel(frame, row, column) {
+      const value = frame.grid[row][column];
+      return `Cell ${frame.rowLabels[row]}, ${frame.colLabels[column]}: ${value == null ? "empty" : value}`;
+    },
+    stateForCell(frame, row, column) {
+      const key = `${row},${column}`;
+      const curKey = frame.cur ? frame.cur.join(",") : null;
+      const depSet = new Set((frame.deps || []).map((dependency) => dependency.join(",")));
+      const pathSet = new Set((frame.path || []).map((cell) => cell.join(",")));
+      if (curKey === key) return "cur";
+      if (pathSet.has(key)) return "path";
+      if (depSet.has(key)) return "dep";
+      return "";
+    },
+    watchRows(frame) {
+      const cur = frame.cur;
+      const value = cur ? frame.grid[cur[0]][cur[1]] : null;
+      return [
+        { k: "cell", v: cur ? `[${cur[0]}, ${cur[1]}]` : "—", sw: "var(--_blue)" },
+        { k: "value", v: value == null ? "—" : String(value), sw: "var(--_green)" }
+      ];
+    }
+  };
+  function paintMatrixRoleBadge(element, descriptor) {
+    element.dataset.role = descriptor.role;
+    element.textContent = descriptor.badge;
+    element.title = descriptor.label;
+  }
+  function makeMatrixRoleBadge(descriptor) {
+    const badge = el("span", "steptrace__matrix-role-badge");
+    badge.setAttribute("aria-hidden", "true");
+    paintMatrixRoleBadge(badge, descriptor);
+    return badge;
+  }
+  function roleDescriptor(descriptors, role) {
+    const descriptor = descriptors.find((candidate) => candidate.role === role);
+    if (!descriptor) throw new Error(`steptrace: matrix role "${role}" is not described.`);
+    return descriptor;
+  }
+  function makeMatrixRoleLegend(descriptors) {
+    const root = el("aside", "steptrace__legend-wrap steptrace__matrix-role-legend");
+    root.setAttribute("aria-label", "Matrix role legend");
+    const items = el("ul", "steptrace__legend steptrace__matrix-role-legend-items");
+    for (const descriptor of descriptors) {
+      const item = el("li", "steptrace__legend-row steptrace__matrix-role-legend-item");
+      const label = el("span", "steptrace__matrix-role-legend-label");
+      label.textContent = descriptor.label;
+      item.append(makeMatrixRoleBadge(descriptor), label);
+      items.append(item);
+    }
+    root.append(items);
+    return root;
+  }
+  function makeMatrixFooter(table, columnCount, descriptors) {
+    const root = document.createElement("tfoot");
+    root.className = "steptrace__matrix-footer";
+    root.setAttribute("aria-label", "Current matrix stage");
+    const row = document.createElement("tr");
+    const cell = document.createElement("td");
+    cell.colSpan = columnCount;
+    const content = el("div", "steptrace__matrix-footer-row");
+    const context = el("span", "steptrace__matrix-footer-context");
+    const summary = el("span", "steptrace__matrix-footer-summary");
+    content.append(context, summary);
+    cell.append(content);
+    row.append(cell);
+    root.append(row);
+    table.append(root);
+    function paint(model) {
+      context.textContent = model.context;
+      summary.replaceChildren();
+      if (model.summary.role) {
+        summary.append(makeMatrixRoleBadge(roleDescriptor(descriptors, model.summary.role)));
+      }
+      summary.append(document.createTextNode(model.summary.text));
+      row.setAttribute("aria-label", `${model.context}; ${model.summary.text}`);
+    }
+    return { paint };
+  }
+  function makeDPView(frames, semantics = lcsMatrixGridSemantics) {
     const f0 = frames[0];
     const R2 = f0.rowLabels.length;
     const C = f0.colLabels.length;
-    const table = el("table", "steptrace__dp");
+    const guided = semantics.stageLayout === "fill";
+    const roleLegend = semantics.roleLegend || [];
+    const table = el("table", `steptrace__dp${guided ? " steptrace__dp--guided" : ""}`);
+    table.setAttribute("aria-label", semantics.tableLabel);
+    const caption = document.createElement("caption");
+    caption.className = "steptrace__dp-caption";
+    caption.textContent = semantics.axisDescription || semantics.tableLabel;
+    table.append(caption);
     const thead = document.createElement("thead");
     const htr = document.createElement("tr");
-    htr.append(document.createElement("th"));
+    const corner = document.createElement("th");
+    corner.setAttribute("scope", "col");
+    corner.className = "steptrace__dp-corner";
+    corner.textContent = semantics.cornerLabel || "";
+    htr.append(corner);
+    const columnHeaders = [];
     for (let c = 0; c < C; c++) {
       const th = document.createElement("th");
       th.textContent = f0.colLabels[c];
+      th.setAttribute("scope", "col");
       htr.append(th);
+      columnHeaders.push(th);
     }
     thead.append(htr);
     table.append(thead);
     const tbody = document.createElement("tbody");
     const cellEls = [];
+    const rowHeaders = [];
     for (let r = 0; r < R2; r++) {
       const tr = document.createElement("tr");
       const th = document.createElement("th");
       th.textContent = f0.rowLabels[r];
+      th.setAttribute("scope", "row");
       tr.append(th);
+      rowHeaders.push(th);
       const rowCells = [];
       for (let c = 0; c < C; c++) {
         const td = document.createElement("td");
+        if (guided) {
+          const value = el("span", "steptrace__dp-value");
+          const markers = el("span", "steptrace__dp-markers");
+          markers.setAttribute("aria-hidden", "true");
+          const operandA = makeMatrixRoleBadge(roleDescriptor(roleLegend, "operand-a"));
+          const operandB = makeMatrixRoleBadge(roleDescriptor(roleLegend, "operand-b"));
+          const target = makeMatrixRoleBadge(roleDescriptor(roleLegend, "target"));
+          markers.append(operandA, operandB, target);
+          td.append(value, markers);
+          rowCells.push({ td, value, target });
+        } else {
+          rowCells.push({ td, value: td, target: null });
+        }
         tr.append(td);
-        rowCells.push(td);
       }
       cellEls.push(rowCells);
       tbody.append(tr);
     }
     table.append(tbody);
-    const wrap = el("div", "steptrace__dp-wrap");
+    const footer = semantics.footerModel ? makeMatrixFooter(table, C + 1, roleLegend) : null;
+    const wrap = el("div", `steptrace__dp-wrap${guided ? " steptrace__dp-wrap--guided" : ""}`);
     wrap.append(table);
+    const legend = roleLegend.length ? makeMatrixRoleLegend(roleLegend) : null;
+    const stage = guided ? el("div", "steptrace__dp-stage steptrace__dp-stage--guided") : null;
+    if (stage) stage.append(wrap);
     const status = statusEl();
+    const nodes = stage ? [stage, ...legend ? [legend] : [], status] : [wrap, status];
     function paint(frame, i, total) {
-      const curKey = frame.cur ? frame.cur.join(",") : null;
-      const depSet = new Set((frame.deps || []).map((d) => d.join(",")));
-      const pathSet = new Set((frame.path || []).map((p) => p.join(",")));
+      if (footer && semantics.footerModel) footer.paint(semantics.footerModel(frame));
+      for (let r = 0; r < R2; r++) {
+        rowHeaders[r].dataset.role = semantics.headerRole?.(frame, "row", r) || "";
+      }
+      for (let c = 0; c < C; c++) {
+        columnHeaders[c].dataset.role = semantics.headerRole?.(frame, "column", c) || "";
+      }
       for (let r = 0; r < R2; r++) {
         for (let c = 0; c < C; c++) {
-          const td = cellEls[r][c];
+          const { td, value, target } = cellEls[r][c];
           const v = frame.grid[r][c];
-          td.textContent = v == null ? "" : v;
-          const key = r + "," + c;
-          let state = "";
-          if (depSet.has(key)) state = "dep";
-          if (pathSet.has(key)) state = "path";
-          if (curKey === key) state = "cur";
-          td.dataset.state = state;
+          value.textContent = semantics.formatValue(v);
+          td.dataset.state = semantics.stateForCell(frame, r, c);
+          td.dataset.roles = (semantics.rolesForCell?.(frame, r, c) || []).join(" ");
+          const decision = semantics.decisionForCell?.(frame, r, c) || "";
+          if (decision) td.dataset.decision = decision;
+          else delete td.dataset.decision;
+          if (target) {
+            const role = decision === "improve" ? "write" : decision === "keep" ? "keep" : "target";
+            paintMatrixRoleBadge(target, roleDescriptor(roleLegend, role));
+          }
+          td.setAttribute("aria-label", semantics.cellLabel(frame, r, c));
         }
       }
       status.innerHTML = escapeHtml(frame.message) + ` <span class="steptrace__counts">· step ${i + 1}/${total}</span>`;
     }
     function watch(frame) {
-      const cur = frame.cur;
-      const v = cur ? frame.grid[cur[0]][cur[1]] : null;
-      return [
-        { k: "cell", v: cur ? `[${cur[0]}, ${cur[1]}]` : "—", sw: "var(--_blue)" },
-        { k: "value", v: v == null ? "—" : String(v), sw: "var(--_green)" }
-      ];
+      return semantics.watchRows(frame);
     }
-    return { nodes: [wrap, status], paint, watch };
+    return {
+      nodes,
+      stageLayout: semantics.stageLayout || "compact",
+      paint,
+      watch
+    };
   }
   function makeUnionFindView(frames) {
     const n = frames[0].n;
@@ -1989,120 +2349,197 @@
     }
     return { nodes: [wrap, status], paint, watch };
   }
-  var RT_R = 16;
-  function makeRecTreeView(frames) {
+  var executionTreeViewSerial = 0;
+  function makeExecutionTreeView(frames, descriptor) {
     const f0 = frames[0];
     const nodes = f0.nodes;
-    const pad = 26;
-    const xs = nodes.map((n) => n.x);
-    const ys = nodes.map((n) => n.y);
+    const halfWidth = descriptor.nodeWidth / 2;
+    const halfHeight = descriptor.nodeHeight / 2;
+    const padX = halfWidth + 12;
+    const padY = halfHeight + 12;
+    const xs = nodes.map((node) => node.x);
+    const ys = nodes.map((node) => node.y);
     const minX = Math.min(...xs);
     const minY = Math.min(...ys);
-    const w = Math.max(...xs) - minX + pad * 2;
-    const h = Math.max(...ys) - minY + pad * 2;
-    const pos = Object.fromEntries(
-      nodes.map((n) => [n.id, { x: n.x - minX + pad, y: n.y - minY + pad }])
+    const width = Math.max(...xs) - minX + padX * 2;
+    const height = Math.max(...ys) - minY + padY * 2;
+    const position = Object.fromEntries(
+      nodes.map((node) => [node.id, { x: node.x - minX + padX, y: node.y - minY + padY }])
     );
     const svg = document.createElementNS(SVGNS, "svg");
+    const title = document.createElementNS(SVGNS, "title");
+    const description = document.createElementNS(SVGNS, "desc");
+    const accessibleId = `steptrace-execution-tree-${++executionTreeViewSerial}`;
+    title.id = `${accessibleId}-title`;
+    description.id = `${accessibleId}-description`;
     svg.setAttribute("class", "steptrace__rtsvg");
-    svg.setAttribute("viewBox", `0 0 ${w} ${h}`);
+    svg.setAttribute("viewBox", `0 0 ${width} ${height}`);
+    svg.setAttribute("preserveAspectRatio", "xMidYMid meet");
     svg.setAttribute("role", "img");
-    svg.setAttribute("aria-label", "Recursion tree");
-    const edgeEls = [];
-    for (const e of f0.edges) {
-      const a = pos[e.from];
-      const b = pos[e.to];
+    svg.setAttribute("aria-labelledby", `${title.id} ${description.id}`);
+    svg.style.setProperty("--steptrace-tree-min-width", `${descriptor.minSvgWidth}px`);
+    svg.append(title, description);
+    const edgeElements = [];
+    for (const edge of f0.edges) {
+      const from = position[edge.from];
+      const to = position[edge.to];
       const line = document.createElementNS(SVGNS, "line");
       line.setAttribute("class", "steptrace__rtedge");
-      line.setAttribute("x1", a.x);
-      line.setAttribute("y1", a.y);
-      line.setAttribute("x2", b.x);
-      line.setAttribute("y2", b.y);
+      line.setAttribute("x1", String(from.x));
+      line.setAttribute("y1", String(from.y + halfHeight));
+      line.setAttribute("x2", String(to.x));
+      line.setAttribute("y2", String(to.y - halfHeight));
+      line.setAttribute("aria-hidden", "true");
+      line.setAttribute("focusable", "false");
       svg.append(line);
-      edgeEls.push({ el: line, to: e.to });
+      edgeElements.push({ element: line, from: edge.from, to: edge.to });
     }
-    const nodeEls = {};
-    for (const n of nodes) {
-      const p = pos[n.id];
-      const g = document.createElementNS(SVGNS, "g");
-      g.setAttribute("class", "steptrace__rtnode");
-      const ring = document.createElementNS(SVGNS, "circle");
+    const nodeElements = {};
+    for (const node of nodes) {
+      const point = position[node.id];
+      const group = document.createElementNS(SVGNS, "g");
+      group.setAttribute("class", "steptrace__rtnode");
+      group.setAttribute("transform", `translate(${point.x} ${point.y})`);
+      group.setAttribute("aria-hidden", "true");
+      group.setAttribute("focusable", "false");
+      group.dataset.shape = descriptor.shape;
+      const ring = document.createElementNS(SVGNS, descriptor.shape === "circle" ? "circle" : "rect");
       ring.setAttribute("class", "steptrace__rtring");
-      ring.setAttribute("cx", p.x);
-      ring.setAttribute("cy", p.y);
-      ring.setAttribute("r", String(RT_R + 3));
-      const back = document.createElementNS(SVGNS, "circle");
-      back.setAttribute("class", "steptrace__rtback");
-      back.setAttribute("cx", p.x);
-      back.setAttribute("cy", p.y);
-      back.setAttribute("r", String(RT_R));
-      const circ = document.createElementNS(SVGNS, "circle");
-      circ.setAttribute("class", "steptrace__rtcirc");
-      circ.setAttribute("cx", p.x);
-      circ.setAttribute("cy", p.y);
-      circ.setAttribute("r", String(RT_R));
+      const surface = document.createElementNS(
+        SVGNS,
+        descriptor.shape === "circle" ? "circle" : "rect"
+      );
+      surface.setAttribute("class", "steptrace__rtcirc");
+      if (descriptor.shape === "circle") {
+        ring.setAttribute("r", String(halfWidth + 3));
+        surface.setAttribute("r", String(halfWidth));
+      } else {
+        surface.setAttribute("x", String(-halfWidth));
+        surface.setAttribute("y", String(-halfHeight));
+        surface.setAttribute("width", String(descriptor.nodeWidth));
+        surface.setAttribute("height", String(descriptor.nodeHeight));
+        surface.setAttribute("rx", "7");
+        ring.setAttribute("x", String(-halfWidth - 2));
+        ring.setAttribute("y", String(-halfHeight - 2));
+        ring.setAttribute("width", String(descriptor.nodeWidth + 4));
+        ring.setAttribute("height", String(descriptor.nodeHeight + 4));
+        ring.setAttribute("rx", "9");
+      }
       const label = document.createElementNS(SVGNS, "text");
+      const detail = document.createElementNS(SVGNS, "text");
+      const result = document.createElementNS(SVGNS, "text");
+      const badge = document.createElementNS(SVGNS, "text");
       label.setAttribute("class", "steptrace__rtlabel");
-      label.setAttribute("x", p.x);
-      label.setAttribute("y", p.y);
-      label.setAttribute("text-anchor", "middle");
-      label.setAttribute("dominant-baseline", "central");
-      label.textContent = n.label;
-      const val = document.createElementNS(SVGNS, "text");
-      val.setAttribute("class", "steptrace__rtval");
-      val.setAttribute("x", p.x);
-      val.setAttribute("y", p.y + RT_R + 9);
-      val.setAttribute("text-anchor", "middle");
-      g.append(ring, back, circ, label, val);
-      svg.append(g);
-      nodeEls[n.id] = { g, val };
+      detail.setAttribute("class", "steptrace__rtdetail");
+      result.setAttribute("class", "steptrace__rtval");
+      badge.setAttribute("class", "steptrace__rtbadge");
+      for (const element of [label, detail, result]) element.setAttribute("text-anchor", "middle");
+      const [primaryLine, secondaryLine] = descriptor.nodeLines(node);
+      label.textContent = primaryLine;
+      detail.textContent = secondaryLine;
+      if (descriptor.shape === "circle") {
+        label.setAttribute("y", "0");
+        label.setAttribute("dominant-baseline", "central");
+        result.setAttribute("y", String(halfHeight + 9));
+      } else {
+        label.setAttribute("y", "-3");
+        detail.setAttribute("y", "9");
+        result.setAttribute("y", "20");
+        badge.setAttribute("x", String(-halfWidth + 7));
+        badge.setAttribute("y", String(-halfHeight + 9));
+        badge.setAttribute("text-anchor", "start");
+      }
+      group.append(ring, surface, label, detail, result, badge);
+      svg.append(group);
+      nodeElements[node.id] = { group, result, badge };
     }
     const legend = el("div", "steptrace__legend");
-    for (const [word, key] of [
-      ["compute", "current"],
-      ["store (miss)", "frontier"],
-      ["reuse (hit)", "visited"]
-    ]) {
+    legend.setAttribute("aria-label", `${descriptor.ariaLabel} state legend`);
+    for (const item of descriptor.legend) {
       const row = el("div", "steptrace__legend-row");
-      row.append(
-        el("span", "steptrace__swatch steptrace__swatch--" + key),
-        document.createTextNode(word)
-      );
+      const swatch = el("span", "steptrace__swatch steptrace__rtswatch");
+      swatch.dataset.state = item.state;
+      row.append(swatch, document.createTextNode(item.label));
       legend.append(row);
     }
     const wrap = el("div", "steptrace__rectree");
+    wrap.setAttribute("role", "region");
+    wrap.setAttribute("aria-label", `${descriptor.ariaLabel} visualization`);
+    wrap.tabIndex = 0;
     wrap.append(svg);
     const status = statusEl();
-    function paint(frame, i, total) {
-      const vis = new Set(frame.vis);
-      const collapsed = new Set(frame.collapsed);
-      const state = frame.state;
-      const vals = frame.vals;
-      for (const n of nodes) {
-        const ne = nodeEls[n.id];
-        ne.g.dataset.vis = vis.has(n.id) ? "1" : "0";
-        ne.g.dataset.collapsed = collapsed.has(n.id) ? "true" : "false";
-        ne.g.dataset.state = state[n.id] || "";
-        ne.g.dataset.active = frame.active === n.id ? "true" : "false";
-        const v = vals[n.id];
-        ne.val.textContent = v == null ? "" : "= " + v;
+    function paint(frame, index, total) {
+      const model = descriptor.frameModel(frame);
+      const visible = new Set(model.visible);
+      const collapsed = new Set(model.collapsed);
+      const path = new Set(model.path);
+      const activeNode2 = nodes.find((node) => node.id === model.active);
+      title.textContent = `${descriptor.ariaLabel}: ${model.phase}`;
+      description.textContent = `${model.phase}. Active subproblem ${activeNode2 ? descriptor.nodeLines(activeNode2).join("; ") : "none"}. ${model.action}.`;
+      for (const node of nodes) {
+        const elements = nodeElements[node.id];
+        const state = model.states[node.id] || "";
+        elements.group.dataset.vis = visible.has(node.id) ? "1" : "0";
+        elements.group.dataset.collapsed = collapsed.has(node.id) ? "true" : "false";
+        elements.group.dataset.state = state;
+        elements.group.dataset.active = model.active === node.id ? "true" : "false";
+        elements.group.dataset.path = path.has(node.id) ? "true" : "false";
+        const value = model.results[node.id];
+        elements.result.textContent = Array.isArray(value) ? value.length ? `→ [${value.join(", ")}]` : "" : value == null ? "" : `→ ${value}`;
+        elements.badge.textContent = descriptor.stateLabels[state] || "";
       }
-      for (const e of edgeEls) {
-        e.el.dataset.vis = vis.has(e.to) ? "1" : "0";
-        e.el.dataset.collapsed = collapsed.has(e.to) ? "true" : "false";
+      for (const edge of edgeElements) {
+        edge.element.dataset.vis = visible.has(edge.to) ? "1" : "0";
+        edge.element.dataset.collapsed = collapsed.has(edge.to) ? "true" : "false";
+        edge.element.dataset.path = path.has(edge.from) && path.has(edge.to) ? "true" : "false";
       }
-      status.innerHTML = escapeHtml(frame.message) + ` <span class="steptrace__counts">· step ${i + 1}/${total}</span>`;
+      status.innerHTML = escapeHtml(frame.message) + ` <span class="steptrace__counts">· step ${index + 1}/${total}</span>`;
     }
     function watch(frame) {
+      const model = descriptor.frameModel(frame);
+      return descriptor.watchRows(frame, model);
+    }
+    return { nodes: [wrap, legend, status], paint, watch };
+  }
+  var legacyRecTreeDescriptor = {
+    ariaLabel: "Recursion tree",
+    shape: "circle",
+    nodeWidth: 32,
+    nodeHeight: 32,
+    minSvgWidth: 320,
+    stateLabels: {},
+    legend: [
+      { state: "compute", label: "compute" },
+      { state: "miss", label: "store (miss)" },
+      { state: "hit", label: "reuse (hit)" }
+    ],
+    frameModel(frame) {
+      return {
+        phase: frame.phase === "memo" ? "Memoized recursion" : "Plain recursion",
+        action: frame.message,
+        active: frame.active,
+        path: frame.active ? [frame.active] : [],
+        visible: frame.vis,
+        states: frame.state,
+        results: frame.vals,
+        collapsed: frame.collapsed
+      };
+    },
+    nodeLines(node) {
+      return [node.label, ""];
+    },
+    watchRows(frame) {
       const last = frame.memo.length ? frame.memo[frame.memo.length - 1] : null;
-      const ev = frame.type === "miss" || frame.type === "hit" || frame.type === "base" ? frame.type : "—";
+      const event = frame.type === "miss" || frame.type === "hit" || frame.type === "base" ? frame.type : "—";
       return [
         { k: "calls", v: String(frame.calls), sw: "var(--_blue)" },
         { k: "memo", v: last ? `f(${last.k}) = ${last.v}` : "—", sw: "var(--_green)" },
-        { k: "event", v: ev, sw: "var(--_violet)" }
+        { k: "event", v: event, sw: "var(--_violet)" }
       ];
     }
-    return { nodes: [wrap, legend, status], paint, watch };
+  };
+  function makeRecTreeView(frames) {
+    return makeExecutionTreeView(frames, legacyRecTreeDescriptor);
   }
   var SVGNS = "http://www.w3.org/2000/svg";
   var R = 16;
@@ -2325,7 +2762,7 @@
     };
     const firstGap = frames.find((frame) => Number.isInteger(frame.gap))?.gap;
     const familyProfile = frames[0]?.profile;
-    const initial = kind === "sort" ? firstGap != null ? `Gap ${firstGap}` : familyProfile === "cyclic" ? "Place values" : familyProfile === "introsort" ? "Quicksort" : algorithm === "bubble-sort" ? "Pass 1" : algorithm === "insertion-sort" ? "Prefix 1" : algorithm === "selection-sort" ? "Select 1" : algorithm === "heap-sort" ? "Build heap" : algorithm === "merge-sort" ? "Runs of 1" : "Partition" : kind === "search" ? familyProfile === "exponential" ? "Gallop" : familyProfile === "jump" ? "Jump blocks" : familyProfile === "ternary" ? "Narrow peak" : "Search range" : kind === "string" ? "Shift 0" : kind === "backtrack" ? "Depth 0" : kind === "rectree" ? "Call tree" : "Initialize";
+    const initial = kind === "sort" ? firstGap != null ? `Gap ${firstGap}` : familyProfile === "cyclic" ? "Place values" : familyProfile === "introsort" ? "Quicksort" : algorithm === "bubble-sort" ? "Pass 1" : algorithm === "insertion-sort" ? "Prefix 1" : algorithm === "selection-sort" ? "Select 1" : algorithm === "heap-sort" ? "Build heap" : algorithm === "merge-sort" ? "Runs of 1" : "Partition" : kind === "search" ? familyProfile === "exponential" ? "Gallop" : familyProfile === "jump" ? "Jump blocks" : familyProfile === "ternary" ? "Narrow peak" : "Search range" : kind === "string" ? "Shift 0" : kind === "backtrack" ? "Depth 0" : kind === "rectree" ? familyProfile === "divide-and-conquer" ? "Whole problem" : "Call tree" : "Initialize";
     push(0, initial);
     let lastRange = "";
     let lastGap = firstGap;
@@ -2381,7 +2818,9 @@
           lastWindow = win;
         }
       } else if (kind === "dp") {
-        if (f.type === "compute" && f.cur && f.cur[0] !== lastRow) {
+        if (familyProfile === "floyd-warshall" && f.type === "stage") {
+          push(i, `Stage k = ${f.k}`);
+        } else if (f.type === "compute" && f.cur && f.cur[0] !== lastRow) {
           push(i, `Row ${f.rowLabels[f.cur[0]]}`);
           lastRow = f.cur[0];
         } else if (f.type === "trace" && frames[i - 1].type !== "trace") {
@@ -2396,8 +2835,16 @@
           push(i, `Depth ${f.depth}`);
           lastDepth = f.depth;
         }
-      } else if (kind === "rectree" && f.type === "phase") {
-        push(i, f.phase === "memo" ? "Memoized" : "Plain recursion");
+      } else if (kind === "rectree") {
+        if (f.type === "split") {
+          const activeNode2 = f.nodes.find((node) => node.id === f.active);
+          push(i, `Split ${activeNode2?.label || "range"}`);
+        } else if (f.type === "combine") {
+          const activeNode2 = f.nodes.find((node) => node.id === f.active);
+          push(i, `Combine ${activeNode2?.label || "problem"}`);
+        } else if (f.type === "phase") {
+          push(i, f.phase === "memo" ? "Memoized" : "Plain recursion");
+        }
       }
     }
     push(frames.length - 1, "Result");
@@ -2471,6 +2918,14 @@
       return values.length ? `Answer indices [${frame.marked.join(", ")}] · values [${values.join(", ")}].` : algorithm === "two-pointers" || algorithm === "sliding-window" ? `No qualifying range was found.` : `No committed result was recorded.`;
     }
     if (kind === "dp") {
+      if (algorithm === "floyd-warshall") {
+        if (frame.negativeCycle?.length)
+          return `Negative cycle through ${frame.negativeCycle.join(", ")}; shortest paths are undefined.`;
+        const distances = frame.grid.map(
+          (row2, index) => `${frame.rowLabels[index]}: [${row2.map((value2) => value2 ?? "∞").join(", ")}]`
+        ).join(" · ");
+        return `All-pairs distances ${distances}.`;
+      }
       const row = frame.grid[frame.grid.length - 1] || [];
       const value = row[row.length - 1];
       const sequence = (frame.path || []).map((p) => frame.rowLabels[p[0]]).join("");
@@ -2482,7 +2937,11 @@
       return algorithm === "kernighan-popcount" ? `Population count ${frame.total} · ${frame.pop} lowest set bits cleared.` : `${frame.pop} of ${frame.total} tally steps committed.`;
     if (kind === "backtrack")
       return frame.solved ? `Solved at depth ${frame.depth} · ${frame.placed} placements · ${frame.pruned} branches pruned.` : `No arrangement found · ${frame.pruned} branches pruned.`;
-    if (kind === "rectree") return stripTags(frame.message);
+    if (kind === "rectree") {
+      const result = frame.results?.root;
+      if (Array.isArray(result)) return `Sorted result [${result.join(", ")}].`;
+      return result ? `${result}.` : stripTags(frame.message);
+    }
     return stripTags(frame.message);
   }
 
@@ -2912,6 +3371,233 @@
     }
   };
 
+  // custom/steptrace/src/families/execution-tree.ts
+  function invalidConfig3(message) {
+    throw new Error(`steptrace: divide-and-conquer ${message}`);
+  }
+  function parseExecutionTreeConfig(config) {
+    if (config.array !== void 0)
+      invalidConfig3('does not take an "array"; it animates the paradigm itself.');
+    return { profile: "divide-and-conquer" };
+  }
+  var stateLabels = {
+    call: "call",
+    split: "split",
+    base: "base",
+    return: "return",
+    combine: "combine",
+    cache: "cached",
+    prune: "pruned"
+  };
+  function frameModel(frame) {
+    return {
+      phase: frame.phase,
+      action: frame.action,
+      active: frame.active,
+      path: frame.path.slice(),
+      visible: frame.visible.slice(),
+      states: frame.states,
+      results: frame.results,
+      collapsed: frame.collapsed.slice()
+    };
+  }
+  function activeNode(frame) {
+    return frame.nodes.find((node) => node.id === frame.active) || null;
+  }
+  function pathLabel(frame) {
+    const labels = frame.path.map((id) => frame.nodes.find((node) => node.id === id)?.label).filter(Boolean);
+    return labels.length ? labels.join(" → ") : "—";
+  }
+  var executionTreeViewDescriptor = {
+    ariaLabel: "Execution tree",
+    shape: "card",
+    nodeWidth: 100,
+    nodeHeight: 48,
+    minSvgWidth: 560,
+    stateLabels,
+    legend: [
+      { state: "split", label: "split subproblem" },
+      { state: "base", label: "base case" },
+      { state: "return", label: "returned result" },
+      { state: "combine", label: "combined result" }
+    ],
+    frameModel,
+    nodeLines(node) {
+      return [node.label, node.detail || `[${node.values.join(", ")}]`];
+    },
+    watchRows(frame) {
+      const node = activeNode(frame);
+      const result = node ? frame.results[node.id] : null;
+      const resultLabel = Array.isArray(result) ? `[${result.join(", ")}]` : result || "—";
+      return [
+        { k: "phase", v: frame.phase, sw: "var(--_violet)" },
+        {
+          k: "subproblem",
+          v: node ? `${node.label} · ${node.detail || `[${node.values.join(", ")}]`}` : "—",
+          sw: "var(--_blue)"
+        },
+        { k: "call path", v: pathLabel(frame), sw: "var(--_neutral)" },
+        { k: "result", v: resultLabel, sw: "var(--_green)" }
+      ];
+    }
+  };
+  var executionTreeFamily = {
+    id: "execution-tree",
+    createRecorder(config) {
+      return new ExecutionTreeRecorder(config);
+    },
+    createView(frames) {
+      return makeExecutionTreeView(
+        frames,
+        executionTreeViewDescriptor
+      );
+    }
+  };
+
+  // custom/steptrace/src/algorithms/divide-and-conquer.ts
+  var divideAndConquer = {
+    id: "divide-and-conquer",
+    kind: "rectree",
+    family: executionTreeFamily,
+    meta: { label: "Divide and Conquer" },
+    parse: parseExecutionTreeConfig,
+    run(input, ops) {
+      const nodes = [
+        {
+          id: "root",
+          label: "Problem",
+          detail: "whole problem",
+          values: [],
+          x: 300,
+          y: 30,
+          depth: 0
+        },
+        {
+          id: "left",
+          label: "Subproblem A",
+          detail: "independent work",
+          values: [],
+          x: 150,
+          y: 105,
+          depth: 1
+        },
+        {
+          id: "right",
+          label: "Subproblem B",
+          detail: "independent work",
+          values: [],
+          x: 450,
+          y: 105,
+          depth: 1
+        },
+        { id: "a", label: "Base A1", detail: "base case", values: [], x: 60, y: 190, depth: 2 },
+        { id: "b", label: "Base A2", detail: "base case", values: [], x: 210, y: 190, depth: 2 },
+        { id: "c", label: "Base B1", detail: "base case", values: [], x: 390, y: 190, depth: 2 },
+        { id: "d", label: "Base B2", detail: "base case", values: [], x: 540, y: 190, depth: 2 }
+      ];
+      const edges = [
+        { from: "root", to: "left" },
+        { from: "root", to: "right" },
+        { from: "left", to: "a" },
+        { from: "left", to: "b" },
+        { from: "right", to: "c" },
+        { from: "right", to: "d" }
+      ];
+      ops.tree(
+        nodes,
+        edges,
+        "root",
+        "Start with one problem. The fixed tree reveals the recursive structure without moving the layout."
+      );
+      ops.split(
+        "root",
+        ["root"],
+        ["left", "right"],
+        "Divide Problem into independent Subproblem A and Subproblem B."
+      );
+      ops.split(
+        "left",
+        ["root", "left"],
+        ["a", "b"],
+        "Divide Subproblem A until its work reaches Base A1 and Base A2."
+      );
+      ops.base(
+        "a",
+        ["root", "left", "a"],
+        "base result A1",
+        "Base A1 solves its smallest direct case."
+      );
+      ops.returnResult(
+        "a",
+        ["root", "left"],
+        "base result A1",
+        "Return the Base A1 result to Subproblem A."
+      );
+      ops.base(
+        "b",
+        ["root", "left", "b"],
+        "base result A2",
+        "Base A2 solves its smallest direct case."
+      );
+      ops.returnResult(
+        "b",
+        ["root", "left"],
+        "base result A2",
+        "Return the Base A2 result to Subproblem A."
+      );
+      ops.combine("left", ["root", "left"], "Result A", "Combine the two base results into Result A.");
+      ops.returnResult("left", ["root"], "Result A", "Return Result A to Problem.");
+      ops.split(
+        "right",
+        ["root", "right"],
+        ["c", "d"],
+        "Divide Subproblem B until its work reaches Base B1 and Base B2."
+      );
+      ops.base(
+        "c",
+        ["root", "right", "c"],
+        "base result B1",
+        "Base B1 solves its smallest direct case."
+      );
+      ops.returnResult(
+        "c",
+        ["root", "right"],
+        "base result B1",
+        "Return the Base B1 result to Subproblem B."
+      );
+      ops.base(
+        "d",
+        ["root", "right", "d"],
+        "base result B2",
+        "Base B2 solves its smallest direct case."
+      );
+      ops.returnResult(
+        "d",
+        ["root", "right"],
+        "base result B2",
+        "Return the Base B2 result to Subproblem B."
+      );
+      ops.combine(
+        "right",
+        ["root", "right"],
+        "Result B",
+        "Combine the two base results into Result B."
+      );
+      ops.returnResult("right", ["root"], "Result B", "Return Result B to Problem.");
+      ops.combine(
+        "root",
+        ["root"],
+        "Final solution",
+        "Combine Result A and Result B into the Final solution."
+      );
+      ops.done(
+        "root",
+        "Final solution",
+        "Final solution: independent work returns upward until the original problem is combined."
+      );
+    }
+  };
+
   // custom/steptrace/src/families/indexed-array-search.ts
   function parseIndexedArraySearchConfig(config, algorithm, profile) {
     const { array, target } = config;
@@ -3178,6 +3864,228 @@
     }
   };
 
+  // custom/steptrace/src/families/matrix-grid.ts
+  function invalidConfig4(message) {
+    throw new Error(`steptrace: floyd-warshall ${message}`);
+  }
+  function parseMatrixGridConfig(config) {
+    const { nodes, edges } = config;
+    if (!Array.isArray(nodes) || nodes.length === 0)
+      invalidConfig4('requires a non-empty numeric "nodes" array.');
+    if (!nodes.every((node) => typeof node === "number" && Number.isFinite(node)))
+      invalidConfig4('requires every "nodes" entry to be a finite number.');
+    if (new Set(nodes).size !== nodes.length) invalidConfig4('requires unique "nodes" entries.');
+    if (!Array.isArray(edges))
+      invalidConfig4('requires an "edges" array of [from, to, weight] tuples.');
+    const knownNodes = new Set(nodes);
+    const parsedEdges = edges.map((edge, index) => {
+      if (!Array.isArray(edge) || edge.length !== 3 || !edge.every((value) => typeof value === "number" && Number.isFinite(value))) {
+        invalidConfig4(`requires edge ${index} to be a finite [from, to, weight] tuple.`);
+      }
+      const [from, to, weight] = edge;
+      if (!knownNodes.has(from) || !knownNodes.has(to))
+        invalidConfig4(`requires edge ${index} to reference nodes declared in "nodes".`);
+      return [from, to, weight];
+    });
+    return { nodes: nodes.slice(), edges: parsedEdges, profile: "floyd-warshall" };
+  }
+  function formatDistance(value) {
+    return value == null ? "∞" : String(value);
+  }
+  function distanceLabel(frame, cell) {
+    const [row, column] = cell;
+    return `dist[${frame.rowLabels[row]}][${frame.colLabels[column]}] = ${formatDistance(frame.grid[row][column])}`;
+  }
+  function stageIndex(frame) {
+    return frame.k == null ? -1 : frame.rowLabels.indexOf(String(frame.k));
+  }
+  function matrixGridRolesForCell(frame, row, column) {
+    const roles = [];
+    const k = stageIndex(frame);
+    if ((frame.type === "stage" || frame.type === "relax") && (row === k || column === k)) {
+      roles.push("stage-axis");
+    }
+    if (frame.type === "relax") {
+      if (frame.deps[0]?.[0] === row && frame.deps[0]?.[1] === column) roles.push("operand-a");
+      if (frame.deps[1]?.[0] === row && frame.deps[1]?.[1] === column) roles.push("operand-b");
+      if (frame.cur?.[0] === row && frame.cur?.[1] === column) roles.push("target");
+    }
+    if (frame.negativeCycle.includes(Number(frame.rowLabels[row])) && frame.rowLabels[row] === frame.colLabels[column]) {
+      roles.push("negative-cycle");
+    }
+    return roles;
+  }
+  var matrixGridRoleLegend = [
+    { role: "operand-a", badge: "A", label: "dist[i][k]" },
+    { role: "operand-b", badge: "B", label: "dist[k][j]" },
+    { role: "target", badge: "T", label: "dist[i][j]" },
+    { role: "keep", badge: "K", label: "keep target" },
+    { role: "write", badge: "W", label: "write target" },
+    { role: "stage-axis", badge: "k", label: "active intermediate row/column" }
+  ];
+  function matrixGridFooterModel(frame) {
+    const nodeCount = frame.rowLabels.length;
+    if (frame.negativeCycle.length) {
+      return {
+        context: "Negative cycle",
+        summary: { text: "Cycle paths are unbounded" }
+      };
+    }
+    if (frame.type === "init") {
+      return {
+        context: "Initialize distance matrix",
+        summary: { text: "Seed diagonal, edges, and ∞" }
+      };
+    }
+    if (frame.type === "stage") {
+      return {
+        context: `Stage k = ${frame.k}`,
+        summary: { text: `Compare ${nodeCount * nodeCount} pairs through node ${frame.k}` }
+      };
+    }
+    if (frame.type === "relax" && frame.cur) {
+      const previous = formatDistance(frame.previous);
+      const result = formatDistance(frame.result);
+      return {
+        context: `Stage k = ${frame.k}`,
+        summary: frame.decision === "improve" ? { role: "write", text: `Write ${result} · ${previous} → ${result}` } : { role: "keep", text: `Keep ${previous} · via ${frame.k} is not shorter` }
+      };
+    }
+    return {
+      context: "All stages complete",
+      summary: { text: `${nodeCount * nodeCount} distances ready` }
+    };
+  }
+  var matrixGridViewSemantics = {
+    tableLabel: "Floyd-Warshall distance matrix. Rows are source nodes and columns are destination nodes.",
+    axisDescription: "Distance matrix: rows identify the from node and columns identify the to node.",
+    cornerLabel: "from ↓ / to →",
+    stageLayout: "fill",
+    formatValue(value) {
+      return formatDistance(value);
+    },
+    cellLabel(frame, row, column) {
+      const base = distanceLabel(frame, [row, column]);
+      const roles = matrixGridRolesForCell(frame, row, column);
+      if (!roles.includes("target"))
+        return roles.length ? `${base}; roles: ${roles.join(", ")}` : base;
+      return `${base}; roles: ${roles.join(", ")}; previous ${formatDistance(frame.previous)}; candidate ${formatDistance(frame.candidate)}; decision ${frame.decision}; result ${formatDistance(frame.result)}`;
+    },
+    stateForCell(frame, row, column) {
+      if (frame.cur?.[0] === row && frame.cur?.[1] === column) return "cur";
+      return frame.deps.some(([depRow, depColumn]) => depRow === row && depColumn === column) ? "dep" : "";
+    },
+    decisionForCell(frame, row, column) {
+      return frame.cur?.[0] === row && frame.cur?.[1] === column ? frame.decision || "" : "";
+    },
+    rolesForCell: matrixGridRolesForCell,
+    headerRole(frame, axis, index) {
+      const k = stageIndex(frame);
+      if (frame.type !== "stage" && frame.type !== "relax" || index !== k) return "";
+      return axis === "row" ? "stage-row" : "stage-column";
+    },
+    footerModel: matrixGridFooterModel,
+    roleLegend: matrixGridRoleLegend,
+    watchRows(frame) {
+      const current = frame.cur ? `dist[${frame.rowLabels[frame.cur[0]]}][${frame.colLabels[frame.cur[1]]}] = ${formatDistance(frame.previous)} before this relaxation` : "—";
+      const left = frame.deps[0] ? `dist[${frame.rowLabels[frame.deps[0][0]]}][${frame.colLabels[frame.deps[0][1]]}] = ${formatDistance(frame.operandA)}` : "—";
+      const right = frame.deps[1] ? `dist[${frame.rowLabels[frame.deps[1][0]]}][${frame.colLabels[frame.deps[1][1]]}] = ${formatDistance(frame.operandB)}` : "—";
+      const candidate = frame.candidate == null || !frame.deps[0] || !frame.deps[1] ? "—" : `${formatDistance(frame.operandA)} + ${formatDistance(frame.operandB)} = ${frame.candidate}`;
+      const rows = [
+        { k: "stage k", v: frame.k == null ? "—" : String(frame.k), sw: "var(--_violet)" },
+        { k: "dist[i][j]", v: current, sw: "var(--_blue)" },
+        { k: "dist[i][k]", v: left, sw: "var(--_amber)" },
+        { k: "dist[k][j]", v: right, sw: "var(--_amber)" },
+        { k: "candidate", v: candidate, sw: "var(--_violet)" },
+        {
+          k: "decision",
+          v: frame.decision === "improve" ? `write ${formatDistance(frame.previous)} → ${formatDistance(frame.result)}` : frame.decision === "keep" ? `keep ${formatDistance(frame.previous)}` : "—",
+          sw: frame.decision === "improve" ? "var(--_green)" : "var(--_neutral)"
+        }
+      ];
+      if (frame.negativeCycle.length) {
+        rows.push({
+          k: "negative cycle",
+          v: frame.negativeCycle.join(", "),
+          sw: "var(--_amber)"
+        });
+      }
+      return rows;
+    }
+  };
+  var matrixGridFamily = {
+    id: "matrix-grid",
+    createRecorder(config) {
+      return new MatrixGridRecorder(config);
+    },
+    createView(frames) {
+      return makeDPView(frames, matrixGridViewSemantics);
+    }
+  };
+
+  // custom/steptrace/src/algorithms/floyd-warshall.ts
+  var displayMatrix = (matrix) => matrix.map((row) => row.map((value) => Number.isFinite(value) ? value : null));
+  var floydWarshall = {
+    id: "floyd-warshall",
+    kind: "dp",
+    family: matrixGridFamily,
+    meta: { label: "Floyd-Warshall" },
+    parse: parseMatrixGridConfig,
+    run(input, ops) {
+      const indexForNode = new Map(input.nodes.map((node, index) => [node, index]));
+      const dist = Array.from(
+        { length: input.nodes.length },
+        (_, row) => Array.from({ length: input.nodes.length }, (_2, column) => row === column ? 0 : Infinity)
+      );
+      for (const [from, to, weight] of input.edges) {
+        const row = indexForNode.get(from);
+        const column = indexForNode.get(to);
+        dist[row][column] = Math.min(dist[row][column], weight);
+      }
+      ops.board(displayMatrix(dist), "Initialize direct-edge distances; missing edges are ∞.");
+      for (let k = 0; k < input.nodes.length; k++) {
+        const kNode = input.nodes[k];
+        ops.stage(kNode, `Stage k = ${kNode}: allow node ${kNode} as an intermediate.`);
+        for (let i = 0; i < input.nodes.length; i++) {
+          for (let j = 0; j < input.nodes.length; j++) {
+            const current = dist[i][j];
+            const left = dist[i][k];
+            const right = dist[k][j];
+            const candidate = Number.isFinite(left) && Number.isFinite(right) ? left + right : Infinity;
+            const improve = candidate < current;
+            if (improve) dist[i][j] = candidate;
+            const from = input.nodes[i];
+            const to = input.nodes[j];
+            const currentLabel = Number.isFinite(current) ? current : "∞";
+            const candidateLabel = Number.isFinite(candidate) ? candidate : "∞";
+            ops.relax(
+              i,
+              j,
+              [
+                [i, k],
+                [k, j]
+              ],
+              Number.isFinite(candidate) ? candidate : null,
+              improve ? "improve" : "keep",
+              Number.isFinite(dist[i][j]) ? dist[i][j] : null,
+              improve ? `dist[${from}][${to}] improves through ${kNode}: ${currentLabel} → ${candidateLabel}.` : `Keep dist[${from}][${to}] = ${currentLabel}; the route through ${kNode} costs ${candidateLabel}.`
+            );
+          }
+        }
+      }
+      const negativeCycle = input.nodes.filter((node, index) => dist[index][index] < 0);
+      if (negativeCycle.length) {
+        ops.reportNegativeCycle(
+          negativeCycle,
+          `Negative cycle detected through ${negativeCycle.join(", ")}; shortest distances are undefined.`
+        );
+        ops.done("Stopped after reporting the negative cycle.");
+        return;
+      }
+      ops.done("All stages complete: the matrix holds every finite shortest-path distance.");
+    }
+  };
+
   // custom/steptrace/src/algorithms/heap-sort.ts
   var heapSort = {
     id: "heap-sort",
@@ -3264,21 +4172,21 @@
   };
 
   // custom/steptrace/src/algorithms/introsort.ts
-  function invalidConfig3(message) {
+  function invalidConfig5(message) {
     throw new Error(`steptrace: introsort ${message}`);
   }
   function parseIntrosortConfig(config) {
     const { array } = config;
     if (!Array.isArray(array) || array.length < 2)
-      invalidConfig3('requires an "array" with at least two numbers.');
+      invalidConfig5('requires an "array" with at least two numbers.');
     if (!array.every((value) => typeof value === "number" && Number.isFinite(value)))
-      invalidConfig3('requires every "array" value to be a finite number.');
+      invalidConfig5('requires every "array" value to be a finite number.');
     const depthLimit = config.depthLimit ?? 2 * Math.floor(Math.log2(array.length));
     const smallPartitionThreshold = config.smallPartitionThreshold ?? 16;
     if (!Number.isInteger(depthLimit) || depthLimit < 0)
-      invalidConfig3('requires "depthLimit" to be a non-negative integer.');
+      invalidConfig5('requires "depthLimit" to be a non-negative integer.');
     if (!Number.isInteger(smallPartitionThreshold) || smallPartitionThreshold < 1)
-      invalidConfig3('requires "smallPartitionThreshold" to be a positive integer.');
+      invalidConfig5('requires "smallPartitionThreshold" to be a positive integer.');
     return {
       array: array.slice(),
       profile: "introsort",
@@ -4045,22 +4953,22 @@
   };
 
   // custom/steptrace/src/algorithms/shell-sort.ts
-  function invalidConfig4(message) {
+  function invalidConfig6(message) {
     throw new Error(`steptrace: shell-sort ${message}`);
   }
   function parseShellSortConfig(config) {
     const { array, gaps } = config;
     if (!Array.isArray(array) || array.length < 2)
-      invalidConfig4('requires an "array" with at least two numbers.');
+      invalidConfig6('requires an "array" with at least two numbers.');
     if (!array.every((value) => typeof value === "number" && Number.isFinite(value)))
-      invalidConfig4('requires every "array" value to be a finite number.');
+      invalidConfig6('requires every "array" value to be a finite number.');
     if (!Array.isArray(gaps) || gaps.length === 0)
-      invalidConfig4('requires a non-empty "gaps" array ending in 1.');
+      invalidConfig6('requires a non-empty "gaps" array ending in 1.');
     if (!gaps.every((gap) => Number.isInteger(gap) && gap > 0 && gap < array.length))
-      invalidConfig4("requires every gap to be a positive integer smaller than the array length.");
-    if (gaps.at(-1) !== 1) invalidConfig4("requires the final gap to be 1.");
+      invalidConfig6("requires every gap to be a positive integer smaller than the array length.");
+    if (gaps.at(-1) !== 1) invalidConfig6("requires the final gap to be 1.");
     if (gaps.some((gap, index) => index > 0 && gap >= gaps[index - 1]))
-      invalidConfig4("requires gaps in strictly decreasing order.");
+      invalidConfig6("requires gaps in strictly decreasing order.");
     return { array: array.slice(), gaps: gaps.slice(), profile: "shell" };
   }
   var shellSort = {
@@ -4402,10 +5310,12 @@
     twoPointers,
     slidingWindow,
     lcs,
+    floydWarshall,
     unionFind,
     kernighanPopcount,
     nQueens,
-    fibonacci
+    fibonacci,
+    divideAndConquer
   ];
 
   // custom/steptrace/src/player.ts
@@ -4505,9 +5415,9 @@
     target: "Value the algorithm is looking for.",
     goal: "Result the algorithm is trying to optimize.",
     phase: "Current stage of the algorithm.",
-    subproblem: "Range and values handled by the active recursive call.",
+    subproblem: "Active part of the problem being solved recursively.",
     "call path": "Active calls from the root down to the current subproblem.",
-    result: "Sorted values returned by the active subproblem.",
+    result: "Answer returned by the active subproblem.",
     probe: "Index and value currently being checked.",
     "probe 1": "First third-point checked in the current range.",
     "probe 2": "Second third-point checked in the current range.",
@@ -4576,6 +5486,7 @@
       const mq = matchMedia("(prefers-reduced-motion: reduce)");
       const applyMotion = () => root.classList.toggle("steptrace--reduced", mq.matches);
       mq.addEventListener("change", applyMotion);
+      const shouldIncludeArray = Array.isArray(config.array) || kind === "sort" || kind === "search" || kind === "pointers";
       const state = {
         algorithm: config.algorithm,
         speed: config.speed || 1,
@@ -4971,7 +5882,7 @@
         const built = buildFrames({
           ...state.config,
           algorithm: state.algorithm,
-          array: state.array,
+          ...shouldIncludeArray ? { array: state.array } : {},
           start: state.start
         });
         if (built.family) root.dataset.visualFamily = built.family.id;

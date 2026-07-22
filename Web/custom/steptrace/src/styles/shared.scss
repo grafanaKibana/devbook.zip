@@ -108,6 +108,27 @@
   gap: 0 1.5rem;
   align-items: stretch;
 }
+.steptrace:is([data-visual-family="execution-tree"], [data-visual-family="matrix-grid"]) {
+  container: steptrace-wide-stage / inline-size;
+}
+@container steptrace-wide-stage (max-width: 64rem) {
+  .steptrace:is([data-visual-family="execution-tree"], [data-visual-family="matrix-grid"])
+    .steptrace__body {
+    grid-template-columns: minmax(0, 1fr);
+  }
+  .steptrace:is([data-visual-family="execution-tree"], [data-visual-family="matrix-grid"])
+    .steptrace__rail {
+    margin-top: 1rem;
+    padding-top: 1rem;
+    padding-left: 0;
+    border-top: 1px solid var(--_hair);
+    border-left: 0;
+  }
+  .steptrace:is([data-visual-family="execution-tree"], [data-visual-family="matrix-grid"])
+    .steptrace__trace {
+    margin-top: 0;
+  }
+}
 .steptrace__stage-col {
   min-width: 0;
   display: flex;
@@ -128,8 +149,16 @@
 .steptrace__stage-col--bottom {
   justify-content: flex-end;
 }
+.steptrace__stage-col--fill {
+  justify-content: stretch;
+}
+.steptrace__stage-col--fill > :first-child {
+  flex: 1 1 auto;
+  min-height: 0;
+}
 /* legend is a sibling of the viz, not a child: bottom of the column, centred */
-.steptrace__stage-col > .steptrace__legend {
+.steptrace__stage-col > .steptrace__legend,
+.steptrace__stage-col > .steptrace__legend-wrap {
   width: 100%;
   margin-top: 0.9rem;
   justify-content: center;

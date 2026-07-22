@@ -94,6 +94,24 @@
   gap: 0 1.5rem;
   align-items: stretch;
 }
+.steptrace:is([data-visual-family=execution-tree], [data-visual-family=matrix-grid]) {
+  container: steptrace-wide-stage/inline-size;
+}
+@container steptrace-wide-stage (max-width: 64rem) {
+  .steptrace:is([data-visual-family=execution-tree], [data-visual-family=matrix-grid]) .steptrace__body {
+    grid-template-columns: minmax(0, 1fr);
+  }
+  .steptrace:is([data-visual-family=execution-tree], [data-visual-family=matrix-grid]) .steptrace__rail {
+    margin-top: 1rem;
+    padding-top: 1rem;
+    padding-left: 0;
+    border-top: 1px solid var(--_hair);
+    border-left: 0;
+  }
+  .steptrace:is([data-visual-family=execution-tree], [data-visual-family=matrix-grid]) .steptrace__trace {
+    margin-top: 0;
+  }
+}
 .steptrace__stage-col {
   min-width: 0;
   display: flex;
@@ -109,7 +127,15 @@
 .steptrace__stage-col--bottom {
   justify-content: flex-end;
 }
-.steptrace__stage-col > .steptrace__legend {
+.steptrace__stage-col--fill {
+  justify-content: stretch;
+}
+.steptrace__stage-col--fill > :first-child {
+  flex: 1 1 auto;
+  min-height: 0;
+}
+.steptrace__stage-col > .steptrace__legend,
+.steptrace__stage-col > .steptrace__legend-wrap {
   width: 100%;
   margin-top: 0.9rem;
   justify-content: center;
@@ -1062,64 +1088,365 @@
 .steptrace__pbrackets[data-match="1"] .steptrace__pbr {
   border-color: var(--_green);
 }
-.steptrace__dp-wrap {
+.steptrace .steptrace__dp-stage,
+.steptrace .steptrace__dp-wrap,
+.steptrace .steptrace__dp {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+.steptrace .steptrace__dp-stage,
+.steptrace .steptrace__dp-wrap,
+.steptrace .steptrace__matrix-role-legend {
+  --_type-small: 0.75rem;
+  --_type-main: 0.875rem;
+  --_motion-state: 90ms;
+  --_role-badge-size: 1.125rem;
+  --_matrix-radius: 0.5625rem;
+  --_matrix-cell: var(--st-table-cell, var(--st-page, var(--_surface)));
+  --_matrix-header: var(--st-table-header, var(--_surface));
+  --_matrix-border-color: var(--st-table-border, var(--_border));
+  --_matrix-text: var(--st-table-text, var(--_text));
+  --_matrix-border: 1px solid var(--_matrix-border-color);
+  font-size: var(--_type-main);
+  font-weight: 600;
+}
+.steptrace .steptrace__dp-stage--guided {
+  display: block;
+  width: 100%;
+  min-width: 0;
+  height: auto;
+  min-height: 0;
+  overflow: visible;
+  container: steptrace-matrix/inline-size;
+}
+.steptrace .steptrace__dp-wrap {
   display: block;
   width: 100%;
   overflow-x: auto;
-  border: 1px solid color-mix(in srgb, var(--_text) 22%, transparent);
-  border-radius: 9px;
-  margin: 0.4rem 0;
+  overflow-y: hidden;
+  border: var(--_matrix-border);
+  border-radius: var(--_matrix-radius);
+  background: var(--_matrix-cell);
+  box-shadow: none;
+  isolation: isolate;
 }
-.steptrace__dp {
+.steptrace .steptrace__dp-wrap--guided {
+  align-self: end;
+}
+.steptrace .steptrace__dp {
+  display: table !important;
   width: 100%;
+  margin: 0 !important;
+  padding: 0 !important;
   table-layout: fixed;
-  border-collapse: collapse;
-  font: 500 0.9rem var(--_font-mono);
+  border: 0 !important;
+  border-spacing: 0 !important;
+  border-collapse: separate !important;
+  background: var(--_matrix-cell);
+  font: 400 var(--_type-main)/1.2 var(--_font-mono);
 }
-.steptrace__dp th {
-  color: var(--_muted);
-  font: 600 0.7rem var(--_font-head);
-  padding: 5px 9px;
-  text-align: center;
-  background: color-mix(in srgb, var(--_text) 5%, transparent);
-  border: 1px solid color-mix(in srgb, var(--_text) 11%, transparent);
+.steptrace .steptrace__dp--guided {
+  min-width: 28rem;
 }
-.steptrace__dp td {
-  position: relative;
-  height: 38px;
-  text-align: center;
-  color: var(--_text);
-  border: 1px solid color-mix(in srgb, var(--_text) 11%, transparent);
-  transition: background var(--_tween) ease, color 0.22s ease;
-}
-.steptrace__dp td::after {
+.steptrace .steptrace__dp-caption {
   position: absolute;
-  right: 3px;
-  top: 2px;
-  font: 800 8px/1 var(--_font-mono);
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+.steptrace .steptrace__dp thead {
+  display: table-header-group !important;
+}
+.steptrace .steptrace__dp tbody {
+  display: table-row-group !important;
+}
+.steptrace .steptrace__dp tfoot {
+  display: table-footer-group !important;
+}
+.steptrace .steptrace__dp tr {
+  display: table-row !important;
+}
+.steptrace .steptrace__dp thead,
+.steptrace .steptrace__dp tbody,
+.steptrace .steptrace__dp tfoot,
+.steptrace .steptrace__dp tr {
+  margin: 0 !important;
+  padding: 0 !important;
+  border: 0 !important;
+  border-radius: 0 !important;
+  background: transparent !important;
+}
+.steptrace .steptrace__dp th,
+.steptrace .steptrace__dp td {
+  display: table-cell !important;
+  box-sizing: border-box;
+  height: 2.375rem;
+  margin: 0 !important;
+  border: 0 !important;
+  border-radius: 0 !important;
+  background: var(--_matrix-cell);
+  color: var(--_matrix-text);
+  font-style: normal !important;
+  letter-spacing: 0 !important;
+  text-align: center !important;
+  vertical-align: middle !important;
+}
+.steptrace .steptrace__dp tr > * + * {
+  border-left: 1px solid var(--_matrix-border-color) !important;
+}
+.steptrace .steptrace__dp tbody tr:first-child > *,
+.steptrace .steptrace__dp thead tr + tr > *,
+.steptrace .steptrace__dp tbody tr + tr > * {
+  border-top: 1px solid var(--_matrix-border-color) !important;
+}
+.steptrace .steptrace__dp:not(.steptrace__dp--guided) td::after {
+  position: absolute;
+  top: 0.125rem;
+  right: 0.1875rem;
   color: currentColor;
+  font: 600 var(--_type-small)/1 var(--_font-mono);
 }
-.steptrace__dp td[data-state=dep] {
-  background: color-mix(in srgb, var(--_amber) 20%, transparent);
-}
-.steptrace__dp td[data-state=dep]::after {
+.steptrace .steptrace__dp:not(.steptrace__dp--guided) td[data-state=dep]::after {
   content: "↖";
 }
-.steptrace__dp td[data-state=cur] {
-  background: color-mix(in srgb, var(--_blue) 20%, transparent);
-  color: var(--_blue);
-  font-weight: 700;
-}
-.steptrace__dp td[data-state=cur]::after {
+.steptrace .steptrace__dp:not(.steptrace__dp--guided) td[data-state=cur]::after {
   content: "■";
 }
-.steptrace__dp td[data-state=path] {
-  background: color-mix(in srgb, var(--_green) 22%, transparent);
-  color: var(--_green);
-  font-weight: 700;
-}
-.steptrace__dp td[data-state=path]::after {
+.steptrace .steptrace__dp:not(.steptrace__dp--guided) td[data-state=path]::after {
   content: "✓";
+}
+.steptrace .steptrace__dp th {
+  padding: 0.3125rem 0.5625rem !important;
+  color: var(--_muted);
+  background: var(--_matrix-header);
+}
+.steptrace .steptrace__dp td {
+  position: relative;
+  padding: 0 !important;
+  color: var(--_matrix-text);
+  font-family: var(--_font-mono) !important;
+  font-size: var(--_type-main) !important;
+  line-height: 1.2 !important;
+  font-weight: 400 !important;
+  transition: background-color var(--_tween) ease, color 0.22s ease;
+}
+.steptrace .steptrace__dp thead th,
+.steptrace .steptrace__dp tbody th {
+  position: static !important;
+  font-family: var(--_font-head) !important;
+  font-size: var(--_type-small) !important;
+  line-height: 1.2 !important;
+  font-weight: 400 !important;
+  font-style: normal !important;
+  letter-spacing: 0 !important;
+  text-align: center !important;
+  vertical-align: middle !important;
+}
+.steptrace .steptrace__dp--guided th,
+.steptrace .steptrace__dp--guided td,
+.steptrace .steptrace__dp--guided tr {
+  height: 2.75rem;
+}
+.steptrace .steptrace__dp--guided th,
+.steptrace .steptrace__dp--guided td {
+  text-align: center !important;
+}
+.steptrace .steptrace__dp--guided td {
+  min-width: 4.75rem;
+  padding: 0 !important;
+  transition: background-color var(--_motion-state) ease, color var(--_motion-state) ease;
+}
+.steptrace .steptrace__dp-corner {
+  line-height: 1.2;
+  white-space: normal;
+}
+.steptrace .steptrace__dp--guided th[data-role=stage-row],
+.steptrace .steptrace__dp--guided th[data-role=stage-column] {
+  color: var(--_violet);
+  background: color-mix(in srgb, var(--_violet) 14%, var(--_matrix-header));
+}
+.steptrace .steptrace__dp-value {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  display: grid;
+  place-items: center;
+  font-weight: 400;
+  font-variant-numeric: tabular-nums;
+  pointer-events: none;
+}
+.steptrace .steptrace__dp-markers {
+  position: absolute;
+  z-index: 2;
+  top: 0.1875rem;
+  right: 0.1875rem;
+  display: flex;
+  flex: none;
+  gap: 0.125rem;
+  pointer-events: none;
+}
+.steptrace .steptrace__matrix-role-badge {
+  display: none;
+  flex: 0 0 var(--_role-badge-size);
+  width: var(--_role-badge-size);
+  height: var(--_role-badge-size);
+  place-items: center;
+  border: 1.5px solid currentColor;
+  border-radius: 999px;
+  background: var(--_matrix-cell);
+  opacity: 1;
+  font: 600 var(--_type-small)/1 var(--_font-mono);
+}
+.steptrace .steptrace__dp td[data-roles~=stage-axis] {
+  background: color-mix(in srgb, var(--_violet) 7%, var(--_matrix-cell));
+}
+.steptrace .steptrace__dp td[data-roles~=operand-a] {
+  background: color-mix(in srgb, var(--_amber) 12%, var(--_matrix-cell));
+}
+.steptrace .steptrace__dp td[data-roles~=operand-b] {
+  background: color-mix(in srgb, var(--_violet) 13%, var(--_matrix-cell));
+}
+.steptrace .steptrace__dp td[data-roles~=target] {
+  --_target-ring-color: var(--_blue);
+  background: color-mix(in srgb, var(--_blue) 15%, var(--_matrix-cell));
+  color: var(--_blue);
+}
+.steptrace .steptrace__dp--guided td[data-roles~=target]::before {
+  position: absolute;
+  inset: 0;
+  z-index: 3;
+  content: "";
+  box-shadow: inset 0 0 0 2px var(--_target-ring-color);
+  transition: box-shadow var(--_motion-state) ease;
+  pointer-events: none;
+}
+.steptrace .steptrace__dp td[data-roles~=target][data-decision=improve] {
+  --_target-ring-color: var(--_green);
+  background: color-mix(in srgb, var(--_green) 18%, var(--_matrix-cell));
+  color: var(--_green);
+}
+.steptrace .steptrace__dp td[data-roles~=target][data-decision=keep] {
+  --_target-ring-color: var(--_muted);
+  background: color-mix(in srgb, var(--_matrix-text) 7%, var(--_matrix-cell));
+  color: var(--_matrix-text);
+}
+.steptrace .steptrace__dp td[data-roles~=negative-cycle] {
+  color: var(--_amber);
+  background: color-mix(in srgb, var(--_amber) 14%, var(--_matrix-cell));
+}
+.steptrace .steptrace__dp--guided td:is([data-roles~=stage-axis], [data-roles~=operand-b]):not([data-roles~=target]) .steptrace__dp-value {
+  font-weight: 600;
+}
+.steptrace .steptrace__dp td[data-roles~=operand-a] .steptrace__matrix-role-badge[data-role=operand-a],
+.steptrace .steptrace__dp td[data-roles~=operand-b] .steptrace__matrix-role-badge[data-role=operand-b],
+.steptrace .steptrace__dp td[data-roles~=target] .steptrace__matrix-role-badge[data-role=target],
+.steptrace .steptrace__dp td[data-roles~=target] .steptrace__matrix-role-badge[data-role=write],
+.steptrace .steptrace__dp td[data-roles~=target] .steptrace__matrix-role-badge[data-role=keep] {
+  display: grid;
+}
+.steptrace .steptrace__matrix-role-badge[data-role=operand-a] {
+  color: var(--_amber);
+}
+.steptrace .steptrace__matrix-role-badge[data-role=operand-b],
+.steptrace .steptrace__matrix-role-badge[data-role=stage-axis] {
+  color: var(--_violet);
+}
+.steptrace .steptrace__matrix-role-badge[data-role=target] {
+  color: var(--_blue);
+}
+.steptrace .steptrace__matrix-role-badge[data-role=write] {
+  color: var(--_green);
+}
+.steptrace .steptrace__matrix-role-badge[data-role=keep] {
+  color: var(--_muted);
+}
+.steptrace .steptrace__dp:not(.steptrace__dp--guided) td[data-state=dep] {
+  background: color-mix(in srgb, var(--_amber) 20%, var(--_matrix-cell));
+}
+.steptrace .steptrace__dp:not(.steptrace__dp--guided) td[data-state=cur] {
+  background: color-mix(in srgb, var(--_blue) 20%, var(--_matrix-cell));
+  color: var(--_blue);
+}
+.steptrace .steptrace__dp:not(.steptrace__dp--guided) td[data-state=path] {
+  background: color-mix(in srgb, var(--_green) 22%, var(--_matrix-cell));
+  color: var(--_green);
+}
+.steptrace .steptrace__matrix-footer > tr > td {
+  height: 2.75rem;
+  padding: 0 0.625rem !important;
+  border-top: 1px solid var(--_matrix-border-color) !important;
+  background: var(--_matrix-header);
+}
+.steptrace .steptrace__matrix-footer-row {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 0.625rem;
+  align-items: center;
+  min-width: 0;
+  color: var(--_matrix-text);
+  font: 400 var(--_type-small)/1.2 var(--_font-head);
+  font-variant-numeric: tabular-nums;
+}
+.steptrace .steptrace__matrix-footer-context {
+  min-width: 0;
+  overflow: hidden;
+  color: var(--_muted);
+  justify-self: start;
+  text-align: left;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.steptrace .steptrace__matrix-footer-summary {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;
+  min-width: 0;
+  max-width: 100%;
+  overflow: hidden;
+  color: var(--_matrix-text);
+  font-family: var(--_font-mono);
+  justify-self: end;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.steptrace .steptrace__matrix-footer .steptrace__matrix-role-badge,
+.steptrace .steptrace__matrix-role-legend .steptrace__matrix-role-badge {
+  display: grid;
+}
+.steptrace .steptrace__matrix-role-legend,
+.steptrace .steptrace__matrix-role-legend-items,
+.steptrace .steptrace__matrix-role-legend-item {
+  font: 600 var(--_type-small)/1.2 var(--_font-head);
+}
+.steptrace .steptrace__matrix-role-legend {
+  min-width: 0;
+}
+.steptrace .steptrace__matrix-role-legend-items {
+  width: 100%;
+  justify-content: center;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.steptrace .steptrace__matrix-role-legend-item {
+  flex: 0 1 auto;
+  min-width: 0;
+  max-width: 100%;
+  color: var(--_muted);
+}
+.steptrace .steptrace__matrix-role-legend-label {
+  letter-spacing: 0;
+  white-space: normal;
+}
+.steptrace--reduced .steptrace__dp--guided td,
+.steptrace--reduced .steptrace__dp--guided td::before {
+  transition: none;
 }
 .steptrace__uf .steptrace__ufnode .steptrace__nback {
   fill: var(--st-page, var(--_surface));
@@ -1387,82 +1714,156 @@
   color: var(--_amber);
   font-weight: 700;
 }
-.steptrace__rectree {
-  display: flex;
-  flex-direction: column;
-  gap: 0.5rem;
-  align-items: stretch;
+.steptrace .steptrace__rectree {
+  inline-size: 100%;
+  min-inline-size: 0;
+  overflow-x: auto;
+  overflow-y: hidden;
+  overscroll-behavior-inline: contain;
+  scrollbar-gutter: stable;
 }
-.steptrace__rtsvg {
-  width: 100%;
-  height: auto;
-  max-height: 260px;
+.steptrace .steptrace__rectree:focus-visible {
+  outline: 2px solid var(--_blue);
+  outline-offset: 0.2rem;
+}
+.steptrace .steptrace__rtsvg {
+  display: block;
+  inline-size: 100%;
+  min-inline-size: var(--steptrace-tree-min-width, 40rem);
+  block-size: auto;
+  max-block-size: none;
+  margin: 0;
+  padding: 0;
   overflow: visible;
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+  box-shadow: none;
+  color: inherit;
+  font: inherit;
 }
-.steptrace__rtedge {
+.steptrace .steptrace__rtsvg text {
+  margin: 0;
+  padding: 0;
+  font-style: normal;
+  letter-spacing: 0;
+  text-decoration: none;
+  text-transform: none;
+}
+.steptrace .steptrace__rtsvg circle,
+.steptrace .steptrace__rtsvg line,
+.steptrace .steptrace__rtsvg rect {
+  vector-effect: non-scaling-stroke;
+}
+.steptrace .steptrace__rtedge {
   stroke: var(--_neutral);
-  stroke-width: 1.6;
+  stroke-width: 1.25;
   transition: stroke var(--_tween) ease, opacity var(--_tween) ease;
 }
-.steptrace__rtedge[data-vis="0"] {
+.steptrace .steptrace__rtedge[data-vis="0"] {
   opacity: 0.12;
 }
-.steptrace__rtedge[data-collapsed=true] {
+.steptrace .steptrace__rtedge[data-path=true] {
+  stroke: var(--_violet);
+}
+.steptrace .steptrace__rtedge[data-collapsed=true] {
   opacity: 0.3;
 }
-.steptrace__rtnode {
+.steptrace .steptrace__rtnode {
+  opacity: 1;
   transition: opacity var(--_tween) ease;
 }
-.steptrace__rtnode[data-vis="0"] {
+.steptrace .steptrace__rtnode[data-vis="0"] {
   opacity: 0.12;
 }
-.steptrace__rtnode[data-collapsed=true] {
+.steptrace .steptrace__rtnode[data-collapsed=true] {
   opacity: 0.34;
-  filter: grayscale(1);
 }
-.steptrace__rtnode .steptrace__rtback {
+.steptrace .steptrace__rtnode .steptrace__rtcirc {
   fill: var(--st-page, var(--_surface));
-  stroke: none;
-}
-.steptrace__rtnode .steptrace__rtcirc {
-  fill: color-mix(in srgb, var(--_neutral) 20%, transparent);
   stroke: var(--_neutral);
-  stroke-width: 1.6;
+  stroke-width: 1.25;
   transition: fill var(--_tween) ease, stroke var(--_tween) ease;
 }
-.steptrace__rtnode .steptrace__rtring {
+.steptrace .steptrace__rtnode .steptrace__rtring {
   fill: none;
   stroke: var(--_violet);
-  stroke-width: 1.8;
+  stroke-width: 1.5;
   opacity: 0;
   transition: opacity var(--_tween) ease;
 }
-.steptrace__rtnode[data-active=true] .steptrace__rtring {
+.steptrace .steptrace__rtnode[data-active=true] .steptrace__rtring {
   opacity: 1;
 }
-.steptrace__rtnode .steptrace__rtlabel {
+.steptrace .steptrace__rtnode .steptrace__rtlabel {
   fill: var(--_text);
-  font: 600 10px var(--_font-mono);
+  font: 600 9px/1 var(--_font-mono);
 }
-.steptrace__rtnode .steptrace__rtval {
+.steptrace .steptrace__rtnode .steptrace__rtdetail {
   fill: var(--_muted);
-  font: 600 9px var(--_font-mono);
+  font: 500 8px/1 var(--_font-mono);
 }
-.steptrace__rtnode[data-state=compute] .steptrace__rtcirc {
-  fill: color-mix(in srgb, var(--_blue) 22%, transparent);
+.steptrace .steptrace__rtnode .steptrace__rtval {
+  fill: var(--_text);
+  font: 600 8px/1 var(--_font-mono);
+}
+.steptrace .steptrace__rtnode .steptrace__rtbadge {
+  fill: var(--_muted);
+  font: 600 6px/1 var(--_font-head);
+  letter-spacing: 0.03em;
+  text-transform: uppercase;
+}
+.steptrace .steptrace__rtnode[data-shape=circle] .steptrace__rtdetail,
+.steptrace .steptrace__rtnode[data-shape=circle] .steptrace__rtbadge {
+  display: none;
+}
+.steptrace .steptrace__rtnode[data-state=call] .steptrace__rtcirc,
+.steptrace .steptrace__rtnode[data-state=compute] .steptrace__rtcirc {
+  fill: color-mix(in srgb, var(--_neutral) 18%, var(--st-page, var(--_surface)));
+  stroke: var(--_neutral);
+}
+.steptrace .steptrace__rtnode[data-state=split] .steptrace__rtcirc {
+  fill: color-mix(in srgb, var(--_blue) 12%, var(--st-page, var(--_surface)));
   stroke: var(--_blue);
 }
-.steptrace__rtnode[data-state=base] .steptrace__rtcirc {
-  fill: color-mix(in srgb, var(--_muted) 16%, transparent);
-  stroke: var(--_muted);
-}
-.steptrace__rtnode[data-state=miss] .steptrace__rtcirc {
-  fill: color-mix(in srgb, var(--_amber) 18%, transparent);
+.steptrace .steptrace__rtnode[data-state=base] .steptrace__rtcirc,
+.steptrace .steptrace__rtnode[data-state=miss] .steptrace__rtcirc {
+  fill: color-mix(in srgb, var(--_amber) 13%, var(--st-page, var(--_surface)));
   stroke: var(--_amber);
 }
-.steptrace__rtnode[data-state=hit] .steptrace__rtcirc {
-  fill: color-mix(in srgb, var(--_green) 30%, transparent);
+.steptrace .steptrace__rtnode[data-state=return] .steptrace__rtcirc {
+  fill: color-mix(in srgb, var(--_violet) 11%, var(--st-page, var(--_surface)));
+  stroke: var(--_violet);
+}
+.steptrace .steptrace__rtnode[data-state=combine] .steptrace__rtcirc,
+.steptrace .steptrace__rtnode[data-state=cache] .steptrace__rtcirc,
+.steptrace .steptrace__rtnode[data-state=hit] .steptrace__rtcirc {
+  fill: color-mix(in srgb, var(--_green) 14%, var(--st-page, var(--_surface)));
   stroke: var(--_green);
+}
+.steptrace .steptrace__rtnode[data-state=prune] .steptrace__rtcirc {
+  fill: color-mix(in srgb, var(--_muted) 9%, var(--st-page, var(--_surface)));
+  stroke: var(--_muted);
+  stroke-dasharray: 3 2;
+}
+.steptrace .steptrace__rtswatch[data-state=split] {
+  background: var(--_blue);
+}
+.steptrace .steptrace__rtswatch[data-state=base],
+.steptrace .steptrace__rtswatch[data-state=miss] {
+  background: var(--_amber);
+}
+.steptrace .steptrace__rtswatch[data-state=return],
+.steptrace .steptrace__rtswatch[data-state=compute] {
+  background: var(--_violet);
+}
+.steptrace .steptrace__rtswatch[data-state=combine],
+.steptrace .steptrace__rtswatch[data-state=cache],
+.steptrace .steptrace__rtswatch[data-state=hit] {
+  background: var(--_green);
+}
+.steptrace .steptrace__rtswatch[data-state=prune] {
+  background: var(--_muted);
 }
 .steptrace__graph {
   display: flex;

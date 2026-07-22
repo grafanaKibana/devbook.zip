@@ -678,6 +678,100 @@ export class DPRecorder {
   }
 }
 
+export class MatrixGridRecorder {
+  [key: string]: any
+  constructor(config) {
+    this.frames = []
+    this.nodes = config.nodes.slice()
+    this.rowLabels = this.nodes.map(String)
+    this.colLabels = this.nodes.map(String)
+    this.grid = []
+    this.cur = null
+    this.deps = []
+    this.k = null
+    this.candidate = null
+    this.decision = null
+    this.previous = null
+    this.result = null
+    this.operandA = null
+    this.operandB = null
+    this.negativeCycle = []
+  }
+  board(grid, message) {
+    this.grid = grid.map((row) => row.slice())
+    this._push("init", message)
+  }
+  stage(k, message) {
+    this.k = k
+    this.cur = null
+    this.deps = []
+    this.candidate = null
+    this.decision = null
+    this.previous = null
+    this.result = null
+    this.operandA = null
+    this.operandB = null
+    this._push("stage", message)
+  }
+  relax(r, c, deps, candidate, decision, value, message) {
+    this.cur = [r, c]
+    this.deps = deps.map((dep) => dep.slice())
+    this.candidate = candidate
+    this.decision = decision
+    this.previous = this.grid[r][c]
+    this.result = value
+    this.operandA = this.grid[deps[0][0]][deps[0][1]]
+    this.operandB = this.grid[deps[1][0]][deps[1][1]]
+    this.grid[r][c] = value
+    this._push("relax", message)
+  }
+  reportNegativeCycle(nodes, message) {
+    this.negativeCycle = nodes.slice()
+    this.cur = null
+    this.deps = []
+    this.candidate = null
+    this.decision = null
+    this.previous = null
+    this.result = null
+    this.operandA = null
+    this.operandB = null
+    this._push("negative-cycle", message)
+  }
+  done(message) {
+    this.cur = null
+    this.deps = []
+    this.candidate = null
+    this.decision = null
+    this.previous = null
+    this.result = null
+    this.operandA = null
+    this.operandB = null
+    this._push("done", message)
+  }
+  _push(type, message) {
+    this.frames.push(
+      Object.freeze({
+        type,
+        profile: "floyd-warshall",
+        rowLabels: this.rowLabels.slice(),
+        colLabels: this.colLabels.slice(),
+        grid: this.grid.map((row) => row.slice()),
+        cur: this.cur ? this.cur.slice() : null,
+        deps: this.deps.map((dep) => dep.slice()),
+        k: this.k,
+        candidate: this.candidate,
+        decision: this.decision,
+        previous: this.previous,
+        result: this.result,
+        operandA: this.operandA,
+        operandB: this.operandB,
+        negativeCycle: this.negativeCycle.slice(),
+        message,
+      }),
+    )
+  }
+}
+
 // A UnionFindRecorder snapshot: { n, parent[], roots[], highlight[], activeEdge,
 //   message }. Rendered as a row of elements with parent-pointer arcs above;
 //   nodes are coloured by their set (root).
@@ -1058,6 +1152,150 @@ export class RecTreeRecorder {
   }
   done(message) {
     this._active = null
+    this._push("done", message)
+  }
+}
+
+export class ExecutionTreeRecorder {
+  [key: string]: any
+  constructor(config) {
+    this.frames = []
+    this.profile = config.profile
+    this.phase = "divide"
+    this.action = "initialize"
+    this._nodes = Object.freeze([])
+    this._edges = Object.freeze([])
+    this._visible = new Set()
+    this._states = {}
+    this._results = {}
+    this._collapsed = new Set()
+    this._path = []
+    this._active = null
+    this._cache = []
+    this.calls = 0
+    this.pruned = 0
+  }
+  _push(type, message) {
+    this.frames.push(
+      Object.freeze({
+        type,
+        profile: this.profile,
+        phase: this.phase,
+        action: this.action,
+        nodes: this._nodes,
+        edges: this._edges,
+        active: this._active,
+        path: Object.freeze(this._path.slice()),
+        visible: Object.freeze([...this._visible]),
+        states: Object.freeze({ ...this._states }),
+        results: Object.freeze(
+          Object.fromEntries(
+            Object.entries(this._results).map(([id, values]) => [
+              id,
+              Array.isArray(values) ? Object.freeze(values.slice()) : values,
+            ]),
+          ),
+        ),
+        collapsed: Object.freeze([...this._collapsed]),
+        cache: Object.freeze(this._cache.map((entry) => Object.freeze({ ...entry }))),
+        calls: this.calls,
+        pruned: this.pruned,
+        message,
+      }),
+    )
+  }
+  tree(nodes, edges, rootId, message) {
+    this._nodes = Object.freeze(
+      nodes.map((node) => Object.freeze({ ...node, values: Object.freeze(node.values.slice()) })),
+    )
+    this._edges = Object.freeze(edges.map((edge) => Object.freeze({ ...edge })))
+    this._active = rootId
+    this._path = [rootId]
+    this._visible.add(rootId)
+    this._states[rootId] = "call"
+    this.calls = 1
+    this._push("tree", message)
+  }
+  split(id, path, childIds, message) {
+    this.phase = "divide"
+    this.action = "split"
+    this._active = id
+    this._path = path.slice()
+    this._visible.add(id)
+    this._states[id] = "split"
+    for (const childId of childIds) {
+      if (!this._visible.has(childId)) this.calls++
+      this._visible.add(childId)
+      this._states[childId] = "call"
+    }
+    this._push("split", message)
+  }
+  base(id, path, result, message) {
+    this.phase = "conquer"
+    this.action = "base case"
+    this._active = id
+    this._path = path.slice()
+    this._visible.add(id)
+    this._states[id] = "base"
+    this._results[id] = Array.isArray(result) ? result.slice() : result
+    this._push("base", message)
+  }
+  returnResult(id, path, result, message) {
+    this.phase = "return"
+    this.action = "return"
+    this._active = id
+    this._path = path.slice()
+    this._visible.add(id)
+    this._states[id] = "return"
+    this._results[id] = Array.isArray(result) ? result.slice() : result
+    this._push("return", message)
+  }
+  combine(id, path, result, message) {
+    this.phase = "combine"
+    this.action = "combine results"
+    this._active = id
+    this._path = path.slice()
+    this._visible.add(id)
+    this._states[id] = "combine"
+    this._results[id] = Array.isArray(result) ? result.slice() : result
+    this._push("combine", message)
+  }
+  cacheHit(id, path, key, result, subtreeIds, message) {
+    this.phase = "return"
+    this.action = "reuse cached result"
+    this._active = id
+    this._path = path.slice()
+    this._visible.add(id)
+    this._states[id] = "cache"
+    this._results[id] = Array.isArray(result) ? result.slice() : result
+    this._cache.push({ key, result: Array.isArray(result) ? result.join(", ") : result })
+    for (const childId of subtreeIds) {
+      this._visible.add(childId)
+      this._collapsed.add(childId)
+    }
+    this._push("cache", message)
+  }
+  prune(id, path, subtreeIds, message) {
+    this.phase = "conquer"
+    this.action = "prune branch"
+    this._active = id
+    this._path = path.slice()
+    this._visible.add(id)
+    this._states[id] = "prune"
+    for (const childId of subtreeIds) {
+      this._visible.add(childId)
+      this._collapsed.add(childId)
+    }
+    this.pruned++
+    this._push("prune", message)
+  }
+  done(rootId, result, message) {
+    this.phase = "complete"
+    this.action = "final result ready"
+    this._active = rootId
+    this._path = [rootId]
+    this._states[rootId] = "combine"
+    this._results[rootId] = Array.isArray(result) ? result.slice() : result
     this._push("done", message)
   }
 }
