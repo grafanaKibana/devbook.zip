@@ -108,15 +108,27 @@
   gap: 0 1.5rem;
   align-items: stretch;
 }
-.steptrace:is([data-visual-family="execution-tree"], [data-visual-family="matrix-grid"]) {
+.steptrace:is(
+  [data-visual-family="execution-tree"],
+  [data-visual-family="matrix-grid"],
+  [data-visual-family="monotone-boundary"]
+) {
   container: steptrace-wide-stage / inline-size;
 }
 @container steptrace-wide-stage (max-width: 64rem) {
-  .steptrace:is([data-visual-family="execution-tree"], [data-visual-family="matrix-grid"])
+  .steptrace:is(
+      [data-visual-family="execution-tree"],
+      [data-visual-family="matrix-grid"],
+      [data-visual-family="monotone-boundary"]
+    )
     .steptrace__body {
     grid-template-columns: minmax(0, 1fr);
   }
-  .steptrace:is([data-visual-family="execution-tree"], [data-visual-family="matrix-grid"])
+  .steptrace:is(
+      [data-visual-family="execution-tree"],
+      [data-visual-family="matrix-grid"],
+      [data-visual-family="monotone-boundary"]
+    )
     .steptrace__rail {
     margin-top: 1rem;
     padding-top: 1rem;
@@ -124,7 +136,11 @@
     border-top: 1px solid var(--_hair);
     border-left: 0;
   }
-  .steptrace:is([data-visual-family="execution-tree"], [data-visual-family="matrix-grid"])
+  .steptrace:is(
+      [data-visual-family="execution-tree"],
+      [data-visual-family="matrix-grid"],
+      [data-visual-family="monotone-boundary"]
+    )
     .steptrace__trace {
     margin-top: 0;
   }

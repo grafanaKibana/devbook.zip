@@ -364,6 +364,198 @@ export function makeSearchView(
   return { nodes: [stage, status], paint, watch }
 }
 
+export interface BoundarySearchViewDescriptor {
+  ariaLabel: string
+  rangeLabel: string
+  evaluationLabel: string
+  unitLabel: string
+  watchRows(frame: any): any[]
+}
+
+function boundaryTicks(lower: number, upper: number) {
+  const span = upper - lower
+  if (span <= 12) return Array.from({ length: span + 1 }, (_, index) => lower + index)
+  return [
+    ...new Set(
+      Array.from({ length: 13 }, (_, index) => Math.round(lower + (span * index) / 12)),
+    ),
+  ]
+}
+
+export function makeBoundarySearchView(frames, descriptor: BoundarySearchViewDescriptor) {
+  const first = frames[0]
+  const ticks = boundaryTicks(first.lower, first.upper)
+  const maxExtraLanes = Math.max(
+    1,
+    ...frames.map((frame) =>
+      frame.evaluation ? Math.max(0, frame.evaluation.required - frame.evaluation.allowed) : 0,
+    ),
+  )
+
+  const root = el("section", "steptrace__boundary")
+  root.setAttribute("aria-label", descriptor.ariaLabel)
+
+  const domain = el("div", "steptrace__boundary-domain")
+  const domainHead = el("div", "steptrace__boundary-section-head")
+  const domainLabel = el("span", "steptrace__boundary-section-label")
+  const domainRange = el("span", "steptrace__boundary-section-value")
+  domainLabel.textContent = descriptor.rangeLabel
+  domainHead.append(domainLabel, domainRange)
+  const tickList = el("div", "steptrace__boundary-ticks")
+  tickList.style.setProperty("--steptrace-boundary-ticks", String(ticks.length))
+  tickList.setAttribute("role", "list")
+  const tickNodes = ticks.map((value) => {
+    const tick = el("div", "steptrace__boundary-tick")
+    tick.setAttribute("role", "listitem")
+    tick.dataset.value = String(value)
+    tick.textContent = String(value)
+    tickList.append(tick)
+    return { value, tick }
+  })
+  domain.append(domainHead, tickList)
+
+  const evaluation = el("div", "steptrace__boundary-evaluation")
+  const evaluationHead = el("div", "steptrace__boundary-section-head")
+  const evaluationLabel = el("span", "steptrace__boundary-section-label")
+  const verdict = el("span", "steptrace__boundary-verdict")
+  evaluationLabel.textContent = descriptor.evaluationLabel
+  evaluationHead.append(evaluationLabel, verdict)
+
+  const lanes = el("div", "steptrace__boundary-lanes")
+  const laneNodes = Array.from({ length: first.allowed }, (_, index) => {
+    const lane = el("div", "steptrace__boundary-lane")
+    const head = el("div", "steptrace__boundary-lane-head")
+    const label = el("span", "steptrace__boundary-lane-label")
+    const total = el("span", "steptrace__boundary-lane-total")
+    label.textContent = `Day ${index + 1}`
+    head.append(label, total)
+    const packages = el("div", "steptrace__boundary-packages")
+    const meter = el("div", "steptrace__boundary-meter")
+    const fill = el("div", "steptrace__boundary-meter-fill")
+    meter.append(fill)
+    lane.append(head, packages, meter)
+    lanes.append(lane)
+    return { lane, total, packages, fill }
+  })
+
+  const overflow = el("div", "steptrace__boundary-lane steptrace__boundary-lane--overflow")
+  overflow.style.setProperty("--steptrace-boundary-overflow-rows", String(maxExtraLanes))
+  const overflowHead = el("div", "steptrace__boundary-lane-head")
+  const overflowLabel = el("span", "steptrace__boundary-lane-label")
+  const overflowTotal = el("span", "steptrace__boundary-lane-total")
+  overflowLabel.textContent = "Beyond limit"
+  overflowHead.append(overflowLabel, overflowTotal)
+  const overflowRows = Array.from({ length: maxExtraLanes }, () => {
+    const row = el("div", "steptrace__boundary-overflow-row")
+    const rowLabel = el("span", "steptrace__boundary-overflow-label")
+    const packages = el("div", "steptrace__boundary-packages")
+    row.append(rowLabel, packages)
+    overflow.append(row)
+    return { row, rowLabel, packages }
+  })
+  overflow.prepend(overflowHead)
+  lanes.append(overflow)
+  evaluation.append(evaluationHead, lanes)
+  root.append(domain, evaluation)
+
+  const legend = el("div", "steptrace__legend steptrace__boundary-legend")
+  legend.setAttribute("aria-label", "Monotone boundary states")
+  for (const [state, label] of [
+    ["range", "unknown candidate"],
+    ["infeasible", "known too small"],
+    ["feasible", "known feasible"],
+    ["probe", "current check"],
+  ]) {
+    const row = el("div", "steptrace__legend-row")
+    const swatch = el("span", "steptrace__boundary-legend-swatch")
+    swatch.dataset.state = state
+    const text = el("span")
+    text.textContent = label
+    row.append(swatch, text)
+    legend.append(row)
+  }
+
+  const status = statusEl()
+
+  function packageTokens(container, items) {
+    const tokens = items.map((weight) => {
+      const token = el("span", "steptrace__boundary-package")
+      token.textContent = weight
+      return token
+    })
+    if (!tokens.length) {
+      const empty = el("span", "steptrace__boundary-empty")
+      empty.textContent = "unused"
+      tokens.push(empty)
+    }
+    container.replaceChildren(...tokens)
+  }
+
+  function paint(frame, index, totalFrames) {
+    domainRange.textContent = `range ${frame.lo}–${frame.hi}`
+    for (const { value, tick } of tickNodes) {
+      let state = "range"
+      if (value <= frame.maxInfeasible) state = "infeasible"
+      if (value >= frame.minFeasible) state = "feasible"
+      if (frame.answer === value) state = "answer"
+      tick.dataset.state = state
+      tick.dataset.current = frame.candidate === value ? "true" : "false"
+      tick.setAttribute(
+        "aria-label",
+        `Capacity ${value}: ${state}${frame.candidate === value ? ", current check" : ""}`,
+      )
+    }
+
+    const model = frame.evaluation
+    const candidate = frame.candidate
+    verdict.textContent = model
+      ? model.feasible
+        ? `${candidate} is feasible`
+        : `${candidate} is too small`
+      : "waiting for first check"
+    verdict.dataset.state = model ? (model.feasible ? "feasible" : "infeasible") : "pending"
+
+    for (let laneIndex = 0; laneIndex < laneNodes.length; laneIndex++) {
+      const node = laneNodes[laneIndex]
+      const lane = model?.lanes[laneIndex] || null
+      packageTokens(node.packages, lane?.items || [])
+      node.total.textContent =
+        lane && candidate != null
+          ? `${descriptor.unitLabel} ${lane.total}/${candidate}`
+          : descriptor.unitLabel
+      node.fill.style.width =
+        lane && candidate ? `${Math.min(100, (lane.total / candidate) * 100)}%` : "0%"
+      node.lane.dataset.state = lane ? "used" : "empty"
+    }
+
+    const extra = model ? model.lanes.slice(model.allowed) : []
+    overflow.dataset.state = extra.length ? "overflow" : "empty"
+    overflowTotal.textContent = extra.length
+      ? `+${extra.length} day${extra.length === 1 ? "" : "s"}`
+      : "none"
+    for (let extraIndex = 0; extraIndex < overflowRows.length; extraIndex++) {
+      const row = overflowRows[extraIndex]
+      const lane = extra[extraIndex]
+      row.row.dataset.state = lane ? "overflow" : "empty"
+      row.rowLabel.textContent = lane ? `Day ${model.allowed + extraIndex + 1}` : "—"
+      packageTokens(row.packages, lane?.items || [])
+    }
+
+    status.innerHTML =
+      escapeHtml(frame.message) +
+      ` <span class="steptrace__counts">· ${frame.probes} check${frame.probes === 1 ? "" : "s"} · step ${index + 1}/${totalFrames}</span>`
+  }
+
+  return {
+    nodes: [root, legend, status],
+    stageLayout: "fill" as const,
+    paint,
+    watch(frame) {
+      return descriptor.watchRows(frame)
+    },
+  }
+}
+
 // ---- string-matching view: text with the pattern aligned underneath ----
 const CELL_W = 34 // px; must match .steptrace__cell width for shift alignment
 export function makeMatchView(frames) {
@@ -1627,11 +1819,15 @@ export function buildMilestones(algorithm, kind, frames) {
       : kind === "search"
         ? familyProfile === "exponential"
           ? "Gallop"
-          : familyProfile === "jump"
-            ? "Jump blocks"
-            : familyProfile === "ternary"
-              ? "Narrow peak"
-              : "Search range"
+          : familyProfile === "interpolation"
+            ? "Estimate"
+            : familyProfile === "jump"
+              ? "Jump blocks"
+              : familyProfile === "ternary"
+                ? "Narrow peak"
+                : familyProfile === "shipping-capacity"
+                  ? "Answer range"
+                  : "Search range"
         : kind === "string"
           ? "Shift 0"
           : kind === "backtrack"
@@ -1690,7 +1886,10 @@ export function buildMilestones(algorithm, kind, frames) {
         push(i, "Binary search")
       else if (f.type === "phase" && f.phase === "scan")
         push(i, familyProfile === "ternary" ? "Final scan" : "Linear scan")
+      else if (f.type === "phase" && f.phase === "interpolation") push(i, "Interpolation")
       else if (f.type === "phase" && f.phase === "ternary") push(i, "Ternary")
+      else if (familyProfile === "shipping-capacity" && f.type === "evaluate")
+        push(i, `Check ${f.candidate}`)
       else if (f.type === "probe")
         push(
           i,
@@ -1829,10 +2028,13 @@ export function summaryFor(algorithm, kind, frame, graph) {
     }
     return `${frame.visited.length} nodes visited · frontier empty.`
   }
-  if (kind === "search")
+  if (kind === "search") {
+    if (algorithm === "binary-search-on-answer")
+      return `Minimum feasible capacity ${frame.answer} · ${frame.probes} probe${frame.probes === 1 ? "" : "s"}.`
     return frame.found == null
       ? `${frame.target} not found · ${frame.comparisons} comparisons.`
       : `${frame.target} found at index ${frame.found} · ${frame.comparisons} comparisons.`
+  }
   if (kind === "string")
     return frame.found.length
       ? `${frame.found.length} match${frame.found.length === 1 ? "" : "es"} at ${frame.found.join(", ")}.`

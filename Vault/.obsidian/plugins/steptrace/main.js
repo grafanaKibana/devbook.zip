@@ -231,91 +231,8 @@ var init_bfs = __esm({
   }
 });
 
-// custom/steptrace/src/algorithms/binary-search.ts
-var binarySearch;
-var init_binary_search = __esm({
-  "custom/steptrace/src/algorithms/binary-search.ts"() {
-    binarySearch = {
-      id: "binary-search",
-      kind: "search",
-      meta: { label: "Binary search" },
-      run: (input, ops) => {
-        const a = ops.value;
-        const target = input.target;
-        ops.init(
-          `Binary search for ${target} in a sorted array — check the middle of the range, then discard the half that can't contain it.`
-        );
-        let lo = 0;
-        let hi = a.length - 1;
-        while (lo <= hi) {
-          const mid = Math.floor((lo + hi) / 2);
-          ops.probe(
-            lo,
-            hi,
-            mid,
-            `Range [${lo}, ${hi}]: probe the middle — index ${mid} holds ${a[mid]}.`
-          );
-          if (a[mid] === target) {
-            ops.hit(mid, `${a[mid]} equals ${target} — found it at index ${mid}.`);
-            ops.done(
-              `Found ${target} after ${ops.comparisons} probe${ops.comparisons === 1 ? "" : "s"}.`
-            );
-            return;
-          }
-          if (a[mid] < target) {
-            lo = mid + 1;
-            ops.narrow(lo, hi, `${a[mid]} < ${target}: discard the left half; search [${lo}, ${hi}].`);
-          } else {
-            hi = mid - 1;
-            ops.narrow(lo, hi, `${a[mid]} > ${target}: discard the right half; search [${lo}, ${hi}].`);
-          }
-        }
-        ops.done(`${target} is not in the array — the range is empty after ${ops.comparisons} probes.`);
-      }
-    };
-  }
-});
-
-// custom/steptrace/src/algorithms/bubble-sort.ts
-var bubbleSort;
-var init_bubble_sort = __esm({
-  "custom/steptrace/src/algorithms/bubble-sort.ts"() {
-    bubbleSort = {
-      id: "bubble-sort",
-      kind: "sort",
-      meta: { label: "Bubble sort" },
-      run: (input, ops) => {
-        const n = ops.value.length;
-        ops.init(
-          `Bubble sort — repeatedly compare adjacent values and swap the larger one rightward, bubbling the largest to the end each pass.`
-        );
-        for (let i = 0; i < n - 1; i++) {
-          let swapped = false;
-          for (let j = 0; j < n - 1 - i; j++) {
-            const a = ops.value;
-            ops.compare(j, j + 1, `Compare index ${j} (${a[j]}) and index ${j + 1} (${a[j + 1]}).`);
-            if (ops.value[j] > ops.value[j + 1]) {
-              const b = ops.value;
-              ops.swap(j, j + 1, `${b[j]} is greater than ${b[j + 1]} — swap them.`);
-              swapped = true;
-            }
-          }
-          ops.markSorted([n - 1 - i], [n - 1 - i], `Index ${n - 1 - i} now holds its final value.`);
-          if (!swapped) {
-            const rest = Array.from({ length: n - 1 - i }, (_, k) => k);
-            ops.markSorted(rest, [], `A full pass made no swaps — the array is already sorted.`);
-            break;
-          }
-        }
-        ops.lockAll(Array.from({ length: n }, (_, k) => k));
-        ops.done(`Sorted in ${ops.comparisons} comparisons and ${ops.swaps} swaps.`);
-      }
-    };
-  }
-});
-
 // custom/steptrace/src/recorders.ts
-var SortRecorder, ArraySortRecorder, GraphRecorder, SearchRecorder, IndexedSearchRecorder, StringRecorder, PointerRecorder, DPRecorder, MatrixGridRecorder, UnionFindRecorder, BitsRecorder, BacktrackRecorder, RecTreeRecorder, ExecutionTreeRecorder;
+var SortRecorder, ArraySortRecorder, GraphRecorder, SearchRecorder, IndexedSearchRecorder, BoundarySearchRecorder, StringRecorder, PointerRecorder, DPRecorder, MatrixGridRecorder, UnionFindRecorder, BitsRecorder, BacktrackRecorder, RecTreeRecorder, ExecutionTreeRecorder;
 var init_recorders = __esm({
   "custom/steptrace/src/recorders.ts"() {
     SortRecorder = class {
@@ -691,6 +608,8 @@ var init_recorders = __esm({
         this._previousBound = -1;
         this._bracket = null;
         this._mid2 = null;
+        this._annotationLabel = null;
+        this._annotationValue = null;
       }
       _push(type, message) {
         super._push(type, message);
@@ -704,14 +623,30 @@ var init_recorders = __esm({
           bracket: this._bracket ? this._bracket.slice() : null,
           mid2: this._mid2,
           goal: this._goal,
-          blockSize: this._blockSize
+          blockSize: this._blockSize,
+          annotationLabel: this._annotationLabel,
+          annotationValue: this._annotationValue
         });
       }
       probe(lo, hi, mid, message) {
         this._mid2 = null;
+        this._annotationLabel = null;
+        this._annotationValue = null;
         super.probe(lo, hi, mid, message);
       }
+      annotatedProbe(lo, hi, mid, label, value, message) {
+        this._mid2 = null;
+        this._annotationLabel = label;
+        this._annotationValue = value;
+        this.lo = lo;
+        this.hi = hi;
+        this.mid = mid;
+        this.comparisons++;
+        this._push("probe", message);
+      }
       dualProbe(lo, hi, mid, mid2, message) {
+        this._annotationLabel = null;
+        this._annotationValue = null;
         this.lo = lo;
         this.hi = hi;
         this.mid = mid;
@@ -721,6 +656,8 @@ var init_recorders = __esm({
       }
       narrow(lo, hi, message) {
         this._mid2 = null;
+        this._annotationLabel = null;
+        this._annotationValue = null;
         super.narrow(lo, hi, message);
       }
       hit(mid, message) {
@@ -732,6 +669,8 @@ var init_recorders = __esm({
         this._previousBound = previousBound;
         this._bound = bound;
         this._mid2 = null;
+        this._annotationLabel = null;
+        this._annotationValue = null;
         this.lo = Math.max(0, previousBound + 1);
         this.hi = bound;
         this.mid = bound;
@@ -751,7 +690,82 @@ var init_recorders = __esm({
         this.hi = hi;
         this.mid = null;
         this._mid2 = null;
+        this._annotationLabel = null;
+        this._annotationValue = null;
         this._push("phase", message);
+      }
+    };
+    BoundarySearchRecorder = class {
+      constructor(config) {
+        this.frames = [];
+        this.profile = config.profile;
+        this.lower = config.lower;
+        this.upper = config.upper;
+        this.lo = config.lower;
+        this.hi = config.upper;
+        this.candidate = null;
+        this.evaluation = null;
+        this.answer = null;
+        this.probes = 0;
+        this.allowed = config.days;
+        this.maxInfeasible = config.lower - 1;
+        this.minFeasible = config.upper + 1;
+      }
+      begin(message) {
+        this._push("range", message);
+      }
+      evaluate(lo, hi, candidate, evaluation, message) {
+        this.lo = lo;
+        this.hi = hi;
+        this.candidate = candidate;
+        this.evaluation = evaluation;
+        if (evaluation.feasible) this.minFeasible = Math.min(this.minFeasible, candidate);
+        else this.maxInfeasible = Math.max(this.maxInfeasible, candidate);
+        this.probes++;
+        this._push("evaluate", message);
+      }
+      narrow(lo, hi, message) {
+        this.lo = lo;
+        this.hi = hi;
+        this._push("narrow", message);
+      }
+      hit(answer, evaluation, message) {
+        this.lo = answer;
+        this.hi = answer;
+        this.candidate = answer;
+        this.answer = answer;
+        this.evaluation = evaluation;
+        this._push("found", message);
+      }
+      done(message) {
+        this._push("done", message);
+      }
+      _push(type, message) {
+        const evaluation = this.evaluation ? {
+          ...this.evaluation,
+          lanes: this.evaluation.lanes.map((lane) => ({
+            ...lane,
+            items: lane.items.slice()
+          }))
+        } : null;
+        this.frames.push(
+          Object.freeze({
+            type,
+            profile: this.profile,
+            lower: this.lower,
+            upper: this.upper,
+            lo: this.lo,
+            hi: this.hi,
+            candidate: this.candidate,
+            evaluation,
+            answer: this.answer,
+            probes: this.probes,
+            allowed: this.allowed,
+            maxInfeasible: this.maxInfeasible,
+            minFeasible: this.minFeasible,
+            message
+          })
+        );
       }
     };
     StringRecorder = class {
@@ -1758,6 +1772,162 @@ function makeSearchView(frames, semantics = legacySearchViewSemantics) {
   }
   return { nodes: [stage, status], paint, watch };
 }
+function boundaryTicks(lower, upper) {
+  const span = upper - lower;
+  if (span <= 12) return Array.from({ length: span + 1 }, (_, index) => lower + index);
+  return [
+    ...new Set(
+      Array.from({ length: 13 }, (_, index) => Math.round(lower + span * index / 12))
+    )
+  ];
+}
+function makeBoundarySearchView(frames, descriptor) {
+  const first = frames[0];
+  const ticks = boundaryTicks(first.lower, first.upper);
+  const maxExtraLanes = Math.max(
+    1,
+    ...frames.map(
+      (frame) => frame.evaluation ? Math.max(0, frame.evaluation.required - frame.evaluation.allowed) : 0
+    )
+  );
+  const root = el("section", "steptrace__boundary");
+  root.setAttribute("aria-label", descriptor.ariaLabel);
+  const domain = el("div", "steptrace__boundary-domain");
+  const domainHead = el("div", "steptrace__boundary-section-head");
+  const domainLabel = el("span", "steptrace__boundary-section-label");
+  const domainRange = el("span", "steptrace__boundary-section-value");
+  domainLabel.textContent = descriptor.rangeLabel;
+  domainHead.append(domainLabel, domainRange);
+  const tickList = el("div", "steptrace__boundary-ticks");
+  tickList.style.setProperty("--steptrace-boundary-ticks", String(ticks.length));
+  tickList.setAttribute("role", "list");
+  const tickNodes = ticks.map((value) => {
+    const tick = el("div", "steptrace__boundary-tick");
+    tick.setAttribute("role", "listitem");
+    tick.dataset.value = String(value);
+    tick.textContent = String(value);
+    tickList.append(tick);
+    return { value, tick };
+  });
+  domain.append(domainHead, tickList);
+  const evaluation = el("div", "steptrace__boundary-evaluation");
+  const evaluationHead = el("div", "steptrace__boundary-section-head");
+  const evaluationLabel = el("span", "steptrace__boundary-section-label");
+  const verdict = el("span", "steptrace__boundary-verdict");
+  evaluationLabel.textContent = descriptor.evaluationLabel;
+  evaluationHead.append(evaluationLabel, verdict);
+  const lanes = el("div", "steptrace__boundary-lanes");
+  const laneNodes = Array.from({ length: first.allowed }, (_, index) => {
+    const lane = el("div", "steptrace__boundary-lane");
+    const head = el("div", "steptrace__boundary-lane-head");
+    const label = el("span", "steptrace__boundary-lane-label");
+    const total = el("span", "steptrace__boundary-lane-total");
+    label.textContent = `Day ${index + 1}`;
+    head.append(label, total);
+    const packages = el("div", "steptrace__boundary-packages");
+    const meter = el("div", "steptrace__boundary-meter");
+    const fill = el("div", "steptrace__boundary-meter-fill");
+    meter.append(fill);
+    lane.append(head, packages, meter);
+    lanes.append(lane);
+    return { lane, total, packages, fill };
+  });
+  const overflow = el("div", "steptrace__boundary-lane steptrace__boundary-lane--overflow");
+  overflow.style.setProperty("--steptrace-boundary-overflow-rows", String(maxExtraLanes));
+  const overflowHead = el("div", "steptrace__boundary-lane-head");
+  const overflowLabel = el("span", "steptrace__boundary-lane-label");
+  const overflowTotal = el("span", "steptrace__boundary-lane-total");
+  overflowLabel.textContent = "Beyond limit";
+  overflowHead.append(overflowLabel, overflowTotal);
+  const overflowRows = Array.from({ length: maxExtraLanes }, () => {
+    const row = el("div", "steptrace__boundary-overflow-row");
+    const rowLabel = el("span", "steptrace__boundary-overflow-label");
+    const packages = el("div", "steptrace__boundary-packages");
+    row.append(rowLabel, packages);
+    overflow.append(row);
+    return { row, rowLabel, packages };
+  });
+  overflow.prepend(overflowHead);
+  lanes.append(overflow);
+  evaluation.append(evaluationHead, lanes);
+  root.append(domain, evaluation);
+  const legend = el("div", "steptrace__legend steptrace__boundary-legend");
+  legend.setAttribute("aria-label", "Monotone boundary states");
+  for (const [state, label] of [
+    ["range", "unknown candidate"],
+    ["infeasible", "known too small"],
+    ["feasible", "known feasible"],
+    ["probe", "current check"]
+  ]) {
+    const row = el("div", "steptrace__legend-row");
+    const swatch = el("span", "steptrace__boundary-legend-swatch");
+    swatch.dataset.state = state;
+    const text = el("span");
+    text.textContent = label;
+    row.append(swatch, text);
+    legend.append(row);
+  }
+  const status = statusEl();
+  function packageTokens(container, items) {
+    const tokens = items.map((weight) => {
+      const token = el("span", "steptrace__boundary-package");
+      token.textContent = weight;
+      return token;
+    });
+    if (!tokens.length) {
+      const empty = el("span", "steptrace__boundary-empty");
+      empty.textContent = "unused";
+      tokens.push(empty);
+    }
+    container.replaceChildren(...tokens);
+  }
+  function paint(frame, index, totalFrames) {
+    domainRange.textContent = `range ${frame.lo}–${frame.hi}`;
+    for (const { value, tick } of tickNodes) {
+      let state = "range";
+      if (value <= frame.maxInfeasible) state = "infeasible";
+      if (value >= frame.minFeasible) state = "feasible";
+      if (frame.answer === value) state = "answer";
+      tick.dataset.state = state;
+      tick.dataset.current = frame.candidate === value ? "true" : "false";
+      tick.setAttribute(
+        "aria-label",
+        `Capacity ${value}: ${state}${frame.candidate === value ? ", current check" : ""}`
+      );
+    }
+    const model = frame.evaluation;
+    const candidate = frame.candidate;
+    verdict.textContent = model ? model.feasible ? `${candidate} is feasible` : `${candidate} is too small` : "waiting for first check";
+    verdict.dataset.state = model ? model.feasible ? "feasible" : "infeasible" : "pending";
+    for (let laneIndex = 0; laneIndex < laneNodes.length; laneIndex++) {
+      const node = laneNodes[laneIndex];
+      const lane = model?.lanes[laneIndex] || null;
+      packageTokens(node.packages, lane?.items || []);
+      node.total.textContent = lane && candidate != null ? `${descriptor.unitLabel} ${lane.total}/${candidate}` : descriptor.unitLabel;
+      node.fill.style.width = lane && candidate ? `${Math.min(100, lane.total / candidate * 100)}%` : "0%";
+      node.lane.dataset.state = lane ? "used" : "empty";
+    }
+    const extra = model ? model.lanes.slice(model.allowed) : [];
+    overflow.dataset.state = extra.length ? "overflow" : "empty";
+    overflowTotal.textContent = extra.length ? `+${extra.length} day${extra.length === 1 ? "" : "s"}` : "none";
+    for (let extraIndex = 0; extraIndex < overflowRows.length; extraIndex++) {
+      const row = overflowRows[extraIndex];
+      const lane = extra[extraIndex];
+      row.row.dataset.state = lane ? "overflow" : "empty";
+      row.rowLabel.textContent = lane ? `Day ${model.allowed + extraIndex + 1}` : "—";
+      packageTokens(row.packages, lane?.items || []);
+    }
+    status.innerHTML = escapeHtml(frame.message) + ` <span class="steptrace__counts">· ${frame.probes} check${frame.probes === 1 ? "" : "s"} · step ${index + 1}/${totalFrames}</span>`;
+  }
+  return {
+    nodes: [root, legend, status],
+    stageLayout: "fill",
+    paint,
+    watch(frame) {
+      return descriptor.watchRows(frame);
+    }
+  };
+}
 function makeMatchView(frames) {
   const text = frames[0].text;
   const pattern = frames[0].pattern;
@@ -2692,7 +2862,7 @@ function buildMilestones(algorithm, kind, frames) {
   };
   const firstGap = frames.find((frame) => Number.isInteger(frame.gap))?.gap;
   const familyProfile = frames[0]?.profile;
-  const initial = kind === "sort" ? firstGap != null ? `Gap ${firstGap}` : familyProfile === "cyclic" ? "Place values" : familyProfile === "introsort" ? "Quicksort" : algorithm === "bubble-sort" ? "Pass 1" : algorithm === "insertion-sort" ? "Prefix 1" : algorithm === "selection-sort" ? "Select 1" : algorithm === "heap-sort" ? "Build heap" : algorithm === "merge-sort" ? "Runs of 1" : "Partition" : kind === "search" ? familyProfile === "exponential" ? "Gallop" : familyProfile === "jump" ? "Jump blocks" : familyProfile === "ternary" ? "Narrow peak" : "Search range" : kind === "string" ? "Shift 0" : kind === "backtrack" ? "Depth 0" : kind === "rectree" ? familyProfile === "divide-and-conquer" ? "Whole problem" : "Call tree" : "Initialize";
+  const initial = kind === "sort" ? firstGap != null ? `Gap ${firstGap}` : familyProfile === "cyclic" ? "Place values" : familyProfile === "introsort" ? "Quicksort" : algorithm === "bubble-sort" ? "Pass 1" : algorithm === "insertion-sort" ? "Prefix 1" : algorithm === "selection-sort" ? "Select 1" : algorithm === "heap-sort" ? "Build heap" : algorithm === "merge-sort" ? "Runs of 1" : "Partition" : kind === "search" ? familyProfile === "exponential" ? "Gallop" : familyProfile === "interpolation" ? "Estimate" : familyProfile === "jump" ? "Jump blocks" : familyProfile === "ternary" ? "Narrow peak" : familyProfile === "shipping-capacity" ? "Answer range" : "Search range" : kind === "string" ? "Shift 0" : kind === "backtrack" ? "Depth 0" : kind === "rectree" ? familyProfile === "divide-and-conquer" ? "Whole problem" : "Call tree" : "Initialize";
   push(0, initial);
   let lastRange = "";
   let lastGap = firstGap;
@@ -2730,7 +2900,10 @@ function buildMilestones(algorithm, kind, frames) {
         push(i, "Binary search");
       else if (f.type === "phase" && f.phase === "scan")
         push(i, familyProfile === "ternary" ? "Final scan" : "Linear scan");
+      else if (f.type === "phase" && f.phase === "interpolation") push(i, "Interpolation");
       else if (f.type === "phase" && f.phase === "ternary") push(i, "Ternary");
+      else if (familyProfile === "shipping-capacity" && f.type === "evaluate")
+        push(i, `Check ${f.candidate}`);
       else if (f.type === "probe")
         push(
           i,
@@ -2839,8 +3012,11 @@ function summaryFor(algorithm, kind, frame, graph) {
     }
     return `${frame.visited.length} nodes visited · frontier empty.`;
   }
-  if (kind === "search")
+  if (kind === "search") {
+    if (algorithm === "binary-search-on-answer")
+      return `Minimum feasible capacity ${frame.answer} · ${frame.probes} probe${frame.probes === 1 ? "" : "s"}.`;
     return frame.found == null ? `${frame.target} not found · ${frame.comparisons} comparisons.` : `${frame.target} found at index ${frame.found} · ${frame.comparisons} comparisons.`;
+  }
   if (kind === "string")
     return frame.found.length ? `${frame.found.length} match${frame.found.length === 1 ? "" : "es"} at ${frame.found.join(", ")}.` : `No matches found.`;
   if (kind === "pointers") {
@@ -2997,6 +3173,230 @@ var init_render = __esm({
       compare: '<svg class="steptrace__cue-compare" viewBox="0 0 24 24" aria-hidden="true"><path d="m7 16-4-4 4-4"/><path d="M3 12h18"/><path d="m17 8 4 4-4 4"/></svg>',
       swap: '<svg class="steptrace__cue-swap" viewBox="0 0 24 24" aria-hidden="true"><path d="m2 9 3-3 3 3"/><path d="M13 18H7a2 2 0 0 1-2-2V6"/><path d="m22 15-3 3-3-3"/><path d="M11 6h6a2 2 0 0 1 2 2v10"/></svg>',
       search: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="10.5" cy="10.5" r="6.5"/><path d="m15.2 15.2 4.8 4.8"/></svg>'
+    };
+  }
+});
+
+// custom/steptrace/src/families/monotone-boundary.ts
+var shippingCapacityDescriptor, monotoneBoundaryFamily;
+var init_monotone_boundary = __esm({
+  "custom/steptrace/src/families/monotone-boundary.ts"() {
+    init_recorders();
+    init_render();
+    shippingCapacityDescriptor = {
+      ariaLabel: "Binary search over shipping capacity",
+      rangeLabel: "Candidate capacity",
+      evaluationLabel: "Greedy shipping check",
+      unitLabel: "load",
+      watchRows(frame) {
+        const evaluation = frame.evaluation;
+        return [
+          {
+            k: "goal",
+            v: "smallest feasible capacity",
+            sw: "var(--_accent)"
+          },
+          {
+            k: "range",
+            v: `[${frame.lo}, ${frame.hi}]`,
+            sw: "var(--_neutral)",
+            hint: "Capacities that can still contain the first feasible answer."
+          },
+          {
+            k: "capacity",
+            v: frame.candidate ?? "—",
+            sw: "var(--_blue)",
+            hint: "Candidate capacity currently passed to the feasibility check."
+          },
+          {
+            k: "days used",
+            v: evaluation ? `${evaluation.required} / ${evaluation.allowed}` : "—",
+            sw: "var(--_amber)"
+          },
+          {
+            k: "verdict",
+            v: evaluation ? evaluation.feasible ? "feasible" : "too small" : "—",
+            sw: evaluation?.feasible ? "var(--_green)" : "var(--_amber)",
+            hint: "Whether this candidate satisfies the day limit."
+          }
+        ];
+      }
+    };
+    monotoneBoundaryFamily = {
+      id: "monotone-boundary",
+      createRecorder(config) {
+        return new BoundarySearchRecorder(config);
+      },
+      createView(frames) {
+        return makeBoundarySearchView(
+          frames,
+          shippingCapacityDescriptor
+        );
+      }
+    };
+  }
+});
+
+// custom/steptrace/src/algorithms/binary-search-on-answer.ts
+function parseBinarySearchOnAnswerConfig(config) {
+  const { weights, days } = config;
+  if (!Array.isArray(weights) || weights.length === 0)
+    throw new Error('steptrace: binary-search-on-answer requires a non-empty "weights" array.');
+  if (!weights.every((weight) => Number.isInteger(weight) && weight > 0))
+    throw new Error('steptrace: binary-search-on-answer requires positive integer "weights".');
+  if (!Number.isInteger(days) || days <= 0)
+    throw new Error('steptrace: binary-search-on-answer requires "days" to be a positive integer.');
+  return {
+    profile: "shipping-capacity",
+    lower: Math.max(...weights),
+    upper: weights.reduce((total, weight) => total + weight, 0),
+    weights: weights.slice(),
+    days,
+    goal: "smallest feasible capacity"
+  };
+}
+function evaluateShipping(weights, capacity, allowed) {
+  const lanes = [];
+  let items = [];
+  let total = 0;
+  for (const weight of weights) {
+    if (total + weight > capacity) {
+      lanes.push({ label: `Day ${lanes.length + 1}`, items, total });
+      items = [];
+      total = 0;
+    }
+    items.push(weight);
+    total += weight;
+  }
+  lanes.push({ label: `Day ${lanes.length + 1}`, items, total });
+  return {
+    lanes,
+    required: lanes.length,
+    allowed,
+    feasible: lanes.length <= allowed
+  };
+}
+var binarySearchOnAnswer;
+var init_binary_search_on_answer = __esm({
+  "custom/steptrace/src/algorithms/binary-search-on-answer.ts"() {
+    init_monotone_boundary();
+    binarySearchOnAnswer = {
+      id: "binary-search-on-answer",
+      kind: "search",
+      family: monotoneBoundaryFamily,
+      meta: { label: "Binary search on answer" },
+      parse: parseBinarySearchOnAnswerConfig,
+      run(input, ops) {
+        ops.begin(
+          `Search capacities ${input.lower} through ${input.upper}; the first feasible value is the answer.`
+        );
+        let lo = input.lower;
+        let hi = input.upper;
+        while (lo < hi) {
+          const candidate = lo + Math.floor((hi - lo) / 2);
+          const evaluation2 = evaluateShipping(input.weights, candidate, input.days);
+          ops.evaluate(
+            lo,
+            hi,
+            candidate,
+            evaluation2,
+            `Capacity ${candidate} needs ${evaluation2.required} day${evaluation2.required === 1 ? "" : "s"}: ${evaluation2.feasible ? "feasible" : "too small"}.`
+          );
+          if (evaluation2.feasible) hi = candidate;
+          else lo = candidate + 1;
+          ops.narrow(
+            lo,
+            hi,
+            evaluation2.feasible ? `Keep ${lo} through ${hi}; a smaller feasible capacity may exist.` : `Keep ${lo} through ${hi}; every smaller capacity is infeasible.`
+          );
+        }
+        const evaluation = evaluateShipping(input.weights, lo, input.days);
+        ops.hit(lo, evaluation, `${lo} is the first feasible capacity.`);
+        ops.done(`Minimum feasible ship capacity: ${lo}.`);
+      }
+    };
+  }
+});
+
+// custom/steptrace/src/algorithms/binary-search.ts
+var binarySearch;
+var init_binary_search = __esm({
+  "custom/steptrace/src/algorithms/binary-search.ts"() {
+    binarySearch = {
+      id: "binary-search",
+      kind: "search",
+      meta: { label: "Binary search" },
+      run: (input, ops) => {
+        const a = ops.value;
+        const target = input.target;
+        ops.init(
+          `Binary search for ${target} in a sorted array — check the middle of the range, then discard the half that can't contain it.`
+        );
+        let lo = 0;
+        let hi = a.length - 1;
+        while (lo <= hi) {
+          const mid = Math.floor((lo + hi) / 2);
+          ops.probe(
+            lo,
+            hi,
+            mid,
+            `Range [${lo}, ${hi}]: probe the middle — index ${mid} holds ${a[mid]}.`
+          );
+          if (a[mid] === target) {
+            ops.hit(mid, `${a[mid]} equals ${target} — found it at index ${mid}.`);
+            ops.done(
+              `Found ${target} after ${ops.comparisons} probe${ops.comparisons === 1 ? "" : "s"}.`
+            );
+            return;
+          }
+          if (a[mid] < target) {
+            lo = mid + 1;
+            ops.narrow(lo, hi, `${a[mid]} < ${target}: discard the left half; search [${lo}, ${hi}].`);
+          } else {
+            hi = mid - 1;
+            ops.narrow(lo, hi, `${a[mid]} > ${target}: discard the right half; search [${lo}, ${hi}].`);
+          }
+        }
+        ops.done(`${target} is not in the array — the range is empty after ${ops.comparisons} probes.`);
+      }
+    };
+  }
+});
+
+// custom/steptrace/src/algorithms/bubble-sort.ts
+var bubbleSort;
+var init_bubble_sort = __esm({
+  "custom/steptrace/src/algorithms/bubble-sort.ts"() {
+    bubbleSort = {
+      id: "bubble-sort",
+      kind: "sort",
+      meta: { label: "Bubble sort" },
+      run: (input, ops) => {
+        const n = ops.value.length;
+        ops.init(
+          `Bubble sort — repeatedly compare adjacent values and swap the larger one rightward, bubbling the largest to the end each pass.`
+        );
+        for (let i = 0; i < n - 1; i++) {
+          let swapped = false;
+          for (let j = 0; j < n - 1 - i; j++) {
+            const a = ops.value;
+            ops.compare(j, j + 1, `Compare index ${j} (${a[j]}) and index ${j + 1} (${a[j + 1]}).`);
+            if (ops.value[j] > ops.value[j + 1]) {
+              const b = ops.value;
+              ops.swap(j, j + 1, `${b[j]} is greater than ${b[j + 1]} — swap them.`);
+              swapped = true;
+            }
+          }
+          ops.markSorted([n - 1 - i], [n - 1 - i], `Index ${n - 1 - i} now holds its final value.`);
+          if (!swapped) {
+            const rest = Array.from({ length: n - 1 - i }, (_, k) => k);
+            ops.markSorted(rest, [], `A full pass made no swaps — the array is already sorted.`);
+            break;
+          }
+        }
+        ops.lockAll(Array.from({ length: n }, (_, k) => k));
+        ops.done(`Sorted in ${ops.comparisons} comparisons and ${ops.swaps} swaps.`);
+      }
     };
   }
 });
@@ -3729,6 +4129,8 @@ function phaseLabel(frame) {
       return "jump";
     case "scan":
       return frame.profile === "ternary" ? "final scan" : "linear scan";
+    case "interpolation":
+      return "interpolation";
     case "ternary":
       return "ternary";
     default:
@@ -3765,6 +4167,8 @@ var init_indexed_array_search = __esm({
             v: frame.mid2 == null ? "—" : `[${frame.mid2}] = ${frame.array[frame.mid2]}`,
             sw: "var(--_violet)"
           });
+        } else if (profile === "interpolation") {
+          rows.push({ k: "estimate", v: frame.annotationValue ?? "—", sw: "var(--_amber)" });
         } else if (profile === "jump") {
           rows.push({ k: "block", v: String(frame.blockSize ?? "—"), sw: "var(--_blue)" });
         }
@@ -3849,6 +4253,82 @@ var init_exponential_search = __esm({
           } else {
             right = mid - 1;
             ops.narrow(left, right, `${values[mid]} > ${target}: discard from index ${mid}.`);
+          }
+        }
+        ops.done(`${target} is not in the array after ${ops.comparisons} probes.`);
+      }
+    };
+  }
+});
+
+// custom/steptrace/src/algorithms/interpolation-search.ts
+function parseInterpolationSearchConfig(config) {
+  return parseIndexedArraySearchConfig(config, "interpolation-search", "interpolation");
+}
+var interpolationSearch;
+var init_interpolation_search = __esm({
+  "custom/steptrace/src/algorithms/interpolation-search.ts"() {
+    init_indexed_array_search();
+    interpolationSearch = {
+      id: "interpolation-search",
+      kind: "search",
+      family: indexedArraySearchFamily,
+      meta: { label: "Interpolation search" },
+      parse: parseInterpolationSearchConfig,
+      run(input, ops) {
+        const values = ops.value;
+        const { target } = input;
+        ops.init(
+          `Interpolation search for ${target}: estimate probe positions from value ratios, then narrow the range.`
+        );
+        ops.beginPhase(
+          0,
+          values.length - 1,
+          `Interpolation phase: probe by relative position inside [${0}, ${values.length - 1}].`,
+          "interpolation"
+        );
+        let lo = 0;
+        let hi = values.length - 1;
+        while (lo <= hi && target >= values[lo] && target <= values[hi]) {
+          if (values[lo] === values[hi]) {
+            ops.annotatedProbe(
+              lo,
+              hi,
+              lo,
+              "estimate",
+              `index ${lo}`,
+              `The value span is flat, so the estimate stays at index ${lo}.`
+            );
+            if (values[lo] === target) {
+              ops.hit(lo, `${target} equals ${values[lo]} at index ${lo}.`);
+              ops.done(`Found ${target} at index ${lo} after ${ops.comparisons} probes.`);
+              return;
+            }
+            break;
+          }
+          const numerator = (target - values[lo]) * (hi - lo);
+          const denominator = values[hi] - values[lo];
+          const pos = Math.floor(lo + numerator / denominator);
+          const ratio = Math.round((target - values[lo]) / denominator * 100);
+          ops.annotatedProbe(
+            lo,
+            hi,
+            pos,
+            "estimate",
+            `${ratio}% → [${pos}]`,
+            `${target} is ${ratio}% through [${values[lo]}, ${values[hi]}]: project to index ${pos}.`
+          );
+          if (values[pos] === target) {
+            ops.hit(pos, `${values[pos]} equals ${target} — found it at index ${pos}.`);
+            ops.done(`Found ${target} after ${ops.comparisons} probes.`);
+            return;
+          }
+          if (values[pos] < target) {
+            lo = pos + 1;
+            ops.narrow(lo, hi, `${values[pos]} < ${target}: search indices ${lo} through ${hi}.`);
+          } else {
+            hi = pos - 1;
+            ops.narrow(lo, hi, `${values[pos]} > ${target}: search indices ${lo} through ${hi}.`);
           }
         }
         ops.done(`${target} is not in the array after ${ops.comparisons} probes.`);
@@ -5522,6 +6002,7 @@ var builtInAlgorithms;
 var init_algorithms = __esm({
   "custom/steptrace/src/algorithms/index.ts"() {
     init_bfs();
+    init_binary_search_on_answer();
     init_binary_search();
     init_bubble_sort();
     init_comb_sort();
@@ -5530,6 +6011,7 @@ var init_algorithms = __esm({
     init_dijkstra();
     init_divide_and_conquer();
     init_exponential_search();
+    init_interpolation_search();
     init_fibonacci();
     init_floyd_warshall();
     init_heap_sort();
@@ -5564,8 +6046,10 @@ var init_algorithms = __esm({
       cyclicSort,
       introsort,
       exponentialSearch,
+      interpolationSearch,
       jumpSearch,
       ternarySearch,
+      binarySearchOnAnswer,
       bfs,
       dfs,
       dijkstra,
@@ -5708,6 +6192,8 @@ var init_watch_hints = __esm({
       estimate: "Index predicted from the target's position in the value range.",
       block: "Number of array positions in each jump.",
       "days used": "Shipping days needed at the tested capacity.",
+      capacity: "Candidate ship capacity currently being tested.",
+      verdict: "Whether the candidate satisfies the feasibility check.",
       scanned: "Array positions inspected so far.",
       mid: "Middle index and value of the current range.",
       shift: "Pattern offset under the text.",

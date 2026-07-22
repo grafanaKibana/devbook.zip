@@ -6,7 +6,7 @@ import type { StepTraceConfig } from "../types"
 export interface IndexedArraySearchConfig {
   array: number[]
   target: number | null
-  profile: "exponential" | "jump" | "ternary"
+  profile: "exponential" | "interpolation" | "jump" | "ternary"
   goal?: string
   blockSize?: number
 }
@@ -14,7 +14,7 @@ export interface IndexedArraySearchConfig {
 export function parseIndexedArraySearchConfig(
   config: StepTraceConfig,
   algorithm: string,
-  profile: "exponential" | "jump",
+  profile: "exponential" | "interpolation" | "jump",
 ) {
   const { array, target } = config
 
@@ -41,13 +41,15 @@ export interface IndexedSearchFrame {
   comparisons: number
   message: string
   profile: IndexedArraySearchConfig["profile"]
-  phase: "gallop" | "binary" | "jump" | "scan" | "ternary"
+  phase: "gallop" | "binary" | "jump" | "scan" | "interpolation" | "ternary"
   bound: number | null
   previousBound: number
   bracket: number[] | null
   mid2: number | null
   goal: string | null
   blockSize: number | null
+  annotationLabel: string | null
+  annotationValue: string | null
   [key: string]: unknown
 }
 
@@ -71,6 +73,8 @@ function phaseLabel(frame: IndexedSearchFrame) {
       return "jump"
     case "scan":
       return frame.profile === "ternary" ? "final scan" : "linear scan"
+    case "interpolation":
+      return "interpolation"
     case "ternary":
       return "ternary"
     default:
@@ -115,6 +119,8 @@ export const indexedSearchViewSemantics = {
         v: frame.mid2 == null ? "—" : `[${frame.mid2}] = ${frame.array[frame.mid2]}`,
         sw: "var(--_violet)",
       })
+    } else if (profile === "interpolation") {
+      rows.push({ k: "estimate", v: frame.annotationValue ?? "—", sw: "var(--_amber)" })
     } else if (profile === "jump") {
       rows.push({ k: "block", v: String(frame.blockSize ?? "—"), sw: "var(--_blue)" })
     }

@@ -3,7 +3,7 @@ topic:
   - Computer Science
 subtopic:
   - Algorithms
-summary: "Guesses the target's position by interpolation, reaching O(log log n) on uniform sorted data."
+summary: "Estimates the target's position from value ratios, with O(log log n) expected probes on uniform sorted data."
 level:
   - "4"
 priority: Medium
@@ -11,20 +11,25 @@ status: Creation
 publish: true
 ---
 
-A sorted array holds ten million evenly spaced sensor readings, and one reading must be located by value. [[Binary Search]] reaches it in about 24 probes by halving the range each time, ignoring one fact the data offers: when values are spread evenly across their range, the target's *value* predicts its *index*. A reading whose value sits 95% of the way between the smallest and largest one almost certainly sits about 95% of the way through the array.
+A sorted array holds ten million evenly spaced sensor readings, and one reading must be located by value. [[Home/Computer Science/Algorithms/Search Algorithms/Binary Search|Binary Search]] reaches it in about 24 probes by halving the range each time, ignoring one fact the data offers: when values are spread evenly across their range, the target's *value* predicts its *index*. A reading whose value sits 95% of the way between the smallest and largest one almost certainly sits about 95% of the way through the array.
 
 Interpolation Search probes at that predicted position instead of the middle. Given the current bounds `lo` and `hi`, it maps the target's value-offset into an index:
 
 `pos = lo + (target - a[lo]) * (hi - lo) / (a[hi] - a[lo])`
 
-To find `950` in `[0 … 1000]` it probes near index `95%`, not `50%` — the same instinct that opens a phone book near the back to find "Smith". The comparison then narrows the range exactly as Binary Search does. On uniformly distributed data each probe removes far more than half of the candidates, reaching `O(log log n)` — roughly 5 probes over a billion elements against Binary Search's 30. That speed is a bet on the distribution: when values are skewed, the estimate points to the wrong region and the same loop degrades to `O(n)`, below Binary Search's guaranteed `O(log n)`.
+To find `950` in `[0 … 1000]` it probes near index `95%`, not `50%` — the same instinct that opens a phone book near the back to find "Smith". The comparison then narrows the range exactly as Binary Search does. Under the uniform random-key model, each probe leaves a much smaller range in expectation and the expected probe count is `O(log log n)`. As an asymptotic illustration, that model grows to roughly five probes over a billion elements while Binary Search grows to about 30. That speed is a bet on the distribution: when values are skewed, the estimate points to the wrong region and the same loop degrades to `O(n)`, below Binary Search's guaranteed `O(log n)`.
 
 **Core condition:** sorted, uniformly distributed numeric input → a value predicts its index → `O(log log n)` average probes with `O(1)` auxiliary space, collapsing to `O(n)` once the distribution is uneven.
 
 The distinguishing step is where the first probe lands.
 
-> [!NOTE] Visualization pending
-> Planned StepTrace: a search card probing at a position estimated from the target's value relative to the range endpoints — linear interpolation, not the midpoint — then narrowing the range. No matching renderer exists in `engine.js` yet.
+# Trace
+
+The trace searches for `81` in the quadratic sequence `a[i] = i²`. The target sits about 67% across the initial value span but at index `9` of `11`, so the first estimate undershoots at index `7`. Two recalculations over the smaller value ranges move the probe through indices `8` and `9`. This makes the useful mechanism visible: interpolation is not a one-shot guess; every miss remaps the target against the new endpoints.
+
+```steptrace
+{"algorithm":"interpolation-search","array":[0,1,4,9,16,25,36,49,64,81,100,121],"target":81}
+```
 
 # Why the range collapses faster
 
@@ -32,7 +37,7 @@ At the start of every loop the target, if present, lies in `[a[lo], a[hi]]` — 
 
 The comparison that follows is identical to Binary Search. `a[pos] < target` proves indices `lo … pos` are too small, so `lo` moves to `pos + 1`; `a[pos] > target` moves `hi` to `pos - 1`. The loop also guards `a[lo] <= target <= a[hi]`, so a target that falls outside the current value window exits immediately rather than interpolating into an empty region.
 
-The `O(log log n)` bound follows from what each probe removes on uniform data: it reduces the candidate count to roughly its *square root* rather than its half. Repeated square-root reduction of `n` reaches one candidate in about `log log n` steps. The iterative form stores only `lo`, `hi`, and `pos`, so auxiliary space stays `O(1)`.
+The `O(log log n)` bound is an expected result under the uniform random-key model: after a probe, the expected remaining candidate count is on the order of the previous count's *square root* rather than its half. Repeated square-root reduction of `n` reaches one candidate in about `log log n` steps. An individual search can shrink by more or less than that model predicts. The iterative form stores only `lo`, `hi`, and `pos`, so auxiliary space stays `O(1)`.
 
 # Complexity
 
@@ -46,11 +51,11 @@ The average bound is inseparable from its assumption: on keys that are not close
 
 # When the distribution stops cooperating
 
-Non-uniform data destroys the analysis rather than merely slowing it. Feed exponentially growing values `1, 2, 4, 8, …, 2^k`: the single largest element dwarfs the rest of the span, so `a[hi] - a[lo]` is essentially `a[hi]` alone. When one endpoint value dwarfs the rest of the span like this, any target that is only a small fraction of that maximum makes `(target - a[lo]) / (a[hi] - a[lo])` near zero, so every estimate collapses toward `lo` and the boundary advances by about one element per probe. Such a target sits deep in the array by index — around `n − Θ(log n)`, since the values only reach a small fraction of the maximum near the very end — so crawling out to its true position costs `O(n)` probes, slower than the `O(log n)` Binary Search that was given up. Clustered timestamps and Zipfian frequency tables produce the same collapse for the same reason.
+Non-uniform data destroys the analysis rather than merely slowing it. Let `a[i] = 2^i` over `n` positions and search for `a[n − 1 − ⌈log₂ n⌉]`, a target roughly `max/n` that still sits at index `n − 1 − Θ(log n)`. The maximum dominates the value span, so the interpolation fraction starts near `1/n` and early estimates land close to `lo`; the boundary advances only a few positions at a time while the target remains near the far end by index. Isolating it can therefore take `Θ(n)` probes, slower than the `O(log n)` Binary Search that was given up. Clustered timestamps and Zipfian frequency tables can produce the same collapse when value ratios poorly predict index ratios.
 
 The probe also requires keys with meaningful arithmetic. `(target - a[lo]) * (hi - lo) / (a[hi] - a[lo])` needs subtraction and a ratio, not just an ordering. Strings under a custom comparator, GUIDs, or opaque records support comparison but not a numeric offset, so the position cannot be estimated at all; those inputs are restricted to comparison-based search such as Binary Search.
 
-The denominator fails when `a[hi] == a[lo]`. A run of equal values, or a range that has collapsed to one element, makes the value span zero. Unguarded, the division throws or yields an out-of-range index that reads arbitrary memory positions. Detecting the flat block and resolving it with a direct equality check keeps the loop valid — the same category of defensive guard as computing a midpoint that cannot overflow.
+The denominator fails when `a[hi] == a[lo]`. A run of equal values, or a range that has collapsed to one element, makes the value span zero. An unguarded integer implementation throws `DivideByZeroException`; floating-point variants produce a non-finite estimate that cannot be used as an index. The C# implementation below detects the flat block before division and resolves it with a direct equality check — the same category of defensive guard as computing a midpoint that cannot overflow.
 
 # Reference drawer
 
@@ -115,7 +120,7 @@ The denominator fails when `a[hi] == a[lo]`. A run of equal values, or a range t
 # Questions
 
 > [!QUESTION]- What property of a value distribution forces the linear worst case?
-> A single endpoint value that dwarfs the rest of the span — as with exponentially growing keys, clustered timestamps, or Zipfian counts. Once the maximum is far larger than most values, any target that is only a small fraction of that maximum interpolates to a position near `lo`, so each estimate advances the boundary by about one element instead of shrinking the range geometrically, and isolating the target costs `O(n)`.
+> A value distribution where ratios do not predict index ratios. In `a[i] = 2^i`, choosing the target near `max/n` places it at index `n − 1 − Θ(log n)` while the first interpolation fraction is only about `1/n`, so early probes stay near `lo`. The range then advances by only a few positions per probe and can require `Θ(n)` work.
 
 > [!QUESTION]- Why can it not run on arbitrary comparable keys?
 > The probe computes `(target - a[lo]) * (hi - lo) / (a[hi] - a[lo])`, which needs subtraction and a ratio with numeric meaning. Ordering-only types such as strings under a custom comparator support comparison but not that arithmetic, so no position can be estimated and only comparison-based search applies.

@@ -25,6 +25,8 @@ export const WATCH_HINTS = Object.freeze({
   estimate: "Index predicted from the target's position in the value range.",
   block: "Number of array positions in each jump.",
   "days used": "Shipping days needed at the tested capacity.",
+  capacity: "Candidate ship capacity currently being tested.",
+  verdict: "Whether the candidate satisfies the feasibility check.",
   scanned: "Array positions inspected so far.",
   mid: "Middle index and value of the current range.",
   shift: "Pattern offset under the text.",

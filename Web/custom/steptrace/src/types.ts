@@ -25,7 +25,11 @@ export type AlgorithmKind =
   | "rectree"
 
 export type VisualFamilyId =
-  "array-sort" | "execution-tree" | "indexed-array-search" | "matrix-grid"
+  | "array-sort"
+  | "execution-tree"
+  | "indexed-array-search"
+  | "matrix-grid"
+  | "monotone-boundary"
 
 export interface AlgorithmMeta {
   label: string
@@ -64,6 +68,8 @@ export interface StepTraceConfig extends Partial<Omit<AlgorithmInput, "algorithm
   smallPartitionThreshold?: number
   values?: number[]
   goal?: string
+  weights?: number[]
+  days?: number
   blockSize?: number
 }
 

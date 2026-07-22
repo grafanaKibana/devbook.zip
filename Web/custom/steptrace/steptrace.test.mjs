@@ -31,8 +31,10 @@ const cases = [
   "prim",
   "topological-sort",
   "binary-search",
+  "interpolation-search",
   "jump-search",
   "ternary-search",
+  "binary-search-on-answer",
   "exponential-search",
   "linear-search",
   "kmp",
@@ -260,10 +262,12 @@ test("all built-in algorithms preserve their headless frame contract", () => {
     const familyConfig =
       algorithm === "ternary-search"
         ? { array: [1, 4, 9, 12, 11, 7, 2], goal: "maximum" }
-        : algorithm === "shell-sort"
-          ? { gaps: [4, 2, 1] }
-          : algorithm === "cyclic-sort"
-            ? { array: [5, 3, 1, 4, 2] }
+        : algorithm === "binary-search-on-answer"
+          ? { weights: [3, 2, 2, 4, 1, 4], days: 3 }
+          : algorithm === "shell-sort"
+            ? { gaps: [4, 2, 1] }
+            : algorithm === "cyclic-sort"
+              ? { array: [5, 3, 1, 4, 2] }
           : algorithm === "floyd-warshall"
             ? {
                 nodes: [0, 1, 2, 3],
@@ -277,7 +281,7 @@ test("all built-in algorithms preserve their headless frame contract", () => {
                   [3, 0, 2],
                 ],
               }
-            : ["exponential-search", "jump-search"].includes(algorithm)
+            : ["exponential-search", "interpolation-search", "jump-search"].includes(algorithm)
               ? { array: commonConfig.array.slice().sort((a, b) => a - b) }
               : {}
     const result = api.buildFrames({
@@ -292,7 +296,7 @@ test("all built-in algorithms preserve their headless frame contract", () => {
 
   assert.equal(
     digest,
-    "203df517843d8741d3277a74923305488eb2d727295731c79d02ca15c15e29e8",
+    "6d84b867612a9b1a9ab45387b9e33dec29b005225d7257a7d845a866a2945e3f",
     "the headless StepTrace behavior changed",
   )
 })
@@ -475,11 +479,11 @@ test("execution-tree watch, legend, responsive styles, and legacy Fibonacci rema
   assert.match(mountSource, /root\.dataset\.visualFamily = built\.family\.id/)
   assert.match(
     sharedStyles,
-    /\.steptrace:is\(\[data-visual-family="execution-tree"\], \[data-visual-family="matrix-grid"\]\)\s*\{\s*container: steptrace-wide-stage \/ inline-size;/,
+    /\.steptrace:is\([\s\S]*?\[data-visual-family="monotone-boundary"\][\s\S]*?\)\s*\{\s*container: steptrace-wide-stage \/ inline-size;/,
   )
   assert.match(
     sharedStyles,
-    /@container steptrace-wide-stage \(max-width: 64rem\)[\s\S]*\.steptrace:is\(\[data-visual-family="execution-tree"\], \[data-visual-family="matrix-grid"\]\)[\s\S]*\.steptrace__body\s*\{[^}]*grid-template-columns: minmax\(0, 1fr\);/,
+    /@container steptrace-wide-stage \(max-width: 64rem\)[\s\S]*?\[data-visual-family="monotone-boundary"\][\s\S]*?\.steptrace__body\s*\{[^}]*grid-template-columns: minmax\(0, 1fr\);/,
   )
   assert.match(styles, /\.steptrace \.steptrace__rectree/)
   assert.match(styles, /overflow-x: auto/)
@@ -517,7 +521,7 @@ test("Floyd-Warshall records matrix relaxations through each permitted intermedi
   })
   const { matrixGridFooterModel, matrixGridRolesForCell, matrixGridViewSemantics } =
     loadStepTraceModule("src", "families", "matrix-grid.ts")
-  const { buildMilestones } = loadStepTraceModule("src", "render.ts")
+  const { buildMilestones, summaryFor } = loadStepTraceModule("src", "render.ts")
   const improve = result.frames.find(
     (frame) => frame.type === "relax" && frame.k === 1 && frame.cur?.join(",") === "0,2",
   )
@@ -983,6 +987,48 @@ test("exponential search gallops to a bracket before reusing indexed binary-sear
   assert.equal(result.frames.at(-1).comparisons, 6)
 })
 
+test("interpolation search probes the target's estimated position", () => {
+  const api = loadEngine(readFileSync(join(here, "generated", "engine.js"), "utf8"))
+  const result = api.buildFrames({
+    algorithm: "interpolation-search",
+    array: [0, 1, 4, 9, 16, 25, 36, 49, 64, 81, 100, 121],
+    target: 81,
+  })
+  const { resolveIndexedSearchState } = loadStepTraceModule(
+    "src",
+    "families",
+    "indexed-array-search.ts",
+  )
+  const { buildMilestones } = loadStepTraceModule("src", "render.ts")
+  const milestones = buildMilestones("interpolation-search", "search", result.frames).map(
+    (mark) => mark.label,
+  )
+  assert.equal(result.family.id, "indexed-array-search")
+  assert.equal(result.frames[1].phase, "interpolation")
+  const probes = result.frames.filter((frame) => frame.type === "probe")
+  assert.deepEqual(
+    probes.map((frame) => frame.mid),
+    [7, 8, 9],
+  )
+  assert.deepEqual(
+    probes.map((frame) => frame.annotationValue),
+    ["67% → [7]", "30% → [8]", "0% → [9]"],
+  )
+  assert.ok(
+    result.frames
+      .filter((frame) => frame.type === "narrow")
+      .every((frame) => frame.annotationValue === null),
+  )
+  assert.ok(milestones.includes("Interpolation"))
+  assert.equal(result.frames.at(-1).found, 9)
+  assert.equal(result.frames.at(-1).comparisons, 3)
+  assert.ok(
+    result.frames.some((frame) => frame.type === "probe" && frame.phase === "interpolation"),
+  )
+  assert.equal(resolveIndexedSearchState(result.frames[1], 0), "range")
+  assert.equal(resolveIndexedSearchState(result.frames.at(-1), 9), "found")
+})
+
 test("jump search probes in fixed blocks, then linearly scans", () => {
   const api = loadEngine(readFileSync(join(here, "generated", "engine.js"), "utf8"))
   const result = api.buildFrames({
@@ -1040,6 +1086,100 @@ test("ternary search narrows a strict unimodal range with simultaneous probes", 
   assert.ok(milestones.includes("Ternary"))
   assert.ok(milestones.includes("Probes 2/4"))
   assert.ok(milestones.includes("Final scan"))
+})
+
+test("binary search on answer finds the first feasible ship capacity", () => {
+  const api = loadEngine(readFileSync(join(here, "generated", "engine.js"), "utf8"))
+  const result = api.buildFrames({
+    algorithm: "binary-search-on-answer",
+    weights: [3, 2, 2, 4, 1, 4],
+    days: 3,
+  })
+  const { buildMilestones, summaryFor } = loadStepTraceModule("src", "render.ts")
+  const milestones = buildMilestones("binary-search-on-answer", "search", result.frames).map(
+    (mark) => mark.label,
+  )
+  const evaluations = result.frames.filter((frame) => frame.type === "evaluate")
+  const final = result.frames.at(-1)
+
+  assert.equal(result.family.id, "monotone-boundary")
+  assert.equal(final.answer, 6)
+  assert.ok(evaluations.some((frame) => frame.evaluation.feasible))
+  assert.ok(evaluations.some((frame) => !frame.evaluation.feasible))
+  assert.ok(evaluations.every((frame) => frame.evaluation.allowed === 3))
+  assert.deepEqual(
+    evaluations.find((frame) => frame.candidate === 10)?.evaluation.lanes.map((lane) => lane.items),
+    [
+      [3, 2, 2],
+      [4, 1, 4],
+    ],
+  )
+  assert.ok(milestones.includes("Answer range"))
+  assert.ok(milestones.includes("Check 10"))
+  assert.equal(
+    summaryFor("binary-search-on-answer", "search", final),
+    "Minimum feasible capacity 6 · 4 probes.",
+  )
+})
+
+test("binary search on answer has a dedicated monotone-boundary visual family", () => {
+  const renderSource = readFileSync(join(here, "src", "render.ts"), "utf8")
+  const styles = readFileSync(join(here, "src", "styles", "boundary.scss"), "utf8")
+  const family = readFileSync(
+    join(here, "src", "families", "monotone-boundary.ts"),
+    "utf8",
+  )
+
+  assert.match(renderSource, /export function makeBoundarySearchView\(/)
+  assert.match(renderSource, /frame\.maxInfeasible/)
+  assert.match(renderSource, /frame\.minFeasible/)
+  assert.match(renderSource, /model\.lanes\.slice\(model\.allowed\)/)
+  assert.match(styles, /\.steptrace__boundary-ticks/)
+  assert.match(styles, /\.steptrace__boundary-lane--overflow/)
+  assert.match(family, /id: "monotone-boundary"/)
+  assert.doesNotMatch(family, /makeSearchView/)
+})
+
+test("indexed search variants reject invalid family-specific inputs", () => {
+  const api = loadEngine(readFileSync(join(here, "generated", "engine.js"), "utf8"))
+
+  assert.throws(
+    () =>
+      api.buildFrames({
+        algorithm: "jump-search",
+        array: [1, 3, 5],
+        target: 3,
+        blockSize: 0,
+      }),
+    /blockSize.*positive integer/,
+  )
+  assert.throws(
+    () =>
+      api.buildFrames({
+        algorithm: "ternary-search",
+        array: [1, 4, 3, 5, 2],
+        goal: "maximum",
+      }),
+    /strictly increasing then strictly decreasing/,
+  )
+  assert.throws(
+    () =>
+      api.buildFrames({
+        algorithm: "ternary-search",
+        array: [1, 4, 2],
+        goal: "minimum",
+      }),
+    /goal: "maximum"/,
+  )
+  assert.throws(
+    () =>
+      api.buildFrames({
+        algorithm: "binary-search-on-answer",
+        weights: [3, 0, 2],
+        days: 3,
+      }),
+    /positive integer "weights"/,
+  )
 })
 
 test("exponential search rejects unsorted arrays and non-numeric targets", () => {
@@ -1223,6 +1363,8 @@ test("Watch rows resolve every built-in label from one hint dictionary", () => {
     "estimate",
     "block",
     "days used",
+    "capacity",
+    "verdict",
     "scanned",
     "mid",
     "shift",

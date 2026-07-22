@@ -441,6 +441,8 @@ export class IndexedSearchRecorder extends SearchRecorder {
     this._previousBound = -1
     this._bracket = null
     this._mid2 = null
+    this._annotationLabel = null
+    this._annotationValue = null
   }
 
   _push(type, message) {
@@ -456,15 +458,32 @@ export class IndexedSearchRecorder extends SearchRecorder {
       mid2: this._mid2,
       goal: this._goal,
       blockSize: this._blockSize,
+      annotationLabel: this._annotationLabel,
+      annotationValue: this._annotationValue,
     })
   }
 
   probe(lo, hi, mid, message) {
     this._mid2 = null
+    this._annotationLabel = null
+    this._annotationValue = null
     super.probe(lo, hi, mid, message)
   }
 
+  annotatedProbe(lo, hi, mid, label, value, message) {
+    this._mid2 = null
+    this._annotationLabel = label
+    this._annotationValue = value
+    this.lo = lo
+    this.hi = hi
+    this.mid = mid
+    this.comparisons++
+    this._push("probe", message)
+  }
+
   dualProbe(lo, hi, mid, mid2, message) {
+    this._annotationLabel = null
+    this._annotationValue = null
     this.lo = lo
     this.hi = hi
     this.mid = mid
@@ -475,6 +494,8 @@ export class IndexedSearchRecorder extends SearchRecorder {
 
   narrow(lo, hi, message) {
     this._mid2 = null
+    this._annotationLabel = null
+    this._annotationValue = null
     super.narrow(lo, hi, message)
   }
 
@@ -488,6 +509,8 @@ export class IndexedSearchRecorder extends SearchRecorder {
     this._previousBound = previousBound
     this._bound = bound
     this._mid2 = null
+    this._annotationLabel = null
+    this._annotationValue = null
     this.lo = Math.max(0, previousBound + 1)
     this.hi = bound
     this.mid = bound
@@ -507,7 +530,7 @@ export class IndexedSearchRecorder extends SearchRecorder {
     lo,
     hi,
     message,
-    phase: "binary" | "scan" | "ternary" = "binary",
+    phase: "binary" | "scan" | "interpolation" | "ternary" = "binary",
   ) {
     this._phase = phase
     this._bracket = [lo, hi]
@@ -515,7 +538,86 @@ export class IndexedSearchRecorder extends SearchRecorder {
     this.hi = hi
     this.mid = null
     this._mid2 = null
+    this._annotationLabel = null
+    this._annotationValue = null
     this._push("phase", message)
+  }
+}
+
+export class BoundarySearchRecorder {
+  [key: string]: any
+  constructor(config) {
+    this.frames = []
+    this.profile = config.profile
+    this.lower = config.lower
+    this.upper = config.upper
+    this.lo = config.lower
+    this.hi = config.upper
+    this.candidate = null
+    this.evaluation = null
+    this.answer = null
+    this.probes = 0
+    this.allowed = config.days
+    this.maxInfeasible = config.lower - 1
+    this.minFeasible = config.upper + 1
+  }
+  begin(message) {
+    this._push("range", message)
+  }
+  evaluate(lo, hi, candidate, evaluation, message) {
+    this.lo = lo
+    this.hi = hi
+    this.candidate = candidate
+    this.evaluation = evaluation
+    if (evaluation.feasible) this.minFeasible = Math.min(this.minFeasible, candidate)
+    else this.maxInfeasible = Math.max(this.maxInfeasible, candidate)
+    this.probes++
+    this._push("evaluate", message)
+  }
+  narrow(lo, hi, message) {
+    this.lo = lo
+    this.hi = hi
+    this._push("narrow", message)
+  }
+  hit(answer, evaluation, message) {
+    this.lo = answer
+    this.hi = answer
+    this.candidate = answer
+    this.answer = answer
+    this.evaluation = evaluation
+    this._push("found", message)
+  }
+  done(message) {
+    this._push("done", message)
+  }
+  _push(type, message) {
+    const evaluation = this.evaluation
+      ? {
+          ...this.evaluation,
+          lanes: this.evaluation.lanes.map((lane) => ({
+            ...lane,
+            items: lane.items.slice(),
+          })),
+        }
+      : null
+    this.frames.push(
+      Object.freeze({
+        type,
+        profile: this.profile,
+        lower: this.lower,
+        upper: this.upper,
+        lo: this.lo,
+        hi: this.hi,
+        candidate: this.candidate,
+        evaluation,
+        answer: this.answer,
+        probes: this.probes,
+        allowed: this.allowed,
+        maxInfeasible: this.maxInfeasible,
+        minFeasible: this.minFeasible,
+        message,
+      }),
+    )
   }
 }
 

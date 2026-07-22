@@ -1,5 +1,6 @@
 import type { BuiltInAlgorithm } from "../types"
 import { bfs } from "./bfs"
+import { binarySearchOnAnswer } from "./binary-search-on-answer"
 import { binarySearch } from "./binary-search"
 import { bubbleSort } from "./bubble-sort"
 import { combSort } from "./comb-sort"
@@ -8,6 +9,7 @@ import { dfs } from "./dfs"
 import { dijkstra } from "./dijkstra"
 import { divideAndConquer } from "./divide-and-conquer"
 import { exponentialSearch } from "./exponential-search"
+import { interpolationSearch } from "./interpolation-search"
 import { fibonacci } from "./fibonacci"
 import { floydWarshall } from "./floyd-warshall"
 import { heapSort } from "./heap-sort"
@@ -43,8 +45,10 @@ export const builtInAlgorithms = [
   cyclicSort,
   introsort,
   exponentialSearch,
+  interpolationSearch,
   jumpSearch,
   ternarySearch,
+  binarySearchOnAnswer,
   bfs,
   dfs,
   dijkstra,
