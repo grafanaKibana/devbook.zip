@@ -1,8 +1,8 @@
 ---
 publish: true
-created: 2026-07-21T14:46:57.607Z
-modified: 2026-07-21T14:47:00.840Z
-published: 2026-07-21T14:47:00.840Z
+created: 2026-07-21T18:52:02.871Z
+modified: 2026-07-23T06:30:44.267Z
+published: 2026-07-23T06:30:44.267Z
 tags:
   - FolderNote
 icon: flask-round

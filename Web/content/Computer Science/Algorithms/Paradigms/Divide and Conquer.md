@@ -1,8 +1,8 @@
 ---
 publish: true
-created: 2026-07-21T14:46:57.603Z
-modified: 2026-07-21T18:17:28.705Z
-published: 2026-07-21T18:17:28.705Z
+created: 2026-07-21T18:52:02.705Z
+modified: 2026-07-21T19:58:21.374Z
+published: 2026-07-21T19:58:21.374Z
 topic:
   - Computer Science
 subtopic:
@@ -22,10 +22,10 @@ Its subproblems are **independent** when each can be solved without another subp
 
 **Core shape:** divide into independent subproblems → recurse to a base case → combine their results. A common balanced special case has a fixed number `a` of equal-size subproblems `n/b`, giving `T(n) = a·T(n/b) + f(n)`. That recurrence is not a universal definition of divide-and-conquer.
 
-The structure to animate is the recursion tree. [[Computer Science/Algorithms/Sorting Algorithms/Merge Sort|Merge sort]] over `[8, 3, 5, 1]` makes both phases visible: the active call path descends to single-element base cases, then sorted results travel back up and merge.
+The structure to animate is the recursion tree itself. One problem divides into independent subproblems, reaches direct base cases, then carries partial answers upward until the original problem can combine them. [[Computer Science/Algorithms/Sorting Algorithms/Merge Sort|Merge sort]] is one concrete use of that shape, but the animation keeps the pattern separate from any one algorithm.
 
 ```steptrace
-{ "algorithm": "divide-and-conquer", "array": [8, 3, 5, 1] }
+{ "algorithm": "divide-and-conquer" }
 ```
 
 ## Divide, conquer, combine
@@ -44,11 +44,11 @@ Logical independence permits parallel execution but does not make it automatic. 
 
 The classical Master Theorem applies to the balanced recurrence `T(n) = a·T(n/b) + f(n)`, where `a ≥ 1` and `b > 1` are constants: every non-base call creates the same fixed number of subproblems, all with the same asymptotic size `n/b`. It compares `f(n)` with the leaf contribution `n^(log_b a)`.
 
-| Case | Condition | Result | Where the work concentrates |
-| --- | --- | --- | --- |
-| 1 | `f(n) = O(n^(log_b a − ε))` for some `ε > 0` | `Θ(n^(log_b a))` | Near the leaves. |
-| 2 | `f(n) = Θ(n^(log_b a))` | `Θ(n^(log_b a) · log n)` | Every level costs the same; the `log n` levels add the log factor. |
-| 3 | `f(n) = Ω(n^(log_b a + ε))` for some `ε > 0`, and `a·f(n/b) ≤ c·f(n)` for some constant `c < 1` and all sufficiently large `n` | `Θ(f(n))` | Near the root. |
+| Case | Condition                                                                                                                      | Result                   | Where the work concentrates                                        |
+| ---- | ------------------------------------------------------------------------------------------------------------------------------ | ------------------------ | ------------------------------------------------------------------ |
+| 1    | `f(n) = O(n^(log_b a − ε))` for some `ε > 0`                                                                                   | `Θ(n^(log_b a))`         | Near the leaves.                                                   |
+| 2    | `f(n) = Θ(n^(log_b a))`                                                                                                        | `Θ(n^(log_b a) · log n)` | Every level costs the same; the `log n` levels add the log factor. |
+| 3    | `f(n) = Ω(n^(log_b a + ε))` for some `ε > 0`, and `a·f(n/b) ≤ c·f(n)` for some constant `c < 1` and all sufficiently large `n` | `Θ(f(n))`                | Near the root.                                                     |
 
 For merge sort, `T(n) = 2T(n/2) + Θ(n)`. Here `a = 2`, `b = 2`, and `n^(log_2 2) = n`; the merge cost matches that term. Case 2 therefore gives `T(n) = Θ(n log n)`.
 

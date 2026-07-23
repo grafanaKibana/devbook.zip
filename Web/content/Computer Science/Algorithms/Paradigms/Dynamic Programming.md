@@ -1,17 +1,17 @@
 ---
+publish: true
 created: 2026-07-18T14:02:43.953Z
-modified: 2026-07-22T18:50:17.000Z
-published: 2026-07-18T14:02:43.955Z
+modified: 2026-07-22T18:49:33.749Z
+published: 2026-07-22T18:49:33.749Z
 topic:
   - Computer Science
 subtopic:
   - Algorithms
-summary: "Defines finite acyclic states and recurrences, solves each state in dependency order, and reuses stored results."
+summary: Defines finite acyclic states and recurrences, solves each state in dependency order, and reuses stored results.
 level:
   - "4"
 priority: High
 status: Ready to Repeat
-publish: true
 ---
 
 # Intro
@@ -33,6 +33,7 @@ A cashier must return exactly `30¢` using real `1¢`, `10¢`, `25¢`, and `50¢
 The simplified Memoization and Tabulation tabs keep the cashier model visible. Memoization (Raw) exposes the transferable recursion tree beneath the counter: each node is a remaining amount, and a cache hit closes a repeated subtree. The exact approaches compute `30¢ → 3 coins`; they differ in which states are visited first and whether control lives in the call stack or a loop.
 
 > [!ABSTRACT]- Coin-change state flow
+>
 > ```mermaid
 > flowchart LR
 >   A["best(30¢)"] -->|"use 1¢"| B["best(29¢) + 1"]
@@ -48,6 +49,7 @@ The simplified Memoization and Tabulation tabs keep the cashier model visible. M
 > ```
 
 > [!EXAMPLE]- Coin change, top-down and bottom-up (C#)
+>
 > ```csharp
 > static int FewestCoinsTopDown(int amount, int[] coins)
 > {
@@ -84,6 +86,7 @@ The simplified Memoization and Tabulation tabs keep the cashier model visible. M
 >     return dp[amount] > amount ? -1 : dp[amount];
 > }
 > ```
+>
 > `FewestCoinsTopDown(30, [1, 10, 25, 50])` and the bottom-up version both return `3`.
 
 ## Grid path — repeated coordinates versus a filled matrix
@@ -97,6 +100,7 @@ A warehouse robot may move only right or down from the loading bay to the dispat
 Here the state is a coordinate rather than an amount. `best(R2C2)` means “the minimum remaining cost from this tile,” independent of how the robot arrived. The four simplified tabs use one warehouse matrix with integrated context, while Memoization (Raw) exposes the canonical recursion tree. Memoization stops repeated calls to a saved coordinate; tabulation makes the dependency order spatial by reading the already-solved tiles to the right and below.
 
 > [!ABSTRACT]- Grid-path state flow
+>
 > ```mermaid
 > flowchart LR
 >   A["best(R1C1)"] -->|right| B["best(R1C2)"]
@@ -106,9 +110,11 @@ Here the state is a coordinate rather than an amount. `best(R2C2)` means “the 
 >   D --> E["minimum of right and down"]
 >   E --> F["dispatch door"]
 > ```
+>
 > `R2C2` is one state even though two route prefixes reach it. Memoization computes its suffix once; tabulation fills it once before either predecessor reads it.
 
 > [!EXAMPLE]- Grid path, top-down and bottom-up (C#)
+>
 > ```csharp
 > static int CheapestPathTopDown(int[,] cost)
 > {
@@ -157,13 +163,14 @@ Here the state is a coordinate rather than an amount. `best(R2C2)` means “the 
 >     return dp[0, 0];
 > }
 > ```
+>
 > Both versions return the same minimum route cost; the visualization keeps the full table so it can also highlight the chosen route.
 
 ## Mechanism — state, recurrence, and the two forms
 
 Both examples become DP only after the state discards irrelevant history. Coin change keeps the remaining amount because every denomination remains reusable; finite coin stock would also require the remaining counts. Grid path keeps the current coordinate. Two calls with the same state have the same future choices and therefore the same answer, regardless of how they arrived there.
 
-- **Top-down (memoisation)** follows the recurrence from the target. The first visit to an amount or coordinate computes it; later visits return the saved answer. It may skip unreachable states, but it pays call-stack cost. [[Home/Computer Science/Algorithms/Paradigms/Memoization|Memoization]] develops that reuse mechanism independently of DP.
+- **Top-down (memoisation)** follows the recurrence from the target. The first visit to an amount or coordinate computes it; later visits return the saved answer. It may skip unreachable states, but it pays call-stack cost. [[Computer Science/Algorithms/Paradigms/Memoization|Memoization]] develops that reuse mechanism independently of DP.
 - **Bottom-up (tabulation)** starts from known answers and fills every state its target may depend on. Coin change advances from `0¢` to `30¢`; grid path moves backward from the dispatch door. The loops make dependency order explicit and avoid recursion.
 
 The recurrence then names the dependencies. Coin change reads `best[amount - coin]` for every usable denomination and keeps the minimum plus one. Grid path reads the right and down suffix costs and adds the current tile. The animations differ because those state spaces differ—a one-dimensional amount board versus a two-dimensional matrix—but the storage rule is the same.
@@ -186,9 +193,9 @@ The recurrence and state definition are load-bearing; reuse and table shape dete
 - **The state omits necessary history.** A coordinate is sufficient only because movement is restricted to right and down and the remaining tile costs depend solely on position. If the robot had fuel, keys, or visited-tile restrictions, those values would also belong in the state.
 - **The dependency order is cyclic.** Right/down movement forms a DAG. Allowing unrestricted movement can create cycles, so a single recursive or tabulated pass is no longer enough; the formulation needs a graph shortest-path algorithm or another convergence rule.
 - **A state may be unreachable.** Coin change without a `1¢` denomination can leave some amounts impossible. The sentinel must survive the recurrence without overflowing, and the public result should distinguish “no solution” from a large valid answer.
-- **No repeated states.** A memo with no cache hits only adds overhead. This is the usual [[Home/Computer Science/Algorithms/Paradigms/Divide and Conquer|divide-and-conquer]] regime: merge sort's subarrays are distinct even though its recurrence is valid.
+- **No repeated states.** A memo with no cache hits only adds overhead. This is the usual [[Computer Science/Algorithms/Paradigms/Divide and Conquer|divide-and-conquer]] regime: merge sort's subarrays are distinct even though its recurrence is valid.
 
-Optimization DP still needs a valid composition rule. For the same US-coin drawer, the largest-coin rule returns `25 + 1 + 1 + 1 + 1 + 1` for `30¢`, while the recurrence compares every allowed predecessor and finds `10 + 10 + 10`. The [[Home/Computer Science/Algorithms/Paradigms/Greedy Algorithms|greedy algorithms]] note develops this failure of the greedy-choice property and the conditions under which the cheaper local rule is safe.
+Optimization DP still needs a valid composition rule. For the same US-coin drawer, the largest-coin rule returns `25 + 1 + 1 + 1 + 1 + 1` for `30¢`, while the recurrence compares every allowed predecessor and finds `10 + 10 + 10`. The [[Computer Science/Algorithms/Paradigms/Greedy Algorithms|greedy algorithms]] note develops this failure of the greedy-choice property and the conditions under which the cheaper local rule is safe.
 
 ## Questions
 
@@ -205,4 +212,4 @@ Optimization DP still needs a valid composition rule. For the same US-coin drawe
 
 - [Dynamic programming (Wikipedia)](https://en.wikipedia.org/wiki/Dynamic_programming) — formal definition, Bellman's origin of the term, and the optimal-substructure / overlapping-subproblems conditions.
 - [MIT 6.006 Introduction to Algorithms, Spring 2020](https://ocw.mit.edu/courses/6-006-introduction-to-algorithms-spring-2020/) — the dynamic-programming unit frames DP as recursion plus memoisation and works through subproblem/state design.
-- Cormen, Leiserson, Rivest, Stein, *Introduction to Algorithms* — the "Dynamic Programming" chapter (Ch. 15 in the 3rd edition, Ch. 14 in the 4th edition) develops state recurrences, optimal substructure, overlapping subproblems, and both evaluation orders.
+- Cormen, Leiserson, Rivest, Stein, _Introduction to Algorithms_ — the "Dynamic Programming" chapter (Ch. 15 in the 3rd edition, Ch. 14 in the 4th edition) develops state recurrences, optimal substructure, overlapping subproblems, and both evaluation orders.

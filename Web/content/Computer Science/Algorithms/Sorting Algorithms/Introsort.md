@@ -1,8 +1,8 @@
 ---
 publish: true
-created: 2026-07-21T14:46:57.607Z
-modified: 2026-07-21T14:47:00.284Z
-published: 2026-07-21T14:47:00.284Z
+created: 2026-07-21T18:52:02.852Z
+modified: 2026-07-21T19:06:18.350Z
+published: 2026-07-21T19:06:18.350Z
 topic:
   - Computer Science
 subtopic:
@@ -14,6 +14,8 @@ priority: Medium
 status: Creation
 ---
 
+# Intro
+
 Quicksort partitions an array around a pivot and averages `O(n log n)`, but a crafted input can force maximally unbalanced partitions at every level — one element on one side, the rest on the other — collapsing it to `O(n²)` time and `O(n)` recursion depth. Because a runtime exposes its default sort to untrusted data, that quadratic path is a denial-of-service vector rather than a benchmark curiosity.
 
 Introsort (David Musser, 1997) keeps quicksort's partitioning but watches its own recursion depth. Once the current partition exceeds a fixed budget of `2⌊log₂ n⌋` levels — a depth quicksort only reaches when its partitions stay badly unbalanced — it stops recursing and finishes that partition with [[Computer Science/Algorithms/Sorting Algorithms/Heap Sort|Heap Sort]], whose `O(n log n)` worst case is guaranteed. Partitions that shrink below a small threshold (~16 elements) are left partially ordered and swept up by one [[Computer Science/Algorithms/Sorting Algorithms/Insertion Sort|Insertion Sort]] pass at the end, which is cheaper than recursing over tiny ranges. The average case stays quicksort's; the worst case becomes heap sort's ceiling. Common `std::sort` implementations and .NET's `Array.Sort` use related introspective hybrids, but their exact depth formulas and small-partition handling are implementation-specific.
@@ -22,7 +24,7 @@ Introsort (David Musser, 1997) keeps quicksort's partitioning but watches its ow
 
 The behavior worth animating is the switch itself: quicksort partitioning and recursing until the depth budget hits zero, at which point heap sort takes over the offending partition.
 
-# Trace
+## Trace
 
 This compact trace deliberately lowers the depth limit to `1` and the insertion cutoff to `3`. Those are illustrative values, not runtime defaults: they keep quicksort, the heap fallback, and a visible insertion cleanup inside nine bars.
 
@@ -30,7 +32,7 @@ This compact trace deliberately lowers the depth limit to `1` and the insertion 
 { "algorithm": "introsort", "array": [2, 1, 9, 8, 7, 6, 5, 4, 3], "depthLimit": 1, "smallPartitionThreshold": 3 }
 ```
 
-# Why the worst case stays bounded
+## Why the worst case stays bounded
 
 The depth budget is `2⌊log₂ n⌋`. Balanced partitions bottom out after about `⌊log₂ n⌋` levels; the factor of two tolerates ordinary imbalance. Reaching the budget means partitions have stayed lopsided level after level — the signature of a run drifting toward `O(n²)`. At that point the current partition is finished with [[Computer Science/Algorithms/Sorting Algorithms/Heap Sort|Heap Sort]] instead of recursing further.
 
@@ -38,7 +40,7 @@ That single rule is what caps the worst case. Every partition either completes i
 
 The small-partition cutoff is a separate optimization. Ranges below ~16 elements are left unsorted during recursion; because each such range is bounded by pivots already in their final positions, no element sits more than about 16 slots from where it belongs. A single [[Computer Science/Algorithms/Sorting Algorithms/Insertion Sort|Insertion Sort]] pass over the whole array afterward closes those local gaps in near-linear time. Skipping that pass leaves the array unsorted; recursing on the tiny ranges instead pays the recursion overhead the cutoff exists to avoid.
 
-# Complexity
+## Complexity
 
 | Case | Time | Auxiliary space | Cause |
 | --- | --- | --- | --- |
@@ -48,7 +50,7 @@ The small-partition cutoff is a separate optimization. Ranges below ~16 elements
 
 All three rows share the `O(n log n)` bound: best and average come from the quicksort phase, and the worst case holds to the same order only because heap sort takes over once the depth budget is spent. Auxiliary space is the `O(log n)` recursion stack — recursing on the smaller partition and looping on the larger keeps that depth logarithmic even when partitions are skewed. The average bound assumes pivots (median-of-three or randomized) good enough to keep the heap-sort branch rare; a poor pivot rule does not break the ceiling but makes the branch fire more often, and heap sort's cache behavior then surfaces in the constant factors.
 
-# Boundaries
+## Boundaries
 
 Introsort provides no stability guarantee once quicksort partitioning or heap sort can run: either phase may move equal keys past one another. A small input handled only by a stable insertion pass can preserve equal-key order, but callers cannot rely on that behavior across input sizes or strategy switches. Sorting records by a single key may therefore lose any secondary ordering carried by the input.
 
@@ -56,7 +58,7 @@ The depth multiplier (`2`) and the small-partition threshold (~16) are tunable a
 
 The switch reacts to cumulative recursion depth, not to the quality of any single partition. An input tuned to the pivot rule but that never sustains deep imbalance stays under the budget and is sorted entirely by the quicksort phase, at quicksort's normal constant factors — introsort does not make partitioning itself cheaper, it only bounds how long a bad run may continue.
 
-# Reference drawer
+## Reference drawer
 
 > [!ABSTRACT]- Control flow
 >
@@ -116,7 +118,7 @@ The switch reacts to cumulative recursion depth, not to the quality of any singl
 >
 > `Partition`, `HeapSortRange`, and `InsertionSort` are the standard helpers from [[Computer Science/Algorithms/Sorting Algorithms/Quick Sort|Quick Sort]], [[Computer Science/Algorithms/Sorting Algorithms/Heap Sort|Heap Sort]], and [[Computer Science/Algorithms/Sorting Algorithms/Insertion Sort|Insertion Sort]]. The load-bearing lines are the `depth == 0` handoff to heap sort and the inclusive range-size check that defers at most 16 values to the single final pass.
 
-# Questions
+## Questions
 
 > [!QUESTION]- What makes introsort switch to heap sort, and why is `2⌊log₂ n⌋` the threshold?
 > The switch fires when the current partition's recursion depth reaches `2⌊log₂ n⌋`. Balanced quicksort bottoms out near `⌊log₂ n⌋` levels, so twice that depth is reached only when partitions stay badly unbalanced — the path toward `O(n²)`. Finishing that partition with heap sort caps its cost at `O(n log n)`.
@@ -130,7 +132,7 @@ The switch reacts to cumulative recursion depth, not to the quality of any singl
 > [!QUESTION]- The heap-sort branch almost never runs — why keep it?
 > Runtimes sort untrusted input, so quicksort's `O(n²)` path is a denial-of-service vector. The branch existing at all is what turns the bound into a contract: whether or not it fires on a given input, no input can exceed `O(n log n)`. The ceiling is a correctness property, not a speedup.
 
-# References
+## References
 
 - [Introspective Sorting and Selection Algorithms (David Musser, 1997)](https://www.cs.rpi.edu/~musser/gp/introsort.ps) — the primary source: the depth-limit fallback and the `2·log n` bound.
 - [A Killer Adversary for Quicksort (McIlroy, 1999)](https://www.cs.dartmouth.edu/~doug/mdmspe.pdf) — constructs inputs that force median-of-three quicksort to `O(n²)`, the attack the depth switch defends against.

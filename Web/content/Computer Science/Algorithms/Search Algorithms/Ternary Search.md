@@ -1,8 +1,8 @@
 ---
 publish: true
-created: 2026-07-21T14:46:57.606Z
-modified: 2026-07-21T14:47:01.293Z
-published: 2026-07-21T14:47:01.293Z
+created: 2026-07-21T18:52:02.838Z
+modified: 2026-07-21T19:06:17.964Z
+published: 2026-07-21T19:06:17.964Z
 topic:
   - Computer Science
 subtopic:
@@ -14,15 +14,17 @@ priority: Medium
 status: Creation
 ---
 
-A ball launched at angle `θ` carries farther as `θ` climbs toward the optimum, then falls off as the angle steepens past it: the range is a single-peaked function of `θ` with no closed-form optimum once drag enters the model. Locating that peak means sampling the function and narrowing toward it, which needs a rule for deciding which samples to keep. [[Binary Search]] cannot supply the rule — there is no order to compare a target against, only a value that rises then falls.
+# Intro
+
+A ball launched at angle `θ` carries farther as `θ` climbs toward the optimum, then falls off as the angle steepens past it: the range is a single-peaked function of `θ` with no closed-form optimum once drag enters the model. Locating that peak means sampling the function and narrowing toward it, which needs a rule for deciding which samples to keep. [[Computer Science/Algorithms/Search Algorithms/Binary Search|Binary Search]] cannot supply the rule — there is no order to compare a target against, only a value that rises then falls.
 
 Ternary search is that rule for a **unimodal** function — one that strictly increases to a single peak, then strictly decreases (or the mirror image for a valley). Two interior probes `m1` and `m2` at the third-points of `[lo, hi]` bracket the peak: whichever probe returns the smaller value sits on the far slope, so the third of the interval beyond it cannot hold the maximum and is discarded. Each step removes a third of the range using two function evaluations.
 
-The same name describes a three-way split of a sorted array, but there it is strictly worse than binary search: two comparisons per level shrink the range to a third (`2·log₃ n ≈ 1.82·ln n` comparisons) where one comparison already shrinks it to a half (`log₂ n ≈ 1.44·ln n`). The extra split earns nothing on ordered data. Its distinct value is the unimodal case, which binary search does not address at all — one-parameter convex optimization, geometric extremum problems (closest point on a parabola), and [[Binary Search on Answer|parametric search]] whose objective is unimodal rather than monotone.
+The same name describes a three-way split of a sorted array, but there it is strictly worse than binary search: two comparisons per level shrink the range to a third (`2·log₃ n ≈ 1.82·ln n` comparisons) where one comparison already shrinks it to a half (`log₂ n ≈ 1.44·ln n`). The extra split earns nothing on ordered data. Its distinct value is the unimodal case, which binary search does not address at all — one-parameter convex optimization, geometric extremum problems (closest point on a parabola), and [[Computer Science/Algorithms/Patterns/Binary Search on Answer|parametric search]] whose objective is unimodal rather than monotone.
 
 **Core condition:** a strictly unimodal `f` over `[lo, hi]` → two third-point probes reveal the peak's side → one third of the interval is discarded per step → `Θ(log n)` evaluations over `n` discrete candidates, or `Θ(log((hi − lo)/eps))` over a continuous interval, with `O(1)` space.
 
-# Trace
+## Trace
 
 The values rise to `12` and then fall, giving one strict peak. Each ternary step shows both third-point probes at once; the lower side is discarded, and a final scan of at most three positions confirms the maximum at index `3`.
 
@@ -30,7 +32,7 @@ The values rise to `12` and then fall, giving one strict peak. Each ternary step
 {"algorithm":"ternary-search","array":[1,4,9,12,11,7,2],"goal":"maximum"}
 ```
 
-# Why a third can be dropped
+## Why a third can be dropped
 
 The interval `[lo, hi]` holds the peak `p` at the start of every step, and the discard rule preserves that. Let `m1 < m2` be the third-point probes. Strict unimodality means `f` increases on `[lo, p]` and decreases on `[p, hi]`.
 
@@ -42,7 +44,7 @@ Each step keeps `2/3` of the width, so `k` steps leave `(2/3)^k · (hi − lo)`.
 
 Golden-section search sharpens the constant without changing the shape: placing the probes at the golden ratio makes one probe of the next step coincide with a probe already evaluated, so every step after the first spends one new evaluation instead of two. The saving matters when `f` is a simulation or a physical measurement rather than an array read.
 
-# Complexity
+## Complexity
 
 The cost is deterministic in the interval width rather than data-dependent, so the table is organized by quantity, not by best/average/worst.
 
@@ -56,7 +58,7 @@ The cost is deterministic in the interval width rather than data-dependent, so t
 
 For a discrete array, the `Θ(log n)` bound and the `2·log₃ n` comparison count describe the same asymptotic class, so the deciding difference between ternary and binary search is the constant factor — and on monotone data it always favours binary search. Continuous optimization instead measures the starting width against the required tolerance; there is no input-size `n` unless the interval has already been discretized.
 
-# When unimodality fails
+## When unimodality fails
 
 Unimodality is the algorithmic precondition; strict unimodality is the StepTrace renderer's narrower contract, and it is easy to violate either one.
 
@@ -68,7 +70,7 @@ The discrete domain needs a different stopping rule. With integer bounds and int
 
 For membership in a sorted array the boundary is simpler still: binary search dominates. Same `O(log n)` class, fewer comparisons, one probe per step instead of two.
 
-# Reference drawer
+## Reference drawer
 
 > [!ABSTRACT]- Control flow (maximizing form)
 >
@@ -111,7 +113,7 @@ For membership in a sorted array the boundary is simpler still: binary search do
 >
 > Flipping the comparison to `f(m1) > f(m2)` minimizes instead. `eps` must stay above the machine resolution of `double`, or `hi - lo` never crosses it and the loop spins; bounding the iteration count is the safe guard.
 
-# Questions
+## Questions
 
 > [!QUESTION]- Why does the smaller of the two probe values mark a discardable third?
 > Under strict unimodality `f` rises to the peak then falls. The probe returning the smaller value sits farther down a slope, on the side away from the peak, so the interval beyond it lies entirely on that slope and cannot contain the maximum. Two probes are needed because a single point on a non-monotone function cannot reveal which side the peak is on.
@@ -122,7 +124,7 @@ For membership in a sorted array the boundary is simpler still: binary search do
 > [!QUESTION]- What input makes the discard rule return a wrong answer?
 > A non-unimodal function. With two humps, probes straddling the valley can discard the third holding the global maximum and return a local one. A flat maximum still permits finding any maximizer, but it cannot support a unique-peak contract or recover the entire maximizing interval without extra boundary work.
 
-# References
+## References
 
 - [J. Kiefer, “Sequential Minimax Search for a Maximum” (1953)](https://doi.org/10.2307/2032161) — the primary sequential-search treatment behind Fibonacci and golden-section strategies for locating a unimodal maximum.
 - [Ternary search (Wikipedia)](https://en.wikipedia.org/wiki/Ternary_search) — definition, the unimodality requirement, and the iteration-count derivation.

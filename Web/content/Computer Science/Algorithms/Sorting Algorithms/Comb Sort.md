@@ -1,8 +1,8 @@
 ---
 publish: true
-created: 2026-07-21T14:46:57.606Z
-modified: 2026-07-21T14:47:01.466Z
-published: 2026-07-21T14:47:01.466Z
+created: 2026-07-21T18:52:02.838Z
+modified: 2026-07-21T19:06:18.159Z
+published: 2026-07-21T19:06:18.159Z
 topic:
   - Computer Science
 subtopic:
@@ -13,6 +13,8 @@ level:
 priority: Medium
 status: Creation
 ---
+
+# Intro
 
 [[Computer Science/Algorithms/Sorting Algorithms/Bubble Sort|Bubble Sort]] compares adjacent elements and swaps the inverted ones, sweeping until a pass makes no swap. Its cost comes from one asymmetry: a small value stranded near the end — a _turtle_ — moves left at most one position per pass, so it needs `O(n)` passes to reach the front. Large values near the front ("rabbits") race right in a single pass; the mismatch is what pins bubble sort at `Θ(n²)`.
 
@@ -26,7 +28,7 @@ The shrinking gap is the state worth watching: wide pairs move turtles first, th
 { "algorithm": "comb-sort", "array": [8, 4, 1, 6, 3, 2], "shrinkFactor": 1.3 }
 ```
 
-# Why the gap accelerates the sort
+## Why the gap accelerates the sort
 
 A pass at gap `g` walks `i` from `0` while `i + g < n`, comparing `a[i]` with `a[i + g]` and swapping any inverted pair. Unlike [[Computer Science/Algorithms/Sorting Algorithms/Shell Sort|Shell Sort]], the pass does not fully sort the `g` interleaved subsequences — each gap value gets a single sweep before the gap shrinks again. What one wide sweep does change is reach: an element far from its correct side moves up to `g` positions toward it per swap, so a turtle at the tail travels in leaps of `g` rather than steps of `1`.
 
@@ -34,7 +36,7 @@ Correctness does not come from the wide passes; they only rearrange. The loop te
 
 The shrink factor governs how fast the gap collapses. Lacey and Box selected `1.3` because it minimized comparisons in their experiments on random input. A smaller factor contracts slowly and spends more full sweeps at wide gaps; a larger one reaches `gap == 1` quickly and can leave more turtles for the bubble phase.
 
-# Complexity
+## Complexity
 
 | Case | Time | Auxiliary space | Cause |
 | --- | --- | --- | --- |
@@ -44,13 +46,13 @@ The shrink factor governs how fast the gap collapses. Lacey and Box selected `1.
 
 The near-`O(n log n)` average is an empirical observation on random inputs, not a proven bound. `O(n²)` remains the safe general upper bound because comb sort has no established sub-quadratic guarantee; its measured behavior depends on the shrink factor rather than a structural argument like the one behind [[Computer Science/Algorithms/Sorting Algorithms/Merge Sort|Merge Sort]] or [[Computer Science/Algorithms/Sorting Algorithms/Heap Sort|Heap Sort]]. Auxiliary space is `O(1)` in every case: the algorithm holds only the current gap and a swap temporary, and the loop is iterative, so no call stack grows.
 
-# Where the guarantees thin out
+## Where the guarantees thin out
 
 The performance rests on an empirical constant. `1.3` is not derived from a convergence proof; it is the factor that minimized comparisons in the original experiments. Some gap values also interact badly with real inputs: when the shrink sequence passes through a gap of `9` or `10`, a residual pattern survives that the next pass fails to clear, so the "combsort11" variant forces those gaps to `11`. A hand-tuned special case is a symptom that the sub-quadratic behavior is measured rather than guaranteed — an adversary can still drive the algorithm to `Θ(n²)`.
 
 Gapped swaps also cost stability. Two elements with equal keys can be reordered when a wide-gap swap lifts one past the other, and no later pass restores their input order because comb sort compares by value alone. Bubble sort keeps equal keys in place because it only ever swaps strictly-inverted adjacent pairs; widening the gap is exactly what removes that guarantee. Comb sort is therefore in-place but not stable — unusable where a prior sort order must survive as a tiebreak.
 
-# Reference drawer
+## Reference drawer
 
 > [!ABSTRACT]- Pass structure
 >
@@ -94,7 +96,7 @@ Gapped swaps also cost stability. Two elements with equal keys can be reordered 
 >
 > The loop condition `gap > 1 || swapped` keeps the gap-1 phase running until one sweep makes no swap. That no-swap pass is the sorted certificate; removing it can leave adjacent inversions the wide passes never inspected.
 
-# Questions
+## Questions
 
 > [!QUESTION]- What is a turtle, and how does the gap remove it?
 > A turtle is a small value near the end of the array. A bubble-style adjacent pass moves it left one position at a time, so it needs `O(n)` passes to reach the front — the asymmetry that keeps bubble sort quadratic. A wide initial gap compares distant pairs, so one swap can carry the turtle up to `gap` positions toward the front, and the shrinking gap then resolves the remaining local disorder.
@@ -102,7 +104,7 @@ Gapped swaps also cost stability. Two elements with equal keys can be reordered 
 > [!QUESTION]- Why is comb sort's sub-quadratic behavior not a guarantee?
 > Measurements on random input can look near `O(n log n)` with a `1.3` shrink factor, but that is not a proven average-case bound. No structural argument prevents `Θ(n²)`, and adversarial inputs still reach it. The combsort11 special case for gaps of `9` and `10` exists precisely because the constant was tuned by experiment rather than derived.
 
-# References
+## References
 
 - [Comb sort — Wikipedia](https://en.wikipedia.org/wiki/Comb_sort) — origin (Włodzimierz Dobosiewicz, 1980; popularized by Lacey and Box, _BYTE_, 1991), the `1.3` shrink factor, the combsort11 gap fix, and the turtle/rabbit framing.
 - [Lacey and Box, “A Fast, Easy Sort,” _BYTE_, April 1991](https://www.worldradiohistory.com/Archive-Byte/90s/1991/Byte-1991-04.pdf) — original Comb Sort article; the experiments on pages 315–318 motivate the `1.3` shrink factor by comparison count.
