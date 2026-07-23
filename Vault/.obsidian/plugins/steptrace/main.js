@@ -634,9 +634,9 @@ var init_recorders = __esm({
         this._annotationValue = null;
         super.probe(lo, hi, mid, message);
       }
-      annotatedProbe(lo, hi, mid, label, value, message) {
+      annotatedProbe(lo, hi, mid, label2, value, message) {
         this._mid2 = null;
-        this._annotationLabel = label;
+        this._annotationLabel = label2;
         this._annotationValue = value;
         this.lo = lo;
         this.hi = hi;
@@ -1683,11 +1683,11 @@ function makeSortView(frames, semantics = legacySortViewSemantics) {
   }
   return { nodes: [stage, status], paint, watch, destroy: tracker.destroy };
 }
-function makeMarker(label, role) {
+function makeMarker(label2, role) {
   const wrap = el("div", "steptrace__marker steptrace__marker--" + role);
   const body = el("span", "steptrace__marker-body");
   const lbl = el("span", "steptrace__marker-label");
-  lbl.textContent = label;
+  lbl.textContent = label2;
   body.append(lbl);
   wrap.append(body);
   return {
@@ -1850,10 +1850,10 @@ function makeBoundarySearchView(frames, descriptor) {
   const laneNodes = Array.from({ length: first.allowed }, (_, index) => {
     const lane = el("div", "steptrace__boundary-lane");
     const head = el("div", "steptrace__boundary-lane-head");
-    const label = el("span", "steptrace__boundary-lane-label");
+    const label2 = el("span", "steptrace__boundary-lane-label");
     const total = el("span", "steptrace__boundary-lane-total");
-    label.textContent = `Day ${index + 1}`;
-    head.append(label, total);
+    label2.textContent = `Day ${index + 1}`;
+    head.append(label2, total);
     const packages = el("div", "steptrace__boundary-packages");
     const meter = el("div", "steptrace__boundary-meter");
     const fill = el("div", "steptrace__boundary-meter-fill");
@@ -1883,7 +1883,7 @@ function makeBoundarySearchView(frames, descriptor) {
   root.append(domain, evaluation);
   const legend = el("div", "steptrace__legend steptrace__boundary-legend");
   legend.setAttribute("aria-label", "Monotone boundary states");
-  for (const [state, label] of [
+  for (const [state, label2] of [
     ["range", "unknown candidate"],
     ["infeasible", "known too small"],
     ["feasible", "known feasible"],
@@ -1893,7 +1893,7 @@ function makeBoundarySearchView(frames, descriptor) {
     const swatch = el("span", "steptrace__boundary-legend-swatch");
     swatch.dataset.state = state;
     const text = el("span");
-    text.textContent = label;
+    text.textContent = label2;
     row.append(swatch, text);
     legend.append(row);
   }
@@ -2121,9 +2121,9 @@ function makeMatrixRoleLegend(descriptors) {
   const items = el("ul", "steptrace__legend steptrace__matrix-role-legend-items");
   for (const descriptor of descriptors) {
     const item = el("li", "steptrace__legend-row steptrace__matrix-role-legend-item");
-    const label = el("span", "steptrace__matrix-role-legend-label");
-    label.textContent = descriptor.label;
-    item.append(makeMatrixRoleBadge(descriptor), label);
+    const label2 = el("span", "steptrace__matrix-role-legend-label");
+    label2.textContent = descriptor.label;
+    item.append(makeMatrixRoleBadge(descriptor), label2);
     items.append(item);
   }
   root.append(items);
@@ -2160,11 +2160,11 @@ function makeDPStoryView(frames) {
 }
 function makeStoryLegend(items) {
   const legend = el("div", "steptrace__legend");
-  for (const [state, label] of items) {
+  for (const [state, label2] of items) {
     const row = el("div", "steptrace__legend-row");
     const swatch = el("span", "steptrace__swatch steptrace__dp-story-swatch");
     swatch.dataset.state = state;
-    row.append(swatch, document.createTextNode(label));
+    row.append(swatch, document.createTextNode(label2));
     legend.append(row);
   }
   return legend;
@@ -2203,11 +2203,11 @@ function makeCoinChangeStoryView(frames) {
     amountBoard.style.setProperty("--steptrace-amount-count", String(first.amounts.length));
     for (const amount of first.amounts) {
       const cell = el("div", "steptrace__amount-cell");
-      const label = el("span", "steptrace__amount-label");
+      const label2 = el("span", "steptrace__amount-label");
       const value = el("span", "steptrace__amount-value");
-      label.textContent = `${amount}¢`;
+      label2.textContent = `${amount}¢`;
       value.textContent = "—";
-      cell.append(label, value);
+      cell.append(label2, value);
       amountBoard.append(cell);
       amountCells.push({ cell, value, amount });
     }
@@ -2249,11 +2249,11 @@ function makeCoinChangeStoryView(frames) {
     for (const attempt of frame.attempts) {
       const row = el("div", "steptrace__coin-attempt");
       row.dataset.state = attempt.state;
-      const label = el("span", "steptrace__coin-attempt-label");
+      const label2 = el("span", "steptrace__coin-attempt-label");
       const value = el("span", "steptrace__coin-attempt-value");
-      label.textContent = attempt.label;
+      label2.textContent = attempt.label;
       value.textContent = attempt.value;
-      row.append(label, value);
+      row.append(label2, value);
       attempts.append(row);
     }
   }
@@ -2809,13 +2809,13 @@ function makeBitsView(frames) {
   for (const key of ["a", "b", "r"]) {
     const row = el("div", "steptrace__brow");
     const gutter = el("div", "steptrace__bgutter");
-    const label = frames[0].labels[key];
+    const label2 = frames[0].labels[key];
     if (OP[key]) {
       const op = el("span", "steptrace__bop");
-      op.textContent = label;
+      op.textContent = label2;
       gutter.append(op);
     } else {
-      gutter.textContent = label;
+      gutter.textContent = label2;
     }
     const strip = el("div", "steptrace__bcells");
     const cells = [];
@@ -3028,27 +3028,27 @@ function makeExecutionTreeView(frames, descriptor) {
       ring.setAttribute("height", String(descriptor.nodeHeight + 4));
       ring.setAttribute("rx", "9");
     }
-    const label = document.createElementNS(SVGNS, "text");
+    const label2 = document.createElementNS(SVGNS, "text");
     const detail = document.createElementNS(SVGNS, "text");
     const result = document.createElementNS(SVGNS, "text");
     const badge = document.createElementNS(SVGNS, "text");
-    label.setAttribute("class", "steptrace__rtlabel");
+    label2.setAttribute("class", "steptrace__rtlabel");
     detail.setAttribute("class", "steptrace__rtdetail");
     result.setAttribute("class", "steptrace__rtval");
     badge.setAttribute("class", "steptrace__rtbadge");
-    for (const element of [label, detail, result]) element.setAttribute("text-anchor", "middle");
+    for (const element of [label2, detail, result]) element.setAttribute("text-anchor", "middle");
     const [primaryLine, secondaryLine] = descriptor.nodeLines(node);
-    label.textContent = primaryLine;
+    label2.textContent = primaryLine;
     detail.textContent = secondaryLine;
     if (descriptor.shape === "circle") {
-      label.setAttribute("y", "0");
-      label.setAttribute("dominant-baseline", "central");
+      label2.setAttribute("y", "0");
+      label2.setAttribute("dominant-baseline", "central");
       result.setAttribute("y", String(halfHeight + 9));
     } else {
-      label.setAttribute("y", "-4");
+      label2.setAttribute("y", "-4");
       detail.setAttribute("y", "9");
     }
-    group.append(ring, surface, label, detail, result, badge);
+    group.append(ring, surface, label2, detail, result, badge);
     svg.append(group);
     nodeElements[node.id] = { group, detail, result, badge, secondaryLine };
   }
@@ -3147,13 +3147,13 @@ function makeGraphView(frames, graph, frontierLabel) {
     svg.append(line);
     edgeEls.push({ el: line, from: e.from, to: e.to });
     if (e.weight != null) {
-      const label = document.createElementNS(SVGNS, "text");
-      label.setAttribute("class", "steptrace__edge-label");
-      label.setAttribute("x", String((a.x + b.x) / 2));
-      label.setAttribute("y", String((a.y + b.y) / 2 - 4));
-      label.setAttribute("text-anchor", "middle");
-      label.textContent = String(e.weight);
-      svg.append(label);
+      const label2 = document.createElementNS(SVGNS, "text");
+      label2.setAttribute("class", "steptrace__edge-label");
+      label2.setAttribute("x", String((a.x + b.x) / 2));
+      label2.setAttribute("y", String((a.y + b.y) / 2 - 4));
+      label2.setAttribute("text-anchor", "middle");
+      label2.textContent = String(e.weight);
+      svg.append(label2);
     }
   }
   const nodeEls = {};
@@ -3299,26 +3299,26 @@ function stripTags(s) {
 function pad2(n) {
   return String(n).padStart(2, "0");
 }
-function iconBtn(label, svg, extra = "") {
+function iconBtn(label2, svg, extra = "") {
   const b = document.createElement("button");
   b.type = "button";
   b.className = "steptrace__btn" + (extra ? " " + extra : "");
   b.innerHTML = svg;
-  b.setAttribute("aria-label", label);
-  b.title = label;
+  b.setAttribute("aria-label", label2);
+  b.title = label2;
   return b;
 }
 function buildMilestones(algorithm, kind, frames) {
   const marks = [];
-  const push = (i, label) => {
-    if (i < 0 || i >= frames.length || !label) return;
+  const push = (i, label2) => {
+    if (i < 0 || i >= frames.length || !label2) return;
     const prev = marks[marks.length - 1];
-    if (prev && (prev.i === i || prev.label === label)) return;
-    marks.push({ i, label });
+    if (prev && (prev.i === i || prev.label === label2)) return;
+    marks.push({ i, label: label2 });
   };
   const firstGap = frames.find((frame) => Number.isInteger(frame.gap))?.gap;
   const familyProfile = frames[0]?.profile;
-  const initial = kind === "sort" ? firstGap != null ? `Gap ${firstGap}` : familyProfile === "cyclic" ? "Place values" : familyProfile === "introsort" ? "Quicksort" : algorithm === "bubble-sort" ? "Pass 1" : algorithm === "insertion-sort" ? "Prefix 1" : algorithm === "selection-sort" ? "Select 1" : algorithm === "heap-sort" ? "Build heap" : algorithm === "merge-sort" ? "Runs of 1" : "Partition" : kind === "search" ? familyProfile === "exponential" ? "Gallop" : familyProfile === "interpolation" ? "Estimate" : familyProfile === "jump" ? "Jump blocks" : familyProfile === "ternary" ? "Narrow peak" : familyProfile === "shipping-capacity" ? "Answer range" : "Search range" : kind === "string" ? "Shift 0" : kind === "backtrack" ? "Depth 0" : kind === "rectree" ? familyProfile === "divide-and-conquer" ? "Whole problem" : familyProfile === "merge-sort" ? "Whole array" : familyProfile === "memoization" ? "Empty cache" : familyProfile === "coin-change-top-down" ? "Amount 30¢" : familyProfile === "grid-path-top-down" ? "Loading bay" : "Call tree" : "Initialize";
+  const initial = kind === "sort" ? firstGap != null ? `Gap ${firstGap}` : familyProfile === "cyclic" ? "Place values" : familyProfile === "counting" ? "Tally keys" : familyProfile === "introsort" ? "Quicksort" : algorithm === "bubble-sort" ? "Pass 1" : algorithm === "insertion-sort" ? "Prefix 1" : algorithm === "selection-sort" ? "Select 1" : algorithm === "heap-sort" ? "Build heap" : algorithm === "merge-sort" ? "Runs of 1" : "Partition" : kind === "search" ? familyProfile === "exponential" ? "Gallop" : familyProfile === "interpolation" ? "Estimate" : familyProfile === "jump" ? "Jump blocks" : familyProfile === "ternary" ? "Narrow peak" : familyProfile === "shipping-capacity" ? "Answer range" : "Search range" : kind === "string" ? "Shift 0" : kind === "backtrack" ? "Depth 0" : kind === "rectree" ? familyProfile === "divide-and-conquer" ? "Whole problem" : familyProfile === "merge-sort" ? "Whole array" : familyProfile === "memoization" ? "Empty cache" : familyProfile === "coin-change-top-down" ? "Amount 30¢" : familyProfile === "grid-path-top-down" ? "Loading bay" : "Call tree" : "Initialize";
   push(0, initial);
   let lastRange = "";
   let lastGap = firstGap;
@@ -3328,7 +3328,11 @@ function buildMilestones(algorithm, kind, frames) {
   for (let i = 1; i < frames.length - 1; i++) {
     const f = frames[i];
     if (kind === "sort") {
-      if (familyProfile === "introsort" && f.type === "fallback") {
+      if (familyProfile === "counting" && f.type === "prefix" && frames[i - 1].type !== "prefix") {
+        push(i, "Reserve output ranges");
+      } else if (familyProfile === "counting" && f.type === "place" && frames[i - 1].type !== "place") {
+        push(i, "Place stably");
+      } else if (familyProfile === "introsort" && f.type === "fallback") {
         push(i, "Heap fallback");
       } else if (familyProfile === "introsort" && f.type === "cleanup") {
         push(i, "Insertion cleanup");
@@ -3445,6 +3449,8 @@ function graphEdgeWeight(graph, a, b) {
 }
 function summaryFor(algorithm, kind, frame, graph) {
   if (kind === "sort") {
+    if (algorithm === "counting-sort")
+      return `Output [${frame.output.join(", ")}] · ${frame.tallied} tallies · ${frame.placed} stable placements.`;
     if (algorithm === "merge-sort")
       return `Output [${frame.array.join(", ")}] · ${frame.swaps} writes.`;
     const unit = frame.movementUnit || (["bubble-sort", "selection-sort", "quick-sort", "heap-sort"].includes(algorithm) ? "swaps" : "moves");
@@ -4178,18 +4184,297 @@ var init_comb_sort = __esm({
   }
 });
 
-// custom/steptrace/src/algorithms/cyclic-sort.ts
+// custom/steptrace/src/families/distribution-sort.ts
 function invalidConfig2(message) {
+  throw new Error(`steptrace: counting-sort ${message}`);
+}
+function parseCountingSortConfig(config) {
+  const { array } = config;
+  if (!Array.isArray(array) || array.length < 2)
+    invalidConfig2('requires an "array" with at least two integer keys.');
+  if (!array.every((value) => Number.isInteger(value)))
+    invalidConfig2("requires every value to be an integer key.");
+  const min = Math.min(...array);
+  const max = Math.max(...array);
+  if (max - min > 32)
+    invalidConfig2("limits the demonstrated key range to 33 values so every counter remains legible.");
+  return { profile: "counting", array: array.slice(), min, max };
+}
+function tokenLabels(input) {
+  const totals = /* @__PURE__ */ new Map();
+  input.forEach((value) => totals.set(value, (totals.get(value) || 0) + 1));
+  const seen = /* @__PURE__ */ new Map();
+  return input.map((value) => {
+    const occurrence = (seen.get(value) || 0) + 1;
+    seen.set(value, occurrence);
+    return totals.get(value) === 1 ? String(value) : `${value}${String.fromCharCode(96 + occurrence)}`;
+  });
+}
+function label(text, detail) {
+  const heading = el("div", "steptrace__distribution-label");
+  heading.textContent = text;
+  heading.title = detail;
+  return heading;
+}
+function phaseLabel(phase) {
+  return phase === "intro" ? "set up" : phase === "done" ? "sorted" : phase;
+}
+function frequencyRangeFor(frame, index) {
+  const count = frame.counts[index];
+  const rangesVisible = frame.type === "prefix" ? index < frame.prefixed : frame.type === "place" || frame.type === "done";
+  if (!rangesVisible) return { count, slots: null };
+  if (count === 0) return { count, slots: "—" };
+  const start = frame.counts.slice(0, index).reduce((sum, value) => sum + value, 0);
+  const end = start + count - 1;
+  return { count, slots: start === end ? String(start) : `${start}–${end}` };
+}
+function distributionWatch(frame) {
+  const active = frame.activeKey == null ? "—" : frame.activeKey;
+  return [
+    { k: "phase", v: phaseLabel(frame.type), sw: "var(--_violet)" },
+    { k: "key", v: active, sw: "var(--_blue)" },
+    { k: "tallied", v: `${frame.tallied}/${frame.input.length}`, sw: "var(--_amber)" },
+    { k: "placed", v: `${frame.placed}/${frame.input.length}`, sw: "var(--_green)" }
+  ];
+}
+function makeDistributionSortView(frames) {
+  const first = frames[0];
+  const keys = Array.from({ length: first.max - first.min + 1 }, (_, index) => first.min + index);
+  const labels = tokenLabels(first.input);
+  const stage = el("div", "steptrace__distribution");
+  const input = el("div", "steptrace__distribution-band");
+  const inputBarsStage = el("div", "steptrace__stage steptrace__distribution-bars");
+  inputBarsStage.setAttribute("role", "region");
+  inputBarsStage.setAttribute("aria-label", "Unsorted Array");
+  const inputBars = makeBars(inputBarsStage, first.input.length);
+  input.append(label("Unsorted Array", "Each bar keeps its original identity."), inputBarsStage);
+  const countBand = el("div", "steptrace__distribution-band");
+  const frequency = el("div", "steptrace__distribution-frequency");
+  frequency.setAttribute("role", "region");
+  frequency.setAttribute("aria-label", "Frequency");
+  const buckets = keys.map((key) => {
+    const bucket = el("div", "steptrace__distribution-bucket");
+    const keyLabel = el("span", "steptrace__distribution-key");
+    keyLabel.textContent = `value ${key}`;
+    const count = el("strong", "steptrace__distribution-value");
+    const slots = el("span", "steptrace__distribution-slots");
+    bucket.append(keyLabel, count, slots);
+    frequency.append(bucket);
+    return { bucket, count, slots, key };
+  });
+  countBand.append(label("Frequency", "Raw counts become reserved output slots from left to right."), frequency);
+  const outputBand = el("div", "steptrace__distribution-band");
+  const outputBarsStage = el("div", "steptrace__stage steptrace__distribution-bars steptrace__distribution-bars--output");
+  outputBarsStage.setAttribute("role", "region");
+  outputBarsStage.setAttribute("aria-label", "Sorted Array");
+  const outputBars = makeBars(outputBarsStage, first.input.length);
+  outputBand.append(label("Sorted Array", "The input is read right-to-left; each placement preserves duplicate order."), outputBarsStage);
+  stage.append(input, countBand, outputBand);
+  const status = statusEl();
+  const maxValue = Math.max(...first.input, 1);
+  function paint(frame, index = 0, total = 1) {
+    stage.dataset.phase = frame.type;
+    inputBars.forEach((bar, barIndex) => {
+      const value = frame.input[barIndex];
+      bar.fill.style.height = barHeightStyle(value, maxValue);
+      bar.num.textContent = labels[barIndex];
+      bar.bar.dataset.state = barIndex === frame.activeInput ? "compare" : "";
+      bar.bar.setAttribute("aria-label", `input index ${barIndex}, value ${value}, token ${labels[barIndex]}`);
+    });
+    buckets.forEach(({ bucket, count, slots, key }, bucketIndex) => {
+      const range = frequencyRangeFor(frame, bucketIndex);
+      count.textContent = `count ${range.count}`;
+      slots.textContent = range.slots == null ? "" : `slots ${range.slots}`;
+      bucket.dataset.active = (frame.type === "tally" || frame.type === "prefix") && key === frame.activeKey ? "1" : "0";
+      bucket.dataset.previous = frame.type === "prefix" && key === frame.previousKey ? "1" : "0";
+      bucket.dataset.placement = frame.type === "place" && key === frame.activeKey ? "1" : "0";
+      bucket.setAttribute(
+        "aria-label",
+        `value ${key}, count ${range.count}${range.slots == null ? "" : `, slots ${range.slots}`}`
+      );
+    });
+    outputBars.forEach((bar, slotIndex) => {
+      const placed = frame.output[slotIndex];
+      const origin = frame.outputOrigins[slotIndex];
+      bar.fill.style.height = placed == null ? "0" : barHeightStyle(placed, maxValue);
+      bar.num.textContent = placed == null ? "·" : labels[origin ?? 0];
+      bar.bar.dataset.state = placed == null ? "" : "sorted";
+      bar.bar.dataset.target = frame.type === "place" && slotIndex === frame.placedAt ? "1" : "0";
+      bar.bar.dataset.empty = placed == null ? "1" : "0";
+      bar.bar.setAttribute(
+        "aria-label",
+        placed == null ? `output index ${slotIndex}, empty` : `output index ${slotIndex}, value ${placed}, token ${labels[origin ?? 0]}`
+      );
+    });
+    status.innerHTML = escapeHtml(frame.message) + ` <span class="steptrace__counts">· ${phaseLabel(frame.type)} · step ${index + 1}/${total}</span>`;
+  }
+  return {
+    nodes: [stage, status],
+    stageLayout: "fill",
+    stableStage: true,
+    paint,
+    watch: distributionWatch
+  };
+}
+var DistributionSortRecorder, distributionSortFamily;
+var init_distribution_sort = __esm({
+  "custom/steptrace/src/families/distribution-sort.ts"() {
+    init_render();
+    DistributionSortRecorder = class {
+      frames = [];
+      input;
+      min;
+      max;
+      counts;
+      positions;
+      output;
+      outputOrigins;
+      activeInput = null;
+      activeKey = null;
+      previousKey = null;
+      placedAt = null;
+      tallied = 0;
+      prefixed = 0;
+      placed = 0;
+      constructor(config) {
+        this.input = config.array.slice();
+        this.min = config.min;
+        this.max = config.max;
+        this.counts = Array.from({ length: this.max - this.min + 1 }, () => 0);
+        this.positions = this.counts.slice();
+        this.output = Array.from({ length: this.input.length }, () => null);
+        this.outputOrigins = Array.from({ length: this.input.length }, () => null);
+      }
+      intro(message) {
+        this.push("intro", message);
+      }
+      tally(inputIndex, message) {
+        const key = this.input[inputIndex];
+        this.activeInput = inputIndex;
+        this.activeKey = key;
+        this.previousKey = null;
+        this.placedAt = null;
+        this.counts[key - this.min]++;
+        this.tallied++;
+        this.push("tally", message);
+      }
+      prefix(key, message) {
+        const index = key - this.min;
+        this.activeInput = null;
+        this.activeKey = key;
+        this.previousKey = key === this.min ? null : key - 1;
+        this.placedAt = null;
+        if (this.prefixed === 0) this.positions = this.counts.slice();
+        if (index > 0) this.positions[index] += this.positions[index - 1];
+        this.prefixed++;
+        this.push("prefix", message);
+      }
+      place(inputIndex, message) {
+        const key = this.input[inputIndex];
+        const countIndex = key - this.min;
+        const target = --this.positions[countIndex];
+        this.output[target] = key;
+        this.outputOrigins[target] = inputIndex;
+        this.activeInput = inputIndex;
+        this.activeKey = key;
+        this.previousKey = null;
+        this.placedAt = target;
+        this.placed++;
+        this.push("place", message);
+      }
+      done(message) {
+        this.activeInput = null;
+        this.activeKey = null;
+        this.previousKey = null;
+        this.placedAt = null;
+        this.push("done", message);
+      }
+      push(type, message) {
+        this.frames.push(
+          Object.freeze({
+            type,
+            profile: "counting",
+            input: this.input.slice(),
+            min: this.min,
+            max: this.max,
+            counts: this.counts.slice(),
+            positions: this.positions.slice(),
+            output: this.output.slice(),
+            outputOrigins: this.outputOrigins.slice(),
+            activeInput: this.activeInput,
+            activeKey: this.activeKey,
+            previousKey: this.previousKey,
+            placedAt: this.placedAt,
+            tallied: this.tallied,
+            prefixed: this.prefixed,
+            placed: this.placed,
+            message
+          })
+        );
+      }
+    };
+    distributionSortFamily = {
+      id: "distribution-sort",
+      createRecorder(config) {
+        return new DistributionSortRecorder(config);
+      },
+      createView(frames) {
+        return makeDistributionSortView(frames);
+      }
+    };
+  }
+});
+
+// custom/steptrace/src/algorithms/counting-sort.ts
+var countingSort;
+var init_counting_sort = __esm({
+  "custom/steptrace/src/algorithms/counting-sort.ts"() {
+    init_distribution_sort();
+    countingSort = {
+      id: "counting-sort",
+      kind: "sort",
+      family: distributionSortFamily,
+      meta: { label: "Counting sort" },
+      parse: parseCountingSortConfig,
+      run(input, ops) {
+        ops.intro(
+          `Keys span ${input.min}…${input.max}. Count by value first; no pair of keys is compared.`
+        );
+        for (let index = 0; index < input.array.length; index++) {
+          const key = input.array[index];
+          ops.tally(index, `Read input[${index}] = ${key}; add one to frequency[${key}].`);
+        }
+        for (let key = input.min; key <= input.max; key++) {
+          ops.prefix(
+            key,
+            key === input.min ? `Position[${key}] starts at ${key}'s frequency: keys ≤ ${key} end before this index.` : `Add position[${key - 1}] into position[${key}]; it now counts keys ≤ ${key}.`
+          );
+        }
+        for (let index = input.array.length - 1; index >= 0; index--) {
+          const key = input.array[index];
+          ops.place(
+            index,
+            `Read input[${index}] = ${key} from the tail; decrement its end position, then write output there.`
+          );
+        }
+        ops.done(`Every key is in its value block. Tail-first placement kept equal keys in input order.`);
+      }
+    };
+  }
+});
+
+// custom/steptrace/src/algorithms/cyclic-sort.ts
+function invalidConfig3(message) {
   throw new Error(`steptrace: cyclic-sort ${message}`);
 }
 function parseCyclicSortConfig(config) {
   const { array } = config;
   if (!Array.isArray(array) || array.length < 2)
-    invalidConfig2('requires an "array" with at least two integers.');
+    invalidConfig3('requires an "array" with at least two integers.');
   if (!array.every((value) => Number.isInteger(value) && value >= 1 && value <= array.length))
-    invalidConfig2("requires every value to be an integer in the range 1..array.length.");
+    invalidConfig3("requires every value to be an integer in the range 1..array.length.");
   if (new Set(array).size !== array.length)
-    invalidConfig2("requires a permutation with no duplicate values.");
+    invalidConfig3("requires a permutation with no duplicate values.");
   return { array: array.slice(), profile: "cyclic" };
 }
 var cyclicSort;
@@ -4358,12 +4643,12 @@ var init_dijkstra = __esm({
 });
 
 // custom/steptrace/src/families/execution-tree.ts
-function invalidConfig3(message) {
+function invalidConfig4(message) {
   throw new Error(`steptrace: divide-and-conquer ${message}`);
 }
 function parseExecutionTreeConfig(config) {
   if (config.array !== void 0)
-    invalidConfig3('does not take an "array"; it animates the paradigm itself.');
+    invalidConfig4('does not take an "array"; it animates the paradigm itself.');
   return { profile: "divide-and-conquer" };
 }
 function parseMemoizationConfig(config) {
@@ -5082,15 +5367,15 @@ var init_dp_problems = __esm({
 });
 
 // custom/steptrace/src/algorithms/dynamic-programming.ts
-function storyAlgorithm(id, label, parse, run) {
-  return { id, kind: "dp", family: dpStoryFamily, meta: { label }, parse, run };
+function storyAlgorithm(id, label2, parse, run) {
+  return { id, kind: "dp", family: dpStoryFamily, meta: { label: label2 }, parse, run };
 }
-function treeAlgorithm(id, label, profile, run) {
+function treeAlgorithm(id, label2, profile, run) {
   return {
     id,
     kind: "rectree",
     family: executionTreeFamily,
-    meta: { label },
+    meta: { label: label2 },
     parse(config) {
       if (config.variant !== void 0) throw new Error(`steptrace: ${id} does not take a variant.`);
       return { profile };
@@ -5098,12 +5383,12 @@ function treeAlgorithm(id, label, profile, run) {
     run
   };
 }
-function tableAlgorithm(id, label, profile, run) {
+function tableAlgorithm(id, label2, profile, run) {
   return {
     id,
     kind: "dp",
     family: dpProblemTableFamily,
-    meta: { label },
+    meta: { label: label2 },
     parse: dpTableConfig(profile),
     run
   };
@@ -5993,7 +6278,7 @@ function resolveIndexedSearchState(frame, index) {
   if (index < frame.lo || index > frame.hi) return "eliminated";
   return "range";
 }
-function phaseLabel(frame) {
+function phaseLabel2(frame) {
   switch (frame.phase) {
     case "gallop":
       return "gallop";
@@ -6029,7 +6314,7 @@ var init_indexed_array_search = __esm({
         const range = frame.phase === "gallop" || frame.phase === "jump" ? frame.bound == null ? "discovering" : `[${Math.max(0, frame.previousBound + 1)}, ${frame.bound}]` : `[${frame.lo}, ${frame.hi}]`;
         const rows = [
           profile === "ternary" ? { k: "goal", v: frame.goal ?? "—", sw: "var(--_accent)" } : { k: "target", v: String(first.target), sw: "var(--_accent)" },
-          { k: "phase", v: phaseLabel(frame), sw: phaseColor(frame) },
+          { k: "phase", v: phaseLabel2(frame), sw: phaseColor(frame) },
           { k: "range", v: range, sw: "var(--_neutral)" },
           { k: profile === "ternary" ? "probe 1" : "probe", v: probe, sw: "var(--_blue)" }
         ];
@@ -6210,26 +6495,26 @@ var init_interpolation_search = __esm({
 });
 
 // custom/steptrace/src/families/matrix-grid.ts
-function invalidConfig4(message) {
+function invalidConfig5(message) {
   throw new Error(`steptrace: floyd-warshall ${message}`);
 }
 function parseMatrixGridConfig(config) {
   const { nodes, edges } = config;
   if (!Array.isArray(nodes) || nodes.length === 0)
-    invalidConfig4('requires a non-empty numeric "nodes" array.');
+    invalidConfig5('requires a non-empty numeric "nodes" array.');
   if (!nodes.every((node) => typeof node === "number" && Number.isFinite(node)))
-    invalidConfig4('requires every "nodes" entry to be a finite number.');
-  if (new Set(nodes).size !== nodes.length) invalidConfig4('requires unique "nodes" entries.');
+    invalidConfig5('requires every "nodes" entry to be a finite number.');
+  if (new Set(nodes).size !== nodes.length) invalidConfig5('requires unique "nodes" entries.');
   if (!Array.isArray(edges))
-    invalidConfig4('requires an "edges" array of [from, to, weight] tuples.');
+    invalidConfig5('requires an "edges" array of [from, to, weight] tuples.');
   const knownNodes = new Set(nodes);
   const parsedEdges = edges.map((edge, index) => {
     if (!Array.isArray(edge) || edge.length !== 3 || !edge.every((value) => typeof value === "number" && Number.isFinite(value))) {
-      invalidConfig4(`requires edge ${index} to be a finite [from, to, weight] tuple.`);
+      invalidConfig5(`requires edge ${index} to be a finite [from, to, weight] tuple.`);
     }
     const [from, to, weight] = edge;
     if (!knownNodes.has(from) || !knownNodes.has(to))
-      invalidConfig4(`requires edge ${index} to reference nodes declared in "nodes".`);
+      invalidConfig5(`requires edge ${index} to reference nodes declared in "nodes".`);
     return [from, to, weight];
   });
   return { nodes: nodes.slice(), edges: parsedEdges, profile: "floyd-warshall" };
@@ -6390,9 +6675,9 @@ var init_matrix_grid = __esm({
         const currentColumn = frame.cur?.[1] ?? null;
         const active = currentColumn == null ? null : frame.colLabels[currentColumn];
         const results = Object.fromEntries(
-          frame.colLabels.flatMap((label, column) => {
+          frame.colLabels.flatMap((label2, column) => {
             const value = frame.grid[0][column];
-            return value == null ? [] : [[label, value]];
+            return value == null ? [] : [[label2, value]];
           })
         );
         const states = Object.fromEntries(
@@ -6618,21 +6903,21 @@ var init_insertion_sort = __esm({
 });
 
 // custom/steptrace/src/algorithms/introsort.ts
-function invalidConfig5(message) {
+function invalidConfig6(message) {
   throw new Error(`steptrace: introsort ${message}`);
 }
 function parseIntrosortConfig(config) {
   const { array } = config;
   if (!Array.isArray(array) || array.length < 2)
-    invalidConfig5('requires an "array" with at least two numbers.');
+    invalidConfig6('requires an "array" with at least two numbers.');
   if (!array.every((value) => typeof value === "number" && Number.isFinite(value)))
-    invalidConfig5('requires every "array" value to be a finite number.');
+    invalidConfig6('requires every "array" value to be a finite number.');
   const depthLimit = config.depthLimit ?? 2 * Math.floor(Math.log2(array.length));
   const smallPartitionThreshold = config.smallPartitionThreshold ?? 16;
   if (!Number.isInteger(depthLimit) || depthLimit < 0)
-    invalidConfig5('requires "depthLimit" to be a non-negative integer.');
+    invalidConfig6('requires "depthLimit" to be a non-negative integer.');
   if (!Number.isInteger(smallPartitionThreshold) || smallPartitionThreshold < 1)
-    invalidConfig5('requires "smallPartitionThreshold" to be a positive integer.');
+    invalidConfig6('requires "smallPartitionThreshold" to be a positive integer.');
   return {
     array: array.slice(),
     profile: "introsort",
@@ -7167,10 +7452,10 @@ function merge(left, right) {
 }
 function buildTree(values, from, to, depth, x, y, id, nodes, edges, metas) {
   const segment = values.slice(from, to);
-  const label = segment.length ? `[${from}…${to - 1}]` : "[]";
+  const label2 = segment.length ? `[${from}…${to - 1}]` : "[]";
   nodes.push({
     id,
-    label,
+    label: label2,
     values: segment,
     x,
     y,
@@ -7178,7 +7463,7 @@ function buildTree(values, from, to, depth, x, y, id, nodes, edges, metas) {
   });
   const meta = {
     id,
-    label,
+    label: label2,
     values: segment,
     from,
     to,
@@ -7200,7 +7485,7 @@ function buildTree(values, from, to, depth, x, y, id, nodes, edges, metas) {
 function emitFrames(id, path, metas, ops) {
   const node = metas.get(id);
   if (!node) return [];
-  const label = node.values.length ? `[${node.from}…${node.to - 1}]` : "[]";
+  const label2 = node.values.length ? `[${node.from}…${node.to - 1}]` : "[]";
   if (node.values.length <= 1) {
     const text = node.values.length ? `[${node.values[0]}]` : "[]";
     ops.base(id, path, node.values, `${text} is already sorted.`);
@@ -7210,13 +7495,13 @@ function emitFrames(id, path, metas, ops) {
   const left = metas.get(leftId);
   const right = metas.get(rightId);
   if (!left || !right) return node.values.slice();
-  ops.split(id, path, [leftId, rightId], `Split ${label} into ${left.label} and ${right.label}.`);
+  ops.split(id, path, [leftId, rightId], `Split ${label2} into ${left.label} and ${right.label}.`);
   const leftPath = [...path, leftId];
   const rightPath = [...path, rightId];
   const leftResult = emitFrames(leftId, leftPath, metas, ops);
-  ops.returnResult(leftId, path, leftResult, `Return [${leftResult.join(", ")}] to ${label}.`);
+  ops.returnResult(leftId, path, leftResult, `Return [${leftResult.join(", ")}] to ${label2}.`);
   const rightResult = emitFrames(rightId, rightPath, metas, ops);
-  ops.returnResult(rightId, path, rightResult, `Return [${rightResult.join(", ")}] to ${label}.`);
+  ops.returnResult(rightId, path, rightResult, `Return [${rightResult.join(", ")}] to ${label2}.`);
   const merged = merge(leftResult, rightResult);
   const combinePath = path.length > 1 ? path.slice(0, -1) : path;
   ops.combine(id, combinePath, merged, `Merge ${left.label} and ${right.label} into [${merged.join(", ")}].`);
@@ -7670,22 +7955,22 @@ var init_selection_sort = __esm({
 });
 
 // custom/steptrace/src/algorithms/shell-sort.ts
-function invalidConfig6(message) {
+function invalidConfig7(message) {
   throw new Error(`steptrace: shell-sort ${message}`);
 }
 function parseShellSortConfig(config) {
   const { array, gaps } = config;
   if (!Array.isArray(array) || array.length < 2)
-    invalidConfig6('requires an "array" with at least two numbers.');
+    invalidConfig7('requires an "array" with at least two numbers.');
   if (!array.every((value) => typeof value === "number" && Number.isFinite(value)))
-    invalidConfig6('requires every "array" value to be a finite number.');
+    invalidConfig7('requires every "array" value to be a finite number.');
   if (!Array.isArray(gaps) || gaps.length === 0)
-    invalidConfig6('requires a non-empty "gaps" array ending in 1.');
+    invalidConfig7('requires a non-empty "gaps" array ending in 1.');
   if (!gaps.every((gap) => Number.isInteger(gap) && gap > 0 && gap < array.length))
-    invalidConfig6("requires every gap to be a positive integer smaller than the array length.");
-  if (gaps.at(-1) !== 1) invalidConfig6("requires the final gap to be 1.");
+    invalidConfig7("requires every gap to be a positive integer smaller than the array length.");
+  if (gaps.at(-1) !== 1) invalidConfig7("requires the final gap to be 1.");
   if (gaps.some((gap, index) => index > 0 && gap >= gaps[index - 1]))
-    invalidConfig6("requires gaps in strictly decreasing order.");
+    invalidConfig7("requires gaps in strictly decreasing order.");
   return { array: array.slice(), gaps: gaps.slice(), profile: "shell" };
 }
 var shellSort;
@@ -8041,6 +8326,7 @@ var init_algorithms = __esm({
     init_binary_search();
     init_bubble_sort();
     init_comb_sort();
+    init_counting_sort();
     init_cyclic_sort();
     init_dfs();
     init_dijkstra();
@@ -8081,6 +8367,7 @@ var init_algorithms = __esm({
       mergeSortTree,
       shellSort,
       combSort,
+      countingSort,
       cyclicSort,
       introsort,
       exponentialSearch,
@@ -8243,8 +8530,8 @@ var init_tabs = __esm({
 function watchHintFor(row) {
   const override = row.hint?.trim();
   if (override) return override;
-  const label = row.k.trim().toLowerCase();
-  return WATCH_HINTS[label] || `Current ${row.k.trim()} value.`;
+  const label2 = row.k.trim().toLowerCase();
+  return WATCH_HINTS[label2] || `Current ${row.k.trim()} value.`;
 }
 var WATCH_HINTS;
 var init_watch_hints = __esm({

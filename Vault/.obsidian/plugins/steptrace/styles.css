@@ -964,6 +964,94 @@
 .steptrace__bar[data-state=found] .steptrace__check {
   display: block;
 }
+.steptrace__distribution {
+  display: grid;
+  align-content: stretch;
+  gap: clamp(0.55rem, 1.6vh, 0.95rem);
+  min-height: 0;
+  padding: 0.15rem 0;
+}
+.steptrace__distribution-band {
+  display: grid;
+  grid-template-columns: minmax(6.8rem, 0.34fr) 1fr;
+  gap: 0.7rem;
+  align-items: center;
+  min-width: 0;
+}
+.steptrace__distribution-label {
+  color: var(--_muted);
+  font: 650 clamp(0.62rem, 1.5vw, 0.72rem)/1.2 var(--_font-head);
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+.steptrace__distribution-bars {
+  height: clamp(4.8rem, 19vh, 8.2rem);
+  min-width: 0;
+  gap: clamp(0.28rem, 1vw, 0.5rem);
+}
+.steptrace__distribution-bars .steptrace__num {
+  color: var(--_text);
+  font-weight: 700;
+}
+.steptrace__distribution-bars--output .steptrace__bar[data-empty="1"] .steptrace__fill {
+  min-height: 0;
+  opacity: 0;
+}
+.steptrace__distribution-bars--output .steptrace__bar[data-target="1"] .steptrace__fill {
+  outline: 2px solid var(--_green);
+  outline-offset: 2px;
+}
+.steptrace__distribution-frequency {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 4.8rem), 1fr));
+  align-items: stretch;
+  min-width: 0;
+  border-inline: 1px solid var(--_hair);
+}
+.steptrace__distribution-bucket {
+  display: grid;
+  grid-template-rows: auto auto minmax(1em, auto);
+  gap: 0.12rem;
+  min-width: 0;
+  padding: 0.3rem 0.35rem;
+  text-align: center;
+  transition: background var(--_tween) ease, color var(--_tween) ease;
+}
+.steptrace__distribution-bucket + .steptrace__distribution-bucket {
+  border-inline-start: 1px solid var(--_hair);
+}
+.steptrace__distribution-key,
+.steptrace__distribution-slots {
+  color: var(--_muted);
+  font: 600 clamp(0.52rem, 1.4vw, 0.62rem)/1.15 var(--_font-mono);
+  font-variant-numeric: tabular-nums;
+}
+.steptrace__distribution-value {
+  color: var(--_text);
+  font: 750 clamp(0.62rem, 1.7vw, 0.76rem)/1.1 var(--_font-mono);
+  font-variant-numeric: tabular-nums;
+}
+.steptrace__distribution-bucket[data-active="1"] {
+  background: color-mix(in srgb, var(--_blue) 14%, var(--_surface));
+}
+.steptrace__distribution-bucket[data-previous="1"] {
+  background: color-mix(in srgb, var(--_violet) 12%, var(--_surface));
+}
+.steptrace__distribution-bucket[data-placement="1"] {
+  background: color-mix(in srgb, var(--_amber) 14%, var(--_surface));
+}
+@media (max-width: 560px) {
+  .steptrace__distribution-band {
+    grid-template-columns: 1fr;
+    gap: 0.3rem;
+  }
+  .steptrace__distribution-bars {
+    height: clamp(4.5rem, 17vh, 6.6rem);
+  }
+  .steptrace__distribution-frequency {
+    grid-template-columns: repeat(auto-fit, minmax(min(100%, 4.2rem), 1fr));
+  }
+}
 .steptrace__hash {
   display: inline-block;
   margin-top: 0.85rem;

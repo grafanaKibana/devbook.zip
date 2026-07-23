@@ -90,7 +90,7 @@ Three further boundaries follow from the same mechanism:
 > }
 >
 > // Capacity to ship all packages within D days (minimise-the-maximum).
-> public static int ShipWithinDays(int[] weights, int days)
+> public static long ShipWithinDays(int[] weights, int days)
 > {
 >     bool CanShip(long cap)
 >     {
@@ -105,7 +105,7 @@ Three further boundaries follow from the same mechanism:
 >         return used <= days;
 >     }
 >
->     return (int)SearchBoundary(weights.Max(), weights.Sum(), CanShip);
+>     return SearchBoundary(weights.Max(), weights.Sum(w => (long)w), CanShip);
 > }
 > ```
 >
