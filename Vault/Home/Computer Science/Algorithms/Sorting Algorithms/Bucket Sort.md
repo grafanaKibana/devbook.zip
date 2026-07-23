@@ -19,10 +19,13 @@ The mapping is what stands in for comparison, and it is cheap only because the r
 
 # Scatter and gather
 
-The operation Bucket Sort would animate is a single scatter-then-gather pass over keys drawn from `[0, 1)`.
+The trace sorts six keys drawn from `[0, 1)` through five equal-width buckets. It establishes the bucket ranges, scatters each key by `floor(5 · key)`, sorts the occupied buckets, then gathers them from the lowest range to the highest.
 
-> [!NOTE] Visualization pending
-> Planned StepTrace: a scatter/gather card showing elements distributed into range buckets, each bucket sorted, then concatenated. No matching renderer exists in `engine.js` yet.
+```steptrace
+{ "algorithm": "bucket-sort", "array": [0.78, 0.17, 0.39, 0.26, 0.72, 0.94], "bucketCount": 5 }
+```
+
+The middle range `[0.4, 0.6)` stays empty, while `[0.6, 0.8)` receives `0.78` and `0.72` and sorts them as `0.72, 0.78`. Empty and occupied buckets gather the same way: range order already determines their order relative to every other bucket.
 
 # Why the average stays linear
 
