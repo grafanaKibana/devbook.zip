@@ -1,5 +1,6 @@
 ---
-title: Credits
+title: About
+aliases: [Credits]
 publish: true
 tags:
   - MetricsIgnore
@@ -12,3 +13,9 @@ The notes I've written to actually *understand* the stack, not just recall it fo
 
 > [!info] Why this exists
 > I learn by writing things down and coming back to them. This vault is that process in the open — built on spaced repetition, organized into 11 topic areas, and updated continuously. Browse by topic from the home dashboard.
+
+Release history lives in the [[Changelog]].
+
+## AI usage
+
+In creating this project, I collaborated with Claude Code to assist with drafting notes, research, editing, and code. I affirm that all AI-generated and co-created content underwent thorough review and evaluation. The final output accurately reflects my understanding, expertise, and intended meaning. While AI assistance was instrumental in the process, I maintain full responsibility for the content, its accuracy, and its presentation. This disclosure is made in the spirit of transparency and to acknowledge the role of AI in the creation process.
