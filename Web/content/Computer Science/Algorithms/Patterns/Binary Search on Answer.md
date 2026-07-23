@@ -1,8 +1,8 @@
 ---
 publish: true
-created: 2026-07-21T14:46:57.603Z
-modified: 2026-07-21T14:47:01.475Z
-published: 2026-07-21T14:47:01.475Z
+created: 2026-07-21T18:52:02.751Z
+modified: 2026-07-22T21:03:33.489Z
+published: 2026-07-22T21:03:33.489Z
 topic:
   - Computer Science
 subtopic:
@@ -22,7 +22,7 @@ The range collapses because feasibility is **monotone**: a larger capacity never
 
 # Trace
 
-Six packages with weights `[3, 2, 2, 4, 1, 4]` must ship within three days. The candidate bars cover capacities `4 … 16`; each probe runs the greedy schedule, reports its day count, and discards the half that cannot contain the smallest feasible capacity. The boundary settles at capacity `6`.
+Six packages with weights `[3, 2, 2, 4, 1, 4]` must ship within three days. The answer strip classifies capacities `4 … 16` as known infeasible, still unknown, or known feasible. Each probe expands into the greedy day-by-day packing that supplies the predicate result, making the work inside `feasible(capacity)` visible instead of presenting the candidates as a stored array. The boundary settles at capacity `6`.
 
 ```steptrace
 {"algorithm":"binary-search-on-answer","weights":[3,2,2,4,1,4],"days":3}
@@ -35,13 +35,13 @@ At the start of every iteration the true answer — the smallest feasible `x` �
 - `feasible(mid)` is `true`: the boundary is at or below `mid`, because monotonicity guarantees nothing above `mid` can be the _smallest_ feasible value. The range becomes `[lo, mid]`.
 - `feasible(mid)` is `false`: `mid` and everything below it fail, so the boundary is strictly above `mid`. The range becomes `[mid + 1, hi]`.
 
-Each probe discards at least half of the remaining values, so the inclusive range reaches a single element in at most `⌈log₂(hi − lo + 1)⌉` steps, at which point `lo == hi` is the smallest feasible answer. The half-open update (`hi = mid` on success, `lo = mid + 1` on failure, with `mid` biased low) pairs the midpoint with the boundary move so the range always shrinks. The maximise-the-minimum mirror flips the predicate direction and biases `mid` high.
+From `N` candidates, each probe keeps at most `⌈N/2⌉`, so the inclusive range reaches a single element in at most `⌈log₂(hi − lo + 1)⌉` steps. At that point `lo == hi` is the smallest feasible answer. The closed-range first-true update (`hi = mid` on success, `lo = mid + 1` on failure, with `mid` biased low) pairs the midpoint with the boundary move so the range always shrinks. The maximise-the-minimum mirror flips the predicate direction and biases `mid` high.
 
 The step that separates this from array search is the probe itself. In [[Binary Search]] the value at `mid` is already stored and the comparison is `O(1)`. Here `mid` is a _candidate answer_, and `feasible(mid)` reconstructs enough of the problem to decide it — a greedy pass, a counting sweep, sometimes a full simulation. The family covers minimise-the-maximum (ship packages within `D` days, split an array to minimise the largest subarray sum, Koko eating bananas at the slowest speed that finishes in time), maximise-the-minimum (place resources to maximise the smallest gap), and degenerate numeric cases such as integer `sqrt(x)`, where `feasible(m)` is just `m * m <= x`.
 
 # Complexity
 
-The cost factors into how many candidates are probed and what each probe pays. There is no early exit: unlike array search, hitting the boundary early does not stop the loop, so the probe count is the full `log(range)` in every case.
+The cost factors into how many candidates are probed and what each probe pays. There is no equality-based `O(1)` best case: a successful midpoint remains only a candidate for the first feasible value, so the search continues left. A one-value range performs no loop probe; every nontrivial integer range uses `Θ(log(hi − lo + 1))` predicate calls, with the exact count depending on the interval size and branch sequence.
 
 | Component | Cost | Cause |
 | --- | --- | --- |
@@ -50,16 +50,16 @@ The cost factors into how many candidates are probed and what each probe pays. T
 | Total time | `O(n · log(range))` | probe count × per-check cost |
 | Auxiliary space | `O(1)` | three integer bounds beyond whatever `feasible` allocates |
 
-The log factor is over the _numeric range of the answer_, not the input size, so an answer space as wide as `10^18` costs only about 60 probes. When `feasible` is itself super-linear — say it runs a DP — its cost replaces the `O(n)` term. For a real-valued answer the probe count is fixed by the iteration bound (below) rather than `log(range)`.
+The log factor is over the _numeric range of the answer_, not the input size, so an answer space as wide as `10^18` costs only about 60 probes. When `feasible` is itself super-linear — say it runs a DP — its cost replaces the `O(n)` term. For a real-valued answer the required iteration count depends on the initial width and target error (below).
 
 # When the predicate is not actually monotone
 
-Monotonicity is the whole precondition, and its absence is the classic failure. If `feasible` flips true and false more than once across the range, there is no single boundary to find. Binary search still runs and still returns a value, but each probe assumes the discarded half cannot contain the answer — an assumption that only holds under monotonicity. On a predicate that is `false, true, false, true`, a `true` at `mid` discards the upper half even though a later `true` region lived there, and the returned `lo` is confidently wrong. The precondition is proved by argument, not code: show that increasing `x` can only make the condition easier to satisfy (or only harder), never reverse it. If that argument fails, this pattern does not apply.
+Monotonicity is the whole precondition, and its absence is the classic failure. If `feasible` flips true and false more than once across the range, there is no single boundary to find. Binary search still runs and still returns a value, but each probe assumes the discarded half cannot contain the answer — an assumption that only holds under monotonicity. On `false, true, false, false, true`, the initial low-biased midpoint is index `2` and evaluates to false, so `lo` moves to `3` and incorrectly discards the earlier true value at index `1`. The precondition is proved by argument, not code: show that increasing `x` can only make the condition easier to satisfy (or only harder), never reverse it. If that argument fails, this pattern does not apply.
 
 Three further boundaries follow from the same mechanism:
 
 - **The range needs sensible `lo`/`hi`.** Binary search only locates a boundary that lies inside `[lo, hi]`. `lo` must be small enough to be infeasible-or-boundary and `hi` large enough to be feasible; a too-tight `hi` clips the true answer, a wildly loose one only adds a handful of probes. For ship-within-`D`-days, `lo = max(weights)` and `hi = sum(weights)` bracket every valid capacity.
-- **Integer versus real domain.** Over integers, `lo < hi` with `mid + 1` terminates exactly. Over reals the interval never collapses to a single value, so termination comes from a **fixed iteration count** (about 100 halvings drives the interval below double precision) rather than an `eps` comparison, which is problem-dependent and can stall on floating-point rounding.
+- **Integer versus real domain.** Over integers, `lo < hi` with `mid + 1` terminates exactly. Over reals the interval never collapses to a single value. To reduce an initial width `hi − lo` below an absolute tolerance `δ`, choose at least `⌈log₂((hi − lo) / δ)⌉` iterations; the fixed count therefore belongs to the domain and required precision rather than a universal constant. A loop that waits for an `eps` comparison can stall on floating-point rounding.
 - **Returning the correct side of the flip.** The template returns the first `x` where the predicate becomes true — a `lower_bound`-style boundary. Minimise-the-maximum wants that value; maximise-the-minimum wants the last `true` before the flip, which needs the mirrored update and a high-biased midpoint. Mixing the update direction with the wrong midpoint bias either loops forever on `lo == mid` or returns the neighbour of the intended answer.
 
 # Reference drawer
@@ -95,7 +95,7 @@ Three further boundaries follow from the same mechanism:
 > }
 >
 > // Capacity to ship all packages within D days (minimise-the-maximum).
-> public static int ShipWithinDays(int[] weights, int days)
+> public static long ShipWithinDays(int[] weights, int days)
 > {
 >     bool CanShip(long cap)
 >     {
@@ -110,7 +110,7 @@ Three further boundaries follow from the same mechanism:
 >         return used <= days;
 >     }
 >
->     return (int)SearchBoundary(weights.Max(), weights.Sum(), CanShip);
+>     return SearchBoundary(weights.Max(), weights.Sum(w => (long)w), CanShip);
 > }
 > ```
 >
@@ -137,7 +137,7 @@ Binary search on the answer is the `O(n · log(range))` tool when the answer is 
 > The log factor counts probes over the `hi − lo + 1` integer candidates in `[lo, hi]`, halving that count each time. Every probe runs `feasible`, typically an `O(n)` pass over the input, giving `O(n · log(range))`. The log is over the value range, so a `10^18`-wide answer space is still only about 60 probes — which is why the search wins when checking a candidate is far cheaper than computing the optimum directly.
 
 > [!QUESTION]- How does the termination differ between an integer answer and a real-valued one?
-> Over integers, `lo < hi` with the `mid + 1` update collapses the interval to one value and stops exactly. Over reals the interval never reaches a single point, so termination comes from a fixed iteration count — roughly 100 halvings drops the interval below double precision — instead of an `eps` comparison, whose correct value is problem-dependent and can stall on floating-point rounding.
+> Over integers, `lo < hi` with the `mid + 1` update collapses the interval to one value and stops exactly. Over reals the interval never reaches a single point. For absolute tolerance `δ`, choose at least `⌈log₂((hi − lo) / δ)⌉` iterations from the initial interval width. This fixed bound makes termination explicit and avoids an `eps` loop that can stall on floating-point rounding.
 
 > [!QUESTION]- Why does ternary search not substitute for this pattern?
 > Ternary search optimises a unimodal objective — a value that rises then falls (or the reverse) with one extremum — by discarding an outer third each step. Binary search on the answer needs a monotone yes/no predicate with one boundary. The preconditions differ: a monotone predicate has no peak to find, and a unimodal objective has no single true/false flip, so neither reduction applies to the other's input.

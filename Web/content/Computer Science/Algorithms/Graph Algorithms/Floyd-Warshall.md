@@ -1,8 +1,8 @@
 ---
 publish: true
-created: 2026-07-21T14:46:57.602Z
-modified: 2026-07-21T14:47:01.458Z
-published: 2026-07-21T14:47:01.458Z
+created: 2026-07-21T18:52:02.621Z
+modified: 2026-07-22T07:22:41.268Z
+published: 2026-07-22T07:22:41.268Z
 topic:
   - Computer Science
 subtopic:
@@ -85,31 +85,36 @@ dist after init:            final all-pairs distances:
 > [!EXAMPLE]- C# implementation with path reconstruction
 >
 > ```csharp
-> public static (long[,] Dist, int[,] Next) FloydWarshall(long[,] weight, int n)
+> public static (long?[,] Dist, int[,] Next) FloydWarshall(long?[,] weight)
 > {
->     const long INF = long.MaxValue / 4;      // survives one addition without wrapping
->     var dist = new long[n, n];
+>     var n = weight.GetLength(0);
+>     if (weight.GetLength(1) != n)
+>     {
+>         throw new ArgumentException("Weight matrix must be square.", nameof(weight));
+>     }
+>
+>     var dist = new long?[n, n];
 >     var next = new int[n, n];
 >
 >     for (var i = 0; i < n; i++)
 >     for (var j = 0; j < n; j++)
 >     {
 >         var direct = weight[i, j];
->         dist[i, j] = i == j ? Math.Min(direct, 0) : direct;
->         next[i, j] = dist[i, j] < INF ? j : -1;
+>         dist[i, j] = i == j ? Math.Min(direct ?? 0, 0) : direct;
+>         next[i, j] = dist[i, j] is not null ? j : -1;
 >     }
 >
 >     for (var k = 0; k < n; k++)              // stage: k is outermost
 >     for (var i = 0; i < n; i++)
 >     for (var j = 0; j < n; j++)
 >     {
->         if (dist[i, k] == INF || dist[k, j] == INF)
+>         if (dist[i, k] is null || dist[k, j] is null)
 >         {
->             continue;                        // never add through the sentinel
+>             continue;
 >         }
 >
->         var through = dist[i, k] + dist[k, j];
->         if (through < dist[i, j])
+>         var through = checked(dist[i, k]!.Value + dist[k, j]!.Value);
+>         if (dist[i, j] is null || through < dist[i, j])
 >         {
 >             dist[i, j] = through;
 >             next[i, j] = next[i, k];
@@ -119,12 +124,11 @@ dist after init:            final all-pairs distances:
 >     return (dist, next);                     // inspect the diagonal before using any result
 > }
 >
-> public static List<int> Path(long[,] dist, int[,] next, int i, int j)
+> public static List<int> Path(long?[,] dist, int[,] next, int i, int j)
 > {
->     const long INF = long.MaxValue / 4;
 >     for (var k = 0; k < dist.GetLength(0); k++)
 >     {
->         if (dist[k, k] < 0 && dist[i, k] < INF && dist[k, j] < INF)
+>         if (dist[k, k] is < 0 && dist[i, k] is not null && dist[k, j] is not null)
 >         {
 >             throw new InvalidOperationException("Path is unbounded through a negative cycle.");
 >         }
@@ -146,7 +150,7 @@ dist after init:            final all-pairs distances:
 > }
 > ```
 >
-> `next[i, j]` stores the first hop of the current best `i`→`j` route and is rewritten to `next[i, k]` on each improving relaxation. `Path` rejects any pair that can reach and leave a negative-cycle witness; a raw `dist`/`next` pair cannot extract the concrete cycle, so that feature needs predecessor tracking during relaxation.
+> A null weight means no direct edge; every non-null weight is finite. The matrix must be square, and every path sum must fit in `long` — `checked` turns a violated numeric bound into an `OverflowException` instead of a false shortest path. `next[i, j]` stores the first hop of the current best `i`→`j` route and is rewritten to `next[i, k]` on each improving relaxation. `Path` rejects any pair that can reach and leave a negative-cycle witness; a raw `dist`/`next` pair cannot extract the concrete cycle, so that feature needs predecessor tracking during relaxation.
 
 # Complexity
 
@@ -156,13 +160,24 @@ dist after init:            final all-pairs distances:
 
 Best, average, and worst coincide because nothing in the data shortens the sweep — a complete graph and an edgeless one both take the same `V³` steps. The single honest bound is `Θ(V³)`. Path reconstruction adds a second `Θ(V²)` `next` matrix; the true auxiliary cost beyond the output matrix stays `O(1)` without it. The naive layered DP that keeps one matrix per stage would need `Θ(V³)` space, which the in-place argument above removes.
 
+For all-pairs shortest paths, the useful choice boundary is graph density and negative-edge support:
+
+| Approach | All-pairs time | Negative edges | Prefer it when |
+| --- | --- | --- | --- |
+| Floyd-Warshall | `Θ(V³)` | Yes | The graph is dense, `V²` memory is acceptable, or the matrix recurrence and negative-cycle reachability are useful directly. |
+| Repeated Dijkstra | `O(V(E + V) log V)` with a binary heap | No | The graph is sparse and every edge is non-negative. |
+| Johnson | `O(VE + V(E + V) log V)` with a binary heap | Yes | The graph is sparse, has negative edges, and has no negative cycle. |
+| Repeated Bellman-Ford | `O(V²E)` | Yes | Simplicity matters more than speed on a small sparse graph; otherwise Johnson or Floyd-Warshall is usually better. |
+
+Use Floyd-Warshall for a dense distance matrix or a modest vertex count where predictable `V³` work is the simpler engineering choice. Use repeated Dijkstra for sparse non-negative graphs, and Johnson for sparse graphs that need negative-edge support. Repeated Bellman-Ford is the fallback to understand, not the default all-pairs implementation.
+
 # When the reported distances are wrong
 
 A negative edge is fine on its own — a stage relaxes through it and the invariant still holds. A negative cycle is not: looping it lowers the total without bound, so every pair that can reach the cycle and then leave it has shortest distance `−∞`. The signal lives on the diagonal. When `dist[w][w] < 0`, there is a negative closed walk reachable from `w` and back to `w`; it is a witness, not proof that `w` itself lies on a simple negative cycle. Every `dist[u][v]` with finite `dist[u][w]` and `dist[w][v]` is affected and must be marked `−∞` or excluded from results. The plain distance matrix detects this condition but does not extract the concrete cycle; record predecessors during relaxation when the cycle itself matters.
 
 Reordering the loops so `i` or `j` is outermost still compiles, runs, and terminates, but it relaxes pairs against cells from a stage that has not finished. The matrix comes back full of finite numbers that are simply wrong wherever a shortest path needed an intermediate whose row or column was consulted before that stage completed. Because nothing crashes, the defect hides until a specific graph exposes it.
 
-Overflow is the other silent corruptor. With `int.MaxValue` as `∞`, the unconditional `dist[i][k] + dist[k][j]` wraps to a large negative number whenever both operands are the sentinel, and that phantom shortcut then propagates through the rest of the sweep. Skipping the relaxation when either operand is `∞`, or using a sentinel such as `long.MaxValue / 4` that tolerates one addition, closes it.
+Overflow is the other silent corruptor. With `int.MaxValue` as `∞`, the unconditional `dist[i][k] + dist[k][j]` wraps to a large negative number whenever both operands are the sentinel, and that phantom shortcut then propagates through the rest of the sweep. Representing an absent edge as `null` avoids a numeric sentinel, but finite path sums can still exceed `long`; the checked addition in the sample makes that input-contract violation explicit.
 
 # Questions
 
