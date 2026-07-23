@@ -3,6 +3,7 @@ import { bfs } from "./bfs"
 import { binarySearchOnAnswer } from "./binary-search-on-answer"
 import { binarySearch } from "./binary-search"
 import { bubbleSort } from "./bubble-sort"
+import { bucketSort } from "./bucket-sort"
 import { combSort } from "./comb-sort"
 import { countingSort } from "./counting-sort"
 import { cyclicSort } from "./cyclic-sort"
@@ -27,6 +28,7 @@ import { memoization } from "./memoization"
 import { nQueens } from "./n-queens"
 import { prim } from "./prim"
 import { quickSort } from "./quick-sort"
+import { radixSort } from "./radix-sort"
 import { rabinKarp } from "./rabin-karp"
 import { selectionSort } from "./selection-sort"
 import { shellSort } from "./shell-sort"
@@ -47,6 +49,8 @@ export const builtInAlgorithms = [
   shellSort,
   combSort,
   countingSort,
+  radixSort,
+  bucketSort,
   cyclicSort,
   introsort,
   exponentialSearch,

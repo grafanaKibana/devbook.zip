@@ -2361,6 +2361,7 @@ export function buildMilestones(algorithm, kind, frames) {
   }
   const firstGap = frames.find((frame) => Number.isInteger(frame.gap))?.gap
   const familyProfile = frames[0]?.profile
+  const firstDistributionPass = frames.find((frame) => frame.type === "pass")
   const initial =
     kind === "sort"
       ? firstGap != null
@@ -2369,19 +2370,23 @@ export function buildMilestones(algorithm, kind, frames) {
           ? "Place values"
           : familyProfile === "counting"
             ? "Tally keys"
-          : familyProfile === "introsort"
-            ? "Quicksort"
-            : algorithm === "bubble-sort"
-              ? "Pass 1"
-              : algorithm === "insertion-sort"
-                ? "Prefix 1"
-                : algorithm === "selection-sort"
-                  ? "Select 1"
-                  : algorithm === "heap-sort"
-                    ? "Build heap"
-                    : algorithm === "merge-sort"
-                      ? "Runs of 1"
-                      : "Partition"
+            : familyProfile === "radix"
+              ? `${firstDistributionPass?.passLabel || "Digit"} pass`
+              : familyProfile === "bucket"
+                ? "Scatter ranges"
+                : familyProfile === "introsort"
+                  ? "Quicksort"
+                  : algorithm === "bubble-sort"
+                    ? "Pass 1"
+                    : algorithm === "insertion-sort"
+                      ? "Prefix 1"
+                      : algorithm === "selection-sort"
+                        ? "Select 1"
+                        : algorithm === "heap-sort"
+                          ? "Build heap"
+                          : algorithm === "merge-sort"
+                            ? "Runs of 1"
+                            : "Partition"
       : kind === "search"
         ? familyProfile === "exponential"
           ? "Gallop"
@@ -2424,6 +2429,20 @@ export function buildMilestones(algorithm, kind, frames) {
         push(i, "Reserve output ranges")
       } else if (familyProfile === "counting" && f.type === "place" && frames[i - 1].type !== "place") {
         push(i, "Place stably")
+      } else if (familyProfile === "radix" && f.type === "pass" && frames[i - 1].type !== "pass") {
+        push(i, `${f.passLabel} pass`)
+      } else if (familyProfile === "radix" && f.type === "gather" && frames[i - 1].type !== "gather") {
+        push(i, `Gather ${f.passLabel}`)
+      } else if (familyProfile === "bucket" && f.type === "pass" && frames[i - 1].type !== "pass") {
+        push(i, "Scatter ranges")
+      } else if (
+        familyProfile === "bucket" &&
+        f.type === "local-sort" &&
+        frames[i - 1].type !== "local-sort"
+      ) {
+        push(i, "Sort buckets")
+      } else if (familyProfile === "bucket" && f.type === "gather" && frames[i - 1].type !== "gather") {
+        push(i, "Gather ranges")
       } else if (familyProfile === "introsort" && f.type === "fallback") {
         push(i, "Heap fallback")
       } else if (familyProfile === "introsort" && f.type === "cleanup") {
@@ -2570,6 +2589,14 @@ export function summaryFor(algorithm, kind, frame, graph) {
   if (kind === "sort") {
     if (algorithm === "counting-sort")
       return `Output [${frame.output.join(", ")}] · ${frame.tallied} tallies · ${frame.placed} stable placements.`
+    if (algorithm === "radix-sort" || algorithm === "bucket-sort") {
+      const output = frame.source.map((token) => token.value)
+      const work =
+        algorithm === "radix-sort"
+          ? `${frame.passCount} stable digit passes`
+          : `${frame.comparisons} local comparisons`
+      return `Output [${output.join(", ")}] · ${work} · ${frame.gathered} gathered.`
+    }
     if (algorithm === "merge-sort")
       return `Output [${frame.array.join(", ")}] · ${frame.swaps} writes.`
     const unit =

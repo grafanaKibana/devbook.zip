@@ -599,9 +599,9 @@
       this._annotationValue = null;
       super.probe(lo, hi, mid, message);
     }
-    annotatedProbe(lo, hi, mid, label2, value, message) {
+    annotatedProbe(lo, hi, mid, label, value, message) {
       this._mid2 = null;
-      this._annotationLabel = label2;
+      this._annotationLabel = label;
       this._annotationValue = value;
       this.lo = lo;
       this.hi = hi;
@@ -1654,11 +1654,11 @@
     }
     return { nodes: [stage, status], paint, watch, destroy: tracker.destroy };
   }
-  function makeMarker(label2, role) {
+  function makeMarker(label, role) {
     const wrap = el("div", "steptrace__marker steptrace__marker--" + role);
     const body = el("span", "steptrace__marker-body");
     const lbl = el("span", "steptrace__marker-label");
-    lbl.textContent = label2;
+    lbl.textContent = label;
     body.append(lbl);
     wrap.append(body);
     return {
@@ -1882,10 +1882,10 @@
     const laneNodes = Array.from({ length: first.allowed }, (_, index) => {
       const lane = el("div", "steptrace__boundary-lane");
       const head = el("div", "steptrace__boundary-lane-head");
-      const label2 = el("span", "steptrace__boundary-lane-label");
+      const label = el("span", "steptrace__boundary-lane-label");
       const total = el("span", "steptrace__boundary-lane-total");
-      label2.textContent = `Day ${index + 1}`;
-      head.append(label2, total);
+      label.textContent = `Day ${index + 1}`;
+      head.append(label, total);
       const packages = el("div", "steptrace__boundary-packages");
       const meter = el("div", "steptrace__boundary-meter");
       const fill = el("div", "steptrace__boundary-meter-fill");
@@ -1915,7 +1915,7 @@
     root.append(domain, evaluation);
     const legend = el("div", "steptrace__legend steptrace__boundary-legend");
     legend.setAttribute("aria-label", "Monotone boundary states");
-    for (const [state, label2] of [
+    for (const [state, label] of [
       ["range", "unknown candidate"],
       ["infeasible", "known too small"],
       ["feasible", "known feasible"],
@@ -1925,7 +1925,7 @@
       const swatch = el("span", "steptrace__boundary-legend-swatch");
       swatch.dataset.state = state;
       const text = el("span");
-      text.textContent = label2;
+      text.textContent = label;
       row.append(swatch, text);
       legend.append(row);
     }
@@ -2182,9 +2182,9 @@
     const items = el("ul", "steptrace__legend steptrace__matrix-role-legend-items");
     for (const descriptor of descriptors) {
       const item = el("li", "steptrace__legend-row steptrace__matrix-role-legend-item");
-      const label2 = el("span", "steptrace__matrix-role-legend-label");
-      label2.textContent = descriptor.label;
-      item.append(makeMatrixRoleBadge(descriptor), label2);
+      const label = el("span", "steptrace__matrix-role-legend-label");
+      label.textContent = descriptor.label;
+      item.append(makeMatrixRoleBadge(descriptor), label);
       items.append(item);
     }
     root.append(items);
@@ -2221,11 +2221,11 @@
   }
   function makeStoryLegend(items) {
     const legend = el("div", "steptrace__legend");
-    for (const [state, label2] of items) {
+    for (const [state, label] of items) {
       const row = el("div", "steptrace__legend-row");
       const swatch = el("span", "steptrace__swatch steptrace__dp-story-swatch");
       swatch.dataset.state = state;
-      row.append(swatch, document.createTextNode(label2));
+      row.append(swatch, document.createTextNode(label));
       legend.append(row);
     }
     return legend;
@@ -2264,11 +2264,11 @@
       amountBoard.style.setProperty("--steptrace-amount-count", String(first.amounts.length));
       for (const amount of first.amounts) {
         const cell = el("div", "steptrace__amount-cell");
-        const label2 = el("span", "steptrace__amount-label");
+        const label = el("span", "steptrace__amount-label");
         const value = el("span", "steptrace__amount-value");
-        label2.textContent = `${amount}¢`;
+        label.textContent = `${amount}¢`;
         value.textContent = "—";
-        cell.append(label2, value);
+        cell.append(label, value);
         amountBoard.append(cell);
         amountCells.push({ cell, value, amount });
       }
@@ -2310,11 +2310,11 @@
       for (const attempt of frame.attempts) {
         const row = el("div", "steptrace__coin-attempt");
         row.dataset.state = attempt.state;
-        const label2 = el("span", "steptrace__coin-attempt-label");
+        const label = el("span", "steptrace__coin-attempt-label");
         const value = el("span", "steptrace__coin-attempt-value");
-        label2.textContent = attempt.label;
+        label.textContent = attempt.label;
         value.textContent = attempt.value;
-        row.append(label2, value);
+        row.append(label, value);
         attempts.append(row);
       }
     }
@@ -2870,13 +2870,13 @@
     for (const key of ["a", "b", "r"]) {
       const row = el("div", "steptrace__brow");
       const gutter = el("div", "steptrace__bgutter");
-      const label2 = frames[0].labels[key];
+      const label = frames[0].labels[key];
       if (OP[key]) {
         const op = el("span", "steptrace__bop");
-        op.textContent = label2;
+        op.textContent = label;
         gutter.append(op);
       } else {
-        gutter.textContent = label2;
+        gutter.textContent = label;
       }
       const strip = el("div", "steptrace__bcells");
       const cells = [];
@@ -3090,27 +3090,27 @@
         ring.setAttribute("height", String(descriptor.nodeHeight + 4));
         ring.setAttribute("rx", "9");
       }
-      const label2 = document.createElementNS(SVGNS, "text");
+      const label = document.createElementNS(SVGNS, "text");
       const detail = document.createElementNS(SVGNS, "text");
       const result = document.createElementNS(SVGNS, "text");
       const badge = document.createElementNS(SVGNS, "text");
-      label2.setAttribute("class", "steptrace__rtlabel");
+      label.setAttribute("class", "steptrace__rtlabel");
       detail.setAttribute("class", "steptrace__rtdetail");
       result.setAttribute("class", "steptrace__rtval");
       badge.setAttribute("class", "steptrace__rtbadge");
-      for (const element of [label2, detail, result]) element.setAttribute("text-anchor", "middle");
+      for (const element of [label, detail, result]) element.setAttribute("text-anchor", "middle");
       const [primaryLine, secondaryLine] = descriptor.nodeLines(node);
-      label2.textContent = primaryLine;
+      label.textContent = primaryLine;
       detail.textContent = secondaryLine;
       if (descriptor.shape === "circle") {
-        label2.setAttribute("y", "0");
-        label2.setAttribute("dominant-baseline", "central");
+        label.setAttribute("y", "0");
+        label.setAttribute("dominant-baseline", "central");
         result.setAttribute("y", String(halfHeight + 9));
       } else {
-        label2.setAttribute("y", "-4");
+        label.setAttribute("y", "-4");
         detail.setAttribute("y", "9");
       }
-      group.append(ring, surface, label2, detail, result, badge);
+      group.append(ring, surface, label, detail, result, badge);
       svg.append(group);
       nodeElements[node.id] = { group, detail, result, badge, secondaryLine };
     }
@@ -3248,13 +3248,13 @@
       svg.append(line);
       edgeEls.push({ el: line, from: e.from, to: e.to });
       if (e.weight != null) {
-        const label2 = document.createElementNS(SVGNS, "text");
-        label2.setAttribute("class", "steptrace__edge-label");
-        label2.setAttribute("x", String((a.x + b.x) / 2));
-        label2.setAttribute("y", String((a.y + b.y) / 2 - 4));
-        label2.setAttribute("text-anchor", "middle");
-        label2.textContent = String(e.weight);
-        svg.append(label2);
+        const label = document.createElementNS(SVGNS, "text");
+        label.setAttribute("class", "steptrace__edge-label");
+        label.setAttribute("x", String((a.x + b.x) / 2));
+        label.setAttribute("y", String((a.y + b.y) / 2 - 4));
+        label.setAttribute("text-anchor", "middle");
+        label.textContent = String(e.weight);
+        svg.append(label);
       }
     }
     const nodeEls = {};
@@ -3412,26 +3412,27 @@
     swap: '<svg class="steptrace__cue-swap" viewBox="0 0 24 24" aria-hidden="true"><path d="m2 9 3-3 3 3"/><path d="M13 18H7a2 2 0 0 1-2-2V6"/><path d="m22 15-3 3-3-3"/><path d="M11 6h6a2 2 0 0 1 2 2v10"/></svg>',
     search: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="10.5" cy="10.5" r="6.5"/><path d="m15.2 15.2 4.8 4.8"/></svg>'
   };
-  function iconBtn(label2, svg, extra = "") {
+  function iconBtn(label, svg, extra = "") {
     const b = document.createElement("button");
     b.type = "button";
     b.className = "steptrace__btn" + (extra ? " " + extra : "");
     b.innerHTML = svg;
-    b.setAttribute("aria-label", label2);
-    b.title = label2;
+    b.setAttribute("aria-label", label);
+    b.title = label;
     return b;
   }
   function buildMilestones(algorithm, kind, frames) {
     const marks = [];
-    const push = (i, label2) => {
-      if (i < 0 || i >= frames.length || !label2) return;
+    const push = (i, label) => {
+      if (i < 0 || i >= frames.length || !label) return;
       const prev = marks[marks.length - 1];
-      if (prev && (prev.i === i || prev.label === label2)) return;
-      marks.push({ i, label: label2 });
+      if (prev && (prev.i === i || prev.label === label)) return;
+      marks.push({ i, label });
     };
     const firstGap = frames.find((frame) => Number.isInteger(frame.gap))?.gap;
     const familyProfile = frames[0]?.profile;
-    const initial = kind === "sort" ? firstGap != null ? `Gap ${firstGap}` : familyProfile === "cyclic" ? "Place values" : familyProfile === "counting" ? "Tally keys" : familyProfile === "introsort" ? "Quicksort" : algorithm === "bubble-sort" ? "Pass 1" : algorithm === "insertion-sort" ? "Prefix 1" : algorithm === "selection-sort" ? "Select 1" : algorithm === "heap-sort" ? "Build heap" : algorithm === "merge-sort" ? "Runs of 1" : "Partition" : kind === "search" ? familyProfile === "exponential" ? "Gallop" : familyProfile === "interpolation" ? "Estimate" : familyProfile === "jump" ? "Jump blocks" : familyProfile === "ternary" ? "Narrow peak" : familyProfile === "shipping-capacity" ? "Answer range" : "Search range" : kind === "string" ? "Shift 0" : kind === "backtrack" ? "Depth 0" : kind === "rectree" ? familyProfile === "divide-and-conquer" ? "Whole problem" : familyProfile === "merge-sort" ? "Whole array" : familyProfile === "memoization" ? "Empty cache" : familyProfile === "coin-change-top-down" ? "Amount 30¢" : familyProfile === "grid-path-top-down" ? "Loading bay" : "Call tree" : "Initialize";
+    const firstDistributionPass = frames.find((frame) => frame.type === "pass");
+    const initial = kind === "sort" ? firstGap != null ? `Gap ${firstGap}` : familyProfile === "cyclic" ? "Place values" : familyProfile === "counting" ? "Tally keys" : familyProfile === "radix" ? `${firstDistributionPass?.passLabel || "Digit"} pass` : familyProfile === "bucket" ? "Scatter ranges" : familyProfile === "introsort" ? "Quicksort" : algorithm === "bubble-sort" ? "Pass 1" : algorithm === "insertion-sort" ? "Prefix 1" : algorithm === "selection-sort" ? "Select 1" : algorithm === "heap-sort" ? "Build heap" : algorithm === "merge-sort" ? "Runs of 1" : "Partition" : kind === "search" ? familyProfile === "exponential" ? "Gallop" : familyProfile === "interpolation" ? "Estimate" : familyProfile === "jump" ? "Jump blocks" : familyProfile === "ternary" ? "Narrow peak" : familyProfile === "shipping-capacity" ? "Answer range" : "Search range" : kind === "string" ? "Shift 0" : kind === "backtrack" ? "Depth 0" : kind === "rectree" ? familyProfile === "divide-and-conquer" ? "Whole problem" : familyProfile === "merge-sort" ? "Whole array" : familyProfile === "memoization" ? "Empty cache" : familyProfile === "coin-change-top-down" ? "Amount 30¢" : familyProfile === "grid-path-top-down" ? "Loading bay" : "Call tree" : "Initialize";
     push(0, initial);
     let lastRange = "";
     let lastGap = firstGap;
@@ -3445,6 +3446,16 @@
           push(i, "Reserve output ranges");
         } else if (familyProfile === "counting" && f.type === "place" && frames[i - 1].type !== "place") {
           push(i, "Place stably");
+        } else if (familyProfile === "radix" && f.type === "pass" && frames[i - 1].type !== "pass") {
+          push(i, `${f.passLabel} pass`);
+        } else if (familyProfile === "radix" && f.type === "gather" && frames[i - 1].type !== "gather") {
+          push(i, `Gather ${f.passLabel}`);
+        } else if (familyProfile === "bucket" && f.type === "pass" && frames[i - 1].type !== "pass") {
+          push(i, "Scatter ranges");
+        } else if (familyProfile === "bucket" && f.type === "local-sort" && frames[i - 1].type !== "local-sort") {
+          push(i, "Sort buckets");
+        } else if (familyProfile === "bucket" && f.type === "gather" && frames[i - 1].type !== "gather") {
+          push(i, "Gather ranges");
         } else if (familyProfile === "introsort" && f.type === "fallback") {
           push(i, "Heap fallback");
         } else if (familyProfile === "introsort" && f.type === "cleanup") {
@@ -3564,6 +3575,11 @@
     if (kind === "sort") {
       if (algorithm === "counting-sort")
         return `Output [${frame.output.join(", ")}] · ${frame.tallied} tallies · ${frame.placed} stable placements.`;
+      if (algorithm === "radix-sort" || algorithm === "bucket-sort") {
+        const output = frame.source.map((token) => token.value);
+        const work = algorithm === "radix-sort" ? `${frame.passCount} stable digit passes` : `${frame.comparisons} local comparisons`;
+        return `Output [${output.join(", ")}] · ${work} · ${frame.gathered} gathered.`;
+      }
       if (algorithm === "merge-sort")
         return `Output [${frame.array.join(", ")}] · ${frame.swaps} writes.`;
       const unit = frame.movementUnit || (["bubble-sort", "selection-sort", "quick-sort", "heap-sort"].includes(algorithm) ? "swaps" : "moves");
@@ -3871,6 +3887,745 @@
     }
   };
 
+  // custom/steptrace/src/families/distribution-sort.ts
+  var DistributionSortRecorder = class {
+    constructor(config) {
+      __publicField(this, "frames", []);
+      __publicField(this, "input");
+      __publicField(this, "min");
+      __publicField(this, "max");
+      __publicField(this, "counts");
+      __publicField(this, "positions");
+      __publicField(this, "output");
+      __publicField(this, "outputOrigins");
+      __publicField(this, "activeInput", null);
+      __publicField(this, "activeKey", null);
+      __publicField(this, "previousKey", null);
+      __publicField(this, "placedAt", null);
+      __publicField(this, "tallied", 0);
+      __publicField(this, "prefixed", 0);
+      __publicField(this, "placed", 0);
+      this.input = config.array.slice();
+      this.min = config.min;
+      this.max = config.max;
+      this.counts = Array.from({ length: this.max - this.min + 1 }, () => 0);
+      this.positions = this.counts.slice();
+      this.output = Array.from({ length: this.input.length }, () => null);
+      this.outputOrigins = Array.from({ length: this.input.length }, () => null);
+    }
+    intro(message) {
+      this.push("intro", message);
+    }
+    tally(inputIndex, message) {
+      const key = this.input[inputIndex];
+      this.activeInput = inputIndex;
+      this.activeKey = key;
+      this.previousKey = null;
+      this.placedAt = null;
+      this.counts[key - this.min]++;
+      this.tallied++;
+      this.push("tally", message);
+    }
+    prefix(key, message) {
+      const index = key - this.min;
+      this.activeInput = null;
+      this.activeKey = key;
+      this.previousKey = key === this.min ? null : key - 1;
+      this.placedAt = null;
+      if (this.prefixed === 0) this.positions = this.counts.slice();
+      if (index > 0) this.positions[index] += this.positions[index - 1];
+      this.prefixed++;
+      this.push("prefix", message);
+    }
+    place(inputIndex, message) {
+      const key = this.input[inputIndex];
+      const countIndex = key - this.min;
+      const target = --this.positions[countIndex];
+      this.output[target] = key;
+      this.outputOrigins[target] = inputIndex;
+      this.activeInput = inputIndex;
+      this.activeKey = key;
+      this.previousKey = null;
+      this.placedAt = target;
+      this.placed++;
+      this.push("place", message);
+    }
+    done(message) {
+      this.activeInput = null;
+      this.activeKey = null;
+      this.previousKey = null;
+      this.placedAt = null;
+      this.push("done", message);
+    }
+    push(type, message) {
+      this.frames.push(
+        Object.freeze({
+          type,
+          profile: "counting",
+          input: this.input.slice(),
+          min: this.min,
+          max: this.max,
+          counts: this.counts.slice(),
+          positions: this.positions.slice(),
+          output: this.output.slice(),
+          outputOrigins: this.outputOrigins.slice(),
+          activeInput: this.activeInput,
+          activeKey: this.activeKey,
+          previousKey: this.previousKey,
+          placedAt: this.placedAt,
+          tallied: this.tallied,
+          prefixed: this.prefixed,
+          placed: this.placed,
+          message
+        })
+      );
+    }
+  };
+  function invalidConfig(message) {
+    throw new Error(`steptrace: counting-sort ${message}`);
+  }
+  function parseCountingSortConfig(config) {
+    const { array } = config;
+    if (!Array.isArray(array) || array.length < 2)
+      invalidConfig('requires an "array" with at least two integer keys.');
+    if (!array.every((value) => Number.isInteger(value)))
+      invalidConfig("requires every value to be an integer key.");
+    const min = Math.min(...array);
+    const max = Math.max(...array);
+    if (max - min > 32)
+      invalidConfig("limits the demonstrated key range to 33 values so every counter remains legible.");
+    return { profile: "counting", array: array.slice(), min, max };
+  }
+  function distributionTokenLabels(input) {
+    const totals = /* @__PURE__ */ new Map();
+    input.forEach((value) => totals.set(value, (totals.get(value) || 0) + 1));
+    const seen = /* @__PURE__ */ new Map();
+    return input.map((value) => {
+      const occurrence = (seen.get(value) || 0) + 1;
+      seen.set(value, occurrence);
+      return totals.get(value) === 1 ? String(value) : `${value}${String.fromCharCode(96 + occurrence)}`;
+    });
+  }
+  function distributionLabel(text, detail) {
+    const heading = el("div", "steptrace__distribution-label");
+    heading.textContent = text;
+    heading.title = detail;
+    return heading;
+  }
+  function makeDistributionArrayBand(title, detail, length, modifier = "") {
+    const band = el("div", "steptrace__distribution-band");
+    const stage = el(
+      "div",
+      `steptrace__stage steptrace__distribution-bars${modifier ? ` ${modifier}` : ""}`
+    );
+    stage.setAttribute("role", "region");
+    stage.setAttribute("aria-label", title);
+    const bars = makeBars(stage, length);
+    band.append(distributionLabel(title, detail), stage);
+    return { band, stage, bars };
+  }
+  function phaseLabel(phase) {
+    return phase === "intro" ? "set up" : phase === "done" ? "sorted" : phase;
+  }
+  function frequencyRangeFor(frame, index) {
+    const count = frame.counts[index];
+    const rangesVisible = frame.type === "prefix" ? index < frame.prefixed : frame.type === "place" || frame.type === "done";
+    if (!rangesVisible) return { count, slots: null };
+    if (count === 0) return { count, slots: "—" };
+    const start = frame.counts.slice(0, index).reduce((sum, value) => sum + value, 0);
+    const end = start + count - 1;
+    return { count, slots: start === end ? String(start) : `${start}–${end}` };
+  }
+  function distributionWatch(frame) {
+    const active = frame.activeKey == null ? "—" : frame.activeKey;
+    return [
+      { k: "phase", v: phaseLabel(frame.type), sw: "var(--_violet)" },
+      { k: "key", v: active, sw: "var(--_blue)" },
+      { k: "tallied", v: `${frame.tallied}/${frame.input.length}`, sw: "var(--_amber)" },
+      { k: "placed", v: `${frame.placed}/${frame.input.length}`, sw: "var(--_green)" }
+    ];
+  }
+  function makeDistributionSortView(frames) {
+    const first = frames[0];
+    const keys = Array.from({ length: first.max - first.min + 1 }, (_, index) => first.min + index);
+    const labels = distributionTokenLabels(first.input);
+    const stage = el("div", "steptrace__distribution");
+    const input = makeDistributionArrayBand(
+      "Unsorted Array",
+      "Each bar keeps its original identity.",
+      first.input.length
+    );
+    const countBand = el("div", "steptrace__distribution-band");
+    const frequency = el("div", "steptrace__distribution-frequency");
+    frequency.setAttribute("role", "region");
+    frequency.setAttribute("aria-label", "Frequency");
+    const buckets = keys.map((key) => {
+      const bucket = el("div", "steptrace__distribution-bucket");
+      const keyRow = el("div", "steptrace__distribution-entry steptrace__distribution-entry--key");
+      const keyLabel = el("span", "steptrace__distribution-entry-label");
+      keyLabel.textContent = "Value:";
+      const keyValue = el("strong", "steptrace__distribution-entry-value");
+      keyValue.textContent = String(key);
+      keyRow.append(keyLabel, keyValue);
+      const details = el("div", "steptrace__distribution-details");
+      const countRow = el("div", "steptrace__distribution-entry");
+      const countLabel = el("span", "steptrace__distribution-entry-label");
+      countLabel.textContent = "Count:";
+      const count = el("strong", "steptrace__distribution-entry-value");
+      countRow.append(countLabel, count);
+      const slotsRow = el("div", "steptrace__distribution-entry steptrace__distribution-entry--slots");
+      const slotsLabel = el("span", "steptrace__distribution-entry-label");
+      slotsLabel.textContent = "Slots:";
+      const slots = el("strong", "steptrace__distribution-entry-value");
+      slotsRow.append(slotsLabel, slots);
+      details.append(countRow, slotsRow);
+      bucket.append(keyRow, details);
+      frequency.append(bucket);
+      return { bucket, count, slots, key };
+    });
+    countBand.append(
+      distributionLabel("Frequency", "Raw counts become reserved output slots from left to right."),
+      frequency
+    );
+    const output = makeDistributionArrayBand(
+      "Sorted Array",
+      "The input is read right-to-left; each placement preserves duplicate order.",
+      first.input.length,
+      "steptrace__distribution-bars--output"
+    );
+    stage.append(input.band, countBand, output.band);
+    const status = statusEl();
+    const maxValue = Math.max(...first.input, 1);
+    function paint(frame, index = 0, total = 1) {
+      stage.dataset.phase = frame.type;
+      input.bars.forEach((bar, barIndex) => {
+        const value = frame.input[barIndex];
+        bar.fill.style.height = barHeightStyle(value, maxValue);
+        bar.num.textContent = labels[barIndex];
+        bar.bar.dataset.state = barIndex === frame.activeInput ? frame.type === "tally" ? "increment" : "compare" : "";
+        bar.bar.setAttribute("aria-label", `input index ${barIndex}, value ${value}, token ${labels[barIndex]}`);
+      });
+      buckets.forEach(({ bucket, count, slots, key }, bucketIndex2) => {
+        const range = frequencyRangeFor(frame, bucketIndex2);
+        count.textContent = String(range.count);
+        slots.textContent = range.slots ?? "";
+        bucket.dataset.hasSlots = range.slots == null ? "0" : "1";
+        bucket.dataset.active = (frame.type === "tally" || frame.type === "prefix") && key === frame.activeKey ? "1" : "0";
+        bucket.dataset.previous = frame.type === "prefix" && key === frame.previousKey ? "1" : "0";
+        bucket.dataset.placement = frame.type === "place" && key === frame.activeKey ? "1" : "0";
+        bucket.setAttribute(
+          "aria-label",
+          `value ${key}, count ${range.count}${range.slots == null ? "" : `, slots ${range.slots}`}`
+        );
+      });
+      output.bars.forEach((bar, slotIndex) => {
+        const placed = frame.output[slotIndex];
+        const origin = frame.outputOrigins[slotIndex];
+        bar.fill.style.height = placed == null ? "0" : barHeightStyle(placed, maxValue);
+        bar.num.textContent = placed == null ? "·" : labels[origin ?? 0];
+        bar.bar.dataset.state = placed == null ? "" : "sorted";
+        bar.bar.dataset.target = frame.type === "place" && slotIndex === frame.placedAt ? "1" : "0";
+        bar.bar.dataset.empty = placed == null ? "1" : "0";
+        bar.bar.setAttribute(
+          "aria-label",
+          placed == null ? `output index ${slotIndex}, empty` : `output index ${slotIndex}, value ${placed}, token ${labels[origin ?? 0]}`
+        );
+      });
+      status.innerHTML = escapeHtml(frame.message) + ` <span class="steptrace__counts">· ${phaseLabel(frame.type)} · step ${index + 1}/${total}</span>`;
+    }
+    return {
+      nodes: [stage, status],
+      stageLayout: "fill",
+      stableStage: true,
+      paint,
+      watch: distributionWatch
+    };
+  }
+  var distributionSortFamily = {
+    id: "distribution-sort",
+    createRecorder(config) {
+      return new DistributionSortRecorder(config);
+    },
+    createView(frames) {
+      return makeDistributionSortView(frames);
+    }
+  };
+
+  // custom/steptrace/src/families/bucket-distribution.ts
+  function parseRangeBucketDistributionConfig(config) {
+    const array = parseArray(config.array, "bucket-sort");
+    const bucketCount = parseBucketCount(config.bucketCount ?? 5, "bucket-sort");
+    return {
+      profile: "bucket",
+      array,
+      bucketCount,
+      bucketLabels: makeRangeLabels(array, bucketCount)
+    };
+  }
+  function parseRadixDistributionConfig(config) {
+    const array = parseArray(config.array, "radix-sort");
+    const radix = parseRadix(config.radix ?? 10);
+    const bucketCount = parseBucketCount(config.bucketCount ?? radix, "radix-sort");
+    const mode = config.mode;
+    if (mode != null && mode !== "LSD")
+      throw new Error('steptrace: radix-sort supports only mode "LSD" for now.');
+    const max = Math.max(...array);
+    if (max < 0) throw new Error("steptrace: radix-sort currently supports only non-negative keys.");
+    const places = Math.max(1, Math.floor(Math.log(Math.max(max, 1)) / Math.log(radix)) + 1);
+    const placesIndexes = Array.from({ length: places }, (_, index) => index);
+    return {
+      profile: "radix",
+      array,
+      bucketCount: radix,
+      radix,
+      places: placesIndexes,
+      bucketLabels: makeRadixLabels(radix)
+    };
+  }
+  function parseArray(values, algorithm) {
+    if (!Array.isArray(values) || values.length < 2)
+      throw new Error(`steptrace: ${algorithm} requires an "array" with at least two keys.`);
+    if (!values.every((value) => Number.isInteger(value)))
+      throw new Error(`steptrace: ${algorithm} requires every value to be an integer key.`);
+    return values.slice();
+  }
+  function parseBucketCount(value, algorithm) {
+    const count = Number(value);
+    if (!Number.isInteger(count) || count < 2 || count > 24)
+      throw new Error(`steptrace: ${algorithm} requires bucketCount between 2 and 24.`);
+    return count;
+  }
+  function parseRadix(value) {
+    const radix = Number(value);
+    if (!Number.isInteger(radix) || radix < 2 || radix > 36)
+      throw new Error("steptrace: radix-sort requires an integer radix between 2 and 36.");
+    return radix;
+  }
+  function makeRangeLabels(values, bucketCount) {
+    const min = Math.min(...values);
+    const max = Math.max(...values);
+    if (max === min) return Array.from({ length: bucketCount }, () => `[${min.toFixed(2)}, ${min.toFixed(2)}]`);
+    const width = (max - min) / bucketCount;
+    return Array.from({ length: bucketCount }, (_, index) => {
+      const left = min + index * width;
+      const right = left + width;
+      return `${index === bucketCount - 1 ? "[" : "["}${left.toFixed(2)}, ${right.toFixed(2)}${index === bucketCount - 1 ? "]" : ")"}`;
+    });
+  }
+  function makeRadixLabels(radix) {
+    return Array.from({ length: radix }, (_, index) => String(index));
+  }
+  var BucketDistributionRecorder = class {
+    constructor(config) {
+      __publicField(this, "frames", []);
+      __publicField(this, "profile");
+      __publicField(this, "bucketLabels");
+      __publicField(this, "source");
+      __publicField(this, "buckets");
+      __publicField(this, "output");
+      __publicField(this, "activeSource", null);
+      __publicField(this, "activeBucket", null);
+      __publicField(this, "activeBucketItems", null);
+      __publicField(this, "activeOutput", null);
+      __publicField(this, "passIndex", 0);
+      __publicField(this, "passCount", 1);
+      __publicField(this, "passLabel", "");
+      __publicField(this, "scattered", 0);
+      __publicField(this, "comparisons", 0);
+      __publicField(this, "movements", 0);
+      __publicField(this, "gathered", 0);
+      this.profile = config.profile;
+      this.bucketLabels = config.bucketLabels.slice();
+      this.source = config.array.map((value, origin) => ({ value, origin }));
+      this.buckets = Array.from({ length: config.bucketCount }, () => []);
+      this.output = Array.from({ length: config.array.length }, () => null);
+    }
+    intro(message) {
+      this.push("intro", message);
+    }
+    beginPass(passIndex, passCount, passLabel, message) {
+      this.passIndex = passIndex;
+      this.passCount = passCount;
+      this.passLabel = passLabel;
+      this.buckets = this.buckets.map(() => []);
+      this.output = this.output.map(() => null);
+      this.scattered = 0;
+      this.gathered = 0;
+      this.clearActive();
+      this.push("pass", message);
+    }
+    scatter(sourceIndex, bucketIndex2, message) {
+      this.assertSourceIndex(sourceIndex);
+      this.assertBucketIndex(bucketIndex2);
+      this.buckets[bucketIndex2].push(this.source[sourceIndex]);
+      this.activeSource = sourceIndex;
+      this.activeBucket = bucketIndex2;
+      this.activeBucketItems = [this.buckets[bucketIndex2].length - 1, this.buckets[bucketIndex2].length - 1];
+      this.activeOutput = null;
+      this.scattered++;
+      this.push("scatter", message);
+    }
+    beginLocalSort(bucketIndex2, message) {
+      this.assertBucketIndex(bucketIndex2);
+      this.activeSource = null;
+      this.activeBucket = bucketIndex2;
+      this.activeBucketItems = null;
+      this.activeOutput = null;
+      this.push("local-sort", message);
+    }
+    compareBucket(bucketIndex2, left, right, message) {
+      this.assertBucketItems(bucketIndex2, left, right);
+      this.activeSource = null;
+      this.activeBucket = bucketIndex2;
+      this.activeBucketItems = [left, right];
+      this.activeOutput = null;
+      this.comparisons++;
+      this.push("compare", message);
+    }
+    swapBucket(bucketIndex2, left, right, message) {
+      this.assertBucketItems(bucketIndex2, left, right);
+      const bucket = this.buckets[bucketIndex2];
+      [bucket[left], bucket[right]] = [bucket[right], bucket[left]];
+      this.activeSource = null;
+      this.activeBucket = bucketIndex2;
+      this.activeBucketItems = [left, right];
+      this.activeOutput = null;
+      this.movements++;
+      this.push("swap", message);
+    }
+    beginGather(message) {
+      this.activeSource = null;
+      this.activeBucket = null;
+      this.activeBucketItems = null;
+      this.activeOutput = null;
+      this.push("gather", message);
+    }
+    gather(bucketIndex2, itemIndex, message) {
+      this.assertBucketItems(bucketIndex2, itemIndex);
+      const target = this.gathered;
+      this.output[target] = this.buckets[bucketIndex2][itemIndex];
+      this.activeSource = null;
+      this.activeBucket = bucketIndex2;
+      this.activeBucketItems = [itemIndex, itemIndex];
+      this.activeOutput = target;
+      this.gathered++;
+      this.push("gather", message);
+    }
+    finishPass(message) {
+      if (this.output.some((token) => token == null))
+        throw new Error("steptrace: distribution pass cannot finish before every key is gathered.");
+      this.source = this.output.map((token) => token);
+      this.clearActive();
+      this.push("pass-complete", message);
+    }
+    done(message) {
+      this.clearActive();
+      this.push("done", message);
+    }
+    clearActive() {
+      this.activeSource = null;
+      this.activeBucket = null;
+      this.activeBucketItems = null;
+      this.activeOutput = null;
+    }
+    assertSourceIndex(index) {
+      if (!Number.isInteger(index) || index < 0 || index >= this.source.length)
+        throw new Error(`steptrace: distribution source index ${index} is out of range.`);
+    }
+    assertBucketIndex(index) {
+      if (!Number.isInteger(index) || index < 0 || index >= this.buckets.length)
+        throw new Error(`steptrace: distribution bucket index ${index} is out of range.`);
+    }
+    assertBucketItems(bucketIndex2, ...indices) {
+      this.assertBucketIndex(bucketIndex2);
+      const bucket = this.buckets[bucketIndex2];
+      if (indices.some((index) => !Number.isInteger(index) || index < 0 || index >= bucket.length))
+        throw new Error(`steptrace: distribution bucket item is out of range.`);
+    }
+    push(type, message) {
+      this.frames.push(
+        Object.freeze({
+          type,
+          profile: this.profile,
+          source: this.source.map((token) => ({ ...token })),
+          buckets: this.buckets.map((bucket) => bucket.map((token) => ({ ...token }))),
+          output: this.output.map((token) => token == null ? null : { ...token }),
+          bucketLabels: this.bucketLabels.slice(),
+          activeSource: this.activeSource,
+          activeBucket: this.activeBucket,
+          activeBucketItems: this.activeBucketItems == null ? null : [this.activeBucketItems[0], this.activeBucketItems[1]],
+          activeOutput: this.activeOutput,
+          passIndex: this.passIndex,
+          passCount: this.passCount,
+          passLabel: this.passLabel,
+          scattered: this.scattered,
+          comparisons: this.comparisons,
+          movements: this.movements,
+          gathered: this.gathered,
+          message
+        })
+      );
+    }
+  };
+  function phaseLabel2(frame) {
+    switch (frame.type) {
+      case "intro":
+        return "set up";
+      case "pass":
+        return "new pass";
+      case "scatter":
+        return "scatter";
+      case "local-sort":
+      case "compare":
+      case "swap":
+        return "sort bucket";
+      case "gather":
+        return "gather";
+      case "pass-complete":
+        return "pass complete";
+      case "done":
+        return "sorted";
+    }
+  }
+  function distributionWatch2(frame) {
+    const activeToken = frame.activeSource == null ? null : frame.source[frame.activeSource];
+    const bucket = frame.activeBucket == null ? "—" : frame.bucketLabels[frame.activeBucket];
+    const progress = frame.type === "gather" || frame.type === "pass-complete" || frame.type === "done" ? `${frame.gathered}/${frame.source.length}` : `${frame.scattered}/${frame.source.length}`;
+    return [
+      {
+        k: "phase",
+        v: phaseLabel2(frame),
+        sw: "var(--_violet)",
+        hint: "Current distribution step: scatter, local bucket sort, or ordered gather."
+      },
+      {
+        k: "pass",
+        v: frame.passLabel || `${frame.passIndex + 1}/${frame.passCount}`,
+        sw: "var(--_blue)",
+        hint: frame.profile === "radix" ? "Digit position currently used to distribute every key." : "The single range-partition pass used by Bucket Sort."
+      },
+      {
+        k: "key",
+        v: activeToken?.value ?? "—",
+        sw: "var(--_amber)",
+        hint: "Input key currently being scattered or moved."
+      },
+      {
+        k: "bucket",
+        v: bucket,
+        sw: "var(--_green)",
+        hint: frame.profile === "radix" ? "Digit bucket selected by the active key." : "Numeric range containing the active key."
+      },
+      {
+        k: "progress",
+        v: progress,
+        hint: "Keys completed in the current scatter or gather phase."
+      }
+    ];
+  }
+  function tokenLabel(value) {
+    return Number.isInteger(value) ? String(value) : value.toFixed(2);
+  }
+  function makeLegendItem(color, text) {
+    const item = el("span", "steptrace__distribution-legend-item");
+    const swatch = el("span", "steptrace__distribution-legend-swatch");
+    swatch.style.setProperty("--_legend-color", color);
+    const label = el("span");
+    label.textContent = text;
+    item.append(swatch, label);
+    return item;
+  }
+  function makeBucketDistributionView(frames) {
+    const first = frames[0];
+    const original = first.source.slice().sort((a, b) => a.origin - b.origin);
+    const labels = distributionTokenLabels(original.map((token) => token.value));
+    const maxValue = Math.max(...original.map((token) => token.value), 1);
+    const stage = el("div", "steptrace__distribution steptrace__distribution--buckets");
+    const sourceTitle = first.profile === "radix" ? "Current Array" : "Unsorted Array";
+    const source = makeDistributionArrayBand(
+      sourceTitle,
+      first.profile === "radix" ? "Each digit pass starts from the order gathered by the previous pass." : "Values keep their identity while range decides their bucket.",
+      first.source.length
+    );
+    const bucketBand = el("div", "steptrace__distribution-band");
+    const board = el("div", "steptrace__distribution-bucket-board");
+    board.setAttribute("role", "region");
+    board.setAttribute(
+      "aria-label",
+      first.profile === "radix" ? "Digit Buckets" : "Range Buckets"
+    );
+    const lanes = first.bucketLabels.map((bucketLabel, bucketIndex2) => {
+      const lane = el("div", "steptrace__distribution-lane");
+      const header = el("div", "steptrace__distribution-lane-header");
+      header.textContent = bucketLabel;
+      const body = el("div", "steptrace__distribution-lane-body");
+      lane.append(header, body);
+      board.append(lane);
+      return { lane, body, bucketIndex: bucketIndex2 };
+    });
+    bucketBand.append(
+      distributionLabel(
+        first.profile === "radix" ? "Digit Buckets" : "Range Buckets",
+        first.profile === "radix" ? "Keys append in source order, preserving lower-digit work." : "Each range is sorted locally before the buckets are concatenated."
+      ),
+      board
+    );
+    const output = makeDistributionArrayBand(
+      first.profile === "radix" ? "Gathered Pass" : "Sorted Array",
+      "Buckets are read left to right; order inside each bucket is retained.",
+      first.source.length,
+      "steptrace__distribution-bars--output"
+    );
+    const legend = el("div", "steptrace__distribution-legend");
+    legend.setAttribute("aria-label", "Distribution state legend");
+    legend.append(
+      makeLegendItem("var(--_blue)", "active bucket"),
+      makeLegendItem("var(--_amber)", "local comparison"),
+      makeLegendItem("var(--_green)", "gathered output")
+    );
+    stage.append(source.band, bucketBand, legend, output.band);
+    const status = statusEl();
+    function paint(frame, index = 0, total = 1) {
+      stage.dataset.phase = frame.type;
+      source.bars.forEach((bar, barIndex) => {
+        const token = frame.source[barIndex];
+        bar.fill.style.height = barHeightStyle(token.value, maxValue);
+        bar.num.textContent = labels[token.origin] ?? tokenLabel(token.value);
+        bar.bar.dataset.state = barIndex === frame.activeSource && frame.type === "scatter" ? "scatter" : "";
+        bar.bar.setAttribute(
+          "aria-label",
+          `${sourceTitle.toLowerCase()} index ${barIndex}, value ${token.value}`
+        );
+      });
+      lanes.forEach(({ lane, body, bucketIndex: bucketIndex2 }) => {
+        const bucket = frame.buckets[bucketIndex2];
+        body.textContent = "";
+        bucket.forEach((token, itemIndex) => {
+          const chip = el("span", "steptrace__distribution-token");
+          chip.textContent = labels[token.origin] ?? tokenLabel(token.value);
+          const activeItems = frame.activeBucketItems;
+          const active = frame.activeBucket === bucketIndex2 && activeItems != null && itemIndex >= Math.min(...activeItems) && itemIndex <= Math.max(...activeItems);
+          chip.dataset.active = active ? "1" : "0";
+          chip.dataset.compare = active && (frame.type === "compare" || frame.type === "swap") ? "1" : "0";
+          chip.dataset.gather = active && frame.type === "gather" ? "1" : "0";
+          chip.setAttribute(
+            "aria-label",
+            `bucket ${frame.bucketLabels[bucketIndex2]}, item ${itemIndex}, value ${token.value}`
+          );
+          body.append(chip);
+        });
+        lane.dataset.active = frame.activeBucket === bucketIndex2 ? "1" : "0";
+        lane.dataset.empty = bucket.length === 0 ? "1" : "0";
+      });
+      output.bars.forEach((bar, outputIndex) => {
+        const token = frame.output[outputIndex];
+        bar.fill.style.height = token == null ? "0" : barHeightStyle(token.value, maxValue);
+        bar.num.textContent = token == null ? "·" : labels[token.origin] ?? tokenLabel(token.value);
+        bar.bar.dataset.state = token == null ? "" : "sorted";
+        bar.bar.dataset.target = frame.type === "gather" && outputIndex === frame.activeOutput ? "1" : "0";
+        bar.bar.dataset.empty = token == null ? "1" : "0";
+        bar.bar.setAttribute(
+          "aria-label",
+          token == null ? `output index ${outputIndex}, empty` : `output index ${outputIndex}, value ${token.value}`
+        );
+      });
+      status.innerHTML = escapeHtml(frame.message) + ` <span class="steptrace__counts">· ${phaseLabel2(frame)} · step ${index + 1}/${total}</span>`;
+    }
+    return {
+      nodes: [stage, status],
+      stageLayout: "fill",
+      stableStage: true,
+      paint,
+      watch: distributionWatch2
+    };
+  }
+  function createBucketDistributionFamily() {
+    return {
+      id: "distribution-sort",
+      createRecorder(config) {
+        return new BucketDistributionRecorder(config);
+      },
+      createView(frames) {
+        return makeBucketDistributionView(frames);
+      }
+    };
+  }
+  var radixDistributionFamily = createBucketDistributionFamily();
+  var rangeBucketDistributionFamily = createBucketDistributionFamily();
+
+  // custom/steptrace/src/algorithms/bucket-sort.ts
+  function bucketIndex(value, min, max, count) {
+    if (max === min) return 0;
+    const ratio = (value - min) / (max - min);
+    const index = Math.floor(count * ratio);
+    return Math.min(count - 1, Math.max(0, index));
+  }
+  function insertionSortBucket(bucket, bucketIndex2, ops) {
+    for (let i = 1; i < bucket.length; i++) {
+      const key = bucket[i];
+      let j = i - 1;
+      while (j >= 0) {
+        ops.compareBucket(
+          bucketIndex2,
+          j,
+          j + 1,
+          `Compare bucket[${bucketIndex2}][${j}] and bucket[${j + 1}] in local sort.`
+        );
+        if (bucket[j].value <= key.value) break;
+        ops.swapBucket(
+          bucketIndex2,
+          j,
+          j + 1,
+          `Swap bucket[${bucketIndex2}][${j}] and bucket[${j + 1}] in local sort.`
+        );
+        bucket[j + 1] = bucket[j];
+        bucket[j] = key;
+        j--;
+      }
+    }
+  }
+  var bucketSort = {
+    id: "bucket-sort",
+    kind: "sort",
+    family: rangeBucketDistributionFamily,
+    meta: { label: "Bucket sort" },
+    parse: parseRangeBucketDistributionConfig,
+    run(input, ops) {
+      const min = Math.min(...input.array);
+      const max = Math.max(...input.array);
+      const count = input.bucketCount;
+      ops.intro(`Partition [${min}, ${max}] into ${count} equal-width buckets.`);
+      const source = input.array.map((value, origin) => ({ value, origin }));
+      ops.beginPass(0, 1, "0", "Scatter keys into range buckets.");
+      const buckets = Array.from({ length: count }, () => []);
+      for (let index = 0; index < source.length; index++) {
+        const token = source[index];
+        const target = bucketIndex(token.value, min, max, count);
+        buckets[target].push(token);
+        ops.scatter(index, target, `Scatter source[${index}] = ${token.value} into bucket ${target}.`);
+      }
+      for (let bucketIdx = 0; bucketIdx < count; bucketIdx++) {
+        const bucket = buckets[bucketIdx];
+        if (bucket.length <= 1) continue;
+        ops.beginLocalSort(bucketIdx, `Sort bucket ${bucketIdx} locally.`);
+        insertionSortBucket(bucket, bucketIdx, ops);
+      }
+      ops.beginGather("Concatenate buckets in order to form the output.");
+      let next = 0;
+      const output = Array.from({ length: source.length }, () => null);
+      for (let bucketIdx = 0; bucketIdx < count; bucketIdx++) {
+        const bucket = buckets[bucketIdx];
+        for (let itemIndex = 0; itemIndex < bucket.length; itemIndex++) {
+          output[next] = bucket[itemIndex];
+          ops.gather(bucketIdx, itemIndex, `Append bucket ${bucketIdx} item ${itemIndex} to output[${next}].`);
+          next++;
+        }
+      }
+      ops.finishPass("Single scatter-sort-gather pass complete.");
+      ops.done(`Sorted by range bucketing: ${output.filter((token) => token != null).map((token) => token.value).join(", ")}.`);
+    }
+  };
+
   // custom/steptrace/src/families/array-sort.ts
   function resolveArraySortFrame(frame) {
     if (frame.profile === "comb") return resolveCombSortFrame(frame);
@@ -4078,18 +4833,18 @@
   };
 
   // custom/steptrace/src/algorithms/comb-sort.ts
-  function invalidConfig(message) {
+  function invalidConfig2(message) {
     throw new Error(`steptrace: comb-sort ${message}`);
   }
   function parseCombSortConfig(config) {
     const { array } = config;
     const shrinkFactor = config.shrinkFactor ?? 1.3;
     if (!Array.isArray(array) || array.length < 2)
-      invalidConfig('requires an "array" with at least two numbers.');
+      invalidConfig2('requires an "array" with at least two numbers.');
     if (!array.every((value) => typeof value === "number" && Number.isFinite(value)))
-      invalidConfig('requires every "array" value to be a finite number.');
+      invalidConfig2('requires every "array" value to be a finite number.');
     if (typeof shrinkFactor !== "number" || !Number.isFinite(shrinkFactor) || shrinkFactor <= 1)
-      invalidConfig('requires "shrinkFactor" to be a finite number greater than 1.');
+      invalidConfig2('requires "shrinkFactor" to be a finite number greater than 1.');
     return { array: array.slice(), shrinkFactor, profile: "comb" };
   }
   var combSort = {
@@ -4132,256 +4887,6 @@
       }
       ops.lockAll(Array.from({ length: ops.value.length }, (_, index) => index));
       ops.done(`Sorted in ${ops.comparisons} comparisons and ${ops.swaps} swaps.`);
-    }
-  };
-
-  // custom/steptrace/src/families/distribution-sort.ts
-  var DistributionSortRecorder = class {
-    constructor(config) {
-      __publicField(this, "frames", []);
-      __publicField(this, "input");
-      __publicField(this, "min");
-      __publicField(this, "max");
-      __publicField(this, "counts");
-      __publicField(this, "positions");
-      __publicField(this, "output");
-      __publicField(this, "outputOrigins");
-      __publicField(this, "activeInput", null);
-      __publicField(this, "activeKey", null);
-      __publicField(this, "previousKey", null);
-      __publicField(this, "placedAt", null);
-      __publicField(this, "tallied", 0);
-      __publicField(this, "prefixed", 0);
-      __publicField(this, "placed", 0);
-      this.input = config.array.slice();
-      this.min = config.min;
-      this.max = config.max;
-      this.counts = Array.from({ length: this.max - this.min + 1 }, () => 0);
-      this.positions = this.counts.slice();
-      this.output = Array.from({ length: this.input.length }, () => null);
-      this.outputOrigins = Array.from({ length: this.input.length }, () => null);
-    }
-    intro(message) {
-      this.push("intro", message);
-    }
-    tally(inputIndex, message) {
-      const key = this.input[inputIndex];
-      this.activeInput = inputIndex;
-      this.activeKey = key;
-      this.previousKey = null;
-      this.placedAt = null;
-      this.counts[key - this.min]++;
-      this.tallied++;
-      this.push("tally", message);
-    }
-    prefix(key, message) {
-      const index = key - this.min;
-      this.activeInput = null;
-      this.activeKey = key;
-      this.previousKey = key === this.min ? null : key - 1;
-      this.placedAt = null;
-      if (this.prefixed === 0) this.positions = this.counts.slice();
-      if (index > 0) this.positions[index] += this.positions[index - 1];
-      this.prefixed++;
-      this.push("prefix", message);
-    }
-    place(inputIndex, message) {
-      const key = this.input[inputIndex];
-      const countIndex = key - this.min;
-      const target = --this.positions[countIndex];
-      this.output[target] = key;
-      this.outputOrigins[target] = inputIndex;
-      this.activeInput = inputIndex;
-      this.activeKey = key;
-      this.previousKey = null;
-      this.placedAt = target;
-      this.placed++;
-      this.push("place", message);
-    }
-    done(message) {
-      this.activeInput = null;
-      this.activeKey = null;
-      this.previousKey = null;
-      this.placedAt = null;
-      this.push("done", message);
-    }
-    push(type, message) {
-      this.frames.push(
-        Object.freeze({
-          type,
-          profile: "counting",
-          input: this.input.slice(),
-          min: this.min,
-          max: this.max,
-          counts: this.counts.slice(),
-          positions: this.positions.slice(),
-          output: this.output.slice(),
-          outputOrigins: this.outputOrigins.slice(),
-          activeInput: this.activeInput,
-          activeKey: this.activeKey,
-          previousKey: this.previousKey,
-          placedAt: this.placedAt,
-          tallied: this.tallied,
-          prefixed: this.prefixed,
-          placed: this.placed,
-          message
-        })
-      );
-    }
-  };
-  function invalidConfig2(message) {
-    throw new Error(`steptrace: counting-sort ${message}`);
-  }
-  function parseCountingSortConfig(config) {
-    const { array } = config;
-    if (!Array.isArray(array) || array.length < 2)
-      invalidConfig2('requires an "array" with at least two integer keys.');
-    if (!array.every((value) => Number.isInteger(value)))
-      invalidConfig2("requires every value to be an integer key.");
-    const min = Math.min(...array);
-    const max = Math.max(...array);
-    if (max - min > 32)
-      invalidConfig2("limits the demonstrated key range to 33 values so every counter remains legible.");
-    return { profile: "counting", array: array.slice(), min, max };
-  }
-  function tokenLabels(input) {
-    const totals = /* @__PURE__ */ new Map();
-    input.forEach((value) => totals.set(value, (totals.get(value) || 0) + 1));
-    const seen = /* @__PURE__ */ new Map();
-    return input.map((value) => {
-      const occurrence = (seen.get(value) || 0) + 1;
-      seen.set(value, occurrence);
-      return totals.get(value) === 1 ? String(value) : `${value}${String.fromCharCode(96 + occurrence)}`;
-    });
-  }
-  function label(text, detail) {
-    const heading = el("div", "steptrace__distribution-label");
-    heading.textContent = text;
-    heading.title = detail;
-    return heading;
-  }
-  function phaseLabel(phase) {
-    return phase === "intro" ? "set up" : phase === "done" ? "sorted" : phase;
-  }
-  function frequencyRangeFor(frame, index) {
-    const count = frame.counts[index];
-    const rangesVisible = frame.type === "prefix" ? index < frame.prefixed : frame.type === "place" || frame.type === "done";
-    if (!rangesVisible) return { count, slots: null };
-    if (count === 0) return { count, slots: "—" };
-    const start = frame.counts.slice(0, index).reduce((sum, value) => sum + value, 0);
-    const end = start + count - 1;
-    return { count, slots: start === end ? String(start) : `${start}–${end}` };
-  }
-  function distributionWatch(frame) {
-    const active = frame.activeKey == null ? "—" : frame.activeKey;
-    return [
-      { k: "phase", v: phaseLabel(frame.type), sw: "var(--_violet)" },
-      { k: "key", v: active, sw: "var(--_blue)" },
-      { k: "tallied", v: `${frame.tallied}/${frame.input.length}`, sw: "var(--_amber)" },
-      { k: "placed", v: `${frame.placed}/${frame.input.length}`, sw: "var(--_green)" }
-    ];
-  }
-  function makeDistributionSortView(frames) {
-    const first = frames[0];
-    const keys = Array.from({ length: first.max - first.min + 1 }, (_, index) => first.min + index);
-    const labels = tokenLabels(first.input);
-    const stage = el("div", "steptrace__distribution");
-    const input = el("div", "steptrace__distribution-band");
-    const inputBarsStage = el("div", "steptrace__stage steptrace__distribution-bars");
-    inputBarsStage.setAttribute("role", "region");
-    inputBarsStage.setAttribute("aria-label", "Unsorted Array");
-    const inputBars = makeBars(inputBarsStage, first.input.length);
-    input.append(label("Unsorted Array", "Each bar keeps its original identity."), inputBarsStage);
-    const countBand = el("div", "steptrace__distribution-band");
-    const frequency = el("div", "steptrace__distribution-frequency");
-    frequency.setAttribute("role", "region");
-    frequency.setAttribute("aria-label", "Frequency");
-    const buckets = keys.map((key) => {
-      const bucket = el("div", "steptrace__distribution-bucket");
-      const keyRow = el("div", "steptrace__distribution-entry steptrace__distribution-entry--key");
-      const keyLabel = el("span", "steptrace__distribution-entry-label");
-      keyLabel.textContent = "Value:";
-      const keyValue = el("strong", "steptrace__distribution-entry-value");
-      keyValue.textContent = String(key);
-      keyRow.append(keyLabel, keyValue);
-      const details = el("div", "steptrace__distribution-details");
-      const countRow = el("div", "steptrace__distribution-entry");
-      const countLabel = el("span", "steptrace__distribution-entry-label");
-      countLabel.textContent = "Count:";
-      const count = el("strong", "steptrace__distribution-entry-value");
-      countRow.append(countLabel, count);
-      const slotsRow = el("div", "steptrace__distribution-entry steptrace__distribution-entry--slots");
-      const slotsLabel = el("span", "steptrace__distribution-entry-label");
-      slotsLabel.textContent = "Slots:";
-      const slots = el("strong", "steptrace__distribution-entry-value");
-      slotsRow.append(slotsLabel, slots);
-      details.append(countRow, slotsRow);
-      bucket.append(keyRow, details);
-      frequency.append(bucket);
-      return { bucket, count, slots, key };
-    });
-    countBand.append(label("Frequency", "Raw counts become reserved output slots from left to right."), frequency);
-    const outputBand = el("div", "steptrace__distribution-band");
-    const outputBarsStage = el("div", "steptrace__stage steptrace__distribution-bars steptrace__distribution-bars--output");
-    outputBarsStage.setAttribute("role", "region");
-    outputBarsStage.setAttribute("aria-label", "Sorted Array");
-    const outputBars = makeBars(outputBarsStage, first.input.length);
-    outputBand.append(label("Sorted Array", "The input is read right-to-left; each placement preserves duplicate order."), outputBarsStage);
-    stage.append(input, countBand, outputBand);
-    const status = statusEl();
-    const maxValue = Math.max(...first.input, 1);
-    function paint(frame, index = 0, total = 1) {
-      stage.dataset.phase = frame.type;
-      inputBars.forEach((bar, barIndex) => {
-        const value = frame.input[barIndex];
-        bar.fill.style.height = barHeightStyle(value, maxValue);
-        bar.num.textContent = labels[barIndex];
-        bar.bar.dataset.state = barIndex === frame.activeInput ? frame.type === "tally" ? "increment" : "compare" : "";
-        bar.bar.setAttribute("aria-label", `input index ${barIndex}, value ${value}, token ${labels[barIndex]}`);
-      });
-      buckets.forEach(({ bucket, count, slots, key }, bucketIndex) => {
-        const range = frequencyRangeFor(frame, bucketIndex);
-        count.textContent = String(range.count);
-        slots.textContent = range.slots ?? "";
-        bucket.dataset.hasSlots = range.slots == null ? "0" : "1";
-        bucket.dataset.active = (frame.type === "tally" || frame.type === "prefix") && key === frame.activeKey ? "1" : "0";
-        bucket.dataset.previous = frame.type === "prefix" && key === frame.previousKey ? "1" : "0";
-        bucket.dataset.placement = frame.type === "place" && key === frame.activeKey ? "1" : "0";
-        bucket.setAttribute(
-          "aria-label",
-          `value ${key}, count ${range.count}${range.slots == null ? "" : `, slots ${range.slots}`}`
-        );
-      });
-      outputBars.forEach((bar, slotIndex) => {
-        const placed = frame.output[slotIndex];
-        const origin = frame.outputOrigins[slotIndex];
-        bar.fill.style.height = placed == null ? "0" : barHeightStyle(placed, maxValue);
-        bar.num.textContent = placed == null ? "·" : labels[origin ?? 0];
-        bar.bar.dataset.state = placed == null ? "" : "sorted";
-        bar.bar.dataset.target = frame.type === "place" && slotIndex === frame.placedAt ? "1" : "0";
-        bar.bar.dataset.empty = placed == null ? "1" : "0";
-        bar.bar.setAttribute(
-          "aria-label",
-          placed == null ? `output index ${slotIndex}, empty` : `output index ${slotIndex}, value ${placed}, token ${labels[origin ?? 0]}`
-        );
-      });
-      status.innerHTML = escapeHtml(frame.message) + ` <span class="steptrace__counts">· ${phaseLabel(frame.type)} · step ${index + 1}/${total}</span>`;
-    }
-    return {
-      nodes: [stage, status],
-      stageLayout: "fill",
-      stableStage: true,
-      paint,
-      watch: distributionWatch
-    };
-  }
-  var distributionSortFamily = {
-    id: "distribution-sort",
-    createRecorder(config) {
-      return new DistributionSortRecorder(config);
-    },
-    createView(frames) {
-      return makeDistributionSortView(frames);
     }
   };
 
@@ -5282,15 +5787,15 @@
   var optimalWarehousePath = gridPathProblem.optimalPath.map((cell) => cell.slice());
   var coinAmounts = coinChangeProblem.amounts;
   var availableCoins = coinChangeProblem.coins;
-  function storyAlgorithm(id, label2, parse, run) {
-    return { id, kind: "dp", family: dpStoryFamily, meta: { label: label2 }, parse, run };
+  function storyAlgorithm(id, label, parse, run) {
+    return { id, kind: "dp", family: dpStoryFamily, meta: { label }, parse, run };
   }
-  function treeAlgorithm(id, label2, profile, run) {
+  function treeAlgorithm(id, label, profile, run) {
     return {
       id,
       kind: "rectree",
       family: executionTreeFamily,
-      meta: { label: label2 },
+      meta: { label },
       parse(config) {
         if (config.variant !== void 0) throw new Error(`steptrace: ${id} does not take a variant.`);
         return { profile };
@@ -5298,12 +5803,12 @@
       run
     };
   }
-  function tableAlgorithm(id, label2, profile, run) {
+  function tableAlgorithm(id, label, profile, run) {
     return {
       id,
       kind: "dp",
       family: dpProblemTableFamily,
-      meta: { label: label2 },
+      meta: { label },
       parse: dpTableConfig(profile),
       run
     };
@@ -6181,7 +6686,7 @@
     if (index < frame.lo || index > frame.hi) return "eliminated";
     return "range";
   }
-  function phaseLabel2(frame) {
+  function phaseLabel3(frame) {
     switch (frame.phase) {
       case "gallop":
         return "gallop";
@@ -6212,7 +6717,7 @@
       const range = frame.phase === "gallop" || frame.phase === "jump" ? frame.bound == null ? "discovering" : `[${Math.max(0, frame.previousBound + 1)}, ${frame.bound}]` : `[${frame.lo}, ${frame.hi}]`;
       const rows = [
         profile === "ternary" ? { k: "goal", v: frame.goal ?? "—", sw: "var(--_accent)" } : { k: "target", v: String(first.target), sw: "var(--_accent)" },
-        { k: "phase", v: phaseLabel2(frame), sw: phaseColor(frame) },
+        { k: "phase", v: phaseLabel3(frame), sw: phaseColor(frame) },
         { k: "range", v: range, sw: "var(--_neutral)" },
         { k: profile === "ternary" ? "probe 1" : "probe", v: probe, sw: "var(--_blue)" }
       ];
@@ -6553,9 +7058,9 @@
       const currentColumn = frame.cur?.[1] ?? null;
       const active = currentColumn == null ? null : frame.colLabels[currentColumn];
       const results = Object.fromEntries(
-        frame.colLabels.flatMap((label2, column) => {
+        frame.colLabels.flatMap((label, column) => {
           const value = frame.grid[0][column];
-          return value == null ? [] : [[label2, value]];
+          return value == null ? [] : [[label, value]];
         })
       );
       const states = Object.fromEntries(
@@ -7275,10 +7780,10 @@
   }
   function buildTree(values, from, to, depth, x, y, id, nodes, edges, metas) {
     const segment = values.slice(from, to);
-    const label2 = segment.length ? `[${from}…${to - 1}]` : "[]";
+    const label = segment.length ? `[${from}…${to - 1}]` : "[]";
     nodes.push({
       id,
-      label: label2,
+      label,
       values: segment,
       x,
       y,
@@ -7286,7 +7791,7 @@
     });
     const meta = {
       id,
-      label: label2,
+      label,
       values: segment,
       from,
       to,
@@ -7308,7 +7813,7 @@
   function emitFrames(id, path, metas, ops) {
     const node = metas.get(id);
     if (!node) return [];
-    const label2 = node.values.length ? `[${node.from}…${node.to - 1}]` : "[]";
+    const label = node.values.length ? `[${node.from}…${node.to - 1}]` : "[]";
     if (node.values.length <= 1) {
       const text = node.values.length ? `[${node.values[0]}]` : "[]";
       ops.base(id, path, node.values, `${text} is already sorted.`);
@@ -7318,13 +7823,13 @@
     const left = metas.get(leftId);
     const right = metas.get(rightId);
     if (!left || !right) return node.values.slice();
-    ops.split(id, path, [leftId, rightId], `Split ${label2} into ${left.label} and ${right.label}.`);
+    ops.split(id, path, [leftId, rightId], `Split ${label} into ${left.label} and ${right.label}.`);
     const leftPath = [...path, leftId];
     const rightPath = [...path, rightId];
     const leftResult = emitFrames(leftId, leftPath, metas, ops);
-    ops.returnResult(leftId, path, leftResult, `Return [${leftResult.join(", ")}] to ${label2}.`);
+    ops.returnResult(leftId, path, leftResult, `Return [${leftResult.join(", ")}] to ${label}.`);
     const rightResult = emitFrames(rightId, rightPath, metas, ops);
-    ops.returnResult(rightId, path, rightResult, `Return [${rightResult.join(", ")}] to ${label2}.`);
+    ops.returnResult(rightId, path, rightResult, `Return [${rightResult.join(", ")}] to ${label}.`);
     const merged = merge(leftResult, rightResult);
     const combinePath = path.length > 1 ? path.slice(0, -1) : path;
     ops.combine(id, combinePath, merged, `Merge ${left.label} and ${right.label} into [${merged.join(", ")}].`);
@@ -7641,6 +8146,83 @@
       }
       qs(0, n - 1);
       ops.done(`Sorted in ${ops.comparisons} comparisons and ${ops.swaps} swaps.`);
+    }
+  };
+
+  // custom/steptrace/src/algorithms/radix-sort.ts
+  function digitOf(value, place, radix) {
+    return Math.floor(value / place) % radix;
+  }
+  function insertionSortBucket2(bucket, bucketIndex2, ops) {
+    for (let i = 1; i < bucket.length; i++) {
+      const key = bucket[i];
+      let j = i - 1;
+      while (j >= 0) {
+        ops.compareBucket(
+          bucketIndex2,
+          j,
+          j + 1,
+          `Compare bucket[${bucketIndex2}][${j}] and bucket[${j + 1}] in local sort.`
+        );
+        if (bucket[j].value <= key.value) break;
+        ops.swapBucket(
+          bucketIndex2,
+          j,
+          j + 1,
+          `Swap bucket[${bucketIndex2}][${j}] and bucket[${j + 1}] in local sort.`
+        );
+        bucket[j + 1] = bucket[j];
+        bucket[j] = key;
+        j--;
+      }
+    }
+  }
+  var radixSort = {
+    id: "radix-sort",
+    kind: "sort",
+    family: radixDistributionFamily,
+    meta: { label: "Radix sort" },
+    parse: parseRadixDistributionConfig,
+    run(input, ops) {
+      const radix = input.radix;
+      const maxPasses = input.places.length;
+      ops.intro(`LSD radix sort with ${radix} buckets and ${maxPasses} pass(es).`);
+      let source = input.array.map((value, origin) => ({ value, origin }));
+      for (let pass = 0; pass < maxPasses; pass++) {
+        const place = Math.pow(radix, pass);
+        const passLabel = `${place}`;
+        ops.beginPass(pass, maxPasses, passLabel, `Distribute by digit ${pass} (${passLabel} place).`);
+        const buckets = Array.from({ length: input.bucketCount }, () => []);
+        for (let index = 0; index < source.length; index++) {
+          const token = source[index];
+          const target = digitOf(token.value, place, radix);
+          buckets[target].push(token);
+          ops.scatter(index, target, `Scatter source[${index}] = ${token.value} into bucket ${target}.`);
+        }
+        for (let bucketIndex2 = 0; bucketIndex2 < buckets.length; bucketIndex2++) {
+          const bucket = buckets[bucketIndex2];
+          if (bucket.length <= 1) continue;
+          ops.beginLocalSort(bucketIndex2, `Sort bucket ${bucketIndex2} locally.`);
+          insertionSortBucket2(bucket, bucketIndex2, ops);
+        }
+        ops.beginGather("Read buckets left-to-right into output array.");
+        const output = Array.from({ length: source.length }, () => null);
+        let next = 0;
+        for (let bucketIndex2 = 0; bucketIndex2 < buckets.length; bucketIndex2++) {
+          const bucket = buckets[bucketIndex2];
+          for (let itemIndex = 0; itemIndex < bucket.length; itemIndex++) {
+            const token = bucket[itemIndex];
+            output[next] = token;
+            ops.gather(bucketIndex2, itemIndex, `Read bucket ${bucketIndex2} item ${itemIndex} into output[${next}].`);
+            next++;
+          }
+        }
+        source = output.map((token) => token);
+        ops.finishPass(`Digit ${pass + 1} completed; all lower digits stay stable.`);
+      }
+      ops.done(
+        `All ${maxPasses} digits processed. Final output: ${source.map((token) => token.value).join(", ")}.`
+      );
     }
   };
 
@@ -8083,6 +8665,8 @@
     shellSort,
     combSort,
     countingSort,
+    radixSort,
+    bucketSort,
     cyclicSort,
     introsort,
     exponentialSearch,
@@ -8297,8 +8881,8 @@
   function watchHintFor(row) {
     const override = row.hint?.trim();
     if (override) return override;
-    const label2 = row.k.trim().toLowerCase();
-    return WATCH_HINTS[label2] || `Current ${row.k.trim()} value.`;
+    const label = row.k.trim().toLowerCase();
+    return WATCH_HINTS[label] || `Current ${row.k.trim()} value.`;
   }
 
   // custom/steptrace/src/mount.ts

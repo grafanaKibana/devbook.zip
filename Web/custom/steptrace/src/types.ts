@@ -46,6 +46,9 @@ export interface AlgorithmInput {
   algorithm: string
   array: number[]
   target: any
+  radix: number
+  bucketCount: number
+  mode: string
   text: string
   pattern: string
   a: string
@@ -64,6 +67,9 @@ export interface StepTraceConfig extends Partial<Omit<AlgorithmInput, "algorithm
   nodes?: Array<RawGraphNode | number>
   edges?: Array<RawGraphEdge | [number, number, number]>
   speed?: number
+  radix?: number
+  mode?: string
+  bucketCount?: number
   gaps?: number[]
   shrinkFactor?: number
   depthLimit?: number

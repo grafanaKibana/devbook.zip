@@ -157,7 +157,7 @@ export function parseCountingSortConfig(config: StepTraceConfig): DistributionSo
   return { profile: "counting", array: array.slice(), min, max }
 }
 
-function tokenLabels(input: readonly number[]) {
+export function distributionTokenLabels(input: readonly number[]) {
   const totals = new Map<number, number>()
   input.forEach((value) => totals.set(value, (totals.get(value) || 0) + 1))
   const seen = new Map<number, number>()
@@ -168,11 +168,29 @@ function tokenLabels(input: readonly number[]) {
   })
 }
 
-function label(text: string, detail: string) {
+export function distributionLabel(text: string, detail: string) {
   const heading = el("div", "steptrace__distribution-label")
   heading.textContent = text
   heading.title = detail
   return heading
+}
+
+export function makeDistributionArrayBand(
+  title: string,
+  detail: string,
+  length: number,
+  modifier = "",
+) {
+  const band = el("div", "steptrace__distribution-band")
+  const stage = el(
+    "div",
+    `steptrace__stage steptrace__distribution-bars${modifier ? ` ${modifier}` : ""}`,
+  )
+  stage.setAttribute("role", "region")
+  stage.setAttribute("aria-label", title)
+  const bars = makeBars(stage, length)
+  band.append(distributionLabel(title, detail), stage)
+  return { band, stage, bars }
 }
 
 function phaseLabel(phase: DistributionPhase) {
@@ -205,14 +223,13 @@ function distributionWatch(frame: DistributionSortFrame) {
 export function makeDistributionSortView(frames: readonly DistributionSortFrame[]) {
   const first = frames[0]
   const keys = Array.from({ length: first.max - first.min + 1 }, (_, index) => first.min + index)
-  const labels = tokenLabels(first.input)
+  const labels = distributionTokenLabels(first.input)
   const stage = el("div", "steptrace__distribution")
-  const input = el("div", "steptrace__distribution-band")
-  const inputBarsStage = el("div", "steptrace__stage steptrace__distribution-bars")
-  inputBarsStage.setAttribute("role", "region")
-  inputBarsStage.setAttribute("aria-label", "Unsorted Array")
-  const inputBars = makeBars(inputBarsStage, first.input.length)
-  input.append(label("Unsorted Array", "Each bar keeps its original identity."), inputBarsStage)
+  const input = makeDistributionArrayBand(
+    "Unsorted Array",
+    "Each bar keeps its original identity.",
+    first.input.length,
+  )
   const countBand = el("div", "steptrace__distribution-band")
   const frequency = el("div", "steptrace__distribution-frequency")
   frequency.setAttribute("role", "region")
@@ -241,20 +258,23 @@ export function makeDistributionSortView(frames: readonly DistributionSortFrame[
     frequency.append(bucket)
     return { bucket, count, slots, key }
   })
-  countBand.append(label("Frequency", "Raw counts become reserved output slots from left to right."), frequency)
-  const outputBand = el("div", "steptrace__distribution-band")
-  const outputBarsStage = el("div", "steptrace__stage steptrace__distribution-bars steptrace__distribution-bars--output")
-  outputBarsStage.setAttribute("role", "region")
-  outputBarsStage.setAttribute("aria-label", "Sorted Array")
-  const outputBars = makeBars(outputBarsStage, first.input.length)
-  outputBand.append(label("Sorted Array", "The input is read right-to-left; each placement preserves duplicate order."), outputBarsStage)
-  stage.append(input, countBand, outputBand)
+  countBand.append(
+    distributionLabel("Frequency", "Raw counts become reserved output slots from left to right."),
+    frequency,
+  )
+  const output = makeDistributionArrayBand(
+    "Sorted Array",
+    "The input is read right-to-left; each placement preserves duplicate order.",
+    first.input.length,
+    "steptrace__distribution-bars--output",
+  )
+  stage.append(input.band, countBand, output.band)
   const status = statusEl()
   const maxValue = Math.max(...first.input, 1)
 
   function paint(frame: DistributionSortFrame, index = 0, total = 1) {
     stage.dataset.phase = frame.type
-    inputBars.forEach((bar, barIndex) => {
+    input.bars.forEach((bar, barIndex) => {
       const value = frame.input[barIndex]
       bar.fill.style.height = barHeightStyle(value, maxValue)
       bar.num.textContent = labels[barIndex]
@@ -276,7 +296,7 @@ export function makeDistributionSortView(frames: readonly DistributionSortFrame[
         `value ${key}, count ${range.count}${range.slots == null ? "" : `, slots ${range.slots}`}`,
       )
     })
-    outputBars.forEach((bar, slotIndex) => {
+    output.bars.forEach((bar, slotIndex) => {
       const placed = frame.output[slotIndex]
       const origin = frame.outputOrigins[slotIndex]
       bar.fill.style.height = placed == null ? "0" : barHeightStyle(placed, maxValue)
