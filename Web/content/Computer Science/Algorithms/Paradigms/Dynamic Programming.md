@@ -1,8 +1,8 @@
 ---
 publish: true
 created: 2026-07-18T14:02:43.953Z
-modified: 2026-07-22T18:49:33.749Z
-published: 2026-07-22T18:49:33.749Z
+modified: 2026-07-23T07:12:49.365Z
+published: 2026-07-23T07:12:49.365Z
 topic:
   - Computer Science
 subtopic:
@@ -21,6 +21,15 @@ Suppose a target state depends on two smaller states, and those states depend on
 Dynamic programming starts with a well-defined state, base cases, and a recurrence that composes already-solved states. In the finite, one-pass formulations covered here, those dependencies form an acyclic order, whether followed lazily by recursion or eagerly by iteration. For optimization problems, that valid recurrence usually expresses **optimal substructure**: an optimum is assembled from optima of smaller states. Counting and decision DPs use the same state-and-recurrence machinery without necessarily optimizing anything. Repeated states are what make storing results pay, but they are an efficiency condition rather than a correctness requirement. Iterative methods such as value iteration are also DP, but may revisit mutually dependent value estimates until convergence rather than solve every state once.
 
 **Core shape for finite one-pass DP:** state + base cases + recurrence + acyclic dependency order → each reached state solved once → `(number of distinct states) × (transition work per state)` time.
+
+## Mechanism — state, recurrence, and the two forms
+
+Both examples become DP only after the state discards irrelevant history. Coin change keeps the remaining amount because every denomination remains reusable; finite coin stock would also require the remaining counts. Grid path keeps the current coordinate. Two calls with the same state have the same future choices and therefore the same answer, regardless of how they arrived there.
+
+- **Top-down (memoisation)** follows the recurrence from the target. The first visit to an amount or coordinate computes it; later visits return the saved answer. It may skip unreachable states, but it pays call-stack cost. [[Computer Science/Algorithms/Paradigms/Memoization|Memoization]] develops that reuse mechanism independently of DP.
+- **Bottom-up (tabulation)** starts from known answers and fills every state its target may depend on. Coin change advances from `0¢` to `30¢`; grid path moves backward from the dispatch door. The loops make dependency order explicit and avoid recursion.
+
+The recurrence then names the dependencies. Coin change reads `best[amount - coin]` for every usable denomination and keeps the minimum plus one. Grid path reads the right and down suffix costs and adds the current tile. The animations differ because those state spaces differ—a one-dimensional amount board versus a two-dimensional matrix—but the storage rule is the same.
 
 ## Coin change — local choice versus stored subproblems
 
@@ -165,15 +174,6 @@ Here the state is a coordinate rather than an amount. `best(R2C2)` means “the 
 > ```
 >
 > Both versions return the same minimum route cost; the visualization keeps the full table so it can also highlight the chosen route.
-
-## Mechanism — state, recurrence, and the two forms
-
-Both examples become DP only after the state discards irrelevant history. Coin change keeps the remaining amount because every denomination remains reusable; finite coin stock would also require the remaining counts. Grid path keeps the current coordinate. Two calls with the same state have the same future choices and therefore the same answer, regardless of how they arrived there.
-
-- **Top-down (memoisation)** follows the recurrence from the target. The first visit to an amount or coordinate computes it; later visits return the saved answer. It may skip unreachable states, but it pays call-stack cost. [[Computer Science/Algorithms/Paradigms/Memoization|Memoization]] develops that reuse mechanism independently of DP.
-- **Bottom-up (tabulation)** starts from known answers and fills every state its target may depend on. Coin change advances from `0¢` to `30¢`; grid path moves backward from the dispatch door. The loops make dependency order explicit and avoid recursion.
-
-The recurrence then names the dependencies. Coin change reads `best[amount - coin]` for every usable denomination and keeps the minimum plus one. Grid path reads the right and down suffix costs and adds the current tile. The animations differ because those state spaces differ—a one-dimensional amount board versus a two-dimensional matrix—but the storage rule is the same.
 
 ## Complexity
 
