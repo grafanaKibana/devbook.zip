@@ -1,45 +1,53 @@
 import {
-  parseRadixDistributionConfig,
+  BucketDistributionRecorder,
   radixDistributionFamily,
   type BucketDistributionFrame,
-  type BucketDistributionRecorder,
   type RadixDistributionConfig,
 } from "../families/bucket-distribution"
-import type { FamilyAlgorithmDefinition } from "../types"
+import type { FamilyAlgorithmDefinition, StepTraceConfig } from "../types"
 
-type Token = { value: number; origin: number }
-
-function digitOf(value: number, place: number, radix: number) {
-  return Math.floor(value / place) % radix
+function invalidConfig(message: string): never {
+  throw new Error(`steptrace: radix-sort ${message}`)
 }
 
-function insertionSortBucket(
-  bucket: Token[],
-  bucketIndex: number,
-  ops: BucketDistributionRecorder,
-) {
-  for (let i = 1; i < bucket.length; i++) {
-    const key = bucket[i]
-    let j = i - 1
-    while (j >= 0) {
-      ops.compareBucket(
-        bucketIndex,
-        j,
-        j + 1,
-        `Compare bucket[${bucketIndex}][${j}] and bucket[${j + 1}] in local sort.`,
-      )
-      if (bucket[j].value <= key.value) break
-      ops.swapBucket(
-        bucketIndex,
-        j,
-        j + 1,
-        `Swap bucket[${bucketIndex}][${j}] and bucket[${j + 1}] in local sort.`,
-      )
-      bucket[j + 1] = bucket[j]
-      bucket[j] = key
-      j--
-    }
+export function parseRadixSortConfig(config: StepTraceConfig): RadixDistributionConfig {
+  const { array } = config
+  const radix = config.radix ?? 10
+  const mode = config.mode ?? "LSD"
+  if (!Array.isArray(array) || array.length < 2)
+    invalidConfig('requires an "array" with at least two non-negative integers.')
+  if (!array.every((value) => Number.isSafeInteger(value) && value >= 0))
+    invalidConfig('requires every "array" value to be a non-negative safe integer.')
+  if (array.length > 12)
+    invalidConfig("limits the demonstration to 12 keys so every bucket pass remains legible.")
+  if (!Number.isInteger(radix) || radix < 2 || radix > 16)
+    invalidConfig('requires "radix" to be an integer from 2 through 16.')
+  if (String(mode).toUpperCase() !== "LSD")
+    invalidConfig('currently visualizes only stable least-significant-digit mode ("LSD").')
+
+  const max = Math.max(...array)
+  const places: number[] = []
+  for (let place = 1; place <= Math.max(max, 1); place *= radix) {
+    places.push(place)
+    if (Math.floor(max / place) < radix) break
   }
+  return {
+    profile: "radix",
+    array: array.slice(),
+    radix,
+    bucketCount: radix,
+    bucketLabels: Array.from({ length: radix }, (_, digit) => String(digit)),
+    places,
+  }
+}
+
+function digitName(place: number, radix: number) {
+  if (radix !== 10) return `place ${place}`
+  if (place === 1) return "ones"
+  if (place === 10) return "tens"
+  if (place === 100) return "hundreds"
+  if (place === 1000) return "thousands"
+  return `place ${place}`
 }
 
 export const radixSort = {
@@ -47,52 +55,50 @@ export const radixSort = {
   kind: "sort",
   family: radixDistributionFamily,
   meta: { label: "Radix sort" },
-  parse: parseRadixDistributionConfig,
-  run(input: RadixDistributionConfig, ops: BucketDistributionRecorder) {
-    const radix = input.radix
-    const maxPasses = input.places.length
-    ops.intro(`LSD radix sort with ${radix} buckets and ${maxPasses} pass(es).`)
-
-    let source: Token[] = input.array.map((value, origin) => ({ value, origin }))
-    for (let pass = 0; pass < maxPasses; pass++) {
-      const place = Math.pow(radix, pass)
-      const passLabel = `${place}`
-      ops.beginPass(pass, maxPasses, passLabel, `Distribute by digit ${pass} (${passLabel} place).`)
-
-      const buckets: Token[][] = Array.from({ length: input.bucketCount }, () => [])
-      for (let index = 0; index < source.length; index++) {
-        const token = source[index]
-        const target = digitOf(token.value, place, radix)
-        buckets[target].push(token)
-        ops.scatter(index, target, `Scatter source[${index}] = ${token.value} into bucket ${target}.`)
-      }
-
-      for (let bucketIndex = 0; bucketIndex < buckets.length; bucketIndex++) {
-        const bucket = buckets[bucketIndex]
-        if (bucket.length <= 1) continue
-        ops.beginLocalSort(bucketIndex, `Sort bucket ${bucketIndex} locally.`)
-        insertionSortBucket(bucket, bucketIndex, ops)
-      }
-
-      ops.beginGather("Read buckets left-to-right into output array.")
-      const output: Array<Token | null> = Array.from({ length: source.length }, () => null)
-      let next = 0
-      for (let bucketIndex = 0; bucketIndex < buckets.length; bucketIndex++) {
-        const bucket = buckets[bucketIndex]
-        for (let itemIndex = 0; itemIndex < bucket.length; itemIndex++) {
-          const token = bucket[itemIndex]
-          output[next] = token
-          ops.gather(bucketIndex, itemIndex, `Read bucket ${bucketIndex} item ${itemIndex} into output[${next}].`)
-          next++
-        }
-      }
-      source = output.map((token) => token as Token)
-      ops.finishPass(`Digit ${pass + 1} completed; all lower digits stay stable.`)
-    }
-
-    ops.done(
-      `All ${maxPasses} digits processed. Final output: ${source.map((token) => token.value).join(", ")}.`,
+  parse: parseRadixSortConfig,
+  run(input, ops) {
+    let working = input.array.slice()
+    ops.intro(
+      `${input.places.length} stable base-${input.radix} passes will order every digit from least to most significant.`,
     )
+    input.places.forEach((place, passIndex) => {
+      const passLabel = digitName(place, input.radix)
+      const buckets = Array.from({ length: input.radix }, () => [] as number[])
+      ops.beginPass(
+        passIndex,
+        input.places.length,
+        passLabel,
+        `Pass ${passIndex + 1}/${input.places.length}: distribute by the ${passLabel} digit.`,
+      )
+      working.forEach((value, sourceIndex) => {
+        const digit = Math.floor(value / place) % input.radix
+        buckets[digit].push(value)
+        ops.scatter(
+          sourceIndex,
+          digit,
+          `${value}'s ${passLabel} digit is ${digit}; append it to bucket ${digit}.`,
+        )
+      })
+      ops.beginGather(
+        `Read digit buckets from ${input.bucketLabels[0]} through ${input.bucketLabels.at(-1)} without changing order inside a bucket.`,
+      )
+      const next: number[] = []
+      buckets.forEach((bucket, bucketIndex) => {
+        bucket.forEach((value, itemIndex) => {
+          next.push(value)
+          ops.gather(
+            bucketIndex,
+            itemIndex,
+            `Take ${value} from bucket ${bucketIndex}; write it at output index ${next.length - 1}.`,
+          )
+        })
+      })
+      ops.finishPass(
+        `${passLabel[0].toUpperCase()}${passLabel.slice(1)} pass complete: lower processed digits remain stably ordered.`,
+      )
+      working = next
+    })
+    ops.done(`All ${input.places.length} digit positions are ordered: [${working.join(", ")}].`)
   },
 } satisfies FamilyAlgorithmDefinition<
   "sort",

@@ -76,80 +76,6 @@ export interface BucketDistributionOperations {
   done(message: string): void
 }
 
-export function parseRangeBucketDistributionConfig(
-  config: StepTraceConfig,
-): RangeBucketDistributionConfig {
-  const array = parseArray(config.array, "bucket-sort")
-  const bucketCount = parseBucketCount(config.bucketCount ?? 5, "bucket-sort")
-  return {
-    profile: "bucket",
-    array,
-    bucketCount,
-    bucketLabels: makeRangeLabels(array, bucketCount),
-  }
-}
-
-export function parseRadixDistributionConfig(config: StepTraceConfig): RadixDistributionConfig {
-  const array = parseArray(config.array, "radix-sort")
-  const radix = parseRadix(config.radix ?? 10)
-  const bucketCount = parseBucketCount(config.bucketCount ?? radix, "radix-sort")
-  const mode = config.mode
-  if (mode != null && mode !== "LSD")
-    throw new Error('steptrace: radix-sort supports only mode "LSD" for now.')
-  const max = Math.max(...array)
-  if (max < 0) throw new Error("steptrace: radix-sort currently supports only non-negative keys.")
-  const places = Math.max(1, Math.floor(Math.log(Math.max(max, 1)) / Math.log(radix)) + 1)
-  const placesIndexes = Array.from({ length: places }, (_, index) => index)
-  return {
-    profile: "radix",
-    array,
-    bucketCount: radix,
-    radix,
-    places: placesIndexes,
-    bucketLabels: makeRadixLabels(radix),
-  }
-}
-
-function parseArray(values: unknown, algorithm: string) {
-  if (!Array.isArray(values) || values.length < 2)
-    throw new Error(`steptrace: ${algorithm} requires an "array" with at least two keys.`)
-  if (!values.every((value) => Number.isInteger(value)))
-    throw new Error(`steptrace: ${algorithm} requires every value to be an integer key.`)
-  return values.slice() as number[]
-}
-
-function parseBucketCount(value: unknown, algorithm: string) {
-  const count = Number(value)
-  if (!Number.isInteger(count) || count < 2 || count > 24)
-    throw new Error(`steptrace: ${algorithm} requires bucketCount between 2 and 24.`)
-  return count
-}
-
-function parseRadix(value: unknown) {
-  const radix = Number(value)
-  if (!Number.isInteger(radix) || radix < 2 || radix > 36)
-    throw new Error('steptrace: radix-sort requires an integer radix between 2 and 36.')
-  return radix
-}
-
-function makeRangeLabels(values: number[], bucketCount: number) {
-  const min = Math.min(...values)
-  const max = Math.max(...values)
-  if (max === min) return Array.from({ length: bucketCount }, () => `[${min.toFixed(2)}, ${min.toFixed(2)}]`)
-  const width = (max - min) / bucketCount
-  return Array.from({ length: bucketCount }, (_, index) => {
-    const left = min + index * width
-    const right = left + width
-    return `${index === bucketCount - 1 ? "[" : "["}${left.toFixed(2)}, ${right.toFixed(2)}${
-      index === bucketCount - 1 ? "]" : ")"
-    }`
-  })
-}
-
-function makeRadixLabels(radix: number) {
-  return Array.from({ length: radix }, (_, index) => String(index))
-}
-
 export class BucketDistributionRecorder implements BucketDistributionOperations {
   frames: BucketDistributionFrame[] = []
   private readonly profile: BucketDistributionConfig["profile"]
@@ -197,9 +123,10 @@ export class BucketDistributionRecorder implements BucketDistributionOperations 
     this.assertSourceIndex(sourceIndex)
     this.assertBucketIndex(bucketIndex)
     this.buckets[bucketIndex].push(this.source[sourceIndex])
+    const itemIndex = this.buckets[bucketIndex].length - 1
     this.activeSource = sourceIndex
     this.activeBucket = bucketIndex
-    this.activeBucketItems = [this.buckets[bucketIndex].length - 1, this.buckets[bucketIndex].length - 1]
+    this.activeBucketItems = [itemIndex, itemIndex]
     this.activeOutput = null
     this.scattered++
     this.push("scatter", message)
@@ -227,7 +154,9 @@ export class BucketDistributionRecorder implements BucketDistributionOperations 
   swapBucket(bucketIndex: number, left: number, right: number, message: string) {
     this.assertBucketItems(bucketIndex, left, right)
     const bucket = this.buckets[bucketIndex]
-    ;[bucket[left], bucket[right]] = [bucket[right], bucket[left]]
+    const token = bucket[left]
+    bucket[left] = bucket[right]
+    bucket[right] = token
     this.activeSource = null
     this.activeBucket = bucketIndex
     this.activeBucketItems = [left, right]
@@ -237,10 +166,7 @@ export class BucketDistributionRecorder implements BucketDistributionOperations 
   }
 
   beginGather(message: string) {
-    this.activeSource = null
-    this.activeBucket = null
-    this.activeBucketItems = null
-    this.activeOutput = null
+    this.clearActive()
     this.push("gather", message)
   }
 
@@ -290,7 +216,7 @@ export class BucketDistributionRecorder implements BucketDistributionOperations 
     this.assertBucketIndex(bucketIndex)
     const bucket = this.buckets[bucketIndex]
     if (indices.some((index) => !Number.isInteger(index) || index < 0 || index >= bucket.length))
-      throw new Error(`steptrace: distribution bucket item is out of range.`)
+      throw new Error("steptrace: distribution bucket item is out of range.")
   }
 
   private push(type: BucketDistributionPhase, message: string) {
@@ -323,24 +249,13 @@ export class BucketDistributionRecorder implements BucketDistributionOperations 
 }
 
 function phaseLabel(frame: BucketDistributionFrame) {
-  switch (frame.type) {
-    case "intro":
-      return "set up"
-    case "pass":
-      return "new pass"
-    case "scatter":
-      return "scatter"
-    case "local-sort":
-    case "compare":
-    case "swap":
-      return "sort bucket"
-    case "gather":
-      return "gather"
-    case "pass-complete":
-      return "pass complete"
-    case "done":
-      return "sorted"
-  }
+  if (frame.type === "intro") return "set up"
+  if (frame.type === "pass") return "new pass"
+  if (frame.type === "scatter") return "scatter"
+  if (["local-sort", "compare", "swap"].includes(frame.type)) return "sort bucket"
+  if (frame.type === "gather") return "gather"
+  if (frame.type === "pass-complete") return "pass complete"
+  return "sorted"
 }
 
 function invalidConfig(message: string): never {
@@ -352,6 +267,12 @@ function ensureIntegerArray(array: unknown, label: string) {
     invalidConfig(`requires a non-empty "${label}" array.`)
   if (!array.every((value) => Number.isInteger(value)))
     invalidConfig(`requires every "${label}" entry to be an integer.`)
+}
+
+function ensureNonNegativeSafeIntegerArray(array: unknown, label: string) {
+  ensureIntegerArray(array, label)
+  if (!(array as number[]).every((value) => Number.isSafeInteger(value) && value >= 0))
+    invalidConfig(`requires every "${label}" entry to be a non-negative safe integer.`)
 }
 
 function radixBucketLabels(radix: number) {
@@ -368,16 +289,20 @@ function rangeBucketLabels(bucketCount: number, min: number, max: number) {
 }
 
 export function parseRadixDistributionConfig(config: StepTraceConfig): RadixDistributionConfig {
-  ensureIntegerArray(config.array, "array")
+  const array = config.array as number[]
+  ensureNonNegativeSafeIntegerArray(array, "array")
   const radix = Number(config.radix ?? 10)
   if (!Number.isInteger(radix) || radix < 2 || radix > 16)
     invalidConfig('requires a "radix" integer from 2 to 16.')
-  const max = Math.max(...config.array)
+  if (config.mode != null && String(config.mode).toUpperCase() !== "LSD")
+    invalidConfig('supports only the least-significant-digit "mode".')
+  const max = Math.max(...array)
   const places: number[] = []
   for (let place = 1; place <= max; place *= radix) places.push(place)
+  if (places.length === 0) places.push(1)
   return {
     profile: "radix",
-    array: config.array.slice(),
+    array: array.slice(),
     bucketCount: radix,
     bucketLabels: radixBucketLabels(radix),
     radix,
@@ -388,28 +313,34 @@ export function parseRadixDistributionConfig(config: StepTraceConfig): RadixDist
 export function parseRangeBucketDistributionConfig(
   config: StepTraceConfig,
 ): RangeBucketDistributionConfig {
-  if (!Array.isArray(config.array) || config.array.length < 2)
+  const array = config.array as number[]
+  if (!Array.isArray(array) || array.length < 2)
     invalidConfig('requires a non-empty "array" with at least two keys.')
-  if (!config.array.every((value) => Number.isFinite(value as number)))
+  if (!array.every((value) => Number.isFinite(value as number)))
     invalidConfig('requires every "array" entry to be a finite number.')
   const bucketCount = Number(config.bucketCount ?? 5)
   if (!Number.isInteger(bucketCount) || bucketCount < 2 || bucketCount > 16)
     invalidConfig('requires a "bucketCount" integer from 2 to 16.')
-  const min = Math.min(...config.array)
-  const max = Math.max(...config.array)
+  const min = Math.min(...array)
+  const max = Math.max(...array)
   if (!(min >= 0 && max < 1))
     invalidConfig('demonstrates bucket sort on values in the half-open range [0, 1).')
   return {
     profile: "bucket",
-    array: config.array.slice(),
+    array: array.slice(),
     bucketCount,
     bucketLabels: rangeBucketLabels(bucketCount, 0, 1),
   }
 }
 
+function activeValue(frame: BucketDistributionFrame) {
+  if (frame.activeSource != null) return frame.source[frame.activeSource]?.value
+  if (frame.activeBucket != null && frame.activeBucketItems != null)
+    return frame.buckets[frame.activeBucket]?.[frame.activeBucketItems[0]]?.value
+  return null
+}
+
 function distributionWatch(frame: BucketDistributionFrame): WatchRow[] {
-  const activeToken =
-    frame.activeSource == null ? null : frame.source[frame.activeSource]
   const bucket =
     frame.activeBucket == null ? "—" : frame.bucketLabels[frame.activeBucket]
   const progress =
@@ -434,9 +365,9 @@ function distributionWatch(frame: BucketDistributionFrame): WatchRow[] {
     },
     {
       k: "key",
-      v: activeToken?.value ?? "—",
+      v: activeValue(frame) ?? "—",
       sw: "var(--_amber)",
-      hint: "Input key currently being scattered or moved.",
+      hint: "Key currently being scattered, compared, or gathered.",
     },
     {
       k: "bucket",
@@ -485,11 +416,9 @@ export function makeBucketDistributionView(frames: readonly BucketDistributionFr
   )
   const bucketBand = el("div", "steptrace__distribution-band")
   const board = el("div", "steptrace__distribution-bucket-board")
+  const bucketTitle = first.profile === "radix" ? "Digit Buckets" : "Range Buckets"
   board.setAttribute("role", "region")
-  board.setAttribute(
-    "aria-label",
-    first.profile === "radix" ? "Digit Buckets" : "Range Buckets",
-  )
+  board.setAttribute("aria-label", bucketTitle)
   const lanes = first.bucketLabels.map((bucketLabel, bucketIndex) => {
     const lane = el("div", "steptrace__distribution-lane")
     const header = el("div", "steptrace__distribution-lane-header")
@@ -501,7 +430,7 @@ export function makeBucketDistributionView(frames: readonly BucketDistributionFr
   })
   bucketBand.append(
     distributionLabel(
-      first.profile === "radix" ? "Digit Buckets" : "Range Buckets",
+      bucketTitle,
       first.profile === "radix"
         ? "Keys append in source order, preserving lower-digit work."
         : "Each range is sorted locally before the buckets are concatenated.",

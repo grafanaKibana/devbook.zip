@@ -1,47 +1,40 @@
 import {
-  parseRangeBucketDistributionConfig,
+  BucketDistributionRecorder,
   rangeBucketDistributionFamily,
   type BucketDistributionFrame,
-  type BucketDistributionRecorder,
   type RangeBucketDistributionConfig,
 } from "../families/bucket-distribution"
-import type { FamilyAlgorithmDefinition } from "../types"
+import type { FamilyAlgorithmDefinition, StepTraceConfig } from "../types"
 
-type Token = { value: number; origin: number }
-
-function bucketIndex(value: number, min: number, max: number, count: number) {
-  if (max === min) return 0
-  const ratio = (value - min) / (max - min)
-  const index = Math.floor(count * ratio)
-  return Math.min(count - 1, Math.max(0, index))
+function invalidConfig(message: string): never {
+  throw new Error(`steptrace: bucket-sort ${message}`)
 }
 
-function insertionSortBucket(
-  bucket: Token[],
-  bucketIndex: number,
-  ops: BucketDistributionRecorder,
-) {
-  for (let i = 1; i < bucket.length; i++) {
-    const key = bucket[i]
-    let j = i - 1
-    while (j >= 0) {
-      ops.compareBucket(
-        bucketIndex,
-        j,
-        j + 1,
-        `Compare bucket[${bucketIndex}][${j}] and bucket[${j + 1}] in local sort.`,
-      )
-      if (bucket[j].value <= key.value) break
-      ops.swapBucket(
-        bucketIndex,
-        j,
-        j + 1,
-        `Swap bucket[${bucketIndex}][${j}] and bucket[${j + 1}] in local sort.`,
-      )
-      bucket[j + 1] = bucket[j]
-      bucket[j] = key
-      j--
-    }
+export function parseBucketSortConfig(config: StepTraceConfig): RangeBucketDistributionConfig {
+  const { array } = config
+  const bucketCount = config.bucketCount ?? 5
+  if (!Array.isArray(array) || array.length < 2)
+    invalidConfig('requires an "array" with at least two finite numbers in [0, 1).')
+  if (
+    !array.every(
+      (value) => typeof value === "number" && Number.isFinite(value) && value >= 0 && value < 1,
+    )
+  )
+    invalidConfig('requires every "array" value to be a finite number in [0, 1).')
+  if (array.length > 12)
+    invalidConfig("limits the demonstration to 12 keys so local bucket order remains legible.")
+  if (!Number.isInteger(bucketCount) || bucketCount < 2 || bucketCount > 8)
+    invalidConfig('requires "bucketCount" to be an integer from 2 through 8.')
+
+  return {
+    profile: "bucket",
+    array: array.slice(),
+    bucketCount,
+    bucketLabels: Array.from({ length: bucketCount }, (_, index) => {
+      const start = index / bucketCount
+      const end = (index + 1) / bucketCount
+      return `${start.toFixed(1)}–${end.toFixed(1)}`
+    }),
   }
 }
 
@@ -50,48 +43,74 @@ export const bucketSort = {
   kind: "sort",
   family: rangeBucketDistributionFamily,
   meta: { label: "Bucket sort" },
-  parse: parseRangeBucketDistributionConfig,
-  run(input: RangeBucketDistributionConfig, ops: BucketDistributionRecorder) {
-    const min = Math.min(...input.array)
-    const max = Math.max(...input.array)
-    const count = input.bucketCount
-    ops.intro(`Partition [${min}, ${max}] into ${count} equal-width buckets.`)
+  parse: parseBucketSortConfig,
+  run(input, ops) {
+    const buckets = Array.from({ length: input.bucketCount }, () => [] as number[])
+    ops.intro(
+      `${input.bucketCount} equal-width ranges split [0, 1); scatter by value, sort locally, then gather left to right.`,
+    )
+    ops.beginPass(
+      0,
+      1,
+      "range pass",
+      `Each value maps directly to one of ${input.bucketCount} numeric ranges.`,
+    )
+    input.array.forEach((value, sourceIndex) => {
+      const bucketIndex = Math.min(input.bucketCount - 1, Math.floor(value * input.bucketCount))
+      buckets[bucketIndex].push(value)
+      ops.scatter(
+        sourceIndex,
+        bucketIndex,
+        `${value.toFixed(2)} lies in ${input.bucketLabels[bucketIndex]}; append it to that bucket.`,
+      )
+    })
 
-    const source: Token[] = input.array.map((value, origin) => ({ value, origin }))
-    ops.beginPass(0, 1, "0", "Scatter keys into range buckets.")
-
-    const buckets: Token[][] = Array.from({ length: count }, () => [])
-    for (let index = 0; index < source.length; index++) {
-      const token = source[index]
-      const target = bucketIndex(token.value, min, max, count)
-      buckets[target].push(token)
-      ops.scatter(index, target, `Scatter source[${index}] = ${token.value} into bucket ${target}.`)
-    }
-
-    for (let bucketIdx = 0; bucketIdx < count; bucketIdx++) {
-      const bucket = buckets[bucketIdx]
-      if (bucket.length <= 1) continue
-      ops.beginLocalSort(bucketIdx, `Sort bucket ${bucketIdx} locally.`)
-      insertionSortBucket(bucket, bucketIdx, ops)
-    }
-
-    ops.beginGather("Concatenate buckets in order to form the output.")
-    let next = 0
-    const output: Array<Token | null> = Array.from({ length: source.length }, () => null)
-    for (let bucketIdx = 0; bucketIdx < count; bucketIdx++) {
-      const bucket = buckets[bucketIdx]
-      for (let itemIndex = 0; itemIndex < bucket.length; itemIndex++) {
-        output[next] = bucket[itemIndex]
-        ops.gather(bucketIdx, itemIndex, `Append bucket ${bucketIdx} item ${itemIndex} to output[${next}].`)
-        next++
+    buckets.forEach((bucket, bucketIndex) => {
+      if (bucket.length < 2) return
+      ops.beginLocalSort(
+        bucketIndex,
+        `Sort ${input.bucketLabels[bucketIndex]} internally; other ranges do not need comparison.`,
+      )
+      for (let right = 1; right < bucket.length; right++) {
+        for (let cursor = right; cursor > 0; cursor--) {
+          const leftValue = bucket[cursor - 1]
+          const rightValue = bucket[cursor]
+          ops.compareBucket(
+            bucketIndex,
+            cursor - 1,
+            cursor,
+            `Compare ${leftValue.toFixed(2)} and ${rightValue.toFixed(2)} inside ${input.bucketLabels[bucketIndex]}.`,
+          )
+          if (leftValue <= rightValue) break
+          const value = bucket[cursor - 1]
+          bucket[cursor - 1] = bucket[cursor]
+          bucket[cursor] = value
+          ops.swapBucket(
+            bucketIndex,
+            cursor - 1,
+            cursor,
+            `${rightValue.toFixed(2)} moves before ${leftValue.toFixed(2)} inside its bucket.`,
+          )
+        }
       }
-    }
+    })
 
-    ops.finishPass("Single scatter-sort-gather pass complete.")
-    ops.done(`Sorted by range bucketing: ${output
-      .filter((token) => token != null)
-      .map((token) => token!.value)
-      .join(", ")}.`)
+    ops.beginGather(
+      `Every earlier bucket covers smaller values, so concatenate ranges without cross-bucket comparisons.`,
+    )
+    const sorted: number[] = []
+    buckets.forEach((bucket, bucketIndex) => {
+      bucket.forEach((value, itemIndex) => {
+        sorted.push(value)
+        ops.gather(
+          bucketIndex,
+          itemIndex,
+          `Write ${value.toFixed(2)} from ${input.bucketLabels[bucketIndex]} at output index ${sorted.length - 1}.`,
+        )
+      })
+    })
+    ops.finishPass("All locally sorted ranges are concatenated in increasing range order.")
+    ops.done(`Bucket Sort produced [${sorted.map((value) => value.toFixed(2)).join(", ")}].`)
   },
 } satisfies FamilyAlgorithmDefinition<
   "sort",

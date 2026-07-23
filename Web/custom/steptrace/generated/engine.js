@@ -4105,8 +4105,8 @@
         bar.bar.dataset.state = barIndex === frame.activeInput ? frame.type === "tally" ? "increment" : "compare" : "";
         bar.bar.setAttribute("aria-label", `input index ${barIndex}, value ${value}, token ${labels[barIndex]}`);
       });
-      buckets.forEach(({ bucket, count, slots, key }, bucketIndex2) => {
-        const range = frequencyRangeFor(frame, bucketIndex2);
+      buckets.forEach(({ bucket, count, slots, key }, bucketIndex) => {
+        const range = frequencyRangeFor(frame, bucketIndex);
         count.textContent = String(range.count);
         slots.textContent = range.slots ?? "";
         bucket.dataset.hasSlots = range.slots == null ? "0" : "1";
@@ -4152,69 +4152,6 @@
   };
 
   // custom/steptrace/src/families/bucket-distribution.ts
-  function parseRangeBucketDistributionConfig(config) {
-    const array = parseArray(config.array, "bucket-sort");
-    const bucketCount = parseBucketCount(config.bucketCount ?? 5, "bucket-sort");
-    return {
-      profile: "bucket",
-      array,
-      bucketCount,
-      bucketLabels: makeRangeLabels(array, bucketCount)
-    };
-  }
-  function parseRadixDistributionConfig(config) {
-    const array = parseArray(config.array, "radix-sort");
-    const radix = parseRadix(config.radix ?? 10);
-    const bucketCount = parseBucketCount(config.bucketCount ?? radix, "radix-sort");
-    const mode = config.mode;
-    if (mode != null && mode !== "LSD")
-      throw new Error('steptrace: radix-sort supports only mode "LSD" for now.');
-    const max = Math.max(...array);
-    if (max < 0) throw new Error("steptrace: radix-sort currently supports only non-negative keys.");
-    const places = Math.max(1, Math.floor(Math.log(Math.max(max, 1)) / Math.log(radix)) + 1);
-    const placesIndexes = Array.from({ length: places }, (_, index) => index);
-    return {
-      profile: "radix",
-      array,
-      bucketCount: radix,
-      radix,
-      places: placesIndexes,
-      bucketLabels: makeRadixLabels(radix)
-    };
-  }
-  function parseArray(values, algorithm) {
-    if (!Array.isArray(values) || values.length < 2)
-      throw new Error(`steptrace: ${algorithm} requires an "array" with at least two keys.`);
-    if (!values.every((value) => Number.isInteger(value)))
-      throw new Error(`steptrace: ${algorithm} requires every value to be an integer key.`);
-    return values.slice();
-  }
-  function parseBucketCount(value, algorithm) {
-    const count = Number(value);
-    if (!Number.isInteger(count) || count < 2 || count > 24)
-      throw new Error(`steptrace: ${algorithm} requires bucketCount between 2 and 24.`);
-    return count;
-  }
-  function parseRadix(value) {
-    const radix = Number(value);
-    if (!Number.isInteger(radix) || radix < 2 || radix > 36)
-      throw new Error("steptrace: radix-sort requires an integer radix between 2 and 36.");
-    return radix;
-  }
-  function makeRangeLabels(values, bucketCount) {
-    const min = Math.min(...values);
-    const max = Math.max(...values);
-    if (max === min) return Array.from({ length: bucketCount }, () => `[${min.toFixed(2)}, ${min.toFixed(2)}]`);
-    const width = (max - min) / bucketCount;
-    return Array.from({ length: bucketCount }, (_, index) => {
-      const left = min + index * width;
-      const right = left + width;
-      return `${index === bucketCount - 1 ? "[" : "["}${left.toFixed(2)}, ${right.toFixed(2)}${index === bucketCount - 1 ? "]" : ")"}`;
-    });
-  }
-  function makeRadixLabels(radix) {
-    return Array.from({ length: radix }, (_, index) => String(index));
-  }
   var BucketDistributionRecorder = class {
     constructor(config) {
       __publicField(this, "frames", []);
@@ -4254,58 +4191,58 @@
       this.clearActive();
       this.push("pass", message);
     }
-    scatter(sourceIndex, bucketIndex2, message) {
+    scatter(sourceIndex, bucketIndex, message) {
       this.assertSourceIndex(sourceIndex);
-      this.assertBucketIndex(bucketIndex2);
-      this.buckets[bucketIndex2].push(this.source[sourceIndex]);
+      this.assertBucketIndex(bucketIndex);
+      this.buckets[bucketIndex].push(this.source[sourceIndex]);
+      const itemIndex = this.buckets[bucketIndex].length - 1;
       this.activeSource = sourceIndex;
-      this.activeBucket = bucketIndex2;
-      this.activeBucketItems = [this.buckets[bucketIndex2].length - 1, this.buckets[bucketIndex2].length - 1];
+      this.activeBucket = bucketIndex;
+      this.activeBucketItems = [itemIndex, itemIndex];
       this.activeOutput = null;
       this.scattered++;
       this.push("scatter", message);
     }
-    beginLocalSort(bucketIndex2, message) {
-      this.assertBucketIndex(bucketIndex2);
+    beginLocalSort(bucketIndex, message) {
+      this.assertBucketIndex(bucketIndex);
       this.activeSource = null;
-      this.activeBucket = bucketIndex2;
+      this.activeBucket = bucketIndex;
       this.activeBucketItems = null;
       this.activeOutput = null;
       this.push("local-sort", message);
     }
-    compareBucket(bucketIndex2, left, right, message) {
-      this.assertBucketItems(bucketIndex2, left, right);
+    compareBucket(bucketIndex, left, right, message) {
+      this.assertBucketItems(bucketIndex, left, right);
       this.activeSource = null;
-      this.activeBucket = bucketIndex2;
+      this.activeBucket = bucketIndex;
       this.activeBucketItems = [left, right];
       this.activeOutput = null;
       this.comparisons++;
       this.push("compare", message);
     }
-    swapBucket(bucketIndex2, left, right, message) {
-      this.assertBucketItems(bucketIndex2, left, right);
-      const bucket = this.buckets[bucketIndex2];
-      [bucket[left], bucket[right]] = [bucket[right], bucket[left]];
+    swapBucket(bucketIndex, left, right, message) {
+      this.assertBucketItems(bucketIndex, left, right);
+      const bucket = this.buckets[bucketIndex];
+      const token = bucket[left];
+      bucket[left] = bucket[right];
+      bucket[right] = token;
       this.activeSource = null;
-      this.activeBucket = bucketIndex2;
+      this.activeBucket = bucketIndex;
       this.activeBucketItems = [left, right];
       this.activeOutput = null;
       this.movements++;
       this.push("swap", message);
     }
     beginGather(message) {
-      this.activeSource = null;
-      this.activeBucket = null;
-      this.activeBucketItems = null;
-      this.activeOutput = null;
+      this.clearActive();
       this.push("gather", message);
     }
-    gather(bucketIndex2, itemIndex, message) {
-      this.assertBucketItems(bucketIndex2, itemIndex);
+    gather(bucketIndex, itemIndex, message) {
+      this.assertBucketItems(bucketIndex, itemIndex);
       const target = this.gathered;
-      this.output[target] = this.buckets[bucketIndex2][itemIndex];
+      this.output[target] = this.buckets[bucketIndex][itemIndex];
       this.activeSource = null;
-      this.activeBucket = bucketIndex2;
+      this.activeBucket = bucketIndex;
       this.activeBucketItems = [itemIndex, itemIndex];
       this.activeOutput = target;
       this.gathered++;
@@ -4336,11 +4273,11 @@
       if (!Number.isInteger(index) || index < 0 || index >= this.buckets.length)
         throw new Error(`steptrace: distribution bucket index ${index} is out of range.`);
     }
-    assertBucketItems(bucketIndex2, ...indices) {
-      this.assertBucketIndex(bucketIndex2);
-      const bucket = this.buckets[bucketIndex2];
+    assertBucketItems(bucketIndex, ...indices) {
+      this.assertBucketIndex(bucketIndex);
+      const bucket = this.buckets[bucketIndex];
       if (indices.some((index) => !Number.isInteger(index) || index < 0 || index >= bucket.length))
-        throw new Error(`steptrace: distribution bucket item is out of range.`);
+        throw new Error("steptrace: distribution bucket item is out of range.");
     }
     push(type, message) {
       this.frames.push(
@@ -4368,27 +4305,21 @@
     }
   };
   function phaseLabel2(frame) {
-    switch (frame.type) {
-      case "intro":
-        return "set up";
-      case "pass":
-        return "new pass";
-      case "scatter":
-        return "scatter";
-      case "local-sort":
-      case "compare":
-      case "swap":
-        return "sort bucket";
-      case "gather":
-        return "gather";
-      case "pass-complete":
-        return "pass complete";
-      case "done":
-        return "sorted";
-    }
+    if (frame.type === "intro") return "set up";
+    if (frame.type === "pass") return "new pass";
+    if (frame.type === "scatter") return "scatter";
+    if (["local-sort", "compare", "swap"].includes(frame.type)) return "sort bucket";
+    if (frame.type === "gather") return "gather";
+    if (frame.type === "pass-complete") return "pass complete";
+    return "sorted";
+  }
+  function activeValue(frame) {
+    if (frame.activeSource != null) return frame.source[frame.activeSource]?.value;
+    if (frame.activeBucket != null && frame.activeBucketItems != null)
+      return frame.buckets[frame.activeBucket]?.[frame.activeBucketItems[0]]?.value;
+    return null;
   }
   function distributionWatch2(frame) {
-    const activeToken = frame.activeSource == null ? null : frame.source[frame.activeSource];
     const bucket = frame.activeBucket == null ? "—" : frame.bucketLabels[frame.activeBucket];
     const progress = frame.type === "gather" || frame.type === "pass-complete" || frame.type === "done" ? `${frame.gathered}/${frame.source.length}` : `${frame.scattered}/${frame.source.length}`;
     return [
@@ -4406,9 +4337,9 @@
       },
       {
         k: "key",
-        v: activeToken?.value ?? "—",
+        v: activeValue(frame) ?? "—",
         sw: "var(--_amber)",
-        hint: "Input key currently being scattered or moved."
+        hint: "Key currently being scattered, compared, or gathered."
       },
       {
         k: "bucket",
@@ -4449,23 +4380,21 @@
     );
     const bucketBand = el("div", "steptrace__distribution-band");
     const board = el("div", "steptrace__distribution-bucket-board");
+    const bucketTitle = first.profile === "radix" ? "Digit Buckets" : "Range Buckets";
     board.setAttribute("role", "region");
-    board.setAttribute(
-      "aria-label",
-      first.profile === "radix" ? "Digit Buckets" : "Range Buckets"
-    );
-    const lanes = first.bucketLabels.map((bucketLabel, bucketIndex2) => {
+    board.setAttribute("aria-label", bucketTitle);
+    const lanes = first.bucketLabels.map((bucketLabel, bucketIndex) => {
       const lane = el("div", "steptrace__distribution-lane");
       const header = el("div", "steptrace__distribution-lane-header");
       header.textContent = bucketLabel;
       const body = el("div", "steptrace__distribution-lane-body");
       lane.append(header, body);
       board.append(lane);
-      return { lane, body, bucketIndex: bucketIndex2 };
+      return { lane, body, bucketIndex };
     });
     bucketBand.append(
       distributionLabel(
-        first.profile === "radix" ? "Digit Buckets" : "Range Buckets",
+        bucketTitle,
         first.profile === "radix" ? "Keys append in source order, preserving lower-digit work." : "Each range is sorted locally before the buckets are concatenated."
       ),
       board
@@ -4497,24 +4426,24 @@
           `${sourceTitle.toLowerCase()} index ${barIndex}, value ${token.value}`
         );
       });
-      lanes.forEach(({ lane, body, bucketIndex: bucketIndex2 }) => {
-        const bucket = frame.buckets[bucketIndex2];
+      lanes.forEach(({ lane, body, bucketIndex }) => {
+        const bucket = frame.buckets[bucketIndex];
         body.textContent = "";
         bucket.forEach((token, itemIndex) => {
           const chip = el("span", "steptrace__distribution-token");
           chip.textContent = labels[token.origin] ?? tokenLabel(token.value);
           const activeItems = frame.activeBucketItems;
-          const active = frame.activeBucket === bucketIndex2 && activeItems != null && itemIndex >= Math.min(...activeItems) && itemIndex <= Math.max(...activeItems);
+          const active = frame.activeBucket === bucketIndex && activeItems != null && itemIndex >= Math.min(...activeItems) && itemIndex <= Math.max(...activeItems);
           chip.dataset.active = active ? "1" : "0";
           chip.dataset.compare = active && (frame.type === "compare" || frame.type === "swap") ? "1" : "0";
           chip.dataset.gather = active && frame.type === "gather" ? "1" : "0";
           chip.setAttribute(
             "aria-label",
-            `bucket ${frame.bucketLabels[bucketIndex2]}, item ${itemIndex}, value ${token.value}`
+            `bucket ${frame.bucketLabels[bucketIndex]}, item ${itemIndex}, value ${token.value}`
           );
           body.append(chip);
         });
-        lane.dataset.active = frame.activeBucket === bucketIndex2 ? "1" : "0";
+        lane.dataset.active = frame.activeBucket === bucketIndex ? "1" : "0";
         lane.dataset.empty = bucket.length === 0 ? "1" : "0";
       });
       output.bars.forEach((bar, outputIndex) => {
@@ -4554,75 +4483,104 @@
   var rangeBucketDistributionFamily = createBucketDistributionFamily();
 
   // custom/steptrace/src/algorithms/bucket-sort.ts
-  function bucketIndex(value, min, max, count) {
-    if (max === min) return 0;
-    const ratio = (value - min) / (max - min);
-    const index = Math.floor(count * ratio);
-    return Math.min(count - 1, Math.max(0, index));
+  function invalidConfig2(message) {
+    throw new Error(`steptrace: bucket-sort ${message}`);
   }
-  function insertionSortBucket(bucket, bucketIndex2, ops) {
-    for (let i = 1; i < bucket.length; i++) {
-      const key = bucket[i];
-      let j = i - 1;
-      while (j >= 0) {
-        ops.compareBucket(
-          bucketIndex2,
-          j,
-          j + 1,
-          `Compare bucket[${bucketIndex2}][${j}] and bucket[${j + 1}] in local sort.`
-        );
-        if (bucket[j].value <= key.value) break;
-        ops.swapBucket(
-          bucketIndex2,
-          j,
-          j + 1,
-          `Swap bucket[${bucketIndex2}][${j}] and bucket[${j + 1}] in local sort.`
-        );
-        bucket[j + 1] = bucket[j];
-        bucket[j] = key;
-        j--;
-      }
-    }
+  function parseBucketSortConfig(config) {
+    const { array } = config;
+    const bucketCount = config.bucketCount ?? 5;
+    if (!Array.isArray(array) || array.length < 2)
+      invalidConfig2('requires an "array" with at least two finite numbers in [0, 1).');
+    if (!array.every(
+      (value) => typeof value === "number" && Number.isFinite(value) && value >= 0 && value < 1
+    ))
+      invalidConfig2('requires every "array" value to be a finite number in [0, 1).');
+    if (array.length > 12)
+      invalidConfig2("limits the demonstration to 12 keys so local bucket order remains legible.");
+    if (!Number.isInteger(bucketCount) || bucketCount < 2 || bucketCount > 8)
+      invalidConfig2('requires "bucketCount" to be an integer from 2 through 8.');
+    return {
+      profile: "bucket",
+      array: array.slice(),
+      bucketCount,
+      bucketLabels: Array.from({ length: bucketCount }, (_, index) => {
+        const start = index / bucketCount;
+        const end = (index + 1) / bucketCount;
+        return `${start.toFixed(1)}–${end.toFixed(1)}`;
+      })
+    };
   }
   var bucketSort = {
     id: "bucket-sort",
     kind: "sort",
     family: rangeBucketDistributionFamily,
     meta: { label: "Bucket sort" },
-    parse: parseRangeBucketDistributionConfig,
+    parse: parseBucketSortConfig,
     run(input, ops) {
-      const min = Math.min(...input.array);
-      const max = Math.max(...input.array);
-      const count = input.bucketCount;
-      ops.intro(`Partition [${min}, ${max}] into ${count} equal-width buckets.`);
-      const source = input.array.map((value, origin) => ({ value, origin }));
-      ops.beginPass(0, 1, "0", "Scatter keys into range buckets.");
-      const buckets = Array.from({ length: count }, () => []);
-      for (let index = 0; index < source.length; index++) {
-        const token = source[index];
-        const target = bucketIndex(token.value, min, max, count);
-        buckets[target].push(token);
-        ops.scatter(index, target, `Scatter source[${index}] = ${token.value} into bucket ${target}.`);
-      }
-      for (let bucketIdx = 0; bucketIdx < count; bucketIdx++) {
-        const bucket = buckets[bucketIdx];
-        if (bucket.length <= 1) continue;
-        ops.beginLocalSort(bucketIdx, `Sort bucket ${bucketIdx} locally.`);
-        insertionSortBucket(bucket, bucketIdx, ops);
-      }
-      ops.beginGather("Concatenate buckets in order to form the output.");
-      let next = 0;
-      const output = Array.from({ length: source.length }, () => null);
-      for (let bucketIdx = 0; bucketIdx < count; bucketIdx++) {
-        const bucket = buckets[bucketIdx];
-        for (let itemIndex = 0; itemIndex < bucket.length; itemIndex++) {
-          output[next] = bucket[itemIndex];
-          ops.gather(bucketIdx, itemIndex, `Append bucket ${bucketIdx} item ${itemIndex} to output[${next}].`);
-          next++;
+      const buckets = Array.from({ length: input.bucketCount }, () => []);
+      ops.intro(
+        `${input.bucketCount} equal-width ranges split [0, 1); scatter by value, sort locally, then gather left to right.`
+      );
+      ops.beginPass(
+        0,
+        1,
+        "range pass",
+        `Each value maps directly to one of ${input.bucketCount} numeric ranges.`
+      );
+      input.array.forEach((value, sourceIndex) => {
+        const bucketIndex = Math.min(input.bucketCount - 1, Math.floor(value * input.bucketCount));
+        buckets[bucketIndex].push(value);
+        ops.scatter(
+          sourceIndex,
+          bucketIndex,
+          `${value.toFixed(2)} lies in ${input.bucketLabels[bucketIndex]}; append it to that bucket.`
+        );
+      });
+      buckets.forEach((bucket, bucketIndex) => {
+        if (bucket.length < 2) return;
+        ops.beginLocalSort(
+          bucketIndex,
+          `Sort ${input.bucketLabels[bucketIndex]} internally; other ranges do not need comparison.`
+        );
+        for (let right = 1; right < bucket.length; right++) {
+          for (let cursor = right; cursor > 0; cursor--) {
+            const leftValue = bucket[cursor - 1];
+            const rightValue = bucket[cursor];
+            ops.compareBucket(
+              bucketIndex,
+              cursor - 1,
+              cursor,
+              `Compare ${leftValue.toFixed(2)} and ${rightValue.toFixed(2)} inside ${input.bucketLabels[bucketIndex]}.`
+            );
+            if (leftValue <= rightValue) break;
+            const value = bucket[cursor - 1];
+            bucket[cursor - 1] = bucket[cursor];
+            bucket[cursor] = value;
+            ops.swapBucket(
+              bucketIndex,
+              cursor - 1,
+              cursor,
+              `${rightValue.toFixed(2)} moves before ${leftValue.toFixed(2)} inside its bucket.`
+            );
+          }
         }
-      }
-      ops.finishPass("Single scatter-sort-gather pass complete.");
-      ops.done(`Sorted by range bucketing: ${output.filter((token) => token != null).map((token) => token.value).join(", ")}.`);
+      });
+      ops.beginGather(
+        `Every earlier bucket covers smaller values, so concatenate ranges without cross-bucket comparisons.`
+      );
+      const sorted = [];
+      buckets.forEach((bucket, bucketIndex) => {
+        bucket.forEach((value, itemIndex) => {
+          sorted.push(value);
+          ops.gather(
+            bucketIndex,
+            itemIndex,
+            `Write ${value.toFixed(2)} from ${input.bucketLabels[bucketIndex]} at output index ${sorted.length - 1}.`
+          );
+        });
+      });
+      ops.finishPass("All locally sorted ranges are concatenated in increasing range order.");
+      ops.done(`Bucket Sort produced [${sorted.map((value) => value.toFixed(2)).join(", ")}].`);
     }
   };
 
@@ -4833,18 +4791,18 @@
   };
 
   // custom/steptrace/src/algorithms/comb-sort.ts
-  function invalidConfig2(message) {
+  function invalidConfig3(message) {
     throw new Error(`steptrace: comb-sort ${message}`);
   }
   function parseCombSortConfig(config) {
     const { array } = config;
     const shrinkFactor = config.shrinkFactor ?? 1.3;
     if (!Array.isArray(array) || array.length < 2)
-      invalidConfig2('requires an "array" with at least two numbers.');
+      invalidConfig3('requires an "array" with at least two numbers.');
     if (!array.every((value) => typeof value === "number" && Number.isFinite(value)))
-      invalidConfig2('requires every "array" value to be a finite number.');
+      invalidConfig3('requires every "array" value to be a finite number.');
     if (typeof shrinkFactor !== "number" || !Number.isFinite(shrinkFactor) || shrinkFactor <= 1)
-      invalidConfig2('requires "shrinkFactor" to be a finite number greater than 1.');
+      invalidConfig3('requires "shrinkFactor" to be a finite number greater than 1.');
     return { array: array.slice(), shrinkFactor, profile: "comb" };
   }
   var combSort = {
@@ -4923,17 +4881,17 @@
   };
 
   // custom/steptrace/src/algorithms/cyclic-sort.ts
-  function invalidConfig3(message) {
+  function invalidConfig4(message) {
     throw new Error(`steptrace: cyclic-sort ${message}`);
   }
   function parseCyclicSortConfig(config) {
     const { array } = config;
     if (!Array.isArray(array) || array.length < 2)
-      invalidConfig3('requires an "array" with at least two integers.');
+      invalidConfig4('requires an "array" with at least two integers.');
     if (!array.every((value) => Number.isInteger(value) && value >= 1 && value <= array.length))
-      invalidConfig3("requires every value to be an integer in the range 1..array.length.");
+      invalidConfig4("requires every value to be an integer in the range 1..array.length.");
     if (new Set(array).size !== array.length)
-      invalidConfig3("requires a permutation with no duplicate values.");
+      invalidConfig4("requires a permutation with no duplicate values.");
     return { array: array.slice(), profile: "cyclic" };
   }
   var cyclicSort = {
@@ -5085,12 +5043,12 @@
   };
 
   // custom/steptrace/src/families/execution-tree.ts
-  function invalidConfig4(message) {
+  function invalidConfig5(message) {
     throw new Error(`steptrace: divide-and-conquer ${message}`);
   }
   function parseExecutionTreeConfig(config) {
     if (config.array !== void 0)
-      invalidConfig4('does not take an "array"; it animates the paradigm itself.');
+      invalidConfig5('does not take an "array"; it animates the paradigm itself.');
     return { profile: "divide-and-conquer" };
   }
   function parseMemoizationConfig(config) {
@@ -6884,26 +6842,26 @@
   };
 
   // custom/steptrace/src/families/matrix-grid.ts
-  function invalidConfig5(message) {
+  function invalidConfig6(message) {
     throw new Error(`steptrace: floyd-warshall ${message}`);
   }
   function parseMatrixGridConfig(config) {
     const { nodes, edges } = config;
     if (!Array.isArray(nodes) || nodes.length === 0)
-      invalidConfig5('requires a non-empty numeric "nodes" array.');
+      invalidConfig6('requires a non-empty numeric "nodes" array.');
     if (!nodes.every((node) => typeof node === "number" && Number.isFinite(node)))
-      invalidConfig5('requires every "nodes" entry to be a finite number.');
-    if (new Set(nodes).size !== nodes.length) invalidConfig5('requires unique "nodes" entries.');
+      invalidConfig6('requires every "nodes" entry to be a finite number.');
+    if (new Set(nodes).size !== nodes.length) invalidConfig6('requires unique "nodes" entries.');
     if (!Array.isArray(edges))
-      invalidConfig5('requires an "edges" array of [from, to, weight] tuples.');
+      invalidConfig6('requires an "edges" array of [from, to, weight] tuples.');
     const knownNodes = new Set(nodes);
     const parsedEdges = edges.map((edge, index) => {
       if (!Array.isArray(edge) || edge.length !== 3 || !edge.every((value) => typeof value === "number" && Number.isFinite(value))) {
-        invalidConfig5(`requires edge ${index} to be a finite [from, to, weight] tuple.`);
+        invalidConfig6(`requires edge ${index} to be a finite [from, to, weight] tuple.`);
       }
       const [from, to, weight] = edge;
       if (!knownNodes.has(from) || !knownNodes.has(to))
-        invalidConfig5(`requires edge ${index} to reference nodes declared in "nodes".`);
+        invalidConfig6(`requires edge ${index} to reference nodes declared in "nodes".`);
       return [from, to, weight];
     });
     return { nodes: nodes.slice(), edges: parsedEdges, profile: "floyd-warshall" };
@@ -7268,21 +7226,21 @@
   };
 
   // custom/steptrace/src/algorithms/introsort.ts
-  function invalidConfig6(message) {
+  function invalidConfig7(message) {
     throw new Error(`steptrace: introsort ${message}`);
   }
   function parseIntrosortConfig(config) {
     const { array } = config;
     if (!Array.isArray(array) || array.length < 2)
-      invalidConfig6('requires an "array" with at least two numbers.');
+      invalidConfig7('requires an "array" with at least two numbers.');
     if (!array.every((value) => typeof value === "number" && Number.isFinite(value)))
-      invalidConfig6('requires every "array" value to be a finite number.');
+      invalidConfig7('requires every "array" value to be a finite number.');
     const depthLimit = config.depthLimit ?? 2 * Math.floor(Math.log2(array.length));
     const smallPartitionThreshold = config.smallPartitionThreshold ?? 16;
     if (!Number.isInteger(depthLimit) || depthLimit < 0)
-      invalidConfig6('requires "depthLimit" to be a non-negative integer.');
+      invalidConfig7('requires "depthLimit" to be a non-negative integer.');
     if (!Number.isInteger(smallPartitionThreshold) || smallPartitionThreshold < 1)
-      invalidConfig6('requires "smallPartitionThreshold" to be a positive integer.');
+      invalidConfig7('requires "smallPartitionThreshold" to be a positive integer.');
     return {
       array: array.slice(),
       profile: "introsort",
@@ -8150,79 +8108,95 @@
   };
 
   // custom/steptrace/src/algorithms/radix-sort.ts
-  function digitOf(value, place, radix) {
-    return Math.floor(value / place) % radix;
+  function invalidConfig8(message) {
+    throw new Error(`steptrace: radix-sort ${message}`);
   }
-  function insertionSortBucket2(bucket, bucketIndex2, ops) {
-    for (let i = 1; i < bucket.length; i++) {
-      const key = bucket[i];
-      let j = i - 1;
-      while (j >= 0) {
-        ops.compareBucket(
-          bucketIndex2,
-          j,
-          j + 1,
-          `Compare bucket[${bucketIndex2}][${j}] and bucket[${j + 1}] in local sort.`
-        );
-        if (bucket[j].value <= key.value) break;
-        ops.swapBucket(
-          bucketIndex2,
-          j,
-          j + 1,
-          `Swap bucket[${bucketIndex2}][${j}] and bucket[${j + 1}] in local sort.`
-        );
-        bucket[j + 1] = bucket[j];
-        bucket[j] = key;
-        j--;
-      }
+  function parseRadixSortConfig(config) {
+    const { array } = config;
+    const radix = config.radix ?? 10;
+    const mode = config.mode ?? "LSD";
+    if (!Array.isArray(array) || array.length < 2)
+      invalidConfig8('requires an "array" with at least two non-negative integers.');
+    if (!array.every((value) => Number.isSafeInteger(value) && value >= 0))
+      invalidConfig8('requires every "array" value to be a non-negative safe integer.');
+    if (array.length > 12)
+      invalidConfig8("limits the demonstration to 12 keys so every bucket pass remains legible.");
+    if (!Number.isInteger(radix) || radix < 2 || radix > 16)
+      invalidConfig8('requires "radix" to be an integer from 2 through 16.');
+    if (String(mode).toUpperCase() !== "LSD")
+      invalidConfig8('currently visualizes only stable least-significant-digit mode ("LSD").');
+    const max = Math.max(...array);
+    const places = [];
+    for (let place = 1; place <= Math.max(max, 1); place *= radix) {
+      places.push(place);
+      if (Math.floor(max / place) < radix) break;
     }
+    return {
+      profile: "radix",
+      array: array.slice(),
+      radix,
+      bucketCount: radix,
+      bucketLabels: Array.from({ length: radix }, (_, digit) => String(digit)),
+      places
+    };
+  }
+  function digitName(place, radix) {
+    if (radix !== 10) return `place ${place}`;
+    if (place === 1) return "ones";
+    if (place === 10) return "tens";
+    if (place === 100) return "hundreds";
+    if (place === 1e3) return "thousands";
+    return `place ${place}`;
   }
   var radixSort = {
     id: "radix-sort",
     kind: "sort",
     family: radixDistributionFamily,
     meta: { label: "Radix sort" },
-    parse: parseRadixDistributionConfig,
+    parse: parseRadixSortConfig,
     run(input, ops) {
-      const radix = input.radix;
-      const maxPasses = input.places.length;
-      ops.intro(`LSD radix sort with ${radix} buckets and ${maxPasses} pass(es).`);
-      let source = input.array.map((value, origin) => ({ value, origin }));
-      for (let pass = 0; pass < maxPasses; pass++) {
-        const place = Math.pow(radix, pass);
-        const passLabel = `${place}`;
-        ops.beginPass(pass, maxPasses, passLabel, `Distribute by digit ${pass} (${passLabel} place).`);
-        const buckets = Array.from({ length: input.bucketCount }, () => []);
-        for (let index = 0; index < source.length; index++) {
-          const token = source[index];
-          const target = digitOf(token.value, place, radix);
-          buckets[target].push(token);
-          ops.scatter(index, target, `Scatter source[${index}] = ${token.value} into bucket ${target}.`);
-        }
-        for (let bucketIndex2 = 0; bucketIndex2 < buckets.length; bucketIndex2++) {
-          const bucket = buckets[bucketIndex2];
-          if (bucket.length <= 1) continue;
-          ops.beginLocalSort(bucketIndex2, `Sort bucket ${bucketIndex2} locally.`);
-          insertionSortBucket2(bucket, bucketIndex2, ops);
-        }
-        ops.beginGather("Read buckets left-to-right into output array.");
-        const output = Array.from({ length: source.length }, () => null);
-        let next = 0;
-        for (let bucketIndex2 = 0; bucketIndex2 < buckets.length; bucketIndex2++) {
-          const bucket = buckets[bucketIndex2];
-          for (let itemIndex = 0; itemIndex < bucket.length; itemIndex++) {
-            const token = bucket[itemIndex];
-            output[next] = token;
-            ops.gather(bucketIndex2, itemIndex, `Read bucket ${bucketIndex2} item ${itemIndex} into output[${next}].`);
-            next++;
-          }
-        }
-        source = output.map((token) => token);
-        ops.finishPass(`Digit ${pass + 1} completed; all lower digits stay stable.`);
-      }
-      ops.done(
-        `All ${maxPasses} digits processed. Final output: ${source.map((token) => token.value).join(", ")}.`
+      let working = input.array.slice();
+      ops.intro(
+        `${input.places.length} stable base-${input.radix} passes will order every digit from least to most significant.`
       );
+      input.places.forEach((place, passIndex) => {
+        const passLabel = digitName(place, input.radix);
+        const buckets = Array.from({ length: input.radix }, () => []);
+        ops.beginPass(
+          passIndex,
+          input.places.length,
+          passLabel,
+          `Pass ${passIndex + 1}/${input.places.length}: distribute by the ${passLabel} digit.`
+        );
+        working.forEach((value, sourceIndex) => {
+          const digit = Math.floor(value / place) % input.radix;
+          buckets[digit].push(value);
+          ops.scatter(
+            sourceIndex,
+            digit,
+            `${value}'s ${passLabel} digit is ${digit}; append it to bucket ${digit}.`
+          );
+        });
+        ops.beginGather(
+          `Read digit buckets from ${input.bucketLabels[0]} through ${input.bucketLabels.at(-1)} without changing order inside a bucket.`
+        );
+        const next = [];
+        buckets.forEach((bucket, bucketIndex) => {
+          bucket.forEach((value, itemIndex) => {
+            next.push(value);
+            ops.gather(
+              bucketIndex,
+              itemIndex,
+              `Take ${value} from bucket ${bucketIndex}; write it at output index ${next.length - 1}.`
+            );
+          });
+        });
+        ops.finishPass(
+          `${passLabel[0].toUpperCase()}${passLabel.slice(1)} pass complete: lower processed digits remain stably ordered.`
+        );
+        working = next;
+      });
+      ops.done(`All ${input.places.length} digit positions are ordered: [${working.join(", ")}].`);
     }
   };
 
@@ -8323,22 +8297,22 @@
   };
 
   // custom/steptrace/src/algorithms/shell-sort.ts
-  function invalidConfig7(message) {
+  function invalidConfig9(message) {
     throw new Error(`steptrace: shell-sort ${message}`);
   }
   function parseShellSortConfig(config) {
     const { array, gaps } = config;
     if (!Array.isArray(array) || array.length < 2)
-      invalidConfig7('requires an "array" with at least two numbers.');
+      invalidConfig9('requires an "array" with at least two numbers.');
     if (!array.every((value) => typeof value === "number" && Number.isFinite(value)))
-      invalidConfig7('requires every "array" value to be a finite number.');
+      invalidConfig9('requires every "array" value to be a finite number.');
     if (!Array.isArray(gaps) || gaps.length === 0)
-      invalidConfig7('requires a non-empty "gaps" array ending in 1.');
+      invalidConfig9('requires a non-empty "gaps" array ending in 1.');
     if (!gaps.every((gap) => Number.isInteger(gap) && gap > 0 && gap < array.length))
-      invalidConfig7("requires every gap to be a positive integer smaller than the array length.");
-    if (gaps.at(-1) !== 1) invalidConfig7("requires the final gap to be 1.");
+      invalidConfig9("requires every gap to be a positive integer smaller than the array length.");
+    if (gaps.at(-1) !== 1) invalidConfig9("requires the final gap to be 1.");
     if (gaps.some((gap, index) => index > 0 && gap >= gaps[index - 1]))
-      invalidConfig7("requires gaps in strictly decreasing order.");
+      invalidConfig9("requires gaps in strictly decreasing order.");
     return { array: array.slice(), gaps: gaps.slice(), profile: "shell" };
   }
   var shellSort = {

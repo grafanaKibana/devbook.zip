@@ -24,6 +24,8 @@ const cases = [
   "shell-sort",
   "comb-sort",
   "counting-sort",
+  "radix-sort",
+  "bucket-sort",
   "cyclic-sort",
   "introsort",
   "bfs",
@@ -397,6 +399,10 @@ test("all built-in algorithms preserve their headless frame contract", () => {
             ? { gaps: [4, 2, 1] }
             : algorithm === "counting-sort"
               ? { array: [2, 5, 3, 0, 2, 3, 0, 3] }
+            : algorithm === "radix-sort"
+              ? { array: [170, 45, 75, 90, 802, 24, 2, 66], radix: 10, mode: "LSD" }
+            : algorithm === "bucket-sort"
+              ? { array: [0.78, 0.17, 0.39, 0.26, 0.72, 0.94], bucketCount: 5 }
             : algorithm === "cyclic-sort"
               ? { array: [5, 3, 1, 4, 2] }
               : algorithm === "floyd-warshall"
@@ -433,7 +439,7 @@ test("all built-in algorithms preserve their headless frame contract", () => {
 
   assert.equal(
     digest,
-    "8f053ec0e187b836309e46ee3d2db6227352585f9ddbff028e318efe27c865f8",
+    "ce55520e96e0b420bf8c4f7bb7809d285946366b1166297af2929a125dddebf9",
     "the headless StepTrace behavior changed",
   )
 })
@@ -485,6 +491,110 @@ test("counting sort records every tally, prefix, and stable placement in the typ
   assert.throws(
     () => api.buildFrames({ algorithm: "counting-sort", array: [1, 1.5] }),
     /integer key/,
+  )
+})
+
+test("radix sort records every stable scatter and gather across all digit passes", () => {
+  const api = loadEngine(readFileSync(join(here, "generated", "engine.js"), "utf8"))
+  const { buildMilestones } = loadStepTraceModule("src", "render.ts")
+  const result = api.buildFrames({
+    algorithm: "radix-sort",
+    array: [170, 45, 75, 90, 802, 24, 2, 66],
+    radix: 10,
+    mode: "LSD",
+  })
+
+  assert.equal(result.family.id, "distribution-sort")
+  assert.equal(result.frames[0].profile, "radix")
+  assert.equal(result.frames.filter((frame) => frame.type === "pass").length, 3)
+  assert.equal(result.frames.filter((frame) => frame.type === "scatter").length, 24)
+  assert.equal(
+    result.frames.filter((frame) => frame.type === "gather" && frame.activeOutput != null).length,
+    24,
+  )
+  const onesScattered = result.frames.find(
+    (frame) => frame.type === "scatter" && frame.passIndex === 0 && frame.scattered === 8,
+  )
+  assert.deepEqual(onesScattered.buckets[0].map((token) => token.value), [170, 90])
+  assert.deepEqual(onesScattered.buckets[2].map((token) => token.value), [802, 2])
+  const onesComplete = result.frames.find(
+    (frame) => frame.type === "pass-complete" && frame.passIndex === 0,
+  )
+  assert.deepEqual(
+    onesComplete.source.map((token) => token.value),
+    [170, 90, 802, 2, 24, 45, 75, 66],
+  )
+  assert.deepEqual(
+    result.frames.at(-1).source.map((token) => token.value),
+    [2, 24, 45, 66, 75, 90, 170, 802],
+  )
+  assert.deepEqual(
+    result.frames.filter((frame) => frame.type === "scatter").map((frame) => frame.activeSource),
+    [...Array(3)].flatMap(() => [0, 1, 2, 3, 4, 5, 6, 7]),
+  )
+  const milestones = buildMilestones("radix-sort", "sort", result.frames)
+  assert.deepEqual(
+    milestones.map((mark) => mark.label),
+    ["ones pass", "Gather ones", "tens pass", "Gather tens", "hundreds pass", "Gather hundreds", "Result"],
+  )
+  assert.throws(
+    () => api.buildFrames({ algorithm: "radix-sort", array: [10, -2], radix: 10 }),
+    /non-negative safe integer/,
+  )
+  assert.throws(
+    () => api.buildFrames({ algorithm: "radix-sort", array: [10, 2], radix: 10, mode: "MSD" }),
+    /least-significant-digit/,
+  )
+})
+
+test("bucket sort exposes every scatter, local comparison, swap, and ordered gather", () => {
+  const api = loadEngine(readFileSync(join(here, "generated", "engine.js"), "utf8"))
+  const { buildMilestones } = loadStepTraceModule("src", "render.ts")
+  const result = api.buildFrames({
+    algorithm: "bucket-sort",
+    array: [0.78, 0.17, 0.39, 0.26, 0.72, 0.94],
+    bucketCount: 5,
+  })
+
+  assert.equal(result.family.id, "distribution-sort")
+  assert.equal(result.frames[0].profile, "bucket")
+  assert.deepEqual(
+    result.frames.filter((frame) => frame.type === "scatter").map((frame) => frame.activeSource),
+    [0, 1, 2, 3, 4, 5],
+  )
+  const scattered = result.frames.find(
+    (frame) => frame.type === "scatter" && frame.scattered === 6,
+  )
+  assert.deepEqual(
+    scattered.buckets.map((bucket) => bucket.map((token) => token.value)),
+    [[0.17], [0.39, 0.26], [], [0.78, 0.72], [0.94]],
+  )
+  const beginGather = result.frames.find(
+    (frame) => frame.type === "gather" && frame.activeOutput == null,
+  )
+  assert.deepEqual(
+    beginGather.buckets.map((bucket) => bucket.map((token) => token.value)),
+    [[0.17], [0.26, 0.39], [], [0.72, 0.78], [0.94]],
+  )
+  assert.deepEqual(
+    result.frames
+      .filter((frame) => frame.type === "gather" && frame.activeOutput != null)
+      .map((frame) => frame.activeOutput),
+    [0, 1, 2, 3, 4, 5],
+  )
+  assert.deepEqual(
+    result.frames.at(-1).source.map((token) => token.value),
+    [0.17, 0.26, 0.39, 0.72, 0.78, 0.94],
+  )
+  assert.equal(result.frames.at(-1).comparisons, 2)
+  assert.equal(result.frames.at(-1).movements, 2)
+  assert.deepEqual(
+    buildMilestones("bucket-sort", "sort", result.frames).map((mark) => mark.label),
+    ["Scatter ranges", "Sort buckets", "Gather ranges", "Result"],
+  )
+  assert.throws(
+    () => api.buildFrames({ algorithm: "bucket-sort", array: [0.2, 1], bucketCount: 5 }),
+    /in \[0, 1\)/,
   )
 })
 
@@ -664,6 +774,106 @@ test("counting sort renders shared bars around one progressive frequency strip",
       ["0a", "0b", "2a", "2b", "3a", "3b", "3c", "5"],
     )
     assert.equal(frequency.children[1].children[1].children[1].children[1].textContent, "—")
+  } finally {
+    globalThis.document = previousDocument
+  }
+})
+
+test("radix and bucket sorts share one stable bucket-board renderer", () => {
+  class FakeNode {
+    constructor(tagName) {
+      this.tagName = tagName
+      this._textContent = ""
+      this.innerHTML = ""
+      this.children = []
+      this.attributes = new Map()
+      this.dataset = {}
+      this.style = { setProperty: (key, value) => this.attributes.set(`style:${key}`, value) }
+      this.className = ""
+      this.title = ""
+    }
+    get textContent() {
+      return this._textContent
+    }
+    set textContent(value) {
+      this._textContent = value
+      if (value === "") this.children = []
+    }
+    setAttribute(key, value) {
+      this.attributes.set(key, String(value))
+    }
+    append(...children) {
+      this.children.push(...children)
+    }
+  }
+  const previousDocument = globalThis.document
+  globalThis.document = { createElement: (tagName) => new FakeNode(tagName) }
+  try {
+    const api = loadEngine(readFileSync(join(here, "generated", "engine.js"), "utf8"))
+    const { makeBucketDistributionView } = loadStepTraceModule(
+      "src",
+      "families",
+      "bucket-distribution.ts",
+    )
+    const styleSource = readFileSync(join(here, "src", "styles", "distribution.scss"), "utf8")
+    const radix = api.buildFrames({
+      algorithm: "radix-sort",
+      array: [170, 45, 75, 90, 802, 24, 2, 66],
+      radix: 10,
+      mode: "LSD",
+    })
+    const radixView = makeBucketDistributionView(radix.frames)
+    const [radixStage] = radixView.nodes
+    const [sourceBand, bucketBand, legend, outputBand] = radixStage.children
+    const [sourceLabel, sourceBars] = sourceBand.children
+    const [bucketLabel, board] = bucketBand.children
+    const [outputLabel, outputBars] = outputBand.children
+
+    assert.equal(radixView.stageLayout, "fill")
+    assert.equal(radixView.stableStage, true)
+    assert.deepEqual(
+      [sourceLabel.textContent, bucketLabel.textContent, outputLabel.textContent],
+      ["Current Array", "Digit Buckets", "Gathered Pass"],
+    )
+    assert.equal(sourceBars.children.length, 8)
+    assert.equal(board.children.length, 10)
+    assert.equal(outputBars.children.length, 8)
+    assert.equal(legend.attributes.get("aria-label"), "Distribution state legend")
+
+    const firstScatter = radix.frames.find(
+      (frame) => frame.type === "scatter" && frame.passIndex === 0,
+    )
+    radixView.paint(firstScatter, 2, radix.frames.length)
+    assert.equal(sourceBars.children[0].dataset.state, "scatter")
+    assert.equal(board.children[0].dataset.active, "1")
+    assert.equal(board.children[0].children[1].children[0].textContent, "170")
+    assert.ok(radixView.watch(firstScatter).every((row) => row.hint))
+
+    const bucket = api.buildFrames({
+      algorithm: "bucket-sort",
+      array: [0.78, 0.17, 0.39, 0.26, 0.72, 0.94],
+      bucketCount: 5,
+    })
+    const bucketView = makeBucketDistributionView(bucket.frames)
+    const [bucketStage] = bucketView.nodes
+    const [, rangeBand, , sortedBand] = bucketStage.children
+    assert.equal(rangeBand.children[0].textContent, "Range Buckets")
+    assert.equal(rangeBand.children[1].children.length, 5)
+    assert.equal(sortedBand.children[0].textContent, "Sorted Array")
+
+    assert.match(
+      styleSource,
+      /\.steptrace__distribution-bucket-board \{[\s\S]*overflow-x: auto;[\s\S]*border: 1px solid var\(--_distribution-border\);[\s\S]*border-radius: var\(--_distribution-radius\);/,
+    )
+    assert.match(
+      styleSource,
+      /\.steptrace__distribution-lane \{[\s\S]*border-inline-end: 1px solid var\(--_distribution-border\);/,
+    )
+    assert.doesNotMatch(styleSource, /\.steptrace__distribution-lane \{[^}]*border-radius:/)
+    assert.match(
+      styleSource,
+      /\.steptrace__distribution-lane:first-child\[data-active="1"\]::after \{[\s\S]*border-start-start-radius:/,
+    )
   } finally {
     globalThis.document = previousDocument
   }
