@@ -281,6 +281,10 @@ export function createMount(
     const applySpeed = (value) => {
       const v = Number(value)
       state.speed = v
+      // transitions must fit inside the step interval (baseDelay / speed), else
+      // 2× bleeds each animation into the next frame and 0.5× freezes mid-step.
+      // 107 keeps the same share of the interval the 320/780 pairing had.
+      root.style.setProperty("--_tween", `${Math.round(107 / v)}ms`)
       if (player) player.setSpeed(v)
     }
     if (host && typeof host.createSpeedSlider === "function") {
@@ -314,6 +318,7 @@ export function createMount(
     }
     speedSection.append(speedHead, speedRow)
     menu.append(speedSection)
+    applySpeed(state.speed)
     let startMenu = null
     if (kind === "sort") {
       const section = el("div", "steptrace__menu-section")

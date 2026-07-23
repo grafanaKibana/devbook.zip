@@ -4,6 +4,7 @@ import { binarySearchOnAnswer } from "./binary-search-on-answer"
 import { binarySearch } from "./binary-search"
 import { bubbleSort } from "./bubble-sort"
 import { combSort } from "./comb-sort"
+import { countingSort } from "./counting-sort"
 import { cyclicSort } from "./cyclic-sort"
 import { dfs } from "./dfs"
 import { dijkstra } from "./dijkstra"
@@ -45,6 +46,7 @@ export const builtInAlgorithms = [
   mergeSortTree,
   shellSort,
   combSort,
+  countingSort,
   cyclicSort,
   introsort,
   exponentialSearch,

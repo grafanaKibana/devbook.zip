@@ -1621,7 +1621,7 @@ function makeSortView(frames, semantics = legacySortViewSemantics) {
       if (visual.holeIndex === k) b.bar.dataset.hole = "1";
       else delete b.bar.dataset.hole;
       b.bar.classList.remove("steptrace__bar--fly");
-      b.bar.style.transform = "";
+      delete b.bar.dataset.fly;
     }
     const starts = [];
     for (const [to, from] of visual.movements) {
@@ -1631,11 +1631,11 @@ function makeSortView(frames, semantics = legacySortViewSemantics) {
       const dx = bf.getBoundingClientRect().left - bt.getBoundingClientRect().left;
       if (dx) starts.push([bt, dx]);
     }
-    for (const [bt, dx] of starts) bt.style.transform = `translateX(${dx}px)`;
     if (starts.length) void starts[0][0].offsetWidth;
-    for (const [bt] of starts) {
+    for (const [bt, dx] of starts) {
+      bt.style.setProperty("--_fly-dx", `${dx}px`);
+      bt.dataset.fly = dx > 0 ? "over" : "under";
       bt.classList.add("steptrace__bar--fly");
-      bt.style.transform = "";
     }
     if (heldMarker) {
       heldMarker.setLabel(visual.heldToken?.label || "");
@@ -1712,6 +1712,10 @@ function stepMarkerSpring(current, target, elapsedMs, settleMs = 360) {
   const next = current + (target - current) * alpha;
   return Math.abs(target - next) < 0.4 ? target : next;
 }
+function markerIsMoving(previousTarget, target, current, epsilon = 0.05) {
+  if (!previousTarget) return true;
+  return Math.abs(previousTarget.x - target.x) > epsilon || Math.abs(previousTarget.y - target.y) > epsilon || Math.abs(current.x - target.x) > epsilon || Math.abs(current.y - target.y) > epsilon;
+}
 function shouldResetHeldMarker(previous, next) {
   if (!previous) return true;
   return previous.tokenId !== next.tokenId || next.frameIndex !== previous.frameIndex + 1;
@@ -1720,11 +1724,14 @@ function createBarTracker(stage, bars, markers) {
   let targets = markers.map(() => null);
   const sx = markers.map(() => null);
   const sy = markers.map(() => null);
-  const SPRING = 0.32;
+  const px = markers.map(() => null);
+  const py = markers.map(() => null);
+  const SPRING_SETTLE_MS = 207;
   let lastStepAt = null;
   function frameStep(now) {
     const elapsed = lastStepAt == null ? 0 : Math.max(0, now - lastStepAt);
     lastStepAt = now;
+    let moving = false;
     const sr = stage.getBoundingClientRect();
     for (let m = 0; m < markers.length; m++) {
       const idx = targets[m];
@@ -1734,6 +1741,8 @@ function createBarTracker(stage, bars, markers) {
         mk.el.style.opacity = "0";
         sx[m] = null;
         sy[m] = null;
+        px[m] = null;
+        py[m] = null;
         continue;
       }
       const br = bar.getBoundingClientRect();
@@ -1745,42 +1754,62 @@ function createBarTracker(stage, bars, markers) {
       const reduced = stage.closest(".steptrace--reduced");
       if (sx[m] == null || reduced) sx[m] = tx;
       else if (mk.role === "held") sx[m] = stepMarkerSpring(sx[m], tx, elapsed);
-      else {
-        sx[m] += (tx - sx[m]) * SPRING;
-        if (Math.abs(tx - sx[m]) < 0.4) sx[m] = tx;
-      }
+      else sx[m] = stepMarkerSpring(sx[m], tx, elapsed, SPRING_SETTLE_MS);
       if (sy[m] == null || reduced || mk.role !== "held") sy[m] = ty;
       else sy[m] = stepMarkerSpring(sy[m], ty, elapsed);
+      const target = { x: tx, y: ty };
+      if (markerIsMoving(px[m], target, { x: sx[m], y: sy[m] })) moving = true;
+      px[m] = target;
       mk.el.style.transform = `translate(${sx[m].toFixed(2)}px, ${sy[m].toFixed(2)}px)`;
       mk.el.style.opacity = "1";
     }
+    return moving;
   }
   let lastRafAt = 0;
+  let raf = null;
+  let iv = null;
+  function sleep() {
+    if (raf != null) cancelAnimationFrame(raf);
+    if (iv != null) clearInterval(iv);
+    raf = null;
+    iv = null;
+    lastStepAt = null;
+  }
   function loop(now) {
     lastRafAt = now;
-    frameStep(now);
-    raf = requestAnimationFrame(loop);
+    if (frameStep(now)) raf = requestAnimationFrame(loop);
+    else sleep();
   }
-  let raf = requestAnimationFrame(loop);
-  const iv = setInterval(() => {
-    const now = performance.now();
-    if (document.hidden || now - lastRafAt > 100) frameStep(now);
-  }, 50);
+  function wake() {
+    if (raf != null) return;
+    lastStepAt = null;
+    lastRafAt = performance.now();
+    raf = requestAnimationFrame(loop);
+    iv = setInterval(() => {
+      const now = performance.now();
+      if ((document.hidden || now - lastRafAt > 100) && !frameStep(now)) sleep();
+    }, 50);
+  }
+  const ro = typeof ResizeObserver === "function" ? new ResizeObserver(() => wake()) : null;
+  if (ro) ro.observe(stage);
+  wake();
   return {
     set(...indices) {
       targets = markers.map((_, index) => indices[index] ?? null);
+      wake();
     },
     reset(index) {
       if (index < 0 || index >= markers.length) return;
       sx[index] = null;
       sy[index] = null;
+      wake();
     },
     renderNow() {
       frameStep(performance.now());
     },
     destroy() {
-      cancelAnimationFrame(raf);
-      clearInterval(iv);
+      if (ro) ro.disconnect();
+      sleep();
     }
   };
 }
@@ -4254,11 +4283,25 @@ function makeDistributionSortView(frames) {
   frequency.setAttribute("aria-label", "Frequency");
   const buckets = keys.map((key) => {
     const bucket = el("div", "steptrace__distribution-bucket");
-    const keyLabel = el("span", "steptrace__distribution-key");
-    keyLabel.textContent = `value ${key}`;
-    const count = el("strong", "steptrace__distribution-value");
-    const slots = el("span", "steptrace__distribution-slots");
-    bucket.append(keyLabel, count, slots);
+    const keyRow = el("div", "steptrace__distribution-entry steptrace__distribution-entry--key");
+    const keyLabel = el("span", "steptrace__distribution-entry-label");
+    keyLabel.textContent = "Value:";
+    const keyValue = el("strong", "steptrace__distribution-entry-value");
+    keyValue.textContent = String(key);
+    keyRow.append(keyLabel, keyValue);
+    const details = el("div", "steptrace__distribution-details");
+    const countRow = el("div", "steptrace__distribution-entry");
+    const countLabel = el("span", "steptrace__distribution-entry-label");
+    countLabel.textContent = "Count:";
+    const count = el("strong", "steptrace__distribution-entry-value");
+    countRow.append(countLabel, count);
+    const slotsRow = el("div", "steptrace__distribution-entry steptrace__distribution-entry--slots");
+    const slotsLabel = el("span", "steptrace__distribution-entry-label");
+    slotsLabel.textContent = "Slots:";
+    const slots = el("strong", "steptrace__distribution-entry-value");
+    slotsRow.append(slotsLabel, slots);
+    details.append(countRow, slotsRow);
+    bucket.append(keyRow, details);
     frequency.append(bucket);
     return { bucket, count, slots, key };
   });
@@ -4278,13 +4321,14 @@ function makeDistributionSortView(frames) {
       const value = frame.input[barIndex];
       bar.fill.style.height = barHeightStyle(value, maxValue);
       bar.num.textContent = labels[barIndex];
-      bar.bar.dataset.state = barIndex === frame.activeInput ? "compare" : "";
+      bar.bar.dataset.state = barIndex === frame.activeInput ? frame.type === "tally" ? "increment" : "compare" : "";
       bar.bar.setAttribute("aria-label", `input index ${barIndex}, value ${value}, token ${labels[barIndex]}`);
     });
     buckets.forEach(({ bucket, count, slots, key }, bucketIndex) => {
       const range = frequencyRangeFor(frame, bucketIndex);
-      count.textContent = `count ${range.count}`;
-      slots.textContent = range.slots == null ? "" : `slots ${range.slots}`;
+      count.textContent = String(range.count);
+      slots.textContent = range.slots ?? "";
+      bucket.dataset.hasSlots = range.slots == null ? "0" : "1";
       bucket.dataset.active = (frame.type === "tally" || frame.type === "prefix") && key === frame.activeKey ? "1" : "0";
       bucket.dataset.previous = frame.type === "prefix" && key === frame.previousKey ? "1" : "0";
       bucket.dataset.placement = frame.type === "place" && key === frame.activeKey ? "1" : "0";
@@ -8410,7 +8454,7 @@ var init_player = __esm({
         this.speed = speed || 1;
         this.playing = false;
         this.timer = null;
-        this.baseDelay = 780;
+        this.baseDelay = 260;
         this.onState = () => {
         };
       }
@@ -8805,6 +8849,7 @@ function createMount(registry2) {
     const applySpeed = (value) => {
       const v = Number(value);
       state.speed = v;
+      root.style.setProperty("--_tween", `${Math.round(107 / v)}ms`);
       if (player) player.setSpeed(v);
     };
     if (host && typeof host.createSpeedSlider === "function") {
@@ -8838,6 +8883,7 @@ function createMount(registry2) {
     }
     speedSection.append(speedHead, speedRow);
     menu.append(speedSection);
+    applySpeed(state.speed);
     let startMenu = null;
     if (kind === "sort") {
       const section = el("div", "steptrace__menu-section");

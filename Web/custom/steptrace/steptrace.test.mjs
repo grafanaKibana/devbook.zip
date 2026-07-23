@@ -23,6 +23,7 @@ const cases = [
   "merge-sort",
   "shell-sort",
   "comb-sort",
+  "counting-sort",
   "cyclic-sort",
   "introsort",
   "bfs",
@@ -337,6 +338,20 @@ test("styles are compiled from real SCSS without runtime injection", () => {
     barsStyles,
     /\.steptrace__bar\[data-state="probe"\] \.steptrace__fill\s*{[^}]*min-height:/s,
   )
+  // every timed visual must scale with playback speed: the swap flight reads
+  // --_tween, and mount rewrites --_tween to fit inside each frame interval.
+  assert.match(barsStyles, /\.steptrace__bar--fly\s*{[^}]*animation: steptrace-fly var\(--_tween\)/s)
+  assert.doesNotMatch(barsStyles, /transition: transform 0\.32s/)
+  assert.match(
+    readFileSync(join(here, "src", "mount.ts"), "utf8"),
+    /setProperty\("--_tween", `\$\{Math\.round\(107 \/ v\)\}ms`\)/,
+  )
+  // the swap arc: the flight starts a full slot away, lifts at the midpoint,
+  // and only the bar travelling leftward passes over its partner.
+  assert.match(barsStyles, /@keyframes steptrace-fly\s*{[^@]*translate\(var\(--_fly-dx, 0px\), 0\)/s)
+  assert.match(barsStyles, /50%\s*{[^}]*var\(--_fly-lift, 0px\)/s)
+  assert.match(barsStyles, /\[data-fly="over"\]\s*{[^}]*--_fly-lift: -10px;[^}]*z-index: 2;/s)
+  assert.match(renderSource, /bt\.dataset\.fly = dx > 0 \? "over" : "under"/)
   assert.ok(contrastRatio("#ffffff", "#92400e") >= 4.5)
   assert.ok(contrastRatio("#1f2937", "#fbbf24") >= 4.5)
 })
@@ -380,6 +395,8 @@ test("all built-in algorithms preserve their headless frame contract", () => {
           ? { weights: [3, 2, 2, 4, 1, 4], days: 3 }
           : algorithm === "shell-sort"
             ? { gaps: [4, 2, 1] }
+            : algorithm === "counting-sort"
+              ? { array: [2, 5, 3, 0, 2, 3, 0, 3] }
             : algorithm === "cyclic-sort"
               ? { array: [5, 3, 1, 4, 2] }
               : algorithm === "floyd-warshall"
@@ -416,9 +433,240 @@ test("all built-in algorithms preserve their headless frame contract", () => {
 
   assert.equal(
     digest,
-    "163b664e9758784ee344391c8af2fa743b495f58aa57b0570daf2aadee75a9e9",
+    "8f053ec0e187b836309e46ee3d2db6227352585f9ddbff028e318efe27c865f8",
     "the headless StepTrace behavior changed",
   )
+})
+
+test("counting sort records every tally, prefix, and stable placement in the typed distribution family", () => {
+  const api = loadEngine(readFileSync(join(here, "generated", "engine.js"), "utf8"))
+  const { buildMilestones, milestoneAt } = loadStepTraceModule("src", "render.ts")
+  const { frequencyRangeFor } = loadStepTraceModule("src", "families", "distribution-sort.ts")
+  const result = api.buildFrames({
+    algorithm: "counting-sort",
+    array: [2, 5, 3, 0, 2, 3, 0, 3],
+  })
+
+  assert.equal(result.family.id, "distribution-sort")
+  assert.equal(result.frames[0].type, "intro")
+  assert.equal(result.frames.filter((frame) => frame.type === "tally").length, 8)
+  assert.equal(result.frames.filter((frame) => frame.type === "prefix").length, 6)
+  assert.equal(result.frames.filter((frame) => frame.type === "place").length, 8)
+  assert.deepEqual(result.frames.at(-1).output, [0, 0, 2, 2, 3, 3, 3, 5])
+  assert.deepEqual(result.frames.at(-1).outputOrigins, [3, 6, 0, 4, 2, 5, 7, 1])
+  assert.deepEqual(result.frames.find((frame) => frame.type === "prefix" && frame.activeKey === 5).positions, [2, 2, 4, 7, 7, 8])
+  assert.equal(result.frames.find((frame) => frame.type === "place").activeInput, 7)
+  const firstPrefix = result.frames.findIndex((frame) => frame.type === "prefix")
+  const firstPlace = result.frames.findIndex((frame) => frame.type === "place")
+  const milestones = buildMilestones("counting-sort", "sort", result.frames)
+
+  assert.deepEqual(
+    milestones.filter((mark) => [0, firstPrefix, firstPlace, result.frames.length - 1].includes(mark.i)),
+    [
+      { i: 0, label: "Tally keys" },
+      { i: firstPrefix, label: "Reserve output ranges" },
+      { i: firstPlace, label: "Place stably" },
+      { i: result.frames.length - 1, label: "Result" },
+    ],
+  )
+  assert.equal(milestoneAt(milestones, firstPrefix).label, "Reserve output ranges")
+  assert.equal(milestoneAt(milestones, firstPlace).label, "Place stably")
+  const prefixZero = result.frames.find((frame) => frame.type === "prefix" && frame.activeKey === 0)
+  const prefixOne = result.frames.find((frame) => frame.type === "prefix" && frame.activeKey === 1)
+  const prefixThree = result.frames.find((frame) => frame.type === "prefix" && frame.activeKey === 3)
+  assert.deepEqual(frequencyRangeFor(prefixZero, 0), { count: 2, slots: "0–1" })
+  assert.deepEqual(frequencyRangeFor(prefixZero, 1), { count: 0, slots: null })
+  assert.deepEqual(frequencyRangeFor(prefixOne, 1), { count: 0, slots: "—" })
+  assert.deepEqual(frequencyRangeFor(prefixThree, 3), { count: 3, slots: "4–6" })
+  assert.deepEqual(frequencyRangeFor(result.frames.at(-1), 1), { count: 0, slots: "—" })
+  assert.deepEqual(frequencyRangeFor(result.frames.at(-1), 0), { count: 2, slots: "0–1" })
+  assert.deepEqual(frequencyRangeFor(result.frames.at(-1), 3), { count: 3, slots: "4–6" })
+  assert.deepEqual(frequencyRangeFor(result.frames.at(-1), 5), { count: 1, slots: "7" })
+  assert.throws(
+    () => api.buildFrames({ algorithm: "counting-sort", array: [1, 1.5] }),
+    /integer key/,
+  )
+})
+
+test("counting sort renders shared bars around one progressive frequency strip", () => {
+  class FakeNode {
+    constructor(tagName) {
+      this.tagName = tagName
+      this.textContent = ""
+      this.innerHTML = ""
+      this.children = []
+      this.attributes = new Map()
+      this.dataset = {}
+      this.style = { setProperty: (key, value) => this.attributes.set(`style:${key}`, value) }
+      this.className = ""
+      this.title = ""
+    }
+    setAttribute(key, value) {
+      this.attributes.set(key, String(value))
+    }
+    append(...children) {
+      this.children.push(...children)
+    }
+  }
+  const previousDocument = globalThis.document
+  globalThis.document = { createElement: (tagName) => new FakeNode(tagName) }
+  try {
+    const api = loadEngine(readFileSync(join(here, "generated", "engine.js"), "utf8"))
+    const { makeDistributionSortView } = loadStepTraceModule(
+      "src",
+      "families",
+      "distribution-sort.ts",
+    )
+    const source = readFileSync(join(here, "src", "families", "distribution-sort.ts"), "utf8")
+    const styleSource = readFileSync(join(here, "src", "styles", "distribution.scss"), "utf8")
+    const renderSource = readFileSync(join(here, "src", "render.ts"), "utf8")
+    const barsSource = readFileSync(join(here, "src", "styles", "bars.scss"), "utf8")
+    const result = api.buildFrames({
+      algorithm: "counting-sort",
+      array: [2, 5, 3, 0, 2, 3, 0, 3],
+    })
+    const view = makeDistributionSortView(result.frames)
+    const [stage] = view.nodes
+    const [inputBand, frequencyBand, outputBand] = stage.children
+    const [inputLabel, inputBars] = inputBand.children
+    const [frequencyLabel, frequency] = frequencyBand.children
+    const [outputLabel, outputBars] = outputBand.children
+
+    assert.equal(view.stageLayout, "fill")
+    assert.equal(view.stableStage, true)
+    assert.deepEqual(
+      [inputLabel.textContent, frequencyLabel.textContent, outputLabel.textContent],
+      ["Unsorted Array", "Frequency", "Sorted Array"],
+    )
+    assert.equal(inputBars.attributes.get("aria-label"), "Unsorted Array")
+    assert.equal(frequency.attributes.get("aria-label"), "Frequency")
+    assert.equal(outputBars.attributes.get("aria-label"), "Sorted Array")
+    assert.equal(inputBars.children.length, 8)
+    assert.equal(outputBars.children.length, 8)
+    assert.match(source, /import \{ barHeightStyle, el, escapeHtml, makeBars, statusEl \} from "\.\.\/render"/)
+    assert.match(source, /const inputBars = makeBars\(inputBarsStage, first\.input\.length\)/)
+    assert.match(source, /const outputBars = makeBars\(outputBarsStage, first\.input\.length\)/)
+    assert.match(source, /frame\.type === "tally" \? "increment" : "compare"/)
+    assert.match(renderSource, /cue\.innerHTML = ICON\.compare \+ ICON\.swap/)
+    assert.doesNotMatch(renderSource, /ICON\.increment|steptrace__cue-increment/)
+    assert.match(
+      barsSource,
+      /\.steptrace__bar\[data-state="increment"\] \.steptrace__fill::before \{\n  content: "\+1";/,
+    )
+    assert.match(
+      barsSource,
+      /\.steptrace__bar\[data-state="candidate"\] \.steptrace__fill::before,\n\.steptrace__bar\[data-state="increment"\] \.steptrace__fill::before \{/,
+    )
+    assert.doesNotMatch(source, /End positions|Next write index|distribution-row--positions/)
+    assert.match(
+      styleSource,
+      /\.steptrace__distribution-frequency \{[\s\S]*grid-auto-flow: column;[\s\S]*grid-auto-columns: minmax\(4\.8rem, 1fr\);[\s\S]*grid-template-rows: 1fr;[\s\S]*overflow-x: auto;[\s\S]*overflow-y: hidden;[\s\S]*border: 1px solid var\(--_distribution-border\);[\s\S]*border-radius: var\(--_distribution-radius\);[\s\S]*background: var\(--_distribution-cell\);/,
+    )
+    assert.doesNotMatch(
+      styleSource,
+      /\.steptrace__distribution-frequency \{[\s\S]*border-block:/,
+    )
+    assert.doesNotMatch(styleSource, /grid-template-columns: repeat\(auto-fit/)
+    assert.match(
+      styleSource,
+      /\.steptrace__distribution-bucket \{[\s\S]*grid-template-rows: 1fr 2fr;[\s\S]*min-height: 3\.9rem;/,
+    )
+    assert.match(styleSource, /\.steptrace__distribution-bucket \{\n  border-inline-end: 1px solid var\(--_distribution-border\);\n\}/)
+    assert.match(styleSource, /\.steptrace__distribution-bucket:last-child \{\n  border-inline-end: 0;\n\}/)
+    assert.match(
+      styleSource,
+      /\.steptrace__distribution-entry--key \{\n  border-block-end: 1px solid var\(--_hair\);\n  background: var\(--_distribution-header\);/,
+    )
+    assert.match(
+      styleSource,
+      /\.steptrace__distribution-details \{[\s\S]*background: var\(--_distribution-cell\);/,
+    )
+    assert.match(
+      styleSource,
+      /\.steptrace__distribution-bucket\[data-active="1"\]::after \{[\s\S]*box-shadow: inset 0 0 0 2px var\(--_blue\);/,
+    )
+    assert.match(
+      styleSource,
+      /\.steptrace__distribution-bucket:first-child\[data-active="1"\]::after \{\n  border-start-start-radius: calc\(var\(--_distribution-radius\) - 1px\);\n  border-end-start-radius: calc\(var\(--_distribution-radius\) - 1px\);\n\}/,
+    )
+    assert.match(
+      styleSource,
+      /\.steptrace__distribution-bucket:last-child\[data-active="1"\]::after \{\n  border-start-end-radius: calc\(var\(--_distribution-radius\) - 1px\);\n  border-end-end-radius: calc\(var\(--_distribution-radius\) - 1px\);\n\}/,
+    )
+    assert.doesNotMatch(
+      styleSource,
+      /\.steptrace__distribution-bucket\[data-active="1"\] \{\n  background:/,
+    )
+    assert.match(styleSource, /data-has-slots="0"\] \.steptrace__distribution-details \{\n  grid-template-rows: 1fr;/)
+    assert.match(
+      styleSource,
+      /\.steptrace__distribution-bars \.steptrace__bar \{\n  height: calc\(100% - 1\.3rem\);\n\}/,
+    )
+    assert.match(
+      styleSource,
+      /\.steptrace\[data-visual-family="distribution-sort"\] \.steptrace__rail \{\n    min-block-size: 16rem;\n  \}/,
+    )
+    assert.match(
+      styleSource,
+      /@media \(max-width: 560px\) and \(pointer: coarse\) \{[\s\S]*grid-template-columns: repeat\(2, minmax\(0, 1fr\)\);[\s\S]*column-gap: 0\.5rem;[\s\S]*min-height: calc\(2 \* 2\.75rem\);/,
+    )
+    assert.match(
+      styleSource,
+      /@media \(max-width: 560px\) \{[\s\S]*\.steptrace__distribution \{\n    gap: 0\.55rem;\n  \}/,
+    )
+    assert.match(
+      styleSource,
+      /@media \(max-width: 560px\) \{[\s\S]*\.steptrace__distribution-frequency \{\n    grid-auto-columns: minmax\(3\.7rem, 1fr\);\n  \}/,
+    )
+
+    const tally = result.frames.find((frame) => frame.type === "tally" && frame.activeInput === 0)
+    view.paint(tally, 1, result.frames.length)
+    assert.equal(inputBars.children[0].dataset.state, "increment")
+    assert.doesNotMatch(inputBars.children[0].children[0].children[2].innerHTML, /cue-increment/)
+    assert.equal(frequency.children[2].dataset.active, "1")
+    assert.equal(frequency.children[2].children[0].children[0].textContent, "Value:")
+    assert.equal(frequency.children[2].children[0].children[1].textContent, "2")
+    assert.equal(frequency.children[2].children[1].children[0].children[0].textContent, "Count:")
+    assert.equal(frequency.children[2].children[1].children[0].children[1].textContent, "1")
+    assert.equal(frequency.children[2].dataset.hasSlots, "0")
+    assert.equal(frequency.children[2].attributes.get("aria-label"), "value 2, count 1")
+
+    const prefix = result.frames.find((frame) => frame.type === "prefix" && frame.activeKey === 3)
+    view.paint(prefix, 0, result.frames.length)
+    assert.equal(frequency.children[3].dataset.active, "1")
+    assert.equal(frequency.children[2].dataset.previous, "1")
+    assert.equal(frequency.children[3].children[1].children[1].children[0].textContent, "Slots:")
+    assert.equal(frequency.children[3].children[1].children[1].children[1].textContent, "4–6")
+    assert.equal(frequency.children[3].dataset.hasSlots, "1")
+
+    const place = result.frames.find((frame) => frame.type === "place")
+    view.paint(place, 0, result.frames.length)
+    assert.equal(inputBars.children[place.activeInput].dataset.state, "compare")
+    assert.equal(frequency.children[place.activeKey].dataset.placement, "1")
+    assert.equal(outputBars.children[place.placedAt].dataset.state, "sorted")
+    assert.equal(outputBars.children[place.placedAt].dataset.target, "1")
+
+    const zeroPlacement = result.frames.find(
+      (frame) => frame.type === "place" && frame.output[frame.placedAt] === 0,
+    )
+    view.paint(zeroPlacement, 0, result.frames.length)
+    assert.equal(outputBars.children[zeroPlacement.placedAt].dataset.empty, "0")
+    assert.match(outputBars.children[zeroPlacement.placedAt].children[0].style.height, /^calc\(/)
+    assert.equal(outputBars.children.find((bar) => bar.dataset.empty === "1").children[0].style.height, "0")
+    assert.match(
+      styleSource,
+      /\[data-empty="1"\] \.steptrace__fill \{\n  min-height: 0;\n  opacity: 0;/,
+    )
+
+    view.paint(result.frames.at(-1), result.frames.length - 1, result.frames.length)
+    assert.deepEqual(
+      outputBars.children.map((bar) => bar.children[1].textContent),
+      ["0a", "0b", "2a", "2b", "3a", "3b", "3c", "5"],
+    )
+    assert.equal(frequency.children[1].children[1].children[1].children[1].textContent, "—")
+  } finally {
+    globalThis.document = previousDocument
+  }
 })
 
 test("divide-and-conquer uses the typed execution-tree family without algorithm input", () => {
@@ -1892,6 +2140,31 @@ test("held marker spring remains in transit early and settles near its target", 
   }
   assert.ok(position > 99)
   assert.equal(stepMarkerSpring(25, 100, 0), 25)
+})
+
+test("the marker loop idles only once both the spring and its target are quiet", () => {
+  const { markerIsMoving, stepMarkerSpring } = loadStepTraceModule("src", "render.ts")
+  const at = (x, y) => ({ x, y })
+
+  // first tick after a wake has no previous target to compare against
+  assert.equal(markerIsMoving(null, at(10, 5), at(10, 5)), true)
+  // settled: the marker sits on a target that did not move this tick
+  assert.equal(markerIsMoving(at(10, 5), at(10, 5), at(10, 5)), false)
+  // the spring is still catching up
+  assert.equal(markerIsMoving(at(10, 5), at(10, 5), at(4, 5)), true)
+  // the marker is on target, but the bar under it is still flying
+  assert.equal(markerIsMoving(at(10, 5), at(14, 5), at(14, 5)), true)
+  assert.equal(markerIsMoving(at(10, 5), at(10, 9), at(10, 9)), true)
+
+  // a real chase converges, so the loop is guaranteed to reach an idle tick
+  let position = 0
+  let ticks = 0
+  while (markerIsMoving(at(100, 0), at(100, 0), at(position, 0)) && ticks < 200) {
+    position = stepMarkerSpring(position, 100, 16, 207)
+    ticks++
+  }
+  assert.ok(ticks < 200, "spring must reach the idle threshold")
+  assert.equal(position, 100)
 })
 
 test("held marker continuity survives only same-token sequential navigation", () => {

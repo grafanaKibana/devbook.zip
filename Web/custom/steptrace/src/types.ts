@@ -26,6 +26,7 @@ export type AlgorithmKind =
 
 export type VisualFamilyId =
   | "array-sort"
+  | "distribution-sort"
   | "dp-story"
   | "execution-tree"
   | "indexed-array-search"
@@ -91,7 +92,7 @@ export interface StepTraceView<TFrame = unknown> {
   nodes: HTMLElement[]
   stageLayout?: "compact" | "fill"
   stableStage?: boolean
-  paint(frame: TFrame): void
+  paint(frame: TFrame, index?: number, total?: number): void
   watch?(frame: TFrame): WatchRow[]
   destroy?(): void
 }

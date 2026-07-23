@@ -9,7 +9,7 @@
 // shared bar scaffold for sort + binary-search: bottom-aligned bars, each a
 // coloured fill with the value BELOW and centered state icons for finalised /
 // probe states (revealed via CSS). Returns [{ bar, fill, num, check, probe }].
-function makeBars(stage, n) {
+export function makeBars(stage, n) {
   const bars = []
   for (let k = 0; k < n; k++) {
     const bar = el("div", "steptrace__bar")
@@ -117,10 +117,11 @@ export function makeSortView(frames, semantics = legacySortViewSemantics) {
       else delete b.bar.dataset.hole
       // clear any in-flight swap animation before (possibly) starting a new one
       b.bar.classList.remove("steptrace__bar--fly")
-      b.bar.style.transform = ""
+      delete b.bar.dataset.fly
     }
-    // FLIP: a moved bar starts in the slot it came FROM (inverted transform,
-    // no transition) and springs home, so the motion is literal.
+    // FLIP: a moved bar starts in the slot it came FROM and arcs home, so the
+    // motion is literal. The arc and which bar passes over lives in bars.scss;
+    // here we only hand it the distance and the travel direction.
     //   swap      — the pair trade places (bubble/selection/quick/heap)
     //   overwrite — one bar travels from frame.from (insertion shift, merge
     //               lifting a value out of a run head into the merged slot)
@@ -132,11 +133,11 @@ export function makeSortView(frames, semantics = legacySortViewSemantics) {
       const dx = bf.getBoundingClientRect().left - bt.getBoundingClientRect().left
       if (dx) starts.push([bt, dx])
     }
-    for (const [bt, dx] of starts) bt.style.transform = `translateX(${dx}px)`
-    if (starts.length) void starts[0][0].offsetWidth // commit the inverted starts
-    for (const [bt] of starts) {
+    if (starts.length) void starts[0][0].offsetWidth // commit the removal so the flight restarts
+    for (const [bt, dx] of starts) {
+      bt.style.setProperty("--_fly-dx", `${dx}px`)
+      bt.dataset.fly = dx > 0 ? "over" : "under"
       bt.classList.add("steptrace__bar--fly")
-      bt.style.transform = ""
     }
     if (heldMarker) {
       heldMarker.setLabel(visual.heldToken?.label || "")
@@ -219,24 +220,46 @@ export function stepMarkerSpring(current, target, elapsedMs, settleMs = 360) {
   return Math.abs(target - next) < 0.4 ? target : next
 }
 
+// A marker keeps the rAF loop alive while it is still easing toward its target
+// OR while the target itself is still moving under it — a bar mid-flight, a
+// fill mid-height-transition, a resize. Both must be quiet before we idle.
+export function markerIsMoving(previousTarget, target, current, epsilon = 0.05) {
+  if (!previousTarget) return true
+  return (
+    Math.abs(previousTarget.x - target.x) > epsilon ||
+    Math.abs(previousTarget.y - target.y) > epsilon ||
+    Math.abs(current.x - target.x) > epsilon ||
+    Math.abs(current.y - target.y) > epsilon
+  )
+}
+
 export function shouldResetHeldMarker(previous, next) {
   if (!previous) return true
   return previous.tokenId !== next.tokenId || next.frameIndex !== previous.frameIndex + 1
 }
 
-// Each marker follows its target bar through the primary rAF loop. A 50 ms
-// timer runs only when the document is hidden or rAF is stale. Legacy markers
-// keep their responsive per-frame x spring and direct y tracking; the held-key
-// marker uses time-based x/y easing so placement remains readable.
+// Each marker follows its target bar through an rAF loop that runs only while
+// something is actually moving — every tick measures the stage and each marker,
+// so leaving it running would cost a forced reflow per frame per card forever.
+// A 50 ms timer covers the same window when the document is hidden or rAF is
+// stale. Legacy markers keep their responsive x spring and direct y tracking;
+// the held-key marker uses slower x/y easing so placement remains readable.
 function createBarTracker(stage, bars, markers) {
   let targets = markers.map(() => null)
   const sx = markers.map(() => null)
   const sy = markers.map(() => null)
-  const SPRING = 0.32
+  const px = markers.map(() => null)
+  const py = markers.map(() => null)
+  // settle time chosen so a 60 Hz tick eases the same 0.32 fraction the old
+  // per-frame lerp did — identical feel, but no longer twice as fast at 120 Hz.
+  const SPRING_SETTLE_MS = 207
   let lastStepAt = null
+  // true while any marker is still easing OR its target is still moving under
+  // it (a bar mid-flight, a fill mid-height-transition, a resize).
   function frameStep(now) {
     const elapsed = lastStepAt == null ? 0 : Math.max(0, now - lastStepAt)
     lastStepAt = now
+    let moving = false
     const sr = stage.getBoundingClientRect()
     for (let m = 0; m < markers.length; m++) {
       const idx = targets[m]
@@ -246,6 +269,8 @@ function createBarTracker(stage, bars, markers) {
         mk.el.style.opacity = "0"
         sx[m] = null
         sy[m] = null
+        px[m] = null
+        py[m] = null
         continue
       }
       const br = bar.getBoundingClientRect()
@@ -257,42 +282,66 @@ function createBarTracker(stage, bars, markers) {
       const reduced = stage.closest(".steptrace--reduced")
       if (sx[m] == null || reduced) sx[m] = tx
       else if (mk.role === "held") sx[m] = stepMarkerSpring(sx[m], tx, elapsed)
-      else {
-        sx[m] += (tx - sx[m]) * SPRING
-        if (Math.abs(tx - sx[m]) < 0.4) sx[m] = tx
-      }
+      else sx[m] = stepMarkerSpring(sx[m], tx, elapsed, SPRING_SETTLE_MS)
       if (sy[m] == null || reduced || mk.role !== "held") sy[m] = ty
       else sy[m] = stepMarkerSpring(sy[m], ty, elapsed)
+      const target = { x: tx, y: ty }
+      if (markerIsMoving(px[m], target, { x: sx[m], y: sy[m] })) moving = true
+      px[m] = target
       mk.el.style.transform = `translate(${sx[m].toFixed(2)}px, ${sy[m].toFixed(2)}px)`
       mk.el.style.opacity = "1"
     }
+    return moving
   }
   let lastRafAt = 0
+  let raf = null
+  let iv = null
+  function sleep() {
+    if (raf != null) cancelAnimationFrame(raf)
+    if (iv != null) clearInterval(iv)
+    raf = null
+    iv = null
+    lastStepAt = null
+  }
   function loop(now) {
     lastRafAt = now
-    frameStep(now)
-    raf = requestAnimationFrame(loop)
+    if (frameStep(now)) raf = requestAnimationFrame(loop)
+    else sleep()
   }
-  let raf = requestAnimationFrame(loop)
-  const iv = setInterval(() => {
-    const now = performance.now()
-    if (document.hidden || now - lastRafAt > 100) frameStep(now)
-  }, 50)
+  function wake() {
+    if (raf != null) return
+    // a fresh elapsed baseline: without it the first tick after a long sleep
+    // reports a huge delta and every spring snaps straight to its target.
+    lastStepAt = null
+    lastRafAt = performance.now()
+    raf = requestAnimationFrame(loop)
+    iv = setInterval(() => {
+      const now = performance.now()
+      if ((document.hidden || now - lastRafAt > 100) && !frameStep(now)) sleep()
+    }, 50)
+  }
+  // bars move without any set() when the stage reflows, so a resize has to wake
+  // the loop on its own.
+  const ro = typeof ResizeObserver === "function" ? new ResizeObserver(() => wake()) : null
+  if (ro) ro.observe(stage)
+  wake()
   return {
     set(...indices) {
       targets = markers.map((_, index) => indices[index] ?? null)
+      wake()
     },
     reset(index) {
       if (index < 0 || index >= markers.length) return
       sx[index] = null
       sy[index] = null
+      wake()
     },
     renderNow() {
       frameStep(performance.now())
     },
     destroy() {
-      cancelAnimationFrame(raf)
-      clearInterval(iv)
+      if (ro) ro.disconnect()
+      sleep()
     },
   }
 }
@@ -2232,7 +2281,7 @@ function trimToRadius(a, b, r) {
   return { x1: a.x + ux * R, y1: a.y + uy * R, x2: b.x - ux * r, y2: b.y - uy * r }
 }
 
-function statusEl() {
+export function statusEl() {
   const status = el("div", "steptrace__status")
   status.setAttribute("role", "status")
   status.setAttribute("aria-live", "polite")
@@ -2318,6 +2367,8 @@ export function buildMilestones(algorithm, kind, frames) {
         ? `Gap ${firstGap}`
         : familyProfile === "cyclic"
           ? "Place values"
+          : familyProfile === "counting"
+            ? "Tally keys"
           : familyProfile === "introsort"
             ? "Quicksort"
             : algorithm === "bubble-sort"
@@ -2369,7 +2420,11 @@ export function buildMilestones(algorithm, kind, frames) {
   for (let i = 1; i < frames.length - 1; i++) {
     const f = frames[i]
     if (kind === "sort") {
-      if (familyProfile === "introsort" && f.type === "fallback") {
+      if (familyProfile === "counting" && f.type === "prefix" && frames[i - 1].type !== "prefix") {
+        push(i, "Reserve output ranges")
+      } else if (familyProfile === "counting" && f.type === "place" && frames[i - 1].type !== "place") {
+        push(i, "Place stably")
+      } else if (familyProfile === "introsort" && f.type === "fallback") {
         push(i, "Heap fallback")
       } else if (familyProfile === "introsort" && f.type === "cleanup") {
         push(i, "Insertion cleanup")
@@ -2513,6 +2568,8 @@ function graphEdgeWeight(graph, a, b) {
 
 export function summaryFor(algorithm, kind, frame, graph) {
   if (kind === "sort") {
+    if (algorithm === "counting-sort")
+      return `Output [${frame.output.join(", ")}] · ${frame.tallied} tallies · ${frame.placed} stable placements.`
     if (algorithm === "merge-sort")
       return `Output [${frame.array.join(", ")}] · ${frame.swaps} writes.`
     const unit =

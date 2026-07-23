@@ -19,6 +19,15 @@ Dynamic programming starts with a well-defined state, base cases, and a recurren
 
 **Core shape for finite one-pass DP:** state + base cases + recurrence + acyclic dependency order → each reached state solved once → `(number of distinct states) × (transition work per state)` time.
 
+## Mechanism — state, recurrence, and the two forms
+
+Both examples become DP only after the state discards irrelevant history. Coin change keeps the remaining amount because every denomination remains reusable; finite coin stock would also require the remaining counts. Grid path keeps the current coordinate. Two calls with the same state have the same future choices and therefore the same answer, regardless of how they arrived there.
+
+- **Top-down (memoisation)** follows the recurrence from the target. The first visit to an amount or coordinate computes it; later visits return the saved answer. It may skip unreachable states, but it pays call-stack cost. [[Home/Computer Science/Algorithms/Paradigms/Memoization|Memoization]] develops that reuse mechanism independently of DP.
+- **Bottom-up (tabulation)** starts from known answers and fills every state its target may depend on. Coin change advances from `0¢` to `30¢`; grid path moves backward from the dispatch door. The loops make dependency order explicit and avoid recursion.
+
+The recurrence then names the dependencies. Coin change reads `best[amount - coin]` for every usable denomination and keeps the minimum plus one. Grid path reads the right and down suffix costs and adds the current tile. The animations differ because those state spaces differ—a one-dimensional amount board versus a two-dimensional matrix—but the storage rule is the same.
+
 ## Coin change — local choice versus stored subproblems
 
 A cashier must return exactly `30¢` using real `1¢`, `10¢`, `25¢`, and `50¢` denominations. The example assumes enough of each coin that stock is not a constraint. Taking the largest usable coin first returns `25 + 1 + 1 + 1 + 1 + 1`, while `10 + 10 + 10` uses half as many coins. The five tabs keep that counterexample fixed while changing the solving strategy and level of abstraction.
@@ -85,10 +94,10 @@ The simplified Memoization and Tabulation tabs keep the cashier model visible. M
 
 ## Grid path — repeated coordinates versus a filled matrix
 
-A warehouse robot may move only right or down from the loading bay to the dispatch door. Choosing the cheaper immediate tile walks into an expensive corridor and costs `21`; the best complete route costs `10`. Naive recursion eventually finds it, but different route prefixes repeatedly reach the same coordinate.
+A warehouse robot may move only right or down from the loading bay to the dispatch door. Choosing the cheaper immediate tile and breaking ties to the right walks into an expensive corridor and costs `21`; the best complete route costs `10`. Naive recursion eventually finds it, but different route prefixes repeatedly reach the same coordinate.
 
 ```steptrace
-{"selected":0,"tabs":[{"name":"Greedy","description":"Choose the cheaper next tile; the route is trapped by later costs.","algorithm":"grid-path-greedy"},{"name":"Naive Recursion","description":"Explore every right/down route and revisit the same coordinates.","algorithm":"grid-path-naive"},{"name":"Memoization","description":"Write solved remaining costs into the warehouse map and reuse repeated tiles.","algorithm":"grid-path-memoization"},{"name":"Tabulation","description":"Fill the warehouse map backward from the dispatch door and reveal the route.","algorithm":"grid-path-tabulation"},{"name":"Memoization (Raw)","description":"Inspect the canonical coordinate recursion tree and cache hits.","algorithm":"grid-path-top-down"}]}
+{"selected":0,"tabs":[{"name":"Greedy","description":"Choose the cheaper next tile, breaking ties right; later costs trap the route.","algorithm":"grid-path-greedy"},{"name":"Naive Recursion","description":"Explore every right/down route and revisit the same coordinates.","algorithm":"grid-path-naive"},{"name":"Memoization","description":"Write solved remaining costs into the warehouse map and reuse repeated tiles.","algorithm":"grid-path-memoization"},{"name":"Tabulation","description":"Fill the warehouse map backward from the dispatch door and reveal the route.","algorithm":"grid-path-tabulation"},{"name":"Memoization (Raw)","description":"Inspect the canonical coordinate recursion tree and cache hits.","algorithm":"grid-path-top-down"}]}
 ```
 
 Here the state is a coordinate rather than an amount. `best(R2C2)` means “the minimum remaining cost from this tile,” independent of how the robot arrived. The four simplified tabs use one warehouse matrix with integrated context, while Memoization (Raw) exposes the canonical recursion tree. Memoization stops repeated calls to a saved coordinate; tabulation makes the dependency order spatial by reading the already-solved tiles to the right and below.
@@ -156,15 +165,6 @@ Here the state is a coordinate rather than an amount. `best(R2C2)` means “the 
 > ```
 > Both versions return the same minimum route cost; the visualization keeps the full table so it can also highlight the chosen route.
 
-## Mechanism — state, recurrence, and the two forms
-
-Both examples become DP only after the state discards irrelevant history. Coin change keeps the remaining amount because every denomination remains reusable; finite coin stock would also require the remaining counts. Grid path keeps the current coordinate. Two calls with the same state have the same future choices and therefore the same answer, regardless of how they arrived there.
-
-- **Top-down (memoisation)** follows the recurrence from the target. The first visit to an amount or coordinate computes it; later visits return the saved answer. It may skip unreachable states, but it pays call-stack cost. [[Home/Computer Science/Algorithms/Paradigms/Memoization|Memoization]] develops that reuse mechanism independently of DP.
-- **Bottom-up (tabulation)** starts from known answers and fills every state its target may depend on. Coin change advances from `0¢` to `30¢`; grid path moves backward from the dispatch door. The loops make dependency order explicit and avoid recursion.
-
-The recurrence then names the dependencies. Coin change reads `best[amount - coin]` for every usable denomination and keeps the minimum plus one. Grid path reads the right and down suffix costs and adds the current tile. The animations differ because those state spaces differ—a one-dimensional amount board versus a two-dimensional matrix—but the storage rule is the same.
-
 ## Complexity
 
 DP's running time is structural: distinct states multiplied by transitions examined per state.
@@ -174,7 +174,7 @@ DP's running time is structural: distinct states multiplied by transitions exami
 | Coin change, target `W`, `D` denominations | `W + 1` amounts | up to `D` coins | `O(WD)` | `O(W)` | `O(W)` |
 | Grid path, `R × C` matrix | `R·C` coordinates | at most right + down | `O(RC)` | `O(RC)` | `O(R + C)` |
 
-Grid-path tabulation can keep one row in `O(C)` space when only the minimum cost matters. The visualization retains all `R·C` cells because reconstructing and highlighting the chosen route needs predecessor information. Coin change similarly needs an extra chosen-coin array if the result must include the actual coins rather than only their count.
+Grid-path tabulation can keep one row in `O(C)` space when only the minimum cost matters. The visualization retains all `R·C` cells because reconstructing and highlighting the chosen route needs predecessor information. Coin change may store a chosen-coin array for direct reconstruction, or rescan the denominations during backtracking for a coin satisfying `dp[a] = dp[a - coin] + 1`.
 
 ## Boundaries
 
@@ -201,5 +201,6 @@ Optimization DP still needs a valid composition rule. For the same US-coin drawe
 ## References
 
 - [Dynamic programming (Wikipedia)](https://en.wikipedia.org/wiki/Dynamic_programming) — formal definition, Bellman's origin of the term, and the optimal-substructure / overlapping-subproblems conditions.
-- [MIT 6.006 Introduction to Algorithms, Spring 2020](https://ocw.mit.edu/courses/6-006-introduction-to-algorithms-spring-2020/) — the dynamic-programming unit frames DP as recursion plus memoisation and works through subproblem/state design.
+- [Richard Bellman, "The Theory of Dynamic Programming" (1954)](https://www.ams.org/bull/1954-60-06/S0002-9904-1954-09848-8/S0002-9904-1954-09848-8.pdf) — the primary paper formalizing state variables and the principle of optimality.
+- [MIT 6.006 Dynamic Programming lecture notes, Spring 2020](https://ocw.mit.edu/courses/6-006-introduction-to-algorithms-spring-2020/pages/lecture-notes/) — lectures 15–18 develop recursive formulations, subproblem selection, memoisation, and bottom-up evaluation.
 - Cormen, Leiserson, Rivest, Stein, *Introduction to Algorithms* — the "Dynamic Programming" chapter (Ch. 15 in the 3rd edition, Ch. 14 in the 4th edition) develops state recurrences, optimal substructure, overlapping subproblems, and both evaluation orders.
