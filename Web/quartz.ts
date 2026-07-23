@@ -1,9 +1,11 @@
 import { ExcalidrawEnhance } from "./custom/components/excalidraw-enhance"
 import { ExplorerIcons } from "./custom/components/explorer-icons"
+import { ContentMetaRow } from "./custom/components/content-meta-row"
 import { ExplorerOrder } from "./custom/components/explorer-order"
 import { FloatingButtons } from "./custom/components/floating-buttons"
 import { HomepageFit } from "./custom/components/homepage-fit"
 import { NavScopeDropdown } from "./custom/components/nav-scope-dropdown"
+import { PageContribute } from "./custom/components/page-contribute"
 import { QuestionsIndex } from "./custom/components/questions-index"
 import { SiteHeader } from "./custom/components/site-header"
 import { SiteMarquee } from "./custom/components/site-marquee"
@@ -132,6 +134,8 @@ for (const pageLayout of Object.values(layout.byPageType)) {
   pageLayout.afterBody = [...(pageLayout.afterBody ?? []), floatingButtons]
 }
 
+const pageContribute = PageContribute()
+
 const content = { ...(layout.byPageType.content ?? {}) }
 content.afterBody = [QuestionsIndex(), ...(content.afterBody ?? [])]
 layout.byPageType.content = content
@@ -163,6 +167,21 @@ const siteHeader = SiteHeader({
 layout.defaults.header = [siteHeader, ...(layout.defaults.header ?? [])]
 for (const pageLayout of Object.values(layout.byPageType)) {
   pageLayout.header = [siteHeader, ...(pageLayout.header ?? [])]
+}
+
+// The Edit/Report contribution links (page-contribute) ride the article's
+// content-meta row — date/reading-time on the left, links on the right — rather
+// than a page-footer block. content-meta is registered but unpositioned in
+// quartz.config.yaml, so ContentMetaRow renders it (with pageContribute) where
+// it used to sit in beforeBody. Appended last to land after breadcrumbs/title/
+// note-properties, matching content-meta's former priority.
+const contentMetaRow = ContentMetaRow({
+  meta: instantiateRegistered("content-meta"),
+  contribute: pageContribute,
+})
+layout.defaults.beforeBody = [...(layout.defaults.beforeBody ?? []), contentMetaRow]
+for (const pageLayout of Object.values(layout.byPageType)) {
+  pageLayout.beforeBody = [...(pageLayout.beforeBody ?? []), contentMetaRow]
 }
 
 // loadQuartzConfig already baked its own layout into a PageTypeDispatcher
