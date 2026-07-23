@@ -1,8 +1,8 @@
 ---
 publish: true
 created: 2026-07-18T14:02:43.953Z
-modified: 2026-07-23T07:12:49.365Z
-published: 2026-07-23T07:12:49.365Z
+modified: 2026-07-23T09:28:17.493Z
+published: 2026-07-23T09:28:17.493Z
 topic:
   - Computer Science
 subtopic:
@@ -100,10 +100,10 @@ The simplified Memoization and Tabulation tabs keep the cashier model visible. M
 
 ## Grid path — repeated coordinates versus a filled matrix
 
-A warehouse robot may move only right or down from the loading bay to the dispatch door. Choosing the cheaper immediate tile walks into an expensive corridor and costs `21`; the best complete route costs `10`. Naive recursion eventually finds it, but different route prefixes repeatedly reach the same coordinate.
+A warehouse robot may move only right or down from the loading bay to the dispatch door. Choosing the cheaper immediate tile and breaking ties to the right walks into an expensive corridor and costs `21`; the best complete route costs `10`. Naive recursion eventually finds it, but different route prefixes repeatedly reach the same coordinate.
 
 ```steptrace
-{"selected":0,"tabs":[{"name":"Greedy","description":"Choose the cheaper next tile; the route is trapped by later costs.","algorithm":"grid-path-greedy"},{"name":"Naive Recursion","description":"Explore every right/down route and revisit the same coordinates.","algorithm":"grid-path-naive"},{"name":"Memoization","description":"Write solved remaining costs into the warehouse map and reuse repeated tiles.","algorithm":"grid-path-memoization"},{"name":"Tabulation","description":"Fill the warehouse map backward from the dispatch door and reveal the route.","algorithm":"grid-path-tabulation"},{"name":"Memoization (Raw)","description":"Inspect the canonical coordinate recursion tree and cache hits.","algorithm":"grid-path-top-down"}]}
+{"selected":0,"tabs":[{"name":"Greedy","description":"Choose the cheaper next tile, breaking ties right; later costs trap the route.","algorithm":"grid-path-greedy"},{"name":"Naive Recursion","description":"Explore every right/down route and revisit the same coordinates.","algorithm":"grid-path-naive"},{"name":"Memoization","description":"Write solved remaining costs into the warehouse map and reuse repeated tiles.","algorithm":"grid-path-memoization"},{"name":"Tabulation","description":"Fill the warehouse map backward from the dispatch door and reveal the route.","algorithm":"grid-path-tabulation"},{"name":"Memoization (Raw)","description":"Inspect the canonical coordinate recursion tree and cache hits.","algorithm":"grid-path-top-down"}]}
 ```
 
 Here the state is a coordinate rather than an amount. `best(R2C2)` means “the minimum remaining cost from this tile,” independent of how the robot arrived. The four simplified tabs use one warehouse matrix with integrated context, while Memoization (Raw) exposes the canonical recursion tree. Memoization stops repeated calls to a saved coordinate; tabulation makes the dependency order spatial by reading the already-solved tiles to the right and below.
@@ -184,7 +184,7 @@ DP's running time is structural: distinct states multiplied by transitions exami
 | Coin change, target `W`, `D` denominations | `W + 1` amounts | up to `D` coins | `O(WD)` | `O(W)` | `O(W)` |
 | Grid path, `R × C` matrix | `R·C` coordinates | at most right + down | `O(RC)` | `O(RC)` | `O(R + C)` |
 
-Grid-path tabulation can keep one row in `O(C)` space when only the minimum cost matters. The visualization retains all `R·C` cells because reconstructing and highlighting the chosen route needs predecessor information. Coin change similarly needs an extra chosen-coin array if the result must include the actual coins rather than only their count.
+Grid-path tabulation can keep one row in `O(C)` space when only the minimum cost matters. The visualization retains all `R·C` cells because reconstructing and highlighting the chosen route needs predecessor information. Coin change may store a chosen-coin array for direct reconstruction, or rescan the denominations during backtracking for a coin satisfying `dp[a] = dp[a - coin] + 1`.
 
 ## Boundaries
 
@@ -211,5 +211,6 @@ Optimization DP still needs a valid composition rule. For the same US-coin drawe
 ## References
 
 - [Dynamic programming (Wikipedia)](https://en.wikipedia.org/wiki/Dynamic_programming) — formal definition, Bellman's origin of the term, and the optimal-substructure / overlapping-subproblems conditions.
-- [MIT 6.006 Introduction to Algorithms, Spring 2020](https://ocw.mit.edu/courses/6-006-introduction-to-algorithms-spring-2020/) — the dynamic-programming unit frames DP as recursion plus memoisation and works through subproblem/state design.
+- [Richard Bellman, "The Theory of Dynamic Programming" (1954)](https://www.ams.org/bull/1954-60-06/S0002-9904-1954-09848-8/S0002-9904-1954-09848-8.pdf) — the primary paper formalizing state variables and the principle of optimality.
+- [MIT 6.006 Dynamic Programming lecture notes, Spring 2020](https://ocw.mit.edu/courses/6-006-introduction-to-algorithms-spring-2020/pages/lecture-notes/) — lectures 15–18 develop recursive formulations, subproblem selection, memoisation, and bottom-up evaluation.
 - Cormen, Leiserson, Rivest, Stein, _Introduction to Algorithms_ — the "Dynamic Programming" chapter (Ch. 15 in the 3rd edition, Ch. 14 in the 4th edition) develops state recurrences, optimal substructure, overlapping subproblems, and both evaluation orders.
