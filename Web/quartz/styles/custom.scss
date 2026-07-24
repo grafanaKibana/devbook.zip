@@ -10,10 +10,60 @@
   --surface-radius: var(--radius-m, 8px);
 }
 
+// ============================================================================
+// Accent ramp of the brand green, for edges and fills only — text stays on the
+// flat --secondary/--tertiary tokens. Inner stops rather than edge-to-edge, on
+// the same diagonal throughout, so the ends hold a flat colour and the whole
+// transition happens across the middle.
+// ============================================================================
+:root {
+  --accent-from: #4c8000;
+  --accent-to: #8cc63f;
+}
+:root[saved-theme="dark"] {
+  --accent-from: #84cc16;
+  --accent-to: #c8fb84;
+}
+:root {
+  --accent-gradient: linear-gradient(115deg, var(--accent-from) 20%, var(--accent-to) 66%);
+}
+
+hr {
+  background-color: transparent;
+  background-image: var(--accent-gradient);
+  opacity: 0.55;
+}
+
 .callout,
 .graph > .graph-outer,
 .graph > .global-graph-outer > .global-graph-container {
   border-radius: var(--surface-radius);
+}
+
+// ============================================================================
+// Graph panel — accent frame + faint top-down glow keyed to --secondary
+// (overrides the plugin's flat --lightgray border).
+// ============================================================================
+// The accent ramp paints the border itself: a transparent border reveals the
+// last layer, which is clipped to the border box, while the fill layers stop at
+// the padding box. border-image would do it in one line but squares off the
+// corners, and this panel is rounded.
+.graph > .graph-outer {
+  border: 1px solid transparent;
+  // Opaque --light base (as the scope dropdown's .ns-menu panel uses) so the page
+  // dot-grid doesn't show through, with a faint top-down accent glow layered over.
+  // --light has to be spelled as a gradient: a plain colour can only ever be the
+  // background-color, which no per-layer clip applies to.
+  background:
+    radial-gradient(
+        120% 120% at 50% 0%,
+        color-mix(in srgb, var(--secondary) 3.5%, transparent),
+        transparent 60%
+      )
+      padding-box,
+    linear-gradient(var(--light), var(--light)) padding-box,
+    var(--accent-gradient) border-box;
+  //box-shadow: inset 0 0 40px color-mix(in srgb, var(--secondary) 4%, transparent);
 }
 
 // ============================================================================
@@ -442,9 +492,24 @@ body {
 }
 .explorer .explorer-content ul li > a.nav-file-title.active {
   color: var(--secondary);
-  background-color: var(--highlight);
   font-weight: #{$semiBoldWeight};
   opacity: 1;
+  // Wash drawn from the ramp's light end, on the same diagonal as the other
+  // accents, fading out before the row's right edge.
+  background-image: linear-gradient(
+    115deg,
+    color-mix(in srgb, var(--accent-to) 22%, transparent),
+    transparent 80%
+  );
+}
+// File glyph carries its topic's hue (set inline as --ec-topic by
+// explorer-icons.tsx) while the label stays --darkgray — the same icon-accent /
+// regular-label split the folder rows use, and the same subtree tint. Root pages
+// have no topic folder above them, so --ec-topic is unset and the icon falls back
+// to the accent. The icon has its own colour, so the label's hover shift to
+// --dark leaves it fixed.
+.explorer .explorer-content ul li > a.nav-file-title .ec-ico {
+  color: var(--ec-topic, var(--secondary));
 }
 
 // ---------------------------------------------------------------------------
@@ -873,14 +938,10 @@ body[data-slug="index"] {
     display: none;
   }
 
-  // Drop the rule after the body. The afterBody block can't be display:none:
-  // it now carries the position:fixed floating scroll buttons, and display:none
-  // on this wrapper hides them too (fatal on the scrollable mobile homepage).
-  // display:contents removes the empty footer box from layout while letting the
-  // fixed controls render.
-  .center > hr {
-    display: none;
-  }
+  // The afterBody block can't be display:none: it now carries the position:fixed
+  // floating scroll buttons, and display:none on this wrapper hides them too
+  // (fatal on the scrollable mobile homepage). display:contents removes the empty
+  // footer box from layout while letting the fixed controls render.
   .center > .page-footer {
     display: contents;
   }
@@ -1578,8 +1639,8 @@ blockquote.transclude:has(.excalidraw-page) {
 // Site footer: drop the "Created with Quartz © …" credit line, center the link
 // row, and prefix each link with a masked icon — Lucide for Credits (info) and
 // Email (mail), brand marks for LinkedIn and GitHub (lucide-static ships no brand
-// icons). Mask + currentColor mirrors the breadcrumb chevron above, so icons
-// track the link ink and warm to the accent on hover.
+// icons). Same split as the sidebar leaves: accent icon, regular-ink label, text
+// warming to --dark on hover.
 footer > p {
   display: none;
 }
@@ -1594,10 +1655,16 @@ footer > ul a {
   display: inline-flex;
   align-items: center;
   gap: 0.35rem;
+  color: var(--darkgray);
+}
+footer > ul a:hover {
+  color: var(--dark);
 }
 
 // Only the four known links carry an icon; a link without a `--footer-icon`
-// gets no ::before (guards against an unmasked solid square).
+// gets no ::before (guards against an unmasked solid square). The icon paints in
+// --secondary regardless of the label's hover state (its own colour, not
+// currentColor), so it stays the fixed accent the sidebar leaves use.
 footer > ul a[href$="Credits"]::before,
 footer > ul a[href^="mailto:"]::before,
 footer > ul a[href*="linkedin.com"]::before,
@@ -1606,7 +1673,7 @@ footer > ul a[href*="github.com"]::before {
   flex: 0 0 auto;
   width: 1em;
   height: 1em;
-  background-color: currentColor;
+  background-color: var(--secondary);
   -webkit-mask: var(--footer-icon) center / contain no-repeat;
   mask: var(--footer-icon) center / contain no-repeat;
 }

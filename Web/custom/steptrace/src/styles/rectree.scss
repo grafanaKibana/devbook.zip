@@ -1,89 +1,231 @@
-/* ---- rectree: a naive recursion tree collapsing into a memo DAG (SVG) ----
-   The FULL naive tree is laid out once and every node lives in the SVG from
-   frame 0; reveal is a data-vis opacity toggle (never DOM insertion) and a memo
-   hit dims a subtree via data-collapsed — so the node set, viewBox and stage
-   height are constant on every frame (zero footer jitter). Colour changes only;
-   stroke-width stays fixed (the "graph card" fix) to keep geometry stable. */
-.steptrace__rectree {
-  display: flex;
-  flex-direction: column;
-  gap: 0.5rem;
-  align-items: stretch;
+.steptrace .steptrace__rectree {
+  display: grid;
+  place-items: center;
+  inline-size: 100%;
+  min-inline-size: 0;
+  overflow-x: auto;
+  overflow-y: hidden;
+  overscroll-behavior-inline: contain;
+  scrollbar-gutter: stable;
 }
-.steptrace__rtsvg {
-  width: 100%;
-  height: auto;
-  max-height: 260px;
+
+.steptrace .steptrace__rectree:focus-visible {
+  outline: 2px solid var(--_blue);
+  outline-offset: 0.2rem;
+}
+
+.steptrace .steptrace__rtsvg {
+  display: block;
+  inline-size: var(--steptrace-tree-width, 100%);
+  min-inline-size: var(--steptrace-tree-width, 100%);
+  block-size: auto;
+  max-block-size: none;
+  margin: 0 auto;
+  padding: 0;
   overflow: visible;
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+  box-shadow: none;
+  color: inherit;
+  font: inherit;
 }
-.steptrace__rtedge {
+
+.steptrace .steptrace__rectree[data-fit-width="true"] .steptrace__rtsvg {
+  inline-size: 100%;
+  min-inline-size: 0;
+  max-inline-size: var(--steptrace-tree-width, 100%);
+  margin-inline: auto;
+}
+
+@media (min-width: 561px) {
+  :is(
+      .steptrace--stable-stage,
+      .steptrace--tabs .steptrace__tabpanel-body.steptrace
+    )
+    .steptrace__rectree[data-fit-width="true"] {
+    block-size: 100%;
+  }
+
+  :is(
+      .steptrace--stable-stage,
+      .steptrace--tabs .steptrace__tabpanel-body.steptrace
+    )
+    .steptrace__rectree[data-fit-width="true"]
+    .steptrace__rtsvg {
+    max-block-size: 100%;
+  }
+}
+
+.steptrace .steptrace__rtsvg text {
+  margin: 0;
+  padding: 0;
+  font-style: normal;
+  letter-spacing: 0;
+  text-decoration: none;
+  text-transform: none;
+}
+
+.steptrace .steptrace__rtsvg circle,
+.steptrace .steptrace__rtsvg line,
+.steptrace .steptrace__rtsvg rect {
+  vector-effect: non-scaling-stroke;
+}
+
+.steptrace .steptrace__rtedge {
   stroke: var(--_neutral);
-  stroke-width: 1.6;
+  stroke-width: 1.25;
   transition:
     stroke var(--_tween) ease,
     opacity var(--_tween) ease;
 }
-.steptrace__rtedge[data-vis="0"] {
+
+.steptrace .steptrace__rtedge[data-vis="0"] {
   opacity: 0.12;
 }
-.steptrace__rtedge[data-collapsed="true"] {
+
+.steptrace .steptrace__rtedge[data-path="true"] {
+  stroke: var(--_violet);
+}
+
+.steptrace .steptrace__rtedge[data-collapsed="true"] {
   opacity: 0.3;
 }
-.steptrace__rtnode {
+
+.steptrace .steptrace__rtnode {
+  opacity: 1;
   transition: opacity var(--_tween) ease;
 }
-.steptrace__rtnode[data-vis="0"] {
+
+.steptrace .steptrace__rtnode[data-vis="0"] {
   opacity: 0.12;
 }
-/* a memo-saved subtree: shown, but dimmed + desaturated so it reads as skipped */
-.steptrace__rtnode[data-collapsed="true"] {
+
+.steptrace .steptrace__rtnode[data-collapsed="true"] {
   opacity: 0.34;
-  filter: grayscale(1);
 }
-.steptrace__rtnode .steptrace__rtback {
+
+.steptrace .steptrace__rtnode .steptrace__rtcirc {
   fill: var(--st-page, var(--_surface));
-  stroke: none;
-}
-.steptrace__rtnode .steptrace__rtcirc {
-  fill: color-mix(in srgb, var(--_neutral) 20%, transparent);
   stroke: var(--_neutral);
-  stroke-width: 1.6;
+  stroke-width: 1.25;
   transition:
     fill var(--_tween) ease,
     stroke var(--_tween) ease;
 }
-/* active-call ring: opacity toggle only — no radius/stroke-width change */
-.steptrace__rtnode .steptrace__rtring {
+
+.steptrace .steptrace__rtnode .steptrace__rtring {
   fill: none;
   stroke: var(--_violet);
-  stroke-width: 1.8;
+  stroke-width: 1.5;
   opacity: 0;
   transition: opacity var(--_tween) ease;
 }
-.steptrace__rtnode[data-active="true"] .steptrace__rtring {
+
+.steptrace .steptrace__rtnode[data-active="true"] .steptrace__rtring {
   opacity: 1;
 }
-.steptrace__rtnode .steptrace__rtlabel {
+
+.steptrace .steptrace__rtnode .steptrace__rtlabel {
   fill: var(--_text);
-  font: 600 10px var(--_font-mono);
+  font: 600 12px/1 var(--_font-mono);
 }
-.steptrace__rtnode .steptrace__rtval {
+
+.steptrace .steptrace__rtnode .steptrace__rtdetail {
   fill: var(--_muted);
-  font: 600 9px var(--_font-mono);
+  font: 400 10.5px/1 var(--_font-mono);
 }
-.steptrace__rtnode[data-state="compute"] .steptrace__rtcirc {
-  fill: color-mix(in srgb, var(--_blue) 22%, transparent);
+
+.steptrace .steptrace__rtnode .steptrace__rtval {
+  fill: var(--_text);
+  font: 600 10px/1 var(--_font-mono);
+}
+
+.steptrace .steptrace__rtnode .steptrace__rtbadge {
+  fill: var(--_muted);
+  font: 600 7px/1 var(--_font-head);
+  letter-spacing: 0.03em;
+  text-transform: uppercase;
+}
+
+.steptrace .steptrace__rtnode[data-shape="circle"] .steptrace__rtdetail,
+.steptrace .steptrace__rtnode[data-shape="circle"] .steptrace__rtbadge {
+  display: none;
+}
+
+.steptrace .steptrace__rtnode[data-shape="card"] .steptrace__rtval,
+.steptrace .steptrace__rtnode[data-shape="card"] .steptrace__rtbadge {
+  display: none;
+}
+
+.steptrace .steptrace__rectree + .steptrace__legend {
+  margin-top: 0.4rem;
+}
+
+.steptrace .steptrace__rtnode[data-state="call"] .steptrace__rtcirc,
+.steptrace .steptrace__rtnode[data-state="compute"] .steptrace__rtcirc {
+  fill: color-mix(in srgb, var(--_neutral) 18%, var(--st-page, var(--_surface)));
+  stroke: var(--_neutral);
+}
+
+.steptrace .steptrace__rtnode[data-state="split"] .steptrace__rtcirc {
+  fill: color-mix(in srgb, var(--_blue) 12%, var(--st-page, var(--_surface)));
   stroke: var(--_blue);
 }
-.steptrace__rtnode[data-state="base"] .steptrace__rtcirc {
-  fill: color-mix(in srgb, var(--_muted) 16%, transparent);
-  stroke: var(--_muted);
-}
-.steptrace__rtnode[data-state="miss"] .steptrace__rtcirc {
-  fill: color-mix(in srgb, var(--_amber) 18%, transparent);
+
+.steptrace .steptrace__rtnode[data-state="base"] .steptrace__rtcirc,
+.steptrace .steptrace__rtnode[data-state="miss"] .steptrace__rtcirc {
+  fill: color-mix(in srgb, var(--_amber) 13%, var(--st-page, var(--_surface)));
   stroke: var(--_amber);
 }
-.steptrace__rtnode[data-state="hit"] .steptrace__rtcirc {
-  fill: color-mix(in srgb, var(--_green) 30%, transparent);
+
+.steptrace .steptrace__rtnode[data-state="return"] .steptrace__rtcirc {
+  fill: color-mix(in srgb, var(--_violet) 11%, var(--st-page, var(--_surface)));
+  stroke: var(--_violet);
+}
+
+.steptrace .steptrace__rtnode[data-state="combine"] .steptrace__rtcirc,
+.steptrace .steptrace__rtnode[data-state="store"] .steptrace__rtcirc,
+.steptrace .steptrace__rtnode[data-state="hit"] .steptrace__rtcirc {
+  fill: color-mix(in srgb, var(--_green) 14%, var(--st-page, var(--_surface)));
   stroke: var(--_green);
+}
+
+.steptrace .steptrace__rtnode[data-state="cache"] .steptrace__rtcirc {
+  fill: color-mix(in srgb, var(--_violet) 12%, var(--st-page, var(--_surface)));
+  stroke: var(--_violet);
+}
+
+.steptrace .steptrace__rtnode[data-state="prune"] .steptrace__rtcirc {
+  fill: color-mix(in srgb, var(--_muted) 9%, var(--st-page, var(--_surface)));
+  stroke: var(--_muted);
+  stroke-dasharray: 3 2;
+}
+
+.steptrace .steptrace__rtswatch[data-state="split"] {
+  background: var(--_blue);
+}
+
+.steptrace .steptrace__rtswatch[data-state="base"],
+.steptrace .steptrace__rtswatch[data-state="miss"] {
+  background: var(--_amber);
+}
+
+.steptrace .steptrace__rtswatch[data-state="return"],
+.steptrace .steptrace__rtswatch[data-state="compute"] {
+  background: var(--_violet);
+}
+
+.steptrace .steptrace__rtswatch[data-state="combine"],
+.steptrace .steptrace__rtswatch[data-state="store"],
+.steptrace .steptrace__rtswatch[data-state="hit"] {
+  background: var(--_green);
+}
+
+.steptrace .steptrace__rtswatch[data-state="cache"] {
+  background: var(--_violet);
+}
+
+.steptrace .steptrace__rtswatch[data-state="prune"] {
+  background: var(--_muted);
 }

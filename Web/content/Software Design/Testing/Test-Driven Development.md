@@ -1,8 +1,8 @@
 ---
 publish: true
-created: 2026-07-15T11:50:29.495Z
-modified: 2026-07-18T11:30:16.184Z
-published: 2026-07-18T11:30:16.184Z
+created: 2026-07-19T15:05:28.203Z
+modified: 2026-07-19T15:05:28.203Z
+published: 2026-07-19T15:05:28.203Z
 topic:
   - Software Design
 subtopic:

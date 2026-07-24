@@ -3,7 +3,7 @@
   "alwaysUpdateLinks": true,
   "showInlineTitle": true,
   "livePreview": false,
-  "defaultViewMode": "source",
+  "defaultViewMode": "preview",
   "readableLineLength": false,
   "strictLineBreaks": false,
   "propertiesInDocument": "hidden",

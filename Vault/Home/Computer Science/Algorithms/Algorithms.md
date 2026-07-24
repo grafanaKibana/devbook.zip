@@ -19,6 +19,11 @@ Complexity analysis ([[Home/Computer Science/Big O Notation|Big O]]) is the prim
 
 Concrete example: for repeated membership checks in a large list of ids, sorting once and using binary search gives fast lookups with low memory overhead. For one-off checks on unsorted data, a linear scan is usually simpler and can be faster overall because there is no preprocessing cost.
 
+```datacorejsx
+const { FolderStructureMap } = await dc.require("Assets/components/devbook-folder-map.jsx");
+return FolderStructureMap;
+```
+
 # Algorithms as system-design mechanisms
 
 System-design diagrams often hide the algorithm inside a box labelled “cache,” “scheduler,” or “database.” Naming the mechanism exposes the cost you are accepting:
@@ -37,11 +42,6 @@ System-design diagrams often hide the algorithm inside a box labelled “cache,�
 ![[Computer Science/Computer Science-Algorithms-18120000.jpg]]
 
 The visual is a topic inventory. Its priority stars are editorial, not a workload-independent ranking; use the mechanism, invariant, and failure boundary above to decide what a design actually needs.
-
-```datacorejsx
-const { FolderStructureMap } = await dc.require("Assets/components/devbook-folder-map.jsx");
-return FolderStructureMap;
-```
 
 # Questions
 

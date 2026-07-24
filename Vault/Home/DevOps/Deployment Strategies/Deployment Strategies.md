@@ -17,6 +17,11 @@ Deployment strategies control how new versions of software reach production. The
 
 The strategies differ across several axes: whether old and new artifacts coexist, whether traffic moves separately from deployment, how much spare capacity is required, how quickly rollback changes exposure, and whether progression is time-driven or evidence-driven. Treating them as one blast-radius scale hides those operational differences.
 
+```datacorejsx
+const { FolderStructureMap } = await dc.require("Assets/components/devbook-folder-map.jsx");
+return FolderStructureMap;
+```
+
 # Deployment, Traffic, Experiment, and Feature Boundaries
 
 These controls solve different problems and should be composed deliberately:

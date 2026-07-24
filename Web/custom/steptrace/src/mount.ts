@@ -23,10 +23,13 @@ import {
   thinMilestones,
 } from "./render"
 import type { RegistryApi } from "./registry"
-import type { MountHandle, StepTraceConfig, StepTraceHost } from "./types"
+import type { MountHandle, StepTraceBlockConfig, StepTraceHost, StepTraceTabsConfig } from "./types"
+import { isTabsConfig, normalizeTabsConfig } from "./tabs"
+import { watchHintFor } from "./watch-hints"
 
 const LOG_ROWS = 10
 const fadeFor = (age: number) => Math.max(0.1, 0.5 * Math.pow(0.62, age - 1))
+let mountSerial = 0
 
 // ==========================================================================
 //  7. MOUNT  —  assemble a card into `root` from a flat config, wire the
@@ -40,14 +43,125 @@ export function createMount(
   registry: Pick<RegistryApi, "kindOf" | "listAlgorithms" | "buildFrames">,
 ) {
   const { kindOf, listAlgorithms, buildFrames } = registry
-  return function mount(
+  function mountTabs(
     root: HTMLElement,
-    config: StepTraceConfig,
+    config: StepTraceTabsConfig,
     host: StepTraceHost = {},
   ): MountHandle {
+    let normalized
+    try {
+      normalized = normalizeTabsConfig(config)
+    } catch (error) {
+      root.textContent = error instanceof Error ? error.message : String(error)
+      return { destroy: () => root.replaceChildren() }
+    }
+    const { tabs } = normalized
+
+    root.classList.add("steptrace", "steptrace--tabs")
+    root.setAttribute("role", "group")
+    root.setAttribute("aria-label", "Tabbed algorithm visualizer")
+
+    const tabsShell = el("div", "steptrace__tabs-shell")
+    const tablist = el("div", "steptrace__tabs")
+    tablist.setAttribute("role", "tablist")
+    tablist.setAttribute("aria-label", "Visualization variants")
+    const tabDesc = el("div", "steptrace__tabs-desc")
+    tabDesc.setAttribute("aria-live", "polite")
+    const panels = el("div", "steptrace__tabpanels")
+
+    const buttons: HTMLButtonElement[] = []
+    const panelShells: HTMLElement[] = []
+    const panelMounts: HTMLElement[] = []
+    const handles: Array<MountHandle | null> = tabs.map(() => null)
+    let activeIndex = normalized.selected
+
+    const showTab = (index: number, focus = false) => {
+      const next = Math.min(Math.max(index, 0), tabs.length - 1)
+      if (next === activeIndex && handles[next]) {
+        if (focus) buttons[next]?.focus()
+        return
+      }
+      handles[activeIndex]?.pause?.()
+      activeIndex = next
+      const tab = tabs[next]
+      tabDesc.textContent = tab.description || ""
+      buttons.forEach((button, i) => {
+        const selected = i === next
+        button.setAttribute("aria-selected", String(selected))
+        button.tabIndex = selected ? 0 : -1
+        button.classList.toggle("steptrace__tab--selected", selected)
+        panelShells[i].hidden = !selected
+      })
+      if (!handles[next]) handles[next] = mount(panelMounts[next], tab.config, host)
+      if (focus) buttons[next]?.focus()
+    }
+
+    tabs.forEach((tab, index) => {
+      const tabId = `steptrace-tab-${++mountSerial}`
+      const panelId = `steptrace-panel-${++mountSerial}`
+      const button = document.createElement("button")
+      button.type = "button"
+      button.className = "steptrace__tab"
+      button.id = tabId
+      button.setAttribute("role", "tab")
+      button.setAttribute("aria-controls", panelId)
+      button.textContent = tab.name
+      button.tabIndex = index === activeIndex ? 0 : -1
+      button.addEventListener("click", () => showTab(index))
+      button.addEventListener("keydown", (event) => {
+        if (event.key === "ArrowLeft" || event.key === "ArrowUp") {
+          event.preventDefault()
+          showTab((index - 1 + tabs.length) % tabs.length, true)
+        } else if (event.key === "ArrowRight" || event.key === "ArrowDown") {
+          event.preventDefault()
+          showTab((index + 1) % tabs.length, true)
+        } else if (event.key === "Home") {
+          event.preventDefault()
+          showTab(0, true)
+        } else if (event.key === "End") {
+          event.preventDefault()
+          showTab(tabs.length - 1, true)
+        }
+      })
+      buttons.push(button)
+      tablist.append(button)
+
+      const panelShell = el("div", "steptrace__tabpanel")
+      panelShell.id = panelId
+      panelShell.hidden = index !== activeIndex
+      panelShell.setAttribute("role", "tabpanel")
+      panelShell.setAttribute("aria-labelledby", tabId)
+      const panelMount = el("div", "steptrace__tabpanel-body")
+      panelShell.append(panelMount)
+      panelShells.push(panelShell)
+      panelMounts.push(panelMount)
+      panels.append(panelShell)
+    })
+
+    tabsShell.append(tablist, tabDesc)
+    root.replaceChildren(tabsShell, panels)
+    activeIndex = -1
+    showTab(normalized.selected)
+
+    return {
+      destroy() {
+        for (const handle of handles) handle?.destroy()
+        root.replaceChildren()
+        root.classList.remove("steptrace", "steptrace--tabs", "steptrace--reduced")
+      },
+    }
+  }
+
+  function mount(
+    root: HTMLElement,
+    config: StepTraceBlockConfig,
+    host: StepTraceHost = {},
+  ): MountHandle {
+    if (isTabsConfig(config)) return mountTabs(root, config, host)
     root.classList.add("steptrace")
     root.setAttribute("role", "group")
     root.setAttribute("aria-label", "Algorithm visualizer")
+    const watchHintPrefix = `steptrace-watch-hint-${++mountSerial}`
 
     const kind = kindOf(config.algorithm)
     if (!kind) {
@@ -58,6 +172,8 @@ export function createMount(
     const mq = matchMedia("(prefers-reduced-motion: reduce)")
     const applyMotion = () => root.classList.toggle("steptrace--reduced", mq.matches)
     mq.addEventListener("change", applyMotion)
+    const shouldIncludeArray =
+      Array.isArray(config.array) || kind === "sort" || kind === "search" || kind === "pointers"
 
     const state = {
       algorithm: config.algorithm,
@@ -165,6 +281,9 @@ export function createMount(
     const applySpeed = (value) => {
       const v = Number(value)
       state.speed = v
+      // transitions must fit inside the step interval (baseDelay / speed), else
+      // 2× bleeds each animation into the next frame and 0.5× freezes mid-step
+      root.style.setProperty("--_tween", `${Math.round(107 / v)}ms`)
       if (player) player.setSpeed(v)
     }
     if (host && typeof host.createSpeedSlider === "function") {
@@ -198,6 +317,7 @@ export function createMount(
     }
     speedSection.append(speedHead, speedRow)
     menu.append(speedSection)
+    applySpeed(state.speed)
     let startMenu = null
     if (kind === "sort") {
       const section = el("div", "steptrace__menu-section")
@@ -275,16 +395,17 @@ export function createMount(
     const onDocClick = () => closeMenu()
     document.addEventListener("click", onDocClick)
 
-    // Pin the log to two history lines plus whichever is taller: the tallest frame
-    // message, or the RESULT box that replaces it on the terminal frame. That makes
-    // the rail's height frame-invariant, so the stage it stretches against — and the
-    // transport buttons below it — never move mid-run. Probes are absolutely
-    // positioned, so measuring them costs no layout and cannot re-trigger the
-    // observer below.
+    // Reserve enough log space for two history lines plus whichever is taller: the
+    // tallest frame message, or the RESULT box that replaces it on the terminal
+    // frame. The log can then grow into every pixel the content-sized WATCH block
+    // leaves available. Probes are absolutely positioned so they do not affect
+    // flow, and all are appended before the first height read so the browser can
+    // resolve them in one layout pass.
     function sizeRail() {
       if (!player) return
       if (matchMedia("(max-width: 560px)").matches) {
         log.style.height = "auto"
+        log.style.minHeight = "0"
         return
       }
       // sub-pixel heights throughout: offsetHeight rounds, and rounding two history
@@ -292,24 +413,23 @@ export function createMount(
       const PROBE =
         "position:absolute;visibility:hidden;pointer-events:none;left:0;right:0;height:auto"
       const tall = (node) => node.getBoundingClientRect().height
-      const probe = el("li", "steptrace__log-line steptrace__log-line--cur")
-      probe.style.cssText = PROBE
-      const pn = el("span", "steptrace__log-num")
-      pn.textContent = "00"
-      const pt = el("span", "steptrace__log-text")
-      probe.append(pn, pt)
-      log.append(probe)
-      let maxRow = 0
-      for (const f of player.frames) {
-        pt.textContent = stripTags(f.message)
-        if (tall(probe) > maxRow) maxRow = tall(probe)
-      }
-      probe.remove()
+      const probes = player.frames.map((frame) => {
+        const probe = el("li", "steptrace__log-line steptrace__log-line--cur")
+        probe.style.cssText = PROBE
+        const number = el("span", "steptrace__log-num")
+        number.textContent = "00"
+        const text = el("span", "steptrace__log-text")
+        text.textContent = stripTags(frame.message)
+        probe.append(number, text)
+        return probe
+      })
       const resultProbe = insight.cloneNode(true)
       resultProbe.hidden = false
       resultProbe.style.cssText = PROBE
-      log.append(resultProbe)
-      if (tall(resultProbe) > maxRow) maxRow = tall(resultProbe)
+      log.append(...probes, resultProbe)
+      let maxRow = tall(resultProbe)
+      for (const probe of probes) maxRow = Math.max(maxRow, tall(probe))
+      for (const probe of probes) probe.remove()
       resultProbe.remove()
       const logCS = getComputedStyle(log)
       const gap = parseFloat(logCS.rowGap) || 0
@@ -317,7 +437,8 @@ export function createMount(
       // rather than measuring whatever the current step happens to render.
       const hist = (parseFloat(logCS.lineHeight) || 0) * 2
       const h = Math.ceil(hist * 2 + gap * 2 + maxRow) + "px"
-      if (log.style.height !== h) log.style.height = h
+      log.style.height = "auto"
+      if (log.style.minHeight !== h) log.style.minHeight = h
     }
     // Walk the rendered rows bottom-up and keep only those that fit whole inside
     // the log's pinned height — a step half-cut by the overflow reads as a bug.
@@ -442,8 +563,17 @@ export function createMount(
         currentView && currentView.watch ? currentView.watch(player.frames[player.i]) : null
       watchEl.replaceChildren()
       if (!rows || !rows.length) return
-      for (const r of rows) {
+      for (const [index, r] of rows.entries()) {
         const row = el("div", "steptrace__watch-row")
+        const hintId = `${watchHintPrefix}-${index}`
+        const hint = el("span", "steptrace__watch-hint")
+        hint.id = hintId
+        hint.setAttribute("role", "tooltip")
+        hint.textContent = watchHintFor(r)
+        row.tabIndex = 0
+        row.setAttribute("role", "group")
+        row.setAttribute("aria-label", `${r.k}: ${String(r.v)}`)
+        row.setAttribute("aria-describedby", hintId)
         if (r.sw) {
           const sw = el("span", "steptrace__watch-sw")
           sw.style.background = r.sw
@@ -453,7 +583,7 @@ export function createMount(
         kk.textContent = r.k
         const vv = el("span", "steptrace__watch-v")
         vv.textContent = r.v
-        row.append(kk, vv)
+        row.append(kk, vv, hint)
         watchEl.append(row)
       }
     }
@@ -496,26 +626,18 @@ export function createMount(
       if (player) player.destroy()
       if (currentView && currentView.destroy) currentView.destroy()
       const built = buildFrames({
+        ...state.config,
         algorithm: state.algorithm,
-        array: state.array,
+        ...(shouldIncludeArray ? { array: state.array } : {}),
         start: state.start,
-        target: state.config.target,
-        text: state.config.text,
-        pattern: state.config.pattern,
-        a: state.config.a,
-        b: state.config.b,
-        n: state.config.n,
-        value: state.config.value,
-        width: state.config.width,
-        ops: state.config.ops,
-        directed: state.config.directed,
-        nodes: state.config.nodes,
-        edges: state.config.edges,
       })
+      if (built.family) root.dataset.visualFamily = built.family.id
+      else delete root.dataset.visualFamily
       currentGraph = built.graph || null
       currentMilestones = buildMilestones(state.algorithm, built.kind, built.frames)
       let view
-      if (built.kind === "graph")
+      if (built.family) view = built.family.createView(built.frames)
+      else if (built.kind === "graph")
         view = makeGraphView(built.frames, built.graph, built.frontierLabel)
       else if (built.kind === "search") view = makeSearchView(built.frames)
       else if (built.kind === "string") view = makeMatchView(built.frames)
@@ -528,9 +650,14 @@ export function createMount(
       else view = makeSortView(built.frames)
       currentView = view
       if (built.kind === "graph") syncStartOptions(built.graph)
-      // every kind but graph bottom-aligns its viz within the stage column
-      stageCol.classList.toggle("steptrace__stage-col--bottom", built.kind !== "graph")
+      const fillStage = view.stageLayout === "fill"
+      root.classList.toggle("steptrace--stable-stage", view.stableStage === true)
+      stageCol.classList.toggle(
+        "steptrace__stage-col--bottom",
+        built.kind !== "graph" && !fillStage,
+      )
       stageCol.classList.toggle("steptrace__stage-col--graph", built.kind === "graph")
+      stageCol.classList.toggle("steptrace__stage-col--fill", fillStage)
       // The view's LAST node is its own one-line status; the rail TRACE log
       // replaces it, so we keep it out of the DOM (paint still writes to it
       // harmlessly). Everything before it is the actual visualization.
@@ -564,8 +691,7 @@ export function createMount(
         }
       }
       watchWrap.hidden = maxRows === 0
-      // one row is `height: 2em` at `font-size: 0.72rem`
-      watchEl.style.minHeight = maxRows ? `calc(${maxRows} * 1.44rem)` : ""
+      watchEl.style.setProperty("--steptrace-watch-rows", String(maxRows))
     }
 
     function syncStartOptions(graph) {
@@ -611,6 +737,9 @@ export function createMount(
     applyMotion()
 
     return {
+      pause() {
+        if (player) player.pause()
+      },
       destroy() {
         if (player) player.destroy()
         if (currentView && currentView.destroy) currentView.destroy()
@@ -620,10 +749,12 @@ export function createMount(
         root.removeEventListener("keydown", onKey)
         document.removeEventListener("click", onDocClick)
         root.replaceChildren()
-        root.classList.remove("steptrace", "steptrace--reduced")
+        root.classList.remove("steptrace", "steptrace--reduced", "steptrace--stable-stage")
       },
     }
   }
+
+  return mount
 }
 
 // randomArray lives in the host layer (mount), never the pure engine, so

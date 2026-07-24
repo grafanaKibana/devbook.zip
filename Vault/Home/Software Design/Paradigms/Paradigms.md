@@ -17,6 +17,11 @@ A programming paradigm is a set of choices about where state lives, how control 
 
 The useful question is not “which paradigm wins?” It is “which model makes the state transitions and effects easiest to see?” Use [[Home/Software Design/Paradigms/OOP]] when identity and invariants dominate, [[Home/Software Design/Paradigms/Functional Programming]] for deterministic transformations, event-driven code when control should follow events, and imperative code when an explicit sequence is the clearest description.
 
+```datacorejsx
+const { FolderStructureMap } = await dc.require("Assets/components/devbook-folder-map.jsx");
+return FolderStructureMap;
+```
+
 # Programming paradigms by state, control, effects, and concurrency
 
 | Style | Control flow | State model | Composition unit | Effects | Concurrency semantics | Representative support |
@@ -89,11 +94,6 @@ The object-oriented version protects the invariant once and keeps the behavior b
 | Where is the invariant checked? | In the procedure | At the transformation boundary | At construction and methods |
 | Best fit | Short explicit workflows | Data pipelines and calculations | Domains with identity and legal transitions |
 | Main cost | Mutation paths grow hard to track | Effect boundaries need discipline | Types and indirection can outgrow the problem |
-
-```datacorejsx
-const { FolderStructureMap } = await dc.require("Assets/components/devbook-folder-map.jsx");
-return FolderStructureMap;
-```
 
 # References
 

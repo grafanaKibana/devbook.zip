@@ -1,8 +1,8 @@
 ---
 publish: true
-created: 2026-07-15T11:47:55.200Z
-modified: 2026-07-18T11:38:38.774Z
-published: 2026-07-18T11:38:38.774Z
+created: 2026-07-18T14:02:44.179Z
+modified: 2026-07-18T14:02:44.180Z
+published: 2026-07-18T14:02:44.180Z
 topic:
   - Software Architecture
 subtopic:

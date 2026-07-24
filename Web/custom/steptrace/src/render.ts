@@ -5,32 +5,82 @@
 //  edit the owning SCSS module, not this file.
 // ==========================================================================
 
+import { springStep, springOmega, SPRINGS, sequence } from "./motion"
+
+// The step interval the player runs on is baseDelay / speed (260 / speed), while
+// --_tween is round(107 / speed); the ratio converts the tween the tracker reads
+// into the full step budget the choreography stages against (~130ms at 2x).
+const STEP_BUDGET_RATIO = 260 / 107
+// Swap staging, as fractions of that budget: wind up at 0, release the held
+// spring a quarter in, pop on arrival at the halfway mark. Tuning knobs — verify
+// the feel in preview; at a 2x budget these gaps fall under the coalesce floor
+// and collapse to one instant.
+const SWAP_TRAVEL_AT = 0
+const SWAP_SETTLE_AT = 0.5
+
 // ---- sort view: value-in-bar + tracked i/j pin markers (no hat) ----
 // shared bar scaffold for sort + binary-search: bottom-aligned bars, each a
-// coloured fill with the value BELOW and a white check INSIDE (revealed via
-// CSS on the finalised state). Returns [{ bar, fill, num, check }].
-function makeBars(stage, n) {
+// coloured fill with the value BELOW and centered state icons for finalised /
+// probe states (revealed via CSS). Returns [{ bar, fill, num, check, probe }].
+export function makeBars(stage, n) {
   const bars = []
   for (let k = 0; k < n; k++) {
     const bar = el("div", "steptrace__bar")
+    bar.style.setProperty("--_i", String(k))
     const fill = el("div", "steptrace__fill")
     const check = el("div", "steptrace__check")
     check.innerHTML = ICON.check
     check.setAttribute("aria-hidden", "true")
+    const probe = el("div", "steptrace__probe")
+    probe.innerHTML = ICON.search
+    probe.setAttribute("aria-hidden", "true")
     const cue = el("div", "steptrace__bar-cue")
     cue.innerHTML = ICON.compare + ICON.swap
     cue.setAttribute("aria-hidden", "true")
-    fill.append(check, cue)
+    fill.append(check, probe, cue)
     const num = el("div", "steptrace__num")
     bar.append(fill, num)
     stage.append(bar)
-    bars.push({ bar, fill, num, check, cue })
+    bars.push({ bar, fill, num, check, probe, cue })
   }
   return bars
 }
 
-// ---- sort view: shared bars + tracked i/j pin markers (no hat) ----
-export function makeSortView(frames) {
+export function barHeightStyle(value, maxValue, minimumRem = 1.8) {
+  const ratio = Math.max(0, Math.min(1, Number(value) / Math.max(Number(maxValue), 1)))
+  return `calc(${ratio * 100}% + ${(1 - ratio) * minimumRem}rem)`
+}
+
+export function resolveLegacySortFrame(frame) {
+  const active = frame.active || []
+  const isMove = frame.type === "swap" || (frame.type === "overwrite" && frame.range)
+  const movements = []
+  if (frame.type === "swap" && active.length === 2) {
+    movements.push([active[0], active[1]], [active[1], active[0]])
+  } else if (frame.type === "overwrite" && frame.from != null && active.length === 1) {
+    movements.push([active[0], frame.from])
+  }
+  return {
+    activeIndices: active,
+    activeRole: active.length ? (isMove ? "move" : "compare") : null,
+    markerIndices: [active[0] ?? frame.candidate ?? null, active[1] ?? null],
+    movements,
+    laneIndices: null,
+    holeIndex: null,
+    heldToken: null,
+  }
+}
+
+export const legacySortViewSemantics = {
+  markerLabels: ["i", "j"],
+  movementLabel: "swaps",
+  resolveFrame: resolveLegacySortFrame,
+  watchRows(_frame, _visual) {
+    return []
+  },
+}
+
+export function makeSortView(frames, semantics = legacySortViewSemantics) {
   const maxVal = Math.max(...frames[0].array, 1)
   const n = frames[0].array.length
   // A card either narrates a recursive range (quick/merge/heap) or it does not
@@ -40,27 +90,33 @@ export function makeSortView(frames) {
 
   const stage = el("div", "steptrace__stage steptrace__stage--pins")
   const bars = makeBars(stage, n)
-  const pinI = makePin("i", "a")
-  const pinJ = makePin("j", "b")
-  stage.append(pinI.el, pinJ.el)
+  const pinI = makeMarker(semantics.markerLabels[0], "a")
+  const pinJ = makeMarker(semantics.markerLabels[1], "b")
+  const hasHeldToken = frames.some((frame) => semantics.resolveFrame(frame).heldToken)
+  const heldMarker = hasHeldToken ? makeMarker("", "held") : null
+  const markers = heldMarker ? [pinI, pinJ, heldMarker] : [pinI, pinJ]
+  stage.append(...markers.map((marker) => marker.el))
 
   const status = statusEl()
-  const tracker = createBarTracker(stage, bars, [pinI, pinJ])
+  const tracker = createBarTracker(stage, bars, markers)
+  const heldMarkerIndex = heldMarker ? markers.indexOf(heldMarker) : -1
+  let lastPaint = null
 
-  function paint(frame) {
+  function paint(frame, frameIndex) {
     const range = frame.range || null
+    const visual = semantics.resolveFrame(frame)
+    if (visual.laneIndices && visual.laneIndices.length) stage.dataset.lane = "1"
+    else delete stage.dataset.lane
     for (let k = 0; k < n; k++) {
       const b = bars[k]
       // data-driven geometry (value → height); colours come from data-state.
-      b.fill.style.height = `${Math.max(6, (frame.array[k] / maxVal) * 100)}%`
-      b.num.textContent = frame.array[k]
+      b.fill.style.height = visual.holeIndex === k ? "12px" : barHeightStyle(frame.array[k], maxVal)
+      b.num.textContent = visual.holeIndex === k ? "∅" : frame.array[k]
       let state = ""
       if (frame.sorted.includes(k)) state = "sorted"
       if (frame.candidate === k) state = "candidate"
-      // merge writeback (overwrite within a range) reuses the violet swap state;
-      // insertion shifts (overwrite, no range) stay blue as before.
-      if (frame.active.includes(k))
-        state = frame.type === "swap" || (frame.type === "overwrite" && range) ? "swap" : "compare"
+      if (visual.activeIndices.includes(k) && visual.activeRole)
+        state = visual.activeRole === "move" ? "swap" : "compare"
       b.bar.dataset.state = state
       // recursion overlays: dim bars outside the active range; mark the pivot.
       // Attribute toggles only (no DOM add/remove) — footer stays jitter-free.
@@ -68,52 +124,58 @@ export function makeSortView(frames) {
       else delete b.bar.dataset.outside
       if (frame.pivot != null && frame.pivot === k) b.bar.dataset.pivot = "1"
       else delete b.bar.dataset.pivot
-      // clear any in-flight swap animation before (possibly) starting a new one
-      b.bar.classList.remove("steptrace__bar--fly")
-      b.bar.style.transform = ""
+      if (visual.laneIndices)
+        b.bar.dataset.lane = visual.laneIndices.includes(k) ? "active" : "muted"
+      else delete b.bar.dataset.lane
+      if (visual.holeIndex === k) b.bar.dataset.hole = "1"
+      else delete b.bar.dataset.hole
     }
-    // FLIP: a moved bar starts in the slot it came FROM (inverted transform,
-    // no transition) and springs home, so the motion is literal.
+    // FLIP: a moved bar starts in the slot it came FROM and springs home, so the
+    // motion is literal. A bar already in flight keeps its live offset and just
+    // retargets — the spring carries its velocity, so re-framing mid-swap stays
+    // continuous without any offset bookkeeping.
     //   swap      — the pair trade places (bubble/selection/quick/heap)
     //   overwrite — one bar travels from frame.from (insertion shift, merge
     //               lifting a value out of a run head into the merged slot)
-    const fly = []
-    if (frame.type === "swap" && frame.active && frame.active.length === 2) {
-      fly.push([frame.active[0], frame.active[1]], [frame.active[1], frame.active[0]])
-    } else if (
-      frame.type === "overwrite" &&
-      frame.from != null &&
-      frame.active &&
-      frame.active.length === 1
-    ) {
-      fly.push([frame.active[0], frame.from])
-    }
-    const starts = []
-    for (const [to, from] of fly) {
+    const flights = []
+    for (const [to, from] of visual.movements) {
       const bt = bars[to] && bars[to].bar
       const bf = bars[from] && bars[from].bar
       if (!bt || !bf || !bt.isConnected) continue
       const dx = bf.getBoundingClientRect().left - bt.getBoundingClientRect().left
-      if (dx) starts.push([bt, dx])
+      if (dx) flights.push([to, dx])
     }
-    for (const [bt, dx] of starts) bt.style.transform = `translateX(${dx}px)`
-    if (starts.length) void starts[0][0].offsetWidth // commit the inverted starts
-    for (const [bt] of starts) {
-      bt.classList.add("steptrace__bar--fly")
-      bt.style.transform = ""
+    tracker.fly(flights)
+    if (heldMarker) {
+      heldMarker.setLabel(visual.heldToken?.label || "")
+      heldMarker.el.dataset.placing = visual.heldToken?.placing ? "1" : "0"
     }
-    // the active pair drives the i / j pins; fall back to the scan candidate.
-    const act = frame.active || []
-    tracker.set(act[0] != null ? act[0] : frame.candidate, act[1])
+    const paintState = {
+      frameIndex: Number.isInteger(frameIndex) ? frameIndex : null,
+      tokenId: visual.heldToken?.id ?? null,
+    }
+    const resetHeldMarker = heldMarker && shouldResetHeldMarker(lastPaint, paintState)
+    if (resetHeldMarker) tracker.reset(heldMarkerIndex)
+    tracker.set(visual.markerIndices[0], visual.markerIndices[1], visual.heldToken?.index ?? null)
+    if (resetHeldMarker) tracker.renderNow()
+    lastPaint = paintState
   }
 
   function watch(frame) {
-    const act = frame.active || []
+    const visual = semantics.resolveFrame(frame)
     const rows = [
-      { k: "i", v: act[0] != null ? act[0] : "—", sw: "var(--_blue)" },
-      { k: "j", v: act[1] != null ? act[1] : "—", sw: "var(--_violet)" },
+      {
+        k: semantics.markerLabels[0],
+        v: visual.markerIndices[0] ?? "—",
+        sw: "var(--_blue)",
+      },
+      {
+        k: semantics.markerLabels[1],
+        v: visual.markerIndices[1] ?? "—",
+        sw: "var(--_violet)",
+      },
     ]
-    if (hasPivot)
+    if (hasPivot && !semantics.markerLabels.includes("pivot"))
       rows.push({
         k: "pivot",
         v: frame.pivot != null ? `[${frame.pivot}] = ${frame.array[frame.pivot]}` : "—",
@@ -125,35 +187,102 @@ export function makeSortView(frames) {
         v: frame.range ? `[${frame.range[0]}, ${frame.range[1]}]` : "—",
         sw: "var(--_neutral)",
       })
-    rows.push({ k: "swaps", v: frame.swaps, sw: "var(--_amber)" })
+    rows.push(...semantics.watchRows(frame, visual))
+    rows.push({ k: semantics.movementLabel, v: frame.swaps, sw: "var(--_amber)" })
     return rows
   }
 
   return { nodes: [stage, status], paint, watch, destroy: tracker.destroy }
 }
 
-// a single-path teardrop pin (no hat); one SVG shape so the translucent fill
-// never shows a seam. role "a" = blue, "b" = violet (coloured via CSS).
-function makePin(label, role) {
-  const wrap = el("div", "steptrace__pin steptrace__pin--" + role)
-  wrap.innerHTML =
-    '<svg class="steptrace__pin-svg" viewBox="0 0 24 30" aria-hidden="true"><path d="M12 1C6.201 1 1.5 5.701 1.5 11.5C1.5 19.5 12 29 12 29S22.5 19.5 22.5 11.5C22.5 5.701 17.799 1 12 1Z"/></svg>'
-  const lbl = el("span", "steptrace__pin-label")
+function makeMarker(label, role) {
+  const wrap = el("div", "steptrace__marker steptrace__marker--" + role)
+  const body = el("span", "steptrace__marker-body")
+  const lbl = el("span", "steptrace__marker-label")
   lbl.textContent = label
-  wrap.append(lbl)
-  return { el: wrap }
+  body.append(lbl)
+  wrap.append(body)
+  return {
+    el: wrap,
+    body,
+    role,
+    setLabel(value) {
+      lbl.textContent = value
+    },
+  }
 }
 
-// persistent tracker: each marker follows its target bar's live top-centre.
-// rAF for smoothness + a 16 ms interval fallback so it still runs in occluded/
-// headless render contexts (screenshot pipelines, hidden panes). x springs
-// between columns; y is a direct, lag-free read so a bar can never touch a pin.
+export function clampMarkerCenter(target, bodyWidth, stageWidth, padding = 2) {
+  const availableHalf = Math.max(0, stageWidth / 2 - padding)
+  const half = Math.min(Math.max(0, bodyWidth / 2), availableHalf)
+  const min = padding + half
+  const max = stageWidth - padding - half
+  return Math.min(max, Math.max(min, target))
+}
+
+// A target that shifted since the last tick counts as movement even when the
+// marker sits exactly on it — the bar underneath may still be flying.
+export function markerIsMoving(previousTarget, target, current, epsilon = 0.05) {
+  if (!previousTarget) return true
+  return (
+    Math.abs(previousTarget.x - target.x) > epsilon ||
+    Math.abs(previousTarget.y - target.y) > epsilon ||
+    Math.abs(current.x - target.x) > epsilon ||
+    Math.abs(current.y - target.y) > epsilon
+  )
+}
+
+export function shouldResetHeldMarker(previous, next) {
+  if (!previous) return true
+  return previous.tokenId !== next.tokenId || next.frameIndex !== previous.frameIndex + 1
+}
+
+// Each marker follows its target bar through an rAF loop that idles whenever
+// nothing is moving; every tick measures the stage and each marker. A 50 ms
+// timer covers the same window when the document is hidden or rAF is stale.
+// Markers and the hero-swap fly share one velocity-carrying spring (motion.ts)
+// whose stiffness is derived from the live step budget, so retargets are
+// interruptible and 2x playback still tracks. The held-key marker is more
+// damped (SPRINGS.held) so placement stays readable.
 function createBarTracker(stage, bars, markers) {
-  let targets = [null, null]
-  const sx = [null, null]
-  const SPRING = 0.32
-  function frameStep() {
-    const sr = stage.getBoundingClientRect()
+  let targets = markers.map(() => null)
+  const sx = markers.map(() => null)
+  const sy = markers.map(() => null)
+  const vx = markers.map(() => 0)
+  const vy = markers.map(() => 0)
+  const px = markers.map(() => null)
+  // hero-swap fly: each bar springs its translateX home to 0. null = at rest, so
+  // no inline transform is written and the mount stagger / layout stay untouched.
+  const fox = bars.map(() => null)
+  const fvx = bars.map(() => 0)
+  // foHold latches a seeded spring at its FLIP origin through the anticipation
+  // beat; the travel beat clears it so the spring integrates home.
+  const foHold = bars.map(() => false)
+  // active swap choreographies; frameStep advances them and stays awake while any
+  // beat is pending, so a settle scheduled after the spring quiets still fires.
+  const sequences = []
+  const VEL_EPS = 0.5
+  let tweenMs = 107
+  function readTween() {
+    if (typeof getComputedStyle !== "function") return
+    const parsed = Number.parseFloat(getComputedStyle(stage).getPropertyValue("--_tween"))
+    if (Number.isFinite(parsed) && parsed > 0) tweenMs = parsed
+  }
+  const rectOf = (node) =>
+    node && typeof node.getBoundingClientRect === "function" ? node.getBoundingClientRect() : null
+  const isReduced = () => !!(stage.closest && stage.closest(".steptrace--reduced"))
+  let lastStepAt = null
+  function frameStep(now) {
+    const elapsed = lastStepAt == null ? 0 : Math.max(0, now - lastStepAt)
+    lastStepAt = now
+    const sr = rectOf(stage)
+    if (!sr) return false
+    const reduced = isReduced()
+    const omega0 = springOmega(tweenMs)
+    // swaps travel over the whole step (slower than the markers) and settle near-
+    // critically, so a bar glides home instead of darting fast then wobbling.
+    const swapOmega = springOmega(tweenMs * STEP_BUDGET_RATIO)
+    let moving = false
     for (let m = 0; m < markers.length; m++) {
       const idx = targets[m]
       const bar = idx != null && idx >= 0 && bars[idx] ? bars[idx].fill : null
@@ -161,66 +290,215 @@ function createBarTracker(stage, bars, markers) {
       if (!bar || !bar.isConnected) {
         mk.el.style.opacity = "0"
         sx[m] = null
+        sy[m] = null
+        vx[m] = 0
+        vy[m] = 0
+        px[m] = null
         continue
       }
-      const br = bar.getBoundingClientRect()
-      const tx = br.left + br.width / 2 - sr.left
-      const ty = br.top - sr.top
-      if (sx[m] == null) sx[m] = tx
-      else {
-        sx[m] += (tx - sx[m]) * SPRING
-        if (Math.abs(tx - sx[m]) < 0.4) sx[m] = tx
+      const br = rectOf(bar)
+      if (!br) continue
+      const targetX = br.left + br.width / 2 - sr.left
+      const bodyWidth = rectOf(mk.body)?.width ?? 0
+      const tx = clampMarkerCenter(targetX, bodyWidth, sr.width)
+      mk.el.style.setProperty("--steptrace-marker-tip-offset", `${targetX - tx}px`)
+      const ty = mk.role === "held" && mk.el.dataset.placing !== "1" ? 34 : br.top - sr.top
+      const zeta = mk.role === "held" ? SPRINGS.held.zeta : SPRINGS.marker.zeta
+      if (sx[m] == null || reduced) {
+        sx[m] = tx
+        vx[m] = 0
+      } else if (elapsed > 0) {
+        const next = springStep(sx[m], vx[m], tx, elapsed, { omega0, zeta })
+        sx[m] = next.pos
+        vx[m] = next.vel
       }
-      mk.el.style.transform = `translate(${sx[m].toFixed(2)}px, ${ty.toFixed(2)}px)`
+      if (sy[m] == null || reduced || mk.role !== "held") {
+        sy[m] = ty
+        vy[m] = 0
+      } else if (elapsed > 0) {
+        const next = springStep(sy[m], vy[m], ty, elapsed, { omega0, zeta: SPRINGS.held.zeta })
+        sy[m] = next.pos
+        vy[m] = next.vel
+      }
+      const target = { x: tx, y: ty }
+      if (
+        markerIsMoving(px[m], target, { x: sx[m], y: sy[m] }) ||
+        Math.abs(vx[m]) > VEL_EPS ||
+        Math.abs(vy[m]) > VEL_EPS
+      )
+        moving = true
+      px[m] = target
+      mk.el.style.transform = `translate(${sx[m].toFixed(2)}px, ${sy[m].toFixed(2)}px)`
       mk.el.style.opacity = "1"
     }
+    // advance swap choreographies before the hero loop so a travel beat's release
+    // takes effect this frame. Reduced motion cancels staging outright — the fly
+    // path already snapped the values in place. A pending beat keeps the loop
+    // awake independent of the marker idle test above.
+    for (let s = sequences.length - 1; s >= 0; s--) {
+      if (reduced) {
+        sequences[s].cancel()
+        sequences.splice(s, 1)
+      } else if (sequences[s].tick(now)) {
+        moving = true
+      } else {
+        sequences.splice(s, 1)
+      }
+    }
+    // hero-swap: spring each flying bar's translateX toward its home slot (0).
+    for (let b = 0; b < bars.length; b++) {
+      if (fox[b] == null) continue
+      const bar = bars[b].bar
+      if (reduced) {
+        fox[b] = null
+        fvx[b] = 0
+        foHold[b] = false
+        bar.style.transform = ""
+        bar.style.zIndex = ""
+        delete bar.dataset.stage
+        continue
+      }
+      if (foHold[b]) {
+        // anticipation: hold at the FLIP origin (dx) while the fill winds up; the
+        // travel beat releases the latch. Keep the loop awake meanwhile.
+        bar.style.transform = `translateX(${fox[b].toFixed(2)}px)`
+        bar.style.zIndex = "2"
+        moving = true
+        continue
+      }
+      if (elapsed > 0) {
+        const next = springStep(fox[b], fvx[b], 0, elapsed, {
+          omega0: swapOmega,
+          zeta: SPRINGS.swap.zeta,
+        })
+        fox[b] = next.pos
+        fvx[b] = next.vel
+      }
+      if (Math.abs(fox[b]) < 0.4 && Math.abs(fvx[b]) < VEL_EPS) {
+        fox[b] = null
+        fvx[b] = 0
+        foHold[b] = false
+        bar.style.transform = ""
+        bar.style.zIndex = ""
+      } else {
+        bar.style.transform = `translateX(${fox[b].toFixed(2)}px)`
+        bar.style.zIndex = "2"
+        moving = true
+      }
+    }
+    return moving
   }
-  function loop() {
-    frameStep()
+  let lastRafAt = 0
+  let raf = null
+  let iv = null
+  function sleep() {
+    if (raf != null) cancelAnimationFrame(raf)
+    if (iv != null) clearInterval(iv)
+    raf = null
+    iv = null
+    lastStepAt = null
+  }
+  function loop(now) {
+    lastRafAt = now
+    if (frameStep(now)) raf = requestAnimationFrame(loop)
+    else sleep()
+  }
+  function wake() {
+    if (raf != null) return
+    readTween()
+    // without a fresh baseline the first tick after a long sleep reports a huge
+    // delta and every spring snaps straight to its target
+    lastStepAt = null
+    lastRafAt = performance.now()
+    // headless test DOM has no rAF: run one best-effort step (a no-op without a
+    // layout engine) rather than scheduling a loop that can never paint.
+    if (typeof requestAnimationFrame !== "function") {
+      frameStep(performance.now())
+      return
+    }
     raf = requestAnimationFrame(loop)
+    iv = setInterval(() => {
+      const now = performance.now()
+      if ((document.hidden || now - lastRafAt > 100) && !frameStep(now)) sleep()
+    }, 50)
   }
-  let raf = requestAnimationFrame(loop)
-  const iv = setInterval(frameStep, 16)
+  // bars move without any set() when the stage reflows, so a resize has to wake
+  // the loop on its own.
+  const ro = typeof ResizeObserver === "function" ? new ResizeObserver(() => wake()) : null
+  if (ro) ro.observe(stage)
+  wake()
   return {
-    set(a, b) {
-      targets = [a != null ? a : null, b != null ? b : null]
+    set(...indices) {
+      targets = markers.map((_, index) => indices[index] ?? null)
+      wake()
+    },
+    reset(index) {
+      if (index < 0 || index >= markers.length) return
+      sx[index] = null
+      sy[index] = null
+      vx[index] = 0
+      vy[index] = 0
+      wake()
+    },
+    // Start a fly for each [barIndex, fromOffset]; a bar already in flight is
+    // left alone so its spring carries it home continuously. Reduced motion
+    // skips the travel entirely — the value just updates in place. Each new fly
+    // stages a wind → travel → settle beat sequence (Heer & Robertson): the bar
+    // waits latched at its origin, then springs home, then pops on arrival. At a
+    // small (fast-playback) budget those beats coalesce and the swap is one
+    // overlapped motion, matching the un-staged behaviour.
+    fly(flights) {
+      if (isReduced()) return
+      readTween()
+      const budgetMs = tweenMs * STEP_BUDGET_RATIO
+      let started = false
+      for (const [idx, dx] of flights) {
+        if (idx < 0 || idx >= bars.length || fox[idx] != null) continue
+        fox[idx] = dx
+        fvx[idx] = 0
+        foHold[idx] = true
+        const bar = bars[idx].bar
+        sequences.push(
+          sequence(
+            [
+              { at: 0, run: () => (bar.dataset.stage = "wind") },
+              {
+                at: SWAP_TRAVEL_AT,
+                run: () => {
+                  foHold[idx] = false
+                  bar.dataset.stage = "travel"
+                },
+              },
+              { at: SWAP_SETTLE_AT, run: () => (bar.dataset.stage = "settle") },
+            ],
+            budgetMs,
+            performance.now(),
+          ),
+        )
+        started = true
+      }
+      if (started) wake()
+    },
+    renderNow() {
+      frameStep(performance.now())
     },
     destroy() {
-      cancelAnimationFrame(raf)
-      clearInterval(iv)
+      for (const seq of sequences) seq.cancel()
+      sequences.length = 0
+      if (ro) ro.disconnect()
+      sleep()
     },
   }
 }
 
-// ---- binary-search view: shared bars with a live [lo, hi] range + probe ----
-export function makeSearchView(frames) {
-  const maxVal = Math.max(...frames[0].array, 1)
-  const n = frames[0].array.length
-
-  const stage = el("div", "steptrace__stage")
-  const bars = makeBars(stage, n)
-  const status = statusEl()
-
-  function paint(frame, i, total) {
-    for (let k = 0; k < n; k++) {
-      const b = bars[k]
-      b.fill.style.height = `${Math.max(6, (frame.array[k] / maxVal) * 100)}%`
-      b.num.textContent = frame.array[k]
-      let state = "range"
-      if (k < frame.lo || k > frame.hi) state = "eliminated"
-      if (frame.mid === k) state = "probe"
-      if (frame.found === k) state = "found"
-      b.bar.dataset.state = state
-    }
-    status.innerHTML =
-      escapeHtml(frame.message) +
-      ` <span class="steptrace__counts">· ${frame.comparisons} probe${frame.comparisons === 1 ? "" : "s"} · step ${i + 1}/${total}</span>`
-  }
-
-  // Constant 3-row watch in both modes (zero footer jitter). Linear search
-  // never eliminates, so a live [lo, hi] range is meaningless — it shows scan
-  // progress instead; binary search keeps the shrinking range.
-  function watch(frame) {
+export const legacySearchViewSemantics = {
+  stateForIndex(frame, index) {
+    if (frame.found === index) return "found"
+    if (frame.mid === index) return "probe"
+    if (index < frame.lo || index > frame.hi) return "eliminated"
+    return "range"
+  },
+  watchRows(frame, frames) {
     const target = { k: "target", v: String(frames[0].target), sw: "var(--_accent)" }
     const at = {
       k: "at",
@@ -243,9 +521,231 @@ export function makeSearchView(frames) {
       { k: "range", v: `[${frame.lo}, ${frame.hi}]`, sw: "var(--_neutral)" },
       { ...at, k: "mid" },
     ]
+  },
+}
+
+// ---- indexed-search view: shared bars with configurable range semantics ----
+export function makeSearchView(
+  frames,
+  semantics: {
+    stateForIndex(frame: any, index: number): string
+    watchRows(frame: any, frames: readonly any[]): any[]
+  } = legacySearchViewSemantics,
+) {
+  const maxVal = Math.max(...frames[0].array, 1)
+  const n = frames[0].array.length
+
+  const stage = el("div", "steptrace__stage")
+  const bars = makeBars(stage, n)
+  const status = statusEl()
+
+  function paint(frame, i, total) {
+    for (let k = 0; k < n; k++) {
+      const b = bars[k]
+      b.fill.style.height = barHeightStyle(frame.array[k], maxVal)
+      b.num.textContent = frame.array[k]
+      b.bar.dataset.state = semantics.stateForIndex(frame, k)
+    }
+    status.innerHTML =
+      escapeHtml(frame.message) +
+      ` <span class="steptrace__counts">· ${frame.comparisons} probe${frame.comparisons === 1 ? "" : "s"} · step ${i + 1}/${total}</span>`
+  }
+
+  function watch(frame) {
+    return semantics.watchRows(frame, frames)
   }
 
   return { nodes: [stage, status], paint, watch }
+}
+
+export interface BoundarySearchViewDescriptor {
+  ariaLabel: string
+  rangeLabel: string
+  evaluationLabel: string
+  unitLabel: string
+  watchRows(frame: any): any[]
+}
+
+function boundaryTicks(lower: number, upper: number) {
+  const span = upper - lower
+  if (span <= 12) return Array.from({ length: span + 1 }, (_, index) => lower + index)
+  return [
+    ...new Set(Array.from({ length: 13 }, (_, index) => Math.round(lower + (span * index) / 12))),
+  ]
+}
+
+export function makeBoundarySearchView(frames, descriptor: BoundarySearchViewDescriptor) {
+  const first = frames[0]
+  const ticks = boundaryTicks(first.lower, first.upper)
+  const maxExtraLanes = Math.max(
+    1,
+    ...frames.map((frame) =>
+      frame.evaluation ? Math.max(0, frame.evaluation.required - frame.evaluation.allowed) : 0,
+    ),
+  )
+
+  const root = el("section", "steptrace__boundary")
+  root.setAttribute("aria-label", descriptor.ariaLabel)
+
+  const domain = el("div", "steptrace__boundary-domain")
+  const domainHead = el("div", "steptrace__boundary-section-head")
+  const domainLabel = el("span", "steptrace__boundary-section-label")
+  const domainRange = el("span", "steptrace__boundary-section-value")
+  domainLabel.textContent = descriptor.rangeLabel
+  domainHead.append(domainLabel, domainRange)
+  const tickList = el("div", "steptrace__boundary-ticks")
+  tickList.style.setProperty("--steptrace-boundary-ticks", String(ticks.length))
+  tickList.setAttribute("role", "list")
+  const tickNodes = ticks.map((value) => {
+    const tick = el("div", "steptrace__boundary-tick")
+    tick.setAttribute("role", "listitem")
+    tick.dataset.value = String(value)
+    tick.textContent = String(value)
+    tickList.append(tick)
+    return { value, tick }
+  })
+  domain.append(domainHead, tickList)
+
+  const evaluation = el("div", "steptrace__boundary-evaluation")
+  const evaluationHead = el("div", "steptrace__boundary-section-head")
+  const evaluationLabel = el("span", "steptrace__boundary-section-label")
+  const verdict = el("span", "steptrace__boundary-verdict")
+  evaluationLabel.textContent = descriptor.evaluationLabel
+  evaluationHead.append(evaluationLabel, verdict)
+
+  const lanes = el("div", "steptrace__boundary-lanes")
+  const laneNodes = Array.from({ length: first.allowed }, (_, index) => {
+    const lane = el("div", "steptrace__boundary-lane")
+    const head = el("div", "steptrace__boundary-lane-head")
+    const label = el("span", "steptrace__boundary-lane-label")
+    const total = el("span", "steptrace__boundary-lane-total")
+    label.textContent = `Day ${index + 1}`
+    head.append(label, total)
+    const packages = el("div", "steptrace__boundary-packages")
+    const meter = el("div", "steptrace__boundary-meter")
+    const fill = el("div", "steptrace__boundary-meter-fill")
+    meter.append(fill)
+    lane.append(head, packages, meter)
+    lanes.append(lane)
+    return { lane, total, packages, fill }
+  })
+
+  const overflow = el("div", "steptrace__boundary-lane steptrace__boundary-lane--overflow")
+  overflow.style.setProperty("--steptrace-boundary-overflow-rows", String(maxExtraLanes))
+  const overflowHead = el("div", "steptrace__boundary-lane-head")
+  const overflowLabel = el("span", "steptrace__boundary-lane-label")
+  const overflowTotal = el("span", "steptrace__boundary-lane-total")
+  overflowLabel.textContent = "Beyond limit"
+  overflowHead.append(overflowLabel, overflowTotal)
+  const overflowRows = Array.from({ length: maxExtraLanes }, () => {
+    const row = el("div", "steptrace__boundary-overflow-row")
+    const rowLabel = el("span", "steptrace__boundary-overflow-label")
+    const packages = el("div", "steptrace__boundary-packages")
+    row.append(rowLabel, packages)
+    overflow.append(row)
+    return { row, rowLabel, packages }
+  })
+  overflow.prepend(overflowHead)
+  lanes.append(overflow)
+  evaluation.append(evaluationHead, lanes)
+  root.append(domain, evaluation)
+
+  const legend = el("div", "steptrace__legend steptrace__boundary-legend")
+  legend.setAttribute("aria-label", "Monotone boundary states")
+  for (const [state, label] of [
+    ["range", "unknown candidate"],
+    ["infeasible", "known too small"],
+    ["feasible", "known feasible"],
+    ["probe", "current check"],
+  ]) {
+    const row = el("div", "steptrace__legend-row")
+    const swatch = el("span", "steptrace__boundary-legend-swatch")
+    swatch.dataset.state = state
+    const text = el("span")
+    text.textContent = label
+    row.append(swatch, text)
+    legend.append(row)
+  }
+
+  const status = statusEl()
+
+  function packageTokens(container, items) {
+    const tokens = items.map((weight) => {
+      const token = el("span", "steptrace__boundary-package")
+      token.textContent = weight
+      return token
+    })
+    if (!tokens.length) {
+      const empty = el("span", "steptrace__boundary-empty")
+      empty.textContent = "unused"
+      tokens.push(empty)
+    }
+    container.replaceChildren(...tokens)
+  }
+
+  function paint(frame, index, totalFrames) {
+    domainRange.textContent = `range ${frame.lo}–${frame.hi}`
+    for (const { value, tick } of tickNodes) {
+      let state = "range"
+      if (value <= frame.maxInfeasible) state = "infeasible"
+      if (value >= frame.minFeasible) state = "feasible"
+      if (frame.answer === value) state = "answer"
+      tick.dataset.state = state
+      tick.dataset.current = frame.candidate === value ? "true" : "false"
+      tick.setAttribute(
+        "aria-label",
+        `Capacity ${value}: ${state}${frame.candidate === value ? ", current check" : ""}`,
+      )
+    }
+
+    const model = frame.evaluation
+    const candidate = frame.candidate
+    verdict.textContent = model
+      ? model.feasible
+        ? `${candidate} is feasible`
+        : `${candidate} is too small`
+      : "waiting for first check"
+    verdict.dataset.state = model ? (model.feasible ? "feasible" : "infeasible") : "pending"
+
+    for (let laneIndex = 0; laneIndex < laneNodes.length; laneIndex++) {
+      const node = laneNodes[laneIndex]
+      const lane = model?.lanes[laneIndex] || null
+      packageTokens(node.packages, lane?.items || [])
+      node.total.textContent =
+        lane && candidate != null
+          ? `${descriptor.unitLabel} ${lane.total}/${candidate}`
+          : descriptor.unitLabel
+      node.fill.style.width =
+        lane && candidate ? `${Math.min(100, (lane.total / candidate) * 100)}%` : "0%"
+      node.lane.dataset.state = lane ? "used" : "empty"
+    }
+
+    const extra = model ? model.lanes.slice(model.allowed) : []
+    overflow.dataset.state = extra.length ? "overflow" : "empty"
+    overflowTotal.textContent = extra.length
+      ? `+${extra.length} day${extra.length === 1 ? "" : "s"}`
+      : "none"
+    for (let extraIndex = 0; extraIndex < overflowRows.length; extraIndex++) {
+      const row = overflowRows[extraIndex]
+      const lane = extra[extraIndex]
+      row.row.dataset.state = lane ? "overflow" : "empty"
+      row.rowLabel.textContent = lane ? `Day ${model.allowed + extraIndex + 1}` : "—"
+      packageTokens(row.packages, lane?.items || [])
+    }
+
+    status.innerHTML =
+      escapeHtml(frame.message) +
+      ` <span class="steptrace__counts">· ${frame.probes} check${frame.probes === 1 ? "" : "s"} · step ${index + 1}/${totalFrames}</span>`
+  }
+
+  return {
+    nodes: [root, legend, status],
+    stageLayout: "fill" as const,
+    paint,
+    watch(frame) {
+      return descriptor.watchRows(frame)
+    },
+  }
 }
 
 // ---- string-matching view: text with the pattern aligned underneath ----
@@ -422,58 +922,739 @@ export function makePointerView(frames) {
   return { nodes: [wrap, status], paint, watch }
 }
 
+export interface MatrixGridViewSemantics {
+  tableLabel: string
+  axisDescription?: string
+  cornerLabel?: string
+  stageLayout?: "compact" | "fill"
+  formatValue(value: unknown): string
+  cellLabel(frame: any, row: number, column: number): string
+  stateForCell(frame: any, row: number, column: number): string
+  decisionForCell?(frame: any, row: number, column: number): string
+  rolesForCell?(frame: any, row: number, column: number): string[]
+  headerRole?(frame: any, axis: "row" | "column", index: number): string
+  footerModel?(frame: any): MatrixGridFooterModel
+  roleLegend?: readonly MatrixGridRoleDescriptor[]
+  watchRows(frame: any): Array<{ k: string; v: unknown; sw?: string; hint?: string }>
+}
+
+export interface MatrixGridRoleDescriptor {
+  role: string
+  badge: string
+  label: string
+}
+
+export interface MatrixGridFooterModel {
+  context: string
+  summary: {
+    text: string
+    role?: "keep" | "write"
+  }
+}
+
+export const lcsMatrixGridSemantics: MatrixGridViewSemantics = {
+  tableLabel: "Dynamic-programming table",
+  formatValue(value) {
+    return value == null ? "" : String(value)
+  },
+  cellLabel(frame, row, column) {
+    const value = frame.grid[row][column]
+    return `Cell ${frame.rowLabels[row]}, ${frame.colLabels[column]}: ${value == null ? "empty" : value}`
+  },
+  stateForCell(frame, row, column) {
+    const key = `${row},${column}`
+    const curKey = frame.cur ? frame.cur.join(",") : null
+    const depSet = new Set((frame.deps || []).map((dependency) => dependency.join(",")))
+    const pathSet = new Set((frame.path || []).map((cell) => cell.join(",")))
+    if (curKey === key) return "cur"
+    if (pathSet.has(key)) return "path"
+    if (depSet.has(key)) return "dep"
+    return ""
+  },
+  watchRows(frame) {
+    const cur = frame.cur
+    const value = cur ? frame.grid[cur[0]][cur[1]] : null
+    return [
+      { k: "cell", v: cur ? `[${cur[0]}, ${cur[1]}]` : "—", sw: "var(--_blue)" },
+      { k: "value", v: value == null ? "—" : String(value), sw: "var(--_green)" },
+    ]
+  },
+}
+
+function paintMatrixRoleBadge(element: HTMLElement, descriptor: MatrixGridRoleDescriptor) {
+  element.dataset.role = descriptor.role
+  element.textContent = descriptor.badge
+  element.title = descriptor.label
+}
+
+export function makeMatrixRoleBadge(descriptor: MatrixGridRoleDescriptor) {
+  const badge = el("span", "steptrace__matrix-role-badge")
+  badge.setAttribute("aria-hidden", "true")
+  paintMatrixRoleBadge(badge, descriptor)
+  return badge
+}
+
+function roleDescriptor(
+  descriptors: readonly MatrixGridRoleDescriptor[],
+  role: string,
+): MatrixGridRoleDescriptor {
+  const descriptor = descriptors.find((candidate) => candidate.role === role)
+  if (!descriptor) throw new Error(`steptrace: matrix role "${role}" is not described.`)
+  return descriptor
+}
+
+export function makeMatrixRoleLegend(descriptors: readonly MatrixGridRoleDescriptor[]) {
+  const root = el("aside", "steptrace__legend-wrap steptrace__matrix-role-legend")
+  root.setAttribute("aria-label", "Matrix role legend")
+  const items = el("ul", "steptrace__legend steptrace__matrix-role-legend-items")
+  for (const descriptor of descriptors) {
+    const item = el("li", "steptrace__legend-row steptrace__matrix-role-legend-item")
+    const label = el("span", "steptrace__matrix-role-legend-label")
+    label.textContent = descriptor.label
+    item.append(makeMatrixRoleBadge(descriptor), label)
+    items.append(item)
+  }
+  root.append(items)
+  return root
+}
+
+function makeMatrixFooter(
+  table: HTMLTableElement,
+  columnCount: number,
+  descriptors: readonly MatrixGridRoleDescriptor[],
+) {
+  const root = document.createElement("tfoot")
+  root.className = "steptrace__matrix-footer"
+  root.setAttribute("aria-label", "Current matrix stage")
+  const row = document.createElement("tr")
+  const cell = document.createElement("td")
+  cell.colSpan = columnCount
+  const content = el("div", "steptrace__matrix-footer-row")
+  const context = el("span", "steptrace__matrix-footer-context")
+  const summary = el("span", "steptrace__matrix-footer-summary")
+  content.append(context, summary)
+  cell.append(content)
+  row.append(cell)
+  root.append(row)
+  table.append(root)
+
+  function paint(model: MatrixGridFooterModel) {
+    context.textContent = model.context
+    summary.replaceChildren()
+    if (model.summary.role) {
+      summary.append(makeMatrixRoleBadge(roleDescriptor(descriptors, model.summary.role)))
+    }
+    summary.append(document.createTextNode(model.summary.text))
+    row.setAttribute("aria-label", `${model.context}; ${model.summary.text}`)
+  }
+
+  return { paint }
+}
+
+export function makeDPStoryView(frames) {
+  return frames[0].problem === "coin-change"
+    ? makeCoinChangeStoryView(frames)
+    : makeGridPathStoryView(frames)
+}
+
+function makeStoryLegend(items) {
+  const legend = el("div", "steptrace__legend")
+  for (const [state, label] of items) {
+    const row = el("div", "steptrace__legend-row")
+    const swatch = el("span", "steptrace__swatch steptrace__dp-story-swatch")
+    swatch.dataset.state = state
+    row.append(swatch, document.createTextNode(label))
+    legend.append(row)
+  }
+  return legend
+}
+
+function makeCoinChangeStoryView(frames) {
+  const first = frames[0]
+  const root = el("div", "steptrace__dp-story")
+  root.setAttribute("role", "region")
+  root.setAttribute("aria-label", "Coin change counter")
+  root.dataset.approach = first.approach
+  const context = el("div", "steptrace__dp-story-context")
+  const contextStart = el("span", "steptrace__dp-story-context-start")
+  const contextEnd = el("span", "steptrace__dp-story-context-end")
+  context.append(contextStart, contextEnd)
+  const stage = el("div", "steptrace__dp-story-stage")
+  const rack = el("div", "steptrace__coin-rack")
+  const coinElements = first.coins.map((coin) => {
+    const element = el("span", "steptrace__coin")
+    element.textContent = `${coin}¢`
+    element.dataset.coin = String(coin)
+    rack.append(element)
+    return element
+  })
+  stage.append(rack)
+  root.append(context, stage)
+  const status = statusEl()
+  const tray = first.approach === "tabulation" ? null : el("div", "steptrace__coin-tray")
+  const attempts = ["greedy", "naive"].includes(first.approach)
+    ? el("div", "steptrace__coin-attempts")
+    : null
+  const memo = first.approach === "memoization" ? el("div", "steptrace__coin-memo") : null
+  const amountBoard = first.approach === "tabulation" ? el("div", "steptrace__amount-board") : null
+  const amountCells = []
+
+  if (tray) stage.append(tray)
+  if (attempts) stage.append(attempts)
+  if (memo) stage.append(memo)
+  if (amountBoard) {
+    amountBoard.style.setProperty("--steptrace-amount-count", String(first.amounts.length))
+    for (const amount of first.amounts) {
+      const cell = el("div", "steptrace__amount-cell")
+      const label = el("span", "steptrace__amount-label")
+      const value = el("span", "steptrace__amount-value")
+      label.textContent = `${amount}¢`
+      value.textContent = "—"
+      cell.append(label, value)
+      amountBoard.append(cell)
+      amountCells.push({ cell, value, amount })
+    }
+    stage.append(amountBoard)
+  }
+
+  const legendItems =
+    first.approach === "memoization"
+      ? [
+          ["active", "coin being tried"],
+          ["selected", "current branch"],
+          ["stored", "saved remainder"],
+          ["hit", "answer reused"],
+        ]
+      : first.approach === "tabulation"
+        ? [
+            ["current", "amount being written"],
+            ["dependency", "smaller amount read"],
+            ["stored", "solved amount"],
+            ["best", "optimal amount chain"],
+          ]
+        : [
+            ["active", "coin being tried"],
+            ["selected", "coins on the counter"],
+            ["repeated", "repeated subproblem"],
+            ["best", "best exact change"],
+          ]
+  const legend = makeStoryLegend(legendItems)
+
+  function paintTray(frame) {
+    if (!tray) return
+    tray.replaceChildren()
+    const trayLabel = el("span", "steptrace__coin-tray-label")
+    trayLabel.textContent = frame.selected.length ? "on the counter" : "counter is empty"
+    tray.append(trayLabel)
+    for (const coin of frame.selected) {
+      const element = el("span", "steptrace__coin")
+      element.dataset.state = "selected"
+      element.textContent = `${coin}¢`
+      tray.append(element)
+    }
+  }
+
+  function paintAttempts(frame) {
+    if (!attempts) return
+    attempts.replaceChildren()
+    for (const attempt of frame.attempts) {
+      const row = el("div", "steptrace__coin-attempt")
+      row.dataset.state = attempt.state
+      const label = el("span", "steptrace__coin-attempt-label")
+      const value = el("span", "steptrace__coin-attempt-value")
+      label.textContent = attempt.label
+      value.textContent = attempt.value
+      row.append(label, value)
+      attempts.append(row)
+    }
+  }
+
+  function paintMemo(frame) {
+    if (!memo) return
+    memo.replaceChildren()
+    const heading = el("div", "steptrace__coin-memo-heading")
+    heading.textContent = "Saved remainder answers"
+    memo.append(heading)
+    for (const entry of frame.memo) {
+      const row = el("div", "steptrace__coin-memo-row")
+      row.dataset.state = entry.state
+      const key = el("span", "steptrace__coin-memo-key")
+      const value = el("span", "steptrace__coin-memo-value")
+      key.textContent = entry.key
+      value.textContent = entry.state === "hit" ? `${entry.value} · reused` : entry.value
+      row.append(key, value)
+      memo.append(row)
+    }
+  }
+
+  function paintAmounts(frame) {
+    if (!amountBoard) return
+    for (let index = 0; index < amountCells.length; index++) {
+      const { cell, value, amount } = amountCells[index]
+      const stored = frame.amountValues[index]
+      value.textContent = stored == null ? "—" : String(stored)
+      cell.setAttribute(
+        "aria-label",
+        stored == null
+          ? `${amount}¢: unsolved`
+          : `${amount}¢: ${stored} coin${stored === 1 ? "" : "s"}`,
+      )
+      cell.dataset.state =
+        amount === frame.amountCurrent
+          ? "current"
+          : frame.amountPath.includes(amount)
+            ? "best"
+            : frame.amountDependencies.includes(amount)
+              ? "dependency"
+              : stored != null
+                ? "stored"
+                : ""
+    }
+  }
+
+  return {
+    nodes: [root, legend, status],
+    stageLayout: "fill",
+    stableStage: true,
+    paint(frame, index, total) {
+      contextStart.textContent =
+        frame.approach === "tabulation"
+          ? "Build exact change from 0¢"
+          : `Customer pays ${frame.target}¢`
+      contextEnd.textContent =
+        frame.approach === "tabulation"
+          ? frame.amountCurrent == null
+            ? frame.best || "amount board empty"
+            : `writing ${frame.amountCurrent}¢`
+          : `remaining ${frame.remaining}¢`
+      for (const element of coinElements) {
+        const coin = Number(element.dataset.coin)
+        element.dataset.state = coin === frame.activeCoin ? "active" : ""
+      }
+      paintTray(frame)
+      paintAttempts(frame)
+      paintMemo(frame)
+      paintAmounts(frame)
+      status.innerHTML =
+        escapeHtml(frame.message) +
+        ` <span class="steptrace__counts">· step ${index + 1}/${total}</span>`
+    },
+    watch(frame) {
+      const plan = frame.selected.length
+        ? frame.selected.map((coin) => `${coin}¢`).join(" + ")
+        : "—"
+      if (frame.approach === "memoization")
+        return [
+          {
+            k: "remaining",
+            v: `${frame.remaining}¢`,
+            sw: "var(--_blue)",
+            hint: "Remainder handled by the current recursive branch.",
+          },
+          {
+            k: "plan",
+            v: plan,
+            sw: "var(--_amber)",
+            hint: "Coins chosen before the current remainder was reached.",
+          },
+          {
+            k: "memo",
+            v: `${frame.memo.length} answers`,
+            sw: "var(--_violet)",
+            hint: "Remainder answers saved for later recursive calls.",
+          },
+          {
+            k: "best",
+            v: frame.best || "—",
+            sw: "var(--_green)",
+            hint: `Fewest exact coins found for the ${frame.target}-cent payment.`,
+          },
+        ]
+      if (frame.approach === "tabulation")
+        return [
+          {
+            k: "amount",
+            v: frame.amountCurrent == null ? "—" : `${frame.amountCurrent}¢`,
+            sw: "var(--_blue)",
+            hint: "Amount currently being written on the bottom-up board.",
+          },
+          {
+            k: "reads",
+            v: frame.amountDependencies.length
+              ? frame.amountDependencies.map((amount) => `${amount}¢`).join(", ")
+              : "base",
+            sw: "var(--_amber)",
+            hint: "Smaller solved amounts read before writing the current amount.",
+          },
+          {
+            k: "solved",
+            v: String(frame.amountValues.filter((value) => value != null).length),
+            sw: "var(--_violet)",
+            hint: "Amount answers already written and available for reuse.",
+          },
+          {
+            k: "best",
+            v: frame.best || "—",
+            sw: "var(--_green)",
+            hint: `Fewest exact coins found for the ${frame.target}-cent payment.`,
+          },
+        ]
+      return [
+        {
+          k: "remaining",
+          v: `${frame.remaining}¢`,
+          sw: "var(--_blue)",
+          hint: "Amount still owed after the coins currently on the counter.",
+        },
+        {
+          k: "plan",
+          v: plan,
+          sw: "var(--_amber)",
+          hint: "Coins chosen by the current branch or strategy.",
+        },
+        {
+          k: "attempts",
+          v: String(frame.attempts.length),
+          sw: "var(--_violet)",
+          hint: "Complete or partial change plans exposed so far.",
+        },
+        {
+          k: "best",
+          v: frame.best || "—",
+          sw: "var(--_green)",
+          hint: `Fewest exact coins found for the ${frame.target}-cent payment.`,
+        },
+      ]
+    },
+  }
+}
+
+function makeGridPathStoryView(frames) {
+  const first = frames[0]
+  const table = el("table", "steptrace__warehouse-matrix")
+  table.setAttribute("aria-label", "Warehouse route cost matrix")
+  const thead = document.createElement("thead")
+  const headerRow = document.createElement("tr")
+  const corner = document.createElement("th")
+  corner.setAttribute("scope", "col")
+  corner.textContent = "cost ↓ / tile →"
+  headerRow.append(corner)
+  for (let column = 0; column < first.costs[0].length; column++) {
+    const header = document.createElement("th")
+    header.setAttribute("scope", "col")
+    header.textContent = `C${column + 1}`
+    headerRow.append(header)
+  }
+  thead.append(headerRow)
+  table.append(thead)
+  const tbody = document.createElement("tbody")
+  const cells = []
+  for (let row = 0; row < first.costs.length; row++) {
+    const tableRow = document.createElement("tr")
+    const header = document.createElement("th")
+    header.setAttribute("scope", "row")
+    header.textContent = `R${row + 1}`
+    tableRow.append(header)
+    const rowCells = []
+    for (let column = 0; column < first.costs[row].length; column++) {
+      const cell = document.createElement("td")
+      const place = el("span", "steptrace__warehouse-cell-name")
+      const cost = el("span", "steptrace__warehouse-cell-cost")
+      const stored = el("span", "steptrace__warehouse-cell-stored")
+      place.textContent =
+        row === 0 && column === 0
+          ? "START"
+          : row === first.costs.length - 1 && column === first.costs[row].length - 1
+            ? "GOAL"
+            : `R${row + 1}C${column + 1}`
+      cost.textContent = `cost ${first.costs[row][column]}`
+      cell.append(place, cost, stored)
+      tableRow.append(cell)
+      rowCells.push({ cell, stored })
+    }
+    cells.push(rowCells)
+    tbody.append(tableRow)
+  }
+  table.append(tbody)
+  const tfoot = document.createElement("tfoot")
+  const footerRow = document.createElement("tr")
+  const footerCell = document.createElement("td")
+  footerCell.colSpan = first.costs[0].length + 1
+  const footer = el("div", "steptrace__warehouse-footer")
+  const footerStart = el("span", "steptrace__warehouse-footer-start")
+  const footerEnd = el("span", "steptrace__warehouse-footer-end")
+  footer.append(footerStart, footerEnd)
+  footerCell.append(footer)
+  footerRow.append(footerCell)
+  tfoot.append(footerRow)
+  table.append(tfoot)
+  const status = statusEl()
+  const legendItems =
+    first.approach === "memoization"
+      ? [
+          ["current", "tile being evaluated"],
+          ["stored", "saved remaining cost"],
+          ["repeated", "saved answer reused"],
+          ["best", "best complete route"],
+        ]
+      : first.approach === "tabulation"
+        ? [
+            ["current", "tile being written"],
+            ["dependency", "written neighbour read"],
+            ["stored", "remaining cost stored"],
+            ["best", "optimal route"],
+          ]
+        : [
+            ["current", "tile being considered"],
+            ["path", "current route"],
+            ["repeated", "tile reached again"],
+            ["best", "best complete route"],
+          ]
+  const legend = makeStoryLegend(legendItems)
+
+  return {
+    nodes: [table, legend, status],
+    stageLayout: "fill",
+    paint(frame, index, total) {
+      const path = new Set(frame.path.map(([row, column]) => `${row},${column}`))
+      const repeated = new Set(frame.repeated.map(([row, column]) => `${row},${column}`))
+      const best = new Set(frame.bestPath.map(([row, column]) => `${row},${column}`))
+      const dependencies = new Set(
+        frame.gridDependencies.map(([row, column]) => `${row},${column}`),
+      )
+      let storedCount = 0
+      for (let row = 0; row < cells.length; row++) {
+        for (let column = 0; column < cells[row].length; column++) {
+          const key = `${row},${column}`
+          const value = frame.gridValues[row][column]
+          if (value != null) storedCount++
+          cells[row][column].stored.textContent = value == null ? "" : `best ${value}`
+          cells[row][column].cell.dataset.state =
+            frame.current?.[0] === row && frame.current?.[1] === column
+              ? "current"
+              : best.has(key)
+                ? "best"
+                : repeated.has(key)
+                  ? "repeated"
+                  : dependencies.has(key)
+                    ? "dependency"
+                    : path.has(key)
+                      ? "path"
+                      : value != null
+                        ? "stored"
+                        : ""
+          cells[row][column].cell.setAttribute(
+            "aria-label",
+            `R${row + 1}C${column + 1}, cost ${frame.costs[row][column]}${value == null ? "" : `, best remaining cost ${value}`}`,
+          )
+        }
+      }
+      footerStart.textContent =
+        frame.approach === "greedy"
+          ? "Greedy route"
+          : frame.approach === "naive"
+            ? "Recursive routes"
+            : frame.approach === "memoization"
+              ? "Memoized route"
+              : "Fill from the goal"
+      footerEnd.textContent =
+        frame.approach === "memoization"
+          ? `${storedCount} answers saved`
+          : frame.approach === "tabulation"
+            ? `${storedCount}/${cells.length * cells[0].length} tiles written`
+            : frame.bestCost == null
+              ? `route cost ${frame.routeCost}`
+              : `best route ${frame.bestCost}`
+      footerRow.setAttribute("aria-label", `${footerStart.textContent}; ${footerEnd.textContent}`)
+      status.innerHTML =
+        escapeHtml(frame.message) +
+        ` <span class="steptrace__counts">· step ${index + 1}/${total}</span>`
+    },
+    watch(frame) {
+      const current = frame.current ? `R${frame.current[0] + 1}C${frame.current[1] + 1}` : "—"
+      const stored = frame.gridValues.flat().filter((value) => value != null).length
+      if (frame.approach === "memoization")
+        return [
+          {
+            k: "tile",
+            v: current,
+            sw: "var(--_blue)",
+            hint: "Warehouse tile handled by the current recursive call.",
+          },
+          {
+            k: "route",
+            v: frame.routeLabel,
+            sw: "var(--_amber)",
+            hint: "Recursive route that reached the current tile.",
+          },
+          {
+            k: "memo",
+            v: `${stored} tiles`,
+            sw: "var(--_violet)",
+            hint: "Solved remaining costs stored directly in the warehouse map.",
+          },
+          {
+            k: "best cost",
+            v: frame.bestCost == null ? "—" : String(frame.bestCost),
+            sw: "var(--_green)",
+            hint: "Lowest complete travel cost found for the warehouse route.",
+          },
+        ]
+      if (frame.approach === "tabulation")
+        return [
+          {
+            k: "tile",
+            v: current,
+            sw: "var(--_blue)",
+            hint: "Warehouse tile whose remaining cost is being written.",
+          },
+          {
+            k: "reads",
+            v: frame.gridDependencies.length
+              ? frame.gridDependencies
+                  .map(([row, column]) => `R${row + 1}C${column + 1}`)
+                  .join(", ")
+              : "base",
+            sw: "var(--_amber)",
+            hint: "Already-written right and down neighbours read by this tile.",
+          },
+          {
+            k: "written",
+            v: `${stored}/${frame.costs.length * frame.costs[0].length}`,
+            sw: "var(--_violet)",
+            hint: "Warehouse tiles with a stored remaining-route cost.",
+          },
+          {
+            k: "best cost",
+            v: frame.bestCost == null ? "—" : String(frame.bestCost),
+            sw: "var(--_green)",
+            hint: "Lowest complete travel cost found for the warehouse route.",
+          },
+        ]
+      return [
+        {
+          k: "tile",
+          v: current,
+          sw: "var(--_blue)",
+          hint: "Warehouse tile currently entered or evaluated.",
+        },
+        {
+          k: "route",
+          v: frame.routeLabel,
+          sw: "var(--_amber)",
+          hint: "Right/down route assembled so far from the loading bay.",
+        },
+        {
+          k: "repeated",
+          v: String(frame.repeated.length),
+          sw: "var(--_violet)",
+          hint: "Coordinates reached by more than one recursive route.",
+        },
+        {
+          k: "best cost",
+          v: frame.bestCost == null ? "—" : String(frame.bestCost),
+          sw: "var(--_green)",
+          hint: "Lowest complete travel cost found for the warehouse route.",
+        },
+      ]
+    },
+  }
+}
+
 // ---- dp view: a 2-D table that fills in cell by cell ----
-export function makeDPView(frames) {
+export function makeDPView(frames, semantics = lcsMatrixGridSemantics) {
   const f0 = frames[0]
   const R = f0.rowLabels.length
   const C = f0.colLabels.length
-  const table = el("table", "steptrace__dp")
+  const guided = semantics.stageLayout === "fill"
+  const roleLegend = semantics.roleLegend || []
+  const table = el("table", `steptrace__dp${guided ? " steptrace__dp--guided" : ""}`)
+  table.setAttribute("aria-label", semantics.tableLabel)
+  const caption = document.createElement("caption")
+  caption.className = "steptrace__dp-caption"
+  caption.textContent = semantics.axisDescription || semantics.tableLabel
+  table.append(caption)
   const thead = document.createElement("thead")
   const htr = document.createElement("tr")
-  htr.append(document.createElement("th"))
+  const corner = document.createElement("th")
+  corner.setAttribute("scope", "col")
+  corner.className = "steptrace__dp-corner"
+  corner.textContent = semantics.cornerLabel || ""
+  htr.append(corner)
+  const columnHeaders = []
   for (let c = 0; c < C; c++) {
     const th = document.createElement("th")
     th.textContent = f0.colLabels[c]
+    th.setAttribute("scope", "col")
     htr.append(th)
+    columnHeaders.push(th)
   }
   thead.append(htr)
   table.append(thead)
   const tbody = document.createElement("tbody")
   const cellEls = []
+  const rowHeaders = []
   for (let r = 0; r < R; r++) {
     const tr = document.createElement("tr")
     const th = document.createElement("th")
     th.textContent = f0.rowLabels[r]
+    th.setAttribute("scope", "row")
     tr.append(th)
+    rowHeaders.push(th)
     const rowCells = []
     for (let c = 0; c < C; c++) {
       const td = document.createElement("td")
+      if (guided) {
+        const value = el("span", "steptrace__dp-value")
+        const markers = el("span", "steptrace__dp-markers")
+        markers.setAttribute("aria-hidden", "true")
+        const operandA = makeMatrixRoleBadge(roleDescriptor(roleLegend, "operand-a"))
+        const operandB = makeMatrixRoleBadge(roleDescriptor(roleLegend, "operand-b"))
+        const target = makeMatrixRoleBadge(roleDescriptor(roleLegend, "target"))
+        markers.append(operandA, operandB, target)
+        td.append(value, markers)
+        rowCells.push({ td, value, target })
+      } else {
+        rowCells.push({ td, value: td, target: null })
+      }
       tr.append(td)
-      rowCells.push(td)
     }
     cellEls.push(rowCells)
     tbody.append(tr)
   }
   table.append(tbody)
-  const wrap = el("div", "steptrace__dp-wrap")
+  const footer = semantics.footerModel ? makeMatrixFooter(table, C + 1, roleLegend) : null
+  const wrap = el("div", `steptrace__dp-wrap${guided ? " steptrace__dp-wrap--guided" : ""}`)
   wrap.append(table)
+  const legend = roleLegend.length ? makeMatrixRoleLegend(roleLegend) : null
+  const stage = guided ? el("div", "steptrace__dp-stage steptrace__dp-stage--guided") : null
+  if (stage) stage.append(wrap)
   const status = statusEl()
+  const nodes = stage ? [stage, ...(legend ? [legend] : []), status] : [wrap, status]
 
   function paint(frame, i, total) {
-    const curKey = frame.cur ? frame.cur.join(",") : null
-    const depSet = new Set((frame.deps || []).map((d) => d.join(",")))
-    const pathSet = new Set((frame.path || []).map((p) => p.join(",")))
+    if (footer && semantics.footerModel) footer.paint(semantics.footerModel(frame))
+    for (let r = 0; r < R; r++) {
+      rowHeaders[r].dataset.role = semantics.headerRole?.(frame, "row", r) || ""
+    }
+    for (let c = 0; c < C; c++) {
+      columnHeaders[c].dataset.role = semantics.headerRole?.(frame, "column", c) || ""
+    }
     for (let r = 0; r < R; r++) {
       for (let c = 0; c < C; c++) {
-        const td = cellEls[r][c]
+        const { td, value, target } = cellEls[r][c]
         const v = frame.grid[r][c]
-        td.textContent = v == null ? "" : v
-        const key = r + "," + c
-        let state = ""
-        if (depSet.has(key)) state = "dep"
-        if (pathSet.has(key)) state = "path"
-        if (curKey === key) state = "cur"
-        td.dataset.state = state
+        value.textContent = semantics.formatValue(v)
+        td.dataset.state = semantics.stateForCell(frame, r, c)
+        td.dataset.roles = (semantics.rolesForCell?.(frame, r, c) || []).join(" ")
+        const decision = semantics.decisionForCell?.(frame, r, c) || ""
+        if (decision) td.dataset.decision = decision
+        else delete td.dataset.decision
+        if (target) {
+          const role = decision === "improve" ? "write" : decision === "keep" ? "keep" : "target"
+          paintMatrixRoleBadge(target, roleDescriptor(roleLegend, role))
+        }
+        td.setAttribute("aria-label", semantics.cellLabel(frame, r, c))
       }
     }
     status.innerHTML =
@@ -481,15 +1662,15 @@ export function makeDPView(frames) {
   }
 
   function watch(frame) {
-    const cur = frame.cur
-    const v = cur ? frame.grid[cur[0]][cur[1]] : null
-    return [
-      { k: "cell", v: cur ? `[${cur[0]}, ${cur[1]}]` : "—", sw: "var(--_blue)" },
-      { k: "value", v: v == null ? "—" : String(v), sw: "var(--_green)" },
-    ]
+    return semantics.watchRows(frame)
   }
 
-  return { nodes: [wrap, status], paint, watch }
+  return {
+    nodes,
+    stageLayout: semantics.stageLayout || "compact",
+    paint,
+    watch,
+  }
 }
 
 // ---- union-find view: a row of elements with parent-pointer arcs above ----
@@ -803,137 +1984,248 @@ export function makeBacktrackView(frames) {
   return { nodes: [wrap, status], paint, watch }
 }
 
-// ---- rectree view: an SVG recursion tree (naive) that collapses into a memo
-//  DAG. Cloned from makeGraphView: the viewBox is derived ONCE from the full
-//  node set and EVERY node/edge is placed on frame 0. paint() only toggles
-//  data-* and rewrites value text — never inserts/removes DOM — so the stage
-//  height is identical on every frame. ----
-const RT_R = 16 // rectree node radius
-export function makeRecTreeView(frames) {
+let executionTreeViewSerial = 0
+
+export interface ExecutionTreeViewDescriptor {
+  ariaLabel: string
+  shape: "circle" | "card"
+  nodeWidth: number
+  nodeHeight: number
+  minSvgWidth: number
+  canvasScale?: number
+  fitWidth?: boolean
+  stateLabels: Record<string, string>
+  legend: ReadonlyArray<{ state: string; label: string }>
+  frameModel(frame: any): {
+    phase: string
+    action: string
+    active: string | null
+    path: string[]
+    visible: string[]
+    states: Record<string, string>
+    results: Record<string, unknown>
+    collapsed: string[]
+  }
+  nodeLines(node: any): [string, string]
+  watchRows(frame: any, model: ReturnType<ExecutionTreeViewDescriptor["frameModel"]>): any[]
+}
+
+export function makeExecutionTreeView(frames, descriptor: ExecutionTreeViewDescriptor) {
   const f0 = frames[0]
   const nodes = f0.nodes
-  const pad = 26
-  const xs = nodes.map((n) => n.x)
-  const ys = nodes.map((n) => n.y)
+  const halfWidth = descriptor.nodeWidth / 2
+  const halfHeight = descriptor.nodeHeight / 2
+  const padX = halfWidth + 12
+  const padY = halfHeight + 12
+  const xs = nodes.map((node) => node.x)
+  const ys = nodes.map((node) => node.y)
   const minX = Math.min(...xs)
   const minY = Math.min(...ys)
-  const w = Math.max(...xs) - minX + pad * 2
-  const h = Math.max(...ys) - minY + pad * 2
-  const pos = Object.fromEntries(
-    nodes.map((n) => [n.id, { x: n.x - minX + pad, y: n.y - minY + pad }]),
+  const width = Math.max(...xs) - minX + padX * 2
+  const height = Math.max(...ys) - minY + padY * 2
+  const position = Object.fromEntries(
+    nodes.map((node) => [node.id, { x: node.x - minX + padX, y: node.y - minY + padY }]),
   )
 
   const svg = document.createElementNS(SVGNS, "svg")
+  const title = document.createElementNS(SVGNS, "title")
+  const description = document.createElementNS(SVGNS, "desc")
+  const accessibleId = `steptrace-execution-tree-${++executionTreeViewSerial}`
+  title.id = `${accessibleId}-title`
+  description.id = `${accessibleId}-description`
   svg.setAttribute("class", "steptrace__rtsvg")
-  svg.setAttribute("viewBox", `0 0 ${w} ${h}`)
+  svg.setAttribute("viewBox", `0 0 ${width} ${height}`)
+  svg.setAttribute("preserveAspectRatio", "xMidYMid meet")
   svg.setAttribute("role", "img")
-  svg.setAttribute("aria-label", "Recursion tree")
+  svg.setAttribute("aria-labelledby", `${title.id} ${description.id}`)
+  const canvasWidth = Math.max(descriptor.minSvgWidth, width * (descriptor.canvasScale || 1))
+  svg.style.setProperty("--steptrace-tree-width", `${canvasWidth}px`)
+  svg.append(title, description)
 
-  // edges first (under nodes); each fades in with its child node
-  const edgeEls = []
-  for (const e of f0.edges) {
-    const a = pos[e.from]
-    const b = pos[e.to]
+  const edgeElements = []
+  for (const edge of f0.edges) {
+    const from = position[edge.from]
+    const to = position[edge.to]
     const line = document.createElementNS(SVGNS, "line")
     line.setAttribute("class", "steptrace__rtedge")
-    line.setAttribute("x1", a.x)
-    line.setAttribute("y1", a.y)
-    line.setAttribute("x2", b.x)
-    line.setAttribute("y2", b.y)
+    line.setAttribute("x1", String(from.x))
+    line.setAttribute("y1", String(from.y + halfHeight))
+    line.setAttribute("x2", String(to.x))
+    line.setAttribute("y2", String(to.y - halfHeight))
+    line.setAttribute("aria-hidden", "true")
+    line.setAttribute("focusable", "false")
     svg.append(line)
-    edgeEls.push({ el: line, to: e.to })
+    edgeElements.push({ element: line, from: edge.from, to: edge.to })
   }
 
-  const nodeEls = {}
-  for (const n of nodes) {
-    const p = pos[n.id]
-    const g = document.createElementNS(SVGNS, "g")
-    g.setAttribute("class", "steptrace__rtnode")
-    const ring = document.createElementNS(SVGNS, "circle")
+  const nodeElements = {}
+  for (const node of nodes) {
+    const point = position[node.id]
+    const group = document.createElementNS(SVGNS, "g")
+    group.setAttribute("class", "steptrace__rtnode")
+    group.setAttribute("transform", `translate(${point.x} ${point.y})`)
+    group.setAttribute("aria-hidden", "true")
+    group.setAttribute("focusable", "false")
+    group.dataset.shape = descriptor.shape
+
+    const ring = document.createElementNS(SVGNS, descriptor.shape === "circle" ? "circle" : "rect")
     ring.setAttribute("class", "steptrace__rtring")
-    ring.setAttribute("cx", p.x)
-    ring.setAttribute("cy", p.y)
-    ring.setAttribute("r", String(RT_R + 3))
-    const back = document.createElementNS(SVGNS, "circle")
-    back.setAttribute("class", "steptrace__rtback")
-    back.setAttribute("cx", p.x)
-    back.setAttribute("cy", p.y)
-    back.setAttribute("r", String(RT_R))
-    const circ = document.createElementNS(SVGNS, "circle")
-    circ.setAttribute("class", "steptrace__rtcirc")
-    circ.setAttribute("cx", p.x)
-    circ.setAttribute("cy", p.y)
-    circ.setAttribute("r", String(RT_R))
+    const surface = document.createElementNS(
+      SVGNS,
+      descriptor.shape === "circle" ? "circle" : "rect",
+    )
+    surface.setAttribute("class", "steptrace__rtcirc")
+    if (descriptor.shape === "circle") {
+      ring.setAttribute("r", String(halfWidth + 3))
+      surface.setAttribute("r", String(halfWidth))
+    } else {
+      surface.setAttribute("x", String(-halfWidth))
+      surface.setAttribute("y", String(-halfHeight))
+      surface.setAttribute("width", String(descriptor.nodeWidth))
+      surface.setAttribute("height", String(descriptor.nodeHeight))
+      surface.setAttribute("rx", "7")
+      ring.setAttribute("x", String(-halfWidth - 2))
+      ring.setAttribute("y", String(-halfHeight - 2))
+      ring.setAttribute("width", String(descriptor.nodeWidth + 4))
+      ring.setAttribute("height", String(descriptor.nodeHeight + 4))
+      ring.setAttribute("rx", "9")
+    }
+
     const label = document.createElementNS(SVGNS, "text")
+    const detail = document.createElementNS(SVGNS, "text")
+    const result = document.createElementNS(SVGNS, "text")
+    const badge = document.createElementNS(SVGNS, "text")
     label.setAttribute("class", "steptrace__rtlabel")
-    label.setAttribute("x", p.x)
-    label.setAttribute("y", p.y)
-    label.setAttribute("text-anchor", "middle")
-    label.setAttribute("dominant-baseline", "central")
-    label.textContent = n.label
-    const val = document.createElementNS(SVGNS, "text")
-    val.setAttribute("class", "steptrace__rtval")
-    val.setAttribute("x", p.x)
-    val.setAttribute("y", p.y + RT_R + 9)
-    val.setAttribute("text-anchor", "middle")
-    g.append(ring, back, circ, label, val)
-    svg.append(g)
-    nodeEls[n.id] = { g, val }
+    detail.setAttribute("class", "steptrace__rtdetail")
+    result.setAttribute("class", "steptrace__rtval")
+    badge.setAttribute("class", "steptrace__rtbadge")
+    for (const element of [label, detail, result]) element.setAttribute("text-anchor", "middle")
+    const [primaryLine, secondaryLine] = descriptor.nodeLines(node)
+    label.textContent = primaryLine
+    detail.textContent = secondaryLine
+    if (descriptor.shape === "circle") {
+      label.setAttribute("y", "0")
+      label.setAttribute("dominant-baseline", "central")
+      result.setAttribute("y", String(halfHeight + 9))
+    } else {
+      label.setAttribute("y", "-4")
+      detail.setAttribute("y", "9")
+    }
+    group.append(ring, surface, label, detail, result, badge)
+    svg.append(group)
+    nodeElements[node.id] = { group, detail, result, badge, secondaryLine }
   }
 
   const legend = el("div", "steptrace__legend")
-  for (const [word, key] of [
-    ["compute", "current"],
-    ["store (miss)", "frontier"],
-    ["reuse (hit)", "visited"],
-  ]) {
+  legend.setAttribute("aria-label", `${descriptor.ariaLabel} state legend`)
+  for (const item of descriptor.legend) {
     const row = el("div", "steptrace__legend-row")
-    row.append(
-      el("span", "steptrace__swatch steptrace__swatch--" + key),
-      document.createTextNode(word),
-    )
+    const swatch = el("span", "steptrace__swatch steptrace__rtswatch")
+    swatch.dataset.state = item.state
+    row.append(swatch, document.createTextNode(item.label))
     legend.append(row)
   }
 
   const wrap = el("div", "steptrace__rectree")
+  wrap.setAttribute("role", "region")
+  wrap.setAttribute("aria-label", `${descriptor.ariaLabel} visualization`)
+  wrap.dataset.fitWidth = descriptor.fitWidth ? "true" : "false"
+  wrap.tabIndex = 0
   wrap.append(svg)
   const status = statusEl()
 
-  function paint(frame, i, total) {
-    const vis = new Set(frame.vis)
-    const collapsed = new Set(frame.collapsed)
-    const state = frame.state
-    const vals = frame.vals
-    for (const n of nodes) {
-      const ne = nodeEls[n.id]
-      ne.g.dataset.vis = vis.has(n.id) ? "1" : "0"
-      ne.g.dataset.collapsed = collapsed.has(n.id) ? "true" : "false"
-      ne.g.dataset.state = state[n.id] || ""
-      ne.g.dataset.active = frame.active === n.id ? "true" : "false"
-      const v = vals[n.id]
-      ne.val.textContent = v == null ? "" : "= " + v
+  function paint(frame, index, total) {
+    const model = descriptor.frameModel(frame)
+    const visible = new Set(model.visible)
+    const collapsed = new Set(model.collapsed)
+    const path = new Set(model.path)
+    const activeNode = nodes.find((node) => node.id === model.active)
+    title.textContent = `${descriptor.ariaLabel}: ${model.phase}`
+    description.textContent = `${model.phase}. Active subproblem ${activeNode ? descriptor.nodeLines(activeNode).join("; ") : "none"}. ${model.action}.`
+    for (const node of nodes) {
+      const elements = nodeElements[node.id]
+      const state = model.states[node.id] || ""
+      elements.group.dataset.vis = visible.has(node.id) ? "1" : "0"
+      elements.group.dataset.collapsed = collapsed.has(node.id) ? "true" : "false"
+      elements.group.dataset.state = state
+      elements.group.dataset.active = model.active === node.id ? "true" : "false"
+      elements.group.dataset.path = path.has(node.id) ? "true" : "false"
+      const value = model.results[node.id]
+      const resultText = Array.isArray(value)
+        ? value.length
+          ? `[${value.join(", ")}]`
+          : ""
+        : value == null
+          ? ""
+          : String(value)
+      if (descriptor.shape === "card") {
+        elements.detail.textContent = resultText || elements.secondaryLine
+        elements.result.textContent = ""
+        elements.badge.textContent = ""
+      } else {
+        elements.result.textContent = resultText ? `→ ${resultText}` : ""
+        elements.badge.textContent = descriptor.stateLabels[state] || ""
+      }
     }
-    for (const e of edgeEls) {
-      e.el.dataset.vis = vis.has(e.to) ? "1" : "0"
-      e.el.dataset.collapsed = collapsed.has(e.to) ? "true" : "false"
+    for (const edge of edgeElements) {
+      edge.element.dataset.vis = visible.has(edge.to) ? "1" : "0"
+      edge.element.dataset.collapsed = collapsed.has(edge.to) ? "true" : "false"
+      edge.element.dataset.path = path.has(edge.from) && path.has(edge.to) ? "true" : "false"
     }
     status.innerHTML =
-      escapeHtml(frame.message) + ` <span class="steptrace__counts">· step ${i + 1}/${total}</span>`
+      escapeHtml(frame.message) +
+      ` <span class="steptrace__counts">· step ${index + 1}/${total}</span>`
   }
 
-  // exactly 3 rows every frame ⇒ constant footer height
   function watch(frame) {
+    const model = descriptor.frameModel(frame)
+    return descriptor.watchRows(frame, model)
+  }
+
+  return { nodes: [wrap, legend, status], stageLayout: "fill", paint, watch }
+}
+
+const legacyRecTreeDescriptor: ExecutionTreeViewDescriptor = {
+  ariaLabel: "Recursion tree",
+  shape: "circle",
+  nodeWidth: 32,
+  nodeHeight: 32,
+  minSvgWidth: 320,
+  stateLabels: {},
+  legend: [
+    { state: "compute", label: "compute" },
+    { state: "miss", label: "store (miss)" },
+    { state: "hit", label: "reuse (hit)" },
+  ],
+  frameModel(frame) {
+    return {
+      phase: frame.phase === "memo" ? "Memoized recursion" : "Plain recursion",
+      action: frame.message,
+      active: frame.active,
+      path: frame.active ? [frame.active] : [],
+      visible: frame.vis,
+      states: frame.state,
+      results: frame.vals,
+      collapsed: frame.collapsed,
+    }
+  },
+  nodeLines(node) {
+    return [node.label, ""]
+  },
+  watchRows(frame) {
     const last = frame.memo.length ? frame.memo[frame.memo.length - 1] : null
-    const ev =
+    const event =
       frame.type === "miss" || frame.type === "hit" || frame.type === "base" ? frame.type : "—"
     return [
       { k: "calls", v: String(frame.calls), sw: "var(--_blue)" },
       { k: "memo", v: last ? `f(${last.k}) = ${last.v}` : "—", sw: "var(--_green)" },
-      { k: "event", v: ev, sw: "var(--_violet)" },
+      { k: "event", v: event, sw: "var(--_violet)" },
     ]
-  }
+  },
+}
 
-  return { nodes: [wrap, legend, status], paint, watch }
+export function makeRecTreeView(frames) {
+  return makeExecutionTreeView(frames, legacyRecTreeDescriptor)
 }
 
 // ---- graph view: svg ----
@@ -1134,7 +2426,7 @@ function trimToRadius(a, b, r) {
   return { x1: a.x + ux * R, y1: a.y + uy * R, x2: b.x - ux * r, y2: b.y - uy * r }
 }
 
-function statusEl() {
+export function statusEl() {
   const status = el("div", "steptrace__status")
   status.setAttribute("role", "status")
   status.setAttribute("aria-live", "polite")
@@ -1187,6 +2479,8 @@ export const ICON = {
   compare:
     '<svg class="steptrace__cue-compare" viewBox="0 0 24 24" aria-hidden="true"><path d="m7 16-4-4 4-4"/><path d="M3 12h18"/><path d="m17 8 4 4-4 4"/></svg>',
   swap: '<svg class="steptrace__cue-swap" viewBox="0 0 24 24" aria-hidden="true"><path d="m2 9 3-3 3 3"/><path d="M13 18H7a2 2 0 0 1-2-2V6"/><path d="m22 15-3 3-3-3"/><path d="M11 6h6a2 2 0 0 1 2 2v10"/></svg>',
+  search:
+    '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="10.5" cy="10.5" r="6.5"/><path d="m15.2 15.2 4.8 4.8"/></svg>',
 }
 export function iconBtn(label, svg, extra = "") {
   const b = document.createElement("button")
@@ -1210,36 +2504,111 @@ export function buildMilestones(algorithm, kind, frames) {
     if (prev && (prev.i === i || prev.label === label)) return
     marks.push({ i, label })
   }
+  const firstGap = frames.find((frame) => Number.isInteger(frame.gap))?.gap
+  const familyProfile = frames[0]?.profile
+  const firstDistributionPass = frames.find((frame) => frame.type === "pass")
   const initial =
     kind === "sort"
-      ? algorithm === "bubble-sort"
-        ? "Pass 1"
-        : algorithm === "insertion-sort"
-          ? "Prefix 1"
-          : algorithm === "selection-sort"
-            ? "Select 1"
-            : algorithm === "heap-sort"
-              ? "Build heap"
-              : algorithm === "merge-sort"
-                ? "Runs of 1"
-                : "Partition"
+      ? firstGap != null
+        ? `Gap ${firstGap}`
+        : familyProfile === "cyclic"
+          ? "Place values"
+          : familyProfile === "counting"
+            ? "Tally keys"
+            : familyProfile === "radix"
+              ? `${firstDistributionPass?.passLabel || "Digit"} pass`
+              : familyProfile === "bucket"
+                ? "Scatter ranges"
+                : familyProfile === "introsort"
+                  ? "Quicksort"
+                  : algorithm === "bubble-sort"
+                    ? "Pass 1"
+                    : algorithm === "insertion-sort"
+                      ? "Prefix 1"
+                      : algorithm === "selection-sort"
+                        ? "Select 1"
+                        : algorithm === "heap-sort"
+                          ? "Build heap"
+                          : algorithm === "merge-sort"
+                            ? "Runs of 1"
+                            : "Partition"
       : kind === "search"
-        ? "Search range"
+        ? familyProfile === "exponential"
+          ? "Gallop"
+          : familyProfile === "interpolation"
+            ? "Estimate"
+            : familyProfile === "jump"
+              ? "Jump blocks"
+              : familyProfile === "ternary"
+                ? "Narrow peak"
+                : familyProfile === "shipping-capacity"
+                  ? "Answer range"
+                  : "Search range"
         : kind === "string"
           ? "Shift 0"
           : kind === "backtrack"
             ? "Depth 0"
             : kind === "rectree"
-              ? "Call tree"
+              ? familyProfile === "divide-and-conquer"
+                ? "Whole problem"
+                : familyProfile === "merge-sort"
+                  ? "Whole array"
+                  : familyProfile === "memoization"
+                    ? "Empty cache"
+                    : familyProfile === "coin-change-top-down"
+                      ? "Amount 30¢"
+                      : familyProfile === "grid-path-top-down"
+                        ? "Loading bay"
+                        : "Call tree"
               : "Initialize"
   push(0, initial)
   let lastRange = ""
+  let lastGap = firstGap
   let lastRow = null
   let lastWindow = ""
   let lastDepth = null
   for (let i = 1; i < frames.length - 1; i++) {
     const f = frames[i]
     if (kind === "sort") {
+      if (familyProfile === "counting" && f.type === "prefix" && frames[i - 1].type !== "prefix") {
+        push(i, "Reserve output ranges")
+      } else if (
+        familyProfile === "counting" &&
+        f.type === "place" &&
+        frames[i - 1].type !== "place"
+      ) {
+        push(i, "Place stably")
+      } else if (familyProfile === "radix" && f.type === "pass" && frames[i - 1].type !== "pass") {
+        push(i, `${f.passLabel} pass`)
+      } else if (
+        familyProfile === "radix" &&
+        f.type === "gather" &&
+        frames[i - 1].type !== "gather"
+      ) {
+        push(i, `Gather ${f.passLabel}`)
+      } else if (familyProfile === "bucket" && f.type === "pass" && frames[i - 1].type !== "pass") {
+        push(i, "Scatter ranges")
+      } else if (
+        familyProfile === "bucket" &&
+        f.type === "local-sort" &&
+        frames[i - 1].type !== "local-sort"
+      ) {
+        push(i, "Sort buckets")
+      } else if (
+        familyProfile === "bucket" &&
+        f.type === "gather" &&
+        frames[i - 1].type !== "gather"
+      ) {
+        push(i, "Gather ranges")
+      } else if (familyProfile === "introsort" && f.type === "fallback") {
+        push(i, "Heap fallback")
+      } else if (familyProfile === "introsort" && f.type === "cleanup") {
+        push(i, "Insertion cleanup")
+      }
+      if (Number.isInteger(f.gap) && f.gap !== lastGap) {
+        push(i, `Gap ${f.gap}`)
+        lastGap = f.gap
+      }
       const range = f.range ? f.range.join(":") : ""
       if (range && range !== lastRange) {
         const word =
@@ -1248,11 +2617,13 @@ export function buildMilestones(algorithm, kind, frames) {
       } else if (f.type === "mark-sorted") {
         const fixed = f.sorted.length
         const word =
-          algorithm === "insertion-sort"
-            ? "Prefix"
-            : algorithm === "selection-sort"
-              ? "Select"
-              : "Fixed"
+          familyProfile === "cyclic"
+            ? "Placed"
+            : algorithm === "insertion-sort"
+              ? "Prefix"
+              : algorithm === "selection-sort"
+                ? "Select"
+                : "Fixed"
         const count =
           algorithm === "bubble-sort" || algorithm === "selection-sort"
             ? Math.min(fixed + 1, f.array.length)
@@ -1264,8 +2635,28 @@ export function buildMilestones(algorithm, kind, frames) {
       const word =
         algorithm === "dijkstra" ? "Settle" : algorithm === "topological-sort" ? "Output" : "Visit"
       push(i, `${word} ${f.current}`)
-    } else if (kind === "search" && f.type === "probe") {
-      push(i, `Probe ${f.mid}`)
+    } else if (kind === "search") {
+      if (familyProfile === "exponential" && f.type === "phase" && f.phase === "binary")
+        push(i, "Binary search")
+      else if (f.type === "phase" && f.phase === "scan")
+        push(i, familyProfile === "ternary" ? "Final scan" : "Linear scan")
+      else if (f.type === "phase" && f.phase === "interpolation") push(i, "Interpolation")
+      else if (f.type === "phase" && f.phase === "ternary") push(i, "Ternary")
+      else if (familyProfile === "shipping-capacity" && f.type === "evaluate")
+        push(i, `Check ${f.candidate}`)
+      else if (f.type === "probe")
+        push(
+          i,
+          familyProfile === "ternary" && f.mid2 != null
+            ? `Probes ${f.mid}/${f.mid2}`
+            : `${
+                familyProfile === "exponential" && f.phase === "gallop"
+                  ? "Bound"
+                  : familyProfile === "jump" && f.phase === "jump"
+                    ? "Block end"
+                    : "Probe"
+              } ${f.mid}`,
+        )
     } else if (kind === "string") {
       if (
         (f.type === "slide" || f.type === "hash" || f.type === "match") &&
@@ -1281,7 +2672,11 @@ export function buildMilestones(algorithm, kind, frames) {
         lastWindow = win
       }
     } else if (kind === "dp") {
-      if (f.type === "compute" && f.cur && f.cur[0] !== lastRow) {
+      if (familyProfile === "floyd-warshall" && f.type === "stage") {
+        push(i, `Stage k = ${f.k}`)
+      } else if (familyProfile === "dynamic-programming" && f.type === "compute" && f.cur) {
+        push(i, `${f.variant === "concrete" ? "Prefix" : "Solve"} ${f.colLabels[f.cur[1]]}`)
+      } else if (f.type === "compute" && f.cur && f.cur[0] !== lastRow) {
         push(i, `Row ${f.rowLabels[f.cur[0]]}`)
         lastRow = f.cur[0]
       } else if (f.type === "trace" && frames[i - 1].type !== "trace") {
@@ -1296,8 +2691,25 @@ export function buildMilestones(algorithm, kind, frames) {
         push(i, `Depth ${f.depth}`)
         lastDepth = f.depth
       }
-    } else if (kind === "rectree" && f.type === "phase") {
-      push(i, f.phase === "memo" ? "Memoized" : "Plain recursion")
+    } else if (kind === "rectree") {
+      if (f.type === "split") {
+        const activeNode = f.nodes.find((node) => node.id === f.active)
+        push(i, `Split ${activeNode?.label || "range"}`)
+      } else if (f.type === "combine") {
+        const activeNode = f.nodes.find((node) => node.id === f.active)
+        push(
+          i,
+          `${f.profile === "merge-sort" ? "Merge" : "Combine"} ${activeNode?.label || "problem"}`,
+        )
+      } else if (f.type === "store") {
+        const activeNode = f.nodes.find((node) => node.id === f.active)
+        push(i, `Store ${activeNode?.label || "state"}`)
+      } else if (f.type === "cache") {
+        const activeNode = f.nodes.find((node) => node.id === f.active)
+        push(i, `Reuse ${activeNode?.label || "state"}`)
+      } else if (f.type === "phase") {
+        push(i, f.phase === "memo" ? "Memoized" : "Plain recursion")
+      }
     }
   }
   push(frames.length - 1, "Result")
@@ -1332,12 +2744,25 @@ function graphEdgeWeight(graph, a, b) {
 
 export function summaryFor(algorithm, kind, frame, graph) {
   if (kind === "sort") {
+    if (algorithm === "counting-sort")
+      return `Output [${frame.output.join(", ")}] · ${frame.tallied} tallies · ${frame.placed} stable placements.`
+    if (algorithm === "radix-sort" || algorithm === "bucket-sort") {
+      const output = frame.source.map((token) => token.value)
+      const work =
+        algorithm === "radix-sort"
+          ? `${frame.passCount} stable digit passes`
+          : `${frame.comparisons} local comparisons`
+      return `Output [${output.join(", ")}] · ${work} · ${frame.gathered} gathered.`
+    }
     if (algorithm === "merge-sort")
       return `Output [${frame.array.join(", ")}] · ${frame.swaps} writes.`
-    const unit = ["bubble-sort", "selection-sort", "quick-sort", "heap-sort"].includes(algorithm)
-      ? "swaps"
-      : "moves"
-    return `Output [${frame.array.join(", ")}] · ${frame.comparisons} comparisons · ${frame.swaps} ${unit}.`
+    const unit =
+      frame.movementUnit ||
+      (["bubble-sort", "selection-sort", "quick-sort", "heap-sort"].includes(algorithm)
+        ? "swaps"
+        : "moves")
+    const comparisons = frame.showComparisons === false ? "" : `${frame.comparisons} comparisons · `
+    return `Output [${frame.array.join(", ")}] · ${comparisons}${frame.swaps} ${unit}.`
   }
   if (kind === "graph") {
     if (algorithm === "dijkstra" && frame.target != null) {
@@ -1378,10 +2803,13 @@ export function summaryFor(algorithm, kind, frame, graph) {
     }
     return `${frame.visited.length} nodes visited · frontier empty.`
   }
-  if (kind === "search")
+  if (kind === "search") {
+    if (algorithm === "binary-search-on-answer")
+      return `Minimum feasible capacity ${frame.answer} · ${frame.probes} probe${frame.probes === 1 ? "" : "s"}.`
     return frame.found == null
       ? `${frame.target} not found · ${frame.comparisons} comparisons.`
       : `${frame.target} found at index ${frame.found} · ${frame.comparisons} comparisons.`
+  }
   if (kind === "string")
     return frame.found.length
       ? `${frame.found.length} match${frame.found.length === 1 ? "" : "es"} at ${frame.found.join(", ")}.`
@@ -1395,6 +2823,48 @@ export function summaryFor(algorithm, kind, frame, graph) {
         : `No committed result was recorded.`
   }
   if (kind === "dp") {
+    if (
+      [
+        "coin-change-greedy",
+        "coin-change-naive",
+        "coin-change-memoization",
+        "coin-change-tabulation",
+      ].includes(algorithm)
+    )
+      return `${frame.best || "Exact change pending"} · target ${frame.target}¢.`
+    if (
+      [
+        "grid-path-greedy",
+        "grid-path-naive",
+        "grid-path-memoization",
+        "grid-path-tabulation",
+      ].includes(algorithm)
+    )
+      return frame.bestCost == null
+        ? `Warehouse route pending · current cost ${frame.routeCost}.`
+        : `Minimum warehouse route cost ${frame.bestCost}.`
+    if (algorithm === "coin-change-bottom-up")
+      return `Fewest coins for 30¢: ${frame.grid[0]?.at(-1)} · exact change 10¢ + 10¢ + 10¢.`
+    if (algorithm === "grid-path-bottom-up")
+      return `Minimum warehouse route cost ${frame.grid[0]?.[0]} · ${frame.path.length} path tiles.`
+    if (algorithm === "floyd-warshall") {
+      if (frame.negativeCycle?.length)
+        return `Negative cycle through ${frame.negativeCycle.join(", ")}; shortest paths are undefined.`
+      const distances = frame.grid
+        .map(
+          (row, index) =>
+            `${frame.rowLabels[index]}: [${row.map((value) => value ?? "∞").join(", ")}]`,
+        )
+        .join(" · ")
+      return `All-pairs distances ${distances}.`
+    }
+    if (algorithm === "dynamic-programming") {
+      const stored = frame.grid.flat().filter((value) => value != null).length
+      const target = frame.grid[0]?.[frame.grid[0].length - 1]
+      if (frame.variant === "concrete")
+        return `Best non-adjacent total ${target} · ${stored} prefixes solved once.`
+      return `Target ${target} · ${stored} states solved once in dependency order.`
+    }
     const row = frame.grid[frame.grid.length - 1] || []
     const value = row[row.length - 1]
     const sequence = (frame.path || []).map((p) => frame.rowLabels[p[0]]).join("")
@@ -1412,6 +2882,18 @@ export function summaryFor(algorithm, kind, frame, graph) {
     return frame.solved
       ? `Solved at depth ${frame.depth} · ${frame.placed} placements · ${frame.pruned} branches pruned.`
       : `No arrangement found · ${frame.pruned} branches pruned.`
-  if (kind === "rectree") return stripTags(frame.message)
+  if (kind === "rectree") {
+    if (algorithm === "coin-change-top-down")
+      return `Fewest coins for 30¢: ${frame.results?.c30 || "—"} · ${frame.pruned} recursive calls skipped.`
+    if (algorithm === "grid-path-top-down")
+      return `Minimum warehouse route cost ${frame.results?.r1c1 || "—"} · ${frame.pruned} recursive calls skipped.`
+    if (algorithm === "memoization") {
+      const memoResult = String(frame.results?.a || "ready").replace(/^result\s+/i, "")
+      return `Result ${memoResult} · ${frame.calls} calls · ${frame.pruned} recursive calls skipped.`
+    }
+    const result = frame.results?.root
+    if (Array.isArray(result)) return `Sorted result [${result.join(", ")}].`
+    return result ? `${result}.` : stripTags(frame.message)
+  }
   return stripTags(frame.message)
 }

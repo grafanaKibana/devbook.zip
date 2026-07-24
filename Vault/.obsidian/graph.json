@@ -15,13 +15,6 @@
       }
     },
     {
-      "query": "tag:#MetricsIgnore  ",
-      "color": {
-        "a": 1,
-        "rgb": 14701138
-      }
-    },
-    {
       "query": "tag:#Template  ",
       "color": {
         "a": 1,
@@ -39,6 +32,6 @@
   "repelStrength": 10,
   "linkStrength": 1,
   "linkDistance": 250,
-  "scale": 0.29179099611175163,
-  "close": false
+  "scale": 0.31324767550164717,
+  "close": true
 }

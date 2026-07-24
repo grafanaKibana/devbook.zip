@@ -231,3073 +231,8 @@ var init_bfs = __esm({
   }
 });
 
-// custom/steptrace/src/algorithms/binary-search.ts
-var binarySearch;
-var init_binary_search = __esm({
-  "custom/steptrace/src/algorithms/binary-search.ts"() {
-    binarySearch = {
-      id: "binary-search",
-      kind: "search",
-      meta: { label: "Binary search" },
-      run: (input, ops) => {
-        const a = ops.value;
-        const target = input.target;
-        ops.init(
-          `Binary search for ${target} in a sorted array — check the middle of the range, then discard the half that can't contain it.`
-        );
-        let lo = 0;
-        let hi = a.length - 1;
-        while (lo <= hi) {
-          const mid = Math.floor((lo + hi) / 2);
-          ops.probe(
-            lo,
-            hi,
-            mid,
-            `Range [${lo}, ${hi}]: probe the middle — index ${mid} holds ${a[mid]}.`
-          );
-          if (a[mid] === target) {
-            ops.hit(mid, `${a[mid]} equals ${target} — found it at index ${mid}.`);
-            ops.done(
-              `Found ${target} after ${ops.comparisons} probe${ops.comparisons === 1 ? "" : "s"}.`
-            );
-            return;
-          }
-          if (a[mid] < target) {
-            lo = mid + 1;
-            ops.narrow(lo, hi, `${a[mid]} < ${target}: discard the left half; search [${lo}, ${hi}].`);
-          } else {
-            hi = mid - 1;
-            ops.narrow(lo, hi, `${a[mid]} > ${target}: discard the right half; search [${lo}, ${hi}].`);
-          }
-        }
-        ops.done(`${target} is not in the array — the range is empty after ${ops.comparisons} probes.`);
-      }
-    };
-  }
-});
-
-// custom/steptrace/src/algorithms/bubble-sort.ts
-var bubbleSort;
-var init_bubble_sort = __esm({
-  "custom/steptrace/src/algorithms/bubble-sort.ts"() {
-    bubbleSort = {
-      id: "bubble-sort",
-      kind: "sort",
-      meta: { label: "Bubble sort" },
-      run: (input, ops) => {
-        const n = ops.value.length;
-        ops.init(
-          `Bubble sort — repeatedly compare adjacent values and swap the larger one rightward, bubbling the largest to the end each pass.`
-        );
-        for (let i = 0; i < n - 1; i++) {
-          let swapped = false;
-          for (let j = 0; j < n - 1 - i; j++) {
-            const a = ops.value;
-            ops.compare(j, j + 1, `Compare index ${j} (${a[j]}) and index ${j + 1} (${a[j + 1]}).`);
-            if (ops.value[j] > ops.value[j + 1]) {
-              const b = ops.value;
-              ops.swap(j, j + 1, `${b[j]} is greater than ${b[j + 1]} — swap them.`);
-              swapped = true;
-            }
-          }
-          ops.markSorted([n - 1 - i], [n - 1 - i], `Index ${n - 1 - i} now holds its final value.`);
-          if (!swapped) {
-            const rest = Array.from({ length: n - 1 - i }, (_, k) => k);
-            ops.markSorted(rest, [], `A full pass made no swaps — the array is already sorted.`);
-            break;
-          }
-        }
-        ops.lockAll(Array.from({ length: n }, (_, k) => k));
-        ops.done(`Sorted in ${ops.comparisons} comparisons and ${ops.swaps} swaps.`);
-      }
-    };
-  }
-});
-
-// custom/steptrace/src/algorithms/dfs.ts
-var dfs;
-var init_dfs = __esm({
-  "custom/steptrace/src/algorithms/dfs.ts"() {
-    init_graph();
-    dfs = {
-      id: "dfs",
-      kind: "graph",
-      meta: { label: "Depth-first search", frontierLabel: "Stack (bottom → top)" },
-      run: (input, ops, graph) => {
-        const adj = adjacency(graph);
-        const start = input.start;
-        const target = input.target != null && input.target !== start ? String(input.target) : null;
-        if (target) ops.target(target);
-        ops.init(
-          target ? `Depth-first search for ${target}, starting at ${start} — dive as deep as possible with a stack, backtracking at dead ends, until the target is popped.` : `Depth-first search from ${start} — dive as deep as possible using a stack, backtracking when a node has no unvisited neighbours.`
-        );
-        const stack = [start];
-        const seen = /* @__PURE__ */ new Set([start]);
-        ops.enqueue(start, 0, `Push the start node ${start} onto the stack.`);
-        while (stack.length) {
-          const u = stack.pop();
-          ops.visit(u, `Pop ${u} off the stack and mark it visited.`);
-          if (u === target) {
-            ops.done(
-              `Found ${target} after visiting only ${ops.visitedCount} nodes — but along a depth-${ops.dist(u)} path, with no shortest-path guarantee.`
-            );
-            return;
-          }
-          const neighbours = adj[u].slice().reverse();
-          for (const v of neighbours) {
-            if (seen.has(v)) continue;
-            ops.edge(u, v, `Explore edge ${u} → ${v}.`);
-            seen.add(v);
-            stack.push(v);
-            ops.enqueue(v, ops.dist(u) + 1, `Push ${v} onto the stack (depth ${ops.dist(u) + 1}).`);
-          }
-        }
-        ops.done(
-          target ? `${target} is not reachable from ${start} — the stack emptied after ${ops.visitedCount} nodes.` : `Depth-first search complete — visited ${ops.visitedCount} node${ops.visitedCount === 1 ? "" : "s"}.`
-        );
-      }
-    };
-  }
-});
-
-// custom/steptrace/src/algorithms/dijkstra.ts
-var dijkstra;
-var init_dijkstra = __esm({
-  "custom/steptrace/src/algorithms/dijkstra.ts"() {
-    dijkstra = {
-      id: "dijkstra",
-      kind: "graph",
-      meta: { label: "Dijkstra", frontierLabel: "Frontier (settle nearest first)" },
-      run: (input, ops, graph) => {
-        const adj = {};
-        for (const nd of graph.nodes) adj[nd.id] = [];
-        for (const e of graph.edges) {
-          const w = e.weight == null ? 1 : e.weight;
-          adj[e.from].push({ to: e.to, w });
-          if (!graph.directed) adj[e.to].push({ to: e.from, w });
-        }
-        for (const id in adj) adj[id].sort((a, b) => a.to < b.to ? -1 : 1);
-        const start = input.start;
-        const target = input.target != null ? String(input.target) : null;
-        if (target) ops.target(target);
-        ops.init(
-          `Dijkstra from ${start} — repeatedly settle the nearest unsettled node, then relax its edges to shorten neighbours' distances.`
-        );
-        const dist = { [start]: 0 };
-        const pred = {};
-        const settled = /* @__PURE__ */ new Set();
-        const inQ = /* @__PURE__ */ new Set([start]);
-        ops.enqueue(start, 0, `Start ${start} at distance 0.`);
-        while (inQ.size) {
-          let u = null;
-          for (const id of inQ) if (u === null || dist[id] < dist[u]) u = id;
-          inQ.delete(u);
-          settled.add(u);
-          ops.visit(u, `Settle ${u} (distance ${dist[u]}) — its shortest distance is now final.`);
-          for (const { to: v, w } of adj[u]) {
-            if (settled.has(v)) continue;
-            ops.edge(u, v, `Explore edge ${u} → ${v} (weight ${w}).`);
-            const nd = dist[u] + w;
-            if (dist[v] === void 0 || nd < dist[v]) {
-              const had = dist[v] !== void 0;
-              dist[v] = nd;
-              pred[v] = u;
-              inQ.add(v);
-              ops.relax(
-                v,
-                nd,
-                had ? `Relax ${v}: a shorter path via ${u} improves its distance to ${nd}.` : `Relax ${v}: reach it via ${u} at distance ${nd}.`
-              );
-            }
-          }
-        }
-        if (target !== null) {
-          if (dist[target] === void 0) {
-            ops.done(`${target} is unreachable from ${start}.`);
-          } else {
-            const path = [target];
-            for (let cur = target; pred[cur] !== void 0; cur = pred[cur]) path.push(pred[cur]);
-            path.reverse();
-            for (let i = 0; i + 1 < path.length; i++)
-              ops.selectEdge(
-                path[i],
-                path[i + 1],
-                `Shortest path: keep edge ${path[i]}–${path[i + 1]} highlighted.`
-              );
-            ops.done(`Shortest path ${path.join(" → ")} — total cost ${dist[target]}.`);
-          }
-        } else {
-          const reached = graph.nodes.map((n) => n.id).filter((id) => id !== start && pred[id] !== void 0);
-          reached.sort();
-          for (const v of reached)
-            ops.selectEdge(pred[v], v, `Shortest-path tree: ${pred[v]}–${v} (distance ${dist[v]}).`);
-          ops.done(`Dijkstra complete — shortest-path tree from ${start} highlighted.`);
-        }
-      }
-    };
-  }
-});
-
-// custom/steptrace/src/algorithms/fibonacci.ts
-var fibonacci;
-var init_fibonacci = __esm({
-  "custom/steptrace/src/algorithms/fibonacci.ts"() {
-    fibonacci = {
-      id: "fibonacci",
-      kind: "rectree",
-      meta: { label: "Fibonacci — recursion vs memo" },
-      run: (input, ops) => {
-        const N = Math.min(Math.max(Math.round(input.n ?? 5), 1), 6);
-        const FIB = [0, 1];
-        for (let i = 2; i <= N; i++) FIB[i] = FIB[i - 1] + FIB[i - 2];
-        let nextId = 0;
-        const all = [];
-        const build = (k, depth) => {
-          const node = { id: "c" + nextId++, k, depth, children: [] };
-          all.push(node);
-          if (k >= 2) {
-            node.children.push(build(k - 1, depth + 1));
-            node.children.push(build(k - 2, depth + 1));
-          }
-          return node;
-        };
-        const root = build(N, 0);
-        const ROW = 62;
-        const SP = 48;
-        let leaf = 0;
-        const layout = (node) => {
-          node.y = node.depth * ROW;
-          if (!node.children.length) {
-            node.x = leaf++ * SP;
-          } else {
-            node.children.forEach(layout);
-            node.x = (node.children[0].x + node.children[node.children.length - 1].x) / 2;
-          }
-        };
-        layout(root);
-        const descendants = (node) => {
-          const out = [];
-          for (const c of node.children) {
-            out.push(c.id);
-            out.push(...descendants(c));
-          }
-          return out;
-        };
-        const nodeList = all.map((n) => ({
-          id: n.id,
-          label: `f(${n.k})`,
-          x: Math.round(n.x),
-          y: n.y,
-          depth: n.depth
-        }));
-        const edges = [];
-        for (const n of all) for (const c of n.children) edges.push({ from: n.id, to: c.id });
-        ops.tree(
-          nodeList,
-          edges,
-          `Compute f(${N}) by plain recursion: every call spawns two more. The tree balloons because identical subproblems get recomputed from scratch.`
-        );
-        ops.phase(
-          "naive",
-          `Phase 1 — plain recursion. Reveal each call in order; the running count IS the total work.`
-        );
-        const naive = (node) => {
-          if (node.k < 2) {
-            ops.base(node.id, node.k, `f(${node.k}) = ${node.k} — base case, return at once.`);
-          } else {
-            ops.enter(
-              node.id,
-              `Call f(${node.k}); with no memory it must recompute f(${node.k - 1}) + f(${node.k - 2}) all over again.`
-            );
-            node.children.forEach(naive);
-          }
-        };
-        naive(root);
-        const naiveCalls = all.length;
-        ops.phase(
-          "memo",
-          `Phase 2 — memoise. Same tree, but keep a table of computed f(k); a repeat of any state is now a cache hit.`
-        );
-        const seen = /* @__PURE__ */ new Set();
-        let memoCalls = 0;
-        let hits = 0;
-        const memo = (node) => {
-          memoCalls++;
-          if (seen.has(node.k)) {
-            hits++;
-            ops.hit(
-              node.id,
-              node.k,
-              FIB[node.k],
-              descendants(node),
-              `f(${node.k}) is already in the table → cache HIT, return ${FIB[node.k]}. Its whole subtree is skipped — that is an overlapping subproblem eliminated.`
-            );
-            return FIB[node.k];
-          }
-          seen.add(node.k);
-          if (node.k < 2) {
-            ops.miss(
-              node.id,
-              node.k,
-              node.k,
-              `f(${node.k}) = ${node.k} — first time seen, store it in the table.`
-            );
-          } else {
-            ops.miss(
-              node.id,
-              node.k,
-              FIB[node.k],
-              `f(${node.k}) is new → compute f(${node.k - 1}) + f(${node.k - 2}) once and store f(${node.k}) = ${FIB[node.k]}.`
-            );
-            node.children.forEach(memo);
-          }
-          return FIB[node.k];
-        };
-        memo(root);
-        ops.done(
-          `Naive f(${N}) makes ${naiveCalls} calls. Memoised: ${memoCalls} calls — ${hits} of them cache hits that skipped whole subtrees. Same answer, ${naiveCalls - memoCalls} calls saved.`
-        );
-      }
-    };
-  }
-});
-
-// custom/steptrace/src/algorithms/heap-sort.ts
-var heapSort;
-var init_heap_sort = __esm({
-  "custom/steptrace/src/algorithms/heap-sort.ts"() {
-    heapSort = {
-      id: "heap-sort",
-      kind: "sort",
-      meta: { label: "Heap sort" },
-      run: (input, ops) => {
-        const n = ops.value.length;
-        ops.init(
-          `Heap sort — build a max-heap (each parent ≥ its children), then repeatedly swap the root to the end and sift the new root down.`
-        );
-        function siftDown(lo, hi) {
-          let root = lo;
-          while (2 * root + 1 < hi) {
-            let child = 2 * root + 1;
-            if (child + 1 < hi) {
-              ops.compare(
-                child,
-                child + 1,
-                `Compare children ${ops.value[child]} and ${ops.value[child + 1]}.`
-              );
-              if (ops.value[child + 1] > ops.value[child]) child++;
-            }
-            ops.compare(
-              root,
-              child,
-              `Compare parent ${ops.value[root]} with its larger child ${ops.value[child]}.`
-            );
-            if (ops.value[root] >= ops.value[child]) break;
-            ops.swap(root, child, `Parent is smaller — sift it down.`);
-            root = child;
-          }
-        }
-        ops.range(0, n - 1);
-        for (let i = Math.floor(n / 2) - 1; i >= 0; i--) siftDown(i, n);
-        for (let end = n - 1; end > 0; end--) {
-          ops.swap(0, end, `Move the largest value (the root) to index ${end}.`);
-          ops.markSorted([end], [end], `Index ${end} now holds its final value.`);
-          ops.range(0, end - 1);
-          siftDown(0, end);
-        }
-        ops.range(null);
-        ops.lockAll([0]);
-        ops.markSorted([0], [0], `The remaining root is the smallest — done.`);
-        ops.done(`Sorted in ${ops.comparisons} comparisons and ${ops.swaps} swaps.`);
-      }
-    };
-  }
-});
-
-// custom/steptrace/src/algorithms/insertion-sort.ts
-var insertionSort;
-var init_insertion_sort = __esm({
-  "custom/steptrace/src/algorithms/insertion-sort.ts"() {
-    insertionSort = {
-      id: "insertion-sort",
-      kind: "sort",
-      meta: { label: "Insertion sort" },
-      run: (input, ops) => {
-        const n = ops.value.length;
-        ops.init(
-          `Insertion sort — grow a sorted prefix on the left; take each next value and slide it left past larger values into place.`
-        );
-        ops.markSorted([0], [0], `The first element alone is a sorted prefix.`);
-        for (let i = 1; i < n; i++) {
-          const key = ops.value[i];
-          ops.holdKey(key);
-          ops.compare(i, i - 1, `Take ${key} (index ${i}) and compare it into the sorted prefix.`);
-          let j = i - 1;
-          while (j >= 0 && ops.value[j] > key) {
-            ops.overwrite(
-              j + 1,
-              ops.value[j],
-              `${ops.value[j]} > ${key}: shift it right into index ${j + 1}.`,
-              j
-            );
-            j--;
-            if (j >= 0) ops.compare(j, null, `Compare ${key} with ${ops.value[j]}.`);
-          }
-          ops.overwrite(j + 1, key, `Insert ${key} at index ${j + 1}.`);
-          ops.holdKey(null);
-          ops.markSorted(
-            Array.from({ length: i + 1 }, (_, k) => k),
-            [j + 1],
-            `Sorted prefix now spans indices 0..${i}.`
-          );
-        }
-        ops.done(`Sorted in ${ops.comparisons} comparisons and ${ops.swaps} moves.`);
-      }
-    };
-  }
-});
-
-// custom/steptrace/src/algorithms/kernighan-popcount.ts
-var kernighanPopcount;
-var init_kernighan_popcount = __esm({
-  "custom/steptrace/src/algorithms/kernighan-popcount.ts"() {
-    kernighanPopcount = {
-      id: "kernighan-popcount",
-      kind: "bits",
-      meta: { label: "Kernighan population count" },
-      run: (input, ops) => {
-        let x = Number(input.value) >>> 0 & ops.mask;
-        const total = ops.popcount(x);
-        ops.init(
-          x,
-          { a: "x", b: "− 1", r: "&" },
-          `x = ${x} has ${total} one${total === 1 ? "" : "s"}. Each pass, x & (x−1) deletes the lowest 1 — so the loop runs ${total} time${total === 1 ? "" : "s"}, once per set bit.`
-        );
-        let pop = 0;
-        while (x !== 0) {
-          const low = ops.lowestSetBit(x);
-          const sub = x - 1 & ops.mask;
-          ops.subtract(
-            sub,
-            low,
-            `Lowest 1 is at bit ${low}. Subtracting 1 flips it to 0 and turns every zero below it into a 1.`
-          );
-          const res = x & sub;
-          ops.and(
-            res,
-            low,
-            `AND the two: the survivors above stay, bit ${low} and everything under it are wiped — exactly one 1 gone.`
-          );
-          pop++;
-          x = res;
-          ops.commit(`x ← ${x}. ${pop} of ${total} ones cleared.`);
-        }
-        ops.done(
-          `x = 0 — every 1 is gone. It took ${total} pass${total === 1 ? "" : "es"}, so x had ${total} set bit${total === 1 ? "" : "s"}.`
-        );
-      }
-    };
-  }
-});
-
-// custom/steptrace/src/algorithms/kmp.ts
-var kmp;
-var init_kmp = __esm({
-  "custom/steptrace/src/algorithms/kmp.ts"() {
-    kmp = {
-      id: "kmp",
-      kind: "string",
-      meta: { label: "KMP" },
-      run: (input, ops) => {
-        const text = String(input.text || "");
-        const pattern = String(input.pattern || "");
-        const n = text.length;
-        const m = pattern.length;
-        ops.init(
-          `KMP search for "${pattern}" — on a mismatch, the failure function slides the pattern forward without re-checking characters already known to match.`
-        );
-        if (!m || m > n) {
-          ops.done("Nothing to search.");
-          return;
-        }
-        const lps = new Array(m).fill(0);
-        let len = 0;
-        for (let idx = 1; idx < m; ) {
-          if (pattern[idx] === pattern[len]) {
-            len++;
-            lps[idx] = len;
-            idx++;
-          } else if (len > 0) {
-            len = lps[len - 1];
-          } else {
-            lps[idx] = 0;
-            idx++;
-          }
-        }
-        let i = 0;
-        let j = 0;
-        while (i < n) {
-          const isMatch = text[i] === pattern[j];
-          ops.compare(
-            i,
-            j,
-            i - j,
-            isMatch,
-            `Compare text[${i}]='${text[i]}' with pattern[${j}]='${pattern[j]}' → ${isMatch ? "match" : "mismatch"}.`
-          );
-          if (isMatch) {
-            i++;
-            j++;
-            if (j === m) {
-              ops.matchAt(i - j, `Whole pattern matched — occurrence at index ${i - j}.`);
-              j = lps[j - 1];
-            }
-          } else if (j > 0) {
-            j = lps[j - 1];
-            ops.slide(
-              i - j,
-              `Mismatch — reuse the matched prefix: realign so ${j} char${j === 1 ? "" : "s"} already line up (no re-check).`
-            );
-          } else {
-            i++;
-            ops.slide(i, `Mismatch at the pattern start — slide forward by one.`);
-          }
-        }
-        ops.done(
-          ops.found.length ? `Found ${ops.found.length} occurrence(s): index ${ops.found.join(", ")}.` : `Pattern not found.`
-        );
-      }
-    };
-  }
-});
-
-// custom/steptrace/src/algorithms/lcs.ts
-var lcs;
-var init_lcs = __esm({
-  "custom/steptrace/src/algorithms/lcs.ts"() {
-    lcs = {
-      id: "lcs",
-      kind: "dp",
-      meta: { label: "Longest common subsequence" },
-      run: (input, ops) => {
-        const A = String(input.a != null ? input.a : input.text || "");
-        const B = String(input.b != null ? input.b : input.pattern || "");
-        const m = A.length;
-        const n = B.length;
-        const rowLabels = ["∅", ...A.split("")];
-        const colLabels = ["∅", ...B.split("")];
-        ops.board(
-          rowLabels,
-          colLabels,
-          `Longest common subsequence of "${A}" and "${B}". Cell dp[i][j] holds the LCS length of the first i letters of "${A}" and the first j of "${B}".`
-        );
-        const dp = Array.from({ length: m + 1 }, () => Array(n + 1).fill(0));
-        for (let c2 = 0; c2 <= n; c2++) ops.set(0, c2, 0, [], `An empty first string has LCS 0.`);
-        for (let r2 = 1; r2 <= m; r2++) ops.set(r2, 0, 0, [], `An empty second string has LCS 0.`);
-        for (let r2 = 1; r2 <= m; r2++) {
-          for (let c2 = 1; c2 <= n; c2++) {
-            if (A[r2 - 1] === B[c2 - 1]) {
-              dp[r2][c2] = dp[r2 - 1][c2 - 1] + 1;
-              ops.set(
-                r2,
-                c2,
-                dp[r2][c2],
-                [[r2 - 1, c2 - 1]],
-                `'${A[r2 - 1]}' = '${B[c2 - 1]}' → take the diagonal + 1 = ${dp[r2][c2]}.`
-              );
-            } else {
-              dp[r2][c2] = Math.max(dp[r2 - 1][c2], dp[r2][c2 - 1]);
-              const better = dp[r2 - 1][c2] >= dp[r2][c2 - 1] ? "top" : "left";
-              ops.set(
-                r2,
-                c2,
-                dp[r2][c2],
-                [
-                  [r2 - 1, c2],
-                  [r2, c2 - 1]
-                ],
-                `'${A[r2 - 1]}' ≠ '${B[c2 - 1]}' → this letter can't extend the match, so the optimum here is inherited from an optimal sub-answer: the better of top (${dp[r2 - 1][c2]}) and left (${dp[r2][c2 - 1]}) = ${dp[r2][c2]} (from the ${better}).`
-              );
-            }
-          }
-        }
-        let r = m;
-        let c = n;
-        const path = [];
-        while (r > 0 && c > 0) {
-          if (A[r - 1] === B[c - 1]) {
-            path.unshift([r, c]);
-            ops.markPath(
-              path,
-              `dp[${r}][${c}]: '${A[r - 1]}' = '${B[c - 1]}' — this cell was built from dp[${r - 1}][${c - 1}] + 1, so '${A[r - 1]}' joins the LCS. Step diagonally to that sub-answer.`
-            );
-            r--;
-            c--;
-          } else if (dp[r - 1][c] >= dp[r][c - 1]) {
-            ops.markPath(
-              path,
-              `dp[${r}][${c}]: '${A[r - 1]}' ≠ '${B[c - 1]}' — its optimum was inherited from the top sub-answer dp[${r - 1}][${c}]. Follow it upward; no letter added.`
-            );
-            r--;
-          } else {
-            ops.markPath(
-              path,
-              `dp[${r}][${c}]: '${A[r - 1]}' ≠ '${B[c - 1]}' — its optimum was inherited from the left sub-answer dp[${r}][${c - 1}]. Follow it leftward; no letter added.`
-            );
-            c--;
-          }
-        }
-        const lcs2 = path.map((p) => A[p[0] - 1]).join("");
-        ops.markPath(
-          path,
-          `Traceback done: the ${path.length} diagonal step${path.length === 1 ? "" : "s"} spell the LCS "${lcs2}".`
-        );
-        ops.done(`LCS length = ${dp[m][n]} ("${lcs2}").`);
-      }
-    };
-  }
-});
-
-// custom/steptrace/src/algorithms/linear-search.ts
-var linearSearch;
-var init_linear_search = __esm({
-  "custom/steptrace/src/algorithms/linear-search.ts"() {
-    linearSearch = {
-      id: "linear-search",
-      kind: "search",
-      meta: { label: "Linear search" },
-      run: (input, ops) => {
-        const a = ops.value;
-        const target = input.target;
-        const n = a.length;
-        ops.mode = "scan";
-        ops.init(
-          `Linear search for ${target} — scan left to right, comparing every element until a match is found (or the array ends).`
-        );
-        for (let i = 0; i < n; i++) {
-          ops.probe(0, n - 1, i, `Check index ${i}: is ${a[i]} the target ${target}?`);
-          if (a[i] === target) {
-            ops.hit(i, `${a[i]} equals ${target} — found it at index ${i}.`);
-            ops.done(
-              `Found ${target} at index ${i} after ${ops.comparisons} comparison${ops.comparisons === 1 ? "" : "s"}.`
-            );
-            return;
-          }
-        }
-        ops.done(
-          `${target} is not in the array — scanned all ${n} elements (${ops.comparisons} comparisons).`
-        );
-      }
-    };
-  }
-});
-
-// custom/steptrace/src/algorithms/merge-sort.ts
-var mergeSort;
-var init_merge_sort = __esm({
-  "custom/steptrace/src/algorithms/merge-sort.ts"() {
-    mergeSort = {
-      id: "merge-sort",
-      kind: "sort",
-      meta: { label: "Merge sort" },
-      run: (input, ops) => {
-        const n = ops.value.length;
-        ops.init(
-          `Merge sort — start with runs of length 1, then repeatedly merge adjacent runs into larger sorted runs (watch the sorted runs double).`
-        );
-        for (let width = 1; width < n; width *= 2) {
-          for (let lo = 0; lo < n; lo += 2 * width) {
-            const mid = Math.min(lo + width, n);
-            const hi = Math.min(lo + 2 * width, n);
-            if (mid >= hi) continue;
-            ops.range(lo, hi - 1);
-            const left = ops.value.slice(lo, mid);
-            const right = ops.value.slice(mid, hi);
-            ops.candidate(
-              null,
-              `Merge the left run [${lo}, ${mid - 1}] and the right run [${mid}, ${hi - 1}] into one sorted run [${lo}, ${hi - 1}].`
-            );
-            let i = 0;
-            let j = 0;
-            let k = lo;
-            while (i < left.length && j < right.length) {
-              if (left[i] <= right[j]) {
-                ops.overwrite(
-                  k,
-                  left[i],
-                  `${left[i]} ≤ ${right[j]}: place ${left[i]} from the left half at index ${k}.`,
-                  lo + i
-                );
-                i++;
-              } else {
-                ops.overwrite(
-                  k,
-                  right[j],
-                  `${right[j]} < ${left[i]}: place ${right[j]} from the right half at index ${k}.`,
-                  mid + j
-                );
-                j++;
-              }
-              k++;
-            }
-            while (i < left.length) {
-              ops.overwrite(
-                k,
-                left[i],
-                `Copy the remaining ${left[i]} from the left half at index ${k}.`,
-                lo + i
-              );
-              i++;
-              k++;
-            }
-            while (j < right.length) {
-              ops.overwrite(
-                k,
-                right[j],
-                `Copy the remaining ${right[j]} from the right half at index ${k}.`,
-                mid + j
-              );
-              j++;
-              k++;
-            }
-          }
-          ops.range(null);
-        }
-        ops.lockAll(Array.from({ length: n }, (_, k) => k));
-        ops.done(`Sorted in ${ops.swaps} writes.`);
-      }
-    };
-  }
-});
-
-// custom/steptrace/src/algorithms/n-queens.ts
-var nQueens;
-var init_n_queens = __esm({
-  "custom/steptrace/src/algorithms/n-queens.ts"() {
-    nQueens = {
-      id: "n-queens",
-      kind: "backtrack",
-      meta: { label: "N-Queens (backtracking)" },
-      run: (input, ops) => {
-        const n = Math.min(Math.max(input.n || 4, 4), 6);
-        ops.board(
-          n,
-          `Place ${n} queens on a ${n}×${n} board so none attack another. Fill one queen per row; retreat whenever a row has no safe square.`
-        );
-        const conflict = (row, col) => {
-          const q = ops.queens;
-          for (let r = 0; r < row; r++) if (q[r] === col || Math.abs(q[r] - col) === row - r) return r;
-          return -1;
-        };
-        let solved = false;
-        const solve = (row) => {
-          if (solved) return;
-          if (row === n) {
-            ops.solved(`All ${n} rows filled — no queen attacks another.`);
-            solved = true;
-            return;
-          }
-          for (let col = 0; col < n; col++) {
-            const bad = conflict(row, col);
-            if (bad >= 0) {
-              ops.reject(
-                row,
-                col,
-                bad,
-                `Row ${row}, column ${col} clashes with the queen in row ${bad} — prune this square.`
-              );
-              continue;
-            }
-            ops.place(row, col, `Column ${col} is safe — place a queen and descend to row ${row + 1}.`);
-            solve(row + 1);
-            if (solved) return;
-            ops.backtrack(
-              row,
-              `Row ${row + 1} had no safe square — remove the queen at (${row}, ${col}) and retreat.`
-            );
-          }
-        };
-        solve(0);
-        ops.done(solved ? `Solved — a valid ${n}-queens arrangement.` : `No solution for n = ${n}.`);
-      }
-    };
-  }
-});
-
-// custom/steptrace/src/algorithms/prim.ts
-var prim;
-var init_prim = __esm({
-  "custom/steptrace/src/algorithms/prim.ts"() {
-    prim = {
-      id: "prim",
-      kind: "graph",
-      meta: { label: "Prim's MST", frontierLabel: "Frontier" },
-      run: (input, ops, graph) => {
-        const adj = {};
-        for (const nd of graph.nodes) adj[nd.id] = [];
-        for (const e of graph.edges) {
-          const w = e.weight == null ? 1 : e.weight;
-          adj[e.from].push({ to: e.to, w });
-          if (!graph.directed) adj[e.to].push({ to: e.from, w });
-        }
-        const start = input.start;
-        ops.init(
-          `Prim's algorithm — grow a minimum spanning tree from ${start}, each step adding the cheapest edge that reaches a node not yet in the tree.`
-        );
-        const pairKey = (a, b) => a < b ? a + "|" + b : b + "|" + a;
-        const inTree = /* @__PURE__ */ new Set([start]);
-        const treeEdges = /* @__PURE__ */ new Set();
-        const skipped = /* @__PURE__ */ new Set();
-        ops.visit(start, `Start the tree at ${start}.`);
-        let total = 0;
-        while (inTree.size < graph.nodes.length) {
-          const cand = [];
-          const seenPair = /* @__PURE__ */ new Set();
-          for (const u of inTree)
-            for (const { to: v, w } of adj[u]) {
-              const key = pairKey(u, v);
-              if (seenPair.has(key)) continue;
-              seenPair.add(key);
-              cand.push({ u, v, w, key });
-            }
-          cand.sort((a, b) => a.w - b.w || (a.key < b.key ? -1 : 1));
-          let chosen = null;
-          for (const c of cand) {
-            if (inTree.has(c.v)) {
-              if (!treeEdges.has(c.key) && !skipped.has(c.key)) {
-                skipped.add(c.key);
-                ops.edge(
-                  c.u,
-                  c.v,
-                  `${c.u}–${c.v} (weight ${c.w}) links two nodes already in the tree — skip it, adding it would make a cycle.`
-                );
-              }
-              continue;
-            }
-            chosen = c;
-            break;
-          }
-          if (!chosen) break;
-          ops.edge(
-            chosen.u,
-            chosen.v,
-            `Cheapest edge leaving the tree: ${chosen.u}–${chosen.v} (weight ${chosen.w}).`
-          );
-          ops.selectEdge(chosen.u, chosen.v, `Add ${chosen.u}–${chosen.v} to the tree.`);
-          treeEdges.add(chosen.key);
-          inTree.add(chosen.v);
-          ops.visit(chosen.v, `${chosen.v} joins the tree.`);
-          total += chosen.w;
-        }
-        ops.done(`Minimum spanning tree complete — total weight ${total}.`);
-      }
-    };
-  }
-});
-
-// custom/steptrace/src/algorithms/quick-sort.ts
-var quickSort;
-var init_quick_sort = __esm({
-  "custom/steptrace/src/algorithms/quick-sort.ts"() {
-    quickSort = {
-      id: "quick-sort",
-      kind: "sort",
-      meta: { label: "Quick sort" },
-      run: (input, ops) => {
-        const n = ops.value.length;
-        ops.init(
-          `Quick sort — pick a pivot, partition values so smaller ones go left and larger ones go right, then recurse on each side.`
-        );
-        function partition(lo, hi) {
-          const pivot = ops.value[hi];
-          ops.range(lo, hi);
-          ops.pivot(hi);
-          ops.candidate(
-            hi,
-            `Partition [${lo}, ${hi}]: pivot ${pivot} (index ${hi}) — send values < ${pivot} left, > ${pivot} right.`
-          );
-          let i = lo;
-          for (let j = lo; j < hi; j++) {
-            ops.compare(j, hi, `Compare ${ops.value[j]} with pivot ${pivot}.`);
-            if (ops.value[j] < pivot) {
-              if (i !== j)
-                ops.swap(
-                  i,
-                  j,
-                  `${ops.value[j]} < ${pivot}: move it into the left region at index ${i}.`
-                );
-              i++;
-            }
-          }
-          if (i !== hi) ops.swap(i, hi, `Swap the pivot ${pivot} into index ${i}.`);
-          ops.pivot(i);
-          ops.candidate(
-            null,
-            `Pivot ${pivot} settles at index ${i} — everything left is < ${pivot}, everything right is > ${pivot}.`
-          );
-          ops.pivot(null);
-          ops.markSorted([i], [i], `Index ${i} is final — it never moves again.`);
-          ops.range(null);
-          return i;
-        }
-        function qs(lo, hi) {
-          if (lo > hi) return;
-          if (lo === hi) {
-            ops.markSorted([lo], [lo], `A single element at index ${lo} is already in place.`);
-            return;
-          }
-          const p = partition(lo, hi);
-          if (p - 1 - lo >= 1) {
-            ops.range(lo, p - 1);
-            ops.candidate(
-              null,
-              `Recurse into the left half [${lo}, ${p - 1}] (the values below the pivot).`
-            );
-          }
-          qs(lo, p - 1);
-          if (hi - (p + 1) >= 1) {
-            ops.range(p + 1, hi);
-            ops.candidate(
-              null,
-              `Recurse into the right half [${p + 1}, ${hi}] (the values above the pivot).`
-            );
-          }
-          qs(p + 1, hi);
-        }
-        qs(0, n - 1);
-        ops.done(`Sorted in ${ops.comparisons} comparisons and ${ops.swaps} swaps.`);
-      }
-    };
-  }
-});
-
-// custom/steptrace/src/algorithms/rabin-karp.ts
-var rabinKarp;
-var init_rabin_karp = __esm({
-  "custom/steptrace/src/algorithms/rabin-karp.ts"() {
-    rabinKarp = {
-      id: "rabin-karp",
-      kind: "string",
-      meta: { label: "Rabin-Karp" },
-      run: (input, ops) => {
-        const text = String(input.text || "");
-        const pattern = String(input.pattern || "");
-        const n = text.length;
-        const m = pattern.length;
-        const B = 256;
-        const MOD = 101;
-        const hash = (s) => {
-          let h = 0;
-          for (let k = 0; k < s.length; k++) h = (h * B + s.charCodeAt(k)) % MOD;
-          return h;
-        };
-        if (!m || m > n) {
-          ops.init(`Rabin-Karp for "${pattern}".`);
-          ops.done("Nothing to search.");
-          return;
-        }
-        const ph = hash(pattern);
-        ops.init(
-          `Rabin-Karp search for "${pattern}" — slide a window, compare its rolling hash to the pattern hash (${ph}), and only verify character-by-character when the hashes collide.`
-        );
-        let highPow = 1;
-        for (let k = 0; k < m - 1; k++) highPow = highPow * B % MOD;
-        let wh = hash(text.slice(0, m));
-        for (let s = 0; s <= n - m; s++) {
-          ops.hashStep(
-            s,
-            wh,
-            ph,
-            `Window [${s}, ${s + m - 1}]: hash ${wh} ${wh === ph ? "=" : "≠"} pattern hash ${ph}${wh === ph ? " — verify" : " — skip"}.`
-          );
-          if (wh === ph) {
-            let ok = true;
-            for (let j = 0; j < m; j++) {
-              const isMatch = text[s + j] === pattern[j];
-              ops.compare(
-                s + j,
-                j,
-                s,
-                isMatch,
-                `Hash hit — verify text[${s + j}]='${text[s + j]}' vs pattern[${j}]='${pattern[j]}'.`
-              );
-              if (!isMatch) {
-                ok = false;
-                break;
-              }
-            }
-            if (ok) ops.matchAt(s, `Verified — occurrence at index ${s}.`);
-          }
-          if (s < n - m) {
-            const removed = text.charCodeAt(s) * highPow % MOD;
-            wh = (wh - removed + MOD) % MOD;
-            wh = (wh * B + text.charCodeAt(s + m)) % MOD;
-          }
-        }
-        ops.done(
-          ops.found.length ? `Found ${ops.found.length} occurrence(s): index ${ops.found.join(", ")}.` : `Pattern not found.`
-        );
-      }
-    };
-  }
-});
-
-// custom/steptrace/src/algorithms/selection-sort.ts
-var selectionSort;
-var init_selection_sort = __esm({
-  "custom/steptrace/src/algorithms/selection-sort.ts"() {
-    selectionSort = {
-      id: "selection-sort",
-      kind: "sort",
-      meta: { label: "Selection sort" },
-      run: (input, ops) => {
-        const n = ops.value.length;
-        ops.init(
-          `Selection sort — repeatedly find the smallest value in the unsorted region and swap it into the next sorted slot.`
-        );
-        for (let i = 0; i < n - 1; i++) {
-          let min = i;
-          ops.candidate(min, `Assume index ${i} (${ops.value[i]}) is the smallest of the rest.`);
-          for (let j = i + 1; j < n; j++) {
-            ops.compare(j, min, `Compare ${ops.value[j]} with the current smallest ${ops.value[min]}.`);
-            if (ops.value[j] < ops.value[min]) {
-              min = j;
-              ops.candidate(min, `New smallest: ${ops.value[min]} at index ${min}.`);
-            }
-          }
-          if (min !== i) ops.swap(i, min, `Swap the smallest (${ops.value[min]}) into index ${i}.`);
-          ops.candidate(null, `Index ${i} settled — scan the remaining region next.`);
-          ops.markSorted([i], [i], `Index ${i} now holds its final value.`);
-        }
-        ops.lockAll([n - 1]);
-        ops.markSorted([n - 1], [n - 1], `The last element is already in place.`);
-        ops.done(`Sorted in ${ops.comparisons} comparisons and ${ops.swaps} swaps.`);
-      }
-    };
-  }
-});
-
-// custom/steptrace/src/algorithms/sliding-window.ts
-var slidingWindow;
-var init_sliding_window = __esm({
-  "custom/steptrace/src/algorithms/sliding-window.ts"() {
-    slidingWindow = {
-      id: "sliding-window",
-      kind: "pointers",
-      meta: { label: "Sliding window" },
-      run: (input, ops) => {
-        const a = ops.value;
-        const target = input.target;
-        ops.init(
-          `Sliding window — find the shortest contiguous subarray with sum ≥ ${target}. Expand the window right to grow the sum; shrink from the left while it stays ≥ ${target}.`
-        );
-        let lo = 0;
-        let sum = 0;
-        let best = Infinity;
-        let bestRange = null;
-        for (let hi = 0; hi < a.length; hi++) {
-          sum += a[hi];
-          ops.step(
-            { pointers: { lo, hi }, window: [lo, hi] },
-            `Expand right to index ${hi}: window sum = ${sum}.`
-          );
-          while (sum >= target) {
-            if (hi - lo + 1 < best) {
-              best = hi - lo + 1;
-              bestRange = [lo, hi];
-            }
-            ops.step(
-              { pointers: { lo, hi }, window: [lo, hi] },
-              `Sum ${sum} ≥ ${target} (length ${hi - lo + 1}) — record it, then shrink from the left.`
-            );
-            sum -= a[lo];
-            lo++;
-          }
-        }
-        if (bestRange) {
-          const marks = [];
-          for (let k = bestRange[0]; k <= bestRange[1]; k++) marks.push(k);
-          ops.step(
-            { pointers: {}, window: bestRange, mark: marks },
-            `Shortest window: indices ${bestRange[0]}..${bestRange[1]} (length ${best}).`
-          );
-          ops.done(`Answer: the shortest qualifying length is ${best}.`);
-        } else {
-          ops.done(`No subarray reaches ${target}.`);
-        }
-      }
-    };
-  }
-});
-
-// custom/steptrace/src/algorithms/topological-sort.ts
-var topologicalSort;
-var init_topological_sort = __esm({
-  "custom/steptrace/src/algorithms/topological-sort.ts"() {
-    topologicalSort = {
-      id: "topological-sort",
-      kind: "graph",
-      meta: { label: "Topological sort (Kahn)", frontierLabel: "Ready queue (in-degree 0)" },
-      run: (input, ops, graph) => {
-        const adj = {};
-        const indeg = {};
-        for (const nd of graph.nodes) {
-          adj[nd.id] = [];
-          indeg[nd.id] = 0;
-        }
-        for (const e of graph.edges) {
-          adj[e.from].push(e.to);
-          indeg[e.to] = (indeg[e.to] || 0) + 1;
-        }
-        ops.init(
-          `Topological sort (Kahn's algorithm) — repeatedly take a node with no remaining prerequisites (in-degree 0) and append it to the order; removing it may make others ready.`
-        );
-        const ready = [];
-        for (const nd of graph.nodes) {
-          if (indeg[nd.id] === 0) {
-            ready.push(nd.id);
-            ops.enqueue(nd.id, null, `${nd.id} has in-degree 0 — ready.`);
-          }
-        }
-        const order = [];
-        while (ready.length) {
-          ready.sort();
-          const u = ready.shift();
-          ops.visit(u, `Output ${u} (position ${order.length + 1} in the order).`);
-          order.push(u);
-          for (const v of adj[u].slice().sort()) {
-            ops.edge(u, v, `Remove edge ${u}→${v}: in-degree of ${v} becomes ${indeg[v] - 1}.`);
-            indeg[v]--;
-            if (indeg[v] === 0) {
-              ready.push(v);
-              ops.enqueue(v, null, `${v} is now ready.`);
-            }
-          }
-        }
-        ops.done(
-          order.length === graph.nodes.length ? `Topological order: ${order.join(" → ")}.` : `A cycle remains (${graph.nodes.length - order.length} node(s) unresolved) — no valid ordering.`
-        );
-      }
-    };
-  }
-});
-
-// custom/steptrace/src/algorithms/two-pointers.ts
-var twoPointers;
-var init_two_pointers = __esm({
-  "custom/steptrace/src/algorithms/two-pointers.ts"() {
-    twoPointers = {
-      id: "two-pointers",
-      kind: "pointers",
-      meta: { label: "Two pointers" },
-      run: (input, ops) => {
-        const a = ops.value;
-        const target = input.target;
-        ops.init(
-          `Two pointers on a sorted array — find a pair summing to ${target}. Move the left pointer right to raise the sum, the right pointer left to lower it.`
-        );
-        let l = 0;
-        let r = a.length - 1;
-        while (l < r) {
-          const sum = a[l] + a[r];
-          ops.step(
-            { pointers: { L: l, R: r }, window: [l, r] },
-            `a[${l}] + a[${r}] = ${a[l]} + ${a[r]} = ${sum}.`
-          );
-          if (sum === target) {
-            ops.step(
-              { pointers: { L: l, R: r }, window: [l, r], mark: [l, r] },
-              `${a[l]} + ${a[r]} = ${target} — found the pair.`
-            );
-            ops.done(`Found a pair at indices ${l} and ${r}.`);
-            return;
-          }
-          if (sum < target) l++;
-          else r--;
-        }
-        ops.done(`No pair sums to ${target}.`);
-      }
-    };
-  }
-});
-
-// custom/steptrace/src/algorithms/union-find.ts
-var unionFind;
-var init_union_find = __esm({
-  "custom/steptrace/src/algorithms/union-find.ts"() {
-    unionFind = {
-      id: "union-find",
-      kind: "unionfind",
-      meta: { label: "Union-Find" },
-      run: (input, ops) => {
-        const n = input.n || 7;
-        ops.init(
-          `Union-Find on ${n} elements — union merges two sets; find returns a set's representative (its root), flattening the path it walks (path compression).`
-        );
-        const operations = Array.isArray(input.ops) && input.ops.length ? input.ops : [
-          ["union", 0, 1],
-          ["union", 2, 3],
-          ["union", 4, 5],
-          ["union", 1, 2],
-          ["find", 3],
-          ["union", 6, 4]
-        ];
-        const findRoot = (x, why) => {
-          const pathToRoot = [x];
-          let c = x;
-          while (ops.parent[c] !== c) {
-            c = ops.parent[c];
-            pathToRoot.push(c);
-          }
-          ops.findPath(pathToRoot, `${why} follow ${pathToRoot.join(" → ")} to root ${c}.`);
-          for (const node of pathToRoot) {
-            if (node !== c && ops.parent[node] !== c)
-              ops.setParent(node, c, `Path compression: point ${node} straight at root ${c}.`);
-          }
-          return c;
-        };
-        for (const op of operations) {
-          if (op[0] === "union") {
-            const a = op[1];
-            const b = op[2];
-            const ra = findRoot(a, `Union(${a}, ${b}):`);
-            const rb = findRoot(b, `Union(${a}, ${b}):`);
-            if (ra === rb) ops.clear(`${a} and ${b} are already in the same set.`);
-            else ops.setParent(ra, rb, `Link root ${ra} under root ${rb} — the two sets merge.`);
-          } else if (op[0] === "find") {
-            const x = op[1];
-            const rt = findRoot(x, `Find(${x}):`);
-            ops.clear(`Find(${x}) = ${rt}.`);
-          }
-        }
-        const roots = /* @__PURE__ */ new Set();
-        for (let i = 0; i < n; i++) {
-          let c = i;
-          while (ops.parent[c] !== c) c = ops.parent[c];
-          roots.add(c);
-        }
-        ops.done(`Done — ${roots.size} disjoint set${roots.size === 1 ? "" : "s"} remain.`);
-      }
-    };
-  }
-});
-
-// custom/steptrace/src/algorithms/index.ts
-var builtInAlgorithms;
-var init_algorithms = __esm({
-  "custom/steptrace/src/algorithms/index.ts"() {
-    init_bfs();
-    init_binary_search();
-    init_bubble_sort();
-    init_dfs();
-    init_dijkstra();
-    init_fibonacci();
-    init_heap_sort();
-    init_insertion_sort();
-    init_kernighan_popcount();
-    init_kmp();
-    init_lcs();
-    init_linear_search();
-    init_merge_sort();
-    init_n_queens();
-    init_prim();
-    init_quick_sort();
-    init_rabin_karp();
-    init_selection_sort();
-    init_sliding_window();
-    init_topological_sort();
-    init_two_pointers();
-    init_union_find();
-    builtInAlgorithms = [
-      bubbleSort,
-      insertionSort,
-      selectionSort,
-      quickSort,
-      heapSort,
-      mergeSort,
-      bfs,
-      dfs,
-      dijkstra,
-      prim,
-      topologicalSort,
-      binarySearch,
-      linearSearch,
-      kmp,
-      rabinKarp,
-      twoPointers,
-      slidingWindow,
-      lcs,
-      unionFind,
-      kernighanPopcount,
-      nQueens,
-      fibonacci
-    ];
-  }
-});
-
-// custom/steptrace/src/player.ts
-var Player;
-var init_player = __esm({
-  "custom/steptrace/src/player.ts"() {
-    Player = class {
-      constructor(frames, paint, speed) {
-        this.frames = frames;
-        this.paint = paint;
-        this.i = 0;
-        this.speed = speed || 1;
-        this.playing = false;
-        this.timer = null;
-        this.baseDelay = 780;
-        this.onState = () => {
-        };
-      }
-      render() {
-        this.paint(this.frames[this.i], this.i, this.frames.length);
-        this.onState();
-      }
-      _clear() {
-        if (this.timer) {
-          clearTimeout(this.timer);
-          this.timer = null;
-        }
-      }
-      _loop() {
-        if (!this.playing) return;
-        if (this.i >= this.frames.length - 1) {
-          this.playing = false;
-          this.onState();
-          return;
-        }
-        this.timer = setTimeout(() => {
-          this.i++;
-          this.render();
-          this._loop();
-        }, this.baseDelay / this.speed);
-      }
-      play() {
-        if (this.i >= this.frames.length - 1) this.i = 0;
-        this.playing = true;
-        this.render();
-        this.onState();
-        this._loop();
-      }
-      pause() {
-        this.playing = false;
-        this._clear();
-        this.onState();
-      }
-      toggle() {
-        this.playing ? this.pause() : this.play();
-      }
-      stepF() {
-        this.pause();
-        if (this.i < this.frames.length - 1) this.i++;
-        this.render();
-      }
-      stepB() {
-        this.pause();
-        if (this.i > 0) this.i--;
-        this.render();
-      }
-      seek(idx) {
-        this.pause();
-        this.i = Math.max(0, Math.min(this.frames.length - 1, idx | 0));
-        this.render();
-      }
-      reset() {
-        this.pause();
-        this.i = 0;
-        this.render();
-      }
-      setSpeed(s) {
-        this.speed = s;
-      }
-      destroy() {
-        this.playing = false;
-        this._clear();
-      }
-    };
-  }
-});
-
-// custom/steptrace/src/render.ts
-function makeBars(stage, n) {
-  const bars = [];
-  for (let k = 0; k < n; k++) {
-    const bar = el("div", "steptrace__bar");
-    const fill = el("div", "steptrace__fill");
-    const check = el("div", "steptrace__check");
-    check.innerHTML = ICON.check;
-    check.setAttribute("aria-hidden", "true");
-    const cue = el("div", "steptrace__bar-cue");
-    cue.innerHTML = ICON.compare + ICON.swap;
-    cue.setAttribute("aria-hidden", "true");
-    fill.append(check, cue);
-    const num = el("div", "steptrace__num");
-    bar.append(fill, num);
-    stage.append(bar);
-    bars.push({ bar, fill, num, check, cue });
-  }
-  return bars;
-}
-function makeSortView(frames) {
-  const maxVal = Math.max(...frames[0].array, 1);
-  const n = frames[0].array.length;
-  const hasRange = frames.some((f) => f.range);
-  const hasPivot = frames.some((f) => f.pivot != null);
-  const stage = el("div", "steptrace__stage steptrace__stage--pins");
-  const bars = makeBars(stage, n);
-  const pinI = makePin("i", "a");
-  const pinJ = makePin("j", "b");
-  stage.append(pinI.el, pinJ.el);
-  const status = statusEl();
-  const tracker = createBarTracker(stage, bars, [pinI, pinJ]);
-  function paint(frame) {
-    const range = frame.range || null;
-    for (let k = 0; k < n; k++) {
-      const b = bars[k];
-      b.fill.style.height = `${Math.max(6, frame.array[k] / maxVal * 100)}%`;
-      b.num.textContent = frame.array[k];
-      let state = "";
-      if (frame.sorted.includes(k)) state = "sorted";
-      if (frame.candidate === k) state = "candidate";
-      if (frame.active.includes(k))
-        state = frame.type === "swap" || frame.type === "overwrite" && range ? "swap" : "compare";
-      b.bar.dataset.state = state;
-      if (range && (k < range[0] || k > range[1])) b.bar.dataset.outside = "1";
-      else delete b.bar.dataset.outside;
-      if (frame.pivot != null && frame.pivot === k) b.bar.dataset.pivot = "1";
-      else delete b.bar.dataset.pivot;
-      b.bar.classList.remove("steptrace__bar--fly");
-      b.bar.style.transform = "";
-    }
-    const fly = [];
-    if (frame.type === "swap" && frame.active && frame.active.length === 2) {
-      fly.push([frame.active[0], frame.active[1]], [frame.active[1], frame.active[0]]);
-    } else if (frame.type === "overwrite" && frame.from != null && frame.active && frame.active.length === 1) {
-      fly.push([frame.active[0], frame.from]);
-    }
-    const starts = [];
-    for (const [to, from] of fly) {
-      const bt = bars[to] && bars[to].bar;
-      const bf = bars[from] && bars[from].bar;
-      if (!bt || !bf || !bt.isConnected) continue;
-      const dx = bf.getBoundingClientRect().left - bt.getBoundingClientRect().left;
-      if (dx) starts.push([bt, dx]);
-    }
-    for (const [bt, dx] of starts) bt.style.transform = `translateX(${dx}px)`;
-    if (starts.length) void starts[0][0].offsetWidth;
-    for (const [bt] of starts) {
-      bt.classList.add("steptrace__bar--fly");
-      bt.style.transform = "";
-    }
-    const act = frame.active || [];
-    tracker.set(act[0] != null ? act[0] : frame.candidate, act[1]);
-  }
-  function watch(frame) {
-    const act = frame.active || [];
-    const rows = [
-      { k: "i", v: act[0] != null ? act[0] : "—", sw: "var(--_blue)" },
-      { k: "j", v: act[1] != null ? act[1] : "—", sw: "var(--_violet)" }
-    ];
-    if (hasPivot)
-      rows.push({
-        k: "pivot",
-        v: frame.pivot != null ? `[${frame.pivot}] = ${frame.array[frame.pivot]}` : "—",
-        sw: "var(--_amber)"
-      });
-    if (hasRange)
-      rows.push({
-        k: "range",
-        v: frame.range ? `[${frame.range[0]}, ${frame.range[1]}]` : "—",
-        sw: "var(--_neutral)"
-      });
-    rows.push({ k: "swaps", v: frame.swaps, sw: "var(--_amber)" });
-    return rows;
-  }
-  return { nodes: [stage, status], paint, watch, destroy: tracker.destroy };
-}
-function makePin(label, role) {
-  const wrap = el("div", "steptrace__pin steptrace__pin--" + role);
-  wrap.innerHTML = '<svg class="steptrace__pin-svg" viewBox="0 0 24 30" aria-hidden="true"><path d="M12 1C6.201 1 1.5 5.701 1.5 11.5C1.5 19.5 12 29 12 29S22.5 19.5 22.5 11.5C22.5 5.701 17.799 1 12 1Z"/></svg>';
-  const lbl = el("span", "steptrace__pin-label");
-  lbl.textContent = label;
-  wrap.append(lbl);
-  return { el: wrap };
-}
-function createBarTracker(stage, bars, markers) {
-  let targets = [null, null];
-  const sx = [null, null];
-  const SPRING = 0.32;
-  function frameStep() {
-    const sr = stage.getBoundingClientRect();
-    for (let m = 0; m < markers.length; m++) {
-      const idx = targets[m];
-      const bar = idx != null && idx >= 0 && bars[idx] ? bars[idx].fill : null;
-      const mk = markers[m];
-      if (!bar || !bar.isConnected) {
-        mk.el.style.opacity = "0";
-        sx[m] = null;
-        continue;
-      }
-      const br = bar.getBoundingClientRect();
-      const tx = br.left + br.width / 2 - sr.left;
-      const ty = br.top - sr.top;
-      if (sx[m] == null) sx[m] = tx;
-      else {
-        sx[m] += (tx - sx[m]) * SPRING;
-        if (Math.abs(tx - sx[m]) < 0.4) sx[m] = tx;
-      }
-      mk.el.style.transform = `translate(${sx[m].toFixed(2)}px, ${ty.toFixed(2)}px)`;
-      mk.el.style.opacity = "1";
-    }
-  }
-  function loop() {
-    frameStep();
-    raf = requestAnimationFrame(loop);
-  }
-  let raf = requestAnimationFrame(loop);
-  const iv = setInterval(frameStep, 16);
-  return {
-    set(a, b) {
-      targets = [a != null ? a : null, b != null ? b : null];
-    },
-    destroy() {
-      cancelAnimationFrame(raf);
-      clearInterval(iv);
-    }
-  };
-}
-function makeSearchView(frames) {
-  const maxVal = Math.max(...frames[0].array, 1);
-  const n = frames[0].array.length;
-  const stage = el("div", "steptrace__stage");
-  const bars = makeBars(stage, n);
-  const status = statusEl();
-  function paint(frame, i, total) {
-    for (let k = 0; k < n; k++) {
-      const b = bars[k];
-      b.fill.style.height = `${Math.max(6, frame.array[k] / maxVal * 100)}%`;
-      b.num.textContent = frame.array[k];
-      let state = "range";
-      if (k < frame.lo || k > frame.hi) state = "eliminated";
-      if (frame.mid === k) state = "probe";
-      if (frame.found === k) state = "found";
-      b.bar.dataset.state = state;
-    }
-    status.innerHTML = escapeHtml(frame.message) + ` <span class="steptrace__counts">· ${frame.comparisons} probe${frame.comparisons === 1 ? "" : "s"} · step ${i + 1}/${total}</span>`;
-  }
-  function watch(frame) {
-    const target = { k: "target", v: String(frames[0].target), sw: "var(--_accent)" };
-    const at = {
-      k: "at",
-      v: frame.mid != null ? `[${frame.mid}] = ${frame.array[frame.mid]}` : "—",
-      sw: "var(--_blue)"
-    };
-    if (frame.mode === "scan") {
-      return [
-        target,
-        {
-          k: "scanned",
-          v: frame.mid != null ? `${frame.mid + 1}/${frame.array.length}` : "—",
-          sw: "var(--_neutral)"
-        },
-        at
-      ];
-    }
-    return [
-      target,
-      { k: "range", v: `[${frame.lo}, ${frame.hi}]`, sw: "var(--_neutral)" },
-      { ...at, k: "mid" }
-    ];
-  }
-  return { nodes: [stage, status], paint, watch };
-}
-function makeMatchView(frames) {
-  const text = frames[0].text;
-  const pattern = frames[0].pattern;
-  const hasHash = frames.some((f) => f.hash);
-  const hashBadge = el("div", "steptrace__hash");
-  const textRow = el("div", "steptrace__cells");
-  const tcells = [];
-  for (let k = 0; k < text.length; k++) {
-    const c = el("div", "steptrace__cell");
-    c.textContent = text[k];
-    textRow.append(c);
-    tcells.push(c);
-  }
-  const patRow = el("div", "steptrace__cells steptrace__cells--pat");
-  const pcells = [];
-  for (let k = 0; k < pattern.length; k++) {
-    const c = el("div", "steptrace__cell steptrace__cell--pat");
-    c.textContent = pattern[k];
-    patRow.append(c);
-    pcells.push(c);
-  }
-  const stage = el("div", "steptrace__match");
-  stage.append(patRow, textRow);
-  const status = statusEl();
-  let lastShift = 0;
-  function applyGeom() {
-    const w = tcells.length ? tcells[0].getBoundingClientRect().width : CELL_W;
-    const cw = w > 0 ? w : CELL_W;
-    stage.style.setProperty("--_cw", cw + "px");
-    patRow.style.transform = `translateX(${(lastShift * cw).toFixed(2)}px)`;
-  }
-  const ro = typeof ResizeObserver !== "undefined" ? new ResizeObserver(applyGeom) : null;
-  if (ro) ro.observe(textRow);
-  function paint(frame, i, total) {
-    lastShift = frame.shift;
-    applyGeom();
-    for (let k = 0; k < tcells.length; k++) tcells[k].dataset.state = "";
-    for (let k = 0; k < pcells.length; k++) pcells[k].dataset.state = "";
-    for (const s of frame.found)
-      for (let k = 0; k < pattern.length; k++)
-        if (tcells[s + k]) tcells[s + k].dataset.state = "found";
-    for (let k = 0; k < pattern.length; k++) {
-      const t = tcells[frame.shift + k];
-      if (t && t.dataset.state !== "found") t.dataset.state = "window";
-    }
-    if (frame.cmpT != null && tcells[frame.cmpT])
-      tcells[frame.cmpT].dataset.state = frame.cmpResult || "probe";
-    if (frame.cmpP != null && pcells[frame.cmpP])
-      pcells[frame.cmpP].dataset.state = frame.cmpResult || "probe";
-    if (hasHash) {
-      hashBadge.textContent = frame.hash ? `window hash ${frame.hash.window} ${frame.hash.window === frame.hash.pattern ? "=" : "≠"} pattern hash ${frame.hash.pattern}` : " ";
-    }
-    status.innerHTML = escapeHtml(frame.message) + ` <span class="steptrace__counts">· step ${i + 1}/${total}</span>`;
-  }
-  function watch(frame) {
-    const rows = [
-      { k: "shift", v: String(frame.shift), sw: "var(--_blue)" },
-      { k: "matches", v: String(frame.found.length), sw: "var(--_green)" }
-    ];
-    if (hasHash) {
-      rows.push({
-        k: "hash",
-        v: frame.hash ? `${frame.hash.window} / ${frame.hash.pattern}` : "—",
-        sw: "var(--_amber)"
-      });
-    }
-    return rows;
-  }
-  const nodes = hasHash ? [stage, hashBadge, status] : [stage, status];
-  return { nodes, paint, watch, destroy: () => ro && ro.disconnect() };
-}
-function makePointerView(frames) {
-  const n = frames[0].array.length;
-  const ptrNames = (function() {
-    for (const f of frames) {
-      const ks = Object.keys(f.pointers || {});
-      if (ks.length) return ks;
-    }
-    return [];
-  })();
-  const wrap = el("div", "steptrace__pwrap");
-  const strip = el("div", "steptrace__pcells");
-  const cells = [];
-  for (let k = 0; k < n; k++) {
-    const cell = el("div", "steptrace__pcell");
-    cell.textContent = frames[0].array[k];
-    strip.append(cell);
-    cells.push(cell);
-  }
-  const brackets = el("div", "steptrace__pbrackets");
-  const brL = el("div", "steptrace__pbr steptrace__pbr--l");
-  const brR = el("div", "steptrace__pbr steptrace__pbr--r");
-  brackets.append(brL, brR);
-  wrap.append(strip, brackets);
-  const status = statusEl();
-  function paint(frame) {
-    const win = frame.window;
-    const matched = frame.marked && frame.marked.length > 0;
-    for (let k = 0; k < n; k++) {
-      const c = cells[k];
-      c.textContent = frame.array[k];
-      let state = "";
-      if (win && k >= win[0] && k <= win[1]) state = matched ? "match" : "window";
-      c.dataset.state = state;
-      c.dataset.end = win && k === win[0] ? "l" : win && k === win[1] ? "r" : "";
-    }
-    if (!win) {
-      brackets.style.display = "none";
-    } else {
-      brackets.style.display = "";
-      brL.style.left = win[0] / n * 100 + "%";
-      brR.style.left = (win[1] + 1) / n * 100 + "%";
-      brL.dataset.round = win[0] === 0 ? "1" : "0";
-      brR.dataset.round = win[1] === n - 1 ? "1" : "0";
-      brackets.dataset.match = matched ? "1" : "0";
-    }
-    status.innerHTML = escapeHtml(frame.message);
-  }
-  function watch(frame) {
-    const color = {
-      left: "var(--_blue)",
-      lo: "var(--_blue)",
-      l: "var(--_blue)",
-      i: "var(--_blue)",
-      right: "var(--_violet)",
-      hi: "var(--_violet)",
-      r: "var(--_violet)",
-      j: "var(--_violet)"
-    };
-    const p = frame.pointers || {};
-    return ptrNames.map((name) => {
-      const idx = p[name];
-      return {
-        k: name,
-        v: idx != null ? `[${idx}] = ${frame.array[idx]}` : "—",
-        sw: color[name.toLowerCase()] || "var(--_muted)"
-      };
-    });
-  }
-  return { nodes: [wrap, status], paint, watch };
-}
-function makeDPView(frames) {
-  const f0 = frames[0];
-  const R2 = f0.rowLabels.length;
-  const C = f0.colLabels.length;
-  const table = el("table", "steptrace__dp");
-  const thead = document.createElement("thead");
-  const htr = document.createElement("tr");
-  htr.append(document.createElement("th"));
-  for (let c = 0; c < C; c++) {
-    const th = document.createElement("th");
-    th.textContent = f0.colLabels[c];
-    htr.append(th);
-  }
-  thead.append(htr);
-  table.append(thead);
-  const tbody = document.createElement("tbody");
-  const cellEls = [];
-  for (let r = 0; r < R2; r++) {
-    const tr = document.createElement("tr");
-    const th = document.createElement("th");
-    th.textContent = f0.rowLabels[r];
-    tr.append(th);
-    const rowCells = [];
-    for (let c = 0; c < C; c++) {
-      const td = document.createElement("td");
-      tr.append(td);
-      rowCells.push(td);
-    }
-    cellEls.push(rowCells);
-    tbody.append(tr);
-  }
-  table.append(tbody);
-  const wrap = el("div", "steptrace__dp-wrap");
-  wrap.append(table);
-  const status = statusEl();
-  function paint(frame, i, total) {
-    const curKey = frame.cur ? frame.cur.join(",") : null;
-    const depSet = new Set((frame.deps || []).map((d) => d.join(",")));
-    const pathSet = new Set((frame.path || []).map((p) => p.join(",")));
-    for (let r = 0; r < R2; r++) {
-      for (let c = 0; c < C; c++) {
-        const td = cellEls[r][c];
-        const v = frame.grid[r][c];
-        td.textContent = v == null ? "" : v;
-        const key = r + "," + c;
-        let state = "";
-        if (depSet.has(key)) state = "dep";
-        if (pathSet.has(key)) state = "path";
-        if (curKey === key) state = "cur";
-        td.dataset.state = state;
-      }
-    }
-    status.innerHTML = escapeHtml(frame.message) + ` <span class="steptrace__counts">· step ${i + 1}/${total}</span>`;
-  }
-  function watch(frame) {
-    const cur = frame.cur;
-    const v = cur ? frame.grid[cur[0]][cur[1]] : null;
-    return [
-      { k: "cell", v: cur ? `[${cur[0]}, ${cur[1]}]` : "—", sw: "var(--_blue)" },
-      { k: "value", v: v == null ? "—" : String(v), sw: "var(--_green)" }
-    ];
-  }
-  return { nodes: [wrap, status], paint, watch };
-}
-function makeUnionFindView(frames) {
-  const n = frames[0].n;
-  const SP = 56;
-  const UR = 16;
-  const MX = 26;
-  const BASE = 150;
-  const TOP = 26;
-  const width = MX * 2 + Math.max(0, n - 1) * SP + UR * 2;
-  const height = 180;
-  const cx = (i) => MX + UR + i * SP;
-  const PALETTE = [
-    "var(--_blue)",
-    "var(--_violet)",
-    "var(--_amber)",
-    "var(--_green)",
-    "var(--_muted)"
-  ];
-  const svg = document.createElementNS(SVGNS, "svg");
-  svg.setAttribute("class", "steptrace__svg steptrace__uf");
-  svg.setAttribute("viewBox", `0 0 ${width} ${height}`);
-  svg.setAttribute("role", "img");
-  svg.setAttribute("aria-label", "Union-Find forest");
-  const arcLayer = document.createElementNS(SVGNS, "g");
-  svg.append(arcLayer);
-  const nodeEls = [];
-  for (let i = 0; i < n; i++) {
-    const g = document.createElementNS(SVGNS, "g");
-    g.setAttribute("class", "steptrace__ufnode");
-    const back = document.createElementNS(SVGNS, "circle");
-    back.setAttribute("class", "steptrace__nback");
-    back.setAttribute("cx", String(cx(i)));
-    back.setAttribute("cy", String(BASE));
-    back.setAttribute("r", String(UR));
-    const circle = document.createElementNS(SVGNS, "circle");
-    circle.setAttribute("class", "steptrace__ncirc");
-    circle.setAttribute("cx", String(cx(i)));
-    circle.setAttribute("cy", String(BASE));
-    circle.setAttribute("r", String(UR));
-    const id = document.createElementNS(SVGNS, "text");
-    id.setAttribute("class", "steptrace__id");
-    id.setAttribute("x", String(cx(i)));
-    id.setAttribute("y", String(BASE));
-    id.setAttribute("text-anchor", "middle");
-    id.setAttribute("dominant-baseline", "central");
-    id.textContent = String(i);
-    g.append(back, circle, id);
-    svg.append(g);
-    nodeEls.push({ g, circle });
-  }
-  const wrap = el("div", "steptrace__graph");
-  wrap.append(svg);
-  const status = statusEl();
-  function paint(frame, i, total) {
-    const uniqueRoots = [...new Set(frame.roots)];
-    const rootColor = {};
-    uniqueRoots.forEach((r, idx) => rootColor[r] = PALETTE[idx % PALETTE.length]);
-    const hl = new Set(frame.highlight);
-    const ae = frame.activeEdge;
-    for (let k = 0; k < n; k++) {
-      const ne = nodeEls[k];
-      const col = rootColor[frame.roots[k]];
-      ne.circle.style.stroke = col;
-      ne.circle.style.fill = `color-mix(in srgb, ${col} 22%, transparent)`;
-      ne.g.dataset.root = frame.parent[k] === k ? "true" : "false";
-      ne.g.dataset.hl = hl.has(k) ? "true" : "false";
-    }
-    arcLayer.replaceChildren();
-    for (let k = 0; k < n; k++) {
-      const p = frame.parent[k];
-      if (p === k) continue;
-      const x1 = cx(k);
-      const x2 = cx(p);
-      const midX = (x1 + x2) / 2;
-      const arc = document.createElementNS(SVGNS, "path");
-      arc.setAttribute("class", "steptrace__ufarc");
-      arc.setAttribute("d", `M ${x1} ${BASE - UR} Q ${midX} ${TOP} ${x2} ${BASE - UR}`);
-      arc.setAttribute("fill", "none");
-      const active = ae && ae[0] === k && ae[1] === p || hl.has(k) && hl.has(p);
-      arc.dataset.active = active ? "true" : "false";
-      arcLayer.append(arc);
-    }
-    status.innerHTML = escapeHtml(frame.message) + ` <span class="steptrace__counts">· step ${i + 1}/${total}</span>`;
-  }
-  function watch(frame) {
-    const sets = new Set(frame.roots).size;
-    const ae = frame.activeEdge;
-    return [
-      { k: "sets", v: String(sets), sw: "var(--_blue)" },
-      { k: "edge", v: ae ? `${ae[0]} — ${ae[1]}` : "—", sw: "var(--_violet)" }
-    ];
-  }
-  return { nodes: [wrap, status], paint, watch };
-}
-function makeBitsView(frames) {
-  const width = frames[0].width;
-  const total = frames[0].total;
-  const stage = el("div", "steptrace__bits");
-  const tally = el("div", "steptrace__btally");
-  const tallyLead = el("div", "steptrace__btally-lead");
-  tallyLead.textContent = "1s cleared";
-  const tallyBoxes = el("div", "steptrace__btally-boxes");
-  const boxes = [];
-  for (let k = 0; k < total; k++) {
-    const b = el("div", "steptrace__btally-box");
-    tallyBoxes.append(b);
-    boxes.push(b);
-  }
-  const tallyCount = el("div", "steptrace__btally-count");
-  tally.append(tallyLead, tallyBoxes, tallyCount);
-  stage.append(tally);
-  const idxRow = el("div", "steptrace__brow steptrace__brow--idx");
-  const idxGutter = el("div", "steptrace__bgutter");
-  idxGutter.textContent = "bit";
-  const idxStrip = el("div", "steptrace__bcells steptrace__bcells--idx");
-  for (let j = 0; j < width; j++) {
-    const bi = width - 1 - j;
-    const c = el("div", "steptrace__bidx");
-    c.textContent = bi % 4 === 0 ? String(bi) : "";
-    idxStrip.append(c);
-  }
-  idxRow.append(idxGutter, idxStrip);
-  stage.append(idxRow);
-  const OP = { a: false, b: true, r: true };
-  const lanes = {};
-  for (const key of ["a", "b", "r"]) {
-    const row = el("div", "steptrace__brow");
-    const gutter = el("div", "steptrace__bgutter");
-    const label = frames[0].labels[key];
-    if (OP[key]) {
-      const op = el("span", "steptrace__bop");
-      op.textContent = label;
-      gutter.append(op);
-    } else {
-      gutter.textContent = label;
-    }
-    const strip = el("div", "steptrace__bcells");
-    const cells = [];
-    for (let j = 0; j < width; j++) {
-      const c = el("div", "steptrace__bcell");
-      strip.append(c);
-      cells.push(c);
-    }
-    row.append(gutter, strip);
-    stage.append(row);
-    lanes[key] = { row, cells };
-  }
-  const status = statusEl();
-  function paint(frame, i, stepTotal) {
-    for (let k = 0; k < boxes.length; k++) {
-      boxes[k].dataset.filled = k < frame.pop ? "1" : "0";
-      boxes[k].dataset.just = k === frame.just ? "1" : "0";
-    }
-    tallyCount.textContent = `${frame.pop} / ${frame.total}`;
-    for (const key of ["a", "b", "r"]) {
-      const lane = lanes[key];
-      const data = frame[key];
-      lane.row.dataset.live = data.live ? "1" : "0";
-      for (let j = 0; j < width; j++) {
-        const bi = width - 1 - j;
-        const c = lane.cells[j];
-        c.textContent = String(data.bits[bi]);
-        c.dataset.bit = String(data.bits[bi]);
-        c.dataset.state = data.state[bi] || "";
-      }
-    }
-    status.innerHTML = escapeHtml(frame.message) + ` <span class="steptrace__counts">· step ${i + 1}/${stepTotal}</span>`;
-  }
-  function watch(frame) {
-    return [
-      {
-        k: "x",
-        v: `${frame.value} = 0b${frame.value.toString(2).padStart(frame.width, "0")}`,
-        sw: "var(--_accent)"
-      },
-      { k: "lowest 1", v: frame.low >= 0 ? `bit ${frame.low}` : "—", sw: "var(--_amber)" },
-      { k: "1s cleared", v: `${frame.pop} / ${frame.total}`, sw: "var(--_violet)" }
-    ];
-  }
-  return { nodes: [stage, status], paint, watch };
-}
-function makeBacktrackView(frames) {
-  const n = frames[0].n;
-  const wrap = el("div", "steptrace__bt");
-  const board = el("div", "steptrace__btboard");
-  board.style.setProperty("--_n", String(n));
-  const cells = [];
-  for (let r = 0; r < n; r++) {
-    const rowCells = [];
-    for (let c = 0; c < n; c++) {
-      const cell = el("div", "steptrace__btcell");
-      cell.dataset.parity = String((r + c) % 2);
-      const glyph = el("div", "steptrace__btqueen");
-      glyph.textContent = "♛";
-      glyph.setAttribute("aria-hidden", "true");
-      cell.append(glyph);
-      board.append(cell);
-      rowCells.push(cell);
-    }
-    cells.push(rowCells);
-  }
-  const strip = el("div", "steptrace__btpath");
-  const slots = [];
-  for (let r = 0; r < n; r++) {
-    const slot = el("div", "steptrace__btslot");
-    slot.textContent = "—";
-    strip.append(slot);
-    slots.push(slot);
-  }
-  wrap.append(board, strip);
-  const status = statusEl();
-  function attackedSet(queens) {
-    const hit = /* @__PURE__ */ new Set();
-    for (let qr = 0; qr < n; qr++) {
-      const qc = queens[qr];
-      if (qc == null) continue;
-      for (let r = 0; r < n; r++) {
-        for (let c = 0; c < n; c++) {
-          if (queens[r] === c) continue;
-          if (c === qc || r === qr || Math.abs(qr - r) === Math.abs(qc - c)) hit.add(r + "," + c);
-        }
-      }
-    }
-    return hit;
-  }
-  function paint(frame) {
-    const q = frame.queens;
-    const cur = frame.cursor;
-    const conf = frame.conflict;
-    const attacked = attackedSet(q);
-    for (let r = 0; r < n; r++) {
-      for (let c = 0; c < n; c++) {
-        const cell = cells[r][c];
-        const hasQueen = q[r] === c;
-        const isCursor = cur && cur.row === r && cur.col === c;
-        let state = "";
-        if (frame.solved && hasQueen) state = "solved";
-        else if (isCursor && frame.type === "reject") state = "reject";
-        else if (isCursor && frame.type === "backtrack") state = "remove";
-        else if (isCursor && frame.type === "place") state = "try";
-        else if (hasQueen) state = "queen";
-        else if (attacked.has(r + "," + c)) state = "attacked";
-        cell.dataset.state = state;
-        cell.dataset.hasQueen = hasQueen ? "1" : "0";
-        cell.dataset.conflict = conf && conf.row === r && conf.col === c ? "1" : "0";
-      }
-    }
-    for (let r = 0; r < n; r++) {
-      const slot = slots[r];
-      const col = q[r];
-      slot.textContent = col == null ? "—" : String(col);
-      let sstate = col == null ? "" : "on";
-      if (cur && cur.row === r) {
-        if (frame.type === "reject") sstate = "reject";
-        else if (frame.type === "backtrack") sstate = "remove";
-        else if (frame.type === "place") sstate = "try";
-      }
-      slot.dataset.state = sstate;
-    }
-    status.innerHTML = escapeHtml(frame.message);
-  }
-  function watch(frame) {
-    const cur = frame.cursor;
-    return [
-      { k: "depth", v: `${frame.depth} / ${frame.n}`, sw: "var(--_blue)" },
-      { k: "trying", v: cur ? `(${cur.row}, ${cur.col})` : "—", sw: "var(--_amber)" },
-      { k: "pruned", v: String(frame.pruned), sw: "var(--_muted)" }
-    ];
-  }
-  return { nodes: [wrap, status], paint, watch };
-}
-function makeRecTreeView(frames) {
-  const f0 = frames[0];
-  const nodes = f0.nodes;
-  const pad = 26;
-  const xs = nodes.map((n) => n.x);
-  const ys = nodes.map((n) => n.y);
-  const minX = Math.min(...xs);
-  const minY = Math.min(...ys);
-  const w = Math.max(...xs) - minX + pad * 2;
-  const h = Math.max(...ys) - minY + pad * 2;
-  const pos = Object.fromEntries(
-    nodes.map((n) => [n.id, { x: n.x - minX + pad, y: n.y - minY + pad }])
-  );
-  const svg = document.createElementNS(SVGNS, "svg");
-  svg.setAttribute("class", "steptrace__rtsvg");
-  svg.setAttribute("viewBox", `0 0 ${w} ${h}`);
-  svg.setAttribute("role", "img");
-  svg.setAttribute("aria-label", "Recursion tree");
-  const edgeEls = [];
-  for (const e of f0.edges) {
-    const a = pos[e.from];
-    const b = pos[e.to];
-    const line = document.createElementNS(SVGNS, "line");
-    line.setAttribute("class", "steptrace__rtedge");
-    line.setAttribute("x1", a.x);
-    line.setAttribute("y1", a.y);
-    line.setAttribute("x2", b.x);
-    line.setAttribute("y2", b.y);
-    svg.append(line);
-    edgeEls.push({ el: line, to: e.to });
-  }
-  const nodeEls = {};
-  for (const n of nodes) {
-    const p = pos[n.id];
-    const g = document.createElementNS(SVGNS, "g");
-    g.setAttribute("class", "steptrace__rtnode");
-    const ring = document.createElementNS(SVGNS, "circle");
-    ring.setAttribute("class", "steptrace__rtring");
-    ring.setAttribute("cx", p.x);
-    ring.setAttribute("cy", p.y);
-    ring.setAttribute("r", String(RT_R + 3));
-    const back = document.createElementNS(SVGNS, "circle");
-    back.setAttribute("class", "steptrace__rtback");
-    back.setAttribute("cx", p.x);
-    back.setAttribute("cy", p.y);
-    back.setAttribute("r", String(RT_R));
-    const circ = document.createElementNS(SVGNS, "circle");
-    circ.setAttribute("class", "steptrace__rtcirc");
-    circ.setAttribute("cx", p.x);
-    circ.setAttribute("cy", p.y);
-    circ.setAttribute("r", String(RT_R));
-    const label = document.createElementNS(SVGNS, "text");
-    label.setAttribute("class", "steptrace__rtlabel");
-    label.setAttribute("x", p.x);
-    label.setAttribute("y", p.y);
-    label.setAttribute("text-anchor", "middle");
-    label.setAttribute("dominant-baseline", "central");
-    label.textContent = n.label;
-    const val = document.createElementNS(SVGNS, "text");
-    val.setAttribute("class", "steptrace__rtval");
-    val.setAttribute("x", p.x);
-    val.setAttribute("y", p.y + RT_R + 9);
-    val.setAttribute("text-anchor", "middle");
-    g.append(ring, back, circ, label, val);
-    svg.append(g);
-    nodeEls[n.id] = { g, val };
-  }
-  const legend = el("div", "steptrace__legend");
-  for (const [word, key] of [
-    ["compute", "current"],
-    ["store (miss)", "frontier"],
-    ["reuse (hit)", "visited"]
-  ]) {
-    const row = el("div", "steptrace__legend-row");
-    row.append(
-      el("span", "steptrace__swatch steptrace__swatch--" + key),
-      document.createTextNode(word)
-    );
-    legend.append(row);
-  }
-  const wrap = el("div", "steptrace__rectree");
-  wrap.append(svg);
-  const status = statusEl();
-  function paint(frame, i, total) {
-    const vis = new Set(frame.vis);
-    const collapsed = new Set(frame.collapsed);
-    const state = frame.state;
-    const vals = frame.vals;
-    for (const n of nodes) {
-      const ne = nodeEls[n.id];
-      ne.g.dataset.vis = vis.has(n.id) ? "1" : "0";
-      ne.g.dataset.collapsed = collapsed.has(n.id) ? "true" : "false";
-      ne.g.dataset.state = state[n.id] || "";
-      ne.g.dataset.active = frame.active === n.id ? "true" : "false";
-      const v = vals[n.id];
-      ne.val.textContent = v == null ? "" : "= " + v;
-    }
-    for (const e of edgeEls) {
-      e.el.dataset.vis = vis.has(e.to) ? "1" : "0";
-      e.el.dataset.collapsed = collapsed.has(e.to) ? "true" : "false";
-    }
-    status.innerHTML = escapeHtml(frame.message) + ` <span class="steptrace__counts">· step ${i + 1}/${total}</span>`;
-  }
-  function watch(frame) {
-    const last = frame.memo.length ? frame.memo[frame.memo.length - 1] : null;
-    const ev = frame.type === "miss" || frame.type === "hit" || frame.type === "base" ? frame.type : "—";
-    return [
-      { k: "calls", v: String(frame.calls), sw: "var(--_blue)" },
-      { k: "memo", v: last ? `f(${last.k}) = ${last.v}` : "—", sw: "var(--_green)" },
-      { k: "event", v: ev, sw: "var(--_violet)" }
-    ];
-  }
-  return { nodes: [wrap, legend, status], paint, watch };
-}
-function makeGraphView(frames, graph, frontierLabel) {
-  const pad = 34;
-  const xs = graph.nodes.map((n) => n.x);
-  const ys = graph.nodes.map((n) => n.y);
-  const minX = Math.min(...xs);
-  const minY = Math.min(...ys);
-  const w = Math.max(...xs) - minX + pad * 2;
-  const h = Math.max(...ys) - minY + pad * 2;
-  const pos = Object.fromEntries(
-    graph.nodes.map((n) => [n.id, { x: n.x - minX + pad, y: n.y - minY + pad }])
-  );
-  const svg = document.createElementNS(SVGNS, "svg");
-  svg.setAttribute("class", "steptrace__svg");
-  svg.setAttribute("viewBox", `0 0 ${w} ${h}`);
-  svg.setAttribute("role", "img");
-  svg.setAttribute("aria-label", "Graph traversal");
-  if (graph.directed) {
-    const defs = document.createElementNS(SVGNS, "defs");
-    defs.innerHTML = `<marker id="st-arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path class="steptrace__arrow" d="M0,0 L10,5 L0,10 z"/></marker>`;
-    svg.append(defs);
-  }
-  const edgeEls = [];
-  for (const e of graph.edges) {
-    const a = pos[e.from];
-    const b = pos[e.to];
-    const { x1, y1, x2, y2 } = trimToRadius(a, b, R + (graph.directed ? 3 : 0));
-    const line = document.createElementNS(SVGNS, "line");
-    line.setAttribute("class", "steptrace__edge");
-    line.setAttribute("x1", x1);
-    line.setAttribute("y1", y1);
-    line.setAttribute("x2", String(x2));
-    line.setAttribute("y2", String(y2));
-    if (graph.directed) line.setAttribute("marker-end", "url(#st-arrow)");
-    svg.append(line);
-    edgeEls.push({ el: line, from: e.from, to: e.to });
-    if (e.weight != null) {
-      const label = document.createElementNS(SVGNS, "text");
-      label.setAttribute("class", "steptrace__edge-label");
-      label.setAttribute("x", String((a.x + b.x) / 2));
-      label.setAttribute("y", String((a.y + b.y) / 2 - 4));
-      label.setAttribute("text-anchor", "middle");
-      label.textContent = String(e.weight);
-      svg.append(label);
-    }
-  }
-  const nodeEls = {};
-  for (const n of graph.nodes) {
-    const p = pos[n.id];
-    const g = document.createElementNS(SVGNS, "g");
-    g.setAttribute("class", "steptrace__node");
-    const back = document.createElementNS(SVGNS, "circle");
-    back.setAttribute("class", "steptrace__nback");
-    back.setAttribute("cx", p.x);
-    back.setAttribute("cy", p.y);
-    back.setAttribute("r", String(R));
-    const circle = document.createElementNS(SVGNS, "circle");
-    circle.setAttribute("class", "steptrace__ncirc");
-    circle.setAttribute("cx", p.x);
-    circle.setAttribute("cy", p.y);
-    circle.setAttribute("r", String(R));
-    if (frames[0] && frames[0].target === n.id) {
-      const halo = document.createElementNS(SVGNS, "circle");
-      halo.setAttribute("class", "steptrace__ntarget");
-      halo.setAttribute("cx", p.x);
-      halo.setAttribute("cy", p.y);
-      halo.setAttribute("r", String(R + 4.5));
-      g.append(halo);
-    }
-    const id = document.createElementNS(SVGNS, "text");
-    id.setAttribute("class", "steptrace__id");
-    id.setAttribute("x", p.x);
-    id.setAttribute("y", p.y);
-    id.setAttribute("text-anchor", "middle");
-    id.setAttribute("dominant-baseline", "central");
-    id.textContent = n.id;
-    const dist = document.createElementNS(SVGNS, "text");
-    dist.setAttribute("class", "steptrace__d");
-    dist.setAttribute("x", p.x);
-    dist.setAttribute("y", String(p.y - R - 5));
-    dist.setAttribute("text-anchor", "middle");
-    const mark = document.createElementNS(SVGNS, "svg");
-    mark.setAttribute("class", "steptrace__nmark");
-    mark.setAttribute("x", String(p.x - 6));
-    mark.setAttribute("y", String(p.y + R + 5));
-    mark.setAttribute("width", "12");
-    mark.setAttribute("height", "12");
-    mark.setAttribute("viewBox", "0 0 24 24");
-    mark.setAttribute("aria-hidden", "true");
-    mark.innerHTML = '<rect data-state-icon="current" x="6" y="6" width="12" height="12" rx="2" fill="currentColor"/><path data-state-icon="frontier" d="m12 3 9 9-9 9-9-9Z" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linejoin="round"/><path data-state-icon="visited" d="M20 6 9 17l-5-5" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>';
-    g.append(back, circle, id, dist, mark);
-    svg.append(g);
-    nodeEls[n.id] = { g, dist, mark };
-  }
-  const legend = el("div", "steptrace__legend");
-  for (const [word, stateKey] of [
-    ["current", "current"],
-    ["frontier", "frontier"],
-    ["visited", "visited"]
-  ]) {
-    const row = el("div", "steptrace__legend-row");
-    const sw = el("span", "steptrace__swatch steptrace__swatch--" + stateKey);
-    if (stateKey === "visited") {
-      sw.innerHTML = ICON.check;
-      sw.setAttribute("aria-hidden", "true");
-    }
-    row.append(sw, document.createTextNode(word));
-    legend.append(row);
-  }
-  const graphWrap = el("div", "steptrace__graph");
-  graphWrap.append(svg);
-  const status = statusEl();
-  function paint(frame, i, total) {
-    const visited = new Set(frame.visited);
-    const frontier = new Set(frame.frontier);
-    for (const n of graph.nodes) {
-      const ne = nodeEls[n.id];
-      let state = "";
-      if (visited.has(n.id)) state = "visited";
-      if (frontier.has(n.id)) state = "frontier";
-      if (frame.current === n.id) state = "current";
-      ne.g.dataset.state = state;
-      ne.mark.dataset.state = state;
-      const d = frame.dist[n.id];
-      ne.dist.textContent = d == null ? "" : `d:${d}`;
-    }
-    const selected = frame.selected || [];
-    const isSel = (from, to) => selected.some(
-      (s) => s[0] === from && s[1] === to || !graph.directed && s[0] === to && s[1] === from
-    );
-    for (const e of edgeEls) {
-      const act = frame.edge && (frame.edge.from === e.from && frame.edge.to === e.to || !graph.directed && frame.edge.from === e.to && frame.edge.to === e.from);
-      const sel = isSel(e.from, e.to);
-      e.el.dataset.active = act ? "true" : "false";
-      e.el.dataset.selected = sel ? "true" : "false";
-      e.el.dataset.dim = selected.length && !sel ? "true" : "false";
-    }
-    status.innerHTML = escapeHtml(frame.message) + ` <span class="steptrace__counts">· ${frame.visited.length} visited · step ${i + 1}/${total}</span>`;
-  }
-  function watch(frame) {
-    return [
-      {
-        k: "queue",
-        v: "[ " + (frame.frontier.length ? frame.frontier.join(", ") : "∅") + " ]",
-        sw: "var(--_amber)"
-      },
-      {
-        k: "visited",
-        v: "{ " + (frame.visited.length ? frame.visited.join(", ") : "∅") + " }",
-        sw: "var(--_green)"
-      }
-    ];
-  }
-  return { nodes: [graphWrap, legend, status], paint, watch };
-}
-function trimToRadius(a, b, r) {
-  const dx = b.x - a.x;
-  const dy = b.y - a.y;
-  const len = Math.hypot(dx, dy) || 1;
-  const ux = dx / len;
-  const uy = dy / len;
-  return { x1: a.x + ux * R, y1: a.y + uy * R, x2: b.x - ux * r, y2: b.y - uy * r };
-}
-function statusEl() {
-  const status = el("div", "steptrace__status");
-  status.setAttribute("role", "status");
-  status.setAttribute("aria-live", "polite");
-  return status;
-}
-function el(tag, cls = "") {
-  const n = document.createElement(tag);
-  if (cls) n.className = cls;
-  return n;
-}
-function spacer() {
-  return el("span", "steptrace__spacer");
-}
-function escapeHtml(s) {
-  return String(s).replace(
-    /[&<>"]/g,
-    (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" })[c]
-  );
-}
-function stripTags(s) {
-  return String(s).replace(/<[^>]*>/g, "");
-}
-function pad2(n) {
-  return String(n).padStart(2, "0");
-}
-function iconBtn(label, svg, extra = "") {
-  const b = document.createElement("button");
-  b.type = "button";
-  b.className = "steptrace__btn" + (extra ? " " + extra : "");
-  b.innerHTML = svg;
-  b.setAttribute("aria-label", label);
-  b.title = label;
-  return b;
-}
-function buildMilestones(algorithm, kind, frames) {
-  const marks = [];
-  const push = (i, label) => {
-    if (i < 0 || i >= frames.length || !label) return;
-    const prev = marks[marks.length - 1];
-    if (prev && (prev.i === i || prev.label === label)) return;
-    marks.push({ i, label });
-  };
-  const initial = kind === "sort" ? algorithm === "bubble-sort" ? "Pass 1" : algorithm === "insertion-sort" ? "Prefix 1" : algorithm === "selection-sort" ? "Select 1" : algorithm === "heap-sort" ? "Build heap" : algorithm === "merge-sort" ? "Runs of 1" : "Partition" : kind === "search" ? "Search range" : kind === "string" ? "Shift 0" : kind === "backtrack" ? "Depth 0" : kind === "rectree" ? "Call tree" : "Initialize";
-  push(0, initial);
-  let lastRange = "";
-  let lastRow = null;
-  let lastWindow = "";
-  let lastDepth = null;
-  for (let i = 1; i < frames.length - 1; i++) {
-    const f = frames[i];
-    if (kind === "sort") {
-      const range = f.range ? f.range.join(":") : "";
-      if (range && range !== lastRange) {
-        const word = algorithm === "merge-sort" ? "Merge" : algorithm === "heap-sort" ? "Heap" : "Range";
-        push(i, `${word} ${f.range[0]}–${f.range[1]}`);
-      } else if (f.type === "mark-sorted") {
-        const fixed = f.sorted.length;
-        const word = algorithm === "insertion-sort" ? "Prefix" : algorithm === "selection-sort" ? "Select" : "Fixed";
-        const count = algorithm === "bubble-sort" || algorithm === "selection-sort" ? Math.min(fixed + 1, f.array.length) : fixed;
-        push(i, algorithm === "bubble-sort" ? `Pass ${count}` : `${word} ${count}`);
-      }
-      lastRange = range || lastRange;
-    } else if (kind === "graph" && f.type === "visit" && f.current != null) {
-      const word = algorithm === "dijkstra" ? "Settle" : algorithm === "topological-sort" ? "Output" : "Visit";
-      push(i, `${word} ${f.current}`);
-    } else if (kind === "search" && f.type === "probe") {
-      push(i, `Probe ${f.mid}`);
-    } else if (kind === "string") {
-      if ((f.type === "slide" || f.type === "hash" || f.type === "match") && String(f.shift) !== lastWindow) {
-        push(i, `Shift ${f.shift}`);
-        lastWindow = String(f.shift);
-      }
-    } else if (kind === "pointers") {
-      const win = f.window ? f.window.join(":") : "";
-      if (win && win !== lastWindow) {
-        push(i, `Window ${f.window[0]}–${f.window[1]}`);
-        lastWindow = win;
-      }
-    } else if (kind === "dp") {
-      if (f.type === "compute" && f.cur && f.cur[0] !== lastRow) {
-        push(i, `Row ${f.rowLabels[f.cur[0]]}`);
-        lastRow = f.cur[0];
-      } else if (f.type === "trace" && frames[i - 1].type !== "trace") {
-        push(i, "Traceback");
-      }
-    } else if (kind === "unionfind" && f.type === "link" && f.activeEdge) {
-      push(i, `Link ${f.activeEdge[0]}→${f.activeEdge[1]}`);
-    } else if (kind === "bits" && f.type === "commit") {
-      push(i, `Clear ${f.pop}`);
-    } else if (kind === "backtrack") {
-      if (f.type === "place" && f.depth !== lastDepth) {
-        push(i, `Depth ${f.depth}`);
-        lastDepth = f.depth;
-      }
-    } else if (kind === "rectree" && f.type === "phase") {
-      push(i, f.phase === "memo" ? "Memoized" : "Plain recursion");
-    }
-  }
-  push(frames.length - 1, "Result");
-  return marks;
-}
-function thinMilestones(marks) {
-  if (marks.length <= 12) return marks;
-  const kept = [marks[0]];
-  const stride = Math.ceil((marks.length - 2) / 10);
-  for (let i = 1; i < marks.length - 1; i += stride) kept.push(marks[i]);
-  kept.push(marks[marks.length - 1]);
-  return kept;
-}
-function milestoneAt(marks, i) {
-  let hit = marks[0];
-  for (const mark of marks) {
-    if (mark.i > i) break;
-    hit = mark;
-  }
-  return hit;
-}
-function graphEdgeWeight(graph, a, b) {
-  if (!graph) return 0;
-  const e = graph.edges.find(
-    (x) => x.from === a && x.to === b || !graph.directed && x.from === b && x.to === a
-  );
-  return e && e.weight != null ? e.weight : 1;
-}
-function summaryFor(algorithm, kind, frame, graph) {
-  if (kind === "sort") {
-    if (algorithm === "merge-sort")
-      return `Output [${frame.array.join(", ")}] · ${frame.swaps} writes.`;
-    const unit = ["bubble-sort", "selection-sort", "quick-sort", "heap-sort"].includes(algorithm) ? "swaps" : "moves";
-    return `Output [${frame.array.join(", ")}] · ${frame.comparisons} comparisons · ${frame.swaps} ${unit}.`;
-  }
-  if (kind === "graph") {
-    if (algorithm === "dijkstra" && frame.target != null) {
-      const edges = frame.selected || [];
-      const path = edges.length ? [edges[0][0], ...edges.map((e) => e[1])].join(" → ") : String(frame.target);
-      const cost = frame.dist[frame.target];
-      return cost == null ? `${frame.target} is unreachable.` : `Path ${path} · cost ${cost} · ${frame.visited.length} nodes settled.`;
-    }
-    if (algorithm === "dijkstra") {
-      const distances = Object.keys(frame.dist).sort().map((id) => `${id}:${frame.dist[id]}`).join(", ");
-      return `Shortest-path tree: ${frame.selected.length} edges · distances ${distances}.`;
-    }
-    if (algorithm === "prim") {
-      const weight = (frame.selected || []).reduce(
-        (sum, e) => sum + graphEdgeWeight(graph, e[0], e[1]),
-        0
-      );
-      return `${frame.selected.length} edges selected · total weight ${weight} · ${frame.visited.length} nodes joined.`;
-    }
-    if (algorithm === "topological-sort") {
-      const unresolved = graph ? graph.nodes.length - frame.visited.length : 0;
-      return unresolved > 0 ? `No topological order · cycle leaves ${unresolved} node${unresolved === 1 ? "" : "s"} unresolved.` : `Order ${frame.visited.join(" → ")} · ${frame.visited.length} nodes emitted.`;
-    }
-    if (frame.target != null) {
-      const d = frame.dist[frame.target];
-      return d == null ? `${frame.target} is unreachable.` : `${frame.target} reached at depth ${d} after ${frame.visited.length} visits.`;
-    }
-    return `${frame.visited.length} nodes visited · frontier empty.`;
-  }
-  if (kind === "search")
-    return frame.found == null ? `${frame.target} not found · ${frame.comparisons} comparisons.` : `${frame.target} found at index ${frame.found} · ${frame.comparisons} comparisons.`;
-  if (kind === "string")
-    return frame.found.length ? `${frame.found.length} match${frame.found.length === 1 ? "" : "es"} at ${frame.found.join(", ")}.` : `No matches found.`;
-  if (kind === "pointers") {
-    const values = (frame.marked || []).map((i) => frame.array[i]);
-    return values.length ? `Answer indices [${frame.marked.join(", ")}] · values [${values.join(", ")}].` : algorithm === "two-pointers" || algorithm === "sliding-window" ? `No qualifying range was found.` : `No committed result was recorded.`;
-  }
-  if (kind === "dp") {
-    const row = frame.grid[frame.grid.length - 1] || [];
-    const value = row[row.length - 1];
-    const sequence = (frame.path || []).map((p) => frame.rowLabels[p[0]]).join("");
-    return algorithm === "lcs" ? `Optimal value ${value}${sequence ? ` · sequence "${sequence}"` : ""}.` : `Final table value ${value}${frame.path.length ? ` · ${frame.path.length} traced cells` : ""}.`;
-  }
-  if (kind === "unionfind")
-    return `${new Set(frame.roots).size} disjoint set${new Set(frame.roots).size === 1 ? "" : "s"} · parents [${frame.parent.join(", ")}].`;
-  if (kind === "bits")
-    return algorithm === "kernighan-popcount" ? `Population count ${frame.total} · ${frame.pop} lowest set bits cleared.` : `${frame.pop} of ${frame.total} tally steps committed.`;
-  if (kind === "backtrack")
-    return frame.solved ? `Solved at depth ${frame.depth} · ${frame.placed} placements · ${frame.pruned} branches pruned.` : `No arrangement found · ${frame.pruned} branches pruned.`;
-  if (kind === "rectree") return stripTags(frame.message);
-  return stripTags(frame.message);
-}
-var CELL_W, RT_R, SVGNS, R, ICON;
-var init_render = __esm({
-  "custom/steptrace/src/render.ts"() {
-    CELL_W = 34;
-    RT_R = 16;
-    SVGNS = "http://www.w3.org/2000/svg";
-    R = 16;
-    ICON = {
-      reset: '<svg viewBox="0 0 24 24"><path d="M4 12a8 8 0 1 0 2.4-5.7" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/><path d="M3.4 4.6V8h3.4" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>',
-      back: '<svg viewBox="0 0 24 24"><polygon points="18 5 9 12 18 19" fill="currentColor" stroke="none"/><rect x="5" y="5" width="2" height="14" rx="0.6" fill="currentColor" stroke="none"/></svg>',
-      fwd: '<svg viewBox="0 0 24 24"><polygon points="6 5 15 12 6 19" fill="currentColor" stroke="none"/><rect x="17" y="5" width="2" height="14" rx="0.6" fill="currentColor" stroke="none"/></svg>',
-      play: '<svg viewBox="0 0 24 24"><polygon points="7 4.5 19 12 7 19.5" fill="currentColor" stroke="none"/></svg>',
-      pause: '<svg viewBox="0 0 24 24"><rect x="7" y="5" width="3.4" height="14" rx="1" fill="currentColor" stroke="none"/><rect x="13.6" y="5" width="3.4" height="14" rx="1" fill="currentColor" stroke="none"/></svg>',
-      kebab: '<svg viewBox="0 0 24 24"><circle cx="12" cy="5" r="1.5" fill="currentColor" stroke="none"/><circle cx="12" cy="12" r="1.5" fill="currentColor" stroke="none"/><circle cx="12" cy="19" r="1.5" fill="currentColor" stroke="none"/></svg>',
-      check: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg>',
-      compare: '<svg class="steptrace__cue-compare" viewBox="0 0 24 24" aria-hidden="true"><path d="m7 16-4-4 4-4"/><path d="M3 12h18"/><path d="m17 8 4 4-4 4"/></svg>',
-      swap: '<svg class="steptrace__cue-swap" viewBox="0 0 24 24" aria-hidden="true"><path d="m2 9 3-3 3 3"/><path d="M13 18H7a2 2 0 0 1-2-2V6"/><path d="m22 15-3 3-3-3"/><path d="M11 6h6a2 2 0 0 1 2 2v10"/></svg>'
-    };
-  }
-});
-
-// custom/steptrace/src/mount.ts
-function createMount(registry2) {
-  const { kindOf, listAlgorithms, buildFrames } = registry2;
-  return function mount2(root, config, host = {}) {
-    root.classList.add("steptrace");
-    root.setAttribute("role", "group");
-    root.setAttribute("aria-label", "Algorithm visualizer");
-    const kind = kindOf(config.algorithm);
-    if (!kind) {
-      root.textContent = `steptrace: unknown algorithm "${config.algorithm}".`;
-      return { destroy: () => root.replaceChildren() };
-    }
-    const mq = matchMedia("(prefers-reduced-motion: reduce)");
-    const applyMotion = () => root.classList.toggle("steptrace--reduced", mq.matches);
-    mq.addEventListener("change", applyMotion);
-    const state = {
-      algorithm: config.algorithm,
-      speed: config.speed || 1,
-      array: Array.isArray(config.array) && config.array.length ? config.array.slice() : randomArray(),
-      start: config.start != null ? String(config.start) : null,
-      config
-    };
-    let player = null;
-    let currentView = null;
-    let currentGraph = null;
-    let currentMilestones = [];
-    let speedControlHandle = null;
-    const head = el("div", "steptrace__head");
-    const crumb = el("div", "steptrace__crumb");
-    const crumbKind = el("span");
-    crumbKind.textContent = kind;
-    const crumbSep = el("span", "steptrace__crumb-sep");
-    crumbSep.textContent = "›";
-    const crumbAlgo = el("span", "steptrace__crumb-algo");
-    crumbAlgo.textContent = state.algorithm;
-    crumb.append(el("span", "steptrace__crumb-dot"), crumbKind, crumbSep, crumbAlgo);
-    const counter = el("div", "steptrace__counter");
-    head.append(crumb, counter);
-    const stageCol = el("div", "steptrace__stage-col");
-    const rail = el("div", "steptrace__rail");
-    const traceWrap = el("div", "steptrace__trace");
-    const traceLabel = el("div", "steptrace__rail-label steptrace__trace-label");
-    traceLabel.textContent = "Trace";
-    const log = el("ol", "steptrace__log");
-    const logLines = [];
-    for (let k = 0; k < LOG_ROWS; k++) {
-      const line = el("li", "steptrace__log-line");
-      const num = el("span", "steptrace__log-num");
-      const txt = el("span", "steptrace__log-text");
-      line.append(num, txt);
-      log.append(line);
-      logLines.push({ line, num, txt });
-    }
-    const insight = el("li", "steptrace__insight");
-    insight.setAttribute("aria-live", "off");
-    insight.setAttribute("aria-atomic", "true");
-    insight.hidden = true;
-    const insightLabel = el("span", "steptrace__insight-label");
-    insightLabel.textContent = "Result";
-    const insightText = el("span", "steptrace__insight-text");
-    insight.append(insightLabel, insightText);
-    log.append(insight);
-    traceWrap.append(traceLabel, log);
-    const watchWrap = el("div", "steptrace__watch-wrap");
-    const watchLabel = el("div", "steptrace__rail-label");
-    watchLabel.textContent = "Watch";
-    const watchEl = el("div", "steptrace__watch");
-    watchWrap.append(watchLabel, watchEl);
-    watchWrap.hidden = true;
-    rail.append(traceWrap, watchWrap);
-    const body = el("div", "steptrace__body");
-    body.append(stageCol, rail);
-    const foot = el("div", "steptrace__foot");
-    const scrub = el("div", "steptrace__scrub");
-    scrub.setAttribute("role", "slider");
-    scrub.setAttribute("tabindex", "0");
-    scrub.setAttribute("aria-label", "Step");
-    const scrubFill = el("div", "steptrace__scrub-fill");
-    const scrubDot = el("div", "steptrace__scrub-dot");
-    const milestoneLayer = el("div", "steptrace__milestones");
-    scrub.append(el("div", "steptrace__scrub-track"), scrubFill, milestoneLayer, scrubDot);
-    const phase = el("div", "steptrace__phase");
-    const phaseName = el("span", "steptrace__phase-name");
-    const phaseStep = el("span");
-    phase.append(phaseName, phaseStep);
-    const btnReset = iconBtn("Restart", ICON.reset);
-    const btnBack = iconBtn("Step back", ICON.back);
-    const btnPlay = iconBtn("Play", ICON.play, "steptrace__btn--play");
-    const btnFwd = iconBtn("Step forward", ICON.fwd);
-    const menuWrap = el("div", "steptrace__menu-wrap");
-    const btnMenu = iconBtn("Options", ICON.kebab);
-    btnMenu.setAttribute("aria-haspopup", "true");
-    btnMenu.setAttribute("aria-expanded", "false");
-    const menu = el("div", "steptrace__menu");
-    const speedHead = el("div", "steptrace__menu-h");
-    speedHead.textContent = "Speed";
-    const speedSection = el("div", "steptrace__menu-section");
-    const speedRow = el("div", "steptrace__speed-row");
-    const speedControl = el("div", "steptrace__speed-control");
-    speedRow.append(speedControl);
-    const fmtSpeed = (v) => Number(v).toFixed(2) + "×";
-    const applySpeed = (value) => {
-      const v = Number(value);
-      state.speed = v;
-      if (player) player.setSpeed(v);
-    };
-    if (host && typeof host.createSpeedSlider === "function") {
-      speedControlHandle = host.createSpeedSlider(speedControl, {
-        min: 0.5,
-        max: 2,
-        step: 0.25,
-        value: state.speed,
-        label: "Playback speed",
-        format: fmtSpeed,
-        onChange: applySpeed
-      });
-    } else {
-      const speedInput = el("input", "steptrace__range");
-      speedInput.type = "range";
-      speedInput.min = "0.5";
-      speedInput.max = "2";
-      speedInput.step = "0.25";
-      speedInput.value = String(state.speed);
-      speedInput.setAttribute("aria-label", "Playback speed");
-      speedInput.setAttribute("aria-valuetext", fmtSpeed(state.speed));
-      const speedVal = el("span", "steptrace__speed-val");
-      speedVal.textContent = fmtSpeed(state.speed);
-      speedInput.addEventListener("input", () => {
-        applySpeed(speedInput.value);
-        speedVal.textContent = fmtSpeed(speedInput.value);
-        speedInput.setAttribute("aria-valuetext", fmtSpeed(speedInput.value));
-      });
-      speedControl.append(speedInput);
-      speedRow.append(speedVal);
-    }
-    speedSection.append(speedHead, speedRow);
-    menu.append(speedSection);
-    let startMenu = null;
-    if (kind === "sort") {
-      const section = el("div", "steptrace__menu-section");
-      const h = el("div", "steptrace__menu-h");
-      h.textContent = "Array";
-      const item = el("button", "steptrace__menu-item");
-      item.type = "button";
-      item.textContent = "Shuffle";
-      item.addEventListener("click", () => {
-        state.array = randomArray();
-        build();
-      });
-      section.append(h, item);
-      menu.append(section);
-    } else if (kind === "graph") {
-      const section = el("div", "steptrace__menu-section");
-      const h = el("div", "steptrace__menu-h");
-      h.textContent = "Start node";
-      startMenu = el("select", "steptrace__select");
-      startMenu.setAttribute("aria-label", "Start node");
-      startMenu.addEventListener("change", () => {
-        state.start = startMenu.value;
-        closeMenu();
-        build();
-      });
-      section.append(h, startMenu);
-      menu.append(section);
-    } else if (kind === "search") {
-      const section = el("div", "steptrace__menu-section");
-      const h = el("div", "steptrace__menu-h");
-      h.textContent = "Target";
-      const sel = el("select", "steptrace__select");
-      sel.setAttribute("aria-label", "Search target");
-      const seen = /* @__PURE__ */ new Set();
-      for (const v of state.array) {
-        if (seen.has(v)) continue;
-        seen.add(v);
-        const opt = el("option");
-        opt.value = String(v);
-        opt.textContent = String(v);
-        if (Number(v) === Number(state.config.target)) opt.selected = true;
-        sel.append(opt);
-      }
-      sel.value = String(state.config.target);
-      sel.addEventListener("change", () => {
-        state.config.target = Number(sel.value);
-        closeMenu();
-        build();
-      });
-      section.append(h, sel);
-      menu.append(section);
-    }
-    menuWrap.append(btnMenu, menu);
-    const transport = el("div", "steptrace__transport");
-    transport.append(btnReset, btnBack, btnPlay, btnFwd, spacer(), menuWrap);
-    foot.append(scrub, phase, transport);
-    root.replaceChildren(head, body, foot);
-    let menuOpen = false;
-    function closeMenu() {
-      menuOpen = false;
-      menu.classList.remove("steptrace__menu--open");
-      btnMenu.setAttribute("aria-expanded", "false");
-    }
-    btnMenu.addEventListener("click", (e) => {
-      e.stopPropagation();
-      menuOpen = !menuOpen;
-      menu.classList.toggle("steptrace__menu--open", menuOpen);
-      btnMenu.setAttribute("aria-expanded", menuOpen ? "true" : "false");
-    });
-    menu.addEventListener("click", (e) => e.stopPropagation());
-    const onDocClick = () => closeMenu();
-    document.addEventListener("click", onDocClick);
-    function sizeRail() {
-      if (!player) return;
-      if (matchMedia("(max-width: 560px)").matches) {
-        log.style.height = "auto";
-        return;
-      }
-      const PROBE = "position:absolute;visibility:hidden;pointer-events:none;left:0;right:0;height:auto";
-      const tall = (node) => node.getBoundingClientRect().height;
-      const probe = el("li", "steptrace__log-line steptrace__log-line--cur");
-      probe.style.cssText = PROBE;
-      const pn = el("span", "steptrace__log-num");
-      pn.textContent = "00";
-      const pt = el("span", "steptrace__log-text");
-      probe.append(pn, pt);
-      log.append(probe);
-      let maxRow = 0;
-      for (const f of player.frames) {
-        pt.textContent = stripTags(f.message);
-        if (tall(probe) > maxRow) maxRow = tall(probe);
-      }
-      probe.remove();
-      const resultProbe = insight.cloneNode(true);
-      resultProbe.hidden = false;
-      resultProbe.style.cssText = PROBE;
-      log.append(resultProbe);
-      if (tall(resultProbe) > maxRow) maxRow = tall(resultProbe);
-      resultProbe.remove();
-      const logCS = getComputedStyle(log);
-      const gap = parseFloat(logCS.rowGap) || 0;
-      const hist = (parseFloat(logCS.lineHeight) || 0) * 2;
-      const h = Math.ceil(hist * 2 + gap * 2 + maxRow) + "px";
-      if (log.style.height !== h) log.style.height = h;
-    }
-    function fitLog(terminal) {
-      const budget = log.clientHeight;
-      if (!budget) return;
-      const gap = parseFloat(getComputedStyle(log).rowGap) || 0;
-      let used = terminal ? insight.getBoundingClientRect().height : 0;
-      let full = false;
-      for (let k = LOG_ROWS - 1; k >= 0; k--) {
-        const line = logLines[k].line;
-        if (line.hidden) continue;
-        if (full) {
-          line.hidden = true;
-          continue;
-        }
-        const h = line.getBoundingClientRect().height;
-        const need = used ? used + gap + h : h;
-        if (!used || need <= budget + 0.5) {
-          used = need;
-        } else {
-          line.hidden = true;
-          full = true;
-        }
-      }
-    }
-    const onRailResize = () => {
-      sizeRail();
-      if (player) renderRail();
-    };
-    const logRO = typeof ResizeObserver !== "undefined" ? new ResizeObserver(onRailResize) : null;
-    if (logRO) logRO.observe(rail);
-    let lastRailI = null;
-    function renderRail() {
-      const total = player.frames.length;
-      const i = player.i;
-      const terminal = i === total - 1;
-      insight.hidden = !terminal;
-      insight.setAttribute("aria-live", terminal && !player.playing ? "polite" : "off");
-      for (let k = 0; k < LOG_ROWS; k++) {
-        const ll = logLines[k];
-        const fi = i - (LOG_ROWS - 1 - k);
-        const cur = fi === i;
-        if (fi < 0 || fi >= total || cur && terminal) {
-          ll.line.hidden = true;
-          ll.num.textContent = "";
-          ll.txt.textContent = "";
-          ll.line.classList.remove("steptrace__log-line--cur");
-          continue;
-        }
-        ll.line.hidden = false;
-        ll.num.textContent = pad2(fi + 1);
-        ll.txt.textContent = stripTags(player.frames[fi].message);
-        ll.line.classList.toggle("steptrace__log-line--cur", cur);
-        ll.line.style.opacity = cur ? "" : String(fadeFor(i - fi));
-      }
-      fitLog(terminal);
-      const dir = lastRailI == null ? 0 : Math.sign(i - lastRailI);
-      lastRailI = i;
-      if (dir !== 0) {
-        log.style.transition = "none";
-        log.style.transform = `translateY(${dir > 0 ? "0.55rem" : "-0.55rem"})`;
-        void log.offsetHeight;
-        log.style.transition = "transform 0.26s var(--_spring)";
-        log.style.transform = "translateY(0)";
-      }
-      const chapter = milestoneAt(currentMilestones, i);
-      phaseName.textContent = chapter ? chapter.label : "Step";
-      phaseStep.textContent = `${i + 1} / ${total}`;
-      scrub.setAttribute("aria-valuetext", `${phaseName.textContent}, step ${i + 1} of ${total}`);
-      for (let k = 0; k < milestoneLayer.children.length; k++) {
-        const step = Number(milestoneLayer.children[k].dataset.step);
-        milestoneLayer.children[k].dataset.passed = step <= i ? "1" : "0";
-      }
-    }
-    function renderMilestones() {
-      milestoneLayer.replaceChildren();
-      const last = Math.max(1, player.frames.length - 1);
-      for (const mark of thinMilestones(currentMilestones)) {
-        const tick = el("span", "steptrace__milestone");
-        tick.style.left = mark.i / last * 100 + "%";
-        tick.dataset.step = String(mark.i);
-        tick.title = `${mark.label} · step ${mark.i + 1}`;
-        tick.setAttribute("aria-hidden", "true");
-        milestoneLayer.append(tick);
-      }
-    }
-    function onState() {
-      const total = player.frames.length;
-      const i = player.i;
-      counter.innerHTML = `<b>${pad2(i + 1)}</b> / ${pad2(total)}`;
-      const pct = total <= 1 ? 0 : i / (total - 1) * 100;
-      scrubFill.style.width = pct + "%";
-      scrubDot.style.left = pct + "%";
-      scrub.setAttribute("aria-valuemin", "0");
-      scrub.setAttribute("aria-valuemax", String(total - 1));
-      scrub.setAttribute("aria-valuenow", String(i));
-      btnPlay.innerHTML = player.playing ? ICON.pause : ICON.play;
-      btnPlay.setAttribute("aria-label", player.playing ? "Pause" : "Play");
-      btnPlay.title = player.playing ? "Pause" : "Play";
-      btnBack.disabled = i === 0;
-      btnFwd.disabled = i === total - 1;
-      renderRail();
-      renderWatch();
-    }
-    function renderWatch() {
-      const rows = currentView && currentView.watch ? currentView.watch(player.frames[player.i]) : null;
-      watchEl.replaceChildren();
-      if (!rows || !rows.length) return;
-      for (const r of rows) {
-        const row = el("div", "steptrace__watch-row");
-        if (r.sw) {
-          const sw = el("span", "steptrace__watch-sw");
-          sw.style.background = r.sw;
-          row.append(sw);
-        }
-        const kk = el("span", "steptrace__watch-k");
-        kk.textContent = r.k;
-        const vv = el("span", "steptrace__watch-v");
-        vv.textContent = r.v;
-        row.append(kk, vv);
-        watchEl.append(row);
-      }
-    }
-    function seekFromEvent(e) {
-      const r = scrub.getBoundingClientRect();
-      const cx = e.clientX != null ? e.clientX : e.touches && e.touches[0] ? e.touches[0].clientX : r.left;
-      const frac = r.width ? Math.max(0, Math.min(1, (cx - r.left) / r.width)) : 0;
-      player.seek(Math.round(frac * (player.frames.length - 1)));
-    }
-    let dragging = false;
-    scrub.addEventListener("pointerdown", (e) => {
-      dragging = true;
-      try {
-        scrub.setPointerCapture(e.pointerId);
-      } catch (_) {
-      }
-      seekFromEvent(e);
-    });
-    scrub.addEventListener("pointermove", (e) => {
-      if (dragging) seekFromEvent(e);
-    });
-    const endDrag = () => {
-      dragging = false;
-    };
-    scrub.addEventListener("pointerup", endDrag);
-    scrub.addEventListener("pointercancel", endDrag);
-    scrub.addEventListener("keydown", (e) => {
-      if (e.key === "ArrowRight") player.stepF();
-      else if (e.key === "ArrowLeft") player.stepB();
-      else if (e.key === "Home") player.seek(0);
-      else if (e.key === "End") player.seek(player.frames.length - 1);
-      else return;
-      e.preventDefault();
-      e.stopPropagation();
-    });
-    function build() {
-      if (player) player.destroy();
-      if (currentView && currentView.destroy) currentView.destroy();
-      const built = buildFrames({
-        algorithm: state.algorithm,
-        array: state.array,
-        start: state.start,
-        target: state.config.target,
-        text: state.config.text,
-        pattern: state.config.pattern,
-        a: state.config.a,
-        b: state.config.b,
-        n: state.config.n,
-        value: state.config.value,
-        width: state.config.width,
-        ops: state.config.ops,
-        directed: state.config.directed,
-        nodes: state.config.nodes,
-        edges: state.config.edges
-      });
-      currentGraph = built.graph || null;
-      currentMilestones = buildMilestones(state.algorithm, built.kind, built.frames);
-      let view;
-      if (built.kind === "graph")
-        view = makeGraphView(built.frames, built.graph, built.frontierLabel);
-      else if (built.kind === "search") view = makeSearchView(built.frames);
-      else if (built.kind === "string") view = makeMatchView(built.frames);
-      else if (built.kind === "pointers") view = makePointerView(built.frames);
-      else if (built.kind === "dp") view = makeDPView(built.frames);
-      else if (built.kind === "unionfind") view = makeUnionFindView(built.frames);
-      else if (built.kind === "bits") view = makeBitsView(built.frames);
-      else if (built.kind === "backtrack") view = makeBacktrackView(built.frames);
-      else if (built.kind === "rectree") view = makeRecTreeView(built.frames);
-      else view = makeSortView(built.frames);
-      currentView = view;
-      if (built.kind === "graph") syncStartOptions(built.graph);
-      stageCol.classList.toggle("steptrace__stage-col--bottom", built.kind !== "graph");
-      stageCol.classList.toggle("steptrace__stage-col--graph", built.kind === "graph");
-      const nodes = view.nodes.slice(0, -1);
-      stageCol.replaceChildren(...nodes);
-      player = new Player(built.frames, view.paint, state.speed);
-      player.onState = onState;
-      insightText.textContent = summaryFor(
-        state.algorithm,
-        built.kind,
-        built.frames[built.frames.length - 1],
-        currentGraph
-      );
-      reserveWatch(built.frames, view);
-      renderMilestones();
-      sizeRail();
-      player.render();
-      onState();
-    }
-    function reserveWatch(frames, view) {
-      let maxRows = 0;
-      if (view.watch) {
-        for (const f of frames) {
-          const rows = view.watch(f);
-          if (rows && rows.length > maxRows) maxRows = rows.length;
-        }
-      }
-      watchWrap.hidden = maxRows === 0;
-      watchEl.style.minHeight = maxRows ? `calc(${maxRows} * 1.44rem)` : "";
-    }
-    function syncStartOptions(graph) {
-      if (!startMenu || startMenu.dataset.filled) {
-        if (state.start == null) state.start = graph.start;
-        return;
-      }
-      startMenu.replaceChildren();
-      for (const n of graph.nodes) {
-        const opt = el("option");
-        opt.value = n.id;
-        opt.textContent = n.id;
-        if (n.id === graph.start) opt.selected = true;
-        startMenu.append(opt);
-      }
-      startMenu.value = graph.start;
-      startMenu.dataset.filled = "1";
-      state.start = graph.start;
-    }
-    build();
-    btnReset.addEventListener("click", () => player.reset());
-    btnBack.addEventListener("click", () => player.stepB());
-    btnPlay.addEventListener("click", () => player.toggle());
-    btnFwd.addEventListener("click", () => player.stepF());
-    const onKey = (e) => {
-      if (e.target instanceof HTMLInputElement || e.target instanceof HTMLSelectElement) return;
-      if (e.target === scrub) return;
-      if (e.key === "ArrowRight") player.stepF();
-      else if (e.key === "ArrowLeft") player.stepB();
-      else if (e.key === " " || e.key === "Spacebar") player.toggle();
-      else return;
-      e.preventDefault();
-      e.stopPropagation();
-    };
-    root.addEventListener("keydown", onKey);
-    applyMotion();
-    return {
-      destroy() {
-        if (player) player.destroy();
-        if (currentView && currentView.destroy) currentView.destroy();
-        if (speedControlHandle && speedControlHandle.destroy) speedControlHandle.destroy();
-        if (logRO) logRO.disconnect();
-        mq.removeEventListener("change", applyMotion);
-        root.removeEventListener("keydown", onKey);
-        document.removeEventListener("click", onDocClick);
-        root.replaceChildren();
-        root.classList.remove("steptrace", "steptrace--reduced");
-      }
-    };
-  };
-}
-function randomArray(n = 12) {
-  const pool = [];
-  for (let v = 5; v <= 62; v++) pool.push(v);
-  for (let k = pool.length - 1; k > 0; k--) {
-    const r = Math.floor(Math.random() * (k + 1));
-    [pool[k], pool[r]] = [pool[r], pool[k]];
-  }
-  return pool.slice(0, n);
-}
-var LOG_ROWS, fadeFor;
-var init_mount = __esm({
-  "custom/steptrace/src/mount.ts"() {
-    init_player();
-    init_render();
-    LOG_ROWS = 10;
-    fadeFor = (age) => Math.max(0.1, 0.5 * Math.pow(0.62, age - 1));
-  }
-});
-
 // custom/steptrace/src/recorders.ts
-var SortRecorder, GraphRecorder, SearchRecorder, StringRecorder, PointerRecorder, DPRecorder, UnionFindRecorder, BitsRecorder, BacktrackRecorder, RecTreeRecorder;
+var SortRecorder, ArraySortRecorder, GraphRecorder, SearchRecorder, IndexedSearchRecorder, BoundarySearchRecorder, StringRecorder, PointerRecorder, DPRecorder, MatrixGridRecorder, UnionFindRecorder, BitsRecorder, BacktrackRecorder, RecTreeRecorder, ExecutionTreeRecorder;
 var init_recorders = __esm({
   "custom/steptrace/src/recorders.ts"() {
     SortRecorder = class {
@@ -3394,6 +329,139 @@ var init_recorders = __esm({
       done(message) {
         this.clearMarks();
         this._push("done", [], message);
+      }
+    };
+    ArraySortRecorder = class extends SortRecorder {
+      constructor(array, profile = "shell") {
+        super(array);
+        this._profile = profile;
+        this._movementUnit = profile === "shell" || profile === "introsort" ? "moves" : "swaps";
+        this._showComparisons = profile !== "cyclic";
+        this._gap = null;
+        this._subsequence = null;
+        this._passSwapped = null;
+        this._cursor = null;
+        this._home = null;
+        this._keyOrigin = null;
+        this._hole = null;
+        this._tokenSerial = 0;
+        this._tokenId = null;
+        this._strategy = null;
+        this._depthUsed = null;
+        this._depthLimit = null;
+        this._cutoff = null;
+      }
+      _push(type, active, message) {
+        super._push(type, active, message);
+        const frame = this.frames[this.frames.length - 1];
+        this.frames[this.frames.length - 1] = Object.freeze({
+          ...frame,
+          profile: this._profile,
+          movementUnit: this._movementUnit,
+          showComparisons: this._showComparisons,
+          gap: this._gap,
+          subsequence: this._subsequence ? this._subsequence.slice() : null,
+          passSwapped: this._passSwapped,
+          cursor: this._cursor,
+          home: this._home,
+          keyOrigin: this._keyOrigin,
+          hole: this._hole,
+          tokenId: this._tokenId,
+          strategy: this._strategy,
+          depthUsed: this._depthUsed,
+          depthLimit: this._depthLimit,
+          cutoff: this._cutoff
+        });
+      }
+      beginGap(gap, message) {
+        this._gap = gap;
+        this._subsequence = null;
+        this._passSwapped = false;
+        this._push("gap", [], message);
+      }
+      selectSubsequence(indices, message) {
+        this._subsequence = indices.slice();
+        this._push("subsequence", indices, message);
+      }
+      compareGapPair(left, right, message) {
+        this._subsequence = [left, right];
+        this.compare(left, right, message);
+      }
+      swapGapPair(left, right, message) {
+        this._subsequence = [left, right];
+        this._passSwapped = true;
+        this.swap(left, right, message);
+      }
+      endGap(swapped, message) {
+        this._passSwapped = swapped;
+        this._subsequence = null;
+        this._push("gap-complete", [], message);
+      }
+      inspectHome(cursor, home, message) {
+        this._cursor = cursor;
+        this._home = home;
+        this._push("home-check", [cursor, home], message);
+      }
+      swapHome(cursor, home, message) {
+        this._cursor = cursor;
+        this._home = home;
+        this.swap(cursor, home, message);
+      }
+      settleHome(index, message) {
+        this._cursor = index;
+        this._home = index;
+        this.markSorted([index], [index], message);
+      }
+      holdKeyAt(value, origin, message) {
+        this._key = value;
+        this._keyOrigin = origin;
+        this._hole = origin;
+        this._tokenId = ++this._tokenSerial;
+        this._push("hold-key", [], message);
+      }
+      compareHeldAt(index, message) {
+        this.comparisons++;
+        this._push("compare-held", [index], message);
+      }
+      shiftHeld(to, from, message) {
+        this.a[to] = this.a[from];
+        this.swaps++;
+        this._from = from;
+        this._hole = from;
+        this._push("shift-held", [to], message);
+        this._from = null;
+      }
+      placeHeld(index, value, message) {
+        this.a[index] = value;
+        this.swaps++;
+        this._push("place-held", [index], message);
+      }
+      releaseHeldKey() {
+        this._key = null;
+        this._keyOrigin = null;
+        this._hole = null;
+        this._tokenId = null;
+      }
+      configureIntrosort(depthLimit, cutoff) {
+        this._depthLimit = depthLimit;
+        this._cutoff = cutoff;
+      }
+      introsortStrategy(strategy, depthUsed, type, message) {
+        this._strategy = strategy;
+        this._depthUsed = depthUsed;
+        this._push(type, [], message);
+      }
+      clearMarks() {
+        super.clearMarks();
+        this._subsequence = null;
+        this._passSwapped = null;
+        this._cursor = null;
+        this._home = null;
+        this._keyOrigin = null;
+        this._hole = null;
+        this._tokenId = null;
+        this._strategy = null;
+        this._depthUsed = null;
       }
     };
     GraphRecorder = class {
@@ -3529,6 +597,177 @@ var init_recorders = __esm({
         this._push("done", message);
       }
     };
+    IndexedSearchRecorder = class extends SearchRecorder {
+      constructor(config) {
+        super(config.array, config.target);
+        this._profile = config.profile;
+        this._phase = config.profile === "exponential" ? "gallop" : config.profile === "jump" ? "jump" : config.profile;
+        this._goal = config.goal ?? null;
+        this._blockSize = config.blockSize ?? null;
+        this._bound = null;
+        this._previousBound = -1;
+        this._bracket = null;
+        this._mid2 = null;
+        this._annotationLabel = null;
+        this._annotationValue = null;
+      }
+      _push(type, message) {
+        super._push(type, message);
+        const frame = this.frames[this.frames.length - 1];
+        this.frames[this.frames.length - 1] = Object.freeze({
+          ...frame,
+          profile: this._profile,
+          phase: this._phase,
+          bound: this._bound,
+          previousBound: this._previousBound,
+          bracket: this._bracket ? this._bracket.slice() : null,
+          mid2: this._mid2,
+          goal: this._goal,
+          blockSize: this._blockSize,
+          annotationLabel: this._annotationLabel,
+          annotationValue: this._annotationValue
+        });
+      }
+      probe(lo, hi, mid, message) {
+        this._mid2 = null;
+        this._annotationLabel = null;
+        this._annotationValue = null;
+        super.probe(lo, hi, mid, message);
+      }
+      annotatedProbe(lo, hi, mid, label, value, message) {
+        this._mid2 = null;
+        this._annotationLabel = label;
+        this._annotationValue = value;
+        this.lo = lo;
+        this.hi = hi;
+        this.mid = mid;
+        this.comparisons++;
+        this._push("probe", message);
+      }
+      dualProbe(lo, hi, mid, mid2, message) {
+        this._annotationLabel = null;
+        this._annotationValue = null;
+        this.lo = lo;
+        this.hi = hi;
+        this.mid = mid;
+        this._mid2 = mid2;
+        this.comparisons += 2;
+        this._push("probe", message);
+      }
+      narrow(lo, hi, message) {
+        this._mid2 = null;
+        this._annotationLabel = null;
+        this._annotationValue = null;
+        super.narrow(lo, hi, message);
+      }
+      hit(mid, message) {
+        this._mid2 = null;
+        super.hit(mid, message);
+      }
+      strideProbe(phase, previousBound, bound, message) {
+        this._phase = phase;
+        this._previousBound = previousBound;
+        this._bound = bound;
+        this._mid2 = null;
+        this._annotationLabel = null;
+        this._annotationValue = null;
+        this.lo = Math.max(0, previousBound + 1);
+        this.hi = bound;
+        this.mid = bound;
+        this.comparisons++;
+        this._push("probe", message);
+      }
+      gallopProbe(previousBound, bound, message) {
+        this.strideProbe("gallop", previousBound, bound, message);
+      }
+      jumpProbe(previousBound, bound, message) {
+        this.strideProbe("jump", previousBound, bound, message);
+      }
+      beginPhase(lo, hi, message, phase = "binary") {
+        this._phase = phase;
+        this._bracket = [lo, hi];
+        this.lo = lo;
+        this.hi = hi;
+        this.mid = null;
+        this._mid2 = null;
+        this._annotationLabel = null;
+        this._annotationValue = null;
+        this._push("phase", message);
+      }
+    };
+    BoundarySearchRecorder = class {
+      constructor(config) {
+        this.frames = [];
+        this.profile = config.profile;
+        this.lower = config.lower;
+        this.upper = config.upper;
+        this.lo = config.lower;
+        this.hi = config.upper;
+        this.candidate = null;
+        this.evaluation = null;
+        this.answer = null;
+        this.probes = 0;
+        this.allowed = config.days;
+        this.maxInfeasible = config.lower - 1;
+        this.minFeasible = config.upper + 1;
+      }
+      begin(message) {
+        this._push("range", message);
+      }
+      evaluate(lo, hi, candidate, evaluation, message) {
+        this.lo = lo;
+        this.hi = hi;
+        this.candidate = candidate;
+        this.evaluation = evaluation;
+        if (evaluation.feasible) this.minFeasible = Math.min(this.minFeasible, candidate);
+        else this.maxInfeasible = Math.max(this.maxInfeasible, candidate);
+        this.probes++;
+        this._push("evaluate", message);
+      }
+      narrow(lo, hi, message) {
+        this.lo = lo;
+        this.hi = hi;
+        this._push("narrow", message);
+      }
+      hit(answer, evaluation, message) {
+        this.lo = answer;
+        this.hi = answer;
+        this.candidate = answer;
+        this.answer = answer;
+        this.evaluation = evaluation;
+        this._push("found", message);
+      }
+      done(message) {
+        this._push("done", message);
+      }
+      _push(type, message) {
+        const evaluation = this.evaluation ? {
+          ...this.evaluation,
+          lanes: this.evaluation.lanes.map((lane) => ({
+            ...lane,
+            items: lane.items.slice()
+          }))
+        } : null;
+        this.frames.push(
+          Object.freeze({
+            type,
+            profile: this.profile,
+            lower: this.lower,
+            upper: this.upper,
+            lo: this.lo,
+            hi: this.hi,
+            candidate: this.candidate,
+            evaluation,
+            answer: this.answer,
+            probes: this.probes,
+            allowed: this.allowed,
+            maxInfeasible: this.maxInfeasible,
+            minFeasible: this.minFeasible,
+            message
+          })
+        );
+      }
+    };
     StringRecorder = class {
       constructor(text, pattern) {
         this.text = String(text || "");
@@ -3626,25 +865,34 @@ var init_recorders = __esm({
       }
     };
     DPRecorder = class {
-      constructor() {
+      constructor(profile = "lcs", variant = null) {
         this.frames = [];
+        this.profile = profile;
+        this.variant = variant;
         this.rowLabels = [];
         this.colLabels = [];
         this.grid = [];
         this.cur = null;
         this.deps = [];
         this.path = [];
+        this.nodes = [];
+        this.edges = [];
+        this.formula = null;
       }
-      board(rowLabels, colLabels, message) {
+      board(rowLabels, colLabels, message, topology = null) {
         this.rowLabels = rowLabels.slice();
         this.colLabels = colLabels.slice();
         this.grid = rowLabels.map(() => colLabels.map(() => null));
+        this.nodes = (topology?.nodes || []).map((node) => ({ ...node }));
+        this.edges = (topology?.edges || []).map((edge) => ({ ...edge }));
+        this.formula = null;
         this._push("init", message);
       }
-      set(r, c, val, deps, message) {
+      set(r, c, val, deps, message, formula = null) {
         this.cur = [r, c];
         this.deps = (deps || []).map((d) => d.slice());
         this.grid[r][c] = val;
+        this.formula = formula;
         this._push("compute", message);
       }
       markPath(cells, message) {
@@ -3656,18 +904,116 @@ var init_recorders = __esm({
       done(message) {
         this.cur = null;
         this.deps = [];
+        this.formula = null;
         this._push("done", message);
       }
       _push(type, message) {
         this.frames.push(
           Object.freeze({
             type,
+            profile: this.profile,
+            variant: this.variant,
             rowLabels: this.rowLabels.slice(),
             colLabels: this.colLabels.slice(),
             grid: this.grid.map((row) => row.slice()),
             cur: this.cur ? this.cur.slice() : null,
             deps: this.deps.map((d) => d.slice()),
             path: this.path.map((p) => p.slice()),
+            nodes: this.nodes.map((node) => Object.freeze({ ...node })),
+            edges: this.edges.map((edge) => Object.freeze({ ...edge })),
+            formula: this.formula,
+            message
+          })
+        );
+      }
+    };
+    MatrixGridRecorder = class {
+      constructor(config) {
+        this.frames = [];
+        this.nodes = config.nodes.slice();
+        this.rowLabels = this.nodes.map(String);
+        this.colLabels = this.nodes.map(String);
+        this.grid = [];
+        this.cur = null;
+        this.deps = [];
+        this.k = null;
+        this.candidate = null;
+        this.decision = null;
+        this.previous = null;
+        this.result = null;
+        this.operandA = null;
+        this.operandB = null;
+        this.negativeCycle = [];
+      }
+      board(grid, message) {
+        this.grid = grid.map((row) => row.slice());
+        this._push("init", message);
+      }
+      stage(k, message) {
+        this.k = k;
+        this.cur = null;
+        this.deps = [];
+        this.candidate = null;
+        this.decision = null;
+        this.previous = null;
+        this.result = null;
+        this.operandA = null;
+        this.operandB = null;
+        this._push("stage", message);
+      }
+      relax(r, c, deps, candidate, decision, value, message) {
+        this.cur = [r, c];
+        this.deps = deps.map((dep) => dep.slice());
+        this.candidate = candidate;
+        this.decision = decision;
+        this.previous = this.grid[r][c];
+        this.result = value;
+        this.operandA = this.grid[deps[0][0]][deps[0][1]];
+        this.operandB = this.grid[deps[1][0]][deps[1][1]];
+        this.grid[r][c] = value;
+        this._push("relax", message);
+      }
+      reportNegativeCycle(nodes, message) {
+        this.negativeCycle = nodes.slice();
+        this.cur = null;
+        this.deps = [];
+        this.candidate = null;
+        this.decision = null;
+        this.previous = null;
+        this.result = null;
+        this.operandA = null;
+        this.operandB = null;
+        this._push("negative-cycle", message);
+      }
+      done(message) {
+        this.cur = null;
+        this.deps = [];
+        this.candidate = null;
+        this.decision = null;
+        this.previous = null;
+        this.result = null;
+        this.operandA = null;
+        this.operandB = null;
+        this._push("done", message);
+      }
+      _push(type, message) {
+        this.frames.push(
+          Object.freeze({
+            type,
+            profile: "floyd-warshall",
+            rowLabels: this.rowLabels.slice(),
+            colLabels: this.colLabels.slice(),
+            grid: this.grid.map((row) => row.slice()),
+            cur: this.cur ? this.cur.slice() : null,
+            deps: this.deps.map((dep) => dep.slice()),
+            k: this.k,
+            candidate: this.candidate,
+            decision: this.decision,
+            previous: this.previous,
+            result: this.result,
+            operandA: this.operandA,
+            operandB: this.operandB,
+            negativeCycle: this.negativeCycle.slice(),
             message
           })
         );
@@ -4025,11 +1371,8689 @@ var init_recorders = __esm({
         this._push("done", message);
       }
     };
+    ExecutionTreeRecorder = class {
+      constructor(config) {
+        this.frames = [];
+        this.profile = config.profile;
+        this.phase = "divide";
+        this.action = "initialize";
+        this._nodes = Object.freeze([]);
+        this._edges = Object.freeze([]);
+        this._visible = /* @__PURE__ */ new Set();
+        this._states = {};
+        this._results = {};
+        this._collapsed = /* @__PURE__ */ new Set();
+        this._path = [];
+        this._active = null;
+        this._cache = [];
+        this.calls = 0;
+        this.pruned = 0;
+      }
+      _push(type, message) {
+        this.frames.push(
+          Object.freeze({
+            type,
+            profile: this.profile,
+            phase: this.phase,
+            action: this.action,
+            nodes: this._nodes,
+            edges: this._edges,
+            active: this._active,
+            path: Object.freeze(this._path.slice()),
+            visible: Object.freeze([...this._visible]),
+            states: Object.freeze({ ...this._states }),
+            results: Object.freeze(
+              Object.fromEntries(
+                Object.entries(this._results).map(([id, values]) => [
+                  id,
+                  Array.isArray(values) ? Object.freeze(values.slice()) : values
+                ])
+              )
+            ),
+            collapsed: Object.freeze([...this._collapsed]),
+            cache: Object.freeze(this._cache.map((entry) => Object.freeze({ ...entry }))),
+            calls: this.calls,
+            pruned: this.pruned,
+            message
+          })
+        );
+      }
+      tree(nodes, edges, rootId, message) {
+        this._nodes = Object.freeze(
+          nodes.map((node) => Object.freeze({ ...node, values: Object.freeze(node.values.slice()) }))
+        );
+        this._edges = Object.freeze(edges.map((edge) => Object.freeze({ ...edge })));
+        this._active = rootId;
+        this._path = [rootId];
+        this._visible.add(rootId);
+        this._states[rootId] = "call";
+        this.calls = 1;
+        this._push("tree", message);
+      }
+      split(id, path, childIds, message) {
+        this.phase = "divide";
+        this.action = "split";
+        this._active = id;
+        this._path = path.slice();
+        this._visible.add(id);
+        this._states[id] = "split";
+        for (const childId of childIds) {
+          if (!this._visible.has(childId)) this.calls++;
+          this._visible.add(childId);
+          this._states[childId] = "call";
+        }
+        this._push("split", message);
+      }
+      base(id, path, result, message) {
+        this.phase = "conquer";
+        this.action = "base case";
+        this._active = id;
+        this._path = path.slice();
+        this._visible.add(id);
+        this._states[id] = "base";
+        this._results[id] = Array.isArray(result) ? result.slice() : result;
+        this._push("base", message);
+      }
+      returnResult(id, path, result, message) {
+        this.phase = "return";
+        this.action = "return";
+        this._active = id;
+        this._path = path.slice();
+        this._visible.add(id);
+        this._states[id] = "return";
+        this._results[id] = Array.isArray(result) ? result.slice() : result;
+        this._push("return", message);
+      }
+      combine(id, path, result, message) {
+        this.phase = "combine";
+        this.action = "combine results";
+        this._active = id;
+        this._path = path.slice();
+        this._visible.add(id);
+        this._states[id] = "combine";
+        this._results[id] = Array.isArray(result) ? result.slice() : result;
+        this._push("combine", message);
+      }
+      cacheHit(id, path, key, result, subtreeIds, message) {
+        this.phase = "cache";
+        this.action = "reuse cached result";
+        this._active = id;
+        this._path = path.slice();
+        this._visible.add(id);
+        this._states[id] = "cache";
+        this._results[id] = Array.isArray(result) ? result.slice() : result;
+        if (!this._cache.some((entry) => entry.key === key)) {
+          this._cache.push({ key, result: Array.isArray(result) ? result.join(", ") : result });
+        }
+        for (const childId of subtreeIds) {
+          this._visible.add(childId);
+          this._collapsed.add(childId);
+        }
+        this.pruned += subtreeIds.length;
+        this._push("cache", message);
+      }
+      store(id, path, key, result, message) {
+        this.phase = "cache";
+        this.action = "store result";
+        this._active = id;
+        this._path = path.slice();
+        this._visible.add(id);
+        this._states[id] = "store";
+        this._results[id] = Array.isArray(result) ? result.slice() : result;
+        const cachedResult = Array.isArray(result) ? result.join(", ") : result;
+        const cached = this._cache.find((entry) => entry.key === key);
+        if (cached) cached.result = cachedResult;
+        else this._cache.push({ key, result: cachedResult });
+        this._push("store", message);
+      }
+      prune(id, path, subtreeIds, message) {
+        this.phase = "conquer";
+        this.action = "prune branch";
+        this._active = id;
+        this._path = path.slice();
+        this._visible.add(id);
+        this._states[id] = "prune";
+        for (const childId of subtreeIds) {
+          this._visible.add(childId);
+          this._collapsed.add(childId);
+        }
+        this.pruned++;
+        this._push("prune", message);
+      }
+      done(rootId, result, message) {
+        this.phase = "complete";
+        this.action = "final result ready";
+        this._active = rootId;
+        this._path = [rootId];
+        this._states[rootId] = "combine";
+        this._results[rootId] = Array.isArray(result) ? result.slice() : result;
+        this._push("done", message);
+      }
+    };
+  }
+});
+
+// custom/steptrace/src/motion.ts
+function springOmega(tweenMs) {
+  const budget = Math.max(tweenMs, 1) / 1e3;
+  return 2 * Math.PI / budget;
+}
+function springStep(pos, vel, target, dtMs, { omega0, zeta }) {
+  if (!(dtMs > 0)) return { pos: target, vel: 0 };
+  const w2 = omega0 * omega0;
+  const damp = 2 * zeta * omega0;
+  let remaining = dtMs;
+  const maxStep = 4;
+  while (remaining > 0) {
+    const h = Math.min(remaining, maxStep) / 1e3;
+    const accel = -w2 * (pos - target) - damp * vel;
+    vel += accel * h;
+    pos += vel * h;
+    remaining -= maxStep;
+  }
+  return { pos, vel };
+}
+function sequence(beats, budgetMs, startNow, minGapMs = SEQUENCE_MIN_GAP_MS) {
+  const budget = Math.max(budgetMs, 0);
+  let prev = -Infinity;
+  let group = startNow;
+  const queue = beats.map((beat) => ({ at: startNow + Math.max(0, beat.at) * budget, run: beat.run })).sort((a, b) => a.at - b.at).map((beat) => {
+    const fireAt = beat.at - prev < minGapMs ? group : group = beat.at;
+    prev = beat.at;
+    return { fireAt, run: beat.run };
+  });
+  let index = 0;
+  let cancelled = false;
+  return {
+    tick(now) {
+      if (cancelled) return false;
+      while (index < queue.length && now >= queue[index].fireAt) queue[index++].run();
+      return index < queue.length;
+    },
+    cancel() {
+      cancelled = true;
+      index = queue.length;
+    },
+    get pending() {
+      return queue.length - index;
+    }
+  };
+}
+var SPRINGS, SEQUENCE_MIN_GAP_MS;
+var init_motion = __esm({
+  "custom/steptrace/src/motion.ts"() {
+    SPRINGS = {
+      marker: { zeta: 0.6 },
+      held: { zeta: 0.85 },
+      swap: { zeta: 0.9 }
+    };
+    SEQUENCE_MIN_GAP_MS = 60;
+  }
+});
+
+// custom/steptrace/src/render.ts
+function makeBars(stage, n) {
+  const bars = [];
+  for (let k = 0; k < n; k++) {
+    const bar = el("div", "steptrace__bar");
+    bar.style.setProperty("--_i", String(k));
+    const fill = el("div", "steptrace__fill");
+    const check = el("div", "steptrace__check");
+    check.innerHTML = ICON.check;
+    check.setAttribute("aria-hidden", "true");
+    const probe = el("div", "steptrace__probe");
+    probe.innerHTML = ICON.search;
+    probe.setAttribute("aria-hidden", "true");
+    const cue = el("div", "steptrace__bar-cue");
+    cue.innerHTML = ICON.compare + ICON.swap;
+    cue.setAttribute("aria-hidden", "true");
+    fill.append(check, probe, cue);
+    const num = el("div", "steptrace__num");
+    bar.append(fill, num);
+    stage.append(bar);
+    bars.push({ bar, fill, num, check, probe, cue });
+  }
+  return bars;
+}
+function barHeightStyle(value, maxValue, minimumRem = 1.8) {
+  const ratio = Math.max(0, Math.min(1, Number(value) / Math.max(Number(maxValue), 1)));
+  return `calc(${ratio * 100}% + ${(1 - ratio) * minimumRem}rem)`;
+}
+function resolveLegacySortFrame(frame) {
+  const active = frame.active || [];
+  const isMove = frame.type === "swap" || frame.type === "overwrite" && frame.range;
+  const movements = [];
+  if (frame.type === "swap" && active.length === 2) {
+    movements.push([active[0], active[1]], [active[1], active[0]]);
+  } else if (frame.type === "overwrite" && frame.from != null && active.length === 1) {
+    movements.push([active[0], frame.from]);
+  }
+  return {
+    activeIndices: active,
+    activeRole: active.length ? isMove ? "move" : "compare" : null,
+    markerIndices: [active[0] ?? frame.candidate ?? null, active[1] ?? null],
+    movements,
+    laneIndices: null,
+    holeIndex: null,
+    heldToken: null
+  };
+}
+function makeSortView(frames, semantics = legacySortViewSemantics) {
+  const maxVal = Math.max(...frames[0].array, 1);
+  const n = frames[0].array.length;
+  const hasRange = frames.some((f) => f.range);
+  const hasPivot = frames.some((f) => f.pivot != null);
+  const stage = el("div", "steptrace__stage steptrace__stage--pins");
+  const bars = makeBars(stage, n);
+  const pinI = makeMarker(semantics.markerLabels[0], "a");
+  const pinJ = makeMarker(semantics.markerLabels[1], "b");
+  const hasHeldToken = frames.some((frame) => semantics.resolveFrame(frame).heldToken);
+  const heldMarker = hasHeldToken ? makeMarker("", "held") : null;
+  const markers = heldMarker ? [pinI, pinJ, heldMarker] : [pinI, pinJ];
+  stage.append(...markers.map((marker) => marker.el));
+  const status = statusEl();
+  const tracker = createBarTracker(stage, bars, markers);
+  const heldMarkerIndex = heldMarker ? markers.indexOf(heldMarker) : -1;
+  let lastPaint = null;
+  function paint(frame, frameIndex) {
+    const range = frame.range || null;
+    const visual = semantics.resolveFrame(frame);
+    if (visual.laneIndices && visual.laneIndices.length) stage.dataset.lane = "1";
+    else delete stage.dataset.lane;
+    for (let k = 0; k < n; k++) {
+      const b = bars[k];
+      b.fill.style.height = visual.holeIndex === k ? "12px" : barHeightStyle(frame.array[k], maxVal);
+      b.num.textContent = visual.holeIndex === k ? "∅" : frame.array[k];
+      let state = "";
+      if (frame.sorted.includes(k)) state = "sorted";
+      if (frame.candidate === k) state = "candidate";
+      if (visual.activeIndices.includes(k) && visual.activeRole)
+        state = visual.activeRole === "move" ? "swap" : "compare";
+      b.bar.dataset.state = state;
+      if (range && (k < range[0] || k > range[1])) b.bar.dataset.outside = "1";
+      else delete b.bar.dataset.outside;
+      if (frame.pivot != null && frame.pivot === k) b.bar.dataset.pivot = "1";
+      else delete b.bar.dataset.pivot;
+      if (visual.laneIndices)
+        b.bar.dataset.lane = visual.laneIndices.includes(k) ? "active" : "muted";
+      else delete b.bar.dataset.lane;
+      if (visual.holeIndex === k) b.bar.dataset.hole = "1";
+      else delete b.bar.dataset.hole;
+    }
+    const flights = [];
+    for (const [to, from] of visual.movements) {
+      const bt = bars[to] && bars[to].bar;
+      const bf = bars[from] && bars[from].bar;
+      if (!bt || !bf || !bt.isConnected) continue;
+      const dx = bf.getBoundingClientRect().left - bt.getBoundingClientRect().left;
+      if (dx) flights.push([to, dx]);
+    }
+    tracker.fly(flights);
+    if (heldMarker) {
+      heldMarker.setLabel(visual.heldToken?.label || "");
+      heldMarker.el.dataset.placing = visual.heldToken?.placing ? "1" : "0";
+    }
+    const paintState = {
+      frameIndex: Number.isInteger(frameIndex) ? frameIndex : null,
+      tokenId: visual.heldToken?.id ?? null
+    };
+    const resetHeldMarker = heldMarker && shouldResetHeldMarker(lastPaint, paintState);
+    if (resetHeldMarker) tracker.reset(heldMarkerIndex);
+    tracker.set(visual.markerIndices[0], visual.markerIndices[1], visual.heldToken?.index ?? null);
+    if (resetHeldMarker) tracker.renderNow();
+    lastPaint = paintState;
+  }
+  function watch(frame) {
+    const visual = semantics.resolveFrame(frame);
+    const rows = [
+      {
+        k: semantics.markerLabels[0],
+        v: visual.markerIndices[0] ?? "—",
+        sw: "var(--_blue)"
+      },
+      {
+        k: semantics.markerLabels[1],
+        v: visual.markerIndices[1] ?? "—",
+        sw: "var(--_violet)"
+      }
+    ];
+    if (hasPivot && !semantics.markerLabels.includes("pivot"))
+      rows.push({
+        k: "pivot",
+        v: frame.pivot != null ? `[${frame.pivot}] = ${frame.array[frame.pivot]}` : "—",
+        sw: "var(--_amber)"
+      });
+    if (hasRange)
+      rows.push({
+        k: "range",
+        v: frame.range ? `[${frame.range[0]}, ${frame.range[1]}]` : "—",
+        sw: "var(--_neutral)"
+      });
+    rows.push(...semantics.watchRows(frame, visual));
+    rows.push({ k: semantics.movementLabel, v: frame.swaps, sw: "var(--_amber)" });
+    return rows;
+  }
+  return { nodes: [stage, status], paint, watch, destroy: tracker.destroy };
+}
+function makeMarker(label, role) {
+  const wrap = el("div", "steptrace__marker steptrace__marker--" + role);
+  const body = el("span", "steptrace__marker-body");
+  const lbl = el("span", "steptrace__marker-label");
+  lbl.textContent = label;
+  body.append(lbl);
+  wrap.append(body);
+  return {
+    el: wrap,
+    body,
+    role,
+    setLabel(value) {
+      lbl.textContent = value;
+    }
+  };
+}
+function clampMarkerCenter(target, bodyWidth, stageWidth, padding = 2) {
+  const availableHalf = Math.max(0, stageWidth / 2 - padding);
+  const half = Math.min(Math.max(0, bodyWidth / 2), availableHalf);
+  const min = padding + half;
+  const max = stageWidth - padding - half;
+  return Math.min(max, Math.max(min, target));
+}
+function markerIsMoving(previousTarget, target, current, epsilon = 0.05) {
+  if (!previousTarget) return true;
+  return Math.abs(previousTarget.x - target.x) > epsilon || Math.abs(previousTarget.y - target.y) > epsilon || Math.abs(current.x - target.x) > epsilon || Math.abs(current.y - target.y) > epsilon;
+}
+function shouldResetHeldMarker(previous, next) {
+  if (!previous) return true;
+  return previous.tokenId !== next.tokenId || next.frameIndex !== previous.frameIndex + 1;
+}
+function createBarTracker(stage, bars, markers) {
+  let targets = markers.map(() => null);
+  const sx = markers.map(() => null);
+  const sy = markers.map(() => null);
+  const vx = markers.map(() => 0);
+  const vy = markers.map(() => 0);
+  const px = markers.map(() => null);
+  const fox = bars.map(() => null);
+  const fvx = bars.map(() => 0);
+  const foHold = bars.map(() => false);
+  const sequences = [];
+  const VEL_EPS = 0.5;
+  let tweenMs = 107;
+  function readTween() {
+    if (typeof getComputedStyle !== "function") return;
+    const parsed = Number.parseFloat(getComputedStyle(stage).getPropertyValue("--_tween"));
+    if (Number.isFinite(parsed) && parsed > 0) tweenMs = parsed;
+  }
+  const rectOf = (node) => node && typeof node.getBoundingClientRect === "function" ? node.getBoundingClientRect() : null;
+  const isReduced = () => !!(stage.closest && stage.closest(".steptrace--reduced"));
+  let lastStepAt = null;
+  function frameStep(now) {
+    const elapsed = lastStepAt == null ? 0 : Math.max(0, now - lastStepAt);
+    lastStepAt = now;
+    const sr = rectOf(stage);
+    if (!sr) return false;
+    const reduced = isReduced();
+    const omega0 = springOmega(tweenMs);
+    const swapOmega = springOmega(tweenMs * STEP_BUDGET_RATIO);
+    let moving = false;
+    for (let m = 0; m < markers.length; m++) {
+      const idx = targets[m];
+      const bar = idx != null && idx >= 0 && bars[idx] ? bars[idx].fill : null;
+      const mk = markers[m];
+      if (!bar || !bar.isConnected) {
+        mk.el.style.opacity = "0";
+        sx[m] = null;
+        sy[m] = null;
+        vx[m] = 0;
+        vy[m] = 0;
+        px[m] = null;
+        continue;
+      }
+      const br = rectOf(bar);
+      if (!br) continue;
+      const targetX = br.left + br.width / 2 - sr.left;
+      const bodyWidth = rectOf(mk.body)?.width ?? 0;
+      const tx = clampMarkerCenter(targetX, bodyWidth, sr.width);
+      mk.el.style.setProperty("--steptrace-marker-tip-offset", `${targetX - tx}px`);
+      const ty = mk.role === "held" && mk.el.dataset.placing !== "1" ? 34 : br.top - sr.top;
+      const zeta = mk.role === "held" ? SPRINGS.held.zeta : SPRINGS.marker.zeta;
+      if (sx[m] == null || reduced) {
+        sx[m] = tx;
+        vx[m] = 0;
+      } else if (elapsed > 0) {
+        const next = springStep(sx[m], vx[m], tx, elapsed, { omega0, zeta });
+        sx[m] = next.pos;
+        vx[m] = next.vel;
+      }
+      if (sy[m] == null || reduced || mk.role !== "held") {
+        sy[m] = ty;
+        vy[m] = 0;
+      } else if (elapsed > 0) {
+        const next = springStep(sy[m], vy[m], ty, elapsed, { omega0, zeta: SPRINGS.held.zeta });
+        sy[m] = next.pos;
+        vy[m] = next.vel;
+      }
+      const target = { x: tx, y: ty };
+      if (markerIsMoving(px[m], target, { x: sx[m], y: sy[m] }) || Math.abs(vx[m]) > VEL_EPS || Math.abs(vy[m]) > VEL_EPS)
+        moving = true;
+      px[m] = target;
+      mk.el.style.transform = `translate(${sx[m].toFixed(2)}px, ${sy[m].toFixed(2)}px)`;
+      mk.el.style.opacity = "1";
+    }
+    for (let s = sequences.length - 1; s >= 0; s--) {
+      if (reduced) {
+        sequences[s].cancel();
+        sequences.splice(s, 1);
+      } else if (sequences[s].tick(now)) {
+        moving = true;
+      } else {
+        sequences.splice(s, 1);
+      }
+    }
+    for (let b = 0; b < bars.length; b++) {
+      if (fox[b] == null) continue;
+      const bar = bars[b].bar;
+      if (reduced) {
+        fox[b] = null;
+        fvx[b] = 0;
+        foHold[b] = false;
+        bar.style.transform = "";
+        bar.style.zIndex = "";
+        delete bar.dataset.stage;
+        continue;
+      }
+      if (foHold[b]) {
+        bar.style.transform = `translateX(${fox[b].toFixed(2)}px)`;
+        bar.style.zIndex = "2";
+        moving = true;
+        continue;
+      }
+      if (elapsed > 0) {
+        const next = springStep(fox[b], fvx[b], 0, elapsed, {
+          omega0: swapOmega,
+          zeta: SPRINGS.swap.zeta
+        });
+        fox[b] = next.pos;
+        fvx[b] = next.vel;
+      }
+      if (Math.abs(fox[b]) < 0.4 && Math.abs(fvx[b]) < VEL_EPS) {
+        fox[b] = null;
+        fvx[b] = 0;
+        foHold[b] = false;
+        bar.style.transform = "";
+        bar.style.zIndex = "";
+      } else {
+        bar.style.transform = `translateX(${fox[b].toFixed(2)}px)`;
+        bar.style.zIndex = "2";
+        moving = true;
+      }
+    }
+    return moving;
+  }
+  let lastRafAt = 0;
+  let raf = null;
+  let iv = null;
+  function sleep() {
+    if (raf != null) cancelAnimationFrame(raf);
+    if (iv != null) clearInterval(iv);
+    raf = null;
+    iv = null;
+    lastStepAt = null;
+  }
+  function loop(now) {
+    lastRafAt = now;
+    if (frameStep(now)) raf = requestAnimationFrame(loop);
+    else sleep();
+  }
+  function wake() {
+    if (raf != null) return;
+    readTween();
+    lastStepAt = null;
+    lastRafAt = performance.now();
+    if (typeof requestAnimationFrame !== "function") {
+      frameStep(performance.now());
+      return;
+    }
+    raf = requestAnimationFrame(loop);
+    iv = setInterval(() => {
+      const now = performance.now();
+      if ((document.hidden || now - lastRafAt > 100) && !frameStep(now)) sleep();
+    }, 50);
+  }
+  const ro = typeof ResizeObserver === "function" ? new ResizeObserver(() => wake()) : null;
+  if (ro) ro.observe(stage);
+  wake();
+  return {
+    set(...indices) {
+      targets = markers.map((_, index) => indices[index] ?? null);
+      wake();
+    },
+    reset(index) {
+      if (index < 0 || index >= markers.length) return;
+      sx[index] = null;
+      sy[index] = null;
+      vx[index] = 0;
+      vy[index] = 0;
+      wake();
+    },
+    // Start a fly for each [barIndex, fromOffset]; a bar already in flight is
+    // left alone so its spring carries it home continuously. Reduced motion
+    // skips the travel entirely — the value just updates in place. Each new fly
+    // stages a wind → travel → settle beat sequence (Heer & Robertson): the bar
+    // waits latched at its origin, then springs home, then pops on arrival. At a
+    // small (fast-playback) budget those beats coalesce and the swap is one
+    // overlapped motion, matching the un-staged behaviour.
+    fly(flights) {
+      if (isReduced()) return;
+      readTween();
+      const budgetMs = tweenMs * STEP_BUDGET_RATIO;
+      let started = false;
+      for (const [idx, dx] of flights) {
+        if (idx < 0 || idx >= bars.length || fox[idx] != null) continue;
+        fox[idx] = dx;
+        fvx[idx] = 0;
+        foHold[idx] = true;
+        const bar = bars[idx].bar;
+        sequences.push(
+          sequence(
+            [
+              { at: 0, run: () => bar.dataset.stage = "wind" },
+              {
+                at: SWAP_TRAVEL_AT,
+                run: () => {
+                  foHold[idx] = false;
+                  bar.dataset.stage = "travel";
+                }
+              },
+              { at: SWAP_SETTLE_AT, run: () => bar.dataset.stage = "settle" }
+            ],
+            budgetMs,
+            performance.now()
+          )
+        );
+        started = true;
+      }
+      if (started) wake();
+    },
+    renderNow() {
+      frameStep(performance.now());
+    },
+    destroy() {
+      for (const seq of sequences) seq.cancel();
+      sequences.length = 0;
+      if (ro) ro.disconnect();
+      sleep();
+    }
+  };
+}
+function makeSearchView(frames, semantics = legacySearchViewSemantics) {
+  const maxVal = Math.max(...frames[0].array, 1);
+  const n = frames[0].array.length;
+  const stage = el("div", "steptrace__stage");
+  const bars = makeBars(stage, n);
+  const status = statusEl();
+  function paint(frame, i, total) {
+    for (let k = 0; k < n; k++) {
+      const b = bars[k];
+      b.fill.style.height = barHeightStyle(frame.array[k], maxVal);
+      b.num.textContent = frame.array[k];
+      b.bar.dataset.state = semantics.stateForIndex(frame, k);
+    }
+    status.innerHTML = escapeHtml(frame.message) + ` <span class="steptrace__counts">· ${frame.comparisons} probe${frame.comparisons === 1 ? "" : "s"} · step ${i + 1}/${total}</span>`;
+  }
+  function watch(frame) {
+    return semantics.watchRows(frame, frames);
+  }
+  return { nodes: [stage, status], paint, watch };
+}
+function boundaryTicks(lower, upper) {
+  const span = upper - lower;
+  if (span <= 12) return Array.from({ length: span + 1 }, (_, index) => lower + index);
+  return [
+    ...new Set(Array.from({ length: 13 }, (_, index) => Math.round(lower + span * index / 12)))
+  ];
+}
+function makeBoundarySearchView(frames, descriptor) {
+  const first = frames[0];
+  const ticks = boundaryTicks(first.lower, first.upper);
+  const maxExtraLanes = Math.max(
+    1,
+    ...frames.map(
+      (frame) => frame.evaluation ? Math.max(0, frame.evaluation.required - frame.evaluation.allowed) : 0
+    )
+  );
+  const root = el("section", "steptrace__boundary");
+  root.setAttribute("aria-label", descriptor.ariaLabel);
+  const domain = el("div", "steptrace__boundary-domain");
+  const domainHead = el("div", "steptrace__boundary-section-head");
+  const domainLabel = el("span", "steptrace__boundary-section-label");
+  const domainRange = el("span", "steptrace__boundary-section-value");
+  domainLabel.textContent = descriptor.rangeLabel;
+  domainHead.append(domainLabel, domainRange);
+  const tickList = el("div", "steptrace__boundary-ticks");
+  tickList.style.setProperty("--steptrace-boundary-ticks", String(ticks.length));
+  tickList.setAttribute("role", "list");
+  const tickNodes = ticks.map((value) => {
+    const tick = el("div", "steptrace__boundary-tick");
+    tick.setAttribute("role", "listitem");
+    tick.dataset.value = String(value);
+    tick.textContent = String(value);
+    tickList.append(tick);
+    return { value, tick };
+  });
+  domain.append(domainHead, tickList);
+  const evaluation = el("div", "steptrace__boundary-evaluation");
+  const evaluationHead = el("div", "steptrace__boundary-section-head");
+  const evaluationLabel = el("span", "steptrace__boundary-section-label");
+  const verdict = el("span", "steptrace__boundary-verdict");
+  evaluationLabel.textContent = descriptor.evaluationLabel;
+  evaluationHead.append(evaluationLabel, verdict);
+  const lanes = el("div", "steptrace__boundary-lanes");
+  const laneNodes = Array.from({ length: first.allowed }, (_, index) => {
+    const lane = el("div", "steptrace__boundary-lane");
+    const head = el("div", "steptrace__boundary-lane-head");
+    const label = el("span", "steptrace__boundary-lane-label");
+    const total = el("span", "steptrace__boundary-lane-total");
+    label.textContent = `Day ${index + 1}`;
+    head.append(label, total);
+    const packages = el("div", "steptrace__boundary-packages");
+    const meter = el("div", "steptrace__boundary-meter");
+    const fill = el("div", "steptrace__boundary-meter-fill");
+    meter.append(fill);
+    lane.append(head, packages, meter);
+    lanes.append(lane);
+    return { lane, total, packages, fill };
+  });
+  const overflow = el("div", "steptrace__boundary-lane steptrace__boundary-lane--overflow");
+  overflow.style.setProperty("--steptrace-boundary-overflow-rows", String(maxExtraLanes));
+  const overflowHead = el("div", "steptrace__boundary-lane-head");
+  const overflowLabel = el("span", "steptrace__boundary-lane-label");
+  const overflowTotal = el("span", "steptrace__boundary-lane-total");
+  overflowLabel.textContent = "Beyond limit";
+  overflowHead.append(overflowLabel, overflowTotal);
+  const overflowRows = Array.from({ length: maxExtraLanes }, () => {
+    const row = el("div", "steptrace__boundary-overflow-row");
+    const rowLabel = el("span", "steptrace__boundary-overflow-label");
+    const packages = el("div", "steptrace__boundary-packages");
+    row.append(rowLabel, packages);
+    overflow.append(row);
+    return { row, rowLabel, packages };
+  });
+  overflow.prepend(overflowHead);
+  lanes.append(overflow);
+  evaluation.append(evaluationHead, lanes);
+  root.append(domain, evaluation);
+  const legend = el("div", "steptrace__legend steptrace__boundary-legend");
+  legend.setAttribute("aria-label", "Monotone boundary states");
+  for (const [state, label] of [
+    ["range", "unknown candidate"],
+    ["infeasible", "known too small"],
+    ["feasible", "known feasible"],
+    ["probe", "current check"]
+  ]) {
+    const row = el("div", "steptrace__legend-row");
+    const swatch = el("span", "steptrace__boundary-legend-swatch");
+    swatch.dataset.state = state;
+    const text = el("span");
+    text.textContent = label;
+    row.append(swatch, text);
+    legend.append(row);
+  }
+  const status = statusEl();
+  function packageTokens(container, items) {
+    const tokens = items.map((weight) => {
+      const token = el("span", "steptrace__boundary-package");
+      token.textContent = weight;
+      return token;
+    });
+    if (!tokens.length) {
+      const empty = el("span", "steptrace__boundary-empty");
+      empty.textContent = "unused";
+      tokens.push(empty);
+    }
+    container.replaceChildren(...tokens);
+  }
+  function paint(frame, index, totalFrames) {
+    domainRange.textContent = `range ${frame.lo}–${frame.hi}`;
+    for (const { value, tick } of tickNodes) {
+      let state = "range";
+      if (value <= frame.maxInfeasible) state = "infeasible";
+      if (value >= frame.minFeasible) state = "feasible";
+      if (frame.answer === value) state = "answer";
+      tick.dataset.state = state;
+      tick.dataset.current = frame.candidate === value ? "true" : "false";
+      tick.setAttribute(
+        "aria-label",
+        `Capacity ${value}: ${state}${frame.candidate === value ? ", current check" : ""}`
+      );
+    }
+    const model = frame.evaluation;
+    const candidate = frame.candidate;
+    verdict.textContent = model ? model.feasible ? `${candidate} is feasible` : `${candidate} is too small` : "waiting for first check";
+    verdict.dataset.state = model ? model.feasible ? "feasible" : "infeasible" : "pending";
+    for (let laneIndex = 0; laneIndex < laneNodes.length; laneIndex++) {
+      const node = laneNodes[laneIndex];
+      const lane = model?.lanes[laneIndex] || null;
+      packageTokens(node.packages, lane?.items || []);
+      node.total.textContent = lane && candidate != null ? `${descriptor.unitLabel} ${lane.total}/${candidate}` : descriptor.unitLabel;
+      node.fill.style.width = lane && candidate ? `${Math.min(100, lane.total / candidate * 100)}%` : "0%";
+      node.lane.dataset.state = lane ? "used" : "empty";
+    }
+    const extra = model ? model.lanes.slice(model.allowed) : [];
+    overflow.dataset.state = extra.length ? "overflow" : "empty";
+    overflowTotal.textContent = extra.length ? `+${extra.length} day${extra.length === 1 ? "" : "s"}` : "none";
+    for (let extraIndex = 0; extraIndex < overflowRows.length; extraIndex++) {
+      const row = overflowRows[extraIndex];
+      const lane = extra[extraIndex];
+      row.row.dataset.state = lane ? "overflow" : "empty";
+      row.rowLabel.textContent = lane ? `Day ${model.allowed + extraIndex + 1}` : "—";
+      packageTokens(row.packages, lane?.items || []);
+    }
+    status.innerHTML = escapeHtml(frame.message) + ` <span class="steptrace__counts">· ${frame.probes} check${frame.probes === 1 ? "" : "s"} · step ${index + 1}/${totalFrames}</span>`;
+  }
+  return {
+    nodes: [root, legend, status],
+    stageLayout: "fill",
+    paint,
+    watch(frame) {
+      return descriptor.watchRows(frame);
+    }
+  };
+}
+function makeMatchView(frames) {
+  const text = frames[0].text;
+  const pattern = frames[0].pattern;
+  const hasHash = frames.some((f) => f.hash);
+  const hashBadge = el("div", "steptrace__hash");
+  const textRow = el("div", "steptrace__cells");
+  const tcells = [];
+  for (let k = 0; k < text.length; k++) {
+    const c = el("div", "steptrace__cell");
+    c.textContent = text[k];
+    textRow.append(c);
+    tcells.push(c);
+  }
+  const patRow = el("div", "steptrace__cells steptrace__cells--pat");
+  const pcells = [];
+  for (let k = 0; k < pattern.length; k++) {
+    const c = el("div", "steptrace__cell steptrace__cell--pat");
+    c.textContent = pattern[k];
+    patRow.append(c);
+    pcells.push(c);
+  }
+  const stage = el("div", "steptrace__match");
+  stage.append(patRow, textRow);
+  const status = statusEl();
+  let lastShift = 0;
+  function applyGeom() {
+    const w = tcells.length ? tcells[0].getBoundingClientRect().width : CELL_W;
+    const cw = w > 0 ? w : CELL_W;
+    stage.style.setProperty("--_cw", cw + "px");
+    patRow.style.transform = `translateX(${(lastShift * cw).toFixed(2)}px)`;
+  }
+  const ro = typeof ResizeObserver !== "undefined" ? new ResizeObserver(applyGeom) : null;
+  if (ro) ro.observe(textRow);
+  function paint(frame, i, total) {
+    lastShift = frame.shift;
+    applyGeom();
+    for (let k = 0; k < tcells.length; k++) tcells[k].dataset.state = "";
+    for (let k = 0; k < pcells.length; k++) pcells[k].dataset.state = "";
+    for (const s of frame.found)
+      for (let k = 0; k < pattern.length; k++)
+        if (tcells[s + k]) tcells[s + k].dataset.state = "found";
+    for (let k = 0; k < pattern.length; k++) {
+      const t = tcells[frame.shift + k];
+      if (t && t.dataset.state !== "found") t.dataset.state = "window";
+    }
+    if (frame.cmpT != null && tcells[frame.cmpT])
+      tcells[frame.cmpT].dataset.state = frame.cmpResult || "probe";
+    if (frame.cmpP != null && pcells[frame.cmpP])
+      pcells[frame.cmpP].dataset.state = frame.cmpResult || "probe";
+    if (hasHash) {
+      hashBadge.textContent = frame.hash ? `window hash ${frame.hash.window} ${frame.hash.window === frame.hash.pattern ? "=" : "≠"} pattern hash ${frame.hash.pattern}` : " ";
+    }
+    status.innerHTML = escapeHtml(frame.message) + ` <span class="steptrace__counts">· step ${i + 1}/${total}</span>`;
+  }
+  function watch(frame) {
+    const rows = [
+      { k: "shift", v: String(frame.shift), sw: "var(--_blue)" },
+      { k: "matches", v: String(frame.found.length), sw: "var(--_green)" }
+    ];
+    if (hasHash) {
+      rows.push({
+        k: "hash",
+        v: frame.hash ? `${frame.hash.window} / ${frame.hash.pattern}` : "—",
+        sw: "var(--_amber)"
+      });
+    }
+    return rows;
+  }
+  const nodes = hasHash ? [stage, hashBadge, status] : [stage, status];
+  return { nodes, paint, watch, destroy: () => ro && ro.disconnect() };
+}
+function makePointerView(frames) {
+  const n = frames[0].array.length;
+  const ptrNames = (function() {
+    for (const f of frames) {
+      const ks = Object.keys(f.pointers || {});
+      if (ks.length) return ks;
+    }
+    return [];
+  })();
+  const wrap = el("div", "steptrace__pwrap");
+  const strip = el("div", "steptrace__pcells");
+  const cells = [];
+  for (let k = 0; k < n; k++) {
+    const cell = el("div", "steptrace__pcell");
+    cell.textContent = frames[0].array[k];
+    strip.append(cell);
+    cells.push(cell);
+  }
+  const brackets = el("div", "steptrace__pbrackets");
+  const brL = el("div", "steptrace__pbr steptrace__pbr--l");
+  const brR = el("div", "steptrace__pbr steptrace__pbr--r");
+  brackets.append(brL, brR);
+  wrap.append(strip, brackets);
+  const status = statusEl();
+  function paint(frame) {
+    const win = frame.window;
+    const matched = frame.marked && frame.marked.length > 0;
+    for (let k = 0; k < n; k++) {
+      const c = cells[k];
+      c.textContent = frame.array[k];
+      let state = "";
+      if (win && k >= win[0] && k <= win[1]) state = matched ? "match" : "window";
+      c.dataset.state = state;
+      c.dataset.end = win && k === win[0] ? "l" : win && k === win[1] ? "r" : "";
+    }
+    if (!win) {
+      brackets.style.display = "none";
+    } else {
+      brackets.style.display = "";
+      brL.style.left = win[0] / n * 100 + "%";
+      brR.style.left = (win[1] + 1) / n * 100 + "%";
+      brL.dataset.round = win[0] === 0 ? "1" : "0";
+      brR.dataset.round = win[1] === n - 1 ? "1" : "0";
+      brackets.dataset.match = matched ? "1" : "0";
+    }
+    status.innerHTML = escapeHtml(frame.message);
+  }
+  function watch(frame) {
+    const color = {
+      left: "var(--_blue)",
+      lo: "var(--_blue)",
+      l: "var(--_blue)",
+      i: "var(--_blue)",
+      right: "var(--_violet)",
+      hi: "var(--_violet)",
+      r: "var(--_violet)",
+      j: "var(--_violet)"
+    };
+    const p = frame.pointers || {};
+    return ptrNames.map((name) => {
+      const idx = p[name];
+      return {
+        k: name,
+        v: idx != null ? `[${idx}] = ${frame.array[idx]}` : "—",
+        sw: color[name.toLowerCase()] || "var(--_muted)"
+      };
+    });
+  }
+  return { nodes: [wrap, status], paint, watch };
+}
+function paintMatrixRoleBadge(element, descriptor) {
+  element.dataset.role = descriptor.role;
+  element.textContent = descriptor.badge;
+  element.title = descriptor.label;
+}
+function makeMatrixRoleBadge(descriptor) {
+  const badge = el("span", "steptrace__matrix-role-badge");
+  badge.setAttribute("aria-hidden", "true");
+  paintMatrixRoleBadge(badge, descriptor);
+  return badge;
+}
+function roleDescriptor(descriptors, role) {
+  const descriptor = descriptors.find((candidate) => candidate.role === role);
+  if (!descriptor) throw new Error(`steptrace: matrix role "${role}" is not described.`);
+  return descriptor;
+}
+function makeMatrixRoleLegend(descriptors) {
+  const root = el("aside", "steptrace__legend-wrap steptrace__matrix-role-legend");
+  root.setAttribute("aria-label", "Matrix role legend");
+  const items = el("ul", "steptrace__legend steptrace__matrix-role-legend-items");
+  for (const descriptor of descriptors) {
+    const item = el("li", "steptrace__legend-row steptrace__matrix-role-legend-item");
+    const label = el("span", "steptrace__matrix-role-legend-label");
+    label.textContent = descriptor.label;
+    item.append(makeMatrixRoleBadge(descriptor), label);
+    items.append(item);
+  }
+  root.append(items);
+  return root;
+}
+function makeMatrixFooter(table, columnCount, descriptors) {
+  const root = document.createElement("tfoot");
+  root.className = "steptrace__matrix-footer";
+  root.setAttribute("aria-label", "Current matrix stage");
+  const row = document.createElement("tr");
+  const cell = document.createElement("td");
+  cell.colSpan = columnCount;
+  const content = el("div", "steptrace__matrix-footer-row");
+  const context = el("span", "steptrace__matrix-footer-context");
+  const summary = el("span", "steptrace__matrix-footer-summary");
+  content.append(context, summary);
+  cell.append(content);
+  row.append(cell);
+  root.append(row);
+  table.append(root);
+  function paint(model) {
+    context.textContent = model.context;
+    summary.replaceChildren();
+    if (model.summary.role) {
+      summary.append(makeMatrixRoleBadge(roleDescriptor(descriptors, model.summary.role)));
+    }
+    summary.append(document.createTextNode(model.summary.text));
+    row.setAttribute("aria-label", `${model.context}; ${model.summary.text}`);
+  }
+  return { paint };
+}
+function makeDPStoryView(frames) {
+  return frames[0].problem === "coin-change" ? makeCoinChangeStoryView(frames) : makeGridPathStoryView(frames);
+}
+function makeStoryLegend(items) {
+  const legend = el("div", "steptrace__legend");
+  for (const [state, label] of items) {
+    const row = el("div", "steptrace__legend-row");
+    const swatch = el("span", "steptrace__swatch steptrace__dp-story-swatch");
+    swatch.dataset.state = state;
+    row.append(swatch, document.createTextNode(label));
+    legend.append(row);
+  }
+  return legend;
+}
+function makeCoinChangeStoryView(frames) {
+  const first = frames[0];
+  const root = el("div", "steptrace__dp-story");
+  root.setAttribute("role", "region");
+  root.setAttribute("aria-label", "Coin change counter");
+  root.dataset.approach = first.approach;
+  const context = el("div", "steptrace__dp-story-context");
+  const contextStart = el("span", "steptrace__dp-story-context-start");
+  const contextEnd = el("span", "steptrace__dp-story-context-end");
+  context.append(contextStart, contextEnd);
+  const stage = el("div", "steptrace__dp-story-stage");
+  const rack = el("div", "steptrace__coin-rack");
+  const coinElements = first.coins.map((coin) => {
+    const element = el("span", "steptrace__coin");
+    element.textContent = `${coin}¢`;
+    element.dataset.coin = String(coin);
+    rack.append(element);
+    return element;
+  });
+  stage.append(rack);
+  root.append(context, stage);
+  const status = statusEl();
+  const tray = first.approach === "tabulation" ? null : el("div", "steptrace__coin-tray");
+  const attempts = ["greedy", "naive"].includes(first.approach) ? el("div", "steptrace__coin-attempts") : null;
+  const memo = first.approach === "memoization" ? el("div", "steptrace__coin-memo") : null;
+  const amountBoard = first.approach === "tabulation" ? el("div", "steptrace__amount-board") : null;
+  const amountCells = [];
+  if (tray) stage.append(tray);
+  if (attempts) stage.append(attempts);
+  if (memo) stage.append(memo);
+  if (amountBoard) {
+    amountBoard.style.setProperty("--steptrace-amount-count", String(first.amounts.length));
+    for (const amount of first.amounts) {
+      const cell = el("div", "steptrace__amount-cell");
+      const label = el("span", "steptrace__amount-label");
+      const value = el("span", "steptrace__amount-value");
+      label.textContent = `${amount}¢`;
+      value.textContent = "—";
+      cell.append(label, value);
+      amountBoard.append(cell);
+      amountCells.push({ cell, value, amount });
+    }
+    stage.append(amountBoard);
+  }
+  const legendItems = first.approach === "memoization" ? [
+    ["active", "coin being tried"],
+    ["selected", "current branch"],
+    ["stored", "saved remainder"],
+    ["hit", "answer reused"]
+  ] : first.approach === "tabulation" ? [
+    ["current", "amount being written"],
+    ["dependency", "smaller amount read"],
+    ["stored", "solved amount"],
+    ["best", "optimal amount chain"]
+  ] : [
+    ["active", "coin being tried"],
+    ["selected", "coins on the counter"],
+    ["repeated", "repeated subproblem"],
+    ["best", "best exact change"]
+  ];
+  const legend = makeStoryLegend(legendItems);
+  function paintTray(frame) {
+    if (!tray) return;
+    tray.replaceChildren();
+    const trayLabel = el("span", "steptrace__coin-tray-label");
+    trayLabel.textContent = frame.selected.length ? "on the counter" : "counter is empty";
+    tray.append(trayLabel);
+    for (const coin of frame.selected) {
+      const element = el("span", "steptrace__coin");
+      element.dataset.state = "selected";
+      element.textContent = `${coin}¢`;
+      tray.append(element);
+    }
+  }
+  function paintAttempts(frame) {
+    if (!attempts) return;
+    attempts.replaceChildren();
+    for (const attempt of frame.attempts) {
+      const row = el("div", "steptrace__coin-attempt");
+      row.dataset.state = attempt.state;
+      const label = el("span", "steptrace__coin-attempt-label");
+      const value = el("span", "steptrace__coin-attempt-value");
+      label.textContent = attempt.label;
+      value.textContent = attempt.value;
+      row.append(label, value);
+      attempts.append(row);
+    }
+  }
+  function paintMemo(frame) {
+    if (!memo) return;
+    memo.replaceChildren();
+    const heading = el("div", "steptrace__coin-memo-heading");
+    heading.textContent = "Saved remainder answers";
+    memo.append(heading);
+    for (const entry of frame.memo) {
+      const row = el("div", "steptrace__coin-memo-row");
+      row.dataset.state = entry.state;
+      const key = el("span", "steptrace__coin-memo-key");
+      const value = el("span", "steptrace__coin-memo-value");
+      key.textContent = entry.key;
+      value.textContent = entry.state === "hit" ? `${entry.value} · reused` : entry.value;
+      row.append(key, value);
+      memo.append(row);
+    }
+  }
+  function paintAmounts(frame) {
+    if (!amountBoard) return;
+    for (let index = 0; index < amountCells.length; index++) {
+      const { cell, value, amount } = amountCells[index];
+      const stored = frame.amountValues[index];
+      value.textContent = stored == null ? "—" : String(stored);
+      cell.setAttribute(
+        "aria-label",
+        stored == null ? `${amount}¢: unsolved` : `${amount}¢: ${stored} coin${stored === 1 ? "" : "s"}`
+      );
+      cell.dataset.state = amount === frame.amountCurrent ? "current" : frame.amountPath.includes(amount) ? "best" : frame.amountDependencies.includes(amount) ? "dependency" : stored != null ? "stored" : "";
+    }
+  }
+  return {
+    nodes: [root, legend, status],
+    stageLayout: "fill",
+    stableStage: true,
+    paint(frame, index, total) {
+      contextStart.textContent = frame.approach === "tabulation" ? "Build exact change from 0¢" : `Customer pays ${frame.target}¢`;
+      contextEnd.textContent = frame.approach === "tabulation" ? frame.amountCurrent == null ? frame.best || "amount board empty" : `writing ${frame.amountCurrent}¢` : `remaining ${frame.remaining}¢`;
+      for (const element of coinElements) {
+        const coin = Number(element.dataset.coin);
+        element.dataset.state = coin === frame.activeCoin ? "active" : "";
+      }
+      paintTray(frame);
+      paintAttempts(frame);
+      paintMemo(frame);
+      paintAmounts(frame);
+      status.innerHTML = escapeHtml(frame.message) + ` <span class="steptrace__counts">· step ${index + 1}/${total}</span>`;
+    },
+    watch(frame) {
+      const plan = frame.selected.length ? frame.selected.map((coin) => `${coin}¢`).join(" + ") : "—";
+      if (frame.approach === "memoization")
+        return [
+          {
+            k: "remaining",
+            v: `${frame.remaining}¢`,
+            sw: "var(--_blue)",
+            hint: "Remainder handled by the current recursive branch."
+          },
+          {
+            k: "plan",
+            v: plan,
+            sw: "var(--_amber)",
+            hint: "Coins chosen before the current remainder was reached."
+          },
+          {
+            k: "memo",
+            v: `${frame.memo.length} answers`,
+            sw: "var(--_violet)",
+            hint: "Remainder answers saved for later recursive calls."
+          },
+          {
+            k: "best",
+            v: frame.best || "—",
+            sw: "var(--_green)",
+            hint: `Fewest exact coins found for the ${frame.target}-cent payment.`
+          }
+        ];
+      if (frame.approach === "tabulation")
+        return [
+          {
+            k: "amount",
+            v: frame.amountCurrent == null ? "—" : `${frame.amountCurrent}¢`,
+            sw: "var(--_blue)",
+            hint: "Amount currently being written on the bottom-up board."
+          },
+          {
+            k: "reads",
+            v: frame.amountDependencies.length ? frame.amountDependencies.map((amount) => `${amount}¢`).join(", ") : "base",
+            sw: "var(--_amber)",
+            hint: "Smaller solved amounts read before writing the current amount."
+          },
+          {
+            k: "solved",
+            v: String(frame.amountValues.filter((value) => value != null).length),
+            sw: "var(--_violet)",
+            hint: "Amount answers already written and available for reuse."
+          },
+          {
+            k: "best",
+            v: frame.best || "—",
+            sw: "var(--_green)",
+            hint: `Fewest exact coins found for the ${frame.target}-cent payment.`
+          }
+        ];
+      return [
+        {
+          k: "remaining",
+          v: `${frame.remaining}¢`,
+          sw: "var(--_blue)",
+          hint: "Amount still owed after the coins currently on the counter."
+        },
+        {
+          k: "plan",
+          v: plan,
+          sw: "var(--_amber)",
+          hint: "Coins chosen by the current branch or strategy."
+        },
+        {
+          k: "attempts",
+          v: String(frame.attempts.length),
+          sw: "var(--_violet)",
+          hint: "Complete or partial change plans exposed so far."
+        },
+        {
+          k: "best",
+          v: frame.best || "—",
+          sw: "var(--_green)",
+          hint: `Fewest exact coins found for the ${frame.target}-cent payment.`
+        }
+      ];
+    }
+  };
+}
+function makeGridPathStoryView(frames) {
+  const first = frames[0];
+  const table = el("table", "steptrace__warehouse-matrix");
+  table.setAttribute("aria-label", "Warehouse route cost matrix");
+  const thead = document.createElement("thead");
+  const headerRow = document.createElement("tr");
+  const corner = document.createElement("th");
+  corner.setAttribute("scope", "col");
+  corner.textContent = "cost ↓ / tile →";
+  headerRow.append(corner);
+  for (let column = 0; column < first.costs[0].length; column++) {
+    const header = document.createElement("th");
+    header.setAttribute("scope", "col");
+    header.textContent = `C${column + 1}`;
+    headerRow.append(header);
+  }
+  thead.append(headerRow);
+  table.append(thead);
+  const tbody = document.createElement("tbody");
+  const cells = [];
+  for (let row = 0; row < first.costs.length; row++) {
+    const tableRow = document.createElement("tr");
+    const header = document.createElement("th");
+    header.setAttribute("scope", "row");
+    header.textContent = `R${row + 1}`;
+    tableRow.append(header);
+    const rowCells = [];
+    for (let column = 0; column < first.costs[row].length; column++) {
+      const cell = document.createElement("td");
+      const place = el("span", "steptrace__warehouse-cell-name");
+      const cost = el("span", "steptrace__warehouse-cell-cost");
+      const stored = el("span", "steptrace__warehouse-cell-stored");
+      place.textContent = row === 0 && column === 0 ? "START" : row === first.costs.length - 1 && column === first.costs[row].length - 1 ? "GOAL" : `R${row + 1}C${column + 1}`;
+      cost.textContent = `cost ${first.costs[row][column]}`;
+      cell.append(place, cost, stored);
+      tableRow.append(cell);
+      rowCells.push({ cell, stored });
+    }
+    cells.push(rowCells);
+    tbody.append(tableRow);
+  }
+  table.append(tbody);
+  const tfoot = document.createElement("tfoot");
+  const footerRow = document.createElement("tr");
+  const footerCell = document.createElement("td");
+  footerCell.colSpan = first.costs[0].length + 1;
+  const footer = el("div", "steptrace__warehouse-footer");
+  const footerStart = el("span", "steptrace__warehouse-footer-start");
+  const footerEnd = el("span", "steptrace__warehouse-footer-end");
+  footer.append(footerStart, footerEnd);
+  footerCell.append(footer);
+  footerRow.append(footerCell);
+  tfoot.append(footerRow);
+  table.append(tfoot);
+  const status = statusEl();
+  const legendItems = first.approach === "memoization" ? [
+    ["current", "tile being evaluated"],
+    ["stored", "saved remaining cost"],
+    ["repeated", "saved answer reused"],
+    ["best", "best complete route"]
+  ] : first.approach === "tabulation" ? [
+    ["current", "tile being written"],
+    ["dependency", "written neighbour read"],
+    ["stored", "remaining cost stored"],
+    ["best", "optimal route"]
+  ] : [
+    ["current", "tile being considered"],
+    ["path", "current route"],
+    ["repeated", "tile reached again"],
+    ["best", "best complete route"]
+  ];
+  const legend = makeStoryLegend(legendItems);
+  return {
+    nodes: [table, legend, status],
+    stageLayout: "fill",
+    paint(frame, index, total) {
+      const path = new Set(frame.path.map(([row, column]) => `${row},${column}`));
+      const repeated = new Set(frame.repeated.map(([row, column]) => `${row},${column}`));
+      const best = new Set(frame.bestPath.map(([row, column]) => `${row},${column}`));
+      const dependencies = new Set(
+        frame.gridDependencies.map(([row, column]) => `${row},${column}`)
+      );
+      let storedCount = 0;
+      for (let row = 0; row < cells.length; row++) {
+        for (let column = 0; column < cells[row].length; column++) {
+          const key = `${row},${column}`;
+          const value = frame.gridValues[row][column];
+          if (value != null) storedCount++;
+          cells[row][column].stored.textContent = value == null ? "" : `best ${value}`;
+          cells[row][column].cell.dataset.state = frame.current?.[0] === row && frame.current?.[1] === column ? "current" : best.has(key) ? "best" : repeated.has(key) ? "repeated" : dependencies.has(key) ? "dependency" : path.has(key) ? "path" : value != null ? "stored" : "";
+          cells[row][column].cell.setAttribute(
+            "aria-label",
+            `R${row + 1}C${column + 1}, cost ${frame.costs[row][column]}${value == null ? "" : `, best remaining cost ${value}`}`
+          );
+        }
+      }
+      footerStart.textContent = frame.approach === "greedy" ? "Greedy route" : frame.approach === "naive" ? "Recursive routes" : frame.approach === "memoization" ? "Memoized route" : "Fill from the goal";
+      footerEnd.textContent = frame.approach === "memoization" ? `${storedCount} answers saved` : frame.approach === "tabulation" ? `${storedCount}/${cells.length * cells[0].length} tiles written` : frame.bestCost == null ? `route cost ${frame.routeCost}` : `best route ${frame.bestCost}`;
+      footerRow.setAttribute("aria-label", `${footerStart.textContent}; ${footerEnd.textContent}`);
+      status.innerHTML = escapeHtml(frame.message) + ` <span class="steptrace__counts">· step ${index + 1}/${total}</span>`;
+    },
+    watch(frame) {
+      const current = frame.current ? `R${frame.current[0] + 1}C${frame.current[1] + 1}` : "—";
+      const stored = frame.gridValues.flat().filter((value) => value != null).length;
+      if (frame.approach === "memoization")
+        return [
+          {
+            k: "tile",
+            v: current,
+            sw: "var(--_blue)",
+            hint: "Warehouse tile handled by the current recursive call."
+          },
+          {
+            k: "route",
+            v: frame.routeLabel,
+            sw: "var(--_amber)",
+            hint: "Recursive route that reached the current tile."
+          },
+          {
+            k: "memo",
+            v: `${stored} tiles`,
+            sw: "var(--_violet)",
+            hint: "Solved remaining costs stored directly in the warehouse map."
+          },
+          {
+            k: "best cost",
+            v: frame.bestCost == null ? "—" : String(frame.bestCost),
+            sw: "var(--_green)",
+            hint: "Lowest complete travel cost found for the warehouse route."
+          }
+        ];
+      if (frame.approach === "tabulation")
+        return [
+          {
+            k: "tile",
+            v: current,
+            sw: "var(--_blue)",
+            hint: "Warehouse tile whose remaining cost is being written."
+          },
+          {
+            k: "reads",
+            v: frame.gridDependencies.length ? frame.gridDependencies.map(([row, column]) => `R${row + 1}C${column + 1}`).join(", ") : "base",
+            sw: "var(--_amber)",
+            hint: "Already-written right and down neighbours read by this tile."
+          },
+          {
+            k: "written",
+            v: `${stored}/${frame.costs.length * frame.costs[0].length}`,
+            sw: "var(--_violet)",
+            hint: "Warehouse tiles with a stored remaining-route cost."
+          },
+          {
+            k: "best cost",
+            v: frame.bestCost == null ? "—" : String(frame.bestCost),
+            sw: "var(--_green)",
+            hint: "Lowest complete travel cost found for the warehouse route."
+          }
+        ];
+      return [
+        {
+          k: "tile",
+          v: current,
+          sw: "var(--_blue)",
+          hint: "Warehouse tile currently entered or evaluated."
+        },
+        {
+          k: "route",
+          v: frame.routeLabel,
+          sw: "var(--_amber)",
+          hint: "Right/down route assembled so far from the loading bay."
+        },
+        {
+          k: "repeated",
+          v: String(frame.repeated.length),
+          sw: "var(--_violet)",
+          hint: "Coordinates reached by more than one recursive route."
+        },
+        {
+          k: "best cost",
+          v: frame.bestCost == null ? "—" : String(frame.bestCost),
+          sw: "var(--_green)",
+          hint: "Lowest complete travel cost found for the warehouse route."
+        }
+      ];
+    }
+  };
+}
+function makeDPView(frames, semantics = lcsMatrixGridSemantics) {
+  const f0 = frames[0];
+  const R2 = f0.rowLabels.length;
+  const C = f0.colLabels.length;
+  const guided = semantics.stageLayout === "fill";
+  const roleLegend = semantics.roleLegend || [];
+  const table = el("table", `steptrace__dp${guided ? " steptrace__dp--guided" : ""}`);
+  table.setAttribute("aria-label", semantics.tableLabel);
+  const caption = document.createElement("caption");
+  caption.className = "steptrace__dp-caption";
+  caption.textContent = semantics.axisDescription || semantics.tableLabel;
+  table.append(caption);
+  const thead = document.createElement("thead");
+  const htr = document.createElement("tr");
+  const corner = document.createElement("th");
+  corner.setAttribute("scope", "col");
+  corner.className = "steptrace__dp-corner";
+  corner.textContent = semantics.cornerLabel || "";
+  htr.append(corner);
+  const columnHeaders = [];
+  for (let c = 0; c < C; c++) {
+    const th = document.createElement("th");
+    th.textContent = f0.colLabels[c];
+    th.setAttribute("scope", "col");
+    htr.append(th);
+    columnHeaders.push(th);
+  }
+  thead.append(htr);
+  table.append(thead);
+  const tbody = document.createElement("tbody");
+  const cellEls = [];
+  const rowHeaders = [];
+  for (let r = 0; r < R2; r++) {
+    const tr = document.createElement("tr");
+    const th = document.createElement("th");
+    th.textContent = f0.rowLabels[r];
+    th.setAttribute("scope", "row");
+    tr.append(th);
+    rowHeaders.push(th);
+    const rowCells = [];
+    for (let c = 0; c < C; c++) {
+      const td = document.createElement("td");
+      if (guided) {
+        const value = el("span", "steptrace__dp-value");
+        const markers = el("span", "steptrace__dp-markers");
+        markers.setAttribute("aria-hidden", "true");
+        const operandA = makeMatrixRoleBadge(roleDescriptor(roleLegend, "operand-a"));
+        const operandB = makeMatrixRoleBadge(roleDescriptor(roleLegend, "operand-b"));
+        const target = makeMatrixRoleBadge(roleDescriptor(roleLegend, "target"));
+        markers.append(operandA, operandB, target);
+        td.append(value, markers);
+        rowCells.push({ td, value, target });
+      } else {
+        rowCells.push({ td, value: td, target: null });
+      }
+      tr.append(td);
+    }
+    cellEls.push(rowCells);
+    tbody.append(tr);
+  }
+  table.append(tbody);
+  const footer = semantics.footerModel ? makeMatrixFooter(table, C + 1, roleLegend) : null;
+  const wrap = el("div", `steptrace__dp-wrap${guided ? " steptrace__dp-wrap--guided" : ""}`);
+  wrap.append(table);
+  const legend = roleLegend.length ? makeMatrixRoleLegend(roleLegend) : null;
+  const stage = guided ? el("div", "steptrace__dp-stage steptrace__dp-stage--guided") : null;
+  if (stage) stage.append(wrap);
+  const status = statusEl();
+  const nodes = stage ? [stage, ...legend ? [legend] : [], status] : [wrap, status];
+  function paint(frame, i, total) {
+    if (footer && semantics.footerModel) footer.paint(semantics.footerModel(frame));
+    for (let r = 0; r < R2; r++) {
+      rowHeaders[r].dataset.role = semantics.headerRole?.(frame, "row", r) || "";
+    }
+    for (let c = 0; c < C; c++) {
+      columnHeaders[c].dataset.role = semantics.headerRole?.(frame, "column", c) || "";
+    }
+    for (let r = 0; r < R2; r++) {
+      for (let c = 0; c < C; c++) {
+        const { td, value, target } = cellEls[r][c];
+        const v = frame.grid[r][c];
+        value.textContent = semantics.formatValue(v);
+        td.dataset.state = semantics.stateForCell(frame, r, c);
+        td.dataset.roles = (semantics.rolesForCell?.(frame, r, c) || []).join(" ");
+        const decision = semantics.decisionForCell?.(frame, r, c) || "";
+        if (decision) td.dataset.decision = decision;
+        else delete td.dataset.decision;
+        if (target) {
+          const role = decision === "improve" ? "write" : decision === "keep" ? "keep" : "target";
+          paintMatrixRoleBadge(target, roleDescriptor(roleLegend, role));
+        }
+        td.setAttribute("aria-label", semantics.cellLabel(frame, r, c));
+      }
+    }
+    status.innerHTML = escapeHtml(frame.message) + ` <span class="steptrace__counts">· step ${i + 1}/${total}</span>`;
+  }
+  function watch(frame) {
+    return semantics.watchRows(frame);
+  }
+  return {
+    nodes,
+    stageLayout: semantics.stageLayout || "compact",
+    paint,
+    watch
+  };
+}
+function makeUnionFindView(frames) {
+  const n = frames[0].n;
+  const SP = 56;
+  const UR = 16;
+  const MX = 26;
+  const BASE = 150;
+  const TOP = 26;
+  const width = MX * 2 + Math.max(0, n - 1) * SP + UR * 2;
+  const height = 180;
+  const cx = (i) => MX + UR + i * SP;
+  const PALETTE = [
+    "var(--_blue)",
+    "var(--_violet)",
+    "var(--_amber)",
+    "var(--_green)",
+    "var(--_muted)"
+  ];
+  const svg = document.createElementNS(SVGNS, "svg");
+  svg.setAttribute("class", "steptrace__svg steptrace__uf");
+  svg.setAttribute("viewBox", `0 0 ${width} ${height}`);
+  svg.setAttribute("role", "img");
+  svg.setAttribute("aria-label", "Union-Find forest");
+  const arcLayer = document.createElementNS(SVGNS, "g");
+  svg.append(arcLayer);
+  const nodeEls = [];
+  for (let i = 0; i < n; i++) {
+    const g = document.createElementNS(SVGNS, "g");
+    g.setAttribute("class", "steptrace__ufnode");
+    const back = document.createElementNS(SVGNS, "circle");
+    back.setAttribute("class", "steptrace__nback");
+    back.setAttribute("cx", String(cx(i)));
+    back.setAttribute("cy", String(BASE));
+    back.setAttribute("r", String(UR));
+    const circle = document.createElementNS(SVGNS, "circle");
+    circle.setAttribute("class", "steptrace__ncirc");
+    circle.setAttribute("cx", String(cx(i)));
+    circle.setAttribute("cy", String(BASE));
+    circle.setAttribute("r", String(UR));
+    const id = document.createElementNS(SVGNS, "text");
+    id.setAttribute("class", "steptrace__id");
+    id.setAttribute("x", String(cx(i)));
+    id.setAttribute("y", String(BASE));
+    id.setAttribute("text-anchor", "middle");
+    id.setAttribute("dominant-baseline", "central");
+    id.textContent = String(i);
+    g.append(back, circle, id);
+    svg.append(g);
+    nodeEls.push({ g, circle });
+  }
+  const wrap = el("div", "steptrace__graph");
+  wrap.append(svg);
+  const status = statusEl();
+  function paint(frame, i, total) {
+    const uniqueRoots = [...new Set(frame.roots)];
+    const rootColor = {};
+    uniqueRoots.forEach((r, idx) => rootColor[r] = PALETTE[idx % PALETTE.length]);
+    const hl = new Set(frame.highlight);
+    const ae = frame.activeEdge;
+    for (let k = 0; k < n; k++) {
+      const ne = nodeEls[k];
+      const col = rootColor[frame.roots[k]];
+      ne.circle.style.stroke = col;
+      ne.circle.style.fill = `color-mix(in srgb, ${col} 22%, transparent)`;
+      ne.g.dataset.root = frame.parent[k] === k ? "true" : "false";
+      ne.g.dataset.hl = hl.has(k) ? "true" : "false";
+    }
+    arcLayer.replaceChildren();
+    for (let k = 0; k < n; k++) {
+      const p = frame.parent[k];
+      if (p === k) continue;
+      const x1 = cx(k);
+      const x2 = cx(p);
+      const midX = (x1 + x2) / 2;
+      const arc = document.createElementNS(SVGNS, "path");
+      arc.setAttribute("class", "steptrace__ufarc");
+      arc.setAttribute("d", `M ${x1} ${BASE - UR} Q ${midX} ${TOP} ${x2} ${BASE - UR}`);
+      arc.setAttribute("fill", "none");
+      const active = ae && ae[0] === k && ae[1] === p || hl.has(k) && hl.has(p);
+      arc.dataset.active = active ? "true" : "false";
+      arcLayer.append(arc);
+    }
+    status.innerHTML = escapeHtml(frame.message) + ` <span class="steptrace__counts">· step ${i + 1}/${total}</span>`;
+  }
+  function watch(frame) {
+    const sets = new Set(frame.roots).size;
+    const ae = frame.activeEdge;
+    return [
+      { k: "sets", v: String(sets), sw: "var(--_blue)" },
+      { k: "edge", v: ae ? `${ae[0]} — ${ae[1]}` : "—", sw: "var(--_violet)" }
+    ];
+  }
+  return { nodes: [wrap, status], paint, watch };
+}
+function makeBitsView(frames) {
+  const width = frames[0].width;
+  const total = frames[0].total;
+  const stage = el("div", "steptrace__bits");
+  const tally = el("div", "steptrace__btally");
+  const tallyLead = el("div", "steptrace__btally-lead");
+  tallyLead.textContent = "1s cleared";
+  const tallyBoxes = el("div", "steptrace__btally-boxes");
+  const boxes = [];
+  for (let k = 0; k < total; k++) {
+    const b = el("div", "steptrace__btally-box");
+    tallyBoxes.append(b);
+    boxes.push(b);
+  }
+  const tallyCount = el("div", "steptrace__btally-count");
+  tally.append(tallyLead, tallyBoxes, tallyCount);
+  stage.append(tally);
+  const idxRow = el("div", "steptrace__brow steptrace__brow--idx");
+  const idxGutter = el("div", "steptrace__bgutter");
+  idxGutter.textContent = "bit";
+  const idxStrip = el("div", "steptrace__bcells steptrace__bcells--idx");
+  for (let j = 0; j < width; j++) {
+    const bi = width - 1 - j;
+    const c = el("div", "steptrace__bidx");
+    c.textContent = bi % 4 === 0 ? String(bi) : "";
+    idxStrip.append(c);
+  }
+  idxRow.append(idxGutter, idxStrip);
+  stage.append(idxRow);
+  const OP = { a: false, b: true, r: true };
+  const lanes = {};
+  for (const key of ["a", "b", "r"]) {
+    const row = el("div", "steptrace__brow");
+    const gutter = el("div", "steptrace__bgutter");
+    const label = frames[0].labels[key];
+    if (OP[key]) {
+      const op = el("span", "steptrace__bop");
+      op.textContent = label;
+      gutter.append(op);
+    } else {
+      gutter.textContent = label;
+    }
+    const strip = el("div", "steptrace__bcells");
+    const cells = [];
+    for (let j = 0; j < width; j++) {
+      const c = el("div", "steptrace__bcell");
+      strip.append(c);
+      cells.push(c);
+    }
+    row.append(gutter, strip);
+    stage.append(row);
+    lanes[key] = { row, cells };
+  }
+  const status = statusEl();
+  function paint(frame, i, stepTotal) {
+    for (let k = 0; k < boxes.length; k++) {
+      boxes[k].dataset.filled = k < frame.pop ? "1" : "0";
+      boxes[k].dataset.just = k === frame.just ? "1" : "0";
+    }
+    tallyCount.textContent = `${frame.pop} / ${frame.total}`;
+    for (const key of ["a", "b", "r"]) {
+      const lane = lanes[key];
+      const data = frame[key];
+      lane.row.dataset.live = data.live ? "1" : "0";
+      for (let j = 0; j < width; j++) {
+        const bi = width - 1 - j;
+        const c = lane.cells[j];
+        c.textContent = String(data.bits[bi]);
+        c.dataset.bit = String(data.bits[bi]);
+        c.dataset.state = data.state[bi] || "";
+      }
+    }
+    status.innerHTML = escapeHtml(frame.message) + ` <span class="steptrace__counts">· step ${i + 1}/${stepTotal}</span>`;
+  }
+  function watch(frame) {
+    return [
+      {
+        k: "x",
+        v: `${frame.value} = 0b${frame.value.toString(2).padStart(frame.width, "0")}`,
+        sw: "var(--_accent)"
+      },
+      { k: "lowest 1", v: frame.low >= 0 ? `bit ${frame.low}` : "—", sw: "var(--_amber)" },
+      { k: "1s cleared", v: `${frame.pop} / ${frame.total}`, sw: "var(--_violet)" }
+    ];
+  }
+  return { nodes: [stage, status], paint, watch };
+}
+function makeBacktrackView(frames) {
+  const n = frames[0].n;
+  const wrap = el("div", "steptrace__bt");
+  const board = el("div", "steptrace__btboard");
+  board.style.setProperty("--_n", String(n));
+  const cells = [];
+  for (let r = 0; r < n; r++) {
+    const rowCells = [];
+    for (let c = 0; c < n; c++) {
+      const cell = el("div", "steptrace__btcell");
+      cell.dataset.parity = String((r + c) % 2);
+      const glyph = el("div", "steptrace__btqueen");
+      glyph.textContent = "♛";
+      glyph.setAttribute("aria-hidden", "true");
+      cell.append(glyph);
+      board.append(cell);
+      rowCells.push(cell);
+    }
+    cells.push(rowCells);
+  }
+  const strip = el("div", "steptrace__btpath");
+  const slots = [];
+  for (let r = 0; r < n; r++) {
+    const slot = el("div", "steptrace__btslot");
+    slot.textContent = "—";
+    strip.append(slot);
+    slots.push(slot);
+  }
+  wrap.append(board, strip);
+  const status = statusEl();
+  function attackedSet(queens) {
+    const hit = /* @__PURE__ */ new Set();
+    for (let qr = 0; qr < n; qr++) {
+      const qc = queens[qr];
+      if (qc == null) continue;
+      for (let r = 0; r < n; r++) {
+        for (let c = 0; c < n; c++) {
+          if (queens[r] === c) continue;
+          if (c === qc || r === qr || Math.abs(qr - r) === Math.abs(qc - c)) hit.add(r + "," + c);
+        }
+      }
+    }
+    return hit;
+  }
+  function paint(frame) {
+    const q = frame.queens;
+    const cur = frame.cursor;
+    const conf = frame.conflict;
+    const attacked = attackedSet(q);
+    for (let r = 0; r < n; r++) {
+      for (let c = 0; c < n; c++) {
+        const cell = cells[r][c];
+        const hasQueen = q[r] === c;
+        const isCursor = cur && cur.row === r && cur.col === c;
+        let state = "";
+        if (frame.solved && hasQueen) state = "solved";
+        else if (isCursor && frame.type === "reject") state = "reject";
+        else if (isCursor && frame.type === "backtrack") state = "remove";
+        else if (isCursor && frame.type === "place") state = "try";
+        else if (hasQueen) state = "queen";
+        else if (attacked.has(r + "," + c)) state = "attacked";
+        cell.dataset.state = state;
+        cell.dataset.hasQueen = hasQueen ? "1" : "0";
+        cell.dataset.conflict = conf && conf.row === r && conf.col === c ? "1" : "0";
+      }
+    }
+    for (let r = 0; r < n; r++) {
+      const slot = slots[r];
+      const col = q[r];
+      slot.textContent = col == null ? "—" : String(col);
+      let sstate = col == null ? "" : "on";
+      if (cur && cur.row === r) {
+        if (frame.type === "reject") sstate = "reject";
+        else if (frame.type === "backtrack") sstate = "remove";
+        else if (frame.type === "place") sstate = "try";
+      }
+      slot.dataset.state = sstate;
+    }
+    status.innerHTML = escapeHtml(frame.message);
+  }
+  function watch(frame) {
+    const cur = frame.cursor;
+    return [
+      { k: "depth", v: `${frame.depth} / ${frame.n}`, sw: "var(--_blue)" },
+      { k: "trying", v: cur ? `(${cur.row}, ${cur.col})` : "—", sw: "var(--_amber)" },
+      { k: "pruned", v: String(frame.pruned), sw: "var(--_muted)" }
+    ];
+  }
+  return { nodes: [wrap, status], paint, watch };
+}
+function makeExecutionTreeView(frames, descriptor) {
+  const f0 = frames[0];
+  const nodes = f0.nodes;
+  const halfWidth = descriptor.nodeWidth / 2;
+  const halfHeight = descriptor.nodeHeight / 2;
+  const padX = halfWidth + 12;
+  const padY = halfHeight + 12;
+  const xs = nodes.map((node) => node.x);
+  const ys = nodes.map((node) => node.y);
+  const minX = Math.min(...xs);
+  const minY = Math.min(...ys);
+  const width = Math.max(...xs) - minX + padX * 2;
+  const height = Math.max(...ys) - minY + padY * 2;
+  const position = Object.fromEntries(
+    nodes.map((node) => [node.id, { x: node.x - minX + padX, y: node.y - minY + padY }])
+  );
+  const svg = document.createElementNS(SVGNS, "svg");
+  const title = document.createElementNS(SVGNS, "title");
+  const description = document.createElementNS(SVGNS, "desc");
+  const accessibleId = `steptrace-execution-tree-${++executionTreeViewSerial}`;
+  title.id = `${accessibleId}-title`;
+  description.id = `${accessibleId}-description`;
+  svg.setAttribute("class", "steptrace__rtsvg");
+  svg.setAttribute("viewBox", `0 0 ${width} ${height}`);
+  svg.setAttribute("preserveAspectRatio", "xMidYMid meet");
+  svg.setAttribute("role", "img");
+  svg.setAttribute("aria-labelledby", `${title.id} ${description.id}`);
+  const canvasWidth = Math.max(descriptor.minSvgWidth, width * (descriptor.canvasScale || 1));
+  svg.style.setProperty("--steptrace-tree-width", `${canvasWidth}px`);
+  svg.append(title, description);
+  const edgeElements = [];
+  for (const edge of f0.edges) {
+    const from = position[edge.from];
+    const to = position[edge.to];
+    const line = document.createElementNS(SVGNS, "line");
+    line.setAttribute("class", "steptrace__rtedge");
+    line.setAttribute("x1", String(from.x));
+    line.setAttribute("y1", String(from.y + halfHeight));
+    line.setAttribute("x2", String(to.x));
+    line.setAttribute("y2", String(to.y - halfHeight));
+    line.setAttribute("aria-hidden", "true");
+    line.setAttribute("focusable", "false");
+    svg.append(line);
+    edgeElements.push({ element: line, from: edge.from, to: edge.to });
+  }
+  const nodeElements = {};
+  for (const node of nodes) {
+    const point = position[node.id];
+    const group = document.createElementNS(SVGNS, "g");
+    group.setAttribute("class", "steptrace__rtnode");
+    group.setAttribute("transform", `translate(${point.x} ${point.y})`);
+    group.setAttribute("aria-hidden", "true");
+    group.setAttribute("focusable", "false");
+    group.dataset.shape = descriptor.shape;
+    const ring = document.createElementNS(SVGNS, descriptor.shape === "circle" ? "circle" : "rect");
+    ring.setAttribute("class", "steptrace__rtring");
+    const surface = document.createElementNS(
+      SVGNS,
+      descriptor.shape === "circle" ? "circle" : "rect"
+    );
+    surface.setAttribute("class", "steptrace__rtcirc");
+    if (descriptor.shape === "circle") {
+      ring.setAttribute("r", String(halfWidth + 3));
+      surface.setAttribute("r", String(halfWidth));
+    } else {
+      surface.setAttribute("x", String(-halfWidth));
+      surface.setAttribute("y", String(-halfHeight));
+      surface.setAttribute("width", String(descriptor.nodeWidth));
+      surface.setAttribute("height", String(descriptor.nodeHeight));
+      surface.setAttribute("rx", "7");
+      ring.setAttribute("x", String(-halfWidth - 2));
+      ring.setAttribute("y", String(-halfHeight - 2));
+      ring.setAttribute("width", String(descriptor.nodeWidth + 4));
+      ring.setAttribute("height", String(descriptor.nodeHeight + 4));
+      ring.setAttribute("rx", "9");
+    }
+    const label = document.createElementNS(SVGNS, "text");
+    const detail = document.createElementNS(SVGNS, "text");
+    const result = document.createElementNS(SVGNS, "text");
+    const badge = document.createElementNS(SVGNS, "text");
+    label.setAttribute("class", "steptrace__rtlabel");
+    detail.setAttribute("class", "steptrace__rtdetail");
+    result.setAttribute("class", "steptrace__rtval");
+    badge.setAttribute("class", "steptrace__rtbadge");
+    for (const element of [label, detail, result]) element.setAttribute("text-anchor", "middle");
+    const [primaryLine, secondaryLine] = descriptor.nodeLines(node);
+    label.textContent = primaryLine;
+    detail.textContent = secondaryLine;
+    if (descriptor.shape === "circle") {
+      label.setAttribute("y", "0");
+      label.setAttribute("dominant-baseline", "central");
+      result.setAttribute("y", String(halfHeight + 9));
+    } else {
+      label.setAttribute("y", "-4");
+      detail.setAttribute("y", "9");
+    }
+    group.append(ring, surface, label, detail, result, badge);
+    svg.append(group);
+    nodeElements[node.id] = { group, detail, result, badge, secondaryLine };
+  }
+  const legend = el("div", "steptrace__legend");
+  legend.setAttribute("aria-label", `${descriptor.ariaLabel} state legend`);
+  for (const item of descriptor.legend) {
+    const row = el("div", "steptrace__legend-row");
+    const swatch = el("span", "steptrace__swatch steptrace__rtswatch");
+    swatch.dataset.state = item.state;
+    row.append(swatch, document.createTextNode(item.label));
+    legend.append(row);
+  }
+  const wrap = el("div", "steptrace__rectree");
+  wrap.setAttribute("role", "region");
+  wrap.setAttribute("aria-label", `${descriptor.ariaLabel} visualization`);
+  wrap.dataset.fitWidth = descriptor.fitWidth ? "true" : "false";
+  wrap.tabIndex = 0;
+  wrap.append(svg);
+  const status = statusEl();
+  function paint(frame, index, total) {
+    const model = descriptor.frameModel(frame);
+    const visible = new Set(model.visible);
+    const collapsed = new Set(model.collapsed);
+    const path = new Set(model.path);
+    const activeNode2 = nodes.find((node) => node.id === model.active);
+    title.textContent = `${descriptor.ariaLabel}: ${model.phase}`;
+    description.textContent = `${model.phase}. Active subproblem ${activeNode2 ? descriptor.nodeLines(activeNode2).join("; ") : "none"}. ${model.action}.`;
+    for (const node of nodes) {
+      const elements = nodeElements[node.id];
+      const state = model.states[node.id] || "";
+      elements.group.dataset.vis = visible.has(node.id) ? "1" : "0";
+      elements.group.dataset.collapsed = collapsed.has(node.id) ? "true" : "false";
+      elements.group.dataset.state = state;
+      elements.group.dataset.active = model.active === node.id ? "true" : "false";
+      elements.group.dataset.path = path.has(node.id) ? "true" : "false";
+      const value = model.results[node.id];
+      const resultText = Array.isArray(value) ? value.length ? `[${value.join(", ")}]` : "" : value == null ? "" : String(value);
+      if (descriptor.shape === "card") {
+        elements.detail.textContent = resultText || elements.secondaryLine;
+        elements.result.textContent = "";
+        elements.badge.textContent = "";
+      } else {
+        elements.result.textContent = resultText ? `→ ${resultText}` : "";
+        elements.badge.textContent = descriptor.stateLabels[state] || "";
+      }
+    }
+    for (const edge of edgeElements) {
+      edge.element.dataset.vis = visible.has(edge.to) ? "1" : "0";
+      edge.element.dataset.collapsed = collapsed.has(edge.to) ? "true" : "false";
+      edge.element.dataset.path = path.has(edge.from) && path.has(edge.to) ? "true" : "false";
+    }
+    status.innerHTML = escapeHtml(frame.message) + ` <span class="steptrace__counts">· step ${index + 1}/${total}</span>`;
+  }
+  function watch(frame) {
+    const model = descriptor.frameModel(frame);
+    return descriptor.watchRows(frame, model);
+  }
+  return { nodes: [wrap, legend, status], stageLayout: "fill", paint, watch };
+}
+function makeRecTreeView(frames) {
+  return makeExecutionTreeView(frames, legacyRecTreeDescriptor);
+}
+function makeGraphView(frames, graph, frontierLabel) {
+  const pad = 34;
+  const xs = graph.nodes.map((n) => n.x);
+  const ys = graph.nodes.map((n) => n.y);
+  const minX = Math.min(...xs);
+  const minY = Math.min(...ys);
+  const w = Math.max(...xs) - minX + pad * 2;
+  const h = Math.max(...ys) - minY + pad * 2;
+  const pos = Object.fromEntries(
+    graph.nodes.map((n) => [n.id, { x: n.x - minX + pad, y: n.y - minY + pad }])
+  );
+  const svg = document.createElementNS(SVGNS, "svg");
+  svg.setAttribute("class", "steptrace__svg");
+  svg.setAttribute("viewBox", `0 0 ${w} ${h}`);
+  svg.setAttribute("role", "img");
+  svg.setAttribute("aria-label", "Graph traversal");
+  if (graph.directed) {
+    const defs = document.createElementNS(SVGNS, "defs");
+    defs.innerHTML = `<marker id="st-arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path class="steptrace__arrow" d="M0,0 L10,5 L0,10 z"/></marker>`;
+    svg.append(defs);
+  }
+  const edgeEls = [];
+  for (const e of graph.edges) {
+    const a = pos[e.from];
+    const b = pos[e.to];
+    const { x1, y1, x2, y2 } = trimToRadius(a, b, R + (graph.directed ? 3 : 0));
+    const line = document.createElementNS(SVGNS, "line");
+    line.setAttribute("class", "steptrace__edge");
+    line.setAttribute("x1", x1);
+    line.setAttribute("y1", y1);
+    line.setAttribute("x2", String(x2));
+    line.setAttribute("y2", String(y2));
+    if (graph.directed) line.setAttribute("marker-end", "url(#st-arrow)");
+    svg.append(line);
+    edgeEls.push({ el: line, from: e.from, to: e.to });
+    if (e.weight != null) {
+      const label = document.createElementNS(SVGNS, "text");
+      label.setAttribute("class", "steptrace__edge-label");
+      label.setAttribute("x", String((a.x + b.x) / 2));
+      label.setAttribute("y", String((a.y + b.y) / 2 - 4));
+      label.setAttribute("text-anchor", "middle");
+      label.textContent = String(e.weight);
+      svg.append(label);
+    }
+  }
+  const nodeEls = {};
+  for (const n of graph.nodes) {
+    const p = pos[n.id];
+    const g = document.createElementNS(SVGNS, "g");
+    g.setAttribute("class", "steptrace__node");
+    const back = document.createElementNS(SVGNS, "circle");
+    back.setAttribute("class", "steptrace__nback");
+    back.setAttribute("cx", p.x);
+    back.setAttribute("cy", p.y);
+    back.setAttribute("r", String(R));
+    const circle = document.createElementNS(SVGNS, "circle");
+    circle.setAttribute("class", "steptrace__ncirc");
+    circle.setAttribute("cx", p.x);
+    circle.setAttribute("cy", p.y);
+    circle.setAttribute("r", String(R));
+    if (frames[0] && frames[0].target === n.id) {
+      const halo = document.createElementNS(SVGNS, "circle");
+      halo.setAttribute("class", "steptrace__ntarget");
+      halo.setAttribute("cx", p.x);
+      halo.setAttribute("cy", p.y);
+      halo.setAttribute("r", String(R + 4.5));
+      g.append(halo);
+    }
+    const id = document.createElementNS(SVGNS, "text");
+    id.setAttribute("class", "steptrace__id");
+    id.setAttribute("x", p.x);
+    id.setAttribute("y", p.y);
+    id.setAttribute("text-anchor", "middle");
+    id.setAttribute("dominant-baseline", "central");
+    id.textContent = n.id;
+    const dist = document.createElementNS(SVGNS, "text");
+    dist.setAttribute("class", "steptrace__d");
+    dist.setAttribute("x", p.x);
+    dist.setAttribute("y", String(p.y - R - 5));
+    dist.setAttribute("text-anchor", "middle");
+    const mark = document.createElementNS(SVGNS, "svg");
+    mark.setAttribute("class", "steptrace__nmark");
+    mark.setAttribute("x", String(p.x - 6));
+    mark.setAttribute("y", String(p.y + R + 5));
+    mark.setAttribute("width", "12");
+    mark.setAttribute("height", "12");
+    mark.setAttribute("viewBox", "0 0 24 24");
+    mark.setAttribute("aria-hidden", "true");
+    mark.innerHTML = '<rect data-state-icon="current" x="6" y="6" width="12" height="12" rx="2" fill="currentColor"/><path data-state-icon="frontier" d="m12 3 9 9-9 9-9-9Z" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linejoin="round"/><path data-state-icon="visited" d="M20 6 9 17l-5-5" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>';
+    g.append(back, circle, id, dist, mark);
+    svg.append(g);
+    nodeEls[n.id] = { g, dist, mark };
+  }
+  const legend = el("div", "steptrace__legend");
+  for (const [word, stateKey] of [
+    ["current", "current"],
+    ["frontier", "frontier"],
+    ["visited", "visited"]
+  ]) {
+    const row = el("div", "steptrace__legend-row");
+    const sw = el("span", "steptrace__swatch steptrace__swatch--" + stateKey);
+    if (stateKey === "visited") {
+      sw.innerHTML = ICON.check;
+      sw.setAttribute("aria-hidden", "true");
+    }
+    row.append(sw, document.createTextNode(word));
+    legend.append(row);
+  }
+  const graphWrap = el("div", "steptrace__graph");
+  graphWrap.append(svg);
+  const status = statusEl();
+  function paint(frame, i, total) {
+    const visited = new Set(frame.visited);
+    const frontier = new Set(frame.frontier);
+    for (const n of graph.nodes) {
+      const ne = nodeEls[n.id];
+      let state = "";
+      if (visited.has(n.id)) state = "visited";
+      if (frontier.has(n.id)) state = "frontier";
+      if (frame.current === n.id) state = "current";
+      ne.g.dataset.state = state;
+      ne.mark.dataset.state = state;
+      const d = frame.dist[n.id];
+      ne.dist.textContent = d == null ? "" : `d:${d}`;
+    }
+    const selected = frame.selected || [];
+    const isSel = (from, to) => selected.some(
+      (s) => s[0] === from && s[1] === to || !graph.directed && s[0] === to && s[1] === from
+    );
+    for (const e of edgeEls) {
+      const act = frame.edge && (frame.edge.from === e.from && frame.edge.to === e.to || !graph.directed && frame.edge.from === e.to && frame.edge.to === e.from);
+      const sel = isSel(e.from, e.to);
+      e.el.dataset.active = act ? "true" : "false";
+      e.el.dataset.selected = sel ? "true" : "false";
+      e.el.dataset.dim = selected.length && !sel ? "true" : "false";
+    }
+    status.innerHTML = escapeHtml(frame.message) + ` <span class="steptrace__counts">· ${frame.visited.length} visited · step ${i + 1}/${total}</span>`;
+  }
+  function watch(frame) {
+    return [
+      {
+        k: "queue",
+        v: "[ " + (frame.frontier.length ? frame.frontier.join(", ") : "∅") + " ]",
+        sw: "var(--_amber)"
+      },
+      {
+        k: "visited",
+        v: "{ " + (frame.visited.length ? frame.visited.join(", ") : "∅") + " }",
+        sw: "var(--_green)"
+      }
+    ];
+  }
+  return { nodes: [graphWrap, legend, status], paint, watch };
+}
+function trimToRadius(a, b, r) {
+  const dx = b.x - a.x;
+  const dy = b.y - a.y;
+  const len = Math.hypot(dx, dy) || 1;
+  const ux = dx / len;
+  const uy = dy / len;
+  return { x1: a.x + ux * R, y1: a.y + uy * R, x2: b.x - ux * r, y2: b.y - uy * r };
+}
+function statusEl() {
+  const status = el("div", "steptrace__status");
+  status.setAttribute("role", "status");
+  status.setAttribute("aria-live", "polite");
+  return status;
+}
+function el(tag, cls = "") {
+  const n = document.createElement(tag);
+  if (cls) n.className = cls;
+  return n;
+}
+function spacer() {
+  return el("span", "steptrace__spacer");
+}
+function escapeHtml(s) {
+  return String(s).replace(
+    /[&<>"]/g,
+    (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" })[c]
+  );
+}
+function stripTags(s) {
+  return String(s).replace(/<[^>]*>/g, "");
+}
+function pad2(n) {
+  return String(n).padStart(2, "0");
+}
+function iconBtn(label, svg, extra = "") {
+  const b = document.createElement("button");
+  b.type = "button";
+  b.className = "steptrace__btn" + (extra ? " " + extra : "");
+  b.innerHTML = svg;
+  b.setAttribute("aria-label", label);
+  b.title = label;
+  return b;
+}
+function buildMilestones(algorithm, kind, frames) {
+  const marks = [];
+  const push = (i, label) => {
+    if (i < 0 || i >= frames.length || !label) return;
+    const prev = marks[marks.length - 1];
+    if (prev && (prev.i === i || prev.label === label)) return;
+    marks.push({ i, label });
+  };
+  const firstGap = frames.find((frame) => Number.isInteger(frame.gap))?.gap;
+  const familyProfile = frames[0]?.profile;
+  const firstDistributionPass = frames.find((frame) => frame.type === "pass");
+  const initial = kind === "sort" ? firstGap != null ? `Gap ${firstGap}` : familyProfile === "cyclic" ? "Place values" : familyProfile === "counting" ? "Tally keys" : familyProfile === "radix" ? `${firstDistributionPass?.passLabel || "Digit"} pass` : familyProfile === "bucket" ? "Scatter ranges" : familyProfile === "introsort" ? "Quicksort" : algorithm === "bubble-sort" ? "Pass 1" : algorithm === "insertion-sort" ? "Prefix 1" : algorithm === "selection-sort" ? "Select 1" : algorithm === "heap-sort" ? "Build heap" : algorithm === "merge-sort" ? "Runs of 1" : "Partition" : kind === "search" ? familyProfile === "exponential" ? "Gallop" : familyProfile === "interpolation" ? "Estimate" : familyProfile === "jump" ? "Jump blocks" : familyProfile === "ternary" ? "Narrow peak" : familyProfile === "shipping-capacity" ? "Answer range" : "Search range" : kind === "string" ? "Shift 0" : kind === "backtrack" ? "Depth 0" : kind === "rectree" ? familyProfile === "divide-and-conquer" ? "Whole problem" : familyProfile === "merge-sort" ? "Whole array" : familyProfile === "memoization" ? "Empty cache" : familyProfile === "coin-change-top-down" ? "Amount 30¢" : familyProfile === "grid-path-top-down" ? "Loading bay" : "Call tree" : "Initialize";
+  push(0, initial);
+  let lastRange = "";
+  let lastGap = firstGap;
+  let lastRow = null;
+  let lastWindow = "";
+  let lastDepth = null;
+  for (let i = 1; i < frames.length - 1; i++) {
+    const f = frames[i];
+    if (kind === "sort") {
+      if (familyProfile === "counting" && f.type === "prefix" && frames[i - 1].type !== "prefix") {
+        push(i, "Reserve output ranges");
+      } else if (familyProfile === "counting" && f.type === "place" && frames[i - 1].type !== "place") {
+        push(i, "Place stably");
+      } else if (familyProfile === "radix" && f.type === "pass" && frames[i - 1].type !== "pass") {
+        push(i, `${f.passLabel} pass`);
+      } else if (familyProfile === "radix" && f.type === "gather" && frames[i - 1].type !== "gather") {
+        push(i, `Gather ${f.passLabel}`);
+      } else if (familyProfile === "bucket" && f.type === "pass" && frames[i - 1].type !== "pass") {
+        push(i, "Scatter ranges");
+      } else if (familyProfile === "bucket" && f.type === "local-sort" && frames[i - 1].type !== "local-sort") {
+        push(i, "Sort buckets");
+      } else if (familyProfile === "bucket" && f.type === "gather" && frames[i - 1].type !== "gather") {
+        push(i, "Gather ranges");
+      } else if (familyProfile === "introsort" && f.type === "fallback") {
+        push(i, "Heap fallback");
+      } else if (familyProfile === "introsort" && f.type === "cleanup") {
+        push(i, "Insertion cleanup");
+      }
+      if (Number.isInteger(f.gap) && f.gap !== lastGap) {
+        push(i, `Gap ${f.gap}`);
+        lastGap = f.gap;
+      }
+      const range = f.range ? f.range.join(":") : "";
+      if (range && range !== lastRange) {
+        const word = algorithm === "merge-sort" ? "Merge" : algorithm === "heap-sort" ? "Heap" : "Range";
+        push(i, `${word} ${f.range[0]}–${f.range[1]}`);
+      } else if (f.type === "mark-sorted") {
+        const fixed = f.sorted.length;
+        const word = familyProfile === "cyclic" ? "Placed" : algorithm === "insertion-sort" ? "Prefix" : algorithm === "selection-sort" ? "Select" : "Fixed";
+        const count = algorithm === "bubble-sort" || algorithm === "selection-sort" ? Math.min(fixed + 1, f.array.length) : fixed;
+        push(i, algorithm === "bubble-sort" ? `Pass ${count}` : `${word} ${count}`);
+      }
+      lastRange = range || lastRange;
+    } else if (kind === "graph" && f.type === "visit" && f.current != null) {
+      const word = algorithm === "dijkstra" ? "Settle" : algorithm === "topological-sort" ? "Output" : "Visit";
+      push(i, `${word} ${f.current}`);
+    } else if (kind === "search") {
+      if (familyProfile === "exponential" && f.type === "phase" && f.phase === "binary")
+        push(i, "Binary search");
+      else if (f.type === "phase" && f.phase === "scan")
+        push(i, familyProfile === "ternary" ? "Final scan" : "Linear scan");
+      else if (f.type === "phase" && f.phase === "interpolation") push(i, "Interpolation");
+      else if (f.type === "phase" && f.phase === "ternary") push(i, "Ternary");
+      else if (familyProfile === "shipping-capacity" && f.type === "evaluate")
+        push(i, `Check ${f.candidate}`);
+      else if (f.type === "probe")
+        push(
+          i,
+          familyProfile === "ternary" && f.mid2 != null ? `Probes ${f.mid}/${f.mid2}` : `${familyProfile === "exponential" && f.phase === "gallop" ? "Bound" : familyProfile === "jump" && f.phase === "jump" ? "Block end" : "Probe"} ${f.mid}`
+        );
+    } else if (kind === "string") {
+      if ((f.type === "slide" || f.type === "hash" || f.type === "match") && String(f.shift) !== lastWindow) {
+        push(i, `Shift ${f.shift}`);
+        lastWindow = String(f.shift);
+      }
+    } else if (kind === "pointers") {
+      const win = f.window ? f.window.join(":") : "";
+      if (win && win !== lastWindow) {
+        push(i, `Window ${f.window[0]}–${f.window[1]}`);
+        lastWindow = win;
+      }
+    } else if (kind === "dp") {
+      if (familyProfile === "floyd-warshall" && f.type === "stage") {
+        push(i, `Stage k = ${f.k}`);
+      } else if (familyProfile === "dynamic-programming" && f.type === "compute" && f.cur) {
+        push(i, `${f.variant === "concrete" ? "Prefix" : "Solve"} ${f.colLabels[f.cur[1]]}`);
+      } else if (f.type === "compute" && f.cur && f.cur[0] !== lastRow) {
+        push(i, `Row ${f.rowLabels[f.cur[0]]}`);
+        lastRow = f.cur[0];
+      } else if (f.type === "trace" && frames[i - 1].type !== "trace") {
+        push(i, "Traceback");
+      }
+    } else if (kind === "unionfind" && f.type === "link" && f.activeEdge) {
+      push(i, `Link ${f.activeEdge[0]}→${f.activeEdge[1]}`);
+    } else if (kind === "bits" && f.type === "commit") {
+      push(i, `Clear ${f.pop}`);
+    } else if (kind === "backtrack") {
+      if (f.type === "place" && f.depth !== lastDepth) {
+        push(i, `Depth ${f.depth}`);
+        lastDepth = f.depth;
+      }
+    } else if (kind === "rectree") {
+      if (f.type === "split") {
+        const activeNode2 = f.nodes.find((node) => node.id === f.active);
+        push(i, `Split ${activeNode2?.label || "range"}`);
+      } else if (f.type === "combine") {
+        const activeNode2 = f.nodes.find((node) => node.id === f.active);
+        push(
+          i,
+          `${f.profile === "merge-sort" ? "Merge" : "Combine"} ${activeNode2?.label || "problem"}`
+        );
+      } else if (f.type === "store") {
+        const activeNode2 = f.nodes.find((node) => node.id === f.active);
+        push(i, `Store ${activeNode2?.label || "state"}`);
+      } else if (f.type === "cache") {
+        const activeNode2 = f.nodes.find((node) => node.id === f.active);
+        push(i, `Reuse ${activeNode2?.label || "state"}`);
+      } else if (f.type === "phase") {
+        push(i, f.phase === "memo" ? "Memoized" : "Plain recursion");
+      }
+    }
+  }
+  push(frames.length - 1, "Result");
+  return marks;
+}
+function thinMilestones(marks) {
+  if (marks.length <= 12) return marks;
+  const kept = [marks[0]];
+  const stride = Math.ceil((marks.length - 2) / 10);
+  for (let i = 1; i < marks.length - 1; i += stride) kept.push(marks[i]);
+  kept.push(marks[marks.length - 1]);
+  return kept;
+}
+function milestoneAt(marks, i) {
+  let hit = marks[0];
+  for (const mark of marks) {
+    if (mark.i > i) break;
+    hit = mark;
+  }
+  return hit;
+}
+function graphEdgeWeight(graph, a, b) {
+  if (!graph) return 0;
+  const e = graph.edges.find(
+    (x) => x.from === a && x.to === b || !graph.directed && x.from === b && x.to === a
+  );
+  return e && e.weight != null ? e.weight : 1;
+}
+function summaryFor(algorithm, kind, frame, graph) {
+  if (kind === "sort") {
+    if (algorithm === "counting-sort")
+      return `Output [${frame.output.join(", ")}] · ${frame.tallied} tallies · ${frame.placed} stable placements.`;
+    if (algorithm === "radix-sort" || algorithm === "bucket-sort") {
+      const output = frame.source.map((token) => token.value);
+      const work = algorithm === "radix-sort" ? `${frame.passCount} stable digit passes` : `${frame.comparisons} local comparisons`;
+      return `Output [${output.join(", ")}] · ${work} · ${frame.gathered} gathered.`;
+    }
+    if (algorithm === "merge-sort")
+      return `Output [${frame.array.join(", ")}] · ${frame.swaps} writes.`;
+    const unit = frame.movementUnit || (["bubble-sort", "selection-sort", "quick-sort", "heap-sort"].includes(algorithm) ? "swaps" : "moves");
+    const comparisons = frame.showComparisons === false ? "" : `${frame.comparisons} comparisons · `;
+    return `Output [${frame.array.join(", ")}] · ${comparisons}${frame.swaps} ${unit}.`;
+  }
+  if (kind === "graph") {
+    if (algorithm === "dijkstra" && frame.target != null) {
+      const edges = frame.selected || [];
+      const path = edges.length ? [edges[0][0], ...edges.map((e) => e[1])].join(" → ") : String(frame.target);
+      const cost = frame.dist[frame.target];
+      return cost == null ? `${frame.target} is unreachable.` : `Path ${path} · cost ${cost} · ${frame.visited.length} nodes settled.`;
+    }
+    if (algorithm === "dijkstra") {
+      const distances = Object.keys(frame.dist).sort().map((id) => `${id}:${frame.dist[id]}`).join(", ");
+      return `Shortest-path tree: ${frame.selected.length} edges · distances ${distances}.`;
+    }
+    if (algorithm === "prim") {
+      const weight = (frame.selected || []).reduce(
+        (sum, e) => sum + graphEdgeWeight(graph, e[0], e[1]),
+        0
+      );
+      return `${frame.selected.length} edges selected · total weight ${weight} · ${frame.visited.length} nodes joined.`;
+    }
+    if (algorithm === "topological-sort") {
+      const unresolved = graph ? graph.nodes.length - frame.visited.length : 0;
+      return unresolved > 0 ? `No topological order · cycle leaves ${unresolved} node${unresolved === 1 ? "" : "s"} unresolved.` : `Order ${frame.visited.join(" → ")} · ${frame.visited.length} nodes emitted.`;
+    }
+    if (frame.target != null) {
+      const d = frame.dist[frame.target];
+      return d == null ? `${frame.target} is unreachable.` : `${frame.target} reached at depth ${d} after ${frame.visited.length} visits.`;
+    }
+    return `${frame.visited.length} nodes visited · frontier empty.`;
+  }
+  if (kind === "search") {
+    if (algorithm === "binary-search-on-answer")
+      return `Minimum feasible capacity ${frame.answer} · ${frame.probes} probe${frame.probes === 1 ? "" : "s"}.`;
+    return frame.found == null ? `${frame.target} not found · ${frame.comparisons} comparisons.` : `${frame.target} found at index ${frame.found} · ${frame.comparisons} comparisons.`;
+  }
+  if (kind === "string")
+    return frame.found.length ? `${frame.found.length} match${frame.found.length === 1 ? "" : "es"} at ${frame.found.join(", ")}.` : `No matches found.`;
+  if (kind === "pointers") {
+    const values = (frame.marked || []).map((i) => frame.array[i]);
+    return values.length ? `Answer indices [${frame.marked.join(", ")}] · values [${values.join(", ")}].` : algorithm === "two-pointers" || algorithm === "sliding-window" ? `No qualifying range was found.` : `No committed result was recorded.`;
+  }
+  if (kind === "dp") {
+    if ([
+      "coin-change-greedy",
+      "coin-change-naive",
+      "coin-change-memoization",
+      "coin-change-tabulation"
+    ].includes(algorithm))
+      return `${frame.best || "Exact change pending"} · target ${frame.target}¢.`;
+    if ([
+      "grid-path-greedy",
+      "grid-path-naive",
+      "grid-path-memoization",
+      "grid-path-tabulation"
+    ].includes(algorithm))
+      return frame.bestCost == null ? `Warehouse route pending · current cost ${frame.routeCost}.` : `Minimum warehouse route cost ${frame.bestCost}.`;
+    if (algorithm === "coin-change-bottom-up")
+      return `Fewest coins for 30¢: ${frame.grid[0]?.at(-1)} · exact change 10¢ + 10¢ + 10¢.`;
+    if (algorithm === "grid-path-bottom-up")
+      return `Minimum warehouse route cost ${frame.grid[0]?.[0]} · ${frame.path.length} path tiles.`;
+    if (algorithm === "floyd-warshall") {
+      if (frame.negativeCycle?.length)
+        return `Negative cycle through ${frame.negativeCycle.join(", ")}; shortest paths are undefined.`;
+      const distances = frame.grid.map(
+        (row2, index) => `${frame.rowLabels[index]}: [${row2.map((value2) => value2 ?? "∞").join(", ")}]`
+      ).join(" · ");
+      return `All-pairs distances ${distances}.`;
+    }
+    if (algorithm === "dynamic-programming") {
+      const stored = frame.grid.flat().filter((value2) => value2 != null).length;
+      const target = frame.grid[0]?.[frame.grid[0].length - 1];
+      if (frame.variant === "concrete")
+        return `Best non-adjacent total ${target} · ${stored} prefixes solved once.`;
+      return `Target ${target} · ${stored} states solved once in dependency order.`;
+    }
+    const row = frame.grid[frame.grid.length - 1] || [];
+    const value = row[row.length - 1];
+    const sequence2 = (frame.path || []).map((p) => frame.rowLabels[p[0]]).join("");
+    return algorithm === "lcs" ? `Optimal value ${value}${sequence2 ? ` · sequence "${sequence2}"` : ""}.` : `Final table value ${value}${frame.path.length ? ` · ${frame.path.length} traced cells` : ""}.`;
+  }
+  if (kind === "unionfind")
+    return `${new Set(frame.roots).size} disjoint set${new Set(frame.roots).size === 1 ? "" : "s"} · parents [${frame.parent.join(", ")}].`;
+  if (kind === "bits")
+    return algorithm === "kernighan-popcount" ? `Population count ${frame.total} · ${frame.pop} lowest set bits cleared.` : `${frame.pop} of ${frame.total} tally steps committed.`;
+  if (kind === "backtrack")
+    return frame.solved ? `Solved at depth ${frame.depth} · ${frame.placed} placements · ${frame.pruned} branches pruned.` : `No arrangement found · ${frame.pruned} branches pruned.`;
+  if (kind === "rectree") {
+    if (algorithm === "coin-change-top-down")
+      return `Fewest coins for 30¢: ${frame.results?.c30 || "—"} · ${frame.pruned} recursive calls skipped.`;
+    if (algorithm === "grid-path-top-down")
+      return `Minimum warehouse route cost ${frame.results?.r1c1 || "—"} · ${frame.pruned} recursive calls skipped.`;
+    if (algorithm === "memoization") {
+      const memoResult = String(frame.results?.a || "ready").replace(/^result\s+/i, "");
+      return `Result ${memoResult} · ${frame.calls} calls · ${frame.pruned} recursive calls skipped.`;
+    }
+    const result = frame.results?.root;
+    if (Array.isArray(result)) return `Sorted result [${result.join(", ")}].`;
+    return result ? `${result}.` : stripTags(frame.message);
+  }
+  return stripTags(frame.message);
+}
+var STEP_BUDGET_RATIO, SWAP_TRAVEL_AT, SWAP_SETTLE_AT, legacySortViewSemantics, legacySearchViewSemantics, CELL_W, lcsMatrixGridSemantics, executionTreeViewSerial, legacyRecTreeDescriptor, SVGNS, R, ICON;
+var init_render = __esm({
+  "custom/steptrace/src/render.ts"() {
+    init_motion();
+    STEP_BUDGET_RATIO = 260 / 107;
+    SWAP_TRAVEL_AT = 0;
+    SWAP_SETTLE_AT = 0.5;
+    legacySortViewSemantics = {
+      markerLabels: ["i", "j"],
+      movementLabel: "swaps",
+      resolveFrame: resolveLegacySortFrame,
+      watchRows(_frame, _visual) {
+        return [];
+      }
+    };
+    legacySearchViewSemantics = {
+      stateForIndex(frame, index) {
+        if (frame.found === index) return "found";
+        if (frame.mid === index) return "probe";
+        if (index < frame.lo || index > frame.hi) return "eliminated";
+        return "range";
+      },
+      watchRows(frame, frames) {
+        const target = { k: "target", v: String(frames[0].target), sw: "var(--_accent)" };
+        const at = {
+          k: "at",
+          v: frame.mid != null ? `[${frame.mid}] = ${frame.array[frame.mid]}` : "—",
+          sw: "var(--_blue)"
+        };
+        if (frame.mode === "scan") {
+          return [
+            target,
+            {
+              k: "scanned",
+              v: frame.mid != null ? `${frame.mid + 1}/${frame.array.length}` : "—",
+              sw: "var(--_neutral)"
+            },
+            at
+          ];
+        }
+        return [
+          target,
+          { k: "range", v: `[${frame.lo}, ${frame.hi}]`, sw: "var(--_neutral)" },
+          { ...at, k: "mid" }
+        ];
+      }
+    };
+    CELL_W = 34;
+    lcsMatrixGridSemantics = {
+      tableLabel: "Dynamic-programming table",
+      formatValue(value) {
+        return value == null ? "" : String(value);
+      },
+      cellLabel(frame, row, column) {
+        const value = frame.grid[row][column];
+        return `Cell ${frame.rowLabels[row]}, ${frame.colLabels[column]}: ${value == null ? "empty" : value}`;
+      },
+      stateForCell(frame, row, column) {
+        const key = `${row},${column}`;
+        const curKey = frame.cur ? frame.cur.join(",") : null;
+        const depSet = new Set((frame.deps || []).map((dependency) => dependency.join(",")));
+        const pathSet = new Set((frame.path || []).map((cell) => cell.join(",")));
+        if (curKey === key) return "cur";
+        if (pathSet.has(key)) return "path";
+        if (depSet.has(key)) return "dep";
+        return "";
+      },
+      watchRows(frame) {
+        const cur = frame.cur;
+        const value = cur ? frame.grid[cur[0]][cur[1]] : null;
+        return [
+          { k: "cell", v: cur ? `[${cur[0]}, ${cur[1]}]` : "—", sw: "var(--_blue)" },
+          { k: "value", v: value == null ? "—" : String(value), sw: "var(--_green)" }
+        ];
+      }
+    };
+    executionTreeViewSerial = 0;
+    legacyRecTreeDescriptor = {
+      ariaLabel: "Recursion tree",
+      shape: "circle",
+      nodeWidth: 32,
+      nodeHeight: 32,
+      minSvgWidth: 320,
+      stateLabels: {},
+      legend: [
+        { state: "compute", label: "compute" },
+        { state: "miss", label: "store (miss)" },
+        { state: "hit", label: "reuse (hit)" }
+      ],
+      frameModel(frame) {
+        return {
+          phase: frame.phase === "memo" ? "Memoized recursion" : "Plain recursion",
+          action: frame.message,
+          active: frame.active,
+          path: frame.active ? [frame.active] : [],
+          visible: frame.vis,
+          states: frame.state,
+          results: frame.vals,
+          collapsed: frame.collapsed
+        };
+      },
+      nodeLines(node) {
+        return [node.label, ""];
+      },
+      watchRows(frame) {
+        const last = frame.memo.length ? frame.memo[frame.memo.length - 1] : null;
+        const event = frame.type === "miss" || frame.type === "hit" || frame.type === "base" ? frame.type : "—";
+        return [
+          { k: "calls", v: String(frame.calls), sw: "var(--_blue)" },
+          { k: "memo", v: last ? `f(${last.k}) = ${last.v}` : "—", sw: "var(--_green)" },
+          { k: "event", v: event, sw: "var(--_violet)" }
+        ];
+      }
+    };
+    SVGNS = "http://www.w3.org/2000/svg";
+    R = 16;
+    ICON = {
+      reset: '<svg viewBox="0 0 24 24"><path d="M4 12a8 8 0 1 0 2.4-5.7" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/><path d="M3.4 4.6V8h3.4" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>',
+      back: '<svg viewBox="0 0 24 24"><polygon points="18 5 9 12 18 19" fill="currentColor" stroke="none"/><rect x="5" y="5" width="2" height="14" rx="0.6" fill="currentColor" stroke="none"/></svg>',
+      fwd: '<svg viewBox="0 0 24 24"><polygon points="6 5 15 12 6 19" fill="currentColor" stroke="none"/><rect x="17" y="5" width="2" height="14" rx="0.6" fill="currentColor" stroke="none"/></svg>',
+      play: '<svg viewBox="0 0 24 24"><polygon points="7 4.5 19 12 7 19.5" fill="currentColor" stroke="none"/></svg>',
+      pause: '<svg viewBox="0 0 24 24"><rect x="7" y="5" width="3.4" height="14" rx="1" fill="currentColor" stroke="none"/><rect x="13.6" y="5" width="3.4" height="14" rx="1" fill="currentColor" stroke="none"/></svg>',
+      kebab: '<svg viewBox="0 0 24 24"><circle cx="12" cy="5" r="1.5" fill="currentColor" stroke="none"/><circle cx="12" cy="12" r="1.5" fill="currentColor" stroke="none"/><circle cx="12" cy="19" r="1.5" fill="currentColor" stroke="none"/></svg>',
+      check: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg>',
+      compare: '<svg class="steptrace__cue-compare" viewBox="0 0 24 24" aria-hidden="true"><path d="m7 16-4-4 4-4"/><path d="M3 12h18"/><path d="m17 8 4 4-4 4"/></svg>',
+      swap: '<svg class="steptrace__cue-swap" viewBox="0 0 24 24" aria-hidden="true"><path d="m2 9 3-3 3 3"/><path d="M13 18H7a2 2 0 0 1-2-2V6"/><path d="m22 15-3 3-3-3"/><path d="M11 6h6a2 2 0 0 1 2 2v10"/></svg>',
+      search: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="10.5" cy="10.5" r="6.5"/><path d="m15.2 15.2 4.8 4.8"/></svg>'
+    };
+  }
+});
+
+// custom/steptrace/src/families/monotone-boundary.ts
+var shippingCapacityDescriptor, monotoneBoundaryFamily;
+var init_monotone_boundary = __esm({
+  "custom/steptrace/src/families/monotone-boundary.ts"() {
+    init_recorders();
+    init_render();
+    shippingCapacityDescriptor = {
+      ariaLabel: "Binary search over shipping capacity",
+      rangeLabel: "Candidate capacity",
+      evaluationLabel: "Greedy shipping check",
+      unitLabel: "load",
+      watchRows(frame) {
+        const evaluation = frame.evaluation;
+        return [
+          {
+            k: "goal",
+            v: "smallest feasible capacity",
+            sw: "var(--_accent)"
+          },
+          {
+            k: "range",
+            v: `[${frame.lo}, ${frame.hi}]`,
+            sw: "var(--_neutral)",
+            hint: "Capacities that can still contain the first feasible answer."
+          },
+          {
+            k: "capacity",
+            v: frame.candidate ?? "—",
+            sw: "var(--_blue)",
+            hint: "Candidate capacity currently passed to the feasibility check."
+          },
+          {
+            k: "days used",
+            v: evaluation ? `${evaluation.required} / ${evaluation.allowed}` : "—",
+            sw: "var(--_amber)"
+          },
+          {
+            k: "verdict",
+            v: evaluation ? evaluation.feasible ? "feasible" : "too small" : "—",
+            sw: evaluation?.feasible ? "var(--_green)" : "var(--_amber)",
+            hint: "Whether this candidate satisfies the day limit."
+          }
+        ];
+      }
+    };
+    monotoneBoundaryFamily = {
+      id: "monotone-boundary",
+      createRecorder(config) {
+        return new BoundarySearchRecorder(config);
+      },
+      createView(frames) {
+        return makeBoundarySearchView(
+          frames,
+          shippingCapacityDescriptor
+        );
+      }
+    };
+  }
+});
+
+// custom/steptrace/src/algorithms/binary-search-on-answer.ts
+function parseBinarySearchOnAnswerConfig(config) {
+  const { weights, days } = config;
+  if (!Array.isArray(weights) || weights.length === 0)
+    throw new Error('steptrace: binary-search-on-answer requires a non-empty "weights" array.');
+  if (!weights.every((weight) => Number.isInteger(weight) && weight > 0))
+    throw new Error('steptrace: binary-search-on-answer requires positive integer "weights".');
+  if (!Number.isInteger(days) || days <= 0)
+    throw new Error('steptrace: binary-search-on-answer requires "days" to be a positive integer.');
+  return {
+    profile: "shipping-capacity",
+    lower: Math.max(...weights),
+    upper: weights.reduce((total, weight) => total + weight, 0),
+    weights: weights.slice(),
+    days,
+    goal: "smallest feasible capacity"
+  };
+}
+function evaluateShipping(weights, capacity, allowed) {
+  const lanes = [];
+  let items = [];
+  let total = 0;
+  for (const weight of weights) {
+    if (total + weight > capacity) {
+      lanes.push({ label: `Day ${lanes.length + 1}`, items, total });
+      items = [];
+      total = 0;
+    }
+    items.push(weight);
+    total += weight;
+  }
+  lanes.push({ label: `Day ${lanes.length + 1}`, items, total });
+  return {
+    lanes,
+    required: lanes.length,
+    allowed,
+    feasible: lanes.length <= allowed
+  };
+}
+var binarySearchOnAnswer;
+var init_binary_search_on_answer = __esm({
+  "custom/steptrace/src/algorithms/binary-search-on-answer.ts"() {
+    init_monotone_boundary();
+    binarySearchOnAnswer = {
+      id: "binary-search-on-answer",
+      kind: "search",
+      family: monotoneBoundaryFamily,
+      meta: { label: "Binary search on answer" },
+      parse: parseBinarySearchOnAnswerConfig,
+      run(input, ops) {
+        ops.begin(
+          `Search capacities ${input.lower} through ${input.upper}; the first feasible value is the answer.`
+        );
+        let lo = input.lower;
+        let hi = input.upper;
+        while (lo < hi) {
+          const candidate = lo + Math.floor((hi - lo) / 2);
+          const evaluation2 = evaluateShipping(input.weights, candidate, input.days);
+          ops.evaluate(
+            lo,
+            hi,
+            candidate,
+            evaluation2,
+            `Capacity ${candidate} needs ${evaluation2.required} day${evaluation2.required === 1 ? "" : "s"}: ${evaluation2.feasible ? "feasible" : "too small"}.`
+          );
+          if (evaluation2.feasible) hi = candidate;
+          else lo = candidate + 1;
+          ops.narrow(
+            lo,
+            hi,
+            evaluation2.feasible ? `Keep ${lo} through ${hi}; a smaller feasible capacity may exist.` : `Keep ${lo} through ${hi}; every smaller capacity is infeasible.`
+          );
+        }
+        const evaluation = evaluateShipping(input.weights, lo, input.days);
+        ops.hit(lo, evaluation, `${lo} is the first feasible capacity.`);
+        ops.done(`Minimum feasible ship capacity: ${lo}.`);
+      }
+    };
+  }
+});
+
+// custom/steptrace/src/algorithms/binary-search.ts
+var binarySearch;
+var init_binary_search = __esm({
+  "custom/steptrace/src/algorithms/binary-search.ts"() {
+    binarySearch = {
+      id: "binary-search",
+      kind: "search",
+      meta: { label: "Binary search" },
+      run: (input, ops) => {
+        const a = ops.value;
+        const target = input.target;
+        ops.init(
+          `Binary search for ${target} in a sorted array — check the middle of the range, then discard the half that can't contain it.`
+        );
+        let lo = 0;
+        let hi = a.length - 1;
+        while (lo <= hi) {
+          const mid = Math.floor((lo + hi) / 2);
+          ops.probe(
+            lo,
+            hi,
+            mid,
+            `Range [${lo}, ${hi}]: probe the middle — index ${mid} holds ${a[mid]}.`
+          );
+          if (a[mid] === target) {
+            ops.hit(mid, `${a[mid]} equals ${target} — found it at index ${mid}.`);
+            ops.done(
+              `Found ${target} after ${ops.comparisons} probe${ops.comparisons === 1 ? "" : "s"}.`
+            );
+            return;
+          }
+          if (a[mid] < target) {
+            lo = mid + 1;
+            ops.narrow(lo, hi, `${a[mid]} < ${target}: discard the left half; search [${lo}, ${hi}].`);
+          } else {
+            hi = mid - 1;
+            ops.narrow(lo, hi, `${a[mid]} > ${target}: discard the right half; search [${lo}, ${hi}].`);
+          }
+        }
+        ops.done(`${target} is not in the array — the range is empty after ${ops.comparisons} probes.`);
+      }
+    };
+  }
+});
+
+// custom/steptrace/src/algorithms/bubble-sort.ts
+var bubbleSort;
+var init_bubble_sort = __esm({
+  "custom/steptrace/src/algorithms/bubble-sort.ts"() {
+    bubbleSort = {
+      id: "bubble-sort",
+      kind: "sort",
+      meta: { label: "Bubble sort" },
+      run: (input, ops) => {
+        const n = ops.value.length;
+        ops.init(
+          `Bubble sort — repeatedly compare adjacent values and swap the larger one rightward, bubbling the largest to the end each pass.`
+        );
+        for (let i = 0; i < n - 1; i++) {
+          let swapped = false;
+          for (let j = 0; j < n - 1 - i; j++) {
+            const a = ops.value;
+            ops.compare(j, j + 1, `Compare index ${j} (${a[j]}) and index ${j + 1} (${a[j + 1]}).`);
+            if (ops.value[j] > ops.value[j + 1]) {
+              const b = ops.value;
+              ops.swap(j, j + 1, `${b[j]} is greater than ${b[j + 1]} — swap them.`);
+              swapped = true;
+            }
+          }
+          ops.markSorted([n - 1 - i], [n - 1 - i], `Index ${n - 1 - i} now holds its final value.`);
+          if (!swapped) {
+            const rest = Array.from({ length: n - 1 - i }, (_, k) => k);
+            ops.markSorted(rest, [], `A full pass made no swaps — the array is already sorted.`);
+            break;
+          }
+        }
+        ops.lockAll(Array.from({ length: n }, (_, k) => k));
+        ops.done(`Sorted in ${ops.comparisons} comparisons and ${ops.swaps} swaps.`);
+      }
+    };
+  }
+});
+
+// custom/steptrace/src/families/distribution-sort.ts
+function invalidConfig(message) {
+  throw new Error(`steptrace: counting-sort ${message}`);
+}
+function parseCountingSortConfig(config) {
+  const { array } = config;
+  if (!Array.isArray(array) || array.length < 2)
+    invalidConfig('requires an "array" with at least two integer keys.');
+  if (!array.every((value) => Number.isInteger(value)))
+    invalidConfig("requires every value to be an integer key.");
+  const min = Math.min(...array);
+  const max = Math.max(...array);
+  if (max - min > 32)
+    invalidConfig("limits the demonstrated key range to 33 values so every counter remains legible.");
+  return { profile: "counting", array: array.slice(), min, max };
+}
+function distributionTokenLabels(input) {
+  const totals = /* @__PURE__ */ new Map();
+  input.forEach((value) => totals.set(value, (totals.get(value) || 0) + 1));
+  const seen = /* @__PURE__ */ new Map();
+  return input.map((value) => {
+    const occurrence = (seen.get(value) || 0) + 1;
+    seen.set(value, occurrence);
+    return totals.get(value) === 1 ? String(value) : `${value}${String.fromCharCode(96 + occurrence)}`;
+  });
+}
+function distributionLabel(text, detail) {
+  const heading = el("div", "steptrace__distribution-label");
+  heading.textContent = text;
+  heading.title = detail;
+  return heading;
+}
+function makeDistributionArrayBand(title, detail, length, modifier = "") {
+  const band = el("div", "steptrace__distribution-band");
+  const stage = el(
+    "div",
+    `steptrace__stage steptrace__distribution-bars${modifier ? ` ${modifier}` : ""}`
+  );
+  stage.setAttribute("role", "region");
+  stage.setAttribute("aria-label", title);
+  const bars = makeBars(stage, length);
+  band.append(distributionLabel(title, detail), stage);
+  return { band, stage, bars };
+}
+function phaseLabel(phase) {
+  return phase === "intro" ? "set up" : phase === "done" ? "sorted" : phase;
+}
+function frequencyRangeFor(frame, index) {
+  const count = frame.counts[index];
+  const rangesVisible = frame.type === "prefix" ? index < frame.prefixed : frame.type === "place" || frame.type === "done";
+  if (!rangesVisible) return { count, slots: null };
+  if (count === 0) return { count, slots: "—" };
+  const start = frame.counts.slice(0, index).reduce((sum, value) => sum + value, 0);
+  const end = start + count - 1;
+  return { count, slots: start === end ? String(start) : `${start}–${end}` };
+}
+function distributionWatch(frame) {
+  const active = frame.activeKey == null ? "—" : frame.activeKey;
+  return [
+    { k: "phase", v: phaseLabel(frame.type), sw: "var(--_violet)" },
+    { k: "key", v: active, sw: "var(--_blue)" },
+    { k: "tallied", v: `${frame.tallied}/${frame.input.length}`, sw: "var(--_amber)" },
+    { k: "placed", v: `${frame.placed}/${frame.input.length}`, sw: "var(--_green)" }
+  ];
+}
+function makeDistributionSortView(frames) {
+  const first = frames[0];
+  const keys = Array.from({ length: first.max - first.min + 1 }, (_, index) => first.min + index);
+  const labels = distributionTokenLabels(first.input);
+  const stage = el("div", "steptrace__distribution");
+  const input = makeDistributionArrayBand(
+    "Unsorted Array",
+    "Each bar keeps its original identity.",
+    first.input.length
+  );
+  const countBand = el("div", "steptrace__distribution-band");
+  const frequency = el("div", "steptrace__distribution-frequency");
+  frequency.setAttribute("role", "region");
+  frequency.setAttribute("aria-label", "Frequency");
+  const buckets = keys.map((key) => {
+    const bucket = el("div", "steptrace__distribution-bucket");
+    const keyRow = el("div", "steptrace__distribution-entry steptrace__distribution-entry--key");
+    const keyLabel = el("span", "steptrace__distribution-entry-label");
+    keyLabel.textContent = "Value:";
+    const keyValue = el("strong", "steptrace__distribution-entry-value");
+    keyValue.textContent = String(key);
+    keyRow.append(keyLabel, keyValue);
+    const details = el("div", "steptrace__distribution-details");
+    const countRow = el("div", "steptrace__distribution-entry");
+    const countLabel = el("span", "steptrace__distribution-entry-label");
+    countLabel.textContent = "Count:";
+    const count = el("strong", "steptrace__distribution-entry-value");
+    countRow.append(countLabel, count);
+    const slotsRow = el("div", "steptrace__distribution-entry steptrace__distribution-entry--slots");
+    const slotsLabel = el("span", "steptrace__distribution-entry-label");
+    slotsLabel.textContent = "Slots:";
+    const slots = el("strong", "steptrace__distribution-entry-value");
+    slotsRow.append(slotsLabel, slots);
+    details.append(countRow, slotsRow);
+    bucket.append(keyRow, details);
+    frequency.append(bucket);
+    return { bucket, count, slots, key };
+  });
+  countBand.append(
+    distributionLabel("Frequency", "Raw counts become reserved output slots from left to right."),
+    frequency
+  );
+  const output = makeDistributionArrayBand(
+    "Sorted Array",
+    "The input is read right-to-left; each placement preserves duplicate order.",
+    first.input.length,
+    "steptrace__distribution-bars--output"
+  );
+  stage.append(input.band, countBand, output.band);
+  const status = statusEl();
+  const maxValue = Math.max(...first.input, 1);
+  function paint(frame, index = 0, total = 1) {
+    stage.dataset.phase = frame.type;
+    input.bars.forEach((bar, barIndex) => {
+      const value = frame.input[barIndex];
+      bar.fill.style.height = barHeightStyle(value, maxValue);
+      bar.num.textContent = labels[barIndex];
+      bar.bar.dataset.state = barIndex === frame.activeInput ? frame.type === "tally" ? "increment" : "compare" : "";
+      bar.bar.setAttribute("aria-label", `input index ${barIndex}, value ${value}, token ${labels[barIndex]}`);
+    });
+    buckets.forEach(({ bucket, count, slots, key }, bucketIndex) => {
+      const range = frequencyRangeFor(frame, bucketIndex);
+      count.textContent = String(range.count);
+      slots.textContent = range.slots ?? "";
+      bucket.dataset.hasSlots = range.slots == null ? "0" : "1";
+      bucket.dataset.active = (frame.type === "tally" || frame.type === "prefix") && key === frame.activeKey ? "1" : "0";
+      bucket.dataset.previous = frame.type === "prefix" && key === frame.previousKey ? "1" : "0";
+      bucket.dataset.placement = frame.type === "place" && key === frame.activeKey ? "1" : "0";
+      bucket.setAttribute(
+        "aria-label",
+        `value ${key}, count ${range.count}${range.slots == null ? "" : `, slots ${range.slots}`}`
+      );
+    });
+    output.bars.forEach((bar, slotIndex) => {
+      const placed = frame.output[slotIndex];
+      const origin = frame.outputOrigins[slotIndex];
+      bar.fill.style.height = placed == null ? "0" : barHeightStyle(placed, maxValue);
+      bar.num.textContent = placed == null ? "·" : labels[origin ?? 0];
+      bar.bar.dataset.state = placed == null ? "" : "sorted";
+      bar.bar.dataset.target = frame.type === "place" && slotIndex === frame.placedAt ? "1" : "0";
+      bar.bar.dataset.empty = placed == null ? "1" : "0";
+      bar.bar.setAttribute(
+        "aria-label",
+        placed == null ? `output index ${slotIndex}, empty` : `output index ${slotIndex}, value ${placed}, token ${labels[origin ?? 0]}`
+      );
+    });
+    status.innerHTML = escapeHtml(frame.message) + ` <span class="steptrace__counts">· ${phaseLabel(frame.type)} · step ${index + 1}/${total}</span>`;
+  }
+  return {
+    nodes: [stage, status],
+    stageLayout: "fill",
+    stableStage: true,
+    paint,
+    watch: distributionWatch
+  };
+}
+var DistributionSortRecorder, distributionSortFamily;
+var init_distribution_sort = __esm({
+  "custom/steptrace/src/families/distribution-sort.ts"() {
+    init_render();
+    DistributionSortRecorder = class {
+      frames = [];
+      input;
+      min;
+      max;
+      counts;
+      positions;
+      output;
+      outputOrigins;
+      activeInput = null;
+      activeKey = null;
+      previousKey = null;
+      placedAt = null;
+      tallied = 0;
+      prefixed = 0;
+      placed = 0;
+      constructor(config) {
+        this.input = config.array.slice();
+        this.min = config.min;
+        this.max = config.max;
+        this.counts = Array.from({ length: this.max - this.min + 1 }, () => 0);
+        this.positions = this.counts.slice();
+        this.output = Array.from({ length: this.input.length }, () => null);
+        this.outputOrigins = Array.from({ length: this.input.length }, () => null);
+      }
+      intro(message) {
+        this.push("intro", message);
+      }
+      tally(inputIndex, message) {
+        const key = this.input[inputIndex];
+        this.activeInput = inputIndex;
+        this.activeKey = key;
+        this.previousKey = null;
+        this.placedAt = null;
+        this.counts[key - this.min]++;
+        this.tallied++;
+        this.push("tally", message);
+      }
+      prefix(key, message) {
+        const index = key - this.min;
+        this.activeInput = null;
+        this.activeKey = key;
+        this.previousKey = key === this.min ? null : key - 1;
+        this.placedAt = null;
+        if (this.prefixed === 0) this.positions = this.counts.slice();
+        if (index > 0) this.positions[index] += this.positions[index - 1];
+        this.prefixed++;
+        this.push("prefix", message);
+      }
+      place(inputIndex, message) {
+        const key = this.input[inputIndex];
+        const countIndex = key - this.min;
+        const target = --this.positions[countIndex];
+        this.output[target] = key;
+        this.outputOrigins[target] = inputIndex;
+        this.activeInput = inputIndex;
+        this.activeKey = key;
+        this.previousKey = null;
+        this.placedAt = target;
+        this.placed++;
+        this.push("place", message);
+      }
+      done(message) {
+        this.activeInput = null;
+        this.activeKey = null;
+        this.previousKey = null;
+        this.placedAt = null;
+        this.push("done", message);
+      }
+      push(type, message) {
+        this.frames.push(
+          Object.freeze({
+            type,
+            profile: "counting",
+            input: this.input.slice(),
+            min: this.min,
+            max: this.max,
+            counts: this.counts.slice(),
+            positions: this.positions.slice(),
+            output: this.output.slice(),
+            outputOrigins: this.outputOrigins.slice(),
+            activeInput: this.activeInput,
+            activeKey: this.activeKey,
+            previousKey: this.previousKey,
+            placedAt: this.placedAt,
+            tallied: this.tallied,
+            prefixed: this.prefixed,
+            placed: this.placed,
+            message
+          })
+        );
+      }
+    };
+    distributionSortFamily = {
+      id: "distribution-sort",
+      createRecorder(config) {
+        return new DistributionSortRecorder(config);
+      },
+      createView(frames) {
+        return makeDistributionSortView(frames);
+      }
+    };
+  }
+});
+
+// custom/steptrace/src/families/bucket-distribution.ts
+function phaseLabel2(frame) {
+  if (frame.type === "intro") return "set up";
+  if (frame.type === "pass") return "new pass";
+  if (frame.type === "scatter") return "scatter";
+  if (["local-sort", "compare", "swap"].includes(frame.type)) return "sort bucket";
+  if (frame.type === "gather") return "gather";
+  if (frame.type === "pass-complete") return "pass complete";
+  return "sorted";
+}
+function activeValue(frame) {
+  if (frame.activeSource != null) return frame.source[frame.activeSource]?.value;
+  if (frame.activeBucket != null && frame.activeBucketItems != null)
+    return frame.buckets[frame.activeBucket]?.[frame.activeBucketItems[0]]?.value;
+  return null;
+}
+function distributionWatch2(frame) {
+  const bucket = frame.activeBucket == null ? "—" : frame.bucketLabels[frame.activeBucket];
+  const progress = frame.type === "gather" || frame.type === "pass-complete" || frame.type === "done" ? `${frame.gathered}/${frame.source.length}` : `${frame.scattered}/${frame.source.length}`;
+  return [
+    {
+      k: "phase",
+      v: phaseLabel2(frame),
+      sw: "var(--_violet)",
+      hint: "Current distribution step: scatter, local bucket sort, or ordered gather."
+    },
+    {
+      k: "pass",
+      v: frame.passLabel || `${frame.passIndex + 1}/${frame.passCount}`,
+      sw: "var(--_blue)",
+      hint: frame.profile === "radix" ? "Digit position currently used to distribute every key." : "The single range-partition pass used by Bucket Sort."
+    },
+    {
+      k: "key",
+      v: activeValue(frame) ?? "—",
+      sw: "var(--_amber)",
+      hint: "Key currently being scattered, compared, or gathered."
+    },
+    {
+      k: "bucket",
+      v: bucket,
+      sw: "var(--_green)",
+      hint: frame.profile === "radix" ? "Digit bucket selected by the active key." : "Numeric range containing the active key."
+    },
+    {
+      k: "progress",
+      v: progress,
+      hint: "Keys completed in the current scatter or gather phase."
+    }
+  ];
+}
+function tokenLabel(value) {
+  return Number.isInteger(value) ? String(value) : value.toFixed(2);
+}
+function bucketColumnCount(itemCount) {
+  return Math.min(3, Math.max(1, Math.ceil(itemCount / 3)));
+}
+function makeLegendItem(color, text) {
+  const item = el("span", "steptrace__distribution-legend-item");
+  const swatch = el("span", "steptrace__distribution-legend-swatch");
+  swatch.style.setProperty("--_legend-color", color);
+  const label = el("span");
+  label.textContent = text;
+  item.append(swatch, label);
+  return item;
+}
+function makeBucketDistributionView(frames) {
+  const first = frames[0];
+  const original = first.source.slice().sort((a, b) => a.origin - b.origin);
+  const labels = distributionTokenLabels(original.map((token) => token.value));
+  const maxValue = Math.max(...original.map((token) => token.value), 1);
+  const stage = el("div", "steptrace__distribution steptrace__distribution--buckets");
+  const sourceTitle = first.profile === "radix" ? "Current Array" : "Unsorted Array";
+  const source = makeDistributionArrayBand(
+    sourceTitle,
+    first.profile === "radix" ? "Each digit pass starts from the order gathered by the previous pass." : "Values keep their identity while range decides their bucket.",
+    first.source.length
+  );
+  const bucketBand = el("div", "steptrace__distribution-band");
+  const board = el("div", "steptrace__distribution-bucket-board");
+  const bucketTitle = first.profile === "radix" ? "Digit Buckets" : "Range Buckets";
+  board.setAttribute("role", "region");
+  board.setAttribute("aria-label", bucketTitle);
+  const lanes = first.bucketLabels.map((bucketLabel, bucketIndex) => {
+    const lane = el("div", "steptrace__distribution-lane");
+    const header = el("div", "steptrace__distribution-lane-header");
+    header.textContent = bucketLabel;
+    const body = el("div", "steptrace__distribution-lane-body");
+    lane.append(header, body);
+    board.append(lane);
+    return { lane, body, bucketIndex };
+  });
+  bucketBand.append(
+    distributionLabel(
+      bucketTitle,
+      first.profile === "radix" ? "Keys append in source order, preserving lower-digit work." : "Each range is sorted locally before the buckets are concatenated."
+    ),
+    board
+  );
+  const output = makeDistributionArrayBand(
+    first.profile === "radix" ? "Gathered Pass" : "Sorted Array",
+    "Buckets are read left to right; order inside each bucket is retained.",
+    first.source.length,
+    "steptrace__distribution-bars--output"
+  );
+  const legend = el("div", "steptrace__distribution-legend");
+  legend.setAttribute("aria-label", "Distribution state legend");
+  legend.append(
+    makeLegendItem("var(--_blue)", "active bucket"),
+    makeLegendItem("var(--_amber)", "local comparison"),
+    makeLegendItem("var(--_green)", "gathered output")
+  );
+  stage.append(source.band, bucketBand, legend, output.band);
+  const status = statusEl();
+  function paint(frame, index = 0, total = 1) {
+    stage.dataset.phase = frame.type;
+    source.bars.forEach((bar, barIndex) => {
+      const token = frame.source[barIndex];
+      bar.fill.style.height = barHeightStyle(token.value, maxValue);
+      bar.num.textContent = labels[token.origin] ?? tokenLabel(token.value);
+      bar.bar.dataset.state = barIndex === frame.activeSource && frame.type === "scatter" ? "scatter" : "";
+      bar.bar.setAttribute(
+        "aria-label",
+        `${sourceTitle.toLowerCase()} index ${barIndex}, value ${token.value}`
+      );
+    });
+    lanes.forEach(({ lane, body, bucketIndex }) => {
+      const bucket = frame.buckets[bucketIndex];
+      body.textContent = "";
+      body.style.setProperty("--_bucket-columns", String(bucketColumnCount(bucket.length)));
+      bucket.forEach((token, itemIndex) => {
+        const chip = el("span", "steptrace__distribution-token");
+        chip.textContent = labels[token.origin] ?? tokenLabel(token.value);
+        const activeItems = frame.activeBucketItems;
+        const active = frame.activeBucket === bucketIndex && activeItems != null && itemIndex >= Math.min(...activeItems) && itemIndex <= Math.max(...activeItems);
+        chip.dataset.active = active ? "1" : "0";
+        chip.dataset.compare = active && (frame.type === "compare" || frame.type === "swap") ? "1" : "0";
+        chip.dataset.gather = active && frame.type === "gather" ? "1" : "0";
+        chip.setAttribute(
+          "aria-label",
+          `bucket ${frame.bucketLabels[bucketIndex]}, item ${itemIndex}, value ${token.value}`
+        );
+        body.append(chip);
+      });
+      lane.dataset.active = frame.activeBucket === bucketIndex ? "1" : "0";
+      lane.dataset.empty = bucket.length === 0 ? "1" : "0";
+    });
+    output.bars.forEach((bar, outputIndex) => {
+      const token = frame.output[outputIndex];
+      bar.fill.style.height = token == null ? "0" : barHeightStyle(token.value, maxValue);
+      bar.num.textContent = token == null ? "·" : labels[token.origin] ?? tokenLabel(token.value);
+      bar.bar.dataset.state = token == null ? "" : "sorted";
+      bar.bar.dataset.target = frame.type === "gather" && outputIndex === frame.activeOutput ? "1" : "0";
+      bar.bar.dataset.empty = token == null ? "1" : "0";
+      bar.bar.setAttribute(
+        "aria-label",
+        token == null ? `output index ${outputIndex}, empty` : `output index ${outputIndex}, value ${token.value}`
+      );
+    });
+    status.innerHTML = escapeHtml(frame.message) + ` <span class="steptrace__counts">· ${phaseLabel2(frame)} · step ${index + 1}/${total}</span>`;
+  }
+  return {
+    nodes: [stage, status],
+    stageLayout: "fill",
+    stableStage: true,
+    paint,
+    watch: distributionWatch2
+  };
+}
+function createBucketDistributionFamily() {
+  return {
+    id: "distribution-sort",
+    createRecorder(config) {
+      return new BucketDistributionRecorder(config);
+    },
+    createView(frames) {
+      return makeBucketDistributionView(frames);
+    }
+  };
+}
+var BucketDistributionRecorder, radixDistributionFamily, rangeBucketDistributionFamily;
+var init_bucket_distribution = __esm({
+  "custom/steptrace/src/families/bucket-distribution.ts"() {
+    init_render();
+    init_distribution_sort();
+    BucketDistributionRecorder = class {
+      frames = [];
+      profile;
+      bucketLabels;
+      source;
+      buckets;
+      output;
+      activeSource = null;
+      activeBucket = null;
+      activeBucketItems = null;
+      activeOutput = null;
+      passIndex = 0;
+      passCount = 1;
+      passLabel = "";
+      scattered = 0;
+      comparisons = 0;
+      movements = 0;
+      gathered = 0;
+      constructor(config) {
+        this.profile = config.profile;
+        this.bucketLabels = config.bucketLabels.slice();
+        this.passCount = config.profile === "radix" ? config.places.length : 1;
+        this.source = config.array.map((value, origin) => ({ value, origin }));
+        this.buckets = Array.from({ length: config.bucketCount }, () => []);
+        this.output = Array.from({ length: config.array.length }, () => null);
+      }
+      intro(message) {
+        this.push("intro", message);
+      }
+      beginPass(passIndex, passCount, passLabel, message) {
+        this.passIndex = passIndex;
+        this.passCount = passCount;
+        this.passLabel = passLabel;
+        this.buckets = this.buckets.map(() => []);
+        this.output = this.output.map(() => null);
+        this.scattered = 0;
+        this.gathered = 0;
+        this.clearActive();
+        this.push("pass", message);
+      }
+      scatter(sourceIndex, bucketIndex, message) {
+        this.assertSourceIndex(sourceIndex);
+        this.assertBucketIndex(bucketIndex);
+        this.buckets[bucketIndex].push(this.source[sourceIndex]);
+        const itemIndex = this.buckets[bucketIndex].length - 1;
+        this.activeSource = sourceIndex;
+        this.activeBucket = bucketIndex;
+        this.activeBucketItems = [itemIndex, itemIndex];
+        this.activeOutput = null;
+        this.scattered++;
+        this.push("scatter", message);
+      }
+      beginLocalSort(bucketIndex, message) {
+        this.assertBucketIndex(bucketIndex);
+        this.activeSource = null;
+        this.activeBucket = bucketIndex;
+        this.activeBucketItems = null;
+        this.activeOutput = null;
+        this.push("local-sort", message);
+      }
+      compareBucket(bucketIndex, left, right, message) {
+        this.assertBucketItems(bucketIndex, left, right);
+        this.activeSource = null;
+        this.activeBucket = bucketIndex;
+        this.activeBucketItems = [left, right];
+        this.activeOutput = null;
+        this.comparisons++;
+        this.push("compare", message);
+      }
+      swapBucket(bucketIndex, left, right, message) {
+        this.assertBucketItems(bucketIndex, left, right);
+        const bucket = this.buckets[bucketIndex];
+        const token = bucket[left];
+        bucket[left] = bucket[right];
+        bucket[right] = token;
+        this.activeSource = null;
+        this.activeBucket = bucketIndex;
+        this.activeBucketItems = [left, right];
+        this.activeOutput = null;
+        this.movements++;
+        this.push("swap", message);
+      }
+      beginGather(message) {
+        this.clearActive();
+        this.push("gather", message);
+      }
+      gather(bucketIndex, itemIndex, message) {
+        this.assertBucketItems(bucketIndex, itemIndex);
+        const target = this.gathered;
+        this.output[target] = this.buckets[bucketIndex][itemIndex];
+        this.activeSource = null;
+        this.activeBucket = bucketIndex;
+        this.activeBucketItems = [itemIndex, itemIndex];
+        this.activeOutput = target;
+        this.gathered++;
+        this.push("gather", message);
+      }
+      finishPass(message) {
+        if (this.output.some((token) => token == null))
+          throw new Error("steptrace: distribution pass cannot finish before every key is gathered.");
+        this.source = this.output.map((token) => token);
+        this.clearActive();
+        this.push("pass-complete", message);
+      }
+      done(message) {
+        this.clearActive();
+        this.push("done", message);
+      }
+      clearActive() {
+        this.activeSource = null;
+        this.activeBucket = null;
+        this.activeBucketItems = null;
+        this.activeOutput = null;
+      }
+      assertSourceIndex(index) {
+        if (!Number.isInteger(index) || index < 0 || index >= this.source.length)
+          throw new Error(`steptrace: distribution source index ${index} is out of range.`);
+      }
+      assertBucketIndex(index) {
+        if (!Number.isInteger(index) || index < 0 || index >= this.buckets.length)
+          throw new Error(`steptrace: distribution bucket index ${index} is out of range.`);
+      }
+      assertBucketItems(bucketIndex, ...indices) {
+        this.assertBucketIndex(bucketIndex);
+        const bucket = this.buckets[bucketIndex];
+        if (indices.some((index) => !Number.isInteger(index) || index < 0 || index >= bucket.length))
+          throw new Error("steptrace: distribution bucket item is out of range.");
+      }
+      push(type, message) {
+        this.frames.push(
+          Object.freeze({
+            type,
+            profile: this.profile,
+            source: this.source.map((token) => ({ ...token })),
+            buckets: this.buckets.map((bucket) => bucket.map((token) => ({ ...token }))),
+            output: this.output.map((token) => token == null ? null : { ...token }),
+            bucketLabels: this.bucketLabels.slice(),
+            activeSource: this.activeSource,
+            activeBucket: this.activeBucket,
+            activeBucketItems: this.activeBucketItems == null ? null : [this.activeBucketItems[0], this.activeBucketItems[1]],
+            activeOutput: this.activeOutput,
+            passIndex: this.passIndex,
+            passCount: this.passCount,
+            passLabel: this.passLabel,
+            scattered: this.scattered,
+            comparisons: this.comparisons,
+            movements: this.movements,
+            gathered: this.gathered,
+            message
+          })
+        );
+      }
+    };
+    radixDistributionFamily = createBucketDistributionFamily();
+    rangeBucketDistributionFamily = createBucketDistributionFamily();
+  }
+});
+
+// custom/steptrace/src/algorithms/bucket-sort.ts
+function invalidConfig2(message) {
+  throw new Error(`steptrace: bucket-sort ${message}`);
+}
+function parseBucketSortConfig(config) {
+  const { array } = config;
+  const bucketCount = config.bucketCount ?? 5;
+  if (!Array.isArray(array) || array.length < 2)
+    invalidConfig2('requires an "array" with at least two finite numbers in [0, 1).');
+  if (!array.every(
+    (value) => typeof value === "number" && Number.isFinite(value) && value >= 0 && value < 1
+  ))
+    invalidConfig2('requires every "array" value to be a finite number in [0, 1).');
+  if (array.length > 12)
+    invalidConfig2("limits the demonstration to 12 keys so local bucket order remains legible.");
+  if (!Number.isInteger(bucketCount) || bucketCount < 2 || bucketCount > 8)
+    invalidConfig2('requires "bucketCount" to be an integer from 2 through 8.');
+  return {
+    profile: "bucket",
+    array: array.slice(),
+    bucketCount,
+    bucketLabels: Array.from({ length: bucketCount }, (_, index) => {
+      const start = index / bucketCount;
+      const end = (index + 1) / bucketCount;
+      return `${start.toFixed(1)}–${end.toFixed(1)}`;
+    })
+  };
+}
+var bucketSort;
+var init_bucket_sort = __esm({
+  "custom/steptrace/src/algorithms/bucket-sort.ts"() {
+    init_bucket_distribution();
+    bucketSort = {
+      id: "bucket-sort",
+      kind: "sort",
+      family: rangeBucketDistributionFamily,
+      meta: { label: "Bucket sort" },
+      parse: parseBucketSortConfig,
+      run(input, ops) {
+        const buckets = Array.from({ length: input.bucketCount }, () => []);
+        ops.intro(
+          `${input.bucketCount} equal-width ranges split [0, 1); scatter by value, sort locally, then gather left to right.`
+        );
+        ops.beginPass(
+          0,
+          1,
+          "range pass",
+          `Each value maps directly to one of ${input.bucketCount} numeric ranges.`
+        );
+        input.array.forEach((value, sourceIndex) => {
+          const bucketIndex = Math.min(input.bucketCount - 1, Math.floor(value * input.bucketCount));
+          buckets[bucketIndex].push(value);
+          ops.scatter(
+            sourceIndex,
+            bucketIndex,
+            `${value.toFixed(2)} lies in ${input.bucketLabels[bucketIndex]}; append it to that bucket.`
+          );
+        });
+        buckets.forEach((bucket, bucketIndex) => {
+          if (bucket.length < 2) return;
+          ops.beginLocalSort(
+            bucketIndex,
+            `Sort ${input.bucketLabels[bucketIndex]} internally; other ranges do not need comparison.`
+          );
+          for (let right = 1; right < bucket.length; right++) {
+            for (let cursor = right; cursor > 0; cursor--) {
+              const leftValue = bucket[cursor - 1];
+              const rightValue = bucket[cursor];
+              ops.compareBucket(
+                bucketIndex,
+                cursor - 1,
+                cursor,
+                `Compare ${leftValue.toFixed(2)} and ${rightValue.toFixed(2)} inside ${input.bucketLabels[bucketIndex]}.`
+              );
+              if (leftValue <= rightValue) break;
+              const value = bucket[cursor - 1];
+              bucket[cursor - 1] = bucket[cursor];
+              bucket[cursor] = value;
+              ops.swapBucket(
+                bucketIndex,
+                cursor - 1,
+                cursor,
+                `${rightValue.toFixed(2)} moves before ${leftValue.toFixed(2)} inside its bucket.`
+              );
+            }
+          }
+        });
+        ops.beginGather(
+          `Every earlier bucket covers smaller values, so concatenate ranges without cross-bucket comparisons.`
+        );
+        const sorted = [];
+        buckets.forEach((bucket, bucketIndex) => {
+          bucket.forEach((value, itemIndex) => {
+            sorted.push(value);
+            ops.gather(
+              bucketIndex,
+              itemIndex,
+              `Write ${value.toFixed(2)} from ${input.bucketLabels[bucketIndex]} at output index ${sorted.length - 1}.`
+            );
+          });
+        });
+        ops.finishPass("All locally sorted ranges are concatenated in increasing range order.");
+        ops.done(`Bucket Sort produced [${sorted.map((value) => value.toFixed(2)).join(", ")}].`);
+      }
+    };
+  }
+});
+
+// custom/steptrace/src/families/array-sort.ts
+function resolveArraySortFrame(frame) {
+  if (frame.profile === "comb") return resolveCombSortFrame(frame);
+  if (frame.profile === "cyclic") return resolveCyclicSortFrame(frame);
+  if (frame.profile === "introsort") return resolveIntrosortFrame(frame);
+  const decorate = (visual) => ({
+    ...visual,
+    laneIndices: frame.subsequence,
+    holeIndex: frame.hole,
+    heldToken: frame.keyValue == null || frame.keyOrigin == null ? null : {
+      id: frame.tokenId,
+      index: frame.type === "place-held" ? frame.hole : frame.keyOrigin,
+      label: `held ${frame.keyValue}`,
+      placing: frame.type === "place-held"
+    }
+  });
+  if (frame.type === "gap" || frame.type === "subsequence") {
+    return decorate({
+      activeIndices: [],
+      activeRole: null,
+      markerIndices: [null, null],
+      movements: []
+    });
+  }
+  if (frame.type === "hold-key") {
+    return decorate({
+      activeIndices: [],
+      activeRole: null,
+      markerIndices: [null, null],
+      movements: []
+    });
+  }
+  if (frame.type === "compare-held") {
+    return decorate({
+      activeIndices: frame.active,
+      activeRole: "compare",
+      markerIndices: [frame.active[0] ?? null, null],
+      movements: []
+    });
+  }
+  if (frame.type === "shift-held") {
+    const to = frame.active[0] ?? null;
+    const from = frame.from ?? null;
+    return decorate({
+      activeIndices: to == null ? [] : [to],
+      activeRole: "move",
+      markerIndices: [null, from],
+      movements: to == null || from == null ? [] : [[to, from]]
+    });
+  }
+  if (frame.type === "place-held") {
+    return decorate({
+      activeIndices: [],
+      activeRole: null,
+      markerIndices: [null, null],
+      movements: []
+    });
+  }
+  return decorate(resolveLegacySortFrame(frame));
+}
+function resolveIntrosortFrame(frame) {
+  const visual = resolveLegacySortFrame(frame);
+  return {
+    ...visual,
+    laneIndices: null,
+    holeIndex: frame.hole,
+    heldToken: frame.keyValue == null || frame.keyOrigin == null ? null : {
+      id: frame.tokenId,
+      index: frame.type === "place-held" ? frame.hole : frame.keyOrigin,
+      label: `held ${frame.keyValue}`,
+      placing: frame.type === "place-held"
+    }
+  };
+}
+function resolveCombSortFrame(frame) {
+  const visual = resolveLegacySortFrame(frame);
+  return {
+    ...visual,
+    laneIndices: frame.subsequence,
+    holeIndex: null,
+    heldToken: null
+  };
+}
+function resolveCyclicSortFrame(frame) {
+  if (frame.type === "home-check") {
+    return {
+      activeIndices: frame.active,
+      activeRole: "compare",
+      markerIndices: [frame.cursor, frame.home],
+      movements: [],
+      laneIndices: null,
+      holeIndex: null,
+      heldToken: null
+    };
+  }
+  if (frame.type === "mark-sorted") {
+    return {
+      activeIndices: [],
+      activeRole: null,
+      markerIndices: [frame.cursor, frame.home],
+      movements: [],
+      laneIndices: null,
+      holeIndex: null,
+      heldToken: null
+    };
+  }
+  return resolveLegacySortFrame(frame);
+}
+function arraySortSemanticsFor(frames) {
+  switch (frames[0]?.profile) {
+    case "comb":
+      return combSortViewSemantics;
+    case "cyclic":
+      return cyclicSortViewSemantics;
+    case "introsort":
+      return introsortViewSemantics;
+    default:
+      return arraySortViewSemantics;
+  }
+}
+var arraySortViewSemantics, combSortViewSemantics, cyclicSortViewSemantics, introsortViewSemantics, arraySortFamily;
+var init_array_sort = __esm({
+  "custom/steptrace/src/families/array-sort.ts"() {
+    init_recorders();
+    init_render();
+    arraySortViewSemantics = {
+      markerLabels: ["at", "from"],
+      movementLabel: "moves",
+      resolveFrame: resolveArraySortFrame,
+      watchRows(frame) {
+        return [
+          { k: "held", v: frame.keyValue ?? "—", sw: "var(--_blue)" },
+          { k: "gap", v: frame.gap ?? "—", sw: "var(--_amber)" },
+          {
+            k: "lane",
+            v: frame.subsequence ? frame.subsequence.join(" → ") : "—",
+            sw: "var(--_violet)"
+          }
+        ];
+      }
+    };
+    combSortViewSemantics = {
+      markerLabels: ["left", "right"],
+      movementLabel: "swaps",
+      resolveFrame: resolveArraySortFrame,
+      watchRows(frame) {
+        return [
+          { k: "gap", v: frame.gap ?? "—", sw: "var(--_amber)" },
+          {
+            k: "pass swapped",
+            v: frame.passSwapped == null ? "—" : frame.passSwapped ? "yes" : "no",
+            sw: frame.passSwapped ? "var(--_green)" : "var(--_neutral)",
+            hint: "Whether this gap pass made any swap."
+          }
+        ];
+      }
+    };
+    cyclicSortViewSemantics = {
+      markerLabels: ["at", "home"],
+      movementLabel: "swaps",
+      resolveFrame: resolveArraySortFrame,
+      watchRows(frame) {
+        const value = frame.cursor == null ? null : frame.array[frame.cursor];
+        return [
+          {
+            k: "value",
+            v: value ?? "—",
+            sw: "var(--_blue)",
+            hint: "Value at the current cursor."
+          },
+          {
+            k: "placed",
+            v: `${frame.sorted.length}/${frame.array.length}`,
+            sw: "var(--_green)",
+            hint: "Values already fixed at their home index."
+          }
+        ];
+      }
+    };
+    introsortViewSemantics = {
+      markerLabels: ["scan", "pivot"],
+      movementLabel: "moves",
+      resolveFrame: resolveArraySortFrame,
+      watchRows(frame) {
+        const depth = frame.depthUsed == null || frame.depthLimit == null ? "—" : `${frame.depthUsed}/${frame.depthLimit}`;
+        return [
+          {
+            k: "strategy",
+            v: frame.strategy ?? (frame.type === "done" ? "complete" : "—"),
+            sw: frame.strategy === "heap sort" ? "var(--_amber)" : frame.strategy === "insertion sort" ? "var(--_green)" : "var(--_blue)"
+          },
+          {
+            k: "depth",
+            v: depth,
+            sw: "var(--_violet)",
+            hint: "Quicksort levels used out of the depth limit."
+          },
+          { k: "cutoff", v: frame.cutoff == null ? "—" : `≤ ${frame.cutoff}`, sw: "var(--_neutral)" }
+        ];
+      }
+    };
+    arraySortFamily = {
+      id: "array-sort",
+      createRecorder(config) {
+        return new ArraySortRecorder(config.array, config.profile);
+      },
+      createView(frames) {
+        return makeSortView(frames, arraySortSemanticsFor(frames));
+      }
+    };
+  }
+});
+
+// custom/steptrace/src/algorithms/comb-sort.ts
+function invalidConfig3(message) {
+  throw new Error(`steptrace: comb-sort ${message}`);
+}
+function parseCombSortConfig(config) {
+  const { array } = config;
+  const shrinkFactor = config.shrinkFactor ?? 1.3;
+  if (!Array.isArray(array) || array.length < 2)
+    invalidConfig3('requires an "array" with at least two numbers.');
+  if (!array.every((value) => typeof value === "number" && Number.isFinite(value)))
+    invalidConfig3('requires every "array" value to be a finite number.');
+  if (typeof shrinkFactor !== "number" || !Number.isFinite(shrinkFactor) || shrinkFactor <= 1)
+    invalidConfig3('requires "shrinkFactor" to be a finite number greater than 1.');
+  return { array: array.slice(), shrinkFactor, profile: "comb" };
+}
+var combSort;
+var init_comb_sort = __esm({
+  "custom/steptrace/src/algorithms/comb-sort.ts"() {
+    init_array_sort();
+    combSort = {
+      id: "comb-sort",
+      kind: "sort",
+      family: arraySortFamily,
+      meta: { label: "Comb sort" },
+      parse: parseCombSortConfig,
+      run(input, ops) {
+        ops.init(
+          `Comb sort — compare distant pairs, shrink the gap by ${input.shrinkFactor}, then finish with gap 1.`
+        );
+        let gap = ops.value.length;
+        let swapped = true;
+        while (gap > 1 || swapped) {
+          gap = Math.max(1, Math.floor(gap / input.shrinkFactor));
+          ops.beginGap(gap, `Gap ${gap}: sweep every pair whose indices are ${gap} apart.`);
+          swapped = false;
+          for (let left = 0; left + gap < ops.value.length; left++) {
+            const right = left + gap;
+            const leftValue = ops.value[left];
+            const rightValue = ops.value[right];
+            ops.compareGapPair(
+              left,
+              right,
+              `Compare ${leftValue} at index ${left} with ${rightValue} at index ${right}.`
+            );
+            if (leftValue <= rightValue) continue;
+            ops.swapGapPair(
+              left,
+              right,
+              `${leftValue} > ${rightValue}: swap the gap-${gap} pair.`
+            );
+            swapped = true;
+          }
+          ops.endGap(
+            swapped,
+            gap === 1 && !swapped ? "Gap 1 made no swap; no adjacent inversion remains." : `Gap ${gap} pass complete${swapped ? " with swaps" : " without a swap"}.`
+          );
+        }
+        ops.lockAll(Array.from({ length: ops.value.length }, (_, index) => index));
+        ops.done(`Sorted in ${ops.comparisons} comparisons and ${ops.swaps} swaps.`);
+      }
+    };
+  }
+});
+
+// custom/steptrace/src/algorithms/counting-sort.ts
+var countingSort;
+var init_counting_sort = __esm({
+  "custom/steptrace/src/algorithms/counting-sort.ts"() {
+    init_distribution_sort();
+    countingSort = {
+      id: "counting-sort",
+      kind: "sort",
+      family: distributionSortFamily,
+      meta: { label: "Counting sort" },
+      parse: parseCountingSortConfig,
+      run(input, ops) {
+        ops.intro(
+          `Keys span ${input.min}…${input.max}. Count by value first; no pair of keys is compared.`
+        );
+        for (let index = 0; index < input.array.length; index++) {
+          const key = input.array[index];
+          ops.tally(index, `Read input[${index}] = ${key}; add one to frequency[${key}].`);
+        }
+        for (let key = input.min; key <= input.max; key++) {
+          ops.prefix(
+            key,
+            key === input.min ? `Position[${key}] starts at ${key}'s frequency: keys ≤ ${key} end before this index.` : `Add position[${key - 1}] into position[${key}]; it now counts keys ≤ ${key}.`
+          );
+        }
+        for (let index = input.array.length - 1; index >= 0; index--) {
+          const key = input.array[index];
+          ops.place(
+            index,
+            `Read input[${index}] = ${key} from the tail; decrement its end position, then write output there.`
+          );
+        }
+        ops.done(`Every key is in its value block. Tail-first placement kept equal keys in input order.`);
+      }
+    };
+  }
+});
+
+// custom/steptrace/src/algorithms/cyclic-sort.ts
+function invalidConfig4(message) {
+  throw new Error(`steptrace: cyclic-sort ${message}`);
+}
+function parseCyclicSortConfig(config) {
+  const { array } = config;
+  if (!Array.isArray(array) || array.length < 2)
+    invalidConfig4('requires an "array" with at least two integers.');
+  if (!array.every((value) => Number.isInteger(value) && value >= 1 && value <= array.length))
+    invalidConfig4("requires every value to be an integer in the range 1..array.length.");
+  if (new Set(array).size !== array.length)
+    invalidConfig4("requires a permutation with no duplicate values.");
+  return { array: array.slice(), profile: "cyclic" };
+}
+var cyclicSort;
+var init_cyclic_sort = __esm({
+  "custom/steptrace/src/algorithms/cyclic-sort.ts"() {
+    init_array_sort();
+    cyclicSort = {
+      id: "cyclic-sort",
+      kind: "sort",
+      family: arraySortFamily,
+      meta: { label: "Cyclic sort" },
+      parse: parseCyclicSortConfig,
+      run(_input, ops) {
+        ops.init("Cyclic sort — value v belongs at index v − 1; keep the cursor still until its value is home.");
+        let cursor = 0;
+        while (cursor < ops.value.length) {
+          const value = ops.value[cursor];
+          const home = value - 1;
+          ops.inspectHome(
+            cursor,
+            home,
+            `At index ${cursor}, value ${value} belongs at home index ${home}.`
+          );
+          if (cursor !== home) {
+            const displaced = ops.value[home];
+            ops.swapHome(
+              cursor,
+              home,
+              `Send ${value} home to index ${home}; ${displaced} returns to index ${cursor}.`
+            );
+            ops.settleHome(home, `Value ${value} is now fixed at its home index ${home}.`);
+            continue;
+          }
+          ops.settleHome(cursor, `Value ${value} is already home at index ${cursor}; advance.`);
+          cursor++;
+        }
+        ops.lockAll(Array.from({ length: ops.value.length }, (_, index) => index));
+        ops.done(`Placed all values with ${ops.swaps} swaps.`);
+      }
+    };
+  }
+});
+
+// custom/steptrace/src/algorithms/dfs.ts
+var dfs;
+var init_dfs = __esm({
+  "custom/steptrace/src/algorithms/dfs.ts"() {
+    init_graph();
+    dfs = {
+      id: "dfs",
+      kind: "graph",
+      meta: { label: "Depth-first search", frontierLabel: "Stack (bottom → top)" },
+      run: (input, ops, graph) => {
+        const adj = adjacency(graph);
+        const start = input.start;
+        const target = input.target != null && input.target !== start ? String(input.target) : null;
+        if (target) ops.target(target);
+        ops.init(
+          target ? `Depth-first search for ${target}, starting at ${start} — dive as deep as possible with a stack, backtracking at dead ends, until the target is popped.` : `Depth-first search from ${start} — dive as deep as possible using a stack, backtracking when a node has no unvisited neighbours.`
+        );
+        const stack = [start];
+        const seen = /* @__PURE__ */ new Set([start]);
+        ops.enqueue(start, 0, `Push the start node ${start} onto the stack.`);
+        while (stack.length) {
+          const u = stack.pop();
+          ops.visit(u, `Pop ${u} off the stack and mark it visited.`);
+          if (u === target) {
+            ops.done(
+              `Found ${target} after visiting only ${ops.visitedCount} nodes — but along a depth-${ops.dist(u)} path, with no shortest-path guarantee.`
+            );
+            return;
+          }
+          const neighbours = adj[u].slice().reverse();
+          for (const v of neighbours) {
+            if (seen.has(v)) continue;
+            ops.edge(u, v, `Explore edge ${u} → ${v}.`);
+            seen.add(v);
+            stack.push(v);
+            ops.enqueue(v, ops.dist(u) + 1, `Push ${v} onto the stack (depth ${ops.dist(u) + 1}).`);
+          }
+        }
+        ops.done(
+          target ? `${target} is not reachable from ${start} — the stack emptied after ${ops.visitedCount} nodes.` : `Depth-first search complete — visited ${ops.visitedCount} node${ops.visitedCount === 1 ? "" : "s"}.`
+        );
+      }
+    };
+  }
+});
+
+// custom/steptrace/src/algorithms/dijkstra.ts
+var dijkstra;
+var init_dijkstra = __esm({
+  "custom/steptrace/src/algorithms/dijkstra.ts"() {
+    dijkstra = {
+      id: "dijkstra",
+      kind: "graph",
+      meta: { label: "Dijkstra", frontierLabel: "Frontier (settle nearest first)" },
+      run: (input, ops, graph) => {
+        const adj = {};
+        for (const nd of graph.nodes) adj[nd.id] = [];
+        for (const e of graph.edges) {
+          const w = e.weight == null ? 1 : e.weight;
+          adj[e.from].push({ to: e.to, w });
+          if (!graph.directed) adj[e.to].push({ to: e.from, w });
+        }
+        for (const id in adj) adj[id].sort((a, b) => a.to < b.to ? -1 : 1);
+        const start = input.start;
+        const target = input.target != null ? String(input.target) : null;
+        if (target) ops.target(target);
+        ops.init(
+          `Dijkstra from ${start} — repeatedly settle the nearest unsettled node, then relax its edges to shorten neighbours' distances.`
+        );
+        const dist = { [start]: 0 };
+        const pred = {};
+        const settled = /* @__PURE__ */ new Set();
+        const inQ = /* @__PURE__ */ new Set([start]);
+        ops.enqueue(start, 0, `Start ${start} at distance 0.`);
+        while (inQ.size) {
+          let u = null;
+          for (const id of inQ) if (u === null || dist[id] < dist[u]) u = id;
+          inQ.delete(u);
+          settled.add(u);
+          ops.visit(u, `Settle ${u} (distance ${dist[u]}) — its shortest distance is now final.`);
+          for (const { to: v, w } of adj[u]) {
+            if (settled.has(v)) continue;
+            ops.edge(u, v, `Explore edge ${u} → ${v} (weight ${w}).`);
+            const nd = dist[u] + w;
+            if (dist[v] === void 0 || nd < dist[v]) {
+              const had = dist[v] !== void 0;
+              dist[v] = nd;
+              pred[v] = u;
+              inQ.add(v);
+              ops.relax(
+                v,
+                nd,
+                had ? `Relax ${v}: a shorter path via ${u} improves its distance to ${nd}.` : `Relax ${v}: reach it via ${u} at distance ${nd}.`
+              );
+            }
+          }
+        }
+        if (target !== null) {
+          if (dist[target] === void 0) {
+            ops.done(`${target} is unreachable from ${start}.`);
+          } else {
+            const path = [target];
+            for (let cur = target; pred[cur] !== void 0; cur = pred[cur]) path.push(pred[cur]);
+            path.reverse();
+            for (let i = 0; i + 1 < path.length; i++)
+              ops.selectEdge(
+                path[i],
+                path[i + 1],
+                `Shortest path: keep edge ${path[i]}–${path[i + 1]} highlighted.`
+              );
+            ops.done(`Shortest path ${path.join(" → ")} — total cost ${dist[target]}.`);
+          }
+        } else {
+          const reached = graph.nodes.map((n) => n.id).filter((id) => id !== start && pred[id] !== void 0);
+          reached.sort();
+          for (const v of reached)
+            ops.selectEdge(pred[v], v, `Shortest-path tree: ${pred[v]}–${v} (distance ${dist[v]}).`);
+          ops.done(`Dijkstra complete — shortest-path tree from ${start} highlighted.`);
+        }
+      }
+    };
+  }
+});
+
+// custom/steptrace/src/families/execution-tree.ts
+function invalidConfig5(message) {
+  throw new Error(`steptrace: divide-and-conquer ${message}`);
+}
+function parseExecutionTreeConfig(config) {
+  if (config.array !== void 0)
+    invalidConfig5('does not take an "array"; it animates the paradigm itself.');
+  return { profile: "divide-and-conquer" };
+}
+function parseMemoizationConfig(config) {
+  if (config.array !== void 0 || config.n !== void 0)
+    throw new Error("steptrace: memoization animates abstract states and takes no data input.");
+  return { profile: "memoization" };
+}
+function frameModel(frame) {
+  return {
+    phase: frame.phase,
+    action: frame.action,
+    active: frame.active,
+    path: frame.path.slice(),
+    visible: frame.visible.slice(),
+    states: frame.states,
+    results: frame.results,
+    collapsed: frame.collapsed.slice()
+  };
+}
+function activeNode(frame) {
+  return frame.nodes.find((node) => node.id === frame.active) || null;
+}
+function pathLabel(frame) {
+  const labels = frame.path.map((id) => frame.nodes.find((node) => node.id === id)?.label).filter(Boolean);
+  return labels.length ? labels.join(" → ") : "—";
+}
+var stateLabels, executionTreeCardMetrics, executionTreeViewDescriptor, memoizationTreeViewDescriptor, dynamicProgrammingTreeViewDescriptor, executionTreeFamily;
+var init_execution_tree = __esm({
+  "custom/steptrace/src/families/execution-tree.ts"() {
+    init_recorders();
+    init_render();
+    stateLabels = {
+      call: "call",
+      split: "split",
+      base: "base",
+      return: "return",
+      combine: "combine",
+      store: "stored",
+      cache: "cached",
+      prune: "pruned"
+    };
+    executionTreeCardMetrics = {
+      shape: "card",
+      nodeWidth: 84,
+      nodeHeight: 40,
+      minSvgWidth: 500,
+      canvasScale: 0.84
+    };
+    executionTreeViewDescriptor = {
+      ariaLabel: "Execution tree",
+      ...executionTreeCardMetrics,
+      stateLabels,
+      legend: [
+        { state: "split", label: "split subproblem" },
+        { state: "base", label: "base case" },
+        { state: "return", label: "returned result" },
+        { state: "combine", label: "combined result" }
+      ],
+      frameModel,
+      nodeLines(node) {
+        return [node.label, node.detail || `[${node.values.join(", ")}]`];
+      },
+      watchRows(frame) {
+        const node = activeNode(frame);
+        const result = node ? frame.results[node.id] : null;
+        const subproblemLabel = frame.profile === "merge-sort" ? "subarray" : "subproblem";
+        const pathLabelName = frame.profile === "merge-sort" ? "split path" : "call path";
+        const resultLabel = Array.isArray(result) ? `[${result.join(", ")}]` : result || "—";
+        return [
+          { k: "phase", v: frame.phase, sw: "var(--_violet)" },
+          {
+            k: subproblemLabel,
+            v: node ? `${node.label} · ${node.detail || `[${node.values.join(", ")}]`}` : "—",
+            sw: "var(--_blue)"
+          },
+          { k: pathLabelName, v: pathLabel(frame), sw: "var(--_neutral)" },
+          { k: "result", v: resultLabel, sw: "var(--_green)" }
+        ];
+      }
+    };
+    memoizationTreeViewDescriptor = {
+      ariaLabel: "Memoization call tree",
+      ...executionTreeCardMetrics,
+      stateLabels,
+      legend: [
+        { state: "split", label: "expand new state" },
+        { state: "base", label: "base result" },
+        { state: "store", label: "store first result" },
+        { state: "cache", label: "cache hit; skip branch" }
+      ],
+      frameModel,
+      nodeLines(node) {
+        return [node.label, node.detail || ""];
+      },
+      watchRows(frame) {
+        const node = activeNode(frame);
+        const cached = frame.cache.map((entry) => `${entry.key} → ${entry.result}`).join(" · ");
+        return [
+          {
+            k: "phase",
+            v: frame.phase,
+            sw: "var(--_violet)",
+            hint: "Whether the trace is expanding, solving, storing, or reusing a state."
+          },
+          {
+            k: "state",
+            v: node ? `${node.label} · ${node.detail || "no cache key"}` : "—",
+            sw: "var(--_blue)",
+            hint: "The active recursive state and the key used to recognize repeats."
+          },
+          {
+            k: "cache",
+            v: cached || "empty",
+            sw: "var(--_green)",
+            hint: "Results already computed once and available for immediate reuse."
+          },
+          {
+            k: "work",
+            v: `${frame.calls} calls · ${frame.pruned} skipped`,
+            sw: "var(--_neutral)",
+            hint: "Calls entered so far and recursive calls avoided by cache hits."
+          }
+        ];
+      }
+    };
+    dynamicProgrammingTreeViewDescriptor = {
+      ariaLabel: "Top-down dynamic-programming recursion tree",
+      ...executionTreeCardMetrics,
+      nodeWidth: 92,
+      nodeHeight: 44,
+      minSvgWidth: 500,
+      canvasScale: 1,
+      fitWidth: true,
+      stateLabels,
+      legend: [
+        { state: "split", label: "expand uncached state" },
+        { state: "base", label: "base case" },
+        { state: "store", label: "store result" },
+        { state: "cache", label: "reuse cached result" }
+      ],
+      frameModel,
+      nodeLines(node) {
+        return [node.label, node.detail || ""];
+      },
+      watchRows(frame) {
+        const node = activeNode(frame);
+        const cached = frame.cache.map((entry) => `${entry.key} → ${entry.result}`).join(" · ");
+        return [
+          {
+            k: "phase",
+            v: frame.phase,
+            sw: "var(--_violet)",
+            hint: "Whether recursion is expanding a new state, storing it, or reusing it."
+          },
+          {
+            k: "state",
+            v: node ? node.label : "—",
+            sw: "var(--_blue)",
+            hint: "The amount or warehouse coordinate currently being solved."
+          },
+          {
+            k: "memo",
+            v: cached || "empty",
+            sw: "var(--_green)",
+            hint: "Answers already computed once and available for immediate reuse."
+          },
+          {
+            k: "work",
+            v: `${frame.calls} calls · ${frame.pruned} skipped`,
+            sw: "var(--_neutral)",
+            hint: "Recursive calls entered and child calls avoided by cache hits."
+          }
+        ];
+      }
+    };
+    executionTreeFamily = {
+      id: "execution-tree",
+      createRecorder(config) {
+        return new ExecutionTreeRecorder(config);
+      },
+      createView(frames) {
+        const profile = frames[0]?.profile;
+        const descriptor = profile === "memoization" ? memoizationTreeViewDescriptor : profile === "coin-change-top-down" || profile === "grid-path-top-down" ? dynamicProgrammingTreeViewDescriptor : executionTreeViewDescriptor;
+        return makeExecutionTreeView(frames, descriptor);
+      }
+    };
+  }
+});
+
+// custom/steptrace/src/algorithms/divide-and-conquer.ts
+var divideAndConquer;
+var init_divide_and_conquer = __esm({
+  "custom/steptrace/src/algorithms/divide-and-conquer.ts"() {
+    init_execution_tree();
+    divideAndConquer = {
+      id: "divide-and-conquer",
+      kind: "rectree",
+      family: executionTreeFamily,
+      meta: { label: "Divide and Conquer" },
+      parse: parseExecutionTreeConfig,
+      run(input, ops) {
+        const nodes = [
+          {
+            id: "root",
+            label: "Problem",
+            detail: "whole problem",
+            values: [],
+            x: 300,
+            y: 30,
+            depth: 0
+          },
+          {
+            id: "left",
+            label: "Subproblem A",
+            detail: "independent work",
+            values: [],
+            x: 150,
+            y: 105,
+            depth: 1
+          },
+          {
+            id: "right",
+            label: "Subproblem B",
+            detail: "independent work",
+            values: [],
+            x: 450,
+            y: 105,
+            depth: 1
+          },
+          { id: "a", label: "Base A1", detail: "base case", values: [], x: 60, y: 190, depth: 2 },
+          { id: "b", label: "Base A2", detail: "base case", values: [], x: 210, y: 190, depth: 2 },
+          { id: "c", label: "Base B1", detail: "base case", values: [], x: 390, y: 190, depth: 2 },
+          { id: "d", label: "Base B2", detail: "base case", values: [], x: 540, y: 190, depth: 2 }
+        ];
+        const edges = [
+          { from: "root", to: "left" },
+          { from: "root", to: "right" },
+          { from: "left", to: "a" },
+          { from: "left", to: "b" },
+          { from: "right", to: "c" },
+          { from: "right", to: "d" }
+        ];
+        ops.tree(
+          nodes,
+          edges,
+          "root",
+          "Start with one problem. The fixed tree reveals the recursive structure without moving the layout."
+        );
+        ops.split(
+          "root",
+          ["root"],
+          ["left", "right"],
+          "Divide Problem into independent Subproblem A and Subproblem B."
+        );
+        ops.split(
+          "left",
+          ["root", "left"],
+          ["a", "b"],
+          "Divide Subproblem A until its work reaches Base A1 and Base A2."
+        );
+        ops.base(
+          "a",
+          ["root", "left", "a"],
+          "base result A1",
+          "Base A1 solves its smallest direct case."
+        );
+        ops.returnResult(
+          "a",
+          ["root", "left"],
+          "base result A1",
+          "Return the Base A1 result to Subproblem A."
+        );
+        ops.base(
+          "b",
+          ["root", "left", "b"],
+          "base result A2",
+          "Base A2 solves its smallest direct case."
+        );
+        ops.returnResult(
+          "b",
+          ["root", "left"],
+          "base result A2",
+          "Return the Base A2 result to Subproblem A."
+        );
+        ops.combine("left", ["root", "left"], "Result A", "Combine the two base results into Result A.");
+        ops.returnResult("left", ["root"], "Result A", "Return Result A to Problem.");
+        ops.split(
+          "right",
+          ["root", "right"],
+          ["c", "d"],
+          "Divide Subproblem B until its work reaches Base B1 and Base B2."
+        );
+        ops.base(
+          "c",
+          ["root", "right", "c"],
+          "base result B1",
+          "Base B1 solves its smallest direct case."
+        );
+        ops.returnResult(
+          "c",
+          ["root", "right"],
+          "base result B1",
+          "Return the Base B1 result to Subproblem B."
+        );
+        ops.base(
+          "d",
+          ["root", "right", "d"],
+          "base result B2",
+          "Base B2 solves its smallest direct case."
+        );
+        ops.returnResult(
+          "d",
+          ["root", "right"],
+          "base result B2",
+          "Return the Base B2 result to Subproblem B."
+        );
+        ops.combine(
+          "right",
+          ["root", "right"],
+          "Result B",
+          "Combine the two base results into Result B."
+        );
+        ops.returnResult("right", ["root"], "Result B", "Return Result B to Problem.");
+        ops.combine(
+          "root",
+          ["root"],
+          "Final solution",
+          "Combine Result A and Result B into the Final solution."
+        );
+        ops.done(
+          "root",
+          "Final solution",
+          "Final solution: independent work returns upward until the original problem is combined."
+        );
+      }
+    };
+  }
+});
+
+// custom/steptrace/src/dp-problem-data.ts
+var coinChangeProblem, gridPathProblem;
+var init_dp_problem_data = __esm({
+  "custom/steptrace/src/dp-problem-data.ts"() {
+    coinChangeProblem = {
+      target: 30,
+      coins: [50, 25, 10, 1],
+      amounts: [0, 1, 2, 3, 4, 5, 10, 15, 20, 25, 30],
+      bestCoins: [0, 1, 2, 3, 4, 5, 1, 6, 2, 1, 3]
+    };
+    gridPathProblem = {
+      costs: [
+        [0, 1, 1, 9],
+        [2, 9, 1, 9],
+        [2, 2, 9, 9],
+        [9, 2, 2, 0]
+      ],
+      greedyPath: [
+        [0, 0],
+        [0, 1],
+        [0, 2],
+        [1, 2],
+        [1, 3],
+        [2, 3],
+        [3, 3]
+      ],
+      optimalPath: [
+        [0, 0],
+        [1, 0],
+        [2, 0],
+        [2, 1],
+        [3, 1],
+        [3, 2],
+        [3, 3]
+      ],
+      bestRemaining: [
+        [10, 14, 13, 27],
+        [10, 15, 12, 18],
+        [8, 6, 11, 9],
+        [13, 4, 2, 0]
+      ],
+      greedyCost: 21,
+      optimalCost: 10
+    };
+  }
+});
+
+// custom/steptrace/src/families/dp-problems.ts
+function dpStoryConfig(problem, approach) {
+  return (config) => {
+    if (config.variant !== void 0)
+      throw new Error(`steptrace: ${problem}-${approach} does not take a variant.`);
+    return { profile: "dp-story", problem, approach };
+  };
+}
+function dpTableConfig(profile) {
+  return (config) => {
+    if (config.variant !== void 0)
+      throw new Error(`steptrace: ${profile} does not take a variant.`);
+    return { profile };
+  };
+}
+function rolesForCell(frame, row, column) {
+  const roles = [];
+  if (frame.grid[row][column] != null) roles.push("stored");
+  if (frame.deps.some(([depRow, depColumn]) => depRow === row && depColumn === column)) {
+    const depIndex = frame.deps.findIndex(
+      ([depRow, depColumn]) => depRow === row && depColumn === column
+    );
+    roles.push(depIndex === 1 ? "operand-b" : "operand-a");
+  }
+  if (frame.path.some(([pathRow, pathColumn]) => pathRow === row && pathColumn === column))
+    roles.push("path");
+  if (frame.cur?.[0] === row && frame.cur?.[1] === column) roles.push("target");
+  return roles;
+}
+var DPStoryRecorder, dpStoryFamily, coinRoles, gridRoles, coinTableSemantics, gridTableSemantics, dpProblemTableFamily;
+var init_dp_problems = __esm({
+  "custom/steptrace/src/families/dp-problems.ts"() {
+    init_recorders();
+    init_dp_problem_data();
+    init_render();
+    DPStoryRecorder = class {
+      frames = [];
+      config;
+      remaining = coinChangeProblem.target;
+      selected = [];
+      activeCoin = null;
+      attempts = [];
+      memo = [];
+      best = null;
+      amounts = coinChangeProblem.amounts.slice();
+      amountValues = this.amounts.map(() => null);
+      amountCurrent = null;
+      amountDependencies = [];
+      amountPath = [];
+      costs = gridPathProblem.costs;
+      gridValues = this.costs.map((row) => row.map(() => null));
+      gridDependencies = [];
+      current = null;
+      path = [];
+      repeated = [];
+      bestPath = [];
+      routeCost = 0;
+      routeLabel = "—";
+      bestCost = null;
+      constructor(config) {
+        this.config = config;
+      }
+      intro(message) {
+        this.push("init", message);
+      }
+      chooseCoin(coin, remaining, selected, message) {
+        this.activeCoin = coin;
+        this.remaining = remaining;
+        this.selected = selected.slice();
+        this.push("step", message);
+      }
+      backtrackCoins(remaining, selected, message) {
+        this.activeCoin = null;
+        this.remaining = remaining;
+        this.selected = selected.slice();
+        this.push("step", message);
+      }
+      coinAttempt(attempt, message) {
+        this.attempts.push({ ...attempt });
+        this.push("step", message);
+      }
+      coinMemo(key, value, state, message) {
+        const existing = this.memo.findIndex((entry2) => entry2.key === key);
+        const entry = { key, value, state };
+        if (existing === -1) this.memo.push(entry);
+        else this.memo[existing] = entry;
+        this.push("step", message);
+      }
+      fillAmount(amount, value, dependencies, message) {
+        const index = this.amounts.indexOf(amount);
+        if (index === -1) throw new Error(`steptrace: unsupported coin-change amount ${amount}.`);
+        this.amountValues[index] = value;
+        this.amountCurrent = amount;
+        this.amountDependencies = dependencies.slice();
+        this.push("step", message);
+      }
+      amountResult(path, best, selected, message) {
+        this.amountPath = path.slice();
+        this.best = best;
+        this.selected = selected.slice();
+        this.remaining = 0;
+        this.amountCurrent = null;
+        this.amountDependencies = [];
+        this.push("step", message);
+      }
+      coinResult(best, selected, message) {
+        this.best = best;
+        this.selected = selected.slice();
+        this.remaining = 0;
+        this.activeCoin = null;
+        this.push("step", message);
+      }
+      visitTile(current, path, routeCost, repeated, message) {
+        this.current = current.slice();
+        this.gridDependencies = [];
+        this.path = path.map((cell) => cell.slice());
+        this.repeated = repeated.map((cell) => cell.slice());
+        this.routeCost = routeCost;
+        this.routeLabel = this.path.map(([row, column]) => `R${row + 1}C${column + 1}`).join(" → ");
+        this.push("step", message);
+      }
+      storeTile(current, value, dependencies, message) {
+        this.current = current.slice();
+        this.gridValues[current[0]][current[1]] = value;
+        this.gridDependencies = dependencies.map((cell) => cell.slice());
+        this.push("step", message);
+      }
+      routeResult(bestCost, bestPath, routeLabel, message) {
+        this.bestCost = bestCost;
+        this.bestPath = bestPath.map((cell) => cell.slice());
+        this.path = this.bestPath.map((cell) => cell.slice());
+        this.current = null;
+        this.gridDependencies = [];
+        this.routeCost = bestCost;
+        this.routeLabel = routeLabel;
+        this.push("step", message);
+      }
+      done(message) {
+        this.activeCoin = null;
+        this.current = null;
+        this.amountCurrent = null;
+        this.amountDependencies = [];
+        this.gridDependencies = [];
+        this.push("done", message);
+      }
+      push(type, message) {
+        this.frames.push(
+          Object.freeze({
+            type,
+            profile: this.config.profile,
+            problem: this.config.problem,
+            approach: this.config.approach,
+            remaining: this.remaining,
+            selected: this.selected.slice(),
+            activeCoin: this.activeCoin,
+            coins: coinChangeProblem.coins.slice(),
+            target: coinChangeProblem.target,
+            attempts: this.attempts.map((attempt) => ({ ...attempt })),
+            memo: this.memo.map((entry) => ({ ...entry })),
+            best: this.best,
+            amounts: this.amounts.slice(),
+            amountValues: this.amountValues.slice(),
+            amountCurrent: this.amountCurrent,
+            amountDependencies: this.amountDependencies.slice(),
+            amountPath: this.amountPath.slice(),
+            costs: this.costs.map((row) => row.slice()),
+            gridValues: this.gridValues.map((row) => row.slice()),
+            gridDependencies: this.gridDependencies.map((cell) => cell.slice()),
+            current: this.current ? this.current.slice() : null,
+            path: this.path.map((cell) => cell.slice()),
+            repeated: this.repeated.map((cell) => cell.slice()),
+            bestPath: this.bestPath.map((cell) => cell.slice()),
+            routeCost: this.routeCost,
+            routeLabel: this.routeLabel,
+            bestCost: this.bestCost,
+            message
+          })
+        );
+      }
+    };
+    dpStoryFamily = {
+      id: "dp-story",
+      createRecorder(config) {
+        return new DPStoryRecorder(config);
+      },
+      createView(frames) {
+        return makeDPStoryView(frames);
+      }
+    };
+    coinRoles = [
+      { role: "operand-a", badge: "A", label: "predecessor amount" },
+      { role: "operand-b", badge: "B", label: "another predecessor" },
+      { role: "target", badge: "T", label: "amount being solved" },
+      { role: "path", badge: "✓", label: "optimal amount chain" }
+    ];
+    gridRoles = [
+      { role: "operand-a", badge: "R", label: "right neighbour" },
+      { role: "operand-b", badge: "D", label: "down neighbour" },
+      { role: "target", badge: "T", label: "tile being solved" },
+      { role: "path", badge: "✓", label: "optimal route" }
+    ];
+    coinTableSemantics = {
+      tableLabel: `Bottom-up coin-change table for a ${coinChangeProblem.target}-cent payment`,
+      axisDescription: "Each column stores the fewest coins needed for that amount.",
+      cornerLabel: "amount →",
+      stageLayout: "fill",
+      formatValue(value) {
+        return value == null ? "—" : String(value);
+      },
+      cellLabel(frame, row, column) {
+        const value = frame.grid[row][column];
+        return `${frame.colLabels[column]} needs ${value ?? "an unsolved number of"} coins`;
+      },
+      stateForCell(frame, row, column) {
+        if (frame.cur?.[0] === row && frame.cur?.[1] === column) return "cur";
+        return frame.deps.some(([depRow, depColumn]) => depRow === row && depColumn === column) ? "dep" : "";
+      },
+      rolesForCell,
+      footerModel(frame) {
+        const column = frame.cur?.[1];
+        if (column != null)
+          return {
+            context: `Solve ${frame.colLabels[column]}`,
+            summary: { text: frame.formula || `Store ${frame.grid[0][column]}` }
+          };
+        return frame.type === "init" ? { context: "Prepare amount table", summary: { text: "start at 0¢" } } : { context: "Exact change ready", summary: { text: "30¢ = 10¢ + 10¢ + 10¢" } };
+      },
+      roleLegend: coinRoles,
+      watchRows(frame) {
+        const column = frame.cur?.[1];
+        return [
+          {
+            k: "amount",
+            v: column == null ? "—" : frame.colLabels[column],
+            sw: "var(--_blue)",
+            hint: "Amount whose best exact change is being stored."
+          },
+          {
+            k: "predecessors",
+            v: frame.deps.length ? frame.deps.map(([, dependency]) => frame.colLabels[dependency]).join(", ") : "base",
+            sw: "var(--_amber)",
+            hint: "Smaller amounts reached after placing one allowed coin."
+          },
+          {
+            k: "transition",
+            v: frame.formula || "—",
+            sw: "var(--_violet)",
+            hint: "Fewest predecessor coins plus the new coin placed now."
+          },
+          {
+            k: "answer",
+            v: frame.grid[0].at(-1) || "—",
+            sw: "var(--_green)",
+            hint: `Fewest coins stored for the full ${coinChangeProblem.target}-cent payment.`
+          }
+        ];
+      }
+    };
+    gridTableSemantics = {
+      tableLabel: "Bottom-up minimum-cost warehouse path matrix",
+      axisDescription: "Each tile stores its cost plus the cheaper right or down neighbour.",
+      cornerLabel: "warehouse",
+      stageLayout: "fill",
+      formatValue(value) {
+        return value == null ? "—" : String(value);
+      },
+      cellLabel(frame, row, column) {
+        return `R${row + 1}C${column + 1}: ${frame.grid[row][column] ?? "not solved"}`;
+      },
+      stateForCell(frame, row, column) {
+        if (frame.cur?.[0] === row && frame.cur?.[1] === column) return "cur";
+        if (frame.path.some(([pathRow, pathColumn]) => pathRow === row && pathColumn === column))
+          return "path";
+        return frame.deps.some(([depRow, depColumn]) => depRow === row && depColumn === column) ? "dep" : "";
+      },
+      rolesForCell,
+      footerModel(frame) {
+        if (frame.type === "trace") return { context: "Optimal route", summary: { text: "cost 10" } };
+        if (frame.cur) {
+          const [row, column] = frame.cur;
+          return {
+            context: `Solve R${row + 1}C${column + 1}`,
+            summary: { text: frame.formula || `Store ${frame.grid[row][column]}` }
+          };
+        }
+        return frame.type === "init" ? { context: "Prepare warehouse matrix", summary: { text: "start at the goal" } } : { context: "Loading bay ready", summary: { text: "minimum cost 10" } };
+      },
+      roleLegend: gridRoles,
+      watchRows(frame) {
+        const tile = frame.cur ? `R${frame.cur[0] + 1}C${frame.cur[1] + 1}` : "—";
+        return [
+          {
+            k: "tile",
+            v: tile,
+            sw: "var(--_blue)",
+            hint: "Warehouse tile whose minimum remaining cost is being stored."
+          },
+          {
+            k: "reads",
+            v: frame.deps.length ? frame.deps.map(([row, column]) => `R${row + 1}C${column + 1}`).join(" or ") : "goal",
+            sw: "var(--_amber)",
+            hint: "Already-solved right and down neighbours available from this tile."
+          },
+          {
+            k: "transition",
+            v: frame.formula || "—",
+            sw: "var(--_violet)",
+            hint: "Current tile cost plus the cheaper reachable neighbour."
+          },
+          {
+            k: "best cost",
+            v: frame.grid[0]?.[0] || "—",
+            sw: "var(--_green)",
+            hint: "Minimum travel cost stored for the loading bay."
+          }
+        ];
+      }
+    };
+    dpProblemTableFamily = {
+      id: "matrix-grid",
+      createRecorder(config) {
+        return new DPRecorder(config.profile);
+      },
+      createView(frames) {
+        const semantics = frames[0]?.profile === "coin-change-bottom-up" ? coinTableSemantics : gridTableSemantics;
+        return makeDPView(frames, semantics);
+      }
+    };
+  }
+});
+
+// custom/steptrace/src/algorithms/dynamic-programming.ts
+function storyAlgorithm(id, label, parse, run) {
+  return { id, kind: "dp", family: dpStoryFamily, meta: { label }, parse, run };
+}
+function treeAlgorithm(id, label, profile, run) {
+  return {
+    id,
+    kind: "rectree",
+    family: executionTreeFamily,
+    meta: { label },
+    parse(config) {
+      if (config.variant !== void 0) throw new Error(`steptrace: ${id} does not take a variant.`);
+      return { profile };
+    },
+    run
+  };
+}
+function tableAlgorithm(id, label, profile, run) {
+  return {
+    id,
+    kind: "dp",
+    family: dpProblemTableFamily,
+    meta: { label },
+    parse: dpTableConfig(profile),
+    run
+  };
+}
+var greedyWarehousePath, optimalWarehousePath, coinAmounts, availableCoins, coinChangeGreedy, coinChangeNaive, coinChangeMemoization, coinChangeTabulation, coinChangeTopDown, coinChangeBottomUp, gridPathGreedy, gridPathNaive, gridPathMemoization, gridPathTabulation, gridPathTopDown, gridPathBottomUp, dynamicProgrammingAlgorithms;
+var init_dynamic_programming = __esm({
+  "custom/steptrace/src/algorithms/dynamic-programming.ts"() {
+    init_dp_problems();
+    init_execution_tree();
+    init_dp_problem_data();
+    greedyWarehousePath = gridPathProblem.greedyPath.map((cell) => cell.slice());
+    optimalWarehousePath = gridPathProblem.optimalPath.map((cell) => cell.slice());
+    coinAmounts = coinChangeProblem.amounts;
+    availableCoins = coinChangeProblem.coins;
+    coinChangeGreedy = storyAlgorithm(
+      "coin-change-greedy",
+      "Coin change — greedy",
+      dpStoryConfig("coin-change", "greedy"),
+      (_input, ops) => {
+        ops.intro("Return 30¢ using the real coins available in this drawer.");
+        ops.chooseCoin(25, 5, [25], "Greedy takes the largest usable coin: 25¢.");
+        ops.chooseCoin(1, 4, [25, 1], "The next available denomination is 1¢.");
+        ops.chooseCoin(1, 3, [25, 1, 1], "Another 1¢ coin leaves 3¢.");
+        ops.chooseCoin(1, 2, [25, 1, 1, 1], "Another 1¢ coin leaves 2¢.");
+        ops.chooseCoin(1, 1, [25, 1, 1, 1, 1], "Another 1¢ coin leaves 1¢.");
+        ops.chooseCoin(1, 0, [25, 1, 1, 1, 1, 1], "The fifth 1¢ coin completes the change.");
+        ops.coinAttempt(
+          { label: "greedy counter", value: "25¢ + 1¢ × 5 · 6 coins", state: "active" },
+          "The greedy plan is exact, but it uses six coins."
+        );
+        ops.coinAttempt(
+          { label: "better counter", value: "10¢ + 10¢ + 10¢ · 3 coins", state: "best" },
+          "Three 10¢ coins prove that the largest-first plan is not optimal."
+        );
+        ops.coinResult(
+          "3 coins (10¢ + 10¢ + 10¢)",
+          [25, 1, 1, 1, 1, 1],
+          "Greedy returns exact change, but uses twice as many coins as the optimum."
+        );
+        ops.done("Largest usable coin first gives 6 coins; the optimum uses 3.");
+      }
+    );
+    coinChangeNaive = storyAlgorithm(
+      "coin-change-naive",
+      "Coin change — naive recursion",
+      dpStoryConfig("coin-change", "naive"),
+      (_input, ops) => {
+        ops.intro("Naive recursion tries every usable coin and rebuilds repeated remainder questions.");
+        ops.chooseCoin(10, 20, [10], "Try a 10¢ coin, leaving change(20¢).");
+        ops.chooseCoin(1, 19, [10, 1], "That branch takes 1¢ and reaches change(19¢).");
+        ops.coinAttempt(
+          { label: "change(19¢)", value: "reached after 10¢ + 1¢", state: "active" },
+          "The first change(19¢) subtree is solved from scratch."
+        );
+        ops.backtrackCoins(30, [], "Backtrack to 30¢ and try a different first coin.");
+        ops.chooseCoin(1, 29, [1], "Try 1¢ first, leaving change(29¢).");
+        ops.chooseCoin(10, 19, [1, 10], "Then take 10¢ and reach change(19¢) again.");
+        ops.coinAttempt(
+          { label: "change(19¢)", value: "reached again after 1¢ + 10¢", state: "repeated" },
+          "Without a memo, the full change(19¢) subtree runs again."
+        );
+        ops.backtrackCoins(30, [], "Backtrack to compare complete exact-change branches.");
+        ops.chooseCoin(25, 5, [25], "The 25¢ branch leaves 5¢, so it must continue with pennies.");
+        ops.chooseCoin(1, 4, [25, 1], "Take the first of five 1¢ coins.");
+        ops.chooseCoin(1, 3, [25, 1, 1], "Take the second 1¢ coin.");
+        ops.chooseCoin(1, 2, [25, 1, 1, 1], "Take the third 1¢ coin.");
+        ops.chooseCoin(1, 1, [25, 1, 1, 1, 1], "Take the fourth 1¢ coin.");
+        ops.chooseCoin(1, 0, [25, 1, 1, 1, 1, 1], "The fifth 1¢ coin completes this branch.");
+        ops.coinAttempt(
+          { label: "25¢ branch", value: "25¢ + 1¢ × 5 · 6 coins", state: "dead" },
+          "The first complete branch returns six coins."
+        );
+        ops.backtrackCoins(30, [], "Backtrack once more and try the 10¢ branch.");
+        ops.chooseCoin(10, 20, [10], "The first 10¢ coin leaves 20¢.");
+        ops.chooseCoin(10, 10, [10, 10], "The second 10¢ coin leaves 10¢.");
+        ops.chooseCoin(10, 0, [10, 10, 10], "The third 10¢ coin completes the payment.");
+        ops.coinAttempt(
+          { label: "10¢ branch", value: "10¢ + 10¢ + 10¢ · 3 coins", state: "best" },
+          "Comparing completed branches finds the three-coin optimum."
+        );
+        ops.coinResult(
+          "3 coins (10¢ + 10¢ + 10¢)",
+          [10, 10, 10],
+          "Naive recursion is correct, but repeated remainders make it needlessly expensive."
+        );
+        ops.done("All valid branches agree that three 10¢ coins are the shortest exact change.");
+      }
+    );
+    coinChangeMemoization = storyAlgorithm(
+      "coin-change-memoization",
+      "Coin change — memoization",
+      dpStoryConfig("coin-change", "memoization"),
+      (_input, ops) => {
+        ops.intro("Solve change recursively, but keep each answered remainder beside the till.");
+        ops.coinMemo("change(0¢)", "0 coins", "stored", "Seed the exact-change base answer.");
+        ops.chooseCoin(10, 20, [10], "A 10¢ coin leaves change(20¢) to solve.");
+        ops.chooseCoin(1, 19, [10, 1], "The first child branch reaches change(19¢).");
+        ops.coinMemo(
+          "change(19¢)",
+          "10 coins",
+          "stored",
+          "Resolve the penny tail once and store change(19¢) = 10 coins."
+        );
+        ops.backtrackCoins(20, [10], "Return to change(20¢) and try its 10¢ child.");
+        ops.chooseCoin(10, 10, [10, 10], "The second 10¢ coin leaves change(10¢).");
+        ops.chooseCoin(10, 0, [10, 10, 10], "The third 10¢ coin reaches the exact-change base.");
+        ops.backtrackCoins(10, [10, 10], "Return the base answer to change(10¢).");
+        ops.coinMemo("change(10¢)", "1 coin", "stored", "Store change(10¢) = 1 coin.");
+        ops.backtrackCoins(20, [10], "Return the saved one-coin answer to change(20¢).");
+        ops.coinMemo("change(20¢)", "2 coins", "stored", "Store change(20¢) = 2 coins.");
+        ops.backtrackCoins(30, [], "Backtrack to change(30¢) and try the 1¢ branch.");
+        ops.chooseCoin(1, 29, [1], "A 1¢ coin leaves change(29¢).");
+        ops.chooseCoin(10, 19, [1, 10], "The next 10¢ coin reaches change(19¢) again.");
+        ops.coinMemo(
+          "change(19¢)",
+          "10 coins",
+          "hit",
+          "Read the saved change(19¢) answer instead of rebuilding its subtree."
+        );
+        ops.backtrackCoins(29, [1], "Return the cache hit to change(29¢).");
+        ops.coinMemo("change(29¢)", "5 coins", "stored", "Store the best answer for change(29¢).");
+        ops.backtrackCoins(30, [], "Return all branch answers to the requested change(30¢) state.");
+        ops.coinMemo("change(30¢)", "3 coins", "stored", "Store the requested three-coin answer.");
+        ops.coinResult(
+          "3 coins (10¢ + 10¢ + 10¢)",
+          [10, 10, 10],
+          "Memoization keeps recursion but answers repeated remainders from the saved slips."
+        );
+        ops.done("change(19¢) is solved once and reused when another branch asks for it.");
+      }
+    );
+    coinChangeTabulation = storyAlgorithm(
+      "coin-change-tabulation",
+      "Coin change — tabulation",
+      dpStoryConfig("coin-change", "tabulation"),
+      (_input, ops) => {
+        ops.intro("Start from 0¢, then build the shortest exact change for every larger amount.");
+        for (let index = 0; index < coinChangeProblem.amounts.length; index++) {
+          const amount = coinChangeProblem.amounts[index];
+          const dependencies = availableCoins.filter((coin) => coin <= amount).map((coin) => amount - coin).filter((predecessor) => coinAmounts.includes(predecessor));
+          ops.fillAmount(
+            amount,
+            coinChangeProblem.bestCoins[index],
+            dependencies,
+            amount === 0 ? "Write the base: 0¢ needs 0 coins." : `Read the solved smaller amounts, add one coin, and write ${amount}¢.`
+          );
+        }
+        ops.amountResult(
+          [0, 10, 20, 30],
+          "3 coins (10¢ + 10¢ + 10¢)",
+          [10, 10, 10],
+          "Follow 0¢ → 10¢ → 20¢ → 30¢ to reconstruct three 10¢ coins."
+        );
+        ops.done("The amount board reaches 30¢ with three coins and no recursive calls.");
+      }
+    );
+    coinChangeTopDown = treeAlgorithm(
+      "coin-change-top-down",
+      "Coin change — top-down DP",
+      "coin-change-top-down",
+      (_input, ops) => {
+        const nodes = [
+          { id: "c30", label: "change(30¢)", detail: "target", values: [], x: 300, y: 24, depth: 0 },
+          { id: "c5", label: "change(5¢)", detail: "after 25¢", values: [], x: 55, y: 88, depth: 1 },
+          { id: "c20", label: "change(20¢)", detail: "after 10¢", values: [], x: 215, y: 88, depth: 1 },
+          { id: "c29", label: "change(29¢)", detail: "after 1¢", values: [], x: 455, y: 88, depth: 1 },
+          {
+            id: "c10",
+            label: "change(10¢)",
+            detail: "after 10¢",
+            values: [],
+            x: 85,
+            y: 152,
+            depth: 2
+          },
+          {
+            id: "c19a",
+            label: "change(19¢)",
+            detail: "first visit",
+            values: [],
+            x: 215,
+            y: 152,
+            depth: 2
+          },
+          {
+            id: "c4",
+            label: "change(4¢)",
+            detail: "after 25¢",
+            values: [],
+            x: 340,
+            y: 152,
+            depth: 2
+          },
+          {
+            id: "c19b",
+            label: "change(19¢)",
+            detail: "same cache key",
+            values: [],
+            x: 465,
+            y: 152,
+            depth: 2
+          },
+          {
+            id: "c28",
+            label: "change(28¢)",
+            detail: "after 1¢",
+            values: [],
+            x: 585,
+            y: 152,
+            depth: 2
+          },
+          {
+            id: "c0",
+            label: "change(0¢)",
+            detail: "exact change",
+            values: [],
+            x: 85,
+            y: 216,
+            depth: 3
+          },
+          {
+            id: "c9",
+            label: "change(9¢)",
+            detail: "would repeat",
+            values: [],
+            x: 425,
+            y: 216,
+            depth: 3
+          },
+          {
+            id: "c18",
+            label: "change(18¢)",
+            detail: "would repeat",
+            values: [],
+            x: 520,
+            y: 216,
+            depth: 3
+          }
+        ];
+        const edges = [
+          { from: "c30", to: "c5" },
+          { from: "c30", to: "c20" },
+          { from: "c30", to: "c29" },
+          { from: "c20", to: "c10" },
+          { from: "c20", to: "c19a" },
+          { from: "c10", to: "c0" },
+          { from: "c29", to: "c4" },
+          { from: "c29", to: "c19b" },
+          { from: "c29", to: "c28" },
+          { from: "c19b", to: "c9" },
+          { from: "c19b", to: "c18" }
+        ];
+        ops.tree(nodes, edges, "c30", "Start with change(30¢) and an empty memo.");
+        ops.split(
+          "c30",
+          ["c30"],
+          ["c5", "c20", "c29"],
+          "The usable 25¢, 10¢, and 1¢ coins create three remainder states."
+        );
+        ops.returnResult(
+          "c5",
+          ["c30", "c5"],
+          "5 coins",
+          "The available denominations make change(5¢) return five pennies."
+        );
+        ops.store("c5", ["c30", "c5"], "5¢", "5 coins", "Store change(5¢) = 5 coins.");
+        ops.split("c20", ["c30", "c20"], ["c10", "c19a"], "Expand change(20¢) through 10¢ and 1¢.");
+        ops.split("c10", ["c30", "c20", "c10"], ["c0"], "A 10¢ coin reaches exact change.");
+        ops.base("c0", ["c30", "c20", "c10", "c0"], "0 coins", "change(0¢) needs no more coins.");
+        ops.combine("c10", ["c30", "c20", "c10"], "1 coin", "One 10¢ coin solves change(10¢).");
+        ops.store("c10", ["c30", "c20", "c10"], "10¢", "1 coin", "Store change(10¢) = 1 coin.");
+        ops.returnResult(
+          "c19a",
+          ["c30", "c20", "c19a"],
+          "10 coins",
+          "The compact penny tail returns 10 coins for change(19¢)."
+        );
+        ops.store("c19a", ["c30", "c20", "c19a"], "19¢", "10 coins", "Store change(19¢) = 10 coins.");
+        ops.combine("c20", ["c30", "c20"], "2 coins", "change(20¢) prefers two 10¢ coins.");
+        ops.store("c20", ["c30", "c20"], "20¢", "2 coins", "Store change(20¢) = 2 coins.");
+        ops.split(
+          "c29",
+          ["c30", "c29"],
+          ["c4", "c19b", "c28"],
+          "change(29¢) reaches the saved change(19¢) state."
+        );
+        ops.returnResult("c4", ["c30", "c29", "c4"], "4 coins", "Four pennies solve change(4¢).");
+        ops.store("c4", ["c30", "c29", "c4"], "4¢", "4 coins", "Store change(4¢) = 4 coins.");
+        ops.cacheHit(
+          "c19b",
+          ["c30", "c29", "c19b"],
+          "19¢",
+          "10 coins",
+          ["c9", "c18"],
+          "The memo returns change(19¢) and skips both child branches."
+        );
+        ops.returnResult(
+          "c28",
+          ["c30", "c29", "c28"],
+          "4 coins",
+          "The 25¢ branch plus three pennies solves change(28¢)."
+        );
+        ops.store("c28", ["c30", "c29", "c28"], "28¢", "4 coins", "Store change(28¢) = 4 coins.");
+        ops.combine("c29", ["c30", "c29"], "5 coins", "change(29¢) prefers 25¢ plus four pennies.");
+        ops.store("c29", ["c30", "c29"], "29¢", "5 coins", "Store change(29¢) = 5 coins.");
+        ops.combine("c30", ["c30"], "3 coins", "Compare 6, 3, and 6 coins: the 10¢ branch wins.");
+        ops.store("c30", ["c30"], "30¢", "3 coins", "Store the requested answer.");
+        ops.done(
+          "c30",
+          "3 coins",
+          "Top-down DP returns three 10¢ coins and solves each remainder at most once."
+        );
+      }
+    );
+    coinChangeBottomUp = tableAlgorithm(
+      "coin-change-bottom-up",
+      "Coin change — bottom-up DP",
+      "coin-change-bottom-up",
+      (_input, ops) => {
+        const amounts = coinAmounts;
+        const best = coinChangeProblem.bestCoins;
+        ops.board(
+          ["fewest coins"],
+          amounts.map((amount) => `${amount}¢`),
+          "Build exact change from 0¢ upward."
+        );
+        ops.set(0, 0, "0", [], "The base amount 0¢ needs no coins.", "dp[0¢] = 0");
+        for (let column = 1; column < amounts.length; column++) {
+          const amount = amounts[column];
+          const dependencies = availableCoins.filter((coin) => coin <= amount).map((coin) => [0, amounts.indexOf(amount - coin)]).filter(([, dependency]) => dependency >= 0);
+          const predecessorValues = dependencies.map(([, dependency]) => best[dependency]);
+          ops.set(
+            0,
+            column,
+            String(best[column]),
+            dependencies,
+            `Try one allowed coin after each solved predecessor amount for ${amount}¢.`,
+            `1 + min(${predecessorValues.join(", ")}) = ${best[column]}`
+          );
+        }
+        ops.markPath(
+          [
+            [0, 0],
+            [0, 6],
+            [0, 8],
+            [0, 10]
+          ],
+          "Trace 30¢ → 20¢ → 10¢ → 0¢: three 10¢ coins produce the stored optimum."
+        );
+        ops.done("The bottom-up table stores 3 coins for 30¢.");
+      }
+    );
+    gridPathGreedy = storyAlgorithm(
+      "grid-path-greedy",
+      "Grid path — greedy",
+      dpStoryConfig("grid-path", "greedy"),
+      (_input, ops) => {
+        ops.intro("Move only right or down from the loading bay to the dispatch door.");
+        let cost = 0;
+        for (let index = 0; index < greedyWarehousePath.length; index++) {
+          const [row, column] = greedyWarehousePath[index];
+          cost += gridPathProblem.costs[row][column];
+          ops.visitTile(
+            [row, column],
+            greedyWarehousePath.slice(0, index + 1),
+            cost,
+            [],
+            index < 4 ? "Choose the cheaper immediate neighbour without looking beyond it." : "The early cheap tiles now force the route through expensive shelves."
+          );
+        }
+        ops.routeResult(
+          10,
+          optimalWarehousePath,
+          "R1C1 → R2C1 → R3C1 → R3C2 → R4C2 → R4C3 → R4C4",
+          "A route costing 10 proves the greedy route costing 21 is not optimal."
+        );
+        ops.done("Greedy pays 21; the best route pays 10.");
+      }
+    );
+    gridPathNaive = storyAlgorithm(
+      "grid-path-naive",
+      "Grid path — naive recursion",
+      dpStoryConfig("grid-path", "naive"),
+      (_input, ops) => {
+        ops.intro("Naive recursion explores every right/down route from the loading bay.");
+        ops.visitTile(
+          [0, 1],
+          [
+            [0, 0],
+            [0, 1]
+          ],
+          1,
+          [],
+          "The first branch moves right."
+        );
+        ops.visitTile(
+          [1, 1],
+          [
+            [0, 0],
+            [0, 1],
+            [1, 1]
+          ],
+          10,
+          [],
+          "This branch reaches R2C2 after moving right then down."
+        );
+        ops.visitTile(
+          [2, 1],
+          [
+            [0, 0],
+            [0, 1],
+            [1, 1],
+            [2, 1]
+          ],
+          12,
+          [],
+          "The same branch continues to R3C2 before recursion backtracks."
+        );
+        ops.visitTile(
+          [0, 0],
+          [[0, 0]],
+          0,
+          [],
+          "Backtrack to the loading bay before exploring the downward branch."
+        );
+        ops.visitTile(
+          [1, 0],
+          [
+            [0, 0],
+            [1, 0]
+          ],
+          2,
+          [],
+          "A second branch restarts from the loading bay and moves down."
+        );
+        ops.visitTile(
+          [1, 1],
+          [
+            [0, 0],
+            [1, 0],
+            [1, 1]
+          ],
+          11,
+          [[1, 1]],
+          "R2C2 is reached again; its entire remaining-route search repeats."
+        );
+        ops.visitTile(
+          [2, 0],
+          [
+            [0, 0],
+            [1, 0],
+            [2, 0]
+          ],
+          4,
+          [[1, 1]],
+          "Continue down to R3C1 before the branch turns right."
+        );
+        ops.visitTile(
+          [2, 1],
+          [
+            [0, 0],
+            [1, 0],
+            [2, 0],
+            [2, 1]
+          ],
+          6,
+          [
+            [1, 1],
+            [2, 1]
+          ],
+          "Different prefixes keep converging on the same warehouse coordinates."
+        );
+        ops.routeResult(
+          10,
+          optimalWarehousePath,
+          "R1C1 → R2C1 → R3C1 → R3C2 → R4C2 → R4C3 → R4C4",
+          "After comparing all routes, recursion finds the cost-10 route."
+        );
+        ops.done("Naive recursion is correct, but recomputes the best route from repeated tiles.");
+      }
+    );
+    gridPathMemoization = storyAlgorithm(
+      "grid-path-memoization",
+      "Grid path — memoization",
+      dpStoryConfig("grid-path", "memoization"),
+      (_input, ops) => {
+        ops.intro("Explore routes recursively and write each solved tile directly into the map.");
+        ops.visitTile([0, 0], [[0, 0]], 0, [], "Start the recursive route at the loading bay.");
+        ops.visitTile(
+          [0, 1],
+          [
+            [0, 0],
+            [0, 1]
+          ],
+          1,
+          [],
+          "The first branch moves right."
+        );
+        ops.visitTile(
+          [0, 2],
+          [
+            [0, 0],
+            [0, 1],
+            [0, 2]
+          ],
+          2,
+          [],
+          "Continue to R1C3 before solving the remaining routes below it."
+        );
+        ops.storeTile(
+          [0, 2],
+          gridPathProblem.bestRemaining[0][2],
+          [
+            [0, 3],
+            [1, 2]
+          ],
+          "Store the best remaining cost from R1C3."
+        );
+        ops.visitTile(
+          [1, 1],
+          [
+            [0, 0],
+            [0, 1],
+            [1, 1]
+          ],
+          10,
+          [],
+          "Backtrack to R1C2, then enter R2C2 through its second child branch."
+        );
+        ops.storeTile(
+          [1, 1],
+          gridPathProblem.bestRemaining[1][1],
+          [
+            [1, 2],
+            [2, 1]
+          ],
+          "Store best(R2C2) = 15 after comparing its two exits."
+        );
+        ops.storeTile(
+          [0, 1],
+          gridPathProblem.bestRemaining[0][1],
+          [
+            [0, 2],
+            [1, 1]
+          ],
+          "The right branch returns 14 from R1C2."
+        );
+        ops.visitTile(
+          [1, 0],
+          [
+            [0, 0],
+            [1, 0]
+          ],
+          2,
+          [],
+          "The second branch restarts from the loading bay and moves down."
+        );
+        ops.visitTile(
+          [1, 1],
+          [
+            [0, 0],
+            [1, 0],
+            [1, 1]
+          ],
+          11,
+          [[1, 1]],
+          "R2C2 is already written, so return 15 without opening another route subtree."
+        );
+        ops.visitTile(
+          [2, 0],
+          [
+            [0, 0],
+            [1, 0],
+            [2, 0]
+          ],
+          4,
+          [[1, 1]],
+          "After the cache hit, continue down to solve R3C1."
+        );
+        ops.visitTile(
+          [2, 1],
+          [
+            [0, 0],
+            [1, 0],
+            [2, 0],
+            [2, 1]
+          ],
+          6,
+          [[1, 1]],
+          "R3C1 first asks for the saved remaining cost from R3C2."
+        );
+        ops.storeTile(
+          [2, 1],
+          gridPathProblem.bestRemaining[2][1],
+          [
+            [2, 2],
+            [3, 1]
+          ],
+          "Store best(R3C2) = 6 after comparing right with down."
+        );
+        ops.storeTile(
+          [2, 0],
+          gridPathProblem.bestRemaining[2][0],
+          [
+            [2, 1],
+            [3, 0]
+          ],
+          "Store best(R3C1) = 8."
+        );
+        ops.storeTile(
+          [1, 0],
+          gridPathProblem.bestRemaining[1][0],
+          [
+            [1, 1],
+            [2, 0]
+          ],
+          "R2C1 prefers the stored route through R3C1 and returns 10."
+        );
+        ops.storeTile(
+          [0, 0],
+          gridPathProblem.bestRemaining[0][0],
+          [
+            [0, 1],
+            [1, 0]
+          ],
+          "The loading bay compares the two saved branch totals and stores 10."
+        );
+        ops.routeResult(
+          gridPathProblem.optimalCost,
+          optimalWarehousePath,
+          "R1C1 → R2C1 → R3C1 → R3C2 → R4C2 → R4C3 → R4C4",
+          "The saved map reconstructs the cost-10 route."
+        );
+        ops.done("R2C2 is evaluated once; its saved answer stops the repeated branch.");
+      }
+    );
+    gridPathTabulation = storyAlgorithm(
+      "grid-path-tabulation",
+      "Grid path — tabulation",
+      dpStoryConfig("grid-path", "tabulation"),
+      (_input, ops) => {
+        ops.intro("Start at the dispatch door and write the cheapest remaining cost into every tile.");
+        for (let row = gridPathProblem.costs.length - 1; row >= 0; row--) {
+          for (let column = gridPathProblem.costs[row].length - 1; column >= 0; column--) {
+            const dependencies = [];
+            if (column < gridPathProblem.costs[row].length - 1) dependencies.push([row, column + 1]);
+            if (row < gridPathProblem.costs.length - 1) dependencies.push([row + 1, column]);
+            ops.storeTile(
+              [row, column],
+              gridPathProblem.bestRemaining[row][column],
+              dependencies,
+              dependencies.length ? "Read the written right and down tiles, then write the cheaper remaining cost." : "Write 0 at the dispatch door: no travel remains."
+            );
+          }
+        }
+        ops.routeResult(
+          gridPathProblem.optimalCost,
+          optimalWarehousePath,
+          "R1C1 → R2C1 → R3C1 → R3C2 → R4C2 → R4C3 → R4C4",
+          "Follow the cheapest written neighbour from the loading bay to the dispatch door."
+        );
+        ops.done("The completed warehouse map stores route cost 10 at the loading bay.");
+      }
+    );
+    gridPathTopDown = treeAlgorithm(
+      "grid-path-top-down",
+      "Grid path — top-down DP",
+      "grid-path-top-down",
+      (_input, ops) => {
+        const nodes = [
+          {
+            id: "r1c1",
+            label: "best(R1C1)",
+            detail: "loading bay",
+            values: [],
+            x: 300,
+            y: 24,
+            depth: 0
+          },
+          {
+            id: "r1c2",
+            label: "best(R1C2)",
+            detail: "move right",
+            values: [],
+            x: 155,
+            y: 88,
+            depth: 1
+          },
+          { id: "r2c1", label: "best(R2C1)", detail: "move down", values: [], x: 445, y: 88, depth: 1 },
+          {
+            id: "r1c3",
+            label: "best(R1C3)",
+            detail: "right child",
+            values: [],
+            x: 65,
+            y: 152,
+            depth: 2
+          },
+          {
+            id: "r2c2a",
+            label: "best(R2C2)",
+            detail: "first visit",
+            values: [],
+            x: 235,
+            y: 152,
+            depth: 2
+          },
+          {
+            id: "r2c2b",
+            label: "best(R2C2)",
+            detail: "same cache key",
+            values: [],
+            x: 375,
+            y: 152,
+            depth: 2
+          },
+          {
+            id: "r3c1",
+            label: "best(R3C1)",
+            detail: "down child",
+            values: [],
+            x: 535,
+            y: 152,
+            depth: 2
+          },
+          {
+            id: "r2c3a",
+            label: "best(R2C3)",
+            detail: "would repeat",
+            values: [],
+            x: 325,
+            y: 216,
+            depth: 3
+          },
+          {
+            id: "r3c2a",
+            label: "best(R3C2)",
+            detail: "would repeat",
+            values: [],
+            x: 425,
+            y: 216,
+            depth: 3
+          }
+        ];
+        const edges = [
+          { from: "r1c1", to: "r1c2" },
+          { from: "r1c1", to: "r2c1" },
+          { from: "r1c2", to: "r1c3" },
+          { from: "r1c2", to: "r2c2a" },
+          { from: "r2c1", to: "r2c2b" },
+          { from: "r2c1", to: "r3c1" },
+          { from: "r2c2b", to: "r2c3a" },
+          { from: "r2c2b", to: "r3c2a" }
+        ];
+        ops.tree(nodes, edges, "r1c1", "Ask for the cheapest route from the loading bay.");
+        ops.split(
+          "r1c1",
+          ["r1c1"],
+          ["r1c2", "r2c1"],
+          "The state compares moving right with moving down."
+        );
+        ops.split(
+          "r1c2",
+          ["r1c1", "r1c2"],
+          ["r1c3", "r2c2a"],
+          "Expand the two routes available from R1C2."
+        );
+        ops.returnResult(
+          "r1c3",
+          ["r1c1", "r1c2", "r1c3"],
+          "13",
+          "The compact branch returns the remaining cost from R1C3."
+        );
+        ops.store("r1c3", ["r1c1", "r1c2", "r1c3"], "R1C3", "13", "Store the best cost from R1C3.");
+        ops.combine(
+          "r2c2a",
+          ["r1c1", "r1c2", "r2c2a"],
+          "15",
+          "The best remaining cost from R2C2 is 15."
+        );
+        ops.store("r2c2a", ["r1c1", "r1c2", "r2c2a"], "R2C2", "15", "Store best(R2C2) = 15.");
+        ops.combine("r1c2", ["r1c1", "r1c2"], "14", "R1C2 stores its tile cost plus the cheaper child.");
+        ops.store("r1c2", ["r1c1", "r1c2"], "R1C2", "14", "Store best(R1C2) = 14.");
+        ops.split(
+          "r2c1",
+          ["r1c1", "r2c1"],
+          ["r2c2b", "r3c1"],
+          "The downward branch reaches R2C2 again."
+        );
+        ops.cacheHit(
+          "r2c2b",
+          ["r1c1", "r2c1", "r2c2b"],
+          "R2C2",
+          "15",
+          ["r2c3a", "r3c2a"],
+          "Reuse best(R2C2) = 15 and skip both of its child routes."
+        );
+        ops.returnResult(
+          "r3c1",
+          ["r1c1", "r2c1", "r3c1"],
+          "8",
+          "The compact branch returns best(R3C1) = 8."
+        );
+        ops.store("r3c1", ["r1c1", "r2c1", "r3c1"], "R3C1", "8", "Store best(R3C1) = 8.");
+        ops.combine("r2c1", ["r1c1", "r2c1"], "10", "R2C1 prefers the route through R3C1.");
+        ops.store("r2c1", ["r1c1", "r2c1"], "R2C1", "10", "Store best(R2C1) = 10.");
+        ops.combine("r1c1", ["r1c1"], "10", "The loading bay prefers down: min(14, 10) = 10.");
+        ops.store("r1c1", ["r1c1"], "R1C1", "10", "Store the requested route cost.");
+        ops.done(
+          "r1c1",
+          "10",
+          "Top-down DP returns cost 10 and avoids recomputing repeated coordinates."
+        );
+      }
+    );
+    gridPathBottomUp = tableAlgorithm(
+      "grid-path-bottom-up",
+      "Grid path — bottom-up DP",
+      "grid-path-bottom-up",
+      (_input, ops) => {
+        const best = gridPathProblem.bestRemaining;
+        ops.board(
+          ["R1", "R2", "R3", "R4"],
+          ["C1", "C2", "C3", "C4"],
+          "Fill the warehouse from the dispatch door back to the loading bay."
+        );
+        for (let row = 3; row >= 0; row--) {
+          for (let column = 3; column >= 0; column--) {
+            const dependencies = [];
+            if (column < 3) dependencies.push([row, column + 1]);
+            if (row < 3) dependencies.push([row + 1, column]);
+            const dependencyValues = dependencies.map(([depRow, depColumn]) => best[depRow][depColumn]);
+            const tileCost = gridPathProblem.costs[row][column];
+            const formula = dependencies.length ? `${tileCost} + min(${dependencyValues.join(", ")}) = ${best[row][column]}` : "goal = 0";
+            ops.set(
+              row,
+              column,
+              String(best[row][column]),
+              dependencies,
+              dependencies.length ? "Read the already-solved right and down neighbours, then store the cheaper route." : "The dispatch door is the base tile with no remaining travel cost.",
+              formula
+            );
+          }
+        }
+        ops.markPath(optimalWarehousePath, "Follow the cheaper stored neighbour from R1C1 to R4C4.");
+        ops.done("The bottom-up matrix stores the minimum route cost 10 at R1C1.");
+      }
+    );
+    dynamicProgrammingAlgorithms = [
+      coinChangeGreedy,
+      coinChangeNaive,
+      coinChangeMemoization,
+      coinChangeTabulation,
+      coinChangeTopDown,
+      coinChangeBottomUp,
+      gridPathGreedy,
+      gridPathNaive,
+      gridPathMemoization,
+      gridPathTabulation,
+      gridPathTopDown,
+      gridPathBottomUp
+    ];
+  }
+});
+
+// custom/steptrace/src/families/indexed-array-search.ts
+function parseIndexedArraySearchConfig(config, algorithm, profile) {
+  const { array, target } = config;
+  if (!Array.isArray(array) || array.length === 0)
+    throw new Error(`steptrace: ${algorithm} requires a non-empty sorted "array".`);
+  if (!array.every((value) => typeof value === "number" && Number.isFinite(value)))
+    throw new Error(`steptrace: ${algorithm} requires every "array" value to be a finite number.`);
+  if (array.some((value, index) => index > 0 && value < array[index - 1]))
+    throw new Error(`steptrace: ${algorithm} requires "array" values in non-decreasing order.`);
+  if (typeof target !== "number" || !Number.isFinite(target))
+    throw new Error(`steptrace: ${algorithm} requires a finite numeric "target".`);
+  return { array: array.slice(), target, profile };
+}
+function resolveIndexedSearchState(frame, index) {
+  if (frame.found === index) return "found";
+  if (frame.mid === index || frame.mid2 === index) return "probe";
+  if (frame.phase === "gallop" || frame.phase === "jump") {
+    if (index <= frame.previousBound) return "eliminated";
+    if (frame.bound != null && index > frame.bound) return "unseen";
+    return "range";
+  }
+  if (index < frame.lo || index > frame.hi) return "eliminated";
+  return "range";
+}
+function phaseLabel3(frame) {
+  switch (frame.phase) {
+    case "gallop":
+      return "gallop";
+    case "jump":
+      return "jump";
+    case "scan":
+      return frame.profile === "ternary" ? "final scan" : "linear scan";
+    case "interpolation":
+      return "interpolation";
+    case "ternary":
+      return "ternary";
+    default:
+      return "binary search";
+  }
+}
+function phaseColor(frame) {
+  if (frame.phase === "gallop") return "var(--_violet)";
+  if (frame.phase === "binary") return "var(--_green)";
+  if (frame.phase === "scan" || frame.phase === "jump") return "var(--_blue)";
+  return "var(--_amber)";
+}
+var indexedSearchViewSemantics, indexedArraySearchFamily;
+var init_indexed_array_search = __esm({
+  "custom/steptrace/src/families/indexed-array-search.ts"() {
+    init_recorders();
+    init_render();
+    indexedSearchViewSemantics = {
+      stateForIndex: resolveIndexedSearchState,
+      watchRows(frame, frames) {
+        const first = frames[0];
+        const profile = frame.profile;
+        const probe = frame.mid == null ? "—" : `[${frame.mid}] = ${frame.array[frame.mid]}`;
+        const range = frame.phase === "gallop" || frame.phase === "jump" ? frame.bound == null ? "discovering" : `[${Math.max(0, frame.previousBound + 1)}, ${frame.bound}]` : `[${frame.lo}, ${frame.hi}]`;
+        const rows = [
+          profile === "ternary" ? { k: "goal", v: frame.goal ?? "—", sw: "var(--_accent)" } : { k: "target", v: String(first.target), sw: "var(--_accent)" },
+          { k: "phase", v: phaseLabel3(frame), sw: phaseColor(frame) },
+          { k: "range", v: range, sw: "var(--_neutral)" },
+          { k: profile === "ternary" ? "probe 1" : "probe", v: probe, sw: "var(--_blue)" }
+        ];
+        if (profile === "ternary") {
+          rows.push({
+            k: "probe 2",
+            v: frame.mid2 == null ? "—" : `[${frame.mid2}] = ${frame.array[frame.mid2]}`,
+            sw: "var(--_violet)"
+          });
+        } else if (profile === "interpolation") {
+          rows.push({ k: "estimate", v: frame.annotationValue ?? "—", sw: "var(--_amber)" });
+        } else if (profile === "jump") {
+          rows.push({ k: "block", v: String(frame.blockSize ?? "—"), sw: "var(--_blue)" });
+        }
+        return rows;
+      }
+    };
+    indexedArraySearchFamily = {
+      id: "indexed-array-search",
+      createRecorder(config) {
+        return new IndexedSearchRecorder(config);
+      },
+      createView(frames) {
+        return makeSearchView(frames, indexedSearchViewSemantics);
+      }
+    };
+  }
+});
+
+// custom/steptrace/src/algorithms/exponential-search.ts
+function parseExponentialSearchConfig(config) {
+  return parseIndexedArraySearchConfig(config, "exponential-search", "exponential");
+}
+var exponentialSearch;
+var init_exponential_search = __esm({
+  "custom/steptrace/src/algorithms/exponential-search.ts"() {
+    init_indexed_array_search();
+    exponentialSearch = {
+      id: "exponential-search",
+      kind: "search",
+      family: indexedArraySearchFamily,
+      meta: { label: "Exponential search" },
+      parse: parseExponentialSearchConfig,
+      run(input, ops) {
+        const values = ops.value;
+        const { target } = input;
+        ops.init(
+          `Exponential search for ${target}: gallop by powers of two, then binary-search the bracket.`
+        );
+        ops.gallopProbe(-1, 0, `Check index 0 first: it holds ${values[0]}.`);
+        if (values[0] === target) {
+          ops.hit(0, `${target} is at index 0.`);
+          ops.done(`Found ${target} at index 0 after ${ops.comparisons} probe.`);
+          return;
+        }
+        if (values[0] > target) {
+          ops.done(`${target} is smaller than the first value, so it is not in the array.`);
+          return;
+        }
+        let previousBound = 0;
+        let bound = 1;
+        while (bound < values.length) {
+          ops.gallopProbe(
+            previousBound,
+            bound,
+            `Gallop to index ${bound}: ${values[bound]} ${values[bound] < target ? "is below" : "reaches or passes"} ${target}.`
+          );
+          if (values[bound] >= target) break;
+          previousBound = bound;
+          bound *= 2;
+        }
+        const lo = Math.floor(bound / 2);
+        const hi = Math.min(bound, values.length - 1);
+        ops.beginPhase(lo, hi, `The target is bracketed in [${lo}, ${hi}]; switch to binary search.`);
+        let left = lo;
+        let right = hi;
+        while (left <= right) {
+          const mid = Math.floor((left + right) / 2);
+          ops.probe(
+            left,
+            right,
+            mid,
+            `Binary-search [${left}, ${right}]: index ${mid} holds ${values[mid]}.`
+          );
+          if (values[mid] === target) {
+            ops.hit(mid, `${values[mid]} equals ${target} — found it at index ${mid}.`);
+            ops.done(`Found ${target} after ${ops.comparisons} probes.`);
+            return;
+          }
+          if (values[mid] < target) {
+            left = mid + 1;
+            ops.narrow(left, right, `${values[mid]} < ${target}: discard through index ${mid}.`);
+          } else {
+            right = mid - 1;
+            ops.narrow(left, right, `${values[mid]} > ${target}: discard from index ${mid}.`);
+          }
+        }
+        ops.done(`${target} is not in the array after ${ops.comparisons} probes.`);
+      }
+    };
+  }
+});
+
+// custom/steptrace/src/algorithms/interpolation-search.ts
+function parseInterpolationSearchConfig(config) {
+  return parseIndexedArraySearchConfig(config, "interpolation-search", "interpolation");
+}
+var interpolationSearch;
+var init_interpolation_search = __esm({
+  "custom/steptrace/src/algorithms/interpolation-search.ts"() {
+    init_indexed_array_search();
+    interpolationSearch = {
+      id: "interpolation-search",
+      kind: "search",
+      family: indexedArraySearchFamily,
+      meta: { label: "Interpolation search" },
+      parse: parseInterpolationSearchConfig,
+      run(input, ops) {
+        const values = ops.value;
+        const { target } = input;
+        ops.init(
+          `Interpolation search for ${target}: estimate probe positions from value ratios, then narrow the range.`
+        );
+        ops.beginPhase(
+          0,
+          values.length - 1,
+          `Interpolation phase: probe by relative position inside [${0}, ${values.length - 1}].`,
+          "interpolation"
+        );
+        let lo = 0;
+        let hi = values.length - 1;
+        while (lo <= hi && target >= values[lo] && target <= values[hi]) {
+          if (values[lo] === values[hi]) {
+            ops.annotatedProbe(
+              lo,
+              hi,
+              lo,
+              "estimate",
+              `index ${lo}`,
+              `The value span is flat, so the estimate stays at index ${lo}.`
+            );
+            if (values[lo] === target) {
+              ops.hit(lo, `${target} equals ${values[lo]} at index ${lo}.`);
+              ops.done(`Found ${target} at index ${lo} after ${ops.comparisons} probes.`);
+              return;
+            }
+            break;
+          }
+          const numerator = (target - values[lo]) * (hi - lo);
+          const denominator = values[hi] - values[lo];
+          const pos = Math.floor(lo + numerator / denominator);
+          const ratio = Math.round((target - values[lo]) / denominator * 100);
+          ops.annotatedProbe(
+            lo,
+            hi,
+            pos,
+            "estimate",
+            `${ratio}% → [${pos}]`,
+            `${target} is ${ratio}% through [${values[lo]}, ${values[hi]}]: project to index ${pos}.`
+          );
+          if (values[pos] === target) {
+            ops.hit(pos, `${values[pos]} equals ${target} — found it at index ${pos}.`);
+            ops.done(`Found ${target} after ${ops.comparisons} probes.`);
+            return;
+          }
+          if (values[pos] < target) {
+            lo = pos + 1;
+            ops.narrow(lo, hi, `${values[pos]} < ${target}: search indices ${lo} through ${hi}.`);
+          } else {
+            hi = pos - 1;
+            ops.narrow(lo, hi, `${values[pos]} > ${target}: search indices ${lo} through ${hi}.`);
+          }
+        }
+        ops.done(`${target} is not in the array after ${ops.comparisons} probes.`);
+      }
+    };
+  }
+});
+
+// custom/steptrace/src/families/matrix-grid.ts
+function invalidConfig6(message) {
+  throw new Error(`steptrace: floyd-warshall ${message}`);
+}
+function parseMatrixGridConfig(config) {
+  const { nodes, edges } = config;
+  if (!Array.isArray(nodes) || nodes.length === 0)
+    invalidConfig6('requires a non-empty numeric "nodes" array.');
+  if (!nodes.every((node) => typeof node === "number" && Number.isFinite(node)))
+    invalidConfig6('requires every "nodes" entry to be a finite number.');
+  if (new Set(nodes).size !== nodes.length) invalidConfig6('requires unique "nodes" entries.');
+  if (!Array.isArray(edges))
+    invalidConfig6('requires an "edges" array of [from, to, weight] tuples.');
+  const knownNodes = new Set(nodes);
+  const parsedEdges = edges.map((edge, index) => {
+    if (!Array.isArray(edge) || edge.length !== 3 || !edge.every((value) => typeof value === "number" && Number.isFinite(value))) {
+      invalidConfig6(`requires edge ${index} to be a finite [from, to, weight] tuple.`);
+    }
+    const [from, to, weight] = edge;
+    if (!knownNodes.has(from) || !knownNodes.has(to))
+      invalidConfig6(`requires edge ${index} to reference nodes declared in "nodes".`);
+    return [from, to, weight];
+  });
+  return { nodes: nodes.slice(), edges: parsedEdges, profile: "floyd-warshall" };
+}
+function formatDistance(value) {
+  return value == null ? "∞" : String(value);
+}
+function distanceLabel(frame, cell) {
+  const [row, column] = cell;
+  return `dist[${frame.rowLabels[row]}][${frame.colLabels[column]}] = ${formatDistance(frame.grid[row][column])}`;
+}
+function stageIndex(frame) {
+  return frame.k == null ? -1 : frame.rowLabels.indexOf(String(frame.k));
+}
+function matrixGridRolesForCell(frame, row, column) {
+  const roles = [];
+  const k = stageIndex(frame);
+  if ((frame.type === "stage" || frame.type === "relax") && (row === k || column === k)) {
+    roles.push("stage-axis");
+  }
+  if (frame.type === "relax") {
+    if (frame.deps[0]?.[0] === row && frame.deps[0]?.[1] === column) roles.push("operand-a");
+    if (frame.deps[1]?.[0] === row && frame.deps[1]?.[1] === column) roles.push("operand-b");
+    if (frame.cur?.[0] === row && frame.cur?.[1] === column) roles.push("target");
+  }
+  if (frame.negativeCycle.includes(Number(frame.rowLabels[row])) && frame.rowLabels[row] === frame.colLabels[column]) {
+    roles.push("negative-cycle");
+  }
+  return roles;
+}
+function matrixGridFooterModel(frame) {
+  const nodeCount = frame.rowLabels.length;
+  if (frame.negativeCycle.length) {
+    return {
+      context: "Negative cycle",
+      summary: { text: "Cycle paths are unbounded" }
+    };
+  }
+  if (frame.type === "init") {
+    return {
+      context: "Initialize distance matrix",
+      summary: { text: "Seed diagonal, edges, and ∞" }
+    };
+  }
+  if (frame.type === "stage") {
+    return {
+      context: `Stage k = ${frame.k}`,
+      summary: { text: `Compare ${nodeCount * nodeCount} pairs through node ${frame.k}` }
+    };
+  }
+  if (frame.type === "relax" && frame.cur) {
+    const previous = formatDistance(frame.previous);
+    const result = formatDistance(frame.result);
+    return {
+      context: `Stage k = ${frame.k}`,
+      summary: frame.decision === "improve" ? { role: "write", text: `Write ${result} · ${previous} → ${result}` } : { role: "keep", text: `Keep ${previous} · via ${frame.k} is not shorter` }
+    };
+  }
+  return {
+    context: "All stages complete",
+    summary: { text: `${nodeCount * nodeCount} distances ready` }
+  };
+}
+var matrixGridRoleLegend, matrixGridViewSemantics, matrixGridFamily, abstractDynamicProgrammingViewDescriptor;
+var init_matrix_grid = __esm({
+  "custom/steptrace/src/families/matrix-grid.ts"() {
+    init_recorders();
+    init_render();
+    init_execution_tree();
+    matrixGridRoleLegend = [
+      { role: "operand-a", badge: "A", label: "dist[i][k]" },
+      { role: "operand-b", badge: "B", label: "dist[k][j]" },
+      { role: "target", badge: "T", label: "dist[i][j]" },
+      { role: "keep", badge: "K", label: "keep target" },
+      { role: "write", badge: "W", label: "write target" },
+      { role: "stage-axis", badge: "k", label: "active intermediate row/column" }
+    ];
+    matrixGridViewSemantics = {
+      tableLabel: "Floyd-Warshall distance matrix. Rows are source nodes and columns are destination nodes.",
+      axisDescription: "Distance matrix: rows identify the from node and columns identify the to node.",
+      cornerLabel: "from ↓ / to →",
+      stageLayout: "fill",
+      formatValue(value) {
+        return formatDistance(value);
+      },
+      cellLabel(frame, row, column) {
+        const base = distanceLabel(frame, [row, column]);
+        const roles = matrixGridRolesForCell(frame, row, column);
+        if (!roles.includes("target"))
+          return roles.length ? `${base}; roles: ${roles.join(", ")}` : base;
+        return `${base}; roles: ${roles.join(", ")}; previous ${formatDistance(frame.previous)}; candidate ${formatDistance(frame.candidate)}; decision ${frame.decision}; result ${formatDistance(frame.result)}`;
+      },
+      stateForCell(frame, row, column) {
+        if (frame.cur?.[0] === row && frame.cur?.[1] === column) return "cur";
+        return frame.deps.some(([depRow, depColumn]) => depRow === row && depColumn === column) ? "dep" : "";
+      },
+      decisionForCell(frame, row, column) {
+        return frame.cur?.[0] === row && frame.cur?.[1] === column ? frame.decision || "" : "";
+      },
+      rolesForCell: matrixGridRolesForCell,
+      headerRole(frame, axis, index) {
+        const k = stageIndex(frame);
+        if (frame.type !== "stage" && frame.type !== "relax" || index !== k) return "";
+        return axis === "row" ? "stage-row" : "stage-column";
+      },
+      footerModel: matrixGridFooterModel,
+      roleLegend: matrixGridRoleLegend,
+      watchRows(frame) {
+        const current = frame.cur ? `dist[${frame.rowLabels[frame.cur[0]]}][${frame.colLabels[frame.cur[1]]}] = ${formatDistance(frame.previous)} before this relaxation` : "—";
+        const left = frame.deps[0] ? `dist[${frame.rowLabels[frame.deps[0][0]]}][${frame.colLabels[frame.deps[0][1]]}] = ${formatDistance(frame.operandA)}` : "—";
+        const right = frame.deps[1] ? `dist[${frame.rowLabels[frame.deps[1][0]]}][${frame.colLabels[frame.deps[1][1]]}] = ${formatDistance(frame.operandB)}` : "—";
+        const candidate = frame.candidate == null || !frame.deps[0] || !frame.deps[1] ? "—" : `${formatDistance(frame.operandA)} + ${formatDistance(frame.operandB)} = ${frame.candidate}`;
+        const rows = [
+          { k: "stage k", v: frame.k == null ? "—" : String(frame.k), sw: "var(--_violet)" },
+          { k: "dist[i][j]", v: current, sw: "var(--_blue)" },
+          { k: "dist[i][k]", v: left, sw: "var(--_amber)" },
+          { k: "dist[k][j]", v: right, sw: "var(--_amber)" },
+          { k: "candidate", v: candidate, sw: "var(--_violet)" },
+          {
+            k: "decision",
+            v: frame.decision === "improve" ? `write ${formatDistance(frame.previous)} → ${formatDistance(frame.result)}` : frame.decision === "keep" ? `keep ${formatDistance(frame.previous)}` : "—",
+            sw: frame.decision === "improve" ? "var(--_green)" : "var(--_neutral)"
+          }
+        ];
+        if (frame.negativeCycle.length) {
+          rows.push({
+            k: "negative cycle",
+            v: frame.negativeCycle.join(", "),
+            sw: "var(--_amber)"
+          });
+        }
+        return rows;
+      }
+    };
+    matrixGridFamily = {
+      id: "matrix-grid",
+      createRecorder(config) {
+        return new MatrixGridRecorder(config);
+      },
+      createView(frames) {
+        return makeDPView(frames, matrixGridViewSemantics);
+      }
+    };
+    abstractDynamicProgrammingViewDescriptor = {
+      ariaLabel: "Dynamic-programming dependency graph",
+      ...executionTreeCardMetrics,
+      stateLabels: {
+        call: "pending",
+        base: "base",
+        store: "stored"
+      },
+      legend: [
+        { state: "call", label: "waiting for dependencies" },
+        { state: "base", label: "base state stored" },
+        { state: "store", label: "dependent state stored" }
+      ],
+      frameModel(frame) {
+        const currentColumn = frame.cur?.[1] ?? null;
+        const active = currentColumn == null ? null : frame.colLabels[currentColumn];
+        const results = Object.fromEntries(
+          frame.colLabels.flatMap((label, column) => {
+            const value = frame.grid[0][column];
+            return value == null ? [] : [[label, value]];
+          })
+        );
+        const states = Object.fromEntries(
+          frame.nodes.map((node) => {
+            const column = frame.colLabels.indexOf(node.id);
+            const solved = column >= 0 && frame.grid[0][column] != null;
+            const isBase = !frame.edges.some((edge) => edge.from === node.id);
+            return [node.id, solved ? isBase ? "base" : "store" : "call"];
+          })
+        );
+        const dependencies = frame.deps.map(([, column]) => frame.colLabels[column]);
+        return {
+          phase: frame.type === "done" ? "Target ready" : active ? `Solve ${active}` : "Dependency graph",
+          action: frame.message,
+          active,
+          path: active ? [active, ...dependencies] : [],
+          visible: frame.nodes.map((node) => node.id),
+          states,
+          results,
+          collapsed: []
+        };
+      },
+      nodeLines(node) {
+        return [node.label, node.detail];
+      },
+      watchRows(frame) {
+        const currentColumn = frame.cur?.[1] ?? null;
+        const dependencies = frame.deps.map(([, column]) => frame.colLabels[column]);
+        const stored = frame.grid[0].filter((value) => value != null).length;
+        return [
+          {
+            k: "state",
+            v: currentColumn == null ? "—" : frame.colLabels[currentColumn],
+            sw: "var(--_blue)",
+            hint: "The state currently becoming available."
+          },
+          {
+            k: "depends on",
+            v: dependencies.length ? dependencies.join(" + ") : "base state",
+            sw: "var(--_amber)",
+            hint: "States that must already be stored before this state can be solved."
+          },
+          {
+            k: "stored result",
+            v: currentColumn == null ? "—" : frame.grid[0][currentColumn] || "—",
+            sw: "var(--_green)",
+            hint: "The result written once and reused by every outgoing dependency."
+          },
+          {
+            k: "progress",
+            v: `${stored} / ${frame.colLabels.length} states ready`,
+            sw: "var(--_neutral)",
+            hint: "How many states have been solved in dependency order."
+          }
+        ];
+      }
+    };
+  }
+});
+
+// custom/steptrace/src/algorithms/floyd-warshall.ts
+var displayMatrix, floydWarshall;
+var init_floyd_warshall = __esm({
+  "custom/steptrace/src/algorithms/floyd-warshall.ts"() {
+    init_matrix_grid();
+    displayMatrix = (matrix) => matrix.map((row) => row.map((value) => Number.isFinite(value) ? value : null));
+    floydWarshall = {
+      id: "floyd-warshall",
+      kind: "dp",
+      family: matrixGridFamily,
+      meta: { label: "Floyd-Warshall" },
+      parse: parseMatrixGridConfig,
+      run(input, ops) {
+        const indexForNode = new Map(input.nodes.map((node, index) => [node, index]));
+        const dist = Array.from(
+          { length: input.nodes.length },
+          (_, row) => Array.from({ length: input.nodes.length }, (_2, column) => row === column ? 0 : Infinity)
+        );
+        for (const [from, to, weight] of input.edges) {
+          const row = indexForNode.get(from);
+          const column = indexForNode.get(to);
+          dist[row][column] = Math.min(dist[row][column], weight);
+        }
+        ops.board(displayMatrix(dist), "Initialize direct-edge distances; missing edges are ∞.");
+        for (let k = 0; k < input.nodes.length; k++) {
+          const kNode = input.nodes[k];
+          ops.stage(kNode, `Stage k = ${kNode}: allow node ${kNode} as an intermediate.`);
+          for (let i = 0; i < input.nodes.length; i++) {
+            for (let j = 0; j < input.nodes.length; j++) {
+              const current = dist[i][j];
+              const left = dist[i][k];
+              const right = dist[k][j];
+              const candidate = Number.isFinite(left) && Number.isFinite(right) ? left + right : Infinity;
+              const improve = candidate < current;
+              if (improve) dist[i][j] = candidate;
+              const from = input.nodes[i];
+              const to = input.nodes[j];
+              const currentLabel = Number.isFinite(current) ? current : "∞";
+              const candidateLabel = Number.isFinite(candidate) ? candidate : "∞";
+              ops.relax(
+                i,
+                j,
+                [
+                  [i, k],
+                  [k, j]
+                ],
+                Number.isFinite(candidate) ? candidate : null,
+                improve ? "improve" : "keep",
+                Number.isFinite(dist[i][j]) ? dist[i][j] : null,
+                improve ? `dist[${from}][${to}] improves through ${kNode}: ${currentLabel} → ${candidateLabel}.` : `Keep dist[${from}][${to}] = ${currentLabel}; the route through ${kNode} costs ${candidateLabel}.`
+              );
+            }
+          }
+        }
+        const negativeCycle = input.nodes.filter((node, index) => dist[index][index] < 0);
+        if (negativeCycle.length) {
+          ops.reportNegativeCycle(
+            negativeCycle,
+            `Negative cycle detected through ${negativeCycle.join(", ")}; shortest distances are undefined.`
+          );
+          ops.done("Stopped after reporting the negative cycle.");
+          return;
+        }
+        ops.done("All stages complete: the matrix holds every finite shortest-path distance.");
+      }
+    };
+  }
+});
+
+// custom/steptrace/src/algorithms/heap-sort.ts
+var heapSort;
+var init_heap_sort = __esm({
+  "custom/steptrace/src/algorithms/heap-sort.ts"() {
+    heapSort = {
+      id: "heap-sort",
+      kind: "sort",
+      meta: { label: "Heap sort" },
+      run: (input, ops) => {
+        const n = ops.value.length;
+        ops.init(
+          `Heap sort — build a max-heap (each parent ≥ its children), then repeatedly swap the root to the end and sift the new root down.`
+        );
+        function siftDown(lo, hi) {
+          let root = lo;
+          while (2 * root + 1 < hi) {
+            let child = 2 * root + 1;
+            if (child + 1 < hi) {
+              ops.compare(
+                child,
+                child + 1,
+                `Compare children ${ops.value[child]} and ${ops.value[child + 1]}.`
+              );
+              if (ops.value[child + 1] > ops.value[child]) child++;
+            }
+            ops.compare(
+              root,
+              child,
+              `Compare parent ${ops.value[root]} with its larger child ${ops.value[child]}.`
+            );
+            if (ops.value[root] >= ops.value[child]) break;
+            ops.swap(root, child, `Parent is smaller — sift it down.`);
+            root = child;
+          }
+        }
+        ops.range(0, n - 1);
+        for (let i = Math.floor(n / 2) - 1; i >= 0; i--) siftDown(i, n);
+        for (let end = n - 1; end > 0; end--) {
+          ops.swap(0, end, `Move the largest value (the root) to index ${end}.`);
+          ops.markSorted([end], [end], `Index ${end} now holds its final value.`);
+          ops.range(0, end - 1);
+          siftDown(0, end);
+        }
+        ops.range(null);
+        ops.lockAll([0]);
+        ops.markSorted([0], [0], `The remaining root is the smallest — done.`);
+        ops.done(`Sorted in ${ops.comparisons} comparisons and ${ops.swaps} swaps.`);
+      }
+    };
+  }
+});
+
+// custom/steptrace/src/algorithms/insertion-sort.ts
+var insertionSort;
+var init_insertion_sort = __esm({
+  "custom/steptrace/src/algorithms/insertion-sort.ts"() {
+    insertionSort = {
+      id: "insertion-sort",
+      kind: "sort",
+      meta: { label: "Insertion sort" },
+      run: (input, ops) => {
+        const n = ops.value.length;
+        ops.init(
+          `Insertion sort — grow a sorted prefix on the left; take each next value and slide it left past larger values into place.`
+        );
+        ops.markSorted([0], [0], `The first element alone is a sorted prefix.`);
+        for (let i = 1; i < n; i++) {
+          const key = ops.value[i];
+          ops.holdKey(key);
+          ops.compare(i, i - 1, `Take ${key} (index ${i}) and compare it into the sorted prefix.`);
+          let j = i - 1;
+          while (j >= 0 && ops.value[j] > key) {
+            ops.overwrite(
+              j + 1,
+              ops.value[j],
+              `${ops.value[j]} > ${key}: shift it right into index ${j + 1}.`,
+              j
+            );
+            j--;
+            if (j >= 0) ops.compare(j, null, `Compare ${key} with ${ops.value[j]}.`);
+          }
+          ops.overwrite(j + 1, key, `Insert ${key} at index ${j + 1}.`);
+          ops.holdKey(null);
+          ops.markSorted(
+            Array.from({ length: i + 1 }, (_, k) => k),
+            [j + 1],
+            `Sorted prefix now spans indices 0..${i}.`
+          );
+        }
+        ops.done(`Sorted in ${ops.comparisons} comparisons and ${ops.swaps} moves.`);
+      }
+    };
+  }
+});
+
+// custom/steptrace/src/algorithms/introsort.ts
+function invalidConfig7(message) {
+  throw new Error(`steptrace: introsort ${message}`);
+}
+function parseIntrosortConfig(config) {
+  const { array } = config;
+  if (!Array.isArray(array) || array.length < 2)
+    invalidConfig7('requires an "array" with at least two numbers.');
+  if (!array.every((value) => typeof value === "number" && Number.isFinite(value)))
+    invalidConfig7('requires every "array" value to be a finite number.');
+  const depthLimit = config.depthLimit ?? 2 * Math.floor(Math.log2(array.length));
+  const smallPartitionThreshold = config.smallPartitionThreshold ?? 16;
+  if (!Number.isInteger(depthLimit) || depthLimit < 0)
+    invalidConfig7('requires "depthLimit" to be a non-negative integer.');
+  if (!Number.isInteger(smallPartitionThreshold) || smallPartitionThreshold < 1)
+    invalidConfig7('requires "smallPartitionThreshold" to be a positive integer.');
+  return {
+    array: array.slice(),
+    profile: "introsort",
+    depthLimit,
+    smallPartitionThreshold
+  };
+}
+var introsort;
+var init_introsort = __esm({
+  "custom/steptrace/src/algorithms/introsort.ts"() {
+    init_array_sort();
+    introsort = {
+      id: "introsort",
+      kind: "sort",
+      family: arraySortFamily,
+      meta: { label: "Introsort" },
+      parse: parseIntrosortConfig,
+      run(input, ops) {
+        const n = ops.value.length;
+        ops.configureIntrosort(input.depthLimit, input.smallPartitionThreshold);
+        ops.init(
+          `Quicksort with depth limit ${input.depthLimit}, heap fallback, and insertion cutoff ${input.smallPartitionThreshold}.`
+        );
+        function partition(lo, hi, depthUsed) {
+          const pivot = ops.value[hi];
+          ops.range(lo, hi);
+          ops.pivot(hi);
+          ops.introsortStrategy(
+            "quicksort",
+            depthUsed,
+            "strategy",
+            `Quicksort [${lo}, ${hi}] at depth ${depthUsed}: use ${pivot} at index ${hi} as the pivot.`
+          );
+          let boundary = lo;
+          for (let scan = lo; scan < hi; scan++) {
+            ops.compare(scan, hi, `Compare ${ops.value[scan]} with pivot ${pivot}.`);
+            if (ops.value[scan] >= pivot) continue;
+            if (boundary !== scan)
+              ops.swap(
+                boundary,
+                scan,
+                `${ops.value[scan]} < ${pivot}: move it into the left partition.`
+              );
+            boundary++;
+          }
+          if (boundary !== hi) ops.swap(boundary, hi, `Place pivot ${pivot} at index ${boundary}.`);
+          ops.pivot(boundary);
+          ops.markSorted([boundary], [boundary], `Pivot ${pivot} is final at index ${boundary}.`);
+          ops.pivot(null);
+          return boundary;
+        }
+        function siftDown(lo, heapSize, root) {
+          let parent = root;
+          while (2 * parent + 1 < heapSize) {
+            let child = 2 * parent + 1;
+            if (child + 1 < heapSize) {
+              ops.compare(lo + child, lo + child + 1, "Choose the larger heap child.");
+              if (ops.value[lo + child + 1] > ops.value[lo + child]) child++;
+            }
+            ops.compare(lo + parent, lo + child, "Compare the heap parent with its larger child.");
+            if (ops.value[lo + parent] >= ops.value[lo + child]) return;
+            ops.swap(lo + parent, lo + child, "Sift the smaller parent down inside the fallback range.");
+            parent = child;
+          }
+        }
+        function heapSortRange(lo, hi) {
+          const length = hi - lo + 1;
+          for (let root = Math.floor(length / 2) - 1; root >= 0; root--) siftDown(lo, length, root);
+          for (let end = length - 1; end > 0; end--) {
+            ops.swap(lo, lo + end, `Move the fallback heap maximum to index ${lo + end}.`);
+            ops.markSorted([lo + end], [lo + end], `Index ${lo + end} is final.`);
+            siftDown(lo, end, 0);
+          }
+          ops.markSorted([lo], [lo], `The fallback range [${lo}, ${hi}] is sorted.`);
+        }
+        function introsortRange(lo, hi, remaining, depthUsed) {
+          if (lo > hi) return;
+          const size = hi - lo + 1;
+          ops.range(lo, hi);
+          if (size <= input.smallPartitionThreshold) {
+            ops.introsortStrategy(
+              "deferred",
+              depthUsed,
+              "defer",
+              `Defer [${lo}, ${hi}] (${size} values) to the final insertion pass; cutoff is ${input.smallPartitionThreshold}.`
+            );
+            return;
+          }
+          if (remaining === 0) {
+            ops.introsortStrategy(
+              "heap sort",
+              depthUsed,
+              "fallback",
+              `Depth limit ${input.depthLimit} reached on [${lo}, ${hi}]; heap-sort this range.`
+            );
+            heapSortRange(lo, hi);
+            return;
+          }
+          const pivot = partition(lo, hi, depthUsed);
+          introsortRange(lo, pivot - 1, remaining - 1, depthUsed + 1);
+          introsortRange(pivot + 1, hi, remaining - 1, depthUsed + 1);
+        }
+        introsortRange(0, n - 1, input.depthLimit, 0);
+        ops.range(0, n - 1);
+        ops.pivot(null);
+        ops.introsortStrategy(
+          "insertion sort",
+          0,
+          "cleanup",
+          `Insertion cleanup: finish ranges of at most ${input.smallPartitionThreshold} values.`
+        );
+        for (let index = 1; index < n; index++) {
+          const key = ops.value[index];
+          ops.holdKeyAt(key, index, `Lift ${key} from index ${index} for insertion cleanup.`);
+          let cursor = index - 1;
+          ops.compareHeldAt(cursor, `Compare held ${key} with ${ops.value[cursor]} at index ${cursor}.`);
+          while (cursor >= 0 && ops.value[cursor] > key) {
+            ops.shiftHeld(
+              cursor + 1,
+              cursor,
+              `${ops.value[cursor]} > ${key}: shift it right to index ${cursor + 1}.`
+            );
+            cursor--;
+            if (cursor >= 0)
+              ops.compareHeldAt(
+                cursor,
+                `Compare held ${key} with ${ops.value[cursor]} at index ${cursor}.`
+              );
+          }
+          ops.placeHeld(cursor + 1, key, `Place ${key} at index ${cursor + 1}.`);
+          ops.releaseHeldKey();
+        }
+        ops.lockAll(Array.from({ length: n }, (_, index) => index));
+        ops.done(`Sorted with ${ops.comparisons} comparisons and ${ops.swaps} moves.`);
+      }
+    };
+  }
+});
+
+// custom/steptrace/src/algorithms/jump-search.ts
+function parseJumpSearchConfig(config) {
+  const parsed = parseIndexedArraySearchConfig(config, "jump-search", "jump");
+  const blockSize = config.blockSize ?? Math.max(1, Math.floor(Math.sqrt(parsed.array.length)));
+  if (!Number.isInteger(blockSize) || blockSize <= 0)
+    throw new Error('steptrace: jump-search requires "blockSize" to be a positive integer.');
+  return { ...parsed, blockSize };
+}
+var jumpSearch;
+var init_jump_search = __esm({
+  "custom/steptrace/src/algorithms/jump-search.ts"() {
+    init_indexed_array_search();
+    jumpSearch = {
+      id: "jump-search",
+      kind: "search",
+      family: indexedArraySearchFamily,
+      meta: { label: "Jump search" },
+      parse: parseJumpSearchConfig,
+      run(input, ops) {
+        const values = ops.value;
+        const { target } = input;
+        const step = input.blockSize;
+        ops.init(
+          `Jump search for ${target}: move in blocks of ${step}, then linearly scan the candidate block.`
+        );
+        let previousBound = -1;
+        let bound = Math.min(step - 1, values.length - 1);
+        while (true) {
+          ops.jumpProbe(
+            previousBound,
+            bound,
+            `Check block end ${bound}: ${values[bound]} ${values[bound] < target ? "is below" : "reaches or passes"} ${target}.`
+          );
+          if (values[bound] >= target || bound === values.length - 1) break;
+          previousBound = bound;
+          bound = Math.min(bound + step, values.length - 1);
+        }
+        if (values[bound] < target) {
+          ops.done(
+            `${target} is larger than the array maximum; not found after ${ops.comparisons} probes.`
+          );
+          return;
+        }
+        const lo = previousBound + 1;
+        const hi = bound;
+        ops.beginPhase(
+          lo,
+          hi,
+          `The target can only be in block [${lo}, ${hi}]; scan that block from the start.`,
+          "scan"
+        );
+        for (let i = lo; i <= hi && i < values.length; i++) {
+          ops.probe(lo, hi, i, `Linear scan in jump block [${lo}, ${hi}]: check index ${i}.`);
+          if (values[i] === target) {
+            ops.hit(i, `${values[i]} equals ${target}; found it at index ${i}.`);
+            ops.done(`Found ${target} at index ${i} after ${ops.comparisons} probes.`);
+            return;
+          }
+          if (values[i] > target) {
+            break;
+          }
+        }
+        ops.done(`${target} is not in the array after ${ops.comparisons} probes.`);
+      }
+    };
+  }
+});
+
+// custom/steptrace/src/algorithms/kernighan-popcount.ts
+var kernighanPopcount;
+var init_kernighan_popcount = __esm({
+  "custom/steptrace/src/algorithms/kernighan-popcount.ts"() {
+    kernighanPopcount = {
+      id: "kernighan-popcount",
+      kind: "bits",
+      meta: { label: "Kernighan population count" },
+      run: (input, ops) => {
+        let x = Number(input.value) >>> 0 & ops.mask;
+        const total = ops.popcount(x);
+        ops.init(
+          x,
+          { a: "x", b: "− 1", r: "&" },
+          `x = ${x} has ${total} one${total === 1 ? "" : "s"}. Each pass, x & (x−1) deletes the lowest 1 — so the loop runs ${total} time${total === 1 ? "" : "s"}, once per set bit.`
+        );
+        let pop = 0;
+        while (x !== 0) {
+          const low = ops.lowestSetBit(x);
+          const sub = x - 1 & ops.mask;
+          ops.subtract(
+            sub,
+            low,
+            `Lowest 1 is at bit ${low}. Subtracting 1 flips it to 0 and turns every zero below it into a 1.`
+          );
+          const res = x & sub;
+          ops.and(
+            res,
+            low,
+            `AND the two: the survivors above stay, bit ${low} and everything under it are wiped — exactly one 1 gone.`
+          );
+          pop++;
+          x = res;
+          ops.commit(`x ← ${x}. ${pop} of ${total} ones cleared.`);
+        }
+        ops.done(
+          `x = 0 — every 1 is gone. It took ${total} pass${total === 1 ? "" : "es"}, so x had ${total} set bit${total === 1 ? "" : "s"}.`
+        );
+      }
+    };
+  }
+});
+
+// custom/steptrace/src/algorithms/kmp.ts
+var kmp;
+var init_kmp = __esm({
+  "custom/steptrace/src/algorithms/kmp.ts"() {
+    kmp = {
+      id: "kmp",
+      kind: "string",
+      meta: { label: "KMP" },
+      run: (input, ops) => {
+        const text = String(input.text || "");
+        const pattern = String(input.pattern || "");
+        const n = text.length;
+        const m = pattern.length;
+        ops.init(
+          `KMP search for "${pattern}" — on a mismatch, the failure function slides the pattern forward without re-checking characters already known to match.`
+        );
+        if (!m || m > n) {
+          ops.done("Nothing to search.");
+          return;
+        }
+        const lps = new Array(m).fill(0);
+        let len = 0;
+        for (let idx = 1; idx < m; ) {
+          if (pattern[idx] === pattern[len]) {
+            len++;
+            lps[idx] = len;
+            idx++;
+          } else if (len > 0) {
+            len = lps[len - 1];
+          } else {
+            lps[idx] = 0;
+            idx++;
+          }
+        }
+        let i = 0;
+        let j = 0;
+        while (i < n) {
+          const isMatch = text[i] === pattern[j];
+          ops.compare(
+            i,
+            j,
+            i - j,
+            isMatch,
+            `Compare text[${i}]='${text[i]}' with pattern[${j}]='${pattern[j]}' → ${isMatch ? "match" : "mismatch"}.`
+          );
+          if (isMatch) {
+            i++;
+            j++;
+            if (j === m) {
+              ops.matchAt(i - j, `Whole pattern matched — occurrence at index ${i - j}.`);
+              j = lps[j - 1];
+            }
+          } else if (j > 0) {
+            j = lps[j - 1];
+            ops.slide(
+              i - j,
+              `Mismatch — reuse the matched prefix: realign so ${j} char${j === 1 ? "" : "s"} already line up (no re-check).`
+            );
+          } else {
+            i++;
+            ops.slide(i, `Mismatch at the pattern start — slide forward by one.`);
+          }
+        }
+        ops.done(
+          ops.found.length ? `Found ${ops.found.length} occurrence(s): index ${ops.found.join(", ")}.` : `Pattern not found.`
+        );
+      }
+    };
+  }
+});
+
+// custom/steptrace/src/algorithms/lcs.ts
+var lcs;
+var init_lcs = __esm({
+  "custom/steptrace/src/algorithms/lcs.ts"() {
+    lcs = {
+      id: "lcs",
+      kind: "dp",
+      meta: { label: "Longest common subsequence" },
+      run: (input, ops) => {
+        const A = String(input.a != null ? input.a : input.text || "");
+        const B = String(input.b != null ? input.b : input.pattern || "");
+        const m = A.length;
+        const n = B.length;
+        const rowLabels = ["∅", ...A.split("")];
+        const colLabels = ["∅", ...B.split("")];
+        ops.board(
+          rowLabels,
+          colLabels,
+          `Longest common subsequence of "${A}" and "${B}". Cell dp[i][j] holds the LCS length of the first i letters of "${A}" and the first j of "${B}".`
+        );
+        const dp = Array.from({ length: m + 1 }, () => Array(n + 1).fill(0));
+        for (let c2 = 0; c2 <= n; c2++) ops.set(0, c2, 0, [], `An empty first string has LCS 0.`);
+        for (let r2 = 1; r2 <= m; r2++) ops.set(r2, 0, 0, [], `An empty second string has LCS 0.`);
+        for (let r2 = 1; r2 <= m; r2++) {
+          for (let c2 = 1; c2 <= n; c2++) {
+            if (A[r2 - 1] === B[c2 - 1]) {
+              dp[r2][c2] = dp[r2 - 1][c2 - 1] + 1;
+              ops.set(
+                r2,
+                c2,
+                dp[r2][c2],
+                [[r2 - 1, c2 - 1]],
+                `'${A[r2 - 1]}' = '${B[c2 - 1]}' → take the diagonal + 1 = ${dp[r2][c2]}.`
+              );
+            } else {
+              dp[r2][c2] = Math.max(dp[r2 - 1][c2], dp[r2][c2 - 1]);
+              const better = dp[r2 - 1][c2] >= dp[r2][c2 - 1] ? "top" : "left";
+              ops.set(
+                r2,
+                c2,
+                dp[r2][c2],
+                [
+                  [r2 - 1, c2],
+                  [r2, c2 - 1]
+                ],
+                `'${A[r2 - 1]}' ≠ '${B[c2 - 1]}' → this letter can't extend the match, so the optimum here is inherited from an optimal sub-answer: the better of top (${dp[r2 - 1][c2]}) and left (${dp[r2][c2 - 1]}) = ${dp[r2][c2]} (from the ${better}).`
+              );
+            }
+          }
+        }
+        let r = m;
+        let c = n;
+        const path = [];
+        while (r > 0 && c > 0) {
+          if (A[r - 1] === B[c - 1]) {
+            path.unshift([r, c]);
+            ops.markPath(
+              path,
+              `dp[${r}][${c}]: '${A[r - 1]}' = '${B[c - 1]}' — this cell was built from dp[${r - 1}][${c - 1}] + 1, so '${A[r - 1]}' joins the LCS. Step diagonally to that sub-answer.`
+            );
+            r--;
+            c--;
+          } else if (dp[r - 1][c] >= dp[r][c - 1]) {
+            ops.markPath(
+              path,
+              `dp[${r}][${c}]: '${A[r - 1]}' ≠ '${B[c - 1]}' — its optimum was inherited from the top sub-answer dp[${r - 1}][${c}]. Follow it upward; no letter added.`
+            );
+            r--;
+          } else {
+            ops.markPath(
+              path,
+              `dp[${r}][${c}]: '${A[r - 1]}' ≠ '${B[c - 1]}' — its optimum was inherited from the left sub-answer dp[${r}][${c - 1}]. Follow it leftward; no letter added.`
+            );
+            c--;
+          }
+        }
+        const lcs2 = path.map((p) => A[p[0] - 1]).join("");
+        ops.markPath(
+          path,
+          `Traceback done: the ${path.length} diagonal step${path.length === 1 ? "" : "s"} spell the LCS "${lcs2}".`
+        );
+        ops.done(`LCS length = ${dp[m][n]} ("${lcs2}").`);
+      }
+    };
+  }
+});
+
+// custom/steptrace/src/algorithms/linear-search.ts
+var linearSearch;
+var init_linear_search = __esm({
+  "custom/steptrace/src/algorithms/linear-search.ts"() {
+    linearSearch = {
+      id: "linear-search",
+      kind: "search",
+      meta: { label: "Linear search" },
+      run: (input, ops) => {
+        const a = ops.value;
+        const target = input.target;
+        const n = a.length;
+        ops.mode = "scan";
+        ops.init(
+          `Linear search for ${target} — scan left to right, comparing every element until a match is found (or the array ends).`
+        );
+        for (let i = 0; i < n; i++) {
+          ops.probe(0, n - 1, i, `Check index ${i}: is ${a[i]} the target ${target}?`);
+          if (a[i] === target) {
+            ops.hit(i, `${a[i]} equals ${target} — found it at index ${i}.`);
+            ops.done(
+              `Found ${target} at index ${i} after ${ops.comparisons} comparison${ops.comparisons === 1 ? "" : "s"}.`
+            );
+            return;
+          }
+        }
+        ops.done(
+          `${target} is not in the array — scanned all ${n} elements (${ops.comparisons} comparisons).`
+        );
+      }
+    };
+  }
+});
+
+// custom/steptrace/src/algorithms/merge-sort.ts
+var mergeSort;
+var init_merge_sort = __esm({
+  "custom/steptrace/src/algorithms/merge-sort.ts"() {
+    mergeSort = {
+      id: "merge-sort",
+      kind: "sort",
+      meta: { label: "Merge sort" },
+      run: (input, ops) => {
+        const n = ops.value.length;
+        ops.init(
+          "Merge sort — start with runs of length 1, then repeatedly merge adjacent runs into larger sorted runs (watch the sorted runs double)."
+        );
+        for (let width = 1; width < n; width *= 2) {
+          for (let lo = 0; lo < n; lo += 2 * width) {
+            const mid = Math.min(lo + width, n);
+            const hi = Math.min(lo + 2 * width, n);
+            if (mid >= hi) continue;
+            ops.range(lo, hi - 1);
+            const left = ops.value.slice(lo, mid);
+            const right = ops.value.slice(mid, hi);
+            ops.candidate(
+              null,
+              `Merge the left run [${lo}, ${mid - 1}] and the right run [${mid}, ${hi - 1}] into one sorted run [${lo}, ${hi - 1}].`
+            );
+            let i = 0;
+            let j = 0;
+            let k = lo;
+            while (i < left.length && j < right.length) {
+              if (left[i] <= right[j]) {
+                ops.overwrite(
+                  k,
+                  left[i],
+                  `${left[i]} ≤ ${right[j]}: place ${left[i]} from the left half at index ${k}.`,
+                  lo + i
+                );
+                i++;
+              } else {
+                ops.overwrite(
+                  k,
+                  right[j],
+                  `${right[j]} < ${left[i]}: place ${right[j]} from the right half at index ${k}.`,
+                  mid + j
+                );
+                j++;
+              }
+              k++;
+            }
+            while (i < left.length) {
+              ops.overwrite(
+                k,
+                left[i],
+                `Copy the remaining ${left[i]} from the left half at index ${k}.`,
+                lo + i
+              );
+              i++;
+              k++;
+            }
+            while (j < right.length) {
+              ops.overwrite(
+                k,
+                right[j],
+                `Copy the remaining ${right[j]} from the right half at index ${k}.`,
+                mid + j
+              );
+              j++;
+              k++;
+            }
+          }
+          ops.range(null);
+        }
+        ops.lockAll(Array.from({ length: n }, (_, k) => k));
+        ops.done(`Sorted in ${ops.swaps} writes.`);
+      }
+    };
+  }
+});
+
+// custom/steptrace/src/algorithms/merge-sort-tree.ts
+function merge(left, right) {
+  const output = [];
+  let i = 0;
+  let j = 0;
+  while (i < left.length && j < right.length) {
+    output.push(left[i] <= right[j] ? left[i++] : right[j++]);
+  }
+  while (i < left.length) output.push(left[i++]);
+  while (j < right.length) output.push(right[j++]);
+  return output;
+}
+function buildTree(values, from, to, depth, x, y, id, nodes, edges, metas) {
+  const segment = values.slice(from, to);
+  const label = segment.length ? `[${from}…${to - 1}]` : "[]";
+  nodes.push({
+    id,
+    label,
+    values: segment,
+    x,
+    y,
+    depth
+  });
+  const meta = {
+    id,
+    label,
+    values: segment,
+    from,
+    to,
+    children: null
+  };
+  metas.set(id, meta);
+  if (segment.length <= 1) return meta;
+  const mid = Math.floor((from + to) / 2);
+  const leftId = `${id}-l`;
+  const rightId = `${id}-r`;
+  edges.push({ from: id, to: leftId }, { from: id, to: rightId });
+  const span = Math.max(1, values.length - 1);
+  const childShift = (span - depth * 0.6 + 1) * 20;
+  const leftMeta = buildTree(values, from, mid, depth + 1, x - childShift, y + 90, leftId, nodes, edges, metas);
+  const rightMeta = buildTree(values, mid, to, depth + 1, x + childShift, y + 90, rightId, nodes, edges, metas);
+  meta.children = [leftMeta.id, rightMeta.id];
+  return meta;
+}
+function emitFrames(id, path, metas, ops) {
+  const node = metas.get(id);
+  if (!node) return [];
+  const label = node.values.length ? `[${node.from}…${node.to - 1}]` : "[]";
+  if (node.values.length <= 1) {
+    const text = node.values.length ? `[${node.values[0]}]` : "[]";
+    ops.base(id, path, node.values, `${text} is already sorted.`);
+    return node.values.slice();
+  }
+  const [leftId, rightId] = node.children || [];
+  const left = metas.get(leftId);
+  const right = metas.get(rightId);
+  if (!left || !right) return node.values.slice();
+  ops.split(id, path, [leftId, rightId], `Split ${label} into ${left.label} and ${right.label}.`);
+  const leftPath = [...path, leftId];
+  const rightPath = [...path, rightId];
+  const leftResult = emitFrames(leftId, leftPath, metas, ops);
+  ops.returnResult(leftId, path, leftResult, `Return [${leftResult.join(", ")}] to ${label}.`);
+  const rightResult = emitFrames(rightId, rightPath, metas, ops);
+  ops.returnResult(rightId, path, rightResult, `Return [${rightResult.join(", ")}] to ${label}.`);
+  const merged = merge(leftResult, rightResult);
+  const combinePath = path.length > 1 ? path.slice(0, -1) : path;
+  ops.combine(id, combinePath, merged, `Merge ${left.label} and ${right.label} into [${merged.join(", ")}].`);
+  if (path.length > 1) {
+    ops.returnResult(id, combinePath, merged, `Return [${merged.join(", ")}] to parent call.`);
+  }
+  return merged;
+}
+function parseMergeSortTreeConfig(config) {
+  if (!Array.isArray(config.array) || config.array.length < 2)
+    throw new Error('steptrace: merge-sort-tree requires an "array" with at least two values.');
+  if (!config.array.every((value) => typeof value === "number" && Number.isFinite(value)))
+    throw new Error("steptrace: merge-sort-tree requires finite numeric values.");
+  return {
+    array: config.array.slice(),
+    profile: "divide-and-conquer"
+  };
+}
+var mergeSortTree;
+var init_merge_sort_tree = __esm({
+  "custom/steptrace/src/algorithms/merge-sort-tree.ts"() {
+    init_execution_tree();
+    mergeSortTree = {
+      id: "merge-sort-tree",
+      kind: "rectree",
+      family: executionTreeFamily,
+      meta: { label: "Merge sort (split tree)" },
+      parse: parseMergeSortTreeConfig,
+      run(input, ops) {
+        const values = input.array.slice();
+        const nodes = [];
+        const edges = [];
+        const metas = /* @__PURE__ */ new Map();
+        const rootId = "root";
+        const rootMeta = buildTree(
+          values,
+          0,
+          values.length,
+          0,
+          Math.max(1, values.length - 1) * 72,
+          30,
+          rootId,
+          nodes,
+          edges,
+          metas
+        );
+        rootMeta.from = 0;
+        rootMeta.to = values.length;
+        rootMeta.values = values.slice();
+        nodes[0].label = `[0…${values.length - 1}]`;
+        const message = `Merge sort ${values.join(", ")} by splitting into halves and merging sorted halves on return.`;
+        ops.tree(nodes, edges, rootId, message);
+        emitFrames(rootId, [rootId], metas, ops);
+        ops.done(rootId, values.slice().sort((a, b) => a - b), `Sorted result [${values.sort((a, b) => a - b).join(", ")}].`);
+      }
+    };
+  }
+});
+
+// custom/steptrace/src/algorithms/memoization.ts
+var memoization;
+var init_memoization = __esm({
+  "custom/steptrace/src/algorithms/memoization.ts"() {
+    init_execution_tree();
+    memoization = {
+      id: "memoization",
+      kind: "rectree",
+      family: executionTreeFamily,
+      meta: { label: "Memoization" },
+      parse: parseMemoizationConfig,
+      run(input, ops) {
+        const nodes = [
+          { id: "a", label: "solve(A)", detail: "key A", values: [], x: 300, y: 24, depth: 0 },
+          { id: "b", label: "solve(B)", detail: "key B", values: [], x: 165, y: 82, depth: 1 },
+          { id: "c", label: "solve(C)", detail: "key C", values: [], x: 435, y: 82, depth: 1 },
+          { id: "d1", label: "solve(D)", detail: "key D", values: [], x: 105, y: 140, depth: 2 },
+          { id: "e", label: "solve(E)", detail: "base key E", values: [], x: 225, y: 140, depth: 2 },
+          { id: "d2", label: "solve(D)", detail: "same key D", values: [], x: 375, y: 140, depth: 2 },
+          { id: "e2", label: "solve(E)", detail: "same key E", values: [], x: 495, y: 140, depth: 2 },
+          { id: "g1", label: "solve(G)", detail: "base key G", values: [], x: 55, y: 198, depth: 3 },
+          { id: "h1", label: "solve(H)", detail: "base key H", values: [], x: 155, y: 198, depth: 3 },
+          { id: "g2", label: "solve(G)", detail: "would repeat", values: [], x: 325, y: 198, depth: 3 },
+          { id: "h2", label: "solve(H)", detail: "would repeat", values: [], x: 425, y: 198, depth: 3 }
+        ];
+        const edges = [
+          { from: "a", to: "b" },
+          { from: "a", to: "c" },
+          { from: "b", to: "d1" },
+          { from: "b", to: "e" },
+          { from: "c", to: "d2" },
+          { from: "c", to: "e2" },
+          { from: "d1", to: "g1" },
+          { from: "d1", to: "h1" },
+          { from: "d2", to: "g2" },
+          { from: "d2", to: "h2" }
+        ];
+        ops.tree(nodes, edges, "a", "Begin at state A with an empty cache.");
+        ops.split("a", ["a"], ["b", "c"], "State A needs the results of states B and C.");
+        ops.split("b", ["a", "b"], ["d1", "e"], "State B needs states D and E.");
+        ops.split("d1", ["a", "b", "d1"], ["g1", "h1"], "State D is new, so expand it once.");
+        ops.base("g1", ["a", "b", "d1", "g1"], "result G", "State G is a base case.");
+        ops.base("h1", ["a", "b", "d1", "h1"], "result H", "State H is a base case.");
+        ops.combine("d1", ["a", "b", "d1"], "result D", "Combine the base results to finish state D.");
+        ops.store(
+          "d1",
+          ["a", "b", "d1"],
+          "D",
+          "result D",
+          "Store state D under its complete cache key."
+        );
+        ops.base("e", ["a", "b", "e"], "result E", "State E is a base case.");
+        ops.store("e", ["a", "b", "e"], "E", "result E", "Store state E for any later repeat.");
+        ops.combine("b", ["a", "b"], "result B", "Combine D and E to finish state B.");
+        ops.store("b", ["a", "b"], "B", "result B", "Store state B for any later repeat.");
+        ops.split("c", ["a", "c"], ["d2", "e2"], "State C reuses cached states D and E.");
+        ops.cacheHit(
+          "d2",
+          ["a", "c", "d2"],
+          "D",
+          "result D",
+          ["g2", "h2"],
+          "Key D is already cached: return result D without entering its two child calls."
+        );
+        ops.cacheHit(
+          "e2",
+          ["a", "c", "e2"],
+          "E",
+          "result E",
+          [],
+          "Key E is already cached: reuse the base result immediately."
+        );
+        ops.combine("c", ["a", "c"], "result C", "Combine the cached branches to finish state C.");
+        ops.store("c", ["a", "c"], "C", "result C", "Store state C.");
+        ops.combine("a", ["a"], "result A", "Combine B and C to finish the original state.");
+        ops.store("a", ["a"], "A", "result A", "Store the final state A.");
+        ops.done(
+          "a",
+          "result A",
+          "Memoization computed each cache key once and skipped repeated D and E branches."
+        );
+      }
+    };
+  }
+});
+
+// custom/steptrace/src/algorithms/n-queens.ts
+var nQueens;
+var init_n_queens = __esm({
+  "custom/steptrace/src/algorithms/n-queens.ts"() {
+    nQueens = {
+      id: "n-queens",
+      kind: "backtrack",
+      meta: { label: "N-Queens (backtracking)" },
+      run: (input, ops) => {
+        const n = Math.min(Math.max(input.n || 4, 4), 6);
+        ops.board(
+          n,
+          `Place ${n} queens on a ${n}×${n} board so none attack another. Fill one queen per row; retreat whenever a row has no safe square.`
+        );
+        const conflict = (row, col) => {
+          const q = ops.queens;
+          for (let r = 0; r < row; r++) if (q[r] === col || Math.abs(q[r] - col) === row - r) return r;
+          return -1;
+        };
+        let solved = false;
+        const solve = (row) => {
+          if (solved) return;
+          if (row === n) {
+            ops.solved(`All ${n} rows filled — no queen attacks another.`);
+            solved = true;
+            return;
+          }
+          for (let col = 0; col < n; col++) {
+            const bad = conflict(row, col);
+            if (bad >= 0) {
+              ops.reject(
+                row,
+                col,
+                bad,
+                `Row ${row}, column ${col} clashes with the queen in row ${bad} — prune this square.`
+              );
+              continue;
+            }
+            ops.place(row, col, `Column ${col} is safe — place a queen and descend to row ${row + 1}.`);
+            solve(row + 1);
+            if (solved) return;
+            ops.backtrack(
+              row,
+              `Row ${row + 1} had no safe square — remove the queen at (${row}, ${col}) and retreat.`
+            );
+          }
+        };
+        solve(0);
+        ops.done(solved ? `Solved — a valid ${n}-queens arrangement.` : `No solution for n = ${n}.`);
+      }
+    };
+  }
+});
+
+// custom/steptrace/src/algorithms/prim.ts
+var prim;
+var init_prim = __esm({
+  "custom/steptrace/src/algorithms/prim.ts"() {
+    prim = {
+      id: "prim",
+      kind: "graph",
+      meta: { label: "Prim's MST", frontierLabel: "Frontier" },
+      run: (input, ops, graph) => {
+        const adj = {};
+        for (const nd of graph.nodes) adj[nd.id] = [];
+        for (const e of graph.edges) {
+          const w = e.weight == null ? 1 : e.weight;
+          adj[e.from].push({ to: e.to, w });
+          if (!graph.directed) adj[e.to].push({ to: e.from, w });
+        }
+        const start = input.start;
+        ops.init(
+          `Prim's algorithm — grow a minimum spanning tree from ${start}, each step adding the cheapest edge that reaches a node not yet in the tree.`
+        );
+        const pairKey = (a, b) => a < b ? a + "|" + b : b + "|" + a;
+        const inTree = /* @__PURE__ */ new Set([start]);
+        const treeEdges = /* @__PURE__ */ new Set();
+        const skipped = /* @__PURE__ */ new Set();
+        ops.visit(start, `Start the tree at ${start}.`);
+        let total = 0;
+        while (inTree.size < graph.nodes.length) {
+          const cand = [];
+          const seenPair = /* @__PURE__ */ new Set();
+          for (const u of inTree)
+            for (const { to: v, w } of adj[u]) {
+              const key = pairKey(u, v);
+              if (seenPair.has(key)) continue;
+              seenPair.add(key);
+              cand.push({ u, v, w, key });
+            }
+          cand.sort((a, b) => a.w - b.w || (a.key < b.key ? -1 : 1));
+          let chosen = null;
+          for (const c of cand) {
+            if (inTree.has(c.v)) {
+              if (!treeEdges.has(c.key) && !skipped.has(c.key)) {
+                skipped.add(c.key);
+                ops.edge(
+                  c.u,
+                  c.v,
+                  `${c.u}–${c.v} (weight ${c.w}) links two nodes already in the tree — skip it, adding it would make a cycle.`
+                );
+              }
+              continue;
+            }
+            chosen = c;
+            break;
+          }
+          if (!chosen) break;
+          ops.edge(
+            chosen.u,
+            chosen.v,
+            `Cheapest edge leaving the tree: ${chosen.u}–${chosen.v} (weight ${chosen.w}).`
+          );
+          ops.selectEdge(chosen.u, chosen.v, `Add ${chosen.u}–${chosen.v} to the tree.`);
+          treeEdges.add(chosen.key);
+          inTree.add(chosen.v);
+          ops.visit(chosen.v, `${chosen.v} joins the tree.`);
+          total += chosen.w;
+        }
+        ops.done(`Minimum spanning tree complete — total weight ${total}.`);
+      }
+    };
+  }
+});
+
+// custom/steptrace/src/algorithms/quick-sort.ts
+var quickSort;
+var init_quick_sort = __esm({
+  "custom/steptrace/src/algorithms/quick-sort.ts"() {
+    quickSort = {
+      id: "quick-sort",
+      kind: "sort",
+      meta: { label: "Quick sort" },
+      run: (input, ops) => {
+        const n = ops.value.length;
+        ops.init(
+          `Quick sort — pick a pivot, partition values so smaller ones go left and larger ones go right, then recurse on each side.`
+        );
+        function partition(lo, hi) {
+          const pivot = ops.value[hi];
+          ops.range(lo, hi);
+          ops.pivot(hi);
+          ops.candidate(
+            hi,
+            `Partition [${lo}, ${hi}]: pivot ${pivot} (index ${hi}) — send values < ${pivot} left, > ${pivot} right.`
+          );
+          let i = lo;
+          for (let j = lo; j < hi; j++) {
+            ops.compare(j, hi, `Compare ${ops.value[j]} with pivot ${pivot}.`);
+            if (ops.value[j] < pivot) {
+              if (i !== j)
+                ops.swap(
+                  i,
+                  j,
+                  `${ops.value[j]} < ${pivot}: move it into the left region at index ${i}.`
+                );
+              i++;
+            }
+          }
+          if (i !== hi) ops.swap(i, hi, `Swap the pivot ${pivot} into index ${i}.`);
+          ops.pivot(i);
+          ops.candidate(
+            null,
+            `Pivot ${pivot} settles at index ${i} — everything left is < ${pivot}, everything right is > ${pivot}.`
+          );
+          ops.pivot(null);
+          ops.markSorted([i], [i], `Index ${i} is final — it never moves again.`);
+          ops.range(null);
+          return i;
+        }
+        function qs(lo, hi) {
+          if (lo > hi) return;
+          if (lo === hi) {
+            ops.markSorted([lo], [lo], `A single element at index ${lo} is already in place.`);
+            return;
+          }
+          const p = partition(lo, hi);
+          if (p - 1 - lo >= 1) {
+            ops.range(lo, p - 1);
+            ops.candidate(
+              null,
+              `Recurse into the left half [${lo}, ${p - 1}] (the values below the pivot).`
+            );
+          }
+          qs(lo, p - 1);
+          if (hi - (p + 1) >= 1) {
+            ops.range(p + 1, hi);
+            ops.candidate(
+              null,
+              `Recurse into the right half [${p + 1}, ${hi}] (the values above the pivot).`
+            );
+          }
+          qs(p + 1, hi);
+        }
+        qs(0, n - 1);
+        ops.done(`Sorted in ${ops.comparisons} comparisons and ${ops.swaps} swaps.`);
+      }
+    };
+  }
+});
+
+// custom/steptrace/src/algorithms/radix-sort.ts
+function invalidConfig8(message) {
+  throw new Error(`steptrace: radix-sort ${message}`);
+}
+function parseRadixSortConfig(config) {
+  const { array } = config;
+  const radix = config.radix ?? 10;
+  const mode = config.mode ?? "LSD";
+  if (!Array.isArray(array) || array.length < 2)
+    invalidConfig8('requires an "array" with at least two non-negative integers.');
+  if (!array.every((value) => Number.isSafeInteger(value) && value >= 0))
+    invalidConfig8('requires every "array" value to be a non-negative safe integer.');
+  if (array.length > 12)
+    invalidConfig8("limits the demonstration to 12 keys so every bucket pass remains legible.");
+  if (!Number.isInteger(radix) || radix < 2 || radix > 16)
+    invalidConfig8('requires "radix" to be an integer from 2 through 16.');
+  if (String(mode).toUpperCase() !== "LSD")
+    invalidConfig8('currently visualizes only stable least-significant-digit mode ("LSD").');
+  const max = Math.max(...array);
+  const places = [];
+  for (let place = 1; place <= Math.max(max, 1); place *= radix) {
+    places.push(place);
+    if (Math.floor(max / place) < radix) break;
+  }
+  return {
+    profile: "radix",
+    array: array.slice(),
+    radix,
+    bucketCount: radix,
+    bucketLabels: Array.from({ length: radix }, (_, digit) => String(digit)),
+    places
+  };
+}
+function digitName(place, radix) {
+  if (radix !== 10) return `place ${place}`;
+  if (place === 1) return "ones";
+  if (place === 10) return "tens";
+  if (place === 100) return "hundreds";
+  if (place === 1e3) return "thousands";
+  return `place ${place}`;
+}
+var radixSort;
+var init_radix_sort = __esm({
+  "custom/steptrace/src/algorithms/radix-sort.ts"() {
+    init_bucket_distribution();
+    radixSort = {
+      id: "radix-sort",
+      kind: "sort",
+      family: radixDistributionFamily,
+      meta: { label: "Radix sort" },
+      parse: parseRadixSortConfig,
+      run(input, ops) {
+        let working = input.array.slice();
+        ops.intro(
+          `${input.places.length} stable base-${input.radix} passes will order every digit from least to most significant.`
+        );
+        input.places.forEach((place, passIndex) => {
+          const passLabel = digitName(place, input.radix);
+          const buckets = Array.from({ length: input.radix }, () => []);
+          ops.beginPass(
+            passIndex,
+            input.places.length,
+            passLabel,
+            `Pass ${passIndex + 1}/${input.places.length}: distribute by the ${passLabel} digit.`
+          );
+          working.forEach((value, sourceIndex) => {
+            const digit = Math.floor(value / place) % input.radix;
+            buckets[digit].push(value);
+            ops.scatter(
+              sourceIndex,
+              digit,
+              `${value}'s ${passLabel} digit is ${digit}; append it to bucket ${digit}.`
+            );
+          });
+          ops.beginGather(
+            `Read digit buckets from ${input.bucketLabels[0]} through ${input.bucketLabels.at(-1)} without changing order inside a bucket.`
+          );
+          const next = [];
+          buckets.forEach((bucket, bucketIndex) => {
+            bucket.forEach((value, itemIndex) => {
+              next.push(value);
+              ops.gather(
+                bucketIndex,
+                itemIndex,
+                `Take ${value} from bucket ${bucketIndex}; write it at output index ${next.length - 1}.`
+              );
+            });
+          });
+          ops.finishPass(
+            `${passLabel[0].toUpperCase()}${passLabel.slice(1)} pass complete: lower processed digits remain stably ordered.`
+          );
+          working = next;
+        });
+        ops.done(`All ${input.places.length} digit positions are ordered: [${working.join(", ")}].`);
+      }
+    };
+  }
+});
+
+// custom/steptrace/src/algorithms/rabin-karp.ts
+var rabinKarp;
+var init_rabin_karp = __esm({
+  "custom/steptrace/src/algorithms/rabin-karp.ts"() {
+    rabinKarp = {
+      id: "rabin-karp",
+      kind: "string",
+      meta: { label: "Rabin-Karp" },
+      run: (input, ops) => {
+        const text = String(input.text || "");
+        const pattern = String(input.pattern || "");
+        const n = text.length;
+        const m = pattern.length;
+        const B = 256;
+        const MOD = 101;
+        const hash = (s) => {
+          let h = 0;
+          for (let k = 0; k < s.length; k++) h = (h * B + s.charCodeAt(k)) % MOD;
+          return h;
+        };
+        if (!m || m > n) {
+          ops.init(`Rabin-Karp for "${pattern}".`);
+          ops.done("Nothing to search.");
+          return;
+        }
+        const ph = hash(pattern);
+        ops.init(
+          `Rabin-Karp search for "${pattern}" — slide a window, compare its rolling hash to the pattern hash (${ph}), and only verify character-by-character when the hashes collide.`
+        );
+        let highPow = 1;
+        for (let k = 0; k < m - 1; k++) highPow = highPow * B % MOD;
+        let wh = hash(text.slice(0, m));
+        for (let s = 0; s <= n - m; s++) {
+          ops.hashStep(
+            s,
+            wh,
+            ph,
+            `Window [${s}, ${s + m - 1}]: hash ${wh} ${wh === ph ? "=" : "≠"} pattern hash ${ph}${wh === ph ? " — verify" : " — skip"}.`
+          );
+          if (wh === ph) {
+            let ok = true;
+            for (let j = 0; j < m; j++) {
+              const isMatch = text[s + j] === pattern[j];
+              ops.compare(
+                s + j,
+                j,
+                s,
+                isMatch,
+                `Hash hit — verify text[${s + j}]='${text[s + j]}' vs pattern[${j}]='${pattern[j]}'.`
+              );
+              if (!isMatch) {
+                ok = false;
+                break;
+              }
+            }
+            if (ok) ops.matchAt(s, `Verified — occurrence at index ${s}.`);
+          }
+          if (s < n - m) {
+            const removed = text.charCodeAt(s) * highPow % MOD;
+            wh = (wh - removed + MOD) % MOD;
+            wh = (wh * B + text.charCodeAt(s + m)) % MOD;
+          }
+        }
+        ops.done(
+          ops.found.length ? `Found ${ops.found.length} occurrence(s): index ${ops.found.join(", ")}.` : `Pattern not found.`
+        );
+      }
+    };
+  }
+});
+
+// custom/steptrace/src/algorithms/selection-sort.ts
+var selectionSort;
+var init_selection_sort = __esm({
+  "custom/steptrace/src/algorithms/selection-sort.ts"() {
+    selectionSort = {
+      id: "selection-sort",
+      kind: "sort",
+      meta: { label: "Selection sort" },
+      run: (input, ops) => {
+        const n = ops.value.length;
+        ops.init(
+          `Selection sort — repeatedly find the smallest value in the unsorted region and swap it into the next sorted slot.`
+        );
+        for (let i = 0; i < n - 1; i++) {
+          let min = i;
+          ops.candidate(min, `Assume index ${i} (${ops.value[i]}) is the smallest of the rest.`);
+          for (let j = i + 1; j < n; j++) {
+            ops.compare(j, min, `Compare ${ops.value[j]} with the current smallest ${ops.value[min]}.`);
+            if (ops.value[j] < ops.value[min]) {
+              min = j;
+              ops.candidate(min, `New smallest: ${ops.value[min]} at index ${min}.`);
+            }
+          }
+          if (min !== i) ops.swap(i, min, `Swap the smallest (${ops.value[min]}) into index ${i}.`);
+          ops.candidate(null, `Index ${i} settled — scan the remaining region next.`);
+          ops.markSorted([i], [i], `Index ${i} now holds its final value.`);
+        }
+        ops.lockAll([n - 1]);
+        ops.markSorted([n - 1], [n - 1], `The last element is already in place.`);
+        ops.done(`Sorted in ${ops.comparisons} comparisons and ${ops.swaps} swaps.`);
+      }
+    };
+  }
+});
+
+// custom/steptrace/src/algorithms/shell-sort.ts
+function invalidConfig9(message) {
+  throw new Error(`steptrace: shell-sort ${message}`);
+}
+function parseShellSortConfig(config) {
+  const { array, gaps } = config;
+  if (!Array.isArray(array) || array.length < 2)
+    invalidConfig9('requires an "array" with at least two numbers.');
+  if (!array.every((value) => typeof value === "number" && Number.isFinite(value)))
+    invalidConfig9('requires every "array" value to be a finite number.');
+  if (!Array.isArray(gaps) || gaps.length === 0)
+    invalidConfig9('requires a non-empty "gaps" array ending in 1.');
+  if (!gaps.every((gap) => Number.isInteger(gap) && gap > 0 && gap < array.length))
+    invalidConfig9("requires every gap to be a positive integer smaller than the array length.");
+  if (gaps.at(-1) !== 1) invalidConfig9("requires the final gap to be 1.");
+  if (gaps.some((gap, index) => index > 0 && gap >= gaps[index - 1]))
+    invalidConfig9("requires gaps in strictly decreasing order.");
+  return { array: array.slice(), gaps: gaps.slice(), profile: "shell" };
+}
+var shellSort;
+var init_shell_sort = __esm({
+  "custom/steptrace/src/algorithms/shell-sort.ts"() {
+    init_array_sort();
+    shellSort = {
+      id: "shell-sort",
+      kind: "sort",
+      family: arraySortFamily,
+      meta: { label: "Shell sort" },
+      parse: parseShellSortConfig,
+      run(input, ops) {
+        ops.init("Shell sort — insertion-sort interleaved subsequences, then shrink the gap to 1.");
+        for (const gap of input.gaps) {
+          ops.beginGap(gap, `Gap ${gap}: sort each subsequence whose indices are ${gap} apart.`);
+          for (let start = 0; start < gap; start++) {
+            const indices = [];
+            for (let index = start; index < ops.value.length; index += gap) indices.push(index);
+            if (indices.length < 2) continue;
+            ops.selectSubsequence(indices, `Gap ${gap}, subsequence ${indices.join(" → ")}.`);
+            for (let index = start + gap; index < ops.value.length; index += gap) {
+              const key = ops.value[index];
+              ops.holdKeyAt(
+                key,
+                index,
+                `Lift ${key} from index ${index}; index ${index} becomes the insertion hole.`
+              );
+              let cursor = index - gap;
+              ops.compareHeldAt(
+                cursor,
+                `Hold ${key} from index ${index}; compare it with ${ops.value[cursor]} at index ${cursor}.`
+              );
+              while (cursor >= start && ops.value[cursor] > key) {
+                ops.shiftHeld(
+                  cursor + gap,
+                  cursor,
+                  `${ops.value[cursor]} > ${key}: shift it from ${cursor} to ${cursor + gap}.`
+                );
+                cursor -= gap;
+                if (cursor >= start)
+                  ops.compareHeldAt(
+                    cursor,
+                    `Compare ${key} with ${ops.value[cursor]} at index ${cursor}.`
+                  );
+              }
+              ops.placeHeld(cursor + gap, key, `Place ${key} at index ${cursor + gap}.`);
+              ops.releaseHeldKey();
+            }
+          }
+        }
+        ops.lockAll(Array.from({ length: ops.value.length }, (_, index) => index));
+        ops.done(`Sorted in ${ops.comparisons} comparisons and ${ops.swaps} gapped moves.`);
+      }
+    };
+  }
+});
+
+// custom/steptrace/src/algorithms/sliding-window.ts
+var slidingWindow;
+var init_sliding_window = __esm({
+  "custom/steptrace/src/algorithms/sliding-window.ts"() {
+    slidingWindow = {
+      id: "sliding-window",
+      kind: "pointers",
+      meta: { label: "Sliding window" },
+      run: (input, ops) => {
+        const a = ops.value;
+        const target = input.target;
+        ops.init(
+          `Sliding window — find the shortest contiguous subarray with sum ≥ ${target}. Expand the window right to grow the sum; shrink from the left while it stays ≥ ${target}.`
+        );
+        let lo = 0;
+        let sum = 0;
+        let best = Infinity;
+        let bestRange = null;
+        for (let hi = 0; hi < a.length; hi++) {
+          sum += a[hi];
+          ops.step(
+            { pointers: { lo, hi }, window: [lo, hi] },
+            `Expand right to index ${hi}: window sum = ${sum}.`
+          );
+          while (sum >= target) {
+            if (hi - lo + 1 < best) {
+              best = hi - lo + 1;
+              bestRange = [lo, hi];
+            }
+            ops.step(
+              { pointers: { lo, hi }, window: [lo, hi] },
+              `Sum ${sum} ≥ ${target} (length ${hi - lo + 1}) — record it, then shrink from the left.`
+            );
+            sum -= a[lo];
+            lo++;
+          }
+        }
+        if (bestRange) {
+          const marks = [];
+          for (let k = bestRange[0]; k <= bestRange[1]; k++) marks.push(k);
+          ops.step(
+            { pointers: {}, window: bestRange, mark: marks },
+            `Shortest window: indices ${bestRange[0]}..${bestRange[1]} (length ${best}).`
+          );
+          ops.done(`Answer: the shortest qualifying length is ${best}.`);
+        } else {
+          ops.done(`No subarray reaches ${target}.`);
+        }
+      }
+    };
+  }
+});
+
+// custom/steptrace/src/algorithms/topological-sort.ts
+var topologicalSort;
+var init_topological_sort = __esm({
+  "custom/steptrace/src/algorithms/topological-sort.ts"() {
+    topologicalSort = {
+      id: "topological-sort",
+      kind: "graph",
+      meta: { label: "Topological sort (Kahn)", frontierLabel: "Ready queue (in-degree 0)" },
+      run: (input, ops, graph) => {
+        const adj = {};
+        const indeg = {};
+        for (const nd of graph.nodes) {
+          adj[nd.id] = [];
+          indeg[nd.id] = 0;
+        }
+        for (const e of graph.edges) {
+          adj[e.from].push(e.to);
+          indeg[e.to] = (indeg[e.to] || 0) + 1;
+        }
+        ops.init(
+          `Topological sort (Kahn's algorithm) — repeatedly take a node with no remaining prerequisites (in-degree 0) and append it to the order; removing it may make others ready.`
+        );
+        const ready = [];
+        for (const nd of graph.nodes) {
+          if (indeg[nd.id] === 0) {
+            ready.push(nd.id);
+            ops.enqueue(nd.id, null, `${nd.id} has in-degree 0 — ready.`);
+          }
+        }
+        const order = [];
+        while (ready.length) {
+          ready.sort();
+          const u = ready.shift();
+          ops.visit(u, `Output ${u} (position ${order.length + 1} in the order).`);
+          order.push(u);
+          for (const v of adj[u].slice().sort()) {
+            ops.edge(u, v, `Remove edge ${u}→${v}: in-degree of ${v} becomes ${indeg[v] - 1}.`);
+            indeg[v]--;
+            if (indeg[v] === 0) {
+              ready.push(v);
+              ops.enqueue(v, null, `${v} is now ready.`);
+            }
+          }
+        }
+        ops.done(
+          order.length === graph.nodes.length ? `Topological order: ${order.join(" → ")}.` : `A cycle remains (${graph.nodes.length - order.length} node(s) unresolved) — no valid ordering.`
+        );
+      }
+    };
+  }
+});
+
+// custom/steptrace/src/algorithms/two-pointers.ts
+var twoPointers;
+var init_two_pointers = __esm({
+  "custom/steptrace/src/algorithms/two-pointers.ts"() {
+    twoPointers = {
+      id: "two-pointers",
+      kind: "pointers",
+      meta: { label: "Two pointers" },
+      run: (input, ops) => {
+        const a = ops.value;
+        const target = input.target;
+        ops.init(
+          `Two pointers on a sorted array — find a pair summing to ${target}. Move the left pointer right to raise the sum, the right pointer left to lower it.`
+        );
+        let l = 0;
+        let r = a.length - 1;
+        while (l < r) {
+          const sum = a[l] + a[r];
+          ops.step(
+            { pointers: { L: l, R: r }, window: [l, r] },
+            `a[${l}] + a[${r}] = ${a[l]} + ${a[r]} = ${sum}.`
+          );
+          if (sum === target) {
+            ops.step(
+              { pointers: { L: l, R: r }, window: [l, r], mark: [l, r] },
+              `${a[l]} + ${a[r]} = ${target} — found the pair.`
+            );
+            ops.done(`Found a pair at indices ${l} and ${r}.`);
+            return;
+          }
+          if (sum < target) l++;
+          else r--;
+        }
+        ops.done(`No pair sums to ${target}.`);
+      }
+    };
+  }
+});
+
+// custom/steptrace/src/algorithms/union-find.ts
+var unionFind;
+var init_union_find = __esm({
+  "custom/steptrace/src/algorithms/union-find.ts"() {
+    unionFind = {
+      id: "union-find",
+      kind: "unionfind",
+      meta: { label: "Union-Find" },
+      run: (input, ops) => {
+        const n = input.n || 7;
+        ops.init(
+          `Union-Find on ${n} elements — union merges two sets; find returns a set's representative (its root), flattening the path it walks (path compression).`
+        );
+        const operations = Array.isArray(input.ops) && input.ops.length ? input.ops : [
+          ["union", 0, 1],
+          ["union", 2, 3],
+          ["union", 4, 5],
+          ["union", 1, 2],
+          ["find", 3],
+          ["union", 6, 4]
+        ];
+        const findRoot = (x, why) => {
+          const pathToRoot = [x];
+          let c = x;
+          while (ops.parent[c] !== c) {
+            c = ops.parent[c];
+            pathToRoot.push(c);
+          }
+          ops.findPath(pathToRoot, `${why} follow ${pathToRoot.join(" → ")} to root ${c}.`);
+          for (const node of pathToRoot) {
+            if (node !== c && ops.parent[node] !== c)
+              ops.setParent(node, c, `Path compression: point ${node} straight at root ${c}.`);
+          }
+          return c;
+        };
+        for (const op of operations) {
+          if (op[0] === "union") {
+            const a = op[1];
+            const b = op[2];
+            const ra = findRoot(a, `Union(${a}, ${b}):`);
+            const rb = findRoot(b, `Union(${a}, ${b}):`);
+            if (ra === rb) ops.clear(`${a} and ${b} are already in the same set.`);
+            else ops.setParent(ra, rb, `Link root ${ra} under root ${rb} — the two sets merge.`);
+          } else if (op[0] === "find") {
+            const x = op[1];
+            const rt = findRoot(x, `Find(${x}):`);
+            ops.clear(`Find(${x}) = ${rt}.`);
+          }
+        }
+        const roots = /* @__PURE__ */ new Set();
+        for (let i = 0; i < n; i++) {
+          let c = i;
+          while (ops.parent[c] !== c) c = ops.parent[c];
+          roots.add(c);
+        }
+        ops.done(`Done — ${roots.size} disjoint set${roots.size === 1 ? "" : "s"} remain.`);
+      }
+    };
+  }
+});
+
+// custom/steptrace/src/algorithms/ternary-search.ts
+function parseTernarySearchConfig(config) {
+  const array = config.array ?? config.values;
+  if (!Array.isArray(array) || array.length < 3)
+    throw new Error('steptrace: ternary-search requires an "array" with at least three values.');
+  if (!array.every((value) => typeof value === "number" && Number.isFinite(value)))
+    throw new Error('steptrace: ternary-search requires every "array" value to be a finite number.');
+  if (config.goal !== "maximum")
+    throw new Error('steptrace: ternary-search requires goal: "maximum".');
+  let peak = 1;
+  while (peak < array.length && array[peak] > array[peak - 1]) peak++;
+  if (peak === 1 || peak === array.length || array.slice(peak).some((value, index) => value >= array[peak + index - 1]))
+    throw new Error(
+      "steptrace: ternary-search requires a strictly increasing then strictly decreasing array."
+    );
+  return { array: array.slice(), target: null, profile: "ternary", goal: "maximum" };
+}
+var ternarySearch;
+var init_ternary_search = __esm({
+  "custom/steptrace/src/algorithms/ternary-search.ts"() {
+    init_indexed_array_search();
+    ternarySearch = {
+      id: "ternary-search",
+      kind: "search",
+      family: indexedArraySearchFamily,
+      meta: { label: "Ternary search" },
+      parse: parseTernarySearchConfig,
+      run(input, ops) {
+        const values = ops.value;
+        ops.init("Ternary search for the maximum: compare two third-points and keep the rising side.");
+        ops.beginPhase(
+          0,
+          values.length - 1,
+          "Probe both third-points together; the larger value shows which side still contains the peak.",
+          "ternary"
+        );
+        let left = 0;
+        let right = values.length - 1;
+        while (right - left > 2) {
+          const third = Math.floor((right - left) / 3);
+          const mid1 = left + third;
+          const mid2 = right - third;
+          ops.dualProbe(
+            left,
+            right,
+            mid1,
+            mid2,
+            `Compare [${mid1}] = ${values[mid1]} with [${mid2}] = ${values[mid2]}.`
+          );
+          if (values[mid1] < values[mid2]) {
+            left = mid1 + 1;
+            ops.narrow(left, right, `The sequence is higher at ${mid2}; keep [${left}, ${right}].`);
+          } else if (values[mid1] > values[mid2]) {
+            right = mid2 - 1;
+            ops.narrow(left, right, `The sequence is higher at ${mid1}; keep [${left}, ${right}].`);
+          } else {
+            left = mid1 + 1;
+            right = mid2 - 1;
+            ops.narrow(
+              left,
+              right,
+              `Equal third-points place the strict peak inside [${left}, ${right}].`
+            );
+          }
+        }
+        ops.beginPhase(
+          left,
+          right,
+          `Only [${left}, ${right}] remains; scan these final values.`,
+          "scan"
+        );
+        let best = left;
+        for (let index = left; index <= right; index++) {
+          ops.probe(left, right, index, `Check final candidate [${index}] = ${values[index]}.`);
+          if (values[index] > values[best]) best = index;
+        }
+        ops.hit(best, `${values[best]} is the maximum at index ${best}.`);
+        ops.done(`Found the maximum ${values[best]} at index ${best} after ${ops.comparisons} probes.`);
+      }
+    };
+  }
+});
+
+// custom/steptrace/src/algorithms/index.ts
+var builtInAlgorithms;
+var init_algorithms = __esm({
+  "custom/steptrace/src/algorithms/index.ts"() {
+    init_bfs();
+    init_binary_search_on_answer();
+    init_binary_search();
+    init_bubble_sort();
+    init_bucket_sort();
+    init_comb_sort();
+    init_counting_sort();
+    init_cyclic_sort();
+    init_dfs();
+    init_dijkstra();
+    init_divide_and_conquer();
+    init_dynamic_programming();
+    init_exponential_search();
+    init_interpolation_search();
+    init_floyd_warshall();
+    init_heap_sort();
+    init_insertion_sort();
+    init_introsort();
+    init_jump_search();
+    init_kernighan_popcount();
+    init_kmp();
+    init_lcs();
+    init_linear_search();
+    init_merge_sort();
+    init_merge_sort_tree();
+    init_memoization();
+    init_n_queens();
+    init_prim();
+    init_quick_sort();
+    init_radix_sort();
+    init_rabin_karp();
+    init_selection_sort();
+    init_shell_sort();
+    init_sliding_window();
+    init_topological_sort();
+    init_two_pointers();
+    init_union_find();
+    init_ternary_search();
+    builtInAlgorithms = [
+      bubbleSort,
+      insertionSort,
+      selectionSort,
+      quickSort,
+      heapSort,
+      mergeSort,
+      mergeSortTree,
+      shellSort,
+      combSort,
+      countingSort,
+      radixSort,
+      bucketSort,
+      cyclicSort,
+      introsort,
+      exponentialSearch,
+      interpolationSearch,
+      jumpSearch,
+      ternarySearch,
+      binarySearchOnAnswer,
+      bfs,
+      dfs,
+      dijkstra,
+      prim,
+      topologicalSort,
+      binarySearch,
+      linearSearch,
+      kmp,
+      rabinKarp,
+      twoPointers,
+      slidingWindow,
+      lcs,
+      ...dynamicProgrammingAlgorithms,
+      floydWarshall,
+      unionFind,
+      kernighanPopcount,
+      nQueens,
+      memoization,
+      divideAndConquer
+    ];
+  }
+});
+
+// custom/steptrace/src/player.ts
+var Player;
+var init_player = __esm({
+  "custom/steptrace/src/player.ts"() {
+    Player = class {
+      constructor(frames, paint, speed) {
+        this.frames = frames;
+        this.paint = paint;
+        this.i = 0;
+        this.speed = speed || 1;
+        this.playing = false;
+        this.timer = null;
+        this.baseDelay = 260;
+        this.onState = () => {
+        };
+      }
+      render() {
+        this.paint(this.frames[this.i], this.i, this.frames.length);
+        this.onState();
+      }
+      _clear() {
+        if (this.timer) {
+          clearTimeout(this.timer);
+          this.timer = null;
+        }
+      }
+      _loop() {
+        if (!this.playing) return;
+        if (this.i >= this.frames.length - 1) {
+          this.playing = false;
+          this.onState();
+          return;
+        }
+        this.timer = setTimeout(() => {
+          this.i++;
+          this.render();
+          this._loop();
+        }, this.baseDelay / this.speed);
+      }
+      play() {
+        if (this.i >= this.frames.length - 1) this.i = 0;
+        this.playing = true;
+        this.render();
+        this.onState();
+        this._loop();
+      }
+      pause() {
+        this.playing = false;
+        this._clear();
+        this.onState();
+      }
+      toggle() {
+        this.playing ? this.pause() : this.play();
+      }
+      stepF() {
+        this.pause();
+        if (this.i < this.frames.length - 1) this.i++;
+        this.render();
+      }
+      stepB() {
+        this.pause();
+        if (this.i > 0) this.i--;
+        this.render();
+      }
+      seek(idx) {
+        this.pause();
+        this.i = Math.max(0, Math.min(this.frames.length - 1, idx | 0));
+        this.render();
+      }
+      reset() {
+        this.pause();
+        this.i = 0;
+        this.render();
+      }
+      setSpeed(s) {
+        this.speed = s;
+      }
+      destroy() {
+        this.playing = false;
+        this._clear();
+      }
+    };
+  }
+});
+
+// custom/steptrace/src/tabs.ts
+function isTabsConfig(config) {
+  return typeof config === "object" && config != null && "tabs" in config;
+}
+function normalizeTabsConfig(config) {
+  if (!Array.isArray(config.tabs) || config.tabs.length === 0) {
+    throw new Error("steptrace: tabs requires at least one tab.");
+  }
+  const names = /* @__PURE__ */ new Set();
+  const tabs = config.tabs.map((rawTab, index) => normalizeTab(rawTab, index, names));
+  const selected = config.selected ?? 0;
+  if (!Number.isInteger(selected) || selected < 0 || selected >= tabs.length) {
+    throw new Error(`steptrace: tabs "selected" must be an index from 0 to ${tabs.length - 1}.`);
+  }
+  return { selected, tabs };
+}
+function normalizeTab(rawTab, index, names) {
+  if (typeof rawTab !== "object" || rawTab == null || Array.isArray(rawTab)) {
+    throw new Error(`steptrace: tabs[${index}] must be an object.`);
+  }
+  const name = typeof rawTab.name === "string" ? rawTab.name.trim() : "";
+  if (!name) throw new Error(`steptrace: tabs[${index}] requires a non-empty "name".`);
+  const nameKey = name.toLocaleLowerCase();
+  if (names.has(nameKey)) throw new Error(`steptrace: duplicate tab name "${name}".`);
+  names.add(nameKey);
+  if (rawTab.description != null && typeof rawTab.description !== "string") {
+    throw new Error(`steptrace: tabs[${index}] "description" must be a string.`);
+  }
+  if (typeof rawTab.algorithm !== "string" || !rawTab.algorithm.trim()) {
+    throw new Error(`steptrace: tabs[${index}] requires a non-empty "algorithm".`);
+  }
+  const { name: _name, description: _description, ...algorithmConfig } = rawTab;
+  return {
+    name,
+    description: rawTab.description?.trim() || "",
+    config: algorithmConfig
+  };
+}
+var init_tabs = __esm({
+  "custom/steptrace/src/tabs.ts"() {
+  }
+});
+
+// custom/steptrace/src/watch-hints.ts
+function watchHintFor(row) {
+  const override = row.hint?.trim();
+  if (override) return override;
+  const label = row.k.trim().toLowerCase();
+  return WATCH_HINTS[label] || `Current ${row.k.trim()} value.`;
+}
+var WATCH_HINTS;
+var init_watch_hints = __esm({
+  "custom/steptrace/src/watch-hints.ts"() {
+    WATCH_HINTS = Object.freeze({
+      i: "First active array index.",
+      j: "Second active array index.",
+      at: "Array index currently being inspected.",
+      from: "Index a value moves from.",
+      pivot: "Pivot index and value for this partition.",
+      range: "Active search or sort index range.",
+      swaps: "Swaps completed so far.",
+      moves: "Value moves completed so far.",
+      held: "Value temporarily held outside the array.",
+      home: "Index where the current value belongs.",
+      gap: "Distance between compared array positions.",
+      lane: "Indices in the active gapped subsequence.",
+      target: "Value the algorithm is looking for.",
+      goal: "Result the algorithm is trying to optimize.",
+      phase: "Current stage of the algorithm.",
+      subproblem: "Active part of the problem being solved recursively.",
+      "call path": "Active calls from the root down to the current subproblem.",
+      result: "Answer returned by the active subproblem.",
+      probe: "Index and value currently being checked.",
+      "probe 1": "First third-point checked in the current range.",
+      "probe 2": "Second third-point checked in the current range.",
+      estimate: "Index predicted from the target's position in the value range.",
+      block: "Number of array positions in each jump.",
+      "days used": "Shipping days needed at the tested capacity.",
+      capacity: "Candidate ship capacity currently being tested.",
+      verdict: "Whether the candidate satisfies the feasibility check.",
+      scanned: "Array positions inspected so far.",
+      mid: "Middle index and value of the current range.",
+      shift: "Pattern offset under the text.",
+      matches: "Matches found so far.",
+      hash: "Current window hash and pattern hash.",
+      l: "Left pointer index and value.",
+      left: "Left pointer index and value.",
+      lo: "Left boundary index and value.",
+      r: "Right pointer index and value.",
+      right: "Right pointer index and value.",
+      hi: "Right boundary index and value.",
+      cell: "Dynamic-programming cell being computed.",
+      value: "Value computed for the current cell.",
+      "stage k": "Intermediate vertex currently allowed in shortest paths.",
+      "dist[i][j]": "Distance entry currently being relaxed.",
+      "dist[i][k]": "Distance from the source to the permitted intermediate vertex.",
+      "dist[k][j]": "Distance from the permitted intermediate vertex to the destination.",
+      candidate: "Distance produced by routing through the permitted intermediate vertex.",
+      decision: "Whether the candidate improves the current distance or the current value is kept.",
+      "negative cycle": "Vertices whose diagonal distance became negative.",
+      sets: "Disjoint sets currently remaining.",
+      edge: "Edge currently being examined.",
+      x: "Current integer and its binary representation.",
+      "lowest 1": "Position of the lowest set bit.",
+      "1s cleared": "Set bits removed so far.",
+      depth: "Current recursion depth.",
+      trying: "Candidate position currently being tried.",
+      pruned: "Candidate branches rejected so far.",
+      calls: "Function calls made so far.",
+      memo: "Most recent cached result.",
+      event: "Current recursion or memoization event.",
+      queue: "Nodes waiting to be processed.",
+      visited: "Nodes already processed.",
+      strategy: "Sorting strategy active on the current range.",
+      cutoff: "Largest range deferred to insertion sort."
+    });
+  }
+});
+
+// custom/steptrace/src/mount.ts
+function createMount(registry2) {
+  const { kindOf, listAlgorithms, buildFrames } = registry2;
+  function mountTabs(root, config, host = {}) {
+    let normalized;
+    try {
+      normalized = normalizeTabsConfig(config);
+    } catch (error) {
+      root.textContent = error instanceof Error ? error.message : String(error);
+      return { destroy: () => root.replaceChildren() };
+    }
+    const { tabs } = normalized;
+    root.classList.add("steptrace", "steptrace--tabs");
+    root.setAttribute("role", "group");
+    root.setAttribute("aria-label", "Tabbed algorithm visualizer");
+    const tabsShell = el("div", "steptrace__tabs-shell");
+    const tablist = el("div", "steptrace__tabs");
+    tablist.setAttribute("role", "tablist");
+    tablist.setAttribute("aria-label", "Visualization variants");
+    const tabDesc = el("div", "steptrace__tabs-desc");
+    tabDesc.setAttribute("aria-live", "polite");
+    const panels = el("div", "steptrace__tabpanels");
+    const buttons = [];
+    const panelShells = [];
+    const panelMounts = [];
+    const handles = tabs.map(() => null);
+    let activeIndex = normalized.selected;
+    const showTab = (index, focus = false) => {
+      const next = Math.min(Math.max(index, 0), tabs.length - 1);
+      if (next === activeIndex && handles[next]) {
+        if (focus) buttons[next]?.focus();
+        return;
+      }
+      handles[activeIndex]?.pause?.();
+      activeIndex = next;
+      const tab = tabs[next];
+      tabDesc.textContent = tab.description || "";
+      buttons.forEach((button2, i) => {
+        const selected = i === next;
+        button2.setAttribute("aria-selected", String(selected));
+        button2.tabIndex = selected ? 0 : -1;
+        button2.classList.toggle("steptrace__tab--selected", selected);
+        panelShells[i].hidden = !selected;
+      });
+      if (!handles[next]) handles[next] = mount2(panelMounts[next], tab.config, host);
+      if (focus) buttons[next]?.focus();
+    };
+    tabs.forEach((tab, index) => {
+      const tabId = `steptrace-tab-${++mountSerial}`;
+      const panelId = `steptrace-panel-${++mountSerial}`;
+      const button2 = document.createElement("button");
+      button2.type = "button";
+      button2.className = "steptrace__tab";
+      button2.id = tabId;
+      button2.setAttribute("role", "tab");
+      button2.setAttribute("aria-controls", panelId);
+      button2.textContent = tab.name;
+      button2.tabIndex = index === activeIndex ? 0 : -1;
+      button2.addEventListener("click", () => showTab(index));
+      button2.addEventListener("keydown", (event) => {
+        if (event.key === "ArrowLeft" || event.key === "ArrowUp") {
+          event.preventDefault();
+          showTab((index - 1 + tabs.length) % tabs.length, true);
+        } else if (event.key === "ArrowRight" || event.key === "ArrowDown") {
+          event.preventDefault();
+          showTab((index + 1) % tabs.length, true);
+        } else if (event.key === "Home") {
+          event.preventDefault();
+          showTab(0, true);
+        } else if (event.key === "End") {
+          event.preventDefault();
+          showTab(tabs.length - 1, true);
+        }
+      });
+      buttons.push(button2);
+      tablist.append(button2);
+      const panelShell = el("div", "steptrace__tabpanel");
+      panelShell.id = panelId;
+      panelShell.hidden = index !== activeIndex;
+      panelShell.setAttribute("role", "tabpanel");
+      panelShell.setAttribute("aria-labelledby", tabId);
+      const panelMount = el("div", "steptrace__tabpanel-body");
+      panelShell.append(panelMount);
+      panelShells.push(panelShell);
+      panelMounts.push(panelMount);
+      panels.append(panelShell);
+    });
+    tabsShell.append(tablist, tabDesc);
+    root.replaceChildren(tabsShell, panels);
+    activeIndex = -1;
+    showTab(normalized.selected);
+    return {
+      destroy() {
+        for (const handle of handles) handle?.destroy();
+        root.replaceChildren();
+        root.classList.remove("steptrace", "steptrace--tabs", "steptrace--reduced");
+      }
+    };
+  }
+  function mount2(root, config, host = {}) {
+    if (isTabsConfig(config)) return mountTabs(root, config, host);
+    root.classList.add("steptrace");
+    root.setAttribute("role", "group");
+    root.setAttribute("aria-label", "Algorithm visualizer");
+    const watchHintPrefix = `steptrace-watch-hint-${++mountSerial}`;
+    const kind = kindOf(config.algorithm);
+    if (!kind) {
+      root.textContent = `steptrace: unknown algorithm "${config.algorithm}".`;
+      return { destroy: () => root.replaceChildren() };
+    }
+    const mq = matchMedia("(prefers-reduced-motion: reduce)");
+    const applyMotion = () => root.classList.toggle("steptrace--reduced", mq.matches);
+    mq.addEventListener("change", applyMotion);
+    const shouldIncludeArray = Array.isArray(config.array) || kind === "sort" || kind === "search" || kind === "pointers";
+    const state = {
+      algorithm: config.algorithm,
+      speed: config.speed || 1,
+      array: Array.isArray(config.array) && config.array.length ? config.array.slice() : randomArray(),
+      start: config.start != null ? String(config.start) : null,
+      config
+    };
+    let player = null;
+    let currentView = null;
+    let currentGraph = null;
+    let currentMilestones = [];
+    let speedControlHandle = null;
+    const head = el("div", "steptrace__head");
+    const crumb = el("div", "steptrace__crumb");
+    const crumbKind = el("span");
+    crumbKind.textContent = kind;
+    const crumbSep = el("span", "steptrace__crumb-sep");
+    crumbSep.textContent = "›";
+    const crumbAlgo = el("span", "steptrace__crumb-algo");
+    crumbAlgo.textContent = state.algorithm;
+    crumb.append(el("span", "steptrace__crumb-dot"), crumbKind, crumbSep, crumbAlgo);
+    const counter = el("div", "steptrace__counter");
+    head.append(crumb, counter);
+    const stageCol = el("div", "steptrace__stage-col");
+    const rail = el("div", "steptrace__rail");
+    const traceWrap = el("div", "steptrace__trace");
+    const traceLabel = el("div", "steptrace__rail-label steptrace__trace-label");
+    traceLabel.textContent = "Trace";
+    const log = el("ol", "steptrace__log");
+    const logLines = [];
+    for (let k = 0; k < LOG_ROWS; k++) {
+      const line = el("li", "steptrace__log-line");
+      const num = el("span", "steptrace__log-num");
+      const txt = el("span", "steptrace__log-text");
+      line.append(num, txt);
+      log.append(line);
+      logLines.push({ line, num, txt });
+    }
+    const insight = el("li", "steptrace__insight");
+    insight.setAttribute("aria-live", "off");
+    insight.setAttribute("aria-atomic", "true");
+    insight.hidden = true;
+    const insightLabel = el("span", "steptrace__insight-label");
+    insightLabel.textContent = "Result";
+    const insightText = el("span", "steptrace__insight-text");
+    insight.append(insightLabel, insightText);
+    log.append(insight);
+    traceWrap.append(traceLabel, log);
+    const watchWrap = el("div", "steptrace__watch-wrap");
+    const watchLabel = el("div", "steptrace__rail-label");
+    watchLabel.textContent = "Watch";
+    const watchEl = el("div", "steptrace__watch");
+    watchWrap.append(watchLabel, watchEl);
+    watchWrap.hidden = true;
+    rail.append(traceWrap, watchWrap);
+    const body = el("div", "steptrace__body");
+    body.append(stageCol, rail);
+    const foot = el("div", "steptrace__foot");
+    const scrub = el("div", "steptrace__scrub");
+    scrub.setAttribute("role", "slider");
+    scrub.setAttribute("tabindex", "0");
+    scrub.setAttribute("aria-label", "Step");
+    const scrubFill = el("div", "steptrace__scrub-fill");
+    const scrubDot = el("div", "steptrace__scrub-dot");
+    const milestoneLayer = el("div", "steptrace__milestones");
+    scrub.append(el("div", "steptrace__scrub-track"), scrubFill, milestoneLayer, scrubDot);
+    const phase = el("div", "steptrace__phase");
+    const phaseName = el("span", "steptrace__phase-name");
+    const phaseStep = el("span");
+    phase.append(phaseName, phaseStep);
+    const btnReset = iconBtn("Restart", ICON.reset);
+    const btnBack = iconBtn("Step back", ICON.back);
+    const btnPlay = iconBtn("Play", ICON.play, "steptrace__btn--play");
+    const btnFwd = iconBtn("Step forward", ICON.fwd);
+    const menuWrap = el("div", "steptrace__menu-wrap");
+    const btnMenu = iconBtn("Options", ICON.kebab);
+    btnMenu.setAttribute("aria-haspopup", "true");
+    btnMenu.setAttribute("aria-expanded", "false");
+    const menu = el("div", "steptrace__menu");
+    const speedHead = el("div", "steptrace__menu-h");
+    speedHead.textContent = "Speed";
+    const speedSection = el("div", "steptrace__menu-section");
+    const speedRow = el("div", "steptrace__speed-row");
+    const speedControl = el("div", "steptrace__speed-control");
+    speedRow.append(speedControl);
+    const fmtSpeed = (v) => Number(v).toFixed(2) + "×";
+    const applySpeed = (value) => {
+      const v = Number(value);
+      state.speed = v;
+      root.style.setProperty("--_tween", `${Math.round(107 / v)}ms`);
+      if (player) player.setSpeed(v);
+    };
+    if (host && typeof host.createSpeedSlider === "function") {
+      speedControlHandle = host.createSpeedSlider(speedControl, {
+        min: 0.5,
+        max: 2,
+        step: 0.25,
+        value: state.speed,
+        label: "Playback speed",
+        format: fmtSpeed,
+        onChange: applySpeed
+      });
+    } else {
+      const speedInput = el("input", "steptrace__range");
+      speedInput.type = "range";
+      speedInput.min = "0.5";
+      speedInput.max = "2";
+      speedInput.step = "0.25";
+      speedInput.value = String(state.speed);
+      speedInput.setAttribute("aria-label", "Playback speed");
+      speedInput.setAttribute("aria-valuetext", fmtSpeed(state.speed));
+      const speedVal = el("span", "steptrace__speed-val");
+      speedVal.textContent = fmtSpeed(state.speed);
+      speedInput.addEventListener("input", () => {
+        applySpeed(speedInput.value);
+        speedVal.textContent = fmtSpeed(speedInput.value);
+        speedInput.setAttribute("aria-valuetext", fmtSpeed(speedInput.value));
+      });
+      speedControl.append(speedInput);
+      speedRow.append(speedVal);
+    }
+    speedSection.append(speedHead, speedRow);
+    menu.append(speedSection);
+    applySpeed(state.speed);
+    let startMenu = null;
+    if (kind === "sort") {
+      const section = el("div", "steptrace__menu-section");
+      const h = el("div", "steptrace__menu-h");
+      h.textContent = "Array";
+      const item = el("button", "steptrace__menu-item");
+      item.type = "button";
+      item.textContent = "Shuffle";
+      item.addEventListener("click", () => {
+        state.array = randomArray();
+        build();
+      });
+      section.append(h, item);
+      menu.append(section);
+    } else if (kind === "graph") {
+      const section = el("div", "steptrace__menu-section");
+      const h = el("div", "steptrace__menu-h");
+      h.textContent = "Start node";
+      startMenu = el("select", "steptrace__select");
+      startMenu.setAttribute("aria-label", "Start node");
+      startMenu.addEventListener("change", () => {
+        state.start = startMenu.value;
+        closeMenu();
+        build();
+      });
+      section.append(h, startMenu);
+      menu.append(section);
+    } else if (kind === "search") {
+      const section = el("div", "steptrace__menu-section");
+      const h = el("div", "steptrace__menu-h");
+      h.textContent = "Target";
+      const sel = el("select", "steptrace__select");
+      sel.setAttribute("aria-label", "Search target");
+      const seen = /* @__PURE__ */ new Set();
+      for (const v of state.array) {
+        if (seen.has(v)) continue;
+        seen.add(v);
+        const opt = el("option");
+        opt.value = String(v);
+        opt.textContent = String(v);
+        if (Number(v) === Number(state.config.target)) opt.selected = true;
+        sel.append(opt);
+      }
+      sel.value = String(state.config.target);
+      sel.addEventListener("change", () => {
+        state.config.target = Number(sel.value);
+        closeMenu();
+        build();
+      });
+      section.append(h, sel);
+      menu.append(section);
+    }
+    menuWrap.append(btnMenu, menu);
+    const transport = el("div", "steptrace__transport");
+    transport.append(btnReset, btnBack, btnPlay, btnFwd, spacer(), menuWrap);
+    foot.append(scrub, phase, transport);
+    root.replaceChildren(head, body, foot);
+    let menuOpen = false;
+    function closeMenu() {
+      menuOpen = false;
+      menu.classList.remove("steptrace__menu--open");
+      btnMenu.setAttribute("aria-expanded", "false");
+    }
+    btnMenu.addEventListener("click", (e) => {
+      e.stopPropagation();
+      menuOpen = !menuOpen;
+      menu.classList.toggle("steptrace__menu--open", menuOpen);
+      btnMenu.setAttribute("aria-expanded", menuOpen ? "true" : "false");
+    });
+    menu.addEventListener("click", (e) => e.stopPropagation());
+    const onDocClick = () => closeMenu();
+    document.addEventListener("click", onDocClick);
+    function sizeRail() {
+      if (!player) return;
+      if (matchMedia("(max-width: 560px)").matches) {
+        log.style.height = "auto";
+        log.style.minHeight = "0";
+        return;
+      }
+      const PROBE = "position:absolute;visibility:hidden;pointer-events:none;left:0;right:0;height:auto";
+      const tall = (node) => node.getBoundingClientRect().height;
+      const probes = player.frames.map((frame) => {
+        const probe = el("li", "steptrace__log-line steptrace__log-line--cur");
+        probe.style.cssText = PROBE;
+        const number = el("span", "steptrace__log-num");
+        number.textContent = "00";
+        const text = el("span", "steptrace__log-text");
+        text.textContent = stripTags(frame.message);
+        probe.append(number, text);
+        return probe;
+      });
+      const resultProbe = insight.cloneNode(true);
+      resultProbe.hidden = false;
+      resultProbe.style.cssText = PROBE;
+      log.append(...probes, resultProbe);
+      let maxRow = tall(resultProbe);
+      for (const probe of probes) maxRow = Math.max(maxRow, tall(probe));
+      for (const probe of probes) probe.remove();
+      resultProbe.remove();
+      const logCS = getComputedStyle(log);
+      const gap = parseFloat(logCS.rowGap) || 0;
+      const hist = (parseFloat(logCS.lineHeight) || 0) * 2;
+      const h = Math.ceil(hist * 2 + gap * 2 + maxRow) + "px";
+      log.style.height = "auto";
+      if (log.style.minHeight !== h) log.style.minHeight = h;
+    }
+    function fitLog(terminal) {
+      const budget = log.clientHeight;
+      if (!budget) return;
+      const gap = parseFloat(getComputedStyle(log).rowGap) || 0;
+      let used = terminal ? insight.getBoundingClientRect().height : 0;
+      let full = false;
+      for (let k = LOG_ROWS - 1; k >= 0; k--) {
+        const line = logLines[k].line;
+        if (line.hidden) continue;
+        if (full) {
+          line.hidden = true;
+          continue;
+        }
+        const h = line.getBoundingClientRect().height;
+        const need = used ? used + gap + h : h;
+        if (!used || need <= budget + 0.5) {
+          used = need;
+        } else {
+          line.hidden = true;
+          full = true;
+        }
+      }
+    }
+    const onRailResize = () => {
+      sizeRail();
+      if (player) renderRail();
+    };
+    const logRO = typeof ResizeObserver !== "undefined" ? new ResizeObserver(onRailResize) : null;
+    if (logRO) logRO.observe(rail);
+    let lastRailI = null;
+    function renderRail() {
+      const total = player.frames.length;
+      const i = player.i;
+      const terminal = i === total - 1;
+      insight.hidden = !terminal;
+      insight.setAttribute("aria-live", terminal && !player.playing ? "polite" : "off");
+      for (let k = 0; k < LOG_ROWS; k++) {
+        const ll = logLines[k];
+        const fi = i - (LOG_ROWS - 1 - k);
+        const cur = fi === i;
+        if (fi < 0 || fi >= total || cur && terminal) {
+          ll.line.hidden = true;
+          ll.num.textContent = "";
+          ll.txt.textContent = "";
+          ll.line.classList.remove("steptrace__log-line--cur");
+          continue;
+        }
+        ll.line.hidden = false;
+        ll.num.textContent = pad2(fi + 1);
+        ll.txt.textContent = stripTags(player.frames[fi].message);
+        ll.line.classList.toggle("steptrace__log-line--cur", cur);
+        ll.line.style.opacity = cur ? "" : String(fadeFor(i - fi));
+      }
+      fitLog(terminal);
+      const dir = lastRailI == null ? 0 : Math.sign(i - lastRailI);
+      lastRailI = i;
+      if (dir !== 0) {
+        log.style.transition = "none";
+        log.style.transform = `translateY(${dir > 0 ? "0.55rem" : "-0.55rem"})`;
+        void log.offsetHeight;
+        log.style.transition = "transform 0.26s var(--_spring)";
+        log.style.transform = "translateY(0)";
+      }
+      const chapter = milestoneAt(currentMilestones, i);
+      phaseName.textContent = chapter ? chapter.label : "Step";
+      phaseStep.textContent = `${i + 1} / ${total}`;
+      scrub.setAttribute("aria-valuetext", `${phaseName.textContent}, step ${i + 1} of ${total}`);
+      for (let k = 0; k < milestoneLayer.children.length; k++) {
+        const step = Number(milestoneLayer.children[k].dataset.step);
+        milestoneLayer.children[k].dataset.passed = step <= i ? "1" : "0";
+      }
+    }
+    function renderMilestones() {
+      milestoneLayer.replaceChildren();
+      const last = Math.max(1, player.frames.length - 1);
+      for (const mark of thinMilestones(currentMilestones)) {
+        const tick = el("span", "steptrace__milestone");
+        tick.style.left = mark.i / last * 100 + "%";
+        tick.dataset.step = String(mark.i);
+        tick.title = `${mark.label} · step ${mark.i + 1}`;
+        tick.setAttribute("aria-hidden", "true");
+        milestoneLayer.append(tick);
+      }
+    }
+    function onState() {
+      const total = player.frames.length;
+      const i = player.i;
+      counter.innerHTML = `<b>${pad2(i + 1)}</b> / ${pad2(total)}`;
+      const pct = total <= 1 ? 0 : i / (total - 1) * 100;
+      scrubFill.style.width = pct + "%";
+      scrubDot.style.left = pct + "%";
+      scrub.setAttribute("aria-valuemin", "0");
+      scrub.setAttribute("aria-valuemax", String(total - 1));
+      scrub.setAttribute("aria-valuenow", String(i));
+      btnPlay.innerHTML = player.playing ? ICON.pause : ICON.play;
+      btnPlay.setAttribute("aria-label", player.playing ? "Pause" : "Play");
+      btnPlay.title = player.playing ? "Pause" : "Play";
+      btnBack.disabled = i === 0;
+      btnFwd.disabled = i === total - 1;
+      renderRail();
+      renderWatch();
+    }
+    function renderWatch() {
+      const rows = currentView && currentView.watch ? currentView.watch(player.frames[player.i]) : null;
+      watchEl.replaceChildren();
+      if (!rows || !rows.length) return;
+      for (const [index, r] of rows.entries()) {
+        const row = el("div", "steptrace__watch-row");
+        const hintId = `${watchHintPrefix}-${index}`;
+        const hint = el("span", "steptrace__watch-hint");
+        hint.id = hintId;
+        hint.setAttribute("role", "tooltip");
+        hint.textContent = watchHintFor(r);
+        row.tabIndex = 0;
+        row.setAttribute("role", "group");
+        row.setAttribute("aria-label", `${r.k}: ${String(r.v)}`);
+        row.setAttribute("aria-describedby", hintId);
+        if (r.sw) {
+          const sw = el("span", "steptrace__watch-sw");
+          sw.style.background = r.sw;
+          row.append(sw);
+        }
+        const kk = el("span", "steptrace__watch-k");
+        kk.textContent = r.k;
+        const vv = el("span", "steptrace__watch-v");
+        vv.textContent = r.v;
+        row.append(kk, vv, hint);
+        watchEl.append(row);
+      }
+    }
+    function seekFromEvent(e) {
+      const r = scrub.getBoundingClientRect();
+      const cx = e.clientX != null ? e.clientX : e.touches && e.touches[0] ? e.touches[0].clientX : r.left;
+      const frac = r.width ? Math.max(0, Math.min(1, (cx - r.left) / r.width)) : 0;
+      player.seek(Math.round(frac * (player.frames.length - 1)));
+    }
+    let dragging = false;
+    scrub.addEventListener("pointerdown", (e) => {
+      dragging = true;
+      try {
+        scrub.setPointerCapture(e.pointerId);
+      } catch (_) {
+      }
+      seekFromEvent(e);
+    });
+    scrub.addEventListener("pointermove", (e) => {
+      if (dragging) seekFromEvent(e);
+    });
+    const endDrag = () => {
+      dragging = false;
+    };
+    scrub.addEventListener("pointerup", endDrag);
+    scrub.addEventListener("pointercancel", endDrag);
+    scrub.addEventListener("keydown", (e) => {
+      if (e.key === "ArrowRight") player.stepF();
+      else if (e.key === "ArrowLeft") player.stepB();
+      else if (e.key === "Home") player.seek(0);
+      else if (e.key === "End") player.seek(player.frames.length - 1);
+      else return;
+      e.preventDefault();
+      e.stopPropagation();
+    });
+    function build() {
+      if (player) player.destroy();
+      if (currentView && currentView.destroy) currentView.destroy();
+      const built = buildFrames({
+        ...state.config,
+        algorithm: state.algorithm,
+        ...shouldIncludeArray ? { array: state.array } : {},
+        start: state.start
+      });
+      if (built.family) root.dataset.visualFamily = built.family.id;
+      else delete root.dataset.visualFamily;
+      currentGraph = built.graph || null;
+      currentMilestones = buildMilestones(state.algorithm, built.kind, built.frames);
+      let view;
+      if (built.family) view = built.family.createView(built.frames);
+      else if (built.kind === "graph")
+        view = makeGraphView(built.frames, built.graph, built.frontierLabel);
+      else if (built.kind === "search") view = makeSearchView(built.frames);
+      else if (built.kind === "string") view = makeMatchView(built.frames);
+      else if (built.kind === "pointers") view = makePointerView(built.frames);
+      else if (built.kind === "dp") view = makeDPView(built.frames);
+      else if (built.kind === "unionfind") view = makeUnionFindView(built.frames);
+      else if (built.kind === "bits") view = makeBitsView(built.frames);
+      else if (built.kind === "backtrack") view = makeBacktrackView(built.frames);
+      else if (built.kind === "rectree") view = makeRecTreeView(built.frames);
+      else view = makeSortView(built.frames);
+      currentView = view;
+      if (built.kind === "graph") syncStartOptions(built.graph);
+      const fillStage = view.stageLayout === "fill";
+      root.classList.toggle("steptrace--stable-stage", view.stableStage === true);
+      stageCol.classList.toggle(
+        "steptrace__stage-col--bottom",
+        built.kind !== "graph" && !fillStage
+      );
+      stageCol.classList.toggle("steptrace__stage-col--graph", built.kind === "graph");
+      stageCol.classList.toggle("steptrace__stage-col--fill", fillStage);
+      const nodes = view.nodes.slice(0, -1);
+      stageCol.replaceChildren(...nodes);
+      player = new Player(built.frames, view.paint, state.speed);
+      player.onState = onState;
+      insightText.textContent = summaryFor(
+        state.algorithm,
+        built.kind,
+        built.frames[built.frames.length - 1],
+        currentGraph
+      );
+      reserveWatch(built.frames, view);
+      renderMilestones();
+      sizeRail();
+      player.render();
+      onState();
+    }
+    function reserveWatch(frames, view) {
+      let maxRows = 0;
+      if (view.watch) {
+        for (const f of frames) {
+          const rows = view.watch(f);
+          if (rows && rows.length > maxRows) maxRows = rows.length;
+        }
+      }
+      watchWrap.hidden = maxRows === 0;
+      watchEl.style.setProperty("--steptrace-watch-rows", String(maxRows));
+    }
+    function syncStartOptions(graph) {
+      if (!startMenu || startMenu.dataset.filled) {
+        if (state.start == null) state.start = graph.start;
+        return;
+      }
+      startMenu.replaceChildren();
+      for (const n of graph.nodes) {
+        const opt = el("option");
+        opt.value = n.id;
+        opt.textContent = n.id;
+        if (n.id === graph.start) opt.selected = true;
+        startMenu.append(opt);
+      }
+      startMenu.value = graph.start;
+      startMenu.dataset.filled = "1";
+      state.start = graph.start;
+    }
+    build();
+    btnReset.addEventListener("click", () => player.reset());
+    btnBack.addEventListener("click", () => player.stepB());
+    btnPlay.addEventListener("click", () => player.toggle());
+    btnFwd.addEventListener("click", () => player.stepF());
+    const onKey = (e) => {
+      if (e.target instanceof HTMLInputElement || e.target instanceof HTMLSelectElement) return;
+      if (e.target === scrub) return;
+      if (e.key === "ArrowRight") player.stepF();
+      else if (e.key === "ArrowLeft") player.stepB();
+      else if (e.key === " " || e.key === "Spacebar") player.toggle();
+      else return;
+      e.preventDefault();
+      e.stopPropagation();
+    };
+    root.addEventListener("keydown", onKey);
+    applyMotion();
+    return {
+      pause() {
+        if (player) player.pause();
+      },
+      destroy() {
+        if (player) player.destroy();
+        if (currentView && currentView.destroy) currentView.destroy();
+        if (speedControlHandle && speedControlHandle.destroy) speedControlHandle.destroy();
+        if (logRO) logRO.disconnect();
+        mq.removeEventListener("change", applyMotion);
+        root.removeEventListener("keydown", onKey);
+        document.removeEventListener("click", onDocClick);
+        root.replaceChildren();
+        root.classList.remove("steptrace", "steptrace--reduced", "steptrace--stable-stage");
+      }
+    };
+  }
+  return mount2;
+}
+function randomArray(n = 12) {
+  const pool = [];
+  for (let v = 5; v <= 62; v++) pool.push(v);
+  for (let k = pool.length - 1; k > 0; k--) {
+    const r = Math.floor(Math.random() * (k + 1));
+    [pool[k], pool[r]] = [pool[r], pool[k]];
+  }
+  return pool.slice(0, n);
+}
+var LOG_ROWS, fadeFor, mountSerial;
+var init_mount = __esm({
+  "custom/steptrace/src/mount.ts"() {
+    init_player();
+    init_render();
+    init_tabs();
+    init_watch_hints();
+    LOG_ROWS = 10;
+    fadeFor = (age) => Math.max(0.1, 0.5 * Math.pow(0.62, age - 1));
+    mountSerial = 0;
   }
 });
 
 // custom/steptrace/src/registry.ts
 function createRegistry(builtIns) {
+  const familyRegistry = /* @__PURE__ */ new Map();
   const sortRegistry = /* @__PURE__ */ new Map();
   const graphRegistry = /* @__PURE__ */ new Map();
   const searchRegistry = /* @__PURE__ */ new Map();
@@ -4073,9 +10097,13 @@ function createRegistry(builtIns) {
     },
     listAlgorithms(kind) {
       const registry2 = kind === "graph" ? graphRegistry : sortRegistry;
-      return [...registry2].map(([id, value]) => ({ id, label: value.meta.label }));
+      const legacy = [...registry2].map(([id, value]) => ({ id, label: value.meta.label }));
+      const families = [...familyRegistry].filter(([, definition]) => definition.kind === kind).map(([id, definition]) => ({ id, label: definition.meta.label }));
+      return [...legacy, ...families];
     },
     kindOf(id) {
+      const family = familyRegistry.get(id);
+      if (family) return family.kind;
       if (sortRegistry.has(id)) return "sort";
       if (graphRegistry.has(id)) return "graph";
       if (searchRegistry.has(id)) return "search";
@@ -4089,6 +10117,17 @@ function createRegistry(builtIns) {
       return null;
     },
     buildFrames(config) {
+      const familyAlgorithm = familyRegistry.get(config.algorithm);
+      if (familyAlgorithm) {
+        const input2 = familyAlgorithm.parse(config);
+        const recorder = familyAlgorithm.family.createRecorder(input2);
+        familyAlgorithm.run(input2, recorder);
+        return {
+          kind: familyAlgorithm.kind,
+          family: familyAlgorithm.family,
+          frames: recorder.frames
+        };
+      }
       const input = config;
       const sort = sortRegistry.get(config.algorithm);
       if (sort) {
@@ -4160,6 +10199,10 @@ function createRegistry(builtIns) {
     }
   };
   for (const definition of builtIns) {
+    if ("family" in definition) {
+      familyRegistry.set(definition.id, definition);
+      continue;
+    }
     switch (definition.kind) {
       case "sort":
         api.registerSort(definition.id, definition.meta, definition.run);

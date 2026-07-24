@@ -1,5 +1,5 @@
 ---
-icon: ruler-dimension-line
+icon: ruler
 order: 60
 color: "#84cc16"
 topic:

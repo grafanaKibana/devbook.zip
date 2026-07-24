@@ -17,6 +17,11 @@ Architectural patterns define how a system's components are organized, how data 
 
 The three patterns here compose naturally: [[Home/Software Architecture/Patterns/Architectural Patterns/Domain-Driven Design]] establishes bounded contexts and a shared language so the code matches the business domain. [[Home/Software Architecture/Patterns/Architectural Patterns/CQRS]] separates the read path from the write path so each can be optimized independently. [[Home/Software Architecture/Patterns/Architectural Patterns/Event Sourcing]] stores state as an immutable event stream, giving you audit trails, temporal queries, and the ability to rebuild read models from history. You can use DDD without CQRS, and CQRS without Event Sourcing, but in complex domains teams often adopt all three because each one solves a problem the others expose.
 
+```datacorejsx
+const { FolderStructureMap } = await dc.require("Assets/components/devbook-folder-map.jsx");
+return FolderStructureMap;
+```
+
 # Integration and data-flow patterns by failure and coupling
 
 First identify what must vary. An API gateway, request-response call, and publish-subscribe topology decide how components interact. Streaming, batching, and ETL decide how data moves and when it becomes visible. Event Sourcing decides how state is recorded and reconstructed. Orchestration decides who owns a multi-step workflow. They can coexist; treating the nine labels below as mutually exclusive choices mixes different design layers.
@@ -48,11 +53,6 @@ The families below also overlap. A service can use hexagonal boundaries internal
 | Client-server | Request contract between consumer and service | Evolving clients and server behind a stable protocol | Compatibility and availability coupling | A central service owns data or policy for many clients |
 | Plugin | Stable host extension point | Adding optional capabilities without changing the core | Versioned extension contracts and isolation | Features are independently installable or supplied by third parties |
 | Hexagonal | Domain ports versus infrastructure adapters | Replacing databases, transports, and frameworks around domain logic | More interfaces and mapping code | Domain rules must remain testable and independent of infrastructure |
-
-```datacorejsx
-const { FolderStructureMap } = await dc.require("Assets/components/devbook-folder-map.jsx");
-return FolderStructureMap;
-```
 
 # References
 

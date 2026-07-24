@@ -1,4 +1,4 @@
-import { normalizeGraph } from "./graph"
+import { normalizeGraph, type GraphConfig } from "./graph"
 import {
   BacktrackRecorder,
   BitsRecorder,
@@ -20,6 +20,7 @@ import type {
   BuiltFrames,
   BuiltInAlgorithm,
   DPAlgorithmDefinition,
+  FamilyAlgorithmDefinition,
   GraphAlgorithmDefinition,
   PointerAlgorithmDefinition,
   RecTreeAlgorithmDefinition,
@@ -51,7 +52,10 @@ interface RegisteredAlgorithm<TRun> {
   run: TRun
 }
 
+type FamilyDefinition = FamilyAlgorithmDefinition<AlgorithmKind, unknown, unknown, unknown>
+
 export function createRegistry(builtIns: readonly BuiltInAlgorithm[]): RegistryApi {
+  const familyRegistry = new Map<string, FamilyDefinition>()
   const sortRegistry = new Map<string, RegisteredAlgorithm<SortAlgorithmDefinition["run"]>>()
   const graphRegistry = new Map<string, RegisteredAlgorithm<GraphAlgorithmDefinition["run"]>>()
   const searchRegistry = new Map<string, RegisteredAlgorithm<SearchAlgorithmDefinition["run"]>>()
@@ -104,9 +108,15 @@ export function createRegistry(builtIns: readonly BuiltInAlgorithm[]): RegistryA
       // Preserve the current toolbar contract: only sort and graph expose an
       // in-card algorithm chooser. Other kinds keep their configured algorithm.
       const registry = kind === "graph" ? graphRegistry : sortRegistry
-      return [...registry].map(([id, value]) => ({ id, label: value.meta.label }))
+      const legacy = [...registry].map(([id, value]) => ({ id, label: value.meta.label }))
+      const families = [...familyRegistry]
+        .filter(([, definition]) => definition.kind === kind)
+        .map(([id, definition]) => ({ id, label: definition.meta.label }))
+      return [...legacy, ...families]
     },
     kindOf(id) {
+      const family = familyRegistry.get(id)
+      if (family) return family.kind
       if (sortRegistry.has(id)) return "sort"
       if (graphRegistry.has(id)) return "graph"
       if (searchRegistry.has(id)) return "search"
@@ -120,6 +130,18 @@ export function createRegistry(builtIns: readonly BuiltInAlgorithm[]): RegistryA
       return null
     },
     buildFrames(config) {
+      const familyAlgorithm = familyRegistry.get(config.algorithm)
+      if (familyAlgorithm) {
+        const input = familyAlgorithm.parse(config)
+        const recorder = familyAlgorithm.family.createRecorder(input) as { frames: any[] }
+        familyAlgorithm.run(input, recorder)
+        return {
+          kind: familyAlgorithm.kind,
+          family: familyAlgorithm.family,
+          frames: recorder.frames,
+        }
+      }
+
       const input = config as AlgorithmInput
       const sort = sortRegistry.get(config.algorithm)
       if (sort) {
@@ -130,7 +152,7 @@ export function createRegistry(builtIns: readonly BuiltInAlgorithm[]): RegistryA
 
       const graphAlgorithm = graphRegistry.get(config.algorithm)
       if (graphAlgorithm) {
-        const graph = normalizeGraph(config)
+        const graph = normalizeGraph(config as GraphConfig)
         const recorder = new GraphRecorder(graph)
         graphAlgorithm.run({ ...input, start: graph.start }, recorder, graph)
         return {
@@ -202,6 +224,10 @@ export function createRegistry(builtIns: readonly BuiltInAlgorithm[]): RegistryA
   }
 
   for (const definition of builtIns) {
+    if ("family" in definition) {
+      familyRegistry.set(definition.id, definition)
+      continue
+    }
     switch (definition.kind) {
       case "sort":
         api.registerSort(definition.id, definition.meta, definition.run)

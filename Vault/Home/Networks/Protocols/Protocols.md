@@ -15,17 +15,6 @@ status: Done
 
 Protocols are the agreed-upon rules that let machines communicate: what to send, in what order, and what to do when things go wrong. Every layer of the stack (link, network, transport, application) has its own protocol set, and production debugging often means knowing which layer broke the contract. Example: an HTTP 502 can mean the upstream is down, or it can mean a TLS version mismatch between proxy and origin that never shows up in application logs.
 
-| Layer in this vault | What it provides | Examples |
-| --- | --- | --- |
-| Application | Message meaning, resources, operations, authentication hooks, and errors | [[DNS]], [[HTTP]], [[SMTP]], [[SSH]], [[WebSockets]], [[GraphQL]], [[gRPC]] |
-| Security between application and transport | Peer authentication, confidentiality, and integrity | HTTPS is HTTP protected by TLS; it is not a separate transport |
-| Transport | End-to-end byte or datagram delivery, ordering, congestion, and ports | TCP, UDP, and QUIC; HTTP/3 runs over QUIC, which is built on UDP |
-| Network | Addressing and routing between networks | IP |
-
-When an API times out, locate the boundary before changing application code: name resolution can fail in DNS, connection establishment in TCP or QUIC, peer authentication in TLS or SSH, and message semantics in HTTP or the API style above it.
-
-For registered service ports and what they usually imply, see [[Ports]].
-
 ```datacorejsx
 const { FolderStructureMap } = await dc.require("Assets/components/devbook-folder-map.jsx");
 return FolderStructureMap;

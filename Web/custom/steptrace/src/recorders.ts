@@ -120,6 +120,157 @@ export class SortRecorder {
   }
 }
 
+export class ArraySortRecorder extends SortRecorder {
+  constructor(array, profile = "shell") {
+    super(array)
+    this._profile = profile
+    this._movementUnit = profile === "shell" || profile === "introsort" ? "moves" : "swaps"
+    this._showComparisons = profile !== "cyclic"
+    this._gap = null
+    this._subsequence = null
+    this._passSwapped = null
+    this._cursor = null
+    this._home = null
+    this._keyOrigin = null
+    this._hole = null
+    this._tokenSerial = 0
+    this._tokenId = null
+    this._strategy = null
+    this._depthUsed = null
+    this._depthLimit = null
+    this._cutoff = null
+  }
+
+  _push(type, active, message) {
+    super._push(type, active, message)
+    const frame = this.frames[this.frames.length - 1]
+    this.frames[this.frames.length - 1] = Object.freeze({
+      ...frame,
+      profile: this._profile,
+      movementUnit: this._movementUnit,
+      showComparisons: this._showComparisons,
+      gap: this._gap,
+      subsequence: this._subsequence ? this._subsequence.slice() : null,
+      passSwapped: this._passSwapped,
+      cursor: this._cursor,
+      home: this._home,
+      keyOrigin: this._keyOrigin,
+      hole: this._hole,
+      tokenId: this._tokenId,
+      strategy: this._strategy,
+      depthUsed: this._depthUsed,
+      depthLimit: this._depthLimit,
+      cutoff: this._cutoff,
+    })
+  }
+
+  beginGap(gap, message) {
+    this._gap = gap
+    this._subsequence = null
+    this._passSwapped = false
+    this._push("gap", [], message)
+  }
+
+  selectSubsequence(indices, message) {
+    this._subsequence = indices.slice()
+    this._push("subsequence", indices, message)
+  }
+
+  compareGapPair(left, right, message) {
+    this._subsequence = [left, right]
+    this.compare(left, right, message)
+  }
+
+  swapGapPair(left, right, message) {
+    this._subsequence = [left, right]
+    this._passSwapped = true
+    this.swap(left, right, message)
+  }
+
+  endGap(swapped, message) {
+    this._passSwapped = swapped
+    this._subsequence = null
+    this._push("gap-complete", [], message)
+  }
+
+  inspectHome(cursor, home, message) {
+    this._cursor = cursor
+    this._home = home
+    this._push("home-check", [cursor, home], message)
+  }
+
+  swapHome(cursor, home, message) {
+    this._cursor = cursor
+    this._home = home
+    this.swap(cursor, home, message)
+  }
+
+  settleHome(index, message) {
+    this._cursor = index
+    this._home = index
+    this.markSorted([index], [index], message)
+  }
+
+  holdKeyAt(value, origin, message) {
+    this._key = value
+    this._keyOrigin = origin
+    this._hole = origin
+    this._tokenId = ++this._tokenSerial
+    this._push("hold-key", [], message)
+  }
+
+  compareHeldAt(index, message) {
+    this.comparisons++
+    this._push("compare-held", [index], message)
+  }
+
+  shiftHeld(to, from, message) {
+    this.a[to] = this.a[from]
+    this.swaps++
+    this._from = from
+    this._hole = from
+    this._push("shift-held", [to], message)
+    this._from = null
+  }
+
+  placeHeld(index, value, message) {
+    this.a[index] = value
+    this.swaps++
+    this._push("place-held", [index], message)
+  }
+
+  releaseHeldKey() {
+    this._key = null
+    this._keyOrigin = null
+    this._hole = null
+    this._tokenId = null
+  }
+
+  configureIntrosort(depthLimit, cutoff) {
+    this._depthLimit = depthLimit
+    this._cutoff = cutoff
+  }
+
+  introsortStrategy(strategy, depthUsed, type, message) {
+    this._strategy = strategy
+    this._depthUsed = depthUsed
+    this._push(type, [], message)
+  }
+
+  clearMarks() {
+    super.clearMarks()
+    this._subsequence = null
+    this._passSwapped = null
+    this._cursor = null
+    this._home = null
+    this._keyOrigin = null
+    this._hole = null
+    this._tokenId = null
+    this._strategy = null
+    this._depthUsed = null
+  }
+}
+
 // A GraphFrame snapshot: { type, visited[], frontier[], current|null,
 //   edge:{from,to}|null, dist:{id:number}, message }.
 export class GraphRecorder {
@@ -274,6 +425,197 @@ export class SearchRecorder {
   }
 }
 
+export class IndexedSearchRecorder extends SearchRecorder {
+  constructor(config) {
+    super(config.array, config.target)
+    this._profile = config.profile
+    this._phase =
+      config.profile === "exponential"
+        ? "gallop"
+        : config.profile === "jump"
+          ? "jump"
+          : config.profile
+    this._goal = config.goal ?? null
+    this._blockSize = config.blockSize ?? null
+    this._bound = null
+    this._previousBound = -1
+    this._bracket = null
+    this._mid2 = null
+    this._annotationLabel = null
+    this._annotationValue = null
+  }
+
+  _push(type, message) {
+    super._push(type, message)
+    const frame = this.frames[this.frames.length - 1]
+    this.frames[this.frames.length - 1] = Object.freeze({
+      ...frame,
+      profile: this._profile,
+      phase: this._phase,
+      bound: this._bound,
+      previousBound: this._previousBound,
+      bracket: this._bracket ? this._bracket.slice() : null,
+      mid2: this._mid2,
+      goal: this._goal,
+      blockSize: this._blockSize,
+      annotationLabel: this._annotationLabel,
+      annotationValue: this._annotationValue,
+    })
+  }
+
+  probe(lo, hi, mid, message) {
+    this._mid2 = null
+    this._annotationLabel = null
+    this._annotationValue = null
+    super.probe(lo, hi, mid, message)
+  }
+
+  annotatedProbe(lo, hi, mid, label, value, message) {
+    this._mid2 = null
+    this._annotationLabel = label
+    this._annotationValue = value
+    this.lo = lo
+    this.hi = hi
+    this.mid = mid
+    this.comparisons++
+    this._push("probe", message)
+  }
+
+  dualProbe(lo, hi, mid, mid2, message) {
+    this._annotationLabel = null
+    this._annotationValue = null
+    this.lo = lo
+    this.hi = hi
+    this.mid = mid
+    this._mid2 = mid2
+    this.comparisons += 2
+    this._push("probe", message)
+  }
+
+  narrow(lo, hi, message) {
+    this._mid2 = null
+    this._annotationLabel = null
+    this._annotationValue = null
+    super.narrow(lo, hi, message)
+  }
+
+  hit(mid, message) {
+    this._mid2 = null
+    super.hit(mid, message)
+  }
+
+  strideProbe(phase, previousBound, bound, message) {
+    this._phase = phase
+    this._previousBound = previousBound
+    this._bound = bound
+    this._mid2 = null
+    this._annotationLabel = null
+    this._annotationValue = null
+    this.lo = Math.max(0, previousBound + 1)
+    this.hi = bound
+    this.mid = bound
+    this.comparisons++
+    this._push("probe", message)
+  }
+
+  gallopProbe(previousBound, bound, message) {
+    this.strideProbe("gallop", previousBound, bound, message)
+  }
+
+  jumpProbe(previousBound, bound, message) {
+    this.strideProbe("jump", previousBound, bound, message)
+  }
+
+  beginPhase(lo, hi, message, phase: "binary" | "scan" | "interpolation" | "ternary" = "binary") {
+    this._phase = phase
+    this._bracket = [lo, hi]
+    this.lo = lo
+    this.hi = hi
+    this.mid = null
+    this._mid2 = null
+    this._annotationLabel = null
+    this._annotationValue = null
+    this._push("phase", message)
+  }
+}
+
+export class BoundarySearchRecorder {
+  [key: string]: any
+  constructor(config) {
+    this.frames = []
+    this.profile = config.profile
+    this.lower = config.lower
+    this.upper = config.upper
+    this.lo = config.lower
+    this.hi = config.upper
+    this.candidate = null
+    this.evaluation = null
+    this.answer = null
+    this.probes = 0
+    this.allowed = config.days
+    this.maxInfeasible = config.lower - 1
+    this.minFeasible = config.upper + 1
+  }
+  begin(message) {
+    this._push("range", message)
+  }
+  evaluate(lo, hi, candidate, evaluation, message) {
+    this.lo = lo
+    this.hi = hi
+    this.candidate = candidate
+    this.evaluation = evaluation
+    if (evaluation.feasible) this.minFeasible = Math.min(this.minFeasible, candidate)
+    else this.maxInfeasible = Math.max(this.maxInfeasible, candidate)
+    this.probes++
+    this._push("evaluate", message)
+  }
+  narrow(lo, hi, message) {
+    this.lo = lo
+    this.hi = hi
+    this._push("narrow", message)
+  }
+  hit(answer, evaluation, message) {
+    this.lo = answer
+    this.hi = answer
+    this.candidate = answer
+    this.answer = answer
+    this.evaluation = evaluation
+    this._push("found", message)
+  }
+  done(message) {
+    this._push("done", message)
+  }
+  _push(type, message) {
+    const evaluation = this.evaluation
+      ? {
+          ...this.evaluation,
+          lanes: this.evaluation.lanes.map((lane) => ({
+            ...lane,
+            items: lane.items.slice(),
+          })),
+        }
+      : null
+    this.frames.push(
+      Object.freeze({
+        type,
+        profile: this.profile,
+        lower: this.lower,
+        upper: this.upper,
+        lo: this.lo,
+        hi: this.hi,
+        candidate: this.candidate,
+        evaluation,
+        answer: this.answer,
+        probes: this.probes,
+        allowed: this.allowed,
+        maxInfeasible: this.maxInfeasible,
+        minFeasible: this.minFeasible,
+        message,
+      }),
+    )
+  }
+}
+
 // A StringRecorder snapshot: { text, pattern, shift, cmpT, cmpP, cmpResult,
 //   found[], hash, message }. Renders the text with the pattern aligned under
 //   it at `shift`; compared cells and matched regions are highlighted.
@@ -385,25 +727,34 @@ export class PointerRecorder {
 //   cell, the cells it reads (deps), and the final backtrack path.
 export class DPRecorder {
   [key: string]: any
-  constructor() {
+  constructor(profile = "lcs", variant = null) {
     this.frames = []
+    this.profile = profile
+    this.variant = variant
     this.rowLabels = []
     this.colLabels = []
     this.grid = []
     this.cur = null
     this.deps = []
     this.path = []
+    this.nodes = []
+    this.edges = []
+    this.formula = null
   }
-  board(rowLabels, colLabels, message) {
+  board(rowLabels, colLabels, message, topology = null) {
     this.rowLabels = rowLabels.slice()
     this.colLabels = colLabels.slice()
     this.grid = rowLabels.map(() => colLabels.map(() => null))
+    this.nodes = (topology?.nodes || []).map((node) => ({ ...node }))
+    this.edges = (topology?.edges || []).map((edge) => ({ ...edge }))
+    this.formula = null
     this._push("init", message)
   }
-  set(r, c, val, deps, message) {
+  set(r, c, val, deps, message, formula = null) {
     this.cur = [r, c]
     this.deps = (deps || []).map((d) => d.slice())
     this.grid[r][c] = val
+    this.formula = formula
     this._push("compute", message)
   }
   markPath(cells, message) {
@@ -415,18 +766,118 @@ export class DPRecorder {
   done(message) {
     this.cur = null
     this.deps = []
+    this.formula = null
     this._push("done", message)
   }
   _push(type, message) {
     this.frames.push(
       Object.freeze({
         type,
+        profile: this.profile,
+        variant: this.variant,
         rowLabels: this.rowLabels.slice(),
         colLabels: this.colLabels.slice(),
         grid: this.grid.map((row) => row.slice()),
         cur: this.cur ? this.cur.slice() : null,
         deps: this.deps.map((d) => d.slice()),
         path: this.path.map((p) => p.slice()),
+        nodes: this.nodes.map((node) => Object.freeze({ ...node })),
+        edges: this.edges.map((edge) => Object.freeze({ ...edge })),
+        formula: this.formula,
+        message,
+      }),
+    )
+  }
+}
+
+export class MatrixGridRecorder {
+  [key: string]: any
+  constructor(config) {
+    this.frames = []
+    this.nodes = config.nodes.slice()
+    this.rowLabels = this.nodes.map(String)
+    this.colLabels = this.nodes.map(String)
+    this.grid = []
+    this.cur = null
+    this.deps = []
+    this.k = null
+    this.candidate = null
+    this.decision = null
+    this.previous = null
+    this.result = null
+    this.operandA = null
+    this.operandB = null
+    this.negativeCycle = []
+  }
+  board(grid, message) {
+    this.grid = grid.map((row) => row.slice())
+    this._push("init", message)
+  }
+  stage(k, message) {
+    this.k = k
+    this.cur = null
+    this.deps = []
+    this.candidate = null
+    this.decision = null
+    this.previous = null
+    this.result = null
+    this.operandA = null
+    this.operandB = null
+    this._push("stage", message)
+  }
+  relax(r, c, deps, candidate, decision, value, message) {
+    this.cur = [r, c]
+    this.deps = deps.map((dep) => dep.slice())
+    this.candidate = candidate
+    this.decision = decision
+    this.previous = this.grid[r][c]
+    this.result = value
+    this.operandA = this.grid[deps[0][0]][deps[0][1]]
+    this.operandB = this.grid[deps[1][0]][deps[1][1]]
+    this.grid[r][c] = value
+    this._push("relax", message)
+  }
+  reportNegativeCycle(nodes, message) {
+    this.negativeCycle = nodes.slice()
+    this.cur = null
+    this.deps = []
+    this.candidate = null
+    this.decision = null
+    this.previous = null
+    this.result = null
+    this.operandA = null
+    this.operandB = null
+    this._push("negative-cycle", message)
+  }
+  done(message) {
+    this.cur = null
+    this.deps = []
+    this.candidate = null
+    this.decision = null
+    this.previous = null
+    this.result = null
+    this.operandA = null
+    this.operandB = null
+    this._push("done", message)
+  }
+  _push(type, message) {
+    this.frames.push(
+      Object.freeze({
+        type,
+        profile: "floyd-warshall",
+        rowLabels: this.rowLabels.slice(),
+        colLabels: this.colLabels.slice(),
+        grid: this.grid.map((row) => row.slice()),
+        cur: this.cur ? this.cur.slice() : null,
+        deps: this.deps.map((dep) => dep.slice()),
+        k: this.k,
+        candidate: this.candidate,
+        decision: this.decision,
+        previous: this.previous,
+        result: this.result,
+        operandA: this.operandA,
+        operandB: this.operandB,
+        negativeCycle: this.negativeCycle.slice(),
         message,
       }),
     )
@@ -813,6 +1264,167 @@ export class RecTreeRecorder {
   }
   done(message) {
     this._active = null
+    this._push("done", message)
+  }
+}
+
+export class ExecutionTreeRecorder {
+  [key: string]: any
+  constructor(config) {
+    this.frames = []
+    this.profile = config.profile
+    this.phase = "divide"
+    this.action = "initialize"
+    this._nodes = Object.freeze([])
+    this._edges = Object.freeze([])
+    this._visible = new Set()
+    this._states = {}
+    this._results = {}
+    this._collapsed = new Set()
+    this._path = []
+    this._active = null
+    this._cache = []
+    this.calls = 0
+    this.pruned = 0
+  }
+  _push(type, message) {
+    this.frames.push(
+      Object.freeze({
+        type,
+        profile: this.profile,
+        phase: this.phase,
+        action: this.action,
+        nodes: this._nodes,
+        edges: this._edges,
+        active: this._active,
+        path: Object.freeze(this._path.slice()),
+        visible: Object.freeze([...this._visible]),
+        states: Object.freeze({ ...this._states }),
+        results: Object.freeze(
+          Object.fromEntries(
+            Object.entries(this._results).map(([id, values]) => [
+              id,
+              Array.isArray(values) ? Object.freeze(values.slice()) : values,
+            ]),
+          ),
+        ),
+        collapsed: Object.freeze([...this._collapsed]),
+        cache: Object.freeze(this._cache.map((entry) => Object.freeze({ ...entry }))),
+        calls: this.calls,
+        pruned: this.pruned,
+        message,
+      }),
+    )
+  }
+  tree(nodes, edges, rootId, message) {
+    this._nodes = Object.freeze(
+      nodes.map((node) => Object.freeze({ ...node, values: Object.freeze(node.values.slice()) })),
+    )
+    this._edges = Object.freeze(edges.map((edge) => Object.freeze({ ...edge })))
+    this._active = rootId
+    this._path = [rootId]
+    this._visible.add(rootId)
+    this._states[rootId] = "call"
+    this.calls = 1
+    this._push("tree", message)
+  }
+  split(id, path, childIds, message) {
+    this.phase = "divide"
+    this.action = "split"
+    this._active = id
+    this._path = path.slice()
+    this._visible.add(id)
+    this._states[id] = "split"
+    for (const childId of childIds) {
+      if (!this._visible.has(childId)) this.calls++
+      this._visible.add(childId)
+      this._states[childId] = "call"
+    }
+    this._push("split", message)
+  }
+  base(id, path, result, message) {
+    this.phase = "conquer"
+    this.action = "base case"
+    this._active = id
+    this._path = path.slice()
+    this._visible.add(id)
+    this._states[id] = "base"
+    this._results[id] = Array.isArray(result) ? result.slice() : result
+    this._push("base", message)
+  }
+  returnResult(id, path, result, message) {
+    this.phase = "return"
+    this.action = "return"
+    this._active = id
+    this._path = path.slice()
+    this._visible.add(id)
+    this._states[id] = "return"
+    this._results[id] = Array.isArray(result) ? result.slice() : result
+    this._push("return", message)
+  }
+  combine(id, path, result, message) {
+    this.phase = "combine"
+    this.action = "combine results"
+    this._active = id
+    this._path = path.slice()
+    this._visible.add(id)
+    this._states[id] = "combine"
+    this._results[id] = Array.isArray(result) ? result.slice() : result
+    this._push("combine", message)
+  }
+  cacheHit(id, path, key, result, subtreeIds, message) {
+    this.phase = "cache"
+    this.action = "reuse cached result"
+    this._active = id
+    this._path = path.slice()
+    this._visible.add(id)
+    this._states[id] = "cache"
+    this._results[id] = Array.isArray(result) ? result.slice() : result
+    if (!this._cache.some((entry) => entry.key === key)) {
+      this._cache.push({ key, result: Array.isArray(result) ? result.join(", ") : result })
+    }
+    for (const childId of subtreeIds) {
+      this._visible.add(childId)
+      this._collapsed.add(childId)
+    }
+    this.pruned += subtreeIds.length
+    this._push("cache", message)
+  }
+  store(id, path, key, result, message) {
+    this.phase = "cache"
+    this.action = "store result"
+    this._active = id
+    this._path = path.slice()
+    this._visible.add(id)
+    this._states[id] = "store"
+    this._results[id] = Array.isArray(result) ? result.slice() : result
+    const cachedResult = Array.isArray(result) ? result.join(", ") : result
+    const cached = this._cache.find((entry) => entry.key === key)
+    if (cached) cached.result = cachedResult
+    else this._cache.push({ key, result: cachedResult })
+    this._push("store", message)
+  }
+  prune(id, path, subtreeIds, message) {
+    this.phase = "conquer"
+    this.action = "prune branch"
+    this._active = id
+    this._path = path.slice()
+    this._visible.add(id)
+    this._states[id] = "prune"
+    for (const childId of subtreeIds) {
+      this._visible.add(childId)
+      this._collapsed.add(childId)
+    }
+    this.pruned++
+    this._push("prune", message)
+  }
+  done(rootId, result, message) {
+    this.phase = "complete"
+    this.action = "final result ready"
+    this._active = rootId
+    this._path = [rootId]
+    this._states[rootId] = "combine"
+    this._results[rootId] = Array.isArray(result) ? result.slice() : result
     this._push("done", message)
   }
 }
