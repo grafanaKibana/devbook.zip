@@ -1,34 +1,34 @@
 ---
 publish: true
 created: 2026-07-18T14:02:44.030Z
-modified: 2026-07-18T14:02:44.030Z
-published: 2026-07-18T14:02:44.030Z
+modified: 2026-07-23T11:38:16.968Z
+published: 2026-07-23T11:38:16.968Z
 topic:
   - Computer Science
 subtopic:
   - Algorithms
-summary: Sorts fixed-width integer keys one digit at a time with a stable pass, beating the comparison bound.
+summary: Sorts bounded-width integer keys one digit at a time with a stable pass, beating the comparison bound.
 level:
   - "4"
 priority: Medium
 status: Creation
 ---
 
-Sorting ten million 32-bit integers with [[Quick Sort]] or [[Merge Sort]] spends its whole runtime comparing pairs of keys, and any sort whose only primitive is _compare two elements_ needs `Ω(n log n)` of them. Radix Sort never compares two keys. It reads each key as a sequence of digits in some radix `b` and distributes keys into buckets by one digit at a time, so its work scales with the _width_ of the keys, not with the number of pairwise comparisons.
+Sorting ten million 32-bit integers with [[Computer Science/Algorithms/Sorting Algorithms/Quick Sort|Quick Sort]] or [[Computer Science/Algorithms/Sorting Algorithms/Merge Sort|Merge Sort]] spends its whole runtime comparing pairs of keys, and a comparison sort needs `Ω(n log n)` comparisons in the worst case over arbitrary distinct-key permutations. Radix Sort never compares two keys. It reads each key as a sequence of digits in some radix `b` and distributes keys into buckets by one digit at a time, so its work scales with the _width_ of the keys, not with the number of pairwise comparisons.
 
-That move is only available when a key decomposes into a bounded number of digits `d`: a 32-bit integer is four base-256 digits, a fixed five-character string is five base-256 digits. Given that decomposition, the whole sort costs `Θ(d · (n + b))` — `d` passes, each touching every key once and every bucket once.
+That move is only available when a key decomposes into a bounded number of digits `d`: a 32-bit integer is four base-256 digits, and a fixed five-byte ASCII key is five base-256 digits. Given that decomposition, the whole sort costs `Θ(d · (n + b))` — `d` passes, each touching every key once and every bucket once.
 
 **Core condition:** keys decomposable into `d` fixed-width digits over radix `b` → one stable pass per digit distributes then gathers → `Θ(d · (n + b))` time, linear whenever `d` is constant.
 
-The trace below would run LSD radix sort on `[170, 45, 75, 90, 802, 24, 2, 66]`, three base-10 passes from the ones digit upward.
+The trace runs LSD radix sort on `[170, 45, 75, 90, 802, 24, 2, 66]`, making three base-10 passes from the ones digit upward. Each pass selects one digit position, distributes the keys into digit buckets without disturbing ties, then gathers the buckets into the input order for the next position.
 
-> [!NOTE] Visualization pending
-> Planned StepTrace: a bucket-pass card showing keys distributed by one digit into base-b buckets, gathered
-> in order, repeated per digit from least significant to most. No matching renderer exists in `engine.js` yet.
+```steptrace
+{ "algorithm": "radix-sort", "array": [170, 45, 75, 90, 802, 24, 2, 66], "radix": 10, "mode": "LSD" }
+```
 
 # Why the passes compose
 
-LSD (least-significant-digit) radix sort runs one pass per digit position, from the rightmost digit up to the leftmost. Each pass is a single **stable** [[Counting Sort]] keyed on that one digit — no other part of the key is examined. After the pass over the most significant digit, the array is fully ordered, and it inherits counting sort's non-comparison nature: no two keys are ever ranked against each other.
+LSD (least-significant-digit) radix sort runs one pass per digit position, from the rightmost digit up to the leftmost. Each pass performs a **stable** distribution keyed on that one digit — no other part of the key is examined. A stable [[Computer Science/Algorithms/Sorting Algorithms/Counting Sort|Counting Sort]] is one way to implement that distribution; the trace shows the equivalent FIFO bucket view. After the pass over the most significant digit, the array is fully ordered, and no two keys were ever ranked against each other.
 
 Stability is the correctness argument, not a performance tweak. When a pass sorts on digit position `p`, keys that share the same digit at `p` must retain the relative order that the earlier passes over positions `p-1 … 0` already established. A stable counting sort preserves that order exactly; an unstable one would reorder those ties and silently discard the work of every prior pass. The output would look sorted on the last digit and be wrong everywhere else.
 
@@ -41,7 +41,7 @@ tens  →      802   2   24  45  66  170  75  90     ties on the tens digit keep
 hundreds →     2  24  45  66  75   90  170  802    fully ordered
 ```
 
-`170` and `75` both carry `7` in the tens place. The tens pass reads only that digit, so it leaves them in the order the ones pass produced — `170` before `75` — and the hundreds pass, comparing `170`'s `1` against `75`'s `0`, moves `75` ahead of `170` without re-examining the lower digits. Every tie survives to the next pass because every pass is stable.
+`170` and `75` both carry `7` in the tens place. The tens pass reads only that digit, so it leaves them in the order the ones pass produced — `170` before `75`. The hundreds pass then places them by hundreds digits `1` and `0`, moving `75` ahead of `170` without re-examining the lower digits. Every tie survives to the next pass because every pass is stable.
 
 # Complexity
 
@@ -53,19 +53,19 @@ hundreds →     2  24  45  66  75   90  170  802    fully ordered
 
 `d` is the width of the widest key in digits and `b` is the radix. The three cases are identical because the algorithm is oblivious to how the input is arranged: it always touches every digit of every key. For fixed-width keys — a 32-bit integer read as four base-256 digits — `d` is a constant, so the time collapses to `Θ(n)`, genuinely linear.
 
-The `Θ(n + b)` auxiliary space is the counting sort's output buffer (`n`) plus the per-digit count array (`b`). Radix Sort is therefore **stable but not in-place**; it cannot sort within the input array alone. For variable-length or string keys, the MSD (most-significant-digit) variant recurses per bucket from the leftmost digit and can stop once a prefix is unique — it handles ragged key lengths that LSD cannot.
+This stable LSD implementation uses `Θ(n + b)` auxiliary space: an output buffer for `n` keys plus either a per-digit count array or equivalent bucket storage of size `b`. It is not in-place, though specialized in-place radix variants exist. For variable-length string keys, the MSD (most-significant-digit) variant recurses per bucket from the leftmost digit and can stop once a prefix is unique.
 
 # Where the linear bound stops applying
 
-**Variable-length keys.** LSD processes a fixed digit position across every key, counted from the right. Keys of unequal width have no shared notion of "position 3," so a three-digit key and a six-digit key line up at misaligned digits and order incorrectly. The fixes are to pad every key to a common width with a sentinel below any real digit, or to switch to MSD radix, which recurses left-to-right and absorbs ragged lengths naturally.
+**Variable-length keys.** Non-negative integers with different digit counts work because missing high-order positions behave like leading zeros; the trace sorts `2`, `24`, and `802` this way. Variable-length lexicographic strings are different: blindly aligning them from the right changes the meaning of character positions. Their LSD representation needs a common width and a missing-character sentinel below every real character, or the algorithm should switch to MSD radix and recurse left-to-right.
 
-**The `d` factor.** `Θ(d · (n + b))` hides a real `d`. Eight-byte keys at `b = 256` mean eight full passes, each a cache-unfriendly scatter over the whole array. Radix beats an `O(n log n)` comparison sort only while `d` stays small relative to `log₂ n`; once keys get wide — long strings, big integers, wide composite keys — the constant erodes and a tuned [[Quick Sort]] or Introsort wins in wall-clock time despite the worse asymptotics.
+**The `d` factor.** `Θ(d · (n + b))` hides a real `d`. Eight-byte keys at `b = 256` mean eight full passes, each a cache-unfriendly scatter over the whole array. Radix beats an `O(n log n)` comparison sort only while `d` stays small relative to `log₂ n`; once keys get wide — long strings, big integers, wide composite keys — the constant erodes and a tuned [[Computer Science/Algorithms/Sorting Algorithms/Quick Sort|Quick Sort]] or [[Computer Science/Algorithms/Sorting Algorithms/Introsort|Introsort]] wins in wall-clock time despite the worse asymptotics.
 
-**Choosing `b`.** The radix sets both the pass count `d = ⌊log_b(maxKey)⌋ + 1` and the per-pass count-array size `Θ(b)`. A large `b` cuts passes but grows a count array that can fall out of cache; a small `b` keeps the array tiny but multiplies passes over the data. `b = 256` (one byte per pass, four passes for 32-bit keys) is the usual balance for integer keys; `b = 2^16` sorts 32-bit keys in two passes but needs a 65,536-entry count array each pass.
+**Choosing `b`.** The radix sets both the pass count — `d = 1` when `maxKey = 0`, otherwise `d = ⌊log_b(maxKey)⌋ + 1` — and the per-pass count-array size `Θ(b)`. A large `b` cuts passes but grows a count array that can fall out of cache; a small `b` keeps the array tiny but multiplies passes over the data. `b = 256` (one byte per pass, four passes for 32-bit keys) is the usual balance for integer keys; `b = 2^16` sorts 32-bit keys in two passes but needs a 65,536-entry count array each pass.
 
 **No digit decomposition.** Radix needs the key to break into digits over a fixed radix — an integer, a fixed-layout string, a tuple of those. Objects ordered only by a comparator, with no positional digit structure, expose nothing to bucket on; radix simply does not apply, and a comparison sort does.
 
-**Unsigned reads.** Each pass treats its digit as an unsigned quantity, so raw two's-complement negatives sort after positives, and raw IEEE-754 bit patterns scatter negatives in reverse. A monotonic transform beforehand — flip the sign bit of integers; for floats flip all bits of negatives and only the sign bit of positives — restores true numeric order, reversed after sorting.
+**Unsigned reads.** Each pass treats its digit as an unsigned quantity, so raw two's-complement negatives sort after positives, and raw IEEE-754 bit patterns scatter negatives in reverse. A monotonic transform beforehand — flip the sign bit of integers; for floats flip all bits of negatives and only the sign bit of positives — restores true numeric order; invert the transform after sorting.
 
 # Reference drawer
 
@@ -130,7 +130,7 @@ The `Θ(n + b)` auxiliary space is the counting sort's output buffer (`n`) plus 
 > Each pass sorts on one digit and trusts that ties on that digit are already ordered by the less-significant digits sorted in earlier passes. A stable counting sort preserves that established order; an unstable one reorders the ties and destroys the work of every prior pass, producing output that is sorted only on the final digit. Stability is a correctness requirement here, not an optimization.
 
 > [!QUESTION]- When does a comparison sort beat Radix Sort?
-> When keys are wide, variable-length without a bound, or not decomposable into digits. The `d` passes carry a real cost, so once `d` grows relative to `log₂ n` — long strings, big integers — a tuned [[Quick Sort]] wins on wall-clock time. Keys exposed only through a comparator have no digit to bucket on, so radix does not apply at all.
+> When keys are wide, variable-length without a bound, or not decomposable into digits. The `d` passes carry a real cost, so once `d` grows relative to `log₂ n` — long strings, big integers — a tuned [[Computer Science/Algorithms/Sorting Algorithms/Quick Sort|Quick Sort]] wins on wall-clock time. Keys exposed only through a comparator have no digit to bucket on, so radix does not apply at all.
 
 # References
 
