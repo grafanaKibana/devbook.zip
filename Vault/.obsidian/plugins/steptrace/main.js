@@ -1533,11 +1533,70 @@ var init_recorders = __esm({
   }
 });
 
+// custom/steptrace/src/motion.ts
+function springOmega(tweenMs) {
+  const budget = Math.max(tweenMs, 1) / 1e3;
+  return 2 * Math.PI / budget;
+}
+function springStep(pos, vel, target, dtMs, { omega0, zeta }) {
+  if (!(dtMs > 0)) return { pos: target, vel: 0 };
+  const w2 = omega0 * omega0;
+  const damp = 2 * zeta * omega0;
+  let remaining = dtMs;
+  const maxStep = 4;
+  while (remaining > 0) {
+    const h = Math.min(remaining, maxStep) / 1e3;
+    const accel = -w2 * (pos - target) - damp * vel;
+    vel += accel * h;
+    pos += vel * h;
+    remaining -= maxStep;
+  }
+  return { pos, vel };
+}
+function sequence(beats, budgetMs, startNow, minGapMs = SEQUENCE_MIN_GAP_MS) {
+  const budget = Math.max(budgetMs, 0);
+  let prev = -Infinity;
+  let group = startNow;
+  const queue = beats.map((beat) => ({ at: startNow + Math.max(0, beat.at) * budget, run: beat.run })).sort((a, b) => a.at - b.at).map((beat) => {
+    const fireAt = beat.at - prev < minGapMs ? group : group = beat.at;
+    prev = beat.at;
+    return { fireAt, run: beat.run };
+  });
+  let index = 0;
+  let cancelled = false;
+  return {
+    tick(now) {
+      if (cancelled) return false;
+      while (index < queue.length && now >= queue[index].fireAt) queue[index++].run();
+      return index < queue.length;
+    },
+    cancel() {
+      cancelled = true;
+      index = queue.length;
+    },
+    get pending() {
+      return queue.length - index;
+    }
+  };
+}
+var SPRINGS, SEQUENCE_MIN_GAP_MS;
+var init_motion = __esm({
+  "custom/steptrace/src/motion.ts"() {
+    SPRINGS = {
+      marker: { zeta: 0.6 },
+      held: { zeta: 0.85 },
+      swap: { zeta: 0.9 }
+    };
+    SEQUENCE_MIN_GAP_MS = 60;
+  }
+});
+
 // custom/steptrace/src/render.ts
 function makeBars(stage, n) {
   const bars = [];
   for (let k = 0; k < n; k++) {
     const bar = el("div", "steptrace__bar");
+    bar.style.setProperty("--_i", String(k));
     const fill = el("div", "steptrace__fill");
     const check = el("div", "steptrace__check");
     check.innerHTML = ICON.check;
@@ -1620,23 +1679,16 @@ function makeSortView(frames, semantics = legacySortViewSemantics) {
       else delete b.bar.dataset.lane;
       if (visual.holeIndex === k) b.bar.dataset.hole = "1";
       else delete b.bar.dataset.hole;
-      b.bar.classList.remove("steptrace__bar--fly");
-      delete b.bar.dataset.fly;
     }
-    const starts = [];
+    const flights = [];
     for (const [to, from] of visual.movements) {
       const bt = bars[to] && bars[to].bar;
       const bf = bars[from] && bars[from].bar;
       if (!bt || !bf || !bt.isConnected) continue;
       const dx = bf.getBoundingClientRect().left - bt.getBoundingClientRect().left;
-      if (dx) starts.push([bt, dx]);
+      if (dx) flights.push([to, dx]);
     }
-    if (starts.length) void starts[0][0].offsetWidth;
-    for (const [bt, dx] of starts) {
-      bt.style.setProperty("--_fly-dx", `${dx}px`);
-      bt.dataset.fly = dx > 0 ? "over" : "under";
-      bt.classList.add("steptrace__bar--fly");
-    }
+    tracker.fly(flights);
     if (heldMarker) {
       heldMarker.setLabel(visual.heldToken?.label || "");
       heldMarker.el.dataset.placing = visual.heldToken?.placing ? "1" : "0";
@@ -1706,12 +1758,6 @@ function clampMarkerCenter(target, bodyWidth, stageWidth, padding = 2) {
   const max = stageWidth - padding - half;
   return Math.min(max, Math.max(min, target));
 }
-function stepMarkerSpring(current, target, elapsedMs, settleMs = 360) {
-  if (current == null || elapsedMs <= 0) return current == null ? target : current;
-  const alpha = 1 - Math.exp(-5 * elapsedMs / settleMs);
-  const next = current + (target - current) * alpha;
-  return Math.abs(target - next) < 0.4 ? target : next;
-}
 function markerIsMoving(previousTarget, target, current, epsilon = 0.05) {
   if (!previousTarget) return true;
   return Math.abs(previousTarget.x - target.x) > epsilon || Math.abs(previousTarget.y - target.y) > epsilon || Math.abs(current.x - target.x) > epsilon || Math.abs(current.y - target.y) > epsilon;
@@ -1724,15 +1770,32 @@ function createBarTracker(stage, bars, markers) {
   let targets = markers.map(() => null);
   const sx = markers.map(() => null);
   const sy = markers.map(() => null);
+  const vx = markers.map(() => 0);
+  const vy = markers.map(() => 0);
   const px = markers.map(() => null);
-  const py = markers.map(() => null);
-  const SPRING_SETTLE_MS = 207;
+  const fox = bars.map(() => null);
+  const fvx = bars.map(() => 0);
+  const foHold = bars.map(() => false);
+  const sequences = [];
+  const VEL_EPS = 0.5;
+  let tweenMs = 107;
+  function readTween() {
+    if (typeof getComputedStyle !== "function") return;
+    const parsed = Number.parseFloat(getComputedStyle(stage).getPropertyValue("--_tween"));
+    if (Number.isFinite(parsed) && parsed > 0) tweenMs = parsed;
+  }
+  const rectOf = (node) => node && typeof node.getBoundingClientRect === "function" ? node.getBoundingClientRect() : null;
+  const isReduced = () => !!(stage.closest && stage.closest(".steptrace--reduced"));
   let lastStepAt = null;
   function frameStep(now) {
     const elapsed = lastStepAt == null ? 0 : Math.max(0, now - lastStepAt);
     lastStepAt = now;
+    const sr = rectOf(stage);
+    if (!sr) return false;
+    const reduced = isReduced();
+    const omega0 = springOmega(tweenMs);
+    const swapOmega = springOmega(tweenMs * STEP_BUDGET_RATIO);
     let moving = false;
-    const sr = stage.getBoundingClientRect();
     for (let m = 0; m < markers.length; m++) {
       const idx = targets[m];
       const bar = idx != null && idx >= 0 && bars[idx] ? bars[idx].fill : null;
@@ -1741,27 +1804,89 @@ function createBarTracker(stage, bars, markers) {
         mk.el.style.opacity = "0";
         sx[m] = null;
         sy[m] = null;
+        vx[m] = 0;
+        vy[m] = 0;
         px[m] = null;
-        py[m] = null;
         continue;
       }
-      const br = bar.getBoundingClientRect();
+      const br = rectOf(bar);
+      if (!br) continue;
       const targetX = br.left + br.width / 2 - sr.left;
-      const bodyWidth = mk.body.getBoundingClientRect().width;
+      const bodyWidth = rectOf(mk.body)?.width ?? 0;
       const tx = clampMarkerCenter(targetX, bodyWidth, sr.width);
       mk.el.style.setProperty("--steptrace-marker-tip-offset", `${targetX - tx}px`);
       const ty = mk.role === "held" && mk.el.dataset.placing !== "1" ? 34 : br.top - sr.top;
-      const reduced = stage.closest(".steptrace--reduced");
-      if (sx[m] == null || reduced) sx[m] = tx;
-      else if (mk.role === "held") sx[m] = stepMarkerSpring(sx[m], tx, elapsed);
-      else sx[m] = stepMarkerSpring(sx[m], tx, elapsed, SPRING_SETTLE_MS);
-      if (sy[m] == null || reduced || mk.role !== "held") sy[m] = ty;
-      else sy[m] = stepMarkerSpring(sy[m], ty, elapsed);
+      const zeta = mk.role === "held" ? SPRINGS.held.zeta : SPRINGS.marker.zeta;
+      if (sx[m] == null || reduced) {
+        sx[m] = tx;
+        vx[m] = 0;
+      } else if (elapsed > 0) {
+        const next = springStep(sx[m], vx[m], tx, elapsed, { omega0, zeta });
+        sx[m] = next.pos;
+        vx[m] = next.vel;
+      }
+      if (sy[m] == null || reduced || mk.role !== "held") {
+        sy[m] = ty;
+        vy[m] = 0;
+      } else if (elapsed > 0) {
+        const next = springStep(sy[m], vy[m], ty, elapsed, { omega0, zeta: SPRINGS.held.zeta });
+        sy[m] = next.pos;
+        vy[m] = next.vel;
+      }
       const target = { x: tx, y: ty };
-      if (markerIsMoving(px[m], target, { x: sx[m], y: sy[m] })) moving = true;
+      if (markerIsMoving(px[m], target, { x: sx[m], y: sy[m] }) || Math.abs(vx[m]) > VEL_EPS || Math.abs(vy[m]) > VEL_EPS)
+        moving = true;
       px[m] = target;
       mk.el.style.transform = `translate(${sx[m].toFixed(2)}px, ${sy[m].toFixed(2)}px)`;
       mk.el.style.opacity = "1";
+    }
+    for (let s = sequences.length - 1; s >= 0; s--) {
+      if (reduced) {
+        sequences[s].cancel();
+        sequences.splice(s, 1);
+      } else if (sequences[s].tick(now)) {
+        moving = true;
+      } else {
+        sequences.splice(s, 1);
+      }
+    }
+    for (let b = 0; b < bars.length; b++) {
+      if (fox[b] == null) continue;
+      const bar = bars[b].bar;
+      if (reduced) {
+        fox[b] = null;
+        fvx[b] = 0;
+        foHold[b] = false;
+        bar.style.transform = "";
+        bar.style.zIndex = "";
+        delete bar.dataset.stage;
+        continue;
+      }
+      if (foHold[b]) {
+        bar.style.transform = `translateX(${fox[b].toFixed(2)}px)`;
+        bar.style.zIndex = "2";
+        moving = true;
+        continue;
+      }
+      if (elapsed > 0) {
+        const next = springStep(fox[b], fvx[b], 0, elapsed, {
+          omega0: swapOmega,
+          zeta: SPRINGS.swap.zeta
+        });
+        fox[b] = next.pos;
+        fvx[b] = next.vel;
+      }
+      if (Math.abs(fox[b]) < 0.4 && Math.abs(fvx[b]) < VEL_EPS) {
+        fox[b] = null;
+        fvx[b] = 0;
+        foHold[b] = false;
+        bar.style.transform = "";
+        bar.style.zIndex = "";
+      } else {
+        bar.style.transform = `translateX(${fox[b].toFixed(2)}px)`;
+        bar.style.zIndex = "2";
+        moving = true;
+      }
     }
     return moving;
   }
@@ -1782,8 +1907,13 @@ function createBarTracker(stage, bars, markers) {
   }
   function wake() {
     if (raf != null) return;
+    readTween();
     lastStepAt = null;
     lastRafAt = performance.now();
+    if (typeof requestAnimationFrame !== "function") {
+      frameStep(performance.now());
+      return;
+    }
     raf = requestAnimationFrame(loop);
     iv = setInterval(() => {
       const now = performance.now();
@@ -1802,12 +1932,55 @@ function createBarTracker(stage, bars, markers) {
       if (index < 0 || index >= markers.length) return;
       sx[index] = null;
       sy[index] = null;
+      vx[index] = 0;
+      vy[index] = 0;
       wake();
+    },
+    // Start a fly for each [barIndex, fromOffset]; a bar already in flight is
+    // left alone so its spring carries it home continuously. Reduced motion
+    // skips the travel entirely — the value just updates in place. Each new fly
+    // stages a wind → travel → settle beat sequence (Heer & Robertson): the bar
+    // waits latched at its origin, then springs home, then pops on arrival. At a
+    // small (fast-playback) budget those beats coalesce and the swap is one
+    // overlapped motion, matching the un-staged behaviour.
+    fly(flights) {
+      if (isReduced()) return;
+      readTween();
+      const budgetMs = tweenMs * STEP_BUDGET_RATIO;
+      let started = false;
+      for (const [idx, dx] of flights) {
+        if (idx < 0 || idx >= bars.length || fox[idx] != null) continue;
+        fox[idx] = dx;
+        fvx[idx] = 0;
+        foHold[idx] = true;
+        const bar = bars[idx].bar;
+        sequences.push(
+          sequence(
+            [
+              { at: 0, run: () => bar.dataset.stage = "wind" },
+              {
+                at: SWAP_TRAVEL_AT,
+                run: () => {
+                  foHold[idx] = false;
+                  bar.dataset.stage = "travel";
+                }
+              },
+              { at: SWAP_SETTLE_AT, run: () => bar.dataset.stage = "settle" }
+            ],
+            budgetMs,
+            performance.now()
+          )
+        );
+        started = true;
+      }
+      if (started) wake();
     },
     renderNow() {
       frameStep(performance.now());
     },
     destroy() {
+      for (const seq of sequences) seq.cancel();
+      sequences.length = 0;
       if (ro) ro.disconnect();
       sleep();
     }
@@ -3577,8 +3750,8 @@ function summaryFor(algorithm, kind, frame, graph) {
     }
     const row = frame.grid[frame.grid.length - 1] || [];
     const value = row[row.length - 1];
-    const sequence = (frame.path || []).map((p) => frame.rowLabels[p[0]]).join("");
-    return algorithm === "lcs" ? `Optimal value ${value}${sequence ? ` · sequence "${sequence}"` : ""}.` : `Final table value ${value}${frame.path.length ? ` · ${frame.path.length} traced cells` : ""}.`;
+    const sequence2 = (frame.path || []).map((p) => frame.rowLabels[p[0]]).join("");
+    return algorithm === "lcs" ? `Optimal value ${value}${sequence2 ? ` · sequence "${sequence2}"` : ""}.` : `Final table value ${value}${frame.path.length ? ` · ${frame.path.length} traced cells` : ""}.`;
   }
   if (kind === "unionfind")
     return `${new Set(frame.roots).size} disjoint set${new Set(frame.roots).size === 1 ? "" : "s"} · parents [${frame.parent.join(", ")}].`;
@@ -3601,9 +3774,13 @@ function summaryFor(algorithm, kind, frame, graph) {
   }
   return stripTags(frame.message);
 }
-var legacySortViewSemantics, legacySearchViewSemantics, CELL_W, lcsMatrixGridSemantics, executionTreeViewSerial, legacyRecTreeDescriptor, SVGNS, R, ICON;
+var STEP_BUDGET_RATIO, SWAP_TRAVEL_AT, SWAP_SETTLE_AT, legacySortViewSemantics, legacySearchViewSemantics, CELL_W, lcsMatrixGridSemantics, executionTreeViewSerial, legacyRecTreeDescriptor, SVGNS, R, ICON;
 var init_render = __esm({
   "custom/steptrace/src/render.ts"() {
+    init_motion();
+    STEP_BUDGET_RATIO = 260 / 107;
+    SWAP_TRAVEL_AT = 0;
+    SWAP_SETTLE_AT = 0.5;
     legacySortViewSemantics = {
       markerLabels: ["i", "j"],
       movementLabel: "swaps",
@@ -4276,6 +4453,9 @@ function distributionWatch2(frame) {
 function tokenLabel(value) {
   return Number.isInteger(value) ? String(value) : value.toFixed(2);
 }
+function bucketColumnCount(itemCount) {
+  return Math.min(3, Math.max(1, Math.ceil(itemCount / 3)));
+}
 function makeLegendItem(color, text) {
   const item = el("span", "steptrace__distribution-legend-item");
   const swatch = el("span", "steptrace__distribution-legend-swatch");
@@ -4348,6 +4528,7 @@ function makeBucketDistributionView(frames) {
     lanes.forEach(({ lane, body, bucketIndex }) => {
       const bucket = frame.buckets[bucketIndex];
       body.textContent = "";
+      body.style.setProperty("--_bucket-columns", String(bucketColumnCount(bucket.length)));
       bucket.forEach((token, itemIndex) => {
         const chip = el("span", "steptrace__distribution-token");
         chip.textContent = labels[token.origin] ?? tokenLabel(token.value);
@@ -4424,6 +4605,7 @@ var init_bucket_distribution = __esm({
       constructor(config) {
         this.profile = config.profile;
         this.bucketLabels = config.bucketLabels.slice();
+        this.passCount = config.profile === "radix" ? config.places.length : 1;
         this.source = config.array.map((value, origin) => ({ value, origin }));
         this.buckets = Array.from({ length: config.bucketCount }, () => []);
         this.output = Array.from({ length: config.array.length }, () => null);

@@ -11,6 +11,11 @@
   --st-table-border: var(--background-modifier-border);
   --st-table-text: var(--text-normal);
   --st-accent: var(--interactive-accent);
+  --st-accent-gradient: linear-gradient(
+    90deg,
+    var(--interactive-accent),
+    var(--interactive-accent-hover)
+  );
   --st-on-accent: var(--text-on-accent);
   --st-neutral: var(--text-faint);
   --st-state-amber: #d97706;

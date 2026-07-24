@@ -5,6 +5,19 @@
 //  edit the owning SCSS module, not this file.
 // ==========================================================================
 
+import { springStep, springOmega, SPRINGS, sequence } from "./motion"
+
+// The step interval the player runs on is baseDelay / speed (260 / speed), while
+// --_tween is round(107 / speed); the ratio converts the tween the tracker reads
+// into the full step budget the choreography stages against (~130ms at 2x).
+const STEP_BUDGET_RATIO = 260 / 107
+// Swap staging, as fractions of that budget: wind up at 0, release the held
+// spring a quarter in, pop on arrival at the halfway mark. Tuning knobs — verify
+// the feel in preview; at a 2x budget these gaps fall under the coalesce floor
+// and collapse to one instant.
+const SWAP_TRAVEL_AT = 0
+const SWAP_SETTLE_AT = 0.5
+
 // ---- sort view: value-in-bar + tracked i/j pin markers (no hat) ----
 // shared bar scaffold for sort + binary-search: bottom-aligned bars, each a
 // coloured fill with the value BELOW and centered state icons for finalised /
@@ -13,6 +26,7 @@ export function makeBars(stage, n) {
   const bars = []
   for (let k = 0; k < n; k++) {
     const bar = el("div", "steptrace__bar")
+    bar.style.setProperty("--_i", String(k))
     const fill = el("div", "steptrace__fill")
     const check = el("div", "steptrace__check")
     check.innerHTML = ICON.check
@@ -115,30 +129,23 @@ export function makeSortView(frames, semantics = legacySortViewSemantics) {
       else delete b.bar.dataset.lane
       if (visual.holeIndex === k) b.bar.dataset.hole = "1"
       else delete b.bar.dataset.hole
-      // clear any in-flight swap animation before (possibly) starting a new one
-      b.bar.classList.remove("steptrace__bar--fly")
-      delete b.bar.dataset.fly
     }
-    // FLIP: a moved bar starts in the slot it came FROM and arcs home, so the
-    // motion is literal. The arc and which bar passes over lives in bars.scss;
-    // here we only hand it the distance and the travel direction.
+    // FLIP: a moved bar starts in the slot it came FROM and springs home, so the
+    // motion is literal. A bar already in flight keeps its live offset and just
+    // retargets — the spring carries its velocity, so re-framing mid-swap stays
+    // continuous without any offset bookkeeping.
     //   swap      — the pair trade places (bubble/selection/quick/heap)
     //   overwrite — one bar travels from frame.from (insertion shift, merge
     //               lifting a value out of a run head into the merged slot)
-    const starts = []
+    const flights = []
     for (const [to, from] of visual.movements) {
       const bt = bars[to] && bars[to].bar
       const bf = bars[from] && bars[from].bar
       if (!bt || !bf || !bt.isConnected) continue
       const dx = bf.getBoundingClientRect().left - bt.getBoundingClientRect().left
-      if (dx) starts.push([bt, dx])
+      if (dx) flights.push([to, dx])
     }
-    if (starts.length) void starts[0][0].offsetWidth // commit the removal so the flight restarts
-    for (const [bt, dx] of starts) {
-      bt.style.setProperty("--_fly-dx", `${dx}px`)
-      bt.dataset.fly = dx > 0 ? "over" : "under"
-      bt.classList.add("steptrace__bar--fly")
-    }
+    tracker.fly(flights)
     if (heldMarker) {
       heldMarker.setLabel(visual.heldToken?.label || "")
       heldMarker.el.dataset.placing = visual.heldToken?.placing ? "1" : "0"
@@ -213,16 +220,8 @@ export function clampMarkerCenter(target, bodyWidth, stageWidth, padding = 2) {
   return Math.min(max, Math.max(min, target))
 }
 
-export function stepMarkerSpring(current, target, elapsedMs, settleMs = 360) {
-  if (current == null || elapsedMs <= 0) return current == null ? target : current
-  const alpha = 1 - Math.exp((-5 * elapsedMs) / settleMs)
-  const next = current + (target - current) * alpha
-  return Math.abs(target - next) < 0.4 ? target : next
-}
-
-// A marker keeps the rAF loop alive while it is still easing toward its target
-// OR while the target itself is still moving under it — a bar mid-flight, a
-// fill mid-height-transition, a resize. Both must be quiet before we idle.
+// A target that shifted since the last tick counts as movement even when the
+// marker sits exactly on it — the bar underneath may still be flying.
 export function markerIsMoving(previousTarget, target, current, epsilon = 0.05) {
   if (!previousTarget) return true
   return (
@@ -238,29 +237,52 @@ export function shouldResetHeldMarker(previous, next) {
   return previous.tokenId !== next.tokenId || next.frameIndex !== previous.frameIndex + 1
 }
 
-// Each marker follows its target bar through an rAF loop that runs only while
-// something is actually moving — every tick measures the stage and each marker,
-// so leaving it running would cost a forced reflow per frame per card forever.
-// A 50 ms timer covers the same window when the document is hidden or rAF is
-// stale. Legacy markers keep their responsive x spring and direct y tracking;
-// the held-key marker uses slower x/y easing so placement remains readable.
+// Each marker follows its target bar through an rAF loop that idles whenever
+// nothing is moving; every tick measures the stage and each marker. A 50 ms
+// timer covers the same window when the document is hidden or rAF is stale.
+// Markers and the hero-swap fly share one velocity-carrying spring (motion.ts)
+// whose stiffness is derived from the live step budget, so retargets are
+// interruptible and 2x playback still tracks. The held-key marker is more
+// damped (SPRINGS.held) so placement stays readable.
 function createBarTracker(stage, bars, markers) {
   let targets = markers.map(() => null)
   const sx = markers.map(() => null)
   const sy = markers.map(() => null)
+  const vx = markers.map(() => 0)
+  const vy = markers.map(() => 0)
   const px = markers.map(() => null)
-  const py = markers.map(() => null)
-  // settle time chosen so a 60 Hz tick eases the same 0.32 fraction the old
-  // per-frame lerp did — identical feel, but no longer twice as fast at 120 Hz.
-  const SPRING_SETTLE_MS = 207
+  // hero-swap fly: each bar springs its translateX home to 0. null = at rest, so
+  // no inline transform is written and the mount stagger / layout stay untouched.
+  const fox = bars.map(() => null)
+  const fvx = bars.map(() => 0)
+  // foHold latches a seeded spring at its FLIP origin through the anticipation
+  // beat; the travel beat clears it so the spring integrates home.
+  const foHold = bars.map(() => false)
+  // active swap choreographies; frameStep advances them and stays awake while any
+  // beat is pending, so a settle scheduled after the spring quiets still fires.
+  const sequences = []
+  const VEL_EPS = 0.5
+  let tweenMs = 107
+  function readTween() {
+    if (typeof getComputedStyle !== "function") return
+    const parsed = Number.parseFloat(getComputedStyle(stage).getPropertyValue("--_tween"))
+    if (Number.isFinite(parsed) && parsed > 0) tweenMs = parsed
+  }
+  const rectOf = (node) =>
+    node && typeof node.getBoundingClientRect === "function" ? node.getBoundingClientRect() : null
+  const isReduced = () => !!(stage.closest && stage.closest(".steptrace--reduced"))
   let lastStepAt = null
-  // true while any marker is still easing OR its target is still moving under
-  // it (a bar mid-flight, a fill mid-height-transition, a resize).
   function frameStep(now) {
     const elapsed = lastStepAt == null ? 0 : Math.max(0, now - lastStepAt)
     lastStepAt = now
+    const sr = rectOf(stage)
+    if (!sr) return false
+    const reduced = isReduced()
+    const omega0 = springOmega(tweenMs)
+    // swaps travel over the whole step (slower than the markers) and settle near-
+    // critically, so a bar glides home instead of darting fast then wobbling.
+    const swapOmega = springOmega(tweenMs * STEP_BUDGET_RATIO)
     let moving = false
-    const sr = stage.getBoundingClientRect()
     for (let m = 0; m < markers.length; m++) {
       const idx = targets[m]
       const bar = idx != null && idx >= 0 && bars[idx] ? bars[idx].fill : null
@@ -269,27 +291,100 @@ function createBarTracker(stage, bars, markers) {
         mk.el.style.opacity = "0"
         sx[m] = null
         sy[m] = null
+        vx[m] = 0
+        vy[m] = 0
         px[m] = null
-        py[m] = null
         continue
       }
-      const br = bar.getBoundingClientRect()
+      const br = rectOf(bar)
+      if (!br) continue
       const targetX = br.left + br.width / 2 - sr.left
-      const bodyWidth = mk.body.getBoundingClientRect().width
+      const bodyWidth = rectOf(mk.body)?.width ?? 0
       const tx = clampMarkerCenter(targetX, bodyWidth, sr.width)
       mk.el.style.setProperty("--steptrace-marker-tip-offset", `${targetX - tx}px`)
       const ty = mk.role === "held" && mk.el.dataset.placing !== "1" ? 34 : br.top - sr.top
-      const reduced = stage.closest(".steptrace--reduced")
-      if (sx[m] == null || reduced) sx[m] = tx
-      else if (mk.role === "held") sx[m] = stepMarkerSpring(sx[m], tx, elapsed)
-      else sx[m] = stepMarkerSpring(sx[m], tx, elapsed, SPRING_SETTLE_MS)
-      if (sy[m] == null || reduced || mk.role !== "held") sy[m] = ty
-      else sy[m] = stepMarkerSpring(sy[m], ty, elapsed)
+      const zeta = mk.role === "held" ? SPRINGS.held.zeta : SPRINGS.marker.zeta
+      if (sx[m] == null || reduced) {
+        sx[m] = tx
+        vx[m] = 0
+      } else if (elapsed > 0) {
+        const next = springStep(sx[m], vx[m], tx, elapsed, { omega0, zeta })
+        sx[m] = next.pos
+        vx[m] = next.vel
+      }
+      if (sy[m] == null || reduced || mk.role !== "held") {
+        sy[m] = ty
+        vy[m] = 0
+      } else if (elapsed > 0) {
+        const next = springStep(sy[m], vy[m], ty, elapsed, { omega0, zeta: SPRINGS.held.zeta })
+        sy[m] = next.pos
+        vy[m] = next.vel
+      }
       const target = { x: tx, y: ty }
-      if (markerIsMoving(px[m], target, { x: sx[m], y: sy[m] })) moving = true
+      if (
+        markerIsMoving(px[m], target, { x: sx[m], y: sy[m] }) ||
+        Math.abs(vx[m]) > VEL_EPS ||
+        Math.abs(vy[m]) > VEL_EPS
+      )
+        moving = true
       px[m] = target
       mk.el.style.transform = `translate(${sx[m].toFixed(2)}px, ${sy[m].toFixed(2)}px)`
       mk.el.style.opacity = "1"
+    }
+    // advance swap choreographies before the hero loop so a travel beat's release
+    // takes effect this frame. Reduced motion cancels staging outright — the fly
+    // path already snapped the values in place. A pending beat keeps the loop
+    // awake independent of the marker idle test above.
+    for (let s = sequences.length - 1; s >= 0; s--) {
+      if (reduced) {
+        sequences[s].cancel()
+        sequences.splice(s, 1)
+      } else if (sequences[s].tick(now)) {
+        moving = true
+      } else {
+        sequences.splice(s, 1)
+      }
+    }
+    // hero-swap: spring each flying bar's translateX toward its home slot (0).
+    for (let b = 0; b < bars.length; b++) {
+      if (fox[b] == null) continue
+      const bar = bars[b].bar
+      if (reduced) {
+        fox[b] = null
+        fvx[b] = 0
+        foHold[b] = false
+        bar.style.transform = ""
+        bar.style.zIndex = ""
+        delete bar.dataset.stage
+        continue
+      }
+      if (foHold[b]) {
+        // anticipation: hold at the FLIP origin (dx) while the fill winds up; the
+        // travel beat releases the latch. Keep the loop awake meanwhile.
+        bar.style.transform = `translateX(${fox[b].toFixed(2)}px)`
+        bar.style.zIndex = "2"
+        moving = true
+        continue
+      }
+      if (elapsed > 0) {
+        const next = springStep(fox[b], fvx[b], 0, elapsed, {
+          omega0: swapOmega,
+          zeta: SPRINGS.swap.zeta,
+        })
+        fox[b] = next.pos
+        fvx[b] = next.vel
+      }
+      if (Math.abs(fox[b]) < 0.4 && Math.abs(fvx[b]) < VEL_EPS) {
+        fox[b] = null
+        fvx[b] = 0
+        foHold[b] = false
+        bar.style.transform = ""
+        bar.style.zIndex = ""
+      } else {
+        bar.style.transform = `translateX(${fox[b].toFixed(2)}px)`
+        bar.style.zIndex = "2"
+        moving = true
+      }
     }
     return moving
   }
@@ -310,10 +405,17 @@ function createBarTracker(stage, bars, markers) {
   }
   function wake() {
     if (raf != null) return
-    // a fresh elapsed baseline: without it the first tick after a long sleep
-    // reports a huge delta and every spring snaps straight to its target.
+    readTween()
+    // without a fresh baseline the first tick after a long sleep reports a huge
+    // delta and every spring snaps straight to its target
     lastStepAt = null
     lastRafAt = performance.now()
+    // headless test DOM has no rAF: run one best-effort step (a no-op without a
+    // layout engine) rather than scheduling a loop that can never paint.
+    if (typeof requestAnimationFrame !== "function") {
+      frameStep(performance.now())
+      return
+    }
     raf = requestAnimationFrame(loop)
     iv = setInterval(() => {
       const now = performance.now()
@@ -334,12 +436,55 @@ function createBarTracker(stage, bars, markers) {
       if (index < 0 || index >= markers.length) return
       sx[index] = null
       sy[index] = null
+      vx[index] = 0
+      vy[index] = 0
       wake()
+    },
+    // Start a fly for each [barIndex, fromOffset]; a bar already in flight is
+    // left alone so its spring carries it home continuously. Reduced motion
+    // skips the travel entirely — the value just updates in place. Each new fly
+    // stages a wind → travel → settle beat sequence (Heer & Robertson): the bar
+    // waits latched at its origin, then springs home, then pops on arrival. At a
+    // small (fast-playback) budget those beats coalesce and the swap is one
+    // overlapped motion, matching the un-staged behaviour.
+    fly(flights) {
+      if (isReduced()) return
+      readTween()
+      const budgetMs = tweenMs * STEP_BUDGET_RATIO
+      let started = false
+      for (const [idx, dx] of flights) {
+        if (idx < 0 || idx >= bars.length || fox[idx] != null) continue
+        fox[idx] = dx
+        fvx[idx] = 0
+        foHold[idx] = true
+        const bar = bars[idx].bar
+        sequences.push(
+          sequence(
+            [
+              { at: 0, run: () => (bar.dataset.stage = "wind") },
+              {
+                at: SWAP_TRAVEL_AT,
+                run: () => {
+                  foHold[idx] = false
+                  bar.dataset.stage = "travel"
+                },
+              },
+              { at: SWAP_SETTLE_AT, run: () => (bar.dataset.stage = "settle") },
+            ],
+            budgetMs,
+            performance.now(),
+          ),
+        )
+        started = true
+      }
+      if (started) wake()
     },
     renderNow() {
       frameStep(performance.now())
     },
     destroy() {
+      for (const seq of sequences) seq.cancel()
+      sequences.length = 0
       if (ro) ro.disconnect()
       sleep()
     },
@@ -2427,11 +2572,19 @@ export function buildMilestones(algorithm, kind, frames) {
     if (kind === "sort") {
       if (familyProfile === "counting" && f.type === "prefix" && frames[i - 1].type !== "prefix") {
         push(i, "Reserve output ranges")
-      } else if (familyProfile === "counting" && f.type === "place" && frames[i - 1].type !== "place") {
+      } else if (
+        familyProfile === "counting" &&
+        f.type === "place" &&
+        frames[i - 1].type !== "place"
+      ) {
         push(i, "Place stably")
       } else if (familyProfile === "radix" && f.type === "pass" && frames[i - 1].type !== "pass") {
         push(i, `${f.passLabel} pass`)
-      } else if (familyProfile === "radix" && f.type === "gather" && frames[i - 1].type !== "gather") {
+      } else if (
+        familyProfile === "radix" &&
+        f.type === "gather" &&
+        frames[i - 1].type !== "gather"
+      ) {
         push(i, `Gather ${f.passLabel}`)
       } else if (familyProfile === "bucket" && f.type === "pass" && frames[i - 1].type !== "pass") {
         push(i, "Scatter ranges")
@@ -2441,7 +2594,11 @@ export function buildMilestones(algorithm, kind, frames) {
         frames[i - 1].type !== "local-sort"
       ) {
         push(i, "Sort buckets")
-      } else if (familyProfile === "bucket" && f.type === "gather" && frames[i - 1].type !== "gather") {
+      } else if (
+        familyProfile === "bucket" &&
+        f.type === "gather" &&
+        frames[i - 1].type !== "gather"
+      ) {
         push(i, "Gather ranges")
       } else if (familyProfile === "introsort" && f.type === "fallback") {
         push(i, "Heap fallback")

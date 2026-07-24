@@ -27,9 +27,7 @@ export interface RangeBucketDistributionConfig extends BucketDistributionBaseCon
   profile: "bucket"
 }
 
-export type BucketDistributionConfig =
-  | RadixDistributionConfig
-  | RangeBucketDistributionConfig
+export type BucketDistributionConfig = RadixDistributionConfig | RangeBucketDistributionConfig
 
 export type BucketDistributionPhase =
   | "intro"
@@ -98,6 +96,7 @@ export class BucketDistributionRecorder implements BucketDistributionOperations 
   constructor(config: BucketDistributionConfig) {
     this.profile = config.profile
     this.bucketLabels = config.bucketLabels.slice()
+    this.passCount = config.profile === "radix" ? config.places.length : 1
     this.source = config.array.map((value, origin) => ({ value, origin }))
     this.buckets = Array.from({ length: config.bucketCount }, () => [])
     this.output = Array.from({ length: config.array.length }, () => null)
@@ -324,7 +323,7 @@ export function parseRangeBucketDistributionConfig(
   const min = Math.min(...array)
   const max = Math.max(...array)
   if (!(min >= 0 && max < 1))
-    invalidConfig('demonstrates bucket sort on values in the half-open range [0, 1).')
+    invalidConfig("demonstrates bucket sort on values in the half-open range [0, 1).")
   return {
     profile: "bucket",
     array: array.slice(),
@@ -341,8 +340,7 @@ function activeValue(frame: BucketDistributionFrame) {
 }
 
 function distributionWatch(frame: BucketDistributionFrame): WatchRow[] {
-  const bucket =
-    frame.activeBucket == null ? "—" : frame.bucketLabels[frame.activeBucket]
+  const bucket = frame.activeBucket == null ? "—" : frame.bucketLabels[frame.activeBucket]
   const progress =
     frame.type === "gather" || frame.type === "pass-complete" || frame.type === "done"
       ? `${frame.gathered}/${frame.source.length}`
@@ -388,6 +386,10 @@ function distributionWatch(frame: BucketDistributionFrame): WatchRow[] {
 
 function tokenLabel(value: number) {
   return Number.isInteger(value) ? String(value) : value.toFixed(2)
+}
+
+function bucketColumnCount(itemCount: number) {
+  return Math.min(3, Math.max(1, Math.ceil(itemCount / 3)))
 }
 
 function makeLegendItem(color: string, text: string) {
@@ -469,6 +471,7 @@ export function makeBucketDistributionView(frames: readonly BucketDistributionFr
     lanes.forEach(({ lane, body, bucketIndex }) => {
       const bucket = frame.buckets[bucketIndex]
       body.textContent = ""
+      body.style.setProperty("--_bucket-columns", String(bucketColumnCount(bucket.length)))
       bucket.forEach((token, itemIndex) => {
         const chip = el("span", "steptrace__distribution-token")
         chip.textContent = labels[token.origin] ?? tokenLabel(token.value)
@@ -494,7 +497,7 @@ export function makeBucketDistributionView(frames: readonly BucketDistributionFr
     output.bars.forEach((bar, outputIndex) => {
       const token = frame.output[outputIndex]
       bar.fill.style.height = token == null ? "0" : barHeightStyle(token.value, maxValue)
-      bar.num.textContent = token == null ? "·" : labels[token.origin] ?? tokenLabel(token.value)
+      bar.num.textContent = token == null ? "·" : (labels[token.origin] ?? tokenLabel(token.value))
       bar.bar.dataset.state = token == null ? "" : "sorted"
       bar.bar.dataset.target =
         frame.type === "gather" && outputIndex === frame.activeOutput ? "1" : "0"
@@ -532,7 +535,6 @@ function createBucketDistributionFamily<TConfig extends BucketDistributionConfig
   } satisfies VisualFamily<TConfig, BucketDistributionRecorder, BucketDistributionFrame>
 }
 
-export const radixDistributionFamily =
-  createBucketDistributionFamily<RadixDistributionConfig>()
+export const radixDistributionFamily = createBucketDistributionFamily<RadixDistributionConfig>()
 export const rangeBucketDistributionFamily =
   createBucketDistributionFamily<RangeBucketDistributionConfig>()

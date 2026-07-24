@@ -29,8 +29,83 @@
   --_font-mono: var(--st-font-mono, "IBM Plex Mono", ui-monospace, monospace);
   --_hair: color-mix(in srgb, var(--_text) 14%, transparent);
   --_hover: color-mix(in srgb, var(--_text) 7%, transparent);
-  --_tween: 320ms;
-  --_spring: cubic-bezier(0.34, 1.4, 0.5, 1);
+  /* ---- motion tokens: one duration scale + a small curve vocabulary. Roles
+     pick a (duration, curve) pair; renderers should reference the scale, never
+     raw ms. Durations above --_dur-base are expressed against --_tween so they
+     inherit the playback-speed scaling mount.ts applies (round(107/v)) and still
+     fit inside the step budget at 2x. --_dur-base is the concrete 1x reference
+     the --_tween alias points to. */
+  --_dur-instant: 0ms;
+  --_dur-base: 107ms;
+  --_dur-quick: calc(var(--_tween) * 0.65); /* ~70ms at 1x */
+  --_dur-move: calc(var(--_tween) * 1.68); /* ~180ms at 1x */
+  --_dur-settle: calc(var(--_tween) * 3); /* ~320ms at 1x */
+  /* standard entering (decelerate) and exiting (accelerate) easings */
+  --_ease-decelerate: cubic-bezier(0, 0, 0.2, 1);
+  --_ease-accelerate: cubic-bezier(0.4, 0, 1, 1);
+  /* sampled damped-spring step responses; resample the whole curve rather than
+     hand-editing stops. The ease-out declaration is the linear()-unsupported
+     fallback, not a duplicate. --_spring-snappy overshoots ~8% (zeta 0.62) for
+     the hero swap; --_spring-soft overshoots ~4% (zeta 0.72) for quiet settles. */
+  --_spring-soft: ease-out;
+  --_spring-soft: linear(
+    0,
+    0.121,
+    0.362,
+    0.604,
+    0.796,
+    0.924,
+    0.997,
+    1.03,
+    1.038,
+    1.034,
+    1.025,
+    1.015,
+    1.008,
+    1.003,
+    1,
+    0.999,
+    0.999,
+    0.999,
+    0.999,
+    0.999,
+    1,
+    1,
+    1
+  );
+  --_spring-snappy: ease-out;
+  --_spring-snappy: linear(
+    0,
+    0.093,
+    0.297,
+    0.529,
+    0.736,
+    0.896,
+    1.002,
+    1.06,
+    1.082,
+    1.08,
+    1.066,
+    1.047,
+    1.028,
+    1.013,
+    1.003,
+    0.996,
+    0.994,
+    0.993,
+    0.994,
+    0.995,
+    0.997,
+    0.998,
+    1
+  );
+  /* back-compat aliases: ~60 refs across the renderer SCSS keep working while the
+     role migration stays incremental (Phase 4 spreads the scale to the rest). */
+  --_tween: var(--_dur-base);
+  --_spring: var(--_spring-snappy);
+  /* multiplied by slot index; a fraction of --_tween so a full row still
+     finishes inside one playback step at any speed */
+  --_stagger: calc(var(--_tween) / 9);
   color: var(--_text);
   font: 400 14px/1.5 var(--_font-body);
   display: flex;
@@ -49,9 +124,15 @@
 .steptrace [hidden] {
   display: none !important;
 }
+/* Reduce, do not remove: positional movement is what causes vestibular trouble,
+   so only that goes instant. Killing the colour and opacity fades too would turn
+   every step into a hard cut, which is harder to follow, not safer. */
 .steptrace--reduced * {
-  transition: none !important;
   animation: none !important;
+  transition-property:
+    background, background-color, color, opacity, box-shadow, border-color, stroke, fill !important;
+  transition-duration: var(--_tween) !important;
+  transition-delay: 0ms !important;
 }
 
 /* ============ head: breadcrumb (left) + step counter (right) ============ */
@@ -115,6 +196,9 @@
   .steptrace:is([data-visual-family="matrix-grid"], [data-visual-family="monotone-boundary"])
     .steptrace__body {
     grid-template-columns: minmax(0, 1fr);
+    /* stacked, so a tall rail no longer stretches the stage beside it and a
+       fixed height would only squeeze the two of them into one screen */
+    block-size: auto;
   }
   .steptrace:is([data-visual-family="matrix-grid"], [data-visual-family="monotone-boundary"])
     .steptrace__rail {
@@ -140,27 +224,28 @@
     padding-left: 1rem;
   }
 
-  :is(
-      .steptrace--stable-stage,
-      .steptrace--tabs .steptrace__tabpanel-body.steptrace
-    )
-    .steptrace__body {
+  /* One definite height for every card — what --stable-stage always did, and
+     what every other family was missing. A ceiling alone is not enough: the
+     rail's log rows hug their whole message, so the rail grows as the trace
+     fills, and `align-items: stretch` hands that height to the stage column.
+     The viz would still resize step by step, merely bounded. A definite height
+     also gives fitLog() a real budget to measure rows against; without one it
+     measures the content it just grew to and never drops a row. */
+  .steptrace__body {
     block-size: clamp(14rem, calc(100dvh - 12rem), 28rem);
+    /* the row must be allowed to shrink under its content, or the grid sizes it
+       to max-content and the columns overflow the height instead of fitting
+       inside it — the stage keeps its natural size and the legend lands on the
+       transport controls */
+    grid-template-rows: minmax(0, 1fr);
   }
 
-  :is(
-      .steptrace--stable-stage,
-      .steptrace--tabs .steptrace__tabpanel-body.steptrace
-    )
-    :is(.steptrace__stage-col, .steptrace__rail) {
+  .steptrace__stage-col,
+  .steptrace__rail {
     min-block-size: 0;
   }
 
-  :is(
-      .steptrace--stable-stage,
-      .steptrace--tabs .steptrace__tabpanel-body.steptrace
-    )
-    .steptrace__rail {
+  .steptrace__rail {
     overflow-y: auto;
   }
 }
@@ -521,12 +606,20 @@
   stroke-linejoin: round;
 }
 .steptrace__btn--play {
-  background: var(--_accent);
+  background-color: var(--_accent);
+  background-image: var(--st-accent-gradient, none);
   color: var(--_on-accent);
   width: 36px;
   height: 36px;
   border-radius: 50%;
   margin: 0 0.35rem;
+}
+/* The generic :hover above would swap the fill for a faint text wash while the
+   glyph keeps --_on-accent, leaving it invisible against either theme's page. */
+.steptrace__btn--play:hover {
+  background-color: var(--_accent);
+  background-image: var(--st-accent-gradient, none);
+  filter: brightness(1.12);
 }
 .steptrace__btn--play svg {
   fill: currentColor;

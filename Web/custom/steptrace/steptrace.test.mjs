@@ -282,7 +282,7 @@ test("tabbed blocks use accessible shared chrome and preserve mounted tab state"
   assert.match(styles, /\.steptrace__tabpanel/)
   assert.match(
     readFileSync(join(here, "src", "styles", "shared.scss"), "utf8"),
-    /\.steptrace--tabs \.steptrace__tabpanel-body\.steptrace[\s\S]*?\.steptrace__body\s*\{[^}]*block-size: clamp\(14rem, calc\(100dvh - 12rem\), 28rem\);/,
+    /\.steptrace__body\s*\{[^}]*block-size: clamp\(14rem, calc\(100dvh - 12rem\), 28rem\);/,
   )
 })
 
@@ -299,6 +299,7 @@ test("styles are compiled from real SCSS without runtime injection", () => {
   )
   const engine = readFileSync(join(here, "generated", "engine.js"), "utf8")
   const barsStyles = readFileSync(join(here, "src", "styles", "bars.scss"), "utf8")
+  const sharedStyles = readFileSync(join(here, "src", "styles", "shared.scss"), "utf8")
   const renderSource = readFileSync(join(here, "src", "render.ts"), "utf8")
 
   assert.match(styleEntry, /@use "shared";/)
@@ -340,20 +341,46 @@ test("styles are compiled from real SCSS without runtime injection", () => {
     barsStyles,
     /\.steptrace__bar\[data-state="probe"\] \.steptrace__fill\s*{[^}]*min-height:/s,
   )
-  // every timed visual must scale with playback speed: the swap flight reads
-  // --_tween, and mount rewrites --_tween to fit inside each frame interval.
-  assert.match(barsStyles, /\.steptrace__bar--fly\s*{[^}]*animation: steptrace-fly var\(--_tween\)/s)
+  // hero-swap moved from the CSS fly keyframe to the JS spring integrator
+  assert.doesNotMatch(barsStyles, /steptrace__bar--fly/)
+  assert.doesNotMatch(barsStyles, /@keyframes steptrace-fly/)
+  assert.doesNotMatch(barsStyles, /--_fly-dx|--_fly-lift|data-fly/)
+  assert.doesNotMatch(renderSource, /liveOffsetX|carried|steptrace__bar--fly|stepMarkerSpring/)
   assert.doesNotMatch(barsStyles, /transition: transform 0\.32s/)
   assert.match(
     readFileSync(join(here, "src", "mount.ts"), "utf8"),
     /setProperty\("--_tween", `\$\{Math\.round\(107 \/ v\)\}ms`\)/,
   )
-  // the swap arc: the flight starts a full slot away, lifts at the midpoint,
-  // and only the bar travelling leftward passes over its partner.
-  assert.match(barsStyles, /@keyframes steptrace-fly\s*{[^@]*translate\(var\(--_fly-dx, 0px\), 0\)/s)
-  assert.match(barsStyles, /50%\s*{[^}]*var\(--_fly-lift, 0px\)/s)
-  assert.match(barsStyles, /\[data-fly="over"\]\s*{[^}]*--_fly-lift: -10px;[^}]*z-index: 2;/s)
-  assert.match(renderSource, /bt\.dataset\.fly = dx > 0 \? "over" : "under"/)
+  // the swap fly is driven through the shared spring integrator (motion.ts)
+  assert.match(
+    renderSource,
+    /import \{ springStep, springOmega, SPRINGS, sequence \} from "\.\/motion"/,
+  )
+  assert.match(renderSource, /tracker\.fly\(flights\)/)
+  assert.match(renderSource, /springStep\(fox\[b\], fvx\[b\], 0, elapsed/)
+  // Phase-2 choreography: swaps stage through the beat scheduler, and a pending
+  // beat keeps the loop awake independent of the marker idle test.
+  assert.match(renderSource, /sequences\[s\]\.tick\(now\)/)
+  assert.match(renderSource, /sequences\.push\(\s*sequence\(/)
+  assert.match(renderSource, /foHold\[idx\] = false/)
+  // motion-token scale + back-compat aliases
+  assert.match(sharedStyles, /--_dur-instant: 0ms;/)
+  assert.match(sharedStyles, /--_dur-quick: calc\(var\(--_tween\) \* 0\.65\)/)
+  assert.match(sharedStyles, /--_dur-move: calc\(var\(--_tween\) \* 1\.68\)/)
+  assert.match(sharedStyles, /--_dur-settle: calc\(var\(--_tween\) \* 3\)/)
+  assert.match(sharedStyles, /--_spring-snappy: linear\(\s*0,/s)
+  assert.match(sharedStyles, /--_spring-soft: linear\(\s*0,/s)
+  assert.match(sharedStyles, /--_tween: var\(--_dur-base\)/)
+  assert.match(sharedStyles, /--_spring: var\(--_spring-snappy\)/)
+  // pilot role bindings: swap = move, compare = quick
+  assert.match(barsStyles, /\[data-state="swap"\]\s*{[^}]*--_role-dur: var\(--_dur-move\)/s)
+  assert.match(barsStyles, /\[data-state="compare"\]\s*{[^}]*--_role-dur: var\(--_dur-quick\)/s)
+  assert.match(sharedStyles, /--_stagger: calc\(var\(--_tween\) \/ 9\)/)
+  assert.match(barsStyles, /@keyframes steptrace-enter/)
+  assert.match(barsStyles, /animation-delay: calc\(var\(--_i, 0\) \* var\(--_stagger\)\)/)
+  assert.match(sharedStyles, /\.steptrace--reduced \*\s*{[^}]*animation: none !important;/s)
+  assert.match(sharedStyles, /transition-property:[^;]*opacity[^;]*!important/s)
+  assert.doesNotMatch(sharedStyles, /\.steptrace--reduced \*\s*{[^}]*transition: none !important;/s)
   assert.ok(contrastRatio("#ffffff", "#92400e") >= 4.5)
   assert.ok(contrastRatio("#1f2937", "#fbbf24") >= 4.5)
 })
@@ -399,28 +426,30 @@ test("all built-in algorithms preserve their headless frame contract", () => {
             ? { gaps: [4, 2, 1] }
             : algorithm === "counting-sort"
               ? { array: [2, 5, 3, 0, 2, 3, 0, 3] }
-            : algorithm === "radix-sort"
-              ? { array: [170, 45, 75, 90, 802, 24, 2, 66], radix: 10, mode: "LSD" }
-            : algorithm === "bucket-sort"
-              ? { array: [0.78, 0.17, 0.39, 0.26, 0.72, 0.94], bucketCount: 5 }
-            : algorithm === "cyclic-sort"
-              ? { array: [5, 3, 1, 4, 2] }
-              : algorithm === "floyd-warshall"
-                ? {
-                    nodes: [0, 1, 2, 3],
-                    edges: [
-                      [0, 1, 3],
-                      [0, 3, 7],
-                      [1, 0, 8],
-                      [1, 2, 2],
-                      [2, 0, 5],
-                      [2, 3, 1],
-                      [3, 0, 2],
-                    ],
-                  }
-                : ["exponential-search", "interpolation-search", "jump-search"].includes(algorithm)
-                  ? { array: commonConfig.array.slice().sort((a, b) => a - b) }
-                  : {}
+              : algorithm === "radix-sort"
+                ? { array: [170, 45, 75, 90, 802, 24, 2, 66], radix: 10, mode: "LSD" }
+                : algorithm === "bucket-sort"
+                  ? { array: [0.78, 0.17, 0.39, 0.26, 0.72, 0.94], bucketCount: 5 }
+                  : algorithm === "cyclic-sort"
+                    ? { array: [5, 3, 1, 4, 2] }
+                    : algorithm === "floyd-warshall"
+                      ? {
+                          nodes: [0, 1, 2, 3],
+                          edges: [
+                            [0, 1, 3],
+                            [0, 3, 7],
+                            [1, 0, 8],
+                            [1, 2, 2],
+                            [2, 0, 5],
+                            [2, 3, 1],
+                            [3, 0, 2],
+                          ],
+                        }
+                      : ["exponential-search", "interpolation-search", "jump-search"].includes(
+                            algorithm,
+                          )
+                        ? { array: commonConfig.array.slice().sort((a, b) => a - b) }
+                        : {}
     const input =
       algorithm === "memoization" ||
       algorithm.startsWith("coin-change-") ||
@@ -439,7 +468,7 @@ test("all built-in algorithms preserve their headless frame contract", () => {
 
   assert.equal(
     digest,
-    "ce55520e96e0b420bf8c4f7bb7809d285946366b1166297af2929a125dddebf9",
+    "b4755a50a103ceaf38b2f787beca827ff9256dd10afcc4691d1afbfc827dd647",
     "the headless StepTrace behavior changed",
   )
 })
@@ -460,14 +489,19 @@ test("counting sort records every tally, prefix, and stable placement in the typ
   assert.equal(result.frames.filter((frame) => frame.type === "place").length, 8)
   assert.deepEqual(result.frames.at(-1).output, [0, 0, 2, 2, 3, 3, 3, 5])
   assert.deepEqual(result.frames.at(-1).outputOrigins, [3, 6, 0, 4, 2, 5, 7, 1])
-  assert.deepEqual(result.frames.find((frame) => frame.type === "prefix" && frame.activeKey === 5).positions, [2, 2, 4, 7, 7, 8])
+  assert.deepEqual(
+    result.frames.find((frame) => frame.type === "prefix" && frame.activeKey === 5).positions,
+    [2, 2, 4, 7, 7, 8],
+  )
   assert.equal(result.frames.find((frame) => frame.type === "place").activeInput, 7)
   const firstPrefix = result.frames.findIndex((frame) => frame.type === "prefix")
   const firstPlace = result.frames.findIndex((frame) => frame.type === "place")
   const milestones = buildMilestones("counting-sort", "sort", result.frames)
 
   assert.deepEqual(
-    milestones.filter((mark) => [0, firstPrefix, firstPlace, result.frames.length - 1].includes(mark.i)),
+    milestones.filter((mark) =>
+      [0, firstPrefix, firstPlace, result.frames.length - 1].includes(mark.i),
+    ),
     [
       { i: 0, label: "Tally keys" },
       { i: firstPrefix, label: "Reserve output ranges" },
@@ -479,7 +513,9 @@ test("counting sort records every tally, prefix, and stable placement in the typ
   assert.equal(milestoneAt(milestones, firstPlace).label, "Place stably")
   const prefixZero = result.frames.find((frame) => frame.type === "prefix" && frame.activeKey === 0)
   const prefixOne = result.frames.find((frame) => frame.type === "prefix" && frame.activeKey === 1)
-  const prefixThree = result.frames.find((frame) => frame.type === "prefix" && frame.activeKey === 3)
+  const prefixThree = result.frames.find(
+    (frame) => frame.type === "prefix" && frame.activeKey === 3,
+  )
   assert.deepEqual(frequencyRangeFor(prefixZero, 0), { count: 2, slots: "0–1" })
   assert.deepEqual(frequencyRangeFor(prefixZero, 1), { count: 0, slots: null })
   assert.deepEqual(frequencyRangeFor(prefixOne, 1), { count: 0, slots: "—" })
@@ -506,6 +542,7 @@ test("radix sort records every stable scatter and gather across all digit passes
 
   assert.equal(result.family.id, "distribution-sort")
   assert.equal(result.frames[0].profile, "radix")
+  assert.equal(result.frames[0].passCount, 3)
   assert.equal(result.frames.filter((frame) => frame.type === "pass").length, 3)
   assert.equal(result.frames.filter((frame) => frame.type === "scatter").length, 24)
   assert.equal(
@@ -515,8 +552,14 @@ test("radix sort records every stable scatter and gather across all digit passes
   const onesScattered = result.frames.find(
     (frame) => frame.type === "scatter" && frame.passIndex === 0 && frame.scattered === 8,
   )
-  assert.deepEqual(onesScattered.buckets[0].map((token) => token.value), [170, 90])
-  assert.deepEqual(onesScattered.buckets[2].map((token) => token.value), [802, 2])
+  assert.deepEqual(
+    onesScattered.buckets[0].map((token) => token.value),
+    [170, 90],
+  )
+  assert.deepEqual(
+    onesScattered.buckets[2].map((token) => token.value),
+    [802, 2],
+  )
   const onesComplete = result.frames.find(
     (frame) => frame.type === "pass-complete" && frame.passIndex === 0,
   )
@@ -535,7 +578,15 @@ test("radix sort records every stable scatter and gather across all digit passes
   const milestones = buildMilestones("radix-sort", "sort", result.frames)
   assert.deepEqual(
     milestones.map((mark) => mark.label),
-    ["ones pass", "Gather ones", "tens pass", "Gather tens", "hundreds pass", "Gather hundreds", "Result"],
+    [
+      "ones pass",
+      "Gather ones",
+      "tens pass",
+      "Gather tens",
+      "hundreds pass",
+      "Gather hundreds",
+      "Result",
+    ],
   )
   assert.throws(
     () => api.buildFrames({ algorithm: "radix-sort", array: [10, -2], radix: 10 }),
@@ -562,9 +613,7 @@ test("bucket sort exposes every scatter, local comparison, swap, and ordered gat
     result.frames.filter((frame) => frame.type === "scatter").map((frame) => frame.activeSource),
     [0, 1, 2, 3, 4, 5],
   )
-  const scattered = result.frames.find(
-    (frame) => frame.type === "scatter" && frame.scattered === 6,
-  )
+  const scattered = result.frames.find((frame) => frame.type === "scatter" && frame.scattered === 6)
   assert.deepEqual(
     scattered.buckets.map((bucket) => bucket.map((token) => token.value)),
     [[0.17], [0.39, 0.26], [], [0.78, 0.72], [0.94]],
@@ -654,8 +703,14 @@ test("counting sort renders shared bars around one progressive frequency strip",
     assert.equal(inputBars.children.length, 8)
     assert.equal(outputBars.children.length, 8)
     assert.match(source, /makeDistributionArrayBand/)
-    assert.match(source, /makeDistributionArrayBand\(\n    "Unsorted Array",[\s\S]*first\.input\.length,\n  \)/)
-    assert.match(source, /makeDistributionArrayBand\(\n    "Sorted Array",[\s\S]*first\.input\.length,\n    "steptrace__distribution-bars--output",\n  \)/)
+    assert.match(
+      source,
+      /makeDistributionArrayBand\(\n    "Unsorted Array",[\s\S]*first\.input\.length,\n  \)/,
+    )
+    assert.match(
+      source,
+      /makeDistributionArrayBand\(\n    "Sorted Array",[\s\S]*first\.input\.length,\n    "steptrace__distribution-bars--output",\n  \)/,
+    )
     assert.match(source, /frame\.type === "tally" \? "increment" : "compare"/)
     assert.match(renderSource, /cue\.innerHTML = ICON\.compare \+ ICON\.swap/)
     assert.doesNotMatch(renderSource, /ICON\.increment|steptrace__cue-increment/)
@@ -672,17 +727,20 @@ test("counting sort renders shared bars around one progressive frequency strip",
       styleSource,
       /\.steptrace__distribution-frequency \{[\s\S]*grid-auto-flow: column;[\s\S]*grid-auto-columns: minmax\(4\.8rem, 1fr\);[\s\S]*grid-template-rows: 1fr;[\s\S]*overflow-x: auto;[\s\S]*overflow-y: hidden;[\s\S]*border: 1px solid var\(--_distribution-border\);[\s\S]*border-radius: var\(--_distribution-radius\);[\s\S]*background: var\(--_distribution-cell\);/,
     )
-    assert.doesNotMatch(
-      styleSource,
-      /\.steptrace__distribution-frequency \{[\s\S]*border-block:/,
-    )
+    assert.doesNotMatch(styleSource, /\.steptrace__distribution-frequency \{[\s\S]*border-block:/)
     assert.doesNotMatch(styleSource, /grid-template-columns: repeat\(auto-fit/)
     assert.match(
       styleSource,
       /\.steptrace__distribution-bucket \{[\s\S]*grid-template-rows: 1fr 2fr;[\s\S]*min-height: 3\.9rem;/,
     )
-    assert.match(styleSource, /\.steptrace__distribution-bucket \{\n  border-inline-end: 1px solid var\(--_distribution-border\);\n\}/)
-    assert.match(styleSource, /\.steptrace__distribution-bucket:last-child \{\n  border-inline-end: 0;\n\}/)
+    assert.match(
+      styleSource,
+      /\.steptrace__distribution-bucket \{\n  border-inline-end: 1px solid var\(--_distribution-border\);\n\}/,
+    )
+    assert.match(
+      styleSource,
+      /\.steptrace__distribution-bucket:last-child \{\n  border-inline-end: 0;\n\}/,
+    )
     assert.match(
       styleSource,
       /\.steptrace__distribution-entry--key \{\n  border-block-end: 1px solid var\(--_hair\);\n  background: var\(--_distribution-header\);/,
@@ -707,7 +765,10 @@ test("counting sort renders shared bars around one progressive frequency strip",
       styleSource,
       /\.steptrace__distribution-bucket\[data-active="1"\] \{\n  background:/,
     )
-    assert.match(styleSource, /data-has-slots="0"\] \.steptrace__distribution-details \{\n  grid-template-rows: 1fr;/)
+    assert.match(
+      styleSource,
+      /data-has-slots="0"\] \.steptrace__distribution-details \{\n  grid-template-rows: 1fr;/,
+    )
     assert.match(
       styleSource,
       /\.steptrace__distribution-bars \.steptrace__bar \{\n  height: calc\(100% - 1\.3rem\);\n\}/,
@@ -762,7 +823,10 @@ test("counting sort renders shared bars around one progressive frequency strip",
     view.paint(zeroPlacement, 0, result.frames.length)
     assert.equal(outputBars.children[zeroPlacement.placedAt].dataset.empty, "0")
     assert.match(outputBars.children[zeroPlacement.placedAt].children[0].style.height, /^calc\(/)
-    assert.equal(outputBars.children.find((bar) => bar.dataset.empty === "1").children[0].style.height, "0")
+    assert.equal(
+      outputBars.children.find((bar) => bar.dataset.empty === "1").children[0].style.height,
+      "0",
+    )
     assert.match(
       styleSource,
       /\[data-empty="1"\] \.steptrace__fill \{\n  min-height: 0;\n  opacity: 0;/,
@@ -849,6 +913,10 @@ test("radix and bucket sorts share one stable bucket-board renderer", () => {
     assert.equal(board.children[0].children[1].children[0].textContent, "170")
     assert.ok(radixView.watch(firstScatter).every((row) => row.hint))
 
+    radixView.paint(radix.frames.at(-1), radix.frames.length - 1, radix.frames.length)
+    assert.equal(board.children[0].children[1].children.length, 6)
+    assert.equal(board.children[0].children[1].attributes.get("style:--_bucket-columns"), "2")
+
     const bucket = api.buildFrames({
       algorithm: "bucket-sort",
       array: [0.78, 0.17, 0.39, 0.26, 0.72, 0.94],
@@ -863,13 +931,17 @@ test("radix and bucket sorts share one stable bucket-board renderer", () => {
 
     assert.match(
       styleSource,
-      /\.steptrace__distribution-bucket-board \{[\s\S]*overflow-x: auto;[\s\S]*border: 1px solid var\(--_distribution-border\);[\s\S]*border-radius: var\(--_distribution-radius\);/,
+      /\.steptrace__distribution-bucket-board \{[\s\S]*block-size: clamp\(7rem, 17vh, 8\.5rem\);[\s\S]*overflow-x: auto;[\s\S]*border: 1px solid var\(--_distribution-border\);[\s\S]*border-radius: var\(--_distribution-radius\);/,
     )
     assert.match(
       styleSource,
       /\.steptrace__distribution-lane \{[\s\S]*border-inline-end: 1px solid var\(--_distribution-border\);/,
     )
     assert.doesNotMatch(styleSource, /\.steptrace__distribution-lane \{[^}]*border-radius:/)
+    assert.match(
+      styleSource,
+      /\.steptrace__distribution-lane-body \{[\s\S]*grid-template-columns: repeat\(\s*var\(--_bucket-columns, 1\),\s*minmax\(0, 1fr\)\s*\);[\s\S]*overflow: hidden;/,
+    )
     assert.match(
       styleSource,
       /\.steptrace__distribution-lane:first-child\[data-active="1"\]::after \{[\s\S]*border-start-start-radius:/,
@@ -1477,13 +1549,17 @@ test("dynamic-programming tabs and stable story stage keep the compact five-view
 
   assert.doesNotMatch(note, /Tabulation \(Raw\)/)
   assert.match(mountSource, /steptrace--stable-stage/)
+  assert.match(sharedStyles, /\.steptrace__rail\s*\{\s*overflow-y: auto;\s*\}/)
+  // the height is definite and unconditional: a growing trace must not resize
+  // the viz on any family, not even within a bound
   assert.match(
     sharedStyles,
-    /\.steptrace--stable-stage,[\s\S]*?\.steptrace--tabs \.steptrace__tabpanel-body\.steptrace[\s\S]*?\.steptrace__body\s*\{[^}]*block-size: clamp\(14rem, calc\(100dvh - 12rem\), 28rem\);/,
+    /\.steptrace__body\s*\{[^}]*block-size: clamp\(14rem, calc\(100dvh - 12rem\), 28rem\);[^}]*grid-template-rows: minmax\(0, 1fr\);/s,
   )
+  assert.doesNotMatch(sharedStyles, /max-block-size: clamp\(14rem/)
   assert.match(
     sharedStyles,
-    /\.steptrace--stable-stage,[\s\S]*?\.steptrace--tabs \.steptrace__tabpanel-body\.steptrace[\s\S]*?\.steptrace__rail\s*\{[^}]*overflow-y: auto;/,
+    /\.steptrace__stage-col,\s*\.steptrace__rail\s*\{\s*min-block-size: 0;\s*\}/,
   )
   assert.match(
     sharedStyles,
@@ -2336,45 +2412,382 @@ test("bar heights preserve relative scale above the shared icon floor", () => {
   assert.equal(barHeightStyle(100, 100), "calc(100% + 0rem)")
 })
 
-test("held marker spring remains in transit early and settles near its target", () => {
-  const { stepMarkerSpring } = loadStepTraceModule("src", "render.ts")
-  let position = 0
+test("springStep is a frame-rate-independent, interruptible damped spring", () => {
+  const { springStep, springOmega, SPRINGS } = loadStepTraceModule("src", "motion.ts")
+  const omega1 = springOmega(107) // 1x step budget
+  const marker = { omega0: omega1, zeta: SPRINGS.marker.zeta }
+  const held = { omega0: omega1, zeta: SPRINGS.held.zeta }
 
-  for (let elapsed = 0; elapsed < 48; elapsed += 16) {
-    position = stepMarkerSpring(position, 100, 16)
-  }
-  assert.ok(position > 40 && position < 60)
+  // omega0 is speed-proportional: a shorter (faster) budget stiffens the spring
+  assert.ok(springOmega(54) > springOmega(107))
 
-  for (let elapsed = 48; elapsed < 400; elapsed += 16) {
-    position = stepMarkerSpring(position, 100, 16)
+  // (a) high damping approaches monotonically, without overshoot
+  {
+    let pos = 0,
+      vel = 0,
+      peak = 0
+    for (let i = 0; i < 200; i++) {
+      const s = springStep(pos, vel, 100, 8, held)
+      pos = s.pos
+      vel = s.vel
+      peak = Math.max(peak, pos)
+    }
+    assert.ok(peak <= 100.5, `high-zeta overshoot ${peak}`)
+    assert.ok(pos > 99.5)
   }
-  assert.ok(position > 99)
-  assert.equal(stepMarkerSpring(25, 100, 0), 25)
+
+  // (b) an underdamped spring overshoots 5-12% of the step, then settles
+  {
+    let pos = 0,
+      vel = 0,
+      peak = 0
+    for (let i = 0; i < 300; i++) {
+      const s = springStep(pos, vel, 100, 8, marker)
+      pos = s.pos
+      vel = s.vel
+      peak = Math.max(peak, pos)
+    }
+    const overshoot = peak - 100
+    assert.ok(overshoot >= 5 && overshoot <= 12, `overshoot ${overshoot.toFixed(2)}%`)
+    assert.ok(Math.abs(pos - 100) < 0.5)
+  }
+
+  // (c) retarget mid-flight carries velocity and stays continuous (no jump)
+  {
+    let pos = 0,
+      vel = 0,
+      prev = 0,
+      maxJump = 0
+    for (let i = 0; i < 3; i++) {
+      const s = springStep(pos, vel, 40, 16, marker)
+      maxJump = Math.max(maxJump, Math.abs(s.pos - prev))
+      prev = s.pos
+      pos = s.pos
+      vel = s.vel
+    }
+    assert.notEqual(vel, 0) // momentum is carried into the retarget
+    for (let i = 0; i < 20; i++) {
+      const s = springStep(pos, vel, 48, 16, marker)
+      maxJump = Math.max(maxJump, Math.abs(s.pos - prev))
+      prev = s.pos
+      pos = s.pos
+      vel = s.vel
+    }
+    assert.ok(maxJump < 25, `discontinuity ${maxJump.toFixed(2)}px`)
+    assert.ok(Math.abs(pos - 48) < 0.5)
+  }
+
+  // (d) dt<=0 (or a reduced-motion snap) resolves straight to target, at rest
+  assert.deepEqual(springStep(30, 12, 100, 0, marker), { pos: 100, vel: 0 })
+
+  // (e) settles within a bounded number of ticks
+  {
+    let pos = 0,
+      vel = 0,
+      ticks = 0
+    for (; ticks < 60; ticks++) {
+      const s = springStep(pos, vel, 100, 16, marker)
+      pos = s.pos
+      vel = s.vel
+      if (Math.abs(pos - 100) < 0.4 && Math.abs(vel) < 0.5) break
+    }
+    assert.ok(ticks < 40, `settle ticks ${ticks}`)
+  }
+
+  // (f) 2x regression: track a moving target within 1px at the speed-derived omega0
+  {
+    const cfg = { omega0: springOmega(54), zeta: SPRINGS.marker.zeta } // 2x budget
+    let pos = 0,
+      vel = 0,
+      target = 0
+    for (let step = 0; step < 8; step++) {
+      target += 18 // the tracked bar shifts one slot every 130ms budget
+      for (let t = 0; t < 130; t += 16) {
+        const s = springStep(pos, vel, target, 16, cfg)
+        pos = s.pos
+        vel = s.vel
+      }
+    }
+    for (let t = 0; t < 400; t += 16) {
+      const s = springStep(pos, vel, target, 16, cfg)
+      pos = s.pos
+      vel = s.vel
+    }
+    assert.ok(Math.abs(pos - target) < 1, `2x gap ${Math.abs(pos - target).toFixed(3)}px`)
+  }
+
+  // frame-rate independence: coarse vs fine dt converge to the same place
+  const settleAt = (dt) => {
+    let p = 0,
+      v = 0
+    for (let t = 0; t < 800; t += dt) {
+      const s = springStep(p, v, 100, dt, marker)
+      p = s.pos
+      v = s.vel
+    }
+    return p
+  }
+  assert.ok(Math.abs(settleAt(8) - settleAt(40)) < 1)
+})
+
+test("sequence stages budget-proportional beats, collapses when fast, and stays live post-idle", () => {
+  const { sequence } = loadStepTraceModule("src", "motion.ts")
+
+  // (a) beats fire in offset order regardless of input order, under injected now()
+  {
+    let clock = 0
+    const fired = []
+    const seq = sequence(
+      [
+        { at: 0.5, run: () => fired.push(["settle", clock]) },
+        { at: 0, run: () => fired.push(["wind", clock]) },
+        { at: 0.25, run: () => fired.push(["travel", clock]) },
+      ],
+      260, // 1x step budget
+      0,
+    )
+    for (clock = 0; clock <= 260; clock += 1) seq.tick(clock)
+    assert.deepEqual(
+      fired.map((f) => f[0]),
+      ["wind", "travel", "settle"],
+    )
+    assert.deepEqual(
+      fired.map((f) => f[1]),
+      [0, 65, 130], // distinct beats at a full budget
+    )
+    assert.equal(seq.pending, 0)
+  }
+
+  // (b) total span scales linearly with the budget (large budgets stay staged)
+  const spanFor = (budget) => {
+    let clock = 0
+    const times = []
+    const seq = sequence(
+      [
+        { at: 0, run: () => times.push(clock) },
+        { at: 0.5, run: () => times.push(clock) },
+      ],
+      budget,
+      0,
+    )
+    for (clock = 0; clock <= budget + 100; clock += 1) seq.tick(clock)
+    return times[times.length - 1] - times[0]
+  }
+  assert.equal(spanFor(800), 400)
+  assert.equal(spanFor(400), 200) // half the budget → half the span
+
+  // (c) budget collapse: at a 130ms (2x) budget every beat coalesces to one
+  // instant — no beat is starved, they fire together
+  {
+    let clock = 0
+    const times = []
+    const seq = sequence(
+      [
+        { at: 0, run: () => times.push(clock) },
+        { at: 0.25, run: () => times.push(clock) },
+        { at: 0.5, run: () => times.push(clock) },
+      ],
+      130, // 2x budget
+      0,
+    )
+    for (clock = 0; clock <= 200; clock += 1) seq.tick(clock)
+    assert.equal(times.length, 3, "every beat still fires")
+    assert.ok(Math.max(...times) - Math.min(...times) <= 1, "beats collapse to one window")
+  }
+
+  // (d) cancel prevents pending beats; retargeting cancels the prior sequence so
+  // no stale beat survives
+  {
+    const fired = []
+    const seq = sequence([{ at: 0.5, run: () => fired.push("x") }], 260, 0)
+    seq.cancel()
+    for (let clock = 0; clock <= 400; clock += 1) seq.tick(clock)
+    assert.equal(fired.length, 0)
+    assert.equal(seq.pending, 0)
+
+    const log = []
+    let active = sequence([{ at: 0.5, run: () => log.push("old") }], 260, 0)
+    active.cancel() // retarget: cancel the prior sequence …
+    active = sequence([{ at: 0.5, run: () => log.push("new") }], 260, 100) // … start a new one
+    for (let clock = 0; clock <= 500; clock += 1) active.tick(clock)
+    assert.deepEqual(log, ["new"])
+  }
+
+  // (e) post-idle liveness — the freeze-mid-beat heisenbug the Architect flagged.
+  // A beat scheduled AFTER the markers settle must still fire. Model the tracker
+  // loop's sleep test: it may sleep only when nothing moves AND no beat pends.
+  {
+    const markersMoving = () => false // settled from frame 0
+    let firedAt = null
+    let clock = 0
+    const seq = sequence([{ at: 0.8, run: () => (firedAt = clock) }], 260, 0)
+    let awake = true
+    for (clock = 0; clock <= 400 && awake; clock += 16) {
+      const beatsPending = seq.tick(clock)
+      awake = markersMoving() || beatsPending // the load-bearing OR
+    }
+    assert.ok(firedAt != null, "post-idle beat must fire")
+    assert.ok(firedAt >= 0.8 * 260 - 16, "and near its scheduled time")
+
+    // negative control: without the OR the loop sleeps at frame 0 and the beat is
+    // lost — proving the pending-beat guard is what prevents the freeze
+    let firedAt2 = null
+    let clock2 = 0
+    const seq2 = sequence([{ at: 0.8, run: () => (firedAt2 = clock2) }], 260, 0)
+    let awake2 = true
+    for (clock2 = 0; clock2 <= 400 && awake2; clock2 += 16) {
+      seq2.tick(clock2)
+      awake2 = markersMoving() // ignores pending beats
+    }
+    assert.equal(firedAt2, null, "freeze reproduced when liveness ignores pending beats")
+  }
+})
+
+test("swap choreography engages headlessly and collapses to a snap under reduced motion", () => {
+  // FakeNode gains a synthetic layout (left derives from --_i) so a swap yields a
+  // real dx and the fly path runs; it still has no rAF / .animate / getComputedStyle.
+  class FakeNode {
+    constructor(tagName, text = "") {
+      this.tagName = tagName
+      this.textContent = text
+      this.innerHTML = ""
+      this.children = []
+      this.attributes = new Map()
+      this.dataset = {}
+      this.style = { setProperty: (key, value) => this.attributes.set(`style:${key}`, value) }
+      this.className = ""
+      this.isConnected = true
+    }
+    setAttribute(key, value) {
+      this.attributes.set(key, String(value))
+    }
+    append(...children) {
+      this.children.push(...children)
+    }
+    getBoundingClientRect() {
+      const i = Number(this.attributes.get("style:--_i") ?? 0)
+      return { left: i * 20, top: 0, width: 100, height: 200, right: i * 20 + 100, bottom: 200 }
+    }
+    closest(selector) {
+      return this.__reduced && selector === ".steptrace--reduced" ? this : null
+    }
+  }
+  const previousDocument = globalThis.document
+  globalThis.document = { createElement: (tagName) => new FakeNode(tagName) }
+  const frames = [
+    { array: [3, 1, 2], sorted: [], candidate: null, active: [0, 1], type: "compare", swaps: 0 },
+    { array: [1, 3, 2], sorted: [], candidate: null, active: [0, 1], type: "swap", swaps: 1 },
+  ]
+  try {
+    const { makeSortView } = loadStepTraceModule("src", "render.ts")
+
+    // (1) with motion allowed the swap fly runs: a beat sets data-stage and the
+    // bar springs from its FLIP origin — all without a layout engine throwing.
+    // The travel beat fires immediately (no anticipation hold), so the first
+    // observable stage is "travel" and translateX is already being written.
+    const view = makeSortView(frames)
+    const bar0 = view.nodes[0].children[0]
+    assert.doesNotThrow(() => {
+      view.paint(frames[0], 0)
+      view.paint(frames[1], 1) // the swap frame exercises the staged fly path
+    })
+    assert.equal(bar0.dataset.stage, "travel")
+    assert.match(bar0.style.transform, /translateX/)
+    view.destroy()
+
+    // (2) reduced motion snaps: the fly path early-returns, so no beat is staged
+    // and no transform is written — the value just updates in place
+    const reducedView = makeSortView(frames)
+    const reducedStage = reducedView.nodes[0]
+    reducedStage.__reduced = true
+    const rbar0 = reducedStage.children[0]
+    assert.doesNotThrow(() => {
+      reducedView.paint(frames[0], 0)
+      reducedView.paint(frames[1], 1)
+    })
+    assert.equal(rbar0.dataset.stage, undefined, "no staging under reduced motion")
+    assert.equal(rbar0.children[1].textContent, 1, "swapped value still written in place")
+    reducedView.destroy()
+  } finally {
+    globalThis.document = previousDocument
+  }
 })
 
 test("the marker loop idles only once both the spring and its target are quiet", () => {
-  const { markerIsMoving, stepMarkerSpring } = loadStepTraceModule("src", "render.ts")
+  const { markerIsMoving } = loadStepTraceModule("src", "render.ts")
+  const { springStep, springOmega, SPRINGS } = loadStepTraceModule("src", "motion.ts")
   const at = (x, y) => ({ x, y })
 
-  // first tick after a wake has no previous target to compare against
   assert.equal(markerIsMoving(null, at(10, 5), at(10, 5)), true)
-  // settled: the marker sits on a target that did not move this tick
   assert.equal(markerIsMoving(at(10, 5), at(10, 5), at(10, 5)), false)
-  // the spring is still catching up
   assert.equal(markerIsMoving(at(10, 5), at(10, 5), at(4, 5)), true)
-  // the marker is on target, but the bar under it is still flying
+  // on target, but the bar underneath is still flying
   assert.equal(markerIsMoving(at(10, 5), at(14, 5), at(14, 5)), true)
   assert.equal(markerIsMoving(at(10, 5), at(10, 9), at(10, 9)), true)
 
-  // a real chase converges, so the loop is guaranteed to reach an idle tick
-  let position = 0
+  // the tracker now also gates on residual velocity: keep stepping until the
+  // spring is both on target and quiet, mirroring frameStep's idle test
+  const cfg = { omega0: springOmega(107), zeta: SPRINGS.marker.zeta }
+  let pos = 0
+  let vel = 0
   let ticks = 0
-  while (markerIsMoving(at(100, 0), at(100, 0), at(position, 0)) && ticks < 200) {
-    position = stepMarkerSpring(position, 100, 16, 207)
+  const quiet = () => !markerIsMoving(at(100, 0), at(100, 0), at(pos, 0)) && Math.abs(vel) <= 0.5
+  while (!quiet() && ticks < 200) {
+    const s = springStep(pos, vel, 100, 16, cfg)
+    pos = s.pos
+    vel = s.vel
     ticks++
   }
   assert.ok(ticks < 200, "spring must reach the idle threshold")
-  assert.equal(position, 100)
+  assert.ok(Math.abs(pos - 100) < 0.4 && Math.abs(vel) <= 0.5)
+})
+
+test("the sort view paints headlessly without a layout engine", () => {
+  // FakeNode has no getBoundingClientRect / requestAnimationFrame / getComputedStyle
+  // / closest — the tracker and the spring-driven swap must no-throw and simply
+  // not move (the values still update in place).
+  class FakeNode {
+    constructor(tagName, text = "") {
+      this.tagName = tagName
+      this.textContent = text
+      this.innerHTML = ""
+      this.children = []
+      this.attributes = new Map()
+      this.dataset = {}
+      this.style = { setProperty: (key, value) => this.attributes.set(`style:${key}`, value) }
+      this.className = ""
+    }
+    setAttribute(key, value) {
+      this.attributes.set(key, String(value))
+    }
+    append(...children) {
+      this.children.push(...children)
+    }
+  }
+  const previousDocument = globalThis.document
+  globalThis.document = {
+    createElement: (tagName) => new FakeNode(tagName),
+    createElementNS: (_namespace, tagName) => new FakeNode(tagName),
+    createTextNode: (value) => new FakeNode("#text", value),
+  }
+  try {
+    const { makeSortView } = loadStepTraceModule("src", "render.ts")
+    const frames = [
+      { array: [3, 1, 2], sorted: [], candidate: null, active: [0, 1], type: "compare", swaps: 0 },
+      { array: [1, 3, 2], sorted: [], candidate: null, active: [0, 1], type: "swap", swaps: 1 },
+      { array: [1, 2, 3], sorted: [0, 1, 2], candidate: null, active: [], type: "done", swaps: 1 },
+    ]
+    const view = makeSortView(frames)
+    assert.doesNotThrow(() => {
+      view.paint(frames[0], 0)
+      view.paint(frames[1], 1) // swap frame exercises the spring-driven fly path
+      view.paint(frames[2], 2)
+      view.watch(frames[1])
+      view.destroy()
+    })
+  } finally {
+    globalThis.document = previousDocument
+  }
 })
 
 test("held marker continuity survives only same-token sequential navigation", () => {

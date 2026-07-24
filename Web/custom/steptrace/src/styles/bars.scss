@@ -21,6 +21,19 @@
   align-items: center;
   justify-content: flex-end;
   gap: 5px;
+  /* mount reveal only; swap travel is the JS spring, so nothing overrides this */
+  animation: steptrace-enter var(--_tween) var(--_spring) both;
+  animation-delay: calc(var(--_i, 0) * var(--_stagger));
+}
+@keyframes steptrace-enter {
+  from {
+    opacity: 0;
+    transform: translateY(9px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
 }
 .steptrace__fill {
   position: relative;
@@ -32,10 +45,46 @@
   display: flex;
   align-items: flex-start;
   justify-content: center;
+  /* height rides the role's spring; colour/opacity ride its duration on a plain
+     ease (tints don't overshoot). A bar's state rebinds these vars (role map
+     below), so each state settles with its own feel; unset falls back to the
+     speed-scaled --_tween default. */
   transition:
-    height var(--_tween) var(--_spring),
-    background var(--_tween) ease,
-    opacity var(--_tween) ease;
+    height var(--_role-dur, var(--_tween)) var(--_role-ease, var(--_spring)),
+    background var(--_role-tint, var(--_tween)) ease,
+    opacity var(--_role-tint, var(--_tween)) ease,
+    transform var(--_dur-quick) var(--_ease-decelerate);
+}
+/* role → token map (Phase 1 pilot; Phase 4 spreads the scale to the other
+   renderers). Each state rebinds the fill transition to a (duration, curve):
+     compare        quick  / spring-soft      quiet, look-here
+     swap           move   / spring-snappy    the hero — overshoots into its slot
+     sorted, found  settle / spring-soft      slow confirming pop
+     candidate,
+     probe          quick  / ease-decelerate  arrives and holds
+   The swap's positional travel is the JS spring (render.ts createBarTracker.fly);
+   these tokens govern the fill's height/colour settle per state. */
+.steptrace__bar[data-state="compare"] {
+  --_role-dur: var(--_dur-quick);
+  --_role-ease: var(--_spring-soft);
+  --_role-tint: var(--_dur-quick);
+}
+.steptrace__bar[data-state="swap"] {
+  --_role-dur: var(--_dur-move);
+  --_role-ease: var(--_spring-snappy);
+  --_role-tint: var(--_dur-move);
+}
+.steptrace__bar[data-state="candidate"],
+.steptrace__bar[data-state="probe"] {
+  --_role-dur: var(--_dur-quick);
+  --_role-ease: var(--_ease-decelerate);
+  --_role-tint: var(--_dur-quick);
+}
+.steptrace__bar[data-state="sorted"],
+.steptrace__bar[data-state="found"] {
+  --_role-dur: var(--_dur-settle);
+  --_role-ease: var(--_spring-soft);
+  --_role-tint: var(--_dur-settle);
 }
 .steptrace__bar-cue {
   position: absolute;
@@ -91,39 +140,16 @@
   box-shadow: inset 0 0 0 2px var(--_amber);
   opacity: 1;
 }
-/* FLIP swap: the two swapped bars travel into each other's slots. While flying,
-   the fill's height transition is dropped so each bar ARRIVES at its new height
-   (a literal swap, not a morph). The pair passes on separate planes — whichever
-   bar travels leftward arcs over the one coming the other way — so a swap reads
-   as a trade rather than two columns sliding through each other. The lift stays
-   inside the headroom --pins already reserves. Transform-only, zero layout. */
-.steptrace__bar--fly {
-  animation: steptrace-fly var(--_tween) linear both;
-  position: relative;
-  z-index: 1;
-}
-.steptrace__bar--fly[data-fly="over"] {
-  --_fly-lift: -10px;
-  z-index: 2;
-}
-@keyframes steptrace-fly {
-  from {
-    transform: translate(var(--_fly-dx, 0px), 0);
-    animation-timing-function: ease-out;
-  }
-  50% {
-    transform: translate(calc(var(--_fly-dx, 0px) / 2), var(--_fly-lift, 0px));
-    animation-timing-function: var(--_spring);
-  }
-  to {
-    transform: translate(0, 0);
-  }
-}
-.steptrace__bar--fly .steptrace__fill {
-  transition:
-    background var(--_tween) ease,
-    opacity var(--_tween) ease;
-}
+/* FLIP swap positional travel is now the JS spring (render.ts
+   createBarTracker.fly): each moved bar's translateX springs home from the slot
+   it came from — interruptible, and continuous when a mid-flight frame retargets
+   it. Reduced motion skips the travel (the value just updates in place). */
+/* Phase-2 staging hooks (data-stage wind/travel/settle) are still emitted by
+   createBarTracker but intentionally carry no transform here: the swap reads as
+   one smooth near-critically-damped spring (translateX on the bar), not a squash
+   plus a landing pop that fought the fill's transitioned `transform`. To re-add a
+   subtle landing accent, animate a NON-transform property on [data-stage="settle"]
+   (e.g. filter/box-shadow) so it can't collide with the JS translateX. */
 /* sort states */
 .steptrace__bar[data-state="compare"] .steptrace__fill {
   background: var(--_blue);
@@ -175,6 +201,16 @@
 .steptrace__bar[data-state="sorted"] .steptrace__check {
   display: block;
 }
+/* Group states land on many bars at once, so they sweep instead of flipping as
+   a block. The active compare/swap pair is deliberately excluded — it is the
+   thing being narrated and must react on the exact frame it belongs to. */
+.steptrace__bar[data-state="sorted"] .steptrace__fill,
+.steptrace__bar[data-state="sorted"] .steptrace__check,
+.steptrace__bar[data-outside="1"] .steptrace__fill,
+.steptrace__bar[data-outside="1"] .steptrace__num,
+.steptrace__stage[data-lane="1"] .steptrace__bar[data-lane="muted"] .steptrace__fill {
+  transition-delay: calc(var(--_i, 0) * var(--_stagger));
+}
 /* quick/merge: bars outside the active range are dimmed (like binary-search's
    eliminated half). Overrides the per-state opacity above; keeps the fill hue. */
 .steptrace__bar[data-outside="1"] .steptrace__fill {
@@ -217,7 +253,8 @@
   height: 0;
   pointer-events: none;
   opacity: 0;
-  transition: opacity 0.2s ease;
+  /* reveal only (the transform is JS-driven); quick role, not a magic 0.2s */
+  transition: opacity var(--_dur-quick) var(--_ease-decelerate);
   will-change: transform;
   z-index: 2;
 }
