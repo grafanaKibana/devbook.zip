@@ -1,8 +1,8 @@
 ---
 publish: true
 created: 2026-07-18T14:02:43.965Z
-modified: 2026-07-25T13:57:52.016Z
-published: 2026-07-25T13:57:52.016Z
+modified: 2026-07-25T14:38:23.097Z
+published: 2026-07-25T14:38:23.097Z
 topic:
   - Computer Science
 subtopic:
@@ -18,7 +18,7 @@ An integer is a fixed-width array of bits — 32 for `int`, 64 for `long`. Any q
 
 **Core shape:** fixed-width binary word → `& | ^ ~` and shifts act on all bits per instruction → identities like `n & (n-1)` and `n & -n` turn per-bit loops into `O(popcount)` or `O(1)` work.
 
-# One Count
+# Trace
 
 The trace runs Brian Kernighan's population count on `44` (`00101100`) in an 8-bit word.
 

@@ -1,8 +1,8 @@
 ---
 publish: true
 created: 2026-07-18T14:02:43.998Z
-modified: 2026-07-25T13:57:51.998Z
-published: 2026-07-25T13:57:51.998Z
+modified: 2026-07-25T14:37:50.460Z
+published: 2026-07-25T14:37:50.460Z
 topic:
   - Computer Science
 subtopic:
@@ -20,7 +20,7 @@ The wasted work has structure. The characters already matched are a prefix of th
 
 **Core condition:** pattern fixed in advance → a failure table encodes the pattern's self-overlap → each mismatch slides the pattern without rewinding the text → `Θ(n + m)` time, `Θ(m)` space.
 
-# One Scan
+# Trace
 
 The trace searches for the pattern `ABAB` in the text `ABABCABAB`.
 

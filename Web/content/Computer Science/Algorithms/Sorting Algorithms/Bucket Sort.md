@@ -1,8 +1,8 @@
 ---
 publish: true
 created: 2026-07-25T08:24:19.993Z
-modified: 2026-07-25T13:57:51.989Z
-published: 2026-07-25T13:57:51.989Z
+modified: 2026-07-25T14:38:25.150Z
+published: 2026-07-25T14:38:25.150Z
 topic:
   - Computer Science
 subtopic:
@@ -20,7 +20,7 @@ The mapping is what stands in for comparison, and it is cheap only because the r
 
 **Core condition:** numeric keys over a known, roughly uniform range with `m = Θ(n)` → each key maps to a bucket in `O(1)` → `Θ(n + m) = Θ(n)` expected time with `Θ(n + m)` auxiliary space.
 
-# Scatter and Gather
+# Trace
 
 The trace sorts six keys drawn from `[0, 1)` through five equal-width buckets. It establishes the bucket ranges, scatters each key by `floor(5 · key)`, sorts the occupied buckets, then gathers them from the lowest range to the highest.
 
