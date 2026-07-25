@@ -51,7 +51,7 @@ Strict CQS is sometimes impractical. Common exceptions:
 
 The principle is a guideline, not a law. Apply it where it improves clarity; relax it where strict adherence creates awkward APIs.
 
-# CQS vs CQRS
+# CQS Vs CQRS
 
 | | CQS | CQRS |
 |---|---|---|
@@ -86,7 +86,6 @@ public interface IOrderRepository
 
 The query methods can be called freely in any order without side effects. The command methods are the only paths that change state — making it easy to audit what can mutate the system.
 
-
 # Pitfalls
 
 ## Violating CQS in Repository Methods
@@ -97,7 +96,6 @@ The query methods can be called freely in any order without side effects. The co
 
 **Mitigation**: document the exception explicitly. For new code, prefer returning only the generated ID from commands (not the full entity), then let the caller query if they need the full state.
 
-
 # Questions
 
 > [!QUESTION]- Why does CQS make code easier to reason about?
@@ -105,7 +103,6 @@ The query methods can be called freely in any order without side effects. The co
 
 > [!QUESTION]- When is it pragmatic to violate CQS?
 > Three common justified exceptions: (1) Stack.Pop() — splitting into Peek() + Remove() introduces a race condition in concurrent code. (2) Repository.Add() returning the generated ID — the ID is produced by the database; returning it avoids an extra round-trip. (3) Async I/O methods — `Task<T>` methods that perform I/O and return a result are idiomatic in .NET even when they have side effects. The principle is a guideline: apply it where it improves clarity, relax it where strict adherence creates awkward APIs.
-
 
 # References
 

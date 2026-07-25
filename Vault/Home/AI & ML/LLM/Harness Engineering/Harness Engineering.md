@@ -4,8 +4,7 @@ topic:
 subtopic:
   - LLM
 summary: "Designing the capability surface and scaffold the model acts through — tools, protocols, execution environment."
-tags:
-  - FolderNote
+tags: [FolderNote]
 publish: true
 level:
   - "3"

@@ -22,7 +22,7 @@ The step that carries the whole idea is a single bound comparison that erases a 
 > [!NOTE] Visualization pending
 > Planned StepTrace: a search-tree card showing each node's bound against the running incumbent, where a subtree whose bound cannot beat the incumbent is pruned unexplored. No matching renderer exists in `engine.js` yet.
 
-# Why a subtree can be discarded
+# Why a Subtree Can Be Discarded
 
 Branch-and-bound turns on four moving parts:
 
@@ -35,7 +35,7 @@ The correctness of the discard rests on the optimism of the bound. For maximisat
 
 This is the same optimism requirement as [[A-Star Search|A* Search]]'s admissibility condition: a guided tree search stays correct only while its estimate errs in the optimistic direction and never lies pessimistically. Branch-and-bound is that same idea applied to the decision tree of an optimisation problem, with the bounding function playing the role of the heuristic. It is why an LP relaxation is a safe bound — an optimal fractional solution can only meet or exceed the integer optimum, so ignoring integrality never under-shoots.
 
-# Exploration order
+# Exploration Order
 
 Every live (unpruned, unexpanded) node is a candidate to visit next, and the order changes how fast a strong incumbent appears — which in turn changes how much gets pruned.
 
@@ -56,7 +56,7 @@ Let `n` be the number of decisions (the tree depth) and `b` the cost of computin
 
 The table describes depth-first branch-and-bound over an `n`-decision binary tree (0/1 knapsack), so auxiliary space is the `O(n)` recursion stack. Best-first exploration keeps live nodes in a priority queue instead of a stack, so its auxiliary space grows with the frontier — up to `O(2ⁿ)` nodes — even though it usually expands the fewest nodes to certify the optimum. A permutation problem such as TSP has an `n!` tree in place of `2ⁿ`. In every case the worst case is exponential: branch-and-bound is exact search that improves the constant factor and the typical case, never the complexity class.
 
-# When the bound stops helping
+# When the Bound Stops Helping
 
 A **non-optimistic bound returns a wrong answer, silently.** Suppose a maximisation subtree's true best is 90 but the bound reports 78, and the incumbent is 80. The subtree is pruned, its 90 is never found, and the search halts reporting 80 as *proven optimal*. Nothing flags the error — the optimality certificate is simply false. The defence is to derive the bound from a relaxation that provably dominates the objective (an LP relaxation that ignores integrality), even when that makes the bound looser.
 
@@ -64,9 +64,10 @@ A **bound too loose to discriminate degenerates to brute force.** "Assume every 
 
 **Best-first exploration exhausts memory before time.** On a hard instance the priority queue accumulates exponentially many live nodes and the process runs out of RAM long before it runs out of clock. Depth-first or iterative-deepening branch-and-bound bounds space to `O(depth)`, at the cost of re-expanding nodes or losing some global pruning quality.
 
-# Reference drawer
+# Reference Drawer
 
 > [!ABSTRACT]- Control flow
+>
 > ```mermaid
 > flowchart TD
 >   A[Pop a live node from the frontier] --> B[Compute its optimistic bound]
@@ -83,6 +84,7 @@ A **bound too loose to discriminate degenerates to brute force.** "Assume every 
 > ```
 
 > [!EXAMPLE]- C# implementation — 0/1 knapsack with an LP-relaxation bound
+>
 > ```csharp
 > public sealed record Item(int Value, int Weight);
 >

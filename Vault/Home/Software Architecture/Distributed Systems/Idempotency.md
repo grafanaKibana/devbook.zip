@@ -17,14 +17,14 @@ Idempotency means applying the same logical operation multiple times produces th
 
 Idempotency is implemented at the boundary where duplicates can enter the system, then reinforced at persistence boundaries so duplicates cannot corrupt state.
 
-## Natural idempotency
+## Natural Idempotency
 
 - `SET balance = 100` is idempotent because repeating it keeps the same result.
 - `INCREMENT balance by 100` is not idempotent because each retry changes state again.
 - HTTP `PUT` and `DELETE` are idempotent by semantics.
 - HTTP `POST` is not idempotent by default because each call usually creates a new server side effect.
 
-## Idempotency keys
+## Idempotency Keys
 
 For non-idempotent operations, the client sends a unique key per logical operation in `Idempotency-Key`.
 
@@ -39,7 +39,7 @@ Server flow:
 
 This turns ambiguous network outcomes into deterministic behavior for retries.
 
-## Database level techniques
+## Database Level Techniques
 
 - **UPSERT**: `INSERT ... ON CONFLICT DO UPDATE` protects read model and projection handlers from duplicate writes.
 - **Unique constraints**: enforce one row per business identity such as `merchant_id + client_operation_id`.
@@ -97,7 +97,7 @@ Interview critical distinction:
 
 Even with idempotent methods, distributed replicas can still show temporary divergence depending on [[Home/Software Architecture/Distributed Systems/Consistency Models]], so method semantics and system consistency level are separate concerns.
 
-# Payment implementation boundary
+# Payment Implementation Boundary
 
 Payment endpoints need a durable local attempt and a provider that honors the same idempotency key. The provider call must run outside local database transactions, and timeouts must be represented as unknown outcomes rather than rolled-back evidence. [[Home/Software Architecture/Distributed Systems/Payment Systems#Durable Idempotency|Payment Systems]] owns the complete reserve-call-reconcile sequence and the narrow effect guarantee.
 # Common Applications
@@ -115,25 +115,25 @@ HTTP method semantics are only a starting point. `PUT` and `DELETE` are idempote
 
 # Pitfalls
 
-## Message handlers not idempotent under at least once delivery
+## Message Handlers Not Idempotent under at Least once Delivery
 
 - **What goes wrong**: duplicate events apply side effects multiple times, such as multiple shipment records.
 - **Why it happens**: brokers redeliver when ack is lost or consumer crashes after processing.
 - **How to avoid it**: persist processed message ids, use upserts, and make handlers safe to replay.
 
-## Idempotency key scope set incorrectly
+## Idempotency Key Scope Set Incorrectly
 
 - **What goes wrong**: broad scope blocks legitimate operations or narrow scope fails to deduplicate retries.
 - **Why it happens**: key design ignores tenant and operation boundaries.
 - **How to avoid it**: scope keys by business boundary like tenant plus operation id and enforce payload hash checks.
 
-## Check then process race window
+## Check then Process Race Window
 
 - **What goes wrong**: two concurrent duplicates both pass pre check and both charge.
 - **Why it happens**: non atomic check then execute logic without a uniqueness barrier.
 - **How to avoid it**: move gate into atomic insert or unique constraint with transaction and conflict handling.
 
-## Idempotent is not safe
+## Idempotent is Not Safe
 
 - **What goes wrong**: teams assume idempotent operations have no side effects.
 - **Why it happens**: confusion between HTTP safe and HTTP idempotent semantics.

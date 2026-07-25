@@ -10,6 +10,7 @@ priority: High
 status: Done
 publish: true
 ---
+
 Ordering a custom sandwich at a sub shop is a Builder in action. You start with bread, add meat, choose veggies, pick a sauce, decide on a size — step by step, in any order, skipping what you don’t want. At the end, the sandwich artist assembles everything into a finished product. You never see a constructor that takes twelve arguments for bread-type, meat-type, lettuce-yes-no, tomato-yes-no.
 
 The Builder pattern separates the construction of a complex object from its representation. A `Builder` class accumulates configuration through a fluent API — `.WithShipping(address)`, `.WithDiscount(code)`, `.WithGiftWrap()` — and a final `Build()` call validates constraints and assembles the finished object. Each step is optional, order-independent, and self-documenting. For **simple objects**, modern C# `required` properties and `init` setters with object initializers are often sufficient — Builder earns its complexity when construction involves cross-field validation, computed values, or a director-driven assembly sequence where the same process produces different representations.

@@ -10,6 +10,7 @@ priority: Medium
 status: Ready to Repeat
 publish: true
 ---
+
 An event is a restricted delegate member that implements publisher-subscriber communication. Outside the declaring type, consumers can only subscribe (`+=`) and unsubscribe (`-=`); they cannot invoke or replace the delegate invocation list. This encapsulation is why events are preferred over raw public delegates in APIs.
 
 The standard .NET event signature uses `EventHandler` or `EventHandler<TEventArgs>`.
@@ -48,7 +49,6 @@ With a public delegate field, any caller can do dangerous operations like:
 - replace all handlers
 
 `event` blocks these operations for external code and exposes only subscription semantics.
-
 
 # Custom `add` and `remove`
 
@@ -103,13 +103,11 @@ public sealed class Listener : IDisposable
 }
 ```
 
-
 # Tradeoffs
 
 - **Events vs public delegate fields**: A public delegate field lets any external caller replace, null out, or directly invoke the handler. The `event` keyword restricts external callers to `+=`/`-=` only, preserving publisher control. Always use `event` in public APIs.
 - **Events vs `IObservable<T>` (Rx)**: Events are synchronous, single-publisher, multicast notifications with no composition support. `IObservable<T>` from Reactive Extensions supports filtering, merging, debouncing, retrying, and async continuations — at the cost of a dependency and a steeper learning curve. Use `IObservable<T>` when you need stream operators; events for simple point-to-point notifications.
 - **Custom `add`/`remove` overhead**: The default event implementation stores handlers in a multicast delegate (immutable; every `+=`/`-=` allocates a new list). In high-frequency subscribe/unsubscribe scenarios, custom accessors backed by a `ConcurrentDictionary` or locked collection reduce per-operation allocation.
-
 
 # Questions
 

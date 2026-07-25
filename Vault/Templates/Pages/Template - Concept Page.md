@@ -4,10 +4,10 @@ subtopic: []
 level: []
 priority: Medium
 status: Not-Started
-tags:
-  - Template
+tags: [Template]
 publish: false
 ---
+
 <%*
 // Derive topic/subtopic from the path below Vault/Home
 const parts = tp.file.folder(true).split("/");

@@ -21,7 +21,7 @@ What it buys over a plain trie is memory proportional to the characters actually
 > [!NOTE] Visualization pending
 > Planned StepTrace: a card that spells a key by alternating two moves — a `lo`/`hi` descent through the BST of alternatives at one string position, then an `eq` step that advances to the next character — and lights an end-of-key flag when the final `eq` node is reached. No matching renderer exists in `engine.js` yet.
 
-# Representation and invariants
+# Representation and Invariants
 
 A node holds a split character, an end-of-key flag, and three child links:
 
@@ -54,7 +54,7 @@ Bounds are in the key length `L`, the number of stored keys `n`, and the alphabe
 
 The memory column is the reason to choose a TST over an array-backed trie: it scales with the characters present, not with `σ × nodes`. The `O(L + log n)` lookup is the price — slightly slower per character than a trie's array indexing, but with none of the empty-slot overhead and with sorted order retained. Insertion order still matters: keys inserted in sorted order build a degenerate per-position BST, so shuffling the input (or balancing) keeps the `log` term honest.
 
-# Where the three-way split earns its place
+# Where the Three-way Split Earns Its Place
 
 The `lo`/`eq`/`hi` structure is not just a memory trick — it makes queries that a hash-map trie cannot answer cheaply fall out naturally.
 
@@ -64,9 +64,10 @@ The `lo`/`eq`/`hi` structure is not just a memory trick — it makes queries tha
 
 Where it breaks is balance. Inserting keys in sorted order turns a per-position BST into a linked list, so a search that collides there degrades to `O(L + n)` — the same failure a plain [[Binary Search Tree]] has, now inside one string position. Randomising insertion order, or rebuilding the BSTs balanced, restores the `log` factor. And like any prefix structure, a TST only pays off when keys share prefixes and have a meaningful character sequence; opaque integer or float keys gain nothing from it.
 
-# Reference drawer
+# Reference Drawer
 
 > [!ABSTRACT]- TST holding `cat`, `car`, `cup`, `bat`
+>
 > ```mermaid
 > graph TD
 >   C["c"] -->|lo| B["b"]
@@ -81,6 +82,7 @@ Where it breaks is balance. Inserting keys in sorted order turns a per-position 
 > `eq` links (vertical) advance one character; `lo`/`hi` links stay at the same position and order the alternatives. `car` sits in the `lo` subtree of the `t` node because `r < t` at position 2; `cup` branches to `hi` at position 1 because `u > a`.
 
 > [!EXAMPLE]- C# implementation
+>
 > ```csharp
 > public sealed class TernarySearchTree
 > {

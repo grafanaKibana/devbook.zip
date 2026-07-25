@@ -91,7 +91,6 @@ HMAC authenticates a message between parties that share one secret. Either party
 
 Choose the algorithm the protocol specifies and the complete client set can verify. Algorithm agility means storing an algorithm or key identifier, supporting a controlled migration, and rejecting unapproved algorithms; it does not mean trusting an unverified message to choose its verifier.
 
-
 # Questions
 
 > [!QUESTION]- Why does signing use the private key to encrypt the hash, not the public key?
@@ -102,7 +101,6 @@ Choose the algorithm the protocol specifies and the complete client set can veri
 
 > [!QUESTION]- How do you choose between ECDSA and RSA?
 > Follow the protocol's allowed algorithms and encodings, then check every signer, verifier, HSM, and rotation path. ECDSA P-256 offers shorter keys and signatures; RSA often has broader compatibility with existing infrastructure. Neither should be selected by an untrusted message or treated as a universal default.
-
 
 # References
 

@@ -4,8 +4,7 @@ topic:
 subtopic:
   - Protocols
 summary: "The agreed rules that let machines communicate, with each layer's protocols and debugging."
-tags:
-  - FolderNote
+tags: [FolderNote]
 publish: true
 priority: High
 level:

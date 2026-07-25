@@ -22,7 +22,7 @@ What it gives up is growth and history: capacity is chosen once, and once the ri
 > [!NOTE] Visualization pending
 > Planned StepTrace: a ring-buffer card showing a fixed-size array with head and tail indices that wrap modulo capacity, with a full-buffer write overwriting the oldest element as `head` is dragged forward. No matching renderer exists in `engine.js` yet.
 
-# Representation and invariants
+# Representation and Invariants
 
 Four fields hold the entire state:
 
@@ -51,7 +51,7 @@ A monotonic-counter variant (never-wrapped 64-bit `head`/`tail`, masked to the a
 
 Structure space is `O(capacity)` and fixed at construction — the array is sized up front and never reallocated, so steady-state operation allocates nothing and produces no per-element garbage. That is the property that separates it from a growable queue: the bounds above are true worst-case per operation, not amortized over resizes, because no resize ever happens.
 
-# When the capacity is reached
+# When the Capacity is Reached
 
 Every boundary here follows from the two design commitments — a fixed array and wrap arithmetic.
 
@@ -61,9 +61,10 @@ The **empty-vs-full ambiguity** becomes a real failure when neither a `count` no
 
 The ring **does not grow**. Reaching capacity never triggers a resize — that is the point of a bounded footprint. A "growable" ring is a different structure: it allocates a larger array and re-linearizes the wrapped contents (copying the `head…end` segment then the `0…tail` segment into contiguous order), an `O(count)` operation that reintroduces the allocation spikes a fixed ring exists to avoid.
 
-# Reference drawer
+# Reference Drawer
 
 > [!ABSTRACT]- Index layout of a wrapped ring
+>
 > ```mermaid
 > flowchart LR
 >   S0["0: c"] --> S1["1: (free)"]
@@ -75,6 +76,7 @@ The ring **does not grow**. Reaching capacity never triggers a resize — that i
 > `capacity = 5`, `head = 3`, `count = 3`. Live elements `a, b, c` occupy indices `3, 4, 0`; `tail = 1`.
 
 > [!EXAMPLE]- C# implementation
+>
 > ```csharp
 > public sealed class CircularBuffer<T>
 > {

@@ -6,8 +6,7 @@ topic:
   - Programming
 subtopic: []
 summary: "Software craft focused on the .NET stack: C#, runtime, web APIs, and concurrency."
-tags:
-  - FolderNote
+tags: [FolderNote]
 publish: true
 status: Creation
 level:
@@ -24,11 +23,11 @@ const { FolderStructureMap } = await dc.require("Assets/components/devbook-folde
 return FolderStructureMap;
 ```
 
-# API contracts and SDK tooling
+# API Contracts and SDK Tooling
 
 An API is a contract between software components. For a service API, a client SDK packages the wire contract into language-specific types, authentication, serialization, helpers, documentation, examples, and sometimes build or diagnostic tools. Calling an HTTP API directly exposes the transport and wire schema. Calling it through an SDK buys ergonomics and consistency while adding package lifecycle, generated-code, and abstraction costs.
 
-## The same call two ways
+## The Same Call Two Ways
 
 For `GET /v1/widgets/{id}`, a manual .NET client owns every HTTP detail:
 
@@ -52,7 +51,7 @@ The short call did not remove HTTP. The SDK still chooses a base URL, sends cred
 
 The visual shows a common HTTP API and client-toolkit relationship, not a definition. APIs are not limited to HTTP, and an SDK may wrap several APIs, local libraries, emulators, generators, and tools. The contract remains the authority; the SDK is one packaged consumer surface.
 
-## Costs and versioning
+## Costs and Versioning
 
 | Concern | Direct API call | SDK |
 | --- | --- | --- |

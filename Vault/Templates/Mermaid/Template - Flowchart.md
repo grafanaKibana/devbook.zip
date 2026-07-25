@@ -1,6 +1,5 @@
 ---
-tags:
-  - Template
+tags: [Template]
 ---
 
 ```mermaid

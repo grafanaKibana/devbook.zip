@@ -18,7 +18,7 @@ A calendar holds a list of `[start, end]` ranges in arbitrary order, some of the
 > [!NOTE] Visualization pending
 > Planned StepTrace: an intervals card showing intervals sorted by start and swept left to right, each interval either extending the current accumulated block when it overlaps or opening a new block when a gap appears. No matching renderer exists in `engine.js` yet.
 
-# Why sorting makes overlap local
+# Why Sorting Makes Overlap Local
 
 The sweep carries one piece of state: `current`, the interval being accumulated, initialised to the first interval after sorting. For each following `next`:
 
@@ -27,7 +27,7 @@ The sweep carries one piece of state: `current`, the interval being accumulated,
 
 The reason one comparison suffices is the sort. After ascending starts, every interval later in the list starts at or after `next.start`. If `next` does not reach `current.end`, no interval after it can reach back either, so `current` is final the moment a gap appears. The invariant that survives each step is that `current.end` holds the furthest right edge of every interval merged into the current block, which is exactly the value the next overlap test needs.
 
-# Variants that reuse the sweep
+# Variants that Reuse the Sweep
 
 The same sort-then-sweep skeleton answers the rest of the interval family, each specialising the emit/extend step:
 
@@ -49,15 +49,16 @@ Every case is `O(n log n)` because the comparison sort is the floor and the swee
 
 Replacing the comparison sort with a counting or radix sort drops the whole algorithm to `O(n)`, but only when the coordinates are integers drawn from a range polynomial in `n`; on unbounded or non-integer starts the `O(n log n)` comparison sort remains the floor.
 
-# When the convention or order breaks
+# When the Convention or Order Breaks
 
 **The overlap definition is a decision, not a default.** Whether `[1,2]` and `[2,3]` merge depends on closed versus half-open semantics. Closed intervals share the point `2` and merge into `[1,3]`; half-open `[1,2)` and `[2,3)` touch nothing and stay separate. The choice maps straight onto the comparison operator — `<=` for closed, `<` for half-open — and getting it wrong produces off-by-one merges that pass small tests and fail exactly on boundary-touching inputs. Meeting-room problems almost always want half-open so a meeting ending at `2` and one starting at `2` share the room.
 
 **Unsorted input silently produces wrong merges.** The "overlap is local" guarantee is the sort's, not the sweep's. On `[[1,3],[6,8],[2,5]]` an unsorted sweep sees `[1,3]` then `[6,8]`, finds a gap, emits `[1,3]`, and never reconsiders it — so the overlapping `[2,5]` merges against the wrong block or opens a spurious one, and `[1,5]` is never formed. Nothing crashes; the output is simply incorrect. Sorting by end rather than start breaks the same guarantee for the same reason.
 
-# Reference drawer
+# Reference Drawer
 
 > [!ABSTRACT]- Sweep control flow
+>
 > ```mermaid
 > flowchart TD
 >   A[Sort intervals by start] --> B[current = first interval]
@@ -72,6 +73,7 @@ Replacing the comparison sort with a counting or radix sort drops the whole algo
 > ```
 
 > [!EXAMPLE]- C# implementation
+>
 > ```csharp
 > // Merge a static list of intervals (closed intervals: <=).
 > public static List<int[]> Merge(int[][] intervals)

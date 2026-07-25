@@ -68,7 +68,6 @@ The practical takeaway: most "P2P" systems are hybrids — they use a small cent
 > [!QUESTION]- How does WebRTC use P2P, and what is the role of STUN/TURN servers?
 > WebRTC establishes direct peer connections between browsers for audio, video, and data. The challenge is NAT traversal: most browsers are behind NAT and don't have public IP addresses. STUN servers help peers discover their public IP/port. When direct connection fails (symmetric NAT), TURN servers relay traffic. The goal is to minimize relay usage — direct P2P connections reduce latency and server cost; TURN relay is the fallback.
 
-
 # Pitfalls
 
 **NAT traversal failure**

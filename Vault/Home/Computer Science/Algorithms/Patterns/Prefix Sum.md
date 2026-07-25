@@ -20,7 +20,7 @@ The trade is one `O(n)` pass and `O(n)` extra memory for `O(1)` answers thereaft
 > [!NOTE] Visualization pending
 > Planned StepTrace: a running-sum-array card that builds `prefix` in one left-to-right pass, then highlights `prefix[r + 1]` and `prefix[l]` and shows their difference isolating a range. No matching renderer exists in `engine.js` yet.
 
-# Why the difference is the range sum
+# Why the Difference is the Range Sum
 
 `prefix[k]` accumulates every element strictly before index `k`, so `prefix[r + 1]` covers `a[0..r]` and `prefix[l]` covers `a[0..l-1]`. Subtracting them removes the common head `a[0..l-1]` exactly, leaving `a[l] + ... + a[r]`. The `prefix[0] = 0` sentinel and the length-`(n + 1)` array are what let `l = 0` use the same formula as any other left bound: `prefix[0]` supplies the empty sum with no special case.
 
@@ -39,7 +39,7 @@ The idea extends along two independent axes:
 
 The build pays for itself the moment a second query arrives: two queries against `prefix` cost `O(n) + O(1)`, while two naive re-sums cost `O(n)` each and only grow from there. The 2D table shifts the same accounting to `O(nm)` build for `O(1)` rectangle sums.
 
-# When the precompute stops holding
+# When the Precompute Stops Holding
 
 The array must be **static** for the whole query phase. Writing `a[j] = x` changes every running total at index `j + 1` and beyond, so a single element update invalidates the entire tail of `prefix` and forces an `O(n)` rebuild. Interleaving `q` updates with queries degrades the whole approach to `O(nq)` — the exact cost the precompute was meant to remove. A workload that mutates the array between reads wants a [[Fenwick Tree]] (point update plus prefix query, each `O(log n)`) or a [[Segment Tree]] (range update and range query) instead; both accept the log factor per query in exchange for cheap updates.
 
@@ -47,9 +47,10 @@ The `+1` convention is the classic off-by-one. Because the formula is `prefix[r 
 
 Accumulated totals also grow far faster than any individual element. A million `int` values near `2^31` overflow a 32-bit prefix long before any single value does, wrapping to a wrong — often negative — total while every input looked in range. Accumulating in a 64-bit type keeps the running sum valid; the same risk carries into the difference between two large prefixes.
 
-# Reference drawer
+# Reference Drawer
 
 > [!ABSTRACT]- Range sum as a difference of prefixes
+>
 > ```mermaid
 > flowchart LR
 >   A["prefix[l]<br/>sum of a[0..l-1]"] --> C["prefix[r+1] - prefix[l]"]
@@ -58,6 +59,7 @@ Accumulated totals also grow far faster than any individual element. A million `
 > ```
 
 > [!EXAMPLE]- C# implementation
+>
 > ```csharp
 > // Build once, then answer any range sum in O(1).
 > public static long[] BuildPrefix(int[] a)

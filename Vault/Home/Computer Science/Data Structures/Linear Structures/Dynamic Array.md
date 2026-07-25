@@ -20,7 +20,7 @@ The representation is a backing array plus two counters: a `count` of live eleme
 > [!NOTE] Visualization pending
 > Planned StepTrace: a growing-array card showing a backing buffer filling to capacity, an overflow event that allocates a larger buffer and copies every element across, then appends resuming into the new spare slots in `O(1)`. No matching renderer exists in `engine.js` yet.
 
-# Representation and growth
+# Representation and Growth
 
 Three fields define the state. The backing array holds the elements in index order; `count` is the logical size the caller sees; `capacity` is the physical length of the backing array. The two counters are distinct on purpose: `capacity - count` is the reserved slack that lets an append skip allocation.
 
@@ -48,7 +48,7 @@ The amortized `O(1)` on append is a sequence-level guarantee, not a per-call one
 
 Space is `O(n)` but with slack: immediately after a doubling the buffer is half empty, so a dynamic array can hold up to roughly `2×` its live elements in allocated slots.
 
-# Boundaries tied to the backing array
+# Boundaries Tied to the Backing Array
 
 The resize is an `O(n)` **latency spike**, not just an accounting curiosity. A real-time loop or a very large array can stall on the single append that copies millions of elements, so a steady-state `O(1)` throughput hides a tail-latency outlier at each power-of-two boundary. Pre-sizing with a known capacity removes those spikes entirely.
 
@@ -58,9 +58,10 @@ The growth `FACTOR` is a direct memory-versus-copy trade. A factor of `2` wastes
 
 Editing away from the tail is `O(n)` because contiguity must be preserved. `Insert(0, x)` shifts every existing element one slot right; `RemoveAt(0)` shifts every element left. A [[Deque]] avoids this by giving `O(1)` insertion and removal at both ends. And because a resize allocates a fresh buffer, any reference, index-derived pointer, or iterator bound to the old backing array is invalidated the moment the array grows — mutating a dynamic array while iterating it is unsound for exactly this reason.
 
-# Reference drawer
+# Reference Drawer
 
 > [!ABSTRACT]- Append with overflow
+>
 > ```mermaid
 > flowchart TD
 >   A[Append x] --> B{count < capacity}
@@ -73,6 +74,7 @@ Editing away from the tail is `O(n)` because contiguity must be preserved. `Inse
 > ```
 
 > [!EXAMPLE]- C# implementation
+>
 > ```csharp
 > public sealed class DynamicArray<T>
 > {

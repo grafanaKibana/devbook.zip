@@ -10,6 +10,7 @@ priority: Medium
 status: Ready to Repeat
 publish: true
 ---
+
 A delegate is a type-safe function pointer in C#. It lets you treat methods as values: store them in variables, pass them to other methods, compose invocation lists, and invoke them later. Delegates are foundational for callbacks, LINQ, strategy-style APIs, and events.
 
 A delegate type defines a method signature. Any method with a compatible signature (static or instance) can be assigned to that delegate variable.
@@ -23,7 +24,7 @@ PriceCalculator calc = StandardPrice;
 var total = calc(3, 19.99m); // 59.97
 ```
 
-# Built-in generic delegates
+# Built-in Generic Delegates
 
 - `Action<T...>`: returns `void`
 - `Func<T..., TResult>`: returns a value

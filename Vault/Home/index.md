@@ -1,11 +1,10 @@
 ---
 title: Welcome to DevBook!
-tags:
-  - FolderNote
-  - MetricsIgnore
+tags: [FolderNote, MetricsIgnore]
 publish: true
 icon: home
 ---
+
 ```datacorejsx
 const { CARD_CSS, squashCss } = await dc.require("Assets/components/devbook-card.jsx");
 const { icon } = await dc.require("Assets/components/devbook-icons.jsx");

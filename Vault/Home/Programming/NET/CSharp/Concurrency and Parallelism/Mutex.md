@@ -33,7 +33,7 @@ m.ReleaseMutex(); // count = 1 — still owned
 m.ReleaseMutex(); // count = 0 — now released for other threads
 ```
 
-## Acquiring multiple handles
+## Acquiring Multiple Handles
 
 Because `Mutex` is a `WaitHandle`, you can acquire several at once with `WaitHandle.WaitAll` (atomic — avoids the lock-ordering deadlocks of nested `WaitOne` calls) or race them with `WaitAny`:
 

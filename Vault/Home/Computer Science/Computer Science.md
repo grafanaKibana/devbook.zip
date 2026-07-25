@@ -6,11 +6,10 @@ topic:
   - Computer Science
 subtopic: []
 summary: "Core CS reasoning for software engineering: data structures, algorithms, complexity analysis, and operating-system mechanisms."
-tags:
-  - FolderNote
+tags: [FolderNote]
 publish: true
 level:
-  - '4'
+  - "4"
 status: Creation
 priority: High
 ---

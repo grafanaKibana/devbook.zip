@@ -10,6 +10,7 @@ priority: Medium
 status: Ready to Repeat
 publish: true
 ---
+
 A VPN (Virtual Private Network) creates an encrypted tunnel between two endpoints so traffic flows as if both are on the same private network, even over the public internet. You reach for it to access private resources remotely, connect geographically separated offices, or secure traffic over untrusted networks (public Wi-Fi, cloud provider links).
 
 The key engineering work is not just encryption — it is routing, DNS, identity, and split-tunnel policy: deciding which traffic goes through the tunnel and which goes directly to the internet.
@@ -96,7 +97,6 @@ PersistentKeepalive = 25
 
 > [!QUESTION]- What causes DNS leaks in a VPN setup, and how do you fix them?
 > DNS queries bypass the encrypted tunnel — typically because the OS sends DNS requests to the default interface rather than the VPN interface. Fix: route DNS through the tunnel by setting DNS to an internal server and ensuring DNS requests use the VPN's routing table, or by running a local DNS resolver that forces all queries through the tunnel.
-
 
 # Pitfalls
 

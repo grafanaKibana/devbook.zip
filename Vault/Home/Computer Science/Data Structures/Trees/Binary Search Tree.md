@@ -20,7 +20,7 @@ The binding rule is the **ordering invariant**: for any node, every key in its l
 > [!NOTE] Visualization pending
 > Planned StepTrace: a tree card showing the decisive transition to animate — a search descending left or right by comparison, an insert falling through to the leaf where the search runs off, and a sorted-insert sequence stretching the tree into a right-leaning chain. No matching renderer exists in `engine.js` yet.
 
-# Representation and invariants
+# Representation and Invariants
 
 Each node holds a `key`, a `Left` child, a `Right` child, and optionally a `Parent` back-pointer. There are no arrays or indices — the structure is a graph of node objects reachable from a single `root`. An empty tree is `root == null`; a leaf is a node whose `Left` and `Right` are both null.
 
@@ -45,7 +45,7 @@ Every operation cost is a function of the height `h`. A balanced tree has `h = O
 
 Structure storage is `O(n)` overall — one node per key, plus the child pointers. The per-operation Space column above is auxiliary space on top of that: a recursive walk consumes `O(h)` call-stack frames, while an iterative walk keeps it at `O(1)`. None of these bounds assume balancing, which is precisely the gap the boundaries below expose.
 
-# When the shape stops cooperating
+# When the Shape Stops Cooperating
 
 A plain BST does not self-balance. Inserting keys in sorted order — `1, 2, 3, 4, 5` — sends every insert down the right child, because each new key is larger than everything already present. The result satisfies the ordering invariant perfectly and is still an `O(n)` chain indistinguishable in cost from a [[LinkedList]]:
 
@@ -63,9 +63,10 @@ Deletion is the operation with real cases, and each is a consequence of keeping 
 
 Order queries by *rank* — "the 7th smallest key" — are not `O(log n)` on a plain BST. Reaching them requires counting nodes along the way, which is `O(n)` unless each node is augmented with a subtree-size field. The base structure stores order but not position.
 
-# Reference drawer
+# Reference Drawer
 
 > [!ABSTRACT]- Balanced vs. degenerate shape
+>
 > ```mermaid
 > flowchart TD
 >   subgraph Balanced
@@ -84,6 +85,7 @@ Order queries by *rank* — "the 7th smallest key" — are not `O(log n)` on a p
 > ```
 
 > [!EXAMPLE]- C# implementation
+>
 > ```csharp
 > public sealed class Node
 > {

@@ -20,7 +20,7 @@ A stack enforces it structurally. All access is fixed to a single end called the
 > [!NOTE] Visualization pending
 > Planned StepTrace: a linear-container card showing push then pop acting only at the top — several pushes grow the top end, then pops return them in reverse (LIFO), with the interior never touched. No matching renderer exists in `engine.js` yet.
 
-# Representation and invariants
+# Representation and Invariants
 
 A stack is an interface — push/pop/peek at one end — that admits two common backings.
 
@@ -44,7 +44,7 @@ The structure deliberately discards random access, bottom access, and search —
 
 Structure space is `O(n)` for both backings. Auxiliary space per operation is `O(1)`, with one exception: an array-backed `Push` that triggers a resize momentarily holds both the old and doubled arrays, an `O(n)` spike on that single call. The `O(1)` on array push is therefore amortized, not worst-case — doubling makes any sequence of `n` pushes cost `O(n)` total, so the per-push average is constant even though an individual resize is linear. The linked backing gives a true per-call `O(1)` but pays a heap allocation and pointer-chasing cache cost on every push.
 
-# Where the discipline bites
+# Where the Discipline Bites
 
 Each of these follows directly from fixing access to one end.
 
@@ -56,9 +56,10 @@ Each of these follows directly from fixing access to one end.
 
 **The hardware call stack is a stack too.** Each function call pushes a frame (locals, return address) and each return pops it, following the same LIFO discipline on a fixed-size region. Deep or unbounded recursion overflows it — `StackOverflowException`, uncatchable. Converting the recursion to an explicit `Stack<T>` moves those frames to the heap, where depth is bounded by available memory rather than the fixed call-stack size; the traversal logic is unchanged (push instead of recurse, pop instead of return).
 
-# Reference drawer
+# Reference Drawer
 
 > [!ABSTRACT]- Top-of-stack view
+>
 > ```mermaid
 > graph TD
 >   T[top] --> C[item c]
@@ -68,6 +69,7 @@ Each of these follows directly from fixing access to one end.
 > ```
 
 > [!EXAMPLE]- C# usage of `Stack<T>`
+>
 > ```csharp
 > var stack = new Stack<string>();
 > stack.Push("A");

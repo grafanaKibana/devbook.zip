@@ -4,7 +4,7 @@
       "enabled": true
     },
     "dedupe-yaml-array-values": {
-      "enabled": false,
+      "enabled": true,
       "dedupe-alias-key": true,
       "dedupe-tag-key": true,
       "dedupe-array-keys": true,
@@ -22,10 +22,10 @@
       "enabled": true
     },
     "format-yaml-array": {
-      "enabled": false,
+      "enabled": true,
       "alias-key": true,
       "tag-key": true,
-      "default-array-style": "single-line",
+      "default-array-style": "multi-line",
       "default-array-keys": true,
       "force-single-line-array-style": "",
       "force-multi-line-array-style": ""
@@ -52,10 +52,10 @@
       "sort-order": "Ascending Alphabetical"
     },
     "yaml-key-sort": {
-      "enabled": false,
-      "yaml-key-priority-sort-order": "",
+      "enabled": true,
+      "yaml-key-priority-sort-order": "order icon color publish tags topic subtopic summary level priority status",
       "priority-keys-at-start-of-yaml": true,
-      "yaml-sort-order-for-other-keys": "Ascending Alphabetical"
+      "yaml-sort-order-for-other-keys": "None"
     },
     "yaml-timestamp": {
       "enabled": false,
@@ -128,7 +128,7 @@
       "enabled": false
     },
     "default-language-for-code-fences": {
-      "enabled": false,
+      "enabled": true,
       "default-language": ""
     },
     "emphasis-style": {
@@ -179,11 +179,11 @@
       "list-style": "consistent"
     },
     "compact-yaml": {
-      "enabled": false,
+      "enabled": true,
       "inner-new-lines": false
     },
     "consecutive-blank-lines": {
-      "enabled": false
+      "enabled": true
     },
     "convert-spaces-to-tabs": {
       "enabled": false,
@@ -245,7 +245,7 @@
       "english-symbols-punctuation-after": "-+'\"([¥$"
     },
     "trailing-spaces": {
-      "enabled": false,
+      "enabled": true,
       "two-space-line-break": false
     },
     "add-blockquote-indentation-on-paste": {
@@ -275,12 +275,12 @@
   },
   "lintOnSave": true,
   "recordLintOnSaveLogs": false,
-  "displayChanged": false,
+  "displayChanged": true,
   "suppressMessageWhenNoChange": false,
   "suppressLintAllFilesConfirmationModal": false,
   "suppressLintAllFilesInFolderConfirmationModal": false,
   "lintOnFileChange": true,
-  "displayLintOnFileChangeNotice": false,
+  "displayLintOnFileChangeNotice": true,
   "settingsConvertedToConfigKeyValues": true,
   "additionalFileExtensions": [],
   "foldersToIgnore": [],

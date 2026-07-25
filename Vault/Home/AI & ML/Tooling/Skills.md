@@ -74,7 +74,6 @@ Assume your team has strict API error contracts and logging conventions. Without
 
 **Mitigation**: project-scoped skills take precedence over user-global skills for repository-specific conventions. Document the precedence rule in the project skill's frontmatter. Avoid encoding team conventions in user-global skills.
 
-
 # Tradeoffs
 
 | Choice | Option A | Option B | Decision criteria |

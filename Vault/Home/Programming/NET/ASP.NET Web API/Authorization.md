@@ -160,7 +160,6 @@ The `"CanEditDocument"` policy handler receives the `document` as the resource a
 > [!QUESTION]- How do you implement OR logic across two authorization policies on a single endpoint?
 > Multiple `[Authorize]` attributes stack with AND semantics — all policies must pass. For OR logic, implement a single custom `IAuthorizationRequirement` that internally checks whether any of the conditions is met, then apply that single requirement via one policy.
 
-
 # References
 
 - [Authorization in ASP.NET Core (Microsoft Learn)](https://learn.microsoft.com/en-us/aspnet/core/security/authorization/introduction) — official overview of role-based, claims-based, and policy-based authorization.

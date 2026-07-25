@@ -4,12 +4,11 @@ topic:
 subtopic:
   - Principles
 summary: "Design heuristics like SOLID, DRY, KISS, and YAGNI that keep systems understandable."
-tags:
-  - FolderNote
+tags: [FolderNote]
 publish: true
 priority: High
 level:
-  - '4'
+  - "4"
 status: Creation
 ---
 
@@ -22,7 +21,7 @@ const { FolderStructureMap } = await dc.require("Assets/components/devbook-folde
 return FolderStructureMap;
 ```
 
-# Code quality as an operating discipline
+# Code Quality as an Operating Discipline
 
 Consider an endpoint that charges a card and records an order. The first version constructs an HTTP client, calls the payment provider, writes SQL, catches every exception, and logs the request body in one method. Each quality practice repairs a different failure surface:
 

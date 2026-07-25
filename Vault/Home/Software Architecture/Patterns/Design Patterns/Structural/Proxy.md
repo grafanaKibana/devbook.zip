@@ -10,6 +10,7 @@ priority: High
 status: Ready to Repeat
 publish: true
 ---
+
 A security guard at a building entrance is a Proxy. The guard has the same "enter" interface as an open door, but checks your badge before letting you through. Some proxies are lazy — like an automatic door that only powers on when someone approaches. Some are protective — checking credentials before granting access. Some are virtual — an intercom that represents someone who isn’t physically present. In every case, the proxy stands in front of the real thing and controls access to it.
 
 The Proxy pattern provides a surrogate for another object to control access to it. The proxy implements the same interface as the real subject and holds a reference to it, intercepting calls and deciding whether, when, and how to forward them. Three common variants: a **virtual proxy** defers expensive creation until first use (lazy-loading product images), a **caching proxy** stores results to avoid repeated work, and a **protection proxy** checks authorization before forwarding. The client interacts with the proxy transparently — it looks identical to the real object.

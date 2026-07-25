@@ -22,7 +22,7 @@ The decisive behaviors are an index jump and a middle-insert shift.
 > [!NOTE] Visualization pending
 > Planned StepTrace: a contiguous-memory card showing an index resolve to `base + i·stride` in a single jump to element `i`, then a middle insert shifting the tail one slot to the right to keep the block packed. No matching renderer exists in `engine.js` yet.
 
-# Representation and layout
+# Representation and Layout
 
 The elements sit back-to-back in one allocation. Because every slot is the same width, the offset of element `i` is purely arithmetic: `address(a[i]) = base + i * elementSize`. Nothing before element `i` needs to be inspected, so `a[5_000_000]` costs exactly what `a[0]` costs. Equal element size is the precondition — variable-width elements would make the offset depend on everything preceding the target, which is the linked, pointer-chasing model instead.
 
@@ -45,7 +45,7 @@ Contiguity is worth more than the complexity table shows. A CPU pulls memory in 
 
 Every bound follows from the layout. `O(1)` access is the address formula; `O(n)` middle mutation is the shift that contiguity forces; the absence of a cheap append is the fixed size. The `O(1)` auxiliary space on access and mutation is real — an in-place shift needs no scratch buffer — but a resize is a separate `O(n)` allocate-and-copy, which is why it is not an array operation at all.
 
-# Boundaries tied to contiguity
+# Boundaries Tied to Contiguity
 
 Fixed capacity is the hard one. The size is chosen at allocation, and there is no room to append. Growing means allocating a larger block, copying every element, and abandoning the old one; doing that on each insert is an accidental, quadratic re-implementation of [[Dynamic Array]], whose growth strategy makes append amortized `O(1)`.
 
@@ -55,9 +55,10 @@ Out-of-bounds access has no natural floor or ceiling in the arithmetic itself: `
 
 The cache-locality advantage is not a rounding error. For small `n`, a contiguous scan routinely beats an asymptotically better structure — a tree or hash table whose nodes are scattered — because the constant factor is memory latency, not operation count. The crossover where the better big-O wins can sit well past the sizes a given workload ever reaches.
 
-# Reference drawer
+# Reference Drawer
 
 > [!ABSTRACT]- Contiguous block and index arithmetic
+>
 > ```mermaid
 > flowchart LR
 >   B["base"] --> S0["a[0]"]
@@ -68,6 +69,7 @@ The cache-locality advantage is not a rounding error. For small `n`, a contiguou
 > ```
 
 > [!EXAMPLE]- C# reference: index and middle insert
+>
 > ```csharp
 > // O(1): address is computed, not searched.
 > static int Get(int[] a, int i) => a[i];

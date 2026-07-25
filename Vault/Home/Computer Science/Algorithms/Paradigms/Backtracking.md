@@ -17,7 +17,7 @@ Backtracking removes that waste by building a candidate one choice at a time and
 
 **Core shape:** incremental candidate, one choice per level → a feasibility test that rejects an unextendable prefix → the pruned subtree is never enumerated → `O(depth)` auxiliary space over an exponential search tree.
 
-# The 4-Queens search
+# The 4-Queens Search
 
 The trace solves 4-Queens, placing one queen per row and rejecting any square already attacked along a column or diagonal.
 
@@ -27,7 +27,7 @@ The trace solves 4-Queens, placing one queen per row and rejecting any square al
 
 The decisive event is a rejection. When the queen in the current row has no safe column, the partial board cannot be extended, so the search abandons it and returns to the previous row to advance that queen to its next column — every board that would have grown beneath the failed placement is pruned unexamined. Starting the first queen in column 0 leads to exactly this dead end: each of its completions collides, the whole subtree under column 0 is exhausted, and the search retreats to row 0, lifts that queen, and only the column-1 start extends to the arrangement `(1, 3, 0, 2)`. Depth in the tree is the row index, so a rejection at row `k` discards every placement of rows `k+1…n` beneath it at once.
 
-# How a rejected prefix prunes a subtree
+# How a Rejected Prefix Prunes a Subtree
 
 A candidate is a sequence of choices, one per level of a search tree. At each node the algorithm extends the partial candidate by one choice and tests the constraints its prefix can already decide:
 
@@ -51,7 +51,7 @@ Let `b` be the number of choices at each level and `d` the depth (for n-queens, 
 
 Auxiliary space is the recursion stack (depth `d`) plus the partial candidate (length ≤ `d`); the collected solutions are output, counted separately. Pruning changes the constant factor and the number of nodes a real input touches, not the worst-case class. A problem whose feasibility can only be judged at a complete candidate gives backtracking the same `O(b^d)` work as brute force.
 
-# When pruning stops helping
+# When Pruning Stops Helping
 
 The advantage lives entirely in the prefix test, and three mechanism details decide whether it materializes.
 
@@ -61,9 +61,10 @@ The partial candidate is one shared mutable buffer, so a choice that is not undo
 
 Recording a solution by appending the live buffer stores a reference that subsequent choices overwrite, leaving the result full of identical copies of the final buffer state — a leaf must snapshot (copy) the candidate. With repeated input elements, equal sibling choices generate identical subtrees, so the same solution appears more than once unless equal siblings at a level are skipped.
 
-# Reference drawer
+# Reference Drawer
 
 > [!ABSTRACT]- Pruned search tree
+>
 > ```mermaid
 > graph TD
 >   R[root] --> A[place a]
@@ -74,6 +75,7 @@ Recording a solution by appending the live buffer stores a reference that subseq
 > ```
 
 > [!EXAMPLE]- C# implementation
+>
 > ```csharp
 > public static IList<IList<int>> Permutations(int[] nums)
 > {

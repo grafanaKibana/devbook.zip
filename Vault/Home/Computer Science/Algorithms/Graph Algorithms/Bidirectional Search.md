@@ -22,7 +22,7 @@ The saving is conditional. The target has to be a concrete vertex the backward s
 > [!NOTE] Visualization pending
 > Planned StepTrace: a two-frontier graph card showing forward and backward BFS expanding outward from source and target until they first intersect at a meeting vertex, then the path spliced through it. No matching renderer exists in `engine.js` yet.
 
-# Meeting in the middle
+# Meeting in the Middle
 
 Two frontiers advance in parallel. `F` holds the vertices reached from `s` along forward edges; `B` holds the vertices reached from `t` along reversed edges. Each side records the distance at which it first reached every vertex.
 
@@ -44,7 +44,7 @@ Expanding whichever frontier currently holds fewer vertices keeps the two search
 
 Here `b` is the branching factor and `d` the shortest-path length. The bounds assume a roughly uniform graph where every vertex has about `b` successors and `b` predecessors and both sides advance in balance. Space matches time because both frontiers plus their distance maps must be held in memory to test for intersection — there is no `O(1)`-space variant, unlike unidirectional search. The unidirectional BFS baseline on the same input is `O(b^d)` time and space; bidirectional search halves the exponent, not the constant.
 
-# Where the clean case ends
+# Where the Clean Case Ends
 
 Weighted edges break first-touch. Once the frontiers advance by cumulative cost rather than by level, the first vertex to appear in both visited sets is no longer guaranteed shortest — a cheaper meeting can still be one relaxation away at a different vertex whose two halves are not both settled. A correct termination tracks the best summed cost `μ = min(gF[u] + gB[u])` over all met vertices and keeps expanding until the sum of the two frontiers' smallest keys — their current search radii — reaches `μ`. Only then can no unexpanded path undercut the best meeting. Returning on first contact is the classic bidirectional-search correctness bug; unweighted BFS avoids it because level-order expansion settles distances in nondecreasing order, so the first overlap is already optimal.
 
@@ -52,9 +52,10 @@ The target must be a concrete vertex. The backward search needs somewhere to sta
 
 Predecessors must be enumerable. The backward BFS walks edges in reverse, so a directed graph needs a reverse adjacency list and an implicit state space needs an invertible move operator. Without incoming edges the backward frontier cannot advance past depth zero, and the `b^(d/2)` bound depends on that frontier reaching depth `d/2`. Undirected graphs supply this for free.
 
-# Reference drawer
+# Reference Drawer
 
 > [!ABSTRACT]- Control flow (unweighted case)
+>
 > ```mermaid
 > flowchart TD
 >   A[Forward frontier at source, backward frontier at target] --> B{Either frontier empty}
@@ -66,6 +67,7 @@ Predecessors must be enumerable. The backward BFS walks edges in reverse, so a d
 > ```
 
 > [!EXAMPLE]- C# implementation
+>
 > ```csharp
 > // Unweighted bidirectional BFS. forward[v] lists successors of v,
 > // backward[v] lists its predecessors. Returns a shortest path s..t, or null.

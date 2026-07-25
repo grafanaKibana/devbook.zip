@@ -29,7 +29,7 @@ This compact trace deliberately lowers the depth limit to `1` and the insertion 
 { "algorithm": "introsort", "array": [2, 1, 9, 8, 7, 6, 5, 4, 3], "depthLimit": 1, "smallPartitionThreshold": 3 }
 ```
 
-## Why the worst case stays bounded
+## Why the Worst Case Stays Bounded
 
 The depth budget is `2⌊log₂ n⌋`. Balanced partitions bottom out after about `⌊log₂ n⌋` levels; the factor of two tolerates ordinary imbalance. Reaching the budget means partitions have stayed lopsided level after level — the signature of a run drifting toward `O(n²)`. At that point the current partition is finished with [[Home/Computer Science/Algorithms/Sorting Algorithms/Heap Sort|Heap Sort]] instead of recursing further.
 
@@ -55,9 +55,10 @@ The depth multiplier (`2`) and the small-partition threshold (~16) are tunable a
 
 The switch reacts to cumulative recursion depth, not to the quality of any single partition. An input tuned to the pivot rule but that never sustains deep imbalance stays under the budget and is sorted entirely by the quicksort phase, at quicksort's normal constant factors — introsort does not make partitioning itself cheaper, it only bounds how long a bad run may continue.
 
-## Reference drawer
+## Reference Drawer
 
 > [!ABSTRACT]- Control flow
+>
 > ```mermaid
 > flowchart TD
 >   A[Sort range with depth budget] --> B{Range size at most sixteen}
@@ -72,6 +73,7 @@ The switch reacts to cumulative recursion depth, not to the quality of any singl
 > ```
 
 > [!EXAMPLE]- C# implementation
+>
 > ```csharp
 > public static void IntroSort(int[] a)
 > {

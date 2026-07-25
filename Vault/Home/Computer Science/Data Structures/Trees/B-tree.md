@@ -22,7 +22,7 @@ A rendered trace would show an insert overflowing a full node and the resulting 
 > [!NOTE] Visualization pending
 > Planned StepTrace: a shallow multi-way-tree card whose wide nodes each hold several sorted keys, animating an insert that overflows a full node, splits it, and pushes the median key up into the parent — the single move that grows the tree. No matching renderer exists in `engine.js` yet.
 
-# Representation and invariants
+# Representation and Invariants
 
 An order-`m` B-tree stores each node as one page. A node is two parallel arrays: up to `m−1` sorted keys and up to `m` child pointers (leaves carry keys only). Four invariants define a valid state:
 
@@ -33,7 +33,7 @@ An order-`m` B-tree stores each node as one page. A node is two parallel arrays:
 
 Search is a binary search within the current node, then a descent into the child whose range brackets the key, repeated until a leaf. Because `m` is large, the base of the logarithm is large, and the tree stays five to ten levels shallower than a binary tree over the same keys. PostgreSQL builds each node from one 8 KB page; SQLite stores an entire database file as B-trees, one page per node.
 
-# Growing and shrinking by split and merge
+# Growing and Shrinking by Split and Merge
 
 Height changes only at the root, which is what keeps every leaf at equal depth without rotations.
 
@@ -51,7 +51,7 @@ A delete can leave a node below the `⌈m/2⌉−1` minimum. The repair mirrors 
 
 The decisive number in every row is the node-access column, because a node access is a page read and page reads dominate the cost of external memory. Search does the same `O(log₂ n)` key comparisons as a [[Binary Search Tree]] — a binary search inside each node makes the wide fan-out free on reads. The extra `O(m · log_m n)` cost falls on writes: an insert or delete shifts keys within a node and splits, borrows, or fuses nodes, and that data movement, not any comparison, is the `O(m)` per-node factor. The B-tree wins on I/O, never on CPU: it accepts more in-node work, all of it on data already in the page, in exchange for far fewer random reads. Structure space is `O(n)` with pages guaranteed at least half full by invariant 2, so an index occupies between `n` and `2n` slots.
 
-# When block orientation stops paying off
+# When Block Orientation Stops Paying off
 
 Each boundary traces back to the page-sized node.
 
@@ -61,9 +61,10 @@ Writes rewrite whole pages. An insert that fills a page splits it, producing two
 
 The branching factor must be sized to the page. Choosing `m` too small shrinks fan-out toward a binary tree, so height climbs back toward `log₂ n` and the extra page reads return — the design's entire benefit is spent. `m` is effectively fixed by `page_size / (key_size + pointer_size)`, not chosen freely.
 
-# Reference drawer
+# Reference Drawer
 
 > [!ABSTRACT]- Structure and a split
+>
 > ```mermaid
 > graph TD
 >   subgraph after["after inserting into a full leaf"]
@@ -79,6 +80,7 @@ The branching factor must be sized to the page. Choosing `m` too small shrinks f
 > The median `17` rises into the parent; the full node becomes two half-full nodes. An overflowing parent repeats the same move, and a splitting root adds the only new level.
 
 > [!EXAMPLE]- Search and insert (C#, order-`m`)
+>
 > ```csharp
 > public sealed class BTreeNode
 > {

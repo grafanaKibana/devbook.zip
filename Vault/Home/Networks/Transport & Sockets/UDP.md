@@ -10,6 +10,7 @@ priority: Medium
 status: Ready to Repeat
 publish: true
 ---
+
 UDP (User Datagram Protocol) is a connectionless transport protocol that sends independent datagrams with no delivery guarantees. There is no handshake, no acknowledgment, no retransmission, and no ordering. You reach for it when lower connection-establishment and transport-retransmission overhead matters and the workload can define its own recovery: DNS retries lost queries, critical game or telemetry events add sequencing, acknowledgments, and bounded retries, while stale media or state samples can be dropped.
 
 # How It Works

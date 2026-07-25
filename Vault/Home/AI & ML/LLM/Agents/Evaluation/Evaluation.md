@@ -8,8 +8,7 @@ level:
   - "3"
 priority: High
 status: Done
-tags:
-  - FolderNote
+tags: [FolderNote]
 publish: true
 ---
 
@@ -22,7 +21,7 @@ const { FolderStructureMap } = await dc.require("Assets/components/devbook-folde
 return FolderStructureMap;
 ```
 
-# What to measure
+# What to Measure
 
 ```mermaid
 flowchart TD

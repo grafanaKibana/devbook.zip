@@ -10,6 +10,7 @@ priority: High
 status: Ready to Repeat
 publish: true
 ---
+
 Airport security is a Chain of Responsibility. Your bag passes through ID verification, then X-ray scanning, then manual inspection, then customs. Each checkpoint either clears you or pulls you aside. Adding a new check — say, a bomb-sniffing dog — means inserting a new station in the line. No existing checkpoint changes. The passenger doesn’t decide which checks to go through; the chain decides.
 
 The Chain of Responsibility pattern passes a request along a chain of handlers, where each handler decides whether to process the request or forward it to the next one. Handlers implement a common interface with a `Handle()` method and hold a reference to their successor. A handler either processes the request and stops the chain, or calls `next.Handle()` to continue. The sender doesn’t know which handler will process the request — or even how many handlers exist. In ASP.NET Core, **the middleware pipeline is this exact pattern**: `app.UseAuthentication()` → `app.UseAuthorization()` → `app.UseRateLimiting()` → your endpoint.

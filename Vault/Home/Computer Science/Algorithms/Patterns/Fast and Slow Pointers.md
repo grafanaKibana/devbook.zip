@@ -20,7 +20,7 @@ The technique needs only one property of the input: each element has exactly one
 > [!NOTE] Visualization pending
 > Planned StepTrace: a two-pointer-on-a-linked-cycle card showing the hare gaining one node per step and lapping the tortoise inside the loop until both occupy the same node, then the phase-two reset from the head converging on the cycle entry. No matching renderer exists in `engine.js` yet.
 
-# Why the pointers meet, and where
+# Why the Pointers Meet, and where
 
 Detection is the first phase. Both pointers start at the head. Each step advances `slow` by one node and `fast` by two. Once both pointers are inside a cycle of length `λ`, the fast pointer's lead over the slow pointer increases by one node per step; measured modulo `λ` that lead cycles through `0`, so within at most `λ` steps the lead is a multiple of `λ` and the two references coincide. If the chain is acyclic the fast pointer reaches `null` first and the loop ends with no meeting. The meeting therefore proves a cycle and running off the end proves acyclicity — a biconditional with no false result either way.
 
@@ -52,9 +52,10 @@ Dereferencing the fast pointer without guarding both hops is the other failure. 
 
 This same-direction, different-speed configuration is distinct from [[LinkedList|linked-list]] traversal patterns and from [[Two Pointers]], where two pointers start at opposite ends of a *sorted array* and converge toward the middle. That pattern exploits sorted order to decide which end to move; this one exploits a speed differential to close a gap inside a loop. They share the name "two pointers" and nothing of the mechanism.
 
-# Reference drawer
+# Reference Drawer
 
 > [!ABSTRACT]- Cycle shape and the two meeting points
+>
 > ```mermaid
 > flowchart LR
 >   H[Head] --> T[Tail into cycle]
@@ -66,6 +67,7 @@ This same-direction, different-speed configuration is distinct from [[LinkedList
 > ```
 
 > [!EXAMPLE]- C# implementation
+>
 > ```csharp
 > public class ListNode { public int val; public ListNode next; }
 >

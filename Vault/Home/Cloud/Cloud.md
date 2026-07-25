@@ -6,8 +6,7 @@ topic:
   - Cloud
 subtopic: []
 summary: "Renting managed compute, storage, and networking with pay as you go economics."
-tags:
-  - FolderNote
+tags: [FolderNote]
 publish: true
 status: Done
 priority: High

@@ -19,7 +19,7 @@ Dynamic programming starts with a well-defined state, base cases, and a recurren
 
 **Core shape for finite one-pass DP:** state + base cases + recurrence + acyclic dependency order → each reached state solved once → `(number of distinct states) × (transition work per state)` time.
 
-## Mechanism — state, recurrence, and the two forms
+## Mechanism — State, Recurrence, and the Two Forms
 
 Both examples become DP only after the state discards irrelevant history. Coin change keeps the remaining amount because every denomination remains reusable; finite coin stock would also require the remaining counts. Grid path keeps the current coordinate. Two calls with the same state have the same future choices and therefore the same answer, regardless of how they arrived there.
 
@@ -28,7 +28,7 @@ Both examples become DP only after the state discards irrelevant history. Coin c
 
 The recurrence then names the dependencies. Coin change reads `best[amount - coin]` for every usable denomination and keeps the minimum plus one. Grid path reads the right and down suffix costs and adds the current tile. The animations differ because those state spaces differ—a one-dimensional amount board versus a two-dimensional matrix—but the storage rule is the same.
 
-## Coin change — local choice versus stored subproblems
+## Coin Change — Local Choice versus Stored Subproblems
 
 A cashier must return exactly `30¢` using real `1¢`, `10¢`, `25¢`, and `50¢` denominations. The example assumes enough of each coin that stock is not a constraint. Taking the largest usable coin first returns `25 + 1 + 1 + 1 + 1 + 1`, while `10 + 10 + 10` uses half as many coins. The five tabs keep that counterexample fixed while changing the solving strategy and level of abstraction.
 
@@ -39,6 +39,7 @@ A cashier must return exactly `30¢` using real `1¢`, `10¢`, `25¢`, and `50¢
 The simplified Memoization and Tabulation tabs keep the cashier model visible. Memoization (Raw) exposes the transferable recursion tree beneath the counter: each node is a remaining amount, and a cache hit closes a repeated subtree. The exact approaches compute `30¢ → 3 coins`; they differ in which states are visited first and whether control lives in the call stack or a loop.
 
 > [!ABSTRACT]- Coin-change state flow
+>
 > ```mermaid
 > flowchart LR
 >   A["best(30¢)"] -->|"use 1¢"| B["best(29¢) + 1"]
@@ -54,6 +55,7 @@ The simplified Memoization and Tabulation tabs keep the cashier model visible. M
 > ```
 
 > [!EXAMPLE]- Coin change, top-down and bottom-up (C#)
+>
 > ```csharp
 > static int FewestCoinsTopDown(int amount, int[] coins)
 > {
@@ -92,7 +94,7 @@ The simplified Memoization and Tabulation tabs keep the cashier model visible. M
 > ```
 > `FewestCoinsTopDown(30, [1, 10, 25, 50])` and the bottom-up version both return `3`.
 
-## Grid path — repeated coordinates versus a filled matrix
+## Grid Path — Repeated Coordinates versus a Filled Matrix
 
 A warehouse robot may move only right or down from the loading bay to the dispatch door. Choosing the cheaper immediate tile and breaking ties to the right walks into an expensive corridor and costs `21`; the best complete route costs `10`. Naive recursion eventually finds it, but different route prefixes repeatedly reach the same coordinate.
 
@@ -103,6 +105,7 @@ A warehouse robot may move only right or down from the loading bay to the dispat
 Here the state is a coordinate rather than an amount. `best(R2C2)` means “the minimum remaining cost from this tile,” independent of how the robot arrived. The four simplified tabs use one warehouse matrix with integrated context, while Memoization (Raw) exposes the canonical recursion tree. Memoization stops repeated calls to a saved coordinate; tabulation makes the dependency order spatial by reading the already-solved tiles to the right and below.
 
 > [!ABSTRACT]- Grid-path state flow
+>
 > ```mermaid
 > flowchart LR
 >   A["best(R1C1)"] -->|right| B["best(R1C2)"]
@@ -115,6 +118,7 @@ Here the state is a coordinate rather than an amount. `best(R2C2)` means “the 
 > `R2C2` is one state even though two route prefixes reach it. Memoization computes its suffix once; tabulation fills it once before either predecessor reads it.
 
 > [!EXAMPLE]- Grid path, top-down and bottom-up (C#)
+>
 > ```csharp
 > static int CheapestPathTopDown(int[,] cost)
 > {

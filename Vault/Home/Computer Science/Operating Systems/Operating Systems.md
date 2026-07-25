@@ -4,8 +4,7 @@ topic:
 subtopic:
   - Operating Systems
 summary: "How an operating system turns hardware into isolated processes, virtual memory, files, networking, and device interfaces."
-tags:
-  - FolderNote
+tags: [FolderNote]
 publish: true
 level:
   - "4"

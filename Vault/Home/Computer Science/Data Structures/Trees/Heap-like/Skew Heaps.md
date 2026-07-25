@@ -20,7 +20,7 @@ The structure is the self-adjusting cousin of a [[Leftist Heaps|leftist heap]]. 
 > [!NOTE] Visualization pending
 > Planned StepTrace: a heap-merge card showing two heaps merged down their right spines, with the children swapped unconditionally after each link so the long right path folds to the left — no rank field, self-adjusting. No matching renderer exists in `engine.js` yet.
 
-# Why the blind swap balances
+# Why the Blind Swap Balances
 
 Merge takes two heap roots and compares them. The smaller root becomes the result's root; its right subtree is merged recursively with the other whole heap; then the root's two children are swapped. Only the right spine is ever descended, so the recursion depth is the combined right-spine length of the two inputs.
 
@@ -41,7 +41,7 @@ The `O(log n)` figures are amortized over a sequence of operations, established 
 
 A single `Merge` can still cost `O(n)`: nothing prevents a momentarily long right spine from existing, and one call may descend all of it. The structure space is `O(n)` with only two child pointers and a key per node — the leftist heap's extra null-path-length field is exactly what the skew heap removes, its edge on memory and on merge code length.
 
-# Where amortized is not enough
+# Where Amortized is Not Enough
 
 The bounds are amortized, so a single operation can spike to `O(n)`. On a latency-sensitive path where one extract-min must complete within a per-operation budget, that spike is a violation even though the sequence average is logarithmic — a [[Leftist Heaps|leftist heap]] holds `O(log n)` per operation as a worst-case guarantee, at the price of the stored rank field and the conditional swap, and fits that requirement where a skew heap does not.
 
@@ -49,9 +49,10 @@ Persistence exposes the same gap. Amortized accounting assumes each stored shape
 
 The unconditional swap is the whole mechanism, not a tunable detail. Making it conditional turns the structure back into a leftist heap (with the rank test) or, done wrong, into an unbalanced chain; dropping it removes the only force shortening the right spine and lets a sequence of merges degrade to `O(n)` each. There is no rank field to inspect, so the swap has to be blind and total for the potential argument to close.
 
-# Reference drawer
+# Reference Drawer
 
 > [!ABSTRACT]- Merge folding the right spine
+>
 > ```mermaid
 > flowchart LR
 >   subgraph before [Two heaps]
@@ -71,6 +72,7 @@ The unconditional swap is the whole mechanism, not a tunable detail. Making it c
 > ```
 
 > [!EXAMPLE]- C# implementation
+>
 > ```csharp
 > public sealed class SkewHeap<T> where T : IComparable<T>
 > {

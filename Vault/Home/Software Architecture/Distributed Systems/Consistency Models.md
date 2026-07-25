@@ -10,6 +10,7 @@ priority: High
 status: Done
 publish: true
 ---
+
 Consistency models define what value a read is allowed to return relative to writes in a distributed system.
 They matter because every replication, partition-tolerance, and caching decision is also a consistency decision.
 You think about consistency when selecting storage, designing leader/replica topology, and deciding whether stale reads are acceptable.
@@ -71,7 +72,7 @@ A product may provide only a subset, so name the required guarantee instead of r
 
 For example, a shipping-address update returns token `region-a:1842`. The checkout read carries that token and cannot use a replica still at `region-a:1839`, although other users may still see older data. The token must survive load balancing; keeping it only in one web server's memory breaks the guarantee when the next request reaches another instance.
 
-# Eventual consistency mechanisms and user-visible guarantees
+# Eventual Consistency Mechanisms and User-visible Guarantees
 
 "Eventual" states only that replicas converge after writes stop. The mechanism determines what users can observe and how conflicts are repaired.
 
@@ -95,7 +96,7 @@ Example: an order API commits `OrderPlaced` in the authoritative store and retur
 | Session | Client sees own writes | Profile/settings updates | Low-medium cost, session token plumbing |
 | Eventual | Converges after writes stop | Catalog/cache/reference data | Lowest coordination, stale reads expected |
 
-# Tunable product consistency
+# Tunable Product Consistency
 
 Some databases expose several positions in this taxonomy. Azure Cosmos DB offers five consistency levels, each with a different observable promise:
 
@@ -137,11 +138,9 @@ The .NET SDK captures session tokens from responses and sends them on later requ
 - Test failure modes with delayed replication and partial-region outages.
 - Keep consistency decisions visible in architecture docs and API contracts.
 
-
-# Optimistic write protection
+# Optimistic Write Protection
 
 The [[Home/Networks/Protocols/HTTP#Fields, Content, and Conditional Requests|HTTP conditional-request contract]] prevents lost updates by requiring `If-Match`, returning `428` when absent, and enforcing the validator with one atomic compare-and-swap write. An application-side check followed by an unconditional save is still racy.
-
 
 # Questions
 

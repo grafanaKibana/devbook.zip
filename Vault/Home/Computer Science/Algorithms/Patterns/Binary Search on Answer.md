@@ -25,7 +25,7 @@ Six packages with weights `[3, 2, 2, 4, 1, 4]` must ship within three days. The 
 {"algorithm":"binary-search-on-answer","weights":[3,2,2,4,1,4],"days":3}
 ```
 
-# Why halving the answer works
+# Why Halving the Answer Works
 
 At the start of every iteration the true answer — the smallest feasible `x` — lies inside the current range `[lo, hi]`. Evaluating the predicate at the midpoint preserves that invariant:
 
@@ -49,7 +49,7 @@ The cost factors into how many candidates are probed and what each probe pays. T
 
 The log factor is over the *numeric range of the answer*, not the input size, so an answer space as wide as `10^18` costs only about 60 probes. When `feasible` is itself super-linear — say it runs a DP — its cost replaces the `O(n)` term. For a real-valued answer the required iteration count depends on the initial width and target error (below).
 
-# When the predicate is not actually monotone
+# When the Predicate is Not Actually Monotone
 
 Monotonicity is the whole precondition, and its absence is the classic failure. If `feasible` flips true and false more than once across the range, there is no single boundary to find. Binary search still runs and still returns a value, but each probe assumes the discarded half cannot contain the answer — an assumption that only holds under monotonicity. On `false, true, false, false, true`, the initial low-biased midpoint is index `2` and evaluates to false, so `lo` moves to `3` and incorrectly discards the earlier true value at index `1`. The precondition is proved by argument, not code: show that increasing `x` can only make the condition easier to satisfy (or only harder), never reverse it. If that argument fails, this pattern does not apply.
 
@@ -59,9 +59,10 @@ Three further boundaries follow from the same mechanism:
 - **Integer versus real domain.** Over integers, `lo < hi` with `mid + 1` terminates exactly. Over reals the interval never collapses to a single value. To reduce an initial width `hi − lo` below an absolute tolerance `δ`, choose at least `⌈log₂((hi − lo) / δ)⌉` iterations; the fixed count therefore belongs to the domain and required precision rather than a universal constant. A loop that waits for an `eps` comparison can stall on floating-point rounding.
 - **Returning the correct side of the flip.** The template returns the first `x` where the predicate becomes true — a `lower_bound`-style boundary. Minimise-the-maximum wants that value; maximise-the-minimum wants the last `true` before the flip, which needs the mirrored update and a high-biased midpoint. Mixing the update direction with the wrong midpoint bias either loops forever on `lo == mid` or returns the neighbour of the intended answer.
 
-# Reference drawer
+# Reference Drawer
 
 > [!ABSTRACT]- Control flow
+>
 > ```mermaid
 > flowchart TD
 >   A[lo = smallest answer, hi = largest] --> B{lo < hi}
@@ -75,6 +76,7 @@ Three further boundaries follow from the same mechanism:
 > ```
 
 > [!EXAMPLE]- C# implementation
+>
 > ```csharp
 > // Smallest x in [lo, hi] with feasible(x) true, given feasible is monotone false -> true.
 > public static long SearchBoundary(long lo, long hi, Func<long, bool> feasible)

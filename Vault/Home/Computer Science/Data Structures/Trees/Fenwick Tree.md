@@ -17,7 +17,7 @@ The compactness comes from a specific division of labour. In a 1-indexed array, 
 
 **Core shape:** 1-indexed array → slot `i` sums the `i & -i` elements ending at `i` → a prefix query clears low bits downward, a point update adds the low bit upward → invertible aggregate only → `O(n)` storage.
 
-# State across operations
+# State across Operations
 
 No StepTrace renderer covers this structure yet.
 
@@ -31,7 +31,7 @@ Both operations move through the array by editing one bit of the index at a time
 
 The two walks are inverses of each other over the low-bit structure: a query descends by removing set bits, an update ascends by carrying one in.
 
-# Representation and invariants
+# Representation and Invariants
 
 The tree is implicit; nothing but an `int[tree]` of length `n + 1` exists, and the 1-based indexing is load-bearing rather than cosmetic. Index `0` has no lowest set bit, so `0 & -0 == 0` and the update loop would never advance from it — a `0`-based layout stalls immediately.
 
@@ -54,7 +54,7 @@ Only the slots on an update path change; the rest of the array is untouched. The
 
 Every bound is worst-case and deterministic — there is no amortization or balancing assumption, because the number of slots touched is fixed by the bit pattern of the index. Constants are small: each step is one array read or write plus one `i & -i`, with no recursion, child-index arithmetic, or pointer chasing.
 
-# When the structure stops fitting
+# When the Structure Stops Fitting
 
 The prefix-subtraction mechanism sets the hard boundary: `RangeSum(l, r) = Prefix(r) − Prefix(l − 1)` only reconstructs `[l..r]` when the aggregate has an inverse. Sum, count, and XOR qualify (subtraction, subtraction, XOR-again); a product over a group works when every element is invertible. Minimum and maximum have no inverse — knowing `min(1..r)` and `min(1..l−1)` says nothing about `min(l..r)` — so range-min/max queries need a [[Segment Tree]] instead. A "prefix max" Fenwick tree exists but is valid only when values never decrease, so it cannot survive point *updates* that lower a value.
 
@@ -62,9 +62,10 @@ The plain layout also supports point update with range query, not the reverse. R
 
 Two mechanical traps recur. The `Update` contract takes a **delta**, not an assignment: setting position `i` to `v` requires passing `v − current[i]` and tracking current values separately, which trips implementations ported from a segment tree's assign-style update. And the 1-indexed low-bit identity is unforgiving — a stray `0` index stalls the walk, and `i & -i` relies on two's-complement negation, so it needs a fixed-width integer type. Arbitrary-precision integers (where `-i` is not a wrapped bit pattern) or a width mismatch between the index and the loop bound break the low-bit extraction.
 
-# Reference drawer
+# Reference Drawer
 
 > [!ABSTRACT]- Responsibility blocks for n = 8
+>
 > ```mermaid
 > flowchart TD
 >   S8["slot 8 · covers 1..8"]
@@ -86,6 +87,7 @@ Two mechanical traps recur. The `Update` contract takes a **delta**, not an assi
 > An update at position `i` walks upward along these parent links (`i += i & -i`); a prefix query at `i` walks the complementary downward chain (`i -= i & -i`).
 
 > [!EXAMPLE]- C# implementation
+>
 > ```csharp
 > public sealed class FenwickTree
 > {

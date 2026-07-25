@@ -4,12 +4,11 @@ topic:
 subtopic:
   - NET
 summary: "Microsoft's cross-platform runtime and framework for building web, cloud, desktop, and mobile software."
-tags:
-  - FolderNote
+tags: [FolderNote]
 publish: true
 status: Creation
 level:
-  - '4'
+  - "4"
 priority: High
 ---
 

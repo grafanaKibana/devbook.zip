@@ -4,11 +4,10 @@ topic:
 subtopic:
   - LLM
 summary: "Keeping an LLM system safe, secure, and truthful — the cross-cutting concern of guardrails, security threats, and hallucination."
-tags:
-  - FolderNote
+tags: [FolderNote]
 publish: true
 level:
-  - '3'
+  - "3"
 priority: Medium
 status: Done
 ---

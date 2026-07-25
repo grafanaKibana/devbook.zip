@@ -115,7 +115,7 @@ Console.WriteLine($"Confidence: {result.Value.ConfidenceScores.Positive:P}");
 
 **Decision rule**: use rule-based approaches for simple, high-volume extraction where patterns are stable. Use fine-tuned small models for production NLP tasks where latency and cost matter. Use LLMs for complex tasks (summarization, QA, multi-step reasoning) or when you lack training data. Use managed services (Azure AI Language) when you need standard NLP tasks without ML infrastructure.
 
-## Monolingual vs Multilingual Models
+## Monolingual Vs Multilingual Models
 
 | Model type | Per-language accuracy | Languages | Model size | Use when |
 |-----------|---------------------|-----------|-----------|----------|
@@ -124,7 +124,6 @@ Console.WriteLine($"Confidence: {result.Value.ConfidenceScores.Positive:P}");
 | LLM (GPT-4, Claude) | High across languages | Many | Very large | Complex tasks; language coverage matters more than latency |
 
 **Decision rule**: use monolingual models when your product serves one language and accuracy is critical. Use multilingual models when you need coverage across many languages and per-language accuracy can be slightly lower. Use LLMs when the task complexity outweighs the cost of per-call API pricing.
-
 
 # Questions
 
@@ -141,7 +140,6 @@ Console.WriteLine($"Confidence: {result.Value.ConfidenceScores.Positive:P}");
 > - Multilingual models are acceptable when you need coverage across many languages and per-language accuracy can be slightly lower.
 > - For high-stakes tasks (medical NER, legal classification), the accuracy gap may be unacceptable — use language-specific models.
 > - Multilingual models trade per-language accuracy for breadth of coverage; accept that when you serve many languages on limited ML infrastructure, but validate explicitly on the languages you actually care about.
-
 
 # References
 

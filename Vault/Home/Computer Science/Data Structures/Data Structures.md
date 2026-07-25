@@ -4,11 +4,10 @@ topic:
 subtopic:
   - Data Structures
 summary: "How to pick a data structure by matching operations to complexity, with the .NET type for each."
-tags:
-  - FolderNote
+tags: [FolderNote]
 publish: true
 level:
-  - '4'
+  - "4"
 priority: High
 status: Creation
 ---
@@ -17,7 +16,7 @@ A data structure organizes data for efficient access, mutation, and iteration. I
 
 The key decision is matching operations to complexity guarantees: random access by index → array or `List<T>`; fast lookup by key → `Dictionary<TKey, TValue>`; membership tests → `HashSet<T>`; ordered traversal → `SortedSet<T>` or sorted array; FIFO processing → `Queue<T>`. Most production performance issues with collections come from using the wrong structure (for example, searching a `List<T>` linearly when a `HashSet<T>` gives expected O(1) lookups) rather than from the structure's implementation being slow.
 
-# Choose by workload and access pattern
+# Choose by Workload and Access Pattern
 
 Start from the operation that dominates the workload, then account for ordering, memory layout, and concurrency. A structure with the right asymptotic lookup can still lose when it adds indirection to a small, scan-heavy collection.
 

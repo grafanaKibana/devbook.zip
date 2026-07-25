@@ -9,8 +9,7 @@ status: Ready to Repeat
 priority: Medium
 level:
   - "2"
-tags:
-  - FolderNote
+tags: [FolderNote]
 ---
 
 Deployment strategies control how new versions of software reach production. The right strategy balances risk tolerance, infrastructure cost, and rollback speed. A strategy is only as good as your monitoring — without metrics and alerts, you cannot detect a bad deploy fast enough to stop it.

@@ -78,7 +78,6 @@ For all new systems, prefer Azure Service Bus (cloud), RabbitMQ (self-hosted cro
 
 **Decision rule**: for new systems, default to Azure Service Bus (Azure) or RabbitMQ (self-hosted). Use Kafka only when you need high-throughput event streaming or event sourcing. MSMQ is a maintenance choice, not a new-system choice.
 
-
 # Questions
 
 > [!QUESTION]- Why is MSMQ a maintenance choice rather than a new-system choice?

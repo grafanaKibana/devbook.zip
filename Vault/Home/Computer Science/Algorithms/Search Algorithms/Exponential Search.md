@@ -27,7 +27,7 @@ The trace searches for `41` in `[2, 4, 7, 11, 18, 29, 41, 56, 72]`. During the g
 { "algorithm": "exponential-search", "array": [2, 4, 7, 11, 18, 29, 41, 56, 72], "target": 41 }
 ```
 
-## Why doubling brackets the target
+## Why Doubling Brackets the Target
 
 The gallop maintains one fact through every iteration: as long as the loop continues, `a[bound] < target`, so the target's position lies strictly to the right of `bound`. Doubling may jump past the answer, but it doubles only after proving the current bound is too small; the skipped interval is retained between the previous and new bounds. The loop stops for exactly one of two reasons:
 
@@ -48,7 +48,7 @@ The unbounded, indexable variant never references `n`. It generates the indices 
 
 The position-sensitive bound applies only when the target exists. It beats Binary Search when `i + 1 ≪ n` and becomes `O(log n)` when the target is near the end. An absent target has no position to substitute for `i`, so its bounded-input cost is `O(log n)`. Auxiliary space is `O(1)` for the iterative binary search below. A recursive binary search would add `O(log(i + 1))` call-stack space for a successful search, or `O(log n)` when the target is absent.
 
-## When the assumptions stop holding
+## When the Assumptions Stop Holding
 
 The headline use case is unknown-length input, but the source must still support indexed reads because the closing binary search revisits earlier positions. A forward-only stream does not satisfy that contract unless it buffers the prefix through the discovered upper bound and binary-searches the buffer. For an indexable source whose length is unknown, an out-of-range probe must act as a terminating signal alongside `a[bound] >= target`, and the eventual high bound must be clamped to the last valid index.
 
@@ -56,9 +56,10 @@ On a bounded array the doubling overshoots by design: `bound` is the first power
 
 The bracket is only as trustworthy as the ordering. The gallop's `a[bound] < target` test assumes sorted input; on `[2, 100, 3, 4, 5]` a search for `5` stops at index `1` because `100 >= 5`, incorrectly brackets `[0, 1]`, and misses the target at index `4`. Exponential search buys range discovery, not freedom from the sorting precondition.
 
-## Reference drawer
+## Reference Drawer
 
 > [!ABSTRACT]- Two-phase control flow
+>
 > ```mermaid
 > flowchart TD
 >   A[Sorted input and target] --> B{value at index 0 equals target}
@@ -72,6 +73,7 @@ The bracket is only as trustworthy as the ordering. The gallop's `a[bound] < tar
 > ```
 
 > [!EXAMPLE]- C# implementation
+>
 > ```csharp
 > public static int ExponentialSearch(int[] arr, int target)
 > {

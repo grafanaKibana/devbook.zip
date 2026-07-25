@@ -25,7 +25,7 @@ The shrinking gap is the transition worth animating: after the `h = 4` lanes mov
 { "algorithm": "shell-sort", "array": [9, 8, 7, 6, 5, 4, 3, 2, 1], "gaps": [4, 1] }
 ```
 
-## Why h-sorting cuts the shift work
+## Why H-sorting Cuts the Shift Work
 
 An array is *`h`-sorted* when `a[i] ≤ a[i + h]` for every valid `i`. A gap-`h` pass treats the array as `h` interleaved subsequences — indices `{0, h, 2h, …}`, `{1, h+1, …}`, and so on — and insertion-sorts each one independently. Because the stride is `h`, a single shift moves an element `h` positions rather than one, so the coarse early passes pay down long-distance disorder cheaply.
 
@@ -47,7 +47,7 @@ The bound is not a fixed property of the algorithm — it is a property of the g
 
 For power-of-two input lengths, Shell's original `n/2^k` schedule keeps every gap even until the final `1`, so even-indexed and odd-indexed values do not compare before that closing pass; the schedule has `Θ(n²)` worst-case work. Hibbard's `1, 3, 7, 15, …` sequence reaches `Θ(n^1.5)`, and Sedgewick's sequences carry a proven `O(n^4/3)` worst-case bound. Ciura's tuned gaps measure near `n^1.3`, but no tight nontrivial asymptotic bound is established for that sequence. Auxiliary space stays `O(1)` regardless. Because the tight bound rides on the sequence, no single clean asymptotic describes Shell sort.
 
-## Where it breaks down
+## Where it Breaks down
 
 The gap-sequence choice is the whole game, and it is genuinely unsettled: the optimal general sequence is an open problem. For power-of-two input lengths, Shell's original `n/2^k` schedule leaves even and odd positions in separate subsequences until `h = 1`, so the closing pass inherits `Θ(n²)` worst-case work. Hibbard, Sedgewick, and Ciura sequences avoid that specific parity failure through different better-analyzed or empirically tuned increments.
 
@@ -55,9 +55,10 @@ There is also no way to buy a proven bound and top speed at once. Pratt's 3-smoo
 
 Instability follows directly from the `h`-stride. Sorting the records `[(5, a), (5, b), (3, c)]` by key, a gap that spans both fives can lift `(5, a)` over `(5, b)`, emitting `… (5, b), (5, a) …` — the original `a`-before-`b` order is lost. A stable secondary sort (the classic radix-style pipeline) cannot be layered on top of Shell sort for that reason.
 
-## Reference drawer
+## Reference Drawer
 
 > [!ABSTRACT]- Pass structure
+>
 > ```mermaid
 > flowchart TD
 >   A[Input array and gap sequence] --> B[Take next largest gap h]
@@ -69,6 +70,7 @@ Instability follows directly from the `h`-stride. Sorting the records `[(5, a), 
 > ```
 
 > [!EXAMPLE]- C# implementation
+>
 > ```csharp
 > public static void ShellSort(int[] a)
 > {

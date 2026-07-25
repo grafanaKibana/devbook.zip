@@ -7,8 +7,7 @@ summary: "Tracks file changes over time, enabling collaboration, branching, merg
 level:
   - "4"
 priority: High
-tags:
-  - FolderNote
+tags: [FolderNote]
 
 publish: true
 status: Creation
@@ -51,7 +50,7 @@ Use `restore` for working-tree/index content and `switch` for branches. `reset` 
 
 A flat command list hides the state transition. Name the source state, destination state, and whether the operation discards data before running it.
 
-# Git vs Hosting Platforms
+# Git Vs Hosting Platforms
 
 Git defines objects, commits, refs, remotes, and transfer protocols. GitHub, GitLab, and Azure DevOps host repositories and add identity, permissions, pull requests, protected branches, issues, automation, and marketplaces. A repository can move between hosts without changing Git's commit graph; platform workflows, permissions, and automation do not move automatically.
 

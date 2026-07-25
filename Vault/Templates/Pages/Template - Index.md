@@ -4,11 +4,10 @@ subtopic: []
 level: []
 priority: Medium
 status: Not-Started
-tags:
-  - Template
-  - FolderNote
+tags: [Template, FolderNote]
 publish: false
 ---
+
 <%*
 // Derive topic/subtopic from the folder path under the "Home" root.
 const parts = tp.file.folder(true).split("/");

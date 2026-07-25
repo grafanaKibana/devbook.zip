@@ -10,6 +10,7 @@ priority: Medium
 status: Ready to Repeat
 publish: true
 ---
+
 HTTP/2 is the second major version of the HTTP protocol, standardized in 2015 (RFC 7540, superseded by RFC 9113). It runs over a TCP connection and multiplexes many request/response pairs simultaneously, eliminating HTTP/1.1's application-layer head-of-line blocking without eliminating TCP's ordered-delivery blocking. The result is lower latency and less connection overhead for applications that make many concurrent requests — without changing the HTTP semantics (methods, headers, status codes) that applications already use.
 
 See [[HTTP]] for the foundational HTTP concepts that HTTP/2 builds on.
@@ -57,7 +58,7 @@ A client and server don't just "speak HTTP/2" — they have to agree to. For HTT
 
 Cleartext HTTP/2 (**h2c**) exists via an HTTP/1.1 `Upgrade` header, but browsers don't support it; it's mostly used **server-to-server** (e.g. behind a load balancer, or [[gRPC]], which runs on HTTP/2 and relies on this multiplexing).
 
-# HTTP/2 vs HTTP/1.1
+# HTTP/2 Vs HTTP/1.1
 
 | Feature | HTTP/1.1 | HTTP/2 |
 |---------|----------|--------|
@@ -68,7 +69,7 @@ Cleartext HTTP/2 (**h2c**) exists via an HTTP/1.1 `Upgrade` header, but browsers
 | Head-of-line blocking | Application layer | TCP layer only |
 | TLS requirement | Optional | Required in practice (browsers enforce) |
 
-# HTTP/2 in .NET
+# HTTP/2 In .NET
 
 ASP.NET Core supports HTTP/2 natively via Kestrel. Enable it in `appsettings.json` or `Program.cs`:
 

@@ -17,7 +17,7 @@ Tim sort is the *natural* merge sort both runtimes use. It reads the existing or
 
 **Core shape:** partially ordered input → detect natural runs → pad short runs to `minrun` with binary insertion sort → merge under stack size invariants → `Θ(n)` on ordered input, `Θ(n log n)` worst, stable, `O(n)` merge buffer.
 
-# Decisive move
+# Decisive Move
 
 Tim sort's turning point is the moment the run stack collapses two adjacent runs because their sizes have just violated the merge invariant. The intended animation would play that over a small partially-ordered array.
 
@@ -39,7 +39,7 @@ runs (lengths)                 contents
 
 The invariant `Z > Y + X` fails the instant `[8]` lands (`4 > 4 + 1` is false), so `Y` merges with the smaller neighbour `X` before the scan continues. Both `4`s keep their input order because every merge resolves ties toward the earlier run. The state that changed is the stack shape, not correctness: the collapse only ever merges *adjacent* runs, so the partition of the array stays contiguous and the eventual merges stay near-balanced.
 
-# Runs, minrun, and the merge stack
+# Runs, Minrun, and the Merge Stack
 
 Four mechanisms carry the algorithm.
 
@@ -61,7 +61,7 @@ Four mechanisms carry the algorithm.
 
 Tim sort is **stable** (every merge and the strict-descent reversal preserve equal-key order) and **adaptive** (existing order shortens run detection and cuts merge count). The best-case `Θ(n)` is the run-detection short-circuit, not a lucky pivot: a sorted *or* reverse-sorted array is one run. Implementations may pre-size a small merge buffer, but no per-element temporary storage is used when the input forms a single run.
 
-# When the merge policy breaks
+# When the Merge Policy Breaks
 
 The run stack's merge policy is where Tim sort's sharp edges live.
 
@@ -71,9 +71,10 @@ The run stack's merge policy is where Tim sort's sharp edges live.
 
 **`O(n)` memory, not in place.** The merge buffer of up to `n/2` is pure overhead when stability is unobservable — for example sorting a huge primitive array whose elements have no identity beyond their value. That cost is precisely why Java sorts *primitives* with a dual-pivot [[Quick Sort]] and .NET sorts with [[Introsort]] rather than Tim sort.
 
-# Reference drawer
+# Reference Drawer
 
 > [!ABSTRACT]- Control flow
+>
 > ```mermaid
 > flowchart TD
 >   A[Scan for next natural run] --> B{Run descending}
@@ -94,6 +95,7 @@ The run stack's merge policy is where Tim sort's sharp edges live.
 > ```
 
 > [!EXAMPLE]- C# implementation
+>
 > ```csharp
 > // Stable natural-merge sort. Galloping is omitted for readability;
 > // the merge below is a plain stable two-way merge on the smaller run.

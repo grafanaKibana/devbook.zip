@@ -31,7 +31,7 @@ The table starts with direct edges and `∞` for missing routes. At each stage `
 }
 ```
 
-# Why one intermediate at a time works
+# Why One Intermediate at a Time Works
 
 Let `D^(k)[i][j]` mean the best `i`→`j` distance whose intermediate vertices are drawn from `{0..k}`; `D^(-1)` contains direct edges, zero-length self paths, and `∞` elsewhere. Each stage moves from `D^(k-1)` to `D^(k)` with:
 
@@ -59,9 +59,10 @@ dist after init:            final all-pairs distances:
 
 `dist[0][3]` holds the direct edge `7` until vertex `2` becomes admissible at stage `k = 2`, where `0→2→3` costs `5 + 1 = 6` and wins. `dist[1][3]` first drops to `15` through vertex `0` at `k = 0`, then to `3` at `k = 2` via `1→2→3`. No diagonal entry ends negative, so the graph carries no negative cycle.
 
-# Reference drawer
+# Reference Drawer
 
 > [!ABSTRACT]- Staged relaxation
+>
 > ```mermaid
 > flowchart TD
 >   A[Init direct weights and infinity elsewhere; dist i i equals min of zero and direct self-loop weight] --> B[Pick next intermediate k, k outermost]
@@ -79,6 +80,7 @@ dist after init:            final all-pairs distances:
 > ```
 
 > [!EXAMPLE]- C# implementation with path reconstruction
+>
 > ```csharp
 > public static (long?[,] Dist, int[,] Next) FloydWarshall(long?[,] weight)
 > {
@@ -165,7 +167,7 @@ For all-pairs shortest paths, the useful choice boundary is graph density and ne
 
 Use Floyd-Warshall for a dense distance matrix or a modest vertex count where predictable `V³` work is the simpler engineering choice. Use repeated Dijkstra for sparse non-negative graphs, and Johnson for sparse graphs that need negative-edge support. Repeated Bellman-Ford is the fallback to understand, not the default all-pairs implementation.
 
-# When the reported distances are wrong
+# When the Reported Distances Are Wrong
 
 A negative edge is fine on its own — a stage relaxes through it and the invariant still holds. A negative cycle is not: looping it lowers the total without bound, so every pair that can reach the cycle and then leave it has shortest distance `−∞`. The signal lives on the diagonal. When `dist[w][w] < 0`, there is a negative closed walk reachable from `w` and back to `w`; it is a witness, not proof that `w` itself lies on a simple negative cycle. Every `dist[u][v]` with finite `dist[u][w]` and `dist[w][v]` is affected and must be marked `−∞` or excluded from results. The plain distance matrix detects this condition but does not extract the concrete cycle; record predecessors during relaxation when the cycle itself matters.
 

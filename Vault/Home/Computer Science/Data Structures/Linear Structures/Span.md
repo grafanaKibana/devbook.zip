@@ -20,7 +20,7 @@ A span owns nothing. It is a small value type — a managed reference to the fir
 > [!NOTE] Visualization pending
 > Planned StepTrace: a (pointer, length) window card laid over part of an existing array, where slicing produces a narrower window over the same memory — no copy — and a write through the slice mutates the shared backing element. No matching renderer exists in `engine.js` yet.
 
-# Representation and non-ownership
+# Representation and Non-ownership
 
 A `Span<T>` holds two fields: a managed reference (`ref T`) to the first element in view and an `int` length. It stores none of the elements itself, so its footprint is constant whether the window covers 2 elements or 2 million. Indexing `span[i]` dereferences `first + i` after checking `0 <= i < length`, giving array-style access with a bounds check and no hop through an owner object.
 
@@ -42,7 +42,7 @@ Three properties follow from the design:
 
 The defining column is allocation: every operation is constant time and copies nothing. A span is two fields, so its own footprint is `O(1)` independent of the window length; the elements live in memory it does not own. Producing the same sub-view as a distinct array — `array[100..200]` typed as `byte[]` — instead costs `O(n)` time and an `O(n)` allocation for the copied elements.
 
-# Where the stack-only window breaks down
+# Where the Stack-only Window Breaks down
 
 The restrictions all follow from one rule: a non-owning window must never outlive its buffer, so the runtime pins it to the stack and refuses every path to the heap.
 
@@ -52,9 +52,10 @@ Lifetime still binds even inside the stack. A span over a `stackalloc` buffer is
 
 `ReadOnlySpan<T>` narrows these rules rather than lifting them: it still cannot escape to the heap, and it additionally rejects writes, so an attempt to mutate through a `ReadOnlySpan<char>` obtained from a `string` fails to compile rather than corrupting an interned literal.
 
-# Reference drawer
+# Reference Drawer
 
 > [!ABSTRACT]- Window over a backing array
+>
 > ```mermaid
 > flowchart LR
 >   subgraph buf[Backing array — length 4]
@@ -65,6 +66,7 @@ Lifetime still binds even inside the stack. A span over a `stackalloc` buffer is
 > ```
 
 > [!EXAMPLE]- C# usage
+>
 > ```csharp
 > Span<int> values = stackalloc int[] { 10, 20, 30, 40 };
 > Span<int> tail = values.Slice(2);   // ref shifted to index 2, length 2

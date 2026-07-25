@@ -24,7 +24,7 @@ The decisive transition is a DFS tree annotated with `disc`/`low`, where each ch
 > [!NOTE] Visualization pending
 > Planned StepTrace: a DFS-tree card showing discovery and low-link values propagating up from the leaves, marking a vertex as a cut vertex when a child's subtree cannot reach above it and an edge as a bridge when a child's low-link strictly exceeds the parent's discovery time. No matching renderer exists in `engine.js` yet.
 
-# What `disc` and `low` measure
+# What `disc` and `low` Measure
 
 DFS runs from any unvisited vertex and repeats until every component is covered. Two integers are stored per vertex:
 
@@ -58,9 +58,10 @@ There is one honest bound, not a best/average/worst spread: the traversal always
 
 **Parallel edges (multigraphs).** The usual guard skips the parent by vertex: `if (v == parent) continue;`. With two edges between `u` and `v` it discards both, so `v`'s subtree appears to have no route up and `(u, v)` is reported as a bridge — although the duplicate edge is itself the route keeping them connected. The escape exists in the graph but not in `low[v]`, because the second edge was never examined. Skipping only the specific parent edge by its id leaves the duplicate as a back edge that lowers `low[v]` and cancels the false bridge.
 
-# Reference drawer
+# Reference Drawer
 
 > [!ABSTRACT]- DFS tree of the triangle-with-tail example
+>
 > ```mermaid
 > flowchart TD
 >   N0["0 (disc 0, low 0)"] --> N1["1 (disc 1, low 0)"]
@@ -72,6 +73,7 @@ There is one honest bound, not a best/average/worst spread: the traversal always
 > Tree edges point downward; the dashed back edge `2→0` pulls `low` to `0` across the triangle, so `0-1-2` has no internal cut. The tail carries no back edge, so `low[3] > disc[2]` and `low[4] > disc[3]` make `2-3` and `3-4` bridges and `2`, `3` cut vertices.
 
 > [!EXAMPLE]- C# implementation
+>
 > ```csharp
 > public sealed class CutFinder
 > {

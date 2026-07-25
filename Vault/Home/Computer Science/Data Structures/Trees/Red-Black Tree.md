@@ -20,7 +20,7 @@ The state it persists is a [[Binary Search Tree]] plus one color bit per node �
 > [!NOTE] Visualization pending
 > Planned StepTrace: a tree card showing an insert colored red, a red-red violation fixed by a recolor, and a case where recoloring is not enough so a rotation restores the black-height invariant. No matching renderer exists in `engine.js` yet.
 
-# Representation and invariants
+# Representation and Invariants
 
 Each node stores its key, left/right/parent pointers, and a single color bit. `nil` leaves are treated as black sentinels, which lets every real node have two children and removes the null-check special cases from the fixup logic — this also folds in the classic fifth property (every `nil` leaf is black) as a property of the sentinel rather than a separate rule. Four invariants then define a valid state:
 
@@ -50,7 +50,7 @@ Structure space is `O(n)` for the nodes plus one color bit each — a single bit
 
 The rotation caps and the height bound both hold unconditionally — no averaging, no amortization over a sequence, and no dependence on insertion order. The `O(log n)` recolorings are single-field writes, so the expensive structural operation stays constant while the cheap one absorbs the height.
 
-# Where the looser balance shows
+# Where the Looser Balance Shows
 
 The slack that makes repairs cheap has a cost on reads. A red-black tree can reach 2·log₂(n+1) height where an AVL tree stays under 1.44·log₂ n, so a lookup can visit up to ~40% more nodes. On a read-dominated, mutation-rare workload that difference is the whole trade — the color invariants deliberately allow a taller tree in exchange for fewer rotations that will never happen.
 
@@ -58,9 +58,10 @@ Delete is where the invariants turn hostile to the implementer. An insert only e
 
 Every mutation must re-establish all four invariants before it returns. A partial fixup that repairs invariant 3 but leaves two paths with different black counts produces a structurally valid BST whose balance guarantee no longer holds, and the defect surfaces only later as an unexpectedly deep path.
 
-# Reference drawer
+# Reference Drawer
 
 > [!ABSTRACT]- A valid coloring and its paths
+>
 > ```mermaid
 > graph TD
 >   A(("13 B")) --> B(("8 R"))
@@ -73,6 +74,7 @@ Every mutation must re-establish all four invariants before it returns. A partia
 > Every root-to-leaf path crosses exactly two black nodes (black-height 2), the root is black, and no red node has a red child.
 
 > [!EXAMPLE]- Insert fixup (C# sketch)
+>
 > ```csharp
 > // After a normal BST insert of `node` colored Red, restore the invariants.
 > private void FixInsert(Node node)

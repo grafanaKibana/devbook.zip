@@ -53,7 +53,7 @@ A branching strategy defines how a team uses Git branches to manage parallel dev
 # Comparison
 
 | Strategy | Long-lived Branches | Release Cadence | CI/CD Fit | Coordination fit |
-|----------|--------------------|-----------------|-----------|-----------| 
+|----------|--------------------|-----------------|-----------|-----------|
 | GitFlow | Yes (`develop`, `main`, sometimes releases) | Scheduled or multi-version | More branch gates | Parallel release stabilization |
 | Trunk-Based | No | Frequent | Direct trunk feedback | Small changes and rapid repair |
 | GitHub Flow | No permanent integration branch | Frequent | PR checks then deploy from `main` | Review gate with short-lived branches |
@@ -108,7 +108,7 @@ if (_featureFlags.IsEnabled("PayPalPayment", userId))
 return await _stripeGateway.ChargeAsync(amount);  // existing path
 ```
 
-# Merge vs Rebase
+# Merge Vs Rebase
 
 `git merge` creates a commit with both histories as parents and preserves the identity and topology of published commits. `git rebase` copies a private sequence onto a new base, producing new commit IDs that are easier to review as a linear series. The content result can be equivalent; the collaboration contract is not.
 
@@ -132,7 +132,6 @@ git switch main
 git merge --no-ff feature/payment-method
 ```
 
-
 # Questions
 
 > [!QUESTION]- Why does GitFlow create integration problems for teams practicing continuous deployment?
@@ -140,7 +139,6 @@ git merge --no-ff feature/payment-method
 
 > [!QUESTION]- What does trunk-based development require that makes it unsuitable for all teams?
 > Trunk-based development needs small integrable changes, a protected and quickly repaired trunk, and feedback fast enough that developers do not stack work on an unknown result. Feature flags are one way to separate deployment from exposure, but branch-by-abstraction and dark code paths can serve the same purpose. A ten-minute CI target is a useful heuristic, not a definition. Teams with slow review or validation can use GitHub Flow while measuring and reducing that latency.
-
 
 # References
 

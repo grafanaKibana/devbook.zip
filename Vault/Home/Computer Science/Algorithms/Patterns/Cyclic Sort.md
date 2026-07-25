@@ -25,7 +25,7 @@ The cursor stays put after a swap because the displaced value still needs inspec
 { "algorithm": "cyclic-sort", "array": [3, 1, 5, 4, 2] }
 ```
 
-## Why each swap finalises an element
+## Why Each Swap Finalises an Element
 
 The placement rule at index `i` is a single decision. Let `v = a[i]` and `home = v − 1`:
 
@@ -46,7 +46,7 @@ The comparison inside the guard is against the *value* at `home`, not the index.
 
 The bound is an amortised accounting argument rather than a per-iteration one: an individual position may be visited more than once, yet the number of swaps is capped by the number of elements because each swap retires a value for good. There is no recursion, so no stack space enters the table.
 
-## Guarded anomaly variants
+## Guarded Anomaly Variants
 
 Duplicates and out-of-range values break the pure sorting contract, but not the guarded placement variant's linear bound. Each successful swap still fills an unsatisfied in-range home; values with no valid home, or whose home already contains an equal value, are skipped.
 
@@ -56,9 +56,10 @@ Duplicates share a home. On `[1, 3, 3, 4]`, once `3` sits at index 2 the second 
 
 Neither case is a general sort. Cyclic Sort cannot order arbitrary integers, floats, or keys with no index correspondence; strip the value-equals-index mapping and the swap target is undefined.
 
-## Reference drawer
+## Reference Drawer
 
 > [!ABSTRACT]- Placement decision at index `i`
+>
 > ```mermaid
 > flowchart TD
 >   A[Set i to zero] --> B{i less than n}
@@ -72,6 +73,7 @@ Neither case is a general sort. Cyclic Sort cannot order arbitrary integers, flo
 > ```
 
 > [!EXAMPLE]- C# implementation
+>
 > ```csharp
 > // Place a permutation of 1..n in O(n) time, O(1) space.
 > public static void CyclicSort(int[] a)

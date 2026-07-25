@@ -7,8 +7,7 @@ summary: "Turning vague intentions into precise, testable model tasks: anatomy, 
 level:
   - "3"
 status: Done
-tags:
-  - FolderNote
+tags: [FolderNote]
 publish: true
 priority: Medium
 ---

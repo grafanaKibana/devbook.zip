@@ -62,7 +62,7 @@ public sealed class PriceCalculator(decimal discountRate, decimal threshold)
 
 Both tests pass. Now Refactor: the logic is already clean, so nothing to change. Move to the next behavior.
 
-# What TDD Improves (and What It Doesn't)
+# What TDD Improves (And What It Doesn't)
 
 **Improves**:
 - **Design**: writing the test first forces a usable public API. Classes that are hard to test are usually poorly designed (too many dependencies, too much responsibility).

@@ -10,6 +10,7 @@ priority: High
 status: Ready to Repeat
 publish: true
 ---
+
 A military command structure is a natural Composite. A general gives an order to a division, which passes it to brigades, which pass it to battalions, down to individual soldiers. Whether you command one soldier or an entire army, the interface is the same: "execute this order." The hierarchy handles the recursion — the general doesn’t need to know whether a unit is a single person or ten thousand.
 
 The Composite pattern composes objects into tree structures and lets clients treat individual objects and compositions uniformly through a shared interface. Leaf nodes (single items) implement the interface directly. Composite nodes (containers) implement the same interface but delegate to their children recursively. In an e-commerce system, a `SingleProduct` has a price. A `ProductBundle` also has a price — calculated by summing its children, which can themselves be products or nested bundles. The client calls `GetPrice()` on either without knowing or caring which type it holds.

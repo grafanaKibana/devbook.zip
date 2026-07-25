@@ -17,7 +17,7 @@ The reduction depends on two properties: the values are ordered, and the middle 
 
 **Core condition:** sorted, indexable input → one comparison removes half of the candidates → `O(log n)` lookup with `O(1)` auxiliary space.
 
-# One search
+# One Search
 
 The trace searches for `83` in a sorted 16-element array.
 
@@ -29,7 +29,7 @@ The first probe inspects `38` at index 7. Because `38 < 83` and the array is sor
 
 Binary Search does not make an individual comparison cheaper than [[Linear Search]]. Its advantage comes from eliminating exponentially more future work with each comparison.
 
-# Why the range shrinks
+# Why the Range Shrinks
 
 At the start of every loop, the target—if it exists—must lie inside the inclusive range `[left, right]`. The middle comparison preserves that invariant:
 
@@ -51,7 +51,7 @@ Compute the midpoint as `left + (right - left) / 2`. It is algebraically equival
 
 The table describes the iterative implementation below. A recursive implementation keeps the same time bounds but uses `O(log n)` call-stack space in the average and worst cases.
 
-# When the assumptions stop holding
+# When the Assumptions Stop Holding
 
 On `[2, 100, 3, 4, 5]`, a search for `100` begins at `3`, moves right, and permanently discards the half containing the target. Nothing crashes; unsorted input produces a plausible false negative. Sorting first costs `O(n log n)`, which only pays back when later searches reuse that ordering.
 
@@ -59,9 +59,10 @@ Duplicates create a different ambiguity. Searching `[2, 5, 5, 5, 9]` may return 
 
 Boundary conventions remain paired. This version uses an inclusive range, so its loop is `left <= right` and its updates exclude the inspected element with `mid + 1` or `mid - 1`. Combining those updates with a half-open range can skip elements or prevent the range from shrinking.
 
-# Reference drawer
+# Reference Drawer
 
 > [!ABSTRACT]- Control flow
+>
 > ```mermaid
 > flowchart TD
 >   A[Start with sorted input] --> B[Set left and right]
@@ -77,6 +78,7 @@ Boundary conventions remain paired. This version uses an inclusive range, so its
 > ```
 
 > [!EXAMPLE]- C# implementation
+>
 > ```csharp
 > public static int BinarySearch(int[] values, int target)
 > {

@@ -4,8 +4,7 @@ topic:
 subtopic:
   - Patterns
 summary: "Architectural patterns define how a system's components are organized, how data flows between them, and where responsibility boundaries lie."
-tags:
-  - FolderNote
+tags: [FolderNote]
 publish: true
 priority: High
 level:
@@ -22,7 +21,7 @@ const { FolderStructureMap } = await dc.require("Assets/components/devbook-folde
 return FolderStructureMap;
 ```
 
-# Integration and data-flow patterns by failure and coupling
+# Integration and Data-flow Patterns by Failure and Coupling
 
 First identify what must vary. An API gateway, request-response call, and publish-subscribe topology decide how components interact. Streaming, batching, and ETL decide how data moves and when it becomes visible. Event Sourcing decides how state is recorded and reconstructed. Orchestration decides who owns a multi-step workflow. They can coexist; treating the nine labels below as mutually exclusive choices mixes different design layers.
 
@@ -39,7 +38,7 @@ First identify what must vary. An API gateway, request-response call, and publis
 
 The selection rule is failure ownership: choose the shape whose operator can explain where a failed item waits, who retries it, whether order matters, and how processing resumes without duplicating side effects.
 
-# Architecture selection matrix
+# Architecture Selection Matrix
 
 The families below also overlap. A service can use hexagonal boundaries internally, publish events, expose a client-server API, and deploy as one monolith or several services. A diagram labels a dominant organizing idea; it does not grant independent deployment or fault tolerance by itself.
 

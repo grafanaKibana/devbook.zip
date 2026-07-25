@@ -4,8 +4,7 @@ topic:
 subtopic:
   - LLM
 summary: "Designing how a model-driven system iterates — control flow, termination, verification, and recovery across turns."
-tags:
-  - FolderNote
+tags: [FolderNote]
 publish: true
 level:
   - "3"

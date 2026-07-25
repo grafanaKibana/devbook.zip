@@ -6,8 +6,7 @@ topic:
   - AI & ML
 subtopic: []
 summary: "How learning systems are built, evaluated, and operated: classic ML, LLMs, and agent tooling."
-tags:
-  - FolderNote
+tags: [FolderNote]
 publish: true
 level:
   - "3"

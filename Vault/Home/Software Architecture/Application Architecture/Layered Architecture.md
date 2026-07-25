@@ -10,6 +10,7 @@ priority: High
 status: Ready to Repeat
 publish: true
 ---
+
 Layered architecture structures an application into layers with clear responsibilities and strict dependency directions. Each layer only depends on the layer directly below it (traditional) or on inner layers (onion/clean). The goal is to isolate business rules from infrastructure details — so you can swap databases, frameworks, or delivery mechanisms without touching domain logic.
 
 # Layer Responsibilities
@@ -57,7 +58,7 @@ graph TD
     OPORT --> UC
 ```
 
-# Traditional vs Onion/Clean
+# Traditional Vs Onion/Clean
 
 ```mermaid
 graph LR

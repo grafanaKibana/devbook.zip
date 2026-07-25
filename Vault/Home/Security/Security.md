@@ -6,12 +6,11 @@ topic:
   - Security
 subtopic: []
 summary: "Protecting users, data, and systems: authentication, authorization, and cryptography."
-tags:
-  - FolderNote
+tags: [FolderNote]
 publish: true
 priority: High
 level:
-  - '4'
+  - "4"
 status: Done
 ---
 

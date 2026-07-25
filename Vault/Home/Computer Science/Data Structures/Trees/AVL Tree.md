@@ -22,7 +22,7 @@ What the structure gives up for that guarantee is written into every write: it c
 > [!NOTE] Visualization pending
 > Planned StepTrace: a balanced-BST card showing an insert descending to a leaf, a node's balance factor leaving `{−1, 0, +1}`, and a rotation (single or double) restoring `|balance| ≤ 1`. No matching renderer exists in `engine.js` yet.
 
-# Representation and rebalancing
+# Representation and Rebalancing
 
 An AVL node holds a key, left and right child pointers, and one extra integer — its height, from which the balance factor is derived:
 
@@ -56,7 +56,7 @@ Insert and delete diverge in how far the repair travels. After an insert, a sing
 
 Structure space is `O(n)`: one node per key, each carrying the constant-size key, two child pointers, and the height/balance field. The height cap is not an average — it is a worst case that follows from the invariant. The sparsest tree the invariant allows is a *Fibonacci tree*, whose minimum node count for height `h` obeys `N(h) = N(h−1) + N(h−2) + 1`; inverting that recurrence yields the `1.4405·log₂(n + 2) − 0.328` bound.
 
-# Where strict balance costs
+# Where Strict Balance Costs
 
 The strict `|balance| ≤ 1` target is exactly what makes AVL fast to read and comparatively expensive to write, and every boundary below traces back to it.
 
@@ -66,9 +66,10 @@ The per-node bookkeeping is a second, quieter cost of the invariant. Every inser
 
 Rotation-case selection is the classic implementation bug, and it too is a consequence of demanding an exact `|balance| ≤ 1`. Applying a single rotation to a Left-Right or Right-Left (zig-zag) shape leaves the tree just as unbalanced, mirrored to the opposite side, because only the double rotation moves the inner node out first. Getting the four-case dispatch wrong produces a tree that still parses as a BST but no longer honors the height bound.
 
-# Reference drawer
+# Reference Drawer
 
 > [!ABSTRACT]- Left-Left case and its single right rotation
+>
 > ```mermaid
 > graph LR
 >     subgraph before ["factor(3) = +2"]
@@ -83,6 +84,7 @@ Rotation-case selection is the classic implementation bug, and it too is a conse
 > ```
 
 > [!EXAMPLE]- C# implementation
+>
 > ```csharp
 > public sealed class AvlTree
 > {

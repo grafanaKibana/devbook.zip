@@ -4,8 +4,7 @@ topic:
 subtopic:
   - Architecture & Ops
 summary: "How networks are designed, observed, and kept healthy in production."
-tags:
-  - FolderNote
+tags: [FolderNote]
 publish: true
 priority: Medium
 level:

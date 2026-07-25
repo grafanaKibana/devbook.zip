@@ -102,7 +102,7 @@ flowchart LR
 - Kafka 4.x is KRaft-only, so Kafka now manages cluster metadata through its own Raft-based controller quorum.
 - Legacy ZooKeeper clusters must migrate to KRaft on a Kafka 3.x release that supports both modes before upgrading to Kafka 4.x.
 
-## Semantics checklist
+## Semantics Checklist
 
 Before choosing configuration values, keep five boundaries straight:
 
@@ -139,7 +139,7 @@ Kafka delivery guarantees come from producer acknowledgement settings, replicati
 - External side effects like database updates or HTTP calls still require idempotency or an outbox pattern.
 - Tradeoff is higher latency and complexity, so use only when business impact justifies it.
 
-## `acks` setting
+## `acks` Setting
 
 - `acks=0`: fire-and-forget, no broker acknowledgement, highest throughput and highest loss risk.
 - `acks=1`: leader acknowledgement only, can lose data if leader fails before followers replicate.
@@ -159,7 +159,7 @@ Design strategies:
 - Use composite keys like `customer_id:region` when one dimension is too skewed.
 - Validate key distribution with load tests and partition-level metrics before production rollout.
 
-# Producer, broker, and consumer loss windows
+# Producer, Broker, and Consumer Loss Windows
 
 ![[Software Architecture/Software Architecture-Kafka-18120000.png]]
 
@@ -174,7 +174,7 @@ Message loss is not one failure mode. Locate the acknowledgement boundary first:
 
 `acks=all` means all current in-sync replicas acknowledge, not all configured replicas. If `min.insync.replicas=2`, a critical topic can reject writes when fewer than two replicas are in sync instead of acknowledging a single-copy write.
 
-# Kafka use cases by workload requirement
+# Kafka Use Cases by Workload Requirement
 
 Choose Kafka for its log semantics, not because a workload is merely "real time."
 
@@ -188,11 +188,11 @@ Choose Kafka for its log semantics, not because a workload is merely "real time.
 
 A simple work queue with per-message priorities, arbitrary routing, or short retention may fit RabbitMQ or Service Bus better. The workload requirement selects the broker.
 
-# Schema evolution
+# Schema Evolution
 
 Kafka retains old records while producers and consumers deploy independently. [[Home/Software Architecture/Distributed Systems/Event Schema Evolution|Event Schema Evolution]] owns writer/reader resolution, compatibility policy, registry behavior, retained-record replay, and breaking-change migrations. Kafka itself is schema-agnostic; Schema Registry-aware serializers embed or associate a schema identifier with each record.
 
-# Why Kafka achieves high throughput
+# Why Kafka Achieves High Throughput
 
 Kafka combines several mechanisms rather than one trick:
 
@@ -204,7 +204,7 @@ Kafka combines several mechanisms rather than one trick:
 
 Each mechanism has a cost. Larger batches improve throughput but add linger latency; more partitions raise metadata, file, and rebalance overhead; compression spends CPU. Measure record size, batch size, partition throughput, and consumer lag instead of copying a benchmark configuration.
 
-# .NET consumer boundary
+# .NET Consumer Boundary
 
 The Confluent .NET client exposes Kafka's group, partition, and offset model through a poll loop. Advance the offset only after the business effect or an owned quarantine path is durable:
 
@@ -246,13 +246,13 @@ Track lag by group and partition, oldest-record age, rebalance duration, quarant
 
 # Pitfalls
 
-## Hot partitions from bad key design
+## Hot Partitions from Bad Key Design
 
 - **What goes wrong:** one partition receives disproportionate load, so one consumer instance does most work.
 - **Why it happens:** key hashing is deterministic and intentionally keeps equal keys together.
 - **How to avoid or detect:** monitor per-partition throughput and lag, redesign keys, and use composite keys when skew is persistent.
 
-## Consumer lag grows unnoticed
+## Consumer Lag Grows Unnoticed
 
 - **What goes wrong:** real-time pipeline becomes delayed and downstream SLAs fail.
 - **Why it happens:** processing time per record exceeds ingest rate or partition assignment is unbalanced.
@@ -262,13 +262,13 @@ Track lag by group and partition, oldest-record age, rebalance duration, quarant
 kafka-consumer-groups.sh --bootstrap-server localhost:9092 --group orders-worker --describe
 ```
 
-## Too many partitions
+## Too Many Partitions
 
 - **What goes wrong:** increased leader election time, metadata overhead, and file handle pressure.
 - **Why it happens:** each partition carries control-plane and storage overhead across brokers and clients.
 - **How to avoid or detect:** size partition count from throughput targets and future growth ranges, not arbitrary large defaults.
 
-## Ignoring `acks=all` for critical data
+## Ignoring `acks=all` for Critical Data
 
 - **What goes wrong:** acknowledged writes can still be lost on leader failure.
 - **Why it happens:** weaker ack modes return success before enough replication.
@@ -295,7 +295,7 @@ kafka-consumer-groups.sh --bootstrap-server localhost:9092 --group orders-worker
 - [Kafka consumer configuration](https://kafka.apache.org/documentation/#consumerconfigs) — official offset-commit and isolation settings that shape delivery behavior.
 - [Confluent poison pill handling](https://www.confluent.io/blog/spring-kafka-can-your-kafka-consumers-handle-a-poison-pill/) — practical quarantine and deserialization-failure handling; the boundary applies beyond the Java example.
 
-## ByteByteGo provenance
+## ByteByteGo Provenance
 
 - [Can Kafka lose messages?](https://github.com/ByteByteGoHq/system-design-101/blob/b28380a4710c5ec9638ec037d4168e288f334cba/data/guides/can-kafka-lose-messages.md) — editorial lead for the producer, broker, and consumer failure matrix.
 - [Top Kafka use cases](https://github.com/ByteByteGoHq/system-design-101/blob/b28380a4710c5ec9638ec037d4168e288f334cba/data/guides/top-5-kafka-use-cases.md) — provenance for workload examples; broker choice remains requirements-driven.

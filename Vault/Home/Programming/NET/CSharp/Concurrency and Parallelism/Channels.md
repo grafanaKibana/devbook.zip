@@ -33,7 +33,7 @@ publish: true
 
 Either you slow the producer or you throw data away; choosing a capacity is choosing which. `SingleReader`/`SingleWriter` are promises about how many threads touch each end — the channel takes a cheaper path when you make them, and breaks when you lie.
 
-## Blocking, lock-free, starvation-free, and wait-free progress
+## Blocking, Lock-free, Starvation-free, and Wait-free Progress
 
 API waiting and implementation progress answer different questions. On a full bounded channel, `WriteAsync` deliberately suspends until capacity exists: that is backpressure, even though no thread is blocked. `TryWrite` reports the admission decision immediately, but `false` means only *not accepted now*; it does not define the channel as formally non-blocking.
 

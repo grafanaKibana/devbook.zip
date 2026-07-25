@@ -4,12 +4,11 @@ topic:
 subtopic:
   - NET
 summary: "Ecosystem .NET topics outside language and runtime, like OWIN hosting and SignalR."
-tags:
-  - FolderNote
+tags: [FolderNote]
 publish: true
 priority: Medium
 level:
-  - '3'
+  - "3"
 status: Creation
 ---
 
@@ -28,7 +27,6 @@ return FolderStructureMap;
 
 > [!QUESTION]- Why would a .NET team still need to understand OWIN today?
 > OWIN matters for teams maintaining or migrating legacy ASP.NET Framework applications. Understanding the OWIN middleware pipeline model helps when migrating to ASP.NET Core's similar but distinct middleware pipeline, and when troubleshooting Katana-hosted services still running in production.
-
 
 # References
 

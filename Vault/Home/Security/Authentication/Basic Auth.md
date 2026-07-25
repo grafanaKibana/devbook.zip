@@ -92,7 +92,6 @@ var response = await httpClient.GetAsync("/api/internal/data");
 
 **Decision rule**: use Basic Auth only for internal service-to-service calls over HTTPS where simplicity is the priority. For user-facing authentication or any external-facing API, use JWT Bearer or OAuth 2.0.
 
-
 # Questions
 
 > [!QUESTION]- Why is Basic Auth unsafe over HTTP?
@@ -100,7 +99,6 @@ var response = await httpClient.GetAsync("/api/internal/data");
 
 > [!QUESTION]- When is Basic Auth acceptable in production?
 > For machine-to-machine calls between trusted services on an internal network over HTTPS, Basic Auth is acceptable when simplicity matters and the credential is a service account (not a user password). For user-facing authentication, use OAuth 2.0 / JWT Bearer — Basic Auth requires sending credentials on every request, which increases exposure.
-
 
 # References
 

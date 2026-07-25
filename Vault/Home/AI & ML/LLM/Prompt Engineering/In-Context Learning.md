@@ -140,7 +140,6 @@ When this pattern is not enough for reasoning-heavy tasks, continue with [[Reaso
 
 **Decision rule**: start zero-shot. Move to one-shot when output format is inconsistent. Move to few-shot when class boundaries are ambiguous. Move to fine-tuning only when few-shot is too expensive at scale or the task requires knowledge injection. Use RAG when the task requires external facts.
 
-
 # Questions
 
 > [!QUESTION]- When should you start with zero-shot versus few-shot?

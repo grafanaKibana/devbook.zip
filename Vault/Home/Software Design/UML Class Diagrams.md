@@ -15,7 +15,7 @@ A UML class diagram is a static map of types, their members, and the relationshi
 
 The diagram is useful only when the arrows carry precise meaning. Association says objects know about one another. Shared aggregation adds a weak whole–part hint but does not define lifecycle. Composition says the whole owns each part exclusively and the part has no independent lifecycle in that model. Generalization and realization describe type contracts, not object ownership.
 
-# Notation and relationship semantics with a C# example
+# Notation and Relationship Semantics with a C# Example
 
 | Mark | Meaning | Example |
 | --- | --- | --- |
@@ -28,7 +28,7 @@ The diagram is useful only when the arrows carry precise meaning. Association sa
 | Solid line with hollow triangle | Generalization | `CardPayment` is a `Payment` |
 | Dashed line with hollow triangle | Realization | `CardPayment` implements `IPayment` |
 
-## C# domain example
+## C# Domain Example
 
 ```mermaid
 classDiagram

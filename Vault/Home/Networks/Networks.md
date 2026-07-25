@@ -6,8 +6,7 @@ topic:
   - Networks
 subtopic: []
 summary: "Protocols, latency, and reliability of how machines communicate over a network."
-tags:
-  - FolderNote
+tags: [FolderNote]
 publish: true
 priority: High
 level:

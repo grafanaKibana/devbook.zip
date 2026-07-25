@@ -20,7 +20,7 @@ A Bloom filter keeps only an *m*-bit array and *k* independent hash functions. A
 > [!NOTE] Visualization pending
 > Planned StepTrace: an m-bit-array card showing adding an element setting *k* bits via *k* hash functions, then a query checking those *k* bits — any 0 means definitely absent, all 1 means probably present. No matching renderer exists in `engine.js` yet.
 
-# Representation and invariants
+# Representation and Invariants
 
 The stored state is a single bit array of length *m* and a family of *k* hash functions, each mapping an element to an index in `[0, m)`. Nothing else persists — no keys, no counts, no insertion order.
 
@@ -59,7 +59,7 @@ k = (m/n) · ln 2
 
 which drives roughly half the bits to 1. Increasing *m* lowers *p* by giving elements more room; *k* trades off between too few probes (weak discrimination) and too many (bits fill faster). These bits are the filter's whole footprint — there is no per-element allocation to grow alongside *n*.
 
-# When the structure stops fitting
+# When the Structure Stops Fitting
 
 Deletion is the hard boundary. The standard filter cannot remove an element, because no bit is owned by a single element; clearing the bits for one key can strip a bit that another present key relies on, and the next query for that key would return "definitely absent" — a false negative the structure is defined never to produce. A **counting Bloom filter** replaces each bit with a small counter that increments on add and decrements on remove, which supports deletion at several times the space of a plain bit array.
 
@@ -69,9 +69,10 @@ Over-filling degrades the guarantee gradually rather than failing loudly. The ra
 
 Every one of these boundaries traces back to the same design choice: no elements are stored. The filter answers membership cheaply precisely because it threw away everything except the bits.
 
-# Reference drawer
+# Reference Drawer
 
 > [!ABSTRACT]- Add and query over the bit array
+>
 > ```mermaid
 > flowchart LR
 >   X["element x"] --> H["h1..hk"]
@@ -83,6 +84,7 @@ Every one of these boundaries traces back to the same design choice: no elements
 > ```
 
 > [!EXAMPLE]- C# implementation
+>
 > ```csharp
 > using System.Collections;
 >

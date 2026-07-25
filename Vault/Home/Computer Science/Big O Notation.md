@@ -17,7 +17,7 @@ The same notation measures two resources. **Time complexity** counts operations 
 
 **Core idea:** cost as a function of `n`, keep only the dominant term, drop constants → a hardware-independent growth class that predicts behaviour at scale but not at small `n`.
 
-# The growth classes, side by side
+# The Growth Classes, Side by Side
 
 The complexity class is the shape of the curve. This chart plots six classes over a small input range, on a single axis tall enough to hold `2ⁿ` at `n = 10` — which is itself the lesson: making room for the exponential flattens every polynomial class into a thin band along the bottom.
 
@@ -54,7 +54,7 @@ Reading the lines from bottom to top at the right edge (the swatch matches each 
 
 The first five curves share the bottom tenth of the axis — at a scale that holds `2ⁿ`, even `n²`'s climb to 100 reads as almost flat. That is the wall: `n²` and `2ⁿ` are equal near `n = 4`, and by `n = 10` the exponential is already ten times larger and pulling away. That doubling is the practical boundary between "solvable for large inputs" (polynomial) and "solvable only for tiny inputs" (exponential and factorial); it is why an `O(2ⁿ)` [[Backtracking|brute-force]] search caps out around `n = 30` and an `O(n!)` permutation search around `n = 12`. `O(n!)` is left off entirely — it would dwarf even `2ⁿ` here.
 
-# Why the wall is a wall
+# Why the Wall is a Wall
 
 The chart's crossover understates the gap at real input sizes. Counting operations at a few scales makes it concrete:
 
@@ -67,7 +67,7 @@ The chart's crossover understates the gap at real input sizes. Counting operatio
 
 At a million elements, the `log n` column is still 20 while `n²` is a trillion — the difference between a hash lookup and a job that never finishes. This is the whole reason complexity class is the *first* thing to check: no amount of constant-factor tuning rescues an `n²` algorithm at `n = 10⁶`, but moving it to `n log n` does, by a factor of ~50,000. The `2ⁿ` column crossing 10³⁰ at `n = 100` is why exponential algorithms are a design signal to reach for [[Dynamic Programming]], a [[Greedy Algorithms|greedy]] rule, or an approximation, not a bigger machine.
 
-# Space complexity and the cases
+# Space Complexity and the Cases
 
 Space is measured the same way, and the term people forget is the **call stack**. A recursive traversal that looks `O(1)` in heap allocation is `O(h)` in stack frames, where `h` is the recursion depth — a chain-shaped input 100k deep overflows the default 1 MB stack even though it allocates nothing. Auxiliary space (extra memory beyond the input) is usually what's quoted: merge sort is `O(n)` auxiliary for its merge buffer, quicksort `O(log n)` for its stack, an in-place scan `O(1)`.
 
@@ -81,6 +81,7 @@ A single algorithm has different bounds depending on the input, and the distinct
 Big O by default states an upper bound; **Big Θ** (theta) states a *tight* bound where the upper and lower bounds match — merge sort is `Θ(n log n)` because it is `n log n` in every case, whereas quicksort is `O(n²)` worst but `Θ(n log n)` on average. **Big Ω** (omega) is the lower bound. In casual use "O" often means the tight bound; the precise word for "grows exactly like" is Θ.
 
 > [!EXAMPLE]- Reading complexity off the code (C#)
+>
 > ```csharp
 > // O(n): one pass, work per element is O(1).
 > long Sum(int[] a)
@@ -110,7 +111,7 @@ Big O by default states an upper bound; **Big Θ** (theta) states a *tight* boun
 > ```
 > `HasDuplicate` and `HasDuplicateFast` answer the same question; the second trades `O(n)` memory to drop time from `O(n²)` to `O(n)`. Reading a bound is mostly counting nested loops and multiplying by the per-iteration cost, then discarding constants and lower-order terms.
 
-# Where Big O misleads
+# Where Big O Misleads
 
 - **Constants matter at small `n`.** Big O drops them, so an `O(n log n)` algorithm with heavy setup can lose to an `O(n²)` one on small inputs. This is why `Array.Sort` switches to insertion sort for small subarrays inside its `O(n log n)` introsort — the quadratic algorithm's tiny constant wins below ~16 elements.
 - **The hidden constant can be huge.** Two `O(n)` algorithms can differ 100× in wall-clock from cache behaviour, branch prediction, or allocation. Big O narrows the field; profiling on representative data picks the winner within a class.

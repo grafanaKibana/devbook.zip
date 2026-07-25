@@ -17,7 +17,7 @@ For a graph with `n` vertices, a cycle is a permutation of the vertices whose co
 > [!NOTE] Visualization pending
 > Planned StepTrace: extend a partial path through unused vertices, show a dead end and backtrack, then close the path only when the last vertex has an edge to the start.
 
-# Backtracking state
+# Backtracking State
 
 For the graph with cycle edges `A-B-C-D-A` plus diagonal `A-C`, start with `A` and mark it used. Choosing `C` first leaves candidates `B` and `D`; the branch `A-C-B` cannot continue to `D` because `B-D` is absent, so it backtracks to `C` and tries `D`. The branch `A-C-D` then cannot reach unused `B`. Returning to the root and choosing `B` produces `A-B-C-D`, and `D-A` closes the cycle.
 
@@ -33,7 +33,7 @@ The maintained invariant is compact: the path contains distinct vertices, and ev
 
 The decision problem is in NP because a proposed cycle can be verified in `O(n)` adjacency checks. Dynamic programming over subsets improves exact worst-case time to `O(n² 2^n)` with `O(n 2^n)` space, but remains exponential.
 
-# Necessary checks and false shortcuts
+# Necessary Checks and False Shortcuts
 
 Every vertex in a Hamiltonian graph has degree at least two, and a Hamiltonian graph cannot contain an articulation point: removing one vertex from the cycle leaves a path that still connects all remaining vertices. These are fast rejection tests, not sufficient conditions. A graph can satisfy both and still have no Hamiltonian cycle.
 

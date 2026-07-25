@@ -4,11 +4,10 @@ topic:
 subtopic:
   - System Architecture
 summary: "High-level styles for organizing systems (monolith, microservices, serverless, SOA), each with predictable strengths and failure modes."
-tags:
-  - FolderNote
+tags: [FolderNote]
 publish: true
 level:
-  - '4'
+  - "4"
 priority: High
 status: Done
 ---

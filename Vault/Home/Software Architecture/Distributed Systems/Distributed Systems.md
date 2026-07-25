@@ -4,8 +4,7 @@ topic:
 subtopic:
   - Distributed Systems
 summary: "Core distributed-systems concepts for production: consistency tradeoffs, messaging, coordination, and failure handling under an unreliable network."
-tags:
-  - FolderNote
+tags: [FolderNote]
 publish: true
 priority: High
 level:
@@ -20,7 +19,7 @@ const { FolderStructureMap } = await dc.require("Assets/components/devbook-folde
 return FolderStructureMap;
 ```
 
-# Quality attributes and measurable targets
+# Quality Attributes and Measurable Targets
 
 ![[Software Architecture/Software Architecture-Distributed Systems-18120000-2.png]]
 
@@ -35,7 +34,7 @@ The four labels are an orientation mnemonic, not independent boxes. Logging does
 
 Targets conflict. Synchronous multi-region replication may improve durability and recovery while raising write latency and reducing partition-time availability. Caching may improve latency and origin efficiency while weakening freshness. State the business invariant that wins, then test the counter-cost.
 
-# Map symptoms to mechanisms, then test the tradeoff
+# Map Symptoms to Mechanisms, then Test the Tradeoff
 
 ![[Software Architecture/Software Architecture-Distributed Systems-18120000.png]]
 
@@ -50,7 +49,7 @@ Treat the visual as diagnostic prompts, not prescriptions:
 | Large immutable payloads | Object storage plus a claim-check reference | Consumers can fetch by durable ID and checksum | Extra fetch, authorization, lifecycle; test loss and expired credentials |
 | Poor diagnosis | [[Home/DevOps/Observability|Correlated traces, metrics, and logs]] | Context propagates through sync and async boundaries | Telemetry cost/cardinality; reconstruct one failed request from evidence |
 
-# Decision table for recurring system tradeoffs
+# Decision Table for Recurring System Tradeoffs
 
 Ask the same four questions for every choice: what is the workload, what fails, what consistency is required, and who operates the added machinery?
 
@@ -65,7 +64,7 @@ Ask the same four questions for every choice: what is the workload, what fails, 
 
 Do not select SQL versus key-value, REST versus GraphQL, or batch versus stream from a label alone. Start from access patterns, ordering/freshness, replay window, failure recovery, and the team's operating skills.
 
-# Distributed identifier requirements and failure modes
+# Distributed Identifier Requirements and Failure Modes
 
 Design IDs from the contract:
 
@@ -108,7 +107,7 @@ Patterns compose but are not substitutes. A leader election can choose one coord
 - [UUIDs (RFC 9562)](https://www.rfc-editor.org/rfc/rfc9562.html) — current IETF UUID layouts and requirements, including time-ordered UUID version 7.
 - [Azure Architecture Center design patterns](https://learn.microsoft.com/en-us/azure/architecture/patterns/) — official catalog for distributed communication, resilience, data, and coordination patterns with consequences.
 
-## ByteByteGo provenance
+## ByteByteGo Provenance
 
 - [Fantastic four of system design](https://github.com/ByteByteGoHq/system-design-101/blob/b28380a4710c5ec9638ec037d4168e288f334cba/data/guides/who-are-the-fantastic-four-of-system-design.md) — provenance for the four-attribute mnemonic, converted into measurable targets.
 - [Common system-design problems and solutions](https://github.com/ByteByteGoHq/system-design-101/blob/b28380a4710c5ec9638ec037d4168e288f334cba/data/guides/8-common-system-design-problems-and-solutions.md) — provenance for the symptom map, qualified with conditions and counter-costs.

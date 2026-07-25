@@ -10,6 +10,7 @@ priority: High
 status: Done
 publish: true
 ---
+
 A restaurant kitchen has one menu, but different stations prepare the same dish their own way — the Italian station makes pasta, the French station makes a soufflé. The customer orders "the special" without knowing which station handles it. The ordering process is the same; the creation varies by station.
 
 The Factory Method pattern works the same way: it defines an interface for creating an object but lets subclasses decide which class to instantiate. A creator class declares an abstract or virtual factory method that returns a product interface. Each concrete creator overrides this method to produce its specific product. The client code calls the factory method through the creator interface, never touching `new` directly — so adding a new product type means adding a new creator subclass, not editing existing code.

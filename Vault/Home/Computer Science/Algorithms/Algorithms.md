@@ -4,11 +4,10 @@ topic:
 subtopic:
   - Algorithms
 summary: "Step-by-step problem-solving procedures compared by runtime, memory, and complexity using Big O."
-tags:
-  - FolderNote
+tags: [FolderNote]
 publish: true
 level:
-  - '4'
+  - "4"
 status: Creation
 priority: High
 ---
@@ -24,7 +23,7 @@ const { FolderStructureMap } = await dc.require("Assets/components/devbook-folde
 return FolderStructureMap;
 ```
 
-# Algorithms as system-design mechanisms
+# Algorithms as System-design Mechanisms
 
 System-design diagrams often hide the algorithm inside a box labelled “cache,” “scheduler,” or “database.” Naming the mechanism exposes the cost you are accepting:
 

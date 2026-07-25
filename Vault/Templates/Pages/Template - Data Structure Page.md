@@ -4,10 +4,10 @@ subtopic: []
 level: []
 priority: Medium
 status: Not-Started
-tags:
-  - Template
+tags: [Template]
 publish: false
 ---
+
 <%*
 const parts = tp.file.folder(true).split("/");
 const homeIndex = parts.indexOf("Home");
@@ -43,7 +43,7 @@ tp.hooks.on_all_templates_executed(async () => {
 
 <!-- State the workload, the information that must persist between operations, the representation that lowers the repeated cost, and the information the structure does not retain. -->
 
-## State across operations
+## State across Operations
 
 <!-- Replace this required placeholder with a valid configuration from the StepTrace registry. Show several operations over one persistent structure; do not substitute a related algorithm trace. Do not publish an unresolved placeholder. -->
 
@@ -51,7 +51,7 @@ tp.hooks.on_all_templates_executed(async () => {
 {"algorithm":"replace-with-supported-id","operations":"replace-with-persistent-operation-sequence"}
 ```
 
-## Representation and invariants
+## Representation and Invariants
 
 <!-- Describe the physical state, empty/root/sentinel conventions, invariants, mutable fields, and retained or discarded identity, ordering, topology, history, or duplicates. -->
 
@@ -70,15 +70,17 @@ tp.hooks.on_all_templates_executed(async () => {
 
 <!-- Keep only limits caused by the representation: deletion, ordering, range access, path recovery, iteration, identity mapping, rollback, or memory layout. -->
 
-## Reference drawer
+## Reference Drawer
 
 > [!ABSTRACT]- Structural view
+>
 > ```mermaid
 > flowchart LR
 >   State --> Operation --> State
 > ```
 
 > [!EXAMPLE]- C# implementation
+>
 > ```csharp
 > // Complete reference implementation.
 > ```

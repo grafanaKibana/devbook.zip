@@ -20,7 +20,7 @@ Keeping a size-`k` heap while scanning removes that waste. To surface the `k` **
 > [!NOTE] Visualization pending
 > Planned StepTrace: a size-k min-heap card showing each input element compared against the heap's smallest and replacing it when larger, so the heap always holds the k largest seen so far. No matching renderer exists in `engine.js` yet.
 
-# Why a min-heap holds the largest
+# Why a Min-heap Holds the Largest
 
 The invariant carried across the scan is that the heap contains the `k` largest of every element seen so far, with the `k`-th largest at the root. The first `k` elements fill the heap outright. Each later element `x` faces one comparison against the root:
 
@@ -45,7 +45,7 @@ Finding the `k` largest of `n` elements:
 
 Quickselect's space is `O(1)` extra beyond the input it mutates in place; its average bound assumes a randomized or otherwise non-adversarial pivot. The heap's `O(k)` is the only column that stays bounded when `n` is unbounded, which is why it is the streaming choice.
 
-# When the assumptions stop holding
+# When the Assumptions Stop Holding
 
 Using a max-heap for the `k` largest inverts the mechanism. A max-heap of all `n` elements — pop `k` times — does return the right answer, but it holds every element, so its `O(n)` resident set defeats the whole point of the pattern: no streaming, and no memory saving over materializing the input. Its time is not the problem — heapify builds in `O(n)` and `k` extractions cost `O(k log n)`, so the total is `O(n + k log n)`, which for `k ≪ n` is roughly `O(n)` and actually beats a full sort. The space is what disqualifies it against the size-`k` heap's `O(k)`. A size-`k` *max*-heap is worse still: its root is the strongest retained element, so the comparison keeps the wrong side and the scan collects the `k` *smallest*. The result passes symmetric test data and fails everything else.
 
@@ -53,9 +53,10 @@ Using a max-heap for the `k` largest inverts the mechanism. A max-heap of all `n
 
 Quickselect cannot run on a stream. It needs the whole array addressable to partition it, and it reorders that array as a side effect, so an input that arrives incrementally or must stay immutable rules it out. Its `O(n²)` worst case is a second constraint: a naive pivot on already-sorted or adversarial input barely shrinks the problem each step, the same degradation as [[Quick Sort]]. A randomized pivot makes that improbable; median-of-medians makes it impossible at a higher constant.
 
-# Reference drawer
+# Reference Drawer
 
 > [!ABSTRACT]- Streaming min-heap for the k largest
+>
 > ```mermaid
 > flowchart TD
 >   A[Empty min-heap, capacity k] --> B{More input}
@@ -72,6 +73,7 @@ Quickselect cannot run on a stream. It needs the whole array addressable to part
 > ```
 
 > [!EXAMPLE]- C# implementations
+>
 > ```csharp
 > // Streaming: k largest via a size-k min-heap. O(n log k) time, O(k) space.
 > public static int[] KLargest(IEnumerable<int> stream, int k)

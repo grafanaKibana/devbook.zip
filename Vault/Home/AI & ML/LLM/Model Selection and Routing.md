@@ -15,7 +15,7 @@ Model selection chooses which model may serve a workload; routing chooses per re
 
 This note covers application-level routing between complete models. Token-level routing among experts inside one sparse model is a different mechanism covered in [[Home/AI & ML/LLM/LLM#Mixture-of-experts|mixture-of-experts routing]].
 
-# Selection criteria
+# Selection Criteria
 
 Evaluate every candidate against the same versioned workload and constraints:
 
@@ -28,13 +28,13 @@ Evaluate every candidate against the same versioned workload and constraints:
 
 Public leaderboards shortlist candidates. They do not replace [[Home/AI & ML/LLM/Evaluation/Evaluation|evaluation]] on the distribution and rubric that determine your release.
 
-# Routing patterns
+# Routing Patterns
 
-## Deterministic task mapping
+## Deterministic Task Mapping
 
 Map known task classes to models in configuration: extraction to one candidate, complex synthesis to another, image work to a multimodal model. This is easiest to audit when task boundaries are explicit.
 
-## Classifier routing
+## Classifier Routing
 
 A cheap classifier predicts task type or difficulty before generation. It avoids paying for a failed first attempt, but a false “easy” decision can silently reduce quality. Evaluate the router as a decision system, including per-route recall for hard or safety-sensitive cases.
 
@@ -53,7 +53,7 @@ flowchart LR
 
 A cascade saves money only if the first attempt plus escalation costs less than sending every request directly to the stronger model. It can increase p95 latency for escalated traffic, so measure the end-to-end path rather than individual model latency.
 
-# Router evaluation
+# Router Evaluation
 
 Build a labeled routing set from real traffic. For each request, record which candidates pass the task rubric, their latency, and full cost. Then evaluate the routing policy against an oracle that selects the cheapest passing model.
 

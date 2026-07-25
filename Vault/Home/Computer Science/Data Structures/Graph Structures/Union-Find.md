@@ -10,13 +10,14 @@ priority: Medium
 status: Ready to Repeat
 publish: true
 ---
+
 A program receives a stream of merge and connectivity requests: `union(a, b)` joins two groups, `find(x)` reports which group `x` belongs to, and two elements are connected when their finds agree. The cost that dominates is the walk `find` performs up a parent chain toward its set's root. Left unmanaged, that chain grows to length `n` and every query degrades to `O(n)`.
 
 Two heuristics keep the forest shallow so the walk stays short. Union by rank controls how two trees combine; path compression rewrites the chain each `find` traverses. Together they drop the amortized cost of a query to `O(α(n))`, where α is the inverse Ackermann function and stays below 5 for any `n` that fits in memory. The [[Disjoint Set]] note covers the parent-array forest these operations run over; this page is about the heuristics and their analysis.
 
 **Core condition:** merges only accumulate → each `find` walks toward a root → the two heuristics keep that walk near-constant amortized → `O(α(n))` per operation with `O(n)` storage.
 
-# The two operations
+# The Two Operations
 
 A trace over seven singleton nodes exercises both operations and the flattening they depend on.
 
@@ -26,7 +27,7 @@ A trace over seven singleton nodes exercises both operations and the flattening 
 
 A `union` resolves both arguments to their roots and links one root beneath the other; an interior node is never linked directly, since that would strand the rest of its set. A `find` walks parent pointers until it reaches a self-parented root, then path-compresses the walked nodes so each points straight at that root. The first deep `find` on a chain is what pays for every shallow `find` after it.
 
-# Why the walk stays short
+# Why the Walk Stays short
 
 Each heuristic attacks tree height from a different direction.
 
@@ -47,15 +48,16 @@ Neither heuristic alone reaches near-constant time: rank bounds how tall a tree 
 
 The amortized column assumes both heuristics. Union by rank *alone* keeps tree height at `O(log n)`, so every operation is `O(log n)` in both the amortized and single-operation sense. With *neither* heuristic a chain can grow to length `n`, turning `find`, `union`, and `connected` into `O(n)` operations. `α(n)` is a guarantee over a sequence, not a promise about any one call: the single-operation worst case stays `O(log n)` because a cold `find` may still walk a full bounded-height path before compressing it.
 
-# Where the bound and the interface stop
+# Where the Bound and the Interface Stop
 
 Path compression trades reversibility for speed. Once a `find` rewrites the parents it walked, the pre-compression shape is gone, so a merge cannot be undone. Rollback DSU keeps union by rank and *drops* compression precisely to preserve that history: each `union` records the single parent-and-rank change it made and can pop it. That is how an offline problem with edge deletions is solved — process the sequence in reverse so every deletion becomes an addition, undoing merges as it unwinds ([rollback DSU](https://cp-algorithms.com/data_structures/deleting_in_log_n.html)).
 
 The interface only grows sets. There is no split, and no removal of an element from a set — the parent forest records membership, not the edges that produced it, so a merged component cannot be separated back into its pre-merge pieces. That limit belongs to the [[Disjoint Set]] page as its own boundary; the algorithmic consequence here is that any workload with removals needs either a rollback variant run offline or a fully dynamic connectivity structure.
 
-# Reference drawer
+# Reference Drawer
 
 > [!ABSTRACT]- Operation flow
+>
 > ```mermaid
 > flowchart TD
 >   subgraph find[find x]
@@ -71,6 +73,7 @@ The interface only grows sets. There is no split, and no removal of an element f
 > ```
 
 > [!EXAMPLE]- Kruskal's cycle test
+>
 > ```csharp
 > // Builds a Minimum Spanning Tree by adding the cheapest edge that
 > // does not close a cycle; Union returns false when both ends already share a root.

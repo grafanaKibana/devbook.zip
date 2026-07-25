@@ -22,7 +22,7 @@ What the forest gives up is compactness and locality. Nodes are separate allocat
 > [!NOTE] Visualization pending
 > Planned StepTrace: a forest-merge card showing two binomial forests melded like binary addition — equal-order trees link into the next order and the carry propagates up until each order is present at most once. No matching renderer exists in `engine.js` yet.
 
-# Meld = binary addition
+# Meld = Binary Addition
 
 Insert, extract-min, and union all reduce to one primitive: **meld**. Walk both forests from the lowest order upward. When two trees share an order `k`, they **link** in `O(1)` — the root with the larger key becomes the leftmost child of the smaller-keyed root, producing one tree of order `k + 1`. That new tree is a **carry** into the next order, propagated exactly as when adding two binary numbers. At most `⌊log₂ n⌋ + 1` orders exist, so the walk — and therefore meld — is `O(log n)` worst case.
 
@@ -45,7 +45,7 @@ The other operations are corollaries:
 - **Find-min** scans the `≤ log n` roots, or reads a cached min-pointer for `O(1)`.
 - **Decrease-key** lowers a key and sifts it up its own tree, whose height is `≤ log n`.
 
-# Representation and invariants
+# Representation and Invariants
 
 Each item is a heap node holding a key, a `degree` (the order of the tree it roots or the subtree it heads), a `child` pointer to its leftmost child, and a `sibling` pointer. Roots form a singly linked list kept in **strictly increasing order**; a node's children are likewise linked by `sibling` in decreasing order, which is the shape reversing produces during extract-min.
 
@@ -73,7 +73,7 @@ The amortized `O(1)` for insert and the worst-case `O(log n)` describe the same 
 
 Find-min is `O(log n)` unless a min-pointer is maintained across meld and extract-min; the pointer is cheap to keep current since both operations already touch every root. Space is dominated by per-node pointers — three references per item on top of the key — which is the concrete cost of choosing a forest over an array.
 
-# When the structure stops fitting
+# When the Structure Stops Fitting
 
 The pointered forest is what buys `O(log n)` meld, and it is also where the structure loses to a plain binary heap on every non-melding workload. A binary heap keeps `n` keys in one array with implicit `2i+1 / 2i+2` child indices: no per-node pointers, no allocation per insert, and sequential memory that the cache prefetches. A binomial queue pays a pointer chase per level and an allocation per node. For a priority queue that never unions, that overhead is pure loss — the binary heap is flatly faster with the same `O(log n)` bounds.
 
@@ -81,9 +81,10 @@ Find-min degrades the moment the min-pointer is dropped. Without it, the minimum
 
 Decrease-key is `O(log n)`, not the `O(1)` amortized a [[Fibonacci Heaps|Fibonacci heap]] reaches, because a lowered key must sift all the way up its binomial tree rather than being cut out and reinserted lazily. A shortest-path relaxation that calls decrease-key on the order of `E` times therefore pays `O(E log n)` here — the workload where the binomial heap's structure is the wrong bet.
 
-# Reference drawer
+# Reference Drawer
 
 > [!ABSTRACT]- Forest shape for `n = 13` (`1101₂`)
+>
 > ```mermaid
 > graph TD
 >   subgraph B3 ["order 3 · 8 nodes"]
@@ -101,6 +102,7 @@ Decrease-key is `O(log n)`, not the `O(1)` amortized a [[Fibonacci Heaps|Fibonac
 > ```
 
 > [!EXAMPLE]- C# implementation
+>
 > ```csharp
 > public sealed class BinomialHeap
 > {

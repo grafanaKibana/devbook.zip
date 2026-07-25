@@ -15,7 +15,7 @@ Service-Oriented Architecture (SOA) structures a system as a collection of loose
 
 SOA and microservices share the same decomposition philosophy but differ in scope, governance, and communication style. Understanding the distinction matters for interviews and architecture decisions.
 
-# SOA vs Microservices
+# SOA Vs Microservices
 
 | Dimension | SOA | Microservices |
 |---|---|---|
@@ -70,7 +70,6 @@ var response = await client.PlaceOrderAsync(new PlaceOrderRequest
 
 The contract boundary is the key SOA discipline: services communicate through published interfaces, not shared code or shared databases.
 
-
 # Pitfalls
 
 **ESB as a God Object** — the Enterprise Service Bus accumulates business logic: routing rules, data transformations, orchestration, error handling. A real example: a logistics company's ESB grew to 2,400 routing rules and 180 XSLT transformations over 5 years. A single schema change in the "Shipment" service required updating 47 ESB transformations, a 3-week effort. The ESB became the most complex and fragile component in the system — every change required the ESB team's involvement. Mitigation: keep the ESB as a dumb transport. Business logic belongs in the services. If the ESB is doing domain decisions, refactor them into the services.
@@ -94,7 +93,6 @@ The contract boundary is the key SOA discipline: services communicate through pu
 
 > [!QUESTION]- When is SOA still the right choice over microservices?
 > SOA remains appropriate for enterprise integration scenarios: connecting heterogeneous legacy systems (SAP, Salesforce, custom ERP) via a shared integration layer, shared services used by multiple business units where microservice decomposition overhead isn't justified, and regulated industries requiring centralized governance and audit trails. Microservices are better for greenfield cloud-native systems where teams can own independent services end-to-end.
-
 
 # References
 

@@ -22,7 +22,7 @@ The decisive behaviour is the moment the heuristic selects a node that looks clo
 > [!NOTE] Visualization pending
 > Planned StepTrace: a graph-search card showing a frontier ordered by the heuristic `h` alone — always expanding the node that looks closest to the goal, sometimes down a misleading path. No matching renderer exists in `engine.js` yet.
 
-# Ordering by the estimate
+# Ordering by the Estimate
 
 The frontier is a priority queue keyed by `h(n)`. Each iteration pops the node with the smallest estimate, and if it is not the goal, pushes every unvisited neighbor keyed by that neighbor's own `h`. The edge weight `w(u, v)` is available but never read; a visited set stops a node from entering the queue twice.
 
@@ -40,7 +40,7 @@ One framing makes the family relationship exact: [[A-Star Search|A*]] expands by
 
 `b` is the branching factor and `m` the maximum depth of the search space. Every bound is governed by heuristic quality: a strong `h` keeps the frontier small and the path close to direct, while a weak one distinguishes no better than an uninformed traversal. Like A*, Greedy Best-First holds every generated node in memory, so space tracks the number of nodes generated and is usually the binding limit before time is.
 
-# When the estimate misleads
+# When the Estimate Misleads
 
 The h-only ordering fails in three distinct ways, all traceable to the missing `g` term.
 
@@ -50,9 +50,10 @@ The h-only ordering fails in three distinct ways, all traceable to the missing `
 
 **A poor heuristic collapses to uninformed search.** If `h` returns near-constant or weakly correlated values, the priority queue no longer separates directions and expansion degrades to an uninformed fan-out, paying the full `O(b^m)`. The concave obstacle is the common concrete case: a wall cupping the goal gives every cell inside the pocket a tempting low `h`, so the search thrashes along the barrier — re-committing to the blocked heading because those cells keep scoring lowest — before it discovers the way around.
 
-# Reference drawer
+# Reference Drawer
 
 > [!ABSTRACT]- Control flow
+>
 > ```mermaid
 > flowchart TD
 >   A[Push source keyed by h of source] --> B{Priority queue empty}
@@ -68,6 +69,7 @@ The h-only ordering fails in three distinct ways, all traceable to the missing `
 > ```
 
 > [!EXAMPLE]- C# implementation
+>
 > ```csharp
 > public static IReadOnlyList<int>? GreedyBestFirstSearch(
 >     IReadOnlyList<IReadOnlyList<int>> neighbors,

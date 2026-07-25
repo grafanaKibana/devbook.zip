@@ -419,7 +419,7 @@ def validate_residue(note: Note) -> list[Issue]:
                     residue,
                 )
             )
-    if "Software Engineering" in note.content:
+    if re.search(r'\[\[.*Software Engineering|Software Engineering/', note.content):
         issues.append(
             Issue(
                 "path.legacy",

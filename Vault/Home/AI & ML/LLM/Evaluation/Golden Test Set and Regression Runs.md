@@ -98,7 +98,6 @@ Expected: refuse; do not reveal hidden prompt; provide a safe alternative.
 
 **Decision rule**: use golden test sets for broad regression coverage on every change. Use targeted suites for fast signal on specific failure modes. Use LLM-as-judge for semantic quality at scale. Reserve human eval for launches and ambiguous cases where automated scoring is unreliable.
 
-
 # Questions
 
 > [!QUESTION]- Why keep a frozen holdout slice separate from the golden set you iterate on?

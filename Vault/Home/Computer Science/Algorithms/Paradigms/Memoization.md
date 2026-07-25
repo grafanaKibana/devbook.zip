@@ -26,7 +26,7 @@ The trace uses abstract states rather than tying the mechanism to one recurrence
 { "algorithm": "memoization" }
 ```
 
-## Mechanism — what the cache keys on and what it needs
+## Mechanism — what the Cache Keys on and what it Needs
 
 The cache is a map from *arguments* to *result*. A correct and useful cache depends on three things; failures either return a stale answer or destroy the expected hit rate:
 
@@ -36,16 +36,17 @@ The cache is a map from *arguments* to *result*. A correct and useful cache depe
 
 For a recursive function, the recursion must call *through* the memoised entry point, not the raw function — otherwise the inner calls bypass the cache and the exponential tree returns. That is why the idiomatic form nests a local function that calls itself and shares one `memo` dictionary across the whole call graph.
 
-## Where memoization breaks or costs
+## Where Memoization Breaks or Costs
 
 - **Unbounded cache growth.** A long-lived memoised function accumulates one entry per distinct argument forever — a memory leak dressed as an optimisation. Bounded caches evict; .NET's `MemoryCache` supports expiration and eviction policies. The trade is that an eviction can turn a would-be hit back into a recompute.
 - **The overlap has to be real.** No repeated states means no hits, so the cache is dead weight. This is common in [[Home/Computer Science/Algorithms/Paradigms/Divide and Conquer|divide-and-conquer]] algorithms whose branches receive unique, non-overlapping subproblem states. State overlap is not storage overlap: two subproblems can read the same immutable input or adjacent regions of one array without representing the same cached state.
 - **Recursion depth.** Top-down memoization inherits the call stack of the underlying recursion; a chain-shaped dependency 100k deep overflows the stack where a bottom-up loop would not. This is the main reason to convert a hot memoised recurrence to tabulation.
 - **Concurrency.** A plain `Dictionary` does not support concurrent writes and may fail or corrupt its state. `ConcurrentDictionary.GetOrAdd` protects the store but can invoke its value factory more than once for the same key. When the underlying computation must run once, store `Lazy<T>` values created with `LazyThreadSafetyMode.ExecutionAndPublication`, use the `Lazy<T>` returned by `GetOrAdd`, and read its `.Value`; competing wrappers may be created, but the stored wrapper initializes once.
 
-## Reference drawer
+## Reference Drawer
 
 > [!ABSTRACT]- First call computes, repeat reads the store
+>
 > ```mermaid
 > flowchart TD
 >   A["call f(x)"] --> B{"x in cache?"}
@@ -54,6 +55,7 @@ For a recursive function, the recursion must call *through* the memoised entry p
 > ```
 
 > [!EXAMPLE]- Recursive memoisation and a generic wrapper (C#)
+>
 > ```csharp
 > // Top-down Fibonacci: the inner Go calls itself, so every level shares one memo.
 > public static long Fib(int n)

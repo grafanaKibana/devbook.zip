@@ -27,7 +27,7 @@ Read it as two questions. *Is the storage open-ended or closed?* Chaining's list
 > [!NOTE] Visualization pending
 > Planned StepTrace: a hash-table card inserting a run of colliding keys three ways side by side — a chain growing off one bucket, a probe sequence walking to the next free slot, and a fixed bucket filling then overflowing — with the load factor annotated as each fills. No matching renderer exists in `engine.js` yet.
 
-# Open hashing — separate chaining (closed addressing)
+# Open Hashing — Separate Chaining (Closed aDdressing)
 
 Each array slot holds a pointer to a secondary container — classically a linked list — of every entry that hashed there. A collision appends to that bucket's list; a lookup hashes to the bucket and scans its list with an equality check. The array slot is a fixed *address* for the key (hence "closed addressing"), but the storage behind it is open-ended (hence "open hashing").
 
@@ -37,7 +37,7 @@ Each array slot holds a pointer to a secondary container — classically a linke
 
 Chaining is the forgiving default: it tolerates a mediocre hash and a load factor above 1, and it never has to reserve empty slots. The price is a pointer (or index) per entry and, in the naive form, poor cache behaviour.
 
-# Closed hashing — open addressing (probing)
+# Closed Hashing — Open Addressing (Probing)
 
 Every entry lives directly in the bucket array; there are no external lists. On a collision the table follows a deterministic **probe sequence** to the next candidate slot until it finds an empty one (for insert) or the key (for lookup). The storage is closed (a fixed array), but a key's final *address* is open — it may sit far from its home slot.
 
@@ -52,7 +52,7 @@ The probe sequence is the whole design:
 
 Open addressing wins on speed when the load factor is controlled: one contiguous array, no per-entry pointer, and cache-friendly probing. It demands a good hash and a disciplined resize policy, and it pays for deletes.
 
-# Bucketed hashing (closed addressing, fixed blocks)
+# Bucketed Hashing (Closed aDdressing, fIxed bLocks)
 
 A hybrid: the array holds fixed-size **buckets**, each a small block of `B` slots, and the home bucket is `hash(key) mod bucketCount`. A key fills the first free slot *within* its bucket; only when the bucket is full does an overflow strategy kick in — an overflow chain, or probing to the next bucket. It is closed addressing at bucket granularity with open placement inside the bucket.
 
@@ -74,9 +74,10 @@ All three are `O(1)` average and `O(n)` worst per operation; the differences tha
 
 The worst case is `O(n)` for all three and fires the same way — a hash that collapses every key into one bucket — which is why the [[HashMap]] hash-flooding pitfall applies across the family regardless of resolution strategy. What differs is the *average* under load: chaining degrades linearly in `α` and survives `α > 1`; open addressing degrades hyperbolically and must resize before the array fills; bucketing pushes the cliff back by a factor of the bucket size and keeps the work in one cache line.
 
-# Reference drawer
+# Reference Drawer
 
 > [!ABSTRACT]- The three strategies on a collision at slot 1
+>
 > ```mermaid
 > flowchart TD
 >   subgraph chaining["Open hashing — chaining"]
@@ -95,6 +96,7 @@ The worst case is `O(n)` for all three and fires the same way — a hash that co
 > Keys A and B both hash to slot 1. Chaining links B off slot 1's list; probing bumps B to slot 2; bucketing drops both into bucket 1's block.
 
 > [!EXAMPLE]- Open-addressed table with linear probing and tombstones (C#)
+>
 > ```csharp
 > public sealed class LinearProbingMap<TKey, TValue> where TKey : notnull
 > {

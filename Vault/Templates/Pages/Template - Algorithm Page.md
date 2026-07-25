@@ -4,10 +4,10 @@ subtopic: []
 level: []
 priority: Medium
 status: Not-Started
-tags:
-  - Template
+tags: [Template]
 publish: false
 ---
+
 <%*
 const parts = tp.file.folder(true).split("/");
 const homeIndex = parts.indexOf("Home");
@@ -69,15 +69,17 @@ tp.hooks.on_all_templates_executed(async () => {
 
 <!-- Keep this section only for concrete input, semantic, or implementation boundaries that change the outcome. -->
 
-## Reference drawer
+## Reference Drawer
 
 > [!ABSTRACT]- Structural view
+>
 > ```mermaid
 > flowchart LR
 >   Input --> State --> Result
 > ```
 
 > [!EXAMPLE]- C# implementation
+>
 > ```csharp
 > // Complete reference implementation.
 > ```

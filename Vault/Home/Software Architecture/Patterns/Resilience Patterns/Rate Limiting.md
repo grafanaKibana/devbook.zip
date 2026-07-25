@@ -10,6 +10,7 @@ level:
   - "3"
 status: Done
 ---
+
 Rate limiting controls how many requests a client can make in a period of time so one caller cannot exhaust shared resources. It matters because it protects reliability, reduces abuse, and keeps cost predictable when downstream work is expensive, especially LLM inference and embedding calls billed per request or token. In system design interviews, rate limiting is usually a quota protection mechanism, not just a security feature: it keeps latency stable for well-behaved users when traffic spikes. Reach for it on public APIs, shared multi-tenant services, and any endpoint that fans out to costly dependencies.
 
 In .NET systems, rate limiting is often a layered decision: edge gateway limits, app-level per-tenant limits, and provider-level limits from dependencies like OpenAI or Stripe. The algorithm you choose defines failure behavior under burst traffic, memory usage, and fairness.
@@ -109,6 +110,7 @@ When to prefer it:
 - Early implementation where simplicity is the dominant requirement.
 
 # Quick Comparison
+
 | Algorithm | Burst support | Accuracy | Memory cost | Operational complexity | Typical fit |
 | --- | --- | --- | --- | --- | --- |
 | Fixed Window | Poor at edges | Low to medium | Low | Low | Simple internal quotas |
@@ -221,7 +223,7 @@ EXEC
 ```
 
 # Pitfalls
-## 1) Fixed window boundary spike
+## 1) Fixed Window Boundary Spike
 
 What goes wrong: with a limit of 100/minute, a client can send 100 requests at 12:00:59 and another 100 at 12:01:00, effectively 200 in two seconds.
 
@@ -229,7 +231,7 @@ Why it happens: counters reset on hard boundaries rather than rolling time.
 
 Mitigation: prefer token bucket or sliding window counter for edge-exposed endpoints.
 
-## 2) Wrong partition key
+## 2) Wrong Partition Key
 
 What goes wrong: limiting by IP can unfairly throttle many users behind one NAT, while bad actors rotate IPs to evade limits.
 
@@ -237,7 +239,7 @@ Why it happens: key does not reflect identity or billing unit.
 
 Mitigation: choose key by business objective (API key, tenant, user, or composite key). Align limiter key with quota ownership.
 
-## 3) Clock skew in distributed limiters
+## 3) Clock Skew in Distributed Limiters
 
 What goes wrong: nodes disagree on current time, leading to inconsistent window calculations and unfair accepts/rejects.
 
@@ -245,7 +247,7 @@ Why it happens: window math depends on timestamps from different hosts.
 
 Mitigation: centralize time decisions in Redis scripts when possible, run NTP everywhere, and avoid client-provided timestamps.
 
-## 4) Missing response metadata
+## 4) Missing Response Metadata
 
 What goes wrong: clients receive `429` without actionable retry guidance, causing aggressive blind retries and more load.
 

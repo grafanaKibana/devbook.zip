@@ -4,13 +4,12 @@ topic:
 subtopic:
   - NET
 summary: "The .NET CLR execution engine: JIT compilation, garbage collection, type safety, and threading."
-tags:
-  - FolderNote
+tags: [FolderNote]
 publish: true
 status: Creation
 priority: High
 level:
-  - '4'
+  - "4"
 ---
 
 The .NET runtime (Common Language Runtime / CLR) is the execution engine that makes managed code work: it compiles IL to native code via JIT, manages memory through garbage collection, enforces type safety, and handles threading. Understanding the runtime matters for any senior .NET developer because most production performance issues — latency spikes, memory growth, thread pool starvation — are runtime problems, not application logic bugs.

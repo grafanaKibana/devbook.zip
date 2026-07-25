@@ -4,8 +4,7 @@ topic:
 subtopic:
   - LLM
 summary: "Deliberately deciding what fills the finite context window, and in what order, to maximize useful signal."
-tags:
-  - FolderNote
+tags: [FolderNote]
 level:
   - "2"
 priority: High
