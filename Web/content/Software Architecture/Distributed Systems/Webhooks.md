@@ -1,8 +1,8 @@
 ---
 publish: true
 created: 2026-07-18T14:02:44.159Z
-modified: 2026-07-18T14:02:44.159Z
-published: 2026-07-18T14:02:44.159Z
+modified: 2026-07-25T13:51:15.273Z
+published: 2026-07-25T13:51:15.273Z
 topic:
   - Software Architecture
 subtopic:
@@ -34,7 +34,7 @@ sequenceDiagram
 
 Webhooks complement [[Software Architecture/System Architecture/Event-Driven Architecture]] — they are the HTTP-native way to deliver events between systems that do not share a message broker. For internal service-to-service communication within the same platform, [[Software Architecture/Distributed Systems/Message Queues/Message Queues|Message Queues]] are usually a better fit because they provide built-in durability, fan-out, and back-pressure.
 
-# ASP.NET Core receiver
+# ASP.NET Core Receiver
 
 Authenticate the provider's exact raw request bytes before parsing JSON. Reserializing a payload can change whitespace or property ordering and invalidate the signature.
 
@@ -83,7 +83,7 @@ app.MapPost("/webhooks/provider", async (
 
 Adapt the signed payload to the provider contract: many providers sign `timestamp + "." + rawBody`, not the body alone. Validate timestamp skew, store the provider event ID under a unique constraint, and commit the inbox record or durable queue message before returning success. Background processing can happen afterward.
 
-# Polling interval versus durable webhook delivery contract
+# Polling Interval versus Durable Webhook Delivery Contract
 
 ![[Assets/Software Architecture/Software Architecture-Webhooks-18120000.png]]
 
@@ -108,7 +108,7 @@ A durable webhook contract needs more than `POST`:
 
 For an hourly billing export, polling may be simpler and more controllable. For `PaymentCaptured`, use a signed webhook for low latency, then poll `GET /events?after=<cursor>` periodically as a correctness safety net. Push handles the common path; pull repairs the gaps.
 
-# Tradeoffs: Webhooks vs Polling vs SSE vs WebSockets
+# Tradeoffs: Webhooks Vs Polling Vs SSE Vs WebSockets
 
 | Approach | Direction | Latency | Complexity | Connection | Best fit |
 | --- | --- | --- | --- | --- | --- |

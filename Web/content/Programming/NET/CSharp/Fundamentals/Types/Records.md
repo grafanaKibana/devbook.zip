@@ -1,8 +1,8 @@
 ---
 publish: true
 created: 2026-07-18T14:02:44.116Z
-modified: 2026-07-18T14:02:44.117Z
-published: 2026-07-18T14:02:44.117Z
+modified: 2026-07-25T13:51:15.334Z
+published: 2026-07-25T13:51:15.334Z
 topic:
   - Programming
 subtopic:
@@ -40,7 +40,7 @@ The compiler produces:
 
 You can override any of these. Adding extra properties or methods is free — the generated members incorporate them.
 
-## Positional vs Nominal Syntax
+## Positional Vs Nominal Syntax
 
 ```csharp
 // Positional — primary constructor, auto-generated properties and Deconstruct
@@ -57,7 +57,7 @@ public record Order
 
 Both get the same equality, `ToString`, and `with` support. Use positional for simple data carriers; nominal when you need validation, computed properties, or custom accessors.
 
-## with-expressions
+## With-expressions
 
 Non-destructive mutation — creates a new instance with selected properties changed:
 
@@ -74,7 +74,7 @@ Under the hood, `with` calls the copy constructor and then sets the changed prop
 
 # Record Variants
 
-## record class (default)
+## Record Class (Default)
 
 `record` or `record class` — a reference type allocated on the heap with value-based equality.
 
@@ -89,7 +89,7 @@ Console.WriteLine(ReferenceEquals(p1, p2)); // False — different heap objects
 
 Positional properties are `get`/`init` by default — the type is immutable after construction.
 
-## abstract record
+## Abstract Record
 
 Cannot be instantiated directly. Subrecords must provide implementations for abstract members. Used to define a record hierarchy with a shared base:
 
@@ -114,7 +114,7 @@ public record Truck(string Make, double PayloadTons) : Vehicle(Make)
 
 The `EqualityContract` in each derived record ensures that a `Car` and `Truck` with the same `Make` are never considered equal.
 
-## sealed record
+## Sealed Record
 
 Cannot be further derived. Useful for leaf types in a record hierarchy or when you want to lock down the equality contract:
 
@@ -123,7 +123,7 @@ public sealed record ApiKey(string Value, DateTime CreatedAt);
 // record DerivedKey(...) : ApiKey(...) { }  // Compile error
 ```
 
-## record struct
+## Record Struct
 
 Value-type record. Positional properties are `get`/`set` by default (mutable):
 
@@ -136,7 +136,7 @@ c.Lat = 51.50;  // Allowed — record struct positional properties are mutable
 
 Use when you want value-based equality and `with`-expressions but need stack allocation and no GC pressure.
 
-## readonly record struct
+## Readonly Record Struct
 
 Immutable value-type record. Positional properties become `get`/`init`:
 
@@ -150,7 +150,7 @@ var pink = red with { R = 255, G = 182, B = 193 };
 
 This is the recommended default when you want a small, immutable data carrier with value equality and no heap allocation.
 
-## partial record
+## Partial Record
 
 Same as partial classes — splits the record definition across files. Commonly used with source generators:
 
@@ -194,7 +194,7 @@ Key rules:
 - `with`-expressions work across the hierarchy — the copy constructor is virtual.
 - Positional parameters from the base must be forwarded in the derived constructor.
 
-# Records vs C# 12 Primary Constructors
+# Records Vs C# 12 Primary Constructors
 
 C# 12 added primary constructors to **plain** classes and structs, which looks like record syntax but behaves differently — a common point of confusion:
 
@@ -203,7 +203,7 @@ C# 12 added primary constructors to **plain** classes and structs, which looks l
 
 Use a record when you want the data-carrier machinery; use a class primary constructor purely to cut constructor boilerplate (e.g. injecting dependencies).
 
-# `required` and Validation
+# `required` And Validation
 
 - Combine records with **`required`** to force a nominal property without a positional parameter: `public record User { public required string Email { get; init; } }`.
 

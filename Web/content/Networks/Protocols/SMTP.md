@@ -1,8 +1,8 @@
 ---
 publish: true
 created: 2026-07-18T14:02:44.090Z
-modified: 2026-07-18T14:02:44.090Z
-published: 2026-07-18T14:02:44.090Z
+modified: 2026-07-25T13:51:15.514Z
+published: 2026-07-25T13:51:15.514Z
 topic:
   - Networks
 subtopic:
@@ -68,7 +68,7 @@ Roll authentication out as an observed migration:
 
 Receiver requirements are not universal. Providers publish different requirements for personal mail, bulk senders, and high-volume traffic, and those policies change. Treat the strictest important receiver as a deployment requirement and verify its current primary documentation. Authentication is necessary for many sending programs but still competes with reputation, complaint rate, content, list hygiene, and unsubscribe handling.
 
-# .NET Sending: Direct Protocol vs Provider APIs
+# .NET Sending: Direct Protocol Vs Provider APIs
 
 `System.Net.Mail.SmtpClient` is usable but legacy; it is not Microsoft-recommended for new systems that need modern reliability.
 
@@ -93,7 +93,7 @@ await client.DisconnectAsync(true, ct);
 
 Do not keep passwords in code or configuration files. Prefer short-lived tokens or a secret store, validate the server certificate, and set connect/send timeouts at the application boundary.
 
-## Submission and acceptance contract
+## Submission and Acceptance Contract
 
 An SMTP `250` after DATA means the receiving submission server accepted responsibility under its policy; it does not mean the recipient read the message or that another domain accepted it. HTTP `202 Accepted` only means a provider accepted the request for processing. It proves durable queueing only when that provider's documented contract says so, and it never proves final delivery.
 

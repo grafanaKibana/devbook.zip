@@ -1,8 +1,8 @@
 ---
 publish: true
 created: 2026-07-19T15:05:28.089Z
-modified: 2026-07-19T15:05:28.089Z
-published: 2026-07-19T15:05:28.089Z
+modified: 2026-07-25T13:51:15.308Z
+published: 2026-07-25T13:51:15.308Z
 topic:
   - Software Architecture
 subtopic:
@@ -61,7 +61,7 @@ graph TD
     OPORT --> UC
 ```
 
-# Traditional vs Onion/Clean
+# Traditional Vs Onion/Clean
 
 ```mermaid
 graph LR

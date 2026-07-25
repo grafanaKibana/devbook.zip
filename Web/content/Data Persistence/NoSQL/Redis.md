@@ -1,8 +1,8 @@
 ---
 publish: true
 created: 2026-07-18T14:02:44.062Z
-modified: 2026-07-18T14:02:44.062Z
-published: 2026-07-18T14:02:44.062Z
+modified: 2026-07-25T13:51:15.544Z
+published: 2026-07-25T13:51:15.544Z
 topic:
   - Data Persistence
 subtopic:
@@ -59,7 +59,7 @@ RDB is a backup-friendly snapshot, not a continuous log. AOF is appended after R
 
 Background does not mean free. `BGSAVE` and AOF rewrite fork a child. Fork latency grows with page-table size, and writes during the child process trigger copy-on-write pages. A large write or delete still consumes main-thread time, network bandwidth, allocator work, and AOF buffer capacity before any background `fsync`. Monitor `latest_fork_usec`, `rdb_bgsave_in_progress`, `aof_rewrite_in_progress`, copy-on-write bytes, disk latency, and memory headroom.
 
-## AOF persistence and big keys
+## AOF Persistence and Big Keys
 
 A five-megabyte value makes several costs visible at once: the client sends and Redis parses a large command; the main thread mutates a large object; the AOF path copies a large command into buffers; replication sends it again; and a rewrite or snapshot may copy additional memory pages. `appendfsync everysec` moves the durability flush off the request path, but it does not remove those costs.
 

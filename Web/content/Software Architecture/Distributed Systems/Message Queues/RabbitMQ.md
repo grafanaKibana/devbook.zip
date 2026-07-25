@@ -1,8 +1,8 @@
 ---
 publish: true
 created: 2026-07-19T15:05:28.111Z
-modified: 2026-07-19T15:05:28.111Z
-published: 2026-07-19T15:05:28.111Z
+modified: 2026-07-25T13:51:15.292Z
+published: 2026-07-25T13:51:15.292Z
 topic:
   - Software Architecture
 subtopic:
@@ -173,7 +173,7 @@ public sealed record Order(string OrderId, string CustomerId, decimal Amount);
 
 # Key Operational Concepts
 
-## Prefetch count (QoS)
+## Prefetch Count (QoS)
 
 - Controls max unacked messages per consumer.
 - Prevents one slow worker from hoarding deliveries.
@@ -185,19 +185,19 @@ public sealed record Order(string OrderId, string CustomerId, decimal Amount);
 - Useful for time-sensitive events.
 - Expired messages can be inspected through DLX.
 
-## Queue length limits
+## Queue Length Limits
 
 - `x-max-length` and `x-max-length-bytes` cap backlog.
 - Protects memory and disk under producer spikes.
 - Pair with alerts on queue depth and message age.
 
-## Lazy queues
+## Lazy Queues
 
 - Prioritize disk storage over memory residency.
 - Good for deep buffers and burst handling.
 - Tradeoff: generally higher per-message latency.
 
-## Quorum queues
+## Quorum Queues
 
 - Replicated queues based on Raft.
 - Better safety and failover behavior than classic mirrored queues.
@@ -205,28 +205,28 @@ public sealed record Order(string OrderId, string CustomerId, decimal Amount);
 
 # Pitfalls
 
-## 1) Unbounded queues without TTL and length limits
+## 1) Unbounded Queues without TTL and Length Limits
 
 - **What goes wrong**: backlog grows without bound.
 - **Why**: producer rate exceeds consumer rate and no limits are configured.
 - **Impact**: memory/disk exhaustion and potential node crash.
 - **Mitigation**: set TTL and max-length policies, use lazy/quorum queues where appropriate, and alert aggressively.
 
-## 2) Auto-ack in production
+## 2) Auto-ack in Production
 
 - **What goes wrong**: message acknowledged before work is complete.
 - **Why**: consumer crashes after receive but before business side effects finish.
 - **Impact**: silent message loss.
 - **Mitigation**: disable auto-ack and ack only after successful processing.
 
-## 3) Relying on classic mirrored queues
+## 3) Relying on Classic Mirrored Queues
 
 - **What goes wrong**: weaker safety profile in failure scenarios.
 - **Why**: mirrored classic queues are legacy compared to quorum queues.
 - **Impact**: higher data-loss/failover risk.
 - **Mitigation**: use quorum queues for new systems and migration plans.
 
-## 4) Not setting prefetch
+## 4) Not Setting Prefetch
 
 - **What goes wrong**: one slow consumer starves others.
 - **Why**: uneven distribution of in-flight deliveries.

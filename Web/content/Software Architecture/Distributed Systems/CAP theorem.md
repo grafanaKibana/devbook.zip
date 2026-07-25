@@ -1,8 +1,8 @@
 ---
 publish: true
 created: 2026-07-18T14:02:44.147Z
-modified: 2026-07-18T14:02:44.148Z
-published: 2026-07-18T14:02:44.148Z
+modified: 2026-07-25T13:51:15.305Z
+published: 2026-07-25T13:51:15.305Z
 topic:
   - Software Architecture
 subtopic:
@@ -18,7 +18,7 @@ CAP theorem says that in a distributed data system, once a network partition hap
 
 # What CAP Actually Means
 
-## Definitions in operational terms
+## Definitions in Operational Terms
 
 - **Consistency (C)**: every successful read sees the most recent successful write (or an error), as if there is one up-to-date value. _(This is **linearizability** — replicas agreeing. It is **not** the "C" in [[Data Persistence/ACID]], which means constraint/invariant preservation within one node. A system can be ACID and AP, or CP and non-ACID — the two C's are unrelated.)_
 - **Availability (A)**: every request to a non-failed node receives a non-error response in finite time.
@@ -56,9 +56,9 @@ flowchart TD
     I --> J[Reconcile later via repair or conflict resolution]
 ```
 
-# CP vs AP With Concrete Systems
+# CP Vs AP With Concrete Systems
 
-## CP behavior (consistency-first during partition)
+## CP Behavior (Consistency-first during pArtition)
 
 Representative systems: ZooKeeper / etcd style coordination services, majority-quorum relational deployments.
 
@@ -73,7 +73,7 @@ Concrete effect:
 
 ZooKeeper-style mindset: "If I cannot prove this write is globally safe, I will not accept it."
 
-## AP behavior (availability-first during partition)
+## AP Behavior (Availability-first during pArtition)
 
 Representative systems: the original Amazon Dynamo design, Cassandra configurations that accept on reachable replicas, and other explicitly availability-first multi-writer topologies.
 
@@ -98,7 +98,7 @@ This is one of the most important interview points:
 
 Practical implication: ask "What happens in the bad 0.1% network case?" rather than evaluating only happy-path latency graphs.
 
-## Partition-time choice and the false CA option
+## Partition-time Choice and the False CA Option
 
 | Partitioned operation | Preserve CAP consistency | Preserve CAP availability |
 |---|---|---|
@@ -109,7 +109,7 @@ Practical implication: ask "What happens in the bad 0.1% network case?" rather t
 
 CAP availability is also stricter than an uptime SLO. It requires every request to every non-failed node to receive a non-error response in finite time. A service can meet `99.99%` monthly uptime while rejecting the small set of partitioned writes needed to protect consistency; that makes the operation CP under CAP, not an operationally "unavailable service" in the usual dashboard sense.
 
-# Normal-time tradeoffs
+# Normal-time Tradeoffs
 
 CAP constrains partition-time behavior. PACELC adds the normal case: if there is a partition, choose availability or consistency; else, choose latency or consistency. Database configuration changes both failure behavior and everyday request latency, so classify an operation and its selected consistency level instead of labeling an entire product `CP` or `AP`.
 
@@ -126,19 +126,19 @@ For a multi-region profile service, writes can go to the primary region and retu
 
 # Pitfalls
 
-## Pitfall 1: "CAP means pick two of three"
+## Pitfall 1: "CAP mEans pIck tWo of tHree"
 
 - **What goes wrong**: teams assume they can permanently choose C and A while ignoring P.
 - **Why it is wrong**: once replication spans unreliable networks, partitions will happen; P is not optional in practice.
 - **How to avoid it**: restate CAP as "during partition, choose C or A" and design explicit failure policy for each critical operation.
 
-## Pitfall 2: Treating CAP choice as system-wide and static
+## Pitfall 2: Treating CAP Choice as System-wide and Static
 
 - **What goes wrong**: architecture docs label entire platform "CP" or "AP," then apply one rule to all endpoints.
 - **Why it is risky**: different endpoints have different correctness and UX budgets.
 - **How to avoid it**: classify operations by business invariants and allowed stale window, then pick per-operation consistency/availability behavior.
 
-## Pitfall 3: Ignoring reconciliation design in AP paths
+## Pitfall 3: Ignoring Reconciliation Design in AP Paths
 
 - **What goes wrong**: system accepts writes under partition but has weak conflict strategy.
 - **Why it is risky**: silent data corruption appears later as duplicate orders or lost preference updates.

@@ -1,8 +1,8 @@
 ---
 publish: true
 created: 2026-07-18T14:02:44.052Z
-modified: 2026-07-18T14:02:44.052Z
-published: 2026-07-18T14:02:44.052Z
+modified: 2026-07-25T13:51:15.553Z
+published: 2026-07-25T13:51:15.553Z
 topic:
   - Computer Science
 subtopic:
@@ -23,7 +23,7 @@ A segment tree keeps the array's index order but overlays a binary hierarchy of 
 > [!NOTE] Visualization pending
 > Planned StepTrace: an interval-tree card showing a range query fracturing `[l, r]` into its `O(log n)` canonical covering nodes, then a point update walking a single leaf-to-root path and re-merging each ancestor. No matching renderer exists in `engine.js` yet.
 
-# Representation and invariants
+# Representation and Invariants
 
 The tree is stored heap-style in a flat array, not as linked nodes. With the root at index `1`, node `i` has children `2i` and `2i + 1`, so navigation is arithmetic and the whole structure is one contiguous allocation. A recursive build over an arbitrary `n` can reach index `4n − 1` in the worst case (an unbalanced right spine of a non-power-of-two range), so `4 * n` slots is the standard safe bound; a power-of-two `n` fits in `2n`.
 
@@ -46,7 +46,7 @@ Lazy propagation adds a second per-node field: a pending tag describing a deferr
 
 Structure space is `O(n)` overall but with a constant near `4` — materially larger than a Fenwick tree's exact `n`. The `O(log n)` per-operation space is recursion-stack depth; an iterative bottom-up variant reduces it to `O(1)` for point-update/query trees, though lazy propagation is awkward to express iteratively.
 
-# When the structure stops fitting
+# When the Structure Stops Fitting
 
 The range is fixed at build. Because every node's `[lo, hi]` is decided during construction, the structure is not a resizable array — appending an element past `n` means rebuilding. A dynamic (implicit) segment tree that allocates nodes on demand over a huge or sparse coordinate space exists, but it trades the flat array for pointer nodes and more memory per used range.
 
@@ -54,7 +54,7 @@ Lazy propagation is where correctness slips. The deferred-tag machinery has to c
 
 Memory is the standing cost. The `≈4n` slots and, for lazy trees, a parallel tag array roughly double the footprint of a Fenwick tree that could answer the same sum query — the price paid for supporting non-invertible aggregates and range updates the Fenwick structure cannot represent.
 
-# Reference drawer
+# Reference Drawer
 
 > [!ABSTRACT]- Interval tree for `[3, 4, 1, 7, 2, 6]` (range sum)
 >

@@ -1,8 +1,8 @@
 ---
 publish: true
 created: 2026-07-18T14:02:44.054Z
-modified: 2026-07-18T14:02:44.055Z
-published: 2026-07-18T14:02:44.055Z
+modified: 2026-07-25T13:51:15.552Z
+published: 2026-07-25T13:51:15.552Z
 topic:
   - Computer Science
 subtopic:
@@ -25,7 +25,7 @@ What the structure gives up is compactness. Because every node reserves room for
 > [!NOTE] Visualization pending
 > Planned StepTrace: a prefix-tree card spelling characters along the edges from the root, showing two words sharing a prefix follow the same path until they diverge, and an end-of-word flag lighting up as each complete key is inserted. No matching renderer exists in `engine.js` yet.
 
-# Representation and invariants
+# Representation and Invariants
 
 A node holds two pieces of state and nothing else:
 
@@ -56,7 +56,7 @@ Every bound is stated in the key length `L` and, for the collection variant, the
 
 The length-not-count property is the reason a trie is chosen: adding millions more keys never lengthens the walk for an existing query, because the path is fixed by the query string alone. The cost is paid in the space column — the `σ`-wide child slot at every node makes the structure memory-heavy in exchange for that flat lookup.
 
-# When the per-symbol layout hurts
+# When the Per-symbol Layout Hurts
 
 The wasted memory is structural, not incidental. An array-backed node reserves `σ` child slots even when a node has one child, so a long chain of single-character branches — the tail of a rare word — allocates a nearly empty array at every step. A **radix (PATRICIA) trie** collapses each such single-child chain into one edge labelled with the whole substring, cutting node count sharply on sparse, long keys while preserving the same `O(L)` walk.
 
@@ -66,7 +66,7 @@ A trie also only applies to keys with a meaningful sequence — strings, byte se
 
 Deletion is the operation that exposes the shared-path invariant. Removing `car` when `card` is also present must clear the `r` node's `IsEnd` flag but leave the node itself, because `d` still hangs off it. Pruning may only remove nodes that have become both unflagged and childless, walking back up until that condition fails. Implementations that skip the prune and merely tombstone the flag leak nodes under churn.
 
-# Reference drawer
+# Reference Drawer
 
 > [!ABSTRACT]- Shared-prefix paths for `car`, `card`, `care`
 >

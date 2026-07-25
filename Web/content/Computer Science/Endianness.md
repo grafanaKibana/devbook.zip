@@ -1,8 +1,8 @@
 ---
 publish: true
 created: 2026-07-18T14:02:44.055Z
-modified: 2026-07-18T14:02:44.055Z
-published: 2026-07-18T14:02:44.055Z
+modified: 2026-07-25T13:51:15.551Z
+published: 2026-07-25T13:51:15.551Z
 topic:
   - Computer Science
 subtopic: []
@@ -24,7 +24,7 @@ Endianness is the order in which a machine or format stores the bytes of a multi
 
 Big-endian puts the most significant byte at the lowest address. Little-endian puts the least significant byte there. The distinction matters when bytes cross a boundary: a network protocol, binary file, device register, or foreign-function interface. Within a process, ordinary integer operations hide the storage order.
 
-# Make the boundary explicit
+# Make the Boundary Explicit
 
 Never serialize by copying the in-memory representation of an integer and assuming the receiver uses the same order. Define the order in the format and use an API that names it:
 

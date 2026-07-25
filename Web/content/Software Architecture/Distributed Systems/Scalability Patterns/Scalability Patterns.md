@@ -1,8 +1,8 @@
 ---
 publish: true
 created: 2026-07-18T14:02:44.157Z
-modified: 2026-07-18T14:02:44.157Z
-published: 2026-07-18T14:02:44.157Z
+modified: 2026-07-25T13:51:15.275Z
+published: 2026-07-25T13:51:15.275Z
 tags:
   - FolderNote
 topic:
@@ -49,7 +49,7 @@ Concrete interview lens: if checkout traffic grows from 1,000 RPS to 10,000 RPS,
 8. Connection pooling is usually low-effort, high-impact hygiene before more dramatic architecture changes.
 9. Event-driven design scales team autonomy and workload isolation, but consistency guarantees must be explicit.
 
-# Measurement and bottleneck migration
+# Measurement and Bottleneck Migration
 
 ![[Assets/Software Architecture/Software Architecture-Scalability Patterns-18120000.png]]
 
@@ -85,7 +85,7 @@ flowchart TD
     F --> G
 ```
 
-# .NET operating guidance
+# .NET Operating Guidance
 
 Use `dotnet-counters` for runtime counters, OpenTelemetry for request and dependency traces and metrics, and the database's own wait and query telemetry. A low application CPU value does not prove spare capacity when threads are blocked on connections. Platform scaling features are useful only when their signal matches the saturated resource; CPU-based autoscaling does not fix a database lock or third-party quota.
 
@@ -146,7 +146,7 @@ Track cost per completed operation, not only instance count. Cache, replicas, qu
 - [.NET diagnostic tools](https://learn.microsoft.com/dotnet/core/diagnostics/) — official counters, traces, dumps, and performance-investigation tools.
 - [Azure load testing](https://learn.microsoft.com/azure/app-testing/load-testing/overview-what-is-azure-load-testing) — official distributed load-test and monitoring workflow.
 
-## ByteByteGo provenance
+## ByteByteGo Provenance
 
 - [Scalability strategies](https://github.com/ByteByteGoHq/system-design-101/blob/b28380a4710c5ec9638ec037d4168e288f334cba/data/guides/8-must-know-scalability-strategies.md) — provenance for the strategy visual, used as a bottleneck map rather than a checklist.
 - [System design cheat sheet](https://github.com/ByteByteGoHq/system-design-101/blob/b28380a4710c5ec9638ec037d4168e288f334cba/data/guides/system-design-cheat-sheet.md) — editorial lead for the operational definitions; its defective scalability and availability visual was rejected.

@@ -1,8 +1,8 @@
 ---
 publish: true
 created: 2026-07-18T14:02:44.113Z
-modified: 2026-07-18T14:02:44.114Z
-published: 2026-07-18T14:02:44.114Z
+modified: 2026-07-25T13:51:15.336Z
+published: 2026-07-25T13:51:15.336Z
 topic:
   - Programming
 subtopic:
@@ -27,7 +27,7 @@ PriceCalculator calc = StandardPrice;
 var total = calc(3, 19.99m); // 59.97
 ```
 
-# Built-in generic delegates
+# Built-in Generic Delegates
 
 - `Action<T...>`: returns `void`
 - `Func<T..., TResult>`: returns a value

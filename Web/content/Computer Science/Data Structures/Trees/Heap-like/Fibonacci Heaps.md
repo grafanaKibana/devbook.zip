@@ -1,8 +1,8 @@
 ---
 publish: true
 created: 2026-07-18T14:02:44.047Z
-modified: 2026-07-18T14:02:44.049Z
-published: 2026-07-18T14:02:44.049Z
+modified: 2026-07-25T13:51:15.559Z
+published: 2026-07-25T13:51:15.559Z
 topic:
   - Computer Science
 subtopic:
@@ -25,7 +25,7 @@ The bound is amortized, not worst-case. The forest can hold many trees and many 
 > [!NOTE] Visualization pending
 > Planned StepTrace: a lazy-forest heap card showing insert dropping a root into the root list, decrease-key cutting a node out (cascading up through an already-marked parent), and extract-min consolidating trees of equal degree until the degrees are distinct. No matching renderer exists in `engine.js` yet.
 
-# Representation and invariants
+# Representation and Invariants
 
 Each node holds a key, its **degree** (number of children), a **mark** bit, and four pointers: to its parent, to one child, and to its left and right siblings. Siblings — including the roots — form circular doubly-linked lists, so splicing a node in or out is a constant number of pointer writes with no boundary case for the list ends. The heap itself stores only the pointer to the minimum root and the total node count.
 
@@ -61,7 +61,7 @@ The two `O(n)` worst singles are the direct cost of laziness. A single extract-m
 
 Structurally the heap is `O(n)` nodes, but the per-node overhead is high: four pointers plus an integer degree and a mark bit, versus a binary heap's single flat array with no per-element pointers at all.
 
-# Where laziness and amortization stop paying
+# Where Laziness and Amortization Stop Paying
 
 The advertised `O(1)` decrease-key is amortized and only wins when decrease-key vastly outnumbers extract-min. That is exactly the dense-graph shape of [[Dijkstra]] and Prim's [[Minimum Spanning Tree]], where `E` relaxations dwarf `V` removals and the `O(E + V log V)` bound is genuinely optimal. On sparse graphs, or any workload where extract-min is a constant fraction of operations, the deferred consolidation is paid often enough that the asymptotic edge evaporates.
 
@@ -69,7 +69,7 @@ The constant factors and memory layout usually erase the win regardless of asymp
 
 The mark-and-cascading-cut machinery is intricate and error-prone: forgetting to clear a mark on promotion to root, or to stop the cascade at an unmarked parent, silently breaks the degree bound and quietly degrades consolidation without any crash. And because a single extract-min or a single cascading decrease-key can be `O(n)`, the structure is unsuitable anywhere per-operation latency matters, such as real-time scheduling — the guarantees hold only in aggregate.
 
-# Reference drawer
+# Reference Drawer
 
 > [!ABSTRACT]- Root list and a cascading cut
 >

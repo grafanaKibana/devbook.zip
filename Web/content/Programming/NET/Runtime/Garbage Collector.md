@@ -1,8 +1,8 @@
 ---
 publish: true
 created: 2026-07-18T14:02:44.126Z
-modified: 2026-07-18T14:02:44.127Z
-published: 2026-07-18T14:02:44.127Z
+modified: 2026-07-25T13:51:15.325Z
+published: 2026-07-25T13:51:15.325Z
 topic:
   - Programming
 subtopic:
@@ -22,7 +22,7 @@ A collection runs in three phases: **mark** (walk from roots, flag reachable obj
 
 For unmanaged resources (file handles, database connections, native memory), the GC provides no help — you must implement `IDisposable` and use `using` statements. Objects with finalizers get queued on the finalization thread, which delays their collection by at least one GC cycle and serializes all finalizer execution on a single thread.
 
-# Managed heap
+# Managed Heap
 
 After the garbage collector is initialized, the CLR allocates a segment of memory for storing and managing objects. This memory is called the managed heap, as opposed to the operating system's native heap.
 
@@ -47,13 +47,13 @@ You can think of the heap as consisting of two heaps: the [Large Object Heap](ht
 > [!TIP]
 > You can [**configure the threshold size**](https://learn.microsoft.com/en-us/dotnet/core/runtime-config/garbage-collector#large-object-heap-threshold) for objects placed on the Large Object Heap.
 
-# Reclaiming memory
+# Reclaiming Memory
 
 The GC optimization mechanism determines the best time to run a collection based on allocation activity. When the GC runs, it reclaims memory allocated for objects that are no longer used by the application. It determines which objects are no longer used by analyzing the application's _roots_. Application roots include static fields, local variables on thread stacks, CPU registers, GC handles, and the finalization queue. Each root either references an object on the managed heap or has a NULL value. The GC can ask the rest of the runtime for these roots. The GC uses this list to build a graph containing all objects reachable from the roots.
 
 Objects that are not in the graph are unreachable from the application's roots. The GC considers unreachable objects to be garbage and reclaims the memory allocated for them. During a collection, the GC inspects the managed heap, looking for blocks of address space occupied by unreachable objects. When it finds unreachable objects, it computes each survivor's new address, rewrites every reference so it points there, and only then copies the survivors down over the space the unreachable objects occupied. It also sets the managed heap pointer to the position after the last reachable object.
 
-## Conditions that trigger garbage collection
+## Conditions that Trigger Garbage Collection
 
 Garbage collection occurs when one of the following conditions is met:
 
@@ -61,7 +61,7 @@ Garbage collection occurs when one of the following conditions is met:
 - The amount of memory used by objects allocated on the managed heap exceeds an acceptable threshold. This threshold is continuously adjusted during process execution.
 - The [GC.Collect](https://learn.microsoft.com/en-us/dotnet/api/system.gc.collect) method is called. In almost all cases you should not call this method, because the GC runs automatically. It is primarily used for special scenarios and testing.
 
-# GC execution model
+# GC Execution Model
 
 ```mermaid
 graph TD
@@ -141,7 +141,7 @@ Most objects die young in Gen 0 and never promote. A Gen 0 collection typically 
    1. **Sliding survivors together:** The GC copies live objects down over the space the unreachable ones occupied. The gaps close, and allocation resumes from a bump pointer at the end of the live data.
    2. **Sweep, the non-compacting alternative:** Instead of moving anything, the GC can reclaim dead space _in place_ onto a free list — no relocation, no copy cost, but the heap stays fragmented. This is what the LOH gets by default (copying 85 KB+ arrays rarely pays) and what a heap pinned down by `fixed`/`GCHandle` falls back to.
 
-# Root objects
+# Root Objects
 
 To understand how the garbage collector decides when an object is no longer needed, you need to know what _application roots_ are. Simply put, a _root_ is a memory slot that contains a reference to an object located on the heap.
 
@@ -154,7 +154,7 @@ Strictly speaking, roots can include:
 - References to an object awaiting _finalization_.
 - Any CPU registers that reference an object.
 
-# Object generations
+# Object Generations
 
 When trying to find unreachable objects, the CLR does not literally inspect every object on the heap each time. Obviously, that would take a lot of time, especially in large projects.
 
@@ -172,15 +172,15 @@ For example, a class defined in the main window of a desktop application may rem
 
 The GC first analyzes all objects that belong to generation 0. If, after collecting Gen 0, there is enough memory, all surviving objects are promoted to Gen 1. If Gen 0 has been collected but additional space is still required, the GC will also collect Gen 1. Objects that survive Gen 1 become Gen 2 objects. If the GC still needs memory, it will perform a Gen 2 collection. Since there are no generations above Gen 2, the generation of surviving objects does not increase further. From this, you can conclude that newer objects tend to be collected faster than older ones.
 
-## Card tables and write barriers
+## Card Tables and Write Barriers
 
 A Gen 0 collection must _not_ scan all of Gen 2 to find roots — that would defeat the point of generations. But an old object can reference a young one (e.g. a long-lived cache holding a freshly created entry). The GC solves this with a **write barrier**: every reference-type field assignment runs a tiny piece of JIT-emitted code that marks the corresponding **card** (a small range of the old heap) as dirty in a **card table**. An ephemeral (Gen 0/1) collection then scans only the dirty cards for old→young references, treating them as extra roots. This is why reference assignments cost slightly more than value writes, and why allocation-heavy code with many old→young links raises GC cost.
 
-## Boxing as a hidden allocation source
+## Boxing as a Hidden Allocation Source
 
 Every time a value type is converted to `object` or an interface (`object o = 42;`, `IComparable c = myStruct;`, non-generic collections, `params object[]`, string-interpolating a struct) the runtime **boxes** it — a Gen 0 heap allocation. In hot loops this is a common, invisible source of GC pressure; prefer generics/`Span<T>` to keep value types unboxed.
 
-## Latency modes and low-pause regions
+## Latency Modes and Low-pause Regions
 
 Beyond Workstation/Server/Background, the GC exposes runtime controls:
 

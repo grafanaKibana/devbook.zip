@@ -1,8 +1,8 @@
 ---
 publish: true
 created: 2026-07-21T14:46:57.608Z
-modified: 2026-07-21T14:47:00.100Z
-published: 2026-07-21T14:47:00.100Z
+modified: 2026-07-25T13:51:15.536Z
+published: 2026-07-25T13:51:15.536Z
 tags:
   - FolderNote
 topic:
@@ -50,7 +50,7 @@ Use `restore` for working-tree/index content and `switch` for branches. `reset` 
 
 A flat command list hides the state transition. Name the source state, destination state, and whether the operation discards data before running it.
 
-# Git vs Hosting Platforms
+# Git Vs Hosting Platforms
 
 Git defines objects, commits, refs, remotes, and transfer protocols. GitHub, GitLab, and Azure DevOps host repositories and add identity, permissions, pull requests, protected branches, issues, automation, and marketplaces. A repository can move between hosts without changing Git's commit graph; platform workflows, permissions, and automation do not move automatically.
 

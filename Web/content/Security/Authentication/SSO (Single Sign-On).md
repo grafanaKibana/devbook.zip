@@ -1,8 +1,8 @@
 ---
 publish: true
 created: 2026-07-18T14:02:44.133Z
-modified: 2026-07-18T14:02:44.133Z
-published: 2026-07-18T14:02:44.133Z
+modified: 2026-07-25T13:51:15.314Z
+published: 2026-07-25T13:51:15.314Z
 topic:
   - Security
 subtopic:
@@ -20,7 +20,7 @@ The main operational benefit is centralized authentication policy and account li
 
 See [[Security/Authentication/Oauth OIDC (OpenId Connect)|OAuth/OIDC]] for the underlying OAuth roles and token rules.
 
-# Federated browser flow
+# Federated Browser Flow
 
 ```text
 Browser -> Application: GET /reports
@@ -43,7 +43,7 @@ Application -> Browser: set a new application-session cookie
 
 The browser crosses three distinct trust boundaries: the application's session, the IdP's session, and the signed federation result. A valid IdP session can make the second application login silent, but each relying party still creates and controls its own local session. Cookie delivery is scoped by a host-only or `Domain` match and `Path`, then constrained by attributes such as `Secure` and `SameSite`; the port and full origin are not cookie isolation boundaries. Relying parties should use narrowly scoped, distinct session cookies so sibling applications do not share them accidentally.
 
-# Trust configuration
+# Trust Configuration
 
 The application pins an expected issuer and obtains its authorization/token endpoints and signing-key set from trusted discovery metadata. It registers exact redirect URIs and a `client_id`. On callback it must:
 
@@ -56,7 +56,7 @@ The application pins an expected issuer and obtains its authorization/token endp
 
 The same model applies to SAML: the service provider trusts configured IdP metadata and validates the assertion's signature, issuer, audience, recipient, time bounds, and correlation with the request before creating a local session.
 
-# Sessions and logout
+# Sessions and Logout
 
 | Event | IdP session | Application A | Application B |
 | --- | --- | --- | --- |
@@ -79,7 +79,7 @@ The same model applies to SAML: the service provider trusts configured IdP metad
 
 Use OIDC for new applications. Use SAML when the required enterprise IdP or SaaS product exposes only SAML, and use a mature library rather than parsing or validating XML signatures yourself.
 
-# Failure modes
+# Failure Modes
 
 - **Login CSRF:** an attacker starts a login for their own account and tricks the victim into completing the callback. Bind callback to the initiating browser with `state` and correlate the transaction server-side.
 - **Token replay:** validate `nonce`, one-time authorization codes, expiry, issuer, and audience. A token valid for Application A must not create a session at B.

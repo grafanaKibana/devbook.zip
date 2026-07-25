@@ -1,8 +1,8 @@
 ---
 publish: true
 created: 2026-07-18T14:02:44.050Z
-modified: 2026-07-18T14:02:44.050Z
-published: 2026-07-18T14:02:44.050Z
+modified: 2026-07-25T13:51:15.558Z
+published: 2026-07-25T13:51:15.558Z
 topic:
   - Computer Science
 subtopic:
@@ -27,7 +27,7 @@ No StepTrace renderer animates heap operations, so the mechanism is described in
 > [!NOTE] Visualization pending
 > Planned StepTrace: a heap card showing an insert appending at the end of the array and sifting up to its place, and an extract-min swapping the root with the last leaf and sifting down. No matching renderer exists in `engine.js` yet. The registered `heap-sort` trace animates the sort, not these insert/extract-min operations, so it is not a substitute here.
 
-# Representation and invariants
+# Representation and Invariants
 
 A binary heap is a **complete** binary tree: every level is full except possibly the last, which fills left to right with no gaps. That completeness is what makes an implicit array representation valid — with no holes, the tree maps onto contiguous indices by arithmetic instead of pointers.
 
@@ -68,7 +68,7 @@ Every boundary here traces back to the same fact: the array holds a partial orde
 - **Arbitrary delete and decrease-key need an external position map.** The operations touch a node by _position_, but the heap exposes elements only by heap-order, not by identity. Without a side table mapping each element to its current index (updated on every swap), there is no way to point at the node to remove or re-key. This is why `System.Collections.Generic.PriorityQueue` offers no `Remove` or `DecreaseKey`; the standard workaround is lazy deletion — re-enqueue with the new key and skip stale entries on dequeue.
 - **Merging two binary heaps is `O(n)`.** Two valid heaps concatenated do not form a valid heap, and no small set of swaps fixes the seam, because neither array segment carries ordering information about the other. The only general repair is to concatenate and run `build-heap` over the whole `O(n)` result. The mergeable heaps — [[Binomial Queues]], [[Leftist Heaps]], [[Skew Heaps]], [[Fibonacci Heaps]] — exist precisely to make union `O(log n)` or `O(1)` amortized by keeping a pointer-linked forest instead of one packed array.
 
-# Reference drawer
+# Reference Drawer
 
 > [!ABSTRACT]- Array-backed min-heap (indices under values)
 >

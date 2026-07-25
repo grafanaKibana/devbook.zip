@@ -1,8 +1,8 @@
 ---
 publish: true
 created: 2026-07-19T15:05:28.038Z
-modified: 2026-07-19T15:05:28.038Z
-published: 2026-07-19T15:05:28.038Z
+modified: 2026-07-25T13:51:15.326Z
+published: 2026-07-25T13:51:15.326Z
 topic:
   - Programming
 subtopic:
@@ -61,7 +61,7 @@ flowchart TB
 | Thread pool | Manages worker and I/O completion threads |
 | Interop | P/Invoke and COM interop for calling native code |
 
-# Managed vs Unmanaged Code
+# Managed Vs Unmanaged Code
 
 **Managed code** runs under the CLR. The runtime provides:
 
@@ -81,7 +81,7 @@ static extern bool Beep(uint dwFreq, uint dwDuration);
 Beep(440, 500); // A4 note for 500ms
 ```
 
-# JIT vs AOT
+# JIT Vs AOT
 
 | Mode | When compiled | Startup | Peak throughput | Binary size |
 |---|---|---|---|---|
