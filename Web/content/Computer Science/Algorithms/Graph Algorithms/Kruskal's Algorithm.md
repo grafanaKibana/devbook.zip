@@ -1,8 +1,8 @@
 ---
 publish: true
 created: 2026-07-18T14:02:43.948Z
-modified: 2026-07-18T14:02:43.948Z
-published: 2026-07-18T14:02:43.948Z
+modified: 2026-07-25T13:51:15.652Z
+published: 2026-07-25T13:51:15.652Z
 topic:
   - Computer Science
 subtopic:
@@ -20,7 +20,7 @@ The cycle test is the whole mechanism. A [[Disjoint Set]] stores the current for
 > [!NOTE] Visualization pending
 > Planned StepTrace: scan a sorted edge list, show union-find component labels, accept edges that merge components, and reject the first edge whose endpoints already share a root.
 
-# One sorted scan
+# One Sorted Scan
 
 For edges `AB=1`, `BC=2`, `AC=3`, `CD=4`, the initial components are `{A}`, `{B}`, `{C}`, `{D}`.
 
@@ -43,7 +43,7 @@ The accepted edges have total weight `7` and stop at `V - 1 = 3` edges. At every
 
 With path compression and union by rank or size, the disjoint-set work is `O(E α(V))`; sorting remains dominant. The `O(V)` term is the union-find forest and assumes an in-place edge sort. A sort that allocates a temporary edge buffer raises auxiliary space to `O(V + E)`. The result itself stores `V - 1` edges and is excluded from auxiliary space.
 
-# Boundary cases
+# Boundary Cases
 
 A disconnected graph never reaches `V - 1` accepted edges. The scan returns a minimum spanning forest rather than an MST, so the edge count must be checked.
 

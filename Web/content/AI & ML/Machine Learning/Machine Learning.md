@@ -1,8 +1,8 @@
 ---
 publish: true
 created: 2026-07-18T14:02:43.917Z
-modified: 2026-07-18T14:02:43.917Z
-published: 2026-07-18T14:02:43.917Z
+modified: 2026-07-25T13:57:52.053Z
+published: 2026-07-25T13:57:52.053Z
 tags:
   - FolderNote
 topic:
@@ -22,7 +22,7 @@ Machine learning is the practice of training models to map inputs to outputs fro
 
 # Training
 
-## Generic pipeline
+## Generic Pipeline
 
 ```mermaid
 flowchart TD

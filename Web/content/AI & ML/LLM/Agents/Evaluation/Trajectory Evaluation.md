@@ -1,8 +1,8 @@
 ---
 publish: true
 created: 2026-07-18T14:02:43.889Z
-modified: 2026-07-18T14:02:43.889Z
-published: 2026-07-18T14:02:43.889Z
+modified: 2026-07-25T13:51:15.679Z
+published: 2026-07-25T13:51:15.679Z
 topic:
   - AI & ML
 subtopic:
@@ -18,7 +18,7 @@ Trajectory evaluation scores the whole path an agent took — the ordered sequen
 
 Two families do this, and they trade off precision against coverage. **Reference-trajectory match** compares the agent's path against a known-good one. **LLM-as-judge over the trace** reads the whole transcript and rates it against a rubric. The judge machinery is the general [[LLM-as-a-Judge]] applied to a trajectory; the modes below are agent-specific.
 
-# Reference-trajectory match
+# Reference-trajectory Match
 
 You curate a reference path — the tool sequence a correct solve should take — and score how the agent's actual path compares. The comparison mode decides how strict that is:
 
@@ -29,7 +29,7 @@ You curate a reference path — the tool sequence a correct solve should take �
 
 Reference matching is precise and cheap to run, but brittle: it can only credit paths you anticipated, and for open-ended tasks the space of valid paths is too large to enumerate. It also says nothing about _quality_ within an allowed path — a superset match passes a bloated trajectory as long as it contains the required steps.
 
-# LLM-as-judge over the trace
+# LLM-as-judge over the Trace
 
 When no single path is correct, give a judge the full transcript and a rubric: did the agent form a sensible plan, choose appropriate tools, avoid needless steps, and recover when a tool failed? The judge handles the open-ended "reasonableness" that reference matching cannot, at the cost of a model call per trajectory and the judge's biases — amplified here because a trajectory is long.
 
@@ -42,7 +42,7 @@ flowchart LR
     J --> SC
 ```
 
-# Step-level vs episode-level
+# Step-level Vs Episode-level
 
 Decide what a "score" attaches to. **Episode-level** rates the trajectory as a whole (one pass/fail or one rubric score per run) — cheap, but a failure tells you the run was bad, not where. **Step-level** scores each decision point (was _this_ the right next action given the state so far) — far more diagnostic for finding where a long agent derailed, but it costs a judgment per step and needs per-step ground truth or a judge with the running context. Start episode-level for release gating; add step-level only on the trajectories that fail, to localize the break.
 
@@ -76,15 +76,15 @@ Decision rule: use reference matching where the task has a small, knowable set o
 
 # Pitfalls
 
-## Reference brittleness penalizes valid alternate paths
+## Reference Brittleness Penalizes Valid Alternate Paths
 
 A strict reference match marks a correct solve wrong because it used `search` then `filter` instead of a single `query` call. The metric is now measuring conformance to your guessed path, not task quality, and will rank a rigid agent above a smarter flexible one. Loosen to a more permissive mode (unordered or superset), or move to a judge, whenever more than one path is genuinely correct.
 
-## Judge degrades on long traces
+## Judge Degrades on Long Traces
 
 LLM judges lose reliability as the transcript grows — they skim the middle, anchor on the first and last steps, and reward verbosity. A 40-step trajectory is exactly where you most need step localization and least trust a single episode-level judgment. Mitigation: summarize or chunk the trace, score key decision points step-level, and validate judge scores against human labels on long runs specifically.
 
-## Outcome leakage inflates path scores
+## Outcome Leakage Inflates Path Scores
 
 If the judge can see that the task succeeded, it rationalizes the path as good regardless of how messy it was. Withhold the outcome from the trajectory judge, or score path and outcome with separate calls, so a lucky success through a bad path is not laundered into a high path score.
 

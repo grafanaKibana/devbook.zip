@@ -1,8 +1,8 @@
 ---
 publish: true
 created: 2026-07-18T14:02:43.968Z
-modified: 2026-07-18T14:02:43.969Z
-published: 2026-07-18T14:02:43.969Z
+modified: 2026-07-25T13:57:52.012Z
+published: 2026-07-25T13:57:52.012Z
 topic:
   - Computer Science
 subtopic:
@@ -25,7 +25,7 @@ A monotonic deque generalises this to a moving window. It stores window candidat
 > [!NOTE] Visualization pending
 > Planned StepTrace: a monotonic-stack card showing a stack kept monotonic — before pushing an element, all elements that violate the order are popped, so each element enters and leaves once. No matching renderer exists in `engine.js` yet.
 
-# Why the pops are free
+# Why the Pops Are Free
 
 The stack answers "next greater element" for every index in one pass. Scanning left to right it holds indices whose values _decrease_ from bottom to top. Before pushing index `i`, every index whose value is less than `a[i]` is popped, because `a[i]` is the next greater element each of them was waiting for. Index `i` is then pushed. Indices still on the stack when the scan ends have no greater element to their right.
 
@@ -45,7 +45,7 @@ The cost argument is a charging scheme. Each index is pushed exactly once and po
 
 The `O(n)` bound is amortized, not per-operation: a single push can trigger a run of pops, but those pops are elements charged only once each. Stack space is the peak occupancy — a decreasing input for a decreasing stack, e.g. `[5, 4, 3, 2, 1]`, satisfies the pop condition on no push (no element has a next-greater to its right), so every index stays resident and gives the `O(n)` worst case. The deque is capped at `k` by front eviction and never reaches `O(n)`.
 
-# When the invariant is set wrong
+# When the Invariant is Set Wrong
 
 The monotone direction must match the query. A _decreasing_ stack yields the next _greater_ element; flip the pop comparison and it yields the next _smaller_. Choosing the direction backwards produces a plausible, fully populated result array that answers the opposite question — nothing crashes, and no-duplicate test inputs may even look right.
 
@@ -55,7 +55,7 @@ The deque must store indices, not values. A window maximum is a _distance_-aware
 
 Sliding-window maximum is the exact case a scalar [[Sliding Window]] aggregate fails. A running sum is reversible — subtract the departing element and the invariant holds in `O(1)`. A maximum has no inverse: when the current max leaves the window, the next-largest is unknown without rescanning. The monotonic deque restores `O(n)` by keeping every "still possibly maximal" index instead of a single collapsed scalar, so the answer survives a removal.
 
-# Reference drawer
+# Reference Drawer
 
 > [!ABSTRACT]- Next-greater control flow
 >

@@ -1,8 +1,8 @@
 ---
 publish: true
 created: 2026-07-21T18:52:02.837Z
-modified: 2026-07-21T19:06:17.781Z
-published: 2026-07-21T19:06:17.781Z
+modified: 2026-07-25T13:57:52.004Z
+published: 2026-07-25T13:57:52.004Z
 topic:
   - Computer Science
 subtopic:
@@ -32,7 +32,7 @@ With block size `3`, the trace probes block ends at indices `2`, `5`, and `8`. T
 {"algorithm":"jump-search","array":[1,3,5,7,9,11,13,15,17],"target":13,"blockSize":3}
 ```
 
-## Why √n blocks work
+## Why √n Blocks Work
 
 Each jump is a proof, not a guess. Block `k` spans indices `[(k−1)m, k·m − 1]`, so its end value is `a[k·m − 1]`. Because the records are sorted, `a[k·m − 1] < target` guarantees every record in the first `k` blocks is below the target — none can match, and the checkpoint link skips their individual probes. The search stops at the first block whose end satisfies `a[k·m − 1] >= target`; the previous block ended below the target, so monotonic order forces the target, if present, into this single block. The retained previous checkpoint is then traversed forward through at most `m` records.
 
@@ -48,7 +48,7 @@ The stride size sets the balance between the two phases. Reaching a late target 
 
 The bounds hold only at the optimal block size `m = √n` and under the unit-cost checkpoint model. If taking a jump means walking all `m` ordinary next-links, the `n/m` jumps already traverse `Θ(n)` records. The search itself retains only the current and previous checkpoints, but a linked representation must store the jump links that make each stride one operation.
 
-## Reference drawer
+## Reference Drawer
 
 > [!ABSTRACT]- Control flow
 >
@@ -105,7 +105,7 @@ The bounds hold only at the optimal block size `m = √n` and under the unit-cos
 >
 > Every block-end read clamps with `Math.Min(step, n) - 1`; the final block is usually shorter than `block`, so an unclamped probe would index past the array.
 
-## When the assumptions stop holding
+## When the Assumptions Stop Holding
 
 On an ordinary array, indexing is already `O(1)`, so Binary Search's `O(log n)` strictly dominates Jump Search's `O(√n)`. On an ordinary singly linked list, walking `m` nodes for each jump makes the total `Θ(n)`; on a forward-only stream, overshooting also loses the candidate block unless it was buffered. The niche is a sequential-file or linked-record representation with explicit skip links or block-end access plus a retained route into the final block. Outside that model Jump Search is either a slower array search or a linear traversal with different bookkeeping.
 

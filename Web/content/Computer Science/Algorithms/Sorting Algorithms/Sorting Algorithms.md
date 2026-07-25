@@ -1,8 +1,8 @@
 ---
 publish: true
 created: 2026-07-18T14:02:44.032Z
-modified: 2026-07-18T14:02:44.032Z
-published: 2026-07-18T14:02:44.032Z
+modified: 2026-07-25T13:57:51.982Z
+published: 2026-07-25T13:57:51.982Z
 tags:
   - FolderNote
 topic:
@@ -41,7 +41,7 @@ flowchart TD
 
 # Algorithm Selection
 
-## Comparison sorts — bounded below by `O(n log n)`
+## Comparison Sorts — Bounded below by `O(n log n)`
 
 | Algorithm | Average | Worst | Space | Stable | Reach for it when |
 | --- | --- | --- | --- | --- | --- |
@@ -56,7 +56,7 @@ flowchart TD
 | [[Tim Sort]] | O(n log n) | O(n log n) | O(n) | Yes | Real-world partly-ordered data (Python, Java) |
 | [[Introsort]] | O(n log n) | O(n log n) | O(log n) | No | Quicksort's speed without its O(n²) tail (C++, .NET) |
 
-## Non-comparison sorts — beat the bound by reading key structure
+## Non-comparison Sorts — Beat the Bound by Reading Key Structure
 
 | Algorithm | Time | Space | Stable | Precondition |
 | --- | --- | --- | --- | --- |

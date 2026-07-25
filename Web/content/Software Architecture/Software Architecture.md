@@ -1,8 +1,8 @@
 ---
 publish: true
 created: 2026-07-18T14:02:44.189Z
-modified: 2026-07-21T14:39:30.445Z
-published: 2026-07-21T14:39:30.445Z
+modified: 2026-07-25T13:57:51.856Z
+published: 2026-07-25T13:57:51.856Z
 tags:
   - FolderNote
 icon: landmark

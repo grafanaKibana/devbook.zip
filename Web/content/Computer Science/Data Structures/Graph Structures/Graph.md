@@ -1,8 +1,8 @@
 ---
 publish: true
 created: 2026-07-18T14:02:44.036Z
-modified: 2026-07-18T14:02:44.037Z
-published: 2026-07-18T14:02:44.037Z
+modified: 2026-07-25T13:57:51.972Z
+published: 2026-07-25T13:57:51.972Z
 topic:
   - Computer Science
 subtopic:
@@ -23,7 +23,7 @@ A graph has no single canonical layout. The same set of vertices and edges can b
 > [!NOTE] Visualization pending
 > Planned StepTrace: a graph-representation card showing one small graph rendered three ways — adjacency list, adjacency matrix, and edge list — with a single edge added to each so the differing storage cost of the same mutation is visible side by side. No matching renderer exists in `engine.js` yet.
 
-# Representation and invariants
+# Representation and Invariants
 
 Each representation stores the same edge set in a different physical shape.
 
@@ -53,7 +53,7 @@ The bounds are per operation and per representation; `deg u` is the number of ed
 
 The matrix's `O(1)` edge test and the list's `O(deg u)` neighbor scan are the two bounds that drive the choice. `add-edge` is constant everywhere, so mutation cost separates the representations only at the vertex level, where the matrix's fixed `V × V` footprint forces an `O(V²)` copy. The `O(1)` amortized bound on list `add-vertex` assumes a growable backing array (`List<T>` doubling); a preallocated fixed-size list is `O(1)` worst case but caps `V`.
 
-# When one representation stops fitting
+# When One Representation Stops Fitting
 
 Density is the dividing line. A **dense** graph where `E ≈ V²` loses nothing to the matrix — the `O(V²)` space is already the edge count, and every algorithm gets `O(1)` edge tests and a compact per-row bitset. A **sparse** graph is where the matrix fails: 10 000 vertices with 50 000 edges costs the list roughly 60 000 entries but costs an `int[V, V]` matrix 100 million cells (~400 MB), almost all of them the sentinel. The matrix charges `O(V²)` whether or not the edges exist.
 
@@ -63,7 +63,7 @@ Dynamic vertex insertion splits the same way. Adding a vertex to an adjacency li
 
 None of these are crashes. A matrix on a sparse graph runs correctly; it simply pays memory the workload never uses, and an edge list backing a traversal returns correct neighbors after scanning far more than it needed.
 
-# Reference drawer
+# Reference Drawer
 
 > [!ABSTRACT]- Same graph, three stored forms
 >

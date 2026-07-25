@@ -1,8 +1,8 @@
 ---
 publish: true
 created: 2026-07-18T14:02:44.037Z
-modified: 2026-07-18T14:02:44.037Z
-published: 2026-07-18T14:02:44.037Z
+modified: 2026-07-25T13:57:51.970Z
+published: 2026-07-25T13:57:51.970Z
 topic:
   - Computer Science
 subtopic:
@@ -23,7 +23,7 @@ A Bloom filter keeps only an _m_-bit array and _k_ independent hash functions. A
 > [!NOTE] Visualization pending
 > Planned StepTrace: an m-bit-array card showing adding an element setting _k_ bits via _k_ hash functions, then a query checking those _k_ bits — any 0 means definitely absent, all 1 means probably present. No matching renderer exists in `engine.js` yet.
 
-# Representation and invariants
+# Representation and Invariants
 
 The stored state is a single bit array of length _m_ and a family of _k_ hash functions, each mapping an element to an index in `[0, m)`. Nothing else persists — no keys, no counts, no insertion order.
 
@@ -62,7 +62,7 @@ k = (m/n) · ln 2
 
 which drives roughly half the bits to 1. Increasing _m_ lowers _p_ by giving elements more room; _k_ trades off between too few probes (weak discrimination) and too many (bits fill faster). These bits are the filter's whole footprint — there is no per-element allocation to grow alongside _n_.
 
-# When the structure stops fitting
+# When the Structure Stops Fitting
 
 Deletion is the hard boundary. The standard filter cannot remove an element, because no bit is owned by a single element; clearing the bits for one key can strip a bit that another present key relies on, and the next query for that key would return "definitely absent" — a false negative the structure is defined never to produce. A **counting Bloom filter** replaces each bit with a small counter that increments on add and decrements on remove, which supports deletion at several times the space of a plain bit array.
 
@@ -72,7 +72,7 @@ Over-filling degrades the guarantee gradually rather than failing loudly. The ra
 
 Every one of these boundaries traces back to the same design choice: no elements are stored. The filter answers membership cheaply precisely because it threw away everything except the bits.
 
-# Reference drawer
+# Reference Drawer
 
 > [!ABSTRACT]- Add and query over the bit array
 >

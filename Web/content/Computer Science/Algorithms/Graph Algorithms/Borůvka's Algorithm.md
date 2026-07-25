@@ -1,8 +1,8 @@
 ---
 publish: true
 created: 2026-07-18T14:02:43.942Z
-modified: 2026-07-18T14:02:43.942Z
-published: 2026-07-18T14:02:43.942Z
+modified: 2026-07-25T13:51:15.660Z
+published: 2026-07-25T13:51:15.660Z
 topic:
   - Computer Science
 subtopic:
@@ -20,7 +20,7 @@ The cut property certifies each candidate relative to the component that selecte
 > [!NOTE] Visualization pending
 > Planned StepTrace: begin with singleton components, highlight each component's cheapest outgoing edge, merge all distinct safe edges, then repeat on the contracted component graph.
 
-# Components shrink by rounds
+# Components Shrink by Rounds
 
 For vertices `A, B, C, D` with edges `AB=1`, `AC=4`, `BC=2`, `BD=5`, `CD=3`, the first round selects `AB` for `A`, `AB` for `B`, `BC` for `C`, and `CD` for `D`. After duplicate removal, all three edges are safe and the graph becomes one component in a single round.
 
@@ -36,7 +36,7 @@ In the general case, every component that is not isolated chooses an edge to ano
 
 The table assumes a flat edge list, one cheapest-edge slot per component, and a [[Disjoint Set]] for contraction. Union-find contributes `O(E α(V))` across scans; repeated edge inspection determines the main bound. Parallel implementations can distribute the edge scan and component-minimum reduction, changing elapsed time without changing total work.
 
-# Boundary cases
+# Boundary Cases
 
 Parallel edges are harmless: only the lightest outgoing candidate for a component survives the round. Equal weights can lead to different valid MSTs, so a deterministic implementation needs a stable tie-break such as normalized endpoint order.
 

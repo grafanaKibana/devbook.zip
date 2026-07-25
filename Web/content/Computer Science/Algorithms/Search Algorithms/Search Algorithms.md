@@ -1,8 +1,8 @@
 ---
 publish: true
 created: 2026-07-18T14:02:43.984Z
-modified: 2026-07-18T14:02:43.990Z
-published: 2026-07-18T14:02:43.990Z
+modified: 2026-07-25T13:57:52.000Z
+published: 2026-07-25T13:57:52.000Z
 tags:
   - FolderNote
 topic:
@@ -43,7 +43,7 @@ flowchart TD
 
 # Algorithm Selection
 
-## Searching an array
+## Searching an Array
 
 | Data shape | Algorithm | Time | Precondition |
 | --- | --- | --- | --- |
@@ -56,7 +56,7 @@ flowchart TD
 
 Binary Search also serves range and insertion-point queries — lower-bound / upper-bound, first/last match — because it keeps the data in sorted order rather than building a separate index.
 
-## Searching text
+## Searching Text
 
 Text/pattern matching is its own sub-family — see [[String Matching]] for the full comparison.
 
@@ -68,7 +68,7 @@ Text/pattern matching is its own sub-family — see [[String Matching]] for the 
 | Text + many patterns at once | [[Aho-Corasick]] | O(n + matches) after build | Build cost is sum of pattern lengths |
 | Text + rolling / multi-pattern hashing | [[Rabin Karp Search\|Rabin–Karp]] | O(n + m) avg | Good hash to avoid collisions |
 
-## Searching a graph
+## Searching a Graph
 
 | Data shape | Algorithm | Time | Precondition |
 | --- | --- | --- | --- |

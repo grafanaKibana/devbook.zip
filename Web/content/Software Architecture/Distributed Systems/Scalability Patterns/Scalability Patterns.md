@@ -1,8 +1,8 @@
 ---
 publish: true
 created: 2026-07-18T14:02:44.157Z
-modified: 2026-07-25T13:51:15.275Z
-published: 2026-07-25T13:51:15.275Z
+modified: 2026-07-25T13:57:51.871Z
+published: 2026-07-25T13:57:51.871Z
 tags:
   - FolderNote
 topic:
@@ -102,24 +102,24 @@ Track cost per completed operation, not only instance count. Cache, replicas, qu
 
 # Pitfalls
 
-1. **Scaling before finding the real bottleneck**\
-   What goes wrong: teams add app instances while p95 remains high.\
-   Why: the bottleneck is often DB lock contention, external API latency, or connection saturation.\
+1. **Scaling before finding the real bottleneck**
+   What goes wrong: teams add app instances while p95 remains high.
+   Why: the bottleneck is often DB lock contention, external API latency, or connection saturation.
    Mitigation: baseline telemetry first, then scale the saturated component.
 
-2. **Premature sharding**\
-   What goes wrong: delivery speed drops and incident complexity rises.\
-   Why: shard routing, cross-shard queries, and resharding become permanent operational overhead.\
+2. **Premature sharding**
+   What goes wrong: delivery speed drops and incident complexity rises.
+   Why: shard routing, cross-shard queries, and resharding become permanent operational overhead.
    Mitigation: exhaust simpler options first (indexes, read replicas, caching, partitioning, queueing).
 
-3. **Stateful services that cannot scale horizontally**\
-   What goes wrong: sticky sessions and per-node memory state cause uneven load and failover pain.\
-   Why: user session or cache state is stored in-process.\
+3. **Stateful services that cannot scale horizontally**
+   What goes wrong: sticky sessions and per-node memory state cause uneven load and failover pain.
+   Why: user session or cache state is stored in-process.
    Mitigation: externalize session to Redis and keep handlers stateless.
 
-4. **Ignoring database bottlenecks while scaling app tier**\
-   What goes wrong: more app instances generate more DB pressure and failures happen faster.\
-   Why: DB CPU, locks, or connection limits were already near saturation.\
+4. **Ignoring database bottlenecks while scaling app tier**
+   What goes wrong: more app instances generate more DB pressure and failures happen faster.
+   Why: DB CPU, locks, or connection limits were already near saturation.
    Mitigation: profile queries, add indexes, tune pools, use read replicas, then scale app tier.
 
 # Questions

@@ -1,8 +1,8 @@
 ---
 publish: true
 created: 2026-07-18T14:02:44.141Z
-modified: 2026-07-18T14:02:44.142Z
-published: 2026-07-18T14:02:44.142Z
+modified: 2026-07-25T13:57:51.877Z
+published: 2026-07-25T13:57:51.877Z
 tags:
   - FolderNote
 icon: lock

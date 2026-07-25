@@ -1,8 +1,8 @@
 ---
 publish: true
 created: 2026-07-19T15:05:27.811Z
-modified: 2026-07-19T15:05:27.811Z
-published: 2026-07-19T15:05:27.811Z
+modified: 2026-07-25T13:57:51.969Z
+published: 2026-07-25T13:57:51.969Z
 topic:
   - Computer Science
 subtopic:
@@ -23,7 +23,7 @@ The structure stores a set of **unique** elements backed by a hash table. It is 
 > [!NOTE] Visualization pending
 > Planned StepTrace: a hash-table card showing an element hashed into a bucket, a membership probe hitting or missing that bucket, and a duplicate `Add` being rejected because an equal member already occupies the slot. No matching renderer exists in `engine.js` yet.
 
-# Representation and the uniqueness contract
+# Representation and the Uniqueness Contract
 
 The physical layout is a hash table, identical to a [[HashMap]] with the value slot removed: a bucket array whose length is a prime (or a power of two, depending on the runtime), a hash function mapping each element to a bucket index, and a collision-resolution scheme — separate chaining (a linked list or slot chain per bucket) or open addressing (probing to the next free slot). A **load factor** (elements ÷ buckets) bounds the average chain length; crossing its threshold triggers a **resize**, allocating a larger array and rehashing every element into new buckets.
 
@@ -44,7 +44,7 @@ Two properties are deliberately not retained. Iteration order reflects bucket la
 
 The `O(1)` average bounds assume two things: the hash function distributes elements roughly uniformly across buckets, and the load factor is capped so the expected chain length is a small constant. Under those assumptions a probe touches a constant number of members regardless of set size. Both can fail. If many elements collide into one bucket — a weak `hashCode` or adversarially chosen keys — that bucket becomes a linear list and `Add`/`Contains`/`Remove` degrade to `O(n)`. A resize is `O(n)` for the single insert that triggers it, but growth is geometric, so the cost amortizes to `O(1)` per insert across a sequence.
 
-# When the structure stops fitting
+# When the Structure Stops Fitting
 
 Three boundaries follow directly from "hash to a bucket, compare for equality":
 
@@ -54,7 +54,7 @@ Three boundaries follow directly from "hash to a bucket, compare for equality":
 
 A resize also produces a latency spike: one unlucky `Add` pays the full `O(n)` rehash while every other add is constant-time. Pre-sizing the set to the expected count avoids the intermediate resizes.
 
-# Reference drawer
+# Reference Drawer
 
 > [!ABSTRACT]- Bucket layout
 >

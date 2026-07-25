@@ -1,8 +1,8 @@
 ---
 publish: true
 created: 2026-07-18T14:02:44.035Z
-modified: 2026-07-18T14:02:44.035Z
-published: 2026-07-18T14:02:44.035Z
+modified: 2026-07-25T13:51:15.579Z
+published: 2026-07-25T13:51:15.579Z
 topic:
   - Computer Science
 subtopic:
@@ -18,7 +18,7 @@ A geohash converts a longitude/latitude point into a base-32 string whose prefix
 
 Reach for geohash when fixed grid precision and ordinary key infrastructure are useful. Do not reach for it merely because data has coordinates: exact containment, nearest-neighbor ranking, polygons, and error-critical distance usually belong in a spatial engine that understands geometry.
 
-# Encoding and query path
+# Encoding and Query Path
 
 The encoder repeatedly bisects longitude and latitude ranges, records which half contains the point, interleaves the resulting bits, and maps each five-bit group to a base-32 character. Each additional character adds five bits of resolution, so truncating characters produces a larger ancestor cell.
 
@@ -38,7 +38,7 @@ A radius query therefore has two phases:
 
 Scanning only the center prefix creates false negatives at cell edges. Skipping the final distance check creates false positives from the rectangular cover. Higher precision reduces candidates per cell but increases the number of ranges needed for a large region; lower precision does the opposite.
 
-# Real systems use the encoding differently
+# Real Systems Use the Encoding Differently
 
 **Redis GEO** stores members in a sorted set using an interleaved 52-bit geospatial score. `GEOSEARCH` covers the requested radius or box with score ranges and filters results; Redis documents spherical Haversine distance and a possible error that is unsuitable for error-critical applications. The standard geohash string returned by `GEOHASH` is a representation of that location, while the internal index uses Redis's numeric variant.
 
@@ -53,7 +53,7 @@ The first command indexes one driver near Kyiv. The second asks Redis to generat
 
 These examples expose the boundary: “uses geohash” can mean a sorted numeric candidate index, a textual interchange encoding, or a result aggregation grid. Verify which one a product implements before reasoning about complexity or durability.
 
-# Geohash, quadtree, and database spatial indexes
+# Geohash, Quadtree, and Database Spatial Indexes
 
 | Mechanism | Partition shape | Storage fit | Main cost |
 | --- | --- | --- | --- |

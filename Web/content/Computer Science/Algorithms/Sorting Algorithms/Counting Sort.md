@@ -1,8 +1,8 @@
 ---
 publish: true
 created: 2026-07-18T14:02:44.024Z
-modified: 2026-07-23T09:33:16.943Z
-published: 2026-07-23T09:33:16.943Z
+modified: 2026-07-25T13:57:51.988Z
+published: 2026-07-25T13:57:51.988Z
 topic:
   - Computer Science
 subtopic:
@@ -26,7 +26,7 @@ A trace over `[2, 5, 3, 0, 2, 3, 0, 3]` with `k = 5` makes the three data struct
 
 **Core condition:** integer keys over a known range `[0, k]` → index by value instead of comparing → `Θ(n + k)` time and `Θ(n + k)` auxiliary space, stable.
 
-# Why the value is an address
+# Why the Value is an Address
 
 Three linear passes, none of them a comparison:
 
@@ -50,7 +50,7 @@ No arrangement of the input alters this. The two `Θ(n)` scans and the `Θ(k)` p
 
 The bound is tight in every case, so `Θ` rather than `O` is the honest notation. Auxiliary space splits into the `k + 1`-cell count array and the `n`-cell output buffer, so Counting Sort is **not in-place**: placement reads the original keys while writing a separate array. Done as above — prefix sum followed by tail-first placement — it is **stable**.
 
-# When indexing by value breaks
+# When Indexing by Value Breaks
 
 Every failure traces to the same assumption: the key can serve as an array index.
 
@@ -60,7 +60,7 @@ Every failure traces to the same assumption: the key can serve as an array index
 
 **Negative keys need an offset.** A key of `-3` addresses `count[-3]`: checked array access throws, languages with negative-index semantics may update the wrong counter, and unchecked access may corrupt memory or invoke undefined behavior. The fix is to size `count` at `max - min + 1` and index `count[key - min]`, shifting the domain so its minimum maps to zero.
 
-# Reference drawer
+# Reference Drawer
 
 > [!ABSTRACT]- Three passes
 >

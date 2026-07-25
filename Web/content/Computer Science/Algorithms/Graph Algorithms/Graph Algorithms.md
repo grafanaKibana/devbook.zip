@@ -1,8 +1,8 @@
 ---
 publish: true
 created: 2026-07-18T14:02:43.945Z
-modified: 2026-07-18T14:02:43.946Z
-published: 2026-07-18T14:02:43.946Z
+modified: 2026-07-25T13:57:52.035Z
+published: 2026-07-25T13:57:52.035Z
 tags:
   - FolderNote
 topic:
@@ -42,7 +42,7 @@ flowchart TD
 
 # Algorithm Selection
 
-## Shortest path
+## Shortest Path
 
 | Algorithm | Solves | Time | Constraint |
 | --- | --- | --- | --- |
@@ -55,7 +55,7 @@ flowchart TD
 | [[Bellman-Ford]] | Single-source shortest path | O(V·E) | Handles negative edges; detects negative cycles |
 | [[Floyd-Warshall]] | All-pairs shortest path | O(V³) time, Θ(V²) space | Small/dense graphs; detects negative cycles |
 
-## Structure and connectivity
+## Structure and Connectivity
 
 | Algorithm | Solves | Time | Constraint |
 | --- | --- | --- | --- |

@@ -1,8 +1,8 @@
 ---
 publish: true
 created: 2026-07-18T14:02:43.935Z
-modified: 2026-07-18T14:02:43.936Z
-published: 2026-07-18T14:02:43.936Z
+modified: 2026-07-25T13:57:52.038Z
+published: 2026-07-25T13:57:52.038Z
 topic:
   - Computer Science
 subtopic:
@@ -25,7 +25,7 @@ The decisive step is which node leaves the frontier next, and how `h` skews that
 > [!NOTE] Visualization pending
 > Planned StepTrace: a frontier ordered by `f = g + h`, expanding the lowest-`f` node first, the heuristic biasing expansion toward the goal. The decisive frame is a node with small `g` but large `h` losing its turn to a node deeper along the goal direction. No matching renderer exists in `engine.js` yet.
 
-# Why `f = g + h` stays optimal
+# Why `f = g + h` Stays Optimal
 
 Each iteration pops the frontier node with the smallest `f`, relaxes its outgoing edges, and pushes any neighbor whose `g` improves; `g[source] = 0` and `f[source] = h(source)` seed the search. Two properties of `h` decide whether the result is correct.
 
@@ -45,7 +45,7 @@ The pull is concrete: on a 4-connected grid with Manhattan `h`, a node reached i
 
 Each expansion also does a heap pop plus edge relaxations, a `log(frontier)` factor over the raw expansion counts. On an _explicit_ finite graph those counts are capped by the graph itself: a consistent heuristic expands each of the `V` nodes at most once, giving `O((V + E) log V)` — precisely Dijkstra's bound, which is what `h ≡ 0` reduces to. The exponential figures belong to _implicit_ state spaces generated on the fly, where quality of `h` is the only thing bounding the search. Space is the operational limit in either setting: A\* retains every generated node across the open and closed sets, so memory, not time, is what fails first on large maps.
 
-# When the heuristic breaks the guarantee
+# When the Heuristic Breaks the Guarantee
 
 An **inadmissible** `h` overestimates the remaining cost for at least one node somewhere in the graph. That overestimate is harmless where it lands off the optimal path and never wins a pop. Optimality breaks only when an inflated `f` pre-empts the true optimal path — a node on that path (or one whose `f` should have been popped before the goal) is delayed, so A\* pops the goal through a cheaper-looking detour first. It returns _a_ path, just not the cheapest, and signals nothing. Weighted A\* makes exactly this trade deliberately: `f = g + ε·h` with `ε > 1` scales the heuristic up, expanding far fewer nodes for a path guaranteed within a factor `ε` of optimal. `ε = 1` is exact A\*; `ε → ∞` approaches greedy behavior.
 
@@ -53,7 +53,7 @@ An admissible but **inconsistent** `h` keeps optimality for the tree-search form
 
 The binding limit is memory. A\* holds every generated node across the open frontier and the closed set, `O(nodes stored)`, and on a large state space that exhausts memory long before time. IDA\* trades it back: an iterative-deepening variant that keeps only the current path (`O(L)` memory) and re-expands nodes across successive `f`-cost thresholds. Weighted A\* attacks the same limit from the other side, shrinking the frontier by biasing toward the goal at a bounded loss of optimality.
 
-# Reference drawer
+# Reference Drawer
 
 > [!ABSTRACT]- Control flow
 >

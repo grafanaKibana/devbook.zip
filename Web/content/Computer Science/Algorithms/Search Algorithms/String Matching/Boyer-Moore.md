@@ -1,8 +1,8 @@
 ---
 publish: true
 created: 2026-07-18T14:02:43.993Z
-modified: 2026-07-18T14:02:43.996Z
-published: 2026-07-18T14:02:43.996Z
+modified: 2026-07-25T13:57:51.998Z
+published: 2026-07-25T13:57:51.998Z
 topic:
   - Computer Science
 subtopic:
@@ -27,7 +27,7 @@ A visualization would align the pattern under the text and step through the righ
 > [!NOTE] Visualization pending
 > Planned StepTrace: a string-matching card aligning the pattern under the text, comparing right-to-left, and jumping the pattern forward by the maximum of the bad-character and good-suffix shift on a mismatch. No matching renderer exists in `engine.js` yet.
 
-# Why a mismatch skips a block
+# Why a Mismatch Skips a Block
 
 Each alignment fixes the pattern's last character over some text index and compares leftward until a character disagrees (or the whole pattern matches). Two independent rules each propose a shift; the algorithm advances by the larger.
 
@@ -39,7 +39,7 @@ The shift is `max(bad_char_shift, good_suffix_shift)`, which is always at least 
 
 Preprocessing builds both tables ahead of the scan. The bad-character table is keyed on each character's last position `i` in the pattern, but the implementation stores the resulting shift `m − 1 − i` directly rather than the raw index (`|Σ|` entries). The good-suffix table maps each mismatch position to a safe suffix-preserving shift; its construction is `Θ(m)` but the index arithmetic is delicate.
 
-## One alignment
+## One Alignment
 
 Searching `TRUTH` (`m = 5`) inside `...WE VALUE TRUTH...`, where each character's last position in the pattern is `T→3, R→1, U→2, H→4`:
 
@@ -69,13 +69,13 @@ Over English text most mismatching characters are absent from a short pattern, s
 
 The tables persist through the scan, so search space stays `O(m + |Σ|)`; the loop itself keeps only a few indices beyond them. The plain-versus-Galil split matters: the sublinear `O(n/m)` is a property of large-alphabet inputs, not a guarantee. Without Galil's rule an adversarial input degrades to `O(n·m)`, and the guaranteed-linear bound requires the extra bookkeeping.
 
-# Where the skip disappears
+# Where the Skip Disappears
 
 On small alphabets the advantage evaporates. With `|Σ|` of 2 to 4 — binary, or DNA over `{A,C,G,T}` — the mismatching character is almost always present in the pattern, so the bad-character shift is usually one. Searching `AAAA` inside a long run of `A` lands in the `O(n·m)` worst case: every alignment is a full match over all `m` characters and the good-suffix rule then shifts by only one, so ~`n` alignments each cost `O(m)`. The shift buys nothing because there is no absent character to jump past. Boyer-Moore's edge grows with alphabet size, so DNA and binary streams are exactly where it stops helping.
 
 The good-suffix table is the part that breaks silently. Its "case 2" prefix fallback is easy to compute off by one, and a wrong entry produces either a missed match or a shift of zero that loops forever. Because the marginal speedup over the bad-character rule alone is small on real text, most production code ships **Boyer-Moore-Horspool** — bad-character rule only, keyed on the text character sitting under the pattern's last position — which drops the fragile table entirely and is nearly as fast on large-alphabet data. GNU `grep`'s fixed-string search and most editor find commands use this variant rather than the full two-rule algorithm; `glibc`'s `memmem` takes a different route entirely, using the Two-Way (Crochemore–Perrin) algorithm.
 
-# Reference drawer
+# Reference Drawer
 
 > [!ABSTRACT]- Control flow
 >

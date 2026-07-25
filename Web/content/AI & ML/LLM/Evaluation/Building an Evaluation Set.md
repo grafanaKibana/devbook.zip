@@ -1,8 +1,8 @@
 ---
 publish: true
 created: 2026-07-18T14:02:43.897Z
-modified: 2026-07-18T14:02:43.897Z
-published: 2026-07-18T14:02:43.897Z
+modified: 2026-07-25T13:51:15.677Z
+published: 2026-07-25T13:51:15.677Z
 topic:
   - AI & ML
 subtopic:
@@ -22,7 +22,7 @@ Two design choices drive whether the numbers mean anything. The first is **label
 
 Each example contains an input (the query or task), the expected behavior (a reference answer or acceptance criteria), and optionally the supporting evidence the system should have used. How strict the expected side is determines which scorers you can run: a reference answer enables correctness scoring, while acceptance criteria alone enable rubric-based judging. Some harnesses run reference-free — RAGAS judges faithfulness and relevance from context alone, and ARES evaluates with synthetic data plus a small human-labeled set via prediction-powered inference (PPI), so a tiny labeled set calibrates judgments over a large unlabeled one.
 
-# Synthetic generation
+# Synthetic Generation
 
 The fastest bootstrap is to prompt an LLM to write the inputs your system will receive from material you already have. The general form: sample source items (documents, transcripts, prior tickets), and for each, ask the model to produce the natural questions or tasks a real user would pose, recording the source as the expected ground truth. This inverts the expensive direction of labeling — instead of writing inputs and then hunting for what's correct, you start from a known-good source and synthesize the input backwards.
 
@@ -40,7 +40,7 @@ for item in sample(source_material, n=2000):
 
 The failure mode every synthetic set shares is **distributional homogeneity**: generated cases are individually reasonable but collectively cluster in the style and difficulty the model finds easy to produce, missing ambiguous, multi-hop, and adversarial inputs real users send. Mitigation: stratify the source sample so common boilerplate does not dominate, vary the prompt to request different input types, and augment with real production logs to cover the actual distribution. Domain-specific distortions — retrieval false-negatives and lexical leakage — are covered where they bite, in [[Retrieval Evaluation Sets]].
 
-# Size and statistical power
+# Size and Statistical Power
 
 Most eval sets are too small to detect meaningful differences between configurations. Anthropic's analysis shows that treating eval questions as samples from a query universe and computing confidence intervals reveals that many published eval results lack statistical power — the observed difference is inside the noise band. Required sample size depends on the target effect size, the confidence level, and the metric's variance. End-to-end metrics typically have higher variance than component metrics and therefore need _more_ samples, not fewer. For regression detection, size the set so that a 3-5% change in your target metric is statistically significant at your chosen confidence level; below that, a "regression" or "improvement" may be sampling noise you will chase for nothing.
 

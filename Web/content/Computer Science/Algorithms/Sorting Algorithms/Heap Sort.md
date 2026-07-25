@@ -1,8 +1,8 @@
 ---
 publish: true
 created: 2026-07-18T14:02:44.025Z
-modified: 2026-07-18T14:02:44.025Z
-published: 2026-07-18T14:02:44.025Z
+modified: 2026-07-25T13:57:51.987Z
+published: 2026-07-25T13:57:51.987Z
 topic:
   - Computer Science
 subtopic:
@@ -20,7 +20,7 @@ Heap sort removes that waste by keeping the unsorted region as a [[Heap|max-heap
 
 **Core shape:** array reinterpreted as an in-place max-heap → repeated extract-max grows a sorted suffix from the back → guaranteed `O(n log n)` time in `O(1)` auxiliary space.
 
-# One sort
+# One Sort
 
 The trace sorts the eight-element array `[8, 3, 5, 1, 9, 2, 7, 4]`.
 
@@ -30,7 +30,7 @@ The trace sorts the eight-element array `[8, 3, 5, 1, 9, 2, 7, 4]`.
 
 The first phase makes a single bottom-up pass, sifting each internal node down until every parent dominates its children; this rearranges the whole array into a max-heap in `O(n)`, with nothing yet in its final sorted position. From there every step is identical: the root — the largest remaining key — is swapped with the last cell still inside the heap, the heap boundary retreats by one, and the new root sifts down until heap order holds again. The swapped-out maximum now sits at its final index, so a sorted suffix grows leftward from the end of the array while the heap shrinks toward the front. When the heap holds one element the array is ordered.
 
-# Array as an implicit heap
+# Array as an Implicit Heap
 
 Heap sort never materialises a tree of node objects. The array _is_ the tree: the element at index `i` is the parent of the elements at `2i + 1` and `2i + 2`, and the last node with any child is at `n/2 - 1`. The structure and its full operation set live in [[Heap]]; heap sort borrows only the max-heap variant and a single primitive, sift-down.
 
@@ -53,13 +53,13 @@ Both phases move data only by swapping array cells, so no auxiliary buffer is ne
 
 The absence of a bad case is the point: the `Θ(n)` build plus `n` extractions of `Θ(log n)` hold for every input, which is exactly where heap sort differs from quicksort. The one real exception is an array of all-equal keys, where every sift-down stops on its first comparison and the whole sort collapses to `Θ(n)`; it is an edge case, not something to plan around. The `O(1)` space assumes the iterative sift-down in the drawer below — a recursive sift-down adds `O(log n)` of call-stack space.
 
-# Where the layout costs
+# Where the Layout Costs
 
 **Memory locality.** Sift-down's access pattern is the opposite of sequential: from index `i` it reaches to `2i + 1` and `2i + 2`, and near the root of a large array those children lie half the array away. Successive descents touch cells on different cache lines that the prefetcher cannot anticipate, so heap sort takes cache misses exactly where quicksort's partitioning walks contiguous memory. On large arrays this constant factor commonly makes heap sort roughly twice as slow as quicksort despite the identical `O(n log n)` — and it is why introsort runs quicksort by default and only drops to heap sort under duress.
 
 **Stability.** Label three items by key and input position: `2ᵃ, 2ᵇ, 1ᶜ`. Nothing in build-heap or extraction preserves the `a`-before-`b` order of the two equal keys; the extraction swaps relocate them by heap geometry, so the sorted result may emerge as `1ᶜ, 2ᵇ, 2ᵃ`, silently reversing the pair. A stable sort such as [[Merge Sort]] keeps `2ᵃ` ahead of `2ᵇ`, which matters when the keys are a secondary sort over an already-meaningful order.
 
-# Reference drawer
+# Reference Drawer
 
 > [!ABSTRACT]- Phase structure
 >

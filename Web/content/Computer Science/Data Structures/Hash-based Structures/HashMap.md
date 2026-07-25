@@ -1,8 +1,8 @@
 ---
 publish: true
 created: 2026-07-18T14:02:44.039Z
-modified: 2026-07-18T14:02:44.039Z
-published: 2026-07-18T14:02:44.039Z
+modified: 2026-07-25T13:57:51.966Z
+published: 2026-07-25T13:57:51.966Z
 topic:
   - Computer Science
 subtopic:
@@ -23,7 +23,7 @@ The structure remembers a mapping from key to value and nothing else. It does no
 > [!NOTE] Visualization pending
 > Planned StepTrace: a hash-table card showing a bucket array with keys hashed to slots, a collision landing two keys in one bucket (chained), and a resize rehashing every entry into a larger array. No matching renderer exists in `engine.js` yet.
 
-# Representation and invariants
+# Representation and Invariants
 
 Two things define the structure: a backing array of buckets and a hash function that maps a key to an index into it, usually `hash(key) mod capacity`. When several keys map to the same index, a collision-resolution strategy keeps them apart:
 
@@ -55,7 +55,7 @@ The `O(1)` average bounds rest on two assumptions stated together: a good hash k
 
 Insert is amortized, not strictly `O(1)`. Any single insert can trip the load-factor threshold and rehash the whole array in `O(n)`. Spread across the inserts that grew the map to that size, the rehash cost averages to `O(1)` each — an amortized-sequence guarantee, distinct from the single-op worst case sitting in the next column. Filling a 1M-entry map from default capacity rehashes roughly 20 times along the way; pre-sizing with `new Dictionary<TKey,TValue>(expectedCount)` skips that churn.
 
-# Where the representation breaks
+# Where the Representation Breaks
 
 Each boundary traces back to the bucket-and-hash mechanism.
 
@@ -69,7 +69,7 @@ Each boundary traces back to the bucket-and-hash mechanism.
 
 **Open addressing adds clustering and tombstones.** Probe sequences pile entries into runs (primary clustering) that lengthen every probe, and a delete cannot simply empty a slot — that would truncate a probe chain — so it leaves a tombstone that later lookups must skip and that only a rebuild reclaims.
 
-# Reference drawer
+# Reference Drawer
 
 > [!ABSTRACT]- Bucket array with chaining
 >

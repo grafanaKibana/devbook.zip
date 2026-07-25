@@ -1,8 +1,8 @@
 ---
 publish: true
 created: 2026-07-19T15:05:27.790Z
-modified: 2026-07-19T15:05:27.790Z
-published: 2026-07-19T15:05:27.790Z
+modified: 2026-07-25T13:57:51.973Z
+published: 2026-07-25T13:57:51.973Z
 topic:
   - Computer Science
 subtopic:
@@ -20,7 +20,7 @@ The structure is narrower than a graph representation. It remembers which elemen
 
 **Core shape:** elements → parent-index forest → one root per set → shared root means shared membership → `O(n)` storage.
 
-# State across operations
+# State across Operations
 
 The trace starts with seven singleton sets. The first three unions deliberately create the chain `0 → 1 → 2 → 3`; `find(0)` then rewrites the visited parents to point directly at root `3`.
 
@@ -32,7 +32,7 @@ Only roots are linked during a union. Linking an arbitrary interior node would d
 
 The trace uses direct root linking to make a deep chain and its compression visible. The reference implementation also stores rank, preventing that chain from becoming deep in the first place.
 
-# Representation and invariants
+# Representation and Invariants
 
 Each element is mapped to an integer index. Two parallel arrays hold the state:
 
@@ -63,7 +63,7 @@ These bounds assume path compression and union by rank. Rank alone keeps tree he
 
 The recursive implementation uses stack space proportional to the current tree height. An iterative path-halving implementation reduces auxiliary space to `O(1)` while keeping the same amortized time bound.
 
-# When the structure stops fitting
+# When the Structure Stops Fitting
 
 Deletion is the hard boundary. After several unions and path-compressing finds, the structure no longer records which original edge caused a component to form. Removing an edge therefore cannot identify whether the component should stay connected or split. Fully dynamic connectivity needs a graph representation plus a more complex dynamic structure; a known offline sequence can use rollback DSU without path compression.
 
@@ -71,7 +71,7 @@ Connectivity also carries no route information. `Connected(a, b)` can return `tr
 
 The array representation assumes dense integer IDs from `0` through `n - 1`. Strings, GUIDs, and sparse numeric IDs need a `Dictionary<T, int>` mapping before they can enter the structure. That mapping adds memory and makes identity management part of the API boundary.
 
-# Reference drawer
+# Reference Drawer
 
 > [!ABSTRACT]- Parent forest
 >

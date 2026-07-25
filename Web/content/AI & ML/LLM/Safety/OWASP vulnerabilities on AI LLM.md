@@ -1,8 +1,8 @@
 ---
 publish: true
 created: 2026-07-18T14:02:43.914Z
-modified: 2026-07-18T14:02:43.914Z
-published: 2026-07-18T14:02:43.914Z
+modified: 2026-07-25T13:51:15.669Z
+published: 2026-07-25T13:51:15.669Z
 topic:
   - AI & ML
 subtopic:
@@ -91,7 +91,7 @@ New in 2025, this frames plausible false generation as a security issue when adv
 
 Adversaries can trigger denial-of-wallet by forcing high token usage, oversized contexts, or tool-call loops. Apply hard budget caps, per-request token limits, and agent-loop circuit breakers.
 
-# What Is New vs Familiar
+# What Is New Vs Familiar
 
 | LLM Risk | Traditional Analog | What is Genuinely New |
 | --- | --- | --- |

@@ -1,8 +1,8 @@
 ---
 publish: true
 created: 2026-07-18T14:02:44.034Z
-modified: 2026-07-18T14:02:44.034Z
-published: 2026-07-18T14:02:44.034Z
+modified: 2026-07-25T13:57:51.974Z
+published: 2026-07-25T13:57:51.974Z
 topic:
   - Computer Science
 subtopic:
@@ -23,7 +23,7 @@ An LRU (Least Recently Used) cache resolves the tension by storing the same entr
 > [!NOTE] Visualization pending
 > Planned StepTrace: a hash-map-plus-recency-list card showing a `get` locating a node through the map and splicing it to the head, then a `put` over capacity evicting the tail node and deleting its map entry in the same step. No matching renderer exists in `engine.js` yet.
 
-# Representation and invariants
+# Representation and Invariants
 
 Two structures hold the same set of entries, indexed differently:
 
@@ -50,7 +50,7 @@ Three invariants define a valid state:
 
 Every bound is genuine worst-case constant time, not amortized: no operation ever traverses the list, because the map turns "find this node" into a hash lookup and the tail turns "find the victim" into a pointer read. The worst-case constant assumes the map's own lookup is `O(1)`, which degrades to `O(n)` under adversarial hash collisions — the same caveat that applies to the underlying [[HashMap]]. Structure space is `O(capacity)`: the map holds one entry per resident key and the list holds one node per resident key, so the two structures together are a constant factor over the entries themselves.
 
-# When the composite breaks
+# When the Composite Breaks
 
 The failure modes all stem from the map and the list being two views that must agree.
 
@@ -62,7 +62,7 @@ Capacity is what forces an eviction _policy_ to exist at all. An unbounded [[Has
 
 The composite is not atomic. A `get` performs a map read followed by several pointer writes; a concurrent `put` interleaving between them can splice against neighbours the `get` already moved, corrupting the list. LRU needs external locking (or a sharded/striped design) — neither the map nor the list provides safe concurrent mutation on its own.
 
-# Reference drawer
+# Reference Drawer
 
 > [!ABSTRACT]- Map into a recency-ordered list
 >
