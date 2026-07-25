@@ -169,9 +169,9 @@ export function distributionTokenLabels(input: readonly number[]) {
 }
 
 export function distributionLabel(text: string, detail: string) {
-  const heading = el("div", "steptrace__distribution-label")
+  const heading = el("div", "steptrace__rail-label steptrace__distribution-label")
   heading.textContent = text
-  heading.title = detail
+  heading.setAttribute("aria-description", detail)
   return heading
 }
 

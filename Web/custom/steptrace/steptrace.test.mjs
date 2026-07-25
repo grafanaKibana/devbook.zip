@@ -705,6 +705,10 @@ test("counting sort renders shared bars around one progressive frequency strip",
     assert.match(source, /makeDistributionArrayBand/)
     assert.match(
       source,
+      /el\("div", "steptrace__rail-label steptrace__distribution-label"\)/,
+    )
+    assert.match(
+      source,
       /makeDistributionArrayBand\(\n    "Unsorted Array",[\s\S]*first\.input\.length,\n  \)/,
     )
     assert.match(
@@ -781,9 +785,9 @@ test("counting sort renders shared bars around one progressive frequency strip",
       styleSource,
       /@media \(max-width: 560px\) and \(pointer: coarse\) \{[\s\S]*grid-template-columns: repeat\(2, minmax\(0, 1fr\)\);[\s\S]*column-gap: 0\.5rem;[\s\S]*min-height: calc\(2 \* 2\.75rem\);/,
     )
-    assert.match(
+    assert.doesNotMatch(
       styleSource,
-      /@media \(max-width: 560px\) \{[\s\S]*\.steptrace__distribution \{\n    gap: 0\.55rem;\n  \}/,
+      /@media \(max-width: 560px\) \{[\s\S]*\.steptrace__distribution \{\n    gap:/,
     )
     assert.match(
       styleSource,
@@ -899,8 +903,15 @@ test("radix and bucket sorts share one stable bucket-board renderer", () => {
       [sourceLabel.textContent, bucketLabel.textContent, outputLabel.textContent],
       ["Current Array", "Digit Buckets", "Gathered Pass"],
     )
+    assert.equal(
+      sourceLabel.attributes.get("aria-description"),
+      "Each digit pass starts from the order gathered by the previous pass.",
+    )
+    assert.equal(sourceLabel.title, "")
     assert.equal(sourceBars.children.length, 8)
     assert.equal(board.children.length, 10)
+    assert.equal(radixStage.dataset.profile, "radix")
+    assert.equal(board.attributes.get("style:--_bucket-count"), "10")
     assert.equal(outputBars.children.length, 8)
     assert.equal(legend.attributes.get("aria-label"), "Distribution state legend")
 
@@ -931,8 +942,25 @@ test("radix and bucket sorts share one stable bucket-board renderer", () => {
 
     assert.match(
       styleSource,
-      /\.steptrace__distribution-bucket-board \{[\s\S]*block-size: clamp\(7rem, 17vh, 8\.5rem\);[\s\S]*overflow-x: auto;[\s\S]*border: 1px solid var\(--_distribution-border\);[\s\S]*border-radius: var\(--_distribution-radius\);/,
+      /\.steptrace__distribution \{[\s\S]*gap: clamp\(0\.3rem, 0\.8vh, 0\.45rem\);[\s\S]*padding: 0\.05rem 0;/,
     )
+    assert.match(
+      styleSource,
+      /\.steptrace__distribution-band \{[\s\S]*grid-template-columns: 1fr;[\s\S]*gap: 0;/,
+    )
+    assert.doesNotMatch(
+      styleSource,
+      /\.steptrace__distribution-band \{[^}]*grid-template-columns: minmax\(/,
+    )
+    assert.match(
+      styleSource,
+      /\.steptrace__distribution-bars \{[\s\S]*height: clamp\(4\.6rem, 16vh, 6\.5rem\);/,
+    )
+    assert.match(
+      styleSource,
+      /\.steptrace__distribution-bucket-board \{[\s\S]*grid-template-columns: repeat\(\s*var\(--_bucket-count, 1\),\s*minmax\(0, 1fr\)\s*\);[\s\S]*block-size: clamp\(7rem, 17vh, 8\.5rem\);[\s\S]*overflow: hidden;[\s\S]*border: 1px solid var\(--_distribution-border\);[\s\S]*border-radius: var\(--_distribution-radius\);/,
+    )
+    assert.doesNotMatch(styleSource, /grid-auto-columns: minmax\(4\.6rem, 1fr\)/)
     assert.match(
       styleSource,
       /\.steptrace__distribution-lane \{[\s\S]*border-inline-end: 1px solid var\(--_distribution-border\);/,
@@ -944,7 +972,19 @@ test("radix and bucket sorts share one stable bucket-board renderer", () => {
     )
     assert.match(
       styleSource,
+      /\.steptrace__distribution-bars \.steptrace__bar \{[\s\S]*pointer-events: none;/,
+    )
+    assert.match(
+      styleSource,
       /\.steptrace__distribution-lane:first-child\[data-active="1"\]::after \{[\s\S]*border-start-start-radius:/,
+    )
+    assert.match(
+      styleSource,
+      /@container steptrace-distribution \(max-width: 50rem\) \{[\s\S]*\.steptrace__distribution\[data-profile="radix"\] \.steptrace__distribution-bucket-board \{[\s\S]*grid-template-columns: repeat\(5, minmax\(0, 1fr\)\);[\s\S]*grid-template-rows: repeat\(2, minmax\(0, 1fr\)\);[\s\S]*block-size: 9\.25rem;/,
+    )
+    assert.match(
+      styleSource,
+      /@container steptrace-distribution \(max-width: 50rem\) \{[\s\S]*\.steptrace__distribution\[data-profile="radix"\][\s\S]*\.steptrace__distribution-lane-body \{[\s\S]*grid-template-columns: repeat\(\s*var\(--_bucket-columns, 1\),\s*minmax\(0, 1fr\)\s*\);[\s\S]*grid-auto-rows: minmax\(0, 1fr\);[\s\S]*overflow: hidden;/,
     )
   } finally {
     globalThis.document = previousDocument

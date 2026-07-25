@@ -4189,9 +4189,9 @@
     });
   }
   function distributionLabel(text, detail) {
-    const heading = el("div", "steptrace__distribution-label");
+    const heading = el("div", "steptrace__rail-label steptrace__distribution-label");
     heading.textContent = text;
-    heading.title = detail;
+    heading.setAttribute("aria-description", detail);
     return heading;
   }
   function makeDistributionArrayBand(title, detail, length, modifier = "") {
@@ -4558,6 +4558,7 @@
     const labels = distributionTokenLabels(original.map((token) => token.value));
     const maxValue = Math.max(...original.map((token) => token.value), 1);
     const stage = el("div", "steptrace__distribution steptrace__distribution--buckets");
+    stage.dataset.profile = first.profile;
     const sourceTitle = first.profile === "radix" ? "Current Array" : "Unsorted Array";
     const source = makeDistributionArrayBand(
       sourceTitle,
@@ -4569,6 +4570,7 @@
     const bucketTitle = first.profile === "radix" ? "Digit Buckets" : "Range Buckets";
     board.setAttribute("role", "region");
     board.setAttribute("aria-label", bucketTitle);
+    board.style.setProperty("--_bucket-count", String(first.bucketLabels.length));
     const lanes = first.bucketLabels.map((bucketLabel, bucketIndex) => {
       const lane = el("div", "steptrace__distribution-lane");
       const header = el("div", "steptrace__distribution-lane-header");

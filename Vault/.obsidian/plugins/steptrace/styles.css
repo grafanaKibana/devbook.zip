@@ -1047,27 +1047,25 @@
   --_distribution-cell: var(--st-table-cell, var(--st-page, var(--_surface)));
   --_distribution-header: var(--st-table-header, var(--_surface));
   --_distribution-radius: 0.5625rem;
+  container: steptrace-distribution/inline-size;
   display: grid;
   align-content: stretch;
-  gap: clamp(0.55rem, 1.6vh, 0.95rem);
+  gap: clamp(0.3rem, 0.8vh, 0.45rem);
   min-height: 0;
-  padding: 0.15rem 0;
+  padding: 0.05rem 0;
 }
 .steptrace__distribution-band {
   display: grid;
-  grid-template-columns: minmax(6.8rem, 0.34fr) 1fr;
-  gap: 0.7rem;
+  grid-template-columns: 1fr;
+  gap: 0;
   align-items: center;
   min-width: 0;
 }
 .steptrace__distribution-label {
-  color: var(--_muted);
-  font: 650 clamp(0.62rem, 1.5vw, 0.72rem)/1.2 var(--_font-head);
-  letter-spacing: 0.04em;
-  text-transform: uppercase;
+  justify-self: start;
 }
 .steptrace__distribution-bars {
-  height: clamp(4.8rem, 19vh, 8.2rem);
+  height: clamp(4.6rem, 16vh, 6.5rem);
   min-width: 0;
   gap: clamp(0.28rem, 1vw, 0.5rem);
 }
@@ -1077,6 +1075,9 @@
 .steptrace__distribution-bars .steptrace__num {
   color: var(--_text);
   font-weight: 700;
+}
+.steptrace__distribution-bars .steptrace__bar {
+  pointer-events: none;
 }
 .steptrace__distribution-bars--output .steptrace__bar[data-empty="1"] .steptrace__fill {
   min-height: 0;
@@ -1174,17 +1175,14 @@
 .steptrace__distribution-bucket[data-placement="1"] .steptrace__distribution-details {
   background: color-mix(in srgb, var(--_amber) 7%, var(--_distribution-cell));
 }
-.steptrace__distribution--buckets {
-  gap: clamp(0.45rem, 1.2vh, 0.72rem);
-}
 .steptrace__distribution-bucket-board {
   display: grid;
-  grid-auto-flow: column;
-  grid-auto-columns: minmax(4.6rem, 1fr);
+  grid-template-columns: repeat(var(--_bucket-count, 1), minmax(0, 1fr));
+  grid-template-rows: minmax(0, 1fr);
+  grid-auto-flow: row;
   block-size: clamp(7rem, 17vh, 8.5rem);
   min-width: 0;
-  overflow-x: auto;
-  overflow-y: hidden;
+  overflow: hidden;
   border: 1px solid var(--_distribution-border);
   border-radius: var(--_distribution-radius);
   background: var(--_distribution-cell);
@@ -1301,27 +1299,11 @@
   background: var(--_legend-color);
 }
 @media (max-width: 560px) {
-  .steptrace__distribution {
-    gap: 0.55rem;
-  }
   .steptrace[data-visual-family=distribution-sort] .steptrace__rail {
     min-block-size: 16rem;
   }
-  .steptrace__distribution-band {
-    grid-template-columns: 1fr;
-    gap: 0.3rem;
-  }
-  .steptrace__distribution-bars {
-    height: clamp(4.5rem, 17vh, 6.6rem);
-  }
   .steptrace__distribution-frequency {
     grid-auto-columns: minmax(3.7rem, 1fr);
-  }
-  .steptrace__distribution-bucket-board {
-    grid-auto-columns: minmax(4.2rem, 1fr);
-  }
-  .steptrace__distribution-lane {
-    grid-template-rows: 1.6rem minmax(3.8rem, 1fr);
   }
 }
 @media (max-width: 560px) and (pointer: coarse) {
@@ -1333,6 +1315,45 @@
   }
   .steptrace[data-visual-family=distribution-sort] .steptrace__watch-row {
     min-width: 0;
+  }
+}
+@container steptrace-distribution (max-width: 50rem) {
+  .steptrace__distribution[data-profile=radix] .steptrace__distribution-bucket-board {
+    grid-template-columns: repeat(5, minmax(0, 1fr));
+    grid-template-rows: repeat(2, minmax(0, 1fr));
+    block-size: 9.25rem;
+  }
+  .steptrace__distribution[data-profile=radix] .steptrace__distribution-lane {
+    grid-template-rows: 1.35rem minmax(0, 1fr);
+  }
+  .steptrace__distribution[data-profile=radix] .steptrace__distribution-lane:nth-child(-n+5) {
+    border-block-end: 1px solid var(--_distribution-border);
+  }
+  .steptrace__distribution[data-profile=radix] .steptrace__distribution-lane:nth-child(5) {
+    border-inline-end: 0;
+  }
+  .steptrace__distribution[data-profile=radix] .steptrace__distribution-lane-body {
+    grid-template-columns: repeat(var(--_bucket-columns, 1), minmax(0, 1fr));
+    grid-auto-rows: minmax(0, 1fr);
+    align-content: stretch;
+    gap: 0.08rem;
+    overflow: hidden;
+    padding: 0.1rem;
+  }
+  .steptrace__distribution[data-profile=radix] .steptrace__distribution-token {
+    padding: 0 0.08rem;
+  }
+  .steptrace__distribution[data-profile=radix] .steptrace__distribution-lane:first-child[data-active="1"]::after {
+    border-end-start-radius: 0;
+  }
+  .steptrace__distribution[data-profile=radix] .steptrace__distribution-lane:nth-child(5)[data-active="1"]::after {
+    border-start-end-radius: calc(var(--_distribution-radius) - 1px);
+  }
+  .steptrace__distribution[data-profile=radix] .steptrace__distribution-lane:nth-child(6)[data-active="1"]::after {
+    border-end-start-radius: calc(var(--_distribution-radius) - 1px);
+  }
+  .steptrace__distribution[data-profile=radix] .steptrace__distribution-lane:last-child[data-active="1"]::after {
+    border-start-end-radius: 0;
   }
 }
 .steptrace__hash {
