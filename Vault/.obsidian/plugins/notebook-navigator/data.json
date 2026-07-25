@@ -25,6 +25,10 @@
         {
           "type": "note",
           "path": "Home/Topics.base"
+        },
+        {
+          "type": "note",
+          "path": "Home/Credits.md"
         }
       ],
       "propertyKeys": [
