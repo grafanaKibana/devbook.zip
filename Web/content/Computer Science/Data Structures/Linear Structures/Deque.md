@@ -1,8 +1,8 @@
 ---
 publish: true
 created: 2026-07-18T14:02:44.040Z
-modified: 2026-07-18T14:02:44.040Z
-published: 2026-07-18T14:02:44.040Z
+modified: 2026-07-25T13:51:15.571Z
+published: 2026-07-25T13:51:15.571Z
 topic:
   - Computer Science
 subtopic:
@@ -29,7 +29,7 @@ No StepTrace renderer covers a double-ended queue yet.
 
 The salient state is a `head` index and a `count`; the back position is derived as `(head + count - 1) % capacity` rather than stored. Representation below owns the index mechanics.
 
-# Representation and invariants
+# Representation and Invariants
 
 Two backings satisfy the same interface with different tradeoffs.
 
@@ -60,7 +60,7 @@ Bounds are for the growable ring buffer unless the row names the linked backing.
 
 The amortized `O(1)` on the ring buffer assumes geometric growth: doubling on overflow spreads the `O(n)` copy across the `n` cheap pushes that preceded it, so a run of `m` pushes costs `O(m)` total. A single push that lands on a full buffer is still `O(n)` in isolation, which matters for latency-sensitive paths even when throughput is fine. The linked backing removes that spike entirely at the cost of an allocation per element and no `O(1)` index.
 
-# When the structure stops fitting
+# When the Structure Stops Fitting
 
 The middle is the hard boundary, and it follows directly from the both-ends design. Both backings optimize the two ends: the ring buffer keeps only `head` and `count`, and the linked list caches only head and tail. Neither holds a position between them, so inserting or removing at an interior offset is `O(n)` — shifting a block of the array, or walking to the node first. A workload dominated by middle splices at positions it already holds wants a plain doubly-[[LinkedList|linked list]] with retained node references, or a balanced tree; a deque has thrown that information away.
 
@@ -68,7 +68,7 @@ The ring buffer's resize is a latency boundary rather than a throughput one. Amo
 
 Sliding-window _maximum_ is a common target, but a raw deque does not provide it — the technique is a **monotonic** deque, covered in [[Monotonic Stack and Queue]]. The deque holds candidate indices whose values stay ordered because each push first pops dominated elements off the back; the both-ends interface is what makes that possible (evict stale maxima from the back, expire out-of-window indices from the front), but the ordering invariant lives in the algorithm, not the container.
 
-# Reference drawer
+# Reference Drawer
 
 > [!ABSTRACT]- Ring-buffer layout
 >

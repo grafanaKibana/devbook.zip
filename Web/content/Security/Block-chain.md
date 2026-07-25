@@ -1,8 +1,8 @@
 ---
 publish: true
 created: 2026-07-18T14:02:44.135Z
-modified: 2026-07-18T14:02:44.135Z
-published: 2026-07-18T14:02:44.135Z
+modified: 2026-07-25T13:51:15.311Z
+published: 2026-07-25T13:51:15.311Z
 topic:
   - Security
 subtopic:
@@ -71,7 +71,7 @@ var block2Hash = Sha256Hex(block2Prev + block2Data);
 
 **Decision rule**: PoW for maximum trustlessness (public cryptocurrency). PoS for public chains where energy matters. PoA for enterprise/private chains where you know and trust all validators — but at that point, ask whether a traditional database with audit logging is simpler.
 
-## Public vs Private Chains
+## Public Vs Private Chains
 
 | Type | Participants | Throughput | Immutability | Use when |
 |------|------------|-----------|-------------|----------|

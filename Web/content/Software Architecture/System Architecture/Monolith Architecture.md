@@ -1,8 +1,8 @@
 ---
 publish: true
 created: 2026-07-19T15:05:28.183Z
-modified: 2026-07-19T15:05:28.183Z
-published: 2026-07-19T15:05:28.183Z
+modified: 2026-07-25T13:51:15.241Z
+published: 2026-07-25T13:51:15.241Z
 topic:
   - Software Architecture
 subtopic:
@@ -60,7 +60,7 @@ These signals indicate the monolith has become a **big ball of mud** — not bec
 
 A [[Software Architecture/System Architecture/Modular Monolith]] keeps one deployment unit while enforcing explicit module contracts and data ownership. It is the normal upgrade path when an unstructured monolith needs stronger change boundaries but independent service deployment is not yet worth the operating cost.
 
-# Monolith vs Microservices
+# Monolith Vs Microservices
 
 | Aspect | Monolith | Microservices |
 |--------|----------|---------------|
@@ -84,7 +84,7 @@ See [[Software Architecture/System Architecture/Microservices]] for the full mic
 
 The cost of premature microservices is high: distributed systems complexity, eventual consistency, and operational overhead before the product has proven its architecture.
 
-# Collocation provenance visuals
+# Collocation Provenance Visuals
 
 ![[Assets/Software Architecture/Software Architecture-Monolith Architecture-18120000-1.jpg]]
 
@@ -128,7 +128,7 @@ Prime Video's monitoring pipeline and Stack Overflow's historical application ti
 - [Scaling up the Prime Video audio/video monitoring service and reducing costs by 90%](https://www.primevideotech.com/video-streaming/scaling-up-the-prime-video-audio-video-monitoring-service-and-reducing-costs-by-90) — the original 2023 engineering case; explains the high-volume data-transfer and orchestration bottlenecks behind the team-specific result.
 - [Stack Overflow: The Architecture — 2016 Edition](https://nickcraver.com/blog/2016/02/17/stack-overflow-the-architecture-2016-edition/) — primary historical account of the web tier, data systems, traffic, redundancy, and nine-primary-server figure.
 
-## ByteByteGo provenance
+## ByteByteGo Provenance
 
 - [Prime Video monitoring service](https://github.com/ByteByteGoHq/system-design-101/blob/b28380a4710c5ec9638ec037d4168e288f334cba/data/guides/amazon-prime-video-monitoring-service.md) — editorial lead for the collocation case; the 90% result is kept explicitly scoped to that service.
 - [Designing Stack Overflow](https://github.com/ByteByteGoHq/system-design-101/blob/b28380a4710c5ec9638ec037d4168e288f334cba/data/guides/how-will-you-design-the-stack-overflow-website.md) — provenance for the 2016 case visual; server counts are labeled historical rather than current.

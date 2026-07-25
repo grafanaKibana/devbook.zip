@@ -1,8 +1,8 @@
 ---
 publish: true
 created: 2026-07-18T14:02:44.058Z
-modified: 2026-07-18T14:02:44.058Z
-published: 2026-07-18T14:02:44.058Z
+modified: 2026-07-25T13:51:15.546Z
+published: 2026-07-25T13:51:15.546Z
 topic:
   - Data Persistence
 subtopic: []
@@ -65,13 +65,13 @@ Isolation controls which effects of concurrent transactions may be observed and 
 
 This table states the SQL standard's minimum guarantees, not a portable prediction of every engine. PostgreSQL maps Read Uncommitted to Read Committed and its Repeatable Read implementation also prevents phantoms, yet still permits serialization anomalies. SQL Server can implement Read Committed with locks or row versioning depending on configuration. Always read the target engine's isolation documentation before choosing a level.
 
-### MVCC and snapshot isolation
+### MVCC and Snapshot Isolation
 
 Isolation is implemented with **locking**, **MVCC/versioning**, or both. See [[Data Persistence/SQL/Database Locks|Database Locks]] for lock modes, granularity, and escalation. Under MVCC, writes create row versions and a snapshot decides which versions a statement may see. PostgreSQL Read Committed takes a new snapshot per statement; Repeatable Read and Serializable use a transaction snapshot. SQL Server uses row versioning for `READ_COMMITTED_SNAPSHOT` and `SNAPSHOT` when configured.
 
 MVCC reduces ordinary reader-writer blocking; it does not mean reads and writes can never block. Writers still conflict with writers, explicit locks can block readers, schema changes need stronger locks, and old versions must be retained while a snapshot can still see them. PostgreSQL reclaims dead tuples through `VACUUM`; SQL Server stores row versions in its version store.
 
-### Write skew — the anomaly the table misses
+### Write Skew — the Anomaly the Table Misses
 
 The dirty/non-repeatable/phantom list does not capture every bad history. **Snapshot isolation can permit write skew**:
 

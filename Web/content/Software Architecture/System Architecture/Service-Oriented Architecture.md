@@ -1,8 +1,8 @@
 ---
 publish: true
 created: 2026-07-18T14:02:44.191Z
-modified: 2026-07-18T14:02:44.191Z
-published: 2026-07-18T14:02:44.191Z
+modified: 2026-07-25T13:51:15.241Z
+published: 2026-07-25T13:51:15.241Z
 topic:
   - Software Architecture
 subtopic:
@@ -18,7 +18,7 @@ Service-Oriented Architecture (SOA) structures a system as a collection of loose
 
 SOA and microservices share the same decomposition philosophy but differ in scope, governance, and communication style. Understanding the distinction matters for interviews and architecture decisions.
 
-# SOA vs Microservices
+# SOA Vs Microservices
 
 | Dimension | SOA | Microservices |
 |---|---|---|

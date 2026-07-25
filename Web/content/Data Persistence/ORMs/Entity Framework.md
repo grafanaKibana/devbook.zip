@@ -1,8 +1,8 @@
 ---
 publish: true
 created: 2026-07-18T14:02:44.063Z
-modified: 2026-07-18T14:02:44.063Z
-published: 2026-07-18T14:02:44.063Z
+modified: 2026-07-25T13:51:15.544Z
+published: 2026-07-25T13:51:15.544Z
 topic:
   - Data Persistence
 subtopic:
@@ -187,7 +187,7 @@ The risk to know: a forgotten filter on a related type, or `IgnoreQueryFilters()
 
 `Include`-ing two or more **collection** navigations in one query makes EF Core emit a single JOIN whose row count is the _product_ of the collections — an order with 50 line items and 20 history rows returns 1,000 duplicated rows, which EF then de-duplicates client-side. Fix with **`AsSplitQuery()`**, which runs one SQL query per collection and stitches them in memory (trading a JOIN for extra round-trips). Use single (joined) queries for one-to-one/small includes; split queries when you `Include` multiple or large collections.
 
-## Code First vs Database First
+## Code First Vs Database First
 
 - **Code First**: C# model is the source of truth. Migrations generate and evolve the schema. Best for new projects with a strong domain model.
 - **Database First**: scaffold the model from an existing schema with `dotnet ef dbcontext scaffold`. Best for legacy databases or DBA-controlled schemas.

@@ -1,8 +1,8 @@
 ---
 publish: true
 created: 2026-07-18T14:02:44.065Z
-modified: 2026-07-18T14:02:44.065Z
-published: 2026-07-18T14:02:44.065Z
+modified: 2026-07-25T13:51:15.543Z
+published: 2026-07-25T13:51:15.543Z
 topic:
   - Data Persistence
 subtopic:
@@ -22,7 +22,7 @@ Three contrasts frame the whole topic:
 - **Pessimistic vs optimistic conflict handling.** Pessimistic code acquires a lock before the protected change. Optimistic code proceeds without that preemptive lock, then detects a conflicting version at write or commit and retries or rejects the change. Either policy can run on an MVCC engine.
 - **Engine locks vs in-process locks.** This note is about the _database-engine_ layer: a lock manager inside the server, shared by every client connection, protecting rows and tables. That is a different layer from the in-process `lock`/`Monitor` story in [[Programming/NET/CSharp/Concurrency and Parallelism/Locking|Locking]], which protects in-memory objects inside a single .NET process. A CLR `lock` never crosses the process boundary; a database lock is the engine's own bookkeeping and is invisible to your application code except as waiting.
 
-# Lock modes
+# Lock Modes
 
 A lock mode encodes _what_ a transaction intends to do, and the engine grants a new lock only if its mode is **compatible** with every lock already held on that resource. Three basic modes cover reads and writes, and an intent hierarchy makes coarse-grained checks cheap.
 
@@ -53,7 +53,7 @@ The engine can lock at several sizes, and the choice is a direct trade of concur
 
 Fine-grained locking maximizes concurrency at the price of many small locks (memory + management cost); coarse-grained locking is cheap to track but forces unrelated transactions to contend. The engine starts fine and coarsens only when the fine-grained bookkeeping gets expensive — which is exactly what escalation does.
 
-# Concurrent schedule and predicate protection
+# Concurrent Schedule and Predicate Protection
 
 With lock-based `READ COMMITTED`, one conflicting row schedule looks like this:
 
@@ -66,7 +66,7 @@ With lock-based `READ COMMITTED`, one conflicting row schedule looks like this:
 
 Row locks cover rows that already exist, but a serializable predicate also has to protect the _gaps_. If A reads `WHERE account_id BETWEEN 100 AND 199`, B must not insert account 150 and create a phantom before A commits. Engines enforce that boundary with key-range or predicate protection, or detect the dangerous dependency through a serializable MVCC scheme. Locking only the rows returned by the first read is insufficient.
 
-# Lock escalation
+# Lock Escalation
 
 SQL Server acquires fine-grained locks first, then **escalates** many of them into a single coarse lock when a statement holds too many. The default trigger is roughly **5,000 locks on one object in a single statement**, or when total lock memory crosses a server-wide threshold. Escalation converts thousands of row/page locks on a table into one table-level lock: it slashes the memory and management cost of holding all those tiny locks.
 
@@ -74,7 +74,7 @@ The danger is the **concurrency cliff**. The instant those 5,000 row locks becom
 
 Notably, **PostgreSQL does not escalate locks at all.** Row locks live in the tuple itself (in the `xmax` field), so holding a million of them costs no shared-memory lock entries; heavier locks live in a fixed-size shared lock table bounded by `max_locks_per_transaction`. The design choice is the mirror image: PostgreSQL never surprises you with a table lock, but a transaction that takes an unusual number of _object-level_ locks can exhaust the shared lock table instead.
 
-# Latch vs lock
+# Latch Vs Lock
 
 Latches and locks are easy to confuse because both serialize access, but they operate at different layers and different timescales. A **lock** is _logical_: it protects a row or table as a transactional resource and is registered in the lock manager. Its duration depends on mode and isolation: write locks normally last to transaction end, while a shared read lock under `READ COMMITTED` can be released after the statement. A **latch** is _physical_: a lightweight, short-lived primitive that protects an **in-memory structure** (a buffer-pool page, an index's internal node) only for the duration of the physical operation touching it — reading bytes out of a page, splitting an index node. A latch is designed to be held briefly, often for microseconds, but scheduling stalls, contention, or slow physical work can extend the hold; latch wait time can be much longer still. It is never tied to your transaction's lifetime and exists to keep memory internally consistent while a page is being read or modified. When you see _lock_ waits you are looking at transactional contention (isolation); when you see _latch_ waits you are looking at memory-structure contention (physical throughput).
 
@@ -124,7 +124,7 @@ COMMIT;
 | Main failure cost | Blocking and deadlocks | Wasted work and retry storms |
 | Engine locking | Holds a reservation while work proceeds | Still locks briefly during the `UPDATE` |
 
-# Blocking vs deadlock
+# Blocking Vs Deadlock
 
 **Blocking** is the normal consequence of locking: transaction B requests a lock incompatible with one A already holds, so B waits. It is not necessarily temporary or self-resolving. An abandoned session or open transaction can retain the lock indefinitely until the client commits or rolls back, a lock or statement timeout or cancellation fires, the connection is terminated, or an operator intervenes. Monitor blocker age and transaction age, not only waiter count.
 

@@ -1,8 +1,8 @@
 ---
 publish: true
 created: 2026-07-18T14:02:44.189Z
-modified: 2026-07-18T14:02:44.189Z
-published: 2026-07-18T14:02:44.189Z
+modified: 2026-07-25T13:51:15.243Z
+published: 2026-07-25T13:51:15.243Z
 topic:
   - Software Architecture
 subtopic:
@@ -100,7 +100,7 @@ Use when workflow visibility, explicit state handling, and compensation logic ar
 - **Choreography**: looser coupling and easier service autonomy, but harder to trace global flow and reason about emergent behavior as subscriptions grow.
 - **Orchestration**: clearer process control, easier audit/debug per workflow instance, but introduces a central dependency that can become a bottleneck or single point of operational complexity.
 
-# .NET messaging boundary
+# .NET Messaging Boundary
 
 A broker can deliver an integration event only after the producer places it on the transport. Saving business state and publishing in two independent operations leaves a failure gap: the database can commit while the publish fails. A transactional outbox stores the business change and outgoing message through the same local `DbContext` transaction, then a delivery service forwards it to the broker.
 
@@ -152,7 +152,7 @@ rabbit.ReceiveEndpoint("billing-order-placed", endpoint =>
 
 The outbox closes a local database-to-broker gap. It does not turn the broker and every downstream database into one global exactly-once transaction.
 
-# Governance and data pipelines
+# Governance and Data Pipelines
 
 ![[Assets/Software Architecture/Software Architecture-Event-Driven Architecture-18120000-1.png]]
 
@@ -233,7 +233,7 @@ Preserve source event IDs in derived records and publish lineage from input data
 - [Transactional Outbox pattern](https://microservices.io/patterns/data/transactional-outbox.html) - Failure gap closed by persisting messages with local business state.
 - [Idempotent Consumer pattern](https://microservices.io/post/microservices/patterns/2020/10/16/idempotent-consumer.html) - Why at-least-once delivery requires durable duplicate handling.
 
-## ByteByteGo provenance
+## ByteByteGo Provenance
 
 - [McDonald's event-driven architecture](https://github.com/ByteByteGoHq/system-design-101/blob/b28380a4710c5ec9638ec037d4168e288f334cba/data/guides/mcdonald%27s-event-driven-architecture.md) — editorial lead for the registry, SDK, gateway, domain, and regional governance case.
 - [Data pipelines overview](https://github.com/ByteByteGoHq/system-design-101/blob/b28380a4710c5ec9638ec037d4168e288f334cba/data/guides/data-pipelines-overview.md) — provenance for the conceptual pipeline stages and record trace.

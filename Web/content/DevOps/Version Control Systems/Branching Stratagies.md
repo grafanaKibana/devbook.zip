@@ -1,8 +1,8 @@
 ---
 publish: true
 created: 2026-07-18T14:02:44.073Z
-modified: 2026-07-18T14:02:44.074Z
-published: 2026-07-18T14:02:44.074Z
+modified: 2026-07-25T13:51:15.537Z
+published: 2026-07-25T13:51:15.537Z
 topic:
   - DevOps
 subtopic:
@@ -110,7 +110,7 @@ if (_featureFlags.IsEnabled("PayPalPayment", userId))
 return await _stripeGateway.ChargeAsync(amount);  // existing path
 ```
 
-# Merge vs Rebase
+# Merge Vs Rebase
 
 `git merge` creates a commit with both histories as parents and preserves the identity and topology of published commits. `git rebase` copies a private sequence onto a new base, producing new commit IDs that are easier to review as a linear series. The content result can be equivalent; the collaboration contract is not.
 

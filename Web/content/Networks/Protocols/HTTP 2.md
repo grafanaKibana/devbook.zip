@@ -1,8 +1,8 @@
 ---
 publish: true
 created: 2026-07-18T14:02:44.084Z
-modified: 2026-07-18T14:02:44.084Z
-published: 2026-07-18T14:02:44.084Z
+modified: 2026-07-25T13:51:15.519Z
+published: 2026-07-25T13:51:15.519Z
 topic:
   - Networks
 subtopic:
@@ -61,7 +61,7 @@ A client and server don't just "speak HTTP/2" — they have to agree to. For HTT
 
 Cleartext HTTP/2 (**h2c**) exists via an HTTP/1.1 `Upgrade` header, but browsers don't support it; it's mostly used **server-to-server** (e.g. behind a load balancer, or [[gRPC]], which runs on HTTP/2 and relies on this multiplexing).
 
-# HTTP/2 vs HTTP/1.1
+# HTTP/2 Vs HTTP/1.1
 
 | Feature | HTTP/1.1 | HTTP/2 |
 |---------|----------|--------|
@@ -72,7 +72,7 @@ Cleartext HTTP/2 (**h2c**) exists via an HTTP/1.1 `Upgrade` header, but browsers
 | Head-of-line blocking | Application layer | TCP layer only |
 | TLS requirement | Optional | Required in practice (browsers enforce) |
 
-# HTTP/2 in .NET
+# HTTP/2 In .NET
 
 ASP.NET Core supports HTTP/2 natively via Kestrel. Enable it in `appsettings.json` or `Program.cs`:
 

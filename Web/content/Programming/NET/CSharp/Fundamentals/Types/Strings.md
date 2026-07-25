@@ -1,8 +1,8 @@
 ---
 publish: true
 created: 2026-07-18T14:02:44.117Z
-modified: 2026-07-18T14:02:44.117Z
-published: 2026-07-18T14:02:44.117Z
+modified: 2026-07-25T13:51:15.333Z
+published: 2026-07-25T13:51:15.333Z
 topic:
   - Programming
 subtopic:
@@ -18,7 +18,7 @@ status: Ready to Repeat
 
 # Deeper Explanation
 
-## Core properties
+## Core Properties
 
 - `string` is a sealed reference type.
 - Strings are immutable in safe managed code.
@@ -35,7 +35,7 @@ Console.WriteLine(b); // hello!
 
 `b = b + "!"` creates a new string object; `a` remains unchanged.
 
-## String interning
+## String Interning
 
 String literals are interned by default, so identical literals can share the same instance:
 

@@ -1,8 +1,8 @@
 ---
 publish: true
 created: 2026-07-18T14:02:44.144Z
-modified: 2026-07-18T14:02:44.144Z
-published: 2026-07-18T14:02:44.144Z
+modified: 2026-07-25T13:51:15.309Z
+published: 2026-07-25T13:51:15.309Z
 tags:
   - FolderNote
 topic:
@@ -33,7 +33,7 @@ These four notes answer different questions. Traditional [[Software Architecture
 
 Default to [[Software Architecture/Application Architecture/Layered Architecture]] and tighten toward [[Software Architecture/Application Architecture/Clean Architecture]] only when domain policy and longevity justify the extra indirection — for a simple CRUD service the stricter rules cost real time without protecting much. Reach for [[Software Architecture/Application Architecture/Plug-in Architecture (MicroKernel)]] on a different axis entirely: when the value is letting others extend the product without touching the core. [[Software Architecture/Application Architecture/Presentation Architecture Variants]] is not an alternative to these but a decision _inside_ whichever structure you pick, governing how the presentation layer is organized.
 
-# Production web application request path
+# Production Web Application Request Path
 
 Trace `POST /orders` through boundaries rather than listing infrastructure as peers:
 
@@ -46,7 +46,7 @@ Trace `POST /orders` through boundaries rather than listing infrastructure as pe
 
 Search is a read projection, not the source of truth. Logging and monitoring observe every boundary but do not sit inline as a synchronous dependency. CI/CD delivers artifacts and configuration; it is not part of a user request. This separation prevents a production architecture picture from implying that alerts, developers, or deployment tools participate in request processing.
 
-# Trigger-action integration platforms
+# Trigger-action Integration Platforms
 
 ![[Assets/Software Architecture/Software Architecture-Application Architecture-18120000.png]]
 

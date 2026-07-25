@@ -1,8 +1,8 @@
 ---
 publish: true
 created: 2026-07-18T14:02:44.050Z
-modified: 2026-07-18T14:02:44.050Z
-published: 2026-07-18T14:02:44.050Z
+modified: 2026-07-25T13:51:15.556Z
+published: 2026-07-25T13:51:15.556Z
 topic:
   - Computer Science
 subtopic:
@@ -25,7 +25,7 @@ The tradeoff is shape. The tree is heap-ordered but deliberately left-heavy and 
 > [!NOTE] Visualization pending
 > Planned StepTrace: a mergeable-heap card showing two heaps merged by recursing down their right spines, comparing roots, then swapping children where the leftist rank demands it — keeping the right spine short. No matching renderer exists in `engine.js` yet.
 
-# Merge, and why the right spine stays short
+# Merge, and why the Right Spine Stays short
 
 Every mutation is a merge of two heaps `a` and `b`:
 
@@ -53,7 +53,7 @@ Bounds are worst-case per operation and assume the leftist invariant is maintain
 
 Structure space is `Θ(n)` for the nodes plus one integer npl per node; the pointer-based layout also carries two child references per node, unlike an array heap's implicit indexing. Auxiliary space is the recursion stack, proportional to the right-spine length; an iterative bottom-up merge that first collects both right spines can bring that to `O(1)` at the cost of more code.
 
-# Where the invariant is load-bearing
+# Where the Invariant is Load-bearing
 
 The child swap in step 4 is not cosmetic. Omit it and a sequence of merges can leave the right subtree consistently deeper than the left; the right spine then grows toward `O(n)`, and because merge walks that spine, every operation degrades to linear. The `O(log n)` guarantee is a direct consequence of restoring `npl(left) ≥ npl(right)` after each step, nothing else enforces it.
 
@@ -61,7 +61,7 @@ The npl bookkeeping must be updated on every merge, not lazily. The swap decisio
 
 These are worst-case bounds. That is the whole reason to pay for the npl field: a [[Skew Heaps|skew heap]] performs the same right-spine merge and unconditional swap without storing npl, and gets `O(log n)` only _amortized_ — an individual meld there can be linear, offset by cheaper later ones. A leftist heap trades that field for a per-operation guarantee.
 
-# Reference drawer
+# Reference Drawer
 
 > [!ABSTRACT]- Leftist structure and the right spine
 >

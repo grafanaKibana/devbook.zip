@@ -1,8 +1,8 @@
 ---
 publish: true
 created: 2026-07-18T14:02:44.108Z
-modified: 2026-07-18T14:02:44.109Z
-published: 2026-07-18T14:02:44.109Z
+modified: 2026-07-25T13:51:15.343Z
+published: 2026-07-25T13:51:15.343Z
 topic:
   - Programming
 subtopic:
@@ -90,7 +90,7 @@ public async Task SyncAllAsync(CancellationToken cancellationToken)
 | `Task.Run(action)` | Offload CPU-bound work to a pool thread |
 | `ValueTask<T>` | Hot-path optimization when result is often synchronously available |
 
-## Processing tasks as they finish
+## Processing Tasks as They Finish
 
 A common anti-pattern is "loop, `WhenAny`, remove the winner, repeat" to process tasks in completion order. That is **O(n²)** — each `WhenAny` re-registers a continuation on every remaining task — and leaves the losing tasks unobserved if you exit early. On **.NET 9+** use `Task.WhenEach`, which yields each task as it completes:
 

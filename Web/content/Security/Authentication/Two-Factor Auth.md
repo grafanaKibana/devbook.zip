@@ -1,8 +1,8 @@
 ---
 publish: true
 created: 2026-07-18T14:02:44.134Z
-modified: 2026-07-18T14:02:44.134Z
-published: 2026-07-18T14:02:44.134Z
+modified: 2026-07-25T13:51:15.313Z
+published: 2026-07-25T13:51:15.313Z
 topic:
   - Security
 subtopic:
@@ -18,7 +18,7 @@ Two-factor authentication (2FA) requires evidence from exactly two independent f
 
 The engineering boundary includes enrollment and recovery. A phishing-resistant authenticator does not protect an account whose help desk can remove it after answering weak questions.
 
-# Method tradeoffs
+# Method Tradeoffs
 
 | Method | Proof | Phishing and replay | Recovery boundary | Choose it when |
 | --- | --- | --- | --- | --- |
@@ -38,7 +38,7 @@ TOTP derives a short code from a shared secret and a time-step counter. The serv
 
 WebAuthn defines the browser/API ceremony between a relying party (RP), client, and authenticator. CTAP defines communication with roaming authenticators such as security keys. A passkey is a WebAuthn discoverable credential: the authenticator can identify an account without the user first typing a username.
 
-## Registration ceremony
+## Registration Ceremony
 
 ```text
 RP -> Browser: challenge, rp.id, user.id, credential options
@@ -56,7 +56,7 @@ RP: store credential ID, public key, user binding, and metadata
 
 The attested credential data inside `authenticatorData` carries the credential ID and credential public key. With `none` attestation, the attestation statement can be empty and no attestation signature is returned; the RP still validates the client data, authenticator data, and public key. Other attestation formats may sign the authenticator data plus the hash of `clientDataJSON`, but the RP verifies that evidence only when its enrollment policy asks for attestation. The private key remains under authenticator control. The RP stores a public key, so a database leak does not directly reveal a reusable authentication secret. Registration must be authorized by a recent trusted session; otherwise an attacker who briefly controls an account can enroll their own credential.
 
-## Authentication ceremony
+## Authentication Ceremony
 
 ```text
 RP -> Browser: fresh unpredictable challenge + rp.id + allowed credentials or discoverable request
@@ -71,7 +71,7 @@ Origin and RP-ID binding give WebAuthn its phishing resistance: a credential reg
 
 ![[Assets/Security/Security-Two-Factor Auth-18120000.png]]
 
-# Passkey, sync, and attestation choices
+# Passkey, Sync, and Attestation Choices
 
 | Choice | Benefit | Cost / trust introduced |
 | --- | --- | --- |
@@ -83,7 +83,7 @@ Origin and RP-ID binding give WebAuthn its phishing resistance: a credential reg
 
 Attestation says something about the authenticator at registration; it does not establish the human's legal identity and is not required for ordinary consumer passkeys. Decide it from the relying party's assurance policy, not from a blanket belief that more attestation is always safer.
 
-# Failure and recovery behavior
+# Failure and Recovery Behavior
 
 - Expire and consume WebAuthn challenges once, and bind them to the initiating session and intended ceremony.
 - Validate `origin` and RP ID on the server through a maintained WebAuthn library; never trust client-provided account identity without matching the stored credential binding.

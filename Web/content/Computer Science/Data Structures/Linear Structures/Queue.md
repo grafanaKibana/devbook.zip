@@ -1,8 +1,8 @@
 ---
 publish: true
 created: 2026-07-18T14:02:44.042Z
-modified: 2026-07-18T14:02:44.042Z
-published: 2026-07-18T14:02:44.042Z
+modified: 2026-07-25T13:51:15.566Z
+published: 2026-07-25T13:51:15.566Z
 topic:
   - Computer Science
 subtopic:
@@ -23,7 +23,7 @@ The structure records only order of arrival. It cannot reach the middle by posit
 > [!NOTE] Visualization pending
 > Planned StepTrace: a ring-buffer card showing head and tail indices advancing modulo capacity as enqueue and dequeue wrap the live region around the backing array, plus the resize that copies into a larger array with head reset to `0`. No matching renderer exists in `engine.js` yet.
 
-# Representation and invariants
+# Representation and Invariants
 
 Two competing physical layouts back the same FIFO contract.
 
@@ -49,7 +49,7 @@ A growable circular buffer adds one more rule: when the live region fills the wh
 
 The `O(1)` bounds assume a circular-buffer or linked-list backing. The naive alternative — an array that removes from index `0` — makes `Dequeue` `O(n)`, because every surviving element shifts one slot toward the front; that single failure is the reason the circular buffer exists. For a growable circular buffer, only enqueue carries a worst case: the resize copy is `O(n)` for that one operation but amortizes to `O(1)` across the sequence of enqueues that filled the array. A fixed-capacity circular queue has no resize and therefore no `O(n)` spike, but it can reject an enqueue when full.
 
-# When the FIFO shape stops fitting
+# When the FIFO Shape Stops Fitting
 
 Random access and priority both fall outside the contract. The queue exposes only the front for removal and the back for insertion; there is no index into the middle and no way to serve the smallest key first. A workload that must dequeue by priority rather than by arrival needs [[Heap|a priority queue]], which pays `O(log n)` per operation to keep the extremum reachable.
 
@@ -57,7 +57,7 @@ The naive array implementation fails specifically at the front. Because dequeue 
 
 A fixed-capacity circular queue has a hard ceiling. Once the live region occupies every slot, `head` has wrapped to meet `tail` and there is nowhere to write; the next enqueue must either block, drop the item, or overwrite the oldest, depending on the chosen policy. This bounded design is deliberate — it caps memory and applies backpressure — and it is the direct trade against an unbounded queue that accepts every arrival and risks unbounded memory growth when producers outpace consumers.
 
-# Reference drawer
+# Reference Drawer
 
 > [!ABSTRACT]- Circular-buffer layout
 >

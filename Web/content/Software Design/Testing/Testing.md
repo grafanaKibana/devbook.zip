@@ -1,8 +1,8 @@
 ---
 publish: true
 created: 2026-07-18T14:02:44.196Z
-modified: 2026-07-18T14:02:44.197Z
-published: 2026-07-18T14:02:44.197Z
+modified: 2026-07-25T13:51:15.233Z
+published: 2026-07-25T13:51:15.233Z
 tags:
   - FolderNote
 topic:
@@ -37,7 +37,7 @@ Assume `POST /orders` accepts an idempotency key, validates inventory, charges a
 
 Smoke tests answer a smaller question: “is the deployed API reachable and is one critical path alive?” They are deployment checks, not substitutes for the risk-focused tests above. UI tests are appropriate only when the browser-to-API interaction is itself the contract under test.
 
-## A minimal ASP.NET Core integration test
+## A Minimal ASP.NET Core Integration Test
 
 `WebApplicationFactory<TEntryPoint>` runs the real middleware and endpoint pipeline in memory. Replace only the external payment boundary, keep serialization, authentication, routing, and persistence behavior as real as the risk requires.
 

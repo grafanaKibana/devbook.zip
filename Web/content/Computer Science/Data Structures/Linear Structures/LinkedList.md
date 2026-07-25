@@ -1,8 +1,8 @@
 ---
 publish: true
 created: 2026-07-18T14:02:44.042Z
-modified: 2026-07-18T14:02:44.042Z
-published: 2026-07-18T14:02:44.042Z
+modified: 2026-07-25T13:51:15.568Z
+published: 2026-07-25T13:51:15.568Z
 topic:
   - Computer Science
 subtopic:
@@ -23,7 +23,7 @@ The cost of that freedom is addressing. Because nodes are scattered across the h
 > [!NOTE] Visualization pending
 > Planned StepTrace: a linked-list card showing a node spliced out of a doubly linked chain — the removed node's neighbours re-point `next`/`prev` across the gap while every other node stays exactly where it was in memory. No matching renderer exists in `engine.js` yet.
 
-# Representation and invariants
+# Representation and Invariants
 
 The list itself stores almost nothing: a `First` reference, usually a `Last` reference, and a count. All content lives in the nodes, and each node is an independent heap allocation reachable only through its neighbours' pointers.
 
@@ -51,7 +51,7 @@ An insertion or removal at a held node mutates only a constant number of adjacen
 
 The `O(1)` splice is a guarantee only when the node reference is already in hand. As soon as the node must be found by index or value, the `O(n)` traversal dominates and the whole operation is `O(n)` — the same asymptotic class as shifting an array, but with worse constants. Space is `O(n)` in element count, but the constant is larger than a contiguous array: every element carries at least one extra pointer plus the per-object allocation header, and each node is a separate allocation the garbage collector must track.
 
-# When the layout stops paying
+# When the Layout Stops Paying
 
 Random access is the hard boundary. There is no `list[k]` in `O(1)`; indexing walks the chain, so any algorithm that repeatedly addresses elements by position turns each access into an `O(n)` traversal. A workload that looks index-light on paper can hide this cost inside a `foreach` that repeatedly searches before it edits.
 
@@ -59,7 +59,7 @@ Cache behaviour is the boundary that surprises people. Because consecutive nodes
 
 Per-node allocation is the third boundary. Every insert allocates a node object and every removal produces garbage, so an insert-heavy linked-list workload generates allocation and GC pressure that an amortized-growth array avoids by reusing one backing buffer. Detached or foreign nodes are also invalid anchors: passing a `LinkedListNode<T>` that belongs to another list (or was already removed) to `AddAfter`/`Remove` throws, because node identity is scoped to its owning list.
 
-# Reference drawer
+# Reference Drawer
 
 > [!ABSTRACT]- Doubly linked chain with head and tail
 >

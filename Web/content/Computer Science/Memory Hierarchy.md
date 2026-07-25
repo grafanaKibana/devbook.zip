@@ -1,8 +1,8 @@
 ---
 publish: true
 created: 2026-07-18T14:02:44.055Z
-modified: 2026-07-18T14:02:44.056Z
-published: 2026-07-18T14:02:44.056Z
+modified: 2026-07-25T13:51:15.550Z
+published: 2026-07-25T13:51:15.550Z
 topic:
   - Computer Science
 subtopic: []
@@ -26,7 +26,7 @@ The layers are not independent boxes. Hardware moves fixed-size cache lines betw
 | Local SSD/HDD | Filesystem and block driver | Filesystem block / device sector | Durable; a file-backed or swapped page fault can wait on this I/O |
 | Object storage | Application, filesystem client, and remote service | Network request / object | Durable remote service; accessed explicitly over a network, not as the CPU or page-fault hierarchy's automatic next layer |
 
-# Locality is the lever software controls
+# Locality is the Lever Software Controls
 
 Temporal locality means recently accessed data is likely to be accessed again. Spatial locality means nearby addresses are likely to follow. Contiguous arrays exploit both; pointer-rich structures trade that locality for cheaper structural updates.
 

@@ -1,8 +1,8 @@
 ---
 publish: true
 created: 2026-07-18T14:02:44.089Z
-modified: 2026-07-18T14:02:44.090Z
-published: 2026-07-18T14:02:44.090Z
+modified: 2026-07-25T13:51:15.514Z
+published: 2026-07-25T13:51:15.514Z
 topic:
   - Networks
 subtopic:
@@ -36,7 +36,7 @@ OrderService.PlaceOrder(req)
 
 The client stub makes the call look local. The network, serialization, and error handling are handled by the framework.
 
-# RPC vs REST
+# RPC Vs REST
 
 | Dimension | RPC (gRPC) | REST |
 |---|---|---|

@@ -1,8 +1,8 @@
 ---
 publish: true
 created: 2026-07-18T14:02:44.084Z
-modified: 2026-07-18T14:02:44.085Z
-published: 2026-07-18T14:02:44.085Z
+modified: 2026-07-25T13:51:15.518Z
+published: 2026-07-25T13:51:15.518Z
 topic:
   - Networks
 subtopic:
@@ -107,7 +107,7 @@ Zero modified rows means the caller must re-read and merge deliberately before r
 
 HTTP caching reuses a stored response only when the request matches its cache key and the response is fresh or validates successfully. The performance win is avoiding origin work and transfer; the cost is a correctness contract around staleness, authorization, representation variants, and invalidation.
 
-## Freshness policy
+## Freshness Policy
 
 ```http
 Cache-Control: public, max-age=60, s-maxage=300, must-revalidate
@@ -124,7 +124,7 @@ Cache-Control: public, max-age=60, s-maxage=300, must-revalidate
 
 If explicit freshness is absent, a cache can apply heuristic freshness to eligible responses. APIs should state the intended policy rather than rely on inference.
 
-## Validators and preconditions
+## Validators and Preconditions
 
 ```http
 GET /catalog/42 HTTP/1.1
@@ -137,7 +137,7 @@ Cache-Control: private, max-age=0, must-revalidate
 
 `304 Not Modified` carries no representation content; the cache updates stored metadata and reuses its prior content. `If-None-Match` takes precedence over `If-Modified-Since` when both are present. Weak entity tags can validate semantic equivalence for caching but are unsuitable for `If-Match` lost-update protection.
 
-## Cache keys and `Vary`
+## Cache Keys and `Vary`
 
 The primary cache key includes the target URI and method according to cache rules. `Vary` adds selected request fields:
 
@@ -159,7 +159,7 @@ Caching pitfalls are contract failures rather than tuning details:
 
 HTTPS is HTTP carried through TLS. TLS authenticates the server certificate, establishes symmetric traffic keys, and protects HTTP bytes from undetected modification or passive reading. It does not authenticate the application user, make the origin trustworthy, or prevent an authorized endpoint from logging plaintext.
 
-## TLS 1.3 handshake
+## TLS 1.3 Handshake
 
 ```text
 ClientHello: versions, key share, cipher suites, SNI, ALPN
@@ -179,13 +179,13 @@ TLS 1.3 resumption can send early application data before the server completes t
 
 HTTP method idempotency alone is insufficient. A repeated `GET` can consume a one-time token, emit an audit event, or trigger billing even though GET is defined as safe. Keep authentication, purchases, state transitions, and one-time links out of 0-RTT unless the application has explicit anti-replay state.
 
-## HSTS and the first visit
+## HSTS and the First Visit
 
 `Strict-Transport-Security` tells a browser that received the header over valid HTTPS to rewrite future HTTP attempts to HTTPS for the stated `max-age`. `includeSubDomains` extends the policy, so enable it only when every covered host supports HTTPS.
 
 HSTS cannot protect the first visit before the browser knows the policy. Browser preload lists close that gap for accepted domains, but preload is a long-lived operational commitment with removal delay. Redirect HTTP to HTTPS, send HSTS only over HTTPS, and treat preload readiness as a separate rollout gate.
 
-## Interception boundary
+## Interception Boundary
 
 An enterprise or debugging proxy can inspect HTTPS only when the client trusts a CA controlled by that proxy. The proxy terminates one TLS connection and creates a second connection to the origin; the connections have different traffic keys. Hostname validation succeeds because the proxy issues a matching leaf certificate from the installed root.
 
@@ -219,7 +219,7 @@ DNS TTL does not close an established connection. `PooledConnectionLifetime` lim
 
 `IHttpClientFactory` centralizes named or typed client configuration and rotates handlers. Its default handler lifetime is an implementation default, not a DNS guarantee: active connections and application retry behavior still determine when traffic leaves an old endpoint.
 
-## HTTP version policy
+## HTTP Version Policy
 
 The default request version remains HTTP/1.1. Set both the desired version and `HttpVersionPolicy` when the application requires a specific negotiation boundary:
 
@@ -231,7 +231,7 @@ The default request version remains HTTP/1.1. Set both the desired version and `
 
 HTTP/2 and HTTP/3 support also depends on TLS/ALPN, operating system, server, proxy, and runtime capabilities. Record the negotiated response version when protocol behavior matters.
 
-## Timeout, retry, and concurrency contract
+## Timeout, Retry, and Concurrency Contract
 
 Separate connect, request, and caller cancellation budgets. A single broad timeout hides whether time was spent waiting for a pool slot, connecting, receiving headers, or streaming content.
 
