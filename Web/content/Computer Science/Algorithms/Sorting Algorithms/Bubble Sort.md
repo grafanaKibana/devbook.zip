@@ -1,8 +1,8 @@
 ---
 publish: true
 created: 2026-07-18T14:02:44.015Z
-modified: 2026-07-25T13:57:51.989Z
-published: 2026-07-25T13:57:51.989Z
+modified: 2026-07-25T14:37:47.830Z
+published: 2026-07-25T14:37:47.830Z
 topic:
   - Computer Science
 subtopic:
@@ -20,7 +20,7 @@ Adjacency is also the cost. An element that starts `k` positions from where it b
 
 **Core shape:** adjacent compare-and-swap → each pass settles one more tail element → a swap-free pass ends the sort → `O(n²)` comparisons, `O(1)` extra space, `O(n)` on already-sorted input.
 
-# One Sort
+# Trace
 
 The trace sorts `[8, 3, 5, 1, 9, 2, 7, 4]` with left-to-right compare-and-swap passes.
 

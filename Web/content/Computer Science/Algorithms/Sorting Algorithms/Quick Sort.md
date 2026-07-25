@@ -1,8 +1,8 @@
 ---
 publish: true
 created: 2026-07-18T14:02:44.029Z
-modified: 2026-07-25T13:57:51.985Z
-published: 2026-07-25T13:57:51.985Z
+modified: 2026-07-25T14:38:26.491Z
+published: 2026-07-25T14:38:26.491Z
 topic:
   - Computer Science
 subtopic:
@@ -20,7 +20,7 @@ The cost is decided before any comparison, by where the pivot lands. A pivot nea
 
 **Core shape:** partition around a pivot → pivot fixed at its final index, smaller-left / larger-right → two independent subarrays → `O(n log n)` on balanced splits, `O(n²)` on degenerate ones, `O(log n)`–`O(n)` stack.
 
-# One Partition, Two Subproblems
+# Trace
 
 The trace sorts the eight-element array `[8, 3, 5, 1, 9, 2, 7, 4]`, choosing a pivot and partitioning around it before each recursive descent.
 

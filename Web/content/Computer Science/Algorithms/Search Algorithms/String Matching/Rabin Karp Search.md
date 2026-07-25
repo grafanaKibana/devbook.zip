@@ -1,8 +1,8 @@
 ---
 publish: true
 created: 2026-07-18T14:02:44.000Z
-modified: 2026-07-25T13:57:51.997Z
-published: 2026-07-25T13:57:51.997Z
+modified: 2026-07-25T14:37:51.084Z
+published: 2026-07-25T14:37:51.084Z
 topic:
   - Computer Science
 subtopic:
@@ -20,7 +20,7 @@ The move that makes this cheap is the rolling hash. Sliding the window one chara
 
 **Core condition:** a window hash that updates in `O(1)` per slide + a verification on every hash match → `O(n + m)` expected search, `O(nm)` only when collisions or genuine matches force verification at most positions.
 
-# One Search
+# Trace
 
 The trace searches for `GEEK` in `GEEKSFORGEEKS`, sliding a four-character window and comparing its rolling hash against the pattern hash.
 

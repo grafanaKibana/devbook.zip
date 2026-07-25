@@ -1,8 +1,8 @@
 ---
 publish: true
 created: 2026-07-25T08:24:19.993Z
-modified: 2026-07-25T13:57:51.984Z
-published: 2026-07-25T13:57:51.984Z
+modified: 2026-07-25T14:41:15.451Z
+published: 2026-07-25T14:41:15.451Z
 topic:
   - Computer Science
 subtopic:
@@ -19,6 +19,8 @@ Sorting ten million 32-bit integers with [[Computer Science/Algorithms/Sorting A
 That move is only available when a key decomposes into a bounded number of digits `d`: a 32-bit integer is four base-256 digits, and a fixed five-byte ASCII key is five base-256 digits. Given that decomposition, the whole sort costs `Θ(d · (n + b))` — `d` passes, each touching every key once and every bucket once.
 
 **Core condition:** keys decomposable into `d` fixed-width digits over radix `b` → one stable pass per digit distributes then gathers → `Θ(d · (n + b))` time, linear whenever `d` is constant.
+
+# Trace
 
 The trace runs LSD radix sort on `[170, 45, 75, 90, 802, 24, 2, 66]`, making three base-10 passes from the ones digit upward. Each pass selects one digit position, distributes the keys into digit buckets without disturbing ties, then gathers the buckets into the input order for the next position.
 

@@ -1,8 +1,8 @@
 ---
 publish: true
 created: 2026-07-18T14:02:43.977Z
-modified: 2026-07-25T13:57:52.009Z
-published: 2026-07-25T13:57:52.009Z
+modified: 2026-07-25T14:37:46.482Z
+published: 2026-07-25T14:37:46.482Z
 topic:
   - Computer Science
 subtopic:
@@ -20,7 +20,7 @@ The reduction depends on two properties: the values are ordered, and the middle 
 
 **Core condition:** sorted, indexable input → one comparison removes half of the candidates → `O(log n)` lookup with `O(1)` auxiliary space.
 
-# One Search
+# Trace
 
 The trace searches for `83` in a sorted 16-element array.
 

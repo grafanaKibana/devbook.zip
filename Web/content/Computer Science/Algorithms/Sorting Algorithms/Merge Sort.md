@@ -1,8 +1,8 @@
 ---
 publish: true
 created: 2026-07-18T14:02:44.028Z
-modified: 2026-07-25T13:57:51.985Z
-published: 2026-07-25T13:57:51.985Z
+modified: 2026-07-25T14:38:25.816Z
+published: 2026-07-25T14:38:25.816Z
 topic:
   - Computer Science
 subtopic:
@@ -20,7 +20,7 @@ The merge is the only place ordering happens, and it is valid because of one fac
 
 **Core condition:** two sorted runs → one linear-time merge takes the smaller front element → `⌈log₂ n⌉` merge levels → `O(n log n)` time on every input, `O(n)` merge buffer for arrays.
 
-# Splitting, then Merging
+# Trace
 
 The trace sorts the eight-element array `[8, 3, 5, 1, 9, 2, 7, 4]`.
 

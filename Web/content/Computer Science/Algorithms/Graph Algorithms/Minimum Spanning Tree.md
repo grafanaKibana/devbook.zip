@@ -1,8 +1,8 @@
 ---
 publish: true
 created: 2026-07-18T14:02:43.949Z
-modified: 2026-07-25T13:57:52.024Z
-published: 2026-07-25T13:57:52.024Z
+modified: 2026-07-25T14:38:21.103Z
+published: 2026-07-25T14:38:21.103Z
 topic:
   - Computer Science
 subtopic:
@@ -20,7 +20,7 @@ The space of spanning trees is exponential, yet two [[Greedy Algorithms|greedy]]
 
 **Core condition:** connected, undirected, weighted graph → repeatedly add the cheapest edge that crosses from chosen to unchosen vertices without closing a cycle → `V − 1` edges of minimum total weight.
 
-# Growing One Tree
+# Trace
 
 The trace runs Prim's algorithm from vertex `A` on a six-vertex weighted graph.
 

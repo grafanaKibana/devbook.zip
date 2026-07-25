@@ -1,8 +1,8 @@
 ---
 publish: true
 created: 2026-07-18T14:02:44.025Z
-modified: 2026-07-25T13:57:51.987Z
-published: 2026-07-25T13:57:51.987Z
+modified: 2026-07-25T14:37:48.418Z
+published: 2026-07-25T14:37:48.418Z
 topic:
   - Computer Science
 subtopic:
@@ -20,7 +20,7 @@ Heap sort removes that waste by keeping the unsorted region as a [[Heap|max-heap
 
 **Core shape:** array reinterpreted as an in-place max-heap → repeated extract-max grows a sorted suffix from the back → guaranteed `O(n log n)` time in `O(1)` auxiliary space.
 
-# One Sort
+# Trace
 
 The trace sorts the eight-element array `[8, 3, 5, 1, 9, 2, 7, 4]`.
 

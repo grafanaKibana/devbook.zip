@@ -1,8 +1,8 @@
 ---
 publish: true
 created: 2026-07-21T18:52:02.705Z
-modified: 2026-07-25T13:57:52.020Z
-published: 2026-07-25T13:57:52.020Z
+modified: 2026-07-25T14:45:31.553Z
+published: 2026-07-25T14:45:31.553Z
 topic:
   - Computer Science
 subtopic:
@@ -14,13 +14,13 @@ priority: Medium
 status: Creation
 ---
 
-# Intro
-
 Sorting a million elements, multiplying two large integers, and locating a value in a sorted array share a structure: split the input into smaller instances of the same problem, solve those instances, and assemble their answers. Divide-and-conquer is the control structure for that shape.
 
 Its subproblems are **independent** when each can be solved without another subproblem's result. They do not have to occupy disjoint storage: two calls may read the same immutable input or operate on different regions of one array. What matters to the paradigm is the dependency graph, not the memory layout. Repeated states reachable from multiple branches are overlapping subproblems instead; caching those states is the territory of [[Computer Science/Algorithms/Paradigms/Dynamic Programming|dynamic programming]].
 
 **Core shape:** divide into independent subproblems → recurse to a base case → combine their results. A common balanced special case has a fixed number `a` of equal-size subproblems `n/b`, giving `T(n) = a·T(n/b) + f(n)`. That recurrence is not a universal definition of divide-and-conquer.
+
+# Trace
 
 The structure to animate is the recursion tree itself. One problem divides into independent subproblems, reaches direct base cases, then carries partial answers upward until the original problem can combine them. [[Computer Science/Algorithms/Sorting Algorithms/Merge Sort|Merge sort]] is one concrete use of that shape, but the animation keeps the pattern separate from any one algorithm.
 
@@ -28,7 +28,7 @@ The structure to animate is the recursion tree itself. One problem divides into 
 { "algorithm": "divide-and-conquer" }
 ```
 
-## Divide, Conquer, Combine
+# Divide, Conquer, Combine
 
 The paradigm is three steps and a stopping rule:
 
@@ -40,7 +40,7 @@ Which step carries the work varies. [[Computer Science/Algorithms/Sorting Algori
 
 Logical independence permits parallel execution but does not make it automatic. Calls that share mutable data still need ownership rules or synchronization, the combine step must wait for every result it consumes, and task-scheduling overhead can exceed the work saved on small inputs. Whether a divide-and-conquer implementation is race-free or faster in parallel depends on its data access, synchronization, grain size, and runtime.
 
-## Analyzing Balanced Recurrences
+# Analyzing Balanced Recurrences
 
 The classical Master Theorem applies to the balanced recurrence `T(n) = a·T(n/b) + f(n)`, where `a ≥ 1` and `b > 1` are constants: every non-base call creates the same fixed number of subproblems, all with the same asymptotic size `n/b`. It compares `f(n)` with the leaf contribution `n^(log_b a)`.
 
@@ -54,7 +54,7 @@ For merge sort, `T(n) = 2T(n/2) + Θ(n)`. Here `a = 2`, `b = 2`, and `n^(log_2 2
 
 The theorem does not apply directly to unequal or input-dependent splits. Quicksort produces `T(n) = T(k) + T(n-k-1) + Θ(n)`, where the pivot determines `k`. Substitution or a recursion tree can establish bounds for a concrete recurrence; Akra–Bazzi handles fixed but unequal branch fractions; randomized quicksort needs an expected recurrence because the partition sizes are random variables.
 
-## Boundaries and Implementation Costs
+# Boundaries and Implementation Costs
 
 Overlapping subproblems are repeated states that can be reached from more than one branch. Naive Fibonacci exposes the failure: both `fib(n-1)` and `fib(n-2)` reach `fib(n-3)`, so plain recursion recomputes the same state. Memoisation helps because the state repeats, not because the calls share storage. Merge sort's range states do not repeat, so caching them adds overhead without removing work.
 
@@ -64,7 +64,7 @@ Stack depth follows the longest live branch. Balanced constant-factor shrinkage 
 
 A small-range cutoff solves a different problem. Once a partition is tiny, recursive calls and partitioning can cost more than a tight [[Computer Science/Algorithms/Sorting Algorithms/Insertion Sort|insertion-sort]] loop. [[Computer Science/Algorithms/Sorting Algorithms/Introsort|Introsort]] uses that cutoff for small partitions, but uses a separate recursion-depth budget and falls back to heapsort when quicksort consumes it. The insertion-sort cutoff reduces call overhead; the depth guard limits adversarial partition chains. Balanced recursion still uses `O(log n)` stack space, unbalanced recursion can use `O(n)`, and combine storage is counted separately—for example, merge sort's `O(n)` auxiliary buffer.
 
-## Reference Drawer
+# Reference Drawer
 
 > [!ABSTRACT]- Recursion structure
 >
@@ -102,7 +102,7 @@ A small-range cutoff solves a different problem. Once a partition is tiny, recur
 >
 > The loop expresses logical independence only. Running it concurrently is safe when the implementation prevents data races and waits for every result consumed by `Combine`; it is profitable only when each subproblem is large enough to cover scheduling and synchronization costs.
 
-## Questions
+# Questions
 
 > [!QUESTION]- When does the Master Theorem apply, and how does it produce merge sort's `Θ(n log n)`?
 > It applies to a fixed number `a` of equal-size subproblems `n/b`, with recurrence `T(n) = aT(n/b) + f(n)`. Merge sort has `a = 2`, `b = 2`, and `f(n) = Θ(n)`. Because `n^(log_2 2) = n`, Case 2 applies and the `Θ(n)` work at each of `Θ(log n)` levels totals `Θ(n log n)`.
@@ -116,7 +116,7 @@ A small-range cutoff solves a different problem. Once a partition is tiny, recur
 > [!QUESTION]- How do overlapping subproblems differ from shared storage?
 > Overlap means the same logical state is reachable from multiple recursion branches and would be solved repeatedly without caching. Shared storage is an implementation detail: independent subproblems may safely read the same immutable data, while overlapping states may be represented in separate allocations.
 
-## References
+# References
 
 - [Bentley, Haken, and Saxe, “A General Method for Solving Divide-and-Conquer Recurrences” (1980)](https://doi.org/10.1145/1008861.1008865) — the original paper develops a general method for deriving asymptotic bounds from divide-and-conquer recurrences.
 - [Akra and Bazzi, “On the Solution of Linear Recurrence Equations” (1998)](https://doi.org/10.1023/A:1018373005182) — the primary source for the Akra–Bazzi method, including recurrences with fixed unequal subproblem sizes that fall outside the classical Master Theorem.
