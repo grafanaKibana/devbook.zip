@@ -17,7 +17,7 @@ The commit order is what makes it cheap. Each step removes the unsettled node wi
 
 **Core condition:** non-negative edge weights → settle nodes in nondecreasing distance order → `O((V + E) log V)` with a binary heap and `O(V)` auxiliary space.
 
-# One Run from a Source
+# Trace
 
 The trace runs a single source from `A` over an undirected weighted graph, settling one node per step until `F` is reached.
 

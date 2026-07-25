@@ -17,7 +17,7 @@ Heap sort removes that waste by keeping the unsorted region as a [[Heap|max-heap
 
 **Core shape:** array reinterpreted as an in-place max-heap → repeated extract-max grows a sorted suffix from the back → guaranteed `O(n log n)` time in `O(1)` auxiliary space.
 
-# One Sort
+# Trace
 
 The trace sorts the eight-element array `[8, 3, 5, 1, 9, 2, 7, 4]`.
 

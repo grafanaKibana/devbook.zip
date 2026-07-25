@@ -38,10 +38,9 @@ tp.hooks.on_all_templates_executed(async () => {
   });
 });
 %>
-# Intro
 
 <!-- Explain what this is, why it matters, when to reach for it, and the mechanism when it is non-obvious. Include a concrete example here for a compact topic. Add separate mechanism, example, pitfalls, tradeoffs, or questions sections only when they teach something the Intro cannot. -->
 
-## References
+# References
 
 <!-- Add at least one annotated primary source: what it specifies, proves, or documents. -->

@@ -17,7 +17,7 @@ The merge is the only place ordering happens, and it is valid because of one fac
 
 **Core condition:** two sorted runs → one linear-time merge takes the smaller front element → `⌈log₂ n⌉` merge levels → `O(n log n)` time on every input, `O(n)` merge buffer for arrays.
 
-# Splitting, then Merging
+# Trace
 
 The trace sorts the eight-element array `[8, 3, 5, 1, 9, 2, 7, 4]`.
 

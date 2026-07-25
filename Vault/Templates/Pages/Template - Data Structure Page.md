@@ -39,11 +39,9 @@ tp.hooks.on_all_templates_executed(async () => {
 });
 %>
 
-# Intro
-
 <!-- State the workload, the information that must persist between operations, the representation that lowers the repeated cost, and the information the structure does not retain. -->
 
-## State across Operations
+# State across Operations
 
 <!-- Replace this required placeholder with a valid configuration from the StepTrace registry. Show several operations over one persistent structure; do not substitute a related algorithm trace. Do not publish an unresolved placeholder. -->
 
@@ -51,11 +49,11 @@ tp.hooks.on_all_templates_executed(async () => {
 {"algorithm":"replace-with-supported-id","operations":"replace-with-persistent-operation-sequence"}
 ```
 
-## Representation and Invariants
+# Representation and Invariants
 
 <!-- Describe the physical state, empty/root/sentinel conventions, invariants, mutable fields, and retained or discarded identity, ordering, topology, history, or duplicates. -->
 
-## Complexity
+# Complexity
 
 | Operation | Best time | Amortized/average time | Worst time | Persistent structure space | Auxiliary space per operation |
 | --- | --- | --- | --- | --- | --- |
@@ -66,11 +64,11 @@ tp.hooks.on_all_templates_executed(async () => {
 
 <!-- Rename or remove operations that do not belong. State the balancing, hashing, resizing, or compression assumption behind each non-worst bound. -->
 
-## Boundaries
+# Boundaries
 
 <!-- Keep only limits caused by the representation: deletion, ordering, range access, path recovery, iteration, identity mapping, rollback, or memory layout. -->
 
-## Reference Drawer
+# Reference Drawer
 
 > [!ABSTRACT]- Structural view
 >
@@ -87,7 +85,7 @@ tp.hooks.on_all_templates_executed(async () => {
 
 <!-- Keep complete Mermaid and code views collapsed. Delete the drawer when neither adds a useful secondary view. -->
 
-## Comparison
+# Comparison
 
 | Representation | Query cost | Update cost | Removal | Information retained | Stronger workload | Weaker workload |
 | --- | --- | --- | --- | --- | --- |
@@ -95,11 +93,11 @@ tp.hooks.on_all_templates_executed(async () => {
 
 <!-- Compare workload shape and retained information, not raw speed alone. Close with the structure’s fit, the flexibility it gives up, and the condition where an alternative is stronger. -->
 
-## Questions
+# Questions
 
 <!-- Keep only distinct recall targets. Remove this section when the prose already makes them obvious. -->
 
-## References
+# References
 
 <!-- Keep at least one annotated primary source before setting publish: true. -->
 

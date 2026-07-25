@@ -17,7 +17,7 @@ Two heuristics keep the forest shallow so the walk stays short. Union by rank co
 
 **Core condition:** merges only accumulate → each `find` walks toward a root → the two heuristics keep that walk near-constant amortized → `O(α(n))` per operation with `O(n)` storage.
 
-# The Two Operations
+# State across Operations
 
 A trace over seven singleton nodes exercises both operations and the flattening they depend on.
 

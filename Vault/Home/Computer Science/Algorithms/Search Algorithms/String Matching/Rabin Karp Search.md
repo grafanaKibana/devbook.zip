@@ -17,7 +17,7 @@ The move that makes this cheap is the rolling hash. Sliding the window one chara
 
 **Core condition:** a window hash that updates in `O(1)` per slide + a verification on every hash match → `O(n + m)` expected search, `O(nm)` only when collisions or genuine matches force verification at most positions.
 
-# One Search
+# Trace
 
 The trace searches for `GEEK` in `GEEKSFORGEEKS`, sliding a four-character window and comparing its rolling hash against the pattern hash.
 

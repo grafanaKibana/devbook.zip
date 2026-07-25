@@ -17,7 +17,7 @@ The missing precondition is the whole point. [[Binary Search]] needs sorted, ind
 
 **Core condition:** any sequence, no ordering or index → one comparison per element until match or end → `O(n)` time with `O(1)` auxiliary space.
 
-# One Search
+# Trace
 
 The trace searches for `83` in a 16-element array.
 

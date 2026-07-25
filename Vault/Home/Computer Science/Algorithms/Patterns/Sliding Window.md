@@ -17,7 +17,7 @@ The technique applies whenever the answer concerns a contiguous sub-array or sub
 
 **Core condition:** contiguous range + an aggregate that updates in `O(1)` on element entry and exit → one linear pass replaces per-window recomputation → `O(n)` time.
 
-# Shrinking to the Shortest Window
+# Trace
 
 The trace searches `[2, 3, 1, 2, 4, 3]` for the shortest contiguous sub-array whose sum reaches `7`.
 

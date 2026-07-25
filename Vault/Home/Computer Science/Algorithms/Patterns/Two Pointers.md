@@ -17,7 +17,7 @@ The collapse depends on order. On sorted input, raising `left` can only increase
 
 **Core condition:** sorted or otherwise monotonic input → one comparison discards a whole column of pairs → an `O(n)` pass with `O(1)` auxiliary space.
 
-# The Converging Pass
+# Trace
 
 The trace runs the converging pair-sum over the sorted array `[1, 3, 4, 6, 8, 10, 13]`, searching for two elements that add to `18`.
 

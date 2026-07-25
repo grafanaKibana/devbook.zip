@@ -17,7 +17,7 @@ Such an order exists only when the dependencies are acyclic. A cycle `a → b �
 
 **Core condition:** a directed acyclic graph → repeatedly emit a vertex whose prerequisites are all placed → a linear order with every edge pointing forward, in `O(V + E)`.
 
-# One Ordering
+# Trace
 
 The trace runs Kahn's algorithm on a seven-vertex DAG, emitting a vertex the moment its in-degree reaches zero.
 

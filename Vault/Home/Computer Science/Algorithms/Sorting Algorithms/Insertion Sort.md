@@ -17,7 +17,7 @@ Each incoming element—the key—is compared against the prefix from its right 
 
 **Core condition:** a sorted prefix and one incoming key → shift the larger prefix elements right until the key lands → `O(n)` when few elements move, `O(n²)` when every key crosses the whole prefix, `O(1)` auxiliary space.
 
-# One Pass
+# Trace
 
 The trace sorts the eight-element array `[8, 3, 5, 1, 9, 2, 7, 4]`, extending the sorted prefix one key at a time.
 

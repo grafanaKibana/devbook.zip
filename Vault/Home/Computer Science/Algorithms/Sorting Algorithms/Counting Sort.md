@@ -11,17 +11,17 @@ status: Creation
 publish: true
 ---
 
-# Intro
-
 Ten million exam scores all fall in the range 0–100. General-purpose comparison sorting has an `Ω(n log n)` worst-case lower bound on arbitrary inputs of `n` distinct keys because comparisons are its only source of ordering information. The score domain supplies more information: a score of 73 is not merely comparable with its neighbours — its value *is* an address. Counting Sort tallies how many keys hold each value across `[0, k]`, turns those tallies into end positions with a running sum, then writes each element straight into the slot its value names. Direct indexing steps outside the comparison model and drops the cost to `Θ(n + k)`. The price is a hard domain assumption: keys must be integers, or map to them, over a range small enough that `k + 1` counters are affordable.
+
+**Core condition:** integer keys over a known range `[0, k]` → index by value instead of comparing → `Θ(n + k)` time and `Θ(n + k)` auxiliary space, stable.
+
+# Trace
 
 A trace over `[2, 5, 3, 0, 2, 3, 0, 3]` with `k = 5` makes the three data structures visible at once: the input tokens, one frequency counter per key, and the separate stable output buffer. Scrub through the tail-first placement pass: after every decrement, the highlighted key's cumulative position becomes the exact output slot it owns.
 
 ```steptrace
 { "algorithm": "counting-sort", "array": [2, 5, 3, 0, 2, 3, 0, 3] }
 ```
-
-**Core condition:** integer keys over a known range `[0, k]` → index by value instead of comparing → `Θ(n + k)` time and `Θ(n + k)` auxiliary space, stable.
 
 # Why the Value is an Address
 

@@ -17,7 +17,7 @@ Backtracking removes that waste by building a candidate one choice at a time and
 
 **Core shape:** incremental candidate, one choice per level → a feasibility test that rejects an unextendable prefix → the pruned subtree is never enumerated → `O(depth)` auxiliary space over an exponential search tree.
 
-# The 4-Queens Search
+# Trace
 
 The trace solves 4-Queens, placing one queen per row and rejecting any square already attacked along a column or diagonal.
 

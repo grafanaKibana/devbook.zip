@@ -39,11 +39,9 @@ tp.hooks.on_all_templates_executed(async () => {
 });
 %>
 
-# Intro
-
 <!-- State the concrete input shape, the repeated cost, the move that reduces it, and the precondition that makes the move valid. -->
 
-## Trace
+# Trace
 
 <!-- Replace this required placeholder with a valid configuration from the StepTrace registry. Introduce the input and operation in one plain sentence, then explain the decisive transition rather than narrating each frame. Do not publish an unresolved placeholder. -->
 
@@ -51,11 +49,11 @@ tp.hooks.on_all_templates_executed(async () => {
 {"algorithm":"replace-with-supported-id","input":"replace-with-trace-input"}
 ```
 
-## Mechanism
+# Mechanism
 
 <!-- Name this section after the actual invariant or state transition, for example “Why the range shrinks”. Explain what remains true and why the next step is valid. -->
 
-## Complexity
+# Complexity
 
 | Case | Time | Auxiliary space | Shape of the work |
 | --- | --- | --- | --- |
@@ -65,11 +63,11 @@ tp.hooks.on_all_templates_executed(async () => {
 
 <!-- State the assumptions behind average bounds and include recursion-stack space when relevant. -->
 
-## Boundaries
+# Boundaries
 
 <!-- Keep this section only for concrete input, semantic, or implementation boundaries that change the outcome. -->
 
-## Reference Drawer
+# Reference Drawer
 
 > [!ABSTRACT]- Structural view
 >
@@ -86,7 +84,7 @@ tp.hooks.on_all_templates_executed(async () => {
 
 <!-- Keep complete Mermaid and code views collapsed. Delete the drawer when neither adds a useful secondary view. -->
 
-## Comparison
+# Comparison
 
 | Alternative | Time and space | Required condition | Stronger case | Weaker case |
 | --- | --- | --- | --- | --- |
@@ -94,11 +92,11 @@ tp.hooks.on_all_templates_executed(async () => {
 
 <!-- Close with a declarative fit/cost comparison; do not turn it into a recommendation section. -->
 
-## Questions
+# Questions
 
 <!-- Keep only distinct recall targets. Remove this section when the prose already makes them obvious. -->
 
-## References
+# References
 
 <!-- Keep at least one annotated primary source before setting publish: true. -->
 

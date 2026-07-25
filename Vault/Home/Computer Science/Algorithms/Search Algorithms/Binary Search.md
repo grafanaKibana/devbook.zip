@@ -17,7 +17,7 @@ The reduction depends on two properties: the values are ordered, and the middle 
 
 **Core condition:** sorted, indexable input → one comparison removes half of the candidates → `O(log n)` lookup with `O(1)` auxiliary space.
 
-# One Search
+# Trace
 
 The trace searches for `83` in a sorted 16-element array.
 

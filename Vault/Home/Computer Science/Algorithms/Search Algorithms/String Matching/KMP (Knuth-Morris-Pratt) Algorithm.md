@@ -17,7 +17,7 @@ The wasted work has structure. The characters already matched are a prefix of th
 
 **Core condition:** pattern fixed in advance → a failure table encodes the pattern's self-overlap → each mismatch slides the pattern without rewinding the text → `Θ(n + m)` time, `Θ(m)` space.
 
-# One Scan
+# Trace
 
 The trace searches for the pattern `ABAB` in the text `ABABCABAB`.
 

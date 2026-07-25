@@ -17,7 +17,7 @@ The scan that finds each minimum is unconditional. It inspects every remaining e
 
 **Core condition:** unsorted array, writes dearer than comparisons → one swap places each element's final value → at most `n − 1` writes but always `Θ(n²)` comparisons.
 
-# One Pass
+# Trace
 
 The trace sorts the eight-element array `[8, 3, 5, 1, 9, 2, 7, 4]`.
 
