@@ -1,8 +1,8 @@
 ---
 publish: true
 created: 2026-07-18T14:02:43.959Z
-modified: 2026-07-18T14:02:43.961Z
-published: 2026-07-18T14:02:43.961Z
+modified: 2026-07-25T13:57:52.019Z
+published: 2026-07-25T13:57:52.019Z
 topic:
   - Computer Science
 subtopic:
@@ -25,7 +25,7 @@ A run of the meeting schedule would animate the activity-selection pass over int
 > [!NOTE] Visualization pending
 > Planned StepTrace: a sequence-of-locally-optimal-choices card showing each step take the best immediate option and never reconsider it — for activity selection, the earliest-finishing compatible interval is highlighted and committed while every overlapping candidate drops out of contention. No matching renderer exists in `engine.js` yet.
 
-# When local choices reach the global optimum
+# When Local Choices Reach the Global Optimum
 
 Two properties decide whether committing to a local choice is safe.
 
@@ -46,7 +46,7 @@ At each step the state that changes is a single element committed to the partial
 
 When the greedy key needs no comparison sort — bucketable weights, an already-ordered stream — the ordering phase drops and the whole algorithm is `O(n)`. Greedy keeps no memoization table, so on any problem where both apply it stays below a [[Dynamic Programming]] solution in both time and space.
 
-# Where the greedy-choice property fails
+# Where the Greedy-choice Property Fails
 
 Coin change with denominations `{1, 3, 4}` making `6` exposes the failure directly. The largest-coin rule takes `4`, then `1`, then `1` — three coins — while `3 + 3` uses two. The rule is locally optimal at every step, yet its first commitment (the `4`) appears in no optimal solution, so the greedy-choice property does not hold and there is nothing to patch in the loop: the rule itself is wrong for this denomination set. Canonical currencies like `{1, 5, 10, 25}` are constructed so the property does hold, which is why greedy is optimal there and nowhere guarantees it in general.
 
@@ -54,7 +54,7 @@ The 0/1 knapsack breaks the same greedy-choice property under a different local 
 
 The common thread: both are the greedy-choice property failing under a different local rule — fewest coins via the largest denomination, most value via the highest ratio — and in each case the locally best first choice belongs to no optimal solution. The failure is silent — the code runs and returns a plausible, suboptimal result — so the difficult part of applying greedy is proving the property holds, not writing the scan.
 
-# Reference drawer
+# Reference Drawer
 
 > [!ABSTRACT]- Greedy template
 >

@@ -1,8 +1,8 @@
 ---
 publish: true
 created: 2026-07-18T14:02:44.000Z
-modified: 2026-07-18T14:02:44.008Z
-published: 2026-07-18T14:02:44.008Z
+modified: 2026-07-25T13:57:51.997Z
+published: 2026-07-25T13:57:51.997Z
 topic:
   - Computer Science
 subtopic:
@@ -20,7 +20,7 @@ The move that makes this cheap is the rolling hash. Sliding the window one chara
 
 **Core condition:** a window hash that updates in `O(1)` per slide + a verification on every hash match → `O(n + m)` expected search, `O(nm)` only when collisions or genuine matches force verification at most positions.
 
-# One search
+# One Search
 
 The trace searches for `GEEK` in `GEEKSFORGEEKS`, sliding a four-character window and comparing its rolling hash against the pattern hash.
 
@@ -30,7 +30,7 @@ The trace searches for `GEEK` in `GEEKSFORGEEKS`, sliding a four-character windo
 
 The window at index 0 hashes equal to the pattern, so that position triggers a character check and confirms the first match. Every following slide reuses the previous hash: the algorithm subtracts the weight of the character leaving on the left, shifts, and adds the character entering on the right, producing the next window's hash in a constant number of operations rather than `O(m)`. Positions whose hash differs from the pattern's — the large majority here — are rejected on a single integer compare and never reach a character comparison. Only when a window hash equals the pattern hash does the algorithm spend `O(m)` confirming the characters, which is why the second occurrence at index 8 pays exactly the verification the first one did.
 
-# The rolling hash and its verification guard
+# The Rolling Hash and Its Verification Guard
 
 Rabin-Karp reads each length-`m` string as a number in base `b`, reduced modulo a large prime `p`. With characters mapped to integers, the window `T[i..i+m-1]` hashes to:
 
@@ -56,7 +56,7 @@ Hash equality is necessary but not sufficient for string equality. The map from 
 
 Auxiliary space is a handful of integer accumulators — the pattern hash, the running window hash, and the precomputed high-order power `b^(m-1)` — independent of both `n` and `m`.
 
-# Collisions and the multi-pattern payoff
+# Collisions and the Multi-pattern Payoff
 
 A hash match is not a string match. Dropping the `O(m)` verification to save time turns the algorithm into a filter that reports any two substrings sharing a residue as equal; the verification is not an optimization to remove.
 
@@ -64,7 +64,7 @@ A weak modulus or overflow makes those collisions common rather than rare. A sma
 
 The screening is strongest across many patterns at once. A single rolling hash over the text can screen a whole set of equal-length patterns: hash every pattern into a set, then test each window hash for membership in `O(1)`. One pass filters for all of them together, which is where the hashing earns its place — document fingerprinting, plagiarism and duplicate-block detection, multi-signature log scanning.
 
-# Reference drawer
+# Reference Drawer
 
 > [!ABSTRACT]- Control flow
 >

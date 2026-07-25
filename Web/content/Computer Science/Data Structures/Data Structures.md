@@ -1,8 +1,8 @@
 ---
 publish: true
 created: 2026-07-19T15:05:27.768Z
-modified: 2026-07-19T15:05:27.768Z
-published: 2026-07-19T15:05:27.768Z
+modified: 2026-07-25T13:57:51.974Z
+published: 2026-07-25T13:57:51.974Z
 tags:
   - FolderNote
 topic:
@@ -20,7 +20,7 @@ A data structure organizes data for efficient access, mutation, and iteration. I
 
 The key decision is matching operations to complexity guarantees: random access by index → array or `List<T>`; fast lookup by key → `Dictionary<TKey, TValue>`; membership tests → `HashSet<T>`; ordered traversal → `SortedSet<T>` or sorted array; FIFO processing → `Queue<T>`. Most production performance issues with collections come from using the wrong structure (for example, searching a `List<T>` linearly when a `HashSet<T>` gives expected O(1) lookups) rather than from the structure's implementation being slow.
 
-# Choose by workload and access pattern
+# Choose by Workload and Access Pattern
 
 Start from the operation that dominates the workload, then account for ordering, memory layout, and concurrency. A structure with the right asymptotic lookup can still lose when it adds indirection to a small, scan-heavy collection.
 

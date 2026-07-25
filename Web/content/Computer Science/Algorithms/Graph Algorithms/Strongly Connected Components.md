@@ -1,8 +1,8 @@
 ---
 publish: true
 created: 2026-07-18T14:02:43.950Z
-modified: 2026-07-18T14:02:43.950Z
-published: 2026-07-18T14:02:43.950Z
+modified: 2026-07-25T13:57:52.024Z
+published: 2026-07-25T13:57:52.024Z
 topic:
   - Computer Science
 subtopic:
@@ -27,7 +27,7 @@ The event that decides a component is the pop, the moment a root vertex's low-li
 > [!NOTE] Visualization pending
 > Planned StepTrace: a graph card showing a DFS that assigns each vertex a discovery index and a low-link, and pops the active stack to emit one SCC whenever a root vertex's low-link equals its discovery index. No matching renderer exists in `engine.js` yet.
 
-# Tarjan's single pass
+# Tarjan's Single Pass
 
 Tarjan computes every SCC in one DFS by recording, for each vertex, when it was discovered and how far back the search can climb from its subtree.
 
@@ -64,7 +64,7 @@ A done: low[A]=0 == disc[A]=0      -> ROOT, pop to A  => SCC {C, B, A}
 
 The components leave the stack in reverse topological order of the condensation — `{D, E}` before `{A, B, C}` — a byproduct Tarjan shares with a DFS-based [[Topological Sort]].
 
-# Kosaraju's two passes
+# Kosaraju's Two Passes
 
 Kosaraju reaches the same partition with two plain DFS runs and no low-link bookkeeping.
 
@@ -83,7 +83,7 @@ Finish order is a reverse topological order of the condensation: the last vertex
 
 Neither bound has a best/average/worst split: every vertex and edge is processed a fixed number of times regardless of input shape, so `Θ(V + E)` is tight in all cases. The recursive form of either algorithm adds call-stack space bounded by the longest DFS path, up to `O(V)`.
 
-# Reference drawer
+# Reference Drawer
 
 > [!ABSTRACT]- Structural view
 >
@@ -178,7 +178,7 @@ Neither bound has a best/average/worst split: every vertex and edge is processed
 >
 > The `onStack[w]` guard paired with `disc[w]` — never `low[w]` — for the non-tree edge is what keeps separate components apart; `Components()` returns them in reverse topological order of the condensation.
 
-# When the decomposition goes wrong
+# When the Decomposition Goes Wrong
 
 The fatal Tarjan mistake is dropping the `onStack[w]` guard on the second update, `low[v] = min(low[v], disc[w])`. A cross edge can point at a vertex `w` that already belongs to a _finished, popped_ component — a subtree the search can never climb back through. Folding its `disc[w]` into `low[v]` anyway drags `low[v]` below `disc[v]`, so `v` fails the `low == disc` root test and two independent components fuse into one, producing too few SCCs. The `onStack` check is exactly what excludes those already-emitted vertices. Substituting `low[w]` for `disc[w]` _inside_ the guarded on-stack branch is a different matter: it still yields the correct partition, because that update fires only when `w` is on the stack, which means `w`'s root is an active ancestor of `v` and the two already share a component — so no low-link ever crosses a component boundary. It merely departs from the strict low-link definition ("at most one edge to an on-stack vertex") and is a common, correct variant.
 

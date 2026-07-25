@@ -1,8 +1,8 @@
 ---
 publish: true
 created: 2026-07-25T08:24:19.993Z
-modified: 2026-07-25T08:24:22.307Z
-published: 2026-07-25T08:24:22.307Z
+modified: 2026-07-25T13:57:51.984Z
+published: 2026-07-25T13:57:51.984Z
 topic:
   - Computer Science
 subtopic:
@@ -26,7 +26,7 @@ The trace runs LSD radix sort on `[170, 45, 75, 90, 802, 24, 2, 66]`, making thr
 { "algorithm": "radix-sort", "array": [170, 45, 75, 90, 802, 24, 2, 66], "radix": 10, "mode": "LSD" }
 ```
 
-# Why the passes compose
+# Why the Passes Compose
 
 LSD (least-significant-digit) radix sort runs one pass per digit position, from the rightmost digit up to the leftmost. Each pass performs a **stable** distribution keyed on that one digit — no other part of the key is examined. A stable [[Computer Science/Algorithms/Sorting Algorithms/Counting Sort|Counting Sort]] is one way to implement that distribution; the trace shows the equivalent FIFO bucket view. After the pass over the most significant digit, the array is fully ordered, and no two keys were ever ranked against each other.
 
@@ -55,7 +55,7 @@ hundreds →     2  24  45  66  75   90  170  802    fully ordered
 
 This stable LSD implementation uses `Θ(n + b)` auxiliary space: an output buffer for `n` keys plus either a per-digit count array or equivalent bucket storage of size `b`. It is not in-place, though specialized in-place radix variants exist. For variable-length string keys, the MSD (most-significant-digit) variant recurses per bucket from the leftmost digit and can stop once a prefix is unique.
 
-# Where the linear bound stops applying
+# Where the Linear Bound Stops Applying
 
 **Variable-length keys.** Non-negative integers with different digit counts work because missing high-order positions behave like leading zeros; the trace sorts `2`, `24`, and `802` this way. Variable-length lexicographic strings are different: blindly aligning them from the right changes the meaning of character positions. Their LSD representation needs a common width and a missing-character sentinel below every real character, or the algorithm should switch to MSD radix and recurse left-to-right.
 
@@ -67,7 +67,7 @@ This stable LSD implementation uses `Θ(n + b)` auxiliary space: an output buffe
 
 **Unsigned reads.** Each pass treats its digit as an unsigned quantity, so raw two's-complement negatives sort after positives, and raw IEEE-754 bit patterns scatter negatives in reverse. A monotonic transform beforehand — flip the sign bit of integers; for floats flip all bits of negatives and only the sign bit of positives — restores true numeric order; invert the transform after sorting.
 
-# Reference drawer
+# Reference Drawer
 
 > [!ABSTRACT]- Per-digit pass loop
 >

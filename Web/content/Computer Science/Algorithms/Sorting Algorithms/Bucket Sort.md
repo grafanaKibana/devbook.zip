@@ -1,8 +1,8 @@
 ---
 publish: true
 created: 2026-07-25T08:24:19.993Z
-modified: 2026-07-25T08:24:21.858Z
-published: 2026-07-25T08:24:21.858Z
+modified: 2026-07-25T13:57:51.989Z
+published: 2026-07-25T13:57:51.989Z
 topic:
   - Computer Science
 subtopic:
@@ -20,7 +20,7 @@ The mapping is what stands in for comparison, and it is cheap only because the r
 
 **Core condition:** numeric keys over a known, roughly uniform range with `m = Θ(n)` → each key maps to a bucket in `O(1)` → `Θ(n + m) = Θ(n)` expected time with `Θ(n + m)` auxiliary space.
 
-# Scatter and gather
+# Scatter and Gather
 
 The trace sorts six keys drawn from `[0, 1)` through five equal-width buckets. It establishes the bucket ranges, scatters each key by `floor(5 · key)`, sorts the occupied buckets, then gathers them from the lowest range to the highest.
 
@@ -30,7 +30,7 @@ The trace sorts six keys drawn from `[0, 1)` through five equal-width buckets. I
 
 The middle range `[0.4, 0.6)` stays empty, while `[0.6, 0.8)` receives `0.78` and `0.72` and sorts them as `0.72, 0.78`. Empty and occupied buckets gather the same way: range order already determines their order relative to every other bucket.
 
-# Why the average stays linear
+# Why the Average Stays Linear
 
 Three properties make the four-step pass valid.
 
@@ -50,7 +50,7 @@ The inner sort is usually [[Computer Science/Algorithms/Sorting Algorithms/Inser
 
 Auxiliary space is `Θ(n + m)`: the `m` bucket headers plus the `n` elements they hold, separate from the input array. Swapping the inner [[Computer Science/Algorithms/Sorting Algorithms/Insertion Sort|Insertion Sort]] for a comparison sort bounds the worst case at `Θ(n log n + m)`: when the skewed input collapses all `n` keys into one bucket, that overloaded bucket sorts in `n log n` while scanning the other `m − 1` buckets still costs `Θ(m)`. Under the same uniform model, constant expected bucket sizes keep the total expected work linear; the swap changes constants and may change stability while improving the skewed tail.
 
-# When the distribution stops cooperating
+# When the Distribution Stops Cooperating
 
 Skew is the defining failure. Zipfian, exponential, or duplicate-heavy keys land most elements in a handful of buckets. A single bucket holding `Θ(n)` keys is sorted by an inner sort that gains nothing from the partition: with [[Computer Science/Algorithms/Sorting Algorithms/Insertion Sort|Insertion Sort]] that bucket alone costs `Θ(n²)`, and Bucket Sort has done extra scatter-and-gather bookkeeping only to collapse to the inner sort's own complexity. Nothing detects this — the output is correct, just quadratic.
 
@@ -60,7 +60,7 @@ The value-to-index mapping restricts the input. Bucket Sort needs `bucketIndex =
 
 Stability is inherited, not intrinsic. Scatter appends keys in read order, so order within a bucket is preserved, and gather concatenates buckets in range order. Global stability therefore holds exactly when the per-bucket sort is stable. [[Computer Science/Algorithms/Sorting Algorithms/Insertion Sort|Insertion Sort]] is; substituting `List<T>.Sort` (an [[Computer Science/Algorithms/Sorting Algorithms/Introsort|Introsort]]) is not, and that swap silently reorders equal keys the moment they carry satellite data.
 
-# Reference drawer
+# Reference Drawer
 
 > [!ABSTRACT]- Scatter–sort–gather flow
 >

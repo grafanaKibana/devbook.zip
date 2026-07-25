@@ -1,8 +1,8 @@
 ---
 publish: true
 created: 2026-07-18T14:02:44.028Z
-modified: 2026-07-18T14:02:44.029Z
-published: 2026-07-18T14:02:44.029Z
+modified: 2026-07-25T13:57:51.985Z
+published: 2026-07-25T13:57:51.985Z
 topic:
   - Computer Science
 subtopic:
@@ -20,7 +20,7 @@ The merge is the only place ordering happens, and it is valid because of one fac
 
 **Core condition:** two sorted runs → one linear-time merge takes the smaller front element → `⌈log₂ n⌉` merge levels → `O(n log n)` time on every input, `O(n)` merge buffer for arrays.
 
-# Splitting, then merging
+# Splitting, then Merging
 
 The trace sorts the eight-element array `[8, 3, 5, 1, 9, 2, 7, 4]`.
 
@@ -30,7 +30,7 @@ The trace sorts the eight-element array `[8, 3, 5, 1, 9, 2, 7, 4]`.
 
 The decisive step is the final merge. By then the left half has become `[1, 3, 5, 8]` and the right half `[2, 4, 7, 9]`; one pass compares the two fronts, emits the smaller, and advances that read head, producing `[1, 2, 3, 4, 5, 7, 8, 9]` after at most seven comparisons for eight elements. That same merge runs at every level below it — length-1 runs merge into length-2, then length-4 — so the number of comparisons is bounded by the number of levels, `⌈log₂ 8⌉ = 3`, times the n elements each level touches. No comparison depends on how disordered the input was; it depends only on how the two current fronts relate.
 
-# Why the merge stays sorted
+# Why the Merge Stays Sorted
 
 A merge holds one invariant: the output already contains, in sorted order, the smallest elements drawn from the two runs so far, and each run's read head points at the smallest element that run has not yet contributed. Taking the smaller of the two heads appends the next-smallest element overall and advances one head, so both halves of the invariant survive. When one run empties, whatever remains in the other is already sorted and no smaller than anything placed, so it copies over directly.
 
@@ -48,13 +48,13 @@ Stability rides on one comparison. The left run holds the elements that appeared
 
 The auxiliary figure is the merge buffer. A top-down array merge sort copies each merge's output into an `O(n)` scratch array and adds `O(log n)` call-stack space for the recursion; a bottom-up variant merges adjacent runs of width 1, 2, 4… in loops and keeps the `O(n)` buffer while dropping the stack entirely. A linked-list merge sort is the outlier: it splices existing nodes by pointer instead of copying, so it needs only `O(1)` extra cells beyond the `O(log n)` stack, and it never asks for `a[mid]` by index.
 
-# Where the memory goes
+# Where the Memory Goes
 
 The `O(n)` buffer is not incidental. A comparison-only merge of two sorted array segments cannot be done in place without extra work, because writing the next output element would overwrite an input element that has not been read yet. In-place merge variants exist — block merge and related "in-place merge sort" schemes — that keep the `O(n log n)` time bound while pushing auxiliary space toward `O(1)`, but they replace the single linear copy with rotations and block swaps, run several times slower in practice, and are harder to keep stable. The standard tradeoff is therefore explicit: pay `O(n)` memory for a simple, fast, stable merge, or pay a constant-factor slowdown for `O(1)` space.
 
 Where the input is sequential rather than indexed, the buffer stops mattering for a different reason. External merge sort streams sorted runs off disk, merges them with the same take-the-smaller-front rule, and streams the result back, so a dataset larger than RAM is sorted with predictable sequential I/O rather than random seeks. Timsort ([[Tim Sort]]) generalizes the same core: it scans the input for runs that are already ascending or descending and merges them with the identical front-comparison rule, layering galloping and a minimum run length on top. Merge sort's merge step is the primitive both of those build on.
 
-# Reference drawer
+# Reference Drawer
 
 > [!ABSTRACT]- Divide-and-merge structure
 >

@@ -1,8 +1,8 @@
 ---
 publish: true
 created: 2026-07-18T14:02:43.941Z
-modified: 2026-07-18T14:02:43.941Z
-published: 2026-07-18T14:02:43.941Z
+modified: 2026-07-25T13:57:52.037Z
+published: 2026-07-25T13:57:52.037Z
 topic:
   - Computer Science
 subtopic:
@@ -25,7 +25,7 @@ No StepTrace renderer is registered for Bellman-Ford, so the round-by-round rela
 > [!NOTE] Visualization pending
 > Planned StepTrace: a graph card relaxing every edge once per round, distances settling over `V−1` rounds, with a `V`-th round that still relaxes flagging a reachable negative cycle. No matching renderer exists in `engine.js` yet.
 
-# Why V−1 rounds settle every distance
+# Why V−1 Rounds Settle Every Distance
 
 A round relaxes every edge once: for edge `(u, v, w)`, if `dist[u] + w < dist[v]`, then `dist[v]` drops to `dist[u] + w` and `pred[v]` becomes `u`. The order of edges within a round changes the intermediate values but never the round's guarantee.
 
@@ -59,13 +59,13 @@ Round 2 is the decisive transition: the negative edge `1→2` pulls `dist[2]` be
 
 The `O(V)` auxiliary space holds the `dist` and `pred` arrays, and the iterative sweep uses no recursion stack. On a dense graph where `E ≈ V²` the bound becomes `O(V³)`, which matches [[Floyd-Warshall]] for a single source and is why all-pairs work usually switches algorithms.
 
-# When distances stop being defined
+# When Distances Stop Being Defined
 
 A reachable negative cycle has no shortest path: each lap around it lowers the total, so the infimum is `−∞`. The `V−1`-round distances into that region are a snapshot taken mid-descent, not an answer. Code that prints them reports finite numbers that mean nothing, and the failure is silent because the arrays are fully populated and no exception fires. A correct report distinguishes three states: a finite distance, `+∞` for a vertex with no path at all, and `−∞` for a vertex reachable through a negative cycle — the last set found by marking every vertex that relaxed on the `V`-th round and everything reachable from it.
 
 Overflow is the second silent failure. Because a round relaxes every edge, including edges leaving vertices not yet reached, computing `dist[u] + w` while `dist[u]` is still the infinity sentinel can wrap a fixed-width integer into a small or negative value and invent a shortest path. Skipping any edge whose source is still at the sentinel (`if (dist[u] == INF) continue;`) removes it; [[Dijkstra]] never hits this because it only expands vertices it has already settled.
 
-# Reference drawer
+# Reference Drawer
 
 > [!ABSTRACT]- Round and detection flow
 >

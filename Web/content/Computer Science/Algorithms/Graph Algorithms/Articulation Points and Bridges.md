@@ -1,8 +1,8 @@
 ---
 publish: true
 created: 2026-07-18T14:02:43.936Z
-modified: 2026-07-18T14:02:43.940Z
-published: 2026-07-18T14:02:43.940Z
+modified: 2026-07-25T13:57:52.038Z
+published: 2026-07-25T13:57:52.038Z
 topic:
   - Computer Science
 subtopic:
@@ -27,7 +27,7 @@ The decisive transition is a DFS tree annotated with `disc`/`low`, where each ch
 > [!NOTE] Visualization pending
 > Planned StepTrace: a DFS-tree card showing discovery and low-link values propagating up from the leaves, marking a vertex as a cut vertex when a child's subtree cannot reach above it and an edge as a bridge when a child's low-link strictly exceeds the parent's discovery time. No matching renderer exists in `engine.js` yet.
 
-# What `disc` and `low` measure
+# What `disc` and `low` Measure
 
 DFS runs from any unvisited vertex and repeats until every component is covered. Two integers are stored per vertex:
 
@@ -61,7 +61,7 @@ There is one honest bound, not a best/average/worst spread: the traversal always
 
 **Parallel edges (multigraphs).** The usual guard skips the parent by vertex: `if (v == parent) continue;`. With two edges between `u` and `v` it discards both, so `v`'s subtree appears to have no route up and `(u, v)` is reported as a bridge — although the duplicate edge is itself the route keeping them connected. The escape exists in the graph but not in `low[v]`, because the second edge was never examined. Skipping only the specific parent edge by its id leaves the duplicate as a back edge that lowers `low[v]` and cancels the false bridge.
 
-# Reference drawer
+# Reference Drawer
 
 > [!ABSTRACT]- DFS tree of the triangle-with-tail example
 >

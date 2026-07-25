@@ -1,8 +1,8 @@
 ---
 publish: true
 created: 2026-07-18T14:02:44.026Z
-modified: 2026-07-18T14:02:44.026Z
-published: 2026-07-18T14:02:44.026Z
+modified: 2026-07-25T13:57:51.986Z
+published: 2026-07-25T13:57:51.986Z
 topic:
   - Computer Science
 subtopic:
@@ -20,7 +20,7 @@ Each incoming element—the key—is compared against the prefix from its right 
 
 **Core condition:** a sorted prefix and one incoming key → shift the larger prefix elements right until the key lands → `O(n)` when few elements move, `O(n²)` when every key crosses the whole prefix, `O(1)` auxiliary space.
 
-# One pass
+# One Pass
 
 The trace sorts the eight-element array `[8, 3, 5, 1, 9, 2, 7, 4]`, extending the sorted prefix one key at a time.
 
@@ -30,7 +30,7 @@ The trace sorts the eight-element array `[8, 3, 5, 1, 9, 2, 7, 4]`, extending th
 
 The prefix left of the active index is sorted before each step and stays sorted after it. When a key is smaller than its left neighbour, every larger prefix element copies one position right until a smaller element—or the start of the array—halts the walk, and the key fills the vacated slot. A key that already fits, like `9` following `1, 3, 5, 8`, triggers no shift and the prefix simply grows by one. The number of shifts a key performs equals the count of larger elements standing to its left, so the further a key is out of place, the more work it does.
 
-# Why the sorted prefix holds
+# Why the Sorted Prefix Holds
 
 Before iteration `j`, the subarray `a[0..j-1]` holds the first `j` elements in sorted order. The step copies `a[j]` into `key`, then scans left while `a[i] > key`, moving each such element into `a[i+1]`. The loop stops at the first `a[i] <= key` (or at `i = -1`) and writes `key` into `a[i+1]`. Nothing left of that slot exceeds `key`, and everything right of it was already shifted up, so `a[0..j]` is sorted—the invariant carries to the next iteration.
 
@@ -51,13 +51,13 @@ The cost of one step is its shift count, which equals the number of prefix eleme
 
 The bound is set by element shifts, not comparisons. In the average and worst cases the two counts differ only by an additive `O(n)` term, so both are `Θ(n²)`; in the best case the comparisons stay `O(n)` while the shifts fall to zero. The shifts are the physical array movement, which is what makes them the deciding cost.
 
-# When shifts dominate
+# When Shifts Dominate
 
 Reverse-sorted input is the worst case because it maximizes shifts: the key at index `j` is smaller than all `j` elements to its left, so it walks the full prefix every time. Sorting `[5, 4, 3, 2, 1]` performs `4 + 3 + 2 + 1 = 10` shifts for five elements, the quadratic `n(n-1)/2` pattern. The result is never wrong, only slow.
 
 Cutting comparisons does not fix this. Since the prefix is sorted, [[Binary Search]] can locate the key's slot in `O(log j)` comparisons instead of a linear scan—binary insertion sort. But locating the slot is not the bottleneck: the elements between the slot and the key still shift right one at a time, so the array movement stays `O(n²)`. Binary insertion only pays off when a comparison costs far more than a move, such as ordering long strings through an expensive comparator.
 
-# Reference drawer
+# Reference Drawer
 
 > [!ABSTRACT]- Control flow
 >

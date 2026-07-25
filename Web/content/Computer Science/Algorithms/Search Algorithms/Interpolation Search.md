@@ -1,8 +1,8 @@
 ---
 publish: true
 created: 2026-07-21T18:52:02.837Z
-modified: 2026-07-22T08:10:33.235Z
-published: 2026-07-22T08:10:33.235Z
+modified: 2026-07-25T13:57:52.007Z
+published: 2026-07-25T13:57:52.007Z
 topic:
   - Computer Science
 subtopic:
@@ -34,7 +34,7 @@ The trace searches for `81` in the quadratic sequence `a[i] = i²`. The target s
 {"algorithm":"interpolation-search","array":[0,1,4,9,16,25,36,49,64,81,100,121],"target":81}
 ```
 
-# Why the range collapses faster
+# Why the Range Collapses Faster
 
 At the start of every loop the target, if present, lies in `[a[lo], a[hi]]` — the same invariant Binary Search maintains. Interpolation Search adds an assumption about _where_ inside that range it lies. The formula treats the values between `a[lo]` and `a[hi]` as points on a straight line against their indices: the fraction `(target - a[lo]) / (a[hi] - a[lo])` of the value span maps to that same fraction of the index span. When the data actually follows that line, the probe lands on or beside the target's true index, and even a miss leaves a sub-range far smaller than half.
 
@@ -52,7 +52,7 @@ The `O(log log n)` bound is an expected result under the uniform random-key mode
 
 The average bound is inseparable from its assumption: on keys that are not close to uniform, the same code exhibits the worst-case row. Binary Search's `O(log n)` carries no such condition, which is the trade Interpolation Search makes for its faster average.
 
-# When the distribution stops cooperating
+# When the Distribution Stops Cooperating
 
 Non-uniform data destroys the analysis rather than merely slowing it. Let `a[i] = 2^i` over `n` positions and search for `a[n − 1 − ⌈log₂ n⌉]`, a target roughly `max/n` that still sits at index `n − 1 − Θ(log n)`. The maximum dominates the value span, so the interpolation fraction starts near `1/n` and early estimates land close to `lo`; the boundary advances only a few positions at a time while the target remains near the far end by index. Isolating it can therefore take `Θ(n)` probes, slower than the `O(log n)` Binary Search that was given up. Clustered timestamps and Zipfian frequency tables can produce the same collapse when value ratios poorly predict index ratios.
 
@@ -60,7 +60,7 @@ The probe also requires keys with meaningful arithmetic. `(target - a[lo]) * (hi
 
 The denominator fails when `a[hi] == a[lo]`. A run of equal values, or a range that has collapsed to one element, makes the value span zero. An unguarded integer implementation throws `DivideByZeroException`; floating-point variants produce a non-finite estimate that cannot be used as an index. The C# implementation below detects the flat block before division and resolves it with a direct equality check — the same category of defensive guard as computing a midpoint that cannot overflow.
 
-# Reference drawer
+# Reference Drawer
 
 > [!ABSTRACT]- Control flow
 >

@@ -1,8 +1,8 @@
 ---
 publish: true
 created: 2026-07-18T14:02:44.037Z
-modified: 2026-07-18T14:02:44.037Z
-published: 2026-07-18T14:02:44.037Z
+modified: 2026-07-25T13:57:51.971Z
+published: 2026-07-25T13:57:51.971Z
 topic:
   - Computer Science
 subtopic:
@@ -20,7 +20,7 @@ Two heuristics keep the forest shallow so the walk stays short. Union by rank co
 
 **Core condition:** merges only accumulate → each `find` walks toward a root → the two heuristics keep that walk near-constant amortized → `O(α(n))` per operation with `O(n)` storage.
 
-# The two operations
+# The Two Operations
 
 A trace over seven singleton nodes exercises both operations and the flattening they depend on.
 
@@ -30,7 +30,7 @@ A trace over seven singleton nodes exercises both operations and the flattening 
 
 A `union` resolves both arguments to their roots and links one root beneath the other; an interior node is never linked directly, since that would strand the rest of its set. A `find` walks parent pointers until it reaches a self-parented root, then path-compresses the walked nodes so each points straight at that root. The first deep `find` on a chain is what pays for every shallow `find` after it.
 
-# Why the walk stays short
+# Why the Walk Stays short
 
 Each heuristic attacks tree height from a different direction.
 
@@ -51,13 +51,13 @@ Neither heuristic alone reaches near-constant time: rank bounds how tall a tree 
 
 The amortized column assumes both heuristics. Union by rank _alone_ keeps tree height at `O(log n)`, so every operation is `O(log n)` in both the amortized and single-operation sense. With _neither_ heuristic a chain can grow to length `n`, turning `find`, `union`, and `connected` into `O(n)` operations. `α(n)` is a guarantee over a sequence, not a promise about any one call: the single-operation worst case stays `O(log n)` because a cold `find` may still walk a full bounded-height path before compressing it.
 
-# Where the bound and the interface stop
+# Where the Bound and the Interface Stop
 
 Path compression trades reversibility for speed. Once a `find` rewrites the parents it walked, the pre-compression shape is gone, so a merge cannot be undone. Rollback DSU keeps union by rank and _drops_ compression precisely to preserve that history: each `union` records the single parent-and-rank change it made and can pop it. That is how an offline problem with edge deletions is solved — process the sequence in reverse so every deletion becomes an addition, undoing merges as it unwinds ([rollback DSU](https://cp-algorithms.com/data_structures/deleting_in_log_n.html)).
 
 The interface only grows sets. There is no split, and no removal of an element from a set — the parent forest records membership, not the edges that produced it, so a merged component cannot be separated back into its pre-merge pieces. That limit belongs to the [[Disjoint Set]] page as its own boundary; the algorithmic consequence here is that any workload with removals needs either a rollback variant run offline or a fully dynamic connectivity structure.
 
-# Reference drawer
+# Reference Drawer
 
 > [!ABSTRACT]- Operation flow
 >

@@ -1,8 +1,8 @@
 ---
 publish: true
 created: 2026-07-18T14:02:43.942Z
-modified: 2026-07-18T14:02:43.943Z
-published: 2026-07-18T14:02:43.943Z
+modified: 2026-07-25T13:57:52.036Z
+published: 2026-07-25T13:57:52.036Z
 topic:
   - Computer Science
 subtopic:
@@ -24,7 +24,7 @@ The decisive detail is the outer loop: a single DFS from one source finds only _
 > [!NOTE] Visualization pending
 > Planned StepTrace: a graph card that floods one component at a time — each unvisited vertex starts a new colour, the flood stamps every reachable vertex that colour, and the colour count is the component total. No matching renderer exists in `engine.js` yet.
 
-# Labelling by traversal
+# Labelling by Traversal
 
 Keep a `component[]` array initialised to "unlabelled". Scan vertices in any order; when one is still unlabelled, it must start a new component, so flood the entire set reachable from it — via a stack (DFS) or queue (BFS) — stamping each vertex with the current id, then increment the id. The traversal marks a vertex the instant it is discovered, so no vertex is stamped twice and the total work is one visit per vertex plus one inspection per edge.
 
@@ -46,7 +46,7 @@ v=6 unlabelled -> flood id 3: reach 6       component = [0,0,0,1,1,2,3]  id -> 4
 
 The final `id` is the component count, and `component[u] == component[v]` answers "same component?" in `O(1)` after the sweep. DFS and BFS produce identical labels — the partition does not depend on visit order, only on which vertices are mutually reachable — so the choice between them is the usual [[DFS BFS|memory trade-off]]: DFS uses `O(h)` stack depth, BFS an `O(V)` frontier.
 
-# Merging by union-find
+# Merging by Union-find
 
 When edges arrive over time, or connectivity queries interleave with edge additions, rebuilding a traversal after every change is wasteful. [[Union-Find|Union-find]] maintains the partition incrementally: start with every vertex its own singleton, and for each edge `union` its endpoints. Two vertices are in the same component exactly when they share a root, so `connected(a, b)` is a pair of `find`s. The component count starts at `V` and drops by one on every `union` that actually merges two distinct sets.
 
@@ -61,7 +61,7 @@ This is the same [[Disjoint Set]] forest that drives Kruskal's [[Minimum Spannin
 
 Traversal is a tight `Θ(V + E)`: every vertex and edge is touched a fixed number of times regardless of graph shape. Union-find's `α(V)` is the inverse-Ackermann factor — below 5 for any `V` that fits in memory — so it is constant in practice but is an _amortised_ guarantee over a sequence, not a per-operation bound. Neither has a best/average/worst split in time; the real difference is _when_ the edges are available. If the graph is fixed, traversal's single sweep and its ready-made labels win; if edges stream, union-find avoids re-traversing after each change.
 
-# Reference drawer
+# Reference Drawer
 
 > [!ABSTRACT]- Four components in an undirected graph
 >

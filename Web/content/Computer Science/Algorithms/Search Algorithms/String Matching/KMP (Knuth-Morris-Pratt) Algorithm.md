@@ -1,8 +1,8 @@
 ---
 publish: true
 created: 2026-07-18T14:02:43.998Z
-modified: 2026-07-18T14:02:43.999Z
-published: 2026-07-18T14:02:43.999Z
+modified: 2026-07-25T13:57:51.998Z
+published: 2026-07-25T13:57:51.998Z
 topic:
   - Computer Science
 subtopic:
@@ -20,7 +20,7 @@ The wasted work has structure. The characters already matched are a prefix of th
 
 **Core condition:** pattern fixed in advance → a failure table encodes the pattern's self-overlap → each mismatch slides the pattern without rewinding the text → `Θ(n + m)` time, `Θ(m)` space.
 
-# One scan
+# One Scan
 
 The trace searches for the pattern `ABAB` in the text `ABABCABAB`.
 
@@ -30,7 +30,7 @@ The trace searches for the pattern `ABAB` in the text `ABABCABAB`.
 
 The first four characters match, so `j` reaches `4 = m` and a match is reported at index 0. Instead of restarting, `j` resets to `π[3] = 2`: the trailing `AB` of the region just matched is itself a prefix of the pattern, so those two characters already count as matched and the pattern strip slides right by two while the text pointer holds at index 4. There `C` fails against `pattern[2] = A`; `j` falls to `π[1] = 0`, the text pointer finally advances, and the scan re-enters the pattern at `A` to find the second match at index 5. At no point does the text pointer retreat to re-read `C` or the earlier `AB`.
 
-# Why the text never rewinds
+# Why the Text Never Rewinds
 
 The failure table `π` (also called the LPS array — longest proper prefix that is also a suffix) has one entry per pattern position. `π[j]` is the length of the longest proper prefix of `pattern[0..j]` that also occurs as a suffix of that same span. For `ABABC` the table is `[0, 0, 1, 2, 0]`: `ABAB` ends in `AB`, which is also its prefix, so `π[3] = 2`.
 
@@ -48,7 +48,7 @@ That monotonic `i` is the entire bound. `j` rises by at most one each time `i` a
 
 The bound holds identically in the best, average, and worst case — determinism is the point. Naive search shares the `O(1)`-space profile but has no such ceiling: on `text = aⁿ`, `pattern = aᵐ⁻¹b`, every one of the `n − m + 1` start positions matches `m − 1` characters before failing on the final `b`, so it performs `Θ(n·m)` comparisons. KMP reads that same run once.
 
-# Where the guarantee earns its keep
+# Where the Guarantee Earns Its Keep
 
 The repetitive input that breaks naive search is exactly where KMP's ceiling matters. On `aⁿ` against `aᵐ⁻¹b` the failure table is `[0, 1, 2, …, m-2, 0]` — the trailing `b` has no matching prefix, so the last entry drops back to `0` (for `m = 5`, `aaaab` → `[0,1,2,3,0]`). Matching stalls at length `m − 1`, the `b` fails, and `j` falls back one position to `π[m-2] = m-2`, so the scan still finishes in `Θ(n + m)`. This is a correctness-of-cost property, not a speedup on friendly text: on random text with a short, low-overlap pattern, naive search and KMP examine nearly the same number of characters, and naive wins on constants and code size.
 
@@ -56,7 +56,7 @@ The classic implementation bug lives in the failure table. On a mismatch while b
 
 KMP gains nothing from a large alphabet. It compares left to right and, in the worst case, inspects essentially every text character. Skip-based methods exploit alphabet size instead: [[Boyer-Moore]] scans the pattern right to left and, on a mismatch, uses a bad-character table to jump ahead by up to `m` positions, so a wider alphabet makes each mismatch more informative and the average scan sublinear. KMP's edge is a guarantee, not throughput on wide alphabets.
 
-# Reference drawer
+# Reference Drawer
 
 > [!ABSTRACT]- Search control flow
 >

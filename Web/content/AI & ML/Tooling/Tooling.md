@@ -1,8 +1,8 @@
 ---
 publish: true
 created: 2026-07-18T14:02:43.925Z
-modified: 2026-07-18T14:02:43.926Z
-published: 2026-07-18T14:02:43.926Z
+modified: 2026-07-25T13:57:52.047Z
+published: 2026-07-25T13:57:52.047Z
 tags:
   - FolderNote
 topic:
@@ -24,15 +24,15 @@ The landscape now breaks into three operational buckets: coding agents that can 
 
 # Categories
 
-## Coding agents
+## Coding Agents
 
 Coding agents are the most autonomous class. They can inspect project files, propose plans, apply edits, run commands, and iterate based on test or lint output. Common tools include Claude Code, Cursor, GitHub Copilot (agent mode), Cline, Aider, Windsurf, and Opencode. See [[Coding Agents]] for mechanism details and tradeoffs.
 
-## Code review agents
+## Code Review Agents
 
 Code review agents optimize a narrower loop: pull-request analysis, risky change detection, and actionable review comments. A representative tool is CodeRabbit, which integrates into GitHub/GitLab workflows and provides automated review feedback so humans can focus on architecture and business correctness.
 
-## IDE extensions
+## IDE Extensions
 
 IDE extensions prioritize in-flow assistance: inline completion, chat panes, refactor suggestions, and basic command execution from the editor. This category includes Copilot extension workflows and extension-backed agents such as Cline. Compared with terminal-first agents, IDE integrations usually reduce context switching but can hide execution details if the tool does not expose a clear action log.
 

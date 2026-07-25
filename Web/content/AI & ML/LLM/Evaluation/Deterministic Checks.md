@@ -1,8 +1,8 @@
 ---
 publish: true
 created: 2026-07-18T14:02:43.898Z
-modified: 2026-07-18T14:02:43.898Z
-published: 2026-07-18T14:02:43.898Z
+modified: 2026-07-25T13:57:52.076Z
+published: 2026-07-25T13:57:52.076Z
 topic:
   - AI & ML
 subtopic:
@@ -64,7 +64,7 @@ LLM Output
 
 Run deterministic checks first. A malformed JSON or a disallowed action does not need a judge — it is a hard failure.
 
-# Deterministic Checks vs LLM-as-Judge
+# Deterministic Checks Vs LLM-as-Judge
 
 | Aspect | Deterministic checks | LLM-as-judge |
 |--------|---------------------|--------------|

@@ -1,8 +1,8 @@
 ---
 publish: true
 created: 2026-07-18T14:02:44.008Z
-modified: 2026-07-18T14:02:44.009Z
-published: 2026-07-18T14:02:44.009Z
+modified: 2026-07-25T13:57:51.992Z
+published: 2026-07-25T13:57:51.992Z
 tags:
   - FolderNote
 topic:
@@ -36,7 +36,7 @@ flowchart TD
   B -->|Many equal-length, or 2-D, or rolling| I[Rabin-Karp]
 ```
 
-# The family
+# The Family
 
 | Algorithm | Patterns | Preprocesses | Time | Worst case | Aux space | Weaker case | Reach for it when |
 | --- | --- | --- | --- | --- | --- | --- | --- |

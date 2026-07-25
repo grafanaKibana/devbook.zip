@@ -1,8 +1,8 @@
 ---
 publish: true
 created: 2026-07-18T14:02:44.012Z
-modified: 2026-07-18T14:02:44.013Z
-published: 2026-07-18T14:02:44.013Z
+modified: 2026-07-25T13:57:51.991Z
+published: 2026-07-25T13:57:51.991Z
 topic:
   - Computer Science
 subtopic:
@@ -27,7 +27,7 @@ A step trace over `S = "aabxaabxay"` would show each `z[i]` being copied or exte
 > [!NOTE] Visualization pending
 > Planned StepTrace: a string-matching card showing the `[l, r]` Z-box sliding along the string, each position's Z-value either read from a prior box or computed by extending a prefix match. No matching renderer exists in `engine.js` yet.
 
-# How the Z-box avoids rescanning
+# How the Z-box Avoids Rescanning
 
 The pass carries one interval, the box `[l, r]`: the match with the largest right endpoint proven equal to a prefix, so `S[l..r] == S[0..r-l]`. Processing index `i` takes one of two paths.
 
@@ -59,7 +59,7 @@ Z = [10, 1, 0, 0, 5, 1, 0, 0, 1, 0]
 
 Indices 5, 6, and 7 spend zero comparisons: their values are copied from the mirror inside `[4, 8]`. That reuse is what keeps the total linear rather than quadratic.
 
-# Matching a pattern by concatenation
+# Matching a Pattern by Concatenation
 
 Single-pattern search reduces to one Z-array. Build `S = P + sep + T`, where `sep` is a character occurring in neither `P` nor `T`, and compute `z` over `S`. Any index `i` in the `T` region with `z[i] >= |P|` marks an occurrence: the substring at `i` reproduces the whole pattern prefix in `|P|` characters that lie entirely inside `T`. A proper separator caps every text-region Z-value at `|P|` — no match can run across the boundary — so here `>=` and `==` coincide. With `|P| = m` and `|T| = n`, `|S| = n + m + 1`, giving `Θ(n + m)` time and `Θ(n + m)` space.
 
@@ -72,7 +72,7 @@ Single-pattern search reduces to one Z-array. Build `S = P + sep + T`, where `se
 
 Best, average, and worst cases coincide: the pass is `Θ(|S|)` whether the string is all-distinct or highly periodic, because the box bounds total comparisons independently of content. The linear bound is unconditional — unlike [[Rabin Karp Search|Rabin-Karp]], whose expected-linear scan can degrade to `O(nm)` when hash collisions force full verifications.
 
-# When the assumptions stop holding
+# When the Assumptions Stop Holding
 
 **A separator drawn from the alphabet — and why `>=` survives it.** A separator outside the input alphabet caps every text-region `z[i]` at `m`: exceeding `m` would require matching `S[m]`, the separator, against a text character, which cannot happen. That cap keeps `z[i] == m` and `z[i] >= m` equivalent and stops any match from spanning the `P`/`T` boundary. Let the separator back into the alphabet and the cap is gone. Searching for `P = "ab"` in `T = "aba"` with `sep = 'a'` builds `"ab" + "a" + "aba" = "abaaba"`, whose Z-array is `[6, 0, 1, 3, 0, 1]`. The real occurrence of `"ab"` at text position 0 lands at index 3, where the match runs on through the separator-turned-`a` into the prefix and gives `z[3] = 3`. A strict `z[i] == m` test checks for `2` and misses it — a genuine hit dropped. The shipped `FindAll` uses `z[i] >= m`, which is robust: any text-region index (scanned from `m + 1` on) with `z[i] >= m` has `S[i..i+m-1]` equal to `P` in `m` consecutive characters lying wholly inside `T` — an occurrence whatever `sep` is. So the separator's job is narrower than correctness: with `>=`, an in-alphabet separator costs only the `== m` equivalence, not the result. A sentinel outside the alphabet — a `\0` byte, or `-1` over an integer sequence — keeps the two tests interchangeable.
 
@@ -80,7 +80,7 @@ Best, average, and worst cases coincide: the pass is `Θ(|S|)` whether the strin
 
 **The extra array is the cost KMP avoids.** Matching materializes `S` and its Z-array over the full `n + m + 1` characters — `Θ(n + m)` scratch memory that exists only to be scanned once. KMP builds an `O(m)` table over the pattern alone and streams `T` in place, so on a large text under tight memory its footprint is smaller for the same linear time.
 
-# Reference drawer
+# Reference Drawer
 
 > [!ABSTRACT]- Control flow
 >

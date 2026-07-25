@@ -1,8 +1,8 @@
 ---
 publish: true
 created: 2026-07-18T14:02:43.944Z
-modified: 2026-07-18T14:02:43.944Z
-published: 2026-07-18T14:02:43.944Z
+modified: 2026-07-25T13:57:52.035Z
+published: 2026-07-25T13:57:52.035Z
 topic:
   - Computer Science
 subtopic:
@@ -20,7 +20,7 @@ The commit order is what makes it cheap. Each step removes the unsettled node wi
 
 **Core condition:** non-negative edge weights → settle nodes in nondecreasing distance order → `O((V + E) log V)` with a binary heap and `O(V)` auxiliary space.
 
-# One run from a source
+# One Run from a Source
 
 The trace runs a single source from `A` over an undirected weighted graph, settling one node per step until `F` is reached.
 
@@ -30,7 +30,7 @@ The trace runs a single source from `A` over an undirected weighted graph, settl
 
 The first extraction settles `A` at distance 0 and relaxes its edges, giving `B` a tentative 2 and `C` a tentative 5. The decisive move is the next extraction: it takes the smallest tentative value, `B` at 2 — not `C` at 5 — settles it, and relaxing `B→C` lowers `C` from 5 to 3. `C` is now final at 3. Every remaining route to `C` must leave through a node whose tentative distance is already at least 2, and every edge adds a non-negative amount, so no later step can undercut the value `C` settles at. Nodes turn final in the order they leave the queue; the frontier holds only the tentative distances still open to a cheaper approach.
 
-# Why settled distances stay final
+# Why Settled Distances Stay Final
 
 The loop maintains one invariant: when a node leaves the priority queue, its tentative distance already equals its true shortest-path distance.
 
@@ -50,7 +50,7 @@ Every variant visits each vertex once and inspects each edge once; what differs 
 
 Auxiliary space is `O(V)` for the `dist` and `settled` arrays plus `O(V)` for the queue in a decrease-key model. With the lazy-deletion approach below, the binary heap can transiently hold up to `O(E)` stale entries, since each relaxation pushes rather than updates.
 
-# Where the invariant breaks
+# Where the Invariant Breaks
 
 A single negative edge violates settle-once. Take edges `A→B = 2`, `A→C = 3`, and `C→B = −2`. Dijkstra relaxes `A` to reach `B` at 2 and `C` at 3, extracts and settles `B` at 2, then extracts `C` at 3 and relaxes `C→B` to `3 + (−2) = 1`. `B` is already settled, so that improvement is discarded and `B` is reported at 2, while the true shortest distance `A→C→B` is 1. Nothing throws — the output is simply not a shortest-path tree. Weights that can be negative need [[Bellman-Ford]], which relaxes all edges `V − 1` times and drops the finalization assumption.
 
@@ -58,7 +58,7 @@ A negative _cycle_ has no shortest path at all: a route can loop it repeatedly t
 
 The second boundary is internal to the implementation. Standard binary heaps (including .NET's `PriorityQueue<TElement, TPriority>`) offer no `decrease-key`, so a relaxation pushes a fresh `(distance, node)` pair and leaves the older, larger one in the heap. When such a stale pair is later popped for a node that was already settled through a cheaper entry, it must be skipped — the `if settled[node] continue` guard at the top of the loop. Omitting it re-relaxes that node's edges from an out-of-date distance and can corrupt neighbours still on the frontier.
 
-# Reference drawer
+# Reference Drawer
 
 > [!ABSTRACT]- Control flow
 >

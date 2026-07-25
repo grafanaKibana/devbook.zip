@@ -1,8 +1,8 @@
 ---
 publish: true
 created: 2026-07-21T18:52:02.705Z
-modified: 2026-07-21T19:58:21.374Z
-published: 2026-07-21T19:58:21.374Z
+modified: 2026-07-25T13:57:52.020Z
+published: 2026-07-25T13:57:52.020Z
 topic:
   - Computer Science
 subtopic:
@@ -28,7 +28,7 @@ The structure to animate is the recursion tree itself. One problem divides into 
 { "algorithm": "divide-and-conquer" }
 ```
 
-## Divide, conquer, combine
+## Divide, Conquer, Combine
 
 The paradigm is three steps and a stopping rule:
 
@@ -40,7 +40,7 @@ Which step carries the work varies. [[Computer Science/Algorithms/Sorting Algori
 
 Logical independence permits parallel execution but does not make it automatic. Calls that share mutable data still need ownership rules or synchronization, the combine step must wait for every result it consumes, and task-scheduling overhead can exceed the work saved on small inputs. Whether a divide-and-conquer implementation is race-free or faster in parallel depends on its data access, synchronization, grain size, and runtime.
 
-## Analyzing balanced recurrences
+## Analyzing Balanced Recurrences
 
 The classical Master Theorem applies to the balanced recurrence `T(n) = a·T(n/b) + f(n)`, where `a ≥ 1` and `b > 1` are constants: every non-base call creates the same fixed number of subproblems, all with the same asymptotic size `n/b`. It compares `f(n)` with the leaf contribution `n^(log_b a)`.
 
@@ -54,7 +54,7 @@ For merge sort, `T(n) = 2T(n/2) + Θ(n)`. Here `a = 2`, `b = 2`, and `n^(log_2 2
 
 The theorem does not apply directly to unequal or input-dependent splits. Quicksort produces `T(n) = T(k) + T(n-k-1) + Θ(n)`, where the pivot determines `k`. Substitution or a recursion tree can establish bounds for a concrete recurrence; Akra–Bazzi handles fixed but unequal branch fractions; randomized quicksort needs an expected recurrence because the partition sizes are random variables.
 
-## Boundaries and implementation costs
+## Boundaries and Implementation Costs
 
 Overlapping subproblems are repeated states that can be reached from more than one branch. Naive Fibonacci exposes the failure: both `fib(n-1)` and `fib(n-2)` reach `fib(n-3)`, so plain recursion recomputes the same state. Memoisation helps because the state repeats, not because the calls share storage. Merge sort's range states do not repeat, so caching them adds overhead without removing work.
 
@@ -64,7 +64,7 @@ Stack depth follows the longest live branch. Balanced constant-factor shrinkage 
 
 A small-range cutoff solves a different problem. Once a partition is tiny, recursive calls and partitioning can cost more than a tight [[Computer Science/Algorithms/Sorting Algorithms/Insertion Sort|insertion-sort]] loop. [[Computer Science/Algorithms/Sorting Algorithms/Introsort|Introsort]] uses that cutoff for small partitions, but uses a separate recursion-depth budget and falls back to heapsort when quicksort consumes it. The insertion-sort cutoff reduces call overhead; the depth guard limits adversarial partition chains. Balanced recursion still uses `O(log n)` stack space, unbalanced recursion can use `O(n)`, and combine storage is counted separately—for example, merge sort's `O(n)` auxiliary buffer.
 
-## Reference drawer
+## Reference Drawer
 
 > [!ABSTRACT]- Recursion structure
 >

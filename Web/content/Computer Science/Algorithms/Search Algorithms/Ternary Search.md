@@ -1,8 +1,8 @@
 ---
 publish: true
 created: 2026-07-21T18:52:02.838Z
-modified: 2026-07-21T19:06:17.964Z
-published: 2026-07-21T19:06:17.964Z
+modified: 2026-07-25T13:57:51.990Z
+published: 2026-07-25T13:57:51.990Z
 topic:
   - Computer Science
 subtopic:
@@ -32,7 +32,7 @@ The values rise to `12` and then fall, giving one strict peak. Each ternary step
 {"algorithm":"ternary-search","array":[1,4,9,12,11,7,2],"goal":"maximum"}
 ```
 
-## Why a third can be dropped
+## Why a Third Can Be Dropped
 
 The interval `[lo, hi]` holds the peak `p` at the start of every step, and the discard rule preserves that. Let `m1 < m2` be the third-point probes. Strict unimodality means `f` increases on `[lo, p]` and decreases on `[p, hi]`.
 
@@ -58,7 +58,7 @@ The cost is deterministic in the interval width rather than data-dependent, so t
 
 For a discrete array, the `Θ(log n)` bound and the `2·log₃ n` comparison count describe the same asymptotic class, so the deciding difference between ternary and binary search is the constant factor — and on monotone data it always favours binary search. Continuous optimization instead measures the starting width against the required tolerance; there is no input-size `n` unless the interval has already been discretized.
 
-## When unimodality fails
+## When Unimodality Fails
 
 Unimodality is the algorithmic precondition; strict unimodality is the StepTrace renderer's narrower contract, and it is easy to violate either one.
 
@@ -70,7 +70,7 @@ The discrete domain needs a different stopping rule. With integer bounds and int
 
 For membership in a sorted array the boundary is simpler still: binary search dominates. Same `O(log n)` class, fewer comparisons, one probe per step instead of two.
 
-## Reference drawer
+## Reference Drawer
 
 > [!ABSTRACT]- Control flow (maximizing form)
 >

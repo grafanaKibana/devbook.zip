@@ -1,8 +1,8 @@
 ---
 publish: true
 created: 2026-07-18T14:02:43.915Z
-modified: 2026-07-18T14:02:43.916Z
-published: 2026-07-18T14:02:43.916Z
+modified: 2026-07-25T13:51:15.668Z
+published: 2026-07-25T13:51:15.668Z
 topic:
   - AI & ML
 subtopic:
@@ -18,7 +18,7 @@ Classification evaluation is how you measure whether a model assigns the right l
 
 # Precision, Recall, and F1
 
-## Confusion matrix first
+## Confusion Matrix First
 
 Everything starts from four counts:
 
@@ -32,7 +32,7 @@ Everything starts from four counts:
 - `FN`: miss.
 - `TN`: correctly ignored.
 
-## The three formulas to remember
+## The Three Formulas to Remember
 
 ```text
 precision = TP / (TP + FP)
@@ -49,7 +49,7 @@ Memory hook:
 - Precision is hurt by `FP` false alarms.
 - Recall is hurt by `FN` misses.
 
-## Threshold tradeoff
+## Threshold Tradeoff
 
 ```mermaid
 flowchart LR
@@ -61,7 +61,7 @@ flowchart LR
   F --> P2[Precision usually up]
 ```
 
-## Real world examples
+## Real World Examples
 
 Content moderation:
 
@@ -73,7 +73,7 @@ Fraud detection:
 - High recall means fewer fraud cases slip through.
 - High precision means fewer legit users get flagged.
 
-## Worked example
+## Worked Example
 
 Binary classifier on 100 cases:
 
