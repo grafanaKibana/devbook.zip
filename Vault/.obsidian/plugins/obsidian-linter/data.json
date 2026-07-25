@@ -55,7 +55,7 @@
       "enabled": false,
       "yaml-key-priority-sort-order": "",
       "priority-keys-at-start-of-yaml": true,
-      "yaml-sort-order-for-other-keys": "None"
+      "yaml-sort-order-for-other-keys": "Ascending Alphabetical"
     },
     "yaml-timestamp": {
       "enabled": false,
@@ -275,12 +275,12 @@
   },
   "lintOnSave": true,
   "recordLintOnSaveLogs": false,
-  "displayChanged": true,
+  "displayChanged": false,
   "suppressMessageWhenNoChange": false,
   "suppressLintAllFilesConfirmationModal": false,
   "suppressLintAllFilesInFolderConfirmationModal": false,
   "lintOnFileChange": true,
-  "displayLintOnFileChangeNotice": true,
+  "displayLintOnFileChangeNotice": false,
   "settingsConvertedToConfigKeyValues": true,
   "additionalFileExtensions": [],
   "foldersToIgnore": [],

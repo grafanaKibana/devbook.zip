@@ -50,7 +50,7 @@
   "baseline-style@@color-scheme-accent": true,
   "baseline-style@@layout-style": "layout-cards",
   "baseline-style@@status-bar-style": "status-bar-cupertino",
-  "baseline-style@@tab-style": "tab-floating-center",
+  "baseline-style@@tab-style": "tab-default",
   "baseline-style@@tab-full-width": true,
   "baseline-style@@tab-text-align": "center",
   "baseline-style@@file-header-visibility": "view-header-title-always",
@@ -119,11 +119,8 @@
   "baseline-style@@bases-table-header-icon-display": "flex",
   "baseline-style@@bases-col-alt": false,
   "baseline-style@@banner-off": true,
-  "baseline-style@@radius-modifier": 1.5,
   "baseline-style@@density-modifier": 1,
   "baseline-style@@dynamic-type-off": false,
-  "baseline-style@@anim-motion-baseline": "cubic-bezier(0.32, 0.72, 0, 1)",
-  "baseline-style@@anim-speed-modifier": 1,
   "baseline-style@@tab-stacked-spine-orientation": "tab-stack-top",
   "baseline-style@@p-spacing": "1.5rem",
   "baseline-style@@readable-spacing-modifier": 0.25,
@@ -132,5 +129,8 @@
   "baseline-style@@translucent-dark-opacity": 70,
   "baseline-style@@mode-switcher-off": false,
   "baseline-style@@translucent-light-opacity": 70,
-  "baseline-style@@icon-stroke-modifier": 0.5
+  "baseline-style@@icon-stroke-modifier": 0.5,
+  "baseline-style@@radius-modifier": 1.5,
+  "baseline-style@@anim-speed-modifier": 0.5,
+  "baseline-style@@tab-divider": false
 }

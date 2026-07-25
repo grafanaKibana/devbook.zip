@@ -16,5 +16,6 @@
   "hot-reload",
   "quartz-syncer",
   "steptrace",
-  "true-recall"
+  "true-recall",
+  "obsidian-linter"
 ]
