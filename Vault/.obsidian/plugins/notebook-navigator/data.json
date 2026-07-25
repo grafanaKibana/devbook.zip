@@ -25,6 +25,10 @@
         {
           "type": "note",
           "path": "Home/Topics.base"
+        },
+        {
+          "type": "note",
+          "path": "Home/Credits.md"
         }
       ],
       "propertyKeys": [
@@ -144,7 +148,7 @@
   "enterToOpenFiles": false,
   "shiftEnterOpenContext": "tab",
   "cmdCtrlEnterOpenContext": "split",
-  "mouseBackForwardAction": "history",
+  "mouseBackForwardAction": "singlePaneSwitch",
   "startView": "navigation",
   "showInfoButtons": true,
   "homepage": {
@@ -153,8 +157,8 @@
     "createMissingPeriodicNote": true
   },
   "dualPane": true,
-  "dualPaneOrientation": "vertical",
-  "narrowSidebarLayout": "singlePane",
+  "dualPaneOrientation": "horizontal",
+  "narrowSidebarLayout": "vertical",
   "narrowSidebarTriggerMode": "fitPanes",
   "narrowSidebarCustomWidth": 350,
   "showTooltips": false,
