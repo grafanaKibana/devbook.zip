@@ -638,7 +638,7 @@ export const NavScopeDropdown: QuartzComponentConstructor = () => {
   border: 1px solid var(--lightgray);
   border-radius: var(--radius-m, 8px);
   padding: 0.45rem 0.5rem;
-  transition: border-color 0.15s ease, background-color 0.15s ease;
+  transition: border-color var(--dur-2) var(--ease-out), background-color var(--dur-2) var(--ease-out);
 }
 .ns-trigger:hover {
   border-color: var(--gray);
@@ -679,7 +679,7 @@ export const NavScopeDropdown: QuartzComponentConstructor = () => {
   display: grid;
   place-items: center;
   color: var(--gray);
-  transition: transform 0.18s ease;
+  transition: transform var(--dur-2) var(--ease-out);
 }
 .ns-chev-svg {
   width: 15px;

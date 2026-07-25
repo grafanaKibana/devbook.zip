@@ -27,7 +27,7 @@ const CARD_CSS = `
   border-radius: var(--radius-m, 0.55rem);
   background-color: var(--background-primary, var(--light, #ffffff));
   box-shadow: 0 0 0 rgba(0, 0, 0, 0);
-  transition: border-color 150ms ease, background-color 150ms ease, box-shadow 150ms ease, transform 150ms ease;
+  transition: border-color var(--dur-2, 140ms) var(--ease-out, cubic-bezier(0.22, 1, 0.36, 1)), background-color var(--dur-2, 140ms) var(--ease-out, cubic-bezier(0.22, 1, 0.36, 1)), box-shadow var(--dur-2, 140ms) var(--ease-out, cubic-bezier(0.22, 1, 0.36, 1)), transform var(--dur-2, 140ms) var(--ease-out, cubic-bezier(0.22, 1, 0.36, 1));
 }
 .db-card::before {
   content: "";
@@ -43,7 +43,7 @@ const CARD_CSS = `
     transparent 90%
   );
   opacity: 0.78;
-  transition: opacity 150ms ease;
+  transition: opacity var(--dur-2, 140ms) var(--ease-out, cubic-bezier(0.22, 1, 0.36, 1));
 }
 .db-card:hover,
 .db-card:focus-within {
@@ -103,11 +103,48 @@ p.db-card-summary {
   outline: 2px solid rgb(${ACCENT});
   outline-offset: -0.3rem;
 }
+/* Entrance for the two grids that are destinations rather than pass-throughs.
+   Fill is backwards, never forwards: it holds the start state through the
+   stagger delay, then hands transform back to the cascade when the animation
+   ends. A forwards fill would outrank the hover rule for the life of the page
+   and kill the lift on every card.
+
+   NO CHILD COMBINATORS ANYWHERE IN THIS FILE. Quartz Syncer freezes this CSS
+   into a <style> block inside published Markdown, and that path HTML-escapes
+   ">" to "&gt;", which silently invalidates every rule containing one. The
+   @keyframes survive (no ">"), so the symptom is an animation that is defined
+   but never applied — and only on the published site, never in Obsidian.
+   Descendant selectors are equivalent here because cards never nest. */
+@keyframes db-card-in {
+  from { opacity: 0; transform: translateY(6px); }
+}
+.dc-topic-grid .db-card,
+.folder-map-children .db-card {
+  animation: db-card-in var(--dur-3, 220ms) var(--ease-spring, cubic-bezier(0.34, 1.56, 0.64, 1)) backwards;
+}
+/* Stagger capped at 6 steps so the tail stays constant no matter how many cards
+   a grid holds: 6 * 28ms + 220ms = 388ms, inside the 400ms responsiveness bound. */
+.dc-topic-grid .db-card:nth-child(2),
+.folder-map-children .db-card:nth-child(2) { animation-delay: calc(var(--stagger, 28ms) * 1); }
+.dc-topic-grid .db-card:nth-child(3),
+.folder-map-children .db-card:nth-child(3) { animation-delay: calc(var(--stagger, 28ms) * 2); }
+.dc-topic-grid .db-card:nth-child(4),
+.folder-map-children .db-card:nth-child(4) { animation-delay: calc(var(--stagger, 28ms) * 3); }
+.dc-topic-grid .db-card:nth-child(5),
+.folder-map-children .db-card:nth-child(5) { animation-delay: calc(var(--stagger, 28ms) * 4); }
+.dc-topic-grid .db-card:nth-child(6),
+.folder-map-children .db-card:nth-child(6) { animation-delay: calc(var(--stagger, 28ms) * 5); }
+.dc-topic-grid .db-card:nth-child(n+7),
+.folder-map-children .db-card:nth-child(n+7) { animation-delay: calc(var(--stagger, 28ms) * 6); }
+/* This block is load-bearing on the Obsidian host, where custom.scss never
+   loads and the --dur-* collapse therefore cannot reach these rules. */
 @media (prefers-reduced-motion: reduce) {
   .db-card { transition: none; }
   .db-card::before { transition: none; }
   .db-card:hover,
   .db-card:focus-within { transform: none; }
+  .dc-topic-grid .db-card,
+  .folder-map-children .db-card { animation: none; }
 }
 `;
 

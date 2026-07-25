@@ -270,6 +270,10 @@ function createBarTracker(stage, bars, markers) {
   }
   const rectOf = (node) =>
     node && typeof node.getBoundingClientRect === "function" ? node.getBoundingClientRect() : null
+  // Sentinels for the read phase: a marker with no bar to track, and one whose
+  // bar exists but reports no rect.
+  const MARKER_ABSENT = { absent: true }
+  const MARKER_UNMEASURED = { unmeasured: true }
   const isReduced = () => !!(stage.closest && stage.closest(".steptrace--reduced"))
   let lastStepAt = null
   function frameStep(now) {
@@ -283,11 +287,28 @@ function createBarTracker(stage, bars, markers) {
     // critically, so a bar glides home instead of darting fast then wobbling.
     const swapOmega = springOmega(tweenMs * STEP_BUDGET_RATIO)
     let moving = false
+    // Read phase. Every geometry read is taken before any style is written, so
+    // the browser resolves layout once for the whole frame. Interleaving them —
+    // read a rect, write a style, read the next marker's rect — forces a
+    // synchronous reflow per marker, and that cost multiplies by the number of
+    // cards animating on the page.
+    const reads = []
     for (let m = 0; m < markers.length; m++) {
       const idx = targets[m]
       const bar = idx != null && idx >= 0 && bars[idx] ? bars[idx].fill : null
-      const mk = markers[m]
       if (!bar || !bar.isConnected) {
+        reads.push(MARKER_ABSENT)
+        continue
+      }
+      const br = rectOf(bar)
+      // no layout engine (headless test DOM): nothing to place this frame
+      reads.push(br ? { br, bodyWidth: rectOf(markers[m].body)?.width ?? 0 } : MARKER_UNMEASURED)
+    }
+    // Write phase.
+    for (let m = 0; m < markers.length; m++) {
+      const read = reads[m]
+      const mk = markers[m]
+      if (read === MARKER_ABSENT) {
         mk.el.style.opacity = "0"
         sx[m] = null
         sy[m] = null
@@ -296,11 +317,10 @@ function createBarTracker(stage, bars, markers) {
         px[m] = null
         continue
       }
-      const br = rectOf(bar)
-      if (!br) continue
+      if (read === MARKER_UNMEASURED) continue
+      const br = read.br
       const targetX = br.left + br.width / 2 - sr.left
-      const bodyWidth = rectOf(mk.body)?.width ?? 0
-      const tx = clampMarkerCenter(targetX, bodyWidth, sr.width)
+      const tx = clampMarkerCenter(targetX, read.bodyWidth, sr.width)
       mk.el.style.setProperty("--steptrace-marker-tip-offset", `${targetX - tx}px`)
       const ty = mk.role === "held" && mk.el.dataset.placing !== "1" ? 34 : br.top - sr.top
       const zeta = mk.role === "held" ? SPRINGS.held.zeta : SPRINGS.marker.zeta

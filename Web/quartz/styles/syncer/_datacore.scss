@@ -9,7 +9,9 @@
   min-width: 89%;
   border: 2px solid var(--table-border-color);
   overflow-y: scroll;
-  transition: all 0.3s cubic-bezier(0.65, 0.05, 0.36, 1);
+  transition:
+    background-color var(--dur-4) var(--ease-in-out),
+    border-color var(--dur-4) var(--ease-in-out);
 }
 
 .datacore-card-title {
@@ -25,7 +27,9 @@
 
 .datacore-card-content,
 .datacore-card-inner {
-  transition: all 0.3s cubic-bezier(0.65, 0.05, 0.36, 1);
+  transition:
+    max-height var(--dur-4) var(--ease-in-out),
+    opacity var(--dur-4) var(--ease-in-out);
 }
 
 .datacore-card-inner {
@@ -37,7 +41,7 @@
 
 .datacore-card .datacore-card-collapser,
 .datacore-card.is-collapsed .datacore-card-collapser {
-  transition: all 0.5s cubic-bezier(0.65, 0.05, 0.36, 1);
+  transition: transform var(--dur-2) var(--ease-in-out);
 }
 
 .datacore-card-content {
@@ -203,7 +207,7 @@
 .dc-slider {
   -webkit-appearance: none;
   appearance: none;
-  transition: background 0.3s;
+  transition: background var(--dur-2) var(--ease-out);
 }
 
 .dc-switch.dc-switch-disabled {
@@ -275,7 +279,9 @@ button.dc-paging-control-page[disabled]:hover {
 /* Callout styles */
 .datacore .callout-content,
 .datacore.callout {
-  transition: all 100ms cubic-bezier(0.02, 0.01, 0.47, 1);
+  transition:
+    max-height var(--dur-1) var(--ease-out),
+    opacity var(--dur-1) var(--ease-out);
   margin-top: 10px;
   margin-bottom: 10px;
 }

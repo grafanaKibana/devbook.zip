@@ -6,6 +6,7 @@ import { FloatingButtons } from "./custom/components/floating-buttons"
 import { HomepageFit } from "./custom/components/homepage-fit"
 import { NavScopeDropdown } from "./custom/components/nav-scope-dropdown"
 import { PageContribute } from "./custom/components/page-contribute"
+import { PageReveal } from "./custom/components/page-reveal"
 import { QuestionsIndex } from "./custom/components/questions-index"
 import { SiteHeader } from "./custom/components/site-header"
 import { SiteMarquee } from "./custom/components/site-marquee"
@@ -110,11 +111,13 @@ for (const pageLayout of Object.values(layout.byPageType)) {
 const steptrace = Steptrace()
 const homepageFit = HomepageFit()
 const excalidrawEnhance = ExcalidrawEnhance()
+const pageReveal = PageReveal()
 layout.defaults.afterBody = [
   ...(layout.defaults.afterBody ?? []),
   steptrace,
   homepageFit,
   excalidrawEnhance,
+  pageReveal,
 ]
 for (const pageLayout of Object.values(layout.byPageType)) {
   pageLayout.afterBody = [
@@ -122,6 +125,7 @@ for (const pageLayout of Object.values(layout.byPageType)) {
     steptrace,
     homepageFit,
     excalidrawEnhance,
+    pageReveal,
   ]
 }
 

@@ -73,8 +73,8 @@
   visibility: hidden;
   opacity: 0;
   transition:
-    opacity 0.3s ease,
-    visibility 0.3s ease;
+    opacity var(--dur-3) var(--ease-out),
+    visibility var(--dur-3) var(--ease-out);
 
   @media all and ($mobile) {
     display: none !important;
@@ -83,7 +83,10 @@
 
 .active-popover,
 .popover:hover {
-  animation: dropin 0.3s ease;
+  animation: dropin var(--dur-3) var(--ease-out);
   animation-fill-mode: forwards;
+  // NOT a motion duration — this is hover intent, so it stays a literal and is
+  // deliberately excluded from the reduced-motion token collapse. At 1ms the
+  // popover would fire on any pointer graze.
   animation-delay: 0.2s;
 }

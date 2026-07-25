@@ -38,8 +38,8 @@ const css = `
      a fixed black shadow, so it reads identically to cards and never becomes a
      light glow in dark mode. */
   transition:
-    box-shadow 150ms ease,
-    transform 150ms ease;
+    box-shadow var(--dur-2) var(--ease-out),
+    transform var(--dur-2) var(--ease-out);
 }
 .lightbox-image:hover,
 .lightbox-image:focus-visible {
@@ -67,8 +67,8 @@ const css = `
      same tick .active lands) but hold it until the opacity fade finishes on
      close. */
   transition:
-    opacity 0.25s ease,
-    visibility 0s linear 0.25s;
+    opacity var(--dur-3) var(--ease-out),
+    visibility 0s linear var(--dur-3);
   -webkit-backdrop-filter: blur(4px);
   backdrop-filter: blur(4px);
 }
@@ -79,7 +79,7 @@ const css = `
   opacity: 1;
   visibility: visible;
   transition:
-    opacity 0.25s ease,
+    opacity var(--dur-3) var(--ease-out),
     visibility 0s linear 0s;
 }
 .lightbox-modal img {
@@ -91,7 +91,7 @@ const css = `
   border-radius: var(--surface-radius, 8px);
   background: var(--light);
   transform: scale(0.96);
-  transition: transform 0.25s ease;
+  transition: transform var(--dur-3) var(--ease-out);
 }
 .lightbox-modal.active img {
   transform: scale(1);
@@ -114,8 +114,8 @@ const css = `
   border: 1px solid var(--lightgray);
   border-radius: 50%;
   transition:
-    color 0.2s ease,
-    border-color 0.2s ease;
+    color var(--dur-2) var(--ease-out),
+    border-color var(--dur-2) var(--ease-out);
 }
 .lightbox-close:hover {
   color: var(--secondary);

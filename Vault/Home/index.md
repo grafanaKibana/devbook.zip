@@ -166,6 +166,20 @@ return function TopicDashboard() {
 .dc-topic-legend { display: flex; flex-wrap: wrap; justify-content: center; gap: 0.4em 1.1em; margin-top: 0.7em; font-size: 0.8em; opacity: 0.85; }
 .dc-topic-legend-item { display: inline-flex; align-items: center; gap: 0.4em; }
 .dc-topic-legend-sw { width: 0.8em; height: 0.8em; border-radius: 3px; flex: 0 0 auto; display: inline-block; background: rgb(var(--topic-rgb)); }
+/* No child combinators: Syncer freezes this CSS into published Markdown and
+   that path escapes ">" to "&gt;", silently killing any rule that uses one.
+   The fills reveal by scaling, not by animating width: the segment widths are
+   inline percentages, and scaleX(0->1) with a left origin lands on exactly that
+   inline width while staying on the compositor.
+   --ease-out, never --ease-spring: the track is overflow:hidden, so a curve that
+   overshoots would clip a near-full bar flat at 100% and then visibly retreat to
+   its real value, which reads as a bug. All three stacked segments share one
+   easing and one delay so their z-ordered boundaries stay put every frame. */
+@keyframes dc-topic-bar-fill { from { transform: scaleX(0); } }
+.dc-topic-bar-track span { transform-origin: left center; animation: dc-topic-bar-fill var(--dur-3, 220ms) var(--ease-out, cubic-bezier(0.22, 1, 0.36, 1)) backwards; }
+/* Needed on its own: this file's CSS is inlined per-page and custom.scss is not
+   loaded at all inside Obsidian, so the --dur-* collapse cannot reach here. */
+@media (prefers-reduced-motion: reduce) { .dc-topic-bar-track span { animation: none; } }
 ${spanRules("dsk")}
 @media (max-width: 1600px) { ${spanRules("med")} }
 @media (max-width: 760px) { ${spanRules("nar")} }
