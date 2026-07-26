@@ -14,6 +14,11 @@ test("dashboard progress hero stays above the cards and inside fit measurement",
     dashboard,
     /<span class="dc-progress-value"><strong>\{oPct\}%<\/strong><span>Progress<\/span><\/span>/,
   )
+  assert.match(
+    dashboard,
+    /<p class="dc-progress-title" id="dc-progress-title" role="heading" aria-level="2">/,
+  )
+  assert.doesNotMatch(dashboard, /<h2 class="dc-progress-title"/)
   assert.match(dashboard, /class="dc-topic-bar dc-progress-bar"/)
   assert.doesNotMatch(dashboard, /dc-topic-total/)
   assert.match(fit, /querySelector\("\.dc-topic-dashboard"\)/)

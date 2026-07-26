@@ -167,11 +167,11 @@ return function TopicDashboard() {
 .dc-topic-cap { font-size: 0.72rem; display: flex; justify-content: space-between; align-items: baseline; color: var(--text-muted, var(--darkgray, #5f6b7a)); }
 .dc-topic-bar { box-sizing: border-box; position: relative; width: 100%; height: 11px; margin-top: 0.15rem; padding: 2px; border-radius: 999px; border: 1px solid rgba(var(--topic-rgb), 0.5); background: var(--background-primary, var(--light, #ffffff)); overflow: hidden; }
 .dc-topic-bar-track { box-sizing: border-box; position: relative; height: 100%; border-radius: 999px; overflow: hidden; }
-.dc-progress-hero { --topic-rgb: 76, 128, 0; --card-accent: 76, 128, 0; --dc-progress-done: #4c8000; --dc-progress-ready: #70a322; --dc-progress-creation: #9cbd66; --dc-radial-size: clamp(7.5rem, 28cqi, 9rem); overflow: hidden; container-type: inline-size; margin: 0 0 clamp(1rem, 2vw, 1.4rem); animation: db-card-in var(--dur-3, 220ms) var(--ease-out, cubic-bezier(0.22, 1, 0.36, 1)) backwards; }
+.dc-progress-hero { --topic-rgb: 76, 128, 0; --card-accent: 76, 128, 0; --dc-progress-done: #4c8000; --dc-progress-ready: #70a322; --dc-progress-creation: #9cbd66; --dc-radial-size: clamp(6.75rem, 24cqi, 8rem); overflow: hidden; container-type: inline-size; margin: 0 0 clamp(1rem, 2vw, 1.4rem); animation: db-card-in var(--dur-3, 220ms) var(--ease-out, cubic-bezier(0.22, 1, 0.36, 1)) backwards; }
 .theme-dark .dc-progress-hero, :root[saved-theme="dark"] .dc-progress-hero { --topic-rgb: 132, 204, 22; --card-accent: 132, 204, 22; --dc-progress-done: #84cc16; --dc-progress-ready: #a3db53; --dc-progress-creation: #c1e88a; }
 .dc-progress-hero:hover, .dc-progress-hero:focus-within { border-color: var(--background-modifier-border, var(--lightgray, #d8dee9)); background-color: var(--background-primary, var(--light, #ffffff)); box-shadow: none; transform: none; }
 .dc-progress-hero:hover::before, .dc-progress-hero:focus-within::before { opacity: 0.78; }
-.dc-progress-hero .db-card-body { display: grid; gap: clamp(1.25rem, 4cqi, 2.5rem); align-items: center; padding: clamp(1.25rem, 4cqi, 2.5rem); }
+.dc-progress-hero .db-card-body { display: grid; gap: clamp(1rem, 3cqi, 2rem); align-items: center; padding: clamp(1rem, 3cqi, 2rem); }
 .dc-progress-copy { min-width: 0; }
 p.dc-progress-eyebrow { margin: 0 0 0.45rem; color: rgb(var(--topic-rgb)); font-family: var(--codeFont, var(--font-monospace, monospace)); font-size: 0.75rem; font-weight: 700; line-height: 1.5; letter-spacing: 0.08em; text-transform: uppercase; }
 .dc-progress-title { margin: 0; color: var(--text-normal, var(--dark, #1f2937)); font-size: clamp(1.1rem, 5cqi, 1.75rem); line-height: 1.08; letter-spacing: -0.04em; white-space: nowrap; }
@@ -179,7 +179,7 @@ p.dc-progress-eyebrow { margin: 0 0 0.45rem; color: rgb(var(--topic-rgb)); font-
 .dc-progress-statuses li { display: inline-flex; min-width: max-content; align-items: baseline; gap: 0.35rem; }
 .dc-progress-statuses strong { color: var(--text-normal, var(--dark, #1f2937)); font-family: var(--codeFont, var(--font-monospace, monospace)); font-size: 0.9rem; }
 .dc-progress-statuses i { width: 0.55rem; height: 0.55rem; border-radius: 2px; flex: 0 0 auto; }
-.dc-progress-visual { display: grid; width: 100%; gap: 0.35rem; padding-top: 1rem; place-self: stretch; }
+.dc-progress-visual { display: grid; width: 100%; gap: 0.35rem; padding-top: 0.75rem; place-self: stretch; }
 .dc-progress-visual svg { display: none; }
 .dc-progress-ring { fill: none; stroke-linecap: round; }
 .dc-progress-ring--track { stroke: var(--background-modifier-border, var(--lightgray, #d8dee9)); stroke-width: 8; }
@@ -227,7 +227,7 @@ ${spanRules("dsk")}
         <div class="db-card-body">
           <div class="dc-progress-copy">
             <p class="dc-progress-eyebrow">Learning overview</p>
-            <h2 class="dc-progress-title" id="dc-progress-title">{oTotal} notes across {N} topics</h2>
+            <p class="dc-progress-title" id="dc-progress-title" role="heading" aria-level="2">{oTotal} notes across {N} topics</p>
             <ul class="dc-progress-statuses" aria-label="Note lifecycle totals">
               {STATUS_RAMP.map((seg) => (
                 <li>
