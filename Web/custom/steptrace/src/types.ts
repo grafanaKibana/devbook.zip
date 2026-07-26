@@ -32,6 +32,7 @@ export type VisualFamilyId =
   | "indexed-array-search"
   | "matrix-grid"
   | "monotone-boundary"
+  | "run-stack"
 
 export interface AlgorithmMeta {
   label: string
@@ -74,6 +75,7 @@ export interface StepTraceConfig extends Partial<Omit<AlgorithmInput, "algorithm
   shrinkFactor?: number
   depthLimit?: number
   smallPartitionThreshold?: number
+  minrun?: number
   values?: number[]
   goal?: string
   weights?: number[]
@@ -97,6 +99,7 @@ export type StepTraceBlockConfig = StepTraceConfig | StepTraceTabsConfig
 export interface StepTraceView<TFrame = unknown> {
   nodes: HTMLElement[]
   stageLayout?: "compact" | "fill"
+  stageAlignment?: "bottom" | "center"
   stableStage?: boolean
   paint(frame: TFrame, index?: number, total?: number): void
   watch?(frame: TFrame): WatchRow[]

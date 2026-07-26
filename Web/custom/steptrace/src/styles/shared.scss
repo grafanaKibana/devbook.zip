@@ -264,10 +264,11 @@
   flex: 1 1 auto;
   min-height: 0;
 }
-/* every kind except graph bottom-aligns its viz within the stage column, so the
-   visualization baseline sits level with the rail's WATCH panel */
 .steptrace__stage-col--bottom {
   justify-content: flex-end;
+}
+.steptrace__stage-col--center {
+  justify-content: center;
 }
 .steptrace__stage-col--fill {
   justify-content: stretch;
@@ -836,6 +837,17 @@
     height: auto !important;
     min-height: 0;
     overflow: visible;
+  }
+  .steptrace--stable-stage .steptrace__trace {
+    --_stable-trace-height: clamp(4.75rem, 16dvh, 5.75rem);
+    flex: 0 0 var(--_stable-trace-height);
+    block-size: var(--_stable-trace-height);
+    overflow: hidden;
+  }
+  .steptrace--stable-stage .steptrace__log {
+    min-block-size: 0;
+    overflow-y: auto !important;
+    overscroll-behavior: contain;
   }
   /* stacked: only the live line (or, at the end, the RESULT that stands in its
      place) survives — there is no room for the step history */

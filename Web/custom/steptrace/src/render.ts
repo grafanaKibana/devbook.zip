@@ -192,7 +192,7 @@ export function makeSortView(frames, semantics = legacySortViewSemantics) {
     return rows
   }
 
-  return { nodes: [stage, status], paint, watch, destroy: tracker.destroy }
+  return { nodes: [stage, status], stageAlignment: "bottom", paint, watch, destroy: tracker.destroy }
 }
 
 function makeMarker(label, role) {
@@ -575,7 +575,7 @@ export function makeSearchView(
     return semantics.watchRows(frame, frames)
   }
 
-  return { nodes: [stage, status], paint, watch }
+  return { nodes: [stage, status], stageAlignment: "bottom", paint, watch }
 }
 
 export interface BoundarySearchViewDescriptor {
@@ -866,6 +866,19 @@ export function makeMatchView(frames) {
 // overflow:hidden rounded frame clips it flush — rounded only at the real
 // ends, square at interior edges (no floating mid-strip radius). The blue [
 // / violet ] brackets overlay the window ends; match recolours all of it green.
+export function makeArrayStrip(values: readonly unknown[]) {
+  const wrap = el("div", "steptrace__pwrap")
+  const strip = el("div", "steptrace__pcells")
+  const cells = values.map((value) => {
+    const cell = el("div", "steptrace__pcell")
+    cell.textContent = String(value)
+    strip.append(cell)
+    return cell
+  })
+  wrap.append(strip)
+  return { wrap, strip, cells }
+}
+
 export function makePointerView(frames) {
   const n = frames[0].array.length
   // capture pointer names once so WATCH always shows the same rows (constant
@@ -877,20 +890,12 @@ export function makePointerView(frames) {
     }
     return []
   })()
-  const wrap = el("div", "steptrace__pwrap")
-  const strip = el("div", "steptrace__pcells")
-  const cells = []
-  for (let k = 0; k < n; k++) {
-    const cell = el("div", "steptrace__pcell")
-    cell.textContent = frames[0].array[k]
-    strip.append(cell)
-    cells.push(cell)
-  }
+  const { wrap, cells } = makeArrayStrip(frames[0].array)
   const brackets = el("div", "steptrace__pbrackets")
   const brL = el("div", "steptrace__pbr steptrace__pbr--l")
   const brR = el("div", "steptrace__pbr steptrace__pbr--r")
   brackets.append(brL, brR)
-  wrap.append(strip, brackets)
+  wrap.append(brackets)
   const status = statusEl()
 
   function paint(frame) {
@@ -2776,6 +2781,8 @@ export function summaryFor(algorithm, kind, frame, graph) {
     }
     if (algorithm === "merge-sort")
       return `Output [${frame.array.join(", ")}] · ${frame.swaps} writes.`
+    if (algorithm === "tim-sort")
+      return `Output [${frame.array.join(", ")}] · ${frame.merges} run-stack merge${frame.merges === 1 ? "" : "s"}.`
     const unit =
       frame.movementUnit ||
       (["bubble-sort", "selection-sort", "quick-sort", "heap-sort"].includes(algorithm)

@@ -1,7 +1,7 @@
 import assert from "node:assert/strict"
 import { createHash } from "node:crypto"
 import { EventEmitter } from "node:events"
-import { readFileSync } from "node:fs"
+import { readFileSync, readdirSync } from "node:fs"
 import { dirname, join } from "node:path"
 import { setTimeout as delay } from "node:timers/promises"
 import test from "node:test"
@@ -28,6 +28,7 @@ const cases = [
   "bucket-sort",
   "cyclic-sort",
   "introsort",
+  "tim-sort",
   "bfs",
   "dfs",
   "dijkstra",
@@ -385,6 +386,15 @@ test("styles are compiled from real SCSS without runtime injection", () => {
   assert.ok(contrastRatio("#1f2937", "#fbbf24") >= 4.5)
 })
 
+test("family SCSS leaves bar-number typography to canonical bars", () => {
+  const familyStyles = readdirSync(join(here, "src", "styles"))
+    .filter((file) => file.endsWith(".scss") && file !== "bars.scss")
+    .map((file) => readFileSync(join(here, "src", "styles", file), "utf8"))
+    .join("\n")
+
+  assert.doesNotMatch(familyStyles, /\.steptrace__num/)
+})
+
 test("the watcher handles Chokidar add and atomic-change events", async () => {
   const events = new EventEmitter()
   events.close = async () => {}
@@ -468,7 +478,7 @@ test("all built-in algorithms preserve their headless frame contract", () => {
 
   assert.equal(
     digest,
-    "b4755a50a103ceaf38b2f787beca827ff9256dd10afcc4691d1afbfc827dd647",
+    "f14d98aa5678ef84132e6687591053dfaaab897b0f136a1361b6d662aab3e316",
     "the headless StepTrace behavior changed",
   )
 })
@@ -956,6 +966,7 @@ test("radix and bucket sorts share one stable bucket-board renderer", () => {
       styleSource,
       /\.steptrace__distribution-bars \{[\s\S]*height: clamp\(4\.6rem, 16vh, 6\.5rem\);/,
     )
+    assert.doesNotMatch(styleSource, /\.steptrace__distribution-bars \.steptrace__num/)
     assert.match(
       styleSource,
       /\.steptrace__distribution-bucket-board \{[\s\S]*grid-template-columns: repeat\(\s*var\(--_bucket-count, 1\),\s*minmax\(0, 1fr\)\s*\);[\s\S]*block-size: clamp\(7rem, 17vh, 8\.5rem\);[\s\S]*overflow: hidden;[\s\S]*border: 1px solid var\(--_distribution-border\);[\s\S]*border-radius: var\(--_distribution-radius\);/,
@@ -976,11 +987,43 @@ test("radix and bucket sorts share one stable bucket-board renderer", () => {
     )
     assert.match(
       styleSource,
+      /\.steptrace__distribution\[data-profile="radix"\] \{[\s\S]*?grid-template-rows: minmax\(0, 1fr\) auto auto auto;/,
+    )
+    assert.match(
+      styleSource,
+      /\.steptrace__distribution\[data-profile="radix"\] \.steptrace__distribution-band:first-child \{[\s\S]*?grid-template-rows: auto minmax\(0, 1fr\);[\s\S]*?row-gap: 0\.5rem;/,
+    )
+    assert.match(
+      styleSource,
+      /\.steptrace__distribution\[data-profile="radix"\] \.steptrace__distribution-band:first-child \{[\s\S]*?padding-bottom: 0\.9rem;/,
+    )
+    assert.match(
+      styleSource,
+      /\.steptrace__distribution\[data-profile="radix"\] \.steptrace__distribution-band:first-child \.steptrace__distribution-bars \{[\s\S]*?min-block-size: 0;[\s\S]*?overflow: hidden;/,
+    )
+    assert.match(
+      styleSource,
+      /\.steptrace__distribution\[data-profile="radix"\] \.steptrace__distribution-band:is\(:nth-child\(2\), :nth-child\(4\)\) \{[\s\S]*?padding-top: 0\.9rem;[\s\S]*?border-top: 1px solid var\(--_hair\);/,
+    )
+    assert.match(
+      styleSource,
+      /\.steptrace__distribution\[data-profile="radix"\] \.steptrace__distribution-band:nth-child\(2\) \{[\s\S]*?padding-bottom: 0\.9rem;/,
+    )
+    assert.match(
+      styleSource,
       /\.steptrace__distribution-lane:first-child\[data-active="1"\]::after \{[\s\S]*border-start-start-radius:/,
     )
     assert.match(
       styleSource,
       /@container steptrace-distribution \(max-width: 50rem\) \{[\s\S]*\.steptrace__distribution\[data-profile="radix"\] \.steptrace__distribution-bucket-board \{[\s\S]*grid-template-columns: repeat\(5, minmax\(0, 1fr\)\);[\s\S]*grid-template-rows: repeat\(2, minmax\(0, 1fr\)\);[\s\S]*block-size: 9\.25rem;/,
+    )
+    assert.match(
+      styleSource,
+      /@media \(max-width: 560px\) \{[\s\S]*\.steptrace__distribution\[data-profile="radix"\] \.steptrace__distribution-bucket-board \{[\s\S]*block-size: 8rem;/,
+    )
+    assert.match(
+      styleSource,
+      /@media \(max-width: 560px\) \{[\s\S]*\.steptrace__distribution\[data-profile="radix"\] \.steptrace__distribution-bars--output \{[\s\S]*height: 4\.75rem;/,
     )
     assert.match(
       styleSource,
@@ -2113,6 +2156,192 @@ test("introsort rejects invalid threshold configurations", () => {
       }),
     /smallPartitionThreshold.*positive integer/,
   )
+})
+
+test("tim sort keeps natural runs contiguous while it reverses, extends, collapses, and force-merges", () => {
+  const api = loadEngine(readFileSync(join(here, "generated", "engine.js"), "utf8"))
+  const { summaryFor } = loadStepTraceModule("src", "render.ts")
+  const result = api.buildFrames({
+    algorithm: "tim-sort",
+    array: [5, 6, 7, 8, 9, 4, 3, 1, 2, 8],
+    minrun: 4,
+  })
+  const { runStackFamily, runStackWatch } = loadStepTraceModule(
+    "src",
+    "families",
+    "run-stack.ts",
+  )
+  const note = readFileSync(
+    join(repoRoot, "Vault", "Home", "Computer Science", "Algorithms", "Sorting Algorithms", "Tim Sort.md"),
+    "utf8",
+  )
+  const source = readFileSync(join(here, "src", "algorithms", "tim-sort.ts"), "utf8")
+  const familySource = readFileSync(join(here, "src", "families", "run-stack.ts"), "utf8")
+  const renderSource = readFileSync(join(here, "src", "render.ts"), "utf8")
+  const mountSource = readFileSync(join(here, "src", "mount.ts"), "utf8")
+  const typesSource = readFileSync(join(here, "src", "types.ts"), "utf8")
+  const pointerStyles = readFileSync(join(here, "src", "styles", "pointers.scss"), "utf8")
+  const barStyles = readFileSync(join(here, "src", "styles", "bars.scss"), "utf8")
+  const sharedStyles = readFileSync(join(here, "src", "styles", "shared.scss"), "utf8")
+  const styles = readFileSync(join(here, "src", "styles", "run-stack.scss"), "utf8")
+  const pushes = result.frames.filter((frame) => frame.type === "push")
+  const insertion = result.frames.filter((frame) => frame.type === "insert")
+  const firstMerge = result.frames.find((frame) => frame.type === "merge")
+  const forced = result.frames.find((frame) => frame.type === "force-merge")
+
+  assert.equal(result.family.id, "run-stack")
+  assert.equal(runStackFamily.id, "run-stack")
+  assert.deepEqual(
+    runStackWatch(result.frames[0]).map((row) => row.hint),
+    [
+      "What Tim sort is doing in this frame.",
+      "Array span currently detected, extended, or merged.",
+      "Saved contiguous run lengths, from stack bottom to top.",
+      "Newest run at the top of the stack.",
+    ],
+  )
+  assert.deepEqual(
+    pushes.map((frame) => frame.stack.map((run) => run.length)),
+    [[5], [5, 4], [5, 4, 1]],
+  )
+  assert.equal(result.frames.find((frame) => frame.type === "detect")?.direction, "ascending")
+  assert.equal(result.frames.find((frame) => frame.type === "reverse")?.direction, "descending")
+  assert.ok(insertion.some((frame) => frame.insertion?.source === 8 && frame.insertion.target === 6))
+  assert.deepEqual(
+    result.frames.find((frame) => frame.type === "check" && frame.invariant?.z != null)?.invariant,
+    { x: 1, y: 4, z: 5, holds: false },
+  )
+  assert.deepEqual(firstMerge.stack.map((run) => [run.start, run.length]), [[0, 5], [5, 5]])
+  assert.equal(forced, undefined)
+  const forceResult = api.buildFrames({ algorithm: "tim-sort", array: [5, 6, 7, 8, 9, 4, 3, 1, 2], minrun: 4 })
+  assert.deepEqual(forceResult.frames.find((frame) => frame.type === "force-merge")?.stack, [
+    { start: 0, length: 9 },
+  ])
+  assert.deepEqual(result.frames.at(-1).array, [1, 2, 3, 4, 5, 6, 7, 8, 8, 9])
+  assert.equal(result.frames.at(-1).type, "done")
+  assert.equal(
+    summaryFor("tim-sort", "sort", result.frames.at(-1)),
+    "Output [1, 2, 3, 4, 5, 6, 7, 8, 8, 9] · 2 run-stack merges.",
+  )
+  assert.doesNotMatch(summaryFor("tim-sort", "sort", result.frames.at(-1)), /undefined/)
+  assert.match(note, /"algorithm": "tim-sort"/)
+  assert.match(source, /value < ops\.value\[mid\]/)
+  assert.match(source, /ops\.reverse/)
+  assert.match(source, /ops\.merge\(\n            mergeIndex,/)
+  assert.match(familySource, /makeBars\(arrayBars, length\)/)
+  assert.doesNotMatch(familySource, /makeArrayStrip|run-array-(?:cell|index|value)/)
+  assert.match(
+    renderSource,
+    /export function makeArrayStrip[\s\S]*?steptrace__pwrap[\s\S]*?steptrace__pcells[\s\S]*?steptrace__pcell/,
+  )
+  assert.match(
+    renderSource,
+    /export function makePointerView[\s\S]*?makeArrayStrip\(frames\[0\]\.array\)/,
+  )
+  assert.match(pointerStyles, /height: 46px/)
+  assert.match(pointerStyles, /border-radius: 9px/)
+  assert.match(pointerStyles, /overflow: hidden/)
+  assert.match(typesSource, /stageAlignment\?: "bottom" \| "center"/)
+  assert.match(mountSource, /view\.stageAlignment \|\| "center"/)
+  assert.match(mountSource, /stageCol\.classList\.toggle\("steptrace__stage-col--bottom", stageAlignment === "bottom"\)/)
+  assert.match(mountSource, /stageCol\.classList\.toggle\("steptrace__stage-col--center", stageAlignment === "center"\)/)
+  assert.match(renderSource, /return \{ nodes: \[stage, status\], stageAlignment: "bottom", paint, watch/)
+  assert.match(renderSource, /export function makeMatchView[\s\S]*?return \{ nodes, paint, watch, destroy:/)
+  assert.match(renderSource, /export function makePointerView[\s\S]*?return \{ nodes: \[wrap, status\], paint, watch \}/)
+  assert.match(renderSource, /stageLayout: "fill"/)
+  assert.match(styles, /\.steptrace__run-stack-cards/)
+  assert.match(styles, /min-block-size: 8\.1rem/)
+  assert.match(
+    sharedStyles,
+    /@media \(max-width: 560px\) \{[\s\S]*?\.steptrace__rail\s*\{[\s\S]*?border-top: 1px solid var\(--_hair\);[\s\S]*?padding-top: 1rem;[\s\S]*?margin-top: 1rem;/,
+  )
+  assert.match(
+    sharedStyles,
+    /@media \(max-width: 560px\)[\s\S]*?\.steptrace--stable-stage \.steptrace__trace\s*\{[\s\S]*?--_stable-trace-height: clamp\(4\.75rem, 16dvh, 5\.75rem\);[\s\S]*?flex: 0 0 var\(--_stable-trace-height\);[\s\S]*?block-size: var\(--_stable-trace-height\);[\s\S]*?overflow: hidden;/,
+  )
+  assert.match(
+    sharedStyles,
+    /\.steptrace--stable-stage \.steptrace__log\s*\{[\s\S]*?overflow-y: auto !important;[\s\S]*?overscroll-behavior: contain;/,
+  )
+  assert.match(styles, /\.steptrace__run-array-section\s*\{[\s\S]*?padding-bottom: 0\.9rem;/)
+  assert.match(styles, /\.steptrace__run-bars\s*\{[\s\S]*?align-self: end;[\s\S]*?block-size: 100%;[\s\S]*?min-block-size: 0;[\s\S]*?overflow: hidden;/)
+  assert.match(styles, /\.steptrace__run-stack-section\s*\{[\s\S]*?padding-top: 0\.9rem;[\s\S]*?border-top: 1px solid var\(--_hair\);/)
+  assert.match(styles, /data-motion="push"[\s\S]*?steptrace-run-stack-push/)
+  assert.match(styles, /data-motion="insert"[\s\S]*?steptrace-run-stack-insert/)
+  assert.match(styles, /data-motion="merge"[\s\S]*?steptrace-run-stack-merge/)
+  assert.match(familySource, /bar\.bar\.dataset\.motion = frame\.type === "insert"/)
+  assert.match(familySource, /isSorted \? "sorted" : isInsert \? "candidate" : isCurrent \? "compare" : ""/)
+  assert.match(styles, /data-run="0"\]\[data-state=""\]/)
+  assert.doesNotMatch(styles, /data-current="1"\][\s\S]*?box-shadow|data-insert="1"\][\s\S]*?box-shadow/)
+  assert.match(barStyles, /\.steptrace__bar\[data-state="sorted"\] \.steptrace__fill \{\n  background: var\(--_green\);/)
+  assert.doesNotMatch(familySource, /dataset\.motion = "remove"|dataset\.state = "removed"/)
+  assert.doesNotMatch(styles, /run-array-(?:cell|index|value)|steptrace__pwrap|steptrace__pcells|steptrace__pcell\s*\{/)
+  assert.doesNotMatch(styles, /glow|drop-shadow/)
+})
+
+test("tim sort rejects invalid minimum-run settings", () => {
+  const api = loadEngine(readFileSync(join(here, "generated", "engine.js"), "utf8"))
+  assert.throws(
+    () => api.buildFrames({ algorithm: "tim-sort", array: [3, 2, 1], minrun: 1 }),
+    /minrun.*at least 2/,
+  )
+})
+
+test("tim sort run-stack cards display only the current stack entries", () => {
+  class FakeNode {
+    constructor(tagName) {
+      this.tagName = tagName
+      this.textContent = ""
+      this.innerHTML = ""
+      this.children = []
+      this.attributes = new Map()
+      this.dataset = {}
+      this.style = { setProperty: (key, value) => this.attributes.set(`style:${key}`, value) }
+      this.className = ""
+      this.hidden = false
+    }
+    setAttribute(key, value) {
+      this.attributes.set(key, String(value))
+    }
+    append(...children) {
+      this.children.push(...children)
+    }
+  }
+  const previousDocument = globalThis.document
+  globalThis.document = { createElement: (tagName) => new FakeNode(tagName) }
+  try {
+    const api = loadEngine(readFileSync(join(here, "generated", "engine.js"), "utf8"))
+    const { makeRunStackView } = loadStepTraceModule("src", "families", "run-stack.ts")
+    const frames = api.buildFrames({
+      algorithm: "tim-sort",
+      array: [5, 6, 7, 8, 9, 4, 3, 1, 2, 8],
+      minrun: 4,
+    }).frames
+    const merge = frames.find((frame) => frame.type === "merge")
+    const done = frames.at(-1)
+    const view = makeRunStackView(frames)
+    view.paint(merge)
+    const stack = view.nodes[0].children[1].children[1]
+    const visibleLabels = stack.children
+      .filter((card) => !card.hidden)
+      .map((card) => card.children[0].textContent)
+      .sort()
+    const currentLabels = merge.stack
+      .map((run, index) => `R${index + 1} [${run.start}…${run.start + run.length - 1}] · ${run.length}`)
+      .sort()
+
+    assert.deepEqual(visibleLabels, currentLabels)
+
+    view.paint(done)
+    const bars = view.nodes[0].children[0].children[1]
+    assert.ok(
+      bars.children.every(
+        (bar) => bar.dataset.state === "sorted" && bar.dataset.current === "0" && bar.dataset.insert === "0",
+      ),
+    )
+  } finally {
+    globalThis.document = previousDocument
+  }
 })
 
 test("exponential search gallops to a bracket before reusing indexed binary-search states", () => {

@@ -37,6 +37,7 @@ import { topologicalSort } from "./topological-sort"
 import { twoPointers } from "./two-pointers"
 import { unionFind } from "./union-find"
 import { ternarySearch } from "./ternary-search"
+import { timSort } from "./tim-sort"
 
 export const builtInAlgorithms = [
   bubbleSort,
@@ -53,6 +54,7 @@ export const builtInAlgorithms = [
   bucketSort,
   cyclicSort,
   introsort,
+  timSort,
   exponentialSearch,
   interpolationSearch,
   jumpSearch,

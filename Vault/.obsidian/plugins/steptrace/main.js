@@ -1733,7 +1733,7 @@ function makeSortView(frames, semantics = legacySortViewSemantics) {
     rows.push({ k: semantics.movementLabel, v: frame.swaps, sw: "var(--_amber)" });
     return rows;
   }
-  return { nodes: [stage, status], paint, watch, destroy: tracker.destroy };
+  return { nodes: [stage, status], stageAlignment: "bottom", paint, watch, destroy: tracker.destroy };
 }
 function makeMarker(label, role) {
   const wrap = el("div", "steptrace__marker steptrace__marker--" + role);
@@ -2015,7 +2015,7 @@ function makeSearchView(frames, semantics = legacySearchViewSemantics) {
   function watch(frame) {
     return semantics.watchRows(frame, frames);
   }
-  return { nodes: [stage, status], paint, watch };
+  return { nodes: [stage, status], stageAlignment: "bottom", paint, watch };
 }
 function boundaryTicks(lower, upper) {
   const span = upper - lower;
@@ -2242,6 +2242,18 @@ function makeMatchView(frames) {
   const nodes = hasHash ? [stage, hashBadge, status] : [stage, status];
   return { nodes, paint, watch, destroy: () => ro && ro.disconnect() };
 }
+function makeArrayStrip(values) {
+  const wrap = el("div", "steptrace__pwrap");
+  const strip = el("div", "steptrace__pcells");
+  const cells = values.map((value) => {
+    const cell = el("div", "steptrace__pcell");
+    cell.textContent = String(value);
+    strip.append(cell);
+    return cell;
+  });
+  wrap.append(strip);
+  return { wrap, strip, cells };
+}
 function makePointerView(frames) {
   const n = frames[0].array.length;
   const ptrNames = (function() {
@@ -2251,20 +2263,12 @@ function makePointerView(frames) {
     }
     return [];
   })();
-  const wrap = el("div", "steptrace__pwrap");
-  const strip = el("div", "steptrace__pcells");
-  const cells = [];
-  for (let k = 0; k < n; k++) {
-    const cell = el("div", "steptrace__pcell");
-    cell.textContent = frames[0].array[k];
-    strip.append(cell);
-    cells.push(cell);
-  }
+  const { wrap, cells } = makeArrayStrip(frames[0].array);
   const brackets = el("div", "steptrace__pbrackets");
   const brL = el("div", "steptrace__pbr steptrace__pbr--l");
   const brR = el("div", "steptrace__pbr steptrace__pbr--r");
   brackets.append(brL, brR);
-  wrap.append(strip, brackets);
+  wrap.append(brackets);
   const status = statusEl();
   function paint(frame) {
     const win = frame.window;
@@ -3682,6 +3686,8 @@ function summaryFor(algorithm, kind, frame, graph) {
     }
     if (algorithm === "merge-sort")
       return `Output [${frame.array.join(", ")}] · ${frame.swaps} writes.`;
+    if (algorithm === "tim-sort")
+      return `Output [${frame.array.join(", ")}] · ${frame.merges} run-stack merge${frame.merges === 1 ? "" : "s"}.`;
     const unit = frame.movementUnit || (["bubble-sort", "selection-sort", "quick-sort", "heap-sort"].includes(algorithm) ? "swaps" : "moves");
     const comparisons = frame.showComparisons === false ? "" : `${frame.comparisons} comparisons · `;
     return `Output [${frame.array.join(", ")}] · ${comparisons}${frame.swaps} ${unit}.`;
@@ -9131,6 +9137,395 @@ var init_ternary_search = __esm({
   }
 });
 
+// custom/steptrace/src/families/run-stack.ts
+function runLabel(run) {
+  return `[${run.start}…${run.start + run.length - 1}] · ${run.length}`;
+}
+function stackRunFor(frame, index) {
+  return frame.stack[index] || null;
+}
+function runAt(frame, index) {
+  return frame.stack.findIndex((run) => run.start <= index && index < run.start + run.length);
+}
+function runStackWatch(frame) {
+  const top = frame.stack.at(-1);
+  return [
+    {
+      k: "phase",
+      v: frame.type.replace("-", " "),
+      sw: "var(--_violet)",
+      hint: "What Tim sort is doing in this frame."
+    },
+    {
+      k: "run",
+      v: frame.current ? runLabel(frame.current) : "—",
+      sw: "var(--_blue)",
+      hint: "Array span currently detected, extended, or merged."
+    },
+    {
+      k: "stack",
+      v: frame.stack.map((run) => run.length).join(" · ") || "empty",
+      sw: "var(--_amber)",
+      hint: "Saved contiguous run lengths, from stack bottom to top."
+    },
+    {
+      k: "top",
+      v: top ? runLabel(top) : "—",
+      sw: "var(--_green)",
+      hint: "Newest run at the top of the stack."
+    }
+  ];
+}
+function makeRunStackView(frames) {
+  const length = frames[0].array.length;
+  const root = el("div", "steptrace__run-stack");
+  root.setAttribute("role", "region");
+  root.setAttribute("aria-label", "Tim sort run stack");
+  const arrayLabel = el("div", "steptrace__rail-label steptrace__run-stack-label");
+  arrayLabel.textContent = "Array runs";
+  const arraySection = el("div", "steptrace__run-array-section");
+  const arrayBars = el("div", "steptrace__stage steptrace__run-bars");
+  const bars = makeBars(arrayBars, length);
+  const stackLabel = el("div", "steptrace__rail-label steptrace__run-stack-label");
+  stackLabel.textContent = "Run stack · top";
+  const stackSection = el("div", "steptrace__run-stack-section");
+  const stack = el("div", "steptrace__run-stack-cards");
+  const stackCards = Array.from({ length }, () => {
+    const card = el("div", "steptrace__run-stack-card");
+    const title = el("div", "steptrace__run-stack-title");
+    const values = el("div", "steptrace__run-stack-values");
+    card.append(title, values);
+    card.hidden = true;
+    stack.append(card);
+    return { card, title, values };
+  });
+  const invariant = el("div", "steptrace__run-invariant");
+  arraySection.append(arrayLabel, arrayBars);
+  stackSection.append(stackLabel, stack, invariant);
+  root.append(arraySection, stackSection);
+  const status = statusEl();
+  const maxValue = Math.max(...frames[0].array, 1);
+  let previousStack = [];
+  function paint(frame) {
+    for (let index = 0; index < length; index++) {
+      const bar = bars[index];
+      const runIndex = runAt(frame, index);
+      bar.fill.style.height = barHeightStyle(frame.array[index], maxValue);
+      bar.num.textContent = String(frame.array[index]);
+      if (runIndex >= 0) bar.bar.dataset.run = String(runIndex % 4);
+      else delete bar.bar.dataset.run;
+      bar.bar.dataset.processed = index < frame.processed ? "1" : "0";
+      const isSorted = frame.type === "done";
+      const isCurrent = !isSorted && frame.current != null && index >= frame.current.start && index < frame.current.start + frame.current.length;
+      const isInsert = !isSorted && frame.insertion?.target === index;
+      bar.bar.dataset.current = isCurrent ? "1" : "0";
+      bar.bar.dataset.insert = isInsert ? "1" : "0";
+      bar.bar.dataset.motion = frame.type === "insert" && isInsert ? "insert" : "";
+      bar.bar.dataset.state = isSorted ? "sorted" : isInsert ? "candidate" : isCurrent ? "compare" : "";
+      bar.bar.setAttribute(
+        "aria-label",
+        `Index ${index}, value ${frame.array[index]}${runIndex >= 0 ? `, run ${runIndex + 1}` : ""}`
+      );
+    }
+    for (let cardIndex = 0; cardIndex < stackCards.length; cardIndex++) {
+      const card = stackCards[cardIndex];
+      const run = stackRunFor(frame, frame.stack.length - cardIndex - 1);
+      if (!run) {
+        card.card.hidden = true;
+        continue;
+      }
+      const stackIndex = frame.stack.length - cardIndex - 1;
+      card.card.hidden = false;
+      card.title.textContent = `R${stackIndex + 1} ${runLabel(run)}`;
+      card.values.textContent = `[${frame.array.slice(run.start, run.start + run.length).join(", ")}]`;
+      card.card.dataset.active = frame.current?.start === run.start ? "1" : "0";
+      card.card.dataset.merged = frame.mergeIndex != null && (stackIndex === frame.mergeIndex || stackIndex === frame.mergeIndex + 1) ? "1" : "0";
+      card.card.dataset.run = String(stackIndex % 4);
+      const previous = previousStack[stackIndex];
+      card.card.dataset.motion = frame.type === "push" && stackIndex === frame.stack.length - 1 ? "push" : frame.type === "check" ? "check" : frame.type === "merge" || frame.type === "force-merge" ? "merge" : previous?.start !== run.start || previous?.length !== run.length ? "reflow" : "";
+    }
+    const check = frame.invariant;
+    invariant.textContent = check ? `X=${check.x ?? "—"}, Y=${check.y ?? "—"}, Z=${check.z ?? "—"}${check.holds == null ? "" : check.holds ? " · holds" : " · merge"}` : frame.type === "force-merge" ? "Final collapse: merge adjacent runs until one remains." : `minrun ${frame.minrun} · ${frame.merges} merge${frame.merges === 1 ? "" : "s"}`;
+    invariant.dataset.state = check?.holds === false ? "merge" : check?.holds ? "holds" : "";
+    status.textContent = frame.message;
+    previousStack = frame.stack;
+  }
+  return {
+    nodes: [root, status],
+    stageLayout: "fill",
+    stableStage: true,
+    paint,
+    watch: runStackWatch
+  };
+}
+var RunStackRecorder, runStackFamily;
+var init_run_stack = __esm({
+  "custom/steptrace/src/families/run-stack.ts"() {
+    init_render();
+    RunStackRecorder = class {
+      constructor(config) {
+        this.config = config;
+        this.array = config.array.slice();
+      }
+      config;
+      frames = [];
+      array;
+      stack = [];
+      current = null;
+      direction = null;
+      processed = 0;
+      insertion = null;
+      mergeIndex = null;
+      invariant = null;
+      merges = 0;
+      get value() {
+        return this.array.slice();
+      }
+      init(message) {
+        this.pushFrame("init", message);
+      }
+      detect(run, direction, message) {
+        this.current = { ...run };
+        this.direction = direction;
+        this.insertion = null;
+        this.mergeIndex = null;
+        this.invariant = null;
+        this.pushFrame("detect", message);
+      }
+      reverse(run, message) {
+        this.array.splice(run.start, run.length, ...this.array.slice(run.start, run.start + run.length).reverse());
+        this.current = { ...run };
+        this.pushFrame("reverse", message);
+      }
+      extend(run, message) {
+        this.current = { ...run };
+        this.insertion = null;
+        this.pushFrame("extend", message);
+      }
+      insert(run, source, target, sortedEnd, message) {
+        const value = this.array[source];
+        for (let index = source; index > target; index--) this.array[index] = this.array[index - 1];
+        this.array[target] = value;
+        this.current = { ...run };
+        this.insertion = { source, target, sortedEnd };
+        this.pushFrame("insert", message);
+      }
+      push(run, message) {
+        this.stack.push({ ...run });
+        this.current = { ...run };
+        this.direction = null;
+        this.insertion = null;
+        this.processed = run.start + run.length;
+        this.mergeIndex = null;
+        this.invariant = null;
+        this.pushFrame("push", message);
+      }
+      check(message) {
+        const x = this.stack.at(-1)?.length ?? null;
+        const y = this.stack.at(-2)?.length ?? null;
+        const z = this.stack.at(-3)?.length ?? null;
+        this.current = null;
+        this.insertion = null;
+        this.mergeIndex = null;
+        this.invariant = {
+          x,
+          y,
+          z,
+          holds: x == null || y == null ? null : y > x && (z == null || z > y + x)
+        };
+        this.pushFrame("check", message);
+      }
+      merge(index, forced, message) {
+        const left = this.stack[index];
+        const right = this.stack[index + 1];
+        if (!left || !right || left.start + left.length !== right.start)
+          throw new Error("steptrace: tim-sort can only merge adjacent run spans.");
+        const leftValues = this.array.slice(left.start, left.start + left.length);
+        const rightValues = this.array.slice(right.start, right.start + right.length);
+        const merged = [];
+        let i = 0;
+        let j = 0;
+        while (i < leftValues.length && j < rightValues.length) {
+          if (leftValues[i] <= rightValues[j]) merged.push(leftValues[i++]);
+          else merged.push(rightValues[j++]);
+        }
+        merged.push(...leftValues.slice(i), ...rightValues.slice(j));
+        this.array.splice(left.start, merged.length, ...merged);
+        this.stack.splice(index, 2, { start: left.start, length: left.length + right.length });
+        this.current = this.stack[index];
+        this.insertion = null;
+        this.mergeIndex = index;
+        this.invariant = null;
+        this.merges++;
+        this.pushFrame(forced ? "force-merge" : "merge", message);
+      }
+      done(message) {
+        this.current = null;
+        this.direction = null;
+        this.insertion = null;
+        this.mergeIndex = null;
+        this.invariant = null;
+        this.pushFrame("done", message);
+      }
+      pushFrame(type, message) {
+        this.frames.push(
+          Object.freeze({
+            type,
+            profile: this.config.profile,
+            array: this.array.slice(),
+            stack: this.stack.map((run) => Object.freeze({ ...run })),
+            current: this.current ? Object.freeze({ ...this.current }) : null,
+            direction: this.direction,
+            processed: this.processed,
+            minrun: this.config.minrun,
+            insertion: this.insertion ? Object.freeze({ ...this.insertion }) : null,
+            mergeIndex: this.mergeIndex,
+            invariant: this.invariant ? Object.freeze({ ...this.invariant }) : null,
+            merges: this.merges,
+            message
+          })
+        );
+      }
+    };
+    runStackFamily = {
+      id: "run-stack",
+      createRecorder(config) {
+        return new RunStackRecorder(config);
+      },
+      createView(frames) {
+        return makeRunStackView(frames);
+      }
+    };
+  }
+});
+
+// custom/steptrace/src/algorithms/tim-sort.ts
+function invalidConfig10(message) {
+  throw new Error(`steptrace: tim-sort ${message}`);
+}
+function parseTimSortConfig(config) {
+  const { array } = config;
+  if (!Array.isArray(array) || array.length < 2)
+    invalidConfig10('requires an "array" with at least two numbers.');
+  if (!array.every((value) => typeof value === "number" && Number.isFinite(value)))
+    invalidConfig10('requires every "array" value to be a finite number.');
+  const minrun = config.minrun ?? Math.min(array.length, 4);
+  if (!Number.isInteger(minrun) || minrun < 2)
+    invalidConfig10('requires "minrun" to be an integer of at least 2.');
+  return { array: array.slice(), minrun: Math.min(minrun, array.length), profile: "tim-sort" };
+}
+function runLabel2(start, length) {
+  return `[${start}, ${start + length - 1}]`;
+}
+var timSort;
+var init_tim_sort = __esm({
+  "custom/steptrace/src/algorithms/tim-sort.ts"() {
+    init_run_stack();
+    timSort = {
+      id: "tim-sort",
+      kind: "sort",
+      family: runStackFamily,
+      meta: { label: "Tim sort" },
+      parse: parseTimSortConfig,
+      run(input, ops) {
+        const n = ops.value.length;
+        ops.init(`Scan natural runs, extend short runs to minrun ${input.minrun}, then merge the run stack.`);
+        function mergeCollapse() {
+          while (true) {
+            const stack = ops.frames.at(-1)?.stack || [];
+            if (stack.length < 2) return;
+            const n2 = stack.length - 2;
+            const x = stack[n2 + 1].length;
+            const y = stack[n2].length;
+            const z = n2 > 0 ? stack[n2 - 1].length : null;
+            const w = n2 > 1 ? stack[n2 - 2].length : null;
+            const deeperViolation = w != null && z != null && w <= z + y;
+            const threeRunViolation = z != null && z <= y + x;
+            const pairViolation = y <= x;
+            ops.check(
+              `Check X=${x}, Y=${y}${z == null ? "" : `, Z=${z}`}: ${threeRunViolation || pairViolation || deeperViolation ? "merge is required" : "invariants hold"}.`
+            );
+            if (threeRunViolation || deeperViolation) {
+              const mergeIndex = z != null && z < x ? n2 - 1 : n2;
+              ops.merge(
+                mergeIndex,
+                false,
+                `Invariant collapse: merge adjacent runs ${runLabel2(stack[mergeIndex].start, stack[mergeIndex].length)} and ${runLabel2(stack[mergeIndex + 1].start, stack[mergeIndex + 1].length)}.`
+              );
+            } else if (pairViolation) {
+              ops.merge(
+                n2,
+                false,
+                `Top pair violates Y > X: merge adjacent runs ${runLabel2(stack[n2].start, stack[n2].length)} and ${runLabel2(stack[n2 + 1].start, stack[n2 + 1].length)}.`
+              );
+            } else return;
+          }
+        }
+        let start = 0;
+        while (start < n) {
+          let end = start + 1;
+          const descending = end < n && ops.value[end] < ops.value[start];
+          if (descending) {
+            while (end < n && ops.value[end] < ops.value[end - 1]) end++;
+          } else {
+            while (end < n && ops.value[end] >= ops.value[end - 1]) end++;
+          }
+          let length = end - start;
+          ops.detect(
+            { start, length },
+            descending ? "descending" : "ascending",
+            `Detect ${descending ? "strictly descending" : "ascending"} natural run ${runLabel2(start, length)}.`
+          );
+          if (descending)
+            ops.reverse(
+              { start, length },
+              `Reverse the strictly descending run ${runLabel2(start, length)}; equal keys never entered it.`
+            );
+          const forcedLength = Math.min(input.minrun, n - start);
+          if (length < forcedLength) {
+            ops.extend(
+              { start, length: forcedLength },
+              `Extend ${runLabel2(start, length)} to minrun ${forcedLength} with stable binary insertion.`
+            );
+            for (let source = start + length; source < start + forcedLength; source++) {
+              const value = ops.value[source];
+              let lo = start;
+              let hi = source;
+              while (lo < hi) {
+                const mid = lo + hi >> 1;
+                if (value < ops.value[mid]) hi = mid;
+                else lo = mid + 1;
+              }
+              ops.insert(
+                { start, length: forcedLength },
+                source,
+                lo,
+                source,
+                `Binary-insert ${value} at index ${lo}; equals stay after earlier equals for stability.`
+              );
+            }
+            length = forcedLength;
+          }
+          ops.push({ start, length }, `Push contiguous run ${runLabel2(start, length)} onto the stack.`);
+          mergeCollapse();
+          start += length;
+        }
+        while ((ops.frames.at(-1)?.stack.length || 0) > 1) {
+          const stack = ops.frames.at(-1).stack;
+          let index = stack.length - 2;
+          if (index > 0 && stack[index - 1].length < stack[index + 1].length) index--;
+          ops.merge(
+            index,
+            true,
+            `Force final merge of adjacent runs ${runLabel2(stack[index].start, stack[index].length)} and ${runLabel2(stack[index + 1].start, stack[index + 1].length)}.`
+          );
+        }
+        ops.done(`One run remains: sorted stably after ${ops.frames.at(-1)?.merges || 0} adjacent merges.`);
+      }
+    };
+  }
+});
+
 // custom/steptrace/src/algorithms/index.ts
 var builtInAlgorithms;
 var init_algorithms = __esm({
@@ -9173,6 +9568,7 @@ var init_algorithms = __esm({
     init_two_pointers();
     init_union_find();
     init_ternary_search();
+    init_tim_sort();
     builtInAlgorithms = [
       bubbleSort,
       insertionSort,
@@ -9188,6 +9584,7 @@ var init_algorithms = __esm({
       bucketSort,
       cyclicSort,
       introsort,
+      timSort,
       exponentialSearch,
       interpolationSearch,
       jumpSearch,
@@ -9955,11 +10352,10 @@ function createMount(registry2) {
       currentView = view;
       if (built.kind === "graph") syncStartOptions(built.graph);
       const fillStage = view.stageLayout === "fill";
+      const stageAlignment = fillStage || built.kind === "graph" ? null : view.stageAlignment || "center";
       root.classList.toggle("steptrace--stable-stage", view.stableStage === true);
-      stageCol.classList.toggle(
-        "steptrace__stage-col--bottom",
-        built.kind !== "graph" && !fillStage
-      );
+      stageCol.classList.toggle("steptrace__stage-col--bottom", stageAlignment === "bottom");
+      stageCol.classList.toggle("steptrace__stage-col--center", stageAlignment === "center");
       stageCol.classList.toggle("steptrace__stage-col--graph", built.kind === "graph");
       stageCol.classList.toggle("steptrace__stage-col--fill", fillStage);
       const nodes = view.nodes.slice(0, -1);
