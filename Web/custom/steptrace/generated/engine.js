@@ -2481,32 +2481,39 @@
     const viewport = el("div", "steptrace__z-viewport");
     const board = el("div", "steptrace__z-board");
     board.style.setProperty("--_z-length", String(Math.max(text.length, 1)));
-    const prefixBand = el("div", "steptrace__z-band");
-    const prefixLabel = el("div", "steptrace__z-label");
-    prefixLabel.textContent = "prefix";
-    const prefixClip = el("div", "steptrace__z-lane steptrace__z-prefix-clip");
-    const prefixTrack = el("div", "steptrace__z-track");
+    const makeRail = (label) => {
+      const rail = el("div", "steptrace__z-rail");
+      const heading = el("div", "steptrace__rail-label steptrace__z-label");
+      heading.textContent = label;
+      rail.append(heading);
+      return rail;
+    };
+    const prefixRail = makeRail("prefix");
+    const prefixClip = el("div", "steptrace__z-prefix-clip");
+    const prefixTrack = el("div", "steptrace__cells steptrace__z-track");
     const prefixCells = [];
     for (let k = 0; k < text.length; k++) {
-      const cell = el("div", "steptrace__z-cell steptrace__z-cell--prefix");
+      const cell = el("div", "steptrace__cell steptrace__z-cell steptrace__z-cell--prefix");
       cell.textContent = text[k];
       prefixTrack.append(cell);
       prefixCells.push(cell);
     }
     prefixClip.append(prefixTrack);
-    prefixBand.append(prefixLabel, prefixClip);
-    const stringBand = el("div", "steptrace__z-band");
-    const stringLabel = el("div", "steptrace__z-label");
-    stringLabel.textContent = "S";
-    const stringRow = el("div", "steptrace__z-lane steptrace__z-string");
+    prefixRail.append(prefixClip);
+    const stringRail = makeRail("string");
+    const stringRow = el("div", "steptrace__cells steptrace__z-string");
     const stringCells = [];
     for (let k = 0; k < text.length; k++) {
-      const cell = el("div", "steptrace__z-cell steptrace__z-cell--string");
-      const index = el("span", "steptrace__z-index");
-      index.textContent = String(k);
+      const edge = k === text.length - 1 ? " steptrace__z-cell--edge-end" : "";
+      const cell = el(
+        "div",
+        `steptrace__cell steptrace__z-cell steptrace__z-cell--string${edge}`
+      );
       const value = el("span", "steptrace__z-char");
       value.textContent = text[k];
-      cell.append(index, value);
+      const index = el("span", "steptrace__z-index");
+      index.textContent = String(k);
+      cell.append(value, index);
       stringRow.append(cell);
       stringCells.push(cell);
     }
@@ -2515,39 +2522,20 @@
     const bracket = el("div", "steptrace__z-bracket");
     bracket.setAttribute("aria-hidden", "true");
     stringRow.append(bracket, cursor);
-    stringBand.append(stringLabel, stringRow);
-    const zBand = el("div", "steptrace__z-band");
-    const zLabel = el("div", "steptrace__z-label");
-    zLabel.textContent = "Z";
-    const zRow = el("div", "steptrace__z-lane steptrace__z-values");
+    stringRail.append(stringRow);
+    const zRail = makeRail("Z array");
+    const zRow = el("div", "steptrace__cells steptrace__z-values");
     const zCells = [];
     for (let k = 0; k < text.length; k++) {
-      const cell = el("div", "steptrace__z-cell steptrace__z-cell--value");
+      const cell = el("div", "steptrace__cell steptrace__z-cell steptrace__z-cell--value");
       cell.textContent = "·";
       zRow.append(cell);
       zCells.push(cell);
     }
-    const copyToken = el("div", "steptrace__z-copy");
-    copyToken.setAttribute("aria-hidden", "true");
-    zRow.append(copyToken);
-    zBand.append(zLabel, zRow);
-    board.append(prefixBand, stringBand, zBand);
+    zRail.append(zRow);
+    board.append(prefixRail, stringRail, zRail);
     viewport.append(board);
-    const legend = el("div", "steptrace__z-legend");
-    for (const [state, label] of [
-      ["compare", "character check"],
-      ["copy", "mirror reuse"],
-      ["commit", "committed Z"]
-    ]) {
-      const item = el("span", "steptrace__z-legend-item");
-      item.dataset.state = state;
-      const swatch = el("span", "steptrace__z-legend-swatch");
-      const textNode = el("span");
-      textNode.textContent = label;
-      item.append(swatch, textNode);
-      legend.append(item);
-    }
-    stage.append(viewport, legend);
+    stage.append(viewport);
     const status = statusEl();
     let currentFrame = frames[0];
     function applyGeom() {
@@ -2559,9 +2547,9 @@
       prefixTrack.style.transform = `translateX(${((i ?? 0) * cw).toFixed(2)}px)`;
       cursor.style.transform = `translateX(${((i ?? 0) * cw).toFixed(2)}px)`;
       bracket.style.transform = `translateX(${(l * cw).toFixed(2)}px)`;
-      bracket.style.width = `${Math.max(1, r - l + 1) * cw}px`;
-      const copyIndex = currentFrame.type === "copy" ? i : currentFrame.k;
-      copyToken.style.transform = `translateX(${((copyIndex ?? 0) * cw).toFixed(2)}px)`;
+      const shellEndInset = r === text.length - 1 ? 1 : 0;
+      const boxWidth = Math.max(1, r - l + 1) * cw;
+      bracket.style.width = `${Math.max(1, boxWidth - shellEndInset)}px`;
     }
     function ensureActiveVisible() {
       if (currentFrame.i == null) return;
@@ -2599,11 +2587,14 @@
       currentFrame = frame;
       stage.dataset.frame = frame.type;
       stage.dataset.case = frame.sourceCase || "";
-      prefixTrack.dataset.visible = frame.i == null ? "0" : "1";
-      cursor.dataset.visible = frame.i == null ? "0" : "1";
-      bracket.dataset.visible = frame.box ? "1" : "0";
-      copyToken.dataset.visible = frame.type === "copy" ? "1" : "0";
-      copyToken.textContent = frame.k == null ? "" : String(frame.z[frame.k] ?? "·");
+      const comparisonActive = !!frame.compare;
+      const copyActive = frame.type === "copy";
+      const boxActive = !!frame.box && frame.box[0] <= frame.box[1];
+      prefixClip.dataset.clipped = frame.i != null && frame.i > 0 ? "1" : "0";
+      bracket.dataset.edgeStart = boxActive && frame.box[0] === 0 ? "1" : "0";
+      bracket.dataset.edgeEnd = boxActive && frame.box[1] === text.length - 1 ? "1" : "0";
+      cursor.dataset.visible = frame.i != null && !comparisonActive && !copyActive ? "1" : "0";
+      bracket.dataset.visible = boxActive && !comparisonActive && !copyActive ? "1" : "0";
       for (let k = 0; k < text.length; k++) {
         prefixCells[k].dataset.state = "";
         stringCells[k].dataset.state = "";
@@ -2612,12 +2603,13 @@
         if (frame.box && k >= frame.box[0] && k <= frame.box[1]) stringCells[k].dataset.box = "1";
         else delete stringCells[k].dataset.box;
       }
-      if (frame.i != null && stringCells[frame.i]) stringCells[frame.i].dataset.state = "focus";
+      if (frame.i != null && !comparisonActive && !copyActive && stringCells[frame.i])
+        stringCells[frame.i].dataset.state = "probe";
       if (frame.type === "copy" && frame.k != null) {
         zCells[frame.k].dataset.state = "copy-source";
         zCells[frame.i].dataset.state = "copy-target";
       }
-      if (frame.type === "commit" && frame.i != null) zCells[frame.i].dataset.state = "commit";
+      if (frame.type === "commit" && frame.i != null) zCells[frame.i].dataset.state = "found";
       if (frame.compare) {
         const state = frame.compare.result;
         prefixCells[frame.compare.prefix].dataset.state = state;
@@ -2628,15 +2620,17 @@
     }
     function watch(frame) {
       const box = frame.box || [0, 0];
+      const boxValue = box[0] <= box[1] ? `[${box[0]}, ${box[1]}]` : "—";
+      const source = frame.sourceCase === "outside" ? "direct" : frame.sourceCase === "copy" && frame.k != null ? `copy Z[${frame.k}]` : frame.sourceCase === "reuse-extend" ? "extend edge" : "—";
       return [
-        { k: "i", v: frame.i ?? "—", sw: "var(--_blue)" },
-        { k: "case", v: frame.sourceCase || "initialize", sw: "var(--_neutral)" },
-        { k: "box", v: `[${box[0]}, ${box[1]}]`, sw: "var(--_violet)" },
         {
-          k: "mirror",
-          v: frame.k == null ? "—" : `k = ${frame.k}, Z[k] = ${frame.z[frame.k] ?? "·"}`,
-          sw: "var(--_amber)"
+          k: "i",
+          v: frame.i ?? "—",
+          sw: "var(--_blue)",
+          hint: "Suffix start whose prefix-match length is being computed."
         },
+        { k: "Z-box", v: boxValue, sw: "var(--_violet)" },
+        { k: "source", v: source, sw: "var(--_amber)" },
         {
           k: "Z[i]",
           v: frame.i == null ? "—" : frame.z[frame.i] ?? "·",
@@ -10144,6 +10138,9 @@
     "bad shift": "Shift proposed by the bad-character rule.",
     "good shift": "Shift proposed by the good-suffix rule.",
     "selected shift": "Larger proposed shift and the rule that selected it.",
+    "z-box": "Inclusive range whose text is already known to match the prefix.",
+    source: "How Z[i] was obtained: direct comparison, mirrored copy, or edge extension.",
+    "z[i]": "Prefix-match length recorded at the active suffix index.",
     l: "Left pointer index and value.",
     left: "Left pointer index and value.",
     lo: "Left boundary index and value.",

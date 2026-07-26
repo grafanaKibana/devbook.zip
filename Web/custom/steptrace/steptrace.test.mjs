@@ -606,16 +606,79 @@ test("the Z-array profile paints every frame into one stable measured-strip DOM"
     assert.equal(stage.dataset.profile, "z-array")
     assert.deepEqual(
       view.watch(frames[0]).map((row) => row.k),
-      ["i", "case", "box", "mirror", "Z[i]"],
+      ["i", "Z-box", "source", "Z[i]"],
+    )
+    assert.equal(view.watch(frames[0])[2].v, "—")
+    const directFrame = frames.find(
+      (frame) => frame.sourceCase === "outside" && frame.box[0] > frame.box[1],
+    )
+    assert.equal(view.watch(directFrame)[1].v, "—", "an empty Z-box must not show an inverted range")
+    assert.equal(view.watch(directFrame)[2].v, "direct")
+    assert.match(
+      view.watch(frames.find((frame) => frame.type === "copy"))[2].v,
+      /^copy Z\[\d+\]$/,
+    )
+    assert.equal(
+      view.watch(frames.find((frame) => frame.sourceCase === "reuse-extend"))[2].v,
+      "extend edge",
     )
     for (let index = 0; index < frames.length; index++) {
       view.paint(frames[index], index, frames.length)
       assert.equal(countNodes(stage), baseline)
     }
     assert.equal(stage.children[0].className, "steptrace__z-viewport")
-    assert.equal(stage.children[1].children.length, 3)
+    assert.equal(stage.children.length, 1, "the Z profile must not render a private legend")
     const viewport = stage.children[0]
+    const board = viewport.children[0]
+    const prefixClip = board.children[0].children[1]
     const stringRow = viewport.children[0].children[1].children[1]
+    const zRow = board.children[2].children[1]
+    const bracket = stringRow.children.at(-2)
+    const cursor = stringRow.children.at(-1)
+    assert.equal(board.children.length, 3)
+    for (const rail of board.children) {
+      assert.match(rail.children[0].className, /steptrace__rail-label/)
+      const cells = rail.children[1].children[0]?.className.includes("steptrace__cells")
+        ? rail.children[1].children[0]
+        : rail.children[1]
+      assert.match(cells.className, /steptrace__cells/)
+      assert.ok(
+        cells.children.slice(0, 12).every((cell) => cell.className.includes("steptrace__cell")),
+      )
+    }
+    assert.match(stringRow.children[0].children[0].className, /steptrace__z-char/)
+    assert.match(stringRow.children[0].children[1].className, /steptrace__z-index/)
+    assert.match(stringRow.children[11].className, /steptrace__z-cell--edge-end/)
+
+    view.paint(frames[0], 0, frames.length)
+    assert.equal(prefixClip.dataset.clipped, "0")
+    assert.equal(bracket.dataset.edgeStart, "1")
+    const rightEdgeFrame = { ...frames[0], type: "focus", i: 11, box: [1, 11] }
+    view.paint(rightEdgeFrame, 1, frames.length)
+    assert.equal(bracket.dataset.edgeEnd, "1")
+    assert.equal(bracket.style.transform, "translateX(40.00px)")
+    assert.equal(bracket.style.width, "439px")
+    const compareFrame = frames.find((frame) => frame.type === "compare")
+    view.paint(compareFrame, 1, frames.length)
+    assert.equal(prefixClip.dataset.clipped, "1")
+    assert.equal(cursor.dataset.visible, "0")
+    assert.equal(bracket.dataset.visible, "0")
+    assert.notEqual(stringRow.children[compareFrame.i].dataset.state, "probe")
+    assert.equal(
+      stringRow.children[compareFrame.compare.candidate].dataset.state,
+      compareFrame.compare.result,
+    )
+    const copyFrame = frames.find((frame) => frame.type === "copy")
+    view.paint(copyFrame, 1, frames.length)
+    assert.equal(cursor.dataset.visible, "0")
+    assert.equal(bracket.dataset.visible, "0")
+    assert.equal(zRow.children[copyFrame.k].dataset.state, "copy-source")
+    assert.equal(zRow.children[copyFrame.i].dataset.state, "copy-target")
+    const focusFrame = frames.find((frame) => frame.type === "focus")
+    view.paint(focusFrame, 1, frames.length)
+    assert.equal(cursor.dataset.visible, "1")
+    assert.equal(stringRow.children[focusFrame.i].dataset.state, "probe")
+
     const scrolls = []
     viewport.scrollLeft = 0
     viewport.clientWidth = 343
@@ -645,7 +708,74 @@ test("the Z-array profile paints every frame into one stable measured-strip DOM"
     view.destroy()
     assert.equal(observer.disconnected, true)
     assert.match(styles, /\.steptrace__z-viewport \{[\s\S]*overflow-x: auto;/)
-    assert.match(styles, /inline-size: max\(100%, calc\(3\.65rem \+ var\(--_z-length\)/)
+    assert.match(styles, /min-inline-size: calc\(var\(--_z-length\) \* var\(--_z-min-cell\)\);/)
+    assert.match(styles, /--_z-shell-block: calc\(44px \+ 2px\);/)
+    assert.match(styles, /--_z-index-tier: 22px;/)
+    assert.match(styles, /--_z-fade: 1\.5rem;/)
+    assert.match(
+      styles,
+      /\.steptrace__z-rail:is\(:nth-child\(2\), :nth-child\(3\)\) \{[\s\S]*padding-block-start: 0\.9rem;[\s\S]*border-block-start: 1px solid var\(--_hair\);/,
+    )
+    assert.match(
+      styles,
+      /\.steptrace__z-label \{[\s\S]*position: sticky;[\s\S]*inset-inline-start: 0;[\s\S]*inline-size: max-content;/,
+    )
+    const zLabelRule = styles.match(/\.steptrace__z-label \{[^}]*\}/)?.[0] || ""
+    assert.doesNotMatch(zLabelRule, /background|padding/)
+    assert.match(
+      styles,
+      /\.steptrace__z-prefix-clip\[data-clipped="1"\] \{[\s\S]*-webkit-mask-image:[\s\S]*mask-image:/,
+    )
+    assert.match(
+      styles,
+      /\.steptrace__z-track \.steptrace__cell:first-child \{[\s\S]*calc\(var\(--_string-radius\) - 1px\);/,
+    )
+    assert.match(
+      styles,
+      /\.steptrace__z-cell--string \{[\s\S]*block-size: calc\(44px \+ var\(--_z-index-tier\)\);[\s\S]*grid-template-columns: minmax\(0, 1fr\);[\s\S]*grid-template-rows: 2fr 1fr;[\s\S]*align-items: stretch;[\s\S]*justify-content: stretch;[\s\S]*padding: 0;/,
+    )
+    assert.match(
+      styles,
+      /\.steptrace__z-index \{[\s\S]*place-items: center;[\s\S]*border-block-start: 1px solid color-mix\(in srgb, var\(--_text\) 22%, transparent\);/,
+    )
+    assert.match(
+      styles,
+      /\.steptrace__z-cursor \{[\s\S]*border-block-end: 2px solid var\(--_blue\);/,
+    )
+    assert.match(
+      styles,
+      /\.steptrace__z-cell\[data-state="copy-source"\] \{[\s\S]*box-shadow: inset 0 0 0 2px var\(--_amber\);/,
+    )
+    assert.match(
+      styles,
+      /\.steptrace__z-string > \.steptrace__z-cell--edge-end \{[\s\S]*border-inline-end: 0;[\s\S]*calc\(var\(--_string-radius\) - 1px\);/,
+    )
+    assert.match(
+      styles,
+      /\.steptrace__z-string > \.steptrace__z-cell--string:first-child \{[\s\S]*calc\(var\(--_string-radius\) - 1px\);/,
+    )
+    assert.match(
+      styles,
+      /\.steptrace__z-bracket \{[\s\S]*box-sizing: border-box;[\s\S]*block-size: calc\(var\(--_string-radius\) - 1px\);[\s\S]*border-block-start: 2px solid var\(--_violet\);/,
+    )
+    assert.match(
+      styles,
+      /\.steptrace__z-bracket\[data-edge-start="1"\] \{[\s\S]*border-inline-start: 2px solid var\(--_violet\);[\s\S]*border-start-start-radius: calc\(var\(--_string-radius\) - 1px\);/,
+    )
+    assert.match(
+      styles,
+      /\.steptrace__z-bracket\[data-edge-end="1"\] \{[\s\S]*border-inline-end: 2px solid var\(--_violet\);[\s\S]*border-start-end-radius: calc\(var\(--_string-radius\) - 1px\);/,
+    )
+    assert.match(
+      styles,
+      /\.steptrace__z-bracket\[data-edge-start="1"\]::before,[\s\S]*\.steptrace__z-bracket\[data-edge-end="1"\]::after \{[\s\S]*content: none;/,
+    )
+    assert.match(
+      styles,
+      /\.steptrace__z \.steptrace__cell\[data-state="match"\],[\s\S]*box-shadow: inset 0 -2px 0 var\(--_green\);/,
+    )
+    assert.match(styles, /\.steptrace__z-string \{\s*position: relative;\s*\}/)
+    assert.doesNotMatch(styles, /steptrace__z-legend|steptrace__z-copy/)
     assert.match(
       styles,
       /\.steptrace--reduced[\s\S]*:is\([\s\S]*transition-property: opacity !important;/,
@@ -3796,6 +3926,9 @@ test("Watch rows resolve every built-in label from one hint dictionary", () => {
     "shift",
     "matches",
     "hash",
+    "Z-box",
+    "source",
+    "Z[i]",
     "L",
     "left",
     "lo",
