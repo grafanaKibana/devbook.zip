@@ -109,6 +109,13 @@ test("homepage fit ignores temporary card transform overflow", () => {
     querySelectorAll: (selector: string) =>
       selector === ":scope > .dc-topic-card" || selector === ".dc-topic-card" ? cards : [],
   }
+  const dashboard = {
+    clientHeight: 641,
+    clientWidth: 800,
+    scrollHeight: 641,
+    scrollWidth: 800,
+    querySelector: (selector: string) => (selector === ".dc-topic-grid" ? grid : null),
+  }
   const footer = { getBoundingClientRect: () => ({ bottom: 900 }) }
   const center = { clientHeight: 800, clientWidth: 800, scrollHeight: 800, scrollWidth: 800 }
   const quartzBody = {
@@ -123,8 +130,8 @@ test("homepage fit ignores temporary card transform overflow", () => {
   const body = {
     dataset,
     querySelector: (selector: string) =>
-      selector === ".dc-topic-grid"
-        ? grid
+      selector === ".dc-topic-dashboard"
+        ? dashboard
         : selector === ".page > #quartz-body"
           ? quartzBody
           : null,

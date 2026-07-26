@@ -15,7 +15,7 @@ const script = `
   if (window.__devbookHomepageFit) return;
 
   var fit = window.matchMedia(
-    "(min-width: 768px) and (max-width: 1200px), (min-width: 1201px) and (min-height: 36rem)"
+    "(min-width: 768px) and (max-width: 1200px) and (min-height: 32rem), (min-width: 1201px) and (min-height: 32rem)"
   );
   var states = ["full", "summary-hidden", "counter-hidden", "bar-hidden"];
   var frame = 0;
@@ -70,13 +70,13 @@ const script = `
     var viewportHeight = window.visualViewport ? window.visualViewport.height : window.innerHeight;
     var footer = quartzBody.querySelector(":scope > footer");
     var center = quartzBody.querySelector(":scope > .center");
-    var grid = dashboard;
+    var grid = dashboard.querySelector(".dc-topic-grid");
     if (!footer || !center || !grid) return false;
 
     var quartzRect = quartzBody.getBoundingClientRect();
     var footerRect = footer.getBoundingClientRect();
     if (quartzRect.bottom > viewportHeight + 1 || footerRect.bottom > viewportHeight + 1) return false;
-    if (!scrollFits(quartzBody) || !scrollFits(center) || !gridFits(grid)) return false;
+    if (!scrollFits(quartzBody) || !scrollFits(center) || !scrollFits(dashboard) || !gridFits(grid)) return false;
 
     var cards = grid.querySelectorAll(".dc-topic-card");
     if (!cards.length) return false;
@@ -102,7 +102,7 @@ const script = `
     frame = 0;
     try {
       var body = document.body;
-      var dashboard = body.querySelector('.dc-topic-grid');
+      var dashboard = body.querySelector(".dc-topic-dashboard");
       var quartzBody = body.querySelector('.page > #quartz-body');
       var isHome = body.dataset.slug === "index";
 

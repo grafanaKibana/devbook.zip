@@ -1202,7 +1202,7 @@ body[data-slug="credits"] .page[data-frame="default"] > #quartz-body > .sidebar.
   }
 }
 
-@media all and (min-width: 1201px) and (min-height: 36rem) {
+@media all and (min-width: 1201px) and (min-height: 32rem) {
   // Gated on [data-home-fit]: the HomepageFit controller owns the one-viewport
   // fill on desktop just as it does on tablet, so it can hide whole tiers
   // (summaries → counters → bars) uniformly instead of letting cards clip
@@ -1278,8 +1278,9 @@ body[data-slug="credits"] .page[data-frame="default"] > #quartz-body > .sidebar.
       grid-auto-rows: minmax(min-content, 1fr);
       gap: clamp(0.6rem, 0.9vw, 1rem);
     }
-    .dc-topic-total {
+    .dc-progress-hero {
       flex: 0 0 auto;
+      margin-bottom: 0;
     }
     // The stock footer bottom margin is dead space inside the fixed 100dvh
     // frame — reclaim most of it for the dashboard rows. Only in fit mode;
@@ -1368,7 +1369,7 @@ body[data-slug="credits"] .page[data-frame="default"] > #quartz-body > .sidebar.
     .dc-topic-grid {
       column-gap: clamp(0.75rem, 1.8vw, 2rem);
       row-gap: clamp(0.6rem, 1.4vh, 1.25rem);
-      margin-top: 0.75rem;
+      margin-top: 0;
     }
   }
 }
@@ -1394,7 +1395,7 @@ body[data-slug="credits"] .page[data-frame="default"] > #quartz-body > .sidebar.
       grid-template-columns: repeat(2, minmax(0, 1fr));
       grid-auto-rows: auto;
       gap: 0.6rem;
-      margin-top: 0.75rem;
+      margin-top: 0;
     }
     .dc-topic-grid .dc-topic-card {
       grid-column: span 1;
@@ -1445,7 +1446,7 @@ body[data-slug="credits"] .page[data-frame="default"] > #quartz-body > .sidebar.
 // This block is the tablet-specific LAYOUT; the degraded states themselves are
 // shared with desktop below. Mobile stays on its normal scrolling branch.
 // ---------------------------------------------------------------------------
-@media all and ($tablet) {
+@media all and ($tablet) and (min-height: 32rem) {
   body[data-slug="index"][data-home-fit] {
     --home-card-pad: clamp(0.65rem, 1.2vh, 0.85rem) clamp(0.75rem, 1.5vw, 1rem);
 
@@ -1519,13 +1520,9 @@ body[data-slug="credits"] .page[data-frame="default"] > #quartz-body > .sidebar.
       margin-top: auto;
     }
 
-    .dc-topic-total {
+    .dc-progress-hero {
       flex: 0 0 auto;
-      margin-top: 0.55rem;
-      padding: 0.6em 0.7em;
-    }
-    .dc-topic-total .dc-topic-legend {
-      margin-top: 0.5em;
+      margin-bottom: 0;
     }
 
     .page > #quartz-body > footer {
@@ -1555,11 +1552,29 @@ body[data-slug="index"][data-home-fit="bar-hidden"] {
   .dc-topic-grid .dc-topic-cap {
     display: none;
   }
+  .dc-progress-statuses {
+    display: none;
+  }
 }
 
 body[data-slug="index"][data-home-fit="bar-hidden"] {
   .dc-topic-grid .dc-topic-bar {
     display: none;
+  }
+}
+
+@media all and (min-width: 768px) and (min-height: 32rem) and (max-height: 35.999rem) {
+  body[data-slug="index"][data-home-fit] {
+    .dc-progress-hero {
+      --dc-radial-size: 5.5rem;
+    }
+    .dc-progress-hero .db-card-body {
+      gap: 1rem;
+      padding: 0.5rem 1rem;
+    }
+    .dc-progress-statuses {
+      margin-top: 0.6rem;
+    }
   }
 }
 
