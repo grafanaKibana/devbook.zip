@@ -1475,11 +1475,29 @@ body[data-slug="index"][data-home-fit="bar-hidden"] {
   .dc-topic-grid .dc-topic-cap {
     display: none;
   }
+  .dc-progress-statuses {
+    display: none;
+  }
 }
 
 body[data-slug="index"][data-home-fit="bar-hidden"] {
   .dc-topic-grid .dc-topic-bar {
     display: none;
+  }
+}
+
+@media all and (min-width: 768px) and (min-height: 32rem) and (max-height: 35.999rem) {
+  body[data-slug="index"][data-home-fit] {
+    .dc-progress-hero {
+      --dc-radial-size: 5.5rem;
+    }
+    .dc-progress-hero .db-card-body {
+      gap: 1rem;
+      padding: 0.5rem 1rem;
+    }
+    .dc-progress-statuses {
+      margin-top: 0.6rem;
+    }
   }
 }
 
