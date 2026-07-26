@@ -32,6 +32,17 @@ const script = `
       element.scrollWidth <= element.clientWidth + 1;
   }
 
+  function gridFits(grid) {
+    if (grid.scrollWidth > grid.clientWidth + 1) return false;
+    // Offset geometry ignores the cards' temporary entrance transforms.
+    var cards = grid.querySelectorAll(":scope > .dc-topic-card");
+    for (var i = 0; i < cards.length; i += 1) {
+      var card = cards[i];
+      if (card.offsetTop + card.offsetHeight > grid.offsetTop + grid.clientHeight + 1) return false;
+    }
+    return true;
+  }
+
   // The parent's CONTENT box (border-box rect inset by its padding). Retained
   // elements are measured against this, not getBoundingClientRect(): the card
   // body's padding is part of the design, so a bar that slides into it is
@@ -65,7 +76,7 @@ const script = `
     var quartzRect = quartzBody.getBoundingClientRect();
     var footerRect = footer.getBoundingClientRect();
     if (quartzRect.bottom > viewportHeight + 1 || footerRect.bottom > viewportHeight + 1) return false;
-    if (!scrollFits(quartzBody) || !scrollFits(center) || !scrollFits(grid)) return false;
+    if (!scrollFits(quartzBody) || !scrollFits(center) || !gridFits(grid)) return false;
 
     var cards = grid.querySelectorAll(".dc-topic-card");
     if (!cards.length) return false;

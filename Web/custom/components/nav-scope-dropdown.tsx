@@ -54,12 +54,20 @@ const firstPaintScript = `
   if (window.__devbookExplorerFirstPaint) return;
 
   var root = document.documentElement;
-  var timer = setTimeout(release, 1000);
+  var releaseRequested = false;
+  var timer = setTimeout(finish, 1000);
 
-  function release() {
+  function finish() {
     if (timer) clearTimeout(timer);
     timer = 0;
     root.removeAttribute("data-explorer-first-paint");
+  }
+
+  function release() {
+    if (releaseRequested) return;
+    releaseRequested = true;
+    var fontsReady = document.fonts ? document.fonts.ready : Promise.resolve();
+    fontsReady.then(finish, finish);
   }
 
   root.setAttribute("data-explorer-first-paint", "pending");
