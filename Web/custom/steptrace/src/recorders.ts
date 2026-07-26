@@ -637,6 +637,11 @@ export class StringRecorder {
     this.k = null
     this.sourceCase = null
     this.zCompare = null
+    this.goodSuffix = null
+    this.lastOccurrence = null
+    this.bmJ = null
+    this.matchedFrom = null
+    this.shiftDecision = null
   }
   _push(type, extra, message) {
     const frame: any = {
@@ -659,6 +664,13 @@ export class StringRecorder {
       frame.k = this.k
       frame.sourceCase = this.sourceCase
       frame.compare = this.zCompare ? { ...this.zCompare } : null
+    }
+    if (this.profile === "boyer-moore") {
+      frame.goodSuffix = this.goodSuffix.slice()
+      frame.lastOccurrence = { ...this.lastOccurrence }
+      frame.j = this.bmJ
+      frame.matchedFrom = this.matchedFrom
+      frame.shiftDecision = this.shiftDecision ? { ...this.shiftDecision } : null
     }
     this.frames.push(Object.freeze(frame))
   }
@@ -726,6 +738,50 @@ export class StringRecorder {
     this.sourceCase = sourceCase
     this.zCompare = null
     this._push("commit", {}, message)
+  }
+  configureBoyerMoore(goodSuffix, lastOccurrence) {
+    this.goodSuffix = goodSuffix.slice()
+    this.lastOccurrence = { ...lastOccurrence }
+    this.matchedFrom = this.pattern.length
+  }
+  alignBoyerMoore(shift, message) {
+    this.shift = shift
+    this.bmJ = this.pattern.length - 1
+    this.matchedFrom = this.pattern.length
+    this.shiftDecision = null
+    this._push("align", {}, message)
+  }
+  compareBoyerMoore(ti, pj, shift, isMatch, matchedFrom, message) {
+    this.shift = shift
+    this.bmJ = pj
+    this.matchedFrom = matchedFrom
+    this._push(
+      "compare",
+      { cmpT: ti, cmpP: pj, cmpResult: isMatch ? "match" : "mismatch" },
+      message,
+    )
+  }
+  decideBoyerMoore(j, bad, good, selected, winner, message) {
+    this.bmJ = j
+    this.shiftDecision = { bad, good, selected, winner }
+    this._push("decision", {}, message)
+  }
+  matchBoyerMoore(shift, fullMatchShift, message) {
+    this.shift = shift
+    this.bmJ = 0
+    this.matchedFrom = 0
+    if (!this.found.includes(shift)) this.found.push(shift)
+    this.shiftDecision = {
+      bad: null,
+      good: fullMatchShift,
+      selected: fullMatchShift,
+      winner: "full-match",
+    }
+    this._push("match", {}, message)
+  }
+  shiftBoyerMoore(shift, message) {
+    this.shift = shift
+    this._push("shift", {}, message)
   }
   done(message) {
     this.zCompare = null

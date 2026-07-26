@@ -785,6 +785,11 @@ var init_recorders = __esm({
         this.k = null;
         this.sourceCase = null;
         this.zCompare = null;
+        this.goodSuffix = null;
+        this.lastOccurrence = null;
+        this.bmJ = null;
+        this.matchedFrom = null;
+        this.shiftDecision = null;
       }
       _push(type, extra, message) {
         const frame = {
@@ -807,6 +812,13 @@ var init_recorders = __esm({
           frame.k = this.k;
           frame.sourceCase = this.sourceCase;
           frame.compare = this.zCompare ? { ...this.zCompare } : null;
+        }
+        if (this.profile === "boyer-moore") {
+          frame.goodSuffix = this.goodSuffix.slice();
+          frame.lastOccurrence = { ...this.lastOccurrence };
+          frame.j = this.bmJ;
+          frame.matchedFrom = this.matchedFrom;
+          frame.shiftDecision = this.shiftDecision ? { ...this.shiftDecision } : null;
         }
         this.frames.push(Object.freeze(frame));
       }
@@ -874,6 +886,50 @@ var init_recorders = __esm({
         this.sourceCase = sourceCase;
         this.zCompare = null;
         this._push("commit", {}, message);
+      }
+      configureBoyerMoore(goodSuffix, lastOccurrence) {
+        this.goodSuffix = goodSuffix.slice();
+        this.lastOccurrence = { ...lastOccurrence };
+        this.matchedFrom = this.pattern.length;
+      }
+      alignBoyerMoore(shift, message) {
+        this.shift = shift;
+        this.bmJ = this.pattern.length - 1;
+        this.matchedFrom = this.pattern.length;
+        this.shiftDecision = null;
+        this._push("align", {}, message);
+      }
+      compareBoyerMoore(ti, pj, shift, isMatch, matchedFrom, message) {
+        this.shift = shift;
+        this.bmJ = pj;
+        this.matchedFrom = matchedFrom;
+        this._push(
+          "compare",
+          { cmpT: ti, cmpP: pj, cmpResult: isMatch ? "match" : "mismatch" },
+          message
+        );
+      }
+      decideBoyerMoore(j, bad, good, selected, winner, message) {
+        this.bmJ = j;
+        this.shiftDecision = { bad, good, selected, winner };
+        this._push("decision", {}, message);
+      }
+      matchBoyerMoore(shift, fullMatchShift, message) {
+        this.shift = shift;
+        this.bmJ = 0;
+        this.matchedFrom = 0;
+        if (!this.found.includes(shift)) this.found.push(shift);
+        this.shiftDecision = {
+          bad: null,
+          good: fullMatchShift,
+          selected: fullMatchShift,
+          winner: "full-match"
+        };
+        this._push("match", {}, message);
+      }
+      shiftBoyerMoore(shift, message) {
+        this.shift = shift;
+        this._push("shift", {}, message);
       }
       done(message) {
         this.zCompare = null;
@@ -2233,6 +2289,7 @@ function makeBoundarySearchView(frames, descriptor) {
 }
 function makeMatchView(frames) {
   if (frames[0].profile === "z-array") return makeZArrayView(frames);
+  if (frames[0].profile === "boyer-moore") return makeBoyerMooreView(frames);
   const text = frames[0].text;
   const pattern = frames[0].pattern;
   const hasHash = frames.some((f) => f.hash);
@@ -2302,6 +2359,108 @@ function makeMatchView(frames) {
   }
   const nodes = hasHash ? [stage, hashBadge, status] : [stage, status];
   return { nodes, paint, watch, destroy: () => ro && ro.disconnect() };
+}
+function makeBoyerMooreView(frames) {
+  const first = frames[0];
+  const text = first.text;
+  const pattern = first.pattern;
+  const stage = el("div", "steptrace__match steptrace__bm");
+  stage.dataset.profile = "boyer-moore";
+  const viewport = el("div", "steptrace__bm-viewport");
+  const board = el("div", "steptrace__bm-board");
+  const makeCell = (character, patternCell = false) => {
+    const cell = el(
+      "div",
+      `steptrace__cell steptrace__bm-cell${patternCell ? " steptrace__cell--pat" : ""}`
+    );
+    const value = el("span", "steptrace__bm-char");
+    value.textContent = character;
+    const cue = el("span", "steptrace__bm-compare-icon");
+    cue.setAttribute("aria-hidden", "true");
+    const matchIcon = el("span", "steptrace__bm-icon steptrace__bm-icon--match");
+    matchIcon.innerHTML = ICON.check;
+    matchIcon.setAttribute("aria-hidden", "true");
+    const mismatchIcon = el("span", "steptrace__bm-icon steptrace__bm-icon--mismatch");
+    mismatchIcon.innerHTML = ICON.x;
+    mismatchIcon.setAttribute("aria-hidden", "true");
+    cue.append(matchIcon, mismatchIcon);
+    cell.append(value, cue);
+    return cell;
+  };
+  const patternRow = el("div", "steptrace__cells steptrace__cells--pat steptrace__bm-pattern");
+  const patternCells = [];
+  for (let i = 0; i < pattern.length; i++) {
+    const cell = makeCell(pattern[i], true);
+    patternRow.append(cell);
+    patternCells.push(cell);
+  }
+  const textRow = el("div", "steptrace__cells steptrace__bm-text");
+  const textCells = [];
+  for (let i = 0; i < text.length; i++) {
+    const cell = makeCell(text[i]);
+    textRow.append(cell);
+    textCells.push(cell);
+  }
+  board.append(patternRow, textRow);
+  viewport.append(board);
+  stage.append(viewport);
+  const status = statusEl();
+  let currentFrame = first;
+  function applyGeom() {
+    const measured = textCells[0]?.getBoundingClientRect?.().width || CELL_W;
+    const cw = measured > 0 ? measured : CELL_W;
+    stage.style.setProperty("--_cw", `${cw}px`);
+    patternRow.style.transform = `translateX(${(currentFrame.shift * cw).toFixed(2)}px)`;
+  }
+  const ro = typeof ResizeObserver !== "undefined" ? new ResizeObserver(applyGeom) : null;
+  if (ro) ro.observe(textRow);
+  function paint(frame, index, total) {
+    currentFrame = frame;
+    stage.dataset.frame = frame.type;
+    for (const cell of textCells) cell.dataset.state = "";
+    for (const cell of patternCells) cell.dataset.state = "";
+    for (const found of frame.found)
+      for (let j = 0; j < pattern.length; j++)
+        if (textCells[found + j]) textCells[found + j].dataset.state = "found";
+    if (frame.matchedFrom != null)
+      for (let j = frame.matchedFrom; j < pattern.length; j++) {
+        patternCells[j].dataset.state = "suffix";
+        const textCell = textCells[frame.shift + j];
+        if (textCell && textCell.dataset.state !== "found") textCell.dataset.state = "suffix";
+      }
+    if (frame.cmpT != null && textCells[frame.cmpT])
+      textCells[frame.cmpT].dataset.state = frame.cmpResult;
+    if (frame.cmpP != null && patternCells[frame.cmpP])
+      patternCells[frame.cmpP].dataset.state = frame.cmpResult;
+    if (frame.type === "match" || frame.shiftDecision?.winner === "full-match" && frame.found.includes(frame.shift))
+      for (const cell of patternCells) cell.dataset.state = "found";
+    applyGeom();
+    status.innerHTML = escapeHtml(frame.message) + ` <span class="steptrace__counts">· step ${index + 1}/${total}</span>`;
+  }
+  function watch(frame) {
+    const suffix = frame.matchedFrom == null || frame.matchedFrom >= pattern.length ? "—" : pattern.slice(frame.matchedFrom);
+    const choice = ["decision", "match", "shift", "done"].includes(frame.type) ? frame.shiftDecision : null;
+    const winner = choice?.winner === "bad-character" ? "bad wins" : choice?.winner === "good-suffix" ? "good wins" : choice?.winner === "full-match" ? "full match" : choice?.winner === "tie" ? "tie" : "";
+    return [
+      { k: "align", v: frame.shift, sw: "var(--_blue)" },
+      { k: "j", v: frame.j ?? "—", sw: "var(--_violet)" },
+      { k: "suffix", v: suffix, sw: "var(--_green)" },
+      { k: "bad shift", v: choice?.bad ?? "—", sw: "var(--_blue)" },
+      { k: "good shift", v: choice?.good ?? "—", sw: "var(--_violet)" },
+      {
+        k: "selected shift",
+        v: choice ? `${choice.selected} · ${winner}` : "—",
+        sw: "var(--_amber)"
+      }
+    ];
+  }
+  return {
+    nodes: [stage, status],
+    stableStage: true,
+    paint,
+    watch,
+    destroy: () => ro && ro.disconnect()
+  };
 }
 function resolveVisibleScrollLeft(scrollLeft, clientWidth, scrollWidth, targetStart, targetEnd, padding = 8) {
   if (!Number.isFinite(scrollLeft) || !Number.isFinite(clientWidth) || !Number.isFinite(scrollWidth) || !Number.isFinite(targetStart) || !Number.isFinite(targetEnd) || clientWidth <= 0)
@@ -3878,7 +4037,7 @@ function buildMilestones(algorithm, kind, frames) {
   const firstGap = frames.find((frame) => Number.isInteger(frame.gap))?.gap;
   const familyProfile = frames[0]?.profile;
   const firstDistributionPass = frames.find((frame) => frame.type === "pass");
-  const initial = kind === "sort" ? firstGap != null ? `Gap ${firstGap}` : familyProfile === "cyclic" ? "Place values" : familyProfile === "counting" ? "Tally keys" : familyProfile === "radix" ? `${firstDistributionPass?.passLabel || "Digit"} pass` : familyProfile === "bucket" ? "Scatter ranges" : familyProfile === "introsort" ? "Quicksort" : algorithm === "bubble-sort" ? "Pass 1" : algorithm === "insertion-sort" ? "Prefix 1" : algorithm === "selection-sort" ? "Select 1" : algorithm === "heap-sort" ? "Build heap" : algorithm === "merge-sort" ? "Runs of 1" : "Partition" : kind === "search" ? familyProfile === "exponential" ? "Gallop" : familyProfile === "interpolation" ? "Estimate" : familyProfile === "jump" ? "Jump blocks" : familyProfile === "ternary" ? "Narrow peak" : familyProfile === "shipping-capacity" ? "Answer range" : "Search range" : kind === "string" ? familyProfile === "z-array" ? "Initialize Z" : "Shift 0" : kind === "backtrack" ? "Depth 0" : kind === "rectree" ? familyProfile === "divide-and-conquer" ? "Whole problem" : familyProfile === "merge-sort" ? "Whole array" : familyProfile === "memoization" ? "Empty cache" : familyProfile === "coin-change-top-down" ? "Amount 30¢" : familyProfile === "grid-path-top-down" ? "Loading bay" : "Call tree" : "Initialize";
+  const initial = kind === "sort" ? firstGap != null ? `Gap ${firstGap}` : familyProfile === "cyclic" ? "Place values" : familyProfile === "counting" ? "Tally keys" : familyProfile === "radix" ? `${firstDistributionPass?.passLabel || "Digit"} pass` : familyProfile === "bucket" ? "Scatter ranges" : familyProfile === "introsort" ? "Quicksort" : algorithm === "bubble-sort" ? "Pass 1" : algorithm === "insertion-sort" ? "Prefix 1" : algorithm === "selection-sort" ? "Select 1" : algorithm === "heap-sort" ? "Build heap" : algorithm === "merge-sort" ? "Runs of 1" : "Partition" : kind === "search" ? familyProfile === "exponential" ? "Gallop" : familyProfile === "interpolation" ? "Estimate" : familyProfile === "jump" ? "Jump blocks" : familyProfile === "ternary" ? "Narrow peak" : familyProfile === "shipping-capacity" ? "Answer range" : "Search range" : kind === "string" ? familyProfile === "z-array" ? "Initialize Z" : familyProfile === "boyer-moore" ? "Preprocess rules" : "Shift 0" : kind === "backtrack" ? "Depth 0" : kind === "rectree" ? familyProfile === "divide-and-conquer" ? "Whole problem" : familyProfile === "merge-sort" ? "Whole array" : familyProfile === "memoization" ? "Empty cache" : familyProfile === "coin-change-top-down" ? "Amount 30¢" : familyProfile === "grid-path-top-down" ? "Loading bay" : "Call tree" : "Initialize";
   push(0, initial);
   let lastRange = "";
   let lastGap = firstGap;
@@ -3941,6 +4100,9 @@ function buildMilestones(algorithm, kind, frames) {
         );
     } else if (kind === "string" && familyProfile === "z-array") {
       if (f.type === "focus") push(i, `i = ${f.i}`);
+    } else if (kind === "string" && familyProfile === "boyer-moore") {
+      if (f.type === "align") push(i, `Align ${f.shift}`);
+      if (f.type === "match") push(i, `Match ${f.shift}`);
     } else if (kind === "string") {
       if ((f.type === "slide" || f.type === "hash" || f.type === "match") && String(f.shift) !== lastWindow) {
         push(i, `Shift ${f.shift}`);
@@ -4260,6 +4422,7 @@ var init_render = __esm({
       pause: '<svg viewBox="0 0 24 24"><rect x="7" y="5" width="3.4" height="14" rx="1" fill="currentColor" stroke="none"/><rect x="13.6" y="5" width="3.4" height="14" rx="1" fill="currentColor" stroke="none"/></svg>',
       kebab: '<svg viewBox="0 0 24 24"><circle cx="12" cy="5" r="1.5" fill="currentColor" stroke="none"/><circle cx="12" cy="12" r="1.5" fill="currentColor" stroke="none"/><circle cx="12" cy="19" r="1.5" fill="currentColor" stroke="none"/></svg>',
       check: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg>',
+      x: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.8" stroke-linecap="round"><path d="M6 6l12 12"/><path d="M18 6 6 18"/></svg>',
       compare: '<svg class="steptrace__cue-compare" viewBox="0 0 24 24" aria-hidden="true"><path d="m7 16-4-4 4-4"/><path d="M3 12h18"/><path d="m17 8 4 4-4 4"/></svg>',
       swap: '<svg class="steptrace__cue-swap" viewBox="0 0 24 24" aria-hidden="true"><path d="m2 9 3-3 3 3"/><path d="M13 18H7a2 2 0 0 1-2-2V6"/><path d="m22 15-3 3-3-3"/><path d="M11 6h6a2 2 0 0 1 2 2v10"/></svg>',
       search: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="10.5" cy="10.5" r="6.5"/><path d="m15.2 15.2 4.8 4.8"/></svg>'
@@ -4448,6 +4611,123 @@ var init_binary_search = __esm({
           }
         }
         ops.done(`${target} is not in the array — the range is empty after ${ops.comparisons} probes.`);
+      }
+    };
+  }
+});
+
+// custom/steptrace/src/algorithms/boyer-moore.ts
+function buildGoodSuffixData(pattern) {
+  const m = pattern.length;
+  if (!m) return { table: [], fullMatchShift: 0 };
+  const shift = new Array(m + 1).fill(0);
+  const border = new Array(m + 1).fill(0);
+  let i = m;
+  let j = m + 1;
+  border[i] = j;
+  while (i > 0) {
+    while (j <= m && pattern[i - 1] !== pattern[j - 1]) {
+      if (shift[j] === 0) shift[j] = j - i;
+      j = border[j];
+    }
+    i--;
+    j--;
+    border[i] = j;
+  }
+  j = border[0];
+  for (i = 0; i <= m; i++) {
+    if (shift[i] === 0) shift[i] = j;
+    if (i === j) j = border[j];
+  }
+  return {
+    table: Array.from({ length: m }, (_, mismatch) => shift[mismatch + 1]),
+    fullMatchShift: shift[0]
+  };
+}
+var boyerMoore;
+var init_boyer_moore = __esm({
+  "custom/steptrace/src/algorithms/boyer-moore.ts"() {
+    boyerMoore = {
+      id: "boyer-moore",
+      kind: "string",
+      profile: "boyer-moore",
+      meta: { label: "Boyer-Moore" },
+      run: (input, ops) => {
+        const text = String(input.text || "");
+        const pattern = String(input.pattern || "");
+        const n = text.length;
+        const m = pattern.length;
+        const { table: goodSuffix, fullMatchShift } = buildGoodSuffixData(pattern);
+        const lastOccurrence = {};
+        for (let i = 0; i < pattern.length; i++) lastOccurrence[pattern[i]] = i;
+        ops.configureBoyerMoore(goodSuffix, lastOccurrence);
+        ops.init(
+          m ? `Precompute the last occurrence of each pattern character and good-suffix shifts [${goodSuffix.join(", ")}].` : "An empty pattern is not searched."
+        );
+        if (!m || m > n) {
+          ops.done("Nothing to search.");
+          return;
+        }
+        let alignment = 0;
+        while (alignment <= n - m) {
+          ops.alignBoyerMoore(
+            alignment,
+            `Align the pattern at ${alignment}; compare from j = ${m - 1} right-to-left.`
+          );
+          let j = m - 1;
+          let matchedFrom = m;
+          while (j >= 0) {
+            const isMatch = pattern[j] === text[alignment + j];
+            const nextMatchedFrom = isMatch ? j : matchedFrom;
+            ops.compareBoyerMoore(
+              alignment + j,
+              j,
+              alignment,
+              isMatch,
+              nextMatchedFrom,
+              `Compare pattern[${j}]='${pattern[j]}' with text[${alignment + j}]='${text[alignment + j]}' → ${isMatch ? "match" : "mismatch"}.`
+            );
+            if (!isMatch) break;
+            matchedFrom = j;
+            j--;
+          }
+          if (j < 0) {
+            ops.matchBoyerMoore(
+              alignment,
+              fullMatchShift,
+              `Whole pattern matched at ${alignment}; the full-match good-suffix shift is ${fullMatchShift}.`
+            );
+            const nextAlignment = alignment + fullMatchShift;
+            if (nextAlignment <= n - m) {
+              alignment = nextAlignment;
+              ops.shiftBoyerMoore(alignment, `Shift by ${fullMatchShift} after the full match.`);
+            } else {
+              ops.shiftBoyerMoore(
+                alignment,
+                `A full-match shift of ${fullMatchShift} would leave the searchable range; keep the match visible.`
+              );
+              alignment = nextAlignment;
+            }
+            continue;
+          }
+          const bad = Math.max(1, j - (lastOccurrence[text[alignment + j]] ?? -1));
+          const good = goodSuffix[j];
+          const selected = Math.max(bad, good);
+          const winner = bad === good ? "tie" : bad > good ? "bad-character" : "good-suffix";
+          ops.decideBoyerMoore(
+            j,
+            bad,
+            good,
+            selected,
+            winner,
+            `Bad-character proposes ${bad}; good-suffix proposes ${good}; take max = ${selected} (${winner}).`
+          );
+          alignment += selected;
+          ops.shiftBoyerMoore(alignment, `Shift the pattern to alignment ${alignment}.`);
+        }
+        ops.done(
+          ops.found.length ? `Found ${ops.found.length} occurrence(s): index ${ops.found.join(", ")}.` : "Pattern not found."
+        );
       }
     };
   }
@@ -10007,6 +10287,7 @@ var init_algorithms = __esm({
     init_bfs();
     init_binary_search_on_answer();
     init_binary_search();
+    init_boyer_moore();
     init_bubble_sort();
     init_bucket_sort();
     init_comb_sort();
@@ -10075,6 +10356,7 @@ var init_algorithms = __esm({
       kmp,
       rabinKarp,
       zAlgorithm,
+      boyerMoore,
       twoPointers,
       slidingWindow,
       lcs,
@@ -10259,6 +10541,11 @@ var init_watch_hints = __esm({
       shift: "Pattern offset under the text.",
       matches: "Matches found so far.",
       hash: "Current window hash and pattern hash.",
+      align: "Pattern offset under the text.",
+      suffix: "Pattern suffix already matched right-to-left.",
+      "bad shift": "Shift proposed by the bad-character rule.",
+      "good shift": "Shift proposed by the good-suffix rule.",
+      "selected shift": "Larger proposed shift and the rule that selected it.",
       l: "Left pointer index and value.",
       left: "Left pointer index and value.",
       lo: "Left boundary index and value.",

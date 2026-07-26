@@ -778,6 +778,7 @@ export function makeBoundarySearchView(frames, descriptor: BoundarySearchViewDes
 const CELL_W = 34 // px; must match .steptrace__cell width for shift alignment
 export function makeMatchView(frames) {
   if (frames[0].profile === "z-array") return makeZArrayView(frames)
+  if (frames[0].profile === "boyer-moore") return makeBoyerMooreView(frames)
 
   const text = frames[0].text
   const pattern = frames[0].pattern
@@ -867,6 +868,135 @@ export function makeMatchView(frames) {
   // hash badge (if any) is placed AFTER the stage ⇒ it renders below the viz.
   const nodes = hasHash ? [stage, hashBadge, status] : [stage, status]
   return { nodes, paint, watch, destroy: () => ro && ro.disconnect() }
+}
+
+function makeBoyerMooreView(frames) {
+  const first = frames[0]
+  const text = first.text
+  const pattern = first.pattern
+  const stage = el("div", "steptrace__match steptrace__bm")
+  stage.dataset.profile = "boyer-moore"
+  const viewport = el("div", "steptrace__bm-viewport")
+  const board = el("div", "steptrace__bm-board")
+
+  const makeCell = (character, patternCell = false) => {
+    const cell = el(
+      "div",
+      `steptrace__cell steptrace__bm-cell${patternCell ? " steptrace__cell--pat" : ""}`,
+    )
+    const value = el("span", "steptrace__bm-char")
+    value.textContent = character
+    const cue = el("span", "steptrace__bm-compare-icon")
+    cue.setAttribute("aria-hidden", "true")
+    const matchIcon = el("span", "steptrace__bm-icon steptrace__bm-icon--match")
+    matchIcon.innerHTML = ICON.check
+    matchIcon.setAttribute("aria-hidden", "true")
+    const mismatchIcon = el("span", "steptrace__bm-icon steptrace__bm-icon--mismatch")
+    mismatchIcon.innerHTML = ICON.x
+    mismatchIcon.setAttribute("aria-hidden", "true")
+    cue.append(matchIcon, mismatchIcon)
+    cell.append(value, cue)
+    return cell
+  }
+
+  const patternRow = el("div", "steptrace__cells steptrace__cells--pat steptrace__bm-pattern")
+  const patternCells = []
+  for (let i = 0; i < pattern.length; i++) {
+    const cell = makeCell(pattern[i], true)
+    patternRow.append(cell)
+    patternCells.push(cell)
+  }
+
+  const textRow = el("div", "steptrace__cells steptrace__bm-text")
+  const textCells = []
+  for (let i = 0; i < text.length; i++) {
+    const cell = makeCell(text[i])
+    textRow.append(cell)
+    textCells.push(cell)
+  }
+  board.append(patternRow, textRow)
+  viewport.append(board)
+  stage.append(viewport)
+  const status = statusEl()
+
+  let currentFrame = first
+  function applyGeom() {
+    const measured = textCells[0]?.getBoundingClientRect?.().width || CELL_W
+    const cw = measured > 0 ? measured : CELL_W
+    stage.style.setProperty("--_cw", `${cw}px`)
+    patternRow.style.transform = `translateX(${(currentFrame.shift * cw).toFixed(2)}px)`
+  }
+  const ro = typeof ResizeObserver !== "undefined" ? new ResizeObserver(applyGeom) : null
+  if (ro) ro.observe(textRow)
+
+  function paint(frame, index, total) {
+    currentFrame = frame
+    stage.dataset.frame = frame.type
+    for (const cell of textCells) cell.dataset.state = ""
+    for (const cell of patternCells) cell.dataset.state = ""
+    for (const found of frame.found)
+      for (let j = 0; j < pattern.length; j++)
+        if (textCells[found + j]) textCells[found + j].dataset.state = "found"
+    if (frame.matchedFrom != null)
+      for (let j = frame.matchedFrom; j < pattern.length; j++) {
+        patternCells[j].dataset.state = "suffix"
+        const textCell = textCells[frame.shift + j]
+        if (textCell && textCell.dataset.state !== "found") textCell.dataset.state = "suffix"
+      }
+    if (frame.cmpT != null && textCells[frame.cmpT])
+      textCells[frame.cmpT].dataset.state = frame.cmpResult
+    if (frame.cmpP != null && patternCells[frame.cmpP])
+      patternCells[frame.cmpP].dataset.state = frame.cmpResult
+    if (
+      frame.type === "match" ||
+      (frame.shiftDecision?.winner === "full-match" && frame.found.includes(frame.shift))
+    )
+      for (const cell of patternCells) cell.dataset.state = "found"
+    applyGeom()
+    status.innerHTML =
+      escapeHtml(frame.message) +
+      ` <span class="steptrace__counts">· step ${index + 1}/${total}</span>`
+  }
+
+  function watch(frame) {
+    const suffix =
+      frame.matchedFrom == null || frame.matchedFrom >= pattern.length
+        ? "—"
+        : pattern.slice(frame.matchedFrom)
+    const choice = ["decision", "match", "shift", "done"].includes(frame.type)
+      ? frame.shiftDecision
+      : null
+    const winner =
+      choice?.winner === "bad-character"
+        ? "bad wins"
+        : choice?.winner === "good-suffix"
+          ? "good wins"
+          : choice?.winner === "full-match"
+            ? "full match"
+            : choice?.winner === "tie"
+              ? "tie"
+              : ""
+    return [
+      { k: "align", v: frame.shift, sw: "var(--_blue)" },
+      { k: "j", v: frame.j ?? "—", sw: "var(--_violet)" },
+      { k: "suffix", v: suffix, sw: "var(--_green)" },
+      { k: "bad shift", v: choice?.bad ?? "—", sw: "var(--_blue)" },
+      { k: "good shift", v: choice?.good ?? "—", sw: "var(--_violet)" },
+      {
+        k: "selected shift",
+        v: choice ? `${choice.selected} · ${winner}` : "—",
+        sw: "var(--_amber)",
+      },
+    ]
+  }
+
+  return {
+    nodes: [stage, status],
+    stableStage: true,
+    paint,
+    watch,
+    destroy: () => ro && ro.disconnect(),
+  }
 }
 
 export function resolveVisibleScrollLeft(
@@ -2829,6 +2959,7 @@ export const ICON = {
     '<svg viewBox="0 0 24 24"><circle cx="12" cy="5" r="1.5" fill="currentColor" stroke="none"/><circle cx="12" cy="12" r="1.5" fill="currentColor" stroke="none"/><circle cx="12" cy="19" r="1.5" fill="currentColor" stroke="none"/></svg>',
   check:
     '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg>',
+  x: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.8" stroke-linecap="round"><path d="M6 6l12 12"/><path d="M18 6 6 18"/></svg>',
   compare:
     '<svg class="steptrace__cue-compare" viewBox="0 0 24 24" aria-hidden="true"><path d="m7 16-4-4 4-4"/><path d="M3 12h18"/><path d="m17 8 4 4-4 4"/></svg>',
   swap: '<svg class="steptrace__cue-swap" viewBox="0 0 24 24" aria-hidden="true"><path d="m2 9 3-3 3 3"/><path d="M13 18H7a2 2 0 0 1-2-2V6"/><path d="m22 15-3 3-3-3"/><path d="M11 6h6a2 2 0 0 1 2 2v10"/></svg>',
@@ -2900,7 +3031,9 @@ export function buildMilestones(algorithm, kind, frames) {
         : kind === "string"
           ? familyProfile === "z-array"
             ? "Initialize Z"
-            : "Shift 0"
+            : familyProfile === "boyer-moore"
+              ? "Preprocess rules"
+              : "Shift 0"
           : kind === "backtrack"
             ? "Depth 0"
             : kind === "rectree"
@@ -3014,6 +3147,9 @@ export function buildMilestones(algorithm, kind, frames) {
         )
     } else if (kind === "string" && familyProfile === "z-array") {
       if (f.type === "focus") push(i, `i = ${f.i}`)
+    } else if (kind === "string" && familyProfile === "boyer-moore") {
+      if (f.type === "align") push(i, `Align ${f.shift}`)
+      if (f.type === "match") push(i, `Match ${f.shift}`)
     } else if (kind === "string") {
       if (
         (f.type === "slide" || f.type === "hash" || f.type === "match") &&

@@ -45,6 +45,7 @@ const cases = [
   "kmp",
   "rabin-karp",
   "z-algorithm",
+  "boyer-moore",
   "two-pointers",
   "sliding-window",
   "lcs",
@@ -238,6 +239,90 @@ test("Z-Algorithm config is registered with an isolated typed string profile", (
   assert.match(note, /```steptrace\n\{"algorithm":"z-algorithm","text":"aabcaabxaaaz"\}\n```/)
 })
 
+test("full Boyer-Moore records both shift rules and the canonical winning decisions", () => {
+  const api = loadEngine(readFileSync(join(here, "generated", "engine.js"), "utf8"))
+  const { buildGoodSuffixTable } = loadStepTraceModule("src", "algorithms", "boyer-moore.ts")
+  const note = readFileSync(
+    join(
+      repoRoot,
+      "Vault",
+      "Home",
+      "Computer Science",
+      "Algorithms",
+      "Search Algorithms",
+      "String Matching",
+      "Boyer-Moore.md",
+    ),
+    "utf8",
+  )
+  const frames = api.buildFrames({
+    algorithm: "boyer-moore",
+    text: "ACCCDBACBA",
+    pattern: "ACBA",
+  }).frames
+
+  assert.equal(api.kindOf("boyer-moore"), "string")
+  assert.equal(frames[0].profile, "boyer-moore")
+  assert.deepEqual(buildGoodSuffixTable("ACBA"), [3, 3, 3, 1])
+  assert.deepEqual(frames[0].goodSuffix, [3, 3, 3, 1])
+  assert.deepEqual(
+    frames.filter((frame) => frame.type === "align").map((frame) => frame.shift),
+    [0, 2, 3, 6],
+  )
+  assert.deepEqual(
+    frames
+      .filter((frame) => frame.type === "decision")
+      .map((frame) => [frame.shift, frame.j, frame.shiftDecision]),
+    [
+      [0, 3, { bad: 2, good: 1, selected: 2, winner: "bad-character" }],
+      [2, 3, { bad: 1, good: 1, selected: 1, winner: "tie" }],
+      [3, 1, { bad: 2, good: 3, selected: 3, winner: "good-suffix" }],
+    ],
+  )
+  assert.deepEqual(
+    frames
+      .filter((frame) => frame.type === "compare" && frame.shift === 3)
+      .map((frame) => [frame.j, frame.cmpResult]),
+    [
+      [3, "match"],
+      [2, "match"],
+      [1, "mismatch"],
+    ],
+  )
+  assert.ok(
+    frames
+      .filter((frame) => frame.type === "compare" && frame.shift === 3)
+      .every((frame) => frame.shiftDecision === null),
+  )
+  assert.deepEqual(frames.find((frame) => frame.type === "match").shiftDecision, {
+    bad: null,
+    good: 3,
+    selected: 3,
+    winner: "full-match",
+  })
+  assert.equal(frames.length, 23)
+  assert.equal(frames.at(-2).type, "shift")
+  assert.equal(frames.at(-2).shift, 6)
+  assert.match(frames.at(-2).message, /would leave the searchable range/)
+  assert.equal(frames.at(-1).shift, 6)
+  assert.deepEqual(frames.at(-1).found, [6])
+  assert.match(
+    note,
+    /```steptrace\n\{"algorithm":"boyer-moore","text":"ACCCDBACBA","pattern":"ACBA"\}\n```/,
+  )
+})
+
+test("Boyer-Moore keeps UTF-16 indexing consistent for surrogate-pair matches", () => {
+  const api = loadEngine(readFileSync(join(here, "generated", "engine.js"), "utf8"))
+  const frames = api.buildFrames({
+    algorithm: "boyer-moore",
+    text: "😀x😀",
+    pattern: "😀",
+  }).frames
+
+  assert.deepEqual(frames.at(-1).found, [0, 3])
+})
+
 test("Z-Algorithm frames expose copy, reuse-extension, comparisons, and the terminal array", () => {
   const api = loadEngine(readFileSync(join(here, "generated", "engine.js"), "utf8"))
   const { buildMilestones, summaryFor } = loadStepTraceModule("src", "render.ts")
@@ -293,6 +378,152 @@ test("Z-Algorithm frames expose copy, reuse-extension, comparisons, and the term
     summaryFor("z-algorithm", "string", frames.at(-1)),
     "Z = [12, 1, 0, 0, 3, 1, 0, 0, 2, 2, 1, 0].",
   )
+})
+
+test("Boyer-Moore reuses stable non-scrolling string strips with inherited edge radii", () => {
+  class FakeNode {
+    constructor(tagName) {
+      this.tagName = tagName
+      this.textContent = ""
+      this.innerHTML = ""
+      this.children = []
+      this.attributes = new Map()
+      this.dataset = {}
+      this.style = {
+        setProperty: (key, value) => this.attributes.set(`style:${key}`, value),
+      }
+      this.className = ""
+    }
+    setAttribute(key, value) {
+      this.attributes.set(key, String(value))
+    }
+    append(...children) {
+      this.children.push(...children)
+    }
+    getBoundingClientRect() {
+      return { left: 0, width: 40 }
+    }
+  }
+  const countNodes = (node) =>
+    1 + node.children.reduce((count, child) => count + countNodes(child), 0)
+  const previousDocument = globalThis.document
+  const previousResizeObserver = globalThis.ResizeObserver
+  let observer
+  globalThis.ResizeObserver = class {
+    constructor(callback) {
+      this.callback = callback
+      this.observed = []
+      this.disconnected = false
+      observer = this
+    }
+    observe(node) {
+      this.observed.push(node)
+    }
+    disconnect() {
+      this.disconnected = true
+    }
+    trigger() {
+      this.callback()
+    }
+  }
+  globalThis.document = { createElement: (tagName) => new FakeNode(tagName) }
+  try {
+    const api = loadEngine(readFileSync(join(here, "generated", "engine.js"), "utf8"))
+    const { ICON, makeMatchView } = loadStepTraceModule("src", "render.ts")
+    const styles = readFileSync(join(here, "src", "styles", "string.scss"), "utf8")
+    const frames = api.buildFrames({
+      algorithm: "boyer-moore",
+      text: "ACCCDBACBA",
+      pattern: "ACBA",
+    }).frames
+    const view = makeMatchView(frames)
+    const [stage] = view.nodes
+    const baseline = countNodes(stage)
+
+    assert.equal(view.stableStage, true)
+    assert.equal(stage.dataset.profile, "boyer-moore")
+    assert.match(stage.className, /\bsteptrace__match\b/)
+    assert.equal(stage.children.length, 1)
+    assert.deepEqual(
+      view.watch(frames[0]).map((row) => row.k),
+      ["align", "j", "suffix", "bad shift", "good shift", "selected shift"],
+    )
+    const goodWins = frames.find(
+      (frame) => frame.type === "decision" && frame.shiftDecision.winner === "good-suffix",
+    )
+    assert.deepEqual(
+      view.watch(goodWins).map((row) => row.v),
+      [3, 1, "BA", 2, 3, "3 · good wins"],
+    )
+    const mismatch = frames.find(
+      (frame) => frame.type === "compare" && frame.shift === 3 && frame.j === 1,
+    )
+    assert.deepEqual(
+      view
+        .watch(mismatch)
+        .slice(3)
+        .map((row) => row.v),
+      ["—", "—", "—"],
+    )
+    for (let index = 0; index < frames.length; index++) {
+      view.paint(frames[index], index, frames.length)
+      assert.equal(countNodes(stage), baseline)
+    }
+    const viewport = stage.children[0]
+    const board = viewport.children[0]
+    const patternRow = board.children[0]
+    const textRow = board.children[1]
+    assert.match(patternRow.className, /\bsteptrace__cells\b/)
+    assert.match(patternRow.className, /\bsteptrace__cells--pat\b/)
+    assert.match(textRow.className, /\bsteptrace__cells\b/)
+    assert.equal(patternRow.children.length, 4)
+    assert.equal(textRow.children.length, 10)
+    const compareCue = textRow.children[0].children[1]
+    assert.equal(compareCue.attributes.get("aria-hidden"), "true")
+    assert.match(compareCue.children[0].innerHTML, /<svg/)
+    assert.match(compareCue.children[1].innerHTML, /<svg/)
+    assert.doesNotMatch(compareCue.children[0].innerHTML + compareCue.children[1].innerHTML, /✓|×/)
+    assert.match(ICON.x, /<svg/)
+    view.paint(frames.at(-1), frames.length - 1, frames.length)
+    assert.equal(patternRow.style.transform, "translateX(240.00px)")
+    assert.deepEqual(observer.observed, [textRow])
+    observer.trigger()
+    assert.equal(patternRow.style.transform, "translateX(240.00px)")
+    view.destroy()
+    assert.equal(observer.disconnected, true)
+
+    const edgeFrames = api.buildFrames({
+      algorithm: "boyer-moore",
+      text: "ACBA",
+      pattern: "ACBA",
+    }).frames
+    const edgeView = makeMatchView(edgeFrames)
+    const edgeBoard = edgeView.nodes[0].children[0].children[0]
+    const edgePattern = edgeBoard.children[0]
+    const edgeText = edgeBoard.children[1]
+    edgeView.paint(edgeFrames.at(-1), edgeFrames.length - 1, edgeFrames.length)
+    for (const row of [edgePattern, edgeText]) {
+      assert.equal(row.children[0].dataset.state, "found")
+      assert.equal(row.children.at(-1).dataset.state, "found")
+    }
+    edgeView.destroy()
+
+    const viewportCss = styles.match(/\.steptrace__bm-viewport \{([^}]*)\}/)[1]
+    const boardCss = styles.match(/\.steptrace__bm-board \{([^}]*)\}/)[1]
+    assert.match(viewportCss, /overflow: hidden;/)
+    assert.doesNotMatch(viewportCss, /overflow[^;]*auto|scrollbar-gutter/)
+    assert.match(boardCss, /inline-size: 100%;/)
+    assert.match(boardCss, /min-inline-size: 0;/)
+    assert.match(boardCss, /overflow: hidden;/)
+    assert.match(styles, /\.steptrace__bm \.steptrace__cell:first-child \{[^}]*radius: inherit;/)
+    assert.match(styles, /\.steptrace__bm \.steptrace__cell:last-child \{[^}]*radius: inherit;/)
+    assert.doesNotMatch(styles, /steptrace__bm-decision|content:\s*["'][✓×]/)
+    assert.match(styles, /\.steptrace__bm-icon svg \{/)
+    assert.match(styles, /\.steptrace--reduced[\s\S]*\.steptrace__bm-pattern/)
+  } finally {
+    globalThis.document = previousDocument
+    globalThis.ResizeObserver = previousResizeObserver
+  }
 })
 
 test("Z active ranges scroll only when they leave the shared viewport", () => {
@@ -418,7 +649,7 @@ test("the Z-array profile paints every frame into one stable measured-strip DOM"
   }
 })
 
-test("KMP and Rabin-Karp stay on the measured match profile", () => {
+test("KMP, Rabin-Karp, and Z stay isolated from the Boyer-Moore profile", () => {
   class FakeNode {
     constructor(tagName) {
       this.tagName = tagName
@@ -457,11 +688,18 @@ test("KMP and Rabin-Karp stay on the measured match profile", () => {
       text: "ABABACABA",
       pattern: "ABAC",
     }).frames
+    const z = api.buildFrames({
+      algorithm: "z-algorithm",
+      text: "aabcaabxaaaz",
+    }).frames
 
     assert.ok(kmp.every((frame) => frame.profile == null && !("z" in frame)))
     assert.ok(rabin.every((frame) => frame.profile == null && !("z" in frame)))
+    assert.ok(z.every((frame) => frame.profile === "z-array" && !("goodSuffix" in frame)))
+    assert.deepEqual(z.at(-1).z, [12, 1, 0, 0, 3, 1, 0, 0, 2, 2, 1, 0])
     assert.equal(makeMatchView(kmp).nodes[0].className, "steptrace__match")
     assert.equal(makeMatchView(rabin).nodes[0].className, "steptrace__match")
+    assert.equal(makeMatchView(z).nodes[0].className, "steptrace__z")
     assert.equal(makeMatchView(kmp).nodes.length, 2)
     assert.equal(makeMatchView(rabin).nodes.length, 3)
     const renderSource = readFileSync(join(here, "src", "render.ts"), "utf8")
@@ -752,7 +990,7 @@ test("all built-in algorithms preserve their headless frame contract", () => {
 
   assert.equal(
     digest,
-    "e668a801c98c8663bb387608ab94607c4ecb142539b0cbbf1ff9eb28ec46716a",
+    "bc368c4578c60bb517ac21df7b6be6cc9cb7cfa995ead93611f0fd5de7ec1be3",
     "the headless StepTrace behavior changed",
   )
 })

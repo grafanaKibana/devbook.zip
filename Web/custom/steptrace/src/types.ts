@@ -147,7 +147,7 @@ export interface FamilyAlgorithmDefinition<
 }
 export type GraphAlgorithmDefinition = AlgorithmDefinition<"graph", GraphRecorder, [StepTraceGraph]>
 export type SearchAlgorithmDefinition = AlgorithmDefinition<"search", SearchRecorder>
-export type StringVisualProfile = "match" | "z-array"
+export type StringVisualProfile = "match" | "z-array" | "boyer-moore"
 export interface StringAlgorithmDefinition extends AlgorithmDefinition<"string", StringRecorder> {
   profile?: StringVisualProfile
 }

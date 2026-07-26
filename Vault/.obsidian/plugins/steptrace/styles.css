@@ -1463,6 +1463,69 @@
   color: var(--_green);
   box-shadow: inset 0 -3px 0 var(--_green);
 }
+.steptrace__bm {
+  inline-size: 100%;
+  min-inline-size: 0;
+  min-block-size: 12.75rem;
+  justify-content: center;
+}
+.steptrace__bm-viewport {
+  inline-size: 100%;
+  min-inline-size: 0;
+  margin-block: auto;
+  overflow: hidden;
+}
+.steptrace__bm-board {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  inline-size: 100%;
+  min-inline-size: 0;
+  padding-block: 0.4rem;
+  overflow: hidden;
+}
+.steptrace__bm-pattern {
+  transition: transform var(--_dur-move) var(--_spring-soft);
+}
+.steptrace__bm-cell {
+  position: relative;
+}
+.steptrace__bm .steptrace__cell:first-child {
+  border-start-start-radius: inherit;
+  border-end-start-radius: inherit;
+}
+.steptrace__bm .steptrace__cell:last-child {
+  border-start-end-radius: inherit;
+  border-end-end-radius: inherit;
+}
+.steptrace__bm .steptrace__cell[data-state=suffix] {
+  color: var(--_violet);
+  background: color-mix(in srgb, var(--_violet) 13%, transparent);
+  box-shadow: inset 0 -3px 0 var(--_violet);
+}
+.steptrace__bm-compare-icon {
+  position: absolute;
+  inset-block-start: 0.2rem;
+  inset-inline-end: 0.2rem;
+  inline-size: 0.78rem;
+  block-size: 0.78rem;
+  pointer-events: none;
+}
+.steptrace__bm-icon {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  opacity: 0;
+}
+.steptrace__bm-icon svg {
+  inline-size: 100%;
+  block-size: 100%;
+}
+.steptrace__bm-cell[data-state=match] .steptrace__bm-icon--match,
+.steptrace__bm-cell[data-state=mismatch] .steptrace__bm-icon--mismatch {
+  opacity: 1;
+}
 .steptrace__z {
   inline-size: 100%;
   min-inline-size: 0;
@@ -1673,6 +1736,9 @@
   background: var(--_green);
 }
 @media (max-width: 560px) {
+  .steptrace__bm {
+    min-block-size: 12.25rem;
+  }
   .steptrace__z {
     min-block-size: 12.25rem;
   }
@@ -1691,7 +1757,7 @@
     font-size: 0.63rem;
   }
 }
-.steptrace--reduced :is(.steptrace__z-track, .steptrace__z-cursor, .steptrace__z-bracket, .steptrace__z-copy) {
+.steptrace--reduced :is(.steptrace__bm-pattern, .steptrace__z-track, .steptrace__z-cursor, .steptrace__z-bracket, .steptrace__z-copy) {
   transition-property: opacity !important;
 }
 .steptrace__pwrap {

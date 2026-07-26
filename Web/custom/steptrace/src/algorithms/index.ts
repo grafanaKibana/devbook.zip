@@ -2,6 +2,7 @@ import type { BuiltInAlgorithm } from "../types"
 import { bfs } from "./bfs"
 import { binarySearchOnAnswer } from "./binary-search-on-answer"
 import { binarySearch } from "./binary-search"
+import { boyerMoore } from "./boyer-moore"
 import { bubbleSort } from "./bubble-sort"
 import { bucketSort } from "./bucket-sort"
 import { combSort } from "./comb-sort"
@@ -71,6 +72,7 @@ export const builtInAlgorithms = [
   kmp,
   rabinKarp,
   zAlgorithm,
+  boyerMoore,
   twoPointers,
   slidingWindow,
   lcs,
