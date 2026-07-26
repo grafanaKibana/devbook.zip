@@ -13,7 +13,8 @@
   },
   "scripts": {
     "quartz": "node ./quartz/bootstrap-cli.mjs",
-    "serve": "node ./quartz/bootstrap-cli.mjs build --serve --port 8080",
+    "serve": "node ./quartz/bootstrap-cli.mjs build --serve --port 8085 --wsPort 3002",
+    "readme:image": "playwright install chromium && node ./scripts/generate-readme-image.mjs",
     "docs": "node ./quartz/bootstrap-cli.mjs build --serve -d docs",
     "check": "npm run steptrace:test && npm run steptrace:typecheck && npm run steptrace:check && tsc --noEmit && npx prettier . --check",
     "format": "npx prettier . --write",
@@ -88,6 +89,7 @@
     "@types/yargs": "^17.0.35",
     "esbuild": "^0.28.1",
     "lucide-static": "^1.25.0",
+    "playwright": "^1.62.0",
     "prettier": "^3.9.5",
     "tsx": "^4.23.1",
     "typescript": "^5.9.3"

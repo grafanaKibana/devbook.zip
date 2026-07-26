@@ -509,6 +509,8 @@ def validate_attachment_locations(vault_root: Path, paths: Iterable[Path]) -> li
     for path in sorted(set(paths)):
         if not path.is_file() or path.suffix.casefold() not in ATTACHMENT_SUFFIXES:
             continue
+        if not path.is_relative_to(vault_root):
+            continue
         try:
             path.relative_to(assets_root)
         except ValueError:
