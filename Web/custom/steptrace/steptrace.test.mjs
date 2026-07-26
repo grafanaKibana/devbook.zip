@@ -380,7 +380,7 @@ test("Z-Algorithm frames expose copy, reuse-extension, comparisons, and the term
   )
 })
 
-test("Boyer-Moore reuses stable non-scrolling string strips with inherited edge radii", () => {
+test("Boyer-Moore reuses stable non-scrolling string strips with shell-matched edge radii", () => {
   class FakeNode {
     constructor(tagName) {
       this.tagName = tagName
@@ -515,8 +515,15 @@ test("Boyer-Moore reuses stable non-scrolling string strips with inherited edge 
     assert.match(boardCss, /inline-size: 100%;/)
     assert.match(boardCss, /min-inline-size: 0;/)
     assert.match(boardCss, /overflow: hidden;/)
-    assert.match(styles, /\.steptrace__bm \.steptrace__cell:first-child \{[^}]*radius: inherit;/)
-    assert.match(styles, /\.steptrace__bm \.steptrace__cell:last-child \{[^}]*radius: inherit;/)
+    assert.match(styles, /\.steptrace__cells \{[^}]*--_string-radius: 9px;/)
+    assert.match(
+      styles,
+      /\.steptrace__bm \.steptrace__cell:first-child \{[^}]*calc\(var\(--_string-radius\) - 1px\);/,
+    )
+    assert.match(
+      styles,
+      /\.steptrace__bm \.steptrace__cell:last-child \{[^}]*calc\(var\(--_string-radius\) - 1px\);/,
+    )
     assert.doesNotMatch(styles, /steptrace__bm-decision|content:\s*["'][✓×]/)
     assert.match(styles, /\.steptrace__bm-icon svg \{/)
     assert.match(styles, /\.steptrace--reduced[\s\S]*\.steptrace__bm-pattern/)

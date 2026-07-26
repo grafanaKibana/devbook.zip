@@ -18,10 +18,11 @@
 }
 /* the main text strip fills the full container width like the pointers array */
 .steptrace__cells {
+  --_string-radius: 9px;
   display: flex;
   width: 100%;
   border: 1px solid color-mix(in srgb, var(--_text) 22%, transparent);
-  border-radius: 9px;
+  border-radius: var(--_string-radius);
   overflow: hidden;
 }
 /* the pattern strip is only as wide as its own cells and slides via translateX */
@@ -107,12 +108,12 @@
   position: relative;
 }
 .steptrace__bm .steptrace__cell:first-child {
-  border-start-start-radius: inherit;
-  border-end-start-radius: inherit;
+  border-start-start-radius: calc(var(--_string-radius) - 1px);
+  border-end-start-radius: calc(var(--_string-radius) - 1px);
 }
 .steptrace__bm .steptrace__cell:last-child {
-  border-start-end-radius: inherit;
-  border-end-end-radius: inherit;
+  border-start-end-radius: calc(var(--_string-radius) - 1px);
+  border-end-end-radius: calc(var(--_string-radius) - 1px);
 }
 .steptrace__bm .steptrace__cell[data-state="suffix"] {
   color: var(--_violet);
