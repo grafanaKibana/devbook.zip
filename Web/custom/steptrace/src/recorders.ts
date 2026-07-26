@@ -1396,6 +1396,7 @@ export class ExecutionTreeRecorder {
     this._cache = []
     this.calls = 0
     this.pruned = 0
+    this._incumbent = 0
   }
   _push(type, message) {
     this.frames.push(
@@ -1422,6 +1423,7 @@ export class ExecutionTreeRecorder {
         cache: Object.freeze(this._cache.map((entry) => Object.freeze({ ...entry }))),
         calls: this.calls,
         pruned: this.pruned,
+        ...(this.profile === "branch-and-bound" ? { incumbent: this._incumbent } : {}),
         message,
       }),
     )
@@ -1514,6 +1516,27 @@ export class ExecutionTreeRecorder {
     else this._cache.push({ key, result: cachedResult })
     this._push("store", message)
   }
+  incumbent(id, path, value, message) {
+    this.phase = "conquer"
+    this.action = "update incumbent"
+    this._active = id
+    this._path = path.slice()
+    this._visible.add(id)
+    this._states[id] = "incumbent"
+    this._incumbent = value
+    this._push("incumbent", message)
+  }
+  reject(id, path, message) {
+    this.phase = "conquer"
+    this.action = "reject infeasible branch"
+    this._active = id
+    this._path = path.slice()
+    this._visible.add(id)
+    this._states[id] = "infeasible"
+    this._collapsed.add(id)
+    this.pruned++
+    this._push("infeasible", message)
+  }
   prune(id, path, subtreeIds, message) {
     this.phase = "conquer"
     this.action = "prune branch"
@@ -1521,6 +1544,7 @@ export class ExecutionTreeRecorder {
     this._path = path.slice()
     this._visible.add(id)
     this._states[id] = "prune"
+    this._collapsed.add(id)
     for (const childId of subtreeIds) {
       this._visible.add(childId)
       this._collapsed.add(childId)

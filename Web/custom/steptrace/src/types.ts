@@ -29,9 +29,11 @@ export type VisualFamilyId =
   | "distribution-sort"
   | "dp-story"
   | "execution-tree"
+  | "graph-state"
   | "indexed-array-search"
   | "matrix-grid"
   | "monotone-boundary"
+  | "prefix-character"
   | "run-stack"
 
 export interface AlgorithmMeta {
@@ -52,6 +54,7 @@ export interface AlgorithmInput {
   mode: string
   text: string
   pattern: string
+  patterns: string[]
   a: string
   b: string
   n: number
@@ -59,6 +62,7 @@ export interface AlgorithmInput {
   value: number
   width: number
   ops: Array<[string, number, number?]>
+  operations: Array<[string, string]>
   start: string
   directed: boolean
 }
@@ -103,6 +107,7 @@ export interface StepTraceView<TFrame = unknown> {
   stableStage?: boolean
   paint(frame: TFrame, index?: number, total?: number): void
   watch?(frame: TFrame): WatchRow[]
+  summary?(frame: TFrame): string
   destroy?(): void
 }
 
@@ -177,6 +182,157 @@ export interface BuiltFrames {
   family?: VisualFamily<unknown, unknown, unknown>
   graph?: StepTraceGraph
   frontierLabel?: string
+  endpointSettings?: EndpointSettings
+}
+
+export interface EndpointSettings {
+  startLabel: string
+  targetLabel: string
+  options: Array<{ value: string; label: string }>
+  start: string
+  target: string
+}
+
+export interface GraphStateNode {
+  id: string
+  label: string
+  x: number
+  y: number
+}
+
+export interface GraphStateEdge {
+  from: string
+  to: string
+  weight: number
+  directed?: boolean
+  label?: string
+  showDirection?: boolean
+}
+
+export type GraphStateDecor =
+  | { kind: "rect"; className: string; x: number; y: number; width: number; height: number; rx?: number }
+  | { kind: "line"; className: string; x1: number; y1: number; x2: number; y2: number }
+  | { kind: "path"; className: string; d: string }
+  | { kind: "text"; className: string; x: number; y: number; text: string }
+
+export type GraphStateNodeRole =
+  | "neutral"
+  | "frontier"
+  | "active"
+  | "closed"
+  | "accepted"
+  | "rejected"
+
+export type GraphStateEdgeRole =
+  | "neutral"
+  | "active"
+  | "candidate"
+  | "accepted"
+  | "rejected"
+  | "cut"
+  | "residual"
+
+export interface GraphStateScore {
+  id: string
+  g: number
+  h: number
+  f: number
+}
+
+export type GraphStateDetail =
+  | {
+      kind: "heuristic-search"
+      policy: "a-star" | "greedy"
+      open: readonly GraphStateScore[]
+      closed: readonly string[]
+      costs: Readonly<Record<string, number>>
+      heuristic: Readonly<Record<string, number>>
+      comparison: {
+        primaryLabel: string
+        primaryValue: number | null
+        baselineLabel: string
+        baselineValue: number | null
+        metric: "expansions" | "cost"
+      }
+    }
+  | {
+      kind: "dual-search"
+      forward: readonly string[]
+      backward: readonly string[]
+      visited: readonly string[]
+      meeting: string | null
+    }
+  | {
+      kind: "edge-relaxation"
+      pass: number
+      edge: readonly [string, string] | null
+      distances: Readonly<Record<string, number>>
+      changed: boolean
+    }
+  | {
+      kind: "component-flood"
+      component: number
+      frontier: readonly string[]
+      visited: readonly string[]
+      groups?: readonly (readonly string[])[]
+    }
+  | {
+      kind: "low-link-cuts"
+      discovery: Readonly<Record<string, number>>
+      low: Readonly<Record<string, number>>
+      articulationPoints: readonly string[]
+      bridges: readonly (readonly [string, string])[]
+    }
+  | {
+      kind: "low-link-components"
+      discovery: Readonly<Record<string, number>>
+      low: Readonly<Record<string, number>>
+      stack: readonly string[]
+      components: readonly (readonly string[])[]
+    }
+  | {
+      kind: "mst-scan"
+      pending: readonly GraphStateEdge[]
+      accepted: readonly GraphStateEdge[]
+      totalWeight: number
+      components?: readonly (readonly string[])[]
+    }
+  | {
+      kind: "mst-round"
+      round: number
+      components: readonly (readonly string[])[]
+      choices: readonly GraphStateEdge[]
+      totalWeight: number
+    }
+  | {
+      kind: "path-backtrack"
+      path: readonly string[]
+      candidates: readonly string[]
+      rejected: readonly string[]
+    }
+  | {
+      kind: "residual-flow"
+      augmentingPath: readonly string[]
+      bottleneck: number | null
+      totalFlow: number
+      flow: Readonly<Record<string, number>>
+    }
+
+export interface GraphStateFrame {
+  type: string
+  profile: string
+  nodes: readonly GraphStateNode[]
+  edges: readonly GraphStateEdge[]
+  decor: readonly GraphStateDecor[]
+  start: string | null
+  target: string | null
+  currentNode: string | null
+  currentEdge: readonly [string, string] | null
+  selectedEdges: readonly string[]
+  nodeState: Readonly<Record<string, GraphStateNodeRole>>
+  edgeState: Readonly<Record<string, GraphStateEdgeRole>>
+  message: string
+  detail: GraphStateDetail
 }
 
 export interface SpeedSliderOptions {

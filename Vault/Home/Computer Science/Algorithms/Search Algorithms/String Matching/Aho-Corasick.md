@@ -11,16 +11,15 @@ status: Creation
 publish: true
 ---
 
-A signature engine scans a byte stream — packets, log lines, a file — against a fixed dictionary of `k` patterns and must report every occurrence of every pattern. Running a single-pattern matcher such as [[KMP (Knuth-Morris-Pratt) Algorithm|KMP]] once per pattern reads the whole text `k` times, so the cost is `O(k·n)` and grows with the dictionary even though the text never changes.
+A signature engine scans a byte stream — packets, log lines, a file — against a fixed dictionary of `k` patterns and must report every occurrence of every pattern. Running a single-pattern matcher such as [[Home/Computer Science/Algorithms/Search Algorithms/String Matching/KMP (Knuth-Morris-Pratt) Algorithm|KMP]] once per pattern reads the whole text `k` times, so the cost is `O(k·n)` and grows with the dictionary even though the text never changes.
 
 The patterns share structure. Any two that begin `sh…` walk the same first edges, and a shorter pattern can be a suffix of the state a longer one reaches. Aho-Corasick compiles the whole dictionary once into a single finite automaton — a trie of all patterns carrying **failure links** and **output links** — then drives the text through it one character at a time without ever rewinding. One pass reports every match of every pattern, and its search cost stops depending on `k`.
 
 **Core shape:** fixed pattern set → trie + failure links + output links → one non-backtracking pass over the text → `Θ(n + z)` search for `z` reported matches, from one automaton built over the whole dictionary.
 
-A future trace would follow the automaton over one short text.
-
-> [!NOTE] Visualization pending
-> Planned StepTrace: a string-automaton card showing a trie of the pattern set with its failure links, consuming the text one character at a time as the automaton transitions on each character and emits every pattern that ends at the arrived state. No matching renderer exists in `engine.js` yet.
+```steptrace
+{"algorithm":"aho-corasick","patterns":["he","she","his","hers"],"text":"ushers"}
+```
 
 # Trie, Failure Links, Output Links
 

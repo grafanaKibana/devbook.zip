@@ -21,8 +21,9 @@ An **articulation point** (cut vertex) is a vertex whose deletion raises the num
 
 The decisive transition is a DFS tree annotated with `disc`/`low`, where each child's `low` is compared against its parent's `disc`.
 
-> [!NOTE] Visualization pending
-> Planned StepTrace: a DFS-tree card showing discovery and low-link values propagating up from the leaves, marking a vertex as a cut vertex when a child's subtree cannot reach above it and an edge as a bridge when a child's low-link strictly exceeds the parent's discovery time. No matching renderer exists in `engine.js` yet.
+```steptrace
+{"algorithm":"articulation-points-and-bridges"}
+```
 
 # What `disc` and `low` Measure
 
@@ -50,7 +51,7 @@ There is one honest bound, not a best/average/worst spread: the traversal always
 
 # Boundaries
 
-**Directed graphs.** The rules assume the DFS tree holds only tree and back edges. Undirectedness guarantees that — every non-tree edge points to an ancestor, and a back edge is a genuine two-way alternate route. On a directed graph DFS also produces cross and forward edges, and a back edge no longer implies a return path, so `low[v]` stops measuring a real escape route and both tests silently report wrong cuts. Directed connectivity is a different decomposition, [[Strongly Connected Components]].
+**Directed graphs.** The rules assume the DFS tree holds only tree and back edges. Undirectedness guarantees that — every non-tree edge points to an ancestor, and a back edge is a genuine two-way alternate route. On a directed graph DFS also produces cross and forward edges, and a back edge no longer implies a return path, so `low[v]` stops measuring a real escape route and both tests silently report wrong cuts. Directed connectivity is a different decomposition, [[Home/Computer Science/Algorithms/Graph Algorithms/Strongly Connected Components|strongly connected components]].
 
 **The root special case.** Applying the non-root rule `low[v] >= disc[u]` to the DFS root marks it as a cut vertex the moment it has any child, because `low[v] >= disc[root]` is vacuously true — nothing sits above the root. Rooting a path `0-1-2` at `0` flags `0` even though deleting it leaves `1-2` connected. The root must instead be tested by child count (two or more). The bridge rule needs no exception: `low[v] > disc[root]` handles the root correctly, since a first child with no back edge genuinely sits below a bridge.
 
@@ -134,13 +135,13 @@ There is one honest bound, not a best/average/worst spread: the traversal always
 
 Cut vertices and bridges are the boundary markers of two connectivity decompositions, and both reuse the same low-link DFS.
 
-| Decomposition | Maximal blocks | Boundary object | Same `disc`/`low` DFS |
+| Decomposition | Maximal blocks | Boundary object | DFS relation |
 | --- | --- | --- | --- |
 | Biconnected components | subgraphs with no cut vertex (2-vertex-connected) | articulation points — a cut vertex belongs to several blocks at once | yes, with an auxiliary edge stack |
 | 2-edge-connected components | subgraphs with no bridge | bridges join adjacent components | yes |
-| [[Strongly Connected Components]] | mutually reachable sets in a **directed** graph | — | yes, low-link over directed edges |
+| [[Home/Computer Science/Algorithms/Graph Algorithms/Strongly Connected Components|Strongly connected components]] | mutually reachable sets in a **directed** graph | — | related low-link DFS, with an active-vertex stack and different update rule |
 
-One `disc`/`low` DFS finds every cut vertex and bridge in `O(V + E)`, against `O(V·(V+E))` for remove-and-recheck, and the same pass — with an edge stack — emits the biconnected components those cut vertices separate. The directed reachability question is a separate decomposition, [[Strongly Connected Components]], built on the same low-link idea but where a back edge no longer certifies a two-way route, so the cut-vertex reasoning does not carry over. For undirected reliability analysis — which node or link is the single point of failure — this one DFS is the whole answer.
+One `disc`/`low` DFS finds every cut vertex and bridge in `O(V + E)`, against `O(V·(V+E))` for remove-and-recheck, and the same pass — with an edge stack — emits the biconnected components those cut vertices separate. The directed reachability question is a separate decomposition, [[Home/Computer Science/Algorithms/Graph Algorithms/Strongly Connected Components|strongly connected components]], built on a related low-link idea. Tarjan's SCC traversal must track which vertices remain on an active stack and must ignore edges into already-finished components when lowering `low`; the cut-vertex implementation cannot be reused by merely directing its edges. For undirected reliability analysis — which node or link is the single point of failure — this one DFS is the whole answer.
 
 # Questions
 
@@ -155,6 +156,7 @@ One `disc`/`low` DFS finds every cut vertex and bridge in `O(V + E)`, against `O
 
 # References
 
+- [Algorithm 447: Efficient Algorithms for Graph Manipulation](https://doi.org/10.1145/362248.362272) — Hopcroft and Tarjan's original linear-time DFS algorithms for biconnected components and articulation structure.
 - [Biconnected component (Wikipedia)](https://en.wikipedia.org/wiki/Biconnected_component) — articulation points, the low-link DFS, and decomposition into biconnected blocks.
 - [Bridge (graph theory) (Wikipedia)](https://en.wikipedia.org/wiki/Bridge_(graph_theory)) — cut edges, 2-edge-connectivity, and the bridge-finding condition.
 - [Finding bridges (cp-algorithms)](https://cp-algorithms.com/graph/bridge-searching.html) — the `disc`/`low` bridge implementation and the parent-edge subtlety on multigraphs.

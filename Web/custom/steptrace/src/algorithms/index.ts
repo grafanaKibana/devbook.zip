@@ -1,11 +1,19 @@
 import type { BuiltInAlgorithm } from "../types"
+import { aStar } from "./a-star"
+import { ahoCorasick } from "./aho-corasick"
+import { articulationPointsAndBridges } from "./articulation-points-and-bridges"
 import { bfs } from "./bfs"
+import { bellmanFord } from "./bellman-ford"
 import { binarySearchOnAnswer } from "./binary-search-on-answer"
 import { binarySearch } from "./binary-search"
+import { bidirectionalSearch } from "./bidirectional-search"
 import { boyerMoore } from "./boyer-moore"
+import { boruvka } from "./boruvka"
+import { branchAndBound } from "./branch-and-bound"
 import { bubbleSort } from "./bubble-sort"
 import { bucketSort } from "./bucket-sort"
 import { combSort } from "./comb-sort"
+import { connectedComponents } from "./connected-components"
 import { countingSort } from "./counting-sort"
 import { cyclicSort } from "./cyclic-sort"
 import { dfs } from "./dfs"
@@ -15,16 +23,20 @@ import { dynamicProgrammingAlgorithms } from "./dynamic-programming"
 import { exponentialSearch } from "./exponential-search"
 import { interpolationSearch } from "./interpolation-search"
 import { floydWarshall } from "./floyd-warshall"
+import { greedyBestFirstSearch } from "./greedy-best-first-search"
 import { heapSort } from "./heap-sort"
+import { hamiltonianCycle } from "./hamiltonian-cycle"
 import { insertionSort } from "./insertion-sort"
 import { introsort } from "./introsort"
 import { jumpSearch } from "./jump-search"
 import { kernighanPopcount } from "./kernighan-popcount"
 import { kmp } from "./kmp"
+import { kruskal } from "./kruskal"
 import { lcs } from "./lcs"
 import { linearSearch } from "./linear-search"
 import { mergeSort } from "./merge-sort"
 import { mergeSortTree } from "./merge-sort-tree"
+import { maximumFlow } from "./maximum-flow"
 import { memoization } from "./memoization"
 import { nQueens } from "./n-queens"
 import { prim } from "./prim"
@@ -35,13 +47,27 @@ import { selectionSort } from "./selection-sort"
 import { shellSort } from "./shell-sort"
 import { slidingWindow } from "./sliding-window"
 import { topologicalSort } from "./topological-sort"
+import { stronglyConnectedComponents } from "./strongly-connected-components"
+import { trie } from "./trie"
 import { twoPointers } from "./two-pointers"
 import { unionFind } from "./union-find"
 import { ternarySearch } from "./ternary-search"
+import { ternarySearchTree } from "./ternary-search-tree"
 import { timSort } from "./tim-sort"
 import { zAlgorithm } from "./z-algorithm"
 
 export const builtInAlgorithms = [
+  aStar,
+  articulationPointsAndBridges,
+  bellmanFord,
+  bidirectionalSearch,
+  boruvka,
+  connectedComponents,
+  greedyBestFirstSearch,
+  hamiltonianCycle,
+  kruskal,
+  maximumFlow,
+  stronglyConnectedComponents,
   bubbleSort,
   insertionSort,
   selectionSort,
@@ -83,4 +109,8 @@ export const builtInAlgorithms = [
   nQueens,
   memoization,
   divideAndConquer,
+  branchAndBound,
+  trie,
+  ahoCorasick,
+  ternarySearchTree,
 ] satisfies readonly BuiltInAlgorithm[]

@@ -181,6 +181,7 @@ export function createMount(
       array:
         Array.isArray(config.array) && config.array.length ? config.array.slice() : randomArray(),
       start: config.start != null ? String(config.start) : null,
+      target: config.target != null ? String(config.target) : null,
       config,
     }
 
@@ -318,7 +319,11 @@ export function createMount(
     speedSection.append(speedHead, speedRow)
     menu.append(speedSection)
     applySpeed(state.speed)
+    let endpointSection = null
+    let startHead = null
     let startMenu = null
+    let targetHead = null
+    let targetMenu = null
     if (kind === "sort") {
       const section = el("div", "steptrace__menu-section")
       const h = el("div", "steptrace__menu-h")
@@ -333,18 +338,41 @@ export function createMount(
       section.append(h, item)
       menu.append(section)
     } else if (kind === "graph") {
-      const section = el("div", "steptrace__menu-section")
-      const h = el("div", "steptrace__menu-h")
-      h.textContent = "Start node"
+      endpointSection = el("div", "steptrace__menu-section")
+      startHead = el("div", "steptrace__menu-h")
+      startHead.textContent = "Start node"
       startMenu = el("select", "steptrace__select")
       startMenu.setAttribute("aria-label", "Start node")
       startMenu.addEventListener("change", () => {
         state.start = startMenu.value
+        if (targetMenu && state.target === state.start) {
+          const fallback = [...targetMenu.options].find((option) => option.value !== state.start)
+          if (fallback) {
+            state.target = fallback.value
+            targetMenu.value = fallback.value
+          }
+        }
         closeMenu()
         build()
       })
-      section.append(h, startMenu)
-      menu.append(section)
+      targetHead = el("div", "steptrace__menu-h")
+      targetHead.textContent = "Target node"
+      targetMenu = el("select", "steptrace__select")
+      targetMenu.setAttribute("aria-label", "Target node")
+      targetMenu.addEventListener("change", () => {
+        state.target = targetMenu.value
+        if (state.target === state.start) {
+          const fallback = [...startMenu.options].find((option) => option.value !== state.target)
+          if (fallback) {
+            state.start = fallback.value
+            startMenu.value = fallback.value
+          }
+        }
+        closeMenu()
+        build()
+      })
+      endpointSection.append(startHead, startMenu, targetHead, targetMenu)
+      menu.append(endpointSection)
     } else if (kind === "search") {
       const section = el("div", "steptrace__menu-section")
       const h = el("div", "steptrace__menu-h")
@@ -630,6 +658,7 @@ export function createMount(
         algorithm: state.algorithm,
         ...(shouldIncludeArray ? { array: state.array } : {}),
         start: state.start,
+        ...(state.target != null ? { target: state.target } : {}),
       })
       if (built.family) root.dataset.visualFamily = built.family.id
       else delete root.dataset.visualFamily
@@ -649,7 +678,7 @@ export function createMount(
       else if (built.kind === "rectree") view = makeRecTreeView(built.frames)
       else view = makeSortView(built.frames)
       currentView = view
-      if (built.kind === "graph") syncStartOptions(built.graph)
+      if (built.kind === "graph") syncEndpointOptions(built.endpointSettings, built.graph)
       const fillStage = view.stageLayout === "fill"
       const stageAlignment = fillStage || built.kind === "graph" ? null : view.stageAlignment || "center"
       root.classList.toggle("steptrace--stable-stage", view.stableStage === true)
@@ -666,12 +695,10 @@ export function createMount(
       player.onState = onState
       // RESULT reads the terminal frame, which this build already fixed, so its
       // text is set once here — sizeRail() needs it to measure the slot.
-      insightText.textContent = summaryFor(
-        state.algorithm,
-        built.kind,
-        built.frames[built.frames.length - 1],
-        currentGraph,
-      )
+      const terminalFrame = built.frames[built.frames.length - 1]
+      insightText.textContent = view.summary
+        ? view.summary(terminalFrame)
+        : summaryFor(state.algorithm, built.kind, terminalFrame, currentGraph)
       reserveWatch(built.frames, view)
       renderMilestones()
       sizeRail()
@@ -693,22 +720,42 @@ export function createMount(
       watchEl.style.setProperty("--steptrace-watch-rows", String(maxRows))
     }
 
-    function syncStartOptions(graph) {
-      if (!startMenu || startMenu.dataset.filled) {
-        if (state.start == null) state.start = graph.start
+    function syncEndpointOptions(settings, graph) {
+      if (!endpointSection || !startMenu || !targetMenu || !startHead || !targetHead) return
+      const options = settings?.options || graph?.nodes?.map((node) => ({ value: node.id, label: node.id }))
+      if (!options?.length) {
+        endpointSection.hidden = true
         return
       }
-      startMenu.replaceChildren()
-      for (const n of graph.nodes) {
-        const opt = el("option")
-        opt.value = n.id
-        opt.textContent = n.id
-        if (n.id === graph.start) opt.selected = true
-        startMenu.append(opt)
+      endpointSection.hidden = false
+      startHead.textContent = settings?.startLabel || "Start node"
+      startMenu.setAttribute("aria-label", startHead.textContent)
+      targetHead.hidden = !settings
+      targetMenu.hidden = !settings
+      const signature = options.map((option) => `${option.value}:${option.label}`).join("|")
+      if (startMenu.dataset.signature !== signature) {
+        startMenu.replaceChildren()
+        targetMenu.replaceChildren()
+        for (const option of options) {
+          const startOption = el("option")
+          startOption.value = option.value
+          startOption.textContent = option.label
+          startMenu.append(startOption)
+          const targetOption = startOption.cloneNode(true)
+          targetMenu.append(targetOption)
+        }
+        startMenu.dataset.signature = signature
       }
-      startMenu.value = graph.start
-      startMenu.dataset.filled = "1"
-      state.start = graph.start
+      const nextStart = settings?.start || graph?.start || options[0].value
+      const nextTarget = settings?.target || state.target
+      state.start = nextStart
+      startMenu.value = nextStart
+      if (settings && nextTarget) {
+        state.target = nextTarget
+        targetHead.textContent = settings.targetLabel
+        targetMenu.setAttribute("aria-label", settings.targetLabel)
+        targetMenu.value = nextTarget
+      }
     }
 
     build()

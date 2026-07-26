@@ -2376,6 +2376,9 @@ export interface ExecutionTreeViewDescriptor {
   fitWidth?: boolean
   tieredCards?: boolean
   centerVisible?: boolean
+  stableStage?: boolean
+  preserveDetail?: boolean
+  showStateBadge?: boolean
   stateLabels: Record<string, string>
   legend: ReadonlyArray<{ state: string; label: string }>
   frameModel(frame: any): {
@@ -2554,8 +2557,12 @@ export function makeExecutionTreeView(frames, descriptor: ExecutionTreeViewDescr
         valueCells.push(value)
       }
     } else {
-      label.setAttribute("y", "-4")
-      detail.setAttribute("y", "9")
+      label.setAttribute("y", descriptor.showStateBadge ? "-10" : "-4")
+      detail.setAttribute("y", descriptor.showStateBadge ? "3" : "9")
+      if (descriptor.showStateBadge) {
+        badge.setAttribute("y", "16")
+        badge.setAttribute("text-anchor", "middle")
+      }
     }
     group.append(ring, surface)
     if (divider) group.append(divider)
@@ -2618,7 +2625,7 @@ export function makeExecutionTreeView(frames, descriptor: ExecutionTreeViewDescr
     const activeNode = nodes.find((node) => node.id === model.active)
     if (descriptor.centerVisible) treeLayer.style.transform = centerTransform(model.visible)
     title.textContent = `${descriptor.ariaLabel}: ${model.phase}`
-    description.textContent = `${model.phase}. Active subproblem ${activeNode ? descriptor.nodeLines(activeNode).join("; ") : "none"}. ${model.action}.`
+    description.textContent = `${model.phase}. Active subproblem ${activeNode ? descriptor.nodeLines(activeNode).join("; ") : "none"}. ${model.action}. ${stripTags(frame.message)}`
     for (const node of nodes) {
       const elements = nodeElements[node.id]
       const state = model.states[node.id] || ""
@@ -2642,10 +2649,14 @@ export function makeExecutionTreeView(frames, descriptor: ExecutionTreeViewDescr
           for (let index = 0; index < elements.valueCells.length; index++)
             elements.valueCells[index].textContent = String(values[index] ?? "")
         } else {
-          elements.detail.textContent = resultText || elements.secondaryLine
+          elements.detail.textContent = descriptor.preserveDetail
+            ? elements.secondaryLine
+            : resultText || elements.secondaryLine
         }
         elements.result.textContent = ""
-        elements.badge.textContent = ""
+        elements.badge.textContent = descriptor.showStateBadge
+          ? descriptor.stateLabels[state] || ""
+          : ""
       } else {
         elements.result.textContent = resultText ? `→ ${resultText}` : ""
         elements.badge.textContent = descriptor.stateLabels[state] || ""
@@ -2668,7 +2679,13 @@ export function makeExecutionTreeView(frames, descriptor: ExecutionTreeViewDescr
     return descriptor.watchRows(frame, model)
   }
 
-  return { nodes: [wrap, legend, status], stageLayout: "fill", paint, watch }
+  return {
+    nodes: [wrap, legend, status],
+    stageLayout: "fill",
+    stableStage: descriptor.stableStage,
+    paint,
+    watch,
+  }
 }
 
 const legacyRecTreeDescriptor: ExecutionTreeViewDescriptor = {
@@ -2948,6 +2965,7 @@ export function stripTags(s) {
 export function pad2(n) {
   return String(n).padStart(2, "0")
 }
+export const CHECK_PATH = "M20 6 9 17l-5-5"
 // transport glyphs — inline SVG so they inherit currentColor. Filled shapes set
 // their own fill/stroke so they render right on both the ghost and accent buttons.
 export const ICON = {
@@ -2960,8 +2978,7 @@ export const ICON = {
     '<svg viewBox="0 0 24 24"><rect x="7" y="5" width="3.4" height="14" rx="1" fill="currentColor" stroke="none"/><rect x="13.6" y="5" width="3.4" height="14" rx="1" fill="currentColor" stroke="none"/></svg>',
   kebab:
     '<svg viewBox="0 0 24 24"><circle cx="12" cy="5" r="1.5" fill="currentColor" stroke="none"/><circle cx="12" cy="12" r="1.5" fill="currentColor" stroke="none"/><circle cx="12" cy="19" r="1.5" fill="currentColor" stroke="none"/></svg>',
-  check:
-    '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg>',
+  check: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="${CHECK_PATH}"/></svg>`,
   x: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.8" stroke-linecap="round"><path d="M6 6l12 12"/><path d="M18 6 6 18"/></svg>',
   compare:
     '<svg class="steptrace__cue-compare" viewBox="0 0 24 24" aria-hidden="true"><path d="m7 16-4-4 4-4"/><path d="M3 12h18"/><path d="m17 8 4 4-4 4"/></svg>',
@@ -2994,6 +3011,10 @@ export function buildMilestones(algorithm, kind, frames) {
   const firstGap = frames.find((frame) => Number.isInteger(frame.gap))?.gap
   const familyProfile = frames[0]?.profile
   const firstDistributionPass = frames.find((frame) => frame.type === "pass")
+  const prefixOperation = (frame) =>
+    frame.operation && frame.key
+      ? `${frame.operation[0].toUpperCase()}${frame.operation.slice(1)} ${frame.key}`
+      : null
   const initial =
     kind === "sort"
       ? firstGap != null
@@ -3036,21 +3057,25 @@ export function buildMilestones(algorithm, kind, frames) {
             ? "Initialize Z"
             : familyProfile === "boyer-moore"
               ? "Preprocess rules"
-              : "Shift 0"
+              : ["trie", "aho-corasick", "ternary-search-tree"].includes(familyProfile)
+                ? prefixOperation(frames[0])
+                : "Shift 0"
           : kind === "backtrack"
             ? "Depth 0"
             : kind === "rectree"
               ? familyProfile === "divide-and-conquer"
                 ? "Whole problem"
-                : familyProfile === "merge-sort"
-                  ? "Whole array"
-                  : familyProfile === "memoization"
-                    ? "Empty cache"
-                    : familyProfile === "coin-change-top-down"
-                      ? "Amount 30¢"
-                      : familyProfile === "grid-path-top-down"
-                        ? "Loading bay"
-                        : "Call tree"
+                : familyProfile === "branch-and-bound"
+                  ? "Root bound 116"
+                  : familyProfile === "merge-sort"
+                    ? "Whole array"
+                    : familyProfile === "memoization"
+                      ? "Empty cache"
+                      : familyProfile === "coin-change-top-down"
+                        ? "Amount 30¢"
+                        : familyProfile === "grid-path-top-down"
+                          ? "Loading bay"
+                          : "Call tree"
               : "Initialize"
   push(0, initial)
   let lastRange = ""
@@ -3122,9 +3147,19 @@ export function buildMilestones(algorithm, kind, frames) {
         push(i, algorithm === "bubble-sort" ? `Pass ${count}` : `${word} ${count}`)
       }
       lastRange = range || lastRange
-    } else if (kind === "graph" && f.type === "visit" && f.current != null) {
+    } else if (
+      kind === "graph" &&
+      (f.type === "visit" || f.type === "expand") &&
+      f.current != null
+    ) {
       const word =
-        algorithm === "dijkstra" ? "Settle" : algorithm === "topological-sort" ? "Output" : "Visit"
+        algorithm === "a-star"
+          ? "Expand"
+          : algorithm === "dijkstra"
+            ? "Settle"
+            : algorithm === "topological-sort"
+              ? "Output"
+              : "Visit"
       push(i, `${word} ${f.current}`)
     } else if (kind === "search") {
       if (familyProfile === "exponential" && f.type === "phase" && f.phase === "binary")
@@ -3148,6 +3183,17 @@ export function buildMilestones(algorithm, kind, frames) {
                     : "Probe"
               } ${f.mid}`,
         )
+    } else if (
+      kind === "string" &&
+      ["trie", "aho-corasick", "ternary-search-tree"].includes(familyProfile)
+    ) {
+      if (f.type === "begin") push(i, prefixOperation(f))
+      else if (familyProfile === "aho-corasick" && f.type === "goto")
+        push(i, `Read ${f.text[f.textCursor]}`)
+      else if (familyProfile === "aho-corasick" && f.type === "fallback")
+        push(i, `Fallback ${f.activePath.at(-1) || "root"}`)
+      else if (familyProfile === "aho-corasick" && f.type === "output")
+        push(i, `Emit ${f.outputs.join(" + ")}`)
     } else if (kind === "string" && familyProfile === "z-array") {
       if (f.type === "focus") push(i, `i = ${f.i}`)
     } else if (kind === "string" && familyProfile === "boyer-moore") {
@@ -3188,7 +3234,13 @@ export function buildMilestones(algorithm, kind, frames) {
         lastDepth = f.depth
       }
     } else if (kind === "rectree") {
-      if (f.type === "split") {
+      if (familyProfile === "branch-and-bound") {
+        const activeNode = f.nodes.find((node) => node.id === f.active)
+        if (f.type === "incumbent") push(i, `Incumbent ${f.incumbent}`)
+        else if (f.type === "split") push(i, `Expand ${activeNode?.label || "decision"}`)
+        else if (f.type === "infeasible") push(i, `Reject ${activeNode?.label || "branch"}`)
+        else if (f.type === "prune") push(i, `Prune ${activeNode?.label || "branch"}`)
+      } else if (f.type === "split") {
         const activeNode = f.nodes.find((node) => node.id === f.active)
         push(i, `Split ${activeNode?.label || "range"}`)
       } else if (f.type === "combine") {
@@ -3208,7 +3260,15 @@ export function buildMilestones(algorithm, kind, frames) {
       }
     }
   }
-  push(frames.length - 1, "Result")
+  const prefixCompletion = {
+    trie: "Trie complete",
+    "aho-corasick": "Scan complete",
+    "ternary-search-tree": "TST complete",
+  }[familyProfile]
+  push(
+    frames.length - 1,
+    familyProfile === "branch-and-bound" ? "Best value 105" : prefixCompletion || "Result",
+  )
   return marks
 }
 
@@ -3263,6 +3323,12 @@ export function summaryFor(algorithm, kind, frame, graph) {
     return `Output [${frame.array.join(", ")}] · ${comparisons}${frame.swaps} ${unit}.`
   }
   if (kind === "graph") {
+    if (algorithm === "a-star") {
+      const cost = frame.selectedPath?.length ? frame.g?.[frame.target] : null
+      return cost == null
+        ? `${frame.target} is unreachable.`
+        : `Path ${frame.selectedPath.join(" → ")} · cost ${cost} · A* ${frame.astarExpanded} vs Dijkstra ${frame.dijkstraExpanded} expansions.`
+    }
     if (algorithm === "dijkstra" && frame.target != null) {
       const edges = frame.selected || []
       const path = edges.length
@@ -3309,10 +3375,24 @@ export function summaryFor(algorithm, kind, frame, graph) {
       : `${frame.target} found at index ${frame.found} · ${frame.comparisons} comparisons.`
   }
   if (kind === "string" && frame.profile === "z-array") return `Z = [${frame.z.join(", ")}].`
-  if (kind === "string")
-    return frame.found.length
-      ? `${frame.found.length} match${frame.found.length === 1 ? "" : "es"} at ${frame.found.join(", ")}.`
+  if (kind === "string" && frame.profile === "aho-corasick") {
+    const matches = frame.matches.map((match) => `${match.pattern}@${match.end}`).join(", ")
+    return matches ? `Matches ${matches}.` : "No patterns matched."
+  }
+  if (kind === "string" && frame.profile === "ternary-search-tree")
+    return `${frame.terminalNodes.length} terminal keys · ${frame.visibleNodes.length - 1} character nodes.`
+  if (kind === "string" && Array.isArray(frame.terminalNodes)) {
+    const keys = frame.terminalNodes.filter((node) => node !== "root")
+    return keys.length
+      ? `Stored keys ${keys.join(", ")} · ${frame.visibleNodes.length} trie nodes.`
+      : `No keys stored · ${frame.visibleNodes.length} trie node.`
+  }
+  if (kind === "string") {
+    const found = Array.isArray(frame.found) ? frame.found : []
+    return found.length
+      ? `${found.length} match${found.length === 1 ? "" : "es"} at ${found.join(", ")}.`
       : `No matches found.`
+  }
   if (kind === "pointers") {
     const values = (frame.marked || []).map((i) => frame.array[i])
     return values.length
@@ -3382,6 +3462,8 @@ export function summaryFor(algorithm, kind, frame, graph) {
       ? `Solved at depth ${frame.depth} · ${frame.placed} placements · ${frame.pruned} branches pruned.`
       : `No arrangement found · ${frame.pruned} branches pruned.`
   if (kind === "rectree") {
+    if (algorithm === "branch-and-bound")
+      return `Best value ${frame.incumbent} · take A + C · weight 7/7 · ${frame.pruned} branches pruned.`
     if (algorithm === "coin-change-top-down")
       return `Fewest coins for 30¢: ${frame.results?.c30 || "—"} · ${frame.pruned} recursive calls skipped.`
     if (algorithm === "grid-path-top-down")

@@ -3,7 +3,7 @@ topic:
   - Computer Science
 subtopic:
   - Algorithms
-summary: "Best-first shortest-path search ordering its frontier by f(n) = g(n) + h(n), optimal when the heuristic is admissible."
+summary: "Best-first shortest-path search ordered by f(n) = g(n) + h(n): admissibility gives optimality when improved states reopen, while consistency permits close-once graph search."
 level:
   - "4"
 priority: High
@@ -11,44 +11,47 @@ status: Creation
 publish: true
 ---
 
-To find the shortest route to one destination on a road graph, [[Dijkstra]] settles nodes in expanding rings of cost-from-source: reaching a target 10 km east, it also settles nodes 10 km north, west, and south first. Almost none of that work touches the optimal path. A* keeps the same cost accounting but reorders the frontier by an estimate of *total* path cost, `f(n) = g(n) + h(n)` — `g(n)` is the exact cost already paid to reach `n`, and `h(n)` is a heuristic estimate of the cost still remaining to the goal. Popping the smallest-`f` node first pulls the search toward the target, collapsing that settled disc into a narrow corridor.
+To find the shortest route to one destination on a road graph, [[Home/Computer Science/Algorithms/Graph Algorithms/Dijkstra|Dijkstra]] settles nodes in expanding rings of cost-from-source: reaching a target 10 km east, it also settles nodes 10 km north, west, and south first. Almost none of that work touches the optimal path. A* keeps the same cost accounting but reorders the frontier by an estimate of *total* path cost, `f(n) = g(n) + h(n)` — `g(n)` is the exact cost already paid to reach `n`, and `h(n)` is a heuristic estimate of the cost still remaining to the goal. Popping the smallest-`f` node first pulls the search toward the target, collapsing that settled disc into a narrow corridor.
 
-The saving holds only when `h` never overestimates the remaining cost. A heuristic that underestimates keeps A* honest; one that overestimates can make it commit to a node that looks close but is not, and return a longer path with no error raised. [[Dijkstra]] is the degenerate case `h ≡ 0` — no goal information, uniform rings, still optimal.
+The optimality guarantee holds when `h` never overestimates the remaining cost. A heuristic that underestimates keeps A* honest when the search reopens a state after finding a cheaper path; consistency adds the stronger condition needed to close each state after its first expansion. One that overestimates can make A* commit to a node that looks close but is not, and return a longer path with no error raised. [[Home/Computer Science/Algorithms/Graph Algorithms/Dijkstra|Dijkstra]] is the degenerate case `h ≡ 0` — no goal information, uniform rings, still optimal.
 
-**Core condition:** single target + an admissible `h` (never overestimates remaining cost) → order the frontier by `f = g + h` → optimal path while settling a fraction of Dijkstra's nodes.
+**Core condition:** single target + an admissible `h` + reopen a state when its `g` improves → order the frontier by `f = g + h` → an optimal path, often after expanding fewer nodes than Dijkstra. If `h` is consistent, each state may instead be closed after its first expansion.
 
 The decisive step is which node leaves the frontier next, and how `h` skews that choice toward the goal.
 
-> [!NOTE] Visualization pending
-> Planned StepTrace: a frontier ordered by `f = g + h`, expanding the lowest-`f` node first, the heuristic biasing expansion toward the goal. The decisive frame is a node with small `g` but large `h` losing its turn to a node deeper along the goal direction. No matching renderer exists in `engine.js` yet.
+The same `f = g + h` rule works across grids, road networks, and floor plans. In every tab, OPEN is ordered by the estimated total cost, CLOSED records expanded states, and the final frame compares how many states A* and Dijkstra expanded.
+
+```steptrace
+{"tabs":[{"name":"Coordinate grid","description":"A winding 6 × 4 grid makes the heuristic steer around two barriers.","algorithm":"a-star","variant":"coordinate-grid"},{"name":"Ukraine cities","description":"Choose From and To in Options; Haversine distance guides a route across 25 regional centers.","algorithm":"a-star","variant":"ukraine-cities","start":"Lviv","target":"Kharkiv"},{"name":"Building floor","description":"A locked fire door blocks the direct corridor, forcing a lower-corridor detour.","algorithm":"a-star","variant":"building-floor"},{"name":"Midtown map","description":"One-way streets and a West 44th closure force the route onto Broadway.","algorithm":"a-star","variant":"midtown-map"}]}
+```
 
 # Why `f = g + h` Stays Optimal
 
 Each iteration pops the frontier node with the smallest `f`, relaxes its outgoing edges, and pushes any neighbor whose `g` improves; `g[source] = 0` and `f[source] = h(source)` seed the search. Two properties of `h` decide whether the result is correct.
 
-**Admissibility** — `h(n)` never exceeds the true remaining cost `h*(n)`. This alone makes A* return an optimal path. When the goal is popped, `h(goal) = 0`, so its `f` equals its `g`: the exact cost of the path found. Any other frontier node `n` has `f(n) = g(n) + h(n) ≤ g(n) + h*(n)`, a lower bound on the best path through `n`; if that lower bound is no smaller than the goal's cost, no cheaper path is hiding on the frontier. Underestimating is safe — it only makes A* inspect a node sooner than strictly necessary.
+**Admissibility** — `h(n)` never exceeds the true remaining cost `h*(n)`. With reopening, this is enough for A* to return an optimal path. Before a suboptimal goal could be popped, take the first state `n` on an optimal path that has not yet been settled with its optimal cost. Its predecessor has been settled optimally, so relaxation has placed an OPEN record for `n` with `g(n) = g*(n)`; if `n` was previously expanded through a worse path, reopening restores that record to OPEN. Therefore `f(n) = g*(n) + h(n) ≤ g*(n) + h*(n)`, which equals the optimal solution cost. Because A* pops the smallest `f` and `f(goal) = g(goal)`, it cannot pop a more expensive goal first. Underestimating is safe — it only makes A* inspect a node sooner than strictly necessary.
 
 **Consistency (monotonicity)** — `h(n) ≤ cost(n, n') + h(n')` for every edge `(n, n')`, with `h(goal) = 0`. Consistency implies admissibility and adds a stronger guarantee: `f` never decreases along a path, so the first time a node is popped its `g` is already optimal. Graph-search A* can then move that node to a closed set and never reconsider it — each node is expanded at most once.
 
-The pull is concrete: on a 4-connected grid with Manhattan `h`, a node reached in `g = 3` that sits toward the goal (`h = 2`, `f = 5`) is popped before an equal-cost node reached in `g = 3` that faces away (`h = 5`, `f = 8`). Dijkstra ranks both by `g` alone and expands the second as readily as the first. That `h` term is the whole difference between a corridor and a disc, and setting `h ≡ 0` erases it — which is exactly what turns A* back into [[Dijkstra]].
+The pull is concrete: on a 4-connected grid with Manhattan `h`, a node reached in `g = 3` that sits toward the goal (`h = 2`, `f = 5`) is popped before an equal-cost node reached in `g = 3` that faces away (`h = 5`, `f = 8`). Dijkstra ranks both by `g` alone and expands the second as readily as the first. That `h` term is the whole difference between a corridor and a disc, and setting `h ≡ 0` erases it — which is exactly what turns A* back into [[Home/Computer Science/Algorithms/Graph Algorithms/Dijkstra|Dijkstra]].
 
 # Complexity
 
 | Case | Time (node expansions) | Auxiliary space | Cause |
 | --- | --- | --- | --- |
-| Best | `Θ(L)`, `L` = optimal-path length | `O(nodes stored)` | `h` equals the true remaining cost, so A* expands only nodes on the optimal path. |
-| Typical | between `Θ(L)` and `O(b^L)` | `O(nodes stored)` | An informative admissible `h` prunes off-path branches; the effective branching factor drops below the raw `b`. |
-| Worst | `O(b^L)` | `O(b^L)` | `h` carries no goal information (`h ≡ 0`, uninformed search); every node cheaper than the goal is expanded. |
+| Best | `Θ(d)`, `d` = optimal solution depth | `O(nodes stored)` | With a unique optimal route and favorable tie-breaking, exact `h*` keeps expansion to that route. |
+| Typical | between `Θ(d)` and `O(b^d)` for uniform edge costs | `O(nodes stored)` | An informative admissible `h` reduces off-path expansion; the effective branching factor drops below the maximum branching factor `b`. |
+| Worst | `O(b^d)` for uniform edge costs | `O(b^d)` | `h` carries no goal information (`h ≡ 0`, uninformed search); every node cheaper than the goal may be expanded. |
 
-Each expansion also does a heap pop plus edge relaxations, a `log(frontier)` factor over the raw expansion counts. On an *explicit* finite graph those counts are capped by the graph itself: a consistent heuristic expands each of the `V` nodes at most once, giving `O((V + E) log V)` — precisely Dijkstra's bound, which is what `h ≡ 0` reduces to. The exponential figures belong to *implicit* state spaces generated on the fly, where quality of `h` is the only thing bounding the search. Space is the operational limit in either setting: A* retains every generated node across the open and closed sets, so memory, not time, is what fails first on large maps.
+Exact `h*` does not make the best case automatic: every state on an optimal route that is reached with `g = g*` has `f = C*`, so multiple optimal routes or unfavorable tie-breaking can still expand many tied states. The `O(b^d)` bound assumes unit or uniform positive edge costs. With arbitrary positive weights, let `δ` be the minimum edge cost and `C*` the optimal solution cost; the corresponding depth bound is `O(b^{⌊C*/δ⌋})`. Each expansion also does a heap pop plus edge relaxations, a `log(frontier)` factor over the raw expansion counts. On an *explicit* finite graph those counts are capped by the graph itself: a consistent heuristic expands each of the `V` nodes at most once, giving `O((V + E) log V)` — precisely Dijkstra's bound, which is what `h ≡ 0` reduces to. The exponential figures belong to *implicit* state spaces generated on the fly, where quality of `h` is the only thing bounding the search. Space is the operational limit in either setting: A* retains every generated node across the open and closed sets, so memory, not time, is what fails first on large maps.
 
 # When the Heuristic Breaks the Guarantee
 
-An **inadmissible** `h` overestimates the remaining cost for at least one node somewhere in the graph. That overestimate is harmless where it lands off the optimal path and never wins a pop. Optimality breaks only when an inflated `f` pre-empts the true optimal path — a node on that path (or one whose `f` should have been popped before the goal) is delayed, so A* pops the goal through a cheaper-looking detour first. It returns *a* path, just not the cheapest, and signals nothing. Weighted A* makes exactly this trade deliberately: `f = g + ε·h` with `ε > 1` scales the heuristic up, expanding far fewer nodes for a path guaranteed within a factor `ε` of optimal. `ε = 1` is exact A*; `ε → ∞` approaches greedy behavior.
+An **inadmissible** `h` overestimates the remaining cost for at least one node somewhere in the graph. That overestimate is harmless where it lands off the optimal path and never wins a pop. Optimality breaks only when an inflated `f` pre-empts the true optimal path — a node on that path (or one whose `f` should have been popped before the goal) is delayed, so A* pops the goal through a cheaper-looking detour first. It returns *a* path, just not the cheapest, and signals nothing. Weighted A* makes exactly this trade deliberately: `f = g + ε·h` with `ε > 1` scales an admissible base heuristic up. Under standard goal-pop termination, its factor-`ε` bound holds with reopening; it also holds without reopening when the base heuristic is consistent. `ε = 1` is exact A*; `ε → ∞` approaches greedy behavior.
 
 An admissible but **inconsistent** `h` keeps optimality for the tree-search form but breaks the single-expansion property. Because `f` can dip along a path, a shorter `g` to an already-closed node can surface later. Graph-search A* that refuses to revisit closed nodes then finalizes that node with a non-optimal `g`, corrupting every path routed through it. The remedy is reopening — pulling the node back onto the frontier when a cheaper `g` appears — which restores optimality at the cost of the re-expansions consistency would have avoided.
 
-The binding limit is memory. A* holds every generated node across the open frontier and the closed set, `O(nodes stored)`, and on a large state space that exhausts memory long before time. IDA* trades it back: an iterative-deepening variant that keeps only the current path (`O(L)` memory) and re-expands nodes across successive `f`-cost thresholds. Weighted A* attacks the same limit from the other side, shrinking the frontier by biasing toward the goal at a bounded loss of optimality.
+The binding limit is memory. A* holds every generated node across the open frontier and the closed set, `O(nodes stored)`, and on a large state space that exhausts memory long before time. IDA* trades it back: an iterative-deepening variant that keeps only the current path (`O(d)` memory) and re-expands nodes across successive `f`-cost thresholds. Weighted A* attacks the same limit from the other side, shrinking the frontier by biasing toward the goal. With an admissible base heuristic and standard goal-pop termination, reopening gives the factor-`ε` bound; a consistent base heuristic preserves the same bound without reopening.
 
 # Reference Drawer
 
@@ -94,7 +97,7 @@ The binding limit is memory. A* holds every generated node across the open front
 >
 >         if (!closed.Add(u))
 >         {
->             continue; // a cheaper copy of u was already expanded
+>             continue; // the optimal copy of u was already expanded
 >         }
 >
 >         foreach (var (v, w) in neighbors(u))
@@ -123,18 +126,18 @@ The binding limit is memory. A* holds every generated node across the open front
 >     }
 > }
 > ```
-> .NET's `PriorityQueue<TElement, TPriority>` has no decrease-key, so an improved node is enqueued again rather than updated; the `closed` guard discards the stale higher-`f` copy when it later surfaces. Dropping that guard — reopening — is what an inconsistent heuristic requires to stay optimal.
+> This implementation assumes a consistent heuristic, so a node's first pop has its optimal `g` and the `closed` guard may reject later stale copies. .NET's `PriorityQueue<TElement, TPriority>` has no decrease-key, so an improved node is enqueued again rather than updated. With an admissible but inconsistent heuristic, the search must instead reopen a closed node when its `g` improves and use a termination rule compatible with those re-expansions.
 
 # Questions
 
 > [!QUESTION]- What does admissibility guarantee, and what does consistency add on top?
-> Admissibility (`h(n)` never exceeds the true remaining cost) makes A* return an optimal path: when the goal is popped its `f` equals its actual cost, and every frontier node's `f` is a lower bound on any path through it, so nothing cheaper is hidden. Consistency (`h(n) ≤ cost(n, n') + h(n')`) additionally forces `f` to be non-decreasing along a path, so a node's first pop is already optimal — graph-search A* can close it and never reopen it, expanding each node at most once.
+> Admissibility (`h(n)` never exceeds the true remaining cost) makes A* optimal when a cheaper path can reopen a state. Before a suboptimal goal could be popped, the frontier contains a node on an optimal path discovered with its optimal `g`, and that node has `f` no greater than the optimal solution cost. Consistency (`h(n) ≤ cost(n, n') + h(n')`) additionally forces `f` to be non-decreasing along a path, so a node's first pop is already optimal — graph-search A* can close it and never reopen it, expanding each node at most once.
 
-> [!QUESTION]- An inadmissible heuristic returns a longer path with no error. What causes that?
-> Overestimating the remaining cost for a node on the true optimal path inflates that node's `f`. A* then pops the goal through a cheaper-looking detour before it expands the node on the real shortest path. The search still terminates and returns a valid path — just not the minimum-cost one — because the inflated `f` reordered the frontier against the optimum. Weighted A* (`f = g + ε·h`, `ε > 1`) does this on purpose for a path bounded within `ε` of optimal.
+> [!QUESTION]- How can an inadmissible heuristic return a longer path with no error?
+> Overestimating the remaining cost for a node on the true optimal path inflates that node's `f`. A* then pops the goal through a cheaper-looking detour before it expands the node on the real shortest path. The search still terminates and returns a valid path — just not the minimum-cost one — because the inflated `f` reordered the frontier against the optimum. Weighted A* (`f = g + ε·h`, `ε > 1`) makes this trade deliberately. With an admissible base `h` and standard goal-pop termination, its factor-`ε` bound holds with reopening, or without reopening when the base heuristic is consistent.
 
 > [!QUESTION]- Why is memory the usual failure mode, and what do IDA* and weighted A* trade for it?
-> A* keeps every generated node in the open frontier and closed set, `O(nodes stored)`, which on a large state space exhausts memory before running out of time. IDA* keeps only the current path (`O(L)` memory) and re-expands nodes across rising `f`-cost thresholds, paying repeated work for a small footprint. Weighted A* keeps A*'s structure but scales `h` to shrink the frontier, trading a bounded loss of optimality for fewer stored nodes.
+> A* keeps every generated node in the open frontier and closed set, `O(nodes stored)`, which on a large state space exhausts memory before running out of time. IDA* keeps only the current path (`O(d)` memory) and re-expands nodes across rising `f`-cost thresholds, paying repeated work for a small footprint. Weighted A* keeps A*'s structure but scales an admissible base `h` to shrink the frontier. With standard goal-pop termination, the factor-`ε` bound holds with reopening, or without reopening when the base heuristic is consistent.
 
 # References
 

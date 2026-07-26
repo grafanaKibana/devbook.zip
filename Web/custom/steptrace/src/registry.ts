@@ -145,10 +145,15 @@ export function createRegistry(builtIns: readonly BuiltInAlgorithm[]): RegistryA
         const input = familyAlgorithm.parse(config)
         const recorder = familyAlgorithm.family.createRecorder(input) as { frames: any[] }
         familyAlgorithm.run(input, recorder)
+        const endpointSettings =
+          typeof input === "object" && input != null && "endpointSettings" in input
+            ? (input as { endpointSettings?: BuiltFrames["endpointSettings"] }).endpointSettings
+            : undefined
         return {
           kind: familyAlgorithm.kind,
           family: familyAlgorithm.family,
           frames: recorder.frames,
+          endpointSettings,
         }
       }
 

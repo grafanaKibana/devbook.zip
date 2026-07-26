@@ -3,7 +3,16 @@ import { makeExecutionTreeView, type ExecutionTreeViewDescriptor } from "../rend
 import type { StepTraceConfig, StepTraceView, VisualFamily } from "../types"
 
 export type ExecutionTreeState =
-  "call" | "split" | "base" | "return" | "combine" | "store" | "cache" | "prune"
+  | "call"
+  | "split"
+  | "base"
+  | "return"
+  | "combine"
+  | "store"
+  | "cache"
+  | "incumbent"
+  | "infeasible"
+  | "prune"
 
 export interface ExecutionTreeConfig {
   array?: number[]
@@ -13,6 +22,7 @@ export interface ExecutionTreeConfig {
     | "memoization"
     | "coin-change-top-down"
     | "grid-path-top-down"
+    | "branch-and-bound"
 }
 
 export interface ExecutionTreeNode {
@@ -24,6 +34,9 @@ export interface ExecutionTreeNode {
   x: number
   y: number
   depth: number
+  weight?: number
+  value?: number
+  bound?: number | null
 }
 
 export interface ExecutionTreeEdge {
@@ -47,6 +60,7 @@ export interface ExecutionTreeFrame {
   cache: ReadonlyArray<Readonly<{ key: string; result: string }>>
   calls: number
   pruned: number
+  incumbent?: number
   message: string
 }
 
@@ -81,6 +95,8 @@ export interface ExecutionTreeOperations {
     subtreeIds: string[],
     message: string,
   ): void
+  incumbent(id: string, path: string[], value: number, message: string): void
+  reject(id: string, path: string[], message: string): void
   prune(id: string, path: string[], subtreeIds: string[], message: string): void
   done(rootId: string, result: readonly number[] | string, message: string): void
 }
@@ -101,6 +117,19 @@ export function parseMemoizationConfig(config: StepTraceConfig): ExecutionTreeCo
   return { profile: "memoization" }
 }
 
+export function parseBranchAndBoundConfig(config: StepTraceConfig): ExecutionTreeConfig {
+  const input = Object.entries(config).find(
+    ([key, value]) =>
+      key !== "algorithm" &&
+      key !== "speed" &&
+      !(key === "start" && value == null) &&
+      value !== undefined,
+  )
+  if (input)
+    throw new Error("steptrace: branch-and-bound uses one fixed knapsack trace and takes no input.")
+  return { profile: "branch-and-bound" }
+}
+
 const stateLabels: Record<ExecutionTreeState, string> = {
   call: "call",
   split: "split",
@@ -109,6 +138,8 @@ const stateLabels: Record<ExecutionTreeState, string> = {
   combine: "combine",
   store: "stored",
   cache: "cached",
+  incumbent: "incumbent",
+  infeasible: "infeasible",
   prune: "pruned",
 }
 
@@ -287,6 +318,59 @@ export const dynamicProgrammingTreeViewDescriptor: ExecutionTreeViewDescriptor =
   },
 }
 
+export const branchAndBoundTreeViewDescriptor: ExecutionTreeViewDescriptor = {
+  ariaLabel: "Branch and bound knapsack decision tree",
+  shape: "card",
+  nodeWidth: 116,
+  nodeHeight: 48,
+  minSvgWidth: 500,
+  canvasScale: 1,
+  fitWidth: true,
+  stableStage: true,
+  preserveDetail: true,
+  showStateBadge: true,
+  stateLabels,
+  legend: [
+    { state: "split", label: "expand decision" },
+    { state: "incumbent", label: "new incumbent" },
+    { state: "infeasible", label: "over capacity" },
+    { state: "prune", label: "bound cannot win" },
+  ],
+  frameModel,
+  nodeLines(node: ExecutionTreeNode) {
+    return [node.label, node.detail || ""]
+  },
+  watchRows(frame: ExecutionTreeFrame) {
+    const node = activeNode(frame)
+    return [
+      {
+        k: "decision",
+        v: node?.label || "—",
+        sw: "var(--_blue)",
+        hint: "The take-or-skip decision currently being evaluated.",
+      },
+      {
+        k: "load",
+        v: node ? `${node.weight}/7 · value ${node.value}` : "—",
+        sw: "var(--_neutral)",
+        hint: "Current knapsack weight against capacity 7 and its feasible value.",
+      },
+      {
+        k: "upper bound",
+        v: node?.bound == null ? "infeasible" : node.bound,
+        sw: "var(--_violet)",
+        hint: "Fractional-knapsack LP upper bound for this branch.",
+      },
+      {
+        k: "incumbent",
+        v: frame.incumbent ?? 0,
+        sw: "var(--_green)",
+        hint: "Best feasible 0/1 knapsack value found so far.",
+      },
+    ]
+  },
+}
+
 export const executionTreeFamily = {
   id: "execution-tree",
   createRecorder(config) {
@@ -295,13 +379,15 @@ export const executionTreeFamily = {
   createView(frames) {
     const profile = frames[0]?.profile
     const descriptor =
-      profile === "memoization"
-        ? memoizationTreeViewDescriptor
-        : profile === "merge-sort"
-          ? mergeSortTreeViewDescriptor
-          : profile === "coin-change-top-down" || profile === "grid-path-top-down"
-            ? dynamicProgrammingTreeViewDescriptor
-            : executionTreeViewDescriptor
+      profile === "branch-and-bound"
+        ? branchAndBoundTreeViewDescriptor
+        : profile === "memoization"
+          ? memoizationTreeViewDescriptor
+          : profile === "merge-sort"
+            ? mergeSortTreeViewDescriptor
+            : profile === "coin-change-top-down" || profile === "grid-path-top-down"
+              ? dynamicProgrammingTreeViewDescriptor
+              : executionTreeViewDescriptor
     return makeExecutionTreeView(frames, descriptor) as StepTraceView<ExecutionTreeFrame>
   },
 } satisfies VisualFamily<ExecutionTreeConfig, ExecutionTreeRecorder, ExecutionTreeFrame>

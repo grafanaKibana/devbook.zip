@@ -15,6 +15,17 @@ const here = dirname(fileURLToPath(import.meta.url))
 const repoRoot = join(here, "..", "..", "..")
 
 const cases = [
+  "a-star",
+  "articulation-points-and-bridges",
+  "bellman-ford",
+  "bidirectional-search",
+  "boruvka",
+  "connected-components",
+  "greedy-best-first-search",
+  "hamiltonian-cycle",
+  "kruskal",
+  "maximum-flow",
+  "strongly-connected-components",
   "bubble-sort",
   "insertion-sort",
   "selection-sort",
@@ -66,6 +77,10 @@ const cases = [
   "kernighan-popcount",
   "n-queens",
   "memoization",
+  "branch-and-bound",
+  "trie",
+  "aho-corasick",
+  "ternary-search-tree",
 ]
 
 const commonConfig = {
@@ -93,6 +108,15 @@ const commonConfig = {
   ],
   start: "A",
   directed: true,
+  operations: [
+    ["insert", "car"],
+    ["insert", "card"],
+    ["insert", "care"],
+    ["insert", "cat"],
+    ["insert", "dog"],
+    ["prefix", "ca"],
+    ["search", "car"],
+  ],
 }
 
 function loadEngine(source) {
@@ -130,6 +154,14 @@ function buildAbstractMemoization() {
   const recorder = memoization.family.createRecorder(config)
   memoization.run(config, recorder)
   return { config, family: memoization.family, frames: recorder.frames }
+}
+
+function buildBranchAndBound() {
+  const { branchAndBound } = loadStepTraceModule("src", "algorithms", "branch-and-bound.ts")
+  const config = branchAndBound.parse({ algorithm: "branch-and-bound" })
+  const recorder = branchAndBound.family.createRecorder(config)
+  branchAndBound.run(config, recorder)
+  return { config, family: branchAndBound.family, frames: recorder.frames }
 }
 
 function buildMergeSortTree(array = [8, 3, 7, 4, 9, 2, 5, 1]) {
@@ -612,12 +644,13 @@ test("the Z-array profile paints every frame into one stable measured-strip DOM"
     const directFrame = frames.find(
       (frame) => frame.sourceCase === "outside" && frame.box[0] > frame.box[1],
     )
-    assert.equal(view.watch(directFrame)[1].v, "—", "an empty Z-box must not show an inverted range")
-    assert.equal(view.watch(directFrame)[2].v, "direct")
-    assert.match(
-      view.watch(frames.find((frame) => frame.type === "copy"))[2].v,
-      /^copy Z\[\d+\]$/,
+    assert.equal(
+      view.watch(directFrame)[1].v,
+      "—",
+      "an empty Z-box must not show an inverted range",
     )
+    assert.equal(view.watch(directFrame)[2].v, "direct")
+    assert.match(view.watch(frames.find((frame) => frame.type === "copy"))[2].v, /^copy Z\[\d+\]$/)
     assert.equal(
       view.watch(frames.find((frame) => frame.sourceCase === "reuse-extend"))[2].v,
       "extend edge",
@@ -910,6 +943,284 @@ test("tabbed blocks validate metadata and keep algorithm configs clean", () => {
   )
 })
 
+test("A* graph-state profiles stay typed, deterministic, optimal, and reachable", () => {
+  const api = loadEngine(readFileSync(join(here, "generated", "engine.js"), "utf8"))
+  const family = loadStepTraceModule("src", "families", "graph-state.ts")
+  const variants = ["coordinate-grid", "ukraine-cities", "building-floor", "midtown-map"]
+  const shortestCost = (frame) => {
+    const distances = new Map(frame.nodes.map((node) => [node.id, Number.POSITIVE_INFINITY]))
+    distances.set(frame.start, 0)
+    const pending = new Set(frame.nodes.map((node) => node.id))
+    while (pending.size) {
+      let current = null
+      for (const id of pending) {
+        if (current == null || distances.get(id) < distances.get(current)) current = id
+      }
+      if (current == null || !Number.isFinite(distances.get(current))) break
+      pending.delete(current)
+      for (const edge of frame.edges) {
+        const candidates = [[edge.from, edge.to]]
+        if (!edge.directed) candidates.push([edge.to, edge.from])
+        for (const [from, to] of candidates) {
+          if (from !== current || !pending.has(to)) continue
+          distances.set(to, Math.min(distances.get(to), distances.get(from) + edge.weight))
+        }
+      }
+    }
+    return distances.get(frame.target)
+  }
+
+  for (const variant of variants) {
+    const result = api.buildFrames({ algorithm: "a-star", variant })
+    assert.equal(result.kind, "graph")
+    assert.equal(result.family.id, "graph-state")
+    assert.equal(result.frames[0].profile, variant)
+    assert.equal(result.frames.at(-1).type, "done")
+    assert.ok(result.frames.some((frame) => frame.type === "expand"))
+    assert.ok(result.frames.some((frame) => frame.type === "relax"))
+    assert.ok(result.frames.at(-1).selectedEdges.length > 0)
+    assert.equal(
+      result.frames.at(-1).detail.costs[result.frames.at(-1).target],
+      shortestCost(result.frames[0]),
+    )
+    const comparison = result.frames.at(-1).detail.comparison
+    assert.equal(comparison.primaryLabel, "A*")
+    assert.equal(comparison.baselineLabel, "Dijkstra")
+    assert.equal(comparison.metric, "expansions")
+    assert.ok(
+      comparison.primaryValue <= comparison.baselineValue,
+    )
+  }
+
+  const parsed = family.parseGraphStateConfig({
+    algorithm: "a-star",
+    variant: "ukraine-cities",
+    start: "Lviv",
+    target: "Lviv",
+  })
+  assert.equal(parsed.nodes.length, 25)
+  assert.equal(parsed.endpointSettings.options.length, 25)
+  assert.equal(parsed.start, "Lviv")
+  assert.notEqual(parsed.target, parsed.start)
+  assert.deepEqual(
+    ["Chernihiv", "Simferopol", "Ivano-Frankivsk", "Uzhhorod", "Luhansk", "Kherson"].every(
+      (id) => parsed.nodes.some((node) => node.id === id),
+    ),
+    true,
+  )
+  assert.throws(
+    () => family.parseGraphStateConfig({ algorithm: "a-star", variant: "unknown" }),
+    /"variant" must be/,
+  )
+})
+
+test("Greedy Best-First reuses the A* grid but exposes its longer h-only route", () => {
+  const api = loadEngine(readFileSync(join(here, "generated", "engine.js"), "utf8"))
+  const { graphStateRacks, graphStateSummary } = loadStepTraceModule("src", "families", "graph-state.ts")
+  const greedy = api.buildFrames({ algorithm: "greedy-best-first-search" })
+  const astar = api.buildFrames({ algorithm: "a-star", variant: "coordinate-grid" })
+  const first = greedy.frames[0]
+  const last = greedy.frames.at(-1)
+
+  assert.equal(greedy.kind, "graph")
+  assert.equal(greedy.family.id, "graph-state")
+  assert.equal(first.profile, "coordinate-grid")
+  assert.equal(first.detail.policy, "greedy")
+  assert.deepEqual(first.nodes, astar.frames[0].nodes)
+  assert.deepEqual(first.edges, astar.frames[0].edges)
+  assert.ok(greedy.frames.some((frame) => frame.message.includes("ignored")))
+  assert.equal(last.detail.costs[last.target], 12)
+  assert.equal(astar.frames.at(-1).detail.costs[astar.frames.at(-1).target], 8)
+  assert.deepEqual(last.detail.comparison, {
+    primaryLabel: "Greedy",
+    primaryValue: 12,
+    baselineLabel: "A*",
+    baselineValue: 8,
+    metric: "cost",
+  })
+  assert.match(graphStateSummary(last), /Greedy cost 12 vs A\* cost 8/)
+  assert.match(graphStateRacks(first.detail)[0].entries[0].value, /^h \d+$/)
+  assert.doesNotMatch(graphStateRacks(first.detail)[0].entries[0].value, /\bg\b|\bf\b/)
+})
+
+test("graph-state keeps topology roles separate from discriminated algorithm detail", () => {
+  const { aStar } = loadStepTraceModule("src", "algorithms", "a-star.ts")
+  const { graphStateRacks } = loadStepTraceModule("src", "families", "graph-state.ts")
+  const config = aStar.parse({ algorithm: "a-star", variant: "coordinate-grid" })
+  const recorder = aStar.family.createRecorder(config)
+  aStar.run(config, recorder)
+
+  const first = recorder.frames[0]
+  const last = recorder.frames.at(-1)
+  assert.equal(first.detail.kind, "heuristic-search")
+  assert.equal(last.detail.kind, "heuristic-search")
+  assert.equal(last.detail.costs[last.target], 8)
+  assert.ok(Object.values(first.nodeState).every((role) => ["neutral", "frontier"].includes(role)))
+  assert.ok(Object.values(last.nodeState).includes("accepted"))
+  assert.ok(Object.values(last.edgeState).includes("accepted"))
+  assert.equal("open" in last, false)
+  assert.equal("closed" in last, false)
+  assert.equal("g" in last, false)
+
+  const [open, closed] = graphStateRacks(first.detail)
+  assert.equal(open.title, "OPEN")
+  assert.equal(closed.title, "CLOSED")
+  assert.match(open.entries[0].value, /^g 0 · h \d+ · f \d+$/)
+  assert.deepEqual(
+    graphStateRacks({
+      kind: "mst-scan",
+      pending: [{ from: "A", to: "B", weight: 2 }],
+      accepted: [],
+      totalWeight: 0,
+    })[0],
+    { title: "PENDING", entries: [{ label: "A—B", value: "2" }] },
+  )
+
+  const familySource = readFileSync(join(here, "src", "families", "graph-state.ts"), "utf8")
+  assert.match(familySource, /switch \(detail\.kind\)/)
+  assert.doesNotMatch(familySource, /frame\.algorithm|algorithmId/)
+})
+
+test("graph-state rollout records every canonical decisive operation", () => {
+  const api = loadEngine(readFileSync(join(here, "generated", "engine.js"), "utf8"))
+  const { graphStateSummary } = loadStepTraceModule("src", "families", "graph-state.ts")
+  const expectations = [
+    ["articulation-points-and-bridges", "low-link-cuts", 10],
+    ["bellman-ford", "edge-relaxation", 18],
+    ["bidirectional-search", "dual-search", 9],
+    ["boruvka", "mst-round", 10],
+    ["connected-components", "component-flood", 10],
+    ["hamiltonian-cycle", "path-backtrack", 14],
+    ["kruskal", "mst-scan", 9],
+    ["maximum-flow", "residual-flow", 10],
+    ["strongly-connected-components", "low-link-components", 12],
+  ]
+
+  for (const [algorithm, detailKind, frameCount] of expectations) {
+    const result = api.buildFrames({ algorithm })
+    assert.equal(result.kind, "graph")
+    assert.equal(result.family.id, "graph-state")
+    assert.equal(result.frames.length, frameCount)
+    assert.ok(result.frames.every((frame) => frame.detail.kind === detailKind))
+    assert.ok(result.frames.every((frame) => frame.nodes === result.frames[0].nodes))
+    assert.ok(result.frames.every((frame) => frame.edges === result.frames[0].edges))
+  }
+
+  const cuts = api.buildFrames({ algorithm: "articulation-points-and-bridges" }).frames.at(-1).detail
+  assert.deepEqual(cuts.articulationPoints, ["3", "2"])
+  assert.deepEqual(cuts.bridges, [["3", "4"], ["2", "3"]])
+
+  const distances = api.buildFrames({ algorithm: "bellman-ford" }).frames.at(-1).detail
+  assert.deepEqual(distances.distances, { "0": 0, "1": 4, "2": 2, "3": 5 })
+  assert.equal(distances.pass, 4)
+  assert.equal(distances.changed, false)
+
+  const meeting = api.buildFrames({ algorithm: "bidirectional-search" }).frames.at(-1)
+  assert.equal(meeting.detail.meeting, "m")
+  assert.equal(Object.values(meeting.edgeState).filter((role) => role === "accepted").length, 6)
+
+  const hamiltonian = api.buildFrames({ algorithm: "hamiltonian-cycle" }).frames.at(-1)
+  assert.equal(graphStateSummary(hamiltonian), "Cycle A → B → C → D → A.")
+
+  const boruvkaResult = api.buildFrames({ algorithm: "boruvka" }).frames.at(-1).detail
+  assert.equal(boruvkaResult.totalWeight, 6)
+  assert.equal(boruvkaResult.components.length, 1)
+
+  const componentResult = api.buildFrames({ algorithm: "connected-components" }).frames.at(-1).detail
+  assert.equal(componentResult.groups.length, 3)
+  assert.deepEqual(componentResult.groups, [["A", "B", "C"], ["D", "E"], ["F"]])
+
+  const cycle = api.buildFrames({ algorithm: "hamiltonian-cycle" }).frames
+  assert.ok(cycle.some((frame) => frame.detail.rejected.includes("D")))
+  assert.equal(cycle.at(-1).selectedEdges.length, 4)
+
+  const kruskalResult = api.buildFrames({ algorithm: "kruskal" }).frames
+  assert.ok(kruskalResult.some((frame) => Object.values(frame.edgeState).includes("rejected")))
+  assert.equal(kruskalResult.at(-1).detail.totalWeight, 7)
+  assert.equal(kruskalResult.at(-1).detail.components.length, 1)
+
+  const flow = api.buildFrames({ algorithm: "maximum-flow" }).frames
+  assert.ok(flow.some((frame) => Object.values(frame.edgeState).includes("residual")))
+  assert.equal(flow.at(-1).detail.totalFlow, 2)
+  assert.equal(flow.at(-1).detail.flow["a|b"], 0)
+
+  const scc = api.buildFrames({ algorithm: "strongly-connected-components" }).frames.at(-1).detail
+  assert.deepEqual(scc.components, [["E", "D"], ["C", "B", "A"]])
+})
+
+test("all 600 ordered Ukraine-city A* routes are reachable, admissible, and optimal", () => {
+  const api = loadEngine(readFileSync(join(here, "generated", "engine.js"), "utf8"))
+  const seed = api.buildFrames({
+    algorithm: "a-star",
+    variant: "ukraine-cities",
+    start: "Lviv",
+    target: "Kharkiv",
+  })
+  const cities = seed.endpointSettings.options.map((option) => option.value)
+  let checked = 0
+  for (const start of cities) {
+    for (const target of cities) {
+      if (start === target) continue
+      const result = api.buildFrames({ algorithm: "a-star", variant: "ukraine-cities", start, target })
+      const first = result.frames[0]
+      const last = result.frames.at(-1)
+      const trueDistance = new Map(first.nodes.map((node) => [node.id, Number.POSITIVE_INFINITY]))
+      trueDistance.set(target, 0)
+      const pending = new Set(first.nodes.map((node) => node.id))
+      while (pending.size) {
+        let current = null
+        for (const id of pending) {
+          if (current == null || trueDistance.get(id) < trueDistance.get(current)) current = id
+        }
+        if (current == null || !Number.isFinite(trueDistance.get(current))) break
+        pending.delete(current)
+        for (const edge of first.edges) {
+          for (const [from, to] of [[edge.from, edge.to], [edge.to, edge.from]]) {
+            if (from !== current || !pending.has(to)) continue
+            trueDistance.set(to, Math.min(trueDistance.get(to), trueDistance.get(from) + edge.weight))
+          }
+        }
+      }
+      assert.ok(first.nodes.every((node) => node.h <= trueDistance.get(node.id)))
+      assert.equal(last.detail.costs[target], trueDistance.get(start))
+      assert.ok(last.selectedEdges.length > 0)
+      checked++
+    }
+  }
+  assert.equal(checked, 600)
+})
+
+test("A* uses profile-owned endpoint controls, visual-only nodes, racks, and arrow policy", () => {
+  const mountSource = readFileSync(join(here, "src", "mount.ts"), "utf8")
+  const familySource = readFileSync(join(here, "src", "families", "graph-state.ts"), "utf8")
+  const styles = readFileSync(join(here, "src", "styles", "graph-state.scss"), "utf8")
+  const styleEntry = readFileSync(join(here, "src", "styles", "index.scss"), "utf8")
+  const note = readFileSync(
+    join(repoRoot, "Vault", "Home", "Computer Science", "Algorithms", "Graph Algorithms", "A-Star Search.md"),
+    "utf8",
+  )
+
+  assert.match(mountSource, /syncEndpointOptions\(built\.endpointSettings, built\.graph\)/)
+  assert.match(mountSource, /settings\?\.startLabel \|\| "Start node"/)
+  assert.match(mountSource, /targetHead\.textContent = settings\.targetLabel/)
+  assert.match(mountSource, /state\.target === state\.start/)
+  assert.doesNotMatch(familySource, /tabIndex|tabindex|addEventListener\("click"/)
+  assert.match(familySource, /if \(edge\.showDirection\)/)
+  assert.match(familySource, /steptrace__gs-road-direction/)
+  assert.match(familySource, /steptrace__gs-rack-row/)
+  assert.match(styleEntry, /@use "graph-state";/)
+  assert.match(styles, /grid-template-rows: minmax\(0, 1fr\) auto 6\.8rem/)
+  assert.match(styles, /\.steptrace__gs-rack-card \{[\s\S]*grid-template-rows: 1fr 1fr;/)
+  assert.match(styles, /\.steptrace__gs-rack-label,[\s\S]*place-items: center;/)
+  assert.match(styles, /\.steptrace__gs-rack-card \{[\s\S]*font: 600 0\.6rem\/1 var\(--_font-mono\);/)
+  assert.match(styles, /@media \(max-width: 47\.99rem\)/)
+  assert.match(
+    note,
+    /```steptrace\n\{"tabs":\[\{"name":"Coordinate grid"[\s\S]*"name":"Ukraine cities"[\s\S]*"name":"Building floor"[\s\S]*"name":"Midtown map"/,
+  )
+  assert.doesNotMatch(note, /Visualization pending/)
+})
+
 test("tabbed blocks use accessible shared chrome and preserve mounted tab state", () => {
   const mountSource = readFileSync(join(here, "src", "mount.ts"), "utf8")
   const styleEntry = readFileSync(join(here, "src", "styles", "index.scss"), "utf8")
@@ -1077,7 +1388,19 @@ test("all built-in algorithms preserve their headless frame contract", () => {
   const output = cases.map((algorithm) => {
     assert.notEqual(api.kindOf(algorithm), null, `${algorithm} must stay registered`)
     const familyConfig =
-      algorithm === "ternary-search"
+      algorithm === "aho-corasick"
+        ? { patterns: ["he", "she", "his", "hers"], text: "ushers" }
+        : algorithm === "ternary-search-tree"
+          ? {
+              operations: [
+                ["insert", "cat"],
+                ["insert", "car"],
+                ["insert", "cup"],
+                ["insert", "bat"],
+                ["search", "car"],
+              ],
+            }
+          : algorithm === "ternary-search"
         ? { array: [1, 4, 9, 12, 11, 7, 2], goal: "maximum" }
         : algorithm === "binary-search-on-answer"
           ? { weights: [3, 2, 2, 4, 1, 4], days: 3 }
@@ -1111,6 +1434,7 @@ test("all built-in algorithms preserve their headless frame contract", () => {
                         : {}
     const input =
       algorithm === "memoization" ||
+      algorithm === "branch-and-bound" ||
       algorithm.startsWith("coin-change-") ||
       algorithm.startsWith("grid-path-")
         ? {}
@@ -1127,7 +1451,7 @@ test("all built-in algorithms preserve their headless frame contract", () => {
 
   assert.equal(
     digest,
-    "bc368c4578c60bb517ac21df7b6be6cc9cb7cfa995ead93611f0fd5de7ec1be3",
+    "d759c6f60ed8f56f11f769bebc4324d7623ee4ebf06852688fbbce6ab026edb8",
     "the headless StepTrace behavior changed",
   )
 })
@@ -2074,6 +2398,111 @@ test("memoization reuses the execution-tree family and collapses a repeated stat
   assert.equal(
     summaryFor("memoization", "rectree", final),
     "Result A · 9 calls · 2 recursive calls skipped.",
+  )
+})
+
+test("branch-and-bound uses the execution-tree family for one fixed fractional-bound trace", () => {
+  const { parseBranchAndBoundConfig, branchAndBoundTreeViewDescriptor } = loadStepTraceModule(
+    "src",
+    "families",
+    "execution-tree.ts",
+  )
+  const { buildMilestones, summaryFor } = loadStepTraceModule("src", "render.ts")
+  const result = buildBranchAndBound()
+  const { frames } = result
+  const incumbents = frames
+    .filter((frame) => frame.type === "incumbent")
+    .map((frame) => frame.incumbent)
+  const final = frames.at(-1)
+  const skipC = frames.find((frame) => frame.type === "prune" && frame.active === "ac-")
+  const skipA = frames.find((frame) => frame.type === "prune" && frame.active === "a-")
+
+  assert.deepEqual(result.config, { profile: "branch-and-bound" })
+  assert.equal(result.family.id, "execution-tree")
+  assert.throws(
+    () => parseBranchAndBoundConfig({ algorithm: "branch-and-bound", array: [1] }),
+    /fixed knapsack trace/,
+  )
+  assert.deepEqual(incumbents, [40, 90, 105])
+  assert.equal(frames[0].nodes.find((node) => node.id === "root").bound, 116)
+  assert.equal(skipC.nodes.find((node) => node.id === "ac-").bound, 75)
+  assert.equal(skipA.nodes.find((node) => node.id === "a-").bound, 102)
+  assert.equal(skipA.incumbent, 105)
+  assert.ok(skipA.message.includes("102 ≤ incumbent 105"))
+  assert.deepEqual(skipC.collapsed, ["abc+", "abcd+", "abcd-", "acd+", "acd-", "ac-"])
+  assert.ok(!skipC.visible.some((id) => id.startsWith("ac-d")))
+  assert.ok(!skipA.visible.some((id) => id.startsWith("a-b")))
+  assert.equal(final.incumbent, 105)
+  assert.equal(final.pruned, 7)
+  assert.ok(frames.every((frame) => frame.nodes === frames[0].nodes))
+  assert.ok(frames.every((frame) => frame.edges === frames[0].edges))
+  assert.deepEqual(
+    branchAndBoundTreeViewDescriptor.watchRows(skipA).map((row) => row.k),
+    ["decision", "load", "upper bound", "incumbent"],
+  )
+  assert.deepEqual(
+    branchAndBoundTreeViewDescriptor.legend.map((item) => item.state),
+    ["split", "incumbent", "infeasible", "prune"],
+  )
+  assert.equal(branchAndBoundTreeViewDescriptor.nodeWidth, 116)
+  assert.equal(branchAndBoundTreeViewDescriptor.nodeHeight, 48)
+  assert.equal(branchAndBoundTreeViewDescriptor.fitWidth, true)
+  assert.equal(branchAndBoundTreeViewDescriptor.stableStage, true)
+  assert.equal(branchAndBoundTreeViewDescriptor.preserveDetail, true)
+  assert.equal(branchAndBoundTreeViewDescriptor.showStateBadge, true)
+  assert.deepEqual(
+    buildMilestones("branch-and-bound", "rectree", frames)
+      .filter((mark) => /^(Root|Incumbent|Prune|Best)/.test(mark.label))
+      .map((mark) => mark.label),
+    [
+      "Root bound 116",
+      "Incumbent 40",
+      "Incumbent 90",
+      "Prune skip D",
+      "Incumbent 105",
+      "Prune skip D",
+      "Prune skip C",
+      "Prune skip A",
+      "Best value 105",
+    ],
+  )
+  assert.equal(
+    summaryFor("branch-and-bound", "rectree", final),
+    "Best value 105 · take A + C · weight 7/7 · 7 branches pruned.",
+  )
+})
+
+test("branch-and-bound keeps D&C and memoization sizing while adding opt-in prune treatment", () => {
+  const {
+    executionTreeViewDescriptor,
+    memoizationTreeViewDescriptor,
+    branchAndBoundTreeViewDescriptor,
+  } = loadStepTraceModule("src", "families", "execution-tree.ts")
+  const render = readFileSync(join(here, "src", "render.ts"), "utf8")
+  const styles = readFileSync(join(here, "src", "styles", "rectree.scss"), "utf8")
+
+  assert.deepEqual(
+    [executionTreeViewDescriptor.nodeWidth, executionTreeViewDescriptor.nodeHeight],
+    [84, 40],
+  )
+  assert.deepEqual(
+    [memoizationTreeViewDescriptor.nodeWidth, memoizationTreeViewDescriptor.nodeHeight],
+    [84, 40],
+  )
+  assert.equal(executionTreeViewDescriptor.stableStage, undefined)
+  assert.equal(memoizationTreeViewDescriptor.stableStage, undefined)
+  assert.match(render, /stableStage: descriptor\.stableStage/)
+  assert.match(render, /descriptor\.preserveDetail/)
+  assert.match(render, /descriptor\.showStateBadge/)
+  assert.match(styles, /\[data-profile="branch-and-bound"\]\s*\{[^}]*overflow-x: hidden;/s)
+  assert.match(
+    styles,
+    /\[data-profile="branch-and-bound"\][\s\S]*:is\(\.steptrace__rtedge, \.steptrace__rtnode\)\[data-vis="0"\][^}]*opacity: 0;[^}]*visibility: hidden;/,
+  )
+  assert.ok(
+    branchAndBoundTreeViewDescriptor
+      .watchRows(buildBranchAndBound().frames[0])
+      .every((row) => row.hint),
   )
 })
 
@@ -3991,4 +4420,607 @@ test("Watch hint UI supports hover, focus, touch, and bounded responsive layout"
   assert.match(styles, /min-height: 2\.75rem/)
   assert.match(styles, /\.steptrace--reduced \*/)
   assert.match(renderSource, /hasPivot && !semantics\.markerLabels\.includes\("pivot"\)/)
+})
+
+test("trie uses the typed prefix-character family and preserves shared paths and terminals", () => {
+  const api = loadEngine(readFileSync(join(here, "generated", "engine.js"), "utf8"))
+  const operations = [
+    ["insert", "car"],
+    ["insert", "card"],
+    ["insert", "care"],
+    ["insert", "cat"],
+    ["insert", "dog"],
+    ["prefix", "ca"],
+    ["search", "car"],
+  ]
+  const result = api.buildFrames({ algorithm: "trie", operations })
+  const frames = result.frames
+  const final = frames.at(-1)
+  const prefix = frames.find((frame) => frame.type === "complete-prefix")
+  const search = frames.find((frame) => frame.type === "complete-search")
+  const secondInsert = frames.findIndex(
+    (frame) => frame.type === "begin" && frame.operation === "insert" && frame.key === "card",
+  )
+  const reuseAfterCar = frames
+    .slice(secondInsert)
+    .filter((frame) => frame.key === "card" && frame.type === "reuse-edge")
+
+  assert.equal(api.kindOf("trie"), "string")
+  assert.equal(result.kind, "string")
+  assert.equal(result.family.id, "prefix-character")
+  assert.deepEqual(
+    frames[0].nodes.map((node) => node.id),
+    ["root", "c", "d", "ca", "do", "car", "cat", "dog", "card", "care"],
+  )
+  assert.ok(frames[0].nodes.every((node) => node.x >= 35 && node.x <= 305))
+  assert.ok(frames[0].nodes.every((node) => node.y >= 38 && node.y <= 270))
+  assert.equal(frames[0].edges.length, 9)
+  assert.deepEqual(
+    reuseAfterCar.map((frame) => frame.activeEdge),
+    ["root->c", "c->ca", "ca->car"],
+  )
+  assert.ok(
+    frames.every(
+      (frame, index) =>
+        index === 0 || frame.visibleNodes.length >= frames[index - 1].visibleNodes.length,
+    ),
+  )
+  assert.deepEqual(final.visibleNodes, ["root", "c", "ca", "car", "card", "care", "cat", "d", "do", "dog"])
+  assert.deepEqual(final.visibleEdges, [
+    "root->c",
+    "c->ca",
+    "ca->car",
+    "car->card",
+    "car->care",
+    "ca->cat",
+    "root->d",
+    "d->do",
+    "do->dog",
+  ])
+  assert.deepEqual(final.terminalNodes, ["car", "card", "care", "cat", "dog"])
+  assert.equal(prefix.testKind, "path")
+  assert.equal(prefix.result, true)
+  assert.equal(prefix.key, "ca")
+  assert.equal(prefix.terminalNodes.includes("ca"), false)
+  assert.equal(search.testKind, "terminal")
+  assert.equal(search.result, true)
+  const { buildMilestones, milestoneAt, summaryFor } = loadStepTraceModule("src", "render.ts")
+  assert.equal(
+    summaryFor("trie", "string", final),
+    "Stored keys car, card, care, cat, dog · 10 trie nodes.",
+  )
+  const milestones = buildMilestones("trie", "string", frames)
+  const labelAt = (predicate) => milestoneAt(milestones, frames.findIndex(predicate)).label
+  assert.equal(labelAt((frame) => frame.type === "create-node" && frame.key === "car"), "Insert car")
+  assert.equal(labelAt((frame) => frame.type === "reuse-edge" && frame.key === "card"), "Insert card")
+  assert.equal(labelAt((frame) => frame.type === "create-node" && frame.key === "care"), "Insert care")
+  assert.equal(labelAt((frame) => frame.type === "create-node" && frame.key === "cat"), "Insert cat")
+  assert.equal(labelAt((frame) => frame.type === "create-node" && frame.key === "dog"), "Insert dog")
+  assert.equal(labelAt((frame) => frame.type === "complete-prefix"), "Prefix ca")
+  assert.equal(labelAt((frame) => frame.type === "complete-search"), "Search car")
+  assert.equal(milestoneAt(milestones, frames.length - 1).label, "Trie complete")
+  assert.doesNotMatch(milestones.map((mark) => mark.label).join(" "), /\bShift\b/)
+  assert.ok(
+    frames
+      .slice(search ? frames.indexOf(search) : -1)
+      .every((frame) => frame.terminalNodes.includes("car")),
+  )
+  assert.deepEqual(
+    new Set(frames.map((frame) => frame.type)),
+    new Set([
+      "begin",
+      "reuse-edge",
+      "create-node",
+      "mark-terminal",
+      "complete-prefix",
+      "complete-search",
+      "done",
+    ]),
+  )
+
+  assert.throws(
+    () => api.buildFrames({ algorithm: "trie", operations: [] }),
+    /requires a non-empty "operations" array/,
+  )
+  assert.throws(
+    () => api.buildFrames({ algorithm: "trie", operations: [["remove", "car"]] }),
+    /operations must be/,
+  )
+})
+
+test("Aho-Corasick reuses prefix-character frames for failure, goto, fallback, and output", () => {
+  const api = loadEngine(readFileSync(join(here, "generated", "engine.js"), "utf8"))
+  const result = api.buildFrames({
+    algorithm: "aho-corasick",
+    patterns: ["he", "she", "his", "hers"],
+    text: "ushers",
+  })
+  const frames = result.frames
+  const final = frames.at(-1)
+  const outputs = frames.filter((frame) => frame.type === "output")
+  const { buildMilestones, summaryFor } = loadStepTraceModule("src", "render.ts")
+  const milestones = buildMilestones("aho-corasick", "string", frames).map((mark) => mark.label)
+
+  assert.equal(result.family.id, "prefix-character")
+  assert.deepEqual(final.terminalNodes, ["he", "she", "his", "hers"])
+  assert.ok(frames.some((frame) => frame.type === "failure-link"))
+  assert.ok(frames.some((frame) => frame.type === "goto"))
+  assert.ok(frames.some((frame) => frame.type === "fallback"))
+  assert.deepEqual(
+    outputs.map((frame) => [frame.textCursor, frame.outputs]),
+    [
+      [3, ["she", "he"]],
+      [5, ["hers"]],
+    ],
+  )
+  assert.deepEqual(final.matches, [
+    { pattern: "she", end: 3 },
+    { pattern: "he", end: 3 },
+    { pattern: "hers", end: 5 },
+  ])
+  assert.ok(final.edges.some((edge) => edge.kind === "failure"))
+  assert.equal(summaryFor("aho-corasick", "string", final), "Matches she@3, he@3, hers@5.")
+  assert.ok(milestones.includes("Emit she + he"))
+  assert.ok(milestones.includes("Emit hers"))
+  assert.equal(milestones.at(-1), "Scan complete")
+  assert.doesNotMatch(milestones.join(" "), /\bShift\b/)
+  assert.throws(
+    () => api.buildFrames({ algorithm: "aho-corasick", patterns: [], text: "ushers" }),
+    /non-empty "patterns"/,
+  )
+})
+
+test("ternary search tree exposes lo/eq/hi roles and consumes characters only through eq", () => {
+  const api = loadEngine(readFileSync(join(here, "generated", "engine.js"), "utf8"))
+  const result = api.buildFrames({
+    algorithm: "ternary-search-tree",
+    operations: [
+      ["insert", "cat"],
+      ["insert", "car"],
+      ["insert", "cup"],
+      ["insert", "bat"],
+      ["search", "car"],
+    ],
+  })
+  const frames = result.frames
+  const final = frames.at(-1)
+  const edgeById = new Map(final.edges.map((edge) => [edge.id, edge]))
+  const search = frames.find((frame) => frame.type === "complete-search")
+  const { buildMilestones, summaryFor } = loadStepTraceModule("src", "render.ts")
+
+  assert.equal(result.family.id, "prefix-character")
+  assert.deepEqual(new Set(final.edges.map((edge) => edge.role)), new Set(["eq", "lo", "hi"]))
+  for (let index = 1; index < frames.length; index++) {
+    const frame = frames[index]
+    const previous = frames[index - 1]
+    if (
+      !frame.activeEdge ||
+      frame.key !== previous.key ||
+      frame.operation !== previous.operation ||
+      !["create-node", "reuse-edge"].includes(frame.type)
+    )
+      continue
+    const role = edgeById.get(frame.activeEdge)?.role
+    if (role === "lo" || role === "hi") assert.equal(frame.cursor, previous.cursor)
+    if (frame.cursor !== previous.cursor) assert.equal(role, "eq")
+  }
+  assert.equal(final.terminalNodes.length, 4)
+  assert.equal(search.key, "car")
+  assert.equal(search.result, true)
+  assert.equal(
+    summaryFor("ternary-search-tree", "string", final),
+    "4 terminal keys · 9 character nodes.",
+  )
+  assert.deepEqual(
+    buildMilestones("ternary-search-tree", "string", frames).map((mark) => mark.label),
+    ["Insert cat", "Insert car", "Insert cup", "Insert bat", "Search car", "TST complete"],
+  )
+  assert.throws(
+    () =>
+      api.buildFrames({
+        algorithm: "ternary-search-tree",
+        operations: [["prefix", "ca"]],
+      }),
+    /operations must be/,
+  )
+})
+
+test("prefix-character renderer keeps stable accessible topology and compact Watch rows", () => {
+  class FakeNode {
+    constructor(tagName, text = "") {
+      this.tagName = tagName
+      this.textContent = text
+      this.innerHTML = ""
+      this.children = []
+      this.attributes = new Map()
+      this.dataset = {}
+      this.className = ""
+      this.id = ""
+      this.tabIndex = -1
+    }
+    setAttribute(key, value) {
+      this.attributes.set(key, String(value))
+    }
+    append(...children) {
+      this.children.push(...children)
+    }
+  }
+  const previousDocument = globalThis.document
+  globalThis.document = {
+    createElement: (tagName) => new FakeNode(tagName),
+    createElementNS: (_namespace, tagName) => new FakeNode(tagName),
+    createTextNode: (value) => new FakeNode("#text", value),
+  }
+  try {
+    const { trie } = loadStepTraceModule("src", "algorithms", "trie.ts")
+    const config = trie.parse({
+      algorithm: "trie",
+      operations: [
+        ["insert", "car"],
+        ["insert", "card"],
+        ["insert", "care"],
+        ["insert", "cat"],
+        ["insert", "dog"],
+        ["prefix", "ca"],
+        ["search", "car"],
+      ],
+    })
+    const recorder = trie.family.createRecorder(config)
+    trie.run(config, recorder)
+    const view = trie.family.createView(recorder.frames)
+    const [root, legend] = view.nodes
+    const svg = root.children.find((node) => node.tagName === "svg")
+    const topology = svg.children.slice()
+    const terminalPaths = svg.children
+      .filter((node) => node.tagName === "g")
+      .map((node) => node.children[2]?.children[0])
+      .filter(Boolean)
+    const terminalMarkers = svg.children
+      .filter((node) => node.tagName === "g")
+      .map((node) => node.children[2])
+
+    view.paint(recorder.frames[0], 0, recorder.frames.length)
+    assert.equal(root.attributes.get("role"), "region")
+    assert.equal(root.tabIndex, 0)
+    assert.equal(svg.attributes.get("viewBox"), "0 0 360 300")
+    assert.equal(svg.attributes.get("role"), "img")
+    assert.match(svg.attributes.get("aria-labelledby"), /title.*description/)
+    assert.equal(svg.children.filter((node) => node.tagName === "line").length, 9)
+    assert.equal(svg.children.filter((node) => node.tagName === "g").length, 10)
+    assert.equal(svg.children.filter((node) => node.tagName === "text").length, 0)
+    assert.equal(legend.children.length, 4)
+    assert.ok(terminalPaths.every((path) => path.attributes.get("d") === "M20 6 9 17l-5-5"))
+    assert.ok(
+      terminalMarkers.every(
+        (marker) => marker.attributes.get("transform") === "translate(22 -7) scale(.55)",
+      ),
+    )
+    assert.ok(view.watch(recorder.frames[0]).length <= 3)
+
+    view.paint(recorder.frames.at(-2), recorder.frames.length - 2, recorder.frames.length)
+    assert.deepEqual(svg.children, topology)
+    assert.match(svg.children[0].textContent, /Trie search: car/)
+    assert.match(svg.children[1].textContent, /Search "car" tests IsEnd/)
+    assert.deepEqual(
+      view.watch(recorder.frames.at(-2)).map((row) => row.k),
+      ["operation", "character", "test"],
+    )
+  } finally {
+    globalThis.document = previousDocument
+  }
+})
+
+test("production mount renders a meaningful Trie terminal summary without string-frame assumptions", () => {
+  class FakeNode {
+    constructor(tagName, text = "") {
+      this.tagName = tagName
+      this.textContent = text
+      this.innerHTML = ""
+      this.children = []
+      this.attributes = new Map()
+      this.dataset = {}
+      this.listeners = new Map()
+      this.className = ""
+      this.id = ""
+      this.tabIndex = -1
+      this.hidden = false
+      this.clientHeight = 0
+      this.style = {
+        cssText: "",
+        setProperty: (key, value) => this.attributes.set(`style:${key}`, value),
+      }
+      this.classList = {
+        add: (...names) => this.setClasses([...this.classes(), ...names]),
+        remove: (...names) => this.setClasses(this.classes().filter((name) => !names.includes(name))),
+        toggle: (name, force) => {
+          const present = this.classes().includes(name)
+          const next = force == null ? !present : force
+          this.setClasses(
+            next
+              ? [...this.classes(), name]
+              : this.classes().filter((candidate) => candidate !== name),
+          )
+          return next
+        },
+        contains: (name) => this.classes().includes(name),
+      }
+    }
+    classes() {
+      return this.className.split(/\s+/).filter(Boolean)
+    }
+    setClasses(names) {
+      this.className = [...new Set(names)].join(" ")
+    }
+    setAttribute(key, value) {
+      this.attributes.set(key, String(value))
+    }
+    removeAttribute(key) {
+      this.attributes.delete(key)
+    }
+    append(...children) {
+      this.children.push(...children)
+      for (const child of children) if (child && typeof child === "object") child.parentNode = this
+    }
+    replaceChildren(...children) {
+      this.children = []
+      this.append(...children)
+    }
+    addEventListener(type, listener) {
+      const listeners = this.listeners.get(type) || []
+      listeners.push(listener)
+      this.listeners.set(type, listeners)
+    }
+    removeEventListener(type, listener) {
+      this.listeners.set(
+        type,
+        (this.listeners.get(type) || []).filter((candidate) => candidate !== listener),
+      )
+    }
+    cloneNode(deep) {
+      const clone = new FakeNode(this.tagName, this.textContent)
+      clone.className = this.className
+      clone.hidden = this.hidden
+      if (deep) clone.append(...this.children.map((child) => child.cloneNode?.(true) || child))
+      return clone
+    }
+    remove() {
+      if (this.parentNode)
+        this.parentNode.children = this.parentNode.children.filter((child) => child !== this)
+    }
+    getBoundingClientRect() {
+      return { left: 0, top: 0, width: 360, height: 20 }
+    }
+  }
+  const findByClass = (node, className) => {
+    if (node.classList?.contains(className)) return node
+    for (const child of node.children || []) {
+      const found = findByClass(child, className)
+      if (found) return found
+    }
+    return null
+  }
+  const findAllByClass = (node, className, found = []) => {
+    if (node.classList?.contains(className)) found.push(node)
+    for (const child of node.children || []) findAllByClass(child, className, found)
+    return found
+  }
+  const findByAttribute = (node, name, value) => {
+    if (node.attributes?.get(name) === value) return node
+    for (const child of node.children || []) {
+      const found = findByAttribute(child, name, value)
+      if (found) return found
+    }
+    return null
+  }
+  const findByTag = (node, tagName) => {
+    if (node.tagName === tagName) return node
+    for (const child of node.children || []) {
+      const found = findByTag(child, tagName)
+      if (found) return found
+    }
+    return null
+  }
+  const previous = {
+    document: globalThis.document,
+    matchMedia: globalThis.matchMedia,
+    getComputedStyle: globalThis.getComputedStyle,
+  }
+  const documentListeners = new Map()
+  globalThis.document = {
+    createElement: (tagName) => new FakeNode(tagName),
+    createElementNS: (_namespace, tagName) => new FakeNode(tagName),
+    createTextNode: (value) => new FakeNode("#text", value),
+    addEventListener(type, listener) {
+      documentListeners.set(type, listener)
+    },
+    removeEventListener(type) {
+      documentListeners.delete(type)
+    },
+  }
+  globalThis.matchMedia = () => ({
+    matches: false,
+    addEventListener() {},
+    removeEventListener() {},
+  })
+  globalThis.getComputedStyle = () => ({ rowGap: "0", lineHeight: "10" })
+  try {
+    const api = loadEngine(readFileSync(join(here, "generated", "engine.js"), "utf8"))
+    const root = new FakeNode("div")
+    let handle
+    assert.doesNotThrow(() => {
+      handle = api.mount(root, {
+        algorithm: "trie",
+        operations: [
+          ["insert", "car"],
+          ["insert", "card"],
+          ["insert", "care"],
+          ["insert", "cat"],
+          ["insert", "dog"],
+          ["prefix", "ca"],
+          ["search", "car"],
+        ],
+      })
+    })
+    assert.equal(root.dataset.visualFamily, "prefix-character")
+    assert.equal(findByTag(root, "title").textContent, "Trie insert: car")
+    assert.equal(findByClass(root, "steptrace__prefix-text").hidden, true)
+    assert.equal(
+      findByClass(root, "steptrace__insight-text").textContent,
+      "Stored keys car, card, care, cat, dog · 10 trie nodes.",
+    )
+    const phaseName = findByClass(root, "steptrace__phase-name")
+    const forward = findByAttribute(root, "aria-label", "Step forward")
+    const phaseLabels = [phaseName.textContent]
+    while (!forward.disabled) {
+      forward.listeners.get("click")[0]()
+      phaseLabels.push(phaseName.textContent)
+    }
+    assert.deepEqual([...new Set(phaseLabels)], [
+      "Insert car",
+      "Insert card",
+      "Insert care",
+      "Insert cat",
+      "Insert dog",
+      "Prefix ca",
+      "Search car",
+      "Trie complete",
+    ])
+    assert.doesNotMatch(phaseLabels.join(" "), /\bShift\b/)
+    handle.destroy()
+
+    const branchRoot = new FakeNode("div")
+    const branchHandle = api.mount(branchRoot, { algorithm: "branch-and-bound" })
+    assert.equal(branchRoot.dataset.visualFamily, "execution-tree")
+    assert.equal(branchRoot.classList.contains("steptrace--stable-stage"), true)
+    assert.equal(
+      findByTag(branchRoot, "title").textContent,
+      "Branch and bound knapsack decision tree: divide",
+    )
+    assert.equal(
+      findByClass(branchRoot, "steptrace__insight-text").textContent,
+      "Best value 105 · take A + C · weight 7/7 · 7 branches pruned.",
+    )
+    assert.deepEqual(
+      findAllByClass(branchRoot, "steptrace__watch-k").map((row) => row.textContent),
+      ["decision", "load", "upper bound", "incumbent"],
+    )
+    const branchForward = findByAttribute(branchRoot, "aria-label", "Step forward")
+    while (!branchForward.disabled) branchForward.listeners.get("click")[0]()
+    assert.equal(findByClass(branchRoot, "steptrace__phase-name").textContent, "Best value 105")
+    assert.match(findByTag(branchRoot, "desc").textContent, /best feasible set is A \+ C/i)
+    branchHandle.destroy()
+
+    const bellmanRoot = new FakeNode("div")
+    const bellmanHandle = api.mount(bellmanRoot, { algorithm: "bellman-ford" })
+    assert.equal(bellmanRoot.dataset.visualFamily, "graph-state")
+    assert.equal(
+      findByClass(bellmanRoot, "steptrace__insight-text").textContent,
+      "Distances 0:0, 1:4, 2:2, 3:5.",
+    )
+    bellmanHandle.destroy()
+
+    const ahoRoot = new FakeNode("div")
+    const ahoHandle = api.mount(ahoRoot, {
+      algorithm: "aho-corasick",
+      patterns: ["he", "she", "his", "hers"],
+      text: "ushers",
+    })
+    assert.equal(ahoRoot.dataset.visualFamily, "prefix-character")
+    assert.equal(findByTag(ahoRoot, "title").textContent, "Aho-Corasick insert: he")
+    assert.equal(findByClass(ahoRoot, "steptrace__insight-text").textContent, "Matches she@3, he@3, hers@5.")
+    const ahoTextRow = findByClass(ahoRoot, "steptrace__prefix-text")
+    const ahoTextCells = findAllByClass(ahoRoot, "steptrace__prefix-text-cell")
+    assert.equal(ahoTextCells.map((cell) => cell.textContent).join(""), "ushers")
+    assert.equal(ahoTextRow.hidden, false)
+    assert.equal(ahoTextRow.dataset.visible, "0")
+    assert.equal(ahoTextRow.attributes.get("aria-hidden"), "true")
+    const ahoForward = findByAttribute(ahoRoot, "aria-label", "Step forward")
+    const ahoPhase = findByClass(ahoRoot, "steptrace__phase-name")
+    const ahoLabels = [ahoPhase.textContent]
+    let sawActiveTextCursor = false
+    let sawMatchedText = false
+    while (!ahoForward.disabled) {
+      ahoForward.listeners.get("click")[0]()
+      ahoLabels.push(ahoPhase.textContent)
+      sawActiveTextCursor ||= ahoTextCells.some((cell) => cell.dataset.active === "1")
+      sawMatchedText ||= ahoTextCells.some((cell) => cell.dataset.matched === "1")
+    }
+    assert.equal(findByClass(ahoRoot, "steptrace__prefix-text"), ahoTextRow)
+    assert.equal(ahoTextRow.hidden, false)
+    assert.equal(ahoTextRow.dataset.visible, "1")
+    assert.equal(ahoTextRow.attributes.get("aria-hidden"), "false")
+    assert.equal(sawActiveTextCursor, true)
+    assert.equal(sawMatchedText, true)
+    assert.ok(ahoLabels.includes("Emit she + he"))
+    assert.ok(ahoLabels.includes("Emit hers"))
+    assert.equal(ahoLabels.at(-1), "Scan complete")
+    ahoHandle.destroy()
+
+    const tstRoot = new FakeNode("div")
+    const tstHandle = api.mount(tstRoot, {
+      algorithm: "ternary-search-tree",
+      operations: [
+        ["insert", "cat"],
+        ["insert", "car"],
+        ["insert", "cup"],
+        ["insert", "bat"],
+        ["search", "car"],
+      ],
+    })
+    assert.equal(tstRoot.dataset.visualFamily, "prefix-character")
+    assert.equal(findByTag(tstRoot, "title").textContent, "Ternary Search Tree insert: cat")
+    assert.equal(findByClass(tstRoot, "steptrace__prefix-text").hidden, true)
+    assert.equal(
+      findByClass(tstRoot, "steptrace__insight-text").textContent,
+      "4 terminal keys · 9 character nodes.",
+    )
+    const tstForward = findByAttribute(tstRoot, "aria-label", "Step forward")
+    const tstPhase = findByClass(tstRoot, "steptrace__phase-name")
+    while (!tstForward.disabled) tstForward.listeners.get("click")[0]()
+    assert.equal(tstPhase.textContent, "TST complete")
+    tstHandle.destroy()
+  } finally {
+    globalThis.document = previous.document
+    globalThis.matchMedia = previous.matchMedia
+    globalThis.getComputedStyle = previous.getComputedStyle
+  }
+})
+
+test("prefix-character styles keep the stage stable, responsive, reduced, and Trace top-aligned", () => {
+  const family = readFileSync(join(here, "src", "families", "prefix-character.ts"), "utf8")
+  const styles = readFileSync(join(here, "src", "styles", "prefix-character.scss"), "utf8")
+  const shared = readFileSync(join(here, "src", "styles", "shared.scss"), "utf8")
+  const algorithms = readFileSync(join(here, "src", "algorithms", "index.ts"), "utf8")
+
+  assert.match(family, /id: "prefix-character"/)
+  assert.match(family, /stableStage: true/)
+  assert.match(family, /"trie" \| "aho-corasick" \| "ternary-search-tree"/)
+  assert.match(algorithms, /import \{ trie \} from "\.\/trie"/)
+  assert.match(algorithms, /import \{ ahoCorasick \} from "\.\/aho-corasick"/)
+  assert.match(algorithms, /import \{ ternarySearchTree \} from "\.\/ternary-search-tree"/)
+  assert.match(styles, /width: min\(100%, 30rem\)/)
+  assert.match(styles, /grid-template-rows: auto minmax\(0, 1fr\)/)
+  assert.match(styles, /overflow-x: hidden/)
+  assert.match(styles, /@media \(max-width: 560px\)/)
+  assert.match(styles, /@media \(prefers-reduced-motion: reduce\)/)
+  assert.match(styles, /transition-property: opacity, color, fill, stroke/)
+  assert.match(styles, /\.steptrace__prefix-edge--failure \{[^}]*stroke-dasharray: 4 5;/s)
+  assert.match(styles, /\.steptrace__prefix-edge-role \{[^}]*font-family: var\(--_font-mono\)/s)
+  assert.match(styles, /\.steptrace__prefix-text-cell\[data-active="1"\]/)
+  assert.match(
+    styles,
+    /\.steptrace__prefix-text\[data-visible="0"\] \{[^}]*visibility: hidden;[^}]*opacity: 0;/s,
+  )
+  assert.match(family, /textRow\.dataset\.visible = textVisible \? "1" : "0"/)
+  assert.match(family, /textRow\.setAttribute\("aria-hidden", String\(!textVisible\)\)/)
+  assert.doesNotMatch(family, /textRow\.hidden = !frame\.text/)
+  const nodeType = styles.match(/\.steptrace__prefix-node > text \{[^}]*\}/s)?.[0] || ""
+  assert.doesNotMatch(family, /steptrace__prefix-edge-label/)
+  assert.doesNotMatch(styles, /steptrace__prefix-edge-label/)
+  assert.match(nodeType, /font-family: var\(--_font-body\)/)
+  assert.match(nodeType, /font-size: clamp\(0\.75rem, 3vw, 0\.875rem\)/)
+  assert.doesNotMatch(nodeType, /font(?:-size)?:[^;]*\d+px/)
+  assert.doesNotMatch(styles, /overflow-x: auto/)
+  assert.match(shared, /\.steptrace__log\s*\{[^}]*justify-content: flex-start;/s)
+  assert.doesNotMatch(shared, /\.steptrace__log\s*\{[^}]*justify-content: flex-end;/s)
 })

@@ -43,6 +43,17 @@
   margin-inline: auto;
 }
 
+.steptrace .steptrace__rectree[data-profile="branch-and-bound"] {
+  overflow-x: hidden;
+}
+
+.steptrace
+  .steptrace__rectree[data-profile="branch-and-bound"]
+  :is(.steptrace__rtedge, .steptrace__rtnode)[data-vis="0"] {
+  opacity: 0;
+  visibility: hidden;
+}
+
 @media (min-width: 561px) {
   :is(
       .steptrace--stable-stage,
@@ -119,6 +130,12 @@
 
 .steptrace .steptrace__rtnode[data-collapsed="true"] {
   opacity: 0.34;
+}
+
+.steptrace
+  .steptrace__rectree[data-profile="branch-and-bound"]
+  .steptrace__rtnode[data-collapsed="true"] {
+  opacity: 0.5;
 }
 
 .steptrace .steptrace__rtnode .steptrace__rtcirc {
@@ -225,7 +242,8 @@
 
 .steptrace .steptrace__rtnode[data-state="combine"] .steptrace__rtcirc,
 .steptrace .steptrace__rtnode[data-state="store"] .steptrace__rtcirc,
-.steptrace .steptrace__rtnode[data-state="hit"] .steptrace__rtcirc {
+.steptrace .steptrace__rtnode[data-state="hit"] .steptrace__rtcirc,
+.steptrace .steptrace__rtnode[data-state="incumbent"] .steptrace__rtcirc {
   fill: color-mix(in srgb, var(--_green) 14%, var(--st-page, var(--_surface)));
   stroke: var(--_green);
 }
@@ -249,6 +267,19 @@
   stroke-dasharray: 3 2;
 }
 
+.steptrace .steptrace__rtnode[data-state="infeasible"] .steptrace__rtcirc {
+  fill: color-mix(in srgb, var(--_amber) 9%, var(--st-page, var(--_surface)));
+  stroke: var(--_amber);
+  stroke-dasharray: 2 2;
+}
+
+.steptrace
+  .steptrace__rectree[data-profile="branch-and-bound"]
+  .steptrace__rtnode[data-shape="card"]
+  .steptrace__rtbadge {
+  display: block;
+}
+
 .steptrace .steptrace__rtswatch[data-state="split"] {
   background: var(--_blue);
 }
@@ -265,7 +296,8 @@
 
 .steptrace .steptrace__rtswatch[data-state="combine"],
 .steptrace .steptrace__rtswatch[data-state="store"],
-.steptrace .steptrace__rtswatch[data-state="hit"] {
+.steptrace .steptrace__rtswatch[data-state="hit"],
+.steptrace .steptrace__rtswatch[data-state="incumbent"] {
   background: var(--_green);
 }
 
@@ -275,4 +307,8 @@
 
 .steptrace .steptrace__rtswatch[data-state="prune"] {
   background: var(--_muted);
+}
+
+.steptrace .steptrace__rtswatch[data-state="infeasible"] {
+  background: var(--_amber);
 }
