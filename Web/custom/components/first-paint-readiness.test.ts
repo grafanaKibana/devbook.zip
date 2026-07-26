@@ -32,6 +32,10 @@ test("hard-load reveal fails open without the Font Loading API", async () => {
   context.window = context
 
   const component = PageReveal(undefined)
+  assert.match(
+    resource(component.css),
+    /data-page-reveal-first-paint="pending"\] \.page > #quartz-body > footer/,
+  )
   vm.runInNewContext(resource(component.beforeDOMLoaded), context)
   vm.runInNewContext(resource(component.afterDOMLoaded), context)
   await new Promise<void>((resolve) => setImmediate(resolve))

@@ -16,7 +16,8 @@ const css = `
 @keyframes page-reveal-first-in {
   from { opacity: 0; transform: translateY(8px); }
 }
-:root[data-page-reveal-first-paint="pending"] article {
+:root[data-page-reveal-first-paint="pending"] article,
+:root[data-page-reveal-first-paint="pending"] .page > #quartz-body > footer {
   visibility: hidden;
   opacity: 0;
   pointer-events: none;
