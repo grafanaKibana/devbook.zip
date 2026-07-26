@@ -31,6 +31,11 @@
   font: inherit;
 }
 
+.steptrace .steptrace__rtcontent {
+  transform-origin: 0 0;
+  transition: transform var(--_dur-move) var(--_spring-soft);
+}
+
 .steptrace .steptrace__rectree[data-fit-width="true"] .steptrace__rtsvg {
   inline-size: 100%;
   min-inline-size: 0;
@@ -88,6 +93,10 @@
   stroke: var(--_violet);
 }
 
+.steptrace .steptrace__rectree[data-profile="merge-sort"] .steptrace__rtedge[data-related="true"] {
+  stroke: var(--_green);
+}
+
 .steptrace .steptrace__rtedge[data-collapsed="true"] {
   opacity: 0.3;
 }
@@ -101,6 +110,13 @@
   opacity: 0.12;
 }
 
+.steptrace
+  .steptrace__rectree[data-profile="merge-sort"]
+  :is(.steptrace__rtedge, .steptrace__rtnode)[data-vis="0"] {
+  opacity: 0;
+  visibility: hidden;
+}
+
 .steptrace .steptrace__rtnode[data-collapsed="true"] {
   opacity: 0.34;
 }
@@ -112,6 +128,21 @@
   transition:
     fill var(--_tween) ease,
     stroke var(--_tween) ease;
+}
+
+.steptrace .steptrace__rtdivider {
+  stroke: var(--_hair);
+  stroke-width: 1;
+}
+
+.steptrace .steptrace__rtcell-separator {
+  stroke: color-mix(in srgb, var(--_text) 13%, transparent);
+  stroke-width: 1;
+}
+
+.steptrace .steptrace__rtcell-value {
+  fill: var(--_text);
+  font: 500 11px/1 var(--_font-mono);
 }
 
 .steptrace .steptrace__rtnode .steptrace__rtring {
@@ -134,6 +165,14 @@
 .steptrace .steptrace__rtnode .steptrace__rtdetail {
   fill: var(--_muted);
   font: 400 10.5px/1 var(--_font-mono);
+}
+
+.steptrace
+  .steptrace__rectree[data-profile="merge-sort"]
+  .steptrace__rtnode
+  .steptrace__rtlabel {
+  fill: var(--_muted);
+  font: 400 9px/1 var(--_font-mono);
 }
 
 .steptrace .steptrace__rtnode .steptrace__rtval {
@@ -188,6 +227,14 @@
 .steptrace .steptrace__rtnode[data-state="store"] .steptrace__rtcirc,
 .steptrace .steptrace__rtnode[data-state="hit"] .steptrace__rtcirc {
   fill: color-mix(in srgb, var(--_green) 14%, var(--st-page, var(--_surface)));
+  stroke: var(--_green);
+}
+
+.steptrace
+  .steptrace__rectree[data-profile="merge-sort"]
+  .steptrace__rtnode[data-related="true"]
+  .steptrace__rtcirc {
+  fill: color-mix(in srgb, var(--_green) 10%, var(--st-page, var(--_surface)));
   stroke: var(--_green);
 }
 

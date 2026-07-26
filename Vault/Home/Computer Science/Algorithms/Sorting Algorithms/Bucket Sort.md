@@ -43,13 +43,13 @@ The inner sort is usually [[Home/Computer Science/Algorithms/Sorting Algorithms/
 | --- | --- | --- | --- |
 | Best | `Θ(n + m)` | `Θ(n + m)` | Keys land one per bucket; every per-bucket sort touches a constant number of elements. |
 | Average | `Θ(n + m) ≈ Θ(n)` when `m ≈ n` | `Θ(n + m)` | Keys drawn from a roughly uniform distribution over the known range, so each of `m ≈ n` buckets holds `O(1)` elements in expectation and the per-bucket insertion sorts sum to `Θ(n)`. The linear average is conditional on this assumption. |
-| Worst | `Θ(n² + m)` | `Θ(n + m)` | A skewed distribution drops nearly all elements into one bucket; the per-bucket [[Home/Computer Science/Algorithms/Sorting Algorithms/Insertion Sort\|Insertion Sort]] then dominates at `Θ(n²)`, while the bucket scan still costs `Θ(m)`. |
+| Worst | `Θ(n² + m)` | `Θ(n + m)` | Skew can put `Θ(n)` distinct values into one bucket; if they arrive in reverse order, the per-bucket [[Home/Computer Science/Algorithms/Sorting Algorithms/Insertion Sort\|Insertion Sort]] costs `Θ(n²)`, while the bucket scan still costs `Θ(m)`. |
 
 Auxiliary space is `Θ(n + m)`: the `m` bucket headers plus the `n` elements they hold, separate from the input array. Swapping the inner [[Home/Computer Science/Algorithms/Sorting Algorithms/Insertion Sort|Insertion Sort]] for a comparison sort bounds the worst case at `Θ(n log n + m)`: when the skewed input collapses all `n` keys into one bucket, that overloaded bucket sorts in `n log n` while scanning the other `m − 1` buckets still costs `Θ(m)`. Under the same uniform model, constant expected bucket sizes keep the total expected work linear; the swap changes constants and may change stability while improving the skewed tail.
 
 # When the Distribution Stops Cooperating
 
-Skew is the defining failure. Zipfian, exponential, or duplicate-heavy keys land most elements in a handful of buckets. A single bucket holding `Θ(n)` keys is sorted by an inner sort that gains nothing from the partition: with [[Home/Computer Science/Algorithms/Sorting Algorithms/Insertion Sort|Insertion Sort]] that bucket alone costs `Θ(n²)`, and Bucket Sort has done extra scatter-and-gather bookkeeping only to collapse to the inner sort's own complexity. Nothing detects this — the output is correct, just quadratic.
+Skew is the defining failure. Zipfian or exponential keys can land most elements in a handful of buckets; duplicate-heavy input can create the same high occupancy. A bucket holding `Θ(n)` keys exposes the inner sort's own worst case, but occupancy alone does not make [[Home/Computer Science/Algorithms/Sorting Algorithms/Insertion Sort|Insertion Sort]] quadratic: equal keys trigger no shifts. The concrete quadratic case is `Θ(n)` distinct values that map to one bucket and arrive in reverse order, forcing `Θ(n²)` shifts. Bucket Sort still returns the right order after the extra scatter-and-gather work; only its running time collapses.
 
 An unknown distribution defeats bucket sizing before the sort runs. Choosing `m` and the slice widths so each bucket receives `O(1)` elements requires knowing how the keys spread. Without that knowledge the load cannot be kept balanced, and the `Θ(n)` average is no longer a guarantee.
 
@@ -68,7 +68,7 @@ Stability is inherited, not intrinsic. Scatter appends keys in read order, so or
 >   C --> D[Sort each bucket, usually insertion sort]
 >   D --> E{Keys roughly uniform?}
 >   E -->|Yes| F[Concatenate buckets in order → Θ n]
->   E -->|No| G[One bucket dominates → cost approaches n²]
+>   E -->|No| G[One bucket dominates → inner sort determines the tail]
 > ```
 
 > [!EXAMPLE]- C# implementation
@@ -129,7 +129,7 @@ Stability is inherited, not intrinsic. Scatter appends keys in read order, so or
 > Bucket `i` covers a strictly lower slice of the range than bucket `i + 1`, so every key in one bucket is smaller than every key in the next by construction. Reading internally sorted buckets in index order therefore emits a globally sorted sequence, and no per-bucket sort ever inspects a key outside its own bucket.
 
 > [!QUESTION]- What input drives Bucket Sort to `Θ(n²)`, and why is the result still correct?
-> A skewed distribution — Zipfian, exponential, or duplicate-heavy — that drops most keys into one bucket. That bucket's inner [[Home/Computer Science/Algorithms/Sorting Algorithms/Insertion Sort|Insertion Sort]] gains nothing from the partition and costs `Θ(n²)`. The partition still separates ranges correctly, so the output stays sorted; only the running time collapses.
+> A skewed distribution can put `Θ(n)` distinct keys into one bucket; if those keys arrive in reverse order, that bucket's [[Home/Computer Science/Algorithms/Sorting Algorithms/Insertion Sort|Insertion Sort]] performs `Θ(n²)` shifts. High occupancy or duplicate-heavy input alone is not enough — equal keys trigger no shifts. The partition still separates ranges correctly, so the output stays sorted; only the running time collapses.
 
 # References
 

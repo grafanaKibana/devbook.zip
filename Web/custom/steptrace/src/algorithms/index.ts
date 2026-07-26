@@ -2,6 +2,7 @@ import type { BuiltInAlgorithm } from "../types"
 import { bfs } from "./bfs"
 import { binarySearchOnAnswer } from "./binary-search-on-answer"
 import { binarySearch } from "./binary-search"
+import { boyerMoore } from "./boyer-moore"
 import { bubbleSort } from "./bubble-sort"
 import { bucketSort } from "./bucket-sort"
 import { combSort } from "./comb-sort"
@@ -37,6 +38,8 @@ import { topologicalSort } from "./topological-sort"
 import { twoPointers } from "./two-pointers"
 import { unionFind } from "./union-find"
 import { ternarySearch } from "./ternary-search"
+import { timSort } from "./tim-sort"
+import { zAlgorithm } from "./z-algorithm"
 
 export const builtInAlgorithms = [
   bubbleSort,
@@ -53,6 +56,7 @@ export const builtInAlgorithms = [
   bucketSort,
   cyclicSort,
   introsort,
+  timSort,
   exponentialSearch,
   interpolationSearch,
   jumpSearch,
@@ -67,6 +71,8 @@ export const builtInAlgorithms = [
   linearSearch,
   kmp,
   rabinKarp,
+  zAlgorithm,
+  boyerMoore,
   twoPointers,
   slidingWindow,
   lcs,

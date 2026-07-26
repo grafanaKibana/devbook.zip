@@ -32,6 +32,7 @@ export type VisualFamilyId =
   | "indexed-array-search"
   | "matrix-grid"
   | "monotone-boundary"
+  | "run-stack"
 
 export interface AlgorithmMeta {
   label: string
@@ -74,6 +75,7 @@ export interface StepTraceConfig extends Partial<Omit<AlgorithmInput, "algorithm
   shrinkFactor?: number
   depthLimit?: number
   smallPartitionThreshold?: number
+  minrun?: number
   values?: number[]
   goal?: string
   weights?: number[]
@@ -97,6 +99,7 @@ export type StepTraceBlockConfig = StepTraceConfig | StepTraceTabsConfig
 export interface StepTraceView<TFrame = unknown> {
   nodes: HTMLElement[]
   stageLayout?: "compact" | "fill"
+  stageAlignment?: "bottom" | "center"
   stableStage?: boolean
   paint(frame: TFrame, index?: number, total?: number): void
   watch?(frame: TFrame): WatchRow[]
@@ -144,7 +147,10 @@ export interface FamilyAlgorithmDefinition<
 }
 export type GraphAlgorithmDefinition = AlgorithmDefinition<"graph", GraphRecorder, [StepTraceGraph]>
 export type SearchAlgorithmDefinition = AlgorithmDefinition<"search", SearchRecorder>
-export type StringAlgorithmDefinition = AlgorithmDefinition<"string", StringRecorder>
+export type StringVisualProfile = "match" | "z-array" | "boyer-moore"
+export interface StringAlgorithmDefinition extends AlgorithmDefinition<"string", StringRecorder> {
+  profile?: StringVisualProfile
+}
 export type PointerAlgorithmDefinition = AlgorithmDefinition<"pointers", PointerRecorder>
 export type DPAlgorithmDefinition = AlgorithmDefinition<"dp", DPRecorder>
 export type UnionFindAlgorithmDefinition = AlgorithmDefinition<"unionfind", UnionFindRecorder>
@@ -201,7 +207,12 @@ export interface StepTraceApi {
   registerSort(id: string, meta: AlgorithmMeta, run: SortAlgorithmDefinition["run"]): void
   registerGraph(id: string, meta: AlgorithmMeta, run: GraphAlgorithmDefinition["run"]): void
   registerSearch(id: string, meta: AlgorithmMeta, run: SearchAlgorithmDefinition["run"]): void
-  registerString(id: string, meta: AlgorithmMeta, run: StringAlgorithmDefinition["run"]): void
+  registerString(
+    id: string,
+    meta: AlgorithmMeta,
+    run: StringAlgorithmDefinition["run"],
+    profile?: StringVisualProfile,
+  ): void
   registerPointer(id: string, meta: AlgorithmMeta, run: PointerAlgorithmDefinition["run"]): void
   registerDP(id: string, meta: AlgorithmMeta, run: DPAlgorithmDefinition["run"]): void
   registerUnionFind(id: string, meta: AlgorithmMeta, run: UnionFindAlgorithmDefinition["run"]): void

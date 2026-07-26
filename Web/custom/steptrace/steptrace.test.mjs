@@ -1,7 +1,7 @@
 import assert from "node:assert/strict"
 import { createHash } from "node:crypto"
 import { EventEmitter } from "node:events"
-import { readFileSync } from "node:fs"
+import { readFileSync, readdirSync } from "node:fs"
 import { dirname, join } from "node:path"
 import { setTimeout as delay } from "node:timers/promises"
 import test from "node:test"
@@ -21,6 +21,7 @@ const cases = [
   "quick-sort",
   "heap-sort",
   "merge-sort",
+  "merge-sort-tree",
   "shell-sort",
   "comb-sort",
   "counting-sort",
@@ -28,6 +29,7 @@ const cases = [
   "bucket-sort",
   "cyclic-sort",
   "introsort",
+  "tim-sort",
   "bfs",
   "dfs",
   "dijkstra",
@@ -42,6 +44,8 @@ const cases = [
   "linear-search",
   "kmp",
   "rabin-karp",
+  "z-algorithm",
+  "boyer-moore",
   "two-pointers",
   "sliding-window",
   "lcs",
@@ -128,6 +132,14 @@ function buildAbstractMemoization() {
   return { config, family: memoization.family, frames: recorder.frames }
 }
 
+function buildMergeSortTree(array = [8, 3, 7, 4, 9, 2, 5, 1]) {
+  const { mergeSortTree } = loadStepTraceModule("src", "algorithms", "merge-sort-tree.ts")
+  const config = mergeSortTree.parse({ algorithm: "merge-sort-tree", array })
+  const recorder = mergeSortTree.family.createRecorder(config)
+  mergeSortTree.run(config, recorder)
+  return { config, family: mergeSortTree.family, frames: recorder.frames }
+}
+
 function buildDynamicProgramming(name) {
   const algorithms = loadStepTraceModule("src", "algorithms", "dynamic-programming.ts")
   const algorithm = algorithms[name]
@@ -199,6 +211,507 @@ test("the public API and both host JavaScript contracts stay stable", () => {
   )
   assert.equal(typeof pluginModule.exports, "function")
   assert.equal(Object.getPrototypeOf(pluginModule.exports), Plugin)
+})
+
+test("Z-Algorithm config is registered with an isolated typed string profile", () => {
+  const api = loadEngine(readFileSync(join(here, "generated", "engine.js"), "utf8"))
+  const note = readFileSync(
+    join(
+      repoRoot,
+      "Vault",
+      "Home",
+      "Computer Science",
+      "Algorithms",
+      "Search Algorithms",
+      "String Matching",
+      "Z-Algorithm.md",
+    ),
+    "utf8",
+  )
+  const result = api.buildFrames({
+    algorithm: "z-algorithm",
+    text: "aabcaabxaaaz",
+  })
+
+  assert.equal(api.kindOf("z-algorithm"), "string")
+  assert.equal(result.kind, "string")
+  assert.equal(result.frames[0].profile, "z-array")
+  assert.match(note, /```steptrace\n\{"algorithm":"z-algorithm","text":"aabcaabxaaaz"\}\n```/)
+})
+
+test("full Boyer-Moore records both shift rules and the canonical winning decisions", () => {
+  const api = loadEngine(readFileSync(join(here, "generated", "engine.js"), "utf8"))
+  const { buildGoodSuffixTable } = loadStepTraceModule("src", "algorithms", "boyer-moore.ts")
+  const note = readFileSync(
+    join(
+      repoRoot,
+      "Vault",
+      "Home",
+      "Computer Science",
+      "Algorithms",
+      "Search Algorithms",
+      "String Matching",
+      "Boyer-Moore.md",
+    ),
+    "utf8",
+  )
+  const frames = api.buildFrames({
+    algorithm: "boyer-moore",
+    text: "ACCCDBACBA",
+    pattern: "ACBA",
+  }).frames
+
+  assert.equal(api.kindOf("boyer-moore"), "string")
+  assert.equal(frames[0].profile, "boyer-moore")
+  assert.deepEqual(buildGoodSuffixTable("ACBA"), [3, 3, 3, 1])
+  assert.deepEqual(frames[0].goodSuffix, [3, 3, 3, 1])
+  assert.deepEqual(
+    frames.filter((frame) => frame.type === "align").map((frame) => frame.shift),
+    [0, 2, 3, 6],
+  )
+  assert.deepEqual(
+    frames
+      .filter((frame) => frame.type === "decision")
+      .map((frame) => [frame.shift, frame.j, frame.shiftDecision]),
+    [
+      [0, 3, { bad: 2, good: 1, selected: 2, winner: "bad-character" }],
+      [2, 3, { bad: 1, good: 1, selected: 1, winner: "tie" }],
+      [3, 1, { bad: 2, good: 3, selected: 3, winner: "good-suffix" }],
+    ],
+  )
+  assert.deepEqual(
+    frames
+      .filter((frame) => frame.type === "compare" && frame.shift === 3)
+      .map((frame) => [frame.j, frame.cmpResult]),
+    [
+      [3, "match"],
+      [2, "match"],
+      [1, "mismatch"],
+    ],
+  )
+  assert.ok(
+    frames
+      .filter((frame) => frame.type === "compare" && frame.shift === 3)
+      .every((frame) => frame.shiftDecision === null),
+  )
+  assert.deepEqual(frames.find((frame) => frame.type === "match").shiftDecision, {
+    bad: null,
+    good: 3,
+    selected: 3,
+    winner: "full-match",
+  })
+  assert.equal(frames.length, 23)
+  assert.equal(frames.at(-2).type, "shift")
+  assert.equal(frames.at(-2).shift, 6)
+  assert.match(frames.at(-2).message, /would leave the searchable range/)
+  assert.equal(frames.at(-1).shift, 6)
+  assert.deepEqual(frames.at(-1).found, [6])
+  assert.match(
+    note,
+    /```steptrace\n\{"algorithm":"boyer-moore","text":"ACCCDBACBA","pattern":"ACBA"\}\n```/,
+  )
+})
+
+test("Boyer-Moore keeps UTF-16 indexing consistent for surrogate-pair matches", () => {
+  const api = loadEngine(readFileSync(join(here, "generated", "engine.js"), "utf8"))
+  const frames = api.buildFrames({
+    algorithm: "boyer-moore",
+    text: "😀x😀",
+    pattern: "😀",
+  }).frames
+
+  assert.deepEqual(frames.at(-1).found, [0, 3])
+})
+
+test("Z-Algorithm frames expose copy, reuse-extension, comparisons, and the terminal array", () => {
+  const api = loadEngine(readFileSync(join(here, "generated", "engine.js"), "utf8"))
+  const { buildMilestones, summaryFor } = loadStepTraceModule("src", "render.ts")
+  const frames = api.buildFrames({
+    algorithm: "z-algorithm",
+    text: "aabcaabxaaaz",
+  }).frames
+  const stages = new Set(frames.map((frame) => frame.type))
+  const at = (i) => frames.filter((frame) => frame.i === i)
+  const copyFive = at(5).find((frame) => frame.type === "copy")
+  const reuseNine = at(9).find((frame) => frame.type === "copy")
+
+  assert.deepEqual([...stages], ["init", "focus", "compare", "commit", "copy", "done"])
+  assert.equal(copyFive.k, 1)
+  assert.equal(copyFive.z[5], 1)
+  assert.equal(copyFive.sourceCase, "copy")
+  assert.equal(
+    at(5).some((frame) => frame.type === "compare"),
+    false,
+  )
+  assert.equal(reuseNine.k, 1)
+  assert.equal(reuseNine.z[9], 1)
+  assert.equal(reuseNine.sourceCase, "reuse-extend")
+  assert.ok(
+    at(9).some(
+      (frame) =>
+        frame.type === "compare" &&
+        frame.compare.prefix === 1 &&
+        frame.compare.candidate === 10 &&
+        frame.compare.result === "match",
+    ),
+  )
+  assert.deepEqual(frames.at(-1).z, [12, 1, 0, 0, 3, 1, 0, 0, 2, 2, 1, 0])
+  assert.deepEqual(
+    buildMilestones("z-algorithm", "string", frames).map((mark) => mark.label),
+    [
+      "Initialize Z",
+      "i = 1",
+      "i = 2",
+      "i = 3",
+      "i = 4",
+      "i = 5",
+      "i = 6",
+      "i = 7",
+      "i = 8",
+      "i = 9",
+      "i = 10",
+      "i = 11",
+      "Result",
+    ],
+  )
+  assert.equal(
+    summaryFor("z-algorithm", "string", frames.at(-1)),
+    "Z = [12, 1, 0, 0, 3, 1, 0, 0, 2, 2, 1, 0].",
+  )
+})
+
+test("Boyer-Moore reuses stable non-scrolling string strips with inherited edge radii", () => {
+  class FakeNode {
+    constructor(tagName) {
+      this.tagName = tagName
+      this.textContent = ""
+      this.innerHTML = ""
+      this.children = []
+      this.attributes = new Map()
+      this.dataset = {}
+      this.style = {
+        setProperty: (key, value) => this.attributes.set(`style:${key}`, value),
+      }
+      this.className = ""
+    }
+    setAttribute(key, value) {
+      this.attributes.set(key, String(value))
+    }
+    append(...children) {
+      this.children.push(...children)
+    }
+    getBoundingClientRect() {
+      return { left: 0, width: 40 }
+    }
+  }
+  const countNodes = (node) =>
+    1 + node.children.reduce((count, child) => count + countNodes(child), 0)
+  const previousDocument = globalThis.document
+  const previousResizeObserver = globalThis.ResizeObserver
+  let observer
+  globalThis.ResizeObserver = class {
+    constructor(callback) {
+      this.callback = callback
+      this.observed = []
+      this.disconnected = false
+      observer = this
+    }
+    observe(node) {
+      this.observed.push(node)
+    }
+    disconnect() {
+      this.disconnected = true
+    }
+    trigger() {
+      this.callback()
+    }
+  }
+  globalThis.document = { createElement: (tagName) => new FakeNode(tagName) }
+  try {
+    const api = loadEngine(readFileSync(join(here, "generated", "engine.js"), "utf8"))
+    const { ICON, makeMatchView } = loadStepTraceModule("src", "render.ts")
+    const styles = readFileSync(join(here, "src", "styles", "string.scss"), "utf8")
+    const frames = api.buildFrames({
+      algorithm: "boyer-moore",
+      text: "ACCCDBACBA",
+      pattern: "ACBA",
+    }).frames
+    const view = makeMatchView(frames)
+    const [stage] = view.nodes
+    const baseline = countNodes(stage)
+
+    assert.equal(view.stableStage, true)
+    assert.equal(stage.dataset.profile, "boyer-moore")
+    assert.match(stage.className, /\bsteptrace__match\b/)
+    assert.equal(stage.children.length, 1)
+    assert.deepEqual(
+      view.watch(frames[0]).map((row) => row.k),
+      ["align", "j", "suffix", "bad shift", "good shift", "selected shift"],
+    )
+    const goodWins = frames.find(
+      (frame) => frame.type === "decision" && frame.shiftDecision.winner === "good-suffix",
+    )
+    assert.deepEqual(
+      view.watch(goodWins).map((row) => row.v),
+      [3, 1, "BA", 2, 3, "3 · good wins"],
+    )
+    const mismatch = frames.find(
+      (frame) => frame.type === "compare" && frame.shift === 3 && frame.j === 1,
+    )
+    assert.deepEqual(
+      view
+        .watch(mismatch)
+        .slice(3)
+        .map((row) => row.v),
+      ["—", "—", "—"],
+    )
+    for (let index = 0; index < frames.length; index++) {
+      view.paint(frames[index], index, frames.length)
+      assert.equal(countNodes(stage), baseline)
+    }
+    const viewport = stage.children[0]
+    const board = viewport.children[0]
+    const patternRow = board.children[0]
+    const textRow = board.children[1]
+    assert.match(patternRow.className, /\bsteptrace__cells\b/)
+    assert.match(patternRow.className, /\bsteptrace__cells--pat\b/)
+    assert.match(textRow.className, /\bsteptrace__cells\b/)
+    assert.equal(patternRow.children.length, 4)
+    assert.equal(textRow.children.length, 10)
+    const compareCue = textRow.children[0].children[1]
+    assert.equal(compareCue.attributes.get("aria-hidden"), "true")
+    assert.match(compareCue.children[0].innerHTML, /<svg/)
+    assert.match(compareCue.children[1].innerHTML, /<svg/)
+    assert.doesNotMatch(compareCue.children[0].innerHTML + compareCue.children[1].innerHTML, /✓|×/)
+    assert.match(ICON.x, /<svg/)
+    view.paint(frames.at(-1), frames.length - 1, frames.length)
+    assert.equal(patternRow.style.transform, "translateX(240.00px)")
+    assert.deepEqual(observer.observed, [textRow])
+    observer.trigger()
+    assert.equal(patternRow.style.transform, "translateX(240.00px)")
+    view.destroy()
+    assert.equal(observer.disconnected, true)
+
+    const edgeFrames = api.buildFrames({
+      algorithm: "boyer-moore",
+      text: "ACBA",
+      pattern: "ACBA",
+    }).frames
+    const edgeView = makeMatchView(edgeFrames)
+    const edgeBoard = edgeView.nodes[0].children[0].children[0]
+    const edgePattern = edgeBoard.children[0]
+    const edgeText = edgeBoard.children[1]
+    edgeView.paint(edgeFrames.at(-1), edgeFrames.length - 1, edgeFrames.length)
+    for (const row of [edgePattern, edgeText]) {
+      assert.equal(row.children[0].dataset.state, "found")
+      assert.equal(row.children.at(-1).dataset.state, "found")
+    }
+    edgeView.destroy()
+
+    const viewportCss = styles.match(/\.steptrace__bm-viewport \{([^}]*)\}/)[1]
+    const boardCss = styles.match(/\.steptrace__bm-board \{([^}]*)\}/)[1]
+    assert.match(viewportCss, /overflow: hidden;/)
+    assert.doesNotMatch(viewportCss, /overflow[^;]*auto|scrollbar-gutter/)
+    assert.match(boardCss, /inline-size: 100%;/)
+    assert.match(boardCss, /min-inline-size: 0;/)
+    assert.match(boardCss, /overflow: hidden;/)
+    assert.match(styles, /\.steptrace__bm \.steptrace__cell:first-child \{[^}]*radius: inherit;/)
+    assert.match(styles, /\.steptrace__bm \.steptrace__cell:last-child \{[^}]*radius: inherit;/)
+    assert.doesNotMatch(styles, /steptrace__bm-decision|content:\s*["'][✓×]/)
+    assert.match(styles, /\.steptrace__bm-icon svg \{/)
+    assert.match(styles, /\.steptrace--reduced[\s\S]*\.steptrace__bm-pattern/)
+  } finally {
+    globalThis.document = previousDocument
+    globalThis.ResizeObserver = previousResizeObserver
+  }
+})
+
+test("Z active ranges scroll only when they leave the shared viewport", () => {
+  const { resolveVisibleScrollLeft } = loadStepTraceModule("src", "render.ts")
+
+  assert.equal(resolveVisibleScrollLeft(0, 343, 538, 245, 285), 0)
+  assert.equal(resolveVisibleScrollLeft(0, 343, 538, 405, 485), 150)
+  assert.equal(resolveVisibleScrollLeft(150, 343, 538, 405, 485), 150)
+  assert.equal(resolveVisibleScrollLeft(150, 300, 538, 405, 485), 193)
+  assert.equal(resolveVisibleScrollLeft(195, 343, 538, 0, 40), 0)
+})
+
+test("the Z-array profile paints every frame into one stable measured-strip DOM", () => {
+  class FakeNode {
+    constructor(tagName) {
+      this.tagName = tagName
+      this.textContent = ""
+      this.innerHTML = ""
+      this.children = []
+      this.attributes = new Map()
+      this.dataset = {}
+      this.style = {
+        setProperty: (key, value) => this.attributes.set(`style:${key}`, value),
+      }
+      this.className = ""
+    }
+    setAttribute(key, value) {
+      this.attributes.set(key, String(value))
+    }
+    append(...children) {
+      this.children.push(...children)
+    }
+    getBoundingClientRect() {
+      return { width: 40, left: 0, top: 0, height: 38 }
+    }
+  }
+  const countNodes = (node) =>
+    1 + node.children.reduce((count, child) => count + countNodes(child), 0)
+  const previousDocument = globalThis.document
+  const previousResizeObserver = globalThis.ResizeObserver
+  let observer
+  globalThis.ResizeObserver = class {
+    constructor(callback) {
+      this.callback = callback
+      this.observed = []
+      this.disconnected = false
+      observer = this
+    }
+    observe(node) {
+      this.observed.push(node)
+    }
+    disconnect() {
+      this.disconnected = true
+    }
+    trigger() {
+      this.callback()
+    }
+  }
+  globalThis.document = { createElement: (tagName) => new FakeNode(tagName) }
+  try {
+    const api = loadEngine(readFileSync(join(here, "generated", "engine.js"), "utf8"))
+    const { makeMatchView } = loadStepTraceModule("src", "render.ts")
+    const styles = readFileSync(join(here, "src", "styles", "string.scss"), "utf8")
+    const frames = api.buildFrames({
+      algorithm: "z-algorithm",
+      text: "aabcaabxaaaz",
+    }).frames
+    const view = makeMatchView(frames)
+    const [stage] = view.nodes
+    const baseline = countNodes(stage)
+
+    assert.equal(view.stableStage, true)
+    assert.equal(stage.dataset.profile, "z-array")
+    assert.deepEqual(
+      view.watch(frames[0]).map((row) => row.k),
+      ["i", "case", "box", "mirror", "Z[i]"],
+    )
+    for (let index = 0; index < frames.length; index++) {
+      view.paint(frames[index], index, frames.length)
+      assert.equal(countNodes(stage), baseline)
+    }
+    assert.equal(stage.children[0].className, "steptrace__z-viewport")
+    assert.equal(stage.children[1].children.length, 3)
+    const viewport = stage.children[0]
+    const stringRow = viewport.children[0].children[1].children[1]
+    const scrolls = []
+    viewport.scrollLeft = 0
+    viewport.clientWidth = 343
+    viewport.scrollWidth = 538
+    viewport.scrollTo = ({ left, behavior }) => {
+      viewport.scrollLeft = left
+      scrolls.push({ left, behavior })
+    }
+    viewport.getBoundingClientRect = () => ({ left: 0, width: viewport.clientWidth })
+    stringRow.children.slice(0, 12).forEach((cell, index) => {
+      cell.getBoundingClientRect = () => ({
+        left: 45 + index * 40 - viewport.scrollLeft,
+        width: 40,
+      })
+    })
+    const compareNine = frames.find(
+      (frame) => frame.type === "compare" && frame.i === 9 && frame.compare?.result === "match",
+    )
+    view.paint(compareNine, 33, frames.length)
+    assert.deepEqual(scrolls, [{ left: 150, behavior: "smooth" }])
+    view.paint(compareNine, 33, frames.length)
+    assert.equal(scrolls.length, 1, "visible targets must preserve the user's scroll position")
+    viewport.clientWidth = 300
+    observer.trigger()
+    assert.deepEqual(scrolls.at(-1), { left: 193, behavior: "smooth" })
+    assert.deepEqual(observer.observed, [stringRow, viewport])
+    view.destroy()
+    assert.equal(observer.disconnected, true)
+    assert.match(styles, /\.steptrace__z-viewport \{[\s\S]*overflow-x: auto;/)
+    assert.match(styles, /inline-size: max\(100%, calc\(3\.65rem \+ var\(--_z-length\)/)
+    assert.match(
+      styles,
+      /\.steptrace--reduced[\s\S]*:is\([\s\S]*transition-property: opacity !important;/,
+    )
+  } finally {
+    globalThis.document = previousDocument
+    globalThis.ResizeObserver = previousResizeObserver
+  }
+})
+
+test("KMP, Rabin-Karp, and Z stay isolated from the Boyer-Moore profile", () => {
+  class FakeNode {
+    constructor(tagName) {
+      this.tagName = tagName
+      this.textContent = ""
+      this.innerHTML = ""
+      this.children = []
+      this.attributes = new Map()
+      this.dataset = {}
+      this.style = {
+        setProperty: (key, value) => this.attributes.set(`style:${key}`, value),
+      }
+      this.className = ""
+    }
+    append(...children) {
+      this.children.push(...children)
+    }
+    setAttribute(key, value) {
+      this.attributes.set(key, String(value))
+    }
+    getBoundingClientRect() {
+      return { width: 40 }
+    }
+  }
+  const previousDocument = globalThis.document
+  globalThis.document = { createElement: (tagName) => new FakeNode(tagName) }
+  try {
+    const api = loadEngine(readFileSync(join(here, "generated", "engine.js"), "utf8"))
+    const { makeMatchView } = loadStepTraceModule("src", "render.ts")
+    const kmp = api.buildFrames({
+      algorithm: "kmp",
+      text: "ABABACABA",
+      pattern: "ABAC",
+    }).frames
+    const rabin = api.buildFrames({
+      algorithm: "rabin-karp",
+      text: "ABABACABA",
+      pattern: "ABAC",
+    }).frames
+    const z = api.buildFrames({
+      algorithm: "z-algorithm",
+      text: "aabcaabxaaaz",
+    }).frames
+
+    assert.ok(kmp.every((frame) => frame.profile == null && !("z" in frame)))
+    assert.ok(rabin.every((frame) => frame.profile == null && !("z" in frame)))
+    assert.ok(z.every((frame) => frame.profile === "z-array" && !("goodSuffix" in frame)))
+    assert.deepEqual(z.at(-1).z, [12, 1, 0, 0, 3, 1, 0, 0, 2, 2, 1, 0])
+    assert.equal(makeMatchView(kmp).nodes[0].className, "steptrace__match")
+    assert.equal(makeMatchView(rabin).nodes[0].className, "steptrace__match")
+    assert.equal(makeMatchView(z).nodes[0].className, "steptrace__z")
+    assert.equal(makeMatchView(kmp).nodes.length, 2)
+    assert.equal(makeMatchView(rabin).nodes.length, 3)
+    const renderSource = readFileSync(join(here, "src", "render.ts"), "utf8")
+    const profileDispatch = renderSource.slice(
+      renderSource.indexOf("export function makeMatchView"),
+      renderSource.indexOf("function makeZArrayView"),
+    )
+    assert.match(profileDispatch, /frames\[0\]\.profile === "z-array"/)
+    assert.doesNotMatch(profileDispatch, /z-algorithm/)
+  } finally {
+    globalThis.document = previousDocument
+  }
 })
 
 test("tabbed blocks validate metadata and keep algorithm configs clean", () => {
@@ -385,6 +898,15 @@ test("styles are compiled from real SCSS without runtime injection", () => {
   assert.ok(contrastRatio("#1f2937", "#fbbf24") >= 4.5)
 })
 
+test("family SCSS leaves bar-number typography to canonical bars", () => {
+  const familyStyles = readdirSync(join(here, "src", "styles"))
+    .filter((file) => file.endsWith(".scss") && file !== "bars.scss")
+    .map((file) => readFileSync(join(here, "src", "styles", file), "utf8"))
+    .join("\n")
+
+  assert.doesNotMatch(familyStyles, /\.steptrace__num/)
+})
+
 test("the watcher handles Chokidar add and atomic-change events", async () => {
   const events = new EventEmitter()
   events.close = async () => {}
@@ -468,7 +990,7 @@ test("all built-in algorithms preserve their headless frame contract", () => {
 
   assert.equal(
     digest,
-    "b4755a50a103ceaf38b2f787beca827ff9256dd10afcc4691d1afbfc827dd647",
+    "bc368c4578c60bb517ac21df7b6be6cc9cb7cfa995ead93611f0fd5de7ec1be3",
     "the headless StepTrace behavior changed",
   )
 })
@@ -703,6 +1225,7 @@ test("counting sort renders shared bars around one progressive frequency strip",
     assert.equal(inputBars.children.length, 8)
     assert.equal(outputBars.children.length, 8)
     assert.match(source, /makeDistributionArrayBand/)
+    assert.match(source, /el\("div", "steptrace__rail-label steptrace__distribution-label"\)/)
     assert.match(
       source,
       /makeDistributionArrayBand\(\n    "Unsorted Array",[\s\S]*first\.input\.length,\n  \)/,
@@ -781,9 +1304,9 @@ test("counting sort renders shared bars around one progressive frequency strip",
       styleSource,
       /@media \(max-width: 560px\) and \(pointer: coarse\) \{[\s\S]*grid-template-columns: repeat\(2, minmax\(0, 1fr\)\);[\s\S]*column-gap: 0\.5rem;[\s\S]*min-height: calc\(2 \* 2\.75rem\);/,
     )
-    assert.match(
+    assert.doesNotMatch(
       styleSource,
-      /@media \(max-width: 560px\) \{[\s\S]*\.steptrace__distribution \{\n    gap: 0\.55rem;\n  \}/,
+      /@media \(max-width: 560px\) \{[\s\S]*\.steptrace__distribution \{\n    gap:/,
     )
     assert.match(
       styleSource,
@@ -899,8 +1422,15 @@ test("radix and bucket sorts share one stable bucket-board renderer", () => {
       [sourceLabel.textContent, bucketLabel.textContent, outputLabel.textContent],
       ["Current Array", "Digit Buckets", "Gathered Pass"],
     )
+    assert.equal(
+      sourceLabel.attributes.get("aria-description"),
+      "Each digit pass starts from the order gathered by the previous pass.",
+    )
+    assert.equal(sourceLabel.title, "")
     assert.equal(sourceBars.children.length, 8)
     assert.equal(board.children.length, 10)
+    assert.equal(radixStage.dataset.profile, "radix")
+    assert.equal(board.attributes.get("style:--_bucket-count"), "10")
     assert.equal(outputBars.children.length, 8)
     assert.equal(legend.attributes.get("aria-label"), "Distribution state legend")
 
@@ -931,8 +1461,26 @@ test("radix and bucket sorts share one stable bucket-board renderer", () => {
 
     assert.match(
       styleSource,
-      /\.steptrace__distribution-bucket-board \{[\s\S]*block-size: clamp\(7rem, 17vh, 8\.5rem\);[\s\S]*overflow-x: auto;[\s\S]*border: 1px solid var\(--_distribution-border\);[\s\S]*border-radius: var\(--_distribution-radius\);/,
+      /\.steptrace__distribution \{[\s\S]*gap: clamp\(0\.3rem, 0\.8vh, 0\.45rem\);[\s\S]*padding: 0\.05rem 0;/,
     )
+    assert.match(
+      styleSource,
+      /\.steptrace__distribution-band \{[\s\S]*grid-template-columns: 1fr;[\s\S]*gap: 0;/,
+    )
+    assert.doesNotMatch(
+      styleSource,
+      /\.steptrace__distribution-band \{[^}]*grid-template-columns: minmax\(/,
+    )
+    assert.match(
+      styleSource,
+      /\.steptrace__distribution-bars \{[\s\S]*height: clamp\(4\.6rem, 16vh, 6\.5rem\);/,
+    )
+    assert.doesNotMatch(styleSource, /\.steptrace__distribution-bars \.steptrace__num/)
+    assert.match(
+      styleSource,
+      /\.steptrace__distribution-bucket-board \{[\s\S]*grid-template-columns: repeat\(\s*var\(--_bucket-count, 1\),\s*minmax\(0, 1fr\)\s*\);[\s\S]*block-size: clamp\(7rem, 17vh, 8\.5rem\);[\s\S]*overflow: hidden;[\s\S]*border: 1px solid var\(--_distribution-border\);[\s\S]*border-radius: var\(--_distribution-radius\);/,
+    )
+    assert.doesNotMatch(styleSource, /grid-auto-columns: minmax\(4\.6rem, 1fr\)/)
     assert.match(
       styleSource,
       /\.steptrace__distribution-lane \{[\s\S]*border-inline-end: 1px solid var\(--_distribution-border\);/,
@@ -944,7 +1492,51 @@ test("radix and bucket sorts share one stable bucket-board renderer", () => {
     )
     assert.match(
       styleSource,
+      /\.steptrace__distribution-bars \.steptrace__bar \{[\s\S]*pointer-events: none;/,
+    )
+    assert.match(
+      styleSource,
+      /\.steptrace__distribution\[data-profile="radix"\] \{[\s\S]*?grid-template-rows: minmax\(0, 1fr\) auto auto auto;/,
+    )
+    assert.match(
+      styleSource,
+      /\.steptrace__distribution\[data-profile="radix"\] \.steptrace__distribution-band:first-child \{[\s\S]*?grid-template-rows: auto minmax\(0, 1fr\);[\s\S]*?row-gap: 0\.5rem;/,
+    )
+    assert.match(
+      styleSource,
+      /\.steptrace__distribution\[data-profile="radix"\] \.steptrace__distribution-band:first-child \{[\s\S]*?padding-bottom: 0\.9rem;/,
+    )
+    assert.match(
+      styleSource,
+      /\.steptrace__distribution\[data-profile="radix"\] \.steptrace__distribution-band:first-child \.steptrace__distribution-bars \{[\s\S]*?min-block-size: 0;[\s\S]*?overflow: hidden;/,
+    )
+    assert.match(
+      styleSource,
+      /\.steptrace__distribution\[data-profile="radix"\] \.steptrace__distribution-band:is\(:nth-child\(2\), :nth-child\(4\)\) \{[\s\S]*?padding-top: 0\.9rem;[\s\S]*?border-top: 1px solid var\(--_hair\);/,
+    )
+    assert.match(
+      styleSource,
+      /\.steptrace__distribution\[data-profile="radix"\] \.steptrace__distribution-band:nth-child\(2\) \{[\s\S]*?padding-bottom: 0\.9rem;/,
+    )
+    assert.match(
+      styleSource,
       /\.steptrace__distribution-lane:first-child\[data-active="1"\]::after \{[\s\S]*border-start-start-radius:/,
+    )
+    assert.match(
+      styleSource,
+      /@container steptrace-distribution \(max-width: 50rem\) \{[\s\S]*\.steptrace__distribution\[data-profile="radix"\] \.steptrace__distribution-bucket-board \{[\s\S]*grid-template-columns: repeat\(5, minmax\(0, 1fr\)\);[\s\S]*grid-template-rows: repeat\(2, minmax\(0, 1fr\)\);[\s\S]*block-size: 9\.25rem;/,
+    )
+    assert.match(
+      styleSource,
+      /@media \(max-width: 560px\) \{[\s\S]*\.steptrace__distribution\[data-profile="radix"\] \.steptrace__distribution-bucket-board \{[\s\S]*block-size: 8rem;/,
+    )
+    assert.match(
+      styleSource,
+      /@media \(max-width: 560px\) \{[\s\S]*\.steptrace__distribution\[data-profile="radix"\] \.steptrace__distribution-bars--output \{[\s\S]*height: 4\.75rem;/,
+    )
+    assert.match(
+      styleSource,
+      /@container steptrace-distribution \(max-width: 50rem\) \{[\s\S]*\.steptrace__distribution\[data-profile="radix"\][\s\S]*\.steptrace__distribution-lane-body \{[\s\S]*grid-template-columns: repeat\(\s*var\(--_bucket-columns, 1\),\s*minmax\(0, 1fr\)\s*\);[\s\S]*grid-auto-rows: minmax\(0, 1fr\);[\s\S]*overflow: hidden;/,
     )
   } finally {
     globalThis.document = previousDocument
@@ -1157,6 +1749,112 @@ test("execution-tree watch, legend, and responsive styles remain compatible", ()
   assert.match(renderSource, /svg\.setAttribute\("aria-labelledby"/)
   assert.match(renderSource, /group\.setAttribute\("focusable", "false"\)/)
   assert.match(renderSource, /stageLayout: "fill"/)
+})
+
+test("merge-sort execution tree reveals every leaf before merging bottom-up left-to-right", () => {
+  const { config, family, frames } = buildMergeSortTree()
+  const firstCombine = frames.findIndex((frame) => frame.type === "combine")
+  const splits = frames.filter((frame) => frame.type === "split")
+  const leaves = frames.filter((frame) => frame.type === "base")
+  const combines = frames.filter((frame) => frame.type === "combine")
+
+  assert.deepEqual(config, {
+    array: [8, 3, 7, 4, 9, 2, 5, 1],
+    profile: "merge-sort",
+  })
+  assert.equal(family.id, "execution-tree")
+  assert.deepEqual(frames[0].visible, ["root"])
+  for (const split of splits) {
+    const previous = frames[frames.indexOf(split) - 1]
+    const newlyVisible = split.visible.filter((id) => !previous.visible.includes(id))
+    assert.equal(newlyVisible.length, 2)
+  }
+  assert.equal(leaves.length, 8)
+  assert.ok(leaves.every((frame) => frames.indexOf(frame) < firstCombine))
+  assert.deepEqual(
+    combines.map((frame) => frame.results[frame.active].length),
+    [2, 2, 2, 2, 4, 4, 8],
+  )
+  assert.deepEqual(combines.at(-1).results.root, [1, 2, 3, 4, 5, 7, 8, 9])
+  assert.deepEqual(frames.at(-1).results.root, [1, 2, 3, 4, 5, 7, 8, 9])
+  assert.ok(frames.every((frame) => frame.nodes === frames[0].nodes))
+  assert.ok(frames.every((frame) => frame.edges === frames[0].edges))
+})
+
+test("merge-sort execution tree uses fluid array-strip cards and merge emphasis", () => {
+  const { executionTreeViewDescriptor, mergeSortTreeViewDescriptor } = loadStepTraceModule(
+    "src",
+    "families",
+    "execution-tree.ts",
+  )
+  const { centerVisibleTree, tieredArrayCells } = loadStepTraceModule("src", "render.ts")
+  const renderSource = readFileSync(join(here, "src", "render.ts"), "utf8")
+  const styles = readFileSync(join(here, "src", "styles", "rectree.scss"), "utf8")
+  const { frames } = buildMergeSortTree()
+  const root = frames[0].nodes.find((node) => node.id === "root")
+  const leaf = frames[0].nodes.find((node) => node.values.length === 1)
+
+  assert.equal(mergeSortTreeViewDescriptor.fitWidth, true)
+  assert.equal(mergeSortTreeViewDescriptor.tieredCards, true)
+  assert.equal(mergeSortTreeViewDescriptor.centerVisible, true)
+  assert.ok(root.width > 84)
+  assert.ok(leaf.width < 84)
+  assert.ok(root.width >= "[8, 3, 7, 4, 9, 2, 5, 1]".length * 6.2 + 28)
+  assert.match(renderSource, /node\.width \|\| descriptor\.nodeWidth/)
+  assert.match(renderSource, /dataset\.related/)
+  assert.match(renderSource, /"steptrace__rtdivider"/)
+  assert.match(renderSource, /"steptrace__rtcell-separator"/)
+  assert.match(renderSource, /"steptrace__rtcell-value"/)
+  assert.match(renderSource, /label\.setAttribute\("y", "13"\)/)
+  assert.match(renderSource, /label\.setAttribute\("dominant-baseline", "central"\)/)
+  assert.match(renderSource, /treeLayer\.style\.transform = centerTransform\(model\.visible\)/)
+  assert.equal(executionTreeViewDescriptor.tieredCards, undefined)
+  assert.equal(executionTreeViewDescriptor.centerVisible, undefined)
+  const frameRects = (frame) =>
+    frames[0].nodes
+      .filter((node) => frame.visible.includes(node.id))
+      .map((node) => ({
+        left: node.x - node.width / 2,
+        right: node.x + node.width / 2,
+        top: node.y - 20,
+        bottom: node.y + 20,
+      }))
+  const rootOffset = centerVisibleTree(frameRects(frames[0]), 500, 320)
+  const firstSplitOffset = centerVisibleTree(frameRects(frames[1]), 500, 320)
+  const deeperSplitOffset = centerVisibleTree(frameRects(frames[3]), 500, 320)
+  assert.ok(rootOffset.y > firstSplitOffset.y)
+  assert.ok(firstSplitOffset.y > deeperSplitOffset.y)
+  const tier = tieredArrayCells([8, 3, 7, 4], 112)
+  assert.equal(tier.cells.length, 4)
+  assert.equal(tier.separators.length, 3)
+  assert.deepEqual(
+    tier.cells.map((cell) => cell.x),
+    [-42, -14, 14, 42],
+  )
+  assert.deepEqual(tier.separators, [-28, 0, 28])
+  assert.match(
+    styles,
+    /\[data-profile="merge-sort"\][\s\S]*:is\(\.steptrace__rtedge, \.steptrace__rtnode\)\[data-vis="0"\][^}]*opacity: 0;[^}]*visibility: hidden;/,
+  )
+  assert.match(styles, /\.steptrace__rtdivider[^}]*stroke: var\(--_hair\);/)
+  assert.match(
+    styles,
+    /\.steptrace__rtcell-separator[^}]*stroke: color-mix\(in srgb, var\(--_text\) 13%, transparent\);/,
+  )
+  assert.match(
+    styles,
+    /\.steptrace__rtcell-value[^}]*fill: var\(--_text\);[^}]*font: 500 11px\/1 var\(--_font-mono\);/,
+  )
+  assert.match(
+    styles,
+    /\.steptrace__rtcontent[^}]*transition: transform var\(--_dur-move\) var\(--_spring-soft\);/,
+  )
+  assert.match(
+    styles,
+    /\[data-profile="merge-sort"\][\s\S]*\.steptrace__rtlabel[^}]*fill: var\(--_muted\);[^}]*font: 400 9px\/1 var\(--_font-mono\);/,
+  )
+  assert.match(styles, /\[data-profile="merge-sort"\][\s\S]*\[data-related="true"\]/)
+  assert.match(styles, /stroke: var\(--_green\)/)
 })
 
 test("memoization reuses the execution-tree family and collapses a repeated state", () => {
@@ -2073,6 +2771,247 @@ test("introsort rejects invalid threshold configurations", () => {
       }),
     /smallPartitionThreshold.*positive integer/,
   )
+})
+
+test("tim sort keeps natural runs contiguous while it reverses, extends, collapses, and force-merges", () => {
+  const api = loadEngine(readFileSync(join(here, "generated", "engine.js"), "utf8"))
+  const { summaryFor } = loadStepTraceModule("src", "render.ts")
+  const result = api.buildFrames({
+    algorithm: "tim-sort",
+    array: [5, 6, 7, 8, 9, 4, 3, 1, 2, 8],
+    minrun: 4,
+  })
+  const { runStackFamily, runStackWatch } = loadStepTraceModule("src", "families", "run-stack.ts")
+  const note = readFileSync(
+    join(
+      repoRoot,
+      "Vault",
+      "Home",
+      "Computer Science",
+      "Algorithms",
+      "Sorting Algorithms",
+      "Tim Sort.md",
+    ),
+    "utf8",
+  )
+  const source = readFileSync(join(here, "src", "algorithms", "tim-sort.ts"), "utf8")
+  const familySource = readFileSync(join(here, "src", "families", "run-stack.ts"), "utf8")
+  const renderSource = readFileSync(join(here, "src", "render.ts"), "utf8")
+  const mountSource = readFileSync(join(here, "src", "mount.ts"), "utf8")
+  const typesSource = readFileSync(join(here, "src", "types.ts"), "utf8")
+  const pointerStyles = readFileSync(join(here, "src", "styles", "pointers.scss"), "utf8")
+  const barStyles = readFileSync(join(here, "src", "styles", "bars.scss"), "utf8")
+  const sharedStyles = readFileSync(join(here, "src", "styles", "shared.scss"), "utf8")
+  const styles = readFileSync(join(here, "src", "styles", "run-stack.scss"), "utf8")
+  const pushes = result.frames.filter((frame) => frame.type === "push")
+  const insertion = result.frames.filter((frame) => frame.type === "insert")
+  const firstMerge = result.frames.find((frame) => frame.type === "merge")
+  const forced = result.frames.find((frame) => frame.type === "force-merge")
+
+  assert.equal(result.family.id, "run-stack")
+  assert.equal(runStackFamily.id, "run-stack")
+  assert.deepEqual(
+    runStackWatch(result.frames[0]).map((row) => row.hint),
+    [
+      "What Tim sort is doing in this frame.",
+      "Array span currently detected, extended, or merged.",
+      "Saved contiguous run lengths, from stack bottom to top.",
+      "Newest run at the top of the stack.",
+    ],
+  )
+  assert.deepEqual(
+    pushes.map((frame) => frame.stack.map((run) => run.length)),
+    [[5], [5, 4], [5, 4, 1]],
+  )
+  assert.equal(result.frames.find((frame) => frame.type === "detect")?.direction, "ascending")
+  assert.equal(result.frames.find((frame) => frame.type === "reverse")?.direction, "descending")
+  assert.ok(
+    insertion.some((frame) => frame.insertion?.source === 8 && frame.insertion.target === 6),
+  )
+  assert.deepEqual(
+    result.frames.find((frame) => frame.type === "check" && frame.invariant?.z != null)?.invariant,
+    { x: 1, y: 4, z: 5, holds: false },
+  )
+  assert.deepEqual(
+    firstMerge.stack.map((run) => [run.start, run.length]),
+    [
+      [0, 5],
+      [5, 5],
+    ],
+  )
+  assert.equal(forced, undefined)
+  const forceResult = api.buildFrames({
+    algorithm: "tim-sort",
+    array: [5, 6, 7, 8, 9, 4, 3, 1, 2],
+    minrun: 4,
+  })
+  assert.deepEqual(forceResult.frames.find((frame) => frame.type === "force-merge")?.stack, [
+    { start: 0, length: 9 },
+  ])
+  assert.deepEqual(result.frames.at(-1).array, [1, 2, 3, 4, 5, 6, 7, 8, 8, 9])
+  assert.equal(result.frames.at(-1).type, "done")
+  assert.equal(
+    summaryFor("tim-sort", "sort", result.frames.at(-1)),
+    "Output [1, 2, 3, 4, 5, 6, 7, 8, 8, 9] · 2 run-stack merges.",
+  )
+  assert.doesNotMatch(summaryFor("tim-sort", "sort", result.frames.at(-1)), /undefined/)
+  assert.match(note, /"algorithm": "tim-sort"/)
+  assert.match(source, /value < ops\.value\[mid\]/)
+  assert.match(source, /ops\.reverse/)
+  assert.match(source, /ops\.merge\(\n            mergeIndex,/)
+  assert.match(familySource, /makeBars\(arrayBars, length\)/)
+  assert.doesNotMatch(familySource, /makeArrayStrip|run-array-(?:cell|index|value)/)
+  assert.match(
+    renderSource,
+    /export function makeArrayStrip[\s\S]*?steptrace__pwrap[\s\S]*?steptrace__pcells[\s\S]*?steptrace__pcell/,
+  )
+  assert.match(
+    renderSource,
+    /export function makePointerView[\s\S]*?makeArrayStrip\(frames\[0\]\.array\)/,
+  )
+  assert.match(pointerStyles, /height: 46px/)
+  assert.match(pointerStyles, /border-radius: 9px/)
+  assert.match(pointerStyles, /overflow: hidden/)
+  assert.match(typesSource, /stageAlignment\?: "bottom" \| "center"/)
+  assert.match(mountSource, /view\.stageAlignment \|\| "center"/)
+  assert.match(
+    mountSource,
+    /stageCol\.classList\.toggle\("steptrace__stage-col--bottom", stageAlignment === "bottom"\)/,
+  )
+  assert.match(
+    mountSource,
+    /stageCol\.classList\.toggle\("steptrace__stage-col--center", stageAlignment === "center"\)/,
+  )
+  assert.match(
+    renderSource,
+    /return \{ nodes: \[stage, status\], stageAlignment: "bottom", paint, watch/,
+  )
+  assert.match(
+    renderSource,
+    /export function makeMatchView[\s\S]*?return \{ nodes, paint, watch, destroy:/,
+  )
+  assert.match(
+    renderSource,
+    /export function makePointerView[\s\S]*?return \{ nodes: \[wrap, status\], paint, watch \}/,
+  )
+  assert.match(renderSource, /stageLayout: "fill"/)
+  assert.match(styles, /\.steptrace__run-stack-cards/)
+  assert.match(styles, /min-block-size: 8\.1rem/)
+  assert.match(
+    sharedStyles,
+    /@media \(max-width: 560px\) \{[\s\S]*?\.steptrace__rail\s*\{[\s\S]*?border-top: 1px solid var\(--_hair\);[\s\S]*?padding-top: 1rem;[\s\S]*?margin-top: 1rem;/,
+  )
+  assert.match(
+    sharedStyles,
+    /@media \(max-width: 560px\)[\s\S]*?\.steptrace--stable-stage \.steptrace__trace\s*\{[\s\S]*?--_stable-trace-height: clamp\(4\.75rem, 16dvh, 5\.75rem\);[\s\S]*?flex: 0 0 var\(--_stable-trace-height\);[\s\S]*?block-size: var\(--_stable-trace-height\);[\s\S]*?overflow: hidden;/,
+  )
+  assert.match(
+    sharedStyles,
+    /\.steptrace--stable-stage \.steptrace__log\s*\{[\s\S]*?overflow-y: auto !important;[\s\S]*?overscroll-behavior: contain;/,
+  )
+  assert.match(styles, /\.steptrace__run-array-section\s*\{[\s\S]*?padding-bottom: 0\.9rem;/)
+  assert.match(
+    styles,
+    /\.steptrace__run-bars\s*\{[\s\S]*?align-self: end;[\s\S]*?block-size: 100%;[\s\S]*?min-block-size: 0;[\s\S]*?overflow: hidden;/,
+  )
+  assert.match(
+    styles,
+    /\.steptrace__run-stack-section\s*\{[\s\S]*?padding-top: 0\.9rem;[\s\S]*?border-top: 1px solid var\(--_hair\);/,
+  )
+  assert.match(styles, /data-motion="push"[\s\S]*?steptrace-run-stack-push/)
+  assert.match(styles, /data-motion="insert"[\s\S]*?steptrace-run-stack-insert/)
+  assert.match(styles, /data-motion="merge"[\s\S]*?steptrace-run-stack-merge/)
+  assert.match(familySource, /bar\.bar\.dataset\.motion = frame\.type === "insert"/)
+  assert.match(
+    familySource,
+    /isSorted \? "sorted" : isInsert \? "candidate" : isCurrent \? "compare" : ""/,
+  )
+  assert.match(styles, /data-run="0"\]\[data-state=""\]/)
+  assert.doesNotMatch(
+    styles,
+    /data-current="1"\][\s\S]*?box-shadow|data-insert="1"\][\s\S]*?box-shadow/,
+  )
+  assert.match(
+    barStyles,
+    /\.steptrace__bar\[data-state="sorted"\] \.steptrace__fill \{\n  background: var\(--_green\);/,
+  )
+  assert.doesNotMatch(familySource, /dataset\.motion = "remove"|dataset\.state = "removed"/)
+  assert.doesNotMatch(
+    styles,
+    /run-array-(?:cell|index|value)|steptrace__pwrap|steptrace__pcells|steptrace__pcell\s*\{/,
+  )
+  assert.doesNotMatch(styles, /glow|drop-shadow/)
+})
+
+test("tim sort rejects invalid minimum-run settings", () => {
+  const api = loadEngine(readFileSync(join(here, "generated", "engine.js"), "utf8"))
+  assert.throws(
+    () => api.buildFrames({ algorithm: "tim-sort", array: [3, 2, 1], minrun: 1 }),
+    /minrun.*at least 2/,
+  )
+})
+
+test("tim sort run-stack cards display only the current stack entries", () => {
+  class FakeNode {
+    constructor(tagName) {
+      this.tagName = tagName
+      this.textContent = ""
+      this.innerHTML = ""
+      this.children = []
+      this.attributes = new Map()
+      this.dataset = {}
+      this.style = { setProperty: (key, value) => this.attributes.set(`style:${key}`, value) }
+      this.className = ""
+      this.hidden = false
+    }
+    setAttribute(key, value) {
+      this.attributes.set(key, String(value))
+    }
+    append(...children) {
+      this.children.push(...children)
+    }
+  }
+  const previousDocument = globalThis.document
+  globalThis.document = { createElement: (tagName) => new FakeNode(tagName) }
+  try {
+    const api = loadEngine(readFileSync(join(here, "generated", "engine.js"), "utf8"))
+    const { makeRunStackView } = loadStepTraceModule("src", "families", "run-stack.ts")
+    const frames = api.buildFrames({
+      algorithm: "tim-sort",
+      array: [5, 6, 7, 8, 9, 4, 3, 1, 2, 8],
+      minrun: 4,
+    }).frames
+    const merge = frames.find((frame) => frame.type === "merge")
+    const done = frames.at(-1)
+    const view = makeRunStackView(frames)
+    view.paint(merge)
+    const stack = view.nodes[0].children[1].children[1]
+    const visibleLabels = stack.children
+      .filter((card) => !card.hidden)
+      .map((card) => card.children[0].textContent)
+      .sort()
+    const currentLabels = merge.stack
+      .map(
+        (run, index) =>
+          `R${index + 1} [${run.start}…${run.start + run.length - 1}] · ${run.length}`,
+      )
+      .sort()
+
+    assert.deepEqual(visibleLabels, currentLabels)
+
+    view.paint(done)
+    const bars = view.nodes[0].children[0].children[1]
+    assert.ok(
+      bars.children.every(
+        (bar) =>
+          bar.dataset.state === "sorted" &&
+          bar.dataset.current === "0" &&
+          bar.dataset.insert === "0",
+      ),
+    )
+  } finally {
+    globalThis.document = previousDocument
+  }
 })
 
 test("exponential search gallops to a bracket before reusing indexed binary-search states", () => {

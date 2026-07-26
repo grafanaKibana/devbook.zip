@@ -651,11 +651,10 @@ export function createMount(
       currentView = view
       if (built.kind === "graph") syncStartOptions(built.graph)
       const fillStage = view.stageLayout === "fill"
+      const stageAlignment = fillStage || built.kind === "graph" ? null : view.stageAlignment || "center"
       root.classList.toggle("steptrace--stable-stage", view.stableStage === true)
-      stageCol.classList.toggle(
-        "steptrace__stage-col--bottom",
-        built.kind !== "graph" && !fillStage,
-      )
+      stageCol.classList.toggle("steptrace__stage-col--bottom", stageAlignment === "bottom")
+      stageCol.classList.toggle("steptrace__stage-col--center", stageAlignment === "center")
       stageCol.classList.toggle("steptrace__stage-col--graph", built.kind === "graph")
       stageCol.classList.toggle("steptrace__stage-col--fill", fillStage)
       // The view's LAST node is its own one-line status; the rail TRACE log

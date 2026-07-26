@@ -14,9 +14,12 @@ interface TreeMeta {
   id: string
   label: string
   values: number[]
+  path: string[]
+  depth: number
   from: number
   to: number
   children: [string, string] | null
+  sorted: number[]
 }
 
 function merge(left: number[], right: number[]) {
@@ -36,21 +39,25 @@ function buildTree(
   from: number,
   to: number,
   depth: number,
-  x: number,
-  y: number,
   id: string,
+  path: string[],
   nodes: ExecutionTreeNode[],
   edges: Array<{ from: string; to: string }>,
   metas: Map<string, TreeMeta>,
 ): TreeMeta {
   const segment = values.slice(from, to)
   const label = segment.length ? `[${from}\u2026${to - 1}]` : "[]"
+  const detail = segment.join("  ")
+  const widestValue = Math.max(...segment.map((value) => String(value).length))
+  const cellWidth = Math.max(28, widestValue * 6.2 + 16)
   nodes.push({
     id,
     label,
     values: segment,
-    x,
-    y,
+    detail,
+    width: Math.max(40, segment.length * cellWidth, label.length * 5 + 20),
+    x: ((from + to - 1) / 2) * 54,
+    y: 30 + depth * 72,
     depth,
   })
 
@@ -58,9 +65,12 @@ function buildTree(
     id,
     label,
     values: segment,
+    path,
+    depth,
     from,
     to,
     children: null,
+    sorted: segment.slice(),
   }
   metas.set(id, meta)
 
@@ -72,52 +82,83 @@ function buildTree(
 
   edges.push({ from: id, to: leftId }, { from: id, to: rightId })
 
-  const span = Math.max(1, values.length - 1)
-  const childShift = (span - depth * 0.6 + 1) * 20
-
-  const leftMeta = buildTree(values, from, mid, depth + 1, x - childShift, y + 90, leftId, nodes, edges, metas)
-  const rightMeta = buildTree(values, mid, to, depth + 1, x + childShift, y + 90, rightId, nodes, edges, metas)
+  const leftMeta = buildTree(
+    values,
+    from,
+    mid,
+    depth + 1,
+    leftId,
+    [...path, leftId],
+    nodes,
+    edges,
+    metas,
+  )
+  const rightMeta = buildTree(
+    values,
+    mid,
+    to,
+    depth + 1,
+    rightId,
+    [...path, rightId],
+    nodes,
+    edges,
+    metas,
+  )
   meta.children = [leftMeta.id, rightMeta.id]
   return meta
 }
 
-function emitFrames(
+function revealSplits(
   id: string,
-  path: string[],
   metas: Map<string, TreeMeta>,
   ops: ExecutionTreeRecorder & ExecutionTreeOperations,
 ) {
   const node = metas.get(id)
-  if (!node) return []
+  if (!node) return
   const label = node.values.length ? `[${node.from}\u2026${node.to - 1}]` : "[]"
 
   if (node.values.length <= 1) {
     const text = node.values.length ? `[${node.values[0]}]` : "[]"
-    ops.base(id, path, node.values, `${text} is already sorted.`)
-    return node.values.slice()
+    ops.base(id, node.path, node.values, `${text} is already sorted.`)
+    return
   }
 
   const [leftId, rightId] = node.children || []
   const left = metas.get(leftId)
   const right = metas.get(rightId)
-  if (!left || !right) return node.values.slice()
+  if (!left || !right) return
 
-  ops.split(id, path, [leftId, rightId], `Split ${label} into ${left.label} and ${right.label}.`)
+  ops.split(
+    id,
+    node.path,
+    [leftId, rightId],
+    `Split ${label} into ${left.label} and ${right.label}.`,
+  )
+  revealSplits(leftId, metas, ops)
+  revealSplits(rightId, metas, ops)
+}
 
-  const leftPath = [...path, leftId]
-  const rightPath = [...path, rightId]
-  const leftResult = emitFrames(leftId, leftPath, metas, ops)
-  ops.returnResult(leftId, path, leftResult, `Return [${leftResult.join(", ")}] to ${label}.`)
-  const rightResult = emitFrames(rightId, rightPath, metas, ops)
-  ops.returnResult(rightId, path, rightResult, `Return [${rightResult.join(", ")}] to ${label}.`)
+function mergeBottomUp(
+  metas: Map<string, TreeMeta>,
+  ops: ExecutionTreeRecorder & ExecutionTreeOperations,
+) {
+  const internalNodes = [...metas.values()]
+    .filter((node) => node.children)
+    .sort((a, b) => b.depth - a.depth || a.from - b.from)
 
-  const merged = merge(leftResult, rightResult)
-  const combinePath = path.length > 1 ? path.slice(0, -1) : path
-  ops.combine(id, combinePath, merged, `Merge ${left.label} and ${right.label} into [${merged.join(", ")}].`)
-  if (path.length > 1) {
-    ops.returnResult(id, combinePath, merged, `Return [${merged.join(", ")}] to parent call.`)
+  for (const node of internalNodes) {
+    const [leftId, rightId] = node.children || []
+    const left = metas.get(leftId)
+    const right = metas.get(rightId)
+    if (!left || !right) continue
+    node.sorted = merge(left.sorted, right.sorted)
+    ops.combine(
+      node.id,
+      node.path,
+      node.sorted,
+      `Merge [${left.sorted.join(", ")}] and [${right.sorted.join(", ")}] into [${node.sorted.join(", ")}].`,
+    )
   }
-  return merged
 }
 
 export function parseMergeSortTreeConfig(config: StepTraceConfig) {
@@ -128,7 +169,7 @@ export function parseMergeSortTreeConfig(config: StepTraceConfig) {
 
   return {
     array: config.array.slice(),
-    profile: "divide-and-conquer",
+    profile: "merge-sort",
   } satisfies ExecutionTreeConfig
 }
 
@@ -145,18 +186,7 @@ export const mergeSortTree = {
     const metas = new Map<string, TreeMeta>()
 
     const rootId = "root"
-    const rootMeta = buildTree(
-      values,
-      0,
-      values.length,
-      0,
-      Math.max(1, values.length - 1) * 72,
-      30,
-      rootId,
-      nodes,
-      edges,
-      metas,
-    )
+    const rootMeta = buildTree(values, 0, values.length, 0, rootId, [rootId], nodes, edges, metas)
     rootMeta.from = 0
     rootMeta.to = values.length
     rootMeta.values = values.slice()
@@ -164,8 +194,9 @@ export const mergeSortTree = {
 
     const message = `Merge sort ${values.join(", ")} by splitting into halves and merging sorted halves on return.`
     ops.tree(nodes, edges, rootId, message)
-    emitFrames(rootId, [rootId], metas, ops)
-    ops.done(rootId, values.slice().sort((a, b) => a - b), `Sorted result [${values.sort((a, b) => a - b).join(", ")}].`)
+    revealSplits(rootId, metas, ops)
+    mergeBottomUp(metas, ops)
+    ops.done(rootId, rootMeta.sorted, `Sorted result [${rootMeta.sorted.join(", ")}].`)
   },
 } satisfies
   FamilyAlgorithmDefinition<

@@ -15,7 +15,7 @@ configuration:
     - Topics.base
   theme:
     fontOrigin: googleFonts
-    cdnCaching: true
+    cdnCaching: false
     typography:
       header: Schibsted Grotesk
       body: Source Sans Pro
@@ -100,7 +100,7 @@ plugins:
     enabled: false
     order: 92
   - source: github:quartz-community/fonts
-    enabled: true
+    enabled: false
   - source: github:quartz-community/remove-draft
     enabled: true
   - source: github:quartz-community/explicit-publish
@@ -146,7 +146,6 @@ plugins:
         depth: 2
         showTags: false
         focusOnHover: true
-        enableRadial: false
       globalGraph:
         showTags: false
         enableRadial: false

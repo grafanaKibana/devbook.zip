@@ -192,7 +192,13 @@ export function makeSortView(frames, semantics = legacySortViewSemantics) {
     return rows
   }
 
-  return { nodes: [stage, status], paint, watch, destroy: tracker.destroy }
+  return {
+    nodes: [stage, status],
+    stageAlignment: "bottom",
+    paint,
+    watch,
+    destroy: tracker.destroy,
+  }
 }
 
 function makeMarker(label, role) {
@@ -575,7 +581,7 @@ export function makeSearchView(
     return semantics.watchRows(frame, frames)
   }
 
-  return { nodes: [stage, status], paint, watch }
+  return { nodes: [stage, status], stageAlignment: "bottom", paint, watch }
 }
 
 export interface BoundarySearchViewDescriptor {
@@ -771,6 +777,9 @@ export function makeBoundarySearchView(frames, descriptor: BoundarySearchViewDes
 // ---- string-matching view: text with the pattern aligned underneath ----
 const CELL_W = 34 // px; must match .steptrace__cell width for shift alignment
 export function makeMatchView(frames) {
+  if (frames[0].profile === "z-array") return makeZArrayView(frames)
+  if (frames[0].profile === "boyer-moore") return makeBoyerMooreView(frames)
+
   const text = frames[0].text
   const pattern = frames[0].pattern
   const hasHash = frames.some((f) => f.hash) // rabin-karp only ⇒ constant rows
@@ -861,11 +870,367 @@ export function makeMatchView(frames) {
   return { nodes, paint, watch, destroy: () => ro && ro.disconnect() }
 }
 
+function makeBoyerMooreView(frames) {
+  const first = frames[0]
+  const text = first.text
+  const pattern = first.pattern
+  const stage = el("div", "steptrace__match steptrace__bm")
+  stage.dataset.profile = "boyer-moore"
+  const viewport = el("div", "steptrace__bm-viewport")
+  const board = el("div", "steptrace__bm-board")
+
+  const makeCell = (character, patternCell = false) => {
+    const cell = el(
+      "div",
+      `steptrace__cell steptrace__bm-cell${patternCell ? " steptrace__cell--pat" : ""}`,
+    )
+    const value = el("span", "steptrace__bm-char")
+    value.textContent = character
+    const cue = el("span", "steptrace__bm-compare-icon")
+    cue.setAttribute("aria-hidden", "true")
+    const matchIcon = el("span", "steptrace__bm-icon steptrace__bm-icon--match")
+    matchIcon.innerHTML = ICON.check
+    matchIcon.setAttribute("aria-hidden", "true")
+    const mismatchIcon = el("span", "steptrace__bm-icon steptrace__bm-icon--mismatch")
+    mismatchIcon.innerHTML = ICON.x
+    mismatchIcon.setAttribute("aria-hidden", "true")
+    cue.append(matchIcon, mismatchIcon)
+    cell.append(value, cue)
+    return cell
+  }
+
+  const patternRow = el("div", "steptrace__cells steptrace__cells--pat steptrace__bm-pattern")
+  const patternCells = []
+  for (let i = 0; i < pattern.length; i++) {
+    const cell = makeCell(pattern[i], true)
+    patternRow.append(cell)
+    patternCells.push(cell)
+  }
+
+  const textRow = el("div", "steptrace__cells steptrace__bm-text")
+  const textCells = []
+  for (let i = 0; i < text.length; i++) {
+    const cell = makeCell(text[i])
+    textRow.append(cell)
+    textCells.push(cell)
+  }
+  board.append(patternRow, textRow)
+  viewport.append(board)
+  stage.append(viewport)
+  const status = statusEl()
+
+  let currentFrame = first
+  function applyGeom() {
+    const measured = textCells[0]?.getBoundingClientRect?.().width || CELL_W
+    const cw = measured > 0 ? measured : CELL_W
+    stage.style.setProperty("--_cw", `${cw}px`)
+    patternRow.style.transform = `translateX(${(currentFrame.shift * cw).toFixed(2)}px)`
+  }
+  const ro = typeof ResizeObserver !== "undefined" ? new ResizeObserver(applyGeom) : null
+  if (ro) ro.observe(textRow)
+
+  function paint(frame, index, total) {
+    currentFrame = frame
+    stage.dataset.frame = frame.type
+    for (const cell of textCells) cell.dataset.state = ""
+    for (const cell of patternCells) cell.dataset.state = ""
+    for (const found of frame.found)
+      for (let j = 0; j < pattern.length; j++)
+        if (textCells[found + j]) textCells[found + j].dataset.state = "found"
+    if (frame.matchedFrom != null)
+      for (let j = frame.matchedFrom; j < pattern.length; j++) {
+        patternCells[j].dataset.state = "suffix"
+        const textCell = textCells[frame.shift + j]
+        if (textCell && textCell.dataset.state !== "found") textCell.dataset.state = "suffix"
+      }
+    if (frame.cmpT != null && textCells[frame.cmpT])
+      textCells[frame.cmpT].dataset.state = frame.cmpResult
+    if (frame.cmpP != null && patternCells[frame.cmpP])
+      patternCells[frame.cmpP].dataset.state = frame.cmpResult
+    if (
+      frame.type === "match" ||
+      (frame.shiftDecision?.winner === "full-match" && frame.found.includes(frame.shift))
+    )
+      for (const cell of patternCells) cell.dataset.state = "found"
+    applyGeom()
+    status.innerHTML =
+      escapeHtml(frame.message) +
+      ` <span class="steptrace__counts">· step ${index + 1}/${total}</span>`
+  }
+
+  function watch(frame) {
+    const suffix =
+      frame.matchedFrom == null || frame.matchedFrom >= pattern.length
+        ? "—"
+        : pattern.slice(frame.matchedFrom)
+    const choice = ["decision", "match", "shift", "done"].includes(frame.type)
+      ? frame.shiftDecision
+      : null
+    const winner =
+      choice?.winner === "bad-character"
+        ? "bad wins"
+        : choice?.winner === "good-suffix"
+          ? "good wins"
+          : choice?.winner === "full-match"
+            ? "full match"
+            : choice?.winner === "tie"
+              ? "tie"
+              : ""
+    return [
+      { k: "align", v: frame.shift, sw: "var(--_blue)" },
+      { k: "j", v: frame.j ?? "—", sw: "var(--_violet)" },
+      { k: "suffix", v: suffix, sw: "var(--_green)" },
+      { k: "bad shift", v: choice?.bad ?? "—", sw: "var(--_blue)" },
+      { k: "good shift", v: choice?.good ?? "—", sw: "var(--_violet)" },
+      {
+        k: "selected shift",
+        v: choice ? `${choice.selected} · ${winner}` : "—",
+        sw: "var(--_amber)",
+      },
+    ]
+  }
+
+  return {
+    nodes: [stage, status],
+    stableStage: true,
+    paint,
+    watch,
+    destroy: () => ro && ro.disconnect(),
+  }
+}
+
+export function resolveVisibleScrollLeft(
+  scrollLeft,
+  clientWidth,
+  scrollWidth,
+  targetStart,
+  targetEnd,
+  padding = 8,
+) {
+  if (
+    !Number.isFinite(scrollLeft) ||
+    !Number.isFinite(clientWidth) ||
+    !Number.isFinite(scrollWidth) ||
+    !Number.isFinite(targetStart) ||
+    !Number.isFinite(targetEnd) ||
+    clientWidth <= 0
+  )
+    return scrollLeft
+  const maxScroll = Math.max(0, scrollWidth - clientWidth)
+  const inset = Math.min(Math.max(0, padding), clientWidth / 2)
+  if (targetStart < scrollLeft + inset) return Math.min(maxScroll, Math.max(0, targetStart - inset))
+  if (targetEnd > scrollLeft + clientWidth - inset)
+    return Math.min(maxScroll, Math.max(0, targetEnd - clientWidth + inset))
+  return scrollLeft
+}
+
+function makeZArrayView(frames) {
+  const text = frames[0].text
+  const stage = el("div", "steptrace__z")
+  stage.dataset.profile = "z-array"
+  const viewport = el("div", "steptrace__z-viewport")
+  const board = el("div", "steptrace__z-board")
+  board.style.setProperty("--_z-length", String(Math.max(text.length, 1)))
+
+  const prefixBand = el("div", "steptrace__z-band")
+  const prefixLabel = el("div", "steptrace__z-label")
+  prefixLabel.textContent = "prefix"
+  const prefixClip = el("div", "steptrace__z-lane steptrace__z-prefix-clip")
+  const prefixTrack = el("div", "steptrace__z-track")
+  const prefixCells = []
+  for (let k = 0; k < text.length; k++) {
+    const cell = el("div", "steptrace__z-cell steptrace__z-cell--prefix")
+    cell.textContent = text[k]
+    prefixTrack.append(cell)
+    prefixCells.push(cell)
+  }
+  prefixClip.append(prefixTrack)
+  prefixBand.append(prefixLabel, prefixClip)
+
+  const stringBand = el("div", "steptrace__z-band")
+  const stringLabel = el("div", "steptrace__z-label")
+  stringLabel.textContent = "S"
+  const stringRow = el("div", "steptrace__z-lane steptrace__z-string")
+  const stringCells = []
+  for (let k = 0; k < text.length; k++) {
+    const cell = el("div", "steptrace__z-cell steptrace__z-cell--string")
+    const index = el("span", "steptrace__z-index")
+    index.textContent = String(k)
+    const value = el("span", "steptrace__z-char")
+    value.textContent = text[k]
+    cell.append(index, value)
+    stringRow.append(cell)
+    stringCells.push(cell)
+  }
+  const cursor = el("div", "steptrace__z-cursor")
+  cursor.setAttribute("aria-hidden", "true")
+  const bracket = el("div", "steptrace__z-bracket")
+  bracket.setAttribute("aria-hidden", "true")
+  stringRow.append(bracket, cursor)
+  stringBand.append(stringLabel, stringRow)
+
+  const zBand = el("div", "steptrace__z-band")
+  const zLabel = el("div", "steptrace__z-label")
+  zLabel.textContent = "Z"
+  const zRow = el("div", "steptrace__z-lane steptrace__z-values")
+  const zCells = []
+  for (let k = 0; k < text.length; k++) {
+    const cell = el("div", "steptrace__z-cell steptrace__z-cell--value")
+    cell.textContent = "·"
+    zRow.append(cell)
+    zCells.push(cell)
+  }
+  const copyToken = el("div", "steptrace__z-copy")
+  copyToken.setAttribute("aria-hidden", "true")
+  zRow.append(copyToken)
+  zBand.append(zLabel, zRow)
+
+  board.append(prefixBand, stringBand, zBand)
+  viewport.append(board)
+  const legend = el("div", "steptrace__z-legend")
+  for (const [state, label] of [
+    ["compare", "character check"],
+    ["copy", "mirror reuse"],
+    ["commit", "committed Z"],
+  ]) {
+    const item = el("span", "steptrace__z-legend-item")
+    item.dataset.state = state
+    const swatch = el("span", "steptrace__z-legend-swatch")
+    const textNode = el("span")
+    textNode.textContent = label
+    item.append(swatch, textNode)
+    legend.append(item)
+  }
+  stage.append(viewport, legend)
+  const status = statusEl()
+
+  let currentFrame = frames[0]
+  function applyGeom() {
+    const measured = stringCells[0]?.getBoundingClientRect?.().width || CELL_W
+    const cw = measured > 0 ? measured : CELL_W
+    const i = currentFrame.i
+    const [l, r] = currentFrame.box || [0, 0]
+    stage.style.setProperty("--_cw", `${cw}px`)
+    prefixTrack.style.transform = `translateX(${((i ?? 0) * cw).toFixed(2)}px)`
+    cursor.style.transform = `translateX(${((i ?? 0) * cw).toFixed(2)}px)`
+    bracket.style.transform = `translateX(${(l * cw).toFixed(2)}px)`
+    bracket.style.width = `${Math.max(1, r - l + 1) * cw}px`
+    const copyIndex = currentFrame.type === "copy" ? i : currentFrame.k
+    copyToken.style.transform = `translateX(${((copyIndex ?? 0) * cw).toFixed(2)}px)`
+  }
+  function ensureActiveVisible() {
+    if (currentFrame.i == null) return
+    const candidate = currentFrame.compare?.candidate
+    const firstIndex = Math.min(currentFrame.i, candidate ?? currentFrame.i)
+    const lastIndex = Math.max(currentFrame.i, candidate ?? currentFrame.i)
+    const firstRect = stringCells[firstIndex]?.getBoundingClientRect?.()
+    const lastRect = stringCells[lastIndex]?.getBoundingClientRect?.()
+    const viewportRect = viewport.getBoundingClientRect?.()
+    if (!firstRect || !lastRect || !viewportRect) return
+    const targetStart = viewport.scrollLeft + firstRect.left - viewportRect.left
+    const targetEnd = viewport.scrollLeft + lastRect.left + lastRect.width - viewportRect.left
+    const next = resolveVisibleScrollLeft(
+      viewport.scrollLeft,
+      viewport.clientWidth,
+      viewport.scrollWidth,
+      targetStart,
+      targetEnd,
+    )
+    if (Math.abs(next - viewport.scrollLeft) < 0.5) return
+    const behavior = stage.closest?.(".steptrace--reduced") ? "auto" : "smooth"
+    if (typeof viewport.scrollTo === "function") viewport.scrollTo({ left: next, behavior })
+    else viewport.scrollLeft = next
+  }
+  function syncLayout() {
+    applyGeom()
+    ensureActiveVisible()
+  }
+  const ro = typeof ResizeObserver !== "undefined" ? new ResizeObserver(syncLayout) : null
+  if (ro) {
+    ro.observe(stringRow)
+    ro.observe(viewport)
+  }
+
+  function paint(frame, index, total) {
+    currentFrame = frame
+    stage.dataset.frame = frame.type
+    stage.dataset.case = frame.sourceCase || ""
+    prefixTrack.dataset.visible = frame.i == null ? "0" : "1"
+    cursor.dataset.visible = frame.i == null ? "0" : "1"
+    bracket.dataset.visible = frame.box ? "1" : "0"
+    copyToken.dataset.visible = frame.type === "copy" ? "1" : "0"
+    copyToken.textContent = frame.k == null ? "" : String(frame.z[frame.k] ?? "·")
+    for (let k = 0; k < text.length; k++) {
+      prefixCells[k].dataset.state = ""
+      stringCells[k].dataset.state = ""
+      zCells[k].dataset.state = ""
+      zCells[k].textContent = frame.z[k] == null ? "·" : String(frame.z[k])
+      if (frame.box && k >= frame.box[0] && k <= frame.box[1]) stringCells[k].dataset.box = "1"
+      else delete stringCells[k].dataset.box
+    }
+    if (frame.i != null && stringCells[frame.i]) stringCells[frame.i].dataset.state = "focus"
+    if (frame.type === "copy" && frame.k != null) {
+      zCells[frame.k].dataset.state = "copy-source"
+      zCells[frame.i].dataset.state = "copy-target"
+    }
+    if (frame.type === "commit" && frame.i != null) zCells[frame.i].dataset.state = "commit"
+    if (frame.compare) {
+      const state = frame.compare.result
+      prefixCells[frame.compare.prefix].dataset.state = state
+      stringCells[frame.compare.candidate].dataset.state = state
+    }
+    syncLayout()
+    status.innerHTML =
+      escapeHtml(frame.message) +
+      ` <span class="steptrace__counts">· step ${index + 1}/${total}</span>`
+  }
+
+  function watch(frame) {
+    const box = frame.box || [0, 0]
+    return [
+      { k: "i", v: frame.i ?? "—", sw: "var(--_blue)" },
+      { k: "case", v: frame.sourceCase || "initialize", sw: "var(--_neutral)" },
+      { k: "box", v: `[${box[0]}, ${box[1]}]`, sw: "var(--_violet)" },
+      {
+        k: "mirror",
+        v: frame.k == null ? "—" : `k = ${frame.k}, Z[k] = ${frame.z[frame.k] ?? "·"}`,
+        sw: "var(--_amber)",
+      },
+      {
+        k: "Z[i]",
+        v: frame.i == null ? "—" : (frame.z[frame.i] ?? "·"),
+        sw: "var(--_green)",
+      },
+    ]
+  }
+
+  return {
+    nodes: [stage, status],
+    stableStage: true,
+    paint,
+    watch,
+    destroy: () => ro && ro.disconnect(),
+  }
+}
+
 // ---- array-pointer view: a segmented strip + [ ] end brackets + window ----
 // The active window tints the cells' OWN background, so the strip's
 // overflow:hidden rounded frame clips it flush — rounded only at the real
 // ends, square at interior edges (no floating mid-strip radius). The blue [
 // / violet ] brackets overlay the window ends; match recolours all of it green.
+export function makeArrayStrip(values: readonly unknown[]) {
+  const wrap = el("div", "steptrace__pwrap")
+  const strip = el("div", "steptrace__pcells")
+  const cells = values.map((value) => {
+    const cell = el("div", "steptrace__pcell")
+    cell.textContent = String(value)
+    strip.append(cell)
+    return cell
+  })
+  wrap.append(strip)
+  return { wrap, strip, cells }
+}
+
 export function makePointerView(frames) {
   const n = frames[0].array.length
   // capture pointer names once so WATCH always shows the same rows (constant
@@ -877,20 +1242,12 @@ export function makePointerView(frames) {
     }
     return []
   })()
-  const wrap = el("div", "steptrace__pwrap")
-  const strip = el("div", "steptrace__pcells")
-  const cells = []
-  for (let k = 0; k < n; k++) {
-    const cell = el("div", "steptrace__pcell")
-    cell.textContent = frames[0].array[k]
-    strip.append(cell)
-    cells.push(cell)
-  }
+  const { wrap, cells } = makeArrayStrip(frames[0].array)
   const brackets = el("div", "steptrace__pbrackets")
   const brL = el("div", "steptrace__pbr steptrace__pbr--l")
   const brR = el("div", "steptrace__pbr steptrace__pbr--r")
   brackets.append(brL, brR)
-  wrap.append(strip, brackets)
+  wrap.append(brackets)
   const status = statusEl()
 
   function paint(frame) {
@@ -2014,6 +2371,8 @@ export interface ExecutionTreeViewDescriptor {
   minSvgWidth: number
   canvasScale?: number
   fitWidth?: boolean
+  tieredCards?: boolean
+  centerVisible?: boolean
   stateLabels: Record<string, string>
   legend: ReadonlyArray<{ state: string; label: string }>
   frameModel(frame: any): {
@@ -2030,21 +2389,44 @@ export interface ExecutionTreeViewDescriptor {
   watchRows(frame: any, model: ReturnType<ExecutionTreeViewDescriptor["frameModel"]>): any[]
 }
 
+export function centerVisibleTree(rects, canvasWidth, canvasHeight) {
+  if (!rects.length) return { x: 0, y: 0 }
+  const left = Math.min(...rects.map((rect) => rect.left))
+  const right = Math.max(...rects.map((rect) => rect.right))
+  const top = Math.min(...rects.map((rect) => rect.top))
+  const bottom = Math.max(...rects.map((rect) => rect.bottom))
+  return {
+    x: canvasWidth / 2 - (left + right) / 2,
+    y: canvasHeight / 2 - (top + bottom) / 2,
+  }
+}
+
+export function tieredArrayCells(values, width) {
+  const cellWidth = width / Math.max(1, values.length)
+  return {
+    cells: values.map((value, index) => ({
+      value,
+      x: -width / 2 + cellWidth * (index + 0.5),
+    })),
+    separators: values.slice(1).map((_, index) => -width / 2 + cellWidth * (index + 1)),
+  }
+}
+
 export function makeExecutionTreeView(frames, descriptor: ExecutionTreeViewDescriptor) {
   const f0 = frames[0]
   const nodes = f0.nodes
-  const halfWidth = descriptor.nodeWidth / 2
   const halfHeight = descriptor.nodeHeight / 2
-  const padX = halfWidth + 12
   const padY = halfHeight + 12
-  const xs = nodes.map((node) => node.x)
+  const nodeWidth = (node) => node.width || descriptor.nodeWidth
+  const lefts = nodes.map((node) => node.x - nodeWidth(node) / 2)
+  const rights = nodes.map((node) => node.x + nodeWidth(node) / 2)
   const ys = nodes.map((node) => node.y)
-  const minX = Math.min(...xs)
+  const minX = Math.min(...lefts)
   const minY = Math.min(...ys)
-  const width = Math.max(...xs) - minX + padX * 2
+  const width = Math.max(...rights) - minX + 24
   const height = Math.max(...ys) - minY + padY * 2
   const position = Object.fromEntries(
-    nodes.map((node) => [node.id, { x: node.x - minX + padX, y: node.y - minY + padY }]),
+    nodes.map((node) => [node.id, { x: node.x - minX + 12, y: node.y - minY + padY }]),
   )
 
   const svg = document.createElementNS(SVGNS, "svg")
@@ -2062,6 +2444,12 @@ export function makeExecutionTreeView(frames, descriptor: ExecutionTreeViewDescr
   svg.style.setProperty("--steptrace-tree-width", `${canvasWidth}px`)
   svg.append(title, description)
 
+  const treeLayer = descriptor.centerVisible ? document.createElementNS(SVGNS, "g") : svg
+  if (descriptor.centerVisible) {
+    treeLayer.setAttribute("class", "steptrace__rtcontent")
+    svg.append(treeLayer)
+  }
+
   const edgeElements = []
   for (const edge of f0.edges) {
     const from = position[edge.from]
@@ -2074,13 +2462,15 @@ export function makeExecutionTreeView(frames, descriptor: ExecutionTreeViewDescr
     line.setAttribute("y2", String(to.y - halfHeight))
     line.setAttribute("aria-hidden", "true")
     line.setAttribute("focusable", "false")
-    svg.append(line)
+    treeLayer.append(line)
     edgeElements.push({ element: line, from: edge.from, to: edge.to })
   }
 
   const nodeElements = {}
   for (const node of nodes) {
     const point = position[node.id]
+    const width = nodeWidth(node)
+    const halfWidth = width / 2
     const group = document.createElementNS(SVGNS, "g")
     group.setAttribute("class", "steptrace__rtnode")
     group.setAttribute("transform", `translate(${point.x} ${point.y})`)
@@ -2101,12 +2491,12 @@ export function makeExecutionTreeView(frames, descriptor: ExecutionTreeViewDescr
     } else {
       surface.setAttribute("x", String(-halfWidth))
       surface.setAttribute("y", String(-halfHeight))
-      surface.setAttribute("width", String(descriptor.nodeWidth))
+      surface.setAttribute("width", String(width))
       surface.setAttribute("height", String(descriptor.nodeHeight))
       surface.setAttribute("rx", "7")
       ring.setAttribute("x", String(-halfWidth - 2))
       ring.setAttribute("y", String(-halfHeight - 2))
-      ring.setAttribute("width", String(descriptor.nodeWidth + 4))
+      ring.setAttribute("width", String(width + 4))
       ring.setAttribute("height", String(descriptor.nodeHeight + 4))
       ring.setAttribute("rx", "9")
     }
@@ -2115,6 +2505,9 @@ export function makeExecutionTreeView(frames, descriptor: ExecutionTreeViewDescr
     const detail = document.createElementNS(SVGNS, "text")
     const result = document.createElementNS(SVGNS, "text")
     const badge = document.createElementNS(SVGNS, "text")
+    const divider = descriptor.tieredCards ? document.createElementNS(SVGNS, "line") : null
+    const valueTier = descriptor.tieredCards ? document.createElementNS(SVGNS, "g") : null
+    const valueCells = []
     label.setAttribute("class", "steptrace__rtlabel")
     detail.setAttribute("class", "steptrace__rtdetail")
     result.setAttribute("class", "steptrace__rtval")
@@ -2127,14 +2520,69 @@ export function makeExecutionTreeView(frames, descriptor: ExecutionTreeViewDescr
       label.setAttribute("y", "0")
       label.setAttribute("dominant-baseline", "central")
       result.setAttribute("y", String(halfHeight + 9))
+    } else if (descriptor.tieredCards) {
+      label.setAttribute("y", "13")
+      label.setAttribute("dominant-baseline", "central")
+      divider?.setAttribute("class", "steptrace__rtdivider")
+      divider?.setAttribute("x1", String(-halfWidth + 1))
+      divider?.setAttribute("x2", String(halfWidth - 1))
+      divider?.setAttribute("y1", "6")
+      divider?.setAttribute("y2", "6")
+      valueTier?.setAttribute("class", "steptrace__rtarray")
+      const tier = tieredArrayCells(node.values, width)
+      for (const x of tier.separators) {
+        const separator = document.createElementNS(SVGNS, "line")
+        separator.setAttribute("class", "steptrace__rtcell-separator")
+        separator.setAttribute("x1", String(x))
+        separator.setAttribute("x2", String(x))
+        separator.setAttribute("y1", String(-halfHeight + 1))
+        separator.setAttribute("y2", "6")
+        valueTier?.append(separator)
+      }
+      for (const cell of tier.cells) {
+        const value = document.createElementNS(SVGNS, "text")
+        value.setAttribute("class", "steptrace__rtcell-value")
+        value.setAttribute("x", String(cell.x))
+        value.setAttribute("y", "-7")
+        value.setAttribute("text-anchor", "middle")
+        value.setAttribute("dominant-baseline", "central")
+        value.textContent = String(cell.value)
+        valueTier?.append(value)
+        valueCells.push(value)
+      }
     } else {
       label.setAttribute("y", "-4")
       detail.setAttribute("y", "9")
     }
-    group.append(ring, surface, label, detail, result, badge)
-    svg.append(group)
-    nodeElements[node.id] = { group, detail, result, badge, secondaryLine }
+    group.append(ring, surface)
+    if (divider) group.append(divider)
+    if (valueTier) group.append(valueTier)
+    group.append(label)
+    if (!descriptor.tieredCards) group.append(detail)
+    group.append(result, badge)
+    treeLayer.append(group)
+    nodeElements[node.id] = { group, detail, result, badge, secondaryLine, valueCells }
   }
+
+  function centerTransform(visibleIds) {
+    const visible = new Set(visibleIds)
+    const rects = nodes
+      .filter((node) => visible.has(node.id))
+      .map((node) => {
+        const point = position[node.id]
+        const halfNodeWidth = nodeWidth(node) / 2
+        return {
+          left: point.x - halfNodeWidth,
+          right: point.x + halfNodeWidth,
+          top: point.y - halfHeight,
+          bottom: point.y + halfHeight,
+        }
+      })
+    const offset = centerVisibleTree(rects, width, height)
+    return `translate(${offset.x}px, ${offset.y}px)`
+  }
+
+  if (descriptor.centerVisible) treeLayer.style.transform = centerTransform(f0.visible)
 
   const legend = el("div", "steptrace__legend")
   legend.setAttribute("aria-label", `${descriptor.ariaLabel} state legend`)
@@ -2150,6 +2598,7 @@ export function makeExecutionTreeView(frames, descriptor: ExecutionTreeViewDescr
   wrap.setAttribute("role", "region")
   wrap.setAttribute("aria-label", `${descriptor.ariaLabel} visualization`)
   wrap.dataset.fitWidth = descriptor.fitWidth ? "true" : "false"
+  wrap.dataset.profile = f0.profile || ""
   wrap.tabIndex = 0
   wrap.append(svg)
   const status = statusEl()
@@ -2159,7 +2608,12 @@ export function makeExecutionTreeView(frames, descriptor: ExecutionTreeViewDescr
     const visible = new Set(model.visible)
     const collapsed = new Set(model.collapsed)
     const path = new Set(model.path)
+    const related =
+      model.phase === "combine"
+        ? new Set(f0.edges.filter((edge) => edge.from === model.active).map((edge) => edge.to))
+        : new Set()
     const activeNode = nodes.find((node) => node.id === model.active)
+    if (descriptor.centerVisible) treeLayer.style.transform = centerTransform(model.visible)
     title.textContent = `${descriptor.ariaLabel}: ${model.phase}`
     description.textContent = `${model.phase}. Active subproblem ${activeNode ? descriptor.nodeLines(activeNode).join("; ") : "none"}. ${model.action}.`
     for (const node of nodes) {
@@ -2170,6 +2624,7 @@ export function makeExecutionTreeView(frames, descriptor: ExecutionTreeViewDescr
       elements.group.dataset.state = state
       elements.group.dataset.active = model.active === node.id ? "true" : "false"
       elements.group.dataset.path = path.has(node.id) ? "true" : "false"
+      elements.group.dataset.related = related.has(node.id) ? "true" : "false"
       const value = model.results[node.id]
       const resultText = Array.isArray(value)
         ? value.length
@@ -2179,7 +2634,13 @@ export function makeExecutionTreeView(frames, descriptor: ExecutionTreeViewDescr
           ? ""
           : String(value)
       if (descriptor.shape === "card") {
-        elements.detail.textContent = resultText || elements.secondaryLine
+        if (descriptor.tieredCards) {
+          const values = Array.isArray(value) ? value : node.values
+          for (let index = 0; index < elements.valueCells.length; index++)
+            elements.valueCells[index].textContent = String(values[index] ?? "")
+        } else {
+          elements.detail.textContent = resultText || elements.secondaryLine
+        }
         elements.result.textContent = ""
         elements.badge.textContent = ""
       } else {
@@ -2191,6 +2652,8 @@ export function makeExecutionTreeView(frames, descriptor: ExecutionTreeViewDescr
       edge.element.dataset.vis = visible.has(edge.to) ? "1" : "0"
       edge.element.dataset.collapsed = collapsed.has(edge.to) ? "true" : "false"
       edge.element.dataset.path = path.has(edge.from) && path.has(edge.to) ? "true" : "false"
+      edge.element.dataset.related =
+        model.active === edge.from && related.has(edge.to) ? "true" : "false"
     }
     status.innerHTML =
       escapeHtml(frame.message) +
@@ -2496,6 +2959,7 @@ export const ICON = {
     '<svg viewBox="0 0 24 24"><circle cx="12" cy="5" r="1.5" fill="currentColor" stroke="none"/><circle cx="12" cy="12" r="1.5" fill="currentColor" stroke="none"/><circle cx="12" cy="19" r="1.5" fill="currentColor" stroke="none"/></svg>',
   check:
     '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg>',
+  x: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.8" stroke-linecap="round"><path d="M6 6l12 12"/><path d="M18 6 6 18"/></svg>',
   compare:
     '<svg class="steptrace__cue-compare" viewBox="0 0 24 24" aria-hidden="true"><path d="m7 16-4-4 4-4"/><path d="M3 12h18"/><path d="m17 8 4 4-4 4"/></svg>',
   swap: '<svg class="steptrace__cue-swap" viewBox="0 0 24 24" aria-hidden="true"><path d="m2 9 3-3 3 3"/><path d="M13 18H7a2 2 0 0 1-2-2V6"/><path d="m22 15-3 3-3-3"/><path d="M11 6h6a2 2 0 0 1 2 2v10"/></svg>',
@@ -2565,7 +3029,11 @@ export function buildMilestones(algorithm, kind, frames) {
                   ? "Answer range"
                   : "Search range"
         : kind === "string"
-          ? "Shift 0"
+          ? familyProfile === "z-array"
+            ? "Initialize Z"
+            : familyProfile === "boyer-moore"
+              ? "Preprocess rules"
+              : "Shift 0"
           : kind === "backtrack"
             ? "Depth 0"
             : kind === "rectree"
@@ -2677,6 +3145,11 @@ export function buildMilestones(algorithm, kind, frames) {
                     : "Probe"
               } ${f.mid}`,
         )
+    } else if (kind === "string" && familyProfile === "z-array") {
+      if (f.type === "focus") push(i, `i = ${f.i}`)
+    } else if (kind === "string" && familyProfile === "boyer-moore") {
+      if (f.type === "align") push(i, `Align ${f.shift}`)
+      if (f.type === "match") push(i, `Match ${f.shift}`)
     } else if (kind === "string") {
       if (
         (f.type === "slide" || f.type === "hash" || f.type === "match") &&
@@ -2776,6 +3249,8 @@ export function summaryFor(algorithm, kind, frame, graph) {
     }
     if (algorithm === "merge-sort")
       return `Output [${frame.array.join(", ")}] · ${frame.swaps} writes.`
+    if (algorithm === "tim-sort")
+      return `Output [${frame.array.join(", ")}] · ${frame.merges} run-stack merge${frame.merges === 1 ? "" : "s"}.`
     const unit =
       frame.movementUnit ||
       (["bubble-sort", "selection-sort", "quick-sort", "heap-sort"].includes(algorithm)
@@ -2830,6 +3305,7 @@ export function summaryFor(algorithm, kind, frame, graph) {
       ? `${frame.target} not found · ${frame.comparisons} comparisons.`
       : `${frame.target} found at index ${frame.found} · ${frame.comparisons} comparisons.`
   }
+  if (kind === "string" && frame.profile === "z-array") return `Z = [${frame.z.join(", ")}].`
   if (kind === "string")
     return frame.found.length
       ? `${frame.found.length} match${frame.found.length === 1 ? "" : "es"} at ${frame.found.join(", ")}.`

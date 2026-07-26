@@ -28,6 +28,7 @@ import type {
   SortAlgorithmDefinition,
   StepTraceConfig,
   StringAlgorithmDefinition,
+  StringVisualProfile,
   UnionFindAlgorithmDefinition,
 } from "./types"
 
@@ -35,7 +36,12 @@ export interface RegistryApi {
   registerSort(id: string, meta: AlgorithmMeta, run: SortAlgorithmDefinition["run"]): void
   registerGraph(id: string, meta: AlgorithmMeta, run: GraphAlgorithmDefinition["run"]): void
   registerSearch(id: string, meta: AlgorithmMeta, run: SearchAlgorithmDefinition["run"]): void
-  registerString(id: string, meta: AlgorithmMeta, run: StringAlgorithmDefinition["run"]): void
+  registerString(
+    id: string,
+    meta: AlgorithmMeta,
+    run: StringAlgorithmDefinition["run"],
+    profile?: StringVisualProfile,
+  ): void
   registerPointer(id: string, meta: AlgorithmMeta, run: PointerAlgorithmDefinition["run"]): void
   registerDP(id: string, meta: AlgorithmMeta, run: DPAlgorithmDefinition["run"]): void
   registerUnionFind(id: string, meta: AlgorithmMeta, run: UnionFindAlgorithmDefinition["run"]): void
@@ -47,9 +53,10 @@ export interface RegistryApi {
   buildFrames(config: StepTraceConfig): BuiltFrames
 }
 
-interface RegisteredAlgorithm<TRun> {
+interface RegisteredAlgorithm<TRun, TProfile = never> {
   meta: AlgorithmMeta
   run: TRun
+  profile?: TProfile
 }
 
 type FamilyDefinition = FamilyAlgorithmDefinition<AlgorithmKind, unknown, unknown, unknown>
@@ -59,7 +66,10 @@ export function createRegistry(builtIns: readonly BuiltInAlgorithm[]): RegistryA
   const sortRegistry = new Map<string, RegisteredAlgorithm<SortAlgorithmDefinition["run"]>>()
   const graphRegistry = new Map<string, RegisteredAlgorithm<GraphAlgorithmDefinition["run"]>>()
   const searchRegistry = new Map<string, RegisteredAlgorithm<SearchAlgorithmDefinition["run"]>>()
-  const stringRegistry = new Map<string, RegisteredAlgorithm<StringAlgorithmDefinition["run"]>>()
+  const stringRegistry = new Map<
+    string,
+    RegisteredAlgorithm<StringAlgorithmDefinition["run"], StringVisualProfile>
+  >()
   const pointerRegistry = new Map<string, RegisteredAlgorithm<PointerAlgorithmDefinition["run"]>>()
   const dpRegistry = new Map<string, RegisteredAlgorithm<DPAlgorithmDefinition["run"]>>()
   const unionFindRegistry = new Map<
@@ -83,8 +93,8 @@ export function createRegistry(builtIns: readonly BuiltInAlgorithm[]): RegistryA
     registerSearch(id, meta, run) {
       searchRegistry.set(id, { meta, run })
     },
-    registerString(id, meta, run) {
-      stringRegistry.set(id, { meta, run })
+    registerString(id, meta, run, profile) {
+      stringRegistry.set(id, { meta, run, profile })
     },
     registerPointer(id, meta, run) {
       pointerRegistry.set(id, { meta, run })
@@ -172,7 +182,7 @@ export function createRegistry(builtIns: readonly BuiltInAlgorithm[]): RegistryA
 
       const string = stringRegistry.get(config.algorithm)
       if (string) {
-        const recorder = new StringRecorder(config.text, config.pattern)
+        const recorder = new StringRecorder(config.text, config.pattern, string.profile)
         string.run(input, recorder)
         return { kind: "string", frames: recorder.frames }
       }
@@ -239,7 +249,7 @@ export function createRegistry(builtIns: readonly BuiltInAlgorithm[]): RegistryA
         api.registerSearch(definition.id, definition.meta, definition.run)
         break
       case "string":
-        api.registerString(definition.id, definition.meta, definition.run)
+        api.registerString(definition.id, definition.meta, definition.run, definition.profile)
         break
       case "pointers":
         api.registerPointer(definition.id, definition.meta, definition.run)

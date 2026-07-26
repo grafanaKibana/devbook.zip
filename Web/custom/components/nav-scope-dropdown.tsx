@@ -49,11 +49,43 @@ const CHROME_ICONS = ["chevron-down", "check", "house", "book", "file"]
 // Browser script. Reads the inlined slug -> meta map (`.ns-scope-map`), builds the
 // dropdown from the Explorer's top-level nodes, wires selection + persistence, and
 // scopes the tree. Idempotent; re-applies on every nav. State is CSS-driven.
+const firstPaintScript = `
+(function () {
+  if (window.__devbookExplorerFirstPaint) return;
+
+  var root = document.documentElement;
+  var releaseRequested = false;
+  var timer = setTimeout(finish, 1000);
+
+  function finish() {
+    if (timer) clearTimeout(timer);
+    timer = 0;
+    root.removeAttribute("data-explorer-first-paint");
+  }
+
+  function release() {
+    if (releaseRequested) return;
+    releaseRequested = true;
+    var fontsReady = document.fonts ? document.fonts.ready : Promise.resolve();
+    fontsReady.then(finish, finish);
+  }
+
+  root.setAttribute("data-explorer-first-paint", "pending");
+  window.__devbookExplorerFirstPaint = { release: release };
+})();
+`
+
 const script = `
 (function () {
   var FILE_ICON_BY_NAME = ${JSON.stringify(FILE_ICON_BY_NAME)};
   var STORE_KEY = ${JSON.stringify(STORE_KEY)};
   var ALL = ${JSON.stringify(ALL)};
+
+  function releaseFirstPaint(explorer, scope) {
+    if (!scope || explorer.querySelector(".hide-until-loaded")) return;
+    var gate = window.__devbookExplorerFirstPaint;
+    if (gate) gate.release();
+  }
 
   // name -> inner-svg, inlined as .ns-icons by the component (from lucide-static).
   // Refreshed each apply() so it tracks the current page's frontmatter icons.
@@ -317,7 +349,6 @@ const script = `
         '</div>';
       place.parent.insertBefore(scope, place.anchor);
       wireSelector(explorer, scope);
-      return scope;
     }
     // Move it to the correct home if the viewport crossed the breakpoint or the
     // tree was rebuilt out from under it.
@@ -455,7 +486,7 @@ const script = `
 
   function renderSelector(explorer, entries, current) {
     var scope = ensureSelector(explorer);
-    if (!scope) return;
+    if (!scope) return null;
     var cur = currentEntry(entries, current);
     var isAll = current === ALL || !cur;
     var chip = scope.querySelector(".ns-trigger-chip");
@@ -471,6 +502,7 @@ const script = `
       if (name) name.textContent = cur.name;
     }
     if (list) list.innerHTML = buildMenu(entries, isAll ? ALL : current);
+    return scope;
   }
 
   // Set on every real navigation (not on plain re-renders). While true, the next
@@ -510,8 +542,9 @@ const script = `
         // only a folder scopes the tree — a file is a leaf with nothing to scope
         // to, so its tree stays the full list.
         var scopeSlug = curEntry && curEntry.kind === "folder" ? current : ALL;
-        renderSelector(explorer, entries, current);
+        var scope = renderSelector(explorer, entries, current);
         applyScope(entries, scopeSlug);
+        releaseFirstPaint(explorer, scope);
       });
     } finally {
       busy = false;
@@ -612,6 +645,7 @@ export const NavScopeDropdown: QuartzComponentConstructor = () => {
   }
 
   Component.afterDOMLoaded = script
+  Component.beforeDOMLoaded = firstPaintScript
 
   Component.css = `
 /* Scope selector — sits in the left sidebar ABOVE the Explorer's "Topics"

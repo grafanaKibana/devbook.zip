@@ -734,29 +734,58 @@
     }
   };
   var StringRecorder = class {
-    constructor(text, pattern) {
+    constructor(text, pattern, profile = null) {
       this.text = String(text || "");
       this.pattern = String(pattern || "");
+      this.profile = profile;
       this.frames = [];
       this.shift = 0;
       this.found = [];
       this.hash = null;
+      this.z = profile === "z-array" ? Array(this.text.length).fill(null) : null;
+      if (this.z) this.z[0] = this.text.length;
+      this.i = null;
+      this.l = 0;
+      this.r = 0;
+      this.k = null;
+      this.sourceCase = null;
+      this.zCompare = null;
+      this.goodSuffix = null;
+      this.lastOccurrence = null;
+      this.bmJ = null;
+      this.matchedFrom = null;
+      this.shiftDecision = null;
     }
     _push(type, extra, message) {
-      this.frames.push(
-        Object.freeze({
-          type,
-          text: this.text,
-          pattern: this.pattern,
-          shift: this.shift,
-          cmpT: extra.cmpT == null ? null : extra.cmpT,
-          cmpP: extra.cmpP == null ? null : extra.cmpP,
-          cmpResult: extra.cmpResult || null,
-          found: this.found.slice(),
-          hash: this.hash,
-          message
-        })
-      );
+      const frame = {
+        type,
+        text: this.text,
+        pattern: this.pattern,
+        shift: this.shift,
+        cmpT: extra.cmpT == null ? null : extra.cmpT,
+        cmpP: extra.cmpP == null ? null : extra.cmpP,
+        cmpResult: extra.cmpResult || null,
+        found: this.found.slice(),
+        hash: this.hash,
+        message
+      };
+      if (this.profile) frame.profile = this.profile;
+      if (this.profile === "z-array") {
+        frame.z = this.z.slice();
+        frame.i = this.i;
+        frame.box = [this.l, this.r];
+        frame.k = this.k;
+        frame.sourceCase = this.sourceCase;
+        frame.compare = this.zCompare ? { ...this.zCompare } : null;
+      }
+      if (this.profile === "boyer-moore") {
+        frame.goodSuffix = this.goodSuffix.slice();
+        frame.lastOccurrence = { ...this.lastOccurrence };
+        frame.j = this.bmJ;
+        frame.matchedFrom = this.matchedFrom;
+        frame.shiftDecision = this.shiftDecision ? { ...this.shiftDecision } : null;
+      }
+      this.frames.push(Object.freeze(frame));
     }
     init(message) {
       this._push("init", {}, message);
@@ -787,7 +816,88 @@
       this.hash = { window: windowHash, pattern: patternHash };
       this._push("hash", {}, message);
     }
+    focusZ(i, l, r, k, sourceCase, message) {
+      this.i = i;
+      this.l = l;
+      this.r = r;
+      this.k = k;
+      this.sourceCase = sourceCase;
+      this.zCompare = null;
+      this._push("focus", {}, message);
+    }
+    copyZ(i, k, value, sourceCase, message) {
+      this.i = i;
+      this.k = k;
+      this.sourceCase = sourceCase;
+      this.z[i] = value;
+      this.zCompare = null;
+      this._push("copy", {}, message);
+    }
+    compareZ(i, prefixIndex, candidateIndex, isMatch, sourceCase, message) {
+      this.i = i;
+      this.sourceCase = sourceCase;
+      this.zCompare = {
+        prefix: prefixIndex,
+        candidate: candidateIndex,
+        result: isMatch ? "match" : "mismatch"
+      };
+      this._push("compare", {}, message);
+    }
+    commitZ(i, value, l, r, sourceCase, message) {
+      this.i = i;
+      this.z[i] = value;
+      this.l = l;
+      this.r = r;
+      this.sourceCase = sourceCase;
+      this.zCompare = null;
+      this._push("commit", {}, message);
+    }
+    configureBoyerMoore(goodSuffix, lastOccurrence) {
+      this.goodSuffix = goodSuffix.slice();
+      this.lastOccurrence = { ...lastOccurrence };
+      this.matchedFrom = this.pattern.length;
+    }
+    alignBoyerMoore(shift, message) {
+      this.shift = shift;
+      this.bmJ = this.pattern.length - 1;
+      this.matchedFrom = this.pattern.length;
+      this.shiftDecision = null;
+      this._push("align", {}, message);
+    }
+    compareBoyerMoore(ti, pj, shift, isMatch, matchedFrom, message) {
+      this.shift = shift;
+      this.bmJ = pj;
+      this.matchedFrom = matchedFrom;
+      this._push(
+        "compare",
+        { cmpT: ti, cmpP: pj, cmpResult: isMatch ? "match" : "mismatch" },
+        message
+      );
+    }
+    decideBoyerMoore(j, bad, good, selected, winner, message) {
+      this.bmJ = j;
+      this.shiftDecision = { bad, good, selected, winner };
+      this._push("decision", {}, message);
+    }
+    matchBoyerMoore(shift, fullMatchShift, message) {
+      this.shift = shift;
+      this.bmJ = 0;
+      this.matchedFrom = 0;
+      if (!this.found.includes(shift)) this.found.push(shift);
+      this.shiftDecision = {
+        bad: null,
+        good: fullMatchShift,
+        selected: fullMatchShift,
+        winner: "full-match"
+      };
+      this._push("match", {}, message);
+    }
+    shiftBoyerMoore(shift, message) {
+      this.shift = shift;
+      this._push("shift", {}, message);
+    }
     done(message) {
+      this.zCompare = null;
       this._push("done", {}, message);
     }
   };
@@ -1702,7 +1812,13 @@
       rows.push({ k: semantics.movementLabel, v: frame.swaps, sw: "var(--_amber)" });
       return rows;
     }
-    return { nodes: [stage, status], paint, watch, destroy: tracker.destroy };
+    return {
+      nodes: [stage, status],
+      stageAlignment: "bottom",
+      paint,
+      watch,
+      destroy: tracker.destroy
+    };
   }
   function makeMarker(label, role) {
     const wrap = el("div", "steptrace__marker steptrace__marker--" + role);
@@ -2016,7 +2132,7 @@
     function watch(frame) {
       return semantics.watchRows(frame, frames);
     }
-    return { nodes: [stage, status], paint, watch };
+    return { nodes: [stage, status], stageAlignment: "bottom", paint, watch };
   }
   function boundaryTicks(lower, upper) {
     const span = upper - lower;
@@ -2174,6 +2290,8 @@
   }
   var CELL_W = 34;
   function makeMatchView(frames) {
+    if (frames[0].profile === "z-array") return makeZArrayView(frames);
+    if (frames[0].profile === "boyer-moore") return makeBoyerMooreView(frames);
     const text = frames[0].text;
     const pattern = frames[0].pattern;
     const hasHash = frames.some((f) => f.hash);
@@ -2244,6 +2362,308 @@
     const nodes = hasHash ? [stage, hashBadge, status] : [stage, status];
     return { nodes, paint, watch, destroy: () => ro && ro.disconnect() };
   }
+  function makeBoyerMooreView(frames) {
+    const first = frames[0];
+    const text = first.text;
+    const pattern = first.pattern;
+    const stage = el("div", "steptrace__match steptrace__bm");
+    stage.dataset.profile = "boyer-moore";
+    const viewport = el("div", "steptrace__bm-viewport");
+    const board = el("div", "steptrace__bm-board");
+    const makeCell = (character, patternCell = false) => {
+      const cell = el(
+        "div",
+        `steptrace__cell steptrace__bm-cell${patternCell ? " steptrace__cell--pat" : ""}`
+      );
+      const value = el("span", "steptrace__bm-char");
+      value.textContent = character;
+      const cue = el("span", "steptrace__bm-compare-icon");
+      cue.setAttribute("aria-hidden", "true");
+      const matchIcon = el("span", "steptrace__bm-icon steptrace__bm-icon--match");
+      matchIcon.innerHTML = ICON.check;
+      matchIcon.setAttribute("aria-hidden", "true");
+      const mismatchIcon = el("span", "steptrace__bm-icon steptrace__bm-icon--mismatch");
+      mismatchIcon.innerHTML = ICON.x;
+      mismatchIcon.setAttribute("aria-hidden", "true");
+      cue.append(matchIcon, mismatchIcon);
+      cell.append(value, cue);
+      return cell;
+    };
+    const patternRow = el("div", "steptrace__cells steptrace__cells--pat steptrace__bm-pattern");
+    const patternCells = [];
+    for (let i = 0; i < pattern.length; i++) {
+      const cell = makeCell(pattern[i], true);
+      patternRow.append(cell);
+      patternCells.push(cell);
+    }
+    const textRow = el("div", "steptrace__cells steptrace__bm-text");
+    const textCells = [];
+    for (let i = 0; i < text.length; i++) {
+      const cell = makeCell(text[i]);
+      textRow.append(cell);
+      textCells.push(cell);
+    }
+    board.append(patternRow, textRow);
+    viewport.append(board);
+    stage.append(viewport);
+    const status = statusEl();
+    let currentFrame = first;
+    function applyGeom() {
+      const measured = textCells[0]?.getBoundingClientRect?.().width || CELL_W;
+      const cw = measured > 0 ? measured : CELL_W;
+      stage.style.setProperty("--_cw", `${cw}px`);
+      patternRow.style.transform = `translateX(${(currentFrame.shift * cw).toFixed(2)}px)`;
+    }
+    const ro = typeof ResizeObserver !== "undefined" ? new ResizeObserver(applyGeom) : null;
+    if (ro) ro.observe(textRow);
+    function paint(frame, index, total) {
+      currentFrame = frame;
+      stage.dataset.frame = frame.type;
+      for (const cell of textCells) cell.dataset.state = "";
+      for (const cell of patternCells) cell.dataset.state = "";
+      for (const found of frame.found)
+        for (let j = 0; j < pattern.length; j++)
+          if (textCells[found + j]) textCells[found + j].dataset.state = "found";
+      if (frame.matchedFrom != null)
+        for (let j = frame.matchedFrom; j < pattern.length; j++) {
+          patternCells[j].dataset.state = "suffix";
+          const textCell = textCells[frame.shift + j];
+          if (textCell && textCell.dataset.state !== "found") textCell.dataset.state = "suffix";
+        }
+      if (frame.cmpT != null && textCells[frame.cmpT])
+        textCells[frame.cmpT].dataset.state = frame.cmpResult;
+      if (frame.cmpP != null && patternCells[frame.cmpP])
+        patternCells[frame.cmpP].dataset.state = frame.cmpResult;
+      if (frame.type === "match" || frame.shiftDecision?.winner === "full-match" && frame.found.includes(frame.shift))
+        for (const cell of patternCells) cell.dataset.state = "found";
+      applyGeom();
+      status.innerHTML = escapeHtml(frame.message) + ` <span class="steptrace__counts">· step ${index + 1}/${total}</span>`;
+    }
+    function watch(frame) {
+      const suffix = frame.matchedFrom == null || frame.matchedFrom >= pattern.length ? "—" : pattern.slice(frame.matchedFrom);
+      const choice = ["decision", "match", "shift", "done"].includes(frame.type) ? frame.shiftDecision : null;
+      const winner = choice?.winner === "bad-character" ? "bad wins" : choice?.winner === "good-suffix" ? "good wins" : choice?.winner === "full-match" ? "full match" : choice?.winner === "tie" ? "tie" : "";
+      return [
+        { k: "align", v: frame.shift, sw: "var(--_blue)" },
+        { k: "j", v: frame.j ?? "—", sw: "var(--_violet)" },
+        { k: "suffix", v: suffix, sw: "var(--_green)" },
+        { k: "bad shift", v: choice?.bad ?? "—", sw: "var(--_blue)" },
+        { k: "good shift", v: choice?.good ?? "—", sw: "var(--_violet)" },
+        {
+          k: "selected shift",
+          v: choice ? `${choice.selected} · ${winner}` : "—",
+          sw: "var(--_amber)"
+        }
+      ];
+    }
+    return {
+      nodes: [stage, status],
+      stableStage: true,
+      paint,
+      watch,
+      destroy: () => ro && ro.disconnect()
+    };
+  }
+  function resolveVisibleScrollLeft(scrollLeft, clientWidth, scrollWidth, targetStart, targetEnd, padding = 8) {
+    if (!Number.isFinite(scrollLeft) || !Number.isFinite(clientWidth) || !Number.isFinite(scrollWidth) || !Number.isFinite(targetStart) || !Number.isFinite(targetEnd) || clientWidth <= 0)
+      return scrollLeft;
+    const maxScroll = Math.max(0, scrollWidth - clientWidth);
+    const inset = Math.min(Math.max(0, padding), clientWidth / 2);
+    if (targetStart < scrollLeft + inset) return Math.min(maxScroll, Math.max(0, targetStart - inset));
+    if (targetEnd > scrollLeft + clientWidth - inset)
+      return Math.min(maxScroll, Math.max(0, targetEnd - clientWidth + inset));
+    return scrollLeft;
+  }
+  function makeZArrayView(frames) {
+    const text = frames[0].text;
+    const stage = el("div", "steptrace__z");
+    stage.dataset.profile = "z-array";
+    const viewport = el("div", "steptrace__z-viewport");
+    const board = el("div", "steptrace__z-board");
+    board.style.setProperty("--_z-length", String(Math.max(text.length, 1)));
+    const prefixBand = el("div", "steptrace__z-band");
+    const prefixLabel = el("div", "steptrace__z-label");
+    prefixLabel.textContent = "prefix";
+    const prefixClip = el("div", "steptrace__z-lane steptrace__z-prefix-clip");
+    const prefixTrack = el("div", "steptrace__z-track");
+    const prefixCells = [];
+    for (let k = 0; k < text.length; k++) {
+      const cell = el("div", "steptrace__z-cell steptrace__z-cell--prefix");
+      cell.textContent = text[k];
+      prefixTrack.append(cell);
+      prefixCells.push(cell);
+    }
+    prefixClip.append(prefixTrack);
+    prefixBand.append(prefixLabel, prefixClip);
+    const stringBand = el("div", "steptrace__z-band");
+    const stringLabel = el("div", "steptrace__z-label");
+    stringLabel.textContent = "S";
+    const stringRow = el("div", "steptrace__z-lane steptrace__z-string");
+    const stringCells = [];
+    for (let k = 0; k < text.length; k++) {
+      const cell = el("div", "steptrace__z-cell steptrace__z-cell--string");
+      const index = el("span", "steptrace__z-index");
+      index.textContent = String(k);
+      const value = el("span", "steptrace__z-char");
+      value.textContent = text[k];
+      cell.append(index, value);
+      stringRow.append(cell);
+      stringCells.push(cell);
+    }
+    const cursor = el("div", "steptrace__z-cursor");
+    cursor.setAttribute("aria-hidden", "true");
+    const bracket = el("div", "steptrace__z-bracket");
+    bracket.setAttribute("aria-hidden", "true");
+    stringRow.append(bracket, cursor);
+    stringBand.append(stringLabel, stringRow);
+    const zBand = el("div", "steptrace__z-band");
+    const zLabel = el("div", "steptrace__z-label");
+    zLabel.textContent = "Z";
+    const zRow = el("div", "steptrace__z-lane steptrace__z-values");
+    const zCells = [];
+    for (let k = 0; k < text.length; k++) {
+      const cell = el("div", "steptrace__z-cell steptrace__z-cell--value");
+      cell.textContent = "·";
+      zRow.append(cell);
+      zCells.push(cell);
+    }
+    const copyToken = el("div", "steptrace__z-copy");
+    copyToken.setAttribute("aria-hidden", "true");
+    zRow.append(copyToken);
+    zBand.append(zLabel, zRow);
+    board.append(prefixBand, stringBand, zBand);
+    viewport.append(board);
+    const legend = el("div", "steptrace__z-legend");
+    for (const [state, label] of [
+      ["compare", "character check"],
+      ["copy", "mirror reuse"],
+      ["commit", "committed Z"]
+    ]) {
+      const item = el("span", "steptrace__z-legend-item");
+      item.dataset.state = state;
+      const swatch = el("span", "steptrace__z-legend-swatch");
+      const textNode = el("span");
+      textNode.textContent = label;
+      item.append(swatch, textNode);
+      legend.append(item);
+    }
+    stage.append(viewport, legend);
+    const status = statusEl();
+    let currentFrame = frames[0];
+    function applyGeom() {
+      const measured = stringCells[0]?.getBoundingClientRect?.().width || CELL_W;
+      const cw = measured > 0 ? measured : CELL_W;
+      const i = currentFrame.i;
+      const [l, r] = currentFrame.box || [0, 0];
+      stage.style.setProperty("--_cw", `${cw}px`);
+      prefixTrack.style.transform = `translateX(${((i ?? 0) * cw).toFixed(2)}px)`;
+      cursor.style.transform = `translateX(${((i ?? 0) * cw).toFixed(2)}px)`;
+      bracket.style.transform = `translateX(${(l * cw).toFixed(2)}px)`;
+      bracket.style.width = `${Math.max(1, r - l + 1) * cw}px`;
+      const copyIndex = currentFrame.type === "copy" ? i : currentFrame.k;
+      copyToken.style.transform = `translateX(${((copyIndex ?? 0) * cw).toFixed(2)}px)`;
+    }
+    function ensureActiveVisible() {
+      if (currentFrame.i == null) return;
+      const candidate = currentFrame.compare?.candidate;
+      const firstIndex = Math.min(currentFrame.i, candidate ?? currentFrame.i);
+      const lastIndex = Math.max(currentFrame.i, candidate ?? currentFrame.i);
+      const firstRect = stringCells[firstIndex]?.getBoundingClientRect?.();
+      const lastRect = stringCells[lastIndex]?.getBoundingClientRect?.();
+      const viewportRect = viewport.getBoundingClientRect?.();
+      if (!firstRect || !lastRect || !viewportRect) return;
+      const targetStart = viewport.scrollLeft + firstRect.left - viewportRect.left;
+      const targetEnd = viewport.scrollLeft + lastRect.left + lastRect.width - viewportRect.left;
+      const next = resolveVisibleScrollLeft(
+        viewport.scrollLeft,
+        viewport.clientWidth,
+        viewport.scrollWidth,
+        targetStart,
+        targetEnd
+      );
+      if (Math.abs(next - viewport.scrollLeft) < 0.5) return;
+      const behavior = stage.closest?.(".steptrace--reduced") ? "auto" : "smooth";
+      if (typeof viewport.scrollTo === "function") viewport.scrollTo({ left: next, behavior });
+      else viewport.scrollLeft = next;
+    }
+    function syncLayout() {
+      applyGeom();
+      ensureActiveVisible();
+    }
+    const ro = typeof ResizeObserver !== "undefined" ? new ResizeObserver(syncLayout) : null;
+    if (ro) {
+      ro.observe(stringRow);
+      ro.observe(viewport);
+    }
+    function paint(frame, index, total) {
+      currentFrame = frame;
+      stage.dataset.frame = frame.type;
+      stage.dataset.case = frame.sourceCase || "";
+      prefixTrack.dataset.visible = frame.i == null ? "0" : "1";
+      cursor.dataset.visible = frame.i == null ? "0" : "1";
+      bracket.dataset.visible = frame.box ? "1" : "0";
+      copyToken.dataset.visible = frame.type === "copy" ? "1" : "0";
+      copyToken.textContent = frame.k == null ? "" : String(frame.z[frame.k] ?? "·");
+      for (let k = 0; k < text.length; k++) {
+        prefixCells[k].dataset.state = "";
+        stringCells[k].dataset.state = "";
+        zCells[k].dataset.state = "";
+        zCells[k].textContent = frame.z[k] == null ? "·" : String(frame.z[k]);
+        if (frame.box && k >= frame.box[0] && k <= frame.box[1]) stringCells[k].dataset.box = "1";
+        else delete stringCells[k].dataset.box;
+      }
+      if (frame.i != null && stringCells[frame.i]) stringCells[frame.i].dataset.state = "focus";
+      if (frame.type === "copy" && frame.k != null) {
+        zCells[frame.k].dataset.state = "copy-source";
+        zCells[frame.i].dataset.state = "copy-target";
+      }
+      if (frame.type === "commit" && frame.i != null) zCells[frame.i].dataset.state = "commit";
+      if (frame.compare) {
+        const state = frame.compare.result;
+        prefixCells[frame.compare.prefix].dataset.state = state;
+        stringCells[frame.compare.candidate].dataset.state = state;
+      }
+      syncLayout();
+      status.innerHTML = escapeHtml(frame.message) + ` <span class="steptrace__counts">· step ${index + 1}/${total}</span>`;
+    }
+    function watch(frame) {
+      const box = frame.box || [0, 0];
+      return [
+        { k: "i", v: frame.i ?? "—", sw: "var(--_blue)" },
+        { k: "case", v: frame.sourceCase || "initialize", sw: "var(--_neutral)" },
+        { k: "box", v: `[${box[0]}, ${box[1]}]`, sw: "var(--_violet)" },
+        {
+          k: "mirror",
+          v: frame.k == null ? "—" : `k = ${frame.k}, Z[k] = ${frame.z[frame.k] ?? "·"}`,
+          sw: "var(--_amber)"
+        },
+        {
+          k: "Z[i]",
+          v: frame.i == null ? "—" : frame.z[frame.i] ?? "·",
+          sw: "var(--_green)"
+        }
+      ];
+    }
+    return {
+      nodes: [stage, status],
+      stableStage: true,
+      paint,
+      watch,
+      destroy: () => ro && ro.disconnect()
+    };
+  }
+  function makeArrayStrip(values) {
+    const wrap = el("div", "steptrace__pwrap");
+    const strip = el("div", "steptrace__pcells");
+    const cells = values.map((value) => {
+      const cell = el("div", "steptrace__pcell");
+      cell.textContent = String(value);
+      strip.append(cell);
+      return cell;
+    });
+    wrap.append(strip);
+    return { wrap, strip, cells };
+  }
   function makePointerView(frames) {
     const n = frames[0].array.length;
     const ptrNames = (function() {
@@ -2253,20 +2673,12 @@
       }
       return [];
     })();
-    const wrap = el("div", "steptrace__pwrap");
-    const strip = el("div", "steptrace__pcells");
-    const cells = [];
-    for (let k = 0; k < n; k++) {
-      const cell = el("div", "steptrace__pcell");
-      cell.textContent = frames[0].array[k];
-      strip.append(cell);
-      cells.push(cell);
-    }
+    const { wrap, cells } = makeArrayStrip(frames[0].array);
     const brackets = el("div", "steptrace__pbrackets");
     const brL = el("div", "steptrace__pbr steptrace__pbr--l");
     const brR = el("div", "steptrace__pbr steptrace__pbr--r");
     brackets.append(brL, brR);
-    wrap.append(strip, brackets);
+    wrap.append(brackets);
     const status = statusEl();
     function paint(frame) {
       const win = frame.window;
@@ -3196,21 +3608,42 @@
     return { nodes: [wrap, status], paint, watch };
   }
   var executionTreeViewSerial = 0;
+  function centerVisibleTree(rects, canvasWidth, canvasHeight) {
+    if (!rects.length) return { x: 0, y: 0 };
+    const left = Math.min(...rects.map((rect) => rect.left));
+    const right = Math.max(...rects.map((rect) => rect.right));
+    const top = Math.min(...rects.map((rect) => rect.top));
+    const bottom = Math.max(...rects.map((rect) => rect.bottom));
+    return {
+      x: canvasWidth / 2 - (left + right) / 2,
+      y: canvasHeight / 2 - (top + bottom) / 2
+    };
+  }
+  function tieredArrayCells(values, width) {
+    const cellWidth = width / Math.max(1, values.length);
+    return {
+      cells: values.map((value, index) => ({
+        value,
+        x: -width / 2 + cellWidth * (index + 0.5)
+      })),
+      separators: values.slice(1).map((_, index) => -width / 2 + cellWidth * (index + 1))
+    };
+  }
   function makeExecutionTreeView(frames, descriptor) {
     const f0 = frames[0];
     const nodes = f0.nodes;
-    const halfWidth = descriptor.nodeWidth / 2;
     const halfHeight = descriptor.nodeHeight / 2;
-    const padX = halfWidth + 12;
     const padY = halfHeight + 12;
-    const xs = nodes.map((node) => node.x);
+    const nodeWidth = (node) => node.width || descriptor.nodeWidth;
+    const lefts = nodes.map((node) => node.x - nodeWidth(node) / 2);
+    const rights = nodes.map((node) => node.x + nodeWidth(node) / 2);
     const ys = nodes.map((node) => node.y);
-    const minX = Math.min(...xs);
+    const minX = Math.min(...lefts);
     const minY = Math.min(...ys);
-    const width = Math.max(...xs) - minX + padX * 2;
+    const width = Math.max(...rights) - minX + 24;
     const height = Math.max(...ys) - minY + padY * 2;
     const position = Object.fromEntries(
-      nodes.map((node) => [node.id, { x: node.x - minX + padX, y: node.y - minY + padY }])
+      nodes.map((node) => [node.id, { x: node.x - minX + 12, y: node.y - minY + padY }])
     );
     const svg = document.createElementNS(SVGNS, "svg");
     const title = document.createElementNS(SVGNS, "title");
@@ -3226,6 +3659,11 @@
     const canvasWidth = Math.max(descriptor.minSvgWidth, width * (descriptor.canvasScale || 1));
     svg.style.setProperty("--steptrace-tree-width", `${canvasWidth}px`);
     svg.append(title, description);
+    const treeLayer = descriptor.centerVisible ? document.createElementNS(SVGNS, "g") : svg;
+    if (descriptor.centerVisible) {
+      treeLayer.setAttribute("class", "steptrace__rtcontent");
+      svg.append(treeLayer);
+    }
     const edgeElements = [];
     for (const edge of f0.edges) {
       const from = position[edge.from];
@@ -3238,12 +3676,14 @@
       line.setAttribute("y2", String(to.y - halfHeight));
       line.setAttribute("aria-hidden", "true");
       line.setAttribute("focusable", "false");
-      svg.append(line);
+      treeLayer.append(line);
       edgeElements.push({ element: line, from: edge.from, to: edge.to });
     }
     const nodeElements = {};
     for (const node of nodes) {
       const point = position[node.id];
+      const width2 = nodeWidth(node);
+      const halfWidth = width2 / 2;
       const group = document.createElementNS(SVGNS, "g");
       group.setAttribute("class", "steptrace__rtnode");
       group.setAttribute("transform", `translate(${point.x} ${point.y})`);
@@ -3263,12 +3703,12 @@
       } else {
         surface.setAttribute("x", String(-halfWidth));
         surface.setAttribute("y", String(-halfHeight));
-        surface.setAttribute("width", String(descriptor.nodeWidth));
+        surface.setAttribute("width", String(width2));
         surface.setAttribute("height", String(descriptor.nodeHeight));
         surface.setAttribute("rx", "7");
         ring.setAttribute("x", String(-halfWidth - 2));
         ring.setAttribute("y", String(-halfHeight - 2));
-        ring.setAttribute("width", String(descriptor.nodeWidth + 4));
+        ring.setAttribute("width", String(width2 + 4));
         ring.setAttribute("height", String(descriptor.nodeHeight + 4));
         ring.setAttribute("rx", "9");
       }
@@ -3276,6 +3716,9 @@
       const detail = document.createElementNS(SVGNS, "text");
       const result = document.createElementNS(SVGNS, "text");
       const badge = document.createElementNS(SVGNS, "text");
+      const divider = descriptor.tieredCards ? document.createElementNS(SVGNS, "line") : null;
+      const valueTier = descriptor.tieredCards ? document.createElementNS(SVGNS, "g") : null;
+      const valueCells = [];
       label.setAttribute("class", "steptrace__rtlabel");
       detail.setAttribute("class", "steptrace__rtdetail");
       result.setAttribute("class", "steptrace__rtval");
@@ -3288,14 +3731,65 @@
         label.setAttribute("y", "0");
         label.setAttribute("dominant-baseline", "central");
         result.setAttribute("y", String(halfHeight + 9));
+      } else if (descriptor.tieredCards) {
+        label.setAttribute("y", "13");
+        label.setAttribute("dominant-baseline", "central");
+        divider?.setAttribute("class", "steptrace__rtdivider");
+        divider?.setAttribute("x1", String(-halfWidth + 1));
+        divider?.setAttribute("x2", String(halfWidth - 1));
+        divider?.setAttribute("y1", "6");
+        divider?.setAttribute("y2", "6");
+        valueTier?.setAttribute("class", "steptrace__rtarray");
+        const tier = tieredArrayCells(node.values, width2);
+        for (const x of tier.separators) {
+          const separator = document.createElementNS(SVGNS, "line");
+          separator.setAttribute("class", "steptrace__rtcell-separator");
+          separator.setAttribute("x1", String(x));
+          separator.setAttribute("x2", String(x));
+          separator.setAttribute("y1", String(-halfHeight + 1));
+          separator.setAttribute("y2", "6");
+          valueTier?.append(separator);
+        }
+        for (const cell of tier.cells) {
+          const value = document.createElementNS(SVGNS, "text");
+          value.setAttribute("class", "steptrace__rtcell-value");
+          value.setAttribute("x", String(cell.x));
+          value.setAttribute("y", "-7");
+          value.setAttribute("text-anchor", "middle");
+          value.setAttribute("dominant-baseline", "central");
+          value.textContent = String(cell.value);
+          valueTier?.append(value);
+          valueCells.push(value);
+        }
       } else {
         label.setAttribute("y", "-4");
         detail.setAttribute("y", "9");
       }
-      group.append(ring, surface, label, detail, result, badge);
-      svg.append(group);
-      nodeElements[node.id] = { group, detail, result, badge, secondaryLine };
+      group.append(ring, surface);
+      if (divider) group.append(divider);
+      if (valueTier) group.append(valueTier);
+      group.append(label);
+      if (!descriptor.tieredCards) group.append(detail);
+      group.append(result, badge);
+      treeLayer.append(group);
+      nodeElements[node.id] = { group, detail, result, badge, secondaryLine, valueCells };
     }
+    function centerTransform(visibleIds) {
+      const visible = new Set(visibleIds);
+      const rects = nodes.filter((node) => visible.has(node.id)).map((node) => {
+        const point = position[node.id];
+        const halfNodeWidth = nodeWidth(node) / 2;
+        return {
+          left: point.x - halfNodeWidth,
+          right: point.x + halfNodeWidth,
+          top: point.y - halfHeight,
+          bottom: point.y + halfHeight
+        };
+      });
+      const offset = centerVisibleTree(rects, width, height);
+      return `translate(${offset.x}px, ${offset.y}px)`;
+    }
+    if (descriptor.centerVisible) treeLayer.style.transform = centerTransform(f0.visible);
     const legend = el("div", "steptrace__legend");
     legend.setAttribute("aria-label", `${descriptor.ariaLabel} state legend`);
     for (const item of descriptor.legend) {
@@ -3309,6 +3803,7 @@
     wrap.setAttribute("role", "region");
     wrap.setAttribute("aria-label", `${descriptor.ariaLabel} visualization`);
     wrap.dataset.fitWidth = descriptor.fitWidth ? "true" : "false";
+    wrap.dataset.profile = f0.profile || "";
     wrap.tabIndex = 0;
     wrap.append(svg);
     const status = statusEl();
@@ -3317,7 +3812,9 @@
       const visible = new Set(model.visible);
       const collapsed = new Set(model.collapsed);
       const path = new Set(model.path);
+      const related = model.phase === "combine" ? new Set(f0.edges.filter((edge) => edge.from === model.active).map((edge) => edge.to)) : /* @__PURE__ */ new Set();
       const activeNode2 = nodes.find((node) => node.id === model.active);
+      if (descriptor.centerVisible) treeLayer.style.transform = centerTransform(model.visible);
       title.textContent = `${descriptor.ariaLabel}: ${model.phase}`;
       description.textContent = `${model.phase}. Active subproblem ${activeNode2 ? descriptor.nodeLines(activeNode2).join("; ") : "none"}. ${model.action}.`;
       for (const node of nodes) {
@@ -3328,10 +3825,17 @@
         elements.group.dataset.state = state;
         elements.group.dataset.active = model.active === node.id ? "true" : "false";
         elements.group.dataset.path = path.has(node.id) ? "true" : "false";
+        elements.group.dataset.related = related.has(node.id) ? "true" : "false";
         const value = model.results[node.id];
         const resultText = Array.isArray(value) ? value.length ? `[${value.join(", ")}]` : "" : value == null ? "" : String(value);
         if (descriptor.shape === "card") {
-          elements.detail.textContent = resultText || elements.secondaryLine;
+          if (descriptor.tieredCards) {
+            const values = Array.isArray(value) ? value : node.values;
+            for (let index2 = 0; index2 < elements.valueCells.length; index2++)
+              elements.valueCells[index2].textContent = String(values[index2] ?? "");
+          } else {
+            elements.detail.textContent = resultText || elements.secondaryLine;
+          }
           elements.result.textContent = "";
           elements.badge.textContent = "";
         } else {
@@ -3343,6 +3847,7 @@
         edge.element.dataset.vis = visible.has(edge.to) ? "1" : "0";
         edge.element.dataset.collapsed = collapsed.has(edge.to) ? "true" : "false";
         edge.element.dataset.path = path.has(edge.from) && path.has(edge.to) ? "true" : "false";
+        edge.element.dataset.related = model.active === edge.from && related.has(edge.to) ? "true" : "false";
       }
       status.innerHTML = escapeHtml(frame.message) + ` <span class="steptrace__counts">· step ${index + 1}/${total}</span>`;
     }
@@ -3590,6 +4095,7 @@
     pause: '<svg viewBox="0 0 24 24"><rect x="7" y="5" width="3.4" height="14" rx="1" fill="currentColor" stroke="none"/><rect x="13.6" y="5" width="3.4" height="14" rx="1" fill="currentColor" stroke="none"/></svg>',
     kebab: '<svg viewBox="0 0 24 24"><circle cx="12" cy="5" r="1.5" fill="currentColor" stroke="none"/><circle cx="12" cy="12" r="1.5" fill="currentColor" stroke="none"/><circle cx="12" cy="19" r="1.5" fill="currentColor" stroke="none"/></svg>',
     check: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg>',
+    x: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.8" stroke-linecap="round"><path d="M6 6l12 12"/><path d="M18 6 6 18"/></svg>',
     compare: '<svg class="steptrace__cue-compare" viewBox="0 0 24 24" aria-hidden="true"><path d="m7 16-4-4 4-4"/><path d="M3 12h18"/><path d="m17 8 4 4-4 4"/></svg>',
     swap: '<svg class="steptrace__cue-swap" viewBox="0 0 24 24" aria-hidden="true"><path d="m2 9 3-3 3 3"/><path d="M13 18H7a2 2 0 0 1-2-2V6"/><path d="m22 15-3 3-3-3"/><path d="M11 6h6a2 2 0 0 1 2 2v10"/></svg>',
     search: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="10.5" cy="10.5" r="6.5"/><path d="m15.2 15.2 4.8 4.8"/></svg>'
@@ -3614,7 +4120,7 @@
     const firstGap = frames.find((frame) => Number.isInteger(frame.gap))?.gap;
     const familyProfile = frames[0]?.profile;
     const firstDistributionPass = frames.find((frame) => frame.type === "pass");
-    const initial = kind === "sort" ? firstGap != null ? `Gap ${firstGap}` : familyProfile === "cyclic" ? "Place values" : familyProfile === "counting" ? "Tally keys" : familyProfile === "radix" ? `${firstDistributionPass?.passLabel || "Digit"} pass` : familyProfile === "bucket" ? "Scatter ranges" : familyProfile === "introsort" ? "Quicksort" : algorithm === "bubble-sort" ? "Pass 1" : algorithm === "insertion-sort" ? "Prefix 1" : algorithm === "selection-sort" ? "Select 1" : algorithm === "heap-sort" ? "Build heap" : algorithm === "merge-sort" ? "Runs of 1" : "Partition" : kind === "search" ? familyProfile === "exponential" ? "Gallop" : familyProfile === "interpolation" ? "Estimate" : familyProfile === "jump" ? "Jump blocks" : familyProfile === "ternary" ? "Narrow peak" : familyProfile === "shipping-capacity" ? "Answer range" : "Search range" : kind === "string" ? "Shift 0" : kind === "backtrack" ? "Depth 0" : kind === "rectree" ? familyProfile === "divide-and-conquer" ? "Whole problem" : familyProfile === "merge-sort" ? "Whole array" : familyProfile === "memoization" ? "Empty cache" : familyProfile === "coin-change-top-down" ? "Amount 30¢" : familyProfile === "grid-path-top-down" ? "Loading bay" : "Call tree" : "Initialize";
+    const initial = kind === "sort" ? firstGap != null ? `Gap ${firstGap}` : familyProfile === "cyclic" ? "Place values" : familyProfile === "counting" ? "Tally keys" : familyProfile === "radix" ? `${firstDistributionPass?.passLabel || "Digit"} pass` : familyProfile === "bucket" ? "Scatter ranges" : familyProfile === "introsort" ? "Quicksort" : algorithm === "bubble-sort" ? "Pass 1" : algorithm === "insertion-sort" ? "Prefix 1" : algorithm === "selection-sort" ? "Select 1" : algorithm === "heap-sort" ? "Build heap" : algorithm === "merge-sort" ? "Runs of 1" : "Partition" : kind === "search" ? familyProfile === "exponential" ? "Gallop" : familyProfile === "interpolation" ? "Estimate" : familyProfile === "jump" ? "Jump blocks" : familyProfile === "ternary" ? "Narrow peak" : familyProfile === "shipping-capacity" ? "Answer range" : "Search range" : kind === "string" ? familyProfile === "z-array" ? "Initialize Z" : familyProfile === "boyer-moore" ? "Preprocess rules" : "Shift 0" : kind === "backtrack" ? "Depth 0" : kind === "rectree" ? familyProfile === "divide-and-conquer" ? "Whole problem" : familyProfile === "merge-sort" ? "Whole array" : familyProfile === "memoization" ? "Empty cache" : familyProfile === "coin-change-top-down" ? "Amount 30¢" : familyProfile === "grid-path-top-down" ? "Loading bay" : "Call tree" : "Initialize";
     push(0, initial);
     let lastRange = "";
     let lastGap = firstGap;
@@ -3675,6 +4181,11 @@
             i,
             familyProfile === "ternary" && f.mid2 != null ? `Probes ${f.mid}/${f.mid2}` : `${familyProfile === "exponential" && f.phase === "gallop" ? "Bound" : familyProfile === "jump" && f.phase === "jump" ? "Block end" : "Probe"} ${f.mid}`
           );
+      } else if (kind === "string" && familyProfile === "z-array") {
+        if (f.type === "focus") push(i, `i = ${f.i}`);
+      } else if (kind === "string" && familyProfile === "boyer-moore") {
+        if (f.type === "align") push(i, `Align ${f.shift}`);
+        if (f.type === "match") push(i, `Match ${f.shift}`);
       } else if (kind === "string") {
         if ((f.type === "slide" || f.type === "hash" || f.type === "match") && String(f.shift) !== lastWindow) {
           push(i, `Shift ${f.shift}`);
@@ -3764,6 +4275,8 @@
       }
       if (algorithm === "merge-sort")
         return `Output [${frame.array.join(", ")}] · ${frame.swaps} writes.`;
+      if (algorithm === "tim-sort")
+        return `Output [${frame.array.join(", ")}] · ${frame.merges} run-stack merge${frame.merges === 1 ? "" : "s"}.`;
       const unit = frame.movementUnit || (["bubble-sort", "selection-sort", "quick-sort", "heap-sort"].includes(algorithm) ? "swaps" : "moves");
       const comparisons = frame.showComparisons === false ? "" : `${frame.comparisons} comparisons · `;
       return `Output [${frame.array.join(", ")}] · ${comparisons}${frame.swaps} ${unit}.`;
@@ -3801,6 +4314,7 @@
         return `Minimum feasible capacity ${frame.answer} · ${frame.probes} probe${frame.probes === 1 ? "" : "s"}.`;
       return frame.found == null ? `${frame.target} not found · ${frame.comparisons} comparisons.` : `${frame.target} found at index ${frame.found} · ${frame.comparisons} comparisons.`;
     }
+    if (kind === "string" && frame.profile === "z-array") return `Z = [${frame.z.join(", ")}].`;
     if (kind === "string")
       return frame.found.length ? `${frame.found.length} match${frame.found.length === 1 ? "" : "es"} at ${frame.found.join(", ")}.` : `No matches found.`;
     if (kind === "pointers") {
@@ -4036,6 +4550,118 @@
     }
   };
 
+  // custom/steptrace/src/algorithms/boyer-moore.ts
+  function buildGoodSuffixData(pattern) {
+    const m = pattern.length;
+    if (!m) return { table: [], fullMatchShift: 0 };
+    const shift = new Array(m + 1).fill(0);
+    const border = new Array(m + 1).fill(0);
+    let i = m;
+    let j = m + 1;
+    border[i] = j;
+    while (i > 0) {
+      while (j <= m && pattern[i - 1] !== pattern[j - 1]) {
+        if (shift[j] === 0) shift[j] = j - i;
+        j = border[j];
+      }
+      i--;
+      j--;
+      border[i] = j;
+    }
+    j = border[0];
+    for (i = 0; i <= m; i++) {
+      if (shift[i] === 0) shift[i] = j;
+      if (i === j) j = border[j];
+    }
+    return {
+      table: Array.from({ length: m }, (_, mismatch) => shift[mismatch + 1]),
+      fullMatchShift: shift[0]
+    };
+  }
+  var boyerMoore = {
+    id: "boyer-moore",
+    kind: "string",
+    profile: "boyer-moore",
+    meta: { label: "Boyer-Moore" },
+    run: (input, ops) => {
+      const text = String(input.text || "");
+      const pattern = String(input.pattern || "");
+      const n = text.length;
+      const m = pattern.length;
+      const { table: goodSuffix, fullMatchShift } = buildGoodSuffixData(pattern);
+      const lastOccurrence = {};
+      for (let i = 0; i < pattern.length; i++) lastOccurrence[pattern[i]] = i;
+      ops.configureBoyerMoore(goodSuffix, lastOccurrence);
+      ops.init(
+        m ? `Precompute the last occurrence of each pattern character and good-suffix shifts [${goodSuffix.join(", ")}].` : "An empty pattern is not searched."
+      );
+      if (!m || m > n) {
+        ops.done("Nothing to search.");
+        return;
+      }
+      let alignment = 0;
+      while (alignment <= n - m) {
+        ops.alignBoyerMoore(
+          alignment,
+          `Align the pattern at ${alignment}; compare from j = ${m - 1} right-to-left.`
+        );
+        let j = m - 1;
+        let matchedFrom = m;
+        while (j >= 0) {
+          const isMatch = pattern[j] === text[alignment + j];
+          const nextMatchedFrom = isMatch ? j : matchedFrom;
+          ops.compareBoyerMoore(
+            alignment + j,
+            j,
+            alignment,
+            isMatch,
+            nextMatchedFrom,
+            `Compare pattern[${j}]='${pattern[j]}' with text[${alignment + j}]='${text[alignment + j]}' → ${isMatch ? "match" : "mismatch"}.`
+          );
+          if (!isMatch) break;
+          matchedFrom = j;
+          j--;
+        }
+        if (j < 0) {
+          ops.matchBoyerMoore(
+            alignment,
+            fullMatchShift,
+            `Whole pattern matched at ${alignment}; the full-match good-suffix shift is ${fullMatchShift}.`
+          );
+          const nextAlignment = alignment + fullMatchShift;
+          if (nextAlignment <= n - m) {
+            alignment = nextAlignment;
+            ops.shiftBoyerMoore(alignment, `Shift by ${fullMatchShift} after the full match.`);
+          } else {
+            ops.shiftBoyerMoore(
+              alignment,
+              `A full-match shift of ${fullMatchShift} would leave the searchable range; keep the match visible.`
+            );
+            alignment = nextAlignment;
+          }
+          continue;
+        }
+        const bad = Math.max(1, j - (lastOccurrence[text[alignment + j]] ?? -1));
+        const good = goodSuffix[j];
+        const selected = Math.max(bad, good);
+        const winner = bad === good ? "tie" : bad > good ? "bad-character" : "good-suffix";
+        ops.decideBoyerMoore(
+          j,
+          bad,
+          good,
+          selected,
+          winner,
+          `Bad-character proposes ${bad}; good-suffix proposes ${good}; take max = ${selected} (${winner}).`
+        );
+        alignment += selected;
+        ops.shiftBoyerMoore(alignment, `Shift the pattern to alignment ${alignment}.`);
+      }
+      ops.done(
+        ops.found.length ? `Found ${ops.found.length} occurrence(s): index ${ops.found.join(", ")}.` : "Pattern not found."
+      );
+    }
+  };
+
   // custom/steptrace/src/algorithms/bubble-sort.ts
   var bubbleSort = {
     id: "bubble-sort",
@@ -4189,9 +4815,9 @@
     });
   }
   function distributionLabel(text, detail) {
-    const heading = el("div", "steptrace__distribution-label");
+    const heading = el("div", "steptrace__rail-label steptrace__distribution-label");
     heading.textContent = text;
-    heading.title = detail;
+    heading.setAttribute("aria-description", detail);
     return heading;
   }
   function makeDistributionArrayBand(title, detail, length, modifier = "") {
@@ -4558,6 +5184,7 @@
     const labels = distributionTokenLabels(original.map((token) => token.value));
     const maxValue = Math.max(...original.map((token) => token.value), 1);
     const stage = el("div", "steptrace__distribution steptrace__distribution--buckets");
+    stage.dataset.profile = first.profile;
     const sourceTitle = first.profile === "radix" ? "Current Array" : "Unsorted Array";
     const source = makeDistributionArrayBand(
       sourceTitle,
@@ -4569,6 +5196,7 @@
     const bucketTitle = first.profile === "radix" ? "Digit Buckets" : "Range Buckets";
     board.setAttribute("role", "region");
     board.setAttribute("aria-label", bucketTitle);
+    board.style.setProperty("--_bucket-count", String(first.bucketLabels.length));
     const lanes = first.bucketLabels.map((bucketLabel, bucketIndex) => {
       const lane = el("div", "steptrace__distribution-lane");
       const header = el("div", "steptrace__distribution-lane-header");
@@ -5311,6 +5939,18 @@
       ];
     }
   };
+  var mergeSortTreeViewDescriptor = {
+    ...executionTreeViewDescriptor,
+    ariaLabel: "Merge sort split and merge tree",
+    minSvgWidth: 420,
+    canvasScale: 1,
+    fitWidth: true,
+    tieredCards: true,
+    centerVisible: true,
+    nodeLines(node) {
+      return [node.label, node.detail || node.values.join("  ")];
+    }
+  };
   var memoizationTreeViewDescriptor = {
     ariaLabel: "Memoization call tree",
     ...executionTreeCardMetrics,
@@ -5413,7 +6053,7 @@
     },
     createView(frames) {
       const profile = frames[0]?.profile;
-      const descriptor = profile === "memoization" ? memoizationTreeViewDescriptor : profile === "coin-change-top-down" || profile === "grid-path-top-down" ? dynamicProgrammingTreeViewDescriptor : executionTreeViewDescriptor;
+      const descriptor = profile === "memoization" ? memoizationTreeViewDescriptor : profile === "merge-sort" ? mergeSortTreeViewDescriptor : profile === "coin-change-top-down" || profile === "grid-path-top-down" ? dynamicProgrammingTreeViewDescriptor : executionTreeViewDescriptor;
       return makeExecutionTreeView(frames, descriptor);
     }
   };
@@ -7923,24 +8563,32 @@
     while (j < right.length) output.push(right[j++]);
     return output;
   }
-  function buildTree(values, from, to, depth, x, y, id, nodes, edges, metas) {
+  function buildTree(values, from, to, depth, id, path, nodes, edges, metas) {
     const segment = values.slice(from, to);
     const label = segment.length ? `[${from}…${to - 1}]` : "[]";
+    const detail = segment.join("  ");
+    const widestValue = Math.max(...segment.map((value) => String(value).length));
+    const cellWidth = Math.max(28, widestValue * 6.2 + 16);
     nodes.push({
       id,
       label,
       values: segment,
-      x,
-      y,
+      detail,
+      width: Math.max(40, segment.length * cellWidth, label.length * 5 + 20),
+      x: (from + to - 1) / 2 * 54,
+      y: 30 + depth * 72,
       depth
     });
     const meta = {
       id,
       label,
       values: segment,
+      path,
+      depth,
       from,
       to,
-      children: null
+      children: null,
+      sorted: segment.slice()
     };
     metas.set(id, meta);
     if (segment.length <= 1) return meta;
@@ -7948,40 +8596,68 @@
     const leftId = `${id}-l`;
     const rightId = `${id}-r`;
     edges.push({ from: id, to: leftId }, { from: id, to: rightId });
-    const span = Math.max(1, values.length - 1);
-    const childShift = (span - depth * 0.6 + 1) * 20;
-    const leftMeta = buildTree(values, from, mid, depth + 1, x - childShift, y + 90, leftId, nodes, edges, metas);
-    const rightMeta = buildTree(values, mid, to, depth + 1, x + childShift, y + 90, rightId, nodes, edges, metas);
+    const leftMeta = buildTree(
+      values,
+      from,
+      mid,
+      depth + 1,
+      leftId,
+      [...path, leftId],
+      nodes,
+      edges,
+      metas
+    );
+    const rightMeta = buildTree(
+      values,
+      mid,
+      to,
+      depth + 1,
+      rightId,
+      [...path, rightId],
+      nodes,
+      edges,
+      metas
+    );
     meta.children = [leftMeta.id, rightMeta.id];
     return meta;
   }
-  function emitFrames(id, path, metas, ops) {
+  function revealSplits(id, metas, ops) {
     const node = metas.get(id);
-    if (!node) return [];
+    if (!node) return;
     const label = node.values.length ? `[${node.from}…${node.to - 1}]` : "[]";
     if (node.values.length <= 1) {
       const text = node.values.length ? `[${node.values[0]}]` : "[]";
-      ops.base(id, path, node.values, `${text} is already sorted.`);
-      return node.values.slice();
+      ops.base(id, node.path, node.values, `${text} is already sorted.`);
+      return;
     }
     const [leftId, rightId] = node.children || [];
     const left = metas.get(leftId);
     const right = metas.get(rightId);
-    if (!left || !right) return node.values.slice();
-    ops.split(id, path, [leftId, rightId], `Split ${label} into ${left.label} and ${right.label}.`);
-    const leftPath = [...path, leftId];
-    const rightPath = [...path, rightId];
-    const leftResult = emitFrames(leftId, leftPath, metas, ops);
-    ops.returnResult(leftId, path, leftResult, `Return [${leftResult.join(", ")}] to ${label}.`);
-    const rightResult = emitFrames(rightId, rightPath, metas, ops);
-    ops.returnResult(rightId, path, rightResult, `Return [${rightResult.join(", ")}] to ${label}.`);
-    const merged = merge(leftResult, rightResult);
-    const combinePath = path.length > 1 ? path.slice(0, -1) : path;
-    ops.combine(id, combinePath, merged, `Merge ${left.label} and ${right.label} into [${merged.join(", ")}].`);
-    if (path.length > 1) {
-      ops.returnResult(id, combinePath, merged, `Return [${merged.join(", ")}] to parent call.`);
+    if (!left || !right) return;
+    ops.split(
+      id,
+      node.path,
+      [leftId, rightId],
+      `Split ${label} into ${left.label} and ${right.label}.`
+    );
+    revealSplits(leftId, metas, ops);
+    revealSplits(rightId, metas, ops);
+  }
+  function mergeBottomUp(metas, ops) {
+    const internalNodes = [...metas.values()].filter((node) => node.children).sort((a, b) => b.depth - a.depth || a.from - b.from);
+    for (const node of internalNodes) {
+      const [leftId, rightId] = node.children || [];
+      const left = metas.get(leftId);
+      const right = metas.get(rightId);
+      if (!left || !right) continue;
+      node.sorted = merge(left.sorted, right.sorted);
+      ops.combine(
+        node.id,
+        node.path,
+        node.sorted,
+        `Merge [${left.sorted.join(", ")}] and [${right.sorted.join(", ")}] into [${node.sorted.join(", ")}].`
+      );
     }
-    return merged;
   }
   function parseMergeSortTreeConfig(config) {
     if (!Array.isArray(config.array) || config.array.length < 2)
@@ -7990,7 +8666,7 @@
       throw new Error("steptrace: merge-sort-tree requires finite numeric values.");
     return {
       array: config.array.slice(),
-      profile: "divide-and-conquer"
+      profile: "merge-sort"
     };
   }
   var mergeSortTree = {
@@ -8005,26 +8681,16 @@
       const edges = [];
       const metas = /* @__PURE__ */ new Map();
       const rootId = "root";
-      const rootMeta = buildTree(
-        values,
-        0,
-        values.length,
-        0,
-        Math.max(1, values.length - 1) * 72,
-        30,
-        rootId,
-        nodes,
-        edges,
-        metas
-      );
+      const rootMeta = buildTree(values, 0, values.length, 0, rootId, [rootId], nodes, edges, metas);
       rootMeta.from = 0;
       rootMeta.to = values.length;
       rootMeta.values = values.slice();
       nodes[0].label = `[0…${values.length - 1}]`;
       const message = `Merge sort ${values.join(", ")} by splitting into halves and merging sorted halves on return.`;
       ops.tree(nodes, edges, rootId, message);
-      emitFrames(rootId, [rootId], metas, ops);
-      ops.done(rootId, values.slice().sort((a, b) => a - b), `Sorted result [${values.sort((a, b) => a - b).join(", ")}].`);
+      revealSplits(rootId, metas, ops);
+      mergeBottomUp(metas, ops);
+      ops.done(rootId, rootMeta.sorted, `Sorted result [${rootMeta.sorted.join(", ")}].`);
     }
   };
 
@@ -8814,6 +9480,468 @@
     }
   };
 
+  // custom/steptrace/src/families/run-stack.ts
+  var RunStackRecorder = class {
+    constructor(config) {
+      __publicField(this, "config", config);
+      __publicField(this, "frames", []);
+      __publicField(this, "array");
+      __publicField(this, "stack", []);
+      __publicField(this, "current", null);
+      __publicField(this, "direction", null);
+      __publicField(this, "processed", 0);
+      __publicField(this, "insertion", null);
+      __publicField(this, "mergeIndex", null);
+      __publicField(this, "invariant", null);
+      __publicField(this, "merges", 0);
+      this.array = config.array.slice();
+    }
+    get value() {
+      return this.array.slice();
+    }
+    init(message) {
+      this.pushFrame("init", message);
+    }
+    detect(run, direction, message) {
+      this.current = { ...run };
+      this.direction = direction;
+      this.insertion = null;
+      this.mergeIndex = null;
+      this.invariant = null;
+      this.pushFrame("detect", message);
+    }
+    reverse(run, message) {
+      this.array.splice(run.start, run.length, ...this.array.slice(run.start, run.start + run.length).reverse());
+      this.current = { ...run };
+      this.pushFrame("reverse", message);
+    }
+    extend(run, message) {
+      this.current = { ...run };
+      this.insertion = null;
+      this.pushFrame("extend", message);
+    }
+    insert(run, source, target, sortedEnd, message) {
+      const value = this.array[source];
+      for (let index = source; index > target; index--) this.array[index] = this.array[index - 1];
+      this.array[target] = value;
+      this.current = { ...run };
+      this.insertion = { source, target, sortedEnd };
+      this.pushFrame("insert", message);
+    }
+    push(run, message) {
+      this.stack.push({ ...run });
+      this.current = { ...run };
+      this.direction = null;
+      this.insertion = null;
+      this.processed = run.start + run.length;
+      this.mergeIndex = null;
+      this.invariant = null;
+      this.pushFrame("push", message);
+    }
+    check(message) {
+      const x = this.stack.at(-1)?.length ?? null;
+      const y = this.stack.at(-2)?.length ?? null;
+      const z = this.stack.at(-3)?.length ?? null;
+      this.current = null;
+      this.insertion = null;
+      this.mergeIndex = null;
+      this.invariant = {
+        x,
+        y,
+        z,
+        holds: x == null || y == null ? null : y > x && (z == null || z > y + x)
+      };
+      this.pushFrame("check", message);
+    }
+    merge(index, forced, message) {
+      const left = this.stack[index];
+      const right = this.stack[index + 1];
+      if (!left || !right || left.start + left.length !== right.start)
+        throw new Error("steptrace: tim-sort can only merge adjacent run spans.");
+      const leftValues = this.array.slice(left.start, left.start + left.length);
+      const rightValues = this.array.slice(right.start, right.start + right.length);
+      const merged = [];
+      let i = 0;
+      let j = 0;
+      while (i < leftValues.length && j < rightValues.length) {
+        if (leftValues[i] <= rightValues[j]) merged.push(leftValues[i++]);
+        else merged.push(rightValues[j++]);
+      }
+      merged.push(...leftValues.slice(i), ...rightValues.slice(j));
+      this.array.splice(left.start, merged.length, ...merged);
+      this.stack.splice(index, 2, { start: left.start, length: left.length + right.length });
+      this.current = this.stack[index];
+      this.insertion = null;
+      this.mergeIndex = index;
+      this.invariant = null;
+      this.merges++;
+      this.pushFrame(forced ? "force-merge" : "merge", message);
+    }
+    done(message) {
+      this.current = null;
+      this.direction = null;
+      this.insertion = null;
+      this.mergeIndex = null;
+      this.invariant = null;
+      this.pushFrame("done", message);
+    }
+    pushFrame(type, message) {
+      this.frames.push(
+        Object.freeze({
+          type,
+          profile: this.config.profile,
+          array: this.array.slice(),
+          stack: this.stack.map((run) => Object.freeze({ ...run })),
+          current: this.current ? Object.freeze({ ...this.current }) : null,
+          direction: this.direction,
+          processed: this.processed,
+          minrun: this.config.minrun,
+          insertion: this.insertion ? Object.freeze({ ...this.insertion }) : null,
+          mergeIndex: this.mergeIndex,
+          invariant: this.invariant ? Object.freeze({ ...this.invariant }) : null,
+          merges: this.merges,
+          message
+        })
+      );
+    }
+  };
+  function runLabel(run) {
+    return `[${run.start}…${run.start + run.length - 1}] · ${run.length}`;
+  }
+  function stackRunFor(frame, index) {
+    return frame.stack[index] || null;
+  }
+  function runAt(frame, index) {
+    return frame.stack.findIndex((run) => run.start <= index && index < run.start + run.length);
+  }
+  function runStackWatch(frame) {
+    const top = frame.stack.at(-1);
+    return [
+      {
+        k: "phase",
+        v: frame.type.replace("-", " "),
+        sw: "var(--_violet)",
+        hint: "What Tim sort is doing in this frame."
+      },
+      {
+        k: "run",
+        v: frame.current ? runLabel(frame.current) : "—",
+        sw: "var(--_blue)",
+        hint: "Array span currently detected, extended, or merged."
+      },
+      {
+        k: "stack",
+        v: frame.stack.map((run) => run.length).join(" · ") || "empty",
+        sw: "var(--_amber)",
+        hint: "Saved contiguous run lengths, from stack bottom to top."
+      },
+      {
+        k: "top",
+        v: top ? runLabel(top) : "—",
+        sw: "var(--_green)",
+        hint: "Newest run at the top of the stack."
+      }
+    ];
+  }
+  function makeRunStackView(frames) {
+    const length = frames[0].array.length;
+    const root = el("div", "steptrace__run-stack");
+    root.setAttribute("role", "region");
+    root.setAttribute("aria-label", "Tim sort run stack");
+    const arrayLabel = el("div", "steptrace__rail-label steptrace__run-stack-label");
+    arrayLabel.textContent = "Array runs";
+    const arraySection = el("div", "steptrace__run-array-section");
+    const arrayBars = el("div", "steptrace__stage steptrace__run-bars");
+    const bars = makeBars(arrayBars, length);
+    const stackLabel = el("div", "steptrace__rail-label steptrace__run-stack-label");
+    stackLabel.textContent = "Run stack · top";
+    const stackSection = el("div", "steptrace__run-stack-section");
+    const stack = el("div", "steptrace__run-stack-cards");
+    const stackCards = Array.from({ length }, () => {
+      const card = el("div", "steptrace__run-stack-card");
+      const title = el("div", "steptrace__run-stack-title");
+      const values = el("div", "steptrace__run-stack-values");
+      card.append(title, values);
+      card.hidden = true;
+      stack.append(card);
+      return { card, title, values };
+    });
+    const invariant = el("div", "steptrace__run-invariant");
+    arraySection.append(arrayLabel, arrayBars);
+    stackSection.append(stackLabel, stack, invariant);
+    root.append(arraySection, stackSection);
+    const status = statusEl();
+    const maxValue = Math.max(...frames[0].array, 1);
+    let previousStack = [];
+    function paint(frame) {
+      for (let index = 0; index < length; index++) {
+        const bar = bars[index];
+        const runIndex = runAt(frame, index);
+        bar.fill.style.height = barHeightStyle(frame.array[index], maxValue);
+        bar.num.textContent = String(frame.array[index]);
+        if (runIndex >= 0) bar.bar.dataset.run = String(runIndex % 4);
+        else delete bar.bar.dataset.run;
+        bar.bar.dataset.processed = index < frame.processed ? "1" : "0";
+        const isSorted = frame.type === "done";
+        const isCurrent = !isSorted && frame.current != null && index >= frame.current.start && index < frame.current.start + frame.current.length;
+        const isInsert = !isSorted && frame.insertion?.target === index;
+        bar.bar.dataset.current = isCurrent ? "1" : "0";
+        bar.bar.dataset.insert = isInsert ? "1" : "0";
+        bar.bar.dataset.motion = frame.type === "insert" && isInsert ? "insert" : "";
+        bar.bar.dataset.state = isSorted ? "sorted" : isInsert ? "candidate" : isCurrent ? "compare" : "";
+        bar.bar.setAttribute(
+          "aria-label",
+          `Index ${index}, value ${frame.array[index]}${runIndex >= 0 ? `, run ${runIndex + 1}` : ""}`
+        );
+      }
+      for (let cardIndex = 0; cardIndex < stackCards.length; cardIndex++) {
+        const card = stackCards[cardIndex];
+        const run = stackRunFor(frame, frame.stack.length - cardIndex - 1);
+        if (!run) {
+          card.card.hidden = true;
+          continue;
+        }
+        const stackIndex = frame.stack.length - cardIndex - 1;
+        card.card.hidden = false;
+        card.title.textContent = `R${stackIndex + 1} ${runLabel(run)}`;
+        card.values.textContent = `[${frame.array.slice(run.start, run.start + run.length).join(", ")}]`;
+        card.card.dataset.active = frame.current?.start === run.start ? "1" : "0";
+        card.card.dataset.merged = frame.mergeIndex != null && (stackIndex === frame.mergeIndex || stackIndex === frame.mergeIndex + 1) ? "1" : "0";
+        card.card.dataset.run = String(stackIndex % 4);
+        const previous = previousStack[stackIndex];
+        card.card.dataset.motion = frame.type === "push" && stackIndex === frame.stack.length - 1 ? "push" : frame.type === "check" ? "check" : frame.type === "merge" || frame.type === "force-merge" ? "merge" : previous?.start !== run.start || previous?.length !== run.length ? "reflow" : "";
+      }
+      const check = frame.invariant;
+      invariant.textContent = check ? `X=${check.x ?? "—"}, Y=${check.y ?? "—"}, Z=${check.z ?? "—"}${check.holds == null ? "" : check.holds ? " · holds" : " · merge"}` : frame.type === "force-merge" ? "Final collapse: merge adjacent runs until one remains." : `minrun ${frame.minrun} · ${frame.merges} merge${frame.merges === 1 ? "" : "s"}`;
+      invariant.dataset.state = check?.holds === false ? "merge" : check?.holds ? "holds" : "";
+      status.textContent = frame.message;
+      previousStack = frame.stack;
+    }
+    return {
+      nodes: [root, status],
+      stageLayout: "fill",
+      stableStage: true,
+      paint,
+      watch: runStackWatch
+    };
+  }
+  var runStackFamily = {
+    id: "run-stack",
+    createRecorder(config) {
+      return new RunStackRecorder(config);
+    },
+    createView(frames) {
+      return makeRunStackView(frames);
+    }
+  };
+
+  // custom/steptrace/src/algorithms/tim-sort.ts
+  function invalidConfig10(message) {
+    throw new Error(`steptrace: tim-sort ${message}`);
+  }
+  function parseTimSortConfig(config) {
+    const { array } = config;
+    if (!Array.isArray(array) || array.length < 2)
+      invalidConfig10('requires an "array" with at least two numbers.');
+    if (!array.every((value) => typeof value === "number" && Number.isFinite(value)))
+      invalidConfig10('requires every "array" value to be a finite number.');
+    const minrun = config.minrun ?? Math.min(array.length, 4);
+    if (!Number.isInteger(minrun) || minrun < 2)
+      invalidConfig10('requires "minrun" to be an integer of at least 2.');
+    return { array: array.slice(), minrun: Math.min(minrun, array.length), profile: "tim-sort" };
+  }
+  function runLabel2(start, length) {
+    return `[${start}, ${start + length - 1}]`;
+  }
+  var timSort = {
+    id: "tim-sort",
+    kind: "sort",
+    family: runStackFamily,
+    meta: { label: "Tim sort" },
+    parse: parseTimSortConfig,
+    run(input, ops) {
+      const n = ops.value.length;
+      ops.init(`Scan natural runs, extend short runs to minrun ${input.minrun}, then merge the run stack.`);
+      function mergeCollapse() {
+        while (true) {
+          const stack = ops.frames.at(-1)?.stack || [];
+          if (stack.length < 2) return;
+          const n2 = stack.length - 2;
+          const x = stack[n2 + 1].length;
+          const y = stack[n2].length;
+          const z = n2 > 0 ? stack[n2 - 1].length : null;
+          const w = n2 > 1 ? stack[n2 - 2].length : null;
+          const deeperViolation = w != null && z != null && w <= z + y;
+          const threeRunViolation = z != null && z <= y + x;
+          const pairViolation = y <= x;
+          ops.check(
+            `Check X=${x}, Y=${y}${z == null ? "" : `, Z=${z}`}: ${threeRunViolation || pairViolation || deeperViolation ? "merge is required" : "invariants hold"}.`
+          );
+          if (threeRunViolation || deeperViolation) {
+            const mergeIndex = z != null && z < x ? n2 - 1 : n2;
+            ops.merge(
+              mergeIndex,
+              false,
+              `Invariant collapse: merge adjacent runs ${runLabel2(stack[mergeIndex].start, stack[mergeIndex].length)} and ${runLabel2(stack[mergeIndex + 1].start, stack[mergeIndex + 1].length)}.`
+            );
+          } else if (pairViolation) {
+            ops.merge(
+              n2,
+              false,
+              `Top pair violates Y > X: merge adjacent runs ${runLabel2(stack[n2].start, stack[n2].length)} and ${runLabel2(stack[n2 + 1].start, stack[n2 + 1].length)}.`
+            );
+          } else return;
+        }
+      }
+      let start = 0;
+      while (start < n) {
+        let end = start + 1;
+        const descending = end < n && ops.value[end] < ops.value[start];
+        if (descending) {
+          while (end < n && ops.value[end] < ops.value[end - 1]) end++;
+        } else {
+          while (end < n && ops.value[end] >= ops.value[end - 1]) end++;
+        }
+        let length = end - start;
+        ops.detect(
+          { start, length },
+          descending ? "descending" : "ascending",
+          `Detect ${descending ? "strictly descending" : "ascending"} natural run ${runLabel2(start, length)}.`
+        );
+        if (descending)
+          ops.reverse(
+            { start, length },
+            `Reverse the strictly descending run ${runLabel2(start, length)}; equal keys never entered it.`
+          );
+        const forcedLength = Math.min(input.minrun, n - start);
+        if (length < forcedLength) {
+          ops.extend(
+            { start, length: forcedLength },
+            `Extend ${runLabel2(start, length)} to minrun ${forcedLength} with stable binary insertion.`
+          );
+          for (let source = start + length; source < start + forcedLength; source++) {
+            const value = ops.value[source];
+            let lo = start;
+            let hi = source;
+            while (lo < hi) {
+              const mid = lo + hi >> 1;
+              if (value < ops.value[mid]) hi = mid;
+              else lo = mid + 1;
+            }
+            ops.insert(
+              { start, length: forcedLength },
+              source,
+              lo,
+              source,
+              `Binary-insert ${value} at index ${lo}; equals stay after earlier equals for stability.`
+            );
+          }
+          length = forcedLength;
+        }
+        ops.push({ start, length }, `Push contiguous run ${runLabel2(start, length)} onto the stack.`);
+        mergeCollapse();
+        start += length;
+      }
+      while ((ops.frames.at(-1)?.stack.length || 0) > 1) {
+        const stack = ops.frames.at(-1).stack;
+        let index = stack.length - 2;
+        if (index > 0 && stack[index - 1].length < stack[index + 1].length) index--;
+        ops.merge(
+          index,
+          true,
+          `Force final merge of adjacent runs ${runLabel2(stack[index].start, stack[index].length)} and ${runLabel2(stack[index + 1].start, stack[index + 1].length)}.`
+        );
+      }
+      ops.done(`One run remains: sorted stably after ${ops.frames.at(-1)?.merges || 0} adjacent merges.`);
+    }
+  };
+
+  // custom/steptrace/src/algorithms/z-algorithm.ts
+  var zAlgorithm = {
+    id: "z-algorithm",
+    kind: "string",
+    profile: "z-array",
+    meta: { label: "Z-Algorithm" },
+    run: (input, ops) => {
+      const text = String(input.text || "");
+      const n = text.length;
+      const z = new Array(n).fill(0);
+      if (n) z[0] = n;
+      ops.init(
+        n ? `Set Z[0] = ${n}. Each remaining entry measures how far the suffix at i matches the prefix.` : "The empty string has no Z-array entries."
+      );
+      if (!n) {
+        ops.done("Z = [].");
+        return;
+      }
+      let l = 0;
+      let r = 0;
+      for (let i = 1; i < n; i++) {
+        const inside = i <= r;
+        const k = inside ? i - l : null;
+        const remainder = inside ? r - i + 1 : 0;
+        const sourceCase = !inside ? "outside" : z[k] < remainder ? "copy" : "reuse-extend";
+        ops.focusZ(
+          i,
+          l,
+          r,
+          k,
+          sourceCase,
+          inside ? `i = ${i} lies inside [${l}, ${r}]; mirror k = ${k}.` : `i = ${i} lies outside [${l}, ${r}]; compare from the prefix start.`
+        );
+        if (inside) {
+          z[i] = Math.min(remainder, z[k]);
+          ops.copyZ(
+            i,
+            k,
+            z[i],
+            sourceCase,
+            sourceCase === "copy" ? `Copy Z[${k}] = ${z[k]} to Z[${i}]; it ends before r, so no character comparison is needed.` : `Reuse the verified box remainder ${remainder} from Z[${k}], then test beyond r.`
+          );
+          if (sourceCase === "copy") {
+            ops.commitZ(
+              i,
+              z[i],
+              l,
+              r,
+              sourceCase,
+              `Commit Z[${i}] = ${z[i]}; the active box stays [${l}, ${r}].`
+            );
+            continue;
+          }
+        }
+        while (i + z[i] < n) {
+          const prefixIndex = z[i];
+          const candidateIndex = i + z[i];
+          const isMatch = text[prefixIndex] === text[candidateIndex];
+          ops.compareZ(
+            i,
+            prefixIndex,
+            candidateIndex,
+            isMatch,
+            sourceCase,
+            `Compare S[${prefixIndex}]='${text[prefixIndex]}' with S[${candidateIndex}]='${text[candidateIndex]}' → ${isMatch ? "match" : "mismatch"}.`
+          );
+          if (!isMatch) break;
+          z[i]++;
+        }
+        if (i + z[i] - 1 > r) {
+          l = i;
+          r = i + z[i] - 1;
+        }
+        ops.commitZ(
+          i,
+          z[i],
+          l,
+          r,
+          sourceCase,
+          `Commit Z[${i}] = ${z[i]}; the active box is [${l}, ${r}].`
+        );
+      }
+      ops.done(`Z = [${z.join(", ")}].`);
+    }
+  };
+
   // custom/steptrace/src/algorithms/index.ts
   var builtInAlgorithms = [
     bubbleSort,
@@ -8830,6 +9958,7 @@
     bucketSort,
     cyclicSort,
     introsort,
+    timSort,
     exponentialSearch,
     interpolationSearch,
     jumpSearch,
@@ -8844,6 +9973,8 @@
     linearSearch,
     kmp,
     rabinKarp,
+    zAlgorithm,
+    boyerMoore,
     twoPointers,
     slidingWindow,
     lcs,
@@ -9008,6 +10139,11 @@
     shift: "Pattern offset under the text.",
     matches: "Matches found so far.",
     hash: "Current window hash and pattern hash.",
+    align: "Pattern offset under the text.",
+    suffix: "Pattern suffix already matched right-to-left.",
+    "bad shift": "Shift proposed by the bad-character rule.",
+    "good shift": "Shift proposed by the good-suffix rule.",
+    "selected shift": "Larger proposed shift and the rule that selected it.",
     l: "Left pointer index and value.",
     left: "Left pointer index and value.",
     lo: "Left boundary index and value.",
@@ -9584,11 +10720,10 @@
         currentView = view;
         if (built.kind === "graph") syncStartOptions(built.graph);
         const fillStage = view.stageLayout === "fill";
+        const stageAlignment = fillStage || built.kind === "graph" ? null : view.stageAlignment || "center";
         root.classList.toggle("steptrace--stable-stage", view.stableStage === true);
-        stageCol.classList.toggle(
-          "steptrace__stage-col--bottom",
-          built.kind !== "graph" && !fillStage
-        );
+        stageCol.classList.toggle("steptrace__stage-col--bottom", stageAlignment === "bottom");
+        stageCol.classList.toggle("steptrace__stage-col--center", stageAlignment === "center");
         stageCol.classList.toggle("steptrace__stage-col--graph", built.kind === "graph");
         stageCol.classList.toggle("steptrace__stage-col--fill", fillStage);
         const nodes = view.nodes.slice(0, -1);
@@ -9704,8 +10839,8 @@
       registerSearch(id, meta, run) {
         searchRegistry.set(id, { meta, run });
       },
-      registerString(id, meta, run) {
-        stringRegistry.set(id, { meta, run });
+      registerString(id, meta, run, profile) {
+        stringRegistry.set(id, { meta, run, profile });
       },
       registerPointer(id, meta, run) {
         pointerRegistry.set(id, { meta, run });
@@ -9785,7 +10920,7 @@
         }
         const string = stringRegistry.get(config.algorithm);
         if (string) {
-          const recorder = new StringRecorder(config.text, config.pattern);
+          const recorder = new StringRecorder(config.text, config.pattern, string.profile);
           string.run(input, recorder);
           return { kind: "string", frames: recorder.frames };
         }
@@ -9844,7 +10979,7 @@
           api.registerSearch(definition.id, definition.meta, definition.run);
           break;
         case "string":
-          api.registerString(definition.id, definition.meta, definition.run);
+          api.registerString(definition.id, definition.meta, definition.run, definition.profile);
           break;
         case "pointers":
           api.registerPointer(definition.id, definition.meta, definition.run);

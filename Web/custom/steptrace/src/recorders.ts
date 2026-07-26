@@ -621,29 +621,58 @@ export class BoundarySearchRecorder {
 //   it at `shift`; compared cells and matched regions are highlighted.
 export class StringRecorder {
   [key: string]: any
-  constructor(text, pattern) {
+  constructor(text, pattern, profile = null) {
     this.text = String(text || "")
     this.pattern = String(pattern || "")
+    this.profile = profile
     this.frames = []
     this.shift = 0
     this.found = []
     this.hash = null
+    this.z = profile === "z-array" ? Array(this.text.length).fill(null) : null
+    if (this.z) this.z[0] = this.text.length
+    this.i = null
+    this.l = 0
+    this.r = 0
+    this.k = null
+    this.sourceCase = null
+    this.zCompare = null
+    this.goodSuffix = null
+    this.lastOccurrence = null
+    this.bmJ = null
+    this.matchedFrom = null
+    this.shiftDecision = null
   }
   _push(type, extra, message) {
-    this.frames.push(
-      Object.freeze({
-        type,
-        text: this.text,
-        pattern: this.pattern,
-        shift: this.shift,
-        cmpT: extra.cmpT == null ? null : extra.cmpT,
-        cmpP: extra.cmpP == null ? null : extra.cmpP,
-        cmpResult: extra.cmpResult || null,
-        found: this.found.slice(),
-        hash: this.hash,
-        message,
-      }),
-    )
+    const frame: any = {
+      type,
+      text: this.text,
+      pattern: this.pattern,
+      shift: this.shift,
+      cmpT: extra.cmpT == null ? null : extra.cmpT,
+      cmpP: extra.cmpP == null ? null : extra.cmpP,
+      cmpResult: extra.cmpResult || null,
+      found: this.found.slice(),
+      hash: this.hash,
+      message,
+    }
+    if (this.profile) frame.profile = this.profile
+    if (this.profile === "z-array") {
+      frame.z = this.z.slice()
+      frame.i = this.i
+      frame.box = [this.l, this.r]
+      frame.k = this.k
+      frame.sourceCase = this.sourceCase
+      frame.compare = this.zCompare ? { ...this.zCompare } : null
+    }
+    if (this.profile === "boyer-moore") {
+      frame.goodSuffix = this.goodSuffix.slice()
+      frame.lastOccurrence = { ...this.lastOccurrence }
+      frame.j = this.bmJ
+      frame.matchedFrom = this.matchedFrom
+      frame.shiftDecision = this.shiftDecision ? { ...this.shiftDecision } : null
+    }
+    this.frames.push(Object.freeze(frame))
   }
   init(message) {
     this._push("init", {}, message)
@@ -674,7 +703,88 @@ export class StringRecorder {
     this.hash = { window: windowHash, pattern: patternHash }
     this._push("hash", {}, message)
   }
+  focusZ(i, l, r, k, sourceCase, message) {
+    this.i = i
+    this.l = l
+    this.r = r
+    this.k = k
+    this.sourceCase = sourceCase
+    this.zCompare = null
+    this._push("focus", {}, message)
+  }
+  copyZ(i, k, value, sourceCase, message) {
+    this.i = i
+    this.k = k
+    this.sourceCase = sourceCase
+    this.z[i] = value
+    this.zCompare = null
+    this._push("copy", {}, message)
+  }
+  compareZ(i, prefixIndex, candidateIndex, isMatch, sourceCase, message) {
+    this.i = i
+    this.sourceCase = sourceCase
+    this.zCompare = {
+      prefix: prefixIndex,
+      candidate: candidateIndex,
+      result: isMatch ? "match" : "mismatch",
+    }
+    this._push("compare", {}, message)
+  }
+  commitZ(i, value, l, r, sourceCase, message) {
+    this.i = i
+    this.z[i] = value
+    this.l = l
+    this.r = r
+    this.sourceCase = sourceCase
+    this.zCompare = null
+    this._push("commit", {}, message)
+  }
+  configureBoyerMoore(goodSuffix, lastOccurrence) {
+    this.goodSuffix = goodSuffix.slice()
+    this.lastOccurrence = { ...lastOccurrence }
+    this.matchedFrom = this.pattern.length
+  }
+  alignBoyerMoore(shift, message) {
+    this.shift = shift
+    this.bmJ = this.pattern.length - 1
+    this.matchedFrom = this.pattern.length
+    this.shiftDecision = null
+    this._push("align", {}, message)
+  }
+  compareBoyerMoore(ti, pj, shift, isMatch, matchedFrom, message) {
+    this.shift = shift
+    this.bmJ = pj
+    this.matchedFrom = matchedFrom
+    this._push(
+      "compare",
+      { cmpT: ti, cmpP: pj, cmpResult: isMatch ? "match" : "mismatch" },
+      message,
+    )
+  }
+  decideBoyerMoore(j, bad, good, selected, winner, message) {
+    this.bmJ = j
+    this.shiftDecision = { bad, good, selected, winner }
+    this._push("decision", {}, message)
+  }
+  matchBoyerMoore(shift, fullMatchShift, message) {
+    this.shift = shift
+    this.bmJ = 0
+    this.matchedFrom = 0
+    if (!this.found.includes(shift)) this.found.push(shift)
+    this.shiftDecision = {
+      bad: null,
+      good: fullMatchShift,
+      selected: fullMatchShift,
+      winner: "full-match",
+    }
+    this._push("match", {}, message)
+  }
+  shiftBoyerMoore(shift, message) {
+    this.shift = shift
+    this._push("shift", {}, message)
+  }
   done(message) {
+    this.zCompare = null
     this._push("done", {}, message)
   }
 }
