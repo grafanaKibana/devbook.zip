@@ -59,13 +59,13 @@ const script = `
     var viewportHeight = window.visualViewport ? window.visualViewport.height : window.innerHeight;
     var footer = quartzBody.querySelector(":scope > footer");
     var center = quartzBody.querySelector(":scope > .center");
-    var grid = dashboard;
+    var grid = dashboard.querySelector(".dc-topic-grid");
     if (!footer || !center || !grid) return false;
 
     var quartzRect = quartzBody.getBoundingClientRect();
     var footerRect = footer.getBoundingClientRect();
     if (quartzRect.bottom > viewportHeight + 1 || footerRect.bottom > viewportHeight + 1) return false;
-    if (!scrollFits(quartzBody) || !scrollFits(center) || !scrollFits(grid)) return false;
+    if (!scrollFits(quartzBody) || !scrollFits(center) || !scrollFits(dashboard) || !scrollFits(grid)) return false;
 
     var cards = grid.querySelectorAll(".dc-topic-card");
     if (!cards.length) return false;
@@ -90,7 +90,7 @@ const script = `
   function chooseState() {
     frame = 0;
     var body = document.body;
-    var dashboard = body.querySelector('.dc-topic-grid');
+    var dashboard = body.querySelector(".dc-topic-dashboard");
     var quartzBody = body.querySelector('.page > #quartz-body');
     var isHome = body.dataset.slug === "index";
 

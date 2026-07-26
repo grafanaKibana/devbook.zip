@@ -1201,8 +1201,9 @@ body[data-slug="credits"] .page[data-frame="default"] > #quartz-body > .sidebar.
       grid-auto-rows: minmax(min-content, 1fr);
       gap: clamp(0.6rem, 0.9vw, 1rem);
     }
-    .dc-topic-total {
+    .dc-progress-hero {
       flex: 0 0 auto;
+      margin-bottom: 0;
     }
     // The stock footer bottom margin is dead space inside the fixed 100dvh
     // frame — reclaim most of it for the dashboard rows. Only in fit mode;
@@ -1291,7 +1292,7 @@ body[data-slug="credits"] .page[data-frame="default"] > #quartz-body > .sidebar.
     .dc-topic-grid {
       column-gap: clamp(0.75rem, 1.8vw, 2rem);
       row-gap: clamp(0.6rem, 1.4vh, 1.25rem);
-      margin-top: 0.75rem;
+      margin-top: 0;
     }
   }
 }
@@ -1317,7 +1318,7 @@ body[data-slug="credits"] .page[data-frame="default"] > #quartz-body > .sidebar.
       grid-template-columns: repeat(2, minmax(0, 1fr));
       grid-auto-rows: auto;
       gap: 0.6rem;
-      margin-top: 0.75rem;
+      margin-top: 0;
     }
     .dc-topic-grid .dc-topic-card {
       grid-column: span 1;
@@ -1442,13 +1443,9 @@ body[data-slug="credits"] .page[data-frame="default"] > #quartz-body > .sidebar.
       margin-top: auto;
     }
 
-    .dc-topic-total {
+    .dc-progress-hero {
       flex: 0 0 auto;
-      margin-top: 0.55rem;
-      padding: 0.6em 0.7em;
-    }
-    .dc-topic-total .dc-topic-legend {
-      margin-top: 0.5em;
+      margin-bottom: 0;
     }
 
     .page > #quartz-body > footer {
