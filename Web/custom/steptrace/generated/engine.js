@@ -3200,21 +3200,42 @@
     return { nodes: [wrap, status], paint, watch };
   }
   var executionTreeViewSerial = 0;
+  function centerVisibleTree(rects, canvasWidth, canvasHeight) {
+    if (!rects.length) return { x: 0, y: 0 };
+    const left = Math.min(...rects.map((rect) => rect.left));
+    const right = Math.max(...rects.map((rect) => rect.right));
+    const top = Math.min(...rects.map((rect) => rect.top));
+    const bottom = Math.max(...rects.map((rect) => rect.bottom));
+    return {
+      x: canvasWidth / 2 - (left + right) / 2,
+      y: canvasHeight / 2 - (top + bottom) / 2
+    };
+  }
+  function tieredArrayCells(values, width) {
+    const cellWidth = width / Math.max(1, values.length);
+    return {
+      cells: values.map((value, index) => ({
+        value,
+        x: -width / 2 + cellWidth * (index + 0.5)
+      })),
+      separators: values.slice(1).map((_, index) => -width / 2 + cellWidth * (index + 1))
+    };
+  }
   function makeExecutionTreeView(frames, descriptor) {
     const f0 = frames[0];
     const nodes = f0.nodes;
-    const halfWidth = descriptor.nodeWidth / 2;
     const halfHeight = descriptor.nodeHeight / 2;
-    const padX = halfWidth + 12;
     const padY = halfHeight + 12;
-    const xs = nodes.map((node) => node.x);
+    const nodeWidth = (node) => node.width || descriptor.nodeWidth;
+    const lefts = nodes.map((node) => node.x - nodeWidth(node) / 2);
+    const rights = nodes.map((node) => node.x + nodeWidth(node) / 2);
     const ys = nodes.map((node) => node.y);
-    const minX = Math.min(...xs);
+    const minX = Math.min(...lefts);
     const minY = Math.min(...ys);
-    const width = Math.max(...xs) - minX + padX * 2;
+    const width = Math.max(...rights) - minX + 24;
     const height = Math.max(...ys) - minY + padY * 2;
     const position = Object.fromEntries(
-      nodes.map((node) => [node.id, { x: node.x - minX + padX, y: node.y - minY + padY }])
+      nodes.map((node) => [node.id, { x: node.x - minX + 12, y: node.y - minY + padY }])
     );
     const svg = document.createElementNS(SVGNS, "svg");
     const title = document.createElementNS(SVGNS, "title");
@@ -3230,6 +3251,11 @@
     const canvasWidth = Math.max(descriptor.minSvgWidth, width * (descriptor.canvasScale || 1));
     svg.style.setProperty("--steptrace-tree-width", `${canvasWidth}px`);
     svg.append(title, description);
+    const treeLayer = descriptor.centerVisible ? document.createElementNS(SVGNS, "g") : svg;
+    if (descriptor.centerVisible) {
+      treeLayer.setAttribute("class", "steptrace__rtcontent");
+      svg.append(treeLayer);
+    }
     const edgeElements = [];
     for (const edge of f0.edges) {
       const from = position[edge.from];
@@ -3242,12 +3268,14 @@
       line.setAttribute("y2", String(to.y - halfHeight));
       line.setAttribute("aria-hidden", "true");
       line.setAttribute("focusable", "false");
-      svg.append(line);
+      treeLayer.append(line);
       edgeElements.push({ element: line, from: edge.from, to: edge.to });
     }
     const nodeElements = {};
     for (const node of nodes) {
       const point = position[node.id];
+      const width2 = nodeWidth(node);
+      const halfWidth = width2 / 2;
       const group = document.createElementNS(SVGNS, "g");
       group.setAttribute("class", "steptrace__rtnode");
       group.setAttribute("transform", `translate(${point.x} ${point.y})`);
@@ -3267,12 +3295,12 @@
       } else {
         surface.setAttribute("x", String(-halfWidth));
         surface.setAttribute("y", String(-halfHeight));
-        surface.setAttribute("width", String(descriptor.nodeWidth));
+        surface.setAttribute("width", String(width2));
         surface.setAttribute("height", String(descriptor.nodeHeight));
         surface.setAttribute("rx", "7");
         ring.setAttribute("x", String(-halfWidth - 2));
         ring.setAttribute("y", String(-halfHeight - 2));
-        ring.setAttribute("width", String(descriptor.nodeWidth + 4));
+        ring.setAttribute("width", String(width2 + 4));
         ring.setAttribute("height", String(descriptor.nodeHeight + 4));
         ring.setAttribute("rx", "9");
       }
@@ -3280,6 +3308,9 @@
       const detail = document.createElementNS(SVGNS, "text");
       const result = document.createElementNS(SVGNS, "text");
       const badge = document.createElementNS(SVGNS, "text");
+      const divider = descriptor.tieredCards ? document.createElementNS(SVGNS, "line") : null;
+      const valueTier = descriptor.tieredCards ? document.createElementNS(SVGNS, "g") : null;
+      const valueCells = [];
       label.setAttribute("class", "steptrace__rtlabel");
       detail.setAttribute("class", "steptrace__rtdetail");
       result.setAttribute("class", "steptrace__rtval");
@@ -3292,14 +3323,65 @@
         label.setAttribute("y", "0");
         label.setAttribute("dominant-baseline", "central");
         result.setAttribute("y", String(halfHeight + 9));
+      } else if (descriptor.tieredCards) {
+        label.setAttribute("y", "13");
+        label.setAttribute("dominant-baseline", "central");
+        divider?.setAttribute("class", "steptrace__rtdivider");
+        divider?.setAttribute("x1", String(-halfWidth + 1));
+        divider?.setAttribute("x2", String(halfWidth - 1));
+        divider?.setAttribute("y1", "6");
+        divider?.setAttribute("y2", "6");
+        valueTier?.setAttribute("class", "steptrace__rtarray");
+        const tier = tieredArrayCells(node.values, width2);
+        for (const x of tier.separators) {
+          const separator = document.createElementNS(SVGNS, "line");
+          separator.setAttribute("class", "steptrace__rtcell-separator");
+          separator.setAttribute("x1", String(x));
+          separator.setAttribute("x2", String(x));
+          separator.setAttribute("y1", String(-halfHeight + 1));
+          separator.setAttribute("y2", "6");
+          valueTier?.append(separator);
+        }
+        for (const cell of tier.cells) {
+          const value = document.createElementNS(SVGNS, "text");
+          value.setAttribute("class", "steptrace__rtcell-value");
+          value.setAttribute("x", String(cell.x));
+          value.setAttribute("y", "-7");
+          value.setAttribute("text-anchor", "middle");
+          value.setAttribute("dominant-baseline", "central");
+          value.textContent = String(cell.value);
+          valueTier?.append(value);
+          valueCells.push(value);
+        }
       } else {
         label.setAttribute("y", "-4");
         detail.setAttribute("y", "9");
       }
-      group.append(ring, surface, label, detail, result, badge);
-      svg.append(group);
-      nodeElements[node.id] = { group, detail, result, badge, secondaryLine };
+      group.append(ring, surface);
+      if (divider) group.append(divider);
+      if (valueTier) group.append(valueTier);
+      group.append(label);
+      if (!descriptor.tieredCards) group.append(detail);
+      group.append(result, badge);
+      treeLayer.append(group);
+      nodeElements[node.id] = { group, detail, result, badge, secondaryLine, valueCells };
     }
+    function centerTransform(visibleIds) {
+      const visible = new Set(visibleIds);
+      const rects = nodes.filter((node) => visible.has(node.id)).map((node) => {
+        const point = position[node.id];
+        const halfNodeWidth = nodeWidth(node) / 2;
+        return {
+          left: point.x - halfNodeWidth,
+          right: point.x + halfNodeWidth,
+          top: point.y - halfHeight,
+          bottom: point.y + halfHeight
+        };
+      });
+      const offset = centerVisibleTree(rects, width, height);
+      return `translate(${offset.x}px, ${offset.y}px)`;
+    }
+    if (descriptor.centerVisible) treeLayer.style.transform = centerTransform(f0.visible);
     const legend = el("div", "steptrace__legend");
     legend.setAttribute("aria-label", `${descriptor.ariaLabel} state legend`);
     for (const item of descriptor.legend) {
@@ -3313,6 +3395,7 @@
     wrap.setAttribute("role", "region");
     wrap.setAttribute("aria-label", `${descriptor.ariaLabel} visualization`);
     wrap.dataset.fitWidth = descriptor.fitWidth ? "true" : "false";
+    wrap.dataset.profile = f0.profile || "";
     wrap.tabIndex = 0;
     wrap.append(svg);
     const status = statusEl();
@@ -3321,7 +3404,9 @@
       const visible = new Set(model.visible);
       const collapsed = new Set(model.collapsed);
       const path = new Set(model.path);
+      const related = model.phase === "combine" ? new Set(f0.edges.filter((edge) => edge.from === model.active).map((edge) => edge.to)) : /* @__PURE__ */ new Set();
       const activeNode2 = nodes.find((node) => node.id === model.active);
+      if (descriptor.centerVisible) treeLayer.style.transform = centerTransform(model.visible);
       title.textContent = `${descriptor.ariaLabel}: ${model.phase}`;
       description.textContent = `${model.phase}. Active subproblem ${activeNode2 ? descriptor.nodeLines(activeNode2).join("; ") : "none"}. ${model.action}.`;
       for (const node of nodes) {
@@ -3332,10 +3417,17 @@
         elements.group.dataset.state = state;
         elements.group.dataset.active = model.active === node.id ? "true" : "false";
         elements.group.dataset.path = path.has(node.id) ? "true" : "false";
+        elements.group.dataset.related = related.has(node.id) ? "true" : "false";
         const value = model.results[node.id];
         const resultText = Array.isArray(value) ? value.length ? `[${value.join(", ")}]` : "" : value == null ? "" : String(value);
         if (descriptor.shape === "card") {
-          elements.detail.textContent = resultText || elements.secondaryLine;
+          if (descriptor.tieredCards) {
+            const values = Array.isArray(value) ? value : node.values;
+            for (let index2 = 0; index2 < elements.valueCells.length; index2++)
+              elements.valueCells[index2].textContent = String(values[index2] ?? "");
+          } else {
+            elements.detail.textContent = resultText || elements.secondaryLine;
+          }
           elements.result.textContent = "";
           elements.badge.textContent = "";
         } else {
@@ -3347,6 +3439,7 @@
         edge.element.dataset.vis = visible.has(edge.to) ? "1" : "0";
         edge.element.dataset.collapsed = collapsed.has(edge.to) ? "true" : "false";
         edge.element.dataset.path = path.has(edge.from) && path.has(edge.to) ? "true" : "false";
+        edge.element.dataset.related = model.active === edge.from && related.has(edge.to) ? "true" : "false";
       }
       status.innerHTML = escapeHtml(frame.message) + ` <span class="steptrace__counts">· step ${index + 1}/${total}</span>`;
     }
@@ -5319,6 +5412,18 @@
       ];
     }
   };
+  var mergeSortTreeViewDescriptor = {
+    ...executionTreeViewDescriptor,
+    ariaLabel: "Merge sort split and merge tree",
+    minSvgWidth: 420,
+    canvasScale: 1,
+    fitWidth: true,
+    tieredCards: true,
+    centerVisible: true,
+    nodeLines(node) {
+      return [node.label, node.detail || node.values.join("  ")];
+    }
+  };
   var memoizationTreeViewDescriptor = {
     ariaLabel: "Memoization call tree",
     ...executionTreeCardMetrics,
@@ -5421,7 +5526,7 @@
     },
     createView(frames) {
       const profile = frames[0]?.profile;
-      const descriptor = profile === "memoization" ? memoizationTreeViewDescriptor : profile === "coin-change-top-down" || profile === "grid-path-top-down" ? dynamicProgrammingTreeViewDescriptor : executionTreeViewDescriptor;
+      const descriptor = profile === "memoization" ? memoizationTreeViewDescriptor : profile === "merge-sort" ? mergeSortTreeViewDescriptor : profile === "coin-change-top-down" || profile === "grid-path-top-down" ? dynamicProgrammingTreeViewDescriptor : executionTreeViewDescriptor;
       return makeExecutionTreeView(frames, descriptor);
     }
   };
@@ -7931,24 +8036,32 @@
     while (j < right.length) output.push(right[j++]);
     return output;
   }
-  function buildTree(values, from, to, depth, x, y, id, nodes, edges, metas) {
+  function buildTree(values, from, to, depth, id, path, nodes, edges, metas) {
     const segment = values.slice(from, to);
     const label = segment.length ? `[${from}…${to - 1}]` : "[]";
+    const detail = segment.join("  ");
+    const widestValue = Math.max(...segment.map((value) => String(value).length));
+    const cellWidth = Math.max(28, widestValue * 6.2 + 16);
     nodes.push({
       id,
       label,
       values: segment,
-      x,
-      y,
+      detail,
+      width: Math.max(40, segment.length * cellWidth, label.length * 5 + 20),
+      x: (from + to - 1) / 2 * 54,
+      y: 30 + depth * 72,
       depth
     });
     const meta = {
       id,
       label,
       values: segment,
+      path,
+      depth,
       from,
       to,
-      children: null
+      children: null,
+      sorted: segment.slice()
     };
     metas.set(id, meta);
     if (segment.length <= 1) return meta;
@@ -7956,40 +8069,68 @@
     const leftId = `${id}-l`;
     const rightId = `${id}-r`;
     edges.push({ from: id, to: leftId }, { from: id, to: rightId });
-    const span = Math.max(1, values.length - 1);
-    const childShift = (span - depth * 0.6 + 1) * 20;
-    const leftMeta = buildTree(values, from, mid, depth + 1, x - childShift, y + 90, leftId, nodes, edges, metas);
-    const rightMeta = buildTree(values, mid, to, depth + 1, x + childShift, y + 90, rightId, nodes, edges, metas);
+    const leftMeta = buildTree(
+      values,
+      from,
+      mid,
+      depth + 1,
+      leftId,
+      [...path, leftId],
+      nodes,
+      edges,
+      metas
+    );
+    const rightMeta = buildTree(
+      values,
+      mid,
+      to,
+      depth + 1,
+      rightId,
+      [...path, rightId],
+      nodes,
+      edges,
+      metas
+    );
     meta.children = [leftMeta.id, rightMeta.id];
     return meta;
   }
-  function emitFrames(id, path, metas, ops) {
+  function revealSplits(id, metas, ops) {
     const node = metas.get(id);
-    if (!node) return [];
+    if (!node) return;
     const label = node.values.length ? `[${node.from}…${node.to - 1}]` : "[]";
     if (node.values.length <= 1) {
       const text = node.values.length ? `[${node.values[0]}]` : "[]";
-      ops.base(id, path, node.values, `${text} is already sorted.`);
-      return node.values.slice();
+      ops.base(id, node.path, node.values, `${text} is already sorted.`);
+      return;
     }
     const [leftId, rightId] = node.children || [];
     const left = metas.get(leftId);
     const right = metas.get(rightId);
-    if (!left || !right) return node.values.slice();
-    ops.split(id, path, [leftId, rightId], `Split ${label} into ${left.label} and ${right.label}.`);
-    const leftPath = [...path, leftId];
-    const rightPath = [...path, rightId];
-    const leftResult = emitFrames(leftId, leftPath, metas, ops);
-    ops.returnResult(leftId, path, leftResult, `Return [${leftResult.join(", ")}] to ${label}.`);
-    const rightResult = emitFrames(rightId, rightPath, metas, ops);
-    ops.returnResult(rightId, path, rightResult, `Return [${rightResult.join(", ")}] to ${label}.`);
-    const merged = merge(leftResult, rightResult);
-    const combinePath = path.length > 1 ? path.slice(0, -1) : path;
-    ops.combine(id, combinePath, merged, `Merge ${left.label} and ${right.label} into [${merged.join(", ")}].`);
-    if (path.length > 1) {
-      ops.returnResult(id, combinePath, merged, `Return [${merged.join(", ")}] to parent call.`);
+    if (!left || !right) return;
+    ops.split(
+      id,
+      node.path,
+      [leftId, rightId],
+      `Split ${label} into ${left.label} and ${right.label}.`
+    );
+    revealSplits(leftId, metas, ops);
+    revealSplits(rightId, metas, ops);
+  }
+  function mergeBottomUp(metas, ops) {
+    const internalNodes = [...metas.values()].filter((node) => node.children).sort((a, b) => b.depth - a.depth || a.from - b.from);
+    for (const node of internalNodes) {
+      const [leftId, rightId] = node.children || [];
+      const left = metas.get(leftId);
+      const right = metas.get(rightId);
+      if (!left || !right) continue;
+      node.sorted = merge(left.sorted, right.sorted);
+      ops.combine(
+        node.id,
+        node.path,
+        node.sorted,
+        `Merge [${left.sorted.join(", ")}] and [${right.sorted.join(", ")}] into [${node.sorted.join(", ")}].`
+      );
     }
-    return merged;
   }
   function parseMergeSortTreeConfig(config) {
     if (!Array.isArray(config.array) || config.array.length < 2)
@@ -7998,7 +8139,7 @@
       throw new Error("steptrace: merge-sort-tree requires finite numeric values.");
     return {
       array: config.array.slice(),
-      profile: "divide-and-conquer"
+      profile: "merge-sort"
     };
   }
   var mergeSortTree = {
@@ -8013,26 +8154,16 @@
       const edges = [];
       const metas = /* @__PURE__ */ new Map();
       const rootId = "root";
-      const rootMeta = buildTree(
-        values,
-        0,
-        values.length,
-        0,
-        Math.max(1, values.length - 1) * 72,
-        30,
-        rootId,
-        nodes,
-        edges,
-        metas
-      );
+      const rootMeta = buildTree(values, 0, values.length, 0, rootId, [rootId], nodes, edges, metas);
       rootMeta.from = 0;
       rootMeta.to = values.length;
       rootMeta.values = values.slice();
       nodes[0].label = `[0…${values.length - 1}]`;
       const message = `Merge sort ${values.join(", ")} by splitting into halves and merging sorted halves on return.`;
       ops.tree(nodes, edges, rootId, message);
-      emitFrames(rootId, [rootId], metas, ops);
-      ops.done(rootId, values.slice().sort((a, b) => a - b), `Sorted result [${values.sort((a, b) => a - b).join(", ")}].`);
+      revealSplits(rootId, metas, ops);
+      mergeBottomUp(metas, ops);
+      ops.done(rootId, rootMeta.sorted, `Sorted result [${rootMeta.sorted.join(", ")}].`);
     }
   };
 

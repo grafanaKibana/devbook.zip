@@ -21,6 +21,7 @@ const cases = [
   "quick-sort",
   "heap-sort",
   "merge-sort",
+  "merge-sort-tree",
   "shell-sort",
   "comb-sort",
   "counting-sort",
@@ -127,6 +128,14 @@ function buildAbstractMemoization() {
   const recorder = memoization.family.createRecorder(config)
   memoization.run(config, recorder)
   return { config, family: memoization.family, frames: recorder.frames }
+}
+
+function buildMergeSortTree(array = [8, 3, 7, 4, 9, 2, 5, 1]) {
+  const { mergeSortTree } = loadStepTraceModule("src", "algorithms", "merge-sort-tree.ts")
+  const config = mergeSortTree.parse({ algorithm: "merge-sort-tree", array })
+  const recorder = mergeSortTree.family.createRecorder(config)
+  mergeSortTree.run(config, recorder)
+  return { config, family: mergeSortTree.family, frames: recorder.frames }
 }
 
 function buildDynamicProgramming(name) {
@@ -478,7 +487,7 @@ test("all built-in algorithms preserve their headless frame contract", () => {
 
   assert.equal(
     digest,
-    "f14d98aa5678ef84132e6687591053dfaaab897b0f136a1361b6d662aab3e316",
+    "6067681e260ff31fb03d59c77449a14419b83df84e94bf50b32b15db3762ab5d",
     "the headless StepTrace behavior changed",
   )
 })
@@ -1240,6 +1249,112 @@ test("execution-tree watch, legend, and responsive styles remain compatible", ()
   assert.match(renderSource, /svg\.setAttribute\("aria-labelledby"/)
   assert.match(renderSource, /group\.setAttribute\("focusable", "false"\)/)
   assert.match(renderSource, /stageLayout: "fill"/)
+})
+
+test("merge-sort execution tree reveals every leaf before merging bottom-up left-to-right", () => {
+  const { config, family, frames } = buildMergeSortTree()
+  const firstCombine = frames.findIndex((frame) => frame.type === "combine")
+  const splits = frames.filter((frame) => frame.type === "split")
+  const leaves = frames.filter((frame) => frame.type === "base")
+  const combines = frames.filter((frame) => frame.type === "combine")
+
+  assert.deepEqual(config, {
+    array: [8, 3, 7, 4, 9, 2, 5, 1],
+    profile: "merge-sort",
+  })
+  assert.equal(family.id, "execution-tree")
+  assert.deepEqual(frames[0].visible, ["root"])
+  for (const split of splits) {
+    const previous = frames[frames.indexOf(split) - 1]
+    const newlyVisible = split.visible.filter((id) => !previous.visible.includes(id))
+    assert.equal(newlyVisible.length, 2)
+  }
+  assert.equal(leaves.length, 8)
+  assert.ok(leaves.every((frame) => frames.indexOf(frame) < firstCombine))
+  assert.deepEqual(
+    combines.map((frame) => frame.results[frame.active].length),
+    [2, 2, 2, 2, 4, 4, 8],
+  )
+  assert.deepEqual(combines.at(-1).results.root, [1, 2, 3, 4, 5, 7, 8, 9])
+  assert.deepEqual(frames.at(-1).results.root, [1, 2, 3, 4, 5, 7, 8, 9])
+  assert.ok(frames.every((frame) => frame.nodes === frames[0].nodes))
+  assert.ok(frames.every((frame) => frame.edges === frames[0].edges))
+})
+
+test("merge-sort execution tree uses fluid array-strip cards and merge emphasis", () => {
+  const { executionTreeViewDescriptor, mergeSortTreeViewDescriptor } = loadStepTraceModule(
+    "src",
+    "families",
+    "execution-tree.ts",
+  )
+  const { centerVisibleTree, tieredArrayCells } = loadStepTraceModule("src", "render.ts")
+  const renderSource = readFileSync(join(here, "src", "render.ts"), "utf8")
+  const styles = readFileSync(join(here, "src", "styles", "rectree.scss"), "utf8")
+  const { frames } = buildMergeSortTree()
+  const root = frames[0].nodes.find((node) => node.id === "root")
+  const leaf = frames[0].nodes.find((node) => node.values.length === 1)
+
+  assert.equal(mergeSortTreeViewDescriptor.fitWidth, true)
+  assert.equal(mergeSortTreeViewDescriptor.tieredCards, true)
+  assert.equal(mergeSortTreeViewDescriptor.centerVisible, true)
+  assert.ok(root.width > 84)
+  assert.ok(leaf.width < 84)
+  assert.ok(root.width >= "[8, 3, 7, 4, 9, 2, 5, 1]".length * 6.2 + 28)
+  assert.match(renderSource, /node\.width \|\| descriptor\.nodeWidth/)
+  assert.match(renderSource, /dataset\.related/)
+  assert.match(renderSource, /"steptrace__rtdivider"/)
+  assert.match(renderSource, /"steptrace__rtcell-separator"/)
+  assert.match(renderSource, /"steptrace__rtcell-value"/)
+  assert.match(renderSource, /label\.setAttribute\("y", "13"\)/)
+  assert.match(renderSource, /label\.setAttribute\("dominant-baseline", "central"\)/)
+  assert.match(renderSource, /treeLayer\.style\.transform = centerTransform\(model\.visible\)/)
+  assert.equal(executionTreeViewDescriptor.tieredCards, undefined)
+  assert.equal(executionTreeViewDescriptor.centerVisible, undefined)
+  const frameRects = (frame) =>
+    frames[0].nodes
+      .filter((node) => frame.visible.includes(node.id))
+      .map((node) => ({
+        left: node.x - node.width / 2,
+        right: node.x + node.width / 2,
+        top: node.y - 20,
+        bottom: node.y + 20,
+      }))
+  const rootOffset = centerVisibleTree(frameRects(frames[0]), 500, 320)
+  const firstSplitOffset = centerVisibleTree(frameRects(frames[1]), 500, 320)
+  const deeperSplitOffset = centerVisibleTree(frameRects(frames[3]), 500, 320)
+  assert.ok(rootOffset.y > firstSplitOffset.y)
+  assert.ok(firstSplitOffset.y > deeperSplitOffset.y)
+  const tier = tieredArrayCells([8, 3, 7, 4], 112)
+  assert.equal(tier.cells.length, 4)
+  assert.equal(tier.separators.length, 3)
+  assert.deepEqual(
+    tier.cells.map((cell) => cell.x),
+    [-42, -14, 14, 42],
+  )
+  assert.deepEqual(tier.separators, [-28, 0, 28])
+  assert.match(
+    styles,
+    /\[data-profile="merge-sort"\][\s\S]*:is\(\.steptrace__rtedge, \.steptrace__rtnode\)\[data-vis="0"\][^}]*opacity: 0;[^}]*visibility: hidden;/,
+  )
+  assert.match(styles, /\.steptrace__rtdivider[^}]*stroke: var\(--_hair\);/)
+  assert.match(
+    styles,
+    /\.steptrace__rtcell-separator[^}]*stroke: color-mix\(in srgb, var\(--_text\) 13%, transparent\);/,
+  )
+  assert.match(
+    styles,
+    /\.steptrace__rtcell-value[^}]*fill: var\(--_text\);[^}]*font: 500 11px\/1 var\(--_font-mono\);/,
+  )
+  assert.match(
+    styles,
+    /\.steptrace__rtcontent[^}]*transition: transform var\(--_dur-move\) var\(--_spring-soft\);/,
+  )
+  assert.match(
+    styles,
+    /\[data-profile="merge-sort"\][\s\S]*\.steptrace__rtlabel[^}]*fill: var\(--_muted\);[^}]*font: 400 9px\/1 var\(--_font-mono\);/,
+  )
+  assert.match(styles, /\[data-profile="merge-sort"\][\s\S]*\[data-related="true"\]/)
+  assert.match(styles, /stroke: var\(--_green\)/)
 })
 
 test("memoization reuses the execution-tree family and collapses a repeated state", () => {

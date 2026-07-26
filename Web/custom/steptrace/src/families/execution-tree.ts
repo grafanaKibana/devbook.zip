@@ -20,6 +20,7 @@ export interface ExecutionTreeNode {
   label: string
   values: number[]
   detail?: string
+  width?: number
   x: number
   y: number
   depth: number
@@ -176,6 +177,19 @@ export const executionTreeViewDescriptor: ExecutionTreeViewDescriptor = {
   },
 }
 
+export const mergeSortTreeViewDescriptor: ExecutionTreeViewDescriptor = {
+  ...executionTreeViewDescriptor,
+  ariaLabel: "Merge sort split and merge tree",
+  minSvgWidth: 420,
+  canvasScale: 1,
+  fitWidth: true,
+  tieredCards: true,
+  centerVisible: true,
+  nodeLines(node: ExecutionTreeNode) {
+    return [node.label, node.detail || node.values.join("  ")]
+  },
+}
+
 export const memoizationTreeViewDescriptor: ExecutionTreeViewDescriptor = {
   ariaLabel: "Memoization call tree",
   ...executionTreeCardMetrics,
@@ -283,9 +297,11 @@ export const executionTreeFamily = {
     const descriptor =
       profile === "memoization"
         ? memoizationTreeViewDescriptor
-        : profile === "coin-change-top-down" || profile === "grid-path-top-down"
-          ? dynamicProgrammingTreeViewDescriptor
-          : executionTreeViewDescriptor
+        : profile === "merge-sort"
+          ? mergeSortTreeViewDescriptor
+          : profile === "coin-change-top-down" || profile === "grid-path-top-down"
+            ? dynamicProgrammingTreeViewDescriptor
+            : executionTreeViewDescriptor
     return makeExecutionTreeView(frames, descriptor) as StepTraceView<ExecutionTreeFrame>
   },
 } satisfies VisualFamily<ExecutionTreeConfig, ExecutionTreeRecorder, ExecutionTreeFrame>
