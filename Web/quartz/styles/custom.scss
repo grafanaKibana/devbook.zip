@@ -1,12 +1,63 @@
 @use "./variables.scss" as *;
 @use "sass:map";
 
+// Quartz caches these Google fonts into /static/fonts, but its generated
+// @font-face URLs point at the production baseUrl even during local serve.
+// Local aliases keep both localhost and production on the copied files.
+@mixin local-font($family, $style, $weight, $file) {
+  @font-face {
+    font-family: $family;
+    font-style: $style;
+    font-weight: $weight;
+    font-display: block;
+    src: url("/static/fonts/#{$file}") format("truetype");
+  }
+}
+
+@include local-font("DevBook IBM Plex Mono", normal, 400, "-F63fjptAgt5VM-kVkqdyU8n5ig.ttf");
+@include local-font("DevBook IBM Plex Mono", normal, 600, "-F6qfjptAgt5VM-kVkqdyU8n3vAO8lc.ttf");
+@include local-font(
+  "DevBook Schibsted Grotesk",
+  normal,
+  400,
+  "JqzK5SSPQuCQF3t8uOwiUL-taUTtarVKQ9vZ6pJJWlMNIsEATw.ttf"
+);
+@include local-font(
+  "DevBook Schibsted Grotesk",
+  normal,
+  700,
+  "JqzK5SSPQuCQF3t8uOwiUL-taUTtarVKQ9vZ6pJJWlMNxcYATw.ttf"
+);
+@include local-font(
+  "DevBook Source Sans Pro",
+  italic,
+  400,
+  "6xK1dSBYKcSV-LCoeQqfX1RYOo3qPa7g.ttf"
+);
+@include local-font(
+  "DevBook Source Sans Pro",
+  italic,
+  600,
+  "6xKwdSBYKcSV-LCoeQqfX1RYOo3qPZY4lBdr.ttf"
+);
+@include local-font("DevBook Source Sans Pro", normal, 400, "6xK3dSBYKcSV-LCoeQqfX1RYOo3aPw.ttf");
+@include local-font(
+  "DevBook Source Sans Pro",
+  normal,
+  600,
+  "6xKydSBYKcSV-LCoeQqfX1RYOo3i54rAkA.ttf"
+);
+
 // Component-specific styles live with their components (each sets `.css`):
 //   Web/custom/components/topic-dashboard.tsx  → .topic-* rules
 //   Web/custom/components/questions-index.tsx  → .questions-index / .qi-* rules
 // Put only truly global overrides here.
 
 :root {
+  --titleFont: "DevBook Schibsted Grotesk";
+  --headerFont: "DevBook Schibsted Grotesk";
+  --bodyFont: "DevBook Source Sans Pro";
+  --codeFont: "DevBook IBM Plex Mono";
   --surface-radius: var(--radius-m, 8px);
 }
 
@@ -388,10 +439,12 @@ body {
   .page > #quartz-body > .sidebar.left .mobile-explorer {
     position: absolute;
     top: 0;
-    left: 1.5rem;
+    left: 0.75rem;
+    width: 3rem;
     height: var(--site-header-height);
     display: flex;
     align-items: center;
+    justify-content: center;
     padding: 0;
     z-index: 101;
   }
@@ -659,12 +712,9 @@ body {
   .explorer .mobile-explorer .lucide-menu {
     stroke: var(--darkgray);
   }
-  // Both halves of the plugin's anti-flash guard: until the inline script runs
-  // and collapses the tree, the hamburger and the tree must stay hidden — else
-  // the drawer paints open on first render.
-  .explorer .mobile-explorer.hide-until-loaded {
-    display: none;
-  }
+  // Keep only the async tree hidden until it is populated. The hamburger is
+  // stable server markup and the closed-state rule below prevents drawer flash,
+  // so hiding the button only makes the whole sidebar appear late.
   .explorer .hide-until-loaded ~ .explorer-content {
     display: none;
   }
@@ -700,10 +750,12 @@ body {
   .page > #quartz-body > .sidebar.left .mobile-explorer {
     position: absolute;
     top: 0;
-    left: 1.5rem;
+    left: 0.75rem;
+    width: 3rem;
     height: var(--site-header-height);
     display: flex;
     align-items: center;
+    justify-content: center;
     padding: 0;
     z-index: 101;
   }
@@ -949,6 +1001,31 @@ body {
 @media all and ($tablet) {
   :root[reader-mode="on"] .page > #quartz-body > .sidebar.left {
     opacity: 1;
+  }
+}
+
+// Hard-load-only regional gates. Their resting state is visible; the document
+// prescripts add the pending attributes before first paint and component-owned
+// readiness removes them. visibility preserves geometry while pointer-events
+// prevents interaction with controls that are not ready yet.
+:root:not([reader-mode="on"]) .page > #quartz-body > .sidebar.left {
+  transition: opacity 120ms var(--ease-out);
+}
+
+// The tablet/mobile sidebar is only the stable hamburger until opened. Keep it
+// visible while the async Explorer tree is preparing; desktop has the tree
+// onscreen, so retain the gate there.
+@media all and ($desktop) {
+  :root[data-explorer-first-paint="pending"] .page > #quartz-body > .sidebar.left {
+    visibility: hidden;
+    opacity: 0;
+    pointer-events: none;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  :root:not([reader-mode="on"]) .page > #quartz-body > .sidebar.left {
+    transition: none;
   }
 }
 
