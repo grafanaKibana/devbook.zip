@@ -15,7 +15,7 @@ const script = `
   if (window.__devbookHomepageFit) return;
 
   var fit = window.matchMedia(
-    "(min-width: 768px) and (max-width: 1200px), (min-width: 1201px) and (min-height: 36rem)"
+    "(min-width: 768px) and (max-width: 1200px) and (min-height: 32rem), (min-width: 1201px) and (min-height: 32rem)"
   );
   var states = ["full", "summary-hidden", "counter-hidden", "bar-hidden"];
   var frame = 0;

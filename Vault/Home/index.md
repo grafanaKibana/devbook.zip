@@ -174,24 +174,29 @@ return function TopicDashboard() {
 .dc-progress-hero .db-card-body { display: grid; gap: clamp(1rem, 3cqi, 2rem); align-items: center; padding: clamp(1rem, 3cqi, 2rem); }
 .dc-progress-copy { min-width: 0; }
 p.dc-progress-eyebrow { margin: 0 0 0.45rem; color: rgb(var(--topic-rgb)); font-family: var(--codeFont, var(--font-monospace, monospace)); font-size: 0.75rem; font-weight: 700; line-height: 1.5; letter-spacing: 0.08em; text-transform: uppercase; }
-.dc-progress-title { margin: 0; color: var(--text-normal, var(--dark, #1f2937)); font-size: clamp(1.1rem, 5cqi, 1.75rem); line-height: 1.08; letter-spacing: -0.04em; white-space: nowrap; }
+.dc-progress-summary { display: flex; min-width: 0; align-items: baseline; justify-content: space-between; gap: 0.75rem; }
+.dc-progress-title, .dc-progress-mobile-value { color: var(--text-normal, var(--dark, #1f2937)); font-size: clamp(1rem, 5cqi, 1.75rem); line-height: 1.08; letter-spacing: -0.04em; white-space: nowrap; }
+.dc-progress-title { min-width: 0; margin: 0; }
+.dc-progress-mobile-value { flex: 0 0 auto; font-weight: 700; }
 .dc-progress-statuses { display: none; flex-wrap: wrap; gap: 0.55rem 1.1rem; margin: 1rem 0 0; padding: 0; list-style: none; color: var(--text-muted, var(--darkgray, #5f6b7a)); font-size: 0.875rem; }
 .dc-progress-statuses li { display: inline-flex; min-width: max-content; align-items: baseline; gap: 0.35rem; }
 .dc-progress-statuses strong { color: var(--text-normal, var(--dark, #1f2937)); font-family: var(--codeFont, var(--font-monospace, monospace)); font-size: 0.9rem; }
 .dc-progress-statuses i { width: 0.55rem; height: 0.55rem; border-radius: 2px; flex: 0 0 auto; }
-.dc-progress-visual { display: grid; width: 100%; gap: 0.35rem; padding-top: 0.75rem; place-self: stretch; }
+.dc-progress-visual { display: grid; width: 100%; place-self: stretch; }
 .dc-progress-visual svg { display: none; }
 .dc-progress-ring { fill: none; stroke-linecap: round; }
 .dc-progress-ring--track { stroke: var(--background-modifier-border, var(--lightgray, #d8dee9)); stroke-width: 8; }
 .dc-progress-ring--arc { stroke-width: 8; animation: dc-progress-ring-draw 480ms var(--ease-out, cubic-bezier(0.22, 1, 0.36, 1)) backwards; }
-.dc-progress-value { display: flex; align-items: baseline; justify-content: center; }
+.dc-progress-value { display: none; }
 .dc-progress-value strong { font-family: var(--codeFont, var(--font-monospace, monospace)); font-size: 0.75rem; font-weight: 700; line-height: 1; }
 .dc-progress-value span { display: none; color: var(--text-muted, var(--darkgray, #5f6b7a)); font-family: var(--codeFont, var(--font-monospace, monospace)); font-size: 0.62rem; line-height: 1.15; letter-spacing: 0.04em; text-transform: uppercase; }
 .dc-progress-bar { height: 12px; margin-top: 0; }
 @keyframes dc-progress-ring-draw { from { stroke-dasharray: 0 100; } }
 @container (min-width: 40rem) {
   .dc-progress-hero .db-card-body { grid-template-columns: minmax(0, 1fr) auto; }
+  .dc-progress-summary { display: block; }
   .dc-progress-title { font-size: clamp(1.75rem, 4cqi, 2.25rem); }
+  .dc-progress-mobile-value { display: none; }
   .dc-progress-statuses { display: flex; }
   .dc-progress-visual { position: relative; width: var(--dc-radial-size); aspect-ratio: 1; gap: 0; padding-top: 0; place-self: center; place-items: center; }
   .dc-progress-visual svg { position: absolute; inset: 0; display: block; width: 100%; height: 100%; overflow: visible; transform: rotate(-90deg); }
@@ -227,7 +232,10 @@ ${spanRules("dsk")}
         <div class="db-card-body">
           <div class="dc-progress-copy">
             <p class="dc-progress-eyebrow">Learning overview</p>
-            <p class="dc-progress-title" id="dc-progress-title" role="heading" aria-level="2">{oTotal} notes across {N} topics</p>
+            <div class="dc-progress-summary">
+              <p class="dc-progress-title" id="dc-progress-title" role="heading" aria-level="2">{oTotal} notes across {N} topics</p>
+              <span class="dc-progress-mobile-value" aria-hidden="true">{oPct}%</span>
+            </div>
             <ul class="dc-progress-statuses" aria-label="Note lifecycle totals">
               {STATUS_RAMP.map((seg) => (
                 <li>

@@ -1125,7 +1125,7 @@ body[data-slug="credits"] .page[data-frame="default"] > #quartz-body > .sidebar.
   }
 }
 
-@media all and (min-width: 1201px) and (min-height: 36rem) {
+@media all and (min-width: 1201px) and (min-height: 32rem) {
   // Gated on [data-home-fit]: the HomepageFit controller owns the one-viewport
   // fill on desktop just as it does on tablet, so it can hide whole tiers
   // (summaries → counters → bars) uniformly instead of letting cards clip
@@ -1369,7 +1369,7 @@ body[data-slug="credits"] .page[data-frame="default"] > #quartz-body > .sidebar.
 // This block is the tablet-specific LAYOUT; the degraded states themselves are
 // shared with desktop below. Mobile stays on its normal scrolling branch.
 // ---------------------------------------------------------------------------
-@media all and ($tablet) {
+@media all and ($tablet) and (min-height: 32rem) {
   body[data-slug="index"][data-home-fit] {
     --home-card-pad: clamp(0.65rem, 1.2vh, 0.85rem) clamp(0.75rem, 1.5vw, 1rem);
 
