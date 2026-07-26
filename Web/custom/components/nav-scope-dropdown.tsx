@@ -55,12 +55,15 @@ const firstPaintScript = `
 
   var root = document.documentElement;
   var releaseRequested = false;
+  var resolveReady;
+  var ready = new Promise(function (resolve) { resolveReady = resolve; });
   var timer = setTimeout(finish, 1000);
 
   function finish() {
     if (timer) clearTimeout(timer);
     timer = 0;
     root.removeAttribute("data-explorer-first-paint");
+    resolveReady();
   }
 
   function release() {
@@ -71,7 +74,7 @@ const firstPaintScript = `
   }
 
   root.setAttribute("data-explorer-first-paint", "pending");
-  window.__devbookExplorerFirstPaint = { release: release };
+  window.__devbookExplorerFirstPaint = { release: release, ready: ready };
 })();
 `
 
@@ -441,8 +444,9 @@ const script = `
 
   // ---- scoping: hide non-selected top-level nodes; reveal the chosen folder ----
   function applyScope(entries, current) {
-    entries.forEach(function (e) {
+    entries.forEach(function (e, index) {
       var li = e.li;
+      li.style.setProperty("--ns-reveal-order", String(index + 2));
       var selected = current === e.slug;
       var scoping = current !== ALL;
       li.classList.toggle("ns-hidden", scoping && !selected);

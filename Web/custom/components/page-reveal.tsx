@@ -16,11 +16,22 @@ const css = `
 @keyframes page-reveal-first-in {
   from { opacity: 0; transform: translateY(8px); }
 }
+@keyframes page-reveal-sidebar-in {
+  from { opacity: 0; transform: translateY(4px); }
+}
+@keyframes page-reveal-footer-in {
+  from { opacity: 0; transform: translateY(4px); }
+}
 :root[data-page-reveal-first-paint="pending"] article,
+:root[data-page-reveal-first-paint="pending"] .center > hr,
 :root[data-page-reveal-first-paint="pending"] .page > #quartz-body > footer {
   visibility: hidden;
   opacity: 0;
   pointer-events: none;
+}
+:root[data-page-reveal-first-paint="pending"] body[data-slug="index"] .dc-topic-grid .db-card,
+:root[data-page-reveal-first-paint="pending"] body[data-slug="index"] .dc-topic-bar-track span {
+  animation-play-state: paused !important;
 }
 article[data-reveal] {
   animation: page-reveal-in var(--dur-3) var(--ease-out) backwards;
@@ -28,8 +39,38 @@ article[data-reveal] {
 article[data-reveal="initial"] {
   animation: page-reveal-first-in var(--dur-4) var(--ease-out) backwards;
 }
+body[data-slug="index"]:has(article[data-reveal="initial"]) .center > hr,
+body[data-slug="index"]:has(article[data-reveal="initial"]) .page > #quartz-body > footer {
+  animation: page-reveal-footer-in var(--dur-3) var(--ease-out)
+    calc(var(--dur-3) + var(--stagger) * 6) backwards;
+}
+@media (min-width: 1201px) {
+  :root[data-page-reveal-first-paint="pending"] .page > #quartz-body > .sidebar.left {
+    visibility: hidden;
+    opacity: 0;
+    pointer-events: none;
+  }
+  body:has(article[data-reveal="initial"]) .sidebar.left > .ns-scope,
+  body:has(article[data-reveal="initial"]) .sidebar.left .explorer button.desktop-explorer,
+  body:has(article[data-reveal="initial"]) .sidebar.left .explorer .explorer-ul > li {
+    animation: page-reveal-sidebar-in var(--dur-3) var(--ease-out) backwards;
+  }
+  body:has(article[data-reveal="initial"]) .sidebar.left .explorer button.desktop-explorer {
+    animation-delay: var(--stagger);
+  }
+  body:has(article[data-reveal="initial"]) .sidebar.left .explorer .explorer-ul > li {
+    animation-delay: calc(var(--stagger) * var(--ns-reveal-order, 2));
+  }
+}
 @media (prefers-reduced-motion: reduce) {
-  article[data-reveal] { animation: none; }
+  article[data-reveal],
+  body[data-slug="index"]:has(article[data-reveal="initial"]) .center > hr,
+  body[data-slug="index"]:has(article[data-reveal="initial"]) .page > #quartz-body > footer,
+  body:has(article[data-reveal="initial"]) .sidebar.left > .ns-scope,
+  body:has(article[data-reveal="initial"]) .sidebar.left .explorer button.desktop-explorer,
+  body:has(article[data-reveal="initial"]) .sidebar.left .explorer .explorer-ul > li {
+    animation: none;
+  }
 }
 `
 
@@ -67,9 +108,11 @@ const script = `
     if (initialScheduled) return;
     initialScheduled = true;
     var fontsReady = document.fonts ? document.fonts.ready : Promise.resolve();
+    var explorerGate = window.__devbookExplorerFirstPaint;
+    var explorerReady = explorerGate ? explorerGate.ready : Promise.resolve();
     var reveal = function () {
-      document.documentElement.removeAttribute("data-page-reveal-first-paint");
       playInitial();
+      document.documentElement.removeAttribute("data-page-reveal-first-paint");
     };
     var schedule = function () {
       if (window.requestIdleCallback) {
@@ -78,7 +121,7 @@ const script = `
         setTimeout(reveal, 0);
       }
     };
-    fontsReady.then(schedule, schedule);
+    Promise.all([fontsReady, explorerReady]).then(schedule, schedule);
   }
 
   document.addEventListener("nav", play);

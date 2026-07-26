@@ -11,6 +11,10 @@ const resource = (value: string | string[] | undefined) =>
 test("hard-load reveal fails open without the Font Loading API", async () => {
   const rootAttributes = new Map<string, string>()
   const articleAttributes = new Map<string, string>()
+  let resolveExplorer: () => void = () => {}
+  const explorerReady = new Promise<void>((resolve) => {
+    resolveExplorer = resolve
+  })
   const root = {
     setAttribute: (name: string, value: string) => rootAttributes.set(name, value),
     removeAttribute: (name: string) => rootAttributes.delete(name),
@@ -30,16 +34,28 @@ test("hard-load reveal fails open without the Font Loading API", async () => {
     requestIdleCallback: (callback: () => void) => callback(),
   }
   context.window = context
+  ;(
+    context.window as { __devbookExplorerFirstPaint: { ready: Promise<void> } }
+  ).__devbookExplorerFirstPaint = { ready: explorerReady }
 
   const component = PageReveal(undefined)
   assert.match(
     resource(component.css),
     /data-page-reveal-first-paint="pending"\] \.page > #quartz-body > footer/,
   )
+  assert.match(resource(component.css), /data-page-reveal-first-paint="pending"\] \.center > hr/)
+  assert.match(resource(component.css), /animation-play-state: paused !important/)
+  assert.match(resource(component.css), /var\(--ns-reveal-order, 2\)/)
+  assert.match(resource(component.css), /calc\(var\(--dur-3\) \+ var\(--stagger\) \* 6\) backwards/)
   vm.runInNewContext(resource(component.beforeDOMLoaded), context)
   vm.runInNewContext(resource(component.afterDOMLoaded), context)
   await new Promise<void>((resolve) => setImmediate(resolve))
 
+  assert.equal(rootAttributes.get("data-page-reveal-first-paint"), "pending")
+  assert.equal(articleAttributes.has("data-reveal"), false)
+
+  resolveExplorer()
+  await new Promise<void>((resolve) => setImmediate(resolve))
   assert.equal(rootAttributes.has("data-page-reveal-first-paint"), false)
   assert.equal(articleAttributes.get("data-reveal"), "initial")
 })
@@ -65,14 +81,19 @@ test("Explorer waits for fonts before revealing icons and text together", async 
   context.window = context
 
   const component = NavScopeDropdown(undefined)
+  assert.match(resource(component.afterDOMLoaded), /--ns-reveal-order/)
   vm.runInNewContext(resource(component.beforeDOMLoaded), context)
-  ;(
-    context.window as { __devbookExplorerFirstPaint: { release(): void } }
-  ).__devbookExplorerFirstPaint.release()
+  const gate = (
+    context.window as {
+      __devbookExplorerFirstPaint: { release(): void; ready: Promise<void> }
+    }
+  ).__devbookExplorerFirstPaint
+  gate.release()
   await new Promise<void>((resolve) => setImmediate(resolve))
   assert.equal(rootAttributes.get("data-explorer-first-paint"), "pending")
 
   resolveFonts()
+  await gate.ready
   await new Promise<void>((resolve) => setImmediate(resolve))
   assert.equal(rootAttributes.has("data-explorer-first-paint"), false)
 })
