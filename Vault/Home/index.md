@@ -175,9 +175,9 @@ return function TopicDashboard() {
 .dc-progress-copy { min-width: 0; }
 p.dc-progress-eyebrow { margin: 0 0 0.45rem; color: rgb(var(--topic-rgb)); font-family: var(--codeFont, var(--font-monospace, monospace)); font-size: 0.75rem; font-weight: 700; line-height: 1.5; letter-spacing: 0.08em; text-transform: uppercase; }
 .dc-progress-summary { display: flex; min-width: 0; align-items: baseline; justify-content: space-between; gap: 0.75rem; }
-.dc-progress-title, .dc-progress-mobile-value { color: var(--text-normal, var(--dark, #1f2937)); font-size: clamp(1rem, 5cqi, 1.75rem); line-height: 1.08; letter-spacing: -0.04em; white-space: nowrap; }
+.dc-progress-title, .dc-progress-mobile-value { color: var(--text-normal, var(--dark, #1f2937)); font-size: clamp(1rem, 5cqi, 1.75rem); font-weight: 700; line-height: 1.08; letter-spacing: -0.04em; white-space: nowrap; }
 .dc-progress-title { min-width: 0; margin: 0; }
-.dc-progress-mobile-value { flex: 0 0 auto; font-weight: 700; }
+.dc-progress-mobile-value { flex: 0 0 auto; }
 .dc-progress-statuses { display: none; flex-wrap: wrap; gap: 0.55rem 1.1rem; margin: 1rem 0 0; padding: 0; list-style: none; color: var(--text-muted, var(--darkgray, #5f6b7a)); font-size: 0.875rem; }
 .dc-progress-statuses li { display: inline-flex; min-width: max-content; align-items: baseline; gap: 0.35rem; }
 .dc-progress-statuses strong { color: var(--text-normal, var(--dark, #1f2937)); font-family: var(--codeFont, var(--font-monospace, monospace)); font-size: 0.9rem; }

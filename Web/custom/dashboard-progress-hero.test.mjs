@@ -23,6 +23,10 @@ test("dashboard progress hero stays above the cards and inside fit measurement",
   assert.match(dashboard, /\.dc-progress-mobile-value \{ display: none; \}/)
   assert.match(
     dashboard,
+    /\.dc-progress-title, \.dc-progress-mobile-value \{[^}]*font-weight: 700;/,
+  )
+  assert.match(
+    dashboard,
     /<p class="dc-progress-title" id="dc-progress-title" role="heading" aria-level="2">/,
   )
   assert.doesNotMatch(dashboard, /<h2 class="dc-progress-title"/)
