@@ -734,29 +734,46 @@
     }
   };
   var StringRecorder = class {
-    constructor(text, pattern) {
+    constructor(text, pattern, profile = null) {
       this.text = String(text || "");
       this.pattern = String(pattern || "");
+      this.profile = profile;
       this.frames = [];
       this.shift = 0;
       this.found = [];
       this.hash = null;
+      this.z = profile === "z-array" ? Array(this.text.length).fill(null) : null;
+      if (this.z) this.z[0] = this.text.length;
+      this.i = null;
+      this.l = 0;
+      this.r = 0;
+      this.k = null;
+      this.sourceCase = null;
+      this.zCompare = null;
     }
     _push(type, extra, message) {
-      this.frames.push(
-        Object.freeze({
-          type,
-          text: this.text,
-          pattern: this.pattern,
-          shift: this.shift,
-          cmpT: extra.cmpT == null ? null : extra.cmpT,
-          cmpP: extra.cmpP == null ? null : extra.cmpP,
-          cmpResult: extra.cmpResult || null,
-          found: this.found.slice(),
-          hash: this.hash,
-          message
-        })
-      );
+      const frame = {
+        type,
+        text: this.text,
+        pattern: this.pattern,
+        shift: this.shift,
+        cmpT: extra.cmpT == null ? null : extra.cmpT,
+        cmpP: extra.cmpP == null ? null : extra.cmpP,
+        cmpResult: extra.cmpResult || null,
+        found: this.found.slice(),
+        hash: this.hash,
+        message
+      };
+      if (this.profile) frame.profile = this.profile;
+      if (this.profile === "z-array") {
+        frame.z = this.z.slice();
+        frame.i = this.i;
+        frame.box = [this.l, this.r];
+        frame.k = this.k;
+        frame.sourceCase = this.sourceCase;
+        frame.compare = this.zCompare ? { ...this.zCompare } : null;
+      }
+      this.frames.push(Object.freeze(frame));
     }
     init(message) {
       this._push("init", {}, message);
@@ -787,7 +804,44 @@
       this.hash = { window: windowHash, pattern: patternHash };
       this._push("hash", {}, message);
     }
+    focusZ(i, l, r, k, sourceCase, message) {
+      this.i = i;
+      this.l = l;
+      this.r = r;
+      this.k = k;
+      this.sourceCase = sourceCase;
+      this.zCompare = null;
+      this._push("focus", {}, message);
+    }
+    copyZ(i, k, value, sourceCase, message) {
+      this.i = i;
+      this.k = k;
+      this.sourceCase = sourceCase;
+      this.z[i] = value;
+      this.zCompare = null;
+      this._push("copy", {}, message);
+    }
+    compareZ(i, prefixIndex, candidateIndex, isMatch, sourceCase, message) {
+      this.i = i;
+      this.sourceCase = sourceCase;
+      this.zCompare = {
+        prefix: prefixIndex,
+        candidate: candidateIndex,
+        result: isMatch ? "match" : "mismatch"
+      };
+      this._push("compare", {}, message);
+    }
+    commitZ(i, value, l, r, sourceCase, message) {
+      this.i = i;
+      this.z[i] = value;
+      this.l = l;
+      this.r = r;
+      this.sourceCase = sourceCase;
+      this.zCompare = null;
+      this._push("commit", {}, message);
+    }
     done(message) {
+      this.zCompare = null;
       this._push("done", {}, message);
     }
   };
@@ -1702,7 +1756,13 @@
       rows.push({ k: semantics.movementLabel, v: frame.swaps, sw: "var(--_amber)" });
       return rows;
     }
-    return { nodes: [stage, status], stageAlignment: "bottom", paint, watch, destroy: tracker.destroy };
+    return {
+      nodes: [stage, status],
+      stageAlignment: "bottom",
+      paint,
+      watch,
+      destroy: tracker.destroy
+    };
   }
   function makeMarker(label, role) {
     const wrap = el("div", "steptrace__marker steptrace__marker--" + role);
@@ -2174,6 +2234,7 @@
   }
   var CELL_W = 34;
   function makeMatchView(frames) {
+    if (frames[0].profile === "z-array") return makeZArrayView(frames);
     const text = frames[0].text;
     const pattern = frames[0].pattern;
     const hasHash = frames.some((f) => f.hash);
@@ -2243,6 +2304,194 @@
     }
     const nodes = hasHash ? [stage, hashBadge, status] : [stage, status];
     return { nodes, paint, watch, destroy: () => ro && ro.disconnect() };
+  }
+  function resolveVisibleScrollLeft(scrollLeft, clientWidth, scrollWidth, targetStart, targetEnd, padding = 8) {
+    if (!Number.isFinite(scrollLeft) || !Number.isFinite(clientWidth) || !Number.isFinite(scrollWidth) || !Number.isFinite(targetStart) || !Number.isFinite(targetEnd) || clientWidth <= 0)
+      return scrollLeft;
+    const maxScroll = Math.max(0, scrollWidth - clientWidth);
+    const inset = Math.min(Math.max(0, padding), clientWidth / 2);
+    if (targetStart < scrollLeft + inset) return Math.min(maxScroll, Math.max(0, targetStart - inset));
+    if (targetEnd > scrollLeft + clientWidth - inset)
+      return Math.min(maxScroll, Math.max(0, targetEnd - clientWidth + inset));
+    return scrollLeft;
+  }
+  function makeZArrayView(frames) {
+    const text = frames[0].text;
+    const stage = el("div", "steptrace__z");
+    stage.dataset.profile = "z-array";
+    const viewport = el("div", "steptrace__z-viewport");
+    const board = el("div", "steptrace__z-board");
+    board.style.setProperty("--_z-length", String(Math.max(text.length, 1)));
+    const prefixBand = el("div", "steptrace__z-band");
+    const prefixLabel = el("div", "steptrace__z-label");
+    prefixLabel.textContent = "prefix";
+    const prefixClip = el("div", "steptrace__z-lane steptrace__z-prefix-clip");
+    const prefixTrack = el("div", "steptrace__z-track");
+    const prefixCells = [];
+    for (let k = 0; k < text.length; k++) {
+      const cell = el("div", "steptrace__z-cell steptrace__z-cell--prefix");
+      cell.textContent = text[k];
+      prefixTrack.append(cell);
+      prefixCells.push(cell);
+    }
+    prefixClip.append(prefixTrack);
+    prefixBand.append(prefixLabel, prefixClip);
+    const stringBand = el("div", "steptrace__z-band");
+    const stringLabel = el("div", "steptrace__z-label");
+    stringLabel.textContent = "S";
+    const stringRow = el("div", "steptrace__z-lane steptrace__z-string");
+    const stringCells = [];
+    for (let k = 0; k < text.length; k++) {
+      const cell = el("div", "steptrace__z-cell steptrace__z-cell--string");
+      const index = el("span", "steptrace__z-index");
+      index.textContent = String(k);
+      const value = el("span", "steptrace__z-char");
+      value.textContent = text[k];
+      cell.append(index, value);
+      stringRow.append(cell);
+      stringCells.push(cell);
+    }
+    const cursor = el("div", "steptrace__z-cursor");
+    cursor.setAttribute("aria-hidden", "true");
+    const bracket = el("div", "steptrace__z-bracket");
+    bracket.setAttribute("aria-hidden", "true");
+    stringRow.append(bracket, cursor);
+    stringBand.append(stringLabel, stringRow);
+    const zBand = el("div", "steptrace__z-band");
+    const zLabel = el("div", "steptrace__z-label");
+    zLabel.textContent = "Z";
+    const zRow = el("div", "steptrace__z-lane steptrace__z-values");
+    const zCells = [];
+    for (let k = 0; k < text.length; k++) {
+      const cell = el("div", "steptrace__z-cell steptrace__z-cell--value");
+      cell.textContent = "·";
+      zRow.append(cell);
+      zCells.push(cell);
+    }
+    const copyToken = el("div", "steptrace__z-copy");
+    copyToken.setAttribute("aria-hidden", "true");
+    zRow.append(copyToken);
+    zBand.append(zLabel, zRow);
+    board.append(prefixBand, stringBand, zBand);
+    viewport.append(board);
+    const legend = el("div", "steptrace__z-legend");
+    for (const [state, label] of [
+      ["compare", "character check"],
+      ["copy", "mirror reuse"],
+      ["commit", "committed Z"]
+    ]) {
+      const item = el("span", "steptrace__z-legend-item");
+      item.dataset.state = state;
+      const swatch = el("span", "steptrace__z-legend-swatch");
+      const textNode = el("span");
+      textNode.textContent = label;
+      item.append(swatch, textNode);
+      legend.append(item);
+    }
+    stage.append(viewport, legend);
+    const status = statusEl();
+    let currentFrame = frames[0];
+    function applyGeom() {
+      const measured = stringCells[0]?.getBoundingClientRect?.().width || CELL_W;
+      const cw = measured > 0 ? measured : CELL_W;
+      const i = currentFrame.i;
+      const [l, r] = currentFrame.box || [0, 0];
+      stage.style.setProperty("--_cw", `${cw}px`);
+      prefixTrack.style.transform = `translateX(${((i ?? 0) * cw).toFixed(2)}px)`;
+      cursor.style.transform = `translateX(${((i ?? 0) * cw).toFixed(2)}px)`;
+      bracket.style.transform = `translateX(${(l * cw).toFixed(2)}px)`;
+      bracket.style.width = `${Math.max(1, r - l + 1) * cw}px`;
+      const copyIndex = currentFrame.type === "copy" ? i : currentFrame.k;
+      copyToken.style.transform = `translateX(${((copyIndex ?? 0) * cw).toFixed(2)}px)`;
+    }
+    function ensureActiveVisible() {
+      if (currentFrame.i == null) return;
+      const candidate = currentFrame.compare?.candidate;
+      const firstIndex = Math.min(currentFrame.i, candidate ?? currentFrame.i);
+      const lastIndex = Math.max(currentFrame.i, candidate ?? currentFrame.i);
+      const firstRect = stringCells[firstIndex]?.getBoundingClientRect?.();
+      const lastRect = stringCells[lastIndex]?.getBoundingClientRect?.();
+      const viewportRect = viewport.getBoundingClientRect?.();
+      if (!firstRect || !lastRect || !viewportRect) return;
+      const targetStart = viewport.scrollLeft + firstRect.left - viewportRect.left;
+      const targetEnd = viewport.scrollLeft + lastRect.left + lastRect.width - viewportRect.left;
+      const next = resolveVisibleScrollLeft(
+        viewport.scrollLeft,
+        viewport.clientWidth,
+        viewport.scrollWidth,
+        targetStart,
+        targetEnd
+      );
+      if (Math.abs(next - viewport.scrollLeft) < 0.5) return;
+      const behavior = stage.closest?.(".steptrace--reduced") ? "auto" : "smooth";
+      if (typeof viewport.scrollTo === "function") viewport.scrollTo({ left: next, behavior });
+      else viewport.scrollLeft = next;
+    }
+    function syncLayout() {
+      applyGeom();
+      ensureActiveVisible();
+    }
+    const ro = typeof ResizeObserver !== "undefined" ? new ResizeObserver(syncLayout) : null;
+    if (ro) {
+      ro.observe(stringRow);
+      ro.observe(viewport);
+    }
+    function paint(frame, index, total) {
+      currentFrame = frame;
+      stage.dataset.frame = frame.type;
+      stage.dataset.case = frame.sourceCase || "";
+      prefixTrack.dataset.visible = frame.i == null ? "0" : "1";
+      cursor.dataset.visible = frame.i == null ? "0" : "1";
+      bracket.dataset.visible = frame.box ? "1" : "0";
+      copyToken.dataset.visible = frame.type === "copy" ? "1" : "0";
+      copyToken.textContent = frame.k == null ? "" : String(frame.z[frame.k] ?? "·");
+      for (let k = 0; k < text.length; k++) {
+        prefixCells[k].dataset.state = "";
+        stringCells[k].dataset.state = "";
+        zCells[k].dataset.state = "";
+        zCells[k].textContent = frame.z[k] == null ? "·" : String(frame.z[k]);
+        if (frame.box && k >= frame.box[0] && k <= frame.box[1]) stringCells[k].dataset.box = "1";
+        else delete stringCells[k].dataset.box;
+      }
+      if (frame.i != null && stringCells[frame.i]) stringCells[frame.i].dataset.state = "focus";
+      if (frame.type === "copy" && frame.k != null) {
+        zCells[frame.k].dataset.state = "copy-source";
+        zCells[frame.i].dataset.state = "copy-target";
+      }
+      if (frame.type === "commit" && frame.i != null) zCells[frame.i].dataset.state = "commit";
+      if (frame.compare) {
+        const state = frame.compare.result;
+        prefixCells[frame.compare.prefix].dataset.state = state;
+        stringCells[frame.compare.candidate].dataset.state = state;
+      }
+      syncLayout();
+      status.innerHTML = escapeHtml(frame.message) + ` <span class="steptrace__counts">· step ${index + 1}/${total}</span>`;
+    }
+    function watch(frame) {
+      const box = frame.box || [0, 0];
+      return [
+        { k: "i", v: frame.i ?? "—", sw: "var(--_blue)" },
+        { k: "case", v: frame.sourceCase || "initialize", sw: "var(--_neutral)" },
+        { k: "box", v: `[${box[0]}, ${box[1]}]`, sw: "var(--_violet)" },
+        {
+          k: "mirror",
+          v: frame.k == null ? "—" : `k = ${frame.k}, Z[k] = ${frame.z[frame.k] ?? "·"}`,
+          sw: "var(--_amber)"
+        },
+        {
+          k: "Z[i]",
+          v: frame.i == null ? "—" : frame.z[frame.i] ?? "·",
+          sw: "var(--_green)"
+        }
+      ];
+    }
+    return {
+      nodes: [stage, status],
+      stableStage: true,
+      paint,
+      watch,
+      destroy: () => ro && ro.disconnect()
+    };
   }
   function makeArrayStrip(values) {
     const wrap = el("div", "steptrace__pwrap");
@@ -3711,7 +3960,7 @@
     const firstGap = frames.find((frame) => Number.isInteger(frame.gap))?.gap;
     const familyProfile = frames[0]?.profile;
     const firstDistributionPass = frames.find((frame) => frame.type === "pass");
-    const initial = kind === "sort" ? firstGap != null ? `Gap ${firstGap}` : familyProfile === "cyclic" ? "Place values" : familyProfile === "counting" ? "Tally keys" : familyProfile === "radix" ? `${firstDistributionPass?.passLabel || "Digit"} pass` : familyProfile === "bucket" ? "Scatter ranges" : familyProfile === "introsort" ? "Quicksort" : algorithm === "bubble-sort" ? "Pass 1" : algorithm === "insertion-sort" ? "Prefix 1" : algorithm === "selection-sort" ? "Select 1" : algorithm === "heap-sort" ? "Build heap" : algorithm === "merge-sort" ? "Runs of 1" : "Partition" : kind === "search" ? familyProfile === "exponential" ? "Gallop" : familyProfile === "interpolation" ? "Estimate" : familyProfile === "jump" ? "Jump blocks" : familyProfile === "ternary" ? "Narrow peak" : familyProfile === "shipping-capacity" ? "Answer range" : "Search range" : kind === "string" ? "Shift 0" : kind === "backtrack" ? "Depth 0" : kind === "rectree" ? familyProfile === "divide-and-conquer" ? "Whole problem" : familyProfile === "merge-sort" ? "Whole array" : familyProfile === "memoization" ? "Empty cache" : familyProfile === "coin-change-top-down" ? "Amount 30¢" : familyProfile === "grid-path-top-down" ? "Loading bay" : "Call tree" : "Initialize";
+    const initial = kind === "sort" ? firstGap != null ? `Gap ${firstGap}` : familyProfile === "cyclic" ? "Place values" : familyProfile === "counting" ? "Tally keys" : familyProfile === "radix" ? `${firstDistributionPass?.passLabel || "Digit"} pass` : familyProfile === "bucket" ? "Scatter ranges" : familyProfile === "introsort" ? "Quicksort" : algorithm === "bubble-sort" ? "Pass 1" : algorithm === "insertion-sort" ? "Prefix 1" : algorithm === "selection-sort" ? "Select 1" : algorithm === "heap-sort" ? "Build heap" : algorithm === "merge-sort" ? "Runs of 1" : "Partition" : kind === "search" ? familyProfile === "exponential" ? "Gallop" : familyProfile === "interpolation" ? "Estimate" : familyProfile === "jump" ? "Jump blocks" : familyProfile === "ternary" ? "Narrow peak" : familyProfile === "shipping-capacity" ? "Answer range" : "Search range" : kind === "string" ? familyProfile === "z-array" ? "Initialize Z" : "Shift 0" : kind === "backtrack" ? "Depth 0" : kind === "rectree" ? familyProfile === "divide-and-conquer" ? "Whole problem" : familyProfile === "merge-sort" ? "Whole array" : familyProfile === "memoization" ? "Empty cache" : familyProfile === "coin-change-top-down" ? "Amount 30¢" : familyProfile === "grid-path-top-down" ? "Loading bay" : "Call tree" : "Initialize";
     push(0, initial);
     let lastRange = "";
     let lastGap = firstGap;
@@ -3772,6 +4021,8 @@
             i,
             familyProfile === "ternary" && f.mid2 != null ? `Probes ${f.mid}/${f.mid2}` : `${familyProfile === "exponential" && f.phase === "gallop" ? "Bound" : familyProfile === "jump" && f.phase === "jump" ? "Block end" : "Probe"} ${f.mid}`
           );
+      } else if (kind === "string" && familyProfile === "z-array") {
+        if (f.type === "focus") push(i, `i = ${f.i}`);
       } else if (kind === "string") {
         if ((f.type === "slide" || f.type === "hash" || f.type === "match") && String(f.shift) !== lastWindow) {
           push(i, `Shift ${f.shift}`);
@@ -3900,6 +4151,7 @@
         return `Minimum feasible capacity ${frame.answer} · ${frame.probes} probe${frame.probes === 1 ? "" : "s"}.`;
       return frame.found == null ? `${frame.target} not found · ${frame.comparisons} comparisons.` : `${frame.target} found at index ${frame.found} · ${frame.comparisons} comparisons.`;
     }
+    if (kind === "string" && frame.profile === "z-array") return `Z = [${frame.z.join(", ")}].`;
     if (kind === "string")
       return frame.found.length ? `${frame.found.length} match${frame.found.length === 1 ? "" : "es"} at ${frame.found.join(", ")}.` : `No matches found.`;
     if (kind === "pointers") {
@@ -9329,6 +9581,92 @@
     }
   };
 
+  // custom/steptrace/src/algorithms/z-algorithm.ts
+  var zAlgorithm = {
+    id: "z-algorithm",
+    kind: "string",
+    profile: "z-array",
+    meta: { label: "Z-Algorithm" },
+    run: (input, ops) => {
+      const text = String(input.text || "");
+      const n = text.length;
+      const z = new Array(n).fill(0);
+      if (n) z[0] = n;
+      ops.init(
+        n ? `Set Z[0] = ${n}. Each remaining entry measures how far the suffix at i matches the prefix.` : "The empty string has no Z-array entries."
+      );
+      if (!n) {
+        ops.done("Z = [].");
+        return;
+      }
+      let l = 0;
+      let r = 0;
+      for (let i = 1; i < n; i++) {
+        const inside = i <= r;
+        const k = inside ? i - l : null;
+        const remainder = inside ? r - i + 1 : 0;
+        const sourceCase = !inside ? "outside" : z[k] < remainder ? "copy" : "reuse-extend";
+        ops.focusZ(
+          i,
+          l,
+          r,
+          k,
+          sourceCase,
+          inside ? `i = ${i} lies inside [${l}, ${r}]; mirror k = ${k}.` : `i = ${i} lies outside [${l}, ${r}]; compare from the prefix start.`
+        );
+        if (inside) {
+          z[i] = Math.min(remainder, z[k]);
+          ops.copyZ(
+            i,
+            k,
+            z[i],
+            sourceCase,
+            sourceCase === "copy" ? `Copy Z[${k}] = ${z[k]} to Z[${i}]; it ends before r, so no character comparison is needed.` : `Reuse the verified box remainder ${remainder} from Z[${k}], then test beyond r.`
+          );
+          if (sourceCase === "copy") {
+            ops.commitZ(
+              i,
+              z[i],
+              l,
+              r,
+              sourceCase,
+              `Commit Z[${i}] = ${z[i]}; the active box stays [${l}, ${r}].`
+            );
+            continue;
+          }
+        }
+        while (i + z[i] < n) {
+          const prefixIndex = z[i];
+          const candidateIndex = i + z[i];
+          const isMatch = text[prefixIndex] === text[candidateIndex];
+          ops.compareZ(
+            i,
+            prefixIndex,
+            candidateIndex,
+            isMatch,
+            sourceCase,
+            `Compare S[${prefixIndex}]='${text[prefixIndex]}' with S[${candidateIndex}]='${text[candidateIndex]}' → ${isMatch ? "match" : "mismatch"}.`
+          );
+          if (!isMatch) break;
+          z[i]++;
+        }
+        if (i + z[i] - 1 > r) {
+          l = i;
+          r = i + z[i] - 1;
+        }
+        ops.commitZ(
+          i,
+          z[i],
+          l,
+          r,
+          sourceCase,
+          `Commit Z[${i}] = ${z[i]}; the active box is [${l}, ${r}].`
+        );
+      }
+      ops.done(`Z = [${z.join(", ")}].`);
+    }
+  };
+
   // custom/steptrace/src/algorithms/index.ts
   var builtInAlgorithms = [
     bubbleSort,
@@ -9360,6 +9698,7 @@
     linearSearch,
     kmp,
     rabinKarp,
+    zAlgorithm,
     twoPointers,
     slidingWindow,
     lcs,
@@ -10219,8 +10558,8 @@
       registerSearch(id, meta, run) {
         searchRegistry.set(id, { meta, run });
       },
-      registerString(id, meta, run) {
-        stringRegistry.set(id, { meta, run });
+      registerString(id, meta, run, profile) {
+        stringRegistry.set(id, { meta, run, profile });
       },
       registerPointer(id, meta, run) {
         pointerRegistry.set(id, { meta, run });
@@ -10300,7 +10639,7 @@
         }
         const string = stringRegistry.get(config.algorithm);
         if (string) {
-          const recorder = new StringRecorder(config.text, config.pattern);
+          const recorder = new StringRecorder(config.text, config.pattern, string.profile);
           string.run(input, recorder);
           return { kind: "string", frames: recorder.frames };
         }
@@ -10359,7 +10698,7 @@
           api.registerSearch(definition.id, definition.meta, definition.run);
           break;
         case "string":
-          api.registerString(definition.id, definition.meta, definition.run);
+          api.registerString(definition.id, definition.meta, definition.run, definition.profile);
           break;
         case "pointers":
           api.registerPointer(definition.id, definition.meta, definition.run);

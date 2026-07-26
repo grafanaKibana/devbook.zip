@@ -76,3 +76,242 @@
   color: var(--_green);
   box-shadow: inset 0 -3px 0 var(--_green);
 }
+
+/* Z-array profile: one horizontally scrollable board keeps prefix, S, indices,
+   Z values, cursor, and box geometry in the same measured coordinate system. */
+.steptrace__z {
+  inline-size: 100%;
+  min-inline-size: 0;
+  display: grid;
+  grid-template-rows: minmax(0, 1fr) 2.25rem;
+  gap: 0.65rem;
+  min-block-size: 12.75rem;
+}
+.steptrace__z-viewport {
+  inline-size: 100%;
+  min-inline-size: 0;
+  overflow-x: auto;
+  overflow-y: hidden;
+  overscroll-behavior-inline: contain;
+  scrollbar-gutter: stable;
+}
+.steptrace__z-board {
+  --_z-cell: 2.55rem;
+  display: grid;
+  gap: 0.55rem;
+  inline-size: max(100%, calc(3.65rem + var(--_z-length) * var(--_z-cell)));
+  min-inline-size: max-content;
+  padding-block: 0.3rem 0.45rem;
+}
+.steptrace__z-band {
+  display: grid;
+  grid-template-columns: 3.15rem calc(var(--_z-length) * var(--_z-cell));
+  align-items: center;
+  gap: 0.5rem;
+}
+.steptrace__z-label {
+  font: 600 0.72rem/1 var(--_font-mono);
+  color: var(--_muted);
+  text-align: end;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+}
+.steptrace__z-lane {
+  position: relative;
+  display: flex;
+  inline-size: calc(var(--_z-length) * var(--_z-cell));
+  min-inline-size: 0;
+}
+.steptrace__z-prefix-clip {
+  overflow: hidden;
+  block-size: 2.35rem;
+}
+.steptrace__z-track {
+  display: flex;
+  inline-size: max-content;
+  opacity: 0;
+  transition:
+    transform var(--_dur-move) var(--_spring-soft),
+    opacity var(--_dur-quick) ease;
+}
+.steptrace__z-track[data-visible="1"] {
+  opacity: 1;
+}
+.steptrace__z-cell {
+  flex: 0 0 var(--_cw, var(--_z-cell));
+  inline-size: var(--_cw, var(--_z-cell));
+  block-size: 2.35rem;
+  display: grid;
+  place-items: center;
+  border-inline-end: 1px solid var(--_hair);
+  font: 600 0.9rem/1 var(--_font-mono);
+  color: var(--_text);
+  transition:
+    background-color var(--_tween) ease,
+    color var(--_tween) ease,
+    box-shadow var(--_tween) ease;
+}
+.steptrace__z-cell:first-child {
+  border-inline-start: 1px solid var(--_hair);
+}
+.steptrace__z-cell--prefix {
+  border-block: 1px dashed color-mix(in srgb, var(--_blue) 40%, transparent);
+  color: var(--_blue);
+  background: color-mix(in srgb, var(--_blue) 7%, transparent);
+}
+.steptrace__z-string,
+.steptrace__z-values {
+  border-block: 1px solid var(--_hair);
+}
+.steptrace__z-cell--string {
+  grid-template-rows: 0.72rem 1fr;
+  padding-block: 0.18rem;
+}
+.steptrace__z-index {
+  font: 500 0.58rem/1 var(--_font-mono);
+  color: var(--_muted);
+}
+.steptrace__z-char {
+  align-self: center;
+}
+.steptrace__z-cell[data-box="1"] {
+  background: color-mix(in srgb, var(--_violet) 9%, transparent);
+}
+.steptrace__z-cell[data-state="focus"] {
+  box-shadow: inset 0 -3px 0 var(--_blue);
+}
+.steptrace__z-cell[data-state="match"] {
+  color: var(--_green);
+  background: color-mix(in srgb, var(--_green) 18%, transparent);
+  box-shadow: inset 0 -3px 0 var(--_green);
+}
+.steptrace__z-cell[data-state="mismatch"] {
+  color: var(--_amber);
+  background: color-mix(in srgb, var(--_amber) 16%, transparent);
+  box-shadow: inset 0 -3px 0 var(--_amber);
+}
+.steptrace__z-cell[data-state="copy-source"] {
+  color: var(--_amber);
+  background: color-mix(in srgb, var(--_amber) 16%, transparent);
+}
+.steptrace__z-cell[data-state="copy-target"] {
+  color: var(--_blue);
+  background: color-mix(in srgb, var(--_blue) 16%, transparent);
+}
+.steptrace__z-cell[data-state="commit"] {
+  color: var(--_green);
+  background: color-mix(in srgb, var(--_green) 17%, transparent);
+  box-shadow: inset 0 -3px 0 var(--_green);
+}
+.steptrace__z-cursor,
+.steptrace__z-bracket,
+.steptrace__z-copy {
+  position: absolute;
+  inset-inline-start: 0;
+  pointer-events: none;
+  transition:
+    transform var(--_dur-move) var(--_spring-soft),
+    width var(--_dur-move) var(--_spring-soft),
+    opacity var(--_dur-quick) ease;
+}
+.steptrace__z-cursor {
+  inset-block: -0.18rem;
+  inline-size: var(--_cw, var(--_z-cell));
+  border-inline: 2px solid var(--_blue);
+  opacity: 0;
+}
+.steptrace__z-cursor[data-visible="1"] {
+  opacity: 1;
+}
+.steptrace__z-bracket {
+  inset-block: -0.32rem;
+  border-block-start: 2px solid var(--_violet);
+  opacity: 0;
+}
+.steptrace__z-bracket::before,
+.steptrace__z-bracket::after {
+  content: "";
+  position: absolute;
+  inset-block-start: 0;
+  block-size: 0.45rem;
+  border-inline-start: 2px solid var(--_violet);
+}
+.steptrace__z-bracket::before {
+  inset-inline-start: 0;
+}
+.steptrace__z-bracket::after {
+  inset-inline-end: 0;
+}
+.steptrace__z-bracket[data-visible="1"] {
+  opacity: 1;
+}
+.steptrace__z-copy {
+  inset-block-start: 0.25rem;
+  inline-size: var(--_cw, var(--_z-cell));
+  block-size: 1.85rem;
+  display: grid;
+  place-items: center;
+  border: 1px solid var(--_amber);
+  border-radius: 0.35rem;
+  background: var(--_surface);
+  color: var(--_amber);
+  font: 700 0.86rem/1 var(--_font-mono);
+  opacity: 0;
+}
+.steptrace__z-copy[data-visible="1"] {
+  opacity: 1;
+}
+.steptrace__z-legend {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  align-items: center;
+  min-block-size: 2.25rem;
+  border-block-start: 1px solid var(--_hair);
+}
+.steptrace__z-legend-item {
+  min-inline-size: 0;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.35rem;
+  font: 500 0.7rem/1.1 var(--_font-body);
+  color: var(--_muted);
+  white-space: nowrap;
+}
+.steptrace__z-legend-swatch {
+  inline-size: 0.55rem;
+  block-size: 0.55rem;
+  border-radius: 2px;
+  background: var(--_blue);
+}
+.steptrace__z-legend-item[data-state="copy"] .steptrace__z-legend-swatch {
+  background: var(--_amber);
+}
+.steptrace__z-legend-item[data-state="commit"] .steptrace__z-legend-swatch {
+  background: var(--_green);
+}
+
+@media (max-width: 560px) {
+  .steptrace__z {
+    min-block-size: 12.25rem;
+  }
+  .steptrace__z-board {
+    --_z-cell: 2.35rem;
+  }
+  .steptrace__z-band {
+    grid-template-columns: 2.6rem calc(var(--_z-length) * var(--_z-cell));
+    gap: 0.4rem;
+  }
+  .steptrace__z-label {
+    font-size: 0.65rem;
+  }
+  .steptrace__z-legend-item {
+    gap: 0.25rem;
+    font-size: 0.63rem;
+  }
+}
+
+.steptrace--reduced
+  :is(.steptrace__z-track, .steptrace__z-cursor, .steptrace__z-bracket, .steptrace__z-copy) {
+  transition-property: opacity !important;
+}

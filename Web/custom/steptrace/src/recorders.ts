@@ -621,29 +621,46 @@ export class BoundarySearchRecorder {
 //   it at `shift`; compared cells and matched regions are highlighted.
 export class StringRecorder {
   [key: string]: any
-  constructor(text, pattern) {
+  constructor(text, pattern, profile = null) {
     this.text = String(text || "")
     this.pattern = String(pattern || "")
+    this.profile = profile
     this.frames = []
     this.shift = 0
     this.found = []
     this.hash = null
+    this.z = profile === "z-array" ? Array(this.text.length).fill(null) : null
+    if (this.z) this.z[0] = this.text.length
+    this.i = null
+    this.l = 0
+    this.r = 0
+    this.k = null
+    this.sourceCase = null
+    this.zCompare = null
   }
   _push(type, extra, message) {
-    this.frames.push(
-      Object.freeze({
-        type,
-        text: this.text,
-        pattern: this.pattern,
-        shift: this.shift,
-        cmpT: extra.cmpT == null ? null : extra.cmpT,
-        cmpP: extra.cmpP == null ? null : extra.cmpP,
-        cmpResult: extra.cmpResult || null,
-        found: this.found.slice(),
-        hash: this.hash,
-        message,
-      }),
-    )
+    const frame: any = {
+      type,
+      text: this.text,
+      pattern: this.pattern,
+      shift: this.shift,
+      cmpT: extra.cmpT == null ? null : extra.cmpT,
+      cmpP: extra.cmpP == null ? null : extra.cmpP,
+      cmpResult: extra.cmpResult || null,
+      found: this.found.slice(),
+      hash: this.hash,
+      message,
+    }
+    if (this.profile) frame.profile = this.profile
+    if (this.profile === "z-array") {
+      frame.z = this.z.slice()
+      frame.i = this.i
+      frame.box = [this.l, this.r]
+      frame.k = this.k
+      frame.sourceCase = this.sourceCase
+      frame.compare = this.zCompare ? { ...this.zCompare } : null
+    }
+    this.frames.push(Object.freeze(frame))
   }
   init(message) {
     this._push("init", {}, message)
@@ -674,7 +691,44 @@ export class StringRecorder {
     this.hash = { window: windowHash, pattern: patternHash }
     this._push("hash", {}, message)
   }
+  focusZ(i, l, r, k, sourceCase, message) {
+    this.i = i
+    this.l = l
+    this.r = r
+    this.k = k
+    this.sourceCase = sourceCase
+    this.zCompare = null
+    this._push("focus", {}, message)
+  }
+  copyZ(i, k, value, sourceCase, message) {
+    this.i = i
+    this.k = k
+    this.sourceCase = sourceCase
+    this.z[i] = value
+    this.zCompare = null
+    this._push("copy", {}, message)
+  }
+  compareZ(i, prefixIndex, candidateIndex, isMatch, sourceCase, message) {
+    this.i = i
+    this.sourceCase = sourceCase
+    this.zCompare = {
+      prefix: prefixIndex,
+      candidate: candidateIndex,
+      result: isMatch ? "match" : "mismatch",
+    }
+    this._push("compare", {}, message)
+  }
+  commitZ(i, value, l, r, sourceCase, message) {
+    this.i = i
+    this.z[i] = value
+    this.l = l
+    this.r = r
+    this.sourceCase = sourceCase
+    this.zCompare = null
+    this._push("commit", {}, message)
+  }
   done(message) {
+    this.zCompare = null
     this._push("done", {}, message)
   }
 }

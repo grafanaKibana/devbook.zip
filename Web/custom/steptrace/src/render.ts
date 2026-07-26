@@ -192,7 +192,13 @@ export function makeSortView(frames, semantics = legacySortViewSemantics) {
     return rows
   }
 
-  return { nodes: [stage, status], stageAlignment: "bottom", paint, watch, destroy: tracker.destroy }
+  return {
+    nodes: [stage, status],
+    stageAlignment: "bottom",
+    paint,
+    watch,
+    destroy: tracker.destroy,
+  }
 }
 
 function makeMarker(label, role) {
@@ -771,6 +777,8 @@ export function makeBoundarySearchView(frames, descriptor: BoundarySearchViewDes
 // ---- string-matching view: text with the pattern aligned underneath ----
 const CELL_W = 34 // px; must match .steptrace__cell width for shift alignment
 export function makeMatchView(frames) {
+  if (frames[0].profile === "z-array") return makeZArrayView(frames)
+
   const text = frames[0].text
   const pattern = frames[0].pattern
   const hasHash = frames.some((f) => f.hash) // rabin-karp only ⇒ constant rows
@@ -859,6 +867,220 @@ export function makeMatchView(frames) {
   // hash badge (if any) is placed AFTER the stage ⇒ it renders below the viz.
   const nodes = hasHash ? [stage, hashBadge, status] : [stage, status]
   return { nodes, paint, watch, destroy: () => ro && ro.disconnect() }
+}
+
+export function resolveVisibleScrollLeft(
+  scrollLeft,
+  clientWidth,
+  scrollWidth,
+  targetStart,
+  targetEnd,
+  padding = 8,
+) {
+  if (
+    !Number.isFinite(scrollLeft) ||
+    !Number.isFinite(clientWidth) ||
+    !Number.isFinite(scrollWidth) ||
+    !Number.isFinite(targetStart) ||
+    !Number.isFinite(targetEnd) ||
+    clientWidth <= 0
+  )
+    return scrollLeft
+  const maxScroll = Math.max(0, scrollWidth - clientWidth)
+  const inset = Math.min(Math.max(0, padding), clientWidth / 2)
+  if (targetStart < scrollLeft + inset) return Math.min(maxScroll, Math.max(0, targetStart - inset))
+  if (targetEnd > scrollLeft + clientWidth - inset)
+    return Math.min(maxScroll, Math.max(0, targetEnd - clientWidth + inset))
+  return scrollLeft
+}
+
+function makeZArrayView(frames) {
+  const text = frames[0].text
+  const stage = el("div", "steptrace__z")
+  stage.dataset.profile = "z-array"
+  const viewport = el("div", "steptrace__z-viewport")
+  const board = el("div", "steptrace__z-board")
+  board.style.setProperty("--_z-length", String(Math.max(text.length, 1)))
+
+  const prefixBand = el("div", "steptrace__z-band")
+  const prefixLabel = el("div", "steptrace__z-label")
+  prefixLabel.textContent = "prefix"
+  const prefixClip = el("div", "steptrace__z-lane steptrace__z-prefix-clip")
+  const prefixTrack = el("div", "steptrace__z-track")
+  const prefixCells = []
+  for (let k = 0; k < text.length; k++) {
+    const cell = el("div", "steptrace__z-cell steptrace__z-cell--prefix")
+    cell.textContent = text[k]
+    prefixTrack.append(cell)
+    prefixCells.push(cell)
+  }
+  prefixClip.append(prefixTrack)
+  prefixBand.append(prefixLabel, prefixClip)
+
+  const stringBand = el("div", "steptrace__z-band")
+  const stringLabel = el("div", "steptrace__z-label")
+  stringLabel.textContent = "S"
+  const stringRow = el("div", "steptrace__z-lane steptrace__z-string")
+  const stringCells = []
+  for (let k = 0; k < text.length; k++) {
+    const cell = el("div", "steptrace__z-cell steptrace__z-cell--string")
+    const index = el("span", "steptrace__z-index")
+    index.textContent = String(k)
+    const value = el("span", "steptrace__z-char")
+    value.textContent = text[k]
+    cell.append(index, value)
+    stringRow.append(cell)
+    stringCells.push(cell)
+  }
+  const cursor = el("div", "steptrace__z-cursor")
+  cursor.setAttribute("aria-hidden", "true")
+  const bracket = el("div", "steptrace__z-bracket")
+  bracket.setAttribute("aria-hidden", "true")
+  stringRow.append(bracket, cursor)
+  stringBand.append(stringLabel, stringRow)
+
+  const zBand = el("div", "steptrace__z-band")
+  const zLabel = el("div", "steptrace__z-label")
+  zLabel.textContent = "Z"
+  const zRow = el("div", "steptrace__z-lane steptrace__z-values")
+  const zCells = []
+  for (let k = 0; k < text.length; k++) {
+    const cell = el("div", "steptrace__z-cell steptrace__z-cell--value")
+    cell.textContent = "·"
+    zRow.append(cell)
+    zCells.push(cell)
+  }
+  const copyToken = el("div", "steptrace__z-copy")
+  copyToken.setAttribute("aria-hidden", "true")
+  zRow.append(copyToken)
+  zBand.append(zLabel, zRow)
+
+  board.append(prefixBand, stringBand, zBand)
+  viewport.append(board)
+  const legend = el("div", "steptrace__z-legend")
+  for (const [state, label] of [
+    ["compare", "character check"],
+    ["copy", "mirror reuse"],
+    ["commit", "committed Z"],
+  ]) {
+    const item = el("span", "steptrace__z-legend-item")
+    item.dataset.state = state
+    const swatch = el("span", "steptrace__z-legend-swatch")
+    const textNode = el("span")
+    textNode.textContent = label
+    item.append(swatch, textNode)
+    legend.append(item)
+  }
+  stage.append(viewport, legend)
+  const status = statusEl()
+
+  let currentFrame = frames[0]
+  function applyGeom() {
+    const measured = stringCells[0]?.getBoundingClientRect?.().width || CELL_W
+    const cw = measured > 0 ? measured : CELL_W
+    const i = currentFrame.i
+    const [l, r] = currentFrame.box || [0, 0]
+    stage.style.setProperty("--_cw", `${cw}px`)
+    prefixTrack.style.transform = `translateX(${((i ?? 0) * cw).toFixed(2)}px)`
+    cursor.style.transform = `translateX(${((i ?? 0) * cw).toFixed(2)}px)`
+    bracket.style.transform = `translateX(${(l * cw).toFixed(2)}px)`
+    bracket.style.width = `${Math.max(1, r - l + 1) * cw}px`
+    const copyIndex = currentFrame.type === "copy" ? i : currentFrame.k
+    copyToken.style.transform = `translateX(${((copyIndex ?? 0) * cw).toFixed(2)}px)`
+  }
+  function ensureActiveVisible() {
+    if (currentFrame.i == null) return
+    const candidate = currentFrame.compare?.candidate
+    const firstIndex = Math.min(currentFrame.i, candidate ?? currentFrame.i)
+    const lastIndex = Math.max(currentFrame.i, candidate ?? currentFrame.i)
+    const firstRect = stringCells[firstIndex]?.getBoundingClientRect?.()
+    const lastRect = stringCells[lastIndex]?.getBoundingClientRect?.()
+    const viewportRect = viewport.getBoundingClientRect?.()
+    if (!firstRect || !lastRect || !viewportRect) return
+    const targetStart = viewport.scrollLeft + firstRect.left - viewportRect.left
+    const targetEnd = viewport.scrollLeft + lastRect.left + lastRect.width - viewportRect.left
+    const next = resolveVisibleScrollLeft(
+      viewport.scrollLeft,
+      viewport.clientWidth,
+      viewport.scrollWidth,
+      targetStart,
+      targetEnd,
+    )
+    if (Math.abs(next - viewport.scrollLeft) < 0.5) return
+    const behavior = stage.closest?.(".steptrace--reduced") ? "auto" : "smooth"
+    if (typeof viewport.scrollTo === "function") viewport.scrollTo({ left: next, behavior })
+    else viewport.scrollLeft = next
+  }
+  function syncLayout() {
+    applyGeom()
+    ensureActiveVisible()
+  }
+  const ro = typeof ResizeObserver !== "undefined" ? new ResizeObserver(syncLayout) : null
+  if (ro) {
+    ro.observe(stringRow)
+    ro.observe(viewport)
+  }
+
+  function paint(frame, index, total) {
+    currentFrame = frame
+    stage.dataset.frame = frame.type
+    stage.dataset.case = frame.sourceCase || ""
+    prefixTrack.dataset.visible = frame.i == null ? "0" : "1"
+    cursor.dataset.visible = frame.i == null ? "0" : "1"
+    bracket.dataset.visible = frame.box ? "1" : "0"
+    copyToken.dataset.visible = frame.type === "copy" ? "1" : "0"
+    copyToken.textContent = frame.k == null ? "" : String(frame.z[frame.k] ?? "·")
+    for (let k = 0; k < text.length; k++) {
+      prefixCells[k].dataset.state = ""
+      stringCells[k].dataset.state = ""
+      zCells[k].dataset.state = ""
+      zCells[k].textContent = frame.z[k] == null ? "·" : String(frame.z[k])
+      if (frame.box && k >= frame.box[0] && k <= frame.box[1]) stringCells[k].dataset.box = "1"
+      else delete stringCells[k].dataset.box
+    }
+    if (frame.i != null && stringCells[frame.i]) stringCells[frame.i].dataset.state = "focus"
+    if (frame.type === "copy" && frame.k != null) {
+      zCells[frame.k].dataset.state = "copy-source"
+      zCells[frame.i].dataset.state = "copy-target"
+    }
+    if (frame.type === "commit" && frame.i != null) zCells[frame.i].dataset.state = "commit"
+    if (frame.compare) {
+      const state = frame.compare.result
+      prefixCells[frame.compare.prefix].dataset.state = state
+      stringCells[frame.compare.candidate].dataset.state = state
+    }
+    syncLayout()
+    status.innerHTML =
+      escapeHtml(frame.message) +
+      ` <span class="steptrace__counts">· step ${index + 1}/${total}</span>`
+  }
+
+  function watch(frame) {
+    const box = frame.box || [0, 0]
+    return [
+      { k: "i", v: frame.i ?? "—", sw: "var(--_blue)" },
+      { k: "case", v: frame.sourceCase || "initialize", sw: "var(--_neutral)" },
+      { k: "box", v: `[${box[0]}, ${box[1]}]`, sw: "var(--_violet)" },
+      {
+        k: "mirror",
+        v: frame.k == null ? "—" : `k = ${frame.k}, Z[k] = ${frame.z[frame.k] ?? "·"}`,
+        sw: "var(--_amber)",
+      },
+      {
+        k: "Z[i]",
+        v: frame.i == null ? "—" : (frame.z[frame.i] ?? "·"),
+        sw: "var(--_green)",
+      },
+    ]
+  }
+
+  return {
+    nodes: [stage, status],
+    stableStage: true,
+    paint,
+    watch,
+    destroy: () => ro && ro.disconnect(),
+  }
 }
 
 // ---- array-pointer view: a segmented strip + [ ] end brackets + window ----
@@ -2092,9 +2314,7 @@ export function makeExecutionTreeView(frames, descriptor: ExecutionTreeViewDescr
   svg.style.setProperty("--steptrace-tree-width", `${canvasWidth}px`)
   svg.append(title, description)
 
-  const treeLayer = descriptor.centerVisible
-    ? document.createElementNS(SVGNS, "g")
-    : svg
+  const treeLayer = descriptor.centerVisible ? document.createElementNS(SVGNS, "g") : svg
   if (descriptor.centerVisible) {
     treeLayer.setAttribute("class", "steptrace__rtcontent")
     svg.append(treeLayer)
@@ -2155,12 +2375,8 @@ export function makeExecutionTreeView(frames, descriptor: ExecutionTreeViewDescr
     const detail = document.createElementNS(SVGNS, "text")
     const result = document.createElementNS(SVGNS, "text")
     const badge = document.createElementNS(SVGNS, "text")
-    const divider = descriptor.tieredCards
-      ? document.createElementNS(SVGNS, "line")
-      : null
-    const valueTier = descriptor.tieredCards
-      ? document.createElementNS(SVGNS, "g")
-      : null
+    const divider = descriptor.tieredCards ? document.createElementNS(SVGNS, "line") : null
+    const valueTier = descriptor.tieredCards ? document.createElementNS(SVGNS, "g") : null
     const valueCells = []
     label.setAttribute("class", "steptrace__rtlabel")
     detail.setAttribute("class", "steptrace__rtdetail")
@@ -2682,7 +2898,9 @@ export function buildMilestones(algorithm, kind, frames) {
                   ? "Answer range"
                   : "Search range"
         : kind === "string"
-          ? "Shift 0"
+          ? familyProfile === "z-array"
+            ? "Initialize Z"
+            : "Shift 0"
           : kind === "backtrack"
             ? "Depth 0"
             : kind === "rectree"
@@ -2794,6 +3012,8 @@ export function buildMilestones(algorithm, kind, frames) {
                     : "Probe"
               } ${f.mid}`,
         )
+    } else if (kind === "string" && familyProfile === "z-array") {
+      if (f.type === "focus") push(i, `i = ${f.i}`)
     } else if (kind === "string") {
       if (
         (f.type === "slide" || f.type === "hash" || f.type === "match") &&
@@ -2949,6 +3169,7 @@ export function summaryFor(algorithm, kind, frame, graph) {
       ? `${frame.target} not found · ${frame.comparisons} comparisons.`
       : `${frame.target} found at index ${frame.found} · ${frame.comparisons} comparisons.`
   }
+  if (kind === "string" && frame.profile === "z-array") return `Z = [${frame.z.join(", ")}].`
   if (kind === "string")
     return frame.found.length
       ? `${frame.found.length} match${frame.found.length === 1 ? "" : "es"} at ${frame.found.join(", ")}.`

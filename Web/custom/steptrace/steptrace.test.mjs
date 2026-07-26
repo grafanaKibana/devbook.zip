@@ -44,6 +44,7 @@ const cases = [
   "linear-search",
   "kmp",
   "rabin-karp",
+  "z-algorithm",
   "two-pointers",
   "sliding-window",
   "lcs",
@@ -209,6 +210,270 @@ test("the public API and both host JavaScript contracts stay stable", () => {
   )
   assert.equal(typeof pluginModule.exports, "function")
   assert.equal(Object.getPrototypeOf(pluginModule.exports), Plugin)
+})
+
+test("Z-Algorithm config is registered with an isolated typed string profile", () => {
+  const api = loadEngine(readFileSync(join(here, "generated", "engine.js"), "utf8"))
+  const note = readFileSync(
+    join(
+      repoRoot,
+      "Vault",
+      "Home",
+      "Computer Science",
+      "Algorithms",
+      "Search Algorithms",
+      "String Matching",
+      "Z-Algorithm.md",
+    ),
+    "utf8",
+  )
+  const result = api.buildFrames({
+    algorithm: "z-algorithm",
+    text: "aabcaabxaaaz",
+  })
+
+  assert.equal(api.kindOf("z-algorithm"), "string")
+  assert.equal(result.kind, "string")
+  assert.equal(result.frames[0].profile, "z-array")
+  assert.match(note, /```steptrace\n\{"algorithm":"z-algorithm","text":"aabcaabxaaaz"\}\n```/)
+})
+
+test("Z-Algorithm frames expose copy, reuse-extension, comparisons, and the terminal array", () => {
+  const api = loadEngine(readFileSync(join(here, "generated", "engine.js"), "utf8"))
+  const { buildMilestones, summaryFor } = loadStepTraceModule("src", "render.ts")
+  const frames = api.buildFrames({
+    algorithm: "z-algorithm",
+    text: "aabcaabxaaaz",
+  }).frames
+  const stages = new Set(frames.map((frame) => frame.type))
+  const at = (i) => frames.filter((frame) => frame.i === i)
+  const copyFive = at(5).find((frame) => frame.type === "copy")
+  const reuseNine = at(9).find((frame) => frame.type === "copy")
+
+  assert.deepEqual([...stages], ["init", "focus", "compare", "commit", "copy", "done"])
+  assert.equal(copyFive.k, 1)
+  assert.equal(copyFive.z[5], 1)
+  assert.equal(copyFive.sourceCase, "copy")
+  assert.equal(
+    at(5).some((frame) => frame.type === "compare"),
+    false,
+  )
+  assert.equal(reuseNine.k, 1)
+  assert.equal(reuseNine.z[9], 1)
+  assert.equal(reuseNine.sourceCase, "reuse-extend")
+  assert.ok(
+    at(9).some(
+      (frame) =>
+        frame.type === "compare" &&
+        frame.compare.prefix === 1 &&
+        frame.compare.candidate === 10 &&
+        frame.compare.result === "match",
+    ),
+  )
+  assert.deepEqual(frames.at(-1).z, [12, 1, 0, 0, 3, 1, 0, 0, 2, 2, 1, 0])
+  assert.deepEqual(
+    buildMilestones("z-algorithm", "string", frames).map((mark) => mark.label),
+    [
+      "Initialize Z",
+      "i = 1",
+      "i = 2",
+      "i = 3",
+      "i = 4",
+      "i = 5",
+      "i = 6",
+      "i = 7",
+      "i = 8",
+      "i = 9",
+      "i = 10",
+      "i = 11",
+      "Result",
+    ],
+  )
+  assert.equal(
+    summaryFor("z-algorithm", "string", frames.at(-1)),
+    "Z = [12, 1, 0, 0, 3, 1, 0, 0, 2, 2, 1, 0].",
+  )
+})
+
+test("Z active ranges scroll only when they leave the shared viewport", () => {
+  const { resolveVisibleScrollLeft } = loadStepTraceModule("src", "render.ts")
+
+  assert.equal(resolveVisibleScrollLeft(0, 343, 538, 245, 285), 0)
+  assert.equal(resolveVisibleScrollLeft(0, 343, 538, 405, 485), 150)
+  assert.equal(resolveVisibleScrollLeft(150, 343, 538, 405, 485), 150)
+  assert.equal(resolveVisibleScrollLeft(150, 300, 538, 405, 485), 193)
+  assert.equal(resolveVisibleScrollLeft(195, 343, 538, 0, 40), 0)
+})
+
+test("the Z-array profile paints every frame into one stable measured-strip DOM", () => {
+  class FakeNode {
+    constructor(tagName) {
+      this.tagName = tagName
+      this.textContent = ""
+      this.innerHTML = ""
+      this.children = []
+      this.attributes = new Map()
+      this.dataset = {}
+      this.style = {
+        setProperty: (key, value) => this.attributes.set(`style:${key}`, value),
+      }
+      this.className = ""
+    }
+    setAttribute(key, value) {
+      this.attributes.set(key, String(value))
+    }
+    append(...children) {
+      this.children.push(...children)
+    }
+    getBoundingClientRect() {
+      return { width: 40, left: 0, top: 0, height: 38 }
+    }
+  }
+  const countNodes = (node) =>
+    1 + node.children.reduce((count, child) => count + countNodes(child), 0)
+  const previousDocument = globalThis.document
+  const previousResizeObserver = globalThis.ResizeObserver
+  let observer
+  globalThis.ResizeObserver = class {
+    constructor(callback) {
+      this.callback = callback
+      this.observed = []
+      this.disconnected = false
+      observer = this
+    }
+    observe(node) {
+      this.observed.push(node)
+    }
+    disconnect() {
+      this.disconnected = true
+    }
+    trigger() {
+      this.callback()
+    }
+  }
+  globalThis.document = { createElement: (tagName) => new FakeNode(tagName) }
+  try {
+    const api = loadEngine(readFileSync(join(here, "generated", "engine.js"), "utf8"))
+    const { makeMatchView } = loadStepTraceModule("src", "render.ts")
+    const styles = readFileSync(join(here, "src", "styles", "string.scss"), "utf8")
+    const frames = api.buildFrames({
+      algorithm: "z-algorithm",
+      text: "aabcaabxaaaz",
+    }).frames
+    const view = makeMatchView(frames)
+    const [stage] = view.nodes
+    const baseline = countNodes(stage)
+
+    assert.equal(view.stableStage, true)
+    assert.equal(stage.dataset.profile, "z-array")
+    assert.deepEqual(
+      view.watch(frames[0]).map((row) => row.k),
+      ["i", "case", "box", "mirror", "Z[i]"],
+    )
+    for (let index = 0; index < frames.length; index++) {
+      view.paint(frames[index], index, frames.length)
+      assert.equal(countNodes(stage), baseline)
+    }
+    assert.equal(stage.children[0].className, "steptrace__z-viewport")
+    assert.equal(stage.children[1].children.length, 3)
+    const viewport = stage.children[0]
+    const stringRow = viewport.children[0].children[1].children[1]
+    const scrolls = []
+    viewport.scrollLeft = 0
+    viewport.clientWidth = 343
+    viewport.scrollWidth = 538
+    viewport.scrollTo = ({ left, behavior }) => {
+      viewport.scrollLeft = left
+      scrolls.push({ left, behavior })
+    }
+    viewport.getBoundingClientRect = () => ({ left: 0, width: viewport.clientWidth })
+    stringRow.children.slice(0, 12).forEach((cell, index) => {
+      cell.getBoundingClientRect = () => ({
+        left: 45 + index * 40 - viewport.scrollLeft,
+        width: 40,
+      })
+    })
+    const compareNine = frames.find(
+      (frame) => frame.type === "compare" && frame.i === 9 && frame.compare?.result === "match",
+    )
+    view.paint(compareNine, 33, frames.length)
+    assert.deepEqual(scrolls, [{ left: 150, behavior: "smooth" }])
+    view.paint(compareNine, 33, frames.length)
+    assert.equal(scrolls.length, 1, "visible targets must preserve the user's scroll position")
+    viewport.clientWidth = 300
+    observer.trigger()
+    assert.deepEqual(scrolls.at(-1), { left: 193, behavior: "smooth" })
+    assert.deepEqual(observer.observed, [stringRow, viewport])
+    view.destroy()
+    assert.equal(observer.disconnected, true)
+    assert.match(styles, /\.steptrace__z-viewport \{[\s\S]*overflow-x: auto;/)
+    assert.match(styles, /inline-size: max\(100%, calc\(3\.65rem \+ var\(--_z-length\)/)
+    assert.match(
+      styles,
+      /\.steptrace--reduced[\s\S]*:is\([\s\S]*transition-property: opacity !important;/,
+    )
+  } finally {
+    globalThis.document = previousDocument
+    globalThis.ResizeObserver = previousResizeObserver
+  }
+})
+
+test("KMP and Rabin-Karp stay on the measured match profile", () => {
+  class FakeNode {
+    constructor(tagName) {
+      this.tagName = tagName
+      this.textContent = ""
+      this.innerHTML = ""
+      this.children = []
+      this.attributes = new Map()
+      this.dataset = {}
+      this.style = {
+        setProperty: (key, value) => this.attributes.set(`style:${key}`, value),
+      }
+      this.className = ""
+    }
+    append(...children) {
+      this.children.push(...children)
+    }
+    setAttribute(key, value) {
+      this.attributes.set(key, String(value))
+    }
+    getBoundingClientRect() {
+      return { width: 40 }
+    }
+  }
+  const previousDocument = globalThis.document
+  globalThis.document = { createElement: (tagName) => new FakeNode(tagName) }
+  try {
+    const api = loadEngine(readFileSync(join(here, "generated", "engine.js"), "utf8"))
+    const { makeMatchView } = loadStepTraceModule("src", "render.ts")
+    const kmp = api.buildFrames({
+      algorithm: "kmp",
+      text: "ABABACABA",
+      pattern: "ABAC",
+    }).frames
+    const rabin = api.buildFrames({
+      algorithm: "rabin-karp",
+      text: "ABABACABA",
+      pattern: "ABAC",
+    }).frames
+
+    assert.ok(kmp.every((frame) => frame.profile == null && !("z" in frame)))
+    assert.ok(rabin.every((frame) => frame.profile == null && !("z" in frame)))
+    assert.equal(makeMatchView(kmp).nodes[0].className, "steptrace__match")
+    assert.equal(makeMatchView(rabin).nodes[0].className, "steptrace__match")
+    assert.equal(makeMatchView(kmp).nodes.length, 2)
+    assert.equal(makeMatchView(rabin).nodes.length, 3)
+    const renderSource = readFileSync(join(here, "src", "render.ts"), "utf8")
+    const profileDispatch = renderSource.slice(
+      renderSource.indexOf("export function makeMatchView"),
+      renderSource.indexOf("function makeZArrayView"),
+    )
+    assert.match(profileDispatch, /frames\[0\]\.profile === "z-array"/)
+    assert.doesNotMatch(profileDispatch, /z-algorithm/)
+  } finally {
+    globalThis.document = previousDocument
+  }
 })
 
 test("tabbed blocks validate metadata and keep algorithm configs clean", () => {
@@ -487,7 +752,7 @@ test("all built-in algorithms preserve their headless frame contract", () => {
 
   assert.equal(
     digest,
-    "6067681e260ff31fb03d59c77449a14419b83df84e94bf50b32b15db3762ab5d",
+    "e668a801c98c8663bb387608ab94607c4ecb142539b0cbbf1ff9eb28ec46716a",
     "the headless StepTrace behavior changed",
   )
 })
@@ -722,10 +987,7 @@ test("counting sort renders shared bars around one progressive frequency strip",
     assert.equal(inputBars.children.length, 8)
     assert.equal(outputBars.children.length, 8)
     assert.match(source, /makeDistributionArrayBand/)
-    assert.match(
-      source,
-      /el\("div", "steptrace__rail-label steptrace__distribution-label"\)/,
-    )
+    assert.match(source, /el\("div", "steptrace__rail-label steptrace__distribution-label"\)/)
     assert.match(
       source,
       /makeDistributionArrayBand\(\n    "Unsorted Array",[\s\S]*first\.input\.length,\n  \)/,
@@ -2281,13 +2543,17 @@ test("tim sort keeps natural runs contiguous while it reverses, extends, collaps
     array: [5, 6, 7, 8, 9, 4, 3, 1, 2, 8],
     minrun: 4,
   })
-  const { runStackFamily, runStackWatch } = loadStepTraceModule(
-    "src",
-    "families",
-    "run-stack.ts",
-  )
+  const { runStackFamily, runStackWatch } = loadStepTraceModule("src", "families", "run-stack.ts")
   const note = readFileSync(
-    join(repoRoot, "Vault", "Home", "Computer Science", "Algorithms", "Sorting Algorithms", "Tim Sort.md"),
+    join(
+      repoRoot,
+      "Vault",
+      "Home",
+      "Computer Science",
+      "Algorithms",
+      "Sorting Algorithms",
+      "Tim Sort.md",
+    ),
     "utf8",
   )
   const source = readFileSync(join(here, "src", "algorithms", "tim-sort.ts"), "utf8")
@@ -2321,14 +2587,26 @@ test("tim sort keeps natural runs contiguous while it reverses, extends, collaps
   )
   assert.equal(result.frames.find((frame) => frame.type === "detect")?.direction, "ascending")
   assert.equal(result.frames.find((frame) => frame.type === "reverse")?.direction, "descending")
-  assert.ok(insertion.some((frame) => frame.insertion?.source === 8 && frame.insertion.target === 6))
+  assert.ok(
+    insertion.some((frame) => frame.insertion?.source === 8 && frame.insertion.target === 6),
+  )
   assert.deepEqual(
     result.frames.find((frame) => frame.type === "check" && frame.invariant?.z != null)?.invariant,
     { x: 1, y: 4, z: 5, holds: false },
   )
-  assert.deepEqual(firstMerge.stack.map((run) => [run.start, run.length]), [[0, 5], [5, 5]])
+  assert.deepEqual(
+    firstMerge.stack.map((run) => [run.start, run.length]),
+    [
+      [0, 5],
+      [5, 5],
+    ],
+  )
   assert.equal(forced, undefined)
-  const forceResult = api.buildFrames({ algorithm: "tim-sort", array: [5, 6, 7, 8, 9, 4, 3, 1, 2], minrun: 4 })
+  const forceResult = api.buildFrames({
+    algorithm: "tim-sort",
+    array: [5, 6, 7, 8, 9, 4, 3, 1, 2],
+    minrun: 4,
+  })
   assert.deepEqual(forceResult.frames.find((frame) => frame.type === "force-merge")?.stack, [
     { start: 0, length: 9 },
   ])
@@ -2358,11 +2636,26 @@ test("tim sort keeps natural runs contiguous while it reverses, extends, collaps
   assert.match(pointerStyles, /overflow: hidden/)
   assert.match(typesSource, /stageAlignment\?: "bottom" \| "center"/)
   assert.match(mountSource, /view\.stageAlignment \|\| "center"/)
-  assert.match(mountSource, /stageCol\.classList\.toggle\("steptrace__stage-col--bottom", stageAlignment === "bottom"\)/)
-  assert.match(mountSource, /stageCol\.classList\.toggle\("steptrace__stage-col--center", stageAlignment === "center"\)/)
-  assert.match(renderSource, /return \{ nodes: \[stage, status\], stageAlignment: "bottom", paint, watch/)
-  assert.match(renderSource, /export function makeMatchView[\s\S]*?return \{ nodes, paint, watch, destroy:/)
-  assert.match(renderSource, /export function makePointerView[\s\S]*?return \{ nodes: \[wrap, status\], paint, watch \}/)
+  assert.match(
+    mountSource,
+    /stageCol\.classList\.toggle\("steptrace__stage-col--bottom", stageAlignment === "bottom"\)/,
+  )
+  assert.match(
+    mountSource,
+    /stageCol\.classList\.toggle\("steptrace__stage-col--center", stageAlignment === "center"\)/,
+  )
+  assert.match(
+    renderSource,
+    /return \{ nodes: \[stage, status\], stageAlignment: "bottom", paint, watch/,
+  )
+  assert.match(
+    renderSource,
+    /export function makeMatchView[\s\S]*?return \{ nodes, paint, watch, destroy:/,
+  )
+  assert.match(
+    renderSource,
+    /export function makePointerView[\s\S]*?return \{ nodes: \[wrap, status\], paint, watch \}/,
+  )
   assert.match(renderSource, /stageLayout: "fill"/)
   assert.match(styles, /\.steptrace__run-stack-cards/)
   assert.match(styles, /min-block-size: 8\.1rem/)
@@ -2379,18 +2672,36 @@ test("tim sort keeps natural runs contiguous while it reverses, extends, collaps
     /\.steptrace--stable-stage \.steptrace__log\s*\{[\s\S]*?overflow-y: auto !important;[\s\S]*?overscroll-behavior: contain;/,
   )
   assert.match(styles, /\.steptrace__run-array-section\s*\{[\s\S]*?padding-bottom: 0\.9rem;/)
-  assert.match(styles, /\.steptrace__run-bars\s*\{[\s\S]*?align-self: end;[\s\S]*?block-size: 100%;[\s\S]*?min-block-size: 0;[\s\S]*?overflow: hidden;/)
-  assert.match(styles, /\.steptrace__run-stack-section\s*\{[\s\S]*?padding-top: 0\.9rem;[\s\S]*?border-top: 1px solid var\(--_hair\);/)
+  assert.match(
+    styles,
+    /\.steptrace__run-bars\s*\{[\s\S]*?align-self: end;[\s\S]*?block-size: 100%;[\s\S]*?min-block-size: 0;[\s\S]*?overflow: hidden;/,
+  )
+  assert.match(
+    styles,
+    /\.steptrace__run-stack-section\s*\{[\s\S]*?padding-top: 0\.9rem;[\s\S]*?border-top: 1px solid var\(--_hair\);/,
+  )
   assert.match(styles, /data-motion="push"[\s\S]*?steptrace-run-stack-push/)
   assert.match(styles, /data-motion="insert"[\s\S]*?steptrace-run-stack-insert/)
   assert.match(styles, /data-motion="merge"[\s\S]*?steptrace-run-stack-merge/)
   assert.match(familySource, /bar\.bar\.dataset\.motion = frame\.type === "insert"/)
-  assert.match(familySource, /isSorted \? "sorted" : isInsert \? "candidate" : isCurrent \? "compare" : ""/)
+  assert.match(
+    familySource,
+    /isSorted \? "sorted" : isInsert \? "candidate" : isCurrent \? "compare" : ""/,
+  )
   assert.match(styles, /data-run="0"\]\[data-state=""\]/)
-  assert.doesNotMatch(styles, /data-current="1"\][\s\S]*?box-shadow|data-insert="1"\][\s\S]*?box-shadow/)
-  assert.match(barStyles, /\.steptrace__bar\[data-state="sorted"\] \.steptrace__fill \{\n  background: var\(--_green\);/)
+  assert.doesNotMatch(
+    styles,
+    /data-current="1"\][\s\S]*?box-shadow|data-insert="1"\][\s\S]*?box-shadow/,
+  )
+  assert.match(
+    barStyles,
+    /\.steptrace__bar\[data-state="sorted"\] \.steptrace__fill \{\n  background: var\(--_green\);/,
+  )
   assert.doesNotMatch(familySource, /dataset\.motion = "remove"|dataset\.state = "removed"/)
-  assert.doesNotMatch(styles, /run-array-(?:cell|index|value)|steptrace__pwrap|steptrace__pcells|steptrace__pcell\s*\{/)
+  assert.doesNotMatch(
+    styles,
+    /run-array-(?:cell|index|value)|steptrace__pwrap|steptrace__pcells|steptrace__pcell\s*\{/,
+  )
   assert.doesNotMatch(styles, /glow|drop-shadow/)
 })
 
@@ -2442,7 +2753,10 @@ test("tim sort run-stack cards display only the current stack entries", () => {
       .map((card) => card.children[0].textContent)
       .sort()
     const currentLabels = merge.stack
-      .map((run, index) => `R${index + 1} [${run.start}…${run.start + run.length - 1}] · ${run.length}`)
+      .map(
+        (run, index) =>
+          `R${index + 1} [${run.start}…${run.start + run.length - 1}] · ${run.length}`,
+      )
       .sort()
 
     assert.deepEqual(visibleLabels, currentLabels)
@@ -2451,7 +2765,10 @@ test("tim sort run-stack cards display only the current stack entries", () => {
     const bars = view.nodes[0].children[0].children[1]
     assert.ok(
       bars.children.every(
-        (bar) => bar.dataset.state === "sorted" && bar.dataset.current === "0" && bar.dataset.insert === "0",
+        (bar) =>
+          bar.dataset.state === "sorted" &&
+          bar.dataset.current === "0" &&
+          bar.dataset.insert === "0",
       ),
     )
   } finally {

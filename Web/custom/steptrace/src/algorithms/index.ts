@@ -38,6 +38,7 @@ import { twoPointers } from "./two-pointers"
 import { unionFind } from "./union-find"
 import { ternarySearch } from "./ternary-search"
 import { timSort } from "./tim-sort"
+import { zAlgorithm } from "./z-algorithm"
 
 export const builtInAlgorithms = [
   bubbleSort,
@@ -69,6 +70,7 @@ export const builtInAlgorithms = [
   linearSearch,
   kmp,
   rabinKarp,
+  zAlgorithm,
   twoPointers,
   slidingWindow,
   lcs,
