@@ -103,6 +103,9 @@ export const WATCH_HINTS = Object.freeze({
   "current block": "Merged interval accumulated by the left-to-right sweep.",
   "next meeting": "Finish-time-ordered meeting currently being checked.",
   "last accepted": "Most recent meeting committed to the schedule.",
+  slow: "The pointer that advances one node at a time.",
+  fast: "The pointer that advances two nodes at a time during cycle detection.",
+  head: "The pointer reset to the head for the cycle-entry search.",
 })
 
 export function watchHintFor(row: WatchRow): string {

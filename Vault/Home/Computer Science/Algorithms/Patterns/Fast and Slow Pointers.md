@@ -3,7 +3,7 @@ topic:
   - Computer Science
 subtopic:
   - Algorithms
-summary: "Floyd's tortoise-and-hare: two pointers moving at different speeds detect cycles, midpoints, or duplicates in O(1) space."
+summary: "Floyd's tortoise-and-hare detects cycles and functional-graph duplicates in O(1) space; related fast/slow traversal finds linked-list midpoints."
 level:
   - "4"
 priority: Medium
@@ -17,20 +17,23 @@ The technique needs only one property of the input: each element has exactly one
 
 **Core condition:** a single-successor structure → one pointer moving twice as fast closes the gap by one per step → cycle detection in `O(n)` time and `O(1)` auxiliary space.
 
-> [!NOTE] Visualization pending
-> Planned StepTrace: a two-pointer-on-a-linked-cycle card showing the hare gaining one node per step and lapping the tortoise inside the loop until both occupy the same node, then the phase-two reset from the head converging on the cycle entry. No matching renderer exists in `engine.js` yet.
+The trace uses `A → B → C → D → E → F → G → H → C`, with the six-node cycle `C → D → E → F → G → H → C`. Every hop is shown separately: slow moves once, fast moves twice, and they first collide at `G` after six slow iterations. Phase two resets the fast pointer to `A`; both then move one hop at a time and converge at the cycle entry `C` after two iterations.
+
+```steptrace
+{"algorithm":"fast-and-slow-pointers"}
+```
 
 # Why the Pointers Meet, and where
 
 Detection is the first phase. Both pointers start at the head. Each step advances `slow` by one node and `fast` by two. Once both pointers are inside a cycle of length `λ`, the fast pointer's lead over the slow pointer increases by one node per step; measured modulo `λ` that lead cycles through `0`, so within at most `λ` steps the lead is a multiple of `λ` and the two references coincide. If the chain is acyclic the fast pointer reaches `null` first and the loop ends with no meeting. The meeting therefore proves a cycle and running off the end proves acyclicity — a biconditional with no false result either way.
 
-The meeting node is *not* the start of the cycle. Locating the entry is a separate second phase: reset one pointer to the head, leave the other at the meeting node, and advance **both** by one node per step. They meet exactly at the entry.
+The meeting node need not be the start of the cycle. Locating the entry is a separate second phase: reset one pointer to the head, leave the other at the meeting node, and advance **both** by one node per step. They meet exactly at the entry.
 
 The distance argument is what makes phase two exact rather than a memorised recipe. Let `μ` be the number of nodes from the head to the cycle entry and `λ` the cycle length. When the pointers first meet, `slow` has travelled some distance `d` and `fast` has travelled `2d`; since the two are at the same node, the fast pointer's extra `2d − d = d` steps must be a whole number of laps, so `d = k·λ` for some integer `k`. Working out where that leaves the meeting node inside the cycle, it sits `μ mod λ` steps *before* the entry — equivalently `λ − (μ mod λ)` steps past it. A pointer restarted at the head reaches the entry after exactly `μ` steps; the pointer left at the meeting node, stepped those same `μ` times, covers the remaining `μ mod λ` steps to the entry and then completes whole laps, so it too lands on the entry. They arrive together.
 
 Cycle length falls out for free once a meeting exists: hold one pointer fixed and walk the other around until it returns; the number of steps is `λ`.
 
-The same two-phase mechanism handles two other single-successor problems. The **middle of a list** is where the slow pointer stands when the fast pointer reaches the end — the fast pointer covers `2×` the distance, so the slow pointer is at the halfway node in one pass. The **nth node from the end** uses a fixed gap instead of a speed difference: advance one pointer `n` nodes ahead, then move both at speed one until the leader hits the end, leaving the follower on the target.
+Midpoint and nth-from-end traversal belong to the broader two-pointer family, but neither uses Floyd's two-phase cycle-entry mechanism. For the **middle of a list**, slow advances one node while fast advances two: `while (fast != null && fast.next != null)` returns the second middle node for an even-length list, while `while (fast.next != null && fast.next.next != null)` returns the first when the list is non-empty. The **nth node from the end** uses a fixed gap rather than different speeds: advance one pointer `n` nodes ahead, then move both one node per step until the leader hits the end, leaving the follower on the target.
 
 # Complexity
 
@@ -46,11 +49,11 @@ Every case is linear in the node count and holds two pointers regardless of inpu
 
 The method needs a *traversable* successor: a `next` pointer, an index-to-index map, or any deterministic "given x, the one next x." It does not apply to a general graph where a node has several outgoing edges, because "advance twice" is undefined when the successor is ambiguous. Functional graphs — where every node has exactly one out-edge — and integer sequences qualify. This is why the same code detects a repeat in the **happy-number** sequence `n → sum of squares of digits`, and why **Find the Duplicate Number** (LeetCode 287) reads an array of `n + 1` values in `[1..n]` as edges `i → nums[i]`: two indices sharing a value create two edges into one node, forcing a cycle whose *entry* is the duplicate.
 
-Returning the phase-one meeting node as the cycle start is the standard bug. The meeting node lies somewhere inside the loop, `μ mod λ` steps before the entry; only when `μ = 0` (the head itself is on the cycle) do the two coincide. Skipping phase two returns a plausible-looking but wrong node, and the code still terminates, so the error is silent.
+Returning the phase-one meeting node as the cycle start is the standard bug. The meeting node lies somewhere inside the loop, `μ mod λ` steps before the entry; the two coincide when `μ mod λ = 0`. Phase two is still required because that condition is unknown in advance. Skipping it can return a plausible-looking but wrong node, and the code still terminates, so the error is silent.
 
-Dereferencing the fast pointer without guarding both hops is the other failure. `fast.next.next` throws on an acyclic list of even length, because `fast.next` becomes `null` immediately before the second hop; every iteration must test `fast != null && fast.next != null` first. Relatedly, cycle detection compares node *identity* (`slow == fast`), not values — two distinct nodes holding equal payloads are not a cycle. Only in the array framing, where indices stand in for identity, does the comparison become a value comparison.
+Dereferencing the fast pointer without guarding both hops is the other failure. `fast.next.next` throws whenever `fast != null` but `fast.next == null`, so every iteration must test both `fast != null` and `fast.next != null` first. Relatedly, cycle detection compares node *identity* (`slow == fast`), not values — two distinct nodes holding equal payloads are not a cycle. Only in the array framing, where indices stand in for identity, does the comparison become a value comparison.
 
-This same-direction, different-speed configuration is distinct from [[LinkedList|linked-list]] traversal patterns and from [[Two Pointers]], where two pointers start at opposite ends of a *sorted array* and converge toward the middle. That pattern exploits sorted order to decide which end to move; this one exploits a speed differential to close a gap inside a loop. They share the name "two pointers" and nothing of the mechanism.
+This same-direction, different-speed configuration is distinct from [[Home/Computer Science/Data Structures/Linear Structures/LinkedList|linked-list]] traversal patterns and from [[Home/Computer Science/Algorithms/Patterns/Two Pointers|two pointers]], where two pointers start at opposite ends of a *sorted array* and converge toward the middle. That pattern exploits sorted order to decide which end to move; this one exploits a speed differential to close a gap inside a loop. They share the name "two pointers" and nothing of the mechanism.
 
 # Reference Drawer
 
@@ -97,7 +100,7 @@ This same-direction, different-speed configuration is distinct from [[LinkedList
 | --- | --- | --- | --- | --- | --- |
 | Fast/slow (Floyd) | `O(n)` | `O(1)` | A single-successor structure | Read-only or memory-tight cycle detection; sequences with no node objects | Needs a second phase to locate the entry |
 | Hash set of visited nodes | `O(n)` | `O(n)` | Hashable/identifiable nodes | The visited set or first repeat is wanted directly | Memory cost scales with the structure |
-| Brent's algorithm | `O(n)` | `O(1)` | A single-successor structure | Fewer iterations and no double-speed pointer; reports `λ` directly | More intricate; less familiar |
+| Brent's algorithm | `O(n)` | `O(1)` | A single-successor structure | Fewer successor-function evaluations on average; reports `λ` directly | More intricate; less familiar |
 
 Floyd's fast/slow is the `O(1)`-space cycle detector for linked structures and functional sequences: it pays a second pass to name the entry but never allocates. A visited set is the simpler code and hands back the entry as the first repeat, at the cost of `O(n)` memory and hashable identity — the fit when that set is needed anyway. Brent's algorithm keeps the same `O(1)` space while cutting the constant factor and yielding the cycle length as a by-product, so it wins in hot loops where the extra implementation complexity is justified.
 

@@ -10,6 +10,10 @@
   gap: 0.55rem;
 }
 
+.steptrace .steptrace__graph-state[data-racks="false"] {
+  grid-template-rows: minmax(0, 1fr) auto;
+}
+
 .steptrace .steptrace__gs-graph {
   min-block-size: 0;
   display: grid;
@@ -37,6 +41,7 @@
 }
 
 .steptrace .steptrace__gs-edge-label {
+  pointer-events: none;
   fill: var(--_muted);
   stroke: var(--_surface);
   stroke-width: 4px;

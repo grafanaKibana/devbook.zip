@@ -19,8 +19,6 @@ The optimality guarantee holds when `h` never overestimates the remaining cost. 
 
 The decisive step is which node leaves the frontier next, and how `h` skews that choice toward the goal.
 
-The same `f = g + h` rule works across grids, road networks, and floor plans. In every tab, OPEN is ordered by the estimated total cost, CLOSED records expanded states, and the final frame compares how many states A* and Dijkstra expanded.
-
 ```steptrace
 {"tabs":[{"name":"Coordinate grid","description":"A winding 6 × 4 grid makes the heuristic steer around two barriers.","algorithm":"a-star","variant":"coordinate-grid"},{"name":"Ukraine cities","description":"Choose From and To in Options; Haversine distance guides a route across 25 regional centers.","algorithm":"a-star","variant":"ukraine-cities","start":"Lviv","target":"Kharkiv"},{"name":"Building floor","description":"A locked fire door blocks the direct corridor, forcing a lower-corridor detour.","algorithm":"a-star","variant":"building-floor"},{"name":"Midtown map","description":"One-way streets and a West 44th closure force the route onto Broadway.","algorithm":"a-star","variant":"midtown-map"}]}
 ```

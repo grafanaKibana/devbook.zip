@@ -805,6 +805,11 @@ export function makeGraphStateView(frames: readonly GraphStateFrame[]): StepTrac
 
   const positions = new Map(first.nodes.map((node) => [node.id, node]))
   const compactMapNodes = first.profile === "building-floor" || first.profile === "midtown-map"
+  const weighted =
+    ["heuristic-search", "edge-relaxation", "mst-scan", "mst-round", "residual-flow"].includes(
+      first.detail.kind,
+    ) ||
+    first.edges.some((edge) => edge.weight !== 1 || edge.label != null)
   const edgeElements = first.edges.map((edge) => {
     const from = positions.get(edge.from)!
     const to = positions.get(edge.to)!
@@ -821,7 +826,7 @@ export function makeGraphStateView(frames: readonly GraphStateFrame[]): StepTrac
     })
     if (edge.showDirection) line.setAttribute("marker-end", `url(#${markerId})`)
     edgeLayer.append(line)
-    const label = edge.label != null || first.detail.kind === "residual-flow"
+    const label = weighted
       ? svgElement("text", {
           class: "steptrace__gs-edge-label",
           x: (from.x + to.x) / 2,
@@ -829,7 +834,7 @@ export function makeGraphStateView(frames: readonly GraphStateFrame[]): StepTrac
         })
       : null
     if (label) {
-      label.textContent = edge.label || ""
+      label.textContent = edge.label ?? String(edge.weight)
       edgeLabelLayer.append(label)
     }
     return { edge, line, label }
@@ -860,11 +865,20 @@ export function makeGraphStateView(frames: readonly GraphStateFrame[]): StepTrac
     legend.append(item)
   }
 
-  const racks = el("div", "steptrace__gs-racks")
-  const openRack = rack("OPEN", "open", 5)
-  const closedRack = rack("CLOSED", "closed", 5)
-  racks.append(openRack.row, closedRack.row)
-  shell.append(graph, legend, racks)
+  const rackViews =
+    first.detail.kind === "heuristic-search"
+      ? null
+      : {
+          root: el("div", "steptrace__gs-racks"),
+          primary: rack("OPEN", "open", 5),
+          secondary: rack("CLOSED", "closed", 5),
+        }
+  shell.dataset.racks = String(rackViews != null)
+  shell.append(graph, legend)
+  if (rackViews) {
+    rackViews.root.append(rackViews.primary.row, rackViews.secondary.row)
+    shell.append(rackViews.root)
+  }
   const status = statusEl()
 
   function fillRack(
@@ -924,12 +938,14 @@ export function makeGraphStateView(frames: readonly GraphStateFrame[]): StepTrac
       if (label) {
         label.textContent = frame.detail.kind === "residual-flow"
           ? `${frame.detail.flow[`${edge.from}|${edge.to}`] || 0}/${edge.weight}`
-          : edge.label || ""
+          : edge.label ?? String(edge.weight)
       }
     }
-    const [primary, secondary] = graphStateRacks(frame.detail)
-    fillRack(openRack, { ...primary, entries: primary.entries.slice(0, 5) })
-    fillRack(closedRack, { ...secondary, entries: secondary.entries.slice(-5) })
+    if (rackViews) {
+      const [primary, secondary] = graphStateRacks(frame.detail)
+      fillRack(rackViews.primary, { ...primary, entries: primary.entries.slice(0, 5) })
+      fillRack(rackViews.secondary, { ...secondary, entries: secondary.entries.slice(-5) })
+    }
     status.textContent = frame.message
   }
 

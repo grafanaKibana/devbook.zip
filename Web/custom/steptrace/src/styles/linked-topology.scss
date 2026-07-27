@@ -1,0 +1,184 @@
+.steptrace[data-visual-family="linked-topology"] .steptrace__stage-col {
+  justify-content: center;
+}
+
+.steptrace .steptrace__linked-topology {
+  inline-size: 100%;
+  min-inline-size: 0;
+}
+
+.steptrace .steptrace__linked-canvas {
+  position: relative;
+  inline-size: 100%;
+  min-inline-size: 0;
+  block-size: clamp(15rem, 34vw, 19rem);
+  overflow: hidden;
+}
+
+.steptrace .steptrace__linked-svg {
+  position: absolute;
+  inset: 0;
+  inline-size: 100%;
+  block-size: 100%;
+  overflow: visible;
+}
+
+.steptrace .steptrace__linked-edge {
+  fill: none;
+  stroke: var(--_neutral);
+  stroke-width: 1.25;
+  vector-effect: non-scaling-stroke;
+}
+
+.steptrace .steptrace__linked-edge[data-cycle="1"] {
+  stroke: color-mix(in srgb, var(--_violet) 62%, var(--_neutral));
+}
+
+.steptrace .steptrace__linked-arrow {
+  fill: context-stroke;
+}
+
+.steptrace .steptrace__linked-node {
+  position: absolute;
+  inset-inline-start: calc(var(--_linked-x) * 1%);
+  inset-block-start: calc(var(--_linked-y) / 70 * 100%);
+  inline-size: clamp(2.35rem, 6vw, 3rem);
+  aspect-ratio: 1;
+  border: 1.5px solid var(--_border);
+  border-radius: 50%;
+  display: grid;
+  place-items: center;
+  color: var(--_text);
+  background: var(--_surface);
+  font: 600 0.92rem/1 var(--_font-head);
+  transform: translate(-50%, -50%);
+  transition:
+    border-color var(--_tween) ease,
+    background-color var(--_tween) ease,
+    box-shadow var(--_tween) ease;
+}
+
+.steptrace .steptrace__linked-node[data-slow="true"] {
+  border-color: var(--_blue);
+  background: color-mix(in srgb, var(--_blue) 14%, var(--_surface));
+}
+
+.steptrace .steptrace__linked-node[data-fast="true"] {
+  box-shadow: 0 0 0 2px color-mix(in srgb, var(--_violet) 78%, transparent);
+}
+
+.steptrace .steptrace__linked-node[data-meeting="true"] {
+  border-color: var(--_amber);
+  background: color-mix(in srgb, var(--_amber) 16%, var(--_surface));
+}
+
+.steptrace .steptrace__linked-node[data-entry="true"] {
+  border-color: var(--_green);
+  background: color-mix(in srgb, var(--_green) 18%, var(--_surface));
+  box-shadow: 0 0 0 2px color-mix(in srgb, var(--_green) 65%, transparent);
+}
+
+.steptrace .steptrace__linked-node-result {
+  position: absolute;
+  inset: -0.3rem -0.3rem auto auto;
+  inline-size: 1rem;
+  block-size: 1rem;
+  display: none;
+}
+
+.steptrace .steptrace__linked-node[data-entry="true"] .steptrace__linked-node-result {
+  display: grid;
+}
+
+.steptrace .steptrace__linked-pointer {
+  position: absolute;
+  z-index: 3;
+  inset-inline-start: calc(var(--_linked-x) * 1%);
+  inset-block-start: calc(var(--_linked-y) / 70 * 100%);
+  min-inline-size: 2.35rem;
+  block-size: 1.35rem;
+  border: 1px solid currentColor;
+  border-radius: 0.35rem;
+  padding-inline: 0.28rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.18rem;
+  background: var(--_surface);
+  font: 600 0.67rem/1 var(--_font-mono);
+  transition:
+    inset-inline-start var(--_dur-move) var(--_spring-soft),
+    inset-block-start var(--_dur-move) var(--_spring-soft),
+    transform var(--_dur-move) var(--_spring-soft);
+}
+
+.steptrace .steptrace__linked-pointer--slow {
+  color: var(--_blue);
+  transform: translate(-50%, -240%);
+}
+
+.steptrace .steptrace__linked-pointer--fast {
+  color: var(--_violet);
+  transform: translate(-50%, 140%);
+}
+
+.steptrace .steptrace__linked-pointer--slow[data-moving="1"] {
+  transform: translate(-50%, -240%) scale(1.06);
+}
+
+.steptrace .steptrace__linked-pointer--fast[data-moving="1"] {
+  transform: translate(-50%, 140%) scale(1.06);
+}
+
+.steptrace .steptrace__linked-legend {
+  margin-top: 0.25rem;
+  justify-content: center;
+}
+
+.steptrace .steptrace__linked-swatch {
+  inline-size: 0.55rem;
+  block-size: 0.55rem;
+  border: 1.5px solid;
+  border-radius: 50%;
+  flex: none;
+}
+
+.steptrace .steptrace__linked-swatch--slow {
+  border-color: var(--_blue);
+  background: color-mix(in srgb, var(--_blue) 22%, transparent);
+}
+
+.steptrace .steptrace__linked-swatch--fast {
+  border-color: var(--_violet);
+  background: color-mix(in srgb, var(--_violet) 22%, transparent);
+}
+
+.steptrace .steptrace__linked-swatch--cycle {
+  border-color: var(--_violet);
+  border-radius: 0;
+  block-size: 0.12rem;
+  background: var(--_violet);
+}
+
+.steptrace .steptrace__linked-swatch--entry {
+  border-color: var(--_green);
+  background: color-mix(in srgb, var(--_green) 22%, transparent);
+}
+
+@media (max-width: 560px) {
+  .steptrace .steptrace__linked-canvas {
+    block-size: 13.5rem;
+  }
+
+  .steptrace .steptrace__linked-pointer {
+    min-inline-size: 1.8rem;
+    padding-inline: 0.2rem;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .steptrace .steptrace__linked-pointer,
+  .steptrace .steptrace__linked-node {
+    transition-duration: 0ms;
+  }
+}

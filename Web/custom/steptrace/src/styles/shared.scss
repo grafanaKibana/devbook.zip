@@ -297,6 +297,26 @@
   align-items: center;
   gap: 0.4rem;
 }
+.steptrace .steptrace__success-marker {
+  display: block;
+  inline-size: 100%;
+  block-size: 100%;
+  overflow: visible;
+  color: var(--_surface);
+}
+.steptrace .steptrace__success-marker circle {
+  fill: var(--_green);
+}
+.steptrace .steptrace__success-marker path {
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 3;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  transform: scale(0.72);
+  transform-box: fill-box;
+  transform-origin: center;
+}
 .steptrace__rail {
   min-width: 0;
   padding-left: 1.4rem;

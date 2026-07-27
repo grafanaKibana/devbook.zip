@@ -24,6 +24,7 @@ import { dynamicProgrammingAlgorithms } from "./dynamic-programming"
 import { exponentialSearch } from "./exponential-search"
 import { interpolationSearch } from "./interpolation-search"
 import { floydWarshall } from "./floyd-warshall"
+import { fastAndSlowPointers } from "./fast-and-slow-pointers"
 import { greedyBestFirstSearch } from "./greedy-best-first-search"
 import { heapSort } from "./heap-sort"
 import { hamiltonianCycle } from "./hamiltonian-cycle"
@@ -40,8 +41,10 @@ import { mergeSortTree } from "./merge-sort-tree"
 import { mergeIntervals } from "./merge-intervals"
 import { maximumFlow } from "./maximum-flow"
 import { memoization } from "./memoization"
+import { monotonicStackAndQueue } from "./monotonic-stack-and-queue"
 import { nQueens } from "./n-queens"
 import { prim } from "./prim"
+import { prefixSum } from "./prefix-sum"
 import { quickSort } from "./quick-sort"
 import { radixSort } from "./radix-sort"
 import { rabinKarp } from "./rabin-karp"
@@ -49,6 +52,7 @@ import { selectionSort } from "./selection-sort"
 import { shellSort } from "./shell-sort"
 import { slidingWindow } from "./sliding-window"
 import { topologicalSort } from "./topological-sort"
+import { topKElements } from "./top-k-elements"
 import { stronglyConnectedComponents } from "./strongly-connected-components"
 import { trie } from "./trie"
 import { twoPointers } from "./two-pointers"
@@ -96,7 +100,9 @@ export const builtInAlgorithms = [
   dfs,
   dijkstra,
   prim,
+  prefixSum,
   topologicalSort,
+  topKElements,
   binarySearch,
   linearSearch,
   kmp,
@@ -108,10 +114,12 @@ export const builtInAlgorithms = [
   lcs,
   ...dynamicProgrammingAlgorithms,
   floydWarshall,
+  fastAndSlowPointers,
   unionFind,
   kernighanPopcount,
   nQueens,
   memoization,
+  monotonicStackAndQueue,
   divideAndConquer,
   branchAndBound,
   trie,

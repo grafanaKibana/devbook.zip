@@ -1,0 +1,175 @@
+.steptrace[data-visual-family="heap-selection"] {
+  container: steptrace-heap-selection / inline-size;
+}
+
+.steptrace .steptrace__heap-selection {
+  display: grid;
+  grid-template-rows: auto auto auto minmax(0, 1fr);
+  min-block-size: 0;
+}
+
+.steptrace .steptrace__heap-stream {
+  margin: 0.45rem 0 1rem;
+}
+
+.steptrace .steptrace__heap-stream .steptrace__pcell {
+  position: relative;
+}
+
+.steptrace .steptrace__heap-stream .steptrace__pcell[data-state="current"] {
+  color: var(--_blue);
+  background: color-mix(in srgb, var(--_blue) 16%, transparent);
+  font-weight: 700;
+}
+
+.steptrace .steptrace__heap-stream .steptrace__pcell[data-state="winner"] {
+  background: color-mix(in srgb, var(--_green) 18%, transparent);
+}
+
+.steptrace .steptrace__heap-stream .steptrace__pcell[data-state="rejected"] {
+  color: var(--_muted);
+  background: color-mix(in srgb, var(--_violet) 8%, transparent);
+}
+
+.steptrace .steptrace__heap-stream .steptrace__pcell[data-state="seen"] {
+  color: var(--_muted);
+  opacity: 0.72;
+}
+
+.steptrace .steptrace__heap-stream-icon {
+  position: absolute;
+  inset: 0.18rem 0.18rem auto auto;
+  inline-size: 0.7rem;
+  block-size: 0.7rem;
+  color: var(--_violet);
+}
+
+.steptrace .steptrace__heap-stream-icon > svg {
+  display: block;
+  inline-size: 100%;
+  block-size: 100%;
+}
+
+.steptrace .steptrace__heap-tree {
+  min-block-size: 0;
+  display: grid;
+  place-items: center;
+}
+
+.steptrace .steptrace__heap-svg {
+  display: block;
+  inline-size: min(100%, 20rem);
+  block-size: 100%;
+  max-block-size: 12rem;
+  overflow: visible;
+}
+
+.steptrace .steptrace__heap-edge {
+  stroke-width: 1.6;
+}
+
+.steptrace .steptrace__heap-node .steptrace__ncirc {
+  fill: var(--_surface);
+  stroke: var(--_border);
+  transition:
+    fill var(--_dur-quick) ease,
+    stroke var(--_dur-quick) ease,
+    transform var(--_dur-move) var(--_spring-snappy);
+}
+
+.steptrace .steptrace__heap-node[data-state="winner"] .steptrace__ncirc {
+  fill: color-mix(in srgb, var(--_green) 18%, var(--_surface));
+  stroke: var(--_green);
+}
+
+.steptrace .steptrace__heap-node[data-state="weakest"] .steptrace__ncirc {
+  fill: color-mix(in srgb, var(--_amber) 20%, var(--_surface));
+  stroke: var(--_amber);
+  stroke-width: 2.2;
+}
+
+.steptrace .steptrace__heap-node[data-state="compare"] .steptrace__ncirc {
+  fill: color-mix(in srgb, var(--_blue) 20%, var(--_surface));
+  stroke: var(--_blue);
+  stroke-width: 2.2;
+}
+
+.steptrace .steptrace__heap-node[data-state="swap"] .steptrace__ncirc {
+  fill: color-mix(in srgb, var(--_violet) 20%, var(--_surface));
+  stroke: var(--_violet);
+  stroke-width: 2.2;
+  transform: scale(1.08);
+}
+
+.steptrace .steptrace__heap-node[data-state="empty"] {
+  opacity: 0.38;
+}
+
+.steptrace .steptrace__heap-root-label {
+  fill: var(--_amber);
+  font: 600 0.52rem/1 var(--_font-head);
+}
+
+.steptrace .steptrace__heap-legend {
+  justify-content: center;
+}
+
+.steptrace .steptrace__heap-swatch {
+  inline-size: 0.58rem;
+  block-size: 0.58rem;
+  border: 1.5px solid;
+  border-radius: 50%;
+  display: grid;
+  place-items: center;
+  flex: none;
+}
+
+.steptrace .steptrace__heap-swatch svg {
+  inline-size: 0.42rem;
+  block-size: 0.42rem;
+}
+
+.steptrace .steptrace__heap-swatch--current {
+  border-color: var(--_blue);
+  background: color-mix(in srgb, var(--_blue) 20%, transparent);
+}
+
+.steptrace .steptrace__heap-swatch--winner {
+  border: 0;
+  color: var(--_surface);
+  background: var(--_green);
+}
+
+.steptrace .steptrace__heap-swatch--weakest {
+  border-color: var(--_amber);
+  background: color-mix(in srgb, var(--_amber) 20%, transparent);
+}
+
+.steptrace .steptrace__heap-swatch--rejected {
+  border-color: var(--_violet);
+  color: var(--_violet);
+}
+
+@container steptrace-heap-selection (max-width: 36rem) {
+  .steptrace .steptrace__heap-stream {
+    block-size: 2.45rem;
+  }
+
+  .steptrace .steptrace__heap-stream .steptrace__pcell {
+    font-size: 0.78rem;
+  }
+
+  .steptrace .steptrace__heap-svg {
+    inline-size: min(100%, 17rem);
+  }
+
+  .steptrace .steptrace__heap-root-label {
+    font-size: 0.48rem;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .steptrace .steptrace__heap-node .steptrace__ncirc {
+    transition-duration: 0ms;
+  }
+}

@@ -4,6 +4,7 @@
 @use "string";
 @use "pointers";
 @use "prefix-character";
+@use "prefix-sum";
 @use "tabs";
 @use "dp";
 @use "dp-story";
@@ -14,6 +15,9 @@
 @use "rectree";
 @use "graph";
 @use "graph-state";
+@use "heap-selection";
 @use "interval-track";
+@use "linked-topology";
 @use "status-toolbar";
 @use "run-stack";
+@use "stack-sequence";

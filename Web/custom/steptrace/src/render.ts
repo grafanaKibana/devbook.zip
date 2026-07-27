@@ -2832,9 +2832,13 @@ export function makeGraphView(frames, graph, frontierLabel) {
     mark.setAttribute("aria-hidden", "true")
     mark.innerHTML =
       '<rect data-state-icon="current" x="6" y="6" width="12" height="12" rx="2" fill="currentColor"/>' +
-      '<path data-state-icon="frontier" d="m12 3 9 9-9 9-9-9Z" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linejoin="round"/>' +
-      '<path data-state-icon="visited" d="M20 6 9 17l-5-5" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>'
-    g.append(back, circle, id, dist, mark)
+      '<path data-state-icon="frontier" d="m12 3 9 9-9 9-9-9Z" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linejoin="round"/>'
+    const visitedMark = successMarker("steptrace__nmark-success")
+    visitedMark.setAttribute("x", String(p.x + R - 8))
+    visitedMark.setAttribute("y", String(p.y - R - 4))
+    visitedMark.setAttribute("width", "12")
+    visitedMark.setAttribute("height", "12")
+    g.append(back, circle, id, dist, mark, visitedMark)
     svg.append(g)
     nodeEls[n.id] = { g, dist, mark }
   }
@@ -2851,7 +2855,7 @@ export function makeGraphView(frames, graph, frontierLabel) {
     const row = el("div", "steptrace__legend-row")
     const sw = el("span", "steptrace__swatch steptrace__swatch--" + stateKey)
     if (stateKey === "visited") {
-      sw.innerHTML = ICON.check
+      sw.append(successMarker())
       sw.setAttribute("aria-hidden", "true")
     }
     row.append(sw, document.createTextNode(word))
@@ -2962,6 +2966,14 @@ export function pad2(n) {
   return String(n).padStart(2, "0")
 }
 export const CHECK_PATH = "M20 6 9 17l-5-5"
+export function successMarker(extraClass = "") {
+  const marker = document.createElementNS("http://www.w3.org/2000/svg", "svg")
+  marker.setAttribute("class", `steptrace__success-marker${extraClass ? ` ${extraClass}` : ""}`)
+  marker.setAttribute("viewBox", "0 0 24 24")
+  marker.setAttribute("aria-hidden", "true")
+  marker.innerHTML = `<circle cx="12" cy="12" r="12"/><path d="${CHECK_PATH}"/>`
+  return marker
+}
 // Lucide transport glyphs stay inline so they inherit the host's currentColor.
 export const ICON = {
   reset:
@@ -3074,7 +3086,9 @@ export function buildMilestones(algorithm, kind, frames) {
               : kind === "pointers" &&
                   ["merge-intervals", "activity-selection"].includes(familyProfile)
                 ? "Input order"
-                : "Initialize"
+                : kind === "pointers" && familyProfile === "fast-slow-pointers"
+                  ? "Start together"
+                  : "Initialize"
   push(0, initial)
   let lastRange = ""
   let lastGap = firstGap
@@ -3220,6 +3234,9 @@ export function buildMilestones(algorithm, kind, frames) {
       if (f.type === "sort") push(i, "Sort by finish")
       else if (f.type === "accept" && active) push(i, `Accept ${active.start}–${active.end}`)
       else if (f.type === "reject" && active) push(i, `Reject ${active.start}–${active.end}`)
+    } else if (kind === "pointers" && familyProfile === "fast-slow-pointers") {
+      if (f.type === "meet") push(i, `Meet at ${f.meeting}`)
+      else if (f.type === "reset") push(i, "Reset to head")
     } else if (kind === "pointers") {
       const win = f.window ? f.window.join(":") : ""
       if (win && win !== lastWindow) {
@@ -3279,6 +3296,7 @@ export function buildMilestones(algorithm, kind, frames) {
     "ternary-search-tree": "TST complete",
     "merge-intervals": "Merged output",
     "activity-selection": "Accepted schedule",
+    "fast-slow-pointers": "Entry located",
   }[familyProfile]
   push(
     frames.length - 1,

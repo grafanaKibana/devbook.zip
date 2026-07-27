@@ -77,8 +77,7 @@
   display: none;
 }
 .steptrace__node .steptrace__nmark[data-state="current"] [data-state-icon="current"],
-.steptrace__node .steptrace__nmark[data-state="frontier"] [data-state-icon="frontier"],
-.steptrace__node .steptrace__nmark[data-state="visited"] [data-state-icon="visited"] {
+.steptrace__node .steptrace__nmark[data-state="frontier"] [data-state-icon="frontier"] {
   display: block;
 }
 .steptrace__node .steptrace__nmark[data-state="current"] {
@@ -87,8 +86,11 @@
 .steptrace__node .steptrace__nmark[data-state="frontier"] {
   color: var(--_amber);
 }
-.steptrace__node .steptrace__nmark[data-state="visited"] {
-  color: var(--_green);
+.steptrace__node .steptrace__nmark-success {
+  display: none;
+}
+.steptrace__node[data-state="visited"] .steptrace__nmark-success {
+  display: block;
 }
 .steptrace__node[data-state="visited"] .steptrace__ncirc {
   fill: color-mix(in srgb, var(--_green) 20%, transparent);
@@ -133,17 +135,5 @@
   transform: rotate(45deg) scale(0.86);
 }
 .steptrace__swatch--visited {
-  background: color-mix(in srgb, var(--_green) 20%, transparent);
-  border-color: var(--_green);
-}
-.steptrace__swatch--visited svg {
-  width: 7px;
-  height: 7px;
-  margin: -0.5px auto 0;
-  fill: none;
-  stroke: currentColor;
-  stroke-width: 3;
-  stroke-linecap: round;
-  stroke-linejoin: round;
-  color: var(--_green);
+  border: 0;
 }

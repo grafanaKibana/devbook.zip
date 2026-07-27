@@ -1,4 +1,4 @@
-import { CHECK_PATH, el, escapeHtml, statusEl } from "../render"
+import { el, escapeHtml, statusEl, successMarker } from "../render"
 import type { StepTraceConfig, StepTraceView, VisualFamily } from "../types"
 
 export type PrefixCharacterOperation =
@@ -404,13 +404,12 @@ export function makePrefixCharacterView(
     edgeElements.set(edge.id, { element, role })
   }
 
-  const nodeElements = new Map<string, { group: SVGGElement; terminal: SVGGElement }>()
+  const nodeElements = new Map<string, { group: SVGGElement; terminal: SVGSVGElement }>()
   for (const node of topology.nodes) {
     const group = document.createElementNS(SVGNS, "g")
     const circle = document.createElementNS(SVGNS, "circle")
     const label = document.createElementNS(SVGNS, "text")
-    const terminal = document.createElementNS(SVGNS, "g")
-    const terminalPath = document.createElementNS(SVGNS, "path")
+    const terminal = successMarker("steptrace__prefix-terminal")
     group.setAttribute("class", "steptrace__prefix-node")
     group.setAttribute("transform", `translate(${node.x} ${node.y})`)
     group.setAttribute("aria-hidden", "true")
@@ -419,15 +418,10 @@ export function makePrefixCharacterView(
     label.setAttribute("text-anchor", "middle")
     label.setAttribute("dominant-baseline", "central")
     label.textContent = node.label
-    terminal.setAttribute("class", "steptrace__prefix-terminal")
-    terminal.setAttribute("transform", "translate(22 -7) scale(.55)")
-    terminalPath.setAttribute("d", CHECK_PATH)
-    terminalPath.setAttribute("fill", "none")
-    terminalPath.setAttribute("stroke", "currentColor")
-    terminalPath.setAttribute("stroke-width", "3")
-    terminalPath.setAttribute("stroke-linecap", "round")
-    terminalPath.setAttribute("stroke-linejoin", "round")
-    terminal.append(terminalPath)
+    terminal.setAttribute("x", "10")
+    terminal.setAttribute("y", "-22")
+    terminal.setAttribute("width", "13.2")
+    terminal.setAttribute("height", "13.2")
     group.append(circle, label, terminal)
     svg.append(group)
     nodeElements.set(node.id, { group, terminal })

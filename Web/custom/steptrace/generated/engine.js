@@ -127,7 +127,7 @@
     const hasHeldToken = frames.some((frame) => semantics.resolveFrame(frame).heldToken);
     const heldMarker = hasHeldToken ? makeMarker("", "held") : null;
     const markers = heldMarker ? [pinI, pinJ, heldMarker] : [pinI, pinJ];
-    stage.append(...markers.map((marker) => marker.el));
+    stage.append(...markers.map((marker2) => marker2.el));
     const status = statusEl();
     const tracker = createBarTracker(stage, bars, markers);
     const heldMarkerIndex = heldMarker ? markers.indexOf(heldMarker) : -1;
@@ -2386,8 +2386,13 @@
       mark.setAttribute("height", "12");
       mark.setAttribute("viewBox", "0 0 24 24");
       mark.setAttribute("aria-hidden", "true");
-      mark.innerHTML = '<rect data-state-icon="current" x="6" y="6" width="12" height="12" rx="2" fill="currentColor"/><path data-state-icon="frontier" d="m12 3 9 9-9 9-9-9Z" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linejoin="round"/><path data-state-icon="visited" d="M20 6 9 17l-5-5" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>';
-      g.append(back, circle, id, dist, mark);
+      mark.innerHTML = '<rect data-state-icon="current" x="6" y="6" width="12" height="12" rx="2" fill="currentColor"/><path data-state-icon="frontier" d="m12 3 9 9-9 9-9-9Z" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linejoin="round"/>';
+      const visitedMark = successMarker("steptrace__nmark-success");
+      visitedMark.setAttribute("x", String(p.x + R - 8));
+      visitedMark.setAttribute("y", String(p.y - R - 4));
+      visitedMark.setAttribute("width", "12");
+      visitedMark.setAttribute("height", "12");
+      g.append(back, circle, id, dist, mark, visitedMark);
       svg.append(g);
       nodeEls[n.id] = { g, dist, mark };
     }
@@ -2400,7 +2405,7 @@
       const row = el("div", "steptrace__legend-row");
       const sw = el("span", "steptrace__swatch steptrace__swatch--" + stateKey);
       if (stateKey === "visited") {
-        sw.innerHTML = ICON.check;
+        sw.append(successMarker());
         sw.setAttribute("aria-hidden", "true");
       }
       row.append(sw, document.createTextNode(word));
@@ -2484,6 +2489,14 @@
     return String(n).padStart(2, "0");
   }
   var CHECK_PATH = "M20 6 9 17l-5-5";
+  function successMarker(extraClass = "") {
+    const marker2 = document.createElementNS("http://www.w3.org/2000/svg", "svg");
+    marker2.setAttribute("class", `steptrace__success-marker${extraClass ? ` ${extraClass}` : ""}`);
+    marker2.setAttribute("viewBox", "0 0 24 24");
+    marker2.setAttribute("aria-hidden", "true");
+    marker2.innerHTML = `<circle cx="12" cy="12" r="12"/><path d="${CHECK_PATH}"/>`;
+    return marker2;
+  }
   var ICON = {
     reset: '<svg class="lucide lucide-rotate-ccw" viewBox="0 0 24 24"><path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/><path d="M3 3v5h5"/></svg>',
     back: '<svg class="lucide lucide-skip-back" viewBox="0 0 24 24"><path d="M17.971 4.285A2 2 0 0 1 21 6v12a2 2 0 0 1-3.029 1.715l-9.997-5.998a2 2 0 0 1-.003-3.432z"/><path d="M3 20V4"/></svg>',
@@ -2518,7 +2531,7 @@
     const familyProfile = frames[0]?.profile;
     const firstDistributionPass = frames.find((frame) => frame.type === "pass");
     const prefixOperation = (frame) => frame.operation && frame.key ? `${frame.operation[0].toUpperCase()}${frame.operation.slice(1)} ${frame.key}` : null;
-    const initial = kind === "sort" ? firstGap != null ? `Gap ${firstGap}` : familyProfile === "cyclic" ? "Place values" : familyProfile === "counting" ? "Tally keys" : familyProfile === "radix" ? `${firstDistributionPass?.passLabel || "Digit"} pass` : familyProfile === "bucket" ? "Scatter ranges" : familyProfile === "introsort" ? "Quicksort" : algorithm === "bubble-sort" ? "Pass 1" : algorithm === "insertion-sort" ? "Prefix 1" : algorithm === "selection-sort" ? "Select 1" : algorithm === "heap-sort" ? "Build heap" : algorithm === "merge-sort" ? "Runs of 1" : "Partition" : kind === "search" ? familyProfile === "exponential" ? "Gallop" : familyProfile === "interpolation" ? "Estimate" : familyProfile === "jump" ? "Jump blocks" : familyProfile === "ternary" ? "Narrow peak" : familyProfile === "shipping-capacity" ? "Answer range" : "Search range" : kind === "string" ? familyProfile === "z-array" ? "Initialize Z" : familyProfile === "boyer-moore" ? "Preprocess rules" : ["trie", "aho-corasick", "ternary-search-tree"].includes(familyProfile) ? prefixOperation(frames[0]) : "Shift 0" : kind === "backtrack" ? "Depth 0" : kind === "rectree" ? familyProfile === "divide-and-conquer" ? "Whole problem" : familyProfile === "branch-and-bound" ? "Root bound 116" : familyProfile === "merge-sort" ? "Whole array" : familyProfile === "memoization" ? "Empty cache" : familyProfile === "coin-change-top-down" ? "Amount 30¢" : familyProfile === "grid-path-top-down" ? "Loading bay" : "Call tree" : kind === "pointers" && ["merge-intervals", "activity-selection"].includes(familyProfile) ? "Input order" : "Initialize";
+    const initial = kind === "sort" ? firstGap != null ? `Gap ${firstGap}` : familyProfile === "cyclic" ? "Place values" : familyProfile === "counting" ? "Tally keys" : familyProfile === "radix" ? `${firstDistributionPass?.passLabel || "Digit"} pass` : familyProfile === "bucket" ? "Scatter ranges" : familyProfile === "introsort" ? "Quicksort" : algorithm === "bubble-sort" ? "Pass 1" : algorithm === "insertion-sort" ? "Prefix 1" : algorithm === "selection-sort" ? "Select 1" : algorithm === "heap-sort" ? "Build heap" : algorithm === "merge-sort" ? "Runs of 1" : "Partition" : kind === "search" ? familyProfile === "exponential" ? "Gallop" : familyProfile === "interpolation" ? "Estimate" : familyProfile === "jump" ? "Jump blocks" : familyProfile === "ternary" ? "Narrow peak" : familyProfile === "shipping-capacity" ? "Answer range" : "Search range" : kind === "string" ? familyProfile === "z-array" ? "Initialize Z" : familyProfile === "boyer-moore" ? "Preprocess rules" : ["trie", "aho-corasick", "ternary-search-tree"].includes(familyProfile) ? prefixOperation(frames[0]) : "Shift 0" : kind === "backtrack" ? "Depth 0" : kind === "rectree" ? familyProfile === "divide-and-conquer" ? "Whole problem" : familyProfile === "branch-and-bound" ? "Root bound 116" : familyProfile === "merge-sort" ? "Whole array" : familyProfile === "memoization" ? "Empty cache" : familyProfile === "coin-change-top-down" ? "Amount 30¢" : familyProfile === "grid-path-top-down" ? "Loading bay" : "Call tree" : kind === "pointers" && ["merge-intervals", "activity-selection"].includes(familyProfile) ? "Input order" : kind === "pointers" && familyProfile === "fast-slow-pointers" ? "Start together" : "Initialize";
     push(0, initial);
     let lastRange = "";
     let lastGap = firstGap;
@@ -2612,6 +2625,9 @@
         if (f.type === "sort") push(i, "Sort by finish");
         else if (f.type === "accept" && active) push(i, `Accept ${active.start}–${active.end}`);
         else if (f.type === "reject" && active) push(i, `Reject ${active.start}–${active.end}`);
+      } else if (kind === "pointers" && familyProfile === "fast-slow-pointers") {
+        if (f.type === "meet") push(i, `Meet at ${f.meeting}`);
+        else if (f.type === "reset") push(i, "Reset to head");
       } else if (kind === "pointers") {
         const win = f.window ? f.window.join(":") : "";
         if (win && win !== lastWindow) {
@@ -2670,7 +2686,8 @@
       "aho-corasick": "Scan complete",
       "ternary-search-tree": "TST complete",
       "merge-intervals": "Merged output",
-      "activity-selection": "Accepted schedule"
+      "activity-selection": "Accepted schedule",
+      "fast-slow-pointers": "Entry located"
     }[familyProfile];
     push(
       frames.length - 1,
@@ -3878,7 +3895,7 @@
     const graph = el("div", "steptrace__gs-graph");
     const svg = svgElement("svg", { class: "steptrace__gs-svg", viewBox: "0 0 620 320", role: "img", "aria-label": "Graph algorithm state" });
     const markerId = `steptrace-gs-arrow-${++graphStateViewId}`;
-    const marker = svgElement("marker", {
+    const marker2 = svgElement("marker", {
       id: markerId,
       viewBox: "0 0 6 6",
       refX: 5,
@@ -3888,9 +3905,9 @@
       markerUnits: "strokeWidth",
       orient: "auto-start-reverse"
     });
-    marker.append(svgElement("path", { class: "steptrace__gs-arrow", d: "M 0 0 L 6 3 L 0 6 Z" }));
+    marker2.append(svgElement("path", { class: "steptrace__gs-arrow", d: "M 0 0 L 6 3 L 0 6 Z" }));
     const defs = svgElement("defs");
-    defs.append(marker);
+    defs.append(marker2);
     const decorLayer = svgElement("g", { class: "steptrace__gs-decor" });
     decorLayer.append(...first.decor.map(decorElement));
     const edgeLayer = svgElement("g", { class: "steptrace__gs-edges" });
@@ -3900,6 +3917,9 @@
     graph.append(svg);
     const positions = new Map(first.nodes.map((node) => [node.id, node]));
     const compactMapNodes = first.profile === "building-floor" || first.profile === "midtown-map";
+    const weighted = ["heuristic-search", "edge-relaxation", "mst-scan", "mst-round", "residual-flow"].includes(
+      first.detail.kind
+    ) || first.edges.some((edge) => edge.weight !== 1 || edge.label != null);
     const edgeElements = first.edges.map((edge) => {
       const from = positions.get(edge.from);
       const to = positions.get(edge.to);
@@ -3916,13 +3936,13 @@
       });
       if (edge.showDirection) line.setAttribute("marker-end", `url(#${markerId})`);
       edgeLayer.append(line);
-      const label = edge.label != null || first.detail.kind === "residual-flow" ? svgElement("text", {
+      const label = weighted ? svgElement("text", {
         class: "steptrace__gs-edge-label",
         x: (from.x + to.x) / 2,
         y: (from.y + to.y) / 2 - 7
       }) : null;
       if (label) {
-        label.textContent = edge.label || "";
+        label.textContent = edge.label ?? String(edge.weight);
         edgeLabelLayer.append(label);
       }
       return { edge, line, label };
@@ -3951,11 +3971,17 @@
       item.append(el("i", `steptrace__gs-swatch steptrace__gs-swatch--${state}`), document.createTextNode(label));
       legend.append(item);
     }
-    const racks = el("div", "steptrace__gs-racks");
-    const openRack = rack("OPEN", "open", 5);
-    const closedRack = rack("CLOSED", "closed", 5);
-    racks.append(openRack.row, closedRack.row);
-    shell.append(graph, legend, racks);
+    const rackViews = first.detail.kind === "heuristic-search" ? null : {
+      root: el("div", "steptrace__gs-racks"),
+      primary: rack("OPEN", "open", 5),
+      secondary: rack("CLOSED", "closed", 5)
+    };
+    shell.dataset.racks = String(rackViews != null);
+    shell.append(graph, legend);
+    if (rackViews) {
+      rackViews.root.append(rackViews.primary.row, rackViews.secondary.row);
+      shell.append(rackViews.root);
+    }
     const status = statusEl();
     function fillRack(rackView, model) {
       rackView.heading.textContent = model.title;
@@ -4001,12 +4027,14 @@
           }
         }
         if (label) {
-          label.textContent = frame.detail.kind === "residual-flow" ? `${frame.detail.flow[`${edge.from}|${edge.to}`] || 0}/${edge.weight}` : edge.label || "";
+          label.textContent = frame.detail.kind === "residual-flow" ? `${frame.detail.flow[`${edge.from}|${edge.to}`] || 0}/${edge.weight}` : edge.label ?? String(edge.weight);
         }
       }
-      const [primary, secondary] = graphStateRacks(frame.detail);
-      fillRack(openRack, { ...primary, entries: primary.entries.slice(0, 5) });
-      fillRack(closedRack, { ...secondary, entries: secondary.entries.slice(-5) });
+      if (rackViews) {
+        const [primary, secondary] = graphStateRacks(frame.detail);
+        fillRack(rackViews.primary, { ...primary, entries: primary.entries.slice(0, 5) });
+        fillRack(rackViews.secondary, { ...secondary, entries: secondary.entries.slice(-5) });
+      }
       status.textContent = frame.message;
     }
     function watch(frame) {
@@ -4526,8 +4554,7 @@
       const group = document.createElementNS(SVGNS2, "g");
       const circle = document.createElementNS(SVGNS2, "circle");
       const label = document.createElementNS(SVGNS2, "text");
-      const terminal = document.createElementNS(SVGNS2, "g");
-      const terminalPath = document.createElementNS(SVGNS2, "path");
+      const terminal = successMarker("steptrace__prefix-terminal");
       group.setAttribute("class", "steptrace__prefix-node");
       group.setAttribute("transform", `translate(${node.x} ${node.y})`);
       group.setAttribute("aria-hidden", "true");
@@ -4536,15 +4563,10 @@
       label.setAttribute("text-anchor", "middle");
       label.setAttribute("dominant-baseline", "central");
       label.textContent = node.label;
-      terminal.setAttribute("class", "steptrace__prefix-terminal");
-      terminal.setAttribute("transform", "translate(22 -7) scale(.55)");
-      terminalPath.setAttribute("d", CHECK_PATH);
-      terminalPath.setAttribute("fill", "none");
-      terminalPath.setAttribute("stroke", "currentColor");
-      terminalPath.setAttribute("stroke-width", "3");
-      terminalPath.setAttribute("stroke-linecap", "round");
-      terminalPath.setAttribute("stroke-linejoin", "round");
-      terminal.append(terminalPath);
+      terminal.setAttribute("x", "10");
+      terminal.setAttribute("y", "-22");
+      terminal.setAttribute("width", "13.2");
+      terminal.setAttribute("height", "13.2");
       group.append(circle, label, terminal);
       svg.append(group);
       nodeElements.set(node.id, { group, terminal });
@@ -10721,6 +10743,289 @@
     }
   };
 
+  // custom/steptrace/src/families/linked-topology.ts
+  var linkedTopologyViewId = 0;
+  var LinkedTopologyRecorder = class {
+    constructor(config) {
+      __publicField(this, "config", config);
+      __publicField(this, "frames", []);
+      __publicField(this, "phase", "detect");
+      __publicField(this, "slow");
+      __publicField(this, "fast");
+      __publicField(this, "moved", null);
+      __publicField(this, "meeting", null);
+      __publicField(this, "entry", null);
+      this.slow = config.nodes[0].id;
+      this.fast = config.nodes[0].id;
+    }
+    push(type, message) {
+      this.frames.push({
+        type,
+        profile: this.config.profile,
+        nodes: this.config.nodes,
+        next: this.config.next,
+        cycle: this.config.cycle,
+        phase: this.phase,
+        slow: this.slow,
+        fast: this.fast,
+        moved: this.moved,
+        meeting: this.meeting,
+        entry: this.entry,
+        message
+      });
+    }
+    set(pointer, to) {
+      if (pointer === "slow") this.slow = to;
+      else this.fast = to;
+      this.moved = pointer;
+    }
+    begin(message) {
+      this.push("init", message);
+    }
+    move(pointer, to, message) {
+      this.set(pointer, to);
+      this.push("move", message);
+    }
+    meet(pointer, to, message) {
+      this.set(pointer, to);
+      this.meeting = to;
+      this.push("meet", message);
+    }
+    reset(pointer, to, message) {
+      this.phase = "locate";
+      this.set(pointer, to);
+      this.push("reset", message);
+    }
+    enter(pointer, to, message) {
+      this.set(pointer, to);
+      this.entry = to;
+      this.push("entry", message);
+    }
+  };
+  function edgePath(from, to) {
+    const dx = to.x - from.x;
+    const dy = to.y - from.y;
+    const length = Math.hypot(dx, dy) || 1;
+    const ux = dx / length;
+    const uy = dy / length;
+    return `M ${from.x + ux * 4} ${from.y + uy * 4} L ${to.x - ux * 5} ${to.y - uy * 5}`;
+  }
+  function marker(label, role) {
+    const node = el("div", `steptrace__linked-pointer steptrace__linked-pointer--${role}`);
+    node.setAttribute("aria-hidden", "true");
+    const text = el("span", "steptrace__linked-pointer-label");
+    text.textContent = label;
+    node.append(text);
+    return { node, text };
+  }
+  function makeLinkedTopologyView(frames) {
+    const first = frames[0];
+    const positions = new Map(first.nodes.map((node) => [node.id, node]));
+    const root = el("div", "steptrace__linked-topology");
+    root.setAttribute("role", "region");
+    root.setAttribute("aria-label", "Fast and slow pointers on a linked cycle");
+    const canvas = el("div", "steptrace__linked-canvas");
+    canvas.setAttribute("role", "img");
+    canvas.setAttribute("aria-label", "Linked structure with slow and fast pointers at A.");
+    const topology2 = document.createElementNS("http://www.w3.org/2000/svg", "svg");
+    topology2.setAttribute("class", "steptrace__linked-svg");
+    topology2.setAttribute("viewBox", "0 0 100 70");
+    topology2.setAttribute("preserveAspectRatio", "none");
+    topology2.setAttribute("aria-hidden", "true");
+    const markerId = `steptrace-linked-arrow-${++linkedTopologyViewId}`;
+    const defs = document.createElementNS("http://www.w3.org/2000/svg", "defs");
+    const arrow = document.createElementNS("http://www.w3.org/2000/svg", "marker");
+    arrow.setAttribute("id", markerId);
+    arrow.setAttribute("viewBox", "0 0 10 10");
+    arrow.setAttribute("refX", "8");
+    arrow.setAttribute("refY", "5");
+    arrow.setAttribute("markerWidth", "5");
+    arrow.setAttribute("markerHeight", "5");
+    arrow.setAttribute("orient", "auto-start-reverse");
+    const arrowPath = document.createElementNS("http://www.w3.org/2000/svg", "path");
+    arrowPath.setAttribute("class", "steptrace__linked-arrow");
+    arrowPath.setAttribute("d", "M 0 0 L 10 5 L 0 10 z");
+    arrow.append(arrowPath);
+    defs.append(arrow);
+    topology2.append(defs);
+    for (const [fromId, toId] of Object.entries(first.next)) {
+      const from = positions.get(fromId);
+      const to = positions.get(toId);
+      const path = document.createElementNS("http://www.w3.org/2000/svg", "path");
+      path.setAttribute("class", "steptrace__linked-edge");
+      path.setAttribute("d", edgePath(from, to));
+      path.setAttribute("marker-end", `url(#${markerId})`);
+      if (first.cycle.includes(fromId) && first.cycle.includes(toId)) path.dataset.cycle = "1";
+      topology2.append(path);
+    }
+    canvas.append(topology2);
+    const nodes5 = new Map(
+      first.nodes.map((node) => {
+        const item = el("div", "steptrace__linked-node");
+        item.style.setProperty("--_linked-x", String(node.x));
+        item.style.setProperty("--_linked-y", String(node.y));
+        item.dataset.node = node.id;
+        item.textContent = node.id;
+        const result = el("span", "steptrace__linked-node-result");
+        result.append(successMarker());
+        item.append(result);
+        canvas.append(item);
+        return [node.id, item];
+      })
+    );
+    const slow = marker("S", "slow");
+    const fast = marker("F", "fast");
+    canvas.append(slow.node, fast.node);
+    const legend = el("div", "steptrace__legend steptrace__linked-legend");
+    for (const [text, state] of [
+      ["slow / cycle pointer", "slow"],
+      ["fast / head pointer", "fast"],
+      ["cycle edge", "cycle"],
+      ["cycle entry", "entry"]
+    ]) {
+      const row = el("span", "steptrace__legend-row");
+      row.append(
+        el("i", `steptrace__linked-swatch steptrace__linked-swatch--${state}`),
+        document.createTextNode(text)
+      );
+      legend.append(row);
+    }
+    root.append(canvas, legend);
+    const status = statusEl();
+    function place(pointer, id) {
+      const position = positions.get(id);
+      pointer.style.setProperty("--_linked-x", String(position.x));
+      pointer.style.setProperty("--_linked-y", String(position.y));
+    }
+    function paint(frame) {
+      place(slow.node, frame.slow);
+      place(fast.node, frame.fast);
+      slow.node.dataset.moving = frame.moved === "slow" ? "1" : "0";
+      fast.node.dataset.moving = frame.moved === "fast" ? "1" : "0";
+      fast.text.textContent = frame.phase === "locate" ? "H" : "F";
+      root.dataset.phase = frame.phase;
+      root.dataset.frame = frame.type;
+      for (const [id, node] of nodes5) {
+        node.dataset.slow = String(id === frame.slow);
+        node.dataset.fast = String(id === frame.fast);
+        node.dataset.meeting = String(id === frame.meeting);
+        node.dataset.entry = String(id === frame.entry);
+      }
+      canvas.setAttribute(
+        "aria-label",
+        `${frame.phase === "detect" ? "Cycle detection" : "Cycle entry search"}: slow at ${frame.slow}, ${frame.phase === "detect" ? "fast" : "head pointer"} at ${frame.fast}.`
+      );
+      status.textContent = frame.message;
+    }
+    const watch = (frame) => [
+      {
+        k: "phase",
+        v: frame.phase === "detect" ? "detect cycle" : "locate entry",
+        sw: "var(--_neutral)"
+      },
+      {
+        k: "slow",
+        v: frame.slow,
+        hint: frame.phase === "detect" ? "The pointer advancing one node per loop iteration." : "The pointer advancing from the phase-one meeting node.",
+        sw: "var(--_blue)"
+      },
+      {
+        k: frame.phase === "detect" ? "fast" : "head",
+        v: frame.fast,
+        hint: frame.phase === "detect" ? "The pointer advancing two nodes per loop iteration." : "The pointer reset to the list head; both pointers now advance one node.",
+        sw: "var(--_violet)"
+      },
+      {
+        k: frame.entry == null ? "meeting" : "entry",
+        v: frame.entry ?? frame.meeting ?? "—",
+        hint: frame.entry == null ? "The phase-one collision that proves a cycle exists." : "The phase-two collision at the cycle entry.",
+        sw: frame.entry == null ? "var(--_amber)" : "var(--_green)"
+      }
+    ];
+    return {
+      nodes: [root, status],
+      stageAlignment: "center",
+      stableStage: true,
+      paint,
+      watch,
+      summary(frame) {
+        return `Cycle detected at ${frame.meeting}; entry located at ${frame.entry}.`;
+      }
+    };
+  }
+  var linkedTopologyFamily = {
+    id: "linked-topology",
+    createRecorder(config) {
+      return new LinkedTopologyRecorder(config);
+    },
+    createView(frames) {
+      return makeLinkedTopologyView(frames);
+    }
+  };
+
+  // custom/steptrace/src/algorithms/fast-and-slow-pointers.ts
+  var CONFIG = {
+    profile: "fast-slow-pointers",
+    nodes: [
+      { id: "A", x: 10, y: 35 },
+      { id: "B", x: 35, y: 35 },
+      { id: "C", x: 60, y: 35 },
+      { id: "D", x: 65, y: 14 },
+      { id: "E", x: 75, y: 14 },
+      { id: "F", x: 80, y: 35 },
+      { id: "G", x: 75, y: 56 },
+      { id: "H", x: 65, y: 56 }
+    ],
+    next: { A: "B", B: "C", C: "D", D: "E", E: "F", F: "G", G: "H", H: "C" },
+    cycle: ["C", "D", "E", "F", "G", "H"],
+    entry: "C"
+  };
+  function parseFastAndSlowPointersConfig(_config) {
+    return {
+      ...CONFIG,
+      nodes: CONFIG.nodes.map((node) => ({ ...node })),
+      next: { ...CONFIG.next },
+      cycle: CONFIG.cycle.slice()
+    };
+  }
+  var fastAndSlowPointers = {
+    id: "fast-and-slow-pointers",
+    kind: "pointers",
+    family: linkedTopologyFamily,
+    meta: { label: "Fast and slow pointers" },
+    parse: parseFastAndSlowPointersConfig,
+    run(_input, ops) {
+      ops.begin("Start slow and fast at A.");
+      ops.move("slow", "B", "Slow advances one node: A → B.");
+      ops.move("fast", "B", "Fast begins its two-node advance: A → B.");
+      ops.move("fast", "C", "Fast completes the advance: B → C.");
+      ops.move("slow", "C", "Slow advances one node: B → C.");
+      ops.move("fast", "D", "Fast begins its next advance: C → D.");
+      ops.move("fast", "E", "Fast completes the advance: D → E.");
+      ops.move("slow", "D", "Slow advances one node: C → D.");
+      ops.move("fast", "F", "Fast begins its next advance: E → F.");
+      ops.move("fast", "G", "Fast completes the advance: F → G.");
+      ops.move("slow", "E", "Slow advances one node: D → E.");
+      ops.move("fast", "H", "Fast begins its next advance: G → H.");
+      ops.move("fast", "C", "Fast completes the advance and wraps: H → C.");
+      ops.move("slow", "F", "Slow advances one node: E → F.");
+      ops.move("fast", "D", "Fast begins its next advance: C → D.");
+      ops.move("fast", "E", "Fast completes the advance: D → E.");
+      ops.move("slow", "G", "Slow advances one node: F → G.");
+      ops.move("fast", "F", "Fast begins its next advance: E → F.");
+      ops.meet("fast", "G", "Fast completes the advance at G; both pointers meet, proving a cycle.");
+      ops.reset(
+        "fast",
+        "A",
+        "Reset fast to A. Keep slow at G; both pointers now move one node at a time."
+      );
+      ops.move("fast", "B", "Head pointer advances one node: A → B.");
+      ops.move("slow", "H", "Cycle pointer advances one node: G → H.");
+      ops.move("fast", "C", "Head pointer advances one node: B → C.");
+      ops.enter("slow", "C", "Cycle pointer advances H → C; both meet at cycle entry C.");
+    }
+  };
+
   // custom/steptrace/src/algorithms/greedy-best-first-search.ts
   function parse5(config) {
     return {
@@ -11949,6 +12254,235 @@
     }
   };
 
+  // custom/steptrace/src/families/stack-sequence.ts
+  var StackSequenceRecorder = class {
+    constructor(config) {
+      __publicField(this, "config", config);
+      __publicField(this, "frames", []);
+      __publicField(this, "cursor", null);
+      __publicField(this, "stack", []);
+      __publicField(this, "popped", null);
+      __publicField(this, "answers");
+      __publicField(this, "pushes", 0);
+      __publicField(this, "pops", 0);
+      this.answers = Array(config.array.length).fill(null);
+    }
+    init(message) {
+      this.record("init", message);
+    }
+    scan(index, message) {
+      this.cursor = index;
+      this.popped = null;
+      this.record("scan", message);
+    }
+    pop(answerIndex, message) {
+      const popped = this.stack.pop();
+      if (popped == null) throw new Error("steptrace: cannot pop an empty monotonic stack.");
+      this.popped = popped;
+      this.answers[popped] = answerIndex;
+      this.pops++;
+      this.record("pop", message);
+    }
+    push(index, message) {
+      this.stack.push(index);
+      this.popped = null;
+      this.pushes++;
+      this.record("push", message);
+    }
+    done(message) {
+      this.cursor = null;
+      this.popped = null;
+      this.record("done", message);
+    }
+    record(type, message) {
+      this.frames.push(
+        Object.freeze({
+          type,
+          profile: this.config.profile,
+          array: this.config.array,
+          cursor: this.cursor,
+          stack: this.stack.slice(),
+          popped: this.popped,
+          answers: this.answers.slice(),
+          pushes: this.pushes,
+          pops: this.pops,
+          message
+        })
+      );
+    }
+  };
+  function answerLabel(frame, index) {
+    const answer = frame.answers[index];
+    if (answer != null) return `→ ${frame.array[answer]}`;
+    return frame.type === "done" ? "→ none" : "waiting";
+  }
+  function makeStackSequenceView(frames) {
+    const first = frames[0];
+    const root = el("div", "steptrace__stack-sequence");
+    root.setAttribute("role", "region");
+    root.setAttribute("aria-label", "Next greater element monotonic stack");
+    root.style.setProperty("--_stack-sequence-size", String(first.array.length));
+    const scanSection = el("section", "steptrace__stack-sequence-section");
+    const scanLabel = el("div", "steptrace__rail-label steptrace__stack-sequence-label");
+    scanLabel.textContent = "Scan";
+    const scan = el("div", "steptrace__stack-sequence-scan");
+    scan.setAttribute("role", "list");
+    const scanCells = first.array.map((value, index) => {
+      const cell = el("div", "steptrace__stack-sequence-cell");
+      cell.setAttribute("role", "listitem");
+      const position = el("span", "steptrace__stack-sequence-index");
+      position.textContent = `i${index}`;
+      const number = el("strong", "steptrace__stack-sequence-value");
+      number.textContent = String(value);
+      const answer = el("span", "steptrace__stack-sequence-answer");
+      const icon = el("span", "steptrace__stack-sequence-icon");
+      icon.innerHTML = ICON.search;
+      icon.setAttribute("aria-hidden", "true");
+      cell.append(position, number, answer, icon);
+      scan.append(cell);
+      return { cell, answer };
+    });
+    scanSection.append(scanLabel, scan);
+    const stackSection = el("section", "steptrace__stack-sequence-section");
+    const stackLabel = el("div", "steptrace__rail-label steptrace__stack-sequence-label");
+    stackLabel.textContent = "Monotonic stack · bottom → top";
+    const stack = el("div", "steptrace__stack-sequence-stack");
+    stack.setAttribute("role", "list");
+    const stackCells = first.array.map(() => {
+      const cell = el("div", "steptrace__stack-sequence-stack-cell");
+      cell.setAttribute("role", "listitem");
+      cell.setAttribute("aria-hidden", "true");
+      stack.append(cell);
+      return cell;
+    });
+    stackSection.append(stackLabel, stack);
+    root.append(scanSection, stackSection);
+    const legend = el("div", "steptrace__legend steptrace__stack-sequence-legend");
+    for (const [label, state] of [
+      ["scanning", "scan"],
+      ["retained candidate", "retained"],
+      ["resolved pop", "popped"]
+    ]) {
+      const row = el("span", "steptrace__legend-row");
+      row.append(
+        el("i", `steptrace__stack-sequence-swatch steptrace__stack-sequence-swatch--${state}`),
+        document.createTextNode(label)
+      );
+      legend.append(row);
+    }
+    const status = statusEl();
+    function paint(frame) {
+      const retained = new Set(frame.stack);
+      scanCells.forEach(({ cell, answer }, index) => {
+        cell.dataset.state = index === frame.popped ? "popped" : index === frame.cursor ? "scan" : retained.has(index) ? "retained" : frame.answers[index] != null ? "resolved" : "";
+        cell.setAttribute("aria-current", index === frame.cursor ? "step" : "false");
+        answer.textContent = answerLabel(frame, index);
+        cell.setAttribute(
+          "aria-label",
+          `Index ${index}, value ${frame.array[index]}, ${answer.textContent}`
+        );
+      });
+      stackCells.forEach((cell, slot) => {
+        const index = frame.stack[slot];
+        const visible = index != null;
+        cell.textContent = visible ? `${frame.array[index]} · i${index}` : "";
+        cell.dataset.visible = visible ? "1" : "0";
+        cell.dataset.top = visible && slot === frame.stack.length - 1 ? "1" : "0";
+        cell.setAttribute("aria-hidden", visible ? "false" : "true");
+        if (visible)
+          cell.setAttribute(
+            "aria-label",
+            `Stack position ${slot + 1}, index ${index}, value ${frame.array[index]}`
+          );
+        else cell.removeAttribute("aria-label");
+      });
+      root.dataset.frame = frame.type;
+      status.textContent = frame.message;
+    }
+    const watch = (frame) => [
+      {
+        k: "scan",
+        v: frame.cursor == null ? "complete" : `i${frame.cursor} · ${frame.array[frame.cursor]}`,
+        sw: "var(--_blue)",
+        hint: "Value currently compared with the stack top."
+      },
+      {
+        k: "stack",
+        v: frame.stack.map((index) => frame.array[index]).join(" · ") || "empty",
+        sw: "var(--_amber)",
+        hint: "Unanswered values, decreasing from bottom to top."
+      },
+      {
+        k: "operation",
+        v: frame.type === "pop" && frame.popped != null ? `pop i${frame.popped}` : frame.type,
+        sw: frame.type === "pop" ? "var(--_violet)" : "var(--_green)"
+      },
+      {
+        k: "charges",
+        v: `${frame.pushes} push · ${frame.pops} pop`,
+        sw: "var(--_neutral)",
+        hint: "Every index is pushed once and popped at most once."
+      }
+    ];
+    return {
+      nodes: [root, legend, status],
+      stageLayout: "fill",
+      stableStage: true,
+      paint,
+      watch,
+      summary(frame) {
+        const answers = frame.answers.map((answer) => answer == null ? "none" : String(frame.array[answer])).join(", ");
+        return `Next greater values: [${answers}] · ${frame.pushes} pushes, ${frame.pops} pops.`;
+      }
+    };
+  }
+  var stackSequenceFamily = {
+    id: "stack-sequence",
+    createRecorder(config) {
+      return new StackSequenceRecorder(config);
+    },
+    createView(frames) {
+      return makeStackSequenceView(frames);
+    }
+  };
+
+  // custom/steptrace/src/algorithms/monotonic-stack-and-queue.ts
+  var DEFAULT_ARRAY = [73, 74, 75, 71, 69, 72, 76, 73];
+  function parseMonotonicStackConfig(config) {
+    const array = config.array ?? DEFAULT_ARRAY;
+    if (!Array.isArray(array) || array.length === 0 || !array.every(Number.isFinite))
+      throw new Error(`steptrace: monotonic-stack-and-queue requires a non-empty numeric "array".`);
+    return { profile: "next-greater", array: array.slice() };
+  }
+  var monotonicStackAndQueue = {
+    id: "monotonic-stack-and-queue",
+    kind: "pointers",
+    family: stackSequenceFamily,
+    meta: { label: "Monotonic stack and queue" },
+    parse: parseMonotonicStackConfig,
+    run(input, ops) {
+      ops.init("Start with an empty decreasing stack of unanswered indices.");
+      const stack = [];
+      for (let index = 0; index < input.array.length; index++) {
+        const value = input.array[index];
+        ops.scan(index, `Scan i${index} = ${value}; compare it with the stack top.`);
+        while (stack.length && input.array[stack.at(-1)] < value) {
+          const popped = stack.pop();
+          ops.pop(
+            index,
+            `${value} > ${input.array[popped]}, so pop i${popped}; ${value} is its next greater value.`
+          );
+        }
+        stack.push(index);
+        ops.push(
+          index,
+          `Push i${index}; retained values are ${stack.map((item) => input.array[item]).join(" > ")}.`
+        );
+      }
+      ops.done("The scan is complete; retained indices have no greater value to their right.");
+    }
+  };
+
   // custom/steptrace/src/algorithms/n-queens.ts
   var nQueens = {
     id: "n-queens",
@@ -12061,6 +12595,205 @@
         total += chosen.w;
       }
       ops.done(`Minimum spanning tree complete — total weight ${total}.`);
+    }
+  };
+
+  // custom/steptrace/src/families/prefix-sum.ts
+  var PrefixSumRecorder = class {
+    constructor(config) {
+      __publicField(this, "config", config);
+      __publicField(this, "frames", []);
+      __publicField(this, "prefix");
+      __publicField(this, "cursor", null);
+      __publicField(this, "running", 0);
+      __publicField(this, "leftPrefix", null);
+      __publicField(this, "rightPrefix", null);
+      __publicField(this, "result", null);
+      this.prefix = [0, ...Array(config.array.length).fill(null)];
+    }
+    init(message) {
+      this.record("init", message);
+    }
+    add(index, message) {
+      this.cursor = index;
+      this.running += this.config.array[index];
+      this.record("add", message);
+    }
+    write(index, message) {
+      this.prefix[index + 1] = this.running;
+      this.record("write", message);
+    }
+    query(message) {
+      this.cursor = null;
+      this.record("query", message);
+    }
+    takeRight(message) {
+      this.rightPrefix = this.prefix[this.config.range[1] + 1];
+      this.record("right", message);
+    }
+    takeLeft(message) {
+      this.leftPrefix = this.prefix[this.config.range[0]];
+      this.record("left", message);
+    }
+    subtract(message) {
+      this.result = this.rightPrefix - this.leftPrefix;
+      this.record("subtract", message);
+    }
+    done(message) {
+      this.record("done", message);
+    }
+    record(type, message) {
+      this.frames.push(
+        Object.freeze({
+          type,
+          profile: this.config.profile,
+          array: this.config.array,
+          prefix: this.prefix.slice(),
+          range: this.config.range,
+          cursor: this.cursor,
+          running: this.running,
+          leftPrefix: this.leftPrefix,
+          rightPrefix: this.rightPrefix,
+          result: this.result,
+          message
+        })
+      );
+    }
+  };
+  function arrayStrip(values, label) {
+    const { wrap, cells } = makeArrayStrip(values);
+    wrap.classList.add("steptrace__prefix-sum-strip");
+    wrap.setAttribute("role", "list");
+    wrap.setAttribute("aria-label", label);
+    cells.forEach((cell) => {
+      cell.setAttribute("role", "listitem");
+    });
+    return { wrap, cells };
+  }
+  function makePrefixSumView(frames) {
+    const first = frames[0];
+    const root = el("div", "steptrace__prefix-sum");
+    root.setAttribute("role", "region");
+    root.setAttribute("aria-label", "Prefix sum construction and range query");
+    const sourceSection = el("section", "steptrace__prefix-sum-section");
+    const sourceLabel = el("div", "steptrace__rail-label");
+    sourceLabel.textContent = "Daily sales";
+    const source = arrayStrip(first.array, "Daily sales array");
+    sourceSection.append(sourceLabel, source.wrap);
+    const prefixSection = el("section", "steptrace__prefix-sum-section");
+    const prefixLabel = el("div", "steptrace__rail-label");
+    prefixLabel.textContent = "Prefix totals";
+    const prefix = arrayStrip(first.prefix, "Prefix sum array");
+    prefixSection.append(prefixLabel, prefix.wrap);
+    root.append(sourceSection, prefixSection);
+    const legend = el("div", "steptrace__legend steptrace__prefix-sum-legend");
+    for (const [label, state] of [
+      ["running total", "build"],
+      ["cancelled prefix", "cancel"],
+      ["requested range", "range"]
+    ]) {
+      const row = el("span", "steptrace__legend-row");
+      row.append(
+        el("i", `steptrace__prefix-sum-swatch steptrace__prefix-sum-swatch--${state}`),
+        document.createTextNode(label)
+      );
+      legend.append(row);
+    }
+    const status = statusEl();
+    function paint(frame) {
+      const [left, right] = frame.range;
+      source.cells.forEach((cell, index) => {
+        cell.textContent = String(frame.array[index]);
+        cell.dataset.state = frame.cursor === index ? "build" : ["query", "right", "left", "subtract", "done"].includes(frame.type) ? index < left ? "cancel" : index <= right ? "range" : "" : "";
+        cell.setAttribute("aria-label", `source index ${index}, value ${frame.array[index]}`);
+      });
+      prefix.cells.forEach((cell, index) => {
+        const value = frame.prefix[index];
+        cell.textContent = value == null ? "·" : String(value);
+        cell.dataset.empty = value == null ? "1" : "0";
+        cell.dataset.state = index === right + 1 && ["right", "left", "subtract", "done"].includes(frame.type) ? "range" : index === left && ["left", "subtract", "done"].includes(frame.type) ? "cancel" : frame.cursor != null && index === frame.cursor + 1 ? "build" : "";
+        cell.setAttribute(
+          "aria-label",
+          `prefix index ${index}, ${value == null ? "not written" : `value ${value}`}`
+        );
+      });
+      status.textContent = frame.message;
+    }
+    const watch = (frame) => [
+      { k: "phase", v: frame.type, sw: "var(--_violet)" },
+      {
+        k: "source",
+        v: frame.cursor == null ? "—" : `a[${frame.cursor}] = ${frame.array[frame.cursor]}`,
+        sw: "var(--_blue)"
+      },
+      { k: "running", v: frame.running, sw: "var(--_amber)" },
+      {
+        k: "query",
+        v: frame.result == null ? `[${frame.range[0]}, ${frame.range[1]}]` : frame.result,
+        sw: "var(--_green)"
+      }
+    ];
+    return {
+      nodes: [root, legend, status],
+      stageLayout: "fill",
+      stableStage: true,
+      paint,
+      watch,
+      summary(frame) {
+        return frame.result == null ? `Built ${frame.prefix.filter((value) => value != null).length}/${frame.prefix.length} prefix totals.` : `Range [${frame.range[0]}, ${frame.range[1]}] sums to ${frame.result}.`;
+      }
+    };
+  }
+  var prefixSumFamily = {
+    id: "prefix-sum",
+    createRecorder(config) {
+      return new PrefixSumRecorder(config);
+    },
+    createView(frames) {
+      return makePrefixSumView(frames);
+    }
+  };
+
+  // custom/steptrace/src/algorithms/prefix-sum.ts
+  var DEFAULT_ARRAY2 = [4, 7, 2, 9, 5, 3, 8];
+  var DEFAULT_RANGE = [2, 5];
+  function parsePrefixSumConfig(config) {
+    const array = config.array ?? DEFAULT_ARRAY2;
+    const range = config.range ?? DEFAULT_RANGE;
+    if (!Array.isArray(array) || array.length < 2 || !array.every(Number.isFinite))
+      throw new Error(`steptrace: prefix-sum requires a numeric "array" with at least two values.`);
+    if (!Array.isArray(range) || range.length !== 2 || !range.every(Number.isInteger) || range[0] < 0 || range[0] > range[1] || range[1] >= array.length)
+      throw new Error(`steptrace: prefix-sum requires "range" as [left, right] inside the array.`);
+    return { profile: "range-sum", array: array.slice(), range: [range[0], range[1]] };
+  }
+  var prefixSum = {
+    id: "prefix-sum",
+    kind: "pointers",
+    family: prefixSumFamily,
+    meta: { label: "Prefix sum" },
+    parse: parsePrefixSumConfig,
+    run(input, ops) {
+      ops.init("Seed prefix[0] = 0 for the empty prefix.");
+      input.array.forEach((value, index) => {
+        ops.add(
+          index,
+          `Read a[${index}] = ${value}; running total becomes ${input.array.slice(0, index + 1).reduce((sum, item) => sum + item, 0)}.`
+        );
+        ops.write(index, `Write that total to prefix[${index + 1}].`);
+      });
+      const [left, right] = input.range;
+      ops.query(`Answer the inclusive range [${left}, ${right}] without rescanning it.`);
+      ops.takeRight(`Take prefix[${right + 1}], the total through a[${right}].`);
+      ops.takeLeft(`Take prefix[${left}], the shared head before a[${left}].`);
+      const rightPrefix = input.array.slice(0, right + 1).reduce((sum, value) => sum + value, 0);
+      const leftPrefix = input.array.slice(0, left).reduce((sum, value) => sum + value, 0);
+      const result = rightPrefix - leftPrefix;
+      ops.subtract(
+        `Subtract the shared head: prefix[${right + 1}] - prefix[${left}] = ${rightPrefix} - ${leftPrefix} = ${result}.`
+      );
+      ops.done(
+        `Range [${left}, ${right}] is ${result}: prefix[${right + 1}] - prefix[${left}] = ${rightPrefix} - ${leftPrefix}.`
+      );
     }
   };
 
@@ -12484,6 +13217,376 @@
       }
       ops.done(
         order.length === graph.nodes.length ? `Topological order: ${order.join(" → ")}.` : `A cycle remains (${graph.nodes.length - order.length} node(s) unresolved) — no valid ordering.`
+      );
+    }
+  };
+
+  // custom/steptrace/src/families/heap-selection.ts
+  var HeapSelectionRecorder = class {
+    constructor(config) {
+      __publicField(this, "config", config);
+      __publicField(this, "frames", []);
+      __publicField(this, "cursor", null);
+      __publicField(this, "heap", []);
+      __publicField(this, "compared", null);
+      __publicField(this, "rejected", []);
+      __publicField(this, "evicted", []);
+      __publicField(this, "decision", "fill the heap");
+      __publicField(this, "comparisons", 0);
+      __publicField(this, "swaps", 0);
+    }
+    init(message) {
+      this.record("init", message);
+    }
+    read(index, message) {
+      this.cursor = index;
+      this.compared = null;
+      this.decision = this.heap.length < this.config.k ? "fill" : "compare with root";
+      this.record("read", message);
+    }
+    insert(index, message) {
+      this.heap.push({ value: this.config.array[index], source: index });
+      this.compared = null;
+      this.decision = "insert";
+      this.record("insert", message);
+    }
+    compareParent(child, parent, message) {
+      this.compared = [child, parent];
+      this.comparisons++;
+      this.decision = "repair upward";
+      this.record("compare-parent", message);
+    }
+    swapUp(child, parent, message) {
+      ;
+      [this.heap[parent], this.heap[child]] = [this.heap[child], this.heap[parent]];
+      this.compared = [child, parent];
+      this.swaps++;
+      this.decision = "swap upward";
+      this.record("swap-up", message);
+    }
+    compareRoot(index, message) {
+      this.cursor = index;
+      this.compared = this.heap.length ? [0, 0] : null;
+      this.comparisons++;
+      this.decision = `${this.config.array[index]} vs root ${this.heap[0]?.value ?? "—"}`;
+      this.record("compare-root", message);
+    }
+    reject(index, message) {
+      this.rejected.push(index);
+      this.compared = null;
+      this.decision = "reject";
+      this.record("reject", message);
+    }
+    replaceRoot(index, message) {
+      const previous = this.heap[0];
+      if (!previous) throw new Error("steptrace: cannot replace the root of an empty top-k heap.");
+      this.evicted.push(previous.source);
+      this.heap[0] = { value: this.config.array[index], source: index };
+      this.compared = [0, 0];
+      this.decision = "replace root";
+      this.record("replace-root", message);
+    }
+    compareChildren(left, right, message) {
+      this.compared = [left, right];
+      this.comparisons++;
+      this.decision = "choose weaker child";
+      this.record("compare-children", message);
+    }
+    compareDown(parent, child, message) {
+      this.compared = [parent, child];
+      this.comparisons++;
+      this.decision = "repair downward";
+      this.record("compare-down", message);
+    }
+    swapDown(parent, child, message) {
+      ;
+      [this.heap[parent], this.heap[child]] = [this.heap[child], this.heap[parent]];
+      this.compared = [parent, child];
+      this.swaps++;
+      this.decision = "swap downward";
+      this.record("swap-down", message);
+    }
+    done(message) {
+      this.cursor = null;
+      this.compared = null;
+      this.decision = "top k retained · heap order";
+      this.record("done", message);
+    }
+    record(type, message) {
+      this.frames.push(
+        Object.freeze({
+          type,
+          profile: this.config.profile,
+          array: this.config.array,
+          k: this.config.k,
+          cursor: this.cursor,
+          heap: this.heap.map((entry) => ({ ...entry })),
+          compared: this.compared ? [...this.compared] : null,
+          rejected: this.rejected.slice(),
+          evicted: this.evicted.slice(),
+          decision: this.decision,
+          comparisons: this.comparisons,
+          swaps: this.swaps,
+          message
+        })
+      );
+    }
+  };
+  var SVG_NS2 = "http://www.w3.org/2000/svg";
+  function heapPosition(index) {
+    const depth = Math.floor(Math.log2(index + 1));
+    const offset = index - (2 ** depth - 1);
+    const count = 2 ** depth;
+    return {
+      x: 300 * (2 * offset + 1) / (2 * count),
+      y: 32 + depth * 68
+    };
+  }
+  function svgEl(tag, className) {
+    const node = document.createElementNS(SVG_NS2, tag);
+    node.setAttribute("class", className);
+    return node;
+  }
+  function makeHeapSelectionView(frames) {
+    const first = frames[0];
+    const root = el("div", "steptrace__heap-selection");
+    root.setAttribute("role", "region");
+    root.setAttribute("aria-label", `Top ${first.k} largest values with a min-heap`);
+    const streamLabel = el("div", "steptrace__rail-label");
+    streamLabel.textContent = "Stream";
+    const stream = makeArrayStrip(first.array);
+    stream.wrap.classList.add("steptrace__heap-stream");
+    stream.wrap.setAttribute("role", "list");
+    stream.wrap.setAttribute("aria-label", "Input stream");
+    const streamIcons = stream.cells.map((cell, index) => {
+      cell.setAttribute("role", "listitem");
+      const icon = el("span", "steptrace__heap-stream-icon");
+      icon.setAttribute("aria-hidden", "true");
+      cell.append(icon);
+      cell.setAttribute("aria-label", `Stream value ${first.array[index]}`);
+      return icon;
+    });
+    const heapLabel = el("div", "steptrace__rail-label");
+    heapLabel.textContent = `Min-heap · capacity k = ${first.k}`;
+    const heapWrap = el("div", "steptrace__heap-tree");
+    const svg = svgEl("svg", "steptrace__heap-svg");
+    svg.setAttribute("viewBox", `0 0 300 ${first.k > 3 ? 184 : 116}`);
+    svg.setAttribute("role", "img");
+    svg.setAttribute("aria-label", "Fixed-size min-heap; root is the weakest current winner");
+    const positions = Array.from({ length: first.k }, (_, index) => heapPosition(index));
+    for (let index = 1; index < first.k; index++) {
+      const parent = Math.floor((index - 1) / 2);
+      const line = svgEl("line", "steptrace__edge steptrace__heap-edge");
+      line.setAttribute("x1", String(positions[parent].x));
+      line.setAttribute("y1", String(positions[parent].y));
+      line.setAttribute("x2", String(positions[index].x));
+      line.setAttribute("y2", String(positions[index].y));
+      svg.append(line);
+    }
+    const nodes5 = positions.map((position, index) => {
+      const group = svgEl("g", "steptrace__node steptrace__heap-node");
+      group.setAttribute("transform", `translate(${position.x} ${position.y})`);
+      const circle = svgEl("circle", "steptrace__ncirc");
+      circle.setAttribute("r", "20");
+      const value = svgEl("text", "steptrace__id");
+      value.setAttribute("text-anchor", "middle");
+      value.setAttribute("dominant-baseline", "central");
+      const rootTag = svgEl("text", "steptrace__heap-root-label");
+      rootTag.setAttribute("text-anchor", "middle");
+      rootTag.setAttribute("y", "-27");
+      rootTag.textContent = index === 0 ? "weakest winner" : "";
+      group.append(circle, value, rootTag);
+      svg.append(group);
+      return { group, value };
+    });
+    heapWrap.append(svg);
+    root.append(streamLabel, stream.wrap, heapLabel, heapWrap);
+    const legend = el("div", "steptrace__legend steptrace__heap-legend");
+    for (const [label, state, icon] of [
+      ["incoming", "current", ""],
+      ["retained winner", "winner", ICON.check],
+      ["weakest root", "weakest", ""],
+      ["rejected / evicted", "rejected", ICON.x]
+    ]) {
+      const row = el("span", "steptrace__legend-row");
+      const swatch = el("i", `steptrace__heap-swatch steptrace__heap-swatch--${state}`);
+      swatch.innerHTML = icon;
+      row.append(swatch, document.createTextNode(label));
+      legend.append(row);
+    }
+    const status = statusEl();
+    function paint(frame) {
+      const retained = new Set(frame.heap.map((entry) => entry.source));
+      const rejected = /* @__PURE__ */ new Set([...frame.rejected, ...frame.evicted]);
+      stream.cells.forEach((cell, index) => {
+        const state = index === frame.cursor ? "current" : retained.has(index) ? "winner" : rejected.has(index) ? "rejected" : index < (frame.cursor ?? frame.array.length) ? "seen" : "";
+        cell.dataset.state = state;
+        cell.setAttribute("aria-current", index === frame.cursor ? "step" : "false");
+        const icon = streamIcons[index];
+        icon.replaceChildren();
+        if (state === "winner" && frame.type === "done") icon.append(successMarker());
+        else if (state === "rejected") icon.innerHTML = ICON.x;
+        cell.setAttribute(
+          "aria-label",
+          `Stream value ${frame.array[index]}, ${state === "winner" ? "retained winner" : state === "rejected" ? "rejected or evicted" : state || "unseen"}`
+        );
+      });
+      const compared = new Set(frame.compared ?? []);
+      nodes5.forEach(({ group, value }, index) => {
+        const entry = frame.heap[index];
+        value.textContent = entry ? String(entry.value) : "·";
+        group.dataset.state = compared.has(index) ? frame.type.startsWith("swap") ? "swap" : "compare" : index === 0 && entry ? "weakest" : entry ? "winner" : "empty";
+        group.setAttribute(
+          "aria-label",
+          entry ? `Heap slot ${index}, value ${entry.value}${index === 0 ? ", weakest current winner" : ""}` : `Heap slot ${index}, empty`
+        );
+      });
+      status.textContent = frame.message;
+    }
+    const watch = (frame) => [
+      {
+        k: "incoming",
+        v: frame.cursor == null ? "complete" : frame.array[frame.cursor],
+        sw: "var(--_blue)"
+      },
+      {
+        k: "weakest root",
+        v: frame.heap[0]?.value ?? "empty",
+        sw: "var(--_amber)",
+        hint: "Smallest retained value; this is the only winner a newcomer must beat."
+      },
+      {
+        k: "heap",
+        v: `[${frame.heap.map((entry) => entry.value).join(", ")}]`,
+        sw: "var(--_green)",
+        hint: "Heap order, not globally sorted order."
+      },
+      { k: "decision", v: frame.decision, sw: "var(--_violet)" }
+    ];
+    return {
+      nodes: [root, legend, status],
+      stageLayout: "fill",
+      stableStage: true,
+      paint,
+      watch,
+      summary(frame) {
+        return `Top ${frame.k}: heap [${frame.heap.map((entry) => entry.value).join(", ")}] · root ${frame.heap[0]?.value} is the weakest winner · not globally sorted.`;
+      }
+    };
+  }
+  var heapSelectionFamily = {
+    id: "heap-selection",
+    createRecorder(config) {
+      return new HeapSelectionRecorder(config);
+    },
+    createView(frames) {
+      return makeHeapSelectionView(frames);
+    }
+  };
+
+  // custom/steptrace/src/algorithms/top-k-elements.ts
+  var DEFAULT_ARRAY3 = [12, 3, 17, 8, 25, 5, 19, 14];
+  var DEFAULT_K = 3;
+  function parseTopKElementsConfig(config) {
+    const array = config.array ?? DEFAULT_ARRAY3;
+    const k = config.k ?? DEFAULT_K;
+    if (!Array.isArray(array) || array.length === 0 || !array.every(Number.isFinite))
+      throw new Error('steptrace: top-k-elements requires a non-empty numeric "array".');
+    if (!Number.isInteger(k) || k < 1 || k > array.length || k > 7)
+      throw new Error(
+        'steptrace: top-k-elements requires integer "k" from 1 to min(array length, 7).'
+      );
+    return { profile: "top-k-largest", array: array.slice(), k };
+  }
+  var topKElements = {
+    id: "top-k-elements",
+    kind: "pointers",
+    family: heapSelectionFamily,
+    meta: { label: "Top-K elements" },
+    parse: parseTopKElementsConfig,
+    run(input, ops) {
+      const heap = [];
+      const swap = (left, right) => {
+        ;
+        [heap[left], heap[right]] = [heap[right], heap[left]];
+      };
+      ops.init(`Keep a min-heap of ${input.k}; its root is the weakest current winner.`);
+      input.array.forEach((value, index) => {
+        ops.read(index, `Read ${value} from the stream.`);
+        if (heap.length < input.k) {
+          heap.push({ value, source: index });
+          ops.insert(index, `The heap has room, so insert ${value} at slot ${heap.length - 1}.`);
+          let child = heap.length - 1;
+          while (child > 0) {
+            const parent2 = Math.floor((child - 1) / 2);
+            ops.compareParent(
+              child,
+              parent2,
+              `Compare inserted ${heap[child].value} with parent ${heap[parent2].value}.`
+            );
+            if (heap[parent2].value <= heap[child].value) break;
+            const childValue = heap[child].value;
+            const parentValue = heap[parent2].value;
+            swap(child, parent2);
+            ops.swapUp(
+              child,
+              parent2,
+              `${childValue} is smaller than ${parentValue}, so swap upward; the smaller value moves toward the root.`
+            );
+            child = parent2;
+          }
+          return;
+        }
+        ops.compareRoot(
+          index,
+          `Compare ${value} with root ${heap[0].value}, the weakest of the ${input.k} retained winners.`
+        );
+        if (value <= heap[0].value) {
+          ops.reject(
+            index,
+            `${value} ≤ ${heap[0].value}; reject ${value} because it cannot enter the top ${input.k}.`
+          );
+          return;
+        }
+        const evicted = heap[0].value;
+        heap[0] = { value, source: index };
+        ops.replaceRoot(
+          index,
+          `${value} > ${evicted}; evict the weakest winner ${evicted} and place ${value} at the root.`
+        );
+        let parent = 0;
+        while (true) {
+          const left = parent * 2 + 1;
+          if (left >= heap.length) break;
+          const right = left + 1;
+          let weaker = left;
+          if (right < heap.length) {
+            ops.compareChildren(
+              left,
+              right,
+              `Compare children ${heap[left].value} and ${heap[right].value}; ${Math.min(heap[left].value, heap[right].value)} is weaker.`
+            );
+            if (heap[right].value < heap[left].value) weaker = right;
+          }
+          ops.compareDown(
+            parent,
+            weaker,
+            `Compare ${heap[parent].value} with weaker child ${heap[weaker].value}.`
+          );
+          if (heap[parent].value <= heap[weaker].value) break;
+          const parentValue = heap[parent].value;
+          const childValue = heap[weaker].value;
+          swap(parent, weaker);
+          ops.swapDown(
+            parent,
+            weaker,
+            `${parentValue} > ${childValue}, so swap them; ${childValue} becomes the weaker root candidate.`
+          );
+          parent = weaker;
+        }
+      });
+      ops.done(
+        `The heap contains the ${input.k} largest values. Its root is the weakest winner; the heap itself is not globally sorted.`
       );
     }
   };
@@ -13408,7 +14511,9 @@
     dfs,
     dijkstra,
     prim,
+    prefixSum,
     topologicalSort,
+    topKElements,
     binarySearch,
     linearSearch,
     kmp,
@@ -13420,10 +14525,12 @@
     lcs,
     ...dynamicProgrammingAlgorithms,
     floydWarshall,
+    fastAndSlowPointers,
     unionFind,
     kernighanPopcount,
     nQueens,
     memoization,
+    monotonicStackAndQueue,
     divideAndConquer,
     branchAndBound,
     trie,
@@ -13653,7 +14760,10 @@
     "next interval": "Sorted interval currently compared with the accumulated block.",
     "current block": "Merged interval accumulated by the left-to-right sweep.",
     "next meeting": "Finish-time-ordered meeting currently being checked.",
-    "last accepted": "Most recent meeting committed to the schedule."
+    "last accepted": "Most recent meeting committed to the schedule.",
+    slow: "The pointer that advances one node at a time.",
+    fast: "The pointer that advances two nodes at a time during cycle detection.",
+    head: "The pointer reset to the head for the cycle-entry search."
   });
   function watchHintFor(row) {
     const override = row.hint?.trim();

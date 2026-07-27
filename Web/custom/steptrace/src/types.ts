@@ -30,12 +30,16 @@ export type VisualFamilyId =
   | "dp-story"
   | "execution-tree"
   | "graph-state"
+  | "heap-selection"
   | "indexed-array-search"
   | "interval-track"
+  | "linked-topology"
   | "matrix-grid"
   | "monotone-boundary"
   | "prefix-character"
+  | "prefix-sum"
   | "run-stack"
+  | "stack-sequence"
 
 export interface AlgorithmMeta {
   label: string
@@ -88,6 +92,8 @@ export interface StepTraceConfig extends Partial<Omit<AlgorithmInput, "algorithm
   days?: number
   blockSize?: number
   variant?: string
+  range?: [number, number]
+  k?: number
 }
 
 export interface StepTraceTabConfig extends StepTraceConfig {

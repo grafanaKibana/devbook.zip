@@ -37,7 +37,7 @@ Alternating complete levels keeps the search depths within one level in the trac
 
 | Case | Time | Auxiliary space | Cause |
 | --- | --- | --- | --- |
-| Best | `O(b)` | `O(b)` | `s` and `t` sit a few edges apart; the frontiers intersect after a handful of expansions. |
+| Best | `O(1)` | `O(1)` | `s == t`; the initial guard returns the source without expanding either frontier. |
 | Model estimate | `O(b^(d/2))` | `O(b^(d/2))` | Uniform branching and level-balanced expansion make the frontiers meet near depth `d/2`. |
 | General worst | `O(V + E)` | `O(V)` | Irregular growth, unbalanced scheduling, or disconnected endpoints can force the reachable graph to be exhausted. |
 
