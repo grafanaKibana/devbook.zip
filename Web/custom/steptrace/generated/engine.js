@@ -903,10 +903,7 @@
     const stringCells = [];
     for (let k = 0; k < text.length; k++) {
       const edge = k === text.length - 1 ? " steptrace__z-cell--edge-end" : "";
-      const cell = el(
-        "div",
-        `steptrace__cell steptrace__z-cell steptrace__z-cell--string${edge}`
-      );
+      const cell = el("div", `steptrace__cell steptrace__z-cell steptrace__z-cell--string${edge}`);
       const value = el("span", "steptrace__z-char");
       value.textContent = text[k];
       const index = el("span", "steptrace__z-index");
@@ -2524,7 +2521,7 @@
     const familyProfile = frames[0]?.profile;
     const firstDistributionPass = frames.find((frame) => frame.type === "pass");
     const prefixOperation = (frame) => frame.operation && frame.key ? `${frame.operation[0].toUpperCase()}${frame.operation.slice(1)} ${frame.key}` : null;
-    const initial = kind === "sort" ? firstGap != null ? `Gap ${firstGap}` : familyProfile === "cyclic" ? "Place values" : familyProfile === "counting" ? "Tally keys" : familyProfile === "radix" ? `${firstDistributionPass?.passLabel || "Digit"} pass` : familyProfile === "bucket" ? "Scatter ranges" : familyProfile === "introsort" ? "Quicksort" : algorithm === "bubble-sort" ? "Pass 1" : algorithm === "insertion-sort" ? "Prefix 1" : algorithm === "selection-sort" ? "Select 1" : algorithm === "heap-sort" ? "Build heap" : algorithm === "merge-sort" ? "Runs of 1" : "Partition" : kind === "search" ? familyProfile === "exponential" ? "Gallop" : familyProfile === "interpolation" ? "Estimate" : familyProfile === "jump" ? "Jump blocks" : familyProfile === "ternary" ? "Narrow peak" : familyProfile === "shipping-capacity" ? "Answer range" : "Search range" : kind === "string" ? familyProfile === "z-array" ? "Initialize Z" : familyProfile === "boyer-moore" ? "Preprocess rules" : ["trie", "aho-corasick", "ternary-search-tree"].includes(familyProfile) ? prefixOperation(frames[0]) : "Shift 0" : kind === "backtrack" ? "Depth 0" : kind === "rectree" ? familyProfile === "divide-and-conquer" ? "Whole problem" : familyProfile === "branch-and-bound" ? "Root bound 116" : familyProfile === "merge-sort" ? "Whole array" : familyProfile === "memoization" ? "Empty cache" : familyProfile === "coin-change-top-down" ? "Amount 30¢" : familyProfile === "grid-path-top-down" ? "Loading bay" : "Call tree" : "Initialize";
+    const initial = kind === "sort" ? firstGap != null ? `Gap ${firstGap}` : familyProfile === "cyclic" ? "Place values" : familyProfile === "counting" ? "Tally keys" : familyProfile === "radix" ? `${firstDistributionPass?.passLabel || "Digit"} pass` : familyProfile === "bucket" ? "Scatter ranges" : familyProfile === "introsort" ? "Quicksort" : algorithm === "bubble-sort" ? "Pass 1" : algorithm === "insertion-sort" ? "Prefix 1" : algorithm === "selection-sort" ? "Select 1" : algorithm === "heap-sort" ? "Build heap" : algorithm === "merge-sort" ? "Runs of 1" : "Partition" : kind === "search" ? familyProfile === "exponential" ? "Gallop" : familyProfile === "interpolation" ? "Estimate" : familyProfile === "jump" ? "Jump blocks" : familyProfile === "ternary" ? "Narrow peak" : familyProfile === "shipping-capacity" ? "Answer range" : "Search range" : kind === "string" ? familyProfile === "z-array" ? "Initialize Z" : familyProfile === "boyer-moore" ? "Preprocess rules" : ["trie", "aho-corasick", "ternary-search-tree"].includes(familyProfile) ? prefixOperation(frames[0]) : "Shift 0" : kind === "backtrack" ? "Depth 0" : kind === "rectree" ? familyProfile === "divide-and-conquer" ? "Whole problem" : familyProfile === "branch-and-bound" ? "Root bound 116" : familyProfile === "merge-sort" ? "Whole array" : familyProfile === "memoization" ? "Empty cache" : familyProfile === "coin-change-top-down" ? "Amount 30¢" : familyProfile === "grid-path-top-down" ? "Loading bay" : "Call tree" : kind === "pointers" && ["merge-intervals", "activity-selection"].includes(familyProfile) ? "Input order" : "Initialize";
     push(0, initial);
     let lastRange = "";
     let lastGap = firstGap;
@@ -2603,6 +2600,21 @@
           push(i, `Shift ${f.shift}`);
           lastWindow = String(f.shift);
         }
+      } else if (kind === "pointers" && familyProfile === "merge-intervals") {
+        if (f.type === "sort") push(i, "Sort by start");
+        else if (f.type === "seed") push(i, `Seed ${f.current[0]}–${f.current[1]}`);
+        else if (f.type === "extend") push(i, `Extend ${f.current[0]}–${f.current[1]}`);
+        else if (f.type === "emit") {
+          const emitted = f.output.at(-1);
+          if (emitted) push(i, `Emit ${emitted[0]}–${emitted[1]}`);
+        } else if (f.type === "restart") {
+          push(i, `Start ${f.current[0]}–${f.current[1]}`);
+        }
+      } else if (kind === "pointers" && familyProfile === "activity-selection") {
+        const active = f.intervals.find((interval) => interval.id === f.active);
+        if (f.type === "sort") push(i, "Sort by finish");
+        else if (f.type === "accept" && active) push(i, `Accept ${active.start}–${active.end}`);
+        else if (f.type === "reject" && active) push(i, `Reject ${active.start}–${active.end}`);
       } else if (kind === "pointers") {
         const win = f.window ? f.window.join(":") : "";
         if (win && win !== lastWindow) {
@@ -2659,7 +2671,9 @@
     const prefixCompletion = {
       trie: "Trie complete",
       "aho-corasick": "Scan complete",
-      "ternary-search-tree": "TST complete"
+      "ternary-search-tree": "TST complete",
+      "merge-intervals": "Merged output",
+      "activity-selection": "Accepted schedule"
     }[familyProfile];
     push(
       frames.length - 1,
@@ -2825,6 +2839,374 @@
     }
     return stripTags(frame.message);
   }
+
+  // custom/steptrace/src/families/interval-track.ts
+  function parseIntervalTokens(config, defaults, algorithm) {
+    const intervals = config.intervals ?? defaults;
+    if (!Array.isArray(intervals) || intervals.length === 0)
+      throw new Error(`steptrace: ${algorithm} requires a non-empty "intervals" array.`);
+    if (!intervals.every(
+      (interval) => Array.isArray(interval) && interval.length === 2 && interval.every(Number.isInteger) && interval[0] <= interval[1]
+    ))
+      throw new Error(
+        `steptrace: ${algorithm} requires integer [start, end] pairs with start <= end.`
+      );
+    return intervals.map(([start, end], id) => ({ id, start, end }));
+  }
+  function copyInterval(interval) {
+    return interval ? [interval[0], interval[1]] : null;
+  }
+  var IntervalTrackRecorder = class {
+    constructor(config) {
+      __publicField(this, "config", config);
+      __publicField(this, "frames", []);
+      __publicField(this, "order");
+      __publicField(this, "cursor", null);
+      __publicField(this, "active", null);
+      __publicField(this, "current", null);
+      __publicField(this, "output", []);
+      __publicField(this, "selected", []);
+      __publicField(this, "rejected", []);
+      __publicField(this, "relation", null);
+      this.order = config.intervals.map((interval) => interval.id);
+    }
+    push(type, message) {
+      this.frames.push({
+        type,
+        profile: this.config.profile,
+        intervals: this.config.intervals,
+        order: this.order.slice(),
+        cursor: this.cursor,
+        active: this.active,
+        current: copyInterval(this.current),
+        output: this.output.map((interval) => [interval[0], interval[1]]),
+        selected: this.selected.slice(),
+        rejected: this.rejected.slice(),
+        relation: this.relation,
+        message
+      });
+    }
+    begin(message) {
+      this.push("input", message);
+    }
+    sorted(order, message) {
+      this.order = order.slice();
+      this.push("sort", message);
+    }
+    seed(cursor, active, current, message) {
+      this.cursor = cursor;
+      this.active = active;
+      this.current = copyInterval(current);
+      this.relation = null;
+      this.push("seed", message);
+    }
+    inspect(cursor, active, relation, message) {
+      this.cursor = cursor;
+      this.active = active;
+      this.relation = relation;
+      this.push("inspect", message);
+    }
+    extend(current, message) {
+      this.current = copyInterval(current);
+      this.push("extend", message);
+    }
+    emit(interval, message) {
+      this.output.push(copyInterval(interval));
+      this.push("emit", message);
+    }
+    restart(cursor, active, current, message) {
+      this.cursor = cursor;
+      this.active = active;
+      this.current = copyInterval(current);
+      this.relation = null;
+      this.push("restart", message);
+    }
+    accept(cursor, active, interval, message) {
+      this.cursor = cursor;
+      this.active = active;
+      this.current = copyInterval(interval);
+      this.output.push(copyInterval(interval));
+      this.selected.push(active);
+      this.relation = "compatible";
+      this.push("accept", message);
+    }
+    reject(cursor, active, message) {
+      this.cursor = cursor;
+      this.active = active;
+      this.rejected.push(active);
+      this.relation = "conflict";
+      this.push("reject", message);
+    }
+    done(interval, message) {
+      this.output.push(copyInterval(interval));
+      this.current = null;
+      this.active = null;
+      this.cursor = null;
+      this.relation = null;
+      this.push("done", message);
+    }
+    finish(message) {
+      this.active = null;
+      this.cursor = null;
+      this.relation = null;
+      this.push("done", message);
+    }
+  };
+  function formatInterval(interval) {
+    return interval ? `[${interval[0]}, ${interval[1]}]` : "—";
+  }
+  function formatRelation(relation) {
+    if (relation === "contained") return "contained · keep end";
+    if (relation === "overlap") return "overlap · extend";
+    if (relation === "gap") return "gap · emit";
+    if (relation === "compatible") return "compatible · accept";
+    if (relation === "conflict") return "overlap · reject";
+    return "—";
+  }
+  function intervalBand(className, start, end, minimum) {
+    const band = el("div", className);
+    band.style.setProperty("--_interval-start", String(start - minimum));
+    band.style.setProperty("--_interval-span", String(end - start + 1));
+    band.textContent = `${start}–${end}`;
+    band.title = `[${start}, ${end}]`;
+    band.setAttribute("aria-label", `Interval ${start} to ${end}`);
+    return band;
+  }
+  function makeIntervalTrackView(frames) {
+    const first = frames[0];
+    const minimum = Math.min(...first.intervals.map((interval) => interval.start));
+    const maximum = Math.max(...first.intervals.map((interval) => interval.end));
+    const columns = maximum - minimum + 1;
+    const scheduling = first.profile === "activity-selection";
+    const root = el("div", "steptrace__interval-track");
+    root.setAttribute("role", "region");
+    root.setAttribute("aria-label", scheduling ? "Activity selection sweep" : "Merge intervals sweep");
+    root.style.setProperty("--_interval-rows", String(first.intervals.length));
+    root.style.setProperty("--_interval-columns", String(columns));
+    const inputSection = el("section", "steptrace__interval-section");
+    const inputLabel = el("div", "steptrace__rail-label steptrace__interval-label");
+    const axis = el("div", "steptrace__interval-axis");
+    for (let value = minimum; value <= maximum; value++) {
+      if (value !== minimum && value !== maximum && (value - minimum) % 4 !== 0) continue;
+      const tick = el("span", "steptrace__interval-tick");
+      tick.style.gridColumn = String(value - minimum + 1);
+      tick.textContent = String(value);
+      axis.append(tick);
+    }
+    const board = el("div", "steptrace__interval-board");
+    const rows = new Map(
+      first.intervals.map((interval) => {
+        const row = el("div", "steptrace__interval-row");
+        const band = intervalBand(
+          "steptrace__interval-band steptrace__interval-band--source",
+          interval.start,
+          interval.end,
+          minimum
+        );
+        row.append(band);
+        board.append(row);
+        return [interval.id, { row, band }];
+      })
+    );
+    inputSection.append(inputLabel, axis, board);
+    const currentSection = el("section", "steptrace__interval-section");
+    const currentLabel = el("div", "steptrace__rail-label steptrace__interval-label");
+    currentLabel.textContent = scheduling ? "Last accepted" : "Current block";
+    const currentLane = el("div", "steptrace__interval-lane");
+    const currentBand = el("div", "steptrace__interval-band steptrace__interval-band--current");
+    currentBand.dataset.visible = "0";
+    currentBand.setAttribute("aria-hidden", "true");
+    currentLane.append(currentBand);
+    currentSection.append(currentLabel, currentLane);
+    const outputSection = el("section", "steptrace__interval-section");
+    const outputLabel = el("div", "steptrace__rail-label steptrace__interval-label");
+    outputLabel.textContent = scheduling ? "Accepted schedule" : "Merged output";
+    const outputLane = el("div", "steptrace__interval-lane");
+    const outputBands = first.intervals.map(() => {
+      const band = el("div", "steptrace__interval-band steptrace__interval-band--output");
+      band.dataset.visible = "0";
+      band.setAttribute("aria-hidden", "true");
+      outputLane.append(band);
+      return band;
+    });
+    outputSection.append(outputLabel, outputLane);
+    const legend = el("div", "steptrace__legend steptrace__interval-legend");
+    const legendItems = scheduling ? [
+      ["next meeting", "candidate"],
+      ["last accepted", "current"],
+      ["accepted", "output"],
+      ["rejected overlap", "rejected"]
+    ] : [
+      ["next interval", "candidate"],
+      ["current merged block", "current"],
+      ["emitted output", "output"]
+    ];
+    for (const [label, state] of legendItems) {
+      const item = el("span", "steptrace__legend-row");
+      item.append(
+        el("i", `steptrace__interval-swatch steptrace__interval-swatch--${state}`),
+        document.createTextNode(label)
+      );
+      legend.append(item);
+    }
+    root.append(inputSection, currentSection, outputSection, legend);
+    const status = statusEl();
+    function positionBand(band, interval) {
+      band.style.setProperty("--_interval-start", String(interval[0] - minimum));
+      band.style.setProperty("--_interval-span", String(interval[1] - interval[0] + 1));
+      band.textContent = `${interval[0]}–${interval[1]}`;
+      band.title = formatInterval(interval);
+      band.setAttribute("aria-label", `Interval ${interval[0]} to ${interval[1]}`);
+    }
+    function paint(frame) {
+      inputLabel.textContent = frame.type === "input" ? scheduling ? "Unsorted meetings" : "Input intervals" : scheduling ? "Finish-time order" : "Sorted intervals";
+      const rowById = new Map(frame.order.map((id, index) => [id, index]));
+      for (const interval of frame.intervals) {
+        const view = rows.get(interval.id);
+        const rowIndex = rowById.get(interval.id);
+        view.row.style.setProperty("--_interval-row", String(rowIndex));
+        const passed = frame.cursor != null && rowIndex < frame.cursor;
+        view.band.dataset.state = frame.selected.includes(interval.id) ? "accepted" : frame.rejected.includes(interval.id) ? "rejected" : interval.id === frame.active ? frame.relation === "gap" || frame.relation === "conflict" ? frame.relation : "candidate" : passed || frame.type === "done" ? "processed" : "";
+      }
+      currentBand.dataset.visible = frame.current ? "1" : "0";
+      currentBand.setAttribute("aria-hidden", frame.current ? "false" : "true");
+      if (frame.current) positionBand(currentBand, frame.current);
+      outputBands.forEach((band, index) => {
+        const interval = frame.output[index];
+        band.dataset.visible = interval ? "1" : "0";
+        band.setAttribute("aria-hidden", interval ? "false" : "true");
+        if (interval) positionBand(band, interval);
+      });
+      root.dataset.frame = frame.type;
+      root.dataset.relation = frame.relation || "";
+      status.textContent = frame.message;
+    }
+    const watch = (frame) => {
+      const active = frame.active == null ? null : frame.intervals.find((interval) => interval.id === frame.active);
+      return scheduling ? [
+        {
+          k: "phase",
+          v: frame.type === "input" ? "unsorted" : frame.type === "done" ? "complete" : frame.type === "sort" ? "sort" : "select",
+          sw: "var(--_violet)"
+        },
+        {
+          k: "next meeting",
+          v: active ? `[${active.start}, ${active.end}]` : "—",
+          sw: "var(--_amber)"
+        },
+        { k: "last accepted", v: formatInterval(frame.current), sw: "var(--_blue)" },
+        {
+          k: "decision",
+          v: frame.type === "done" ? "complete" : formatRelation(frame.relation),
+          hint: "Whether the current meeting is accepted or rejected.",
+          sw: frame.relation === "conflict" ? "var(--_violet)" : frame.relation === "compatible" ? "var(--_green)" : "var(--_neutral)"
+        }
+      ] : [
+        {
+          k: "phase",
+          v: frame.type === "input" ? "unsorted" : frame.type === "done" ? "complete" : frame.type === "sort" ? "sort" : "sweep",
+          sw: "var(--_violet)"
+        },
+        {
+          k: "next interval",
+          v: active ? `[${active.start}, ${active.end}]` : "—",
+          sw: "var(--_amber)"
+        },
+        { k: "current block", v: formatInterval(frame.current), sw: "var(--_blue)" },
+        {
+          k: "decision",
+          v: frame.type === "done" ? "complete" : formatRelation(frame.relation),
+          hint: "How the next interval changes the current merged block.",
+          sw: frame.relation === "gap" ? "var(--_violet)" : frame.relation ? "var(--_green)" : "var(--_neutral)"
+        }
+      ];
+    };
+    return {
+      nodes: [root, status],
+      stageAlignment: "center",
+      stableStage: true,
+      paint,
+      watch,
+      summary(frame) {
+        const output = frame.output.map((interval) => formatInterval(interval)).join(", ");
+        return scheduling ? `Accepted ${output} · ${frame.output.length} of ${frame.intervals.length} meetings.` : `Merged ${output} · ${frame.intervals.length} intervals → ${frame.output.length} blocks.`;
+      }
+    };
+  }
+  var intervalTrackFamily = {
+    id: "interval-track",
+    createRecorder(config) {
+      return new IntervalTrackRecorder(config);
+    },
+    createView(frames) {
+      return makeIntervalTrackView(frames);
+    }
+  };
+
+  // custom/steptrace/src/algorithms/activity-selection.ts
+  var DEFAULT_MEETINGS = [
+    [0, 6],
+    [8, 9],
+    [3, 5],
+    [1, 4],
+    [5, 7]
+  ];
+  function pair(interval) {
+    return [interval.start, interval.end];
+  }
+  var activitySelection = {
+    id: "activity-selection",
+    kind: "pointers",
+    family: intervalTrackFamily,
+    meta: { label: "Activity selection" },
+    parse(config) {
+      return {
+        profile: "activity-selection",
+        intervals: parseIntervalTokens(config, DEFAULT_MEETINGS, "activity-selection")
+      };
+    },
+    run(input, ops) {
+      ops.begin("Start with meetings in their original order.");
+      const sorted = input.intervals.slice().sort((a, b) => a.end - b.end || a.start - b.start || a.id - b.id);
+      ops.sorted(
+        sorted.map((interval) => interval.id),
+        "Sort by finish time so each accepted meeting leaves the most room for what follows."
+      );
+      let accepted = sorted[0];
+      ops.accept(
+        0,
+        accepted.id,
+        pair(accepted),
+        `Accept [${accepted.start}, ${accepted.end}]; it finishes first.`
+      );
+      for (let index = 1; index < sorted.length; index++) {
+        const next = sorted[index];
+        const compatible = next.start >= accepted.end;
+        ops.inspect(
+          index,
+          next.id,
+          compatible ? "compatible" : "conflict",
+          compatible ? `${next.start} ≥ ${accepted.end}, so [${next.start}, ${next.end}] is compatible.` : `${next.start} < ${accepted.end}, so [${next.start}, ${next.end}] overlaps the last accepted meeting.`
+        );
+        if (!compatible) {
+          ops.reject(
+            index,
+            next.id,
+            `Reject [${next.start}, ${next.end}]; accepting it would overlap [${accepted.start}, ${accepted.end}].`
+          );
+          continue;
+        }
+        accepted = next;
+        ops.accept(
+          index,
+          next.id,
+          pair(next),
+          `Accept [${next.start}, ${next.end}] and move the compatibility boundary to ${next.end}.`
+        );
+      }
+      ops.finish("Every meeting was considered; the accepted schedule is maximum-size.");
+    }
+  };
 
   // custom/steptrace/src/families/graph-state.ts
   var SVG_NS = "http://www.w3.org/2000/svg";
@@ -11331,6 +11713,72 @@
     }
   };
 
+  // custom/steptrace/src/algorithms/merge-intervals.ts
+  var DEFAULT_INTERVALS = [
+    [13, 16],
+    [1, 4],
+    [8, 10],
+    [2, 6],
+    [16, 20],
+    [9, 12],
+    [3, 5]
+  ];
+  function parseMergeIntervalsConfig(config) {
+    return {
+      profile: "merge-intervals",
+      intervals: parseIntervalTokens(config, DEFAULT_INTERVALS, "merge-intervals")
+    };
+  }
+  function pair2(interval) {
+    return [interval.start, interval.end];
+  }
+  var mergeIntervals = {
+    id: "merge-intervals",
+    kind: "pointers",
+    family: intervalTrackFamily,
+    meta: { label: "Merge intervals" },
+    parse: parseMergeIntervalsConfig,
+    run(input, ops) {
+      ops.begin("Start with intervals in their original order.");
+      const sorted = input.intervals.slice().sort((a, b) => a.start - b.start || a.end - b.end || a.id - b.id);
+      ops.sorted(
+        sorted.map((interval) => interval.id),
+        "Sort intervals by start so every possible overlap becomes adjacent."
+      );
+      let current = pair2(sorted[0]);
+      ops.seed(0, sorted[0].id, current, `Seed the current block with [${current.join(", ")}].`);
+      for (let index = 1; index < sorted.length; index++) {
+        const next = sorted[index];
+        if (next.start <= current[1]) {
+          const relation = next.end <= current[1] ? "contained" : "overlap";
+          ops.inspect(
+            index,
+            next.id,
+            relation,
+            relation === "contained" ? `[${next.start}, ${next.end}] is contained in [${current.join(", ")}]; keep the current end.` : `${next.start} ≤ ${current[1]}, so [${next.start}, ${next.end}] overlaps the current block.`
+          );
+          if (relation === "contained") continue;
+          current = [current[0], Math.max(current[1], next.end)];
+          ops.extend(current, `Extend the current block to [${current.join(", ")}].`);
+          continue;
+        }
+        ops.inspect(
+          index,
+          next.id,
+          "gap",
+          `${next.start} > ${current[1]}, so a gap closes [${current.join(", ")}].`
+        );
+        ops.emit(
+          current,
+          `Emit [${current.join(", ")}]; no later interval can reach back across the gap.`
+        );
+        current = pair2(next);
+        ops.restart(index, next.id, current, `Start a new current block at [${current.join(", ")}].`);
+      }
+      ops.done(current, `Emit [${current.join(", ")}] and finish the sweep.`);
+    }
+  };
+
   // custom/steptrace/src/algorithms/maximum-flow.ts
   var nodes4 = [
     { id: "s", label: "s", x: 80, y: 160 },
@@ -12926,6 +13374,7 @@
 
   // custom/steptrace/src/algorithms/index.ts
   var builtInAlgorithms = [
+    activitySelection,
     aStar,
     articulationPointsAndBridges,
     bellmanFord,
@@ -12944,6 +13393,7 @@
     heapSort,
     mergeSort,
     mergeSortTree,
+    mergeIntervals,
     shellSort,
     combSort,
     countingSort,
@@ -13202,7 +13652,11 @@
     character: "Character on the active trie edge.",
     test: "Whether the current path or terminal-marker test succeeded.",
     state: "Active automaton or character-tree state.",
-    output: "Patterns emitted at the current text position."
+    output: "Patterns emitted at the current text position.",
+    "next interval": "Sorted interval currently compared with the accumulated block.",
+    "current block": "Merged interval accumulated by the left-to-right sweep.",
+    "next meeting": "Finish-time-ordered meeting currently being checked.",
+    "last accepted": "Most recent meeting committed to the schedule."
   });
   function watchHintFor(row) {
     const override = row.hint?.trim();

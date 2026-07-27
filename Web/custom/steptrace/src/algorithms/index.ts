@@ -1,4 +1,5 @@
 import type { BuiltInAlgorithm } from "../types"
+import { activitySelection } from "./activity-selection"
 import { aStar } from "./a-star"
 import { ahoCorasick } from "./aho-corasick"
 import { articulationPointsAndBridges } from "./articulation-points-and-bridges"
@@ -36,6 +37,7 @@ import { lcs } from "./lcs"
 import { linearSearch } from "./linear-search"
 import { mergeSort } from "./merge-sort"
 import { mergeSortTree } from "./merge-sort-tree"
+import { mergeIntervals } from "./merge-intervals"
 import { maximumFlow } from "./maximum-flow"
 import { memoization } from "./memoization"
 import { nQueens } from "./n-queens"
@@ -57,6 +59,7 @@ import { timSort } from "./tim-sort"
 import { zAlgorithm } from "./z-algorithm"
 
 export const builtInAlgorithms = [
+  activitySelection,
   aStar,
   articulationPointsAndBridges,
   bellmanFord,
@@ -75,6 +78,7 @@ export const builtInAlgorithms = [
   heapSort,
   mergeSort,
   mergeSortTree,
+  mergeIntervals,
   shellSort,
   combSort,
   countingSort,

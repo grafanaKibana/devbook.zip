@@ -15,6 +15,7 @@ const here = dirname(fileURLToPath(import.meta.url))
 const repoRoot = join(here, "..", "..", "..")
 
 const cases = [
+  "activity-selection",
   "a-star",
   "articulation-points-and-bridges",
   "bellman-ford",
@@ -33,6 +34,7 @@ const cases = [
   "heap-sort",
   "merge-sort",
   "merge-sort-tree",
+  "merge-intervals",
   "shell-sort",
   "comb-sort",
   "counting-sort",
@@ -1451,9 +1453,119 @@ test("all built-in algorithms preserve their headless frame contract", () => {
 
   assert.equal(
     digest,
-    "d759c6f60ed8f56f11f769bebc4324d7623ee4ebf06852688fbbce6ab026edb8",
+    "71d0ac3cbd712479db5f456ecf78ba162f39ed7f304987406fb82b9a7966cc72",
     "the headless StepTrace behavior changed",
   )
+})
+
+test("merge intervals sorts once, preserves contained ends, and emits only at gaps", () => {
+  const api = loadEngine(readFileSync(join(here, "generated", "engine.js"), "utf8"))
+  const { buildMilestones } = loadStepTraceModule("src", "render.ts")
+  const result = api.buildFrames({ algorithm: "merge-intervals" })
+  const frames = result.frames
+
+  assert.equal(result.kind, "pointers")
+  assert.equal(result.family.id, "interval-track")
+  assert.deepEqual(frames[0].order, [0, 1, 2, 3, 4, 5, 6])
+  assert.deepEqual(frames.find((frame) => frame.type === "sort").order, [1, 3, 6, 2, 5, 0, 4])
+
+  const contained = frames.find((frame) => frame.relation === "contained")
+  assert.deepEqual(contained.current, [1, 6])
+  assert.deepEqual(contained.intervals[contained.active], { id: 6, start: 3, end: 5 })
+  assert.notEqual(frames[frames.indexOf(contained) + 1].type, "extend")
+  assert.deepEqual(frames.at(-1).output, [
+    [1, 6],
+    [8, 12],
+    [13, 20],
+  ])
+  assert.deepEqual(
+    frames.filter((frame) => frame.type === "emit").map((frame) => frame.output.at(-1)),
+    [
+      [1, 6],
+      [8, 12],
+    ],
+  )
+  assert.deepEqual(
+    buildMilestones("merge-intervals", "pointers", frames).map((mark) => mark.label),
+    [
+      "Input order",
+      "Sort by start",
+      "Seed 1–4",
+      "Extend 1–6",
+      "Emit 1–6",
+      "Start 8–10",
+      "Extend 8–12",
+      "Emit 8–12",
+      "Start 13–16",
+      "Extend 13–20",
+      "Merged output",
+    ],
+  )
+
+  assert.throws(
+    () => api.buildFrames({ algorithm: "merge-intervals", intervals: [] }),
+    /non-empty "intervals"/,
+  )
+  assert.throws(
+    () => api.buildFrames({ algorithm: "merge-intervals", intervals: [[4, 2]] }),
+    /start <= end/,
+  )
+})
+
+test("activity selection reuses interval-track and commits the earliest compatible finishes", () => {
+  const api = loadEngine(readFileSync(join(here, "generated", "engine.js"), "utf8"))
+  const { buildMilestones } = loadStepTraceModule("src", "render.ts")
+  const result = api.buildFrames({ algorithm: "activity-selection" })
+  const frames = result.frames
+
+  assert.equal(result.kind, "pointers")
+  assert.equal(result.family.id, "interval-track")
+  assert.deepEqual(frames[0].order, [0, 1, 2, 3, 4])
+  assert.deepEqual(frames.find((frame) => frame.type === "sort").order, [3, 2, 0, 4, 1])
+  assert.deepEqual(frames.at(-1).selected, [3, 4, 1])
+  assert.deepEqual(frames.at(-1).rejected, [2, 0])
+  assert.deepEqual(frames.at(-1).output, [
+    [1, 4],
+    [5, 7],
+    [8, 9],
+  ])
+  assert.equal(frames.filter((frame) => frame.type === "inspect").length, 4)
+  assert.deepEqual(
+    buildMilestones("activity-selection", "pointers", frames).map((mark) => mark.label),
+    [
+      "Input order",
+      "Sort by finish",
+      "Accept 1–4",
+      "Reject 3–5",
+      "Reject 0–6",
+      "Accept 5–7",
+      "Accept 8–9",
+      "Accepted schedule",
+    ],
+  )
+})
+
+test("interval-track reuses shared rails and keeps its stage stable and responsive", () => {
+  const familySource = readFileSync(join(here, "src", "families", "interval-track.ts"), "utf8")
+  const styles = readFileSync(join(here, "src", "styles", "interval-track.scss"), "utf8")
+  const styleEntry = readFileSync(join(here, "src", "styles", "index.scss"), "utf8")
+
+  assert.match(familySource, /steptrace__rail-label steptrace__interval-label/)
+  assert.match(familySource, /stableStage: true/)
+  assert.match(familySource, /steptrace__legend steptrace__interval-legend/)
+  assert.match(familySource, /profile: "merge-intervals" \| "activity-selection"/)
+  assert.match(familySource, /parseIntervalTokens/)
+  assert.match(familySource, /--_interval-start/)
+  assert.match(familySource, /--_interval-span/)
+  assert.match(styles, /\.steptrace__interval-section \+ \.steptrace__interval-section/)
+  assert.match(styles, /inset-inline-start var\(--_dur-move\)/)
+  assert.match(styles, /inline-size var\(--_dur-move\)/)
+  assert.match(styles, /data-state="accepted"/)
+  assert.match(styles, /data-state="rejected"/)
+  assert.match(styles, /@media \(max-width: 560px\)/)
+  assert.match(styles, /@media \(prefers-reduced-motion: reduce\)/)
+  assert.doesNotMatch(styles, /overflow-x:\s*auto/)
+  assert.match(styleEntry, /@use "interval-track";/)
 })
 
 test("counting sort records every tally, prefix, and stable placement in the typed distribution family", () => {

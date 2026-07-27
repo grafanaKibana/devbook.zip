@@ -31,6 +31,7 @@ export type VisualFamilyId =
   | "execution-tree"
   | "graph-state"
   | "indexed-array-search"
+  | "interval-track"
   | "matrix-grid"
   | "monotone-boundary"
   | "prefix-character"
@@ -76,6 +77,7 @@ export interface StepTraceConfig extends Partial<Omit<AlgorithmInput, "algorithm
   mode?: string
   bucketCount?: number
   gaps?: number[]
+  intervals?: Array<[number, number]>
   shrinkFactor?: number
   depthLimit?: number
   smallPartitionThreshold?: number

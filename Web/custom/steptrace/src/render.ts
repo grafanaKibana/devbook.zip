@@ -1058,10 +1058,7 @@ function makeZArrayView(frames) {
   const stringCells = []
   for (let k = 0; k < text.length; k++) {
     const edge = k === text.length - 1 ? " steptrace__z-cell--edge-end" : ""
-    const cell = el(
-      "div",
-      `steptrace__cell steptrace__z-cell steptrace__z-cell--string${edge}`,
-    )
+    const cell = el("div", `steptrace__cell steptrace__z-cell steptrace__z-cell--string${edge}`)
     const value = el("span", "steptrace__z-char")
     value.textContent = text[k]
     const index = el("span", "steptrace__z-index")
@@ -1150,8 +1147,7 @@ function makeZArrayView(frames) {
     prefixClip.dataset.clipped = frame.i != null && frame.i > 0 ? "1" : "0"
     bracket.dataset.edgeStart = boxActive && frame.box[0] === 0 ? "1" : "0"
     bracket.dataset.edgeEnd = boxActive && frame.box[1] === text.length - 1 ? "1" : "0"
-    cursor.dataset.visible =
-      frame.i != null && !comparisonActive && !copyActive ? "1" : "0"
+    cursor.dataset.visible = frame.i != null && !comparisonActive && !copyActive ? "1" : "0"
     bracket.dataset.visible = boxActive && !comparisonActive && !copyActive ? "1" : "0"
     for (let k = 0; k < text.length; k++) {
       prefixCells[k].dataset.state = ""
@@ -3076,7 +3072,10 @@ export function buildMilestones(algorithm, kind, frames) {
                         : familyProfile === "grid-path-top-down"
                           ? "Loading bay"
                           : "Call tree"
-              : "Initialize"
+              : kind === "pointers" &&
+                  ["merge-intervals", "activity-selection"].includes(familyProfile)
+                ? "Input order"
+                : "Initialize"
   push(0, initial)
   let lastRange = ""
   let lastGap = firstGap
@@ -3207,6 +3206,21 @@ export function buildMilestones(algorithm, kind, frames) {
         push(i, `Shift ${f.shift}`)
         lastWindow = String(f.shift)
       }
+    } else if (kind === "pointers" && familyProfile === "merge-intervals") {
+      if (f.type === "sort") push(i, "Sort by start")
+      else if (f.type === "seed") push(i, `Seed ${f.current[0]}–${f.current[1]}`)
+      else if (f.type === "extend") push(i, `Extend ${f.current[0]}–${f.current[1]}`)
+      else if (f.type === "emit") {
+        const emitted = f.output.at(-1)
+        if (emitted) push(i, `Emit ${emitted[0]}–${emitted[1]}`)
+      } else if (f.type === "restart") {
+        push(i, `Start ${f.current[0]}–${f.current[1]}`)
+      }
+    } else if (kind === "pointers" && familyProfile === "activity-selection") {
+      const active = f.intervals.find((interval) => interval.id === f.active)
+      if (f.type === "sort") push(i, "Sort by finish")
+      else if (f.type === "accept" && active) push(i, `Accept ${active.start}–${active.end}`)
+      else if (f.type === "reject" && active) push(i, `Reject ${active.start}–${active.end}`)
     } else if (kind === "pointers") {
       const win = f.window ? f.window.join(":") : ""
       if (win && win !== lastWindow) {
@@ -3264,6 +3278,8 @@ export function buildMilestones(algorithm, kind, frames) {
     trie: "Trie complete",
     "aho-corasick": "Scan complete",
     "ternary-search-tree": "TST complete",
+    "merge-intervals": "Merged output",
+    "activity-selection": "Accepted schedule",
   }[familyProfile]
   push(
     frames.length - 1,

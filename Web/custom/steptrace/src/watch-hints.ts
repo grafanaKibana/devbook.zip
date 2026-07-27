@@ -99,6 +99,10 @@ export const WATCH_HINTS = Object.freeze({
   test: "Whether the current path or terminal-marker test succeeded.",
   state: "Active automaton or character-tree state.",
   output: "Patterns emitted at the current text position.",
+  "next interval": "Sorted interval currently compared with the accumulated block.",
+  "current block": "Merged interval accumulated by the left-to-right sweep.",
+  "next meeting": "Finish-time-ordered meeting currently being checked.",
+  "last accepted": "Most recent meeting committed to the schedule.",
 })
 
 export function watchHintFor(row: WatchRow): string {
