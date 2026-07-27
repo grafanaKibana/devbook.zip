@@ -1,12 +1,7 @@
-import { el, escapeHtml, statusEl, successMarker } from "../render"
+import { el, escapeHtml, makeLegend, statusEl, successMarker } from "../render"
 import type { StepTraceConfig, StepTraceView, VisualFamily } from "../types"
 
-export type PrefixCharacterOperation =
-  | "insert"
-  | "prefix"
-  | "search"
-  | "build failures"
-  | "scan"
+export type PrefixCharacterOperation = "insert" | "prefix" | "search" | "build failures" | "scan"
 export type PrefixCharacterFrameType =
   | "begin"
   | "reuse-edge"
@@ -125,17 +120,14 @@ export function prefixTopology(keys: readonly string[]) {
   for (const key of keys) {
     for (let index = 1; index <= key.length; index++) prefixes.add(key.slice(0, index))
   }
-  const ordered = [...prefixes]
-    .sort((a, b) => a.length - b.length || a.localeCompare(b))
+  const ordered = [...prefixes].sort((a, b) => a.length - b.length || a.localeCompare(b))
   const labels = new Map(
     ordered.map((prefix) => [prefix || "root", prefix ? prefix.at(-1) || "" : "root"]),
   )
-  const edges = ordered
-    .filter(Boolean)
-    .map((prefix) => {
-      const parent = prefix.slice(0, -1) || "root"
-      return { id: `${parent}->${prefix}`, from: parent, to: prefix } satisfies PrefixCharacterEdge
-    })
+  const edges = ordered.filter(Boolean).map((prefix) => {
+    const parent = prefix.slice(0, -1) || "root"
+    return { id: `${parent}->${prefix}`, from: parent, to: prefix } satisfies PrefixCharacterEdge
+  })
   return { nodes: layoutNodes(labels, edges), edges }
 }
 
@@ -428,20 +420,31 @@ export function makePrefixCharacterView(
   }
   root.append(textRow, svg)
 
-  const legend = el("div", "steptrace__legend")
-  legend.setAttribute("aria-label", "Prefix character state legend")
-  for (const [state, label] of [
-    ["active", "active path"],
-    ["reused", "reused edge"],
-    ["created", "new node"],
-    ["terminal", "terminal key"],
-  ]) {
-    const row = el("div", "steptrace__legend-row")
-    const swatch = el("span", "steptrace__swatch steptrace__prefix-swatch")
-    swatch.dataset.state = state
-    row.append(swatch, document.createTextNode(label))
-    legend.append(row)
-  }
+  const legend = makeLegend(
+    [
+      {
+        state: "active",
+        label: "active path",
+        swatchClass: "steptrace__swatch steptrace__prefix-swatch",
+      },
+      {
+        state: "reused",
+        label: "reused edge",
+        swatchClass: "steptrace__swatch steptrace__prefix-swatch",
+      },
+      {
+        state: "created",
+        label: "new node",
+        swatchClass: "steptrace__swatch steptrace__prefix-swatch",
+      },
+      {
+        state: "terminal",
+        label: "terminal key",
+        swatchClass: "steptrace__swatch steptrace__prefix-swatch",
+      },
+    ],
+    "Prefix character state legend",
+  )
   const status = statusEl()
 
   function paint(frame: PrefixCharacterFrame, index = 0, total = frames.length) {
@@ -531,9 +534,7 @@ export function makePrefixCharacterView(
     else if (frame.text)
       rows.push({
         k: frame.outputs.length ? "output" : "state",
-        v: frame.outputs.length
-          ? frame.outputs.join(" + ")
-          : frame.activePath.at(-1) || "root",
+        v: frame.outputs.length ? frame.outputs.join(" + ") : frame.activePath.at(-1) || "root",
         sw: frame.outputs.length ? "var(--_green)" : "var(--_amber)",
       })
     return rows

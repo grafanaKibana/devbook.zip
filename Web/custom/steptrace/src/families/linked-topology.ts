@@ -1,4 +1,4 @@
-import { el, statusEl, successMarker } from "../render"
+import { el, makeLegend, statusEl, successMarker } from "../render"
 import type { StepTraceView, VisualFamily, WatchRow } from "../types"
 
 let linkedTopologyViewId = 0
@@ -191,22 +191,30 @@ export function makeLinkedTopologyView(
   const fast = marker("F", "fast")
   canvas.append(slow.node, fast.node)
 
-  const legend = el("div", "steptrace__legend steptrace__linked-legend")
-  for (const [text, state] of [
-    ["slow / cycle pointer", "slow"],
-    ["fast / head pointer", "fast"],
-    ["cycle edge", "cycle"],
-    ["cycle entry", "entry"],
-  ] as const) {
-    const row = el("span", "steptrace__legend-row")
-    row.append(
-      el("i", `steptrace__linked-swatch steptrace__linked-swatch--${state}`),
-      document.createTextNode(text),
-    )
-    legend.append(row)
-  }
+  const legend = makeLegend(
+    [
+      {
+        label: "slow / cycle pointer",
+        swatchClass: "steptrace__linked-swatch steptrace__linked-swatch--slow",
+      },
+      {
+        label: "fast / head pointer",
+        swatchClass: "steptrace__linked-swatch steptrace__linked-swatch--fast",
+      },
+      {
+        label: "cycle edge",
+        swatchClass: "steptrace__linked-swatch steptrace__linked-swatch--cycle",
+      },
+      {
+        label: "cycle entry",
+        swatchClass: "steptrace__linked-swatch steptrace__linked-swatch--entry",
+      },
+    ],
+    "Linked topology state legend",
+    "steptrace__linked-legend",
+  )
 
-  root.append(canvas, legend)
+  root.append(canvas)
   const status = statusEl()
 
   function place(pointer: HTMLElement, id: string) {
@@ -272,7 +280,7 @@ export function makeLinkedTopologyView(
   ]
 
   return {
-    nodes: [root, status],
+    nodes: [root, legend, status],
     stageAlignment: "center",
     stableStage: true,
     paint,

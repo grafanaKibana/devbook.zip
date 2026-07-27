@@ -241,7 +241,25 @@
   }
 }
 
+@container steptrace-wide-stage (min-width: 44rem) {
+  .steptrace[data-visual-family="monotone-boundary"] .steptrace__body {
+    grid-template-columns: 1fr minmax(240px, 312px);
+  }
+
+  .steptrace[data-visual-family="monotone-boundary"] .steptrace__rail {
+    margin-top: 0;
+    padding-top: 0;
+    padding-left: 1.4rem;
+    border-top: 0;
+    border-left: 1px solid var(--_hair);
+  }
+}
+
 @container steptrace-boundary (max-width: 28rem) {
+  .steptrace .steptrace__boundary-lanes {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
   .steptrace .steptrace__boundary-section-head {
     align-items: flex-start;
     flex-direction: column;

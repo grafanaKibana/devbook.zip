@@ -34,7 +34,7 @@ export const rabinKarp = {
         s,
         wh,
         ph,
-        `Window [${s}, ${s + m - 1}]: hash ${wh} ${wh === ph ? "=" : "≠"} pattern hash ${ph}${wh === ph ? " — verify" : " — skip"}.`,
+        `Window [${s}, ${s + m - 1}]: window hash ${wh} ${wh === ph ? "=" : "≠"} pattern hash ${ph}${wh === ph ? " — verify" : " — skip"}.`,
       )
       if (wh === ph) {
         let ok = true

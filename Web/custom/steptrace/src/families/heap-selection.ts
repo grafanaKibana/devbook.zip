@@ -1,4 +1,4 @@
-import { el, ICON, makeArrayStrip, statusEl, successMarker } from "../render"
+import { el, ICON, makeArrayStrip, makeLegend, statusEl, successMarker } from "../render"
 import type { StepTraceView, VisualFamily, WatchRow } from "../types"
 
 export interface HeapSelectionConfig {
@@ -219,7 +219,7 @@ export function makeHeapSelectionView(
     return icon
   })
 
-  const heapLabel = el("div", "steptrace__rail-label")
+  const heapLabel = el("div", "steptrace__rail-label steptrace__heap-tree-label")
   heapLabel.textContent = `Min-heap · capacity k = ${first.k}`
   const heapWrap = el("div", "steptrace__heap-tree")
   const svg = svgEl("svg", "steptrace__heap-svg")
@@ -257,19 +257,28 @@ export function makeHeapSelectionView(
   heapWrap.append(svg)
   root.append(streamLabel, stream.wrap, heapLabel, heapWrap)
 
-  const legend = el("div", "steptrace__legend steptrace__heap-legend")
-  for (const [label, state, icon] of [
-    ["incoming", "current", ""],
-    ["retained winner", "winner", ICON.check],
-    ["weakest root", "weakest", ""],
-    ["rejected / evicted", "rejected", ICON.x],
-  ] as const) {
-    const row = el("span", "steptrace__legend-row")
-    const swatch = el("i", `steptrace__heap-swatch steptrace__heap-swatch--${state}`)
-    swatch.innerHTML = icon
-    row.append(swatch, document.createTextNode(label))
-    legend.append(row)
-  }
+  const rejected = el("span")
+  rejected.innerHTML = ICON.x
+  const legend = makeLegend(
+    [
+      { label: "incoming", swatchClass: "steptrace__heap-swatch steptrace__heap-swatch--current" },
+      {
+        label: "retained winner",
+        swatchClass: "steptrace__heap-swatch steptrace__heap-swatch--winner",
+        marker: successMarker(),
+      },
+      {
+        label: "weakest root",
+        swatchClass: "steptrace__heap-swatch steptrace__heap-swatch--weakest",
+      },
+      {
+        label: "rejected / evicted",
+        swatchClass: "steptrace__heap-swatch steptrace__heap-swatch--rejected",
+        marker: rejected,
+      },
+    ],
+    "Heap selection state legend",
+  )
 
   const status = statusEl()
 

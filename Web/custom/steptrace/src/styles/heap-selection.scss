@@ -9,7 +9,13 @@
 }
 
 .steptrace .steptrace__heap-stream {
-  margin: 0.45rem 0 1rem;
+  margin: 0.45rem 0 0;
+  padding-bottom: 0.9rem;
+}
+
+.steptrace .steptrace__heap-tree-label {
+  padding-top: 0.9rem;
+  border-top: 1px solid var(--_hair);
 }
 
 .steptrace .steptrace__heap-stream .steptrace__pcell {
@@ -108,10 +114,6 @@
 .steptrace .steptrace__heap-root-label {
   fill: var(--_amber);
   font: 600 0.52rem/1 var(--_font-head);
-}
-
-.steptrace .steptrace__heap-legend {
-  justify-content: center;
 }
 
 .steptrace .steptrace__heap-swatch {

@@ -1,4 +1,4 @@
-import { el, ICON, statusEl } from "../render"
+import { el, ICON, makeLegend, statusEl } from "../render"
 import type { StepTraceView, VisualFamily, WatchRow } from "../types"
 
 export interface StackSequenceConfig {
@@ -144,19 +144,24 @@ export function makeStackSequenceView(
   stackSection.append(stackLabel, stack)
   root.append(scanSection, stackSection)
 
-  const legend = el("div", "steptrace__legend steptrace__stack-sequence-legend")
-  for (const [label, state] of [
-    ["scanning", "scan"],
-    ["retained candidate", "retained"],
-    ["resolved pop", "popped"],
-  ] as const) {
-    const row = el("span", "steptrace__legend-row")
-    row.append(
-      el("i", `steptrace__stack-sequence-swatch steptrace__stack-sequence-swatch--${state}`),
-      document.createTextNode(label),
-    )
-    legend.append(row)
-  }
+  const legend = makeLegend(
+    [
+      {
+        label: "scanning",
+        swatchClass: "steptrace__stack-sequence-swatch steptrace__stack-sequence-swatch--scan",
+      },
+      {
+        label: "retained candidate",
+        swatchClass: "steptrace__stack-sequence-swatch steptrace__stack-sequence-swatch--retained",
+      },
+      {
+        label: "resolved pop",
+        swatchClass: "steptrace__stack-sequence-swatch steptrace__stack-sequence-swatch--popped",
+      },
+    ],
+    "Stack sequence state legend",
+    "steptrace__stack-sequence-legend",
+  )
 
   const status = statusEl()
 

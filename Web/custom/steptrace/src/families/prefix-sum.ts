@@ -1,4 +1,4 @@
-import { el, makeArrayStrip, statusEl } from "../render"
+import { el, makeArrayStrip, makeLegend, statusEl } from "../render"
 import type { StepTraceView, VisualFamily, WatchRow } from "../types"
 
 export interface PrefixSumConfig {
@@ -138,19 +138,24 @@ export function makePrefixSumView(
   prefixSection.append(prefixLabel, prefix.wrap)
   root.append(sourceSection, prefixSection)
 
-  const legend = el("div", "steptrace__legend steptrace__prefix-sum-legend")
-  for (const [label, state] of [
-    ["running total", "build"],
-    ["cancelled prefix", "cancel"],
-    ["requested range", "range"],
-  ] as const) {
-    const row = el("span", "steptrace__legend-row")
-    row.append(
-      el("i", `steptrace__prefix-sum-swatch steptrace__prefix-sum-swatch--${state}`),
-      document.createTextNode(label),
-    )
-    legend.append(row)
-  }
+  const legend = makeLegend(
+    [
+      {
+        label: "running total",
+        swatchClass: "steptrace__prefix-sum-swatch steptrace__prefix-sum-swatch--build",
+      },
+      {
+        label: "cancelled prefix",
+        swatchClass: "steptrace__prefix-sum-swatch steptrace__prefix-sum-swatch--cancel",
+      },
+      {
+        label: "requested range",
+        swatchClass: "steptrace__prefix-sum-swatch steptrace__prefix-sum-swatch--range",
+      },
+    ],
+    "Prefix sum state legend",
+    "steptrace__prefix-sum-legend",
+  )
   const status = statusEl()
 
   function paint(frame: PrefixSumFrame) {

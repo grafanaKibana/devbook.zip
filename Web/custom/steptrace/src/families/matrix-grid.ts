@@ -297,7 +297,7 @@ const dynamicProgrammingRoles = [
   { role: "operand-a", badge: "A", label: "exclude current value" },
   { role: "operand-b", badge: "B", label: "include current value" },
   { role: "target", badge: "T", label: "prefix being solved" },
-  { role: "stored", badge: "✓", label: "stored result" },
+  { role: "stored", badge: "success", label: "stored result" },
 ] satisfies readonly MatrixGridRoleDescriptor[]
 
 function dynamicProgrammingRolesForCell(

@@ -22,7 +22,13 @@ import {
   thinMilestones,
 } from "./render"
 import type { RegistryApi } from "./registry"
-import type { MountHandle, StepTraceBlockConfig, StepTraceHost, StepTraceTabsConfig } from "./types"
+import type {
+  InteractiveStructureDefinition,
+  MountHandle,
+  StepTraceBlockConfig,
+  StepTraceHost,
+  StepTraceTabsConfig,
+} from "./types"
 import { isTabsConfig, normalizeTabsConfig } from "./tabs"
 import { watchHintFor } from "./watch-hints"
 
@@ -40,8 +46,10 @@ let mountSerial = 0
 
 export function createMount(
   registry: Pick<RegistryApi, "kindOf" | "listAlgorithms" | "buildFrames">,
+  structures: readonly InteractiveStructureDefinition[] = [],
 ) {
   const { kindOf, listAlgorithms, buildFrames } = registry
+  const structureRegistry = new Map(structures.map((structure) => [structure.id, structure]))
   function mountTabs(
     root: HTMLElement,
     config: StepTraceTabsConfig,
@@ -157,6 +165,15 @@ export function createMount(
     host: StepTraceHost = {},
   ): MountHandle {
     if (isTabsConfig(config)) return mountTabs(root, config, host)
+    const structure = structureRegistry.get(config.algorithm)
+    if (structure) {
+      try {
+        return structure.mount(root, structure.parse(config))
+      } catch (error) {
+        root.textContent = error instanceof Error ? error.message : String(error)
+        return { destroy: () => root.replaceChildren() }
+      }
+    }
     root.classList.add("steptrace")
     root.setAttribute("role", "group")
     root.setAttribute("aria-label", "Algorithm visualizer")
@@ -554,7 +571,11 @@ export function createMount(
       }
       const chapter = milestoneAt(currentMilestones, i)
       phaseName.textContent = chapter ? chapter.label : "Step"
-      phaseCopy.textContent = stripTags(player.frames[i].message)
+      const currentFrame = player.frames[i]
+      phaseCopy.textContent =
+        state.algorithm === "rabin-karp" && currentFrame.type === "hash"
+          ? ""
+          : stripTags(currentFrame.message)
       scrub.setAttribute("aria-valuetext", `${phaseName.textContent}, step ${i + 1} of ${total}`)
       for (let k = 0; k < milestoneLayer.children.length; k++) {
         const step = Number(milestoneLayer.children[k].dataset.step)
@@ -671,7 +692,7 @@ export function createMount(
         algorithm: state.algorithm,
         ...(shouldIncludeArray ? { array: state.array } : {}),
         start: state.start,
-        ...(state.target != null ? { target: state.target } : {}),
+        ...(kind === "graph" && state.target != null ? { target: state.target } : {}),
       })
       if (built.family) root.dataset.visualFamily = built.family.id
       else delete root.dataset.visualFamily
@@ -693,7 +714,8 @@ export function createMount(
       currentView = view
       if (built.kind === "graph") syncEndpointOptions(built.endpointSettings, built.graph)
       const fillStage = view.stageLayout === "fill"
-      const stageAlignment = fillStage || built.kind === "graph" ? null : view.stageAlignment || "center"
+      const stageAlignment =
+        fillStage || built.kind === "graph" ? null : view.stageAlignment || "center"
       root.classList.toggle("steptrace--stable-stage", view.stableStage === true)
       stageCol.classList.toggle("steptrace__stage-col--bottom", stageAlignment === "bottom")
       stageCol.classList.toggle("steptrace__stage-col--center", stageAlignment === "center")
@@ -735,7 +757,8 @@ export function createMount(
 
     function syncEndpointOptions(settings, graph) {
       if (!endpointSection || !startMenu || !targetMenu || !startHead || !targetHead) return
-      const options = settings?.options || graph?.nodes?.map((node) => ({ value: node.id, label: node.id }))
+      const options =
+        settings?.options || graph?.nodes?.map((node) => ({ value: node.id, label: node.id }))
       if (!options?.length) {
         endpointSection.hidden = true
         return

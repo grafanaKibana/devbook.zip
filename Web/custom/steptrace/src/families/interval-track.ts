@@ -1,4 +1,4 @@
-import { el, statusEl } from "../render"
+import { el, makeLegend, statusEl } from "../render"
 import type { StepTraceConfig, StepTraceView, VisualFamily, WatchRow } from "../types"
 
 export interface IntervalToken {
@@ -287,7 +287,6 @@ export function makeIntervalTrackView(
   })
   outputSection.append(outputLabel, outputLane)
 
-  const legend = el("div", "steptrace__legend steptrace__interval-legend")
   const legendItems = scheduling
     ? ([
         ["next meeting", "candidate"],
@@ -300,16 +299,16 @@ export function makeIntervalTrackView(
         ["current merged block", "current"],
         ["emitted output", "output"],
       ] as const)
-  for (const [label, state] of legendItems) {
-    const item = el("span", "steptrace__legend-row")
-    item.append(
-      el("i", `steptrace__interval-swatch steptrace__interval-swatch--${state}`),
-      document.createTextNode(label),
-    )
-    legend.append(item)
-  }
+  const legend = makeLegend(
+    legendItems.map(([label, state]) => ({
+      label,
+      swatchClass: `steptrace__interval-swatch steptrace__interval-swatch--${state}`,
+    })),
+    "Interval state legend",
+    "steptrace__interval-legend",
+  )
 
-  root.append(inputSection, currentSection, outputSection, legend)
+  root.append(inputSection, currentSection, outputSection)
   const status = statusEl()
 
   function positionBand(band: HTMLElement, interval: [number, number]) {
@@ -418,11 +417,11 @@ export function makeIntervalTrackView(
             sw: "var(--_amber)",
           },
           { k: "current block", v: formatInterval(frame.current), sw: "var(--_blue)" },
-      {
-        k: "decision",
-        v: frame.type === "done" ? "complete" : formatRelation(frame.relation),
-        hint: "How the next interval changes the current merged block.",
-        sw:
+          {
+            k: "decision",
+            v: frame.type === "done" ? "complete" : formatRelation(frame.relation),
+            hint: "How the next interval changes the current merged block.",
+            sw:
               frame.relation === "gap"
                 ? "var(--_violet)"
                 : frame.relation
@@ -433,7 +432,7 @@ export function makeIntervalTrackView(
   }
 
   return {
-    nodes: [root, status],
+    nodes: [root, legend, status],
     stageAlignment: "center",
     stableStage: true,
     paint,

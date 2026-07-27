@@ -1,15 +1,5 @@
 /* ---- string matching: text + pattern as pointer-style segmented strips,
       stacked (the pattern strip slides under the current window) ---- */
-/* hash badge (rabin-karp): sits BELOW the visualization, above the scrubber */
-.steptrace__hash {
-  display: inline-block;
-  margin-top: 0.85rem;
-  font: 600 0.72rem var(--_font-mono);
-  color: var(--_text);
-  padding: 0.2rem 0.55rem;
-  border-radius: 6px;
-  background: color-mix(in srgb, var(--_accent) 12%, transparent);
-}
 .steptrace__match {
   display: flex;
   flex-direction: column;
@@ -206,12 +196,7 @@
     #000 calc(100% - var(--_z-fade)),
     transparent 100%
   );
-  mask-image: linear-gradient(
-    to right,
-    #000 0,
-    #000 calc(100% - var(--_z-fade)),
-    transparent 100%
-  );
+  mask-image: linear-gradient(to right, #000 0, #000 calc(100% - var(--_z-fade)), transparent 100%);
 }
 .steptrace__z-track {
   transition: transform var(--_dur-move) var(--_spring-soft);
@@ -352,11 +337,6 @@
 }
 
 .steptrace--reduced
-  :is(
-    .steptrace__bm-pattern,
-    .steptrace__z-track,
-    .steptrace__z-cursor,
-    .steptrace__z-bracket
-  ) {
+  :is(.steptrace__bm-pattern, .steptrace__z-track, .steptrace__z-cursor, .steptrace__z-bracket) {
   transition-property: opacity !important;
 }

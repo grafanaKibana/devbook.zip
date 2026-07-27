@@ -20,6 +20,15 @@
   min-width: 0;
 }
 
+.steptrace__distribution-band[data-section="source"] {
+  padding-bottom: 0.9rem;
+}
+
+.steptrace__distribution-band[data-section="source"] + .steptrace__distribution-band {
+  padding-top: 0.9rem;
+  border-top: 1px solid var(--_hair);
+}
+
 .steptrace__distribution-label {
   justify-self: start;
 }
@@ -39,24 +48,25 @@
 }
 
 .steptrace__distribution[data-profile="radix"] {
-  grid-template-rows: minmax(0, 1fr) auto auto auto;
+  grid-template-rows: minmax(0, 1fr) auto auto;
 }
 
 .steptrace__distribution[data-profile="radix"] .steptrace__distribution-band:first-child {
   grid-template-rows: auto minmax(0, 1fr);
   row-gap: 0.5rem;
   align-self: stretch;
-  padding-bottom: 0.9rem;
 }
 
-.steptrace__distribution[data-profile="radix"] .steptrace__distribution-band:first-child .steptrace__distribution-bars {
+.steptrace__distribution[data-profile="radix"]
+  .steptrace__distribution-band:first-child
+  .steptrace__distribution-bars {
   align-self: end;
   block-size: 100%;
   min-block-size: 0;
   overflow: hidden;
 }
 
-.steptrace__distribution[data-profile="radix"] .steptrace__distribution-band:is(:nth-child(2), :nth-child(4)) {
+.steptrace__distribution[data-profile="radix"] .steptrace__distribution-band:nth-child(3) {
   padding-top: 0.9rem;
   border-top: 1px solid var(--_hair);
 }
@@ -300,28 +310,6 @@
   border-end-end-radius: calc(var(--_distribution-radius) - 1px);
 }
 
-.steptrace__distribution-legend {
-  display: flex;
-  flex-wrap: wrap;
-  justify-content: center;
-  gap: 0.35rem 0.8rem;
-  color: var(--_muted);
-  font: 600 clamp(0.55rem, 1.35vw, 0.64rem) / 1.2 var(--_font-head);
-}
-
-.steptrace__distribution-legend-item {
-  display: inline-flex;
-  align-items: center;
-  gap: 0.3rem;
-}
-
-.steptrace__distribution-legend-swatch {
-  width: 0.46rem;
-  height: 0.46rem;
-  border-radius: 50%;
-  background: var(--_legend-color);
-}
-
 @media (max-width: 560px) {
   .steptrace[data-visual-family="distribution-sort"] .steptrace__rail {
     min-block-size: 16rem;
@@ -364,13 +352,11 @@
     grid-template-rows: 1.35rem minmax(0, 1fr);
   }
 
-  .steptrace__distribution[data-profile="radix"]
-    .steptrace__distribution-lane:nth-child(-n + 5) {
+  .steptrace__distribution[data-profile="radix"] .steptrace__distribution-lane:nth-child(-n + 5) {
     border-block-end: 1px solid var(--_distribution-border);
   }
 
-  .steptrace__distribution[data-profile="radix"]
-    .steptrace__distribution-lane:nth-child(5) {
+  .steptrace__distribution[data-profile="radix"] .steptrace__distribution-lane:nth-child(5) {
     border-inline-end: 0;
   }
 

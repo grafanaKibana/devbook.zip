@@ -170,6 +170,18 @@ function buildBranchAndBound() {
   return { config, family: branchAndBound.family, frames: recorder.frames }
 }
 
+function buildBidirectionalSearch() {
+  const { bidirectionalSearch } = loadStepTraceModule(
+    "src",
+    "algorithms",
+    "bidirectional-search.ts",
+  )
+  const config = bidirectionalSearch.parse({ algorithm: "bidirectional-search" })
+  const recorder = bidirectionalSearch.family.createRecorder(config)
+  bidirectionalSearch.run(config, recorder)
+  return { config, family: bidirectionalSearch.family, frames: recorder.frames }
+}
+
 function buildMergeSortTree(array = [8, 3, 7, 4, 9, 2, 5, 1]) {
   const { mergeSortTree } = loadStepTraceModule("src", "algorithms", "merge-sort-tree.ts")
   const config = mergeSortTree.parse({ algorithm: "merge-sort-tree", array })
@@ -464,7 +476,10 @@ test("Boyer-Moore reuses stable non-scrolling string strips with shell-matched e
       this.callback()
     }
   }
-  globalThis.document = { createElement: (tagName) => new FakeNode(tagName) }
+  globalThis.document = {
+    createElement: (tagName) => new FakeNode(tagName),
+    createElementNS: (_namespace, tagName) => new FakeNode(tagName),
+  }
   try {
     const api = loadEngine(readFileSync(join(here, "generated", "engine.js"), "utf8"))
     const { ICON, makeMatchView } = loadStepTraceModule("src", "render.ts")
@@ -518,9 +533,16 @@ test("Boyer-Moore reuses stable non-scrolling string strips with shell-matched e
     assert.equal(textRow.children.length, 10)
     const compareCue = textRow.children[0].children[1]
     assert.equal(compareCue.attributes.get("aria-hidden"), "true")
-    assert.match(compareCue.children[0].innerHTML, /<svg/)
+    assert.equal(
+      compareCue.children[0].children[0].attributes.get("class"),
+      "steptrace__success-marker",
+    )
+    assert.match(compareCue.children[0].children[0].innerHTML, /<circle/)
     assert.match(compareCue.children[1].innerHTML, /<svg/)
-    assert.doesNotMatch(compareCue.children[0].innerHTML + compareCue.children[1].innerHTML, /✓|×/)
+    assert.doesNotMatch(
+      compareCue.children[0].children[0].innerHTML + compareCue.children[1].innerHTML,
+      /✓|×/,
+    )
     assert.match(ICON.x, /<svg/)
     view.paint(frames.at(-1), frames.length - 1, frames.length)
     assert.equal(patternRow.style.transform, "translateX(240.00px)")
@@ -627,7 +649,10 @@ test("the Z-array profile paints every frame into one stable measured-strip DOM"
       this.callback()
     }
   }
-  globalThis.document = { createElement: (tagName) => new FakeNode(tagName) }
+  globalThis.document = {
+    createElement: (tagName) => new FakeNode(tagName),
+    createElementNS: (_namespace, tagName) => new FakeNode(tagName),
+  }
   try {
     const api = loadEngine(readFileSync(join(here, "generated", "engine.js"), "utf8"))
     const { makeMatchView } = loadStepTraceModule("src", "render.ts")
@@ -850,7 +875,10 @@ test("KMP, Rabin-Karp, and Z stay isolated from the Boyer-Moore profile", () => 
     }
   }
   const previousDocument = globalThis.document
-  globalThis.document = { createElement: (tagName) => new FakeNode(tagName) }
+  globalThis.document = {
+    createElement: (tagName) => new FakeNode(tagName),
+    createElementNS: (_namespace, tagName) => new FakeNode(tagName),
+  }
   try {
     const api = loadEngine(readFileSync(join(here, "generated", "engine.js"), "utf8"))
     const { makeMatchView } = loadStepTraceModule("src", "render.ts")
@@ -877,7 +905,7 @@ test("KMP, Rabin-Karp, and Z stay isolated from the Boyer-Moore profile", () => 
     assert.equal(makeMatchView(rabin).nodes[0].className, "steptrace__match")
     assert.equal(makeMatchView(z).nodes[0].className, "steptrace__z")
     assert.equal(makeMatchView(kmp).nodes.length, 2)
-    assert.equal(makeMatchView(rabin).nodes.length, 3)
+    assert.equal(makeMatchView(rabin).nodes.length, 2)
     const renderSource = readFileSync(join(here, "src", "render.ts"), "utf8")
     const profileDispatch = renderSource.slice(
       renderSource.indexOf("export function makeMatchView"),
@@ -1020,11 +1048,7 @@ test("A* graph-state profiles stay typed, deterministic, optimal, and reachable"
 
 test("Greedy Best-First reuses the A* grid but exposes its longer h-only route", () => {
   const api = loadEngine(readFileSync(join(here, "generated", "engine.js"), "utf8"))
-  const { graphStateRacks, graphStateSummary } = loadStepTraceModule(
-    "src",
-    "families",
-    "graph-state.ts",
-  )
+  const { graphStateSummary } = loadStepTraceModule("src", "families", "graph-state.ts")
   const greedy = api.buildFrames({ algorithm: "greedy-best-first-search" })
   const astar = api.buildFrames({ algorithm: "a-star", variant: "coordinate-grid" })
   const first = greedy.frames[0]
@@ -1047,13 +1071,10 @@ test("Greedy Best-First reuses the A* grid but exposes its longer h-only route",
     metric: "cost",
   })
   assert.match(graphStateSummary(last), /Greedy cost 12 vs A\* cost 8/)
-  assert.match(graphStateRacks(first.detail)[0].entries[0].value, /^h \d+$/)
-  assert.doesNotMatch(graphStateRacks(first.detail)[0].entries[0].value, /\bg\b|\bf\b/)
 })
 
 test("graph-state keeps topology roles separate from discriminated algorithm detail", () => {
   const { aStar } = loadStepTraceModule("src", "algorithms", "a-star.ts")
-  const { graphStateRacks } = loadStepTraceModule("src", "families", "graph-state.ts")
   const config = aStar.parse({ algorithm: "a-star", variant: "coordinate-grid" })
   const recorder = aStar.family.createRecorder(config)
   aStar.run(config, recorder)
@@ -1070,23 +1091,57 @@ test("graph-state keeps topology roles separate from discriminated algorithm det
   assert.equal("closed" in last, false)
   assert.equal("g" in last, false)
 
-  const [open, closed] = graphStateRacks(first.detail)
-  assert.equal(open.title, "OPEN")
-  assert.equal(closed.title, "CLOSED")
-  assert.match(open.entries[0].value, /^g 0 · h \d+ · f \d+$/)
-  assert.deepEqual(
-    graphStateRacks({
-      kind: "mst-scan",
-      pending: [{ from: "A", to: "B", weight: 2 }],
-      accepted: [],
-      totalWeight: 0,
-    })[0],
-    { title: "PENDING", entries: [{ label: "A—B", value: "2" }] },
+  const familySource = readFileSync(join(here, "src", "families", "graph-state.ts"), "utf8")
+  assert.match(familySource, /switch \(frame\.detail\.kind\)/)
+  assert.doesNotMatch(familySource, /frame\.algorithm|algorithmId/)
+  assert.doesNotMatch(familySource, /graphStateRacks|steptrace__gs-racks|function rack\(/)
+  assert.match(familySource, /k: "open"/)
+  assert.match(familySource, /k: "closed"/)
+})
+
+test("shared legends and success badges use the canonical render helpers", () => {
+  const renderSource = readFileSync(join(here, "src", "render.ts"), "utf8")
+  const sharedStyles = readFileSync(join(here, "src", "styles", "shared.scss"), "utf8")
+  const families = [
+    "graph-state",
+    "prefix-character",
+    "linked-topology",
+    "interval-track",
+    "heap-selection",
+    "prefix-sum",
+    "stack-sequence",
+  ]
+
+  assert.match(renderSource, /export function makeLegend\(items, ariaLabel, extraClass = ""\)/)
+  assert.match(renderSource, /export function successMarker\(extraClass = ""\)/)
+  assert.match(renderSource, /legend\.setAttribute\("role", "list"\)/)
+  assert.match(renderSource, /row\.setAttribute\("role", "listitem"\)/)
+  assert.match(
+    renderSource,
+    /document\.createElementNS\("http:\/\/www\.w3\.org\/2000\/svg", "svg"\)/,
+  )
+  assert.doesNotMatch(renderSource, /document\.createElement\("svg"\)/)
+  assert.match(renderSource, /check\.append\(successMarker\(\)\)/)
+  assert.match(renderSource, /matchIcon\.append\(successMarker\(\)\)/)
+  assert.match(renderSource, /descriptor\.badge === "success"/)
+  assert.doesNotMatch(renderSource, /ICON\.check|✓|✔/)
+  assert.doesNotMatch(renderSource, /function makeStoryLegend|function makeMatrixRoleLegend/)
+  assert.match(sharedStyles, /\.steptrace__legend-swatch \{[^}]*inline-size: 0\.75rem;/s)
+  assert.match(sharedStyles, /\.steptrace__legend \{[^}]*justify-content: center;/s)
+  assert.match(
+    sharedStyles,
+    /\.steptrace \.steptrace__success-marker circle \{[^}]*fill: var\(--_green\);/s,
   )
 
-  const familySource = readFileSync(join(here, "src", "families", "graph-state.ts"), "utf8")
-  assert.match(familySource, /switch \(detail\.kind\)/)
-  assert.doesNotMatch(familySource, /frame\.algorithm|algorithmId/)
+  for (const family of families) {
+    const source = readFileSync(join(here, "src", "families", `${family}.ts`), "utf8")
+    assert.match(source, /makeLegend\(/, `${family} should use the shared legend renderer`)
+    assert.doesNotMatch(source, /const legend = el\(/, `${family} should not rebuild legend DOM`)
+  }
+
+  const rabinKarp = readFileSync(join(here, "src", "algorithms", "rabin-karp.ts"), "utf8")
+  assert.match(rabinKarp, /window hash .* pattern hash/)
+  assert.doesNotMatch(renderSource, /steptrace__hash|hashBadge/)
 })
 
 test("graph-state rollout records every canonical decisive operation", () => {
@@ -1095,7 +1150,6 @@ test("graph-state rollout records every canonical decisive operation", () => {
   const expectations = [
     ["articulation-points-and-bridges", "low-link-cuts", 10],
     ["bellman-ford", "edge-relaxation", 18],
-    ["bidirectional-search", "dual-search", 9],
     ["boruvka", "mst-round", 10],
     ["connected-components", "component-flood", 10],
     ["hamiltonian-cycle", "path-backtrack", 14],
@@ -1128,9 +1182,29 @@ test("graph-state rollout records every canonical decisive operation", () => {
   assert.equal(distances.pass, 4)
   assert.equal(distances.changed, false)
 
-  const meeting = api.buildFrames({ algorithm: "bidirectional-search" }).frames.at(-1)
+  const bidirectional = buildBidirectionalSearch()
+  const meeting = bidirectional.frames.find((frame) => frame.type === "meet")
+  const completed = bidirectional.frames.at(-1)
+  assert.equal(bidirectional.family.id, "graph-state")
+  assert.equal(bidirectional.frames.length, 14)
+  assert.ok(bidirectional.frames.every((frame) => frame.detail.kind === "dual-search"))
   assert.equal(meeting.detail.meeting, "m")
-  assert.equal(Object.values(meeting.edgeState).filter((role) => role === "accepted").length, 6)
+  assert.equal(bidirectional.frames[0].nodes.length, 12)
+  assert.equal(bidirectional.frames[0].edges.length, 11)
+  assert.ok(
+    bidirectional.frames[0].nodes.every(({ x, y }) => x >= 24 && x <= 596 && y >= 24 && y <= 296),
+    "bidirectional nodes must stay inside the shared 620×320 graph canvas",
+  )
+  assert.ok(meeting.detail.forward.includes("x"))
+  assert.ok(meeting.detail.forward.includes("v"))
+  assert.ok(meeting.detail.backward.includes("r"))
+  assert.equal(Object.values(completed.edgeState).filter((role) => role === "accepted").length, 6)
+  assert.deepEqual(
+    completed.nodes
+      .filter((node) => completed.nodeState[node.id] === "accepted")
+      .map((node) => node.id),
+    ["s", "a", "b", "m", "c", "d", "t"],
+  )
 
   const hamiltonian = api.buildFrames({ algorithm: "hamiltonian-cycle" }).frames.at(-1)
   assert.equal(graphStateSummary(hamiltonian), "Cycle A → B → C → D → A.")
@@ -1244,18 +1318,10 @@ test("A* uses profile-owned controls and visual-only graph state without racks",
   assert.doesNotMatch(familySource, /tabIndex|tabindex|addEventListener\("click"/)
   assert.match(familySource, /if \(edge\.showDirection\)/)
   assert.match(familySource, /steptrace__gs-road-direction/)
-  assert.match(familySource, /first\.detail\.kind === "heuristic-search"/)
-  assert.match(familySource, /shell\.dataset\.racks = String\(rackViews != null\)/)
+  assert.doesNotMatch(familySource, /dataset\.racks|graphStateRacks|steptrace__gs-racks/)
   assert.match(styleEntry, /@use "graph-state";/)
-  assert.match(styles, /grid-template-rows: minmax\(0, 1fr\) auto 6\.8rem/)
-  assert.match(styles, /\.steptrace \.steptrace__graph-state\[data-racks="false"\] \{[^}]*grid-template-rows: minmax\(0, 1fr\) auto;/s)
-  assert.match(styles, /\.steptrace__gs-rack-card \{[\s\S]*grid-template-rows: 1fr 1fr;/)
-  assert.match(styles, /\.steptrace__gs-rack-label,[\s\S]*place-items: center;/)
-  assert.match(
-    styles,
-    /\.steptrace__gs-rack-card \{[\s\S]*font: 600 0\.6rem\/1 var\(--_font-mono\);/,
-  )
-  assert.match(styles, /@media \(max-width: 47\.99rem\)/)
+  assert.match(styles, /grid-template-rows: minmax\(0, 1fr\)/)
+  assert.doesNotMatch(styles, /steptrace__gs-rack/)
   assert.match(
     note,
     /```steptrace\n\{"tabs":\[\{"name":"Coordinate grid"[\s\S]*"name":"Ukraine cities"[\s\S]*"name":"Building floor"[\s\S]*"name":"Midtown map"/,
@@ -1321,7 +1387,10 @@ test("styles are compiled from real SCSS without runtime injection", () => {
   assert.match(obsidianCss, /--st-table-text: var\(--text-normal\)/)
   assert.match(obsidianCss, /--st-held-bg: #fbbf24/)
   assert.match(obsidianCss, /--st-held-fg: #1f2937/)
-  assert.match(obsidianHostStyles, /\.theme-dark \.steptrace \{[^}]*--st-panel-shadow: rgb\(0 0 0 \/ 0\.32\);/s)
+  assert.match(
+    obsidianHostStyles,
+    /\.theme-dark \.steptrace \{[^}]*--st-panel-shadow: rgb\(0 0 0 \/ 0\.32\);/s,
+  )
   assert.match(
     obsidianHostStyles,
     /\.steptrace button\.steptrace__btn \{[^}]*appearance: none;[^}]*border: 0;[^}]*background: transparent;[^}]*box-shadow: none;/s,
@@ -1469,37 +1538,37 @@ test("all built-in algorithms preserve their headless frame contract", () => {
               ],
             }
           : algorithm === "ternary-search"
-        ? { array: [1, 4, 9, 12, 11, 7, 2], goal: "maximum" }
-        : algorithm === "binary-search-on-answer"
-          ? { weights: [3, 2, 2, 4, 1, 4], days: 3 }
-          : algorithm === "shell-sort"
-            ? { gaps: [4, 2, 1] }
-            : algorithm === "counting-sort"
-              ? { array: [2, 5, 3, 0, 2, 3, 0, 3] }
-              : algorithm === "radix-sort"
-                ? { array: [170, 45, 75, 90, 802, 24, 2, 66], radix: 10, mode: "LSD" }
-                : algorithm === "bucket-sort"
-                  ? { array: [0.78, 0.17, 0.39, 0.26, 0.72, 0.94], bucketCount: 5 }
-                  : algorithm === "cyclic-sort"
-                    ? { array: [5, 3, 1, 4, 2] }
-                    : algorithm === "floyd-warshall"
-                      ? {
-                          nodes: [0, 1, 2, 3],
-                          edges: [
-                            [0, 1, 3],
-                            [0, 3, 7],
-                            [1, 0, 8],
-                            [1, 2, 2],
-                            [2, 0, 5],
-                            [2, 3, 1],
-                            [3, 0, 2],
-                          ],
-                        }
-                      : ["exponential-search", "interpolation-search", "jump-search"].includes(
-                            algorithm,
-                          )
-                        ? { array: commonConfig.array.slice().sort((a, b) => a - b) }
-                        : {}
+            ? { array: [1, 4, 9, 12, 11, 7, 2], goal: "maximum" }
+            : algorithm === "binary-search-on-answer"
+              ? { weights: [3, 2, 2, 4, 1, 4], days: 3 }
+              : algorithm === "shell-sort"
+                ? { gaps: [4, 2, 1] }
+                : algorithm === "counting-sort"
+                  ? { array: [2, 5, 3, 0, 2, 3, 0, 3] }
+                  : algorithm === "radix-sort"
+                    ? { array: [170, 45, 75, 90, 802, 24, 2, 66], radix: 10, mode: "LSD" }
+                    : algorithm === "bucket-sort"
+                      ? { array: [0.78, 0.17, 0.39, 0.26, 0.72, 0.94], bucketCount: 5 }
+                      : algorithm === "cyclic-sort"
+                        ? { array: [5, 3, 1, 4, 2] }
+                        : algorithm === "floyd-warshall"
+                          ? {
+                              nodes: [0, 1, 2, 3],
+                              edges: [
+                                [0, 1, 3],
+                                [0, 3, 7],
+                                [1, 0, 8],
+                                [1, 2, 2],
+                                [2, 0, 5],
+                                [2, 3, 1],
+                                [3, 0, 2],
+                              ],
+                            }
+                          : ["exponential-search", "interpolation-search", "jump-search"].includes(
+                                algorithm,
+                              )
+                            ? { array: commonConfig.array.slice().sort((a, b) => a - b) }
+                            : {}
     const input =
       algorithm === "memoization" ||
       algorithm === "branch-and-bound" ||
@@ -1519,7 +1588,7 @@ test("all built-in algorithms preserve their headless frame contract", () => {
 
   assert.equal(
     digest,
-    "5a89df984be26c1d113017cd8335ac7d57440b2a6233866a94cac569e3505f45",
+    "1395e8a8b30fff3e17faa14a4ecc346de8cf7f79d991c0b31e31516ded81f6f2",
     "the headless StepTrace behavior changed",
   )
 })
@@ -1618,7 +1687,7 @@ test("interval-track reuses shared rails and keeps its stage stable and responsi
 
   assert.match(familySource, /steptrace__rail-label steptrace__interval-label/)
   assert.match(familySource, /stableStage: true/)
-  assert.match(familySource, /steptrace__legend steptrace__interval-legend/)
+  assert.match(familySource, /steptrace__interval-legend/)
   assert.match(familySource, /profile: "merge-intervals" \| "activity-selection"/)
   assert.match(familySource, /parseIntervalTokens/)
   assert.match(familySource, /--_interval-start/)
@@ -1671,9 +1740,10 @@ test("prefix sum records every build read, write, and range-query operation", ()
       "done",
     ],
   )
-  assert.deepEqual(frames.filter((frame) => frame.type === "write").at(-1).prefix, [
-    0, 4, 11, 13, 22, 27, 30, 38,
-  ])
+  assert.deepEqual(
+    frames.filter((frame) => frame.type === "write").at(-1).prefix,
+    [0, 4, 11, 13, 22, 27, 30, 38],
+  )
   assert.equal(frames.find((frame) => frame.type === "right").rightPrefix, 30)
   assert.equal(frames.find((frame) => frame.type === "left").leftPrefix, 11)
   assert.equal(frames.at(-1).result, 19)
@@ -1688,15 +1758,7 @@ test("prefix sum reuses canonical value-only array strips in a stable responsive
   const styles = readFileSync(join(here, "src", "styles", "prefix-sum.scss"), "utf8")
   const styleEntry = readFileSync(join(here, "src", "styles", "index.scss"), "utf8")
   const note = readFileSync(
-    join(
-      repoRoot,
-      "Vault",
-      "Home",
-      "Computer Science",
-      "Algorithms",
-      "Patterns",
-      "Prefix Sum.md",
-    ),
+    join(repoRoot, "Vault", "Home", "Computer Science", "Algorithms", "Patterns", "Prefix Sum.md"),
     "utf8",
   )
 
@@ -1705,7 +1767,7 @@ test("prefix sum reuses canonical value-only array strips in a stable responsive
   assert.match(familySource, /stageLayout: "fill"/)
   assert.match(familySource, /nodes: \[root, legend, status\]/)
   assert.match(familySource, /steptrace__rail-label/)
-  assert.match(familySource, /steptrace__legend steptrace__prefix-sum-legend/)
+  assert.match(familySource, /steptrace__prefix-sum-legend/)
   assert.match(styles, /\.steptrace__prefix-sum-section \+ \.steptrace__prefix-sum-section/)
   assert.doesNotMatch(styles, /border-block-start/)
   assert.doesNotMatch(styles, /steptrace__prefix-sum-index/)
@@ -1823,9 +1885,8 @@ test("heap-selection reuses shared strips, tree tokens, and host artifacts", () 
   assert.match(familySource, /stableStage: true/)
   assert.match(familySource, /stageLayout: "fill"/)
   assert.match(familySource, /nodes: \[root, legend, status\]/)
-  assert.match(familySource, /steptrace__legend steptrace__heap-legend/)
   assert.match(familySource, /root is the weakest current winner/)
-  assert.match(styles, /\.steptrace__heap-legend \{[^}]*justify-content: center;/s)
+  assert.doesNotMatch(styles, /\.steptrace__heap-legend/)
   assert.match(styles, /@container steptrace-heap-selection \(max-width: 36rem\)/)
   assert.match(styles, /@media \(prefers-reduced-motion: reduce\)/)
   assert.doesNotMatch(styles, /overflow-x:\s*auto/)
@@ -1838,6 +1899,74 @@ test("heap-selection reuses shared strips, tree tokens, and host artifacts", () 
   )
   assert.match(note, /final `\[17, 25, 19\]` is a valid min-heap/)
   assert.doesNotMatch(note, /Visualization pending/)
+})
+
+test("heap-selection separates the stream rail from the heap at every width", () => {
+  class FakeNode {
+    constructor(tagName, textContent = "") {
+      this.tagName = tagName
+      this.textContent = textContent
+      this.innerHTML = ""
+      this.children = []
+      this.attributes = new Map()
+      this.dataset = {}
+      this.className = ""
+      this.style = { setProperty: (key, value) => this.attributes.set(`style:${key}`, value) }
+      this.classList = {
+        add: (...names) => {
+          this.className = [
+            ...new Set([...this.className.split(/\s+/).filter(Boolean), ...names]),
+          ].join(" ")
+        },
+      }
+    }
+    setAttribute(key, value) {
+      this.attributes.set(key, String(value))
+    }
+    append(...children) {
+      this.children.push(...children)
+    }
+    replaceChildren(...children) {
+      this.children = children
+    }
+  }
+  const previousDocument = globalThis.document
+  globalThis.document = {
+    createElement: (tagName) => new FakeNode(tagName),
+    createElementNS: (_namespace, tagName) => new FakeNode(tagName),
+    createTextNode: (value) => new FakeNode("#text", value),
+  }
+  try {
+    const { steptrace: api } = loadStepTraceModule("src", "engine.ts")
+    const { makeHeapSelectionView } = loadStepTraceModule("src", "families", "heap-selection.ts")
+    const frames = api.buildFrames({
+      algorithm: "top-k-elements",
+      array: [12, 3, 17, 8, 25, 5, 19, 14],
+      k: 3,
+    }).frames
+    const view = makeHeapSelectionView(frames)
+    const [root, legend] = view.nodes
+    const [streamLabel, stream, heapLabel, heap] = root.children
+    const styles = readFileSync(join(here, "src", "styles", "heap-selection.scss"), "utf8")
+
+    assert.equal(streamLabel.textContent, "Stream")
+    assert.match(stream.className, /\bsteptrace__heap-stream\b/)
+    assert.equal(heapLabel.textContent, "Min-heap · capacity k = 3")
+    assert.match(heapLabel.className, /\bsteptrace__heap-tree-label\b/)
+    assert.match(heap.className, /\bsteptrace__heap-tree\b/)
+    assert.match(legend.className, /\bsteptrace__legend\b/)
+    assert.match(styles, /\.steptrace \.steptrace__heap-stream \{[\s\S]*padding-bottom: 0\.9rem;/)
+    assert.match(
+      styles,
+      /\.steptrace \.steptrace__heap-tree-label \{[\s\S]*padding-top: 0\.9rem;[\s\S]*border-top: 1px solid var\(--_hair\);/,
+    )
+    assert.match(
+      styles,
+      /@container steptrace-heap-selection \(max-width: 36rem\) \{[\s\S]*\.steptrace \.steptrace__heap-stream \{[\s\S]*block-size: 2\.45rem;/,
+    )
+  } finally {
+    globalThis.document = previousDocument
+  }
 })
 
 test("monotonic stack records every dominated pop and retained push", () => {
@@ -1900,10 +2029,12 @@ test("monotonic stack records every dominated pop and retained push", () => {
     ),
   )
 
-  const equal = api.buildFrames({
-    algorithm: "monotonic-stack-and-queue",
-    array: [2, 2],
-  }).frames.at(-1)
+  const equal = api
+    .buildFrames({
+      algorithm: "monotonic-stack-and-queue",
+      array: [2, 2],
+    })
+    .frames.at(-1)
   assert.deepEqual(equal.stack, [0, 1], "equal values stay live for strict next-greater")
   assert.deepEqual(equal.answers, [null, null])
   assert.throws(
@@ -1939,14 +2070,20 @@ test("stack-sequence keeps one stable accessible viewport in both hosts", () => 
   assert.match(familySource, /nodes: \[root, legend, status\]/)
   assert.match(familySource, /steptrace__rail-label steptrace__stack-sequence-label/)
   assert.match(familySource, /Monotonic stack · bottom → top/)
-  assert.match(familySource, /steptrace__legend steptrace__stack-sequence-legend/)
+  assert.match(familySource, /steptrace__stack-sequence-legend/)
   assert.match(familySource, /ICON\.search/)
   assert.match(familySource, /setAttribute\("role", "list"\)/)
   assert.match(familySource, /setAttribute\("aria-current"/)
-  assert.match(styles, /grid-template-columns: repeat\(var\(--_stack-sequence-size\), minmax\(0, 1fr\)\)/)
+  assert.match(
+    styles,
+    /grid-template-columns: repeat\(var\(--_stack-sequence-size\), minmax\(0, 1fr\)\)/,
+  )
   assert.match(styles, /\.steptrace__stack-sequence-stack \{[^}]*flex-direction: column-reverse;/s)
   assert.match(styles, /\.steptrace__stack-sequence-stack \{[^}]*justify-content: flex-start;/s)
-  assert.match(styles, /\.steptrace__stack-sequence-stack \{[^}]*inline-size: clamp\(6\.5rem, 28cqi, 9rem\);/s)
+  assert.match(
+    styles,
+    /\.steptrace__stack-sequence-stack \{[^}]*inline-size: clamp\(6\.5rem, 28cqi, 9rem\);/s,
+  )
   assert.match(styles, /\.steptrace__stack-sequence-stack-cell \{[^}]*flex: 1 1 0;/s)
   assert.match(styles, /@container steptrace-stack-sequence \(max-width: 36rem\)/)
   assert.match(styles, /@media \(prefers-reduced-motion: reduce\)/)
@@ -1971,9 +2108,14 @@ test("fast and slow pointers records every hop and reuses linked-topology", () =
   assert.equal(result.kind, "pointers")
   assert.equal(result.family.id, "linked-topology")
   assert.equal(frames.length, 24)
-  assert.deepEqual(frames[0].nodes.map((node) => node.id), ["A", "B", "C", "D", "E", "F", "G", "H"])
+  assert.deepEqual(
+    frames[0].nodes.map((node) => node.id),
+    ["A", "B", "C", "D", "E", "F", "G", "H"],
+  )
   assert.deepEqual(frames[0].cycle, ["C", "D", "E", "F", "G", "H"])
-  assert.ok(frames[0].nodes.every((node) => node.x >= 0 && node.x <= 100 && node.y >= 0 && node.y <= 70))
+  assert.ok(
+    frames[0].nodes.every((node) => node.x >= 0 && node.x <= 100 && node.y >= 0 && node.y <= 70),
+  )
   const positions = Object.fromEntries(frames[0].nodes.map((node) => [node.id, [node.x, node.y]]))
   assert.deepEqual(
     frames[0].cycle.map((id) => positions[id]),
@@ -2057,7 +2199,7 @@ test("linked-topology keeps topology stable and animates only pointer markers", 
 
   assert.match(familySource, /profile: "fast-slow-pointers"/)
   assert.match(familySource, /stableStage: true/)
-  assert.match(familySource, /steptrace__legend steptrace__linked-legend/)
+  assert.match(familySource, /steptrace__linked-legend/)
   assert.match(familySource, /result\.append\(successMarker\(\)\)/)
   assert.doesNotMatch(familySource, /steptrace__linked-label|textContent = "Linked structure"/)
   assert.match(familySource, /canvas\.setAttribute\("role", "img"\)/)
@@ -2073,10 +2215,20 @@ test("linked-topology keeps topology stable and animates only pointer markers", 
   assert.doesNotMatch(familySource, /entryCandidate|linked-pointer-icon/)
   assert.match(styles, /inset-inline-start var\(--_dur-move\)/)
   assert.match(styles, /inset-block-start var\(--_dur-move\)/)
-  assert.match(styles, /\.steptrace__linked-legend \{[^}]*justify-content: center;/s)
-  assert.match(sharedStyles, /\.steptrace \.steptrace__success-marker circle \{[^}]*fill: var\(--_green\);/s)
-  assert.match(sharedStyles, /\.steptrace \.steptrace__success-marker path \{[^}]*stroke: currentColor;/s)
-  assert.match(sharedStyles, /\.steptrace \.steptrace__success-marker path \{[^}]*transform: scale\(0\.72\);/s)
+  assert.doesNotMatch(styles, /\.steptrace__linked-legend \{/)
+  assert.match(sharedStyles, /\.steptrace__legend \{[^}]*justify-content: center;/s)
+  assert.match(
+    sharedStyles,
+    /\.steptrace \.steptrace__success-marker circle \{[^}]*fill: var\(--_green\);/s,
+  )
+  assert.match(
+    sharedStyles,
+    /\.steptrace \.steptrace__success-marker path \{[^}]*stroke: currentColor;/s,
+  )
+  assert.match(
+    sharedStyles,
+    /\.steptrace \.steptrace__success-marker path \{[^}]*transform: scale\(0\.72\);/s,
+  )
   assert.match(familySource, /arrowPath\.setAttribute\("class", "steptrace__linked-arrow"\)/)
   assert.match(styles, /\.steptrace \.steptrace__linked-arrow \{[^}]*fill: context-stroke;/s)
   assert.match(styles, /@media \(prefers-reduced-motion: reduce\)/)
@@ -2092,9 +2244,12 @@ test("legacy graph visited markers reuse the shared success badge", () => {
   assert.match(renderSource, /successMarker\("steptrace__nmark-success"\)/)
   assert.match(renderSource, /visitedMark\.setAttribute\("x", String\(p\.x \+ R - 8\)\)/)
   assert.match(renderSource, /visitedMark\.setAttribute\("y", String\(p\.y - R - 4\)\)/)
-  assert.match(renderSource, /sw\.append\(successMarker\(\)\)/)
+  assert.match(renderSource, /marker: successMarker\(\)/)
   assert.doesNotMatch(renderSource, /data-state-icon="visited"/)
-  assert.match(styles, /\.steptrace__node\[data-state="visited"\] \.steptrace__nmark-success \{[^}]*display: block;/s)
+  assert.match(
+    styles,
+    /\.steptrace__node\[data-state="visited"\] \.steptrace__nmark-success \{[^}]*display: block;/s,
+  )
   assert.match(styles, /\.steptrace__swatch--visited \{[^}]*border: 0;/s)
 })
 
@@ -2106,10 +2261,19 @@ test("graph-state labels every edge when the graph carries weighted meaning", ()
 
   assert.equal(grid.detail.kind, "heuristic-search")
   assert.ok(grid.edges.every((edge) => edge.weight === 1))
-  assert.match(familySource, /\["heuristic-search", "edge-relaxation", "mst-scan", "mst-round", "residual-flow"\]\.includes/)
-  assert.match(familySource, /first\.edges\.some\(\(edge\) => edge\.weight !== 1 \|\| edge\.label != null\)/)
+  assert.match(
+    familySource,
+    /\["heuristic-search", "edge-relaxation", "mst-scan", "mst-round", "residual-flow"\]\.includes/,
+  )
+  assert.match(
+    familySource,
+    /first\.edges\.some\(\(edge\) => edge\.weight !== 1 \|\| edge\.label != null\)/,
+  )
   assert.match(familySource, /label\.textContent = edge\.label \?\? String\(edge\.weight\)/)
-  assert.match(familySource, /`\$\{frame\.detail\.flow\[`\$\{edge\.from\}\|\$\{edge\.to\}`\] \|\| 0\}\/\$\{edge\.weight\}`/)
+  assert.match(
+    familySource,
+    /`\$\{frame\.detail\.flow\[`\$\{edge\.from\}\|\$\{edge\.to\}`\] \|\| 0\}\/\$\{edge\.weight\}`/,
+  )
   assert.match(styles, /\.steptrace \.steptrace__gs-edge-label \{[^}]*pointer-events: none;/s)
   assert.match(styles, /paint-order: stroke/)
   assert.match(styles, /font: 600 0\.56rem\/1 var\(--_font-mono\)/)
@@ -2310,7 +2474,10 @@ test("counting sort renders shared bars around one progressive frequency strip",
     }
   }
   const previousDocument = globalThis.document
-  globalThis.document = { createElement: (tagName) => new FakeNode(tagName) }
+  globalThis.document = {
+    createElement: (tagName) => new FakeNode(tagName),
+    createElementNS: (_namespace, tagName) => new FakeNode(tagName),
+  }
   try {
     const api = loadEngine(readFileSync(join(here, "generated", "engine.js"), "utf8"))
     const { makeDistributionSortView } = loadStepTraceModule(
@@ -2342,6 +2509,7 @@ test("counting sort renders shared bars around one progressive frequency strip",
     assert.equal(inputBars.attributes.get("aria-label"), "Unsorted Array")
     assert.equal(frequency.attributes.get("aria-label"), "Frequency")
     assert.equal(outputBars.attributes.get("aria-label"), "Sorted Array")
+    assert.equal(inputBand.dataset.section, "source")
     assert.equal(inputBars.children.length, 8)
     assert.equal(outputBars.children.length, 8)
     assert.match(source, /makeDistributionArrayBand/)
@@ -2415,6 +2583,10 @@ test("counting sort renders shared bars around one progressive frequency strip",
     assert.match(
       styleSource,
       /\.steptrace__distribution-bars \.steptrace__bar \{\n  height: calc\(100% - 1\.3rem\);\n\}/,
+    )
+    assert.match(
+      styleSource,
+      /\.steptrace__distribution-band\[data-section="source"\] \{[\s\S]*padding-bottom: 0\.9rem;[\s\S]*\}\n\n\.steptrace__distribution-band\[data-section="source"\] \+ \.steptrace__distribution-band \{[\s\S]*padding-top: 0\.9rem;[\s\S]*border-top: 1px solid var\(--_hair\);/,
     )
     assert.match(
       styleSource,
@@ -2514,7 +2686,15 @@ test("radix and bucket sorts share one stable bucket-board renderer", () => {
     }
   }
   const previousDocument = globalThis.document
-  globalThis.document = { createElement: (tagName) => new FakeNode(tagName) }
+  globalThis.document = {
+    createElement: (tagName) => new FakeNode(tagName),
+    createElementNS: (_namespace, tagName) => new FakeNode(tagName),
+    createTextNode: (value) => {
+      const node = new FakeNode("#text")
+      node.textContent = value
+      return node
+    },
+  }
   try {
     const api = loadEngine(readFileSync(join(here, "generated", "engine.js"), "utf8"))
     const { makeBucketDistributionView } = loadStepTraceModule(
@@ -2530,8 +2710,8 @@ test("radix and bucket sorts share one stable bucket-board renderer", () => {
       mode: "LSD",
     })
     const radixView = makeBucketDistributionView(radix.frames)
-    const [radixStage] = radixView.nodes
-    const [sourceBand, bucketBand, legend, outputBand] = radixStage.children
+    const [radixStage, legend] = radixView.nodes
+    const [sourceBand, bucketBand, outputBand] = radixStage.children
     const [sourceLabel, sourceBars] = sourceBand.children
     const [bucketLabel, board] = bucketBand.children
     const [outputLabel, outputBars] = outputBand.children
@@ -2548,11 +2728,14 @@ test("radix and bucket sorts share one stable bucket-board renderer", () => {
     )
     assert.equal(sourceLabel.title, "")
     assert.equal(sourceBars.children.length, 8)
+    assert.equal(sourceBand.dataset.section, "source")
     assert.equal(board.children.length, 10)
     assert.equal(radixStage.dataset.profile, "radix")
     assert.equal(board.attributes.get("style:--_bucket-count"), "10")
     assert.equal(outputBars.children.length, 8)
     assert.equal(legend.attributes.get("aria-label"), "Distribution state legend")
+    assert.equal(legend.className, "steptrace__legend steptrace__distribution-legend")
+    assert.ok(legend.children.every((row) => row.className === "steptrace__legend-row"))
 
     const firstScatter = radix.frames.find(
       (frame) => frame.type === "scatter" && frame.passIndex === 0,
@@ -2573,11 +2756,13 @@ test("radix and bucket sorts share one stable bucket-board renderer", () => {
       bucketCount: 5,
     })
     const bucketView = makeBucketDistributionView(bucket.frames)
-    const [bucketStage] = bucketView.nodes
-    const [, rangeBand, , sortedBand] = bucketStage.children
+    const [bucketStage, bucketLegend] = bucketView.nodes
+    const [bucketSourceBand, rangeBand, sortedBand] = bucketStage.children
+    assert.equal(bucketSourceBand.dataset.section, "source")
     assert.equal(rangeBand.children[0].textContent, "Range Buckets")
     assert.equal(rangeBand.children[1].children.length, 5)
     assert.equal(sortedBand.children[0].textContent, "Sorted Array")
+    assert.equal(bucketLegend.className, "steptrace__legend steptrace__distribution-legend")
 
     assert.match(
       styleSource,
@@ -2616,7 +2801,7 @@ test("radix and bucket sorts share one stable bucket-board renderer", () => {
     )
     assert.match(
       styleSource,
-      /\.steptrace__distribution\[data-profile="radix"\] \{[\s\S]*?grid-template-rows: minmax\(0, 1fr\) auto auto auto;/,
+      /\.steptrace__distribution\[data-profile="radix"\] \{[\s\S]*?grid-template-rows: minmax\(0, 1fr\) auto auto;/,
     )
     assert.match(
       styleSource,
@@ -2624,15 +2809,15 @@ test("radix and bucket sorts share one stable bucket-board renderer", () => {
     )
     assert.match(
       styleSource,
-      /\.steptrace__distribution\[data-profile="radix"\] \.steptrace__distribution-band:first-child \{[\s\S]*?padding-bottom: 0\.9rem;/,
+      /\.steptrace__distribution-band\[data-section="source"\] \{[\s\S]*padding-bottom: 0\.9rem;/,
     )
     assert.match(
       styleSource,
-      /\.steptrace__distribution\[data-profile="radix"\] \.steptrace__distribution-band:first-child \.steptrace__distribution-bars \{[\s\S]*?min-block-size: 0;[\s\S]*?overflow: hidden;/,
+      /\.steptrace__distribution\[data-profile="radix"\]\s+\.steptrace__distribution-band:first-child\s+\.steptrace__distribution-bars \{[\s\S]*?min-block-size: 0;[\s\S]*?overflow: hidden;/,
     )
     assert.match(
       styleSource,
-      /\.steptrace__distribution\[data-profile="radix"\] \.steptrace__distribution-band:is\(:nth-child\(2\), :nth-child\(4\)\) \{[\s\S]*?padding-top: 0\.9rem;[\s\S]*?border-top: 1px solid var\(--_hair\);/,
+      /\.steptrace__distribution\[data-profile="radix"\] \.steptrace__distribution-band:nth-child\(3\) \{[\s\S]*?padding-top: 0\.9rem;[\s\S]*?border-top: 1px solid var\(--_hair\);/,
     )
     assert.match(
       styleSource,
@@ -2657,6 +2842,10 @@ test("radix and bucket sorts share one stable bucket-board renderer", () => {
     assert.match(
       styleSource,
       /@container steptrace-distribution \(max-width: 50rem\) \{[\s\S]*\.steptrace__distribution\[data-profile="radix"\][\s\S]*\.steptrace__distribution-lane-body \{[\s\S]*grid-template-columns: repeat\(\s*var\(--_bucket-columns, 1\),\s*minmax\(0, 1fr\)\s*\);[\s\S]*grid-auto-rows: minmax\(0, 1fr\);[\s\S]*overflow: hidden;/,
+    )
+    assert.doesNotMatch(
+      styleSource,
+      /steptrace__distribution-legend-(?:item|swatch)|\.steptrace__distribution-legend \{/,
     )
   } finally {
     globalThis.document = previousDocument
@@ -2863,7 +3052,11 @@ test("execution-tree watch, legend, and responsive styles remain compatible", ()
   assert.match(styles, /\.steptrace__rtlabel[^}]*font: 600 12px\/1 var\(--_font-mono\);/s)
   assert.match(styles, /\.steptrace__rtdetail[^}]*font: 400 10\.5px\/1 var\(--_font-mono\);/s)
   assert.match(styles, /\[data-shape="card"\] \.steptrace__rtval/)
-  assert.match(styles, /\.steptrace__rectree \+ \.steptrace__legend[^}]*margin-top: 0\.4rem;/s)
+  assert.doesNotMatch(styles, /\.steptrace__rectree \+ \.steptrace__legend/)
+  assert.match(
+    sharedStyles,
+    /\.steptrace__stage-col > \.steptrace__legend,[\s\S]*?margin-top: 0\.9rem;/,
+  )
   assert.match(styles, /\.steptrace__rtbadge[^}]*font: 600 7px\/1 var\(--_font-head\);/s)
   assert.doesNotMatch(styles, /glow|drop-shadow/)
   assert.match(renderSource, /svg\.setAttribute\("aria-labelledby"/)
@@ -3103,9 +3296,10 @@ test("branch-and-bound uses the execution-tree family for one fixed fractional-b
     branchAndBoundTreeViewDescriptor.legend.map((item) => item.state),
     ["split", "incumbent", "infeasible", "prune"],
   )
-  assert.equal(branchAndBoundTreeViewDescriptor.nodeWidth, 116)
-  assert.equal(branchAndBoundTreeViewDescriptor.nodeHeight, 48)
-  assert.equal(branchAndBoundTreeViewDescriptor.fitWidth, true)
+  assert.equal(branchAndBoundTreeViewDescriptor.nodeWidth, 136)
+  assert.equal(branchAndBoundTreeViewDescriptor.nodeHeight, 50)
+  assert.equal(branchAndBoundTreeViewDescriptor.minSvgWidth, 1080)
+  assert.equal(branchAndBoundTreeViewDescriptor.fitWidth, undefined)
   assert.equal(branchAndBoundTreeViewDescriptor.stableStage, true)
   assert.equal(branchAndBoundTreeViewDescriptor.preserveDetail, true)
   assert.equal(branchAndBoundTreeViewDescriptor.showStateBadge, true)
@@ -3153,11 +3347,30 @@ test("branch-and-bound keeps D&C and memoization sizing while adding opt-in prun
   assert.match(render, /stableStage: descriptor\.stableStage/)
   assert.match(render, /descriptor\.preserveDetail/)
   assert.match(render, /descriptor\.showStateBadge/)
-  assert.match(styles, /\[data-profile="branch-and-bound"\]\s*\{[^}]*overflow-x: hidden;/s)
+  assert.match(styles, /\.steptrace \.steptrace__rectree\s*\{[^}]*overflow-x: auto;/s)
+  assert.doesNotMatch(
+    styles,
+    /\.steptrace__rectree\[data-profile="branch-and-bound"\]\s*\{[^}]*overflow-x: hidden;/s,
+  )
+  assert.match(
+    styles,
+    /\[data-profile="branch-and-bound"\][\s\S]*?\.steptrace__rtdetail\s*\{[^}]*font-size: 9\.5px;/,
+  )
   assert.match(
     styles,
     /\[data-profile="branch-and-bound"\][\s\S]*:is\(\.steptrace__rtedge, \.steptrace__rtnode\)\[data-vis="0"\][^}]*opacity: 0;[^}]*visibility: hidden;/,
   )
+  const nodes = buildBranchAndBound().frames[0].nodes
+  for (const depth of new Set(nodes.map((node) => node.depth))) {
+    const tier = nodes
+      .filter((node) => node.depth === depth)
+      .sort((left, right) => left.x - right.x)
+    for (let index = 1; index < tier.length; index++)
+      assert.ok(
+        tier[index].x - tier[index - 1].x >= branchAndBoundTreeViewDescriptor.nodeWidth + 6,
+        `depth ${depth}: ${tier[index - 1].id} overlaps ${tier[index].id}`,
+      )
+  }
   assert.ok(
     branchAndBoundTreeViewDescriptor
       .watchRows(buildBranchAndBound().frames[0])
@@ -4113,7 +4326,7 @@ test("tim sort keeps natural runs contiguous while it reverses, extends, collaps
   )
   assert.match(
     renderSource,
-    /export function makeMatchView[\s\S]*?return \{ nodes, paint, watch, destroy:/,
+    /export function makeMatchView[\s\S]*?return \{ nodes: \[stage, status\], paint, watch, destroy:/,
   )
   assert.match(
     renderSource,
@@ -4197,7 +4410,10 @@ test("tim sort run-stack cards display only the current stack entries", () => {
     }
   }
   const previousDocument = globalThis.document
-  globalThis.document = { createElement: (tagName) => new FakeNode(tagName) }
+  globalThis.document = {
+    createElement: (tagName) => new FakeNode(tagName),
+    createElementNS: (_namespace, tagName) => new FakeNode(tagName),
+  }
   try {
     const api = loadEngine(readFileSync(join(here, "generated", "engine.js"), "utf8"))
     const { makeRunStackView } = loadStepTraceModule("src", "families", "run-stack.ts")
@@ -4418,6 +4634,14 @@ test("binary search on answer has a dedicated monotone-boundary visual family", 
   assert.match(renderSource, /model\.lanes\.slice\(model\.allowed\)/)
   assert.match(styles, /\.steptrace__boundary-ticks/)
   assert.match(styles, /\.steptrace__boundary-lane--overflow/)
+  assert.match(
+    styles,
+    /@container steptrace-wide-stage \(min-width: 44rem\)[\s\S]*?\[data-visual-family="monotone-boundary"\] \.steptrace__body\s*\{[^}]*grid-template-columns: 1fr minmax\(240px, 312px\);/,
+  )
+  assert.match(
+    styles,
+    /@container steptrace-boundary \(max-width: 28rem\)[\s\S]*?\.steptrace__boundary-lanes\s*\{[^}]*grid-template-columns: minmax\(0, 1fr\);/,
+  )
   assert.match(family, /id: "monotone-boundary"/)
   assert.doesNotMatch(family, /makeSearchView/)
 })
@@ -4464,17 +4688,20 @@ test("indexed search variants reject invalid family-specific inputs", () => {
   )
 })
 
-test("exponential search rejects unsorted arrays and non-numeric targets", () => {
-  const api = loadEngine(readFileSync(join(here, "generated", "engine.js"), "utf8"))
+test("indexed searches reject unsorted arrays and non-numeric targets", () => {
+  const { steptrace: api } = loadStepTraceModule("src", "engine.ts")
 
   assert.throws(
     () => api.buildFrames({ algorithm: "exponential-search", array: [2, 7, 4], target: 4 }),
     /non-decreasing order/,
   )
-  assert.throws(
-    () => api.buildFrames({ algorithm: "exponential-search", array: [2, 4, 7], target: "4" }),
-    /numeric "target"/,
-  )
+  for (const algorithm of ["exponential-search", "interpolation-search", "jump-search"]) {
+    for (const target of ["4", undefined, Number.NaN])
+      assert.throws(
+        () => api.buildFrames({ algorithm, array: [2, 4, 7], target }),
+        /finite numeric "target"/,
+      )
+  }
 })
 
 test("gap-aware sort frames create gap milestones without algorithm-name rules", () => {
@@ -4837,7 +5064,10 @@ test("swap choreography engages headlessly and collapses to a snap under reduced
     }
   }
   const previousDocument = globalThis.document
-  globalThis.document = { createElement: (tagName) => new FakeNode(tagName) }
+  globalThis.document = {
+    createElement: (tagName) => new FakeNode(tagName),
+    createElementNS: (_namespace, tagName) => new FakeNode(tagName),
+  }
   const frames = [
     { array: [3, 1, 2], sorted: [], candidate: null, active: [0, 1], type: "compare", swaps: 0 },
     { array: [1, 3, 2], sorted: [], candidate: null, active: [0, 1], type: "swap", swaps: 1 },
@@ -5124,7 +5354,18 @@ test("trie uses the typed prefix-character family and preserves shared paths and
         index === 0 || frame.visibleNodes.length >= frames[index - 1].visibleNodes.length,
     ),
   )
-  assert.deepEqual(final.visibleNodes, ["root", "c", "ca", "car", "card", "care", "cat", "d", "do", "dog"])
+  assert.deepEqual(final.visibleNodes, [
+    "root",
+    "c",
+    "ca",
+    "car",
+    "card",
+    "care",
+    "cat",
+    "d",
+    "do",
+    "dog",
+  ])
   assert.deepEqual(final.visibleEdges, [
     "root->c",
     "c->ca",
@@ -5150,13 +5391,34 @@ test("trie uses the typed prefix-character family and preserves shared paths and
   )
   const milestones = buildMilestones("trie", "string", frames)
   const labelAt = (predicate) => milestoneAt(milestones, frames.findIndex(predicate)).label
-  assert.equal(labelAt((frame) => frame.type === "create-node" && frame.key === "car"), "Insert car")
-  assert.equal(labelAt((frame) => frame.type === "reuse-edge" && frame.key === "card"), "Insert card")
-  assert.equal(labelAt((frame) => frame.type === "create-node" && frame.key === "care"), "Insert care")
-  assert.equal(labelAt((frame) => frame.type === "create-node" && frame.key === "cat"), "Insert cat")
-  assert.equal(labelAt((frame) => frame.type === "create-node" && frame.key === "dog"), "Insert dog")
-  assert.equal(labelAt((frame) => frame.type === "complete-prefix"), "Prefix ca")
-  assert.equal(labelAt((frame) => frame.type === "complete-search"), "Search car")
+  assert.equal(
+    labelAt((frame) => frame.type === "create-node" && frame.key === "car"),
+    "Insert car",
+  )
+  assert.equal(
+    labelAt((frame) => frame.type === "reuse-edge" && frame.key === "card"),
+    "Insert card",
+  )
+  assert.equal(
+    labelAt((frame) => frame.type === "create-node" && frame.key === "care"),
+    "Insert care",
+  )
+  assert.equal(
+    labelAt((frame) => frame.type === "create-node" && frame.key === "cat"),
+    "Insert cat",
+  )
+  assert.equal(
+    labelAt((frame) => frame.type === "create-node" && frame.key === "dog"),
+    "Insert dog",
+  )
+  assert.equal(
+    labelAt((frame) => frame.type === "complete-prefix"),
+    "Prefix ca",
+  )
+  assert.equal(
+    labelAt((frame) => frame.type === "complete-search"),
+    "Search car",
+  )
   assert.equal(milestoneAt(milestones, frames.length - 1).label, "Trie complete")
   assert.doesNotMatch(milestones.map((mark) => mark.label).join(" "), /\bShift\b/)
   assert.ok(
@@ -5391,7 +5653,8 @@ test("production mount renders a meaningful Trie terminal summary without string
       }
       this.classList = {
         add: (...names) => this.setClasses([...this.classes(), ...names]),
-        remove: (...names) => this.setClasses(this.classes().filter((name) => !names.includes(name))),
+        remove: (...names) =>
+          this.setClasses(this.classes().filter((name) => !names.includes(name))),
         toggle: (name, force) => {
           const present = this.classes().includes(name)
           const next = force == null ? !present : force
@@ -5505,6 +5768,60 @@ test("production mount renders a meaningful Trie terminal summary without string
   globalThis.getComputedStyle = () => ({ rowGap: "0", lineHeight: "10" })
   try {
     const api = loadEngine(readFileSync(join(here, "generated", "engine.js"), "utf8"))
+    for (const [file, algorithm] of [
+      ["Exponential Search.md", "exponential-search"],
+      ["Interpolation Search.md", "interpolation-search"],
+      ["Jump Search.md", "jump-search"],
+    ]) {
+      const note = readFileSync(
+        join(
+          repoRoot,
+          "Vault",
+          "Home",
+          "Computer Science",
+          "Algorithms",
+          "Search Algorithms",
+          file,
+        ),
+        "utf8",
+      )
+      const config = [...note.matchAll(/```steptrace\n([\s\S]*?)\n```/g)]
+        .map((match) => JSON.parse(match[1]))
+        .find((candidate) => candidate.algorithm === algorithm)
+      const quartzConfig = JSON.parse(JSON.stringify(config))
+      assert.equal(typeof config.target, "number", `${file} must give Obsidian a numeric target`)
+      assert.equal(
+        typeof quartzConfig.target,
+        "number",
+        `${file} must give Quartz a numeric target`,
+      )
+      const searchRoot = new FakeNode("div")
+      let searchHandle
+      assert.doesNotThrow(() => {
+        searchHandle = api.mount(searchRoot, quartzConfig)
+      })
+      assert.equal(searchRoot.dataset.visualFamily, "indexed-array-search")
+      searchHandle.destroy()
+    }
+
+    const rabinRoot = new FakeNode("div")
+    const rabinHandle = api.mount(rabinRoot, {
+      algorithm: "rabin-karp",
+      text: "ABABACABA",
+      pattern: "ABAC",
+    })
+    const rabinPhaseCopy = findByClass(rabinRoot, "steptrace__phase-copy")
+    assert.match(rabinPhaseCopy.textContent, /Rabin-Karp search/)
+    findByAttribute(rabinRoot, "aria-label", "Step forward").listeners.get("click")[0]()
+    assert.equal(rabinPhaseCopy.textContent, "")
+    assert.match(
+      findAllByClass(rabinRoot, "steptrace__log-text")
+        .map((line) => line.textContent)
+        .join(" "),
+      /Window \[0, 3\]: window hash \d+ [=≠] pattern hash \d+/,
+    )
+    rabinHandle.destroy()
+
     const root = new FakeNode("div")
     let handle
     assert.doesNotThrow(() => {
@@ -5531,12 +5848,7 @@ test("production mount renders a meaningful Trie terminal summary without string
     const foot = findByClass(root, "steptrace__foot")
     assert.deepEqual(
       foot.children.map((child) => child.className),
-      [
-        "steptrace__phase",
-        "steptrace__transport",
-        "steptrace__timeline",
-        "steptrace__utility",
-      ],
+      ["steptrace__phase", "steptrace__transport", "steptrace__timeline", "steptrace__utility"],
     )
     const phaseName = findByClass(root, "steptrace__phase-name")
     const phaseCopy = findByClass(root, "steptrace__phase-copy")
@@ -5555,16 +5867,19 @@ test("production mount renders a meaningful Trie terminal summary without string
       forward.listeners.get("click")[0]()
       phaseLabels.push(phaseName.textContent)
     }
-    assert.deepEqual([...new Set(phaseLabels)], [
-      "Insert car",
-      "Insert card",
-      "Insert care",
-      "Insert cat",
-      "Insert dog",
-      "Prefix ca",
-      "Search car",
-      "Trie complete",
-    ])
+    assert.deepEqual(
+      [...new Set(phaseLabels)],
+      [
+        "Insert car",
+        "Insert card",
+        "Insert care",
+        "Insert cat",
+        "Insert dog",
+        "Prefix ca",
+        "Search car",
+        "Trie complete",
+      ],
+    )
     assert.doesNotMatch(phaseLabels.join(" "), /\bShift\b/)
     const sharedStyles = readFileSync(join(here, "src", "styles", "shared.scss"), "utf8")
     assert.match(sharedStyles, /\.steptrace__foot \{[^}]*grid-template-areas:/s)
@@ -5604,15 +5919,15 @@ test("production mount renders a meaningful Trie terminal summary without string
       algorithm: "a-star",
       variant: "coordinate-grid",
     })
-    assert.equal(findByClass(aStarRoot, "steptrace__graph-state").dataset.racks, "false")
+    assert.equal(findByClass(aStarRoot, "steptrace__graph-state").dataset.racks, undefined)
     assert.equal(findAllByClass(aStarRoot, "steptrace__gs-racks").length, 0)
     aStarHandle.destroy()
 
     const bellmanRoot = new FakeNode("div")
     const bellmanHandle = api.mount(bellmanRoot, { algorithm: "bellman-ford" })
     assert.equal(bellmanRoot.dataset.visualFamily, "graph-state")
-    assert.equal(findByClass(bellmanRoot, "steptrace__graph-state").dataset.racks, "true")
-    assert.equal(findAllByClass(bellmanRoot, "steptrace__gs-racks").length, 1)
+    assert.equal(findByClass(bellmanRoot, "steptrace__graph-state").dataset.racks, undefined)
+    assert.equal(findAllByClass(bellmanRoot, "steptrace__gs-racks").length, 0)
     assert.equal(
       findByClass(bellmanRoot, "steptrace__insight-text").textContent,
       "Distances 0:0, 1:4, 2:2, 3:5.",
@@ -5627,7 +5942,10 @@ test("production mount renders a meaningful Trie terminal summary without string
     })
     assert.equal(ahoRoot.dataset.visualFamily, "prefix-character")
     assert.equal(findByTag(ahoRoot, "title").textContent, "Aho-Corasick insert: he")
-    assert.equal(findByClass(ahoRoot, "steptrace__insight-text").textContent, "Matches she@3, he@3, hers@5.")
+    assert.equal(
+      findByClass(ahoRoot, "steptrace__insight-text").textContent,
+      "Matches she@3, he@3, hers@5.",
+    )
     const ahoTextRow = findByClass(ahoRoot, "steptrace__prefix-text")
     const ahoTextCells = findAllByClass(ahoRoot, "steptrace__prefix-text-cell")
     assert.equal(ahoTextCells.map((cell) => cell.textContent).join(""), "ushers")
@@ -5679,11 +5997,145 @@ test("production mount renders a meaningful Trie terminal summary without string
     while (!tstForward.disabled) tstForward.listeners.get("click")[0]()
     assert.equal(tstPhase.textContent, "TST complete")
     tstHandle.destroy()
+
+    const queueRoot = new FakeNode("div")
+    const queueHandle = api.mount(queueRoot, { algorithm: "queue" })
+    const queueInput = findByAttribute(queueRoot, "aria-label", "Value to enqueue")
+    const enqueue = findByClass(queueRoot, "steptrace__queue-action--primary")
+    const dequeue = findAllByClass(queueRoot, "steptrace__queue-action").find(
+      (button) => button.textContent === "Dequeue",
+    )
+    const queueReset = findByClass(queueRoot, "steptrace__queue-reset")
+    const queueOrder = findByClass(queueRoot, "steptrace__queue-order-value")
+    const queueStatus = findByClass(queueRoot, "steptrace__queue-status")
+    const queueCells = findAllByClass(queueRoot, "steptrace__contiguous-cell")
+    const queueCounter = findByClass(queueRoot, "steptrace__counter")
+    const click = (node) => node.listeners.get("click")[0]()
+    const enter = () =>
+      queueInput.listeners.get("keydown")[0]({
+        key: "Enter",
+        preventDefault() {},
+      })
+    const enqueueValue = (value, withEnter = false) => {
+      queueInput.value = value
+      if (withEnter) enter()
+      else click(enqueue)
+    }
+
+    assert.equal(queueRoot.dataset.visualFamily, "contiguous-storage")
+    assert.equal(dequeue.disabled, true)
+    assert.equal(enqueue.disabled, false)
+    assert.equal(queueCounter.innerHTML, "<b>0</b> / 6")
+    assert.equal(queueOrder.textContent, "empty")
+    assert.equal(findByClass(queueRoot, "steptrace__queue-state"), null)
+    assert.equal(findByClass(queueRoot, "steptrace__timeline"), null)
+    assert.equal(findByClass(queueRoot, "steptrace__transport"), null)
+    assert.deepEqual(
+      queueCells[0].children[0].children.map((badge) => [
+        badge.textContent,
+        badge.hidden,
+        badge.attributes.get("aria-label"),
+        badge.attributes.get("title"),
+      ]),
+      [
+        ["H", false, "Head", "Head"],
+        ["T", false, "Tail", "Tail"],
+      ],
+    )
+    assert.equal(queueCells[0].attributes.get("aria-label"), "slot 0, empty, head and tail")
+
+    enqueueValue("A", true)
+    for (const value of ["B", "C", "D", "E", "F"]) enqueueValue(value)
+    assert.equal(queueCounter.innerHTML, "<b>6</b> / 6")
+    assert.equal(queueOrder.textContent, "A → B → C → D → E → F")
+    assert.equal(enqueue.disabled, true)
+    assert.equal(queueInput.disabled, true)
+    assert.equal(queueCells[0].children[0].children[0].hidden, false)
+    assert.equal(queueCells[0].children[0].children[1].hidden, false)
+    assert.equal(queueCells[0].attributes.get("aria-label"), "slot 0, value A, head and tail")
+
+    click(dequeue)
+    click(dequeue)
+    enqueueValue("G")
+    enqueueValue("H")
+    assert.equal(queueCounter.innerHTML, "<b>6</b> / 6")
+    assert.equal(queueOrder.textContent, "C → D → E → F → G → H")
+    assert.equal(queueCells[2].children[0].children[0].hidden, false)
+    assert.equal(queueCells[2].children[0].children[1].hidden, false)
+    assert.equal(queueCells[2].attributes.get("aria-label"), "slot 2, value C, head and tail")
+    assert.deepEqual(
+      queueCells.map((cell) => cell.children[1].textContent),
+      ["G", "H", "C", "D", "E", "F"],
+    )
+
+    click(queueReset)
+    assert.equal(queueCounter.innerHTML, "<b>0</b> / 6")
+    assert.equal(queueOrder.textContent, "empty")
+    assert.equal(dequeue.disabled, true)
+    assert.match(queueStatus.textContent, /Queue reset/)
+
+    const listeners = [enqueue, dequeue, queueReset, queueInput]
+    queueHandle.destroy()
+    assert.equal(queueRoot.children.length, 0)
+    assert.equal(queueRoot.dataset.visualFamily, undefined)
+    assert.ok(
+      listeners.every((node) => [...node.listeners.values()].every((items) => !items.length)),
+    )
   } finally {
     globalThis.document = previous.document
     globalThis.matchMedia = previous.matchMedia
     globalThis.getComputedStyle = previous.getComputedStyle
   }
+})
+
+test("Queue uses the persistent contiguous-storage contract in both hosts", () => {
+  const family = readFileSync(join(here, "src", "families", "contiguous-storage.ts"), "utf8")
+  const styles = readFileSync(join(here, "src", "styles", "contiguous-storage.scss"), "utf8")
+  const styleEntry = readFileSync(join(here, "src", "styles", "index.scss"), "utf8")
+  const mount = readFileSync(join(here, "src", "mount.ts"), "utf8")
+  const quartzCss = readFileSync(join(here, "generated", "engine.css"), "utf8")
+  const obsidianCss = readFileSync(
+    join(repoRoot, "Vault", ".obsidian", "plugins", "steptrace", "styles.css"),
+    "utf8",
+  )
+  const note = readFileSync(
+    join(
+      repoRoot,
+      "Vault",
+      "Home",
+      "Computer Science",
+      "Data Structures",
+      "Linear Structures",
+      "Queue.md",
+    ),
+    "utf8",
+  )
+
+  assert.match(mount, /structureRegistry\.get\(config\.algorithm\)/)
+  assert.match(family, /tail = \(tail \+ 1\) % config\.capacity/)
+  assert.match(family, /head = \(head \+ 1\) % config\.capacity/)
+  assert.match(family, /event\.key !== "Enter"/)
+  assert.match(family, /enqueue\.disabled = count === config\.capacity/)
+  assert.match(family, /dequeue\.disabled = count === 0/)
+  assert.match(family, /removeEventListener\("keydown", onInputKeydown\)/)
+  assert.match(styles, /min-block-size: 11rem/)
+  assert.match(
+    styles,
+    /\.steptrace__contiguous-array \{[^}]*border-radius: 9px;[^}]*overflow: hidden;/s,
+  )
+  assert.match(styles, /\.steptrace__contiguous-cell \{[^}]*border-inline-end:/s)
+  assert.doesNotMatch(styles, /\.steptrace__contiguous-cell \{[^}]*border-radius:/s)
+  assert.match(styles, /\.steptrace__contiguous-index \{[^}]*border-block-start:/s)
+  assert.doesNotMatch(styles, /steptrace__queue-state/)
+  assert.doesNotMatch(styles, /box-shadow/)
+  assert.match(styles, /min-height: 2\.75rem/)
+  assert.match(styles, /@container steptrace-contiguous \(max-width: 36rem\)/)
+  assert.match(styles, /@media \(prefers-reduced-motion: reduce\)/)
+  assert.match(styleEntry, /@use "contiguous-storage";/)
+  assert.match(quartzCss, /\.steptrace__contiguous-array/)
+  assert.match(obsidianCss, /\.steptrace__contiguous-array/)
+  assert.match(note, /```steptrace\n\{"algorithm":"queue"\}\n```/)
+  assert.doesNotMatch(note, /Visualization pending/)
 })
 
 test("prefix-character styles keep the stage stable, responsive, reduced, and Trace top-aligned", () => {

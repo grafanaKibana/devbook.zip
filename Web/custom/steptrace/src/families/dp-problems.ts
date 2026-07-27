@@ -316,14 +316,14 @@ const coinRoles = [
   { role: "operand-a", badge: "A", label: "predecessor amount" },
   { role: "operand-b", badge: "B", label: "another predecessor" },
   { role: "target", badge: "T", label: "amount being solved" },
-  { role: "path", badge: "✓", label: "optimal amount chain" },
+  { role: "path", badge: "success", label: "optimal amount chain" },
 ] satisfies readonly MatrixGridRoleDescriptor[]
 
 const gridRoles = [
   { role: "operand-a", badge: "R", label: "right neighbour" },
   { role: "operand-b", badge: "D", label: "down neighbour" },
   { role: "target", badge: "T", label: "tile being solved" },
-  { role: "path", badge: "✓", label: "optimal route" },
+  { role: "path", badge: "success", label: "optimal route" },
 ] satisfies readonly MatrixGridRoleDescriptor[]
 
 function rolesForCell(frame: DPTableFrame, row: number, column: number) {

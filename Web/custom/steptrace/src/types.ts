@@ -40,6 +40,7 @@ export type VisualFamilyId =
   | "prefix-sum"
   | "run-stack"
   | "stack-sequence"
+  | "contiguous-storage"
 
 export interface AlgorithmMeta {
   label: string
@@ -94,6 +95,7 @@ export interface StepTraceConfig extends Partial<Omit<AlgorithmInput, "algorithm
   variant?: string
   range?: [number, number]
   k?: number
+  capacity?: number
 }
 
 export interface StepTraceTabConfig extends StepTraceConfig {
@@ -130,6 +132,14 @@ export interface VisualFamily<TConfig, TRecorder, TFrame> {
   id: VisualFamilyId
   createRecorder(config: TConfig): TRecorder
   createView(frames: readonly TFrame[]): StepTraceView<TFrame>
+}
+
+export interface InteractiveStructureDefinition<TConfig = unknown> {
+  id: string
+  family: VisualFamilyId
+  meta: AlgorithmMeta
+  parse(config: StepTraceConfig): TConfig
+  mount(root: HTMLElement, config: TConfig): MountHandle
 }
 
 interface AlgorithmDefinition<
@@ -218,27 +228,24 @@ export interface GraphStateEdge {
 }
 
 export type GraphStateDecor =
-  | { kind: "rect"; className: string; x: number; y: number; width: number; height: number; rx?: number }
+  | {
+      kind: "rect"
+      className: string
+      x: number
+      y: number
+      width: number
+      height: number
+      rx?: number
+    }
   | { kind: "line"; className: string; x1: number; y1: number; x2: number; y2: number }
   | { kind: "path"; className: string; d: string }
   | { kind: "text"; className: string; x: number; y: number; text: string }
 
 export type GraphStateNodeRole =
-  | "neutral"
-  | "frontier"
-  | "active"
-  | "closed"
-  | "accepted"
-  | "rejected"
+  "neutral" | "frontier" | "active" | "closed" | "accepted" | "rejected"
 
 export type GraphStateEdgeRole =
-  | "neutral"
-  | "active"
-  | "candidate"
-  | "accepted"
-  | "rejected"
-  | "cut"
-  | "residual"
+  "neutral" | "active" | "candidate" | "accepted" | "rejected" | "cut" | "residual"
 
 export interface GraphStateScore {
   id: string

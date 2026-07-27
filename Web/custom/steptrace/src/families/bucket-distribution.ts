@@ -1,4 +1,4 @@
-import { barHeightStyle, el, escapeHtml, statusEl } from "../render"
+import { barHeightStyle, el, escapeHtml, makeLegend, statusEl } from "../render"
 import type { StepTraceConfig, StepTraceView, VisualFamily, WatchRow } from "../types"
 import {
   distributionLabel,
@@ -392,16 +392,6 @@ function bucketColumnCount(itemCount: number) {
   return Math.min(3, Math.max(1, Math.ceil(itemCount / 3)))
 }
 
-function makeLegendItem(color: string, text: string) {
-  const item = el("span", "steptrace__distribution-legend-item")
-  const swatch = el("span", "steptrace__distribution-legend-swatch")
-  swatch.style.setProperty("--_legend-color", color)
-  const label = el("span")
-  label.textContent = text
-  item.append(swatch, label)
-  return item
-}
-
 export function makeBucketDistributionView(frames: readonly BucketDistributionFrame[]) {
   const first = frames[0]
   const original = first.source.slice().sort((a, b) => a.origin - b.origin)
@@ -417,6 +407,7 @@ export function makeBucketDistributionView(frames: readonly BucketDistributionFr
       : "Values keep their identity while range decides their bucket.",
     first.source.length,
   )
+  source.band.dataset.section = "source"
   const bucketBand = el("div", "steptrace__distribution-band")
   const board = el("div", "steptrace__distribution-bucket-board")
   const bucketTitle = first.profile === "radix" ? "Digit Buckets" : "Range Buckets"
@@ -447,14 +438,16 @@ export function makeBucketDistributionView(frames: readonly BucketDistributionFr
     first.source.length,
     "steptrace__distribution-bars--output",
   )
-  const legend = el("div", "steptrace__distribution-legend")
-  legend.setAttribute("aria-label", "Distribution state legend")
-  legend.append(
-    makeLegendItem("var(--_blue)", "active bucket"),
-    makeLegendItem("var(--_amber)", "local comparison"),
-    makeLegendItem("var(--_green)", "gathered output"),
+  const legend = makeLegend(
+    [
+      { label: "active bucket", color: "var(--_blue)" },
+      { label: "local comparison", color: "var(--_amber)" },
+      { label: "gathered output", color: "var(--_green)" },
+    ],
+    "Distribution state legend",
+    "steptrace__distribution-legend",
   )
-  stage.append(source.band, bucketBand, legend, output.band)
+  stage.append(source.band, bucketBand, output.band)
   const status = statusEl()
 
   function paint(frame: BucketDistributionFrame, index = 0, total = 1) {
@@ -517,7 +510,7 @@ export function makeBucketDistributionView(frames: readonly BucketDistributionFr
   }
 
   return {
-    nodes: [stage, status],
+    nodes: [stage, legend, status],
     stageLayout: "fill" as const,
     stableStage: true,
     paint,

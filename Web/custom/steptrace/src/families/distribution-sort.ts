@@ -148,12 +148,14 @@ export function parseCountingSortConfig(config: StepTraceConfig): DistributionSo
   if (!Array.isArray(array) || array.length < 2)
     invalidConfig('requires an "array" with at least two integer keys.')
   if (!array.every((value) => Number.isInteger(value)))
-    invalidConfig('requires every value to be an integer key.')
+    invalidConfig("requires every value to be an integer key.")
 
   const min = Math.min(...array)
   const max = Math.max(...array)
   if (max - min > 32)
-    invalidConfig('limits the demonstrated key range to 33 values so every counter remains legible.')
+    invalidConfig(
+      "limits the demonstrated key range to 33 values so every counter remains legible.",
+    )
   return { profile: "counting", array: array.slice(), min, max }
 }
 
@@ -164,7 +166,9 @@ export function distributionTokenLabels(input: readonly number[]) {
   return input.map((value) => {
     const occurrence = (seen.get(value) || 0) + 1
     seen.set(value, occurrence)
-    return totals.get(value) === 1 ? String(value) : `${value}${String.fromCharCode(96 + occurrence)}`
+    return totals.get(value) === 1
+      ? String(value)
+      : `${value}${String.fromCharCode(96 + occurrence)}`
   })
 }
 
@@ -202,7 +206,10 @@ export function frequencyRangeFor(
   index: number,
 ): { count: number; slots: string | null } {
   const count = frame.counts[index]
-  const rangesVisible = frame.type === "prefix" ? index < frame.prefixed : frame.type === "place" || frame.type === "done"
+  const rangesVisible =
+    frame.type === "prefix"
+      ? index < frame.prefixed
+      : frame.type === "place" || frame.type === "done"
   if (!rangesVisible) return { count, slots: null }
   if (count === 0) return { count, slots: "—" }
   const start = frame.counts.slice(0, index).reduce((sum, value) => sum + value, 0)
@@ -230,6 +237,7 @@ export function makeDistributionSortView(frames: readonly DistributionSortFrame[
     "Each bar keeps its original identity.",
     first.input.length,
   )
+  input.band.dataset.section = "source"
   const countBand = el("div", "steptrace__distribution-band")
   const frequency = el("div", "steptrace__distribution-frequency")
   frequency.setAttribute("role", "region")
@@ -280,7 +288,10 @@ export function makeDistributionSortView(frames: readonly DistributionSortFrame[
       bar.num.textContent = labels[barIndex]
       bar.bar.dataset.state =
         barIndex === frame.activeInput ? (frame.type === "tally" ? "increment" : "compare") : ""
-      bar.bar.setAttribute("aria-label", `input index ${barIndex}, value ${value}, token ${labels[barIndex]}`)
+      bar.bar.setAttribute(
+        "aria-label",
+        `input index ${barIndex}, value ${value}, token ${labels[barIndex]}`,
+      )
     })
     buckets.forEach(({ bucket, count, slots, key }, bucketIndex) => {
       const range = frequencyRangeFor(frame, bucketIndex)

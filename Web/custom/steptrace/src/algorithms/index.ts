@@ -45,6 +45,7 @@ import { monotonicStackAndQueue } from "./monotonic-stack-and-queue"
 import { nQueens } from "./n-queens"
 import { prim } from "./prim"
 import { prefixSum } from "./prefix-sum"
+import { queue } from "./queue"
 import { quickSort } from "./quick-sort"
 import { radixSort } from "./radix-sort"
 import { rabinKarp } from "./rabin-karp"
@@ -126,3 +127,5 @@ export const builtInAlgorithms = [
   ahoCorasick,
   ternarySearchTree,
 ] satisfies readonly BuiltInAlgorithm[]
+
+export const interactiveStructures = [queue] as const

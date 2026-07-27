@@ -29,7 +29,7 @@ export function makeBars(stage, n) {
     bar.style.setProperty("--_i", String(k))
     const fill = el("div", "steptrace__fill")
     const check = el("div", "steptrace__check")
-    check.innerHTML = ICON.check
+    check.append(successMarker())
     check.setAttribute("aria-hidden", "true")
     const probe = el("div", "steptrace__probe")
     probe.innerHTML = ICON.search
@@ -676,22 +676,20 @@ export function makeBoundarySearchView(frames, descriptor: BoundarySearchViewDes
   evaluation.append(evaluationHead, lanes)
   root.append(domain, evaluation)
 
-  const legend = el("div", "steptrace__legend steptrace__boundary-legend")
-  legend.setAttribute("aria-label", "Monotone boundary states")
-  for (const [state, label] of [
-    ["range", "unknown candidate"],
-    ["infeasible", "known too small"],
-    ["feasible", "known feasible"],
-    ["probe", "current check"],
-  ]) {
-    const row = el("div", "steptrace__legend-row")
-    const swatch = el("span", "steptrace__boundary-legend-swatch")
-    swatch.dataset.state = state
-    const text = el("span")
-    text.textContent = label
-    row.append(swatch, text)
-    legend.append(row)
-  }
+  const legend = makeLegend(
+    [
+      ["range", "unknown candidate"],
+      ["infeasible", "known too small"],
+      ["feasible", "known feasible"],
+      ["probe", "current check"],
+    ].map(([state, label]) => ({
+      state,
+      label,
+      swatchClass: "steptrace__boundary-legend-swatch",
+    })),
+    "Monotone boundary states",
+    "steptrace__boundary-legend",
+  )
 
   const status = statusEl()
 
@@ -782,9 +780,7 @@ export function makeMatchView(frames) {
 
   const text = frames[0].text
   const pattern = frames[0].pattern
-  const hasHash = frames.some((f) => f.hash) // rabin-karp only ⇒ constant rows
 
-  const hashBadge = el("div", "steptrace__hash")
   const textRow = el("div", "steptrace__cells")
   const tcells = []
   for (let k = 0; k < text.length; k++) {
@@ -839,13 +835,6 @@ export function makeMatchView(frames) {
       tcells[frame.cmpT].dataset.state = frame.cmpResult || "probe"
     if (frame.cmpP != null && pcells[frame.cmpP])
       pcells[frame.cmpP].dataset.state = frame.cmpResult || "probe"
-    // rabin-karp only: the badge is always present (constant height ⇒ no jitter);
-    // frames without a live hash keep the row via a non-breaking placeholder.
-    if (hasHash) {
-      hashBadge.textContent = frame.hash
-        ? `window hash ${frame.hash.window} ${frame.hash.window === frame.hash.pattern ? "=" : "≠"} pattern hash ${frame.hash.pattern}`
-        : " "
-    }
     status.innerHTML =
       escapeHtml(frame.message) + ` <span class="steptrace__counts">· step ${i + 1}/${total}</span>`
   }
@@ -855,19 +844,10 @@ export function makeMatchView(frames) {
       { k: "shift", v: String(frame.shift), sw: "var(--_blue)" },
       { k: "matches", v: String(frame.found.length), sw: "var(--_green)" },
     ]
-    if (hasHash) {
-      rows.push({
-        k: "hash",
-        v: frame.hash ? `${frame.hash.window} / ${frame.hash.pattern}` : "—",
-        sw: "var(--_amber)",
-      })
-    }
     return rows
   }
 
-  // hash badge (if any) is placed AFTER the stage ⇒ it renders below the viz.
-  const nodes = hasHash ? [stage, hashBadge, status] : [stage, status]
-  return { nodes, paint, watch, destroy: () => ro && ro.disconnect() }
+  return { nodes: [stage, status], paint, watch, destroy: () => ro && ro.disconnect() }
 }
 
 function makeBoyerMooreView(frames) {
@@ -889,7 +869,7 @@ function makeBoyerMooreView(frames) {
     const cue = el("span", "steptrace__bm-compare-icon")
     cue.setAttribute("aria-hidden", "true")
     const matchIcon = el("span", "steptrace__bm-icon steptrace__bm-icon--match")
-    matchIcon.innerHTML = ICON.check
+    matchIcon.append(successMarker())
     matchIcon.setAttribute("aria-hidden", "true")
     const mismatchIcon = el("span", "steptrace__bm-icon steptrace__bm-icon--mismatch")
     mismatchIcon.innerHTML = ICON.x
@@ -1359,7 +1339,7 @@ export const lcsMatrixGridSemantics: MatrixGridViewSemantics = {
 
 function paintMatrixRoleBadge(element: HTMLElement, descriptor: MatrixGridRoleDescriptor) {
   element.dataset.role = descriptor.role
-  element.textContent = descriptor.badge
+  element.replaceChildren(descriptor.badge === "success" ? successMarker() : descriptor.badge)
   element.title = descriptor.label
 }
 
@@ -1377,21 +1357,6 @@ function roleDescriptor(
   const descriptor = descriptors.find((candidate) => candidate.role === role)
   if (!descriptor) throw new Error(`steptrace: matrix role "${role}" is not described.`)
   return descriptor
-}
-
-export function makeMatrixRoleLegend(descriptors: readonly MatrixGridRoleDescriptor[]) {
-  const root = el("aside", "steptrace__legend-wrap steptrace__matrix-role-legend")
-  root.setAttribute("aria-label", "Matrix role legend")
-  const items = el("ul", "steptrace__legend steptrace__matrix-role-legend-items")
-  for (const descriptor of descriptors) {
-    const item = el("li", "steptrace__legend-row steptrace__matrix-role-legend-item")
-    const label = el("span", "steptrace__matrix-role-legend-label")
-    label.textContent = descriptor.label
-    item.append(makeMatrixRoleBadge(descriptor), label)
-    items.append(item)
-  }
-  root.append(items)
-  return root
 }
 
 function makeMatrixFooter(
@@ -1431,18 +1396,6 @@ export function makeDPStoryView(frames) {
   return frames[0].problem === "coin-change"
     ? makeCoinChangeStoryView(frames)
     : makeGridPathStoryView(frames)
-}
-
-function makeStoryLegend(items) {
-  const legend = el("div", "steptrace__legend")
-  for (const [state, label] of items) {
-    const row = el("div", "steptrace__legend-row")
-    const swatch = el("span", "steptrace__swatch steptrace__dp-story-swatch")
-    swatch.dataset.state = state
-    row.append(swatch, document.createTextNode(label))
-    legend.append(row)
-  }
-  return legend
 }
 
 function makeCoinChangeStoryView(frames) {
@@ -1514,7 +1467,14 @@ function makeCoinChangeStoryView(frames) {
             ["repeated", "repeated subproblem"],
             ["best", "best exact change"],
           ]
-  const legend = makeStoryLegend(legendItems)
+  const legend = makeLegend(
+    legendItems.map(([state, label]) => ({
+      state,
+      label,
+      swatchClass: "steptrace__swatch steptrace__dp-story-swatch",
+    })),
+    "Dynamic-programming state legend",
+  )
 
   function paintTray(frame) {
     if (!tray) return
@@ -1786,7 +1746,14 @@ function makeGridPathStoryView(frames) {
             ["repeated", "tile reached again"],
             ["best", "best complete route"],
           ]
-  const legend = makeStoryLegend(legendItems)
+  const legend = makeLegend(
+    legendItems.map(([state, label]) => ({
+      state,
+      label,
+      swatchClass: "steptrace__swatch steptrace__dp-story-swatch",
+    })),
+    "Dynamic-programming state legend",
+  )
 
   return {
     nodes: [table, legend, status],
@@ -1989,9 +1956,14 @@ export function makeDPView(frames, semantics = lcsMatrixGridSemantics) {
         const target = makeMatrixRoleBadge(roleDescriptor(roleLegend, "target"))
         markers.append(operandA, operandB, target)
         td.append(value, markers)
-        rowCells.push({ td, value, target })
+        rowCells.push({ td, value, target, pathMarker: null })
       } else {
-        rowCells.push({ td, value: td, target: null })
+        const value = el("span", "steptrace__dp-value")
+        const pathMarker = el("span", "steptrace__dp-path-marker")
+        pathMarker.append(successMarker())
+        pathMarker.hidden = true
+        td.append(value, pathMarker)
+        rowCells.push({ td, value, target: null, pathMarker })
       }
       tr.append(td)
     }
@@ -2002,7 +1974,21 @@ export function makeDPView(frames, semantics = lcsMatrixGridSemantics) {
   const footer = semantics.footerModel ? makeMatrixFooter(table, C + 1, roleLegend) : null
   const wrap = el("div", `steptrace__dp-wrap${guided ? " steptrace__dp-wrap--guided" : ""}`)
   wrap.append(table)
-  const legend = roleLegend.length ? makeMatrixRoleLegend(roleLegend) : null
+  const legend = roleLegend.length
+    ? makeLegend(
+        roleLegend.map((descriptor) => ({
+          label: descriptor.label,
+          swatchClass: "steptrace__matrix-role-badge",
+          role: descriptor.role,
+          marker:
+            descriptor.badge === "success"
+              ? successMarker()
+              : document.createTextNode(descriptor.badge),
+        })),
+        "Matrix role legend",
+        "steptrace__matrix-role-legend",
+      )
+    : null
   const stage = guided ? el("div", "steptrace__dp-stage steptrace__dp-stage--guided") : null
   if (stage) stage.append(wrap)
   const status = statusEl()
@@ -2018,10 +2004,12 @@ export function makeDPView(frames, semantics = lcsMatrixGridSemantics) {
     }
     for (let r = 0; r < R; r++) {
       for (let c = 0; c < C; c++) {
-        const { td, value, target } = cellEls[r][c]
+        const { td, value, target, pathMarker } = cellEls[r][c]
         const v = frame.grid[r][c]
         value.textContent = semantics.formatValue(v)
-        td.dataset.state = semantics.stateForCell(frame, r, c)
+        const state = semantics.stateForCell(frame, r, c)
+        td.dataset.state = state
+        if (pathMarker) pathMarker.hidden = state !== "path"
         td.dataset.roles = (semantics.rolesForCell?.(frame, r, c) || []).join(" ")
         const decision = semantics.decisionForCell?.(frame, r, c) || ""
         if (decision) td.dataset.decision = decision
@@ -2590,15 +2578,14 @@ export function makeExecutionTreeView(frames, descriptor: ExecutionTreeViewDescr
 
   if (descriptor.centerVisible) treeLayer.style.transform = centerTransform(f0.visible)
 
-  const legend = el("div", "steptrace__legend")
-  legend.setAttribute("aria-label", `${descriptor.ariaLabel} state legend`)
-  for (const item of descriptor.legend) {
-    const row = el("div", "steptrace__legend-row")
-    const swatch = el("span", "steptrace__swatch steptrace__rtswatch")
-    swatch.dataset.state = item.state
-    row.append(swatch, document.createTextNode(item.label))
-    legend.append(row)
-  }
+  const legend = makeLegend(
+    descriptor.legend.map((item) => ({
+      label: item.label,
+      state: item.state,
+      swatchClass: "steptrace__swatch steptrace__rtswatch",
+    })),
+    `${descriptor.ariaLabel} state legend`,
+  )
 
   const wrap = el("div", "steptrace__rectree")
   wrap.setAttribute("role", "region")
@@ -2846,21 +2833,18 @@ export function makeGraphView(frames, graph, frontierLabel) {
   // legend is returned as its own node so the stage column can pin it to its
   // bottom edge; the live queue + visited set move to the rail WATCH (see
   // watch() below), matching the other renderers' rails.
-  const legend = el("div", "steptrace__legend")
-  for (const [word, stateKey] of [
-    ["current", "current"],
-    ["frontier", "frontier"],
-    ["visited", "visited"],
-  ]) {
-    const row = el("div", "steptrace__legend-row")
-    const sw = el("span", "steptrace__swatch steptrace__swatch--" + stateKey)
-    if (stateKey === "visited") {
-      sw.append(successMarker())
-      sw.setAttribute("aria-hidden", "true")
-    }
-    row.append(sw, document.createTextNode(word))
-    legend.append(row)
-  }
+  const legend = makeLegend(
+    [
+      { label: "current", swatchClass: "steptrace__swatch steptrace__swatch--current" },
+      { label: "frontier", swatchClass: "steptrace__swatch steptrace__swatch--frontier" },
+      {
+        label: "visited",
+        swatchClass: "steptrace__swatch steptrace__swatch--visited",
+        marker: successMarker(),
+      },
+    ],
+    "Graph state legend",
+  )
 
   const graphWrap = el("div", "steptrace__graph")
   graphWrap.append(svg)
@@ -2936,6 +2920,27 @@ export function statusEl() {
   return status
 }
 
+export function makeLegend(items, ariaLabel, extraClass = "") {
+  const legend = el("div", `steptrace__legend${extraClass ? ` ${extraClass}` : ""}`)
+  legend.setAttribute("role", "list")
+  legend.setAttribute("aria-label", ariaLabel)
+  for (const item of items) {
+    const row = el("span", "steptrace__legend-row")
+    row.setAttribute("role", "listitem")
+    const swatch = el(
+      "span",
+      `steptrace__legend-swatch${item.swatchClass ? ` ${item.swatchClass}` : ""}`,
+    )
+    if (item.state) swatch.dataset.state = item.state
+    if (item.role) swatch.dataset.role = item.role
+    if (item.color) swatch.style.setProperty("--_legend-color", item.color)
+    if (item.marker) swatch.append(item.marker)
+    row.append(swatch, document.createTextNode(item.label))
+    legend.append(row)
+  }
+  return legend
+}
+
 export function el(tag, cls = "") {
   const n = document.createElement(tag)
   if (cls) n.className = cls
@@ -2985,7 +2990,6 @@ export const ICON = {
     '<svg class="lucide lucide-pause" viewBox="0 0 24 24"><rect x="14" y="3" width="5" height="18" rx="1"/><rect x="5" y="3" width="5" height="18" rx="1"/></svg>',
   kebab:
     '<svg class="lucide lucide-ellipsis" viewBox="0 0 24 24"><circle cx="12" cy="12" r="1"/><circle cx="19" cy="12" r="1"/><circle cx="5" cy="12" r="1"/></svg>',
-  check: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="${CHECK_PATH}"/></svg>`,
   x: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.8" stroke-linecap="round"><path d="M6 6l12 12"/><path d="M18 6 6 18"/></svg>',
   compare:
     '<svg class="steptrace__cue-compare" viewBox="0 0 24 24" aria-hidden="true"><path d="m7 16-4-4 4-4"/><path d="M3 12h18"/><path d="m17 8 4 4-4 4"/></svg>',

@@ -16197,7 +16197,8 @@ function createMount(registry2, structures = []) {
       }
       const chapter = milestoneAt(currentMilestones, i);
       phaseName.textContent = chapter ? chapter.label : "Step";
-      phaseCopy.textContent = stripTags(player.frames[i].message);
+      const currentFrame = player.frames[i];
+      phaseCopy.textContent = state.algorithm === "rabin-karp" && currentFrame.type === "hash" ? "" : stripTags(currentFrame.message);
       scrub.setAttribute("aria-valuetext", `${phaseName.textContent}, step ${i + 1} of ${total}`);
       for (let k = 0; k < milestoneLayer.children.length; k++) {
         const step = Number(milestoneLayer.children[k].dataset.step);

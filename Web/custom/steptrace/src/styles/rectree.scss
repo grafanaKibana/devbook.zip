@@ -43,10 +43,6 @@
   margin-inline: auto;
 }
 
-.steptrace .steptrace__rectree[data-profile="branch-and-bound"] {
-  overflow-x: hidden;
-}
-
 .steptrace
   .steptrace__rectree[data-profile="branch-and-bound"]
   :is(.steptrace__rtedge, .steptrace__rtnode)[data-vis="0"] {
@@ -55,18 +51,12 @@
 }
 
 @media (min-width: 561px) {
-  :is(
-      .steptrace--stable-stage,
-      .steptrace--tabs .steptrace__tabpanel-body.steptrace
-    )
+  :is(.steptrace--stable-stage, .steptrace--tabs .steptrace__tabpanel-body.steptrace)
     .steptrace__rectree[data-fit-width="true"] {
     block-size: 100%;
   }
 
-  :is(
-      .steptrace--stable-stage,
-      .steptrace--tabs .steptrace__tabpanel-body.steptrace
-    )
+  :is(.steptrace--stable-stage, .steptrace--tabs .steptrace__tabpanel-body.steptrace)
     .steptrace__rectree[data-fit-width="true"]
     .steptrace__rtsvg {
     max-block-size: 100%;
@@ -185,9 +175,13 @@
 }
 
 .steptrace
-  .steptrace__rectree[data-profile="merge-sort"]
+  .steptrace__rectree[data-profile="branch-and-bound"]
   .steptrace__rtnode
-  .steptrace__rtlabel {
+  .steptrace__rtdetail {
+  font-size: 9.5px;
+}
+
+.steptrace .steptrace__rectree[data-profile="merge-sort"] .steptrace__rtnode .steptrace__rtlabel {
   fill: var(--_muted);
   font: 400 9px/1 var(--_font-mono);
 }
@@ -212,10 +206,6 @@
 .steptrace .steptrace__rtnode[data-shape="card"] .steptrace__rtval,
 .steptrace .steptrace__rtnode[data-shape="card"] .steptrace__rtbadge {
   display: none;
-}
-
-.steptrace .steptrace__rectree + .steptrace__legend {
-  margin-top: 0.4rem;
 }
 
 .steptrace .steptrace__rtnode[data-state="call"] .steptrace__rtcirc,
