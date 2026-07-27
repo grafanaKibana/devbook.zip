@@ -1280,6 +1280,7 @@ test("styles are compiled from real SCSS without runtime injection", () => {
   assert.match(obsidianCss, /--st-table-text: var\(--text-normal\)/)
   assert.match(obsidianCss, /--st-held-bg: #fbbf24/)
   assert.match(obsidianCss, /--st-held-fg: #1f2937/)
+  assert.match(obsidianHostStyles, /\.theme-dark \.steptrace \{[^}]*--st-panel-shadow: rgb\(0 0 0 \/ 0\.32\);/s)
   assert.match(
     obsidianHostStyles,
     /\.steptrace button\.steptrace__btn \{[^}]*appearance: none;[^}]*border: 0;[^}]*background: transparent;[^}]*box-shadow: none;/s,
@@ -1292,6 +1293,22 @@ test("styles are compiled from real SCSS without runtime injection", () => {
   assert.match(quartzHostStyles, /--st-table-text: var\(--darkgray\)/)
   assert.match(quartzHostStyles, /--st-held-bg: #fbbf24/)
   assert.match(quartzHostStyles, /--st-held-fg: #1f2937/)
+  assert.match(
+    quartzHostStyles,
+    /:root\[saved-theme="dark"\] \.steptrace \{[^}]*--st-panel-shadow: rgb\(0 0 0 \/ 0\.32\);/s,
+  )
+  assert.match(
+    sharedStyles,
+    /\.steptrace__foot \{[^}]*padding: 0\.65rem;[^}]*border-radius: 0\.85rem;[^}]*box-shadow: 0 8px 24px var\(--_panel-shadow\);/s,
+  )
+  assert.match(
+    sharedStyles,
+    /\.steptrace__btn \{[^}]*width: 2\.5rem;[^}]*height: 2\.5rem;[^}]*flex: 0 0 2\.5rem;/s,
+  )
+  assert.match(
+    sharedStyles,
+    /@media \(hover: none\), \(pointer: coarse\) \{[^}]*\.steptrace__btn,[\s\S]*width: 2\.75rem;[\s\S]*height: 2\.75rem;/s,
+  )
   assert.doesNotMatch(engine, /steptrace-engine-style|const STYLES|injectStyle/)
   assert.match(quartzCss, /\.steptrace__marker-body/)
   assert.match(quartzCss, /color:\s*var\(--_held-fg\)/)

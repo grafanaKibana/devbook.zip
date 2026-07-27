@@ -17,6 +17,7 @@
     var(--interactive-accent-hover)
   );
   --st-on-accent: var(--text-on-accent);
+  --st-panel-shadow: rgb(0 0 0 / 0.12);
   --st-neutral: var(--text-faint);
   --st-state-amber: #d97706;
   --st-state-violet: #7c3aed;
@@ -30,6 +31,7 @@
 }
 
 .theme-dark .steptrace {
+  --st-panel-shadow: rgb(0 0 0 / 0.32);
   --st-state-amber: #f59e0b;
   --st-state-violet: #a78bfa;
   --st-state-blue: #60a5fa;

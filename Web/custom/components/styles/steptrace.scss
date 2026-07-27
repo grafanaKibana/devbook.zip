@@ -13,6 +13,7 @@
   --st-accent: var(--secondary);
   --st-accent-gradient: var(--accent-gradient);
   --st-on-accent: var(--light);
+  --st-panel-shadow: rgb(0 0 0 / 0.12);
   --st-neutral: var(--gray);
   --st-state-amber: #d97706;
   --st-state-violet: #7c3aed;
@@ -26,6 +27,7 @@
 }
 
 :root[saved-theme="dark"] .steptrace {
+  --st-panel-shadow: rgb(0 0 0 / 0.32);
   --st-state-amber: #f59e0b;
   --st-state-violet: #a78bfa;
   --st-state-blue: #60a5fa;
