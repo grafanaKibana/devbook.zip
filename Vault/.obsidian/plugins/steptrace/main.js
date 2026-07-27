@@ -49,7 +49,7 @@ function sequence(beats, budgetMs, startNow, minGapMs = SEQUENCE_MIN_GAP_MS) {
   const budget = Math.max(budgetMs, 0);
   let prev = -Infinity;
   let group = startNow;
-  const queue = beats.map((beat) => ({ at: startNow + Math.max(0, beat.at) * budget, run: beat.run })).sort((a, b) => a.at - b.at).map((beat) => {
+  const queue2 = beats.map((beat) => ({ at: startNow + Math.max(0, beat.at) * budget, run: beat.run })).sort((a, b) => a.at - b.at).map((beat) => {
     const fireAt = beat.at - prev < minGapMs ? group : group = beat.at;
     prev = beat.at;
     return { fireAt, run: beat.run };
@@ -59,15 +59,15 @@ function sequence(beats, budgetMs, startNow, minGapMs = SEQUENCE_MIN_GAP_MS) {
   return {
     tick(now) {
       if (cancelled) return false;
-      while (index < queue.length && now >= queue[index].fireAt) queue[index++].run();
-      return index < queue.length;
+      while (index < queue2.length && now >= queue2[index].fireAt) queue2[index++].run();
+      return index < queue2.length;
     },
     cancel() {
       cancelled = true;
-      index = queue.length;
+      index = queue2.length;
     },
     get pending() {
-      return queue.length - index;
+      return queue2.length - index;
     }
   };
 }
@@ -91,7 +91,7 @@ function makeBars(stage, n) {
     bar.style.setProperty("--_i", String(k));
     const fill = el("div", "steptrace__fill");
     const check = el("div", "steptrace__check");
-    check.innerHTML = ICON.check;
+    check.append(successMarker());
     check.setAttribute("aria-hidden", "true");
     const probe = el("div", "steptrace__probe");
     probe.innerHTML = ICON.search;
@@ -592,22 +592,20 @@ function makeBoundarySearchView(frames, descriptor) {
   lanes.append(overflow);
   evaluation.append(evaluationHead, lanes);
   root.append(domain, evaluation);
-  const legend = el("div", "steptrace__legend steptrace__boundary-legend");
-  legend.setAttribute("aria-label", "Monotone boundary states");
-  for (const [state, label] of [
-    ["range", "unknown candidate"],
-    ["infeasible", "known too small"],
-    ["feasible", "known feasible"],
-    ["probe", "current check"]
-  ]) {
-    const row = el("div", "steptrace__legend-row");
-    const swatch = el("span", "steptrace__boundary-legend-swatch");
-    swatch.dataset.state = state;
-    const text = el("span");
-    text.textContent = label;
-    row.append(swatch, text);
-    legend.append(row);
-  }
+  const legend = makeLegend(
+    [
+      ["range", "unknown candidate"],
+      ["infeasible", "known too small"],
+      ["feasible", "known feasible"],
+      ["probe", "current check"]
+    ].map(([state, label]) => ({
+      state,
+      label,
+      swatchClass: "steptrace__boundary-legend-swatch"
+    })),
+    "Monotone boundary states",
+    "steptrace__boundary-legend"
+  );
   const status = statusEl();
   function packageTokens(container, items) {
     const tokens = items.map((weight) => {
@@ -674,8 +672,6 @@ function makeMatchView(frames) {
   if (frames[0].profile === "boyer-moore") return makeBoyerMooreView(frames);
   const text = frames[0].text;
   const pattern = frames[0].pattern;
-  const hasHash = frames.some((f) => f.hash);
-  const hashBadge = el("div", "steptrace__hash");
   const textRow = el("div", "steptrace__cells");
   const tcells = [];
   for (let k = 0; k < text.length; k++) {
@@ -720,9 +716,6 @@ function makeMatchView(frames) {
       tcells[frame.cmpT].dataset.state = frame.cmpResult || "probe";
     if (frame.cmpP != null && pcells[frame.cmpP])
       pcells[frame.cmpP].dataset.state = frame.cmpResult || "probe";
-    if (hasHash) {
-      hashBadge.textContent = frame.hash ? `window hash ${frame.hash.window} ${frame.hash.window === frame.hash.pattern ? "=" : "≠"} pattern hash ${frame.hash.pattern}` : " ";
-    }
     status.innerHTML = escapeHtml(frame.message) + ` <span class="steptrace__counts">· step ${i + 1}/${total}</span>`;
   }
   function watch(frame) {
@@ -730,17 +723,9 @@ function makeMatchView(frames) {
       { k: "shift", v: String(frame.shift), sw: "var(--_blue)" },
       { k: "matches", v: String(frame.found.length), sw: "var(--_green)" }
     ];
-    if (hasHash) {
-      rows.push({
-        k: "hash",
-        v: frame.hash ? `${frame.hash.window} / ${frame.hash.pattern}` : "—",
-        sw: "var(--_amber)"
-      });
-    }
     return rows;
   }
-  const nodes5 = hasHash ? [stage, hashBadge, status] : [stage, status];
-  return { nodes: nodes5, paint, watch, destroy: () => ro && ro.disconnect() };
+  return { nodes: [stage, status], paint, watch, destroy: () => ro && ro.disconnect() };
 }
 function makeBoyerMooreView(frames) {
   const first = frames[0];
@@ -760,7 +745,7 @@ function makeBoyerMooreView(frames) {
     const cue = el("span", "steptrace__bm-compare-icon");
     cue.setAttribute("aria-hidden", "true");
     const matchIcon = el("span", "steptrace__bm-icon steptrace__bm-icon--match");
-    matchIcon.innerHTML = ICON.check;
+    matchIcon.append(successMarker());
     matchIcon.setAttribute("aria-hidden", "true");
     const mismatchIcon = el("span", "steptrace__bm-icon steptrace__bm-icon--mismatch");
     mismatchIcon.innerHTML = ICON.x;
@@ -1099,7 +1084,7 @@ function makePointerView(frames) {
 }
 function paintMatrixRoleBadge(element, descriptor) {
   element.dataset.role = descriptor.role;
-  element.textContent = descriptor.badge;
+  element.replaceChildren(descriptor.badge === "success" ? successMarker() : descriptor.badge);
   element.title = descriptor.label;
 }
 function makeMatrixRoleBadge(descriptor) {
@@ -1112,20 +1097,6 @@ function roleDescriptor(descriptors, role) {
   const descriptor = descriptors.find((candidate) => candidate.role === role);
   if (!descriptor) throw new Error(`steptrace: matrix role "${role}" is not described.`);
   return descriptor;
-}
-function makeMatrixRoleLegend(descriptors) {
-  const root = el("aside", "steptrace__legend-wrap steptrace__matrix-role-legend");
-  root.setAttribute("aria-label", "Matrix role legend");
-  const items = el("ul", "steptrace__legend steptrace__matrix-role-legend-items");
-  for (const descriptor of descriptors) {
-    const item = el("li", "steptrace__legend-row steptrace__matrix-role-legend-item");
-    const label = el("span", "steptrace__matrix-role-legend-label");
-    label.textContent = descriptor.label;
-    item.append(makeMatrixRoleBadge(descriptor), label);
-    items.append(item);
-  }
-  root.append(items);
-  return root;
 }
 function makeMatrixFooter(table, columnCount, descriptors) {
   const root = document.createElement("tfoot");
@@ -1156,17 +1127,6 @@ function makeMatrixFooter(table, columnCount, descriptors) {
 function makeDPStoryView(frames) {
   return frames[0].problem === "coin-change" ? makeCoinChangeStoryView(frames) : makeGridPathStoryView(frames);
 }
-function makeStoryLegend(items) {
-  const legend = el("div", "steptrace__legend");
-  for (const [state, label] of items) {
-    const row = el("div", "steptrace__legend-row");
-    const swatch = el("span", "steptrace__swatch steptrace__dp-story-swatch");
-    swatch.dataset.state = state;
-    row.append(swatch, document.createTextNode(label));
-    legend.append(row);
-  }
-  return legend;
-}
 function makeCoinChangeStoryView(frames) {
   const first = frames[0];
   const root = el("div", "steptrace__dp-story");
@@ -1178,15 +1138,15 @@ function makeCoinChangeStoryView(frames) {
   const contextEnd = el("span", "steptrace__dp-story-context-end");
   context.append(contextStart, contextEnd);
   const stage = el("div", "steptrace__dp-story-stage");
-  const rack2 = el("div", "steptrace__coin-rack");
+  const rack = el("div", "steptrace__coin-rack");
   const coinElements = first.coins.map((coin) => {
     const element = el("span", "steptrace__coin");
     element.textContent = `${coin}¢`;
     element.dataset.coin = String(coin);
-    rack2.append(element);
+    rack.append(element);
     return element;
   });
-  stage.append(rack2);
+  stage.append(rack);
   root.append(context, stage);
   const status = statusEl();
   const tray = first.approach === "tabulation" ? null : el("div", "steptrace__coin-tray");
@@ -1227,7 +1187,14 @@ function makeCoinChangeStoryView(frames) {
     ["repeated", "repeated subproblem"],
     ["best", "best exact change"]
   ];
-  const legend = makeStoryLegend(legendItems);
+  const legend = makeLegend(
+    legendItems.map(([state, label]) => ({
+      state,
+      label,
+      swatchClass: "steptrace__swatch steptrace__dp-story-swatch"
+    })),
+    "Dynamic-programming state legend"
+  );
   function paintTray(frame) {
     if (!tray) return;
     tray.replaceChildren();
@@ -1458,7 +1425,14 @@ function makeGridPathStoryView(frames) {
     ["repeated", "tile reached again"],
     ["best", "best complete route"]
   ];
-  const legend = makeStoryLegend(legendItems);
+  const legend = makeLegend(
+    legendItems.map(([state, label]) => ({
+      state,
+      label,
+      swatchClass: "steptrace__swatch steptrace__dp-story-swatch"
+    })),
+    "Dynamic-programming state legend"
+  );
   return {
     nodes: [table, legend, status],
     stageLayout: "fill",
@@ -1625,9 +1599,14 @@ function makeDPView(frames, semantics = lcsMatrixGridSemantics) {
         const target = makeMatrixRoleBadge(roleDescriptor(roleLegend, "target"));
         markers.append(operandA, operandB, target);
         td.append(value, markers);
-        rowCells.push({ td, value, target });
+        rowCells.push({ td, value, target, pathMarker: null });
       } else {
-        rowCells.push({ td, value: td, target: null });
+        const value = el("span", "steptrace__dp-value");
+        const pathMarker = el("span", "steptrace__dp-path-marker");
+        pathMarker.append(successMarker());
+        pathMarker.hidden = true;
+        td.append(value, pathMarker);
+        rowCells.push({ td, value, target: null, pathMarker });
       }
       tr.append(td);
     }
@@ -1638,7 +1617,16 @@ function makeDPView(frames, semantics = lcsMatrixGridSemantics) {
   const footer = semantics.footerModel ? makeMatrixFooter(table, C + 1, roleLegend) : null;
   const wrap = el("div", `steptrace__dp-wrap${guided ? " steptrace__dp-wrap--guided" : ""}`);
   wrap.append(table);
-  const legend = roleLegend.length ? makeMatrixRoleLegend(roleLegend) : null;
+  const legend = roleLegend.length ? makeLegend(
+    roleLegend.map((descriptor) => ({
+      label: descriptor.label,
+      swatchClass: "steptrace__matrix-role-badge",
+      role: descriptor.role,
+      marker: descriptor.badge === "success" ? successMarker() : document.createTextNode(descriptor.badge)
+    })),
+    "Matrix role legend",
+    "steptrace__matrix-role-legend"
+  ) : null;
   const stage = guided ? el("div", "steptrace__dp-stage steptrace__dp-stage--guided") : null;
   if (stage) stage.append(wrap);
   const status = statusEl();
@@ -1653,10 +1641,12 @@ function makeDPView(frames, semantics = lcsMatrixGridSemantics) {
     }
     for (let r = 0; r < R2; r++) {
       for (let c = 0; c < C; c++) {
-        const { td, value, target } = cellEls[r][c];
+        const { td, value, target, pathMarker } = cellEls[r][c];
         const v = frame.grid[r][c];
         value.textContent = semantics.formatValue(v);
-        td.dataset.state = semantics.stateForCell(frame, r, c);
+        const state = semantics.stateForCell(frame, r, c);
+        td.dataset.state = state;
+        if (pathMarker) pathMarker.hidden = state !== "path";
         td.dataset.roles = (semantics.rolesForCell?.(frame, r, c) || []).join(" ");
         const decision = semantics.decisionForCell?.(frame, r, c) || "";
         if (decision) td.dataset.decision = decision;
@@ -2136,15 +2126,14 @@ function makeExecutionTreeView(frames, descriptor) {
     return `translate(${offset.x}px, ${offset.y}px)`;
   }
   if (descriptor.centerVisible) treeLayer.style.transform = centerTransform(f0.visible);
-  const legend = el("div", "steptrace__legend");
-  legend.setAttribute("aria-label", `${descriptor.ariaLabel} state legend`);
-  for (const item of descriptor.legend) {
-    const row = el("div", "steptrace__legend-row");
-    const swatch = el("span", "steptrace__swatch steptrace__rtswatch");
-    swatch.dataset.state = item.state;
-    row.append(swatch, document.createTextNode(item.label));
-    legend.append(row);
-  }
+  const legend = makeLegend(
+    descriptor.legend.map((item) => ({
+      label: item.label,
+      state: item.state,
+      swatchClass: "steptrace__swatch steptrace__rtswatch"
+    })),
+    `${descriptor.ariaLabel} state legend`
+  );
   const wrap = el("div", "steptrace__rectree");
   wrap.setAttribute("role", "region");
   wrap.setAttribute("aria-label", `${descriptor.ariaLabel} visualization`);
@@ -2310,21 +2299,18 @@ function makeGraphView(frames, graph, frontierLabel) {
     svg.append(g);
     nodeEls[n.id] = { g, dist, mark };
   }
-  const legend = el("div", "steptrace__legend");
-  for (const [word, stateKey] of [
-    ["current", "current"],
-    ["frontier", "frontier"],
-    ["visited", "visited"]
-  ]) {
-    const row = el("div", "steptrace__legend-row");
-    const sw = el("span", "steptrace__swatch steptrace__swatch--" + stateKey);
-    if (stateKey === "visited") {
-      sw.append(successMarker());
-      sw.setAttribute("aria-hidden", "true");
-    }
-    row.append(sw, document.createTextNode(word));
-    legend.append(row);
-  }
+  const legend = makeLegend(
+    [
+      { label: "current", swatchClass: "steptrace__swatch steptrace__swatch--current" },
+      { label: "frontier", swatchClass: "steptrace__swatch steptrace__swatch--frontier" },
+      {
+        label: "visited",
+        swatchClass: "steptrace__swatch steptrace__swatch--visited",
+        marker: successMarker()
+      }
+    ],
+    "Graph state legend"
+  );
   const graphWrap = el("div", "steptrace__graph");
   graphWrap.append(svg);
   const status = statusEl();
@@ -2384,6 +2370,26 @@ function statusEl() {
   status.setAttribute("role", "status");
   status.setAttribute("aria-live", "polite");
   return status;
+}
+function makeLegend(items, ariaLabel, extraClass = "") {
+  const legend = el("div", `steptrace__legend${extraClass ? ` ${extraClass}` : ""}`);
+  legend.setAttribute("role", "list");
+  legend.setAttribute("aria-label", ariaLabel);
+  for (const item of items) {
+    const row = el("span", "steptrace__legend-row");
+    row.setAttribute("role", "listitem");
+    const swatch = el(
+      "span",
+      `steptrace__legend-swatch${item.swatchClass ? ` ${item.swatchClass}` : ""}`
+    );
+    if (item.state) swatch.dataset.state = item.state;
+    if (item.role) swatch.dataset.role = item.role;
+    if (item.color) swatch.style.setProperty("--_legend-color", item.color);
+    if (item.marker) swatch.append(item.marker);
+    row.append(swatch, document.createTextNode(item.label));
+    legend.append(row);
+  }
+  return legend;
 }
 function el(tag, cls = "") {
   const n = document.createElement(tag);
@@ -2877,7 +2883,6 @@ var init_render = __esm({
       play: '<svg class="lucide lucide-play" viewBox="0 0 24 24"><path d="M5 5a2 2 0 0 1 3.008-1.728l11.997 6.998a2 2 0 0 1 .003 3.458l-12 7A2 2 0 0 1 5 19z"/></svg>',
       pause: '<svg class="lucide lucide-pause" viewBox="0 0 24 24"><rect x="14" y="3" width="5" height="18" rx="1"/><rect x="5" y="3" width="5" height="18" rx="1"/></svg>',
       kebab: '<svg class="lucide lucide-ellipsis" viewBox="0 0 24 24"><circle cx="12" cy="12" r="1"/><circle cx="19" cy="12" r="1"/><circle cx="5" cy="12" r="1"/></svg>',
-      check: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="${CHECK_PATH}"/></svg>`,
       x: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.8" stroke-linecap="round"><path d="M6 6l12 12"/><path d="M18 6 6 18"/></svg>',
       compare: '<svg class="steptrace__cue-compare" viewBox="0 0 24 24" aria-hidden="true"><path d="m7 16-4-4 4-4"/><path d="M3 12h18"/><path d="m17 8 4 4-4 4"/></svg>',
       swap: '<svg class="steptrace__cue-swap" viewBox="0 0 24 24" aria-hidden="true"><path d="m2 9 3-3 3 3"/><path d="M13 18H7a2 2 0 0 1-2-2V6"/><path d="m22 15-3 3-3-3"/><path d="M11 6h6a2 2 0 0 1 2 2v10"/></svg>',
@@ -2980,7 +2985,6 @@ function makeIntervalTrackView(frames) {
     return band;
   });
   outputSection.append(outputLabel, outputLane);
-  const legend = el("div", "steptrace__legend steptrace__interval-legend");
   const legendItems = scheduling ? [
     ["next meeting", "candidate"],
     ["last accepted", "current"],
@@ -2991,15 +2995,15 @@ function makeIntervalTrackView(frames) {
     ["current merged block", "current"],
     ["emitted output", "output"]
   ];
-  for (const [label, state] of legendItems) {
-    const item = el("span", "steptrace__legend-row");
-    item.append(
-      el("i", `steptrace__interval-swatch steptrace__interval-swatch--${state}`),
-      document.createTextNode(label)
-    );
-    legend.append(item);
-  }
-  root.append(inputSection, currentSection, outputSection, legend);
+  const legend = makeLegend(
+    legendItems.map(([label, state]) => ({
+      label,
+      swatchClass: `steptrace__interval-swatch steptrace__interval-swatch--${state}`
+    })),
+    "Interval state legend",
+    "steptrace__interval-legend"
+  );
+  root.append(inputSection, currentSection, outputSection);
   const status = statusEl();
   function positionBand(band, interval) {
     band.style.setProperty("--_interval-start", String(interval[0] - minimum));
@@ -3072,7 +3076,7 @@ function makeIntervalTrackView(frames) {
     ];
   };
   return {
-    nodes: [root, status],
+    nodes: [root, legend, status],
     stageAlignment: "center",
     stableStage: true,
     paint,
@@ -3278,12 +3282,15 @@ function distance(a, b) {
   return Math.hypot(b.x - a.x, b.y - a.y);
 }
 function graphStateAdjacency(config) {
-  const result = new Map(config.nodes.map((node) => [node.id, []]));
+  const result = new Map(
+    config.nodes.map((node) => [node.id, []])
+  );
   for (const edge of config.edges) {
     result.get(edge.from).push({ to: edge.to, weight: edge.weight });
     if (!edge.directed) result.get(edge.to).push({ to: edge.from, weight: edge.weight });
   }
-  for (const neighbours of result.values()) neighbours.sort((left, right) => left.to.localeCompare(right.to));
+  for (const neighbours of result.values())
+    neighbours.sort((left, right) => left.to.localeCompare(right.to));
   return result;
 }
 function graphStateShortestDistances(nodes5, edges5, target) {
@@ -3474,7 +3481,13 @@ function buildingScenario() {
     ["D3", "Archive threshold", 421, 130],
     ["D4", "Ops threshold", 510, 240],
     ["D6", "Reception threshold", 100, 130]
-  ].map(([id, label, x, y]) => ({ id: String(id), label: String(label), x: Number(x), y: Number(y), h: 0 }));
+  ].map(([id, label, x, y]) => ({
+    id: String(id),
+    label: String(label),
+    x: Number(x),
+    y: Number(y),
+    h: 0
+  }));
   const pairs = [
     ["S", "W"],
     ["W", "D1"],
@@ -3514,10 +3527,24 @@ function buildingScenario() {
   ];
   const decor = rooms.flatMap(([x, y, width, height, text]) => [
     { kind: "rect", className: "steptrace__gs-room", x, y, width, height },
-    { kind: "text", className: "steptrace__gs-map-label", x: x + width / 2, y: y + height / 2, text }
+    {
+      kind: "text",
+      className: "steptrace__gs-map-label",
+      x: x + width / 2,
+      y: y + height / 2,
+      text
+    }
   ]);
   decor.push(
-    { kind: "rect", className: "steptrace__gs-closure", x: 346, y: 143, width: 28, height: 24, rx: 2 },
+    {
+      kind: "rect",
+      className: "steptrace__gs-closure",
+      x: 346,
+      y: 143,
+      width: 28,
+      height: 24,
+      rx: 2
+    },
     { kind: "text", className: "steptrace__gs-map-label", x: 360, y: 137, text: "LOCKED" }
   );
   return {
@@ -3539,7 +3566,13 @@ function midtownScenario() {
     nodes5.push({ id: `6-${street}`, label: `Sixth & W${street}`, x: 170, y, h: 0 });
     nodes5.push({ id: `7-${street}`, label: `Seventh & W${street}`, x: 405, y, h: 0 });
   }
-  for (const [id, x, y] of [["B47", 310, 28], ["B46", 356, 81], ["B44", 437, 175], ["B43", 480, 224], ["B42", 518, 268]]) {
+  for (const [id, x, y] of [
+    ["B47", 310, 28],
+    ["B46", 356, 81],
+    ["B44", 437, 175],
+    ["B43", 480, 224],
+    ["B42", 518, 268]
+  ]) {
     nodes5.push({ id, label: `Broadway ${id.slice(1)}`, x, y, h: 0 });
   }
   const pairs = [];
@@ -3577,17 +3610,47 @@ function midtownScenario() {
   const decor = [
     { kind: "path", className: "steptrace__gs-street", d: "M170 18 L170 300" },
     { kind: "path", className: "steptrace__gs-street", d: "M405 18 L405 300" },
-    ...Object.values(rows).map((y) => ({ kind: "path", className: "steptrace__gs-street", d: `M55 ${y} L575 ${y}` })),
+    ...Object.values(rows).map((y) => ({
+      kind: "path",
+      className: "steptrace__gs-street",
+      d: `M55 ${y} L575 ${y}`
+    })),
     { kind: "path", className: "steptrace__gs-street", d: "M310 28 L540 292" }
   ];
   for (const y of [61, 105, 149, 193, 237]) {
-    decor.push({ kind: "rect", className: "steptrace__gs-building", x: 70, y, width: 80, height: 18 });
+    decor.push({
+      kind: "rect",
+      className: "steptrace__gs-building",
+      x: 70,
+      y,
+      width: 80,
+      height: 18
+    });
   }
-  for (const [x, y, width] of [[190, 61, 120], [190, 105, 158], [190, 149, 195], [190, 193, 195], [190, 237, 195], [425, 61, 140], [425, 105, 140], [440, 149, 125], [480, 193, 85], [520, 237, 45]]) {
+  for (const [x, y, width] of [
+    [190, 61, 120],
+    [190, 105, 158],
+    [190, 149, 195],
+    [190, 193, 195],
+    [190, 237, 195],
+    [425, 61, 140],
+    [425, 105, 140],
+    [440, 149, 125],
+    [480, 193, 85],
+    [520, 237, 45]
+  ]) {
     decor.push({ kind: "rect", className: "steptrace__gs-building", x, y, width, height: 18 });
   }
   decor.push(
-    { kind: "rect", className: "steptrace__gs-closure", x: 272, y: 167, width: 62, height: 26, rx: 3 },
+    {
+      kind: "rect",
+      className: "steptrace__gs-closure",
+      x: 272,
+      y: 167,
+      width: 62,
+      height: 26,
+      rx: 3
+    },
     { kind: "text", className: "steptrace__gs-map-label", x: 303, y: 184, text: "W44 CLOSED" },
     { kind: "text", className: "steptrace__gs-road-direction", x: 150, y: 113, text: "↑" },
     { kind: "text", className: "steptrace__gs-road-direction", x: 425, y: 113, text: "↓" },
@@ -3624,29 +3687,27 @@ function svgElement(kind, attributes = {}) {
 }
 function decorElement(shape) {
   const className = shape.className;
-  if (shape.kind === "rect") return svgElement("rect", { class: className, x: shape.x, y: shape.y, width: shape.width, height: shape.height, rx: shape.rx || 0 });
-  if (shape.kind === "line") return svgElement("line", { class: className, x1: shape.x1, y1: shape.y1, x2: shape.x2, y2: shape.y2 });
+  if (shape.kind === "rect")
+    return svgElement("rect", {
+      class: className,
+      x: shape.x,
+      y: shape.y,
+      width: shape.width,
+      height: shape.height,
+      rx: shape.rx || 0
+    });
+  if (shape.kind === "line")
+    return svgElement("line", {
+      class: className,
+      x1: shape.x1,
+      y1: shape.y1,
+      x2: shape.x2,
+      y2: shape.y2
+    });
   if (shape.kind === "path") return svgElement("path", { class: className, d: shape.d });
   const text = svgElement("text", { class: className, x: shape.x, y: shape.y });
   text.textContent = shape.text;
   return text;
-}
-function rack(title, kind, maxItems) {
-  const row = el("div", "steptrace__gs-rack-row");
-  row.dataset.kind = kind;
-  const heading = el("div", "steptrace__gs-rack-title");
-  heading.textContent = title;
-  const items = el("div", "steptrace__gs-rack-items");
-  const cards = Array.from({ length: maxItems }, () => {
-    const card = el("div", "steptrace__gs-rack-card");
-    const label = el("span", "steptrace__gs-rack-label");
-    const score = el("span", "steptrace__gs-rack-score");
-    card.append(label, score);
-    items.append(card);
-    return { card, label, score };
-  });
-  row.append(heading, items);
-  return { row, heading, cards };
 }
 function pathEdgeSet(path) {
   const edges5 = /* @__PURE__ */ new Set();
@@ -3655,112 +3716,6 @@ function pathEdgeSet(path) {
     edges5.add(`${path[index + 1]}|${path[index]}`);
   }
   return edges5;
-}
-function edgeLabel(edge) {
-  return `${edge.from}${edge.directed ? "→" : "—"}${edge.to}`;
-}
-function nodeEntries(ids, value) {
-  return ids.map((id) => ({ label: id, value }));
-}
-function graphStateRacks(detail) {
-  switch (detail.kind) {
-    case "heuristic-search":
-      return [
-        {
-          title: "OPEN",
-          entries: detail.open.map((entry) => ({
-            label: entry.id,
-            value: detail.policy === "greedy" ? `h ${entry.h}` : `g ${entry.g} · h ${entry.h} · f ${entry.f}`
-          }))
-        },
-        {
-          title: "CLOSED",
-          entries: detail.closed.map((id) => {
-            const g = detail.costs[id];
-            const h = detail.heuristic[id];
-            return {
-              label: id,
-              value: detail.policy === "greedy" ? `h ${h}` : `g ${g} · h ${h} · f ${g + h}`
-            };
-          })
-        }
-      ];
-    case "dual-search":
-      return [
-        { title: "FORWARD", entries: nodeEntries(detail.forward, "from start") },
-        { title: "BACKWARD", entries: nodeEntries(detail.backward, "from goal") }
-      ];
-    case "edge-relaxation":
-      return [
-        {
-          title: `PASS ${detail.pass}`,
-          entries: Object.entries(detail.distances).map(([id, value]) => ({ label: id, value: String(value) }))
-        },
-        {
-          title: "EDGE",
-          entries: detail.edge ? [{ label: detail.edge.join(" → "), value: detail.changed ? "updated" : "kept" }] : []
-        }
-      ];
-    case "component-flood":
-      return [
-        { title: `COMP ${detail.component}`, entries: nodeEntries(detail.frontier, "frontier") },
-        { title: "VISITED", entries: nodeEntries(detail.visited, "assigned") }
-      ];
-    case "low-link-cuts":
-      return [
-        {
-          title: "LOW LINK",
-          entries: Object.keys(detail.discovery).map((id) => ({
-            label: id,
-            value: `d ${detail.discovery[id]} · low ${detail.low[id]}`
-          }))
-        },
-        {
-          title: "CUTS",
-          entries: [
-            ...detail.articulationPoints.map((id) => ({ label: id, value: "articulation" })),
-            ...detail.bridges.map(([from, to]) => ({ label: `${from}—${to}`, value: "bridge" }))
-          ]
-        }
-      ];
-    case "low-link-components":
-      return [
-        { title: "STACK", entries: nodeEntries(detail.stack, "active") },
-        {
-          title: "SCC",
-          entries: detail.components.map((component, index) => ({
-            label: `C${index + 1}`,
-            value: component.join(" · ")
-          }))
-        }
-      ];
-    case "mst-scan":
-      return [
-        { title: "PENDING", entries: detail.pending.map((edge) => ({ label: edgeLabel(edge), value: String(edge.weight) })) },
-        { title: "TREE", entries: detail.accepted.map((edge) => ({ label: edgeLabel(edge), value: String(edge.weight) })) }
-      ];
-    case "mst-round":
-      return [
-        {
-          title: `ROUND ${detail.round}`,
-          entries: detail.components.map((component, index) => ({ label: `C${index + 1}`, value: component.join(" · ") }))
-        },
-        { title: "CHOICES", entries: detail.choices.map((edge) => ({ label: edgeLabel(edge), value: String(edge.weight) })) }
-      ];
-    case "path-backtrack":
-      return [
-        { title: "PATH", entries: nodeEntries(detail.path, "chosen") },
-        { title: "NEXT", entries: nodeEntries(detail.candidates, "candidate") }
-      ];
-    case "residual-flow":
-      return [
-        { title: "PATH", entries: nodeEntries(detail.augmentingPath, "augment") },
-        {
-          title: "FLOW",
-          entries: Object.entries(detail.flow).map(([edge, value]) => ({ label: edge, value: String(value) }))
-        }
-      ];
-  }
 }
 function graphStateSummary(frame) {
   switch (frame.detail.kind) {
@@ -3803,24 +3758,69 @@ function graphStateSummary(frame) {
 function graphStateLegend(kind) {
   switch (kind) {
     case "heuristic-search":
-      return [["current", "current"], ["open", "open"], ["closed / path", "closed"], ["goal", "goal"]];
+      return [
+        ["current", "current"],
+        ["open", "open"],
+        ["closed / path", "closed"],
+        ["goal", "goal"]
+      ];
     case "dual-search":
-      return [["current", "current"], ["frontiers", "open"], ["visited / path", "closed"], ["meeting", "goal"]];
+      return [
+        ["current", "current"],
+        ["frontiers", "open"],
+        ["visited / path", "closed"],
+        ["meeting", "goal"]
+      ];
     case "edge-relaxation":
-      return [["active edge", "current"], ["candidate", "open"], ["settled", "closed"], ["source", "goal"]];
+      return [
+        ["active edge", "current"],
+        ["candidate", "open"],
+        ["settled", "closed"],
+        ["source", "goal"]
+      ];
     case "component-flood":
-      return [["current", "current"], ["frontier", "open"], ["component", "closed"], ["seed", "goal"]];
+      return [
+        ["current", "current"],
+        ["frontier", "open"],
+        ["component", "closed"],
+        ["seed", "goal"]
+      ];
     case "low-link-cuts":
-      return [["current", "current"], ["DFS frontier", "open"], ["visited", "closed"], ["cut", "goal"]];
+      return [
+        ["current", "current"],
+        ["DFS frontier", "open"],
+        ["visited", "closed"],
+        ["cut", "goal"]
+      ];
     case "low-link-components":
-      return [["current", "current"], ["stack", "open"], ["component", "closed"], ["root", "goal"]];
+      return [
+        ["current", "current"],
+        ["stack", "open"],
+        ["component", "closed"],
+        ["root", "goal"]
+      ];
     case "mst-scan":
     case "mst-round":
-      return [["active edge", "current"], ["candidate", "open"], ["tree", "closed"], ["rejected", "goal"]];
+      return [
+        ["active edge", "current"],
+        ["candidate", "open"],
+        ["tree", "closed"],
+        ["rejected", "goal"]
+      ];
     case "path-backtrack":
-      return [["current", "current"], ["candidate", "open"], ["path", "closed"], ["rejected", "goal"]];
+      return [
+        ["current", "current"],
+        ["candidate", "open"],
+        ["path", "closed"],
+        ["rejected", "goal"]
+      ];
     case "residual-flow":
-      return [["active edge", "current"], ["residual", "open"], ["flow", "closed"], ["cut", "goal"]];
+      return [
+        ["active edge", "current"],
+        ["residual", "open"],
+        ["flow", "closed"],
+        ["cut", "goal"]
+      ];
   }
 }
 function graphStateGroups(detail) {
@@ -3835,7 +3835,12 @@ function makeGraphStateView(frames) {
   const shell = el("div", "steptrace__graph-state");
   shell.dataset.profile = first.profile;
   const graph = el("div", "steptrace__gs-graph");
-  const svg = svgElement("svg", { class: "steptrace__gs-svg", viewBox: "0 0 620 320", role: "img", "aria-label": "Graph algorithm state" });
+  const svg = svgElement("svg", {
+    class: "steptrace__gs-svg",
+    viewBox: "0 0 620 320",
+    role: "img",
+    "aria-label": "Graph algorithm state"
+  });
   const markerId = `steptrace-gs-arrow-${++graphStateViewId}`;
   const marker2 = svgElement("marker", {
     id: markerId,
@@ -3889,55 +3894,41 @@ function makeGraphStateView(frames) {
     }
     return { edge, line, label };
   });
-  const nodeElements = new Map(first.nodes.map((node) => {
-    const group = svgElement("g", {
-      class: `steptrace__gs-node${first.profile === "ukraine-cities" ? " steptrace__gs-node--city" : compactMapNodes ? " steptrace__gs-node--map" : ""}`,
-      transform: `translate(${node.x} ${node.y})`
-    });
-    const title = svgElement("title");
-    title.textContent = node.label;
-    const halo = svgElement("circle", { class: "steptrace__gs-target", r: 13 });
-    const circle = svgElement("circle", {
-      class: "steptrace__gs-node-circle",
-      r: first.profile === "ukraine-cities" ? 5 : compactMapNodes ? 6 : 13
-    });
-    const label = svgElement("text", { class: "steptrace__gs-node-label", x: 0, y: 0 });
-    label.textContent = node.label;
-    group.append(title, halo, circle, label);
-    nodeLayer.append(group);
-    return [node.id, group];
-  }));
-  const legend = el("div", "steptrace__legend steptrace__gs-legend");
-  for (const [label, state] of graphStateLegend(first.detail.kind)) {
-    const item = el("span", "steptrace__legend-row");
-    item.append(el("i", `steptrace__gs-swatch steptrace__gs-swatch--${state}`), document.createTextNode(label));
-    legend.append(item);
-  }
-  const rackViews = first.detail.kind === "heuristic-search" ? null : {
-    root: el("div", "steptrace__gs-racks"),
-    primary: rack("OPEN", "open", 5),
-    secondary: rack("CLOSED", "closed", 5)
-  };
-  shell.dataset.racks = String(rackViews != null);
-  shell.append(graph, legend);
-  if (rackViews) {
-    rackViews.root.append(rackViews.primary.row, rackViews.secondary.row);
-    shell.append(rackViews.root);
-  }
+  const nodeElements = new Map(
+    first.nodes.map((node) => {
+      const group = svgElement("g", {
+        class: `steptrace__gs-node${first.profile === "ukraine-cities" ? " steptrace__gs-node--city" : compactMapNodes ? " steptrace__gs-node--map" : ""}`,
+        transform: `translate(${node.x} ${node.y})`
+      });
+      const title = svgElement("title");
+      title.textContent = node.label;
+      const halo = svgElement("circle", { class: "steptrace__gs-target", r: 13 });
+      const circle = svgElement("circle", {
+        class: "steptrace__gs-node-circle",
+        r: first.profile === "ukraine-cities" ? 5 : compactMapNodes ? 6 : 13
+      });
+      const label = svgElement("text", { class: "steptrace__gs-node-label", x: 0, y: 0 });
+      label.textContent = node.label;
+      group.append(title, halo, circle, label);
+      nodeLayer.append(group);
+      return [node.id, group];
+    })
+  );
+  const legend = makeLegend(
+    graphStateLegend(first.detail.kind).map(([label, state]) => ({
+      label,
+      swatchClass: `steptrace__gs-swatch steptrace__gs-swatch--${state}`
+    })),
+    "Graph state legend",
+    "steptrace__gs-legend"
+  );
+  shell.append(graph);
   const status = statusEl();
-  function fillRack(rackView, model) {
-    rackView.heading.textContent = model.title;
-    rackView.cards.forEach(({ card, label, score }, index) => {
-      const entry = model.entries[index];
-      card.hidden = !entry;
-      if (!entry) return;
-      label.textContent = positions.get(entry.label)?.label || entry.label;
-      score.textContent = entry.value;
-    });
-  }
   function paint(frame) {
     const groups = graphStateGroups(frame.detail);
-    const groupByNode = new Map(groups.flatMap((members, index) => members.map((id) => [id, index + 1])));
+    const groupByNode = new Map(
+      groups.flatMap((members, index) => members.map((id) => [id, index + 1]))
+    );
     for (const [id, group] of nodeElements) {
       const role = frame.nodeState[id] || "neutral";
       const component = groupByNode.get(id);
@@ -3972,27 +3963,32 @@ function makeGraphStateView(frames) {
         label.textContent = frame.detail.kind === "residual-flow" ? `${frame.detail.flow[`${edge.from}|${edge.to}`] || 0}/${edge.weight}` : edge.label ?? String(edge.weight);
       }
     }
-    if (rackViews) {
-      const [primary, secondary] = graphStateRacks(frame.detail);
-      fillRack(rackViews.primary, { ...primary, entries: primary.entries.slice(0, 5) });
-      fillRack(rackViews.secondary, { ...secondary, entries: secondary.entries.slice(-5) });
-    }
     status.textContent = frame.message;
   }
   function watch(frame) {
     const currentId = frame.currentNode || frame.currentEdge?.[0] || null;
     const current = currentId ? positions.get(currentId) : null;
-    const rows = [
-      { k: "current", v: current?.label || "—", sw: "var(--_blue)" }
-    ];
+    const rows = [{ k: "current", v: current?.label || "—", sw: "var(--_blue)" }];
     if (frame.detail.kind === "heuristic-search") {
       const g = frame.currentNode ? frame.detail.costs[frame.currentNode] : null;
       const h = frame.currentNode ? frame.detail.heuristic[frame.currentNode] : null;
-      rows.push({
-        k: "score",
-        v: current && g != null && h != null ? frame.detail.policy === "greedy" ? `h ${h}` : `g ${g} · h ${h} · f ${g + h}` : "—",
-        sw: "var(--_amber)"
-      });
+      rows.push(
+        {
+          k: "score",
+          v: current && g != null && h != null ? frame.detail.policy === "greedy" ? `h ${h}` : `g ${g} · h ${h} · f ${g + h}` : "—",
+          sw: "var(--_amber)"
+        },
+        {
+          k: "open",
+          v: frame.detail.open.map((entry) => entry.id).join(" · ") || "—",
+          sw: "var(--_amber)"
+        },
+        {
+          k: "closed",
+          v: frame.detail.closed.join(" · ") || "—",
+          sw: "var(--_green)"
+        }
+      );
     }
     if (frame.detail.kind === "heuristic-search" && frame.detail.comparison.primaryValue != null && frame.detail.comparison.baselineValue != null) {
       const comparison = frame.detail.comparison;
@@ -4005,7 +4001,11 @@ function makeGraphStateView(frames) {
     switch (frame.detail.kind) {
       case "dual-search":
         rows.push(
-          { k: "frontiers", v: `F ${frame.detail.forward.length} · B ${frame.detail.backward.length}`, sw: "var(--_amber)" },
+          {
+            k: "frontiers",
+            v: `F ${frame.detail.forward.length} · B ${frame.detail.backward.length}`,
+            sw: "var(--_amber)"
+          },
           { k: "meeting", v: frame.detail.meeting || "—", sw: "var(--_violet)" }
         );
         break;
@@ -4013,7 +4013,11 @@ function makeGraphStateView(frames) {
         rows.push(
           { k: "pass", v: String(frame.detail.pass), sw: "var(--_violet)" },
           { k: "edge", v: frame.detail.edge?.join(" → ") || "—", sw: "var(--_amber)" },
-          { k: "change", v: frame.detail.changed ? "updated" : "kept", sw: frame.detail.changed ? "var(--_green)" : "var(--_neutral)" }
+          {
+            k: "change",
+            v: frame.detail.changed ? "updated" : "kept",
+            sw: frame.detail.changed ? "var(--_green)" : "var(--_neutral)"
+          }
         );
         break;
       case "component-flood":
@@ -4026,16 +4030,32 @@ function makeGraphStateView(frames) {
       case "low-link-cuts": {
         const id = currentId || "";
         rows.push(
-          { k: "disc / low", v: id ? `${frame.detail.discovery[id] ?? "—"} / ${frame.detail.low[id] ?? "—"}` : "—", sw: "var(--_amber)" },
-          { k: "cut vertices", v: frame.detail.articulationPoints.join(" · ") || "—", sw: "var(--_violet)" },
-          { k: "bridges", v: frame.detail.bridges.map(([from, to]) => `${from}—${to}`).join(" · ") || "—", sw: "var(--_green)" }
+          {
+            k: "disc / low",
+            v: id ? `${frame.detail.discovery[id] ?? "—"} / ${frame.detail.low[id] ?? "—"}` : "—",
+            sw: "var(--_amber)"
+          },
+          {
+            k: "cut vertices",
+            v: frame.detail.articulationPoints.join(" · ") || "—",
+            sw: "var(--_violet)"
+          },
+          {
+            k: "bridges",
+            v: frame.detail.bridges.map(([from, to]) => `${from}—${to}`).join(" · ") || "—",
+            sw: "var(--_green)"
+          }
         );
         break;
       }
       case "low-link-components": {
         const id = currentId || "";
         rows.push(
-          { k: "disc / low", v: id ? `${frame.detail.discovery[id] ?? "—"} / ${frame.detail.low[id] ?? "—"}` : "—", sw: "var(--_amber)" },
+          {
+            k: "disc / low",
+            v: id ? `${frame.detail.discovery[id] ?? "—"} / ${frame.detail.low[id] ?? "—"}` : "—",
+            sw: "var(--_amber)"
+          },
           { k: "stack", v: frame.detail.stack.join(" · ") || "—", sw: "var(--_violet)" },
           { k: "components", v: String(frame.detail.components.length), sw: "var(--_green)" }
         );
@@ -4044,7 +4064,11 @@ function makeGraphStateView(frames) {
       case "mst-scan":
         rows.push(
           { k: "pending", v: String(frame.detail.pending.length), sw: "var(--_amber)" },
-          { k: "components", v: String(frame.detail.components?.length ?? "—"), sw: "var(--_violet)" },
+          {
+            k: "components",
+            v: String(frame.detail.components?.length ?? "—"),
+            sw: "var(--_violet)"
+          },
           { k: "weight", v: String(frame.detail.totalWeight), sw: "var(--_violet)" }
         );
         break;
@@ -4065,7 +4089,11 @@ function makeGraphStateView(frames) {
       case "residual-flow":
         rows.push(
           { k: "path", v: frame.detail.augmentingPath.join(" → ") || "—", sw: "var(--_amber)" },
-          { k: "bottleneck", v: frame.detail.bottleneck == null ? "—" : String(frame.detail.bottleneck), sw: "var(--_violet)" },
+          {
+            k: "bottleneck",
+            v: frame.detail.bottleneck == null ? "—" : String(frame.detail.bottleneck),
+            sw: "var(--_violet)"
+          },
           { k: "flow", v: String(frame.detail.totalFlow), sw: "var(--_green)" }
         );
         break;
@@ -4075,7 +4103,7 @@ function makeGraphStateView(frames) {
     return rows;
   }
   return {
-    nodes: [shell, status],
+    nodes: [shell, legend, status],
     stableStage: true,
     stageLayout: "fill",
     paint,
@@ -4124,23 +4152,29 @@ var init_graph_state = __esm({
       frames = [];
       push(type, current, activeEdge, g, open, closed, selectedPath, message, comparison = [null, null]) {
         const selectedEdges = [...pathEdgeSet(selectedPath)];
-        const nodeState = Object.fromEntries(this.config.nodes.map((node) => [
-          node.id,
-          selectedPath.includes(node.id) ? "accepted" : node.id === current ? "active" : open.some((entry) => entry.id === node.id) ? "frontier" : closed.includes(node.id) ? "closed" : "neutral"
-        ]));
-        const edgeState = Object.fromEntries(this.config.edges.map((edge) => {
-          const selected = selectedEdges.includes(`${edge.from}|${edge.to}`);
-          const active = activeEdge?.[0] === edge.from && activeEdge[1] === edge.to || !edge.directed && activeEdge?.[0] === edge.to && activeEdge[1] === edge.from;
-          const role = selected ? "accepted" : active ? "active" : selectedPath.length ? "rejected" : "neutral";
-          return [`${edge.from}|${edge.to}`, role];
-        }));
+        const nodeState = Object.fromEntries(
+          this.config.nodes.map((node) => [
+            node.id,
+            selectedPath.includes(node.id) ? "accepted" : node.id === current ? "active" : open.some((entry) => entry.id === node.id) ? "frontier" : closed.includes(node.id) ? "closed" : "neutral"
+          ])
+        );
+        const edgeState = Object.fromEntries(
+          this.config.edges.map((edge) => {
+            const selected = selectedEdges.includes(`${edge.from}|${edge.to}`);
+            const active = activeEdge?.[0] === edge.from && activeEdge[1] === edge.to || !edge.directed && activeEdge?.[0] === edge.to && activeEdge[1] === edge.from;
+            const role = selected ? "accepted" : active ? "active" : selectedPath.length ? "rejected" : "neutral";
+            return [`${edge.from}|${edge.to}`, role];
+          })
+        );
         const detail = {
           kind: "heuristic-search",
           policy: this.config.policy,
           open: open.map((entry) => Object.freeze({ ...entry })),
           closed: closed.slice(),
           costs: Object.freeze({ ...g }),
-          heuristic: Object.freeze(Object.fromEntries(this.config.nodes.map((node) => [node.id, node.h]))),
+          heuristic: Object.freeze(
+            Object.fromEntries(this.config.nodes.map((node) => [node.id, node.h]))
+          ),
           comparison: this.config.policy === "greedy" ? {
             primaryLabel: "Greedy",
             primaryValue: comparison[0],
@@ -4155,22 +4189,24 @@ var init_graph_state = __esm({
             metric: "expansions"
           }
         };
-        this.frames.push(Object.freeze({
-          type,
-          profile: this.config.profile,
-          nodes: this.config.nodes,
-          edges: this.config.edges,
-          decor: this.config.decor,
-          start: this.config.start,
-          target: this.config.target,
-          currentNode: current,
-          currentEdge: activeEdge,
-          selectedEdges,
-          nodeState: Object.freeze(nodeState),
-          edgeState: Object.freeze(edgeState),
-          message,
-          detail
-        }));
+        this.frames.push(
+          Object.freeze({
+            type,
+            profile: this.config.profile,
+            nodes: this.config.nodes,
+            edges: this.config.edges,
+            decor: this.config.decor,
+            start: this.config.start,
+            target: this.config.target,
+            currentNode: current,
+            currentEdge: activeEdge,
+            selectedEdges,
+            nodeState: Object.freeze(nodeState),
+            edgeState: Object.freeze(edgeState),
+            message,
+            detail
+          })
+        );
       }
       init(g, open, message) {
         this.push("init", null, null, g, open, [], [], message);
@@ -4209,11 +4245,11 @@ function runCount(config, heuristic) {
   const h = new Map(config.nodes.map((node) => [node.id, heuristic ? node.h : 0]));
   const g = { [config.start]: 0 };
   const closed = /* @__PURE__ */ new Set();
-  const queue = [{ id: config.start, g: 0, h: h.get(config.start), f: h.get(config.start), order: 0 }];
+  const queue2 = [{ id: config.start, g: 0, h: h.get(config.start), f: h.get(config.start), order: 0 }];
   let order = 1;
-  while (queue.length) {
-    queue.sort((left, right) => left.f - right.f || left.h - right.h || left.order - right.order || left.id.localeCompare(right.id));
-    const current = queue.shift();
+  while (queue2.length) {
+    queue2.sort((left, right) => left.f - right.f || left.h - right.h || left.order - right.order || left.id.localeCompare(right.id));
+    const current = queue2.shift();
     if (closed.has(current.id) || current.g !== g[current.id]) continue;
     closed.add(current.id);
     if (current.id === config.target) return closed.size;
@@ -4222,14 +4258,14 @@ function runCount(config, heuristic) {
       const tentative = current.g + edge.weight;
       if (tentative >= (g[edge.to] ?? Number.POSITIVE_INFINITY)) continue;
       g[edge.to] = tentative;
-      queue.push({ id: edge.to, g: tentative, h: h.get(edge.to), f: tentative + h.get(edge.to), order: order++ });
+      queue2.push({ id: edge.to, g: tentative, h: h.get(edge.to), f: tentative + h.get(edge.to), order: order++ });
     }
   }
   return closed.size;
 }
-function visibleQueue(queue, closed) {
+function visibleQueue(queue2, closed) {
   const best = /* @__PURE__ */ new Map();
-  for (const entry of queue) {
+  for (const entry of queue2) {
     if (closed.has(entry.id)) continue;
     const current = best.get(entry.id);
     if (!current || entry.g < current.g) best.set(entry.id, entry);
@@ -4243,7 +4279,7 @@ function runAStar(config, ops) {
   const parent = {};
   const closed = /* @__PURE__ */ new Set();
   const closedOrder = [];
-  const queue = [{
+  const queue2 = [{
     id: config.start,
     g: 0,
     h: h.get(config.start),
@@ -4251,17 +4287,17 @@ function runAStar(config, ops) {
     order: 0
   }];
   let order = 1;
-  ops.init(g, visibleQueue(queue, closed), `Seed OPEN with ${config.start}; rank it by f = g + h.`);
-  while (queue.length) {
-    queue.sort((left, right) => left.f - right.f || left.h - right.h || left.order - right.order || left.id.localeCompare(right.id));
-    const current = queue.shift();
+  ops.init(g, visibleQueue(queue2, closed), `Seed OPEN with ${config.start}; rank it by f = g + h.`);
+  while (queue2.length) {
+    queue2.sort((left, right) => left.f - right.f || left.h - right.h || left.order - right.order || left.id.localeCompare(right.id));
+    const current = queue2.shift();
     if (closed.has(current.id) || current.g !== g[current.id]) continue;
     closed.add(current.id);
     closedOrder.push(current.id);
     ops.expand(
       current.id,
       g,
-      visibleQueue(queue, closed),
+      visibleQueue(queue2, closed),
       closedOrder,
       `Move ${current.id} from OPEN to CLOSED: f ${current.f} is smallest.`
     );
@@ -4285,7 +4321,7 @@ function runAStar(config, ops) {
         current.id,
         edge.to,
         g,
-        visibleQueue(queue, closed),
+        visibleQueue(queue2, closed),
         closedOrder,
         `Inspect ${current.id} → ${edge.to} with cost ${edge.weight}.`
       );
@@ -4300,12 +4336,12 @@ function runAStar(config, ops) {
         f: tentative + h.get(edge.to),
         order: order++
       };
-      queue.push(entry);
+      queue2.push(entry);
       ops.relax(
         current.id,
         edge.to,
         g,
-        visibleQueue(queue, closed),
+        visibleQueue(queue2, closed),
         closedOrder,
         `Update ${edge.to}: g ${entry.g} + h ${entry.h} = f ${entry.f}.`
       );
@@ -4485,20 +4521,31 @@ function makePrefixCharacterView(frames) {
     nodeElements.set(node.id, { group, terminal });
   }
   root.append(textRow, svg);
-  const legend = el("div", "steptrace__legend");
-  legend.setAttribute("aria-label", "Prefix character state legend");
-  for (const [state, label] of [
-    ["active", "active path"],
-    ["reused", "reused edge"],
-    ["created", "new node"],
-    ["terminal", "terminal key"]
-  ]) {
-    const row = el("div", "steptrace__legend-row");
-    const swatch = el("span", "steptrace__swatch steptrace__prefix-swatch");
-    swatch.dataset.state = state;
-    row.append(swatch, document.createTextNode(label));
-    legend.append(row);
-  }
+  const legend = makeLegend(
+    [
+      {
+        state: "active",
+        label: "active path",
+        swatchClass: "steptrace__swatch steptrace__prefix-swatch"
+      },
+      {
+        state: "reused",
+        label: "reused edge",
+        swatchClass: "steptrace__swatch steptrace__prefix-swatch"
+      },
+      {
+        state: "created",
+        label: "new node",
+        swatchClass: "steptrace__swatch steptrace__prefix-swatch"
+      },
+      {
+        state: "terminal",
+        label: "terminal key",
+        swatchClass: "steptrace__swatch steptrace__prefix-swatch"
+      }
+    ],
+    "Prefix character state legend"
+  );
   const status = statusEl();
   function paint(frame, index = 0, total = frames.length) {
     const visibleNodes = new Set(frame.visibleNodes);
@@ -4954,14 +5001,14 @@ function layeredLayout(rawNodes, rawEdges, directed, start) {
   }
   const layer = /* @__PURE__ */ new Map();
   const assignBfsLayers = (adjacency2, root) => {
-    const queue = idSet.has(root) ? [root] : [];
-    if (queue.length) layer.set(root, 0);
-    for (let head = 0; head < queue.length; head++) {
-      const current = queue[head];
+    const queue2 = idSet.has(root) ? [root] : [];
+    if (queue2.length) layer.set(root, 0);
+    for (let head = 0; head < queue2.length; head++) {
+      const current = queue2[head];
       for (const neighbour of adjacency2.get(current) ?? []) {
         if (!layer.has(neighbour)) {
           layer.set(neighbour, layer.get(current) + 1);
-          queue.push(neighbour);
+          queue2.push(neighbour);
         }
       }
     }
@@ -4971,11 +5018,11 @@ function layeredLayout(rawNodes, rawEdges, directed, start) {
   };
   if (directed) {
     const indegree = new Map(ids.map((id) => [id, incoming.get(id).length]));
-    const queue = ids.filter((id) => indegree.get(id) === 0).sort();
+    const queue2 = ids.filter((id) => indegree.get(id) === 0).sort();
     for (const id of ids) layer.set(id, 0);
     let seen = 0;
-    for (let head = 0; head < queue.length; head++) {
-      const current = queue[head];
+    for (let head = 0; head < queue2.length; head++) {
+      const current = queue2[head];
       seen++;
       for (const neighbour of out.get(current) ?? []) {
         if (layer.get(neighbour) < layer.get(current) + 1) {
@@ -4983,7 +5030,7 @@ function layeredLayout(rawNodes, rawEdges, directed, start) {
         }
         const nextDegree = indegree.get(neighbour) - 1;
         indegree.set(neighbour, nextDegree);
-        if (nextDegree === 0) queue.push(neighbour);
+        if (nextDegree === 0) queue2.push(neighbour);
       }
     }
     if (seen < ids.length) {
@@ -5106,11 +5153,11 @@ var init_bfs = __esm({
         ops.init(
           target ? `Breadth-first search for ${target}, starting at ${start} — explore level by level with a first-in, first-out queue until the target is dequeued.` : `Breadth-first search from ${start} — explore the graph level by level using a first-in, first-out queue.`
         );
-        const queue = [start];
+        const queue2 = [start];
         const seen = /* @__PURE__ */ new Set([start]);
         ops.enqueue(start, 0, `Enqueue the start node ${start} at distance 0.`);
-        while (queue.length) {
-          const u = queue.shift();
+        while (queue2.length) {
+          const u = queue2.shift();
           ops.visit(u, `Dequeue ${u} (distance ${ops.dist(u)}) and mark it visited.`);
           if (u === target) {
             ops.done(
@@ -5122,7 +5169,7 @@ var init_bfs = __esm({
             if (seen.has(v)) continue;
             ops.edge(u, v, `Explore edge ${u} → ${v}.`);
             seen.add(v);
-            queue.push(v);
+            queue2.push(v);
             ops.enqueue(
               v,
               ops.dist(u) + 1,
@@ -6842,26 +6889,106 @@ var init_binary_search = __esm({
 
 // custom/steptrace/src/algorithms/bidirectional-search.ts
 function parse3() {
-  const ids = ["s", "a", "b", "m", "c", "d", "t"];
   return {
-    nodes: ids.map((id, index) => ({ id, label: id, x: 55 + index * 85, y: 160 })),
-    edges: ids.slice(1).map((id, index) => ({ from: ids[index], to: id, weight: 1 }))
+    nodes: [
+      { id: "s", label: "s", x: 45, y: 150 },
+      { id: "a", label: "a", x: 130, y: 90 },
+      { id: "u", label: "u", x: 130, y: 220 },
+      { id: "b", label: "b", x: 220, y: 70 },
+      { id: "x", label: "x", x: 220, y: 140 },
+      { id: "v", label: "v", x: 220, y: 230 },
+      { id: "m", label: "m", x: 320, y: 65 },
+      { id: "c", label: "c", x: 410, y: 100 },
+      { id: "r", label: "r", x: 410, y: 235 },
+      { id: "d", label: "d", x: 500, y: 90 },
+      { id: "q", label: "q", x: 500, y: 210 },
+      { id: "t", label: "t", x: 585, y: 150 }
+    ],
+    edges: [
+      { from: "s", to: "a", weight: 1 },
+      { from: "s", to: "u", weight: 1 },
+      { from: "a", to: "b", weight: 1 },
+      { from: "a", to: "x", weight: 1 },
+      { from: "u", to: "v", weight: 1 },
+      { from: "b", to: "m", weight: 1 },
+      { from: "m", to: "c", weight: 1 },
+      { from: "c", to: "d", weight: 1 },
+      { from: "d", to: "t", weight: 1 },
+      { from: "t", to: "q", weight: 1 },
+      { from: "q", to: "r", weight: 1 }
+    ]
   };
 }
 function run3(_, recorder) {
   const forward = ["s"];
   const backward = ["t"];
-  recorder.record("init", null, null, forward, backward, null, [], "Seed a forward BFS at s and a backward BFS at t.");
-  for (const [from, to, side] of [["s", "a", "forward"], ["t", "d", "backward"], ["a", "b", "forward"], ["d", "c", "backward"], ["b", "m", "forward"]]) {
+  recorder.record(
+    "init",
+    null,
+    null,
+    forward,
+    backward,
+    null,
+    [],
+    "Seed a forward BFS at s and a backward BFS at t."
+  );
+  for (const [from, to, side] of [
+    ["s", "a", "forward"],
+    ["s", "u", "forward"],
+    ["t", "d", "backward"],
+    ["t", "q", "backward"],
+    ["a", "b", "forward"],
+    ["a", "x", "forward"],
+    ["u", "v", "forward"],
+    ["d", "c", "backward"],
+    ["q", "r", "backward"],
+    ["b", "m", "forward"]
+  ]) {
     ;
     (side === "forward" ? forward : backward).push(to);
-    recorder.record("expand", to, [from, to], forward, backward, null, [], `${side === "forward" ? "Forward" : "Backward"} BFS reaches ${to} from ${from}.`);
+    recorder.record(
+      "expand",
+      to,
+      [from, to],
+      forward,
+      backward,
+      null,
+      [],
+      `${side === "forward" ? "Forward" : "Backward"} BFS reaches ${to} from ${from}.`
+    );
   }
   backward.push("m");
-  recorder.record("meet", "m", ["c", "m"], forward, backward, "m", [], "Backward BFS reaches m, already visited by the forward search.");
+  recorder.record(
+    "meet",
+    "m",
+    ["c", "m"],
+    forward,
+    backward,
+    "m",
+    [],
+    "Backward BFS reaches m, already visited by the forward search."
+  );
   const path = ["s", "a", "b", "m", "c", "d", "t"];
-  recorder.record("path", "m", null, forward, backward, "m", path, "Splice the two parent chains at m.");
-  recorder.record("done", null, null, forward, backward, "m", path, "Shortest path: s → a → b → m → c → d → t.");
+  recorder.record(
+    "path",
+    "m",
+    null,
+    forward,
+    backward,
+    "m",
+    path,
+    "Splice the two parent chains at m."
+  );
+  recorder.record(
+    "done",
+    null,
+    null,
+    forward,
+    backward,
+    "m",
+    path,
+    "Shortest path: s → a → b → m → c → d → t."
+  );
 }
 var Recorder3, family3, bidirectionalSearch;
 var init_bidirectional_search = __esm({
@@ -6875,8 +7002,18 @@ var init_bidirectional_search = __esm({
       frames = [];
       record(type, current, edge, forward, backward, meeting, path, message) {
         const visited = [.../* @__PURE__ */ new Set([...forward, ...backward])];
-        const detail = { kind: "dual-search", forward: [...forward], backward: [...backward], visited, meeting };
-        const pathEdges = new Set(path.flatMap((id, index) => index ? [`${path[index - 1]}|${id}`, `${id}|${path[index - 1]}`] : []));
+        const detail = {
+          kind: "dual-search",
+          forward: [...forward],
+          backward: [...backward],
+          visited,
+          meeting
+        };
+        const pathEdges = new Set(
+          path.flatMap(
+            (id, index) => index ? [`${path[index - 1]}|${id}`, `${id}|${path[index - 1]}`] : []
+          )
+        );
         this.frames.push({
           type,
           profile: "bidirectional-search",
@@ -6888,14 +7025,28 @@ var init_bidirectional_search = __esm({
           currentNode: current,
           currentEdge: edge,
           selectedEdges: [...pathEdges],
-          nodeState: Object.fromEntries(this.config.nodes.map(({ id }) => [id, path.includes(id) ? "accepted" : id === current || id === meeting ? "active" : forward.includes(id) || backward.includes(id) ? "frontier" : "neutral"])),
-          edgeState: Object.fromEntries(this.config.edges.map(({ from, to }) => [`${from}|${to}`, pathEdges.has(`${from}|${to}`) ? "accepted" : edge && (from === edge[0] && to === edge[1] || from === edge[1] && to === edge[0]) ? "active" : "neutral"])),
+          nodeState: Object.fromEntries(
+            this.config.nodes.map(({ id }) => [
+              id,
+              path.includes(id) ? "accepted" : id === current || id === meeting ? "active" : forward.includes(id) || backward.includes(id) ? "frontier" : "neutral"
+            ])
+          ),
+          edgeState: Object.fromEntries(
+            this.config.edges.map(({ from, to }) => [
+              `${from}|${to}`,
+              pathEdges.has(`${from}|${to}`) ? "accepted" : edge && (from === edge[0] && to === edge[1] || from === edge[1] && to === edge[0]) ? "active" : "neutral"
+            ])
+          ),
           message,
           detail
         });
       }
     };
-    family3 = { id: "graph-state", createRecorder: (config) => new Recorder3(config), createView: makeGraphStateView };
+    family3 = {
+      id: "graph-state",
+      createRecorder: (config) => new Recorder3(config),
+      createView: makeGraphStateView
+    };
     bidirectionalSearch = {
       id: "bidirectional-search",
       kind: "graph",
@@ -7327,11 +7478,10 @@ var init_execution_tree = __esm({
     branchAndBoundTreeViewDescriptor = {
       ariaLabel: "Branch and bound knapsack decision tree",
       shape: "card",
-      nodeWidth: 116,
-      nodeHeight: 48,
-      minSvgWidth: 500,
+      nodeWidth: 136,
+      nodeHeight: 50,
+      minSvgWidth: 1080,
       canvasScale: 1,
-      fitWidth: true,
       stableStage: true,
       preserveDetail: true,
       showStateBadge: true,
@@ -7406,10 +7556,10 @@ var init_branch_and_bound = __esm({
           {
             id: "root",
             label: "start",
-            detail: "w 0/7 · v 0 · b 116",
+            detail: "0/7 · 0 · bound 116",
             values: [],
-            x: 330,
-            y: 24,
+            x: 636,
+            y: 28,
             depth: 0,
             weight: 0,
             value: 0,
@@ -7418,10 +7568,10 @@ var init_branch_and_bound = __esm({
           {
             id: "a+",
             label: "take A",
-            detail: "w 2/7 · v 40 · b 116",
+            detail: "2/7 · 40 · bound 116",
             values: [],
-            x: 165,
-            y: 82,
+            x: 352,
+            y: 100,
             depth: 1,
             weight: 2,
             value: 40,
@@ -7430,10 +7580,10 @@ var init_branch_and_bound = __esm({
           {
             id: "a-",
             label: "skip A",
-            detail: "w 0/7 · v 0 · b 102",
+            detail: "0/7 · 0 · bound 102",
             values: [],
-            x: 495,
-            y: 82,
+            x: 920,
+            y: 100,
             depth: 1,
             weight: 0,
             value: 0,
@@ -7442,10 +7592,10 @@ var init_branch_and_bound = __esm({
           {
             id: "ab+",
             label: "take B",
-            detail: "w 5/7 · v 90 · b 116",
+            detail: "5/7 · 90 · bound 116",
             values: [],
-            x: 82,
-            y: 140,
+            x: 139,
+            y: 172,
             depth: 2,
             weight: 5,
             value: 90,
@@ -7454,10 +7604,10 @@ var init_branch_and_bound = __esm({
           {
             id: "ab-",
             label: "skip B",
-            detail: "w 2/7 · v 40 · b 105",
+            detail: "2/7 · 40 · bound 105",
             values: [],
-            x: 248,
-            y: 140,
+            x: 565,
+            y: 172,
             depth: 2,
             weight: 2,
             value: 40,
@@ -7466,10 +7616,10 @@ var init_branch_and_bound = __esm({
           {
             id: "abc+",
             label: "take C",
-            detail: "w 10/7 · v 155 · infeasible",
+            detail: "10/7 · 155 · infeasible",
             values: [],
-            x: 32,
-            y: 198,
+            x: 68,
+            y: 244,
             depth: 3,
             weight: 10,
             value: 155,
@@ -7478,10 +7628,10 @@ var init_branch_and_bound = __esm({
           {
             id: "abc-",
             label: "skip C",
-            detail: "w 5/7 · v 90 · b 107.5",
+            detail: "5/7 · 90 · bound 107.5",
             values: [],
-            x: 132,
-            y: 198,
+            x: 210,
+            y: 244,
             depth: 3,
             weight: 5,
             value: 90,
@@ -7490,10 +7640,10 @@ var init_branch_and_bound = __esm({
           {
             id: "ac+",
             label: "take C",
-            detail: "w 7/7 · v 105 · b 105",
+            detail: "7/7 · 105 · bound 105",
             values: [],
-            x: 215,
-            y: 198,
+            x: 423,
+            y: 244,
             depth: 3,
             weight: 7,
             value: 105,
@@ -7502,10 +7652,10 @@ var init_branch_and_bound = __esm({
           {
             id: "ac-",
             label: "skip C",
-            detail: "w 2/7 · v 40 · b 75",
+            detail: "2/7 · 40 · bound 75",
             values: [],
-            x: 315,
-            y: 198,
+            x: 707,
+            y: 244,
             depth: 3,
             weight: 2,
             value: 40,
@@ -7514,10 +7664,10 @@ var init_branch_and_bound = __esm({
           {
             id: "abcd+",
             label: "take D",
-            detail: "w 9/7 · v 125 · infeasible",
+            detail: "9/7 · 125 · infeasible",
             values: [],
-            x: 82,
-            y: 256,
+            x: 68,
+            y: 316,
             depth: 4,
             weight: 9,
             value: 125,
@@ -7526,10 +7676,10 @@ var init_branch_and_bound = __esm({
           {
             id: "abcd-",
             label: "skip D",
-            detail: "w 5/7 · v 90 · b 90",
+            detail: "5/7 · 90 · bound 90",
             values: [],
-            x: 182,
-            y: 256,
+            x: 210,
+            y: 316,
             depth: 4,
             weight: 5,
             value: 90,
@@ -7538,10 +7688,10 @@ var init_branch_and_bound = __esm({
           {
             id: "acd+",
             label: "take D",
-            detail: "w 11/7 · v 140 · infeasible",
+            detail: "11/7 · 140 · infeasible",
             values: [],
-            x: 198,
-            y: 256,
+            x: 352,
+            y: 316,
             depth: 4,
             weight: 11,
             value: 140,
@@ -7550,10 +7700,10 @@ var init_branch_and_bound = __esm({
           {
             id: "acd-",
             label: "skip D",
-            detail: "w 7/7 · v 105 · b 105",
+            detail: "7/7 · 105 · bound 105",
             values: [],
-            x: 298,
-            y: 256,
+            x: 494,
+            y: 316,
             depth: 4,
             weight: 7,
             value: 105,
@@ -7562,10 +7712,10 @@ var init_branch_and_bound = __esm({
           {
             id: "ac-d+",
             label: "take D",
-            detail: "w 6/7 · v 75 · b 75",
+            detail: "6/7 · 75 · bound 75",
             values: [],
-            x: 348,
-            y: 256,
+            x: 636,
+            y: 316,
             depth: 4,
             weight: 6,
             value: 75,
@@ -7574,10 +7724,10 @@ var init_branch_and_bound = __esm({
           {
             id: "ac-d-",
             label: "skip D",
-            detail: "w 2/7 · v 40 · b 40",
+            detail: "2/7 · 40 · bound 40",
             values: [],
-            x: 398,
-            y: 256,
+            x: 778,
+            y: 316,
             depth: 4,
             weight: 2,
             value: 40,
@@ -7586,10 +7736,10 @@ var init_branch_and_bound = __esm({
           {
             id: "a-b+",
             label: "take B",
-            detail: "w 3/7 · v 50 · b 102",
+            detail: "3/7 · 50 · bound 102",
             values: [],
-            x: 445,
-            y: 140,
+            x: 849,
+            y: 172,
             depth: 2,
             weight: 3,
             value: 50,
@@ -7598,10 +7748,10 @@ var init_branch_and_bound = __esm({
           {
             id: "a-b-",
             label: "skip B",
-            detail: "w 0/7 · v 0 · b 82.5",
+            detail: "0/7 · 0 · bound 82.5",
             values: [],
-            x: 628,
-            y: 140,
+            x: 991,
+            y: 172,
             depth: 2,
             weight: 0,
             value: 0,
@@ -7763,7 +7913,9 @@ function parseCountingSortConfig(config) {
   const min = Math.min(...array);
   const max = Math.max(...array);
   if (max - min > 32)
-    invalidConfig3("limits the demonstrated key range to 33 values so every counter remains legible.");
+    invalidConfig3(
+      "limits the demonstrated key range to 33 values so every counter remains legible."
+    );
   return { profile: "counting", array: array.slice(), min, max };
 }
 function distributionTokenLabels(input) {
@@ -7825,6 +7977,7 @@ function makeDistributionSortView(frames) {
     "Each bar keeps its original identity.",
     first.input.length
   );
+  input.band.dataset.section = "source";
   const countBand = el("div", "steptrace__distribution-band");
   const frequency = el("div", "steptrace__distribution-frequency");
   frequency.setAttribute("role", "region");
@@ -7873,7 +8026,10 @@ function makeDistributionSortView(frames) {
       bar.fill.style.height = barHeightStyle(value, maxValue);
       bar.num.textContent = labels[barIndex];
       bar.bar.dataset.state = barIndex === frame.activeInput ? frame.type === "tally" ? "increment" : "compare" : "";
-      bar.bar.setAttribute("aria-label", `input index ${barIndex}, value ${value}, token ${labels[barIndex]}`);
+      bar.bar.setAttribute(
+        "aria-label",
+        `input index ${barIndex}, value ${value}, token ${labels[barIndex]}`
+      );
     });
     buckets.forEach(({ bucket, count, slots, key: key4 }, bucketIndex) => {
       const range = frequencyRangeFor(frame, bucketIndex);
@@ -8077,15 +8233,6 @@ function tokenLabel(value) {
 function bucketColumnCount(itemCount) {
   return Math.min(3, Math.max(1, Math.ceil(itemCount / 3)));
 }
-function makeLegendItem(color, text) {
-  const item = el("span", "steptrace__distribution-legend-item");
-  const swatch = el("span", "steptrace__distribution-legend-swatch");
-  swatch.style.setProperty("--_legend-color", color);
-  const label = el("span");
-  label.textContent = text;
-  item.append(swatch, label);
-  return item;
-}
 function makeBucketDistributionView(frames) {
   const first = frames[0];
   const original = first.source.slice().sort((a, b) => a.origin - b.origin);
@@ -8099,6 +8246,7 @@ function makeBucketDistributionView(frames) {
     first.profile === "radix" ? "Each digit pass starts from the order gathered by the previous pass." : "Values keep their identity while range decides their bucket.",
     first.source.length
   );
+  source.band.dataset.section = "source";
   const bucketBand = el("div", "steptrace__distribution-band");
   const board = el("div", "steptrace__distribution-bucket-board");
   const bucketTitle = first.profile === "radix" ? "Digit Buckets" : "Range Buckets";
@@ -8127,14 +8275,16 @@ function makeBucketDistributionView(frames) {
     first.source.length,
     "steptrace__distribution-bars--output"
   );
-  const legend = el("div", "steptrace__distribution-legend");
-  legend.setAttribute("aria-label", "Distribution state legend");
-  legend.append(
-    makeLegendItem("var(--_blue)", "active bucket"),
-    makeLegendItem("var(--_amber)", "local comparison"),
-    makeLegendItem("var(--_green)", "gathered output")
+  const legend = makeLegend(
+    [
+      { label: "active bucket", color: "var(--_blue)" },
+      { label: "local comparison", color: "var(--_amber)" },
+      { label: "gathered output", color: "var(--_green)" }
+    ],
+    "Distribution state legend",
+    "steptrace__distribution-legend"
   );
-  stage.append(source.band, bucketBand, legend, output.band);
+  stage.append(source.band, bucketBand, output.band);
   const status = statusEl();
   function paint(frame, index = 0, total = 1) {
     stage.dataset.phase = frame.type;
@@ -8184,7 +8334,7 @@ function makeBucketDistributionView(frames) {
     status.innerHTML = escapeHtml(frame.message) + ` <span class="steptrace__counts">· ${phaseLabel2(frame)} · step ${index + 1}/${total}</span>`;
   }
   return {
-    nodes: [stage, status],
+    nodes: [stage, legend, status],
     stageLayout: "fill",
     stableStage: true,
     paint,
@@ -9439,13 +9589,13 @@ var init_dp_problems = __esm({
       { role: "operand-a", badge: "A", label: "predecessor amount" },
       { role: "operand-b", badge: "B", label: "another predecessor" },
       { role: "target", badge: "T", label: "amount being solved" },
-      { role: "path", badge: "✓", label: "optimal amount chain" }
+      { role: "path", badge: "success", label: "optimal amount chain" }
     ];
     gridRoles = [
       { role: "operand-a", badge: "R", label: "right neighbour" },
       { role: "operand-b", badge: "D", label: "down neighbour" },
       { role: "target", badge: "T", label: "tile being solved" },
-      { role: "path", badge: "✓", label: "optimal route" }
+      { role: "path", badge: "success", label: "optimal route" }
     ];
     coinTableSemantics = {
       tableLabel: `Bottom-up coin-change table for a ${coinChangeProblem.target}-cent payment`,
@@ -11093,21 +11243,29 @@ function makeLinkedTopologyView(frames) {
   const slow = marker("S", "slow");
   const fast = marker("F", "fast");
   canvas.append(slow.node, fast.node);
-  const legend = el("div", "steptrace__legend steptrace__linked-legend");
-  for (const [text, state] of [
-    ["slow / cycle pointer", "slow"],
-    ["fast / head pointer", "fast"],
-    ["cycle edge", "cycle"],
-    ["cycle entry", "entry"]
-  ]) {
-    const row = el("span", "steptrace__legend-row");
-    row.append(
-      el("i", `steptrace__linked-swatch steptrace__linked-swatch--${state}`),
-      document.createTextNode(text)
-    );
-    legend.append(row);
-  }
-  root.append(canvas, legend);
+  const legend = makeLegend(
+    [
+      {
+        label: "slow / cycle pointer",
+        swatchClass: "steptrace__linked-swatch steptrace__linked-swatch--slow"
+      },
+      {
+        label: "fast / head pointer",
+        swatchClass: "steptrace__linked-swatch steptrace__linked-swatch--fast"
+      },
+      {
+        label: "cycle edge",
+        swatchClass: "steptrace__linked-swatch steptrace__linked-swatch--cycle"
+      },
+      {
+        label: "cycle entry",
+        swatchClass: "steptrace__linked-swatch steptrace__linked-swatch--entry"
+      }
+    ],
+    "Linked topology state legend",
+    "steptrace__linked-legend"
+  );
+  root.append(canvas);
   const status = statusEl();
   function place(pointer, id) {
     const position = positions.get(id);
@@ -11160,7 +11318,7 @@ function makeLinkedTopologyView(frames) {
     }
   ];
   return {
-    nodes: [root, status],
+    nodes: [root, legend, status],
     stageAlignment: "center",
     stableStage: true,
     paint,
@@ -11321,8 +11479,8 @@ function parse5(config) {
     policy: "greedy"
   };
 }
-function visibleQueue2(queue) {
-  return queue.slice().sort((left, right) => left.h - right.h || left.order - right.order || left.id.localeCompare(right.id)).map(({ id, g, h, f }) => ({ id, g, h, f }));
+function visibleQueue2(queue2) {
+  return queue2.slice().sort((left, right) => left.h - right.h || left.order - right.order || left.id.localeCompare(right.id)).map(({ id, g, h, f }) => ({ id, g, h, f }));
 }
 function runGreedyBestFirst(config, ops) {
   const neighbours = graphStateAdjacency(config);
@@ -11331,7 +11489,7 @@ function runGreedyBestFirst(config, ops) {
   const parent = {};
   const visited = /* @__PURE__ */ new Set([config.start]);
   const closed = [];
-  const queue = [{
+  const queue2 = [{
     id: config.start,
     g: 0,
     h: heuristic.get(config.start),
@@ -11339,15 +11497,15 @@ function runGreedyBestFirst(config, ops) {
     order: 0
   }];
   let order = 1;
-  ops.init(pathCost, visibleQueue2(queue), `Seed OPEN with ${config.start}; rank it by h alone.`);
-  while (queue.length) {
-    queue.sort((left, right) => left.h - right.h || left.order - right.order || left.id.localeCompare(right.id));
-    const current = queue.shift();
+  ops.init(pathCost, visibleQueue2(queue2), `Seed OPEN with ${config.start}; rank it by h alone.`);
+  while (queue2.length) {
+    queue2.sort((left, right) => left.h - right.h || left.order - right.order || left.id.localeCompare(right.id));
+    const current = queue2.shift();
     closed.push(current.id);
     ops.expand(
       current.id,
       pathCost,
-      visibleQueue2(queue),
+      visibleQueue2(queue2),
       closed,
       `Move ${current.id} to CLOSED: h ${current.h} is smallest; path cost ${current.g} is ignored.`
     );
@@ -11371,7 +11529,7 @@ function runGreedyBestFirst(config, ops) {
         current.id,
         edge.to,
         pathCost,
-        visibleQueue2(queue),
+        visibleQueue2(queue2),
         closed,
         `Inspect ${current.id} → ${edge.to}; only h(${edge.to}) will rank it.`
       );
@@ -11380,12 +11538,12 @@ function runGreedyBestFirst(config, ops) {
       parent[edge.to] = current.id;
       pathCost[edge.to] = current.g + edge.weight;
       const h = heuristic.get(edge.to);
-      queue.push({ id: edge.to, g: pathCost[edge.to], h, f: h, order: order++ });
+      queue2.push({ id: edge.to, g: pathCost[edge.to], h, f: h, order: order++ });
       ops.relax(
         current.id,
         edge.to,
         pathCost,
-        visibleQueue2(queue),
+        visibleQueue2(queue2),
         closed,
         `Add ${edge.to} to OPEN with h ${h}; accumulated cost ${pathCost[edge.to]} does not affect priority.`
       );
@@ -12672,19 +12830,24 @@ function makeStackSequenceView(frames) {
   });
   stackSection.append(stackLabel, stack);
   root.append(scanSection, stackSection);
-  const legend = el("div", "steptrace__legend steptrace__stack-sequence-legend");
-  for (const [label, state] of [
-    ["scanning", "scan"],
-    ["retained candidate", "retained"],
-    ["resolved pop", "popped"]
-  ]) {
-    const row = el("span", "steptrace__legend-row");
-    row.append(
-      el("i", `steptrace__stack-sequence-swatch steptrace__stack-sequence-swatch--${state}`),
-      document.createTextNode(label)
-    );
-    legend.append(row);
-  }
+  const legend = makeLegend(
+    [
+      {
+        label: "scanning",
+        swatchClass: "steptrace__stack-sequence-swatch steptrace__stack-sequence-swatch--scan"
+      },
+      {
+        label: "retained candidate",
+        swatchClass: "steptrace__stack-sequence-swatch steptrace__stack-sequence-swatch--retained"
+      },
+      {
+        label: "resolved pop",
+        swatchClass: "steptrace__stack-sequence-swatch steptrace__stack-sequence-swatch--popped"
+      }
+    ],
+    "Stack sequence state legend",
+    "steptrace__stack-sequence-legend"
+  );
   const status = statusEl();
   function paint(frame) {
     const retained = new Set(frame.stack);
@@ -13019,19 +13182,24 @@ function makePrefixSumView(frames) {
   const prefix = arrayStrip(first.prefix, "Prefix sum array");
   prefixSection.append(prefixLabel, prefix.wrap);
   root.append(sourceSection, prefixSection);
-  const legend = el("div", "steptrace__legend steptrace__prefix-sum-legend");
-  for (const [label, state] of [
-    ["running total", "build"],
-    ["cancelled prefix", "cancel"],
-    ["requested range", "range"]
-  ]) {
-    const row = el("span", "steptrace__legend-row");
-    row.append(
-      el("i", `steptrace__prefix-sum-swatch steptrace__prefix-sum-swatch--${state}`),
-      document.createTextNode(label)
-    );
-    legend.append(row);
-  }
+  const legend = makeLegend(
+    [
+      {
+        label: "running total",
+        swatchClass: "steptrace__prefix-sum-swatch steptrace__prefix-sum-swatch--build"
+      },
+      {
+        label: "cancelled prefix",
+        swatchClass: "steptrace__prefix-sum-swatch steptrace__prefix-sum-swatch--cancel"
+      },
+      {
+        label: "requested range",
+        swatchClass: "steptrace__prefix-sum-swatch steptrace__prefix-sum-swatch--range"
+      }
+    ],
+    "Prefix sum state legend",
+    "steptrace__prefix-sum-legend"
+  );
   const status = statusEl();
   function paint(frame) {
     const [left, right] = frame.range;
@@ -13200,6 +13368,207 @@ var init_prefix_sum2 = __esm({
           `Range [${left}, ${right}] is ${result}: prefix[${right + 1}] - prefix[${left}] = ${rightPrefix} - ${leftPrefix}.`
         );
       }
+    };
+  }
+});
+
+// custom/steptrace/src/families/contiguous-storage.ts
+function mountQueue(root, config) {
+  const slots = Array(config.capacity).fill(null);
+  let head = 0;
+  let tail = 0;
+  let count = 0;
+  root.classList.add("steptrace", "steptrace--structure");
+  root.dataset.visualFamily = "contiguous-storage";
+  root.setAttribute("role", "group");
+  root.setAttribute("aria-label", "Interactive circular-array queue");
+  const media = matchMedia("(prefers-reduced-motion: reduce)");
+  const applyMotion = () => root.classList.toggle("steptrace--reduced", media.matches);
+  media.addEventListener("change", applyMotion);
+  const headEl = el("div", "steptrace__head");
+  const crumb = el("div", "steptrace__crumb");
+  const crumbKind = el("span");
+  crumbKind.textContent = "data structure";
+  const separator = el("span", "steptrace__crumb-sep");
+  separator.textContent = "›";
+  const name = el("span", "steptrace__crumb-algo");
+  name.textContent = "queue";
+  crumb.append(el("span", "steptrace__crumb-dot"), crumbKind, separator, name);
+  const counter = el("div", "steptrace__counter");
+  headEl.append(crumb, counter);
+  const body = el("div", "steptrace__body steptrace__structure-body");
+  const stage = el("div", "steptrace__contiguous");
+  stage.setAttribute("role", "region");
+  stage.setAttribute("aria-label", `Circular backing array with ${config.capacity} slots`);
+  const stageLabel = el("div", "steptrace__rail-label");
+  stageLabel.textContent = "Backing array";
+  const array = el("div", "steptrace__contiguous-array");
+  array.setAttribute("role", "list");
+  array.style.setProperty("--steptrace-capacity", String(config.capacity));
+  const cells = slots.map((_, index) => {
+    const cell = el("div", "steptrace__contiguous-cell");
+    cell.setAttribute("role", "listitem");
+    const markers = el("div", "steptrace__contiguous-markers");
+    const headBadge = el("span", "steptrace__contiguous-marker");
+    headBadge.textContent = "H";
+    headBadge.setAttribute("aria-label", "Head");
+    headBadge.setAttribute("title", "Head");
+    const tailBadge = el("span", "steptrace__contiguous-marker");
+    tailBadge.textContent = "T";
+    tailBadge.setAttribute("aria-label", "Tail");
+    tailBadge.setAttribute("title", "Tail");
+    markers.append(headBadge, tailBadge);
+    const value = el("span", "steptrace__contiguous-value");
+    const indexLabel = el("span", "steptrace__contiguous-index");
+    indexLabel.textContent = String(index);
+    cell.append(markers, value, indexLabel);
+    array.append(cell);
+    return { cell, headBadge, tailBadge, value };
+  });
+  const order = el("div", "steptrace__queue-order");
+  const orderLabel = el("span", "steptrace__queue-order-label");
+  orderLabel.textContent = "FIFO";
+  const orderValue = el("span", "steptrace__queue-order-value");
+  order.append(orderLabel, orderValue);
+  stage.append(stageLabel, array, order);
+  body.append(stage);
+  const controls = el("div", "steptrace__structure-controls");
+  const inputLabel = el("label", "steptrace__queue-input-label");
+  inputLabel.textContent = "Value";
+  const input = el("input", "steptrace__queue-input");
+  input.type = "text";
+  input.maxLength = 12;
+  input.placeholder = "job-1";
+  input.setAttribute("aria-label", "Value to enqueue");
+  inputLabel.append(input);
+  const enqueue = el("button", "steptrace__queue-action steptrace__queue-action--primary");
+  enqueue.textContent = "Enqueue";
+  const dequeue = el("button", "steptrace__queue-action");
+  dequeue.textContent = "Dequeue";
+  const reset = el("button", "steptrace__queue-action steptrace__queue-reset");
+  reset.textContent = "Reset";
+  for (const button2 of [enqueue, dequeue, reset]) button2.type = "button";
+  const status = el("div", "steptrace__queue-status");
+  status.setAttribute("role", "status");
+  status.setAttribute("aria-live", "polite");
+  status.setAttribute("aria-atomic", "true");
+  controls.append(inputLabel, enqueue, dequeue, reset, status);
+  root.replaceChildren(headEl, body, controls);
+  function render(message = "") {
+    cells.forEach(({ cell, headBadge, tailBadge, value }, index) => {
+      const slotValue = slots[index];
+      value.textContent = slotValue ?? "·";
+      cell.dataset.empty = slotValue == null ? "1" : "0";
+      cell.dataset.head = index === head ? "1" : "0";
+      cell.dataset.tail = index === tail ? "1" : "0";
+      headBadge.hidden = index !== head;
+      tailBadge.hidden = index !== tail;
+      const markerNames = [index === head ? "head" : "", index === tail ? "tail" : ""].filter(
+        Boolean
+      );
+      cell.setAttribute(
+        "aria-label",
+        `slot ${index}, ${slotValue == null ? "empty" : `value ${slotValue}`}${markerNames.length ? `, ${markerNames.join(" and ")}` : ""}`
+      );
+    });
+    counter.innerHTML = `<b>${count}</b> / ${config.capacity}`;
+    const fifo = Array.from(
+      { length: count },
+      (_, offset) => slots[(head + offset) % config.capacity]
+    );
+    orderValue.textContent = fifo.length ? fifo.join(" → ") : "empty";
+    enqueue.disabled = count === config.capacity;
+    dequeue.disabled = count === 0;
+    input.disabled = count === config.capacity;
+    status.textContent = message || (count === 0 ? "Queue is empty. Enqueue a value to begin." : "Queue ready.");
+  }
+  function onEnqueue() {
+    const value = input.value.trim();
+    if (!value) {
+      status.textContent = "Enter a value before enqueueing.";
+      return;
+    }
+    if (count === config.capacity) {
+      status.textContent = "Queue is full. Dequeue an item before enqueueing another.";
+      return;
+    }
+    const index = tail;
+    slots[index] = value;
+    tail = (tail + 1) % config.capacity;
+    count++;
+    input.value = "";
+    render(`Enqueued ${value} at slot ${index}. Tail advanced to slot ${tail}.`);
+    input.focus?.();
+  }
+  function onDequeue() {
+    if (count === 0) {
+      status.textContent = "Queue is empty. There is nothing to dequeue.";
+      return;
+    }
+    const index = head;
+    const value = slots[index];
+    slots[index] = null;
+    head = (head + 1) % config.capacity;
+    count--;
+    render(`Dequeued ${value} from slot ${index}. Head advanced to slot ${head}.`);
+  }
+  function onReset() {
+    slots.fill(null);
+    head = 0;
+    tail = 0;
+    count = 0;
+    input.value = "";
+    render("Queue reset. Head and tail returned to slot 0.");
+    input.focus?.();
+  }
+  function onInputKeydown(event) {
+    if (event.key !== "Enter") return;
+    event.preventDefault();
+    onEnqueue();
+  }
+  enqueue.addEventListener("click", onEnqueue);
+  dequeue.addEventListener("click", onDequeue);
+  reset.addEventListener("click", onReset);
+  input.addEventListener("keydown", onInputKeydown);
+  applyMotion();
+  render();
+  return {
+    destroy() {
+      enqueue.removeEventListener("click", onEnqueue);
+      dequeue.removeEventListener("click", onDequeue);
+      reset.removeEventListener("click", onReset);
+      input.removeEventListener("keydown", onInputKeydown);
+      media.removeEventListener("change", applyMotion);
+      root.replaceChildren();
+      root.classList.remove("steptrace", "steptrace--structure", "steptrace--reduced");
+      delete root.dataset.visualFamily;
+    }
+  };
+}
+var init_contiguous_storage = __esm({
+  "custom/steptrace/src/families/contiguous-storage.ts"() {
+    init_render();
+  }
+});
+
+// custom/steptrace/src/algorithms/queue.ts
+function parseQueueConfig(config) {
+  const capacity = config.capacity ?? DEFAULT_CAPACITY;
+  if (!Number.isInteger(capacity) || capacity < 3 || capacity > 10)
+    throw new Error(`steptrace: queue requires integer "capacity" from 3 to 10.`);
+  return { capacity };
+}
+var DEFAULT_CAPACITY, queue;
+var init_queue = __esm({
+  "custom/steptrace/src/algorithms/queue.ts"() {
+    init_contiguous_storage();
+    DEFAULT_CAPACITY = 6;
+    queue = {
+      id: "queue",
+      family: "contiguous-storage",
+      meta: { label: "Queue" },
+      parse: parseQueueConfig,
+      mount: mountQueue
     };
   }
 });
@@ -13416,7 +13785,7 @@ var init_rabin_karp = __esm({
             s,
             wh,
             ph,
-            `Window [${s}, ${s + m - 1}]: hash ${wh} ${wh === ph ? "=" : "≠"} pattern hash ${ph}${wh === ph ? " — verify" : " — skip"}.`
+            `Window [${s}, ${s + m - 1}]: window hash ${wh} ${wh === ph ? "=" : "≠"} pattern hash ${ph}${wh === ph ? " — verify" : " — skip"}.`
           );
           if (wh === ph) {
             let ok = true;
@@ -13699,7 +14068,7 @@ function makeHeapSelectionView(frames) {
     cell.setAttribute("aria-label", `Stream value ${first.array[index]}`);
     return icon;
   });
-  const heapLabel = el("div", "steptrace__rail-label");
+  const heapLabel = el("div", "steptrace__rail-label steptrace__heap-tree-label");
   heapLabel.textContent = `Min-heap · capacity k = ${first.k}`;
   const heapWrap = el("div", "steptrace__heap-tree");
   const svg = svgEl("svg", "steptrace__heap-svg");
@@ -13734,25 +14103,34 @@ function makeHeapSelectionView(frames) {
   });
   heapWrap.append(svg);
   root.append(streamLabel, stream.wrap, heapLabel, heapWrap);
-  const legend = el("div", "steptrace__legend steptrace__heap-legend");
-  for (const [label, state, icon] of [
-    ["incoming", "current", ""],
-    ["retained winner", "winner", ICON.check],
-    ["weakest root", "weakest", ""],
-    ["rejected / evicted", "rejected", ICON.x]
-  ]) {
-    const row = el("span", "steptrace__legend-row");
-    const swatch = el("i", `steptrace__heap-swatch steptrace__heap-swatch--${state}`);
-    swatch.innerHTML = icon;
-    row.append(swatch, document.createTextNode(label));
-    legend.append(row);
-  }
+  const rejected = el("span");
+  rejected.innerHTML = ICON.x;
+  const legend = makeLegend(
+    [
+      { label: "incoming", swatchClass: "steptrace__heap-swatch steptrace__heap-swatch--current" },
+      {
+        label: "retained winner",
+        swatchClass: "steptrace__heap-swatch steptrace__heap-swatch--winner",
+        marker: successMarker()
+      },
+      {
+        label: "weakest root",
+        swatchClass: "steptrace__heap-swatch steptrace__heap-swatch--weakest"
+      },
+      {
+        label: "rejected / evicted",
+        swatchClass: "steptrace__heap-swatch steptrace__heap-swatch--rejected",
+        marker: rejected
+      }
+    ],
+    "Heap selection state legend"
+  );
   const status = statusEl();
   function paint(frame) {
     const retained = new Set(frame.heap.map((entry) => entry.source));
-    const rejected = /* @__PURE__ */ new Set([...frame.rejected, ...frame.evicted]);
+    const rejected2 = /* @__PURE__ */ new Set([...frame.rejected, ...frame.evicted]);
     stream.cells.forEach((cell, index) => {
-      const state = index === frame.cursor ? "current" : retained.has(index) ? "winner" : rejected.has(index) ? "rejected" : index < (frame.cursor ?? frame.array.length) ? "seen" : "";
+      const state = index === frame.cursor ? "current" : retained.has(index) ? "winner" : rejected2.has(index) ? "rejected" : index < (frame.cursor ?? frame.array.length) ? "seen" : "";
       cell.dataset.state = state;
       cell.setAttribute("aria-current", index === frame.cursor ? "step" : "false");
       const icon = streamIcons[index];
@@ -14983,7 +15361,7 @@ var init_z_algorithm = __esm({
 });
 
 // custom/steptrace/src/algorithms/index.ts
-var builtInAlgorithms;
+var builtInAlgorithms, interactiveStructures;
 var init_algorithms = __esm({
   "custom/steptrace/src/algorithms/index.ts"() {
     init_activity_selection();
@@ -15032,6 +15410,7 @@ var init_algorithms = __esm({
     init_n_queens();
     init_prim();
     init_prefix_sum2();
+    init_queue();
     init_quick_sort();
     init_radix_sort();
     init_rabin_karp();
@@ -15112,6 +15491,7 @@ var init_algorithms = __esm({
       ahoCorasick,
       ternarySearchTree
     ];
+    interactiveStructures = [queue];
   }
 });
 
@@ -15364,8 +15744,9 @@ var init_watch_hints = __esm({
 });
 
 // custom/steptrace/src/mount.ts
-function createMount(registry2) {
+function createMount(registry2, structures = []) {
   const { kindOf, listAlgorithms, buildFrames } = registry2;
+  const structureRegistry = new Map(structures.map((structure) => [structure.id, structure]));
   function mountTabs(root, config, host = {}) {
     let normalized;
     try {
@@ -15464,6 +15845,15 @@ function createMount(registry2) {
   }
   function mount2(root, config, host = {}) {
     if (isTabsConfig(config)) return mountTabs(root, config, host);
+    const structure = structureRegistry.get(config.algorithm);
+    if (structure) {
+      try {
+        return structure.mount(root, structure.parse(config));
+      } catch (error) {
+        root.textContent = error instanceof Error ? error.message : String(error);
+        return { destroy: () => root.replaceChildren() };
+      }
+    }
     root.classList.add("steptrace");
     root.setAttribute("role", "group");
     root.setAttribute("aria-label", "Algorithm visualizer");
@@ -15919,7 +16309,7 @@ function createMount(registry2) {
         algorithm: state.algorithm,
         ...shouldIncludeArray ? { array: state.array } : {},
         start: state.start,
-        ...state.target != null ? { target: state.target } : {}
+        ...kind === "graph" && state.target != null ? { target: state.target } : {}
       });
       if (built.family) root.dataset.visualFamily = built.family.id;
       else delete root.dataset.visualFamily;
@@ -16275,7 +16665,7 @@ var init_engine = __esm({
     init_registry();
     VERSION = "2.0.0";
     registry = createRegistry(builtInAlgorithms);
-    mount = createMount(registry);
+    mount = createMount(registry, interactiveStructures);
     steptrace = {
       VERSION,
       ...registry,

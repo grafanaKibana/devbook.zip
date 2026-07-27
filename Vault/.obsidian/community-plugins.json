@@ -16,5 +16,6 @@
   "hot-reload",
   "quartz-syncer",
   "steptrace",
-  "obsidian-linter"
+  "obsidian-linter",
+  "tabs"
 ]
