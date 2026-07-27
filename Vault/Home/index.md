@@ -178,8 +178,13 @@ p.dc-progress-eyebrow { margin: 0 0 0.45rem; color: rgb(var(--topic-rgb)); font-
 .dc-progress-title, .dc-progress-mobile-value { color: var(--text-normal, var(--dark, #1f2937)); font-size: clamp(1rem, 5cqi, 1.75rem); font-weight: 700; line-height: 1.08; letter-spacing: -0.04em; white-space: nowrap; }
 .dc-progress-title { min-width: 0; margin: 0; }
 .dc-progress-mobile-value { flex: 0 0 auto; }
-.dc-progress-statuses { display: none; flex-wrap: wrap; gap: 0.55rem 1.1rem; margin: 1rem 0 0; padding: 0; list-style: none; color: var(--text-muted, var(--darkgray, #5f6b7a)); font-size: 0.875rem; }
+ul.dc-progress-statuses { display: none; flex-wrap: wrap; gap: 0.55rem 1.1rem; margin: 1rem 0 0; padding: 0; list-style: none; color: var(--text-muted, var(--darkgray, #5f6b7a)); font-size: 0.875rem; }
 .dc-progress-statuses li { display: inline-flex; min-width: max-content; align-items: baseline; gap: 0.35rem; }
+/* Obsidian's own list indent (.markdown-rendered ul/li) outranks the rules
+   above, so the row lands short of the title's left edge. Kill the indent from
+   a selector that outranks it, on both the list and the item, and keep it off
+   the display cascade so the container query still governs visibility. */
+.dc-progress-copy ul.dc-progress-statuses, .dc-progress-copy ul.dc-progress-statuses li { margin-inline-start: 0; padding-inline-start: 0; text-indent: 0; }
 .dc-progress-statuses strong { color: var(--text-normal, var(--dark, #1f2937)); font-family: var(--codeFont, var(--font-monospace, monospace)); font-size: 0.9rem; }
 .dc-progress-statuses i { width: 0.55rem; height: 0.55rem; border-radius: 2px; flex: 0 0 auto; }
 .dc-progress-visual { display: grid; width: 100%; place-self: stretch; }
@@ -197,12 +202,16 @@ p.dc-progress-eyebrow { margin: 0 0 0.45rem; color: rgb(var(--topic-rgb)); font-
   .dc-progress-summary { display: block; }
   .dc-progress-title { font-size: clamp(1.75rem, 4cqi, 2.25rem); }
   .dc-progress-mobile-value { display: none; }
-  .dc-progress-statuses { display: flex; }
+  ul.dc-progress-statuses { display: flex; }
   .dc-progress-visual { position: relative; width: var(--dc-radial-size); aspect-ratio: 1; gap: 0; padding-top: 0; place-self: center; place-items: center; }
   .dc-progress-visual svg { position: absolute; inset: 0; display: block; width: 100%; height: 100%; overflow: visible; transform: rotate(-90deg); }
-  .dc-progress-value { position: relative; display: grid; place-items: center; text-align: center; }
-  .dc-progress-value strong { font-family: var(--headerFont, var(--font-interface, sans-serif)); font-size: clamp(1.8rem, 7cqi, 2.45rem); letter-spacing: -0.05em; }
-  .dc-progress-value span { display: block; margin-top: 0.35rem; }
+  /* Everything inside the ring scales off --dc-radial-size, not the card's cqi:
+     the ring shrinks in fit mode while cqi does not, and a container-sized
+     label overruns the 8-wide stroke. The inline padding keeps the text off
+     the arc itself. */
+  .dc-progress-value { position: relative; display: grid; place-items: center; padding: 0 calc(var(--dc-radial-size) * 0.14); text-align: center; }
+  .dc-progress-value strong { font-family: var(--headerFont, var(--font-interface, sans-serif)); font-size: calc(var(--dc-radial-size) * 0.26); letter-spacing: -0.05em; }
+  .dc-progress-value span { display: block; margin-top: 0.06em; font-size: calc(var(--dc-radial-size) * 0.095); }
   .dc-progress-bar { display: none; }
 }
 /* No child combinators: Syncer freezes this CSS into published Markdown and
