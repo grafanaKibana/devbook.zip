@@ -44,8 +44,24 @@ test("hard-load reveal fails open without the Font Loading API", async () => {
     /data-page-reveal-first-paint="pending"\] \.page > #quartz-body > footer/,
   )
   assert.match(resource(component.css), /data-page-reveal-first-paint="pending"\] \.center > hr/)
+  assert.match(
+    resource(component.css),
+    /data-page-reveal-first-paint="pending"\]\s+\.page > #quartz-body > \.center > \.page-header/,
+  )
+  assert.match(
+    resource(component.css),
+    /data-page-reveal-first-paint="pending"\]\s+\.page > #quartz-body > \.sidebar\.right/,
+  )
   assert.match(resource(component.css), /animation-play-state: paused !important/)
   assert.match(resource(component.css), /var\(--ns-reveal-order, 2\)/)
+  assert.match(resource(component.css), /\.site-header > \*/)
+  assert.match(resource(component.css), /\.sidebar\.right > \*/)
+  assert.match(resource(component.css), /var\(--page-reveal-order, 0\)/)
+  assert.match(
+    resource(component.css),
+    /\.page > #quartz-body > \.sidebar\.right > \* \{\s+animation-delay:/,
+  )
+  assert.match(resource(component.css), /\.site-marquee \{\s+animation-name: page-reveal-fade-in/)
   assert.match(resource(component.css), /calc\(var\(--dur-3\) \+ var\(--stagger\) \* 6\) backwards/)
   vm.runInNewContext(resource(component.beforeDOMLoaded), context)
   vm.runInNewContext(resource(component.afterDOMLoaded), context)
