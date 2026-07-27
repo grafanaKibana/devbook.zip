@@ -17,7 +17,6 @@ import {
   makeUnionFindView,
   milestoneAt,
   pad2,
-  spacer,
   stripTags,
   summaryFor,
   thinMilestones,
@@ -259,8 +258,10 @@ export function createMount(
     scrub.append(el("div", "steptrace__scrub-track"), scrubFill, milestoneLayer, scrubDot)
     const phase = el("div", "steptrace__phase")
     const phaseName = el("span", "steptrace__phase-name")
-    const phaseStep = el("span")
-    phase.append(phaseName, phaseStep)
+    const phaseCopy = el("span", "steptrace__phase-copy")
+    phase.append(phaseName, phaseCopy)
+    const timeline = el("div", "steptrace__timeline")
+    timeline.append(scrub)
 
     const btnReset = iconBtn("Restart", ICON.reset)
     const btnBack = iconBtn("Step back", ICON.back)
@@ -274,6 +275,8 @@ export function createMount(
     const menu = el("div", "steptrace__menu")
     const speedHead = el("div", "steptrace__menu-h")
     speedHead.textContent = "Speed"
+    const speedIndicator = el("span", "steptrace__speed-indicator")
+    speedIndicator.setAttribute("aria-hidden", "true")
     const speedSection = el("div", "steptrace__menu-section")
     const speedRow = el("div", "steptrace__speed-row")
     const speedControl = el("div", "steptrace__speed-control")
@@ -282,6 +285,7 @@ export function createMount(
     const applySpeed = (value) => {
       const v = Number(value)
       state.speed = v
+      speedIndicator.textContent = `${v}×`
       // transitions must fit inside the step interval (baseDelay / speed), else
       // 2× bleeds each animation into the next frame and 0.5× freezes mid-step
       root.style.setProperty("--_tween", `${Math.round(107 / v)}ms`)
@@ -401,8 +405,10 @@ export function createMount(
     menuWrap.append(btnMenu, menu)
 
     const transport = el("div", "steptrace__transport")
-    transport.append(btnReset, btnBack, btnPlay, btnFwd, spacer(), menuWrap)
-    foot.append(scrub, phase, transport)
+    transport.append(btnReset, btnBack, btnPlay, btnFwd)
+    const utility = el("div", "steptrace__utility")
+    utility.append(speedIndicator, menuWrap)
+    foot.append(phase, transport, timeline, utility)
 
     root.replaceChildren(head, body, foot)
 
@@ -548,7 +554,7 @@ export function createMount(
       }
       const chapter = milestoneAt(currentMilestones, i)
       phaseName.textContent = chapter ? chapter.label : "Step"
-      phaseStep.textContent = `${i + 1} / ${total}`
+      phaseCopy.textContent = stripTags(player.frames[i].message)
       scrub.setAttribute("aria-valuetext", `${phaseName.textContent}, step ${i + 1} of ${total}`)
       for (let k = 0; k < milestoneLayer.children.length; k++) {
         const step = Number(milestoneLayer.children[k].dataset.step)
@@ -559,12 +565,19 @@ export function createMount(
     function renderMilestones() {
       milestoneLayer.replaceChildren()
       const last = Math.max(1, player.frames.length - 1)
-      for (const mark of thinMilestones(currentMilestones)) {
+      const marks = thinMilestones(currentMilestones)
+      for (const [index, mark] of marks.entries()) {
+        const start = (mark.i / last) * 100
+        const end = marks[index + 1] ? (marks[index + 1].i / last) * 100 : 100
         const tick = el("span", "steptrace__milestone")
-        tick.style.left = (mark.i / last) * 100 + "%"
+        tick.style.setProperty("--start", `${start}%`)
+        tick.style.setProperty("--end", `${end}%`)
         tick.dataset.step = String(mark.i)
         tick.title = `${mark.label} · step ${mark.i + 1}`
         tick.setAttribute("aria-hidden", "true")
+        const label = el("b", "steptrace__milestone-label")
+        label.textContent = mark.label
+        tick.append(label)
         milestoneLayer.append(tick)
       }
     }

@@ -37,3 +37,20 @@
   --st-held-bg: #fbbf24;
   --st-held-fg: #1f2937;
 }
+
+.steptrace button.steptrace__btn {
+  appearance: none;
+  border: 0;
+  background: transparent;
+  box-shadow: none;
+}
+
+.steptrace button.steptrace__btn:hover {
+  background: var(--_hover);
+}
+
+.steptrace button.steptrace__btn--play,
+.steptrace button.steptrace__btn--play:hover {
+  background-color: var(--_accent);
+  background-image: var(--st-accent-gradient, none);
+}

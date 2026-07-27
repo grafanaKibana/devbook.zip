@@ -2471,9 +2471,6 @@
     if (cls) n.className = cls;
     return n;
   }
-  function spacer() {
-    return el("span", "steptrace__spacer");
-  }
   function escapeHtml(s) {
     return String(s).replace(
       /[&<>"]/g,
@@ -2488,12 +2485,12 @@
   }
   var CHECK_PATH = "M20 6 9 17l-5-5";
   var ICON = {
-    reset: '<svg viewBox="0 0 24 24"><path d="M4 12a8 8 0 1 0 2.4-5.7" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/><path d="M3.4 4.6V8h3.4" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>',
-    back: '<svg viewBox="0 0 24 24"><polygon points="18 5 9 12 18 19" fill="currentColor" stroke="none"/><rect x="5" y="5" width="2" height="14" rx="0.6" fill="currentColor" stroke="none"/></svg>',
-    fwd: '<svg viewBox="0 0 24 24"><polygon points="6 5 15 12 6 19" fill="currentColor" stroke="none"/><rect x="17" y="5" width="2" height="14" rx="0.6" fill="currentColor" stroke="none"/></svg>',
-    play: '<svg viewBox="0 0 24 24"><polygon points="7 4.5 19 12 7 19.5" fill="currentColor" stroke="none"/></svg>',
-    pause: '<svg viewBox="0 0 24 24"><rect x="7" y="5" width="3.4" height="14" rx="1" fill="currentColor" stroke="none"/><rect x="13.6" y="5" width="3.4" height="14" rx="1" fill="currentColor" stroke="none"/></svg>',
-    kebab: '<svg viewBox="0 0 24 24"><circle cx="12" cy="5" r="1.5" fill="currentColor" stroke="none"/><circle cx="12" cy="12" r="1.5" fill="currentColor" stroke="none"/><circle cx="12" cy="19" r="1.5" fill="currentColor" stroke="none"/></svg>',
+    reset: '<svg class="lucide lucide-rotate-ccw" viewBox="0 0 24 24"><path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/><path d="M3 3v5h5"/></svg>',
+    back: '<svg class="lucide lucide-skip-back" viewBox="0 0 24 24"><path d="M17.971 4.285A2 2 0 0 1 21 6v12a2 2 0 0 1-3.029 1.715l-9.997-5.998a2 2 0 0 1-.003-3.432z"/><path d="M3 20V4"/></svg>',
+    fwd: '<svg class="lucide lucide-skip-forward" viewBox="0 0 24 24"><path d="M21 4v16"/><path d="M6.029 4.285A2 2 0 0 0 3 6v12a2 2 0 0 0 3.029 1.715l9.997-5.998a2 2 0 0 0 .003-3.432z"/></svg>',
+    play: '<svg class="lucide lucide-play" viewBox="0 0 24 24"><path d="M5 5a2 2 0 0 1 3.008-1.728l11.997 6.998a2 2 0 0 1 .003 3.458l-12 7A2 2 0 0 1 5 19z"/></svg>',
+    pause: '<svg class="lucide lucide-pause" viewBox="0 0 24 24"><rect x="14" y="3" width="5" height="18" rx="1"/><rect x="5" y="3" width="5" height="18" rx="1"/></svg>',
+    kebab: '<svg class="lucide lucide-ellipsis" viewBox="0 0 24 24"><circle cx="12" cy="12" r="1"/><circle cx="19" cy="12" r="1"/><circle cx="5" cy="12" r="1"/></svg>',
     check: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="${CHECK_PATH}"/></svg>`,
     x: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.8" stroke-linecap="round"><path d="M6 6l12 12"/><path d="M18 6 6 18"/></svg>',
     compare: '<svg class="steptrace__cue-compare" viewBox="0 0 24 24" aria-hidden="true"><path d="m7 16-4-4 4-4"/><path d="M3 12h18"/><path d="m17 8 4 4-4 4"/></svg>',
@@ -13851,8 +13848,10 @@
       scrub.append(el("div", "steptrace__scrub-track"), scrubFill, milestoneLayer, scrubDot);
       const phase = el("div", "steptrace__phase");
       const phaseName = el("span", "steptrace__phase-name");
-      const phaseStep = el("span");
-      phase.append(phaseName, phaseStep);
+      const phaseCopy = el("span", "steptrace__phase-copy");
+      phase.append(phaseName, phaseCopy);
+      const timeline = el("div", "steptrace__timeline");
+      timeline.append(scrub);
       const btnReset = iconBtn("Restart", ICON.reset);
       const btnBack = iconBtn("Step back", ICON.back);
       const btnPlay = iconBtn("Play", ICON.play, "steptrace__btn--play");
@@ -13864,6 +13863,8 @@
       const menu = el("div", "steptrace__menu");
       const speedHead = el("div", "steptrace__menu-h");
       speedHead.textContent = "Speed";
+      const speedIndicator = el("span", "steptrace__speed-indicator");
+      speedIndicator.setAttribute("aria-hidden", "true");
       const speedSection = el("div", "steptrace__menu-section");
       const speedRow = el("div", "steptrace__speed-row");
       const speedControl = el("div", "steptrace__speed-control");
@@ -13872,6 +13873,7 @@
       const applySpeed = (value) => {
         const v = Number(value);
         state.speed = v;
+        speedIndicator.textContent = `${v}×`;
         root.style.setProperty("--_tween", `${Math.round(107 / v)}ms`);
         if (player) player.setSpeed(v);
       };
@@ -13988,8 +13990,10 @@
       }
       menuWrap.append(btnMenu, menu);
       const transport = el("div", "steptrace__transport");
-      transport.append(btnReset, btnBack, btnPlay, btnFwd, spacer(), menuWrap);
-      foot.append(scrub, phase, transport);
+      transport.append(btnReset, btnBack, btnPlay, btnFwd);
+      const utility = el("div", "steptrace__utility");
+      utility.append(speedIndicator, menuWrap);
+      foot.append(phase, transport, timeline, utility);
       root.replaceChildren(head, body, foot);
       let menuOpen = false;
       function closeMenu() {
@@ -14105,7 +14109,7 @@
         }
         const chapter = milestoneAt(currentMilestones, i);
         phaseName.textContent = chapter ? chapter.label : "Step";
-        phaseStep.textContent = `${i + 1} / ${total}`;
+        phaseCopy.textContent = stripTags(player.frames[i].message);
         scrub.setAttribute("aria-valuetext", `${phaseName.textContent}, step ${i + 1} of ${total}`);
         for (let k = 0; k < milestoneLayer.children.length; k++) {
           const step = Number(milestoneLayer.children[k].dataset.step);
@@ -14115,12 +14119,19 @@
       function renderMilestones() {
         milestoneLayer.replaceChildren();
         const last = Math.max(1, player.frames.length - 1);
-        for (const mark of thinMilestones(currentMilestones)) {
+        const marks = thinMilestones(currentMilestones);
+        for (const [index, mark] of marks.entries()) {
+          const start = mark.i / last * 100;
+          const end = marks[index + 1] ? marks[index + 1].i / last * 100 : 100;
           const tick = el("span", "steptrace__milestone");
-          tick.style.left = mark.i / last * 100 + "%";
+          tick.style.setProperty("--start", `${start}%`);
+          tick.style.setProperty("--end", `${end}%`);
           tick.dataset.step = String(mark.i);
           tick.title = `${mark.label} · step ${mark.i + 1}`;
           tick.setAttribute("aria-hidden", "true");
+          const label = el("b", "steptrace__milestone-label");
+          label.textContent = mark.label;
+          tick.append(label);
           milestoneLayer.append(tick);
         }
       }

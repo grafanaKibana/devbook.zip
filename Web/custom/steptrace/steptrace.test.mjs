@@ -1263,6 +1263,10 @@ test("styles are compiled from real SCSS without runtime injection", () => {
   const engine = readFileSync(join(here, "generated", "engine.js"), "utf8")
   const barsStyles = readFileSync(join(here, "src", "styles", "bars.scss"), "utf8")
   const sharedStyles = readFileSync(join(here, "src", "styles", "shared.scss"), "utf8")
+  const obsidianHostStyles = readFileSync(
+    join(here, "src", "styles", "hosts", "obsidian.scss"),
+    "utf8",
+  )
   const renderSource = readFileSync(join(here, "src", "render.ts"), "utf8")
 
   assert.match(styleEntry, /@use "shared";/)
@@ -1276,6 +1280,10 @@ test("styles are compiled from real SCSS without runtime injection", () => {
   assert.match(obsidianCss, /--st-table-text: var\(--text-normal\)/)
   assert.match(obsidianCss, /--st-held-bg: #fbbf24/)
   assert.match(obsidianCss, /--st-held-fg: #1f2937/)
+  assert.match(
+    obsidianHostStyles,
+    /\.steptrace button\.steptrace__btn \{[^}]*appearance: none;[^}]*border: 0;[^}]*background: transparent;[^}]*box-shadow: none;/s,
+  )
   assert.match(quartzHostStyles, /--st-held-bg: #92400e/)
   assert.match(quartzHostStyles, /--st-held-fg: #ffffff/)
   assert.match(quartzHostStyles, /--st-table-cell: var\(--light\)/)
@@ -4980,7 +4988,27 @@ test("production mount renders a meaningful Trie terminal summary without string
       findByClass(root, "steptrace__insight-text").textContent,
       "Stored keys car, card, care, cat, dog · 10 trie nodes.",
     )
+    const foot = findByClass(root, "steptrace__foot")
+    assert.deepEqual(
+      foot.children.map((child) => child.className),
+      [
+        "steptrace__phase",
+        "steptrace__transport",
+        "steptrace__timeline",
+        "steptrace__utility",
+      ],
+    )
     const phaseName = findByClass(root, "steptrace__phase-name")
+    const phaseCopy = findByClass(root, "steptrace__phase-copy")
+    assert.ok(phaseCopy.textContent)
+    const milestones = findAllByClass(root, "steptrace__milestone")
+    assert.ok(milestones.length > 1)
+    assert.ok(milestones.every((milestone) => findByClass(milestone, "steptrace__milestone-label")))
+    assert.equal(milestones[0].attributes.get("style:--start"), "0%")
+    assert.notEqual(
+      milestones[0].attributes.get("style:--start"),
+      milestones[0].attributes.get("style:--end"),
+    )
     const forward = findByAttribute(root, "aria-label", "Step forward")
     const phaseLabels = [phaseName.textContent]
     while (!forward.disabled) {
@@ -4998,6 +5026,15 @@ test("production mount renders a meaningful Trie terminal summary without string
       "Trie complete",
     ])
     assert.doesNotMatch(phaseLabels.join(" "), /\bShift\b/)
+    const sharedStyles = readFileSync(join(here, "src", "styles", "shared.scss"), "utf8")
+    assert.match(sharedStyles, /\.steptrace__foot \{[^}]*grid-template-areas:/s)
+    assert.match(
+      sharedStyles,
+      /\.steptrace__milestone-label \{[^}]*left: 50%;[^}]*transform: translate\(-50%, 0\.2rem\);/s,
+    )
+    const renderSource = readFileSync(join(here, "src", "render.ts"), "utf8")
+    for (const icon of ["rotate-ccw", "skip-back", "play", "pause", "skip-forward", "ellipsis"])
+      assert.match(renderSource, new RegExp(`lucide-${icon}`))
     handle.destroy()
 
     const branchRoot = new FakeNode("div")
