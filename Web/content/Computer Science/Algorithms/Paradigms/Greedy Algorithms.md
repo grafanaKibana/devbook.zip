@@ -1,13 +1,13 @@
 ---
 publish: true
 created: 2026-07-18T14:02:43.959Z
-modified: 2026-07-25T13:57:52.019Z
-published: 2026-07-25T13:57:52.019Z
+modified: 2026-07-27T05:52:55.494Z
+published: 2026-07-27T05:52:55.494Z
 topic:
   - Computer Science
 subtopic:
   - Algorithms
-summary: Builds a solution by repeatedly making the locally best choice and never reconsidering; correct only when provably applicable.
+summary: Builds a solution by repeatedly making the locally best choice and never reconsidering; exact only when a proof connects the rule to the optimum.
 level:
   - "4"
 priority: High
@@ -16,14 +16,19 @@ status: Ready to Repeat
 
 Scheduling the most non-overlapping meetings into one room has an exponential number of candidate subsets. A greedy algorithm skips that search: sort the meetings by finish time, then walk the list once, accepting each meeting whose start is at or after the last accepted finish. One sort and one pass produce a maximum-size schedule — no subset is ever enumerated, and no accepted meeting is ever reconsidered.
 
-That is the shape of every greedy algorithm: build the answer incrementally, at each step commit to the option that ranks best under a fixed local rule, and never revisit a committed choice. The cost is almost always a sort (or a priority queue) plus a linear scan. The commitment is valid only when the local rule provably composes into a global optimum — most plausible-looking rules do not, and the paradigm gives no signal when a rule is wrong.
+Greedy algorithms build the answer incrementally: at each step, commit to the option that ranks best under a fixed local rule and never revisit it. For an exact algorithm, that commitment is valid only when the local rule provably composes into a global optimum — most plausible-looking rules do not, and the paradigm gives no signal when a rule is wrong. The same pattern also appears in approximation algorithms, where the proof guarantees a bound rather than an exact optimum. Runtime comes from the ordering mechanism: activity selection sorts once and scans once, while Dijkstra and Prim repeatedly update a priority queue.
 
-**Core condition:** a fixed local rule + the greedy-choice property + optimal substructure → one sort-and-scan reaches the global optimum → typically `O(n log n)` time, `O(1)`–`O(n)` space.
+**Exactness condition:** a fixed local rule + the greedy-choice property + optimal substructure → the committed choices form a global optimum. **Activity-selection cost:** sort by finish time, then scan once → `O(n log n)` time and `O(n)` auxiliary space when the input is cloned.
 
-A run of the meeting schedule would animate the activity-selection pass over intervals sorted by finish time.
+# Trace
 
-> [!NOTE] Visualization pending
-> Planned StepTrace: a sequence-of-locally-optimal-choices card showing each step take the best immediate option and never reconsider it — for activity selection, the earliest-finishing compatible interval is highlighted and committed while every overlapping candidate drops out of contention. No matching renderer exists in `engine.js` yet.
+The trace starts with five meetings in input order. Sorting by finish time moves the earliest release opportunity first; the sweep then accepts a compatible meeting permanently or rejects it as soon as it overlaps the last accepted finish.
+
+```steptrace
+{"algorithm":"activity-selection"}
+```
+
+The first commitment, `[1, 4]`, rejects `[3, 5]` and `[0, 6]`. Meetings `[5, 7]` and `[8, 9]` remain compatible, producing a maximum schedule of three meetings. The accepted lane illustrates the exchange intuition: each commitment leaves at least as much room as any alternative first choice.
 
 # When Local Choices Reach the Global Optimum
 
@@ -32,9 +37,9 @@ Two properties decide whether committing to a local choice is safe.
 - **Greedy-choice property** — some globally optimal solution contains the choice the local rule makes first, so committing to it never forecloses optimality. This is the property that fails most often and the one that must be proven.
 - **Optimal substructure** — after the committed choice is removed, the remainder is the same problem on a smaller input, so the same argument applies again by induction.
 
-Correctness is established by an **exchange argument**: take any optimal solution, show one of its choices can be replaced by the greedy choice without reducing quality, then repeat the swap until the optimal solution becomes the greedy one. Because no swap makes the solution worse, greedy is at least as good as any optimum. Where the candidates form a matroid, the same result follows from the Rado–Edmonds theorem instead of a hand-written swap.
+Correctness is established by an **exchange argument**: take any optimal solution, show one of its choices can be replaced by the greedy choice without reducing quality, then repeat the swap until the optimal solution becomes the greedy one. Because no swap makes the solution worse, greedy is at least as good as any optimum. For a hereditary independence system, the Rado–Edmonds theorem gives a sharper characterization: the standard weight-ordered greedy algorithm succeeds for every weight assignment exactly when the system is a matroid. It does not validate an arbitrary local rule.
 
-At each step the state that changes is a single element committed to the partial solution; the candidates that conflict with it become impossible; and the invariant that survives is that the partial solution stays a prefix of some optimal solution. [[Dijkstra]] shortest paths, Prim and Kruskal for a [[Minimum Spanning Tree]], Huffman coding, activity selection, and fractional knapsack all carry a published exchange (or cut/cycle) argument for exactly this invariant.
+For activity selection, each accepted meeting extends a partial schedule and makes its overlapping candidates impossible; the invariant is that the partial schedule can still be extended to an optimum. Other greedy algorithms need their own invariant. [[Computer Science/Algorithms/Graph Algorithms/Dijkstra|Dijkstra]] finalizes the shortest distance of each settled vertex, while Prim and Kruskal accept only edges justified by the cut or cycle properties of a [[Computer Science/Algorithms/Graph Algorithms/Minimum Spanning Tree|Minimum Spanning Tree]].
 
 # Complexity
 
@@ -42,15 +47,15 @@ At each step the state that changes is a single element committed to the partial
 | --- | --- | --- | --- |
 | Order candidates by the greedy key | `O(n log n)` | `O(n)` or `O(log n)` | A comparison sort of `n` candidates dominates the total. |
 | Feasibility scan | `O(n)` | `O(1)` | Each candidate is examined once, then committed or discarded. |
-| Priority-queue variant | `O((V + E) log V)` | `O(V)` | [[Dijkstra]] and Prim re-rank candidates as edges are relaxed rather than sorting once. |
+| Priority-queue variant | `O((V + E) log V)` | `O(V)` | [[Computer Science/Algorithms/Graph Algorithms/Dijkstra\|Dijkstra]] and Prim re-rank candidates as edges are relaxed rather than sorting once. |
 
-When the greedy key needs no comparison sort — bucketable weights, an already-ordered stream — the ordering phase drops and the whole algorithm is `O(n)`. Greedy keeps no memoization table, so on any problem where both apply it stays below a [[Dynamic Programming]] solution in both time and space.
+An already finish-ordered activity stream needs only the `O(n)` feasibility scan. Bucket ordering instead costs `O(n + k)` for `k` key values; it is linear only when `k = O(n)`. Greedy often avoids the state table used by [[Computer Science/Algorithms/Paradigms/Dynamic Programming|Dynamic Programming]], but there is no general theorem that it always uses less time and space.
 
 # Where the Greedy-choice Property Fails
 
 Coin change with denominations `{1, 3, 4}` making `6` exposes the failure directly. The largest-coin rule takes `4`, then `1`, then `1` — three coins — while `3 + 3` uses two. The rule is locally optimal at every step, yet its first commitment (the `4`) appears in no optimal solution, so the greedy-choice property does not hold and there is nothing to patch in the loop: the rule itself is wrong for this denomination set. Canonical currencies like `{1, 5, 10, 25}` are constructed so the property does hold, which is why greedy is optimal there and nowhere guarantees it in general.
 
-The 0/1 knapsack breaks the same greedy-choice property under a different local rule: value-per-weight. With capacity `50` and items `(value 60, weight 10)`, `(100, 20)`, `(120, 30)` — ratios `6`, `5`, `4` — greedy commits to the highest-ratio item first and ends with items 1 and 2 for weight `30` and value `160`, unable to fit the third. The only optimal packing is `(100, 20)` with `(120, 30)`, weight `50` and value `220`, and it excludes the highest-ratio item entirely — so the first local commitment is already outside every optimum. The problem still has optimal substructure — `OPT(cap, items) = max(OPT(cap, items∖{i}), v_i + OPT(cap − w_i, items∖{i}))` — which is exactly what makes the `O(nW)` [[Dynamic Programming]] solution correct; the greedy-choice property is what fails, not the substructure. Fractional knapsack, where the highest-ratio item can be cut to fill the capacity, always admits that item into an optimal solution, restoring the greedy-choice property and making greedy-by-ratio optimal.
+The 0/1 knapsack breaks the same greedy-choice property under a different local rule: value-per-weight. With capacity `50` and items `(value 60, weight 10)`, `(100, 20)`, `(120, 30)` — ratios `6`, `5`, `4` — greedy commits to the highest-ratio item first and ends with items 1 and 2 for weight `30` and value `160`, unable to fit the third. The only optimal packing is `(100, 20)` with `(120, 30)`, weight `50` and value `220`, and it excludes the highest-ratio item entirely — so the first local commitment is already outside every optimum. The problem still has optimal substructure — `OPT(cap, items) = max(OPT(cap, items∖{i}), v_i + OPT(cap − w_i, items∖{i}))` — which is exactly what makes the `O(nW)` [[Computer Science/Algorithms/Paradigms/Dynamic Programming|Dynamic Programming]] solution correct; the greedy-choice property is what fails, not the substructure. Fractional knapsack, where the highest-ratio item can be cut to fill the capacity, always admits that item into an optimal solution, restoring the greedy-choice property and making greedy-by-ratio optimal.
 
 The common thread: both are the greedy-choice property failing under a different local rule — fewest coins via the largest denomination, most value via the highest ratio — and in each case the locally best first choice belongs to no optimal solution. The failure is silent — the code runs and returns a plausible, suboptimal result — so the difficult part of applying greedy is proving the property holds, not writing the scan.
 
@@ -75,9 +80,10 @@ The common thread: both are the greedy-choice property failing under a different
 > ```csharp
 > public static int MaxActivities((int start, int end)[] acts)
 > {
->     Array.Sort(acts, (a, b) => a.end.CompareTo(b.end)); // earliest finish first
+>     var ordered = acts.ToArray();
+>     Array.Sort(ordered, (a, b) => a.end.CompareTo(b.end)); // earliest finish first
 >     int count = 0, lastEnd = int.MinValue;
->     foreach (var (start, end) in acts)
+>     foreach (var (start, end) in ordered)
 >     {
 >         if (start >= lastEnd) // compatible with the last committed activity
 >         {
@@ -89,7 +95,7 @@ The common thread: both are the greedy-choice property failing under a different
 > }
 > ```
 >
-> The sort fixes the greedy key; `start >= lastEnd` is the only place a candidate is rejected. Replacing the key with shortest-duration or earliest-start breaks the exchange argument and the result, even though the code still runs.
+> The clone keeps the caller's order intact and accounts for the `O(n)` auxiliary space. The sort fixes the greedy key; `start >= lastEnd` is the only place a candidate is rejected. Replacing the key with shortest-duration or earliest-start breaks the exchange argument and the result, even though the code still runs.
 
 # Questions
 
@@ -104,6 +110,7 @@ The common thread: both are the greedy-choice property failing under a different
 
 # References
 
-- [Greedy algorithm (Wikipedia)](https://en.wikipedia.org/wiki/Greedy_algorithm) — definition, the greedy-choice property, and the matroid characterization of when greedy is provably optimal.
+- [Greedy algorithm (Wikipedia)](https://en.wikipedia.org/wiki/Greedy_algorithm) — a compact overview of greedy construction, exact solutions, and approximation uses.
 - [Algorithms (Jeff Erickson)](https://jeffe.cs.illinois.edu/teaching/algorithms/) — the greedy chapter gives exchange-argument proofs for scheduling and Huffman codes, and the failure modes of plausible-but-wrong greedy rules.
-- [Matroid (Wikipedia)](https://en.wikipedia.org/wiki/Matroid) — the Rado–Edmonds theorem: the greedy algorithm is optimal on a set system exactly when it forms a matroid.
+- [Matroids and the greedy algorithm (Jack Edmonds)](https://link.springer.com/article/10.1007/BF01584082) — the original characterization of matroids through weight-ordered greedy optimization over hereditary independence systems.
+- [Greedy approximation algorithms (University of Wisconsin notes)](https://pages.cs.wisc.edu/~dieter/Courses/2004F-CS787/Scribes/greedy-approx.pdf) — examples where the greedy commitment is analyzed by an approximation bound rather than exact optimality.
