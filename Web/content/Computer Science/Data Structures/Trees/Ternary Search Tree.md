@@ -1,8 +1,8 @@
 ---
 publish: true
 created: 2026-07-18T14:02:44.053Z
-modified: 2026-07-25T13:57:51.948Z
-published: 2026-07-25T13:57:51.948Z
+modified: 2026-07-26T13:53:10.736Z
+published: 2026-07-26T13:53:10.736Z
 topic:
   - Computer Science
 subtopic:
@@ -13,7 +13,7 @@ priority: Medium
 status: Ready to Repeat
 ---
 
-A [[Trie]] answers prefix queries in `O(L)`, but pays for it in memory: an array-backed node reserves one child slot per alphabet symbol `σ`, so a table keyed on Unicode allocates thousands of mostly-empty pointers at every node. Swapping the array for a `Dictionary<char, Node>` fixes the waste but hashes a character on every step and throws away the sorted order the array gave for free. A ternary search tree (TST) keeps the trie's shape while storing each node's children as a small **binary search tree keyed on the next character** — three pointers per node instead of `σ`, and the ordering survives.
+A [[Computer Science/Data Structures/Trees/Trie|Trie]] answers prefix queries in `O(L)`, but pays for it in memory: an array-backed node reserves one child slot per alphabet symbol `σ`, so a table keyed on Unicode allocates thousands of mostly-empty pointers at every node. Swapping the array for a `Dictionary<char, Node>` fixes the waste but hashes a character on every step and throws away the sorted order the array gave for free. A ternary search tree (TST) keeps the trie's shape while storing each node's children as a small **binary search tree keyed on the next character** — three pointers per node instead of `σ`, and the ordering survives.
 
 Each node carries one split character and three links: `lo` for keys whose current character is smaller, `hi` for larger, and `eq` for equal — and _only_ the `eq` link advances to the next character of the key. Walking a key alternates two motions: descend the per-position BST via `lo`/`hi` until the split character matches, then step forward one character down `eq`. The path that spells a key is still there, threaded through the `eq` links; the `lo`/`hi` links are the trie's "which child" decision turned into a comparison tree rather than an array index.
 
@@ -21,8 +21,9 @@ What it buys over a plain trie is memory proportional to the characters actually
 
 **Core shape:** trie positions linked by `eq`; at each position the alternatives form a BST split on the character via `lo`/`hi` → three pointers per node, not `σ` → `O(L + log n)` lookup that preserves order.
 
-> [!NOTE] Visualization pending
-> Planned StepTrace: a card that spells a key by alternating two moves — a `lo`/`hi` descent through the BST of alternatives at one string position, then an `eq` step that advances to the next character — and lights an end-of-key flag when the final `eq` node is reached. No matching renderer exists in `engine.js` yet.
+```steptrace
+{"algorithm":"ternary-search-tree","operations":[["insert","cat"],["insert","car"],["insert","cup"],["insert","bat"],["search","car"]]}
+```
 
 # Representation and Invariants
 
@@ -45,27 +46,27 @@ The whole contract lives in the difference between "matched the split and there 
 
 # Complexity
 
-Bounds are in the key length `L`, the number of stored keys `n`, and the alphabet size `σ`. The per-position BST is what adds a logarithmic term the plain trie does not have.
+Bounds are in the key length `L`, the number of stored keys `n`, the alphabet size `σ`, and the `S` characters visited or emitted while collecting results. The per-position BST is what adds a logarithmic term the plain trie does not have.
 
 | Operation | Time | Space | Cause |
 | --- | --- | --- | --- |
 | Search hit (key length `L`) | `O(L + log n)` avg, `O(L + n)` worst | `O(1)` | `L` matched `eq` steps plus a BST descent at each position; balanced BSTs give `log`, a sorted-order insertion degrades one to a chain. |
 | Search miss | `O(log n)` avg | `O(1)` | A miss usually fails inside the first BST it descends, before spending the full `L`. |
 | Insert | `O(L + log n)` avg | `O(L)` new nodes | One new node per previously-unseen character along the `eq` path; `lo`/`hi` position it in its BST. |
-| Prefix collection | `O(L + m)` | `O(m)` output | Reach the prefix node, then in-order traverse its `eq` subtree to emit `m` completions in sorted order. |
-| Whole structure | — | `O(total characters)` | Three pointers per node, one node per stored character — no `σ`-wide reservation. |
+| Prefix collection | `O(L + log n + S)` avg, `O(L + n + S)` worst | `O(S)` output | Reach the prefix node, then in-order traverse its `eq` subtree to emit the completions in sorted order. |
+| Whole structure | — | `O(total input characters)` | Three pointers per node and at most one new node per input character — no `σ`-wide reservation. |
 
 The memory column is the reason to choose a TST over an array-backed trie: it scales with the characters present, not with `σ × nodes`. The `O(L + log n)` lookup is the price — slightly slower per character than a trie's array indexing, but with none of the empty-slot overhead and with sorted order retained. Insertion order still matters: keys inserted in sorted order build a degenerate per-position BST, so shuffling the input (or balancing) keeps the `log` term honest.
 
 # Where the Three-way Split Earns Its Place
 
-The `lo`/`eq`/`hi` structure is not just a memory trick — it makes queries that a hash-map trie cannot answer cheaply fall out naturally.
+The `lo`/`eq`/`hi` structure is not just a memory trick: it preserves character order while keeping fan-out fixed at three pointers per node.
 
 - **Sorted output for free.** An in-order traversal — recurse `lo`, visit the `eq` subtree with `Split` appended, recurse `hi` — emits every key in lexicographic order without a separate sort. A `Dictionary`-backed trie has to collect and sort its children at each node to do the same.
-- **Near-neighbour and wildcard search.** Because each position is a comparison tree, a query can afford to explore `lo` _and_ `hi` in addition to `eq`, which is exactly how partial-match (`.a.`-style wildcards) and edit-distance-one spell-check queries are implemented: at a wildcard or an allowed-mismatch position, descend all three links; elsewhere, follow only the matching branch.
+- **Near-neighbour and wildcard search.** The comparison layout supports partial-match (`.a.`-style wildcards) and one-substitution spell-check queries: at a wildcard or an allowed-mismatch position, explore the alternative branches; elsewhere, follow only the matching branch. A hash-map trie can perform the same search by iterating its actual children, so this is not an asymptotic TST advantage. Insertion and deletion edits need extra query-index state in either structure because they change which character positions align.
 - **Bounded fan-out.** Three pointers per node means a TST is often smaller than a `Dictionary<char, Node>` trie once you count the hash table's own overhead per node, while avoiding the array trie's `σ` reservation entirely.
 
-Where it breaks is balance. Inserting keys in sorted order turns a per-position BST into a linked list, so a search that collides there degrades to `O(L + n)` — the same failure a plain [[Binary Search Tree]] has, now inside one string position. Randomising insertion order, or rebuilding the BSTs balanced, restores the `log` factor. And like any prefix structure, a TST only pays off when keys share prefixes and have a meaningful character sequence; opaque integer or float keys gain nothing from it.
+Where it breaks is balance. Inserting keys in sorted order turns a per-position BST into a linked list, so a search that collides there degrades to `O(L + n)` — the same failure a plain [[Computer Science/Data Structures/Trees/Binary Search Tree|Binary Search Tree]] has, now inside one string position. Randomising insertion order, or rebuilding the BSTs balanced, restores the `log` factor. And like any prefix structure, a TST only pays off when keys share prefixes and have a meaningful character sequence; opaque integer or float keys gain nothing from it.
 
 # Reference Drawer
 
@@ -144,13 +145,13 @@ Every structure below stores a set of string keys; they differ in the per-node c
 
 | Structure | Lookup | Prefix / ordered | Space | Child representation |
 | --- | --- | --- | --- | --- |
-| Ternary search tree | `O(L + log n)` | Prefix `O(L + m)`; in-order walk is sorted | `O(total chars)`, 3 pointers/node | BST split on the next character |
-| Array-backed [[Trie]] | `O(L)` | Prefix `O(L + m)`; sorted by symbol order | `O(total chars × σ)` | Fixed `Node[σ]` array |
-| Hash-map [[Trie]] | `O(L)` expected | Prefix `O(L + m)`; needs a sort for order | `O(total chars)` plus hash overhead | `Dictionary<char, Node>` |
-| Radix / PATRICIA trie | `O(L)` | Prefix `O(L + m)`; sorted | `O(n)`, path-compressed | Substring-labelled edges |
-| Balanced [[Binary Search Tree]] | `O(log n · L)` | Range and ordered scan; no cheap prefix set | `O(n)` | One key per node, full-key compares |
+| Ternary search tree | `O(L + log n)` | Prefix `O(L + log n + S)` avg; in-order walk is sorted | `O(total chars)`, 3 pointers/node | BST split on the next character |
+| Array-backed [[Computer Science/Data Structures/Trees/Trie\|Trie]] | `O(L)` | Prefix `O(L + S)`; sorted by symbol order | `O(total chars × σ)` | Fixed `Node[σ]` array |
+| Hash-map [[Computer Science/Data Structures/Trees/Trie\|Trie]] | `O(L)` expected | Prefix `O(L + S)` plus sorting visited children | `O(total chars)` plus hash overhead | `Dictionary<char, Node>` |
+| Radix / PATRICIA trie | `O(L)` | Prefix `O(L + S)`; sorted | `O(n)`, path-compressed | Substring-labelled edges |
+| Balanced [[Computer Science/Data Structures/Trees/Binary Search Tree\|Binary Search Tree]] | `O(log n · L)` | Range and ordered scan; no cheap prefix set | `O(n)` | One key per node, full-key compares |
 
-A TST is the trie to reach for when the alphabet is large or unknown (Unicode, arbitrary bytes) so the array trie's `σ`-wide slots are unaffordable, and you still want sorted output and near-neighbour queries that a hash-map trie can't do cheaply — it accepts an `O(L + log n)` lookup and a sensitivity to insertion order in exchange. An array-backed trie wins on a small fixed alphabet where flat `O(L)` and cache-friendly array indexing beat the pointer chasing. A radix trie wins when node count is the constraint and keys are long and sparse. A balanced BST keyed on whole strings is the choice when there are no shared prefixes to exploit and total order over complete keys is all that's needed.
+A TST is the trie to reach for when the alphabet is large or unknown (Unicode, arbitrary bytes), the array trie's `σ`-wide slots are unaffordable, and sorted output plus bounded per-node fan-out matter — it accepts an `O(L + log n)` lookup and a sensitivity to insertion order in exchange. An array-backed trie wins on a small fixed alphabet where flat `O(L)` and cache-friendly array indexing beat the pointer chasing. A radix trie wins when node count is the constraint and keys are long and sparse. A balanced BST keyed on whole strings is the choice when there are no shared prefixes to exploit and total order over complete keys is all that's needed.
 
 # Questions
 
@@ -161,10 +162,10 @@ A TST is the trie to reach for when the alphabet is large or unknown (Unicode, a
 > A plain trie resolves "which child" with a single array index or hash, `O(1)` per character, giving `O(L)`. A TST resolves it by descending a BST of the alternatives at that position, which costs `O(log n)` when balanced. Summed over the `L` matched positions the descents amortise, and the standard result is roughly `L + log n` character comparisons for a hit.
 
 > [!QUESTION]- How does inserting keys in sorted order hurt a TST?
-> Each string position is a BST built by insertion. Feeding characters in ascending order at some position makes that BST a right-leaning chain, so the `O(log n)` descent degrades to `O(n)` and lookups approach `O(L · n)`. Randomising the insertion order, or balancing the per-position BSTs, keeps the logarithmic factor — the same fix a degenerate [[Binary Search Tree]] needs.
+> Each string position is a BST built by insertion. Feeding characters in ascending order at some position makes that BST a right-leaning chain, so the `O(log n)` lateral descent degrades to `O(n)` and the full lookup approaches `O(L + n)`. Randomising the insertion order, or balancing the per-position BSTs, keeps the logarithmic factor — the same fix a degenerate [[Computer Science/Data Structures/Trees/Binary Search Tree|Binary Search Tree]] needs.
 
-> [!QUESTION]- What can a TST do that a `Dictionary`-backed trie cannot do cheaply?
-> Emit keys in sorted order without a separate sort (in-order `lo`/`eq`/`hi` traversal), and run near-neighbour queries — partial-match wildcards and edit-distance-one spell-check — by descending `lo`, `eq`, and `hi` together at a mismatch position. A hash-map trie has no ordering among children, so both require extra work it doesn't natively support.
+> [!QUESTION]- What does a TST provide over a `Dictionary`-backed trie?
+> Its in-order `lo`/`eq`/`hi` traversal emits keys in sorted order without sorting hash-map children, and every node has exactly three link slots instead of a hash-table allocation. Both structures can run wildcard or one-substitution searches by exploring alternative children; the TST's advantage is ordered layout and bounded fan-out, not a better asymptotic search bound.
 
 # References
 
