@@ -11,7 +11,7 @@ status: Ready to Repeat
 publish: true
 ---
 
-Two priority queues need to become one. An array-backed [[Heap]] cannot do this cheaply: merging two heaps of size `n` means dumping both into a buffer and rebuilding, which is `O(n)`. A leftist heap stores the same heap-ordered keys as an explicit binary tree and adds one field per node so that melding two heaps touches only a logarithmic slice of each.
+Two priority queues need to become one. An array-backed [[Home/Computer Science/Data Structures/Trees/Heap-like/Heap|heap]] cannot do this cheaply: merging two heaps of size `n` means dumping both into a buffer and rebuilding, which is `O(n)`. A leftist heap stores the same heap-ordered keys as an explicit binary tree and adds one field per node so that melding two heaps touches only a logarithmic slice of each.
 
 That field is the **null-path length** (npl, also called rank or s-value): the distance from a node to the nearest missing child, with `npl(null) = 0` and a leaf at `1`. The **leftist property** holds `npl(left) ≥ npl(right)` at every node. Consequently the right spine — the path from the root that always steps to the right child — has length at most `log(n + 1)`, because a right spine of length `r` forces at least `2^r − 1` nodes below it. Merge walks only the right spines, so it stays logarithmic in the worst case, not merely on average.
 
@@ -45,7 +45,7 @@ Bounds are worst-case per operation and assume the leftist invariant is maintain
 | --- | --- | --- | --- | --- | --- |
 | `Merge(a, b)` | `O(1)` | `O(log n)` | `Θ(n)` nodes + one npl field each | `O(log n)` recursion stack | Recurses only the two right spines, each bounded by the leftist invariant to `≤ log(n + 1)` |
 | `Insert(x)` | `O(1)` | `O(log n)` | `O(1)` new node | `O(log n)` | Merge with a singleton; cost is one right-spine walk |
-| `ExtractMin()` | `O(log n)` | `O(log n)` | `O(1)` | `O(log n)` | Merges the removed root's two subtrees — again one right-spine walk |
+| `ExtractMin()` | `O(1)` | `O(log n)` | `O(1)` | `O(log n)` | A singleton or empty-child case returns immediately; otherwise merges both right spines |
 | `FindMin()` | `O(1)` | `O(1)` | `O(1)` | `O(1)` | Minimum is the root by heap order |
 
 Structure space is `Θ(n)` for the nodes plus one integer npl per node; the pointer-based layout also carries two child references per node, unlike an array heap's implicit indexing. Auxiliary space is the recursion stack, proportional to the right-spine length; an iterative bottom-up merge that first collects both right spines can bring that to `O(1)` at the cost of more code.
@@ -56,7 +56,7 @@ The child swap in step 4 is not cosmetic. Omit it and a sequence of merges can l
 
 The npl bookkeeping must be updated on every merge, not lazily. The swap decision at each level reads the children's current npl values, so a stale rank on a subtree can cause a wrong swap — or a skipped one — and silently corrupt the bound for all ancestors. The field is part of the invariant, not a cached hint.
 
-These are worst-case bounds. That is the whole reason to pay for the npl field: a [[Skew Heaps|skew heap]] performs the same right-spine merge and unconditional swap without storing npl, and gets `O(log n)` only *amortized* — an individual meld there can be linear, offset by cheaper later ones. A leftist heap trades that field for a per-operation guarantee.
+These are worst-case bounds. That is the whole reason to pay for the npl field: a [[Home/Computer Science/Data Structures/Trees/Heap-like/Skew Heaps|skew heap]] performs the same right-spine merge and unconditional swap without storing npl, and gets `O(log n)` only *amortized* — an individual meld there can be linear, offset by cheaper later ones. A leftist heap trades that field for a per-operation guarantee.
 
 # Reference Drawer
 

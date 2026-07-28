@@ -63,7 +63,7 @@ Every boundary here traces back to the same fact: the array holds a partial orde
 
 - **Search for an arbitrary key is `O(n)`.** Only the root's rank is known; any other value can sit anywhere below it, so finding a specific element means scanning the array. A heap answers "what is the minimum," never "where is `x`."
 - **Arbitrary delete and decrease-key need an external position map.** The operations touch a node by *position*, but the heap exposes elements only by heap-order, not by identity. Without a side table mapping each element to its current index (updated on every swap), there is no way to point at the node to remove or re-key. This is why `System.Collections.Generic.PriorityQueue` offers no `Remove` or `DecreaseKey`; the standard workaround is lazy deletion — re-enqueue with the new key and skip stale entries on dequeue.
-- **Merging two binary heaps is `O(n)`.** Two valid heaps concatenated do not form a valid heap, and no small set of swaps fixes the seam, because neither array segment carries ordering information about the other. The only general repair is to concatenate and run `build-heap` over the whole `O(n)` result. The mergeable heaps — [[Binomial Queues]], [[Leftist Heaps]], [[Skew Heaps]], [[Fibonacci Heaps]] — exist precisely to make union `O(log n)` or `O(1)` amortized by keeping a pointer-linked forest instead of one packed array.
+- **Merging two binary heaps is `O(n)`.** Two valid heaps concatenated do not form a valid heap, and no small set of swaps fixes the seam, because neither array segment carries ordering information about the other. The only general repair is to concatenate and run `build-heap` over the whole `O(n)` result. The mergeable heaps — [[Home/Computer Science/Data Structures/Trees/Heap-like/Binomial Queues|binomial queues]], [[Home/Computer Science/Data Structures/Trees/Heap-like/Leftist Heaps|leftist heaps]], [[Home/Computer Science/Data Structures/Trees/Heap-like/Skew Heaps|skew heaps]], and [[Home/Computer Science/Data Structures/Trees/Heap-like/Fibonacci Heaps|Fibonacci heaps]] — exist precisely to make union `O(log n)` or `O(1)` amortized by keeping a pointer-linked forest instead of one packed array.
 
 # Reference Drawer
 
@@ -167,7 +167,7 @@ Every boundary here traces back to the same fact: the array holds a partial orde
 >     }
 > }
 > ```
-> `Build` starts sift-down at index `Count / 2 - 1` — the last internal node — because every index beyond it is a leaf that already satisfies heap order. A decrease-key or arbitrary remove would require a parallel `Dictionary<int, int>` mapping value to index, updated inside both sift loops.
+> `Build` starts sift-down at index `Count / 2 - 1` — the last internal node — because every index beyond it is a leaf that already satisfies heap order. A decrease-key or arbitrary remove needs stable unique item handles and a parallel handle-to-index dictionary updated inside both sift loops; mapping by value alone fails when duplicate values occupy different indices.
 
 # Questions
 

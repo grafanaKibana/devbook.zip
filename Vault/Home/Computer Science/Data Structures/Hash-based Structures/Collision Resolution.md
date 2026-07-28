@@ -10,7 +10,7 @@ status: Ready to Repeat
 publish: true
 ---
 
-Every hash table maps a key to a bucket with `hash(key) mod capacity`, and the pigeonhole principle guarantees that two distinct keys eventually land in the same bucket. What a table does at that moment — the **collision-resolution strategy** — is the single decision that sets its memory layout, its delete semantics, its cache behaviour, and how it degrades under load. The [[HashMap]] note covers .NET's `Dictionary` as one concrete table; this note is about the three families it could have been built on and the terminology that makes them hard to talk about.
+Every hash table maps a key to a bucket with `hash(key) mod capacity`, and the pigeonhole principle guarantees that two distinct keys eventually land in the same bucket. What a table does at that moment — the **collision-resolution strategy** — is the single decision that sets its memory layout, its delete semantics, its cache behaviour, and how it degrades under load. The [[Home/Computer Science/Data Structures/Hash-based Structures/HashMap|HashMap]] note covers .NET's `Dictionary` as one concrete table; this note is about the three families it could have been built on and the terminology that makes them hard to talk about.
 
 The naming is genuinely confusing because two independent axes both use the words "open" and "closed", meaning opposite things:
 
@@ -27,7 +27,7 @@ Read it as two questions. *Is the storage open-ended or closed?* Chaining's list
 > [!NOTE] Visualization pending
 > Planned StepTrace: a hash-table card inserting a run of colliding keys three ways side by side — a chain growing off one bucket, a probe sequence walking to the next free slot, and a fixed bucket filling then overflowing — with the load factor annotated as each fills. No matching renderer exists in `engine.js` yet.
 
-# Open Hashing — Separate Chaining (Closed aDdressing)
+# Open Hashing — Separate Chaining (Closed Addressing)
 
 Each array slot holds a pointer to a secondary container — classically a linked list — of every entry that hashed there. A collision appends to that bucket's list; a lookup hashes to the bucket and scans its list with an equality check. The array slot is a fixed *address* for the key (hence "closed addressing"), but the storage behind it is open-ended (hence "open hashing").
 
@@ -52,7 +52,7 @@ The probe sequence is the whole design:
 
 Open addressing wins on speed when the load factor is controlled: one contiguous array, no per-entry pointer, and cache-friendly probing. It demands a good hash and a disciplined resize policy, and it pays for deletes.
 
-# Bucketed Hashing (Closed aDdressing, fIxed bLocks)
+# Bucketed Hashing (Closed Addressing, Fixed Blocks)
 
 A hybrid: the array holds fixed-size **buckets**, each a small block of `B` slots, and the home bucket is `hash(key) mod bucketCount`. A key fills the first free slot *within* its bucket; only when the bucket is full does an overflow strategy kick in — an overflow chain, or probing to the next bucket. It is closed addressing at bucket granularity with open placement inside the bucket.
 
@@ -64,7 +64,7 @@ Bucketing is the design when memory or disk locality dominates — you amortise 
 
 # Complexity
 
-All three are `O(1)` average and `O(n)` worst per operation; the differences that matter are the constants and the failure modes.
+All three are `O(1)` average under a bounded load factor. List-based chaining, open addressing, and bucket overflow can degrade to `O(n)` per operation; a chaining implementation that treeifies a long bucket reduces that bucket's lookup to `O(log n)` for comparable keys. The differences that matter are the constants and failure modes.
 
 | Strategy | Avg lookup | Worst lookup | Load factor | Delete | Locality | Extra memory |
 | --- | --- | --- | --- | --- | --- | --- |
@@ -72,7 +72,7 @@ All three are `O(1)` average and `O(n)` worst per operation; the differences tha
 | Closed hashing (open addressing) | `O(1/(1−α))` | `O(n)` | must be `< 1` | tombstone or backshift | excellent (one array) | none per entry; tombstones transient |
 | Bucketed | `O(1 + overflow)` | `O(n)` | per bucket, high tolerance | clear slot in bucket | best (bucket = cache line/page) | fixed block, some slack slots |
 
-The worst case is `O(n)` for all three and fires the same way — a hash that collapses every key into one bucket — which is why the [[HashMap]] hash-flooding pitfall applies across the family regardless of resolution strategy. What differs is the *average* under load: chaining degrades linearly in `α` and survives `α > 1`; open addressing degrades hyperbolically and must resize before the array fills; bucketing pushes the cliff back by a factor of the bucket size and keeps the work in one cache line.
+List-based chaining, open addressing, and bucket overflow reach `O(n)` when a hash collapses keys into one bucket; a treeified chain instead reaches `O(log n)` lookup for comparable keys. The [[Home/Computer Science/Data Structures/Hash-based Structures/HashMap|HashMap]] hash-flooding pitfall still applies across the family regardless of resolution strategy. What differs is the *average* under load: chaining degrades linearly in `α` and survives `α > 1`; open addressing degrades hyperbolically and must resize before the array fills; bucketing pushes the cliff back by a factor of the bucket size and keeps the work in one cache line.
 
 # Reference Drawer
 
@@ -94,58 +94,6 @@ The worst case is `O(n)` for all three and fires the same way — a hash that co
 >   end
 > ```
 > Keys A and B both hash to slot 1. Chaining links B off slot 1's list; probing bumps B to slot 2; bucketing drops both into bucket 1's block.
-
-> [!EXAMPLE]- Open-addressed table with linear probing and tombstones (C#)
->
-> ```csharp
-> public sealed class LinearProbingMap<TKey, TValue> where TKey : notnull
-> {
->     private readonly record struct Slot(TKey Key, TValue Value, bool Occupied, bool Tombstone);
->     private Slot[] _slots = new Slot[8];
->     private int _count;
->
->     public void Add(TKey key, TValue value)
->     {
->         if ((_count + 1) > _slots.Length * 0.7) Resize();      // stay well below full
->         var i = Index(key);
->         var firstTombstone = -1;
->         while (_slots[i].Occupied || _slots[i].Tombstone)      // stop only at a never-used slot
->         {
->             if (_slots[i].Occupied && _slots[i].Key.Equals(key))
->             {
->                 _slots[i] = _slots[i] with { Value = value };  // key present later in the cluster: update in place
->                 return;
->             }
->             if (_slots[i].Tombstone && firstTombstone < 0)
->                 firstTombstone = i;                            // remember the first reusable slot, but keep probing
->             i = (i + 1) & (_slots.Length - 1);                 // probe forward, wrap
->         }
->         _slots[firstTombstone < 0 ? i : firstTombstone] =      // key absent: fill the tombstone, else the empty slot
->             new Slot(key, value, Occupied: true, Tombstone: false);
->         _count++;
->     }
->
->     public bool TryGet(TKey key, out TValue value)
->     {
->         var i = Index(key);
->         while (_slots[i].Occupied || _slots[i].Tombstone)      // must skip tombstones
->         {
->             if (_slots[i].Occupied && _slots[i].Key.Equals(key))
->             {
->                 value = _slots[i].Value;
->                 return true;
->             }
->             i = (i + 1) & (_slots.Length - 1);
->         }
->         value = default!;
->         return false;
->     }
->
->     private int Index(TKey key) => key.GetHashCode() & (_slots.Length - 1);
->     private void Resize() { /* allocate 2×, re-insert live entries, drop tombstones */ }
-> }
-> ```
-> A delete would set `Tombstone` (not clear the slot) so `TryGet`'s probe loop still crosses it; `Resize` is where tombstones are finally discarded. Clearing the slot outright would truncate the chain and hide any key that probed past it.
 
 # Comparison
 

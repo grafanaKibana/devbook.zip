@@ -148,6 +148,7 @@ Cyclic Sort is the in-place, `O(1)`-space tool for problems whose values already
 
 # References
 
+- [B. K. Haddon, "Cycle-Sort: A Linear Sorting Method" (1990)](https://doi.org/10.1093/comjnl/33.4.365) — the primary paper derives cycle-based in-place placement from permutation cycles.
 - [Find All Numbers Disappeared in an Array (LeetCode #448)](https://leetcode.com/problems/find-all-numbers-disappeared-in-an-array/) — the canonical cyclic-sort application; every slot should hold `index + 1`.
 - [First Missing Positive (LeetCode #41)](https://leetcode.com/problems/first-missing-positive/) — cyclic sort with out-of-range values guarded and skipped.
 - [Find the Duplicate Number (LeetCode #287)](https://leetcode.com/problems/find-the-duplicate-number/) — contrasts the mutating placement approach with the read-only pointer method.

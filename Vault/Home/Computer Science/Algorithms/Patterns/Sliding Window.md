@@ -127,6 +127,7 @@ Sliding window is the `O(n)` default for a contiguous-range answer whose aggrega
 
 # References
 
+- [Mayur Datar et al., "Maintaining Stream Statistics over Sliding Windows" (2002)](https://doi.org/10.1137/S0097539701398363) — a primary treatment of maintaining aggregates over the last `N` stream elements, the same enter-once/expire-once model used here.
 - [Window Sliding Technique](https://www.geeksforgeeks.org/window-sliding-technique/) — GeeksforGeeks walkthrough of fixed and variable windows with the incremental-update derivation.
 - [Longest Substring Without Repeating Characters (LeetCode #3)](https://leetcode.com/problems/longest-substring-without-repeating-characters/) — canonical variable-window problem backed by a frequency map.
 - [Sliding Window Maximum (LeetCode #239)](https://leetcode.com/problems/sliding-window-maximum/) — the non-reversible-aggregate case that requires a monotonic deque.

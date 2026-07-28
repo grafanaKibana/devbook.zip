@@ -11,15 +11,13 @@ status: Ready to Repeat
 publish: true
 ---
 
-# Intro
-
 Suppose a target state depends on two smaller states, and those states depend on earlier ones. Solving that dependency graph in order turns it into a table where every state is written once and later transitions read stored results instead of rebuilding them.
 
 Dynamic programming starts with a well-defined state, base cases, and a recurrence that composes already-solved states. In the finite, one-pass formulations covered here, those dependencies form an acyclic order, whether followed lazily by recursion or eagerly by iteration. For optimization problems, that valid recurrence usually expresses **optimal substructure**: an optimum is assembled from optima of smaller states. Counting and decision DPs use the same state-and-recurrence machinery without necessarily optimizing anything. Repeated states are what make storing results pay, but they are an efficiency condition rather than a correctness requirement. Iterative methods such as value iteration are also DP, but may revisit mutually dependent value estimates until convergence rather than solve every state once.
 
 **Core shape for finite one-pass DP:** state + base cases + recurrence + acyclic dependency order → each reached state solved once → `(number of distinct states) × (transition work per state)` time.
 
-## Mechanism — State, Recurrence, and the Two Forms
+# Mechanism — State, Recurrence, and the Two Forms
 
 Both examples become DP only after the state discards irrelevant history. Coin change keeps the remaining amount because every denomination remains reusable; finite coin stock would also require the remaining counts. Grid path keeps the current coordinate. Two calls with the same state have the same future choices and therefore the same answer, regardless of how they arrived there.
 
@@ -28,7 +26,7 @@ Both examples become DP only after the state discards irrelevant history. Coin c
 
 The recurrence then names the dependencies. Coin change reads `best[amount - coin]` for every usable denomination and keeps the minimum plus one. Grid path reads the right and down suffix costs and adds the current tile. The animations differ because those state spaces differ—a one-dimensional amount board versus a two-dimensional matrix—but the storage rule is the same.
 
-## Coin Change — Local Choice versus Stored Subproblems
+# Coin Change — Local Choice versus Stored Subproblems
 
 A cashier must return exactly `30¢` using real `1¢`, `10¢`, `25¢`, and `50¢` denominations. The example assumes enough of each coin that stock is not a constraint. Taking the largest usable coin first returns `25 + 1 + 1 + 1 + 1 + 1`, while `10 + 10 + 10` uses half as many coins. The five tabs keep that counterexample fixed while changing the solving strategy and level of abstraction.
 
@@ -94,7 +92,7 @@ The simplified Memoization and Tabulation tabs keep the cashier model visible. M
 > ```
 > `FewestCoinsTopDown(30, [1, 10, 25, 50])` and the bottom-up version both return `3`.
 
-## Grid Path — Repeated Coordinates versus a Filled Matrix
+# Grid Path — Repeated Coordinates versus a Filled Matrix
 
 A warehouse robot may move only right or down from the loading bay to the dispatch door. Choosing the cheaper immediate tile and breaking ties to the right walks into an expensive corridor and costs `21`; the best complete route costs `10`. Naive recursion eventually finds it, but different route prefixes repeatedly reach the same coordinate.
 
@@ -169,7 +167,7 @@ Here the state is a coordinate rather than an amount. `best(R2C2)` means “the 
 > ```
 > Both versions return the same minimum route cost; the visualization keeps the full table so it can also highlight the chosen route.
 
-## Complexity
+# Complexity
 
 DP's running time is structural: distinct states multiplied by transitions examined per state.
 
@@ -180,7 +178,7 @@ DP's running time is structural: distinct states multiplied by transitions exami
 
 Grid-path tabulation can keep one row in `O(C)` space when only the minimum cost matters. The visualization retains all `R·C` cells because reconstructing and highlighting the chosen route needs predecessor information. Coin change may store a chosen-coin array for direct reconstruction, or rescan the denominations during backtracking for a coin satisfying `dp[a] = dp[a - coin] + 1`.
 
-## Boundaries
+# Boundaries
 
 The recurrence and state definition are load-bearing; reuse and table shape determine whether the formulation is practical.
 
@@ -191,7 +189,7 @@ The recurrence and state definition are load-bearing; reuse and table shape dete
 
 Optimization DP still needs a valid composition rule. For the same US-coin drawer, the largest-coin rule returns `25 + 1 + 1 + 1 + 1 + 1` for `30¢`, while the recurrence compares every allowed predecessor and finds `10 + 10 + 10`. The [[Home/Computer Science/Algorithms/Paradigms/Greedy Algorithms|greedy algorithms]] note develops this failure of the greedy-choice property and the conditions under which the cheaper local rule is safe.
 
-## Questions
+# Questions
 
 > [!QUESTION]- Why are remaining amount and current coordinate valid states?
 > Each captures everything that can change the future answer. With reusable denominations, the coins already chosen do not change which combinations can finish a remaining amount; finite stock would add the remaining counts to the state. Once the coordinate is known, the route prefix does not change the right/down suffix costs. Calls with the same state are therefore interchangeable and may share one stored answer.
@@ -202,7 +200,7 @@ Optimization DP still needs a valid composition rule. For the same US-coin drawe
 > [!QUESTION]- What changes between memoization and tabulation if the recurrence is the same?
 > Evaluation order and control flow. Memoization begins at the target, follows recursive dependencies, and stores states on demand. Tabulation begins at base cases and fills states in a predetermined order. Their asymptotic work matches when both visit the same states; tabulation avoids call-stack cost, while memoization may skip states the target never reaches.
 
-## References
+# References
 
 - [Dynamic programming (Wikipedia)](https://en.wikipedia.org/wiki/Dynamic_programming) — formal definition, Bellman's origin of the term, and the optimal-substructure / overlapping-subproblems conditions.
 - [Richard Bellman, "The Theory of Dynamic Programming" (1954)](https://www.ams.org/bull/1954-60-06/S0002-9904-1954-09848-8/S0002-9904-1954-09848-8.pdf) — the primary paper formalizing state variables and the principle of optimality.

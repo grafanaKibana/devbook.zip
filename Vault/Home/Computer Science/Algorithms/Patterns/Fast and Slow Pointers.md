@@ -120,6 +120,7 @@ Floyd's fast/slow is the `O(1)`-space cycle detector for linked structures and f
 
 # References
 
+- [Richard P. Brent, "An Improved Monte Carlo Factorization Algorithm" (1980)](https://doi.org/10.1007/BF01933190) — the primary presentation of Brent’s constant-space cycle-detection variant, a useful comparison to the tortoise-and-hare walk.
 - [Cycle detection (Wikipedia)](https://en.wikipedia.org/wiki/Cycle_detection) — Floyd's and Brent's algorithms with correctness proofs and the entry-point derivation.
 - [Floyd's tortoise and hare (cp-algorithms)](https://cp-algorithms.com/others/tortoise_and_hare.html) — the cycle-finding method and its length and entry extensions.
 - [Linked List Cycle II (LeetCode #142)](https://leetcode.com/problems/linked-list-cycle-ii/) — return the cycle-entry node, the canonical phase-two problem.

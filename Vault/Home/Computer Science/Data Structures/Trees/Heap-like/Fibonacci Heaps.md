@@ -11,9 +11,9 @@ status: Ready to Repeat
 publish: true
 ---
 
-[[Dijkstra]] and Prim's [[Minimum Spanning Tree]] spend most of their time on one operation: lowering the tentative key of a vertex already in the frontier. Each relaxed edge triggers a decrease-key, so a dense graph performs up to `E` of them against only `V` extract-mins. A binary [[Heap]] charges `O(log n)` for every decrease-key, which dominates the total and pins Dijkstra at `O(E log V)`.
+[[Home/Computer Science/Algorithms/Graph Algorithms/Dijkstra|Dijkstra]] and Prim's [[Home/Computer Science/Algorithms/Graph Algorithms/Minimum Spanning Tree|minimum spanning tree]] algorithm spend most of their time on one operation: lowering the tentative key of a vertex already in the frontier. Each relaxed edge triggers a decrease-key, so a dense graph performs up to `E` of them against only `V` extract-mins. A binary [[Home/Computer Science/Data Structures/Trees/Heap-like/Heap|heap]] charges `O(log n)` for every decrease-key, which dominates the total and pins Dijkstra at `O(E log V)`.
 
-A Fibonacci heap removes that cost by refusing to reorganize eagerly. It keeps a forest of heap-ordered trees strung together in a circular doubly-linked **root list** with a pointer to the minimum root, and it does the least work each operation allows: insert splices a new single-node tree into the root list, merge concatenates two root lists, and decrease-key cuts the affected node loose to the root list rather than sifting it. All the deferred restructuring is paid off once, later, by extract-min. That laziness is what buys **O(1) amortized decrease-key and merge**, dropping Dijkstra and Prim to `O(E + V log V)` — the optimal comparison-based bound.
+A Fibonacci heap removes that cost by refusing to reorganize eagerly. It keeps a forest of heap-ordered trees strung together in a circular doubly-linked **root list** with a pointer to the minimum root, and it does the least work each operation allows: insert splices a new single-node tree into the root list, merge concatenates two root lists, and decrease-key cuts the affected node loose to the root list rather than sifting it. All the deferred restructuring is paid off once, later, by extract-min. That laziness buys **O(1) amortized decrease-key and merge**, yielding the standard Fibonacci-heap bound `O(E + V log V)` for Dijkstra and Prim under their usual adjacency-list and priority-queue analyses.
 
 The bound is amortized, not worst-case. The forest can hold many trees and many equal degrees between extract-mins, and a single extract-min can then be expensive. What keeps the amortized accounting solvent is a per-node **mark bit** and a cascading-cut rule that prevents trees from degenerating.
 
@@ -60,9 +60,9 @@ Structurally the heap is `O(n)` nodes, but the per-node overhead is high: four p
 
 # Where Laziness and Amortization Stop Paying
 
-The advertised `O(1)` decrease-key is amortized and only wins when decrease-key vastly outnumbers extract-min. That is exactly the dense-graph shape of [[Dijkstra]] and Prim's [[Minimum Spanning Tree]], where `E` relaxations dwarf `V` removals and the `O(E + V log V)` bound is genuinely optimal. On sparse graphs, or any workload where extract-min is a constant fraction of operations, the deferred consolidation is paid often enough that the asymptotic edge evaporates.
+The advertised `O(1)` decrease-key is amortized and only wins when decrease-key vastly outnumbers extract-min. That is exactly the dense-graph shape of [[Home/Computer Science/Algorithms/Graph Algorithms/Dijkstra|Dijkstra]] and Prim's [[Home/Computer Science/Algorithms/Graph Algorithms/Minimum Spanning Tree|minimum spanning tree]] algorithm, where `E` relaxations dwarf `V` removals and the standard analysis reaches `O(E + V log V)`. On sparse graphs, or any workload where extract-min is a constant fraction of operations, the deferred consolidation is paid often enough that the asymptotic edge evaporates.
 
-The constant factors and memory layout usually erase the win regardless of asymptotics. Each operation chases pointers through a forest of separately allocated nodes scattered across memory, so consolidation and cascading cuts thrash the cache, while a binary [[Heap]] does index arithmetic over one contiguous array. Empirically an array-backed binary or quaternary heap — or a pairing heap — beats a Fibonacci heap on real Dijkstra inputs despite the worse `O(log n)` decrease-key.
+The constant factors and memory layout usually erase the win regardless of asymptotics. Each operation chases pointers through a forest of separately allocated nodes scattered across memory, so consolidation and cascading cuts thrash the cache, while a binary [[Home/Computer Science/Data Structures/Trees/Heap-like/Heap|heap]] does index arithmetic over one contiguous array. Empirically an array-backed binary or quaternary heap — or a pairing heap — beats a Fibonacci heap on real Dijkstra inputs despite the worse `O(log n)` decrease-key.
 
 The mark-and-cascading-cut machinery is intricate and error-prone: forgetting to clear a mark on promotion to root, or to stop the cascade at an unmarked parent, silently breaks the degree bound and quietly degrades consolidation without any crash. And because a single extract-min or a single cascading decrease-key can be `O(n)`, the structure is unsuitable anywhere per-operation latency matters, such as real-time scheduling — the guarantees hold only in aggregate.
 
@@ -86,86 +86,6 @@ The mark-and-cascading-cut machinery is intricate and error-prone: forgetting to
 >   classDef cut fill:#c33,stroke:#611,color:#fff
 > ```
 > `*` marks a node that has already lost one child. Decreasing `30` to `2` cuts it to the root list; because its parent `21` was already marked, the cut cascades and `21` is cut up as well.
-
-> [!EXAMPLE]- C# implementation (structure, insert, decrease-key, cut/cascade)
->
-> ```csharp
-> public sealed class FibonacciHeap<T>
-> {
->     private sealed class Node
->     {
->         public int Key;
->         public T Value = default!;
->         public int Degree;
->         public bool Mark;
->         public Node Parent = null!;
->         public Node Child = null!;
->         public Node Left = null!;   // circular
->         public Node Right = null!;  // circular
->     }
->
->     private Node? _min;
->     private int _count;
->
->     public int Count => _count;
->     public int Minimum => _min is null
->         ? throw new InvalidOperationException("empty")
->         : _min.Key;
->
->     // O(1): splice a single-node tree into the root list.
->     public Node Insert(int key, T value)
->     {
->         var node = new Node { Key = key, Value = value };
->         node.Left = node;
->         node.Right = node;
->         _min = MergeLists(_min, node);
->         _count++;
->         return node;
->     }
->
->     // O(1) amortized: cut to the root list, cascade if the parent was marked.
->     public void DecreaseKey(Node node, int newKey)
->     {
->         if (newKey > node.Key)
->             throw new ArgumentException("key would increase");
->
->         node.Key = newKey;
->         var parent = node.Parent;
->         if (parent is not null && node.Key < parent.Key)
->         {
->             Cut(node, parent);
->             CascadingCut(parent);
->         }
->         if (_min is null || node.Key < _min.Key)
->             _min = node;
->     }
->
->     private void Cut(Node child, Node parent)
->     {
->         RemoveFromChildren(parent, child);
->         parent.Degree--;
->         child.Parent = null!;
->         child.Mark = false;            // roots are never marked
->         _min = MergeLists(_min, child);
->     }
->
->     private void CascadingCut(Node node)
->     {
->         var parent = node.Parent;
->         if (parent is null) return;    // reached a root
->         if (!node.Mark) node.Mark = true;   // first loss: just record it
->         else { Cut(node, parent); CascadingCut(parent); }  // second loss: cut up
->     }
->
->     // ExtractMin (summarized): detach _min, promote its children to roots,
->     // then Consolidate() links roots of equal degree via an index-by-degree
->     // table until all root degrees are distinct, and rescans for the new _min.
->
->     private static Node? MergeLists(Node? a, Node? b) { /* splice two circular lists, return smaller-key head */ return a ?? b; }
->     private static void RemoveFromChildren(Node parent, Node child) { /* unlink child; fix parent.Child if needed */ }
-> }
-> ```
-> The invariant carriers are `Cut` (clears the mark because a root is always unmarked) and `CascadingCut` (stops at the first unmarked ancestor, otherwise cuts upward). Consolidation is elided; it is the standard degree-indexed linking pass that pays the deferred cost.
 
 # Questions
 

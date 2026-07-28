@@ -11,11 +11,13 @@ status: Creation
 publish: true
 ---
 
-A signature engine scans a byte stream — packets, log lines, a file — against a fixed dictionary of `k` patterns and must report every occurrence of every pattern. Running a single-pattern matcher such as [[Home/Computer Science/Algorithms/Search Algorithms/String Matching/KMP (Knuth-Morris-Pratt) Algorithm|KMP]] once per pattern reads the whole text `k` times, so the cost is `O(k·n)` and grows with the dictionary even though the text never changes.
+A signature engine scans a byte stream — packets, log lines, a file — against a fixed dictionary of `k` non-empty patterns and must report every occurrence of every pattern. Running a single-pattern matcher such as [[Home/Computer Science/Algorithms/Search Algorithms/String Matching/KMP (Knuth-Morris-Pratt) Algorithm|KMP]] once per pattern reads the whole text `k` times, so the cost is `O(k·n)` and grows with the dictionary even though the text never changes.
 
 The patterns share structure. Any two that begin `sh…` walk the same first edges, and a shorter pattern can be a suffix of the state a longer one reaches. Aho-Corasick compiles the whole dictionary once into a single finite automaton — a trie of all patterns carrying **failure links** and **output links** — then drives the text through it one character at a time without ever rewinding. One pass reports every match of every pattern, and its search cost stops depending on `k`.
 
 **Core shape:** fixed pattern set → trie + failure links + output links → one non-backtracking pass over the text → `Θ(n + z)` search for `z` reported matches, from one automaton built over the whole dictionary.
+
+# Trace
 
 ```steptrace
 {"algorithm":"aho-corasick","patterns":["he","she","his","hers"],"text":"ushers"}
@@ -47,10 +49,10 @@ Let `M = Σmᵢ` be the total length of all patterns — an upper bound on the t
 
 | Phase | Time | Space | Cause |
 | --- | --- | --- | --- |
-| Build automaton | `Θ(M)` sparse, `Θ(M·σ)` dense | `Θ(M)` sparse, `Θ(M·σ)` dense | One insertion per pattern character builds the `≤ M+1` trie nodes; a single BFS assigns every failure and output link. A dense `σ`-wide transition row per node adds the `σ` factor; a hash map per node stores only real edges and drops it, at an `O(1)` expected lookup instead of an array index. |
+| Build automaton | `O(M·L)` sparse, `Θ(M·σ)` dense | `Θ(M)` sparse, `Θ(M·σ)` dense | One insertion per pattern character builds the `≤ M+1` trie nodes; with this map-and-failure-hop construction, each BFS edge can follow up to `L` failure links, where `L` is the longest pattern length. A dense `σ`-wide transition row per node assigns every transition directly but adds the `σ` factor; a hash map per node stores only real edges and drops it, at an `O(1)` expected lookup instead of an array index. |
 | Search | `Θ(n + z)` | `O(1)` beyond the automaton | Each text character makes one forward move plus failure hops that amortize to `O(1)` over the scan (the KMP argument), and the output walk emits exactly the `z` matches. No term in `k`, the pattern count. |
 
-The `Θ(M·σ)` (dense) or `Θ(M)` (sparse) figure is the automaton itself, allocated once and reused across every text. A search adds only a current-state index and an output-walk cursor, so its per-pass auxiliary space is `O(1)` — the automaton is structure space, not per-operation space. The dense-versus-sparse choice trades that automaton memory against a constant-factor transition cost, and is the main space decision on wide alphabets.
+The `Θ(M·σ)` (dense) or `Θ(M)` (sparse) figure is the automaton itself, allocated once and reused across every text; the sparse build can take `O(M·L)` with the simple failure-hop loop shown below. A search adds only a current-state index and an output-walk cursor, so its per-pass auxiliary space is `O(1)` — the automaton is structure space, not per-operation space. The dense-versus-sparse choice trades that automaton memory against a constant-factor transition cost, and is the main space decision on wide alphabets.
 
 # Where it Stops Fitting
 
@@ -58,7 +60,7 @@ The `Θ(M·σ)` (dense) or `Θ(M)` (sparse) figure is the automaton itself, allo
 
 **Overlapping and nested matches.** The automaton reports every occurrence of every pattern, including matches that overlap (`aa` in `aaa` at offsets 0 and 1) and matches nested inside a longer one (`he` ending inside `she`). Those extra matches surface only through the output-link walk. Reporting a pattern only when the current node itself ends one leaves the scan correctly positioned but silently drops the nested cases: on `{ he, she, hers }` over `ushers` it reports `she` and `hers` and loses `he`. The defect is invisible on any dictionary where no pattern is a suffix of another, which is what makes it easy to ship.
 
-**A fixed dictionary.** Failure and output links are global properties of the whole pattern set, resolved by the single construction BFS. Adding a pattern changes suffix relationships throughout the trie, so the links must be recomputed — an insertion after construction means rebuilding the automaton, or maintaining a more complex dynamic variant. The algorithm therefore fits a dictionary compiled once and reused across many texts; a set that changes on every query pays the `Θ(M)` build repeatedly and loses its edge over rerunning a single-pattern matcher.
+**A fixed dictionary.** Failure and output links are global properties of the whole pattern set, resolved by the single construction BFS. Adding a pattern changes suffix relationships throughout the trie, so the links must be recomputed — an insertion after construction means rebuilding the automaton, or maintaining a more complex dynamic variant. The algorithm therefore fits a dictionary compiled once and reused across many texts; a set that changes on every query pays the sparse `O(M·L)` build repeatedly and loses its edge over rerunning a single-pattern matcher.
 
 # Reference Drawer
 
@@ -98,6 +100,11 @@ The `Θ(M·σ)` (dense) or `Θ(M)` (sparse) figure is the automaton itself, allo
 >
 >     public void Add(string pattern, int id)
 >     {
+>         if (pattern.Length == 0)
+>         {
+>             throw new ArgumentException("Patterns must not be empty.", nameof(pattern));
+>         }
+>
 >         var node = 0;
 >         foreach (var c in pattern)
 >         {
@@ -180,7 +187,7 @@ The `Θ(M·σ)` (dense) or `Θ(M)` (sparse) figure is the automaton itself, allo
 > A single state can complete several patterns when a shorter one is a suffix of a longer one, such as `he` ending inside `she`. Output links chain each state to the nearest shorter pattern that also ends there, and walking the chain enumerates every simultaneous match. Without them the scan is still correctly positioned but reports only the pattern the current node ends, silently dropping the nested ones — the classic loss of `he` when matching `{ he, she, hers }` in `ushers`.
 
 > [!QUESTION]- Why does adding a pattern after construction force a rebuild?
-> Failure and output links encode suffix relationships across the entire pattern set and are resolved together by the single construction BFS. A new pattern can change the longest-suffix target of many existing states, so the links are no longer valid and must be recomputed. That is why the automaton fits a dictionary built once and reused across texts rather than one that changes per query.
+> Failure and output links encode suffix relationships across the entire pattern set and are resolved together by the single construction BFS. A new pattern can change the longest-suffix target of many existing states, so the links are no longer valid and must be recomputed. That is why the automaton fits a dictionary built once and reused across texts rather than one that changes per query. Empty patterns are rejected here: otherwise they match at every boundary and need a separately defined `n + 1`-position result contract.
 
 # References
 

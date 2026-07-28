@@ -141,6 +141,7 @@ Binary search on the answer is the `O(n · log(range))` tool when the answer is 
 
 # References
 
+- [Nimrod Megiddo, "Applying Parallel Computation Algorithms in the Design of Serial Algorithms" (1983)](https://doi.org/10.1145/2157.322410) — the primary paper introducing parametric search: reduce an optimization threshold to a monotone decision predicate.
 - [Binary search (CP Algorithms)](https://cp-algorithms.com/num_methods/binary_search.html) — the "binary search on the answer" section and the monotone-predicate framing behind `lower_bound`-style boundaries.
 - [Capacity To Ship Packages Within D Days (LeetCode #1011)](https://leetcode.com/problems/capacity-to-ship-packages-within-d-days/) — the minimise-the-maximum instance whose predicate is the reference implementation above.
 - [Split Array Largest Sum (LeetCode #410)](https://leetcode.com/problems/split-array-largest-sum/) — the same monotone predicate under "minimise the largest subarray sum" wording.
