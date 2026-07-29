@@ -1,8 +1,8 @@
 ---
 publish: true
-created: 2026-07-25T18:38:43.812Z
-modified: 2026-07-25T18:38:43.813Z
-published: 2026-07-25T18:38:43.813Z
+created: 2026-07-29T14:28:24.644Z
+modified: 2026-07-29T14:28:24.645Z
+published: 2026-07-29T14:28:24.645Z
 topic:
   - Computer Science
 subtopic:
@@ -20,17 +20,17 @@ The structure is narrower than a graph representation. It remembers which elemen
 
 **Core shape:** elements → parent-index forest → one root per set → shared root means shared membership → `O(n)` storage.
 
-# State across Operations
+# Interactive Forest
 
-The trace starts with seven singleton sets. The first three unions deliberately create the chain `0 → 1 → 2 → 3`; `find(0)` then rewrites the visited parents to point directly at root `3`.
+The view starts with seven singleton sets. Choose two elements and run `Union` to merge their roots, `Find A` to resolve and compress one parent path, or `Connected?` to resolve both roots and compare representatives. Because that check performs two finds, it may flatten both parent paths. The forest and its parent array update together: an arrow points from a child to its parent, and a root stores its own index.
 
 ```steptrace
-{"algorithm":"union-find","n":7,"ops":[["union",0,1],["union",1,2],["union",2,3],["find",0],["union",4,5],["union",3,4],["find",1]]}
+{"algorithm":"union-find","n":7}
 ```
 
 Only roots are linked during a union. Linking an arbitrary interior node would detach or misclassify part of its existing set. A find follows parent indices until `parent[root] == root`; path compression can then shorten the route without changing the representative.
 
-The trace uses direct root linking to make a deep chain and its compression visible. The reference implementation also stores rank, preventing that chain from becoming deep in the first place.
+The interactive structure uses union by rank, so a lower-rank root attaches beneath a higher-rank root. On equal rank, this view keeps element A's root as parent and increments that root's rank.
 
 # Representation and Invariants
 
@@ -50,12 +50,12 @@ Path compression rewrites parent indices but preserves set membership. Union by 
 
 # Complexity
 
-| Operation | Best time | Amortized time | Worst single operation | Peak space |
-| --- | --- | --- | --- | --- |
-| Construct `n` singleton sets | `Θ(n)` | `Θ(n)` | `Θ(n)` | `Θ(n)` structure |
-| `Find(x)` | `O(1)` | `O(α(n))` | `O(log n)` | `O(1)` best, `O(log n)` worst stack |
-| `Union(a, b)` | `O(1)` | `O(α(n))` | `O(log n)` | `O(1)` best, `O(log n)` worst stack |
-| `Connected(a, b)` | `O(1)` | `O(α(n))` | `O(log n)` | `O(1)` best, `O(log n)` worst stack |
+| Operation                    | Best time | Amortized time | Worst single operation | Peak space                          |
+| ---------------------------- | --------- | -------------- | ---------------------- | ----------------------------------- |
+| Construct `n` singleton sets | `Θ(n)`    | `Θ(n)`         | `Θ(n)`                 | `Θ(n)` structure                    |
+| `Find(x)`                    | `O(1)`    | `O(α(n))`      | `O(log n)`             | `O(1)` best, `O(log n)` worst stack |
+| `Union(a, b)`                | `O(1)`    | `O(α(n))`      | `O(log n)`             | `O(1)` best, `O(log n)` worst stack |
+| `Connected(a, b)`            | `O(1)`    | `O(α(n))`      | `O(log n)`             | `O(1)` best, `O(log n)` worst stack |
 
 These bounds assume path compression and union by rank. Rank alone keeps tree height at `O(log n)`; path compression makes a sequence of operations cost `O(α(n))` per operation amortized. Without either heuristic, a chain can grow to length `n`, turning `Find`, `Union`, and `Connected` into `O(n)` operations.
 
@@ -144,15 +144,15 @@ The array representation assumes dense integer IDs from `0` through `n - 1`. Str
 
 # Comparison
 
-| Representation | Connectivity query | Add connection / merge | Removal | Information retained | Stronger case |
-| --- | --- | --- | --- | --- | --- |
-| Disjoint set | `O(α(n))` amortized | `O(α(n))` amortized | Not supported | Component membership | Connections only accumulate and connectivity is queried repeatedly |
-| Static component labels | `O(1)` after preprocessing | Recompute labels in `O(V + E)` | Recompute labels | Component ID snapshot | The graph is immutable and receives many connectivity queries |
-| Rollback disjoint set | `O(log n)` | `O(log n)` | `O(1)` rollback of the latest merge | Component membership plus change history | Offline connectivity where additions must be undone in reverse order |
+| Representation          | Connectivity query         | Add connection / merge         | Removal                             | Information retained                     | Stronger case                                                        |
+| ----------------------- | -------------------------- | ------------------------------ | ----------------------------------- | ---------------------------------------- | -------------------------------------------------------------------- |
+| Disjoint set            | `O(α(n))` amortized        | `O(α(n))` amortized            | Not supported                       | Component membership                     | Connections only accumulate and connectivity is queried repeatedly   |
+| Static component labels | `O(1)` after preprocessing | Recompute labels in `O(V + E)` | Recompute labels                    | Component ID snapshot                    | The graph is immutable and receives many connectivity queries        |
+| Rollback disjoint set   | `O(log n)`                 | `O(log n)`                     | `O(1)` rollback of the latest merge | Component membership plus change history | Offline connectivity where additions must be undone in reverse order |
 
 The disjoint set occupies a specific point in this comparison: it gives up graph topology and deletion in exchange for extremely cheap incremental merges and membership checks. Static labels are cheaper to query when the graph never changes. Rollback retains change history at a higher per-operation cost and without path compression.
 
-The related [[Union-Find]] note covers the operation heuristics and their analysis. This page remains centered on stored state, invariants, and the boundary of the data structure itself.
+The related [[Computer Science/Data Structures/Graph Structures/Union-Find|Union-Find]] note covers the operation heuristics and their analysis. This page remains centered on stored state, invariants, and the boundary of the data structure itself.
 
 # Questions
 

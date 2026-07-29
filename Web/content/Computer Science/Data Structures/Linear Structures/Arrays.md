@@ -1,13 +1,13 @@
 ---
 publish: true
-created: 2026-07-18T14:02:44.039Z
-modified: 2026-07-28T13:33:35.402Z
-published: 2026-07-28T13:33:35.402Z
+created: 2026-07-29T14:28:24.648Z
+modified: 2026-07-29T14:28:24.648Z
+published: 2026-07-29T14:28:24.648Z
 topic:
   - Computer Science
 subtopic:
   - Data Structures
-summary: A fixed-size contiguous block of same-typed elements, the substrate every other linear structure builds on.
+summary: A fixed-size contiguous block of same-typed elements, the substrate for many indexed collections.
 level:
   - "4"
 priority: Medium
@@ -16,13 +16,13 @@ status: Ready to Repeat
 
 A program holds an ordered collection of same-typed values and needs to reach the i-th one directly, not by walking from the front. An array stores those values as a contiguous block of equal-size slots, so the address of element `i` is `base + i * elementSize` — a single multiply-and-add that lands on the element regardless of how large `i` is. That same contiguity places neighbors in the sequence next to each other in RAM, which is what makes a scan cache-friendly.
 
-The block is what other linear structures are built on: `List<T>` wraps one, `Stack<T>` and `Queue<T>` wrap one, `Dictionary<TKey,TValue>` keeps its entries in one. The cost of contiguity is rigidity — the size is fixed at allocation, so growth means allocating a new block and copying, and inserting in the middle shifts every later element to keep the slots packed. Growable capacity belongs to [[Computer Science/Data Structures/Linear Structures/Dynamic Array|Dynamic Array]]; a zero-copy view over an existing block belongs to [[Computer Science/Data Structures/Linear Structures/Span|Span]].
+The block backs many .NET collections: `List<T>`, `Stack<T>`, and `Queue<T>` wrap one, while `Dictionary<TKey,TValue>` stores entries in arrays. The cost of contiguity is rigidity — the size is fixed at allocation, so growth means allocating a new block and copying, and inserting in the middle shifts every later element to keep the slots packed. Growable capacity belongs to [[Computer Science/Data Structures/Linear Structures/Dynamic Array|Dynamic Array]]; a zero-copy view over an existing block belongs to [[Computer Science/Data Structures/Linear Structures/Span|Span]].
 
 **Core shape:** equal-size elements → one contiguous fixed block → address `base + i·elementSize` → `O(1)` index, cache-local scan → no cheap growth or middle insert.
 
-The decisive behaviors are an index jump and a middle-insert shift.
+The decisive behaviors are an index jump and an in-place write to one fixed slot.
 
-The interactive view keeps the array state between actions: an index lookup jumps directly to one slot, while a middle insert shifts the contiguous tail.
+The interactive view keeps the array state between actions. Reading jumps directly to one slot; writing to an occupied index replaces that slot's value without moving any neighbor. Inserting a _new element_ is a separate operation that requires shifting the tail or allocating another array.
 
 ```steptrace
 {"algorithm":"arrays"}
@@ -30,7 +30,7 @@ The interactive view keeps the array state between actions: an index lookup jump
 
 # Representation and Layout
 
-The elements sit back-to-back in one allocation. Because every slot is the same width, the offset of element `i` is purely arithmetic: `address(a[i]) = base + i * elementSize`. Nothing before element `i` needs to be inspected, so `a[5_000_000]` costs exactly what `a[0]` costs. Equal element size is the precondition — variable-width elements would make the offset depend on everything preceding the target, which is the linked, pointer-chasing model instead.
+The elements sit back-to-back in one allocation. Because every slot is the same width, the offset of element `i` is purely arithmetic: `address(a[i]) = base + i * elementSize`. Nothing before element `i` needs to be inspected, so `a[5_000_000]` costs exactly what `a[0]` costs. Fixed-width slots are the precondition for direct address arithmetic; variable-width payloads need indirection or extra offset/length metadata.
 
 Multi-dimensional arrays flatten the same way. A row-major `T[,]` stores row 0 in full, then row 1, and resolves `a[r, c]` as `base + (r * width + c) * elementSize`; the two-dimensional shape is an addressing convention over one contiguous block.
 
@@ -40,14 +40,14 @@ Contiguity is worth more than the complexity table shows. On representative x86-
 
 # Complexity
 
-| Operation | Time | Aux space | Cause |
-| --- | --- | --- | --- |
-| Access by index | `O(1)` | `O(1)` | Address is `base + i·elementSize`; one multiply-and-add, independent of `i` or length. |
-| Search, unsorted | `O(n)` | `O(1)` | No order to exploit, so every slot may need inspecting. |
-| Search, sorted | `O(log n)` | `O(1)` | Random access lets [[Computer Science/Algorithms/Search Algorithms/Binary Search\|Binary Search]] discard half the range per probe. |
-| Insert / delete at the middle | `O(n)` | `O(1)` | The tail shifts one slot to keep the block packed and contiguous. |
-| Append / grow | not supported | — | Capacity is fixed at allocation; growth needs a new block plus a copy — that is [[Computer Science/Data Structures/Linear Structures/Dynamic Array\|Dynamic Array]]. |
-| Storage | — | `O(n)` | `n` equal-size slots occupy one contiguous allocation. |
+| Operation                     | Time          | Aux space | Cause                                                                                                                                                   |
+| ----------------------------- | ------------- | --------- | ------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Access by index               | `O(1)`        | `O(1)`    | Address is `base + i·elementSize`; one multiply-and-add, independent of `i` or length.                                                                  |
+| Search, unsorted              | `O(n)`        | `O(1)`    | No order to exploit, so every slot may need inspecting.                                                                                                 |
+| Search, sorted                | `O(log n)`    | `O(1)`    | Random access lets [[Computer Science/Algorithms/Search Algorithms/Binary Search\|Binary Search]] discard half the range per probe.                 |
+| Insert / delete at the middle | `O(n)`        | `O(1)`    | The tail shifts one slot to keep the block packed and contiguous.                                                                                       |
+| Append / grow                 | not supported | —         | Capacity is fixed at allocation; growth needs a new block plus a copy — that is [[Computer Science/Data Structures/Linear Structures/Dynamic Array\|Dynamic Array]]. |
+| Storage                       | —             | `O(n)`    | `n` equal-size slots occupy one contiguous allocation.                                                                                                  |
 
 Every bound follows from the layout. `O(1)` access is the address formula; `O(n)` middle mutation is the shift that contiguity forces; the absence of a cheap append is the fixed size. The `O(1)` auxiliary space on access and mutation is real — an in-place shift needs no scratch buffer — but a resize is a separate `O(n)` allocate-and-copy, which is why it is not an array operation at all.
 
@@ -57,7 +57,7 @@ Fixed capacity is the hard one. The size is chosen at allocation, and there is n
 
 Middle insertion and deletion pay for packing. Inserting at index `k` in an `n`-element array moves `n − k` elements up by one slot before the new value can occupy its place; deletion moves them down. The contiguous invariant — no gaps between slots — is exactly what forces the shift, and it is why a structure with cheap splices (a linked list) trades away the `O(1)` index to get them.
 
-Out-of-bounds access has no natural floor or ceiling in the arithmetic itself: `base + i * elementSize` is a valid computation for any `i`. Managed runtimes range-check every access and throw `IndexOutOfRangeException`; the unchecked equivalent in C is a buffer overflow reading or writing neighboring memory.
+Out-of-bounds access has no natural floor or ceiling in the arithmetic itself. Managed runtimes range-check every access and throw `IndexOutOfRangeException`; in C, an out-of-bounds access is undefined behavior and may corrupt adjacent memory, crash, or behave unpredictably.
 
 The cache-locality advantage is not a rounding error. For small `n`, a contiguous scan routinely beats an asymptotically better structure — a tree or hash table whose nodes are scattered — because the constant factor is memory latency, not operation count. The crossover where the better big-O wins can sit well past the sizes a given workload ever reaches.
 
@@ -112,7 +112,7 @@ The cache-locality advantage is not a rounding error. For small `n`, a contiguou
 
 # References
 
-- [System.Array class (Microsoft Learn)](https://learn.microsoft.com/en-us/dotnet/api/system.array) — API surface plus remarks on single-dimensional, multidimensional, and jagged array layout.
+- [System.Array class (Microsoft Learn)](https://learn.microsoft.com/en-us/dotnet/api/system.array) — API surface, fixed-size semantics, and supported array shapes.
 - [Arrays — C# reference](https://learn.microsoft.com/en-us/dotnet/csharp/language-reference/builtin-types/arrays) — element access, row-major multidimensional semantics, and jagged array syntax.
 - [Array data structure (Wikipedia)](https://en.wikipedia.org/wiki/Array_\(data_structure\)) — the address formula, row-major addressing, and the contiguity assumptions behind `O(1)` access.
 - [Latency numbers every programmer should know](https://gist.github.com/jboner/2841832) — the L1-versus-main-memory figures behind the cache-locality argument.

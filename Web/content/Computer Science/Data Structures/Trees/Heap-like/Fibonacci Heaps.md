@@ -1,8 +1,8 @@
 ---
 publish: true
 created: 2026-07-28T10:20:00.773Z
-modified: 2026-07-28T10:41:53.313Z
-published: 2026-07-28T10:41:53.313Z
+modified: 2026-07-29T15:36:51.653Z
+published: 2026-07-29T15:36:51.653Z
 topic:
   - Computer Science
 subtopic:
@@ -14,7 +14,9 @@ priority: Medium
 status: Ready to Repeat
 ---
 
-[[Computer Science/Algorithms/Graph Algorithms/Dijkstra|Dijkstra]] and Prim's [[Computer Science/Algorithms/Graph Algorithms/Minimum Spanning Tree|minimum spanning tree]] algorithm spend most of their time on one operation: lowering the tentative key of a vertex already in the frontier. Each relaxed edge triggers a decrease-key, so a dense graph performs up to `E` of them against only `V` extract-mins. A binary [[Computer Science/Data Structures/Trees/Heap-like/Heap|heap]] charges `O(log n)` for every decrease-key, which dominates the total and pins Dijkstra at `O(E log V)`.
+# Intro
+
+[[Computer Science/Algorithms/Graph Algorithms/Dijkstra|Dijkstra]] and Prim's [[Computer Science/Algorithms/Graph Algorithms/Minimum Spanning Tree|minimum spanning tree]] algorithm spend most of their time on one operation: lowering the tentative key of a vertex already in the frontier. Only a successful relaxation that lowers a tentative distance triggers decrease-key, so a dense graph can perform up to `E` of them against only `V` extract-mins. A binary [[Computer Science/Data Structures/Trees/Heap-like/Heap|heap]] charges `O(log n)` for every decrease-key, which dominates the total and pins Dijkstra at `O(E log V)`.
 
 A Fibonacci heap removes that cost by refusing to reorganize eagerly. It keeps a forest of heap-ordered trees strung together in a circular doubly-linked **root list** with a pointer to the minimum root, and it does the least work each operation allows: insert splices a new single-node tree into the root list, merge concatenates two root lists, and decrease-key cuts the affected node loose to the root list rather than sifting it. All the deferred restructuring is paid off once, later, by extract-min. That laziness buys **O(1) amortized decrease-key and merge**, yielding the standard Fibonacci-heap bound `O(E + V log V)` for Dijkstra and Prim under their usual adjacency-list and priority-queue analyses.
 
@@ -22,8 +24,11 @@ The bound is amortized, not worst-case. The forest can hold many trees and many 
 
 **Core shape:** heap-ordered trees in a circular root list → min pointer → lazy insert/merge/cut now → consolidate by degree at extract-min → `O(n)` storage plus a degree and a mark per node.
 
-> [!NOTE] Visualization pending
-> Planned StepTrace: a lazy-forest heap card showing insert dropping a root into the root list, decrease-key cutting a node out (cascading up through an already-marked parent), and extract-min consolidating trees of equal degree until the degrees are distinct. No matching renderer exists in `engine.js` yet.
+The initial forest is replayed through public **Insert** operations. Add roots lazily, use **Extract min** to consolidate equal degrees, then decrease an existing key to see the cut rule move it to the root list; **Reset** repeats those public inserts rather than loading a hidden prebuilt forest.
+
+```steptrace
+{"algorithm":"fibonacci-heap","array":[3,7,18,24,26,39,41,52,63]}
+```
 
 # Representation and Invariants
 
@@ -63,7 +68,7 @@ Structurally the heap is `O(n)` nodes, but the per-node overhead is high: four p
 
 # Where Laziness and Amortization Stop Paying
 
-The advertised `O(1)` decrease-key is amortized and only wins when decrease-key vastly outnumbers extract-min. That is exactly the dense-graph shape of [[Computer Science/Algorithms/Graph Algorithms/Dijkstra|Dijkstra]] and Prim's [[Computer Science/Algorithms/Graph Algorithms/Minimum Spanning Tree|minimum spanning tree]] algorithm, where `E` relaxations dwarf `V` removals and the standard analysis reaches `O(E + V log V)`. On sparse graphs, or any workload where extract-min is a constant fraction of operations, the deferred consolidation is paid often enough that the asymptotic edge evaporates.
+The advertised `O(1)` decrease-key is amortized and only wins when decrease-key vastly outnumbers extract-min. That is exactly the dense-graph shape of [[Computer Science/Algorithms/Graph Algorithms/Dijkstra|Dijkstra]] and Prim's [[Computer Science/Algorithms/Graph Algorithms/Minimum Spanning Tree|minimum spanning tree]] algorithm, where up to `E` successful relaxations can dwarf `V` removals and the standard analysis reaches `O(E + V log V)`. On sparse graphs, or any workload where extract-min is a constant fraction of operations, the deferred consolidation is paid often enough that the asymptotic edge evaporates.
 
 The constant factors and memory layout usually erase the win regardless of asymptotics. Each operation chases pointers through a forest of separately allocated nodes scattered across memory, so consolidation and cascading cuts thrash the cache, while a binary [[Computer Science/Data Structures/Trees/Heap-like/Heap|heap]] does index arithmetic over one contiguous array. Empirically an array-backed binary or quaternary heap — or a pairing heap — beats a Fibonacci heap on real Dijkstra inputs despite the worse `O(log n)` decrease-key.
 

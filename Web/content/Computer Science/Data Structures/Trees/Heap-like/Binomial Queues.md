@@ -1,8 +1,8 @@
 ---
 publish: true
 created: 2026-07-28T10:20:00.772Z
-modified: 2026-07-28T10:41:53.134Z
-published: 2026-07-28T10:41:53.134Z
+modified: 2026-07-29T15:36:42.945Z
+published: 2026-07-29T15:36:42.945Z
 topic:
   - Computer Science
 subtopic:
@@ -14,6 +14,8 @@ priority: Medium
 status: Ready to Repeat
 ---
 
+# Intro
+
 A priority queue must sometimes absorb another whole priority queue — merge two work sets, join two event streams — and keep answering "smallest first". An array-backed [[Computer Science/Data Structures/Trees/Heap-like/Heap|binary heap]] cannot do this cheaply: its elements sit in one contiguous block, so combining two of them means concatenating and re-heapifying in `O(n)`. The contiguous layout that makes a binary heap fast to index is exactly what makes it slow to union.
 
 A binomial queue (binomial heap) trades that single array for a **forest of heap-ordered binomial trees, at most one tree of each order**. A binomial tree `Bₖ` holds exactly `2ᵏ` nodes and is built by **linking** two `Bₖ₋₁` trees — the root with the larger key becomes a child of the other. Because each order appears at most once, the set of orders present is the **binary representation of `n`**: a queue of 13 items (`1101₂`) holds trees of orders 3, 2, and 0, sized 8 + 4 + 1. Merging two such forests then runs like adding two binary numbers, and the whole union costs `O(log n)`.
@@ -22,8 +24,11 @@ What the forest gives up is compactness and locality. Nodes are separate allocat
 
 **Core shape:** items → forest of heap-ordered binomial trees, one per order → orders present = binary digits of `n` → meld = binary addition of orders → `O(log n)` union, `O(n)` pointered storage.
 
-> [!NOTE] Visualization pending
-> Planned StepTrace: a forest-merge card showing two binomial forests melded like binary addition — equal-order trees link into the next order and the carry propagates up until each order is present at most once. No matching renderer exists in `engine.js` yet.
+Use **Meld** to combine the canonical 3-value forest with a singleton. The forest slots expose the two equal-order links and the carry into `B₂`; **Reset** restores both source forests.
+
+```steptrace
+{"algorithm":"binomial-queue"}
+```
 
 # Meld = Binary Addition
 
