@@ -11,6 +11,7 @@
 .steptrace__btally {
   display: flex;
   align-items: center;
+  justify-content: center;
   gap: 9px;
   height: 22px;
   margin-bottom: 2px;
@@ -55,6 +56,10 @@
   align-items: stretch;
   gap: 9px;
   transition: opacity var(--_tween) ease;
+}
+.steptrace__brow::after {
+  flex: 0 0 72px;
+  content: "";
 }
 /* dimmed placeholder lanes (b / r before they go live) — never removed from DOM */
 .steptrace__brow[data-live="0"] {

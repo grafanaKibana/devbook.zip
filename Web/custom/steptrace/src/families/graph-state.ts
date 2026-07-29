@@ -1,4 +1,10 @@
 import { el, makeLegend, statusEl } from "../render"
+import {
+  GRAPH_NODE_HALO_GAP_PX,
+  GRAPH_NODE_RADIUS_PX,
+  observeFixedSvgNodes,
+  trimGraphEdge,
+} from "../graph-node"
 import type {
   EndpointSettings,
   GraphStateDecor,
@@ -80,6 +86,8 @@ export interface GraphStateOperations {
 
 const SVG_NS = "http://www.w3.org/2000/svg"
 let graphStateViewId = 0
+const GRAPH_STATE_MARKER_ROLES = ["neutral", "active", "selected", "cut"] as const
+type GraphStateMarkerRole = (typeof GRAPH_STATE_MARKER_ROLES)[number]
 
 function invalid(message: string): never {
   throw new Error(`steptrace: a-star ${message}`)
@@ -91,6 +99,13 @@ function pairKey(left: string, right: string) {
 
 function distance(a: Pick<GraphStateNode, "x" | "y">, b: Pick<GraphStateNode, "x" | "y">) {
   return Math.hypot(b.x - a.x, b.y - a.y)
+}
+
+function graphStateMarkerRole(role: GraphStateEdgeRole): GraphStateMarkerRole {
+  if (role === "accepted") return "selected"
+  if (role === "cut") return "cut"
+  if (role === "active" || role === "candidate" || role === "residual") return "active"
+  return "neutral"
 }
 
 export function graphStateAdjacency(config: GraphStateConfig) {
@@ -213,6 +228,23 @@ const CITY_DATA = [
   ["Simferopol", 44.9521, 34.1024],
 ] as const
 
+const CITY_NODE_OFFSETS: Readonly<Record<string, readonly [number, number]>> = {
+  Lutsk: [-8, -4],
+  Rivne: [5, 3],
+  Lviv: [-6, 4],
+  Ternopil: [5, -2],
+  "Ivano-Frankivsk": [-7, 7],
+  Chernivtsi: [2, 7],
+  Khmelnytskyi: [7, -4],
+  Vinnytsia: [-4, 5],
+  Zhytomyr: [-4, -4],
+  Kyiv: [5, -4],
+  Cherkasy: [4, 5],
+  Kropyvnytskyi: [0, 6],
+  Dnipro: [-4, 4],
+  Zaporizhzhia: [4, 5],
+}
+
 function haversine(a: { lat: number; lon: number }, b: { lat: number; lon: number }) {
   const radians = (degrees: number) => (degrees * Math.PI) / 180
   const dLat = radians(b.lat - a.lat)
@@ -224,14 +256,17 @@ function haversine(a: { lat: number; lon: number }, b: { lat: number; lon: numbe
 }
 
 function cityScenario(start: string, target: string): GraphStateConfig {
-  const raw = CITY_DATA.map(([id, lat, lon]) => ({
-    id,
-    label: id,
-    lat,
-    lon,
-    x: 40 + ((lon - 22.1) / 17.4) * 540,
-    y: 24 + ((51.7 - lat) / 7.1) * 266,
-  }))
+  const raw = CITY_DATA.map(([id, lat, lon]) => {
+    const [offsetX = 0, offsetY = 0] = CITY_NODE_OFFSETS[id] || []
+    return {
+      id,
+      label: id,
+      lat,
+      lon,
+      x: Math.max(24, Math.min(596, 40 + ((lon - 22.1) / 17.4) * 540 + offsetX)),
+      y: Math.max(20, Math.min(300, 24 + ((51.7 - lat) / 7.1) * 266 + offsetY)),
+    }
+  })
   const lookup = new Map<string, (typeof raw)[number]>(raw.map((city) => [city.id, city]))
   const safeStart = lookup.has(start) ? start : "Lviv"
   const safeTarget =
@@ -876,20 +911,32 @@ export function makeGraphStateView(
     role: "img",
     "aria-label": "Graph algorithm state",
   })
-  const markerId = `steptrace-gs-arrow-${++graphStateViewId}`
-  const marker = svgElement("marker", {
-    id: markerId,
-    viewBox: "0 0 6 6",
-    refX: 5,
-    refY: 3,
-    markerWidth: 5,
-    markerHeight: 5,
-    markerUnits: "strokeWidth",
-    orient: "auto-start-reverse",
-  })
-  marker.append(svgElement("path", { class: "steptrace__gs-arrow", d: "M 0 0 L 6 3 L 0 6 Z" }))
   const defs = svgElement("defs")
-  defs.append(marker)
+  const markerBaseId = `steptrace-gs-arrow-${++graphStateViewId}`
+  const markerIds = new Map(
+    GRAPH_STATE_MARKER_ROLES.map((role) => {
+      const id = `${markerBaseId}-${role}`
+      const marker = svgElement("marker", {
+        id,
+        viewBox: "0 0 6 6",
+        refX: 6,
+        refY: 3,
+        markerWidth: 5,
+        markerHeight: 5,
+        markerUnits: "strokeWidth",
+        orient: "auto-start-reverse",
+      })
+      marker.append(
+        svgElement("path", {
+          class: "steptrace__gs-arrow",
+          d: "M 0 0 L 6 3 L 0 6 Z",
+          "data-role": role,
+        }),
+      )
+      defs.append(marker)
+      return [role, id] as const
+    }),
+  )
   const decorLayer = svgElement("g", { class: "steptrace__gs-decor" })
   decorLayer.append(...first.decor.map(decorElement))
   const edgeLayer = svgElement("g", { class: "steptrace__gs-edges" })
@@ -900,6 +947,9 @@ export function makeGraphStateView(
 
   const positions = new Map(first.nodes.map((node) => [node.id, node]))
   const compactMapNodes = first.profile === "building-floor" || first.profile === "midtown-map"
+  const mapMarkers = first.profile === "ukraine-cities" || compactMapNodes
+  const nodeRadius =
+    first.profile === "ukraine-cities" ? 5 : compactMapNodes ? 6 : GRAPH_NODE_RADIUS_PX
   const weighted =
     ["heuristic-search", "edge-relaxation", "mst-scan", "mst-round", "residual-flow"].includes(
       first.detail.kind,
@@ -907,18 +957,14 @@ export function makeGraphStateView(
   const edgeElements = first.edges.map((edge) => {
     const from = positions.get(edge.from)!
     const to = positions.get(edge.to)!
-    const length = Math.hypot(to.x - from.x, to.y - from.y) || 1
-    const targetInset = edge.showDirection ? 12 : 0
-    const x2 = to.x - ((to.x - from.x) / length) * targetInset
-    const y2 = to.y - ((to.y - from.y) / length) * targetInset
     const line = svgElement("line", {
       class: "steptrace__gs-edge",
       x1: from.x,
       y1: from.y,
-      x2,
-      y2,
+      x2: to.x,
+      y2: to.y,
     })
-    if (edge.showDirection) line.setAttribute("marker-end", `url(#${markerId})`)
+    if (edge.showDirection) line.setAttribute("marker-end", `url(#${markerIds.get("neutral")!})`)
     edgeLayer.append(line)
     const label = weighted
       ? svgElement("text", {
@@ -931,7 +977,7 @@ export function makeGraphStateView(
       label.textContent = edge.label ?? String(edge.weight)
       edgeLabelLayer.append(label)
     }
-    return { edge, line, label }
+    return { edge, line, label, from, to }
   })
   const nodeElements = new Map(
     first.nodes.map((node) => {
@@ -941,10 +987,13 @@ export function makeGraphStateView(
       })
       const title = svgElement("title")
       title.textContent = node.label
-      const halo = svgElement("circle", { class: "steptrace__gs-target", r: 13 })
+      const halo = svgElement("circle", {
+        class: "steptrace__gs-target",
+        r: mapMarkers ? 13 : GRAPH_NODE_RADIUS_PX + GRAPH_NODE_HALO_GAP_PX,
+      })
       const circle = svgElement("circle", {
         class: "steptrace__gs-node-circle",
-        r: first.profile === "ukraine-cities" ? 5 : compactMapNodes ? 6 : 13,
+        r: nodeRadius,
       })
       const label = svgElement("text", { class: "steptrace__gs-node-label", x: 0, y: 0 })
       label.textContent = node.label
@@ -953,6 +1002,28 @@ export function makeGraphStateView(
       return [node.id, group] as const
     }),
   )
+  const applyEdgeGeometry = (radius: number, trimAll: boolean) => {
+    for (const { edge, line, from, to } of edgeElements) {
+      const inset = trimAll || edge.showDirection ? radius : 0
+      const trimmed = trimGraphEdge(from, to, inset)
+      line.setAttribute("x1", String(trimmed.x1))
+      line.setAttribute("y1", String(trimmed.y1))
+      line.setAttribute("x2", String(trimmed.x2))
+      line.setAttribute("y2", String(trimmed.y2))
+    }
+  }
+  const geometry = mapMarkers
+    ? (applyEdgeGeometry(nodeRadius, false), null)
+    : observeFixedSvgNodes(
+        svg,
+        first.nodes.map((node) => ({
+          element: nodeElements.get(node.id)!,
+          point: node,
+        })),
+        (unitsPerCssPixel) => {
+          applyEdgeGeometry(GRAPH_NODE_RADIUS_PX * unitsPerCssPixel, true)
+        },
+      )
 
   const legend = makeLegend(
     graphStateLegend(first.detail.kind).map(([label, state]) => ({
@@ -1006,12 +1077,13 @@ export function makeGraphStateView(
       line.dataset.cut = String(role === "cut")
       line.dataset.dim = String(role === "rejected")
       if (edge.showDirection) {
+        const markerUrl = `url(#${markerIds.get(graphStateMarkerRole(role))!})`
         if (role === "residual") {
-          line.setAttribute("marker-start", `url(#${markerId})`)
+          line.setAttribute("marker-start", markerUrl)
           line.removeAttribute("marker-end")
         } else {
           line.removeAttribute("marker-start")
-          line.setAttribute("marker-end", `url(#${markerId})`)
+          line.setAttribute("marker-end", markerUrl)
         }
       }
       if (label) {
@@ -1178,6 +1250,7 @@ export function makeGraphStateView(
     paint,
     watch,
     summary: graphStateSummary,
+    destroy: () => geometry?.destroy(),
   }
 }
 

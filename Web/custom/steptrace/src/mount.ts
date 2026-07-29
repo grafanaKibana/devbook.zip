@@ -717,6 +717,12 @@ export function createMount(
       const stageAlignment =
         fillStage || built.kind === "graph" ? null : view.stageAlignment || "center"
       root.classList.toggle("steptrace--stable-stage", view.stableStage === true)
+      root.classList.toggle(
+        "steptrace--compact-stage",
+        built.family
+          ? ["monotone-boundary", "prefix-sum", "stack-sequence"].includes(built.family.id)
+          : ["bits", "pointers", "string"].includes(built.kind),
+      )
       stageCol.classList.toggle("steptrace__stage-col--bottom", stageAlignment === "bottom")
       stageCol.classList.toggle("steptrace__stage-col--center", stageAlignment === "center")
       stageCol.classList.toggle("steptrace__stage-col--graph", built.kind === "graph")
@@ -725,6 +731,14 @@ export function createMount(
       // replaces it, so we keep it out of the DOM (paint still writes to it
       // harmlessly). Everything before it is the actual visualization.
       const nodes = view.nodes.slice(0, -1)
+      const stageLegend = nodes.at(-1)
+      stageCol.classList.toggle(
+        "steptrace__stage-col--legend",
+        Boolean(
+          stageLegend?.classList.contains("steptrace__legend") ||
+            stageLegend?.classList.contains("steptrace__legend-wrap"),
+        ),
+      )
       stageCol.replaceChildren(...nodes)
       player = new Player(built.frames, view.paint, state.speed)
       player.onState = onState
@@ -831,7 +845,12 @@ export function createMount(
         root.removeEventListener("keydown", onKey)
         document.removeEventListener("click", onDocClick)
         root.replaceChildren()
-        root.classList.remove("steptrace", "steptrace--reduced", "steptrace--stable-stage")
+        root.classList.remove(
+          "steptrace",
+          "steptrace--reduced",
+          "steptrace--stable-stage",
+          "steptrace--compact-stage",
+        )
       },
     }
   }

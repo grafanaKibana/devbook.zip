@@ -51,6 +51,34 @@
   grid-template-rows: minmax(0, 1fr) auto auto;
 }
 
+.steptrace__distribution--buckets[data-profile="bucket"] {
+  grid-template-rows: repeat(3, minmax(0, 1fr));
+  overflow: hidden;
+}
+
+.steptrace__distribution--buckets[data-profile="bucket"] .steptrace__distribution-band {
+  grid-template-rows: auto minmax(0, 1fr);
+  min-block-size: 0;
+}
+
+.steptrace__distribution--buckets[data-profile="bucket"] .steptrace__distribution-bars,
+.steptrace__distribution--buckets[data-profile="bucket"] .steptrace__distribution-bucket-board {
+  block-size: 100%;
+  min-block-size: 0;
+  overflow: hidden;
+}
+
+.steptrace__distribution--buckets[data-profile="bucket"]
+  .steptrace__distribution-band:nth-child(2) {
+  padding-bottom: 0.9rem;
+}
+
+.steptrace__distribution--buckets[data-profile="bucket"]
+  .steptrace__distribution-band:nth-child(3) {
+  padding-top: 0.9rem;
+  border-top: 1px solid var(--_hair);
+}
+
 .steptrace__distribution[data-profile="radix"] .steptrace__distribution-band:first-child {
   grid-template-rows: auto minmax(0, 1fr);
   row-gap: 0.5rem;
@@ -313,6 +341,10 @@
 @media (max-width: 560px) {
   .steptrace[data-visual-family="distribution-sort"] .steptrace__rail {
     min-block-size: 16rem;
+  }
+
+  .steptrace__distribution--buckets[data-profile="bucket"] {
+    block-size: 27.75rem;
   }
 
   .steptrace__distribution-frequency {

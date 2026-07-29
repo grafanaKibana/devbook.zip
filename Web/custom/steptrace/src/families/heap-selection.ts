@@ -1,4 +1,5 @@
 import { el, ICON, makeArrayStrip, makeLegend, statusEl, successMarker } from "../render"
+import { GRAPH_NODE_RADIUS_PX, observeFixedSvgNodes, trimGraphEdge } from "../graph-node"
 import type { StepTraceView, VisualFamily, WatchRow } from "../types"
 
 export interface HeapSelectionConfig {
@@ -180,7 +181,7 @@ export class HeapSelectionRecorder implements HeapSelectionOperations {
 
 const SVG_NS = "http://www.w3.org/2000/svg"
 
-function heapPosition(index: number) {
+export function heapPosition(index: number) {
   const depth = Math.floor(Math.log2(index + 1))
   const offset = index - (2 ** depth - 1)
   const count = 2 ** depth
@@ -210,24 +211,21 @@ export function makeHeapSelectionView(
   stream.wrap.classList.add("steptrace__heap-stream")
   stream.wrap.setAttribute("role", "list")
   stream.wrap.setAttribute("aria-label", "Input stream")
-  const streamIcons = stream.cells.map((cell, index) => {
+  stream.cells.forEach((cell, index) => {
     cell.setAttribute("role", "listitem")
-    const icon = el("span", "steptrace__heap-stream-icon")
-    icon.setAttribute("aria-hidden", "true")
-    cell.append(icon)
     cell.setAttribute("aria-label", `Stream value ${first.array[index]}`)
-    return icon
   })
 
   const heapLabel = el("div", "steptrace__rail-label steptrace__heap-tree-label")
   heapLabel.textContent = `Min-heap · capacity k = ${first.k}`
   const heapWrap = el("div", "steptrace__heap-tree")
   const svg = svgEl("svg", "steptrace__heap-svg")
-  svg.setAttribute("viewBox", `0 0 300 ${first.k > 3 ? 184 : 116}`)
+  svg.setAttribute("viewBox", `0 0 300 ${first.k > 3 ? 192 : 124}`)
   svg.setAttribute("role", "img")
   svg.setAttribute("aria-label", "Fixed-size min-heap; root is the weakest current winner")
 
   const positions = Array.from({ length: first.k }, (_, index) => heapPosition(index))
+  const edges: Array<{ line: SVGElement; parent: number; child: number }> = []
   for (let index = 1; index < first.k; index++) {
     const parent = Math.floor((index - 1) / 2)
     const line = svgEl("line", "steptrace__edge steptrace__heap-edge")
@@ -236,26 +234,44 @@ export function makeHeapSelectionView(
     line.setAttribute("x2", String(positions[index].x))
     line.setAttribute("y2", String(positions[index].y))
     svg.append(line)
+    edges.push({ line, parent, child: index })
   }
 
   const nodes = positions.map((position, index) => {
     const group = svgEl("g", "steptrace__node steptrace__heap-node")
     group.setAttribute("transform", `translate(${position.x} ${position.y})`)
     const circle = svgEl("circle", "steptrace__ncirc")
-    circle.setAttribute("r", "20")
+    circle.setAttribute("r", String(GRAPH_NODE_RADIUS_PX))
     const value = svgEl("text", "steptrace__id")
     value.setAttribute("text-anchor", "middle")
     value.setAttribute("dominant-baseline", "central")
     const rootTag = svgEl("text", "steptrace__heap-root-label")
     rootTag.setAttribute("text-anchor", "middle")
-    rootTag.setAttribute("y", "-27")
+    rootTag.setAttribute("y", "-23")
     rootTag.textContent = index === 0 ? "weakest winner" : ""
     group.append(circle, value, rootTag)
     svg.append(group)
-    return { group, value }
+    return { group, value, rootTag }
   })
   heapWrap.append(svg)
   root.append(streamLabel, stream.wrap, heapLabel, heapWrap)
+  const geometry = observeFixedSvgNodes(
+    svg as SVGSVGElement,
+    nodes.map(({ group }, index) => ({
+      element: group as SVGGElement,
+      point: positions[index],
+    })),
+    (unitsPerCssPixel) => {
+      const radius = GRAPH_NODE_RADIUS_PX * unitsPerCssPixel
+      for (const { line, parent, child } of edges) {
+        const trimmed = trimGraphEdge(positions[parent], positions[child], radius)
+        line.setAttribute("x1", String(trimmed.x1))
+        line.setAttribute("y1", String(trimmed.y1))
+        line.setAttribute("x2", String(trimmed.x2))
+        line.setAttribute("y2", String(trimmed.y2))
+      }
+    },
+  )
 
   const rejected = el("span")
   rejected.innerHTML = ICON.x
@@ -298,10 +314,6 @@ export function makeHeapSelectionView(
                 : ""
       cell.dataset.state = state
       cell.setAttribute("aria-current", index === frame.cursor ? "step" : "false")
-      const icon = streamIcons[index]
-      icon.replaceChildren()
-      if (state === "winner" && frame.type === "done") icon.append(successMarker())
-      else if (state === "rejected") icon.innerHTML = ICON.x
       cell.setAttribute(
         "aria-label",
         `Stream value ${frame.array[index]}, ${
@@ -315,9 +327,13 @@ export function makeHeapSelectionView(
     })
 
     const compared = new Set(frame.compared ?? [])
-    nodes.forEach(({ group, value }, index) => {
+    nodes.forEach(({ group, value, rootTag }, index) => {
       const entry = frame.heap[index]
-      value.textContent = entry ? String(entry.value) : "·"
+      const visible = entry != null
+      value.textContent = visible ? String(entry.value) : ""
+      group.dataset.visible = visible ? "1" : "0"
+      group.setAttribute("aria-hidden", visible ? "false" : "true")
+      rootTag.dataset.visible = index === 0 && visible ? "1" : "0"
       group.dataset.state = compared.has(index)
         ? frame.type.startsWith("swap")
           ? "swap"
@@ -334,6 +350,8 @@ export function makeHeapSelectionView(
           : `Heap slot ${index}, empty`,
       )
     })
+    for (const { line, child } of edges)
+      line.dataset.visible = frame.heap[child] == null ? "0" : "1"
     status.textContent = frame.message
   }
 
@@ -367,6 +385,7 @@ export function makeHeapSelectionView(
     summary(frame) {
       return `Top ${frame.k}: heap [${frame.heap.map((entry) => entry.value).join(", ")}] · root ${frame.heap[0]?.value} is the weakest winner · not globally sorted.`
     },
+    destroy: geometry.destroy,
   }
 }
 

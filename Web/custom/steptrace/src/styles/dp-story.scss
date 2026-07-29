@@ -78,6 +78,9 @@
 }
 
 .steptrace .steptrace__coin-tray {
+  /* One coin plus the tray's padding and border: the empty counter keeps the
+     same row height as the first chosen-coin frame. */
+  min-block-size: calc(2.75rem + 1rem + 2px);
   flex-wrap: wrap;
   padding: 0.5rem;
   border: 1px dashed var(--_story-border);
@@ -437,5 +440,11 @@
 
   .steptrace .steptrace__warehouse-footer-end {
     text-align: left;
+  }
+}
+
+@media (max-width: 560px) {
+  .steptrace .steptrace__dp-story {
+    block-size: 22.5rem;
   }
 }

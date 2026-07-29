@@ -353,7 +353,11 @@ export function makeIntervalTrackView(
 
     outputBands.forEach((band, index) => {
       const interval = frame.output[index]
+      const previous = frame.output[index - 1]
+      const next = frame.output[index + 1]
       band.dataset.visible = interval ? "1" : "0"
+      band.dataset.joinStart = interval && previous && previous[1] + 1 === interval[0] ? "1" : "0"
+      band.dataset.joinEnd = interval && next && interval[1] + 1 === next[0] ? "1" : "0"
       band.setAttribute("aria-hidden", interval ? "false" : "true")
       if (interval) positionBand(band, interval)
     })

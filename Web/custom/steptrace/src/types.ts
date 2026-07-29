@@ -41,6 +41,10 @@ export type VisualFamilyId =
   | "run-stack"
   | "stack-sequence"
   | "contiguous-storage"
+  | "hash-index"
+  | "graph-representation"
+  | "range-aggregate"
+  | "union-find"
 
 export interface AlgorithmMeta {
   label: string

@@ -11,14 +11,17 @@ status: Done
 publish: true
 ---
 
-A sequence needs to keep growing at the tail while still supporting `O(1)` access by position. A fixed [[Arrays|array]] gives the cheap indexing but has a hard capacity; allocating a fresh array on every append and copying the old contents would make each append `O(n)`. A dynamic array keeps the contiguous backing buffer but over-allocates it, so most appends write into spare room already reserved and only an occasional append pays for growth.
+A sequence needs to keep growing at the tail while still supporting `O(1)` access by position. A fixed [[Home/Computer Science/Data Structures/Linear Structures/Arrays|array]] gives the cheap indexing but has a hard capacity; allocating a fresh array on every append and copying the old contents would make each append `O(n)`. A dynamic array keeps the contiguous backing buffer but over-allocates it, so most appends write into spare room already reserved and only an occasional append pays for growth.
 
 The representation is a backing array plus two counters: a `count` of live elements and a `capacity` of allocated slots. What it gives up relative to a raw array is a stable buffer address — a growth event moves every element to a new allocation — and cheap edits away from the tail, since keeping the elements contiguous forces a shift on any front or middle insert.
 
 **Core shape:** backing array + `count` + `capacity` → append writes at `count` while `count < capacity` → overflow doubles the buffer and copies → amortized `O(1)` append, `O(1)` index, `O(n)` middle edit.
 
-> [!NOTE] Visualization pending
-> Planned StepTrace: a growing-array card showing a backing buffer filling to capacity, an overflow event that allocates a larger buffer and copies every element across, then appends resuming into the new spare slots in `O(1)`. No matching renderer exists in `engine.js` yet.
+The interactive view keeps the dynamic-array state between operations. Fill its spare slots, then append once more to expose the allocate-copy-grow step.
+
+```steptrace
+{"algorithm":"dynamic-array"}
+```
 
 # Representation and Growth
 
@@ -56,7 +59,7 @@ Growth also has a transient memory peak. During a resize the old and new buffers
 
 The growth `FACTOR` is a direct memory-versus-copy trade. A factor of `2` wastes up to half the buffer but copies rarely; a factor of `1.5` wastes less slack but resizes more often and copies more total elements over the array's life. The choice is fixed at the mechanism level, not per call.
 
-Editing away from the tail is `O(n)` because contiguity must be preserved. `Insert(0, x)` shifts every existing element one slot right; `RemoveAt(0)` shifts every element left. A [[Deque]] avoids this by giving `O(1)` insertion and removal at both ends. And because a resize allocates a fresh buffer, any reference, index-derived pointer, or iterator bound to the old backing array is invalidated the moment the array grows — mutating a dynamic array while iterating it is unsound for exactly this reason.
+Editing away from the tail is `O(n)` because contiguity must be preserved. `Insert(0, x)` shifts every existing element one slot right; `RemoveAt(0)` shifts every element left. A [[Home/Computer Science/Data Structures/Linear Structures/Deque|Deque]] avoids this by giving `O(1)` insertion and removal at both ends. A resize separately invalidates references, spans, and pointers into the old backing array because growth replaces that array. A versioned enumerator such as `List<T>.Enumerator` is invalidated whenever a mutation changes the collection version, even when no resize occurs, and detects the mismatch on `MoveNext` or `Reset`.
 
 # Reference Drawer
 
@@ -86,8 +89,20 @@ Editing away from the tail is `O(n)` because contiguity must be preserved. `Inse
 >
 >     public T this[int index]
 >     {
->         get => _buffer[index];
->         set => _buffer[index] = value;
+>         get
+>         {
+>             if ((uint)index >= (uint)Count)
+>                 throw new ArgumentOutOfRangeException(nameof(index));
+>
+>             return _buffer[index];
+>         }
+>         set
+>         {
+>             if ((uint)index >= (uint)Count)
+>                 throw new ArgumentOutOfRangeException(nameof(index));
+>
+>             _buffer[index] = value;
+>         }
 >     }
 >
 >     public void Append(T value)
@@ -104,6 +119,9 @@ Editing away from the tail is `O(n)` because contiguity must be preserved. `Inse
 >
 >     public void Insert(int index, T value)
 >     {
+>         if ((uint)index > (uint)Count)
+>             throw new ArgumentOutOfRangeException(nameof(index));
+>
 >         if (Count == _buffer.Length)
 >         {
 >             var grown = new T[_buffer.Length * Factor];
@@ -128,8 +146,8 @@ Editing away from the tail is `O(n)` because contiguity must be preserved. `Inse
 > [!QUESTION]- What breaks if the buffer grows by a fixed amount instead of a constant factor?
 > Fixed-increment growth resizes every constant number of appends, so the copies sum to `O(n²)` across `n` appends and append degrades to `O(n)` amortized. Geometric growth (e.g. `2×`) is what spaces resizes far enough apart to keep the amortized cost constant.
 
-> [!QUESTION]- Why does a resize invalidate held references and iterators?
-> Growth allocates a new backing array and copies elements into it, then drops the old buffer. Any pointer, cached index target, or iterator bound to the old array now refers to a stale allocation, which is why appending during iteration is unsound.
+> [!QUESTION]- What invalidates backing-buffer references versus versioned enumerators?
+> A resize replaces the backing array, so references, spans, and pointers into the old buffer no longer refer to the dynamic array's current storage. A versioned enumerator follows a separate rule: mutations that change the collection version invalidate it even without a resize, so `MoveNext` or `Reset` throws rather than continuing over changed state.
 
 # References
 

@@ -1,0 +1,150 @@
+.steptrace .steptrace__graph-representation {
+  display: grid;
+  min-block-size: 21rem;
+  gap: 0.65rem;
+}
+
+.steptrace .steptrace__graph-rep-topology {
+  min-block-size: 8.5rem;
+}
+
+.steptrace .steptrace__graph-rep-svg {
+  display: block;
+  inline-size: 100%;
+  block-size: 8.5rem;
+  overflow: visible;
+}
+
+.steptrace .steptrace__graph-rep-edge {
+  opacity: 0;
+  stroke: var(--_neutral);
+  stroke-width: 2.1;
+  transition:
+    opacity var(--_tween) ease,
+    stroke var(--_tween) ease,
+    stroke-width var(--_tween) ease;
+}
+
+.steptrace .steptrace__graph-rep-edge[data-present="1"] {
+  opacity: 1;
+}
+
+.steptrace .steptrace__graph-rep-edge[data-changed="1"] {
+  opacity: 1;
+  stroke: var(--_green);
+  stroke-width: 2.6;
+}
+
+.steptrace .steptrace__graph-rep-arrow {
+  fill: context-stroke;
+}
+
+.steptrace .steptrace__graph-rep-node circle {
+  fill: var(--_graph-node-fill);
+  stroke: var(--_graph-node-stroke);
+  stroke-width: var(--_graph-node-stroke-width);
+}
+
+.steptrace .steptrace__graph-rep-node text {
+  fill: var(--_text);
+  font: var(--_graph-node-font);
+  text-anchor: middle;
+  dominant-baseline: central;
+}
+
+.steptrace .steptrace__graph-rep-storage {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  align-items: start;
+  gap: 0.75rem;
+}
+
+.steptrace .steptrace__graph-rep-group,
+.steptrace .steptrace__graph-rep-lists {
+  min-width: 0;
+}
+
+.steptrace .steptrace__graph-rep-lists {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 3fr);
+  gap: 0.75rem;
+}
+
+.steptrace .steptrace__graph-rep-heading {
+  margin: 0;
+  padding: 0 0.2rem 0.35rem;
+  color: var(--_muted);
+  font: 700 0.65rem/1 var(--_font-head);
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+.steptrace .steptrace__graph-rep-matrix-wrap {
+  overflow: hidden;
+}
+
+.steptrace .steptrace__graph-rep-matrix-table {
+  min-width: 0;
+}
+
+.steptrace .steptrace__graph-rep-matrix-cell[data-value="1"] .steptrace__dp-value {
+  color: var(--_green);
+  font-weight: 800;
+}
+
+.steptrace .steptrace__graph-rep-matrix-cell[data-changed="1"] {
+  background: color-mix(in srgb, var(--_green) 22%, var(--_surface));
+}
+
+.steptrace .steptrace__graph-rep-list-body {
+  --steptrace-capacity: 4;
+}
+
+.steptrace .steptrace__graph-rep-edge-list-body {
+  --steptrace-capacity: 12;
+}
+
+.steptrace .steptrace__graph-rep-list-row,
+.steptrace .steptrace__graph-rep-edge-row {
+  block-size: 2.4rem;
+  grid-template-rows: minmax(0, 1fr) 0.8rem;
+}
+
+.steptrace .steptrace__graph-rep-list-row[data-changed="1"],
+.steptrace .steptrace__graph-rep-edge-row[data-changed="1"] {
+  background: color-mix(in srgb, var(--_green) 22%, var(--_surface));
+  box-shadow: inset 0 0 0 2px var(--_green);
+}
+
+.steptrace .steptrace__graph-rep-list-row .steptrace__contiguous-value,
+.steptrace .steptrace__graph-rep-edge-row .steptrace__contiguous-value {
+  padding: 0.2rem;
+  font-size: 0.72rem;
+  white-space: nowrap;
+}
+
+.steptrace .steptrace__graph-rep-list-row .steptrace__contiguous-index,
+.steptrace .steptrace__graph-rep-edge-row .steptrace__contiguous-index {
+  font-size: 0.5rem;
+}
+
+@container steptrace-structure (max-width: 36rem) {
+  .steptrace .steptrace__graph-representation {
+    min-block-size: 31rem;
+  }
+
+  .steptrace .steptrace__graph-rep-storage {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .steptrace .steptrace__graph-rep-lists {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .steptrace .steptrace__graph-rep-edge,
+  .steptrace .steptrace__graph-rep-matrix-cell {
+    transition: none;
+  }
+}

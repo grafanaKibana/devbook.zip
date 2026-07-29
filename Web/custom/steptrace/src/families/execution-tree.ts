@@ -169,10 +169,13 @@ function pathLabel(frame: ExecutionTreeFrame) {
 
 export const executionTreeCardMetrics = {
   shape: "card",
-  nodeWidth: 84,
-  nodeHeight: 40,
+  nodeWidth: 136,
+  nodeHeight: 50,
   minSvgWidth: 500,
-  canvasScale: 0.84,
+  canvasScale: 1,
+  fitWidth: true,
+  responsiveLayout: true,
+  tieredLayout: true,
 } as const
 
 export const executionTreeViewDescriptor: ExecutionTreeViewDescriptor = {
@@ -211,11 +214,15 @@ export const executionTreeViewDescriptor: ExecutionTreeViewDescriptor = {
 export const mergeSortTreeViewDescriptor: ExecutionTreeViewDescriptor = {
   ...executionTreeViewDescriptor,
   ariaLabel: "Merge sort split and merge tree",
+  nodeWidth: 84,
+  nodeHeight: 40,
   minSvgWidth: 420,
   canvasScale: 1,
   fitWidth: true,
   tieredCards: true,
+  tieredLayout: false,
   centerVisible: true,
+  responsiveLayout: false,
   nodeLines(node: ExecutionTreeNode) {
     return [node.label, node.detail || node.values.join("  ")]
   },
@@ -270,11 +277,6 @@ export const memoizationTreeViewDescriptor: ExecutionTreeViewDescriptor = {
 export const dynamicProgrammingTreeViewDescriptor: ExecutionTreeViewDescriptor = {
   ariaLabel: "Top-down dynamic-programming recursion tree",
   ...executionTreeCardMetrics,
-  nodeWidth: 92,
-  nodeHeight: 44,
-  minSvgWidth: 500,
-  canvasScale: 1,
-  fitWidth: true,
   stateLabels,
   legend: [
     { state: "split", label: "expand uncached state" },
@@ -320,11 +322,7 @@ export const dynamicProgrammingTreeViewDescriptor: ExecutionTreeViewDescriptor =
 
 export const branchAndBoundTreeViewDescriptor: ExecutionTreeViewDescriptor = {
   ariaLabel: "Branch and bound knapsack decision tree",
-  shape: "card",
-  nodeWidth: 136,
-  nodeHeight: 50,
-  minSvgWidth: 1080,
-  canvasScale: 1,
+  ...executionTreeCardMetrics,
   stableStage: true,
   preserveDetail: true,
   showStateBadge: true,

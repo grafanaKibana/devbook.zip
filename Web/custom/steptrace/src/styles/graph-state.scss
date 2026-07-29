@@ -33,7 +33,16 @@
 }
 
 .steptrace .steptrace__gs-arrow {
-  fill: context-stroke;
+  fill: var(--_neutral);
+}
+
+.steptrace .steptrace__gs-arrow[data-role="active"],
+.steptrace .steptrace__gs-arrow[data-role="cut"] {
+  fill: var(--_violet);
+}
+
+.steptrace .steptrace__gs-arrow[data-role="selected"] {
+  fill: var(--_green);
 }
 
 .steptrace .steptrace__gs-edge-label {
@@ -70,9 +79,9 @@
 }
 
 .steptrace .steptrace__gs-node-circle {
-  fill: color-mix(in srgb, var(--_neutral) 16%, var(--_surface));
-  stroke: var(--_neutral);
-  stroke-width: 1.6;
+  fill: var(--_graph-node-fill);
+  stroke: var(--_graph-node-stroke);
+  stroke-width: var(--_graph-node-stroke-width);
   transition:
     fill var(--_tween) ease,
     stroke var(--_tween) ease;
@@ -152,7 +161,7 @@
 
 .steptrace .steptrace__gs-node-label {
   fill: var(--_text);
-  font: 600 0.66rem/1 var(--_font-head);
+  font: var(--_graph-node-font);
   text-anchor: middle;
   dominant-baseline: central;
 }
@@ -197,7 +206,7 @@
 }
 
 .steptrace .steptrace__gs-city-label {
-  font-size: 0.48rem;
+  font-size: 0.54rem;
 }
 
 .steptrace .steptrace__gs-road-direction {

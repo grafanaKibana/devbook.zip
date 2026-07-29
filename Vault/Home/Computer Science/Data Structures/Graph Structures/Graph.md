@@ -13,12 +13,15 @@ publish: true
 
 A dependency system holds a set of entities and a set of connections between them, and it repeatedly asks two different questions: does a direct link exist between `u` and `v`, and what are all the neighbors of `u`. The connections carry no inherent order and no single root, so there is nothing to sort or index the way an array allows. What must persist is the *incidence* structure — which vertex connects to which, in which direction, at what weight — and the storage choice decides which of those two questions is cheap and which is linear.
 
-A graph has no single canonical layout. The same set of vertices and edges can be stored as an **adjacency list** (per-vertex neighbor lists), an **adjacency matrix** (a `V × V` table of presence or weight), or an **edge list** (a flat sequence of `(u, v[, w])` tuples). All three retain the full topology, and all three can encode direction and weight; they differ in what they make constant-time versus what they force a scan. The list answers "who are `u`'s neighbors" directly but tests a specific edge in `O(outdeg(u))`; the matrix answers "is `u–v` present" in `O(1)` but spends `O(V²)` even when almost no edges exist; the edge list stores nothing but the edges and is fast only when every edge is streamed at once.
+A graph has no single canonical layout. The same set of vertices and edges can be stored as an **adjacency list** (per-vertex neighbor lists), an **adjacency matrix** (a `V × V` table of presence or weight), or an **edge list** (a flat sequence of `(u, v[, w])` tuples). All three retain the full topology, and all three can encode direction and weight; they differ in what they make constant-time versus what they force a scan. The list answers "who are `u`'s neighbors" directly but tests a specific edge in `O(outdeg(u))`; the matrix answers "is `u–v` present" in `O(1)` but spends `O(V²)` even when almost no edges exist; the edge list stores nothing but the edges and fits workloads that scan or sort the full edge set.
 
 **Core shape:** vertices + edges → one of {neighbor lists, `V × V` table, flat edge tuples} → each keeps topology, direction, and weight but trades space against edge-test and neighbor-scan cost.
 
-> [!NOTE] Visualization pending
-> Planned StepTrace: a graph-representation card showing one small graph rendered three ways — adjacency list, adjacency matrix, and edge list — with a single edge added to each so the differing storage cost of the same mutation is visible side by side. No matching renderer exists in `engine.js` yet.
+The inspector below keeps one directed, unweighted edge set and derives all three storage forms from it. Add `3 → 0` first: the topology gains a cycle, while the same mutation appends `0` to row `3`, flips matrix cell `[3,0]` to `1`, and appends `(3,0)` to the edge list.
+
+```steptrace
+{"algorithm":"graph"}
+```
 
 # Representation and Invariants
 
@@ -30,10 +33,10 @@ Each representation stores the same edge set in a different physical shape.
 
 **Edge list** — a flat sequence of tuples `(u, v)` or `(u, v, w)`, with no per-vertex indexing at all. Direction is whatever order the tuple stores; an undirected edge is one tuple read both ways. Self-loops and parallel edges are just more tuples. There is no structure to answer "neighbors of `u`" except a full pass.
 
-Three invariants hold across all three:
+These representation invariants define valid stored graphs:
 
 1. Every endpoint is a valid vertex identifier — an index inside `[0, V)` for the array and matrix forms, or a mapped key for a dictionary form.
-2. Undirected symmetry is a stored property, not a derived one: the mirrored list entries or the symmetric matrix cells must be maintained together, or the graph silently becomes directed.
+2. In adjacency lists and matrices, undirected symmetry is a stored property: the mirrored list entries or symmetric matrix cells must be maintained together, or the graph silently becomes directed. An edge list instead treats one `(u, v)` tuple as an unordered endpoint pair and needs no mirrored tuple.
 3. The vertex identifier is an internal index. The array and matrix forms assume dense integer IDs `0 … V − 1`; strings, GUIDs, or sparse numeric IDs need a `Dictionary<T, int>` mapping first, which adds memory and makes ID management part of the API boundary — the same constraint the [[Home/Computer Science/Data Structures/Graph Structures/Disjoint Set|Disjoint Set]] array representation carries.
 
 # Complexity
@@ -54,7 +57,7 @@ The matrix's `O(1)` edge test and the list's `O(outdeg(u))` neighbor scan are th
 
 Density is the dividing line. A **dense** graph where `E ≈ V²` loses nothing to the matrix — the `O(V²)` space is already the edge count, and every algorithm gets `O(1)` edge tests and a compact per-row bitset. A **sparse** graph is where the matrix fails: 10 000 vertices with 50 000 edges costs the list roughly 60 000 entries but costs an `int[V, V]` matrix 100 million cells (~400 MB), almost all of them the sentinel. The matrix charges `O(V²)` whether or not the edges exist.
 
-The **edge list** is not a general-purpose store. `has-edge` and `iterate-neighbors` are both `O(E)`, so it is only competitive for algorithms that consume every edge in one sweep and never query a single edge — relaxing all edges in [[Home/Computer Science/Algorithms/Graph Algorithms/Bellman-Ford|Bellman-Ford]], or sorting edges by weight in Kruskal's [[Home/Computer Science/Algorithms/Graph Algorithms/Minimum Spanning Tree|Minimum Spanning Tree]]. Used for traversal, it turns each neighbor lookup into a full-list scan.
+The **edge list** is not a general-purpose store. `has-edge` and `iterate-neighbors` are both `O(E)`, so it is only competitive for algorithms whose main operation scans or sorts the whole edge set and never queries a single edge. [[Home/Computer Science/Algorithms/Graph Algorithms/Bellman-Ford|Bellman-Ford]] scans every edge for up to `V − 1` relaxation rounds, then performs an additional full scan to detect a reachable negative cycle; Kruskal sorts edges by weight, then scans them to build a [[Home/Computer Science/Algorithms/Graph Algorithms/Minimum Spanning Tree|Minimum Spanning Tree]]. Used for traversal, an edge list turns each neighbor lookup into a full-list scan.
 
 Dynamic vertex insertion splits the same way. Adding a vertex to an adjacency list appends one slot in amortized `O(1)`; adding one to a matrix reallocates the entire `(V+1) × (V+1)` grid and copies the old cells, an `O(V²)` rebuild. A graph whose vertex set grows during its lifetime is a poor match for the matrix regardless of density.
 
@@ -110,9 +113,9 @@ None of these are crashes. A matrix on a sparse graph runs correctly; it simply 
 | --- | --- | --- | --- | --- | --- |
 | Adjacency list | `O(V + E)` | `O(outdeg(u))` | `O(outdeg(u))` | `O(1)` amortized | Sparse graphs and traversal |
 | Adjacency matrix | `O(V²)` | `O(1)` | `O(V)` | `O(V²)` rebuild | Dense graphs and frequent single-edge tests |
-| Edge list | `O(E)` | `O(E)` | `O(E)` | `O(1)` | Algorithms that stream every edge once |
+| Edge list | `O(E)` | `O(E)` | `O(E)` | `O(1)` | Algorithms that scan or sort the full edge set |
 
-The adjacency list is the general default: real graphs are usually sparse, its space tracks the actual edge count, and it enumerates neighbors — the operation traversal repeats — in output-sized time. The matrix pays `O(V²)` space unconditionally, which is only free on dense graphs, and buys `O(1)` edge tests plus tight per-row bitsets in return; it becomes the stronger choice when the graph is near-complete or the workload is dominated by "is `u–v` connected" rather than "walk `u`'s neighbors". The edge list retains the least accessible structure and fits exactly the algorithms that never ask about one edge in isolation but sweep all of them.
+The adjacency list is the general default: real graphs are usually sparse, its space tracks the actual edge count, and it enumerates neighbors — the operation traversal repeats — in output-sized time. The matrix pays `O(V²)` space unconditionally, which is only free on dense graphs, and buys `O(1)` edge tests plus tight per-row bitsets in return; it becomes the stronger choice when the graph is near-complete or the workload is dominated by "is `u–v` connected" rather than "walk `u`'s neighbors". The edge list retains the least accessible structure and fits exactly the algorithms that process the full edge set by repeated scans or sorting.
 
 # Questions
 
@@ -126,11 +129,10 @@ The adjacency list is the general default: real graphs are usually sparse, its s
 > The adjacency list stores it twice, as mirrored entries in both endpoints' lists; the matrix stores it as two symmetric cells `[u, v]` and `[v, u]`; the edge list stores one tuple read in both directions. For the list and matrix, symmetry is a maintained invariant — removing or updating the edge must touch both stored copies, or the graph silently becomes directed.
 
 > [!QUESTION]- When is an edge list the right storage despite its `O(E)` edge test?
-> When the algorithm consumes every edge in a single pass and never queries an individual edge — relaxing all edges in Bellman-Ford, or sorting edges by weight for Kruskal's MST. Both want a flat, iterable edge set; neither benefits from per-vertex indexing, so the edge list's weakness never triggers.
+> When the algorithm scans or sorts the whole edge set and never queries an individual edge. Bellman-Ford scans all edges for up to `V − 1` relaxation rounds and performs an additional full scan for a reachable negative cycle; Kruskal sorts the edges and then scans them to build its MST. Neither benefits from per-vertex indexing, so the edge list's weakness never triggers.
 
 # References
 
 - [NIST Dictionary of Algorithms and Data Structures: graph](https://xlinux.nist.gov/dads/HTML/graph.html) — authoritative definition of graph vertices, edges, adjacency, and the adjacency-list and adjacency-matrix implementations.
-- [Graph (abstract data type)](https://en.wikipedia.org/wiki/Graph_(abstract_data_type)) — the adjacency-list, adjacency-matrix, and edge-list representations with their operation costs side by side.
-- [Graph representation](https://cp-algorithms.com/graph/graph-representation.html) — practical comparison of the storage forms and when sparse versus dense density favors each.
-- [Introduction to Algorithms, Ch. 22 — Elementary Graph Algorithms](https://mitpress.mit.edu/9780262046305/introduction-to-algorithms/) — CLRS's formal treatment of adjacency-list versus adjacency-matrix storage and their `O(V + E)` / `O(V²)` bounds.
+- [Graph (abstract data type)](https://en.wikipedia.org/wiki/Graph_(abstract_data_type)) — adjacency-list and adjacency-matrix representations with their operation costs side by side.
+- [Introduction to Algorithms, 4th ed., Ch. 20 §20.1 — Representations of graphs](https://mitpress.mit.edu/9780262046305/introduction-to-algorithms/) — CLRS's formal treatment of adjacency-list versus adjacency-matrix storage and their `O(V + E)` / `O(V²)` bounds.

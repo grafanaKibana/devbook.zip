@@ -11,14 +11,19 @@ status: Ready to Repeat
 publish: true
 ---
 
+# Intro
+
 A priority queue built on an array [[Home/Computer Science/Data Structures/Trees/Heap-like/Heap|heap]] answers find-min and extract-min cheaply, but melding two such heaps into one means rebuilding: `O(n)` work to reheapify the concatenation. When two priority queues must combine repeatedly — merging event streams, uniting sub-schedules — the melding cost dominates. A skew heap keeps only a heap-ordered binary tree and makes merge the primitive: two heaps combine by walking down their right spines, and insert and extract-min are defined in terms of that merge.
 
 The structure is the self-adjusting cousin of a [[Home/Computer Science/Data Structures/Trees/Heap-like/Leftist Heaps|leftist heap]]. A leftist heap stores a null-path-length field per node and swaps children only when that field would be violated, buying a per-operation worst-case bound. A skew heap deletes the field entirely: after merging down a right spine it **swaps the two children at every touched node unconditionally** — no test, no bookkeeping. The blind swap moves a right path that just grew back to the left, where the next merge never looks. What can no longer be read off a node is its rank; balance exists only in the amortized aggregate, not as a checkable invariant.
 
 **Core shape:** heap-ordered binary tree, no rank field → merge recurses down right spines → swap children at every merged node → amortized `O(log n)` per operation, `O(n)` structure space.
 
-> [!NOTE] Visualization pending
-> Planned StepTrace: a heap-merge card showing two heaps merged down their right spines, with the children swapped unconditionally after each link so the long right path folds to the left — no rank field, self-adjusting. No matching renderer exists in `engine.js` yet.
+Use **Merge** on the same canonical heaps `[2, 7, 10]` and `[3, 5, 8]`. Unlike the leftist version, every touched node swaps its children unconditionally; **Reset** restores both source heaps.
+
+```steptrace
+{"algorithm":"skew-heap"}
+```
 
 # Why the Blind Swap Balances
 

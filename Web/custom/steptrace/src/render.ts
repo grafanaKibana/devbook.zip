@@ -5,6 +5,12 @@
 //  edit the owning SCSS module, not this file.
 // ==========================================================================
 
+import {
+  GRAPH_NODE_HALO_GAP_PX,
+  GRAPH_NODE_RADIUS_PX,
+  observeFixedSvgNodes,
+  trimGraphEdge,
+} from "./graph-node"
 import { springStep, springOmega, SPRINGS, sequence } from "./motion"
 
 // The step interval the player runs on is baseDelay / speed (260 / speed), while
@@ -2246,15 +2252,23 @@ export function makeBitsView(frames) {
   return { nodes: [stage, status], paint, watch }
 }
 
-// ---- backtrack view: an n×n board (row = recursion depth) + a path strip ----
-// The board IS the tree state: queen columns are the root-to-node path. `attacked`
-// is DERIVED here from `queens` (frames stay small), so shaded options visibly
-// shrink before a choice and recede when a queen is torn off. Cells + path slots
-// are built ONCE; paint() only rewrites data-* / textContent (no jitter).
+let backtrackTreeSerial = 0
+
+// ---- backtrack view: an n×n board + a persistent decision tree ----
+// Queen columns are the root-to-node path. `attacked` is DERIVED here from
+// `queens` (frames stay small). The tree is built once from those same frames:
+// committed choices become decision nodes, repeated rejects collapse into one
+// prune leaf per parent, and paint() only changes state attributes and labels.
 export function makeBacktrackView(frames) {
   const n = frames[0].n
   const wrap = el("div", "steptrace__bt")
+  wrap.setAttribute("role", "region")
+  wrap.setAttribute("aria-label", "N-Queens search board and decision tree")
+  const layout = el("div", "steptrace__bt-layout")
+  const boardColumn = el("div", "steptrace__bt-board-column")
   const board = el("div", "steptrace__btboard")
+  board.setAttribute("role", "grid")
+  board.setAttribute("aria-label", `${n} by ${n} chess board`)
   board.style.setProperty("--_n", String(n))
   const cells = []
   for (let r = 0; r < n; r++) {
@@ -2262,8 +2276,9 @@ export function makeBacktrackView(frames) {
     for (let c = 0; c < n; c++) {
       const cell = el("div", "steptrace__btcell")
       cell.dataset.parity = String((r + c) % 2)
+      cell.setAttribute("role", "gridcell")
       const glyph = el("div", "steptrace__btqueen")
-      glyph.textContent = "♛" // ♛
+      glyph.innerHTML = ICON.chessQueen
       glyph.setAttribute("aria-hidden", "true")
       cell.append(glyph)
       board.append(cell)
@@ -2279,7 +2294,316 @@ export function makeBacktrackView(frames) {
     strip.append(slot)
     slots.push(slot)
   }
-  wrap.append(board, strip)
+  boardColumn.append(board, strip)
+
+  const columnsFromQueens = (queens) => {
+    const columns = []
+    for (const column of queens) {
+      if (column == null) break
+      columns.push(column)
+    }
+    return columns
+  }
+  const decisionId = (columns) => (columns.length ? `d:${columns.join(".")}` : "root")
+  const pathIds = (columns) => [
+    "root",
+    ...columns.map((_, index) => decisionId(columns.slice(0, index + 1))),
+  ]
+
+  const treeNodes = []
+  const treeNodeById = new Map()
+  const addTreeNode = (node) => {
+    if (treeNodeById.has(node.id)) return treeNodeById.get(node.id)
+    const stored = { ...node, children: [] }
+    treeNodes.push(stored)
+    treeNodeById.set(stored.id, stored)
+    if (stored.parent) treeNodeById.get(stored.parent)?.children.push(stored.id)
+    return stored
+  }
+  addTreeNode({
+    id: "root",
+    parent: null,
+    kind: "root",
+    depth: 0,
+    firstFrame: 0,
+    column: null,
+    attempts: [],
+  })
+
+  let solutionNode = null
+  for (let frameIndex = 0; frameIndex < frames.length; frameIndex++) {
+    const frame = frames[frameIndex]
+    const columns = columnsFromQueens(frame.queens)
+    if (frame.type === "place" && frame.cursor) {
+      const id = decisionId(columns)
+      addTreeNode({
+        id,
+        parent: decisionId(columns.slice(0, -1)),
+        kind: "decision",
+        depth: frame.cursor.row + 1,
+        firstFrame: frameIndex,
+        row: frame.cursor.row,
+        column: frame.cursor.col,
+        attempts: [],
+      })
+    } else if (frame.type === "reject" && frame.cursor) {
+      const parent = decisionId(columns)
+      const id = `p:${parent}`
+      const pruneNode = addTreeNode({
+        id,
+        parent,
+        kind: "prune",
+        depth: columns.length + 1,
+        firstFrame: frameIndex,
+        column: null,
+        attempts: [],
+      })
+      pruneNode.attempts.push({
+        frameIndex,
+        row: frame.cursor.row,
+        column: frame.cursor.col,
+        conflict: frame.conflict,
+      })
+    } else if (frame.type === "solved") {
+      const parent = decisionId(columns)
+      solutionNode = addTreeNode({
+        id: "solution",
+        parent,
+        kind: "solution",
+        depth: columns.length + 1,
+        firstFrame: frameIndex,
+        column: null,
+        attempts: [],
+      })
+    }
+  }
+
+  const treeEdges = treeNodes
+    .filter((node) => node.parent)
+    .map((node) => ({ from: node.parent, to: node.id, kind: node.kind }))
+  const leafSlots = new Map()
+  let leafCount = 0
+  function assignLeafSlots(nodeId) {
+    const node = treeNodeById.get(nodeId)
+    if (!node.children.length) {
+      const slot = leafCount++
+      leafSlots.set(nodeId, slot)
+      return slot
+    }
+    const childSlots = node.children.map(assignLeafSlots)
+    const slot = (childSlots[0] + childSlots[childSlots.length - 1]) / 2
+    leafSlots.set(nodeId, slot)
+    return slot
+  }
+  assignLeafSlots("root")
+  const maxTreeDepth = Math.max(...treeNodes.map((node) => node.depth))
+
+  function makeTreeLayout() {
+    const leafGap = 36
+    const depthGap = 42
+    const leafPad = 90
+    const leafEndPad = 10
+    const depthPad = 20
+    const positions = Object.fromEntries(
+      treeNodes.map((node) => {
+        const leaf = leafSlots.get(node.id)
+        return [node.id, { x: leafPad + leaf * leafGap, y: depthPad + node.depth * depthGap }]
+      }),
+    )
+    return {
+      positions,
+      width: leafPad + leafEndPad + Math.max(0, leafCount - 1) * leafGap,
+      height: depthPad * 2 + maxTreeDepth * depthGap,
+      leafGap,
+      depthGap,
+      leafPad,
+      depthPad,
+    }
+  }
+  const treeLayout = makeTreeLayout()
+
+  const tree = el("aside", "steptrace__bt-tree")
+  tree.setAttribute("role", "region")
+  tree.setAttribute("aria-label", "N-Queens decision tree")
+  tree.dataset.orientation = "portrait"
+  const treeHead = el("div", "steptrace__bt-tree-head")
+  const treeLabel = el("span", "steptrace__rail-label steptrace__bt-tree-label")
+  treeLabel.textContent = "DECISION TREE"
+  const treeDepth = el("span", "steptrace__bt-tree-depth")
+  treeHead.append(treeLabel, treeDepth)
+  const treeCaption = el("div", "steptrace__bt-tree-caption")
+  treeCaption.setAttribute("aria-live", "polite")
+  treeCaption.setAttribute("aria-atomic", "true")
+  const treeCanvas = el("div", "steptrace__bt-tree-canvas")
+  const svgNode = (tag) =>
+    typeof document.createElementNS === "function"
+      ? document.createElementNS("http://www.w3.org/2000/svg", tag)
+      : document.createElement(tag)
+  const treeSvg = svgNode("svg")
+  const treeTitle = svgNode("title")
+  const treeDescription = svgNode("desc")
+  const treeId = `steptrace-backtrack-tree-${++backtrackTreeSerial}`
+  const returnMarkerId = `${treeId}-return`
+  treeTitle.id = `${treeId}-title`
+  treeDescription.id = `${treeId}-description`
+  treeSvg.setAttribute("class", "steptrace__bt-tree-svg")
+  treeSvg.setAttribute("role", "img")
+  treeSvg.setAttribute("aria-labelledby", `${treeTitle.id} ${treeDescription.id}`)
+  treeSvg.setAttribute("preserveAspectRatio", "xMidYMid meet")
+
+  const treeDefs = svgNode("defs")
+  const returnMarker = svgNode("marker")
+  returnMarker.setAttribute("id", returnMarkerId)
+  returnMarker.setAttribute("viewBox", "0 0 8 8")
+  returnMarker.setAttribute("refX", "4")
+  returnMarker.setAttribute("refY", "4")
+  returnMarker.setAttribute("markerWidth", "5")
+  returnMarker.setAttribute("markerHeight", "5")
+  returnMarker.setAttribute("orient", "auto-start-reverse")
+  const returnArrow = svgNode("path")
+  returnArrow.setAttribute("class", "steptrace__bt-tree-return-arrow")
+  returnArrow.setAttribute("d", "M0 0 8 4 0 8z")
+  returnMarker.append(returnArrow)
+  treeDefs.append(returnMarker)
+
+  const depthLayer = svgNode("g")
+  depthLayer.setAttribute("class", "steptrace__bt-tree-depths")
+  const depthLabels = []
+  for (let depth = 0; depth <= maxTreeDepth; depth++) {
+    const depthGroup = svgNode("g")
+    depthGroup.setAttribute("class", "steptrace__bt-tree-depth")
+    depthGroup.setAttribute("aria-hidden", "true")
+    depthGroup.setAttribute("focusable", "false")
+    const depthLabel = svgNode("text")
+    const depthLine = svgNode("line")
+    depthLabel.setAttribute("class", "steptrace__bt-tree-depth-label")
+    depthLabel.setAttribute("text-anchor", "start")
+    depthLabel.setAttribute("dominant-baseline", "central")
+    depthLabel.textContent = depth === 0 ? "root" : depth <= n ? `R${depth - 1}` : "Result"
+    depthLine.setAttribute("class", "steptrace__bt-tree-depth-line")
+    depthLine.setAttribute("aria-hidden", "true")
+    depthLine.setAttribute("focusable", "false")
+    depthGroup.append(depthLabel)
+    depthLayer.append(depthLine)
+    depthLayer.append(depthGroup)
+    depthLabels.push({ group: depthGroup, label: depthLabel, line: depthLine })
+  }
+
+  const edgeLayer = svgNode("g")
+  edgeLayer.setAttribute("class", "steptrace__bt-tree-edges")
+  const edgeElements = treeEdges.map((edge) => {
+    const line = svgNode("line")
+    line.setAttribute("class", "steptrace__rtedge steptrace__bt-tree-edge")
+    line.setAttribute("aria-hidden", "true")
+    line.setAttribute("focusable", "false")
+    line.dataset.kind = edge.kind
+    line.dataset.from = edge.from
+    line.dataset.to = edge.to
+    edgeLayer.append(line)
+    return { ...edge, element: line }
+  })
+
+  const nodeLayer = svgNode("g")
+  nodeLayer.setAttribute("class", "steptrace__bt-tree-nodes")
+  const nodeElements = new Map()
+  for (const node of treeNodes) {
+    const group = svgNode("g")
+    const ring = svgNode("circle")
+    const surface = svgNode("circle")
+    const label = svgNode("text")
+    group.setAttribute("class", "steptrace__node steptrace__rtnode steptrace__bt-tree-node")
+    group.setAttribute("aria-hidden", "true")
+    group.setAttribute("focusable", "false")
+    group.dataset.kind = node.kind
+    group.dataset.node = node.id
+    ring.setAttribute("class", "steptrace__rtring")
+    ring.setAttribute("r", String(GRAPH_NODE_RADIUS_PX + GRAPH_NODE_HALO_GAP_PX))
+    surface.setAttribute("class", "steptrace__ncirc steptrace__rtcirc")
+    surface.setAttribute("r", String(GRAPH_NODE_RADIUS_PX))
+    label.setAttribute("class", "steptrace__id steptrace__rtlabel steptrace__bt-tree-node-label")
+    label.setAttribute("text-anchor", "middle")
+    label.setAttribute("dominant-baseline", "central")
+    group.append(ring, surface, label)
+    nodeLayer.append(group)
+    nodeElements.set(node.id, { group, label })
+  }
+  treeSvg.append(treeDefs, treeTitle, treeDescription, depthLayer, edgeLayer, nodeLayer)
+  treeCanvas.append(treeSvg)
+
+  const treeLegend = makeLegend(
+    [
+      { label: "branch", state: "split", swatchClass: "steptrace__swatch steptrace__rtswatch" },
+      { label: "prune", state: "prune", swatchClass: "steptrace__swatch steptrace__rtswatch" },
+      { label: "return", state: "return", swatchClass: "steptrace__swatch steptrace__rtswatch" },
+      { label: "solution", state: "combine", swatchClass: "steptrace__swatch steptrace__rtswatch" },
+    ],
+    "Decision tree state legend",
+    "steptrace__bt-tree-legend",
+  )
+  tree.append(treeHead, treeCaption, treeCanvas, treeLegend)
+
+  const geometryPoints = new Map(
+    treeNodes.map((node) => [node.id, { ...treeLayout.positions[node.id] }]),
+  )
+  const depthGeometryPoints = depthLabels.map((_, depth) => ({
+    x: 3,
+    y: treeLayout.depthPad + depth * treeLayout.depthGap,
+  }))
+  let treeGeometry = null
+
+  function applyTreeLayout() {
+    treeSvg.setAttribute("viewBox", `0 0 ${treeLayout.width} ${treeLayout.height}`)
+    treeGeometry?.update()
+  }
+  applyTreeLayout()
+  treeGeometry = observeFixedSvgNodes(
+    treeSvg,
+    [
+      ...treeNodes.map((node) => ({
+        element: nodeElements.get(node.id).group,
+        point: geometryPoints.get(node.id),
+      })),
+      ...depthLabels.map(({ group }, depth) => ({
+        element: group,
+        point: depthGeometryPoints[depth],
+      })),
+    ],
+    (unitsPerCssPixel) => {
+      const inset = GRAPH_NODE_RADIUS_PX * unitsPerCssPixel
+      const renderedTreeWidth = treeLayout.width / unitsPerCssPixel
+      const canvasWidth = Number(treeCanvas.clientWidth) || 0
+      const sideGutter = Math.max(0, (canvasWidth - renderedTreeWidth) / 2)
+      const guideShift = Math.max(0, sideGutter - 8)
+      for (const edge of edgeElements) {
+        const points = trimGraphEdge(
+          geometryPoints.get(edge.from),
+          geometryPoints.get(edge.to),
+          inset,
+        )
+        for (const [attribute, value] of Object.entries(points))
+          edge.element.setAttribute(attribute, String(value))
+      }
+      for (let depth = 0; depth < depthLabels.length; depth++) {
+        const { group, line } = depthLabels[depth]
+        const y = treeLayout.depthPad + depth * treeLayout.depthGap
+        const labelX = (3 - guideShift) * unitsPerCssPixel
+        Object.assign(depthGeometryPoints[depth], { x: labelX, y })
+        group.setAttribute("transform", `translate(${labelX} ${y}) scale(${unitsPerCssPixel})`)
+        const firstNodeX = Math.min(
+          ...treeNodes
+            .filter((node) => node.depth === depth)
+            .map((node) => treeLayout.positions[node.id].x),
+        )
+        line.setAttribute("x1", String((42 - guideShift) * unitsPerCssPixel))
+        line.setAttribute("y1", String(y))
+        line.setAttribute("x2", String(firstNodeX - (GRAPH_NODE_RADIUS_PX + 2) * unitsPerCssPixel))
+        line.setAttribute("y2", String(y))
+      }
+    },
+  )
+
+  layout.append(boardColumn, tree)
+  wrap.append(layout)
   const status = statusEl()
 
   // squares attacked by already-committed queens (column / row / diagonal)
@@ -2298,7 +2622,7 @@ export function makeBacktrackView(frames) {
     return hit
   }
 
-  function paint(frame) {
+  function paint(frame, frameIndex) {
     const q = frame.queens
     const cur = frame.cursor
     const conf = frame.conflict
@@ -2318,6 +2642,22 @@ export function makeBacktrackView(frames) {
         cell.dataset.state = state
         cell.dataset.hasQueen = hasQueen ? "1" : "0"
         cell.dataset.conflict = conf && conf.row === r && conf.col === c ? "1" : "0"
+        cell.setAttribute(
+          "aria-label",
+          `Row ${r}, column ${c}, ${
+            hasQueen
+              ? "queen"
+              : isCursor
+                ? frame.type === "reject"
+                  ? "rejected"
+                  : frame.type === "backtrack"
+                    ? "queen removed"
+                    : "candidate"
+                : attacked.has(r + "," + c)
+                  ? "attacked"
+                  : "safe"
+          }`,
+        )
       }
     }
     for (let r = 0; r < n; r++) {
@@ -2332,6 +2672,95 @@ export function makeBacktrackView(frames) {
       }
       slot.dataset.state = sstate
     }
+    const columns = columnsFromQueens(frame.queens)
+    const activePath = new Set(pathIds(columns))
+    const finalPath = new Set(
+      solutionNode ? [...pathIds(columnsFromQueens(frames.at(-1).queens)), solutionNode.id] : [],
+    )
+    let activeNode = decisionId(columns)
+    let returnSource = null
+    let event = "start"
+    let caption = "Start at root"
+    if (frame.type === "place" && cur) {
+      activeNode = decisionId(columns)
+      event = "branch"
+      caption = `Branch R${cur.row} C${cur.col} · descend to R${cur.row + 1}`
+    } else if (frame.type === "reject" && cur) {
+      activeNode = `p:${decisionId(columns)}`
+      activePath.add(activeNode)
+      event = "prune"
+      caption = frame.conflict
+        ? `Prune R${cur.row} C${cur.col} · blocked by R${frame.conflict.row} C${frame.conflict.col}`
+        : `Prune R${cur.row} C${cur.col}`
+    } else if (frame.type === "backtrack" && cur) {
+      const returningColumns = [...columns, cur.col]
+      returnSource = decisionId(returningColumns)
+      activeNode = decisionId(columns)
+      event = "return"
+      caption = columns.length
+        ? `Return R${cur.row} C${cur.col} → R${columns.length - 1} C${columns.at(-1)}`
+        : `Return R${cur.row} C${cur.col} → root`
+    } else if (frame.solved && solutionNode) {
+      activeNode = solutionNode.id
+      event = "solution"
+      caption = `Solution [${frame.queens.join(", ")}]`
+    }
+    const solutionPath = event === "solution" ? finalPath : new Set()
+    tree.dataset.event = event
+    treeDepth.textContent = `depth ${frame.depth} / ${frame.n}`
+    treeCaption.textContent = caption
+    treeTitle.textContent = `N-Queens decision tree: ${caption}`
+    treeDescription.textContent = `${caption}. ${frame.message}`
+
+    for (const node of treeNodes) {
+      const elements = nodeElements.get(node.id)
+      const visible = node.firstFrame <= frameIndex
+      const onPath = activePath.has(node.id)
+      const onSolution = solutionPath.has(node.id)
+      const returning = node.id === returnSource
+      elements.group.dataset.vis = visible ? "1" : "0"
+      elements.group.dataset.active = node.id === activeNode ? "true" : "false"
+      elements.group.dataset.path = onPath ? "true" : "false"
+      elements.group.dataset.solution = onSolution ? "true" : "false"
+      elements.group.dataset.returnSource = returning ? "true" : "false"
+      elements.group.dataset.collapsed =
+        visible && !onPath && !onSolution && !returning && node.id !== activeNode ? "true" : "false"
+      elements.group.dataset.state =
+        node.kind === "prune"
+          ? "prune"
+          : returning
+            ? "return"
+            : node.kind === "solution"
+              ? "combine"
+              : node.kind === "decision"
+                ? "split"
+                : "compute"
+      if (!visible) elements.label.textContent = ""
+      else if (node.kind === "root") elements.label.textContent = "R"
+      else if (node.kind === "decision") elements.label.textContent = String(node.column)
+      else if (node.kind === "solution") elements.label.textContent = "S"
+      else {
+        const seenAttempts = node.attempts.filter(
+          (attempt) => attempt.frameIndex <= frameIndex,
+        ).length
+        elements.label.textContent = `×${seenAttempts}`
+      }
+    }
+
+    for (const edge of edgeElements) {
+      const child = treeNodeById.get(edge.to)
+      const visible = child.firstFrame <= frameIndex
+      const onPath = activePath.has(edge.from) && activePath.has(edge.to)
+      const onSolution = solutionPath.has(edge.from) && solutionPath.has(edge.to)
+      const returning = edge.to === returnSource
+      edge.element.dataset.vis = visible ? "1" : "0"
+      edge.element.dataset.path = onPath ? "true" : "false"
+      edge.element.dataset.solution = onSolution ? "true" : "false"
+      edge.element.dataset.return = returning ? "true" : "false"
+      edge.element.dataset.collapsed =
+        visible && !onPath && !onSolution && !returning ? "true" : "false"
+      edge.element.setAttribute("marker-start", returning ? `url(#${returnMarkerId})` : "none")
+    }
     status.innerHTML = escapeHtml(frame.message)
   }
 
@@ -2345,7 +2774,14 @@ export function makeBacktrackView(frames) {
     ]
   }
 
-  return { nodes: [wrap, status], paint, watch }
+  return {
+    nodes: [wrap, status],
+    paint,
+    watch,
+    destroy: () => {
+      treeGeometry.destroy()
+    },
+  }
 }
 
 let executionTreeViewSerial = 0
@@ -2358,6 +2794,8 @@ export interface ExecutionTreeViewDescriptor {
   minSvgWidth: number
   canvasScale?: number
   fitWidth?: boolean
+  responsiveLayout?: boolean
+  tieredLayout?: boolean
   tieredCards?: boolean
   centerVisible?: boolean
   stableStage?: boolean
@@ -2407,17 +2845,87 @@ export function makeExecutionTreeView(frames, descriptor: ExecutionTreeViewDescr
   const nodes = f0.nodes
   const halfHeight = descriptor.nodeHeight / 2
   const padY = halfHeight + 12
-  const nodeWidth = (node) => node.width || descriptor.nodeWidth
-  const lefts = nodes.map((node) => node.x - nodeWidth(node) / 2)
-  const rights = nodes.map((node) => node.x + nodeWidth(node) / 2)
+  const naturalNodeWidth = (node) => node.width || descriptor.nodeWidth
+  const lefts = nodes.map((node) => node.x - naturalNodeWidth(node) / 2)
+  const rights = nodes.map((node) => node.x + naturalNodeWidth(node) / 2)
   const ys = nodes.map((node) => node.y)
   const minX = Math.min(...lefts)
   const minY = Math.min(...ys)
-  const width = Math.max(...rights) - minX + 24
-  const height = Math.max(...ys) - minY + padY * 2
-  const position = Object.fromEntries(
+  const naturalWidth = Math.max(...rights) - minX + 24
+  const naturalHeight = Math.max(...ys) - minY + padY * 2
+  const naturalPosition = Object.fromEntries(
     nodes.map((node) => [node.id, { x: node.x - minX + 12, y: node.y - minY + padY }]),
   )
+  const naturalWidths = Object.fromEntries(nodes.map((node) => [node.id, naturalNodeWidth(node)]))
+  const naturalLayout = {
+    width: naturalWidth,
+    height: naturalHeight,
+    position: naturalPosition,
+    widths: naturalWidths,
+  }
+
+  const visibleNodeIds = new Set(frames.flatMap((frame) => frame.visible))
+  const layoutNodes = nodes.filter((node) => visibleNodeIds.has(node.id))
+  const tiers = new Map<number, any[]>()
+  for (const node of layoutNodes) {
+    const tier = tiers.get(node.depth) || []
+    tier.push(node)
+    tiers.set(node.depth, tier)
+  }
+  for (const tier of tiers.values()) tier.sort((left, right) => left.x - right.x)
+  const maxTierSize = Math.max(...[...tiers.values()].map((tier) => tier.length))
+  const maxDepth = Math.max(...nodes.map((node) => node.depth))
+
+  function tierLayout(width, maxNodeWidth, gap) {
+    const widths = {
+      ...naturalWidths,
+      ...Object.fromEntries(
+        layoutNodes.map((node) => [node.id, Math.min(naturalNodeWidth(node), maxNodeWidth)]),
+      ),
+    }
+    const position = { ...naturalPosition }
+    const levelGap = descriptor.nodeHeight + 22
+    for (const [depth, tier] of tiers) {
+      const tierWidth =
+        tier.reduce((total, node) => total + widths[node.id], 0) + gap * (tier.length - 1)
+      let x = (width - tierWidth) / 2
+      for (const node of tier) {
+        position[node.id] = {
+          x: x + widths[node.id] / 2,
+          y: padY + depth * levelGap,
+        }
+        x += widths[node.id] + gap
+      }
+    }
+    return {
+      width,
+      height: padY * 2 + maxDepth * levelGap,
+      position,
+      widths,
+    }
+  }
+
+  const desktopGap = 12
+  const desktopTierWidth =
+    Math.max(
+      ...[...tiers.values()].map(
+        (tier) =>
+          tier.reduce(
+            (total, node) => total + Math.min(naturalNodeWidth(node), descriptor.nodeWidth),
+            0,
+          ) +
+          desktopGap * (tier.length - 1),
+      ),
+    ) + 24
+  const desktopLayout = descriptor.tieredLayout
+    ? tierLayout(
+        Math.max(descriptor.minSvgWidth, desktopTierWidth),
+        descriptor.nodeWidth,
+        desktopGap,
+      )
+    : naturalLayout
+  let layout = desktopLayout
+  const nodeWidth = (node) => layout.widths[node.id] || naturalNodeWidth(node)
 
   const svg = document.createElementNS(SVGNS, "svg")
   const title = document.createElementNS(SVGNS, "title")
@@ -2426,11 +2934,11 @@ export function makeExecutionTreeView(frames, descriptor: ExecutionTreeViewDescr
   title.id = `${accessibleId}-title`
   description.id = `${accessibleId}-description`
   svg.setAttribute("class", "steptrace__rtsvg")
-  svg.setAttribute("viewBox", `0 0 ${width} ${height}`)
+  svg.setAttribute("viewBox", `0 0 ${layout.width} ${layout.height}`)
   svg.setAttribute("preserveAspectRatio", "xMidYMid meet")
   svg.setAttribute("role", "img")
   svg.setAttribute("aria-labelledby", `${title.id} ${description.id}`)
-  const canvasWidth = Math.max(descriptor.minSvgWidth, width * (descriptor.canvasScale || 1))
+  const canvasWidth = Math.max(descriptor.minSvgWidth, layout.width * (descriptor.canvasScale || 1))
   svg.style.setProperty("--steptrace-tree-width", `${canvasWidth}px`)
   svg.append(title, description)
 
@@ -2442,8 +2950,8 @@ export function makeExecutionTreeView(frames, descriptor: ExecutionTreeViewDescr
 
   const edgeElements = []
   for (const edge of f0.edges) {
-    const from = position[edge.from]
-    const to = position[edge.to]
+    const from = layout.position[edge.from]
+    const to = layout.position[edge.to]
     const line = document.createElementNS(SVGNS, "line")
     line.setAttribute("class", "steptrace__rtedge")
     line.setAttribute("x1", String(from.x))
@@ -2458,7 +2966,7 @@ export function makeExecutionTreeView(frames, descriptor: ExecutionTreeViewDescr
 
   const nodeElements = {}
   for (const node of nodes) {
-    const point = position[node.id]
+    const point = layout.position[node.id]
     const width = nodeWidth(node)
     const halfWidth = width / 2
     const group = document.createElementNS(SVGNS, "g")
@@ -2555,7 +3063,16 @@ export function makeExecutionTreeView(frames, descriptor: ExecutionTreeViewDescr
     if (!descriptor.tieredCards) group.append(detail)
     group.append(result, badge)
     treeLayer.append(group)
-    nodeElements[node.id] = { group, detail, result, badge, secondaryLine, valueCells }
+    nodeElements[node.id] = {
+      group,
+      ring,
+      surface,
+      detail,
+      result,
+      badge,
+      secondaryLine,
+      valueCells,
+    }
   }
 
   function centerTransform(visibleIds) {
@@ -2563,7 +3080,7 @@ export function makeExecutionTreeView(frames, descriptor: ExecutionTreeViewDescr
     const rects = nodes
       .filter((node) => visible.has(node.id))
       .map((node) => {
-        const point = position[node.id]
+        const point = layout.position[node.id]
         const halfNodeWidth = nodeWidth(node) / 2
         return {
           left: point.x - halfNodeWidth,
@@ -2572,7 +3089,7 @@ export function makeExecutionTreeView(frames, descriptor: ExecutionTreeViewDescr
           bottom: point.y + halfHeight,
         }
       })
-    const offset = centerVisibleTree(rects, width, height)
+    const offset = centerVisibleTree(rects, layout.width, layout.height)
     return `translate(${offset.x}px, ${offset.y}px)`
   }
 
@@ -2592,11 +3109,71 @@ export function makeExecutionTreeView(frames, descriptor: ExecutionTreeViewDescr
   wrap.setAttribute("aria-label", `${descriptor.ariaLabel} visualization`)
   wrap.dataset.fitWidth = descriptor.fitWidth ? "true" : "false"
   wrap.dataset.profile = f0.profile || ""
+  wrap.dataset.compact = "false"
   wrap.tabIndex = 0
   wrap.append(svg)
+
+  function responsiveTreeLayout(availableWidth) {
+    if (
+      !descriptor.responsiveLayout ||
+      !Number.isFinite(availableWidth) ||
+      availableWidth <= 0 ||
+      typeof matchMedia !== "function" ||
+      !matchMedia("(max-width: 560px)").matches
+    )
+      return desktopLayout
+
+    const width = Math.max(280, Math.floor(availableWidth))
+    const gap = descriptor.showStateBadge ? 4 : 8
+    const fittedWidth = Math.floor((width - 24 - gap * (maxTierSize - 1)) / maxTierSize)
+    const compactWidth = Math.max(36, Math.min(descriptor.nodeWidth, fittedWidth))
+    return tierLayout(width, compactWidth, gap)
+  }
+
+  let lastAvailableWidth = -1
+  function applyTreeLayout() {
+    const availableWidth = wrap.clientWidth
+    if (Math.abs(availableWidth - lastAvailableWidth) < 0.5) return
+    lastAvailableWidth = availableWidth
+    const next = responsiveTreeLayout(availableWidth)
+    layout = next
+    wrap.dataset.compact = layout === desktopLayout ? "false" : "true"
+    svg.setAttribute("viewBox", `0 0 ${layout.width} ${layout.height}`)
+    svg.style.setProperty("--steptrace-tree-width", `${layout.width}px`)
+    for (const node of nodes) {
+      const elements = nodeElements[node.id]
+      const point = layout.position[node.id]
+      const width = nodeWidth(node)
+      const halfWidth = width / 2
+      elements.group.setAttribute("transform", `translate(${point.x} ${point.y})`)
+      if (descriptor.shape === "circle") {
+        elements.ring.setAttribute("r", String(halfWidth + 3))
+        elements.surface.setAttribute("r", String(halfWidth))
+      } else {
+        elements.surface.setAttribute("x", String(-halfWidth))
+        elements.surface.setAttribute("width", String(width))
+        elements.ring.setAttribute("x", String(-halfWidth - 2))
+        elements.ring.setAttribute("width", String(width + 4))
+      }
+    }
+    for (const edge of edgeElements) {
+      const from = layout.position[edge.from]
+      const to = layout.position[edge.to]
+      edge.element.setAttribute("x1", String(from.x))
+      edge.element.setAttribute("y1", String(from.y + halfHeight))
+      edge.element.setAttribute("x2", String(to.x))
+      edge.element.setAttribute("y2", String(to.y - halfHeight))
+    }
+    if (descriptor.centerVisible) treeLayer.style.transform = centerTransform(f0.visible)
+  }
+
+  const resizeObserver =
+    typeof ResizeObserver === "undefined" ? null : new ResizeObserver(applyTreeLayout)
+  if (resizeObserver) resizeObserver.observe(wrap)
   const status = statusEl()
 
   function paint(frame, index, total) {
+    applyTreeLayout()
     const model = descriptor.frameModel(frame)
     const visible = new Set(model.visible)
     const collapsed = new Set(model.collapsed)
@@ -2668,6 +3245,7 @@ export function makeExecutionTreeView(frames, descriptor: ExecutionTreeViewDescr
     stableStage: descriptor.stableStage,
     paint,
     watch,
+    destroy: () => resizeObserver?.disconnect(),
   }
 }
 
@@ -2716,7 +3294,6 @@ export function makeRecTreeView(frames) {
 
 // ---- graph view: svg ----
 const SVGNS = "http://www.w3.org/2000/svg"
-const R = 16 // node radius
 
 export function makeGraphView(frames, graph, frontierLabel) {
   const pad = 34
@@ -2749,16 +3326,15 @@ export function makeGraphView(frames, graph, frontierLabel) {
   for (const e of graph.edges) {
     const a = pos[e.from]
     const b = pos[e.to]
-    const { x1, y1, x2, y2 } = trimToRadius(a, b, R + (graph.directed ? 3 : 0))
     const line = document.createElementNS(SVGNS, "line")
     line.setAttribute("class", "steptrace__edge")
-    line.setAttribute("x1", x1)
-    line.setAttribute("y1", y1)
-    line.setAttribute("x2", String(x2))
-    line.setAttribute("y2", String(y2))
+    line.setAttribute("x1", String(a.x))
+    line.setAttribute("y1", String(a.y))
+    line.setAttribute("x2", String(b.x))
+    line.setAttribute("y2", String(b.y))
     if (graph.directed) line.setAttribute("marker-end", "url(#st-arrow)")
     svg.append(line)
-    edgeEls.push({ el: line, from: e.from, to: e.to })
+    edgeEls.push({ el: line, from: e.from, to: e.to, a, b })
     if (e.weight != null) {
       const label = document.createElementNS(SVGNS, "text")
       label.setAttribute("class", "steptrace__edge-label")
@@ -2782,19 +3358,19 @@ export function makeGraphView(frames, graph, frontierLabel) {
     back.setAttribute("class", "steptrace__nback")
     back.setAttribute("cx", p.x)
     back.setAttribute("cy", p.y)
-    back.setAttribute("r", String(R))
+    back.setAttribute("r", String(GRAPH_NODE_RADIUS_PX))
     const circle = document.createElementNS(SVGNS, "circle")
     circle.setAttribute("class", "steptrace__ncirc")
     circle.setAttribute("cx", p.x)
     circle.setAttribute("cy", p.y)
-    circle.setAttribute("r", String(R))
+    circle.setAttribute("r", String(GRAPH_NODE_RADIUS_PX))
     // search goal marker: a static dashed halo, present from frame 0
     if (frames[0] && frames[0].target === n.id) {
       const halo = document.createElementNS(SVGNS, "circle")
       halo.setAttribute("class", "steptrace__ntarget")
       halo.setAttribute("cx", p.x)
       halo.setAttribute("cy", p.y)
-      halo.setAttribute("r", String(R + 4.5))
+      halo.setAttribute("r", String(GRAPH_NODE_RADIUS_PX + GRAPH_NODE_HALO_GAP_PX))
       g.append(halo)
     }
     const id = document.createElementNS(SVGNS, "text")
@@ -2807,12 +3383,12 @@ export function makeGraphView(frames, graph, frontierLabel) {
     const dist = document.createElementNS(SVGNS, "text")
     dist.setAttribute("class", "steptrace__d")
     dist.setAttribute("x", p.x)
-    dist.setAttribute("y", String(p.y - R - 5))
+    dist.setAttribute("y", String(p.y - GRAPH_NODE_RADIUS_PX - 5))
     dist.setAttribute("text-anchor", "middle")
     const mark = document.createElementNS(SVGNS, "svg")
     mark.setAttribute("class", "steptrace__nmark")
     mark.setAttribute("x", String(p.x - 6))
-    mark.setAttribute("y", String(p.y + R + 5))
+    mark.setAttribute("y", String(p.y + GRAPH_NODE_RADIUS_PX + 5))
     mark.setAttribute("width", "12")
     mark.setAttribute("height", "12")
     mark.setAttribute("viewBox", "0 0 24 24")
@@ -2821,8 +3397,8 @@ export function makeGraphView(frames, graph, frontierLabel) {
       '<rect data-state-icon="current" x="6" y="6" width="12" height="12" rx="2" fill="currentColor"/>' +
       '<path data-state-icon="frontier" d="m12 3 9 9-9 9-9-9Z" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linejoin="round"/>'
     const visitedMark = successMarker("steptrace__nmark-success")
-    visitedMark.setAttribute("x", String(p.x + R - 8))
-    visitedMark.setAttribute("y", String(p.y - R - 4))
+    visitedMark.setAttribute("x", String(p.x + GRAPH_NODE_RADIUS_PX - 8))
+    visitedMark.setAttribute("y", String(p.y - GRAPH_NODE_RADIUS_PX - 4))
     visitedMark.setAttribute("width", "12")
     visitedMark.setAttribute("height", "12")
     g.append(back, circle, id, dist, mark, visitedMark)
@@ -2848,6 +3424,25 @@ export function makeGraphView(frames, graph, frontierLabel) {
 
   const graphWrap = el("div", "steptrace__graph")
   graphWrap.append(svg)
+  const geometry = observeFixedSvgNodes(
+    svg,
+    graph.nodes.map((node) => ({
+      element: nodeEls[node.id].g,
+      point: pos[node.id],
+      coordinates: "absolute",
+    })),
+    (unitsPerCssPixel) => {
+      const radius = GRAPH_NODE_RADIUS_PX * unitsPerCssPixel
+      const targetRadius = (GRAPH_NODE_RADIUS_PX + (graph.directed ? 3 : 0)) * unitsPerCssPixel
+      for (const edge of edgeEls) {
+        const trimmed = trimGraphEdge(edge.a, edge.b, radius, targetRadius)
+        edge.el.setAttribute("x1", String(trimmed.x1))
+        edge.el.setAttribute("y1", String(trimmed.y1))
+        edge.el.setAttribute("x2", String(trimmed.x2))
+        edge.el.setAttribute("y2", String(trimmed.y2))
+      }
+    },
+  )
 
   const status = statusEl()
 
@@ -2900,19 +3495,10 @@ export function makeGraphView(frames, graph, frontierLabel) {
     ]
   }
 
-  return { nodes: [graphWrap, legend, status], paint, watch }
+  return { nodes: [graphWrap, legend, status], paint, watch, destroy: geometry.destroy }
 }
 
 // ---- small DOM helpers (structure only; no styling) ----
-function trimToRadius(a, b, r) {
-  const dx = b.x - a.x
-  const dy = b.y - a.y
-  const len = Math.hypot(dx, dy) || 1
-  const ux = dx / len
-  const uy = dy / len
-  return { x1: a.x + ux * R, y1: a.y + uy * R, x2: b.x - ux * r, y2: b.y - uy * r }
-}
-
 export function statusEl() {
   const status = el("div", "steptrace__status")
   status.setAttribute("role", "status")
@@ -2996,6 +3582,8 @@ export const ICON = {
   swap: '<svg class="steptrace__cue-swap" viewBox="0 0 24 24" aria-hidden="true"><path d="m2 9 3-3 3 3"/><path d="M13 18H7a2 2 0 0 1-2-2V6"/><path d="m22 15-3 3-3-3"/><path d="M11 6h6a2 2 0 0 1 2 2v10"/></svg>',
   search:
     '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="10.5" cy="10.5" r="6.5"/><path d="m15.2 15.2 4.8 4.8"/></svg>',
+  chessQueen:
+    '<svg class="lucide lucide-chess-queen" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 20a2 2 0 0 1 2-2h12a2 2 0 0 1 2 2v1a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1z"/><path d="m12.474 5.943 1.567 5.34a1 1 0 0 0 1.75.328l2.616-3.402"/><path d="m20 9-3 9"/><path d="m5.594 8.209 2.615 3.403a1 1 0 0 0 1.75-.329l1.567-5.34"/><path d="M7 18 4 9"/><circle cx="12" cy="4" r="2"/><circle cx="20" cy="7" r="2"/><circle cx="4" cy="7" r="2"/></svg>',
 }
 export function iconBtn(label, svg, extra = "") {
   const b = document.createElement("button")

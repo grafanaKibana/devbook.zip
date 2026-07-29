@@ -76,9 +76,9 @@
 }
 
 .steptrace__prefix-node circle {
-  fill: var(--st-page, var(--_surface));
+  fill: color-mix(in srgb, var(--_neutral) 16%, var(--_surface));
   stroke: var(--_neutral);
-  stroke-width: 2;
+  stroke-width: 1.6;
   transition:
     fill var(--_dur-quick) var(--_ease-decelerate),
     stroke var(--_dur-quick) var(--_ease-decelerate);
@@ -86,9 +86,7 @@
 
 .steptrace__prefix-node > text {
   fill: var(--_text);
-  font-family: var(--_font-body);
-  font-size: clamp(0.75rem, 3vw, 0.875rem);
-  font-weight: 600;
+  font: 600 0.66rem/1 var(--_font-head);
 }
 
 .steptrace__prefix-edge[data-state="active"],

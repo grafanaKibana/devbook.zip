@@ -46,9 +46,9 @@
   stroke: none;
 }
 .steptrace__node .steptrace__ncirc {
-  fill: color-mix(in srgb, var(--_neutral) 20%, transparent);
-  stroke: var(--_neutral);
-  stroke-width: 1.6;
+  fill: var(--_graph-node-fill);
+  stroke: var(--_graph-node-stroke);
+  stroke-width: var(--_graph-node-stroke-width);
   transition:
     fill var(--_tween) ease,
     stroke var(--_tween) ease,
@@ -56,7 +56,7 @@
 }
 .steptrace__node .steptrace__id {
   fill: var(--_text);
-  font: 600 13px var(--_font-head);
+  font: var(--_graph-node-font);
 }
 /* search goal (bfs/dfs target): a static dashed halo around the node */
 .steptrace__ntarget {

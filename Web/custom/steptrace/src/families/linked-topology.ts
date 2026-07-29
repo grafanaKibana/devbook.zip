@@ -1,7 +1,338 @@
+import {
+  GRAPH_EDGE_ARROW_GAP_PX,
+  GRAPH_NODE_RADIUS_PX,
+  observeFixedSvgNodes,
+  trimGraphEdge,
+} from "../graph-node"
 import { el, makeLegend, statusEl, successMarker } from "../render"
-import type { StepTraceView, VisualFamily, WatchRow } from "../types"
+import type { MountHandle, StepTraceView, VisualFamily, WatchRow } from "../types"
+import { createIndexedBoard, createStructureShell, onEnter } from "./interactive-structure"
 
 let linkedTopologyViewId = 0
+export const LINKED_LIST_MAX_NODES = 6
+
+export interface LinkedListConfig {
+  values: number[]
+  variant: "singly" | "doubly"
+}
+
+interface AddressChainNode {
+  address: string
+  value: string
+}
+
+function linkedAddress(index: number, base = 0x1000) {
+  return `0x${(base + index * 0x20).toString(16).toUpperCase()}`
+}
+
+function createAddressChain(stage: HTMLElement, variant: "singly" | "doubly") {
+  const board = el("div", "steptrace__linked-list-board")
+  board.dataset.variant = variant
+  board.setAttribute("role", "list")
+  stage.append(board)
+
+  function paint(
+    nodes: readonly AddressChainNode[],
+    state: { appended?: string; moved?: string; relinked?: string } = {},
+  ) {
+    board.replaceChildren(
+      ...nodes.map((item, index) => {
+        const node = el("div", "steptrace__linked-list-node-card")
+        node.dataset.appended = item.address === state.appended ? "1" : "0"
+        node.dataset.moved = item.address === state.moved ? "1" : "0"
+        node.dataset.relinked = item.address === state.relinked ? "1" : "0"
+        node.setAttribute("role", "listitem")
+        const array = el("div", "steptrace__contiguous-array")
+        array.style.setProperty("--steptrace-capacity", "1")
+        const cell = el("div", "steptrace__contiguous-cell steptrace__linked-list-cell")
+        cell.dataset.empty = "0"
+        const valueField = el(
+          "span",
+          "steptrace__contiguous-value steptrace__linked-list-value-field",
+        )
+        const valueText = el("span", "steptrace__linked-list-value")
+        valueText.textContent = item.value
+        const ownAddress = el("span", "steptrace__linked-list-address")
+        ownAddress.textContent = item.address
+        valueField.append(valueText, ownAddress)
+        const nextAddress = nodes[index + 1]?.address ?? null
+        const nextField = el("span", "steptrace__linked-list-pointer")
+        nextField.dataset.pointer = "next"
+        nextField.textContent = `next ${nextAddress ?? "null"}`
+        if (variant === "doubly") {
+          const previousAddress = nodes[index - 1]?.address ?? null
+          const previousField = el("span", "steptrace__linked-list-pointer")
+          previousField.dataset.pointer = "prev"
+          previousField.textContent = `prev ${previousAddress ?? "null"}`
+          cell.append(valueField, previousField, nextField)
+        } else cell.append(valueField, nextField)
+        array.append(cell)
+        node.append(array)
+        if (nextAddress) {
+          const nextLink = el("span", "steptrace__linked-list-link")
+          nextLink.dataset.pointer = "next"
+          nextLink.setAttribute("aria-hidden", "true")
+          node.append(nextLink)
+        }
+        if (variant === "doubly" && index > 0) {
+          const previousLink = el("span", "steptrace__linked-list-link")
+          previousLink.dataset.pointer = "prev"
+          previousLink.setAttribute("aria-hidden", "true")
+          node.append(previousLink)
+        }
+        node.setAttribute(
+          "aria-label",
+          `${index === 0 ? "Head" : index === nodes.length - 1 ? "Tail" : `Node ${index}`}, address ${item.address}, value ${item.value}, ${
+            variant === "doubly" ? `prev ${nodes[index - 1]?.address ?? "null"}, ` : ""
+          }next ${nextAddress ?? "null"}`,
+        )
+        return node
+      }),
+    )
+  }
+  return { paint }
+}
+
+export function mountLinkedList(root: HTMLElement, config: LinkedListConfig): MountHandle {
+  const shell = createStructureShell(
+    root,
+    "linked-list",
+    `${config.variant} linked list`,
+    `Interactive ${config.variant} linked list`,
+    "linked-topology",
+    "steptrace__linked-list",
+  )
+  const initial = [...config.values]
+  const values = [...initial]
+  let appended: number | null = null
+  let relinked: number | null = null
+
+  const chain = createAddressChain(shell.stage, config.variant)
+  const input = shell.input("Value to append", "Value", 8)
+  input.type = "number"
+  input.step = "1"
+  const append = shell.button("Append", true)
+  const remove = shell.button("Remove tail")
+  const reset = shell.button("Reset")
+  shell.controls.append(input, append, remove, reset)
+
+  function paint(message = "") {
+    chain.paint(
+      values.map((value, index) => ({ value: String(value), address: linkedAddress(index) })),
+      {
+        appended: appended == null ? undefined : linkedAddress(appended),
+        relinked: relinked == null ? undefined : linkedAddress(relinked),
+      },
+    )
+    shell.setCounter(String(values.length), values.length === 1 ? " node" : " nodes")
+    append.disabled = values.length >= LINKED_LIST_MAX_NODES
+    input.disabled = values.length >= LINKED_LIST_MAX_NODES
+    remove.disabled = values.length <= 1
+    shell.status.textContent =
+      message || "Append a node to update the tail pointer, or remove the current tail."
+  }
+
+  function onAppend() {
+    const raw = input.value.trim()
+    const value = raw === "" ? Math.floor(Math.random() * 90) + 10 : Number(raw)
+    if (!Number.isFinite(value) || !Number.isInteger(value)) {
+      shell.status.textContent = "Value must be a finite integer."
+      return
+    }
+    if (values.length >= LINKED_LIST_MAX_NODES) return
+    const previousAddress = linkedAddress(values.length - 1)
+    const nextAddress = linkedAddress(values.length)
+    relinked = values.length - 1
+    values.push(value)
+    appended = values.length - 1
+    input.value = ""
+    paint(
+      config.variant === "doubly"
+        ? `Appended ${value} at ${nextAddress}; ${previousAddress}.next now stores ${nextAddress}, and ${nextAddress}.prev stores ${previousAddress}.`
+        : `Appended ${value} at ${nextAddress}; ${previousAddress}.next now stores ${nextAddress}.`,
+    )
+    input.focus?.()
+  }
+
+  function onRemove() {
+    if (values.length <= 1) return
+    const removed = values.pop()
+    relinked = values.length - 1
+    appended = null
+    paint(`Removed tail ${removed}; ${linkedAddress(values.length - 1)}.next is null.`)
+  }
+
+  function onReset() {
+    values.splice(0, values.length, ...initial)
+    appended = null
+    relinked = null
+    input.value = ""
+    paint("Reset the linked list to its initial nodes.")
+  }
+
+  shell.listen(append, "click", onAppend)
+  shell.listen(remove, "click", onRemove)
+  shell.listen(reset, "click", onReset)
+  onEnter(shell, input, onAppend)
+  paint()
+  return shell.finish()
+}
+
+interface LruEntry {
+  key: string
+  value: string
+  address: string
+}
+
+export function mountLruCache(root: HTMLElement): MountHandle {
+  const capacity = 4
+  const initial: LruEntry[] = [
+    { key: "A", value: "10", address: linkedAddress(0, 0x2000) },
+    { key: "B", value: "20", address: linkedAddress(1, 0x2000) },
+    { key: "C", value: "30", address: linkedAddress(2, 0x2000) },
+  ]
+  let entries = initial.map((entry) => ({ ...entry }))
+  let mapSlots: Array<string | null> = ["A", "B", "C", null]
+  let nextAddress = 3
+  let moved: string | undefined
+  let accessedKey: string | undefined
+  let changedMapSlot: number | undefined
+  const shell = createStructureShell(
+    root,
+    "lru-cache",
+    "LRU cache",
+    "Interactive capacity-four least recently used cache",
+    "linked-topology",
+    "steptrace__lru-cache",
+  )
+  const mapLabel = el("div", "steptrace__rail-label")
+  mapLabel.textContent = "Map · key → node address"
+  const mapWrap = el("div", "steptrace__lru-map")
+  const map = createIndexedBoard(mapWrap, capacity, "LRU key to node address index")
+  const chainLabel = el("div", "steptrace__rail-label")
+  chainLabel.textContent = "Recency · MRU → LRU"
+  const chainWrap = el("div", "steptrace__lru-chain")
+  const chain = createAddressChain(chainWrap, "doubly")
+  shell.stage.append(mapLabel, mapWrap, chainLabel, chainWrap)
+  const keyInput = shell.input("Cache key", "Key", 4)
+  const valueInput = shell.input("Cache value", "Value", 8)
+  valueInput.type = "number"
+  valueInput.step = "1"
+  const put = shell.button("Put", true)
+  const get = shell.button("Get")
+  const reset = shell.button("Reset")
+  shell.controls.append(keyInput, valueInput, put, get, reset)
+
+  const randomKey = () => String.fromCharCode(65 + Math.floor(Math.random() * 26))
+  const randomValue = () => String(Math.floor(Math.random() * 90) + 10)
+  const key = () => (keyInput.value.trim() || randomKey()).toUpperCase()
+
+  function paint(message = "") {
+    map.paint(
+      mapSlots.map((storedKey, index) => {
+        const entry = entries.find((candidate) => candidate.key === storedKey)
+        return {
+          value: entry ? `${entry.key} → ${entry.address}` : null,
+          active: Boolean(entry && accessedKey && entry.key === accessedKey),
+          changed: changedMapSlot != null && index === changedMapSlot,
+          ariaLabel: entry
+            ? `key ${entry.key} maps to node ${entry.address}`
+            : `map slot ${index}, empty`,
+        }
+      }),
+    )
+    chain.paint(
+      entries.map((entry) => ({
+        address: entry.address,
+        value: `${entry.key}:${entry.value}`,
+      })),
+      { moved },
+    )
+    shell.setCounter(String(entries.length), ` / ${capacity}`)
+    shell.status.textContent =
+      message || "Put or get a key. The left node is MRU; the right node is LRU."
+  }
+
+  function promote(index: number) {
+    const [entry] = entries.splice(index, 1)
+    entries.unshift(entry)
+    moved = entry.address
+    return entry
+  }
+
+  function onGet() {
+    const target = key()
+    const index = entries.findIndex((entry) => entry.key === target)
+    keyInput.value = ""
+    changedMapSlot = undefined
+    if (index < 0) {
+      moved = undefined
+      accessedKey = undefined
+      paint(`Get ${target}: miss. Cache state did not change.`)
+      return
+    }
+    const entry = promote(index)
+    accessedKey = target
+    paint(`Get ${target}: hit ${entry.value}; promoted ${entry.address} to MRU.`)
+  }
+
+  function onPut() {
+    const target = key()
+    const rawValue = valueInput.value.trim() || randomValue()
+    if (!/^[A-Z0-9]{1,4}$/.test(target) || !Number.isInteger(Number(rawValue))) {
+      shell.status.textContent = "Key must be 1–4 letters or digits; value must be an integer."
+      return
+    }
+    const index = entries.findIndex((entry) => entry.key === target)
+    let message: string
+    if (index >= 0) {
+      entries[index].value = rawValue
+      const entry = promote(index)
+      accessedKey = target
+      changedMapSlot = undefined
+      message = `Put ${target}:${rawValue}: updated ${entry.address} and promoted it to MRU.`
+    } else {
+      const evicted = entries.length === capacity ? entries.pop() : undefined
+      const slot = evicted
+        ? mapSlots.findIndex((storedKey) => storedKey === evicted.key)
+        : mapSlots.findIndex((storedKey) => storedKey == null)
+      const entry = {
+        key: target,
+        value: rawValue,
+        address: linkedAddress(nextAddress++, 0x2000),
+      }
+      entries.unshift(entry)
+      mapSlots[slot] = target
+      moved = entry.address
+      accessedKey = undefined
+      changedMapSlot = slot
+      message = evicted
+        ? `Put ${target}:${rawValue}: evicted LRU ${evicted.key} at ${evicted.address}; inserted ${entry.address} at MRU.`
+        : `Put ${target}:${rawValue}: inserted ${entry.address} at MRU.`
+    }
+    keyInput.value = ""
+    valueInput.value = ""
+    paint(message)
+  }
+
+  function onReset() {
+    entries = initial.map((entry) => ({ ...entry }))
+    mapSlots = ["A", "B", "C", null]
+    nextAddress = 3
+    moved = undefined
+    accessedKey = undefined
+    changedMapSlot = undefined
+    keyInput.value = ""
+    valueInput.value = ""
+    paint("Reset the LRU cache.")
+  }
+  shell.listen(put, "click", onPut)
+  shell.listen(get, "click", onGet)
+  shell.listen(reset, "click", onReset)
+  onEnter(shell, valueInput, onPut)
+  paint()
+  return shell.finish()
+}
 
 export interface LinkedTopologyNode {
   id: string
@@ -107,13 +438,14 @@ export class LinkedTopologyRecorder implements LinkedTopologyOperations {
   }
 }
 
-function edgePath(from: LinkedTopologyNode, to: LinkedTopologyNode) {
-  const dx = to.x - from.x
-  const dy = to.y - from.y
-  const length = Math.hypot(dx, dy) || 1
-  const ux = dx / length
-  const uy = dy / length
-  return `M ${from.x + ux * 4} ${from.y + uy * 4} L ${to.x - ux * 5} ${to.y - uy * 5}`
+function edgePath(
+  from: LinkedTopologyNode,
+  to: LinkedTopologyNode,
+  nodeRadius: number,
+  arrowGap: number,
+) {
+  const edge = trimGraphEdge(from, to, nodeRadius, nodeRadius + arrowGap)
+  return `M ${edge.x1} ${edge.y1} L ${edge.x2} ${edge.y2}`
 }
 
 function marker(label: string, role: LinkedPointer) {
@@ -140,43 +472,64 @@ export function makeLinkedTopologyView(
   const topology = document.createElementNS("http://www.w3.org/2000/svg", "svg")
   topology.setAttribute("class", "steptrace__linked-svg")
   topology.setAttribute("viewBox", "0 0 100 70")
-  topology.setAttribute("preserveAspectRatio", "none")
+  topology.setAttribute("preserveAspectRatio", "xMidYMid meet")
   topology.setAttribute("aria-hidden", "true")
 
-  const markerId = `steptrace-linked-arrow-${++linkedTopologyViewId}`
   const defs = document.createElementNS("http://www.w3.org/2000/svg", "defs")
-  const arrow = document.createElementNS("http://www.w3.org/2000/svg", "marker")
-  arrow.setAttribute("id", markerId)
-  arrow.setAttribute("viewBox", "0 0 10 10")
-  arrow.setAttribute("refX", "8")
-  arrow.setAttribute("refY", "5")
-  arrow.setAttribute("markerWidth", "5")
-  arrow.setAttribute("markerHeight", "5")
-  arrow.setAttribute("orient", "auto-start-reverse")
-  const arrowPath = document.createElementNS("http://www.w3.org/2000/svg", "path")
-  arrowPath.setAttribute("class", "steptrace__linked-arrow")
-  arrowPath.setAttribute("d", "M 0 0 L 10 5 L 0 10 z")
-  arrow.append(arrowPath)
-  defs.append(arrow)
+  const markerBaseId = `steptrace-linked-arrow-${++linkedTopologyViewId}`
+  const markerIds = new Map(
+    (["neutral", "cycle"] as const).map((role) => {
+      const id = `${markerBaseId}-${role}`
+      const arrow = document.createElementNS("http://www.w3.org/2000/svg", "marker")
+      arrow.setAttribute("id", id)
+      arrow.setAttribute("viewBox", "0 0 10 10")
+      arrow.setAttribute("refX", "8")
+      arrow.setAttribute("refY", "5")
+      arrow.setAttribute("markerWidth", "5")
+      arrow.setAttribute("markerHeight", "5")
+      arrow.setAttribute("orient", "auto-start-reverse")
+      const arrowPath = document.createElementNS("http://www.w3.org/2000/svg", "path")
+      arrowPath.setAttribute("class", "steptrace__linked-arrow")
+      arrowPath.setAttribute("data-role", role)
+      arrowPath.setAttribute("d", "M 0 0 L 10 5 L 0 10 z")
+      arrow.append(arrowPath)
+      defs.append(arrow)
+      return [role, id] as const
+    }),
+  )
   topology.append(defs)
 
+  const edgeElements: Array<{
+    path: SVGPathElement
+    from: LinkedTopologyNode
+    to: LinkedTopologyNode
+  }> = []
   for (const [fromId, toId] of Object.entries(first.next)) {
     const from = positions.get(fromId)!
     const to = positions.get(toId)!
     const path = document.createElementNS("http://www.w3.org/2000/svg", "path")
     path.setAttribute("class", "steptrace__linked-edge")
-    path.setAttribute("d", edgePath(from, to))
-    path.setAttribute("marker-end", `url(#${markerId})`)
-    if (first.cycle.includes(fromId) && first.cycle.includes(toId)) path.dataset.cycle = "1"
+    path.setAttribute("d", edgePath(from, to, GRAPH_NODE_RADIUS_PX, GRAPH_EDGE_ARROW_GAP_PX))
+    const cycle = first.cycle.includes(fromId) && first.cycle.includes(toId)
+    path.setAttribute("marker-end", `url(#${markerIds.get(cycle ? "cycle" : "neutral")!})`)
+    if (cycle) path.dataset.cycle = "1"
     topology.append(path)
+    edgeElements.push({ path, from, to })
   }
   canvas.append(topology)
+  const geometry = observeFixedSvgNodes(topology, [], (unitsPerCssPixel) => {
+    const radius = GRAPH_NODE_RADIUS_PX * unitsPerCssPixel
+    const arrowGap = GRAPH_EDGE_ARROW_GAP_PX * unitsPerCssPixel
+    for (const edge of edgeElements)
+      edge.path.setAttribute("d", edgePath(edge.from, edge.to, radius, arrowGap))
+  })
 
   const nodes = new Map(
     first.nodes.map((node) => {
+      const position = positions.get(node.id)!
       const item = el("div", "steptrace__linked-node")
-      item.style.setProperty("--_linked-x", String(node.x))
-      item.style.setProperty("--_linked-y", String(node.y))
+      item.style.setProperty("--_linked-x", String(position.x))
+      item.style.setProperty("--_linked-y", String(position.y))
       item.dataset.node = node.id
       item.textContent = node.id
       const result = el("span", "steptrace__linked-node-result")
@@ -288,6 +641,7 @@ export function makeLinkedTopologyView(
     summary(frame) {
       return `Cycle detected at ${frame.meeting}; entry located at ${frame.entry}.`
     },
+    destroy: geometry.destroy,
   }
 }
 

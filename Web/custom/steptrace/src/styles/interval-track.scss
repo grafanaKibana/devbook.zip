@@ -1,5 +1,5 @@
 .steptrace[data-visual-family="interval-track"] .steptrace__stage-col {
-  justify-content: center;
+  justify-content: stretch;
 }
 
 .steptrace .steptrace__interval-track {
@@ -139,6 +139,16 @@
   border-color: var(--_green);
   background: color-mix(in srgb, var(--_green) 18%, var(--_surface));
   opacity: 0;
+}
+
+.steptrace .steptrace__interval-band--output[data-join-start="1"] {
+  border-start-start-radius: 0;
+  border-end-start-radius: 0;
+}
+
+.steptrace .steptrace__interval-band--output[data-join-end="1"] {
+  border-start-end-radius: 0;
+  border-end-end-radius: 0;
 }
 
 .steptrace .steptrace__interval-band--current[data-visible="1"],

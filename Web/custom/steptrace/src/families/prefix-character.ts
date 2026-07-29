@@ -115,6 +115,20 @@ function layoutNodes(
   }))
 }
 
+function insetPoint(
+  from: Pick<PrefixCharacterNode, "x" | "y">,
+  toward: Pick<PrefixCharacterNode, "x" | "y">,
+  distance: number,
+) {
+  const dx = toward.x - from.x
+  const dy = toward.y - from.y
+  const length = Math.hypot(dx, dy) || 1
+  return {
+    x: from.x + (dx / length) * distance,
+    y: from.y + (dy / length) * distance,
+  }
+}
+
 export function prefixTopology(keys: readonly string[]) {
   const prefixes = new Set([""])
   for (const key of keys) {
@@ -371,15 +385,23 @@ export function makePrefixCharacterView(
     )
     if (edge.kind === "failure") {
       const bend = from.x <= to.x ? -24 : 24
+      const control = {
+        x: (from.x + to.x) / 2 + bend,
+        y: (from.y + to.y) / 2,
+      }
+      const start = insetPoint(from, control, 18)
+      const end = insetPoint(to, control, 18)
       element.setAttribute(
         "d",
-        `M ${from.x} ${from.y} Q ${(from.x + to.x) / 2 + bend} ${(from.y + to.y) / 2} ${to.x} ${to.y}`,
+        `M ${start.x} ${start.y} Q ${control.x} ${control.y} ${end.x} ${end.y}`,
       )
     } else {
-      element.setAttribute("x1", String(from.x))
-      element.setAttribute("y1", String(from.y + 18))
-      element.setAttribute("x2", String(to.x))
-      element.setAttribute("y2", String(to.y - 18))
+      const start = insetPoint(from, to, 18)
+      const end = insetPoint(to, from, 18)
+      element.setAttribute("x1", String(start.x))
+      element.setAttribute("y1", String(start.y))
+      element.setAttribute("x2", String(end.x))
+      element.setAttribute("y2", String(end.y))
     }
     element.setAttribute("aria-hidden", "true")
     element.setAttribute("focusable", "false")
@@ -409,6 +431,7 @@ export function makePrefixCharacterView(
     circle.setAttribute("r", "18")
     label.setAttribute("text-anchor", "middle")
     label.setAttribute("dominant-baseline", "central")
+    label.setAttribute("dy", "0.04em")
     label.textContent = node.label
     terminal.setAttribute("x", "10")
     terminal.setAttribute("y", "-22")

@@ -10,7 +10,7 @@ status: Ready to Repeat
 publish: true
 ---
 
-Every hash table maps a key to a bucket with `hash(key) mod capacity`, and the pigeonhole principle guarantees that two distinct keys eventually land in the same bucket. What a table does at that moment — the **collision-resolution strategy** — is the single decision that sets its memory layout, its delete semantics, its cache behaviour, and how it degrades under load. The [[Home/Computer Science/Data Structures/Hash-based Structures/HashMap|HashMap]] note covers .NET's `Dictionary` as one concrete table; this note is about the three families it could have been built on and the terminology that makes them hard to talk about.
+A hash table mixes a key into a hash, then derives a **home bucket** or slot. Common reductions are `hash mod m` for `m` buckets and `hash & (m - 1)` when `m` is a power of two and the hash bits have been mixed. A collision occurs when distinct keys derive the same home bucket. The pigeonhole principle guarantees one only after more distinct keys are mapped than there are home buckets; before that, collisions are possible but not inevitable. What the table does next — chain or probe — sets its delete semantics and how it degrades under load. The [[Home/Computer Science/Data Structures/Hash-based Structures/HashMap|HashMap]] note covers .NET's `Dictionary` as one concrete table.
 
 The naming is genuinely confusing because two independent axes both use the words "open" and "closed", meaning opposite things:
 
@@ -18,24 +18,25 @@ The naming is genuinely confusing because two independent axes both use the word
 | --- | --- | --- | --- |
 | **Open hashing** | Separate chaining, **closed addressing** | Outside the array, in per-bucket lists | Fixed — one bucket, never moves |
 | **Closed hashing** | **Open addressing** | Inside the array itself | Open — may end up in a slot other than its home |
-| **Bucketed hashing** | Bucket addressing | Inside fixed-size blocks in the array | Fixed to a bucket, open within it |
+| **Bucket/group layout** | Bucket addressing | Fixed-size blocks layered over chaining or probing | Depends on the overflow strategy |
 
-Read it as two questions. *Is the storage open-ended or closed?* Chaining's lists grow without bound (open hashing); open addressing lives in a closed, fixed array (closed hashing). *Is a key's final address fixed or open?* Chaining pins each key to one bucket (closed addressing); open addressing lets a key drift to another slot (open addressing). "Open hashing" and "open addressing" are opposite techniques — the word "open" refers to storage in one and to the address in the other.
+Read it as two questions. *Is the storage open-ended or closed?* Chaining's lists grow beyond the bucket array (open hashing); open addressing lives in a closed array (closed hashing). *Is a key's final address fixed or open?* Chaining pins each key to one bucket (closed addressing); open addressing lets a key drift to another slot. Bucket size is a separate layout choice: either strategy can process several adjacent slots as one bucket or group.
 
-**Core split:** collisions land two keys in one home bucket → chain them outside the array (open hashing), probe to another in-array slot (closed hashing), or fit them in a fixed-size in-array block (bucketed) → the choice sets load-factor limits, delete cost, and locality.
+**Core split:** collisions land two keys in one home bucket → chain them outside the array or probe to another in-array slot. A bucket/group layout changes how many candidates one access examines, then delegates overflow to chaining or probing. The third StepTrace tab demonstrates bucketed probing.
 
-> [!NOTE] Visualization pending
-> Planned StepTrace: a hash-table card inserting a run of colliding keys three ways side by side — a chain growing off one bucket, a probe sequence walking to the next free slot, and a fixed bucket filling then overflowing — with the load factor annotated as each fills. No matching renderer exists in `engine.js` yet.
+```steptrace
+{"tabs":[{"name":"Closed Addressing","description":"Separate chaining (open hashing): each bucket points to its own external key/value chain.","algorithm":"hash-map","variant":"closed-addressing"},{"name":"Open Addressing","description":"Linear probing scans the fixed table and preserves tombstones after removal.","algorithm":"hash-map","variant":"open-addressing"},{"name":"Bucket Hashing","description":"Four three-cell buckets use bucket-by-bucket linear overflow with wraparound.","algorithm":"hash-map","variant":"buckets"}]}
+```
 
 # Open Hashing — Separate Chaining (Closed Addressing)
 
 Each array slot holds a pointer to a secondary container — classically a linked list — of every entry that hashed there. A collision appends to that bucket's list; a lookup hashes to the bucket and scans its list with an equality check. The array slot is a fixed *address* for the key (hence "closed addressing"), but the storage behind it is open-ended (hence "open hashing").
 
-- **Load factor** `α = count / capacity` can exceed 1; the average successful lookup scans `1 + α/2` entries, so performance degrades linearly and gracefully rather than falling off a cliff. Java's `HashMap` upgrades a bucket from a list to a balanced tree once it passes 8 entries, capping a pathological bucket at `O(log k)` instead of `O(k)`.
-- **Delete is trivial** — unlink the node from its bucket's list. No bookkeeping, no tombstones.
-- **Cost is locality.** A classic linked chain is a pointer chase across the heap, one cache miss per hop. .NET's `Dictionary` avoids this by chaining through indices into one contiguous `entries[]` array rather than heap nodes — closed-addressing semantics with far better locality.
+- **Load factor** `α = count / bucketCount` can exceed 1. Under simple uniform hashing, a successful lookup in an unordered chain examines about `1 + α/2` entries, so cost rises linearly rather than approaching a full-table cliff. Java's `HashMap` may treeify when an insertion grows a bin past its threshold of 8 entries, but only when the table capacity is at least 64; below that it resizes instead. Its tree gives logarithmic lookup when equal-hash keys have a usable `Comparable` order, while non-comparable equal-hash keys may still require examining both subtrees.
+- **Delete is direct** — unlink the node and update normal table metadata. No tombstone or probe-chain repair is required.
+- **Cost is locality.** A classic linked chain is a pointer chase across the heap and can incur a cache miss per hop. .NET's `Dictionary` reduces this cost by chaining through indices into one contiguous `entries[]` array rather than heap nodes.
 
-Chaining is the forgiving default: it tolerates a mediocre hash and a load factor above 1, and it never has to reserve empty slots. The price is a pointer (or index) per entry and, in the naive form, poor cache behaviour.
+Chaining tolerates moderate hash skew and a load factor above 1 without reserving empty slots; a pathological hash can still collapse one bin to `O(n)`. The price is a pointer or index per entry and, in the naive form, poor cache behaviour.
 
 # Closed Hashing — Open Addressing (Probing)
 
@@ -43,40 +44,40 @@ Every entry lives directly in the bucket array; there are no external lists. On 
 
 The probe sequence is the whole design:
 
-- **Linear probing** — try `h, h+1, h+2, …`. Best locality (sequential memory), but collisions pile into contiguous runs (**primary clustering**) that lengthen every probe touching the run.
+- **Linear probing** — try `h, h+1, h+2, …`. It usually has the strongest spatial locality of these probe sequences, but collisions pile into contiguous runs (**primary clustering**) that lengthen every probe touching the run.
 - **Quadratic probing** — try `h+1², h+2², h+3², …`. Breaks up primary clustering; keys with the *same* home slot still share a sequence (**secondary clustering**), and it can fail to find a free slot unless capacity and load are constrained.
-- **Double hashing** — step by a second hash `h₂(key)`. Different keys get different strides, eliminating both clustering types at the cost of a second hash computation and worse locality than linear.
+- **Double hashing** — step by a second hash `h₂(key)`. The stride must be non-zero and coprime to the table capacity so the sequence can visit every slot. Key-specific strides mitigate primary and secondary clustering; they do not eliminate clustering caused by correlated or poor hashes. The cost is a second hash computation and worse locality than linear probing.
 
-- **Load factor must stay below 1** — the array *is* the storage, so it needs empty slots to terminate probes. Cost explodes as `α → 1`: linear probing's average successful search is `½(1 + 1/(1−α))`, which is ~1.5 probes at `α = 0.5` but ~5.5 at `α = 0.9`. Tables resize well before full — SwissTable at `α ≈ 0.875`, older tables at `0.7`.
-- **Delete cannot just empty a slot** — that would truncate a probe chain and strand later entries. The slot gets a **tombstone** that lookups probe past and inserts may reuse; tombstones accumulate and only a rehash reclaims them. (Linear probing alone admits backward-shift deletion, which avoids tombstones by moving the trailing run back.)
+- **Load factor must stay below 1** — the array *is* the storage, so a terminating empty slot must remain reachable. For classic linear probing, assume a large table, uniformly distributed independent home slots, and no tombstones. Then an average successful lookup takes about `½(1 + 1/(1−α))` probes, while a miss or insertion takes about `½(1 + 1/(1−α)²)`. At `α = 0.9`, those are roughly 5.5 and 50.5 probes respectively. Real costs depend on hash quality, deletion history, and resize policy.
+- **Deletion must preserve probe reachability.** Blindly clearing a slot can create a terminating empty before keys displaced past it. A tombstone is one strategy: lookups continue through it and inserts may reuse it, with periodic cleanup or rehashing to control accumulation. Linear probing can instead backward-shift entries or rebuild the affected local cluster; other probe schemes need a repair rule that preserves their sequence.
 
-Open addressing wins on speed when the load factor is controlled: one contiguous array, no per-entry pointer, and cache-friendly probing. It demands a good hash and a disciplined resize policy, and it pays for deletes.
+Open addressing often lowers pointer and cache overhead when the hash is good and the load factor is controlled. It is not overhead-free: the table reserves empty slack and needs control metadata or sentinel states to distinguish empty, occupied, and sometimes deleted slots.
 
-# Bucketed Hashing (Closed Addressing, Fixed Blocks)
+# Bucket/Group Layout — Layered over Chaining or Probing
 
-A hybrid: the array holds fixed-size **buckets**, each a small block of `B` slots, and the home bucket is `hash(key) mod bucketCount`. A key fills the first free slot *within* its bucket; only when the bucket is full does an overflow strategy kick in — an overflow chain, or probing to the next bucket. It is closed addressing at bucket granularity with open placement inside the bucket.
+The array can group `B` adjacent slots into a fixed-size **bucket**. The home reduction selects a bucket, but the full-bucket rule still comes from a collision-resolution strategy: follow an overflow chain/page, or probe another bucket. The StepTrace example uses the latter, so it is bucketed open addressing rather than a third family.
 
-- **The bucket is the unit of locality.** Sized to a cache line (in-memory) or a disk page (on-disk), one memory or I/O access brings in the whole bucket, so scanning its `B` slots is effectively free after the first access. This is why extendible and linear hashing in databases are bucket-based — a bucket is a page — and why modern SIMD tables (Google's SwissTable/`absl::flat_hash_map`, Facebook's F14) group slots and scan a bucket's metadata with one vector instruction.
-- **Load factor is per bucket.** A bucket absorbs up to `B` collisions before overflowing, so a table of bucket size 8 tolerates local hot spots that would trigger long probe runs in a flat open-addressed table.
-- **Delete** stays within the bucket (clear the slot, optionally compact); overflow handling reintroduces chaining or probing costs only for the buckets that actually overflowed.
+- **The bucket is the unit of locality.** A cache-line group or disk-page bucket brings several candidates into one access. SwissTable is open addressing: it scans one group of control bytes for matching 7-bit hash fragments, checks only those candidate keys, and continues its probe sequence with another group when no key or true empty control byte was found. A deleted control byte does not terminate that search; an empty one does.
+- **Global load factor and local occupancy answer different questions.** Global `α = count / (bucketCount × B)` controls overall free space. A particular bucket's `occupied / B` measures a local hot spot. A full home bucket can overflow while the table still has low global `α`.
+- **Overflow and deletion inherit the underlying strategy.** Chained overflow unlinks an entry from its chain or page. Probed overflow cannot blindly clear a slot that earlier probes depend on; it uses tombstones, backward shifting, or a local/full rebuild as its probe scheme permits.
 
-Bucketing is the design when memory or disk locality dominates — you amortise one expensive access over `B` entries — and it degrades to whatever overflow strategy you picked once buckets fill.
+Use bucket/group layout when memory or disk locality dominates; its tail behaviour remains the behaviour of the chosen chain or probe scheme.
 
 # Complexity
 
-All three are `O(1)` average under a bounded load factor. List-based chaining, open addressing, and bucket overflow can degrade to `O(n)` per operation; a chaining implementation that treeifies a long bucket reduces that bucket's lookup to `O(log n)` for comparable keys. The differences that matter are the constants and failure modes.
+Under the hashing assumptions stated above and a controlled global load factor, chaining and open addressing are `O(1)` on average. Either can degrade to `O(n)`; grouping changes the number of candidates examined per memory or I/O access, not that asymptotic bound.
 
-| Strategy | Avg lookup | Worst lookup | Load factor | Delete | Locality | Extra memory |
+| Strategy/layout | Avg lookup | Worst lookup | Load factor | Delete | Locality | Extra memory |
 | --- | --- | --- | --- | --- | --- | --- |
-| Open hashing (chaining) | `O(1 + α)` | `O(n)` (or `O(log n)` treeified) | can exceed 1 | unlink node | poor (heap chase) / good (index chain) | pointer/index per entry |
-| Closed hashing (open addressing) | `O(1/(1−α))` | `O(n)` | must be `< 1` | tombstone or backshift | excellent (one array) | none per entry; tombstones transient |
-| Bucketed | `O(1 + overflow)` | `O(n)` | per bucket, high tolerance | clear slot in bucket | best (bucket = cache line/page) | fixed block, some slack slots |
+| Open hashing (chaining) | `O(1 + α)` | `O(n)`; treeified comparable-key bin `O(log k)` | may exceed 1 | unlink node | poor (heap chase) / good (index chain) | pointer/index per entry |
+| Closed hashing (open addressing) | Linear probing: success `O(1/(1−α))`, miss/insert `O(1/(1−α)²)` | `O(n)` | must be `< 1` | tombstone or probe-preserving repair | contiguous; strongest with linear probing | empty slack plus control metadata or sentinels |
+| Bucket/group layout | Resolution-dependent; scans `B` slots/metadata together | resolution-dependent | global `α`; local occupancy per bucket | follows chain/probe strategy | cache line, SIMD group, or page | block slack plus metadata or overflow links |
 
-List-based chaining, open addressing, and bucket overflow reach `O(n)` when a hash collapses keys into one bucket; a treeified chain instead reaches `O(log n)` lookup for comparable keys. The [[Home/Computer Science/Data Structures/Hash-based Structures/HashMap|HashMap]] hash-flooding pitfall still applies across the family regardless of resolution strategy. What differs is the *average* under load: chaining degrades linearly in `α` and survives `α > 1`; open addressing degrades hyperbolically and must resize before the array fills; bucketing pushes the cliff back by a factor of the bucket size and keeps the work in one cache line.
+The [[Home/Computer Science/Data Structures/Hash-based Structures/HashMap|HashMap]] hash-flooding pitfall applies to both resolution families. Chaining degrades roughly linearly in `α` and survives `α > 1`; probing must resize before the array fills, with misses and inserts deteriorating faster than successful lookups. Grouping improves locality but inherits whichever failure mode handles overflow.
 
 # Reference Drawer
 
-> [!ABSTRACT]- The three strategies on a collision at slot 1
+> [!ABSTRACT]- Two resolution strategies and one bucket layout at slot 1
 >
 > ```mermaid
 > flowchart TD
@@ -89,23 +90,23 @@ List-based chaining, open addressing, and bucket overflow reach `O(n)` when a ha
 >     P1["slot 1: key A"]
 >     P2["slot 2: key B (probed +1)"]
 >   end
->   subgraph bucketed["Bucketed — block of 4"]
->     B1["bucket 1 | A | B | _ | _ |"]
+>   subgraph bucketed["Bucketed probing — block of 3"]
+>     B1["bucket 1 | A | B | _ |"]
 >   end
 > ```
-> Keys A and B both hash to slot 1. Chaining links B off slot 1's list; probing bumps B to slot 2; bucketing drops both into bucket 1's block.
+> Keys A and B both derive home slot 1. Chaining links B off slot 1's list; probing advances B to slot 2; bucketed probing tests both positions in bucket 1 before it advances to another bucket.
 
 # Comparison
 
-The strategies answer the same question — where does a colliding key go — with different trade-offs.
+Chaining and probing decide where a colliding key goes. Bucket/group layout decides how many candidates each access examines and still needs one of those overflow rules.
 
 | Pick | When | Because |
 | --- | --- | --- |
 | Open hashing (chaining) | Load factor is hard to bound, hash quality is uncertain, deletes are frequent | Survives `α > 1`, degrades gracefully, delete is a pointer unlink |
-| Closed hashing (open addressing) | Load factor is controlled, the hash is good, memory and speed matter | No per-entry pointer, contiguous array, best raw speed under moderate load |
-| Bucketed | Locality dominates — on-disk pages or cache-line SIMD scans | One access covers `B` entries; buckets absorb local hot spots |
+| Closed hashing (open addressing) | Load factor is controlled, the hash is good, memory and speed matter | Often lowers link overhead and improves locality under moderate load |
+| Bucket/group layout plus a resolution strategy | Locality dominates — on-disk pages or cache-line SIMD scans | One access covers `B` candidates; overflow still follows a chain or probe sequence |
 
-Chaining is the safe default and the one to teach first, which is why closed-addressing variants back most standard-library maps' conceptual model (.NET's `Dictionary` is index-based chaining). Open addressing is the performance choice once you can guarantee a good hash and a bounded load factor — the regime where its locality and pointer-free layout dominate, accepting tombstoned deletes. Bucketing is the specialisation for when a single memory or disk access is the expensive operation: database indexes make a bucket a page, and cache-optimised libraries make it a SIMD word. In practice the fastest modern in-memory tables combine them — bucketed open addressing — taking locality from buckets and pointer-free storage from open addressing.
+Chaining is the forgiving default when load is uncertain or deletes are frequent. Open addressing often reduces per-entry overhead when a good hash, spare capacity, and a probe-preserving delete policy are acceptable. Add bucket/group layout when the access unit is the bottleneck: a disk page or SIMD-sized control group.
 
 # Questions
 
@@ -115,15 +116,16 @@ Chaining is the safe default and the one to teach first, which is why closed-add
 > [!QUESTION]- Why can a load factor exceed 1 with chaining but not with open addressing?
 > Chaining stores entries in lists outside the array, so the array can hold more entries than it has slots — `α > 1` just means the average chain is longer than one. Open addressing stores every entry *in* the array, so it cannot hold more entries than slots; it needs empty slots to terminate probe sequences, and its cost blows up as `α → 1`.
 
-> [!QUESTION]- Why does deleting from an open-addressed table need a tombstone?
-> A lookup follows a probe chain until it hits an empty slot, which it reads as "not present". If a delete simply emptied a slot in the middle of a chain, every key that had probed past it would become unreachable — the empty slot would end the search early. A tombstone marks the slot as "deleted, keep probing", preserving the chain; a later rehash clears the accumulated tombstones.
+> [!QUESTION]- Why can an open-addressed table not always clear a deleted slot, and when can it avoid tombstones?
+> A true empty slot terminates lookup, so clearing a slot inside a probe chain can strand keys displaced past it. A tombstone preserves reachability by saying "deleted, keep probing", but it is only one strategy. Linear probing can backward-shift entries or rebuild the affected cluster; other schemes may repair or rehash if they can preserve every key's probe sequence.
 
 > [!QUESTION]- What makes bucketed hashing fast for on-disk and SIMD tables?
-> The bucket is sized to the expensive access unit — a disk page or a cache line — so one I/O or memory fetch brings in `B` slots at once and scanning them is nearly free. A bucket also absorbs up to `B` collisions before any overflow logic runs, so local hot spots that would cause long probe runs in a flat table stay contained in one block.
+> The bucket or group matches the expensive access unit, so one I/O or vector metadata scan examines `B` candidates. It is a layout optimisation, not a complete collision strategy: a full home bucket still overflows through chaining or probing.
 
 # References
 
 - [Hash table (Wikipedia)](https://en.wikipedia.org/wiki/Hash_table) — the separate-chaining vs open-addressing split, the open/closed terminology clash, and load-factor analysis for each.
 - [Open addressing (Wikipedia)](https://en.wikipedia.org/wiki/Open_addressing) — linear, quadratic, and double-hashing probe sequences with their clustering behaviour and the tombstone deletion problem.
 - [Swiss Tables design notes (Abseil)](https://abseil.io/about/design/swisstables) — a bucketed open-addressing table that scans control bytes with SIMD, showing how buckets and open addressing combine in a modern high-performance map.
+- [OpenJDK `HashMap` source](https://github.com/openjdk/jdk/blob/master/src/java.base/share/classes/java/util/HashMap.java) — the treeification threshold, minimum table capacity, and comparable-key tree-search path.
 - [The Art of Computer Programming, Vol. 3, §6.4](https://www-cs-faculty.stanford.edu/~knuth/taocp.html) — Knuth's original analysis of chaining, linear probing, and their expected probe counts as a function of load factor.

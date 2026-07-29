@@ -7,14 +7,14 @@
   gap: 0.6rem;
 }
 
-.steptrace .steptrace__tabs {
+:is(.steptrace, .complexity) .steptrace__tabs {
   display: flex;
   flex-wrap: wrap;
   gap: 0.25rem;
   align-items: center;
 }
 
-.steptrace .steptrace__tab {
+:is(.steptrace, .complexity) .steptrace__tab {
   min-height: 2rem;
   padding: 0.35rem 0.58rem;
   border: 1px solid var(--_hair);
@@ -29,17 +29,17 @@
     transform var(--_tween) ease;
 }
 
-.steptrace .steptrace__tab:hover {
+:is(.steptrace, .complexity) .steptrace__tab:hover {
   background: var(--_hover);
   color: var(--_text);
 }
 
-.steptrace .steptrace__tab:focus-visible {
+:is(.steptrace, .complexity) .steptrace__tab:focus-visible {
   outline-offset: 2px;
 }
 
-.steptrace .steptrace__tab--selected,
-.steptrace .steptrace__tab[aria-selected="true"] {
+:is(.steptrace, .complexity) .steptrace__tab--selected,
+:is(.steptrace, .complexity) .steptrace__tab[aria-selected="true"] {
   background: color-mix(in srgb, var(--_accent) 10%, var(--_surface));
   color: var(--_text);
   border-color: color-mix(in srgb, var(--_accent) 55%, var(--_border));
@@ -61,7 +61,7 @@
 }
 
 @media (max-width: 600px) {
-  .steptrace .steptrace__tab {
+  :is(.steptrace, .complexity) .steptrace__tab {
     min-height: 2.75rem;
   }
 }

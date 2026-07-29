@@ -7,12 +7,16 @@ import { bfs } from "./bfs"
 import { bellmanFord } from "./bellman-ford"
 import { binarySearchOnAnswer } from "./binary-search-on-answer"
 import { binarySearch } from "./binary-search"
+import { bloomFilter } from "./bloom-filter"
+import { binomialQueue } from "./binomial-queue"
 import { bidirectionalSearch } from "./bidirectional-search"
 import { boyerMoore } from "./boyer-moore"
 import { boruvka } from "./boruvka"
 import { branchAndBound } from "./branch-and-bound"
 import { bubbleSort } from "./bubble-sort"
 import { bucketSort } from "./bucket-sort"
+import { arrays } from "./arrays"
+import { circularBuffer } from "./circular-buffer"
 import { combSort } from "./comb-sort"
 import { connectedComponents } from "./connected-components"
 import { countingSort } from "./counting-sort"
@@ -20,14 +24,22 @@ import { cyclicSort } from "./cyclic-sort"
 import { dfs } from "./dfs"
 import { dijkstra } from "./dijkstra"
 import { divideAndConquer } from "./divide-and-conquer"
+import { deque } from "./deque"
 import { dynamicProgrammingAlgorithms } from "./dynamic-programming"
+import { dynamicArray } from "./dynamic-array"
 import { exponentialSearch } from "./exponential-search"
 import { interpolationSearch } from "./interpolation-search"
 import { floydWarshall } from "./floyd-warshall"
 import { fastAndSlowPointers } from "./fast-and-slow-pointers"
+import { fenwickTree } from "./fenwick-tree"
+import { fibonacciHeap } from "./fibonacci-heap"
 import { greedyBestFirstSearch } from "./greedy-best-first-search"
+import { graphStructure } from "./graph"
+import { heap } from "./heap"
 import { heapSort } from "./heap-sort"
 import { hamiltonianCycle } from "./hamiltonian-cycle"
+import { hashMap } from "./hash-map"
+import { hashSet } from "./hash-set"
 import { insertionSort } from "./insertion-sort"
 import { introsort } from "./introsort"
 import { jumpSearch } from "./jump-search"
@@ -36,6 +48,9 @@ import { kmp } from "./kmp"
 import { kruskal } from "./kruskal"
 import { lcs } from "./lcs"
 import { linearSearch } from "./linear-search"
+import { linkedList } from "./linked-list"
+import { lruCache } from "./lru-cache"
+import { leftistHeap } from "./leftist-heap"
 import { mergeSort } from "./merge-sort"
 import { mergeSortTree } from "./merge-sort-tree"
 import { mergeIntervals } from "./merge-intervals"
@@ -50,8 +65,12 @@ import { quickSort } from "./quick-sort"
 import { radixSort } from "./radix-sort"
 import { rabinKarp } from "./rabin-karp"
 import { selectionSort } from "./selection-sort"
+import { segmentTree } from "./segment-tree"
 import { shellSort } from "./shell-sort"
 import { slidingWindow } from "./sliding-window"
+import { span } from "./span"
+import { stack } from "./stack"
+import { skewHeap } from "./skew-heap"
 import { topologicalSort } from "./topological-sort"
 import { topKElements } from "./top-k-elements"
 import { stronglyConnectedComponents } from "./strongly-connected-components"
@@ -116,7 +135,6 @@ export const builtInAlgorithms = [
   ...dynamicProgrammingAlgorithms,
   floydWarshall,
   fastAndSlowPointers,
-  unionFind,
   kernighanPopcount,
   nQueens,
   memoization,
@@ -128,4 +146,26 @@ export const builtInAlgorithms = [
   ternarySearchTree,
 ] satisfies readonly BuiltInAlgorithm[]
 
-export const interactiveStructures = [queue] as const
+export const interactiveStructures = [
+  arrays,
+  binomialQueue,
+  bloomFilter,
+  circularBuffer,
+  deque,
+  dynamicArray,
+  fenwickTree,
+  fibonacciHeap,
+  graphStructure,
+  heap,
+  hashMap,
+  hashSet,
+  leftistHeap,
+  linkedList,
+  lruCache,
+  queue,
+  segmentTree,
+  skewHeap,
+  span,
+  stack,
+  unionFind,
+] as const
