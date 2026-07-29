@@ -1,10 +1,6 @@
 import type { Element, ElementContent, RootContent, Text } from "hast"
 
-import {
-  COMPLEXITY_CHART,
-  COMPLEXITY_FILTERS,
-  type ComplexityViewModel,
-} from "./model"
+import { COMPLEXITY_CHART, COMPLEXITY_FILTERS, type ComplexityViewModel } from "./model"
 
 const text = (value: string): Text => ({ type: "text", value })
 
@@ -36,10 +32,21 @@ export function renderComplexityHast(view: ComplexityViewModel): RootContent {
       y1: tick.y,
       y2: tick.y,
     }),
-    element("text", { className: ["complexity__tick"], x: left - 8, y: tick.y + 4 }, [
+    element(
+      "text",
+      {
+        className: ["complexity__tick"],
+        x: left + 8,
+        y: tick.y + (tick.value === 0 ? -6 : 4),
+      },
+      [text(tick.label)],
+    ),
+  ])
+  const xTicks = view.xTicks.map((tick) =>
+    element("text", { className: ["complexity__x-tick"], x: tick.x, y: axisY + 18 }, [
       text(tick.label),
     ]),
-  ])
+  )
   const areas = view.paths
     .filter((path) => !path.dimmed)
     .map((path) =>
@@ -73,10 +80,7 @@ export function renderComplexityHast(view: ComplexityViewModel): RootContent {
     element(
       "text",
       {
-        className: [
-          "complexity__endpoint-label",
-          label.dimmed ? "is-subtle" : "is-active",
-        ],
+        className: ["complexity__endpoint-label", label.dimmed ? "is-subtle" : "is-active"],
         x: labelX,
         y: label.y + 4,
         "data-curve-id": label.curveId,
@@ -130,9 +134,10 @@ export function renderComplexityHast(view: ComplexityViewModel): RootContent {
     element(
       "button",
       {
+        id: `${view.figureId}-tab-${filter.id}`,
         type: "button",
         role: "tab",
-        className: ["complexity__tab"],
+        className: ["steptrace__tab", "complexity__tab"],
         "data-filter": filter.id,
         ariaSelected: filter.id === "all" ? "true" : "false",
         ariaControls: panelId,
@@ -153,15 +158,13 @@ export function renderComplexityHast(view: ComplexityViewModel): RootContent {
       "data-active-filter": "all",
     },
     [
-      element(
-        "figcaption",
-        { id: `${view.figureId}-title`, className: ["complexity__title"] },
-        [text(view.title)],
-      ),
+      element("figcaption", { id: `${view.figureId}-title`, className: ["complexity__title"] }, [
+        text(view.title),
+      ]),
       element(
         "div",
         {
-          className: ["complexity__tabs"],
+          className: ["steptrace__tabs", "complexity__tabs"],
           role: "tablist",
           ariaLabel: "Complexity cases",
         },
@@ -173,7 +176,7 @@ export function renderComplexityHast(view: ComplexityViewModel): RootContent {
           id: panelId,
           className: ["complexity__panel"],
           role: "tabpanel",
-          ariaLabelledBy: `${view.figureId}-title`,
+          ariaLabelledBy: `${view.figureId}-tab-all`,
         },
         [
           element("div", { className: ["complexity__plot-wrap"] }, [
@@ -206,6 +209,7 @@ export function renderComplexityHast(view: ComplexityViewModel): RootContent {
                   y1: axisY,
                   y2: axisY,
                 }),
+                ...xTicks,
                 element("g", { clipPath: `url(#${clipId})` }, [
                   element("g", { className: ["complexity__areas"] }, areas),
                   element("g", { className: ["complexity__curves"] }, paths),

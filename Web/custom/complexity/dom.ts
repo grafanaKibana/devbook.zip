@@ -1,9 +1,5 @@
 import { mountComplexityFigure } from "./interactions"
-import {
-  COMPLEXITY_CHART,
-  COMPLEXITY_FILTERS,
-  type ComplexityViewModel,
-} from "./model"
+import { COMPLEXITY_CHART, COMPLEXITY_FILTERS, type ComplexityViewModel } from "./model"
 
 const SVG_NS = "http://www.w3.org/2000/svg"
 
@@ -48,20 +44,20 @@ export function renderComplexityDom(
   title.className = "complexity__title"
 
   const tabs = document.createElement("div")
-  tabs.className = "complexity__tabs"
+  tabs.className = "steptrace__tabs complexity__tabs"
   tabs.setAttribute("role", "tablist")
   tabs.setAttribute("aria-label", "Complexity cases")
   for (const filter of COMPLEXITY_FILTERS) {
     const tab = appendText(document, tabs, "button", filter.label)
+    tab.id = `${view.figureId}-tab-${filter.id}`
     tab.type = "button"
-    tab.className = "complexity__tab"
+    tab.className = "steptrace__tab complexity__tab"
     tab.dataset.filter = filter.id
     tab.setAttribute("role", "tab")
     tab.setAttribute("aria-controls", panelId)
     tab.setAttribute("aria-selected", filter.id === "all" ? "true" : "false")
     tab.tabIndex = filter.id === "all" ? 0 : -1
-    tab.disabled =
-      filter.id !== "all" && !view.availableCategories.includes(filter.id)
+    tab.disabled = filter.id !== "all" && !view.availableCategories.includes(filter.id)
   }
   figure.append(tabs)
 
@@ -69,7 +65,7 @@ export function renderComplexityDom(
   panel.id = panelId
   panel.className = "complexity__panel"
   panel.setAttribute("role", "tabpanel")
-  panel.setAttribute("aria-labelledby", title.id)
+  panel.setAttribute("aria-labelledby", `${view.figureId}-tab-all`)
   const plotWrap = document.createElement("div")
   plotWrap.className = "complexity__plot-wrap"
   const svg = svgElement(document, "svg", {
@@ -125,8 +121,8 @@ export function renderComplexityDom(
     )
     const label = svgElement(document, "text", {
       class: "complexity__tick",
-      x: left - 8,
-      y: tick.y + 4,
+      x: left + 8,
+      y: tick.y + (tick.value === 0 ? -6 : 4),
     })
     label.textContent = tick.label
     svg.append(label)
@@ -140,6 +136,15 @@ export function renderComplexityDom(
       y2: axisY,
     }),
   )
+  for (const tick of view.xTicks) {
+    const label = svgElement(document, "text", {
+      class: "complexity__x-tick",
+      x: tick.x,
+      y: axisY + 18,
+    })
+    label.textContent = tick.label
+    svg.append(label)
+  }
   const clipped = svgElement(document, "g", { "clip-path": `url(#${clipId})` })
   const areas = svgElement(document, "g", { class: "complexity__areas" })
   const curves = svgElement(document, "g", { class: "complexity__curves" })
@@ -225,9 +230,7 @@ export function renderComplexityDom(
   root.replaceChildren(figure)
 
   const interaction =
-    typeof figure.querySelectorAll === "function"
-      ? mountComplexityFigure(figure)
-      : { destroy() {} }
+    typeof figure.querySelectorAll === "function" ? mountComplexityFigure(figure) : { destroy() {} }
   return {
     destroy() {
       interaction.destroy()

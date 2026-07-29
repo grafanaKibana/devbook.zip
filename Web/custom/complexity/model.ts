@@ -24,9 +24,9 @@ export const COMPLEXITY_FILTERS: { id: ComplexityFilter; label: string }[] = [
 export const COMPLEXITY_CHART = {
   width: 800,
   height: 320,
-  left: 56,
-  plotRight: 670,
-  labelX: 682,
+  left: 0,
+  plotRight: 740,
+  labelX: 748,
   top: 18,
   axisY: 282,
 } as const
@@ -102,6 +102,7 @@ export interface ComplexityViewModel {
   availableCategories: ComplexityCategory[]
   rows: ComplexityRow[]
   ticks: { value: number; label: string; y: number }[]
+  xTicks: { value: number; label: string; x: number }[]
 }
 
 export function complexityRowCells(row: ComplexityRow): string[] {
@@ -345,10 +346,7 @@ function curvePath(
     const value = curves[curveId].evaluate(n)
     return { n, value, x: scale.x(n), y: scale.y(value) }
   })
-  const points = [
-    { x: LEFT, y: AXIS_Y },
-    ...samples.map(({ x, y }) => ({ x, y: y - offset })),
-  ]
+  const points = [{ x: LEFT, y: AXIS_Y }, ...samples.map(({ x, y }) => ({ x, y: y - offset }))]
   const geometry = points
     .map(({ x, y }, index) => `${index === 0 ? "M" : "L"}${x.toFixed(2)},${y.toFixed(2)}`)
     .join(" ")
@@ -600,6 +598,11 @@ export function buildComplexityViewModel(input: unknown): ComplexityViewModel {
   for (let value = 1; value <= MAX_VALUE; value *= 10) {
     ticks.push({ value, label: formatTick(value), y: scale.y(value) })
   }
+  const xTicks: ComplexityViewModel["xTicks"] = [2, 4, 6, 8, 10].map((value) => ({
+    value,
+    label: String(value),
+    x: scale.x(value),
+  }))
   const legend: ComplexityLegendGroup[] = []
   for (const path of paths.filter((candidate) => !candidate.dimmed)) {
     const group = legend.find((candidate) => candidate.label === path.legendGroup)
@@ -613,9 +616,7 @@ export function buildComplexityViewModel(input: unknown): ComplexityViewModel {
     else legend.push({ label: path.legendGroup, items: [item] })
   }
 
-  const availableCategories = Array.from(
-    new Set(highlightedPaths.map((path) => path.category)),
-  )
+  const availableCategories = Array.from(new Set(highlightedPaths.map((path) => path.category)))
 
   return {
     figureId,
@@ -627,6 +628,7 @@ export function buildComplexityViewModel(input: unknown): ComplexityViewModel {
     availableCategories,
     rows,
     ticks,
+    xTicks,
   }
 }
 

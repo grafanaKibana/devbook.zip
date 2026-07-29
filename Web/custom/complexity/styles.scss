@@ -1,8 +1,19 @@
+@use "../steptrace/src/styles/tabs";
+
 .complexity {
   --cx-text: var(--darkgray, var(--text-normal, #2f2f2f));
   --cx-muted: var(--gray, var(--text-muted, #767676));
   --cx-border: var(--lightgray, var(--background-modifier-border, #dedede));
   --cx-bg: var(--light, var(--background-primary, #fff));
+  --_text: var(--cx-text);
+  --_muted: var(--cx-muted);
+  --_border: var(--cx-border);
+  --_hair: var(--cx-border);
+  --_surface: var(--cx-bg);
+  --_hover: color-mix(in srgb, var(--cx-text) 7%, transparent);
+  --_accent: var(--secondary, var(--interactive-accent, #245b98));
+  --_font-head: var(--headerFont, var(--font-interface));
+  --_tween: 140ms;
   color: var(--cx-text);
   margin: 1.5rem 0;
 }
@@ -17,29 +28,7 @@
 }
 
 .complexity__tabs {
-  display: flex;
-  gap: 0.15rem;
   margin-bottom: 0.25rem;
-  border-bottom: 1px solid var(--cx-border);
-  overflow-x: auto;
-}
-
-.complexity__tab {
-  min-width: 3.35rem;
-  min-height: 2.75rem;
-  padding: 0 0.55rem;
-  color: var(--cx-muted);
-  font: 600 0.72rem var(--headerFont, var(--font-interface));
-  white-space: nowrap;
-  cursor: pointer;
-  background: transparent;
-  border: 0;
-  border-bottom: 2px solid transparent;
-}
-
-.complexity__tab[aria-selected="true"] {
-  color: var(--secondary, var(--interactive-accent, #245b98));
-  border-bottom-color: currentcolor;
 }
 
 .complexity__tab:disabled {
@@ -79,14 +68,23 @@
 }
 
 .complexity__tick,
+.complexity__x-tick,
 .complexity__endpoint-label {
-  font-family: var(--codeFont, var(--font-monospace));
-  font-size: 12px;
+  font-family: var(--bodyFont, var(--font-text, sans-serif));
+  font-size: 10px;
 }
 
 .complexity__tick {
   fill: var(--cx-muted);
-  text-anchor: end;
+  paint-order: stroke;
+  stroke: var(--cx-bg);
+  stroke-width: 3px;
+  text-anchor: start;
+}
+
+.complexity__x-tick {
+  fill: var(--cx-muted);
+  text-anchor: middle;
 }
 
 .complexity__area {
@@ -231,10 +229,6 @@
 @media (min-width: 600px) {
   .complexity__title {
     font-size: 1.05rem;
-  }
-
-  .complexity__tab {
-    min-height: 2.1rem;
   }
 
   .complexity__plot {

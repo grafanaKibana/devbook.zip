@@ -14,6 +14,7 @@ const hydrate = `
     var paths = Array.from(figure.querySelectorAll(".complexity__curve"));
     var areas = Array.from(figure.querySelectorAll(".complexity__area"));
     var labels = Array.from(figure.querySelectorAll(".complexity__endpoint-label"));
+    var panel = figure.querySelector(".complexity__panel");
     var listeners = [];
     var activeFilter = "all";
     var selectedPathId = null;
@@ -63,6 +64,7 @@ const hydrate = `
         var selected = tab.dataset.filter === activeFilter;
         tab.setAttribute("aria-selected", selected ? "true" : "false");
         tab.tabIndex = selected ? 0 : -1;
+        if (selected && tab.id && panel) panel.setAttribute("aria-labelledby", tab.id);
       });
       figure.dataset.activeFilter = activeFilter;
     }

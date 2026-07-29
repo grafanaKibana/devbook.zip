@@ -8,9 +8,8 @@ export function mountComplexityFigure(figure: HTMLElement): { destroy(): void } 
   )
   const paths = Array.from(figure.querySelectorAll<SVGPathElement>(".complexity__curve"))
   const areas = Array.from(figure.querySelectorAll<SVGPathElement>(".complexity__area"))
-  const labels = Array.from(
-    figure.querySelectorAll<SVGTextElement>(".complexity__endpoint-label"),
-  )
+  const labels = Array.from(figure.querySelectorAll<SVGTextElement>(".complexity__endpoint-label"))
+  const panel = figure.querySelector<HTMLElement>(".complexity__panel")
   const listeners: [EventTarget, string, EventListener][] = []
   let activeFilter = "all"
   let selectedPathId: string | null = null
@@ -52,7 +51,8 @@ export function mountComplexityFigure(figure: HTMLElement): { destroy(): void } 
     for (const label of labels) {
       const ids = (label.dataset.pathIds ?? "").split(",")
       const activePath = paths.find(
-        (path) => ids.includes(path.dataset.pathId ?? "") && activeIds.has(path.dataset.pathId ?? ""),
+        (path) =>
+          ids.includes(path.dataset.pathId ?? "") && activeIds.has(path.dataset.pathId ?? ""),
       )
       label.classList.toggle("is-active", Boolean(activePath))
       label.classList.toggle("is-subtle", !activePath)
@@ -64,6 +64,7 @@ export function mountComplexityFigure(figure: HTMLElement): { destroy(): void } 
       const selected = tab.dataset.filter === activeFilter
       tab.setAttribute("aria-selected", selected ? "true" : "false")
       tab.tabIndex = selected ? 0 : -1
+      if (selected && tab.id) panel?.setAttribute("aria-labelledby", tab.id)
     }
     figure.dataset.activeFilter = activeFilter
   }

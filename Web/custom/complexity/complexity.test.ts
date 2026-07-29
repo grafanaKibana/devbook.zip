@@ -6,12 +6,7 @@ import type { Element } from "hast"
 
 import { renderComplexityDom } from "./dom"
 import { renderComplexityHast } from "./hast"
-import {
-  buildComplexityViewModel,
-  COMPLEXITY_FILTERS,
-  CURVE_IDS,
-  curveValue,
-} from "./model"
+import { buildComplexityViewModel, COMPLEXITY_FILTERS, CURVE_IDS, curveValue } from "./model"
 import { ComplexityBlock } from "../transformers/complexity-block"
 
 const variables = { n: "number of input elements" }
@@ -148,7 +143,7 @@ test("every representative function uses the fixed 0-origin and 1…10k log scal
         18 + (1 - Math.log10(expected) / Math.log10(maximum)) * (320 - 18 - 38 - 14),
       )
     }
-    assert.match(path.geometry, /^M56\.00,282\.00 /)
+    assert.match(path.geometry, /^M0\.00,282\.00 /)
   }
   assert.deepEqual(
     view.ticks.map(({ value }) => value),
@@ -207,6 +202,10 @@ test("the 10k ceiling clips visually without changing representative values", ()
   assert.equal(view.ticks.at(-1)?.value, 10_000)
   assert.equal(view.ticks[0]?.label, "0")
   assert.ok(view.ticks.every((tick, index) => index === 0 || tick.y < view.ticks[index - 1].y))
+  assert.deepEqual(
+    view.xTicks.map(({ value }) => value),
+    [2, 4, 6, 8, 10],
+  )
 })
 
 test("duplicate case curves separate after sharing the visual origin", () => {
@@ -214,16 +213,13 @@ test("duplicate case curves separate after sharing the visual origin", () => {
   const best = view.paths.find((path) => path.label.startsWith("Best:"))
   const average = view.paths.find((path) => path.label.startsWith("Average:"))
   assert.notEqual(best?.geometry, average?.geometry)
-  assert.match(best?.geometry ?? "", /^M56\.00,282\.00 /)
-  assert.match(average?.geometry ?? "", /^M56\.00,282\.00 /)
+  assert.match(best?.geometry ?? "", /^M0\.00,282\.00 /)
+  assert.match(average?.geometry ?? "", /^M0\.00,282\.00 /)
   assert.notEqual(best?.id, average?.id)
   assert.equal(best?.color, "#22a06b")
   assert.equal(average?.color, "#d99a00")
   assert.deepEqual(view.availableCategories, ["best", "average", "worst"])
-  assert.equal(
-    view.endpointLabels.find((label) => label.curveId === "n-log-n")?.pathIds.length,
-    2,
-  )
+  assert.equal(view.endpointLabels.find((label) => label.curveId === "n-log-n")?.pathIds.length, 2)
   assert.deepEqual(
     view.rows.map((row) => [row.label, row.formula, row.auxiliarySpace, row.cause]),
     [
@@ -281,11 +277,9 @@ test("operation legends group each operation and shade its plotted bounds", () =
       },
     ],
   )
-  const constantPaths = view.paths.filter(
-    (path) => !path.dimmed && path.curveId === "constant",
-  )
+  const constantPaths = view.paths.filter((path) => !path.dimmed && path.curveId === "constant")
   assert.equal(new Set(constantPaths.map((path) => path.geometry)).size, constantPaths.length)
-  assert.ok(constantPaths.every((path) => path.geometry.startsWith("M56.00,282.00 ")))
+  assert.ok(constantPaths.every((path) => path.geometry.startsWith("M0.00,282.00 ")))
 })
 
 test("semantic duplicates and unknown details fail at their exact field", () => {
@@ -451,7 +445,11 @@ test("Quartz HAST is interactive static-first markup without an embedded details
   assert.equal(hastElements(hast, "table").length, 0)
   assert.equal(hastElements(hast, "clipPath").length, 1)
   assert.equal(hastElements(hast, "button").length, COMPLEXITY_FILTERS.length + 3)
-  assert.equal(hastElements(hast, "text").length, view.ticks.length + CURVE_IDS.length)
+  assert.equal(
+    hastElements(hast, "text").length,
+    view.ticks.length + view.xTicks.length + CURVE_IDS.length,
+  )
+  assert.ok(findHastByClass(hast, "steptrace__tabs"))
   const plotGroups = findHastByClass(hast, "complexity__areas")
   const curveGroups = findHastByClass(hast, "complexity__curves")
   assert.ok(plotGroups)
