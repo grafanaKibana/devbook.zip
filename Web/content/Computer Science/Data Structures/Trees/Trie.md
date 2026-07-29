@@ -1,8 +1,8 @@
 ---
 publish: true
 created: 2026-07-18T14:02:44.054Z
-modified: 2026-07-27T08:47:25.715Z
-published: 2026-07-27T08:47:25.715Z
+modified: 2026-07-28T11:19:09.722Z
+published: 2026-07-28T11:19:09.722Z
 topic:
   - Computer Science
 subtopic:
@@ -13,8 +13,6 @@ level:
 priority: Medium
 status: Ready to Repeat
 ---
-
-# Intro
 
 An autocomplete box holds a set of strings and must answer a different question than "is this exact word present?": given the typed fragment `lap`, which stored keys begin with it? A [[Computer Science/Data Structures/Hash-based Structures/HashMap|hash map]] hashes the whole key, so it can confirm exact membership but has no notion of a shared prefix — answering the fragment query means scanning all `n` keys. A trie (prefix tree) keys the set on the _sequence_ of characters instead of a hash of the whole string, so the prefix becomes a location in the structure rather than a filter over every entry.
 
@@ -28,7 +26,7 @@ What the structure gives up is compactness. Every distinct prefix becomes a node
 {"algorithm":"trie","operations":[["insert","car"],["insert","card"],["insert","care"],["insert","cat"],["insert","dog"],["prefix","ca"],["search","car"]]}
 ```
 
-## Representation and Invariants
+# Representation and Invariants
 
 A node holds two pieces of state and nothing else:
 
@@ -45,7 +43,7 @@ Three invariants hold in a valid trie:
 
 The distinction between reaching a node and reaching a _flagged_ node is the whole contract: exact search checks the flag, prefix search does not.
 
-## Complexity
+# Complexity
 
 Bounds use key length `L`, distinct-prefix node count `U`, alphabet size `σ`, nodes visited below a queried prefix `V`, maximum stored-key length `H`, and total characters emitted across matching keys `C`. The stored-key count `n` does not affect the walk for a single-key operation; collecting matches depends on the subtree and output size.
 
@@ -59,7 +57,7 @@ Bounds use key length `L`, distinct-prefix node count `U`, alphabet size `σ`, n
 
 The length-not-count property is the reason a trie is chosen: adding millions more keys never lengthens the walk for an existing query, because the path is fixed by the query string alone. The space cost depends on representation. Sparse maps allocate only actual branches but carry map and object overhead at each node; fixed arrays give direct indexing but reserve `σ` child slots at all `U` nodes.
 
-## When Fixed Child Arrays Hurt
+# When Fixed Child Arrays Hurt
 
 The wasted memory is structural, not incidental. An array-backed node reserves `σ` child slots even when a node has one child, so a long chain of single-character branches — the tail of a rare word — allocates a nearly empty array at every step. A **radix (PATRICIA) trie** collapses each such single-child chain into one edge labelled with the whole substring, cutting node count sharply on sparse, long keys while preserving the same `O(L)` walk.
 
@@ -69,7 +67,7 @@ A trie pays off when the key has a useful symbol sequence and the workload queri
 
 Deletion is the operation that exposes the shared-path invariant. Removing `car` when `card` is also present must clear the `r` node's `IsEnd` flag but leave the node itself, because `d` still hangs off it. Pruning may only remove nodes that have become both unflagged and childless, walking back up until that condition fails. Implementations that skip the prune and merely tombstone the flag leak nodes under churn.
 
-## Reference Drawer
+# Reference Drawer
 
 > [!ABSTRACT]- Shared-prefix paths for `car`, `card`, `care`
 >
@@ -137,7 +135,7 @@ Deletion is the operation that exposes the shared-path invariant. Removing `car`
 >
 > `Search` and `StartsWith` share the same walk; the only difference is that `Search` requires the terminal node's `IsEnd` flag while `StartsWith` accepts any reached node. A `Dictionary` child map keeps memory proportional to actual branches; a `Node[26]` array is faster per step but reserves all slots.
 
-## Comparison
+# Comparison
 
 Every structure below stores a set of keys; they differ in whether prefixes and ordering survive, and in memory.
 
@@ -150,7 +148,7 @@ Every structure below stores a set of keys; they differ in whether prefixes and 
 
 A trie is the structure when prefixes are the query — autocomplete, longest-prefix routing, shared-prefix key sets — because its `O(L)` lookup stays flat as `n` grows and the tree already enumerates completions and sorted order for free. A [[Computer Science/Data Structures/Hash-based Structures/HashMap|hash map]] wins when only exact membership matters and memory is tight: it drops prefix and ordering entirely and avoids a node per distinct prefix. A radix tree is the trie to pick when the plain trie's node count is the problem — it compresses single-child chains without changing the query semantics. [[Computer Science/Algorithms/Search Algorithms/String Matching/Aho-Corasick|Aho-Corasick]] extends the trie with failure links to scan one text against many patterns at once, a different workload from single-key lookup.
 
-## Questions
+# Questions
 
 > [!QUESTION]- Why is a trie lookup `O(L)` and not affected by the number of stored keys?
 > The walk follows one labelled edge per character of the query, so the work equals the key length `L`. The path a query traces is fixed by the query string; adding more keys creates other branches but never lengthens that path. A comparison tree, by contrast, reads the key `O(log n)` times as `n` grows.
@@ -164,7 +162,7 @@ A trie is the structure when prefixes are the query — autocomplete, longest-pr
 > [!QUESTION]- What does a radix (PATRICIA) trie change about the representation, and why?
 > It collapses each chain of single-child nodes into one edge labelled with the whole substring. An array-backed plain trie reserves `σ` child slots at every node, while a sparse-map trie still allocates a node and map along each chain; compressing the chains cuts node count while keeping the `O(L)` walk and the same prefix and ordering queries.
 
-## References
+# References
 
 - [Trie (Wikipedia)](https://en.wikipedia.org/wiki/Trie) — formal definition, the array-versus-map node layout, and the radix/PATRICIA compression variant.
 - [PATRICIA — Practical Algorithm To Retrieve Information Coded In Alphanumeric](https://dl.acm.org/doi/10.1145/321479.321481) — Donald Morrison's original path-compressed trie, the basis of the radix tree.

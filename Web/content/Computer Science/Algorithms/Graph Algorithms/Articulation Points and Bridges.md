@@ -1,8 +1,8 @@
 ---
 publish: true
 created: 2026-07-18T14:02:43.936Z
-modified: 2026-07-26T18:58:29.858Z
-published: 2026-07-26T18:58:29.858Z
+modified: 2026-07-27T14:43:18.308Z
+published: 2026-07-27T14:43:18.308Z
 topic:
   - Computer Science
 subtopic:
@@ -14,7 +14,7 @@ priority: Medium
 status: Creation
 ---
 
-An undirected network needs to know which routers or cables are single points of failure: remove that one vertex or edge and some pair of nodes can no longer reach each other. Checking candidates one at a time — delete it, re-run a connectivity scan, see whether the component count grew — costs `O(V·(V+E))`, a full traversal per vertex or edge.
+An undirected network needs to know which routers or cables are single points of failure: remove that one vertex or edge and some pair of nodes can no longer reach each other. Checking candidates one at a time — delete it, re-run a connectivity scan, see whether the component count grew — costs `O(V·(V+E))` for all vertices and `O(E·(V+E))` for all edges, or `O((V+E)²)` to find both.
 
 A single depth-first traversal finds all of them at once. As DFS explores an undirected graph it builds a tree whose only non-tree edges are back edges to ancestors — undirectedness forbids cross edges — and each back edge is an alternate route that survives removing the tree edge or vertex above it. Recording, per vertex, how far back its subtree can escape turns "does removing this disconnect anything?" into a local numeric comparison at every edge.
 
@@ -146,7 +146,7 @@ Cut vertices and bridges are the boundary markers of two connectivity decomposit
 | 2-edge-connected components | subgraphs with no bridge | bridges join adjacent components | yes |
 | [[Computer Science/Algorithms/Graph Algorithms/Strongly Connected Components\|Strongly connected components]] | mutually reachable sets in a **directed** graph | — | related low-link DFS, with an active-vertex stack and different update rule |
 
-One `disc`/`low` DFS finds every cut vertex and bridge in `O(V + E)`, against `O(V·(V+E))` for remove-and-recheck, and the same pass — with an edge stack — emits the biconnected components those cut vertices separate. The directed reachability question is a separate decomposition, [[Computer Science/Algorithms/Graph Algorithms/Strongly Connected Components|strongly connected components]], built on a related low-link idea. Tarjan's SCC traversal must track which vertices remain on an active stack and must ignore edges into already-finished components when lowering `low`; the cut-vertex implementation cannot be reused by merely directing its edges. For undirected reliability analysis — which node or link is the single point of failure — this one DFS is the whole answer.
+One `disc`/`low` DFS finds every cut vertex and bridge in `O(V + E)`, against `O((V+E)²)` for remove-and-recheck, and the same pass — with an edge stack — emits the biconnected components those cut vertices separate. The directed reachability question is a separate decomposition, [[Computer Science/Algorithms/Graph Algorithms/Strongly Connected Components|strongly connected components]], built on a related low-link idea. Tarjan's SCC traversal must track which vertices remain on an active stack and must ignore edges into already-finished components when lowering `low`; the cut-vertex implementation cannot be reused by merely directing its edges. For undirected reliability analysis — which node or link is the single point of failure — this one DFS is the whole answer.
 
 # Questions
 

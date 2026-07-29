@@ -1,8 +1,8 @@
 ---
 publish: true
-created: 2026-07-25T18:38:43.816Z
-modified: 2026-07-25T18:38:43.816Z
-published: 2026-07-25T18:38:43.816Z
+created: 2026-07-18T14:02:44.039Z
+modified: 2026-07-28T13:33:35.402Z
+published: 2026-07-28T13:33:35.402Z
 topic:
   - Computer Science
 subtopic:
@@ -16,14 +16,17 @@ status: Ready to Repeat
 
 A program holds an ordered collection of same-typed values and needs to reach the i-th one directly, not by walking from the front. An array stores those values as a contiguous block of equal-size slots, so the address of element `i` is `base + i * elementSize` — a single multiply-and-add that lands on the element regardless of how large `i` is. That same contiguity places neighbors in the sequence next to each other in RAM, which is what makes a scan cache-friendly.
 
-The block is what other linear structures are built on: `List<T>` wraps one, `Stack<T>` and `Queue<T>` wrap one, `Dictionary<TKey,TValue>` keeps its entries in one. The cost of contiguity is rigidity — the size is fixed at allocation, so growth means allocating a new block and copying, and inserting in the middle shifts every later element to keep the slots packed. Growable capacity belongs to [[Dynamic Array]]; a zero-copy view over an existing block belongs to [[Span]].
+The block is what other linear structures are built on: `List<T>` wraps one, `Stack<T>` and `Queue<T>` wrap one, `Dictionary<TKey,TValue>` keeps its entries in one. The cost of contiguity is rigidity — the size is fixed at allocation, so growth means allocating a new block and copying, and inserting in the middle shifts every later element to keep the slots packed. Growable capacity belongs to [[Computer Science/Data Structures/Linear Structures/Dynamic Array|Dynamic Array]]; a zero-copy view over an existing block belongs to [[Computer Science/Data Structures/Linear Structures/Span|Span]].
 
 **Core shape:** equal-size elements → one contiguous fixed block → address `base + i·elementSize` → `O(1)` index, cache-local scan → no cheap growth or middle insert.
 
 The decisive behaviors are an index jump and a middle-insert shift.
 
-> [!NOTE] Visualization pending
-> Planned StepTrace: a contiguous-memory card showing an index resolve to `base + i·stride` in a single jump to element `i`, then a middle insert shifting the tail one slot to the right to keep the block packed. No matching renderer exists in `engine.js` yet.
+The interactive view keeps the array state between actions: an index lookup jumps directly to one slot, while a middle insert shifts the contiguous tail.
+
+```steptrace
+{"algorithm":"arrays"}
+```
 
 # Representation and Layout
 
@@ -33,7 +36,7 @@ Multi-dimensional arrays flatten the same way. A row-major `T[,]` stores row 0 i
 
 For a value type the values live in the block itself — `new int[1000]` is one allocation holding 4,000 bytes of data. For a reference type the block holds references and the objects live elsewhere, so `string[]` iteration is contiguous over the _pointers_ but still chases each one to reach the characters.
 
-Contiguity is worth more than the complexity table shows. A CPU pulls memory in 64-byte cache lines, so one miss brings in a line of neighbors for free (16 elements for 4-byte ints), and the hardware prefetcher recognizes a sequential scan and streams the next lines ahead. That hides the gap between an L1 hit (~1 ns) and main memory (~100 ns) — the top rungs of the [[Data Persistence/Caching#Latency ladder|latency ladder]]. A [[LinkedList]] node is a separate allocation at an unpredictable address, so every `Next` is a potential full-latency miss the prefetcher cannot anticipate — the same `n` and the same `O(n)` can run an order of magnitude slower. This is the physical reason .NET's default collections are array-backed.
+Contiguity is worth more than the complexity table shows. On representative x86-64 machines, cache lines are commonly 64 bytes, so one miss brings in a line of neighbors (16 elements for 4-byte ints), and the hardware prefetcher can stream later lines during a sequential scan. Representative orders of magnitude put an L1 hit near 1 ns and main-memory access near 100 ns, although both vary by processor and workload — the top rungs of the [[Data Persistence/Caching#Latency ladder|latency ladder]]. A [[Computer Science/Data Structures/Linear Structures/LinkedList|LinkedList]] node is a separate allocation at an unpredictable address, so every `Next` is a potential full-latency miss the prefetcher cannot anticipate — the same `n` and the same `O(n)` can run an order of magnitude slower. This is the physical reason .NET's default collections are array-backed.
 
 # Complexity
 
@@ -41,16 +44,16 @@ Contiguity is worth more than the complexity table shows. A CPU pulls memory in 
 | --- | --- | --- | --- |
 | Access by index | `O(1)` | `O(1)` | Address is `base + i·elementSize`; one multiply-and-add, independent of `i` or length. |
 | Search, unsorted | `O(n)` | `O(1)` | No order to exploit, so every slot may need inspecting. |
-| Search, sorted | `O(log n)` | `O(1)` | Random access lets [[Binary Search]] discard half the range per probe. |
+| Search, sorted | `O(log n)` | `O(1)` | Random access lets [[Computer Science/Algorithms/Search Algorithms/Binary Search\|Binary Search]] discard half the range per probe. |
 | Insert / delete at the middle | `O(n)` | `O(1)` | The tail shifts one slot to keep the block packed and contiguous. |
-| Append / grow | not supported | — | Capacity is fixed at allocation; growth needs a new block plus a copy — that is [[Dynamic Array]]. |
+| Append / grow | not supported | — | Capacity is fixed at allocation; growth needs a new block plus a copy — that is [[Computer Science/Data Structures/Linear Structures/Dynamic Array\|Dynamic Array]]. |
 | Storage | — | `O(n)` | `n` equal-size slots occupy one contiguous allocation. |
 
 Every bound follows from the layout. `O(1)` access is the address formula; `O(n)` middle mutation is the shift that contiguity forces; the absence of a cheap append is the fixed size. The `O(1)` auxiliary space on access and mutation is real — an in-place shift needs no scratch buffer — but a resize is a separate `O(n)` allocate-and-copy, which is why it is not an array operation at all.
 
 # Boundaries Tied to Contiguity
 
-Fixed capacity is the hard one. The size is chosen at allocation, and there is no room to append. Growing means allocating a larger block, copying every element, and abandoning the old one; doing that on each insert is an accidental, quadratic re-implementation of [[Dynamic Array]], whose growth strategy makes append amortized `O(1)`.
+Fixed capacity is the hard one. The size is chosen at allocation, and there is no room to append. Growing means allocating a larger block, copying every element, and abandoning the old one; doing that on each insert is an accidental, quadratic re-implementation of [[Computer Science/Data Structures/Linear Structures/Dynamic Array|Dynamic Array]], whose growth strategy makes append amortized `O(1)`.
 
 Middle insertion and deletion pay for packing. Inserting at index `k` in an `n`-element array moves `n − k` elements up by one slot before the new value can occupy its place; deletion moves them down. The contiguous invariant — no gaps between slots — is exactly what forces the shift, and it is why a structure with cheap splices (a linked list) trades away the `O(1)` index to get them.
 
@@ -91,7 +94,7 @@ The cache-locality advantage is not a rounding error. For small `n`, a contiguou
 > }
 > ```
 >
-> A true insert cannot grow the block; `InsertAt` overwrites the last element because the capacity was fixed at allocation. Preserving every element is a resize, which allocates a new array — the job of [[Dynamic Array]].
+> A true insert cannot grow the block; `InsertAt` overwrites the last element because the capacity was fixed at allocation. Preserving every element is a resize, which allocates a new array — the job of [[Computer Science/Data Structures/Linear Structures/Dynamic Array|Dynamic Array]].
 
 # Questions
 
@@ -105,7 +108,7 @@ The cache-locality advantage is not a rounding error. For small `n`, a contiguou
 > Capacity is fixed at allocation, so there is no free slot past the last element; adding one requires a new, larger block and a full copy. A dynamic array owns that resize policy — typically doubling — which spreads the copy cost so that append is amortized `O(1)` while keeping the same contiguous layout and `O(1)` index.
 
 > [!QUESTION]- Why can an array scan beat an asymptotically better structure at small `n`?
-> Contiguity keeps neighbors in the same cache lines, and the prefetcher streams the next lines ahead of a sequential scan, so most accesses hit L1 (~1 ns) rather than main memory (~100 ns). A scattered structure pays a near-full miss per node. Big-O counts operations; the array's constant factor is far smaller, so the crossover where a better bound wins can sit past the sizes a workload reaches.
+> On representative x86-64 machines, contiguous neighbors share commonly 64-byte cache lines and the prefetcher can stream later lines during a sequential scan. L1 hits are roughly nanosecond-scale while main-memory accesses are roughly two orders of magnitude slower, though exact latency depends on the processor and workload. A scattered structure can pay a cache miss per node. Big-O counts operations; the array's constant factor is far smaller, so the crossover where a better bound wins can sit past the sizes a workload reaches.
 
 # References
 

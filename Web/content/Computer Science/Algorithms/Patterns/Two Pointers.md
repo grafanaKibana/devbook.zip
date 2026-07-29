@@ -1,8 +1,8 @@
 ---
 publish: true
-created: 2026-07-25T18:38:43.800Z
-modified: 2026-07-25T18:38:43.800Z
-published: 2026-07-25T18:38:43.800Z
+created: 2026-07-28T10:25:59.700Z
+modified: 2026-07-28T10:25:59.700Z
+published: 2026-07-28T10:25:59.700Z
 topic:
   - Computer Science
 subtopic:
@@ -130,6 +130,7 @@ Two pointers is the `O(1)`-space linear method once the array is sorted: it reus
 
 # References
 
+- [C. A. R. Hoare, "Quicksort" (1962)](https://doi.org/10.1093/comjnl/5.1.10) — the primary paper for a canonical bidirectional-pointer scan: inward indices partition an ordered range without extra storage.
 - [Two Sum II (LeetCode #167)](https://leetcode.com/problems/two-sum-ii-input-array-is-sorted/) — the canonical converging-pointer problem on a sorted array.
 - [Two Pointers (USACO Guide)](https://usaco.guide/silver/two-pointers) — categorised converging and same-direction two-pointer problems with worked solutions.
 - [Floyd's cycle detection (cp-algorithms)](https://cp-algorithms.com/others/tortoise_and_hare.html) — the same-direction fast/slow variant distinguished from the converging pattern on this page.

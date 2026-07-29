@@ -1,8 +1,8 @@
 ---
 publish: true
 created: 2026-07-27T06:20:03.462Z
-modified: 2026-07-27T07:10:34.026Z
-published: 2026-07-27T07:10:34.026Z
+modified: 2026-07-27T15:06:57.390Z
+published: 2026-07-27T15:06:57.390Z
 topic:
   - Computer Science
 subtopic:
@@ -19,6 +19,12 @@ A service accepts jobs faster than a single worker drains them, and fairness req
 The structure records only order of arrival. It cannot reach the middle by position, and it cannot promote an urgent item ahead of an older one — retrieval by priority needs [[Computer Science/Data Structures/Trees/Heap-like/Heap|a priority queue]], not a FIFO queue. What it retains is exactly the front-to-back sequence and nothing more.
 
 **Core shape:** enqueue at the back in amortized `O(1)` → dequeue from the front in `O(1)` → first in, first out → occasional `O(n)` resize → `O(n)` storage.
+
+The interactive view isolates circular wraparound and fixed-capacity full behavior; the growable resize remains explained in the prose below.
+
+```steptrace
+{"algorithm":"queue"}
+```
 
 # Representation and Invariants
 

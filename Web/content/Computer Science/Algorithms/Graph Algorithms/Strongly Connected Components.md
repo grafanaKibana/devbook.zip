@@ -1,8 +1,8 @@
 ---
 publish: true
 created: 2026-07-18T14:02:43.950Z
-modified: 2026-07-26T19:26:59.904Z
-published: 2026-07-26T19:26:59.904Z
+modified: 2026-07-27T14:39:43.180Z
+published: 2026-07-27T14:39:43.180Z
 topic:
   - Computer Science
 subtopic:
@@ -28,7 +28,7 @@ The trace uses Tarjan's single-pass algorithm as the concrete way to expose this
 
 # One Partition, Then a DAG
 
-On `A→B, B→C, C→A, C→D, D→E, E→D`, the visualization emits `{D, E}` and `{A, B, C}`. Inside each set every vertex reaches every other. Across the sets only the first reaches the second, so they cannot merge.
+On `A→B, B→C, C→A, C→D, D→E, E→D`, the visualization emits `{D, E}` and `{A, B, C}`. Inside each set every vertex reaches every other. Across the sets `{A, B, C}` reaches `{D, E}`, but not vice versa, so they cannot merge.
 
 Contracting the two sets gives one edge, `A-B-C → D-E`. More generally, the condensation cannot contain a cycle: a cycle between two component nodes would make their original vertices mutually reachable, contradicting maximality. The result is therefore a DAG that can feed [[Computer Science/Algorithms/Graph Algorithms/Topological Sort|topological sorting]] and DAG dynamic programming.
 

@@ -1,8 +1,8 @@
 ---
 publish: true
-created: 2026-07-25T18:38:43.815Z
-modified: 2026-07-25T18:38:43.816Z
-published: 2026-07-25T18:38:43.816Z
+created: 2026-07-18T14:02:44.039Z
+modified: 2026-07-28T17:05:22.422Z
+published: 2026-07-28T17:05:22.422Z
 topic:
   - Computer Science
 subtopic:
@@ -18,25 +18,28 @@ A cache holds 50K active sessions and repeatedly looks up one session by its ID.
 
 The structure remembers a mapping from key to value and nothing else. It does not retain insertion order, sort order, or the sequence in which resizes moved entries around. Two keys that hash to the same bucket coexist there, distinguished only by an equality check.
 
-**Core shape:** key → `hash(key) mod capacity` → bucket → chain or probe resolves collisions → resize when the load factor crosses its threshold → `O(1)` average, `O(n)` worst, `O(n)` storage.
+**Core shape:** key → `hash(key) % capacity` → bucket → chain or probe resolves collisions → resize when the load factor crosses its threshold → `O(1)` average, `O(n)` worst, `O(n)` storage.
 
-> [!NOTE] Visualization pending
-> Planned StepTrace: a hash-table card showing a bucket array with keys hashed to slots, a collision landing two keys in one bucket (chained), and a resize rehashing every entry into a larger array. No matching renderer exists in `engine.js` yet.
+The three tabs keep the same 12-cell bucket-head array while changing only collision policy. **Closed Addressing** uses separate chaining (also called open hashing): each bucket points to its own external key/value chain. **Open Addressing** uses linear probing (also called closed hashing) and leaves tombstones after removal. **Bucket Hashing** groups the array into four contiguous 3-cell buckets, then advances bucket by bucket with wraparound when the home group is full. This prototype fixes capacity at 12 to compare collision policies; production maps usually resize or rebuild after crossing a load threshold.
+
+```steptrace
+{"tabs":[{"name":"Closed Addressing","description":"Separate chaining (open hashing): each bucket points to its own external key/value chain.","algorithm":"hash-map","variant":"closed-addressing"},{"name":"Open Addressing","description":"Linear probing scans the fixed table and preserves tombstones after removal.","algorithm":"hash-map","variant":"open-addressing"},{"name":"Bucket Hashing","description":"Four three-cell buckets use bucket-by-bucket linear overflow with wraparound.","algorithm":"hash-map","variant":"buckets"}]}
+```
 
 # Representation and Invariants
 
-Two things define the structure: a backing array of buckets and a hash function that maps a key to an index into it, usually `hash(key) mod capacity`. When several keys map to the same index, a collision-resolution strategy keeps them apart:
+Two things define the structure: a backing array of buckets and a hash function that maps a key to an index into it, usually `hash(key) % capacity`. When several keys map to the same index, a collision-resolution strategy keeps them apart:
 
 - **Chaining** — each bucket holds a secondary container of the entries that landed there, typically a linked list (Java's `HashMap` converts a bucket to a balanced tree once it grows large; .NET's `Dictionary` never does). .NET's `Dictionary<TKey, TValue>` chains, but stores all entries in one contiguous `entries[]` array linked by a `next` **index**, with a parallel `buckets[]` array mapping each hash to its chain head — no per-collision heap allocation, cache-friendly traversal.
 - **Open addressing** — every entry lives directly in the bucket array. A collision follows a probe sequence (linear, quadratic, or double hashing) to the next candidate slot. The legacy `Hashtable` probes this way.
 
-The **load factor** `α = count / capacity` tracks how full the array is. Crossing a threshold triggers a **resize**: the map allocates a larger array and **rehashes every entry**, recomputing each bucket index for the new capacity. .NET grows to the next prime above roughly double the current size, because a prime modulus scatters keys better than a power of two.
+The **load factor** `α = count / capacity` tracks how full the array is. Crossing a threshold triggers a **resize**: the map allocates a larger array and **rehashes every entry**, recomputing each bucket index for the new capacity. .NET grows to the next prime above roughly double the current size; prime capacities reduce sensitivity to common periodic patterns in weak hash functions, but cannot make a poor hash distribute well.
 
 What the structure retains is the key-to-value association. What it discards is order — insertion order is not guaranteed, sort order is never present, and both can shift the moment a resize re-derives every index.
 
 Three invariants define a valid state:
 
-1. Every entry resides in the bucket its key currently hashes to. A key whose hash changes after insertion violates this and becomes unreachable.
+1. Every entry resides in the bucket selected when the map last inserted or rehashed it. If the key's hash later changes enough to select a different bucket, lookups fail to reach the entry.
 2. Keys that compare equal must hash equal — the `GetHashCode`/`Equals` contract. If it breaks, equal keys can land in different buckets and both survive as separate entries.
 3. A lookup recomputes the bucket, then resolves the collision by equality within it. Correctness depends on both the hash (which bucket) and equality (which entry).
 
@@ -61,13 +64,13 @@ Each boundary traces back to the bucket-and-hash mechanism.
 
 **A weak or adversarial hash collapses a bucket.** A `GetHashCode` that returns a constant puts every entry in one bucket, and the map degrades into a linked list at `O(n)` per operation. When keys come from untrusted input (HTTP query keys, JSON property names), an attacker who can predict the hash forces mass collisions on purpose — algorithmic-complexity denial of service, "hash flooding." .NET randomizes the `string` hash seed per process to defend against it; a custom key type with a weak hash stays exposed.
 
-**A mutated key is lost.** Insert a key, then mutate a field that participates in its hash, and invariant 1 breaks — the entry still sits in the old bucket while lookups compute the new one. The entry becomes orphaned: present in memory, unreachable by any lookup. Immutable key types (`string`, `int`, records with `init` properties) avoid this; a mutable key must never change after insertion.
+**A mutated key may become unreachable.** Insert a key, then mutate a field that participates in its hash, and invariant 1 breaks — the entry stays in the old bucket while lookups use the recomputed hash. If that hash selects a different bucket, lookup misses the entry even though it remains in memory. Immutable key types (`string`, `int`, records with `init` properties) avoid this; a mutable key must never change after insertion.
 
 **Iteration order is unspecified and unstable.** Insert `3, 1, 2` and enumeration may return any permutation, because order follows bucket layout, not insertion. A resize re-derives every bucket index and can reorder the whole enumeration. Code that depends on iteration order is relying on an implementation artifact.
 
 **A resize is a latency spike.** The amortized `O(1)` insert hides an occasional `O(n)` rehash of the entire array. For a real-time or low-latency path, that single stall matters even though the average is fine; pre-sizing or a resize-free structure avoids it.
 
-**Open addressing adds clustering and tombstones.** Probe sequences pile entries into runs (primary clustering) that lengthen every probe, and a delete cannot simply empty a slot — that would truncate a probe chain — so it leaves a tombstone that later lookups must skip and that only a rebuild reclaims.
+**Open addressing adds clustering and tombstones.** Probe sequences pile entries into runs (primary clustering) that lengthen every probe, and a delete cannot simply empty a slot — that would truncate a probe chain — so it leaves a tombstone. Lookups skip tombstones, later inserts may reuse them, and a rehash removes any that remain.
 
 # Reference Drawer
 
@@ -81,8 +84,8 @@ Each boundary traces back to the bucket-and-hash mechanism.
 >     B2[bucket 2]
 >     B3[bucket 3]
 >   end
->   K1["hash(1001) mod 4 = 1"] --> B1
->   K2["hash(1005) mod 4 = 1"] --> B1
+>   K1["hash(1001) % 4 = 1"] --> B1
+>   K2["hash(1005) % 4 = 1"] --> B1
 >   B1 --> E1[1001 → Ann] --> E2[1005 → Cid]
 >   B3 --> E3[1002 → Bob]
 > ```
@@ -102,7 +105,7 @@ Each boundary traces back to the bucket-and-hash mechanism.
 > }
 > ```
 >
-> `Dictionary<TKey, TValue>` is the default map in modern .NET. `ConcurrentDictionary` covers concurrent writes (a plain map corrupts its bucket array under a data race), `FrozenDictionary` optimizes build-once/read-many hot paths, and `SortedDictionary` trades `O(1)` for ordered iteration. Passing an initial `capacity` pre-sizes the array and skips the grow-and-rehash cycles.
+> `Dictionary<TKey, TValue>` is the default map in modern .NET. Concurrent writes are unsupported and may throw or corrupt its state; synchronize access or use `ConcurrentDictionary`. `FrozenDictionary` optimizes build-once/read-many hot paths, and `SortedDictionary` trades `O(1)` for ordered iteration. Passing an initial `capacity` pre-sizes the array and skips the grow-and-rehash cycles.
 
 # Questions
 
@@ -113,7 +116,7 @@ Each boundary traces back to the bucket-and-hash mechanism.
 > A single insert can push the load factor past its threshold and rehash every existing entry into a larger array, an `O(n)` step. Averaged over the inserts that grew the map to that size, the rehash cost is `O(1)` per insert. The guarantee is over a sequence; any individual insert can still cost `O(n)`.
 
 > [!QUESTION]- What happens to an entry whose key is mutated after insertion?
-> The entry stays in the bucket the key hashed to at insertion time, but a lookup recomputes the bucket from the key's new hash and searches a different one. The entry is present in memory yet unreachable — orphaned. Keys must be immutable, or at least never change a hash-participating field after insertion.
+> The entry stays in the bucket the key hashed to at insertion time. If mutation changes the hash enough to select a different bucket, lookup searches there and misses the still-resident entry. Keys must be immutable, or at least never change a hash-participating field after insertion.
 
 > [!QUESTION]- When is a balanced tree preferable to a hash map?
 > When the workload needs ordered iteration, range queries, or nearest-key lookups. A hash map scatters keys across buckets and cannot answer those without a full scan and sort; a balanced tree keeps keys sorted at `O(log n)` per operation, which is the price for that ordering.

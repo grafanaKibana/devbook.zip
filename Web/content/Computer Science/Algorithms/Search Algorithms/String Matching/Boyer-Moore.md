@@ -1,8 +1,8 @@
 ---
 publish: true
-created: 2026-07-26T09:27:47.543Z
-modified: 2026-07-26T09:27:47.544Z
-published: 2026-07-26T09:27:47.544Z
+created: 2026-07-28T10:25:56.632Z
+modified: 2026-07-28T10:25:56.632Z
+published: 2026-07-28T10:25:56.632Z
 topic:
   - Computer Science
 subtopic:
@@ -24,6 +24,8 @@ The jump distance comes from two precomputed tables, and every shift is sound on
 
 The trace keeps the pattern aligned under the text while the comparison cursor moves right-to-left and both rules expose the shift they propose.
 
+# Trace
+
 ```steptrace
 {"algorithm":"boyer-moore","text":"ACCCDBACBA","pattern":"ACBA"}
 ```
@@ -36,7 +38,7 @@ Each alignment fixes the pattern's last character over some text index and compa
 
 **Good-suffix rule.** Suppose the suffix after `pattern[j]` matched before the mismatch. The strong rule first looks for another occurrence of that suffix whose preceding pattern character differs from the mismatching `pattern[j]`; requiring a different predecessor prevents the same mismatch from recurring immediately. If no eligible occurrence exists, it falls back to the longest suffix of the matched region that is also a prefix of the pattern. This reuses the partial-match information the bad-character rule discards.
 
-The shift is `max(bad_char_shift, good_suffix_shift)`, which is always at least one, so the search never stalls. Correctness rests on a negative argument: any smaller shift would either drop a known-mismatching character back over the text or misalign a suffix already proven to match, so every alignment skipped over provably cannot produce a match — even though its characters were never compared. That clause is the whole mechanism. Left-to-right scanning learns nothing about the characters ahead, so it can never justify a jump larger than one on the same evidence.
+The shift is `max(bad_char_shift, good_suffix_shift)`, which is always at least one, so the search never stalls. Correctness rests on a negative argument: any smaller shift would either drop a known-mismatching character back over the text or misalign a suffix already proven to match, so every alignment skipped over provably cannot produce a match — even though its characters were never compared. That clause is the whole mechanism. A left-to-right comparison at the current alignment does not expose the trailing mismatch needed for this bad-character/block-skipping argument; KMP instead advances by reusing pattern-overlap information.
 
 Preprocessing builds both tables ahead of the scan. A last-occurrence table stores the raw rightmost index for each character (`|Σ|` entries), making the mismatch calculation `max(1, j - lastOccurrence(c))` explicit. An equivalent delta table used by Horspool-style code stores `m - 1 - i`, excludes the pattern's final position, and must adjust that end-relative delta back to the current mismatch position `j`; applying its values as unconditional shifts is a different algorithm. The good-suffix table maps each mismatch position to a safe suffix-preserving shift; its construction is `Θ(m)` but the index arithmetic is delicate.
 
@@ -191,7 +193,7 @@ Production code does not converge on one universal variant. GNU `grep` documents
 # Questions
 
 > [!QUESTION]- Why does comparing right-to-left let Boyer-Moore skip characters it never reads?
-> A mismatch at the pattern's last position exposes a text character together with its offset. If that character is absent from the pattern, no alignment that places any pattern character over it can match, so the pattern jumps clear past it — up to `m` positions — without comparing the characters in between. Left-to-right scanning learns nothing about the text ahead, so it can never justify a jump larger than one on the same information.
+> A mismatch at the pattern's last position exposes a text character together with its offset. If that character is absent from the pattern, no alignment that places any pattern character over it can match, so the pattern jumps clear past it — up to `m` positions — without comparing the characters in between. A left-to-right comparison at the current alignment does not expose the trailing mismatch needed for this block-skipping argument; KMP instead advances by reusing pattern-overlap information.
 
 > [!QUESTION]- What does each shift rule contribute, and why might an implementation choose Horspool?
 > The bad-character rule aligns the pattern's rightmost copy of the mismatching text character, giving large skips on large alphabets. The strong good-suffix rule reuses an already-matched suffix only when its preceding character differs from the mismatching pattern character, then falls back to a pattern prefix. The algorithm takes the larger shift, so it is never worse than either alone. Horspool is attractive when a simpler one-table implementation matters more than the extra skips, but the right choice depends on the workload.

@@ -1,8 +1,8 @@
 ---
 publish: true
-created: 2026-07-18T14:02:44.012Z
-modified: 2026-07-26T06:51:55.739Z
-published: 2026-07-26T06:51:55.739Z
+created: 2026-07-28T10:25:56.632Z
+modified: 2026-07-28T10:25:56.633Z
+published: 2026-07-28T10:25:56.633Z
 topic:
   - Computer Science
 subtopic:
@@ -23,6 +23,8 @@ The pass stays linear because it never recompares a character already known to s
 **Core condition:** a match interval whose right edge `r` only ever advances → each character is compared a bounded number of times → `Θ(|S|)` Z-array in `Θ(|S|)` space.
 
 The trace keeps the prefix, current Z-box, mirror source, and committed Z values aligned while each entry is copied or extended.
+
+# Trace
 
 ```steptrace
 {"algorithm":"z-algorithm","text":"aabcaabxaaaz"}
@@ -181,6 +183,7 @@ Best, average, and worst cases coincide: the pass is `Θ(|S|)` whether the strin
 
 # References
 
+- [An O(n log n) Algorithm for Finding All Repetitions in a String](https://doi.org/10.1016/0196-6774\(84\)90021-X) — Main and Lorentz’s 1984 primary paper for the prefix-match preprocessing later presented as the Z-algorithm; it uses that linear preprocessing to find repetitions.
 - [Z-function](https://cp-algorithms.com/string/z-function.html) — derivation of the box-based linear algorithm and the `P + sep + T` matching reduction, with the amortized `O(n)` argument.
 - [Algorithms on Strings, Trees, and Sequences](https://doi.org/10.1017/CBO9780511574931) — Dan Gusfield's Cambridge text develops exact string matching and the Z-based linear-time preprocessing framework from the original string-algorithms literature.
 - [Competitive Programmer's Handbook](https://cses.fi/book/book.pdf) — Antti Laaksonen; the string chapter covers the Z-array alongside the prefix function and their shared applications.

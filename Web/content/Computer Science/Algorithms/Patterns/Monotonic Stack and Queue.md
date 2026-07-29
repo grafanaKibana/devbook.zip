@@ -1,8 +1,8 @@
 ---
 publish: true
-created: 2026-07-18T14:02:43.968Z
-modified: 2026-07-27T09:24:19.444Z
-published: 2026-07-27T09:24:19.444Z
+created: 2026-07-28T10:25:59.699Z
+modified: 2026-07-28T10:25:59.699Z
+published: 2026-07-28T10:25:59.699Z
 topic:
   - Computer Science
 subtopic:
@@ -131,6 +131,7 @@ Prefer indices for a window deque because expiry is positional. Values can work 
 
 # References
 
+- [Mayur Datar et al., "Maintaining Stream Statistics over Sliding Windows" (2002)](https://doi.org/10.1137/S0097539701398363) — a primary treatment of maintaining aggregates over the most recent fixed-size stream window, the setting where deque expiry matters.
 - [Sliding Window Maximum (LeetCode #239)](https://leetcode.com/problems/sliding-window-maximum/) — the canonical monotonic-deque problem; indices are the standard way to express expiry, while value-count variants require the departing value.
 - [Largest Rectangle in Histogram (LeetCode #84)](https://leetcode.com/problems/largest-rectangle-in-histogram/) — the previous-smaller / next-smaller boundary application of a monotonic stack.
 - [Amortized analysis](https://en.wikipedia.org/wiki/Amortized_analysis) — the charging/aggregate argument behind the push-once, pop-once `O(n)` bound.

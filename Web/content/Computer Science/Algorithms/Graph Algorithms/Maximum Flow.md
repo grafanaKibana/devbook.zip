@@ -1,8 +1,8 @@
 ---
 publish: true
 created: 2026-07-18T14:02:43.948Z
-modified: 2026-07-26T19:26:59.570Z
-published: 2026-07-26T19:26:59.570Z
+modified: 2026-07-27T14:39:43.388Z
+published: 2026-07-27T14:39:43.388Z
 topic:
   - Computer Science
 subtopic:
@@ -72,11 +72,16 @@ Two failure modes both trace back to the residual mechanism.
 > [!EXAMPLE]- Edmonds–Karp in C#
 >
 > ```csharp
-> public static int MaxFlow(int[,] capacity, int source, int sink)
+> public static long MaxFlow(long[,] capacity, int source, int sink)
 > {
+>     if (source == sink)
+>     {
+>         throw new ArgumentException("Source and sink must differ.");
+>     }
+>
 >     int n = capacity.GetLength(0);
->     var residual = (int[,])capacity.Clone();
->     int maxFlow = 0;
+>     var residual = (long[,])capacity.Clone();
+>     long maxFlow = 0;
 >
 >     while (true)
 >     {
@@ -105,7 +110,7 @@ Two failure modes both trace back to the residual mechanism.
 >             break; // No augmenting path: the flow is maximal.
 >         }
 >
->         int bottleneck = int.MaxValue;
+>         long bottleneck = long.MaxValue;
 >         for (int v = sink; v != source; v = parent[v])
 >         {
 >             bottleneck = Math.Min(bottleneck, residual[parent[v], v]);
