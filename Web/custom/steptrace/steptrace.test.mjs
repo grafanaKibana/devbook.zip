@@ -6881,6 +6881,103 @@ test("production mount renders a meaningful Trie terminal summary without string
       graphListeners.every((node) => [...node.listeners.values()].every((items) => !items.length)),
     )
 
+    const avlRoot = new FakeNode("div")
+    const avlHandle = api.mount(avlRoot, {
+      algorithm: "avl-tree",
+      values: [30, 20, 40, 10],
+      value: 5,
+    })
+    const avlInput = findByAttribute(avlRoot, "aria-label", "AVL key")
+    const avlButtons = findAllByClass(avlRoot, "steptrace__structure-action")
+    const avlButton = (label) => avlButtons.find((button) => button.textContent === label)
+    const avlStatus = findByClass(avlRoot, "steptrace__structure-status")
+    const avlNodes = () =>
+      findByTag(avlRoot, "svg").children[1].children.filter((node) => node.tagName === "g")
+
+    assert.equal(avlRoot.dataset.visualFamily, "binary-tree")
+    assert.equal(avlRoot.dataset.structure, "avl-tree")
+    assert.equal(findByClass(avlRoot, "steptrace__timeline"), null)
+    assert.equal(findByClass(avlRoot, "steptrace__transport"), null)
+    assert.equal(findByTag(avlRoot, "svg").attributes.get("role"), "img")
+    assert.equal(findByClass(avlRoot, "steptrace__counter").innerHTML, "<b>4</b> keys")
+    assert.equal(avlInput.value, "5")
+    assert.equal(findAllByClass(avlRoot, "steptrace__structure-input").length, 1)
+    assert.deepEqual(
+      avlButtons.map((button) => button.textContent),
+      ["Insert", "Search", "Remove", "Reset"],
+    )
+
+    click(avlButton("Insert"))
+    assert.match(avlStatus.textContent, /LL at 20 restored/)
+    assert.ok(
+      avlNodes().some(
+        (node) => node.attributes.get("aria-label") === "Key 10, height 2, balance factor 0",
+      ),
+    )
+    assert.equal(avlNodes().filter((node) => node.dataset.state === "rotation").length >= 2, true)
+
+    avlInput.value = "5"
+    click(avlButton("Insert"))
+    assert.match(avlStatus.textContent, /already exists/)
+    assert.equal(findByClass(avlRoot, "steptrace__counter").innerHTML, "<b>5</b> keys")
+
+    avlInput.value = "40"
+    click(avlButton("Search"))
+    assert.match(avlStatus.textContent, /Search path 30 → 40 found 40/)
+    assert.equal(avlNodes().filter((node) => node.dataset.state === "path").length, 2)
+
+    click(avlButton("Reset"))
+    assert.equal(findByClass(avlRoot, "steptrace__counter").innerHTML, "<b>4</b> keys")
+    assert.equal(avlInput.value, "5")
+    assert.match(avlStatus.textContent, /initial AVL tree/)
+    avlHandle.destroy()
+    assert.equal(avlRoot.children.length, 0)
+    assert.ok(
+      [avlInput, ...avlButtons].every((node) =>
+        [...node.listeners.values()].every((items) => !items.length),
+      ),
+    )
+
+    for (const { values, inserted, rotation } of [
+      { values: [10, 20], inserted: 30, rotation: "RR at 10" },
+      { values: [30, 10], inserted: 20, rotation: "LR at 30" },
+      { values: [10, 30], inserted: 20, rotation: "RL at 10" },
+    ]) {
+      const rotationRoot = new FakeNode("div")
+      const rotationHandle = api.mount(rotationRoot, { algorithm: "avl-tree", values })
+      findByAttribute(rotationRoot, "aria-label", "AVL key").value = String(inserted)
+      click(
+        findAllByClass(rotationRoot, "steptrace__structure-action").find(
+          (button) => button.textContent === "Insert",
+        ),
+      )
+      assert.match(
+        findByClass(rotationRoot, "steptrace__structure-status").textContent,
+        new RegExp(rotation),
+      )
+      rotationHandle.destroy()
+    }
+
+    const deleteAvlRoot = new FakeNode("div")
+    const deleteAvlHandle = api.mount(deleteAvlRoot, {
+      algorithm: "avl-tree",
+      values: [9, 5, 10, 0, 6, 11, -1, 1, 2],
+    })
+    const deleteInput = findByAttribute(deleteAvlRoot, "aria-label", "AVL key")
+    deleteInput.value = "10"
+    click(
+      findAllByClass(deleteAvlRoot, "steptrace__structure-action").find(
+        (button) => button.textContent === "Remove",
+      ),
+    )
+    assert.match(findByClass(deleteAvlRoot, "steptrace__structure-status").textContent, / at /)
+    assert.ok(
+      findAllByClass(deleteAvlRoot, "steptrace__binary-tree-node").every((node) =>
+        /balance factor -?1|balance factor 0/.test(node.attributes.get("aria-label")),
+      ),
+    )
+    deleteAvlHandle.destroy()
+
     const invalidHashRoot = new FakeNode("div")
     const invalidHashHandle = api.mount(invalidHashRoot, {
       algorithm: "hash-map",
@@ -9242,4 +9339,73 @@ test("Graph registers one synchronized persistent representation in both hosts",
   }
   for (const artifact of [quartzCss, obsidianCss])
     assert.match(artifact, /\.steptrace__graph-rep-storage/)
+})
+
+test("AVL Tree registers one persistent balanced binary-tree prototype in both hosts", () => {
+  const algorithm = readFileSync(join(here, "src", "algorithms", "avl-tree.ts"), "utf8")
+  const algorithms = readFileSync(join(here, "src", "algorithms", "index.ts"), "utf8")
+  const family = readFileSync(join(here, "src", "families", "binary-tree.ts"), "utf8")
+  const styles = readFileSync(join(here, "src", "styles", "binary-tree.scss"), "utf8")
+  const styleEntry = readFileSync(join(here, "src", "styles", "index.scss"), "utf8")
+  const quartzJs = readFileSync(join(here, "generated", "engine.js"), "utf8")
+  const quartzCss = readFileSync(join(here, "generated", "engine.css"), "utf8")
+  const obsidianJs = readFileSync(
+    join(repoRoot, "Vault", ".obsidian", "plugins", "steptrace", "main.js"),
+    "utf8",
+  )
+  const obsidianCss = readFileSync(
+    join(repoRoot, "Vault", ".obsidian", "plugins", "steptrace", "styles.css"),
+    "utf8",
+  )
+  const note = readFileSync(
+    join(repoRoot, "Vault", "Home", "Computer Science", "Data Structures", "Trees", "AVL Tree.md"),
+    "utf8",
+  )
+
+  assert.match(algorithm, /id: "avl-tree"/)
+  assert.match(algorithm, /family: "binary-tree"/)
+  assert.match(algorithm, /const DEFAULT_VALUES = \[40, 20, 60, 10, 30, 50, 70\]/)
+  assert.match(algorithm, /supports at most 11 values/)
+  assert.match(algorithm, /value must be a finite integer/)
+  assert.match(algorithms, /import \{ avlTree \} from "\.\/avl-tree"/)
+  assert.match(algorithms, /interactiveStructures = \[[\s\S]*avlTree,/)
+  assert.match(family, /createStructureShell\(/)
+  assert.match(family, /onEnter\(shell, input, onInsert\)/)
+  assert.match(family, /observeFixedSvgNodes\(/)
+  assert.match(family, /trimGraphEdge\(/)
+  assert.match(family, /GRAPH_NODE_RADIUS_PX/)
+  assert.match(family, /rotations\.push\(`LL at \$\{node\.key\}`\)/)
+  assert.match(family, /rotations\.push\(`RR at \$\{node\.key\}`\)/)
+  assert.match(family, /rotations\.push\(`LR at \$\{node\.key\}`\)/)
+  assert.match(family, /rotations\.push\(`RL at \$\{node\.key\}`\)/)
+  assert.match(family, /already exists, so the tree did not change/)
+  assert.match(family, /Search path \$\{state\.path\.join\(" → "\)\}/)
+  assert.match(family, /rebalanced the shortened path/)
+  assert.match(family, /Math\.floor\(Math\.random\(\) \* 90\) \+ 10/)
+  assert.match(family, /h\$\{entry\.node\.height\} bf\$\{balance\(entry\.node\)\}/)
+  assert.match(family, /successMarker\("steptrace__binary-tree-success"\)/)
+  assert.match(family, /const MAX_VALUES = 11/)
+  assert.doesNotMatch(family, /settleLater|clearTimer|850/)
+  assert.doesNotMatch(family, /✓|dataset\.tone/)
+  assert.doesNotMatch(family, /\bPlayer\b|\btimeline\b|\bframes\b/)
+  assert.match(styles, /min-block-size: 17rem/)
+  assert.match(styles, /inline-size: min\(100%, 42rem\)/)
+  assert.match(styles, /overflow: hidden/)
+  assert.match(styles, /@container steptrace-binary-tree \(max-width: 36rem\)/)
+  assert.match(styles, /@media \(prefers-reduced-motion: reduce\)/)
+  assert.doesNotMatch(styles, /structure-status\[data-tone/)
+  assert.doesNotMatch(styles, /overflow-x:\s*(auto|scroll)/)
+  assert.match(styleEntry, /@use "binary-tree";/)
+  assert.match(
+    note,
+    /```steptrace\n\{"algorithm":"avl-tree","values":\[30,20,40,10\],"value":5\}\n```/,
+  )
+  assert.match(note, /Press \*\*Insert\*\* with the prefilled `5`/)
+  assert.doesNotMatch(note, /Visualization pending/)
+  for (const artifact of [quartzJs, obsidianJs]) {
+    assert.match(artifact, /Interactive AVL tree/)
+    assert.match(artifact, /rebalanced the shortened path/)
+  }
+  for (const artifact of [quartzCss, obsidianCss])
+    assert.match(artifact, /\.steptrace__binary-tree-surface/)
 })

@@ -52,7 +52,7 @@ function trimGraphEdge(from, to, sourceInset, targetInset = sourceInset) {
   };
 }
 function observeFixedSvgNodes(svg, nodes5, onGeometry) {
-  const update = () => {
+  const update2 = () => {
     const viewBox = numericViewBox(svg);
     const rect = svg.getBoundingClientRect?.();
     const scale = viewBox && rect ? svgRenderedScale(rect, viewBox) : 1;
@@ -66,13 +66,13 @@ function observeFixedSvgNodes(svg, nodes5, onGeometry) {
     }
     onGeometry?.(inverseScale);
   };
-  update();
+  update2();
   const observer = typeof ResizeObserver === "undefined" ? null : new ResizeObserver(() => {
-    update();
+    update2();
   });
   observer?.observe(svg);
   return {
-    update,
+    update: update2,
     destroy() {
       observer?.disconnect();
     }
@@ -1741,7 +1741,7 @@ function makeUnionFindView(frames) {
   const BASE = 150;
   const TOP3 = 26;
   const width = MX * 2 + Math.max(0, n - 1) * SP + UR * 2;
-  const height = 180;
+  const height2 = 180;
   const cx = (i) => MX + UR + i * SP;
   const PALETTE = [
     "var(--_blue)",
@@ -1752,7 +1752,7 @@ function makeUnionFindView(frames) {
   ];
   const svg = document.createElementNS(SVGNS, "svg");
   svg.setAttribute("class", "steptrace__svg steptrace__uf");
-  svg.setAttribute("viewBox", `0 0 ${width} ${height}`);
+  svg.setAttribute("viewBox", `0 0 ${width} ${height2}`);
   svg.setAttribute("role", "img");
   svg.setAttribute("aria-label", "Union-Find forest");
   const arcLayer = document.createElementNS(SVGNS, "g");
@@ -3848,6 +3848,584 @@ var init_activity_selection = __esm({
   }
 });
 
+// custom/steptrace/src/families/interactive-structure.ts
+function createStructureShell(root, id, label, ariaLabel, family10 = "contiguous-storage", stageClass = "steptrace__contiguous") {
+  root.classList.add("steptrace", "steptrace--structure");
+  root.dataset.visualFamily = family10;
+  root.dataset.structure = id;
+  root.setAttribute("role", "group");
+  root.setAttribute("aria-label", ariaLabel);
+  const media = matchMedia("(prefers-reduced-motion: reduce)");
+  const applyMotion = () => root.classList.toggle("steptrace--reduced", media.matches);
+  media.addEventListener("change", applyMotion);
+  const head = el("div", "steptrace__head");
+  const crumb = el("div", "steptrace__crumb");
+  const kind = el("span");
+  kind.textContent = "data structure";
+  const separator = el("span", "steptrace__crumb-sep");
+  separator.textContent = "›";
+  const name = el("span", "steptrace__crumb-algo");
+  name.textContent = label;
+  crumb.append(el("span", "steptrace__crumb-dot"), kind, separator, name);
+  const counter = el("div", "steptrace__counter");
+  head.append(crumb, counter);
+  const body = el("div", "steptrace__body steptrace__structure-body");
+  const stage = el("div", stageClass);
+  body.append(stage);
+  const controls = el("div", "steptrace__foot steptrace__structure-controls");
+  const status = el("div", "steptrace__structure-status");
+  status.setAttribute("role", "status");
+  status.setAttribute("aria-live", "polite");
+  status.setAttribute("aria-atomic", "true");
+  const cleanups = [];
+  root.replaceChildren(head, body, controls);
+  applyMotion();
+  return {
+    stage,
+    controls,
+    status,
+    setCounter(value, suffix = "") {
+      counter.innerHTML = `<b>${value}</b>${suffix}`;
+    },
+    input(inputLabel, placeholder, maxLength = 12) {
+      const input = el("input", "steptrace__structure-input");
+      input.type = "text";
+      input.maxLength = maxLength;
+      input.placeholder = placeholder;
+      input.name = inputLabel;
+      input.setAttribute("aria-label", inputLabel);
+      return input;
+    },
+    select(selectLabel, placeholder, options, selected) {
+      const select = el(
+        "select",
+        "steptrace__select steptrace__structure-select"
+      );
+      select.name = selectLabel;
+      select.setAttribute("aria-label", selectLabel);
+      const prompt = el("option");
+      prompt.value = "";
+      prompt.textContent = placeholder;
+      prompt.disabled = true;
+      select.append(prompt);
+      for (const value of options) {
+        const option = el("option");
+        option.value = value;
+        option.textContent = value;
+        select.append(option);
+      }
+      select.value = selected ?? "";
+      return select;
+    },
+    button(buttonLabel, primary = false) {
+      const button2 = el(
+        "button",
+        `steptrace__structure-action${primary ? " steptrace__structure-action--primary" : ""}`
+      );
+      button2.type = "button";
+      button2.textContent = buttonLabel;
+      return button2;
+    },
+    listen(node, type, listener) {
+      node.addEventListener(type, listener);
+      cleanups.push(() => node.removeEventListener(type, listener));
+    },
+    reducedMotion() {
+      return media.matches;
+    },
+    finish() {
+      controls.append(status);
+      return {
+        destroy() {
+          for (const cleanup of cleanups) cleanup();
+          media.removeEventListener("change", applyMotion);
+          root.replaceChildren();
+          root.classList.remove("steptrace", "steptrace--structure", "steptrace--reduced");
+          delete root.dataset.visualFamily;
+          delete root.dataset.structure;
+        }
+      };
+    }
+  };
+}
+function createIndexedBoard(stage, capacity, ariaLabel) {
+  const board = el("div", "steptrace__contiguous-array");
+  board.setAttribute("role", "list");
+  board.setAttribute("aria-label", ariaLabel);
+  stage.append(board);
+  let cells = [];
+  function resize(nextCapacity) {
+    board.style.setProperty("--steptrace-capacity", String(nextCapacity));
+    board.replaceChildren();
+    cells = Array.from({ length: nextCapacity }, (_, index) => {
+      const cell = el("div", "steptrace__contiguous-cell");
+      cell.setAttribute("role", "listitem");
+      const value = el("span", "steptrace__contiguous-value");
+      const indexLabel = el("span", "steptrace__contiguous-index");
+      indexLabel.textContent = String(index);
+      cell.append(value, indexLabel);
+      board.append(cell);
+      return { cell, index: indexLabel, value };
+    });
+  }
+  function paint(states) {
+    if (states.length !== cells.length) resize(states.length);
+    states.forEach((state, index) => {
+      const target = cells[index];
+      target.value.textContent = state.value ?? "·";
+      target.index.textContent = state.label ?? String(index);
+      target.cell.dataset.empty = state.value == null ? "1" : "0";
+      target.cell.dataset.active = state.active ? "1" : "0";
+      target.cell.dataset.changed = state.changed ? "1" : "0";
+      target.cell.dataset.head = state.head ? "1" : "0";
+      target.cell.dataset.tail = state.tail ? "1" : "0";
+      target.cell.dataset.view = state.view ? "1" : "0";
+      target.cell.setAttribute(
+        "aria-label",
+        state.ariaLabel || `slot ${index}, ${state.value == null ? "empty" : `value ${state.value}`}`
+      );
+    });
+  }
+  resize(capacity);
+  return { paint, resize };
+}
+function onEnter(shell, input, action) {
+  shell.listen(input, "keydown", ((event) => {
+    if (event.key !== "Enter") return;
+    event.preventDefault();
+    action();
+  }));
+}
+var init_interactive_structure = __esm({
+  "custom/steptrace/src/families/interactive-structure.ts"() {
+    init_render();
+  }
+});
+
+// custom/steptrace/src/families/binary-tree.ts
+function svgEl(tag, className) {
+  const node = document.createElementNS(SVG_NS2, tag);
+  node.setAttribute("class", className);
+  return node;
+}
+function height(node) {
+  return node?.height ?? 0;
+}
+function balance(node) {
+  return height(node.left) - height(node.right);
+}
+function update(node) {
+  node.height = 1 + Math.max(height(node.left), height(node.right));
+}
+function rotateRight(node, state) {
+  const root = node.left;
+  state.rotating.add(node.key).add(root.key);
+  node.left = root.right;
+  root.right = node;
+  update(node);
+  update(root);
+  return root;
+}
+function rotateLeft(node, state) {
+  const root = node.right;
+  state.rotating.add(node.key).add(root.key);
+  node.right = root.left;
+  root.left = node;
+  update(node);
+  update(root);
+  return root;
+}
+function rebalance(node, state, rotations) {
+  update(node);
+  const factor = balance(node);
+  if (factor > 1) {
+    if (balance(node.left) < 0) {
+      rotations.push(`LR at ${node.key}`);
+      node.left = rotateLeft(node.left, state);
+    } else rotations.push(`LL at ${node.key}`);
+    return rotateRight(node, state);
+  }
+  if (factor < -1) {
+    if (balance(node.right) > 0) {
+      rotations.push(`RL at ${node.key}`);
+      node.right = rotateRight(node.right, state);
+    } else rotations.push(`RR at ${node.key}`);
+    return rotateLeft(node, state);
+  }
+  return node;
+}
+function insertNode(node, key4, state, rotations) {
+  if (!node) {
+    state.changed.add(key4);
+    return [{ key: key4, height: 1, left: null, right: null }, true];
+  }
+  state.path.push(node.key);
+  if (key4 === node.key) return [node, false];
+  let inserted;
+  if (key4 < node.key) [node.left, inserted] = insertNode(node.left, key4, state, rotations);
+  else [node.right, inserted] = insertNode(node.right, key4, state, rotations);
+  return [inserted ? rebalance(node, state, rotations) : node, inserted];
+}
+function minimumNode(node) {
+  while (node.left) node = node.left;
+  return node;
+}
+function removeNode(node, key4, state, rotations) {
+  if (!node) return [null, false];
+  state.path.push(node.key);
+  let removed;
+  if (key4 < node.key) [node.left, removed] = removeNode(node.left, key4, state, rotations);
+  else if (key4 > node.key) [node.right, removed] = removeNode(node.right, key4, state, rotations);
+  else {
+    removed = true;
+    state.changed.add(node.key);
+    if (!node.left || !node.right) return [node.left || node.right, true];
+    const successor = minimumNode(node.right);
+    node.key = successor.key;
+    state.changed.add(successor.key);
+    [node.right] = removeNode(node.right, successor.key, state, rotations);
+  }
+  return [removed ? rebalance(node, state, rotations) : node, removed];
+}
+function buildTree(values) {
+  let root = null;
+  for (const value of values) {
+    const state = {
+      path: [],
+      changed: /* @__PURE__ */ new Set(),
+      rotating: /* @__PURE__ */ new Set(),
+      success: null
+    };
+    [root] = insertNode(root, value, state, []);
+  }
+  return root;
+}
+function orderedKeys(root) {
+  const keys = [];
+  const visit = (node) => {
+    if (!node) return;
+    visit(node.left);
+    keys.push(node.key);
+    visit(node.right);
+  };
+  visit(root);
+  return keys;
+}
+function mountAvlTree(rootElement, config) {
+  const shell = createStructureShell(
+    rootElement,
+    "avl-tree",
+    "AVL tree",
+    "Interactive AVL tree",
+    "binary-tree",
+    "steptrace__binary-tree"
+  );
+  const initial = [...config.values];
+  let root = buildTree(initial);
+  let state = {
+    path: [],
+    changed: /* @__PURE__ */ new Set(),
+    rotating: /* @__PURE__ */ new Set(),
+    success: null
+  };
+  let geometry = null;
+  const exitTimers = /* @__PURE__ */ new Set();
+  const surface = el("div", "steptrace__binary-tree-surface");
+  const svg = svgEl("svg", "steptrace__binary-tree-svg");
+  svg.setAttribute("viewBox", `0 0 ${VIEW_WIDTH} ${VIEW_HEIGHT}`);
+  svg.setAttribute("role", "img");
+  const edgeLayer = svgEl("g", "steptrace__binary-tree-edges");
+  const nodeLayer = svgEl("g", "steptrace__binary-tree-nodes");
+  svg.append(edgeLayer, nodeLayer);
+  surface.append(svg);
+  shell.stage.append(surface);
+  const nodeViews = /* @__PURE__ */ new Map();
+  const edgeViews = /* @__PURE__ */ new Map();
+  const input = shell.input("AVL key", "Value", 8);
+  input.type = "number";
+  input.step = "1";
+  input.value = config.value == null ? "" : String(config.value);
+  const insert = shell.button("Insert", true);
+  const search = shell.button("Search");
+  const remove = shell.button("Remove");
+  const reset = shell.button("Reset");
+  shell.controls.append(input, insert, search, remove, reset);
+  function positions() {
+    const entries = [];
+    const maxDepth = Math.max(height(root) - 1, 0);
+    const visit = (node, depth, slot) => {
+      if (!node) return;
+      const slots = 2 ** (depth + 1);
+      entries.push({
+        node,
+        x: (slot * 2 + 1) / slots * VIEW_WIDTH,
+        y: 28 + (maxDepth ? depth * 182 / maxDepth : 0)
+      });
+      visit(node.left, depth + 1, slot * 2);
+      visit(node.right, depth + 1, slot * 2 + 1);
+    };
+    visit(root, 0, 0);
+    return entries;
+  }
+  function paintTree() {
+    geometry?.destroy();
+    if (!root) {
+      geometry = null;
+      svg.setAttribute("aria-label", "Empty AVL tree");
+      for (const view of nodeViews.values()) view.group.remove();
+      for (const line of edgeViews.values()) line.remove();
+      nodeViews.clear();
+      edgeViews.clear();
+      return;
+    }
+    const entries = positions();
+    const byNode = new Map(entries.map((entry) => [entry.node, entry]));
+    svg.setAttribute("aria-label", `AVL tree with ${entries.length} unique keys`);
+    const edges5 = [];
+    const nextEdges = /* @__PURE__ */ new Set();
+    for (const parent of entries) {
+      for (const childNode of [parent.node.left, parent.node.right]) {
+        if (!childNode) continue;
+        const child = byNode.get(childNode);
+        const key4 = `${parent.node.key}:${child.node.key}`;
+        nextEdges.add(key4);
+        let line = edgeViews.get(key4);
+        if (!line) {
+          line = svgEl("line", "steptrace__edge steptrace__binary-tree-edge");
+          line.dataset.entering = shell.reducedMotion() ? "0" : "1";
+          edgeLayer.append(line);
+          edgeViews.set(key4, line);
+          globalThis.requestAnimationFrame?.(() => {
+            line.dataset.entering = "0";
+          });
+        }
+        const pathIndex = state.path.indexOf(parent.node.key);
+        line.dataset.state = state.rotating.has(parent.node.key) && state.rotating.has(child.node.key) ? "rotation" : pathIndex >= 0 && state.path[pathIndex + 1] === child.node.key ? "path" : "neutral";
+        edges5.push({ line, from: parent, to: child });
+      }
+    }
+    for (const [key4, line] of edgeViews) {
+      if (nextEdges.has(key4)) continue;
+      edgeViews.delete(key4);
+      if (shell.reducedMotion()) line.remove();
+      else {
+        line.dataset.exiting = "1";
+        const timer = setTimeout(() => {
+          exitTimers.delete(timer);
+          line.remove();
+        }, 180);
+        exitTimers.add(timer);
+      }
+    }
+    const nextNodes = new Set(entries.map((entry) => entry.node.key));
+    const nodes5 = entries.map((entry) => {
+      let view = nodeViews.get(entry.node.key);
+      if (!view) {
+        const group2 = svgEl("g", "steptrace__node steptrace__binary-tree-node");
+        group2.dataset.entering = shell.reducedMotion() ? "0" : "1";
+        const circle = svgEl("circle", "steptrace__ncirc");
+        circle.setAttribute("r", String(GRAPH_NODE_RADIUS_PX));
+        const value2 = svgEl("text", "steptrace__id");
+        value2.setAttribute("text-anchor", "middle");
+        value2.setAttribute("dominant-baseline", "central");
+        const meta2 = svgEl("text", "steptrace__binary-tree-meta");
+        meta2.setAttribute("text-anchor", "middle");
+        meta2.setAttribute("y", "22");
+        const badge2 = successMarker("steptrace__binary-tree-success");
+        badge2.setAttribute("x", "7");
+        badge2.setAttribute("y", "-22");
+        badge2.setAttribute("width", "12");
+        badge2.setAttribute("height", "12");
+        group2.append(circle, value2, meta2, badge2);
+        nodeLayer.append(group2);
+        view = { group: group2, value: value2, meta: meta2, badge: badge2 };
+        nodeViews.set(entry.node.key, view);
+        globalThis.requestAnimationFrame?.(() => {
+          group2.dataset.entering = "0";
+        });
+      }
+      const { group, value, meta, badge } = view;
+      group.dataset.state = state.rotating.has(entry.node.key) ? "rotation" : state.changed.has(entry.node.key) ? "changed" : state.path.includes(entry.node.key) ? "path" : "neutral";
+      group.setAttribute(
+        "aria-label",
+        `Key ${entry.node.key}, height ${entry.node.height}, balance factor ${balance(entry.node)}`
+      );
+      value.textContent = String(entry.node.key);
+      meta.textContent = `h${entry.node.height} bf${balance(entry.node)}`;
+      badge.dataset.visible = state.success === entry.node.key ? "1" : "0";
+      return { element: group, point: { x: entry.x, y: entry.y } };
+    });
+    for (const [key4, view] of nodeViews) {
+      if (nextNodes.has(key4)) continue;
+      nodeViews.delete(key4);
+      if (shell.reducedMotion()) view.group.remove();
+      else {
+        view.group.dataset.exiting = "1";
+        const timer = setTimeout(() => {
+          exitTimers.delete(timer);
+          view.group.remove();
+        }, 180);
+        exitTimers.add(timer);
+      }
+    }
+    geometry = observeFixedSvgNodes(svg, nodes5, (unitsPerCssPixel) => {
+      const radius = GRAPH_NODE_RADIUS_PX * unitsPerCssPixel;
+      for (const { line, from, to } of edges5) {
+        const edge = trimGraphEdge(from, to, radius);
+        line.setAttribute("x1", String(edge.x1));
+        line.setAttribute("y1", String(edge.y1));
+        line.setAttribute("x2", String(edge.x2));
+        line.setAttribute("y2", String(edge.y2));
+        line.style.setProperty("x1", `${edge.x1}px`);
+        line.style.setProperty("y1", `${edge.y1}px`);
+        line.style.setProperty("x2", `${edge.x2}px`);
+        line.style.setProperty("y2", `${edge.y2}px`);
+      }
+    });
+  }
+  function paint(message) {
+    paintTree();
+    const count = orderedKeys(root).length;
+    shell.setCounter(String(count), count === 1 ? " key" : " keys");
+    shell.status.textContent = message;
+    remove.disabled = count === 0;
+    search.disabled = count === 0;
+    insert.disabled = count >= MAX_VALUES;
+  }
+  function valueFromInput(operation) {
+    const raw = input.value.trim();
+    if (raw !== "") {
+      const value2 = Number(raw);
+      if (Number.isFinite(value2) && Number.isInteger(value2)) return value2;
+      paint("Value must be a finite integer.");
+      return null;
+    }
+    const keys = orderedKeys(root);
+    if (operation === "search") return root?.key ?? null;
+    if (operation === "remove") return keys.at(-1) ?? null;
+    if (keys.length >= MAX_VALUES) {
+      paint(`The review tree is capped at ${MAX_VALUES} keys.`);
+      return null;
+    }
+    let value = Math.floor(Math.random() * 90) + 10;
+    while (keys.includes(value)) value = value === 99 ? 10 : value + 1;
+    return value;
+  }
+  function onInsert() {
+    const value = valueFromInput("insert");
+    if (value == null) return;
+    state = { path: [], changed: /* @__PURE__ */ new Set(), rotating: /* @__PURE__ */ new Set(), success: null };
+    const rotations = [];
+    let inserted;
+    [root, inserted] = insertNode(root, value, state, rotations);
+    input.value = "";
+    if (!inserted) {
+      paint(
+        `Compared ${state.path.join(" → ")}; ${value} already exists, so the tree did not change.`
+      );
+      return;
+    }
+    state.success = value;
+    paint(
+      `Inserted ${value} via ${state.path.join(" → ") || "the root"}; ${rotations.length ? `${rotations.join(", ")} restored |balance| ≤ 1.` : "no rotation was needed."}`
+    );
+  }
+  function onSearch() {
+    const value = valueFromInput("search");
+    if (value == null) return;
+    state = { path: [], changed: /* @__PURE__ */ new Set(), rotating: /* @__PURE__ */ new Set(), success: null };
+    let node = root;
+    while (node) {
+      state.path.push(node.key);
+      if (value === node.key) break;
+      node = value < node.key ? node.left : node.right;
+    }
+    input.value = "";
+    state.success = node?.key ?? null;
+    paint(
+      node ? `Search path ${state.path.join(" → ")} found ${value}.` : `Search path ${state.path.join(" → ")} reached an empty child; ${value} is absent.`
+    );
+  }
+  function onRemove() {
+    const value = valueFromInput("remove");
+    if (value == null) return;
+    state = { path: [], changed: /* @__PURE__ */ new Set(), rotating: /* @__PURE__ */ new Set(), success: null };
+    const rotations = [];
+    let removed;
+    [root, removed] = removeNode(root, value, state, rotations);
+    input.value = "";
+    if (!removed) {
+      paint(`Compared ${state.path.join(" → ")}; ${value} is absent, so the tree did not change.`);
+      return;
+    }
+    paint(
+      `Removed ${value} via ${state.path.join(" → ")}; ${rotations.length ? `${rotations.join(", ")} rebalanced the shortened path.` : "all ancestors stayed within |balance| ≤ 1."}`
+    );
+  }
+  function onReset() {
+    root = buildTree(initial);
+    state = { path: [], changed: /* @__PURE__ */ new Set(), rotating: /* @__PURE__ */ new Set(), success: null };
+    input.value = config.value == null ? "" : String(config.value);
+    paint("Reset to the initial AVL tree.");
+  }
+  shell.listen(insert, "click", onInsert);
+  shell.listen(search, "click", onSearch);
+  shell.listen(remove, "click", onRemove);
+  shell.listen(reset, "click", onReset);
+  onEnter(shell, input, onInsert);
+  paint("Insert, search, or remove a key; AVL repairs every imbalance immediately.");
+  const handle = shell.finish();
+  return {
+    destroy() {
+      for (const timer of exitTimers) clearTimeout(timer);
+      geometry?.destroy();
+      handle.destroy();
+    }
+  };
+}
+var SVG_NS2, VIEW_WIDTH, VIEW_HEIGHT, MAX_VALUES;
+var init_binary_tree = __esm({
+  "custom/steptrace/src/families/binary-tree.ts"() {
+    init_graph_node();
+    init_render();
+    init_interactive_structure();
+    SVG_NS2 = "http://www.w3.org/2000/svg";
+    VIEW_WIDTH = 580;
+    VIEW_HEIGHT = 250;
+    MAX_VALUES = 11;
+  }
+});
+
+// custom/steptrace/src/algorithms/avl-tree.ts
+function parseAvlTreeConfig(config) {
+  const values = Array.isArray(config.values) && config.values.length ? config.values : DEFAULT_VALUES;
+  if (values.some(
+    (value2) => typeof value2 !== "number" || !Number.isFinite(value2) || !Number.isInteger(value2)
+  ))
+    throw new Error("steptrace: avl-tree requires finite integer values.");
+  if (new Set(values).size !== values.length)
+    throw new Error("steptrace: avl-tree requires unique values.");
+  if (values.length > 11) throw new Error("steptrace: avl-tree supports at most 11 values.");
+  const value = config.value;
+  if (value != null && (typeof value !== "number" || !Number.isFinite(value) || !Number.isInteger(value)))
+    throw new Error("steptrace: avl-tree value must be a finite integer.");
+  return { values, value };
+}
+var DEFAULT_VALUES, avlTree;
+var init_avl_tree = __esm({
+  "custom/steptrace/src/algorithms/avl-tree.ts"() {
+    init_binary_tree();
+    DEFAULT_VALUES = [40, 20, 60, 10, 30, 50, 70];
+    avlTree = {
+      id: "avl-tree",
+      family: "binary-tree",
+      meta: { label: "AVL Tree" },
+      parse: parseAvlTreeConfig,
+      mount: mountAvlTree
+    };
+  }
+});
+
 // custom/steptrace/src/families/graph-state.ts
 function invalid(message) {
   throw new Error(`steptrace: a-star ${message}`);
@@ -4111,13 +4689,13 @@ function buildingScenario() {
     [295, 240, 140, 55, "ARCHIVE"],
     [435, 240, 160, 55, "OPERATIONS"]
   ];
-  const decor = rooms.flatMap(([x, y, width, height, text]) => [
-    { kind: "rect", className: "steptrace__gs-room", x, y, width, height },
+  const decor = rooms.flatMap(([x, y, width, height2, text]) => [
+    { kind: "rect", className: "steptrace__gs-room", x, y, width, height: height2 },
     {
       kind: "text",
       className: "steptrace__gs-map-label",
       x: x + width / 2,
-      y: y + height / 2,
+      y: y + height2 / 2,
       text
     }
   ]);
@@ -4267,7 +4845,7 @@ function parseGraphStateConfig(config) {
   return gridScenario();
 }
 function svgElement2(kind, attributes = {}) {
-  const node = document.createElementNS(SVG_NS2, kind);
+  const node = document.createElementNS(SVG_NS3, kind);
   for (const [key4, value] of Object.entries(attributes)) node.setAttribute(key4, String(value));
   return node;
 }
@@ -4732,12 +5310,12 @@ function makeGraphStateView(frames) {
     destroy: () => geometry?.destroy()
   };
 }
-var SVG_NS2, graphStateViewId, GRAPH_STATE_MARKER_ROLES, CITY_DATA, CITY_NODE_OFFSETS, GraphStateRecorder, graphStateFamily;
+var SVG_NS3, graphStateViewId, GRAPH_STATE_MARKER_ROLES, CITY_DATA, CITY_NODE_OFFSETS, GraphStateRecorder, graphStateFamily;
 var init_graph_state = __esm({
   "custom/steptrace/src/families/graph-state.ts"() {
     init_render();
     init_graph_node();
-    SVG_NS2 = "http://www.w3.org/2000/svg";
+    SVG_NS3 = "http://www.w3.org/2000/svg";
     graphStateViewId = 0;
     GRAPH_STATE_MARKER_ROLES = ["neutral", "active", "selected", "cut"];
     CITY_DATA = [
@@ -6654,12 +7232,12 @@ var init_recorders = __esm({
         this._push("init", message);
       }
       /** One logical step: update named pointers, the window span, and/or marks. */
-      step(update, message) {
-        update = update || {};
-        if (update.pointers) this.pointers = { ...update.pointers };
-        if ("window" in update) this.window = update.window ? update.window.slice() : null;
-        if (update.mark) this.marked = this.marked.concat(update.mark);
-        this._push(update.mark ? "match" : "step", message);
+      step(update2, message) {
+        update2 = update2 || {};
+        if (update2.pointers) this.pointers = { ...update2.pointers };
+        if ("window" in update2) this.window = update2.window ? update2.window.slice() : null;
+        if (update2.mark) this.marked = this.marked.concat(update2.mark);
+        this._push(update2.mark ? "match" : "step", message);
       }
       done(message) {
         this._push("done", message);
@@ -7544,160 +8122,6 @@ var init_binary_search = __esm({
   }
 });
 
-// custom/steptrace/src/families/interactive-structure.ts
-function createStructureShell(root, id, label, ariaLabel, family10 = "contiguous-storage", stageClass = "steptrace__contiguous") {
-  root.classList.add("steptrace", "steptrace--structure");
-  root.dataset.visualFamily = family10;
-  root.dataset.structure = id;
-  root.setAttribute("role", "group");
-  root.setAttribute("aria-label", ariaLabel);
-  const media = matchMedia("(prefers-reduced-motion: reduce)");
-  const applyMotion = () => root.classList.toggle("steptrace--reduced", media.matches);
-  media.addEventListener("change", applyMotion);
-  const head = el("div", "steptrace__head");
-  const crumb = el("div", "steptrace__crumb");
-  const kind = el("span");
-  kind.textContent = "data structure";
-  const separator = el("span", "steptrace__crumb-sep");
-  separator.textContent = "›";
-  const name = el("span", "steptrace__crumb-algo");
-  name.textContent = label;
-  crumb.append(el("span", "steptrace__crumb-dot"), kind, separator, name);
-  const counter = el("div", "steptrace__counter");
-  head.append(crumb, counter);
-  const body = el("div", "steptrace__body steptrace__structure-body");
-  const stage = el("div", stageClass);
-  body.append(stage);
-  const controls = el("div", "steptrace__foot steptrace__structure-controls");
-  const status = el("div", "steptrace__structure-status");
-  status.setAttribute("role", "status");
-  status.setAttribute("aria-live", "polite");
-  status.setAttribute("aria-atomic", "true");
-  const cleanups = [];
-  root.replaceChildren(head, body, controls);
-  applyMotion();
-  return {
-    stage,
-    controls,
-    status,
-    setCounter(value, suffix = "") {
-      counter.innerHTML = `<b>${value}</b>${suffix}`;
-    },
-    input(inputLabel, placeholder, maxLength = 12) {
-      const input = el("input", "steptrace__structure-input");
-      input.type = "text";
-      input.maxLength = maxLength;
-      input.placeholder = placeholder;
-      input.name = inputLabel;
-      input.setAttribute("aria-label", inputLabel);
-      return input;
-    },
-    select(selectLabel, placeholder, options, selected) {
-      const select = el(
-        "select",
-        "steptrace__select steptrace__structure-select"
-      );
-      select.name = selectLabel;
-      select.setAttribute("aria-label", selectLabel);
-      const prompt = el("option");
-      prompt.value = "";
-      prompt.textContent = placeholder;
-      prompt.disabled = true;
-      select.append(prompt);
-      for (const value of options) {
-        const option = el("option");
-        option.value = value;
-        option.textContent = value;
-        select.append(option);
-      }
-      select.value = selected ?? "";
-      return select;
-    },
-    button(buttonLabel, primary = false) {
-      const button2 = el(
-        "button",
-        `steptrace__structure-action${primary ? " steptrace__structure-action--primary" : ""}`
-      );
-      button2.type = "button";
-      button2.textContent = buttonLabel;
-      return button2;
-    },
-    listen(node, type, listener) {
-      node.addEventListener(type, listener);
-      cleanups.push(() => node.removeEventListener(type, listener));
-    },
-    reducedMotion() {
-      return media.matches;
-    },
-    finish() {
-      controls.append(status);
-      return {
-        destroy() {
-          for (const cleanup of cleanups) cleanup();
-          media.removeEventListener("change", applyMotion);
-          root.replaceChildren();
-          root.classList.remove("steptrace", "steptrace--structure", "steptrace--reduced");
-          delete root.dataset.visualFamily;
-          delete root.dataset.structure;
-        }
-      };
-    }
-  };
-}
-function createIndexedBoard(stage, capacity, ariaLabel) {
-  const board = el("div", "steptrace__contiguous-array");
-  board.setAttribute("role", "list");
-  board.setAttribute("aria-label", ariaLabel);
-  stage.append(board);
-  let cells = [];
-  function resize(nextCapacity) {
-    board.style.setProperty("--steptrace-capacity", String(nextCapacity));
-    board.replaceChildren();
-    cells = Array.from({ length: nextCapacity }, (_, index) => {
-      const cell = el("div", "steptrace__contiguous-cell");
-      cell.setAttribute("role", "listitem");
-      const value = el("span", "steptrace__contiguous-value");
-      const indexLabel = el("span", "steptrace__contiguous-index");
-      indexLabel.textContent = String(index);
-      cell.append(value, indexLabel);
-      board.append(cell);
-      return { cell, index: indexLabel, value };
-    });
-  }
-  function paint(states) {
-    if (states.length !== cells.length) resize(states.length);
-    states.forEach((state, index) => {
-      const target = cells[index];
-      target.value.textContent = state.value ?? "·";
-      target.index.textContent = state.label ?? String(index);
-      target.cell.dataset.empty = state.value == null ? "1" : "0";
-      target.cell.dataset.active = state.active ? "1" : "0";
-      target.cell.dataset.changed = state.changed ? "1" : "0";
-      target.cell.dataset.head = state.head ? "1" : "0";
-      target.cell.dataset.tail = state.tail ? "1" : "0";
-      target.cell.dataset.view = state.view ? "1" : "0";
-      target.cell.setAttribute(
-        "aria-label",
-        state.ariaLabel || `slot ${index}, ${state.value == null ? "empty" : `value ${state.value}`}`
-      );
-    });
-  }
-  resize(capacity);
-  return { paint, resize };
-}
-function onEnter(shell, input, action) {
-  shell.listen(input, "keydown", ((event) => {
-    if (event.key !== "Enter") return;
-    event.preventDefault();
-    action();
-  }));
-}
-var init_interactive_structure = __esm({
-  "custom/steptrace/src/families/interactive-structure.ts"() {
-    init_render();
-  }
-});
-
 // custom/steptrace/src/families/hash-index.ts
 function indexFor(key4, size) {
   return (key4 % size + size) % size;
@@ -7949,12 +8373,12 @@ function mountHashTable(root, config, content) {
   function centeredTokenFrame(target, tokenOrigin) {
     const targetRect = target.getBoundingClientRect();
     const width = tokenWidth || tokenOrigin.width;
-    const height = tokenHeight || tokenOrigin.height;
+    const height2 = tokenHeight || tokenOrigin.height;
     return {
       x: targetRect.left + targetRect.width / 2 - tokenOrigin.left - width / 2,
-      y: targetRect.top + targetRect.height / 2 - tokenOrigin.top - height / 2,
+      y: targetRect.top + targetRect.height / 2 - tokenOrigin.top - height2 / 2,
       width,
-      height
+      height: height2
     };
   }
   function setTokenPosition(x, y) {
@@ -8741,8 +9165,8 @@ function heapPosition(index) {
     y: 32 + depth * 68
   };
 }
-function svgEl(tag, className) {
-  const node = document.createElementNS(SVG_NS3, tag);
+function svgEl2(tag, className) {
+  const node = document.createElementNS(SVG_NS4, tag);
   node.setAttribute("class", className);
   return node;
 }
@@ -8764,7 +9188,7 @@ function makeHeapSelectionView(frames) {
   const heapLabel = el("div", "steptrace__rail-label steptrace__heap-tree-label");
   heapLabel.textContent = `Min-heap · capacity k = ${first.k}`;
   const heapWrap = el("div", "steptrace__heap-tree");
-  const svg = svgEl("svg", "steptrace__heap-svg");
+  const svg = svgEl2("svg", "steptrace__heap-svg");
   svg.setAttribute("viewBox", `0 0 300 ${first.k > 3 ? 192 : 124}`);
   svg.setAttribute("role", "img");
   svg.setAttribute("aria-label", "Fixed-size min-heap; root is the weakest current winner");
@@ -8772,7 +9196,7 @@ function makeHeapSelectionView(frames) {
   const edges5 = [];
   for (let index = 1; index < first.k; index++) {
     const parent = Math.floor((index - 1) / 2);
-    const line = svgEl("line", "steptrace__edge steptrace__heap-edge");
+    const line = svgEl2("line", "steptrace__edge steptrace__heap-edge");
     line.setAttribute("x1", String(positions[parent].x));
     line.setAttribute("y1", String(positions[parent].y));
     line.setAttribute("x2", String(positions[index].x));
@@ -8781,14 +9205,14 @@ function makeHeapSelectionView(frames) {
     edges5.push({ line, parent, child: index });
   }
   const nodes5 = positions.map((position, index) => {
-    const group = svgEl("g", "steptrace__node steptrace__heap-node");
+    const group = svgEl2("g", "steptrace__node steptrace__heap-node");
     group.setAttribute("transform", `translate(${position.x} ${position.y})`);
-    const circle = svgEl("circle", "steptrace__ncirc");
+    const circle = svgEl2("circle", "steptrace__ncirc");
     circle.setAttribute("r", String(GRAPH_NODE_RADIUS_PX));
-    const value = svgEl("text", "steptrace__id");
+    const value = svgEl2("text", "steptrace__id");
     value.setAttribute("text-anchor", "middle");
     value.setAttribute("dominant-baseline", "central");
-    const rootTag = svgEl("text", "steptrace__heap-root-label");
+    const rootTag = svgEl2("text", "steptrace__heap-root-label");
     rootTag.setAttribute("text-anchor", "middle");
     rootTag.setAttribute("y", "-23");
     rootTag.textContent = index === 0 ? "weakest winner" : "";
@@ -8900,7 +9324,7 @@ function makeHeapSelectionView(frames) {
     destroy: geometry.destroy
   };
 }
-var HeapSelectionRecorder, SVG_NS3, heapSelectionFamily;
+var HeapSelectionRecorder, SVG_NS4, heapSelectionFamily;
 var init_heap_selection = __esm({
   "custom/steptrace/src/families/heap-selection.ts"() {
     init_render();
@@ -9016,7 +9440,7 @@ var init_heap_selection = __esm({
         );
       }
     };
-    SVG_NS3 = "http://www.w3.org/2000/svg";
+    SVG_NS4 = "http://www.w3.org/2000/svg";
     heapSelectionFamily = {
       id: "heap-selection",
       createRecorder(config) {
@@ -9030,8 +9454,8 @@ var init_heap_selection = __esm({
 });
 
 // custom/steptrace/src/families/heap-structure.ts
-function svgEl2(tag, className) {
-  const node = document.createElementNS(SVG_NS4, tag);
+function svgEl3(tag, className) {
+  const node = document.createElementNS(SVG_NS5, tag);
   node.setAttribute("class", className);
   return node;
 }
@@ -9075,7 +9499,7 @@ function mountHeap(root, config) {
       return;
     }
     const depth = Math.floor(Math.log2(values.length));
-    const svg = svgEl2("svg", "steptrace__heap-svg");
+    const svg = svgEl3("svg", "steptrace__heap-svg");
     svg.setAttribute("viewBox", `0 0 300 ${64 + depth * 68}`);
     svg.setAttribute("role", "img");
     svg.setAttribute("aria-label", `Binary min-heap tree with ${values.length} values`);
@@ -9089,19 +9513,19 @@ function mountHeap(root, config) {
     const edges5 = [];
     for (let child = 1; child < values.length; child++) {
       const parent = Math.floor((child - 1) / 2);
-      const line = svgEl2("line", "steptrace__edge steptrace__heap-edge");
+      const line = svgEl3("line", "steptrace__edge steptrace__heap-edge");
       line.dataset.path = pathEdges.has(`${parent}:${child}`) ? "1" : "0";
       svg.append(line);
       edges5.push({ line, parent, child });
     }
     const nodes5 = positions.map((position, index) => {
-      const group = svgEl2("g", "steptrace__node steptrace__heap-node");
+      const group = svgEl3("g", "steptrace__node steptrace__heap-node");
       group.dataset.visible = "1";
       group.dataset.state = index === settled ? "settled" : path.includes(index) ? "compare" : "neutral";
       group.setAttribute("aria-label", `Heap index ${index}, value ${values[index]}`);
-      const circle = svgEl2("circle", "steptrace__ncirc");
+      const circle = svgEl3("circle", "steptrace__ncirc");
       circle.setAttribute("r", String(GRAPH_NODE_RADIUS_PX));
-      const value = svgEl2("text", "steptrace__id");
+      const value = svgEl3("text", "steptrace__id");
       value.setAttribute("text-anchor", "middle");
       value.setAttribute("dominant-baseline", "central");
       value.textContent = String(values[index]);
@@ -9251,7 +9675,7 @@ function paintForest(target, roots, options) {
     place(root, left, 0);
     left += widths.get(root.id) ?? 1;
   }
-  const svg = svgEl2("svg", "steptrace__heap-svg steptrace__heap-forest-svg");
+  const svg = svgEl3("svg", "steptrace__heap-svg steptrace__heap-forest-svg");
   svg.setAttribute("viewBox", `0 0 ${Math.max(180, 56 + totalWidth * 66)} ${74 + maxDepth * 62}`);
   svg.setAttribute("role", "img");
   svg.setAttribute("aria-label", options.ariaLabel);
@@ -9260,7 +9684,7 @@ function paintForest(target, roots, options) {
   const visit = (node) => {
     flat.push(node);
     for (const child of node.children) {
-      const line = svgEl2("line", "steptrace__edge steptrace__heap-edge");
+      const line = svgEl3("line", "steptrace__edge steptrace__heap-edge");
       line.dataset.path = options.active?.has(node.id) && options.active.has(child.id) ? "1" : "0";
       svg.append(line);
       edges5.push({ line, from: node, to: child });
@@ -9270,23 +9694,23 @@ function paintForest(target, roots, options) {
   roots.forEach(visit);
   const nodes5 = flat.map((node) => {
     const point = positions.get(node.id);
-    const group = svgEl2("g", "steptrace__node steptrace__heap-node");
+    const group = svgEl3("g", "steptrace__node steptrace__heap-node");
     group.dataset.visible = "1";
     group.dataset.state = options.settled?.has(node.id) ? "settled" : options.active?.has(node.id) ? "compare" : "neutral";
     group.setAttribute(
       "aria-label",
       `Heap node ${node.key}${node.marked ? ", marked" : ""}${node.npl ? `, npl ${node.npl}` : ""}`
     );
-    const circle = svgEl2("circle", "steptrace__ncirc");
+    const circle = svgEl3("circle", "steptrace__ncirc");
     circle.setAttribute("r", String(GRAPH_NODE_RADIUS_PX));
-    const value = svgEl2("text", "steptrace__id");
+    const value = svgEl3("text", "steptrace__id");
     value.setAttribute("text-anchor", "middle");
     value.setAttribute("dominant-baseline", "central");
     value.textContent = String(node.key);
     group.append(circle, value);
     const detail = options.meta?.(node);
     if (detail) {
-      const meta = svgEl2("text", "steptrace__heap-node-meta");
+      const meta = svgEl3("text", "steptrace__heap-node-meta");
       meta.setAttribute("text-anchor", "middle");
       meta.setAttribute("y", "23");
       meta.textContent = detail;
@@ -9294,14 +9718,14 @@ function paintForest(target, roots, options) {
     }
     const rootLabel = options.rootMeta?.get(node.id);
     if (rootLabel) {
-      const meta = svgEl2("text", "steptrace__heap-root-label");
+      const meta = svgEl3("text", "steptrace__heap-root-label");
       meta.setAttribute("text-anchor", "middle");
       meta.setAttribute("y", "-20");
       meta.textContent = rootLabel;
       group.append(meta);
     }
     if (node.marked) {
-      const mark = svgEl2("circle", "steptrace__heap-mark");
+      const mark = svgEl3("circle", "steptrace__heap-mark");
       mark.setAttribute("cx", "11");
       mark.setAttribute("cy", "-11");
       mark.setAttribute("r", "4");
@@ -9780,14 +10204,14 @@ function mountLeftistHeap(root, _config) {
 function mountSkewHeap(root, _config) {
   return mountMergeHeap(root, "skew");
 }
-var SVG_NS4;
+var SVG_NS5;
 var init_heap_structure = __esm({
   "custom/steptrace/src/families/heap-structure.ts"() {
     init_graph_node();
     init_render();
     init_heap_selection();
     init_interactive_structure();
-    SVG_NS4 = "http://www.w3.org/2000/svg";
+    SVG_NS5 = "http://www.w3.org/2000/svg";
   }
 });
 
@@ -12032,7 +12456,7 @@ var init_contiguous_storage = __esm({
 
 // custom/steptrace/src/algorithms/arrays.ts
 function parseArrayConfig(config) {
-  const values = (config.values?.length ? config.values : DEFAULT_VALUES).map(String);
+  const values = (config.values?.length ? config.values : DEFAULT_VALUES2).map(String);
   const capacity = config.capacity ?? values.length;
   if (!Number.isInteger(capacity) || capacity < 3 || capacity > 10 || values.length > capacity)
     throw new Error(
@@ -12040,11 +12464,11 @@ function parseArrayConfig(config) {
     );
   return { capacity, values };
 }
-var DEFAULT_VALUES, arrays;
+var DEFAULT_VALUES2, arrays;
 var init_arrays = __esm({
   "custom/steptrace/src/algorithms/arrays.ts"() {
     init_contiguous_storage();
-    DEFAULT_VALUES = [12, 7, 31, 18, 9, 25];
+    DEFAULT_VALUES2 = [12, 7, 31, 18, 9, 25];
     arrays = {
       id: "arrays",
       family: "contiguous-storage",
@@ -14091,7 +14515,7 @@ var init_dynamic_programming = __esm({
 
 // custom/steptrace/src/algorithms/dynamic-array.ts
 function parseDynamicArrayConfig(config) {
-  const values = (config.values?.length ? config.values : DEFAULT_VALUES2).map(String);
+  const values = (config.values?.length ? config.values : DEFAULT_VALUES3).map(String);
   const capacity = config.capacity ?? 4;
   if (!Number.isInteger(capacity) || capacity < 3 || capacity > 5 || values.length > capacity)
     throw new Error(
@@ -14099,11 +14523,11 @@ function parseDynamicArrayConfig(config) {
     );
   return { capacity, values };
 }
-var DEFAULT_VALUES2, dynamicArray;
+var DEFAULT_VALUES3, dynamicArray;
 var init_dynamic_array = __esm({
   "custom/steptrace/src/algorithms/dynamic-array.ts"() {
     init_contiguous_storage();
-    DEFAULT_VALUES2 = [12, 7, 31];
+    DEFAULT_VALUES3 = [12, 7, 31];
     dynamicArray = {
       id: "dynamic-array",
       family: "contiguous-storage",
@@ -15360,12 +15784,12 @@ function mountFenwickTree(root, config) {
   const options = values.map((_, index) => String(index + 1));
   const updateIndex = shell.select("Point update index", "Index", options, "5");
   const delta = shell.input("Delta to add", "Delta", 6);
-  const update = shell.button("Add delta", true);
+  const update2 = shell.button("Add delta", true);
   const rangeStart = shell.select("Range start", "From", options, "3");
   const rangeEnd = shell.select("Range end", "To", options, "7");
   const query = shell.button("Range sum");
   const reset = shell.button("Reset");
-  shell.controls.append(updateIndex, delta, update, rangeStart, rangeEnd, query, reset);
+  shell.controls.append(updateIndex, delta, update2, rangeStart, rangeEnd, query, reset);
   function paint(message = "") {
     valuesBoard.paint(
       values.map((value, offset) => {
@@ -15444,7 +15868,7 @@ function mountFenwickTree(root, config) {
     delta.value = "";
     paint("Reset source values and every stored Fenwick aggregate.");
   }
-  shell.listen(update, "click", onUpdate);
+  shell.listen(update2, "click", onUpdate);
   shell.listen(query, "click", onQuery);
   shell.listen(reset, "click", onReset);
   shell.listen(updateIndex, "change", (() => paint()));
@@ -15532,12 +15956,12 @@ function mountSegmentTree(root, config) {
   const options = values.map((_, index) => String(index + 1));
   const updateIndex = shell.select("Point update index", "Index", options, "4");
   const updateValue = shell.input("New value", "Value", 6);
-  const update = shell.button("Set value", true);
+  const update2 = shell.button("Set value", true);
   const rangeStart = shell.select("Range start", "From", options, "3");
   const rangeEnd = shell.select("Range end", "To", options, "7");
   const query = shell.button("Range sum");
   const reset = shell.button("Reset");
-  shell.controls.append(updateIndex, updateValue, update, rangeStart, rangeEnd, query, reset);
+  shell.controls.append(updateIndex, updateValue, update2, rangeStart, rangeEnd, query, reset);
   function paint(message = "") {
     valuesBoard.paint(
       values.map((value, offset) => {
@@ -15611,7 +16035,7 @@ function mountSegmentTree(root, config) {
     updateValue.value = "";
     paint("Reset source values and every segment aggregate.");
   }
-  shell.listen(update, "click", onUpdate);
+  shell.listen(update2, "click", onUpdate);
   shell.listen(query, "click", onQuery);
   shell.listen(reset, "click", onReset);
   onEnter(shell, updateValue, onUpdate);
@@ -15627,18 +16051,18 @@ var init_range_aggregate = __esm({
 
 // custom/steptrace/src/algorithms/fenwick-tree.ts
 function parseFenwickTreeConfig(config) {
-  const values = Array.isArray(config.array) && config.array.length ? config.array : DEFAULT_VALUES3;
+  const values = Array.isArray(config.array) && config.array.length ? config.array : DEFAULT_VALUES4;
   if (values.length < 4 || values.length > 8 || values.some(
     (value) => typeof value !== "number" || !Number.isFinite(value) || !Number.isInteger(value)
   ))
     throw new Error(`steptrace: fenwick-tree requires 4 to 8 finite integer values.`);
   return { values };
 }
-var DEFAULT_VALUES3, fenwickTree;
+var DEFAULT_VALUES4, fenwickTree;
 var init_fenwick_tree = __esm({
   "custom/steptrace/src/algorithms/fenwick-tree.ts"() {
     init_range_aggregate();
-    DEFAULT_VALUES3 = [3, 1, 4, 1, 5, 9, 2, 6];
+    DEFAULT_VALUES4 = [3, 1, 4, 1, 5, 9, 2, 6];
     fenwickTree = {
       id: "fenwick-tree",
       family: "range-aggregate",
@@ -15651,18 +16075,18 @@ var init_fenwick_tree = __esm({
 
 // custom/steptrace/src/algorithms/fibonacci-heap.ts
 function parseFibonacciHeapConfig(config) {
-  const values = Array.isArray(config.array) && config.array.length ? config.array : DEFAULT_VALUES4;
+  const values = Array.isArray(config.array) && config.array.length ? config.array : DEFAULT_VALUES5;
   if (values.some(
     (value) => typeof value !== "number" || !Number.isFinite(value) || !Number.isInteger(value)
   ))
     throw new Error(`steptrace: fibonacci-heap requires finite integer values.`);
   return { values };
 }
-var DEFAULT_VALUES4, fibonacciHeap;
+var DEFAULT_VALUES5, fibonacciHeap;
 var init_fibonacci_heap = __esm({
   "custom/steptrace/src/algorithms/fibonacci-heap.ts"() {
     init_heap_structure();
-    DEFAULT_VALUES4 = [3, 7, 18, 24, 26, 39, 41, 52, 63];
+    DEFAULT_VALUES5 = [3, 7, 18, 24, 26, 39, 41, 52, 63];
     fibonacciHeap = {
       id: "fibonacci-heap",
       family: "heap-selection",
@@ -15769,7 +16193,7 @@ var init_greedy_best_first_search = __esm({
 
 // custom/steptrace/src/families/graph-representation.ts
 function svgElement3(kind, attributes = {}) {
-  const node = document.createElementNS(SVG_NS5, kind);
+  const node = document.createElementNS(SVG_NS6, kind);
   for (const [key4, value] of Object.entries(attributes)) node.setAttribute(key4, String(value));
   return node;
 }
@@ -16099,14 +16523,14 @@ function mountGraphRepresentation(root) {
     }
   };
 }
-var SVG_NS5, VERTICES, INITIAL_EDGES, CHANGE_MS, graphRepresentationId;
+var SVG_NS6, VERTICES, INITIAL_EDGES, CHANGE_MS, graphRepresentationId;
 var init_graph_representation = __esm({
   "custom/steptrace/src/families/graph-representation.ts"() {
     init_graph();
     init_graph_node();
     init_render();
     init_interactive_structure();
-    SVG_NS5 = "http://www.w3.org/2000/svg";
+    SVG_NS6 = "http://www.w3.org/2000/svg";
     VERTICES = ["0", "1", "2", "3"];
     INITIAL_EDGES = [
       ["0", "1"],
@@ -16136,7 +16560,7 @@ var init_graph2 = __esm({
 
 // custom/steptrace/src/algorithms/heap.ts
 function parseHeapConfig(config) {
-  const values = Array.isArray(config.array) && config.array.length ? config.array : DEFAULT_VALUES5;
+  const values = Array.isArray(config.array) && config.array.length ? config.array : DEFAULT_VALUES6;
   if (values.some(
     (value) => typeof value !== "number" || !Number.isFinite(value) || !Number.isInteger(value)
   ))
@@ -16145,11 +16569,11 @@ function parseHeapConfig(config) {
     throw new Error(`steptrace: heap requires a valid binary min-heap array.`);
   return { values };
 }
-var DEFAULT_VALUES5, heap;
+var DEFAULT_VALUES6, heap;
 var init_heap = __esm({
   "custom/steptrace/src/algorithms/heap.ts"() {
     init_heap_structure();
-    DEFAULT_VALUES5 = [3, 5, 8, 9];
+    DEFAULT_VALUES6 = [3, 5, 8, 9];
     heap = {
       id: "heap",
       family: "heap-selection",
@@ -16945,7 +17369,7 @@ var init_linear_search = __esm({
 
 // custom/steptrace/src/algorithms/linked-list.ts
 function parseLinkedListConfig(config) {
-  const values = Array.isArray(config.array) && config.array.length ? config.array : DEFAULT_VALUES6;
+  const values = Array.isArray(config.array) && config.array.length ? config.array : DEFAULT_VALUES7;
   const variant = config.variant ?? "singly";
   if (variant !== "singly" && variant !== "doubly")
     throw new Error(`steptrace: linked-list "variant" must be "singly" or "doubly".`);
@@ -16957,11 +17381,11 @@ function parseLinkedListConfig(config) {
     );
   return { values, variant };
 }
-var DEFAULT_VALUES6, linkedList;
+var DEFAULT_VALUES7, linkedList;
 var init_linked_list = __esm({
   "custom/steptrace/src/algorithms/linked-list.ts"() {
     init_linked_topology();
-    DEFAULT_VALUES6 = [12, 27, 39, 54];
+    DEFAULT_VALUES7 = [12, 27, 39, 54];
     linkedList = {
       id: "linked-list",
       family: "linked-topology",
@@ -17095,7 +17519,7 @@ function merge(left, right) {
   while (j < right.length) output.push(right[j++]);
   return output;
 }
-function buildTree(values, from, to, depth, id, path, nodes5, edges5, metas) {
+function buildTree2(values, from, to, depth, id, path, nodes5, edges5, metas) {
   const segment = values.slice(from, to);
   const label = segment.length ? `[${from}…${to - 1}]` : "[]";
   const detail = segment.join("  ");
@@ -17128,7 +17552,7 @@ function buildTree(values, from, to, depth, id, path, nodes5, edges5, metas) {
   const leftId = `${id}-l`;
   const rightId = `${id}-r`;
   edges5.push({ from: id, to: leftId }, { from: id, to: rightId });
-  const leftMeta = buildTree(
+  const leftMeta = buildTree2(
     values,
     from,
     mid,
@@ -17139,7 +17563,7 @@ function buildTree(values, from, to, depth, id, path, nodes5, edges5, metas) {
     edges5,
     metas
   );
-  const rightMeta = buildTree(
+  const rightMeta = buildTree2(
     values,
     mid,
     to,
@@ -17217,7 +17641,7 @@ var init_merge_sort_tree = __esm({
         const edges5 = [];
         const metas = /* @__PURE__ */ new Map();
         const rootId = "root";
-        const rootMeta = buildTree(values, 0, values.length, 0, rootId, [rootId], nodes5, edges5, metas);
+        const rootMeta = buildTree2(values, 0, values.length, 0, rootId, [rootId], nodes5, edges5, metas);
         rootMeta.from = 0;
         rootMeta.to = values.length;
         rootMeta.values = values.slice();
@@ -18500,18 +18924,18 @@ var init_selection_sort = __esm({
 
 // custom/steptrace/src/algorithms/segment-tree.ts
 function parseSegmentTreeConfig(config) {
-  const values = Array.isArray(config.array) && config.array.length ? config.array : DEFAULT_VALUES7;
+  const values = Array.isArray(config.array) && config.array.length ? config.array : DEFAULT_VALUES8;
   if (values.length < 4 || values.length > 8 || values.some(
     (value) => typeof value !== "number" || !Number.isFinite(value) || !Number.isInteger(value)
   ))
     throw new Error(`steptrace: segment-tree requires 4 to 8 finite integer values.`);
   return { values };
 }
-var DEFAULT_VALUES7, segmentTree;
+var DEFAULT_VALUES8, segmentTree;
 var init_segment_tree = __esm({
   "custom/steptrace/src/algorithms/segment-tree.ts"() {
     init_range_aggregate();
-    DEFAULT_VALUES7 = [3, 4, 1, 7, 2, 6, 5, 8];
+    DEFAULT_VALUES8 = [3, 4, 1, 7, 2, 6, 5, 8];
     segmentTree = {
       id: "segment-tree",
       family: "range-aggregate",
@@ -18652,17 +19076,17 @@ var init_sliding_window = __esm({
 
 // custom/steptrace/src/algorithms/span.ts
 function parseSpanConfig(config) {
-  const values = (config.values?.length ? config.values : DEFAULT_VALUES8).map(String);
+  const values = (config.values?.length ? config.values : DEFAULT_VALUES9).map(String);
   const [start, end] = config.range ?? [1, Math.min(4, values.length)];
   if (values.length < 3 || values.length > 10 || !Number.isInteger(start) || !Number.isInteger(end) || start < 0 || end <= start || end > values.length)
     throw new Error(`steptrace: span requires 3 to 10 "values" and a valid half-open "range".`);
   return { values, start, length: end - start };
 }
-var DEFAULT_VALUES8, span;
+var DEFAULT_VALUES9, span;
 var init_span = __esm({
   "custom/steptrace/src/algorithms/span.ts"() {
     init_contiguous_storage();
-    DEFAULT_VALUES8 = [10, 20, 30, 40, 50, 60];
+    DEFAULT_VALUES9 = [10, 20, 30, 40, 50, 60];
     span = {
       id: "span",
       family: "contiguous-storage",
@@ -18675,7 +19099,7 @@ var init_span = __esm({
 
 // custom/steptrace/src/algorithms/stack.ts
 function parseStackConfig(config) {
-  const values = (config.values?.length ? config.values : DEFAULT_VALUES9).map(String);
+  const values = (config.values?.length ? config.values : DEFAULT_VALUES10).map(String);
   const capacity = config.capacity ?? 6;
   if (!Number.isInteger(capacity) || capacity < 3 || capacity > 8 || values.length > capacity)
     throw new Error(
@@ -18683,11 +19107,11 @@ function parseStackConfig(config) {
     );
   return { capacity, values };
 }
-var DEFAULT_VALUES9, stack;
+var DEFAULT_VALUES10, stack;
 var init_stack = __esm({
   "custom/steptrace/src/algorithms/stack.ts"() {
     init_stack_sequence();
-    DEFAULT_VALUES9 = ["A", "B", "C"];
+    DEFAULT_VALUES10 = ["A", "B", "C"];
     stack = {
       id: "stack",
       family: "stack-sequence",
@@ -19060,7 +19484,7 @@ var init_two_pointers = __esm({
 
 // custom/steptrace/src/families/union-find.ts
 function svgElement4(kind, attributes = {}) {
-  const node = document.createElementNS(SVG_NS6, kind);
+  const node = document.createElementNS(SVG_NS7, kind);
   for (const [key4, value] of Object.entries(attributes)) node.setAttribute(key4, String(value));
   return node;
 }
@@ -19324,12 +19748,12 @@ function mountUnionFind(root, config) {
     }
   };
 }
-var SVG_NS6, WIDTH, HEIGHT, TOP2, LEVEL_GAP, NODE_RADIUS, markerSerial;
+var SVG_NS7, WIDTH, HEIGHT, TOP2, LEVEL_GAP, NODE_RADIUS, markerSerial;
 var init_union_find = __esm({
   "custom/steptrace/src/families/union-find.ts"() {
     init_render();
     init_interactive_structure();
-    SVG_NS6 = "http://www.w3.org/2000/svg";
+    SVG_NS7 = "http://www.w3.org/2000/svg";
     WIDTH = 700;
     HEIGHT = 220;
     TOP2 = 34;
@@ -20061,6 +20485,7 @@ var builtInAlgorithms, interactiveStructures;
 var init_algorithms = __esm({
   "custom/steptrace/src/algorithms/index.ts"() {
     init_activity_selection();
+    init_avl_tree();
     init_a_star();
     init_aho_corasick();
     init_articulation_points_and_bridges();
@@ -20207,6 +20632,7 @@ var init_algorithms = __esm({
     ];
     interactiveStructures = [
       arrays,
+      avlTree,
       binomialQueue,
       bloomFilter,
       circularBuffer,
@@ -21448,7 +21874,7 @@ function mountComplexityFigure(figure) {
     target.addEventListener(type, listener);
     listeners.push([target, type, listener]);
   }
-  function update() {
+  function update2() {
     const activeIds = new Set(
       paths.filter(
         (path) => path.dataset.context !== "true" && (activeFilter === "all" || path.dataset.category === activeFilter)
@@ -21495,7 +21921,7 @@ function mountComplexityFigure(figure) {
     listen(tab, "click", () => {
       activeFilter = tab.dataset.filter ?? "all";
       selectedPathId = null;
-      update();
+      update2();
     });
     listen(tab, "keydown", (event) => {
       const key4 = event.key;
@@ -21513,10 +21939,10 @@ function mountComplexityFigure(figure) {
       const pathId = button2.dataset.pathId ?? null;
       selectedPathId = selectedPathId === pathId ? null : pathId;
       if (selectedPathId) activeFilter = button2.dataset.category ?? "all";
-      update();
+      update2();
     });
   }
-  update();
+  update2();
   return {
     destroy() {
       for (const [target, type, listener] of listeners) {
@@ -22010,7 +22436,7 @@ function svgElement(document2, tagName, attributes) {
 }
 function renderComplexityDom(root, view) {
   const document2 = root.ownerDocument;
-  const { width, height, left, plotRight, labelX, top, axisY } = COMPLEXITY_CHART;
+  const { width, height: height2, left, plotRight, labelX, top, axisY } = COMPLEXITY_CHART;
   const clipId = `${view.figureId}-plot-clip`;
   const panelId = `${view.figureId}-panel`;
   const figure = document2.createElement("figure");
@@ -22047,7 +22473,7 @@ function renderComplexityDom(root, view) {
   plotWrap.className = "complexity__plot-wrap";
   const svg = svgElement(document2, "svg", {
     class: "complexity__plot",
-    viewBox: `0 0 ${width} ${height}`,
+    viewBox: `0 0 ${width} ${height2}`,
     role: "presentation",
     "aria-hidden": "true",
     focusable: "false"

@@ -44,6 +44,7 @@ export type VisualFamilyId =
   | "hash-index"
   | "graph-representation"
   | "range-aggregate"
+  | "binary-tree"
   | "union-find"
 
 export interface AlgorithmMeta {

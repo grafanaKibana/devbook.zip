@@ -1,5 +1,6 @@
 import type { BuiltInAlgorithm } from "../types"
 import { activitySelection } from "./activity-selection"
+import { avlTree } from "./avl-tree"
 import { aStar } from "./a-star"
 import { ahoCorasick } from "./aho-corasick"
 import { articulationPointsAndBridges } from "./articulation-points-and-bridges"
@@ -148,6 +149,7 @@ export const builtInAlgorithms = [
 
 export const interactiveStructures = [
   arrays,
+  avlTree,
   binomialQueue,
   bloomFilter,
   circularBuffer,
