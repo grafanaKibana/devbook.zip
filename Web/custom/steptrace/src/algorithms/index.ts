@@ -8,6 +8,9 @@ import { bfs } from "./bfs"
 import { bellmanFord } from "./bellman-ford"
 import { binarySearchOnAnswer } from "./binary-search-on-answer"
 import { binarySearch } from "./binary-search"
+import { binarySearchTree } from "./binary-search-tree"
+import { bPlusTree } from "./b-plus-tree"
+import { bTree } from "./b-tree"
 import { bloomFilter } from "./bloom-filter"
 import { binomialQueue } from "./binomial-queue"
 import { bidirectionalSearch } from "./bidirectional-search"
@@ -65,11 +68,13 @@ import { queue } from "./queue"
 import { quickSort } from "./quick-sort"
 import { radixSort } from "./radix-sort"
 import { rabinKarp } from "./rabin-karp"
+import { redBlackTree } from "./red-black-tree"
 import { selectionSort } from "./selection-sort"
 import { segmentTree } from "./segment-tree"
 import { shellSort } from "./shell-sort"
 import { slidingWindow } from "./sliding-window"
 import { span } from "./span"
+import { splayTree } from "./splay-tree"
 import { stack } from "./stack"
 import { skewHeap } from "./skew-heap"
 import { topologicalSort } from "./topological-sort"
@@ -150,6 +155,9 @@ export const builtInAlgorithms = [
 export const interactiveStructures = [
   arrays,
   avlTree,
+  binarySearchTree,
+  bPlusTree,
+  bTree,
   binomialQueue,
   bloomFilter,
   circularBuffer,
@@ -165,9 +173,11 @@ export const interactiveStructures = [
   linkedList,
   lruCache,
   queue,
+  redBlackTree,
   segmentTree,
   skewHeap,
   span,
+  splayTree,
   stack,
   unionFind,
 ] as const

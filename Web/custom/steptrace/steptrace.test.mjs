@@ -6203,7 +6203,7 @@ test("prefix-character renderer keeps stable accessible topology and compact Wat
   }
 })
 
-test("production mount renders a meaningful Trie terminal summary without string-frame assumptions", () => {
+test("production mount verifies persistent structures, binary ordered trees, and Trie summary", () => {
   class FakeNode {
     constructor(tagName, text = "") {
       this.tagName = tagName
@@ -6977,6 +6977,320 @@ test("production mount renders a meaningful Trie terminal summary without string
       ),
     )
     deleteAvlHandle.destroy()
+
+    const treeButtons = (root) => findAllByClass(root, "steptrace__structure-action")
+    const treeButton = (root, label) =>
+      treeButtons(root).find((button) => button.textContent === label)
+    const treeNodes = (root) =>
+      findByTag(root, "svg").children[1].children.filter(
+        (item) => item.tagName === "g" && item.dataset.exiting !== "1",
+      )
+    const treeEdges = (root) =>
+      findByTag(root, "svg").children[0].children.filter(
+        (item) => item.tagName === "line" && item.dataset.exiting !== "1",
+      )
+    const treeRootKey = (root) => {
+      const edges = treeEdges(root)
+      const children = new Set(edges.map((edge) => edge.dataset.to))
+      const rootKey = edges.map((edge) => edge.dataset.from).find((key) => !children.has(key))
+      return Number(rootKey ?? treeNodes(root)[0].dataset.key)
+    }
+    const assertOrderedTree = (root) => {
+      const nodes = new Map(
+        treeNodes(root).map((item) => [
+          Number(item.dataset.key),
+          { color: item.dataset.color, left: null, right: null },
+        ]),
+      )
+      for (const edge of treeEdges(root))
+        nodes.get(Number(edge.dataset.from))[edge.dataset.side] = Number(edge.dataset.to)
+      const visit = (key) => {
+        if (key == null) return []
+        const current = nodes.get(key)
+        return [...visit(current.left), key, ...visit(current.right)]
+      }
+      const ordered = visit(treeRootKey(root))
+      assert.deepEqual(
+        ordered,
+        [...nodes.keys()].sort((a, b) => a - b),
+      )
+      return nodes
+    }
+    const assertRedBlackTree = (root) => {
+      const nodes = assertOrderedTree(root)
+      const rootKey = treeRootKey(root)
+      assert.equal(nodes.get(rootKey).color, "black")
+      const blackHeight = (key) => {
+        if (key == null) return 1
+        const current = nodes.get(key)
+        if (current.color === "red") {
+          assert.notEqual(current.left == null ? "black" : nodes.get(current.left).color, "red")
+          assert.notEqual(current.right == null ? "black" : nodes.get(current.right).color, "red")
+        }
+        const left = blackHeight(current.left)
+        const right = blackHeight(current.right)
+        assert.equal(left, right)
+        return left + (current.color === "black" ? 1 : 0)
+      }
+      blackHeight(rootKey)
+    }
+
+    const bstRoot = new FakeNode("div")
+    const bstHandle = api.mount(bstRoot, {
+      algorithm: "binary-search-tree",
+      values: [40, 20, 60, 10, 30, 50, 70],
+      value: 80,
+    })
+    const bstInput = findByAttribute(bstRoot, "aria-label", "Binary search tree key")
+    click(treeButton(bstRoot, "Insert"))
+    assert.match(findByClass(bstRoot, "steptrace__structure-status").textContent, /height 3 → 4/)
+    assertOrderedTree(bstRoot)
+    bstInput.value = "10"
+    click(treeButton(bstRoot, "Remove"))
+    assertOrderedTree(bstRoot)
+    bstInput.value = "60"
+    click(treeButton(bstRoot, "Remove"))
+    assertOrderedTree(bstRoot)
+    bstInput.value = "40"
+    click(treeButton(bstRoot, "Remove"))
+    assertOrderedTree(bstRoot)
+    bstInput.value = "50"
+    click(treeButton(bstRoot, "Search"))
+    assert.match(findByClass(bstRoot, "steptrace__structure-status").textContent, /found 50/)
+    click(treeButton(bstRoot, "Reset"))
+    assert.equal(treeRootKey(bstRoot), 40)
+    assert.equal(findByClass(bstRoot, "steptrace__counter").innerHTML, "<b>7</b> keys")
+    bstHandle.destroy()
+
+    for (const { values, removed } of [
+      { values: [40, 20, 60, 10], removed: 20 },
+      { values: [40, 20, 60, 10, 30, 50, 70], removed: 40 },
+    ]) {
+      const root = new FakeNode("div")
+      const handle = api.mount(root, { algorithm: "binary-search-tree", values })
+      findByAttribute(root, "aria-label", "Binary search tree key").value = String(removed)
+      click(treeButton(root, "Remove"))
+      assertOrderedTree(root)
+      assert.equal(
+        treeNodes(root).some((item) => item.dataset.key === String(removed)),
+        false,
+      )
+      handle.destroy()
+    }
+
+    const rbRoot = new FakeNode("div")
+    const rbHandle = api.mount(rbRoot, {
+      algorithm: "red-black-tree",
+      values: [10, 5, 15, 1],
+      value: 0,
+    })
+    assertRedBlackTree(rbRoot)
+    click(treeButton(rbRoot, "Insert"))
+    assert.match(findByClass(rbRoot, "steptrace__structure-status").textContent, /Black-height/)
+    assert.ok(treeNodes(rbRoot).filter((item) => item.dataset.state === "rotation").length >= 2)
+    assertRedBlackTree(rbRoot)
+    for (const removed of [15, 10, 1, 5]) {
+      findByAttribute(rbRoot, "aria-label", "Red-black tree key").value = String(removed)
+      click(treeButton(rbRoot, "Remove"))
+      assert.match(findByClass(rbRoot, "steptrace__structure-status").textContent, /Black-height/)
+      assertRedBlackTree(rbRoot)
+    }
+    findByAttribute(rbRoot, "aria-label", "Red-black tree key").value = "0"
+    click(treeButton(rbRoot, "Search"))
+    assert.match(findByClass(rbRoot, "steptrace__structure-status").textContent, /found 0/)
+    click(treeButton(rbRoot, "Reset"))
+    assertRedBlackTree(rbRoot)
+    assert.equal(findByClass(rbRoot, "steptrace__counter").innerHTML, "<b>4</b> keys")
+    rbHandle.destroy()
+
+    for (const { values, searched, expectedCase } of [
+      { values: [20, 10], searched: 10, expectedCase: "zig" },
+      { values: [30, 20, 10], searched: 10, expectedCase: "zig-zig" },
+      { values: [30, 10, 20], searched: 20, expectedCase: "zig-zag" },
+    ]) {
+      const root = new FakeNode("div")
+      const handle = api.mount(root, { algorithm: "splay-tree", values, value: searched })
+      click(treeButton(root, "Search"))
+      assert.equal(treeRootKey(root), searched)
+      assert.match(
+        findByClass(root, "steptrace__structure-status").textContent,
+        new RegExp(expectedCase),
+      )
+      assertOrderedTree(root)
+      handle.destroy()
+    }
+
+    const splayRoot = new FakeNode("div")
+    const splayHandle = api.mount(splayRoot, {
+      algorithm: "splay-tree",
+      values: [100, 50, 150, 25, 75, 60],
+      value: 60,
+    })
+    click(treeButton(splayRoot, "Search"))
+    assert.equal(treeRootKey(splayRoot), 60)
+    assert.match(findByClass(splayRoot, "steptrace__structure-status").textContent, /zig-zag → zig/)
+    const splayInput = findByAttribute(splayRoot, "aria-label", "Splay tree key")
+    splayInput.value = "65"
+    click(treeButton(splayRoot, "Search"))
+    assert.equal(treeRootKey(splayRoot), 75)
+    assert.match(
+      findByClass(splayRoot, "steptrace__structure-status").textContent,
+      /canonical splay moves last accessed 75 to the root/,
+    )
+    assertOrderedTree(splayRoot)
+    splayInput.value = "65"
+    click(treeButton(splayRoot, "Insert"))
+    assert.equal(treeRootKey(splayRoot), 65)
+    splayInput.value = "65"
+    click(treeButton(splayRoot, "Remove"))
+    assert.equal(
+      treeNodes(splayRoot).some((item) => item.dataset.key === "65"),
+      false,
+    )
+    assertOrderedTree(splayRoot)
+    click(treeButton(splayRoot, "Reset"))
+    assert.equal(treeRootKey(splayRoot), 100)
+    assert.equal(splayInput.value, "60")
+    splayHandle.destroy()
+
+    const multiwayButtons = (root) => findAllByClass(root, "steptrace__structure-action")
+    const multiwayButton = (root, label) =>
+      multiwayButtons(root).find((button) => button.textContent === label)
+    const findAllMultiway = (node, className, found = []) => {
+      if ((node.attributes?.get("class") || "").split(/\s+/).includes(className)) found.push(node)
+      for (const child of node.children || []) findAllMultiway(child, className, found)
+      return found
+    }
+    const multiwayNodes = (root, role) =>
+      findAllMultiway(root, "steptrace__multiway-tree-node").filter(
+        (node) => role == null || node.dataset.role === role,
+      )
+    const multiwayKeys = (node) =>
+      findAllMultiway(node, "steptrace__multiway-tree-cell")
+        .map((cell) => Number(cell.dataset.key))
+        .filter(Number.isFinite)
+
+    const bTreeRoot = new FakeNode("div")
+    const bTreeHandle = api.mount(bTreeRoot, {
+      algorithm: "b-tree",
+      values: [10, 20, 5],
+      value: 6,
+      order: 4,
+    })
+    assert.equal(bTreeRoot.dataset.visualFamily, "multiway-tree")
+    assert.equal(bTreeRoot.dataset.structure, "b-tree")
+    assert.equal(findByClass(bTreeRoot, "steptrace__timeline"), null)
+    assert.equal(findByClass(bTreeRoot, "steptrace__transport"), null)
+    assert.equal(findByTag(bTreeRoot, "svg").attributes.get("role"), "img")
+    assert.equal(findByTag(bTreeRoot, "svg").attributes.get("viewBox"), "0 0 360 280")
+    assert.equal(
+      findByClass(bTreeRoot, "steptrace__structure-status").attributes.get("role"),
+      "status",
+    )
+    assert.equal(
+      findByClass(bTreeRoot, "steptrace__structure-status").attributes.get("aria-live"),
+      "polite",
+    )
+    assert.deepEqual(
+      multiwayButtons(bTreeRoot).map((button) => button.textContent),
+      ["Insert", "Search", "Reset"],
+    )
+    click(multiwayButton(bTreeRoot, "Insert"))
+    assert.deepEqual(multiwayKeys(multiwayNodes(bTreeRoot, "internal")[0]), [10])
+    assert.deepEqual(multiwayNodes(bTreeRoot, "leaf").map(multiwayKeys), [[5, 6], [20]])
+    assert.equal(
+      findAllMultiway(bTreeRoot, "steptrace__multiway-tree-cell").filter(
+        (cell) => cell.dataset.state === "special",
+      )[0].dataset.key,
+      "10",
+    )
+    bTreeHandle.destroy()
+
+    const bPlusRoot = new FakeNode("div")
+    const bPlusHandle = api.mount(bPlusRoot, {
+      algorithm: "b-plus-tree",
+      values: [5, 9, 12, 17, 33, 40, 21],
+      value: 25,
+      range: [15, 40],
+      order: 4,
+    })
+    assert.equal(bPlusRoot.dataset.visualFamily, "multiway-tree")
+    assert.equal(bPlusRoot.dataset.structure, "b-plus-tree")
+    assert.deepEqual(
+      multiwayButtons(bPlusRoot).map((button) => button.textContent),
+      ["Insert", "Search", "Range scan", "Reset"],
+    )
+    assert.deepEqual(
+      findAllByClass(bPlusRoot, "steptrace__structure-input").map((input) => input.placeholder),
+      ["Key", "From", "To"],
+    )
+    click(multiwayButton(bPlusRoot, "Insert"))
+    assert.deepEqual(multiwayKeys(multiwayNodes(bPlusRoot, "internal")[0]), [12, 21, 33])
+    assert.deepEqual(multiwayNodes(bPlusRoot, "leaf").map(multiwayKeys), [
+      [5, 9],
+      [12, 17],
+      [21, 25],
+      [33, 40],
+    ])
+    assert.deepEqual(
+      findAllMultiway(bPlusRoot, "steptrace__multiway-tree-cell")
+        .filter((cell) => cell.dataset.state === "special")
+        .map((cell) => cell.dataset.key),
+      ["21", "21"],
+    )
+    const bPlusKey = findByAttribute(bPlusRoot, "aria-label", "B+ tree key")
+    bPlusKey.value = "21"
+    click(multiwayButton(bPlusRoot, "Search"))
+    assert.equal(
+      multiwayNodes(bPlusRoot, "leaf").filter((node) => node.dataset.path === "1").length,
+      1,
+    )
+    assert.equal(
+      multiwayNodes(bPlusRoot, "internal").filter((node) => node.dataset.path === "1").length,
+      1,
+    )
+    assert.deepEqual(
+      findAllMultiway(bPlusRoot, "steptrace__multiway-tree-cell")
+        .filter((cell) => cell.dataset.state === "found")
+        .map((cell) => cell.dataset.key),
+      ["21"],
+    )
+    click(multiwayButton(bPlusRoot, "Range scan"))
+    assert.equal(
+      findByClass(bPlusRoot, "steptrace__structure-status").textContent,
+      "Range [15, 40] returned 17, 21, 25, 33, 40 by following leaf links.",
+    )
+    assert.deepEqual(
+      findAllMultiway(bPlusRoot, "steptrace__multiway-tree-cell")
+        .filter((cell) => cell.dataset.state === "found")
+        .map((cell) => Number(cell.dataset.key)),
+      [17, 21, 25, 33, 40],
+    )
+    assert.equal(
+      multiwayNodes(bPlusRoot, "leaf").filter((node) => node.dataset.path === "1").length,
+      3,
+    )
+    assert.equal(
+      findAllMultiway(bPlusRoot, "steptrace__multiway-tree-link").filter(
+        (link) => link.dataset.state === "active",
+      ).length,
+      2,
+    )
+    bPlusHandle.destroy()
+
+    mediaMatches = true
+    const reducedTreeRoot = new FakeNode("div")
+    const reducedTreeHandle = api.mount(reducedTreeRoot, { algorithm: "b-tree" })
+    assert.equal(reducedTreeRoot.classList.contains("steptrace--reduced"), true)
+    reducedTreeHandle.destroy()
+    mediaMatches = false
+
+    const cappedTreeRoot = new FakeNode("div")
+    api.mount(cappedTreeRoot, {
+      algorithm: "binary-search-tree",
+      values: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10],
+    })
+    assert.match(cappedTreeRoot.textContent, /supports at most 9 values/)
 
     const invalidHashRoot = new FakeNode("div")
     const invalidHashHandle = api.mount(invalidHashRoot, {
@@ -9365,8 +9679,7 @@ test("AVL Tree registers one persistent balanced binary-tree prototype in both h
   assert.match(algorithm, /id: "avl-tree"/)
   assert.match(algorithm, /family: "binary-tree"/)
   assert.match(algorithm, /const DEFAULT_VALUES = \[40, 20, 60, 10, 30, 50, 70\]/)
-  assert.match(algorithm, /supports at most 11 values/)
-  assert.match(algorithm, /value must be a finite integer/)
+  assert.match(algorithm, /parseBinaryTreeConfig\(config, "avl-tree", DEFAULT_VALUES, 11\)/)
   assert.match(algorithms, /import \{ avlTree \} from "\.\/avl-tree"/)
   assert.match(algorithms, /interactiveStructures = \[[\s\S]*avlTree,/)
   assert.match(family, /createStructureShell\(/)
@@ -9374,17 +9687,18 @@ test("AVL Tree registers one persistent balanced binary-tree prototype in both h
   assert.match(family, /observeFixedSvgNodes\(/)
   assert.match(family, /trimGraphEdge\(/)
   assert.match(family, /GRAPH_NODE_RADIUS_PX/)
-  assert.match(family, /rotations\.push\(`LL at \$\{node\.key\}`\)/)
-  assert.match(family, /rotations\.push\(`RR at \$\{node\.key\}`\)/)
-  assert.match(family, /rotations\.push\(`LR at \$\{node\.key\}`\)/)
-  assert.match(family, /rotations\.push\(`RL at \$\{node\.key\}`\)/)
+  assert.match(family, /repairs\.push\(`LL at \$\{current\.key\}`\)/)
+  assert.match(family, /repairs\.push\(`RR at \$\{current\.key\}`\)/)
+  assert.match(family, /repairs\.push\(`LR at \$\{current\.key\}`\)/)
+  assert.match(family, /repairs\.push\(`RL at \$\{current\.key\}`\)/)
   assert.match(family, /already exists, so the tree did not change/)
   assert.match(family, /Search path \$\{state\.path\.join\(" → "\)\}/)
   assert.match(family, /rebalanced the shortened path/)
   assert.match(family, /Math\.floor\(Math\.random\(\) \* 90\) \+ 10/)
-  assert.match(family, /h\$\{entry\.node\.height\} bf\$\{balance\(entry\.node\)\}/)
+  assert.match(family, /`h\$\{current\.height\} bf\$\{balanceFactor\(current\)\}`/)
   assert.match(family, /successMarker\("steptrace__binary-tree-success"\)/)
-  assert.match(family, /const MAX_VALUES = 11/)
+  assert.match(family, /const MAX_VALUES = 9/)
+  assert.match(family, /kind === "avl-tree" \? 11 : MAX_VALUES/)
   assert.doesNotMatch(family, /settleLater|clearTimer|850/)
   assert.doesNotMatch(family, /✓|dataset\.tone/)
   assert.doesNotMatch(family, /\bPlayer\b|\btimeline\b|\bframes\b/)
@@ -9408,4 +9722,223 @@ test("AVL Tree registers one persistent balanced binary-tree prototype in both h
   }
   for (const artifact of [quartzCss, obsidianCss])
     assert.match(artifact, /\.steptrace__binary-tree-surface/)
+})
+
+test("BST, red-black, and splay trees share the direct binary-tree contract in both hosts", () => {
+  const algorithms = readFileSync(join(here, "src", "algorithms", "index.ts"), "utf8")
+  const family = readFileSync(join(here, "src", "families", "binary-tree.ts"), "utf8")
+  const styles = readFileSync(join(here, "src", "styles", "binary-tree.scss"), "utf8")
+  const quartzJs = readFileSync(join(here, "generated", "engine.js"), "utf8")
+  const obsidianJs = readFileSync(
+    join(repoRoot, "Vault", ".obsidian", "plugins", "steptrace", "main.js"),
+    "utf8",
+  )
+
+  for (const [id, file, fence] of [
+    ["binary-search-tree", "Binary Search Tree.md", /"value":80/],
+    ["red-black-tree", "Red-Black Tree.md", /"value":0/],
+    ["splay-tree", "Splay Tree.md", /"value":60/],
+  ]) {
+    const definition = readFileSync(join(here, "src", "algorithms", `${id}.ts`), "utf8")
+    const note = readFileSync(
+      join(repoRoot, "Vault", "Home", "Computer Science", "Data Structures", "Trees", file),
+      "utf8",
+    )
+    assert.match(definition, new RegExp(`id: "${id}"`))
+    assert.match(definition, /family: "binary-tree"/)
+    assert.match(algorithms, new RegExp(`${id.replace(/-([a-z])/g, (_, c) => c.toUpperCase())},`))
+    assert.match(note, new RegExp(`"algorithm":"${id}"`))
+    assert.match(note, fence)
+    assert.doesNotMatch(note, /Visualization pending/)
+  }
+
+  assert.match(family, /line\.dataset\.from = String\(parent\.node\.key\)/)
+  assert.match(family, /line\.dataset\.to = String\(child\.node\.key\)/)
+  assert.match(family, /line\.dataset\.side = child\.node === parent\.node\.left/)
+  assert.match(family, /group\.dataset\.key = String\(entry\.node\.key\)/)
+  assert.match(family, /group\.dataset\.color = kind === "red-black-tree"/)
+  assert.match(family, /canonical splay moves last accessed/)
+  assert.match(family, /Black-height \$\{blackHeight\(model\.root\)\} is equal on every path/)
+  assert.match(styles, /\[data-color="red"\]/)
+  assert.match(styles, /@media \(forced-colors: active\)/)
+  for (const artifact of [quartzJs, obsidianJs]) {
+    assert.match(artifact, /Interactive binary search tree/)
+    assert.match(artifact, /Interactive red-black tree/)
+    assert.match(artifact, /Interactive splay tree/)
+  }
+})
+
+test("B-tree and B+ Tree preserve exact order-4 split, routing, and leaf-link invariants", () => {
+  const { createMultiwayTreeModel, createMultiwayTreeOperationState } = loadStepTraceModule(
+    "src",
+    "families",
+    "multiway-tree.ts",
+  )
+  const { bTree } = loadStepTraceModule("src", "algorithms", "b-tree.ts")
+  const { bPlusTree } = loadStepTraceModule("src", "algorithms", "b-plus-tree.ts")
+  const leaves = (root) => {
+    const result = []
+    const visit = (node) => {
+      if (!node.children.length) result.push(node)
+      else node.children.forEach(visit)
+    }
+    visit(root)
+    return result
+  }
+  const assertOrderFour = (root) => {
+    const leafDepths = new Set()
+    const visit = (node, depth) => {
+      assert.ok(node.keys.length <= 3)
+      if (node.children.length) {
+        assert.equal(node.children.length, node.keys.length + 1)
+        node.children.forEach((child) => visit(child, depth + 1))
+      } else leafDepths.add(depth)
+    }
+    visit(root, 0)
+    assert.equal(leafDepths.size, 1)
+  }
+
+  assert.deepEqual(bTree.parse({ algorithm: "b-tree", order: 4 }), {
+    values: [10, 20, 5],
+    value: 6,
+    range: undefined,
+  })
+  assert.deepEqual(bPlusTree.parse({ algorithm: "b-plus-tree", order: 4 }).range, [15, 40])
+  assert.throws(() => bTree.parse({ algorithm: "b-tree", order: 3 }), /supports fixed order 4/)
+  assert.throws(
+    () => bTree.parse({ algorithm: "b-tree", values: [1, 1] }),
+    /requires unique values/,
+  )
+  assert.throws(
+    () => bTree.parse({ algorithm: "b-tree", values: [1, 2.5] }),
+    /requires finite integer values/,
+  )
+  assert.throws(
+    () =>
+      bTree.parse({
+        algorithm: "b-tree",
+        values: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11],
+      }),
+    /supports at most 10 values/,
+  )
+
+  const bTreeModel = createMultiwayTreeModel("b-tree", [10, 20, 5])
+  const bTreeInsert = createMultiwayTreeOperationState()
+  bTreeModel.insert(6, bTreeInsert)
+  assert.deepEqual(bTreeModel.root.keys, [10])
+  assert.deepEqual(
+    bTreeModel.root.children.map((node) => node.keys),
+    [[5, 6], [20]],
+  )
+  assert.equal(bTreeInsert.special, 10)
+  assertOrderFour(bTreeModel.root)
+
+  const bPlusModel = createMultiwayTreeModel("b-plus-tree", [5, 9, 12, 17, 33, 40, 21])
+  const bPlusInsert = createMultiwayTreeOperationState()
+  bPlusModel.insert(25, bPlusInsert)
+  assert.deepEqual(bPlusModel.root.keys, [12, 21, 33])
+  assert.deepEqual(
+    leaves(bPlusModel.root).map((node) => node.keys),
+    [
+      [5, 9],
+      [12, 17],
+      [21, 25],
+      [33, 40],
+    ],
+  )
+  assert.equal(bPlusInsert.special, 21)
+  const bPlusLeaves = leaves(bPlusModel.root)
+  assert.deepEqual(
+    bPlusLeaves.map((leaf) => leaf.next?.id ?? null),
+    [bPlusLeaves[1].id, bPlusLeaves[2].id, bPlusLeaves[3].id, null],
+  )
+  assertOrderFour(bPlusModel.root)
+
+  const search = createMultiwayTreeOperationState()
+  assert.equal(bPlusModel.search(21, search).found, true)
+  assert.equal(search.path.has(bPlusModel.root.id), true)
+  assert.equal(bPlusLeaves.filter((leaf) => search.path.has(leaf.id)).length, 1)
+  assert.deepEqual([...search.found], [`${bPlusLeaves[2].id}:21`])
+
+  const range = createMultiwayTreeOperationState()
+  assert.deepEqual(bPlusModel.range(15, 40, range).matches, [17, 21, 25, 33, 40])
+  assert.equal(bPlusLeaves.filter((leaf) => range.path.has(leaf.id)).length, 3)
+  assert.deepEqual(
+    [...range.links],
+    [`${bPlusLeaves[1].id}->${bPlusLeaves[2].id}`, `${bPlusLeaves[2].id}->${bPlusLeaves[3].id}`],
+  )
+
+  const capped = createMultiwayTreeModel("b-tree", [1, 2, 3, 4, 5, 6, 7, 8, 9, 10])
+  assert.equal(capped.insert(11, createMultiwayTreeOperationState()).changed, false)
+  assert.deepEqual(capped.keys(), [1, 2, 3, 4, 5, 6, 7, 8, 9, 10])
+})
+
+test("B-tree and B+ Tree register one direct responsive multiway-tree contract in both hosts", () => {
+  const algorithms = readFileSync(join(here, "src", "algorithms", "index.ts"), "utf8")
+  const family = readFileSync(join(here, "src", "families", "multiway-tree.ts"), "utf8")
+  const styles = readFileSync(join(here, "src", "styles", "multiway-tree.scss"), "utf8")
+  const styleEntry = readFileSync(join(here, "src", "styles", "index.scss"), "utf8")
+  const quartzJs = readFileSync(join(here, "generated", "engine.js"), "utf8")
+  const quartzCss = readFileSync(join(here, "generated", "engine.css"), "utf8")
+  const obsidianJs = readFileSync(
+    join(repoRoot, "Vault", ".obsidian", "plugins", "steptrace", "main.js"),
+    "utf8",
+  )
+  const obsidianCss = readFileSync(
+    join(repoRoot, "Vault", ".obsidian", "plugins", "steptrace", "styles.css"),
+    "utf8",
+  )
+  const bTreeNote = readFileSync(
+    join(repoRoot, "Vault", "Home", "Computer Science", "Data Structures", "Trees", "B-tree.md"),
+    "utf8",
+  )
+  const bPlusNote = readFileSync(
+    join(repoRoot, "Vault", "Home", "Computer Science", "Data Structures", "Trees", "B+ Tree.md"),
+    "utf8",
+  )
+
+  assert.match(algorithms, /import \{ bTree \} from "\.\/b-tree"/)
+  assert.match(algorithms, /import \{ bPlusTree \} from "\.\/b-plus-tree"/)
+  assert.match(algorithms, /interactiveStructures = \[[\s\S]*bPlusTree,[\s\S]*bTree,/)
+  assert.match(family, /createStructureShell\(/)
+  assert.match(family, /const MAX_KEYS = 3/)
+  assert.match(family, /const MAX_VALUES = 10/)
+  assert.match(family, /const CELL_WIDTH = 33/)
+  assert.match(family, /const NODE_GAP = 8/)
+  assert.match(family, /Math\.round\(svg\.getBoundingClientRect\(\)\.width\)/)
+  assert.match(family, /let cursor = \(viewWidth - levelWidth\) \/ 2/)
+  assert.match(family, /supports fixed order 4/)
+  assert.match(family, /upperBound\(current\.keys, key\)/)
+  assert.match(family, /right\.next = current\.next/)
+  assert.match(family, /current\.next = right/)
+  assert.match(family, /group\.dataset\.role = node\.children\.length \? "internal" : "leaf"/)
+  assert.match(family, /path\.dataset\.from = leaf\.id/)
+  assert.match(family, /path\.dataset\.to = next\.id/)
+  assert.match(family, /svg\.setAttribute\("viewBox", `0 0 \$\{VIEW_WIDTH\} \$\{VIEW_HEIGHT\}`\)/)
+  assert.match(family, /status/)
+  assert.doesNotMatch(family, /\bPlayer\b|\btimeline\b|\bframes\b|class\s+\w+/)
+  assert.match(styles, /min-block-size: 15rem/)
+  assert.match(styles, /font: 700 0\.8rem\/1 var\(--_font-mono\)/)
+  assert.match(styles, /inline-size: min\(100%, 42rem\)/)
+  assert.match(styles, /overflow: hidden/)
+  assert.match(styles, /@container steptrace-multiway-tree \(min-width: 36rem\)/)
+  assert.match(styles, /@media \(prefers-reduced-motion: reduce\)/)
+  assert.doesNotMatch(styles, /overflow-x:\s*(auto|scroll)/)
+  assert.match(styleEntry, /@use "multiway-tree";/)
+  assert.match(
+    bTreeNote,
+    /```steptrace\n\{"algorithm":"b-tree","values":\[10,20,5\],"value":6\}\n```/,
+  )
+  assert.match(
+    bPlusNote,
+    /```steptrace\n\{"algorithm":"b-plus-tree","values":\[5,9,12,17,33,40,21\],"value":25,"range":\[15,40\]\}\n```/,
+  )
+  for (const artifact of [quartzJs, obsidianJs]) {
+    assert.match(artifact, /Interactive order-4 \$\{label\}/)
+    assert.match(artifact, /id: "b-tree"/)
+    assert.match(artifact, /id: "b-plus-tree"/)
+    assert.match(artifact, /Range scan/)
+  }
+  for (const artifact of [quartzCss, obsidianCss])
+    assert.match(artifact, /\.steptrace__multiway-tree-link/)
 })

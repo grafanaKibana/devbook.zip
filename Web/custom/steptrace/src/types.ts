@@ -45,6 +45,7 @@ export type VisualFamilyId =
   | "graph-representation"
   | "range-aggregate"
   | "binary-tree"
+  | "multiway-tree"
   | "union-find"
 
 export interface AlgorithmMeta {
@@ -101,6 +102,7 @@ export interface StepTraceConfig extends Partial<Omit<AlgorithmInput, "algorithm
   range?: [number, number]
   k?: number
   capacity?: number
+  order?: number
 }
 
 export interface StepTraceTabConfig extends StepTraceConfig {

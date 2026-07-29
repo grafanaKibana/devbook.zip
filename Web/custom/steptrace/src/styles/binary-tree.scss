@@ -88,6 +88,19 @@
   stroke-width: 2.4;
 }
 
+.steptrace .steptrace__binary-tree-node[data-color="black"] .steptrace__ncirc {
+  fill: var(--_text);
+}
+
+.steptrace .steptrace__binary-tree-node[data-color="red"] .steptrace__ncirc {
+  fill: var(--st-state-red, #b42318);
+}
+
+.steptrace .steptrace__binary-tree-node[data-color="black"] .steptrace__id,
+.steptrace .steptrace__binary-tree-node[data-color="red"] .steptrace__id {
+  fill: var(--_surface);
+}
+
 .steptrace .steptrace__binary-tree-meta {
   fill: var(--_muted);
   font: 600 0.48rem/1 var(--_font-mono);
@@ -120,5 +133,11 @@
   .steptrace .steptrace__binary-tree-node,
   .steptrace .steptrace__binary-tree-node .steptrace__ncirc {
     transition: none;
+  }
+}
+
+@media (forced-colors: active) {
+  .steptrace .steptrace__binary-tree-node[data-color="red"] .steptrace__ncirc {
+    stroke-dasharray: 4 2;
   }
 }

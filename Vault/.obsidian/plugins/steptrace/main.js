@@ -52,7 +52,7 @@ function trimGraphEdge(from, to, sourceInset, targetInset = sourceInset) {
   };
 }
 function observeFixedSvgNodes(svg, nodes5, onGeometry) {
-  const update2 = () => {
+  const update = () => {
     const viewBox = numericViewBox(svg);
     const rect = svg.getBoundingClientRect?.();
     const scale = viewBox && rect ? svgRenderedScale(rect, viewBox) : 1;
@@ -66,13 +66,13 @@ function observeFixedSvgNodes(svg, nodes5, onGeometry) {
     }
     onGeometry?.(inverseScale);
   };
-  update2();
+  update();
   const observer = typeof ResizeObserver === "undefined" ? null : new ResizeObserver(() => {
-    update2();
+    update();
   });
   observer?.observe(svg);
   return {
-    update: update2,
+    update,
     destroy() {
       observer?.disconnect();
     }
@@ -345,7 +345,7 @@ function createBarTracker(stage, bars, markers) {
     const parsed = Number.parseFloat(getComputedStyle(stage).getPropertyValue("--_tween"));
     if (Number.isFinite(parsed) && parsed > 0) tweenMs = parsed;
   }
-  const rectOf = (node) => node && typeof node.getBoundingClientRect === "function" ? node.getBoundingClientRect() : null;
+  const rectOf = (node2) => node2 && typeof node2.getBoundingClientRect === "function" ? node2.getBoundingClientRect() : null;
   const MARKER_ABSENT = { absent: true };
   const MARKER_UNMEASURED = { unmeasured: true };
   const isReduced = () => !!(stage.closest && stage.closest(".steptrace--reduced"));
@@ -702,12 +702,12 @@ function makeBoundarySearchView(frames, descriptor) {
     verdict.textContent = model ? model.feasible ? `${candidate} is feasible` : `${candidate} is too small` : "waiting for first check";
     verdict.dataset.state = model ? model.feasible ? "feasible" : "infeasible" : "pending";
     for (let laneIndex = 0; laneIndex < laneNodes.length; laneIndex++) {
-      const node = laneNodes[laneIndex];
+      const node2 = laneNodes[laneIndex];
       const lane = model?.lanes[laneIndex] || null;
-      packageTokens(node.packages, lane?.items || []);
-      node.total.textContent = lane && candidate != null ? `${descriptor.unitLabel} ${lane.total}/${candidate}` : descriptor.unitLabel;
-      node.fill.style.width = lane && candidate ? `${Math.min(100, lane.total / candidate * 100)}%` : "0%";
-      node.lane.dataset.state = lane ? "used" : "empty";
+      packageTokens(node2.packages, lane?.items || []);
+      node2.total.textContent = lane && candidate != null ? `${descriptor.unitLabel} ${lane.total}/${candidate}` : descriptor.unitLabel;
+      node2.fill.style.width = lane && candidate ? `${Math.min(100, lane.total / candidate * 100)}%` : "0%";
+      node2.lane.dataset.state = lane ? "used" : "empty";
     }
     const extra = model ? model.lanes.slice(model.allowed) : [];
     overflow.dataset.state = extra.length ? "overflow" : "empty";
@@ -1964,9 +1964,9 @@ function makeBacktrackView(frames) {
   ];
   const treeNodes = [];
   const treeNodeById = /* @__PURE__ */ new Map();
-  const addTreeNode = (node) => {
-    if (treeNodeById.has(node.id)) return treeNodeById.get(node.id);
-    const stored = { ...node, children: [] };
+  const addTreeNode = (node2) => {
+    if (treeNodeById.has(node2.id)) return treeNodeById.get(node2.id);
+    const stored = { ...node2, children: [] };
     treeNodes.push(stored);
     treeNodeById.set(stored.id, stored);
     if (stored.parent) treeNodeById.get(stored.parent)?.children.push(stored.id);
@@ -2028,23 +2028,23 @@ function makeBacktrackView(frames) {
       });
     }
   }
-  const treeEdges = treeNodes.filter((node) => node.parent).map((node) => ({ from: node.parent, to: node.id, kind: node.kind }));
+  const treeEdges = treeNodes.filter((node2) => node2.parent).map((node2) => ({ from: node2.parent, to: node2.id, kind: node2.kind }));
   const leafSlots = /* @__PURE__ */ new Map();
   let leafCount = 0;
   function assignLeafSlots(nodeId) {
-    const node = treeNodeById.get(nodeId);
-    if (!node.children.length) {
+    const node2 = treeNodeById.get(nodeId);
+    if (!node2.children.length) {
       const slot2 = leafCount++;
       leafSlots.set(nodeId, slot2);
       return slot2;
     }
-    const childSlots = node.children.map(assignLeafSlots);
+    const childSlots = node2.children.map(assignLeafSlots);
     const slot = (childSlots[0] + childSlots[childSlots.length - 1]) / 2;
     leafSlots.set(nodeId, slot);
     return slot;
   }
   assignLeafSlots("root");
-  const maxTreeDepth = Math.max(...treeNodes.map((node) => node.depth));
+  const maxTreeDepth = Math.max(...treeNodes.map((node2) => node2.depth));
   function makeTreeLayout() {
     const leafGap = 36;
     const depthGap = 42;
@@ -2052,9 +2052,9 @@ function makeBacktrackView(frames) {
     const leafEndPad = 10;
     const depthPad = 20;
     const positions = Object.fromEntries(
-      treeNodes.map((node) => {
-        const leaf = leafSlots.get(node.id);
-        return [node.id, { x: leafPad + leaf * leafGap, y: depthPad + node.depth * depthGap }];
+      treeNodes.map((node2) => {
+        const leaf = leafSlots.get(node2.id);
+        return [node2.id, { x: leafPad + leaf * leafGap, y: depthPad + node2.depth * depthGap }];
       })
     );
     return {
@@ -2145,7 +2145,7 @@ function makeBacktrackView(frames) {
   const nodeLayer = svgNode("g");
   nodeLayer.setAttribute("class", "steptrace__bt-tree-nodes");
   const nodeElements = /* @__PURE__ */ new Map();
-  for (const node of treeNodes) {
+  for (const node2 of treeNodes) {
     const group = svgNode("g");
     const ring = svgNode("circle");
     const surface = svgNode("circle");
@@ -2153,8 +2153,8 @@ function makeBacktrackView(frames) {
     group.setAttribute("class", "steptrace__node steptrace__rtnode steptrace__bt-tree-node");
     group.setAttribute("aria-hidden", "true");
     group.setAttribute("focusable", "false");
-    group.dataset.kind = node.kind;
-    group.dataset.node = node.id;
+    group.dataset.kind = node2.kind;
+    group.dataset.node = node2.id;
     ring.setAttribute("class", "steptrace__rtring");
     ring.setAttribute("r", String(GRAPH_NODE_RADIUS_PX + GRAPH_NODE_HALO_GAP_PX));
     surface.setAttribute("class", "steptrace__ncirc steptrace__rtcirc");
@@ -2164,7 +2164,7 @@ function makeBacktrackView(frames) {
     label.setAttribute("dominant-baseline", "central");
     group.append(ring, surface, label);
     nodeLayer.append(group);
-    nodeElements.set(node.id, { group, label });
+    nodeElements.set(node2.id, { group, label });
   }
   treeSvg.append(treeDefs, treeTitle, treeDescription, depthLayer, edgeLayer, nodeLayer);
   treeCanvas.append(treeSvg);
@@ -2180,7 +2180,7 @@ function makeBacktrackView(frames) {
   );
   tree.append(treeHead, treeCaption, treeCanvas, treeLegend);
   const geometryPoints = new Map(
-    treeNodes.map((node) => [node.id, { ...treeLayout.positions[node.id] }])
+    treeNodes.map((node2) => [node2.id, { ...treeLayout.positions[node2.id] }])
   );
   const depthGeometryPoints = depthLabels.map((_, depth) => ({
     x: 3,
@@ -2195,9 +2195,9 @@ function makeBacktrackView(frames) {
   treeGeometry = observeFixedSvgNodes(
     treeSvg,
     [
-      ...treeNodes.map((node) => ({
-        element: nodeElements.get(node.id).group,
-        point: geometryPoints.get(node.id)
+      ...treeNodes.map((node2) => ({
+        element: nodeElements.get(node2.id).group,
+        point: geometryPoints.get(node2.id)
       })),
       ...depthLabels.map(({ group }, depth) => ({
         element: group,
@@ -2226,7 +2226,7 @@ function makeBacktrackView(frames) {
         Object.assign(depthGeometryPoints[depth], { x: labelX, y });
         group.setAttribute("transform", `translate(${labelX} ${y}) scale(${unitsPerCssPixel})`);
         const firstNodeX = Math.min(
-          ...treeNodes.filter((node) => node.depth === depth).map((node) => treeLayout.positions[node.id].x)
+          ...treeNodes.filter((node2) => node2.depth === depth).map((node2) => treeLayout.positions[node2.id].x)
         );
         line.setAttribute("x1", String((42 - guideShift) * unitsPerCssPixel));
         line.setAttribute("y1", String(y));
@@ -2325,25 +2325,25 @@ function makeBacktrackView(frames) {
     treeCaption.textContent = caption;
     treeTitle.textContent = `N-Queens decision tree: ${caption}`;
     treeDescription.textContent = `${caption}. ${frame.message}`;
-    for (const node of treeNodes) {
-      const elements = nodeElements.get(node.id);
-      const visible = node.firstFrame <= frameIndex;
-      const onPath = activePath.has(node.id);
-      const onSolution = solutionPath.has(node.id);
-      const returning = node.id === returnSource;
+    for (const node2 of treeNodes) {
+      const elements = nodeElements.get(node2.id);
+      const visible = node2.firstFrame <= frameIndex;
+      const onPath = activePath.has(node2.id);
+      const onSolution = solutionPath.has(node2.id);
+      const returning = node2.id === returnSource;
       elements.group.dataset.vis = visible ? "1" : "0";
-      elements.group.dataset.active = node.id === activeNode2 ? "true" : "false";
+      elements.group.dataset.active = node2.id === activeNode2 ? "true" : "false";
       elements.group.dataset.path = onPath ? "true" : "false";
       elements.group.dataset.solution = onSolution ? "true" : "false";
       elements.group.dataset.returnSource = returning ? "true" : "false";
-      elements.group.dataset.collapsed = visible && !onPath && !onSolution && !returning && node.id !== activeNode2 ? "true" : "false";
-      elements.group.dataset.state = node.kind === "prune" ? "prune" : returning ? "return" : node.kind === "solution" ? "combine" : node.kind === "decision" ? "split" : "compute";
+      elements.group.dataset.collapsed = visible && !onPath && !onSolution && !returning && node2.id !== activeNode2 ? "true" : "false";
+      elements.group.dataset.state = node2.kind === "prune" ? "prune" : returning ? "return" : node2.kind === "solution" ? "combine" : node2.kind === "decision" ? "split" : "compute";
       if (!visible) elements.label.textContent = "";
-      else if (node.kind === "root") elements.label.textContent = "R";
-      else if (node.kind === "decision") elements.label.textContent = String(node.column);
-      else if (node.kind === "solution") elements.label.textContent = "S";
+      else if (node2.kind === "root") elements.label.textContent = "R";
+      else if (node2.kind === "decision") elements.label.textContent = String(node2.column);
+      else if (node2.kind === "solution") elements.label.textContent = "S";
       else {
-        const seenAttempts = node.attempts.filter(
+        const seenAttempts = node2.attempts.filter(
           (attempt) => attempt.frameIndex <= frameIndex
         ).length;
         elements.label.textContent = `×${seenAttempts}`;
@@ -2407,18 +2407,18 @@ function makeExecutionTreeView(frames, descriptor) {
   const nodes5 = f0.nodes;
   const halfHeight = descriptor.nodeHeight / 2;
   const padY = halfHeight + 12;
-  const naturalNodeWidth = (node) => node.width || descriptor.nodeWidth;
-  const lefts = nodes5.map((node) => node.x - naturalNodeWidth(node) / 2);
-  const rights = nodes5.map((node) => node.x + naturalNodeWidth(node) / 2);
-  const ys = nodes5.map((node) => node.y);
+  const naturalNodeWidth = (node2) => node2.width || descriptor.nodeWidth;
+  const lefts = nodes5.map((node2) => node2.x - naturalNodeWidth(node2) / 2);
+  const rights = nodes5.map((node2) => node2.x + naturalNodeWidth(node2) / 2);
+  const ys = nodes5.map((node2) => node2.y);
   const minX = Math.min(...lefts);
   const minY = Math.min(...ys);
   const naturalWidth = Math.max(...rights) - minX + 24;
   const naturalHeight = Math.max(...ys) - minY + padY * 2;
   const naturalPosition = Object.fromEntries(
-    nodes5.map((node) => [node.id, { x: node.x - minX + 12, y: node.y - minY + padY }])
+    nodes5.map((node2) => [node2.id, { x: node2.x - minX + 12, y: node2.y - minY + padY }])
   );
-  const naturalWidths = Object.fromEntries(nodes5.map((node) => [node.id, naturalNodeWidth(node)]));
+  const naturalWidths = Object.fromEntries(nodes5.map((node2) => [node2.id, naturalNodeWidth(node2)]));
   const naturalLayout = {
     width: naturalWidth,
     height: naturalHeight,
@@ -2426,34 +2426,34 @@ function makeExecutionTreeView(frames, descriptor) {
     widths: naturalWidths
   };
   const visibleNodeIds = new Set(frames.flatMap((frame) => frame.visible));
-  const layoutNodes2 = nodes5.filter((node) => visibleNodeIds.has(node.id));
+  const layoutNodes2 = nodes5.filter((node2) => visibleNodeIds.has(node2.id));
   const tiers = /* @__PURE__ */ new Map();
-  for (const node of layoutNodes2) {
-    const tier = tiers.get(node.depth) || [];
-    tier.push(node);
-    tiers.set(node.depth, tier);
+  for (const node2 of layoutNodes2) {
+    const tier = tiers.get(node2.depth) || [];
+    tier.push(node2);
+    tiers.set(node2.depth, tier);
   }
   for (const tier of tiers.values()) tier.sort((left, right) => left.x - right.x);
   const maxTierSize = Math.max(...[...tiers.values()].map((tier) => tier.length));
-  const maxDepth = Math.max(...nodes5.map((node) => node.depth));
+  const maxDepth = Math.max(...nodes5.map((node2) => node2.depth));
   function tierLayout(width, maxNodeWidth, gap) {
     const widths = {
       ...naturalWidths,
       ...Object.fromEntries(
-        layoutNodes2.map((node) => [node.id, Math.min(naturalNodeWidth(node), maxNodeWidth)])
+        layoutNodes2.map((node2) => [node2.id, Math.min(naturalNodeWidth(node2), maxNodeWidth)])
       )
     };
     const position = { ...naturalPosition };
     const levelGap = descriptor.nodeHeight + 22;
     for (const [depth, tier] of tiers) {
-      const tierWidth = tier.reduce((total, node) => total + widths[node.id], 0) + gap * (tier.length - 1);
+      const tierWidth = tier.reduce((total, node2) => total + widths[node2.id], 0) + gap * (tier.length - 1);
       let x = (width - tierWidth) / 2;
-      for (const node of tier) {
-        position[node.id] = {
-          x: x + widths[node.id] / 2,
+      for (const node2 of tier) {
+        position[node2.id] = {
+          x: x + widths[node2.id] / 2,
           y: padY + depth * levelGap
         };
-        x += widths[node.id] + gap;
+        x += widths[node2.id] + gap;
       }
     }
     return {
@@ -2467,7 +2467,7 @@ function makeExecutionTreeView(frames, descriptor) {
   const desktopTierWidth = Math.max(
     ...[...tiers.values()].map(
       (tier) => tier.reduce(
-        (total, node) => total + Math.min(naturalNodeWidth(node), descriptor.nodeWidth),
+        (total, node2) => total + Math.min(naturalNodeWidth(node2), descriptor.nodeWidth),
         0
       ) + desktopGap * (tier.length - 1)
     )
@@ -2478,7 +2478,7 @@ function makeExecutionTreeView(frames, descriptor) {
     desktopGap
   ) : naturalLayout;
   let layout = desktopLayout;
-  const nodeWidth = (node) => layout.widths[node.id] || naturalNodeWidth(node);
+  const nodeWidth = (node2) => layout.widths[node2.id] || naturalNodeWidth(node2);
   const svg = document.createElementNS(SVGNS, "svg");
   const title = document.createElementNS(SVGNS, "title");
   const description = document.createElementNS(SVGNS, "desc");
@@ -2514,9 +2514,9 @@ function makeExecutionTreeView(frames, descriptor) {
     edgeElements.push({ element: line, from: edge.from, to: edge.to });
   }
   const nodeElements = {};
-  for (const node of nodes5) {
-    const point = layout.position[node.id];
-    const width = nodeWidth(node);
+  for (const node2 of nodes5) {
+    const point = layout.position[node2.id];
+    const width = nodeWidth(node2);
     const halfWidth = width / 2;
     const group = document.createElementNS(SVGNS, "g");
     group.setAttribute("class", "steptrace__rtnode");
@@ -2558,7 +2558,7 @@ function makeExecutionTreeView(frames, descriptor) {
     result.setAttribute("class", "steptrace__rtval");
     badge.setAttribute("class", "steptrace__rtbadge");
     for (const element of [label, detail, result]) element.setAttribute("text-anchor", "middle");
-    const [primaryLine, secondaryLine] = descriptor.nodeLines(node);
+    const [primaryLine, secondaryLine] = descriptor.nodeLines(node2);
     label.textContent = primaryLine;
     detail.textContent = secondaryLine;
     if (descriptor.shape === "circle") {
@@ -2574,7 +2574,7 @@ function makeExecutionTreeView(frames, descriptor) {
       divider?.setAttribute("y1", "6");
       divider?.setAttribute("y2", "6");
       valueTier?.setAttribute("class", "steptrace__rtarray");
-      const tier = tieredArrayCells(node.values, width);
+      const tier = tieredArrayCells(node2.values, width);
       for (const x of tier.separators) {
         const separator = document.createElementNS(SVGNS, "line");
         separator.setAttribute("class", "steptrace__rtcell-separator");
@@ -2610,7 +2610,7 @@ function makeExecutionTreeView(frames, descriptor) {
     if (!descriptor.tieredCards) group.append(detail);
     group.append(result, badge);
     treeLayer.append(group);
-    nodeElements[node.id] = {
+    nodeElements[node2.id] = {
       group,
       ring,
       surface,
@@ -2623,9 +2623,9 @@ function makeExecutionTreeView(frames, descriptor) {
   }
   function centerTransform(visibleIds) {
     const visible = new Set(visibleIds);
-    const rects = nodes5.filter((node) => visible.has(node.id)).map((node) => {
-      const point = layout.position[node.id];
-      const halfNodeWidth = nodeWidth(node) / 2;
+    const rects = nodes5.filter((node2) => visible.has(node2.id)).map((node2) => {
+      const point = layout.position[node2.id];
+      const halfNodeWidth = nodeWidth(node2) / 2;
       return {
         left: point.x - halfNodeWidth,
         right: point.x + halfNodeWidth,
@@ -2672,10 +2672,10 @@ function makeExecutionTreeView(frames, descriptor) {
     wrap.dataset.compact = layout === desktopLayout ? "false" : "true";
     svg.setAttribute("viewBox", `0 0 ${layout.width} ${layout.height}`);
     svg.style.setProperty("--steptrace-tree-width", `${layout.width}px`);
-    for (const node of nodes5) {
-      const elements = nodeElements[node.id];
-      const point = layout.position[node.id];
-      const width = nodeWidth(node);
+    for (const node2 of nodes5) {
+      const elements = nodeElements[node2.id];
+      const point = layout.position[node2.id];
+      const width = nodeWidth(node2);
       const halfWidth = width / 2;
       elements.group.setAttribute("transform", `translate(${point.x} ${point.y})`);
       if (descriptor.shape === "circle") {
@@ -2708,24 +2708,24 @@ function makeExecutionTreeView(frames, descriptor) {
     const collapsed = new Set(model.collapsed);
     const path = new Set(model.path);
     const related = model.phase === "combine" ? new Set(f0.edges.filter((edge) => edge.from === model.active).map((edge) => edge.to)) : /* @__PURE__ */ new Set();
-    const activeNode2 = nodes5.find((node) => node.id === model.active);
+    const activeNode2 = nodes5.find((node2) => node2.id === model.active);
     if (descriptor.centerVisible) treeLayer.style.transform = centerTransform(model.visible);
     title.textContent = `${descriptor.ariaLabel}: ${model.phase}`;
     description.textContent = `${model.phase}. Active subproblem ${activeNode2 ? descriptor.nodeLines(activeNode2).join("; ") : "none"}. ${model.action}. ${stripTags(frame.message)}`;
-    for (const node of nodes5) {
-      const elements = nodeElements[node.id];
-      const state = model.states[node.id] || "";
-      elements.group.dataset.vis = visible.has(node.id) ? "1" : "0";
-      elements.group.dataset.collapsed = collapsed.has(node.id) ? "true" : "false";
+    for (const node2 of nodes5) {
+      const elements = nodeElements[node2.id];
+      const state = model.states[node2.id] || "";
+      elements.group.dataset.vis = visible.has(node2.id) ? "1" : "0";
+      elements.group.dataset.collapsed = collapsed.has(node2.id) ? "true" : "false";
       elements.group.dataset.state = state;
-      elements.group.dataset.active = model.active === node.id ? "true" : "false";
-      elements.group.dataset.path = path.has(node.id) ? "true" : "false";
-      elements.group.dataset.related = related.has(node.id) ? "true" : "false";
-      const value = model.results[node.id];
+      elements.group.dataset.active = model.active === node2.id ? "true" : "false";
+      elements.group.dataset.path = path.has(node2.id) ? "true" : "false";
+      elements.group.dataset.related = related.has(node2.id) ? "true" : "false";
+      const value = model.results[node2.id];
       const resultText = Array.isArray(value) ? value.length ? `[${value.join(", ")}]` : "" : value == null ? "" : String(value);
       if (descriptor.shape === "card") {
         if (descriptor.tieredCards) {
-          const values = Array.isArray(value) ? value : node.values;
+          const values = Array.isArray(value) ? value : node2.values;
           for (let index2 = 0; index2 < elements.valueCells.length; index2++)
             elements.valueCells[index2].textContent = String(values[index2] ?? "");
         } else {
@@ -2875,9 +2875,9 @@ function makeGraphView(frames, graph, frontierLabel) {
   graphWrap.append(svg);
   const geometry = observeFixedSvgNodes(
     svg,
-    graph.nodes.map((node) => ({
-      element: nodeEls[node.id].g,
-      point: pos[node.id],
+    graph.nodes.map((node2) => ({
+      element: nodeEls[node2.id].g,
+      point: pos[node2.id],
       coordinates: "absolute"
     })),
     (unitsPerCssPixel) => {
@@ -3133,25 +3133,25 @@ function buildMilestones(algorithm, kind, frames) {
       }
     } else if (kind === "rectree") {
       if (familyProfile === "branch-and-bound") {
-        const activeNode2 = f.nodes.find((node) => node.id === f.active);
+        const activeNode2 = f.nodes.find((node2) => node2.id === f.active);
         if (f.type === "incumbent") push(i, `Incumbent ${f.incumbent}`);
         else if (f.type === "split") push(i, `Expand ${activeNode2?.label || "decision"}`);
         else if (f.type === "infeasible") push(i, `Reject ${activeNode2?.label || "branch"}`);
         else if (f.type === "prune") push(i, `Prune ${activeNode2?.label || "branch"}`);
       } else if (f.type === "split") {
-        const activeNode2 = f.nodes.find((node) => node.id === f.active);
+        const activeNode2 = f.nodes.find((node2) => node2.id === f.active);
         push(i, `Split ${activeNode2?.label || "range"}`);
       } else if (f.type === "combine") {
-        const activeNode2 = f.nodes.find((node) => node.id === f.active);
+        const activeNode2 = f.nodes.find((node2) => node2.id === f.active);
         push(
           i,
           `${f.profile === "merge-sort" ? "Merge" : "Combine"} ${activeNode2?.label || "problem"}`
         );
       } else if (f.type === "store") {
-        const activeNode2 = f.nodes.find((node) => node.id === f.active);
+        const activeNode2 = f.nodes.find((node2) => node2.id === f.active);
         push(i, `Store ${activeNode2?.label || "state"}`);
       } else if (f.type === "cache") {
-        const activeNode2 = f.nodes.find((node) => node.id === f.active);
+        const activeNode2 = f.nodes.find((node2) => node2.id === f.active);
         push(i, `Reuse ${activeNode2?.label || "state"}`);
       } else if (f.type === "phase") {
         push(i, f.phase === "memo" ? "Memoized" : "Plain recursion");
@@ -3257,7 +3257,7 @@ function summaryFor(algorithm, kind, frame, graph) {
   if (kind === "string" && frame.profile === "ternary-search-tree")
     return `${frame.terminalNodes.length} terminal keys · ${frame.visibleNodes.length - 1} character nodes.`;
   if (kind === "string" && Array.isArray(frame.terminalNodes)) {
-    const keys = frame.terminalNodes.filter((node) => node !== "root");
+    const keys = frame.terminalNodes.filter((node2) => node2 !== "root");
     return keys.length ? `Stored keys ${keys.join(", ")} · ${frame.visibleNodes.length} trie nodes.` : `No keys stored · ${frame.visibleNodes.length} trie node.`;
   }
   if (kind === "string") {
@@ -3433,8 +3433,8 @@ var init_render = __esm({
           collapsed: frame.collapsed
         };
       },
-      nodeLines(node) {
-        return [node.label, ""];
+      nodeLines(node2) {
+        return [node2.label, ""];
       },
       watchRows(frame) {
         const last = frame.memo.length ? frame.memo[frame.memo.length - 1] : null;
@@ -3926,9 +3926,9 @@ function createStructureShell(root, id, label, ariaLabel, family10 = "contiguous
       button2.textContent = buttonLabel;
       return button2;
     },
-    listen(node, type, listener) {
-      node.addEventListener(type, listener);
-      cleanups.push(() => node.removeEventListener(type, listener));
+    listen(node2, type, listener) {
+      node2.addEventListener(type, listener);
+      cleanups.push(() => node2.removeEventListener(type, listener));
     },
     reducedMotion() {
       return media.matches;
@@ -4003,131 +4003,637 @@ var init_interactive_structure = __esm({
 });
 
 // custom/steptrace/src/families/binary-tree.ts
+function parseBinaryTreeConfig(config, algorithm, defaults, maxValues = MAX_VALUES) {
+  const values = Array.isArray(config.values) && config.values.length ? config.values : defaults;
+  if (values.some(
+    (value2) => typeof value2 !== "number" || !Number.isFinite(value2) || !Number.isInteger(value2)
+  ))
+    throw new Error(`steptrace: ${algorithm} requires finite integer values.`);
+  if (new Set(values).size !== values.length)
+    throw new Error(`steptrace: ${algorithm} requires unique values.`);
+  if (values.length > maxValues)
+    throw new Error(`steptrace: ${algorithm} supports at most ${maxValues} values.`);
+  const value = config.value;
+  if (value != null && (typeof value !== "number" || !Number.isFinite(value) || !Number.isInteger(value)))
+    throw new Error(`steptrace: ${algorithm} value must be a finite integer.`);
+  return { values, value };
+}
 function svgEl(tag, className) {
-  const node = document.createElementNS(SVG_NS2, tag);
-  node.setAttribute("class", className);
-  return node;
+  const node2 = document.createElementNS(SVG_NS2, tag);
+  node2.setAttribute("class", className);
+  return node2;
 }
-function height(node) {
-  return node?.height ?? 0;
+function operationState() {
+  return { path: [], changed: /* @__PURE__ */ new Set(), repairing: /* @__PURE__ */ new Set(), success: null };
 }
-function balance(node) {
-  return height(node.left) - height(node.right);
+function node(key4, color = "black") {
+  return { key: key4, height: 1, color, left: null, right: null, parent: null };
 }
-function update(node) {
-  node.height = 1 + Math.max(height(node.left), height(node.right));
+function height(current) {
+  return current?.height ?? 0;
 }
-function rotateRight(node, state) {
-  const root = node.left;
-  state.rotating.add(node.key).add(root.key);
-  node.left = root.right;
-  root.right = node;
-  update(node);
-  update(root);
-  return root;
+function updateHeight(current) {
+  current.height = 1 + Math.max(height(current.left), height(current.right));
 }
-function rotateLeft(node, state) {
-  const root = node.right;
-  state.rotating.add(node.key).add(root.key);
-  node.right = root.left;
-  root.left = node;
-  update(node);
-  update(root);
-  return root;
-}
-function rebalance(node, state, rotations) {
-  update(node);
-  const factor = balance(node);
-  if (factor > 1) {
-    if (balance(node.left) < 0) {
-      rotations.push(`LR at ${node.key}`);
-      node.left = rotateLeft(node.left, state);
-    } else rotations.push(`LL at ${node.key}`);
-    return rotateRight(node, state);
-  }
-  if (factor < -1) {
-    if (balance(node.right) > 0) {
-      rotations.push(`RL at ${node.key}`);
-      node.right = rotateRight(node.right, state);
-    } else rotations.push(`RR at ${node.key}`);
-    return rotateLeft(node, state);
-  }
-  return node;
-}
-function insertNode(node, key4, state, rotations) {
-  if (!node) {
-    state.changed.add(key4);
-    return [{ key: key4, height: 1, left: null, right: null }, true];
-  }
-  state.path.push(node.key);
-  if (key4 === node.key) return [node, false];
-  let inserted;
-  if (key4 < node.key) [node.left, inserted] = insertNode(node.left, key4, state, rotations);
-  else [node.right, inserted] = insertNode(node.right, key4, state, rotations);
-  return [inserted ? rebalance(node, state, rotations) : node, inserted];
-}
-function minimumNode(node) {
-  while (node.left) node = node.left;
-  return node;
-}
-function removeNode(node, key4, state, rotations) {
-  if (!node) return [null, false];
-  state.path.push(node.key);
-  let removed;
-  if (key4 < node.key) [node.left, removed] = removeNode(node.left, key4, state, rotations);
-  else if (key4 > node.key) [node.right, removed] = removeNode(node.right, key4, state, rotations);
-  else {
-    removed = true;
-    state.changed.add(node.key);
-    if (!node.left || !node.right) return [node.left || node.right, true];
-    const successor = minimumNode(node.right);
-    node.key = successor.key;
-    state.changed.add(successor.key);
-    [node.right] = removeNode(node.right, successor.key, state, rotations);
-  }
-  return [removed ? rebalance(node, state, rotations) : node, removed];
-}
-function buildTree(values) {
-  let root = null;
-  for (const value of values) {
-    const state = {
-      path: [],
-      changed: /* @__PURE__ */ new Set(),
-      rotating: /* @__PURE__ */ new Set(),
-      success: null
-    };
-    [root] = insertNode(root, value, state, []);
-  }
-  return root;
+function balanceFactor(current) {
+  return height(current.left) - height(current.right);
 }
 function orderedKeys(root) {
   const keys = [];
-  const visit = (node) => {
-    if (!node) return;
-    visit(node.left);
-    keys.push(node.key);
-    visit(node.right);
+  const visit = (current) => {
+    if (!current) return;
+    visit(current.left);
+    keys.push(current.key);
+    visit(current.right);
   };
   visit(root);
   return keys;
 }
-function mountAvlTree(rootElement, config) {
+function treeHeight(root) {
+  return root ? 1 + Math.max(treeHeight(root.left), treeHeight(root.right)) : 0;
+}
+function plainInsert(root, key4) {
+  if (!root) return node(key4);
+  let current = root;
+  while (true) {
+    if (key4 < current.key) {
+      if (current.left) current = current.left;
+      else {
+        current.left = node(key4);
+        current.left.parent = current;
+        break;
+      }
+    } else {
+      if (current.right) current = current.right;
+      else {
+        current.right = node(key4);
+        current.right.parent = current;
+        break;
+      }
+    }
+  }
+  return root;
+}
+function createBstModel(values) {
+  let root = null;
+  for (const value of values) root = plainInsert(root, value);
+  const model = {
+    root,
+    insert(key4, state) {
+      const before = treeHeight(model.root);
+      if (!model.root) {
+        model.root = node(key4);
+        state.changed.add(key4);
+        state.success = key4;
+        return { changed: true, detail: `Inserted ${key4} as the root; height is 1.` };
+      }
+      let current = model.root;
+      while (true) {
+        state.path.push(current.key);
+        if (key4 === current.key)
+          return {
+            changed: false,
+            detail: `Compared ${state.path.join(" → ")}; ${key4} already exists, so the tree did not change.`
+          };
+        const side = key4 < current.key ? "left" : "right";
+        const child = current[side];
+        if (child) {
+          current = child;
+          continue;
+        }
+        current[side] = node(key4);
+        current[side].parent = current;
+        state.changed.add(key4);
+        state.success = key4;
+        const after = treeHeight(model.root);
+        return {
+          changed: true,
+          detail: `Inserted ${key4} via ${state.path.join(" → ")}; height ${before} → ${after}. Sorted inserts keep extending one side instead of restoring balance.`
+        };
+      }
+    },
+    search(key4, state) {
+      let current = model.root;
+      while (current) {
+        state.path.push(current.key);
+        if (key4 === current.key) {
+          state.success = key4;
+          return { found: true, detail: `Search path ${state.path.join(" → ")} found ${key4}.` };
+        }
+        current = key4 < current.key ? current.left : current.right;
+      }
+      return {
+        found: false,
+        detail: `Search path ${state.path.join(" → ")} reached an empty child; ${key4} is absent.`
+      };
+    },
+    remove(key4, state) {
+      let parent = null;
+      let current = model.root;
+      while (current && current.key !== key4) {
+        state.path.push(current.key);
+        parent = current;
+        current = key4 < current.key ? current.left : current.right;
+      }
+      if (!current)
+        return {
+          changed: false,
+          detail: `Compared ${state.path.join(" → ")}; ${key4} is absent, so the tree did not change.`
+        };
+      state.path.push(current.key);
+      state.changed.add(current.key);
+      if (current.left && current.right) {
+        let successorParent = current;
+        let successor = current.right;
+        while (successor.left) {
+          state.path.push(successor.key);
+          successorParent = successor;
+          successor = successor.left;
+        }
+        current.key = successor.key;
+        state.changed.add(successor.key);
+        const child = successor.right;
+        if (successorParent.left === successor) successorParent.left = child;
+        else successorParent.right = child;
+        if (child) child.parent = successorParent;
+      } else {
+        const child = current.left ?? current.right;
+        if (!parent) model.root = child;
+        else if (parent.left === current) parent.left = child;
+        else parent.right = child;
+        if (child) child.parent = parent;
+      }
+      return {
+        changed: true,
+        detail: `Removed ${key4} via ${state.path.join(" → ")}; BST order is preserved at height ${treeHeight(model.root)}.`
+      };
+    },
+    meta: () => "",
+    invariant: () => `BST order valid · height ${treeHeight(model.root)}`
+  };
+  return model;
+}
+function createAvlModel(values) {
+  const rotateRight = (current, state) => {
+    const next = current.left;
+    state.repairing.add(current.key).add(next.key);
+    current.left = next.right;
+    if (current.left) current.left.parent = current;
+    next.right = current;
+    next.parent = current.parent;
+    current.parent = next;
+    updateHeight(current);
+    updateHeight(next);
+    return next;
+  };
+  const rotateLeft = (current, state) => {
+    const next = current.right;
+    state.repairing.add(current.key).add(next.key);
+    current.right = next.left;
+    if (current.right) current.right.parent = current;
+    next.left = current;
+    next.parent = current.parent;
+    current.parent = next;
+    updateHeight(current);
+    updateHeight(next);
+    return next;
+  };
+  const rebalance = (current, state, repairs) => {
+    updateHeight(current);
+    const factor = balanceFactor(current);
+    if (factor > 1) {
+      if (balanceFactor(current.left) < 0) {
+        repairs.push(`LR at ${current.key}`);
+        current.left = rotateLeft(current.left, state);
+        current.left.parent = current;
+      } else repairs.push(`LL at ${current.key}`);
+      return rotateRight(current, state);
+    }
+    if (factor < -1) {
+      if (balanceFactor(current.right) > 0) {
+        repairs.push(`RL at ${current.key}`);
+        current.right = rotateRight(current.right, state);
+        current.right.parent = current;
+      } else repairs.push(`RR at ${current.key}`);
+      return rotateLeft(current, state);
+    }
+    return current;
+  };
+  const insert = (current, key4, state, repairs) => {
+    if (!current) {
+      state.changed.add(key4);
+      return [node(key4), true];
+    }
+    state.path.push(current.key);
+    if (key4 === current.key) return [current, false];
+    let inserted;
+    if (key4 < current.key) {
+      ;
+      [current.left, inserted] = insert(current.left, key4, state, repairs);
+      current.left.parent = current;
+    } else {
+      ;
+      [current.right, inserted] = insert(current.right, key4, state, repairs);
+      current.right.parent = current;
+    }
+    return [inserted ? rebalance(current, state, repairs) : current, inserted];
+  };
+  const minimum = (current) => {
+    while (current.left) current = current.left;
+    return current;
+  };
+  const remove = (current, key4, state, repairs) => {
+    if (!current) return [null, false];
+    state.path.push(current.key);
+    let removed;
+    if (key4 < current.key) {
+      ;
+      [current.left, removed] = remove(current.left, key4, state, repairs);
+      if (current.left) current.left.parent = current;
+    } else if (key4 > current.key) {
+      ;
+      [current.right, removed] = remove(current.right, key4, state, repairs);
+      if (current.right) current.right.parent = current;
+    } else {
+      removed = true;
+      state.changed.add(current.key);
+      if (!current.left || !current.right) {
+        const child = current.left ?? current.right;
+        if (child) child.parent = current.parent;
+        return [child, true];
+      }
+      const successor = minimum(current.right);
+      current.key = successor.key;
+      state.changed.add(successor.key);
+      [current.right] = remove(current.right, successor.key, state, repairs);
+      if (current.right) current.right.parent = current;
+    }
+    return [removed ? rebalance(current, state, repairs) : current, removed];
+  };
+  const model = {
+    root: null,
+    insert(key4, state) {
+      const repairs = [];
+      let inserted;
+      [model.root, inserted] = insert(model.root, key4, state, repairs);
+      if (model.root) model.root.parent = null;
+      if (inserted) state.success = key4;
+      return {
+        changed: inserted,
+        detail: inserted ? `Inserted ${key4} via ${state.path.join(" → ") || "the root"}; ${repairs.length ? `${repairs.join(", ")} restored |balance| ≤ 1.` : "no rotation was needed."}` : `Compared ${state.path.join(" → ")}; ${key4} already exists, so the tree did not change.`
+      };
+    },
+    search(key4, state) {
+      let current = model.root;
+      while (current) {
+        state.path.push(current.key);
+        if (key4 === current.key) {
+          state.success = key4;
+          return { found: true, detail: `Search path ${state.path.join(" → ")} found ${key4}.` };
+        }
+        current = key4 < current.key ? current.left : current.right;
+      }
+      return {
+        found: false,
+        detail: `Search path ${state.path.join(" → ")} reached an empty child; ${key4} is absent.`
+      };
+    },
+    remove(key4, state) {
+      const repairs = [];
+      let removed;
+      [model.root, removed] = remove(model.root, key4, state, repairs);
+      if (model.root) model.root.parent = null;
+      return {
+        changed: removed,
+        detail: removed ? `Removed ${key4} via ${state.path.join(" → ")}; ${repairs.length ? `${repairs.join(", ")} rebalanced the shortened path.` : "all ancestors stayed within |balance| ≤ 1."}` : `Compared ${state.path.join(" → ")}; ${key4} is absent, so the tree did not change.`
+      };
+    },
+    meta: (current) => `h${current.height} bf${balanceFactor(current)}`,
+    invariant: () => "AVL balance valid · |balance| ≤ 1"
+  };
+  for (const value of values) model.insert(value, operationState());
+  return model;
+}
+function createRedBlackModel(values) {
+  const isRed = (current) => current?.color === "red";
+  const repair = (state, ...nodes5) => {
+    for (const current of nodes5) if (current) state.repairing.add(current.key);
+  };
+  const rotateLeft = (current, state, events) => {
+    const next = current.right;
+    repair(state, current, next);
+    events.push(`rotate left at ${current.key}`);
+    current.right = next.left;
+    next.left = current;
+    next.color = current.color;
+    current.color = "red";
+    return next;
+  };
+  const rotateRight = (current, state, events) => {
+    const next = current.left;
+    repair(state, current, next);
+    events.push(`rotate right at ${current.key}`);
+    current.left = next.right;
+    next.right = current;
+    next.color = current.color;
+    current.color = "red";
+    return next;
+  };
+  const flipColors = (current, state, events) => {
+    repair(state, current, current.left, current.right);
+    events.push(`recolor at ${current.key}`);
+    current.color = current.color === "red" ? "black" : "red";
+    if (current.left) current.left.color = current.left.color === "red" ? "black" : "red";
+    if (current.right) current.right.color = current.right.color === "red" ? "black" : "red";
+  };
+  const balance = (current, state, events) => {
+    if (isRed(current.right) && !isRed(current.left)) current = rotateLeft(current, state, events);
+    if (isRed(current.left) && isRed(current.left.left))
+      current = rotateRight(current, state, events);
+    if (isRed(current.left) && isRed(current.right)) flipColors(current, state, events);
+    return current;
+  };
+  const insert = (current, key4, state, events) => {
+    if (!current) {
+      state.changed.add(key4);
+      return [node(key4, "red"), true];
+    }
+    state.path.push(current.key);
+    if (key4 === current.key) return [current, false];
+    let inserted;
+    if (key4 < current.key) [current.left, inserted] = insert(current.left, key4, state, events);
+    else [current.right, inserted] = insert(current.right, key4, state, events);
+    return [inserted ? balance(current, state, events) : current, inserted];
+  };
+  const moveRedLeft = (current, state, events) => {
+    flipColors(current, state, events);
+    if (isRed(current.right?.left ?? null)) {
+      current.right = rotateRight(current.right, state, events);
+      current = rotateLeft(current, state, events);
+      flipColors(current, state, events);
+    }
+    return current;
+  };
+  const moveRedRight = (current, state, events) => {
+    flipColors(current, state, events);
+    if (isRed(current.left?.left ?? null)) {
+      current = rotateRight(current, state, events);
+      flipColors(current, state, events);
+    }
+    return current;
+  };
+  const minimum = (current) => {
+    while (current.left) current = current.left;
+    return current;
+  };
+  const deleteMin = (current, state, events) => {
+    if (!current.left) return null;
+    if (!isRed(current.left) && !isRed(current.left.left))
+      current = moveRedLeft(current, state, events);
+    current.left = deleteMin(current.left, state, events);
+    return balance(current, state, events);
+  };
+  const remove = (current, key4, state, events) => {
+    state.path.push(current.key);
+    if (key4 < current.key) {
+      if (current.left) {
+        if (!isRed(current.left) && !isRed(current.left.left))
+          current = moveRedLeft(current, state, events);
+        current.left = remove(current.left, key4, state, events);
+      }
+    } else {
+      if (isRed(current.left)) current = rotateRight(current, state, events);
+      if (key4 === current.key && !current.right) return null;
+      if (current.right) {
+        if (!isRed(current.right) && !isRed(current.right.left))
+          current = moveRedRight(current, state, events);
+        if (key4 === current.key) {
+          const successor = minimum(current.right);
+          state.changed.add(current.key).add(successor.key);
+          current.key = successor.key;
+          current.right = deleteMin(current.right, state, events);
+        } else current.right = remove(current.right, key4, state, events);
+      }
+    }
+    return balance(current, state, events);
+  };
+  const blackHeight = (root) => {
+    let count = 1;
+    while (root) {
+      if (root.color === "black") count++;
+      root = root.left;
+    }
+    return count;
+  };
+  const model = {
+    root: null,
+    insert(key4, state) {
+      const events = [];
+      let inserted;
+      [model.root, inserted] = insert(model.root, key4, state, events);
+      if (model.root) model.root.color = "black";
+      if (inserted) state.success = key4;
+      return {
+        changed: inserted,
+        detail: inserted ? `Inserted ${key4}; ${events.join(", ") || "no fixup needed"}. Black-height ${blackHeight(model.root)} is equal on every path.` : `Compared ${state.path.join(" → ")}; ${key4} already exists, so the tree did not change.`
+      };
+    },
+    search(key4, state) {
+      let current = model.root;
+      while (current) {
+        state.path.push(current.key);
+        if (key4 === current.key) {
+          state.success = key4;
+          return { found: true, detail: `Search path ${state.path.join(" → ")} found ${key4}.` };
+        }
+        current = key4 < current.key ? current.left : current.right;
+      }
+      return {
+        found: false,
+        detail: `Search path ${state.path.join(" → ")} reached an empty child; ${key4} is absent.`
+      };
+    },
+    remove(key4, state) {
+      const probe = model.search(key4, operationState());
+      if (!probe.found)
+        return {
+          changed: false,
+          detail: `${key4} is absent, so the red-black tree did not change.`
+        };
+      const events = [];
+      state.changed.add(key4);
+      if (model.root && !isRed(model.root.left) && !isRed(model.root.right))
+        model.root.color = "red";
+      model.root = model.root ? remove(model.root, key4, state, events) : null;
+      if (model.root) model.root.color = "black";
+      return {
+        changed: true,
+        detail: `Removed ${key4}; ${events.join(", ") || "no fixup needed"}. Black-height ${blackHeight(model.root)} is equal on every path.`
+      };
+    },
+    meta: (current) => current.color === "red" ? "R" : "B",
+    invariant: () => `RB invariants valid · black-height ${blackHeight(model.root)}`
+  };
+  for (const value of values) model.insert(value, operationState());
+  return model;
+}
+function createSplayModel(values) {
+  const model = {
+    root: null,
+    insert: () => ({ changed: false, detail: "" }),
+    search: () => ({ found: false, detail: "" }),
+    remove: () => ({ changed: false, detail: "" }),
+    meta: () => "",
+    invariant: () => "BST order valid · accessed node becomes root"
+  };
+  for (const value of values) model.root = plainInsert(model.root, value);
+  const rotateLeft = (current, state) => {
+    const next = current.right;
+    state.repairing.add(current.key).add(next.key);
+    current.right = next.left;
+    if (next.left) next.left.parent = current;
+    next.parent = current.parent;
+    if (!current.parent) model.root = next;
+    else if (current === current.parent.left) current.parent.left = next;
+    else current.parent.right = next;
+    next.left = current;
+    current.parent = next;
+  };
+  const rotateRight = (current, state) => {
+    const next = current.left;
+    state.repairing.add(current.key).add(next.key);
+    current.left = next.right;
+    if (next.right) next.right.parent = current;
+    next.parent = current.parent;
+    if (!current.parent) model.root = next;
+    else if (current === current.parent.left) current.parent.left = next;
+    else current.parent.right = next;
+    next.right = current;
+    current.parent = next;
+  };
+  const splay = (current, state) => {
+    const cases = [];
+    while (current.parent) {
+      const parent = current.parent;
+      const grandparent = parent.parent;
+      if (!grandparent) {
+        cases.push("zig");
+        if (current === parent.left) rotateRight(parent, state);
+        else rotateLeft(parent, state);
+      } else if (current === parent.left && parent === grandparent.left || current === parent.right && parent === grandparent.right) {
+        cases.push("zig-zig");
+        if (current === parent.left) {
+          rotateRight(grandparent, state);
+          rotateRight(parent, state);
+        } else {
+          rotateLeft(grandparent, state);
+          rotateLeft(parent, state);
+        }
+      } else {
+        cases.push("zig-zag");
+        if (current === parent.left) {
+          rotateRight(parent, state);
+          rotateLeft(grandparent, state);
+        } else {
+          rotateLeft(parent, state);
+          rotateRight(grandparent, state);
+        }
+      }
+    }
+    return cases;
+  };
+  const find = (key4, state) => {
+    let current = model.root;
+    let last = null;
+    while (current) {
+      state.path.push(current.key);
+      last = current;
+      if (key4 === current.key) break;
+      current = key4 < current.key ? current.left : current.right;
+    }
+    return { found: current, last };
+  };
+  model.insert = (key4, state) => {
+    if (!model.root) {
+      model.root = node(key4);
+      state.changed.add(key4);
+      state.success = key4;
+      return { changed: true, detail: `Inserted ${key4} as the root.` };
+    }
+    const result = find(key4, state);
+    if (result.found)
+      return {
+        changed: false,
+        detail: `${key4} already exists; the tree did not change.`
+      };
+    const parent = result.last;
+    const added = node(key4);
+    added.parent = parent;
+    if (key4 < parent.key) parent.left = added;
+    else parent.right = added;
+    state.changed.add(key4);
+    const cases = splay(added, state);
+    state.success = key4;
+    return {
+      changed: true,
+      detail: `Inserted ${key4}, then ${cases.join(" → ")} moved it to the root.`
+    };
+  };
+  model.search = (key4, state) => {
+    const result = find(key4, state);
+    const accessed = result.found ?? result.last;
+    const cases = accessed ? splay(accessed, state) : [];
+    if (result.found) state.success = key4;
+    return {
+      found: !!result.found,
+      detail: result.found ? `Search path ${state.path.join(" → ")} found ${key4}; ${cases.join(" → ") || "already root"} moved it to the root.` : `Search path ${state.path.join(" → ")} missed ${key4}; canonical splay moves last accessed ${accessed?.key ?? "node"} to the root via ${cases.join(" → ") || "no rotation"}.`
+    };
+  };
+  model.remove = (key4, state) => {
+    const result = find(key4, state);
+    const accessed = result.found ?? result.last;
+    if (!result.found) {
+      const cases = accessed ? splay(accessed, state) : [];
+      return {
+        changed: false,
+        detail: `${key4} is absent; last accessed ${accessed?.key ?? "node"} was splayed via ${cases.join(" → ") || "no rotation"}.`
+      };
+    }
+    splay(result.found, state);
+    state.changed.add(key4);
+    const left = result.found.left;
+    const right = result.found.right;
+    if (left) left.parent = null;
+    if (right) right.parent = null;
+    if (!left) model.root = right;
+    else {
+      model.root = left;
+      let maximum = left;
+      while (maximum.right) maximum = maximum.right;
+      splay(maximum, state);
+      model.root.right = right;
+      if (right) right.parent = model.root;
+    }
+    return {
+      changed: true,
+      detail: `Removed ${key4}; splayed the left maximum and joined both ordered halves.`
+    };
+  };
+  return model;
+}
+function mountBinaryTree(rootElement, config, kind) {
+  const label = LABELS[kind];
   const shell = createStructureShell(
     rootElement,
-    "avl-tree",
-    "AVL tree",
-    "Interactive AVL tree",
+    kind,
+    label,
+    DESCRIPTIONS[kind],
     "binary-tree",
     "steptrace__binary-tree"
   );
   const initial = [...config.values];
-  let root = buildTree(initial);
-  let state = {
-    path: [],
-    changed: /* @__PURE__ */ new Set(),
-    rotating: /* @__PURE__ */ new Set(),
-    success: null
-  };
+  let model = MODELS[kind](initial);
+  let state = operationState();
   let geometry = null;
   const exitTimers = /* @__PURE__ */ new Set();
   const surface = el("div", "steptrace__binary-tree-surface");
@@ -4141,7 +4647,7 @@ function mountAvlTree(rootElement, config) {
   shell.stage.append(surface);
   const nodeViews = /* @__PURE__ */ new Map();
   const edgeViews = /* @__PURE__ */ new Map();
-  const input = shell.input("AVL key", "Value", 8);
+  const input = shell.input(INPUT_LABELS[kind], "Value", 8);
   input.type = "number";
   input.step = "1";
   input.value = config.value == null ? "" : String(config.value);
@@ -4152,26 +4658,29 @@ function mountAvlTree(rootElement, config) {
   shell.controls.append(input, insert, search, remove, reset);
   function positions() {
     const entries = [];
-    const maxDepth = Math.max(height(root) - 1, 0);
-    const visit = (node, depth, slot) => {
-      if (!node) return;
-      const slots = 2 ** (depth + 1);
+    const keys = orderedKeys(model.root);
+    const xByKey = new Map(
+      keys.map((key4, index) => [key4, (index + 1) / (keys.length + 1) * VIEW_WIDTH])
+    );
+    const maxDepth = Math.max(treeHeight(model.root) - 1, 0);
+    const visit = (current, depth) => {
+      if (!current) return;
       entries.push({
-        node,
-        x: (slot * 2 + 1) / slots * VIEW_WIDTH,
+        node: current,
+        x: xByKey.get(current.key),
         y: 28 + (maxDepth ? depth * 182 / maxDepth : 0)
       });
-      visit(node.left, depth + 1, slot * 2);
-      visit(node.right, depth + 1, slot * 2 + 1);
+      visit(current.left, depth + 1);
+      visit(current.right, depth + 1);
     };
-    visit(root, 0, 0);
+    visit(model.root, 0);
     return entries;
   }
   function paintTree() {
     geometry?.destroy();
-    if (!root) {
+    if (!model.root) {
       geometry = null;
-      svg.setAttribute("aria-label", "Empty AVL tree");
+      svg.setAttribute("aria-label", `Empty ${label}`);
       for (const view of nodeViews.values()) view.group.remove();
       for (const line of edgeViews.values()) line.remove();
       nodeViews.clear();
@@ -4180,7 +4689,7 @@ function mountAvlTree(rootElement, config) {
     }
     const entries = positions();
     const byNode = new Map(entries.map((entry) => [entry.node, entry]));
-    svg.setAttribute("aria-label", `AVL tree with ${entries.length} unique keys`);
+    svg.setAttribute("aria-label", `${label} with ${entries.length} unique keys`);
     const edges5 = [];
     const nextEdges = /* @__PURE__ */ new Set();
     for (const parent of entries) {
@@ -4199,8 +4708,11 @@ function mountAvlTree(rootElement, config) {
             line.dataset.entering = "0";
           });
         }
+        line.dataset.from = String(parent.node.key);
+        line.dataset.to = String(child.node.key);
+        line.dataset.side = child.node === parent.node.left ? "left" : "right";
         const pathIndex = state.path.indexOf(parent.node.key);
-        line.dataset.state = state.rotating.has(parent.node.key) && state.rotating.has(child.node.key) ? "rotation" : pathIndex >= 0 && state.path[pathIndex + 1] === child.node.key ? "path" : "neutral";
+        line.dataset.state = state.repairing.has(parent.node.key) && state.repairing.has(child.node.key) ? "rotation" : pathIndex >= 0 && state.path[pathIndex + 1] === child.node.key ? "path" : "neutral";
         edges5.push({ line, from: parent, to: child });
       }
     }
@@ -4245,13 +4757,16 @@ function mountAvlTree(rootElement, config) {
         });
       }
       const { group, value, meta, badge } = view;
-      group.dataset.state = state.rotating.has(entry.node.key) ? "rotation" : state.changed.has(entry.node.key) ? "changed" : state.path.includes(entry.node.key) ? "path" : "neutral";
+      group.dataset.state = state.repairing.has(entry.node.key) ? "rotation" : state.changed.has(entry.node.key) ? "changed" : state.path.includes(entry.node.key) ? "path" : "neutral";
+      group.dataset.color = kind === "red-black-tree" ? entry.node.color : "";
+      group.dataset.key = String(entry.node.key);
+      const metadata = model.meta(entry.node);
       group.setAttribute(
         "aria-label",
-        `Key ${entry.node.key}, height ${entry.node.height}, balance factor ${balance(entry.node)}`
+        kind === "avl-tree" ? `Key ${entry.node.key}, height ${entry.node.height}, balance factor ${balanceFactor(entry.node)}` : `Key ${entry.node.key}${metadata ? `, ${metadata}` : ""}`
       );
       value.textContent = String(entry.node.key);
-      meta.textContent = `h${entry.node.height} bf${balance(entry.node)}`;
+      meta.textContent = metadata;
       badge.dataset.visible = state.success === entry.node.key ? "1" : "0";
       return { element: group, point: { x: entry.x, y: entry.y } };
     });
@@ -4285,12 +4800,12 @@ function mountAvlTree(rootElement, config) {
   }
   function paint(message) {
     paintTree();
-    const count = orderedKeys(root).length;
+    const count = orderedKeys(model.root).length;
     shell.setCounter(String(count), count === 1 ? " key" : " keys");
     shell.status.textContent = message;
     remove.disabled = count === 0;
     search.disabled = count === 0;
-    insert.disabled = count >= MAX_VALUES;
+    insert.disabled = count >= (kind === "avl-tree" ? 11 : MAX_VALUES);
   }
   function valueFromInput(operation) {
     const raw = input.value.trim();
@@ -4300,11 +4815,12 @@ function mountAvlTree(rootElement, config) {
       paint("Value must be a finite integer.");
       return null;
     }
-    const keys = orderedKeys(root);
-    if (operation === "search") return root?.key ?? null;
+    const keys = orderedKeys(model.root);
+    if (operation === "search") return model.root?.key ?? null;
     if (operation === "remove") return keys.at(-1) ?? null;
-    if (keys.length >= MAX_VALUES) {
-      paint(`The review tree is capped at ${MAX_VALUES} keys.`);
+    const maxValues = kind === "avl-tree" ? 11 : MAX_VALUES;
+    if (keys.length >= maxValues) {
+      paint(`The review tree is capped at ${maxValues} keys.`);
       return null;
     }
     let value = Math.floor(Math.random() * 90) + 10;
@@ -4314,66 +4830,39 @@ function mountAvlTree(rootElement, config) {
   function onInsert() {
     const value = valueFromInput("insert");
     if (value == null) return;
-    state = { path: [], changed: /* @__PURE__ */ new Set(), rotating: /* @__PURE__ */ new Set(), success: null };
-    const rotations = [];
-    let inserted;
-    [root, inserted] = insertNode(root, value, state, rotations);
+    state = operationState();
+    const result = model.insert(value, state);
     input.value = "";
-    if (!inserted) {
-      paint(
-        `Compared ${state.path.join(" → ")}; ${value} already exists, so the tree did not change.`
-      );
-      return;
-    }
-    state.success = value;
-    paint(
-      `Inserted ${value} via ${state.path.join(" → ") || "the root"}; ${rotations.length ? `${rotations.join(", ")} restored |balance| ≤ 1.` : "no rotation was needed."}`
-    );
+    paint(result.detail);
   }
   function onSearch() {
     const value = valueFromInput("search");
     if (value == null) return;
-    state = { path: [], changed: /* @__PURE__ */ new Set(), rotating: /* @__PURE__ */ new Set(), success: null };
-    let node = root;
-    while (node) {
-      state.path.push(node.key);
-      if (value === node.key) break;
-      node = value < node.key ? node.left : node.right;
-    }
+    state = operationState();
+    const result = model.search(value, state);
     input.value = "";
-    state.success = node?.key ?? null;
-    paint(
-      node ? `Search path ${state.path.join(" → ")} found ${value}.` : `Search path ${state.path.join(" → ")} reached an empty child; ${value} is absent.`
-    );
+    paint(result.detail);
   }
   function onRemove() {
     const value = valueFromInput("remove");
     if (value == null) return;
-    state = { path: [], changed: /* @__PURE__ */ new Set(), rotating: /* @__PURE__ */ new Set(), success: null };
-    const rotations = [];
-    let removed;
-    [root, removed] = removeNode(root, value, state, rotations);
+    state = operationState();
+    const result = model.remove(value, state);
     input.value = "";
-    if (!removed) {
-      paint(`Compared ${state.path.join(" → ")}; ${value} is absent, so the tree did not change.`);
-      return;
-    }
-    paint(
-      `Removed ${value} via ${state.path.join(" → ")}; ${rotations.length ? `${rotations.join(", ")} rebalanced the shortened path.` : "all ancestors stayed within |balance| ≤ 1."}`
-    );
+    paint(result.detail);
   }
   function onReset() {
-    root = buildTree(initial);
-    state = { path: [], changed: /* @__PURE__ */ new Set(), rotating: /* @__PURE__ */ new Set(), success: null };
+    model = MODELS[kind](initial);
+    state = operationState();
     input.value = config.value == null ? "" : String(config.value);
-    paint("Reset to the initial AVL tree.");
+    paint(`Reset to the initial ${label}. ${model.invariant()}.`);
   }
   shell.listen(insert, "click", onInsert);
   shell.listen(search, "click", onSearch);
   shell.listen(remove, "click", onRemove);
   shell.listen(reset, "click", onReset);
   onEnter(shell, input, onInsert);
-  paint("Insert, search, or remove a key; AVL repairs every imbalance immediately.");
+  paint(`Insert, search, or remove a key. ${model.invariant()}.`);
   const handle = shell.finish();
   return {
     destroy() {
@@ -4383,7 +4872,7 @@ function mountAvlTree(rootElement, config) {
     }
   };
 }
-var SVG_NS2, VIEW_WIDTH, VIEW_HEIGHT, MAX_VALUES;
+var SVG_NS2, VIEW_WIDTH, VIEW_HEIGHT, MAX_VALUES, MODELS, LABELS, INPUT_LABELS, DESCRIPTIONS, mountAvlTree, mountBinarySearchTree, mountRedBlackTree, mountSplayTree;
 var init_binary_tree = __esm({
   "custom/steptrace/src/families/binary-tree.ts"() {
     init_graph_node();
@@ -4392,30 +4881,45 @@ var init_binary_tree = __esm({
     SVG_NS2 = "http://www.w3.org/2000/svg";
     VIEW_WIDTH = 580;
     VIEW_HEIGHT = 250;
-    MAX_VALUES = 11;
+    MAX_VALUES = 9;
+    MODELS = {
+      "avl-tree": createAvlModel,
+      "binary-search-tree": createBstModel,
+      "red-black-tree": createRedBlackModel,
+      "splay-tree": createSplayModel
+    };
+    LABELS = {
+      "avl-tree": "AVL tree",
+      "binary-search-tree": "Binary search tree",
+      "red-black-tree": "Red-black tree",
+      "splay-tree": "Splay tree"
+    };
+    INPUT_LABELS = {
+      "avl-tree": "AVL key",
+      "binary-search-tree": "Binary search tree key",
+      "red-black-tree": "Red-black tree key",
+      "splay-tree": "Splay tree key"
+    };
+    DESCRIPTIONS = {
+      "avl-tree": "Interactive AVL tree",
+      "binary-search-tree": "Interactive binary search tree",
+      "red-black-tree": "Interactive red-black tree",
+      "splay-tree": "Interactive splay tree"
+    };
+    mountAvlTree = (root, config) => mountBinaryTree(root, config, "avl-tree");
+    mountBinarySearchTree = (root, config) => mountBinaryTree(root, config, "binary-search-tree");
+    mountRedBlackTree = (root, config) => mountBinaryTree(root, config, "red-black-tree");
+    mountSplayTree = (root, config) => mountBinaryTree(root, config, "splay-tree");
   }
 });
 
 // custom/steptrace/src/algorithms/avl-tree.ts
-function parseAvlTreeConfig(config) {
-  const values = Array.isArray(config.values) && config.values.length ? config.values : DEFAULT_VALUES;
-  if (values.some(
-    (value2) => typeof value2 !== "number" || !Number.isFinite(value2) || !Number.isInteger(value2)
-  ))
-    throw new Error("steptrace: avl-tree requires finite integer values.");
-  if (new Set(values).size !== values.length)
-    throw new Error("steptrace: avl-tree requires unique values.");
-  if (values.length > 11) throw new Error("steptrace: avl-tree supports at most 11 values.");
-  const value = config.value;
-  if (value != null && (typeof value !== "number" || !Number.isFinite(value) || !Number.isInteger(value)))
-    throw new Error("steptrace: avl-tree value must be a finite integer.");
-  return { values, value };
-}
-var DEFAULT_VALUES, avlTree;
+var DEFAULT_VALUES, parseAvlTreeConfig, avlTree;
 var init_avl_tree = __esm({
   "custom/steptrace/src/algorithms/avl-tree.ts"() {
     init_binary_tree();
     DEFAULT_VALUES = [40, 20, 60, 10, 30, 50, 70];
+    parseAvlTreeConfig = (config) => parseBinaryTreeConfig(config, "avl-tree", DEFAULT_VALUES, 11);
     avlTree = {
       id: "avl-tree",
       family: "binary-tree",
@@ -4444,7 +4948,7 @@ function graphStateMarkerRole(role) {
 }
 function graphStateAdjacency(config) {
   const result = new Map(
-    config.nodes.map((node) => [node.id, []])
+    config.nodes.map((node2) => [node2.id, []])
   );
   for (const edge of config.edges) {
     result.get(edge.from).push({ to: edge.to, weight: edge.weight });
@@ -4455,9 +4959,9 @@ function graphStateAdjacency(config) {
   return result;
 }
 function graphStateShortestDistances(nodes5, edges5, target) {
-  const dist = new Map(nodes5.map((node) => [node.id, Number.POSITIVE_INFINITY]));
+  const dist = new Map(nodes5.map((node2) => [node2.id, Number.POSITIVE_INFINITY]));
   dist.set(target, 0);
-  const pending = new Set(nodes5.map((node) => node.id));
+  const pending = new Set(nodes5.map((node2) => node2.id));
   while (pending.size) {
     let current = null;
     for (const id of pending) {
@@ -4492,16 +4996,16 @@ function gridScenario() {
       });
     }
   }
-  const ids = new Set(nodes5.map((node) => node.id));
+  const ids = new Set(nodes5.map((node2) => node2.id));
   const edges5 = [];
-  for (const node of nodes5) {
-    const [column, row] = node.id.split(",").map(Number);
+  for (const node2 of nodes5) {
+    const [column, row] = node2.id.split(",").map(Number);
     for (const [nextColumn, nextRow] of [
       [column + 1, row],
       [column, row + 1]
     ]) {
       const to = `${nextColumn},${nextRow}`;
-      if (ids.has(to)) edges5.push({ from: node.id, to, weight: 1 });
+      if (ids.has(to)) edges5.push({ from: node2.id, to, weight: 1 });
     }
   }
   return {
@@ -4617,7 +5121,7 @@ function cityScenario(start, target) {
     endpointSettings: {
       startLabel: "From",
       targetLabel: "To",
-      options: nodes5.map((node) => ({ value: node.id, label: node.label })),
+      options: nodes5.map((node2) => ({ value: node2.id, label: node2.label })),
       start: safeStart,
       target: safeTarget
     },
@@ -4671,14 +5175,14 @@ function buildingScenario() {
     ["ER", "D4"],
     ["W", "D6"]
   ];
-  const byId = new Map(nodes5.map((node) => [node.id, node]));
+  const byId = new Map(nodes5.map((node2) => [node2.id, node2]));
   const edges5 = pairs.map(([from, to]) => {
     const a = byId.get(from);
     const b = byId.get(to);
     return { from, to, weight: Math.max(1, Math.ceil(distance(a, b) / 40)) };
   });
   const remaining = graphStateShortestDistances(nodes5, edges5, "X");
-  nodes5.forEach((node) => node.h = remaining.get(node.id));
+  nodes5.forEach((node2) => node2.h = remaining.get(node2.id));
   const rooms = [
     [25, 25, 150, 105, "RECEPTION"],
     [175, 25, 120, 105, "MEETING"],
@@ -4762,7 +5266,7 @@ function midtownScenario() {
     ["6-43", "7-43", true],
     ["7-42", "6-42", true]
   );
-  const byId = new Map(nodes5.map((node) => [node.id, node]));
+  const byId = new Map(nodes5.map((node2) => [node2.id, node2]));
   const edges5 = pairs.map(([from, to, directed]) => ({
     from,
     to,
@@ -4770,7 +5274,7 @@ function midtownScenario() {
     weight: Math.max(1, Math.ceil(distance(byId.get(from), byId.get(to)) / 45))
   }));
   const remaining = graphStateShortestDistances(nodes5, edges5, "6-42");
-  nodes5.forEach((node) => node.h = remaining.get(node.id) ?? 0);
+  nodes5.forEach((node2) => node2.h = remaining.get(node2.id) ?? 0);
   const decor = [
     { kind: "path", className: "steptrace__gs-street", d: "M170 18 L170 300" },
     { kind: "path", className: "steptrace__gs-street", d: "M405 18 L405 300" },
@@ -4845,9 +5349,9 @@ function parseGraphStateConfig(config) {
   return gridScenario();
 }
 function svgElement2(kind, attributes = {}) {
-  const node = document.createElementNS(SVG_NS3, kind);
-  for (const [key4, value] of Object.entries(attributes)) node.setAttribute(key4, String(value));
-  return node;
+  const node2 = document.createElementNS(SVG_NS3, kind);
+  for (const [key4, value] of Object.entries(attributes)) node2.setAttribute(key4, String(value));
+  return node2;
 }
 function decorElement(shape) {
   const className = shape.className;
@@ -5038,7 +5542,7 @@ function makeGraphStateView(frames) {
   const nodeLayer = svgElement2("g", { class: "steptrace__gs-nodes" });
   svg.append(defs, decorLayer, edgeLayer, edgeLabelLayer, nodeLayer);
   graph.append(svg);
-  const positions = new Map(first.nodes.map((node) => [node.id, node]));
+  const positions = new Map(first.nodes.map((node2) => [node2.id, node2]));
   const compactMapNodes = first.profile === "building-floor" || first.profile === "midtown-map";
   const mapMarkers = first.profile === "ukraine-cities" || compactMapNodes;
   const nodeRadius = first.profile === "ukraine-cities" ? 5 : compactMapNodes ? 6 : GRAPH_NODE_RADIUS_PX;
@@ -5069,13 +5573,13 @@ function makeGraphStateView(frames) {
     return { edge, line, label, from, to };
   });
   const nodeElements = new Map(
-    first.nodes.map((node) => {
+    first.nodes.map((node2) => {
       const group = svgElement2("g", {
         class: `steptrace__gs-node${first.profile === "ukraine-cities" ? " steptrace__gs-node--city" : compactMapNodes ? " steptrace__gs-node--map" : ""}`,
-        transform: `translate(${node.x} ${node.y})`
+        transform: `translate(${node2.x} ${node2.y})`
       });
       const title = svgElement2("title");
-      title.textContent = node.label;
+      title.textContent = node2.label;
       const halo = svgElement2("circle", {
         class: "steptrace__gs-target",
         r: mapMarkers ? 13 : GRAPH_NODE_RADIUS_PX + GRAPH_NODE_HALO_GAP_PX
@@ -5085,10 +5589,10 @@ function makeGraphStateView(frames) {
         r: nodeRadius
       });
       const label = svgElement2("text", { class: "steptrace__gs-node-label", x: 0, y: 0 });
-      label.textContent = node.label;
+      label.textContent = node2.label;
       group.append(title, halo, circle, label);
       nodeLayer.append(group);
-      return [node.id, group];
+      return [node2.id, group];
     })
   );
   const applyEdgeGeometry = (radius, trimAll) => {
@@ -5103,9 +5607,9 @@ function makeGraphStateView(frames) {
   };
   const geometry = mapMarkers ? (applyEdgeGeometry(nodeRadius, false), null) : observeFixedSvgNodes(
     svg,
-    first.nodes.map((node) => ({
-      element: nodeElements.get(node.id),
-      point: node
+    first.nodes.map((node2) => ({
+      element: nodeElements.get(node2.id),
+      point: node2
     })),
     (unitsPerCssPixel) => {
       applyEdgeGeometry(GRAPH_NODE_RADIUS_PX * unitsPerCssPixel, true);
@@ -5132,13 +5636,13 @@ function makeGraphStateView(frames) {
       group.dataset.group = component ? String(component) : "";
       group.dataset.state = role === "frontier" ? "open" : role === "active" ? "current" : role === "accepted" && !component ? "path" : role === "closed" ? "closed" : role === "rejected" ? "rejected" : "";
       group.dataset.target = String(id === frame.target);
-      const node = positions.get(id);
+      const node2 = positions.get(id);
       if (frame.detail.kind === "heuristic-search") {
         const g = frame.detail.costs[id];
         const h = frame.detail.heuristic[id];
-        group.children[0].textContent = frame.detail.policy === "greedy" ? `${node.label}: h ${h}; path cost ${g ?? "∞"} is ignored for priority` : `${node.label}: g ${g ?? "∞"}, h ${h}, f ${g == null ? "∞" : g + h}`;
+        group.children[0].textContent = frame.detail.policy === "greedy" ? `${node2.label}: h ${h}; path cost ${g ?? "∞"} is ignored for priority` : `${node2.label}: g ${g ?? "∞"}, h ${h}, f ${g == null ? "∞" : g + h}`;
       } else {
-        group.children[0].textContent = node.label;
+        group.children[0].textContent = node2.label;
       }
     }
     for (const { edge, line, label } of edgeElements) {
@@ -5370,9 +5874,9 @@ var init_graph_state = __esm({
       push(type, current, activeEdge, g, open, closed, selectedPath, message, comparison = [null, null]) {
         const selectedEdges = [...pathEdgeSet(selectedPath)];
         const nodeState = Object.fromEntries(
-          this.config.nodes.map((node) => [
-            node.id,
-            selectedPath.includes(node.id) ? "accepted" : node.id === current ? "active" : open.some((entry) => entry.id === node.id) ? "frontier" : closed.includes(node.id) ? "closed" : "neutral"
+          this.config.nodes.map((node2) => [
+            node2.id,
+            selectedPath.includes(node2.id) ? "accepted" : node2.id === current ? "active" : open.some((entry) => entry.id === node2.id) ? "frontier" : closed.includes(node2.id) ? "closed" : "neutral"
           ])
         );
         const edgeState = Object.fromEntries(
@@ -5390,7 +5894,7 @@ var init_graph_state = __esm({
           closed: closed.slice(),
           costs: Object.freeze({ ...g }),
           heuristic: Object.freeze(
-            Object.fromEntries(this.config.nodes.map((node) => [node.id, node.h]))
+            Object.fromEntries(this.config.nodes.map((node2) => [node2.id, node2.h]))
           ),
           comparison: this.config.policy === "greedy" ? {
             primaryLabel: "Greedy",
@@ -5428,8 +5932,8 @@ var init_graph_state = __esm({
       init(g, open, message) {
         this.push("init", null, null, g, open, [], [], message);
       }
-      expand(node, g, open, closed, message) {
-        this.push("expand", node, null, g, open, closed, [], message);
+      expand(node2, g, open, closed, message) {
+        this.push("expand", node2, null, g, open, closed, [], message);
       }
       edge(from, to, g, open, closed, message) {
         this.push("edge", from, [from, to], g, open, closed, [], message);
@@ -5459,7 +5963,7 @@ var init_graph_state = __esm({
 // custom/steptrace/src/algorithms/a-star.ts
 function runCount(config, heuristic) {
   const neighbours = graphStateAdjacency(config);
-  const h = new Map(config.nodes.map((node) => [node.id, heuristic ? node.h : 0]));
+  const h = new Map(config.nodes.map((node2) => [node2.id, heuristic ? node2.h : 0]));
   const g = { [config.start]: 0 };
   const closed = /* @__PURE__ */ new Set();
   const queue2 = [{ id: config.start, g: 0, h: h.get(config.start), f: h.get(config.start), order: 0 }];
@@ -5491,7 +5995,7 @@ function visibleQueue(queue2, closed) {
 }
 function runAStar(config, ops) {
   const neighbours = graphStateAdjacency(config);
-  const h = new Map(config.nodes.map((node) => [node.id, node.h]));
+  const h = new Map(config.nodes.map((node2) => [node2.id, node2.h]));
   const g = { [config.start]: 0 };
   const parent = {};
   const closed = /* @__PURE__ */ new Set();
@@ -5688,7 +6192,7 @@ function makePrefixCharacterView(frames) {
   svg.setAttribute("role", "img");
   svg.setAttribute("aria-labelledby", `${title.id} ${description.id}`);
   svg.append(title, description);
-  const positions = new Map(topology2.nodes.map((node) => [node.id, node]));
+  const positions = new Map(topology2.nodes.map((node2) => [node2.id, node2]));
   const edgeElements = /* @__PURE__ */ new Map();
   for (const edge of topology2.edges) {
     const from = positions.get(edge.from);
@@ -5733,27 +6237,27 @@ function makePrefixCharacterView(frames) {
     edgeElements.set(edge.id, { element, role });
   }
   const nodeElements = /* @__PURE__ */ new Map();
-  for (const node of topology2.nodes) {
+  for (const node2 of topology2.nodes) {
     const group = document.createElementNS(SVGNS2, "g");
     const circle = document.createElementNS(SVGNS2, "circle");
     const label = document.createElementNS(SVGNS2, "text");
     const terminal = successMarker("steptrace__prefix-terminal");
     group.setAttribute("class", "steptrace__prefix-node");
-    group.setAttribute("transform", `translate(${node.x} ${node.y})`);
+    group.setAttribute("transform", `translate(${node2.x} ${node2.y})`);
     group.setAttribute("aria-hidden", "true");
     group.setAttribute("focusable", "false");
     circle.setAttribute("r", "18");
     label.setAttribute("text-anchor", "middle");
     label.setAttribute("dominant-baseline", "central");
     label.setAttribute("dy", "0.04em");
-    label.textContent = node.label;
+    label.textContent = node2.label;
     terminal.setAttribute("x", "10");
     terminal.setAttribute("y", "-22");
     terminal.setAttribute("width", "13.2");
     terminal.setAttribute("height", "13.2");
     group.append(circle, label, terminal);
     svg.append(group);
-    nodeElements.set(node.id, { group, terminal });
+    nodeElements.set(node2.id, { group, terminal });
   }
   root.append(textRow, svg);
   const legend = makeLegend(
@@ -5804,13 +6308,13 @@ function makePrefixCharacterView(frames) {
       "ternary-search-tree": "Ternary Search Tree"
     }[frame.profile];
     title.textContent = `${profileLabel} ${frame.operation || "complete"}: ${frame.key || "all operations"}`;
-    description.textContent = `${frame.message} Visible path ${frame.visibleNodes.join(" → ")}. Terminal keys ${frame.terminalNodes.filter((node) => node !== "root").join(", ") || "none"}.`;
-    for (const node of topology2.nodes) {
-      const elements = nodeElements.get(node.id);
-      elements.group.dataset.vis = visibleNodes.has(node.id) ? "1" : "0";
-      elements.group.dataset.path = activePath.has(node.id) ? "1" : "0";
-      elements.group.dataset.state = frame.type === "create-node" && frame.activePath.at(-1) === node.id ? "created" : frame.type === "reuse-edge" && frame.activePath.at(-1) === node.id ? "reused" : activePath.has(node.id) ? "active" : terminals.has(node.id) ? "terminal" : "settled";
-      elements.terminal.dataset.visible = terminals.has(node.id) ? "1" : "0";
+    description.textContent = `${frame.message} Visible path ${frame.visibleNodes.join(" → ")}. Terminal keys ${frame.terminalNodes.filter((node2) => node2 !== "root").join(", ") || "none"}.`;
+    for (const node2 of topology2.nodes) {
+      const elements = nodeElements.get(node2.id);
+      elements.group.dataset.vis = visibleNodes.has(node2.id) ? "1" : "0";
+      elements.group.dataset.path = activePath.has(node2.id) ? "1" : "0";
+      elements.group.dataset.state = frame.type === "create-node" && frame.activePath.at(-1) === node2.id ? "created" : frame.type === "reuse-edge" && frame.activePath.at(-1) === node2.id ? "reused" : activePath.has(node2.id) ? "active" : terminals.has(node2.id) ? "terminal" : "settled";
+      elements.terminal.dataset.visible = terminals.has(node2.id) ? "1" : "0";
     }
     for (const edge of topology2.edges) {
       const elements = edgeElements.get(edge.id);
@@ -5864,7 +6368,7 @@ var init_prefix_character = __esm({
     PrefixCharacterRecorder = class {
       constructor(config) {
         this.config = config;
-        this.nodes = Object.freeze(config.nodes.map((node) => Object.freeze({ ...node })));
+        this.nodes = Object.freeze(config.nodes.map((node2) => Object.freeze({ ...node2 })));
         this.edges = Object.freeze(config.edges.map((edge) => Object.freeze({ ...edge })));
       }
       config;
@@ -6031,12 +6535,12 @@ function parseAhoCorasickConfig(config) {
   if (typeof config.text !== "string" || !config.text) invalid2('requires a non-empty "text".');
   const patterns = config.patterns.slice();
   const built = prefixTopology(patterns);
-  const ids = new Set(built.nodes.map((node) => node.id));
+  const ids = new Set(built.nodes.map((node2) => node2.id));
   const failures = {};
-  for (const node of built.nodes.filter((candidate) => candidate.id !== "root")) {
-    let suffix = node.id.slice(1);
+  for (const node2 of built.nodes.filter((candidate) => candidate.id !== "root")) {
+    let suffix = node2.id.slice(1);
     while (suffix && !ids.has(suffix)) suffix = suffix.slice(1);
-    failures[node.id] = suffix || "root";
+    failures[node2.id] = suffix || "root";
   }
   const failureEdges = Object.entries(failures).filter(([, target]) => target !== "root").map(([from, to]) => ({ id: `fail:${from}->${to}`, from, to, kind: "failure" }));
   return {
@@ -6078,14 +6582,14 @@ var init_aho_corasick = __esm({
           ops.markTerminal(pattern, `Mark output pattern "${pattern}".`);
         }
         ops.begin("build failures", "patterns", "Compute the longest proper suffix for each state.");
-        for (const node of input.nodes.filter((candidate) => candidate.id !== "root")) {
-          const target = input.failures[node.id];
-          const edgeId2 = target === "root" ? null : `fail:${node.id}->${target}`;
-          ops.failureLink(edgeId2, node.id, `Failure("${node.id}") → ${target}.`);
+        for (const node2 of input.nodes.filter((candidate) => candidate.id !== "root")) {
+          const target = input.failures[node2.id];
+          const edgeId2 = target === "root" ? null : `fail:${node2.id}->${target}`;
+          ops.failureLink(edgeId2, node2.id, `Failure("${node2.id}") → ${target}.`);
         }
         ops.setText(input.text);
         ops.begin("scan", input.text, `Scan "${input.text}" once through goto and failure links.`);
-        const states = new Set(input.nodes.map((node) => node.id));
+        const states = new Set(input.nodes.map((node2) => node2.id));
         let state = "root";
         for (let index = 0; index < input.text.length; index++) {
           const character = input.text[index];
@@ -6222,7 +6726,7 @@ function layeredLayout(rawNodes, rawEdges, directed, start) {
   const Y1 = 266;
   const YC = (Y0 + Y1) / 2;
   const STAG = 8;
-  const ids = rawNodes.map((node) => String(node.id));
+  const ids = rawNodes.map((node2) => String(node2.id));
   const idSet = new Set(ids);
   const edges5 = (rawEdges || []).map((edge) => ({ from: String(edge.from), to: String(edge.to) })).filter((edge) => idSet.has(edge.from) && idSet.has(edge.to));
   const out = new Map(ids.map((id) => [id, []]));
@@ -6323,12 +6827,12 @@ function normalizeGraph(config) {
   const source = Array.isArray(config.nodes) && config.nodes.length ? config : DEFAULT_GRAPH;
   const nodes5 = source.nodes;
   const edges5 = source.edges ?? [];
-  const needsLayout = nodes5.some((node) => node.x == null || node.y == null);
+  const needsLayout = nodes5.some((node2) => node2.x == null || node2.y == null);
   let start = config.start != null ? String(config.start) : source.start != null ? String(source.start) : String(nodes5[0].id);
-  if (!nodes5.some((node) => String(node.id) === start)) start = String(nodes5[0].id);
+  if (!nodes5.some((node2) => String(node2.id) === start)) start = String(nodes5[0].id);
   const layout = needsLayout ? layeredLayout(nodes5, edges5, !!source.directed, start) : null;
-  const normalizedNodes = needsLayout ? nodes5.map((node) => ({ id: String(node.id), ...layout.get(String(node.id)) })) : nodes5.map((node) => ({ id: String(node.id), x: Number(node.x), y: Number(node.y) }));
-  const ids = new Set(normalizedNodes.map((node) => node.id));
+  const normalizedNodes = needsLayout ? nodes5.map((node2) => ({ id: String(node2.id), ...layout.get(String(node2.id)) })) : nodes5.map((node2) => ({ id: String(node2.id), x: Number(node2.x), y: Number(node2.y) }));
+  const ids = new Set(normalizedNodes.map((node2) => node2.id));
   const normalizedEdges = edges5.filter((edge) => ids.has(String(edge.from)) && ids.has(String(edge.to))).map((edge) => ({
     from: String(edge.from),
     to: String(edge.to),
@@ -6343,7 +6847,7 @@ function normalizeGraph(config) {
 }
 function adjacency(graph) {
   const result = {};
-  for (const node of graph.nodes) result[node.id] = [];
+  for (const node2 of graph.nodes) result[node2.id] = [];
   for (const edge of graph.edges) {
     result[edge.from].push(edge.to);
     if (!graph.directed) result[edge.to].push(edge.from);
@@ -6773,16 +7277,16 @@ var init_recorders = __esm({
         this._push("init", null, message);
       }
       /** Discover a node: set its distance and append it to the queue (frontier). */
-      enqueue(node, d, message) {
-        this._frontier.push(node);
-        this._dist[node] = d;
+      enqueue(node2, d, message) {
+        this._frontier.push(node2);
+        this._dist[node2] = d;
         this._push("frontier", null, message);
       }
       /** Relax a node to a shorter distance (Dijkstra): update its distance and
        *  make sure it is shown in the frontier. */
-      relax(node, d, message) {
-        this._dist[node] = d;
-        if (this._frontier.indexOf(node) < 0) this._frontier.push(node);
+      relax(node2, d, message) {
+        this._dist[node2] = d;
+        if (this._frontier.indexOf(node2) < 0) this._frontier.push(node2);
         this._push("relax", null, message);
       }
       /** Explore an edge u -> v (highlight only; no state change). */
@@ -6795,11 +7299,11 @@ var init_recorders = __esm({
         this._push("select", { from: u, to: v }, message);
       }
       /** Visit a node: dequeue it from the frontier and mark it visited. */
-      visit(node, message) {
-        this._current = node;
-        const i = this._frontier.indexOf(node);
+      visit(node2, message) {
+        this._current = node2;
+        const i = this._frontier.indexOf(node2);
         if (i >= 0) this._frontier.splice(i, 1);
-        this._visited.add(node);
+        this._visited.add(node2);
         this._push("visit", null, message);
       }
       done(message) {
@@ -7232,12 +7736,12 @@ var init_recorders = __esm({
         this._push("init", message);
       }
       /** One logical step: update named pointers, the window span, and/or marks. */
-      step(update2, message) {
-        update2 = update2 || {};
-        if (update2.pointers) this.pointers = { ...update2.pointers };
-        if ("window" in update2) this.window = update2.window ? update2.window.slice() : null;
-        if (update2.mark) this.marked = this.marked.concat(update2.mark);
-        this._push(update2.mark ? "match" : "step", message);
+      step(update, message) {
+        update = update || {};
+        if (update.pointers) this.pointers = { ...update.pointers };
+        if ("window" in update) this.window = update.window ? update.window.slice() : null;
+        if (update.mark) this.marked = this.marked.concat(update.mark);
+        this._push(update.mark ? "match" : "step", message);
       }
       done(message) {
         this._push("done", message);
@@ -7262,7 +7766,7 @@ var init_recorders = __esm({
         this.rowLabels = rowLabels.slice();
         this.colLabels = colLabels.slice();
         this.grid = rowLabels.map(() => colLabels.map(() => null));
-        this.nodes = (topology2?.nodes || []).map((node) => ({ ...node }));
+        this.nodes = (topology2?.nodes || []).map((node2) => ({ ...node2 }));
         this.edges = (topology2?.edges || []).map((edge) => ({ ...edge }));
         this.formula = null;
         this._push("init", message);
@@ -7298,7 +7802,7 @@ var init_recorders = __esm({
             cur: this.cur ? this.cur.slice() : null,
             deps: this.deps.map((d) => d.slice()),
             path: this.path.map((p) => p.slice()),
-            nodes: this.nodes.map((node) => Object.freeze({ ...node })),
+            nodes: this.nodes.map((node2) => Object.freeze({ ...node2 })),
             edges: this.edges.map((edge) => Object.freeze({ ...edge })),
             formula: this.formula,
             message
@@ -7801,7 +8305,7 @@ var init_recorders = __esm({
       }
       tree(nodes5, edges5, rootId, message) {
         this._nodes = Object.freeze(
-          nodes5.map((node) => Object.freeze({ ...node, values: Object.freeze(node.values.slice()) }))
+          nodes5.map((node2) => Object.freeze({ ...node2, values: Object.freeze(node2.values.slice()) }))
         );
         this._edges = Object.freeze(edges5.map((edge) => Object.freeze({ ...edge })));
         this._active = rootId;
@@ -8122,6 +8626,511 @@ var init_binary_search = __esm({
   }
 });
 
+// custom/steptrace/src/algorithms/binary-search-tree.ts
+var DEFAULT_VALUES2, binarySearchTree;
+var init_binary_search_tree = __esm({
+  "custom/steptrace/src/algorithms/binary-search-tree.ts"() {
+    init_binary_tree();
+    DEFAULT_VALUES2 = [40, 20, 60, 10, 30, 50, 70];
+    binarySearchTree = {
+      id: "binary-search-tree",
+      family: "binary-tree",
+      meta: { label: "Binary Search Tree" },
+      parse: (config) => parseBinaryTreeConfig(config, "binary-search-tree", DEFAULT_VALUES2),
+      mount: mountBinarySearchTree
+    };
+  }
+});
+
+// custom/steptrace/src/families/multiway-tree.ts
+function parseMultiwayTreeConfig(config, algorithm, defaults, defaultValue, defaultRange) {
+  if (config.order != null && config.order !== 4)
+    throw new Error(`steptrace: ${algorithm} supports fixed order 4.`);
+  const values = Array.isArray(config.values) && config.values.length ? config.values : defaults;
+  if (values.some(
+    (value2) => typeof value2 !== "number" || !Number.isFinite(value2) || !Number.isInteger(value2)
+  ))
+    throw new Error(`steptrace: ${algorithm} requires finite integer values.`);
+  if (new Set(values).size !== values.length)
+    throw new Error(`steptrace: ${algorithm} requires unique values.`);
+  if (values.length > MAX_VALUES2)
+    throw new Error(`steptrace: ${algorithm} supports at most ${MAX_VALUES2} values.`);
+  const value = config.value ?? defaultValue;
+  if (typeof value !== "number" || !Number.isFinite(value) || !Number.isInteger(value))
+    throw new Error(`steptrace: ${algorithm} value must be a finite integer.`);
+  const range = config.range ?? defaultRange;
+  if (range && (range.length !== 2 || range.some(
+    (bound) => typeof bound !== "number" || !Number.isFinite(bound) || !Number.isInteger(bound)
+  )))
+    throw new Error(`steptrace: ${algorithm} range must contain two finite integers.`);
+  return {
+    values: [...values],
+    value,
+    range: range ? [...range] : void 0
+  };
+}
+function svgEl2(tag, className) {
+  const node2 = document.createElementNS(SVG_NS4, tag);
+  node2.setAttribute("class", className);
+  return node2;
+}
+function createMultiwayTreeOperationState() {
+  return {
+    path: /* @__PURE__ */ new Set(),
+    affected: /* @__PURE__ */ new Set(),
+    special: null,
+    found: /* @__PURE__ */ new Set(),
+    links: /* @__PURE__ */ new Set()
+  };
+}
+function upperBound(keys, key4) {
+  let index = 0;
+  while (index < keys.length && key4 >= keys[index]) index++;
+  return index;
+}
+function lowerBound(keys, key4) {
+  let index = 0;
+  while (index < keys.length && key4 > keys[index]) index++;
+  return index;
+}
+function createMultiwayTreeModel(kind, values) {
+  let nextId = 0;
+  const makeNode = (keys = [], children = []) => ({
+    id: `m${nextId++}`,
+    keys,
+    children,
+    next: null
+  });
+  let root = makeNode();
+  const splitNode = (current, state) => {
+    const splitAt = 2;
+    const separator = current.keys[splitAt];
+    const rightKeys = kind === "b-plus-tree" && current.children.length === 0 ? current.keys.splice(splitAt) : current.keys.splice(splitAt + 1);
+    const rightChildren = current.children.length === 0 ? [] : current.children.splice(splitAt + 1);
+    if (kind !== "b-plus-tree" || current.children.length > 0) current.keys.pop();
+    const right = makeNode(rightKeys, rightChildren);
+    if (kind === "b-plus-tree" && current.children.length === 0) {
+      right.next = current.next;
+      current.next = right;
+    }
+    state.affected.add(current.id).add(right.id);
+    state.special = separator;
+    return { separator, right };
+  };
+  const insertInto = (current, key4, state) => {
+    state.path.add(current.id);
+    if (current.children.length === 0) {
+      const index = lowerBound(current.keys, key4);
+      if (current.keys[index] === key4) return null;
+      current.keys.splice(index, 0, key4);
+      state.affected.add(current.id);
+    } else {
+      const childIndex = kind === "b-plus-tree" ? upperBound(current.keys, key4) : lowerBound(current.keys, key4);
+      if (kind === "b-tree" && current.keys[childIndex] === key4) return null;
+      const split = insertInto(current.children[childIndex], key4, state);
+      if (split) {
+        current.keys.splice(childIndex, 0, split.separator);
+        current.children.splice(childIndex + 1, 0, split.right);
+        state.affected.add(current.id);
+      }
+    }
+    return current.keys.length > MAX_KEYS ? splitNode(current, state) : null;
+  };
+  const model = {
+    get root() {
+      return root;
+    },
+    insert(key4, state) {
+      if (model.keys().includes(key4))
+        return { changed: false, detail: `${key4} already exists, so the tree did not change.` };
+      if (model.keys().length >= MAX_VALUES2)
+        return {
+          changed: false,
+          detail: `The review tree is capped at ${MAX_VALUES2} records.`
+        };
+      const split = insertInto(root, key4, state);
+      if (split) {
+        root = makeNode([split.separator], [root, split.right]);
+        state.affected.add(root.id);
+      }
+      return {
+        changed: true,
+        detail: state.special != null ? kind === "b-plus-tree" ? `Inserted ${key4}; copied separator ${state.special} into the parent and kept it in the right leaf.` : `Inserted ${key4}; promoted median ${state.special} into the parent.` : `Inserted ${key4}; every node remains within the order-4 limit.`
+      };
+    },
+    search(key4, state) {
+      let current = root;
+      while (true) {
+        state.path.add(current.id);
+        const index = kind === "b-plus-tree" ? upperBound(current.keys, key4) : lowerBound(current.keys, key4);
+        if (kind === "b-tree" && current.keys[index] === key4) {
+          state.found.add(`${current.id}:${key4}`);
+          return { found: true, detail: `Search found ${key4} in node ${current.id}.` };
+        }
+        if (current.children.length === 0) {
+          const found = current.keys.includes(key4);
+          if (found) state.found.add(`${current.id}:${key4}`);
+          return {
+            found,
+            detail: found ? `Search reached leaf ${current.id} and found ${key4}.` : `Search reached leaf ${current.id}; ${key4} is absent.`
+          };
+        }
+        current = current.children[index];
+      }
+    },
+    range(from, to, state) {
+      let current = root;
+      while (current.children.length) {
+        state.path.add(current.id);
+        current = current.children[upperBound(current.keys, from)];
+      }
+      state.path.add(current.id);
+      const matches = [];
+      while (current) {
+        for (const key4 of current.keys) {
+          if (key4 > to)
+            return {
+              matches,
+              detail: `Range [${from}, ${to}] returned ${matches.join(", ") || "no keys"} by following leaf links.`
+            };
+          if (key4 >= from) {
+            matches.push(key4);
+            state.found.add(`${current.id}:${key4}`);
+          }
+        }
+        if (!current.next) break;
+        const next = current.next;
+        if (next.keys[0] > to) break;
+        state.links.add(`${current.id}->${next.id}`);
+        current = next;
+        state.path.add(current.id);
+      }
+      return {
+        matches,
+        detail: `Range [${from}, ${to}] returned ${matches.join(", ") || "no keys"} by following leaf links.`
+      };
+    },
+    keys() {
+      if (kind === "b-plus-tree") {
+        let leaf = root;
+        while (leaf.children.length) leaf = leaf.children[0];
+        const keys2 = [];
+        while (leaf) {
+          keys2.push(...leaf.keys);
+          leaf = leaf.next;
+        }
+        return keys2;
+      }
+      const keys = [];
+      const visit = (current) => {
+        current.keys.forEach((key4, index) => {
+          if (current.children[index]) visit(current.children[index]);
+          keys.push(key4);
+        });
+        if (current.children[current.keys.length]) visit(current.children[current.keys.length]);
+      };
+      visit(root);
+      return keys;
+    }
+  };
+  for (const value of values) model.insert(value, createMultiwayTreeOperationState());
+  return model;
+}
+function mountMultiwayTree(rootElement, config, kind) {
+  const label = kind === "b-tree" ? "B-tree" : "B+ tree";
+  const shell = createStructureShell(
+    rootElement,
+    kind,
+    label,
+    `Interactive order-4 ${label}`,
+    "multiway-tree",
+    "steptrace__multiway-tree"
+  );
+  const initial = [...config.values];
+  let model = createMultiwayTreeModel(kind, initial);
+  let state = createMultiwayTreeOperationState();
+  const svg = svgEl2("svg", "steptrace__multiway-tree-svg");
+  svg.setAttribute("viewBox", `0 0 ${VIEW_WIDTH2} ${VIEW_HEIGHT2}`);
+  svg.setAttribute("role", "img");
+  shell.stage.append(svg);
+  let renderedWidth = VIEW_WIDTH2;
+  const keyInput = shell.input(`${label} key`, "Key", 8);
+  keyInput.type = "number";
+  keyInput.step = "1";
+  keyInput.value = String(config.value ?? "");
+  const insert = shell.button("Insert", true);
+  const search = shell.button("Search");
+  const reset = shell.button("Reset");
+  shell.controls.append(keyInput, insert, search);
+  let fromInput = null;
+  let toInput = null;
+  let rangeButton = null;
+  if (kind === "b-plus-tree") {
+    fromInput = shell.input("Range start", "From", 8);
+    fromInput.type = "number";
+    fromInput.step = "1";
+    fromInput.value = String(config.range?.[0] ?? "");
+    toInput = shell.input("Range end", "To", 8);
+    toInput.type = "number";
+    toInput.step = "1";
+    toInput.value = String(config.range?.[1] ?? "");
+    rangeButton = shell.button("Range scan");
+    shell.controls.append(fromInput, toInput, rangeButton);
+  }
+  shell.controls.append(reset);
+  function paintTree() {
+    svg.replaceChildren();
+    const marker2 = svgEl2("marker", "steptrace__multiway-tree-arrow");
+    marker2.id = `${kind}-next-arrow`;
+    marker2.setAttribute("viewBox", "0 0 10 10");
+    marker2.setAttribute("refX", "8");
+    marker2.setAttribute("refY", "5");
+    marker2.setAttribute("markerWidth", "5");
+    marker2.setAttribute("markerHeight", "5");
+    marker2.setAttribute("orient", "auto-start-reverse");
+    const arrow = svgEl2("path", "");
+    arrow.setAttribute("d", "M 0 0 L 10 5 L 0 10 z");
+    marker2.append(arrow);
+    const defs = svgEl2("defs", "");
+    defs.append(marker2);
+    svg.append(defs);
+    const levels = [];
+    const visit = (current, depth) => {
+      ;
+      (levels[depth] ??= []).push(current);
+      current.children.forEach((child) => visit(child, depth + 1));
+    };
+    visit(model.root, 0);
+    const measuredWidth = Math.round(svg.getBoundingClientRect().width);
+    if (measuredWidth > 0) renderedWidth = Math.min(measuredWidth, VIEW_WIDTH2);
+    const viewWidth = Math.max(
+      renderedWidth,
+      ...levels.map(
+        (nodes5) => nodes5.reduce((width, node2) => width + Math.max(node2.keys.length, 1) * CELL_WIDTH, 0) + Math.max(nodes5.length - 1, 0) * NODE_GAP + VIEW_PADDING * 2
+      )
+    );
+    svg.setAttribute("viewBox", `0 0 ${viewWidth} ${VIEW_HEIGHT2}`);
+    const positions = /* @__PURE__ */ new Map();
+    levels.forEach((nodes5, depth) => {
+      const y = 30 + depth * (kind === "b-plus-tree" ? 80 : 92);
+      const widths = nodes5.map((node2) => Math.max(node2.keys.length, 1) * CELL_WIDTH);
+      const levelWidth = widths.reduce((sum, width) => sum + width, 0) + Math.max(nodes5.length - 1, 0) * NODE_GAP;
+      let cursor = (viewWidth - levelWidth) / 2;
+      nodes5.forEach((node2) => {
+        const width = Math.max(node2.keys.length, 1) * CELL_WIDTH;
+        positions.set(node2.id, {
+          x: cursor + width / 2,
+          y,
+          width
+        });
+        cursor += width + NODE_GAP;
+      });
+    });
+    for (const nodes5 of levels) {
+      for (const parent of nodes5) {
+        const from = positions.get(parent.id);
+        for (const child of parent.children) {
+          const to = positions.get(child.id);
+          const line = svgEl2("line", "steptrace__edge steptrace__multiway-tree-edge");
+          line.setAttribute("x1", String(from.x));
+          line.setAttribute("y1", String(from.y + NODE_HEIGHT / 2));
+          line.setAttribute("x2", String(to.x));
+          line.setAttribute("y2", String(to.y - NODE_HEIGHT / 2));
+          line.dataset.state = state.path.has(parent.id) && state.path.has(child.id) ? "path" : "neutral";
+          svg.append(line);
+        }
+      }
+    }
+    const leaves = levels.at(-1) ?? [];
+    if (kind === "b-plus-tree") {
+      leaves.slice(0, -1).forEach((leaf, index) => {
+        const next = leaves[index + 1];
+        const from = positions.get(leaf.id);
+        const to = positions.get(next.id);
+        const path = svgEl2("path", "steptrace__multiway-tree-link");
+        path.setAttribute(
+          "d",
+          `M ${from.x + from.width / 2} ${from.y + NODE_HEIGHT / 2} V 248 H ${to.x - to.width / 2} V ${to.y + NODE_HEIGHT / 2 + 5}`
+        );
+        path.setAttribute("marker-end", `url(#${kind}-next-arrow)`);
+        path.dataset.from = leaf.id;
+        path.dataset.to = next.id;
+        path.dataset.state = state.links.has(`${leaf.id}->${next.id}`) ? "active" : "neutral";
+        svg.append(path);
+      });
+    }
+    for (const nodes5 of levels) {
+      for (const node2 of nodes5) {
+        const position = positions.get(node2.id);
+        const group = svgEl2("g", "steptrace__multiway-tree-node");
+        group.setAttribute(
+          "transform",
+          `translate(${position.x - position.width / 2} ${position.y - NODE_HEIGHT / 2})`
+        );
+        group.dataset.path = state.path.has(node2.id) ? "1" : "0";
+        group.dataset.affected = state.affected.has(node2.id) ? "1" : "0";
+        group.dataset.nodeId = node2.id;
+        group.dataset.role = node2.children.length ? "internal" : "leaf";
+        group.setAttribute(
+          "aria-label",
+          `${node2.children.length ? "Internal node" : "Leaf"} ${node2.id}, keys ${node2.keys.join(", ") || "empty"}`
+        );
+        const keys = node2.keys.length ? node2.keys : [null];
+        keys.forEach((key4, index) => {
+          const cell = svgEl2("rect", "steptrace__multiway-tree-cell");
+          cell.setAttribute("x", String(index * CELL_WIDTH));
+          cell.setAttribute("width", String(CELL_WIDTH));
+          cell.setAttribute("height", String(NODE_HEIGHT));
+          cell.setAttribute("rx", "4");
+          cell.dataset.key = key4 == null ? "" : String(key4);
+          cell.dataset.state = key4 != null && state.found.has(`${node2.id}:${key4}`) ? "found" : key4 === state.special ? "special" : "neutral";
+          const text = svgEl2("text", "steptrace__multiway-tree-key");
+          text.setAttribute("x", String(index * CELL_WIDTH + CELL_WIDTH / 2));
+          text.setAttribute("y", String(NODE_HEIGHT / 2));
+          text.setAttribute("text-anchor", "middle");
+          text.setAttribute("dominant-baseline", "central");
+          text.textContent = key4 == null ? "·" : String(key4);
+          group.append(cell, text);
+        });
+        const id = svgEl2("text", "steptrace__multiway-tree-id");
+        id.setAttribute("x", String(position.width / 2));
+        id.setAttribute("y", "-6");
+        id.setAttribute("text-anchor", "middle");
+        id.textContent = node2.id;
+        group.append(id);
+        svg.append(group);
+      }
+    }
+    svg.setAttribute(
+      "aria-label",
+      `${label} with ${model.keys().length} unique keys in ${levels.length} levels`
+    );
+  }
+  function paint(message) {
+    paintTree();
+    const count = model.keys().length;
+    shell.setCounter(String(count), count === 1 ? " record" : " records");
+    shell.status.textContent = message;
+    insert.disabled = count >= MAX_VALUES2;
+    search.disabled = count === 0;
+    if (rangeButton) rangeButton.disabled = count === 0;
+  }
+  function integerFrom(input, label2) {
+    const value = Number(input.value);
+    if (input.value.trim() && Number.isFinite(value) && Number.isInteger(value)) return value;
+    paint(`${label2} must be a finite integer.`);
+    return null;
+  }
+  function onInsert() {
+    const key4 = integerFrom(keyInput, "Key");
+    if (key4 == null) return;
+    state = createMultiwayTreeOperationState();
+    const result = model.insert(key4, state);
+    keyInput.value = "";
+    paint(result.detail);
+  }
+  function onSearch() {
+    const key4 = integerFrom(keyInput, "Key");
+    if (key4 == null) return;
+    state = createMultiwayTreeOperationState();
+    const result = model.search(key4, state);
+    paint(result.detail);
+  }
+  function onRange() {
+    const from = integerFrom(fromInput, "From");
+    if (from == null) return;
+    const to = integerFrom(toInput, "To");
+    if (to == null) return;
+    if (from > to) {
+      paint("From must be less than or equal to To.");
+      return;
+    }
+    state = createMultiwayTreeOperationState();
+    paint(model.range(from, to, state).detail);
+  }
+  function onReset() {
+    model = createMultiwayTreeModel(kind, initial);
+    state = createMultiwayTreeOperationState();
+    keyInput.value = String(config.value ?? "");
+    if (fromInput) fromInput.value = String(config.range?.[0] ?? "");
+    if (toInput) toInput.value = String(config.range?.[1] ?? "");
+    paint(`Reset to the initial order-4 ${label}.`);
+  }
+  shell.listen(insert, "click", onInsert);
+  shell.listen(search, "click", onSearch);
+  shell.listen(reset, "click", onReset);
+  if (rangeButton) shell.listen(rangeButton, "click", onRange);
+  onEnter(shell, keyInput, onInsert);
+  if (fromInput) onEnter(shell, fromInput, onRange);
+  if (toInput) onEnter(shell, toInput, onRange);
+  paint(
+    `Insert or search a key${kind === "b-plus-tree" ? ", or scan a range" : ""}. Order 4 means at most 3 keys per node.`
+  );
+  const handle = shell.finish();
+  const resizeObserver = typeof ResizeObserver === "undefined" ? null : new ResizeObserver(() => {
+    const nextWidth = Math.min(Math.round(svg.getBoundingClientRect().width), VIEW_WIDTH2);
+    if (nextWidth <= 0 || nextWidth === renderedWidth) return;
+    renderedWidth = nextWidth;
+    paintTree();
+  });
+  resizeObserver?.observe(svg);
+  return {
+    destroy() {
+      resizeObserver?.disconnect();
+      handle.destroy();
+    }
+  };
+}
+var SVG_NS4, VIEW_WIDTH2, VIEW_HEIGHT2, MAX_KEYS, MAX_VALUES2, CELL_WIDTH, NODE_HEIGHT, NODE_GAP, VIEW_PADDING, mountBTree, mountBPlusTree;
+var init_multiway_tree = __esm({
+  "custom/steptrace/src/families/multiway-tree.ts"() {
+    init_interactive_structure();
+    SVG_NS4 = "http://www.w3.org/2000/svg";
+    VIEW_WIDTH2 = 620;
+    VIEW_HEIGHT2 = 280;
+    MAX_KEYS = 3;
+    MAX_VALUES2 = 10;
+    CELL_WIDTH = 33;
+    NODE_HEIGHT = 34;
+    NODE_GAP = 8;
+    VIEW_PADDING = 10;
+    mountBTree = (root, config) => mountMultiwayTree(root, config, "b-tree");
+    mountBPlusTree = (root, config) => mountMultiwayTree(root, config, "b-plus-tree");
+  }
+});
+
+// custom/steptrace/src/algorithms/b-plus-tree.ts
+var DEFAULT_VALUES3, bPlusTree;
+var init_b_plus_tree = __esm({
+  "custom/steptrace/src/algorithms/b-plus-tree.ts"() {
+    init_multiway_tree();
+    DEFAULT_VALUES3 = [5, 9, 12, 17, 33, 40, 21];
+    bPlusTree = {
+      id: "b-plus-tree",
+      family: "multiway-tree",
+      meta: { label: "B+ Tree" },
+      parse: (config) => parseMultiwayTreeConfig(config, "b-plus-tree", DEFAULT_VALUES3, 25, [15, 40]),
+      mount: mountBPlusTree
+    };
+  }
+});
+
+// custom/steptrace/src/algorithms/b-tree.ts
+var DEFAULT_VALUES4, bTree;
+var init_b_tree = __esm({
+  "custom/steptrace/src/algorithms/b-tree.ts"() {
+    init_multiway_tree();
+    DEFAULT_VALUES4 = [10, 20, 5];
+    bTree = {
+      id: "b-tree",
+      family: "multiway-tree",
+      meta: { label: "B-tree" },
+      parse: (config) => parseMultiwayTreeConfig(config, "b-tree", DEFAULT_VALUES4, 6),
+      mount: mountBTree
+    };
+  }
+});
+
 // custom/steptrace/src/families/hash-index.ts
 function indexFor(key4, size) {
   return (key4 % size + size) % size;
@@ -8396,8 +9405,8 @@ function mountHashTable(root, config, content) {
     ])
       token.style.removeProperty(property);
   }
-  function nativeAnimation(node, keyframes, duration) {
-    return typeof node.animate === "function" ? node.animate(keyframes, { duration, easing: "cubic-bezier(.2,.8,.2,1)" }) : null;
+  function nativeAnimation(node2, keyframes, duration) {
+    return typeof node2.animate === "function" ? node2.animate(keyframes, { duration, easing: "cubic-bezier(.2,.8,.2,1)" }) : null;
   }
   function waitForMotion(animations, duration, done) {
     const running = animations.filter((animation) => animation != null);
@@ -9165,10 +10174,10 @@ function heapPosition(index) {
     y: 32 + depth * 68
   };
 }
-function svgEl2(tag, className) {
-  const node = document.createElementNS(SVG_NS4, tag);
-  node.setAttribute("class", className);
-  return node;
+function svgEl3(tag, className) {
+  const node2 = document.createElementNS(SVG_NS5, tag);
+  node2.setAttribute("class", className);
+  return node2;
 }
 function makeHeapSelectionView(frames) {
   const first = frames[0];
@@ -9188,7 +10197,7 @@ function makeHeapSelectionView(frames) {
   const heapLabel = el("div", "steptrace__rail-label steptrace__heap-tree-label");
   heapLabel.textContent = `Min-heap · capacity k = ${first.k}`;
   const heapWrap = el("div", "steptrace__heap-tree");
-  const svg = svgEl2("svg", "steptrace__heap-svg");
+  const svg = svgEl3("svg", "steptrace__heap-svg");
   svg.setAttribute("viewBox", `0 0 300 ${first.k > 3 ? 192 : 124}`);
   svg.setAttribute("role", "img");
   svg.setAttribute("aria-label", "Fixed-size min-heap; root is the weakest current winner");
@@ -9196,7 +10205,7 @@ function makeHeapSelectionView(frames) {
   const edges5 = [];
   for (let index = 1; index < first.k; index++) {
     const parent = Math.floor((index - 1) / 2);
-    const line = svgEl2("line", "steptrace__edge steptrace__heap-edge");
+    const line = svgEl3("line", "steptrace__edge steptrace__heap-edge");
     line.setAttribute("x1", String(positions[parent].x));
     line.setAttribute("y1", String(positions[parent].y));
     line.setAttribute("x2", String(positions[index].x));
@@ -9205,14 +10214,14 @@ function makeHeapSelectionView(frames) {
     edges5.push({ line, parent, child: index });
   }
   const nodes5 = positions.map((position, index) => {
-    const group = svgEl2("g", "steptrace__node steptrace__heap-node");
+    const group = svgEl3("g", "steptrace__node steptrace__heap-node");
     group.setAttribute("transform", `translate(${position.x} ${position.y})`);
-    const circle = svgEl2("circle", "steptrace__ncirc");
+    const circle = svgEl3("circle", "steptrace__ncirc");
     circle.setAttribute("r", String(GRAPH_NODE_RADIUS_PX));
-    const value = svgEl2("text", "steptrace__id");
+    const value = svgEl3("text", "steptrace__id");
     value.setAttribute("text-anchor", "middle");
     value.setAttribute("dominant-baseline", "central");
-    const rootTag = svgEl2("text", "steptrace__heap-root-label");
+    const rootTag = svgEl3("text", "steptrace__heap-root-label");
     rootTag.setAttribute("text-anchor", "middle");
     rootTag.setAttribute("y", "-23");
     rootTag.textContent = index === 0 ? "weakest winner" : "";
@@ -9324,7 +10333,7 @@ function makeHeapSelectionView(frames) {
     destroy: geometry.destroy
   };
 }
-var HeapSelectionRecorder, SVG_NS4, heapSelectionFamily;
+var HeapSelectionRecorder, SVG_NS5, heapSelectionFamily;
 var init_heap_selection = __esm({
   "custom/steptrace/src/families/heap-selection.ts"() {
     init_render();
@@ -9440,7 +10449,7 @@ var init_heap_selection = __esm({
         );
       }
     };
-    SVG_NS4 = "http://www.w3.org/2000/svg";
+    SVG_NS5 = "http://www.w3.org/2000/svg";
     heapSelectionFamily = {
       id: "heap-selection",
       createRecorder(config) {
@@ -9454,10 +10463,10 @@ var init_heap_selection = __esm({
 });
 
 // custom/steptrace/src/families/heap-structure.ts
-function svgEl3(tag, className) {
-  const node = document.createElementNS(SVG_NS5, tag);
-  node.setAttribute("class", className);
-  return node;
+function svgEl4(tag, className) {
+  const node2 = document.createElementNS(SVG_NS6, tag);
+  node2.setAttribute("class", className);
+  return node2;
 }
 function mountHeap(root, config) {
   const shell = createStructureShell(
@@ -9499,7 +10508,7 @@ function mountHeap(root, config) {
       return;
     }
     const depth = Math.floor(Math.log2(values.length));
-    const svg = svgEl3("svg", "steptrace__heap-svg");
+    const svg = svgEl4("svg", "steptrace__heap-svg");
     svg.setAttribute("viewBox", `0 0 300 ${64 + depth * 68}`);
     svg.setAttribute("role", "img");
     svg.setAttribute("aria-label", `Binary min-heap tree with ${values.length} values`);
@@ -9513,19 +10522,19 @@ function mountHeap(root, config) {
     const edges5 = [];
     for (let child = 1; child < values.length; child++) {
       const parent = Math.floor((child - 1) / 2);
-      const line = svgEl3("line", "steptrace__edge steptrace__heap-edge");
+      const line = svgEl4("line", "steptrace__edge steptrace__heap-edge");
       line.dataset.path = pathEdges.has(`${parent}:${child}`) ? "1" : "0";
       svg.append(line);
       edges5.push({ line, parent, child });
     }
     const nodes5 = positions.map((position, index) => {
-      const group = svgEl3("g", "steptrace__node steptrace__heap-node");
+      const group = svgEl4("g", "steptrace__node steptrace__heap-node");
       group.dataset.visible = "1";
       group.dataset.state = index === settled ? "settled" : path.includes(index) ? "compare" : "neutral";
       group.setAttribute("aria-label", `Heap index ${index}, value ${values[index]}`);
-      const circle = svgEl3("circle", "steptrace__ncirc");
+      const circle = svgEl4("circle", "steptrace__ncirc");
       circle.setAttribute("r", String(GRAPH_NODE_RADIUS_PX));
-      const value = svgEl3("text", "steptrace__id");
+      const value = svgEl4("text", "steptrace__id");
       value.setAttribute("text-anchor", "middle");
       value.setAttribute("dominant-baseline", "central");
       value.textContent = String(values[index]);
@@ -9649,23 +10658,23 @@ function paintForest(target, roots, options) {
     } };
   }
   const widths = /* @__PURE__ */ new Map();
-  const measure = (node) => {
+  const measure = (node2) => {
     const width = Math.max(
       1,
-      node.children.reduce((sum, child) => sum + measure(child), 0)
+      node2.children.reduce((sum, child) => sum + measure(child), 0)
     );
-    widths.set(node.id, width);
+    widths.set(node2.id, width);
     return width;
   };
   const totalWidth = roots.reduce((sum, root) => sum + measure(root), 0);
   const positions = /* @__PURE__ */ new Map();
   let maxDepth = 0;
-  const place = (node, left2, depth) => {
+  const place = (node2, left2, depth) => {
     maxDepth = Math.max(maxDepth, depth);
-    const width = widths.get(node.id) ?? 1;
-    positions.set(node.id, { x: 28 + (left2 + width / 2) * 66, y: 34 + depth * 62 });
+    const width = widths.get(node2.id) ?? 1;
+    positions.set(node2.id, { x: 28 + (left2 + width / 2) * 66, y: 34 + depth * 62 });
     let childLeft = left2;
-    for (const child of node.children) {
+    for (const child of node2.children) {
       place(child, childLeft, depth + 1);
       childLeft += widths.get(child.id) ?? 1;
     }
@@ -9675,57 +10684,57 @@ function paintForest(target, roots, options) {
     place(root, left, 0);
     left += widths.get(root.id) ?? 1;
   }
-  const svg = svgEl3("svg", "steptrace__heap-svg steptrace__heap-forest-svg");
+  const svg = svgEl4("svg", "steptrace__heap-svg steptrace__heap-forest-svg");
   svg.setAttribute("viewBox", `0 0 ${Math.max(180, 56 + totalWidth * 66)} ${74 + maxDepth * 62}`);
   svg.setAttribute("role", "img");
   svg.setAttribute("aria-label", options.ariaLabel);
   const edges5 = [];
   const flat = [];
-  const visit = (node) => {
-    flat.push(node);
-    for (const child of node.children) {
-      const line = svgEl3("line", "steptrace__edge steptrace__heap-edge");
-      line.dataset.path = options.active?.has(node.id) && options.active.has(child.id) ? "1" : "0";
+  const visit = (node2) => {
+    flat.push(node2);
+    for (const child of node2.children) {
+      const line = svgEl4("line", "steptrace__edge steptrace__heap-edge");
+      line.dataset.path = options.active?.has(node2.id) && options.active.has(child.id) ? "1" : "0";
       svg.append(line);
-      edges5.push({ line, from: node, to: child });
+      edges5.push({ line, from: node2, to: child });
       visit(child);
     }
   };
   roots.forEach(visit);
-  const nodes5 = flat.map((node) => {
-    const point = positions.get(node.id);
-    const group = svgEl3("g", "steptrace__node steptrace__heap-node");
+  const nodes5 = flat.map((node2) => {
+    const point = positions.get(node2.id);
+    const group = svgEl4("g", "steptrace__node steptrace__heap-node");
     group.dataset.visible = "1";
-    group.dataset.state = options.settled?.has(node.id) ? "settled" : options.active?.has(node.id) ? "compare" : "neutral";
+    group.dataset.state = options.settled?.has(node2.id) ? "settled" : options.active?.has(node2.id) ? "compare" : "neutral";
     group.setAttribute(
       "aria-label",
-      `Heap node ${node.key}${node.marked ? ", marked" : ""}${node.npl ? `, npl ${node.npl}` : ""}`
+      `Heap node ${node2.key}${node2.marked ? ", marked" : ""}${node2.npl ? `, npl ${node2.npl}` : ""}`
     );
-    const circle = svgEl3("circle", "steptrace__ncirc");
+    const circle = svgEl4("circle", "steptrace__ncirc");
     circle.setAttribute("r", String(GRAPH_NODE_RADIUS_PX));
-    const value = svgEl3("text", "steptrace__id");
+    const value = svgEl4("text", "steptrace__id");
     value.setAttribute("text-anchor", "middle");
     value.setAttribute("dominant-baseline", "central");
-    value.textContent = String(node.key);
+    value.textContent = String(node2.key);
     group.append(circle, value);
-    const detail = options.meta?.(node);
+    const detail = options.meta?.(node2);
     if (detail) {
-      const meta = svgEl3("text", "steptrace__heap-node-meta");
+      const meta = svgEl4("text", "steptrace__heap-node-meta");
       meta.setAttribute("text-anchor", "middle");
       meta.setAttribute("y", "23");
       meta.textContent = detail;
       group.append(meta);
     }
-    const rootLabel = options.rootMeta?.get(node.id);
+    const rootLabel = options.rootMeta?.get(node2.id);
     if (rootLabel) {
-      const meta = svgEl3("text", "steptrace__heap-root-label");
+      const meta = svgEl4("text", "steptrace__heap-root-label");
       meta.setAttribute("text-anchor", "middle");
       meta.setAttribute("y", "-20");
       meta.textContent = rootLabel;
       group.append(meta);
     }
-    if (node.marked) {
-      const mark = svgEl3("circle", "steptrace__heap-mark");
+    if (node2.marked) {
+      const mark = svgEl4("circle", "steptrace__heap-mark");
       mark.setAttribute("cx", "11");
       mark.setAttribute("cy", "-11");
       mark.setAttribute("r", "4");
@@ -9902,26 +10911,26 @@ function mountFibonacciHeap(root, config) {
   let geometry = null;
   const allNodes = () => {
     const found = [];
-    const visit = (node) => {
-      found.push(node);
-      node.children.forEach(visit);
+    const visit = (node2) => {
+      found.push(node2);
+      node2.children.forEach(visit);
     };
     roots.forEach(visit);
     return found;
   };
-  const minimum = () => roots.reduce((best, node) => node.key < best.key ? node : best);
+  const minimum = () => roots.reduce((best, node2) => node2.key < best.key ? node2 : best);
   function insertValue(key4) {
-    const node = {
+    const node2 = {
       id: `f${nextId++}`,
       key: key4,
       children: [],
       parent: null,
       marked: false
     };
-    roots.push(node);
-    active = /* @__PURE__ */ new Set([node.id]);
+    roots.push(node2);
+    active = /* @__PURE__ */ new Set([node2.id]);
     settled = /* @__PURE__ */ new Set([minimum().id]);
-    return node;
+    return node2;
   }
   function link(child, parent) {
     child.parent = parent;
@@ -9931,60 +10940,60 @@ function mountFibonacciHeap(root, config) {
   function consolidate() {
     const byDegree = /* @__PURE__ */ new Map();
     for (const start of roots) {
-      let node = start;
-      let degree = node.children.length;
+      let node2 = start;
+      let degree = node2.children.length;
       while (byDegree.has(degree)) {
         let other = byDegree.get(degree);
         byDegree.delete(degree);
-        if (other.key < node.key) [node, other] = [other, node];
-        link(other, node);
-        active.add(node.id);
+        if (other.key < node2.key) [node2, other] = [other, node2];
+        link(other, node2);
+        active.add(node2.id);
         active.add(other.id);
-        degree = node.children.length;
+        degree = node2.children.length;
       }
-      byDegree.set(degree, node);
+      byDegree.set(degree, node2);
     }
     roots = [...byDegree.values()];
-    roots.forEach((node) => {
-      node.parent = null;
-      node.marked = false;
+    roots.forEach((node2) => {
+      node2.parent = null;
+      node2.marked = false;
     });
   }
-  function cut(node, parent) {
-    parent.children = parent.children.filter((child) => child !== node);
-    node.parent = null;
-    node.marked = false;
-    roots.push(node);
-    active.add(node.id);
+  function cut(node2, parent) {
+    parent.children = parent.children.filter((child) => child !== node2);
+    node2.parent = null;
+    node2.marked = false;
+    roots.push(node2);
+    active.add(node2.id);
     active.add(parent.id);
     operationCuts++;
   }
-  function cascadingCut(node) {
-    const parent = node.parent;
+  function cascadingCut(node2) {
+    const parent = node2.parent;
     if (!parent) return;
-    if (!node.marked) node.marked = true;
+    if (!node2.marked) node2.marked = true;
     else {
-      cut(node, parent);
+      cut(node2, parent);
       cascadingCut(parent);
     }
   }
   function paint(message = "") {
     geometry?.destroy();
-    const rootMeta = new Map(roots.map((node) => [node.id, `d${node.children.length}`]));
+    const rootMeta = new Map(roots.map((node2) => [node2.id, `d${node2.children.length}`]));
     geometry = paintForest(tree, roots, {
       active,
       settled,
-      meta: (node) => node.marked ? "marked" : "",
+      meta: (node2) => node2.marked ? "marked" : "",
       rootMeta,
       ariaLabel: `Fibonacci heap forest with ${allNodes().length} values and ${roots.length} roots`
     });
     board.paint(
-      roots.map((node) => ({
-        value: String(node.key),
-        label: `d${node.children.length}`,
-        active: active.has(node.id),
-        changed: settled.has(node.id),
-        ariaLabel: `root ${node.key}, degree ${node.children.length}${settled.has(node.id) ? ", minimum" : ""}`
+      roots.map((node2) => ({
+        value: String(node2.key),
+        label: `d${node2.children.length}`,
+        active: active.has(node2.id),
+        changed: settled.has(node2.id),
+        ariaLabel: `root ${node2.key}, degree ${node2.children.length}${settled.has(node2.id) ? ", minimum" : ""}`
       }))
     );
     const count = allNodes().length;
@@ -10009,7 +11018,7 @@ function mountFibonacciHeap(root, config) {
     active = /* @__PURE__ */ new Set();
     settled = /* @__PURE__ */ new Set();
     const min = minimum();
-    roots = roots.filter((node) => node !== min);
+    roots = roots.filter((node2) => node2 !== min);
     for (const child of min.children) {
       child.parent = null;
       child.marked = false;
@@ -10021,25 +11030,25 @@ function mountFibonacciHeap(root, config) {
       settled.add(minimum().id);
     }
     paint(
-      `Extracted minimum ${min.key}; promoted its children and consolidated equal degrees.${allNodes().some((node) => node.key === 41) && allNodes().some((node) => node.key === 52) ? " Next: decrease 41 to 5, then 52 to 4 to see a mark and cascading cut." : ""}`
+      `Extracted minimum ${min.key}; promoted its children and consolidated equal degrees.${allNodes().some((node2) => node2.key === 41) && allNodes().some((node2) => node2.key === 52) ? " Next: decrease 41 to 5, then 52 to 4 to see a mark and cascading cut." : ""}`
     );
   }
   function onDecrease() {
     const current = Number(currentInput.value);
     const next = Number(newInput.value);
-    const node = allNodes().find((candidate) => candidate.key === current);
-    if (!Number.isInteger(current) || !Number.isInteger(next) || !node || next >= current) {
+    const node2 = allNodes().find((candidate) => candidate.key === current);
+    if (!Number.isInteger(current) || !Number.isInteger(next) || !node2 || next >= current) {
       shell.status.textContent = "Enter an existing current key and a smaller finite integer as the new key.";
       return;
     }
-    active = /* @__PURE__ */ new Set([node.id]);
+    active = /* @__PURE__ */ new Set([node2.id]);
     settled = /* @__PURE__ */ new Set();
     operationCuts = 0;
-    node.key = next;
-    const parent = node.parent;
+    node2.key = next;
+    const parent = node2.parent;
     let cutOccurred = false;
-    if (parent && node.key < parent.key) {
-      cut(node, parent);
+    if (parent && node2.key < parent.key) {
+      cut(node2, parent);
       cascadingCut(parent);
       cutOccurred = true;
     }
@@ -10075,8 +11084,8 @@ function mountFibonacciHeap(root, config) {
     }
   };
 }
-function npl(node) {
-  return node?.npl ?? 0;
+function npl(node2) {
+  return node2?.npl ?? 0;
 }
 function canonicalMergeHeaps() {
   return [
@@ -10100,12 +11109,12 @@ function canonicalMergeHeaps() {
     }
   ];
 }
-function cloneBinary(node) {
+function cloneBinary(node2) {
   return {
-    ...node,
+    ...node2,
     children: [
-      node.children[0] ? cloneBinary(node.children[0]) : void 0,
-      node.children[1] ? cloneBinary(node.children[1]) : void 0
+      node2.children[0] ? cloneBinary(node2.children[0]) : void 0,
+      node2.children[1] ? cloneBinary(node2.children[1]) : void 0
     ]
   };
 }
@@ -10124,10 +11133,10 @@ function mergeBinaryHeaps(first, second, mode, active, swapped) {
   first.npl = npl(first.children[1]) + 1;
   return first;
 }
-function forestBinary(node) {
+function forestBinary(node2) {
   return {
-    ...node,
-    children: node.children.filter(Boolean).map((child) => forestBinary(child))
+    ...node2,
+    children: node2.children.filter(Boolean).map((child) => forestBinary(child))
   };
 }
 function mountMergeHeap(root, mode) {
@@ -10165,7 +11174,7 @@ function mountMergeHeap(root, mode) {
     geometry = paintForest(tree, roots, {
       active,
       settled: swapped,
-      meta: mode === "leftist" ? (node) => `npl ${node.npl}` : void 0,
+      meta: mode === "leftist" ? (node2) => `npl ${node2.npl}` : void 0,
       rootMeta,
       ariaLabel: `${label} ${result ? "merged result" : "two input heaps"}`
     });
@@ -10204,14 +11213,14 @@ function mountLeftistHeap(root, _config) {
 function mountSkewHeap(root, _config) {
   return mountMergeHeap(root, "skew");
 }
-var SVG_NS5;
+var SVG_NS6;
 var init_heap_structure = __esm({
   "custom/steptrace/src/families/heap-structure.ts"() {
     init_graph_node();
     init_render();
     init_heap_selection();
     init_interactive_structure();
-    SVG_NS5 = "http://www.w3.org/2000/svg";
+    SVG_NS6 = "http://www.w3.org/2000/svg";
   }
 });
 
@@ -10652,10 +11661,10 @@ function frameModel(frame) {
   };
 }
 function activeNode(frame) {
-  return frame.nodes.find((node) => node.id === frame.active) || null;
+  return frame.nodes.find((node2) => node2.id === frame.active) || null;
 }
 function pathLabel(frame) {
-  const labels = frame.path.map((id) => frame.nodes.find((node) => node.id === id)?.label).filter(Boolean);
+  const labels = frame.path.map((id) => frame.nodes.find((node2) => node2.id === id)?.label).filter(Boolean);
   return labels.length ? labels.join(" → ") : "—";
 }
 var stateLabels, executionTreeCardMetrics, executionTreeViewDescriptor, mergeSortTreeViewDescriptor, memoizationTreeViewDescriptor, dynamicProgrammingTreeViewDescriptor, branchAndBoundTreeViewDescriptor, executionTreeFamily;
@@ -10696,12 +11705,12 @@ var init_execution_tree = __esm({
         { state: "combine", label: "combined result" }
       ],
       frameModel,
-      nodeLines(node) {
-        return [node.label, node.detail || `[${node.values.join(", ")}]`];
+      nodeLines(node2) {
+        return [node2.label, node2.detail || `[${node2.values.join(", ")}]`];
       },
       watchRows(frame) {
-        const node = activeNode(frame);
-        const result = node ? frame.results[node.id] : null;
+        const node2 = activeNode(frame);
+        const result = node2 ? frame.results[node2.id] : null;
         const subproblemLabel = frame.profile === "merge-sort" ? "subarray" : "subproblem";
         const pathLabelName = frame.profile === "merge-sort" ? "split path" : "call path";
         const resultLabel = Array.isArray(result) ? `[${result.join(", ")}]` : result || "—";
@@ -10709,7 +11718,7 @@ var init_execution_tree = __esm({
           { k: "phase", v: frame.phase, sw: "var(--_violet)" },
           {
             k: subproblemLabel,
-            v: node ? `${node.label} · ${node.detail || `[${node.values.join(", ")}]`}` : "—",
+            v: node2 ? `${node2.label} · ${node2.detail || `[${node2.values.join(", ")}]`}` : "—",
             sw: "var(--_blue)"
           },
           { k: pathLabelName, v: pathLabel(frame), sw: "var(--_neutral)" },
@@ -10729,8 +11738,8 @@ var init_execution_tree = __esm({
       tieredLayout: false,
       centerVisible: true,
       responsiveLayout: false,
-      nodeLines(node) {
-        return [node.label, node.detail || node.values.join("  ")];
+      nodeLines(node2) {
+        return [node2.label, node2.detail || node2.values.join("  ")];
       }
     };
     memoizationTreeViewDescriptor = {
@@ -10744,11 +11753,11 @@ var init_execution_tree = __esm({
         { state: "cache", label: "cache hit; skip branch" }
       ],
       frameModel,
-      nodeLines(node) {
-        return [node.label, node.detail || ""];
+      nodeLines(node2) {
+        return [node2.label, node2.detail || ""];
       },
       watchRows(frame) {
-        const node = activeNode(frame);
+        const node2 = activeNode(frame);
         const cached = frame.cache.map((entry) => `${entry.key} → ${entry.result}`).join(" · ");
         return [
           {
@@ -10759,7 +11768,7 @@ var init_execution_tree = __esm({
           },
           {
             k: "state",
-            v: node ? `${node.label} · ${node.detail || "no cache key"}` : "—",
+            v: node2 ? `${node2.label} · ${node2.detail || "no cache key"}` : "—",
             sw: "var(--_blue)",
             hint: "The active recursive state and the key used to recognize repeats."
           },
@@ -10789,11 +11798,11 @@ var init_execution_tree = __esm({
         { state: "cache", label: "reuse cached result" }
       ],
       frameModel,
-      nodeLines(node) {
-        return [node.label, node.detail || ""];
+      nodeLines(node2) {
+        return [node2.label, node2.detail || ""];
       },
       watchRows(frame) {
-        const node = activeNode(frame);
+        const node2 = activeNode(frame);
         const cached = frame.cache.map((entry) => `${entry.key} → ${entry.result}`).join(" · ");
         return [
           {
@@ -10804,7 +11813,7 @@ var init_execution_tree = __esm({
           },
           {
             k: "state",
-            v: node ? node.label : "—",
+            v: node2 ? node2.label : "—",
             sw: "var(--_blue)",
             hint: "The amount or warehouse coordinate currently being solved."
           },
@@ -10837,27 +11846,27 @@ var init_execution_tree = __esm({
         { state: "prune", label: "bound cannot win" }
       ],
       frameModel,
-      nodeLines(node) {
-        return [node.label, node.detail || ""];
+      nodeLines(node2) {
+        return [node2.label, node2.detail || ""];
       },
       watchRows(frame) {
-        const node = activeNode(frame);
+        const node2 = activeNode(frame);
         return [
           {
             k: "decision",
-            v: node?.label || "—",
+            v: node2?.label || "—",
             sw: "var(--_blue)",
             hint: "The take-or-skip decision currently being evaluated."
           },
           {
             k: "load",
-            v: node ? `${node.weight}/7 · value ${node.value}` : "—",
+            v: node2 ? `${node2.weight}/7 · value ${node2.value}` : "—",
             sw: "var(--_neutral)",
             hint: "Current knapsack weight against capacity 7 and its feasible value."
           },
           {
             k: "upper bound",
-            v: node?.bound == null ? "infeasible" : node.bound,
+            v: node2?.bound == null ? "infeasible" : node2.bound,
             sw: "var(--_violet)",
             hint: "Fractional-knapsack LP upper bound for this branch."
           },
@@ -12456,7 +13465,7 @@ var init_contiguous_storage = __esm({
 
 // custom/steptrace/src/algorithms/arrays.ts
 function parseArrayConfig(config) {
-  const values = (config.values?.length ? config.values : DEFAULT_VALUES2).map(String);
+  const values = (config.values?.length ? config.values : DEFAULT_VALUES5).map(String);
   const capacity = config.capacity ?? values.length;
   if (!Number.isInteger(capacity) || capacity < 3 || capacity > 10 || values.length > capacity)
     throw new Error(
@@ -12464,11 +13473,11 @@ function parseArrayConfig(config) {
     );
   return { capacity, values };
 }
-var DEFAULT_VALUES2, arrays;
+var DEFAULT_VALUES5, arrays;
 var init_arrays = __esm({
   "custom/steptrace/src/algorithms/arrays.ts"() {
     init_contiguous_storage();
-    DEFAULT_VALUES2 = [12, 7, 31, 18, 9, 25];
+    DEFAULT_VALUES5 = [12, 7, 31, 18, 9, 25];
     arrays = {
       id: "arrays",
       family: "contiguous-storage",
@@ -14515,7 +15524,7 @@ var init_dynamic_programming = __esm({
 
 // custom/steptrace/src/algorithms/dynamic-array.ts
 function parseDynamicArrayConfig(config) {
-  const values = (config.values?.length ? config.values : DEFAULT_VALUES3).map(String);
+  const values = (config.values?.length ? config.values : DEFAULT_VALUES6).map(String);
   const capacity = config.capacity ?? 4;
   if (!Number.isInteger(capacity) || capacity < 3 || capacity > 5 || values.length > capacity)
     throw new Error(
@@ -14523,11 +15532,11 @@ function parseDynamicArrayConfig(config) {
     );
   return { capacity, values };
 }
-var DEFAULT_VALUES3, dynamicArray;
+var DEFAULT_VALUES6, dynamicArray;
 var init_dynamic_array = __esm({
   "custom/steptrace/src/algorithms/dynamic-array.ts"() {
     init_contiguous_storage();
-    DEFAULT_VALUES3 = [12, 7, 31];
+    DEFAULT_VALUES6 = [12, 7, 31];
     dynamicArray = {
       id: "dynamic-array",
       family: "contiguous-storage",
@@ -14786,7 +15795,7 @@ function parseMatrixGridConfig(config) {
   const { nodes: nodes5, edges: edges5 } = config;
   if (!Array.isArray(nodes5) || nodes5.length === 0)
     invalidConfig7('requires a non-empty numeric "nodes" array.');
-  if (!nodes5.every((node) => typeof node === "number" && Number.isFinite(node)))
+  if (!nodes5.every((node2) => typeof node2 === "number" && Number.isFinite(node2)))
     invalidConfig7('requires every "nodes" entry to be a finite number.');
   if (new Set(nodes5).size !== nodes5.length) invalidConfig7('requires unique "nodes" entries.');
   if (!Array.isArray(edges5))
@@ -14965,11 +15974,11 @@ var init_matrix_grid = __esm({
           })
         );
         const states = Object.fromEntries(
-          frame.nodes.map((node) => {
-            const column = frame.colLabels.indexOf(node.id);
+          frame.nodes.map((node2) => {
+            const column = frame.colLabels.indexOf(node2.id);
             const solved = column >= 0 && frame.grid[0][column] != null;
-            const isBase = !frame.edges.some((edge) => edge.from === node.id);
-            return [node.id, solved ? isBase ? "base" : "store" : "call"];
+            const isBase = !frame.edges.some((edge) => edge.from === node2.id);
+            return [node2.id, solved ? isBase ? "base" : "store" : "call"];
           })
         );
         const dependencies = frame.deps.map(([, column]) => frame.colLabels[column]);
@@ -14978,14 +15987,14 @@ var init_matrix_grid = __esm({
           action: frame.message,
           active,
           path: active ? [active, ...dependencies] : [],
-          visible: frame.nodes.map((node) => node.id),
+          visible: frame.nodes.map((node2) => node2.id),
           states,
           results,
           collapsed: []
         };
       },
-      nodeLines(node) {
-        return [node.label, node.detail];
+      nodeLines(node2) {
+        return [node2.label, node2.detail];
       },
       watchRows(frame) {
         const currentColumn = frame.cur?.[1] ?? null;
@@ -15035,7 +16044,7 @@ var init_floyd_warshall = __esm({
       meta: { label: "Floyd-Warshall" },
       parse: parseMatrixGridConfig,
       run(input, ops) {
-        const indexForNode = new Map(input.nodes.map((node, index) => [node, index]));
+        const indexForNode = new Map(input.nodes.map((node2, index) => [node2, index]));
         const dist = Array.from(
           { length: input.nodes.length },
           (_, row) => Array.from({ length: input.nodes.length }, (_2, column) => row === column ? 0 : Infinity)
@@ -15076,7 +16085,7 @@ var init_floyd_warshall = __esm({
             }
           }
         }
-        const negativeCycle = input.nodes.filter((node, index) => dist[index][index] < 0);
+        const negativeCycle = input.nodes.filter((node2, index) => dist[index][index] < 0);
         if (negativeCycle.length) {
           ops.reportNegativeCycle(
             negativeCycle,
@@ -15103,11 +16112,11 @@ function createAddressChain(stage, variant) {
   function paint(nodes5, state = {}) {
     board.replaceChildren(
       ...nodes5.map((item, index) => {
-        const node = el("div", "steptrace__linked-list-node-card");
-        node.dataset.appended = item.address === state.appended ? "1" : "0";
-        node.dataset.moved = item.address === state.moved ? "1" : "0";
-        node.dataset.relinked = item.address === state.relinked ? "1" : "0";
-        node.setAttribute("role", "listitem");
+        const node2 = el("div", "steptrace__linked-list-node-card");
+        node2.dataset.appended = item.address === state.appended ? "1" : "0";
+        node2.dataset.moved = item.address === state.moved ? "1" : "0";
+        node2.dataset.relinked = item.address === state.relinked ? "1" : "0";
+        node2.setAttribute("role", "listitem");
         const array = el("div", "steptrace__contiguous-array");
         array.style.setProperty("--steptrace-capacity", "1");
         const cell = el("div", "steptrace__contiguous-cell steptrace__linked-list-cell");
@@ -15133,24 +16142,24 @@ function createAddressChain(stage, variant) {
           cell.append(valueField, previousField, nextField);
         } else cell.append(valueField, nextField);
         array.append(cell);
-        node.append(array);
+        node2.append(array);
         if (nextAddress) {
           const nextLink = el("span", "steptrace__linked-list-link");
           nextLink.dataset.pointer = "next";
           nextLink.setAttribute("aria-hidden", "true");
-          node.append(nextLink);
+          node2.append(nextLink);
         }
         if (variant === "doubly" && index > 0) {
           const previousLink = el("span", "steptrace__linked-list-link");
           previousLink.dataset.pointer = "prev";
           previousLink.setAttribute("aria-hidden", "true");
-          node.append(previousLink);
+          node2.append(previousLink);
         }
-        node.setAttribute(
+        node2.setAttribute(
           "aria-label",
           `${index === 0 ? "Head" : index === nodes5.length - 1 ? "Tail" : `Node ${index}`}, address ${item.address}, value ${item.value}, ${variant === "doubly" ? `prev ${nodes5[index - 1]?.address ?? "null"}, ` : ""}next ${nextAddress ?? "null"}`
         );
-        return node;
+        return node2;
       })
     );
   }
@@ -15372,16 +16381,16 @@ function edgePath(from, to, nodeRadius, arrowGap) {
   return `M ${edge.x1} ${edge.y1} L ${edge.x2} ${edge.y2}`;
 }
 function marker(label, role) {
-  const node = el("div", `steptrace__linked-pointer steptrace__linked-pointer--${role}`);
-  node.setAttribute("aria-hidden", "true");
+  const node2 = el("div", `steptrace__linked-pointer steptrace__linked-pointer--${role}`);
+  node2.setAttribute("aria-hidden", "true");
   const text = el("span", "steptrace__linked-pointer-label");
   text.textContent = label;
-  node.append(text);
-  return { node, text };
+  node2.append(text);
+  return { node: node2, text };
 }
 function makeLinkedTopologyView(frames) {
   const first = frames[0];
-  const positions = new Map(first.nodes.map((node) => [node.id, node]));
+  const positions = new Map(first.nodes.map((node2) => [node2.id, node2]));
   const root = el("div", "steptrace__linked-topology");
   root.setAttribute("role", "region");
   root.setAttribute("aria-label", "Fast and slow pointers on a linked cycle");
@@ -15437,18 +16446,18 @@ function makeLinkedTopologyView(frames) {
       edge.path.setAttribute("d", edgePath(edge.from, edge.to, radius, arrowGap));
   });
   const nodes5 = new Map(
-    first.nodes.map((node) => {
-      const position = positions.get(node.id);
+    first.nodes.map((node2) => {
+      const position = positions.get(node2.id);
       const item = el("div", "steptrace__linked-node");
       item.style.setProperty("--_linked-x", String(position.x));
       item.style.setProperty("--_linked-y", String(position.y));
-      item.dataset.node = node.id;
-      item.textContent = node.id;
+      item.dataset.node = node2.id;
+      item.textContent = node2.id;
       const result = el("span", "steptrace__linked-node-result");
       result.append(successMarker());
       item.append(result);
       canvas.append(item);
-      return [node.id, item];
+      return [node2.id, item];
     })
   );
   const slow = marker("S", "slow");
@@ -15491,11 +16500,11 @@ function makeLinkedTopologyView(frames) {
     fast.text.textContent = frame.phase === "locate" ? "H" : "F";
     root.dataset.phase = frame.phase;
     root.dataset.frame = frame.type;
-    for (const [id, node] of nodes5) {
-      node.dataset.slow = String(id === frame.slow);
-      node.dataset.fast = String(id === frame.fast);
-      node.dataset.meeting = String(id === frame.meeting);
-      node.dataset.entry = String(id === frame.entry);
+    for (const [id, node2] of nodes5) {
+      node2.dataset.slow = String(id === frame.slow);
+      node2.dataset.fast = String(id === frame.fast);
+      node2.dataset.meeting = String(id === frame.meeting);
+      node2.dataset.entry = String(id === frame.entry);
     }
     canvas.setAttribute(
       "aria-label",
@@ -15622,7 +16631,7 @@ var init_linked_topology = __esm({
 function parseFastAndSlowPointersConfig(_config) {
   return {
     ...CONFIG,
-    nodes: CONFIG.nodes.map((node) => ({ ...node })),
+    nodes: CONFIG.nodes.map((node2) => ({ ...node2 })),
     next: { ...CONFIG.next },
     cycle: CONFIG.cycle.slice()
   };
@@ -15784,12 +16793,12 @@ function mountFenwickTree(root, config) {
   const options = values.map((_, index) => String(index + 1));
   const updateIndex = shell.select("Point update index", "Index", options, "5");
   const delta = shell.input("Delta to add", "Delta", 6);
-  const update2 = shell.button("Add delta", true);
+  const update = shell.button("Add delta", true);
   const rangeStart = shell.select("Range start", "From", options, "3");
   const rangeEnd = shell.select("Range end", "To", options, "7");
   const query = shell.button("Range sum");
   const reset = shell.button("Reset");
-  shell.controls.append(updateIndex, delta, update2, rangeStart, rangeEnd, query, reset);
+  shell.controls.append(updateIndex, delta, update, rangeStart, rangeEnd, query, reset);
   function paint(message = "") {
     valuesBoard.paint(
       values.map((value, offset) => {
@@ -15868,7 +16877,7 @@ function mountFenwickTree(root, config) {
     delta.value = "";
     paint("Reset source values and every stored Fenwick aggregate.");
   }
-  shell.listen(update2, "click", onUpdate);
+  shell.listen(update, "click", onUpdate);
   shell.listen(query, "click", onQuery);
   shell.listen(reset, "click", onReset);
   shell.listen(updateIndex, "change", (() => paint()));
@@ -15890,11 +16899,11 @@ function buildSegmentShape(start, end, index = 1, level = 1) {
     right: buildSegmentShape(middle + 1, end, index * 2 + 1, level + 1)
   };
 }
-function flattenSegment(node) {
+function flattenSegment(node2) {
   return [
-    node,
-    ...node.left ? flattenSegment(node.left) : [],
-    ...node.right ? flattenSegment(node.right) : []
+    node2,
+    ...node2.left ? flattenSegment(node2.left) : [],
+    ...node2.right ? flattenSegment(node2.right) : []
   ];
 }
 function rangeTotal(values, start, end) {
@@ -15902,14 +16911,14 @@ function rangeTotal(values, start, end) {
   for (let index = start; index <= end; index++) total += values[index - 1];
   return total;
 }
-function coverRange(node, start, end, result) {
-  if (end < node.start || node.end < start) return;
-  if (start <= node.start && node.end <= end) {
-    result.push(node);
+function coverRange(node2, start, end, result) {
+  if (end < node2.start || node2.end < start) return;
+  if (start <= node2.start && node2.end <= end) {
+    result.push(node2);
     return;
   }
-  if (node.left) coverRange(node.left, start, end, result);
-  if (node.right) coverRange(node.right, start, end, result);
+  if (node2.left) coverRange(node2.left, start, end, result);
+  if (node2.right) coverRange(node2.right, start, end, result);
 }
 function mountSegmentTree(root, config) {
   const shell = createStructureShell(
@@ -15937,15 +16946,15 @@ function mountSegmentTree(root, config) {
   );
   blocks.setAttribute("role", "list");
   blocks.setAttribute("aria-label", "Segment tree interval aggregates");
-  const blockNodes = nodes5.map((node) => ({
-    node,
+  const blockNodes = nodes5.map((node2) => ({
+    node: node2,
     target: createRangeBlock(
       blocks,
       "steptrace__segment-block",
       "Σ",
-      node.start,
-      node.end,
-      node.level
+      node2.start,
+      node2.end,
+      node2.level
     )
   }));
   const valuesLabel = el("div", "steptrace__rail-label steptrace__segment-values-label");
@@ -15956,12 +16965,12 @@ function mountSegmentTree(root, config) {
   const options = values.map((_, index) => String(index + 1));
   const updateIndex = shell.select("Point update index", "Index", options, "4");
   const updateValue = shell.input("New value", "Value", 6);
-  const update2 = shell.button("Set value", true);
+  const update = shell.button("Set value", true);
   const rangeStart = shell.select("Range start", "From", options, "3");
   const rangeEnd = shell.select("Range end", "To", options, "7");
   const query = shell.button("Range sum");
   const reset = shell.button("Reset");
-  shell.controls.append(updateIndex, updateValue, update2, rangeStart, rangeEnd, query, reset);
+  shell.controls.append(updateIndex, updateValue, update, rangeStart, rangeEnd, query, reset);
   function paint(message = "") {
     valuesBoard.paint(
       values.map((value, offset) => {
@@ -15975,13 +16984,13 @@ function mountSegmentTree(root, config) {
         };
       })
     );
-    for (const { node, target } of blockNodes) {
-      const role = roles.get(node.index) ?? "idle";
-      const value = rangeTotal(values, node.start, node.end);
+    for (const { node: node2, target } of blockNodes) {
+      const role = roles.get(node2.index) ?? "idle";
+      const value = rangeTotal(values, node2.start, node2.end);
       paintRangeBlock(target, value, role);
       target.block.setAttribute(
         "aria-label",
-        `segment ${node.start} through ${node.end}, sum ${value}${role === "idle" ? "" : `, active ${role} path`}`
+        `segment ${node2.start} through ${node2.end}, sum ${value}${role === "idle" ? "" : `, active ${role} path`}`
       );
     }
     shell.setCounter(String(values.length), " values");
@@ -15997,7 +17006,7 @@ function mountSegmentTree(root, config) {
     const before = values[index - 1];
     values[index - 1] = parsed;
     roles = new Map(
-      nodes5.filter((node) => node.start <= index && index <= node.end).map((node) => [node.index, "update"])
+      nodes5.filter((node2) => node2.start <= index && index <= node2.end).map((node2) => [node2.index, "update"])
     );
     activeIndex = index;
     activeRange = null;
@@ -16012,14 +17021,14 @@ function mountSegmentTree(root, config) {
     rangeEnd.value = String(right);
     const cover = [];
     coverRange(shape, left, right, cover);
-    roles = new Map(cover.map((node) => [node.index, "query"]));
+    roles = new Map(cover.map((node2) => [node2.index, "query"]));
     activeIndex = null;
     activeRange = [left, right];
     const parts = cover.map(
-      (node) => `${node.start === node.end ? `[${node.start}]` : `[${node.start}..${node.end}]`} ${rangeTotal(
+      (node2) => `${node2.start === node2.end ? `[${node2.start}]` : `[${node2.start}..${node2.end}]`} ${rangeTotal(
         values,
-        node.start,
-        node.end
+        node2.start,
+        node2.end
       )}`
     );
     paint(`Sum [${left}..${right}] = ${parts.join(" + ")} = ${rangeTotal(values, left, right)}.`);
@@ -16035,7 +17044,7 @@ function mountSegmentTree(root, config) {
     updateValue.value = "";
     paint("Reset source values and every segment aggregate.");
   }
-  shell.listen(update2, "click", onUpdate);
+  shell.listen(update, "click", onUpdate);
   shell.listen(query, "click", onQuery);
   shell.listen(reset, "click", onReset);
   onEnter(shell, updateValue, onUpdate);
@@ -16051,18 +17060,18 @@ var init_range_aggregate = __esm({
 
 // custom/steptrace/src/algorithms/fenwick-tree.ts
 function parseFenwickTreeConfig(config) {
-  const values = Array.isArray(config.array) && config.array.length ? config.array : DEFAULT_VALUES4;
+  const values = Array.isArray(config.array) && config.array.length ? config.array : DEFAULT_VALUES7;
   if (values.length < 4 || values.length > 8 || values.some(
     (value) => typeof value !== "number" || !Number.isFinite(value) || !Number.isInteger(value)
   ))
     throw new Error(`steptrace: fenwick-tree requires 4 to 8 finite integer values.`);
   return { values };
 }
-var DEFAULT_VALUES4, fenwickTree;
+var DEFAULT_VALUES7, fenwickTree;
 var init_fenwick_tree = __esm({
   "custom/steptrace/src/algorithms/fenwick-tree.ts"() {
     init_range_aggregate();
-    DEFAULT_VALUES4 = [3, 1, 4, 1, 5, 9, 2, 6];
+    DEFAULT_VALUES7 = [3, 1, 4, 1, 5, 9, 2, 6];
     fenwickTree = {
       id: "fenwick-tree",
       family: "range-aggregate",
@@ -16075,18 +17084,18 @@ var init_fenwick_tree = __esm({
 
 // custom/steptrace/src/algorithms/fibonacci-heap.ts
 function parseFibonacciHeapConfig(config) {
-  const values = Array.isArray(config.array) && config.array.length ? config.array : DEFAULT_VALUES5;
+  const values = Array.isArray(config.array) && config.array.length ? config.array : DEFAULT_VALUES8;
   if (values.some(
     (value) => typeof value !== "number" || !Number.isFinite(value) || !Number.isInteger(value)
   ))
     throw new Error(`steptrace: fibonacci-heap requires finite integer values.`);
   return { values };
 }
-var DEFAULT_VALUES5, fibonacciHeap;
+var DEFAULT_VALUES8, fibonacciHeap;
 var init_fibonacci_heap = __esm({
   "custom/steptrace/src/algorithms/fibonacci-heap.ts"() {
     init_heap_structure();
-    DEFAULT_VALUES5 = [3, 7, 18, 24, 26, 39, 41, 52, 63];
+    DEFAULT_VALUES8 = [3, 7, 18, 24, 26, 39, 41, 52, 63];
     fibonacciHeap = {
       id: "fibonacci-heap",
       family: "heap-selection",
@@ -16109,7 +17118,7 @@ function visibleQueue2(queue2) {
 }
 function runGreedyBestFirst(config, ops) {
   const neighbours = graphStateAdjacency(config);
-  const heuristic = new Map(config.nodes.map((node) => [node.id, node.h]));
+  const heuristic = new Map(config.nodes.map((node2) => [node2.id, node2.h]));
   const pathCost = { [config.start]: 0 };
   const parent = {};
   const visited = /* @__PURE__ */ new Set([config.start]);
@@ -16193,9 +17202,9 @@ var init_greedy_best_first_search = __esm({
 
 // custom/steptrace/src/families/graph-representation.ts
 function svgElement3(kind, attributes = {}) {
-  const node = document.createElementNS(SVG_NS6, kind);
-  for (const [key4, value] of Object.entries(attributes)) node.setAttribute(key4, String(value));
-  return node;
+  const node2 = document.createElementNS(SVG_NS7, kind);
+  for (const [key4, value] of Object.entries(attributes)) node2.setAttribute(key4, String(value));
+  return node2;
 }
 function edgeKey(from, to) {
   return `${from}|${to}`;
@@ -16250,7 +17259,7 @@ function mountGraphRepresentation(root) {
     edges: INITIAL_EDGES.map(([from2, to2]) => ({ from: from2, to: to2 }))
   });
   const positions = new Map(
-    layout.nodes.map((node) => [node.id, { ...node, y: Math.round(105 + (node.y - 150) * 0.63) }])
+    layout.nodes.map((node2) => [node2.id, { ...node2, y: Math.round(105 + (node2.y - 150) * 0.63) }])
   );
   const topologyEdges = /* @__PURE__ */ new Map();
   for (const from2 of VERTICES) {
@@ -16274,16 +17283,16 @@ function mountGraphRepresentation(root) {
   const topologyNodes = /* @__PURE__ */ new Map();
   for (const vertex of VERTICES) {
     const position = positions.get(vertex);
-    const node = svgElement3("g", {
+    const node2 = svgElement3("g", {
       class: "steptrace__graph-rep-node",
       transform: `translate(${position.x} ${position.y})`
     });
     const circle = svgElement3("circle", { r: GRAPH_NODE_RADIUS_PX });
     const label = svgElement3("text");
     label.textContent = vertex;
-    node.append(circle, label);
-    nodeLayer.append(node);
-    topologyNodes.set(vertex, node);
+    node2.append(circle, label);
+    nodeLayer.append(node2);
+    topologyNodes.set(vertex, node2);
   }
   const geometry = observeFixedSvgNodes(
     svg,
@@ -16523,14 +17532,14 @@ function mountGraphRepresentation(root) {
     }
   };
 }
-var SVG_NS6, VERTICES, INITIAL_EDGES, CHANGE_MS, graphRepresentationId;
+var SVG_NS7, VERTICES, INITIAL_EDGES, CHANGE_MS, graphRepresentationId;
 var init_graph_representation = __esm({
   "custom/steptrace/src/families/graph-representation.ts"() {
     init_graph();
     init_graph_node();
     init_render();
     init_interactive_structure();
-    SVG_NS6 = "http://www.w3.org/2000/svg";
+    SVG_NS7 = "http://www.w3.org/2000/svg";
     VERTICES = ["0", "1", "2", "3"];
     INITIAL_EDGES = [
       ["0", "1"],
@@ -16560,7 +17569,7 @@ var init_graph2 = __esm({
 
 // custom/steptrace/src/algorithms/heap.ts
 function parseHeapConfig(config) {
-  const values = Array.isArray(config.array) && config.array.length ? config.array : DEFAULT_VALUES6;
+  const values = Array.isArray(config.array) && config.array.length ? config.array : DEFAULT_VALUES9;
   if (values.some(
     (value) => typeof value !== "number" || !Number.isFinite(value) || !Number.isInteger(value)
   ))
@@ -16569,11 +17578,11 @@ function parseHeapConfig(config) {
     throw new Error(`steptrace: heap requires a valid binary min-heap array.`);
   return { values };
 }
-var DEFAULT_VALUES6, heap;
+var DEFAULT_VALUES9, heap;
 var init_heap = __esm({
   "custom/steptrace/src/algorithms/heap.ts"() {
     init_heap_structure();
-    DEFAULT_VALUES6 = [3, 5, 8, 9];
+    DEFAULT_VALUES9 = [3, 5, 8, 9];
     heap = {
       id: "heap",
       family: "heap-selection",
@@ -17369,7 +18378,7 @@ var init_linear_search = __esm({
 
 // custom/steptrace/src/algorithms/linked-list.ts
 function parseLinkedListConfig(config) {
-  const values = Array.isArray(config.array) && config.array.length ? config.array : DEFAULT_VALUES7;
+  const values = Array.isArray(config.array) && config.array.length ? config.array : DEFAULT_VALUES10;
   const variant = config.variant ?? "singly";
   if (variant !== "singly" && variant !== "doubly")
     throw new Error(`steptrace: linked-list "variant" must be "singly" or "doubly".`);
@@ -17381,11 +18390,11 @@ function parseLinkedListConfig(config) {
     );
   return { values, variant };
 }
-var DEFAULT_VALUES7, linkedList;
+var DEFAULT_VALUES10, linkedList;
 var init_linked_list = __esm({
   "custom/steptrace/src/algorithms/linked-list.ts"() {
     init_linked_topology();
-    DEFAULT_VALUES7 = [12, 27, 39, 54];
+    DEFAULT_VALUES10 = [12, 27, 39, 54];
     linkedList = {
       id: "linked-list",
       family: "linked-topology",
@@ -17519,7 +18528,7 @@ function merge(left, right) {
   while (j < right.length) output.push(right[j++]);
   return output;
 }
-function buildTree2(values, from, to, depth, id, path, nodes5, edges5, metas) {
+function buildTree(values, from, to, depth, id, path, nodes5, edges5, metas) {
   const segment = values.slice(from, to);
   const label = segment.length ? `[${from}…${to - 1}]` : "[]";
   const detail = segment.join("  ");
@@ -17552,7 +18561,7 @@ function buildTree2(values, from, to, depth, id, path, nodes5, edges5, metas) {
   const leftId = `${id}-l`;
   const rightId = `${id}-r`;
   edges5.push({ from: id, to: leftId }, { from: id, to: rightId });
-  const leftMeta = buildTree2(
+  const leftMeta = buildTree(
     values,
     from,
     mid,
@@ -17563,7 +18572,7 @@ function buildTree2(values, from, to, depth, id, path, nodes5, edges5, metas) {
     edges5,
     metas
   );
-  const rightMeta = buildTree2(
+  const rightMeta = buildTree(
     values,
     mid,
     to,
@@ -17578,21 +18587,21 @@ function buildTree2(values, from, to, depth, id, path, nodes5, edges5, metas) {
   return meta;
 }
 function revealSplits(id, metas, ops) {
-  const node = metas.get(id);
-  if (!node) return;
-  const label = node.values.length ? `[${node.from}…${node.to - 1}]` : "[]";
-  if (node.values.length <= 1) {
-    const text = node.values.length ? `[${node.values[0]}]` : "[]";
-    ops.base(id, node.path, node.values, `${text} is already sorted.`);
+  const node2 = metas.get(id);
+  if (!node2) return;
+  const label = node2.values.length ? `[${node2.from}…${node2.to - 1}]` : "[]";
+  if (node2.values.length <= 1) {
+    const text = node2.values.length ? `[${node2.values[0]}]` : "[]";
+    ops.base(id, node2.path, node2.values, `${text} is already sorted.`);
     return;
   }
-  const [leftId, rightId] = node.children || [];
+  const [leftId, rightId] = node2.children || [];
   const left = metas.get(leftId);
   const right = metas.get(rightId);
   if (!left || !right) return;
   ops.split(
     id,
-    node.path,
+    node2.path,
     [leftId, rightId],
     `Split ${label} into ${left.label} and ${right.label}.`
   );
@@ -17600,18 +18609,18 @@ function revealSplits(id, metas, ops) {
   revealSplits(rightId, metas, ops);
 }
 function mergeBottomUp(metas, ops) {
-  const internalNodes = [...metas.values()].filter((node) => node.children).sort((a, b) => b.depth - a.depth || a.from - b.from);
-  for (const node of internalNodes) {
-    const [leftId, rightId] = node.children || [];
+  const internalNodes = [...metas.values()].filter((node2) => node2.children).sort((a, b) => b.depth - a.depth || a.from - b.from);
+  for (const node2 of internalNodes) {
+    const [leftId, rightId] = node2.children || [];
     const left = metas.get(leftId);
     const right = metas.get(rightId);
     if (!left || !right) continue;
-    node.sorted = merge(left.sorted, right.sorted);
+    node2.sorted = merge(left.sorted, right.sorted);
     ops.combine(
-      node.id,
-      node.path,
-      node.sorted,
-      `Merge [${left.sorted.join(", ")}] and [${right.sorted.join(", ")}] into [${node.sorted.join(", ")}].`
+      node2.id,
+      node2.path,
+      node2.sorted,
+      `Merge [${left.sorted.join(", ")}] and [${right.sorted.join(", ")}] into [${node2.sorted.join(", ")}].`
     );
   }
 }
@@ -17641,7 +18650,7 @@ var init_merge_sort_tree = __esm({
         const edges5 = [];
         const metas = /* @__PURE__ */ new Map();
         const rootId = "root";
-        const rootMeta = buildTree2(values, 0, values.length, 0, rootId, [rootId], nodes5, edges5, metas);
+        const rootMeta = buildTree(values, 0, values.length, 0, rootId, [rootId], nodes5, edges5, metas);
         rootMeta.from = 0;
         rootMeta.to = values.length;
         rootMeta.values = values.slice();
@@ -18887,6 +19896,22 @@ var init_rabin_karp = __esm({
   }
 });
 
+// custom/steptrace/src/algorithms/red-black-tree.ts
+var DEFAULT_VALUES11, redBlackTree;
+var init_red_black_tree = __esm({
+  "custom/steptrace/src/algorithms/red-black-tree.ts"() {
+    init_binary_tree();
+    DEFAULT_VALUES11 = [10, 5, 15, 1];
+    redBlackTree = {
+      id: "red-black-tree",
+      family: "binary-tree",
+      meta: { label: "Red-Black Tree" },
+      parse: (config) => parseBinaryTreeConfig(config, "red-black-tree", DEFAULT_VALUES11),
+      mount: mountRedBlackTree
+    };
+  }
+});
+
 // custom/steptrace/src/algorithms/selection-sort.ts
 var selectionSort;
 var init_selection_sort = __esm({
@@ -18924,18 +19949,18 @@ var init_selection_sort = __esm({
 
 // custom/steptrace/src/algorithms/segment-tree.ts
 function parseSegmentTreeConfig(config) {
-  const values = Array.isArray(config.array) && config.array.length ? config.array : DEFAULT_VALUES8;
+  const values = Array.isArray(config.array) && config.array.length ? config.array : DEFAULT_VALUES12;
   if (values.length < 4 || values.length > 8 || values.some(
     (value) => typeof value !== "number" || !Number.isFinite(value) || !Number.isInteger(value)
   ))
     throw new Error(`steptrace: segment-tree requires 4 to 8 finite integer values.`);
   return { values };
 }
-var DEFAULT_VALUES8, segmentTree;
+var DEFAULT_VALUES12, segmentTree;
 var init_segment_tree = __esm({
   "custom/steptrace/src/algorithms/segment-tree.ts"() {
     init_range_aggregate();
-    DEFAULT_VALUES8 = [3, 4, 1, 7, 2, 6, 5, 8];
+    DEFAULT_VALUES12 = [3, 4, 1, 7, 2, 6, 5, 8];
     segmentTree = {
       id: "segment-tree",
       family: "range-aggregate",
@@ -19076,17 +20101,17 @@ var init_sliding_window = __esm({
 
 // custom/steptrace/src/algorithms/span.ts
 function parseSpanConfig(config) {
-  const values = (config.values?.length ? config.values : DEFAULT_VALUES9).map(String);
+  const values = (config.values?.length ? config.values : DEFAULT_VALUES13).map(String);
   const [start, end] = config.range ?? [1, Math.min(4, values.length)];
   if (values.length < 3 || values.length > 10 || !Number.isInteger(start) || !Number.isInteger(end) || start < 0 || end <= start || end > values.length)
     throw new Error(`steptrace: span requires 3 to 10 "values" and a valid half-open "range".`);
   return { values, start, length: end - start };
 }
-var DEFAULT_VALUES9, span;
+var DEFAULT_VALUES13, span;
 var init_span = __esm({
   "custom/steptrace/src/algorithms/span.ts"() {
     init_contiguous_storage();
-    DEFAULT_VALUES9 = [10, 20, 30, 40, 50, 60];
+    DEFAULT_VALUES13 = [10, 20, 30, 40, 50, 60];
     span = {
       id: "span",
       family: "contiguous-storage",
@@ -19097,9 +20122,25 @@ var init_span = __esm({
   }
 });
 
+// custom/steptrace/src/algorithms/splay-tree.ts
+var DEFAULT_VALUES14, splayTree;
+var init_splay_tree = __esm({
+  "custom/steptrace/src/algorithms/splay-tree.ts"() {
+    init_binary_tree();
+    DEFAULT_VALUES14 = [100, 50, 150, 25, 75, 60];
+    splayTree = {
+      id: "splay-tree",
+      family: "binary-tree",
+      meta: { label: "Splay Tree" },
+      parse: (config) => parseBinaryTreeConfig(config, "splay-tree", DEFAULT_VALUES14),
+      mount: mountSplayTree
+    };
+  }
+});
+
 // custom/steptrace/src/algorithms/stack.ts
 function parseStackConfig(config) {
-  const values = (config.values?.length ? config.values : DEFAULT_VALUES10).map(String);
+  const values = (config.values?.length ? config.values : DEFAULT_VALUES15).map(String);
   const capacity = config.capacity ?? 6;
   if (!Number.isInteger(capacity) || capacity < 3 || capacity > 8 || values.length > capacity)
     throw new Error(
@@ -19107,11 +20148,11 @@ function parseStackConfig(config) {
     );
   return { capacity, values };
 }
-var DEFAULT_VALUES10, stack;
+var DEFAULT_VALUES15, stack;
 var init_stack = __esm({
   "custom/steptrace/src/algorithms/stack.ts"() {
     init_stack_sequence();
-    DEFAULT_VALUES10 = ["A", "B", "C"];
+    DEFAULT_VALUES15 = ["A", "B", "C"];
     stack = {
       id: "stack",
       family: "stack-sequence",
@@ -19484,9 +20525,9 @@ var init_two_pointers = __esm({
 
 // custom/steptrace/src/families/union-find.ts
 function svgElement4(kind, attributes = {}) {
-  const node = document.createElementNS(SVG_NS7, kind);
-  for (const [key4, value] of Object.entries(attributes)) node.setAttribute(key4, String(value));
-  return node;
+  const node2 = document.createElementNS(SVG_NS8, kind);
+  for (const [key4, value] of Object.entries(attributes)) node2.setAttribute(key4, String(value));
+  return node2;
 }
 function mountUnionFind(root, config) {
   const shell = createStructureShell(
@@ -19576,7 +20617,7 @@ function mountUnionFind(root, config) {
       current = parent[current];
       path.push(current);
     }
-    for (const node of path) parent[node] = current;
+    for (const node2 of path) parent[node2] = current;
     return { root: current, path };
   }
   function layout() {
@@ -19587,23 +20628,23 @@ function mountUnionFind(root, config) {
       else children[parent[index]].push(index);
     }
     const widths = Array(config.size).fill(1);
-    const measure = (node) => {
-      widths[node] = Math.max(
+    const measure = (node2) => {
+      widths[node2] = Math.max(
         1,
-        children[node].reduce((sum, child) => sum + measure(child), 0)
+        children[node2].reduce((sum, child) => sum + measure(child), 0)
       );
-      return widths[node];
+      return widths[node2];
     };
     const gap = 0.45;
     const total = roots.reduce((sum, root2) => sum + measure(root2), 0) + gap * (roots.length - 1);
     const positions = Array.from({ length: config.size }, () => ({ x: 0, y: 0 }));
-    const place = (node, start, depth) => {
-      positions[node] = {
-        x: 35 + (start + widths[node] / 2) / total * (layoutWidth - 70),
+    const place = (node2, start, depth) => {
+      positions[node2] = {
+        x: 35 + (start + widths[node2] / 2) / total * (layoutWidth - 70),
         y: TOP2 + depth * LEVEL_GAP
       };
       let cursor2 = start;
-      for (const child of children[node]) {
+      for (const child of children[node2]) {
         place(child, cursor2, depth + 1);
         cursor2 += widths[child];
       }
@@ -19748,12 +20789,12 @@ function mountUnionFind(root, config) {
     }
   };
 }
-var SVG_NS7, WIDTH, HEIGHT, TOP2, LEVEL_GAP, NODE_RADIUS, markerSerial;
+var SVG_NS8, WIDTH, HEIGHT, TOP2, LEVEL_GAP, NODE_RADIUS, markerSerial;
 var init_union_find = __esm({
   "custom/steptrace/src/families/union-find.ts"() {
     init_render();
     init_interactive_structure();
-    SVG_NS7 = "http://www.w3.org/2000/svg";
+    SVG_NS8 = "http://www.w3.org/2000/svg";
     WIDTH = 700;
     HEIGHT = 220;
     TOP2 = 34;
@@ -19898,34 +20939,34 @@ function parseTernarySearchTreeConfig(config) {
     }
     let current = rootNode;
     while (true) {
-      const node = nodes5[current];
+      const node2 = nodes5[current];
       const character = key4[index];
-      if (character < node.character) {
-        if (!node.lo) {
-          node.lo = create(character);
-          edges5.push({ id: edgeId(current, "lo", node.lo), from: current, to: node.lo, role: "lo" });
+      if (character < node2.character) {
+        if (!node2.lo) {
+          node2.lo = create(character);
+          edges5.push({ id: edgeId(current, "lo", node2.lo), from: current, to: node2.lo, role: "lo" });
         }
-        current = node.lo;
-      } else if (character > node.character) {
-        if (!node.hi) {
-          node.hi = create(character);
-          edges5.push({ id: edgeId(current, "hi", node.hi), from: current, to: node.hi, role: "hi" });
+        current = node2.lo;
+      } else if (character > node2.character) {
+        if (!node2.hi) {
+          node2.hi = create(character);
+          edges5.push({ id: edgeId(current, "hi", node2.hi), from: current, to: node2.hi, role: "hi" });
         }
-        current = node.hi;
+        current = node2.hi;
       } else {
         if (index === key4.length - 1) break;
         index++;
-        if (!node.eq) {
-          node.eq = create(key4[index]);
-          edges5.push({ id: edgeId(current, "eq", node.eq), from: current, to: node.eq, role: "eq" });
+        if (!node2.eq) {
+          node2.eq = create(key4[index]);
+          edges5.push({ id: edgeId(current, "eq", node2.eq), from: current, to: node2.eq, role: "eq" });
         }
-        current = node.eq;
+        current = node2.eq;
       }
     }
   }
   const labels = new Map([
     ["root", "root"],
-    ...Object.values(nodes5).map((node) => [node.id, node.character])
+    ...Object.values(nodes5).map((node2) => [node2.id, node2.character])
   ]);
   const built = characterTopology(labels, edges5);
   return {
@@ -19933,7 +20974,7 @@ function parseTernarySearchTreeConfig(config) {
     operations,
     rootNode,
     ternaryNodes: Object.freeze(
-      Object.fromEntries(Object.entries(nodes5).map(([id, node]) => [id, Object.freeze({ ...node })]))
+      Object.fromEntries(Object.entries(nodes5).map(([id, node2]) => [id, Object.freeze({ ...node2 })]))
     ),
     nodes: built.nodes,
     edges: built.edges
@@ -19948,9 +20989,9 @@ function traverse(input, ops, operation, key4) {
     ops.reuseEdge(rootEdge, current, index, `Enter root character ${input.ternaryNodes[current].character}.`);
   else ops.createNode(rootEdge, current, index, `Create root character ${input.ternaryNodes[current].character}.`);
   while (current) {
-    const node = input.ternaryNodes[current];
+    const node2 = input.ternaryNodes[current];
     const character = key4[index];
-    if (character === node.character) {
+    if (character === node2.character) {
       if (index === key4.length - 1) {
         if (operation === "insert") ops.markTerminal(current, `Mark "${key4}" terminal.`);
         else
@@ -19961,15 +21002,15 @@ function traverse(input, ops, operation, key4) {
         return;
       }
       index++;
-      if (!node.eq) break;
-      const id = edgeId(current, "eq", node.eq);
+      if (!node2.eq) break;
+      const id = edgeId(current, "eq", node2.eq);
       if (ops.hasVisibleEdge(id))
-        ops.reuseEdge(id, node.eq, index, `eq consumes the character; continue with ${key4[index]}.`);
-      else ops.createNode(id, node.eq, index, `eq consumes the character; create ${key4[index]}.`);
-      current = node.eq;
+        ops.reuseEdge(id, node2.eq, index, `eq consumes the character; continue with ${key4[index]}.`);
+      else ops.createNode(id, node2.eq, index, `eq consumes the character; create ${key4[index]}.`);
+      current = node2.eq;
     } else {
-      const role = character < node.character ? "lo" : "hi";
-      const next = node[role];
+      const role = character < node2.character ? "lo" : "hi";
+      const next = node2[role];
       if (!next) break;
       const id = edgeId(current, role, next);
       if (ops.hasVisibleEdge(id))
@@ -20493,6 +21534,9 @@ var init_algorithms = __esm({
     init_bellman_ford();
     init_binary_search_on_answer();
     init_binary_search();
+    init_binary_search_tree();
+    init_b_plus_tree();
+    init_b_tree();
     init_bloom_filter();
     init_binomial_queue();
     init_bidirectional_search();
@@ -20550,11 +21594,13 @@ var init_algorithms = __esm({
     init_quick_sort();
     init_radix_sort();
     init_rabin_karp();
+    init_red_black_tree();
     init_selection_sort();
     init_segment_tree();
     init_shell_sort();
     init_sliding_window();
     init_span();
+    init_splay_tree();
     init_stack();
     init_skew_heap();
     init_topological_sort();
@@ -20633,6 +21679,9 @@ var init_algorithms = __esm({
     interactiveStructures = [
       arrays,
       avlTree,
+      binarySearchTree,
+      bPlusTree,
+      bTree,
       binomialQueue,
       bloomFilter,
       circularBuffer,
@@ -20648,9 +21697,11 @@ var init_algorithms = __esm({
       linkedList,
       lruCache,
       queue,
+      redBlackTree,
       segmentTree,
       skewHeap,
       span,
+      splayTree,
       stack,
       unionFind
     ];
@@ -21268,7 +22319,7 @@ function createMount(registry2, structures = []) {
         return;
       }
       const PROBE = "position:absolute;visibility:hidden;pointer-events:none;left:0;right:0;height:auto";
-      const tall = (node) => node.getBoundingClientRect().height;
+      const tall = (node2) => node2.getBoundingClientRect().height;
       const probes = player.frames.map((frame) => {
         const probe = el("li", "steptrace__log-line steptrace__log-line--cur");
         probe.style.cssText = PROBE;
@@ -21536,7 +22587,7 @@ function createMount(registry2, structures = []) {
     }
     function syncEndpointOptions(settings, graph) {
       if (!endpointSection || !startMenu || !targetMenu || !startHead || !targetHead) return;
-      const options = settings?.options || graph?.nodes?.map((node) => ({ value: node.id, label: node.id }));
+      const options = settings?.options || graph?.nodes?.map((node2) => ({ value: node2.id, label: node2.id }));
       if (!options?.length) {
         endpointSection.hidden = true;
         return;
@@ -21874,7 +22925,7 @@ function mountComplexityFigure(figure) {
     target.addEventListener(type, listener);
     listeners.push([target, type, listener]);
   }
-  function update2() {
+  function update() {
     const activeIds = new Set(
       paths.filter(
         (path) => path.dataset.context !== "true" && (activeFilter === "all" || path.dataset.category === activeFilter)
@@ -21921,7 +22972,7 @@ function mountComplexityFigure(figure) {
     listen(tab, "click", () => {
       activeFilter = tab.dataset.filter ?? "all";
       selectedPathId = null;
-      update2();
+      update();
     });
     listen(tab, "keydown", (event) => {
       const key4 = event.key;
@@ -21939,10 +22990,10 @@ function mountComplexityFigure(figure) {
       const pathId = button2.dataset.pathId ?? null;
       selectedPathId = selectedPathId === pathId ? null : pathId;
       if (selectedPathId) activeFilter = button2.dataset.category ?? "all";
-      update2();
+      update();
     });
   }
-  update2();
+  update();
   return {
     destroy() {
       for (const [target, type, listener] of listeners) {
@@ -22430,9 +23481,9 @@ function appendText(document2, parent, tagName, value) {
   return child;
 }
 function svgElement(document2, tagName, attributes) {
-  const node = document2.createElementNS(SVG_NS, tagName);
-  for (const [name, value] of Object.entries(attributes)) node.setAttribute(name, String(value));
-  return node;
+  const node2 = document2.createElementNS(SVG_NS, tagName);
+  for (const [name, value] of Object.entries(attributes)) node2.setAttribute(name, String(value));
+  return node2;
 }
 function renderComplexityDom(root, view) {
   const document2 = root.ownerDocument;
