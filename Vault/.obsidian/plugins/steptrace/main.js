@@ -1676,7 +1676,7 @@ function makeUnionFindView(frames) {
   const UR = 16;
   const MX = 26;
   const BASE = 150;
-  const TOP = 26;
+  const TOP2 = 26;
   const width = MX * 2 + Math.max(0, n - 1) * SP + UR * 2;
   const height = 180;
   const cx = (i) => MX + UR + i * SP;
@@ -1745,7 +1745,7 @@ function makeUnionFindView(frames) {
       const midX = (x1 + x2) / 2;
       const arc = document.createElementNS(SVGNS, "path");
       arc.setAttribute("class", "steptrace__ufarc");
-      arc.setAttribute("d", `M ${x1} ${BASE - UR} Q ${midX} ${TOP} ${x2} ${BASE - UR}`);
+      arc.setAttribute("d", `M ${x1} ${BASE - UR} Q ${midX} ${TOP2} ${x2} ${BASE - UR}`);
       arc.setAttribute("fill", "none");
       const active = ae && ae[0] === k && ae[1] === p || hl.has(k) && hl.has(p);
       arc.dataset.active = active ? "true" : "false";
@@ -16676,6 +16676,780 @@ var init_engine = __esm({
   }
 });
 
+// custom/complexity/interactions.ts
+function mountComplexityFigure(figure) {
+  if (figure.dataset.complexityMounted) return { destroy() {
+  } };
+  figure.dataset.complexityMounted = "true";
+  const tabs = Array.from(figure.querySelectorAll(".complexity__tab"));
+  const legendButtons = Array.from(
+    figure.querySelectorAll(".complexity__legend-button")
+  );
+  const paths = Array.from(figure.querySelectorAll(".complexity__curve"));
+  const areas = Array.from(figure.querySelectorAll(".complexity__area"));
+  const labels = Array.from(
+    figure.querySelectorAll(".complexity__endpoint-label")
+  );
+  const listeners = [];
+  let activeFilter = "all";
+  let selectedPathId = null;
+  function listen(target, type, listener) {
+    target.addEventListener(type, listener);
+    listeners.push([target, type, listener]);
+  }
+  function update() {
+    const activeIds = new Set(
+      paths.filter(
+        (path) => path.dataset.context !== "true" && (activeFilter === "all" || path.dataset.category === activeFilter)
+      ).map((path) => path.dataset.pathId ?? "")
+    );
+    if (selectedPathId) {
+      activeIds.clear();
+      activeIds.add(selectedPathId);
+    }
+    for (const path of paths) {
+      const active = activeIds.has(path.dataset.pathId ?? "");
+      path.classList.toggle("is-highlighted", active);
+      path.classList.toggle("is-subtle", !active);
+    }
+    for (const area of areas) {
+      area.classList.toggle("is-subtle", !activeIds.has(area.dataset.pathId ?? ""));
+    }
+    for (const button2 of legendButtons) {
+      const pathId = button2.dataset.pathId ?? "";
+      button2.classList.toggle("is-selected", selectedPathId === pathId);
+      button2.classList.toggle("is-subtle", !activeIds.has(pathId));
+      button2.setAttribute("aria-pressed", selectedPathId === pathId ? "true" : "false");
+    }
+    for (const label of labels) {
+      const ids = (label.dataset.pathIds ?? "").split(",");
+      const activePath = paths.find(
+        (path) => ids.includes(path.dataset.pathId ?? "") && activeIds.has(path.dataset.pathId ?? "")
+      );
+      label.classList.toggle("is-active", Boolean(activePath));
+      label.classList.toggle("is-subtle", !activePath);
+      if (activePath) {
+        label.style.setProperty("--complexity-label-color", activePath.getAttribute("stroke") ?? "");
+      }
+    }
+    for (const tab of tabs) {
+      const selected = tab.dataset.filter === activeFilter;
+      tab.setAttribute("aria-selected", selected ? "true" : "false");
+      tab.tabIndex = selected ? 0 : -1;
+    }
+    figure.dataset.activeFilter = activeFilter;
+  }
+  for (const tab of tabs) {
+    listen(tab, "click", () => {
+      activeFilter = tab.dataset.filter ?? "all";
+      selectedPathId = null;
+      update();
+    });
+    listen(tab, "keydown", (event) => {
+      const key = event.key;
+      if (!["ArrowLeft", "ArrowRight", "Home", "End"].includes(key)) return;
+      event.preventDefault();
+      const enabled = tabs.filter((candidate) => !candidate.disabled);
+      const current = enabled.indexOf(tab);
+      const next = key === "Home" ? enabled[0] : key === "End" ? enabled.at(-1) : enabled[(current + (key === "ArrowRight" ? 1 : -1) + enabled.length) % enabled.length];
+      next?.focus();
+      next?.click();
+    });
+  }
+  for (const button2 of legendButtons) {
+    listen(button2, "click", () => {
+      const pathId = button2.dataset.pathId ?? null;
+      selectedPathId = selectedPathId === pathId ? null : pathId;
+      if (selectedPathId) activeFilter = button2.dataset.category ?? "all";
+      update();
+    });
+  }
+  update();
+  return {
+    destroy() {
+      for (const [target, type, listener] of listeners) {
+        target.removeEventListener(type, listener);
+      }
+      delete figure.dataset.complexityMounted;
+    }
+  };
+}
+
+// custom/complexity/model.ts
+var CURVE_IDS = [
+  "constant",
+  "log-n",
+  "linear",
+  "n-log-n",
+  "quadratic",
+  "exponential",
+  "factorial"
+];
+var COMPLEXITY_FILTERS = [
+  { id: "all", label: "All" },
+  { id: "best", label: "Best" },
+  { id: "average", label: "Avg" },
+  { id: "worst", label: "Worst" },
+  { id: "other", label: "Other" }
+];
+var COMPLEXITY_CHART = {
+  width: 800,
+  height: 320,
+  left: 56,
+  plotRight: 670,
+  labelX: 682,
+  top: 18,
+  axisY: 282
+};
+var curves = {
+  constant: {
+    formula: "O(1)",
+    description: "Same time regardless of input size.",
+    evaluate: () => 1
+  },
+  "log-n": {
+    formula: "O(log n)",
+    description: "Halves the problem each step.",
+    evaluate: Math.log2
+  },
+  linear: { formula: "O(n)", description: "Processes each element once.", evaluate: (n) => n },
+  "n-log-n": {
+    formula: "O(n log n)",
+    description: "Efficient divide-and-conquer work.",
+    evaluate: (n) => n * Math.log2(n)
+  },
+  quadratic: {
+    formula: "O(n²)",
+    description: "Nested work over the input.",
+    evaluate: (n) => n * n
+  },
+  exponential: {
+    formula: "O(2^n)",
+    description: "Doubles with each new element.",
+    evaluate: (n) => 2 ** n
+  },
+  factorial: {
+    formula: "O(n!)",
+    description: "Visits every permutation.",
+    evaluate: (n) => {
+      let value = 1;
+      for (let factor = 2; factor <= n; factor++) value *= factor;
+      return value;
+    }
+  }
+};
+var CASE_COLORS = { Best: "#22a06b", Average: "#d99a00", Worst: "#e05252" };
+var CURVE_COLORS = {
+  constant: "#22a06b",
+  "log-n": "#1597b8",
+  linear: "#db7c2e",
+  "n-log-n": "#9b6bd6",
+  quadratic: "#e05252",
+  exponential: "#d04f9b",
+  factorial: "#6f5bd3"
+};
+var CONTEXT_COLOR = "currentColor";
+var OPERATION_COLORS = [
+  ["#8bb8e8", "#4c89cb", "#245b98"],
+  ["#bd9ee8", "#8d62c7", "#65379e"],
+  ["#e7aa78", "#c97735", "#914619"],
+  ["#78c9b3", "#389b82", "#176b57"]
+];
+var DETAIL_KEYS = ["cause", "assumptions", "auxiliarySpace", "structureSpace"];
+var CONFIG_KEYS = ["version", "mode", "title", "variables", "entries"];
+var { left: LEFT, plotRight: PLOT_RIGHT, top: TOP, axisY: AXIS_Y } = COMPLEXITY_CHART;
+var DATA_BOTTOM = AXIS_Y - 14;
+var MAX_VALUE = 1e4;
+var DUPLICATE_GAP = 4;
+function fail(path, message) {
+  throw new Error(`complexity.${path}: ${message}`);
+}
+function objectAt(value, path) {
+  if (!value || typeof value !== "object" || Array.isArray(value)) fail(path, "must be an object");
+  return value;
+}
+function rejectUnknown(value, allowed, path) {
+  for (const key of Object.keys(value)) {
+    if (!allowed.includes(key)) fail(`${path}.${key}`, "is not supported");
+  }
+}
+function textAt(value, path) {
+  if (typeof value !== "string" || value.trim() === "") fail(path, "must be a non-empty string");
+  return value;
+}
+function stringsAt(value, path) {
+  if (!Array.isArray(value) || value.some((item) => typeof item !== "string" || item.trim() === "")) {
+    fail(path, "must be an array of non-empty strings");
+  }
+  return value;
+}
+function curveIdAt(value, path) {
+  if (typeof value !== "string" || !CURVE_IDS.includes(value)) {
+    fail(path, `must be one of ${CURVE_IDS.join(", ")}`);
+  }
+  return value;
+}
+function detailsAt(value, path, required = false) {
+  const details = objectAt(value, path);
+  rejectUnknown(details, DETAIL_KEYS, path);
+  const result = {};
+  if (details.cause !== void 0) result.cause = textAt(details.cause, `${path}.cause`);
+  if (details.assumptions !== void 0) {
+    result.assumptions = stringsAt(details.assumptions, `${path}.assumptions`);
+  }
+  if (details.auxiliarySpace !== void 0) {
+    result.auxiliarySpace = textAt(details.auxiliarySpace, `${path}.auxiliarySpace`);
+  }
+  if (details.structureSpace !== void 0) {
+    result.structureSpace = textAt(details.structureSpace, `${path}.structureSpace`);
+  }
+  if (required && !result.auxiliarySpace) fail(`${path}.auxiliarySpace`, "is required");
+  if (required && !result.cause) fail(`${path}.cause`, "is required");
+  return result;
+}
+function qualifiersAt(value, path) {
+  return value === void 0 ? void 0 : stringsAt(value, path);
+}
+function variablesAt(value) {
+  const variables = objectAt(value, "variables");
+  const entries = Object.entries(variables);
+  if (entries.length === 0) fail("variables", "must declare n");
+  const names = /* @__PURE__ */ new Set();
+  for (const [name, description] of entries) {
+    if (!/^[A-Za-z][A-Za-z0-9_]*$/.test(name)) fail(`variables.${name}`, "has an invalid name");
+    textAt(description, `variables.${name}`);
+    names.add(name);
+  }
+  if (!names.has("n")) fail("variables.n", "is required for plotted curves");
+  return {
+    names,
+    text: entries.map(([name, description]) => `${name}: ${String(description)}`).join("; ")
+  };
+}
+function slug(value) {
+  return value.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "");
+}
+function rowId(figureId, key, index) {
+  return `${figureId}-${slug(key)}-${index}`;
+}
+function categoryFor(role) {
+  if (!role) return "other";
+  const normalized = role.toLowerCase();
+  if (normalized.startsWith("best")) return "best";
+  if (normalized.includes("average")) return "average";
+  if (normalized.startsWith("worst")) return "worst";
+  return "other";
+}
+function mergeDetails(parent, child) {
+  if (!parent) return child ?? {};
+  if (!child) return parent;
+  return {
+    ...parent,
+    ...child,
+    assumptions: parent.assumptions || child.assumptions ? [...parent.assumptions ?? [], ...child.assumptions ?? []] : void 0
+  };
+}
+function roleColor(role, curveId) {
+  if (role === "Best" || role === "Average" || role === "Worst") return CASE_COLORS[role];
+  return CURVE_COLORS[curveId];
+}
+function operationColor(operationIndex, boundIndex) {
+  const palette = OPERATION_COLORS[operationIndex % OPERATION_COLORS.length];
+  return palette[Math.min(boundIndex, palette.length - 1)];
+}
+function compactRole(role) {
+  return role.replace("Average", "Avg").replace("Amortized / average", "Amortized / avg").replace("Worst single op", "Worst");
+}
+function formatTick(value) {
+  if (value >= 1e6) return `${value / 1e6}M`;
+  if (value >= 1e3) return `${value / 1e3}k`;
+  return String(value);
+}
+function makeScale(maxValue) {
+  const logMax = Math.max(1, Math.log10(maxValue));
+  return {
+    x: (n) => LEFT + n / 10 * (PLOT_RIGHT - LEFT),
+    y: (value) => TOP + (1 - Math.log10(value) / logMax) * (DATA_BOTTOM - TOP)
+  };
+}
+function curvePath(id, curveId, category, label, legendLabel, color, dimmed, scale, legendGroup, offset = 0) {
+  const samples = Array.from({ length: 9 }, (_, index) => {
+    const n = index + 2;
+    const value = curves[curveId].evaluate(n);
+    return { n, value, x: scale.x(n), y: scale.y(value) };
+  });
+  const points = [
+    { x: LEFT, y: AXIS_Y },
+    ...samples.map(({ x, y }) => ({ x, y: y - offset }))
+  ];
+  const geometry = points.map(({ x, y }, index) => `${index === 0 ? "M" : "L"}${x.toFixed(2)},${y.toFixed(2)}`).join(" ");
+  const last = samples[samples.length - 1];
+  const endY = Math.max(TOP, Math.min(DATA_BOTTOM, last.y - offset));
+  return {
+    id,
+    curveId,
+    category,
+    formula: curves[curveId].formula,
+    label,
+    legendGroup,
+    legendLabel,
+    color,
+    dimmed,
+    geometry,
+    area: `${geometry} L${last.x.toFixed(2)},${AXIS_Y.toFixed(2)} Z`,
+    endY,
+    samples
+  };
+}
+function layoutEndpointLabels(paths) {
+  const labels = CURVE_IDS.map((curveId) => {
+    const matching = paths.filter((path) => path.curveId === curveId);
+    const highlighted = matching.filter((path) => !path.dimmed);
+    return {
+      curveId,
+      formula: curves[curveId].formula,
+      pathIds: matching.map((path) => path.id),
+      color: highlighted[0]?.color ?? CONTEXT_COLOR,
+      dimmed: highlighted.length === 0,
+      y: matching.reduce((sum, path) => sum + path.endY, 0) / matching.length
+    };
+  }).sort((a, b) => a.y - b.y);
+  const gap = 15;
+  const min = TOP + 5;
+  const max = DATA_BOTTOM - 4;
+  labels.forEach((label, index) => {
+    label.y = Math.max(label.y, index === 0 ? min : labels[index - 1].y + gap);
+  });
+  const overflow = labels.at(-1).y - max;
+  if (overflow > 0) labels.forEach((label) => label.y -= overflow);
+  for (let index = labels.length - 2; index >= 0; index--) {
+    labels[index].y = Math.min(labels[index].y, labels[index + 1].y - gap);
+  }
+  const underflow = min - labels[0].y;
+  if (underflow > 0) labels.forEach((label) => label.y += underflow);
+  return labels;
+}
+function assertUnique(seen, value, path) {
+  if (seen.has(value)) fail(path, `duplicates ${value}`);
+  seen.add(value);
+}
+function buildComplexityViewModel(input) {
+  const config = objectAt(input, "config");
+  rejectUnknown(config, CONFIG_KEYS, "config");
+  if (config.version !== 1) fail("version", "must be 1");
+  const mode = config.mode;
+  if (mode !== "catalogue" && mode !== "cases" && mode !== "operations") {
+    fail("mode", "must be catalogue, cases, or operations");
+  }
+  const title = textAt(config.title, "title");
+  const figureId = `complexity-${mode}-${slug(title)}`;
+  const variables = variablesAt(config.variables);
+  if (!Array.isArray(config.entries) || config.entries.length === 0) {
+    fail("entries", "must be a non-empty array");
+  }
+  const rows = [];
+  const highlighted = [];
+  if (mode === "catalogue") {
+    const seen = /* @__PURE__ */ new Set();
+    config.entries.forEach((raw, index) => {
+      const path = `entries[${index}]`;
+      const entry = objectAt(raw, path);
+      rejectUnknown(entry, ["kind", "curveId", "description"], path);
+      if (entry.kind !== "catalogue") fail(`${path}.kind`, "must be catalogue");
+      const curveId = curveIdAt(entry.curveId, `${path}.curveId`);
+      assertUnique(seen, curveId, `${path}.curveId`);
+      const description = textAt(entry.description, `${path}.description`);
+      const id = rowId(figureId, curveId, index);
+      rows.push({
+        id,
+        label: curves[curveId].formula,
+        formula: curves[curveId].formula,
+        variables: variables.text,
+        description
+      });
+      highlighted.push({
+        id,
+        curveId,
+        category: "other",
+        label: curves[curveId].formula,
+        legendLabel: curves[curveId].formula,
+        color: CURVE_COLORS[curveId]
+      });
+    });
+  } else if (mode === "cases") {
+    const seen = /* @__PURE__ */ new Set();
+    config.entries.forEach((raw, index) => {
+      const path = `entries[${index}]`;
+      const entry = objectAt(raw, path);
+      rejectUnknown(entry, ["kind", "role", "curveId", "qualifiers", "details"], path);
+      if (entry.kind !== "case") fail(`${path}.kind`, "must be case");
+      const role = textAt(entry.role, `${path}.role`);
+      if (role !== "Best" && role !== "Average" && role !== "Worst") {
+        fail(`${path}.role`, "must be Best, Average, or Worst");
+      }
+      assertUnique(seen, role, `${path}.role`);
+      const curveId = curveIdAt(entry.curveId, `${path}.curveId`);
+      const qualifiers = qualifiersAt(entry.qualifiers, `${path}.qualifiers`);
+      const details = detailsAt(entry.details, `${path}.details`, true);
+      const id = rowId(figureId, role, index);
+      rows.push({
+        id,
+        label: role,
+        formula: curves[curveId].formula,
+        variables: variables.text,
+        qualifiers,
+        ...details
+      });
+      highlighted.push({
+        id,
+        curveId,
+        category: categoryFor(role),
+        label: `${role}: ${curves[curveId].formula}`,
+        legendLabel: `${compactRole(role)} ${curves[curveId].formula}`,
+        color: roleColor(role, curveId)
+      });
+    });
+    for (const role of ["Best", "Average", "Worst"]) {
+      if (!seen.has(role)) fail("entries", `must include ${role}`);
+    }
+  } else {
+    const seenOperations = /* @__PURE__ */ new Set();
+    config.entries.forEach((raw, operationIndex) => {
+      const path = `entries[${operationIndex}]`;
+      const entry = objectAt(raw, path);
+      rejectUnknown(entry, ["kind", "operation", "bounds", "details"], path);
+      if (entry.kind !== "operation") fail(`${path}.kind`, "must be operation");
+      const operation = textAt(entry.operation, `${path}.operation`);
+      assertUnique(seenOperations, operation, `${path}.operation`);
+      const operationDetails = entry.details === void 0 ? void 0 : detailsAt(entry.details, `${path}.details`);
+      if (!Array.isArray(entry.bounds) || entry.bounds.length === 0) {
+        fail(`${path}.bounds`, "must be a non-empty array");
+      }
+      const seenRoles = /* @__PURE__ */ new Set();
+      entry.bounds.forEach((rawBound, boundIndex) => {
+        const boundPath = `${path}.bounds[${boundIndex}]`;
+        const bound = objectAt(rawBound, boundPath);
+        const kind = bound.kind;
+        if (kind === "catalogue") {
+          rejectUnknown(bound, ["kind", "curveId", "role", "qualifiers", "details"], boundPath);
+        } else if (kind === "text") {
+          rejectUnknown(bound, ["kind", "formula", "role", "qualifiers", "details"], boundPath);
+        } else {
+          fail(`${boundPath}.kind`, "must be catalogue or text");
+        }
+        const role = textAt(bound.role, `${boundPath}.role`);
+        assertUnique(seenRoles, role, `${boundPath}.role`);
+        const qualifiers = qualifiersAt(bound.qualifiers, `${boundPath}.qualifiers`);
+        const boundDetails = bound.details === void 0 ? void 0 : detailsAt(bound.details, `${boundPath}.details`);
+        const details = mergeDetails(operationDetails, boundDetails);
+        let curveId;
+        let formula;
+        if (kind === "catalogue") {
+          curveId = curveIdAt(bound.curveId, `${boundPath}.curveId`);
+          formula = curves[curveId].formula;
+        } else {
+          formula = textAt(bound.formula, `${boundPath}.formula`);
+        }
+        const id = rowId(figureId, `${operation}-${role}`, operationIndex * 100 + boundIndex);
+        rows.push({
+          id,
+          label: `${operation} — ${role}`,
+          formula,
+          variables: variables.text,
+          qualifiers,
+          ...details
+        });
+        if (curveId) {
+          highlighted.push({
+            id,
+            curveId,
+            category: categoryFor(role),
+            label: `${operation} — ${role}: ${curves[curveId].formula}`,
+            legendGroup: operation,
+            legendLabel: `${compactRole(role)} ${curves[curveId].formula}`,
+            color: operationColor(operationIndex, boundIndex)
+          });
+        }
+      });
+    });
+  }
+  const scale = makeScale(MAX_VALUE);
+  const selected = new Set(highlighted.map(({ curveId }) => curveId));
+  const context = CURVE_IDS.filter((curveId) => !selected.has(curveId)).map(
+    (curveId, index) => curvePath(
+      `${figureId}-context-${curveId}-${index}`,
+      curveId,
+      "other",
+      curves[curveId].formula,
+      curves[curveId].formula,
+      CONTEXT_COLOR,
+      true,
+      scale
+    )
+  );
+  const counts = /* @__PURE__ */ new Map();
+  const indexes = /* @__PURE__ */ new Map();
+  for (const { curveId } of highlighted) counts.set(curveId, (counts.get(curveId) ?? 0) + 1);
+  const highlightedPaths = highlighted.map(
+    ({ id, curveId, category, label, legendGroup, legendLabel, color }) => {
+      const index = indexes.get(curveId) ?? 0;
+      indexes.set(curveId, index + 1);
+      const offset = (counts.get(curveId) ?? 0) > 1 ? index * DUPLICATE_GAP : 0;
+      return curvePath(
+        id,
+        curveId,
+        category,
+        label,
+        legendLabel,
+        color,
+        false,
+        scale,
+        legendGroup,
+        offset
+      );
+    }
+  );
+  const paths = [...context, ...highlightedPaths];
+  const ticks = [{ value: 0, label: "0", y: AXIS_Y }];
+  for (let value = 1; value <= MAX_VALUE; value *= 10) {
+    ticks.push({ value, label: formatTick(value), y: scale.y(value) });
+  }
+  const legend = [];
+  for (const path of paths.filter((candidate) => !candidate.dimmed)) {
+    const group = legend.find((candidate) => candidate.label === path.legendGroup);
+    const item = {
+      pathId: path.id,
+      category: path.category,
+      label: path.legendLabel,
+      color: path.color
+    };
+    if (group) group.items.push(item);
+    else legend.push({ label: path.legendGroup, items: [item] });
+  }
+  const availableCategories = Array.from(
+    new Set(highlightedPaths.map((path) => path.category))
+  );
+  return {
+    figureId,
+    mode,
+    title,
+    paths,
+    legend,
+    endpointLabels: layoutEndpointLabels(paths),
+    availableCategories,
+    rows,
+    ticks
+  };
+}
+
+// custom/complexity/dom.ts
+var SVG_NS = "http://www.w3.org/2000/svg";
+function appendText(document2, parent, tagName, value) {
+  const child = document2.createElement(tagName);
+  child.textContent = value;
+  parent.append(child);
+  return child;
+}
+function svgElement(document2, tagName, attributes) {
+  const node = document2.createElementNS(SVG_NS, tagName);
+  for (const [name, value] of Object.entries(attributes)) node.setAttribute(name, String(value));
+  return node;
+}
+function renderComplexityDom(root, view) {
+  const document2 = root.ownerDocument;
+  const { width, height, left, plotRight, labelX, top, axisY } = COMPLEXITY_CHART;
+  const clipId = `${view.figureId}-plot-clip`;
+  const panelId = `${view.figureId}-panel`;
+  const figure = document2.createElement("figure");
+  figure.id = view.figureId;
+  figure.className = "complexity";
+  figure.dataset.complexityMode = view.mode;
+  figure.dataset.activeFilter = "all";
+  const title = appendText(document2, figure, "figcaption", view.title);
+  title.id = `${view.figureId}-title`;
+  title.className = "complexity__title";
+  const tabs = document2.createElement("div");
+  tabs.className = "complexity__tabs";
+  tabs.setAttribute("role", "tablist");
+  tabs.setAttribute("aria-label", "Complexity cases");
+  for (const filter of COMPLEXITY_FILTERS) {
+    const tab = appendText(document2, tabs, "button", filter.label);
+    tab.type = "button";
+    tab.className = "complexity__tab";
+    tab.dataset.filter = filter.id;
+    tab.setAttribute("role", "tab");
+    tab.setAttribute("aria-controls", panelId);
+    tab.setAttribute("aria-selected", filter.id === "all" ? "true" : "false");
+    tab.tabIndex = filter.id === "all" ? 0 : -1;
+    tab.disabled = filter.id !== "all" && !view.availableCategories.includes(filter.id);
+  }
+  figure.append(tabs);
+  const panel = document2.createElement("div");
+  panel.id = panelId;
+  panel.className = "complexity__panel";
+  panel.setAttribute("role", "tabpanel");
+  panel.setAttribute("aria-labelledby", title.id);
+  const plotWrap = document2.createElement("div");
+  plotWrap.className = "complexity__plot-wrap";
+  const svg = svgElement(document2, "svg", {
+    class: "complexity__plot",
+    viewBox: `0 0 ${width} ${height}`,
+    role: "presentation",
+    "aria-hidden": "true",
+    focusable: "false"
+  });
+  const defs = svgElement(document2, "defs", {});
+  const clip = svgElement(document2, "clipPath", { id: clipId });
+  clip.append(
+    svgElement(document2, "rect", {
+      x: left,
+      y: top,
+      width: plotRight - left,
+      height: axisY - top
+    })
+  );
+  defs.append(clip);
+  for (const path of view.paths.filter((candidate) => !candidate.dimmed)) {
+    const gradient = svgElement(document2, "linearGradient", {
+      id: `${path.id}-fill`,
+      x1: 0,
+      y1: 0,
+      x2: 0,
+      y2: 1
+    });
+    gradient.append(
+      svgElement(document2, "stop", {
+        offset: "0%",
+        "stop-color": path.color,
+        "stop-opacity": 0.2
+      }),
+      svgElement(document2, "stop", {
+        offset: "100%",
+        "stop-color": path.color,
+        "stop-opacity": 0
+      })
+    );
+    defs.append(gradient);
+  }
+  svg.append(defs);
+  for (const tick of view.ticks) {
+    svg.append(
+      svgElement(document2, "line", {
+        class: "complexity__grid",
+        x1: left,
+        x2: plotRight,
+        y1: tick.y,
+        y2: tick.y
+      })
+    );
+    const label = svgElement(document2, "text", {
+      class: "complexity__tick",
+      x: left - 8,
+      y: tick.y + 4
+    });
+    label.textContent = tick.label;
+    svg.append(label);
+  }
+  svg.append(
+    svgElement(document2, "line", {
+      class: "complexity__axis",
+      x1: left,
+      x2: plotRight,
+      y1: axisY,
+      y2: axisY
+    })
+  );
+  const clipped = svgElement(document2, "g", { "clip-path": `url(#${clipId})` });
+  const areas = svgElement(document2, "g", { class: "complexity__areas" });
+  const curves2 = svgElement(document2, "g", { class: "complexity__curves" });
+  for (const path of view.paths) {
+    if (!path.dimmed) {
+      areas.append(
+        svgElement(document2, "path", {
+          class: "complexity__area",
+          d: path.area,
+          fill: `url(#${path.id}-fill)`,
+          "data-path-id": path.id,
+          "data-category": path.category
+        })
+      );
+    }
+    curves2.append(
+      svgElement(document2, "path", {
+        id: path.id,
+        class: `complexity__curve ${path.dimmed ? "is-subtle is-context" : "is-highlighted"}`,
+        d: path.geometry,
+        fill: "none",
+        stroke: path.color,
+        "vector-effect": "non-scaling-stroke",
+        "data-path-id": path.id,
+        "data-curve-id": path.curveId,
+        "data-category": path.category,
+        "data-context": path.dimmed ? "true" : "false"
+      })
+    );
+  }
+  clipped.append(areas, curves2);
+  svg.append(clipped);
+  const endpointLabels = svgElement(document2, "g", { class: "complexity__endpoint-labels" });
+  for (const endpoint of view.endpointLabels) {
+    const label = svgElement(document2, "text", {
+      class: `complexity__endpoint-label ${endpoint.dimmed ? "is-subtle" : "is-active"}`,
+      x: labelX,
+      y: endpoint.y + 4,
+      "data-curve-id": endpoint.curveId,
+      "data-path-ids": endpoint.pathIds.join(",")
+    });
+    label.style.setProperty("--complexity-label-color", endpoint.color);
+    label.textContent = endpoint.formula;
+    endpointLabels.append(label);
+  }
+  svg.append(endpointLabels);
+  plotWrap.append(svg);
+  panel.append(plotWrap);
+  figure.append(panel);
+  const legend = document2.createElement("div");
+  legend.className = "complexity__legend";
+  for (const group of view.legend) {
+    const row = document2.createElement("div");
+    row.className = `complexity__legend-group${group.label ? "" : " is-ungrouped"}`;
+    if (group.label) {
+      appendText(document2, row, "span", group.label).className = "complexity__legend-group-label";
+    }
+    const items = document2.createElement("ul");
+    items.className = "complexity__legend-items";
+    for (const legendItem of group.items) {
+      const item = document2.createElement("li");
+      item.className = "complexity__legend-item";
+      const button2 = document2.createElement("button");
+      button2.type = "button";
+      button2.className = "complexity__legend-button";
+      button2.dataset.pathId = legendItem.pathId;
+      button2.dataset.category = legendItem.category;
+      button2.setAttribute("aria-pressed", "false");
+      button2.style.setProperty("--complexity-color", legendItem.color);
+      const swatch = document2.createElement("span");
+      swatch.className = "complexity__legend-swatch";
+      swatch.setAttribute("aria-hidden", "true");
+      button2.append(swatch, document2.createTextNode(legendItem.label));
+      item.append(button2);
+      items.append(item);
+    }
+    row.append(items);
+    legend.append(row);
+  }
+  figure.append(legend);
+  root.replaceChildren(figure);
+  const interaction = typeof figure.querySelectorAll === "function" ? mountComplexityFigure(figure) : { destroy() {
+  } };
+  return {
+    destroy() {
+      interaction.destroy();
+      root.replaceChildren();
+    }
+  };
+}
+
 // custom/steptrace/src/entries/obsidian.cts
 var { Plugin, MarkdownRenderChild, Notice, SliderComponent } = require("obsidian");
 var { steptrace: steptrace2 } = (init_engine(), __toCommonJS(engine_exports));
@@ -16697,7 +17471,7 @@ function createSpeedSlider(container, options) {
     }
   };
 }
-var SteptraceChild = class extends MarkdownRenderChild {
+var RenderChild = class extends MarkdownRenderChild {
   handle;
   constructor(el2, handle) {
     super(el2);
@@ -16724,7 +17498,25 @@ ${error instanceof Error ? error.message : String(error)}`
         }
         const root = el2.createEl("div");
         const handle = steptrace2.mount(root, config, { createSpeedSlider });
-        ctx.addChild(new SteptraceChild(el2, handle));
+        ctx.addChild(new RenderChild(el2, handle));
+      }
+    );
+    this.registerMarkdownCodeBlockProcessor(
+      "complexity",
+      (source, el2, ctx) => {
+        try {
+          const view = buildComplexityViewModel(JSON.parse(source));
+          const root = el2.createEl("div");
+          const handle = renderComplexityDom(root, view);
+          ctx.addChild(new RenderChild(el2, handle));
+        } catch (error) {
+          el2.replaceChildren();
+          el2.createEl("pre", {
+            text: `complexity: ${error instanceof Error ? error.message : String(error)}
+
+${source}`
+          });
+        }
       }
     );
     this.addCommand({

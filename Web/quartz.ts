@@ -1,6 +1,7 @@
 import { ExcalidrawEnhance } from "./custom/components/excalidraw-enhance"
 import { ExplorerIcons } from "./custom/components/explorer-icons"
 import { ContentMetaRow } from "./custom/components/content-meta-row"
+import { Complexity } from "./custom/components/complexity"
 import { ExplorerOrder } from "./custom/components/explorer-order"
 import { FloatingButtons } from "./custom/components/floating-buttons"
 import { HomepageFit } from "./custom/components/homepage-fit"
@@ -13,6 +14,7 @@ import { SiteMarquee } from "./custom/components/site-marquee"
 import { Steptrace } from "./custom/components/steptrace"
 import { StepTraceStatic } from "./custom/emitters/steptrace-static"
 import { ClickableImages } from "./custom/transformers/clickable-images"
+import { ComplexityBlock } from "./custom/transformers/complexity-block"
 import { QuestionCollector } from "./custom/transformers/question-collector"
 import { SyncerFixups } from "./custom/transformers/syncer-fixups"
 import { SteptraceBlock } from "./custom/transformers/steptrace-block"
@@ -56,6 +58,18 @@ config.plugins.transformers.push(QuestionCollector())
 // now publishes these properties into content/ directly, so the status-gated
 // SiteMarquee and the Explorer's icon/order decorations read them straight from
 // each note's frontmatter — no backfill transformers needed.
+
+// Render ```complexity fences before syntax highlighting wraps them in its own
+// figure markup. The transformer supplies the static first paint; the client-only
+// Complexity component below adds filtering and legend interaction.
+const syntaxHighlightingIdx = config.plugins.transformers.findIndex(
+  (t) => t.name === "SyntaxHighlighting",
+)
+config.plugins.transformers.splice(
+  syntaxHighlightingIdx === -1 ? config.plugins.transformers.length : syntaxHighlightingIdx,
+  0,
+  ComplexityBlock(),
+)
 
 // Rewrite ```steptrace fences (committed raw by Syncer — not on its freeze
 // allowlist) into the <div class="steptrace-mount" data-config> markers that the
@@ -109,12 +123,14 @@ for (const pageLayout of Object.values(layout.byPageType)) {
 // loader/theme binding; HomepageFit measures the frozen home dashboard and
 // selects the least-degraded tablet state that fits one viewport.
 const steptrace = Steptrace()
+const complexity = Complexity()
 const homepageFit = HomepageFit()
 const excalidrawEnhance = ExcalidrawEnhance()
 const pageReveal = PageReveal()
 layout.defaults.afterBody = [
   ...(layout.defaults.afterBody ?? []),
   steptrace,
+  complexity,
   homepageFit,
   excalidrawEnhance,
   pageReveal,
@@ -123,6 +139,7 @@ for (const pageLayout of Object.values(layout.byPageType)) {
   pageLayout.afterBody = [
     ...(pageLayout.afterBody ?? []),
     steptrace,
+    complexity,
     homepageFit,
     excalidrawEnhance,
     pageReveal,

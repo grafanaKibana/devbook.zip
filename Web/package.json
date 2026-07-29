@@ -16,7 +16,7 @@
     "serve": "node ./quartz/bootstrap-cli.mjs build --serve --port 8085 --wsPort 3002",
     "readme:image": "playwright install chromium && node ./scripts/generate-readme-image.mjs",
     "docs": "node ./quartz/bootstrap-cli.mjs build --serve -d docs",
-    "check": "npm run steptrace:test && npm run steptrace:typecheck && npm run steptrace:check && tsc --noEmit && npx prettier . --check",
+    "check": "npm run complexity:test && npm run steptrace:test && npm run steptrace:typecheck && npm run steptrace:check && tsc --noEmit && npx prettier . --check",
     "format": "npx prettier . --write",
     "test": "tsx --test",
     "profile": "0x -D prof ./quartz/bootstrap-cli.mjs build --concurrency=1",
@@ -26,6 +26,7 @@
     "steptrace:test": "node --test ./custom/steptrace/steptrace.test.mjs",
     "steptrace:typecheck": "tsc --noEmit -p ./custom/steptrace/tsconfig.json",
     "steptrace:watch": "node ./custom/steptrace/watch.mjs",
+    "complexity:test": "node ./custom/complexity/run-tests.mjs",
     "prebuild": "npm run install-plugins"
   },
   "engines": {
