@@ -1223,7 +1223,9 @@
       if (model.summary.role) {
         summary.append(makeMatrixRoleBadge(roleDescriptor(descriptors, model.summary.role)));
       }
-      summary.append(document.createTextNode(model.summary.text));
+      const text = el("span", "steptrace__matrix-footer-summary-text");
+      text.textContent = model.summary.text;
+      summary.append(text);
       row.setAttribute("aria-label", `${model.context}; ${model.summary.text}`);
     }
     return { paint };

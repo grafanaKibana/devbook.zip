@@ -4517,10 +4517,11 @@ test("Floyd-Warshall keeps one stable semantic footer inside its matrix table", 
   )
   assert.match(
     styles,
-    /\.steptrace \.steptrace__matrix-footer-row\s*\{[^}]*grid-template-columns: minmax\(0, 1fr\) auto;[^}]*font: 400 var\(--_type-small\) \/ 1\.2 var\(--_font-head\);/s,
+    /\.steptrace \.steptrace__matrix-footer-row\s*\{[^}]*grid-template-columns: auto minmax\(0, 1fr\);[^}]*font: 400 var\(--_type-small\) \/ 1\.2 var\(--_font-head\);/s,
   )
   assert.match(renderSource, /steptrace__matrix-footer-context/)
   assert.match(renderSource, /steptrace__matrix-footer-summary/)
+  assert.match(renderSource, /steptrace__matrix-footer-summary-text/)
   assert.doesNotMatch(renderSource, /steptrace__matrix-footer-(?:label|formula|output)/)
   assert.match(
     styles,

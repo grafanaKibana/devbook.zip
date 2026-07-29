@@ -63,7 +63,7 @@
 }
 
 .steptrace .steptrace__dp--guided {
-  min-width: 28rem;
+  min-width: min(28rem, 100%);
 }
 
 .steptrace .steptrace__dp-caption {
@@ -382,7 +382,7 @@
 
 .steptrace .steptrace__matrix-footer-row {
   display: grid;
-  grid-template-columns: minmax(0, 1fr) auto;
+  grid-template-columns: auto minmax(0, 1fr);
   gap: 0.625rem;
   align-items: center;
   min-width: 0;
@@ -393,6 +393,7 @@
 
 .steptrace .steptrace__matrix-footer-context {
   min-width: 0;
+  max-width: 100%;
   overflow: hidden;
   color: var(--_muted);
   justify-self: start;
@@ -411,8 +412,13 @@
   color: var(--_matrix-text);
   font-family: var(--_font-mono);
   justify-self: end;
-  text-overflow: ellipsis;
   white-space: nowrap;
+}
+
+.steptrace .steptrace__matrix-footer-summary-text {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 .steptrace .steptrace__matrix-footer .steptrace__matrix-role-badge,
