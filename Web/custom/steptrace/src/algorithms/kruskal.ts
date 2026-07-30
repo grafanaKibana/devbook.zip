@@ -46,7 +46,7 @@ class Recorder {
     })
     const edgeState: Record<string, GraphStateEdgeRole> = {}
     accepted.forEach((edge) => { edgeState[key(edge)] = "accepted" })
-    if (current) edgeState[key(current)] = "active"
+    if (current && !accepted.includes(current)) edgeState[key(current)] = "active"
     if (rejected) edgeState[key(rejected)] = "rejected"
     this.frames.push({
       type: "kruskal",
@@ -65,7 +65,7 @@ class Recorder {
       detail: {
         kind: "mst-scan",
         pending,
-        accepted,
+        accepted: [...accepted],
         totalWeight: accepted.reduce((sum, edge) => sum + edge.weight, 0),
         components,
       },

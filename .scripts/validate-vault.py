@@ -431,6 +431,32 @@ def validate_residue(note: Note) -> list[Issue]:
     return issues
 
 
+def validate_code_fences(note: Note) -> list[Issue]:
+    issues: list[Issue] = []
+    open_fence: tuple[str, int] | None = None
+    for index, line in enumerate(note.body.splitlines()):
+        match = re.match(r"^ {0,3}(`{3,}|~{3,})(.*)$", line)
+        if not match:
+            continue
+        fence, suffix = match.groups()
+        if open_fence:
+            marker, length = open_fence
+            if fence[0] == marker and len(fence) >= length and not suffix.strip():
+                open_fence = None
+            continue
+        open_fence = (fence[0], len(fence))
+        if not suffix.strip():
+            issues.append(
+                Issue(
+                    "markdown.code-fence-language",
+                    note.rel,
+                    note.body_start_line + index,
+                    "fenced code blocks need a language; use `text` when none fits",
+                )
+            )
+    return issues
+
+
 def strip_non_link_markdown(content: str) -> str:
     def preserve_lines(match: re.Match[str]) -> str:
         return "\n" * match.group(0).count("\n")
@@ -658,6 +684,7 @@ def validate(repo_root: Path, mode: str, use_baseline: bool = True) -> tuple[lis
         issues.extend(validate_folder_note(note, home_root))
         issues.extend(validate_published(note))
         issues.extend(validate_residue(note))
+        issues.extend(validate_code_fences(note))
         issues.extend(validate_wikilinks(note, index))
 
     if mode == "all":

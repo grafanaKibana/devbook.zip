@@ -345,7 +345,7 @@ export function createMount(
     let startMenu = null
     let targetHead = null
     let targetMenu = null
-    if (kind === "sort") {
+    if (kind === "sort" && state.algorithm !== "bucket-sort" && state.algorithm !== "cyclic-sort") {
       const section = el("div", "steptrace__menu-section")
       const h = el("div", "steptrace__menu-h")
       h.textContent = "Array"

@@ -180,6 +180,20 @@ publish: "true"
         )
         self.assertEqual([], validate_vault.validate_residue(note))
 
+    def test_code_fences_require_a_language(self) -> None:
+        temp, root = self.make_repo()
+        self.addCleanup(temp.cleanup)
+        note = self.write_note(
+            root,
+            "Vault/Home/Topic/Fences.md",
+            VALID_FRONTMATTER
+            + "```\nbare\n```\n\n```text\ntagged\n```\n\n~~~csharp\nvar value = 1;\n~~~\n",
+        )
+
+        issues = validate_vault.validate_code_fences(note)
+
+        self.assertEqual(["markdown.code-fence-language"], [issue.code for issue in issues])
+
     def test_steptrace_freshness_delegates_to_non_writing_build_check(self) -> None:
         temp, root = self.make_repo()
         self.addCleanup(temp.cleanup)

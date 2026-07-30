@@ -1292,6 +1292,8 @@ test("graph-state rollout records every canonical decisive operation", () => {
 
   const kruskalResult = api.buildFrames({ algorithm: "kruskal" }).frames
   assert.ok(kruskalResult.some((frame) => Object.values(frame.edgeState).includes("rejected")))
+  assert.deepEqual(kruskalResult[0].detail.accepted, [])
+  assert.equal(kruskalResult.at(-1).edgeState["C|D"], "accepted")
   assert.equal(kruskalResult.at(-1).detail.totalWeight, 7)
   assert.equal(kruskalResult.at(-1).detail.components.length, 1)
 
@@ -1300,11 +1302,14 @@ test("graph-state rollout records every canonical decisive operation", () => {
   assert.equal(flow.at(-1).detail.totalFlow, 2)
   assert.equal(flow.at(-1).detail.flow["a|b"], 0)
 
-  const scc = api.buildFrames({ algorithm: "strongly-connected-components" }).frames.at(-1).detail
-  assert.deepEqual(scc.components, [
+  const sccFrame = api.buildFrames({ algorithm: "strongly-connected-components" }).frames.at(-1)
+  assert.deepEqual(sccFrame.detail.components, [
     ["E", "D"],
     ["C", "B", "A"],
   ])
+  assert.equal(sccFrame.edgeState["A|B"], "accepted")
+  assert.equal(sccFrame.edgeState["D|E"], "accepted")
+  assert.equal(sccFrame.edgeState["C|D"], "neutral")
 })
 
 test("all 600 ordered Ukraine-city A* routes are reachable, admissible, and optimal", () => {
@@ -1432,6 +1437,12 @@ test("tabbed blocks use accessible shared chrome and preserve mounted tab state"
     readFileSync(join(here, "src", "styles", "shared.scss"), "utf8"),
     /\.steptrace--compact-stage \.steptrace__body\s*\{[^}]*block-size: clamp\(14rem, calc\(100dvh - 16rem\), 24rem\);/,
   )
+})
+
+test("constrained sort visualizers do not expose the generic Shuffle action", () => {
+  const mountSource = readFileSync(join(here, "src", "mount.ts"), "utf8")
+  assert.match(mountSource, /state\.algorithm !== "bucket-sort"/)
+  assert.match(mountSource, /state\.algorithm !== "cyclic-sort"/)
 })
 
 test("styles are compiled from real SCSS without runtime injection", () => {
@@ -1666,7 +1677,7 @@ test("all built-in algorithms preserve their headless frame contract", () => {
 
   assert.equal(
     digest,
-    "ebc60a0c4b72eb50e52f143ca031260d95fb0f331f52e2f33e54634fada1ac2e",
+    "fadd721c43fa9372e890585c68ded38543324d0a39ca6ab7d383b32cfd9dd70b",
     "the headless StepTrace behavior changed",
   )
 })

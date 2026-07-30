@@ -17701,7 +17701,7 @@
       accepted.forEach((edge) => {
         edgeState[key2(edge)] = "accepted";
       });
-      if (current) edgeState[key2(current)] = "active";
+      if (current && !accepted.includes(current)) edgeState[key2(current)] = "active";
       if (rejected) edgeState[key2(rejected)] = "rejected";
       this.frames.push({
         type: "kruskal",
@@ -17720,7 +17720,7 @@
         detail: {
           kind: "mst-scan",
           pending,
-          accepted,
+          accepted: [...accepted],
           totalWeight: accepted.reduce((sum, edge) => sum + edge.weight, 0),
           components
         }
@@ -19690,7 +19690,7 @@
         currentEdge: edge,
         selectedEdges: [],
         nodeState: Object.fromEntries(this.config.nodes.map(({ id }) => [id, id === current ? "active" : emitted.has(id) ? "accepted" : stack2.includes(id) ? "frontier" : id in discovery ? "closed" : "neutral"])),
-        edgeState: Object.fromEntries(this.config.edges.map(({ from, to }) => [`${from}|${to}`, edge?.[0] === from && edge[1] === to ? "active" : emitted.has(from) && emitted.has(to) ? "accepted" : "neutral"])),
+        edgeState: Object.fromEntries(this.config.edges.map(({ from, to }) => [`${from}|${to}`, edge?.[0] === from && edge[1] === to ? "active" : components.some((component) => component.includes(from) && component.includes(to)) ? "accepted" : "neutral"])),
         message,
         detail
       });
@@ -21373,7 +21373,7 @@
       let startMenu = null;
       let targetHead = null;
       let targetMenu = null;
-      if (kind === "sort") {
+      if (kind === "sort" && state.algorithm !== "bucket-sort" && state.algorithm !== "cyclic-sort") {
         const section = el("div", "steptrace__menu-section");
         const h = el("div", "steptrace__menu-h");
         h.textContent = "Array";
