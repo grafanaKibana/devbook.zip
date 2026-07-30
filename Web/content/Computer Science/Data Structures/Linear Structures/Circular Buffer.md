@@ -1,8 +1,8 @@
 ---
 publish: true
-created: 2026-07-12T14:27:20.419Z
-modified: 2026-07-18T11:30:05.188Z
-published: 2026-07-18T11:30:05.188Z
+created: 2026-07-29T14:28:24.648Z
+modified: 2026-07-29T14:28:24.649Z
+published: 2026-07-29T14:28:24.649Z
 topic:
   - Computer Science
 subtopic:
@@ -14,18 +14,21 @@ priority: Medium
 status: Ready to Repeat
 ---
 
-A stream produces items faster than a consumer drains them, and only a bounded window of recent items needs to survive: the last N log lines, one frame of audio samples, packets waiting for a socket. A plain [[Queue]] built on a growable [[Dynamic Array]] would keep allocating and shifting as the window slides; a circular buffer keeps one fixed array and moves two indices instead of the data.
+A stream produces items faster than a consumer drains them, and only a bounded window of recent items needs to survive: the last N log lines, one frame of audio samples, packets waiting for a socket. A growable [[Computer Science/Data Structures/Linear Structures/Queue|Queue]] also uses circular indexing but occasionally allocates and copies when it runs out of capacity; a fixed circular buffer chooses the memory bound up front and moves indices without ever resizing.
 
-The array is treated as if its ends were joined. A `head` index marks the front (next read), a `tail` index marks the back (next write), and every advance is taken modulo the capacity so an index running off the end reappears at `0`. Enqueue writes at `tail` and sets `tail = (tail + 1) % capacity`; dequeue reads at `head` and advances `head` the same way. No element is ever copied to a new slot — the indices circle a stationary array — which makes this the standard O(1), allocation-free backing for a bounded [[Queue]].
+The array is treated as if its ends were joined. A `head` index marks the front (next read), a `tail` index marks the back (next write), and every advance is taken modulo the capacity so an index running off the end reappears at `0`. Enqueue writes at `tail` and sets `tail = (tail + 1) % capacity`; dequeue reads at `head` and advances `head` the same way. No element is ever copied to a new slot — the indices circle a stationary array — which makes this the standard O(1), allocation-free backing for a bounded [[Computer Science/Data Structures/Linear Structures/Queue|Queue]].
 
 What it gives up is growth and history: capacity is chosen once, and once the ring is full the next write either overwrites the oldest element or is refused. There is no record of items that scrolled past.
 
-**Core shape:** fixed array + `head`/`tail`/`count` → indices wrap `mod capacity` → O(1) enqueue/dequeue with no per-element allocation → oldest data is dropped, not stored.
+**Core shape:** fixed array + `head`/`tail`/`count` → indices wrap `mod capacity` → O(1) enqueue/dequeue with no per-element allocation → a full write overwrites the oldest element or is rejected, according to policy.
 
-> [!NOTE] Visualization pending
-> Planned StepTrace: a ring-buffer card showing a fixed-size array with head and tail indices that wrap modulo capacity, with a full-buffer write overwriting the oldest element as `head` is dragged forward. No matching renderer exists in `engine.js` yet.
+The interactive view keeps the ring state between operations. Fill it past capacity to see `tail` wrap and the oldest slot yield as `head` advances.
 
-# Representation and invariants
+```steptrace
+{"algorithm":"circular-buffer"}
+```
+
+# Representation and Invariants
 
 Four fields hold the entire state:
 
@@ -54,7 +57,7 @@ A monotonic-counter variant (never-wrapped 64-bit `head`/`tail`, masked to the a
 
 Structure space is `O(capacity)` and fixed at construction — the array is sized up front and never reallocated, so steady-state operation allocates nothing and produces no per-element garbage. That is the property that separates it from a growable queue: the bounds above are true worst-case per operation, not amortized over resizes, because no resize ever happens.
 
-# When the capacity is reached
+# When the Capacity is Reached
 
 Every boundary here follows from the two design commitments — a fixed array and wrap arithmetic.
 
@@ -64,7 +67,7 @@ The **empty-vs-full ambiguity** becomes a real failure when neither a `count` no
 
 The ring **does not grow**. Reaching capacity never triggers a resize — that is the point of a bounded footprint. A "growable" ring is a different structure: it allocates a larger array and re-linearizes the wrapped contents (copying the `head…end` segment then the `0…tail` segment into contiguous order), an `O(count)` operation that reintroduces the allocation spikes a fixed ring exists to avoid.
 
-# Reference drawer
+# Reference Drawer
 
 > [!ABSTRACT]- Index layout of a wrapped ring
 >
@@ -89,7 +92,13 @@ The ring **does not grow**. Reaching capacity never triggers a resize — that i
 >     private int _tail;
 >     private int _count;
 >
->     public CircularBuffer(int capacity) => _buffer = new T[capacity];
+>     public CircularBuffer(int capacity)
+>     {
+>         if (capacity <= 0)
+>             throw new ArgumentOutOfRangeException(nameof(capacity));
+>
+>         _buffer = new T[capacity];
+>     }
 >
 >     public int Count => _count;
 >     public bool IsFull => _count == _buffer.Length;
@@ -119,7 +128,7 @@ The ring **does not grow**. Reaching capacity never triggers a resize — that i
 >         }
 >
 >         item = _buffer[_head];
->         _buffer[_head] = default!; // release the reference so GC can reclaim it
+>         _buffer[_head] = default!; // release contained references for collection
 >         _head = (_head + 1) % _buffer.Length;
 >         _count--;
 >         return true;
@@ -127,7 +136,7 @@ The ring **does not grow**. Reaching capacity never triggers a resize — that i
 > }
 > ```
 >
-> The `count` field is what disambiguates `head == tail`. Nulling the dequeued slot matters only for reference types: without it the array pins objects that are logically gone, a slow leak in a long-lived ring.
+> The `count` field is what disambiguates `head == tail`. Clearing the dequeued slot matters when `T` is a reference type or contains references: otherwise the backing array keeps objects that are logically gone alive, causing avoidable retention in a long-lived ring.
 
 # Questions
 
@@ -140,11 +149,11 @@ The ring **does not grow**. Reaching capacity never triggers a resize — that i
 > [!QUESTION]- On reaching capacity, what distinguishes an overwrite ring from a reject ring, and when does each fit?
 > Overwrite advances `head` over the write, dropping the oldest element so the newest N always remain — right for logs, telemetry, and frame buffers where old data is disposable. Reject leaves the buffer unchanged and signals the producer to back off — right for a work queue where every item must be processed. The structure is identical; only the full-buffer branch of enqueue differs.
 
-> [!QUESTION]- Why must a reference-type ring null out dequeued slots?
-> The backing array holds references for every physical slot, including ones whose logical element was already dequeued. Until a slot is overwritten by a later enqueue, its stale reference keeps the object alive, so a long-lived ring can pin objects long after they left the queue. Assigning `default` on dequeue releases the reference for collection.
+> [!QUESTION]- Why must a ring whose `T` contains references clear dequeued slots?
+> The backing array retains references in every physical slot, including slots whose logical element was already dequeued. Until such a slot is overwritten, those stale references keep their objects alive. Assigning `default` on dequeue releases them for collection.
 
 # References
 
 - [Circular buffer (Wikipedia)](https://en.wikipedia.org/wiki/Circular_buffer) — index schemes, the full-versus-empty disambiguation, and the mirroring/sacrificial-slot techniques.
-- [System.Threading.Channels](https://learn.microsoft.com/en-us/dotnet/core/extensions/channels) — .NET's bounded channel is a ring-backed producer/consumer queue with explicit full-mode policies (wait, drop-oldest, drop-newest) mirroring the overwrite/reject choice.
+- [System.Threading.Channels](https://learn.microsoft.com/en-us/dotnet/core/extensions/channels) — .NET's bounded producer/consumer abstraction exposes explicit full modes such as wait, drop-oldest, and drop-newest, mirroring the policy choice a bounded buffer must make.
 - [The LMAX Disruptor](https://lmax-exchange.github.io/disruptor/) — a high-throughput ring buffer using monotonic sequence counters instead of a `count` field to disambiguate and to coordinate producers and consumers lock-free.

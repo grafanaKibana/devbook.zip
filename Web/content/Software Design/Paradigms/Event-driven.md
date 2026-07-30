@@ -1,8 +1,8 @@
 ---
 publish: true
-created: 2026-07-15T11:47:57.283Z
-modified: 2026-07-18T11:38:38.785Z
-published: 2026-07-18T11:38:38.785Z
+created: 2026-07-25T18:38:43.892Z
+modified: 2026-07-25T18:38:43.893Z
+published: 2026-07-25T18:38:43.893Z
 topic:
   - Software Design
 subtopic:
@@ -18,7 +18,7 @@ Event-driven development builds systems around _events_ — immutable facts that
 
 The pattern appears at two scales: **in-process** (domain events within a single application, dispatched via MediatR or a simple in-memory bus) and **distributed** (events published to a message broker like RabbitMQ, Azure Service Bus, or Kafka, consumed by separate services).
 
-# Events vs Commands
+# Events Vs Commands
 
 A distinction "event-driven" tends to blur:
 

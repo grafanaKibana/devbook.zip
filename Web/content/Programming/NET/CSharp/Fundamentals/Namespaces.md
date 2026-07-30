@@ -1,8 +1,8 @@
 ---
 publish: true
-created: 2026-07-11T21:45:18.007Z
-modified: 2026-07-18T11:30:12.394Z
-published: 2026-07-18T11:30:12.394Z
+created: 2026-07-25T18:38:43.854Z
+modified: 2026-07-25T18:38:43.854Z
+published: 2026-07-25T18:38:43.854Z
 topic:
   - Programming
 subtopic:
@@ -45,7 +45,7 @@ public static class MathUtility
 }
 ```
 
-# using Directives and Aliases
+# Using Directives and Aliases
 
 `using` brings names into scope; it has several flavours beyond the basic import:
 
@@ -56,7 +56,7 @@ public static class MathUtility
 
 Name resolution searches from the **most-nested** namespace outward, so a type in the current namespace shadows a same-named type in an outer one.
 
-## Project-level conventions
+## Project-level Conventions
 
 - **`<ImplicitUsings>enable</ImplicitUsings>`** auto-adds a set of `global using`s (System, Linq, Collections.Generic, …) for the SDK, removing boilerplate from every file.
 - **`<RootNamespace>`** sets the default namespace the templates/`dotnet new` use; the compiler does **not** force namespace to match folder structure, but most teams keep `Namespace == folder path` by convention for navigability.

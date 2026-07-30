@@ -1,8 +1,8 @@
 ---
 publish: true
-created: 2026-07-11T21:46:49.851Z
-modified: 2026-07-18T11:30:06.340Z
-published: 2026-07-18T11:30:06.340Z
+created: 2026-07-25T18:38:43.833Z
+modified: 2026-07-25T18:38:43.833Z
+published: 2026-07-25T18:38:43.833Z
 topic:
   - Data Persistence
 subtopic:
@@ -72,7 +72,7 @@ The table is in 1NF but not in 2NF. The car price depends on both model and make
 
 A relation is in 3NF when it is in 2NF and every non-key attribute depends on the primary key non-transitively.
 
-## What are transitive functional dependencies?
+## What Are Transitive Functional Dependencies?
 
 A transitive functional dependency means changing one non-key column can imply a change in another non-key column.
 
@@ -201,7 +201,7 @@ The decomposition produces three binary relations: `SupplierProduct(Supplier, Pr
 
 Fifth Normal Form focuses on join dependencies. Such join dependencies among three attributes are very rare. Join dependencies among four, five, or more attributes are practically impossible to specify.
 
-# Domain-key normal form
+# Domain-key Normal Form
 
 A relation variable is in DKNF if and only if every constraint on it is a logical consequence of domain constraints and key constraints imposed on that relation variable.
 

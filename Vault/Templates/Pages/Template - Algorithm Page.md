@@ -4,10 +4,10 @@ subtopic: []
 level: []
 priority: Medium
 status: Not-Started
-tags:
-  - Template
+tags: [Template]
 publish: false
 ---
+
 <%*
 const parts = tp.file.folder(true).split("/");
 const homeIndex = parts.indexOf("Home");
@@ -39,64 +39,64 @@ tp.hooks.on_all_templates_executed(async () => {
 });
 %>
 
-# Intro
+<!-- Open with one paragraph: name the concrete problem and input shape, the repeated cost, the move that reduces it, and the condition that makes that move valid. -->
 
-<!-- State the concrete input shape, the repeated cost, the move that reduces it, and the precondition that makes the move valid. -->
+# Trace
 
-## Trace
-
-<!-- Replace this required placeholder with a valid configuration from the StepTrace registry. Introduce the input and operation in one plain sentence, then explain the decisive transition rather than narrating each frame. Do not publish an unresolved placeholder. -->
+<!-- Lead into the trace with one plain sentence that names the input and operation. Replace this required placeholder with a valid StepTrace configuration that exposes the decisive transition and any auxiliary state needed to understand it. Do not duplicate the trace in prose or publish an unresolved placeholder. -->
 
 ```steptrace
 {"algorithm":"replace-with-supported-id","input":"replace-with-trace-input"}
 ```
 
-## Mechanism
+# Mechanism
 
-<!-- Name this section after the actual invariant or state transition, for example “Why the range shrinks”. Explain what remains true and why the next step is valid. -->
+<!-- Rename this section after the actual invariant or state transition, for example “Why the range shrinks”. Use concrete before-and-after state as evidence for what remains true and why the next move is valid. -->
 
-## Complexity
+# Complexity
 
-| Case | Time | Auxiliary space | Shape of the work |
-| --- | --- | --- | --- |
-| Best |  |  |  |
-| Average |  |  |  |
-| Worst |  |  |  |
+| Case    | Time | Auxiliary space | Shape of the work |
+| ------- | ---- | --------------- | ----------------- |
+| Best    |      |                 |                   |
+| Average |      |                 |                   |
+| Worst   |      |                 |                   |
 
-<!-- State the assumptions behind average bounds and include recursion-stack space when relevant. -->
+<!-- Explain the actual cause of each bound, not only the notation. State the assumptions behind average bounds, separate auxiliary space from recursion-stack space when relevant, and add a concrete scale estimate when it changes the engineering decision. -->
 
-## Boundaries
+# Fit and Limits
 
-<!-- Keep this section only for concrete input, semantic, or implementation boundaries that change the outcome. -->
+<!-- Rename this section to the note's actual claim. State the assumptions and useful scale, then show what becomes incorrect, too slow, or too memory-heavy when they fail. -->
 
-## Reference drawer
+# Reference Drawer
 
 > [!ABSTRACT]- Structural view
+>
 > ```mermaid
 > flowchart LR
 >   Input --> State --> Result
 > ```
 
 > [!EXAMPLE]- C# implementation
+>
 > ```csharp
 > // Complete reference implementation.
 > ```
 
-<!-- Keep complete Mermaid and code views collapsed. Delete the drawer when neither adds a useful secondary view. -->
+<!-- StepTrace remains the primary visualization. Keep complete Mermaid and code views only as collapsed secondary references; delete this drawer when neither adds useful evidence. -->
 
-## Comparison
+# Comparison
 
 | Alternative | Time and space | Required condition | Stronger case | Weaker case |
-| --- | --- | --- | --- | --- |
-|  |  |  |  |  |
+| ----------- | -------------- | ------------------ | ------------- | ----------- |
+|             |                |                    |               |             |
 
-<!-- Close with a declarative fit/cost comparison; do not turn it into a recommendation section. -->
+<!-- Keep only real alternatives that change the engineering decision. Compare their fit and cost under the same conditions, then state when this algorithm loses; delete this section when no such alternative exists. -->
 
-## Questions
+# Questions
 
 <!-- Keep only distinct recall targets. Remove this section when the prose already makes them obvious. -->
 
-## References
+# References
 
 <!-- Keep at least one annotated primary source before setting publish: true. -->
 

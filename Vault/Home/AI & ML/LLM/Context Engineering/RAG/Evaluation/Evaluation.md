@@ -7,8 +7,7 @@ summary: "Decomposes into retrieval, generation, and end-to-end layers so regres
 level:
   - "2"
 priority: High
-tags:
-  - FolderNote
+tags: [FolderNote]
 publish: true
 status: Done
 ---

@@ -4,12 +4,11 @@ topic:
 subtopic:
   - Algorithms
 summary: "Techniques to find target values in arrays, graphs, or text, chosen by data ordering and shape."
-tags:
-  - FolderNote
+tags: [FolderNote]
 publish: true
 priority: Medium
 level:
-  - '4'
+  - "4"
 status: Creation
 ---
 
@@ -43,7 +42,7 @@ flowchart TD
 
 # Algorithm Selection
 
-## Searching an array
+## Searching an Array
 
 | Data shape | Algorithm | Time | Precondition |
 | --- | --- | --- | --- |
@@ -56,7 +55,7 @@ flowchart TD
 
 Binary Search also serves range and insertion-point queries — lower-bound / upper-bound, first/last match — because it keeps the data in sorted order rather than building a separate index.
 
-## Searching text
+## Searching Text
 
 Text/pattern matching is its own sub-family — see [[String Matching]] for the full comparison.
 
@@ -68,7 +67,7 @@ Text/pattern matching is its own sub-family — see [[String Matching]] for the 
 | Text + many patterns at once | [[Aho-Corasick]] | O(n + matches) after build | Build cost is sum of pattern lengths |
 | Text + rolling / multi-pattern hashing | [[Rabin Karp Search\|Rabin–Karp]] | O(n + m) avg | Good hash to avoid collisions |
 
-## Searching a graph
+## Searching a Graph
 
 | Data shape | Algorithm | Time | Precondition |
 | --- | --- | --- | --- |

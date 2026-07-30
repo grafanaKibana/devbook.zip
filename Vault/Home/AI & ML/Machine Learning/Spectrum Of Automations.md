@@ -101,7 +101,6 @@ def process_transaction_partial(tx: Transaction) -> Action:
         return Action.ALLOW
 ```
 
-
 # Pitfalls
 
 ## Skipping Shadow Mode
@@ -118,7 +117,6 @@ def process_transaction_partial(tx: Transaction) -> Action:
 
 **Mitigation**: before moving to Full Automation, define and instrument the metrics that indicate model health (precision, recall, false positive rate). Set alert thresholds. Establish a rollback procedure. Full Automation without monitoring is not automation — it is uncontrolled risk.
 
-
 # Tradeoffs
 
 | Approach | Human effort | Error risk | When to use |
@@ -131,7 +129,6 @@ def process_transaction_partial(tx: Transaction) -> Action:
 
 **Key tradeoff**: moving up the spectrum reduces human effort but increases the blast radius of model errors. The right level depends on error cost, model maturity, and monitoring capability — not on how confident the team feels about the model.
 
-
 # Questions
 
 > [!QUESTION]- Why start every new AI feature in Shadow Mode?
@@ -139,7 +136,6 @@ def process_transaction_partial(tx: Transaction) -> Action:
 
 > [!QUESTION]- What signals indicate it is safe to move from Partial to Full Automation?
 > Precision on automated cases is consistently above your acceptable error threshold across multiple weeks. Monitoring dashboards show stable metrics with no degradation. The cost of errors is low enough that automated mistakes are recoverable. You have alerting in place to detect metric drift quickly.
-
 
 # References
 

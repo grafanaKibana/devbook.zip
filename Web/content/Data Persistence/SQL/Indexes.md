@@ -1,8 +1,8 @@
 ---
 publish: true
-created: 2026-07-16T15:14:44.878Z
-modified: 2026-07-18T11:59:15.657Z
-published: 2026-07-18T11:59:15.657Z
+created: 2026-07-25T18:38:43.832Z
+modified: 2026-07-25T18:38:43.832Z
+published: 2026-07-25T18:38:43.832Z
 topic:
   - Data Persistence
 subtopic:
@@ -61,7 +61,7 @@ CREATE INDEX IX_Orders_Tenant_Status_CreatedAt
 
 The equality predicates establish a tenant/status prefix, `CreatedAt` bounds the range and supplies output order, and the included values cover the projection without widening upper tree levels. The index cannot efficiently serve a general `Status` query because that query omits the leading tenant key.
 
-## SARGability and key order
+## SARGability and Key Order
 
 SARGability means the optimizer can turn a predicate into a search argument. `CreatedAt >= @from` normally supplies a range; `YEAR(CreatedAt) = @year` usually does not unless the expression is rewritten as a date interval or exposed through an indexable computed column.
 
@@ -70,7 +70,7 @@ SARGability means the optimizer can turn a predicate into a search argument. `Cr
 - “Most selective first” is not universal. Prefer prefixes reused by important queries, tenant or partition boundaries, and required ordering, then verify estimates.
 - A `GROUP BY`, `ORDER BY`, or join column belongs in the key only when its position supplies useful navigation or order.
 
-## Covering and filtered indexes
+## Covering and Filtered Indexes
 
 A nonclustered index covers a query when all required values can be returned from the index. Use `INCLUDE` for output or residual values whose order does not help a seek, join, grouping, or sort. Included values still widen leaf rows, consume cache, and add write work.
 

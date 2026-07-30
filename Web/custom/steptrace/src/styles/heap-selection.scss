@@ -1,0 +1,258 @@
+.steptrace[data-visual-family="heap-selection"] {
+  container: steptrace-heap-selection / inline-size;
+}
+
+.steptrace .steptrace__heap-selection {
+  display: grid;
+  grid-template-rows: auto auto auto minmax(0, 1fr);
+  min-block-size: 0;
+}
+
+.steptrace .steptrace__heap-tree-label {
+  padding-top: 0.9rem;
+  border-top: 1px solid var(--_hair);
+}
+
+.steptrace .steptrace__heap-stream .steptrace__pcell {
+  position: relative;
+}
+
+.steptrace .steptrace__heap-stream .steptrace__pcell[data-state="current"] {
+  --steptrace-array-outline: var(--_blue);
+
+  color: var(--_blue);
+  font-weight: 700;
+}
+
+.steptrace .steptrace__heap-stream .steptrace__pcell[data-state="winner"] {
+  background: color-mix(in srgb, var(--_green) 18%, transparent);
+}
+
+.steptrace .steptrace__heap-stream .steptrace__pcell[data-state="rejected"] {
+  color: var(--_muted);
+  background: color-mix(in srgb, var(--_violet) 8%, transparent);
+}
+
+.steptrace .steptrace__heap-stream .steptrace__pcell[data-state="seen"] {
+  color: var(--_muted);
+  opacity: 0.72;
+}
+
+.steptrace .steptrace__heap-tree {
+  min-block-size: 0;
+  display: grid;
+  place-items: center;
+}
+
+.steptrace .steptrace__heap-structure {
+  display: grid;
+  grid-template-rows: auto minmax(8rem, 1fr) auto auto;
+  min-block-size: 0;
+}
+
+.steptrace .steptrace__heap-structure-tree {
+  min-block-size: 8rem;
+  display: grid;
+  place-items: center;
+}
+
+.steptrace .steptrace__heap-structure-tree .steptrace__heap-svg {
+  min-block-size: 8rem;
+}
+
+.steptrace .steptrace__heap-variant {
+  grid-template-rows: auto minmax(12rem, 1fr) auto auto;
+}
+
+.steptrace .steptrace__heap-node-meta {
+  fill: var(--_muted);
+  font: 600 0.48rem/1 var(--_font-mono);
+}
+
+.steptrace .steptrace__heap-mark {
+  fill: var(--_violet);
+  stroke: var(--_surface);
+  stroke-width: 1.5;
+}
+
+.steptrace .steptrace__heap-rule {
+  min-block-size: 2.25rem;
+  padding: 0.65rem 0.75rem;
+  border-top: 1px solid var(--_hair);
+  color: var(--_muted);
+  font: 600 0.72rem/1.3 var(--_font-body);
+  text-align: center;
+}
+
+.steptrace .steptrace__heap-variant .steptrace__structure-controls {
+  grid-template-columns: repeat(7, minmax(0, auto)) minmax(12rem, 1fr);
+}
+
+.steptrace .steptrace__merge-heap {
+  grid-template-rows: auto minmax(12rem, 1fr) auto;
+}
+
+.steptrace .steptrace__heap-edge[data-path="1"] {
+  stroke: var(--_blue);
+  stroke-width: 2.4;
+}
+
+.steptrace .steptrace__heap-array-label {
+  padding-top: 0.7rem;
+  border-top: 1px solid var(--_hair);
+}
+
+.steptrace .steptrace__heap-empty {
+  color: var(--_muted);
+  font: 600 0.75rem/1 var(--_font-mono);
+}
+
+.steptrace .steptrace__heap-svg {
+  display: block;
+  inline-size: min(100%, 20rem);
+  block-size: 100%;
+  max-block-size: 12rem;
+  overflow: hidden;
+}
+
+.steptrace .steptrace__heap-forest-svg {
+  inline-size: min(100%, 34rem);
+  max-block-size: 15rem;
+}
+
+.steptrace .steptrace__heap-edge {
+  stroke-width: 1.6;
+  transition:
+    opacity var(--_dur-quick) ease,
+    visibility var(--_dur-quick) step-end;
+}
+
+.steptrace .steptrace__heap-node .steptrace__ncirc {
+  transition:
+    fill var(--_dur-quick) ease,
+    stroke var(--_dur-quick) ease;
+}
+
+.steptrace .steptrace__heap-node[data-state="winner"] .steptrace__ncirc {
+  fill: color-mix(in srgb, var(--_green) 18%, var(--_surface));
+  stroke: var(--_green);
+}
+
+.steptrace .steptrace__heap-node[data-state="weakest"] .steptrace__ncirc {
+  fill: color-mix(in srgb, var(--_amber) 20%, var(--_surface));
+  stroke: var(--_amber);
+}
+
+.steptrace .steptrace__heap-node[data-state="compare"] .steptrace__ncirc {
+  fill: color-mix(in srgb, var(--_blue) 20%, var(--_surface));
+  stroke: var(--_blue);
+}
+
+.steptrace .steptrace__heap-node[data-state="settled"] .steptrace__ncirc {
+  fill: color-mix(in srgb, var(--_amber) 20%, var(--_surface));
+  stroke: var(--_amber);
+}
+
+.steptrace .steptrace__heap-node[data-state="swap"] .steptrace__ncirc {
+  fill: color-mix(in srgb, var(--_violet) 20%, var(--_surface));
+  stroke: var(--_violet);
+}
+
+.steptrace .steptrace__heap-node,
+.steptrace .steptrace__heap-root-label {
+  transition:
+    opacity var(--_dur-quick) ease,
+    visibility var(--_dur-quick) step-end;
+}
+
+.steptrace .steptrace__heap-node[data-visible="0"],
+.steptrace .steptrace__heap-edge[data-visible="0"],
+.steptrace .steptrace__heap-root-label[data-visible="0"] {
+  opacity: 0;
+  visibility: hidden;
+}
+
+.steptrace .steptrace__heap-root-label {
+  fill: var(--_amber);
+  font: 600 0.52rem/1 var(--_font-head);
+}
+
+.steptrace .steptrace__heap-swatch {
+  inline-size: 0.58rem;
+  block-size: 0.58rem;
+  border: 1.5px solid;
+  border-radius: 50%;
+  display: grid;
+  place-items: center;
+  flex: none;
+}
+
+.steptrace .steptrace__heap-swatch svg {
+  inline-size: 0.42rem;
+  block-size: 0.42rem;
+}
+
+.steptrace .steptrace__heap-swatch > span {
+  display: grid;
+  inline-size: 100%;
+  block-size: 100%;
+  place-items: center;
+  line-height: 0;
+}
+
+.steptrace .steptrace__heap-swatch--current {
+  border-color: var(--_blue);
+  background: color-mix(in srgb, var(--_blue) 20%, transparent);
+}
+
+.steptrace .steptrace__heap-swatch--winner {
+  border: 0;
+  color: var(--_surface);
+  background: var(--_green);
+}
+
+.steptrace .steptrace__heap-swatch--weakest {
+  border-color: var(--_amber);
+  background: color-mix(in srgb, var(--_amber) 20%, transparent);
+}
+
+.steptrace .steptrace__heap-swatch--rejected {
+  border-color: var(--_violet);
+  color: var(--_violet);
+}
+
+@container steptrace-heap-selection (max-width: 36rem) {
+  .steptrace .steptrace__heap-structure {
+    grid-template-rows: auto minmax(7rem, 1fr) auto auto;
+  }
+
+  .steptrace .steptrace__heap-svg {
+    inline-size: min(100%, 17rem);
+  }
+
+  .steptrace .steptrace__heap-root-label {
+    font-size: 0.48rem;
+  }
+
+  .steptrace .steptrace__heap-variant,
+  .steptrace .steptrace__merge-heap {
+    grid-template-rows: auto minmax(10rem, 1fr) auto auto;
+  }
+
+  .steptrace .steptrace__heap-variant .steptrace__structure-controls {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .steptrace .steptrace__heap-variant .steptrace__structure-status {
+    grid-column: 1 / -1;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .steptrace .steptrace__heap-node,
+  .steptrace .steptrace__heap-edge,
+  .steptrace .steptrace__heap-root-label,
+  .steptrace .steptrace__heap-node .steptrace__ncirc {
+    transition-duration: 0ms;
+  }
+}

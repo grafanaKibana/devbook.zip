@@ -64,7 +64,6 @@ The `Order` class has the information (line items, prices, quantities) — it sh
 
 **Mitigation**: ask 'which class has the information needed to fulfill this responsibility?' If `Order` has the line items and prices, `Order.CalculateTotal()` belongs on `Order`, not on `OrderService`.
 
-
 # Tradeoffs
 
 | Decision | Option A | Option B | When A | When B |
@@ -105,7 +104,6 @@ public sealed class CsvReportGenerator : IReportGenerator
 // Adding a new format = new class, no changes to existing code (Open/Closed)
 ```
 
-
 # Questions
 
 > [!QUESTION]- What is the Information Expert principle and why does it reduce coupling?
@@ -113,7 +111,6 @@ public sealed class CsvReportGenerator : IReportGenerator
 
 > [!QUESTION]- How does GRASP differ from SOLID?
 > GRASP focuses on responsibility assignment — which class should own a behavior or data. SOLID focuses on design principles for maintainability (single responsibility, open/closed, etc.). They are complementary: GRASP guides initial design decisions; SOLID guides refactoring and long-term maintainability.
-
 
 # References
 

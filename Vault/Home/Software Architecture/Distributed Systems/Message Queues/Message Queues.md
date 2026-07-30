@@ -4,8 +4,7 @@ topic:
 subtopic:
   - Distributed Systems
 summary: "Message queues decouple producers from consumers by buffering messages until consumers are ready, absorbing spikes and isolating failures."
-tags:
-  - FolderNote
+tags: [FolderNote]
 publish: true
 priority: High
 level:
@@ -20,7 +19,7 @@ const { FolderStructureMap } = await dc.require("Assets/components/devbook-folde
 return FolderStructureMap;
 ```
 
-# Core concepts
+# Core Concepts
 
 - **Queue vs Topic**
 - `Queue` (point-to-point): one message is consumed by one worker in a competing-consumer group.
@@ -49,7 +48,7 @@ flowchart LR
 - Retries/redelivery and competing consumers can reorder events.
 - Kafka rebalances can cause duplicate processing when offsets were not committed; out-of-order effects usually come from multi-partition reads or concurrent handlers.
 
-# Reliability patterns
+# Reliability Patterns
 
 - **DLQ for poison messages**
 - Use DLQ when messages repeatedly fail and block healthy traffic.
@@ -76,7 +75,7 @@ flowchart LR
 - Limit in-flight work using prefetch/QoS.
 - Track queue depth, lag, and oldest-message age to avoid memory and latency collapse.
 
-# .NET worker implementation
+# .NET Worker Implementation
 
 A worker acknowledges only after the business effect or an owned quarantine record is durable:
 
@@ -118,7 +117,7 @@ public sealed class InvoiceWorker(
 `HandleAsync` should reserve a unique message or business-operation key in the same transaction as its state change. A crash after that commit but before `AckAsync` then produces a harmless redelivery. Dead-letter or quarantine publication must succeed before the original delivery is acknowledged.
 
 Bound concurrency by downstream capacity, stop intake during shutdown, and track oldest-message age, in-flight count, handler latency, retries, dead-letter rate, and idempotency conflicts. A short queue can still be unhealthy when one old message never completes.
-# .NET platform choices
+# .NET Platform Choices
 
 Use [[Home/Software Architecture/Distributed Systems/Message Queues/RabbitMQ]] for routing-heavy queues and latency-sensitive tasks. Use [[Home/Software Architecture/Distributed Systems/Message Queues/Kafka]] for replayable event streams. Use Azure Service Bus for managed messaging with queues/topics and dead-lettering.
 
@@ -132,7 +131,7 @@ Use [[Home/Software Architecture/Distributed Systems/Message Queues/RabbitMQ]] f
 - `IDistributedCache` is not a queue.
 - Cache stores key-value state; queues store ordered work items/events with ack/retry semantics.
 
-# Delivery attempts, processing effects, and idempotency
+# Delivery Attempts, Processing Effects, and Idempotency
 
 Broker guarantees describe delivery attempts at a boundary; they do not automatically guarantee business effects. An at-least-once broker may redeliver after a consumer commits `ChargeCustomer` but crashes before acknowledgement. The second attempt is correct broker behavior and a dangerous duplicate unless the charge operation uses a stable idempotency key.
 
@@ -144,7 +143,7 @@ Broker guarantees describe delivery attempts at a boundary; they do not automati
 
 For `InvoicePaid { EventId = 91, InvoiceId = 42 }`, reserve `EventId=91` with a unique constraint in the same database transaction that marks invoice 42 paid. A redelivery then observes the completed reservation and acknowledges without applying the transition twice. This produces one durable effect even though delivery was attempted more than once.
 
-# Messaging patterns
+# Messaging Patterns
 
 Choose a pattern from ownership and fan-out, not from broker terminology:
 
@@ -157,7 +156,7 @@ Choose a pattern from ownership and fan-out, not from broker terminology:
 
 Patterns combine. A video upload can publish a claim-check message to a competing-consumer queue, then emit `VideoProcessed` to multiple subscribers.
 
-# Choosing a broker
+# Choosing a Broker
 
 ![[Software Architecture/Software Architecture-Message Queues-18120000.png]]
 
@@ -232,7 +231,7 @@ Managed services such as Azure Service Bus, Amazon SQS/SNS, and Google Pub/Sub a
 - [Azure messaging comparison](https://learn.microsoft.com/azure/service-bus-messaging/compare-messaging-services) — official comparison of Service Bus, Event Hubs, and Event Grid.
 - [Worker services in .NET](https://learn.microsoft.com/dotnet/core/extensions/workers) — official `BackgroundService`, hosting, and cancellation model.
 - [Hosted services in ASP.NET Core](https://learn.microsoft.com/aspnet/core/fundamentals/host/hosted-services) — official queued background-task and shutdown guidance.
-## ByteByteGo provenance
+## ByteByteGo Provenance
 
 - [Delivery semantics](https://github.com/ByteByteGoHq/system-design-101/blob/b28380a4710c5ec9638ec037d4168e288f334cba/data/guides/delivery-semantics.md) — editorial lead for separating delivery attempts from durable effects; its misleading visual was rejected.
 - [Types of message queue](https://github.com/ByteByteGoHq/system-design-101/blob/b28380a4710c5ec9638ec037d4168e288f334cba/data/guides/types-of-message-queue.md) — provenance for workload-first broker selection; its defective taxonomy visual was rejected.

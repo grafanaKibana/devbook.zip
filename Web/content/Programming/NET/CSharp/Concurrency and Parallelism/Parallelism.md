@@ -1,8 +1,8 @@
 ---
 publish: true
-created: 2026-07-15T06:12:10.154Z
-modified: 2026-07-18T11:30:11.597Z
-published: 2026-07-18T11:30:11.597Z
+created: 2026-07-25T18:38:43.851Z
+modified: 2026-07-25T18:38:43.851Z
+published: 2026-07-25T18:38:43.851Z
 topic:
   - Programming
 subtopic:
@@ -66,7 +66,7 @@ public async Task<IReadOnlyList<Result>> ComputeAsync(
 }
 ```
 
-## PLINQ example for pure transforms
+## PLINQ Example for Pure Transforms
 
 ```csharp
 public int[] ComputePrimes(int fromInclusive, int toExclusive)
@@ -81,7 +81,7 @@ public int[] ComputePrimes(int fromInclusive, int toExclusive)
 
 PLINQ works best when each element has enough CPU work to amortize partitioning and merge costs.
 
-## Lock-free accumulation with thread-local state
+## Lock-free Accumulation with Thread-local State
 
 The cleanest way to aggregate in parallel without a shared lock is the `Parallel.For` overload with `localInit`/`localFinally`: each worker accumulates into its own local, and only the final merge touches shared state.
 

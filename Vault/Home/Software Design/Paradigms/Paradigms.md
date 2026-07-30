@@ -4,12 +4,11 @@ topic:
 subtopic:
   - Paradigms
 summary: "Mental models adopted before writing code — the programming paradigms that shape how you structure it (OOP, functional, event-driven)."
-tags:
-  - FolderNote
+tags: [FolderNote]
 publish: true
 status: Creation
 level:
-  - '4'
+  - "4"
 priority: Medium
 ---
 
@@ -17,7 +16,12 @@ A programming paradigm is a set of choices about where state lives, how control 
 
 The useful question is not “which paradigm wins?” It is “which model makes the state transitions and effects easiest to see?” Use [[Home/Software Design/Paradigms/OOP]] when identity and invariants dominate, [[Home/Software Design/Paradigms/Functional Programming]] for deterministic transformations, event-driven code when control should follow events, and imperative code when an explicit sequence is the clearest description.
 
-# Programming paradigms by state, control, effects, and concurrency
+```datacorejsx
+const { FolderStructureMap } = await dc.require("Assets/components/devbook-folder-map.jsx");
+return FolderStructureMap;
+```
+
+# Programming Paradigms by State, Control, Effects, and Concurrency
 
 | Style | Control flow | State model | Composition unit | Effects | Concurrency semantics | Representative support |
 | --- | --- | --- | --- | --- | --- | --- |
@@ -33,7 +37,7 @@ Event-driven describes how control is triggered and how producers are decoupled 
 
 Concurrency is about overlapping progress; parallelism is about simultaneous execution on multiple cores. An async HTTP request is concurrent while the thread is free to do other work, even if no two instructions run at once. A CPU-bound `Parallel.For` is parallel when iterations execute on different cores. Treating the terms as synonyms leads to the wrong synchronization and capacity assumptions.
 
-# Imperative, functional, and object-oriented styles
+# Imperative, Functional, and Object-oriented Styles
 
 All three examples reject negative invoice lines and total the rest. The result is identical; the ownership of state and behavior changes.
 
@@ -89,11 +93,6 @@ The object-oriented version protects the invariant once and keeps the behavior b
 | Where is the invariant checked? | In the procedure | At the transformation boundary | At construction and methods |
 | Best fit | Short explicit workflows | Data pipelines and calculations | Domains with identity and legal transitions |
 | Main cost | Mutation paths grow hard to track | Effect boundaries need discipline | Types and indirection can outgrow the problem |
-
-```datacorejsx
-const { FolderStructureMap } = await dc.require("Assets/components/devbook-folder-map.jsx");
-return FolderStructureMap;
-```
 
 # References
 

@@ -10,6 +10,7 @@ priority: Medium
 status: Ready to Repeat
 publish: true
 ---
+
 DNS (Domain Name System) is the internet's distributed directory service. Applications usually resolve names through local cache, static host maps, or recursive resolvers before opening transport connections.
 
 DNS is hierarchical and distributed. Most queries are cache hits; misses can require referrals from root to TLD to authoritative servers.
@@ -81,7 +82,7 @@ Traffic-steering mechanisms have different boundaries:
 
 Short TTLs speed answer changes but increase authoritative and recursive query load. Long TTLs improve cache efficiency but extend rollback and failover windows. Pick the TTL from the recovery contract, not a universal number.
 
-## Diagnostic sequence
+## Diagnostic Sequence
 
 ```bash
 dig api.example.com A
@@ -98,10 +99,9 @@ Compare the local answer with a known recursive resolver, then use `+trace` to i
 
 DNS security has two different channels. DNSSEC authenticates signed record sets so a validating resolver can detect forged or modified DNS data. DNS-over-TLS (DoT) and DNS-over-HTTPS (DoH) encrypt the connection between a client and its recursive resolver. Neither control provides the other's guarantee.
 
-## DNSSEC data authentication
+## DNSSEC Data Authentication
 
 An authoritative zone signs record sets with a zone-signing key. The resolver obtains the corresponding DNSKEY record and validates a chain of DS delegations from a configured trust anchor, normally the DNS root. A valid signature proves that the signed answer came from the key owner and was not changed; it does not hide the queried name or make the returned service trustworthy.
-
 
 ```text
 root trust anchor
@@ -114,13 +114,13 @@ root trust anchor
 
 An authenticated denial response uses NSEC or NSEC3 records to prove that a requested name or type does not exist. Operators must rotate keys without breaking the DS/DNSKEY chain, monitor signature expiry, and verify positive and negative answers before a registrar or DNS-provider migration.
 
-## Encrypted resolver transport
+## Encrypted Resolver Transport
 
 DoT carries DNS messages over TLS, conventionally on port 853. DoH carries DNS requests over HTTPS and can share port 443 with other web traffic. Both authenticate the configured resolver's TLS endpoint and protect the client-resolver hop from passive observation and on-path modification.
 
 After that hop, the resolver still performs recursion and contacts authoritative infrastructure. DoT or DoH does not authenticate those answers, constrain what the resolver returns, or hide queries from the resolver. DNSSEC validation at the resolver or validating client authenticates signed data across those hops.
 
-## Threat-to-control map
+## Threat-to-control Map
 
 | Threat | Primary control | Residual boundary |
 |---|---|---|

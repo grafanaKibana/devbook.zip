@@ -67,7 +67,7 @@ public IActionResult PublicEndpoint() => Ok();
 public IActionResult InternalEndpoint() => Ok();
 ```
 
-# Exposed Headers, Simple vs Preflighted, and Caching
+# Exposed Headers, Simple Vs Preflighted, and Caching
 
 - **Reading custom response headers needs `WithExposedHeaders`.** By default browser JS can only read a small all-list of response headers (`Content-Type`, `Cache-Control`, etc.). If your client needs to read `X-Total-Count`, `Location`, or a custom header, the server must send `Access-Control-Expose-Headers` — `policy.WithExposedHeaders("X-Total-Count")`. This is a frequent "the header is there in DevTools but `response.headers.get()` returns null" bug.
 - **Simple vs preflighted.** A request skips the preflight only if it's a "simple" request: method `GET`/`HEAD`/`POST`, only CORS-safelisted headers, and `Content-Type` is one of `application/x-www-form-urlencoded`, `multipart/form-data`, or `text/plain`. Anything else (a `PUT`, an `Authorization` header, `Content-Type: application/json`) triggers the `OPTIONS` preflight.
@@ -78,7 +78,7 @@ public IActionResult InternalEndpoint() => Ok();
 
 # Pitfalls
 
-## `AllowAnyOrigin()` with `AllowCredentials()`
+## `AllowAnyOrigin()` With `AllowCredentials()`
 
 **What goes wrong**: combining `AllowAnyOrigin()` with `AllowCredentials()` throws a runtime exception in ASP.NET Core.
 
@@ -100,12 +100,10 @@ public IActionResult InternalEndpoint() => Ok();
 - **Global policy vs endpoint-specific**: a single global policy is easier to maintain but may be too permissive for write endpoints. Per-endpoint CORS via `[EnableCors("PolicyName")]` allows tighter control — a public read API can allow any origin while write endpoints restrict to trusted origins.
 - **Preflight caching**: browsers cache preflight responses to avoid redundant OPTIONS requests. Setting `SetPreflightMaxAge(TimeSpan.FromMinutes(10))` in the policy reduces round-trip latency in production. Set it to zero during development to always test current configuration.
 
-
 # Questions
 
 > [!QUESTION]- Why must app.UseCors() come before authentication middleware?
 > Preflight OPTIONS requests do not carry authentication credentials. If authentication middleware runs first, it rejects the preflight with 401 before CORS headers are added to the response. The browser then sees a failed preflight and blocks the actual request. Placing UseCors() before UseAuthentication() ensures preflight responses include the correct CORS headers and return 200, allowing the browser to proceed with the actual authenticated request.
-
 
 # References
 

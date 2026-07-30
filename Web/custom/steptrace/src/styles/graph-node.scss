@@ -1,0 +1,26 @@
+.steptrace {
+  --_graph-node-size: 1.625rem;
+  --_graph-node-fill: color-mix(in srgb, var(--_neutral) 16%, var(--_surface));
+  --_graph-node-stroke: var(--_neutral);
+  --_graph-node-stroke-width: 1.6px;
+  --_graph-node-font: 600 0.66rem/1 var(--_font-head);
+}
+
+.steptrace
+  :is(
+    .steptrace__node .steptrace__ncirc,
+    .steptrace__gs-node-circle,
+    .steptrace__graph-rep-node circle
+  ) {
+  fill: var(--_graph-node-fill);
+  stroke: var(--_graph-node-stroke);
+  stroke-width: var(--_graph-node-stroke-width);
+}
+
+.steptrace
+  :is(.steptrace__node .steptrace__id, .steptrace__gs-node-label, .steptrace__graph-rep-node text) {
+  fill: var(--_text);
+  font: var(--_graph-node-font);
+  text-anchor: middle;
+  dominant-baseline: central;
+}

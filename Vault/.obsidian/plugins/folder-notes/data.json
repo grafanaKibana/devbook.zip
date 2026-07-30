@@ -116,7 +116,7 @@
   "deleteFilesAction": "trash",
   "openSidebar": {
     "mobile": false,
-    "desktop": true
+    "desktop": false
   },
   "highlightFolder": true,
   "persistentSettingsTab": {

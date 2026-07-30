@@ -11,6 +11,7 @@ status: Ready to Repeat
 
 publish: true
 ---
+
 DRY means one place should own a single piece of knowledge, so you do not have to change the same rule in multiple places.
 It is not "never repeat code." It is "avoid duplicated business rules and duplicated decision logic."
 You reach for DRY when duplication causes bugs, inconsistent behavior, or high change cost. In a payments codebase, the tax calculation formula was duplicated in the checkout API and the invoicing batch job — when tax rates changed, only the API was updated, causing a $43,000 discrepancy over two months before the invoicing path was discovered.

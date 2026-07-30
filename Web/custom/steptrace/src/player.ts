@@ -12,7 +12,7 @@ export class Player {
     this.speed = speed || 1
     this.playing = false
     this.timer = null
-    this.baseDelay = 780
+    this.baseDelay = 260
     this.onState = () => {}
   }
   render() {

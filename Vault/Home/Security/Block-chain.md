@@ -41,7 +41,6 @@ var block2Data = "tx: alice -> bob (10)";
 var block2Hash = Sha256Hex(block2Prev + block2Data);
 ```
 
-
 # Pitfalls
 
 ## Using Blockchain When a Database Suffices
@@ -70,7 +69,7 @@ var block2Hash = Sha256Hex(block2Prev + block2Data);
 
 **Decision rule**: PoW for maximum trustlessness (public cryptocurrency). PoS for public chains where energy matters. PoA for enterprise/private chains where you know and trust all validators — but at that point, ask whether a traditional database with audit logging is simpler.
 
-## Public vs Private Chains
+## Public Vs Private Chains
 
 | Type | Participants | Throughput | Immutability | Use when |
 |------|------------|-----------|-------------|----------|

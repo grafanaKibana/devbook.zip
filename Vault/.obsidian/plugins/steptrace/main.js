@@ -17,1606 +17,132 @@ var __export = (target, all) => {
 };
 var __copyProps = (to, from, except, desc) => {
   if (from && typeof from === "object" || typeof from === "function") {
-    for (let key of __getOwnPropNames(from))
-      if (!__hasOwnProp.call(to, key) && key !== except)
-        __defProp(to, key, { get: () => from[key], enumerable: !(desc = __getOwnPropDesc(from, key)) || desc.enumerable });
+    for (let key4 of __getOwnPropNames(from))
+      if (!__hasOwnProp.call(to, key4) && key4 !== except)
+        __defProp(to, key4, { get: () => from[key4], enumerable: !(desc = __getOwnPropDesc(from, key4)) || desc.enumerable });
   }
   return to;
 };
 var __toCommonJS = (mod) => __copyProps(__defProp({}, "__esModule", { value: true }), mod);
 
-// custom/steptrace/src/graph.ts
-function layeredLayout(rawNodes, rawEdges, directed, start) {
-  const X0 = 40;
-  const X1 = 540;
-  const Y0 = 34;
-  const Y1 = 266;
-  const YC = (Y0 + Y1) / 2;
-  const STAG = 8;
-  const ids = rawNodes.map((node) => String(node.id));
-  const idSet = new Set(ids);
-  const edges = (rawEdges || []).map((edge) => ({ from: String(edge.from), to: String(edge.to) })).filter((edge) => idSet.has(edge.from) && idSet.has(edge.to));
-  const out = new Map(ids.map((id) => [id, []]));
-  const incoming = new Map(ids.map((id) => [id, []]));
-  const undirected = new Map(ids.map((id) => [id, []]));
-  for (const edge of edges) {
-    out.get(edge.from).push(edge.to);
-    incoming.get(edge.to).push(edge.from);
-    undirected.get(edge.from).push(edge.to);
-    undirected.get(edge.to).push(edge.from);
-  }
-  const layer = /* @__PURE__ */ new Map();
-  const assignBfsLayers = (adjacency2, root) => {
-    const queue = idSet.has(root) ? [root] : [];
-    if (queue.length) layer.set(root, 0);
-    for (let head = 0; head < queue.length; head++) {
-      const current = queue[head];
-      for (const neighbour of adjacency2.get(current) ?? []) {
-        if (!layer.has(neighbour)) {
-          layer.set(neighbour, layer.get(current) + 1);
-          queue.push(neighbour);
-        }
-      }
-    }
-    let maxLayer2 = 0;
-    for (const value of layer.values()) maxLayer2 = Math.max(maxLayer2, value);
-    for (const id of ids) if (!layer.has(id)) layer.set(id, maxLayer2 + 1);
-  };
-  if (directed) {
-    const indegree = new Map(ids.map((id) => [id, incoming.get(id).length]));
-    const queue = ids.filter((id) => indegree.get(id) === 0).sort();
-    for (const id of ids) layer.set(id, 0);
-    let seen = 0;
-    for (let head = 0; head < queue.length; head++) {
-      const current = queue[head];
-      seen++;
-      for (const neighbour of out.get(current) ?? []) {
-        if (layer.get(neighbour) < layer.get(current) + 1) {
-          layer.set(neighbour, layer.get(current) + 1);
-        }
-        const nextDegree = indegree.get(neighbour) - 1;
-        indegree.set(neighbour, nextDegree);
-        if (nextDegree === 0) queue.push(neighbour);
-      }
-    }
-    if (seen < ids.length) {
-      layer.clear();
-      assignBfsLayers(out, start);
-    }
-  } else {
-    assignBfsLayers(undirected, start);
-  }
-  let maxLayer = 0;
-  for (const value of layer.values()) maxLayer = Math.max(maxLayer, value);
-  const buckets = Array.from({ length: maxLayer + 1 }, () => []);
-  for (const id of ids) buckets[layer.get(id)].push(id);
-  for (const bucket of buckets) bucket.sort();
-  const layers = buckets.filter((bucket) => bucket.length);
-  const positions = (items) => new Map(items.map((id, index) => [id, index]));
-  const sweep = (layerIndex, reference) => {
-    const current = layers[layerIndex];
-    const key = /* @__PURE__ */ new Map();
-    current.forEach((id, index) => {
-      const neighbours = undirected.get(id).filter((value) => reference.has(value));
-      key.set(
-        id,
-        neighbours.length ? neighbours.reduce((sum, value) => sum + reference.get(value), 0) / neighbours.length : index
-      );
-    });
-    current.sort(
-      (left, right) => key.get(left) - key.get(right) || (left < right ? -1 : left > right ? 1 : 0)
-    );
-  };
-  for (let pass = 0; pass < 4; pass++) {
-    if (pass % 2 === 0) {
-      for (let index = 1; index < layers.length; index++) {
-        sweep(index, positions(layers[index - 1]));
-      }
-    } else {
-      for (let index = layers.length - 2; index >= 0; index--) {
-        sweep(index, positions(layers[index + 1]));
-      }
-    }
-  }
-  const coordinates = /* @__PURE__ */ new Map();
-  const layerCount = layers.length;
-  layers.forEach((current, layerIndex) => {
-    const x = layerCount === 1 ? (X0 + X1) / 2 : X0 + layerIndex * (X1 - X0) / (layerCount - 1);
-    const offset = layerIndex % 2 * STAG;
-    current.forEach((id, index) => {
-      const y = current.length === 1 ? YC : Y0 + offset + index * (Y1 - Y0) / (current.length - 1);
-      coordinates.set(id, { x: Math.round(x), y: Math.round(y) });
-    });
-  });
-  return coordinates;
+// custom/steptrace/src/graph-node.ts
+function numericViewBox(svg) {
+  const box = svg.viewBox?.baseVal;
+  if (box?.width && box?.height) return { width: box.width, height: box.height };
+  const source = typeof svg.getAttribute === "function" ? svg.getAttribute("viewBox") : svg.attributes?.get("viewBox");
+  const values = source?.trim().split(/\s+/).map(Number);
+  return values?.length === 4 && values.every(Number.isFinite) ? { width: values[2], height: values[3] } : null;
 }
-function normalizeGraph(config) {
-  const source = Array.isArray(config.nodes) && config.nodes.length ? config : DEFAULT_GRAPH;
-  const nodes = source.nodes;
-  const edges = source.edges ?? [];
-  const needsLayout = nodes.some((node) => node.x == null || node.y == null);
-  let start = config.start != null ? String(config.start) : source.start != null ? String(source.start) : String(nodes[0].id);
-  if (!nodes.some((node) => String(node.id) === start)) start = String(nodes[0].id);
-  const layout = needsLayout ? layeredLayout(nodes, edges, !!source.directed, start) : null;
-  const normalizedNodes = needsLayout ? nodes.map((node) => ({ id: String(node.id), ...layout.get(String(node.id)) })) : nodes.map((node) => ({ id: String(node.id), x: Number(node.x), y: Number(node.y) }));
-  const ids = new Set(normalizedNodes.map((node) => node.id));
-  const normalizedEdges = edges.filter((edge) => ids.has(String(edge.from)) && ids.has(String(edge.to))).map((edge) => ({
-    from: String(edge.from),
-    to: String(edge.to),
-    weight: edge.weight == null ? null : Number(edge.weight)
-  }));
+function svgRenderedScale(rect, viewBox) {
+  if (!Number.isFinite(rect.width) || !Number.isFinite(rect.height) || rect.width <= 0 || rect.height <= 0 || viewBox.width <= 0 || viewBox.height <= 0)
+    return 1;
+  return Math.min(rect.width / viewBox.width, rect.height / viewBox.height);
+}
+function trimGraphEdge(from, to, sourceInset, targetInset = sourceInset) {
+  const dx = to.x - from.x;
+  const dy = to.y - from.y;
+  const length = Math.hypot(dx, dy) || 1;
+  const ux = dx / length;
+  const uy = dy / length;
   return {
-    nodes: normalizedNodes,
-    edges: normalizedEdges,
-    directed: !!source.directed,
-    start: ids.has(start) ? start : normalizedNodes[0].id
+    x1: from.x + ux * sourceInset,
+    y1: from.y + uy * sourceInset,
+    x2: to.x - ux * targetInset,
+    y2: to.y - uy * targetInset
   };
 }
-function adjacency(graph) {
-  const result = {};
-  for (const node of graph.nodes) result[node.id] = [];
-  for (const edge of graph.edges) {
-    result[edge.from].push(edge.to);
-    if (!graph.directed) result[edge.to].push(edge.from);
-  }
-  for (const id of Object.keys(result)) result[id].sort();
-  return result;
+function observeFixedSvgNodes(svg, nodes5, onGeometry) {
+  const update = () => {
+    const viewBox = numericViewBox(svg);
+    const rect = svg.getBoundingClientRect?.();
+    const scale = viewBox && rect ? svgRenderedScale(rect, viewBox) : 1;
+    const inverseScale = 1 / scale;
+    for (const { element, point, coordinates = "local" } of nodes5) {
+      const origin = `translate(${point.x} ${point.y}) scale(${inverseScale})`;
+      element.setAttribute(
+        "transform",
+        coordinates === "absolute" ? `${origin} translate(${-point.x} ${-point.y})` : origin
+      );
+    }
+    onGeometry?.(inverseScale);
+  };
+  update();
+  const observer = typeof ResizeObserver === "undefined" ? null : new ResizeObserver(() => {
+    update();
+  });
+  observer?.observe(svg);
+  return {
+    update,
+    destroy() {
+      observer?.disconnect();
+    }
+  };
 }
-var DEFAULT_GRAPH;
-var init_graph = __esm({
-  "custom/steptrace/src/graph.ts"() {
-    DEFAULT_GRAPH = {
-      directed: false,
-      start: "A",
-      nodes: [{ id: "A" }, { id: "B" }, { id: "C" }, { id: "D" }, { id: "E" }, { id: "F" }],
-      edges: [
-        { from: "A", to: "B" },
-        { from: "A", to: "C" },
-        { from: "B", to: "D" },
-        { from: "B", to: "E" },
-        { from: "C", to: "D" },
-        { from: "D", to: "F" },
-        { from: "E", to: "F" }
-      ]
-    };
+var GRAPH_NODE_SIZE_PX, GRAPH_NODE_RADIUS_PX, GRAPH_NODE_HALO_GAP_PX, GRAPH_EDGE_ARROW_GAP_PX;
+var init_graph_node = __esm({
+  "custom/steptrace/src/graph-node.ts"() {
+    GRAPH_NODE_SIZE_PX = 26;
+    GRAPH_NODE_RADIUS_PX = GRAPH_NODE_SIZE_PX / 2;
+    GRAPH_NODE_HALO_GAP_PX = 4.5;
+    GRAPH_EDGE_ARROW_GAP_PX = 3;
   }
 });
 
-// custom/steptrace/src/algorithms/bfs.ts
-var bfs;
-var init_bfs = __esm({
-  "custom/steptrace/src/algorithms/bfs.ts"() {
-    init_graph();
-    bfs = {
-      id: "bfs",
-      kind: "graph",
-      meta: { label: "Breadth-first search" },
-      run: (input, ops, graph) => {
-        const adj = adjacency(graph);
-        const start = input.start;
-        const target = input.target != null && input.target !== start ? String(input.target) : null;
-        if (target) ops.target(target);
-        ops.init(
-          target ? `Breadth-first search for ${target}, starting at ${start} — explore level by level with a first-in, first-out queue until the target is dequeued.` : `Breadth-first search from ${start} — explore the graph level by level using a first-in, first-out queue.`
-        );
-        const queue = [start];
-        const seen = /* @__PURE__ */ new Set([start]);
-        ops.enqueue(start, 0, `Enqueue the start node ${start} at distance 0.`);
-        while (queue.length) {
-          const u = queue.shift();
-          ops.visit(u, `Dequeue ${u} (distance ${ops.dist(u)}) and mark it visited.`);
-          if (u === target) {
-            ops.done(
-              `Found ${target} at distance ${ops.dist(u)} after visiting ${ops.visitedCount} nodes — BFS reaches it by a shortest path.`
-            );
-            return;
-          }
-          for (const v of adj[u]) {
-            if (seen.has(v)) continue;
-            ops.edge(u, v, `Explore edge ${u} → ${v}.`);
-            seen.add(v);
-            queue.push(v);
-            ops.enqueue(
-              v,
-              ops.dist(u) + 1,
-              `Discover ${v} — enqueue it at distance ${ops.dist(u) + 1}.`
-            );
-          }
-        }
-        ops.done(
-          target ? `${target} is not reachable from ${start} — the queue emptied after ${ops.visitedCount} nodes.` : `Breadth-first search complete — visited ${ops.visitedCount} node${ops.visitedCount === 1 ? "" : "s"}.`
-        );
-      }
-    };
+// custom/steptrace/src/motion.ts
+function springOmega(tweenMs) {
+  const budget = Math.max(tweenMs, 1) / 1e3;
+  return 2 * Math.PI / budget;
+}
+function springStep(pos, vel, target, dtMs, { omega0, zeta }) {
+  if (!(dtMs > 0)) return { pos: target, vel: 0 };
+  const w2 = omega0 * omega0;
+  const damp = 2 * zeta * omega0;
+  let remaining = dtMs;
+  const maxStep = 4;
+  while (remaining > 0) {
+    const h = Math.min(remaining, maxStep) / 1e3;
+    const accel = -w2 * (pos - target) - damp * vel;
+    vel += accel * h;
+    pos += vel * h;
+    remaining -= maxStep;
   }
-});
-
-// custom/steptrace/src/algorithms/binary-search.ts
-var binarySearch;
-var init_binary_search = __esm({
-  "custom/steptrace/src/algorithms/binary-search.ts"() {
-    binarySearch = {
-      id: "binary-search",
-      kind: "search",
-      meta: { label: "Binary search" },
-      run: (input, ops) => {
-        const a = ops.value;
-        const target = input.target;
-        ops.init(
-          `Binary search for ${target} in a sorted array — check the middle of the range, then discard the half that can't contain it.`
-        );
-        let lo = 0;
-        let hi = a.length - 1;
-        while (lo <= hi) {
-          const mid = Math.floor((lo + hi) / 2);
-          ops.probe(
-            lo,
-            hi,
-            mid,
-            `Range [${lo}, ${hi}]: probe the middle — index ${mid} holds ${a[mid]}.`
-          );
-          if (a[mid] === target) {
-            ops.hit(mid, `${a[mid]} equals ${target} — found it at index ${mid}.`);
-            ops.done(
-              `Found ${target} after ${ops.comparisons} probe${ops.comparisons === 1 ? "" : "s"}.`
-            );
-            return;
-          }
-          if (a[mid] < target) {
-            lo = mid + 1;
-            ops.narrow(lo, hi, `${a[mid]} < ${target}: discard the left half; search [${lo}, ${hi}].`);
-          } else {
-            hi = mid - 1;
-            ops.narrow(lo, hi, `${a[mid]} > ${target}: discard the right half; search [${lo}, ${hi}].`);
-          }
-        }
-        ops.done(`${target} is not in the array — the range is empty after ${ops.comparisons} probes.`);
-      }
+  return { pos, vel };
+}
+function sequence(beats, budgetMs, startNow, minGapMs = SEQUENCE_MIN_GAP_MS) {
+  const budget = Math.max(budgetMs, 0);
+  let prev = -Infinity;
+  let group = startNow;
+  const queue2 = beats.map((beat) => ({ at: startNow + Math.max(0, beat.at) * budget, run: beat.run })).sort((a, b) => a.at - b.at).map((beat) => {
+    const fireAt = beat.at - prev < minGapMs ? group : group = beat.at;
+    prev = beat.at;
+    return { fireAt, run: beat.run };
+  });
+  let index = 0;
+  let cancelled = false;
+  return {
+    tick(now) {
+      if (cancelled) return false;
+      while (index < queue2.length && now >= queue2[index].fireAt) queue2[index++].run();
+      return index < queue2.length;
+    },
+    cancel() {
+      cancelled = true;
+      index = queue2.length;
+    },
+    get pending() {
+      return queue2.length - index;
+    }
+  };
+}
+var SPRINGS, SEQUENCE_MIN_GAP_MS;
+var init_motion = __esm({
+  "custom/steptrace/src/motion.ts"() {
+    SPRINGS = {
+      marker: { zeta: 0.6 },
+      held: { zeta: 0.85 },
+      swap: { zeta: 0.9 }
     };
-  }
-});
-
-// custom/steptrace/src/algorithms/bubble-sort.ts
-var bubbleSort;
-var init_bubble_sort = __esm({
-  "custom/steptrace/src/algorithms/bubble-sort.ts"() {
-    bubbleSort = {
-      id: "bubble-sort",
-      kind: "sort",
-      meta: { label: "Bubble sort" },
-      run: (input, ops) => {
-        const n = ops.value.length;
-        ops.init(
-          `Bubble sort — repeatedly compare adjacent values and swap the larger one rightward, bubbling the largest to the end each pass.`
-        );
-        for (let i = 0; i < n - 1; i++) {
-          let swapped = false;
-          for (let j = 0; j < n - 1 - i; j++) {
-            const a = ops.value;
-            ops.compare(j, j + 1, `Compare index ${j} (${a[j]}) and index ${j + 1} (${a[j + 1]}).`);
-            if (ops.value[j] > ops.value[j + 1]) {
-              const b = ops.value;
-              ops.swap(j, j + 1, `${b[j]} is greater than ${b[j + 1]} — swap them.`);
-              swapped = true;
-            }
-          }
-          ops.markSorted([n - 1 - i], [n - 1 - i], `Index ${n - 1 - i} now holds its final value.`);
-          if (!swapped) {
-            const rest = Array.from({ length: n - 1 - i }, (_, k) => k);
-            ops.markSorted(rest, [], `A full pass made no swaps — the array is already sorted.`);
-            break;
-          }
-        }
-        ops.lockAll(Array.from({ length: n }, (_, k) => k));
-        ops.done(`Sorted in ${ops.comparisons} comparisons and ${ops.swaps} swaps.`);
-      }
-    };
-  }
-});
-
-// custom/steptrace/src/algorithms/dfs.ts
-var dfs;
-var init_dfs = __esm({
-  "custom/steptrace/src/algorithms/dfs.ts"() {
-    init_graph();
-    dfs = {
-      id: "dfs",
-      kind: "graph",
-      meta: { label: "Depth-first search", frontierLabel: "Stack (bottom → top)" },
-      run: (input, ops, graph) => {
-        const adj = adjacency(graph);
-        const start = input.start;
-        const target = input.target != null && input.target !== start ? String(input.target) : null;
-        if (target) ops.target(target);
-        ops.init(
-          target ? `Depth-first search for ${target}, starting at ${start} — dive as deep as possible with a stack, backtracking at dead ends, until the target is popped.` : `Depth-first search from ${start} — dive as deep as possible using a stack, backtracking when a node has no unvisited neighbours.`
-        );
-        const stack = [start];
-        const seen = /* @__PURE__ */ new Set([start]);
-        ops.enqueue(start, 0, `Push the start node ${start} onto the stack.`);
-        while (stack.length) {
-          const u = stack.pop();
-          ops.visit(u, `Pop ${u} off the stack and mark it visited.`);
-          if (u === target) {
-            ops.done(
-              `Found ${target} after visiting only ${ops.visitedCount} nodes — but along a depth-${ops.dist(u)} path, with no shortest-path guarantee.`
-            );
-            return;
-          }
-          const neighbours = adj[u].slice().reverse();
-          for (const v of neighbours) {
-            if (seen.has(v)) continue;
-            ops.edge(u, v, `Explore edge ${u} → ${v}.`);
-            seen.add(v);
-            stack.push(v);
-            ops.enqueue(v, ops.dist(u) + 1, `Push ${v} onto the stack (depth ${ops.dist(u) + 1}).`);
-          }
-        }
-        ops.done(
-          target ? `${target} is not reachable from ${start} — the stack emptied after ${ops.visitedCount} nodes.` : `Depth-first search complete — visited ${ops.visitedCount} node${ops.visitedCount === 1 ? "" : "s"}.`
-        );
-      }
-    };
-  }
-});
-
-// custom/steptrace/src/algorithms/dijkstra.ts
-var dijkstra;
-var init_dijkstra = __esm({
-  "custom/steptrace/src/algorithms/dijkstra.ts"() {
-    dijkstra = {
-      id: "dijkstra",
-      kind: "graph",
-      meta: { label: "Dijkstra", frontierLabel: "Frontier (settle nearest first)" },
-      run: (input, ops, graph) => {
-        const adj = {};
-        for (const nd of graph.nodes) adj[nd.id] = [];
-        for (const e of graph.edges) {
-          const w = e.weight == null ? 1 : e.weight;
-          adj[e.from].push({ to: e.to, w });
-          if (!graph.directed) adj[e.to].push({ to: e.from, w });
-        }
-        for (const id in adj) adj[id].sort((a, b) => a.to < b.to ? -1 : 1);
-        const start = input.start;
-        const target = input.target != null ? String(input.target) : null;
-        if (target) ops.target(target);
-        ops.init(
-          `Dijkstra from ${start} — repeatedly settle the nearest unsettled node, then relax its edges to shorten neighbours' distances.`
-        );
-        const dist = { [start]: 0 };
-        const pred = {};
-        const settled = /* @__PURE__ */ new Set();
-        const inQ = /* @__PURE__ */ new Set([start]);
-        ops.enqueue(start, 0, `Start ${start} at distance 0.`);
-        while (inQ.size) {
-          let u = null;
-          for (const id of inQ) if (u === null || dist[id] < dist[u]) u = id;
-          inQ.delete(u);
-          settled.add(u);
-          ops.visit(u, `Settle ${u} (distance ${dist[u]}) — its shortest distance is now final.`);
-          for (const { to: v, w } of adj[u]) {
-            if (settled.has(v)) continue;
-            ops.edge(u, v, `Explore edge ${u} → ${v} (weight ${w}).`);
-            const nd = dist[u] + w;
-            if (dist[v] === void 0 || nd < dist[v]) {
-              const had = dist[v] !== void 0;
-              dist[v] = nd;
-              pred[v] = u;
-              inQ.add(v);
-              ops.relax(
-                v,
-                nd,
-                had ? `Relax ${v}: a shorter path via ${u} improves its distance to ${nd}.` : `Relax ${v}: reach it via ${u} at distance ${nd}.`
-              );
-            }
-          }
-        }
-        if (target !== null) {
-          if (dist[target] === void 0) {
-            ops.done(`${target} is unreachable from ${start}.`);
-          } else {
-            const path = [target];
-            for (let cur = target; pred[cur] !== void 0; cur = pred[cur]) path.push(pred[cur]);
-            path.reverse();
-            for (let i = 0; i + 1 < path.length; i++)
-              ops.selectEdge(
-                path[i],
-                path[i + 1],
-                `Shortest path: keep edge ${path[i]}–${path[i + 1]} highlighted.`
-              );
-            ops.done(`Shortest path ${path.join(" → ")} — total cost ${dist[target]}.`);
-          }
-        } else {
-          const reached = graph.nodes.map((n) => n.id).filter((id) => id !== start && pred[id] !== void 0);
-          reached.sort();
-          for (const v of reached)
-            ops.selectEdge(pred[v], v, `Shortest-path tree: ${pred[v]}–${v} (distance ${dist[v]}).`);
-          ops.done(`Dijkstra complete — shortest-path tree from ${start} highlighted.`);
-        }
-      }
-    };
-  }
-});
-
-// custom/steptrace/src/algorithms/fibonacci.ts
-var fibonacci;
-var init_fibonacci = __esm({
-  "custom/steptrace/src/algorithms/fibonacci.ts"() {
-    fibonacci = {
-      id: "fibonacci",
-      kind: "rectree",
-      meta: { label: "Fibonacci — recursion vs memo" },
-      run: (input, ops) => {
-        const N = Math.min(Math.max(Math.round(input.n ?? 5), 1), 6);
-        const FIB = [0, 1];
-        for (let i = 2; i <= N; i++) FIB[i] = FIB[i - 1] + FIB[i - 2];
-        let nextId = 0;
-        const all = [];
-        const build = (k, depth) => {
-          const node = { id: "c" + nextId++, k, depth, children: [] };
-          all.push(node);
-          if (k >= 2) {
-            node.children.push(build(k - 1, depth + 1));
-            node.children.push(build(k - 2, depth + 1));
-          }
-          return node;
-        };
-        const root = build(N, 0);
-        const ROW = 62;
-        const SP = 48;
-        let leaf = 0;
-        const layout = (node) => {
-          node.y = node.depth * ROW;
-          if (!node.children.length) {
-            node.x = leaf++ * SP;
-          } else {
-            node.children.forEach(layout);
-            node.x = (node.children[0].x + node.children[node.children.length - 1].x) / 2;
-          }
-        };
-        layout(root);
-        const descendants = (node) => {
-          const out = [];
-          for (const c of node.children) {
-            out.push(c.id);
-            out.push(...descendants(c));
-          }
-          return out;
-        };
-        const nodeList = all.map((n) => ({
-          id: n.id,
-          label: `f(${n.k})`,
-          x: Math.round(n.x),
-          y: n.y,
-          depth: n.depth
-        }));
-        const edges = [];
-        for (const n of all) for (const c of n.children) edges.push({ from: n.id, to: c.id });
-        ops.tree(
-          nodeList,
-          edges,
-          `Compute f(${N}) by plain recursion: every call spawns two more. The tree balloons because identical subproblems get recomputed from scratch.`
-        );
-        ops.phase(
-          "naive",
-          `Phase 1 — plain recursion. Reveal each call in order; the running count IS the total work.`
-        );
-        const naive = (node) => {
-          if (node.k < 2) {
-            ops.base(node.id, node.k, `f(${node.k}) = ${node.k} — base case, return at once.`);
-          } else {
-            ops.enter(
-              node.id,
-              `Call f(${node.k}); with no memory it must recompute f(${node.k - 1}) + f(${node.k - 2}) all over again.`
-            );
-            node.children.forEach(naive);
-          }
-        };
-        naive(root);
-        const naiveCalls = all.length;
-        ops.phase(
-          "memo",
-          `Phase 2 — memoise. Same tree, but keep a table of computed f(k); a repeat of any state is now a cache hit.`
-        );
-        const seen = /* @__PURE__ */ new Set();
-        let memoCalls = 0;
-        let hits = 0;
-        const memo = (node) => {
-          memoCalls++;
-          if (seen.has(node.k)) {
-            hits++;
-            ops.hit(
-              node.id,
-              node.k,
-              FIB[node.k],
-              descendants(node),
-              `f(${node.k}) is already in the table → cache HIT, return ${FIB[node.k]}. Its whole subtree is skipped — that is an overlapping subproblem eliminated.`
-            );
-            return FIB[node.k];
-          }
-          seen.add(node.k);
-          if (node.k < 2) {
-            ops.miss(
-              node.id,
-              node.k,
-              node.k,
-              `f(${node.k}) = ${node.k} — first time seen, store it in the table.`
-            );
-          } else {
-            ops.miss(
-              node.id,
-              node.k,
-              FIB[node.k],
-              `f(${node.k}) is new → compute f(${node.k - 1}) + f(${node.k - 2}) once and store f(${node.k}) = ${FIB[node.k]}.`
-            );
-            node.children.forEach(memo);
-          }
-          return FIB[node.k];
-        };
-        memo(root);
-        ops.done(
-          `Naive f(${N}) makes ${naiveCalls} calls. Memoised: ${memoCalls} calls — ${hits} of them cache hits that skipped whole subtrees. Same answer, ${naiveCalls - memoCalls} calls saved.`
-        );
-      }
-    };
-  }
-});
-
-// custom/steptrace/src/algorithms/heap-sort.ts
-var heapSort;
-var init_heap_sort = __esm({
-  "custom/steptrace/src/algorithms/heap-sort.ts"() {
-    heapSort = {
-      id: "heap-sort",
-      kind: "sort",
-      meta: { label: "Heap sort" },
-      run: (input, ops) => {
-        const n = ops.value.length;
-        ops.init(
-          `Heap sort — build a max-heap (each parent ≥ its children), then repeatedly swap the root to the end and sift the new root down.`
-        );
-        function siftDown(lo, hi) {
-          let root = lo;
-          while (2 * root + 1 < hi) {
-            let child = 2 * root + 1;
-            if (child + 1 < hi) {
-              ops.compare(
-                child,
-                child + 1,
-                `Compare children ${ops.value[child]} and ${ops.value[child + 1]}.`
-              );
-              if (ops.value[child + 1] > ops.value[child]) child++;
-            }
-            ops.compare(
-              root,
-              child,
-              `Compare parent ${ops.value[root]} with its larger child ${ops.value[child]}.`
-            );
-            if (ops.value[root] >= ops.value[child]) break;
-            ops.swap(root, child, `Parent is smaller — sift it down.`);
-            root = child;
-          }
-        }
-        ops.range(0, n - 1);
-        for (let i = Math.floor(n / 2) - 1; i >= 0; i--) siftDown(i, n);
-        for (let end = n - 1; end > 0; end--) {
-          ops.swap(0, end, `Move the largest value (the root) to index ${end}.`);
-          ops.markSorted([end], [end], `Index ${end} now holds its final value.`);
-          ops.range(0, end - 1);
-          siftDown(0, end);
-        }
-        ops.range(null);
-        ops.lockAll([0]);
-        ops.markSorted([0], [0], `The remaining root is the smallest — done.`);
-        ops.done(`Sorted in ${ops.comparisons} comparisons and ${ops.swaps} swaps.`);
-      }
-    };
-  }
-});
-
-// custom/steptrace/src/algorithms/insertion-sort.ts
-var insertionSort;
-var init_insertion_sort = __esm({
-  "custom/steptrace/src/algorithms/insertion-sort.ts"() {
-    insertionSort = {
-      id: "insertion-sort",
-      kind: "sort",
-      meta: { label: "Insertion sort" },
-      run: (input, ops) => {
-        const n = ops.value.length;
-        ops.init(
-          `Insertion sort — grow a sorted prefix on the left; take each next value and slide it left past larger values into place.`
-        );
-        ops.markSorted([0], [0], `The first element alone is a sorted prefix.`);
-        for (let i = 1; i < n; i++) {
-          const key = ops.value[i];
-          ops.holdKey(key);
-          ops.compare(i, i - 1, `Take ${key} (index ${i}) and compare it into the sorted prefix.`);
-          let j = i - 1;
-          while (j >= 0 && ops.value[j] > key) {
-            ops.overwrite(
-              j + 1,
-              ops.value[j],
-              `${ops.value[j]} > ${key}: shift it right into index ${j + 1}.`,
-              j
-            );
-            j--;
-            if (j >= 0) ops.compare(j, null, `Compare ${key} with ${ops.value[j]}.`);
-          }
-          ops.overwrite(j + 1, key, `Insert ${key} at index ${j + 1}.`);
-          ops.holdKey(null);
-          ops.markSorted(
-            Array.from({ length: i + 1 }, (_, k) => k),
-            [j + 1],
-            `Sorted prefix now spans indices 0..${i}.`
-          );
-        }
-        ops.done(`Sorted in ${ops.comparisons} comparisons and ${ops.swaps} moves.`);
-      }
-    };
-  }
-});
-
-// custom/steptrace/src/algorithms/kernighan-popcount.ts
-var kernighanPopcount;
-var init_kernighan_popcount = __esm({
-  "custom/steptrace/src/algorithms/kernighan-popcount.ts"() {
-    kernighanPopcount = {
-      id: "kernighan-popcount",
-      kind: "bits",
-      meta: { label: "Kernighan population count" },
-      run: (input, ops) => {
-        let x = Number(input.value) >>> 0 & ops.mask;
-        const total = ops.popcount(x);
-        ops.init(
-          x,
-          { a: "x", b: "− 1", r: "&" },
-          `x = ${x} has ${total} one${total === 1 ? "" : "s"}. Each pass, x & (x−1) deletes the lowest 1 — so the loop runs ${total} time${total === 1 ? "" : "s"}, once per set bit.`
-        );
-        let pop = 0;
-        while (x !== 0) {
-          const low = ops.lowestSetBit(x);
-          const sub = x - 1 & ops.mask;
-          ops.subtract(
-            sub,
-            low,
-            `Lowest 1 is at bit ${low}. Subtracting 1 flips it to 0 and turns every zero below it into a 1.`
-          );
-          const res = x & sub;
-          ops.and(
-            res,
-            low,
-            `AND the two: the survivors above stay, bit ${low} and everything under it are wiped — exactly one 1 gone.`
-          );
-          pop++;
-          x = res;
-          ops.commit(`x ← ${x}. ${pop} of ${total} ones cleared.`);
-        }
-        ops.done(
-          `x = 0 — every 1 is gone. It took ${total} pass${total === 1 ? "" : "es"}, so x had ${total} set bit${total === 1 ? "" : "s"}.`
-        );
-      }
-    };
-  }
-});
-
-// custom/steptrace/src/algorithms/kmp.ts
-var kmp;
-var init_kmp = __esm({
-  "custom/steptrace/src/algorithms/kmp.ts"() {
-    kmp = {
-      id: "kmp",
-      kind: "string",
-      meta: { label: "KMP" },
-      run: (input, ops) => {
-        const text = String(input.text || "");
-        const pattern = String(input.pattern || "");
-        const n = text.length;
-        const m = pattern.length;
-        ops.init(
-          `KMP search for "${pattern}" — on a mismatch, the failure function slides the pattern forward without re-checking characters already known to match.`
-        );
-        if (!m || m > n) {
-          ops.done("Nothing to search.");
-          return;
-        }
-        const lps = new Array(m).fill(0);
-        let len = 0;
-        for (let idx = 1; idx < m; ) {
-          if (pattern[idx] === pattern[len]) {
-            len++;
-            lps[idx] = len;
-            idx++;
-          } else if (len > 0) {
-            len = lps[len - 1];
-          } else {
-            lps[idx] = 0;
-            idx++;
-          }
-        }
-        let i = 0;
-        let j = 0;
-        while (i < n) {
-          const isMatch = text[i] === pattern[j];
-          ops.compare(
-            i,
-            j,
-            i - j,
-            isMatch,
-            `Compare text[${i}]='${text[i]}' with pattern[${j}]='${pattern[j]}' → ${isMatch ? "match" : "mismatch"}.`
-          );
-          if (isMatch) {
-            i++;
-            j++;
-            if (j === m) {
-              ops.matchAt(i - j, `Whole pattern matched — occurrence at index ${i - j}.`);
-              j = lps[j - 1];
-            }
-          } else if (j > 0) {
-            j = lps[j - 1];
-            ops.slide(
-              i - j,
-              `Mismatch — reuse the matched prefix: realign so ${j} char${j === 1 ? "" : "s"} already line up (no re-check).`
-            );
-          } else {
-            i++;
-            ops.slide(i, `Mismatch at the pattern start — slide forward by one.`);
-          }
-        }
-        ops.done(
-          ops.found.length ? `Found ${ops.found.length} occurrence(s): index ${ops.found.join(", ")}.` : `Pattern not found.`
-        );
-      }
-    };
-  }
-});
-
-// custom/steptrace/src/algorithms/lcs.ts
-var lcs;
-var init_lcs = __esm({
-  "custom/steptrace/src/algorithms/lcs.ts"() {
-    lcs = {
-      id: "lcs",
-      kind: "dp",
-      meta: { label: "Longest common subsequence" },
-      run: (input, ops) => {
-        const A = String(input.a != null ? input.a : input.text || "");
-        const B = String(input.b != null ? input.b : input.pattern || "");
-        const m = A.length;
-        const n = B.length;
-        const rowLabels = ["∅", ...A.split("")];
-        const colLabels = ["∅", ...B.split("")];
-        ops.board(
-          rowLabels,
-          colLabels,
-          `Longest common subsequence of "${A}" and "${B}". Cell dp[i][j] holds the LCS length of the first i letters of "${A}" and the first j of "${B}".`
-        );
-        const dp = Array.from({ length: m + 1 }, () => Array(n + 1).fill(0));
-        for (let c2 = 0; c2 <= n; c2++) ops.set(0, c2, 0, [], `An empty first string has LCS 0.`);
-        for (let r2 = 1; r2 <= m; r2++) ops.set(r2, 0, 0, [], `An empty second string has LCS 0.`);
-        for (let r2 = 1; r2 <= m; r2++) {
-          for (let c2 = 1; c2 <= n; c2++) {
-            if (A[r2 - 1] === B[c2 - 1]) {
-              dp[r2][c2] = dp[r2 - 1][c2 - 1] + 1;
-              ops.set(
-                r2,
-                c2,
-                dp[r2][c2],
-                [[r2 - 1, c2 - 1]],
-                `'${A[r2 - 1]}' = '${B[c2 - 1]}' → take the diagonal + 1 = ${dp[r2][c2]}.`
-              );
-            } else {
-              dp[r2][c2] = Math.max(dp[r2 - 1][c2], dp[r2][c2 - 1]);
-              const better = dp[r2 - 1][c2] >= dp[r2][c2 - 1] ? "top" : "left";
-              ops.set(
-                r2,
-                c2,
-                dp[r2][c2],
-                [
-                  [r2 - 1, c2],
-                  [r2, c2 - 1]
-                ],
-                `'${A[r2 - 1]}' ≠ '${B[c2 - 1]}' → this letter can't extend the match, so the optimum here is inherited from an optimal sub-answer: the better of top (${dp[r2 - 1][c2]}) and left (${dp[r2][c2 - 1]}) = ${dp[r2][c2]} (from the ${better}).`
-              );
-            }
-          }
-        }
-        let r = m;
-        let c = n;
-        const path = [];
-        while (r > 0 && c > 0) {
-          if (A[r - 1] === B[c - 1]) {
-            path.unshift([r, c]);
-            ops.markPath(
-              path,
-              `dp[${r}][${c}]: '${A[r - 1]}' = '${B[c - 1]}' — this cell was built from dp[${r - 1}][${c - 1}] + 1, so '${A[r - 1]}' joins the LCS. Step diagonally to that sub-answer.`
-            );
-            r--;
-            c--;
-          } else if (dp[r - 1][c] >= dp[r][c - 1]) {
-            ops.markPath(
-              path,
-              `dp[${r}][${c}]: '${A[r - 1]}' ≠ '${B[c - 1]}' — its optimum was inherited from the top sub-answer dp[${r - 1}][${c}]. Follow it upward; no letter added.`
-            );
-            r--;
-          } else {
-            ops.markPath(
-              path,
-              `dp[${r}][${c}]: '${A[r - 1]}' ≠ '${B[c - 1]}' — its optimum was inherited from the left sub-answer dp[${r}][${c - 1}]. Follow it leftward; no letter added.`
-            );
-            c--;
-          }
-        }
-        const lcs2 = path.map((p) => A[p[0] - 1]).join("");
-        ops.markPath(
-          path,
-          `Traceback done: the ${path.length} diagonal step${path.length === 1 ? "" : "s"} spell the LCS "${lcs2}".`
-        );
-        ops.done(`LCS length = ${dp[m][n]} ("${lcs2}").`);
-      }
-    };
-  }
-});
-
-// custom/steptrace/src/algorithms/linear-search.ts
-var linearSearch;
-var init_linear_search = __esm({
-  "custom/steptrace/src/algorithms/linear-search.ts"() {
-    linearSearch = {
-      id: "linear-search",
-      kind: "search",
-      meta: { label: "Linear search" },
-      run: (input, ops) => {
-        const a = ops.value;
-        const target = input.target;
-        const n = a.length;
-        ops.mode = "scan";
-        ops.init(
-          `Linear search for ${target} — scan left to right, comparing every element until a match is found (or the array ends).`
-        );
-        for (let i = 0; i < n; i++) {
-          ops.probe(0, n - 1, i, `Check index ${i}: is ${a[i]} the target ${target}?`);
-          if (a[i] === target) {
-            ops.hit(i, `${a[i]} equals ${target} — found it at index ${i}.`);
-            ops.done(
-              `Found ${target} at index ${i} after ${ops.comparisons} comparison${ops.comparisons === 1 ? "" : "s"}.`
-            );
-            return;
-          }
-        }
-        ops.done(
-          `${target} is not in the array — scanned all ${n} elements (${ops.comparisons} comparisons).`
-        );
-      }
-    };
-  }
-});
-
-// custom/steptrace/src/algorithms/merge-sort.ts
-var mergeSort;
-var init_merge_sort = __esm({
-  "custom/steptrace/src/algorithms/merge-sort.ts"() {
-    mergeSort = {
-      id: "merge-sort",
-      kind: "sort",
-      meta: { label: "Merge sort" },
-      run: (input, ops) => {
-        const n = ops.value.length;
-        ops.init(
-          `Merge sort — start with runs of length 1, then repeatedly merge adjacent runs into larger sorted runs (watch the sorted runs double).`
-        );
-        for (let width = 1; width < n; width *= 2) {
-          for (let lo = 0; lo < n; lo += 2 * width) {
-            const mid = Math.min(lo + width, n);
-            const hi = Math.min(lo + 2 * width, n);
-            if (mid >= hi) continue;
-            ops.range(lo, hi - 1);
-            const left = ops.value.slice(lo, mid);
-            const right = ops.value.slice(mid, hi);
-            ops.candidate(
-              null,
-              `Merge the left run [${lo}, ${mid - 1}] and the right run [${mid}, ${hi - 1}] into one sorted run [${lo}, ${hi - 1}].`
-            );
-            let i = 0;
-            let j = 0;
-            let k = lo;
-            while (i < left.length && j < right.length) {
-              if (left[i] <= right[j]) {
-                ops.overwrite(
-                  k,
-                  left[i],
-                  `${left[i]} ≤ ${right[j]}: place ${left[i]} from the left half at index ${k}.`,
-                  lo + i
-                );
-                i++;
-              } else {
-                ops.overwrite(
-                  k,
-                  right[j],
-                  `${right[j]} < ${left[i]}: place ${right[j]} from the right half at index ${k}.`,
-                  mid + j
-                );
-                j++;
-              }
-              k++;
-            }
-            while (i < left.length) {
-              ops.overwrite(
-                k,
-                left[i],
-                `Copy the remaining ${left[i]} from the left half at index ${k}.`,
-                lo + i
-              );
-              i++;
-              k++;
-            }
-            while (j < right.length) {
-              ops.overwrite(
-                k,
-                right[j],
-                `Copy the remaining ${right[j]} from the right half at index ${k}.`,
-                mid + j
-              );
-              j++;
-              k++;
-            }
-          }
-          ops.range(null);
-        }
-        ops.lockAll(Array.from({ length: n }, (_, k) => k));
-        ops.done(`Sorted in ${ops.swaps} writes.`);
-      }
-    };
-  }
-});
-
-// custom/steptrace/src/algorithms/n-queens.ts
-var nQueens;
-var init_n_queens = __esm({
-  "custom/steptrace/src/algorithms/n-queens.ts"() {
-    nQueens = {
-      id: "n-queens",
-      kind: "backtrack",
-      meta: { label: "N-Queens (backtracking)" },
-      run: (input, ops) => {
-        const n = Math.min(Math.max(input.n || 4, 4), 6);
-        ops.board(
-          n,
-          `Place ${n} queens on a ${n}×${n} board so none attack another. Fill one queen per row; retreat whenever a row has no safe square.`
-        );
-        const conflict = (row, col) => {
-          const q = ops.queens;
-          for (let r = 0; r < row; r++) if (q[r] === col || Math.abs(q[r] - col) === row - r) return r;
-          return -1;
-        };
-        let solved = false;
-        const solve = (row) => {
-          if (solved) return;
-          if (row === n) {
-            ops.solved(`All ${n} rows filled — no queen attacks another.`);
-            solved = true;
-            return;
-          }
-          for (let col = 0; col < n; col++) {
-            const bad = conflict(row, col);
-            if (bad >= 0) {
-              ops.reject(
-                row,
-                col,
-                bad,
-                `Row ${row}, column ${col} clashes with the queen in row ${bad} — prune this square.`
-              );
-              continue;
-            }
-            ops.place(row, col, `Column ${col} is safe — place a queen and descend to row ${row + 1}.`);
-            solve(row + 1);
-            if (solved) return;
-            ops.backtrack(
-              row,
-              `Row ${row + 1} had no safe square — remove the queen at (${row}, ${col}) and retreat.`
-            );
-          }
-        };
-        solve(0);
-        ops.done(solved ? `Solved — a valid ${n}-queens arrangement.` : `No solution for n = ${n}.`);
-      }
-    };
-  }
-});
-
-// custom/steptrace/src/algorithms/prim.ts
-var prim;
-var init_prim = __esm({
-  "custom/steptrace/src/algorithms/prim.ts"() {
-    prim = {
-      id: "prim",
-      kind: "graph",
-      meta: { label: "Prim's MST", frontierLabel: "Frontier" },
-      run: (input, ops, graph) => {
-        const adj = {};
-        for (const nd of graph.nodes) adj[nd.id] = [];
-        for (const e of graph.edges) {
-          const w = e.weight == null ? 1 : e.weight;
-          adj[e.from].push({ to: e.to, w });
-          if (!graph.directed) adj[e.to].push({ to: e.from, w });
-        }
-        const start = input.start;
-        ops.init(
-          `Prim's algorithm — grow a minimum spanning tree from ${start}, each step adding the cheapest edge that reaches a node not yet in the tree.`
-        );
-        const pairKey = (a, b) => a < b ? a + "|" + b : b + "|" + a;
-        const inTree = /* @__PURE__ */ new Set([start]);
-        const treeEdges = /* @__PURE__ */ new Set();
-        const skipped = /* @__PURE__ */ new Set();
-        ops.visit(start, `Start the tree at ${start}.`);
-        let total = 0;
-        while (inTree.size < graph.nodes.length) {
-          const cand = [];
-          const seenPair = /* @__PURE__ */ new Set();
-          for (const u of inTree)
-            for (const { to: v, w } of adj[u]) {
-              const key = pairKey(u, v);
-              if (seenPair.has(key)) continue;
-              seenPair.add(key);
-              cand.push({ u, v, w, key });
-            }
-          cand.sort((a, b) => a.w - b.w || (a.key < b.key ? -1 : 1));
-          let chosen = null;
-          for (const c of cand) {
-            if (inTree.has(c.v)) {
-              if (!treeEdges.has(c.key) && !skipped.has(c.key)) {
-                skipped.add(c.key);
-                ops.edge(
-                  c.u,
-                  c.v,
-                  `${c.u}–${c.v} (weight ${c.w}) links two nodes already in the tree — skip it, adding it would make a cycle.`
-                );
-              }
-              continue;
-            }
-            chosen = c;
-            break;
-          }
-          if (!chosen) break;
-          ops.edge(
-            chosen.u,
-            chosen.v,
-            `Cheapest edge leaving the tree: ${chosen.u}–${chosen.v} (weight ${chosen.w}).`
-          );
-          ops.selectEdge(chosen.u, chosen.v, `Add ${chosen.u}–${chosen.v} to the tree.`);
-          treeEdges.add(chosen.key);
-          inTree.add(chosen.v);
-          ops.visit(chosen.v, `${chosen.v} joins the tree.`);
-          total += chosen.w;
-        }
-        ops.done(`Minimum spanning tree complete — total weight ${total}.`);
-      }
-    };
-  }
-});
-
-// custom/steptrace/src/algorithms/quick-sort.ts
-var quickSort;
-var init_quick_sort = __esm({
-  "custom/steptrace/src/algorithms/quick-sort.ts"() {
-    quickSort = {
-      id: "quick-sort",
-      kind: "sort",
-      meta: { label: "Quick sort" },
-      run: (input, ops) => {
-        const n = ops.value.length;
-        ops.init(
-          `Quick sort — pick a pivot, partition values so smaller ones go left and larger ones go right, then recurse on each side.`
-        );
-        function partition(lo, hi) {
-          const pivot = ops.value[hi];
-          ops.range(lo, hi);
-          ops.pivot(hi);
-          ops.candidate(
-            hi,
-            `Partition [${lo}, ${hi}]: pivot ${pivot} (index ${hi}) — send values < ${pivot} left, > ${pivot} right.`
-          );
-          let i = lo;
-          for (let j = lo; j < hi; j++) {
-            ops.compare(j, hi, `Compare ${ops.value[j]} with pivot ${pivot}.`);
-            if (ops.value[j] < pivot) {
-              if (i !== j)
-                ops.swap(
-                  i,
-                  j,
-                  `${ops.value[j]} < ${pivot}: move it into the left region at index ${i}.`
-                );
-              i++;
-            }
-          }
-          if (i !== hi) ops.swap(i, hi, `Swap the pivot ${pivot} into index ${i}.`);
-          ops.pivot(i);
-          ops.candidate(
-            null,
-            `Pivot ${pivot} settles at index ${i} — everything left is < ${pivot}, everything right is > ${pivot}.`
-          );
-          ops.pivot(null);
-          ops.markSorted([i], [i], `Index ${i} is final — it never moves again.`);
-          ops.range(null);
-          return i;
-        }
-        function qs(lo, hi) {
-          if (lo > hi) return;
-          if (lo === hi) {
-            ops.markSorted([lo], [lo], `A single element at index ${lo} is already in place.`);
-            return;
-          }
-          const p = partition(lo, hi);
-          if (p - 1 - lo >= 1) {
-            ops.range(lo, p - 1);
-            ops.candidate(
-              null,
-              `Recurse into the left half [${lo}, ${p - 1}] (the values below the pivot).`
-            );
-          }
-          qs(lo, p - 1);
-          if (hi - (p + 1) >= 1) {
-            ops.range(p + 1, hi);
-            ops.candidate(
-              null,
-              `Recurse into the right half [${p + 1}, ${hi}] (the values above the pivot).`
-            );
-          }
-          qs(p + 1, hi);
-        }
-        qs(0, n - 1);
-        ops.done(`Sorted in ${ops.comparisons} comparisons and ${ops.swaps} swaps.`);
-      }
-    };
-  }
-});
-
-// custom/steptrace/src/algorithms/rabin-karp.ts
-var rabinKarp;
-var init_rabin_karp = __esm({
-  "custom/steptrace/src/algorithms/rabin-karp.ts"() {
-    rabinKarp = {
-      id: "rabin-karp",
-      kind: "string",
-      meta: { label: "Rabin-Karp" },
-      run: (input, ops) => {
-        const text = String(input.text || "");
-        const pattern = String(input.pattern || "");
-        const n = text.length;
-        const m = pattern.length;
-        const B = 256;
-        const MOD = 101;
-        const hash = (s) => {
-          let h = 0;
-          for (let k = 0; k < s.length; k++) h = (h * B + s.charCodeAt(k)) % MOD;
-          return h;
-        };
-        if (!m || m > n) {
-          ops.init(`Rabin-Karp for "${pattern}".`);
-          ops.done("Nothing to search.");
-          return;
-        }
-        const ph = hash(pattern);
-        ops.init(
-          `Rabin-Karp search for "${pattern}" — slide a window, compare its rolling hash to the pattern hash (${ph}), and only verify character-by-character when the hashes collide.`
-        );
-        let highPow = 1;
-        for (let k = 0; k < m - 1; k++) highPow = highPow * B % MOD;
-        let wh = hash(text.slice(0, m));
-        for (let s = 0; s <= n - m; s++) {
-          ops.hashStep(
-            s,
-            wh,
-            ph,
-            `Window [${s}, ${s + m - 1}]: hash ${wh} ${wh === ph ? "=" : "≠"} pattern hash ${ph}${wh === ph ? " — verify" : " — skip"}.`
-          );
-          if (wh === ph) {
-            let ok = true;
-            for (let j = 0; j < m; j++) {
-              const isMatch = text[s + j] === pattern[j];
-              ops.compare(
-                s + j,
-                j,
-                s,
-                isMatch,
-                `Hash hit — verify text[${s + j}]='${text[s + j]}' vs pattern[${j}]='${pattern[j]}'.`
-              );
-              if (!isMatch) {
-                ok = false;
-                break;
-              }
-            }
-            if (ok) ops.matchAt(s, `Verified — occurrence at index ${s}.`);
-          }
-          if (s < n - m) {
-            const removed = text.charCodeAt(s) * highPow % MOD;
-            wh = (wh - removed + MOD) % MOD;
-            wh = (wh * B + text.charCodeAt(s + m)) % MOD;
-          }
-        }
-        ops.done(
-          ops.found.length ? `Found ${ops.found.length} occurrence(s): index ${ops.found.join(", ")}.` : `Pattern not found.`
-        );
-      }
-    };
-  }
-});
-
-// custom/steptrace/src/algorithms/selection-sort.ts
-var selectionSort;
-var init_selection_sort = __esm({
-  "custom/steptrace/src/algorithms/selection-sort.ts"() {
-    selectionSort = {
-      id: "selection-sort",
-      kind: "sort",
-      meta: { label: "Selection sort" },
-      run: (input, ops) => {
-        const n = ops.value.length;
-        ops.init(
-          `Selection sort — repeatedly find the smallest value in the unsorted region and swap it into the next sorted slot.`
-        );
-        for (let i = 0; i < n - 1; i++) {
-          let min = i;
-          ops.candidate(min, `Assume index ${i} (${ops.value[i]}) is the smallest of the rest.`);
-          for (let j = i + 1; j < n; j++) {
-            ops.compare(j, min, `Compare ${ops.value[j]} with the current smallest ${ops.value[min]}.`);
-            if (ops.value[j] < ops.value[min]) {
-              min = j;
-              ops.candidate(min, `New smallest: ${ops.value[min]} at index ${min}.`);
-            }
-          }
-          if (min !== i) ops.swap(i, min, `Swap the smallest (${ops.value[min]}) into index ${i}.`);
-          ops.candidate(null, `Index ${i} settled — scan the remaining region next.`);
-          ops.markSorted([i], [i], `Index ${i} now holds its final value.`);
-        }
-        ops.lockAll([n - 1]);
-        ops.markSorted([n - 1], [n - 1], `The last element is already in place.`);
-        ops.done(`Sorted in ${ops.comparisons} comparisons and ${ops.swaps} swaps.`);
-      }
-    };
-  }
-});
-
-// custom/steptrace/src/algorithms/sliding-window.ts
-var slidingWindow;
-var init_sliding_window = __esm({
-  "custom/steptrace/src/algorithms/sliding-window.ts"() {
-    slidingWindow = {
-      id: "sliding-window",
-      kind: "pointers",
-      meta: { label: "Sliding window" },
-      run: (input, ops) => {
-        const a = ops.value;
-        const target = input.target;
-        ops.init(
-          `Sliding window — find the shortest contiguous subarray with sum ≥ ${target}. Expand the window right to grow the sum; shrink from the left while it stays ≥ ${target}.`
-        );
-        let lo = 0;
-        let sum = 0;
-        let best = Infinity;
-        let bestRange = null;
-        for (let hi = 0; hi < a.length; hi++) {
-          sum += a[hi];
-          ops.step(
-            { pointers: { lo, hi }, window: [lo, hi] },
-            `Expand right to index ${hi}: window sum = ${sum}.`
-          );
-          while (sum >= target) {
-            if (hi - lo + 1 < best) {
-              best = hi - lo + 1;
-              bestRange = [lo, hi];
-            }
-            ops.step(
-              { pointers: { lo, hi }, window: [lo, hi] },
-              `Sum ${sum} ≥ ${target} (length ${hi - lo + 1}) — record it, then shrink from the left.`
-            );
-            sum -= a[lo];
-            lo++;
-          }
-        }
-        if (bestRange) {
-          const marks = [];
-          for (let k = bestRange[0]; k <= bestRange[1]; k++) marks.push(k);
-          ops.step(
-            { pointers: {}, window: bestRange, mark: marks },
-            `Shortest window: indices ${bestRange[0]}..${bestRange[1]} (length ${best}).`
-          );
-          ops.done(`Answer: the shortest qualifying length is ${best}.`);
-        } else {
-          ops.done(`No subarray reaches ${target}.`);
-        }
-      }
-    };
-  }
-});
-
-// custom/steptrace/src/algorithms/topological-sort.ts
-var topologicalSort;
-var init_topological_sort = __esm({
-  "custom/steptrace/src/algorithms/topological-sort.ts"() {
-    topologicalSort = {
-      id: "topological-sort",
-      kind: "graph",
-      meta: { label: "Topological sort (Kahn)", frontierLabel: "Ready queue (in-degree 0)" },
-      run: (input, ops, graph) => {
-        const adj = {};
-        const indeg = {};
-        for (const nd of graph.nodes) {
-          adj[nd.id] = [];
-          indeg[nd.id] = 0;
-        }
-        for (const e of graph.edges) {
-          adj[e.from].push(e.to);
-          indeg[e.to] = (indeg[e.to] || 0) + 1;
-        }
-        ops.init(
-          `Topological sort (Kahn's algorithm) — repeatedly take a node with no remaining prerequisites (in-degree 0) and append it to the order; removing it may make others ready.`
-        );
-        const ready = [];
-        for (const nd of graph.nodes) {
-          if (indeg[nd.id] === 0) {
-            ready.push(nd.id);
-            ops.enqueue(nd.id, null, `${nd.id} has in-degree 0 — ready.`);
-          }
-        }
-        const order = [];
-        while (ready.length) {
-          ready.sort();
-          const u = ready.shift();
-          ops.visit(u, `Output ${u} (position ${order.length + 1} in the order).`);
-          order.push(u);
-          for (const v of adj[u].slice().sort()) {
-            ops.edge(u, v, `Remove edge ${u}→${v}: in-degree of ${v} becomes ${indeg[v] - 1}.`);
-            indeg[v]--;
-            if (indeg[v] === 0) {
-              ready.push(v);
-              ops.enqueue(v, null, `${v} is now ready.`);
-            }
-          }
-        }
-        ops.done(
-          order.length === graph.nodes.length ? `Topological order: ${order.join(" → ")}.` : `A cycle remains (${graph.nodes.length - order.length} node(s) unresolved) — no valid ordering.`
-        );
-      }
-    };
-  }
-});
-
-// custom/steptrace/src/algorithms/two-pointers.ts
-var twoPointers;
-var init_two_pointers = __esm({
-  "custom/steptrace/src/algorithms/two-pointers.ts"() {
-    twoPointers = {
-      id: "two-pointers",
-      kind: "pointers",
-      meta: { label: "Two pointers" },
-      run: (input, ops) => {
-        const a = ops.value;
-        const target = input.target;
-        ops.init(
-          `Two pointers on a sorted array — find a pair summing to ${target}. Move the left pointer right to raise the sum, the right pointer left to lower it.`
-        );
-        let l = 0;
-        let r = a.length - 1;
-        while (l < r) {
-          const sum = a[l] + a[r];
-          ops.step(
-            { pointers: { L: l, R: r }, window: [l, r] },
-            `a[${l}] + a[${r}] = ${a[l]} + ${a[r]} = ${sum}.`
-          );
-          if (sum === target) {
-            ops.step(
-              { pointers: { L: l, R: r }, window: [l, r], mark: [l, r] },
-              `${a[l]} + ${a[r]} = ${target} — found the pair.`
-            );
-            ops.done(`Found a pair at indices ${l} and ${r}.`);
-            return;
-          }
-          if (sum < target) l++;
-          else r--;
-        }
-        ops.done(`No pair sums to ${target}.`);
-      }
-    };
-  }
-});
-
-// custom/steptrace/src/algorithms/union-find.ts
-var unionFind;
-var init_union_find = __esm({
-  "custom/steptrace/src/algorithms/union-find.ts"() {
-    unionFind = {
-      id: "union-find",
-      kind: "unionfind",
-      meta: { label: "Union-Find" },
-      run: (input, ops) => {
-        const n = input.n || 7;
-        ops.init(
-          `Union-Find on ${n} elements — union merges two sets; find returns a set's representative (its root), flattening the path it walks (path compression).`
-        );
-        const operations = Array.isArray(input.ops) && input.ops.length ? input.ops : [
-          ["union", 0, 1],
-          ["union", 2, 3],
-          ["union", 4, 5],
-          ["union", 1, 2],
-          ["find", 3],
-          ["union", 6, 4]
-        ];
-        const findRoot = (x, why) => {
-          const pathToRoot = [x];
-          let c = x;
-          while (ops.parent[c] !== c) {
-            c = ops.parent[c];
-            pathToRoot.push(c);
-          }
-          ops.findPath(pathToRoot, `${why} follow ${pathToRoot.join(" → ")} to root ${c}.`);
-          for (const node of pathToRoot) {
-            if (node !== c && ops.parent[node] !== c)
-              ops.setParent(node, c, `Path compression: point ${node} straight at root ${c}.`);
-          }
-          return c;
-        };
-        for (const op of operations) {
-          if (op[0] === "union") {
-            const a = op[1];
-            const b = op[2];
-            const ra = findRoot(a, `Union(${a}, ${b}):`);
-            const rb = findRoot(b, `Union(${a}, ${b}):`);
-            if (ra === rb) ops.clear(`${a} and ${b} are already in the same set.`);
-            else ops.setParent(ra, rb, `Link root ${ra} under root ${rb} — the two sets merge.`);
-          } else if (op[0] === "find") {
-            const x = op[1];
-            const rt = findRoot(x, `Find(${x}):`);
-            ops.clear(`Find(${x}) = ${rt}.`);
-          }
-        }
-        const roots = /* @__PURE__ */ new Set();
-        for (let i = 0; i < n; i++) {
-          let c = i;
-          while (ops.parent[c] !== c) c = ops.parent[c];
-          roots.add(c);
-        }
-        ops.done(`Done — ${roots.size} disjoint set${roots.size === 1 ? "" : "s"} remain.`);
-      }
-    };
-  }
-});
-
-// custom/steptrace/src/algorithms/index.ts
-var builtInAlgorithms;
-var init_algorithms = __esm({
-  "custom/steptrace/src/algorithms/index.ts"() {
-    init_bfs();
-    init_binary_search();
-    init_bubble_sort();
-    init_dfs();
-    init_dijkstra();
-    init_fibonacci();
-    init_heap_sort();
-    init_insertion_sort();
-    init_kernighan_popcount();
-    init_kmp();
-    init_lcs();
-    init_linear_search();
-    init_merge_sort();
-    init_n_queens();
-    init_prim();
-    init_quick_sort();
-    init_rabin_karp();
-    init_selection_sort();
-    init_sliding_window();
-    init_topological_sort();
-    init_two_pointers();
-    init_union_find();
-    builtInAlgorithms = [
-      bubbleSort,
-      insertionSort,
-      selectionSort,
-      quickSort,
-      heapSort,
-      mergeSort,
-      bfs,
-      dfs,
-      dijkstra,
-      prim,
-      topologicalSort,
-      binarySearch,
-      linearSearch,
-      kmp,
-      rabinKarp,
-      twoPointers,
-      slidingWindow,
-      lcs,
-      unionFind,
-      kernighanPopcount,
-      nQueens,
-      fibonacci
-    ];
-  }
-});
-
-// custom/steptrace/src/player.ts
-var Player;
-var init_player = __esm({
-  "custom/steptrace/src/player.ts"() {
-    Player = class {
-      constructor(frames, paint, speed) {
-        this.frames = frames;
-        this.paint = paint;
-        this.i = 0;
-        this.speed = speed || 1;
-        this.playing = false;
-        this.timer = null;
-        this.baseDelay = 780;
-        this.onState = () => {
-        };
-      }
-      render() {
-        this.paint(this.frames[this.i], this.i, this.frames.length);
-        this.onState();
-      }
-      _clear() {
-        if (this.timer) {
-          clearTimeout(this.timer);
-          this.timer = null;
-        }
-      }
-      _loop() {
-        if (!this.playing) return;
-        if (this.i >= this.frames.length - 1) {
-          this.playing = false;
-          this.onState();
-          return;
-        }
-        this.timer = setTimeout(() => {
-          this.i++;
-          this.render();
-          this._loop();
-        }, this.baseDelay / this.speed);
-      }
-      play() {
-        if (this.i >= this.frames.length - 1) this.i = 0;
-        this.playing = true;
-        this.render();
-        this.onState();
-        this._loop();
-      }
-      pause() {
-        this.playing = false;
-        this._clear();
-        this.onState();
-      }
-      toggle() {
-        this.playing ? this.pause() : this.play();
-      }
-      stepF() {
-        this.pause();
-        if (this.i < this.frames.length - 1) this.i++;
-        this.render();
-      }
-      stepB() {
-        this.pause();
-        if (this.i > 0) this.i--;
-        this.render();
-      }
-      seek(idx) {
-        this.pause();
-        this.i = Math.max(0, Math.min(this.frames.length - 1, idx | 0));
-        this.render();
-      }
-      reset() {
-        this.pause();
-        this.i = 0;
-        this.render();
-      }
-      setSpeed(s) {
-        this.speed = s;
-      }
-      destroy() {
-        this.playing = false;
-        this._clear();
-      }
-    };
+    SEQUENCE_MIN_GAP_MS = 60;
   }
 });
 
@@ -1625,82 +151,128 @@ function makeBars(stage, n) {
   const bars = [];
   for (let k = 0; k < n; k++) {
     const bar = el("div", "steptrace__bar");
+    bar.style.setProperty("--_i", String(k));
     const fill = el("div", "steptrace__fill");
     const check = el("div", "steptrace__check");
-    check.innerHTML = ICON.check;
+    check.append(successMarker());
     check.setAttribute("aria-hidden", "true");
+    const probe = el("div", "steptrace__probe");
+    probe.innerHTML = ICON.search;
+    probe.setAttribute("aria-hidden", "true");
     const cue = el("div", "steptrace__bar-cue");
     cue.innerHTML = ICON.compare + ICON.swap;
     cue.setAttribute("aria-hidden", "true");
-    fill.append(check, cue);
+    fill.append(check, probe, cue);
     const num = el("div", "steptrace__num");
     bar.append(fill, num);
     stage.append(bar);
-    bars.push({ bar, fill, num, check, cue });
+    bars.push({ bar, fill, num, check, probe, cue });
   }
   return bars;
 }
-function makeSortView(frames) {
+function barHeightStyle(value, maxValue, minimumRem = 1.8) {
+  const ratio = Math.max(0, Math.min(1, Number(value) / Math.max(Number(maxValue), 1)));
+  return `calc(${ratio * 100}% + ${(1 - ratio) * minimumRem}rem)`;
+}
+function resolveLegacySortFrame(frame) {
+  const active = frame.active || [];
+  const isMove = frame.type === "swap" || frame.type === "overwrite" && frame.range;
+  const movements = [];
+  if (frame.type === "swap" && active.length === 2) {
+    movements.push([active[0], active[1]], [active[1], active[0]]);
+  } else if (frame.type === "overwrite" && frame.from != null && active.length === 1) {
+    movements.push([active[0], frame.from]);
+  }
+  return {
+    activeIndices: active,
+    activeRole: active.length ? isMove ? "move" : "compare" : null,
+    markerIndices: [active[0] ?? frame.candidate ?? null, active[1] ?? null],
+    movements,
+    laneIndices: null,
+    holeIndex: null,
+    heldToken: null
+  };
+}
+function makeSortView(frames, semantics = legacySortViewSemantics) {
   const maxVal = Math.max(...frames[0].array, 1);
   const n = frames[0].array.length;
   const hasRange = frames.some((f) => f.range);
   const hasPivot = frames.some((f) => f.pivot != null);
   const stage = el("div", "steptrace__stage steptrace__stage--pins");
   const bars = makeBars(stage, n);
-  const pinI = makePin("i", "a");
-  const pinJ = makePin("j", "b");
-  stage.append(pinI.el, pinJ.el);
+  const pinI = makeMarker(semantics.markerLabels[0], "a");
+  const pinJ = makeMarker(semantics.markerLabels[1], "b");
+  const hasHeldToken = frames.some((frame) => semantics.resolveFrame(frame).heldToken);
+  const heldMarker = hasHeldToken ? makeMarker("", "held") : null;
+  const markers = heldMarker ? [pinI, pinJ, heldMarker] : [pinI, pinJ];
+  stage.append(...markers.map((marker2) => marker2.el));
   const status = statusEl();
-  const tracker = createBarTracker(stage, bars, [pinI, pinJ]);
-  function paint(frame) {
+  const tracker = createBarTracker(stage, bars, markers);
+  const heldMarkerIndex = heldMarker ? markers.indexOf(heldMarker) : -1;
+  let lastPaint = null;
+  function paint(frame, frameIndex) {
     const range = frame.range || null;
+    const visual = semantics.resolveFrame(frame);
+    if (visual.laneIndices && visual.laneIndices.length) stage.dataset.lane = "1";
+    else delete stage.dataset.lane;
     for (let k = 0; k < n; k++) {
       const b = bars[k];
-      b.fill.style.height = `${Math.max(6, frame.array[k] / maxVal * 100)}%`;
-      b.num.textContent = frame.array[k];
+      b.fill.style.height = visual.holeIndex === k ? "12px" : barHeightStyle(frame.array[k], maxVal);
+      b.num.textContent = visual.holeIndex === k ? "∅" : frame.array[k];
       let state = "";
       if (frame.sorted.includes(k)) state = "sorted";
       if (frame.candidate === k) state = "candidate";
-      if (frame.active.includes(k))
-        state = frame.type === "swap" || frame.type === "overwrite" && range ? "swap" : "compare";
+      if (visual.activeIndices.includes(k) && visual.activeRole)
+        state = visual.activeRole === "move" ? "swap" : "compare";
       b.bar.dataset.state = state;
       if (range && (k < range[0] || k > range[1])) b.bar.dataset.outside = "1";
       else delete b.bar.dataset.outside;
       if (frame.pivot != null && frame.pivot === k) b.bar.dataset.pivot = "1";
       else delete b.bar.dataset.pivot;
-      b.bar.classList.remove("steptrace__bar--fly");
-      b.bar.style.transform = "";
+      if (visual.laneIndices)
+        b.bar.dataset.lane = visual.laneIndices.includes(k) ? "active" : "muted";
+      else delete b.bar.dataset.lane;
+      if (visual.holeIndex === k) b.bar.dataset.hole = "1";
+      else delete b.bar.dataset.hole;
     }
-    const fly = [];
-    if (frame.type === "swap" && frame.active && frame.active.length === 2) {
-      fly.push([frame.active[0], frame.active[1]], [frame.active[1], frame.active[0]]);
-    } else if (frame.type === "overwrite" && frame.from != null && frame.active && frame.active.length === 1) {
-      fly.push([frame.active[0], frame.from]);
-    }
-    const starts = [];
-    for (const [to, from] of fly) {
+    const flights = [];
+    for (const [to, from] of visual.movements) {
       const bt = bars[to] && bars[to].bar;
       const bf = bars[from] && bars[from].bar;
       if (!bt || !bf || !bt.isConnected) continue;
       const dx = bf.getBoundingClientRect().left - bt.getBoundingClientRect().left;
-      if (dx) starts.push([bt, dx]);
+      if (dx) flights.push([to, dx]);
     }
-    for (const [bt, dx] of starts) bt.style.transform = `translateX(${dx}px)`;
-    if (starts.length) void starts[0][0].offsetWidth;
-    for (const [bt] of starts) {
-      bt.classList.add("steptrace__bar--fly");
-      bt.style.transform = "";
+    tracker.fly(flights);
+    if (heldMarker) {
+      heldMarker.setLabel(visual.heldToken?.label || "");
+      heldMarker.el.dataset.placing = visual.heldToken?.placing ? "1" : "0";
     }
-    const act = frame.active || [];
-    tracker.set(act[0] != null ? act[0] : frame.candidate, act[1]);
+    const paintState = {
+      frameIndex: Number.isInteger(frameIndex) ? frameIndex : null,
+      tokenId: visual.heldToken?.id ?? null
+    };
+    const resetHeldMarker = heldMarker && shouldResetHeldMarker(lastPaint, paintState);
+    if (resetHeldMarker) tracker.reset(heldMarkerIndex);
+    tracker.set(visual.markerIndices[0], visual.markerIndices[1], visual.heldToken?.index ?? null);
+    if (resetHeldMarker) tracker.renderNow();
+    lastPaint = paintState;
   }
   function watch(frame) {
-    const act = frame.active || [];
+    const visual = semantics.resolveFrame(frame);
     const rows = [
-      { k: "i", v: act[0] != null ? act[0] : "—", sw: "var(--_blue)" },
-      { k: "j", v: act[1] != null ? act[1] : "—", sw: "var(--_violet)" }
+      {
+        k: semantics.markerLabels[0],
+        v: visual.markerIndices[0] ?? "—",
+        sw: "var(--_blue)"
+      },
+      {
+        k: semantics.markerLabels[1],
+        v: visual.markerIndices[1] ?? "—",
+        sw: "var(--_violet)"
+      }
     ];
-    if (hasPivot)
+    if (hasPivot && !semantics.markerLabels.includes("pivot"))
       rows.push({
         k: "pivot",
         v: frame.pivot != null ? `[${frame.pivot}] = ${frame.array[frame.pivot]}` : "—",
@@ -1712,63 +284,281 @@ function makeSortView(frames) {
         v: frame.range ? `[${frame.range[0]}, ${frame.range[1]}]` : "—",
         sw: "var(--_neutral)"
       });
-    rows.push({ k: "swaps", v: frame.swaps, sw: "var(--_amber)" });
+    rows.push(...semantics.watchRows(frame, visual));
+    rows.push({ k: semantics.movementLabel, v: frame.swaps, sw: "var(--_amber)" });
     return rows;
   }
-  return { nodes: [stage, status], paint, watch, destroy: tracker.destroy };
-}
-function makePin(label, role) {
-  const wrap = el("div", "steptrace__pin steptrace__pin--" + role);
-  wrap.innerHTML = '<svg class="steptrace__pin-svg" viewBox="0 0 24 30" aria-hidden="true"><path d="M12 1C6.201 1 1.5 5.701 1.5 11.5C1.5 19.5 12 29 12 29S22.5 19.5 22.5 11.5C22.5 5.701 17.799 1 12 1Z"/></svg>';
-  const lbl = el("span", "steptrace__pin-label");
-  lbl.textContent = label;
-  wrap.append(lbl);
-  return { el: wrap };
-}
-function createBarTracker(stage, bars, markers) {
-  let targets = [null, null];
-  const sx = [null, null];
-  const SPRING = 0.32;
-  function frameStep() {
-    const sr = stage.getBoundingClientRect();
-    for (let m = 0; m < markers.length; m++) {
-      const idx = targets[m];
-      const bar = idx != null && idx >= 0 && bars[idx] ? bars[idx].fill : null;
-      const mk = markers[m];
-      if (!bar || !bar.isConnected) {
-        mk.el.style.opacity = "0";
-        sx[m] = null;
-        continue;
-      }
-      const br = bar.getBoundingClientRect();
-      const tx = br.left + br.width / 2 - sr.left;
-      const ty = br.top - sr.top;
-      if (sx[m] == null) sx[m] = tx;
-      else {
-        sx[m] += (tx - sx[m]) * SPRING;
-        if (Math.abs(tx - sx[m]) < 0.4) sx[m] = tx;
-      }
-      mk.el.style.transform = `translate(${sx[m].toFixed(2)}px, ${ty.toFixed(2)}px)`;
-      mk.el.style.opacity = "1";
-    }
-  }
-  function loop() {
-    frameStep();
-    raf = requestAnimationFrame(loop);
-  }
-  let raf = requestAnimationFrame(loop);
-  const iv = setInterval(frameStep, 16);
   return {
-    set(a, b) {
-      targets = [a != null ? a : null, b != null ? b : null];
-    },
-    destroy() {
-      cancelAnimationFrame(raf);
-      clearInterval(iv);
+    nodes: [stage, status],
+    stageAlignment: "bottom",
+    paint,
+    watch,
+    destroy: tracker.destroy
+  };
+}
+function makeMarker(label, role) {
+  const wrap = el("div", "steptrace__marker steptrace__marker--" + role);
+  const body = el("span", "steptrace__marker-body");
+  const lbl = el("span", "steptrace__marker-label");
+  lbl.textContent = label;
+  body.append(lbl);
+  wrap.append(body);
+  return {
+    el: wrap,
+    body,
+    role,
+    setLabel(value) {
+      lbl.textContent = value;
     }
   };
 }
-function makeSearchView(frames) {
+function clampMarkerCenter(target, bodyWidth, stageWidth, padding = 2) {
+  const availableHalf = Math.max(0, stageWidth / 2 - padding);
+  const half = Math.min(Math.max(0, bodyWidth / 2), availableHalf);
+  const min = padding + half;
+  const max = stageWidth - padding - half;
+  return Math.min(max, Math.max(min, target));
+}
+function markerIsMoving(previousTarget, target, current, epsilon = 0.05) {
+  if (!previousTarget) return true;
+  return Math.abs(previousTarget.x - target.x) > epsilon || Math.abs(previousTarget.y - target.y) > epsilon || Math.abs(current.x - target.x) > epsilon || Math.abs(current.y - target.y) > epsilon;
+}
+function shouldResetHeldMarker(previous, next) {
+  if (!previous) return true;
+  return previous.tokenId !== next.tokenId || next.frameIndex !== previous.frameIndex + 1;
+}
+function createBarTracker(stage, bars, markers) {
+  let targets = markers.map(() => null);
+  const sx = markers.map(() => null);
+  const sy = markers.map(() => null);
+  const vx = markers.map(() => 0);
+  const vy = markers.map(() => 0);
+  const px = markers.map(() => null);
+  const fox = bars.map(() => null);
+  const fvx = bars.map(() => 0);
+  const foHold = bars.map(() => false);
+  const sequences = [];
+  const VEL_EPS = 0.5;
+  let tweenMs = 107;
+  function readTween() {
+    if (typeof getComputedStyle !== "function") return;
+    const parsed = Number.parseFloat(getComputedStyle(stage).getPropertyValue("--_tween"));
+    if (Number.isFinite(parsed) && parsed > 0) tweenMs = parsed;
+  }
+  const rectOf = (node2) => node2 && typeof node2.getBoundingClientRect === "function" ? node2.getBoundingClientRect() : null;
+  const MARKER_ABSENT = { absent: true };
+  const MARKER_UNMEASURED = { unmeasured: true };
+  const isReduced = () => !!(stage.closest && stage.closest(".steptrace--reduced"));
+  let lastStepAt = null;
+  function frameStep(now) {
+    const elapsed = lastStepAt == null ? 0 : Math.max(0, now - lastStepAt);
+    lastStepAt = now;
+    const sr = rectOf(stage);
+    if (!sr) return false;
+    const reduced = isReduced();
+    const omega0 = springOmega(tweenMs);
+    const swapOmega = springOmega(tweenMs * STEP_BUDGET_RATIO);
+    let moving = false;
+    const reads = [];
+    for (let m = 0; m < markers.length; m++) {
+      const idx = targets[m];
+      const bar = idx != null && idx >= 0 && bars[idx] ? bars[idx].fill : null;
+      if (!bar || !bar.isConnected) {
+        reads.push(MARKER_ABSENT);
+        continue;
+      }
+      const br = rectOf(bar);
+      reads.push(br ? { br, bodyWidth: rectOf(markers[m].body)?.width ?? 0 } : MARKER_UNMEASURED);
+    }
+    for (let m = 0; m < markers.length; m++) {
+      const read = reads[m];
+      const mk = markers[m];
+      if (read === MARKER_ABSENT) {
+        mk.el.style.opacity = "0";
+        sx[m] = null;
+        sy[m] = null;
+        vx[m] = 0;
+        vy[m] = 0;
+        px[m] = null;
+        continue;
+      }
+      if (read === MARKER_UNMEASURED) continue;
+      const br = read.br;
+      const targetX = br.left + br.width / 2 - sr.left;
+      const tx = clampMarkerCenter(targetX, read.bodyWidth, sr.width);
+      mk.el.style.setProperty("--steptrace-marker-tip-offset", `${targetX - tx}px`);
+      const ty = mk.role === "held" && mk.el.dataset.placing !== "1" ? 34 : br.top - sr.top;
+      const zeta = mk.role === "held" ? SPRINGS.held.zeta : SPRINGS.marker.zeta;
+      if (sx[m] == null || reduced) {
+        sx[m] = tx;
+        vx[m] = 0;
+      } else if (elapsed > 0) {
+        const next = springStep(sx[m], vx[m], tx, elapsed, { omega0, zeta });
+        sx[m] = next.pos;
+        vx[m] = next.vel;
+      }
+      if (sy[m] == null || reduced || mk.role !== "held") {
+        sy[m] = ty;
+        vy[m] = 0;
+      } else if (elapsed > 0) {
+        const next = springStep(sy[m], vy[m], ty, elapsed, { omega0, zeta: SPRINGS.held.zeta });
+        sy[m] = next.pos;
+        vy[m] = next.vel;
+      }
+      const target = { x: tx, y: ty };
+      if (markerIsMoving(px[m], target, { x: sx[m], y: sy[m] }) || Math.abs(vx[m]) > VEL_EPS || Math.abs(vy[m]) > VEL_EPS)
+        moving = true;
+      px[m] = target;
+      mk.el.style.transform = `translate(${sx[m].toFixed(2)}px, ${sy[m].toFixed(2)}px)`;
+      mk.el.style.opacity = "1";
+    }
+    for (let s = sequences.length - 1; s >= 0; s--) {
+      if (reduced) {
+        sequences[s].cancel();
+        sequences.splice(s, 1);
+      } else if (sequences[s].tick(now)) {
+        moving = true;
+      } else {
+        sequences.splice(s, 1);
+      }
+    }
+    for (let b = 0; b < bars.length; b++) {
+      if (fox[b] == null) continue;
+      const bar = bars[b].bar;
+      if (reduced) {
+        fox[b] = null;
+        fvx[b] = 0;
+        foHold[b] = false;
+        bar.style.transform = "";
+        bar.style.zIndex = "";
+        delete bar.dataset.stage;
+        continue;
+      }
+      if (foHold[b]) {
+        bar.style.transform = `translateX(${fox[b].toFixed(2)}px)`;
+        bar.style.zIndex = "2";
+        moving = true;
+        continue;
+      }
+      if (elapsed > 0) {
+        const next = springStep(fox[b], fvx[b], 0, elapsed, {
+          omega0: swapOmega,
+          zeta: SPRINGS.swap.zeta
+        });
+        fox[b] = next.pos;
+        fvx[b] = next.vel;
+      }
+      if (Math.abs(fox[b]) < 0.4 && Math.abs(fvx[b]) < VEL_EPS) {
+        fox[b] = null;
+        fvx[b] = 0;
+        foHold[b] = false;
+        bar.style.transform = "";
+        bar.style.zIndex = "";
+      } else {
+        bar.style.transform = `translateX(${fox[b].toFixed(2)}px)`;
+        bar.style.zIndex = "2";
+        moving = true;
+      }
+    }
+    return moving;
+  }
+  let lastRafAt = 0;
+  let raf = null;
+  let iv = null;
+  function sleep() {
+    if (raf != null) cancelAnimationFrame(raf);
+    if (iv != null) clearInterval(iv);
+    raf = null;
+    iv = null;
+    lastStepAt = null;
+  }
+  function loop(now) {
+    lastRafAt = now;
+    if (frameStep(now)) raf = requestAnimationFrame(loop);
+    else sleep();
+  }
+  function wake() {
+    if (raf != null) return;
+    readTween();
+    lastStepAt = null;
+    lastRafAt = performance.now();
+    if (typeof requestAnimationFrame !== "function") {
+      frameStep(performance.now());
+      return;
+    }
+    raf = requestAnimationFrame(loop);
+    iv = setInterval(() => {
+      const now = performance.now();
+      if ((document.hidden || now - lastRafAt > 100) && !frameStep(now)) sleep();
+    }, 50);
+  }
+  const ro = typeof ResizeObserver === "function" ? new ResizeObserver(() => wake()) : null;
+  if (ro) ro.observe(stage);
+  wake();
+  return {
+    set(...indices) {
+      targets = markers.map((_, index) => indices[index] ?? null);
+      wake();
+    },
+    reset(index) {
+      if (index < 0 || index >= markers.length) return;
+      sx[index] = null;
+      sy[index] = null;
+      vx[index] = 0;
+      vy[index] = 0;
+      wake();
+    },
+    // Start a fly for each [barIndex, fromOffset]; a bar already in flight is
+    // left alone so its spring carries it home continuously. Reduced motion
+    // skips the travel entirely — the value just updates in place. Each new fly
+    // stages a wind → travel → settle beat sequence (Heer & Robertson): the bar
+    // waits latched at its origin, then springs home, then pops on arrival. At a
+    // small (fast-playback) budget those beats coalesce and the swap is one
+    // overlapped motion, matching the un-staged behaviour.
+    fly(flights) {
+      if (isReduced()) return;
+      readTween();
+      const budgetMs = tweenMs * STEP_BUDGET_RATIO;
+      let started = false;
+      for (const [idx, dx] of flights) {
+        if (idx < 0 || idx >= bars.length || fox[idx] != null) continue;
+        fox[idx] = dx;
+        fvx[idx] = 0;
+        foHold[idx] = true;
+        const bar = bars[idx].bar;
+        sequences.push(
+          sequence(
+            [
+              { at: 0, run: () => bar.dataset.stage = "wind" },
+              {
+                at: SWAP_TRAVEL_AT,
+                run: () => {
+                  foHold[idx] = false;
+                  bar.dataset.stage = "travel";
+                }
+              },
+              { at: SWAP_SETTLE_AT, run: () => bar.dataset.stage = "settle" }
+            ],
+            budgetMs,
+            performance.now()
+          )
+        );
+        started = true;
+      }
+      if (started) wake();
+    },
+    renderNow() {
+      frameStep(performance.now());
+    },
+    destroy() {
+      for (const seq of sequences) seq.cancel();
+      sequences.length = 0;
+      if (ro) ro.disconnect();
+      sleep();
+    }
+  };
+}
+function makeSearchView(frames, semantics = legacySearchViewSemantics) {
   const maxVal = Math.max(...frames[0].array, 1);
   const n = frames[0].array.length;
   const stage = el("div", "steptrace__stage");
@@ -1777,47 +567,174 @@ function makeSearchView(frames) {
   function paint(frame, i, total) {
     for (let k = 0; k < n; k++) {
       const b = bars[k];
-      b.fill.style.height = `${Math.max(6, frame.array[k] / maxVal * 100)}%`;
+      b.fill.style.height = barHeightStyle(frame.array[k], maxVal);
       b.num.textContent = frame.array[k];
-      let state = "range";
-      if (k < frame.lo || k > frame.hi) state = "eliminated";
-      if (frame.mid === k) state = "probe";
-      if (frame.found === k) state = "found";
-      b.bar.dataset.state = state;
+      b.bar.dataset.state = semantics.stateForIndex(frame, k);
     }
     status.innerHTML = escapeHtml(frame.message) + ` <span class="steptrace__counts">· ${frame.comparisons} probe${frame.comparisons === 1 ? "" : "s"} · step ${i + 1}/${total}</span>`;
   }
   function watch(frame) {
-    const target = { k: "target", v: String(frames[0].target), sw: "var(--_accent)" };
-    const at = {
-      k: "at",
-      v: frame.mid != null ? `[${frame.mid}] = ${frame.array[frame.mid]}` : "—",
-      sw: "var(--_blue)"
-    };
-    if (frame.mode === "scan") {
-      return [
-        target,
-        {
-          k: "scanned",
-          v: frame.mid != null ? `${frame.mid + 1}/${frame.array.length}` : "—",
-          sw: "var(--_neutral)"
-        },
-        at
-      ];
-    }
-    return [
-      target,
-      { k: "range", v: `[${frame.lo}, ${frame.hi}]`, sw: "var(--_neutral)" },
-      { ...at, k: "mid" }
-    ];
+    return semantics.watchRows(frame, frames);
   }
-  return { nodes: [stage, status], paint, watch };
+  return { nodes: [stage, status], stageAlignment: "bottom", paint, watch };
+}
+function boundaryTicks(lower, upper) {
+  const span2 = upper - lower;
+  if (span2 <= 12) return Array.from({ length: span2 + 1 }, (_, index) => lower + index);
+  return [
+    ...new Set(Array.from({ length: 13 }, (_, index) => Math.round(lower + span2 * index / 12)))
+  ];
+}
+function makeBoundarySearchView(frames, descriptor) {
+  const first = frames[0];
+  const ticks = boundaryTicks(first.lower, first.upper);
+  const maxExtraLanes = Math.max(
+    1,
+    ...frames.map(
+      (frame) => frame.evaluation ? Math.max(0, frame.evaluation.required - frame.evaluation.allowed) : 0
+    )
+  );
+  const root = el("section", "steptrace__boundary");
+  root.setAttribute("aria-label", descriptor.ariaLabel);
+  const domain = el("div", "steptrace__boundary-domain");
+  const domainHead = el("div", "steptrace__boundary-section-head");
+  const domainLabel = el("span", "steptrace__boundary-section-label");
+  const domainRange = el("span", "steptrace__boundary-section-value");
+  domainLabel.textContent = descriptor.rangeLabel;
+  domainHead.append(domainLabel, domainRange);
+  const tickList = el("div", "steptrace__boundary-ticks");
+  tickList.style.setProperty("--steptrace-boundary-ticks", String(ticks.length));
+  tickList.setAttribute("role", "list");
+  const tickNodes = ticks.map((value) => {
+    const tick = el("div", "steptrace__boundary-tick");
+    tick.setAttribute("role", "listitem");
+    tick.dataset.value = String(value);
+    tick.textContent = String(value);
+    tickList.append(tick);
+    return { value, tick };
+  });
+  domain.append(domainHead, tickList);
+  const evaluation = el("div", "steptrace__boundary-evaluation");
+  const evaluationHead = el("div", "steptrace__boundary-section-head");
+  const evaluationLabel = el("span", "steptrace__boundary-section-label");
+  const verdict = el("span", "steptrace__boundary-verdict");
+  evaluationLabel.textContent = descriptor.evaluationLabel;
+  evaluationHead.append(evaluationLabel, verdict);
+  const lanes = el("div", "steptrace__boundary-lanes");
+  const laneNodes = Array.from({ length: first.allowed }, (_, index) => {
+    const lane = el("div", "steptrace__boundary-lane");
+    const head = el("div", "steptrace__boundary-lane-head");
+    const label = el("span", "steptrace__boundary-lane-label");
+    const total = el("span", "steptrace__boundary-lane-total");
+    label.textContent = `Day ${index + 1}`;
+    head.append(label, total);
+    const packages = el("div", "steptrace__boundary-packages");
+    const meter = el("div", "steptrace__boundary-meter");
+    const fill = el("div", "steptrace__boundary-meter-fill");
+    meter.append(fill);
+    lane.append(head, packages, meter);
+    lanes.append(lane);
+    return { lane, total, packages, fill };
+  });
+  const overflow = el("div", "steptrace__boundary-lane steptrace__boundary-lane--overflow");
+  overflow.style.setProperty("--steptrace-boundary-overflow-rows", String(maxExtraLanes));
+  const overflowHead = el("div", "steptrace__boundary-lane-head");
+  const overflowLabel = el("span", "steptrace__boundary-lane-label");
+  const overflowTotal = el("span", "steptrace__boundary-lane-total");
+  overflowLabel.textContent = "Beyond limit";
+  overflowHead.append(overflowLabel, overflowTotal);
+  const overflowRows = Array.from({ length: maxExtraLanes }, () => {
+    const row = el("div", "steptrace__boundary-overflow-row");
+    const rowLabel = el("span", "steptrace__boundary-overflow-label");
+    const packages = el("div", "steptrace__boundary-packages");
+    row.append(rowLabel, packages);
+    overflow.append(row);
+    return { row, rowLabel, packages };
+  });
+  overflow.prepend(overflowHead);
+  lanes.append(overflow);
+  evaluation.append(evaluationHead, lanes);
+  root.append(domain, evaluation);
+  const legend = makeLegend(
+    [
+      ["range", "unknown candidate"],
+      ["infeasible", "known too small"],
+      ["feasible", "known feasible"],
+      ["probe", "current check"]
+    ].map(([state, label]) => ({
+      state,
+      label,
+      swatchClass: "steptrace__boundary-legend-swatch"
+    })),
+    "Monotone boundary states",
+    "steptrace__boundary-legend"
+  );
+  const status = statusEl();
+  function packageTokens(container, items) {
+    const tokens = items.map((weight) => {
+      const token = el("span", "steptrace__boundary-package");
+      token.textContent = weight;
+      return token;
+    });
+    if (!tokens.length) {
+      const empty = el("span", "steptrace__boundary-empty");
+      empty.textContent = "unused";
+      tokens.push(empty);
+    }
+    container.replaceChildren(...tokens);
+  }
+  function paint(frame, index, totalFrames) {
+    domainRange.textContent = `range ${frame.lo}–${frame.hi}`;
+    for (const { value, tick } of tickNodes) {
+      let state = "range";
+      if (value <= frame.maxInfeasible) state = "infeasible";
+      if (value >= frame.minFeasible) state = "feasible";
+      if (frame.answer === value) state = "answer";
+      tick.dataset.state = state;
+      tick.dataset.current = frame.candidate === value ? "true" : "false";
+      tick.setAttribute(
+        "aria-label",
+        `Capacity ${value}: ${state}${frame.candidate === value ? ", current check" : ""}`
+      );
+    }
+    const model = frame.evaluation;
+    const candidate = frame.candidate;
+    verdict.textContent = model ? model.feasible ? `${candidate} is feasible` : `${candidate} is too small` : "waiting for first check";
+    verdict.dataset.state = model ? model.feasible ? "feasible" : "infeasible" : "pending";
+    for (let laneIndex = 0; laneIndex < laneNodes.length; laneIndex++) {
+      const node2 = laneNodes[laneIndex];
+      const lane = model?.lanes[laneIndex] || null;
+      packageTokens(node2.packages, lane?.items || []);
+      node2.total.textContent = lane && candidate != null ? `${descriptor.unitLabel} ${lane.total}/${candidate}` : descriptor.unitLabel;
+      node2.fill.style.width = lane && candidate ? `${Math.min(100, lane.total / candidate * 100)}%` : "0%";
+      node2.lane.dataset.state = lane ? "used" : "empty";
+    }
+    const extra = model ? model.lanes.slice(model.allowed) : [];
+    overflow.dataset.state = extra.length ? "overflow" : "empty";
+    overflowTotal.textContent = extra.length ? `+${extra.length} day${extra.length === 1 ? "" : "s"}` : "none";
+    for (let extraIndex = 0; extraIndex < overflowRows.length; extraIndex++) {
+      const row = overflowRows[extraIndex];
+      const lane = extra[extraIndex];
+      row.row.dataset.state = lane ? "overflow" : "empty";
+      row.rowLabel.textContent = lane ? `Day ${model.allowed + extraIndex + 1}` : "—";
+      packageTokens(row.packages, lane?.items || []);
+    }
+    status.innerHTML = escapeHtml(frame.message) + ` <span class="steptrace__counts">· ${frame.probes} check${frame.probes === 1 ? "" : "s"} · step ${index + 1}/${totalFrames}</span>`;
+  }
+  return {
+    nodes: [root, legend, status],
+    stageLayout: "fill",
+    paint,
+    watch(frame) {
+      return descriptor.watchRows(frame);
+    }
+  };
 }
 function makeMatchView(frames) {
+  if (frames[0].profile === "z-array") return makeZArrayView(frames);
+  if (frames[0].profile === "boyer-moore") return makeBoyerMooreView(frames);
   const text = frames[0].text;
   const pattern = frames[0].pattern;
-  const hasHash = frames.some((f) => f.hash);
-  const hashBadge = el("div", "steptrace__hash");
   const textRow = el("div", "steptrace__cells");
   const tcells = [];
   for (let k = 0; k < text.length; k++) {
@@ -1862,9 +779,6 @@ function makeMatchView(frames) {
       tcells[frame.cmpT].dataset.state = frame.cmpResult || "probe";
     if (frame.cmpP != null && pcells[frame.cmpP])
       pcells[frame.cmpP].dataset.state = frame.cmpResult || "probe";
-    if (hasHash) {
-      hashBadge.textContent = frame.hash ? `window hash ${frame.hash.window} ${frame.hash.window === frame.hash.pattern ? "=" : "≠"} pattern hash ${frame.hash.pattern}` : " ";
-    }
     status.innerHTML = escapeHtml(frame.message) + ` <span class="steptrace__counts">· step ${i + 1}/${total}</span>`;
   }
   function watch(frame) {
@@ -1872,17 +786,302 @@ function makeMatchView(frames) {
       { k: "shift", v: String(frame.shift), sw: "var(--_blue)" },
       { k: "matches", v: String(frame.found.length), sw: "var(--_green)" }
     ];
-    if (hasHash) {
-      rows.push({
-        k: "hash",
-        v: frame.hash ? `${frame.hash.window} / ${frame.hash.pattern}` : "—",
-        sw: "var(--_amber)"
-      });
-    }
     return rows;
   }
-  const nodes = hasHash ? [stage, hashBadge, status] : [stage, status];
-  return { nodes, paint, watch, destroy: () => ro && ro.disconnect() };
+  return { nodes: [stage, status], paint, watch, destroy: () => ro && ro.disconnect() };
+}
+function makeBoyerMooreView(frames) {
+  const first = frames[0];
+  const text = first.text;
+  const pattern = first.pattern;
+  const stage = el("div", "steptrace__match steptrace__bm");
+  stage.dataset.profile = "boyer-moore";
+  const viewport = el("div", "steptrace__bm-viewport");
+  const board = el("div", "steptrace__bm-board");
+  const makeCell = (character, patternCell = false) => {
+    const cell = el(
+      "div",
+      `steptrace__cell steptrace__bm-cell${patternCell ? " steptrace__cell--pat" : ""}`
+    );
+    const value = el("span", "steptrace__bm-char");
+    value.textContent = character;
+    const cue = el("span", "steptrace__bm-compare-icon");
+    cue.setAttribute("aria-hidden", "true");
+    const matchIcon = el("span", "steptrace__bm-icon steptrace__bm-icon--match");
+    matchIcon.append(successMarker());
+    matchIcon.setAttribute("aria-hidden", "true");
+    const mismatchIcon = el("span", "steptrace__bm-icon steptrace__bm-icon--mismatch");
+    mismatchIcon.innerHTML = ICON.x;
+    mismatchIcon.setAttribute("aria-hidden", "true");
+    cue.append(matchIcon, mismatchIcon);
+    cell.append(value, cue);
+    return cell;
+  };
+  const patternRow = el("div", "steptrace__cells steptrace__cells--pat steptrace__bm-pattern");
+  const patternCells = [];
+  for (let i = 0; i < pattern.length; i++) {
+    const cell = makeCell(pattern[i], true);
+    patternRow.append(cell);
+    patternCells.push(cell);
+  }
+  const textRow = el("div", "steptrace__cells steptrace__bm-text");
+  const textCells = [];
+  for (let i = 0; i < text.length; i++) {
+    const cell = makeCell(text[i]);
+    textRow.append(cell);
+    textCells.push(cell);
+  }
+  board.append(patternRow, textRow);
+  viewport.append(board);
+  stage.append(viewport);
+  const status = statusEl();
+  let currentFrame = first;
+  function applyGeom() {
+    const measured = textCells[0]?.getBoundingClientRect?.().width || CELL_W;
+    const cw = measured > 0 ? measured : CELL_W;
+    stage.style.setProperty("--_cw", `${cw}px`);
+    patternRow.style.transform = `translateX(${(currentFrame.shift * cw).toFixed(2)}px)`;
+  }
+  const ro = typeof ResizeObserver !== "undefined" ? new ResizeObserver(applyGeom) : null;
+  if (ro) ro.observe(textRow);
+  function paint(frame, index, total) {
+    currentFrame = frame;
+    stage.dataset.frame = frame.type;
+    for (const cell of textCells) cell.dataset.state = "";
+    for (const cell of patternCells) cell.dataset.state = "";
+    for (const found of frame.found)
+      for (let j = 0; j < pattern.length; j++)
+        if (textCells[found + j]) textCells[found + j].dataset.state = "found";
+    if (frame.matchedFrom != null)
+      for (let j = frame.matchedFrom; j < pattern.length; j++) {
+        patternCells[j].dataset.state = "suffix";
+        const textCell = textCells[frame.shift + j];
+        if (textCell && textCell.dataset.state !== "found") textCell.dataset.state = "suffix";
+      }
+    if (frame.cmpT != null && textCells[frame.cmpT])
+      textCells[frame.cmpT].dataset.state = frame.cmpResult;
+    if (frame.cmpP != null && patternCells[frame.cmpP])
+      patternCells[frame.cmpP].dataset.state = frame.cmpResult;
+    if (frame.type === "match" || frame.shiftDecision?.winner === "full-match" && frame.found.includes(frame.shift))
+      for (const cell of patternCells) cell.dataset.state = "found";
+    applyGeom();
+    status.innerHTML = escapeHtml(frame.message) + ` <span class="steptrace__counts">· step ${index + 1}/${total}</span>`;
+  }
+  function watch(frame) {
+    const suffix = frame.matchedFrom == null || frame.matchedFrom >= pattern.length ? "—" : pattern.slice(frame.matchedFrom);
+    const choice = ["decision", "match", "shift", "done"].includes(frame.type) ? frame.shiftDecision : null;
+    const winner = choice?.winner === "bad-character" ? "bad wins" : choice?.winner === "good-suffix" ? "good wins" : choice?.winner === "full-match" ? "full match" : choice?.winner === "tie" ? "tie" : "";
+    return [
+      { k: "align", v: frame.shift, sw: "var(--_blue)" },
+      { k: "j", v: frame.j ?? "—", sw: "var(--_violet)" },
+      { k: "suffix", v: suffix, sw: "var(--_green)" },
+      { k: "bad shift", v: choice?.bad ?? "—", sw: "var(--_blue)" },
+      { k: "good shift", v: choice?.good ?? "—", sw: "var(--_violet)" },
+      {
+        k: "selected shift",
+        v: choice ? `${choice.selected} · ${winner}` : "—",
+        sw: "var(--_amber)"
+      }
+    ];
+  }
+  return {
+    nodes: [stage, status],
+    stableStage: true,
+    paint,
+    watch,
+    destroy: () => ro && ro.disconnect()
+  };
+}
+function resolveVisibleScrollLeft(scrollLeft, clientWidth, scrollWidth, targetStart, targetEnd, padding = 8) {
+  if (!Number.isFinite(scrollLeft) || !Number.isFinite(clientWidth) || !Number.isFinite(scrollWidth) || !Number.isFinite(targetStart) || !Number.isFinite(targetEnd) || clientWidth <= 0)
+    return scrollLeft;
+  const maxScroll = Math.max(0, scrollWidth - clientWidth);
+  const inset = Math.min(Math.max(0, padding), clientWidth / 2);
+  if (targetStart < scrollLeft + inset) return Math.min(maxScroll, Math.max(0, targetStart - inset));
+  if (targetEnd > scrollLeft + clientWidth - inset)
+    return Math.min(maxScroll, Math.max(0, targetEnd - clientWidth + inset));
+  return scrollLeft;
+}
+function makeZArrayView(frames) {
+  const text = frames[0].text;
+  const stage = el("div", "steptrace__z");
+  stage.dataset.profile = "z-array";
+  const viewport = el("div", "steptrace__z-viewport");
+  const board = el("div", "steptrace__z-board");
+  board.style.setProperty("--_z-length", String(Math.max(text.length, 1)));
+  const makeRail = (label) => {
+    const rail = el("div", "steptrace__z-rail");
+    const heading = el("div", "steptrace__rail-label steptrace__z-label");
+    heading.textContent = label;
+    rail.append(heading);
+    return rail;
+  };
+  const prefixRail = makeRail("prefix");
+  const prefixClip = el("div", "steptrace__z-prefix-clip");
+  const prefixTrack = el("div", "steptrace__cells steptrace__z-track");
+  const prefixCells = [];
+  for (let k = 0; k < text.length; k++) {
+    const cell = el("div", "steptrace__cell steptrace__z-cell steptrace__z-cell--prefix");
+    cell.textContent = text[k];
+    prefixTrack.append(cell);
+    prefixCells.push(cell);
+  }
+  prefixClip.append(prefixTrack);
+  prefixRail.append(prefixClip);
+  const stringRail = makeRail("string");
+  const stringRow = el("div", "steptrace__cells steptrace__z-string");
+  const stringCells = [];
+  for (let k = 0; k < text.length; k++) {
+    const edge = k === text.length - 1 ? " steptrace__z-cell--edge-end" : "";
+    const cell = el("div", `steptrace__cell steptrace__z-cell steptrace__z-cell--string${edge}`);
+    const value = el("span", "steptrace__z-char");
+    value.textContent = text[k];
+    const index = el("span", "steptrace__z-index");
+    index.textContent = String(k);
+    cell.append(value, index);
+    stringRow.append(cell);
+    stringCells.push(cell);
+  }
+  const cursor = el("div", "steptrace__z-cursor");
+  cursor.setAttribute("aria-hidden", "true");
+  const bracket = el("div", "steptrace__z-bracket");
+  bracket.setAttribute("aria-hidden", "true");
+  stringRow.append(bracket, cursor);
+  stringRail.append(stringRow);
+  const zRail = makeRail("Z array");
+  const zRow = el("div", "steptrace__cells steptrace__z-values");
+  const zCells = [];
+  for (let k = 0; k < text.length; k++) {
+    const cell = el("div", "steptrace__cell steptrace__z-cell steptrace__z-cell--value");
+    cell.textContent = "·";
+    zRow.append(cell);
+    zCells.push(cell);
+  }
+  zRail.append(zRow);
+  board.append(prefixRail, stringRail, zRail);
+  viewport.append(board);
+  stage.append(viewport);
+  const status = statusEl();
+  let currentFrame = frames[0];
+  function applyGeom() {
+    const measured = stringCells[0]?.getBoundingClientRect?.().width || CELL_W;
+    const cw = measured > 0 ? measured : CELL_W;
+    const i = currentFrame.i;
+    const [l, r] = currentFrame.box || [0, 0];
+    stage.style.setProperty("--_cw", `${cw}px`);
+    prefixTrack.style.transform = `translateX(${((i ?? 0) * cw).toFixed(2)}px)`;
+    cursor.style.transform = `translateX(${((i ?? 0) * cw).toFixed(2)}px)`;
+    bracket.style.transform = `translateX(${(l * cw).toFixed(2)}px)`;
+    const shellEndInset = r === text.length - 1 ? 1 : 0;
+    const boxWidth = Math.max(1, r - l + 1) * cw;
+    bracket.style.width = `${Math.max(1, boxWidth - shellEndInset)}px`;
+  }
+  function ensureActiveVisible() {
+    if (currentFrame.i == null) return;
+    const candidate = currentFrame.compare?.candidate;
+    const firstIndex = Math.min(currentFrame.i, candidate ?? currentFrame.i);
+    const lastIndex = Math.max(currentFrame.i, candidate ?? currentFrame.i);
+    const firstRect = stringCells[firstIndex]?.getBoundingClientRect?.();
+    const lastRect = stringCells[lastIndex]?.getBoundingClientRect?.();
+    const viewportRect = viewport.getBoundingClientRect?.();
+    if (!firstRect || !lastRect || !viewportRect) return;
+    const targetStart = viewport.scrollLeft + firstRect.left - viewportRect.left;
+    const targetEnd = viewport.scrollLeft + lastRect.left + lastRect.width - viewportRect.left;
+    const next = resolveVisibleScrollLeft(
+      viewport.scrollLeft,
+      viewport.clientWidth,
+      viewport.scrollWidth,
+      targetStart,
+      targetEnd
+    );
+    if (Math.abs(next - viewport.scrollLeft) < 0.5) return;
+    const behavior = stage.closest?.(".steptrace--reduced") ? "auto" : "smooth";
+    if (typeof viewport.scrollTo === "function") viewport.scrollTo({ left: next, behavior });
+    else viewport.scrollLeft = next;
+  }
+  function syncLayout() {
+    applyGeom();
+    ensureActiveVisible();
+  }
+  const ro = typeof ResizeObserver !== "undefined" ? new ResizeObserver(syncLayout) : null;
+  if (ro) {
+    ro.observe(stringRow);
+    ro.observe(viewport);
+  }
+  function paint(frame, index, total) {
+    currentFrame = frame;
+    stage.dataset.frame = frame.type;
+    stage.dataset.case = frame.sourceCase || "";
+    const comparisonActive = !!frame.compare;
+    const copyActive = frame.type === "copy";
+    const boxActive = !!frame.box && frame.box[0] <= frame.box[1];
+    prefixClip.dataset.clipped = frame.i != null && frame.i > 0 ? "1" : "0";
+    bracket.dataset.edgeStart = boxActive && frame.box[0] === 0 ? "1" : "0";
+    bracket.dataset.edgeEnd = boxActive && frame.box[1] === text.length - 1 ? "1" : "0";
+    cursor.dataset.visible = frame.i != null && !comparisonActive && !copyActive ? "1" : "0";
+    bracket.dataset.visible = boxActive && !comparisonActive && !copyActive ? "1" : "0";
+    for (let k = 0; k < text.length; k++) {
+      prefixCells[k].dataset.state = "";
+      stringCells[k].dataset.state = "";
+      zCells[k].dataset.state = "";
+      zCells[k].textContent = frame.z[k] == null ? "·" : String(frame.z[k]);
+      if (frame.box && k >= frame.box[0] && k <= frame.box[1]) stringCells[k].dataset.box = "1";
+      else delete stringCells[k].dataset.box;
+    }
+    if (frame.i != null && !comparisonActive && !copyActive && stringCells[frame.i])
+      stringCells[frame.i].dataset.state = "probe";
+    if (frame.type === "copy" && frame.k != null) {
+      zCells[frame.k].dataset.state = "copy-source";
+      zCells[frame.i].dataset.state = "copy-target";
+    }
+    if (frame.type === "commit" && frame.i != null) zCells[frame.i].dataset.state = "found";
+    if (frame.compare) {
+      const state = frame.compare.result;
+      prefixCells[frame.compare.prefix].dataset.state = state;
+      stringCells[frame.compare.candidate].dataset.state = state;
+    }
+    syncLayout();
+    status.innerHTML = escapeHtml(frame.message) + ` <span class="steptrace__counts">· step ${index + 1}/${total}</span>`;
+  }
+  function watch(frame) {
+    const box = frame.box || [0, 0];
+    const boxValue = box[0] <= box[1] ? `[${box[0]}, ${box[1]}]` : "—";
+    const source = frame.sourceCase === "outside" ? "direct" : frame.sourceCase === "copy" && frame.k != null ? `copy Z[${frame.k}]` : frame.sourceCase === "reuse-extend" ? "extend edge" : "—";
+    return [
+      {
+        k: "i",
+        v: frame.i ?? "—",
+        sw: "var(--_blue)",
+        hint: "Suffix start whose prefix-match length is being computed."
+      },
+      { k: "Z-box", v: boxValue, sw: "var(--_violet)" },
+      { k: "source", v: source, sw: "var(--_amber)" },
+      {
+        k: "Z[i]",
+        v: frame.i == null ? "—" : frame.z[frame.i] ?? "·",
+        sw: "var(--_green)"
+      }
+    ];
+  }
+  return {
+    nodes: [stage, status],
+    stableStage: true,
+    paint,
+    watch,
+    destroy: () => ro && ro.disconnect()
+  };
+}
+function makeArrayStrip(values) {
+  const wrap = el("div", "steptrace__pwrap");
+  const strip = el("div", "steptrace__pcells");
+  const cells = values.map((value) => {
+    const cell = el("div", "steptrace__pcell");
+    cell.textContent = String(value);
+    strip.append(cell);
+    return cell;
+  });
+  wrap.append(strip);
+  return { wrap, strip, cells };
 }
 function makePointerView(frames) {
   const n = frames[0].array.length;
@@ -1893,20 +1092,12 @@ function makePointerView(frames) {
     }
     return [];
   })();
-  const wrap = el("div", "steptrace__pwrap");
-  const strip = el("div", "steptrace__pcells");
-  const cells = [];
-  for (let k = 0; k < n; k++) {
-    const cell = el("div", "steptrace__pcell");
-    cell.textContent = frames[0].array[k];
-    strip.append(cell);
-    cells.push(cell);
-  }
+  const { wrap, cells } = makeArrayStrip(frames[0].array);
   const brackets = el("div", "steptrace__pbrackets");
   const brL = el("div", "steptrace__pbr steptrace__pbr--l");
   const brR = el("div", "steptrace__pbr steptrace__pbr--r");
   brackets.append(brL, brR);
-  wrap.append(strip, brackets);
+  wrap.append(brackets);
   const status = statusEl();
   function paint(frame) {
     const win = frame.window;
@@ -1954,69 +1145,595 @@ function makePointerView(frames) {
   }
   return { nodes: [wrap, status], paint, watch };
 }
-function makeDPView(frames) {
+function paintMatrixRoleBadge(element, descriptor) {
+  element.dataset.role = descriptor.role;
+  element.replaceChildren(descriptor.badge === "success" ? successMarker() : descriptor.badge);
+  element.title = descriptor.label;
+}
+function makeMatrixRoleBadge(descriptor) {
+  const badge = el("span", "steptrace__matrix-role-badge");
+  badge.setAttribute("aria-hidden", "true");
+  paintMatrixRoleBadge(badge, descriptor);
+  return badge;
+}
+function roleDescriptor(descriptors, role) {
+  const descriptor = descriptors.find((candidate) => candidate.role === role);
+  if (!descriptor) throw new Error(`steptrace: matrix role "${role}" is not described.`);
+  return descriptor;
+}
+function makeMatrixFooter(table, columnCount, descriptors) {
+  const root = document.createElement("tfoot");
+  root.className = "steptrace__matrix-footer";
+  root.setAttribute("aria-label", "Current matrix stage");
+  const row = document.createElement("tr");
+  const cell = document.createElement("td");
+  cell.colSpan = columnCount;
+  const content = el("div", "steptrace__matrix-footer-row");
+  const context = el("span", "steptrace__matrix-footer-context");
+  const summary = el("span", "steptrace__matrix-footer-summary");
+  content.append(context, summary);
+  cell.append(content);
+  row.append(cell);
+  root.append(row);
+  table.append(root);
+  function paint(model) {
+    context.textContent = model.context;
+    summary.replaceChildren();
+    if (model.summary.role) {
+      summary.append(makeMatrixRoleBadge(roleDescriptor(descriptors, model.summary.role)));
+    }
+    const text = el("span", "steptrace__matrix-footer-summary-text");
+    text.textContent = model.summary.text;
+    summary.append(text);
+    row.setAttribute("aria-label", `${model.context}; ${model.summary.text}`);
+  }
+  return { paint };
+}
+function makeDPStoryView(frames) {
+  return frames[0].problem === "coin-change" ? makeCoinChangeStoryView(frames) : makeGridPathStoryView(frames);
+}
+function makeCoinChangeStoryView(frames) {
+  const first = frames[0];
+  const root = el("div", "steptrace__dp-story");
+  root.setAttribute("role", "region");
+  root.setAttribute("aria-label", "Coin change counter");
+  root.dataset.approach = first.approach;
+  const context = el("div", "steptrace__dp-story-context");
+  const contextStart = el("span", "steptrace__dp-story-context-start");
+  const contextEnd = el("span", "steptrace__dp-story-context-end");
+  context.append(contextStart, contextEnd);
+  const stage = el("div", "steptrace__dp-story-stage");
+  const rack = el("div", "steptrace__coin-rack");
+  const coinElements = first.coins.map((coin) => {
+    const element = el("span", "steptrace__coin");
+    element.textContent = `${coin}¢`;
+    element.dataset.coin = String(coin);
+    rack.append(element);
+    return element;
+  });
+  stage.append(rack);
+  root.append(context, stage);
+  const status = statusEl();
+  const tray = first.approach === "tabulation" ? null : el("div", "steptrace__coin-tray");
+  const attempts = ["greedy", "naive"].includes(first.approach) ? el("div", "steptrace__coin-attempts") : null;
+  const memo = first.approach === "memoization" ? el("div", "steptrace__coin-memo") : null;
+  const amountBoard = first.approach === "tabulation" ? el("div", "steptrace__amount-board") : null;
+  const amountCells = [];
+  if (tray) stage.append(tray);
+  if (attempts) stage.append(attempts);
+  if (memo) stage.append(memo);
+  if (amountBoard) {
+    amountBoard.style.setProperty("--steptrace-amount-count", String(first.amounts.length));
+    for (const amount of first.amounts) {
+      const cell = el("div", "steptrace__amount-cell");
+      const label = el("span", "steptrace__amount-label");
+      const value = el("span", "steptrace__amount-value");
+      label.textContent = `${amount}¢`;
+      value.textContent = "—";
+      cell.append(label, value);
+      amountBoard.append(cell);
+      amountCells.push({ cell, value, amount });
+    }
+    stage.append(amountBoard);
+  }
+  const legendItems = first.approach === "memoization" ? [
+    ["active", "coin being tried"],
+    ["selected", "current branch"],
+    ["stored", "saved remainder"],
+    ["hit", "answer reused"]
+  ] : first.approach === "tabulation" ? [
+    ["current", "amount being written"],
+    ["dependency", "smaller amount read"],
+    ["stored", "solved amount"],
+    ["best", "optimal amount chain"]
+  ] : [
+    ["active", "coin being tried"],
+    ["selected", "coins on the counter"],
+    ["repeated", "repeated subproblem"],
+    ["best", "best exact change"]
+  ];
+  const legend = makeLegend(
+    legendItems.map(([state, label]) => ({
+      state,
+      label,
+      swatchClass: "steptrace__swatch steptrace__dp-story-swatch"
+    })),
+    "Dynamic-programming state legend"
+  );
+  function paintTray(frame) {
+    if (!tray) return;
+    tray.replaceChildren();
+    const trayLabel = el("span", "steptrace__coin-tray-label");
+    trayLabel.textContent = frame.selected.length ? "on the counter" : "counter is empty";
+    tray.append(trayLabel);
+    for (const coin of frame.selected) {
+      const element = el("span", "steptrace__coin");
+      element.dataset.state = "selected";
+      element.textContent = `${coin}¢`;
+      tray.append(element);
+    }
+  }
+  function paintAttempts(frame) {
+    if (!attempts) return;
+    attempts.replaceChildren();
+    for (const attempt of frame.attempts) {
+      const row = el("div", "steptrace__coin-attempt");
+      row.dataset.state = attempt.state;
+      const label = el("span", "steptrace__coin-attempt-label");
+      const value = el("span", "steptrace__coin-attempt-value");
+      label.textContent = attempt.label;
+      value.textContent = attempt.value;
+      row.append(label, value);
+      attempts.append(row);
+    }
+  }
+  function paintMemo(frame) {
+    if (!memo) return;
+    memo.replaceChildren();
+    const heading = el("div", "steptrace__coin-memo-heading");
+    heading.textContent = "Saved remainder answers";
+    memo.append(heading);
+    for (const entry of frame.memo) {
+      const row = el("div", "steptrace__coin-memo-row");
+      row.dataset.state = entry.state;
+      const key4 = el("span", "steptrace__coin-memo-key");
+      const value = el("span", "steptrace__coin-memo-value");
+      key4.textContent = entry.key;
+      value.textContent = entry.state === "hit" ? `${entry.value} · reused` : entry.value;
+      row.append(key4, value);
+      memo.append(row);
+    }
+  }
+  function paintAmounts(frame) {
+    if (!amountBoard) return;
+    for (let index = 0; index < amountCells.length; index++) {
+      const { cell, value, amount } = amountCells[index];
+      const stored = frame.amountValues[index];
+      value.textContent = stored == null ? "—" : String(stored);
+      cell.setAttribute(
+        "aria-label",
+        stored == null ? `${amount}¢: unsolved` : `${amount}¢: ${stored} coin${stored === 1 ? "" : "s"}`
+      );
+      cell.dataset.state = amount === frame.amountCurrent ? "current" : frame.amountPath.includes(amount) ? "best" : frame.amountDependencies.includes(amount) ? "dependency" : stored != null ? "stored" : "";
+    }
+  }
+  return {
+    nodes: [root, legend, status],
+    stageLayout: "fill",
+    stableStage: true,
+    paint(frame, index, total) {
+      contextStart.textContent = frame.approach === "tabulation" ? "Build exact change from 0¢" : `Customer pays ${frame.target}¢`;
+      contextEnd.textContent = frame.approach === "tabulation" ? frame.amountCurrent == null ? frame.best || "amount board empty" : `writing ${frame.amountCurrent}¢` : `remaining ${frame.remaining}¢`;
+      for (const element of coinElements) {
+        const coin = Number(element.dataset.coin);
+        element.dataset.state = coin === frame.activeCoin ? "active" : "";
+      }
+      paintTray(frame);
+      paintAttempts(frame);
+      paintMemo(frame);
+      paintAmounts(frame);
+      status.innerHTML = escapeHtml(frame.message) + ` <span class="steptrace__counts">· step ${index + 1}/${total}</span>`;
+    },
+    watch(frame) {
+      const plan = frame.selected.length ? frame.selected.map((coin) => `${coin}¢`).join(" + ") : "—";
+      if (frame.approach === "memoization")
+        return [
+          {
+            k: "remaining",
+            v: `${frame.remaining}¢`,
+            sw: "var(--_blue)",
+            hint: "Remainder handled by the current recursive branch."
+          },
+          {
+            k: "plan",
+            v: plan,
+            sw: "var(--_amber)",
+            hint: "Coins chosen before the current remainder was reached."
+          },
+          {
+            k: "memo",
+            v: `${frame.memo.length} answers`,
+            sw: "var(--_violet)",
+            hint: "Remainder answers saved for later recursive calls."
+          },
+          {
+            k: "best",
+            v: frame.best || "—",
+            sw: "var(--_green)",
+            hint: `Fewest exact coins found for the ${frame.target}-cent payment.`
+          }
+        ];
+      if (frame.approach === "tabulation")
+        return [
+          {
+            k: "amount",
+            v: frame.amountCurrent == null ? "—" : `${frame.amountCurrent}¢`,
+            sw: "var(--_blue)",
+            hint: "Amount currently being written on the bottom-up board."
+          },
+          {
+            k: "reads",
+            v: frame.amountDependencies.length ? frame.amountDependencies.map((amount) => `${amount}¢`).join(", ") : "base",
+            sw: "var(--_amber)",
+            hint: "Smaller solved amounts read before writing the current amount."
+          },
+          {
+            k: "solved",
+            v: String(frame.amountValues.filter((value) => value != null).length),
+            sw: "var(--_violet)",
+            hint: "Amount answers already written and available for reuse."
+          },
+          {
+            k: "best",
+            v: frame.best || "—",
+            sw: "var(--_green)",
+            hint: `Fewest exact coins found for the ${frame.target}-cent payment.`
+          }
+        ];
+      return [
+        {
+          k: "remaining",
+          v: `${frame.remaining}¢`,
+          sw: "var(--_blue)",
+          hint: "Amount still owed after the coins currently on the counter."
+        },
+        {
+          k: "plan",
+          v: plan,
+          sw: "var(--_amber)",
+          hint: "Coins chosen by the current branch or strategy."
+        },
+        {
+          k: "attempts",
+          v: String(frame.attempts.length),
+          sw: "var(--_violet)",
+          hint: "Complete or partial change plans exposed so far."
+        },
+        {
+          k: "best",
+          v: frame.best || "—",
+          sw: "var(--_green)",
+          hint: `Fewest exact coins found for the ${frame.target}-cent payment.`
+        }
+      ];
+    }
+  };
+}
+function makeGridPathStoryView(frames) {
+  const first = frames[0];
+  const table = el("table", "steptrace__warehouse-matrix");
+  table.setAttribute("aria-label", "Warehouse route cost matrix");
+  const thead = document.createElement("thead");
+  const headerRow = document.createElement("tr");
+  const corner = document.createElement("th");
+  corner.setAttribute("scope", "col");
+  corner.textContent = "cost ↓ / tile →";
+  headerRow.append(corner);
+  for (let column = 0; column < first.costs[0].length; column++) {
+    const header = document.createElement("th");
+    header.setAttribute("scope", "col");
+    header.textContent = `C${column + 1}`;
+    headerRow.append(header);
+  }
+  thead.append(headerRow);
+  table.append(thead);
+  const tbody = document.createElement("tbody");
+  const cells = [];
+  for (let row = 0; row < first.costs.length; row++) {
+    const tableRow = document.createElement("tr");
+    const header = document.createElement("th");
+    header.setAttribute("scope", "row");
+    header.textContent = `R${row + 1}`;
+    tableRow.append(header);
+    const rowCells = [];
+    for (let column = 0; column < first.costs[row].length; column++) {
+      const cell = document.createElement("td");
+      const place = el("span", "steptrace__warehouse-cell-name");
+      const cost = el("span", "steptrace__warehouse-cell-cost");
+      const stored = el("span", "steptrace__warehouse-cell-stored");
+      place.textContent = row === 0 && column === 0 ? "START" : row === first.costs.length - 1 && column === first.costs[row].length - 1 ? "GOAL" : `R${row + 1}C${column + 1}`;
+      cost.textContent = `cost ${first.costs[row][column]}`;
+      cell.append(place, cost, stored);
+      tableRow.append(cell);
+      rowCells.push({ cell, stored });
+    }
+    cells.push(rowCells);
+    tbody.append(tableRow);
+  }
+  table.append(tbody);
+  const tfoot = document.createElement("tfoot");
+  const footerRow = document.createElement("tr");
+  const footerCell = document.createElement("td");
+  footerCell.colSpan = first.costs[0].length + 1;
+  const footer = el("div", "steptrace__warehouse-footer");
+  const footerStart = el("span", "steptrace__warehouse-footer-start");
+  const footerEnd = el("span", "steptrace__warehouse-footer-end");
+  footer.append(footerStart, footerEnd);
+  footerCell.append(footer);
+  footerRow.append(footerCell);
+  tfoot.append(footerRow);
+  table.append(tfoot);
+  const status = statusEl();
+  const legendItems = first.approach === "memoization" ? [
+    ["current", "tile being evaluated"],
+    ["stored", "saved remaining cost"],
+    ["repeated", "saved answer reused"],
+    ["best", "best complete route"]
+  ] : first.approach === "tabulation" ? [
+    ["current", "tile being written"],
+    ["dependency", "written neighbour read"],
+    ["stored", "remaining cost stored"],
+    ["best", "optimal route"]
+  ] : [
+    ["current", "tile being considered"],
+    ["path", "current route"],
+    ["repeated", "tile reached again"],
+    ["best", "best complete route"]
+  ];
+  const legend = makeLegend(
+    legendItems.map(([state, label]) => ({
+      state,
+      label,
+      swatchClass: "steptrace__swatch steptrace__dp-story-swatch"
+    })),
+    "Dynamic-programming state legend"
+  );
+  return {
+    nodes: [table, legend, status],
+    stageLayout: "fill",
+    paint(frame, index, total) {
+      const path = new Set(frame.path.map(([row, column]) => `${row},${column}`));
+      const repeated = new Set(frame.repeated.map(([row, column]) => `${row},${column}`));
+      const best = new Set(frame.bestPath.map(([row, column]) => `${row},${column}`));
+      const dependencies = new Set(
+        frame.gridDependencies.map(([row, column]) => `${row},${column}`)
+      );
+      let storedCount = 0;
+      for (let row = 0; row < cells.length; row++) {
+        for (let column = 0; column < cells[row].length; column++) {
+          const key4 = `${row},${column}`;
+          const value = frame.gridValues[row][column];
+          if (value != null) storedCount++;
+          cells[row][column].stored.textContent = value == null ? "" : `best ${value}`;
+          cells[row][column].cell.dataset.state = frame.current?.[0] === row && frame.current?.[1] === column ? "current" : best.has(key4) ? "best" : repeated.has(key4) ? "repeated" : dependencies.has(key4) ? "dependency" : path.has(key4) ? "path" : value != null ? "stored" : "";
+          cells[row][column].cell.setAttribute(
+            "aria-label",
+            `R${row + 1}C${column + 1}, cost ${frame.costs[row][column]}${value == null ? "" : `, best remaining cost ${value}`}`
+          );
+        }
+      }
+      footerStart.textContent = frame.approach === "greedy" ? "Greedy route" : frame.approach === "naive" ? "Recursive routes" : frame.approach === "memoization" ? "Memoized route" : "Fill from the goal";
+      footerEnd.textContent = frame.approach === "memoization" ? `${storedCount} answers saved` : frame.approach === "tabulation" ? `${storedCount}/${cells.length * cells[0].length} tiles written` : frame.bestCost == null ? `route cost ${frame.routeCost}` : `best route ${frame.bestCost}`;
+      footerRow.setAttribute("aria-label", `${footerStart.textContent}; ${footerEnd.textContent}`);
+      status.innerHTML = escapeHtml(frame.message) + ` <span class="steptrace__counts">· step ${index + 1}/${total}</span>`;
+    },
+    watch(frame) {
+      const current = frame.current ? `R${frame.current[0] + 1}C${frame.current[1] + 1}` : "—";
+      const stored = frame.gridValues.flat().filter((value) => value != null).length;
+      if (frame.approach === "memoization")
+        return [
+          {
+            k: "tile",
+            v: current,
+            sw: "var(--_blue)",
+            hint: "Warehouse tile handled by the current recursive call."
+          },
+          {
+            k: "route",
+            v: frame.routeLabel,
+            sw: "var(--_amber)",
+            hint: "Recursive route that reached the current tile."
+          },
+          {
+            k: "memo",
+            v: `${stored} tiles`,
+            sw: "var(--_violet)",
+            hint: "Solved remaining costs stored directly in the warehouse map."
+          },
+          {
+            k: "best cost",
+            v: frame.bestCost == null ? "—" : String(frame.bestCost),
+            sw: "var(--_green)",
+            hint: "Lowest complete travel cost found for the warehouse route."
+          }
+        ];
+      if (frame.approach === "tabulation")
+        return [
+          {
+            k: "tile",
+            v: current,
+            sw: "var(--_blue)",
+            hint: "Warehouse tile whose remaining cost is being written."
+          },
+          {
+            k: "reads",
+            v: frame.gridDependencies.length ? frame.gridDependencies.map(([row, column]) => `R${row + 1}C${column + 1}`).join(", ") : "base",
+            sw: "var(--_amber)",
+            hint: "Already-written right and down neighbours read by this tile."
+          },
+          {
+            k: "written",
+            v: `${stored}/${frame.costs.length * frame.costs[0].length}`,
+            sw: "var(--_violet)",
+            hint: "Warehouse tiles with a stored remaining-route cost."
+          },
+          {
+            k: "best cost",
+            v: frame.bestCost == null ? "—" : String(frame.bestCost),
+            sw: "var(--_green)",
+            hint: "Lowest complete travel cost found for the warehouse route."
+          }
+        ];
+      return [
+        {
+          k: "tile",
+          v: current,
+          sw: "var(--_blue)",
+          hint: "Warehouse tile currently entered or evaluated."
+        },
+        {
+          k: "route",
+          v: frame.routeLabel,
+          sw: "var(--_amber)",
+          hint: "Right/down route assembled so far from the loading bay."
+        },
+        {
+          k: "repeated",
+          v: String(frame.repeated.length),
+          sw: "var(--_violet)",
+          hint: "Coordinates reached by more than one recursive route."
+        },
+        {
+          k: "best cost",
+          v: frame.bestCost == null ? "—" : String(frame.bestCost),
+          sw: "var(--_green)",
+          hint: "Lowest complete travel cost found for the warehouse route."
+        }
+      ];
+    }
+  };
+}
+function makeDPView(frames, semantics = lcsMatrixGridSemantics) {
   const f0 = frames[0];
-  const R2 = f0.rowLabels.length;
+  const R = f0.rowLabels.length;
   const C = f0.colLabels.length;
-  const table = el("table", "steptrace__dp");
+  const guided = semantics.stageLayout === "fill";
+  const roleLegend = semantics.roleLegend || [];
+  const table = el("table", `steptrace__dp${guided ? " steptrace__dp--guided" : ""}`);
+  table.setAttribute("aria-label", semantics.tableLabel);
+  const caption = document.createElement("caption");
+  caption.className = "steptrace__dp-caption";
+  caption.textContent = semantics.axisDescription || semantics.tableLabel;
+  table.append(caption);
   const thead = document.createElement("thead");
   const htr = document.createElement("tr");
-  htr.append(document.createElement("th"));
+  const corner = document.createElement("th");
+  corner.setAttribute("scope", "col");
+  corner.className = "steptrace__dp-corner";
+  corner.textContent = semantics.cornerLabel || "";
+  htr.append(corner);
+  const columnHeaders = [];
   for (let c = 0; c < C; c++) {
     const th = document.createElement("th");
     th.textContent = f0.colLabels[c];
+    th.setAttribute("scope", "col");
     htr.append(th);
+    columnHeaders.push(th);
   }
   thead.append(htr);
   table.append(thead);
   const tbody = document.createElement("tbody");
   const cellEls = [];
-  for (let r = 0; r < R2; r++) {
+  const rowHeaders = [];
+  for (let r = 0; r < R; r++) {
     const tr = document.createElement("tr");
     const th = document.createElement("th");
     th.textContent = f0.rowLabels[r];
+    th.setAttribute("scope", "row");
     tr.append(th);
+    rowHeaders.push(th);
     const rowCells = [];
     for (let c = 0; c < C; c++) {
       const td = document.createElement("td");
+      if (guided) {
+        const value = el("span", "steptrace__dp-value");
+        const markers = el("span", "steptrace__dp-markers");
+        markers.setAttribute("aria-hidden", "true");
+        const operandA = makeMatrixRoleBadge(roleDescriptor(roleLegend, "operand-a"));
+        const operandB = makeMatrixRoleBadge(roleDescriptor(roleLegend, "operand-b"));
+        const target = makeMatrixRoleBadge(roleDescriptor(roleLegend, "target"));
+        markers.append(operandA, operandB, target);
+        td.append(value, markers);
+        rowCells.push({ td, value, target, pathMarker: null });
+      } else {
+        const value = el("span", "steptrace__dp-value");
+        const pathMarker = el("span", "steptrace__dp-path-marker");
+        pathMarker.append(successMarker());
+        pathMarker.hidden = true;
+        td.append(value, pathMarker);
+        rowCells.push({ td, value, target: null, pathMarker });
+      }
       tr.append(td);
-      rowCells.push(td);
     }
     cellEls.push(rowCells);
     tbody.append(tr);
   }
   table.append(tbody);
-  const wrap = el("div", "steptrace__dp-wrap");
+  const footer = semantics.footerModel ? makeMatrixFooter(table, C + 1, roleLegend) : null;
+  const wrap = el("div", `steptrace__dp-wrap${guided ? " steptrace__dp-wrap--guided" : ""}`);
   wrap.append(table);
+  const legend = roleLegend.length ? makeLegend(
+    roleLegend.map((descriptor) => ({
+      label: descriptor.label,
+      swatchClass: "steptrace__matrix-role-badge",
+      role: descriptor.role,
+      marker: descriptor.badge === "success" ? successMarker() : document.createTextNode(descriptor.badge)
+    })),
+    "Matrix role legend",
+    "steptrace__matrix-role-legend"
+  ) : null;
+  const stage = guided ? el("div", "steptrace__dp-stage steptrace__dp-stage--guided") : null;
+  if (stage) stage.append(wrap);
   const status = statusEl();
+  const nodes5 = stage ? [stage, ...legend ? [legend] : [], status] : [wrap, status];
   function paint(frame, i, total) {
-    const curKey = frame.cur ? frame.cur.join(",") : null;
-    const depSet = new Set((frame.deps || []).map((d) => d.join(",")));
-    const pathSet = new Set((frame.path || []).map((p) => p.join(",")));
-    for (let r = 0; r < R2; r++) {
+    if (footer && semantics.footerModel) footer.paint(semantics.footerModel(frame));
+    for (let r = 0; r < R; r++) {
+      rowHeaders[r].dataset.role = semantics.headerRole?.(frame, "row", r) || "";
+    }
+    for (let c = 0; c < C; c++) {
+      columnHeaders[c].dataset.role = semantics.headerRole?.(frame, "column", c) || "";
+    }
+    for (let r = 0; r < R; r++) {
       for (let c = 0; c < C; c++) {
-        const td = cellEls[r][c];
+        const { td, value, target, pathMarker } = cellEls[r][c];
         const v = frame.grid[r][c];
-        td.textContent = v == null ? "" : v;
-        const key = r + "," + c;
-        let state = "";
-        if (depSet.has(key)) state = "dep";
-        if (pathSet.has(key)) state = "path";
-        if (curKey === key) state = "cur";
+        value.textContent = semantics.formatValue(v);
+        const state = semantics.stateForCell(frame, r, c);
         td.dataset.state = state;
+        if (pathMarker) pathMarker.hidden = state !== "path";
+        td.dataset.roles = (semantics.rolesForCell?.(frame, r, c) || []).join(" ");
+        const decision = semantics.decisionForCell?.(frame, r, c) || "";
+        if (decision) td.dataset.decision = decision;
+        else delete td.dataset.decision;
+        if (target) {
+          const role = decision === "improve" ? "write" : decision === "keep" ? "keep" : "target";
+          paintMatrixRoleBadge(target, roleDescriptor(roleLegend, role));
+        }
+        td.setAttribute("aria-label", semantics.cellLabel(frame, r, c));
       }
     }
     status.innerHTML = escapeHtml(frame.message) + ` <span class="steptrace__counts">· step ${i + 1}/${total}</span>`;
   }
   function watch(frame) {
-    const cur = frame.cur;
-    const v = cur ? frame.grid[cur[0]][cur[1]] : null;
-    return [
-      { k: "cell", v: cur ? `[${cur[0]}, ${cur[1]}]` : "—", sw: "var(--_blue)" },
-      { k: "value", v: v == null ? "—" : String(v), sw: "var(--_green)" }
-    ];
+    return semantics.watchRows(frame);
   }
-  return { nodes: [wrap, status], paint, watch };
+  return {
+    nodes: nodes5,
+    stageLayout: semantics.stageLayout || "compact",
+    paint,
+    watch
+  };
 }
 function makeUnionFindView(frames) {
   const n = frames[0].n;
@@ -2024,9 +1741,9 @@ function makeUnionFindView(frames) {
   const UR = 16;
   const MX = 26;
   const BASE = 150;
-  const TOP = 26;
+  const TOP3 = 26;
   const width = MX * 2 + Math.max(0, n - 1) * SP + UR * 2;
-  const height = 180;
+  const height2 = 180;
   const cx = (i) => MX + UR + i * SP;
   const PALETTE = [
     "var(--_blue)",
@@ -2037,7 +1754,7 @@ function makeUnionFindView(frames) {
   ];
   const svg = document.createElementNS(SVGNS, "svg");
   svg.setAttribute("class", "steptrace__svg steptrace__uf");
-  svg.setAttribute("viewBox", `0 0 ${width} ${height}`);
+  svg.setAttribute("viewBox", `0 0 ${width} ${height2}`);
   svg.setAttribute("role", "img");
   svg.setAttribute("aria-label", "Union-Find forest");
   const arcLayer = document.createElementNS(SVGNS, "g");
@@ -2093,7 +1810,7 @@ function makeUnionFindView(frames) {
       const midX = (x1 + x2) / 2;
       const arc = document.createElementNS(SVGNS, "path");
       arc.setAttribute("class", "steptrace__ufarc");
-      arc.setAttribute("d", `M ${x1} ${BASE - UR} Q ${midX} ${TOP} ${x2} ${BASE - UR}`);
+      arc.setAttribute("d", `M ${x1} ${BASE - UR} Q ${midX} ${TOP3} ${x2} ${BASE - UR}`);
       arc.setAttribute("fill", "none");
       const active = ae && ae[0] === k && ae[1] === p || hl.has(k) && hl.has(p);
       arc.dataset.active = active ? "true" : "false";
@@ -2142,11 +1859,11 @@ function makeBitsView(frames) {
   stage.append(idxRow);
   const OP = { a: false, b: true, r: true };
   const lanes = {};
-  for (const key of ["a", "b", "r"]) {
+  for (const key4 of ["a", "b", "r"]) {
     const row = el("div", "steptrace__brow");
     const gutter = el("div", "steptrace__bgutter");
-    const label = frames[0].labels[key];
-    if (OP[key]) {
+    const label = frames[0].labels[key4];
+    if (OP[key4]) {
       const op = el("span", "steptrace__bop");
       op.textContent = label;
       gutter.append(op);
@@ -2162,7 +1879,7 @@ function makeBitsView(frames) {
     }
     row.append(gutter, strip);
     stage.append(row);
-    lanes[key] = { row, cells };
+    lanes[key4] = { row, cells };
   }
   const status = statusEl();
   function paint(frame, i, stepTotal) {
@@ -2171,9 +1888,9 @@ function makeBitsView(frames) {
       boxes[k].dataset.just = k === frame.just ? "1" : "0";
     }
     tallyCount.textContent = `${frame.pop} / ${frame.total}`;
-    for (const key of ["a", "b", "r"]) {
-      const lane = lanes[key];
-      const data = frame[key];
+    for (const key4 of ["a", "b", "r"]) {
+      const lane = lanes[key4];
+      const data = frame[key4];
       lane.row.dataset.live = data.live ? "1" : "0";
       for (let j = 0; j < width; j++) {
         const bi = width - 1 - j;
@@ -2201,7 +1918,13 @@ function makeBitsView(frames) {
 function makeBacktrackView(frames) {
   const n = frames[0].n;
   const wrap = el("div", "steptrace__bt");
+  wrap.setAttribute("role", "region");
+  wrap.setAttribute("aria-label", "N-Queens search board and decision tree");
+  const layout = el("div", "steptrace__bt-layout");
+  const boardColumn = el("div", "steptrace__bt-board-column");
   const board = el("div", "steptrace__btboard");
+  board.setAttribute("role", "grid");
+  board.setAttribute("aria-label", `${n} by ${n} chess board`);
   board.style.setProperty("--_n", String(n));
   const cells = [];
   for (let r = 0; r < n; r++) {
@@ -2209,8 +1932,9 @@ function makeBacktrackView(frames) {
     for (let c = 0; c < n; c++) {
       const cell = el("div", "steptrace__btcell");
       cell.dataset.parity = String((r + c) % 2);
+      cell.setAttribute("role", "gridcell");
       const glyph = el("div", "steptrace__btqueen");
-      glyph.textContent = "♛";
+      glyph.innerHTML = ICON.chessQueen;
       glyph.setAttribute("aria-hidden", "true");
       cell.append(glyph);
       board.append(cell);
@@ -2226,7 +1950,295 @@ function makeBacktrackView(frames) {
     strip.append(slot);
     slots.push(slot);
   }
-  wrap.append(board, strip);
+  boardColumn.append(board, strip);
+  const columnsFromQueens = (queens) => {
+    const columns = [];
+    for (const column of queens) {
+      if (column == null) break;
+      columns.push(column);
+    }
+    return columns;
+  };
+  const decisionId = (columns) => columns.length ? `d:${columns.join(".")}` : "root";
+  const pathIds = (columns) => [
+    "root",
+    ...columns.map((_, index) => decisionId(columns.slice(0, index + 1)))
+  ];
+  const treeNodes = [];
+  const treeNodeById = /* @__PURE__ */ new Map();
+  const addTreeNode = (node2) => {
+    if (treeNodeById.has(node2.id)) return treeNodeById.get(node2.id);
+    const stored = { ...node2, children: [] };
+    treeNodes.push(stored);
+    treeNodeById.set(stored.id, stored);
+    if (stored.parent) treeNodeById.get(stored.parent)?.children.push(stored.id);
+    return stored;
+  };
+  addTreeNode({
+    id: "root",
+    parent: null,
+    kind: "root",
+    depth: 0,
+    firstFrame: 0,
+    column: null,
+    attempts: []
+  });
+  let solutionNode = null;
+  for (let frameIndex = 0; frameIndex < frames.length; frameIndex++) {
+    const frame = frames[frameIndex];
+    const columns = columnsFromQueens(frame.queens);
+    if (frame.type === "place" && frame.cursor) {
+      const id = decisionId(columns);
+      addTreeNode({
+        id,
+        parent: decisionId(columns.slice(0, -1)),
+        kind: "decision",
+        depth: frame.cursor.row + 1,
+        firstFrame: frameIndex,
+        row: frame.cursor.row,
+        column: frame.cursor.col,
+        attempts: []
+      });
+    } else if (frame.type === "reject" && frame.cursor) {
+      const parent = decisionId(columns);
+      const id = `p:${parent}`;
+      const pruneNode = addTreeNode({
+        id,
+        parent,
+        kind: "prune",
+        depth: columns.length + 1,
+        firstFrame: frameIndex,
+        column: null,
+        attempts: []
+      });
+      pruneNode.attempts.push({
+        frameIndex,
+        row: frame.cursor.row,
+        column: frame.cursor.col,
+        conflict: frame.conflict
+      });
+    } else if (frame.type === "solved") {
+      const parent = decisionId(columns);
+      solutionNode = addTreeNode({
+        id: "solution",
+        parent,
+        kind: "solution",
+        depth: columns.length + 1,
+        firstFrame: frameIndex,
+        column: null,
+        attempts: []
+      });
+    }
+  }
+  const treeEdges = treeNodes.filter((node2) => node2.parent).map((node2) => ({ from: node2.parent, to: node2.id, kind: node2.kind }));
+  const leafSlots = /* @__PURE__ */ new Map();
+  let leafCount = 0;
+  function assignLeafSlots(nodeId) {
+    const node2 = treeNodeById.get(nodeId);
+    if (!node2.children.length) {
+      const slot2 = leafCount++;
+      leafSlots.set(nodeId, slot2);
+      return slot2;
+    }
+    const childSlots = node2.children.map(assignLeafSlots);
+    const slot = (childSlots[0] + childSlots[childSlots.length - 1]) / 2;
+    leafSlots.set(nodeId, slot);
+    return slot;
+  }
+  assignLeafSlots("root");
+  const maxTreeDepth = Math.max(...treeNodes.map((node2) => node2.depth));
+  function makeTreeLayout() {
+    const leafGap = 36;
+    const depthGap = 42;
+    const leafPad = 90;
+    const leafEndPad = 10;
+    const depthPad = 20;
+    const positions = Object.fromEntries(
+      treeNodes.map((node2) => {
+        const leaf = leafSlots.get(node2.id);
+        return [node2.id, { x: leafPad + leaf * leafGap, y: depthPad + node2.depth * depthGap }];
+      })
+    );
+    return {
+      positions,
+      width: leafPad + leafEndPad + Math.max(0, leafCount - 1) * leafGap,
+      height: depthPad * 2 + maxTreeDepth * depthGap,
+      leafGap,
+      depthGap,
+      leafPad,
+      depthPad
+    };
+  }
+  const treeLayout = makeTreeLayout();
+  const tree = el("aside", "steptrace__bt-tree");
+  tree.setAttribute("role", "region");
+  tree.setAttribute("aria-label", "N-Queens decision tree");
+  tree.dataset.orientation = "portrait";
+  const treeHead = el("div", "steptrace__bt-tree-head");
+  const treeLabel = el("span", "steptrace__rail-label steptrace__bt-tree-label");
+  treeLabel.textContent = "DECISION TREE";
+  const treeDepth = el("span", "steptrace__bt-tree-depth");
+  treeHead.append(treeLabel, treeDepth);
+  const treeCaption = el("div", "steptrace__bt-tree-caption");
+  treeCaption.setAttribute("aria-live", "polite");
+  treeCaption.setAttribute("aria-atomic", "true");
+  const treeCanvas = el("div", "steptrace__bt-tree-canvas");
+  const svgNode = (tag) => typeof document.createElementNS === "function" ? document.createElementNS("http://www.w3.org/2000/svg", tag) : document.createElement(tag);
+  const treeSvg = svgNode("svg");
+  const treeTitle = svgNode("title");
+  const treeDescription = svgNode("desc");
+  const treeId = `steptrace-backtrack-tree-${++backtrackTreeSerial}`;
+  const returnMarkerId = `${treeId}-return`;
+  treeTitle.id = `${treeId}-title`;
+  treeDescription.id = `${treeId}-description`;
+  treeSvg.setAttribute("class", "steptrace__bt-tree-svg");
+  treeSvg.setAttribute("role", "img");
+  treeSvg.setAttribute("aria-labelledby", `${treeTitle.id} ${treeDescription.id}`);
+  treeSvg.setAttribute("preserveAspectRatio", "xMidYMid meet");
+  const treeDefs = svgNode("defs");
+  const returnMarker = svgNode("marker");
+  returnMarker.setAttribute("id", returnMarkerId);
+  returnMarker.setAttribute("viewBox", "0 0 8 8");
+  returnMarker.setAttribute("refX", "4");
+  returnMarker.setAttribute("refY", "4");
+  returnMarker.setAttribute("markerWidth", "5");
+  returnMarker.setAttribute("markerHeight", "5");
+  returnMarker.setAttribute("orient", "auto-start-reverse");
+  const returnArrow = svgNode("path");
+  returnArrow.setAttribute("class", "steptrace__bt-tree-return-arrow");
+  returnArrow.setAttribute("d", "M0 0 8 4 0 8z");
+  returnMarker.append(returnArrow);
+  treeDefs.append(returnMarker);
+  const depthLayer = svgNode("g");
+  depthLayer.setAttribute("class", "steptrace__bt-tree-depths");
+  const depthLabels = [];
+  for (let depth = 0; depth <= maxTreeDepth; depth++) {
+    const depthGroup = svgNode("g");
+    depthGroup.setAttribute("class", "steptrace__bt-tree-depth");
+    depthGroup.setAttribute("aria-hidden", "true");
+    depthGroup.setAttribute("focusable", "false");
+    const depthLabel = svgNode("text");
+    const depthLine = svgNode("line");
+    depthLabel.setAttribute("class", "steptrace__bt-tree-depth-label");
+    depthLabel.setAttribute("text-anchor", "start");
+    depthLabel.setAttribute("dominant-baseline", "central");
+    depthLabel.textContent = depth === 0 ? "root" : depth <= n ? `R${depth - 1}` : "Result";
+    depthLine.setAttribute("class", "steptrace__bt-tree-depth-line");
+    depthLine.setAttribute("aria-hidden", "true");
+    depthLine.setAttribute("focusable", "false");
+    depthGroup.append(depthLabel);
+    depthLayer.append(depthLine);
+    depthLayer.append(depthGroup);
+    depthLabels.push({ group: depthGroup, label: depthLabel, line: depthLine });
+  }
+  const edgeLayer = svgNode("g");
+  edgeLayer.setAttribute("class", "steptrace__bt-tree-edges");
+  const edgeElements = treeEdges.map((edge) => {
+    const line = svgNode("line");
+    line.setAttribute("class", "steptrace__rtedge steptrace__bt-tree-edge");
+    line.setAttribute("aria-hidden", "true");
+    line.setAttribute("focusable", "false");
+    line.dataset.kind = edge.kind;
+    line.dataset.from = edge.from;
+    line.dataset.to = edge.to;
+    edgeLayer.append(line);
+    return { ...edge, element: line };
+  });
+  const nodeLayer = svgNode("g");
+  nodeLayer.setAttribute("class", "steptrace__bt-tree-nodes");
+  const nodeElements = /* @__PURE__ */ new Map();
+  for (const node2 of treeNodes) {
+    const group = svgNode("g");
+    const ring = svgNode("circle");
+    const surface = svgNode("circle");
+    const label = svgNode("text");
+    group.setAttribute("class", "steptrace__node steptrace__rtnode steptrace__bt-tree-node");
+    group.setAttribute("aria-hidden", "true");
+    group.setAttribute("focusable", "false");
+    group.dataset.kind = node2.kind;
+    group.dataset.node = node2.id;
+    ring.setAttribute("class", "steptrace__rtring");
+    ring.setAttribute("r", String(GRAPH_NODE_RADIUS_PX + GRAPH_NODE_HALO_GAP_PX));
+    surface.setAttribute("class", "steptrace__ncirc steptrace__rtcirc");
+    surface.setAttribute("r", String(GRAPH_NODE_RADIUS_PX));
+    label.setAttribute("class", "steptrace__id steptrace__rtlabel steptrace__bt-tree-node-label");
+    label.setAttribute("text-anchor", "middle");
+    label.setAttribute("dominant-baseline", "central");
+    group.append(ring, surface, label);
+    nodeLayer.append(group);
+    nodeElements.set(node2.id, { group, label });
+  }
+  treeSvg.append(treeDefs, treeTitle, treeDescription, depthLayer, edgeLayer, nodeLayer);
+  treeCanvas.append(treeSvg);
+  const treeLegend = makeLegend(
+    [
+      { label: "branch", state: "split", swatchClass: "steptrace__swatch steptrace__rtswatch" },
+      { label: "prune", state: "prune", swatchClass: "steptrace__swatch steptrace__rtswatch" },
+      { label: "return", state: "return", swatchClass: "steptrace__swatch steptrace__rtswatch" },
+      { label: "solution", state: "combine", swatchClass: "steptrace__swatch steptrace__rtswatch" }
+    ],
+    "Decision tree state legend",
+    "steptrace__bt-tree-legend"
+  );
+  tree.append(treeHead, treeCaption, treeCanvas, treeLegend);
+  const geometryPoints = new Map(
+    treeNodes.map((node2) => [node2.id, { ...treeLayout.positions[node2.id] }])
+  );
+  const depthGeometryPoints = depthLabels.map((_, depth) => ({
+    x: 3,
+    y: treeLayout.depthPad + depth * treeLayout.depthGap
+  }));
+  let treeGeometry = null;
+  function applyTreeLayout() {
+    treeSvg.setAttribute("viewBox", `0 0 ${treeLayout.width} ${treeLayout.height}`);
+    treeGeometry?.update();
+  }
+  applyTreeLayout();
+  treeGeometry = observeFixedSvgNodes(
+    treeSvg,
+    [
+      ...treeNodes.map((node2) => ({
+        element: nodeElements.get(node2.id).group,
+        point: geometryPoints.get(node2.id)
+      })),
+      ...depthLabels.map(({ group }, depth) => ({
+        element: group,
+        point: depthGeometryPoints[depth]
+      }))
+    ],
+    (unitsPerCssPixel) => {
+      const inset = GRAPH_NODE_RADIUS_PX * unitsPerCssPixel;
+      const renderedTreeWidth = treeLayout.width / unitsPerCssPixel;
+      const canvasWidth = Number(treeCanvas.clientWidth) || 0;
+      const sideGutter = Math.max(0, (canvasWidth - renderedTreeWidth) / 2);
+      const guideShift = Math.max(0, sideGutter - 8);
+      for (const edge of edgeElements) {
+        const points = trimGraphEdge(
+          geometryPoints.get(edge.from),
+          geometryPoints.get(edge.to),
+          inset
+        );
+        for (const [attribute, value] of Object.entries(points))
+          edge.element.setAttribute(attribute, String(value));
+      }
+      for (let depth = 0; depth < depthLabels.length; depth++) {
+        const { group, line } = depthLabels[depth];
+        const y = treeLayout.depthPad + depth * treeLayout.depthGap;
+        const labelX = (3 - guideShift) * unitsPerCssPixel;
+        Object.assign(depthGeometryPoints[depth], { x: labelX, y });
+        group.setAttribute("transform", `translate(${labelX} ${y}) scale(${unitsPerCssPixel})`);
+        const firstNodeX = Math.min(
+          ...treeNodes.filter((node2) => node2.depth === depth).map((node2) => treeLayout.positions[node2.id].x)
+        );
+        line.setAttribute("x1", String((42 - guideShift) * unitsPerCssPixel));
+        line.setAttribute("y1", String(y));
+        line.setAttribute("x2", String(firstNodeX - (GRAPH_NODE_RADIUS_PX + 2) * unitsPerCssPixel));
+        line.setAttribute("y2", String(y));
+      }
+    }
+  );
+  layout.append(boardColumn, tree);
+  wrap.append(layout);
   const status = statusEl();
   function attackedSet(queens) {
     const hit = /* @__PURE__ */ new Set();
@@ -2242,7 +2254,7 @@ function makeBacktrackView(frames) {
     }
     return hit;
   }
-  function paint(frame) {
+  function paint(frame, frameIndex) {
     const q = frame.queens;
     const cur = frame.cursor;
     const conf = frame.conflict;
@@ -2262,6 +2274,10 @@ function makeBacktrackView(frames) {
         cell.dataset.state = state;
         cell.dataset.hasQueen = hasQueen ? "1" : "0";
         cell.dataset.conflict = conf && conf.row === r && conf.col === c ? "1" : "0";
+        cell.setAttribute(
+          "aria-label",
+          `Row ${r}, column ${c}, ${hasQueen ? "queen" : isCursor ? frame.type === "reject" ? "rejected" : frame.type === "backtrack" ? "queen removed" : "candidate" : attacked.has(r + "," + c) ? "attacked" : "safe"}`
+        );
       }
     }
     for (let r = 0; r < n; r++) {
@@ -2276,6 +2292,78 @@ function makeBacktrackView(frames) {
       }
       slot.dataset.state = sstate;
     }
+    const columns = columnsFromQueens(frame.queens);
+    const activePath = new Set(pathIds(columns));
+    const finalPath = new Set(
+      solutionNode ? [...pathIds(columnsFromQueens(frames.at(-1).queens)), solutionNode.id] : []
+    );
+    let activeNode2 = decisionId(columns);
+    let returnSource = null;
+    let event = "start";
+    let caption = "Start at root";
+    if (frame.type === "place" && cur) {
+      activeNode2 = decisionId(columns);
+      event = "branch";
+      caption = `Branch R${cur.row} C${cur.col} · descend to R${cur.row + 1}`;
+    } else if (frame.type === "reject" && cur) {
+      activeNode2 = `p:${decisionId(columns)}`;
+      activePath.add(activeNode2);
+      event = "prune";
+      caption = frame.conflict ? `Prune R${cur.row} C${cur.col} · blocked by R${frame.conflict.row} C${frame.conflict.col}` : `Prune R${cur.row} C${cur.col}`;
+    } else if (frame.type === "backtrack" && cur) {
+      const returningColumns = [...columns, cur.col];
+      returnSource = decisionId(returningColumns);
+      activeNode2 = decisionId(columns);
+      event = "return";
+      caption = columns.length ? `Return R${cur.row} C${cur.col} → R${columns.length - 1} C${columns.at(-1)}` : `Return R${cur.row} C${cur.col} → root`;
+    } else if (frame.solved && solutionNode) {
+      activeNode2 = solutionNode.id;
+      event = "solution";
+      caption = `Solution [${frame.queens.join(", ")}]`;
+    }
+    const solutionPath = event === "solution" ? finalPath : /* @__PURE__ */ new Set();
+    tree.dataset.event = event;
+    treeDepth.textContent = `depth ${frame.depth} / ${frame.n}`;
+    treeCaption.textContent = caption;
+    treeTitle.textContent = `N-Queens decision tree: ${caption}`;
+    treeDescription.textContent = `${caption}. ${frame.message}`;
+    for (const node2 of treeNodes) {
+      const elements = nodeElements.get(node2.id);
+      const visible = node2.firstFrame <= frameIndex;
+      const onPath = activePath.has(node2.id);
+      const onSolution = solutionPath.has(node2.id);
+      const returning = node2.id === returnSource;
+      elements.group.dataset.vis = visible ? "1" : "0";
+      elements.group.dataset.active = node2.id === activeNode2 ? "true" : "false";
+      elements.group.dataset.path = onPath ? "true" : "false";
+      elements.group.dataset.solution = onSolution ? "true" : "false";
+      elements.group.dataset.returnSource = returning ? "true" : "false";
+      elements.group.dataset.collapsed = visible && !onPath && !onSolution && !returning && node2.id !== activeNode2 ? "true" : "false";
+      elements.group.dataset.state = node2.kind === "prune" ? "prune" : returning ? "return" : node2.kind === "solution" ? "combine" : node2.kind === "decision" ? "split" : "compute";
+      if (!visible) elements.label.textContent = "";
+      else if (node2.kind === "root") elements.label.textContent = "R";
+      else if (node2.kind === "decision") elements.label.textContent = String(node2.column);
+      else if (node2.kind === "solution") elements.label.textContent = "S";
+      else {
+        const seenAttempts = node2.attempts.filter(
+          (attempt) => attempt.frameIndex <= frameIndex
+        ).length;
+        elements.label.textContent = `×${seenAttempts}`;
+      }
+    }
+    for (const edge of edgeElements) {
+      const child = treeNodeById.get(edge.to);
+      const visible = child.firstFrame <= frameIndex;
+      const onPath = activePath.has(edge.from) && activePath.has(edge.to);
+      const onSolution = solutionPath.has(edge.from) && solutionPath.has(edge.to);
+      const returning = edge.to === returnSource;
+      edge.element.dataset.vis = visible ? "1" : "0";
+      edge.element.dataset.path = onPath ? "true" : "false";
+      edge.element.dataset.solution = onSolution ? "true" : "false";
+      edge.element.dataset.return = returning ? "true" : "false";
+      edge.element.dataset.collapsed = visible && !onPath && !onSolution && !returning ? "true" : "false";
+      edge.element.setAttribute("marker-start", returning ? `url(#${returnMarkerId})` : "none");
+    }
     status.innerHTML = escapeHtml(frame.message);
   }
   function watch(frame) {
@@ -2286,121 +2374,395 @@ function makeBacktrackView(frames) {
       { k: "pruned", v: String(frame.pruned), sw: "var(--_muted)" }
     ];
   }
-  return { nodes: [wrap, status], paint, watch };
+  return {
+    nodes: [wrap, status],
+    paint,
+    watch,
+    destroy: () => {
+      treeGeometry.destroy();
+    }
+  };
 }
-function makeRecTreeView(frames) {
+function centerVisibleTree(rects, canvasWidth, canvasHeight) {
+  if (!rects.length) return { x: 0, y: 0 };
+  const left = Math.min(...rects.map((rect) => rect.left));
+  const right = Math.max(...rects.map((rect) => rect.right));
+  const top = Math.min(...rects.map((rect) => rect.top));
+  const bottom = Math.max(...rects.map((rect) => rect.bottom));
+  return {
+    x: canvasWidth / 2 - (left + right) / 2,
+    y: canvasHeight / 2 - (top + bottom) / 2
+  };
+}
+function tieredArrayCells(values, width) {
+  const cellWidth = width / Math.max(1, values.length);
+  return {
+    cells: values.map((value, index) => ({
+      value,
+      x: -width / 2 + cellWidth * (index + 0.5)
+    })),
+    separators: values.slice(1).map((_, index) => -width / 2 + cellWidth * (index + 1))
+  };
+}
+function makeExecutionTreeView(frames, descriptor) {
   const f0 = frames[0];
-  const nodes = f0.nodes;
-  const pad = 26;
-  const xs = nodes.map((n) => n.x);
-  const ys = nodes.map((n) => n.y);
-  const minX = Math.min(...xs);
+  const nodes5 = f0.nodes;
+  const halfHeight = descriptor.nodeHeight / 2;
+  const padY = halfHeight + 12;
+  const naturalNodeWidth = (node2) => node2.width || descriptor.nodeWidth;
+  const lefts = nodes5.map((node2) => node2.x - naturalNodeWidth(node2) / 2);
+  const rights = nodes5.map((node2) => node2.x + naturalNodeWidth(node2) / 2);
+  const ys = nodes5.map((node2) => node2.y);
+  const minX = Math.min(...lefts);
   const minY = Math.min(...ys);
-  const w = Math.max(...xs) - minX + pad * 2;
-  const h = Math.max(...ys) - minY + pad * 2;
-  const pos = Object.fromEntries(
-    nodes.map((n) => [n.id, { x: n.x - minX + pad, y: n.y - minY + pad }])
+  const naturalWidth = Math.max(...rights) - minX + 24;
+  const naturalHeight = Math.max(...ys) - minY + padY * 2;
+  const naturalPosition = Object.fromEntries(
+    nodes5.map((node2) => [node2.id, { x: node2.x - minX + 12, y: node2.y - minY + padY }])
   );
+  const naturalWidths = Object.fromEntries(nodes5.map((node2) => [node2.id, naturalNodeWidth(node2)]));
+  const naturalLayout = {
+    width: naturalWidth,
+    height: naturalHeight,
+    position: naturalPosition,
+    widths: naturalWidths
+  };
+  const visibleNodeIds = new Set(frames.flatMap((frame) => frame.visible));
+  const layoutNodes2 = nodes5.filter((node2) => visibleNodeIds.has(node2.id));
+  const tiers = /* @__PURE__ */ new Map();
+  for (const node2 of layoutNodes2) {
+    const tier = tiers.get(node2.depth) || [];
+    tier.push(node2);
+    tiers.set(node2.depth, tier);
+  }
+  for (const tier of tiers.values()) tier.sort((left, right) => left.x - right.x);
+  const maxTierSize = Math.max(...[...tiers.values()].map((tier) => tier.length));
+  const maxDepth = Math.max(...nodes5.map((node2) => node2.depth));
+  function tierLayout(width, maxNodeWidth, gap) {
+    const widths = {
+      ...naturalWidths,
+      ...Object.fromEntries(
+        layoutNodes2.map((node2) => [node2.id, Math.min(naturalNodeWidth(node2), maxNodeWidth)])
+      )
+    };
+    const position = { ...naturalPosition };
+    const levelGap = descriptor.nodeHeight + 22;
+    for (const [depth, tier] of tiers) {
+      const tierWidth = tier.reduce((total, node2) => total + widths[node2.id], 0) + gap * (tier.length - 1);
+      let x = (width - tierWidth) / 2;
+      for (const node2 of tier) {
+        position[node2.id] = {
+          x: x + widths[node2.id] / 2,
+          y: padY + depth * levelGap
+        };
+        x += widths[node2.id] + gap;
+      }
+    }
+    return {
+      width,
+      height: padY * 2 + maxDepth * levelGap,
+      position,
+      widths
+    };
+  }
+  const desktopGap = 12;
+  const desktopTierWidth = Math.max(
+    ...[...tiers.values()].map(
+      (tier) => tier.reduce(
+        (total, node2) => total + Math.min(naturalNodeWidth(node2), descriptor.nodeWidth),
+        0
+      ) + desktopGap * (tier.length - 1)
+    )
+  ) + 24;
+  const desktopLayout = descriptor.tieredLayout ? tierLayout(
+    Math.max(descriptor.minSvgWidth, desktopTierWidth),
+    descriptor.nodeWidth,
+    desktopGap
+  ) : naturalLayout;
+  let layout = desktopLayout;
+  const nodeWidth = (node2) => layout.widths[node2.id] || naturalNodeWidth(node2);
   const svg = document.createElementNS(SVGNS, "svg");
+  const title = document.createElementNS(SVGNS, "title");
+  const description = document.createElementNS(SVGNS, "desc");
+  const accessibleId = `steptrace-execution-tree-${++executionTreeViewSerial}`;
+  title.id = `${accessibleId}-title`;
+  description.id = `${accessibleId}-description`;
   svg.setAttribute("class", "steptrace__rtsvg");
-  svg.setAttribute("viewBox", `0 0 ${w} ${h}`);
+  svg.setAttribute("viewBox", `0 0 ${layout.width} ${layout.height}`);
+  svg.setAttribute("preserveAspectRatio", "xMidYMid meet");
   svg.setAttribute("role", "img");
-  svg.setAttribute("aria-label", "Recursion tree");
-  const edgeEls = [];
-  for (const e of f0.edges) {
-    const a = pos[e.from];
-    const b = pos[e.to];
+  svg.setAttribute("aria-labelledby", `${title.id} ${description.id}`);
+  const canvasWidth = Math.max(descriptor.minSvgWidth, layout.width * (descriptor.canvasScale || 1));
+  svg.style.setProperty("--steptrace-tree-width", `${canvasWidth}px`);
+  svg.append(title, description);
+  const treeLayer = descriptor.centerVisible ? document.createElementNS(SVGNS, "g") : svg;
+  if (descriptor.centerVisible) {
+    treeLayer.setAttribute("class", "steptrace__rtcontent");
+    svg.append(treeLayer);
+  }
+  const edgeElements = [];
+  for (const edge of f0.edges) {
+    const from = layout.position[edge.from];
+    const to = layout.position[edge.to];
     const line = document.createElementNS(SVGNS, "line");
     line.setAttribute("class", "steptrace__rtedge");
-    line.setAttribute("x1", a.x);
-    line.setAttribute("y1", a.y);
-    line.setAttribute("x2", b.x);
-    line.setAttribute("y2", b.y);
-    svg.append(line);
-    edgeEls.push({ el: line, to: e.to });
+    line.setAttribute("x1", String(from.x));
+    line.setAttribute("y1", String(from.y + halfHeight));
+    line.setAttribute("x2", String(to.x));
+    line.setAttribute("y2", String(to.y - halfHeight));
+    line.setAttribute("aria-hidden", "true");
+    line.setAttribute("focusable", "false");
+    treeLayer.append(line);
+    edgeElements.push({ element: line, from: edge.from, to: edge.to });
   }
-  const nodeEls = {};
-  for (const n of nodes) {
-    const p = pos[n.id];
-    const g = document.createElementNS(SVGNS, "g");
-    g.setAttribute("class", "steptrace__rtnode");
-    const ring = document.createElementNS(SVGNS, "circle");
+  const nodeElements = {};
+  for (const node2 of nodes5) {
+    const point = layout.position[node2.id];
+    const width = nodeWidth(node2);
+    const halfWidth = width / 2;
+    const group = document.createElementNS(SVGNS, "g");
+    group.setAttribute("class", "steptrace__rtnode");
+    group.setAttribute("transform", `translate(${point.x} ${point.y})`);
+    group.setAttribute("aria-hidden", "true");
+    group.setAttribute("focusable", "false");
+    group.dataset.shape = descriptor.shape;
+    const ring = document.createElementNS(SVGNS, descriptor.shape === "circle" ? "circle" : "rect");
     ring.setAttribute("class", "steptrace__rtring");
-    ring.setAttribute("cx", p.x);
-    ring.setAttribute("cy", p.y);
-    ring.setAttribute("r", String(RT_R + 3));
-    const back = document.createElementNS(SVGNS, "circle");
-    back.setAttribute("class", "steptrace__rtback");
-    back.setAttribute("cx", p.x);
-    back.setAttribute("cy", p.y);
-    back.setAttribute("r", String(RT_R));
-    const circ = document.createElementNS(SVGNS, "circle");
-    circ.setAttribute("class", "steptrace__rtcirc");
-    circ.setAttribute("cx", p.x);
-    circ.setAttribute("cy", p.y);
-    circ.setAttribute("r", String(RT_R));
-    const label = document.createElementNS(SVGNS, "text");
-    label.setAttribute("class", "steptrace__rtlabel");
-    label.setAttribute("x", p.x);
-    label.setAttribute("y", p.y);
-    label.setAttribute("text-anchor", "middle");
-    label.setAttribute("dominant-baseline", "central");
-    label.textContent = n.label;
-    const val = document.createElementNS(SVGNS, "text");
-    val.setAttribute("class", "steptrace__rtval");
-    val.setAttribute("x", p.x);
-    val.setAttribute("y", p.y + RT_R + 9);
-    val.setAttribute("text-anchor", "middle");
-    g.append(ring, back, circ, label, val);
-    svg.append(g);
-    nodeEls[n.id] = { g, val };
-  }
-  const legend = el("div", "steptrace__legend");
-  for (const [word, key] of [
-    ["compute", "current"],
-    ["store (miss)", "frontier"],
-    ["reuse (hit)", "visited"]
-  ]) {
-    const row = el("div", "steptrace__legend-row");
-    row.append(
-      el("span", "steptrace__swatch steptrace__swatch--" + key),
-      document.createTextNode(word)
+    const surface = document.createElementNS(
+      SVGNS,
+      descriptor.shape === "circle" ? "circle" : "rect"
     );
-    legend.append(row);
+    surface.setAttribute("class", "steptrace__rtcirc");
+    if (descriptor.shape === "circle") {
+      ring.setAttribute("r", String(halfWidth + 3));
+      surface.setAttribute("r", String(halfWidth));
+    } else {
+      surface.setAttribute("x", String(-halfWidth));
+      surface.setAttribute("y", String(-halfHeight));
+      surface.setAttribute("width", String(width));
+      surface.setAttribute("height", String(descriptor.nodeHeight));
+      surface.setAttribute("rx", "7");
+      ring.setAttribute("x", String(-halfWidth - 2));
+      ring.setAttribute("y", String(-halfHeight - 2));
+      ring.setAttribute("width", String(width + 4));
+      ring.setAttribute("height", String(descriptor.nodeHeight + 4));
+      ring.setAttribute("rx", "9");
+    }
+    const label = document.createElementNS(SVGNS, "text");
+    const detail = document.createElementNS(SVGNS, "text");
+    const result = document.createElementNS(SVGNS, "text");
+    const badge = document.createElementNS(SVGNS, "text");
+    const divider = descriptor.tieredCards ? document.createElementNS(SVGNS, "line") : null;
+    const valueTier = descriptor.tieredCards ? document.createElementNS(SVGNS, "g") : null;
+    const valueCells = [];
+    label.setAttribute("class", "steptrace__rtlabel");
+    detail.setAttribute("class", "steptrace__rtdetail");
+    result.setAttribute("class", "steptrace__rtval");
+    badge.setAttribute("class", "steptrace__rtbadge");
+    for (const element of [label, detail, result]) element.setAttribute("text-anchor", "middle");
+    const [primaryLine, secondaryLine] = descriptor.nodeLines(node2);
+    label.textContent = primaryLine;
+    detail.textContent = secondaryLine;
+    if (descriptor.shape === "circle") {
+      label.setAttribute("y", "0");
+      label.setAttribute("dominant-baseline", "central");
+      result.setAttribute("y", String(halfHeight + 9));
+    } else if (descriptor.tieredCards) {
+      label.setAttribute("y", "13");
+      label.setAttribute("dominant-baseline", "central");
+      divider?.setAttribute("class", "steptrace__rtdivider");
+      divider?.setAttribute("x1", String(-halfWidth + 1));
+      divider?.setAttribute("x2", String(halfWidth - 1));
+      divider?.setAttribute("y1", "6");
+      divider?.setAttribute("y2", "6");
+      valueTier?.setAttribute("class", "steptrace__rtarray");
+      const tier = tieredArrayCells(node2.values, width);
+      for (const x of tier.separators) {
+        const separator = document.createElementNS(SVGNS, "line");
+        separator.setAttribute("class", "steptrace__rtcell-separator");
+        separator.setAttribute("x1", String(x));
+        separator.setAttribute("x2", String(x));
+        separator.setAttribute("y1", String(-halfHeight + 1));
+        separator.setAttribute("y2", "6");
+        valueTier?.append(separator);
+      }
+      for (const cell of tier.cells) {
+        const value = document.createElementNS(SVGNS, "text");
+        value.setAttribute("class", "steptrace__rtcell-value");
+        value.setAttribute("x", String(cell.x));
+        value.setAttribute("y", "-7");
+        value.setAttribute("text-anchor", "middle");
+        value.setAttribute("dominant-baseline", "central");
+        value.textContent = String(cell.value);
+        valueTier?.append(value);
+        valueCells.push(value);
+      }
+    } else {
+      label.setAttribute("y", descriptor.showStateBadge ? "-10" : "-4");
+      detail.setAttribute("y", descriptor.showStateBadge ? "3" : "9");
+      if (descriptor.showStateBadge) {
+        badge.setAttribute("y", "16");
+        badge.setAttribute("text-anchor", "middle");
+      }
+    }
+    group.append(ring, surface);
+    if (divider) group.append(divider);
+    if (valueTier) group.append(valueTier);
+    group.append(label);
+    if (!descriptor.tieredCards) group.append(detail);
+    group.append(result, badge);
+    treeLayer.append(group);
+    nodeElements[node2.id] = {
+      group,
+      ring,
+      surface,
+      detail,
+      result,
+      badge,
+      secondaryLine,
+      valueCells
+    };
   }
+  function centerTransform(visibleIds) {
+    const visible = new Set(visibleIds);
+    const rects = nodes5.filter((node2) => visible.has(node2.id)).map((node2) => {
+      const point = layout.position[node2.id];
+      const halfNodeWidth = nodeWidth(node2) / 2;
+      return {
+        left: point.x - halfNodeWidth,
+        right: point.x + halfNodeWidth,
+        top: point.y - halfHeight,
+        bottom: point.y + halfHeight
+      };
+    });
+    const offset = centerVisibleTree(rects, layout.width, layout.height);
+    return `translate(${offset.x}px, ${offset.y}px)`;
+  }
+  if (descriptor.centerVisible) treeLayer.style.transform = centerTransform(f0.visible);
+  const legend = makeLegend(
+    descriptor.legend.map((item) => ({
+      label: item.label,
+      state: item.state,
+      swatchClass: "steptrace__swatch steptrace__rtswatch"
+    })),
+    `${descriptor.ariaLabel} state legend`
+  );
   const wrap = el("div", "steptrace__rectree");
+  wrap.setAttribute("role", "region");
+  wrap.setAttribute("aria-label", `${descriptor.ariaLabel} visualization`);
+  wrap.dataset.fitWidth = descriptor.fitWidth ? "true" : "false";
+  wrap.dataset.profile = f0.profile || "";
+  wrap.dataset.compact = "false";
+  wrap.tabIndex = 0;
   wrap.append(svg);
+  function responsiveTreeLayout(availableWidth) {
+    if (!descriptor.responsiveLayout || !Number.isFinite(availableWidth) || availableWidth <= 0 || typeof matchMedia !== "function" || !matchMedia("(max-width: 560px)").matches)
+      return desktopLayout;
+    const width = Math.max(280, Math.floor(availableWidth));
+    const gap = descriptor.showStateBadge ? 4 : 8;
+    const fittedWidth = Math.floor((width - 24 - gap * (maxTierSize - 1)) / maxTierSize);
+    const compactWidth = Math.max(36, Math.min(descriptor.nodeWidth, fittedWidth));
+    return tierLayout(width, compactWidth, gap);
+  }
+  let lastAvailableWidth = -1;
+  function applyTreeLayout() {
+    const availableWidth = wrap.clientWidth;
+    if (Math.abs(availableWidth - lastAvailableWidth) < 0.5) return;
+    lastAvailableWidth = availableWidth;
+    const next = responsiveTreeLayout(availableWidth);
+    layout = next;
+    wrap.dataset.compact = layout === desktopLayout ? "false" : "true";
+    svg.setAttribute("viewBox", `0 0 ${layout.width} ${layout.height}`);
+    svg.style.setProperty("--steptrace-tree-width", `${layout.width}px`);
+    for (const node2 of nodes5) {
+      const elements = nodeElements[node2.id];
+      const point = layout.position[node2.id];
+      const width = nodeWidth(node2);
+      const halfWidth = width / 2;
+      elements.group.setAttribute("transform", `translate(${point.x} ${point.y})`);
+      if (descriptor.shape === "circle") {
+        elements.ring.setAttribute("r", String(halfWidth + 3));
+        elements.surface.setAttribute("r", String(halfWidth));
+      } else {
+        elements.surface.setAttribute("x", String(-halfWidth));
+        elements.surface.setAttribute("width", String(width));
+        elements.ring.setAttribute("x", String(-halfWidth - 2));
+        elements.ring.setAttribute("width", String(width + 4));
+      }
+    }
+    for (const edge of edgeElements) {
+      const from = layout.position[edge.from];
+      const to = layout.position[edge.to];
+      edge.element.setAttribute("x1", String(from.x));
+      edge.element.setAttribute("y1", String(from.y + halfHeight));
+      edge.element.setAttribute("x2", String(to.x));
+      edge.element.setAttribute("y2", String(to.y - halfHeight));
+    }
+    if (descriptor.centerVisible) treeLayer.style.transform = centerTransform(f0.visible);
+  }
+  const resizeObserver = typeof ResizeObserver === "undefined" ? null : new ResizeObserver(applyTreeLayout);
+  if (resizeObserver) resizeObserver.observe(wrap);
   const status = statusEl();
-  function paint(frame, i, total) {
-    const vis = new Set(frame.vis);
-    const collapsed = new Set(frame.collapsed);
-    const state = frame.state;
-    const vals = frame.vals;
-    for (const n of nodes) {
-      const ne = nodeEls[n.id];
-      ne.g.dataset.vis = vis.has(n.id) ? "1" : "0";
-      ne.g.dataset.collapsed = collapsed.has(n.id) ? "true" : "false";
-      ne.g.dataset.state = state[n.id] || "";
-      ne.g.dataset.active = frame.active === n.id ? "true" : "false";
-      const v = vals[n.id];
-      ne.val.textContent = v == null ? "" : "= " + v;
+  function paint(frame, index, total) {
+    applyTreeLayout();
+    const model = descriptor.frameModel(frame);
+    const visible = new Set(model.visible);
+    const collapsed = new Set(model.collapsed);
+    const path = new Set(model.path);
+    const related = model.phase === "combine" ? new Set(f0.edges.filter((edge) => edge.from === model.active).map((edge) => edge.to)) : /* @__PURE__ */ new Set();
+    const activeNode2 = nodes5.find((node2) => node2.id === model.active);
+    if (descriptor.centerVisible) treeLayer.style.transform = centerTransform(model.visible);
+    title.textContent = `${descriptor.ariaLabel}: ${model.phase}`;
+    description.textContent = `${model.phase}. Active subproblem ${activeNode2 ? descriptor.nodeLines(activeNode2).join("; ") : "none"}. ${model.action}. ${stripTags(frame.message)}`;
+    for (const node2 of nodes5) {
+      const elements = nodeElements[node2.id];
+      const state = model.states[node2.id] || "";
+      elements.group.dataset.vis = visible.has(node2.id) ? "1" : "0";
+      elements.group.dataset.collapsed = collapsed.has(node2.id) ? "true" : "false";
+      elements.group.dataset.state = state;
+      elements.group.dataset.active = model.active === node2.id ? "true" : "false";
+      elements.group.dataset.path = path.has(node2.id) ? "true" : "false";
+      elements.group.dataset.related = related.has(node2.id) ? "true" : "false";
+      const value = model.results[node2.id];
+      const resultText = Array.isArray(value) ? value.length ? `[${value.join(", ")}]` : "" : value == null ? "" : String(value);
+      if (descriptor.shape === "card") {
+        if (descriptor.tieredCards) {
+          const values = Array.isArray(value) ? value : node2.values;
+          for (let index2 = 0; index2 < elements.valueCells.length; index2++)
+            elements.valueCells[index2].textContent = String(values[index2] ?? "");
+        } else {
+          elements.detail.textContent = descriptor.preserveDetail ? elements.secondaryLine : resultText || elements.secondaryLine;
+        }
+        elements.result.textContent = "";
+        elements.badge.textContent = descriptor.showStateBadge ? descriptor.stateLabels[state] || "" : "";
+      } else {
+        elements.result.textContent = resultText ? `→ ${resultText}` : "";
+        elements.badge.textContent = descriptor.stateLabels[state] || "";
+      }
     }
-    for (const e of edgeEls) {
-      e.el.dataset.vis = vis.has(e.to) ? "1" : "0";
-      e.el.dataset.collapsed = collapsed.has(e.to) ? "true" : "false";
+    for (const edge of edgeElements) {
+      edge.element.dataset.vis = visible.has(edge.to) ? "1" : "0";
+      edge.element.dataset.collapsed = collapsed.has(edge.to) ? "true" : "false";
+      edge.element.dataset.path = path.has(edge.from) && path.has(edge.to) ? "true" : "false";
+      edge.element.dataset.related = model.active === edge.from && related.has(edge.to) ? "true" : "false";
     }
-    status.innerHTML = escapeHtml(frame.message) + ` <span class="steptrace__counts">· step ${i + 1}/${total}</span>`;
+    status.innerHTML = escapeHtml(frame.message) + ` <span class="steptrace__counts">· step ${index + 1}/${total}</span>`;
   }
   function watch(frame) {
-    const last = frame.memo.length ? frame.memo[frame.memo.length - 1] : null;
-    const ev = frame.type === "miss" || frame.type === "hit" || frame.type === "base" ? frame.type : "—";
-    return [
-      { k: "calls", v: String(frame.calls), sw: "var(--_blue)" },
-      { k: "memo", v: last ? `f(${last.k}) = ${last.v}` : "—", sw: "var(--_green)" },
-      { k: "event", v: ev, sw: "var(--_violet)" }
-    ];
+    const model = descriptor.frameModel(frame);
+    return descriptor.watchRows(frame, model);
   }
-  return { nodes: [wrap, legend, status], paint, watch };
+  return {
+    nodes: [wrap, legend, status],
+    stageLayout: "fill",
+    stableStage: descriptor.stableStage,
+    paint,
+    watch,
+    destroy: () => resizeObserver?.disconnect()
+  };
+}
+function makeRecTreeView(frames) {
+  return makeExecutionTreeView(frames, legacyRecTreeDescriptor);
 }
 function makeGraphView(frames, graph, frontierLabel) {
   const pad = 34;
@@ -2427,16 +2789,15 @@ function makeGraphView(frames, graph, frontierLabel) {
   for (const e of graph.edges) {
     const a = pos[e.from];
     const b = pos[e.to];
-    const { x1, y1, x2, y2 } = trimToRadius(a, b, R + (graph.directed ? 3 : 0));
     const line = document.createElementNS(SVGNS, "line");
     line.setAttribute("class", "steptrace__edge");
-    line.setAttribute("x1", x1);
-    line.setAttribute("y1", y1);
-    line.setAttribute("x2", String(x2));
-    line.setAttribute("y2", String(y2));
+    line.setAttribute("x1", String(a.x));
+    line.setAttribute("y1", String(a.y));
+    line.setAttribute("x2", String(b.x));
+    line.setAttribute("y2", String(b.y));
     if (graph.directed) line.setAttribute("marker-end", "url(#st-arrow)");
     svg.append(line);
-    edgeEls.push({ el: line, from: e.from, to: e.to });
+    edgeEls.push({ el: line, from: e.from, to: e.to, a, b });
     if (e.weight != null) {
       const label = document.createElementNS(SVGNS, "text");
       label.setAttribute("class", "steptrace__edge-label");
@@ -2456,18 +2817,18 @@ function makeGraphView(frames, graph, frontierLabel) {
     back.setAttribute("class", "steptrace__nback");
     back.setAttribute("cx", p.x);
     back.setAttribute("cy", p.y);
-    back.setAttribute("r", String(R));
+    back.setAttribute("r", String(GRAPH_NODE_RADIUS_PX));
     const circle = document.createElementNS(SVGNS, "circle");
     circle.setAttribute("class", "steptrace__ncirc");
     circle.setAttribute("cx", p.x);
     circle.setAttribute("cy", p.y);
-    circle.setAttribute("r", String(R));
+    circle.setAttribute("r", String(GRAPH_NODE_RADIUS_PX));
     if (frames[0] && frames[0].target === n.id) {
       const halo = document.createElementNS(SVGNS, "circle");
       halo.setAttribute("class", "steptrace__ntarget");
       halo.setAttribute("cx", p.x);
       halo.setAttribute("cy", p.y);
-      halo.setAttribute("r", String(R + 4.5));
+      halo.setAttribute("r", String(GRAPH_NODE_RADIUS_PX + GRAPH_NODE_HALO_GAP_PX));
       g.append(halo);
     }
     const id = document.createElementNS(SVGNS, "text");
@@ -2480,38 +2841,59 @@ function makeGraphView(frames, graph, frontierLabel) {
     const dist = document.createElementNS(SVGNS, "text");
     dist.setAttribute("class", "steptrace__d");
     dist.setAttribute("x", p.x);
-    dist.setAttribute("y", String(p.y - R - 5));
+    dist.setAttribute("y", String(p.y - GRAPH_NODE_RADIUS_PX - 5));
     dist.setAttribute("text-anchor", "middle");
     const mark = document.createElementNS(SVGNS, "svg");
     mark.setAttribute("class", "steptrace__nmark");
     mark.setAttribute("x", String(p.x - 6));
-    mark.setAttribute("y", String(p.y + R + 5));
+    mark.setAttribute("y", String(p.y + GRAPH_NODE_RADIUS_PX + 5));
     mark.setAttribute("width", "12");
     mark.setAttribute("height", "12");
     mark.setAttribute("viewBox", "0 0 24 24");
     mark.setAttribute("aria-hidden", "true");
-    mark.innerHTML = '<rect data-state-icon="current" x="6" y="6" width="12" height="12" rx="2" fill="currentColor"/><path data-state-icon="frontier" d="m12 3 9 9-9 9-9-9Z" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linejoin="round"/><path data-state-icon="visited" d="M20 6 9 17l-5-5" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>';
-    g.append(back, circle, id, dist, mark);
+    mark.innerHTML = '<rect data-state-icon="current" x="6" y="6" width="12" height="12" rx="2" fill="currentColor"/><path data-state-icon="frontier" d="m12 3 9 9-9 9-9-9Z" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linejoin="round"/>';
+    const visitedMark = successMarker("steptrace__nmark-success");
+    visitedMark.setAttribute("x", String(p.x + GRAPH_NODE_RADIUS_PX - 8));
+    visitedMark.setAttribute("y", String(p.y - GRAPH_NODE_RADIUS_PX - 4));
+    visitedMark.setAttribute("width", "12");
+    visitedMark.setAttribute("height", "12");
+    g.append(back, circle, id, dist, mark, visitedMark);
     svg.append(g);
     nodeEls[n.id] = { g, dist, mark };
   }
-  const legend = el("div", "steptrace__legend");
-  for (const [word, stateKey] of [
-    ["current", "current"],
-    ["frontier", "frontier"],
-    ["visited", "visited"]
-  ]) {
-    const row = el("div", "steptrace__legend-row");
-    const sw = el("span", "steptrace__swatch steptrace__swatch--" + stateKey);
-    if (stateKey === "visited") {
-      sw.innerHTML = ICON.check;
-      sw.setAttribute("aria-hidden", "true");
-    }
-    row.append(sw, document.createTextNode(word));
-    legend.append(row);
-  }
+  const legend = makeLegend(
+    [
+      { label: "current", swatchClass: "steptrace__swatch steptrace__swatch--current" },
+      { label: "frontier", swatchClass: "steptrace__swatch steptrace__swatch--frontier" },
+      {
+        label: "visited",
+        swatchClass: "steptrace__swatch steptrace__swatch--visited",
+        marker: successMarker()
+      }
+    ],
+    "Graph state legend"
+  );
   const graphWrap = el("div", "steptrace__graph");
   graphWrap.append(svg);
+  const geometry = observeFixedSvgNodes(
+    svg,
+    graph.nodes.map((node2) => ({
+      element: nodeEls[node2.id].g,
+      point: pos[node2.id],
+      coordinates: "absolute"
+    })),
+    (unitsPerCssPixel) => {
+      const radius = GRAPH_NODE_RADIUS_PX * unitsPerCssPixel;
+      const targetRadius = (GRAPH_NODE_RADIUS_PX + (graph.directed ? 3 : 0)) * unitsPerCssPixel;
+      for (const edge of edgeEls) {
+        const trimmed = trimGraphEdge(edge.a, edge.b, radius, targetRadius);
+        edge.el.setAttribute("x1", String(trimmed.x1));
+        edge.el.setAttribute("y1", String(trimmed.y1));
+        edge.el.setAttribute("x2", String(trimmed.x2));
+        edge.el.setAttribute("y2", String(trimmed.y2));
+      }
+    }
+  );
   const status = statusEl();
   function paint(frame, i, total) {
     const visited = new Set(frame.visited);
@@ -2554,15 +2936,7 @@ function makeGraphView(frames, graph, frontierLabel) {
       }
     ];
   }
-  return { nodes: [graphWrap, legend, status], paint, watch };
-}
-function trimToRadius(a, b, r) {
-  const dx = b.x - a.x;
-  const dy = b.y - a.y;
-  const len = Math.hypot(dx, dy) || 1;
-  const ux = dx / len;
-  const uy = dy / len;
-  return { x1: a.x + ux * R, y1: a.y + uy * R, x2: b.x - ux * r, y2: b.y - uy * r };
+  return { nodes: [graphWrap, legend, status], paint, watch, destroy: geometry.destroy };
 }
 function statusEl() {
   const status = el("div", "steptrace__status");
@@ -2570,13 +2944,30 @@ function statusEl() {
   status.setAttribute("aria-live", "polite");
   return status;
 }
+function makeLegend(items, ariaLabel, extraClass = "") {
+  const legend = el("div", `steptrace__legend${extraClass ? ` ${extraClass}` : ""}`);
+  legend.setAttribute("role", "list");
+  legend.setAttribute("aria-label", ariaLabel);
+  for (const item of items) {
+    const row = el("span", "steptrace__legend-row");
+    row.setAttribute("role", "listitem");
+    const swatch = el(
+      "span",
+      `steptrace__legend-swatch${item.swatchClass ? ` ${item.swatchClass}` : ""}`
+    );
+    if (item.state) swatch.dataset.state = item.state;
+    if (item.role) swatch.dataset.role = item.role;
+    if (item.color) swatch.style.setProperty("--_legend-color", item.color);
+    if (item.marker) swatch.append(item.marker);
+    row.append(swatch, document.createTextNode(item.label));
+    legend.append(row);
+  }
+  return legend;
+}
 function el(tag, cls = "") {
   const n = document.createElement(tag);
   if (cls) n.className = cls;
   return n;
-}
-function spacer() {
-  return el("span", "steptrace__spacer");
 }
 function escapeHtml(s) {
   return String(s).replace(
@@ -2589,6 +2980,14 @@ function stripTags(s) {
 }
 function pad2(n) {
   return String(n).padStart(2, "0");
+}
+function successMarker(extraClass = "") {
+  const marker2 = document.createElementNS("http://www.w3.org/2000/svg", "svg");
+  marker2.setAttribute("class", `steptrace__success-marker${extraClass ? ` ${extraClass}` : ""}`);
+  marker2.setAttribute("viewBox", "0 0 24 24");
+  marker2.setAttribute("aria-hidden", "true");
+  marker2.innerHTML = `<circle cx="12" cy="12" r="12"/><path d="${CHECK_PATH}"/>`;
+  return marker2;
 }
 function iconBtn(label, svg, extra = "") {
   const b = document.createElement("button");
@@ -2607,36 +3006,107 @@ function buildMilestones(algorithm, kind, frames) {
     if (prev && (prev.i === i || prev.label === label)) return;
     marks.push({ i, label });
   };
-  const initial = kind === "sort" ? algorithm === "bubble-sort" ? "Pass 1" : algorithm === "insertion-sort" ? "Prefix 1" : algorithm === "selection-sort" ? "Select 1" : algorithm === "heap-sort" ? "Build heap" : algorithm === "merge-sort" ? "Runs of 1" : "Partition" : kind === "search" ? "Search range" : kind === "string" ? "Shift 0" : kind === "backtrack" ? "Depth 0" : kind === "rectree" ? "Call tree" : "Initialize";
+  const firstGap = frames.find((frame) => Number.isInteger(frame.gap))?.gap;
+  const familyProfile = frames[0]?.profile;
+  const firstDistributionPass = frames.find((frame) => frame.type === "pass");
+  const prefixOperation = (frame) => frame.operation && frame.key ? `${frame.operation[0].toUpperCase()}${frame.operation.slice(1)} ${frame.key}` : null;
+  const initial = kind === "sort" ? firstGap != null ? `Gap ${firstGap}` : familyProfile === "cyclic" ? "Place values" : familyProfile === "counting" ? "Tally keys" : familyProfile === "radix" ? `${firstDistributionPass?.passLabel || "Digit"} pass` : familyProfile === "bucket" ? "Scatter ranges" : familyProfile === "introsort" ? "Quicksort" : algorithm === "bubble-sort" ? "Pass 1" : algorithm === "insertion-sort" ? "Prefix 1" : algorithm === "selection-sort" ? "Select 1" : algorithm === "heap-sort" ? "Build heap" : algorithm === "merge-sort" ? "Runs of 1" : "Partition" : kind === "search" ? familyProfile === "exponential" ? "Gallop" : familyProfile === "interpolation" ? "Estimate" : familyProfile === "jump" ? "Jump blocks" : familyProfile === "ternary" ? "Narrow peak" : familyProfile === "shipping-capacity" ? "Answer range" : "Search range" : kind === "string" ? familyProfile === "z-array" ? "Initialize Z" : familyProfile === "boyer-moore" ? "Preprocess rules" : ["trie", "aho-corasick", "ternary-search-tree"].includes(familyProfile) ? prefixOperation(frames[0]) : "Shift 0" : kind === "backtrack" ? "Depth 0" : kind === "rectree" ? familyProfile === "divide-and-conquer" ? "Whole problem" : familyProfile === "branch-and-bound" ? "Root bound 116" : familyProfile === "merge-sort" ? "Whole array" : familyProfile === "memoization" ? "Empty cache" : familyProfile === "coin-change-top-down" ? "Amount 30¢" : familyProfile === "grid-path-top-down" ? "Loading bay" : "Call tree" : kind === "pointers" && ["merge-intervals", "activity-selection"].includes(familyProfile) ? "Input order" : kind === "pointers" && familyProfile === "fast-slow-pointers" ? "Start together" : "Initialize";
   push(0, initial);
   let lastRange = "";
+  let lastGap = firstGap;
   let lastRow = null;
   let lastWindow = "";
   let lastDepth = null;
   for (let i = 1; i < frames.length - 1; i++) {
     const f = frames[i];
     if (kind === "sort") {
+      if (familyProfile === "counting" && f.type === "prefix" && frames[i - 1].type !== "prefix") {
+        push(i, "Reserve output ranges");
+      } else if (familyProfile === "counting" && f.type === "place" && frames[i - 1].type !== "place") {
+        push(i, "Place stably");
+      } else if (familyProfile === "radix" && f.type === "pass" && frames[i - 1].type !== "pass") {
+        push(i, `${f.passLabel} pass`);
+      } else if (familyProfile === "radix" && f.type === "gather" && frames[i - 1].type !== "gather") {
+        push(i, `Gather ${f.passLabel}`);
+      } else if (familyProfile === "bucket" && f.type === "pass" && frames[i - 1].type !== "pass") {
+        push(i, "Scatter ranges");
+      } else if (familyProfile === "bucket" && f.type === "local-sort" && frames[i - 1].type !== "local-sort") {
+        push(i, "Sort buckets");
+      } else if (familyProfile === "bucket" && f.type === "gather" && frames[i - 1].type !== "gather") {
+        push(i, "Gather ranges");
+      } else if (familyProfile === "introsort" && f.type === "fallback") {
+        push(i, "Heap fallback");
+      } else if (familyProfile === "introsort" && f.type === "cleanup") {
+        push(i, "Insertion cleanup");
+      }
+      if (Number.isInteger(f.gap) && f.gap !== lastGap) {
+        push(i, `Gap ${f.gap}`);
+        lastGap = f.gap;
+      }
       const range = f.range ? f.range.join(":") : "";
       if (range && range !== lastRange) {
         const word = algorithm === "merge-sort" ? "Merge" : algorithm === "heap-sort" ? "Heap" : "Range";
         push(i, `${word} ${f.range[0]}–${f.range[1]}`);
       } else if (f.type === "mark-sorted") {
         const fixed = f.sorted.length;
-        const word = algorithm === "insertion-sort" ? "Prefix" : algorithm === "selection-sort" ? "Select" : "Fixed";
+        const word = familyProfile === "cyclic" ? "Placed" : algorithm === "insertion-sort" ? "Prefix" : algorithm === "selection-sort" ? "Select" : "Fixed";
         const count = algorithm === "bubble-sort" || algorithm === "selection-sort" ? Math.min(fixed + 1, f.array.length) : fixed;
         push(i, algorithm === "bubble-sort" ? `Pass ${count}` : `${word} ${count}`);
       }
       lastRange = range || lastRange;
-    } else if (kind === "graph" && f.type === "visit" && f.current != null) {
-      const word = algorithm === "dijkstra" ? "Settle" : algorithm === "topological-sort" ? "Output" : "Visit";
+    } else if (kind === "graph" && (f.type === "visit" || f.type === "expand") && f.current != null) {
+      const word = algorithm === "a-star" ? "Expand" : algorithm === "dijkstra" ? "Settle" : algorithm === "topological-sort" ? "Output" : "Visit";
       push(i, `${word} ${f.current}`);
-    } else if (kind === "search" && f.type === "probe") {
-      push(i, `Probe ${f.mid}`);
+    } else if (kind === "search") {
+      if (familyProfile === "exponential" && f.type === "phase" && f.phase === "binary")
+        push(i, "Binary search");
+      else if (f.type === "phase" && f.phase === "scan")
+        push(i, familyProfile === "ternary" ? "Final scan" : "Linear scan");
+      else if (f.type === "phase" && f.phase === "interpolation") push(i, "Interpolation");
+      else if (f.type === "phase" && f.phase === "ternary") push(i, "Ternary");
+      else if (familyProfile === "shipping-capacity" && f.type === "evaluate")
+        push(i, `Check ${f.candidate}`);
+      else if (f.type === "probe")
+        push(
+          i,
+          familyProfile === "ternary" && f.mid2 != null ? `Probes ${f.mid}/${f.mid2}` : `${familyProfile === "exponential" && f.phase === "gallop" ? "Bound" : familyProfile === "jump" && f.phase === "jump" ? "Block end" : "Probe"} ${f.mid}`
+        );
+    } else if (kind === "string" && ["trie", "aho-corasick", "ternary-search-tree"].includes(familyProfile)) {
+      if (f.type === "begin") push(i, prefixOperation(f));
+      else if (familyProfile === "aho-corasick" && f.type === "goto")
+        push(i, `Read ${f.text[f.textCursor]}`);
+      else if (familyProfile === "aho-corasick" && f.type === "fallback")
+        push(i, `Fallback ${f.activePath.at(-1) || "root"}`);
+      else if (familyProfile === "aho-corasick" && f.type === "output")
+        push(i, `Emit ${f.outputs.join(" + ")}`);
+    } else if (kind === "string" && familyProfile === "z-array") {
+      if (f.type === "focus") push(i, `i = ${f.i}`);
+    } else if (kind === "string" && familyProfile === "boyer-moore") {
+      if (f.type === "align") push(i, `Align ${f.shift}`);
+      if (f.type === "match") push(i, `Match ${f.shift}`);
     } else if (kind === "string") {
       if ((f.type === "slide" || f.type === "hash" || f.type === "match") && String(f.shift) !== lastWindow) {
         push(i, `Shift ${f.shift}`);
         lastWindow = String(f.shift);
       }
+    } else if (kind === "pointers" && familyProfile === "merge-intervals") {
+      if (f.type === "sort") push(i, "Sort by start");
+      else if (f.type === "seed") push(i, `Seed ${f.current[0]}–${f.current[1]}`);
+      else if (f.type === "extend") push(i, `Extend ${f.current[0]}–${f.current[1]}`);
+      else if (f.type === "emit") {
+        const emitted = f.output.at(-1);
+        if (emitted) push(i, `Emit ${emitted[0]}–${emitted[1]}`);
+      } else if (f.type === "restart") {
+        push(i, `Start ${f.current[0]}–${f.current[1]}`);
+      }
+    } else if (kind === "pointers" && familyProfile === "activity-selection") {
+      const active = f.intervals.find((interval) => interval.id === f.active);
+      if (f.type === "sort") push(i, "Sort by finish");
+      else if (f.type === "accept" && active) push(i, `Accept ${active.start}–${active.end}`);
+      else if (f.type === "reject" && active) push(i, `Reject ${active.start}–${active.end}`);
+    } else if (kind === "pointers" && familyProfile === "fast-slow-pointers") {
+      if (f.type === "meet") push(i, `Meet at ${f.meeting}`);
+      else if (f.type === "reset") push(i, "Reset to head");
     } else if (kind === "pointers") {
       const win = f.window ? f.window.join(":") : "";
       if (win && win !== lastWindow) {
@@ -2644,7 +3114,11 @@ function buildMilestones(algorithm, kind, frames) {
         lastWindow = win;
       }
     } else if (kind === "dp") {
-      if (f.type === "compute" && f.cur && f.cur[0] !== lastRow) {
+      if (familyProfile === "floyd-warshall" && f.type === "stage") {
+        push(i, `Stage k = ${f.k}`);
+      } else if (familyProfile === "dynamic-programming" && f.type === "compute" && f.cur) {
+        push(i, `${f.variant === "concrete" ? "Prefix" : "Solve"} ${f.colLabels[f.cur[1]]}`);
+      } else if (f.type === "compute" && f.cur && f.cur[0] !== lastRow) {
         push(i, `Row ${f.rowLabels[f.cur[0]]}`);
         lastRow = f.cur[0];
       } else if (f.type === "trace" && frames[i - 1].type !== "trace") {
@@ -2659,11 +3133,45 @@ function buildMilestones(algorithm, kind, frames) {
         push(i, `Depth ${f.depth}`);
         lastDepth = f.depth;
       }
-    } else if (kind === "rectree" && f.type === "phase") {
-      push(i, f.phase === "memo" ? "Memoized" : "Plain recursion");
+    } else if (kind === "rectree") {
+      if (familyProfile === "branch-and-bound") {
+        const activeNode2 = f.nodes.find((node2) => node2.id === f.active);
+        if (f.type === "incumbent") push(i, `Incumbent ${f.incumbent}`);
+        else if (f.type === "split") push(i, `Expand ${activeNode2?.label || "decision"}`);
+        else if (f.type === "infeasible") push(i, `Reject ${activeNode2?.label || "branch"}`);
+        else if (f.type === "prune") push(i, `Prune ${activeNode2?.label || "branch"}`);
+      } else if (f.type === "split") {
+        const activeNode2 = f.nodes.find((node2) => node2.id === f.active);
+        push(i, `Split ${activeNode2?.label || "range"}`);
+      } else if (f.type === "combine") {
+        const activeNode2 = f.nodes.find((node2) => node2.id === f.active);
+        push(
+          i,
+          `${f.profile === "merge-sort" ? "Merge" : "Combine"} ${activeNode2?.label || "problem"}`
+        );
+      } else if (f.type === "store") {
+        const activeNode2 = f.nodes.find((node2) => node2.id === f.active);
+        push(i, `Store ${activeNode2?.label || "state"}`);
+      } else if (f.type === "cache") {
+        const activeNode2 = f.nodes.find((node2) => node2.id === f.active);
+        push(i, `Reuse ${activeNode2?.label || "state"}`);
+      } else if (f.type === "phase") {
+        push(i, f.phase === "memo" ? "Memoized" : "Plain recursion");
+      }
     }
   }
-  push(frames.length - 1, "Result");
+  const prefixCompletion = {
+    trie: "Trie complete",
+    "aho-corasick": "Scan complete",
+    "ternary-search-tree": "TST complete",
+    "merge-intervals": "Merged output",
+    "activity-selection": "Accepted schedule",
+    "fast-slow-pointers": "Entry located"
+  }[familyProfile];
+  push(
+    frames.length - 1,
+    familyProfile === "branch-and-bound" ? "Best value 105" : prefixCompletion || "Result"
+  );
   return marks;
 }
 function thinMilestones(marks) {
@@ -2691,15 +3199,29 @@ function graphEdgeWeight(graph, a, b) {
 }
 function summaryFor(algorithm, kind, frame, graph) {
   if (kind === "sort") {
+    if (algorithm === "counting-sort")
+      return `Output [${frame.output.join(", ")}] · ${frame.tallied} tallies · ${frame.placed} stable placements.`;
+    if (algorithm === "radix-sort" || algorithm === "bucket-sort") {
+      const output = frame.source.map((token) => token.value);
+      const work = algorithm === "radix-sort" ? `${frame.passCount} stable digit passes` : `${frame.comparisons} local comparisons`;
+      return `Output [${output.join(", ")}] · ${work} · ${frame.gathered} gathered.`;
+    }
     if (algorithm === "merge-sort")
       return `Output [${frame.array.join(", ")}] · ${frame.swaps} writes.`;
-    const unit = ["bubble-sort", "selection-sort", "quick-sort", "heap-sort"].includes(algorithm) ? "swaps" : "moves";
-    return `Output [${frame.array.join(", ")}] · ${frame.comparisons} comparisons · ${frame.swaps} ${unit}.`;
+    if (algorithm === "tim-sort")
+      return `Output [${frame.array.join(", ")}] · ${frame.merges} run-stack merge${frame.merges === 1 ? "" : "s"}.`;
+    const unit = frame.movementUnit || (["bubble-sort", "selection-sort", "quick-sort", "heap-sort"].includes(algorithm) ? "swaps" : "moves");
+    const comparisons = frame.showComparisons === false ? "" : `${frame.comparisons} comparisons · `;
+    return `Output [${frame.array.join(", ")}] · ${comparisons}${frame.swaps} ${unit}.`;
   }
   if (kind === "graph") {
+    if (algorithm === "a-star") {
+      const cost = frame.selectedPath?.length ? frame.g?.[frame.target] : null;
+      return cost == null ? `${frame.target} is unreachable.` : `Path ${frame.selectedPath.join(" → ")} · cost ${cost} · A* ${frame.astarExpanded} vs Dijkstra ${frame.dijkstraExpanded} expansions.`;
+    }
     if (algorithm === "dijkstra" && frame.target != null) {
-      const edges = frame.selected || [];
-      const path = edges.length ? [edges[0][0], ...edges.map((e) => e[1])].join(" → ") : String(frame.target);
+      const edges5 = frame.selected || [];
+      const path = edges5.length ? [edges5[0][0], ...edges5.map((e) => e[1])].join(" → ") : String(frame.target);
       const cost = frame.dist[frame.target];
       return cost == null ? `${frame.target} is unreachable.` : `Path ${path} · cost ${cost} · ${frame.visited.length} nodes settled.`;
     }
@@ -2724,19 +3246,68 @@ function summaryFor(algorithm, kind, frame, graph) {
     }
     return `${frame.visited.length} nodes visited · frontier empty.`;
   }
-  if (kind === "search")
+  if (kind === "search") {
+    if (algorithm === "binary-search-on-answer")
+      return `Minimum feasible capacity ${frame.answer} · ${frame.probes} probe${frame.probes === 1 ? "" : "s"}.`;
     return frame.found == null ? `${frame.target} not found · ${frame.comparisons} comparisons.` : `${frame.target} found at index ${frame.found} · ${frame.comparisons} comparisons.`;
-  if (kind === "string")
-    return frame.found.length ? `${frame.found.length} match${frame.found.length === 1 ? "" : "es"} at ${frame.found.join(", ")}.` : `No matches found.`;
+  }
+  if (kind === "string" && frame.profile === "z-array") return `Z = [${frame.z.join(", ")}].`;
+  if (kind === "string" && frame.profile === "aho-corasick") {
+    const matches = frame.matches.map((match) => `${match.pattern}@${match.end}`).join(", ");
+    return matches ? `Matches ${matches}.` : "No patterns matched.";
+  }
+  if (kind === "string" && frame.profile === "ternary-search-tree")
+    return `${frame.terminalNodes.length} terminal keys · ${frame.visibleNodes.length - 1} character nodes.`;
+  if (kind === "string" && Array.isArray(frame.terminalNodes)) {
+    const keys = frame.terminalNodes.filter((node2) => node2 !== "root");
+    return keys.length ? `Stored keys ${keys.join(", ")} · ${frame.visibleNodes.length} trie nodes.` : `No keys stored · ${frame.visibleNodes.length} trie node.`;
+  }
+  if (kind === "string") {
+    const found = Array.isArray(frame.found) ? frame.found : [];
+    return found.length ? `${found.length} match${found.length === 1 ? "" : "es"} at ${found.join(", ")}.` : `No matches found.`;
+  }
   if (kind === "pointers") {
     const values = (frame.marked || []).map((i) => frame.array[i]);
     return values.length ? `Answer indices [${frame.marked.join(", ")}] · values [${values.join(", ")}].` : algorithm === "two-pointers" || algorithm === "sliding-window" ? `No qualifying range was found.` : `No committed result was recorded.`;
   }
   if (kind === "dp") {
+    if ([
+      "coin-change-greedy",
+      "coin-change-naive",
+      "coin-change-memoization",
+      "coin-change-tabulation"
+    ].includes(algorithm))
+      return `${frame.best || "Exact change pending"} · target ${frame.target}¢.`;
+    if ([
+      "grid-path-greedy",
+      "grid-path-naive",
+      "grid-path-memoization",
+      "grid-path-tabulation"
+    ].includes(algorithm))
+      return frame.bestCost == null ? `Warehouse route pending · current cost ${frame.routeCost}.` : `Minimum warehouse route cost ${frame.bestCost}.`;
+    if (algorithm === "coin-change-bottom-up")
+      return `Fewest coins for 30¢: ${frame.grid[0]?.at(-1)} · exact change 10¢ + 10¢ + 10¢.`;
+    if (algorithm === "grid-path-bottom-up")
+      return `Minimum warehouse route cost ${frame.grid[0]?.[0]} · ${frame.path.length} path tiles.`;
+    if (algorithm === "floyd-warshall") {
+      if (frame.negativeCycle?.length)
+        return `Negative cycle through ${frame.negativeCycle.join(", ")}; shortest paths are undefined.`;
+      const distances = frame.grid.map(
+        (row2, index) => `${frame.rowLabels[index]}: [${row2.map((value2) => value2 ?? "∞").join(", ")}]`
+      ).join(" · ");
+      return `All-pairs distances ${distances}.`;
+    }
+    if (algorithm === "dynamic-programming") {
+      const stored = frame.grid.flat().filter((value2) => value2 != null).length;
+      const target = frame.grid[0]?.[frame.grid[0].length - 1];
+      if (frame.variant === "concrete")
+        return `Best non-adjacent total ${target} · ${stored} prefixes solved once.`;
+      return `Target ${target} · ${stored} states solved once in dependency order.`;
+    }
     const row = frame.grid[frame.grid.length - 1] || [];
     const value = row[row.length - 1];
-    const sequence = (frame.path || []).map((p) => frame.rowLabels[p[0]]).join("");
-    return algorithm === "lcs" ? `Optimal value ${value}${sequence ? ` · sequence "${sequence}"` : ""}.` : `Final table value ${value}${frame.path.length ? ` · ${frame.path.length} traced cells` : ""}.`;
+    const sequence2 = (frame.path || []).map((p) => frame.rowLabels[p[0]]).join("");
+    return algorithm === "lcs" ? `Optimal value ${value}${sequence2 ? ` · sequence "${sequence2}"` : ""}.` : `Final table value ${value}${frame.path.length ? ` · ${frame.path.length} traced cells` : ""}.`;
   }
   if (kind === "unionfind")
     return `${new Set(frame.roots).size} disjoint set${new Set(frame.roots).size === 1 ? "" : "s"} · parents [${frame.parent.join(", ")}].`;
@@ -2744,560 +3315,3699 @@ function summaryFor(algorithm, kind, frame, graph) {
     return algorithm === "kernighan-popcount" ? `Population count ${frame.total} · ${frame.pop} lowest set bits cleared.` : `${frame.pop} of ${frame.total} tally steps committed.`;
   if (kind === "backtrack")
     return frame.solved ? `Solved at depth ${frame.depth} · ${frame.placed} placements · ${frame.pruned} branches pruned.` : `No arrangement found · ${frame.pruned} branches pruned.`;
-  if (kind === "rectree") return stripTags(frame.message);
+  if (kind === "rectree") {
+    if (algorithm === "branch-and-bound")
+      return `Best value ${frame.incumbent} · take A + C · weight 7/7 · ${frame.pruned} branches pruned.`;
+    if (algorithm === "coin-change-top-down")
+      return `Fewest coins for 30¢: ${frame.results?.c30 || "—"} · ${frame.pruned} recursive calls skipped.`;
+    if (algorithm === "grid-path-top-down")
+      return `Minimum warehouse route cost ${frame.results?.r1c1 || "—"} · ${frame.pruned} recursive calls skipped.`;
+    if (algorithm === "memoization") {
+      const memoResult = String(frame.results?.a || "ready").replace(/^result\s+/i, "");
+      return `Result ${memoResult} · ${frame.calls} calls · ${frame.pruned} recursive calls skipped.`;
+    }
+    const result = frame.results?.root;
+    if (Array.isArray(result)) return `Sorted result [${result.join(", ")}].`;
+    return result ? `${result}.` : stripTags(frame.message);
+  }
   return stripTags(frame.message);
 }
-var CELL_W, RT_R, SVGNS, R, ICON;
+var STEP_BUDGET_RATIO, SWAP_TRAVEL_AT, SWAP_SETTLE_AT, legacySortViewSemantics, legacySearchViewSemantics, CELL_W, lcsMatrixGridSemantics, backtrackTreeSerial, executionTreeViewSerial, legacyRecTreeDescriptor, SVGNS, CHECK_PATH, ICON;
 var init_render = __esm({
   "custom/steptrace/src/render.ts"() {
+    init_graph_node();
+    init_motion();
+    STEP_BUDGET_RATIO = 260 / 107;
+    SWAP_TRAVEL_AT = 0;
+    SWAP_SETTLE_AT = 0.5;
+    legacySortViewSemantics = {
+      markerLabels: ["i", "j"],
+      movementLabel: "swaps",
+      resolveFrame: resolveLegacySortFrame,
+      watchRows(_frame, _visual) {
+        return [];
+      }
+    };
+    legacySearchViewSemantics = {
+      stateForIndex(frame, index) {
+        if (frame.found === index) return "found";
+        if (frame.mid === index) return "probe";
+        if (index < frame.lo || index > frame.hi) return "eliminated";
+        return "range";
+      },
+      watchRows(frame, frames) {
+        const target = { k: "target", v: String(frames[0].target), sw: "var(--_accent)" };
+        const at = {
+          k: "at",
+          v: frame.mid != null ? `[${frame.mid}] = ${frame.array[frame.mid]}` : "—",
+          sw: "var(--_blue)"
+        };
+        if (frame.mode === "scan") {
+          return [
+            target,
+            {
+              k: "scanned",
+              v: frame.mid != null ? `${frame.mid + 1}/${frame.array.length}` : "—",
+              sw: "var(--_neutral)"
+            },
+            at
+          ];
+        }
+        return [
+          target,
+          { k: "range", v: `[${frame.lo}, ${frame.hi}]`, sw: "var(--_neutral)" },
+          { ...at, k: "mid" }
+        ];
+      }
+    };
     CELL_W = 34;
-    RT_R = 16;
+    lcsMatrixGridSemantics = {
+      tableLabel: "Dynamic-programming table",
+      formatValue(value) {
+        return value == null ? "" : String(value);
+      },
+      cellLabel(frame, row, column) {
+        const value = frame.grid[row][column];
+        return `Cell ${frame.rowLabels[row]}, ${frame.colLabels[column]}: ${value == null ? "empty" : value}`;
+      },
+      stateForCell(frame, row, column) {
+        const key4 = `${row},${column}`;
+        const curKey = frame.cur ? frame.cur.join(",") : null;
+        const depSet = new Set((frame.deps || []).map((dependency) => dependency.join(",")));
+        const pathSet = new Set((frame.path || []).map((cell) => cell.join(",")));
+        if (curKey === key4) return "cur";
+        if (pathSet.has(key4)) return "path";
+        if (depSet.has(key4)) return "dep";
+        return "";
+      },
+      watchRows(frame) {
+        const cur = frame.cur;
+        const value = cur ? frame.grid[cur[0]][cur[1]] : null;
+        return [
+          { k: "cell", v: cur ? `[${cur[0]}, ${cur[1]}]` : "—", sw: "var(--_blue)" },
+          { k: "value", v: value == null ? "—" : String(value), sw: "var(--_green)" }
+        ];
+      }
+    };
+    backtrackTreeSerial = 0;
+    executionTreeViewSerial = 0;
+    legacyRecTreeDescriptor = {
+      ariaLabel: "Recursion tree",
+      shape: "circle",
+      nodeWidth: 32,
+      nodeHeight: 32,
+      minSvgWidth: 320,
+      stateLabels: {},
+      legend: [
+        { state: "compute", label: "compute" },
+        { state: "miss", label: "store (miss)" },
+        { state: "hit", label: "reuse (hit)" }
+      ],
+      frameModel(frame) {
+        return {
+          phase: frame.phase === "memo" ? "Memoized recursion" : "Plain recursion",
+          action: frame.message,
+          active: frame.active,
+          path: frame.active ? [frame.active] : [],
+          visible: frame.vis,
+          states: frame.state,
+          results: frame.vals,
+          collapsed: frame.collapsed
+        };
+      },
+      nodeLines(node2) {
+        return [node2.label, ""];
+      },
+      watchRows(frame) {
+        const last = frame.memo.length ? frame.memo[frame.memo.length - 1] : null;
+        const event = frame.type === "miss" || frame.type === "hit" || frame.type === "base" ? frame.type : "—";
+        return [
+          { k: "calls", v: String(frame.calls), sw: "var(--_blue)" },
+          { k: "memo", v: last ? `f(${last.k}) = ${last.v}` : "—", sw: "var(--_green)" },
+          { k: "event", v: event, sw: "var(--_violet)" }
+        ];
+      }
+    };
     SVGNS = "http://www.w3.org/2000/svg";
-    R = 16;
+    CHECK_PATH = "M20 6 9 17l-5-5";
     ICON = {
-      reset: '<svg viewBox="0 0 24 24"><path d="M4 12a8 8 0 1 0 2.4-5.7" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/><path d="M3.4 4.6V8h3.4" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>',
-      back: '<svg viewBox="0 0 24 24"><polygon points="18 5 9 12 18 19" fill="currentColor" stroke="none"/><rect x="5" y="5" width="2" height="14" rx="0.6" fill="currentColor" stroke="none"/></svg>',
-      fwd: '<svg viewBox="0 0 24 24"><polygon points="6 5 15 12 6 19" fill="currentColor" stroke="none"/><rect x="17" y="5" width="2" height="14" rx="0.6" fill="currentColor" stroke="none"/></svg>',
-      play: '<svg viewBox="0 0 24 24"><polygon points="7 4.5 19 12 7 19.5" fill="currentColor" stroke="none"/></svg>',
-      pause: '<svg viewBox="0 0 24 24"><rect x="7" y="5" width="3.4" height="14" rx="1" fill="currentColor" stroke="none"/><rect x="13.6" y="5" width="3.4" height="14" rx="1" fill="currentColor" stroke="none"/></svg>',
-      kebab: '<svg viewBox="0 0 24 24"><circle cx="12" cy="5" r="1.5" fill="currentColor" stroke="none"/><circle cx="12" cy="12" r="1.5" fill="currentColor" stroke="none"/><circle cx="12" cy="19" r="1.5" fill="currentColor" stroke="none"/></svg>',
-      check: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg>',
+      reset: '<svg class="lucide lucide-rotate-ccw" viewBox="0 0 24 24"><path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/><path d="M3 3v5h5"/></svg>',
+      back: '<svg class="lucide lucide-skip-back" viewBox="0 0 24 24"><path d="M17.971 4.285A2 2 0 0 1 21 6v12a2 2 0 0 1-3.029 1.715l-9.997-5.998a2 2 0 0 1-.003-3.432z"/><path d="M3 20V4"/></svg>',
+      fwd: '<svg class="lucide lucide-skip-forward" viewBox="0 0 24 24"><path d="M21 4v16"/><path d="M6.029 4.285A2 2 0 0 0 3 6v12a2 2 0 0 0 3.029 1.715l9.997-5.998a2 2 0 0 0 .003-3.432z"/></svg>',
+      play: '<svg class="lucide lucide-play" viewBox="0 0 24 24"><path d="M5 5a2 2 0 0 1 3.008-1.728l11.997 6.998a2 2 0 0 1 .003 3.458l-12 7A2 2 0 0 1 5 19z"/></svg>',
+      pause: '<svg class="lucide lucide-pause" viewBox="0 0 24 24"><rect x="14" y="3" width="5" height="18" rx="1"/><rect x="5" y="3" width="5" height="18" rx="1"/></svg>',
+      kebab: '<svg class="lucide lucide-ellipsis" viewBox="0 0 24 24"><circle cx="12" cy="12" r="1"/><circle cx="19" cy="12" r="1"/><circle cx="5" cy="12" r="1"/></svg>',
+      x: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.8" stroke-linecap="round"><path d="M6 6l12 12"/><path d="M18 6 6 18"/></svg>',
       compare: '<svg class="steptrace__cue-compare" viewBox="0 0 24 24" aria-hidden="true"><path d="m7 16-4-4 4-4"/><path d="M3 12h18"/><path d="m17 8 4 4-4 4"/></svg>',
-      swap: '<svg class="steptrace__cue-swap" viewBox="0 0 24 24" aria-hidden="true"><path d="m2 9 3-3 3 3"/><path d="M13 18H7a2 2 0 0 1-2-2V6"/><path d="m22 15-3 3-3-3"/><path d="M11 6h6a2 2 0 0 1 2 2v10"/></svg>'
+      swap: '<svg class="steptrace__cue-swap" viewBox="0 0 24 24" aria-hidden="true"><path d="m2 9 3-3 3 3"/><path d="M13 18H7a2 2 0 0 1-2-2V6"/><path d="m22 15-3 3-3-3"/><path d="M11 6h6a2 2 0 0 1 2 2v10"/></svg>',
+      search: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="10.5" cy="10.5" r="6.5"/><path d="m15.2 15.2 4.8 4.8"/></svg>',
+      chessQueen: '<svg class="lucide lucide-chess-queen" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 20a2 2 0 0 1 2-2h12a2 2 0 0 1 2 2v1a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1z"/><path d="m12.474 5.943 1.567 5.34a1 1 0 0 0 1.75.328l2.616-3.402"/><path d="m20 9-3 9"/><path d="m5.594 8.209 2.615 3.403a1 1 0 0 0 1.75-.329l1.567-5.34"/><path d="M7 18 4 9"/><circle cx="12" cy="4" r="2"/><circle cx="20" cy="7" r="2"/><circle cx="4" cy="7" r="2"/></svg>'
     };
   }
 });
 
-// custom/steptrace/src/mount.ts
-function createMount(registry2) {
-  const { kindOf, listAlgorithms, buildFrames } = registry2;
-  return function mount2(root, config, host = {}) {
-    root.classList.add("steptrace");
-    root.setAttribute("role", "group");
-    root.setAttribute("aria-label", "Algorithm visualizer");
-    const kind = kindOf(config.algorithm);
-    if (!kind) {
-      root.textContent = `steptrace: unknown algorithm "${config.algorithm}".`;
-      return { destroy: () => root.replaceChildren() };
-    }
-    const mq = matchMedia("(prefers-reduced-motion: reduce)");
-    const applyMotion = () => root.classList.toggle("steptrace--reduced", mq.matches);
-    mq.addEventListener("change", applyMotion);
-    const state = {
-      algorithm: config.algorithm,
-      speed: config.speed || 1,
-      array: Array.isArray(config.array) && config.array.length ? config.array.slice() : randomArray(),
-      start: config.start != null ? String(config.start) : null,
-      config
-    };
-    let player = null;
-    let currentView = null;
-    let currentGraph = null;
-    let currentMilestones = [];
-    let speedControlHandle = null;
-    const head = el("div", "steptrace__head");
-    const crumb = el("div", "steptrace__crumb");
-    const crumbKind = el("span");
-    crumbKind.textContent = kind;
-    const crumbSep = el("span", "steptrace__crumb-sep");
-    crumbSep.textContent = "›";
-    const crumbAlgo = el("span", "steptrace__crumb-algo");
-    crumbAlgo.textContent = state.algorithm;
-    crumb.append(el("span", "steptrace__crumb-dot"), crumbKind, crumbSep, crumbAlgo);
-    const counter = el("div", "steptrace__counter");
-    head.append(crumb, counter);
-    const stageCol = el("div", "steptrace__stage-col");
-    const rail = el("div", "steptrace__rail");
-    const traceWrap = el("div", "steptrace__trace");
-    const traceLabel = el("div", "steptrace__rail-label steptrace__trace-label");
-    traceLabel.textContent = "Trace";
-    const log = el("ol", "steptrace__log");
-    const logLines = [];
-    for (let k = 0; k < LOG_ROWS; k++) {
-      const line = el("li", "steptrace__log-line");
-      const num = el("span", "steptrace__log-num");
-      const txt = el("span", "steptrace__log-text");
-      line.append(num, txt);
-      log.append(line);
-      logLines.push({ line, num, txt });
-    }
-    const insight = el("li", "steptrace__insight");
-    insight.setAttribute("aria-live", "off");
-    insight.setAttribute("aria-atomic", "true");
-    insight.hidden = true;
-    const insightLabel = el("span", "steptrace__insight-label");
-    insightLabel.textContent = "Result";
-    const insightText = el("span", "steptrace__insight-text");
-    insight.append(insightLabel, insightText);
-    log.append(insight);
-    traceWrap.append(traceLabel, log);
-    const watchWrap = el("div", "steptrace__watch-wrap");
-    const watchLabel = el("div", "steptrace__rail-label");
-    watchLabel.textContent = "Watch";
-    const watchEl = el("div", "steptrace__watch");
-    watchWrap.append(watchLabel, watchEl);
-    watchWrap.hidden = true;
-    rail.append(traceWrap, watchWrap);
-    const body = el("div", "steptrace__body");
-    body.append(stageCol, rail);
-    const foot = el("div", "steptrace__foot");
-    const scrub = el("div", "steptrace__scrub");
-    scrub.setAttribute("role", "slider");
-    scrub.setAttribute("tabindex", "0");
-    scrub.setAttribute("aria-label", "Step");
-    const scrubFill = el("div", "steptrace__scrub-fill");
-    const scrubDot = el("div", "steptrace__scrub-dot");
-    const milestoneLayer = el("div", "steptrace__milestones");
-    scrub.append(el("div", "steptrace__scrub-track"), scrubFill, milestoneLayer, scrubDot);
-    const phase = el("div", "steptrace__phase");
-    const phaseName = el("span", "steptrace__phase-name");
-    const phaseStep = el("span");
-    phase.append(phaseName, phaseStep);
-    const btnReset = iconBtn("Restart", ICON.reset);
-    const btnBack = iconBtn("Step back", ICON.back);
-    const btnPlay = iconBtn("Play", ICON.play, "steptrace__btn--play");
-    const btnFwd = iconBtn("Step forward", ICON.fwd);
-    const menuWrap = el("div", "steptrace__menu-wrap");
-    const btnMenu = iconBtn("Options", ICON.kebab);
-    btnMenu.setAttribute("aria-haspopup", "true");
-    btnMenu.setAttribute("aria-expanded", "false");
-    const menu = el("div", "steptrace__menu");
-    const speedHead = el("div", "steptrace__menu-h");
-    speedHead.textContent = "Speed";
-    const speedSection = el("div", "steptrace__menu-section");
-    const speedRow = el("div", "steptrace__speed-row");
-    const speedControl = el("div", "steptrace__speed-control");
-    speedRow.append(speedControl);
-    const fmtSpeed = (v) => Number(v).toFixed(2) + "×";
-    const applySpeed = (value) => {
-      const v = Number(value);
-      state.speed = v;
-      if (player) player.setSpeed(v);
-    };
-    if (host && typeof host.createSpeedSlider === "function") {
-      speedControlHandle = host.createSpeedSlider(speedControl, {
-        min: 0.5,
-        max: 2,
-        step: 0.25,
-        value: state.speed,
-        label: "Playback speed",
-        format: fmtSpeed,
-        onChange: applySpeed
-      });
-    } else {
-      const speedInput = el("input", "steptrace__range");
-      speedInput.type = "range";
-      speedInput.min = "0.5";
-      speedInput.max = "2";
-      speedInput.step = "0.25";
-      speedInput.value = String(state.speed);
-      speedInput.setAttribute("aria-label", "Playback speed");
-      speedInput.setAttribute("aria-valuetext", fmtSpeed(state.speed));
-      const speedVal = el("span", "steptrace__speed-val");
-      speedVal.textContent = fmtSpeed(state.speed);
-      speedInput.addEventListener("input", () => {
-        applySpeed(speedInput.value);
-        speedVal.textContent = fmtSpeed(speedInput.value);
-        speedInput.setAttribute("aria-valuetext", fmtSpeed(speedInput.value));
-      });
-      speedControl.append(speedInput);
-      speedRow.append(speedVal);
-    }
-    speedSection.append(speedHead, speedRow);
-    menu.append(speedSection);
-    let startMenu = null;
-    if (kind === "sort") {
-      const section = el("div", "steptrace__menu-section");
-      const h = el("div", "steptrace__menu-h");
-      h.textContent = "Array";
-      const item = el("button", "steptrace__menu-item");
-      item.type = "button";
-      item.textContent = "Shuffle";
-      item.addEventListener("click", () => {
-        state.array = randomArray();
-        build();
-      });
-      section.append(h, item);
-      menu.append(section);
-    } else if (kind === "graph") {
-      const section = el("div", "steptrace__menu-section");
-      const h = el("div", "steptrace__menu-h");
-      h.textContent = "Start node";
-      startMenu = el("select", "steptrace__select");
-      startMenu.setAttribute("aria-label", "Start node");
-      startMenu.addEventListener("change", () => {
-        state.start = startMenu.value;
-        closeMenu();
-        build();
-      });
-      section.append(h, startMenu);
-      menu.append(section);
-    } else if (kind === "search") {
-      const section = el("div", "steptrace__menu-section");
-      const h = el("div", "steptrace__menu-h");
-      h.textContent = "Target";
-      const sel = el("select", "steptrace__select");
-      sel.setAttribute("aria-label", "Search target");
-      const seen = /* @__PURE__ */ new Set();
-      for (const v of state.array) {
-        if (seen.has(v)) continue;
-        seen.add(v);
-        const opt = el("option");
-        opt.value = String(v);
-        opt.textContent = String(v);
-        if (Number(v) === Number(state.config.target)) opt.selected = true;
-        sel.append(opt);
-      }
-      sel.value = String(state.config.target);
-      sel.addEventListener("change", () => {
-        state.config.target = Number(sel.value);
-        closeMenu();
-        build();
-      });
-      section.append(h, sel);
-      menu.append(section);
-    }
-    menuWrap.append(btnMenu, menu);
-    const transport = el("div", "steptrace__transport");
-    transport.append(btnReset, btnBack, btnPlay, btnFwd, spacer(), menuWrap);
-    foot.append(scrub, phase, transport);
-    root.replaceChildren(head, body, foot);
-    let menuOpen = false;
-    function closeMenu() {
-      menuOpen = false;
-      menu.classList.remove("steptrace__menu--open");
-      btnMenu.setAttribute("aria-expanded", "false");
-    }
-    btnMenu.addEventListener("click", (e) => {
-      e.stopPropagation();
-      menuOpen = !menuOpen;
-      menu.classList.toggle("steptrace__menu--open", menuOpen);
-      btnMenu.setAttribute("aria-expanded", menuOpen ? "true" : "false");
-    });
-    menu.addEventListener("click", (e) => e.stopPropagation());
-    const onDocClick = () => closeMenu();
-    document.addEventListener("click", onDocClick);
-    function sizeRail() {
-      if (!player) return;
-      if (matchMedia("(max-width: 560px)").matches) {
-        log.style.height = "auto";
-        return;
-      }
-      const PROBE = "position:absolute;visibility:hidden;pointer-events:none;left:0;right:0;height:auto";
-      const tall = (node) => node.getBoundingClientRect().height;
-      const probe = el("li", "steptrace__log-line steptrace__log-line--cur");
-      probe.style.cssText = PROBE;
-      const pn = el("span", "steptrace__log-num");
-      pn.textContent = "00";
-      const pt = el("span", "steptrace__log-text");
-      probe.append(pn, pt);
-      log.append(probe);
-      let maxRow = 0;
-      for (const f of player.frames) {
-        pt.textContent = stripTags(f.message);
-        if (tall(probe) > maxRow) maxRow = tall(probe);
-      }
-      probe.remove();
-      const resultProbe = insight.cloneNode(true);
-      resultProbe.hidden = false;
-      resultProbe.style.cssText = PROBE;
-      log.append(resultProbe);
-      if (tall(resultProbe) > maxRow) maxRow = tall(resultProbe);
-      resultProbe.remove();
-      const logCS = getComputedStyle(log);
-      const gap = parseFloat(logCS.rowGap) || 0;
-      const hist = (parseFloat(logCS.lineHeight) || 0) * 2;
-      const h = Math.ceil(hist * 2 + gap * 2 + maxRow) + "px";
-      if (log.style.height !== h) log.style.height = h;
-    }
-    function fitLog(terminal) {
-      const budget = log.clientHeight;
-      if (!budget) return;
-      const gap = parseFloat(getComputedStyle(log).rowGap) || 0;
-      let used = terminal ? insight.getBoundingClientRect().height : 0;
-      let full = false;
-      for (let k = LOG_ROWS - 1; k >= 0; k--) {
-        const line = logLines[k].line;
-        if (line.hidden) continue;
-        if (full) {
-          line.hidden = true;
-          continue;
-        }
-        const h = line.getBoundingClientRect().height;
-        const need = used ? used + gap + h : h;
-        if (!used || need <= budget + 0.5) {
-          used = need;
-        } else {
-          line.hidden = true;
-          full = true;
-        }
-      }
-    }
-    const onRailResize = () => {
-      sizeRail();
-      if (player) renderRail();
-    };
-    const logRO = typeof ResizeObserver !== "undefined" ? new ResizeObserver(onRailResize) : null;
-    if (logRO) logRO.observe(rail);
-    let lastRailI = null;
-    function renderRail() {
-      const total = player.frames.length;
-      const i = player.i;
-      const terminal = i === total - 1;
-      insight.hidden = !terminal;
-      insight.setAttribute("aria-live", terminal && !player.playing ? "polite" : "off");
-      for (let k = 0; k < LOG_ROWS; k++) {
-        const ll = logLines[k];
-        const fi = i - (LOG_ROWS - 1 - k);
-        const cur = fi === i;
-        if (fi < 0 || fi >= total || cur && terminal) {
-          ll.line.hidden = true;
-          ll.num.textContent = "";
-          ll.txt.textContent = "";
-          ll.line.classList.remove("steptrace__log-line--cur");
-          continue;
-        }
-        ll.line.hidden = false;
-        ll.num.textContent = pad2(fi + 1);
-        ll.txt.textContent = stripTags(player.frames[fi].message);
-        ll.line.classList.toggle("steptrace__log-line--cur", cur);
-        ll.line.style.opacity = cur ? "" : String(fadeFor(i - fi));
-      }
-      fitLog(terminal);
-      const dir = lastRailI == null ? 0 : Math.sign(i - lastRailI);
-      lastRailI = i;
-      if (dir !== 0) {
-        log.style.transition = "none";
-        log.style.transform = `translateY(${dir > 0 ? "0.55rem" : "-0.55rem"})`;
-        void log.offsetHeight;
-        log.style.transition = "transform 0.26s var(--_spring)";
-        log.style.transform = "translateY(0)";
-      }
-      const chapter = milestoneAt(currentMilestones, i);
-      phaseName.textContent = chapter ? chapter.label : "Step";
-      phaseStep.textContent = `${i + 1} / ${total}`;
-      scrub.setAttribute("aria-valuetext", `${phaseName.textContent}, step ${i + 1} of ${total}`);
-      for (let k = 0; k < milestoneLayer.children.length; k++) {
-        const step = Number(milestoneLayer.children[k].dataset.step);
-        milestoneLayer.children[k].dataset.passed = step <= i ? "1" : "0";
-      }
-    }
-    function renderMilestones() {
-      milestoneLayer.replaceChildren();
-      const last = Math.max(1, player.frames.length - 1);
-      for (const mark of thinMilestones(currentMilestones)) {
-        const tick = el("span", "steptrace__milestone");
-        tick.style.left = mark.i / last * 100 + "%";
-        tick.dataset.step = String(mark.i);
-        tick.title = `${mark.label} · step ${mark.i + 1}`;
-        tick.setAttribute("aria-hidden", "true");
-        milestoneLayer.append(tick);
-      }
-    }
-    function onState() {
-      const total = player.frames.length;
-      const i = player.i;
-      counter.innerHTML = `<b>${pad2(i + 1)}</b> / ${pad2(total)}`;
-      const pct = total <= 1 ? 0 : i / (total - 1) * 100;
-      scrubFill.style.width = pct + "%";
-      scrubDot.style.left = pct + "%";
-      scrub.setAttribute("aria-valuemin", "0");
-      scrub.setAttribute("aria-valuemax", String(total - 1));
-      scrub.setAttribute("aria-valuenow", String(i));
-      btnPlay.innerHTML = player.playing ? ICON.pause : ICON.play;
-      btnPlay.setAttribute("aria-label", player.playing ? "Pause" : "Play");
-      btnPlay.title = player.playing ? "Pause" : "Play";
-      btnBack.disabled = i === 0;
-      btnFwd.disabled = i === total - 1;
-      renderRail();
-      renderWatch();
-    }
-    function renderWatch() {
-      const rows = currentView && currentView.watch ? currentView.watch(player.frames[player.i]) : null;
-      watchEl.replaceChildren();
-      if (!rows || !rows.length) return;
-      for (const r of rows) {
-        const row = el("div", "steptrace__watch-row");
-        if (r.sw) {
-          const sw = el("span", "steptrace__watch-sw");
-          sw.style.background = r.sw;
-          row.append(sw);
-        }
-        const kk = el("span", "steptrace__watch-k");
-        kk.textContent = r.k;
-        const vv = el("span", "steptrace__watch-v");
-        vv.textContent = r.v;
-        row.append(kk, vv);
-        watchEl.append(row);
-      }
-    }
-    function seekFromEvent(e) {
-      const r = scrub.getBoundingClientRect();
-      const cx = e.clientX != null ? e.clientX : e.touches && e.touches[0] ? e.touches[0].clientX : r.left;
-      const frac = r.width ? Math.max(0, Math.min(1, (cx - r.left) / r.width)) : 0;
-      player.seek(Math.round(frac * (player.frames.length - 1)));
-    }
-    let dragging = false;
-    scrub.addEventListener("pointerdown", (e) => {
-      dragging = true;
-      try {
-        scrub.setPointerCapture(e.pointerId);
-      } catch (_) {
-      }
-      seekFromEvent(e);
-    });
-    scrub.addEventListener("pointermove", (e) => {
-      if (dragging) seekFromEvent(e);
-    });
-    const endDrag = () => {
-      dragging = false;
-    };
-    scrub.addEventListener("pointerup", endDrag);
-    scrub.addEventListener("pointercancel", endDrag);
-    scrub.addEventListener("keydown", (e) => {
-      if (e.key === "ArrowRight") player.stepF();
-      else if (e.key === "ArrowLeft") player.stepB();
-      else if (e.key === "Home") player.seek(0);
-      else if (e.key === "End") player.seek(player.frames.length - 1);
-      else return;
-      e.preventDefault();
-      e.stopPropagation();
-    });
-    function build() {
-      if (player) player.destroy();
-      if (currentView && currentView.destroy) currentView.destroy();
-      const built = buildFrames({
-        algorithm: state.algorithm,
-        array: state.array,
-        start: state.start,
-        target: state.config.target,
-        text: state.config.text,
-        pattern: state.config.pattern,
-        a: state.config.a,
-        b: state.config.b,
-        n: state.config.n,
-        value: state.config.value,
-        width: state.config.width,
-        ops: state.config.ops,
-        directed: state.config.directed,
-        nodes: state.config.nodes,
-        edges: state.config.edges
-      });
-      currentGraph = built.graph || null;
-      currentMilestones = buildMilestones(state.algorithm, built.kind, built.frames);
-      let view;
-      if (built.kind === "graph")
-        view = makeGraphView(built.frames, built.graph, built.frontierLabel);
-      else if (built.kind === "search") view = makeSearchView(built.frames);
-      else if (built.kind === "string") view = makeMatchView(built.frames);
-      else if (built.kind === "pointers") view = makePointerView(built.frames);
-      else if (built.kind === "dp") view = makeDPView(built.frames);
-      else if (built.kind === "unionfind") view = makeUnionFindView(built.frames);
-      else if (built.kind === "bits") view = makeBitsView(built.frames);
-      else if (built.kind === "backtrack") view = makeBacktrackView(built.frames);
-      else if (built.kind === "rectree") view = makeRecTreeView(built.frames);
-      else view = makeSortView(built.frames);
-      currentView = view;
-      if (built.kind === "graph") syncStartOptions(built.graph);
-      stageCol.classList.toggle("steptrace__stage-col--bottom", built.kind !== "graph");
-      stageCol.classList.toggle("steptrace__stage-col--graph", built.kind === "graph");
-      const nodes = view.nodes.slice(0, -1);
-      stageCol.replaceChildren(...nodes);
-      player = new Player(built.frames, view.paint, state.speed);
-      player.onState = onState;
-      insightText.textContent = summaryFor(
-        state.algorithm,
-        built.kind,
-        built.frames[built.frames.length - 1],
-        currentGraph
+// custom/steptrace/src/families/interval-track.ts
+function parseIntervalTokens(config, defaults, algorithm) {
+  const intervals = config.intervals ?? defaults;
+  if (!Array.isArray(intervals) || intervals.length === 0)
+    throw new Error(`steptrace: ${algorithm} requires a non-empty "intervals" array.`);
+  if (!intervals.every(
+    (interval) => Array.isArray(interval) && interval.length === 2 && interval.every(Number.isInteger) && interval[0] <= interval[1]
+  ))
+    throw new Error(
+      `steptrace: ${algorithm} requires integer [start, end] pairs with start <= end.`
+    );
+  return intervals.map(([start, end], id) => ({ id, start, end }));
+}
+function copyInterval(interval) {
+  return interval ? [interval[0], interval[1]] : null;
+}
+function formatInterval(interval) {
+  return interval ? `[${interval[0]}, ${interval[1]}]` : "—";
+}
+function formatRelation(relation) {
+  if (relation === "contained") return "contained · keep end";
+  if (relation === "overlap") return "overlap · extend";
+  if (relation === "gap") return "gap · emit";
+  if (relation === "compatible") return "compatible · accept";
+  if (relation === "conflict") return "overlap · reject";
+  return "—";
+}
+function intervalBand(className, start, end, minimum) {
+  const band = el("div", className);
+  band.style.setProperty("--_interval-start", String(start - minimum));
+  band.style.setProperty("--_interval-span", String(end - start + 1));
+  band.textContent = `${start}–${end}`;
+  band.title = `[${start}, ${end}]`;
+  band.setAttribute("aria-label", `Interval ${start} to ${end}`);
+  return band;
+}
+function makeIntervalTrackView(frames) {
+  const first = frames[0];
+  const minimum = Math.min(...first.intervals.map((interval) => interval.start));
+  const maximum = Math.max(...first.intervals.map((interval) => interval.end));
+  const columns = maximum - minimum + 1;
+  const scheduling = first.profile === "activity-selection";
+  const root = el("div", "steptrace__interval-track");
+  root.setAttribute("role", "region");
+  root.setAttribute("aria-label", scheduling ? "Activity selection sweep" : "Merge intervals sweep");
+  root.style.setProperty("--_interval-rows", String(first.intervals.length));
+  root.style.setProperty("--_interval-columns", String(columns));
+  const inputSection = el("section", "steptrace__interval-section");
+  const inputLabel = el("div", "steptrace__rail-label steptrace__interval-label");
+  const axis = el("div", "steptrace__interval-axis");
+  for (let value = minimum; value <= maximum; value++) {
+    if (value !== minimum && value !== maximum && (value - minimum) % 4 !== 0) continue;
+    const tick = el("span", "steptrace__interval-tick");
+    tick.style.gridColumn = String(value - minimum + 1);
+    tick.textContent = String(value);
+    axis.append(tick);
+  }
+  const board = el("div", "steptrace__interval-board");
+  const rows = new Map(
+    first.intervals.map((interval) => {
+      const row = el("div", "steptrace__interval-row");
+      const band = intervalBand(
+        "steptrace__interval-band steptrace__interval-band--source",
+        interval.start,
+        interval.end,
+        minimum
       );
-      reserveWatch(built.frames, view);
-      renderMilestones();
-      sizeRail();
-      player.render();
-      onState();
+      row.append(band);
+      board.append(row);
+      return [interval.id, { row, band }];
+    })
+  );
+  inputSection.append(inputLabel, axis, board);
+  const currentSection = el("section", "steptrace__interval-section");
+  const currentLabel = el("div", "steptrace__rail-label steptrace__interval-label");
+  currentLabel.textContent = scheduling ? "Last accepted" : "Current block";
+  const currentLane = el("div", "steptrace__interval-lane");
+  const currentBand = el("div", "steptrace__interval-band steptrace__interval-band--current");
+  currentBand.dataset.visible = "0";
+  currentBand.setAttribute("aria-hidden", "true");
+  currentLane.append(currentBand);
+  currentSection.append(currentLabel, currentLane);
+  const outputSection = el("section", "steptrace__interval-section");
+  const outputLabel = el("div", "steptrace__rail-label steptrace__interval-label");
+  outputLabel.textContent = scheduling ? "Accepted schedule" : "Merged output";
+  const outputLane = el("div", "steptrace__interval-lane");
+  const outputBands = first.intervals.map(() => {
+    const band = el("div", "steptrace__interval-band steptrace__interval-band--output");
+    band.dataset.visible = "0";
+    band.setAttribute("aria-hidden", "true");
+    outputLane.append(band);
+    return band;
+  });
+  outputSection.append(outputLabel, outputLane);
+  const legendItems = scheduling ? [
+    ["next meeting", "candidate"],
+    ["last accepted", "current"],
+    ["accepted", "output"],
+    ["rejected overlap", "rejected"]
+  ] : [
+    ["next interval", "candidate"],
+    ["current merged block", "current"],
+    ["emitted output", "output"]
+  ];
+  const legend = makeLegend(
+    legendItems.map(([label, state]) => ({
+      label,
+      swatchClass: `steptrace__interval-swatch steptrace__interval-swatch--${state}`
+    })),
+    "Interval state legend",
+    "steptrace__interval-legend"
+  );
+  root.append(inputSection, currentSection, outputSection);
+  const status = statusEl();
+  function positionBand(band, interval) {
+    band.style.setProperty("--_interval-start", String(interval[0] - minimum));
+    band.style.setProperty("--_interval-span", String(interval[1] - interval[0] + 1));
+    band.textContent = `${interval[0]}–${interval[1]}`;
+    band.title = formatInterval(interval);
+    band.setAttribute("aria-label", `Interval ${interval[0]} to ${interval[1]}`);
+  }
+  function paint(frame) {
+    inputLabel.textContent = frame.type === "input" ? scheduling ? "Unsorted meetings" : "Input intervals" : scheduling ? "Finish-time order" : "Sorted intervals";
+    const rowById = new Map(frame.order.map((id, index) => [id, index]));
+    for (const interval of frame.intervals) {
+      const view = rows.get(interval.id);
+      const rowIndex = rowById.get(interval.id);
+      view.row.style.setProperty("--_interval-row", String(rowIndex));
+      const passed = frame.cursor != null && rowIndex < frame.cursor;
+      view.band.dataset.state = frame.selected.includes(interval.id) ? "accepted" : frame.rejected.includes(interval.id) ? "rejected" : interval.id === frame.active ? frame.relation === "gap" || frame.relation === "conflict" ? frame.relation : "candidate" : passed || frame.type === "done" ? "processed" : "";
     }
-    function reserveWatch(frames, view) {
-      let maxRows = 0;
-      if (view.watch) {
-        for (const f of frames) {
-          const rows = view.watch(f);
-          if (rows && rows.length > maxRows) maxRows = rows.length;
-        }
+    currentBand.dataset.visible = frame.current ? "1" : "0";
+    currentBand.setAttribute("aria-hidden", frame.current ? "false" : "true");
+    if (frame.current) positionBand(currentBand, frame.current);
+    outputBands.forEach((band, index) => {
+      const interval = frame.output[index];
+      const previous = frame.output[index - 1];
+      const next = frame.output[index + 1];
+      band.dataset.visible = interval ? "1" : "0";
+      band.dataset.joinStart = interval && previous && previous[1] + 1 === interval[0] ? "1" : "0";
+      band.dataset.joinEnd = interval && next && interval[1] + 1 === next[0] ? "1" : "0";
+      band.setAttribute("aria-hidden", interval ? "false" : "true");
+      if (interval) positionBand(band, interval);
+    });
+    root.dataset.frame = frame.type;
+    root.dataset.relation = frame.relation || "";
+    status.textContent = frame.message;
+  }
+  const watch = (frame) => {
+    const active = frame.active == null ? null : frame.intervals.find((interval) => interval.id === frame.active);
+    return scheduling ? [
+      {
+        k: "phase",
+        v: frame.type === "input" ? "unsorted" : frame.type === "done" ? "complete" : frame.type === "sort" ? "sort" : "select",
+        sw: "var(--_violet)"
+      },
+      {
+        k: "next meeting",
+        v: active ? `[${active.start}, ${active.end}]` : "—",
+        sw: "var(--_amber)"
+      },
+      { k: "last accepted", v: formatInterval(frame.current), sw: "var(--_blue)" },
+      {
+        k: "decision",
+        v: frame.type === "done" ? "complete" : formatRelation(frame.relation),
+        hint: "Whether the current meeting is accepted or rejected.",
+        sw: frame.relation === "conflict" ? "var(--_violet)" : frame.relation === "compatible" ? "var(--_green)" : "var(--_neutral)"
       }
-      watchWrap.hidden = maxRows === 0;
-      watchEl.style.minHeight = maxRows ? `calc(${maxRows} * 1.44rem)` : "";
+    ] : [
+      {
+        k: "phase",
+        v: frame.type === "input" ? "unsorted" : frame.type === "done" ? "complete" : frame.type === "sort" ? "sort" : "sweep",
+        sw: "var(--_violet)"
+      },
+      {
+        k: "next interval",
+        v: active ? `[${active.start}, ${active.end}]` : "—",
+        sw: "var(--_amber)"
+      },
+      { k: "current block", v: formatInterval(frame.current), sw: "var(--_blue)" },
+      {
+        k: "decision",
+        v: frame.type === "done" ? "complete" : formatRelation(frame.relation),
+        hint: "How the next interval changes the current merged block.",
+        sw: frame.relation === "gap" ? "var(--_violet)" : frame.relation ? "var(--_green)" : "var(--_neutral)"
+      }
+    ];
+  };
+  return {
+    nodes: [root, legend, status],
+    stageAlignment: "center",
+    stableStage: true,
+    paint,
+    watch,
+    summary(frame) {
+      const output = frame.output.map((interval) => formatInterval(interval)).join(", ");
+      return scheduling ? `Accepted ${output} · ${frame.output.length} of ${frame.intervals.length} meetings.` : `Merged ${output} · ${frame.intervals.length} intervals → ${frame.output.length} blocks.`;
     }
-    function syncStartOptions(graph) {
-      if (!startMenu || startMenu.dataset.filled) {
-        if (state.start == null) state.start = graph.start;
-        return;
-      }
-      startMenu.replaceChildren();
-      for (const n of graph.nodes) {
-        const opt = el("option");
-        opt.value = n.id;
-        opt.textContent = n.id;
-        if (n.id === graph.start) opt.selected = true;
-        startMenu.append(opt);
-      }
-      startMenu.value = graph.start;
-      startMenu.dataset.filled = "1";
-      state.start = graph.start;
-    }
-    build();
-    btnReset.addEventListener("click", () => player.reset());
-    btnBack.addEventListener("click", () => player.stepB());
-    btnPlay.addEventListener("click", () => player.toggle());
-    btnFwd.addEventListener("click", () => player.stepF());
-    const onKey = (e) => {
-      if (e.target instanceof HTMLInputElement || e.target instanceof HTMLSelectElement) return;
-      if (e.target === scrub) return;
-      if (e.key === "ArrowRight") player.stepF();
-      else if (e.key === "ArrowLeft") player.stepB();
-      else if (e.key === " " || e.key === "Spacebar") player.toggle();
-      else return;
-      e.preventDefault();
-      e.stopPropagation();
-    };
-    root.addEventListener("keydown", onKey);
-    applyMotion();
-    return {
-      destroy() {
-        if (player) player.destroy();
-        if (currentView && currentView.destroy) currentView.destroy();
-        if (speedControlHandle && speedControlHandle.destroy) speedControlHandle.destroy();
-        if (logRO) logRO.disconnect();
-        mq.removeEventListener("change", applyMotion);
-        root.removeEventListener("keydown", onKey);
-        document.removeEventListener("click", onDocClick);
-        root.replaceChildren();
-        root.classList.remove("steptrace", "steptrace--reduced");
-      }
-    };
   };
 }
-function randomArray(n = 12) {
-  const pool = [];
-  for (let v = 5; v <= 62; v++) pool.push(v);
-  for (let k = pool.length - 1; k > 0; k--) {
-    const r = Math.floor(Math.random() * (k + 1));
-    [pool[k], pool[r]] = [pool[r], pool[k]];
-  }
-  return pool.slice(0, n);
-}
-var LOG_ROWS, fadeFor;
-var init_mount = __esm({
-  "custom/steptrace/src/mount.ts"() {
-    init_player();
+var IntervalTrackRecorder, intervalTrackFamily;
+var init_interval_track = __esm({
+  "custom/steptrace/src/families/interval-track.ts"() {
     init_render();
-    LOG_ROWS = 10;
-    fadeFor = (age) => Math.max(0.1, 0.5 * Math.pow(0.62, age - 1));
+    IntervalTrackRecorder = class {
+      constructor(config) {
+        this.config = config;
+        this.order = config.intervals.map((interval) => interval.id);
+      }
+      config;
+      frames = [];
+      order;
+      cursor = null;
+      active = null;
+      current = null;
+      output = [];
+      selected = [];
+      rejected = [];
+      relation = null;
+      push(type, message) {
+        this.frames.push({
+          type,
+          profile: this.config.profile,
+          intervals: this.config.intervals,
+          order: this.order.slice(),
+          cursor: this.cursor,
+          active: this.active,
+          current: copyInterval(this.current),
+          output: this.output.map((interval) => [interval[0], interval[1]]),
+          selected: this.selected.slice(),
+          rejected: this.rejected.slice(),
+          relation: this.relation,
+          message
+        });
+      }
+      begin(message) {
+        this.push("input", message);
+      }
+      sorted(order, message) {
+        this.order = order.slice();
+        this.push("sort", message);
+      }
+      seed(cursor, active, current, message) {
+        this.cursor = cursor;
+        this.active = active;
+        this.current = copyInterval(current);
+        this.relation = null;
+        this.push("seed", message);
+      }
+      inspect(cursor, active, relation, message) {
+        this.cursor = cursor;
+        this.active = active;
+        this.relation = relation;
+        this.push("inspect", message);
+      }
+      extend(current, message) {
+        this.current = copyInterval(current);
+        this.push("extend", message);
+      }
+      emit(interval, message) {
+        this.output.push(copyInterval(interval));
+        this.push("emit", message);
+      }
+      restart(cursor, active, current, message) {
+        this.cursor = cursor;
+        this.active = active;
+        this.current = copyInterval(current);
+        this.relation = null;
+        this.push("restart", message);
+      }
+      accept(cursor, active, interval, message) {
+        this.cursor = cursor;
+        this.active = active;
+        this.current = copyInterval(interval);
+        this.output.push(copyInterval(interval));
+        this.selected.push(active);
+        this.relation = "compatible";
+        this.push("accept", message);
+      }
+      reject(cursor, active, message) {
+        this.cursor = cursor;
+        this.active = active;
+        this.rejected.push(active);
+        this.relation = "conflict";
+        this.push("reject", message);
+      }
+      done(interval, message) {
+        this.output.push(copyInterval(interval));
+        this.current = null;
+        this.active = null;
+        this.cursor = null;
+        this.relation = null;
+        this.push("done", message);
+      }
+      finish(message) {
+        this.active = null;
+        this.cursor = null;
+        this.relation = null;
+        this.push("done", message);
+      }
+    };
+    intervalTrackFamily = {
+      id: "interval-track",
+      createRecorder(config) {
+        return new IntervalTrackRecorder(config);
+      },
+      createView(frames) {
+        return makeIntervalTrackView(frames);
+      }
+    };
+  }
+});
+
+// custom/steptrace/src/algorithms/activity-selection.ts
+function pair(interval) {
+  return [interval.start, interval.end];
+}
+var DEFAULT_MEETINGS, activitySelection;
+var init_activity_selection = __esm({
+  "custom/steptrace/src/algorithms/activity-selection.ts"() {
+    init_interval_track();
+    DEFAULT_MEETINGS = [
+      [0, 6],
+      [8, 9],
+      [3, 5],
+      [1, 4],
+      [5, 7]
+    ];
+    activitySelection = {
+      id: "activity-selection",
+      kind: "pointers",
+      family: intervalTrackFamily,
+      meta: { label: "Activity selection" },
+      parse(config) {
+        return {
+          profile: "activity-selection",
+          intervals: parseIntervalTokens(config, DEFAULT_MEETINGS, "activity-selection")
+        };
+      },
+      run(input, ops) {
+        ops.begin("Start with meetings in their original order.");
+        const sorted = input.intervals.slice().sort((a, b) => a.end - b.end || a.start - b.start || a.id - b.id);
+        ops.sorted(
+          sorted.map((interval) => interval.id),
+          "Sort by finish time so each accepted meeting leaves the most room for what follows."
+        );
+        let accepted = sorted[0];
+        ops.accept(
+          0,
+          accepted.id,
+          pair(accepted),
+          `Accept [${accepted.start}, ${accepted.end}]; it finishes first.`
+        );
+        for (let index = 1; index < sorted.length; index++) {
+          const next = sorted[index];
+          const compatible = next.start >= accepted.end;
+          ops.inspect(
+            index,
+            next.id,
+            compatible ? "compatible" : "conflict",
+            compatible ? `${next.start} ≥ ${accepted.end}, so [${next.start}, ${next.end}] is compatible.` : `${next.start} < ${accepted.end}, so [${next.start}, ${next.end}] overlaps the last accepted meeting.`
+          );
+          if (!compatible) {
+            ops.reject(
+              index,
+              next.id,
+              `Reject [${next.start}, ${next.end}]; accepting it would overlap [${accepted.start}, ${accepted.end}].`
+            );
+            continue;
+          }
+          accepted = next;
+          ops.accept(
+            index,
+            next.id,
+            pair(next),
+            `Accept [${next.start}, ${next.end}] and move the compatibility boundary to ${next.end}.`
+          );
+        }
+        ops.finish("Every meeting was considered; the accepted schedule is maximum-size.");
+      }
+    };
+  }
+});
+
+// custom/steptrace/src/families/interactive-structure.ts
+function createStructureShell(root, id, label, ariaLabel, family10 = "contiguous-storage", stageClass = "steptrace__contiguous") {
+  root.classList.add("steptrace", "steptrace--structure");
+  root.dataset.visualFamily = family10;
+  root.dataset.structure = id;
+  root.setAttribute("role", "group");
+  root.setAttribute("aria-label", ariaLabel);
+  const media = matchMedia("(prefers-reduced-motion: reduce)");
+  const applyMotion = () => root.classList.toggle("steptrace--reduced", media.matches);
+  media.addEventListener("change", applyMotion);
+  const head = el("div", "steptrace__head");
+  const crumb = el("div", "steptrace__crumb");
+  const kind = el("span");
+  kind.textContent = "data structure";
+  const separator = el("span", "steptrace__crumb-sep");
+  separator.textContent = "›";
+  const name = el("span", "steptrace__crumb-algo");
+  name.textContent = label;
+  crumb.append(el("span", "steptrace__crumb-dot"), kind, separator, name);
+  const counter = el("div", "steptrace__counter");
+  head.append(crumb, counter);
+  const body = el("div", "steptrace__body steptrace__structure-body");
+  const stage = el("div", stageClass);
+  body.append(stage);
+  const controls = el("div", "steptrace__foot steptrace__structure-controls");
+  const status = el("div", "steptrace__structure-status");
+  status.setAttribute("role", "status");
+  status.setAttribute("aria-live", "polite");
+  status.setAttribute("aria-atomic", "true");
+  const cleanups = [];
+  root.replaceChildren(head, body, controls);
+  applyMotion();
+  return {
+    stage,
+    controls,
+    status,
+    setCounter(value, suffix = "") {
+      counter.innerHTML = `<b>${value}</b>${suffix}`;
+    },
+    input(inputLabel, placeholder, maxLength = 12) {
+      const input = el("input", "steptrace__structure-input");
+      input.type = "text";
+      input.maxLength = maxLength;
+      input.placeholder = placeholder;
+      input.name = inputLabel;
+      input.setAttribute("aria-label", inputLabel);
+      return input;
+    },
+    select(selectLabel, placeholder, options, selected) {
+      const select = el(
+        "select",
+        "steptrace__select steptrace__structure-select"
+      );
+      select.name = selectLabel;
+      select.setAttribute("aria-label", selectLabel);
+      const prompt = el("option");
+      prompt.value = "";
+      prompt.textContent = placeholder;
+      prompt.disabled = true;
+      select.append(prompt);
+      for (const value of options) {
+        const option = el("option");
+        option.value = value;
+        option.textContent = value;
+        select.append(option);
+      }
+      select.value = selected ?? "";
+      return select;
+    },
+    button(buttonLabel, primary = false) {
+      const button2 = el(
+        "button",
+        `steptrace__structure-action${primary ? " steptrace__structure-action--primary" : ""}`
+      );
+      button2.type = "button";
+      button2.textContent = buttonLabel;
+      return button2;
+    },
+    listen(node2, type, listener) {
+      node2.addEventListener(type, listener);
+      cleanups.push(() => node2.removeEventListener(type, listener));
+    },
+    reducedMotion() {
+      return media.matches;
+    },
+    finish() {
+      controls.append(status);
+      return {
+        destroy() {
+          for (const cleanup of cleanups) cleanup();
+          media.removeEventListener("change", applyMotion);
+          root.replaceChildren();
+          root.classList.remove("steptrace", "steptrace--structure", "steptrace--reduced");
+          delete root.dataset.visualFamily;
+          delete root.dataset.structure;
+        }
+      };
+    }
+  };
+}
+function createIndexedBoard(stage, capacity, ariaLabel) {
+  const board = el("div", "steptrace__contiguous-array");
+  board.setAttribute("role", "list");
+  board.setAttribute("aria-label", ariaLabel);
+  stage.append(board);
+  let cells = [];
+  function resize(nextCapacity) {
+    board.style.setProperty("--steptrace-capacity", String(nextCapacity));
+    board.replaceChildren();
+    cells = Array.from({ length: nextCapacity }, (_, index) => {
+      const cell = el("div", "steptrace__contiguous-cell");
+      cell.setAttribute("role", "listitem");
+      const value = el("span", "steptrace__contiguous-value");
+      const indexLabel = el("span", "steptrace__contiguous-index");
+      indexLabel.textContent = String(index);
+      cell.append(value, indexLabel);
+      board.append(cell);
+      return { cell, index: indexLabel, value };
+    });
+  }
+  function paint(states) {
+    if (states.length !== cells.length) resize(states.length);
+    states.forEach((state, index) => {
+      const target = cells[index];
+      target.value.textContent = state.value ?? "·";
+      target.index.textContent = state.label ?? String(index);
+      target.cell.dataset.empty = state.value == null ? "1" : "0";
+      target.cell.dataset.active = state.active ? "1" : "0";
+      target.cell.dataset.changed = state.changed ? "1" : "0";
+      target.cell.dataset.head = state.head ? "1" : "0";
+      target.cell.dataset.tail = state.tail ? "1" : "0";
+      target.cell.dataset.view = state.view ? "1" : "0";
+      target.cell.setAttribute(
+        "aria-label",
+        state.ariaLabel || `slot ${index}, ${state.value == null ? "empty" : `value ${state.value}`}`
+      );
+    });
+  }
+  resize(capacity);
+  return { paint, resize };
+}
+function onEnter(shell, input, action) {
+  shell.listen(input, "keydown", ((event) => {
+    if (event.key !== "Enter") return;
+    event.preventDefault();
+    action();
+  }));
+}
+var init_interactive_structure = __esm({
+  "custom/steptrace/src/families/interactive-structure.ts"() {
+    init_render();
+  }
+});
+
+// custom/steptrace/src/families/binary-tree.ts
+function parseBinaryTreeConfig(config, algorithm, defaults, maxValues = MAX_VALUES) {
+  const values = Array.isArray(config.values) && config.values.length ? config.values : defaults;
+  if (values.some(
+    (value2) => typeof value2 !== "number" || !Number.isFinite(value2) || !Number.isInteger(value2)
+  ))
+    throw new Error(`steptrace: ${algorithm} requires finite integer values.`);
+  if (new Set(values).size !== values.length)
+    throw new Error(`steptrace: ${algorithm} requires unique values.`);
+  if (values.length > maxValues)
+    throw new Error(`steptrace: ${algorithm} supports at most ${maxValues} values.`);
+  const value = config.value;
+  if (value != null && (typeof value !== "number" || !Number.isFinite(value) || !Number.isInteger(value)))
+    throw new Error(`steptrace: ${algorithm} value must be a finite integer.`);
+  return { values, value };
+}
+function svgEl(tag, className) {
+  const node2 = document.createElementNS(SVG_NS2, tag);
+  node2.setAttribute("class", className);
+  return node2;
+}
+function operationState() {
+  return { path: [], changed: /* @__PURE__ */ new Set(), repairing: /* @__PURE__ */ new Set(), success: null };
+}
+function node(key4, color = "black") {
+  return { key: key4, height: 1, color, left: null, right: null, parent: null };
+}
+function height(current) {
+  return current?.height ?? 0;
+}
+function updateHeight(current) {
+  current.height = 1 + Math.max(height(current.left), height(current.right));
+}
+function balanceFactor(current) {
+  return height(current.left) - height(current.right);
+}
+function orderedKeys(root) {
+  const keys = [];
+  const visit = (current) => {
+    if (!current) return;
+    visit(current.left);
+    keys.push(current.key);
+    visit(current.right);
+  };
+  visit(root);
+  return keys;
+}
+function treeHeight(root) {
+  return root ? 1 + Math.max(treeHeight(root.left), treeHeight(root.right)) : 0;
+}
+function plainInsert(root, key4) {
+  if (!root) return node(key4);
+  let current = root;
+  while (true) {
+    if (key4 < current.key) {
+      if (current.left) current = current.left;
+      else {
+        current.left = node(key4);
+        current.left.parent = current;
+        break;
+      }
+    } else {
+      if (current.right) current = current.right;
+      else {
+        current.right = node(key4);
+        current.right.parent = current;
+        break;
+      }
+    }
+  }
+  return root;
+}
+function createBstModel(values) {
+  let root = null;
+  for (const value of values) root = plainInsert(root, value);
+  const model = {
+    root,
+    insert(key4, state) {
+      const before = treeHeight(model.root);
+      if (!model.root) {
+        model.root = node(key4);
+        state.changed.add(key4);
+        state.success = key4;
+        return { changed: true, detail: `Inserted ${key4} as the root; height is 1.` };
+      }
+      let current = model.root;
+      while (true) {
+        state.path.push(current.key);
+        if (key4 === current.key)
+          return {
+            changed: false,
+            detail: `Compared ${state.path.join(" → ")}; ${key4} already exists, so the tree did not change.`
+          };
+        const side = key4 < current.key ? "left" : "right";
+        const child = current[side];
+        if (child) {
+          current = child;
+          continue;
+        }
+        current[side] = node(key4);
+        current[side].parent = current;
+        state.changed.add(key4);
+        state.success = key4;
+        const after = treeHeight(model.root);
+        return {
+          changed: true,
+          detail: `Inserted ${key4} via ${state.path.join(" → ")}; height ${before} → ${after}. Sorted inserts keep extending one side instead of restoring balance.`
+        };
+      }
+    },
+    search(key4, state) {
+      let current = model.root;
+      while (current) {
+        state.path.push(current.key);
+        if (key4 === current.key) {
+          state.success = key4;
+          return { found: true, detail: `Search path ${state.path.join(" → ")} found ${key4}.` };
+        }
+        current = key4 < current.key ? current.left : current.right;
+      }
+      return {
+        found: false,
+        detail: `Search path ${state.path.join(" → ")} reached an empty child; ${key4} is absent.`
+      };
+    },
+    remove(key4, state) {
+      let parent = null;
+      let current = model.root;
+      while (current && current.key !== key4) {
+        state.path.push(current.key);
+        parent = current;
+        current = key4 < current.key ? current.left : current.right;
+      }
+      if (!current)
+        return {
+          changed: false,
+          detail: `Compared ${state.path.join(" → ")}; ${key4} is absent, so the tree did not change.`
+        };
+      state.path.push(current.key);
+      state.changed.add(current.key);
+      if (current.left && current.right) {
+        let successorParent = current;
+        let successor = current.right;
+        while (successor.left) {
+          state.path.push(successor.key);
+          successorParent = successor;
+          successor = successor.left;
+        }
+        current.key = successor.key;
+        state.changed.add(successor.key);
+        const child = successor.right;
+        if (successorParent.left === successor) successorParent.left = child;
+        else successorParent.right = child;
+        if (child) child.parent = successorParent;
+      } else {
+        const child = current.left ?? current.right;
+        if (!parent) model.root = child;
+        else if (parent.left === current) parent.left = child;
+        else parent.right = child;
+        if (child) child.parent = parent;
+      }
+      return {
+        changed: true,
+        detail: `Removed ${key4} via ${state.path.join(" → ")}; BST order is preserved at height ${treeHeight(model.root)}.`
+      };
+    },
+    meta: () => "",
+    invariant: () => `BST order valid · height ${treeHeight(model.root)}`
+  };
+  return model;
+}
+function createAvlModel(values) {
+  const rotateRight = (current, state) => {
+    const next = current.left;
+    state.repairing.add(current.key).add(next.key);
+    current.left = next.right;
+    if (current.left) current.left.parent = current;
+    next.right = current;
+    next.parent = current.parent;
+    current.parent = next;
+    updateHeight(current);
+    updateHeight(next);
+    return next;
+  };
+  const rotateLeft = (current, state) => {
+    const next = current.right;
+    state.repairing.add(current.key).add(next.key);
+    current.right = next.left;
+    if (current.right) current.right.parent = current;
+    next.left = current;
+    next.parent = current.parent;
+    current.parent = next;
+    updateHeight(current);
+    updateHeight(next);
+    return next;
+  };
+  const rebalance = (current, state, repairs) => {
+    updateHeight(current);
+    const factor = balanceFactor(current);
+    if (factor > 1) {
+      if (balanceFactor(current.left) < 0) {
+        repairs.push(`LR at ${current.key}`);
+        current.left = rotateLeft(current.left, state);
+        current.left.parent = current;
+      } else repairs.push(`LL at ${current.key}`);
+      return rotateRight(current, state);
+    }
+    if (factor < -1) {
+      if (balanceFactor(current.right) > 0) {
+        repairs.push(`RL at ${current.key}`);
+        current.right = rotateRight(current.right, state);
+        current.right.parent = current;
+      } else repairs.push(`RR at ${current.key}`);
+      return rotateLeft(current, state);
+    }
+    return current;
+  };
+  const insert = (current, key4, state, repairs) => {
+    if (!current) {
+      state.changed.add(key4);
+      return [node(key4), true];
+    }
+    state.path.push(current.key);
+    if (key4 === current.key) return [current, false];
+    let inserted;
+    if (key4 < current.key) {
+      ;
+      [current.left, inserted] = insert(current.left, key4, state, repairs);
+      current.left.parent = current;
+    } else {
+      ;
+      [current.right, inserted] = insert(current.right, key4, state, repairs);
+      current.right.parent = current;
+    }
+    return [inserted ? rebalance(current, state, repairs) : current, inserted];
+  };
+  const minimum = (current) => {
+    while (current.left) current = current.left;
+    return current;
+  };
+  const remove = (current, key4, state, repairs) => {
+    if (!current) return [null, false];
+    state.path.push(current.key);
+    let removed;
+    if (key4 < current.key) {
+      ;
+      [current.left, removed] = remove(current.left, key4, state, repairs);
+      if (current.left) current.left.parent = current;
+    } else if (key4 > current.key) {
+      ;
+      [current.right, removed] = remove(current.right, key4, state, repairs);
+      if (current.right) current.right.parent = current;
+    } else {
+      removed = true;
+      state.changed.add(current.key);
+      if (!current.left || !current.right) {
+        const child = current.left ?? current.right;
+        if (child) child.parent = current.parent;
+        return [child, true];
+      }
+      const successor = minimum(current.right);
+      current.key = successor.key;
+      state.changed.add(successor.key);
+      [current.right] = remove(current.right, successor.key, state, repairs);
+      if (current.right) current.right.parent = current;
+    }
+    return [removed ? rebalance(current, state, repairs) : current, removed];
+  };
+  const model = {
+    root: null,
+    insert(key4, state) {
+      const repairs = [];
+      let inserted;
+      [model.root, inserted] = insert(model.root, key4, state, repairs);
+      if (model.root) model.root.parent = null;
+      if (inserted) state.success = key4;
+      return {
+        changed: inserted,
+        detail: inserted ? `Inserted ${key4} via ${state.path.join(" → ") || "the root"}; ${repairs.length ? `${repairs.join(", ")} restored |balance| ≤ 1.` : "no rotation was needed."}` : `Compared ${state.path.join(" → ")}; ${key4} already exists, so the tree did not change.`
+      };
+    },
+    search(key4, state) {
+      let current = model.root;
+      while (current) {
+        state.path.push(current.key);
+        if (key4 === current.key) {
+          state.success = key4;
+          return { found: true, detail: `Search path ${state.path.join(" → ")} found ${key4}.` };
+        }
+        current = key4 < current.key ? current.left : current.right;
+      }
+      return {
+        found: false,
+        detail: `Search path ${state.path.join(" → ")} reached an empty child; ${key4} is absent.`
+      };
+    },
+    remove(key4, state) {
+      const repairs = [];
+      let removed;
+      [model.root, removed] = remove(model.root, key4, state, repairs);
+      if (model.root) model.root.parent = null;
+      return {
+        changed: removed,
+        detail: removed ? `Removed ${key4} via ${state.path.join(" → ")}; ${repairs.length ? `${repairs.join(", ")} rebalanced the shortened path.` : "all ancestors stayed within |balance| ≤ 1."}` : `Compared ${state.path.join(" → ")}; ${key4} is absent, so the tree did not change.`
+      };
+    },
+    meta: (current) => `h${current.height} bf${balanceFactor(current)}`,
+    invariant: () => "AVL balance valid · |balance| ≤ 1"
+  };
+  for (const value of values) model.insert(value, operationState());
+  return model;
+}
+function createRedBlackModel(values) {
+  const isRed = (current) => current?.color === "red";
+  const repair = (state, ...nodes5) => {
+    for (const current of nodes5) if (current) state.repairing.add(current.key);
+  };
+  const rotateLeft = (current, state, events) => {
+    const next = current.right;
+    repair(state, current, next);
+    events.push(`rotate left at ${current.key}`);
+    current.right = next.left;
+    next.left = current;
+    next.color = current.color;
+    current.color = "red";
+    return next;
+  };
+  const rotateRight = (current, state, events) => {
+    const next = current.left;
+    repair(state, current, next);
+    events.push(`rotate right at ${current.key}`);
+    current.left = next.right;
+    next.right = current;
+    next.color = current.color;
+    current.color = "red";
+    return next;
+  };
+  const flipColors = (current, state, events) => {
+    repair(state, current, current.left, current.right);
+    events.push(`recolor at ${current.key}`);
+    current.color = current.color === "red" ? "black" : "red";
+    if (current.left) current.left.color = current.left.color === "red" ? "black" : "red";
+    if (current.right) current.right.color = current.right.color === "red" ? "black" : "red";
+  };
+  const balance = (current, state, events) => {
+    if (isRed(current.right) && !isRed(current.left)) current = rotateLeft(current, state, events);
+    if (isRed(current.left) && isRed(current.left.left))
+      current = rotateRight(current, state, events);
+    if (isRed(current.left) && isRed(current.right)) flipColors(current, state, events);
+    return current;
+  };
+  const insert = (current, key4, state, events) => {
+    if (!current) {
+      state.changed.add(key4);
+      return [node(key4, "red"), true];
+    }
+    state.path.push(current.key);
+    if (key4 === current.key) return [current, false];
+    let inserted;
+    if (key4 < current.key) [current.left, inserted] = insert(current.left, key4, state, events);
+    else [current.right, inserted] = insert(current.right, key4, state, events);
+    return [inserted ? balance(current, state, events) : current, inserted];
+  };
+  const moveRedLeft = (current, state, events) => {
+    flipColors(current, state, events);
+    if (isRed(current.right?.left ?? null)) {
+      current.right = rotateRight(current.right, state, events);
+      current = rotateLeft(current, state, events);
+      flipColors(current, state, events);
+    }
+    return current;
+  };
+  const moveRedRight = (current, state, events) => {
+    flipColors(current, state, events);
+    if (isRed(current.left?.left ?? null)) {
+      current = rotateRight(current, state, events);
+      flipColors(current, state, events);
+    }
+    return current;
+  };
+  const minimum = (current) => {
+    while (current.left) current = current.left;
+    return current;
+  };
+  const deleteMin = (current, state, events) => {
+    if (!current.left) return null;
+    if (!isRed(current.left) && !isRed(current.left.left))
+      current = moveRedLeft(current, state, events);
+    current.left = deleteMin(current.left, state, events);
+    return balance(current, state, events);
+  };
+  const remove = (current, key4, state, events) => {
+    state.path.push(current.key);
+    if (key4 < current.key) {
+      if (current.left) {
+        if (!isRed(current.left) && !isRed(current.left.left))
+          current = moveRedLeft(current, state, events);
+        current.left = remove(current.left, key4, state, events);
+      }
+    } else {
+      if (isRed(current.left)) current = rotateRight(current, state, events);
+      if (key4 === current.key && !current.right) return null;
+      if (current.right) {
+        if (!isRed(current.right) && !isRed(current.right.left))
+          current = moveRedRight(current, state, events);
+        if (key4 === current.key) {
+          const successor = minimum(current.right);
+          state.changed.add(current.key).add(successor.key);
+          current.key = successor.key;
+          current.right = deleteMin(current.right, state, events);
+        } else current.right = remove(current.right, key4, state, events);
+      }
+    }
+    return balance(current, state, events);
+  };
+  const blackHeight = (root) => {
+    let count = 1;
+    while (root) {
+      if (root.color === "black") count++;
+      root = root.left;
+    }
+    return count;
+  };
+  const model = {
+    root: null,
+    insert(key4, state) {
+      const events = [];
+      let inserted;
+      [model.root, inserted] = insert(model.root, key4, state, events);
+      if (model.root) model.root.color = "black";
+      if (inserted) state.success = key4;
+      return {
+        changed: inserted,
+        detail: inserted ? `Inserted ${key4}; ${events.join(", ") || "no fixup needed"}. Black-height ${blackHeight(model.root)} is equal on every path.` : `Compared ${state.path.join(" → ")}; ${key4} already exists, so the tree did not change.`
+      };
+    },
+    search(key4, state) {
+      let current = model.root;
+      while (current) {
+        state.path.push(current.key);
+        if (key4 === current.key) {
+          state.success = key4;
+          return { found: true, detail: `Search path ${state.path.join(" → ")} found ${key4}.` };
+        }
+        current = key4 < current.key ? current.left : current.right;
+      }
+      return {
+        found: false,
+        detail: `Search path ${state.path.join(" → ")} reached an empty child; ${key4} is absent.`
+      };
+    },
+    remove(key4, state) {
+      const probe = model.search(key4, operationState());
+      if (!probe.found)
+        return {
+          changed: false,
+          detail: `${key4} is absent, so the red-black tree did not change.`
+        };
+      const events = [];
+      state.changed.add(key4);
+      if (model.root && !isRed(model.root.left) && !isRed(model.root.right))
+        model.root.color = "red";
+      model.root = model.root ? remove(model.root, key4, state, events) : null;
+      if (model.root) model.root.color = "black";
+      return {
+        changed: true,
+        detail: `Removed ${key4}; ${events.join(", ") || "no fixup needed"}. Black-height ${blackHeight(model.root)} is equal on every path.`
+      };
+    },
+    meta: (current) => current.color === "red" ? "R" : "B",
+    invariant: () => `RB invariants valid · black-height ${blackHeight(model.root)}`
+  };
+  for (const value of values) model.insert(value, operationState());
+  return model;
+}
+function createSplayModel(values) {
+  const model = {
+    root: null,
+    insert: () => ({ changed: false, detail: "" }),
+    search: () => ({ found: false, detail: "" }),
+    remove: () => ({ changed: false, detail: "" }),
+    meta: () => "",
+    invariant: () => "BST order valid · accessed node becomes root"
+  };
+  for (const value of values) model.root = plainInsert(model.root, value);
+  const rotateLeft = (current, state) => {
+    const next = current.right;
+    state.repairing.add(current.key).add(next.key);
+    current.right = next.left;
+    if (next.left) next.left.parent = current;
+    next.parent = current.parent;
+    if (!current.parent) model.root = next;
+    else if (current === current.parent.left) current.parent.left = next;
+    else current.parent.right = next;
+    next.left = current;
+    current.parent = next;
+  };
+  const rotateRight = (current, state) => {
+    const next = current.left;
+    state.repairing.add(current.key).add(next.key);
+    current.left = next.right;
+    if (next.right) next.right.parent = current;
+    next.parent = current.parent;
+    if (!current.parent) model.root = next;
+    else if (current === current.parent.left) current.parent.left = next;
+    else current.parent.right = next;
+    next.right = current;
+    current.parent = next;
+  };
+  const splay = (current, state) => {
+    const cases = [];
+    while (current.parent) {
+      const parent = current.parent;
+      const grandparent = parent.parent;
+      if (!grandparent) {
+        cases.push("zig");
+        if (current === parent.left) rotateRight(parent, state);
+        else rotateLeft(parent, state);
+      } else if (current === parent.left && parent === grandparent.left || current === parent.right && parent === grandparent.right) {
+        cases.push("zig-zig");
+        if (current === parent.left) {
+          rotateRight(grandparent, state);
+          rotateRight(parent, state);
+        } else {
+          rotateLeft(grandparent, state);
+          rotateLeft(parent, state);
+        }
+      } else {
+        cases.push("zig-zag");
+        if (current === parent.left) {
+          rotateRight(parent, state);
+          rotateLeft(grandparent, state);
+        } else {
+          rotateLeft(parent, state);
+          rotateRight(grandparent, state);
+        }
+      }
+    }
+    return cases;
+  };
+  const find = (key4, state) => {
+    let current = model.root;
+    let last = null;
+    while (current) {
+      state.path.push(current.key);
+      last = current;
+      if (key4 === current.key) break;
+      current = key4 < current.key ? current.left : current.right;
+    }
+    return { found: current, last };
+  };
+  model.insert = (key4, state) => {
+    if (!model.root) {
+      model.root = node(key4);
+      state.changed.add(key4);
+      state.success = key4;
+      return { changed: true, detail: `Inserted ${key4} as the root.` };
+    }
+    const result = find(key4, state);
+    if (result.found)
+      return {
+        changed: false,
+        detail: `${key4} already exists; the tree did not change.`
+      };
+    const parent = result.last;
+    const added = node(key4);
+    added.parent = parent;
+    if (key4 < parent.key) parent.left = added;
+    else parent.right = added;
+    state.changed.add(key4);
+    const cases = splay(added, state);
+    state.success = key4;
+    return {
+      changed: true,
+      detail: `Inserted ${key4}, then ${cases.join(" → ")} moved it to the root.`
+    };
+  };
+  model.search = (key4, state) => {
+    const result = find(key4, state);
+    const accessed = result.found ?? result.last;
+    const cases = accessed ? splay(accessed, state) : [];
+    if (result.found) state.success = key4;
+    return {
+      found: !!result.found,
+      detail: result.found ? `Search path ${state.path.join(" → ")} found ${key4}; ${cases.join(" → ") || "already root"} moved it to the root.` : `Search path ${state.path.join(" → ")} missed ${key4}; canonical splay moves last accessed ${accessed?.key ?? "node"} to the root via ${cases.join(" → ") || "no rotation"}.`
+    };
+  };
+  model.remove = (key4, state) => {
+    const result = find(key4, state);
+    const accessed = result.found ?? result.last;
+    if (!result.found) {
+      const cases = accessed ? splay(accessed, state) : [];
+      return {
+        changed: false,
+        detail: `${key4} is absent; last accessed ${accessed?.key ?? "node"} was splayed via ${cases.join(" → ") || "no rotation"}.`
+      };
+    }
+    splay(result.found, state);
+    state.changed.add(key4);
+    const left = result.found.left;
+    const right = result.found.right;
+    if (left) left.parent = null;
+    if (right) right.parent = null;
+    if (!left) model.root = right;
+    else {
+      model.root = left;
+      let maximum = left;
+      while (maximum.right) maximum = maximum.right;
+      splay(maximum, state);
+      model.root.right = right;
+      if (right) right.parent = model.root;
+    }
+    return {
+      changed: true,
+      detail: `Removed ${key4}; splayed the left maximum and joined both ordered halves.`
+    };
+  };
+  return model;
+}
+function mountBinaryTree(rootElement, config, kind) {
+  const label = LABELS[kind];
+  const shell = createStructureShell(
+    rootElement,
+    kind,
+    label,
+    DESCRIPTIONS[kind],
+    "binary-tree",
+    "steptrace__binary-tree"
+  );
+  const initial = [...config.values];
+  let model = MODELS[kind](initial);
+  let state = operationState();
+  let geometry = null;
+  const exitTimers = /* @__PURE__ */ new Set();
+  const surface = el("div", "steptrace__binary-tree-surface");
+  const svg = svgEl("svg", "steptrace__binary-tree-svg");
+  svg.setAttribute("viewBox", `0 0 ${VIEW_WIDTH} ${VIEW_HEIGHT}`);
+  svg.setAttribute("role", "img");
+  const edgeLayer = svgEl("g", "steptrace__binary-tree-edges");
+  const nodeLayer = svgEl("g", "steptrace__binary-tree-nodes");
+  svg.append(edgeLayer, nodeLayer);
+  surface.append(svg);
+  shell.stage.append(surface);
+  const nodeViews = /* @__PURE__ */ new Map();
+  const edgeViews = /* @__PURE__ */ new Map();
+  const input = shell.input(INPUT_LABELS[kind], "Value", 8);
+  input.type = "number";
+  input.step = "1";
+  input.value = config.value == null ? "" : String(config.value);
+  const insert = shell.button("Insert", true);
+  const search = shell.button("Search");
+  const remove = shell.button("Remove");
+  const reset = shell.button("Reset");
+  shell.controls.append(input, insert, search, remove, reset);
+  function positions() {
+    const entries = [];
+    const keys = orderedKeys(model.root);
+    const xByKey = new Map(
+      keys.map((key4, index) => [key4, (index + 1) / (keys.length + 1) * VIEW_WIDTH])
+    );
+    const maxDepth = Math.max(treeHeight(model.root) - 1, 0);
+    const visit = (current, depth) => {
+      if (!current) return;
+      entries.push({
+        node: current,
+        x: xByKey.get(current.key),
+        y: 28 + (maxDepth ? depth * 182 / maxDepth : 0)
+      });
+      visit(current.left, depth + 1);
+      visit(current.right, depth + 1);
+    };
+    visit(model.root, 0);
+    return entries;
+  }
+  function paintTree() {
+    geometry?.destroy();
+    if (!model.root) {
+      geometry = null;
+      svg.setAttribute("aria-label", `Empty ${label}`);
+      for (const view of nodeViews.values()) view.group.remove();
+      for (const line of edgeViews.values()) line.remove();
+      nodeViews.clear();
+      edgeViews.clear();
+      return;
+    }
+    const entries = positions();
+    const byNode = new Map(entries.map((entry) => [entry.node, entry]));
+    svg.setAttribute("aria-label", `${label} with ${entries.length} unique keys`);
+    const edges5 = [];
+    const nextEdges = /* @__PURE__ */ new Set();
+    for (const parent of entries) {
+      for (const childNode of [parent.node.left, parent.node.right]) {
+        if (!childNode) continue;
+        const child = byNode.get(childNode);
+        const key4 = `${parent.node.key}:${child.node.key}`;
+        nextEdges.add(key4);
+        let line = edgeViews.get(key4);
+        if (!line) {
+          line = svgEl("line", "steptrace__edge steptrace__binary-tree-edge");
+          line.dataset.entering = shell.reducedMotion() ? "0" : "1";
+          edgeLayer.append(line);
+          edgeViews.set(key4, line);
+          globalThis.requestAnimationFrame?.(() => {
+            line.dataset.entering = "0";
+          });
+        }
+        line.dataset.from = String(parent.node.key);
+        line.dataset.to = String(child.node.key);
+        line.dataset.side = child.node === parent.node.left ? "left" : "right";
+        const pathIndex = state.path.indexOf(parent.node.key);
+        line.dataset.state = state.repairing.has(parent.node.key) && state.repairing.has(child.node.key) ? "rotation" : pathIndex >= 0 && state.path[pathIndex + 1] === child.node.key ? "path" : "neutral";
+        edges5.push({ line, from: parent, to: child });
+      }
+    }
+    for (const [key4, line] of edgeViews) {
+      if (nextEdges.has(key4)) continue;
+      edgeViews.delete(key4);
+      if (shell.reducedMotion()) line.remove();
+      else {
+        line.dataset.exiting = "1";
+        const timer = setTimeout(() => {
+          exitTimers.delete(timer);
+          line.remove();
+        }, 180);
+        exitTimers.add(timer);
+      }
+    }
+    const nextNodes = new Set(entries.map((entry) => entry.node.key));
+    const nodes5 = entries.map((entry) => {
+      let view = nodeViews.get(entry.node.key);
+      if (!view) {
+        const group2 = svgEl("g", "steptrace__node steptrace__binary-tree-node");
+        group2.dataset.entering = shell.reducedMotion() ? "0" : "1";
+        const circle = svgEl("circle", "steptrace__ncirc");
+        circle.setAttribute("r", String(GRAPH_NODE_RADIUS_PX));
+        const value2 = svgEl("text", "steptrace__id");
+        value2.setAttribute("text-anchor", "middle");
+        value2.setAttribute("dominant-baseline", "central");
+        const meta2 = svgEl("text", "steptrace__binary-tree-meta");
+        meta2.setAttribute("text-anchor", "middle");
+        meta2.setAttribute("y", "22");
+        const badge2 = successMarker("steptrace__binary-tree-success");
+        badge2.setAttribute("x", "7");
+        badge2.setAttribute("y", "-22");
+        badge2.setAttribute("width", "12");
+        badge2.setAttribute("height", "12");
+        group2.append(circle, value2, meta2, badge2);
+        nodeLayer.append(group2);
+        view = { group: group2, value: value2, meta: meta2, badge: badge2 };
+        nodeViews.set(entry.node.key, view);
+        globalThis.requestAnimationFrame?.(() => {
+          group2.dataset.entering = "0";
+        });
+      }
+      const { group, value, meta, badge } = view;
+      group.dataset.state = state.repairing.has(entry.node.key) ? "rotation" : state.changed.has(entry.node.key) ? "changed" : state.path.includes(entry.node.key) ? "path" : "neutral";
+      group.dataset.color = kind === "red-black-tree" ? entry.node.color : "";
+      group.dataset.key = String(entry.node.key);
+      const metadata = model.meta(entry.node);
+      group.setAttribute(
+        "aria-label",
+        kind === "avl-tree" ? `Key ${entry.node.key}, height ${entry.node.height}, balance factor ${balanceFactor(entry.node)}` : `Key ${entry.node.key}${metadata ? `, ${metadata}` : ""}`
+      );
+      value.textContent = String(entry.node.key);
+      meta.textContent = metadata;
+      badge.dataset.visible = state.success === entry.node.key ? "1" : "0";
+      return { element: group, point: { x: entry.x, y: entry.y } };
+    });
+    for (const [key4, view] of nodeViews) {
+      if (nextNodes.has(key4)) continue;
+      nodeViews.delete(key4);
+      if (shell.reducedMotion()) view.group.remove();
+      else {
+        view.group.dataset.exiting = "1";
+        const timer = setTimeout(() => {
+          exitTimers.delete(timer);
+          view.group.remove();
+        }, 180);
+        exitTimers.add(timer);
+      }
+    }
+    geometry = observeFixedSvgNodes(svg, nodes5, (unitsPerCssPixel) => {
+      const radius = GRAPH_NODE_RADIUS_PX * unitsPerCssPixel;
+      for (const { line, from, to } of edges5) {
+        const edge = trimGraphEdge(from, to, radius);
+        line.setAttribute("x1", String(edge.x1));
+        line.setAttribute("y1", String(edge.y1));
+        line.setAttribute("x2", String(edge.x2));
+        line.setAttribute("y2", String(edge.y2));
+        line.style.setProperty("x1", `${edge.x1}px`);
+        line.style.setProperty("y1", `${edge.y1}px`);
+        line.style.setProperty("x2", `${edge.x2}px`);
+        line.style.setProperty("y2", `${edge.y2}px`);
+      }
+    });
+  }
+  function paint(message) {
+    paintTree();
+    const count = orderedKeys(model.root).length;
+    shell.setCounter(String(count), count === 1 ? " key" : " keys");
+    shell.status.textContent = message;
+    remove.disabled = count === 0;
+    search.disabled = count === 0;
+    insert.disabled = count >= (kind === "avl-tree" ? 11 : MAX_VALUES);
+  }
+  function valueFromInput(operation) {
+    const raw = input.value.trim();
+    if (raw !== "") {
+      const value2 = Number(raw);
+      if (Number.isFinite(value2) && Number.isInteger(value2)) return value2;
+      paint("Value must be a finite integer.");
+      return null;
+    }
+    const keys = orderedKeys(model.root);
+    if (operation === "search") return model.root?.key ?? null;
+    if (operation === "remove") return keys.at(-1) ?? null;
+    const maxValues = kind === "avl-tree" ? 11 : MAX_VALUES;
+    if (keys.length >= maxValues) {
+      paint(`The review tree is capped at ${maxValues} keys.`);
+      return null;
+    }
+    let value = Math.floor(Math.random() * 90) + 10;
+    while (keys.includes(value)) value = value === 99 ? 10 : value + 1;
+    return value;
+  }
+  function onInsert() {
+    const value = valueFromInput("insert");
+    if (value == null) return;
+    state = operationState();
+    const result = model.insert(value, state);
+    input.value = "";
+    paint(result.detail);
+  }
+  function onSearch() {
+    const value = valueFromInput("search");
+    if (value == null) return;
+    state = operationState();
+    const result = model.search(value, state);
+    input.value = "";
+    paint(result.detail);
+  }
+  function onRemove() {
+    const value = valueFromInput("remove");
+    if (value == null) return;
+    state = operationState();
+    const result = model.remove(value, state);
+    input.value = "";
+    paint(result.detail);
+  }
+  function onReset() {
+    model = MODELS[kind](initial);
+    state = operationState();
+    input.value = config.value == null ? "" : String(config.value);
+    paint(`Reset to the initial ${label}. ${model.invariant()}.`);
+  }
+  shell.listen(insert, "click", onInsert);
+  shell.listen(search, "click", onSearch);
+  shell.listen(remove, "click", onRemove);
+  shell.listen(reset, "click", onReset);
+  onEnter(shell, input, onInsert);
+  paint(`Insert, search, or remove a key. ${model.invariant()}.`);
+  const handle = shell.finish();
+  return {
+    destroy() {
+      for (const timer of exitTimers) clearTimeout(timer);
+      geometry?.destroy();
+      handle.destroy();
+    }
+  };
+}
+var SVG_NS2, VIEW_WIDTH, VIEW_HEIGHT, MAX_VALUES, MODELS, LABELS, INPUT_LABELS, DESCRIPTIONS, mountAvlTree, mountBinarySearchTree, mountRedBlackTree, mountSplayTree;
+var init_binary_tree = __esm({
+  "custom/steptrace/src/families/binary-tree.ts"() {
+    init_graph_node();
+    init_render();
+    init_interactive_structure();
+    SVG_NS2 = "http://www.w3.org/2000/svg";
+    VIEW_WIDTH = 580;
+    VIEW_HEIGHT = 250;
+    MAX_VALUES = 9;
+    MODELS = {
+      "avl-tree": createAvlModel,
+      "binary-search-tree": createBstModel,
+      "red-black-tree": createRedBlackModel,
+      "splay-tree": createSplayModel
+    };
+    LABELS = {
+      "avl-tree": "AVL tree",
+      "binary-search-tree": "Binary search tree",
+      "red-black-tree": "Red-black tree",
+      "splay-tree": "Splay tree"
+    };
+    INPUT_LABELS = {
+      "avl-tree": "AVL key",
+      "binary-search-tree": "Binary search tree key",
+      "red-black-tree": "Red-black tree key",
+      "splay-tree": "Splay tree key"
+    };
+    DESCRIPTIONS = {
+      "avl-tree": "Interactive AVL tree",
+      "binary-search-tree": "Interactive binary search tree",
+      "red-black-tree": "Interactive red-black tree",
+      "splay-tree": "Interactive splay tree"
+    };
+    mountAvlTree = (root, config) => mountBinaryTree(root, config, "avl-tree");
+    mountBinarySearchTree = (root, config) => mountBinaryTree(root, config, "binary-search-tree");
+    mountRedBlackTree = (root, config) => mountBinaryTree(root, config, "red-black-tree");
+    mountSplayTree = (root, config) => mountBinaryTree(root, config, "splay-tree");
+  }
+});
+
+// custom/steptrace/src/algorithms/avl-tree.ts
+var DEFAULT_VALUES, parseAvlTreeConfig, avlTree;
+var init_avl_tree = __esm({
+  "custom/steptrace/src/algorithms/avl-tree.ts"() {
+    init_binary_tree();
+    DEFAULT_VALUES = [40, 20, 60, 10, 30, 50, 70];
+    parseAvlTreeConfig = (config) => parseBinaryTreeConfig(config, "avl-tree", DEFAULT_VALUES, 11);
+    avlTree = {
+      id: "avl-tree",
+      family: "binary-tree",
+      meta: { label: "AVL Tree" },
+      parse: parseAvlTreeConfig,
+      mount: mountAvlTree
+    };
+  }
+});
+
+// custom/steptrace/src/families/graph-state.ts
+function invalid(message) {
+  throw new Error(`steptrace: a-star ${message}`);
+}
+function pairKey(left, right) {
+  return left < right ? `${left}|${right}` : `${right}|${left}`;
+}
+function distance(a, b) {
+  return Math.hypot(b.x - a.x, b.y - a.y);
+}
+function graphStateMarkerRole(role) {
+  if (role === "accepted") return "selected";
+  if (role === "cut") return "cut";
+  if (role === "active" || role === "candidate" || role === "residual") return "active";
+  return "neutral";
+}
+function graphStateAdjacency(config) {
+  const result = new Map(
+    config.nodes.map((node2) => [node2.id, []])
+  );
+  for (const edge of config.edges) {
+    result.get(edge.from).push({ to: edge.to, weight: edge.weight });
+    if (!edge.directed) result.get(edge.to).push({ to: edge.from, weight: edge.weight });
+  }
+  for (const neighbours of result.values())
+    neighbours.sort((left, right) => left.to.localeCompare(right.to));
+  return result;
+}
+function graphStateShortestDistances(nodes5, edges5, target) {
+  const dist = new Map(nodes5.map((node2) => [node2.id, Number.POSITIVE_INFINITY]));
+  dist.set(target, 0);
+  const pending = new Set(nodes5.map((node2) => node2.id));
+  while (pending.size) {
+    let current = null;
+    for (const id of pending) {
+      if (current == null || dist.get(id) < dist.get(current)) current = id;
+    }
+    if (current == null || !Number.isFinite(dist.get(current))) break;
+    pending.delete(current);
+    for (const edge of edges5) {
+      const candidates = [[edge.to, edge.from]];
+      if (!edge.directed) candidates.push([edge.from, edge.to]);
+      for (const [from, to] of candidates) {
+        if (from !== current || !pending.has(to)) continue;
+        dist.set(to, Math.min(dist.get(to), dist.get(from) + edge.weight));
+      }
+    }
+  }
+  return dist;
+}
+function gridScenario() {
+  const blocked = /* @__PURE__ */ new Set(["1,1", "3,1", "4,1", "1,2", "3,2", "3,3"]);
+  const nodes5 = [];
+  for (let row = 0; row < 4; row++) {
+    for (let column = 0; column < 6; column++) {
+      const id = `${column},${row}`;
+      if (blocked.has(id)) continue;
+      nodes5.push({
+        id,
+        label: id,
+        x: 55 + column * 100,
+        y: 50 + row * 70,
+        h: Math.abs(5 - column) + Math.abs(2 - row)
+      });
+    }
+  }
+  const ids = new Set(nodes5.map((node2) => node2.id));
+  const edges5 = [];
+  for (const node2 of nodes5) {
+    const [column, row] = node2.id.split(",").map(Number);
+    for (const [nextColumn, nextRow] of [
+      [column + 1, row],
+      [column, row + 1]
+    ]) {
+      const to = `${nextColumn},${nextRow}`;
+      if (ids.has(to)) edges5.push({ from: node2.id, to, weight: 1 });
+    }
+  }
+  return {
+    profile: "coordinate-grid",
+    policy: "a-star",
+    nodes: nodes5,
+    edges: edges5,
+    decor: [...blocked].map((id) => {
+      const [column, row] = id.split(",").map(Number);
+      return {
+        kind: "rect",
+        className: "steptrace__gs-wall",
+        x: 31 + column * 100,
+        y: 26 + row * 70,
+        width: 48,
+        height: 48,
+        rx: 6
+      };
+    }),
+    start: "0,1",
+    target: "5,2",
+    mapMode: false,
+    cityMode: false
+  };
+}
+function haversine(a, b) {
+  const radians = (degrees) => degrees * Math.PI / 180;
+  const dLat = radians(b.lat - a.lat);
+  const dLon = radians(b.lon - a.lon);
+  const value = Math.sin(dLat / 2) ** 2 + Math.cos(radians(a.lat)) * Math.cos(radians(b.lat)) * Math.sin(dLon / 2) ** 2;
+  return 6371 * 2 * Math.atan2(Math.sqrt(value), Math.sqrt(1 - value));
+}
+function cityScenario(start, target) {
+  const raw = CITY_DATA.map(([id, lat, lon]) => {
+    const [offsetX = 0, offsetY = 0] = CITY_NODE_OFFSETS[id] || [];
+    return {
+      id,
+      label: id,
+      lat,
+      lon,
+      x: Math.max(24, Math.min(596, 40 + (lon - 22.1) / 17.4 * 540 + offsetX)),
+      y: Math.max(20, Math.min(300, 24 + (51.7 - lat) / 7.1 * 266 + offsetY))
+    };
+  });
+  const lookup = new Map(raw.map((city) => [city.id, city]));
+  const safeStart = lookup.has(start) ? start : "Lviv";
+  const safeTarget = lookup.has(target) && target !== safeStart ? target : safeStart === "Kharkiv" ? "Lviv" : "Kharkiv";
+  const edgeKeys = /* @__PURE__ */ new Set();
+  const edges5 = [];
+  for (const city of raw) {
+    const neighbours = raw.filter((candidate) => candidate !== city).sort((left, right) => haversine(city, left) - haversine(city, right)).slice(0, 3);
+    for (const neighbour of neighbours) {
+      const key4 = pairKey(city.id, neighbour.id);
+      if (edgeKeys.has(key4)) continue;
+      edgeKeys.add(key4);
+      edges5.push({
+        from: city.id,
+        to: neighbour.id,
+        weight: Math.ceil(haversine(city, neighbour) * 1.12)
+      });
+    }
+  }
+  const goal = lookup.get(safeTarget);
+  const nodes5 = raw.map((city) => ({
+    id: city.id,
+    label: city.label,
+    x: city.x,
+    y: city.y,
+    h: Math.floor(haversine(city, goal))
+  }));
+  const offsets = {
+    Uzhhorod: [0, 14],
+    Lviv: [-9, -10],
+    Lutsk: [-8, -10],
+    Rivne: [10, 13],
+    Ternopil: [28, 6],
+    "Ivano-Frankivsk": [-30, 18],
+    Chernivtsi: [8, 18],
+    Khmelnytskyi: [30, -12],
+    Vinnytsia: [-13, 13],
+    Zhytomyr: [-13, -10],
+    Kyiv: [11, -10],
+    Chernihiv: [8, -10],
+    Cherkasy: [13, 13],
+    Kropyvnytskyi: [0, 14],
+    Odesa: [-9, 13],
+    Mykolaiv: [12, -10],
+    Kherson: [12, 13],
+    Simferopol: [0, 14],
+    Poltava: [10, -10],
+    Sumy: [0, -10],
+    Dnipro: [-11, 13],
+    Zaporizhzhia: [14, 13],
+    Kharkiv: [0, -10],
+    Donetsk: [0, 14],
+    Luhansk: [0, -10]
+  };
+  const decor = nodes5.map((city) => ({
+    kind: "text",
+    className: "steptrace__gs-map-label steptrace__gs-city-label",
+    x: city.x + offsets[city.id][0],
+    y: city.y + offsets[city.id][1],
+    text: city.label
+  }));
+  return {
+    profile: "ukraine-cities",
+    policy: "a-star",
+    nodes: nodes5,
+    edges: edges5,
+    decor,
+    start: safeStart,
+    target: safeTarget,
+    endpointSettings: {
+      startLabel: "From",
+      targetLabel: "To",
+      options: nodes5.map((node2) => ({ value: node2.id, label: node2.label })),
+      start: safeStart,
+      target: safeTarget
+    },
+    mapMode: true,
+    cityMode: true
+  };
+}
+function buildingScenario() {
+  const nodes5 = [
+    ["S", "Studio door", 45, 155],
+    ["W", "West hall", 100, 155],
+    ["D1", "Meeting threshold", 180, 155],
+    ["J1", "West junction", 280, 155],
+    ["J2", "Fire door west", 340, 155],
+    ["J3", "Fire door east", 380, 155],
+    ["J4", "East junction", 421, 155],
+    ["EU", "East stair", 510, 155],
+    ["X", "Emergency exit", 575, 155],
+    ["WL", "West lower turn", 100, 215],
+    ["ML", "Lower hall west", 280, 215],
+    ["D5", "Lower junction", 350, 215],
+    ["EL", "Lower hall east", 421, 215],
+    ["ER", "East lower turn", 510, 215],
+    ["D2", "Kitchen threshold", 280, 130],
+    ["D3", "Archive threshold", 421, 130],
+    ["D4", "Ops threshold", 510, 240],
+    ["D6", "Reception threshold", 100, 130]
+  ].map(([id, label, x, y]) => ({
+    id: String(id),
+    label: String(label),
+    x: Number(x),
+    y: Number(y),
+    h: 0
+  }));
+  const pairs = [
+    ["S", "W"],
+    ["W", "D1"],
+    ["D1", "J1"],
+    ["J1", "J2"],
+    ["J3", "J4"],
+    ["J4", "EU"],
+    ["EU", "X"],
+    ["W", "WL"],
+    ["WL", "ML"],
+    ["ML", "D5"],
+    ["D5", "EL"],
+    ["EL", "ER"],
+    ["ER", "EU"],
+    ["J1", "D2"],
+    ["J4", "D3"],
+    ["ER", "D4"],
+    ["W", "D6"]
+  ];
+  const byId = new Map(nodes5.map((node2) => [node2.id, node2]));
+  const edges5 = pairs.map(([from, to]) => {
+    const a = byId.get(from);
+    const b = byId.get(to);
+    return { from, to, weight: Math.max(1, Math.ceil(distance(a, b) / 40)) };
+  });
+  const remaining = graphStateShortestDistances(nodes5, edges5, "X");
+  nodes5.forEach((node2) => node2.h = remaining.get(node2.id));
+  const rooms = [
+    [25, 25, 150, 105, "RECEPTION"],
+    [175, 25, 120, 105, "MEETING"],
+    [295, 25, 140, 105, "KITCHEN"],
+    [435, 25, 160, 105, "OFFICES"],
+    [25, 240, 150, 55, "STUDIO"],
+    [175, 240, 120, 55, "STORAGE"],
+    [295, 240, 140, 55, "ARCHIVE"],
+    [435, 240, 160, 55, "OPERATIONS"]
+  ];
+  const decor = rooms.flatMap(([x, y, width, height2, text]) => [
+    { kind: "rect", className: "steptrace__gs-room", x, y, width, height: height2 },
+    {
+      kind: "text",
+      className: "steptrace__gs-map-label",
+      x: x + width / 2,
+      y: y + height2 / 2,
+      text
+    }
+  ]);
+  decor.push(
+    {
+      kind: "rect",
+      className: "steptrace__gs-closure",
+      x: 346,
+      y: 143,
+      width: 28,
+      height: 24,
+      rx: 2
+    },
+    { kind: "text", className: "steptrace__gs-map-label", x: 360, y: 137, text: "LOCKED" }
+  );
+  return {
+    profile: "building-floor",
+    policy: "a-star",
+    nodes: nodes5,
+    edges: edges5,
+    decor,
+    start: "S",
+    target: "X",
+    mapMode: true,
+    cityMode: false
+  };
+}
+function midtownScenario() {
+  const rows = { 47: 48, 46: 92, 45: 136, 44: 180, 43: 224, 42: 268 };
+  const nodes5 = [];
+  for (const [street, y] of Object.entries(rows)) {
+    nodes5.push({ id: `6-${street}`, label: `Sixth & W${street}`, x: 170, y, h: 0 });
+    nodes5.push({ id: `7-${street}`, label: `Seventh & W${street}`, x: 405, y, h: 0 });
+  }
+  for (const [id, x, y] of [
+    ["B47", 310, 28],
+    ["B46", 356, 81],
+    ["B44", 437, 175],
+    ["B43", 480, 224],
+    ["B42", 518, 268]
+  ]) {
+    nodes5.push({ id, label: `Broadway ${id.slice(1)}`, x, y, h: 0 });
+  }
+  const pairs = [];
+  for (let street = 47; street > 42; street--) {
+    if (street !== 45) pairs.push([`7-${street}`, `7-${street - 1}`, true]);
+    pairs.push([`6-${street - 1}`, `6-${street}`, true]);
+  }
+  pairs.push(
+    ["7-47", "B47"],
+    ["B47", "B46", true],
+    ["B46", "B44", true],
+    ["B44", "B43", true],
+    ["B43", "B42", true],
+    ["B42", "6-42"],
+    ["6-47", "B47"],
+    ["7-46", "B46"],
+    ["6-46", "B46"],
+    ["7-45", "B44"],
+    ["6-43", "B43"],
+    ["6-47", "7-47", true],
+    ["7-46", "6-46", true],
+    ["6-45", "7-45", true],
+    ["6-43", "7-43", true],
+    ["7-42", "6-42", true]
+  );
+  const byId = new Map(nodes5.map((node2) => [node2.id, node2]));
+  const edges5 = pairs.map(([from, to, directed]) => ({
+    from,
+    to,
+    directed,
+    weight: Math.max(1, Math.ceil(distance(byId.get(from), byId.get(to)) / 45))
+  }));
+  const remaining = graphStateShortestDistances(nodes5, edges5, "6-42");
+  nodes5.forEach((node2) => node2.h = remaining.get(node2.id) ?? 0);
+  const decor = [
+    { kind: "path", className: "steptrace__gs-street", d: "M170 18 L170 300" },
+    { kind: "path", className: "steptrace__gs-street", d: "M405 18 L405 300" },
+    ...Object.values(rows).map((y) => ({
+      kind: "path",
+      className: "steptrace__gs-street",
+      d: `M55 ${y} L575 ${y}`
+    })),
+    { kind: "path", className: "steptrace__gs-street", d: "M310 28 L540 292" }
+  ];
+  for (const y of [61, 105, 149, 193, 237]) {
+    decor.push({
+      kind: "rect",
+      className: "steptrace__gs-building",
+      x: 70,
+      y,
+      width: 80,
+      height: 18
+    });
+  }
+  for (const [x, y, width] of [
+    [190, 61, 120],
+    [190, 105, 158],
+    [190, 149, 195],
+    [190, 193, 195],
+    [190, 237, 195],
+    [425, 61, 140],
+    [425, 105, 140],
+    [440, 149, 125],
+    [480, 193, 85],
+    [520, 237, 45]
+  ]) {
+    decor.push({ kind: "rect", className: "steptrace__gs-building", x, y, width, height: 18 });
+  }
+  decor.push(
+    {
+      kind: "rect",
+      className: "steptrace__gs-closure",
+      x: 272,
+      y: 167,
+      width: 62,
+      height: 26,
+      rx: 3
+    },
+    { kind: "text", className: "steptrace__gs-map-label", x: 303, y: 184, text: "W44 CLOSED" },
+    { kind: "text", className: "steptrace__gs-road-direction", x: 150, y: 113, text: "↑" },
+    { kind: "text", className: "steptrace__gs-road-direction", x: 425, y: 113, text: "↓" },
+    { kind: "text", className: "steptrace__gs-road-direction", x: 452, y: 199, text: "↘" }
+  );
+  return {
+    profile: "midtown-map",
+    policy: "a-star",
+    nodes: nodes5,
+    edges: edges5,
+    decor,
+    start: "7-47",
+    target: "6-42",
+    mapMode: true,
+    cityMode: false
+  };
+}
+function parseGraphStateConfig(config) {
+  const profile = config.variant || "coordinate-grid";
+  if (!["coordinate-grid", "ukraine-cities", "building-floor", "midtown-map"].includes(profile)) {
+    invalid('"variant" must be coordinate-grid, ukraine-cities, building-floor, or midtown-map.');
+  }
+  if (profile === "ukraine-cities") {
+    return cityScenario(String(config.start || "Lviv"), String(config.target || "Kharkiv"));
+  }
+  if (profile === "building-floor") return buildingScenario();
+  if (profile === "midtown-map") return midtownScenario();
+  return gridScenario();
+}
+function svgElement2(kind, attributes = {}) {
+  const node2 = document.createElementNS(SVG_NS3, kind);
+  for (const [key4, value] of Object.entries(attributes)) node2.setAttribute(key4, String(value));
+  return node2;
+}
+function decorElement(shape) {
+  const className = shape.className;
+  if (shape.kind === "rect")
+    return svgElement2("rect", {
+      class: className,
+      x: shape.x,
+      y: shape.y,
+      width: shape.width,
+      height: shape.height,
+      rx: shape.rx || 0
+    });
+  if (shape.kind === "line")
+    return svgElement2("line", {
+      class: className,
+      x1: shape.x1,
+      y1: shape.y1,
+      x2: shape.x2,
+      y2: shape.y2
+    });
+  if (shape.kind === "path") return svgElement2("path", { class: className, d: shape.d });
+  const text = svgElement2("text", { class: className, x: shape.x, y: shape.y });
+  text.textContent = shape.text;
+  return text;
+}
+function pathEdgeSet(path) {
+  const edges5 = /* @__PURE__ */ new Set();
+  for (let index = 0; index + 1 < path.length; index++) {
+    edges5.add(`${path[index]}|${path[index + 1]}`);
+    edges5.add(`${path[index + 1]}|${path[index]}`);
+  }
+  return edges5;
+}
+function graphStateSummary(frame) {
+  switch (frame.detail.kind) {
+    case "heuristic-search": {
+      const cost = frame.target ? frame.detail.costs[frame.target] : null;
+      const path = frame.start && frame.selectedEdges.length ? [
+        frame.start,
+        ...frame.selectedEdges.filter((_, index) => index % 2 === 0).map((edge) => edge.split("|")[1])
+      ] : [];
+      const { comparison: result } = frame.detail;
+      const comparison = result.primaryValue != null && result.baselineValue != null ? result.metric === "cost" ? ` · ${result.primaryLabel} cost ${result.primaryValue} vs ${result.baselineLabel} cost ${result.baselineValue}` : ` · ${result.primaryLabel} ${result.primaryValue} vs ${result.baselineLabel} ${result.baselineValue} expansions` : "";
+      return frame.target && cost == null ? `${frame.target} is unreachable.` : `Path ${path.length ? path.join(" → ") : "pending"}${cost == null ? "" : ` · cost ${cost}`}${comparison}.`;
+    }
+    case "dual-search":
+      return frame.detail.meeting ? `Frontiers meet at ${frame.detail.meeting}.` : "No meeting point was found.";
+    case "edge-relaxation":
+      return `Distances ${Object.entries(frame.detail.distances).map(([id, value]) => `${id}:${value}`).join(", ")}.`;
+    case "component-flood":
+      return `${frame.detail.groups?.length ?? frame.detail.component} connected components.`;
+    case "low-link-cuts":
+      return `${frame.detail.articulationPoints.length} articulation points · ${frame.detail.bridges.length} bridges.`;
+    case "low-link-components":
+      return `${frame.detail.components.length} strongly connected components.`;
+    case "mst-scan":
+      return `${frame.detail.accepted.length} tree edges · total weight ${frame.detail.totalWeight}.`;
+    case "mst-round":
+      return `${frame.detail.components.length} component${frame.detail.components.length === 1 ? "" : "s"} · total weight ${frame.detail.totalWeight}.`;
+    case "path-backtrack": {
+      const [first] = frame.detail.path;
+      const last = frame.detail.path.at(-1);
+      const closesCycle = first != null && last != null && frame.edges.some(
+        (edge) => (edge.from === last && edge.to === first || edge.from === first && edge.to === last) && frame.selectedEdges.includes(`${edge.from}|${edge.to}`)
+      );
+      return frame.detail.path.length ? `Cycle ${[...frame.detail.path, ...closesCycle ? [first] : []].join(" → ")}.` : "No Hamiltonian cycle was found.";
+    }
+    case "residual-flow":
+      return `Maximum flow ${frame.detail.totalFlow}.`;
+  }
+}
+function graphStateLegend(kind) {
+  switch (kind) {
+    case "heuristic-search":
+      return [
+        ["current", "current"],
+        ["open", "open"],
+        ["closed / path", "closed"],
+        ["goal", "goal"]
+      ];
+    case "dual-search":
+      return [
+        ["current", "current"],
+        ["frontiers", "open"],
+        ["visited / path", "closed"],
+        ["meeting", "goal"]
+      ];
+    case "edge-relaxation":
+      return [
+        ["active edge", "current"],
+        ["candidate", "open"],
+        ["settled", "closed"],
+        ["source", "goal"]
+      ];
+    case "component-flood":
+      return [
+        ["current", "current"],
+        ["frontier", "open"],
+        ["component", "closed"],
+        ["seed", "goal"]
+      ];
+    case "low-link-cuts":
+      return [
+        ["current", "current"],
+        ["DFS frontier", "open"],
+        ["visited", "closed"],
+        ["cut", "goal"]
+      ];
+    case "low-link-components":
+      return [
+        ["current", "current"],
+        ["stack", "open"],
+        ["component", "closed"],
+        ["root", "goal"]
+      ];
+    case "mst-scan":
+    case "mst-round":
+      return [
+        ["active edge", "current"],
+        ["candidate", "open"],
+        ["tree", "closed"],
+        ["rejected", "goal"]
+      ];
+    case "path-backtrack":
+      return [
+        ["current", "current"],
+        ["candidate", "open"],
+        ["path", "closed"],
+        ["rejected", "goal"]
+      ];
+    case "residual-flow":
+      return [
+        ["active edge", "current"],
+        ["residual", "open"],
+        ["flow", "closed"],
+        ["cut", "goal"]
+      ];
+  }
+}
+function graphStateGroups(detail) {
+  if (detail.kind === "component-flood") return detail.groups || [];
+  if (detail.kind === "low-link-components") return detail.components;
+  if (detail.kind === "mst-round") return detail.components;
+  if (detail.kind === "mst-scan") return detail.components || [];
+  return [];
+}
+function makeGraphStateView(frames) {
+  const first = frames[0];
+  const shell = el("div", "steptrace__graph-state");
+  shell.dataset.profile = first.profile;
+  const graph = el("div", "steptrace__gs-graph");
+  const svg = svgElement2("svg", {
+    class: "steptrace__gs-svg",
+    viewBox: "0 0 620 320",
+    role: "img",
+    "aria-label": "Graph algorithm state"
+  });
+  const defs = svgElement2("defs");
+  const markerBaseId = `steptrace-gs-arrow-${++graphStateViewId}`;
+  const markerIds = new Map(
+    GRAPH_STATE_MARKER_ROLES.map((role) => {
+      const id = `${markerBaseId}-${role}`;
+      const marker2 = svgElement2("marker", {
+        id,
+        viewBox: "0 0 6 6",
+        refX: 6,
+        refY: 3,
+        markerWidth: 5,
+        markerHeight: 5,
+        markerUnits: "strokeWidth",
+        orient: "auto-start-reverse"
+      });
+      marker2.append(
+        svgElement2("path", {
+          class: "steptrace__gs-arrow",
+          d: "M 0 0 L 6 3 L 0 6 Z",
+          "data-role": role
+        })
+      );
+      defs.append(marker2);
+      return [role, id];
+    })
+  );
+  const decorLayer = svgElement2("g", { class: "steptrace__gs-decor" });
+  decorLayer.append(...first.decor.map(decorElement));
+  const edgeLayer = svgElement2("g", { class: "steptrace__gs-edges" });
+  const edgeLabelLayer = svgElement2("g", { class: "steptrace__gs-edge-labels" });
+  const nodeLayer = svgElement2("g", { class: "steptrace__gs-nodes" });
+  svg.append(defs, decorLayer, edgeLayer, edgeLabelLayer, nodeLayer);
+  graph.append(svg);
+  const positions = new Map(first.nodes.map((node2) => [node2.id, node2]));
+  const compactMapNodes = first.profile === "building-floor" || first.profile === "midtown-map";
+  const mapMarkers = first.profile === "ukraine-cities" || compactMapNodes;
+  const nodeRadius = first.profile === "ukraine-cities" ? 5 : compactMapNodes ? 6 : GRAPH_NODE_RADIUS_PX;
+  const weighted = ["heuristic-search", "edge-relaxation", "mst-scan", "mst-round", "residual-flow"].includes(
+    first.detail.kind
+  ) || first.edges.some((edge) => edge.weight !== 1 || edge.label != null);
+  const edgeElements = first.edges.map((edge) => {
+    const from = positions.get(edge.from);
+    const to = positions.get(edge.to);
+    const line = svgElement2("line", {
+      class: "steptrace__gs-edge",
+      x1: from.x,
+      y1: from.y,
+      x2: to.x,
+      y2: to.y
+    });
+    if (edge.showDirection) line.setAttribute("marker-end", `url(#${markerIds.get("neutral")})`);
+    edgeLayer.append(line);
+    const label = weighted ? svgElement2("text", {
+      class: "steptrace__gs-edge-label",
+      x: (from.x + to.x) / 2,
+      y: (from.y + to.y) / 2 - 7
+    }) : null;
+    if (label) {
+      label.textContent = edge.label ?? String(edge.weight);
+      edgeLabelLayer.append(label);
+    }
+    return { edge, line, label, from, to };
+  });
+  const nodeElements = new Map(
+    first.nodes.map((node2) => {
+      const group = svgElement2("g", {
+        class: `steptrace__gs-node${first.profile === "ukraine-cities" ? " steptrace__gs-node--city" : compactMapNodes ? " steptrace__gs-node--map" : ""}`,
+        transform: `translate(${node2.x} ${node2.y})`
+      });
+      const title = svgElement2("title");
+      title.textContent = node2.label;
+      const halo = svgElement2("circle", {
+        class: "steptrace__gs-target",
+        r: mapMarkers ? 13 : GRAPH_NODE_RADIUS_PX + GRAPH_NODE_HALO_GAP_PX
+      });
+      const circle = svgElement2("circle", {
+        class: "steptrace__gs-node-circle",
+        r: nodeRadius
+      });
+      const label = svgElement2("text", { class: "steptrace__gs-node-label", x: 0, y: 0 });
+      label.textContent = node2.label;
+      group.append(title, halo, circle, label);
+      nodeLayer.append(group);
+      return [node2.id, group];
+    })
+  );
+  const applyEdgeGeometry = (radius, trimAll) => {
+    for (const { edge, line, from, to } of edgeElements) {
+      const inset = trimAll || edge.showDirection ? radius : 0;
+      const trimmed = trimGraphEdge(from, to, inset);
+      line.setAttribute("x1", String(trimmed.x1));
+      line.setAttribute("y1", String(trimmed.y1));
+      line.setAttribute("x2", String(trimmed.x2));
+      line.setAttribute("y2", String(trimmed.y2));
+    }
+  };
+  const geometry = mapMarkers ? (applyEdgeGeometry(nodeRadius, false), null) : observeFixedSvgNodes(
+    svg,
+    first.nodes.map((node2) => ({
+      element: nodeElements.get(node2.id),
+      point: node2
+    })),
+    (unitsPerCssPixel) => {
+      applyEdgeGeometry(GRAPH_NODE_RADIUS_PX * unitsPerCssPixel, true);
+    }
+  );
+  const legend = makeLegend(
+    graphStateLegend(first.detail.kind).map(([label, state]) => ({
+      label,
+      swatchClass: `steptrace__gs-swatch steptrace__gs-swatch--${state}`
+    })),
+    "Graph state legend",
+    "steptrace__gs-legend"
+  );
+  shell.append(graph);
+  const status = statusEl();
+  function paint(frame) {
+    const groups = graphStateGroups(frame.detail);
+    const groupByNode = new Map(
+      groups.flatMap((members, index) => members.map((id) => [id, index + 1]))
+    );
+    for (const [id, group] of nodeElements) {
+      const role = frame.nodeState[id] || "neutral";
+      const component = groupByNode.get(id);
+      group.dataset.group = component ? String(component) : "";
+      group.dataset.state = role === "frontier" ? "open" : role === "active" ? "current" : role === "accepted" && !component ? "path" : role === "closed" ? "closed" : role === "rejected" ? "rejected" : "";
+      group.dataset.target = String(id === frame.target);
+      const node2 = positions.get(id);
+      if (frame.detail.kind === "heuristic-search") {
+        const g = frame.detail.costs[id];
+        const h = frame.detail.heuristic[id];
+        group.children[0].textContent = frame.detail.policy === "greedy" ? `${node2.label}: h ${h}; path cost ${g ?? "∞"} is ignored for priority` : `${node2.label}: g ${g ?? "∞"}, h ${h}, f ${g == null ? "∞" : g + h}`;
+      } else {
+        group.children[0].textContent = node2.label;
+      }
+    }
+    for (const { edge, line, label } of edgeElements) {
+      const role = frame.edgeState[`${edge.from}|${edge.to}`] || "neutral";
+      line.dataset.active = String(role === "active" || role === "candidate" || role === "residual");
+      line.dataset.selected = String(role === "accepted");
+      line.dataset.cut = String(role === "cut");
+      line.dataset.dim = String(role === "rejected");
+      if (edge.showDirection) {
+        const markerUrl = `url(#${markerIds.get(graphStateMarkerRole(role))})`;
+        if (role === "residual") {
+          line.setAttribute("marker-start", markerUrl);
+          line.removeAttribute("marker-end");
+        } else {
+          line.removeAttribute("marker-start");
+          line.setAttribute("marker-end", markerUrl);
+        }
+      }
+      if (label) {
+        label.textContent = frame.detail.kind === "residual-flow" ? `${frame.detail.flow[`${edge.from}|${edge.to}`] || 0}/${edge.weight}` : edge.label ?? String(edge.weight);
+      }
+    }
+    status.textContent = frame.message;
+  }
+  function watch(frame) {
+    const currentId = frame.currentNode || frame.currentEdge?.[0] || null;
+    const current = currentId ? positions.get(currentId) : null;
+    const rows = [{ k: "current", v: current?.label || "—", sw: "var(--_blue)" }];
+    if (frame.detail.kind === "heuristic-search") {
+      const g = frame.currentNode ? frame.detail.costs[frame.currentNode] : null;
+      const h = frame.currentNode ? frame.detail.heuristic[frame.currentNode] : null;
+      rows.push(
+        {
+          k: "score",
+          v: current && g != null && h != null ? frame.detail.policy === "greedy" ? `h ${h}` : `g ${g} · h ${h} · f ${g + h}` : "—",
+          sw: "var(--_amber)"
+        },
+        {
+          k: "open",
+          v: frame.detail.open.map((entry) => entry.id).join(" · ") || "—",
+          sw: "var(--_amber)"
+        },
+        {
+          k: "closed",
+          v: frame.detail.closed.join(" · ") || "—",
+          sw: "var(--_green)"
+        }
+      );
+    }
+    if (frame.detail.kind === "heuristic-search" && frame.detail.comparison.primaryValue != null && frame.detail.comparison.baselineValue != null) {
+      const comparison = frame.detail.comparison;
+      rows.push({
+        k: comparison.metric === "expansions" ? "expanded" : "comparison",
+        v: `${comparison.primaryLabel} ${comparison.primaryValue} · ${comparison.baselineLabel} ${comparison.baselineValue}`,
+        sw: "var(--_green)"
+      });
+    }
+    switch (frame.detail.kind) {
+      case "dual-search":
+        rows.push(
+          {
+            k: "frontiers",
+            v: `F ${frame.detail.forward.length} · B ${frame.detail.backward.length}`,
+            sw: "var(--_amber)"
+          },
+          { k: "meeting", v: frame.detail.meeting || "—", sw: "var(--_violet)" }
+        );
+        break;
+      case "edge-relaxation":
+        rows.push(
+          { k: "pass", v: String(frame.detail.pass), sw: "var(--_violet)" },
+          { k: "edge", v: frame.detail.edge?.join(" → ") || "—", sw: "var(--_amber)" },
+          {
+            k: "change",
+            v: frame.detail.changed ? "updated" : "kept",
+            sw: frame.detail.changed ? "var(--_green)" : "var(--_neutral)"
+          }
+        );
+        break;
+      case "component-flood":
+        rows.push(
+          { k: "component", v: String(frame.detail.component), sw: "var(--_violet)" },
+          { k: "frontier", v: String(frame.detail.frontier.length), sw: "var(--_amber)" },
+          { k: "visited", v: String(frame.detail.visited.length), sw: "var(--_green)" }
+        );
+        break;
+      case "low-link-cuts": {
+        const id = currentId || "";
+        rows.push(
+          {
+            k: "disc / low",
+            v: id ? `${frame.detail.discovery[id] ?? "—"} / ${frame.detail.low[id] ?? "—"}` : "—",
+            sw: "var(--_amber)"
+          },
+          {
+            k: "cut vertices",
+            v: frame.detail.articulationPoints.join(" · ") || "—",
+            sw: "var(--_violet)"
+          },
+          {
+            k: "bridges",
+            v: frame.detail.bridges.map(([from, to]) => `${from}—${to}`).join(" · ") || "—",
+            sw: "var(--_green)"
+          }
+        );
+        break;
+      }
+      case "low-link-components": {
+        const id = currentId || "";
+        rows.push(
+          {
+            k: "disc / low",
+            v: id ? `${frame.detail.discovery[id] ?? "—"} / ${frame.detail.low[id] ?? "—"}` : "—",
+            sw: "var(--_amber)"
+          },
+          { k: "stack", v: frame.detail.stack.join(" · ") || "—", sw: "var(--_violet)" },
+          { k: "components", v: String(frame.detail.components.length), sw: "var(--_green)" }
+        );
+        break;
+      }
+      case "mst-scan":
+        rows.push(
+          { k: "pending", v: String(frame.detail.pending.length), sw: "var(--_amber)" },
+          {
+            k: "components",
+            v: String(frame.detail.components?.length ?? "—"),
+            sw: "var(--_violet)"
+          },
+          { k: "weight", v: String(frame.detail.totalWeight), sw: "var(--_violet)" }
+        );
+        break;
+      case "mst-round":
+        rows.push(
+          { k: "round", v: String(frame.detail.round), sw: "var(--_violet)" },
+          { k: "components", v: String(frame.detail.components.length), sw: "var(--_amber)" },
+          { k: "weight", v: String(frame.detail.totalWeight), sw: "var(--_green)" }
+        );
+        break;
+      case "path-backtrack":
+        rows.push(
+          { k: "path", v: frame.detail.path.join(" → ") || "—", sw: "var(--_green)" },
+          { k: "candidates", v: frame.detail.candidates.join(" · ") || "—", sw: "var(--_amber)" },
+          { k: "rejected", v: frame.detail.rejected.join(" · ") || "—", sw: "var(--_violet)" }
+        );
+        break;
+      case "residual-flow":
+        rows.push(
+          { k: "path", v: frame.detail.augmentingPath.join(" → ") || "—", sw: "var(--_amber)" },
+          {
+            k: "bottleneck",
+            v: frame.detail.bottleneck == null ? "—" : String(frame.detail.bottleneck),
+            sw: "var(--_violet)"
+          },
+          { k: "flow", v: String(frame.detail.totalFlow), sw: "var(--_green)" }
+        );
+        break;
+      case "heuristic-search":
+        break;
+    }
+    return rows;
+  }
+  return {
+    nodes: [shell, legend, status],
+    stableStage: true,
+    stageLayout: "fill",
+    paint,
+    watch,
+    summary: graphStateSummary,
+    destroy: () => geometry?.destroy()
+  };
+}
+var SVG_NS3, graphStateViewId, GRAPH_STATE_MARKER_ROLES, CITY_DATA, CITY_NODE_OFFSETS, GraphStateRecorder, graphStateFamily;
+var init_graph_state = __esm({
+  "custom/steptrace/src/families/graph-state.ts"() {
+    init_render();
+    init_graph_node();
+    SVG_NS3 = "http://www.w3.org/2000/svg";
+    graphStateViewId = 0;
+    GRAPH_STATE_MARKER_ROLES = ["neutral", "active", "selected", "cut"];
+    CITY_DATA = [
+      ["Vinnytsia", 49.2331, 28.4682],
+      ["Lutsk", 50.7472, 25.3254],
+      ["Dnipro", 48.4647, 35.0462],
+      ["Donetsk", 48.0159, 37.8028],
+      ["Zhytomyr", 50.2547, 28.6587],
+      ["Uzhhorod", 48.6208, 22.2879],
+      ["Zaporizhzhia", 47.8388, 35.1396],
+      ["Ivano-Frankivsk", 48.9226, 24.7111],
+      ["Kyiv", 50.4501, 30.5234],
+      ["Kropyvnytskyi", 48.5079, 32.2623],
+      ["Luhansk", 48.574, 39.3078],
+      ["Lviv", 49.8397, 24.0297],
+      ["Mykolaiv", 46.975, 31.9946],
+      ["Odesa", 46.4825, 30.7233],
+      ["Poltava", 49.5883, 34.5514],
+      ["Rivne", 50.6199, 26.2516],
+      ["Sumy", 50.9077, 34.7981],
+      ["Ternopil", 49.5535, 25.5948],
+      ["Kharkiv", 49.9935, 36.2304],
+      ["Kherson", 46.6354, 32.6169],
+      ["Khmelnytskyi", 49.4229, 26.9871],
+      ["Cherkasy", 49.4444, 32.0598],
+      ["Chernivtsi", 48.2915, 25.9403],
+      ["Chernihiv", 51.4982, 31.2893],
+      ["Simferopol", 44.9521, 34.1024]
+    ];
+    CITY_NODE_OFFSETS = {
+      Lutsk: [-8, -4],
+      Rivne: [5, 3],
+      Lviv: [-6, 4],
+      Ternopil: [5, -2],
+      "Ivano-Frankivsk": [-7, 7],
+      Chernivtsi: [2, 7],
+      Khmelnytskyi: [7, -4],
+      Vinnytsia: [-4, 5],
+      Zhytomyr: [-4, -4],
+      Kyiv: [5, -4],
+      Cherkasy: [4, 5],
+      Kropyvnytskyi: [0, 6],
+      Dnipro: [-4, 4],
+      Zaporizhzhia: [4, 5]
+    };
+    GraphStateRecorder = class {
+      constructor(config) {
+        this.config = config;
+      }
+      config;
+      frames = [];
+      push(type, current, activeEdge, g, open, closed, selectedPath, message, comparison = [null, null]) {
+        const selectedEdges = [...pathEdgeSet(selectedPath)];
+        const nodeState = Object.fromEntries(
+          this.config.nodes.map((node2) => [
+            node2.id,
+            selectedPath.includes(node2.id) ? "accepted" : node2.id === current ? "active" : open.some((entry) => entry.id === node2.id) ? "frontier" : closed.includes(node2.id) ? "closed" : "neutral"
+          ])
+        );
+        const edgeState = Object.fromEntries(
+          this.config.edges.map((edge) => {
+            const selected = selectedEdges.includes(`${edge.from}|${edge.to}`);
+            const active = activeEdge?.[0] === edge.from && activeEdge[1] === edge.to || !edge.directed && activeEdge?.[0] === edge.to && activeEdge[1] === edge.from;
+            const role = selected ? "accepted" : active ? "active" : selectedPath.length ? "rejected" : "neutral";
+            return [`${edge.from}|${edge.to}`, role];
+          })
+        );
+        const detail = {
+          kind: "heuristic-search",
+          policy: this.config.policy,
+          open: open.map((entry) => Object.freeze({ ...entry })),
+          closed: closed.slice(),
+          costs: Object.freeze({ ...g }),
+          heuristic: Object.freeze(
+            Object.fromEntries(this.config.nodes.map((node2) => [node2.id, node2.h]))
+          ),
+          comparison: this.config.policy === "greedy" ? {
+            primaryLabel: "Greedy",
+            primaryValue: comparison[0],
+            baselineLabel: "A*",
+            baselineValue: comparison[1],
+            metric: "cost"
+          } : {
+            primaryLabel: "A*",
+            primaryValue: comparison[0],
+            baselineLabel: "Dijkstra",
+            baselineValue: comparison[1],
+            metric: "expansions"
+          }
+        };
+        this.frames.push(
+          Object.freeze({
+            type,
+            profile: this.config.profile,
+            nodes: this.config.nodes,
+            edges: this.config.edges,
+            decor: this.config.decor,
+            start: this.config.start,
+            target: this.config.target,
+            currentNode: current,
+            currentEdge: activeEdge,
+            selectedEdges,
+            nodeState: Object.freeze(nodeState),
+            edgeState: Object.freeze(edgeState),
+            message,
+            detail
+          })
+        );
+      }
+      init(g, open, message) {
+        this.push("init", null, null, g, open, [], [], message);
+      }
+      expand(node2, g, open, closed, message) {
+        this.push("expand", node2, null, g, open, closed, [], message);
+      }
+      edge(from, to, g, open, closed, message) {
+        this.push("edge", from, [from, to], g, open, closed, [], message);
+      }
+      relax(from, to, g, open, closed, message) {
+        this.push("relax", from, [from, to], g, open, closed, [], message);
+      }
+      path(path, g, message) {
+        this.push("path", path.at(-1) || null, null, g, [], path, path, message);
+      }
+      done(path, g, primaryValue, baselineValue, message) {
+        this.push("done", null, null, g, [], path, path, message, [primaryValue, baselineValue]);
+      }
+    };
+    graphStateFamily = {
+      id: "graph-state",
+      createRecorder(config) {
+        return new GraphStateRecorder(config);
+      },
+      createView(frames) {
+        return makeGraphStateView(frames);
+      }
+    };
+  }
+});
+
+// custom/steptrace/src/algorithms/a-star.ts
+function runCount(config, heuristic) {
+  const neighbours = graphStateAdjacency(config);
+  const h = new Map(config.nodes.map((node2) => [node2.id, heuristic ? node2.h : 0]));
+  const g = { [config.start]: 0 };
+  const closed = /* @__PURE__ */ new Set();
+  const queue2 = [{ id: config.start, g: 0, h: h.get(config.start), f: h.get(config.start), order: 0 }];
+  let order = 1;
+  while (queue2.length) {
+    queue2.sort((left, right) => left.f - right.f || left.h - right.h || left.order - right.order || left.id.localeCompare(right.id));
+    const current = queue2.shift();
+    if (closed.has(current.id) || current.g !== g[current.id]) continue;
+    closed.add(current.id);
+    if (current.id === config.target) return closed.size;
+    for (const edge of neighbours.get(current.id)) {
+      if (closed.has(edge.to)) continue;
+      const tentative = current.g + edge.weight;
+      if (tentative >= (g[edge.to] ?? Number.POSITIVE_INFINITY)) continue;
+      g[edge.to] = tentative;
+      queue2.push({ id: edge.to, g: tentative, h: h.get(edge.to), f: tentative + h.get(edge.to), order: order++ });
+    }
+  }
+  return closed.size;
+}
+function visibleQueue(queue2, closed) {
+  const best = /* @__PURE__ */ new Map();
+  for (const entry of queue2) {
+    if (closed.has(entry.id)) continue;
+    const current = best.get(entry.id);
+    if (!current || entry.g < current.g) best.set(entry.id, entry);
+  }
+  return [...best.values()].sort((left, right) => left.f - right.f || left.h - right.h || left.order - right.order || left.id.localeCompare(right.id)).map(({ id, g, h, f }) => ({ id, g, h, f }));
+}
+function runAStar(config, ops) {
+  const neighbours = graphStateAdjacency(config);
+  const h = new Map(config.nodes.map((node2) => [node2.id, node2.h]));
+  const g = { [config.start]: 0 };
+  const parent = {};
+  const closed = /* @__PURE__ */ new Set();
+  const closedOrder = [];
+  const queue2 = [{
+    id: config.start,
+    g: 0,
+    h: h.get(config.start),
+    f: h.get(config.start),
+    order: 0
+  }];
+  let order = 1;
+  ops.init(g, visibleQueue(queue2, closed), `Seed OPEN with ${config.start}; rank it by f = g + h.`);
+  while (queue2.length) {
+    queue2.sort((left, right) => left.f - right.f || left.h - right.h || left.order - right.order || left.id.localeCompare(right.id));
+    const current = queue2.shift();
+    if (closed.has(current.id) || current.g !== g[current.id]) continue;
+    closed.add(current.id);
+    closedOrder.push(current.id);
+    ops.expand(
+      current.id,
+      g,
+      visibleQueue(queue2, closed),
+      closedOrder,
+      `Move ${current.id} from OPEN to CLOSED: f ${current.f} is smallest.`
+    );
+    if (current.id === config.target) {
+      const path = [current.id];
+      while (path[0] !== config.start) path.unshift(parent[path[0]]);
+      ops.path(path, g, `Reconstruct the optimal path ${path.join(" → ")}.`);
+      const dijkstraExpanded = runCount(config, false);
+      ops.done(
+        path,
+        g,
+        closed.size,
+        dijkstraExpanded,
+        `Path cost ${g[config.target]}. A* expanded ${closed.size}; Dijkstra expanded ${dijkstraExpanded}.`
+      );
+      return;
+    }
+    for (const edge of neighbours.get(current.id)) {
+      if (closed.has(edge.to)) continue;
+      ops.edge(
+        current.id,
+        edge.to,
+        g,
+        visibleQueue(queue2, closed),
+        closedOrder,
+        `Inspect ${current.id} → ${edge.to} with cost ${edge.weight}.`
+      );
+      const tentative = current.g + edge.weight;
+      if (tentative >= (g[edge.to] ?? Number.POSITIVE_INFINITY)) continue;
+      g[edge.to] = tentative;
+      parent[edge.to] = current.id;
+      const entry = {
+        id: edge.to,
+        g: tentative,
+        h: h.get(edge.to),
+        f: tentative + h.get(edge.to),
+        order: order++
+      };
+      queue2.push(entry);
+      ops.relax(
+        current.id,
+        edge.to,
+        g,
+        visibleQueue(queue2, closed),
+        closedOrder,
+        `Update ${edge.to}: g ${entry.g} + h ${entry.h} = f ${entry.f}.`
+      );
+    }
+  }
+  ops.done([], g, closed.size, runCount(config, false), `${config.target} is unreachable from ${config.start}.`);
+}
+var aStar;
+var init_a_star = __esm({
+  "custom/steptrace/src/algorithms/a-star.ts"() {
+    init_graph_state();
+    aStar = {
+      id: "a-star",
+      kind: "graph",
+      family: graphStateFamily,
+      meta: { label: "A*" },
+      parse: parseGraphStateConfig,
+      run: runAStar
+    };
+  }
+});
+
+// custom/steptrace/src/families/prefix-character.ts
+function invalidConfig(message) {
+  throw new Error(`steptrace: trie ${message}`);
+}
+function layoutNodes(labels, edges5) {
+  const treeEdges = edges5.filter((edge) => edge.kind !== "failure");
+  const children = /* @__PURE__ */ new Map();
+  for (const id of labels.keys()) children.set(id, []);
+  for (const edge of treeEdges) children.get(edge.from)?.push(edge.to);
+  const depths = /* @__PURE__ */ new Map([["root", 0]]);
+  const visitDepth = (id) => {
+    const depth = depths.get(id) || 0;
+    for (const child of children.get(id) || []) {
+      depths.set(child, depth + 1);
+      visitDepth(child);
+    }
+  };
+  visitDepth("root");
+  const leaves = [...labels.keys()].filter((id) => (children.get(id)?.length || 0) === 0);
+  const leafStep = leaves.length > 1 ? 270 / (leaves.length - 1) : 0;
+  const leafX = new Map(leaves.map((id, index) => [id, 35 + index * leafStep]));
+  const xFor = (id) => {
+    const descendants = children.get(id) || [];
+    if (!descendants.length) return leafX.get(id) || 180;
+    return descendants.reduce((sum, child) => sum + xFor(child), 0) / descendants.length;
+  };
+  const maxDepth = Math.max(...depths.values(), 1);
+  const stepY = Math.min(58, 232 / maxDepth);
+  return [...labels].map(([id, label]) => ({
+    id,
+    label,
+    x: xFor(id),
+    y: 38 + (depths.get(id) || 0) * stepY
+  }));
+}
+function insetPoint(from, toward, distance2) {
+  const dx = toward.x - from.x;
+  const dy = toward.y - from.y;
+  const length = Math.hypot(dx, dy) || 1;
+  return {
+    x: from.x + dx / length * distance2,
+    y: from.y + dy / length * distance2
+  };
+}
+function prefixTopology(keys) {
+  const prefixes = /* @__PURE__ */ new Set([""]);
+  for (const key4 of keys) {
+    for (let index = 1; index <= key4.length; index++) prefixes.add(key4.slice(0, index));
+  }
+  const ordered = [...prefixes].sort((a, b) => a.length - b.length || a.localeCompare(b));
+  const labels = new Map(
+    ordered.map((prefix) => [prefix || "root", prefix ? prefix.at(-1) || "" : "root"])
+  );
+  const edges5 = ordered.filter(Boolean).map((prefix) => {
+    const parent = prefix.slice(0, -1) || "root";
+    return { id: `${parent}->${prefix}`, from: parent, to: prefix };
+  });
+  return { nodes: layoutNodes(labels, edges5), edges: edges5 };
+}
+function characterTopology(labels, edges5) {
+  return { nodes: layoutNodes(labels, edges5), edges: edges5.slice() };
+}
+function topology(operations) {
+  return prefixTopology(
+    operations.filter(([operation]) => operation === "insert").map(([, key4]) => key4)
+  );
+}
+function parsePrefixCharacterConfig(config) {
+  if (!Array.isArray(config.operations) || !config.operations.length)
+    invalidConfig('requires a non-empty "operations" array.');
+  const operations = config.operations.map((entry) => {
+    if (!Array.isArray(entry) || entry.length !== 2 || !["insert", "prefix", "search"].includes(entry[0]) || typeof entry[1] !== "string" || !entry[1])
+      invalidConfig('operations must be ["insert"|"prefix"|"search", non-empty string] pairs.');
+    return [entry[0], entry[1]];
+  });
+  const built = topology(operations);
+  return { profile: "trie", operations, ...built };
+}
+function makePrefixCharacterView(frames) {
+  const topology2 = frames[0];
+  const root = el("div", "steptrace__prefix-character");
+  root.setAttribute("role", "region");
+  root.setAttribute("aria-label", "Prefix character path debugger");
+  root.tabIndex = 0;
+  const textRow = el("div", "steptrace__prefix-text");
+  const railText = frames.find((frame) => frame.text)?.text || "";
+  const textCells = Array.from(railText).map((character) => {
+    const cell = el("span", "steptrace__prefix-text-cell");
+    cell.textContent = character;
+    textRow.append(cell);
+    return cell;
+  });
+  textRow.hidden = textCells.length === 0;
+  textRow.dataset.visible = "0";
+  textRow.setAttribute("aria-hidden", "true");
+  const svg = document.createElementNS(SVGNS2, "svg");
+  const title = document.createElementNS(SVGNS2, "title");
+  const description = document.createElementNS(SVGNS2, "desc");
+  const id = `steptrace-prefix-character-${++viewSerial}`;
+  title.id = `${id}-title`;
+  description.id = `${id}-description`;
+  svg.setAttribute("class", "steptrace__prefix-svg");
+  svg.setAttribute("viewBox", "0 0 360 300");
+  svg.setAttribute("preserveAspectRatio", "xMidYMid meet");
+  svg.setAttribute("role", "img");
+  svg.setAttribute("aria-labelledby", `${title.id} ${description.id}`);
+  svg.append(title, description);
+  const positions = new Map(topology2.nodes.map((node2) => [node2.id, node2]));
+  const edgeElements = /* @__PURE__ */ new Map();
+  for (const edge of topology2.edges) {
+    const from = positions.get(edge.from);
+    const to = positions.get(edge.to);
+    const element = document.createElementNS(SVGNS2, edge.kind === "failure" ? "path" : "line");
+    element.setAttribute(
+      "class",
+      `steptrace__prefix-edge${edge.kind === "failure" ? " steptrace__prefix-edge--failure" : ""}`
+    );
+    if (edge.kind === "failure") {
+      const bend = from.x <= to.x ? -24 : 24;
+      const control = {
+        x: (from.x + to.x) / 2 + bend,
+        y: (from.y + to.y) / 2
+      };
+      const start = insetPoint(from, control, 18);
+      const end = insetPoint(to, control, 18);
+      element.setAttribute(
+        "d",
+        `M ${start.x} ${start.y} Q ${control.x} ${control.y} ${end.x} ${end.y}`
+      );
+    } else {
+      const start = insetPoint(from, to, 18);
+      const end = insetPoint(to, from, 18);
+      element.setAttribute("x1", String(start.x));
+      element.setAttribute("y1", String(start.y));
+      element.setAttribute("x2", String(end.x));
+      element.setAttribute("y2", String(end.y));
+    }
+    element.setAttribute("aria-hidden", "true");
+    element.setAttribute("focusable", "false");
+    svg.append(element);
+    const role = edge.role ? document.createElementNS(SVGNS2, "text") : null;
+    if (role) {
+      role.setAttribute("class", "steptrace__prefix-edge-role");
+      role.setAttribute("x", String((from.x + to.x) / 2 + 8));
+      role.setAttribute("y", String((from.y + to.y) / 2));
+      role.setAttribute("aria-hidden", "true");
+      role.textContent = edge.role;
+      svg.append(role);
+    }
+    edgeElements.set(edge.id, { element, role });
+  }
+  const nodeElements = /* @__PURE__ */ new Map();
+  for (const node2 of topology2.nodes) {
+    const group = document.createElementNS(SVGNS2, "g");
+    const circle = document.createElementNS(SVGNS2, "circle");
+    const label = document.createElementNS(SVGNS2, "text");
+    const terminal = successMarker("steptrace__prefix-terminal");
+    group.setAttribute("class", "steptrace__prefix-node");
+    group.setAttribute("transform", `translate(${node2.x} ${node2.y})`);
+    group.setAttribute("aria-hidden", "true");
+    group.setAttribute("focusable", "false");
+    circle.setAttribute("r", "18");
+    label.setAttribute("text-anchor", "middle");
+    label.setAttribute("dominant-baseline", "central");
+    label.setAttribute("dy", "0.04em");
+    label.textContent = node2.label;
+    terminal.setAttribute("x", "10");
+    terminal.setAttribute("y", "-22");
+    terminal.setAttribute("width", "13.2");
+    terminal.setAttribute("height", "13.2");
+    group.append(circle, label, terminal);
+    svg.append(group);
+    nodeElements.set(node2.id, { group, terminal });
+  }
+  root.append(textRow, svg);
+  const legend = makeLegend(
+    [
+      {
+        state: "active",
+        label: "active path",
+        swatchClass: "steptrace__swatch steptrace__prefix-swatch"
+      },
+      {
+        state: "reused",
+        label: "reused edge",
+        swatchClass: "steptrace__swatch steptrace__prefix-swatch"
+      },
+      {
+        state: "created",
+        label: "new node",
+        swatchClass: "steptrace__swatch steptrace__prefix-swatch"
+      },
+      {
+        state: "terminal",
+        label: "terminal key",
+        swatchClass: "steptrace__swatch steptrace__prefix-swatch"
+      }
+    ],
+    "Prefix character state legend"
+  );
+  const status = statusEl();
+  function paint(frame, index = 0, total = frames.length) {
+    const visibleNodes = new Set(frame.visibleNodes);
+    const visibleEdges = new Set(frame.visibleEdges);
+    const activePath = new Set(frame.activePath);
+    const terminals = new Set(frame.terminalNodes);
+    if (textCells.length) {
+      const textVisible = Boolean(frame.text);
+      textRow.dataset.visible = textVisible ? "1" : "0";
+      textRow.setAttribute("aria-hidden", String(!textVisible));
+    }
+    textCells.forEach((cell, index2) => {
+      cell.dataset.active = frame.textCursor === index2 ? "1" : "0";
+      cell.dataset.matched = frame.matches.some(
+        (match) => index2 > match.end - match.pattern.length && index2 <= match.end
+      ) ? "1" : "0";
+    });
+    const profileLabel = {
+      trie: "Trie",
+      "aho-corasick": "Aho-Corasick",
+      "ternary-search-tree": "Ternary Search Tree"
+    }[frame.profile];
+    title.textContent = `${profileLabel} ${frame.operation || "complete"}: ${frame.key || "all operations"}`;
+    description.textContent = `${frame.message} Visible path ${frame.visibleNodes.join(" → ")}. Terminal keys ${frame.terminalNodes.filter((node2) => node2 !== "root").join(", ") || "none"}.`;
+    for (const node2 of topology2.nodes) {
+      const elements = nodeElements.get(node2.id);
+      elements.group.dataset.vis = visibleNodes.has(node2.id) ? "1" : "0";
+      elements.group.dataset.path = activePath.has(node2.id) ? "1" : "0";
+      elements.group.dataset.state = frame.type === "create-node" && frame.activePath.at(-1) === node2.id ? "created" : frame.type === "reuse-edge" && frame.activePath.at(-1) === node2.id ? "reused" : activePath.has(node2.id) ? "active" : terminals.has(node2.id) ? "terminal" : "settled";
+      elements.terminal.dataset.visible = terminals.has(node2.id) ? "1" : "0";
+    }
+    for (const edge of topology2.edges) {
+      const elements = edgeElements.get(edge.id);
+      const state = frame.activeEdge === edge.id ? frame.type === "create-node" ? "created" : "reused" : frame.activePath.includes(edge.from) && frame.activePath.includes(edge.to) ? "active" : "settled";
+      elements.element.dataset.vis = visibleEdges.has(edge.id) ? "1" : "0";
+      elements.element.dataset.state = frame.type === "fallback" ? "fallback" : state;
+      if (elements.role) {
+        elements.role.dataset.vis = visibleEdges.has(edge.id) ? "1" : "0";
+        elements.role.dataset.state = state;
+      }
+    }
+    status.innerHTML = `${escapeHtml(frame.message)} <span class="steptrace__counts">· step ${index + 1}/${total}</span>`;
+  }
+  function watch(frame) {
+    const character = frame.text && frame.textCursor != null ? frame.text[frame.textCursor] || "—" : frame.profile === "ternary-search-tree" && frame.cursor != null ? frame.key[frame.cursor] || "—" : frame.cursor && frame.cursor > 0 ? frame.key[frame.cursor - 1] || "—" : frame.key[0] || "—";
+    const rows = [
+      {
+        k: "operation",
+        v: frame.operation ? `${frame.operation} ${frame.key}` : "complete",
+        sw: "var(--_blue)"
+      },
+      { k: "character", v: character, sw: "var(--_violet)" }
+    ];
+    if (frame.testKind)
+      rows.push({
+        k: "test",
+        v: `${frame.testKind} ${frame.result ? "found" : "missing"}`,
+        sw: frame.result ? "var(--_green)" : "var(--_amber)"
+      });
+    else if (frame.text)
+      rows.push({
+        k: frame.outputs.length ? "output" : "state",
+        v: frame.outputs.length ? frame.outputs.join(" + ") : frame.activePath.at(-1) || "root",
+        sw: frame.outputs.length ? "var(--_green)" : "var(--_amber)"
+      });
+    return rows;
+  }
+  return {
+    nodes: [root, legend, status],
+    stageLayout: "fill",
+    stageAlignment: "center",
+    stableStage: true,
+    paint,
+    watch
+  };
+}
+var PrefixCharacterRecorder, viewSerial, SVGNS2, prefixCharacterFamily;
+var init_prefix_character = __esm({
+  "custom/steptrace/src/families/prefix-character.ts"() {
+    init_render();
+    PrefixCharacterRecorder = class {
+      constructor(config) {
+        this.config = config;
+        this.nodes = Object.freeze(config.nodes.map((node2) => Object.freeze({ ...node2 })));
+        this.edges = Object.freeze(config.edges.map((edge) => Object.freeze({ ...edge })));
+      }
+      config;
+      frames = [];
+      nodes;
+      edges;
+      visibleNodes = /* @__PURE__ */ new Set(["root"]);
+      visibleEdges = /* @__PURE__ */ new Set();
+      terminalNodes = /* @__PURE__ */ new Set();
+      activePath = ["root"];
+      activeEdge = null;
+      operation = null;
+      key = "";
+      cursor = null;
+      testKind = null;
+      result = null;
+      text = "";
+      textCursor = null;
+      outputs = [];
+      matches = [];
+      hasVisibleEdge(edgeId2) {
+        return this.visibleEdges.has(edgeId2);
+      }
+      hasTerminal(nodeId) {
+        return this.terminalNodes.has(nodeId);
+      }
+      begin(operation, key4, message) {
+        this.operation = operation;
+        this.key = key4;
+        this.cursor = 0;
+        this.activePath = ["root"];
+        this.activeEdge = null;
+        this.testKind = null;
+        this.result = null;
+        this.textCursor = null;
+        this.outputs = [];
+        this.push("begin", message);
+      }
+      reuseEdge(edgeId2, nodeId, cursor, message) {
+        this.visibleEdges.add(edgeId2);
+        this.visibleNodes.add(nodeId);
+        this.activePath.push(nodeId);
+        this.activeEdge = edgeId2;
+        this.cursor = cursor;
+        this.push("reuse-edge", message);
+      }
+      createNode(edgeId2, nodeId, cursor, message) {
+        this.visibleEdges.add(edgeId2);
+        this.visibleNodes.add(nodeId);
+        this.activePath.push(nodeId);
+        this.activeEdge = edgeId2;
+        this.cursor = cursor;
+        this.push("create-node", message);
+      }
+      markTerminal(nodeId, message) {
+        this.terminalNodes.add(nodeId);
+        this.activeEdge = null;
+        this.push("mark-terminal", message);
+      }
+      completePrefix(result, message) {
+        this.activeEdge = null;
+        this.testKind = "path";
+        this.result = result;
+        this.push("complete-prefix", message);
+      }
+      completeSearch(result, message) {
+        this.activeEdge = null;
+        this.testKind = "terminal";
+        this.result = result;
+        this.push("complete-search", message);
+      }
+      setText(text) {
+        this.text = text;
+      }
+      failureLink(edgeId2, nodeId, message) {
+        if (edgeId2) this.visibleEdges.add(edgeId2);
+        this.visibleNodes.add(nodeId);
+        this.activePath = [nodeId];
+        this.activeEdge = edgeId2;
+        this.push("failure-link", message);
+      }
+      goto(edgeId2, nodeId, textCursor, message) {
+        this.visibleEdges.add(edgeId2);
+        this.visibleNodes.add(nodeId);
+        this.activePath = [nodeId];
+        this.activeEdge = edgeId2;
+        this.textCursor = textCursor;
+        this.outputs = [];
+        this.push("goto", message);
+      }
+      fallback(edgeId2, nodeId, textCursor, message) {
+        if (edgeId2) this.visibleEdges.add(edgeId2);
+        this.activePath = [nodeId];
+        this.activeEdge = edgeId2;
+        this.textCursor = textCursor;
+        this.outputs = [];
+        this.push("fallback", message);
+      }
+      output(patterns, textCursor, message) {
+        this.textCursor = textCursor;
+        this.outputs = patterns.slice();
+        this.matches.push(...patterns.map((pattern) => ({ pattern, end: textCursor })));
+        this.push("output", message);
+      }
+      done(message) {
+        this.operation = null;
+        this.key = "";
+        this.cursor = null;
+        this.activePath = [];
+        this.activeEdge = null;
+        this.testKind = null;
+        this.result = true;
+        this.push("done", message);
+      }
+      push(type, message) {
+        this.frames.push(
+          Object.freeze({
+            type,
+            profile: this.config.profile,
+            nodes: this.nodes,
+            edges: this.edges,
+            visibleNodes: Object.freeze([...this.visibleNodes]),
+            visibleEdges: Object.freeze([...this.visibleEdges]),
+            activePath: Object.freeze(this.activePath.slice()),
+            activeEdge: this.activeEdge,
+            terminalNodes: Object.freeze([...this.terminalNodes]),
+            operation: this.operation,
+            key: this.key,
+            cursor: this.cursor,
+            testKind: this.testKind,
+            result: this.result,
+            text: this.text,
+            textCursor: this.textCursor,
+            outputs: Object.freeze(this.outputs.slice()),
+            matches: Object.freeze(this.matches.map((match) => Object.freeze({ ...match }))),
+            message
+          })
+        );
+      }
+    };
+    viewSerial = 0;
+    SVGNS2 = "http://www.w3.org/2000/svg";
+    prefixCharacterFamily = {
+      id: "prefix-character",
+      createRecorder(config) {
+        return new PrefixCharacterRecorder(config);
+      },
+      createView(frames) {
+        return makePrefixCharacterView(frames);
+      }
+    };
+  }
+});
+
+// custom/steptrace/src/algorithms/aho-corasick.ts
+function invalid2(message) {
+  throw new Error(`steptrace: aho-corasick ${message}`);
+}
+function parseAhoCorasickConfig(config) {
+  if (!Array.isArray(config.patterns) || !config.patterns.length)
+    invalid2('requires a non-empty "patterns" array.');
+  if (!config.patterns.every((pattern) => typeof pattern === "string" && pattern))
+    invalid2('requires every "patterns" value to be a non-empty string.');
+  if (typeof config.text !== "string" || !config.text) invalid2('requires a non-empty "text".');
+  const patterns = config.patterns.slice();
+  const built = prefixTopology(patterns);
+  const ids = new Set(built.nodes.map((node2) => node2.id));
+  const failures = {};
+  for (const node2 of built.nodes.filter((candidate) => candidate.id !== "root")) {
+    let suffix = node2.id.slice(1);
+    while (suffix && !ids.has(suffix)) suffix = suffix.slice(1);
+    failures[node2.id] = suffix || "root";
+  }
+  const failureEdges = Object.entries(failures).filter(([, target]) => target !== "root").map(([from, to]) => ({ id: `fail:${from}->${to}`, from, to, kind: "failure" }));
+  return {
+    profile: "aho-corasick",
+    patterns,
+    text: config.text,
+    failures,
+    operations: [
+      ...patterns.map((pattern) => ["insert", pattern]),
+      ["build failures", "patterns"],
+      ["scan", config.text]
+    ],
+    nodes: built.nodes,
+    edges: [...built.edges, ...failureEdges]
+  };
+}
+var ahoCorasick;
+var init_aho_corasick = __esm({
+  "custom/steptrace/src/algorithms/aho-corasick.ts"() {
+    init_prefix_character();
+    ahoCorasick = {
+      id: "aho-corasick",
+      kind: "string",
+      family: prefixCharacterFamily,
+      meta: { label: "Aho-Corasick" },
+      parse: parseAhoCorasickConfig,
+      run(input, ops) {
+        for (const pattern of input.patterns) {
+          ops.begin("insert", pattern, `Insert pattern "${pattern}" into the shared prefix tree.`);
+          let prefix = "";
+          for (let index = 0; index < pattern.length; index++) {
+            const next = prefix + pattern[index];
+            const edgeId2 = `${prefix || "root"}->${next}`;
+            if (ops.hasVisibleEdge(edgeId2))
+              ops.reuseEdge(edgeId2, next, index + 1, `Reuse ${pattern[index]} to state "${next}".`);
+            else ops.createNode(edgeId2, next, index + 1, `Create state "${next}".`);
+            prefix = next;
+          }
+          ops.markTerminal(pattern, `Mark output pattern "${pattern}".`);
+        }
+        ops.begin("build failures", "patterns", "Compute the longest proper suffix for each state.");
+        for (const node2 of input.nodes.filter((candidate) => candidate.id !== "root")) {
+          const target = input.failures[node2.id];
+          const edgeId2 = target === "root" ? null : `fail:${node2.id}->${target}`;
+          ops.failureLink(edgeId2, node2.id, `Failure("${node2.id}") → ${target}.`);
+        }
+        ops.setText(input.text);
+        ops.begin("scan", input.text, `Scan "${input.text}" once through goto and failure links.`);
+        const states = new Set(input.nodes.map((node2) => node2.id));
+        let state = "root";
+        for (let index = 0; index < input.text.length; index++) {
+          const character = input.text[index];
+          while (state !== "root" && !states.has(`${state}${character}`)) {
+            const target = input.failures[state];
+            const edgeId2 = target === "root" ? null : `fail:${state}->${target}`;
+            ops.fallback(edgeId2, target, index, `No ${character} edge: fall back ${state} → ${target}.`);
+            state = target;
+          }
+          const next = state === "root" ? character : `${state}${character}`;
+          if (states.has(next)) {
+            ops.goto(`${state}->${next}`, next, index, `Consume ${character}: goto "${next}".`);
+            state = next;
+          } else {
+            ops.fallback(null, "root", index, `No ${character} edge from root; stay at root.`);
+            state = "root";
+          }
+          const outputs = [];
+          let outputState = state;
+          while (outputState !== "root") {
+            if (input.patterns.includes(outputState)) outputs.push(outputState);
+            outputState = input.failures[outputState];
+          }
+          if (outputs.length)
+            ops.output(outputs, index, `Emit ${outputs.join(" + ")} ending at text index ${index}.`);
+        }
+        ops.done("Scan complete.");
+      }
+    };
+  }
+});
+
+// custom/steptrace/src/algorithms/articulation-points-and-bridges.ts
+function parse() {
+  return {
+    nodes: [
+      { id: "0", label: "0", x: 90, y: 120 },
+      { id: "1", label: "1", x: 220, y: 55 },
+      { id: "2", label: "2", x: 220, y: 185 },
+      { id: "3", label: "3", x: 390, y: 185 },
+      { id: "4", label: "4", x: 540, y: 185 }
+    ],
+    edges: [
+      { from: "0", to: "1", weight: 1 },
+      { from: "1", to: "2", weight: 1 },
+      { from: "2", to: "0", weight: 1 },
+      { from: "2", to: "3", weight: 1 },
+      { from: "3", to: "4", weight: 1 }
+    ]
+  };
+}
+function run(_, recorder) {
+  const disc = {};
+  const low = {};
+  const cuts = [];
+  const bridges = [];
+  const visit = (id, time, parent) => {
+    disc[id] = low[id] = time;
+    recorder.record("discover", id, parent ? [parent, id] : null, disc, low, cuts, bridges, `Discover ${id}: disc ${time}, low ${time}.`);
+  };
+  visit("0", 0, null);
+  visit("1", 1, "0");
+  visit("2", 2, "1");
+  low["2"] = 0;
+  recorder.record("back-edge", "2", ["2", "0"], disc, low, cuts, bridges, "Back edge 2—0 lowers low[2] to 0.");
+  visit("3", 3, "2");
+  visit("4", 4, "3");
+  bridges.push(["3", "4"]);
+  if (!cuts.includes("3")) cuts.push("3");
+  recorder.record("cut", "3", ["3", "4"], disc, low, cuts, bridges, "low[4] > disc[3]: 3—4 is a bridge and 3 is a cut vertex.");
+  low["3"] = Math.min(low["3"], low["4"]);
+  bridges.push(["2", "3"]);
+  if (!cuts.includes("2")) cuts.push("2");
+  recorder.record("cut", "2", ["2", "3"], disc, low, cuts, bridges, "low[3] > disc[2]: 2—3 is a bridge and 2 is a cut vertex.");
+  low["1"] = Math.min(low["1"], low["2"]);
+  recorder.record("propagate", "1", ["1", "2"], disc, low, cuts, bridges, "Propagate low[2] = 0 to vertex 1; the triangle remains connected.");
+  low["0"] = Math.min(low["0"], low["1"]);
+  recorder.record("done", null, null, disc, low, cuts, bridges, "Cut vertices: 2, 3. Bridges: 2—3, 3—4.");
+}
+var Recorder, family, articulationPointsAndBridges;
+var init_articulation_points_and_bridges = __esm({
+  "custom/steptrace/src/algorithms/articulation-points-and-bridges.ts"() {
+    init_graph_state();
+    Recorder = class {
+      constructor(config) {
+        this.config = config;
+      }
+      config;
+      frames = [];
+      record(type, currentNode, currentEdge, discovery, low, articulationPoints, bridges, message) {
+        const visited = new Set(Object.keys(discovery));
+        const cuts = new Set(articulationPoints);
+        const bridgeKeys = new Set(bridges.flatMap(([a, b]) => [`${a}|${b}`, `${b}|${a}`]));
+        const detail = { kind: "low-link-cuts", discovery: { ...discovery }, low: { ...low }, articulationPoints: [...articulationPoints], bridges: bridges.map((edge) => [...edge]) };
+        this.frames.push({
+          type,
+          profile: "articulation-points-and-bridges",
+          nodes: this.config.nodes,
+          edges: this.config.edges,
+          decor: [],
+          start: "0",
+          target: null,
+          currentNode,
+          currentEdge,
+          selectedEdges: [...bridgeKeys],
+          nodeState: Object.fromEntries(this.config.nodes.map(({ id }) => [id, cuts.has(id) ? "accepted" : id === currentNode ? "active" : visited.has(id) ? "closed" : "neutral"])),
+          edgeState: Object.fromEntries(this.config.edges.map(({ from, to }) => [`${from}|${to}`, bridgeKeys.has(`${from}|${to}`) ? "cut" : currentEdge && (from === currentEdge[0] && to === currentEdge[1] || from === currentEdge[1] && to === currentEdge[0]) ? "active" : "neutral"])),
+          message,
+          detail
+        });
+      }
+    };
+    family = {
+      id: "graph-state",
+      createRecorder: (config) => new Recorder(config),
+      createView: makeGraphStateView
+    };
+    articulationPointsAndBridges = {
+      id: "articulation-points-and-bridges",
+      kind: "graph",
+      family,
+      meta: { label: "Articulation Points and Bridges" },
+      parse,
+      run
+    };
+  }
+});
+
+// custom/steptrace/src/graph.ts
+function layeredLayout(rawNodes, rawEdges, directed, start) {
+  const X0 = 40;
+  const X1 = 540;
+  const Y0 = 34;
+  const Y1 = 266;
+  const YC = (Y0 + Y1) / 2;
+  const STAG = 8;
+  const ids = rawNodes.map((node2) => String(node2.id));
+  const idSet = new Set(ids);
+  const edges5 = (rawEdges || []).map((edge) => ({ from: String(edge.from), to: String(edge.to) })).filter((edge) => idSet.has(edge.from) && idSet.has(edge.to));
+  const out = new Map(ids.map((id) => [id, []]));
+  const incoming = new Map(ids.map((id) => [id, []]));
+  const undirected = new Map(ids.map((id) => [id, []]));
+  for (const edge of edges5) {
+    out.get(edge.from).push(edge.to);
+    incoming.get(edge.to).push(edge.from);
+    undirected.get(edge.from).push(edge.to);
+    undirected.get(edge.to).push(edge.from);
+  }
+  const layer = /* @__PURE__ */ new Map();
+  const assignBfsLayers = (adjacency2, root) => {
+    const queue2 = idSet.has(root) ? [root] : [];
+    if (queue2.length) layer.set(root, 0);
+    for (let head = 0; head < queue2.length; head++) {
+      const current = queue2[head];
+      for (const neighbour of adjacency2.get(current) ?? []) {
+        if (!layer.has(neighbour)) {
+          layer.set(neighbour, layer.get(current) + 1);
+          queue2.push(neighbour);
+        }
+      }
+    }
+    let maxLayer2 = 0;
+    for (const value of layer.values()) maxLayer2 = Math.max(maxLayer2, value);
+    for (const id of ids) if (!layer.has(id)) layer.set(id, maxLayer2 + 1);
+  };
+  if (directed) {
+    const indegree = new Map(ids.map((id) => [id, incoming.get(id).length]));
+    const queue2 = ids.filter((id) => indegree.get(id) === 0).sort();
+    for (const id of ids) layer.set(id, 0);
+    let seen = 0;
+    for (let head = 0; head < queue2.length; head++) {
+      const current = queue2[head];
+      seen++;
+      for (const neighbour of out.get(current) ?? []) {
+        if (layer.get(neighbour) < layer.get(current) + 1) {
+          layer.set(neighbour, layer.get(current) + 1);
+        }
+        const nextDegree = indegree.get(neighbour) - 1;
+        indegree.set(neighbour, nextDegree);
+        if (nextDegree === 0) queue2.push(neighbour);
+      }
+    }
+    if (seen < ids.length) {
+      layer.clear();
+      assignBfsLayers(out, start);
+    }
+  } else {
+    assignBfsLayers(undirected, start);
+  }
+  let maxLayer = 0;
+  for (const value of layer.values()) maxLayer = Math.max(maxLayer, value);
+  const buckets = Array.from({ length: maxLayer + 1 }, () => []);
+  for (const id of ids) buckets[layer.get(id)].push(id);
+  for (const bucket of buckets) bucket.sort();
+  const layers = buckets.filter((bucket) => bucket.length);
+  const positions = (items) => new Map(items.map((id, index) => [id, index]));
+  const sweep = (layerIndex, reference) => {
+    const current = layers[layerIndex];
+    const key4 = /* @__PURE__ */ new Map();
+    current.forEach((id, index) => {
+      const neighbours = undirected.get(id).filter((value) => reference.has(value));
+      key4.set(
+        id,
+        neighbours.length ? neighbours.reduce((sum, value) => sum + reference.get(value), 0) / neighbours.length : index
+      );
+    });
+    current.sort(
+      (left, right) => key4.get(left) - key4.get(right) || (left < right ? -1 : left > right ? 1 : 0)
+    );
+  };
+  for (let pass = 0; pass < 4; pass++) {
+    if (pass % 2 === 0) {
+      for (let index = 1; index < layers.length; index++) {
+        sweep(index, positions(layers[index - 1]));
+      }
+    } else {
+      for (let index = layers.length - 2; index >= 0; index--) {
+        sweep(index, positions(layers[index + 1]));
+      }
+    }
+  }
+  const coordinates = /* @__PURE__ */ new Map();
+  const layerCount = layers.length;
+  layers.forEach((current, layerIndex) => {
+    const x = layerCount === 1 ? (X0 + X1) / 2 : X0 + layerIndex * (X1 - X0) / (layerCount - 1);
+    const offset = layerIndex % 2 * STAG;
+    current.forEach((id, index) => {
+      const y = current.length === 1 ? YC : Y0 + offset + index * (Y1 - Y0) / (current.length - 1);
+      coordinates.set(id, { x: Math.round(x), y: Math.round(y) });
+    });
+  });
+  return coordinates;
+}
+function normalizeGraph(config) {
+  const source = Array.isArray(config.nodes) && config.nodes.length ? config : DEFAULT_GRAPH;
+  const nodes5 = source.nodes;
+  const edges5 = source.edges ?? [];
+  const needsLayout = nodes5.some((node2) => node2.x == null || node2.y == null);
+  let start = config.start != null ? String(config.start) : source.start != null ? String(source.start) : String(nodes5[0].id);
+  if (!nodes5.some((node2) => String(node2.id) === start)) start = String(nodes5[0].id);
+  const layout = needsLayout ? layeredLayout(nodes5, edges5, !!source.directed, start) : null;
+  const normalizedNodes = needsLayout ? nodes5.map((node2) => ({ id: String(node2.id), ...layout.get(String(node2.id)) })) : nodes5.map((node2) => ({ id: String(node2.id), x: Number(node2.x), y: Number(node2.y) }));
+  const ids = new Set(normalizedNodes.map((node2) => node2.id));
+  const normalizedEdges = edges5.filter((edge) => ids.has(String(edge.from)) && ids.has(String(edge.to))).map((edge) => ({
+    from: String(edge.from),
+    to: String(edge.to),
+    weight: edge.weight == null ? null : Number(edge.weight)
+  }));
+  return {
+    nodes: normalizedNodes,
+    edges: normalizedEdges,
+    directed: !!source.directed,
+    start: ids.has(start) ? start : normalizedNodes[0].id
+  };
+}
+function adjacency(graph) {
+  const result = {};
+  for (const node2 of graph.nodes) result[node2.id] = [];
+  for (const edge of graph.edges) {
+    result[edge.from].push(edge.to);
+    if (!graph.directed) result[edge.to].push(edge.from);
+  }
+  for (const id of Object.keys(result)) result[id].sort();
+  return result;
+}
+var DEFAULT_GRAPH;
+var init_graph = __esm({
+  "custom/steptrace/src/graph.ts"() {
+    DEFAULT_GRAPH = {
+      directed: false,
+      start: "A",
+      nodes: [{ id: "A" }, { id: "B" }, { id: "C" }, { id: "D" }, { id: "E" }, { id: "F" }],
+      edges: [
+        { from: "A", to: "B" },
+        { from: "A", to: "C" },
+        { from: "B", to: "D" },
+        { from: "B", to: "E" },
+        { from: "C", to: "D" },
+        { from: "D", to: "F" },
+        { from: "E", to: "F" }
+      ]
+    };
+  }
+});
+
+// custom/steptrace/src/algorithms/bfs.ts
+var bfs;
+var init_bfs = __esm({
+  "custom/steptrace/src/algorithms/bfs.ts"() {
+    init_graph();
+    bfs = {
+      id: "bfs",
+      kind: "graph",
+      meta: { label: "Breadth-first search" },
+      run: (input, ops, graph) => {
+        const adj = adjacency(graph);
+        const start = input.start;
+        const target = input.target != null && input.target !== start ? String(input.target) : null;
+        if (target) ops.target(target);
+        ops.init(
+          target ? `Breadth-first search for ${target}, starting at ${start} — explore level by level with a first-in, first-out queue until the target is dequeued.` : `Breadth-first search from ${start} — explore the graph level by level using a first-in, first-out queue.`
+        );
+        const queue2 = [start];
+        const seen = /* @__PURE__ */ new Set([start]);
+        ops.enqueue(start, 0, `Enqueue the start node ${start} at distance 0.`);
+        while (queue2.length) {
+          const u = queue2.shift();
+          ops.visit(u, `Dequeue ${u} (distance ${ops.dist(u)}) and mark it visited.`);
+          if (u === target) {
+            ops.done(
+              `Found ${target} at distance ${ops.dist(u)} after visiting ${ops.visitedCount} nodes — BFS reaches it by a shortest path.`
+            );
+            return;
+          }
+          for (const v of adj[u]) {
+            if (seen.has(v)) continue;
+            ops.edge(u, v, `Explore edge ${u} → ${v}.`);
+            seen.add(v);
+            queue2.push(v);
+            ops.enqueue(
+              v,
+              ops.dist(u) + 1,
+              `Discover ${v} — enqueue it at distance ${ops.dist(u) + 1}.`
+            );
+          }
+        }
+        ops.done(
+          target ? `${target} is not reachable from ${start} — the queue emptied after ${ops.visitedCount} nodes.` : `Breadth-first search complete — visited ${ops.visitedCount} node${ops.visitedCount === 1 ? "" : "s"}.`
+        );
+      }
+    };
+  }
+});
+
+// custom/steptrace/src/algorithms/bellman-ford.ts
+function parse2() {
+  return {
+    nodes: [
+      { id: "0", label: "0", x: 70, y: 160 },
+      { id: "1", label: "1", x: 230, y: 70 },
+      { id: "2", label: "2", x: 390, y: 160 },
+      { id: "3", label: "3", x: 550, y: 160 }
+    ],
+    edges: [
+      { from: "2", to: "3", weight: 3, label: "3", directed: true, showDirection: true },
+      { from: "1", to: "2", weight: -2, label: "−2", directed: true, showDirection: true },
+      { from: "0", to: "2", weight: 5, label: "5", directed: true, showDirection: true },
+      { from: "0", to: "1", weight: 4, label: "4", directed: true, showDirection: true }
+    ]
+  };
+}
+function run2(config, recorder) {
+  const distances = { "0": 0, "1": Infinity, "2": Infinity, "3": Infinity };
+  recorder.record(0, null, distances, false, "Set dist[0] = 0; all other distances start at ∞.");
+  for (let pass = 1; pass <= 3; pass++) {
+    for (const edge of config.edges) {
+      const before = distances[edge.to];
+      const candidate = distances[edge.from] + edge.weight;
+      const changed2 = Number.isFinite(candidate) && candidate < before;
+      if (changed2) distances[edge.to] = candidate;
+      recorder.record(pass, [edge.from, edge.to], distances, changed2, changed2 ? `Pass ${pass}: ${edge.from}→${edge.to} lowers dist[${edge.to}] from ${before} to ${candidate}.` : `Pass ${pass}: ${edge.from}→${edge.to} cannot improve dist[${edge.to}].`);
+    }
+  }
+  let changed = false;
+  for (const edge of config.edges) {
+    const relaxes = Number.isFinite(distances[edge.from]) && distances[edge.from] + edge.weight < distances[edge.to];
+    changed ||= relaxes;
+    recorder.record(4, [edge.from, edge.to], distances, relaxes, `Check ${edge.from}→${edge.to}: ${relaxes ? "it still relaxes" : "no change"}.`);
+  }
+  recorder.record(4, null, distances, changed, "The confirming sweep changes nothing; no reachable negative cycle exists.");
+}
+var Recorder2, family2, bellmanFord;
+var init_bellman_ford = __esm({
+  "custom/steptrace/src/algorithms/bellman-ford.ts"() {
+    init_graph_state();
+    Recorder2 = class {
+      constructor(config) {
+        this.config = config;
+      }
+      config;
+      frames = [];
+      record(pass, edge, distances, changed, message) {
+        const reachable = new Set(Object.entries(distances).filter(([, value]) => Number.isFinite(value)).map(([id]) => id));
+        const detail = { kind: "edge-relaxation", pass, edge, distances: { ...distances }, changed };
+        this.frames.push({
+          type: edge ? "relax" : pass ? "done" : "init",
+          profile: "bellman-ford",
+          nodes: this.config.nodes,
+          edges: this.config.edges,
+          decor: [],
+          start: "0",
+          target: null,
+          currentNode: edge?.[0] ?? null,
+          currentEdge: edge,
+          selectedEdges: [],
+          nodeState: Object.fromEntries(this.config.nodes.map(({ id }) => [id, id === edge?.[0] ? "active" : reachable.has(id) ? "closed" : "neutral"])),
+          edgeState: Object.fromEntries(this.config.edges.map(({ from, to }) => [`${from}|${to}`, edge?.[0] === from && edge[1] === to ? "active" : "neutral"])),
+          message,
+          detail
+        });
+      }
+    };
+    family2 = { id: "graph-state", createRecorder: (config) => new Recorder2(config), createView: makeGraphStateView };
+    bellmanFord = {
+      id: "bellman-ford",
+      kind: "graph",
+      family: family2,
+      meta: { label: "Bellman-Ford" },
+      parse: parse2,
+      run: run2
+    };
   }
 });
 
 // custom/steptrace/src/recorders.ts
-var SortRecorder, GraphRecorder, SearchRecorder, StringRecorder, PointerRecorder, DPRecorder, UnionFindRecorder, BitsRecorder, BacktrackRecorder, RecTreeRecorder;
+var SortRecorder, ArraySortRecorder, GraphRecorder, SearchRecorder, IndexedSearchRecorder, BoundarySearchRecorder, StringRecorder, PointerRecorder, DPRecorder, MatrixGridRecorder, UnionFindRecorder, BitsRecorder, BacktrackRecorder, RecTreeRecorder, ExecutionTreeRecorder;
 var init_recorders = __esm({
   "custom/steptrace/src/recorders.ts"() {
     SortRecorder = class {
@@ -3396,6 +7106,139 @@ var init_recorders = __esm({
         this._push("done", [], message);
       }
     };
+    ArraySortRecorder = class extends SortRecorder {
+      constructor(array, profile = "shell") {
+        super(array);
+        this._profile = profile;
+        this._movementUnit = profile === "shell" || profile === "introsort" ? "moves" : "swaps";
+        this._showComparisons = profile !== "cyclic";
+        this._gap = null;
+        this._subsequence = null;
+        this._passSwapped = null;
+        this._cursor = null;
+        this._home = null;
+        this._keyOrigin = null;
+        this._hole = null;
+        this._tokenSerial = 0;
+        this._tokenId = null;
+        this._strategy = null;
+        this._depthUsed = null;
+        this._depthLimit = null;
+        this._cutoff = null;
+      }
+      _push(type, active, message) {
+        super._push(type, active, message);
+        const frame = this.frames[this.frames.length - 1];
+        this.frames[this.frames.length - 1] = Object.freeze({
+          ...frame,
+          profile: this._profile,
+          movementUnit: this._movementUnit,
+          showComparisons: this._showComparisons,
+          gap: this._gap,
+          subsequence: this._subsequence ? this._subsequence.slice() : null,
+          passSwapped: this._passSwapped,
+          cursor: this._cursor,
+          home: this._home,
+          keyOrigin: this._keyOrigin,
+          hole: this._hole,
+          tokenId: this._tokenId,
+          strategy: this._strategy,
+          depthUsed: this._depthUsed,
+          depthLimit: this._depthLimit,
+          cutoff: this._cutoff
+        });
+      }
+      beginGap(gap, message) {
+        this._gap = gap;
+        this._subsequence = null;
+        this._passSwapped = false;
+        this._push("gap", [], message);
+      }
+      selectSubsequence(indices, message) {
+        this._subsequence = indices.slice();
+        this._push("subsequence", indices, message);
+      }
+      compareGapPair(left, right, message) {
+        this._subsequence = [left, right];
+        this.compare(left, right, message);
+      }
+      swapGapPair(left, right, message) {
+        this._subsequence = [left, right];
+        this._passSwapped = true;
+        this.swap(left, right, message);
+      }
+      endGap(swapped, message) {
+        this._passSwapped = swapped;
+        this._subsequence = null;
+        this._push("gap-complete", [], message);
+      }
+      inspectHome(cursor, home, message) {
+        this._cursor = cursor;
+        this._home = home;
+        this._push("home-check", [cursor, home], message);
+      }
+      swapHome(cursor, home, message) {
+        this._cursor = cursor;
+        this._home = home;
+        this.swap(cursor, home, message);
+      }
+      settleHome(index, message) {
+        this._cursor = index;
+        this._home = index;
+        this.markSorted([index], [index], message);
+      }
+      holdKeyAt(value, origin, message) {
+        this._key = value;
+        this._keyOrigin = origin;
+        this._hole = origin;
+        this._tokenId = ++this._tokenSerial;
+        this._push("hold-key", [], message);
+      }
+      compareHeldAt(index, message) {
+        this.comparisons++;
+        this._push("compare-held", [index], message);
+      }
+      shiftHeld(to, from, message) {
+        this.a[to] = this.a[from];
+        this.swaps++;
+        this._from = from;
+        this._hole = from;
+        this._push("shift-held", [to], message);
+        this._from = null;
+      }
+      placeHeld(index, value, message) {
+        this.a[index] = value;
+        this.swaps++;
+        this._push("place-held", [index], message);
+      }
+      releaseHeldKey() {
+        this._key = null;
+        this._keyOrigin = null;
+        this._hole = null;
+        this._tokenId = null;
+      }
+      configureIntrosort(depthLimit, cutoff) {
+        this._depthLimit = depthLimit;
+        this._cutoff = cutoff;
+      }
+      introsortStrategy(strategy, depthUsed, type, message) {
+        this._strategy = strategy;
+        this._depthUsed = depthUsed;
+        this._push(type, [], message);
+      }
+      clearMarks() {
+        super.clearMarks();
+        this._subsequence = null;
+        this._passSwapped = null;
+        this._cursor = null;
+        this._home = null;
+        this._keyOrigin = null;
+        this._hole = null;
+        this._tokenId = null;
+        this._strategy = null;
+        this._depthUsed = null;
+      }
+    };
     GraphRecorder = class {
       constructor(graph) {
         this.graph = graph;
@@ -3436,16 +7279,16 @@ var init_recorders = __esm({
         this._push("init", null, message);
       }
       /** Discover a node: set its distance and append it to the queue (frontier). */
-      enqueue(node, d, message) {
-        this._frontier.push(node);
-        this._dist[node] = d;
+      enqueue(node2, d, message) {
+        this._frontier.push(node2);
+        this._dist[node2] = d;
         this._push("frontier", null, message);
       }
       /** Relax a node to a shorter distance (Dijkstra): update its distance and
        *  make sure it is shown in the frontier. */
-      relax(node, d, message) {
-        this._dist[node] = d;
-        if (this._frontier.indexOf(node) < 0) this._frontier.push(node);
+      relax(node2, d, message) {
+        this._dist[node2] = d;
+        if (this._frontier.indexOf(node2) < 0) this._frontier.push(node2);
         this._push("relax", null, message);
       }
       /** Explore an edge u -> v (highlight only; no state change). */
@@ -3458,11 +7301,11 @@ var init_recorders = __esm({
         this._push("select", { from: u, to: v }, message);
       }
       /** Visit a node: dequeue it from the frontier and mark it visited. */
-      visit(node, message) {
-        this._current = node;
-        const i = this._frontier.indexOf(node);
+      visit(node2, message) {
+        this._current = node2;
+        const i = this._frontier.indexOf(node2);
         if (i >= 0) this._frontier.splice(i, 1);
-        this._visited.add(node);
+        this._visited.add(node2);
         this._push("visit", null, message);
       }
       done(message) {
@@ -3529,30 +7372,230 @@ var init_recorders = __esm({
         this._push("done", message);
       }
     };
+    IndexedSearchRecorder = class extends SearchRecorder {
+      constructor(config) {
+        super(config.array, config.target);
+        this._profile = config.profile;
+        this._phase = config.profile === "exponential" ? "gallop" : config.profile === "jump" ? "jump" : config.profile;
+        this._goal = config.goal ?? null;
+        this._blockSize = config.blockSize ?? null;
+        this._bound = null;
+        this._previousBound = -1;
+        this._bracket = null;
+        this._mid2 = null;
+        this._annotationLabel = null;
+        this._annotationValue = null;
+      }
+      _push(type, message) {
+        super._push(type, message);
+        const frame = this.frames[this.frames.length - 1];
+        this.frames[this.frames.length - 1] = Object.freeze({
+          ...frame,
+          profile: this._profile,
+          phase: this._phase,
+          bound: this._bound,
+          previousBound: this._previousBound,
+          bracket: this._bracket ? this._bracket.slice() : null,
+          mid2: this._mid2,
+          goal: this._goal,
+          blockSize: this._blockSize,
+          annotationLabel: this._annotationLabel,
+          annotationValue: this._annotationValue
+        });
+      }
+      probe(lo, hi, mid, message) {
+        this._mid2 = null;
+        this._annotationLabel = null;
+        this._annotationValue = null;
+        super.probe(lo, hi, mid, message);
+      }
+      annotatedProbe(lo, hi, mid, label, value, message) {
+        this._mid2 = null;
+        this._annotationLabel = label;
+        this._annotationValue = value;
+        this.lo = lo;
+        this.hi = hi;
+        this.mid = mid;
+        this.comparisons++;
+        this._push("probe", message);
+      }
+      dualProbe(lo, hi, mid, mid2, message) {
+        this._annotationLabel = null;
+        this._annotationValue = null;
+        this.lo = lo;
+        this.hi = hi;
+        this.mid = mid;
+        this._mid2 = mid2;
+        this.comparisons += 2;
+        this._push("probe", message);
+      }
+      narrow(lo, hi, message) {
+        this._mid2 = null;
+        this._annotationLabel = null;
+        this._annotationValue = null;
+        super.narrow(lo, hi, message);
+      }
+      hit(mid, message) {
+        this._mid2 = null;
+        super.hit(mid, message);
+      }
+      strideProbe(phase, previousBound, bound, message) {
+        this._phase = phase;
+        this._previousBound = previousBound;
+        this._bound = bound;
+        this._mid2 = null;
+        this._annotationLabel = null;
+        this._annotationValue = null;
+        this.lo = Math.max(0, previousBound + 1);
+        this.hi = bound;
+        this.mid = bound;
+        this.comparisons++;
+        this._push("probe", message);
+      }
+      gallopProbe(previousBound, bound, message) {
+        this.strideProbe("gallop", previousBound, bound, message);
+      }
+      jumpProbe(previousBound, bound, message) {
+        this.strideProbe("jump", previousBound, bound, message);
+      }
+      beginPhase(lo, hi, message, phase = "binary") {
+        this._phase = phase;
+        this._bracket = [lo, hi];
+        this.lo = lo;
+        this.hi = hi;
+        this.mid = null;
+        this._mid2 = null;
+        this._annotationLabel = null;
+        this._annotationValue = null;
+        this._push("phase", message);
+      }
+    };
+    BoundarySearchRecorder = class {
+      constructor(config) {
+        this.frames = [];
+        this.profile = config.profile;
+        this.lower = config.lower;
+        this.upper = config.upper;
+        this.lo = config.lower;
+        this.hi = config.upper;
+        this.candidate = null;
+        this.evaluation = null;
+        this.answer = null;
+        this.probes = 0;
+        this.allowed = config.days;
+        this.maxInfeasible = config.lower - 1;
+        this.minFeasible = config.upper + 1;
+      }
+      begin(message) {
+        this._push("range", message);
+      }
+      evaluate(lo, hi, candidate, evaluation, message) {
+        this.lo = lo;
+        this.hi = hi;
+        this.candidate = candidate;
+        this.evaluation = evaluation;
+        if (evaluation.feasible) this.minFeasible = Math.min(this.minFeasible, candidate);
+        else this.maxInfeasible = Math.max(this.maxInfeasible, candidate);
+        this.probes++;
+        this._push("evaluate", message);
+      }
+      narrow(lo, hi, message) {
+        this.lo = lo;
+        this.hi = hi;
+        this._push("narrow", message);
+      }
+      hit(answer, evaluation, message) {
+        this.lo = answer;
+        this.hi = answer;
+        this.candidate = answer;
+        this.answer = answer;
+        this.evaluation = evaluation;
+        this._push("found", message);
+      }
+      done(message) {
+        this._push("done", message);
+      }
+      _push(type, message) {
+        const evaluation = this.evaluation ? {
+          ...this.evaluation,
+          lanes: this.evaluation.lanes.map((lane) => ({
+            ...lane,
+            items: lane.items.slice()
+          }))
+        } : null;
+        this.frames.push(
+          Object.freeze({
+            type,
+            profile: this.profile,
+            lower: this.lower,
+            upper: this.upper,
+            lo: this.lo,
+            hi: this.hi,
+            candidate: this.candidate,
+            evaluation,
+            answer: this.answer,
+            probes: this.probes,
+            allowed: this.allowed,
+            maxInfeasible: this.maxInfeasible,
+            minFeasible: this.minFeasible,
+            message
+          })
+        );
+      }
+    };
     StringRecorder = class {
-      constructor(text, pattern) {
+      constructor(text, pattern, profile = null) {
         this.text = String(text || "");
         this.pattern = String(pattern || "");
+        this.profile = profile;
         this.frames = [];
         this.shift = 0;
         this.found = [];
         this.hash = null;
+        this.z = profile === "z-array" ? Array(this.text.length).fill(null) : null;
+        if (this.z) this.z[0] = this.text.length;
+        this.i = null;
+        this.l = 0;
+        this.r = 0;
+        this.k = null;
+        this.sourceCase = null;
+        this.zCompare = null;
+        this.goodSuffix = null;
+        this.lastOccurrence = null;
+        this.bmJ = null;
+        this.matchedFrom = null;
+        this.shiftDecision = null;
       }
       _push(type, extra, message) {
-        this.frames.push(
-          Object.freeze({
-            type,
-            text: this.text,
-            pattern: this.pattern,
-            shift: this.shift,
-            cmpT: extra.cmpT == null ? null : extra.cmpT,
-            cmpP: extra.cmpP == null ? null : extra.cmpP,
-            cmpResult: extra.cmpResult || null,
-            found: this.found.slice(),
-            hash: this.hash,
-            message
-          })
-        );
+        const frame = {
+          type,
+          text: this.text,
+          pattern: this.pattern,
+          shift: this.shift,
+          cmpT: extra.cmpT == null ? null : extra.cmpT,
+          cmpP: extra.cmpP == null ? null : extra.cmpP,
+          cmpResult: extra.cmpResult || null,
+          found: this.found.slice(),
+          hash: this.hash,
+          message
+        };
+        if (this.profile) frame.profile = this.profile;
+        if (this.profile === "z-array") {
+          frame.z = this.z.slice();
+          frame.i = this.i;
+          frame.box = [this.l, this.r];
+          frame.k = this.k;
+          frame.sourceCase = this.sourceCase;
+          frame.compare = this.zCompare ? { ...this.zCompare } : null;
+        }
+        if (this.profile === "boyer-moore") {
+          frame.goodSuffix = this.goodSuffix.slice();
+          frame.lastOccurrence = { ...this.lastOccurrence };
+          frame.j = this.bmJ;
+          frame.matchedFrom = this.matchedFrom;
+          frame.shiftDecision = this.shiftDecision ? { ...this.shiftDecision } : null;
+        }
+        this.frames.push(Object.freeze(frame));
       }
       init(message) {
         this._push("init", {}, message);
@@ -3583,7 +7626,88 @@ var init_recorders = __esm({
         this.hash = { window: windowHash, pattern: patternHash };
         this._push("hash", {}, message);
       }
+      focusZ(i, l, r, k, sourceCase, message) {
+        this.i = i;
+        this.l = l;
+        this.r = r;
+        this.k = k;
+        this.sourceCase = sourceCase;
+        this.zCompare = null;
+        this._push("focus", {}, message);
+      }
+      copyZ(i, k, value, sourceCase, message) {
+        this.i = i;
+        this.k = k;
+        this.sourceCase = sourceCase;
+        this.z[i] = value;
+        this.zCompare = null;
+        this._push("copy", {}, message);
+      }
+      compareZ(i, prefixIndex, candidateIndex, isMatch, sourceCase, message) {
+        this.i = i;
+        this.sourceCase = sourceCase;
+        this.zCompare = {
+          prefix: prefixIndex,
+          candidate: candidateIndex,
+          result: isMatch ? "match" : "mismatch"
+        };
+        this._push("compare", {}, message);
+      }
+      commitZ(i, value, l, r, sourceCase, message) {
+        this.i = i;
+        this.z[i] = value;
+        this.l = l;
+        this.r = r;
+        this.sourceCase = sourceCase;
+        this.zCompare = null;
+        this._push("commit", {}, message);
+      }
+      configureBoyerMoore(goodSuffix, lastOccurrence) {
+        this.goodSuffix = goodSuffix.slice();
+        this.lastOccurrence = { ...lastOccurrence };
+        this.matchedFrom = this.pattern.length;
+      }
+      alignBoyerMoore(shift, message) {
+        this.shift = shift;
+        this.bmJ = this.pattern.length - 1;
+        this.matchedFrom = this.pattern.length;
+        this.shiftDecision = null;
+        this._push("align", {}, message);
+      }
+      compareBoyerMoore(ti, pj, shift, isMatch, matchedFrom, message) {
+        this.shift = shift;
+        this.bmJ = pj;
+        this.matchedFrom = matchedFrom;
+        this._push(
+          "compare",
+          { cmpT: ti, cmpP: pj, cmpResult: isMatch ? "match" : "mismatch" },
+          message
+        );
+      }
+      decideBoyerMoore(j, bad, good, selected, winner, message) {
+        this.bmJ = j;
+        this.shiftDecision = { bad, good, selected, winner };
+        this._push("decision", {}, message);
+      }
+      matchBoyerMoore(shift, fullMatchShift, message) {
+        this.shift = shift;
+        this.bmJ = 0;
+        this.matchedFrom = 0;
+        if (!this.found.includes(shift)) this.found.push(shift);
+        this.shiftDecision = {
+          bad: null,
+          good: fullMatchShift,
+          selected: fullMatchShift,
+          winner: "full-match"
+        };
+        this._push("match", {}, message);
+      }
+      shiftBoyerMoore(shift, message) {
+        this.shift = shift;
+        this._push("shift", {}, message);
+      }
       done(message) {
+        this.zCompare = null;
         this._push("done", {}, message);
       }
     };
@@ -3626,25 +7750,34 @@ var init_recorders = __esm({
       }
     };
     DPRecorder = class {
-      constructor() {
+      constructor(profile = "lcs", variant = null) {
         this.frames = [];
+        this.profile = profile;
+        this.variant = variant;
         this.rowLabels = [];
         this.colLabels = [];
         this.grid = [];
         this.cur = null;
         this.deps = [];
         this.path = [];
+        this.nodes = [];
+        this.edges = [];
+        this.formula = null;
       }
-      board(rowLabels, colLabels, message) {
+      board(rowLabels, colLabels, message, topology2 = null) {
         this.rowLabels = rowLabels.slice();
         this.colLabels = colLabels.slice();
         this.grid = rowLabels.map(() => colLabels.map(() => null));
+        this.nodes = (topology2?.nodes || []).map((node2) => ({ ...node2 }));
+        this.edges = (topology2?.edges || []).map((edge) => ({ ...edge }));
+        this.formula = null;
         this._push("init", message);
       }
-      set(r, c, val, deps, message) {
+      set(r, c, val, deps, message, formula = null) {
         this.cur = [r, c];
         this.deps = (deps || []).map((d) => d.slice());
         this.grid[r][c] = val;
+        this.formula = formula;
         this._push("compute", message);
       }
       markPath(cells, message) {
@@ -3656,18 +7789,116 @@ var init_recorders = __esm({
       done(message) {
         this.cur = null;
         this.deps = [];
+        this.formula = null;
         this._push("done", message);
       }
       _push(type, message) {
         this.frames.push(
           Object.freeze({
             type,
+            profile: this.profile,
+            variant: this.variant,
             rowLabels: this.rowLabels.slice(),
             colLabels: this.colLabels.slice(),
             grid: this.grid.map((row) => row.slice()),
             cur: this.cur ? this.cur.slice() : null,
             deps: this.deps.map((d) => d.slice()),
             path: this.path.map((p) => p.slice()),
+            nodes: this.nodes.map((node2) => Object.freeze({ ...node2 })),
+            edges: this.edges.map((edge) => Object.freeze({ ...edge })),
+            formula: this.formula,
+            message
+          })
+        );
+      }
+    };
+    MatrixGridRecorder = class {
+      constructor(config) {
+        this.frames = [];
+        this.nodes = config.nodes.slice();
+        this.rowLabels = this.nodes.map(String);
+        this.colLabels = this.nodes.map(String);
+        this.grid = [];
+        this.cur = null;
+        this.deps = [];
+        this.k = null;
+        this.candidate = null;
+        this.decision = null;
+        this.previous = null;
+        this.result = null;
+        this.operandA = null;
+        this.operandB = null;
+        this.negativeCycle = [];
+      }
+      board(grid, message) {
+        this.grid = grid.map((row) => row.slice());
+        this._push("init", message);
+      }
+      stage(k, message) {
+        this.k = k;
+        this.cur = null;
+        this.deps = [];
+        this.candidate = null;
+        this.decision = null;
+        this.previous = null;
+        this.result = null;
+        this.operandA = null;
+        this.operandB = null;
+        this._push("stage", message);
+      }
+      relax(r, c, deps, candidate, decision, value, message) {
+        this.cur = [r, c];
+        this.deps = deps.map((dep) => dep.slice());
+        this.candidate = candidate;
+        this.decision = decision;
+        this.previous = this.grid[r][c];
+        this.result = value;
+        this.operandA = this.grid[deps[0][0]][deps[0][1]];
+        this.operandB = this.grid[deps[1][0]][deps[1][1]];
+        this.grid[r][c] = value;
+        this._push("relax", message);
+      }
+      reportNegativeCycle(nodes5, message) {
+        this.negativeCycle = nodes5.slice();
+        this.cur = null;
+        this.deps = [];
+        this.candidate = null;
+        this.decision = null;
+        this.previous = null;
+        this.result = null;
+        this.operandA = null;
+        this.operandB = null;
+        this._push("negative-cycle", message);
+      }
+      done(message) {
+        this.cur = null;
+        this.deps = [];
+        this.candidate = null;
+        this.decision = null;
+        this.previous = null;
+        this.result = null;
+        this.operandA = null;
+        this.operandB = null;
+        this._push("done", message);
+      }
+      _push(type, message) {
+        this.frames.push(
+          Object.freeze({
+            type,
+            profile: "floyd-warshall",
+            rowLabels: this.rowLabels.slice(),
+            colLabels: this.colLabels.slice(),
+            grid: this.grid.map((row) => row.slice()),
+            cur: this.cur ? this.cur.slice() : null,
+            deps: this.deps.map((dep) => dep.slice()),
+            k: this.k,
+            candidate: this.candidate,
+            decision: this.decision,
+            previous: this.previous,
+            result: this.result,
+            operandA: this.operandA,
+            operandB: this.operandB,
+            negativeCycle: this.negativeCycle.slice(),
             message
           })
         );
@@ -3958,9 +8189,9 @@ var init_recorders = __esm({
         );
       }
       /** The full naive call tree — laid out once, reused (same frozen arrays) forever. */
-      tree(nodes, edges, message) {
-        this._nodes = Object.freeze(nodes.map((n) => Object.freeze({ ...n })));
-        this._edges = Object.freeze(edges.map((e) => Object.freeze({ ...e })));
+      tree(nodes5, edges5, message) {
+        this._nodes = Object.freeze(nodes5.map((n) => Object.freeze({ ...n })));
+        this._edges = Object.freeze(edges5.map((e) => Object.freeze({ ...e })));
         this._active = null;
         this._push("tree", message);
       }
@@ -4025,11 +8256,14440 @@ var init_recorders = __esm({
         this._push("done", message);
       }
     };
+    ExecutionTreeRecorder = class {
+      constructor(config) {
+        this.frames = [];
+        this.profile = config.profile;
+        this.phase = "divide";
+        this.action = "initialize";
+        this._nodes = Object.freeze([]);
+        this._edges = Object.freeze([]);
+        this._visible = /* @__PURE__ */ new Set();
+        this._states = {};
+        this._results = {};
+        this._collapsed = /* @__PURE__ */ new Set();
+        this._path = [];
+        this._active = null;
+        this._cache = [];
+        this.calls = 0;
+        this.pruned = 0;
+        this._incumbent = 0;
+      }
+      _push(type, message) {
+        this.frames.push(
+          Object.freeze({
+            type,
+            profile: this.profile,
+            phase: this.phase,
+            action: this.action,
+            nodes: this._nodes,
+            edges: this._edges,
+            active: this._active,
+            path: Object.freeze(this._path.slice()),
+            visible: Object.freeze([...this._visible]),
+            states: Object.freeze({ ...this._states }),
+            results: Object.freeze(
+              Object.fromEntries(
+                Object.entries(this._results).map(([id, values]) => [
+                  id,
+                  Array.isArray(values) ? Object.freeze(values.slice()) : values
+                ])
+              )
+            ),
+            collapsed: Object.freeze([...this._collapsed]),
+            cache: Object.freeze(this._cache.map((entry) => Object.freeze({ ...entry }))),
+            calls: this.calls,
+            pruned: this.pruned,
+            ...this.profile === "branch-and-bound" ? { incumbent: this._incumbent } : {},
+            message
+          })
+        );
+      }
+      tree(nodes5, edges5, rootId, message) {
+        this._nodes = Object.freeze(
+          nodes5.map((node2) => Object.freeze({ ...node2, values: Object.freeze(node2.values.slice()) }))
+        );
+        this._edges = Object.freeze(edges5.map((edge) => Object.freeze({ ...edge })));
+        this._active = rootId;
+        this._path = [rootId];
+        this._visible.add(rootId);
+        this._states[rootId] = "call";
+        this.calls = 1;
+        this._push("tree", message);
+      }
+      split(id, path, childIds, message) {
+        this.phase = "divide";
+        this.action = "split";
+        this._active = id;
+        this._path = path.slice();
+        this._visible.add(id);
+        this._states[id] = "split";
+        for (const childId of childIds) {
+          if (!this._visible.has(childId)) this.calls++;
+          this._visible.add(childId);
+          this._states[childId] = "call";
+        }
+        this._push("split", message);
+      }
+      base(id, path, result, message) {
+        this.phase = "conquer";
+        this.action = "base case";
+        this._active = id;
+        this._path = path.slice();
+        this._visible.add(id);
+        this._states[id] = "base";
+        this._results[id] = Array.isArray(result) ? result.slice() : result;
+        this._push("base", message);
+      }
+      returnResult(id, path, result, message) {
+        this.phase = "return";
+        this.action = "return";
+        this._active = id;
+        this._path = path.slice();
+        this._visible.add(id);
+        this._states[id] = "return";
+        this._results[id] = Array.isArray(result) ? result.slice() : result;
+        this._push("return", message);
+      }
+      combine(id, path, result, message) {
+        this.phase = "combine";
+        this.action = "combine results";
+        this._active = id;
+        this._path = path.slice();
+        this._visible.add(id);
+        this._states[id] = "combine";
+        this._results[id] = Array.isArray(result) ? result.slice() : result;
+        this._push("combine", message);
+      }
+      cacheHit(id, path, key4, result, subtreeIds, message) {
+        this.phase = "cache";
+        this.action = "reuse cached result";
+        this._active = id;
+        this._path = path.slice();
+        this._visible.add(id);
+        this._states[id] = "cache";
+        this._results[id] = Array.isArray(result) ? result.slice() : result;
+        if (!this._cache.some((entry) => entry.key === key4)) {
+          this._cache.push({ key: key4, result: Array.isArray(result) ? result.join(", ") : result });
+        }
+        for (const childId of subtreeIds) {
+          this._visible.add(childId);
+          this._collapsed.add(childId);
+        }
+        this.pruned += subtreeIds.length;
+        this._push("cache", message);
+      }
+      store(id, path, key4, result, message) {
+        this.phase = "cache";
+        this.action = "store result";
+        this._active = id;
+        this._path = path.slice();
+        this._visible.add(id);
+        this._states[id] = "store";
+        this._results[id] = Array.isArray(result) ? result.slice() : result;
+        const cachedResult = Array.isArray(result) ? result.join(", ") : result;
+        const cached = this._cache.find((entry) => entry.key === key4);
+        if (cached) cached.result = cachedResult;
+        else this._cache.push({ key: key4, result: cachedResult });
+        this._push("store", message);
+      }
+      incumbent(id, path, value, message) {
+        this.phase = "conquer";
+        this.action = "update incumbent";
+        this._active = id;
+        this._path = path.slice();
+        this._visible.add(id);
+        this._states[id] = "incumbent";
+        this._incumbent = value;
+        this._push("incumbent", message);
+      }
+      reject(id, path, message) {
+        this.phase = "conquer";
+        this.action = "reject infeasible branch";
+        this._active = id;
+        this._path = path.slice();
+        this._visible.add(id);
+        this._states[id] = "infeasible";
+        this._collapsed.add(id);
+        this.pruned++;
+        this._push("infeasible", message);
+      }
+      prune(id, path, subtreeIds, message) {
+        this.phase = "conquer";
+        this.action = "prune branch";
+        this._active = id;
+        this._path = path.slice();
+        this._visible.add(id);
+        this._states[id] = "prune";
+        this._collapsed.add(id);
+        for (const childId of subtreeIds) {
+          this._visible.add(childId);
+          this._collapsed.add(childId);
+        }
+        this.pruned++;
+        this._push("prune", message);
+      }
+      done(rootId, result, message) {
+        this.phase = "complete";
+        this.action = "final result ready";
+        this._active = rootId;
+        this._path = [rootId];
+        this._states[rootId] = "combine";
+        this._results[rootId] = Array.isArray(result) ? result.slice() : result;
+        this._push("done", message);
+      }
+    };
+  }
+});
+
+// custom/steptrace/src/families/monotone-boundary.ts
+var shippingCapacityDescriptor, monotoneBoundaryFamily;
+var init_monotone_boundary = __esm({
+  "custom/steptrace/src/families/monotone-boundary.ts"() {
+    init_recorders();
+    init_render();
+    shippingCapacityDescriptor = {
+      ariaLabel: "Binary search over shipping capacity",
+      rangeLabel: "Candidate capacity",
+      evaluationLabel: "Greedy shipping check",
+      unitLabel: "load",
+      watchRows(frame) {
+        const evaluation = frame.evaluation;
+        return [
+          {
+            k: "goal",
+            v: "smallest feasible capacity",
+            sw: "var(--_accent)"
+          },
+          {
+            k: "range",
+            v: `[${frame.lo}, ${frame.hi}]`,
+            sw: "var(--_neutral)",
+            hint: "Capacities that can still contain the first feasible answer."
+          },
+          {
+            k: "capacity",
+            v: frame.candidate ?? "—",
+            sw: "var(--_blue)",
+            hint: "Candidate capacity currently passed to the feasibility check."
+          },
+          {
+            k: "days used",
+            v: evaluation ? `${evaluation.required} / ${evaluation.allowed}` : "—",
+            sw: "var(--_amber)"
+          },
+          {
+            k: "verdict",
+            v: evaluation ? evaluation.feasible ? "feasible" : "too small" : "—",
+            sw: evaluation?.feasible ? "var(--_green)" : "var(--_amber)",
+            hint: "Whether this candidate satisfies the day limit."
+          }
+        ];
+      }
+    };
+    monotoneBoundaryFamily = {
+      id: "monotone-boundary",
+      createRecorder(config) {
+        return new BoundarySearchRecorder(config);
+      },
+      createView(frames) {
+        return makeBoundarySearchView(
+          frames,
+          shippingCapacityDescriptor
+        );
+      }
+    };
+  }
+});
+
+// custom/steptrace/src/algorithms/binary-search-on-answer.ts
+function parseBinarySearchOnAnswerConfig(config) {
+  const { weights, days } = config;
+  if (!Array.isArray(weights) || weights.length === 0)
+    throw new Error('steptrace: binary-search-on-answer requires a non-empty "weights" array.');
+  if (!weights.every((weight) => Number.isInteger(weight) && weight > 0))
+    throw new Error('steptrace: binary-search-on-answer requires positive integer "weights".');
+  if (!Number.isInteger(days) || days <= 0)
+    throw new Error('steptrace: binary-search-on-answer requires "days" to be a positive integer.');
+  return {
+    profile: "shipping-capacity",
+    lower: Math.max(...weights),
+    upper: weights.reduce((total, weight) => total + weight, 0),
+    weights: weights.slice(),
+    days,
+    goal: "smallest feasible capacity"
+  };
+}
+function evaluateShipping(weights, capacity, allowed) {
+  const lanes = [];
+  let items = [];
+  let total = 0;
+  for (const weight of weights) {
+    if (total + weight > capacity) {
+      lanes.push({ label: `Day ${lanes.length + 1}`, items, total });
+      items = [];
+      total = 0;
+    }
+    items.push(weight);
+    total += weight;
+  }
+  lanes.push({ label: `Day ${lanes.length + 1}`, items, total });
+  return {
+    lanes,
+    required: lanes.length,
+    allowed,
+    feasible: lanes.length <= allowed
+  };
+}
+var binarySearchOnAnswer;
+var init_binary_search_on_answer = __esm({
+  "custom/steptrace/src/algorithms/binary-search-on-answer.ts"() {
+    init_monotone_boundary();
+    binarySearchOnAnswer = {
+      id: "binary-search-on-answer",
+      kind: "search",
+      family: monotoneBoundaryFamily,
+      meta: { label: "Binary search on answer" },
+      parse: parseBinarySearchOnAnswerConfig,
+      run(input, ops) {
+        ops.begin(
+          `Search capacities ${input.lower} through ${input.upper}; the first feasible value is the answer.`
+        );
+        let lo = input.lower;
+        let hi = input.upper;
+        while (lo < hi) {
+          const candidate = lo + Math.floor((hi - lo) / 2);
+          const evaluation2 = evaluateShipping(input.weights, candidate, input.days);
+          ops.evaluate(
+            lo,
+            hi,
+            candidate,
+            evaluation2,
+            `Capacity ${candidate} needs ${evaluation2.required} day${evaluation2.required === 1 ? "" : "s"}: ${evaluation2.feasible ? "feasible" : "too small"}.`
+          );
+          if (evaluation2.feasible) hi = candidate;
+          else lo = candidate + 1;
+          ops.narrow(
+            lo,
+            hi,
+            evaluation2.feasible ? `Keep ${lo} through ${hi}; a smaller feasible capacity may exist.` : `Keep ${lo} through ${hi}; every smaller capacity is infeasible.`
+          );
+        }
+        const evaluation = evaluateShipping(input.weights, lo, input.days);
+        ops.hit(lo, evaluation, `${lo} is the first feasible capacity.`);
+        ops.done(`Minimum feasible ship capacity: ${lo}.`);
+      }
+    };
+  }
+});
+
+// custom/steptrace/src/algorithms/binary-search.ts
+var binarySearch;
+var init_binary_search = __esm({
+  "custom/steptrace/src/algorithms/binary-search.ts"() {
+    binarySearch = {
+      id: "binary-search",
+      kind: "search",
+      meta: { label: "Binary search" },
+      run: (input, ops) => {
+        const a = ops.value;
+        const target = input.target;
+        ops.init(
+          `Binary search for ${target} in a sorted array — check the middle of the range, then discard the half that can't contain it.`
+        );
+        let lo = 0;
+        let hi = a.length - 1;
+        while (lo <= hi) {
+          const mid = Math.floor((lo + hi) / 2);
+          ops.probe(
+            lo,
+            hi,
+            mid,
+            `Range [${lo}, ${hi}]: probe the middle — index ${mid} holds ${a[mid]}.`
+          );
+          if (a[mid] === target) {
+            ops.hit(mid, `${a[mid]} equals ${target} — found it at index ${mid}.`);
+            ops.done(
+              `Found ${target} after ${ops.comparisons} probe${ops.comparisons === 1 ? "" : "s"}.`
+            );
+            return;
+          }
+          if (a[mid] < target) {
+            lo = mid + 1;
+            ops.narrow(lo, hi, `${a[mid]} < ${target}: discard the left half; search [${lo}, ${hi}].`);
+          } else {
+            hi = mid - 1;
+            ops.narrow(lo, hi, `${a[mid]} > ${target}: discard the right half; search [${lo}, ${hi}].`);
+          }
+        }
+        ops.done(`${target} is not in the array — the range is empty after ${ops.comparisons} probes.`);
+      }
+    };
+  }
+});
+
+// custom/steptrace/src/algorithms/binary-search-tree.ts
+var DEFAULT_VALUES2, binarySearchTree;
+var init_binary_search_tree = __esm({
+  "custom/steptrace/src/algorithms/binary-search-tree.ts"() {
+    init_binary_tree();
+    DEFAULT_VALUES2 = [40, 20, 60, 10, 30, 50, 70];
+    binarySearchTree = {
+      id: "binary-search-tree",
+      family: "binary-tree",
+      meta: { label: "Binary Search Tree" },
+      parse: (config) => parseBinaryTreeConfig(config, "binary-search-tree", DEFAULT_VALUES2),
+      mount: mountBinarySearchTree
+    };
+  }
+});
+
+// custom/steptrace/src/families/multiway-tree.ts
+function parseMultiwayTreeConfig(config, algorithm, defaults, defaultValue, defaultRange) {
+  if (config.order != null && config.order !== 4)
+    throw new Error(`steptrace: ${algorithm} supports fixed order 4.`);
+  const values = Array.isArray(config.values) && config.values.length ? config.values : defaults;
+  if (values.some(
+    (value2) => typeof value2 !== "number" || !Number.isFinite(value2) || !Number.isInteger(value2)
+  ))
+    throw new Error(`steptrace: ${algorithm} requires finite integer values.`);
+  if (new Set(values).size !== values.length)
+    throw new Error(`steptrace: ${algorithm} requires unique values.`);
+  if (values.length > MAX_VALUES2)
+    throw new Error(`steptrace: ${algorithm} supports at most ${MAX_VALUES2} values.`);
+  const value = config.value ?? defaultValue;
+  if (typeof value !== "number" || !Number.isFinite(value) || !Number.isInteger(value))
+    throw new Error(`steptrace: ${algorithm} value must be a finite integer.`);
+  const range = config.range ?? defaultRange;
+  if (range && (range.length !== 2 || range.some(
+    (bound) => typeof bound !== "number" || !Number.isFinite(bound) || !Number.isInteger(bound)
+  )))
+    throw new Error(`steptrace: ${algorithm} range must contain two finite integers.`);
+  return {
+    values: [...values],
+    value,
+    range: range ? [...range] : void 0
+  };
+}
+function svgEl2(tag, className) {
+  const node2 = document.createElementNS(SVG_NS4, tag);
+  node2.setAttribute("class", className);
+  return node2;
+}
+function createMultiwayTreeOperationState() {
+  return {
+    path: /* @__PURE__ */ new Set(),
+    affected: /* @__PURE__ */ new Set(),
+    special: null,
+    found: /* @__PURE__ */ new Set(),
+    links: /* @__PURE__ */ new Set()
+  };
+}
+function upperBound(keys, key4) {
+  let index = 0;
+  while (index < keys.length && key4 >= keys[index]) index++;
+  return index;
+}
+function lowerBound(keys, key4) {
+  let index = 0;
+  while (index < keys.length && key4 > keys[index]) index++;
+  return index;
+}
+function createMultiwayTreeModel(kind, values) {
+  let nextId = 0;
+  const makeNode = (keys = [], children = []) => ({
+    id: `m${nextId++}`,
+    keys,
+    children,
+    next: null
+  });
+  let root = makeNode();
+  const splitNode = (current, state) => {
+    const splitAt = 2;
+    const separator = current.keys[splitAt];
+    const rightKeys = kind === "b-plus-tree" && current.children.length === 0 ? current.keys.splice(splitAt) : current.keys.splice(splitAt + 1);
+    const rightChildren = current.children.length === 0 ? [] : current.children.splice(splitAt + 1);
+    if (kind !== "b-plus-tree" || current.children.length > 0) current.keys.pop();
+    const right = makeNode(rightKeys, rightChildren);
+    if (kind === "b-plus-tree" && current.children.length === 0) {
+      right.next = current.next;
+      current.next = right;
+    }
+    state.affected.add(current.id).add(right.id);
+    state.special = separator;
+    return { separator, right };
+  };
+  const insertInto = (current, key4, state) => {
+    state.path.add(current.id);
+    if (current.children.length === 0) {
+      const index = lowerBound(current.keys, key4);
+      if (current.keys[index] === key4) return null;
+      current.keys.splice(index, 0, key4);
+      state.affected.add(current.id);
+    } else {
+      const childIndex = kind === "b-plus-tree" ? upperBound(current.keys, key4) : lowerBound(current.keys, key4);
+      if (kind === "b-tree" && current.keys[childIndex] === key4) return null;
+      const split = insertInto(current.children[childIndex], key4, state);
+      if (split) {
+        current.keys.splice(childIndex, 0, split.separator);
+        current.children.splice(childIndex + 1, 0, split.right);
+        state.affected.add(current.id);
+      }
+    }
+    return current.keys.length > MAX_KEYS ? splitNode(current, state) : null;
+  };
+  const model = {
+    get root() {
+      return root;
+    },
+    insert(key4, state) {
+      if (model.keys().includes(key4))
+        return { changed: false, detail: `${key4} already exists, so the tree did not change.` };
+      if (model.keys().length >= MAX_VALUES2)
+        return {
+          changed: false,
+          detail: `The review tree is capped at ${MAX_VALUES2} records.`
+        };
+      const split = insertInto(root, key4, state);
+      if (split) {
+        root = makeNode([split.separator], [root, split.right]);
+        state.affected.add(root.id);
+      }
+      return {
+        changed: true,
+        detail: state.special != null ? kind === "b-plus-tree" ? `Inserted ${key4}; copied separator ${state.special} into the parent and kept it in the right leaf.` : `Inserted ${key4}; promoted median ${state.special} into the parent.` : `Inserted ${key4}; every node remains within the order-4 limit.`
+      };
+    },
+    search(key4, state) {
+      let current = root;
+      while (true) {
+        state.path.add(current.id);
+        const index = kind === "b-plus-tree" ? upperBound(current.keys, key4) : lowerBound(current.keys, key4);
+        if (kind === "b-tree" && current.keys[index] === key4) {
+          state.found.add(`${current.id}:${key4}`);
+          return { found: true, detail: `Search found ${key4} in node ${current.id}.` };
+        }
+        if (current.children.length === 0) {
+          const found = current.keys.includes(key4);
+          if (found) state.found.add(`${current.id}:${key4}`);
+          return {
+            found,
+            detail: found ? `Search reached leaf ${current.id} and found ${key4}.` : `Search reached leaf ${current.id}; ${key4} is absent.`
+          };
+        }
+        current = current.children[index];
+      }
+    },
+    range(from, to, state) {
+      let current = root;
+      while (current.children.length) {
+        state.path.add(current.id);
+        current = current.children[upperBound(current.keys, from)];
+      }
+      state.path.add(current.id);
+      const matches = [];
+      while (current) {
+        for (const key4 of current.keys) {
+          if (key4 > to)
+            return {
+              matches,
+              detail: `Range [${from}, ${to}] returned ${matches.join(", ") || "no keys"} by following leaf links.`
+            };
+          if (key4 >= from) {
+            matches.push(key4);
+            state.found.add(`${current.id}:${key4}`);
+          }
+        }
+        if (!current.next) break;
+        const next = current.next;
+        if (next.keys[0] > to) break;
+        state.links.add(`${current.id}->${next.id}`);
+        current = next;
+        state.path.add(current.id);
+      }
+      return {
+        matches,
+        detail: `Range [${from}, ${to}] returned ${matches.join(", ") || "no keys"} by following leaf links.`
+      };
+    },
+    keys() {
+      if (kind === "b-plus-tree") {
+        let leaf = root;
+        while (leaf.children.length) leaf = leaf.children[0];
+        const keys2 = [];
+        while (leaf) {
+          keys2.push(...leaf.keys);
+          leaf = leaf.next;
+        }
+        return keys2;
+      }
+      const keys = [];
+      const visit = (current) => {
+        current.keys.forEach((key4, index) => {
+          if (current.children[index]) visit(current.children[index]);
+          keys.push(key4);
+        });
+        if (current.children[current.keys.length]) visit(current.children[current.keys.length]);
+      };
+      visit(root);
+      return keys;
+    }
+  };
+  for (const value of values) model.insert(value, createMultiwayTreeOperationState());
+  return model;
+}
+function mountMultiwayTree(rootElement, config, kind) {
+  const label = kind === "b-tree" ? "B-tree" : "B+ tree";
+  const shell = createStructureShell(
+    rootElement,
+    kind,
+    label,
+    `Interactive order-4 ${label}`,
+    "multiway-tree",
+    "steptrace__multiway-tree"
+  );
+  const initial = [...config.values];
+  let model = createMultiwayTreeModel(kind, initial);
+  let state = createMultiwayTreeOperationState();
+  const svg = svgEl2("svg", "steptrace__multiway-tree-svg");
+  svg.setAttribute("viewBox", `0 0 ${VIEW_WIDTH2} ${VIEW_HEIGHT2}`);
+  svg.setAttribute("role", "img");
+  shell.stage.append(svg);
+  let renderedWidth = VIEW_WIDTH2;
+  const keyInput = shell.input(`${label} key`, "Key", 8);
+  keyInput.type = "number";
+  keyInput.step = "1";
+  keyInput.value = String(config.value ?? "");
+  const insert = shell.button("Insert", true);
+  const search = shell.button("Search");
+  const reset = shell.button("Reset");
+  shell.controls.append(keyInput, insert, search);
+  let fromInput = null;
+  let toInput = null;
+  let rangeButton = null;
+  if (kind === "b-plus-tree") {
+    fromInput = shell.input("Range start", "From", 8);
+    fromInput.type = "number";
+    fromInput.step = "1";
+    fromInput.value = String(config.range?.[0] ?? "");
+    toInput = shell.input("Range end", "To", 8);
+    toInput.type = "number";
+    toInput.step = "1";
+    toInput.value = String(config.range?.[1] ?? "");
+    rangeButton = shell.button("Range scan");
+    shell.controls.append(fromInput, toInput, rangeButton);
+  }
+  shell.controls.append(reset);
+  function paintTree() {
+    svg.replaceChildren();
+    const marker2 = svgEl2("marker", "steptrace__multiway-tree-arrow");
+    marker2.id = `${kind}-next-arrow`;
+    marker2.setAttribute("viewBox", "0 0 10 10");
+    marker2.setAttribute("refX", "8");
+    marker2.setAttribute("refY", "5");
+    marker2.setAttribute("markerWidth", "5");
+    marker2.setAttribute("markerHeight", "5");
+    marker2.setAttribute("orient", "auto-start-reverse");
+    const arrow = svgEl2("path", "");
+    arrow.setAttribute("d", "M 0 0 L 10 5 L 0 10 z");
+    marker2.append(arrow);
+    const defs = svgEl2("defs", "");
+    defs.append(marker2);
+    svg.append(defs);
+    const levels = [];
+    const visit = (current, depth) => {
+      ;
+      (levels[depth] ??= []).push(current);
+      current.children.forEach((child) => visit(child, depth + 1));
+    };
+    visit(model.root, 0);
+    const measuredWidth = Math.round(svg.getBoundingClientRect().width);
+    if (measuredWidth > 0) renderedWidth = Math.min(measuredWidth, VIEW_WIDTH2);
+    const viewWidth = Math.max(
+      renderedWidth,
+      ...levels.map(
+        (nodes5) => nodes5.reduce((width, node2) => width + Math.max(node2.keys.length, 1) * CELL_WIDTH, 0) + Math.max(nodes5.length - 1, 0) * NODE_GAP + VIEW_PADDING * 2
+      )
+    );
+    svg.setAttribute("viewBox", `0 0 ${viewWidth} ${VIEW_HEIGHT2}`);
+    const positions = /* @__PURE__ */ new Map();
+    levels.forEach((nodes5, depth) => {
+      const y = 30 + depth * (kind === "b-plus-tree" ? 80 : 92);
+      const widths = nodes5.map((node2) => Math.max(node2.keys.length, 1) * CELL_WIDTH);
+      const levelWidth = widths.reduce((sum, width) => sum + width, 0) + Math.max(nodes5.length - 1, 0) * NODE_GAP;
+      let cursor = (viewWidth - levelWidth) / 2;
+      nodes5.forEach((node2) => {
+        const width = Math.max(node2.keys.length, 1) * CELL_WIDTH;
+        positions.set(node2.id, {
+          x: cursor + width / 2,
+          y,
+          width
+        });
+        cursor += width + NODE_GAP;
+      });
+    });
+    for (const nodes5 of levels) {
+      for (const parent of nodes5) {
+        const from = positions.get(parent.id);
+        for (const child of parent.children) {
+          const to = positions.get(child.id);
+          const line = svgEl2("line", "steptrace__edge steptrace__multiway-tree-edge");
+          line.setAttribute("x1", String(from.x));
+          line.setAttribute("y1", String(from.y + NODE_HEIGHT / 2));
+          line.setAttribute("x2", String(to.x));
+          line.setAttribute("y2", String(to.y - NODE_HEIGHT / 2));
+          line.dataset.state = state.path.has(parent.id) && state.path.has(child.id) ? "path" : "neutral";
+          svg.append(line);
+        }
+      }
+    }
+    const leaves = levels.at(-1) ?? [];
+    if (kind === "b-plus-tree") {
+      leaves.slice(0, -1).forEach((leaf, index) => {
+        const next = leaves[index + 1];
+        const from = positions.get(leaf.id);
+        const to = positions.get(next.id);
+        const path = svgEl2("path", "steptrace__multiway-tree-link");
+        path.setAttribute(
+          "d",
+          `M ${from.x + from.width / 2} ${from.y + NODE_HEIGHT / 2} V 248 H ${to.x - to.width / 2} V ${to.y + NODE_HEIGHT / 2 + 5}`
+        );
+        path.setAttribute("marker-end", `url(#${kind}-next-arrow)`);
+        path.dataset.from = leaf.id;
+        path.dataset.to = next.id;
+        path.dataset.state = state.links.has(`${leaf.id}->${next.id}`) ? "active" : "neutral";
+        svg.append(path);
+      });
+    }
+    for (const nodes5 of levels) {
+      for (const node2 of nodes5) {
+        const position = positions.get(node2.id);
+        const group = svgEl2("g", "steptrace__multiway-tree-node");
+        group.setAttribute(
+          "transform",
+          `translate(${position.x - position.width / 2} ${position.y - NODE_HEIGHT / 2})`
+        );
+        group.dataset.path = state.path.has(node2.id) ? "1" : "0";
+        group.dataset.affected = state.affected.has(node2.id) ? "1" : "0";
+        group.dataset.nodeId = node2.id;
+        group.dataset.role = node2.children.length ? "internal" : "leaf";
+        group.setAttribute(
+          "aria-label",
+          `${node2.children.length ? "Internal node" : "Leaf"} ${node2.id}, keys ${node2.keys.join(", ") || "empty"}`
+        );
+        const keys = node2.keys.length ? node2.keys : [null];
+        keys.forEach((key4, index) => {
+          const cell = svgEl2("rect", "steptrace__multiway-tree-cell");
+          cell.setAttribute("x", String(index * CELL_WIDTH));
+          cell.setAttribute("width", String(CELL_WIDTH));
+          cell.setAttribute("height", String(NODE_HEIGHT));
+          cell.setAttribute("rx", "4");
+          cell.dataset.key = key4 == null ? "" : String(key4);
+          cell.dataset.state = key4 != null && state.found.has(`${node2.id}:${key4}`) ? "found" : key4 === state.special ? "special" : "neutral";
+          const text = svgEl2("text", "steptrace__multiway-tree-key");
+          text.setAttribute("x", String(index * CELL_WIDTH + CELL_WIDTH / 2));
+          text.setAttribute("y", String(NODE_HEIGHT / 2));
+          text.setAttribute("text-anchor", "middle");
+          text.setAttribute("dominant-baseline", "central");
+          text.textContent = key4 == null ? "·" : String(key4);
+          group.append(cell, text);
+        });
+        const id = svgEl2("text", "steptrace__multiway-tree-id");
+        id.setAttribute("x", String(position.width / 2));
+        id.setAttribute("y", "-6");
+        id.setAttribute("text-anchor", "middle");
+        id.textContent = node2.id;
+        group.append(id);
+        svg.append(group);
+      }
+    }
+    svg.setAttribute(
+      "aria-label",
+      `${label} with ${model.keys().length} unique keys in ${levels.length} levels`
+    );
+  }
+  function paint(message) {
+    paintTree();
+    const count = model.keys().length;
+    shell.setCounter(String(count), count === 1 ? " record" : " records");
+    shell.status.textContent = message;
+    insert.disabled = count >= MAX_VALUES2;
+    search.disabled = count === 0;
+    if (rangeButton) rangeButton.disabled = count === 0;
+  }
+  function integerFrom(input, label2) {
+    const value = Number(input.value);
+    if (input.value.trim() && Number.isFinite(value) && Number.isInteger(value)) return value;
+    paint(`${label2} must be a finite integer.`);
+    return null;
+  }
+  function onInsert() {
+    const key4 = integerFrom(keyInput, "Key");
+    if (key4 == null) return;
+    state = createMultiwayTreeOperationState();
+    const result = model.insert(key4, state);
+    keyInput.value = "";
+    paint(result.detail);
+  }
+  function onSearch() {
+    const key4 = integerFrom(keyInput, "Key");
+    if (key4 == null) return;
+    state = createMultiwayTreeOperationState();
+    const result = model.search(key4, state);
+    paint(result.detail);
+  }
+  function onRange() {
+    const from = integerFrom(fromInput, "From");
+    if (from == null) return;
+    const to = integerFrom(toInput, "To");
+    if (to == null) return;
+    if (from > to) {
+      paint("From must be less than or equal to To.");
+      return;
+    }
+    state = createMultiwayTreeOperationState();
+    paint(model.range(from, to, state).detail);
+  }
+  function onReset() {
+    model = createMultiwayTreeModel(kind, initial);
+    state = createMultiwayTreeOperationState();
+    keyInput.value = String(config.value ?? "");
+    if (fromInput) fromInput.value = String(config.range?.[0] ?? "");
+    if (toInput) toInput.value = String(config.range?.[1] ?? "");
+    paint(`Reset to the initial order-4 ${label}.`);
+  }
+  shell.listen(insert, "click", onInsert);
+  shell.listen(search, "click", onSearch);
+  shell.listen(reset, "click", onReset);
+  if (rangeButton) shell.listen(rangeButton, "click", onRange);
+  onEnter(shell, keyInput, onInsert);
+  if (fromInput) onEnter(shell, fromInput, onRange);
+  if (toInput) onEnter(shell, toInput, onRange);
+  paint(
+    `Insert or search a key${kind === "b-plus-tree" ? ", or scan a range" : ""}. Order 4 means at most 3 keys per node.`
+  );
+  const handle = shell.finish();
+  const resizeObserver = typeof ResizeObserver === "undefined" ? null : new ResizeObserver(() => {
+    const nextWidth = Math.min(Math.round(svg.getBoundingClientRect().width), VIEW_WIDTH2);
+    if (nextWidth <= 0 || nextWidth === renderedWidth) return;
+    renderedWidth = nextWidth;
+    paintTree();
+  });
+  resizeObserver?.observe(svg);
+  return {
+    destroy() {
+      resizeObserver?.disconnect();
+      handle.destroy();
+    }
+  };
+}
+var SVG_NS4, VIEW_WIDTH2, VIEW_HEIGHT2, MAX_KEYS, MAX_VALUES2, CELL_WIDTH, NODE_HEIGHT, NODE_GAP, VIEW_PADDING, mountBTree, mountBPlusTree;
+var init_multiway_tree = __esm({
+  "custom/steptrace/src/families/multiway-tree.ts"() {
+    init_interactive_structure();
+    SVG_NS4 = "http://www.w3.org/2000/svg";
+    VIEW_WIDTH2 = 620;
+    VIEW_HEIGHT2 = 280;
+    MAX_KEYS = 3;
+    MAX_VALUES2 = 10;
+    CELL_WIDTH = 33;
+    NODE_HEIGHT = 34;
+    NODE_GAP = 8;
+    VIEW_PADDING = 10;
+    mountBTree = (root, config) => mountMultiwayTree(root, config, "b-tree");
+    mountBPlusTree = (root, config) => mountMultiwayTree(root, config, "b-plus-tree");
+  }
+});
+
+// custom/steptrace/src/algorithms/b-plus-tree.ts
+var DEFAULT_VALUES3, bPlusTree;
+var init_b_plus_tree = __esm({
+  "custom/steptrace/src/algorithms/b-plus-tree.ts"() {
+    init_multiway_tree();
+    DEFAULT_VALUES3 = [5, 9, 12, 17, 33, 40, 21];
+    bPlusTree = {
+      id: "b-plus-tree",
+      family: "multiway-tree",
+      meta: { label: "B+ Tree" },
+      parse: (config) => parseMultiwayTreeConfig(config, "b-plus-tree", DEFAULT_VALUES3, 25, [15, 40]),
+      mount: mountBPlusTree
+    };
+  }
+});
+
+// custom/steptrace/src/algorithms/b-tree.ts
+var DEFAULT_VALUES4, bTree;
+var init_b_tree = __esm({
+  "custom/steptrace/src/algorithms/b-tree.ts"() {
+    init_multiway_tree();
+    DEFAULT_VALUES4 = [10, 20, 5];
+    bTree = {
+      id: "b-tree",
+      family: "multiway-tree",
+      meta: { label: "B-tree" },
+      parse: (config) => parseMultiwayTreeConfig(config, "b-tree", DEFAULT_VALUES4, 6),
+      mount: mountBTree
+    };
+  }
+});
+
+// custom/steptrace/src/families/hash-index.ts
+function indexFor(key4, size) {
+  return (key4 % size + size) % size;
+}
+function randomKey() {
+  return Math.floor(Math.random() * 90) + 10;
+}
+function randomValue() {
+  return String.fromCharCode(65 + Math.floor(Math.random() * 26));
+}
+function createHashIndexSurface(root, options) {
+  const shell = createStructureShell(
+    root,
+    options.id,
+    options.label,
+    options.ariaLabel,
+    "hash-index",
+    "steptrace__hash-index"
+  );
+  const operation = el("div", "steptrace__hash-operation steptrace__hash-probe-lane");
+  operation.setAttribute("aria-label", "Current hash operation");
+  const token = el("div", "steptrace__hash-token");
+  token.setAttribute("aria-hidden", "true");
+  const tokenInline = el("span", "steptrace__hash-token-inline");
+  const tokenStored = el("span", "steptrace__hash-token-stored");
+  const tokenStoredKey = el("span", "steptrace__hash-token-key");
+  const tokenStoredValue = el("span", "steptrace__hash-token-value");
+  tokenInline.textContent = options.tokenText;
+  tokenStoredKey.textContent = options.tokenText;
+  tokenStoredValue.textContent = "";
+  tokenStored.append(tokenStoredKey, tokenStoredValue);
+  token.append(tokenInline, tokenStored);
+  const calculation = el("div", "steptrace__hash-calculation");
+  calculation.textContent = options.calculation;
+  operation.append(token, calculation);
+  const boardWrap = el("div", "steptrace__hash-board-wrap steptrace__hash-canvas");
+  boardWrap.dataset.strategy = options.strategy;
+  const chainLane = el("div", "steptrace__hash-chain-lane");
+  chainLane.setAttribute("aria-label", "Separate-chaining entries");
+  chainLane.dataset.active = options.strategy === "closed-addressing" ? "1" : "0";
+  const chainSlots = [];
+  const chainColumns = Array.from({ length: options.size }, (_, index) => {
+    const column = el("div", "steptrace__hash-chain");
+    const slots = Array.from({ length: options.chainCapacity ?? 0 }, (_2, slotIndex) => {
+      const slot = el("div", "steptrace__hash-chain-slot");
+      slot.dataset.slot = String(slotIndex);
+      column.append(slot);
+      return slot;
+    });
+    chainSlots.push(slots);
+    chainLane.append(column);
+    return column;
+  });
+  const board = el("div", "steptrace__hash-buckets");
+  board.dataset.strategy = options.strategy;
+  board.style.setProperty("--steptrace-hash-size", String(options.size));
+  board.setAttribute("role", "list");
+  board.setAttribute("aria-label", `${options.label}, ${options.size} indexed cells`);
+  boardWrap.append(chainLane, board);
+  shell.stage.append(operation, boardWrap);
+  const cells = Array.from({ length: options.size }, (_, index) => {
+    const cell = el("div", "steptrace__hash-cell");
+    cell.setAttribute("role", "listitem");
+    const value = el("div", "steptrace__hash-cell-value");
+    const indexLabel = el("div", "steptrace__hash-index-label");
+    indexLabel.textContent = String(index);
+    cell.append(value, indexLabel);
+    board.append(cell);
+    return { cell, value };
+  });
+  return {
+    shell,
+    operation,
+    token,
+    tokenInline,
+    tokenStored,
+    tokenStoredKey,
+    tokenStoredValue,
+    calculation,
+    chainSlots,
+    chainColumns,
+    cells
+  };
+}
+function mountHashMap(root, config) {
+  return mountHashTable(root, config, "map");
+}
+function mountHashSet(root, config) {
+  return mountHashTable(root, config, "set");
+}
+function mountHashTable(root, config, content) {
+  const slots = Array(SIZE).fill(null);
+  const chains = Array.from({ length: SIZE }, () => []);
+  const tombstones = Array(SIZE).fill(false);
+  let activePath = [];
+  let activeChain = null;
+  let selected = null;
+  let selectedChain = null;
+  let previousGeneratedPutKey = null;
+  let previousGeneratedPutValue = null;
+  let motionTimer = null;
+  let activeAnimations = [];
+  let activeKey = null;
+  let activeResult = null;
+  let tokenX = 0;
+  let tokenY = 0;
+  let tokenWidth = 0;
+  let tokenHeight = 0;
+  let destroyed = false;
+  const label = content === "set" ? "open-addressed hash set" : config.strategy === "closed-addressing" ? "closed addressing" : config.strategy === "open-addressing" ? "open addressing" : "bucket hashing";
+  const initialCalculation = config.strategy === "buckets" ? "key % 4 selects one 3-cell bucket" : "key % 12 selects the home cell";
+  const {
+    shell,
+    operation,
+    token,
+    tokenInline,
+    tokenStored,
+    tokenStoredKey,
+    tokenStoredValue,
+    calculation,
+    chainSlots,
+    chainColumns,
+    cells
+  } = createHashIndexSurface(root, {
+    id: content === "map" ? "hash-map" : "hash-set",
+    label,
+    ariaLabel: content === "map" ? `Interactive hash map using ${label}` : "Interactive key-only hash set",
+    strategy: config.strategy,
+    size: SIZE,
+    chainCapacity: CHAIN_CAPACITY,
+    tokenText: content === "map" ? "k:v" : "key",
+    calculation: initialCalculation
+  });
+  const keyInput = shell.input(content === "map" ? "Hash map key" : "Hash set key", "Key", 12);
+  keyInput.type = "number";
+  keyInput.setAttribute("inputmode", "numeric");
+  const valueInput = content === "map" ? shell.input("Hash map value", "Value", 8) : null;
+  const put = shell.button(content === "map" ? "Put" : "Add", true);
+  const search = shell.button(content === "map" ? "Search" : "Contains");
+  const remove = shell.button("Remove");
+  const reset = shell.button("Reset");
+  const fields = el("div", "steptrace__hash-fields");
+  const actions = el("div", "steptrace__hash-actions");
+  fields.append(keyInput);
+  if (valueInput) fields.append(valueInput);
+  actions.append(put, search, remove, reset);
+  shell.controls.classList.add("steptrace__hash-controls");
+  shell.controls.dataset.mode = content;
+  shell.controls.append(fields, actions);
+  const interactive = [keyInput, ...valueInput ? [valueInput] : [], put, search, remove, reset];
+  function entries() {
+    if (config.strategy === "closed-addressing") return chains.flat();
+    return slots.filter((entry) => entry != null);
+  }
+  function calculationFor(key4) {
+    if (config.strategy !== "buckets") return `${key4} % 12 = ${indexFor(key4, SIZE)}`;
+    const bucket = indexFor(key4, SIZE / BUCKET_SIZE);
+    const start = bucket * BUCKET_SIZE;
+    return `${key4} % 4 = bucket ${bucket} → cells ${start}–${start + BUCKET_SIZE - 1}`;
+  }
+  function paintChains() {
+    if (config.strategy !== "closed-addressing") return;
+    chains.forEach((chain, bucket) => {
+      const count = chain.length;
+      chainColumns[bucket].dataset.count = String(count);
+      chainSlots[bucket].forEach((slot, index) => {
+        const entry = chain[index];
+        slot.replaceChildren();
+        slot.dataset.filled = entry ? "1" : "0";
+        slot.dataset.path = entry && activeChain?.bucket === bucket && activeChain.path.includes(index) ? "1" : "0";
+        slot.dataset.selected = entry && selectedChain?.bucket === bucket && selectedChain.index === index ? "1" : "0";
+        slot.dataset.result = entry && selectedChain?.bucket === bucket && selectedChain.index === index ? activeResult ?? "" : "";
+        if (!entry) {
+          slot.removeAttribute("role");
+          slot.removeAttribute("aria-label");
+          return;
+        }
+        slot.setAttribute("role", "listitem");
+        slot.setAttribute(
+          "aria-label",
+          `bucket ${bucket} chain entry ${index}, key ${entry.key}, value ${entry.value}`
+        );
+        const key4 = el("span", "steptrace__hash-key");
+        key4.textContent = String(entry.key);
+        const value = el("span", "steptrace__hash-value");
+        value.textContent = entry.value;
+        slot.append(key4, value);
+      });
+      if (count) {
+        chainColumns[bucket].setAttribute("role", "list");
+        chainColumns[bucket].setAttribute(
+          "aria-label",
+          `Bucket ${bucket} chain, ${count} ${count === 1 ? "entry" : "entries"}`
+        );
+      } else {
+        chainColumns[bucket].removeAttribute("role");
+        chainColumns[bucket].removeAttribute("aria-label");
+      }
+    });
+  }
+  function paint() {
+    paintChains();
+    cells.forEach(({ cell, value }, index) => {
+      const entry = config.strategy === "closed-addressing" ? null : slots[index];
+      value.replaceChildren();
+      if (entry) {
+        const key4 = el("span", "steptrace__hash-key");
+        key4.textContent = String(entry.key);
+        value.append(key4);
+        if (content === "map") {
+          const itemValue = el("span", "steptrace__hash-value");
+          itemValue.textContent = entry.value;
+          value.append(itemValue);
+        }
+      } else {
+        if (config.strategy !== "closed-addressing") {
+          const empty = el("span", "steptrace__hash-empty");
+          empty.textContent = tombstones[index] ? "†" : "·";
+          value.append(empty);
+        }
+      }
+      cell.dataset.empty = entry || config.strategy === "closed-addressing" && chains[index].length ? "0" : "1";
+      cell.dataset.tombstone = tombstones[index] ? "1" : "0";
+      const onPath = activePath.includes(index);
+      const current = selected === index;
+      const collision = current && entry != null && activeKey != null && entry.key !== activeKey;
+      cell.dataset.probe = collision ? "collision" : current ? "current" : onPath ? "visited" : "";
+      cell.dataset.result = current ? activeResult ?? "" : "";
+      cell.setAttribute(
+        "aria-label",
+        config.strategy === "closed-addressing" ? `bucket index ${index}, ${chains[index].length ? `points to key ${chains[index][0].key}, chain length ${chains[index].length}` : "empty"}` : entry ? content === "map" ? `cell ${index}, key ${entry.key}, value ${entry.value}${entry.next == null ? "" : `, next cell ${entry.next}`}` : `cell ${index}, key ${entry.key}` : tombstones[index] ? `cell ${index}, tombstone` : `cell ${index}, empty`
+      );
+    });
+  }
+  function lock(value) {
+    operation.dataset.busy = value ? "1" : "0";
+    for (const control of interactive) control.disabled = value;
+  }
+  function tokenFrame(target, tokenOrigin) {
+    if (!target) return { x: 0, y: 0, width: tokenOrigin.width, height: tokenOrigin.height };
+    const targetRect = target.getBoundingClientRect();
+    return {
+      x: targetRect.left - tokenOrigin.left,
+      y: targetRect.top - tokenOrigin.top,
+      width: targetRect.width,
+      height: targetRect.height
+    };
+  }
+  function centeredTokenFrame(target, tokenOrigin) {
+    const targetRect = target.getBoundingClientRect();
+    const width = tokenWidth || tokenOrigin.width;
+    const height2 = tokenHeight || tokenOrigin.height;
+    return {
+      x: targetRect.left + targetRect.width / 2 - tokenOrigin.left - width / 2,
+      y: targetRect.top + targetRect.height / 2 - tokenOrigin.top - height2 / 2,
+      width,
+      height: height2
+    };
+  }
+  function setTokenPosition(x, y) {
+    token.style.setProperty("--steptrace-token-x", `${x}px`);
+    token.style.setProperty("--steptrace-token-y", `${y}px`);
+  }
+  function clearTokenMotionStyles() {
+    for (const property of [
+      "--steptrace-token-x",
+      "--steptrace-token-y",
+      "--steptrace-token-width",
+      "--steptrace-token-height",
+      "--steptrace-token-radius",
+      "--steptrace-token-padding"
+    ])
+      token.style.removeProperty(property);
+  }
+  function nativeAnimation(node2, keyframes, duration) {
+    return typeof node2.animate === "function" ? node2.animate(keyframes, { duration, easing: "cubic-bezier(.2,.8,.2,1)" }) : null;
+  }
+  function waitForMotion(animations, duration, done) {
+    const running = animations.filter((animation) => animation != null);
+    const complete = () => {
+      activeAnimations = [];
+      motionTimer = null;
+      if (!destroyed) done();
+    };
+    if (running.length) {
+      activeAnimations = running;
+      running[0].onfinish = complete;
+      return;
+    }
+    motionTimer = setTimeout(complete, duration);
+  }
+  function moveToken(target, motion, duration, tokenOrigin, done) {
+    const next = motion === "travel" && target ? centeredTokenFrame(target, tokenOrigin) : tokenFrame(target, tokenOrigin);
+    const fromWidth = tokenWidth || tokenOrigin.width;
+    const fromHeight = tokenHeight || tokenOrigin.height;
+    const nextWidth = motion === "return" ? tokenOrigin.width : tokenWidth || tokenOrigin.width;
+    const nextHeight = motion === "return" ? tokenOrigin.height : tokenHeight || tokenOrigin.height;
+    setTokenPosition(next.x, next.y);
+    if (motion === "return") {
+      token.style.setProperty("--steptrace-token-width", `${nextWidth}px`);
+      token.style.setProperty("--steptrace-token-height", `${nextHeight}px`);
+      token.style.setProperty("--steptrace-token-radius", "6px");
+      token.style.setProperty("--steptrace-token-padding", "5px 7px");
+    }
+    token.dataset.motion = motion;
+    const animation = nativeAnimation(
+      token,
+      motion === "return" ? [
+        {
+          transform: `translate3d(${tokenX}px, ${tokenY}px, 0)`,
+          width: `${fromWidth}px`,
+          height: `${fromHeight}px`,
+          borderRadius: "5px",
+          padding: "0px",
+          opacity: 0.78
+        },
+        {
+          transform: `translate3d(${next.x}px, ${next.y}px, 0)`,
+          width: `${nextWidth}px`,
+          height: `${nextHeight}px`,
+          borderRadius: "6px",
+          padding: "5px 7px",
+          opacity: 0
+        }
+      ] : [
+        {
+          transform: `translate3d(${tokenX}px, ${tokenY}px, 0)`,
+          opacity: 0.92
+        },
+        {
+          transform: `translate3d(${next.x}px, ${next.y}px, 0)`,
+          opacity: 0.92
+        }
+      ],
+      duration
+    );
+    waitForMotion([animation], duration, () => {
+      tokenX = next.x;
+      tokenY = next.y;
+      tokenWidth = nextWidth;
+      tokenHeight = nextHeight;
+      setTokenPosition(next.x, next.y);
+      done();
+    });
+  }
+  function arriveToken(target, tokenOrigin, done) {
+    const next = tokenFrame(target, tokenOrigin);
+    const fromWidth = tokenWidth || tokenOrigin.width;
+    const fromHeight = tokenHeight || tokenOrigin.height;
+    setTokenPosition(next.x, next.y);
+    token.style.setProperty("--steptrace-token-width", `${next.width}px`);
+    token.style.setProperty("--steptrace-token-height", `${next.height}px`);
+    token.style.setProperty("--steptrace-token-radius", "5px");
+    token.style.setProperty("--steptrace-token-padding", "0px");
+    token.dataset.motion = "arrival";
+    const geometry = nativeAnimation(
+      token,
+      [
+        {
+          transform: `translate3d(${tokenX}px, ${tokenY}px, 0)`,
+          width: `${fromWidth}px`,
+          height: `${fromHeight}px`,
+          borderRadius: "6px",
+          padding: "5px 7px",
+          opacity: 0.92
+        },
+        {
+          transform: `translate3d(${next.x}px, ${next.y}px, 0)`,
+          width: `${next.width}px`,
+          height: `${next.height}px`,
+          borderRadius: "5px",
+          padding: "0px",
+          opacity: 0.78
+        }
+      ],
+      FINISH_MS
+    );
+    const inlineFade = nativeAnimation(tokenInline, [{ opacity: 1 }, { opacity: 0 }], FINISH_MS);
+    const storedFade = nativeAnimation(tokenStored, [{ opacity: 0 }, { opacity: 1 }], FINISH_MS);
+    waitForMotion([geometry, inlineFade, storedFade], FINISH_MS, () => {
+      tokenX = next.x;
+      tokenY = next.y;
+      tokenWidth = next.width;
+      tokenHeight = next.height;
+      done();
+    });
+  }
+  function finishEffect(target, motion, tokenOrigin, done) {
+    const next = centeredTokenFrame(target, tokenOrigin);
+    setTokenPosition(next.x, next.y);
+    token.dataset.motion = motion;
+    const animation = nativeAnimation(
+      token,
+      motion === "success" ? [
+        { transform: `translate3d(${next.x}px, ${next.y}px, 0) scale(1)` },
+        { transform: `translate3d(${next.x}px, ${next.y}px, 0) scale(1.08)` },
+        { transform: `translate3d(${next.x}px, ${next.y}px, 0) scale(1)` }
+      ] : [
+        { transform: `translate3d(${next.x}px, ${next.y}px, 0) scale(1)`, opacity: 0.92 },
+        { transform: `translate3d(${next.x}px, ${next.y}px, 0) scale(0.72)`, opacity: 0 }
+      ],
+      FINISH_MS
+    );
+    waitForMotion([animation], FINISH_MS, () => {
+      tokenX = next.x;
+      tokenY = next.y;
+      done();
+    });
+  }
+  function settleToken(hidden = false) {
+    tokenX = 0;
+    tokenY = 0;
+    tokenWidth = 0;
+    tokenHeight = 0;
+    clearTokenMotionStyles();
+    token.dataset.motion = hidden ? "handoff" : "idle";
+  }
+  function restoreGenericToken() {
+    tokenInline.textContent = content === "map" ? "k:v" : "key";
+    tokenStoredKey.textContent = content === "map" ? "k" : "key";
+    tokenStoredValue.textContent = content === "map" ? "v" : "";
+    delete token.dataset.key;
+    delete token.dataset.value;
+  }
+  function cancelMotion() {
+    if (motionTimer != null) clearTimeout(motionTimer);
+    motionTimer = null;
+    for (const animation of activeAnimations) animation.cancel();
+    activeAnimations = [];
+    settleToken();
+  }
+  function applyPlanState(plan) {
+    if (plan.finish === "put") {
+      activeChain = null;
+      selectedChain = null;
+      activeResult = null;
+      return;
+    }
+    const chainBucket = plan.chainBucket ?? plan.chainTarget?.bucket;
+    activeChain = chainBucket == null ? null : { bucket: chainBucket, path: plan.chainPath ?? [] };
+    selectedChain = plan.chainTarget ?? null;
+    activeResult = null;
+  }
+  function clearTransientState() {
+    activePath = [];
+    activeChain = null;
+    selected = null;
+    selectedChain = null;
+    activeResult = null;
+    activeKey = null;
+  }
+  function finishPlan(plan, tokenOrigin, returnToken = true, restoreChip = false) {
+    plan.commit?.();
+    clearTransientState();
+    shell.status.textContent = plan.message;
+    paint();
+    if (!returnToken) {
+      if (restoreChip) restoreGenericToken();
+      settleToken(!restoreChip);
+      lock(false);
+      return;
+    }
+    moveToken(null, "return", RETURN_MS, tokenOrigin, () => {
+      settleToken();
+      lock(false);
+    });
+  }
+  function run6(plan) {
+    if (motionTimer != null || activeAnimations.length) return;
+    calculation.textContent = plan.calculation;
+    tokenInline.textContent = content === "map" ? `${plan.key}:${plan.value || "?"}` : String(plan.key);
+    tokenStoredKey.textContent = String(plan.key);
+    tokenStoredValue.textContent = content === "map" ? plan.value || "?" : "";
+    token.dataset.key = String(plan.key);
+    if (content === "map") token.dataset.value = plan.value || "?";
+    else delete token.dataset.value;
+    settleToken();
+    delete token.dataset.motion;
+    void token.offsetWidth;
+    const tokenOrigin = token.getBoundingClientRect();
+    tokenWidth = tokenOrigin.width;
+    tokenHeight = tokenOrigin.height;
+    lock(true);
+    applyPlanState(plan);
+    activeKey = plan.key;
+    if (shell.reducedMotion()) {
+      activePath = plan.path;
+      selected = plan.target;
+      plan.commit?.();
+      clearTransientState();
+      shell.status.textContent = plan.message;
+      paint();
+      if (plan.finish === "put") restoreGenericToken();
+      settleToken();
+      lock(false);
+      return;
+    }
+    let hop = 0;
+    const destination = () => plan.chainTarget ? chainSlots[plan.chainTarget.bucket][plan.chainTarget.index] : plan.target != null ? cells[plan.target].value : null;
+    const finish = () => {
+      const target = destination();
+      if (plan.finish === "put" && target) {
+        arriveToken(target, tokenOrigin, () => finishPlan(plan, tokenOrigin, false, true));
+        return;
+      }
+      if (plan.finish === "search-hit" && target) {
+        const pulse = () => {
+          activeResult = "success";
+          paint();
+          finishEffect(target, "success", tokenOrigin, () => finishPlan(plan, tokenOrigin));
+        };
+        if (plan.chainTarget) {
+          moveToken(target, "travel", HOP_MS, tokenOrigin, pulse);
+          return;
+        }
+        pulse();
+        return;
+      }
+      if (plan.finish === "remove-hit" && target) {
+        const extract = () => {
+          activeResult = "remove";
+          paint();
+          finishEffect(target, "extract", tokenOrigin, () => finishPlan(plan, tokenOrigin, false));
+        };
+        if (plan.chainTarget) {
+          moveToken(target, "travel", HOP_MS, tokenOrigin, extract);
+          return;
+        }
+        extract();
+        return;
+      }
+      finishPlan(plan, tokenOrigin);
+    };
+    const probePath = plan.finish === "put" ? plan.path.slice(0, -1) : plan.path;
+    const advance = () => {
+      activePath = probePath.slice(0, hop + 1);
+      selected = probePath[hop] ?? plan.target;
+      paint();
+      moveToken(
+        selected == null ? null : cells[selected].cell,
+        "travel",
+        HOP_MS,
+        tokenOrigin,
+        () => {
+          hop++;
+          if (hop < probePath.length) advance();
+          else finish();
+        }
+      );
+    };
+    if (probePath.length) advance();
+    else {
+      activePath = [];
+      selected = null;
+      paint();
+      finish();
+    }
+  }
+  function enteredKey() {
+    const raw = (keyInput.value || "").trim();
+    if (!raw) return void 0;
+    const parsed = Number(raw);
+    if (Number.isSafeInteger(parsed)) return parsed;
+    shell.status.textContent = "Key must be a safe integer.";
+    keyInput.focus();
+    return null;
+  }
+  function freshPutKey() {
+    const sampled = randomKey();
+    const used = new Set(entries().map((entry) => entry.key));
+    let generated = sampled;
+    for (let offset = 0; offset < 90; offset++) {
+      const candidate = 10 + (sampled - 10 + offset) % 90;
+      if (!used.has(candidate) && candidate !== previousGeneratedPutKey) {
+        generated = candidate;
+        break;
+      }
+    }
+    if (generated === previousGeneratedPutKey) generated = generated === 99 ? 10 : generated + 1;
+    previousGeneratedPutKey = generated;
+    return generated;
+  }
+  function freshPutValue() {
+    const sampled = randomValue();
+    const generated = sampled === previousGeneratedPutValue ? sampled === "Z" ? "A" : String.fromCharCode(sampled.charCodeAt(0) + 1) : sampled;
+    previousGeneratedPutValue = generated;
+    return generated;
+  }
+  function suppliedKey(preferExisting = false) {
+    const entered = enteredKey();
+    if (entered !== void 0) return entered;
+    const existing = preferExisting ? entries()[0]?.key : void 0;
+    const generated = existing ?? randomKey();
+    keyInput.value = String(generated);
+    return generated;
+  }
+  function suppliedPutKey() {
+    const entered = enteredKey();
+    return entered === void 0 ? freshPutKey() : entered;
+  }
+  function suppliedPutValue() {
+    const entered = (valueInput?.value || "").trim();
+    return entered || freshPutValue();
+  }
+  function closedPath(key4) {
+    const home = indexFor(key4, SIZE);
+    const chain = chains[home];
+    const found = chain.findIndex((entry) => entry.key === key4);
+    const path = Array.from({ length: found < 0 ? chain.length : found + 1 }, (_, index) => index);
+    return { home, path, found: null };
+  }
+  function closedPut(key4, value) {
+    const lookup = closedPath(key4);
+    const chain = chains[lookup.home];
+    const found = chain.findIndex((entry) => entry.key === key4);
+    if (found >= 0) {
+      return {
+        finish: "put",
+        key: key4,
+        value,
+        calculation: calculationFor(key4),
+        path: [lookup.home],
+        target: lookup.home,
+        chainBucket: lookup.home,
+        chainTarget: { bucket: lookup.home, index: found },
+        chainPath: Array.from({ length: found + 1 }, (_, index2) => index2),
+        message: `Updated key ${key4} in bucket ${lookup.home}, chain node ${found}.`,
+        commit: () => {
+          chain[found].value = value;
+        }
+      };
+    }
+    if (chain.length >= CHAIN_CAPACITY) {
+      return {
+        finish: "return",
+        key: key4,
+        value,
+        calculation: calculationFor(key4),
+        path: [lookup.home],
+        target: lookup.home,
+        chainBucket: lookup.home,
+        chainTarget: { bucket: lookup.home, index: CHAIN_CAPACITY - 1 },
+        chainPath: Array.from({ length: CHAIN_CAPACITY }, (_, index2) => index2),
+        message: `Bucket ${lookup.home} chain is full (${CHAIN_CAPACITY}); key ${key4} was not added.`
+      };
+    }
+    const index = chain.length;
+    return {
+      finish: "put",
+      key: key4,
+      value,
+      calculation: calculationFor(key4),
+      path: [lookup.home],
+      target: lookup.home,
+      chainBucket: lookup.home,
+      chainTarget: { bucket: lookup.home, index },
+      chainPath: Array.from({ length: index + 1 }, (_, position) => position),
+      message: index === 0 ? `Put ${key4}:${value} in bucket ${lookup.home}'s first chain node.` : `Collision at bucket ${lookup.home}; appended chain node ${index}.`,
+      commit: () => {
+        chain.push({ key: key4, value, home: lookup.home, next: null });
+      }
+    };
+  }
+  function closedSearch(key4, removeEntry) {
+    const lookup = closedPath(key4);
+    const chain = chains[lookup.home];
+    const found = chain.findIndex((entry) => entry.key === key4);
+    if (found < 0) {
+      return {
+        finish: "return",
+        key: key4,
+        value: "",
+        calculation: calculationFor(key4),
+        path: [lookup.home],
+        target: lookup.home,
+        chainBucket: lookup.home,
+        chainPath: lookup.path,
+        message: `${removeEntry ? "Remove" : "Search"} ${key4} missed in bucket ${lookup.home}'s chain.`
+      };
+    }
+    const value = chain[found].value;
+    return {
+      finish: removeEntry ? "remove-hit" : "search-hit",
+      key: key4,
+      value,
+      calculation: calculationFor(key4),
+      path: [lookup.home],
+      target: lookup.home,
+      chainBucket: lookup.home,
+      chainTarget: { bucket: lookup.home, index: found },
+      chainPath: Array.from({ length: found + 1 }, (_, index) => index),
+      removesChainTarget: removeEntry,
+      message: removeEntry ? `Removed key ${key4} from bucket ${lookup.home} and repaired its external chain.` : `Search ${key4} found ${value} in bucket ${lookup.home}, chain node ${found}.`,
+      commit: removeEntry ? () => {
+        chain.splice(found, 1);
+      } : void 0
+    };
+  }
+  function openProbe(key4) {
+    const home = indexFor(key4, SIZE);
+    const path = [];
+    let firstTombstone = null;
+    for (let offset = 0; offset < SIZE; offset++) {
+      const index = (home + offset) % SIZE;
+      path.push(index);
+      if (tombstones[index] && firstTombstone == null) firstTombstone = index;
+      if (slots[index]?.key === key4) return { home, path, found: index, insert: index, full: false };
+      if (!slots[index] && !tombstones[index])
+        return { home, path, found: null, insert: firstTombstone ?? index, full: false };
+    }
+    return { home, path, found: null, insert: firstTombstone, full: firstTombstone == null };
+  }
+  function openPut(key4, value) {
+    const probe = openProbe(key4);
+    if (content === "set" && probe.found != null) {
+      return {
+        finish: "return",
+        key: key4,
+        value: "",
+        calculation: calculationFor(key4),
+        path: probe.path,
+        target: probe.found,
+        message: `Add ${key4} rejected; the key already exists in cell ${probe.found}.`
+      };
+    }
+    const target = probe.insert;
+    const path = target != null && probe.found == null && tombstones[target] ? probe.path.slice(0, probe.path.indexOf(target) + 1) : probe.path;
+    return {
+      finish: target == null ? "return" : "put",
+      key: key4,
+      value,
+      calculation: calculationFor(key4),
+      path,
+      target: target ?? path.at(-1) ?? probe.home,
+      message: target == null ? "Open-addressing table is full." : probe.found != null ? `Updated key ${key4} in cell ${target}.` : tombstones[target] ? content === "set" ? `Added key ${key4} in reused tombstone cell ${target}.` : `Put ${key4}:${value} in reused tombstone cell ${target}.` : target === probe.home ? content === "set" ? `Added key ${key4} in home cell ${target}.` : `Put ${key4}:${value} in home cell ${target}.` : content === "set" ? `Collision at ${probe.home}; linear probe added key ${key4} in cell ${target}.` : `Collision at ${probe.home}; linear probe placed ${key4}:${value} in cell ${target}.`,
+      commit: target == null ? void 0 : () => {
+        slots[target] = { key: key4, value, home: probe.home, next: null };
+        tombstones[target] = false;
+      }
+    };
+  }
+  function openSearch(key4, removeEntry) {
+    const probe = openProbe(key4);
+    const target = probe.found ?? probe.path.at(-1) ?? probe.home;
+    const entry = probe.found == null ? null : slots[probe.found];
+    return {
+      finish: entry ? removeEntry ? "remove-hit" : "search-hit" : "return",
+      key: key4,
+      value: entry?.value ?? "",
+      calculation: calculationFor(key4),
+      path: probe.path,
+      target,
+      message: entry ? removeEntry ? `Removed key ${key4}; cell ${probe.found} is now a tombstone.` : content === "set" ? `Contains ${key4}: true; found in cell ${probe.found}.` : `Search ${key4} found ${entry.value} in cell ${probe.found}.` : `${removeEntry ? "Remove" : content === "set" ? "Contains" : "Search"} ${key4}${content === "set" && !removeEntry ? ": false;" : ""} missed after ${probe.path.length} probe${probe.path.length === 1 ? "" : "s"}.`,
+      commit: entry && removeEntry ? () => {
+        slots[probe.found] = null;
+        tombstones[probe.found] = true;
+      } : void 0
+    };
+  }
+  function bucketPath(key4) {
+    const bucket = indexFor(key4, SIZE / BUCKET_SIZE);
+    const path = Array.from({ length: SIZE }, (_, offset) => {
+      const groupOffset = Math.floor(offset / BUCKET_SIZE);
+      const within = offset % BUCKET_SIZE;
+      return (bucket + groupOffset) % (SIZE / BUCKET_SIZE) * BUCKET_SIZE + within;
+    });
+    return { bucket, path };
+  }
+  function bucketPut(key4, value) {
+    const traversal = bucketPath(key4);
+    const found = traversal.path.find((index) => slots[index]?.key === key4);
+    const target = found ?? traversal.path.find((index) => slots[index] == null) ?? null;
+    const targetBucket = target == null ? null : Math.floor(target / BUCKET_SIZE);
+    return {
+      finish: target == null ? "return" : "put",
+      key: key4,
+      value,
+      calculation: calculationFor(key4),
+      path: target == null ? traversal.path : traversal.path.slice(0, traversal.path.indexOf(target) + 1),
+      target: target ?? traversal.path.at(-1),
+      message: target == null ? "All four buckets are full." : found != null ? `Updated key ${key4} in bucket ${targetBucket}, cell ${target}.` : targetBucket === traversal.bucket ? `Put ${key4}:${value} in bucket ${targetBucket}, cell ${target}.` : `Bucket ${traversal.bucket} was full; overflow placed ${key4}:${value} in bucket ${targetBucket}, cell ${target}.`,
+      commit: target == null ? void 0 : () => {
+        slots[target] = { key: key4, value, home: traversal.bucket, next: null };
+      }
+    };
+  }
+  function bucketSearch(key4, removeEntry) {
+    const traversal = bucketPath(key4);
+    const found = traversal.path.find((index) => slots[index]?.key === key4);
+    const path = found == null ? traversal.path : traversal.path.slice(0, traversal.path.indexOf(found) + 1);
+    const entry = found == null ? null : slots[found];
+    return {
+      finish: entry ? removeEntry ? "remove-hit" : "search-hit" : "return",
+      key: key4,
+      value: entry?.value ?? "",
+      calculation: calculationFor(key4),
+      path,
+      target: found ?? path.at(-1),
+      message: entry ? removeEntry ? `Removed key ${key4} from bucket ${Math.floor(found / BUCKET_SIZE)}, cell ${found}.` : `Search ${key4} found ${entry.value} in bucket ${Math.floor(found / BUCKET_SIZE)}, cell ${found}.` : `${removeEntry ? "Remove" : "Search"} ${key4} missed across all four buckets.`,
+      commit: entry && removeEntry ? () => {
+        slots[found] = null;
+      } : void 0
+    };
+  }
+  function onPut() {
+    const key4 = suppliedPutKey();
+    if (key4 == null) return;
+    const value = content === "map" ? suppliedPutValue() : "";
+    run6(
+      config.strategy === "closed-addressing" ? closedPut(key4, value) : config.strategy === "open-addressing" ? openPut(key4, value) : bucketPut(key4, value)
+    );
+  }
+  function onSearch(removeEntry = false) {
+    const key4 = content === "map" ? suppliedKey(true) : (() => {
+      const entered = enteredKey();
+      const generated = entered === void 0 ? freshPutKey() : entered;
+      return generated;
+    })();
+    if (key4 == null) return;
+    run6(
+      config.strategy === "closed-addressing" ? closedSearch(key4, removeEntry) : config.strategy === "open-addressing" ? openSearch(key4, removeEntry) : bucketSearch(key4, removeEntry)
+    );
+  }
+  function onReset() {
+    cancelMotion();
+    lock(false);
+    slots.fill(null);
+    for (const chain of chains) chain.splice(0);
+    tombstones.fill(false);
+    clearTransientState();
+    keyInput.value = "";
+    if (valueInput) valueInput.value = "";
+    calculation.textContent = initialCalculation;
+    restoreGenericToken();
+    settleToken();
+    shell.status.textContent = content === "map" ? `${label[0].toUpperCase()}${label.slice(1)} table reset.` : "Hash set reset.";
+    paint();
+  }
+  shell.listen(put, "click", onPut);
+  shell.listen(search, "click", () => onSearch(false));
+  shell.listen(remove, "click", () => onSearch(true));
+  shell.listen(reset, "click", onReset);
+  onEnter(shell, valueInput ?? keyInput, onPut);
+  shell.status.textContent = content === "map" ? `Fixed 12-cell ${label} table ready.` : "Fixed 12-cell hash set ready.";
+  paint();
+  const base = shell.finish();
+  return {
+    destroy() {
+      destroyed = true;
+      cancelMotion();
+      base.destroy();
+    }
+  };
+}
+function bloomSeed(value) {
+  if (/^-?\d+$/.test(value)) {
+    const parsed = Number(value);
+    if (Number.isSafeInteger(parsed)) return parsed;
+  }
+  let seed = 0;
+  for (const character of value) seed = seed * 31 + character.charCodeAt(0) | 0;
+  return seed;
+}
+function bloomPositions(value) {
+  const seed = bloomSeed(value);
+  return [indexFor(seed, 10), indexFor(seed * 3 + 1, 10), indexFor(seed * 7 + 4, 10)];
+}
+function mountBloomFilter(root, _config) {
+  const bits = Array(10).fill(false);
+  let selected = null;
+  let visited = [];
+  let timer = null;
+  let previousGeneratedValue = null;
+  let destroyed = false;
+  const initialCalculation = "three hashes select bits in the 10-bit array";
+  const { shell, operation, token, tokenInline, calculation, cells } = createHashIndexSurface(
+    root,
+    {
+      id: "bloom-filter",
+      label: "Bloom filter",
+      ariaLabel: "Interactive 10-bit Bloom filter",
+      strategy: "bits",
+      size: 10,
+      tokenText: "item",
+      calculation: initialCalculation
+    }
+  );
+  const valueInput = shell.input("Bloom filter value", "Value", 16);
+  const add = shell.button("Add", true);
+  const query = shell.button("Query");
+  const reset = shell.button("Reset");
+  const fields = el("div", "steptrace__hash-fields");
+  const actions = el("div", "steptrace__hash-actions");
+  fields.append(valueInput);
+  actions.append(add, query, reset);
+  shell.controls.classList.add("steptrace__hash-controls");
+  shell.controls.dataset.mode = "bloom";
+  shell.controls.append(fields, actions);
+  const interactive = [valueInput, add, query, reset];
+  function paint() {
+    cells.forEach(({ cell, value }, index) => {
+      value.textContent = bits[index] ? "1" : "0";
+      cell.dataset.empty = bits[index] ? "0" : "1";
+      cell.dataset.probe = selected === index ? "current" : visited.includes(index) ? "visited" : "";
+      cell.setAttribute("aria-label", `bit ${index}, ${bits[index] ? "set to 1" : "set to 0"}`);
+    });
+  }
+  function lock(value) {
+    operation.dataset.busy = value ? "1" : "0";
+    for (const control of interactive) control.disabled = value;
+  }
+  function clearSequence() {
+    if (timer != null) clearTimeout(timer);
+    timer = null;
+    selected = null;
+    visited = [];
+  }
+  function freshValue() {
+    const sampled = String(Math.floor(Math.random() * 90) + 10);
+    const generated = sampled === previousGeneratedValue ? sampled === "99" ? "10" : String(Number(sampled) + 1) : sampled;
+    previousGeneratedValue = generated;
+    return generated;
+  }
+  function suppliedValue() {
+    return valueInput.value.trim() || freshValue();
+  }
+  function finish(outcome, message) {
+    timer = null;
+    selected = null;
+    visited = [];
+    operation.dataset.outcome = outcome;
+    shell.status.textContent = message;
+    tokenInline.textContent = "item";
+    token.dataset.motion = "idle";
+    paint();
+    lock(false);
+  }
+  function run6(kind) {
+    if (timer != null) return;
+    const value = suppliedValue();
+    const positions = bloomPositions(value);
+    calculation.textContent = `${value} → [${positions.join(", ")}]`;
+    tokenInline.textContent = value;
+    token.dataset.motion = "travel";
+    delete operation.dataset.outcome;
+    lock(true);
+    let step = 0;
+    const advance = () => {
+      const index = positions[step];
+      selected = index;
+      visited = [...positions.slice(0, step + 1)];
+      if (kind === "add") bits[index] = true;
+      paint();
+      const completeStep = () => {
+        if (destroyed) return;
+        if (kind === "query" && !bits[index]) {
+          finish("definitely-absent", `Query ${value}: definitely absent; bit ${index} is 0.`);
+          return;
+        }
+        step++;
+        if (step < positions.length) advance();
+        else if (kind === "add")
+          finish("added", `Added ${value}; bits ${positions.join(", ")} are 1.`);
+        else finish("possibly-present", `Query ${value}: possibly present; all three bits are 1.`);
+      };
+      if (shell.reducedMotion()) completeStep();
+      else timer = setTimeout(completeStep, HOP_MS);
+    };
+    advance();
+  }
+  function onReset() {
+    clearSequence();
+    bits.fill(false);
+    valueInput.value = "";
+    calculation.textContent = initialCalculation;
+    tokenInline.textContent = "item";
+    token.dataset.motion = "idle";
+    delete operation.dataset.outcome;
+    lock(false);
+    shell.status.textContent = "Bloom filter reset.";
+    paint();
+  }
+  shell.listen(add, "click", () => run6("add"));
+  shell.listen(query, "click", () => run6("query"));
+  shell.listen(reset, "click", onReset);
+  onEnter(shell, valueInput, () => run6("add"));
+  shell.status.textContent = "Fixed 10-bit Bloom filter ready.";
+  paint();
+  const base = shell.finish();
+  return {
+    destroy() {
+      destroyed = true;
+      clearSequence();
+      base.destroy();
+    }
+  };
+}
+var SIZE, BUCKET_SIZE, CHAIN_CAPACITY, HOP_MS, FINISH_MS, RETURN_MS;
+var init_hash_index = __esm({
+  "custom/steptrace/src/families/hash-index.ts"() {
+    init_render();
+    init_interactive_structure();
+    SIZE = 12;
+    BUCKET_SIZE = 3;
+    CHAIN_CAPACITY = 3;
+    HOP_MS = 320;
+    FINISH_MS = 180;
+    RETURN_MS = 180;
+  }
+});
+
+// custom/steptrace/src/algorithms/bloom-filter.ts
+function parseBloomFilterConfig(config) {
+  if (config.variant != null)
+    throw new Error(`steptrace: bloom-filter does not accept a "variant".`);
+  if (config.capacity != null && config.capacity !== 10)
+    throw new Error(`steptrace: bloom-filter uses fixed "capacity" 10.`);
+  return { capacity: 10 };
+}
+var bloomFilter;
+var init_bloom_filter = __esm({
+  "custom/steptrace/src/algorithms/bloom-filter.ts"() {
+    init_hash_index();
+    bloomFilter = {
+      id: "bloom-filter",
+      family: "hash-index",
+      meta: { label: "Bloom Filter" },
+      parse: parseBloomFilterConfig,
+      mount: mountBloomFilter
+    };
+  }
+});
+
+// custom/steptrace/src/families/heap-selection.ts
+function heapPosition(index) {
+  const depth = Math.floor(Math.log2(index + 1));
+  const offset = index - (2 ** depth - 1);
+  const count = 2 ** depth;
+  return {
+    x: 300 * (2 * offset + 1) / (2 * count),
+    y: 32 + depth * 68
+  };
+}
+function svgEl3(tag, className) {
+  const node2 = document.createElementNS(SVG_NS5, tag);
+  node2.setAttribute("class", className);
+  return node2;
+}
+function makeHeapSelectionView(frames) {
+  const first = frames[0];
+  const root = el("div", "steptrace__heap-selection");
+  root.setAttribute("role", "region");
+  root.setAttribute("aria-label", `Top ${first.k} largest values with a min-heap`);
+  const streamLabel = el("div", "steptrace__rail-label");
+  streamLabel.textContent = "Stream";
+  const stream = makeArrayStrip(first.array);
+  stream.wrap.classList.add("steptrace__heap-stream");
+  stream.wrap.setAttribute("role", "list");
+  stream.wrap.setAttribute("aria-label", "Input stream");
+  stream.cells.forEach((cell, index) => {
+    cell.setAttribute("role", "listitem");
+    cell.setAttribute("aria-label", `Stream value ${first.array[index]}`);
+  });
+  const heapLabel = el("div", "steptrace__rail-label steptrace__heap-tree-label");
+  heapLabel.textContent = `Min-heap · capacity k = ${first.k}`;
+  const heapWrap = el("div", "steptrace__heap-tree");
+  const svg = svgEl3("svg", "steptrace__heap-svg");
+  svg.setAttribute("viewBox", `0 0 300 ${first.k > 3 ? 192 : 124}`);
+  svg.setAttribute("role", "img");
+  svg.setAttribute("aria-label", "Fixed-size min-heap; root is the weakest current winner");
+  const positions = Array.from({ length: first.k }, (_, index) => heapPosition(index));
+  const edges5 = [];
+  for (let index = 1; index < first.k; index++) {
+    const parent = Math.floor((index - 1) / 2);
+    const line = svgEl3("line", "steptrace__edge steptrace__heap-edge");
+    line.setAttribute("x1", String(positions[parent].x));
+    line.setAttribute("y1", String(positions[parent].y));
+    line.setAttribute("x2", String(positions[index].x));
+    line.setAttribute("y2", String(positions[index].y));
+    svg.append(line);
+    edges5.push({ line, parent, child: index });
+  }
+  const nodes5 = positions.map((position, index) => {
+    const group = svgEl3("g", "steptrace__node steptrace__heap-node");
+    group.setAttribute("transform", `translate(${position.x} ${position.y})`);
+    const circle = svgEl3("circle", "steptrace__ncirc");
+    circle.setAttribute("r", String(GRAPH_NODE_RADIUS_PX));
+    const value = svgEl3("text", "steptrace__id");
+    value.setAttribute("text-anchor", "middle");
+    value.setAttribute("dominant-baseline", "central");
+    const rootTag = svgEl3("text", "steptrace__heap-root-label");
+    rootTag.setAttribute("text-anchor", "middle");
+    rootTag.setAttribute("y", "-23");
+    rootTag.textContent = index === 0 ? "weakest winner" : "";
+    group.append(circle, value, rootTag);
+    svg.append(group);
+    return { group, value, rootTag };
+  });
+  heapWrap.append(svg);
+  root.append(streamLabel, stream.wrap, heapLabel, heapWrap);
+  const geometry = observeFixedSvgNodes(
+    svg,
+    nodes5.map(({ group }, index) => ({
+      element: group,
+      point: positions[index]
+    })),
+    (unitsPerCssPixel) => {
+      const radius = GRAPH_NODE_RADIUS_PX * unitsPerCssPixel;
+      for (const { line, parent, child } of edges5) {
+        const trimmed = trimGraphEdge(positions[parent], positions[child], radius);
+        line.setAttribute("x1", String(trimmed.x1));
+        line.setAttribute("y1", String(trimmed.y1));
+        line.setAttribute("x2", String(trimmed.x2));
+        line.setAttribute("y2", String(trimmed.y2));
+      }
+    }
+  );
+  const rejected = el("span");
+  rejected.innerHTML = ICON.x;
+  const legend = makeLegend(
+    [
+      { label: "incoming", swatchClass: "steptrace__heap-swatch steptrace__heap-swatch--current" },
+      {
+        label: "retained winner",
+        swatchClass: "steptrace__heap-swatch steptrace__heap-swatch--winner",
+        marker: successMarker()
+      },
+      {
+        label: "weakest root",
+        swatchClass: "steptrace__heap-swatch steptrace__heap-swatch--weakest"
+      },
+      {
+        label: "rejected / evicted",
+        swatchClass: "steptrace__heap-swatch steptrace__heap-swatch--rejected",
+        marker: rejected
+      }
+    ],
+    "Heap selection state legend"
+  );
+  const status = statusEl();
+  function paint(frame) {
+    const retained = new Set(frame.heap.map((entry) => entry.source));
+    const rejected2 = /* @__PURE__ */ new Set([...frame.rejected, ...frame.evicted]);
+    stream.cells.forEach((cell, index) => {
+      const state = index === frame.cursor ? "current" : retained.has(index) ? "winner" : rejected2.has(index) ? "rejected" : index < (frame.cursor ?? frame.array.length) ? "seen" : "";
+      cell.dataset.state = state;
+      cell.setAttribute("aria-current", index === frame.cursor ? "step" : "false");
+      cell.setAttribute(
+        "aria-label",
+        `Stream value ${frame.array[index]}, ${state === "winner" ? "retained winner" : state === "rejected" ? "rejected or evicted" : state || "unseen"}`
+      );
+    });
+    const compared = new Set(frame.compared ?? []);
+    nodes5.forEach(({ group, value, rootTag }, index) => {
+      const entry = frame.heap[index];
+      const visible = entry != null;
+      value.textContent = visible ? String(entry.value) : "";
+      group.dataset.visible = visible ? "1" : "0";
+      group.setAttribute("aria-hidden", visible ? "false" : "true");
+      rootTag.dataset.visible = index === 0 && visible ? "1" : "0";
+      group.dataset.state = compared.has(index) ? frame.type.startsWith("swap") ? "swap" : "compare" : index === 0 && entry ? "weakest" : entry ? "winner" : "empty";
+      group.setAttribute(
+        "aria-label",
+        entry ? `Heap slot ${index}, value ${entry.value}${index === 0 ? ", weakest current winner" : ""}` : `Heap slot ${index}, empty`
+      );
+    });
+    for (const { line, child } of edges5)
+      line.dataset.visible = frame.heap[child] == null ? "0" : "1";
+    status.textContent = frame.message;
+  }
+  const watch = (frame) => [
+    {
+      k: "incoming",
+      v: frame.cursor == null ? "complete" : frame.array[frame.cursor],
+      sw: "var(--_blue)"
+    },
+    {
+      k: "weakest root",
+      v: frame.heap[0]?.value ?? "empty",
+      sw: "var(--_amber)",
+      hint: "Smallest retained value; this is the only winner a newcomer must beat."
+    },
+    {
+      k: "heap",
+      v: `[${frame.heap.map((entry) => entry.value).join(", ")}]`,
+      sw: "var(--_green)",
+      hint: "Heap order, not globally sorted order."
+    },
+    { k: "decision", v: frame.decision, sw: "var(--_violet)" }
+  ];
+  return {
+    nodes: [root, legend, status],
+    stageLayout: "fill",
+    stableStage: true,
+    paint,
+    watch,
+    summary(frame) {
+      return `Top ${frame.k}: heap [${frame.heap.map((entry) => entry.value).join(", ")}] · root ${frame.heap[0]?.value} is the weakest winner · not globally sorted.`;
+    },
+    destroy: geometry.destroy
+  };
+}
+var HeapSelectionRecorder, SVG_NS5, heapSelectionFamily;
+var init_heap_selection = __esm({
+  "custom/steptrace/src/families/heap-selection.ts"() {
+    init_render();
+    init_graph_node();
+    HeapSelectionRecorder = class {
+      constructor(config) {
+        this.config = config;
+      }
+      config;
+      frames = [];
+      cursor = null;
+      heap = [];
+      compared = null;
+      rejected = [];
+      evicted = [];
+      decision = "fill the heap";
+      comparisons = 0;
+      swaps = 0;
+      init(message) {
+        this.record("init", message);
+      }
+      read(index, message) {
+        this.cursor = index;
+        this.compared = null;
+        this.decision = this.heap.length < this.config.k ? "fill" : "compare with root";
+        this.record("read", message);
+      }
+      insert(index, message) {
+        this.heap.push({ value: this.config.array[index], source: index });
+        this.compared = null;
+        this.decision = "insert";
+        this.record("insert", message);
+      }
+      compareParent(child, parent, message) {
+        this.compared = [child, parent];
+        this.comparisons++;
+        this.decision = "repair upward";
+        this.record("compare-parent", message);
+      }
+      swapUp(child, parent, message) {
+        ;
+        [this.heap[parent], this.heap[child]] = [this.heap[child], this.heap[parent]];
+        this.compared = [child, parent];
+        this.swaps++;
+        this.decision = "swap upward";
+        this.record("swap-up", message);
+      }
+      compareRoot(index, message) {
+        this.cursor = index;
+        this.compared = this.heap.length ? [0, 0] : null;
+        this.comparisons++;
+        this.decision = `${this.config.array[index]} vs root ${this.heap[0]?.value ?? "—"}`;
+        this.record("compare-root", message);
+      }
+      reject(index, message) {
+        this.rejected.push(index);
+        this.compared = null;
+        this.decision = "reject";
+        this.record("reject", message);
+      }
+      replaceRoot(index, message) {
+        const previous = this.heap[0];
+        if (!previous) throw new Error("steptrace: cannot replace the root of an empty top-k heap.");
+        this.evicted.push(previous.source);
+        this.heap[0] = { value: this.config.array[index], source: index };
+        this.compared = [0, 0];
+        this.decision = "replace root";
+        this.record("replace-root", message);
+      }
+      compareChildren(left, right, message) {
+        this.compared = [left, right];
+        this.comparisons++;
+        this.decision = "choose weaker child";
+        this.record("compare-children", message);
+      }
+      compareDown(parent, child, message) {
+        this.compared = [parent, child];
+        this.comparisons++;
+        this.decision = "repair downward";
+        this.record("compare-down", message);
+      }
+      swapDown(parent, child, message) {
+        ;
+        [this.heap[parent], this.heap[child]] = [this.heap[child], this.heap[parent]];
+        this.compared = [parent, child];
+        this.swaps++;
+        this.decision = "swap downward";
+        this.record("swap-down", message);
+      }
+      done(message) {
+        this.cursor = null;
+        this.compared = null;
+        this.decision = "top k retained · heap order";
+        this.record("done", message);
+      }
+      record(type, message) {
+        this.frames.push(
+          Object.freeze({
+            type,
+            profile: this.config.profile,
+            array: this.config.array,
+            k: this.config.k,
+            cursor: this.cursor,
+            heap: this.heap.map((entry) => ({ ...entry })),
+            compared: this.compared ? [...this.compared] : null,
+            rejected: this.rejected.slice(),
+            evicted: this.evicted.slice(),
+            decision: this.decision,
+            comparisons: this.comparisons,
+            swaps: this.swaps,
+            message
+          })
+        );
+      }
+    };
+    SVG_NS5 = "http://www.w3.org/2000/svg";
+    heapSelectionFamily = {
+      id: "heap-selection",
+      createRecorder(config) {
+        return new HeapSelectionRecorder(config);
+      },
+      createView(frames) {
+        return makeHeapSelectionView(frames);
+      }
+    };
+  }
+});
+
+// custom/steptrace/src/families/heap-structure.ts
+function svgEl4(tag, className) {
+  const node2 = document.createElementNS(SVG_NS6, tag);
+  node2.setAttribute("class", className);
+  return node2;
+}
+function mountHeap(root, config) {
+  const shell = createStructureShell(
+    root,
+    "heap",
+    "heap",
+    "Interactive binary min-heap",
+    "heap-selection",
+    "steptrace__heap-structure"
+  );
+  const initial = [...config.values];
+  const values = [...initial];
+  let path = [];
+  let settled = null;
+  let geometry = null;
+  const treeLabel = el("div", "steptrace__rail-label");
+  treeLabel.textContent = "Min-heap tree";
+  const tree = el("div", "steptrace__heap-structure-tree");
+  const arrayLabel = el("div", "steptrace__rail-label steptrace__heap-array-label");
+  arrayLabel.textContent = "Backing array";
+  const arrayWrap = el("div", "steptrace__heap-array");
+  const board = createIndexedBoard(arrayWrap, values.length, "Binary heap backing array");
+  shell.stage.append(treeLabel, tree, arrayLabel, arrayWrap);
+  const input = shell.input("Value to insert", "Value", 8);
+  input.type = "number";
+  input.step = "1";
+  const insert = shell.button("Insert", true);
+  const extract = shell.button("Extract min");
+  const reset = shell.button("Reset");
+  shell.controls.append(input, insert, extract, reset);
+  function paintTree() {
+    geometry?.destroy();
+    tree.replaceChildren();
+    if (!values.length) {
+      geometry = null;
+      const empty = el("div", "steptrace__heap-empty");
+      empty.textContent = "empty heap";
+      tree.append(empty);
+      return;
+    }
+    const depth = Math.floor(Math.log2(values.length));
+    const svg = svgEl4("svg", "steptrace__heap-svg");
+    svg.setAttribute("viewBox", `0 0 300 ${64 + depth * 68}`);
+    svg.setAttribute("role", "img");
+    svg.setAttribute("aria-label", `Binary min-heap tree with ${values.length} values`);
+    const positions = values.map((_, index) => heapPosition(index));
+    const pathEdges = new Set(
+      path.slice(1).map((index, offset) => {
+        const previous = path[offset];
+        return `${Math.min(previous, index)}:${Math.max(previous, index)}`;
+      })
+    );
+    const edges5 = [];
+    for (let child = 1; child < values.length; child++) {
+      const parent = Math.floor((child - 1) / 2);
+      const line = svgEl4("line", "steptrace__edge steptrace__heap-edge");
+      line.dataset.path = pathEdges.has(`${parent}:${child}`) ? "1" : "0";
+      svg.append(line);
+      edges5.push({ line, parent, child });
+    }
+    const nodes5 = positions.map((position, index) => {
+      const group = svgEl4("g", "steptrace__node steptrace__heap-node");
+      group.dataset.visible = "1";
+      group.dataset.state = index === settled ? "settled" : path.includes(index) ? "compare" : "neutral";
+      group.setAttribute("aria-label", `Heap index ${index}, value ${values[index]}`);
+      const circle = svgEl4("circle", "steptrace__ncirc");
+      circle.setAttribute("r", String(GRAPH_NODE_RADIUS_PX));
+      const value = svgEl4("text", "steptrace__id");
+      value.setAttribute("text-anchor", "middle");
+      value.setAttribute("dominant-baseline", "central");
+      value.textContent = String(values[index]);
+      group.append(circle, value);
+      svg.append(group);
+      return { group, position };
+    });
+    tree.append(svg);
+    geometry = observeFixedSvgNodes(
+      svg,
+      nodes5.map(({ group, position }) => ({
+        element: group,
+        point: position
+      })),
+      (unitsPerCssPixel) => {
+        const radius = GRAPH_NODE_RADIUS_PX * unitsPerCssPixel;
+        for (const { line, parent, child } of edges5) {
+          const trimmed = trimGraphEdge(positions[parent], positions[child], radius);
+          line.setAttribute("x1", String(trimmed.x1));
+          line.setAttribute("y1", String(trimmed.y1));
+          line.setAttribute("x2", String(trimmed.x2));
+          line.setAttribute("y2", String(trimmed.y2));
+        }
+      }
+    );
+  }
+  function paint(message = "") {
+    board.paint(
+      values.map((value, index) => ({
+        value: String(value),
+        active: path.includes(index),
+        changed: index === settled,
+        ariaLabel: `heap index ${index}, value ${value}`
+      }))
+    );
+    paintTree();
+    shell.setCounter(String(values.length), values.length === 1 ? " value" : " values");
+    shell.status.textContent = message || "Insert a finite integer, or extract the root and repair heap order.";
+    extract.disabled = values.length === 0;
+  }
+  function onInsert() {
+    const raw = input.value.trim();
+    const value = raw === "" ? Math.floor(Math.random() * 90) + 10 : Number(raw);
+    if (!Number.isFinite(value) || !Number.isInteger(value)) {
+      shell.status.textContent = "Value must be a finite integer.";
+      return;
+    }
+    values.push(value);
+    path = [values.length - 1];
+    let child = values.length - 1;
+    let swaps = 0;
+    while (child > 0) {
+      const parent = Math.floor((child - 1) / 2);
+      path.push(parent);
+      if (values[parent] <= values[child]) break;
+      [values[parent], values[child]] = [values[child], values[parent]];
+      child = parent;
+      swaps++;
+    }
+    settled = child;
+    input.value = "";
+    paint(
+      `Inserted ${value}; sift-up path ${path.join(" → ")}${swaps ? ` with ${swaps} swap${swaps === 1 ? "" : "s"}` : " already satisfied heap order"}.`
+    );
+  }
+  function onExtract() {
+    if (!values.length) return;
+    const minimum = values[0];
+    const last = values.pop();
+    path = [];
+    settled = null;
+    let swaps = 0;
+    if (values.length && last != null) {
+      values[0] = last;
+      let parent = 0;
+      path.push(parent);
+      while (true) {
+        const left = parent * 2 + 1;
+        if (left >= values.length) break;
+        const right = left + 1;
+        const child = right < values.length && values[right] < values[left] ? right : left;
+        path.push(child);
+        if (values[parent] <= values[child]) break;
+        [values[parent], values[child]] = [values[child], values[parent]];
+        parent = child;
+        swaps++;
+      }
+      settled = parent;
+    }
+    paint(
+      `Extracted minimum ${minimum}${path.length ? `; sift-down path ${path.join(" → ")} with ${swaps} swap${swaps === 1 ? "" : "s"}` : "; heap is now empty"}.`
+    );
+  }
+  function onReset() {
+    values.splice(0, values.length, ...initial);
+    path = [];
+    settled = null;
+    input.value = "";
+    paint("Reset the heap to its initial state.");
+  }
+  shell.listen(insert, "click", onInsert);
+  shell.listen(extract, "click", onExtract);
+  shell.listen(reset, "click", onReset);
+  onEnter(shell, input, onInsert);
+  paint();
+  const handle = shell.finish();
+  return {
+    destroy() {
+      geometry?.destroy();
+      handle.destroy();
+    }
+  };
+}
+function paintForest(target, roots, options) {
+  target.replaceChildren();
+  if (!roots.length) {
+    const empty = el("div", "steptrace__heap-empty");
+    empty.textContent = "empty forest";
+    target.append(empty);
+    return { destroy() {
+    } };
+  }
+  const widths = /* @__PURE__ */ new Map();
+  const measure = (node2) => {
+    const width = Math.max(
+      1,
+      node2.children.reduce((sum, child) => sum + measure(child), 0)
+    );
+    widths.set(node2.id, width);
+    return width;
+  };
+  const totalWidth = roots.reduce((sum, root) => sum + measure(root), 0);
+  const positions = /* @__PURE__ */ new Map();
+  let maxDepth = 0;
+  const place = (node2, left2, depth) => {
+    maxDepth = Math.max(maxDepth, depth);
+    const width = widths.get(node2.id) ?? 1;
+    positions.set(node2.id, { x: 28 + (left2 + width / 2) * 66, y: 34 + depth * 62 });
+    let childLeft = left2;
+    for (const child of node2.children) {
+      place(child, childLeft, depth + 1);
+      childLeft += widths.get(child.id) ?? 1;
+    }
+  };
+  let left = 0;
+  for (const root of roots) {
+    place(root, left, 0);
+    left += widths.get(root.id) ?? 1;
+  }
+  const svg = svgEl4("svg", "steptrace__heap-svg steptrace__heap-forest-svg");
+  svg.setAttribute("viewBox", `0 0 ${Math.max(180, 56 + totalWidth * 66)} ${74 + maxDepth * 62}`);
+  svg.setAttribute("role", "img");
+  svg.setAttribute("aria-label", options.ariaLabel);
+  const edges5 = [];
+  const flat = [];
+  const visit = (node2) => {
+    flat.push(node2);
+    for (const child of node2.children) {
+      const line = svgEl4("line", "steptrace__edge steptrace__heap-edge");
+      line.dataset.path = options.active?.has(node2.id) && options.active.has(child.id) ? "1" : "0";
+      svg.append(line);
+      edges5.push({ line, from: node2, to: child });
+      visit(child);
+    }
+  };
+  roots.forEach(visit);
+  const nodes5 = flat.map((node2) => {
+    const point = positions.get(node2.id);
+    const group = svgEl4("g", "steptrace__node steptrace__heap-node");
+    group.dataset.visible = "1";
+    group.dataset.state = options.settled?.has(node2.id) ? "settled" : options.active?.has(node2.id) ? "compare" : "neutral";
+    group.setAttribute(
+      "aria-label",
+      `Heap node ${node2.key}${node2.marked ? ", marked" : ""}${node2.npl ? `, npl ${node2.npl}` : ""}`
+    );
+    const circle = svgEl4("circle", "steptrace__ncirc");
+    circle.setAttribute("r", String(GRAPH_NODE_RADIUS_PX));
+    const value = svgEl4("text", "steptrace__id");
+    value.setAttribute("text-anchor", "middle");
+    value.setAttribute("dominant-baseline", "central");
+    value.textContent = String(node2.key);
+    group.append(circle, value);
+    const detail = options.meta?.(node2);
+    if (detail) {
+      const meta = svgEl4("text", "steptrace__heap-node-meta");
+      meta.setAttribute("text-anchor", "middle");
+      meta.setAttribute("y", "23");
+      meta.textContent = detail;
+      group.append(meta);
+    }
+    const rootLabel = options.rootMeta?.get(node2.id);
+    if (rootLabel) {
+      const meta = svgEl4("text", "steptrace__heap-root-label");
+      meta.setAttribute("text-anchor", "middle");
+      meta.setAttribute("y", "-20");
+      meta.textContent = rootLabel;
+      group.append(meta);
+    }
+    if (node2.marked) {
+      const mark = svgEl4("circle", "steptrace__heap-mark");
+      mark.setAttribute("cx", "11");
+      mark.setAttribute("cy", "-11");
+      mark.setAttribute("r", "4");
+      group.append(mark);
+    }
+    svg.append(group);
+    return { element: group, point };
+  });
+  target.append(svg);
+  return observeFixedSvgNodes(svg, nodes5, (unitsPerCssPixel) => {
+    const radius = GRAPH_NODE_RADIUS_PX * unitsPerCssPixel;
+    for (const { line, from, to } of edges5) {
+      const trimmed = trimGraphEdge(positions.get(from.id), positions.get(to.id), radius);
+      line.setAttribute("x1", String(trimmed.x1));
+      line.setAttribute("y1", String(trimmed.y1));
+      line.setAttribute("x2", String(trimmed.x2));
+      line.setAttribute("y2", String(trimmed.y2));
+    }
+  });
+}
+function mountBinomialQueue(root, _config) {
+  const shell = createStructureShell(
+    root,
+    "binomial-queue",
+    "binomial queue",
+    "Interactive binomial queue meld",
+    "heap-selection",
+    "steptrace__heap-structure steptrace__heap-variant"
+  );
+  const treeLabel = el("div", "steptrace__rail-label");
+  treeLabel.textContent = "Two forests · 3 + 1 values";
+  const tree = el("div", "steptrace__heap-structure-tree");
+  const slotLabel = el("div", "steptrace__rail-label steptrace__heap-array-label");
+  slotLabel.textContent = "Forest slots · binary carry";
+  const slotWrap = el("div", "steptrace__heap-array");
+  const slots = createIndexedBoard(slotWrap, 3, "Binomial forest slots by order");
+  shell.stage.append(treeLabel, tree, slotLabel, slotWrap);
+  const meld = shell.button("Meld", true);
+  const reset = shell.button("Reset");
+  shell.controls.append(meld, reset);
+  const first = {
+    id: "a1",
+    key: 2,
+    children: [{ id: "a2", key: 9, children: [] }]
+  };
+  const loose = { id: "a0", key: 7, children: [] };
+  const second = { id: "b0", key: 3, children: [] };
+  const result = {
+    id: "r2",
+    key: 2,
+    children: [
+      { id: "r1", key: 3, children: [{ id: "r0", key: 7, children: [] }] },
+      { id: "r9", key: 9, children: [] }
+    ]
+  };
+  let phase = 0;
+  let geometry = null;
+  function paint(message = "") {
+    geometry?.destroy();
+    const rootMeta = /* @__PURE__ */ new Map();
+    const carry = {
+      id: "carry1",
+      key: 3,
+      children: [{ id: "carry0", key: 7, children: [] }]
+    };
+    if (phase === 0) {
+      rootMeta.set(first.id, "A · B₁");
+      rootMeta.set(loose.id, "A · B₀");
+      rootMeta.set(second.id, "B · B₀");
+    } else if (phase === 1) {
+      rootMeta.set(first.id, "A · B₁");
+      rootMeta.set(carry.id, "carry · B₁");
+    } else rootMeta.set(result.id, "result · B₂");
+    geometry = paintForest(
+      tree,
+      phase === 0 ? [first, loose, second] : phase === 1 ? [first, carry] : [result],
+      {
+        active: phase === 0 ? /* @__PURE__ */ new Set(["a0", "b0"]) : phase === 1 ? /* @__PURE__ */ new Set(["a1", "carry1"]) : /* @__PURE__ */ new Set(["r2", "r1", "r0"]),
+        settled: phase === 2 ? /* @__PURE__ */ new Set(["r2"]) : phase === 1 ? /* @__PURE__ */ new Set(["carry1"]) : void 0,
+        rootMeta,
+        ariaLabel: phase === 0 ? "Two binomial forests containing three and one values" : phase === 1 ? "First link produced an order one carry" : "Melded binomial queue with one order two tree"
+      }
+    );
+    slots.paint(
+      phase === 2 ? [
+        { value: null, label: "B₀", ariaLabel: "order zero empty after carry" },
+        { value: null, label: "B₁", ariaLabel: "order one empty after carry" },
+        {
+          value: "2",
+          label: "B₂",
+          changed: true,
+          ariaLabel: "order two tree rooted at 2"
+        }
+      ] : phase === 1 ? [
+        { value: null, label: "B₀", ariaLabel: "order zero emptied into carry" },
+        {
+          value: "2 + 3",
+          label: "B₁",
+          active: true,
+          ariaLabel: "existing order one tree and order one carry collide"
+        },
+        { value: null, label: "B₂", ariaLabel: "order two empty" }
+      ] : [
+        {
+          value: "7 + 3",
+          label: "B₀",
+          active: true,
+          ariaLabel: "two order zero trees collide"
+        },
+        { value: "2", label: "B₁", ariaLabel: "one order one tree rooted at 2" },
+        { value: null, label: "B₂", ariaLabel: "order two empty" }
+      ]
+    );
+    shell.setCounter(
+      phase === 2 ? "1" : phase === 1 ? "2" : "3",
+      phase === 2 ? " tree" : " roots"
+    );
+    shell.status.textContent = message || "Meld the 3-value forest with the singleton; equal orders link and carry right.";
+    meld.textContent = phase === 0 ? "Meld" : phase === 1 ? "Continue carry" : "Melded";
+    meld.disabled = phase === 2;
+  }
+  shell.listen(meld, "click", () => {
+    phase++;
+    paint(
+      phase === 1 ? "B₀ + B₀ links into a B₁ carry; the next B₁ slot is already occupied." : "B₁ + B₁ links again, carrying one B₂ tree into the empty order-2 slot."
+    );
+  });
+  shell.listen(reset, "click", () => {
+    phase = 0;
+    paint("Reset to two forests holding 3 and 1 values.");
+  });
+  paint();
+  const handle = shell.finish();
+  return {
+    destroy() {
+      geometry?.destroy();
+      handle.destroy();
+    }
+  };
+}
+function mountFibonacciHeap(root, config) {
+  const shell = createStructureShell(
+    root,
+    "fibonacci-heap",
+    "fibonacci heap",
+    "Interactive Fibonacci heap",
+    "heap-selection",
+    "steptrace__heap-structure steptrace__heap-variant"
+  );
+  const treeLabel = el("div", "steptrace__rail-label");
+  treeLabel.textContent = "Lazy forest";
+  const tree = el("div", "steptrace__heap-structure-tree");
+  const rootsLabel = el("div", "steptrace__rail-label steptrace__heap-array-label");
+  rootsLabel.textContent = "Root list";
+  const rootWrap = el("div", "steptrace__heap-array");
+  const board = createIndexedBoard(rootWrap, 0, "Fibonacci heap root list");
+  shell.stage.append(treeLabel, tree, rootsLabel, rootWrap);
+  const insertInput = shell.input("Value to insert", "Value", 8);
+  insertInput.type = "number";
+  const insert = shell.button("Insert", true);
+  const extract = shell.button("Extract min");
+  const currentInput = shell.input("Current key", "Current", 8);
+  currentInput.type = "number";
+  const newInput = shell.input("Decreased key", "New key", 8);
+  newInput.type = "number";
+  const decrease = shell.button("Decrease key");
+  const reset = shell.button("Reset");
+  shell.controls.append(insertInput, insert, extract, currentInput, newInput, decrease, reset);
+  let nextId = 0;
+  let roots = [];
+  let active = /* @__PURE__ */ new Set();
+  let settled = /* @__PURE__ */ new Set();
+  let operationCuts = 0;
+  let geometry = null;
+  const allNodes = () => {
+    const found = [];
+    const visit = (node2) => {
+      found.push(node2);
+      node2.children.forEach(visit);
+    };
+    roots.forEach(visit);
+    return found;
+  };
+  const minimum = () => roots.reduce((best, node2) => node2.key < best.key ? node2 : best);
+  function insertValue(key4) {
+    const node2 = {
+      id: `f${nextId++}`,
+      key: key4,
+      children: [],
+      parent: null,
+      marked: false
+    };
+    roots.push(node2);
+    active = /* @__PURE__ */ new Set([node2.id]);
+    settled = /* @__PURE__ */ new Set([minimum().id]);
+    return node2;
+  }
+  function link(child, parent) {
+    child.parent = parent;
+    child.marked = false;
+    parent.children.push(child);
+  }
+  function consolidate() {
+    const byDegree = /* @__PURE__ */ new Map();
+    for (const start of roots) {
+      let node2 = start;
+      let degree = node2.children.length;
+      while (byDegree.has(degree)) {
+        let other = byDegree.get(degree);
+        byDegree.delete(degree);
+        if (other.key < node2.key) [node2, other] = [other, node2];
+        link(other, node2);
+        active.add(node2.id);
+        active.add(other.id);
+        degree = node2.children.length;
+      }
+      byDegree.set(degree, node2);
+    }
+    roots = [...byDegree.values()];
+    roots.forEach((node2) => {
+      node2.parent = null;
+      node2.marked = false;
+    });
+  }
+  function cut(node2, parent) {
+    parent.children = parent.children.filter((child) => child !== node2);
+    node2.parent = null;
+    node2.marked = false;
+    roots.push(node2);
+    active.add(node2.id);
+    active.add(parent.id);
+    operationCuts++;
+  }
+  function cascadingCut(node2) {
+    const parent = node2.parent;
+    if (!parent) return;
+    if (!node2.marked) node2.marked = true;
+    else {
+      cut(node2, parent);
+      cascadingCut(parent);
+    }
+  }
+  function paint(message = "") {
+    geometry?.destroy();
+    const rootMeta = new Map(roots.map((node2) => [node2.id, `d${node2.children.length}`]));
+    geometry = paintForest(tree, roots, {
+      active,
+      settled,
+      meta: (node2) => node2.marked ? "marked" : "",
+      rootMeta,
+      ariaLabel: `Fibonacci heap forest with ${allNodes().length} values and ${roots.length} roots`
+    });
+    board.paint(
+      roots.map((node2) => ({
+        value: String(node2.key),
+        label: `d${node2.children.length}`,
+        active: active.has(node2.id),
+        changed: settled.has(node2.id),
+        ariaLabel: `root ${node2.key}, degree ${node2.children.length}${settled.has(node2.id) ? ", minimum" : ""}`
+      }))
+    );
+    const count = allNodes().length;
+    shell.setCounter(String(count), count === 1 ? " value" : " values");
+    shell.status.textContent = message || "This forest was built by public inserts; extract-min consolidates, decrease-key cuts.";
+    extract.disabled = roots.length === 0;
+    decrease.disabled = count === 0;
+  }
+  function onInsert() {
+    const raw = insertInput.value.trim();
+    const value = raw === "" ? Math.floor(Math.random() * 90) + 10 : Number(raw);
+    if (!Number.isInteger(value)) {
+      shell.status.textContent = "Value must be a finite integer.";
+      return;
+    }
+    insertValue(value);
+    insertInput.value = "";
+    paint(`Inserted ${value} as a new degree-0 root; no consolidation work is done yet.`);
+  }
+  function onExtract() {
+    if (!roots.length) return;
+    active = /* @__PURE__ */ new Set();
+    settled = /* @__PURE__ */ new Set();
+    const min = minimum();
+    roots = roots.filter((node2) => node2 !== min);
+    for (const child of min.children) {
+      child.parent = null;
+      child.marked = false;
+      roots.push(child);
+      active.add(child.id);
+    }
+    if (roots.length) {
+      consolidate();
+      settled.add(minimum().id);
+    }
+    paint(
+      `Extracted minimum ${min.key}; promoted its children and consolidated equal degrees.${allNodes().some((node2) => node2.key === 41) && allNodes().some((node2) => node2.key === 52) ? " Next: decrease 41 to 5, then 52 to 4 to see a mark and cascading cut." : ""}`
+    );
+  }
+  function onDecrease() {
+    const current = Number(currentInput.value);
+    const next = Number(newInput.value);
+    const node2 = allNodes().find((candidate) => candidate.key === current);
+    if (!Number.isInteger(current) || !Number.isInteger(next) || !node2 || next >= current) {
+      shell.status.textContent = "Enter an existing current key and a smaller finite integer as the new key.";
+      return;
+    }
+    active = /* @__PURE__ */ new Set([node2.id]);
+    settled = /* @__PURE__ */ new Set();
+    operationCuts = 0;
+    node2.key = next;
+    const parent = node2.parent;
+    let cutOccurred = false;
+    if (parent && node2.key < parent.key) {
+      cut(node2, parent);
+      cascadingCut(parent);
+      cutOccurred = true;
+    }
+    settled.add(minimum().id);
+    currentInput.value = "";
+    newInput.value = "";
+    paint(
+      `Decreased ${current} to ${next}${operationCuts > 1 ? `; the cut removed a second child, so marked parent ${parent?.key} cascaded to the root list` : cutOccurred && parent?.marked ? `; the node was cut and parent ${parent.key} is now marked after its first child loss. Decrease 52 to 4 next to cascade` : cutOccurred ? "; heap order broke, so the node was cut to the root list" : ""}.`
+    );
+  }
+  function onReset() {
+    nextId = 0;
+    roots = [];
+    active = /* @__PURE__ */ new Set();
+    settled = /* @__PURE__ */ new Set();
+    operationCuts = 0;
+    config.values.forEach(insertValue);
+    active.clear();
+    settled = roots.length ? /* @__PURE__ */ new Set([minimum().id]) : /* @__PURE__ */ new Set();
+    paint("Reset by replaying the configured values through public insert operations.");
+  }
+  shell.listen(insert, "click", onInsert);
+  shell.listen(extract, "click", onExtract);
+  shell.listen(decrease, "click", onDecrease);
+  shell.listen(reset, "click", onReset);
+  onEnter(shell, insertInput, onInsert);
+  onReset();
+  const handle = shell.finish();
+  return {
+    destroy() {
+      geometry?.destroy();
+      handle.destroy();
+    }
+  };
+}
+function npl(node2) {
+  return node2?.npl ?? 0;
+}
+function canonicalMergeHeaps() {
+  return [
+    {
+      id: "a2",
+      key: 2,
+      npl: 2,
+      children: [
+        { id: "a7", key: 7, npl: 1, children: [void 0, void 0] },
+        { id: "a10", key: 10, npl: 1, children: [void 0, void 0] }
+      ]
+    },
+    {
+      id: "b3",
+      key: 3,
+      npl: 2,
+      children: [
+        { id: "b5", key: 5, npl: 1, children: [void 0, void 0] },
+        { id: "b8", key: 8, npl: 1, children: [void 0, void 0] }
+      ]
+    }
+  ];
+}
+function cloneBinary(node2) {
+  return {
+    ...node2,
+    children: [
+      node2.children[0] ? cloneBinary(node2.children[0]) : void 0,
+      node2.children[1] ? cloneBinary(node2.children[1]) : void 0
+    ]
+  };
+}
+function mergeBinaryHeaps(first, second, mode, active, swapped) {
+  if (!first) return second;
+  if (!second) return first;
+  if (first.key > second.key) [first, second] = [second, first];
+  active.add(first.id);
+  active.add(second.id);
+  first.children[1] = mergeBinaryHeaps(first.children[1], second, mode, active, swapped);
+  if (mode === "skew" || npl(first.children[0]) < npl(first.children[1])) {
+    ;
+    [first.children[0], first.children[1]] = [first.children[1], first.children[0]];
+    swapped.add(first.id);
+  }
+  first.npl = npl(first.children[1]) + 1;
+  return first;
+}
+function forestBinary(node2) {
+  return {
+    ...node2,
+    children: node2.children.filter(Boolean).map((child) => forestBinary(child))
+  };
+}
+function mountMergeHeap(root, mode) {
+  const label = mode === "leftist" ? "leftist heap" : "skew heap";
+  const shell = createStructureShell(
+    root,
+    `${mode}-heap`,
+    label,
+    `Interactive ${label} meld`,
+    "heap-selection",
+    "steptrace__heap-structure steptrace__heap-variant steptrace__merge-heap"
+  );
+  const treeLabel = el("div", "steptrace__rail-label");
+  treeLabel.textContent = "Two heaps · [2, 7, 10] + [3, 5, 8]";
+  const tree = el("div", "steptrace__heap-structure-tree");
+  const ruleLabel = el("div", "steptrace__heap-rule");
+  ruleLabel.textContent = mode === "leftist" ? "Conditional swap · keep npl(left) ≥ npl(right)" : "Unconditional swap · every touched node";
+  shell.stage.append(treeLabel, tree, ruleLabel);
+  const merge2 = shell.button("Merge", true);
+  const reset = shell.button("Reset");
+  shell.controls.append(merge2, reset);
+  let [first, second] = canonicalMergeHeaps();
+  let result;
+  let active = /* @__PURE__ */ new Set();
+  let swapped = /* @__PURE__ */ new Set();
+  let geometry = null;
+  function paint(message = "") {
+    geometry?.destroy();
+    const roots = result ? [forestBinary(result)] : [forestBinary(first), forestBinary(second)];
+    const rootMeta = /* @__PURE__ */ new Map();
+    if (!result) {
+      rootMeta.set(first.id, "heap A");
+      rootMeta.set(second.id, "heap B");
+    } else rootMeta.set(result.id, "merged");
+    geometry = paintForest(tree, roots, {
+      active,
+      settled: swapped,
+      meta: mode === "leftist" ? (node2) => `npl ${node2.npl}` : void 0,
+      rootMeta,
+      ariaLabel: `${label} ${result ? "merged result" : "two input heaps"}`
+    });
+    shell.setCounter(result ? "1" : "2", result ? " heap" : " heaps");
+    shell.status.textContent = message || (mode === "leftist" ? "Merge follows the right spines and swaps only when the npl invariant requires it." : "Merge follows the right spines and swaps children at every touched node.");
+    merge2.disabled = Boolean(result);
+  }
+  shell.listen(merge2, "click", () => {
+    active = /* @__PURE__ */ new Set();
+    swapped = /* @__PURE__ */ new Set();
+    result = mergeBinaryHeaps(cloneBinary(first), cloneBinary(second), mode, active, swapped);
+    paint(
+      mode === "leftist" ? `Merged along the right spines; ${swapped.size} conditional child swap${swapped.size === 1 ? "" : "s"} restored the npl invariant.` : `Merged along the right spines; all ${swapped.size} touched node${swapped.size === 1 ? "" : "s"} swapped children unconditionally.`
+    );
+  });
+  shell.listen(reset, "click", () => {
+    ;
+    [first, second] = canonicalMergeHeaps();
+    result = void 0;
+    active = /* @__PURE__ */ new Set();
+    swapped = /* @__PURE__ */ new Set();
+    paint("Reset to the same two canonical min-heaps.");
+  });
+  paint();
+  const handle = shell.finish();
+  return {
+    destroy() {
+      geometry?.destroy();
+      handle.destroy();
+    }
+  };
+}
+function mountLeftistHeap(root, _config) {
+  return mountMergeHeap(root, "leftist");
+}
+function mountSkewHeap(root, _config) {
+  return mountMergeHeap(root, "skew");
+}
+var SVG_NS6;
+var init_heap_structure = __esm({
+  "custom/steptrace/src/families/heap-structure.ts"() {
+    init_graph_node();
+    init_render();
+    init_heap_selection();
+    init_interactive_structure();
+    SVG_NS6 = "http://www.w3.org/2000/svg";
+  }
+});
+
+// custom/steptrace/src/algorithms/binomial-queue.ts
+function parseBinomialQueueConfig(_config) {
+  return {};
+}
+var binomialQueue;
+var init_binomial_queue = __esm({
+  "custom/steptrace/src/algorithms/binomial-queue.ts"() {
+    init_heap_structure();
+    binomialQueue = {
+      id: "binomial-queue",
+      family: "heap-selection",
+      meta: { label: "Binomial queue" },
+      parse: parseBinomialQueueConfig,
+      mount: mountBinomialQueue
+    };
+  }
+});
+
+// custom/steptrace/src/algorithms/bidirectional-search.ts
+function parse3() {
+  return {
+    nodes: [
+      { id: "s", label: "s", x: 45, y: 150 },
+      { id: "a", label: "a", x: 130, y: 90 },
+      { id: "u", label: "u", x: 130, y: 220 },
+      { id: "b", label: "b", x: 220, y: 70 },
+      { id: "x", label: "x", x: 220, y: 140 },
+      { id: "v", label: "v", x: 220, y: 230 },
+      { id: "m", label: "m", x: 320, y: 65 },
+      { id: "c", label: "c", x: 410, y: 100 },
+      { id: "r", label: "r", x: 410, y: 235 },
+      { id: "d", label: "d", x: 500, y: 90 },
+      { id: "q", label: "q", x: 500, y: 210 },
+      { id: "t", label: "t", x: 585, y: 150 }
+    ],
+    edges: [
+      { from: "s", to: "a", weight: 1 },
+      { from: "s", to: "u", weight: 1 },
+      { from: "a", to: "b", weight: 1 },
+      { from: "a", to: "x", weight: 1 },
+      { from: "u", to: "v", weight: 1 },
+      { from: "b", to: "m", weight: 1 },
+      { from: "m", to: "c", weight: 1 },
+      { from: "c", to: "d", weight: 1 },
+      { from: "d", to: "t", weight: 1 },
+      { from: "t", to: "q", weight: 1 },
+      { from: "q", to: "r", weight: 1 }
+    ]
+  };
+}
+function run3(_, recorder) {
+  const forward = ["s"];
+  const backward = ["t"];
+  recorder.record(
+    "init",
+    null,
+    null,
+    forward,
+    backward,
+    null,
+    [],
+    "Seed a forward BFS at s and a backward BFS at t."
+  );
+  for (const [from, to, side] of [
+    ["s", "a", "forward"],
+    ["s", "u", "forward"],
+    ["t", "d", "backward"],
+    ["t", "q", "backward"],
+    ["a", "b", "forward"],
+    ["a", "x", "forward"],
+    ["u", "v", "forward"],
+    ["d", "c", "backward"],
+    ["q", "r", "backward"],
+    ["b", "m", "forward"]
+  ]) {
+    ;
+    (side === "forward" ? forward : backward).push(to);
+    recorder.record(
+      "expand",
+      to,
+      [from, to],
+      forward,
+      backward,
+      null,
+      [],
+      `${side === "forward" ? "Forward" : "Backward"} BFS reaches ${to} from ${from}.`
+    );
+  }
+  backward.push("m");
+  recorder.record(
+    "meet",
+    "m",
+    ["c", "m"],
+    forward,
+    backward,
+    "m",
+    [],
+    "Backward BFS reaches m, already visited by the forward search."
+  );
+  const path = ["s", "a", "b", "m", "c", "d", "t"];
+  recorder.record(
+    "path",
+    "m",
+    null,
+    forward,
+    backward,
+    "m",
+    path,
+    "Splice the two parent chains at m."
+  );
+  recorder.record(
+    "done",
+    null,
+    null,
+    forward,
+    backward,
+    "m",
+    path,
+    "Shortest path: s → a → b → m → c → d → t."
+  );
+}
+var Recorder3, family3, bidirectionalSearch;
+var init_bidirectional_search = __esm({
+  "custom/steptrace/src/algorithms/bidirectional-search.ts"() {
+    init_graph_state();
+    Recorder3 = class {
+      constructor(config) {
+        this.config = config;
+      }
+      config;
+      frames = [];
+      record(type, current, edge, forward, backward, meeting, path, message) {
+        const visited = [.../* @__PURE__ */ new Set([...forward, ...backward])];
+        const detail = {
+          kind: "dual-search",
+          forward: [...forward],
+          backward: [...backward],
+          visited,
+          meeting
+        };
+        const pathEdges = new Set(
+          path.flatMap(
+            (id, index) => index ? [`${path[index - 1]}|${id}`, `${id}|${path[index - 1]}`] : []
+          )
+        );
+        this.frames.push({
+          type,
+          profile: "bidirectional-search",
+          nodes: this.config.nodes,
+          edges: this.config.edges,
+          decor: [],
+          start: "s",
+          target: "t",
+          currentNode: current,
+          currentEdge: edge,
+          selectedEdges: [...pathEdges],
+          nodeState: Object.fromEntries(
+            this.config.nodes.map(({ id }) => [
+              id,
+              path.includes(id) ? "accepted" : id === current || id === meeting ? "active" : forward.includes(id) || backward.includes(id) ? "frontier" : "neutral"
+            ])
+          ),
+          edgeState: Object.fromEntries(
+            this.config.edges.map(({ from, to }) => [
+              `${from}|${to}`,
+              pathEdges.has(`${from}|${to}`) ? "accepted" : edge && (from === edge[0] && to === edge[1] || from === edge[1] && to === edge[0]) ? "active" : "neutral"
+            ])
+          ),
+          message,
+          detail
+        });
+      }
+    };
+    family3 = {
+      id: "graph-state",
+      createRecorder: (config) => new Recorder3(config),
+      createView: makeGraphStateView
+    };
+    bidirectionalSearch = {
+      id: "bidirectional-search",
+      kind: "graph",
+      family: family3,
+      meta: { label: "Bidirectional Search" },
+      parse: parse3,
+      run: run3
+    };
+  }
+});
+
+// custom/steptrace/src/algorithms/boyer-moore.ts
+function buildGoodSuffixData(pattern) {
+  const m = pattern.length;
+  if (!m) return { table: [], fullMatchShift: 0 };
+  const shift = new Array(m + 1).fill(0);
+  const border = new Array(m + 1).fill(0);
+  let i = m;
+  let j = m + 1;
+  border[i] = j;
+  while (i > 0) {
+    while (j <= m && pattern[i - 1] !== pattern[j - 1]) {
+      if (shift[j] === 0) shift[j] = j - i;
+      j = border[j];
+    }
+    i--;
+    j--;
+    border[i] = j;
+  }
+  j = border[0];
+  for (i = 0; i <= m; i++) {
+    if (shift[i] === 0) shift[i] = j;
+    if (i === j) j = border[j];
+  }
+  return {
+    table: Array.from({ length: m }, (_, mismatch) => shift[mismatch + 1]),
+    fullMatchShift: shift[0]
+  };
+}
+var boyerMoore;
+var init_boyer_moore = __esm({
+  "custom/steptrace/src/algorithms/boyer-moore.ts"() {
+    boyerMoore = {
+      id: "boyer-moore",
+      kind: "string",
+      profile: "boyer-moore",
+      meta: { label: "Boyer-Moore" },
+      run: (input, ops) => {
+        const text = String(input.text || "");
+        const pattern = String(input.pattern || "");
+        const n = text.length;
+        const m = pattern.length;
+        const { table: goodSuffix, fullMatchShift } = buildGoodSuffixData(pattern);
+        const lastOccurrence = {};
+        for (let i = 0; i < pattern.length; i++) lastOccurrence[pattern[i]] = i;
+        ops.configureBoyerMoore(goodSuffix, lastOccurrence);
+        ops.init(
+          m ? `Precompute the last occurrence of each pattern character and good-suffix shifts [${goodSuffix.join(", ")}].` : "An empty pattern is not searched."
+        );
+        if (!m || m > n) {
+          ops.done("Nothing to search.");
+          return;
+        }
+        let alignment = 0;
+        while (alignment <= n - m) {
+          ops.alignBoyerMoore(
+            alignment,
+            `Align the pattern at ${alignment}; compare from j = ${m - 1} right-to-left.`
+          );
+          let j = m - 1;
+          let matchedFrom = m;
+          while (j >= 0) {
+            const isMatch = pattern[j] === text[alignment + j];
+            const nextMatchedFrom = isMatch ? j : matchedFrom;
+            ops.compareBoyerMoore(
+              alignment + j,
+              j,
+              alignment,
+              isMatch,
+              nextMatchedFrom,
+              `Compare pattern[${j}]='${pattern[j]}' with text[${alignment + j}]='${text[alignment + j]}' → ${isMatch ? "match" : "mismatch"}.`
+            );
+            if (!isMatch) break;
+            matchedFrom = j;
+            j--;
+          }
+          if (j < 0) {
+            ops.matchBoyerMoore(
+              alignment,
+              fullMatchShift,
+              `Whole pattern matched at ${alignment}; the full-match good-suffix shift is ${fullMatchShift}.`
+            );
+            const nextAlignment = alignment + fullMatchShift;
+            if (nextAlignment <= n - m) {
+              alignment = nextAlignment;
+              ops.shiftBoyerMoore(alignment, `Shift by ${fullMatchShift} after the full match.`);
+            } else {
+              ops.shiftBoyerMoore(
+                alignment,
+                `A full-match shift of ${fullMatchShift} would leave the searchable range; keep the match visible.`
+              );
+              alignment = nextAlignment;
+            }
+            continue;
+          }
+          const bad = Math.max(1, j - (lastOccurrence[text[alignment + j]] ?? -1));
+          const good = goodSuffix[j];
+          const selected = Math.max(bad, good);
+          const winner = bad === good ? "tie" : bad > good ? "bad-character" : "good-suffix";
+          ops.decideBoyerMoore(
+            j,
+            bad,
+            good,
+            selected,
+            winner,
+            `Bad-character proposes ${bad}; good-suffix proposes ${good}; take max = ${selected} (${winner}).`
+          );
+          alignment += selected;
+          ops.shiftBoyerMoore(alignment, `Shift the pattern to alignment ${alignment}.`);
+        }
+        ops.done(
+          ops.found.length ? `Found ${ops.found.length} occurrence(s): index ${ops.found.join(", ")}.` : "Pattern not found."
+        );
+      }
+    };
+  }
+});
+
+// custom/steptrace/src/algorithms/boruvka.ts
+var nodes, edges, key, Recorder4, family4, boruvka;
+var init_boruvka = __esm({
+  "custom/steptrace/src/algorithms/boruvka.ts"() {
+    init_graph_state();
+    nodes = [
+      { id: "A", label: "A", x: 110, y: 80 },
+      { id: "B", label: "B", x: 260, y: 55 },
+      { id: "C", label: "C", x: 360, y: 190 },
+      { id: "D", label: "D", x: 510, y: 120 }
+    ];
+    edges = [
+      { from: "A", to: "B", weight: 1, label: "1" },
+      { from: "A", to: "C", weight: 4, label: "4" },
+      { from: "B", to: "C", weight: 2, label: "2" },
+      { from: "B", to: "D", weight: 5, label: "5" },
+      { from: "C", to: "D", weight: 3, label: "3" }
+    ];
+    key = (edge) => `${edge.from}|${edge.to}`;
+    Recorder4 = class {
+      frames = [];
+      add(message, components, choices, accepted, current = null) {
+        const nodeState = {};
+        accepted.forEach((edge) => {
+          nodeState[edge.from] = "accepted";
+          nodeState[edge.to] = "accepted";
+        });
+        const edgeState = {};
+        choices.forEach((edge) => {
+          edgeState[key(edge)] = "candidate";
+        });
+        accepted.forEach((edge) => {
+          edgeState[key(edge)] = "accepted";
+        });
+        if (current) edgeState[key(current)] = accepted.includes(current) ? "accepted" : "active";
+        this.frames.push({
+          type: "boruvka",
+          profile: "graph",
+          nodes,
+          edges,
+          decor: [],
+          start: null,
+          target: null,
+          currentNode: current?.from || null,
+          currentEdge: current ? [current.from, current.to] : null,
+          selectedEdges: accepted.map(key),
+          nodeState,
+          edgeState,
+          message,
+          detail: {
+            kind: "mst-round",
+            round: 1,
+            components,
+            choices,
+            totalWeight: accepted.reduce((sum, edge) => sum + edge.weight, 0)
+          }
+        });
+      }
+    };
+    family4 = {
+      id: "graph-state",
+      createRecorder: () => new Recorder4(),
+      createView: makeGraphStateView
+    };
+    boruvka = {
+      id: "boruvka",
+      kind: "graph",
+      family: family4,
+      meta: { label: "Borůvka's MST" },
+      parse: () => ({ nodes, edges }),
+      run(_config, recorder) {
+        const components = [["A"], ["B"], ["C"], ["D"]];
+        const [ab, , bc, , cd] = edges;
+        const choices = [];
+        const accepted = [];
+        recorder.add("Begin round 1 with four singleton components.", components, choices, accepted);
+        choices.push(ab);
+        recorder.add("Component A chooses its cheapest outgoing edge A—B (1).", components, choices, accepted, ab);
+        recorder.add("Component B chooses the same cheapest edge B—A (1).", components, choices, accepted, ab);
+        choices.push(bc);
+        recorder.add("Component C chooses B—C (2).", components, choices, accepted, bc);
+        choices.push(cd);
+        recorder.add("Component D chooses C—D (3).", components, choices, accepted, cd);
+        recorder.add("Deduplicate A—B; three distinct safe candidates remain.", components, choices, accepted);
+        accepted.push(ab);
+        recorder.add("Accept A—B; A and B merge.", [["A", "B"], ["C"], ["D"]], choices, accepted, ab);
+        accepted.push(bc);
+        recorder.add("Accept B—C; C joins the component.", [["A", "B", "C"], ["D"]], choices, accepted, bc);
+        accepted.push(cd);
+        recorder.add("Accept C—D; all vertices are connected.", [["A", "B", "C", "D"]], choices, accepted, cd);
+        recorder.add("The MST is complete in one effective round with total weight 6.", [["A", "B", "C", "D"]], choices, accepted);
+      }
+    };
+  }
+});
+
+// custom/steptrace/src/families/execution-tree.ts
+function invalidConfig2(message) {
+  throw new Error(`steptrace: divide-and-conquer ${message}`);
+}
+function parseExecutionTreeConfig(config) {
+  if (config.array !== void 0)
+    invalidConfig2('does not take an "array"; it animates the paradigm itself.');
+  return { profile: "divide-and-conquer" };
+}
+function parseMemoizationConfig(config) {
+  if (config.array !== void 0 || config.n !== void 0)
+    throw new Error("steptrace: memoization animates abstract states and takes no data input.");
+  return { profile: "memoization" };
+}
+function parseBranchAndBoundConfig(config) {
+  const input = Object.entries(config).find(
+    ([key4, value]) => key4 !== "algorithm" && key4 !== "speed" && !(key4 === "start" && value == null) && value !== void 0
+  );
+  if (input)
+    throw new Error("steptrace: branch-and-bound uses one fixed knapsack trace and takes no input.");
+  return { profile: "branch-and-bound" };
+}
+function frameModel(frame) {
+  return {
+    phase: frame.phase,
+    action: frame.action,
+    active: frame.active,
+    path: frame.path.slice(),
+    visible: frame.visible.slice(),
+    states: frame.states,
+    results: frame.results,
+    collapsed: frame.collapsed.slice()
+  };
+}
+function activeNode(frame) {
+  return frame.nodes.find((node2) => node2.id === frame.active) || null;
+}
+function pathLabel(frame) {
+  const labels = frame.path.map((id) => frame.nodes.find((node2) => node2.id === id)?.label).filter(Boolean);
+  return labels.length ? labels.join(" → ") : "—";
+}
+var stateLabels, executionTreeCardMetrics, executionTreeViewDescriptor, mergeSortTreeViewDescriptor, memoizationTreeViewDescriptor, dynamicProgrammingTreeViewDescriptor, branchAndBoundTreeViewDescriptor, executionTreeFamily;
+var init_execution_tree = __esm({
+  "custom/steptrace/src/families/execution-tree.ts"() {
+    init_recorders();
+    init_render();
+    stateLabels = {
+      call: "call",
+      split: "split",
+      base: "base",
+      return: "return",
+      combine: "combine",
+      store: "stored",
+      cache: "cached",
+      incumbent: "incumbent",
+      infeasible: "infeasible",
+      prune: "pruned"
+    };
+    executionTreeCardMetrics = {
+      shape: "card",
+      nodeWidth: 136,
+      nodeHeight: 50,
+      minSvgWidth: 500,
+      canvasScale: 1,
+      fitWidth: true,
+      responsiveLayout: true,
+      tieredLayout: true
+    };
+    executionTreeViewDescriptor = {
+      ariaLabel: "Execution tree",
+      ...executionTreeCardMetrics,
+      stateLabels,
+      legend: [
+        { state: "split", label: "split subproblem" },
+        { state: "base", label: "base case" },
+        { state: "return", label: "returned result" },
+        { state: "combine", label: "combined result" }
+      ],
+      frameModel,
+      nodeLines(node2) {
+        return [node2.label, node2.detail || `[${node2.values.join(", ")}]`];
+      },
+      watchRows(frame) {
+        const node2 = activeNode(frame);
+        const result = node2 ? frame.results[node2.id] : null;
+        const subproblemLabel = frame.profile === "merge-sort" ? "subarray" : "subproblem";
+        const pathLabelName = frame.profile === "merge-sort" ? "split path" : "call path";
+        const resultLabel = Array.isArray(result) ? `[${result.join(", ")}]` : result || "—";
+        return [
+          { k: "phase", v: frame.phase, sw: "var(--_violet)" },
+          {
+            k: subproblemLabel,
+            v: node2 ? `${node2.label} · ${node2.detail || `[${node2.values.join(", ")}]`}` : "—",
+            sw: "var(--_blue)"
+          },
+          { k: pathLabelName, v: pathLabel(frame), sw: "var(--_neutral)" },
+          { k: "result", v: resultLabel, sw: "var(--_green)" }
+        ];
+      }
+    };
+    mergeSortTreeViewDescriptor = {
+      ...executionTreeViewDescriptor,
+      ariaLabel: "Merge sort split and merge tree",
+      nodeWidth: 84,
+      nodeHeight: 40,
+      minSvgWidth: 420,
+      canvasScale: 1,
+      fitWidth: true,
+      tieredCards: true,
+      tieredLayout: false,
+      centerVisible: true,
+      responsiveLayout: false,
+      nodeLines(node2) {
+        return [node2.label, node2.detail || node2.values.join("  ")];
+      }
+    };
+    memoizationTreeViewDescriptor = {
+      ariaLabel: "Memoization call tree",
+      ...executionTreeCardMetrics,
+      stateLabels,
+      legend: [
+        { state: "split", label: "expand new state" },
+        { state: "base", label: "base result" },
+        { state: "store", label: "store first result" },
+        { state: "cache", label: "cache hit; skip branch" }
+      ],
+      frameModel,
+      nodeLines(node2) {
+        return [node2.label, node2.detail || ""];
+      },
+      watchRows(frame) {
+        const node2 = activeNode(frame);
+        const cached = frame.cache.map((entry) => `${entry.key} → ${entry.result}`).join(" · ");
+        return [
+          {
+            k: "phase",
+            v: frame.phase,
+            sw: "var(--_violet)",
+            hint: "Whether the trace is expanding, solving, storing, or reusing a state."
+          },
+          {
+            k: "state",
+            v: node2 ? `${node2.label} · ${node2.detail || "no cache key"}` : "—",
+            sw: "var(--_blue)",
+            hint: "The active recursive state and the key used to recognize repeats."
+          },
+          {
+            k: "cache",
+            v: cached || "empty",
+            sw: "var(--_green)",
+            hint: "Results already computed once and available for immediate reuse."
+          },
+          {
+            k: "work",
+            v: `${frame.calls} calls · ${frame.pruned} skipped`,
+            sw: "var(--_neutral)",
+            hint: "Calls entered so far and recursive calls avoided by cache hits."
+          }
+        ];
+      }
+    };
+    dynamicProgrammingTreeViewDescriptor = {
+      ariaLabel: "Top-down dynamic-programming recursion tree",
+      ...executionTreeCardMetrics,
+      stateLabels,
+      legend: [
+        { state: "split", label: "expand uncached state" },
+        { state: "base", label: "base case" },
+        { state: "store", label: "store result" },
+        { state: "cache", label: "reuse cached result" }
+      ],
+      frameModel,
+      nodeLines(node2) {
+        return [node2.label, node2.detail || ""];
+      },
+      watchRows(frame) {
+        const node2 = activeNode(frame);
+        const cached = frame.cache.map((entry) => `${entry.key} → ${entry.result}`).join(" · ");
+        return [
+          {
+            k: "phase",
+            v: frame.phase,
+            sw: "var(--_violet)",
+            hint: "Whether recursion is expanding a new state, storing it, or reusing it."
+          },
+          {
+            k: "state",
+            v: node2 ? node2.label : "—",
+            sw: "var(--_blue)",
+            hint: "The amount or warehouse coordinate currently being solved."
+          },
+          {
+            k: "memo",
+            v: cached || "empty",
+            sw: "var(--_green)",
+            hint: "Answers already computed once and available for immediate reuse."
+          },
+          {
+            k: "work",
+            v: `${frame.calls} calls · ${frame.pruned} skipped`,
+            sw: "var(--_neutral)",
+            hint: "Recursive calls entered and child calls avoided by cache hits."
+          }
+        ];
+      }
+    };
+    branchAndBoundTreeViewDescriptor = {
+      ariaLabel: "Branch and bound knapsack decision tree",
+      ...executionTreeCardMetrics,
+      stableStage: true,
+      preserveDetail: true,
+      showStateBadge: true,
+      stateLabels,
+      legend: [
+        { state: "split", label: "expand decision" },
+        { state: "incumbent", label: "new incumbent" },
+        { state: "infeasible", label: "over capacity" },
+        { state: "prune", label: "bound cannot win" }
+      ],
+      frameModel,
+      nodeLines(node2) {
+        return [node2.label, node2.detail || ""];
+      },
+      watchRows(frame) {
+        const node2 = activeNode(frame);
+        return [
+          {
+            k: "decision",
+            v: node2?.label || "—",
+            sw: "var(--_blue)",
+            hint: "The take-or-skip decision currently being evaluated."
+          },
+          {
+            k: "load",
+            v: node2 ? `${node2.weight}/7 · value ${node2.value}` : "—",
+            sw: "var(--_neutral)",
+            hint: "Current knapsack weight against capacity 7 and its feasible value."
+          },
+          {
+            k: "upper bound",
+            v: node2?.bound == null ? "infeasible" : node2.bound,
+            sw: "var(--_violet)",
+            hint: "Fractional-knapsack LP upper bound for this branch."
+          },
+          {
+            k: "incumbent",
+            v: frame.incumbent ?? 0,
+            sw: "var(--_green)",
+            hint: "Best feasible 0/1 knapsack value found so far."
+          }
+        ];
+      }
+    };
+    executionTreeFamily = {
+      id: "execution-tree",
+      createRecorder(config) {
+        return new ExecutionTreeRecorder(config);
+      },
+      createView(frames) {
+        const profile = frames[0]?.profile;
+        const descriptor = profile === "branch-and-bound" ? branchAndBoundTreeViewDescriptor : profile === "memoization" ? memoizationTreeViewDescriptor : profile === "merge-sort" ? mergeSortTreeViewDescriptor : profile === "coin-change-top-down" || profile === "grid-path-top-down" ? dynamicProgrammingTreeViewDescriptor : executionTreeViewDescriptor;
+        return makeExecutionTreeView(frames, descriptor);
+      }
+    };
+  }
+});
+
+// custom/steptrace/src/algorithms/branch-and-bound.ts
+var branchAndBound;
+var init_branch_and_bound = __esm({
+  "custom/steptrace/src/algorithms/branch-and-bound.ts"() {
+    init_execution_tree();
+    branchAndBound = {
+      id: "branch-and-bound",
+      kind: "rectree",
+      family: executionTreeFamily,
+      meta: { label: "Branch and Bound" },
+      parse: parseBranchAndBoundConfig,
+      run(input, ops) {
+        const nodes5 = [
+          {
+            id: "root",
+            label: "start",
+            detail: "0/7 · 0 · bound 116",
+            values: [],
+            x: 636,
+            y: 28,
+            depth: 0,
+            weight: 0,
+            value: 0,
+            bound: 116
+          },
+          {
+            id: "a+",
+            label: "take A",
+            detail: "2/7 · 40 · bound 116",
+            values: [],
+            x: 352,
+            y: 100,
+            depth: 1,
+            weight: 2,
+            value: 40,
+            bound: 116
+          },
+          {
+            id: "a-",
+            label: "skip A",
+            detail: "0/7 · 0 · bound 102",
+            values: [],
+            x: 920,
+            y: 100,
+            depth: 1,
+            weight: 0,
+            value: 0,
+            bound: 102
+          },
+          {
+            id: "ab+",
+            label: "take B",
+            detail: "5/7 · 90 · bound 116",
+            values: [],
+            x: 139,
+            y: 172,
+            depth: 2,
+            weight: 5,
+            value: 90,
+            bound: 116
+          },
+          {
+            id: "ab-",
+            label: "skip B",
+            detail: "2/7 · 40 · bound 105",
+            values: [],
+            x: 565,
+            y: 172,
+            depth: 2,
+            weight: 2,
+            value: 40,
+            bound: 105
+          },
+          {
+            id: "abc+",
+            label: "take C",
+            detail: "10/7 · 155 · infeasible",
+            values: [],
+            x: 68,
+            y: 244,
+            depth: 3,
+            weight: 10,
+            value: 155,
+            bound: null
+          },
+          {
+            id: "abc-",
+            label: "skip C",
+            detail: "5/7 · 90 · bound 107.5",
+            values: [],
+            x: 210,
+            y: 244,
+            depth: 3,
+            weight: 5,
+            value: 90,
+            bound: 107.5
+          },
+          {
+            id: "ac+",
+            label: "take C",
+            detail: "7/7 · 105 · bound 105",
+            values: [],
+            x: 423,
+            y: 244,
+            depth: 3,
+            weight: 7,
+            value: 105,
+            bound: 105
+          },
+          {
+            id: "ac-",
+            label: "skip C",
+            detail: "2/7 · 40 · bound 75",
+            values: [],
+            x: 707,
+            y: 244,
+            depth: 3,
+            weight: 2,
+            value: 40,
+            bound: 75
+          },
+          {
+            id: "abcd+",
+            label: "take D",
+            detail: "9/7 · 125 · infeasible",
+            values: [],
+            x: 68,
+            y: 316,
+            depth: 4,
+            weight: 9,
+            value: 125,
+            bound: null
+          },
+          {
+            id: "abcd-",
+            label: "skip D",
+            detail: "5/7 · 90 · bound 90",
+            values: [],
+            x: 210,
+            y: 316,
+            depth: 4,
+            weight: 5,
+            value: 90,
+            bound: 90
+          },
+          {
+            id: "acd+",
+            label: "take D",
+            detail: "11/7 · 140 · infeasible",
+            values: [],
+            x: 352,
+            y: 316,
+            depth: 4,
+            weight: 11,
+            value: 140,
+            bound: null
+          },
+          {
+            id: "acd-",
+            label: "skip D",
+            detail: "7/7 · 105 · bound 105",
+            values: [],
+            x: 494,
+            y: 316,
+            depth: 4,
+            weight: 7,
+            value: 105,
+            bound: 105
+          },
+          {
+            id: "ac-d+",
+            label: "take D",
+            detail: "6/7 · 75 · bound 75",
+            values: [],
+            x: 636,
+            y: 316,
+            depth: 4,
+            weight: 6,
+            value: 75,
+            bound: 75
+          },
+          {
+            id: "ac-d-",
+            label: "skip D",
+            detail: "2/7 · 40 · bound 40",
+            values: [],
+            x: 778,
+            y: 316,
+            depth: 4,
+            weight: 2,
+            value: 40,
+            bound: 40
+          },
+          {
+            id: "a-b+",
+            label: "take B",
+            detail: "3/7 · 50 · bound 102",
+            values: [],
+            x: 849,
+            y: 172,
+            depth: 2,
+            weight: 3,
+            value: 50,
+            bound: 102
+          },
+          {
+            id: "a-b-",
+            label: "skip B",
+            detail: "0/7 · 0 · bound 82.5",
+            values: [],
+            x: 991,
+            y: 172,
+            depth: 2,
+            weight: 0,
+            value: 0,
+            bound: 82.5
+          }
+        ];
+        const edges5 = [
+          { from: "root", to: "a+" },
+          { from: "root", to: "a-" },
+          { from: "a+", to: "ab+" },
+          { from: "a+", to: "ab-" },
+          { from: "ab+", to: "abc+" },
+          { from: "ab+", to: "abc-" },
+          { from: "ab-", to: "ac+" },
+          { from: "ab-", to: "ac-" },
+          { from: "abc-", to: "abcd+" },
+          { from: "abc-", to: "abcd-" },
+          { from: "ac+", to: "acd+" },
+          { from: "ac+", to: "acd-" },
+          { from: "ac-", to: "ac-d+" },
+          { from: "ac-", to: "ac-d-" },
+          { from: "a-", to: "a-b+" },
+          { from: "a-", to: "a-b-" }
+        ];
+        ops.tree(
+          nodes5,
+          edges5,
+          "root",
+          "Start with capacity 7 and the fractional-knapsack upper bound 116."
+        );
+        ops.split(
+          "root",
+          ["root"],
+          ["a+", "a-"],
+          "Branch on A; depth-first search explores take A first."
+        );
+        ops.incumbent(
+          "a+",
+          ["root", "a+"],
+          40,
+          "Take A: value 40 becomes the first feasible incumbent."
+        );
+        ops.split("a+", ["root", "a+"], ["ab+", "ab-"], "Branch on B below take A.");
+        ops.incumbent("ab+", ["root", "a+", "ab+"], 90, "Take B: A + B raises the incumbent to 90.");
+        ops.split(
+          "ab+",
+          ["root", "a+", "ab+"],
+          ["abc+", "abc-"],
+          "Branch on C; the take branch is visited first."
+        );
+        ops.reject("abc+", ["root", "a+", "ab+", "abc+"], "Take C exceeds capacity: weight 10 > 7.");
+        ops.split(
+          "abc-",
+          ["root", "a+", "ab+", "abc-"],
+          ["abcd+", "abcd-"],
+          "Skip C and branch on D; the optimistic bound is 107.5."
+        );
+        ops.reject(
+          "abcd+",
+          ["root", "a+", "ab+", "abc-", "abcd+"],
+          "Take D exceeds capacity: weight 9 > 7."
+        );
+        ops.prune(
+          "abcd-",
+          ["root", "a+", "ab+", "abc-", "abcd-"],
+          [],
+          "Skip D cannot beat incumbent 90: bound 90 ≤ 90."
+        );
+        ops.split("ab-", ["root", "a+", "ab-"], ["ac+", "ac-"], "Backtrack, skip B, and branch on C.");
+        ops.incumbent(
+          "ac+",
+          ["root", "a+", "ab-", "ac+"],
+          105,
+          "Take C: A + C exactly fills capacity and raises the incumbent to 105."
+        );
+        ops.split(
+          "ac+",
+          ["root", "a+", "ab-", "ac+"],
+          ["acd+", "acd-"],
+          "Branch on D below the new incumbent."
+        );
+        ops.reject(
+          "acd+",
+          ["root", "a+", "ab-", "ac+", "acd+"],
+          "Take D exceeds capacity: weight 11 > 7."
+        );
+        ops.prune(
+          "acd-",
+          ["root", "a+", "ab-", "ac+", "acd-"],
+          [],
+          "Skip D ties incumbent 105, so no better solution is possible."
+        );
+        ops.prune(
+          "ac-",
+          ["root", "a+", "ab-", "ac-"],
+          [],
+          "Skip C loses on its bound: 75 ≤ incumbent 105; do not expand D."
+        );
+        ops.prune(
+          "a-",
+          ["root", "a-"],
+          [],
+          "Skip A loses at the root: bound 102 ≤ incumbent 105; prune its whole subtree."
+        );
+        ops.done("root", "best value 105", "Best feasible set is A + C with weight 7 and value 105.");
+      }
+    };
+  }
+});
+
+// custom/steptrace/src/algorithms/bubble-sort.ts
+var bubbleSort;
+var init_bubble_sort = __esm({
+  "custom/steptrace/src/algorithms/bubble-sort.ts"() {
+    bubbleSort = {
+      id: "bubble-sort",
+      kind: "sort",
+      meta: { label: "Bubble sort" },
+      run: (input, ops) => {
+        const n = ops.value.length;
+        ops.init(
+          `Bubble sort — repeatedly compare adjacent values and swap the larger one rightward, bubbling the largest to the end each pass.`
+        );
+        for (let i = 0; i < n - 1; i++) {
+          let swapped = false;
+          for (let j = 0; j < n - 1 - i; j++) {
+            const a = ops.value;
+            ops.compare(j, j + 1, `Compare index ${j} (${a[j]}) and index ${j + 1} (${a[j + 1]}).`);
+            if (ops.value[j] > ops.value[j + 1]) {
+              const b = ops.value;
+              ops.swap(j, j + 1, `${b[j]} is greater than ${b[j + 1]} — swap them.`);
+              swapped = true;
+            }
+          }
+          ops.markSorted([n - 1 - i], [n - 1 - i], `Index ${n - 1 - i} now holds its final value.`);
+          if (!swapped) {
+            const rest = Array.from({ length: n - 1 - i }, (_, k) => k);
+            ops.markSorted(rest, [], `A full pass made no swaps — the array is already sorted.`);
+            break;
+          }
+        }
+        ops.lockAll(Array.from({ length: n }, (_, k) => k));
+        ops.done(`Sorted in ${ops.comparisons} comparisons and ${ops.swaps} swaps.`);
+      }
+    };
+  }
+});
+
+// custom/steptrace/src/families/distribution-sort.ts
+function invalidConfig3(message) {
+  throw new Error(`steptrace: counting-sort ${message}`);
+}
+function parseCountingSortConfig(config) {
+  const { array } = config;
+  if (!Array.isArray(array) || array.length < 2)
+    invalidConfig3('requires an "array" with at least two integer keys.');
+  if (!array.every((value) => Number.isInteger(value)))
+    invalidConfig3("requires every value to be an integer key.");
+  const min = Math.min(...array);
+  const max = Math.max(...array);
+  if (max - min > 32)
+    invalidConfig3(
+      "limits the demonstrated key range to 33 values so every counter remains legible."
+    );
+  return { profile: "counting", array: array.slice(), min, max };
+}
+function distributionTokenLabels(input) {
+  const totals = /* @__PURE__ */ new Map();
+  input.forEach((value) => totals.set(value, (totals.get(value) || 0) + 1));
+  const seen = /* @__PURE__ */ new Map();
+  return input.map((value) => {
+    const occurrence = (seen.get(value) || 0) + 1;
+    seen.set(value, occurrence);
+    return totals.get(value) === 1 ? String(value) : `${value}${String.fromCharCode(96 + occurrence)}`;
+  });
+}
+function distributionLabel(text, detail) {
+  const heading = el("div", "steptrace__rail-label steptrace__distribution-label");
+  heading.textContent = text;
+  heading.setAttribute("aria-description", detail);
+  return heading;
+}
+function makeDistributionArrayBand(title, detail, length, modifier = "") {
+  const band = el("div", "steptrace__distribution-band");
+  const stage = el(
+    "div",
+    `steptrace__stage steptrace__distribution-bars${modifier ? ` ${modifier}` : ""}`
+  );
+  stage.setAttribute("role", "region");
+  stage.setAttribute("aria-label", title);
+  const bars = makeBars(stage, length);
+  band.append(distributionLabel(title, detail), stage);
+  return { band, stage, bars };
+}
+function phaseLabel(phase) {
+  return phase === "intro" ? "set up" : phase === "done" ? "sorted" : phase;
+}
+function frequencyRangeFor(frame, index) {
+  const count = frame.counts[index];
+  const rangesVisible = frame.type === "prefix" ? index < frame.prefixed : frame.type === "place" || frame.type === "done";
+  if (!rangesVisible) return { count, slots: null };
+  if (count === 0) return { count, slots: "—" };
+  const start = frame.counts.slice(0, index).reduce((sum, value) => sum + value, 0);
+  const end = start + count - 1;
+  return { count, slots: start === end ? String(start) : `${start}–${end}` };
+}
+function distributionWatch(frame) {
+  const active = frame.activeKey == null ? "—" : frame.activeKey;
+  return [
+    { k: "phase", v: phaseLabel(frame.type), sw: "var(--_violet)" },
+    { k: "key", v: active, sw: "var(--_blue)" },
+    { k: "tallied", v: `${frame.tallied}/${frame.input.length}`, sw: "var(--_amber)" },
+    { k: "placed", v: `${frame.placed}/${frame.input.length}`, sw: "var(--_green)" }
+  ];
+}
+function makeDistributionSortView(frames) {
+  const first = frames[0];
+  const keys = Array.from({ length: first.max - first.min + 1 }, (_, index) => first.min + index);
+  const labels = distributionTokenLabels(first.input);
+  const stage = el("div", "steptrace__distribution");
+  const input = makeDistributionArrayBand(
+    "Unsorted Array",
+    "Each bar keeps its original identity.",
+    first.input.length
+  );
+  input.band.dataset.section = "source";
+  const countBand = el("div", "steptrace__distribution-band");
+  const frequency = el("div", "steptrace__distribution-frequency");
+  frequency.setAttribute("role", "region");
+  frequency.setAttribute("aria-label", "Frequency");
+  const buckets = keys.map((key4) => {
+    const bucket = el("div", "steptrace__distribution-bucket");
+    const keyRow = el("div", "steptrace__distribution-entry steptrace__distribution-entry--key");
+    const keyLabel = el("span", "steptrace__distribution-entry-label");
+    keyLabel.textContent = "Value:";
+    const keyValue = el("strong", "steptrace__distribution-entry-value");
+    keyValue.textContent = String(key4);
+    keyRow.append(keyLabel, keyValue);
+    const details = el("div", "steptrace__distribution-details");
+    const countRow = el("div", "steptrace__distribution-entry");
+    const countLabel = el("span", "steptrace__distribution-entry-label");
+    countLabel.textContent = "Count:";
+    const count = el("strong", "steptrace__distribution-entry-value");
+    countRow.append(countLabel, count);
+    const slotsRow = el("div", "steptrace__distribution-entry steptrace__distribution-entry--slots");
+    const slotsLabel = el("span", "steptrace__distribution-entry-label");
+    slotsLabel.textContent = "Slots:";
+    const slots = el("strong", "steptrace__distribution-entry-value");
+    slotsRow.append(slotsLabel, slots);
+    details.append(countRow, slotsRow);
+    bucket.append(keyRow, details);
+    frequency.append(bucket);
+    return { bucket, count, slots, key: key4 };
+  });
+  countBand.append(
+    distributionLabel("Frequency", "Raw counts become reserved output slots from left to right."),
+    frequency
+  );
+  const output = makeDistributionArrayBand(
+    "Sorted Array",
+    "The input is read right-to-left; each placement preserves duplicate order.",
+    first.input.length,
+    "steptrace__distribution-bars--output"
+  );
+  stage.append(input.band, countBand, output.band);
+  const status = statusEl();
+  const maxValue = Math.max(...first.input, 1);
+  function paint(frame, index = 0, total = 1) {
+    stage.dataset.phase = frame.type;
+    input.bars.forEach((bar, barIndex) => {
+      const value = frame.input[barIndex];
+      bar.fill.style.height = barHeightStyle(value, maxValue);
+      bar.num.textContent = labels[barIndex];
+      bar.bar.dataset.state = barIndex === frame.activeInput ? frame.type === "tally" ? "increment" : "compare" : "";
+      bar.bar.setAttribute(
+        "aria-label",
+        `input index ${barIndex}, value ${value}, token ${labels[barIndex]}`
+      );
+    });
+    buckets.forEach(({ bucket, count, slots, key: key4 }, bucketIndex) => {
+      const range = frequencyRangeFor(frame, bucketIndex);
+      count.textContent = String(range.count);
+      slots.textContent = range.slots ?? "";
+      bucket.dataset.hasSlots = range.slots == null ? "0" : "1";
+      bucket.dataset.active = (frame.type === "tally" || frame.type === "prefix") && key4 === frame.activeKey ? "1" : "0";
+      bucket.dataset.previous = frame.type === "prefix" && key4 === frame.previousKey ? "1" : "0";
+      bucket.dataset.placement = frame.type === "place" && key4 === frame.activeKey ? "1" : "0";
+      bucket.setAttribute(
+        "aria-label",
+        `value ${key4}, count ${range.count}${range.slots == null ? "" : `, slots ${range.slots}`}`
+      );
+    });
+    output.bars.forEach((bar, slotIndex) => {
+      const placed = frame.output[slotIndex];
+      const origin = frame.outputOrigins[slotIndex];
+      bar.fill.style.height = placed == null ? "0" : barHeightStyle(placed, maxValue);
+      bar.num.textContent = placed == null ? "·" : labels[origin ?? 0];
+      bar.bar.dataset.state = placed == null ? "" : "sorted";
+      bar.bar.dataset.target = frame.type === "place" && slotIndex === frame.placedAt ? "1" : "0";
+      bar.bar.dataset.empty = placed == null ? "1" : "0";
+      bar.bar.setAttribute(
+        "aria-label",
+        placed == null ? `output index ${slotIndex}, empty` : `output index ${slotIndex}, value ${placed}, token ${labels[origin ?? 0]}`
+      );
+    });
+    status.innerHTML = escapeHtml(frame.message) + ` <span class="steptrace__counts">· ${phaseLabel(frame.type)} · step ${index + 1}/${total}</span>`;
+  }
+  return {
+    nodes: [stage, status],
+    stageLayout: "fill",
+    stableStage: true,
+    paint,
+    watch: distributionWatch
+  };
+}
+var DistributionSortRecorder, distributionSortFamily;
+var init_distribution_sort = __esm({
+  "custom/steptrace/src/families/distribution-sort.ts"() {
+    init_render();
+    DistributionSortRecorder = class {
+      frames = [];
+      input;
+      min;
+      max;
+      counts;
+      positions;
+      output;
+      outputOrigins;
+      activeInput = null;
+      activeKey = null;
+      previousKey = null;
+      placedAt = null;
+      tallied = 0;
+      prefixed = 0;
+      placed = 0;
+      constructor(config) {
+        this.input = config.array.slice();
+        this.min = config.min;
+        this.max = config.max;
+        this.counts = Array.from({ length: this.max - this.min + 1 }, () => 0);
+        this.positions = this.counts.slice();
+        this.output = Array.from({ length: this.input.length }, () => null);
+        this.outputOrigins = Array.from({ length: this.input.length }, () => null);
+      }
+      intro(message) {
+        this.push("intro", message);
+      }
+      tally(inputIndex, message) {
+        const key4 = this.input[inputIndex];
+        this.activeInput = inputIndex;
+        this.activeKey = key4;
+        this.previousKey = null;
+        this.placedAt = null;
+        this.counts[key4 - this.min]++;
+        this.tallied++;
+        this.push("tally", message);
+      }
+      prefix(key4, message) {
+        const index = key4 - this.min;
+        this.activeInput = null;
+        this.activeKey = key4;
+        this.previousKey = key4 === this.min ? null : key4 - 1;
+        this.placedAt = null;
+        if (this.prefixed === 0) this.positions = this.counts.slice();
+        if (index > 0) this.positions[index] += this.positions[index - 1];
+        this.prefixed++;
+        this.push("prefix", message);
+      }
+      place(inputIndex, message) {
+        const key4 = this.input[inputIndex];
+        const countIndex = key4 - this.min;
+        const target = --this.positions[countIndex];
+        this.output[target] = key4;
+        this.outputOrigins[target] = inputIndex;
+        this.activeInput = inputIndex;
+        this.activeKey = key4;
+        this.previousKey = null;
+        this.placedAt = target;
+        this.placed++;
+        this.push("place", message);
+      }
+      done(message) {
+        this.activeInput = null;
+        this.activeKey = null;
+        this.previousKey = null;
+        this.placedAt = null;
+        this.push("done", message);
+      }
+      push(type, message) {
+        this.frames.push(
+          Object.freeze({
+            type,
+            profile: "counting",
+            input: this.input.slice(),
+            min: this.min,
+            max: this.max,
+            counts: this.counts.slice(),
+            positions: this.positions.slice(),
+            output: this.output.slice(),
+            outputOrigins: this.outputOrigins.slice(),
+            activeInput: this.activeInput,
+            activeKey: this.activeKey,
+            previousKey: this.previousKey,
+            placedAt: this.placedAt,
+            tallied: this.tallied,
+            prefixed: this.prefixed,
+            placed: this.placed,
+            message
+          })
+        );
+      }
+    };
+    distributionSortFamily = {
+      id: "distribution-sort",
+      createRecorder(config) {
+        return new DistributionSortRecorder(config);
+      },
+      createView(frames) {
+        return makeDistributionSortView(frames);
+      }
+    };
+  }
+});
+
+// custom/steptrace/src/families/bucket-distribution.ts
+function phaseLabel2(frame) {
+  if (frame.type === "intro") return "set up";
+  if (frame.type === "pass") return "new pass";
+  if (frame.type === "scatter") return "scatter";
+  if (["local-sort", "compare", "swap"].includes(frame.type)) return "sort bucket";
+  if (frame.type === "gather") return "gather";
+  if (frame.type === "pass-complete") return "pass complete";
+  return "sorted";
+}
+function activeValue(frame) {
+  if (frame.activeSource != null) return frame.source[frame.activeSource]?.value;
+  if (frame.activeBucket != null && frame.activeBucketItems != null)
+    return frame.buckets[frame.activeBucket]?.[frame.activeBucketItems[0]]?.value;
+  return null;
+}
+function distributionWatch2(frame) {
+  const bucket = frame.activeBucket == null ? "—" : frame.bucketLabels[frame.activeBucket];
+  const progress = frame.type === "gather" || frame.type === "pass-complete" || frame.type === "done" ? `${frame.gathered}/${frame.source.length}` : `${frame.scattered}/${frame.source.length}`;
+  return [
+    {
+      k: "phase",
+      v: phaseLabel2(frame),
+      sw: "var(--_violet)",
+      hint: "Current distribution step: scatter, local bucket sort, or ordered gather."
+    },
+    {
+      k: "pass",
+      v: frame.passLabel || `${frame.passIndex + 1}/${frame.passCount}`,
+      sw: "var(--_blue)",
+      hint: frame.profile === "radix" ? "Digit position currently used to distribute every key." : "The single range-partition pass used by Bucket Sort."
+    },
+    {
+      k: "key",
+      v: activeValue(frame) ?? "—",
+      sw: "var(--_amber)",
+      hint: "Key currently being scattered, compared, or gathered."
+    },
+    {
+      k: "bucket",
+      v: bucket,
+      sw: "var(--_green)",
+      hint: frame.profile === "radix" ? "Digit bucket selected by the active key." : "Numeric range containing the active key."
+    },
+    {
+      k: "progress",
+      v: progress,
+      hint: "Keys completed in the current scatter or gather phase."
+    }
+  ];
+}
+function tokenLabel(value) {
+  return Number.isInteger(value) ? String(value) : value.toFixed(2);
+}
+function bucketColumnCount(itemCount) {
+  return Math.min(3, Math.max(1, Math.ceil(itemCount / 3)));
+}
+function makeBucketDistributionView(frames) {
+  const first = frames[0];
+  const original = first.source.slice().sort((a, b) => a.origin - b.origin);
+  const labels = distributionTokenLabels(original.map((token) => token.value));
+  const maxValue = Math.max(...original.map((token) => token.value), 1);
+  const stage = el("div", "steptrace__distribution steptrace__distribution--buckets");
+  stage.dataset.profile = first.profile;
+  const sourceTitle = first.profile === "radix" ? "Current Array" : "Unsorted Array";
+  const source = makeDistributionArrayBand(
+    sourceTitle,
+    first.profile === "radix" ? "Each digit pass starts from the order gathered by the previous pass." : "Values keep their identity while range decides their bucket.",
+    first.source.length
+  );
+  source.band.dataset.section = "source";
+  const bucketBand = el("div", "steptrace__distribution-band");
+  const board = el("div", "steptrace__distribution-bucket-board");
+  const bucketTitle = first.profile === "radix" ? "Digit Buckets" : "Range Buckets";
+  board.setAttribute("role", "region");
+  board.setAttribute("aria-label", bucketTitle);
+  board.style.setProperty("--_bucket-count", String(first.bucketLabels.length));
+  const lanes = first.bucketLabels.map((bucketLabel, bucketIndex) => {
+    const lane = el("div", "steptrace__distribution-lane");
+    const header = el("div", "steptrace__distribution-lane-header");
+    header.textContent = bucketLabel;
+    const body = el("div", "steptrace__distribution-lane-body");
+    lane.append(header, body);
+    board.append(lane);
+    return { lane, body, bucketIndex };
+  });
+  bucketBand.append(
+    distributionLabel(
+      bucketTitle,
+      first.profile === "radix" ? "Keys append in source order, preserving lower-digit work." : "Each range is sorted locally before the buckets are concatenated."
+    ),
+    board
+  );
+  const output = makeDistributionArrayBand(
+    first.profile === "radix" ? "Gathered Pass" : "Sorted Array",
+    "Buckets are read left to right; order inside each bucket is retained.",
+    first.source.length,
+    "steptrace__distribution-bars--output"
+  );
+  const legend = makeLegend(
+    [
+      { label: "active bucket", color: "var(--_blue)" },
+      { label: "local comparison", color: "var(--_amber)" },
+      { label: "gathered output", color: "var(--_green)" }
+    ],
+    "Distribution state legend",
+    "steptrace__distribution-legend"
+  );
+  stage.append(source.band, bucketBand, output.band);
+  const status = statusEl();
+  function paint(frame, index = 0, total = 1) {
+    stage.dataset.phase = frame.type;
+    source.bars.forEach((bar, barIndex) => {
+      const token = frame.source[barIndex];
+      bar.fill.style.height = barHeightStyle(token.value, maxValue);
+      bar.num.textContent = labels[token.origin] ?? tokenLabel(token.value);
+      bar.bar.dataset.state = barIndex === frame.activeSource && frame.type === "scatter" ? "scatter" : "";
+      bar.bar.setAttribute(
+        "aria-label",
+        `${sourceTitle.toLowerCase()} index ${barIndex}, value ${token.value}`
+      );
+    });
+    lanes.forEach(({ lane, body, bucketIndex }) => {
+      const bucket = frame.buckets[bucketIndex];
+      body.textContent = "";
+      body.style.setProperty("--_bucket-columns", String(bucketColumnCount(bucket.length)));
+      bucket.forEach((token, itemIndex) => {
+        const chip = el("span", "steptrace__distribution-token");
+        chip.textContent = labels[token.origin] ?? tokenLabel(token.value);
+        const activeItems = frame.activeBucketItems;
+        const active = frame.activeBucket === bucketIndex && activeItems != null && itemIndex >= Math.min(...activeItems) && itemIndex <= Math.max(...activeItems);
+        chip.dataset.active = active ? "1" : "0";
+        chip.dataset.compare = active && (frame.type === "compare" || frame.type === "swap") ? "1" : "0";
+        chip.dataset.gather = active && frame.type === "gather" ? "1" : "0";
+        chip.setAttribute(
+          "aria-label",
+          `bucket ${frame.bucketLabels[bucketIndex]}, item ${itemIndex}, value ${token.value}`
+        );
+        body.append(chip);
+      });
+      lane.dataset.active = frame.activeBucket === bucketIndex ? "1" : "0";
+      lane.dataset.empty = bucket.length === 0 ? "1" : "0";
+    });
+    output.bars.forEach((bar, outputIndex) => {
+      const token = frame.output[outputIndex];
+      bar.fill.style.height = token == null ? "0" : barHeightStyle(token.value, maxValue);
+      bar.num.textContent = token == null ? "·" : labels[token.origin] ?? tokenLabel(token.value);
+      bar.bar.dataset.state = token == null ? "" : "sorted";
+      bar.bar.dataset.target = frame.type === "gather" && outputIndex === frame.activeOutput ? "1" : "0";
+      bar.bar.dataset.empty = token == null ? "1" : "0";
+      bar.bar.setAttribute(
+        "aria-label",
+        token == null ? `output index ${outputIndex}, empty` : `output index ${outputIndex}, value ${token.value}`
+      );
+    });
+    status.innerHTML = escapeHtml(frame.message) + ` <span class="steptrace__counts">· ${phaseLabel2(frame)} · step ${index + 1}/${total}</span>`;
+  }
+  return {
+    nodes: [stage, legend, status],
+    stageLayout: "fill",
+    stableStage: true,
+    paint,
+    watch: distributionWatch2
+  };
+}
+function createBucketDistributionFamily() {
+  return {
+    id: "distribution-sort",
+    createRecorder(config) {
+      return new BucketDistributionRecorder(config);
+    },
+    createView(frames) {
+      return makeBucketDistributionView(frames);
+    }
+  };
+}
+var BucketDistributionRecorder, radixDistributionFamily, rangeBucketDistributionFamily;
+var init_bucket_distribution = __esm({
+  "custom/steptrace/src/families/bucket-distribution.ts"() {
+    init_render();
+    init_distribution_sort();
+    BucketDistributionRecorder = class {
+      frames = [];
+      profile;
+      bucketLabels;
+      source;
+      buckets;
+      output;
+      activeSource = null;
+      activeBucket = null;
+      activeBucketItems = null;
+      activeOutput = null;
+      passIndex = 0;
+      passCount = 1;
+      passLabel = "";
+      scattered = 0;
+      comparisons = 0;
+      movements = 0;
+      gathered = 0;
+      constructor(config) {
+        this.profile = config.profile;
+        this.bucketLabels = config.bucketLabels.slice();
+        this.passCount = config.profile === "radix" ? config.places.length : 1;
+        this.source = config.array.map((value, origin) => ({ value, origin }));
+        this.buckets = Array.from({ length: config.bucketCount }, () => []);
+        this.output = Array.from({ length: config.array.length }, () => null);
+      }
+      intro(message) {
+        this.push("intro", message);
+      }
+      beginPass(passIndex, passCount, passLabel, message) {
+        this.passIndex = passIndex;
+        this.passCount = passCount;
+        this.passLabel = passLabel;
+        this.buckets = this.buckets.map(() => []);
+        this.output = this.output.map(() => null);
+        this.scattered = 0;
+        this.gathered = 0;
+        this.clearActive();
+        this.push("pass", message);
+      }
+      scatter(sourceIndex, bucketIndex, message) {
+        this.assertSourceIndex(sourceIndex);
+        this.assertBucketIndex(bucketIndex);
+        this.buckets[bucketIndex].push(this.source[sourceIndex]);
+        const itemIndex = this.buckets[bucketIndex].length - 1;
+        this.activeSource = sourceIndex;
+        this.activeBucket = bucketIndex;
+        this.activeBucketItems = [itemIndex, itemIndex];
+        this.activeOutput = null;
+        this.scattered++;
+        this.push("scatter", message);
+      }
+      beginLocalSort(bucketIndex, message) {
+        this.assertBucketIndex(bucketIndex);
+        this.activeSource = null;
+        this.activeBucket = bucketIndex;
+        this.activeBucketItems = null;
+        this.activeOutput = null;
+        this.push("local-sort", message);
+      }
+      compareBucket(bucketIndex, left, right, message) {
+        this.assertBucketItems(bucketIndex, left, right);
+        this.activeSource = null;
+        this.activeBucket = bucketIndex;
+        this.activeBucketItems = [left, right];
+        this.activeOutput = null;
+        this.comparisons++;
+        this.push("compare", message);
+      }
+      swapBucket(bucketIndex, left, right, message) {
+        this.assertBucketItems(bucketIndex, left, right);
+        const bucket = this.buckets[bucketIndex];
+        const token = bucket[left];
+        bucket[left] = bucket[right];
+        bucket[right] = token;
+        this.activeSource = null;
+        this.activeBucket = bucketIndex;
+        this.activeBucketItems = [left, right];
+        this.activeOutput = null;
+        this.movements++;
+        this.push("swap", message);
+      }
+      beginGather(message) {
+        this.clearActive();
+        this.push("gather", message);
+      }
+      gather(bucketIndex, itemIndex, message) {
+        this.assertBucketItems(bucketIndex, itemIndex);
+        const target = this.gathered;
+        this.output[target] = this.buckets[bucketIndex][itemIndex];
+        this.activeSource = null;
+        this.activeBucket = bucketIndex;
+        this.activeBucketItems = [itemIndex, itemIndex];
+        this.activeOutput = target;
+        this.gathered++;
+        this.push("gather", message);
+      }
+      finishPass(message) {
+        if (this.output.some((token) => token == null))
+          throw new Error("steptrace: distribution pass cannot finish before every key is gathered.");
+        this.source = this.output.map((token) => token);
+        this.clearActive();
+        this.push("pass-complete", message);
+      }
+      done(message) {
+        this.clearActive();
+        this.push("done", message);
+      }
+      clearActive() {
+        this.activeSource = null;
+        this.activeBucket = null;
+        this.activeBucketItems = null;
+        this.activeOutput = null;
+      }
+      assertSourceIndex(index) {
+        if (!Number.isInteger(index) || index < 0 || index >= this.source.length)
+          throw new Error(`steptrace: distribution source index ${index} is out of range.`);
+      }
+      assertBucketIndex(index) {
+        if (!Number.isInteger(index) || index < 0 || index >= this.buckets.length)
+          throw new Error(`steptrace: distribution bucket index ${index} is out of range.`);
+      }
+      assertBucketItems(bucketIndex, ...indices) {
+        this.assertBucketIndex(bucketIndex);
+        const bucket = this.buckets[bucketIndex];
+        if (indices.some((index) => !Number.isInteger(index) || index < 0 || index >= bucket.length))
+          throw new Error("steptrace: distribution bucket item is out of range.");
+      }
+      push(type, message) {
+        this.frames.push(
+          Object.freeze({
+            type,
+            profile: this.profile,
+            source: this.source.map((token) => ({ ...token })),
+            buckets: this.buckets.map((bucket) => bucket.map((token) => ({ ...token }))),
+            output: this.output.map((token) => token == null ? null : { ...token }),
+            bucketLabels: this.bucketLabels.slice(),
+            activeSource: this.activeSource,
+            activeBucket: this.activeBucket,
+            activeBucketItems: this.activeBucketItems == null ? null : [this.activeBucketItems[0], this.activeBucketItems[1]],
+            activeOutput: this.activeOutput,
+            passIndex: this.passIndex,
+            passCount: this.passCount,
+            passLabel: this.passLabel,
+            scattered: this.scattered,
+            comparisons: this.comparisons,
+            movements: this.movements,
+            gathered: this.gathered,
+            message
+          })
+        );
+      }
+    };
+    radixDistributionFamily = createBucketDistributionFamily();
+    rangeBucketDistributionFamily = createBucketDistributionFamily();
+  }
+});
+
+// custom/steptrace/src/algorithms/bucket-sort.ts
+function invalidConfig4(message) {
+  throw new Error(`steptrace: bucket-sort ${message}`);
+}
+function parseBucketSortConfig(config) {
+  const { array } = config;
+  const bucketCount = config.bucketCount ?? 5;
+  if (!Array.isArray(array) || array.length < 2)
+    invalidConfig4('requires an "array" with at least two finite numbers in [0, 1).');
+  if (!array.every(
+    (value) => typeof value === "number" && Number.isFinite(value) && value >= 0 && value < 1
+  ))
+    invalidConfig4('requires every "array" value to be a finite number in [0, 1).');
+  if (array.length > 12)
+    invalidConfig4("limits the demonstration to 12 keys so local bucket order remains legible.");
+  if (!Number.isInteger(bucketCount) || bucketCount < 2 || bucketCount > 8)
+    invalidConfig4('requires "bucketCount" to be an integer from 2 through 8.');
+  return {
+    profile: "bucket",
+    array: array.slice(),
+    bucketCount,
+    bucketLabels: Array.from({ length: bucketCount }, (_, index) => {
+      const start = index / bucketCount;
+      const end = (index + 1) / bucketCount;
+      return `${start.toFixed(1)}–${end.toFixed(1)}`;
+    })
+  };
+}
+var bucketSort;
+var init_bucket_sort = __esm({
+  "custom/steptrace/src/algorithms/bucket-sort.ts"() {
+    init_bucket_distribution();
+    bucketSort = {
+      id: "bucket-sort",
+      kind: "sort",
+      family: rangeBucketDistributionFamily,
+      meta: { label: "Bucket sort" },
+      parse: parseBucketSortConfig,
+      run(input, ops) {
+        const buckets = Array.from({ length: input.bucketCount }, () => []);
+        ops.intro(
+          `${input.bucketCount} equal-width ranges split [0, 1); scatter by value, sort locally, then gather left to right.`
+        );
+        ops.beginPass(
+          0,
+          1,
+          "range pass",
+          `Each value maps directly to one of ${input.bucketCount} numeric ranges.`
+        );
+        input.array.forEach((value, sourceIndex) => {
+          const bucketIndex = Math.min(input.bucketCount - 1, Math.floor(value * input.bucketCount));
+          buckets[bucketIndex].push(value);
+          ops.scatter(
+            sourceIndex,
+            bucketIndex,
+            `${value.toFixed(2)} lies in ${input.bucketLabels[bucketIndex]}; append it to that bucket.`
+          );
+        });
+        buckets.forEach((bucket, bucketIndex) => {
+          if (bucket.length < 2) return;
+          ops.beginLocalSort(
+            bucketIndex,
+            `Sort ${input.bucketLabels[bucketIndex]} internally; other ranges do not need comparison.`
+          );
+          for (let right = 1; right < bucket.length; right++) {
+            for (let cursor = right; cursor > 0; cursor--) {
+              const leftValue = bucket[cursor - 1];
+              const rightValue = bucket[cursor];
+              ops.compareBucket(
+                bucketIndex,
+                cursor - 1,
+                cursor,
+                `Compare ${leftValue.toFixed(2)} and ${rightValue.toFixed(2)} inside ${input.bucketLabels[bucketIndex]}.`
+              );
+              if (leftValue <= rightValue) break;
+              const value = bucket[cursor - 1];
+              bucket[cursor - 1] = bucket[cursor];
+              bucket[cursor] = value;
+              ops.swapBucket(
+                bucketIndex,
+                cursor - 1,
+                cursor,
+                `${rightValue.toFixed(2)} moves before ${leftValue.toFixed(2)} inside its bucket.`
+              );
+            }
+          }
+        });
+        ops.beginGather(
+          `Every earlier bucket covers smaller values, so concatenate ranges without cross-bucket comparisons.`
+        );
+        const sorted = [];
+        buckets.forEach((bucket, bucketIndex) => {
+          bucket.forEach((value, itemIndex) => {
+            sorted.push(value);
+            ops.gather(
+              bucketIndex,
+              itemIndex,
+              `Write ${value.toFixed(2)} from ${input.bucketLabels[bucketIndex]} at output index ${sorted.length - 1}.`
+            );
+          });
+        });
+        ops.finishPass("All locally sorted ranges are concatenated in increasing range order.");
+        ops.done(`Bucket Sort produced [${sorted.map((value) => value.toFixed(2)).join(", ")}].`);
+      }
+    };
+  }
+});
+
+// custom/steptrace/src/families/contiguous-storage.ts
+function ringOrder(head, count, capacity) {
+  return Array.from({ length: count }, (_, offset) => (head + offset) % capacity);
+}
+function randomValue2() {
+  return String(Math.floor(Math.random() * 90) + 10);
+}
+function numericIndex(input, limit) {
+  if (!input.value.trim()) return null;
+  const index = Number(input.value);
+  return Number.isInteger(index) && index >= 0 && index < limit ? index : null;
+}
+function mountQueue(root, config) {
+  const slots = Array(config.capacity).fill(null);
+  let head = 0;
+  let tail = 0;
+  let count = 0;
+  const shell = createStructureShell(root, "queue", "queue", "Interactive circular-array queue");
+  const board = createIndexedBoard(
+    shell.stage,
+    config.capacity,
+    `Circular backing array with ${config.capacity} slots`
+  );
+  const input = shell.input("Value to enqueue", "Value");
+  input.classList.add("steptrace__queue-input");
+  const enqueue = shell.button("Enqueue", true);
+  enqueue.classList.add("steptrace__queue-action", "steptrace__queue-action--primary");
+  const dequeue = shell.button("Dequeue");
+  dequeue.classList.add("steptrace__queue-action");
+  const reset = shell.button("Reset");
+  reset.classList.add("steptrace__queue-action", "steptrace__queue-reset");
+  shell.status.classList.add("steptrace__queue-status");
+  shell.controls.append(input, enqueue, dequeue, reset);
+  function render(message = "") {
+    board.paint(
+      slots.map((value, index) => {
+        const isHead = index === head;
+        const isTail = index === tail;
+        const markers = [isHead ? "head" : "", isTail ? "tail" : ""].filter(Boolean);
+        return {
+          value,
+          head: isHead,
+          tail: isTail,
+          label: isHead && isTail ? "HEAD / TAIL" : isHead ? "HEAD" : isTail ? "TAIL" : String(index),
+          ariaLabel: `slot ${index}, ${value == null ? "empty" : `value ${value}`}${markers.length ? `, ${markers.join(" and ")}` : ""}`
+        };
+      })
+    );
+    shell.setCounter(String(count), ` / ${config.capacity}`);
+    enqueue.disabled = count === config.capacity;
+    dequeue.disabled = count === 0;
+    input.disabled = count === config.capacity;
+    shell.status.textContent = message || (count === 0 ? "Queue is empty. Enqueue a value to begin." : "Queue ready.");
+  }
+  function onEnqueue() {
+    if (count === config.capacity) {
+      shell.status.textContent = "Queue is full. Dequeue an item before enqueueing another.";
+      return;
+    }
+    const value = input.value.trim() || randomValue2();
+    const index = tail;
+    slots[index] = value;
+    tail = (tail + 1) % config.capacity;
+    count++;
+    input.value = "";
+    render(`Enqueued ${value} at slot ${index}. Tail advanced to slot ${tail}.`);
+    input.focus?.();
+  }
+  function onDequeue() {
+    if (!count) return;
+    const index = head;
+    const value = slots[index];
+    slots[index] = null;
+    head = (head + 1) % config.capacity;
+    count--;
+    render(`Dequeued ${value} from slot ${index}. Head advanced to slot ${head}.`);
+  }
+  function onReset() {
+    slots.fill(null);
+    head = 0;
+    tail = 0;
+    count = 0;
+    input.value = "";
+    render("Queue reset. Head and tail returned to slot 0.");
+    input.focus?.();
+  }
+  shell.listen(enqueue, "click", onEnqueue);
+  shell.listen(dequeue, "click", onDequeue);
+  shell.listen(reset, "click", onReset);
+  onEnter(shell, input, onEnqueue);
+  render();
+  return shell.finish();
+}
+function mountArray(root, config) {
+  const initial = [...config.values, ...Array(config.capacity).fill(null)].slice(0, config.capacity);
+  const slots = initial.slice();
+  let changed = [];
+  const shell = createStructureShell(root, "arrays", "arrays", "Interactive fixed-size array");
+  const board = createIndexedBoard(shell.stage, config.capacity, "Fixed contiguous array");
+  const indexInput = shell.input("Array index", "Index", 2);
+  const valueInput = shell.input("Value to write", "Value");
+  const read = shell.button("Read");
+  const write = shell.button("Write", true);
+  const reset = shell.button("Reset");
+  shell.controls.append(indexInput, valueInput, read, write, reset);
+  function render(message = "") {
+    board.paint(
+      slots.map((value, index) => ({
+        value,
+        changed: changed.includes(index),
+        ariaLabel: `index ${index}, address 0x${(4096 + index * 4).toString(16)}, ${value == null ? "empty" : `value ${value}`}`
+      }))
+    );
+    shell.setCounter(String(config.capacity), " fixed slots");
+    shell.status.textContent = message || "Read or replace one value by its fixed index.";
+  }
+  function onRead() {
+    const index = numericIndex(indexInput, config.capacity);
+    if (index == null) {
+      shell.status.textContent = `Enter an index from 0 to ${config.capacity - 1}.`;
+      return;
+    }
+    changed = [index];
+    render(
+      `Read array[${index}] at address 0x${(4096 + index * 4).toString(16)}: ${slots[index] ?? "empty"}.`
+    );
+  }
+  function onWrite() {
+    const index = numericIndex(indexInput, config.capacity);
+    if (index == null) {
+      shell.status.textContent = `Enter an index from 0 to ${config.capacity - 1}.`;
+      return;
+    }
+    const value = valueInput.value.trim() || randomValue2();
+    const previous = slots[index];
+    slots[index] = value;
+    changed = [index];
+    valueInput.value = "";
+    render(
+      previous == null ? `Wrote ${value} to empty array[${index}].` : `Replaced array[${index}] value ${previous} with ${value}.`
+    );
+  }
+  function onReset() {
+    slots.splice(0, slots.length, ...initial);
+    changed = [];
+    render("Array reset to its initial fixed-capacity values.");
+  }
+  shell.listen(read, "click", onRead);
+  shell.listen(write, "click", onWrite);
+  shell.listen(reset, "click", onReset);
+  onEnter(shell, valueInput, onWrite);
+  render();
+  return shell.finish();
+}
+function mountCircularBuffer(root, config) {
+  const slots = Array(config.capacity).fill(null);
+  let head = 0;
+  let count = 0;
+  const shell = createStructureShell(
+    root,
+    "circular-buffer",
+    "circular buffer",
+    "Interactive overwrite-oldest circular buffer"
+  );
+  const board = createIndexedBoard(shell.stage, config.capacity, "Circular buffer slots");
+  const input = shell.input("Value to write", "Value");
+  const write = shell.button("Write", true);
+  const read = shell.button("Read oldest");
+  const reset = shell.button("Reset");
+  shell.controls.append(input, write, read, reset);
+  function render(message = "") {
+    const order = ringOrder(head, count, config.capacity);
+    const writeIndex = (head + count) % config.capacity;
+    board.paint(
+      slots.map((value, index) => {
+        const isHead = count > 0 && index === head;
+        const isWrite = index === writeIndex;
+        return {
+          value,
+          active: order.includes(index),
+          head: isHead,
+          tail: isWrite,
+          label: isHead && isWrite ? "OLDEST / WRITE" : isHead ? "OLDEST" : isWrite ? "WRITE" : String(index),
+          ariaLabel: `slot ${index}, ${value == null ? "empty" : `value ${value}`}${isHead ? ", oldest" : ""}${isWrite ? ", next write" : ""}`
+        };
+      })
+    );
+    shell.setCounter(String(count), ` / ${config.capacity}`);
+    read.disabled = count === 0;
+    shell.status.textContent = message || (count ? "The oldest value is read first." : "Write a value to begin.");
+  }
+  function onWrite() {
+    const value = input.value.trim() || randomValue2();
+    const full = count === config.capacity;
+    const index = full ? head : (head + count) % config.capacity;
+    const overwritten = slots[index];
+    slots[index] = value;
+    if (full) head = (head + 1) % config.capacity;
+    else count++;
+    input.value = "";
+    render(
+      full ? `Wrote ${value} at slot ${index}; overwrote oldest value ${overwritten} and advanced oldest.` : `Wrote ${value} at slot ${index}.`
+    );
+  }
+  function onRead() {
+    if (!count) return;
+    const index = head;
+    const value = slots[index];
+    slots[index] = null;
+    head = (head + 1) % config.capacity;
+    count--;
+    render(`Read oldest value ${value} from slot ${index}.`);
+  }
+  function onReset() {
+    slots.fill(null);
+    head = 0;
+    count = 0;
+    input.value = "";
+    render("Circular buffer reset.");
+  }
+  shell.listen(write, "click", onWrite);
+  shell.listen(read, "click", onRead);
+  shell.listen(reset, "click", onReset);
+  onEnter(shell, input, onWrite);
+  render();
+  return shell.finish();
+}
+function mountDeque(root, config) {
+  const maxCapacity = config.capacity * 2;
+  let capacity = config.capacity;
+  let slots = Array(capacity).fill(null);
+  let head = 0;
+  let count = 0;
+  const shell = createStructureShell(
+    root,
+    "deque",
+    "deque",
+    "Interactive double-ended circular deque"
+  );
+  const board = createIndexedBoard(shell.stage, capacity, "Deque circular backing array");
+  const input = shell.input("Value to push", "Value");
+  const pushFront = shell.button("Push front", true);
+  const pushBack = shell.button("Push back", true);
+  const popFront = shell.button("Pop front");
+  const popBack = shell.button("Pop back");
+  const reset = shell.button("Reset");
+  shell.controls.append(input, pushFront, pushBack, popFront, popBack, reset);
+  function grow() {
+    if (capacity === maxCapacity) return false;
+    const nextCapacity = capacity * 2;
+    const next = Array(nextCapacity).fill(null);
+    ringOrder(head, count, capacity).forEach((index, offset) => {
+      next[offset] = slots[index];
+    });
+    slots = next;
+    head = 0;
+    capacity = nextCapacity;
+    board.resize(capacity);
+    return true;
+  }
+  function render(message = "") {
+    const order = ringOrder(head, count, capacity);
+    const back = count ? order.at(-1) : -1;
+    board.paint(
+      slots.map((value2, index) => {
+        const isFront = count > 0 && index === head;
+        const isBack = count > 0 && index === back;
+        return {
+          value: value2,
+          active: order.includes(index),
+          head: isFront,
+          tail: isBack,
+          label: isFront && isBack ? "FRONT / BACK" : isFront ? "FRONT" : isBack ? "BACK" : String(index),
+          ariaLabel: `slot ${index}, ${value2 == null ? "empty" : `value ${value2}`}${isFront ? ", front" : ""}${isBack ? ", back" : ""}`
+        };
+      })
+    );
+    shell.setCounter(String(count), ` / ${capacity}`);
+    popFront.disabled = count === 0;
+    popBack.disabled = count === 0;
+    pushFront.disabled = count === maxCapacity;
+    pushBack.disabled = count === maxCapacity;
+    input.disabled = count === maxCapacity;
+    shell.status.textContent = message || (count ? "Push or pop at either end." : "Deque is empty.");
+  }
+  function value() {
+    const next = input.value.trim() || randomValue2();
+    input.value = "";
+    return next;
+  }
+  function onPushFront() {
+    const grew = count === capacity && grow();
+    if (count === capacity) return;
+    head = (head - 1 + capacity) % capacity;
+    slots[head] = value();
+    count++;
+    render(
+      `Pushed ${slots[head]} at the front${grew ? ` after growing and relinearizing to ${capacity} slots` : ""}.`
+    );
+  }
+  function onPushBack() {
+    const grew = count === capacity;
+    if (grew && !grow()) return;
+    const index = (head + count) % capacity;
+    slots[index] = value();
+    count++;
+    render(
+      `Pushed ${slots[index]} at the back${grew ? ` after growing and relinearizing to ${capacity} slots` : ""}.`
+    );
+  }
+  function onPopFront() {
+    if (!count) return;
+    const index = head;
+    const removed = slots[index];
+    slots[index] = null;
+    head = (head + 1) % capacity;
+    count--;
+    render(`Popped ${removed} from the front.`);
+  }
+  function onPopBack() {
+    if (!count) return;
+    const index = (head + count - 1) % capacity;
+    const removed = slots[index];
+    slots[index] = null;
+    count--;
+    render(`Popped ${removed} from the back.`);
+  }
+  function onReset() {
+    capacity = config.capacity;
+    slots = Array(capacity).fill(null);
+    head = 0;
+    count = 0;
+    board.resize(capacity);
+    input.value = "";
+    render("Deque reset.");
+  }
+  shell.listen(pushFront, "click", onPushFront);
+  shell.listen(pushBack, "click", onPushBack);
+  shell.listen(popFront, "click", onPopFront);
+  shell.listen(popBack, "click", onPopBack);
+  shell.listen(reset, "click", onReset);
+  onEnter(shell, input, onPushBack);
+  render();
+  return shell.finish();
+}
+function mountDynamicArray(root, config) {
+  const maxCapacity = config.capacity * 2;
+  const initial = config.values.slice();
+  let capacity = Math.max(config.capacity, initial.length);
+  const values = initial.slice();
+  const shell = createStructureShell(
+    root,
+    "dynamic-array",
+    "dynamic array",
+    "Interactive geometrically growing dynamic array"
+  );
+  const board = createIndexedBoard(shell.stage, capacity, "Dynamic array backing storage");
+  const input = shell.input("Value to append", "Value");
+  const append = shell.button("Append", true);
+  const remove = shell.button("Remove last");
+  const reset = shell.button("Reset");
+  shell.controls.append(input, append, remove, reset);
+  function render(message = "") {
+    board.paint(
+      Array.from({ length: capacity }, (_, index) => ({
+        value: values[index] ?? null,
+        active: index < values.length,
+        ariaLabel: `index ${index}, ${index < values.length ? `value ${values[index]}` : "unused capacity"}`
+      }))
+    );
+    shell.setCounter(String(values.length), ` / ${capacity} capacity`);
+    remove.disabled = values.length === 0;
+    append.disabled = values.length === maxCapacity;
+    input.disabled = values.length === maxCapacity;
+    shell.status.textContent = message || "Append in constant time until capacity is exhausted, then grow and copy.";
+  }
+  function onAppend() {
+    if (values.length === maxCapacity) return;
+    const value = input.value.trim() || randomValue2();
+    const grew = values.length === capacity;
+    if (grew) {
+      capacity *= 2;
+      board.resize(capacity);
+    }
+    values.push(value);
+    input.value = "";
+    render(
+      grew ? `Capacity exhausted: allocated ${capacity} slots, copied ${values.length - 1} values, then appended ${value}.` : `Appended ${value} at index ${values.length - 1}.`
+    );
+  }
+  function onRemove() {
+    if (!values.length) return;
+    const removed = values.pop();
+    render(`Removed last value ${removed}; capacity remains ${capacity}.`);
+  }
+  function onReset() {
+    values.splice(0, values.length, ...initial);
+    capacity = Math.max(config.capacity, initial.length);
+    board.resize(capacity);
+    input.value = "";
+    render("Dynamic array reset.");
+  }
+  shell.listen(append, "click", onAppend);
+  shell.listen(remove, "click", onRemove);
+  shell.listen(reset, "click", onReset);
+  onEnter(shell, input, onAppend);
+  render();
+  return shell.finish();
+}
+function mountSpan(root, config) {
+  const initial = config.values.slice();
+  const values = initial.slice();
+  let start = config.start;
+  let length = config.length;
+  const shell = createStructureShell(
+    root,
+    "span",
+    "span",
+    "Interactive span view over shared backing storage"
+  );
+  const board = createIndexedBoard(shell.stage, values.length, "Backing array with span overlay");
+  const startInput = shell.input("Span start index", "Start", 2);
+  const lengthInput = shell.input("Span length", "Length", 2);
+  const offsetInput = shell.input("Span write offset", "Offset", 2);
+  const valueInput = shell.input("Value to write through span", "Value");
+  const slice = shell.button("Slice", true);
+  const write = shell.button("Write", true);
+  const reset = shell.button("Reset");
+  shell.controls.append(startInput, lengthInput, slice, offsetInput, valueInput, write, reset);
+  function render(message = "") {
+    board.paint(
+      values.map((value, index) => {
+        const inView = index >= start && index < start + length;
+        return {
+          value,
+          view: inView,
+          label: inView ? `SPAN ${index - start}` : String(index),
+          ariaLabel: `backing index ${index}, value ${value}${inView ? `, span offset ${index - start}` : ""}`
+        };
+      })
+    );
+    shell.setCounter(`[${start}..${start + length})`, " view");
+    shell.status.textContent = message || "The highlighted span aliases the same backing cells; writes are visible in both.";
+  }
+  function onSlice() {
+    const nextStart = numericIndex(startInput, values.length);
+    const nextLength = Number(lengthInput.value);
+    if (nextStart == null || !Number.isInteger(nextLength) || nextLength < 1 || nextStart + nextLength > values.length) {
+      shell.status.textContent = `Choose a start and length inside the ${values.length}-cell backing array.`;
+      return;
+    }
+    start = nextStart;
+    length = nextLength;
+    render(`Created span view backing[${start}..${start + length}); no values were copied.`);
+  }
+  function onWrite() {
+    const offset = numericIndex(offsetInput, length);
+    if (offset == null) {
+      shell.status.textContent = `Enter a span offset from 0 to ${length - 1}.`;
+      return;
+    }
+    const value = valueInput.value.trim() || randomValue2();
+    const backingIndex = start + offset;
+    values[backingIndex] = value;
+    valueInput.value = "";
+    render(`span[${offset}] wrote ${value} through to backing[${backingIndex}].`);
+  }
+  function onReset() {
+    values.splice(0, values.length, ...initial);
+    start = config.start;
+    length = config.length;
+    for (const input of [startInput, lengthInput, offsetInput, valueInput]) input.value = "";
+    render("Backing array and span view reset.");
+  }
+  shell.listen(slice, "click", onSlice);
+  shell.listen(write, "click", onWrite);
+  shell.listen(reset, "click", onReset);
+  onEnter(shell, valueInput, onWrite);
+  render();
+  return shell.finish();
+}
+var init_contiguous_storage = __esm({
+  "custom/steptrace/src/families/contiguous-storage.ts"() {
+    init_interactive_structure();
+  }
+});
+
+// custom/steptrace/src/algorithms/arrays.ts
+function parseArrayConfig(config) {
+  const values = (config.values?.length ? config.values : DEFAULT_VALUES5).map(String);
+  const capacity = config.capacity ?? values.length;
+  if (!Number.isInteger(capacity) || capacity < 3 || capacity > 10 || values.length > capacity)
+    throw new Error(
+      `steptrace: arrays requires integer "capacity" from 3 to 10 with no more values than slots.`
+    );
+  return { capacity, values };
+}
+var DEFAULT_VALUES5, arrays;
+var init_arrays = __esm({
+  "custom/steptrace/src/algorithms/arrays.ts"() {
+    init_contiguous_storage();
+    DEFAULT_VALUES5 = [12, 7, 31, 18, 9, 25];
+    arrays = {
+      id: "arrays",
+      family: "contiguous-storage",
+      meta: { label: "Arrays" },
+      parse: parseArrayConfig,
+      mount: mountArray
+    };
+  }
+});
+
+// custom/steptrace/src/algorithms/circular-buffer.ts
+function parseCircularBufferConfig(config) {
+  const capacity = config.capacity ?? 6;
+  if (!Number.isInteger(capacity) || capacity < 3 || capacity > 10)
+    throw new Error(`steptrace: circular-buffer requires integer "capacity" from 3 to 10.`);
+  return { capacity };
+}
+var circularBuffer;
+var init_circular_buffer = __esm({
+  "custom/steptrace/src/algorithms/circular-buffer.ts"() {
+    init_contiguous_storage();
+    circularBuffer = {
+      id: "circular-buffer",
+      family: "contiguous-storage",
+      meta: { label: "Circular Buffer" },
+      parse: parseCircularBufferConfig,
+      mount: mountCircularBuffer
+    };
+  }
+});
+
+// custom/steptrace/src/families/array-sort.ts
+function resolveArraySortFrame(frame) {
+  if (frame.profile === "comb") return resolveCombSortFrame(frame);
+  if (frame.profile === "cyclic") return resolveCyclicSortFrame(frame);
+  if (frame.profile === "introsort") return resolveIntrosortFrame(frame);
+  const decorate = (visual) => ({
+    ...visual,
+    laneIndices: frame.subsequence,
+    holeIndex: frame.hole,
+    heldToken: frame.keyValue == null || frame.keyOrigin == null ? null : {
+      id: frame.tokenId,
+      index: frame.type === "place-held" ? frame.hole : frame.keyOrigin,
+      label: `held ${frame.keyValue}`,
+      placing: frame.type === "place-held"
+    }
+  });
+  if (frame.type === "gap" || frame.type === "subsequence") {
+    return decorate({
+      activeIndices: [],
+      activeRole: null,
+      markerIndices: [null, null],
+      movements: []
+    });
+  }
+  if (frame.type === "hold-key") {
+    return decorate({
+      activeIndices: [],
+      activeRole: null,
+      markerIndices: [null, null],
+      movements: []
+    });
+  }
+  if (frame.type === "compare-held") {
+    return decorate({
+      activeIndices: frame.active,
+      activeRole: "compare",
+      markerIndices: [frame.active[0] ?? null, null],
+      movements: []
+    });
+  }
+  if (frame.type === "shift-held") {
+    const to = frame.active[0] ?? null;
+    const from = frame.from ?? null;
+    return decorate({
+      activeIndices: to == null ? [] : [to],
+      activeRole: "move",
+      markerIndices: [null, from],
+      movements: to == null || from == null ? [] : [[to, from]]
+    });
+  }
+  if (frame.type === "place-held") {
+    return decorate({
+      activeIndices: [],
+      activeRole: null,
+      markerIndices: [null, null],
+      movements: []
+    });
+  }
+  return decorate(resolveLegacySortFrame(frame));
+}
+function resolveIntrosortFrame(frame) {
+  const visual = resolveLegacySortFrame(frame);
+  return {
+    ...visual,
+    laneIndices: null,
+    holeIndex: frame.hole,
+    heldToken: frame.keyValue == null || frame.keyOrigin == null ? null : {
+      id: frame.tokenId,
+      index: frame.type === "place-held" ? frame.hole : frame.keyOrigin,
+      label: `held ${frame.keyValue}`,
+      placing: frame.type === "place-held"
+    }
+  };
+}
+function resolveCombSortFrame(frame) {
+  const visual = resolveLegacySortFrame(frame);
+  return {
+    ...visual,
+    laneIndices: frame.subsequence,
+    holeIndex: null,
+    heldToken: null
+  };
+}
+function resolveCyclicSortFrame(frame) {
+  if (frame.type === "home-check") {
+    return {
+      activeIndices: frame.active,
+      activeRole: "compare",
+      markerIndices: [frame.cursor, frame.home],
+      movements: [],
+      laneIndices: null,
+      holeIndex: null,
+      heldToken: null
+    };
+  }
+  if (frame.type === "mark-sorted") {
+    return {
+      activeIndices: [],
+      activeRole: null,
+      markerIndices: [frame.cursor, frame.home],
+      movements: [],
+      laneIndices: null,
+      holeIndex: null,
+      heldToken: null
+    };
+  }
+  return resolveLegacySortFrame(frame);
+}
+function arraySortSemanticsFor(frames) {
+  switch (frames[0]?.profile) {
+    case "comb":
+      return combSortViewSemantics;
+    case "cyclic":
+      return cyclicSortViewSemantics;
+    case "introsort":
+      return introsortViewSemantics;
+    default:
+      return arraySortViewSemantics;
+  }
+}
+var arraySortViewSemantics, combSortViewSemantics, cyclicSortViewSemantics, introsortViewSemantics, arraySortFamily;
+var init_array_sort = __esm({
+  "custom/steptrace/src/families/array-sort.ts"() {
+    init_recorders();
+    init_render();
+    arraySortViewSemantics = {
+      markerLabels: ["at", "from"],
+      movementLabel: "moves",
+      resolveFrame: resolveArraySortFrame,
+      watchRows(frame) {
+        return [
+          { k: "held", v: frame.keyValue ?? "—", sw: "var(--_blue)" },
+          { k: "gap", v: frame.gap ?? "—", sw: "var(--_amber)" },
+          {
+            k: "lane",
+            v: frame.subsequence ? frame.subsequence.join(" → ") : "—",
+            sw: "var(--_violet)"
+          }
+        ];
+      }
+    };
+    combSortViewSemantics = {
+      markerLabels: ["left", "right"],
+      movementLabel: "swaps",
+      resolveFrame: resolveArraySortFrame,
+      watchRows(frame) {
+        return [
+          { k: "gap", v: frame.gap ?? "—", sw: "var(--_amber)" },
+          {
+            k: "pass swapped",
+            v: frame.passSwapped == null ? "—" : frame.passSwapped ? "yes" : "no",
+            sw: frame.passSwapped ? "var(--_green)" : "var(--_neutral)",
+            hint: "Whether this gap pass made any swap."
+          }
+        ];
+      }
+    };
+    cyclicSortViewSemantics = {
+      markerLabels: ["at", "home"],
+      movementLabel: "swaps",
+      resolveFrame: resolveArraySortFrame,
+      watchRows(frame) {
+        const value = frame.cursor == null ? null : frame.array[frame.cursor];
+        return [
+          {
+            k: "value",
+            v: value ?? "—",
+            sw: "var(--_blue)",
+            hint: "Value at the current cursor."
+          },
+          {
+            k: "placed",
+            v: `${frame.sorted.length}/${frame.array.length}`,
+            sw: "var(--_green)",
+            hint: "Values already fixed at their home index."
+          }
+        ];
+      }
+    };
+    introsortViewSemantics = {
+      markerLabels: ["scan", "pivot"],
+      movementLabel: "moves",
+      resolveFrame: resolveArraySortFrame,
+      watchRows(frame) {
+        const depth = frame.depthUsed == null || frame.depthLimit == null ? "—" : `${frame.depthUsed}/${frame.depthLimit}`;
+        return [
+          {
+            k: "strategy",
+            v: frame.strategy ?? (frame.type === "done" ? "complete" : "—"),
+            sw: frame.strategy === "heap sort" ? "var(--_amber)" : frame.strategy === "insertion sort" ? "var(--_green)" : "var(--_blue)"
+          },
+          {
+            k: "depth",
+            v: depth,
+            sw: "var(--_violet)",
+            hint: "Quicksort levels used out of the depth limit."
+          },
+          { k: "cutoff", v: frame.cutoff == null ? "—" : `≤ ${frame.cutoff}`, sw: "var(--_neutral)" }
+        ];
+      }
+    };
+    arraySortFamily = {
+      id: "array-sort",
+      createRecorder(config) {
+        return new ArraySortRecorder(config.array, config.profile);
+      },
+      createView(frames) {
+        return makeSortView(frames, arraySortSemanticsFor(frames));
+      }
+    };
+  }
+});
+
+// custom/steptrace/src/algorithms/comb-sort.ts
+function invalidConfig5(message) {
+  throw new Error(`steptrace: comb-sort ${message}`);
+}
+function parseCombSortConfig(config) {
+  const { array } = config;
+  const shrinkFactor = config.shrinkFactor ?? 1.3;
+  if (!Array.isArray(array) || array.length < 2)
+    invalidConfig5('requires an "array" with at least two numbers.');
+  if (!array.every((value) => typeof value === "number" && Number.isFinite(value)))
+    invalidConfig5('requires every "array" value to be a finite number.');
+  if (typeof shrinkFactor !== "number" || !Number.isFinite(shrinkFactor) || shrinkFactor <= 1)
+    invalidConfig5('requires "shrinkFactor" to be a finite number greater than 1.');
+  return { array: array.slice(), shrinkFactor, profile: "comb" };
+}
+var combSort;
+var init_comb_sort = __esm({
+  "custom/steptrace/src/algorithms/comb-sort.ts"() {
+    init_array_sort();
+    combSort = {
+      id: "comb-sort",
+      kind: "sort",
+      family: arraySortFamily,
+      meta: { label: "Comb sort" },
+      parse: parseCombSortConfig,
+      run(input, ops) {
+        ops.init(
+          `Comb sort — compare distant pairs, shrink the gap by ${input.shrinkFactor}, then finish with gap 1.`
+        );
+        let gap = ops.value.length;
+        let swapped = true;
+        while (gap > 1 || swapped) {
+          gap = Math.max(1, Math.floor(gap / input.shrinkFactor));
+          ops.beginGap(gap, `Gap ${gap}: sweep every pair whose indices are ${gap} apart.`);
+          swapped = false;
+          for (let left = 0; left + gap < ops.value.length; left++) {
+            const right = left + gap;
+            const leftValue = ops.value[left];
+            const rightValue = ops.value[right];
+            ops.compareGapPair(
+              left,
+              right,
+              `Compare ${leftValue} at index ${left} with ${rightValue} at index ${right}.`
+            );
+            if (leftValue <= rightValue) continue;
+            ops.swapGapPair(
+              left,
+              right,
+              `${leftValue} > ${rightValue}: swap the gap-${gap} pair.`
+            );
+            swapped = true;
+          }
+          ops.endGap(
+            swapped,
+            gap === 1 && !swapped ? "Gap 1 made no swap; no adjacent inversion remains." : `Gap ${gap} pass complete${swapped ? " with swaps" : " without a swap"}.`
+          );
+        }
+        ops.lockAll(Array.from({ length: ops.value.length }, (_, index) => index));
+        ops.done(`Sorted in ${ops.comparisons} comparisons and ${ops.swaps} swaps.`);
+      }
+    };
+  }
+});
+
+// custom/steptrace/src/algorithms/connected-components.ts
+function parse4() {
+  return {
+    nodes: [
+      { id: "A", label: "A", x: 100, y: 95 },
+      { id: "B", label: "B", x: 210, y: 55 },
+      { id: "C", label: "C", x: 210, y: 160 },
+      { id: "D", label: "D", x: 380, y: 90 },
+      { id: "E", label: "E", x: 490, y: 90 },
+      { id: "F", label: "F", x: 530, y: 230 }
+    ],
+    edges: [
+      { from: "A", to: "B", weight: 1 },
+      { from: "B", to: "C", weight: 1 },
+      { from: "C", to: "A", weight: 1 },
+      { from: "D", to: "E", weight: 1 }
+    ]
+  };
+}
+function run4(_, recorder) {
+  const visited = [];
+  const groups = [];
+  const flood = (component, order) => {
+    const frontier = [order[0]];
+    recorder.record(component, order[0], frontier, visited, groups, `Start component ${component} at unvisited vertex ${order[0]}.`);
+    for (const id of order) {
+      frontier.splice(frontier.indexOf(id), 1);
+      if (!visited.includes(id)) visited.push(id);
+      const next = order.filter((candidate) => !visited.includes(candidate) && !frontier.includes(candidate));
+      frontier.push(...next.slice(0, 1));
+      const currentGroup = order.filter((member) => visited.includes(member));
+      recorder.record(component, id, frontier, visited, [...groups, currentGroup], `Assign ${id} to component ${component}.`);
+    }
+    groups.push([...order]);
+  };
+  flood(1, ["A", "B", "C"]);
+  flood(2, ["D", "E"]);
+  flood(3, ["F"]);
+  recorder.record(3, null, [], visited, groups, "All vertices are assigned: {A,B,C}, {D,E}, {F}.");
+}
+var Recorder5, family5, connectedComponents;
+var init_connected_components = __esm({
+  "custom/steptrace/src/algorithms/connected-components.ts"() {
+    init_graph_state();
+    Recorder5 = class {
+      constructor(config) {
+        this.config = config;
+      }
+      config;
+      frames = [];
+      record(component, current, frontier, visited, groups, message) {
+        const detail = { kind: "component-flood", component, frontier: [...frontier], visited: [...visited], groups: groups.map((group) => [...group]) };
+        this.frames.push({
+          type: current ? "visit" : "done",
+          profile: "connected-components",
+          nodes: this.config.nodes,
+          edges: this.config.edges,
+          decor: [],
+          start: null,
+          target: null,
+          currentNode: current,
+          currentEdge: null,
+          selectedEdges: [],
+          nodeState: Object.fromEntries(this.config.nodes.map(({ id }) => [id, id === current ? "active" : frontier.includes(id) ? "frontier" : visited.includes(id) ? "accepted" : "neutral"])),
+          edgeState: Object.fromEntries(this.config.edges.map(({ from, to }) => [`${from}|${to}`, visited.includes(from) && visited.includes(to) ? "accepted" : "neutral"])),
+          message,
+          detail
+        });
+      }
+    };
+    family5 = { id: "graph-state", createRecorder: (config) => new Recorder5(config), createView: makeGraphStateView };
+    connectedComponents = {
+      id: "connected-components",
+      kind: "graph",
+      family: family5,
+      meta: { label: "Connected Components" },
+      parse: parse4,
+      run: run4
+    };
+  }
+});
+
+// custom/steptrace/src/algorithms/counting-sort.ts
+var countingSort;
+var init_counting_sort = __esm({
+  "custom/steptrace/src/algorithms/counting-sort.ts"() {
+    init_distribution_sort();
+    countingSort = {
+      id: "counting-sort",
+      kind: "sort",
+      family: distributionSortFamily,
+      meta: { label: "Counting sort" },
+      parse: parseCountingSortConfig,
+      run(input, ops) {
+        ops.intro(
+          `Keys span ${input.min}…${input.max}. Count by value first; no pair of keys is compared.`
+        );
+        for (let index = 0; index < input.array.length; index++) {
+          const key4 = input.array[index];
+          ops.tally(index, `Read input[${index}] = ${key4}; add one to frequency[${key4}].`);
+        }
+        for (let key4 = input.min; key4 <= input.max; key4++) {
+          ops.prefix(
+            key4,
+            key4 === input.min ? `Position[${key4}] starts at ${key4}'s frequency: keys ≤ ${key4} end before this index.` : `Add position[${key4 - 1}] into position[${key4}]; it now counts keys ≤ ${key4}.`
+          );
+        }
+        for (let index = input.array.length - 1; index >= 0; index--) {
+          const key4 = input.array[index];
+          ops.place(
+            index,
+            `Read input[${index}] = ${key4} from the tail; decrement its end position, then write output there.`
+          );
+        }
+        ops.done(`Every key is in its value block. Tail-first placement kept equal keys in input order.`);
+      }
+    };
+  }
+});
+
+// custom/steptrace/src/algorithms/cyclic-sort.ts
+function invalidConfig6(message) {
+  throw new Error(`steptrace: cyclic-sort ${message}`);
+}
+function parseCyclicSortConfig(config) {
+  const { array } = config;
+  if (!Array.isArray(array) || array.length < 2)
+    invalidConfig6('requires an "array" with at least two integers.');
+  if (!array.every((value) => Number.isInteger(value) && value >= 1 && value <= array.length))
+    invalidConfig6("requires every value to be an integer in the range 1..array.length.");
+  if (new Set(array).size !== array.length)
+    invalidConfig6("requires a permutation with no duplicate values.");
+  return { array: array.slice(), profile: "cyclic" };
+}
+var cyclicSort;
+var init_cyclic_sort = __esm({
+  "custom/steptrace/src/algorithms/cyclic-sort.ts"() {
+    init_array_sort();
+    cyclicSort = {
+      id: "cyclic-sort",
+      kind: "sort",
+      family: arraySortFamily,
+      meta: { label: "Cyclic sort" },
+      parse: parseCyclicSortConfig,
+      run(_input, ops) {
+        ops.init("Cyclic sort — value v belongs at index v − 1; keep the cursor still until its value is home.");
+        let cursor = 0;
+        while (cursor < ops.value.length) {
+          const value = ops.value[cursor];
+          const home = value - 1;
+          ops.inspectHome(
+            cursor,
+            home,
+            `At index ${cursor}, value ${value} belongs at home index ${home}.`
+          );
+          if (cursor !== home) {
+            const displaced = ops.value[home];
+            ops.swapHome(
+              cursor,
+              home,
+              `Send ${value} home to index ${home}; ${displaced} returns to index ${cursor}.`
+            );
+            ops.settleHome(home, `Value ${value} is now fixed at its home index ${home}.`);
+            continue;
+          }
+          ops.settleHome(cursor, `Value ${value} is already home at index ${cursor}; advance.`);
+          cursor++;
+        }
+        ops.lockAll(Array.from({ length: ops.value.length }, (_, index) => index));
+        ops.done(`Placed all values with ${ops.swaps} swaps.`);
+      }
+    };
+  }
+});
+
+// custom/steptrace/src/algorithms/dfs.ts
+var dfs;
+var init_dfs = __esm({
+  "custom/steptrace/src/algorithms/dfs.ts"() {
+    init_graph();
+    dfs = {
+      id: "dfs",
+      kind: "graph",
+      meta: { label: "Depth-first search", frontierLabel: "Stack (bottom → top)" },
+      run: (input, ops, graph) => {
+        const adj = adjacency(graph);
+        const start = input.start;
+        const target = input.target != null && input.target !== start ? String(input.target) : null;
+        if (target) ops.target(target);
+        ops.init(
+          target ? `Depth-first search for ${target}, starting at ${start} — dive as deep as possible with a stack, backtracking at dead ends, until the target is popped.` : `Depth-first search from ${start} — dive as deep as possible using a stack, backtracking when a node has no unvisited neighbours.`
+        );
+        const stack2 = [start];
+        const seen = /* @__PURE__ */ new Set([start]);
+        ops.enqueue(start, 0, `Push the start node ${start} onto the stack.`);
+        while (stack2.length) {
+          const u = stack2.pop();
+          ops.visit(u, `Pop ${u} off the stack and mark it visited.`);
+          if (u === target) {
+            ops.done(
+              `Found ${target} after visiting only ${ops.visitedCount} nodes — but along a depth-${ops.dist(u)} path, with no shortest-path guarantee.`
+            );
+            return;
+          }
+          const neighbours = adj[u].slice().reverse();
+          for (const v of neighbours) {
+            if (seen.has(v)) continue;
+            ops.edge(u, v, `Explore edge ${u} → ${v}.`);
+            seen.add(v);
+            stack2.push(v);
+            ops.enqueue(v, ops.dist(u) + 1, `Push ${v} onto the stack (depth ${ops.dist(u) + 1}).`);
+          }
+        }
+        ops.done(
+          target ? `${target} is not reachable from ${start} — the stack emptied after ${ops.visitedCount} nodes.` : `Depth-first search complete — visited ${ops.visitedCount} node${ops.visitedCount === 1 ? "" : "s"}.`
+        );
+      }
+    };
+  }
+});
+
+// custom/steptrace/src/algorithms/dijkstra.ts
+var dijkstra;
+var init_dijkstra = __esm({
+  "custom/steptrace/src/algorithms/dijkstra.ts"() {
+    dijkstra = {
+      id: "dijkstra",
+      kind: "graph",
+      meta: { label: "Dijkstra", frontierLabel: "Frontier (settle nearest first)" },
+      run: (input, ops, graph) => {
+        const adj = {};
+        for (const nd of graph.nodes) adj[nd.id] = [];
+        for (const e of graph.edges) {
+          const w = e.weight == null ? 1 : e.weight;
+          adj[e.from].push({ to: e.to, w });
+          if (!graph.directed) adj[e.to].push({ to: e.from, w });
+        }
+        for (const id in adj) adj[id].sort((a, b) => a.to < b.to ? -1 : 1);
+        const start = input.start;
+        const target = input.target != null ? String(input.target) : null;
+        if (target) ops.target(target);
+        ops.init(
+          `Dijkstra from ${start} — repeatedly settle the nearest unsettled node, then relax its edges to shorten neighbours' distances.`
+        );
+        const dist = { [start]: 0 };
+        const pred = {};
+        const settled = /* @__PURE__ */ new Set();
+        const inQ = /* @__PURE__ */ new Set([start]);
+        ops.enqueue(start, 0, `Start ${start} at distance 0.`);
+        while (inQ.size) {
+          let u = null;
+          for (const id of inQ) if (u === null || dist[id] < dist[u]) u = id;
+          inQ.delete(u);
+          settled.add(u);
+          ops.visit(u, `Settle ${u} (distance ${dist[u]}) — its shortest distance is now final.`);
+          for (const { to: v, w } of adj[u]) {
+            if (settled.has(v)) continue;
+            ops.edge(u, v, `Explore edge ${u} → ${v} (weight ${w}).`);
+            const nd = dist[u] + w;
+            if (dist[v] === void 0 || nd < dist[v]) {
+              const had = dist[v] !== void 0;
+              dist[v] = nd;
+              pred[v] = u;
+              inQ.add(v);
+              ops.relax(
+                v,
+                nd,
+                had ? `Relax ${v}: a shorter path via ${u} improves its distance to ${nd}.` : `Relax ${v}: reach it via ${u} at distance ${nd}.`
+              );
+            }
+          }
+        }
+        if (target !== null) {
+          if (dist[target] === void 0) {
+            ops.done(`${target} is unreachable from ${start}.`);
+          } else {
+            const path = [target];
+            for (let cur = target; pred[cur] !== void 0; cur = pred[cur]) path.push(pred[cur]);
+            path.reverse();
+            for (let i = 0; i + 1 < path.length; i++)
+              ops.selectEdge(
+                path[i],
+                path[i + 1],
+                `Shortest path: keep edge ${path[i]}–${path[i + 1]} highlighted.`
+              );
+            ops.done(`Shortest path ${path.join(" → ")} — total cost ${dist[target]}.`);
+          }
+        } else {
+          const reached = graph.nodes.map((n) => n.id).filter((id) => id !== start && pred[id] !== void 0);
+          reached.sort();
+          for (const v of reached)
+            ops.selectEdge(pred[v], v, `Shortest-path tree: ${pred[v]}–${v} (distance ${dist[v]}).`);
+          ops.done(`Dijkstra complete — shortest-path tree from ${start} highlighted.`);
+        }
+      }
+    };
+  }
+});
+
+// custom/steptrace/src/algorithms/divide-and-conquer.ts
+var divideAndConquer;
+var init_divide_and_conquer = __esm({
+  "custom/steptrace/src/algorithms/divide-and-conquer.ts"() {
+    init_execution_tree();
+    divideAndConquer = {
+      id: "divide-and-conquer",
+      kind: "rectree",
+      family: executionTreeFamily,
+      meta: { label: "Divide and Conquer" },
+      parse: parseExecutionTreeConfig,
+      run(input, ops) {
+        const nodes5 = [
+          {
+            id: "root",
+            label: "Problem",
+            detail: "whole problem",
+            values: [],
+            x: 300,
+            y: 30,
+            depth: 0
+          },
+          {
+            id: "left",
+            label: "Subproblem A",
+            detail: "independent work",
+            values: [],
+            x: 150,
+            y: 105,
+            depth: 1
+          },
+          {
+            id: "right",
+            label: "Subproblem B",
+            detail: "independent work",
+            values: [],
+            x: 450,
+            y: 105,
+            depth: 1
+          },
+          { id: "a", label: "Base A1", detail: "base case", values: [], x: 60, y: 190, depth: 2 },
+          { id: "b", label: "Base A2", detail: "base case", values: [], x: 210, y: 190, depth: 2 },
+          { id: "c", label: "Base B1", detail: "base case", values: [], x: 390, y: 190, depth: 2 },
+          { id: "d", label: "Base B2", detail: "base case", values: [], x: 540, y: 190, depth: 2 }
+        ];
+        const edges5 = [
+          { from: "root", to: "left" },
+          { from: "root", to: "right" },
+          { from: "left", to: "a" },
+          { from: "left", to: "b" },
+          { from: "right", to: "c" },
+          { from: "right", to: "d" }
+        ];
+        ops.tree(
+          nodes5,
+          edges5,
+          "root",
+          "Start with one problem. The fixed tree reveals the recursive structure without moving the layout."
+        );
+        ops.split(
+          "root",
+          ["root"],
+          ["left", "right"],
+          "Divide Problem into independent Subproblem A and Subproblem B."
+        );
+        ops.split(
+          "left",
+          ["root", "left"],
+          ["a", "b"],
+          "Divide Subproblem A until its work reaches Base A1 and Base A2."
+        );
+        ops.base(
+          "a",
+          ["root", "left", "a"],
+          "base result A1",
+          "Base A1 solves its smallest direct case."
+        );
+        ops.returnResult(
+          "a",
+          ["root", "left"],
+          "base result A1",
+          "Return the Base A1 result to Subproblem A."
+        );
+        ops.base(
+          "b",
+          ["root", "left", "b"],
+          "base result A2",
+          "Base A2 solves its smallest direct case."
+        );
+        ops.returnResult(
+          "b",
+          ["root", "left"],
+          "base result A2",
+          "Return the Base A2 result to Subproblem A."
+        );
+        ops.combine("left", ["root", "left"], "Result A", "Combine the two base results into Result A.");
+        ops.returnResult("left", ["root"], "Result A", "Return Result A to Problem.");
+        ops.split(
+          "right",
+          ["root", "right"],
+          ["c", "d"],
+          "Divide Subproblem B until its work reaches Base B1 and Base B2."
+        );
+        ops.base(
+          "c",
+          ["root", "right", "c"],
+          "base result B1",
+          "Base B1 solves its smallest direct case."
+        );
+        ops.returnResult(
+          "c",
+          ["root", "right"],
+          "base result B1",
+          "Return the Base B1 result to Subproblem B."
+        );
+        ops.base(
+          "d",
+          ["root", "right", "d"],
+          "base result B2",
+          "Base B2 solves its smallest direct case."
+        );
+        ops.returnResult(
+          "d",
+          ["root", "right"],
+          "base result B2",
+          "Return the Base B2 result to Subproblem B."
+        );
+        ops.combine(
+          "right",
+          ["root", "right"],
+          "Result B",
+          "Combine the two base results into Result B."
+        );
+        ops.returnResult("right", ["root"], "Result B", "Return Result B to Problem.");
+        ops.combine(
+          "root",
+          ["root"],
+          "Final solution",
+          "Combine Result A and Result B into the Final solution."
+        );
+        ops.done(
+          "root",
+          "Final solution",
+          "Final solution: independent work returns upward until the original problem is combined."
+        );
+      }
+    };
+  }
+});
+
+// custom/steptrace/src/algorithms/deque.ts
+function parseDequeConfig(config) {
+  const capacity = config.capacity ?? 4;
+  if (!Number.isInteger(capacity) || capacity < 3 || capacity > 5)
+    throw new Error(`steptrace: deque requires integer "capacity" from 3 to 5.`);
+  return { capacity };
+}
+var deque;
+var init_deque = __esm({
+  "custom/steptrace/src/algorithms/deque.ts"() {
+    init_contiguous_storage();
+    deque = {
+      id: "deque",
+      family: "contiguous-storage",
+      meta: { label: "Deque" },
+      parse: parseDequeConfig,
+      mount: mountDeque
+    };
+  }
+});
+
+// custom/steptrace/src/dp-problem-data.ts
+var coinChangeProblem, gridPathProblem;
+var init_dp_problem_data = __esm({
+  "custom/steptrace/src/dp-problem-data.ts"() {
+    coinChangeProblem = {
+      target: 30,
+      coins: [50, 25, 10, 1],
+      amounts: [0, 1, 2, 3, 4, 5, 10, 15, 20, 25, 30],
+      bestCoins: [0, 1, 2, 3, 4, 5, 1, 6, 2, 1, 3]
+    };
+    gridPathProblem = {
+      costs: [
+        [0, 1, 1, 9],
+        [2, 9, 1, 9],
+        [2, 2, 9, 9],
+        [9, 2, 2, 0]
+      ],
+      greedyPath: [
+        [0, 0],
+        [0, 1],
+        [0, 2],
+        [1, 2],
+        [1, 3],
+        [2, 3],
+        [3, 3]
+      ],
+      optimalPath: [
+        [0, 0],
+        [1, 0],
+        [2, 0],
+        [2, 1],
+        [3, 1],
+        [3, 2],
+        [3, 3]
+      ],
+      bestRemaining: [
+        [10, 14, 13, 27],
+        [10, 15, 12, 18],
+        [8, 6, 11, 9],
+        [13, 4, 2, 0]
+      ],
+      greedyCost: 21,
+      optimalCost: 10
+    };
+  }
+});
+
+// custom/steptrace/src/families/dp-problems.ts
+function dpStoryConfig(problem, approach) {
+  return (config) => {
+    if (config.variant !== void 0)
+      throw new Error(`steptrace: ${problem}-${approach} does not take a variant.`);
+    return { profile: "dp-story", problem, approach };
+  };
+}
+function dpTableConfig(profile) {
+  return (config) => {
+    if (config.variant !== void 0)
+      throw new Error(`steptrace: ${profile} does not take a variant.`);
+    return { profile };
+  };
+}
+function rolesForCell(frame, row, column) {
+  const roles = [];
+  if (frame.grid[row][column] != null) roles.push("stored");
+  if (frame.deps.some(([depRow, depColumn]) => depRow === row && depColumn === column)) {
+    const depIndex = frame.deps.findIndex(
+      ([depRow, depColumn]) => depRow === row && depColumn === column
+    );
+    roles.push(depIndex === 1 ? "operand-b" : "operand-a");
+  }
+  if (frame.path.some(([pathRow, pathColumn]) => pathRow === row && pathColumn === column))
+    roles.push("path");
+  if (frame.cur?.[0] === row && frame.cur?.[1] === column) roles.push("target");
+  return roles;
+}
+var DPStoryRecorder, dpStoryFamily, coinRoles, gridRoles, coinTableSemantics, gridTableSemantics, dpProblemTableFamily;
+var init_dp_problems = __esm({
+  "custom/steptrace/src/families/dp-problems.ts"() {
+    init_recorders();
+    init_dp_problem_data();
+    init_render();
+    DPStoryRecorder = class {
+      frames = [];
+      config;
+      remaining = coinChangeProblem.target;
+      selected = [];
+      activeCoin = null;
+      attempts = [];
+      memo = [];
+      best = null;
+      amounts = coinChangeProblem.amounts.slice();
+      amountValues = this.amounts.map(() => null);
+      amountCurrent = null;
+      amountDependencies = [];
+      amountPath = [];
+      costs = gridPathProblem.costs;
+      gridValues = this.costs.map((row) => row.map(() => null));
+      gridDependencies = [];
+      current = null;
+      path = [];
+      repeated = [];
+      bestPath = [];
+      routeCost = 0;
+      routeLabel = "—";
+      bestCost = null;
+      constructor(config) {
+        this.config = config;
+      }
+      intro(message) {
+        this.push("init", message);
+      }
+      chooseCoin(coin, remaining, selected, message) {
+        this.activeCoin = coin;
+        this.remaining = remaining;
+        this.selected = selected.slice();
+        this.push("step", message);
+      }
+      backtrackCoins(remaining, selected, message) {
+        this.activeCoin = null;
+        this.remaining = remaining;
+        this.selected = selected.slice();
+        this.push("step", message);
+      }
+      coinAttempt(attempt, message) {
+        this.attempts.push({ ...attempt });
+        this.push("step", message);
+      }
+      coinMemo(key4, value, state, message) {
+        const existing = this.memo.findIndex((entry2) => entry2.key === key4);
+        const entry = { key: key4, value, state };
+        if (existing === -1) this.memo.push(entry);
+        else this.memo[existing] = entry;
+        this.push("step", message);
+      }
+      fillAmount(amount, value, dependencies, message) {
+        const index = this.amounts.indexOf(amount);
+        if (index === -1) throw new Error(`steptrace: unsupported coin-change amount ${amount}.`);
+        this.amountValues[index] = value;
+        this.amountCurrent = amount;
+        this.amountDependencies = dependencies.slice();
+        this.push("step", message);
+      }
+      amountResult(path, best, selected, message) {
+        this.amountPath = path.slice();
+        this.best = best;
+        this.selected = selected.slice();
+        this.remaining = 0;
+        this.amountCurrent = null;
+        this.amountDependencies = [];
+        this.push("step", message);
+      }
+      coinResult(best, selected, message) {
+        this.best = best;
+        this.selected = selected.slice();
+        this.remaining = 0;
+        this.activeCoin = null;
+        this.push("step", message);
+      }
+      visitTile(current, path, routeCost, repeated, message) {
+        this.current = current.slice();
+        this.gridDependencies = [];
+        this.path = path.map((cell) => cell.slice());
+        this.repeated = repeated.map((cell) => cell.slice());
+        this.routeCost = routeCost;
+        this.routeLabel = this.path.map(([row, column]) => `R${row + 1}C${column + 1}`).join(" → ");
+        this.push("step", message);
+      }
+      storeTile(current, value, dependencies, message) {
+        this.current = current.slice();
+        this.gridValues[current[0]][current[1]] = value;
+        this.gridDependencies = dependencies.map((cell) => cell.slice());
+        this.push("step", message);
+      }
+      routeResult(bestCost, bestPath, routeLabel, message) {
+        this.bestCost = bestCost;
+        this.bestPath = bestPath.map((cell) => cell.slice());
+        this.path = this.bestPath.map((cell) => cell.slice());
+        this.current = null;
+        this.gridDependencies = [];
+        this.routeCost = bestCost;
+        this.routeLabel = routeLabel;
+        this.push("step", message);
+      }
+      done(message) {
+        this.activeCoin = null;
+        this.current = null;
+        this.amountCurrent = null;
+        this.amountDependencies = [];
+        this.gridDependencies = [];
+        this.push("done", message);
+      }
+      push(type, message) {
+        this.frames.push(
+          Object.freeze({
+            type,
+            profile: this.config.profile,
+            problem: this.config.problem,
+            approach: this.config.approach,
+            remaining: this.remaining,
+            selected: this.selected.slice(),
+            activeCoin: this.activeCoin,
+            coins: coinChangeProblem.coins.slice(),
+            target: coinChangeProblem.target,
+            attempts: this.attempts.map((attempt) => ({ ...attempt })),
+            memo: this.memo.map((entry) => ({ ...entry })),
+            best: this.best,
+            amounts: this.amounts.slice(),
+            amountValues: this.amountValues.slice(),
+            amountCurrent: this.amountCurrent,
+            amountDependencies: this.amountDependencies.slice(),
+            amountPath: this.amountPath.slice(),
+            costs: this.costs.map((row) => row.slice()),
+            gridValues: this.gridValues.map((row) => row.slice()),
+            gridDependencies: this.gridDependencies.map((cell) => cell.slice()),
+            current: this.current ? this.current.slice() : null,
+            path: this.path.map((cell) => cell.slice()),
+            repeated: this.repeated.map((cell) => cell.slice()),
+            bestPath: this.bestPath.map((cell) => cell.slice()),
+            routeCost: this.routeCost,
+            routeLabel: this.routeLabel,
+            bestCost: this.bestCost,
+            message
+          })
+        );
+      }
+    };
+    dpStoryFamily = {
+      id: "dp-story",
+      createRecorder(config) {
+        return new DPStoryRecorder(config);
+      },
+      createView(frames) {
+        return makeDPStoryView(frames);
+      }
+    };
+    coinRoles = [
+      { role: "operand-a", badge: "A", label: "predecessor amount" },
+      { role: "operand-b", badge: "B", label: "another predecessor" },
+      { role: "target", badge: "T", label: "amount being solved" },
+      { role: "path", badge: "success", label: "optimal amount chain" }
+    ];
+    gridRoles = [
+      { role: "operand-a", badge: "R", label: "right neighbour" },
+      { role: "operand-b", badge: "D", label: "down neighbour" },
+      { role: "target", badge: "T", label: "tile being solved" },
+      { role: "path", badge: "success", label: "optimal route" }
+    ];
+    coinTableSemantics = {
+      tableLabel: `Bottom-up coin-change table for a ${coinChangeProblem.target}-cent payment`,
+      axisDescription: "Each column stores the fewest coins needed for that amount.",
+      cornerLabel: "amount →",
+      stageLayout: "fill",
+      formatValue(value) {
+        return value == null ? "—" : String(value);
+      },
+      cellLabel(frame, row, column) {
+        const value = frame.grid[row][column];
+        return `${frame.colLabels[column]} needs ${value ?? "an unsolved number of"} coins`;
+      },
+      stateForCell(frame, row, column) {
+        if (frame.cur?.[0] === row && frame.cur?.[1] === column) return "cur";
+        return frame.deps.some(([depRow, depColumn]) => depRow === row && depColumn === column) ? "dep" : "";
+      },
+      rolesForCell,
+      footerModel(frame) {
+        const column = frame.cur?.[1];
+        if (column != null)
+          return {
+            context: `Solve ${frame.colLabels[column]}`,
+            summary: { text: frame.formula || `Store ${frame.grid[0][column]}` }
+          };
+        return frame.type === "init" ? { context: "Prepare amount table", summary: { text: "start at 0¢" } } : { context: "Exact change ready", summary: { text: "30¢ = 10¢ + 10¢ + 10¢" } };
+      },
+      roleLegend: coinRoles,
+      watchRows(frame) {
+        const column = frame.cur?.[1];
+        return [
+          {
+            k: "amount",
+            v: column == null ? "—" : frame.colLabels[column],
+            sw: "var(--_blue)",
+            hint: "Amount whose best exact change is being stored."
+          },
+          {
+            k: "predecessors",
+            v: frame.deps.length ? frame.deps.map(([, dependency]) => frame.colLabels[dependency]).join(", ") : "base",
+            sw: "var(--_amber)",
+            hint: "Smaller amounts reached after placing one allowed coin."
+          },
+          {
+            k: "transition",
+            v: frame.formula || "—",
+            sw: "var(--_violet)",
+            hint: "Fewest predecessor coins plus the new coin placed now."
+          },
+          {
+            k: "answer",
+            v: frame.grid[0].at(-1) || "—",
+            sw: "var(--_green)",
+            hint: `Fewest coins stored for the full ${coinChangeProblem.target}-cent payment.`
+          }
+        ];
+      }
+    };
+    gridTableSemantics = {
+      tableLabel: "Bottom-up minimum-cost warehouse path matrix",
+      axisDescription: "Each tile stores its cost plus the cheaper right or down neighbour.",
+      cornerLabel: "warehouse",
+      stageLayout: "fill",
+      formatValue(value) {
+        return value == null ? "—" : String(value);
+      },
+      cellLabel(frame, row, column) {
+        return `R${row + 1}C${column + 1}: ${frame.grid[row][column] ?? "not solved"}`;
+      },
+      stateForCell(frame, row, column) {
+        if (frame.cur?.[0] === row && frame.cur?.[1] === column) return "cur";
+        if (frame.path.some(([pathRow, pathColumn]) => pathRow === row && pathColumn === column))
+          return "path";
+        return frame.deps.some(([depRow, depColumn]) => depRow === row && depColumn === column) ? "dep" : "";
+      },
+      rolesForCell,
+      footerModel(frame) {
+        if (frame.type === "trace") return { context: "Optimal route", summary: { text: "cost 10" } };
+        if (frame.cur) {
+          const [row, column] = frame.cur;
+          return {
+            context: `Solve R${row + 1}C${column + 1}`,
+            summary: { text: frame.formula || `Store ${frame.grid[row][column]}` }
+          };
+        }
+        return frame.type === "init" ? { context: "Prepare warehouse matrix", summary: { text: "start at the goal" } } : { context: "Loading bay ready", summary: { text: "minimum cost 10" } };
+      },
+      roleLegend: gridRoles,
+      watchRows(frame) {
+        const tile = frame.cur ? `R${frame.cur[0] + 1}C${frame.cur[1] + 1}` : "—";
+        return [
+          {
+            k: "tile",
+            v: tile,
+            sw: "var(--_blue)",
+            hint: "Warehouse tile whose minimum remaining cost is being stored."
+          },
+          {
+            k: "reads",
+            v: frame.deps.length ? frame.deps.map(([row, column]) => `R${row + 1}C${column + 1}`).join(" or ") : "goal",
+            sw: "var(--_amber)",
+            hint: "Already-solved right and down neighbours available from this tile."
+          },
+          {
+            k: "transition",
+            v: frame.formula || "—",
+            sw: "var(--_violet)",
+            hint: "Current tile cost plus the cheaper reachable neighbour."
+          },
+          {
+            k: "best cost",
+            v: frame.grid[0]?.[0] || "—",
+            sw: "var(--_green)",
+            hint: "Minimum travel cost stored for the loading bay."
+          }
+        ];
+      }
+    };
+    dpProblemTableFamily = {
+      id: "matrix-grid",
+      createRecorder(config) {
+        return new DPRecorder(config.profile);
+      },
+      createView(frames) {
+        const semantics = frames[0]?.profile === "coin-change-bottom-up" ? coinTableSemantics : gridTableSemantics;
+        return makeDPView(frames, semantics);
+      }
+    };
+  }
+});
+
+// custom/steptrace/src/algorithms/dynamic-programming.ts
+function storyAlgorithm(id, label, parse7, run6) {
+  return { id, kind: "dp", family: dpStoryFamily, meta: { label }, parse: parse7, run: run6 };
+}
+function treeAlgorithm(id, label, profile, run6) {
+  return {
+    id,
+    kind: "rectree",
+    family: executionTreeFamily,
+    meta: { label },
+    parse(config) {
+      if (config.variant !== void 0) throw new Error(`steptrace: ${id} does not take a variant.`);
+      return { profile };
+    },
+    run: run6
+  };
+}
+function tableAlgorithm(id, label, profile, run6) {
+  return {
+    id,
+    kind: "dp",
+    family: dpProblemTableFamily,
+    meta: { label },
+    parse: dpTableConfig(profile),
+    run: run6
+  };
+}
+var greedyWarehousePath, optimalWarehousePath, coinAmounts, availableCoins, coinChangeGreedy, coinChangeNaive, coinChangeMemoization, coinChangeTabulation, coinChangeTopDown, coinChangeBottomUp, gridPathGreedy, gridPathNaive, gridPathMemoization, gridPathTabulation, gridPathTopDown, gridPathBottomUp, dynamicProgrammingAlgorithms;
+var init_dynamic_programming = __esm({
+  "custom/steptrace/src/algorithms/dynamic-programming.ts"() {
+    init_dp_problems();
+    init_execution_tree();
+    init_dp_problem_data();
+    greedyWarehousePath = gridPathProblem.greedyPath.map((cell) => cell.slice());
+    optimalWarehousePath = gridPathProblem.optimalPath.map((cell) => cell.slice());
+    coinAmounts = coinChangeProblem.amounts;
+    availableCoins = coinChangeProblem.coins;
+    coinChangeGreedy = storyAlgorithm(
+      "coin-change-greedy",
+      "Coin change — greedy",
+      dpStoryConfig("coin-change", "greedy"),
+      (_input, ops) => {
+        ops.intro("Return 30¢ using the real coins available in this drawer.");
+        ops.chooseCoin(25, 5, [25], "Greedy takes the largest usable coin: 25¢.");
+        ops.chooseCoin(1, 4, [25, 1], "The next available denomination is 1¢.");
+        ops.chooseCoin(1, 3, [25, 1, 1], "Another 1¢ coin leaves 3¢.");
+        ops.chooseCoin(1, 2, [25, 1, 1, 1], "Another 1¢ coin leaves 2¢.");
+        ops.chooseCoin(1, 1, [25, 1, 1, 1, 1], "Another 1¢ coin leaves 1¢.");
+        ops.chooseCoin(1, 0, [25, 1, 1, 1, 1, 1], "The fifth 1¢ coin completes the change.");
+        ops.coinAttempt(
+          { label: "greedy counter", value: "25¢ + 1¢ × 5 · 6 coins", state: "active" },
+          "The greedy plan is exact, but it uses six coins."
+        );
+        ops.coinAttempt(
+          { label: "better counter", value: "10¢ + 10¢ + 10¢ · 3 coins", state: "best" },
+          "Three 10¢ coins prove that the largest-first plan is not optimal."
+        );
+        ops.coinResult(
+          "3 coins (10¢ + 10¢ + 10¢)",
+          [25, 1, 1, 1, 1, 1],
+          "Greedy returns exact change, but uses twice as many coins as the optimum."
+        );
+        ops.done("Largest usable coin first gives 6 coins; the optimum uses 3.");
+      }
+    );
+    coinChangeNaive = storyAlgorithm(
+      "coin-change-naive",
+      "Coin change — naive recursion",
+      dpStoryConfig("coin-change", "naive"),
+      (_input, ops) => {
+        ops.intro("Naive recursion tries every usable coin and rebuilds repeated remainder questions.");
+        ops.chooseCoin(10, 20, [10], "Try a 10¢ coin, leaving change(20¢).");
+        ops.chooseCoin(1, 19, [10, 1], "That branch takes 1¢ and reaches change(19¢).");
+        ops.coinAttempt(
+          { label: "change(19¢)", value: "reached after 10¢ + 1¢", state: "active" },
+          "The first change(19¢) subtree is solved from scratch."
+        );
+        ops.backtrackCoins(30, [], "Backtrack to 30¢ and try a different first coin.");
+        ops.chooseCoin(1, 29, [1], "Try 1¢ first, leaving change(29¢).");
+        ops.chooseCoin(10, 19, [1, 10], "Then take 10¢ and reach change(19¢) again.");
+        ops.coinAttempt(
+          { label: "change(19¢)", value: "reached again after 1¢ + 10¢", state: "repeated" },
+          "Without a memo, the full change(19¢) subtree runs again."
+        );
+        ops.backtrackCoins(30, [], "Backtrack to compare complete exact-change branches.");
+        ops.chooseCoin(25, 5, [25], "The 25¢ branch leaves 5¢, so it must continue with pennies.");
+        ops.chooseCoin(1, 4, [25, 1], "Take the first of five 1¢ coins.");
+        ops.chooseCoin(1, 3, [25, 1, 1], "Take the second 1¢ coin.");
+        ops.chooseCoin(1, 2, [25, 1, 1, 1], "Take the third 1¢ coin.");
+        ops.chooseCoin(1, 1, [25, 1, 1, 1, 1], "Take the fourth 1¢ coin.");
+        ops.chooseCoin(1, 0, [25, 1, 1, 1, 1, 1], "The fifth 1¢ coin completes this branch.");
+        ops.coinAttempt(
+          { label: "25¢ branch", value: "25¢ + 1¢ × 5 · 6 coins", state: "dead" },
+          "The first complete branch returns six coins."
+        );
+        ops.backtrackCoins(30, [], "Backtrack once more and try the 10¢ branch.");
+        ops.chooseCoin(10, 20, [10], "The first 10¢ coin leaves 20¢.");
+        ops.chooseCoin(10, 10, [10, 10], "The second 10¢ coin leaves 10¢.");
+        ops.chooseCoin(10, 0, [10, 10, 10], "The third 10¢ coin completes the payment.");
+        ops.coinAttempt(
+          { label: "10¢ branch", value: "10¢ + 10¢ + 10¢ · 3 coins", state: "best" },
+          "Comparing completed branches finds the three-coin optimum."
+        );
+        ops.coinResult(
+          "3 coins (10¢ + 10¢ + 10¢)",
+          [10, 10, 10],
+          "Naive recursion is correct, but repeated remainders make it needlessly expensive."
+        );
+        ops.done("All valid branches agree that three 10¢ coins are the shortest exact change.");
+      }
+    );
+    coinChangeMemoization = storyAlgorithm(
+      "coin-change-memoization",
+      "Coin change — memoization",
+      dpStoryConfig("coin-change", "memoization"),
+      (_input, ops) => {
+        ops.intro("Solve change recursively, but keep each answered remainder beside the till.");
+        ops.coinMemo("change(0¢)", "0 coins", "stored", "Seed the exact-change base answer.");
+        ops.chooseCoin(10, 20, [10], "A 10¢ coin leaves change(20¢) to solve.");
+        ops.chooseCoin(1, 19, [10, 1], "The first child branch reaches change(19¢).");
+        ops.coinMemo(
+          "change(19¢)",
+          "10 coins",
+          "stored",
+          "Resolve the penny tail once and store change(19¢) = 10 coins."
+        );
+        ops.backtrackCoins(20, [10], "Return to change(20¢) and try its 10¢ child.");
+        ops.chooseCoin(10, 10, [10, 10], "The second 10¢ coin leaves change(10¢).");
+        ops.chooseCoin(10, 0, [10, 10, 10], "The third 10¢ coin reaches the exact-change base.");
+        ops.backtrackCoins(10, [10, 10], "Return the base answer to change(10¢).");
+        ops.coinMemo("change(10¢)", "1 coin", "stored", "Store change(10¢) = 1 coin.");
+        ops.backtrackCoins(20, [10], "Return the saved one-coin answer to change(20¢).");
+        ops.coinMemo("change(20¢)", "2 coins", "stored", "Store change(20¢) = 2 coins.");
+        ops.backtrackCoins(30, [], "Backtrack to change(30¢) and try the 1¢ branch.");
+        ops.chooseCoin(1, 29, [1], "A 1¢ coin leaves change(29¢).");
+        ops.chooseCoin(10, 19, [1, 10], "The next 10¢ coin reaches change(19¢) again.");
+        ops.coinMemo(
+          "change(19¢)",
+          "10 coins",
+          "hit",
+          "Read the saved change(19¢) answer instead of rebuilding its subtree."
+        );
+        ops.backtrackCoins(29, [1], "Return the cache hit to change(29¢).");
+        ops.coinMemo("change(29¢)", "5 coins", "stored", "Store the best answer for change(29¢).");
+        ops.backtrackCoins(30, [], "Return all branch answers to the requested change(30¢) state.");
+        ops.coinMemo("change(30¢)", "3 coins", "stored", "Store the requested three-coin answer.");
+        ops.coinResult(
+          "3 coins (10¢ + 10¢ + 10¢)",
+          [10, 10, 10],
+          "Memoization keeps recursion but answers repeated remainders from the saved slips."
+        );
+        ops.done("change(19¢) is solved once and reused when another branch asks for it.");
+      }
+    );
+    coinChangeTabulation = storyAlgorithm(
+      "coin-change-tabulation",
+      "Coin change — tabulation",
+      dpStoryConfig("coin-change", "tabulation"),
+      (_input, ops) => {
+        ops.intro("Start from 0¢, then build the shortest exact change for every larger amount.");
+        for (let index = 0; index < coinChangeProblem.amounts.length; index++) {
+          const amount = coinChangeProblem.amounts[index];
+          const dependencies = availableCoins.filter((coin) => coin <= amount).map((coin) => amount - coin).filter((predecessor) => coinAmounts.includes(predecessor));
+          ops.fillAmount(
+            amount,
+            coinChangeProblem.bestCoins[index],
+            dependencies,
+            amount === 0 ? "Write the base: 0¢ needs 0 coins." : `Read the solved smaller amounts, add one coin, and write ${amount}¢.`
+          );
+        }
+        ops.amountResult(
+          [0, 10, 20, 30],
+          "3 coins (10¢ + 10¢ + 10¢)",
+          [10, 10, 10],
+          "Follow 0¢ → 10¢ → 20¢ → 30¢ to reconstruct three 10¢ coins."
+        );
+        ops.done("The amount board reaches 30¢ with three coins and no recursive calls.");
+      }
+    );
+    coinChangeTopDown = treeAlgorithm(
+      "coin-change-top-down",
+      "Coin change — top-down DP",
+      "coin-change-top-down",
+      (_input, ops) => {
+        const nodes5 = [
+          { id: "c30", label: "change(30¢)", detail: "target", values: [], x: 300, y: 24, depth: 0 },
+          { id: "c5", label: "change(5¢)", detail: "after 25¢", values: [], x: 55, y: 88, depth: 1 },
+          { id: "c20", label: "change(20¢)", detail: "after 10¢", values: [], x: 215, y: 88, depth: 1 },
+          { id: "c29", label: "change(29¢)", detail: "after 1¢", values: [], x: 455, y: 88, depth: 1 },
+          {
+            id: "c10",
+            label: "change(10¢)",
+            detail: "after 10¢",
+            values: [],
+            x: 85,
+            y: 152,
+            depth: 2
+          },
+          {
+            id: "c19a",
+            label: "change(19¢)",
+            detail: "first visit",
+            values: [],
+            x: 215,
+            y: 152,
+            depth: 2
+          },
+          {
+            id: "c4",
+            label: "change(4¢)",
+            detail: "after 25¢",
+            values: [],
+            x: 340,
+            y: 152,
+            depth: 2
+          },
+          {
+            id: "c19b",
+            label: "change(19¢)",
+            detail: "same cache key",
+            values: [],
+            x: 465,
+            y: 152,
+            depth: 2
+          },
+          {
+            id: "c28",
+            label: "change(28¢)",
+            detail: "after 1¢",
+            values: [],
+            x: 585,
+            y: 152,
+            depth: 2
+          },
+          {
+            id: "c0",
+            label: "change(0¢)",
+            detail: "exact change",
+            values: [],
+            x: 85,
+            y: 216,
+            depth: 3
+          },
+          {
+            id: "c9",
+            label: "change(9¢)",
+            detail: "would repeat",
+            values: [],
+            x: 425,
+            y: 216,
+            depth: 3
+          },
+          {
+            id: "c18",
+            label: "change(18¢)",
+            detail: "would repeat",
+            values: [],
+            x: 520,
+            y: 216,
+            depth: 3
+          }
+        ];
+        const edges5 = [
+          { from: "c30", to: "c5" },
+          { from: "c30", to: "c20" },
+          { from: "c30", to: "c29" },
+          { from: "c20", to: "c10" },
+          { from: "c20", to: "c19a" },
+          { from: "c10", to: "c0" },
+          { from: "c29", to: "c4" },
+          { from: "c29", to: "c19b" },
+          { from: "c29", to: "c28" },
+          { from: "c19b", to: "c9" },
+          { from: "c19b", to: "c18" }
+        ];
+        ops.tree(nodes5, edges5, "c30", "Start with change(30¢) and an empty memo.");
+        ops.split(
+          "c30",
+          ["c30"],
+          ["c5", "c20", "c29"],
+          "The usable 25¢, 10¢, and 1¢ coins create three remainder states."
+        );
+        ops.returnResult(
+          "c5",
+          ["c30", "c5"],
+          "5 coins",
+          "The available denominations make change(5¢) return five pennies."
+        );
+        ops.store("c5", ["c30", "c5"], "5¢", "5 coins", "Store change(5¢) = 5 coins.");
+        ops.split("c20", ["c30", "c20"], ["c10", "c19a"], "Expand change(20¢) through 10¢ and 1¢.");
+        ops.split("c10", ["c30", "c20", "c10"], ["c0"], "A 10¢ coin reaches exact change.");
+        ops.base("c0", ["c30", "c20", "c10", "c0"], "0 coins", "change(0¢) needs no more coins.");
+        ops.combine("c10", ["c30", "c20", "c10"], "1 coin", "One 10¢ coin solves change(10¢).");
+        ops.store("c10", ["c30", "c20", "c10"], "10¢", "1 coin", "Store change(10¢) = 1 coin.");
+        ops.returnResult(
+          "c19a",
+          ["c30", "c20", "c19a"],
+          "10 coins",
+          "The compact penny tail returns 10 coins for change(19¢)."
+        );
+        ops.store("c19a", ["c30", "c20", "c19a"], "19¢", "10 coins", "Store change(19¢) = 10 coins.");
+        ops.combine("c20", ["c30", "c20"], "2 coins", "change(20¢) prefers two 10¢ coins.");
+        ops.store("c20", ["c30", "c20"], "20¢", "2 coins", "Store change(20¢) = 2 coins.");
+        ops.split(
+          "c29",
+          ["c30", "c29"],
+          ["c4", "c19b", "c28"],
+          "change(29¢) reaches the saved change(19¢) state."
+        );
+        ops.returnResult("c4", ["c30", "c29", "c4"], "4 coins", "Four pennies solve change(4¢).");
+        ops.store("c4", ["c30", "c29", "c4"], "4¢", "4 coins", "Store change(4¢) = 4 coins.");
+        ops.cacheHit(
+          "c19b",
+          ["c30", "c29", "c19b"],
+          "19¢",
+          "10 coins",
+          ["c9", "c18"],
+          "The memo returns change(19¢) and skips both child branches."
+        );
+        ops.returnResult(
+          "c28",
+          ["c30", "c29", "c28"],
+          "4 coins",
+          "The 25¢ branch plus three pennies solves change(28¢)."
+        );
+        ops.store("c28", ["c30", "c29", "c28"], "28¢", "4 coins", "Store change(28¢) = 4 coins.");
+        ops.combine("c29", ["c30", "c29"], "5 coins", "change(29¢) prefers 25¢ plus four pennies.");
+        ops.store("c29", ["c30", "c29"], "29¢", "5 coins", "Store change(29¢) = 5 coins.");
+        ops.combine("c30", ["c30"], "3 coins", "Compare 6, 3, and 6 coins: the 10¢ branch wins.");
+        ops.store("c30", ["c30"], "30¢", "3 coins", "Store the requested answer.");
+        ops.done(
+          "c30",
+          "3 coins",
+          "Top-down DP returns three 10¢ coins and solves each remainder at most once."
+        );
+      }
+    );
+    coinChangeBottomUp = tableAlgorithm(
+      "coin-change-bottom-up",
+      "Coin change — bottom-up DP",
+      "coin-change-bottom-up",
+      (_input, ops) => {
+        const amounts = coinAmounts;
+        const best = coinChangeProblem.bestCoins;
+        ops.board(
+          ["fewest coins"],
+          amounts.map((amount) => `${amount}¢`),
+          "Build exact change from 0¢ upward."
+        );
+        ops.set(0, 0, "0", [], "The base amount 0¢ needs no coins.", "dp[0¢] = 0");
+        for (let column = 1; column < amounts.length; column++) {
+          const amount = amounts[column];
+          const dependencies = availableCoins.filter((coin) => coin <= amount).map((coin) => [0, amounts.indexOf(amount - coin)]).filter(([, dependency]) => dependency >= 0);
+          const predecessorValues = dependencies.map(([, dependency]) => best[dependency]);
+          ops.set(
+            0,
+            column,
+            String(best[column]),
+            dependencies,
+            `Try one allowed coin after each solved predecessor amount for ${amount}¢.`,
+            `1 + min(${predecessorValues.join(", ")}) = ${best[column]}`
+          );
+        }
+        ops.markPath(
+          [
+            [0, 0],
+            [0, 6],
+            [0, 8],
+            [0, 10]
+          ],
+          "Trace 30¢ → 20¢ → 10¢ → 0¢: three 10¢ coins produce the stored optimum."
+        );
+        ops.done("The bottom-up table stores 3 coins for 30¢.");
+      }
+    );
+    gridPathGreedy = storyAlgorithm(
+      "grid-path-greedy",
+      "Grid path — greedy",
+      dpStoryConfig("grid-path", "greedy"),
+      (_input, ops) => {
+        ops.intro("Move only right or down from the loading bay to the dispatch door.");
+        let cost = 0;
+        for (let index = 0; index < greedyWarehousePath.length; index++) {
+          const [row, column] = greedyWarehousePath[index];
+          cost += gridPathProblem.costs[row][column];
+          ops.visitTile(
+            [row, column],
+            greedyWarehousePath.slice(0, index + 1),
+            cost,
+            [],
+            index < 4 ? "Choose the cheaper immediate neighbour without looking beyond it." : "The early cheap tiles now force the route through expensive shelves."
+          );
+        }
+        ops.routeResult(
+          10,
+          optimalWarehousePath,
+          "R1C1 → R2C1 → R3C1 → R3C2 → R4C2 → R4C3 → R4C4",
+          "A route costing 10 proves the greedy route costing 21 is not optimal."
+        );
+        ops.done("Greedy pays 21; the best route pays 10.");
+      }
+    );
+    gridPathNaive = storyAlgorithm(
+      "grid-path-naive",
+      "Grid path — naive recursion",
+      dpStoryConfig("grid-path", "naive"),
+      (_input, ops) => {
+        ops.intro("Naive recursion explores every right/down route from the loading bay.");
+        ops.visitTile(
+          [0, 1],
+          [
+            [0, 0],
+            [0, 1]
+          ],
+          1,
+          [],
+          "The first branch moves right."
+        );
+        ops.visitTile(
+          [1, 1],
+          [
+            [0, 0],
+            [0, 1],
+            [1, 1]
+          ],
+          10,
+          [],
+          "This branch reaches R2C2 after moving right then down."
+        );
+        ops.visitTile(
+          [2, 1],
+          [
+            [0, 0],
+            [0, 1],
+            [1, 1],
+            [2, 1]
+          ],
+          12,
+          [],
+          "The same branch continues to R3C2 before recursion backtracks."
+        );
+        ops.visitTile(
+          [0, 0],
+          [[0, 0]],
+          0,
+          [],
+          "Backtrack to the loading bay before exploring the downward branch."
+        );
+        ops.visitTile(
+          [1, 0],
+          [
+            [0, 0],
+            [1, 0]
+          ],
+          2,
+          [],
+          "A second branch restarts from the loading bay and moves down."
+        );
+        ops.visitTile(
+          [1, 1],
+          [
+            [0, 0],
+            [1, 0],
+            [1, 1]
+          ],
+          11,
+          [[1, 1]],
+          "R2C2 is reached again; its entire remaining-route search repeats."
+        );
+        ops.visitTile(
+          [2, 0],
+          [
+            [0, 0],
+            [1, 0],
+            [2, 0]
+          ],
+          4,
+          [[1, 1]],
+          "Continue down to R3C1 before the branch turns right."
+        );
+        ops.visitTile(
+          [2, 1],
+          [
+            [0, 0],
+            [1, 0],
+            [2, 0],
+            [2, 1]
+          ],
+          6,
+          [
+            [1, 1],
+            [2, 1]
+          ],
+          "Different prefixes keep converging on the same warehouse coordinates."
+        );
+        ops.routeResult(
+          10,
+          optimalWarehousePath,
+          "R1C1 → R2C1 → R3C1 → R3C2 → R4C2 → R4C3 → R4C4",
+          "After comparing all routes, recursion finds the cost-10 route."
+        );
+        ops.done("Naive recursion is correct, but recomputes the best route from repeated tiles.");
+      }
+    );
+    gridPathMemoization = storyAlgorithm(
+      "grid-path-memoization",
+      "Grid path — memoization",
+      dpStoryConfig("grid-path", "memoization"),
+      (_input, ops) => {
+        ops.intro("Explore routes recursively and write each solved tile directly into the map.");
+        ops.visitTile([0, 0], [[0, 0]], 0, [], "Start the recursive route at the loading bay.");
+        ops.visitTile(
+          [0, 1],
+          [
+            [0, 0],
+            [0, 1]
+          ],
+          1,
+          [],
+          "The first branch moves right."
+        );
+        ops.visitTile(
+          [0, 2],
+          [
+            [0, 0],
+            [0, 1],
+            [0, 2]
+          ],
+          2,
+          [],
+          "Continue to R1C3 before solving the remaining routes below it."
+        );
+        ops.storeTile(
+          [0, 2],
+          gridPathProblem.bestRemaining[0][2],
+          [
+            [0, 3],
+            [1, 2]
+          ],
+          "Store the best remaining cost from R1C3."
+        );
+        ops.visitTile(
+          [1, 1],
+          [
+            [0, 0],
+            [0, 1],
+            [1, 1]
+          ],
+          10,
+          [],
+          "Backtrack to R1C2, then enter R2C2 through its second child branch."
+        );
+        ops.storeTile(
+          [1, 1],
+          gridPathProblem.bestRemaining[1][1],
+          [
+            [1, 2],
+            [2, 1]
+          ],
+          "Store best(R2C2) = 15 after comparing its two exits."
+        );
+        ops.storeTile(
+          [0, 1],
+          gridPathProblem.bestRemaining[0][1],
+          [
+            [0, 2],
+            [1, 1]
+          ],
+          "The right branch returns 14 from R1C2."
+        );
+        ops.visitTile(
+          [1, 0],
+          [
+            [0, 0],
+            [1, 0]
+          ],
+          2,
+          [],
+          "The second branch restarts from the loading bay and moves down."
+        );
+        ops.visitTile(
+          [1, 1],
+          [
+            [0, 0],
+            [1, 0],
+            [1, 1]
+          ],
+          11,
+          [[1, 1]],
+          "R2C2 is already written, so return 15 without opening another route subtree."
+        );
+        ops.visitTile(
+          [2, 0],
+          [
+            [0, 0],
+            [1, 0],
+            [2, 0]
+          ],
+          4,
+          [[1, 1]],
+          "After the cache hit, continue down to solve R3C1."
+        );
+        ops.visitTile(
+          [2, 1],
+          [
+            [0, 0],
+            [1, 0],
+            [2, 0],
+            [2, 1]
+          ],
+          6,
+          [[1, 1]],
+          "R3C1 first asks for the saved remaining cost from R3C2."
+        );
+        ops.storeTile(
+          [2, 1],
+          gridPathProblem.bestRemaining[2][1],
+          [
+            [2, 2],
+            [3, 1]
+          ],
+          "Store best(R3C2) = 6 after comparing right with down."
+        );
+        ops.storeTile(
+          [2, 0],
+          gridPathProblem.bestRemaining[2][0],
+          [
+            [2, 1],
+            [3, 0]
+          ],
+          "Store best(R3C1) = 8."
+        );
+        ops.storeTile(
+          [1, 0],
+          gridPathProblem.bestRemaining[1][0],
+          [
+            [1, 1],
+            [2, 0]
+          ],
+          "R2C1 prefers the stored route through R3C1 and returns 10."
+        );
+        ops.storeTile(
+          [0, 0],
+          gridPathProblem.bestRemaining[0][0],
+          [
+            [0, 1],
+            [1, 0]
+          ],
+          "The loading bay compares the two saved branch totals and stores 10."
+        );
+        ops.routeResult(
+          gridPathProblem.optimalCost,
+          optimalWarehousePath,
+          "R1C1 → R2C1 → R3C1 → R3C2 → R4C2 → R4C3 → R4C4",
+          "The saved map reconstructs the cost-10 route."
+        );
+        ops.done("R2C2 is evaluated once; its saved answer stops the repeated branch.");
+      }
+    );
+    gridPathTabulation = storyAlgorithm(
+      "grid-path-tabulation",
+      "Grid path — tabulation",
+      dpStoryConfig("grid-path", "tabulation"),
+      (_input, ops) => {
+        ops.intro("Start at the dispatch door and write the cheapest remaining cost into every tile.");
+        for (let row = gridPathProblem.costs.length - 1; row >= 0; row--) {
+          for (let column = gridPathProblem.costs[row].length - 1; column >= 0; column--) {
+            const dependencies = [];
+            if (column < gridPathProblem.costs[row].length - 1) dependencies.push([row, column + 1]);
+            if (row < gridPathProblem.costs.length - 1) dependencies.push([row + 1, column]);
+            ops.storeTile(
+              [row, column],
+              gridPathProblem.bestRemaining[row][column],
+              dependencies,
+              dependencies.length ? "Read the written right and down tiles, then write the cheaper remaining cost." : "Write 0 at the dispatch door: no travel remains."
+            );
+          }
+        }
+        ops.routeResult(
+          gridPathProblem.optimalCost,
+          optimalWarehousePath,
+          "R1C1 → R2C1 → R3C1 → R3C2 → R4C2 → R4C3 → R4C4",
+          "Follow the cheapest written neighbour from the loading bay to the dispatch door."
+        );
+        ops.done("The completed warehouse map stores route cost 10 at the loading bay.");
+      }
+    );
+    gridPathTopDown = treeAlgorithm(
+      "grid-path-top-down",
+      "Grid path — top-down DP",
+      "grid-path-top-down",
+      (_input, ops) => {
+        const nodes5 = [
+          {
+            id: "r1c1",
+            label: "best(R1C1)",
+            detail: "loading bay",
+            values: [],
+            x: 300,
+            y: 24,
+            depth: 0
+          },
+          {
+            id: "r1c2",
+            label: "best(R1C2)",
+            detail: "move right",
+            values: [],
+            x: 155,
+            y: 88,
+            depth: 1
+          },
+          { id: "r2c1", label: "best(R2C1)", detail: "move down", values: [], x: 445, y: 88, depth: 1 },
+          {
+            id: "r1c3",
+            label: "best(R1C3)",
+            detail: "right child",
+            values: [],
+            x: 65,
+            y: 152,
+            depth: 2
+          },
+          {
+            id: "r2c2a",
+            label: "best(R2C2)",
+            detail: "first visit",
+            values: [],
+            x: 235,
+            y: 152,
+            depth: 2
+          },
+          {
+            id: "r2c2b",
+            label: "best(R2C2)",
+            detail: "same cache key",
+            values: [],
+            x: 375,
+            y: 152,
+            depth: 2
+          },
+          {
+            id: "r3c1",
+            label: "best(R3C1)",
+            detail: "down child",
+            values: [],
+            x: 535,
+            y: 152,
+            depth: 2
+          },
+          {
+            id: "r2c3a",
+            label: "best(R2C3)",
+            detail: "would repeat",
+            values: [],
+            x: 325,
+            y: 216,
+            depth: 3
+          },
+          {
+            id: "r3c2a",
+            label: "best(R3C2)",
+            detail: "would repeat",
+            values: [],
+            x: 425,
+            y: 216,
+            depth: 3
+          }
+        ];
+        const edges5 = [
+          { from: "r1c1", to: "r1c2" },
+          { from: "r1c1", to: "r2c1" },
+          { from: "r1c2", to: "r1c3" },
+          { from: "r1c2", to: "r2c2a" },
+          { from: "r2c1", to: "r2c2b" },
+          { from: "r2c1", to: "r3c1" },
+          { from: "r2c2b", to: "r2c3a" },
+          { from: "r2c2b", to: "r3c2a" }
+        ];
+        ops.tree(nodes5, edges5, "r1c1", "Ask for the cheapest route from the loading bay.");
+        ops.split(
+          "r1c1",
+          ["r1c1"],
+          ["r1c2", "r2c1"],
+          "The state compares moving right with moving down."
+        );
+        ops.split(
+          "r1c2",
+          ["r1c1", "r1c2"],
+          ["r1c3", "r2c2a"],
+          "Expand the two routes available from R1C2."
+        );
+        ops.returnResult(
+          "r1c3",
+          ["r1c1", "r1c2", "r1c3"],
+          "13",
+          "The compact branch returns the remaining cost from R1C3."
+        );
+        ops.store("r1c3", ["r1c1", "r1c2", "r1c3"], "R1C3", "13", "Store the best cost from R1C3.");
+        ops.combine(
+          "r2c2a",
+          ["r1c1", "r1c2", "r2c2a"],
+          "15",
+          "The best remaining cost from R2C2 is 15."
+        );
+        ops.store("r2c2a", ["r1c1", "r1c2", "r2c2a"], "R2C2", "15", "Store best(R2C2) = 15.");
+        ops.combine("r1c2", ["r1c1", "r1c2"], "14", "R1C2 stores its tile cost plus the cheaper child.");
+        ops.store("r1c2", ["r1c1", "r1c2"], "R1C2", "14", "Store best(R1C2) = 14.");
+        ops.split(
+          "r2c1",
+          ["r1c1", "r2c1"],
+          ["r2c2b", "r3c1"],
+          "The downward branch reaches R2C2 again."
+        );
+        ops.cacheHit(
+          "r2c2b",
+          ["r1c1", "r2c1", "r2c2b"],
+          "R2C2",
+          "15",
+          ["r2c3a", "r3c2a"],
+          "Reuse best(R2C2) = 15 and skip both of its child routes."
+        );
+        ops.returnResult(
+          "r3c1",
+          ["r1c1", "r2c1", "r3c1"],
+          "8",
+          "The compact branch returns best(R3C1) = 8."
+        );
+        ops.store("r3c1", ["r1c1", "r2c1", "r3c1"], "R3C1", "8", "Store best(R3C1) = 8.");
+        ops.combine("r2c1", ["r1c1", "r2c1"], "10", "R2C1 prefers the route through R3C1.");
+        ops.store("r2c1", ["r1c1", "r2c1"], "R2C1", "10", "Store best(R2C1) = 10.");
+        ops.combine("r1c1", ["r1c1"], "10", "The loading bay prefers down: min(14, 10) = 10.");
+        ops.store("r1c1", ["r1c1"], "R1C1", "10", "Store the requested route cost.");
+        ops.done(
+          "r1c1",
+          "10",
+          "Top-down DP returns cost 10 and avoids recomputing repeated coordinates."
+        );
+      }
+    );
+    gridPathBottomUp = tableAlgorithm(
+      "grid-path-bottom-up",
+      "Grid path — bottom-up DP",
+      "grid-path-bottom-up",
+      (_input, ops) => {
+        const best = gridPathProblem.bestRemaining;
+        ops.board(
+          ["R1", "R2", "R3", "R4"],
+          ["C1", "C2", "C3", "C4"],
+          "Fill the warehouse from the dispatch door back to the loading bay."
+        );
+        for (let row = 3; row >= 0; row--) {
+          for (let column = 3; column >= 0; column--) {
+            const dependencies = [];
+            if (column < 3) dependencies.push([row, column + 1]);
+            if (row < 3) dependencies.push([row + 1, column]);
+            const dependencyValues = dependencies.map(([depRow, depColumn]) => best[depRow][depColumn]);
+            const tileCost = gridPathProblem.costs[row][column];
+            const formula = dependencies.length ? `${tileCost} + min(${dependencyValues.join(", ")}) = ${best[row][column]}` : "goal = 0";
+            ops.set(
+              row,
+              column,
+              String(best[row][column]),
+              dependencies,
+              dependencies.length ? "Read the already-solved right and down neighbours, then store the cheaper route." : "The dispatch door is the base tile with no remaining travel cost.",
+              formula
+            );
+          }
+        }
+        ops.markPath(optimalWarehousePath, "Follow the cheaper stored neighbour from R1C1 to R4C4.");
+        ops.done("The bottom-up matrix stores the minimum route cost 10 at R1C1.");
+      }
+    );
+    dynamicProgrammingAlgorithms = [
+      coinChangeGreedy,
+      coinChangeNaive,
+      coinChangeMemoization,
+      coinChangeTabulation,
+      coinChangeTopDown,
+      coinChangeBottomUp,
+      gridPathGreedy,
+      gridPathNaive,
+      gridPathMemoization,
+      gridPathTabulation,
+      gridPathTopDown,
+      gridPathBottomUp
+    ];
+  }
+});
+
+// custom/steptrace/src/algorithms/dynamic-array.ts
+function parseDynamicArrayConfig(config) {
+  const values = (config.values?.length ? config.values : DEFAULT_VALUES6).map(String);
+  const capacity = config.capacity ?? 4;
+  if (!Number.isInteger(capacity) || capacity < 3 || capacity > 5 || values.length > capacity)
+    throw new Error(
+      `steptrace: dynamic-array requires integer "capacity" from 3 to 5 with no more values than slots.`
+    );
+  return { capacity, values };
+}
+var DEFAULT_VALUES6, dynamicArray;
+var init_dynamic_array = __esm({
+  "custom/steptrace/src/algorithms/dynamic-array.ts"() {
+    init_contiguous_storage();
+    DEFAULT_VALUES6 = [12, 7, 31];
+    dynamicArray = {
+      id: "dynamic-array",
+      family: "contiguous-storage",
+      meta: { label: "Dynamic Array" },
+      parse: parseDynamicArrayConfig,
+      mount: mountDynamicArray
+    };
+  }
+});
+
+// custom/steptrace/src/families/indexed-array-search.ts
+function parseIndexedArraySearchConfig(config, algorithm, profile) {
+  const { array, target } = config;
+  if (!Array.isArray(array) || array.length === 0)
+    throw new Error(`steptrace: ${algorithm} requires a non-empty sorted "array".`);
+  if (!array.every((value) => typeof value === "number" && Number.isFinite(value)))
+    throw new Error(`steptrace: ${algorithm} requires every "array" value to be a finite number.`);
+  if (array.some((value, index) => index > 0 && value < array[index - 1]))
+    throw new Error(`steptrace: ${algorithm} requires "array" values in non-decreasing order.`);
+  if (typeof target !== "number" || !Number.isFinite(target))
+    throw new Error(`steptrace: ${algorithm} requires a finite numeric "target".`);
+  return { array: array.slice(), target, profile };
+}
+function resolveIndexedSearchState(frame, index) {
+  if (frame.found === index) return "found";
+  if (frame.mid === index || frame.mid2 === index) return "probe";
+  if (frame.phase === "gallop" || frame.phase === "jump") {
+    if (index <= frame.previousBound) return "eliminated";
+    if (frame.bound != null && index > frame.bound) return "unseen";
+    return "range";
+  }
+  if (index < frame.lo || index > frame.hi) return "eliminated";
+  return "range";
+}
+function phaseLabel3(frame) {
+  switch (frame.phase) {
+    case "gallop":
+      return "gallop";
+    case "jump":
+      return "jump";
+    case "scan":
+      return frame.profile === "ternary" ? "final scan" : "linear scan";
+    case "interpolation":
+      return "interpolation";
+    case "ternary":
+      return "ternary";
+    default:
+      return "binary search";
+  }
+}
+function phaseColor(frame) {
+  if (frame.phase === "gallop") return "var(--_violet)";
+  if (frame.phase === "binary") return "var(--_green)";
+  if (frame.phase === "scan" || frame.phase === "jump") return "var(--_blue)";
+  return "var(--_amber)";
+}
+var indexedSearchViewSemantics, indexedArraySearchFamily;
+var init_indexed_array_search = __esm({
+  "custom/steptrace/src/families/indexed-array-search.ts"() {
+    init_recorders();
+    init_render();
+    indexedSearchViewSemantics = {
+      stateForIndex: resolveIndexedSearchState,
+      watchRows(frame, frames) {
+        const first = frames[0];
+        const profile = frame.profile;
+        const probe = frame.mid == null ? "—" : `[${frame.mid}] = ${frame.array[frame.mid]}`;
+        const range = frame.phase === "gallop" || frame.phase === "jump" ? frame.bound == null ? "discovering" : `[${Math.max(0, frame.previousBound + 1)}, ${frame.bound}]` : `[${frame.lo}, ${frame.hi}]`;
+        const rows = [
+          profile === "ternary" ? { k: "goal", v: frame.goal ?? "—", sw: "var(--_accent)" } : { k: "target", v: String(first.target), sw: "var(--_accent)" },
+          { k: "phase", v: phaseLabel3(frame), sw: phaseColor(frame) },
+          { k: "range", v: range, sw: "var(--_neutral)" },
+          { k: profile === "ternary" ? "probe 1" : "probe", v: probe, sw: "var(--_blue)" }
+        ];
+        if (profile === "ternary") {
+          rows.push({
+            k: "probe 2",
+            v: frame.mid2 == null ? "—" : `[${frame.mid2}] = ${frame.array[frame.mid2]}`,
+            sw: "var(--_violet)"
+          });
+        } else if (profile === "interpolation") {
+          rows.push({ k: "estimate", v: frame.annotationValue ?? "—", sw: "var(--_amber)" });
+        } else if (profile === "jump") {
+          rows.push({ k: "block", v: String(frame.blockSize ?? "—"), sw: "var(--_blue)" });
+        }
+        return rows;
+      }
+    };
+    indexedArraySearchFamily = {
+      id: "indexed-array-search",
+      createRecorder(config) {
+        return new IndexedSearchRecorder(config);
+      },
+      createView(frames) {
+        return makeSearchView(frames, indexedSearchViewSemantics);
+      }
+    };
+  }
+});
+
+// custom/steptrace/src/algorithms/exponential-search.ts
+function parseExponentialSearchConfig(config) {
+  return parseIndexedArraySearchConfig(config, "exponential-search", "exponential");
+}
+var exponentialSearch;
+var init_exponential_search = __esm({
+  "custom/steptrace/src/algorithms/exponential-search.ts"() {
+    init_indexed_array_search();
+    exponentialSearch = {
+      id: "exponential-search",
+      kind: "search",
+      family: indexedArraySearchFamily,
+      meta: { label: "Exponential search" },
+      parse: parseExponentialSearchConfig,
+      run(input, ops) {
+        const values = ops.value;
+        const { target } = input;
+        ops.init(
+          `Exponential search for ${target}: gallop by powers of two, then binary-search the bracket.`
+        );
+        ops.gallopProbe(-1, 0, `Check index 0 first: it holds ${values[0]}.`);
+        if (values[0] === target) {
+          ops.hit(0, `${target} is at index 0.`);
+          ops.done(`Found ${target} at index 0 after ${ops.comparisons} probe.`);
+          return;
+        }
+        if (values[0] > target) {
+          ops.done(`${target} is smaller than the first value, so it is not in the array.`);
+          return;
+        }
+        let previousBound = 0;
+        let bound = 1;
+        while (bound < values.length) {
+          ops.gallopProbe(
+            previousBound,
+            bound,
+            `Gallop to index ${bound}: ${values[bound]} ${values[bound] < target ? "is below" : "reaches or passes"} ${target}.`
+          );
+          if (values[bound] >= target) break;
+          previousBound = bound;
+          bound *= 2;
+        }
+        const lo = Math.floor(bound / 2);
+        const hi = Math.min(bound, values.length - 1);
+        ops.beginPhase(lo, hi, `The target is bracketed in [${lo}, ${hi}]; switch to binary search.`);
+        let left = lo;
+        let right = hi;
+        while (left <= right) {
+          const mid = Math.floor((left + right) / 2);
+          ops.probe(
+            left,
+            right,
+            mid,
+            `Binary-search [${left}, ${right}]: index ${mid} holds ${values[mid]}.`
+          );
+          if (values[mid] === target) {
+            ops.hit(mid, `${values[mid]} equals ${target} — found it at index ${mid}.`);
+            ops.done(`Found ${target} after ${ops.comparisons} probes.`);
+            return;
+          }
+          if (values[mid] < target) {
+            left = mid + 1;
+            ops.narrow(left, right, `${values[mid]} < ${target}: discard through index ${mid}.`);
+          } else {
+            right = mid - 1;
+            ops.narrow(left, right, `${values[mid]} > ${target}: discard from index ${mid}.`);
+          }
+        }
+        ops.done(`${target} is not in the array after ${ops.comparisons} probes.`);
+      }
+    };
+  }
+});
+
+// custom/steptrace/src/algorithms/interpolation-search.ts
+function parseInterpolationSearchConfig(config) {
+  return parseIndexedArraySearchConfig(config, "interpolation-search", "interpolation");
+}
+var interpolationSearch;
+var init_interpolation_search = __esm({
+  "custom/steptrace/src/algorithms/interpolation-search.ts"() {
+    init_indexed_array_search();
+    interpolationSearch = {
+      id: "interpolation-search",
+      kind: "search",
+      family: indexedArraySearchFamily,
+      meta: { label: "Interpolation search" },
+      parse: parseInterpolationSearchConfig,
+      run(input, ops) {
+        const values = ops.value;
+        const { target } = input;
+        ops.init(
+          `Interpolation search for ${target}: estimate probe positions from value ratios, then narrow the range.`
+        );
+        ops.beginPhase(
+          0,
+          values.length - 1,
+          `Interpolation phase: probe by relative position inside [${0}, ${values.length - 1}].`,
+          "interpolation"
+        );
+        let lo = 0;
+        let hi = values.length - 1;
+        while (lo <= hi && target >= values[lo] && target <= values[hi]) {
+          if (values[lo] === values[hi]) {
+            ops.annotatedProbe(
+              lo,
+              hi,
+              lo,
+              "estimate",
+              `index ${lo}`,
+              `The value span is flat, so the estimate stays at index ${lo}.`
+            );
+            if (values[lo] === target) {
+              ops.hit(lo, `${target} equals ${values[lo]} at index ${lo}.`);
+              ops.done(`Found ${target} at index ${lo} after ${ops.comparisons} probes.`);
+              return;
+            }
+            break;
+          }
+          const numerator = (target - values[lo]) * (hi - lo);
+          const denominator = values[hi] - values[lo];
+          const pos = Math.floor(lo + numerator / denominator);
+          const ratio = Math.round((target - values[lo]) / denominator * 100);
+          ops.annotatedProbe(
+            lo,
+            hi,
+            pos,
+            "estimate",
+            `${ratio}% → [${pos}]`,
+            `${target} is ${ratio}% through [${values[lo]}, ${values[hi]}]: project to index ${pos}.`
+          );
+          if (values[pos] === target) {
+            ops.hit(pos, `${values[pos]} equals ${target} — found it at index ${pos}.`);
+            ops.done(`Found ${target} after ${ops.comparisons} probes.`);
+            return;
+          }
+          if (values[pos] < target) {
+            lo = pos + 1;
+            ops.narrow(lo, hi, `${values[pos]} < ${target}: search indices ${lo} through ${hi}.`);
+          } else {
+            hi = pos - 1;
+            ops.narrow(lo, hi, `${values[pos]} > ${target}: search indices ${lo} through ${hi}.`);
+          }
+        }
+        ops.done(`${target} is not in the array after ${ops.comparisons} probes.`);
+      }
+    };
+  }
+});
+
+// custom/steptrace/src/families/matrix-grid.ts
+function invalidConfig7(message) {
+  throw new Error(`steptrace: floyd-warshall ${message}`);
+}
+function parseMatrixGridConfig(config) {
+  const { nodes: nodes5, edges: edges5 } = config;
+  if (!Array.isArray(nodes5) || nodes5.length === 0)
+    invalidConfig7('requires a non-empty numeric "nodes" array.');
+  if (!nodes5.every((node2) => typeof node2 === "number" && Number.isFinite(node2)))
+    invalidConfig7('requires every "nodes" entry to be a finite number.');
+  if (new Set(nodes5).size !== nodes5.length) invalidConfig7('requires unique "nodes" entries.');
+  if (!Array.isArray(edges5))
+    invalidConfig7('requires an "edges" array of [from, to, weight] tuples.');
+  const knownNodes = new Set(nodes5);
+  const parsedEdges = edges5.map((edge, index) => {
+    if (!Array.isArray(edge) || edge.length !== 3 || !edge.every((value) => typeof value === "number" && Number.isFinite(value))) {
+      invalidConfig7(`requires edge ${index} to be a finite [from, to, weight] tuple.`);
+    }
+    const [from, to, weight] = edge;
+    if (!knownNodes.has(from) || !knownNodes.has(to))
+      invalidConfig7(`requires edge ${index} to reference nodes declared in "nodes".`);
+    return [from, to, weight];
+  });
+  return { nodes: nodes5.slice(), edges: parsedEdges, profile: "floyd-warshall" };
+}
+function formatDistance(value) {
+  return value == null ? "∞" : String(value);
+}
+function distanceLabel(frame, cell) {
+  const [row, column] = cell;
+  return `dist[${frame.rowLabels[row]}][${frame.colLabels[column]}] = ${formatDistance(frame.grid[row][column])}`;
+}
+function stageIndex(frame) {
+  return frame.k == null ? -1 : frame.rowLabels.indexOf(String(frame.k));
+}
+function matrixGridRolesForCell(frame, row, column) {
+  const roles = [];
+  const k = stageIndex(frame);
+  if ((frame.type === "stage" || frame.type === "relax") && (row === k || column === k)) {
+    roles.push("stage-axis");
+  }
+  if (frame.type === "relax") {
+    if (frame.deps[0]?.[0] === row && frame.deps[0]?.[1] === column) roles.push("operand-a");
+    if (frame.deps[1]?.[0] === row && frame.deps[1]?.[1] === column) roles.push("operand-b");
+    if (frame.cur?.[0] === row && frame.cur?.[1] === column) roles.push("target");
+  }
+  if (frame.negativeCycle.includes(Number(frame.rowLabels[row])) && frame.rowLabels[row] === frame.colLabels[column]) {
+    roles.push("negative-cycle");
+  }
+  return roles;
+}
+function matrixGridFooterModel(frame) {
+  const nodeCount = frame.rowLabels.length;
+  if (frame.negativeCycle.length) {
+    return {
+      context: "Negative cycle",
+      summary: { text: "Cycle paths are unbounded" }
+    };
+  }
+  if (frame.type === "init") {
+    return {
+      context: "Initialize distance matrix",
+      summary: { text: "Seed diagonal, edges, and ∞" }
+    };
+  }
+  if (frame.type === "stage") {
+    return {
+      context: `Stage k = ${frame.k}`,
+      summary: { text: `Compare ${nodeCount * nodeCount} pairs through node ${frame.k}` }
+    };
+  }
+  if (frame.type === "relax" && frame.cur) {
+    const previous = formatDistance(frame.previous);
+    const result = formatDistance(frame.result);
+    return {
+      context: `Stage k = ${frame.k}`,
+      summary: frame.decision === "improve" ? { role: "write", text: `Write ${result} · ${previous} → ${result}` } : { role: "keep", text: `Keep ${previous} · via ${frame.k} is not shorter` }
+    };
+  }
+  return {
+    context: "All stages complete",
+    summary: { text: `${nodeCount * nodeCount} distances ready` }
+  };
+}
+var matrixGridRoleLegend, matrixGridViewSemantics, matrixGridFamily, abstractDynamicProgrammingViewDescriptor;
+var init_matrix_grid = __esm({
+  "custom/steptrace/src/families/matrix-grid.ts"() {
+    init_recorders();
+    init_render();
+    init_execution_tree();
+    matrixGridRoleLegend = [
+      { role: "operand-a", badge: "A", label: "dist[i][k]" },
+      { role: "operand-b", badge: "B", label: "dist[k][j]" },
+      { role: "target", badge: "T", label: "dist[i][j]" },
+      { role: "keep", badge: "K", label: "keep target" },
+      { role: "write", badge: "W", label: "write target" },
+      { role: "stage-axis", badge: "k", label: "active intermediate row/column" }
+    ];
+    matrixGridViewSemantics = {
+      tableLabel: "Floyd-Warshall distance matrix. Rows are source nodes and columns are destination nodes.",
+      axisDescription: "Distance matrix: rows identify the from node and columns identify the to node.",
+      cornerLabel: "from ↓ / to →",
+      stageLayout: "fill",
+      formatValue(value) {
+        return formatDistance(value);
+      },
+      cellLabel(frame, row, column) {
+        const base = distanceLabel(frame, [row, column]);
+        const roles = matrixGridRolesForCell(frame, row, column);
+        if (!roles.includes("target"))
+          return roles.length ? `${base}; roles: ${roles.join(", ")}` : base;
+        return `${base}; roles: ${roles.join(", ")}; previous ${formatDistance(frame.previous)}; candidate ${formatDistance(frame.candidate)}; decision ${frame.decision}; result ${formatDistance(frame.result)}`;
+      },
+      stateForCell(frame, row, column) {
+        if (frame.cur?.[0] === row && frame.cur?.[1] === column) return "cur";
+        return frame.deps.some(([depRow, depColumn]) => depRow === row && depColumn === column) ? "dep" : "";
+      },
+      decisionForCell(frame, row, column) {
+        return frame.cur?.[0] === row && frame.cur?.[1] === column ? frame.decision || "" : "";
+      },
+      rolesForCell: matrixGridRolesForCell,
+      headerRole(frame, axis, index) {
+        const k = stageIndex(frame);
+        if (frame.type !== "stage" && frame.type !== "relax" || index !== k) return "";
+        return axis === "row" ? "stage-row" : "stage-column";
+      },
+      footerModel: matrixGridFooterModel,
+      roleLegend: matrixGridRoleLegend,
+      watchRows(frame) {
+        const current = frame.cur ? `dist[${frame.rowLabels[frame.cur[0]]}][${frame.colLabels[frame.cur[1]]}] = ${formatDistance(frame.previous)} before this relaxation` : "—";
+        const left = frame.deps[0] ? `dist[${frame.rowLabels[frame.deps[0][0]]}][${frame.colLabels[frame.deps[0][1]]}] = ${formatDistance(frame.operandA)}` : "—";
+        const right = frame.deps[1] ? `dist[${frame.rowLabels[frame.deps[1][0]]}][${frame.colLabels[frame.deps[1][1]]}] = ${formatDistance(frame.operandB)}` : "—";
+        const candidate = frame.candidate == null || !frame.deps[0] || !frame.deps[1] ? "—" : `${formatDistance(frame.operandA)} + ${formatDistance(frame.operandB)} = ${frame.candidate}`;
+        const rows = [
+          { k: "stage k", v: frame.k == null ? "—" : String(frame.k), sw: "var(--_violet)" },
+          { k: "dist[i][j]", v: current, sw: "var(--_blue)" },
+          { k: "dist[i][k]", v: left, sw: "var(--_amber)" },
+          { k: "dist[k][j]", v: right, sw: "var(--_amber)" },
+          { k: "candidate", v: candidate, sw: "var(--_violet)" },
+          {
+            k: "decision",
+            v: frame.decision === "improve" ? `write ${formatDistance(frame.previous)} → ${formatDistance(frame.result)}` : frame.decision === "keep" ? `keep ${formatDistance(frame.previous)}` : "—",
+            sw: frame.decision === "improve" ? "var(--_green)" : "var(--_neutral)"
+          }
+        ];
+        if (frame.negativeCycle.length) {
+          rows.push({
+            k: "negative cycle",
+            v: frame.negativeCycle.join(", "),
+            sw: "var(--_amber)"
+          });
+        }
+        return rows;
+      }
+    };
+    matrixGridFamily = {
+      id: "matrix-grid",
+      createRecorder(config) {
+        return new MatrixGridRecorder(config);
+      },
+      createView(frames) {
+        return makeDPView(frames, matrixGridViewSemantics);
+      }
+    };
+    abstractDynamicProgrammingViewDescriptor = {
+      ariaLabel: "Dynamic-programming dependency graph",
+      ...executionTreeCardMetrics,
+      stateLabels: {
+        call: "pending",
+        base: "base",
+        store: "stored"
+      },
+      legend: [
+        { state: "call", label: "waiting for dependencies" },
+        { state: "base", label: "base state stored" },
+        { state: "store", label: "dependent state stored" }
+      ],
+      frameModel(frame) {
+        const currentColumn = frame.cur?.[1] ?? null;
+        const active = currentColumn == null ? null : frame.colLabels[currentColumn];
+        const results = Object.fromEntries(
+          frame.colLabels.flatMap((label, column) => {
+            const value = frame.grid[0][column];
+            return value == null ? [] : [[label, value]];
+          })
+        );
+        const states = Object.fromEntries(
+          frame.nodes.map((node2) => {
+            const column = frame.colLabels.indexOf(node2.id);
+            const solved = column >= 0 && frame.grid[0][column] != null;
+            const isBase = !frame.edges.some((edge) => edge.from === node2.id);
+            return [node2.id, solved ? isBase ? "base" : "store" : "call"];
+          })
+        );
+        const dependencies = frame.deps.map(([, column]) => frame.colLabels[column]);
+        return {
+          phase: frame.type === "done" ? "Target ready" : active ? `Solve ${active}` : "Dependency graph",
+          action: frame.message,
+          active,
+          path: active ? [active, ...dependencies] : [],
+          visible: frame.nodes.map((node2) => node2.id),
+          states,
+          results,
+          collapsed: []
+        };
+      },
+      nodeLines(node2) {
+        return [node2.label, node2.detail];
+      },
+      watchRows(frame) {
+        const currentColumn = frame.cur?.[1] ?? null;
+        const dependencies = frame.deps.map(([, column]) => frame.colLabels[column]);
+        const stored = frame.grid[0].filter((value) => value != null).length;
+        return [
+          {
+            k: "state",
+            v: currentColumn == null ? "—" : frame.colLabels[currentColumn],
+            sw: "var(--_blue)",
+            hint: "The state currently becoming available."
+          },
+          {
+            k: "depends on",
+            v: dependencies.length ? dependencies.join(" + ") : "base state",
+            sw: "var(--_amber)",
+            hint: "States that must already be stored before this state can be solved."
+          },
+          {
+            k: "stored result",
+            v: currentColumn == null ? "—" : frame.grid[0][currentColumn] || "—",
+            sw: "var(--_green)",
+            hint: "The result written once and reused by every outgoing dependency."
+          },
+          {
+            k: "progress",
+            v: `${stored} / ${frame.colLabels.length} states ready`,
+            sw: "var(--_neutral)",
+            hint: "How many states have been solved in dependency order."
+          }
+        ];
+      }
+    };
+  }
+});
+
+// custom/steptrace/src/algorithms/floyd-warshall.ts
+var displayMatrix, floydWarshall;
+var init_floyd_warshall = __esm({
+  "custom/steptrace/src/algorithms/floyd-warshall.ts"() {
+    init_matrix_grid();
+    displayMatrix = (matrix) => matrix.map((row) => row.map((value) => Number.isFinite(value) ? value : null));
+    floydWarshall = {
+      id: "floyd-warshall",
+      kind: "dp",
+      family: matrixGridFamily,
+      meta: { label: "Floyd-Warshall" },
+      parse: parseMatrixGridConfig,
+      run(input, ops) {
+        const indexForNode = new Map(input.nodes.map((node2, index) => [node2, index]));
+        const dist = Array.from(
+          { length: input.nodes.length },
+          (_, row) => Array.from({ length: input.nodes.length }, (_2, column) => row === column ? 0 : Infinity)
+        );
+        for (const [from, to, weight] of input.edges) {
+          const row = indexForNode.get(from);
+          const column = indexForNode.get(to);
+          dist[row][column] = Math.min(dist[row][column], weight);
+        }
+        ops.board(displayMatrix(dist), "Initialize direct-edge distances; missing edges are ∞.");
+        for (let k = 0; k < input.nodes.length; k++) {
+          const kNode = input.nodes[k];
+          ops.stage(kNode, `Stage k = ${kNode}: allow node ${kNode} as an intermediate.`);
+          for (let i = 0; i < input.nodes.length; i++) {
+            for (let j = 0; j < input.nodes.length; j++) {
+              const current = dist[i][j];
+              const left = dist[i][k];
+              const right = dist[k][j];
+              const candidate = Number.isFinite(left) && Number.isFinite(right) ? left + right : Infinity;
+              const improve = candidate < current;
+              if (improve) dist[i][j] = candidate;
+              const from = input.nodes[i];
+              const to = input.nodes[j];
+              const currentLabel = Number.isFinite(current) ? current : "∞";
+              const candidateLabel = Number.isFinite(candidate) ? candidate : "∞";
+              ops.relax(
+                i,
+                j,
+                [
+                  [i, k],
+                  [k, j]
+                ],
+                Number.isFinite(candidate) ? candidate : null,
+                improve ? "improve" : "keep",
+                Number.isFinite(dist[i][j]) ? dist[i][j] : null,
+                improve ? `dist[${from}][${to}] improves through ${kNode}: ${currentLabel} → ${candidateLabel}.` : `Keep dist[${from}][${to}] = ${currentLabel}; the route through ${kNode} costs ${candidateLabel}.`
+              );
+            }
+          }
+        }
+        const negativeCycle = input.nodes.filter((node2, index) => dist[index][index] < 0);
+        if (negativeCycle.length) {
+          ops.reportNegativeCycle(
+            negativeCycle,
+            `Negative cycle detected through ${negativeCycle.join(", ")}; shortest distances are undefined.`
+          );
+          ops.done("Stopped after reporting the negative cycle.");
+          return;
+        }
+        ops.done("All stages complete: the matrix holds every finite shortest-path distance.");
+      }
+    };
+  }
+});
+
+// custom/steptrace/src/families/linked-topology.ts
+function linkedAddress(index, base = 4096) {
+  return `0x${(base + index * 32).toString(16).toUpperCase()}`;
+}
+function createAddressChain(stage, variant) {
+  const board = el("div", "steptrace__linked-list-board");
+  board.dataset.variant = variant;
+  board.setAttribute("role", "list");
+  stage.append(board);
+  function paint(nodes5, state = {}) {
+    board.replaceChildren(
+      ...nodes5.map((item, index) => {
+        const node2 = el("div", "steptrace__linked-list-node-card");
+        node2.dataset.appended = item.address === state.appended ? "1" : "0";
+        node2.dataset.moved = item.address === state.moved ? "1" : "0";
+        node2.dataset.relinked = item.address === state.relinked ? "1" : "0";
+        node2.setAttribute("role", "listitem");
+        const array = el("div", "steptrace__contiguous-array");
+        array.style.setProperty("--steptrace-capacity", "1");
+        const cell = el("div", "steptrace__contiguous-cell steptrace__linked-list-cell");
+        cell.dataset.empty = "0";
+        const valueField = el(
+          "span",
+          "steptrace__contiguous-value steptrace__linked-list-value-field"
+        );
+        const valueText = el("span", "steptrace__linked-list-value");
+        valueText.textContent = item.value;
+        const ownAddress = el("span", "steptrace__linked-list-address");
+        ownAddress.textContent = item.address;
+        valueField.append(valueText, ownAddress);
+        const nextAddress = nodes5[index + 1]?.address ?? null;
+        const nextField = el("span", "steptrace__linked-list-pointer");
+        nextField.dataset.pointer = "next";
+        nextField.textContent = `next ${nextAddress ?? "null"}`;
+        if (variant === "doubly") {
+          const previousAddress = nodes5[index - 1]?.address ?? null;
+          const previousField = el("span", "steptrace__linked-list-pointer");
+          previousField.dataset.pointer = "prev";
+          previousField.textContent = `prev ${previousAddress ?? "null"}`;
+          cell.append(valueField, previousField, nextField);
+        } else cell.append(valueField, nextField);
+        array.append(cell);
+        node2.append(array);
+        if (nextAddress) {
+          const nextLink = el("span", "steptrace__linked-list-link");
+          nextLink.dataset.pointer = "next";
+          nextLink.setAttribute("aria-hidden", "true");
+          node2.append(nextLink);
+        }
+        if (variant === "doubly" && index > 0) {
+          const previousLink = el("span", "steptrace__linked-list-link");
+          previousLink.dataset.pointer = "prev";
+          previousLink.setAttribute("aria-hidden", "true");
+          node2.append(previousLink);
+        }
+        node2.setAttribute(
+          "aria-label",
+          `${index === 0 ? "Head" : index === nodes5.length - 1 ? "Tail" : `Node ${index}`}, address ${item.address}, value ${item.value}, ${variant === "doubly" ? `prev ${nodes5[index - 1]?.address ?? "null"}, ` : ""}next ${nextAddress ?? "null"}`
+        );
+        return node2;
+      })
+    );
+  }
+  return { paint };
+}
+function mountLinkedList(root, config) {
+  const shell = createStructureShell(
+    root,
+    "linked-list",
+    `${config.variant} linked list`,
+    `Interactive ${config.variant} linked list`,
+    "linked-topology",
+    "steptrace__linked-list"
+  );
+  const initial = [...config.values];
+  const values = [...initial];
+  let appended = null;
+  let relinked = null;
+  const chain = createAddressChain(shell.stage, config.variant);
+  const input = shell.input("Value to append", "Value", 8);
+  input.type = "number";
+  input.step = "1";
+  const append = shell.button("Append", true);
+  const remove = shell.button("Remove tail");
+  const reset = shell.button("Reset");
+  shell.controls.append(input, append, remove, reset);
+  function paint(message = "") {
+    chain.paint(
+      values.map((value, index) => ({ value: String(value), address: linkedAddress(index) })),
+      {
+        appended: appended == null ? void 0 : linkedAddress(appended),
+        relinked: relinked == null ? void 0 : linkedAddress(relinked)
+      }
+    );
+    shell.setCounter(String(values.length), values.length === 1 ? " node" : " nodes");
+    append.disabled = values.length >= LINKED_LIST_MAX_NODES;
+    input.disabled = values.length >= LINKED_LIST_MAX_NODES;
+    remove.disabled = values.length <= 1;
+    shell.status.textContent = message || "Append a node to update the tail pointer, or remove the current tail.";
+  }
+  function onAppend() {
+    const raw = input.value.trim();
+    const value = raw === "" ? Math.floor(Math.random() * 90) + 10 : Number(raw);
+    if (!Number.isFinite(value) || !Number.isInteger(value)) {
+      shell.status.textContent = "Value must be a finite integer.";
+      return;
+    }
+    if (values.length >= LINKED_LIST_MAX_NODES) return;
+    const previousAddress = linkedAddress(values.length - 1);
+    const nextAddress = linkedAddress(values.length);
+    relinked = values.length - 1;
+    values.push(value);
+    appended = values.length - 1;
+    input.value = "";
+    paint(
+      config.variant === "doubly" ? `Appended ${value} at ${nextAddress}; ${previousAddress}.next now stores ${nextAddress}, and ${nextAddress}.prev stores ${previousAddress}.` : `Appended ${value} at ${nextAddress}; ${previousAddress}.next now stores ${nextAddress}.`
+    );
+    input.focus?.();
+  }
+  function onRemove() {
+    if (values.length <= 1) return;
+    const removed = values.pop();
+    relinked = values.length - 1;
+    appended = null;
+    paint(`Removed tail ${removed}; ${linkedAddress(values.length - 1)}.next is null.`);
+  }
+  function onReset() {
+    values.splice(0, values.length, ...initial);
+    appended = null;
+    relinked = null;
+    input.value = "";
+    paint("Reset the linked list to its initial nodes.");
+  }
+  shell.listen(append, "click", onAppend);
+  shell.listen(remove, "click", onRemove);
+  shell.listen(reset, "click", onReset);
+  onEnter(shell, input, onAppend);
+  paint();
+  return shell.finish();
+}
+function mountLruCache(root) {
+  const capacity = 4;
+  const initial = [
+    { key: "A", value: "10", address: linkedAddress(0, 8192) },
+    { key: "B", value: "20", address: linkedAddress(1, 8192) },
+    { key: "C", value: "30", address: linkedAddress(2, 8192) }
+  ];
+  let entries = initial.map((entry) => ({ ...entry }));
+  let mapSlots = ["A", "B", "C", null];
+  let nextAddress = 3;
+  let moved;
+  let accessedKey;
+  let changedMapSlot;
+  const shell = createStructureShell(
+    root,
+    "lru-cache",
+    "LRU cache",
+    "Interactive capacity-four least recently used cache",
+    "linked-topology",
+    "steptrace__lru-cache"
+  );
+  const mapLabel = el("div", "steptrace__rail-label");
+  mapLabel.textContent = "Map · key → node address";
+  const mapWrap = el("div", "steptrace__lru-map");
+  const map = createIndexedBoard(mapWrap, capacity, "LRU key to node address index");
+  const chainLabel = el("div", "steptrace__rail-label");
+  chainLabel.textContent = "Recency · MRU → LRU";
+  const chainWrap = el("div", "steptrace__lru-chain");
+  const chain = createAddressChain(chainWrap, "doubly");
+  shell.stage.append(mapLabel, mapWrap, chainLabel, chainWrap);
+  const keyInput = shell.input("Cache key", "Key", 4);
+  const valueInput = shell.input("Cache value", "Value", 8);
+  valueInput.type = "number";
+  valueInput.step = "1";
+  const put = shell.button("Put", true);
+  const get = shell.button("Get");
+  const reset = shell.button("Reset");
+  shell.controls.append(keyInput, valueInput, put, get, reset);
+  const randomKey2 = () => String.fromCharCode(65 + Math.floor(Math.random() * 26));
+  const randomValue4 = () => String(Math.floor(Math.random() * 90) + 10);
+  const key4 = () => (keyInput.value.trim() || randomKey2()).toUpperCase();
+  function paint(message = "") {
+    map.paint(
+      mapSlots.map((storedKey, index) => {
+        const entry = entries.find((candidate) => candidate.key === storedKey);
+        return {
+          value: entry ? `${entry.key} → ${entry.address}` : null,
+          active: Boolean(entry && accessedKey && entry.key === accessedKey),
+          changed: changedMapSlot != null && index === changedMapSlot,
+          ariaLabel: entry ? `key ${entry.key} maps to node ${entry.address}` : `map slot ${index}, empty`
+        };
+      })
+    );
+    chain.paint(
+      entries.map((entry) => ({
+        address: entry.address,
+        value: `${entry.key}:${entry.value}`
+      })),
+      { moved }
+    );
+    shell.setCounter(String(entries.length), ` / ${capacity}`);
+    shell.status.textContent = message || "Put or get a key. The left node is MRU; the right node is LRU.";
+  }
+  function promote(index) {
+    const [entry] = entries.splice(index, 1);
+    entries.unshift(entry);
+    moved = entry.address;
+    return entry;
+  }
+  function onGet() {
+    const target = key4();
+    const index = entries.findIndex((entry2) => entry2.key === target);
+    keyInput.value = "";
+    changedMapSlot = void 0;
+    if (index < 0) {
+      moved = void 0;
+      accessedKey = void 0;
+      paint(`Get ${target}: miss. Cache state did not change.`);
+      return;
+    }
+    const entry = promote(index);
+    accessedKey = target;
+    paint(`Get ${target}: hit ${entry.value}; promoted ${entry.address} to MRU.`);
+  }
+  function onPut() {
+    const target = key4();
+    const rawValue = valueInput.value.trim() || randomValue4();
+    if (!/^[A-Z0-9]{1,4}$/.test(target) || !Number.isInteger(Number(rawValue))) {
+      shell.status.textContent = "Key must be 1–4 letters or digits; value must be an integer.";
+      return;
+    }
+    const index = entries.findIndex((entry) => entry.key === target);
+    let message;
+    if (index >= 0) {
+      entries[index].value = rawValue;
+      const entry = promote(index);
+      accessedKey = target;
+      changedMapSlot = void 0;
+      message = `Put ${target}:${rawValue}: updated ${entry.address} and promoted it to MRU.`;
+    } else {
+      const evicted = entries.length === capacity ? entries.pop() : void 0;
+      const slot = evicted ? mapSlots.findIndex((storedKey) => storedKey === evicted.key) : mapSlots.findIndex((storedKey) => storedKey == null);
+      const entry = {
+        key: target,
+        value: rawValue,
+        address: linkedAddress(nextAddress++, 8192)
+      };
+      entries.unshift(entry);
+      mapSlots[slot] = target;
+      moved = entry.address;
+      accessedKey = void 0;
+      changedMapSlot = slot;
+      message = evicted ? `Put ${target}:${rawValue}: evicted LRU ${evicted.key} at ${evicted.address}; inserted ${entry.address} at MRU.` : `Put ${target}:${rawValue}: inserted ${entry.address} at MRU.`;
+    }
+    keyInput.value = "";
+    valueInput.value = "";
+    paint(message);
+  }
+  function onReset() {
+    entries = initial.map((entry) => ({ ...entry }));
+    mapSlots = ["A", "B", "C", null];
+    nextAddress = 3;
+    moved = void 0;
+    accessedKey = void 0;
+    changedMapSlot = void 0;
+    keyInput.value = "";
+    valueInput.value = "";
+    paint("Reset the LRU cache.");
+  }
+  shell.listen(put, "click", onPut);
+  shell.listen(get, "click", onGet);
+  shell.listen(reset, "click", onReset);
+  onEnter(shell, valueInput, onPut);
+  paint();
+  return shell.finish();
+}
+function edgePath(from, to, nodeRadius, arrowGap) {
+  const edge = trimGraphEdge(from, to, nodeRadius, nodeRadius + arrowGap);
+  return `M ${edge.x1} ${edge.y1} L ${edge.x2} ${edge.y2}`;
+}
+function marker(label, role) {
+  const node2 = el("div", `steptrace__linked-pointer steptrace__linked-pointer--${role}`);
+  node2.setAttribute("aria-hidden", "true");
+  const text = el("span", "steptrace__linked-pointer-label");
+  text.textContent = label;
+  node2.append(text);
+  return { node: node2, text };
+}
+function makeLinkedTopologyView(frames) {
+  const first = frames[0];
+  const positions = new Map(first.nodes.map((node2) => [node2.id, node2]));
+  const root = el("div", "steptrace__linked-topology");
+  root.setAttribute("role", "region");
+  root.setAttribute("aria-label", "Fast and slow pointers on a linked cycle");
+  const canvas = el("div", "steptrace__linked-canvas");
+  canvas.setAttribute("role", "img");
+  canvas.setAttribute("aria-label", "Linked structure with slow and fast pointers at A.");
+  const topology2 = document.createElementNS("http://www.w3.org/2000/svg", "svg");
+  topology2.setAttribute("class", "steptrace__linked-svg");
+  topology2.setAttribute("viewBox", "0 0 100 70");
+  topology2.setAttribute("preserveAspectRatio", "xMidYMid meet");
+  topology2.setAttribute("aria-hidden", "true");
+  const defs = document.createElementNS("http://www.w3.org/2000/svg", "defs");
+  const markerBaseId = `steptrace-linked-arrow-${++linkedTopologyViewId}`;
+  const markerIds = new Map(
+    ["neutral", "cycle"].map((role) => {
+      const id = `${markerBaseId}-${role}`;
+      const arrow = document.createElementNS("http://www.w3.org/2000/svg", "marker");
+      arrow.setAttribute("id", id);
+      arrow.setAttribute("viewBox", "0 0 10 10");
+      arrow.setAttribute("refX", "8");
+      arrow.setAttribute("refY", "5");
+      arrow.setAttribute("markerWidth", "5");
+      arrow.setAttribute("markerHeight", "5");
+      arrow.setAttribute("orient", "auto-start-reverse");
+      const arrowPath = document.createElementNS("http://www.w3.org/2000/svg", "path");
+      arrowPath.setAttribute("class", "steptrace__linked-arrow");
+      arrowPath.setAttribute("data-role", role);
+      arrowPath.setAttribute("d", "M 0 0 L 10 5 L 0 10 z");
+      arrow.append(arrowPath);
+      defs.append(arrow);
+      return [role, id];
+    })
+  );
+  topology2.append(defs);
+  const edgeElements = [];
+  for (const [fromId, toId] of Object.entries(first.next)) {
+    const from = positions.get(fromId);
+    const to = positions.get(toId);
+    const path = document.createElementNS("http://www.w3.org/2000/svg", "path");
+    path.setAttribute("class", "steptrace__linked-edge");
+    path.setAttribute("d", edgePath(from, to, GRAPH_NODE_RADIUS_PX, GRAPH_EDGE_ARROW_GAP_PX));
+    const cycle = first.cycle.includes(fromId) && first.cycle.includes(toId);
+    path.setAttribute("marker-end", `url(#${markerIds.get(cycle ? "cycle" : "neutral")})`);
+    if (cycle) path.dataset.cycle = "1";
+    topology2.append(path);
+    edgeElements.push({ path, from, to });
+  }
+  canvas.append(topology2);
+  const geometry = observeFixedSvgNodes(topology2, [], (unitsPerCssPixel) => {
+    const radius = GRAPH_NODE_RADIUS_PX * unitsPerCssPixel;
+    const arrowGap = GRAPH_EDGE_ARROW_GAP_PX * unitsPerCssPixel;
+    for (const edge of edgeElements)
+      edge.path.setAttribute("d", edgePath(edge.from, edge.to, radius, arrowGap));
+  });
+  const nodes5 = new Map(
+    first.nodes.map((node2) => {
+      const position = positions.get(node2.id);
+      const item = el("div", "steptrace__linked-node");
+      item.style.setProperty("--_linked-x", String(position.x));
+      item.style.setProperty("--_linked-y", String(position.y));
+      item.dataset.node = node2.id;
+      item.textContent = node2.id;
+      const result = el("span", "steptrace__linked-node-result");
+      result.append(successMarker());
+      item.append(result);
+      canvas.append(item);
+      return [node2.id, item];
+    })
+  );
+  const slow = marker("S", "slow");
+  const fast = marker("F", "fast");
+  canvas.append(slow.node, fast.node);
+  const legend = makeLegend(
+    [
+      {
+        label: "slow / cycle pointer",
+        swatchClass: "steptrace__linked-swatch steptrace__linked-swatch--slow"
+      },
+      {
+        label: "fast / head pointer",
+        swatchClass: "steptrace__linked-swatch steptrace__linked-swatch--fast"
+      },
+      {
+        label: "cycle edge",
+        swatchClass: "steptrace__linked-swatch steptrace__linked-swatch--cycle"
+      },
+      {
+        label: "cycle entry",
+        swatchClass: "steptrace__linked-swatch steptrace__linked-swatch--entry"
+      }
+    ],
+    "Linked topology state legend",
+    "steptrace__linked-legend"
+  );
+  root.append(canvas);
+  const status = statusEl();
+  function place(pointer, id) {
+    const position = positions.get(id);
+    pointer.style.setProperty("--_linked-x", String(position.x));
+    pointer.style.setProperty("--_linked-y", String(position.y));
+  }
+  function paint(frame) {
+    place(slow.node, frame.slow);
+    place(fast.node, frame.fast);
+    slow.node.dataset.moving = frame.moved === "slow" ? "1" : "0";
+    fast.node.dataset.moving = frame.moved === "fast" ? "1" : "0";
+    fast.text.textContent = frame.phase === "locate" ? "H" : "F";
+    root.dataset.phase = frame.phase;
+    root.dataset.frame = frame.type;
+    for (const [id, node2] of nodes5) {
+      node2.dataset.slow = String(id === frame.slow);
+      node2.dataset.fast = String(id === frame.fast);
+      node2.dataset.meeting = String(id === frame.meeting);
+      node2.dataset.entry = String(id === frame.entry);
+    }
+    canvas.setAttribute(
+      "aria-label",
+      `${frame.phase === "detect" ? "Cycle detection" : "Cycle entry search"}: slow at ${frame.slow}, ${frame.phase === "detect" ? "fast" : "head pointer"} at ${frame.fast}.`
+    );
+    status.textContent = frame.message;
+  }
+  const watch = (frame) => [
+    {
+      k: "phase",
+      v: frame.phase === "detect" ? "detect cycle" : "locate entry",
+      sw: "var(--_neutral)"
+    },
+    {
+      k: "slow",
+      v: frame.slow,
+      hint: frame.phase === "detect" ? "The pointer advancing one node per loop iteration." : "The pointer advancing from the phase-one meeting node.",
+      sw: "var(--_blue)"
+    },
+    {
+      k: frame.phase === "detect" ? "fast" : "head",
+      v: frame.fast,
+      hint: frame.phase === "detect" ? "The pointer advancing two nodes per loop iteration." : "The pointer reset to the list head; both pointers now advance one node.",
+      sw: "var(--_violet)"
+    },
+    {
+      k: frame.entry == null ? "meeting" : "entry",
+      v: frame.entry ?? frame.meeting ?? "—",
+      hint: frame.entry == null ? "The phase-one collision that proves a cycle exists." : "The phase-two collision at the cycle entry.",
+      sw: frame.entry == null ? "var(--_amber)" : "var(--_green)"
+    }
+  ];
+  return {
+    nodes: [root, legend, status],
+    stageAlignment: "center",
+    stableStage: true,
+    paint,
+    watch,
+    summary(frame) {
+      return `Cycle detected at ${frame.meeting}; entry located at ${frame.entry}.`;
+    },
+    destroy: geometry.destroy
+  };
+}
+var linkedTopologyViewId, LINKED_LIST_MAX_NODES, LinkedTopologyRecorder, linkedTopologyFamily;
+var init_linked_topology = __esm({
+  "custom/steptrace/src/families/linked-topology.ts"() {
+    init_graph_node();
+    init_render();
+    init_interactive_structure();
+    linkedTopologyViewId = 0;
+    LINKED_LIST_MAX_NODES = 6;
+    LinkedTopologyRecorder = class {
+      constructor(config) {
+        this.config = config;
+        this.slow = config.nodes[0].id;
+        this.fast = config.nodes[0].id;
+      }
+      config;
+      frames = [];
+      phase = "detect";
+      slow;
+      fast;
+      moved = null;
+      meeting = null;
+      entry = null;
+      push(type, message) {
+        this.frames.push({
+          type,
+          profile: this.config.profile,
+          nodes: this.config.nodes,
+          next: this.config.next,
+          cycle: this.config.cycle,
+          phase: this.phase,
+          slow: this.slow,
+          fast: this.fast,
+          moved: this.moved,
+          meeting: this.meeting,
+          entry: this.entry,
+          message
+        });
+      }
+      set(pointer, to) {
+        if (pointer === "slow") this.slow = to;
+        else this.fast = to;
+        this.moved = pointer;
+      }
+      begin(message) {
+        this.push("init", message);
+      }
+      move(pointer, to, message) {
+        this.set(pointer, to);
+        this.push("move", message);
+      }
+      meet(pointer, to, message) {
+        this.set(pointer, to);
+        this.meeting = to;
+        this.push("meet", message);
+      }
+      reset(pointer, to, message) {
+        this.phase = "locate";
+        this.set(pointer, to);
+        this.push("reset", message);
+      }
+      enter(pointer, to, message) {
+        this.set(pointer, to);
+        this.entry = to;
+        this.push("entry", message);
+      }
+    };
+    linkedTopologyFamily = {
+      id: "linked-topology",
+      createRecorder(config) {
+        return new LinkedTopologyRecorder(config);
+      },
+      createView(frames) {
+        return makeLinkedTopologyView(frames);
+      }
+    };
+  }
+});
+
+// custom/steptrace/src/algorithms/fast-and-slow-pointers.ts
+function parseFastAndSlowPointersConfig(_config) {
+  return {
+    ...CONFIG,
+    nodes: CONFIG.nodes.map((node2) => ({ ...node2 })),
+    next: { ...CONFIG.next },
+    cycle: CONFIG.cycle.slice()
+  };
+}
+var CONFIG, fastAndSlowPointers;
+var init_fast_and_slow_pointers = __esm({
+  "custom/steptrace/src/algorithms/fast-and-slow-pointers.ts"() {
+    init_linked_topology();
+    CONFIG = {
+      profile: "fast-slow-pointers",
+      nodes: [
+        { id: "A", x: 8, y: 35 },
+        { id: "B", x: 23, y: 35 },
+        { id: "C", x: 38, y: 35 },
+        { id: "D", x: 53, y: 15 },
+        { id: "E", x: 78, y: 15 },
+        { id: "F", x: 93, y: 35 },
+        { id: "G", x: 78, y: 55 },
+        { id: "H", x: 53, y: 55 }
+      ],
+      next: { A: "B", B: "C", C: "D", D: "E", E: "F", F: "G", G: "H", H: "C" },
+      cycle: ["C", "D", "E", "F", "G", "H"],
+      entry: "C"
+    };
+    fastAndSlowPointers = {
+      id: "fast-and-slow-pointers",
+      kind: "pointers",
+      family: linkedTopologyFamily,
+      meta: { label: "Fast and slow pointers" },
+      parse: parseFastAndSlowPointersConfig,
+      run(_input, ops) {
+        ops.begin("Start slow and fast at A.");
+        ops.move("slow", "B", "Slow advances one node: A → B.");
+        ops.move("fast", "B", "Fast begins its two-node advance: A → B.");
+        ops.move("fast", "C", "Fast completes the advance: B → C.");
+        ops.move("slow", "C", "Slow advances one node: B → C.");
+        ops.move("fast", "D", "Fast begins its next advance: C → D.");
+        ops.move("fast", "E", "Fast completes the advance: D → E.");
+        ops.move("slow", "D", "Slow advances one node: C → D.");
+        ops.move("fast", "F", "Fast begins its next advance: E → F.");
+        ops.move("fast", "G", "Fast completes the advance: F → G.");
+        ops.move("slow", "E", "Slow advances one node: D → E.");
+        ops.move("fast", "H", "Fast begins its next advance: G → H.");
+        ops.move("fast", "C", "Fast completes the advance and wraps: H → C.");
+        ops.move("slow", "F", "Slow advances one node: E → F.");
+        ops.move("fast", "D", "Fast begins its next advance: C → D.");
+        ops.move("fast", "E", "Fast completes the advance: D → E.");
+        ops.move("slow", "G", "Slow advances one node: F → G.");
+        ops.move("fast", "F", "Fast begins its next advance: E → F.");
+        ops.meet("fast", "G", "Fast completes the advance at G; both pointers meet, proving a cycle.");
+        ops.reset(
+          "fast",
+          "A",
+          "Reset fast to A. Keep slow at G; both pointers now move one node at a time."
+        );
+        ops.move("fast", "B", "Head pointer advances one node: A → B.");
+        ops.move("slow", "H", "Cycle pointer advances one node: G → H.");
+        ops.move("fast", "C", "Head pointer advances one node: B → C.");
+        ops.enter("slow", "C", "Cycle pointer advances H → C; both meet at cycle entry C.");
+      }
+    };
+  }
+});
+
+// custom/steptrace/src/families/range-aggregate.ts
+function createRangeBlock(parent, markerClass, headText, start, end, level) {
+  const block = el("div", `steptrace__range-block ${markerClass}`);
+  block.style.setProperty("--steptrace-range-start", String(start));
+  block.style.setProperty("--steptrace-range-span", String(end - start + 1));
+  block.style.setProperty("--steptrace-range-level", String(level));
+  block.setAttribute("role", "listitem");
+  const head = el("span", "steptrace__range-block-head");
+  head.textContent = headText;
+  const operation = el("span", "steptrace__range-block-op");
+  const value = el("strong", "steptrace__range-block-value");
+  const range = el("span", "steptrace__range-block-range");
+  range.textContent = start === end ? `[${start}]` : `[${start}..${end}]`;
+  block.append(head, operation, value, range);
+  parent.append(block);
+  return { block, operation, value };
+}
+function paintRangeBlock(target, value, role) {
+  target.block.dataset.role = role;
+  target.value.textContent = String(value);
+  target.operation.textContent = role === "update" ? "U" : role === "query" || role === "prefix-right" ? "+" : role === "prefix-left" ? "−" : role === "cancelled" ? "±" : "";
+  target.operation.setAttribute(
+    "aria-label",
+    role === "update" ? "updated path" : role === "query" ? "included in range result" : role === "prefix-right" ? "added by the right prefix" : role === "prefix-left" ? "subtracted by the left prefix" : role === "cancelled" ? "read by both prefixes and cancelled" : "inactive"
+  );
+}
+function lowbit(index) {
+  return index & -index;
+}
+function buildFenwick(values) {
+  const tree = Array(values.length + 1).fill(0);
+  values.forEach((value, offset) => {
+    for (let index = offset + 1; index <= values.length; index += lowbit(index))
+      tree[index] += value;
+  });
+  return tree;
+}
+function updatePath(start, size) {
+  const path = [];
+  for (let index = start; index <= size; index += lowbit(index)) path.push(index);
+  return path;
+}
+function prefixPath(start) {
+  const path = [];
+  for (let index = start; index > 0; index -= lowbit(index)) path.push(index);
+  return path;
+}
+function sumPath(tree, path) {
+  return path.reduce((sum, index) => sum + tree[index], 0);
+}
+function mountFenwickTree(root, config) {
+  const shell = createStructureShell(
+    root,
+    "fenwick-tree",
+    "fenwick tree",
+    "Interactive Fenwick tree with point updates and range-sum queries",
+    "range-aggregate",
+    "steptrace__range-aggregate steptrace__fenwick"
+  );
+  const initial = [...config.values];
+  const values = [...initial];
+  const tree = buildFenwick(values);
+  let activeIndex = null;
+  let activeRange = null;
+  let roles = /* @__PURE__ */ new Map();
+  const blocksLabel = el("div", "steptrace__rail-label");
+  blocksLabel.textContent = "Fenwick blocks";
+  const blocks = el("div", "steptrace__fenwick-blocks");
+  blocks.style.setProperty("--steptrace-range-size", String(values.length));
+  blocks.setAttribute("role", "list");
+  blocks.setAttribute(
+    "aria-label",
+    "Fenwick aggregate slots positioned over the source ranges they summarize"
+  );
+  const levels = Math.floor(Math.log2(values.length)) + 1;
+  const blockNodes = Array.from({ length: values.length }, (_, offset) => {
+    const index = offset + 1;
+    const span2 = lowbit(index);
+    const start = index - span2 + 1;
+    const target = createRangeBlock(
+      blocks,
+      "steptrace__fenwick-block",
+      String(index),
+      start,
+      index,
+      levels - Math.log2(span2)
+    );
+    return { ...target, start, index };
+  });
+  const valuesLabel = el("div", "steptrace__rail-label steptrace__fenwick-values-label");
+  valuesLabel.textContent = "Values";
+  const valuesWrap = el("div", "steptrace__fenwick-values");
+  const valuesBoard = createIndexedBoard(valuesWrap, values.length, "One-based source values");
+  shell.stage.append(blocksLabel, blocks, valuesLabel, valuesWrap);
+  const options = values.map((_, index) => String(index + 1));
+  const updateIndex = shell.select("Point update index", "Index", options, "5");
+  const delta = shell.input("Delta to add", "Delta", 6);
+  const update = shell.button("Add delta", true);
+  const rangeStart = shell.select("Range start", "From", options, "3");
+  const rangeEnd = shell.select("Range end", "To", options, "7");
+  const query = shell.button("Range sum");
+  const reset = shell.button("Reset");
+  shell.controls.append(updateIndex, delta, update, rangeStart, rangeEnd, query, reset);
+  function paint(message = "") {
+    valuesBoard.paint(
+      values.map((value, offset) => {
+        const index = offset + 1;
+        return {
+          value: String(value),
+          label: String(index),
+          active: activeRange != null && index >= activeRange[0] && index <= activeRange[1],
+          changed: activeIndex === index,
+          ariaLabel: `value ${index}, ${value}`
+        };
+      })
+    );
+    blockNodes.forEach(({ block, operation, value, start, index }) => {
+      const role = roles.get(index) ?? "idle";
+      paintRangeBlock({ block, operation, value }, tree[index], role);
+      block.setAttribute(
+        "aria-label",
+        `BIT slot ${index}, value ${tree[index]}, summarizes source values ${start} through ${index}${role === "idle" ? "" : `, active ${role.replace("-", " ")} path`}`
+      );
+    });
+    shell.setCounter(String(values.length), " values");
+    shell.status.textContent = message || "Add a delta to one value, or query a range to see which stored blocks compose it.";
+  }
+  function onUpdate() {
+    const index = Number(updateIndex.value);
+    const parsed = delta.value.trim() === "" ? Math.floor(Math.random() * 9) + 1 : Number(delta.value);
+    if (!Number.isFinite(parsed) || !Number.isInteger(parsed)) {
+      shell.status.textContent = "Delta must be a finite integer.";
+      return;
+    }
+    const path = updatePath(index, values.length);
+    values[index - 1] += parsed;
+    for (const slot of path) tree[slot] += parsed;
+    activeIndex = index;
+    activeRange = null;
+    roles = new Map(path.map((slot) => [slot, "update"]));
+    delta.value = "";
+    paint(
+      `Added ${parsed} at value[${index}]; updated ${path.map((slot) => `BIT[${slot}]`).join(" → ")}.`
+    );
+  }
+  function onQuery() {
+    let left = Number(rangeStart.value);
+    let right = Number(rangeEnd.value);
+    if (left > right) [left, right] = [right, left];
+    rangeStart.value = String(left);
+    rangeEnd.value = String(right);
+    const rightPath = prefixPath(right);
+    const leftPath = prefixPath(left - 1);
+    const rightSum = sumPath(tree, rightPath);
+    const leftSum = sumPath(tree, leftPath);
+    const leftSlots = new Set(leftPath);
+    const rightSlots = new Set(rightPath);
+    roles = new Map(
+      [.../* @__PURE__ */ new Set([...leftPath, ...rightPath])].map((slot) => [
+        slot,
+        leftSlots.has(slot) && rightSlots.has(slot) ? "cancelled" : rightSlots.has(slot) ? "prefix-right" : "prefix-left"
+      ])
+    );
+    activeIndex = null;
+    activeRange = [left, right];
+    paint(
+      `Sum [${left}..${right}] = Prefix(${right}) ${rightSum} − Prefix(${left - 1}) ${leftSum} = ${rightSum - leftSum}.`
+    );
+  }
+  function onReset() {
+    values.splice(0, values.length, ...initial);
+    tree.splice(0, tree.length, ...buildFenwick(values));
+    activeIndex = null;
+    activeRange = null;
+    roles = /* @__PURE__ */ new Map();
+    updateIndex.value = "5";
+    rangeStart.value = "3";
+    rangeEnd.value = "7";
+    delta.value = "";
+    paint("Reset source values and every stored Fenwick aggregate.");
+  }
+  shell.listen(update, "click", onUpdate);
+  shell.listen(query, "click", onQuery);
+  shell.listen(reset, "click", onReset);
+  shell.listen(updateIndex, "change", (() => paint()));
+  shell.listen(rangeStart, "change", (() => paint()));
+  shell.listen(rangeEnd, "change", (() => paint()));
+  onEnter(shell, delta, onUpdate);
+  paint();
+  return shell.finish();
+}
+function buildSegmentShape(start, end, index = 1, level = 1) {
+  if (start === end) return { index, start, end, level, left: null, right: null };
+  const middle = Math.floor((start + end) / 2);
+  return {
+    index,
+    start,
+    end,
+    level,
+    left: buildSegmentShape(start, middle, index * 2, level + 1),
+    right: buildSegmentShape(middle + 1, end, index * 2 + 1, level + 1)
+  };
+}
+function flattenSegment(node2) {
+  return [
+    node2,
+    ...node2.left ? flattenSegment(node2.left) : [],
+    ...node2.right ? flattenSegment(node2.right) : []
+  ];
+}
+function rangeTotal(values, start, end) {
+  let total = 0;
+  for (let index = start; index <= end; index++) total += values[index - 1];
+  return total;
+}
+function coverRange(node2, start, end, result) {
+  if (end < node2.start || node2.end < start) return;
+  if (start <= node2.start && node2.end <= end) {
+    result.push(node2);
+    return;
+  }
+  if (node2.left) coverRange(node2.left, start, end, result);
+  if (node2.right) coverRange(node2.right, start, end, result);
+}
+function mountSegmentTree(root, config) {
+  const shell = createStructureShell(
+    root,
+    "segment-tree",
+    "segment tree",
+    "Interactive segment tree with point assignment and range-sum queries",
+    "range-aggregate",
+    "steptrace__range-aggregate steptrace__segment"
+  );
+  const initial = [...config.values];
+  const values = [...initial];
+  const shape = buildSegmentShape(1, values.length);
+  const nodes5 = flattenSegment(shape);
+  let roles = /* @__PURE__ */ new Map();
+  let activeIndex = null;
+  let activeRange = null;
+  const treeLabel = el("div", "steptrace__rail-label");
+  treeLabel.textContent = "Interval tree";
+  const blocks = el("div", "steptrace__segment-blocks");
+  blocks.style.setProperty("--steptrace-range-size", String(values.length));
+  blocks.style.setProperty(
+    "--steptrace-range-levels",
+    String(Math.ceil(Math.log2(values.length)) + 1)
+  );
+  blocks.setAttribute("role", "list");
+  blocks.setAttribute("aria-label", "Segment tree interval aggregates");
+  const blockNodes = nodes5.map((node2) => ({
+    node: node2,
+    target: createRangeBlock(
+      blocks,
+      "steptrace__segment-block",
+      "Σ",
+      node2.start,
+      node2.end,
+      node2.level
+    )
+  }));
+  const valuesLabel = el("div", "steptrace__rail-label steptrace__segment-values-label");
+  valuesLabel.textContent = "Values";
+  const valuesWrap = el("div", "steptrace__segment-values");
+  const valuesBoard = createIndexedBoard(valuesWrap, values.length, "One-based source values");
+  shell.stage.append(treeLabel, blocks, valuesLabel, valuesWrap);
+  const options = values.map((_, index) => String(index + 1));
+  const updateIndex = shell.select("Point update index", "Index", options, "4");
+  const updateValue = shell.input("New value", "Value", 6);
+  const update = shell.button("Set value", true);
+  const rangeStart = shell.select("Range start", "From", options, "3");
+  const rangeEnd = shell.select("Range end", "To", options, "7");
+  const query = shell.button("Range sum");
+  const reset = shell.button("Reset");
+  shell.controls.append(updateIndex, updateValue, update, rangeStart, rangeEnd, query, reset);
+  function paint(message = "") {
+    valuesBoard.paint(
+      values.map((value, offset) => {
+        const index = offset + 1;
+        return {
+          value: String(value),
+          label: String(index),
+          active: activeRange != null && index >= activeRange[0] && index <= activeRange[1],
+          changed: activeIndex === index,
+          ariaLabel: `value ${index}, ${value}`
+        };
+      })
+    );
+    for (const { node: node2, target } of blockNodes) {
+      const role = roles.get(node2.index) ?? "idle";
+      const value = rangeTotal(values, node2.start, node2.end);
+      paintRangeBlock(target, value, role);
+      target.block.setAttribute(
+        "aria-label",
+        `segment ${node2.start} through ${node2.end}, sum ${value}${role === "idle" ? "" : `, active ${role} path`}`
+      );
+    }
+    shell.setCounter(String(values.length), " values");
+    shell.status.textContent = message || "Set one source value, or query a range to reveal its canonical covering nodes.";
+  }
+  function onUpdate() {
+    const index = Number(updateIndex.value);
+    const parsed = updateValue.value.trim() === "" ? Math.floor(Math.random() * 20) + 1 : Number(updateValue.value);
+    if (!Number.isFinite(parsed) || !Number.isInteger(parsed)) {
+      shell.status.textContent = "Value must be a finite integer.";
+      return;
+    }
+    const before = values[index - 1];
+    values[index - 1] = parsed;
+    roles = new Map(
+      nodes5.filter((node2) => node2.start <= index && index <= node2.end).map((node2) => [node2.index, "update"])
+    );
+    activeIndex = index;
+    activeRange = null;
+    updateValue.value = "";
+    paint(`Set value[${index}] from ${before} to ${parsed}; recomputed its path to the root.`);
+  }
+  function onQuery() {
+    let left = Number(rangeStart.value);
+    let right = Number(rangeEnd.value);
+    if (left > right) [left, right] = [right, left];
+    rangeStart.value = String(left);
+    rangeEnd.value = String(right);
+    const cover = [];
+    coverRange(shape, left, right, cover);
+    roles = new Map(cover.map((node2) => [node2.index, "query"]));
+    activeIndex = null;
+    activeRange = [left, right];
+    const parts = cover.map(
+      (node2) => `${node2.start === node2.end ? `[${node2.start}]` : `[${node2.start}..${node2.end}]`} ${rangeTotal(
+        values,
+        node2.start,
+        node2.end
+      )}`
+    );
+    paint(`Sum [${left}..${right}] = ${parts.join(" + ")} = ${rangeTotal(values, left, right)}.`);
+  }
+  function onReset() {
+    values.splice(0, values.length, ...initial);
+    roles = /* @__PURE__ */ new Map();
+    activeIndex = null;
+    activeRange = null;
+    updateIndex.value = "4";
+    rangeStart.value = "3";
+    rangeEnd.value = "7";
+    updateValue.value = "";
+    paint("Reset source values and every segment aggregate.");
+  }
+  shell.listen(update, "click", onUpdate);
+  shell.listen(query, "click", onQuery);
+  shell.listen(reset, "click", onReset);
+  onEnter(shell, updateValue, onUpdate);
+  paint();
+  return shell.finish();
+}
+var init_range_aggregate = __esm({
+  "custom/steptrace/src/families/range-aggregate.ts"() {
+    init_render();
+    init_interactive_structure();
+  }
+});
+
+// custom/steptrace/src/algorithms/fenwick-tree.ts
+function parseFenwickTreeConfig(config) {
+  const values = Array.isArray(config.array) && config.array.length ? config.array : DEFAULT_VALUES7;
+  if (values.length < 4 || values.length > 8 || values.some(
+    (value) => typeof value !== "number" || !Number.isFinite(value) || !Number.isInteger(value)
+  ))
+    throw new Error(`steptrace: fenwick-tree requires 4 to 8 finite integer values.`);
+  return { values };
+}
+var DEFAULT_VALUES7, fenwickTree;
+var init_fenwick_tree = __esm({
+  "custom/steptrace/src/algorithms/fenwick-tree.ts"() {
+    init_range_aggregate();
+    DEFAULT_VALUES7 = [3, 1, 4, 1, 5, 9, 2, 6];
+    fenwickTree = {
+      id: "fenwick-tree",
+      family: "range-aggregate",
+      meta: { label: "Fenwick Tree" },
+      parse: parseFenwickTreeConfig,
+      mount: mountFenwickTree
+    };
+  }
+});
+
+// custom/steptrace/src/algorithms/fibonacci-heap.ts
+function parseFibonacciHeapConfig(config) {
+  const values = Array.isArray(config.array) && config.array.length ? config.array : DEFAULT_VALUES8;
+  if (values.some(
+    (value) => typeof value !== "number" || !Number.isFinite(value) || !Number.isInteger(value)
+  ))
+    throw new Error(`steptrace: fibonacci-heap requires finite integer values.`);
+  return { values };
+}
+var DEFAULT_VALUES8, fibonacciHeap;
+var init_fibonacci_heap = __esm({
+  "custom/steptrace/src/algorithms/fibonacci-heap.ts"() {
+    init_heap_structure();
+    DEFAULT_VALUES8 = [3, 7, 18, 24, 26, 39, 41, 52, 63];
+    fibonacciHeap = {
+      id: "fibonacci-heap",
+      family: "heap-selection",
+      meta: { label: "Fibonacci heap" },
+      parse: parseFibonacciHeapConfig,
+      mount: mountFibonacciHeap
+    };
+  }
+});
+
+// custom/steptrace/src/algorithms/greedy-best-first-search.ts
+function parse5(config) {
+  return {
+    ...parseGraphStateConfig({ ...config, variant: "coordinate-grid" }),
+    policy: "greedy"
+  };
+}
+function visibleQueue2(queue2) {
+  return queue2.slice().sort((left, right) => left.h - right.h || left.order - right.order || left.id.localeCompare(right.id)).map(({ id, g, h, f }) => ({ id, g, h, f }));
+}
+function runGreedyBestFirst(config, ops) {
+  const neighbours = graphStateAdjacency(config);
+  const heuristic = new Map(config.nodes.map((node2) => [node2.id, node2.h]));
+  const pathCost = { [config.start]: 0 };
+  const parent = {};
+  const visited = /* @__PURE__ */ new Set([config.start]);
+  const closed = [];
+  const queue2 = [{
+    id: config.start,
+    g: 0,
+    h: heuristic.get(config.start),
+    f: heuristic.get(config.start),
+    order: 0
+  }];
+  let order = 1;
+  ops.init(pathCost, visibleQueue2(queue2), `Seed OPEN with ${config.start}; rank it by h alone.`);
+  while (queue2.length) {
+    queue2.sort((left, right) => left.h - right.h || left.order - right.order || left.id.localeCompare(right.id));
+    const current = queue2.shift();
+    closed.push(current.id);
+    ops.expand(
+      current.id,
+      pathCost,
+      visibleQueue2(queue2),
+      closed,
+      `Move ${current.id} to CLOSED: h ${current.h} is smallest; path cost ${current.g} is ignored.`
+    );
+    if (current.id === config.target) {
+      const path = [current.id];
+      while (path[0] !== config.start) path.unshift(parent[path[0]]);
+      const greedyCost = pathCost[config.target];
+      const optimalCost = graphStateShortestDistances(config.nodes, config.edges, config.target).get(config.start);
+      ops.path(path, pathCost, `Reconstruct Greedy's first route ${path.join(" → ")}.`);
+      ops.done(
+        path,
+        pathCost,
+        greedyCost,
+        optimalCost,
+        `Greedy stops at cost ${greedyCost}; A* reaches the same goal with optimal cost ${optimalCost}.`
+      );
+      return;
+    }
+    for (const edge of neighbours.get(current.id)) {
+      ops.edge(
+        current.id,
+        edge.to,
+        pathCost,
+        visibleQueue2(queue2),
+        closed,
+        `Inspect ${current.id} → ${edge.to}; only h(${edge.to}) will rank it.`
+      );
+      if (visited.has(edge.to)) continue;
+      visited.add(edge.to);
+      parent[edge.to] = current.id;
+      pathCost[edge.to] = current.g + edge.weight;
+      const h = heuristic.get(edge.to);
+      queue2.push({ id: edge.to, g: pathCost[edge.to], h, f: h, order: order++ });
+      ops.relax(
+        current.id,
+        edge.to,
+        pathCost,
+        visibleQueue2(queue2),
+        closed,
+        `Add ${edge.to} to OPEN with h ${h}; accumulated cost ${pathCost[edge.to]} does not affect priority.`
+      );
+    }
+  }
+  ops.done([], pathCost, 0, 0, `${config.target} is unreachable from ${config.start}.`);
+}
+var greedyBestFirstSearch;
+var init_greedy_best_first_search = __esm({
+  "custom/steptrace/src/algorithms/greedy-best-first-search.ts"() {
+    init_graph_state();
+    greedyBestFirstSearch = {
+      id: "greedy-best-first-search",
+      kind: "graph",
+      family: graphStateFamily,
+      meta: { label: "Greedy Best-First Search" },
+      parse: parse5,
+      run: runGreedyBestFirst
+    };
+  }
+});
+
+// custom/steptrace/src/families/graph-representation.ts
+function svgElement3(kind, attributes = {}) {
+  const node2 = document.createElementNS(SVG_NS7, kind);
+  for (const [key4, value] of Object.entries(attributes)) node2.setAttribute(key4, String(value));
+  return node2;
+}
+function edgeKey(from, to) {
+  return `${from}|${to}`;
+}
+function mountGraphRepresentation(root) {
+  const shell = createStructureShell(
+    root,
+    "graph",
+    "graph",
+    "Interactive directed unweighted graph storage inspector",
+    "graph-representation",
+    "steptrace__graph-representation"
+  );
+  const edges5 = INITIAL_EDGES.map(([from2, to2]) => ({
+    from: from2,
+    to: to2
+  }));
+  let changedEdge = null;
+  let changeTimer = null;
+  const topology2 = el("section", "steptrace__graph-rep-topology");
+  topology2.setAttribute("aria-label", "Directed graph topology");
+  const svg = svgElement3("svg", {
+    class: "steptrace__graph-rep-svg",
+    viewBox: "0 0 580 210",
+    role: "img",
+    "aria-label": "Directed graph with vertices 0 through 3"
+  });
+  const markerId = `steptrace-graph-rep-arrow-${++graphRepresentationId}`;
+  const marker2 = svgElement3("marker", {
+    id: markerId,
+    viewBox: "0 0 6 6",
+    refX: 5,
+    refY: 3,
+    markerWidth: 7,
+    markerHeight: 7,
+    markerUnits: "strokeWidth",
+    orient: "auto"
+  });
+  marker2.append(
+    svgElement3("path", { class: "steptrace__graph-rep-arrow", d: "M 0 0 L 6 3 L 0 6 Z" })
+  );
+  const defs = svgElement3("defs");
+  defs.append(marker2);
+  const edgeLayer = svgElement3("g", { class: "steptrace__graph-rep-edges" });
+  const nodeLayer = svgElement3("g", { class: "steptrace__graph-rep-nodes" });
+  svg.append(defs, edgeLayer, nodeLayer);
+  topology2.append(svg);
+  const layout = normalizeGraph({
+    directed: true,
+    start: "0",
+    nodes: VERTICES.map((id) => ({ id })),
+    edges: INITIAL_EDGES.map(([from2, to2]) => ({ from: from2, to: to2 }))
+  });
+  const positions = new Map(
+    layout.nodes.map((node2) => [node2.id, { ...node2, y: Math.round(105 + (node2.y - 150) * 0.63) }])
+  );
+  const topologyEdges = /* @__PURE__ */ new Map();
+  for (const from2 of VERTICES) {
+    for (const to2 of VERTICES) {
+      if (from2 === to2) continue;
+      const start = positions.get(from2);
+      const end = positions.get(to2);
+      const line = svgElement3("line", {
+        class: "steptrace__graph-rep-edge",
+        x1: start.x,
+        y1: start.y,
+        x2: end.x,
+        y2: end.y,
+        "marker-end": `url(#${markerId})`
+      });
+      line.dataset.edge = edgeKey(from2, to2);
+      edgeLayer.append(line);
+      topologyEdges.set(edgeKey(from2, to2), line);
+    }
+  }
+  const topologyNodes = /* @__PURE__ */ new Map();
+  for (const vertex of VERTICES) {
+    const position = positions.get(vertex);
+    const node2 = svgElement3("g", {
+      class: "steptrace__graph-rep-node",
+      transform: `translate(${position.x} ${position.y})`
+    });
+    const circle = svgElement3("circle", { r: GRAPH_NODE_RADIUS_PX });
+    const label = svgElement3("text");
+    label.textContent = vertex;
+    node2.append(circle, label);
+    nodeLayer.append(node2);
+    topologyNodes.set(vertex, node2);
+  }
+  const geometry = observeFixedSvgNodes(
+    svg,
+    VERTICES.map((vertex) => ({
+      element: topologyNodes.get(vertex),
+      point: positions.get(vertex)
+    })),
+    (unitsPerCssPixel) => {
+      const radius = GRAPH_NODE_RADIUS_PX * unitsPerCssPixel;
+      for (const [key4, line] of topologyEdges) {
+        const [from2, to2] = key4.split("|");
+        const trimmed = trimGraphEdge(positions.get(from2), positions.get(to2), radius);
+        line.setAttribute("x1", String(trimmed.x1));
+        line.setAttribute("y1", String(trimmed.y1));
+        line.setAttribute("x2", String(trimmed.x2));
+        line.setAttribute("y2", String(trimmed.y2));
+      }
+    }
+  );
+  const storage = el("div", "steptrace__graph-rep-storage");
+  const matrixPanel = el("section", "steptrace__graph-rep-group steptrace__graph-rep-matrix");
+  const lists = el("div", "steptrace__graph-rep-lists");
+  const listPanel = el("section", "steptrace__graph-rep-group steptrace__graph-rep-list");
+  const edgePanel = el("section", "steptrace__graph-rep-group steptrace__graph-rep-edge-list");
+  const panel = (target, title, label) => {
+    target.setAttribute("aria-label", label);
+    const heading = el("h3", "steptrace__graph-rep-heading");
+    heading.textContent = title;
+    target.append(heading);
+  };
+  panel(listPanel, "Adjacency list", "Adjacency list representation");
+  panel(matrixPanel, "0 / 1 matrix", "Adjacency matrix representation");
+  panel(edgePanel, "Edge list", "Ordered edge list representation");
+  const list = el("div", "steptrace__contiguous-array steptrace__graph-rep-list-body");
+  list.style.setProperty("--steptrace-capacity", "4");
+  list.setAttribute("role", "list");
+  const listRows = /* @__PURE__ */ new Map();
+  for (const vertex of VERTICES) {
+    const row = el("div", "steptrace__contiguous-cell steptrace__graph-rep-list-row");
+    row.setAttribute("role", "listitem");
+    row.dataset.empty = "0";
+    const neighbors = el("span", "steptrace__contiguous-value");
+    const vertexIndex = el("span", "steptrace__contiguous-index");
+    vertexIndex.textContent = `vertex ${vertex}`;
+    row.append(neighbors, vertexIndex);
+    list.append(row);
+    listRows.set(vertex, { row, neighbors, neighborCell: row });
+  }
+  listPanel.append(list);
+  const matrixWrap = el("div", "steptrace__dp-wrap steptrace__graph-rep-matrix-wrap");
+  const matrix = el("table", "steptrace__dp steptrace__graph-rep-matrix-table");
+  matrix.setAttribute("aria-label", "Rows are from vertices and columns are to vertices");
+  const caption = document.createElement("caption");
+  caption.className = "steptrace__dp-caption";
+  caption.textContent = "Directed adjacency matrix; rows are from and columns are to vertices";
+  matrix.append(caption);
+  const matrixHead = document.createElement("thead");
+  const matrixHeader = document.createElement("tr");
+  const corner = document.createElement("th");
+  corner.className = "steptrace__dp-corner";
+  corner.setAttribute("scope", "col");
+  corner.textContent = "from / to";
+  matrixHeader.append(corner);
+  for (const vertex of VERTICES) {
+    const heading = document.createElement("th");
+    heading.textContent = vertex;
+    heading.setAttribute("scope", "col");
+    matrixHeader.append(heading);
+  }
+  matrixHead.append(matrixHeader);
+  matrix.append(matrixHead);
+  const matrixBody = document.createElement("tbody");
+  const matrixCells = /* @__PURE__ */ new Map();
+  for (const from2 of VERTICES) {
+    const row = document.createElement("tr");
+    const heading = document.createElement("th");
+    heading.textContent = from2;
+    heading.setAttribute("scope", "row");
+    row.append(heading);
+    for (const to2 of VERTICES) {
+      const cell = el("td", "steptrace__graph-rep-matrix-cell");
+      cell.setAttribute("aria-label", `edge ${from2} to ${to2}`);
+      cell.append(el("span", "steptrace__dp-value"));
+      row.append(cell);
+      matrixCells.set(edgeKey(from2, to2), cell);
+    }
+    matrixBody.append(row);
+  }
+  matrix.append(matrixBody);
+  matrixWrap.append(matrix);
+  matrixPanel.append(matrixWrap);
+  const edgeList = el(
+    "div",
+    "steptrace__contiguous-array steptrace__graph-rep-edge-list-body steptrace__graph-rep-edge-strip"
+  );
+  edgeList.style.setProperty("--steptrace-capacity", "12");
+  edgeList.setAttribute("role", "list");
+  const edgeRows = Array.from({ length: VERTICES.length * (VERTICES.length - 1) }, (_, index) => {
+    const row = el("div", "steptrace__contiguous-cell steptrace__graph-rep-edge-row");
+    row.setAttribute("role", "listitem");
+    const value = el("span", "steptrace__contiguous-value");
+    const indexLabel = el("span", "steptrace__contiguous-index");
+    indexLabel.textContent = String(index);
+    row.append(value, indexLabel);
+    edgeList.append(row);
+    return { row, value };
+  });
+  edgePanel.append(edgeList);
+  lists.append(listPanel, edgePanel);
+  storage.append(matrixPanel, lists);
+  shell.stage.append(topology2, storage);
+  const from = shell.select("From vertex", "From", VERTICES);
+  const to = shell.select("To vertex", "To", VERTICES);
+  from.classList.add("steptrace__graph-rep-select");
+  to.classList.add("steptrace__graph-rep-select");
+  const add = shell.button("Add edge", true);
+  const remove = shell.button("Remove edge");
+  const reset = shell.button("Reset");
+  reset.classList.add("steptrace__graph-rep-reset");
+  shell.controls.append(from, to, add, remove, reset);
+  function hasEdge(source, target) {
+    return edges5.some((edge) => edge.from === source && edge.to === target);
+  }
+  function paint() {
+    const graph = normalizeGraph({
+      directed: true,
+      start: "0",
+      nodes: VERTICES.map((id) => ({ id, ...positions.get(id) })),
+      edges: edges5
+    });
+    const neighbors = adjacency(graph);
+    const present = new Set(edges5.map((edge) => edgeKey(edge.from, edge.to)));
+    for (const [key4, line] of topologyEdges) {
+      line.dataset.present = present.has(key4) ? "1" : "0";
+      line.dataset.changed = changedEdge === key4 && present.has(key4) ? "1" : "0";
+    }
+    for (const vertex of VERTICES) {
+      const { row, neighbors: values, neighborCell } = listRows.get(vertex);
+      values.textContent = neighbors[vertex].length ? neighbors[vertex].join(", ") : "∅";
+      neighborCell.dataset.changed = changedEdge?.startsWith(`${vertex}|`) ? "1" : "0";
+      row.setAttribute(
+        "aria-label",
+        `vertex ${vertex}, neighbors ${neighbors[vertex].length ? neighbors[vertex].join(", ") : "none"}`
+      );
+    }
+    for (const fromVertex of VERTICES) {
+      for (const toVertex of VERTICES) {
+        const key4 = edgeKey(fromVertex, toVertex);
+        const cell = matrixCells.get(key4);
+        cell.children[0].textContent = present.has(key4) ? "1" : "0";
+        cell.dataset.value = present.has(key4) ? "1" : "0";
+        cell.dataset.changed = changedEdge === key4 ? "1" : "0";
+      }
+    }
+    edgeRows.forEach(({ row, value }, index) => {
+      const edge = edges5[index];
+      value.textContent = edge ? `${edge.from} → ${edge.to}` : "·";
+      row.dataset.empty = edge ? "0" : "1";
+      row.dataset.changed = edge && changedEdge === edgeKey(edge.from, edge.to) ? "1" : "0";
+      row.setAttribute("aria-hidden", edge ? "false" : "true");
+    });
+    shell.setCounter(String(edges5.length), " edges");
+  }
+  function flash(key4) {
+    changedEdge = key4;
+    paint();
+    if (changeTimer) clearTimeout(changeTimer);
+    if (shell.reducedMotion()) {
+      changedEdge = null;
+      paint();
+      return;
+    }
+    changeTimer = setTimeout(() => {
+      changedEdge = null;
+      paint();
+      changeTimer = null;
+    }, CHANGE_MS);
+  }
+  function addEdge() {
+    const source = from.value;
+    const target = to.value;
+    if (!source || !target) {
+      shell.status.textContent = "Choose From and To vertices.";
+      return;
+    }
+    if (source === target) {
+      shell.status.textContent = "Self-edges are not stored.";
+      return;
+    }
+    if (hasEdge(source, target)) {
+      shell.status.textContent = `Edge ${source} → ${target} already exists.`;
+      return;
+    }
+    edges5.push({ from: source, to: target });
+    shell.status.textContent = `Added ${source} → ${target}.`;
+    flash(edgeKey(source, target));
+  }
+  function removeEdge() {
+    const source = from.value;
+    const target = to.value;
+    if (!source || !target) {
+      shell.status.textContent = "Choose From and To vertices.";
+      return;
+    }
+    const index = edges5.findIndex((edge) => edge.from === source && edge.to === target);
+    if (source === target || index < 0) {
+      shell.status.textContent = `Edge ${source} → ${target} does not exist.`;
+      return;
+    }
+    edges5.splice(index, 1);
+    shell.status.textContent = `Removed ${source} → ${target}.`;
+    flash(edgeKey(source, target));
+  }
+  function resetGraph() {
+    edges5.splice(
+      0,
+      edges5.length,
+      ...INITIAL_EDGES.map(([source, target]) => ({ from: source, to: target }))
+    );
+    changedEdge = null;
+    if (changeTimer) clearTimeout(changeTimer);
+    changeTimer = null;
+    paint();
+    shell.status.textContent = "Graph reset.";
+  }
+  shell.listen(add, "click", addEdge);
+  shell.listen(remove, "click", removeEdge);
+  shell.listen(reset, "click", resetGraph);
+  paint();
+  shell.status.textContent = "Add or remove an edge to inspect each representation.";
+  const handle = shell.finish();
+  return {
+    destroy() {
+      if (changeTimer) clearTimeout(changeTimer);
+      geometry.destroy();
+      handle.destroy();
+    }
+  };
+}
+var SVG_NS7, VERTICES, INITIAL_EDGES, CHANGE_MS, graphRepresentationId;
+var init_graph_representation = __esm({
+  "custom/steptrace/src/families/graph-representation.ts"() {
+    init_graph();
+    init_graph_node();
+    init_render();
+    init_interactive_structure();
+    SVG_NS7 = "http://www.w3.org/2000/svg";
+    VERTICES = ["0", "1", "2", "3"];
+    INITIAL_EDGES = [
+      ["0", "1"],
+      ["0", "2"],
+      ["1", "3"],
+      ["2", "3"]
+    ];
+    CHANGE_MS = 520;
+    graphRepresentationId = 0;
+  }
+});
+
+// custom/steptrace/src/algorithms/graph.ts
+var graphStructure;
+var init_graph2 = __esm({
+  "custom/steptrace/src/algorithms/graph.ts"() {
+    init_graph_representation();
+    graphStructure = {
+      id: "graph",
+      family: "graph-representation",
+      meta: { label: "Graph" },
+      parse: () => ({}),
+      mount: mountGraphRepresentation
+    };
+  }
+});
+
+// custom/steptrace/src/algorithms/heap.ts
+function parseHeapConfig(config) {
+  const values = Array.isArray(config.array) && config.array.length ? config.array : DEFAULT_VALUES9;
+  if (values.some(
+    (value) => typeof value !== "number" || !Number.isFinite(value) || !Number.isInteger(value)
+  ))
+    throw new Error(`steptrace: heap requires finite integer values.`);
+  if (values.some((value, index) => index > 0 && values[index - 1 >> 1] > value))
+    throw new Error(`steptrace: heap requires a valid binary min-heap array.`);
+  return { values };
+}
+var DEFAULT_VALUES9, heap;
+var init_heap = __esm({
+  "custom/steptrace/src/algorithms/heap.ts"() {
+    init_heap_structure();
+    DEFAULT_VALUES9 = [3, 5, 8, 9];
+    heap = {
+      id: "heap",
+      family: "heap-selection",
+      meta: { label: "Heap" },
+      parse: parseHeapConfig,
+      mount: mountHeap
+    };
+  }
+});
+
+// custom/steptrace/src/algorithms/heap-sort.ts
+var heapSort;
+var init_heap_sort = __esm({
+  "custom/steptrace/src/algorithms/heap-sort.ts"() {
+    heapSort = {
+      id: "heap-sort",
+      kind: "sort",
+      meta: { label: "Heap sort" },
+      run: (input, ops) => {
+        const n = ops.value.length;
+        ops.init(
+          `Heap sort — build a max-heap (each parent ≥ its children), then repeatedly swap the root to the end and sift the new root down.`
+        );
+        function siftDown(lo, hi) {
+          let root = lo;
+          while (2 * root + 1 < hi) {
+            let child = 2 * root + 1;
+            if (child + 1 < hi) {
+              ops.compare(
+                child,
+                child + 1,
+                `Compare children ${ops.value[child]} and ${ops.value[child + 1]}.`
+              );
+              if (ops.value[child + 1] > ops.value[child]) child++;
+            }
+            ops.compare(
+              root,
+              child,
+              `Compare parent ${ops.value[root]} with its larger child ${ops.value[child]}.`
+            );
+            if (ops.value[root] >= ops.value[child]) break;
+            ops.swap(root, child, `Parent is smaller — sift it down.`);
+            root = child;
+          }
+        }
+        ops.range(0, n - 1);
+        for (let i = Math.floor(n / 2) - 1; i >= 0; i--) siftDown(i, n);
+        for (let end = n - 1; end > 0; end--) {
+          ops.swap(0, end, `Move the largest value (the root) to index ${end}.`);
+          ops.markSorted([end], [end], `Index ${end} now holds its final value.`);
+          ops.range(0, end - 1);
+          siftDown(0, end);
+        }
+        ops.range(null);
+        ops.lockAll([0]);
+        ops.markSorted([0], [0], `The remaining root is the smallest — done.`);
+        ops.done(`Sorted in ${ops.comparisons} comparisons and ${ops.swaps} swaps.`);
+      }
+    };
+  }
+});
+
+// custom/steptrace/src/algorithms/hamiltonian-cycle.ts
+var nodes2, edges2, edgeKey2, Recorder6, family6, hamiltonianCycle;
+var init_hamiltonian_cycle = __esm({
+  "custom/steptrace/src/algorithms/hamiltonian-cycle.ts"() {
+    init_graph_state();
+    nodes2 = [
+      { id: "A", label: "A", x: 160, y: 70 },
+      { id: "B", label: "B", x: 460, y: 70 },
+      { id: "C", label: "C", x: 460, y: 240 },
+      { id: "D", label: "D", x: 160, y: 240 }
+    ];
+    edges2 = [
+      { from: "A", to: "B", weight: 1 },
+      { from: "B", to: "C", weight: 1 },
+      { from: "C", to: "D", weight: 1 },
+      { from: "D", to: "A", weight: 1 },
+      { from: "A", to: "C", weight: 1 }
+    ];
+    edgeKey2 = (left, right) => {
+      const edge = edges2.find((candidate) => candidate.from === left && candidate.to === right || candidate.from === right && candidate.to === left);
+      return edge ? `${edge.from}|${edge.to}` : "";
+    };
+    Recorder6 = class {
+      frames = [];
+      add(message, path, candidates, rejected = [], rejectedEdge = null) {
+        const nodeState = {};
+        path.forEach((id) => {
+          nodeState[id] = "accepted";
+        });
+        candidates.forEach((id) => {
+          nodeState[id] = "frontier";
+        });
+        rejected.forEach((id) => {
+          nodeState[id] = "rejected";
+        });
+        if (path.length) nodeState[path[path.length - 1]] = "active";
+        const edgeState = {};
+        for (let index = 1; index < path.length; index++) {
+          edgeState[edgeKey2(path[index - 1], path[index])] = "accepted";
+        }
+        if (path.length === nodes2.length && edgeKey2(path[path.length - 1], path[0])) {
+          edgeState[edgeKey2(path[path.length - 1], path[0])] = "accepted";
+        }
+        if (rejectedEdge) {
+          const key4 = edgeKey2(rejectedEdge[0], rejectedEdge[1]);
+          if (key4) edgeState[key4] = "rejected";
+        }
+        this.frames.push({
+          type: "hamiltonian-cycle",
+          profile: "graph",
+          nodes: nodes2,
+          edges: edges2,
+          decor: [],
+          start: "A",
+          target: "A",
+          currentNode: path[path.length - 1] || null,
+          currentEdge: path.length > 1 ? [path[path.length - 2], path[path.length - 1]] : null,
+          selectedEdges: Object.keys(edgeState).filter((key4) => edgeState[key4] === "accepted"),
+          nodeState,
+          edgeState,
+          message,
+          detail: { kind: "path-backtrack", path, candidates, rejected }
+        });
+      }
+    };
+    family6 = {
+      id: "graph-state",
+      createRecorder: () => new Recorder6(),
+      createView: makeGraphStateView
+    };
+    hamiltonianCycle = {
+      id: "hamiltonian-cycle",
+      kind: "graph",
+      family: family6,
+      meta: { label: "Hamiltonian Cycle" },
+      parse: () => ({ nodes: nodes2, edges: edges2 }),
+      run(_config, recorder) {
+        recorder.add("Start at A; try unused neighbours in the order C, B, D.", ["A"], ["C", "B", "D"]);
+        recorder.add("Choose C first.", ["A", "C"], ["B", "D"]);
+        recorder.add("Choose B from C.", ["A", "C", "B"], []);
+        recorder.add("Dead end: B cannot reach the only unused vertex D.", ["A", "C", "B"], [], ["D"], ["B", "D"]);
+        recorder.add("Backtrack from B to C.", ["A", "C"], ["D"], ["B"]);
+        recorder.add("Choose D from C.", ["A", "C", "D"], []);
+        recorder.add("Dead end: D cannot reach the only unused vertex B.", ["A", "C", "D"], [], ["B"], ["D", "B"]);
+        recorder.add("Backtrack from D to C.", ["A", "C"], [], ["D"]);
+        recorder.add("Both C branches failed; backtrack to A.", ["A"], ["B", "D"], ["C"]);
+        recorder.add("Choose B from A.", ["A", "B"], ["C"]);
+        recorder.add("Choose C from B.", ["A", "B", "C"], ["D"]);
+        recorder.add("Choose D from C.", ["A", "B", "C", "D"], []);
+        recorder.add("D connects back to A, closing the Hamiltonian cycle.", ["A", "B", "C", "D"], []);
+        recorder.add("Cycle found: A → B → C → D → A.", ["A", "B", "C", "D"], []);
+      }
+    };
+  }
+});
+
+// custom/steptrace/src/algorithms/hash-map.ts
+function parseHashMapConfig(config) {
+  const strategy = config.variant ?? "closed-addressing";
+  if (!STRATEGIES.has(strategy))
+    throw new Error(
+      `steptrace: hash-map "variant" must be "closed-addressing", "open-addressing", or "buckets".`
+    );
+  if (config.capacity != null && config.capacity !== 12)
+    throw new Error(`steptrace: hash-map uses fixed "capacity" 12.`);
+  return { strategy };
+}
+var STRATEGIES, hashMap;
+var init_hash_map = __esm({
+  "custom/steptrace/src/algorithms/hash-map.ts"() {
+    init_hash_index();
+    STRATEGIES = /* @__PURE__ */ new Set(["closed-addressing", "open-addressing", "buckets"]);
+    hashMap = {
+      id: "hash-map",
+      family: "hash-index",
+      meta: { label: "HashMap" },
+      parse: parseHashMapConfig,
+      mount: mountHashMap
+    };
+  }
+});
+
+// custom/steptrace/src/algorithms/hash-set.ts
+function parseHashSetConfig(config) {
+  if (config.variant != null && config.variant !== "open-addressing")
+    throw new Error(`steptrace: hash-set "variant" must be "open-addressing".`);
+  if (config.capacity != null && config.capacity !== 12)
+    throw new Error(`steptrace: hash-set uses fixed "capacity" 12.`);
+  return { strategy: "open-addressing" };
+}
+var hashSet;
+var init_hash_set = __esm({
+  "custom/steptrace/src/algorithms/hash-set.ts"() {
+    init_hash_index();
+    hashSet = {
+      id: "hash-set",
+      family: "hash-index",
+      meta: { label: "Hash Set" },
+      parse: parseHashSetConfig,
+      mount: mountHashSet
+    };
+  }
+});
+
+// custom/steptrace/src/algorithms/insertion-sort.ts
+var insertionSort;
+var init_insertion_sort = __esm({
+  "custom/steptrace/src/algorithms/insertion-sort.ts"() {
+    insertionSort = {
+      id: "insertion-sort",
+      kind: "sort",
+      meta: { label: "Insertion sort" },
+      run: (input, ops) => {
+        const n = ops.value.length;
+        ops.init(
+          `Insertion sort — grow a sorted prefix on the left; take each next value and slide it left past larger values into place.`
+        );
+        ops.markSorted([0], [0], `The first element alone is a sorted prefix.`);
+        for (let i = 1; i < n; i++) {
+          const key4 = ops.value[i];
+          ops.holdKey(key4);
+          ops.compare(i, i - 1, `Take ${key4} (index ${i}) and compare it into the sorted prefix.`);
+          let j = i - 1;
+          while (j >= 0 && ops.value[j] > key4) {
+            ops.overwrite(
+              j + 1,
+              ops.value[j],
+              `${ops.value[j]} > ${key4}: shift it right into index ${j + 1}.`,
+              j
+            );
+            j--;
+            if (j >= 0) ops.compare(j, null, `Compare ${key4} with ${ops.value[j]}.`);
+          }
+          ops.overwrite(j + 1, key4, `Insert ${key4} at index ${j + 1}.`);
+          ops.holdKey(null);
+          ops.markSorted(
+            Array.from({ length: i + 1 }, (_, k) => k),
+            [j + 1],
+            `Sorted prefix now spans indices 0..${i}.`
+          );
+        }
+        ops.done(`Sorted in ${ops.comparisons} comparisons and ${ops.swaps} moves.`);
+      }
+    };
+  }
+});
+
+// custom/steptrace/src/algorithms/introsort.ts
+function invalidConfig8(message) {
+  throw new Error(`steptrace: introsort ${message}`);
+}
+function parseIntrosortConfig(config) {
+  const { array } = config;
+  if (!Array.isArray(array) || array.length < 2)
+    invalidConfig8('requires an "array" with at least two numbers.');
+  if (!array.every((value) => typeof value === "number" && Number.isFinite(value)))
+    invalidConfig8('requires every "array" value to be a finite number.');
+  const depthLimit = config.depthLimit ?? 2 * Math.floor(Math.log2(array.length));
+  const smallPartitionThreshold = config.smallPartitionThreshold ?? 16;
+  if (!Number.isInteger(depthLimit) || depthLimit < 0)
+    invalidConfig8('requires "depthLimit" to be a non-negative integer.');
+  if (!Number.isInteger(smallPartitionThreshold) || smallPartitionThreshold < 1)
+    invalidConfig8('requires "smallPartitionThreshold" to be a positive integer.');
+  return {
+    array: array.slice(),
+    profile: "introsort",
+    depthLimit,
+    smallPartitionThreshold
+  };
+}
+var introsort;
+var init_introsort = __esm({
+  "custom/steptrace/src/algorithms/introsort.ts"() {
+    init_array_sort();
+    introsort = {
+      id: "introsort",
+      kind: "sort",
+      family: arraySortFamily,
+      meta: { label: "Introsort" },
+      parse: parseIntrosortConfig,
+      run(input, ops) {
+        const n = ops.value.length;
+        ops.configureIntrosort(input.depthLimit, input.smallPartitionThreshold);
+        ops.init(
+          `Quicksort with depth limit ${input.depthLimit}, heap fallback, and insertion cutoff ${input.smallPartitionThreshold}.`
+        );
+        function partition(lo, hi, depthUsed) {
+          const pivot = ops.value[hi];
+          ops.range(lo, hi);
+          ops.pivot(hi);
+          ops.introsortStrategy(
+            "quicksort",
+            depthUsed,
+            "strategy",
+            `Quicksort [${lo}, ${hi}] at depth ${depthUsed}: use ${pivot} at index ${hi} as the pivot.`
+          );
+          let boundary = lo;
+          for (let scan = lo; scan < hi; scan++) {
+            ops.compare(scan, hi, `Compare ${ops.value[scan]} with pivot ${pivot}.`);
+            if (ops.value[scan] >= pivot) continue;
+            if (boundary !== scan)
+              ops.swap(
+                boundary,
+                scan,
+                `${ops.value[scan]} < ${pivot}: move it into the left partition.`
+              );
+            boundary++;
+          }
+          if (boundary !== hi) ops.swap(boundary, hi, `Place pivot ${pivot} at index ${boundary}.`);
+          ops.pivot(boundary);
+          ops.markSorted([boundary], [boundary], `Pivot ${pivot} is final at index ${boundary}.`);
+          ops.pivot(null);
+          return boundary;
+        }
+        function siftDown(lo, heapSize, root) {
+          let parent = root;
+          while (2 * parent + 1 < heapSize) {
+            let child = 2 * parent + 1;
+            if (child + 1 < heapSize) {
+              ops.compare(lo + child, lo + child + 1, "Choose the larger heap child.");
+              if (ops.value[lo + child + 1] > ops.value[lo + child]) child++;
+            }
+            ops.compare(lo + parent, lo + child, "Compare the heap parent with its larger child.");
+            if (ops.value[lo + parent] >= ops.value[lo + child]) return;
+            ops.swap(lo + parent, lo + child, "Sift the smaller parent down inside the fallback range.");
+            parent = child;
+          }
+        }
+        function heapSortRange(lo, hi) {
+          const length = hi - lo + 1;
+          for (let root = Math.floor(length / 2) - 1; root >= 0; root--) siftDown(lo, length, root);
+          for (let end = length - 1; end > 0; end--) {
+            ops.swap(lo, lo + end, `Move the fallback heap maximum to index ${lo + end}.`);
+            ops.markSorted([lo + end], [lo + end], `Index ${lo + end} is final.`);
+            siftDown(lo, end, 0);
+          }
+          ops.markSorted([lo], [lo], `The fallback range [${lo}, ${hi}] is sorted.`);
+        }
+        function introsortRange(lo, hi, remaining, depthUsed) {
+          if (lo > hi) return;
+          const size = hi - lo + 1;
+          ops.range(lo, hi);
+          if (size <= input.smallPartitionThreshold) {
+            ops.introsortStrategy(
+              "deferred",
+              depthUsed,
+              "defer",
+              `Defer [${lo}, ${hi}] (${size} values) to the final insertion pass; cutoff is ${input.smallPartitionThreshold}.`
+            );
+            return;
+          }
+          if (remaining === 0) {
+            ops.introsortStrategy(
+              "heap sort",
+              depthUsed,
+              "fallback",
+              `Depth limit ${input.depthLimit} reached on [${lo}, ${hi}]; heap-sort this range.`
+            );
+            heapSortRange(lo, hi);
+            return;
+          }
+          const pivot = partition(lo, hi, depthUsed);
+          introsortRange(lo, pivot - 1, remaining - 1, depthUsed + 1);
+          introsortRange(pivot + 1, hi, remaining - 1, depthUsed + 1);
+        }
+        introsortRange(0, n - 1, input.depthLimit, 0);
+        ops.range(0, n - 1);
+        ops.pivot(null);
+        ops.introsortStrategy(
+          "insertion sort",
+          0,
+          "cleanup",
+          `Insertion cleanup: finish ranges of at most ${input.smallPartitionThreshold} values.`
+        );
+        for (let index = 1; index < n; index++) {
+          const key4 = ops.value[index];
+          ops.holdKeyAt(key4, index, `Lift ${key4} from index ${index} for insertion cleanup.`);
+          let cursor = index - 1;
+          ops.compareHeldAt(cursor, `Compare held ${key4} with ${ops.value[cursor]} at index ${cursor}.`);
+          while (cursor >= 0 && ops.value[cursor] > key4) {
+            ops.shiftHeld(
+              cursor + 1,
+              cursor,
+              `${ops.value[cursor]} > ${key4}: shift it right to index ${cursor + 1}.`
+            );
+            cursor--;
+            if (cursor >= 0)
+              ops.compareHeldAt(
+                cursor,
+                `Compare held ${key4} with ${ops.value[cursor]} at index ${cursor}.`
+              );
+          }
+          ops.placeHeld(cursor + 1, key4, `Place ${key4} at index ${cursor + 1}.`);
+          ops.releaseHeldKey();
+        }
+        ops.lockAll(Array.from({ length: n }, (_, index) => index));
+        ops.done(`Sorted with ${ops.comparisons} comparisons and ${ops.swaps} moves.`);
+      }
+    };
+  }
+});
+
+// custom/steptrace/src/algorithms/jump-search.ts
+function parseJumpSearchConfig(config) {
+  const parsed = parseIndexedArraySearchConfig(config, "jump-search", "jump");
+  const blockSize = config.blockSize ?? Math.max(1, Math.floor(Math.sqrt(parsed.array.length)));
+  if (!Number.isInteger(blockSize) || blockSize <= 0)
+    throw new Error('steptrace: jump-search requires "blockSize" to be a positive integer.');
+  return { ...parsed, blockSize };
+}
+var jumpSearch;
+var init_jump_search = __esm({
+  "custom/steptrace/src/algorithms/jump-search.ts"() {
+    init_indexed_array_search();
+    jumpSearch = {
+      id: "jump-search",
+      kind: "search",
+      family: indexedArraySearchFamily,
+      meta: { label: "Jump search" },
+      parse: parseJumpSearchConfig,
+      run(input, ops) {
+        const values = ops.value;
+        const { target } = input;
+        const step = input.blockSize;
+        ops.init(
+          `Jump search for ${target}: move in blocks of ${step}, then linearly scan the candidate block.`
+        );
+        let previousBound = -1;
+        let bound = Math.min(step - 1, values.length - 1);
+        while (true) {
+          ops.jumpProbe(
+            previousBound,
+            bound,
+            `Check block end ${bound}: ${values[bound]} ${values[bound] < target ? "is below" : "reaches or passes"} ${target}.`
+          );
+          if (values[bound] >= target || bound === values.length - 1) break;
+          previousBound = bound;
+          bound = Math.min(bound + step, values.length - 1);
+        }
+        if (values[bound] < target) {
+          ops.done(
+            `${target} is larger than the array maximum; not found after ${ops.comparisons} probes.`
+          );
+          return;
+        }
+        const lo = previousBound + 1;
+        const hi = bound;
+        ops.beginPhase(
+          lo,
+          hi,
+          `The target can only be in block [${lo}, ${hi}]; scan that block from the start.`,
+          "scan"
+        );
+        for (let i = lo; i <= hi && i < values.length; i++) {
+          ops.probe(lo, hi, i, `Linear scan in jump block [${lo}, ${hi}]: check index ${i}.`);
+          if (values[i] === target) {
+            ops.hit(i, `${values[i]} equals ${target}; found it at index ${i}.`);
+            ops.done(`Found ${target} at index ${i} after ${ops.comparisons} probes.`);
+            return;
+          }
+          if (values[i] > target) {
+            break;
+          }
+        }
+        ops.done(`${target} is not in the array after ${ops.comparisons} probes.`);
+      }
+    };
+  }
+});
+
+// custom/steptrace/src/algorithms/kernighan-popcount.ts
+var kernighanPopcount;
+var init_kernighan_popcount = __esm({
+  "custom/steptrace/src/algorithms/kernighan-popcount.ts"() {
+    kernighanPopcount = {
+      id: "kernighan-popcount",
+      kind: "bits",
+      meta: { label: "Kernighan population count" },
+      run: (input, ops) => {
+        let x = Number(input.value) >>> 0 & ops.mask;
+        const total = ops.popcount(x);
+        ops.init(
+          x,
+          { a: "x", b: "− 1", r: "&" },
+          `x = ${x} has ${total} one${total === 1 ? "" : "s"}. Each pass, x & (x−1) deletes the lowest 1 — so the loop runs ${total} time${total === 1 ? "" : "s"}, once per set bit.`
+        );
+        let pop = 0;
+        while (x !== 0) {
+          const low = ops.lowestSetBit(x);
+          const sub = x - 1 & ops.mask;
+          ops.subtract(
+            sub,
+            low,
+            `Lowest 1 is at bit ${low}. Subtracting 1 flips it to 0 and turns every zero below it into a 1.`
+          );
+          const res = x & sub;
+          ops.and(
+            res,
+            low,
+            `AND the two: the survivors above stay, bit ${low} and everything under it are wiped — exactly one 1 gone.`
+          );
+          pop++;
+          x = res;
+          ops.commit(`x ← ${x}. ${pop} of ${total} ones cleared.`);
+        }
+        ops.done(
+          `x = 0 — every 1 is gone. It took ${total} pass${total === 1 ? "" : "es"}, so x had ${total} set bit${total === 1 ? "" : "s"}.`
+        );
+      }
+    };
+  }
+});
+
+// custom/steptrace/src/algorithms/kmp.ts
+var kmp;
+var init_kmp = __esm({
+  "custom/steptrace/src/algorithms/kmp.ts"() {
+    kmp = {
+      id: "kmp",
+      kind: "string",
+      meta: { label: "KMP" },
+      run: (input, ops) => {
+        const text = String(input.text || "");
+        const pattern = String(input.pattern || "");
+        const n = text.length;
+        const m = pattern.length;
+        ops.init(
+          `KMP search for "${pattern}" — on a mismatch, the failure function slides the pattern forward without re-checking characters already known to match.`
+        );
+        if (!m || m > n) {
+          ops.done("Nothing to search.");
+          return;
+        }
+        const lps = new Array(m).fill(0);
+        let len = 0;
+        for (let idx = 1; idx < m; ) {
+          if (pattern[idx] === pattern[len]) {
+            len++;
+            lps[idx] = len;
+            idx++;
+          } else if (len > 0) {
+            len = lps[len - 1];
+          } else {
+            lps[idx] = 0;
+            idx++;
+          }
+        }
+        let i = 0;
+        let j = 0;
+        while (i < n) {
+          const isMatch = text[i] === pattern[j];
+          ops.compare(
+            i,
+            j,
+            i - j,
+            isMatch,
+            `Compare text[${i}]='${text[i]}' with pattern[${j}]='${pattern[j]}' → ${isMatch ? "match" : "mismatch"}.`
+          );
+          if (isMatch) {
+            i++;
+            j++;
+            if (j === m) {
+              ops.matchAt(i - j, `Whole pattern matched — occurrence at index ${i - j}.`);
+              j = lps[j - 1];
+            }
+          } else if (j > 0) {
+            j = lps[j - 1];
+            ops.slide(
+              i - j,
+              `Mismatch — reuse the matched prefix: realign so ${j} char${j === 1 ? "" : "s"} already line up (no re-check).`
+            );
+          } else {
+            i++;
+            ops.slide(i, `Mismatch at the pattern start — slide forward by one.`);
+          }
+        }
+        ops.done(
+          ops.found.length ? `Found ${ops.found.length} occurrence(s): index ${ops.found.join(", ")}.` : `Pattern not found.`
+        );
+      }
+    };
+  }
+});
+
+// custom/steptrace/src/algorithms/kruskal.ts
+var nodes3, edges3, key2, Recorder7, family7, kruskal;
+var init_kruskal = __esm({
+  "custom/steptrace/src/algorithms/kruskal.ts"() {
+    init_graph_state();
+    nodes3 = [
+      { id: "A", label: "A", x: 100, y: 160 },
+      { id: "B", label: "B", x: 245, y: 65 },
+      { id: "C", label: "C", x: 390, y: 160 },
+      { id: "D", label: "D", x: 535, y: 65 }
+    ];
+    edges3 = [
+      { from: "A", to: "B", weight: 1, label: "1" },
+      { from: "B", to: "C", weight: 2, label: "2" },
+      { from: "A", to: "C", weight: 3, label: "3" },
+      { from: "C", to: "D", weight: 4, label: "4" }
+    ];
+    key2 = (edge) => `${edge.from}|${edge.to}`;
+    Recorder7 = class {
+      frames = [];
+      add(message, components, pending, accepted, current = null, rejected = null) {
+        const nodeState = {};
+        accepted.forEach((edge) => {
+          nodeState[edge.from] = "accepted";
+          nodeState[edge.to] = "accepted";
+        });
+        const edgeState = {};
+        accepted.forEach((edge) => {
+          edgeState[key2(edge)] = "accepted";
+        });
+        if (current) edgeState[key2(current)] = "active";
+        if (rejected) edgeState[key2(rejected)] = "rejected";
+        this.frames.push({
+          type: "kruskal",
+          profile: "graph",
+          nodes: nodes3,
+          edges: edges3,
+          decor: [],
+          start: null,
+          target: null,
+          currentNode: current?.from || null,
+          currentEdge: current ? [current.from, current.to] : null,
+          selectedEdges: accepted.map(key2),
+          nodeState,
+          edgeState,
+          message,
+          detail: {
+            kind: "mst-scan",
+            pending,
+            accepted,
+            totalWeight: accepted.reduce((sum, edge) => sum + edge.weight, 0),
+            components
+          }
+        });
+      }
+    };
+    family7 = {
+      id: "graph-state",
+      createRecorder: () => new Recorder7(),
+      createView: makeGraphStateView
+    };
+    kruskal = {
+      id: "kruskal",
+      kind: "graph",
+      family: family7,
+      meta: { label: "Kruskal's MST" },
+      parse: () => ({ nodes: nodes3, edges: edges3 }),
+      run(_config, recorder) {
+        const accepted = [];
+        recorder.add("Sort edges by weight: AB 1, BC 2, AC 3, CD 4.", [["A"], ["B"], ["C"], ["D"]], edges3, accepted);
+        recorder.add("Inspect A—B (1): its endpoints are in different components.", [["A"], ["B"], ["C"], ["D"]], edges3, accepted, edges3[0]);
+        accepted.push(edges3[0]);
+        recorder.add("Accept A—B and merge A with B.", [["A", "B"], ["C"], ["D"]], edges3.slice(1), accepted, edges3[0]);
+        recorder.add("Inspect B—C (2): it joins two components.", [["A", "B"], ["C"], ["D"]], edges3.slice(1), accepted, edges3[1]);
+        accepted.push(edges3[1]);
+        recorder.add("Accept B—C and merge C into the tree.", [["A", "B", "C"], ["D"]], edges3.slice(2), accepted, edges3[1]);
+        recorder.add("Inspect A—C (3): both endpoints already share a component.", [["A", "B", "C"], ["D"]], edges3.slice(2), accepted, edges3[2]);
+        recorder.add("Reject A—C because it would close a cycle.", [["A", "B", "C"], ["D"]], edges3.slice(3), accepted, edges3[2], edges3[2]);
+        recorder.add("Inspect C—D (4): D is still separate.", [["A", "B", "C"], ["D"]], edges3.slice(3), accepted, edges3[3]);
+        accepted.push(edges3[3]);
+        recorder.add("Accept C—D; V − 1 edges complete the MST with total weight 7.", [["A", "B", "C", "D"]], [], accepted, edges3[3]);
+      }
+    };
+  }
+});
+
+// custom/steptrace/src/algorithms/lcs.ts
+var lcs;
+var init_lcs = __esm({
+  "custom/steptrace/src/algorithms/lcs.ts"() {
+    lcs = {
+      id: "lcs",
+      kind: "dp",
+      meta: { label: "Longest common subsequence" },
+      run: (input, ops) => {
+        const A = String(input.a != null ? input.a : input.text || "");
+        const B = String(input.b != null ? input.b : input.pattern || "");
+        const m = A.length;
+        const n = B.length;
+        const rowLabels = ["∅", ...A.split("")];
+        const colLabels = ["∅", ...B.split("")];
+        ops.board(
+          rowLabels,
+          colLabels,
+          `Longest common subsequence of "${A}" and "${B}". Cell dp[i][j] holds the LCS length of the first i letters of "${A}" and the first j of "${B}".`
+        );
+        const dp = Array.from({ length: m + 1 }, () => Array(n + 1).fill(0));
+        for (let c2 = 0; c2 <= n; c2++) ops.set(0, c2, 0, [], `An empty first string has LCS 0.`);
+        for (let r2 = 1; r2 <= m; r2++) ops.set(r2, 0, 0, [], `An empty second string has LCS 0.`);
+        for (let r2 = 1; r2 <= m; r2++) {
+          for (let c2 = 1; c2 <= n; c2++) {
+            if (A[r2 - 1] === B[c2 - 1]) {
+              dp[r2][c2] = dp[r2 - 1][c2 - 1] + 1;
+              ops.set(
+                r2,
+                c2,
+                dp[r2][c2],
+                [[r2 - 1, c2 - 1]],
+                `'${A[r2 - 1]}' = '${B[c2 - 1]}' → take the diagonal + 1 = ${dp[r2][c2]}.`
+              );
+            } else {
+              dp[r2][c2] = Math.max(dp[r2 - 1][c2], dp[r2][c2 - 1]);
+              const better = dp[r2 - 1][c2] >= dp[r2][c2 - 1] ? "top" : "left";
+              ops.set(
+                r2,
+                c2,
+                dp[r2][c2],
+                [
+                  [r2 - 1, c2],
+                  [r2, c2 - 1]
+                ],
+                `'${A[r2 - 1]}' ≠ '${B[c2 - 1]}' → this letter can't extend the match, so the optimum here is inherited from an optimal sub-answer: the better of top (${dp[r2 - 1][c2]}) and left (${dp[r2][c2 - 1]}) = ${dp[r2][c2]} (from the ${better}).`
+              );
+            }
+          }
+        }
+        let r = m;
+        let c = n;
+        const path = [];
+        while (r > 0 && c > 0) {
+          if (A[r - 1] === B[c - 1]) {
+            path.unshift([r, c]);
+            ops.markPath(
+              path,
+              `dp[${r}][${c}]: '${A[r - 1]}' = '${B[c - 1]}' — this cell was built from dp[${r - 1}][${c - 1}] + 1, so '${A[r - 1]}' joins the LCS. Step diagonally to that sub-answer.`
+            );
+            r--;
+            c--;
+          } else if (dp[r - 1][c] >= dp[r][c - 1]) {
+            ops.markPath(
+              path,
+              `dp[${r}][${c}]: '${A[r - 1]}' ≠ '${B[c - 1]}' — its optimum was inherited from the top sub-answer dp[${r - 1}][${c}]. Follow it upward; no letter added.`
+            );
+            r--;
+          } else {
+            ops.markPath(
+              path,
+              `dp[${r}][${c}]: '${A[r - 1]}' ≠ '${B[c - 1]}' — its optimum was inherited from the left sub-answer dp[${r}][${c - 1}]. Follow it leftward; no letter added.`
+            );
+            c--;
+          }
+        }
+        const lcs2 = path.map((p) => A[p[0] - 1]).join("");
+        ops.markPath(
+          path,
+          `Traceback done: the ${path.length} diagonal step${path.length === 1 ? "" : "s"} spell the LCS "${lcs2}".`
+        );
+        ops.done(`LCS length = ${dp[m][n]} ("${lcs2}").`);
+      }
+    };
+  }
+});
+
+// custom/steptrace/src/algorithms/linear-search.ts
+var linearSearch;
+var init_linear_search = __esm({
+  "custom/steptrace/src/algorithms/linear-search.ts"() {
+    linearSearch = {
+      id: "linear-search",
+      kind: "search",
+      meta: { label: "Linear search" },
+      run: (input, ops) => {
+        const a = ops.value;
+        const target = input.target;
+        const n = a.length;
+        ops.mode = "scan";
+        ops.init(
+          `Linear search for ${target} — scan left to right, comparing every element until a match is found (or the array ends).`
+        );
+        for (let i = 0; i < n; i++) {
+          ops.probe(0, n - 1, i, `Check index ${i}: is ${a[i]} the target ${target}?`);
+          if (a[i] === target) {
+            ops.hit(i, `${a[i]} equals ${target} — found it at index ${i}.`);
+            ops.done(
+              `Found ${target} at index ${i} after ${ops.comparisons} comparison${ops.comparisons === 1 ? "" : "s"}.`
+            );
+            return;
+          }
+        }
+        ops.done(
+          `${target} is not in the array — scanned all ${n} elements (${ops.comparisons} comparisons).`
+        );
+      }
+    };
+  }
+});
+
+// custom/steptrace/src/algorithms/linked-list.ts
+function parseLinkedListConfig(config) {
+  const values = Array.isArray(config.array) && config.array.length ? config.array : DEFAULT_VALUES10;
+  const variant = config.variant ?? "singly";
+  if (variant !== "singly" && variant !== "doubly")
+    throw new Error(`steptrace: linked-list "variant" must be "singly" or "doubly".`);
+  if (values.length < 2 || values.length > LINKED_LIST_MAX_NODES || values.some(
+    (value) => typeof value !== "number" || !Number.isFinite(value) || !Number.isInteger(value)
+  ))
+    throw new Error(
+      `steptrace: linked-list requires 2 to ${LINKED_LIST_MAX_NODES} finite integer values.`
+    );
+  return { values, variant };
+}
+var DEFAULT_VALUES10, linkedList;
+var init_linked_list = __esm({
+  "custom/steptrace/src/algorithms/linked-list.ts"() {
+    init_linked_topology();
+    DEFAULT_VALUES10 = [12, 27, 39, 54];
+    linkedList = {
+      id: "linked-list",
+      family: "linked-topology",
+      meta: { label: "Linked List" },
+      parse: parseLinkedListConfig,
+      mount: mountLinkedList
+    };
+  }
+});
+
+// custom/steptrace/src/algorithms/lru-cache.ts
+var lruCache;
+var init_lru_cache = __esm({
+  "custom/steptrace/src/algorithms/lru-cache.ts"() {
+    init_linked_topology();
+    lruCache = {
+      id: "lru-cache",
+      family: "linked-topology",
+      meta: { label: "LRU Cache" },
+      parse: () => ({}),
+      mount: mountLruCache
+    };
+  }
+});
+
+// custom/steptrace/src/algorithms/leftist-heap.ts
+function parseLeftistHeapConfig(_config) {
+  return {};
+}
+var leftistHeap;
+var init_leftist_heap = __esm({
+  "custom/steptrace/src/algorithms/leftist-heap.ts"() {
+    init_heap_structure();
+    leftistHeap = {
+      id: "leftist-heap",
+      family: "heap-selection",
+      meta: { label: "Leftist heap" },
+      parse: parseLeftistHeapConfig,
+      mount: mountLeftistHeap
+    };
+  }
+});
+
+// custom/steptrace/src/algorithms/merge-sort.ts
+var mergeSort;
+var init_merge_sort = __esm({
+  "custom/steptrace/src/algorithms/merge-sort.ts"() {
+    mergeSort = {
+      id: "merge-sort",
+      kind: "sort",
+      meta: { label: "Merge sort" },
+      run: (input, ops) => {
+        const n = ops.value.length;
+        ops.init(
+          "Merge sort — start with runs of length 1, then repeatedly merge adjacent runs into larger sorted runs (watch the sorted runs double)."
+        );
+        for (let width = 1; width < n; width *= 2) {
+          for (let lo = 0; lo < n; lo += 2 * width) {
+            const mid = Math.min(lo + width, n);
+            const hi = Math.min(lo + 2 * width, n);
+            if (mid >= hi) continue;
+            ops.range(lo, hi - 1);
+            const left = ops.value.slice(lo, mid);
+            const right = ops.value.slice(mid, hi);
+            ops.candidate(
+              null,
+              `Merge the left run [${lo}, ${mid - 1}] and the right run [${mid}, ${hi - 1}] into one sorted run [${lo}, ${hi - 1}].`
+            );
+            let i = 0;
+            let j = 0;
+            let k = lo;
+            while (i < left.length && j < right.length) {
+              if (left[i] <= right[j]) {
+                ops.overwrite(
+                  k,
+                  left[i],
+                  `${left[i]} ≤ ${right[j]}: place ${left[i]} from the left half at index ${k}.`,
+                  lo + i
+                );
+                i++;
+              } else {
+                ops.overwrite(
+                  k,
+                  right[j],
+                  `${right[j]} < ${left[i]}: place ${right[j]} from the right half at index ${k}.`,
+                  mid + j
+                );
+                j++;
+              }
+              k++;
+            }
+            while (i < left.length) {
+              ops.overwrite(
+                k,
+                left[i],
+                `Copy the remaining ${left[i]} from the left half at index ${k}.`,
+                lo + i
+              );
+              i++;
+              k++;
+            }
+            while (j < right.length) {
+              ops.overwrite(
+                k,
+                right[j],
+                `Copy the remaining ${right[j]} from the right half at index ${k}.`,
+                mid + j
+              );
+              j++;
+              k++;
+            }
+          }
+          ops.range(null);
+        }
+        ops.lockAll(Array.from({ length: n }, (_, k) => k));
+        ops.done(`Sorted in ${ops.swaps} writes.`);
+      }
+    };
+  }
+});
+
+// custom/steptrace/src/algorithms/merge-sort-tree.ts
+function merge(left, right) {
+  const output = [];
+  let i = 0;
+  let j = 0;
+  while (i < left.length && j < right.length) {
+    output.push(left[i] <= right[j] ? left[i++] : right[j++]);
+  }
+  while (i < left.length) output.push(left[i++]);
+  while (j < right.length) output.push(right[j++]);
+  return output;
+}
+function buildTree(values, from, to, depth, id, path, nodes5, edges5, metas) {
+  const segment = values.slice(from, to);
+  const label = segment.length ? `[${from}…${to - 1}]` : "[]";
+  const detail = segment.join("  ");
+  const widestValue = Math.max(...segment.map((value) => String(value).length));
+  const cellWidth = Math.max(28, widestValue * 6.2 + 16);
+  nodes5.push({
+    id,
+    label,
+    values: segment,
+    detail,
+    width: Math.max(40, segment.length * cellWidth, label.length * 5 + 20),
+    x: (from + to - 1) / 2 * 54,
+    y: 30 + depth * 72,
+    depth
+  });
+  const meta = {
+    id,
+    label,
+    values: segment,
+    path,
+    depth,
+    from,
+    to,
+    children: null,
+    sorted: segment.slice()
+  };
+  metas.set(id, meta);
+  if (segment.length <= 1) return meta;
+  const mid = Math.floor((from + to) / 2);
+  const leftId = `${id}-l`;
+  const rightId = `${id}-r`;
+  edges5.push({ from: id, to: leftId }, { from: id, to: rightId });
+  const leftMeta = buildTree(
+    values,
+    from,
+    mid,
+    depth + 1,
+    leftId,
+    [...path, leftId],
+    nodes5,
+    edges5,
+    metas
+  );
+  const rightMeta = buildTree(
+    values,
+    mid,
+    to,
+    depth + 1,
+    rightId,
+    [...path, rightId],
+    nodes5,
+    edges5,
+    metas
+  );
+  meta.children = [leftMeta.id, rightMeta.id];
+  return meta;
+}
+function revealSplits(id, metas, ops) {
+  const node2 = metas.get(id);
+  if (!node2) return;
+  const label = node2.values.length ? `[${node2.from}…${node2.to - 1}]` : "[]";
+  if (node2.values.length <= 1) {
+    const text = node2.values.length ? `[${node2.values[0]}]` : "[]";
+    ops.base(id, node2.path, node2.values, `${text} is already sorted.`);
+    return;
+  }
+  const [leftId, rightId] = node2.children || [];
+  const left = metas.get(leftId);
+  const right = metas.get(rightId);
+  if (!left || !right) return;
+  ops.split(
+    id,
+    node2.path,
+    [leftId, rightId],
+    `Split ${label} into ${left.label} and ${right.label}.`
+  );
+  revealSplits(leftId, metas, ops);
+  revealSplits(rightId, metas, ops);
+}
+function mergeBottomUp(metas, ops) {
+  const internalNodes = [...metas.values()].filter((node2) => node2.children).sort((a, b) => b.depth - a.depth || a.from - b.from);
+  for (const node2 of internalNodes) {
+    const [leftId, rightId] = node2.children || [];
+    const left = metas.get(leftId);
+    const right = metas.get(rightId);
+    if (!left || !right) continue;
+    node2.sorted = merge(left.sorted, right.sorted);
+    ops.combine(
+      node2.id,
+      node2.path,
+      node2.sorted,
+      `Merge [${left.sorted.join(", ")}] and [${right.sorted.join(", ")}] into [${node2.sorted.join(", ")}].`
+    );
+  }
+}
+function parseMergeSortTreeConfig(config) {
+  if (!Array.isArray(config.array) || config.array.length < 2)
+    throw new Error('steptrace: merge-sort-tree requires an "array" with at least two values.');
+  if (!config.array.every((value) => typeof value === "number" && Number.isFinite(value)))
+    throw new Error("steptrace: merge-sort-tree requires finite numeric values.");
+  return {
+    array: config.array.slice(),
+    profile: "merge-sort"
+  };
+}
+var mergeSortTree;
+var init_merge_sort_tree = __esm({
+  "custom/steptrace/src/algorithms/merge-sort-tree.ts"() {
+    init_execution_tree();
+    mergeSortTree = {
+      id: "merge-sort-tree",
+      kind: "rectree",
+      family: executionTreeFamily,
+      meta: { label: "Merge sort (split tree)" },
+      parse: parseMergeSortTreeConfig,
+      run(input, ops) {
+        const values = input.array.slice();
+        const nodes5 = [];
+        const edges5 = [];
+        const metas = /* @__PURE__ */ new Map();
+        const rootId = "root";
+        const rootMeta = buildTree(values, 0, values.length, 0, rootId, [rootId], nodes5, edges5, metas);
+        rootMeta.from = 0;
+        rootMeta.to = values.length;
+        rootMeta.values = values.slice();
+        nodes5[0].label = `[0…${values.length - 1}]`;
+        const message = `Merge sort ${values.join(", ")} by splitting into halves and merging sorted halves on return.`;
+        ops.tree(nodes5, edges5, rootId, message);
+        revealSplits(rootId, metas, ops);
+        mergeBottomUp(metas, ops);
+        ops.done(rootId, rootMeta.sorted, `Sorted result [${rootMeta.sorted.join(", ")}].`);
+      }
+    };
+  }
+});
+
+// custom/steptrace/src/algorithms/merge-intervals.ts
+function parseMergeIntervalsConfig(config) {
+  return {
+    profile: "merge-intervals",
+    intervals: parseIntervalTokens(config, DEFAULT_INTERVALS, "merge-intervals")
+  };
+}
+function pair2(interval) {
+  return [interval.start, interval.end];
+}
+var DEFAULT_INTERVALS, mergeIntervals;
+var init_merge_intervals = __esm({
+  "custom/steptrace/src/algorithms/merge-intervals.ts"() {
+    init_interval_track();
+    DEFAULT_INTERVALS = [
+      [13, 16],
+      [1, 4],
+      [8, 10],
+      [2, 6],
+      [16, 20],
+      [9, 12],
+      [3, 5]
+    ];
+    mergeIntervals = {
+      id: "merge-intervals",
+      kind: "pointers",
+      family: intervalTrackFamily,
+      meta: { label: "Merge intervals" },
+      parse: parseMergeIntervalsConfig,
+      run(input, ops) {
+        ops.begin("Start with intervals in their original order.");
+        const sorted = input.intervals.slice().sort((a, b) => a.start - b.start || a.end - b.end || a.id - b.id);
+        ops.sorted(
+          sorted.map((interval) => interval.id),
+          "Sort intervals by start so every possible overlap becomes adjacent."
+        );
+        let current = pair2(sorted[0]);
+        ops.seed(0, sorted[0].id, current, `Seed the current block with [${current.join(", ")}].`);
+        for (let index = 1; index < sorted.length; index++) {
+          const next = sorted[index];
+          if (next.start <= current[1]) {
+            const relation = next.end <= current[1] ? "contained" : "overlap";
+            ops.inspect(
+              index,
+              next.id,
+              relation,
+              relation === "contained" ? `[${next.start}, ${next.end}] is contained in [${current.join(", ")}]; keep the current end.` : `${next.start} ≤ ${current[1]}, so [${next.start}, ${next.end}] overlaps the current block.`
+            );
+            if (relation === "contained") continue;
+            current = [current[0], Math.max(current[1], next.end)];
+            ops.extend(current, `Extend the current block to [${current.join(", ")}].`);
+            continue;
+          }
+          ops.inspect(
+            index,
+            next.id,
+            "gap",
+            `${next.start} > ${current[1]}, so a gap closes [${current.join(", ")}].`
+          );
+          ops.emit(
+            current,
+            `Emit [${current.join(", ")}]; no later interval can reach back across the gap.`
+          );
+          current = pair2(next);
+          ops.restart(index, next.id, current, `Start a new current block at [${current.join(", ")}].`);
+        }
+        ops.done(current, `Emit [${current.join(", ")}] and finish the sweep.`);
+      }
+    };
+  }
+});
+
+// custom/steptrace/src/algorithms/maximum-flow.ts
+var nodes4, edges4, key3, Recorder8, family8, maximumFlow;
+var init_maximum_flow = __esm({
+  "custom/steptrace/src/algorithms/maximum-flow.ts"() {
+    init_graph_state();
+    nodes4 = [
+      { id: "s", label: "s", x: 80, y: 160 },
+      { id: "a", label: "a", x: 270, y: 80 },
+      { id: "b", label: "b", x: 270, y: 240 },
+      { id: "t", label: "t", x: 540, y: 160 }
+    ];
+    edges4 = [
+      { from: "s", to: "a", weight: 1, directed: true, showDirection: true },
+      { from: "s", to: "b", weight: 1, directed: true, showDirection: true },
+      { from: "a", to: "b", weight: 1, directed: true, showDirection: true },
+      { from: "a", to: "t", weight: 1, directed: true, showDirection: true },
+      { from: "b", to: "t", weight: 1, directed: true, showDirection: true }
+    ];
+    key3 = (from, to) => `${from}|${to}`;
+    Recorder8 = class {
+      frames = [];
+      add(message, path, flow, totalFlow, bottleneck = null) {
+        const nodeState = {};
+        path.forEach((id) => {
+          nodeState[id] = "frontier";
+        });
+        if (path.length) nodeState[path[path.length - 1]] = "active";
+        const edgeState = {};
+        for (const [edge, value] of Object.entries(flow)) {
+          if (value > 0) edgeState[edge] = "accepted";
+        }
+        for (let index = 1; index < path.length; index++) {
+          const from = path[index - 1];
+          const to = path[index];
+          const original = edges4.some((edge) => edge.from === from && edge.to === to);
+          edgeState[original ? key3(from, to) : key3(to, from)] = original ? "active" : "residual";
+        }
+        this.frames.push({
+          type: "maximum-flow",
+          profile: "graph",
+          nodes: nodes4,
+          edges: edges4,
+          decor: [],
+          start: "s",
+          target: "t",
+          currentNode: path[path.length - 1] || null,
+          currentEdge: path.length > 1 ? [path[path.length - 2], path[path.length - 1]] : null,
+          selectedEdges: Object.keys(flow).filter((edge) => flow[edge] > 0),
+          nodeState,
+          edgeState,
+          message,
+          detail: {
+            kind: "residual-flow",
+            augmentingPath: path,
+            bottleneck,
+            totalFlow,
+            flow
+          }
+        });
+      }
+    };
+    family8 = {
+      id: "graph-state",
+      createRecorder: () => new Recorder8(),
+      createView: makeGraphStateView
+    };
+    maximumFlow = {
+      id: "maximum-flow",
+      kind: "graph",
+      family: family8,
+      meta: { label: "Maximum Flow" },
+      parse: () => ({ nodes: nodes4, edges: edges4 }),
+      run(_config, recorder) {
+        let flow = {
+          "s|a": 0,
+          "s|b": 0,
+          "a|b": 0,
+          "a|t": 0,
+          "b|t": 0
+        };
+        recorder.add("Begin with zero flow and unit residual capacity on every forward edge.", ["s"], flow, 0);
+        recorder.add("DFS chooses s → a.", ["s", "a"], flow, 0);
+        recorder.add("Continue through a → b.", ["s", "a", "b"], flow, 0);
+        recorder.add("Reach t through b → t; the bottleneck is 1.", ["s", "a", "b", "t"], flow, 0, 1);
+        flow = { ...flow, "s|a": 1, "a|b": 1, "b|t": 1 };
+        recorder.add("Augment s → a → b → t by 1; total flow is 1.", ["s", "a", "b", "t"], flow, 1, 1);
+        recorder.add("The next search starts with the remaining edge s → b.", ["s", "b"], flow, 1);
+        recorder.add("Use residual edge b → a to retract the earlier a → b unit.", ["s", "b", "a"], flow, 1);
+        recorder.add("Continue through the free edge a → t; bottleneck is 1.", ["s", "b", "a", "t"], flow, 1, 1);
+        flow = { ...flow, "s|b": 1, "a|b": 0, "a|t": 1 };
+        recorder.add("Augment s → b → a → t: cancel a → b and raise total flow to 2.", ["s", "b", "a", "t"], flow, 2, 1);
+        recorder.add("No residual s → t path remains; the maximum flow is 2.", [], flow, 2);
+      }
+    };
+  }
+});
+
+// custom/steptrace/src/algorithms/memoization.ts
+var memoization;
+var init_memoization = __esm({
+  "custom/steptrace/src/algorithms/memoization.ts"() {
+    init_execution_tree();
+    memoization = {
+      id: "memoization",
+      kind: "rectree",
+      family: executionTreeFamily,
+      meta: { label: "Memoization" },
+      parse: parseMemoizationConfig,
+      run(input, ops) {
+        const nodes5 = [
+          { id: "a", label: "solve(A)", detail: "key A", values: [], x: 300, y: 24, depth: 0 },
+          { id: "b", label: "solve(B)", detail: "key B", values: [], x: 165, y: 82, depth: 1 },
+          { id: "c", label: "solve(C)", detail: "key C", values: [], x: 435, y: 82, depth: 1 },
+          { id: "d1", label: "solve(D)", detail: "key D", values: [], x: 105, y: 140, depth: 2 },
+          { id: "e", label: "solve(E)", detail: "base key E", values: [], x: 225, y: 140, depth: 2 },
+          { id: "d2", label: "solve(D)", detail: "same key D", values: [], x: 375, y: 140, depth: 2 },
+          { id: "e2", label: "solve(E)", detail: "same key E", values: [], x: 495, y: 140, depth: 2 },
+          { id: "g1", label: "solve(G)", detail: "base key G", values: [], x: 55, y: 198, depth: 3 },
+          { id: "h1", label: "solve(H)", detail: "base key H", values: [], x: 155, y: 198, depth: 3 },
+          { id: "g2", label: "solve(G)", detail: "would repeat", values: [], x: 325, y: 198, depth: 3 },
+          { id: "h2", label: "solve(H)", detail: "would repeat", values: [], x: 425, y: 198, depth: 3 }
+        ];
+        const edges5 = [
+          { from: "a", to: "b" },
+          { from: "a", to: "c" },
+          { from: "b", to: "d1" },
+          { from: "b", to: "e" },
+          { from: "c", to: "d2" },
+          { from: "c", to: "e2" },
+          { from: "d1", to: "g1" },
+          { from: "d1", to: "h1" },
+          { from: "d2", to: "g2" },
+          { from: "d2", to: "h2" }
+        ];
+        ops.tree(nodes5, edges5, "a", "Begin at state A with an empty cache.");
+        ops.split("a", ["a"], ["b", "c"], "State A needs the results of states B and C.");
+        ops.split("b", ["a", "b"], ["d1", "e"], "State B needs states D and E.");
+        ops.split("d1", ["a", "b", "d1"], ["g1", "h1"], "State D is new, so expand it once.");
+        ops.base("g1", ["a", "b", "d1", "g1"], "result G", "State G is a base case.");
+        ops.base("h1", ["a", "b", "d1", "h1"], "result H", "State H is a base case.");
+        ops.combine("d1", ["a", "b", "d1"], "result D", "Combine the base results to finish state D.");
+        ops.store(
+          "d1",
+          ["a", "b", "d1"],
+          "D",
+          "result D",
+          "Store state D under its complete cache key."
+        );
+        ops.base("e", ["a", "b", "e"], "result E", "State E is a base case.");
+        ops.store("e", ["a", "b", "e"], "E", "result E", "Store state E for any later repeat.");
+        ops.combine("b", ["a", "b"], "result B", "Combine D and E to finish state B.");
+        ops.store("b", ["a", "b"], "B", "result B", "Store state B for any later repeat.");
+        ops.split("c", ["a", "c"], ["d2", "e2"], "State C reuses cached states D and E.");
+        ops.cacheHit(
+          "d2",
+          ["a", "c", "d2"],
+          "D",
+          "result D",
+          ["g2", "h2"],
+          "Key D is already cached: return result D without entering its two child calls."
+        );
+        ops.cacheHit(
+          "e2",
+          ["a", "c", "e2"],
+          "E",
+          "result E",
+          [],
+          "Key E is already cached: reuse the base result immediately."
+        );
+        ops.combine("c", ["a", "c"], "result C", "Combine the cached branches to finish state C.");
+        ops.store("c", ["a", "c"], "C", "result C", "Store state C.");
+        ops.combine("a", ["a"], "result A", "Combine B and C to finish the original state.");
+        ops.store("a", ["a"], "A", "result A", "Store the final state A.");
+        ops.done(
+          "a",
+          "result A",
+          "Memoization computed each cache key once and skipped repeated D and E branches."
+        );
+      }
+    };
+  }
+});
+
+// custom/steptrace/src/families/stack-sequence.ts
+function randomValue3() {
+  return String(Math.floor(Math.random() * 90) + 10);
+}
+function mountStack(root, config) {
+  const initial = config.values.slice();
+  const values = initial.slice();
+  const shell = createStructureShell(
+    root,
+    "stack",
+    "stack",
+    "Interactive last-in, first-out stack",
+    "stack-sequence",
+    "steptrace__stack"
+  );
+  const cells = Array.from({ length: config.capacity }, (_, index) => {
+    const cell = el("div", "steptrace__contiguous-cell steptrace__stack-cell");
+    cell.setAttribute("role", "listitem");
+    const value = el("span", "steptrace__contiguous-value");
+    const label = el("span", "steptrace__contiguous-index");
+    const popGhost = el("span", "steptrace__stack-pop-ghost");
+    popGhost.setAttribute("aria-hidden", "true");
+    cell.append(value, label, popGhost);
+    return { cell, value, label, popGhost, index };
+  });
+  const board = el("div", "steptrace__stack-board");
+  board.setAttribute("role", "list");
+  board.setAttribute("aria-label", `Vertical stack with capacity ${config.capacity}`);
+  board.append(
+    ...cells.slice().reverse().map(({ cell }) => cell)
+  );
+  shell.stage.append(board);
+  const input = shell.input("Value to push", "Value");
+  const push = shell.button("Push", true);
+  const pop = shell.button("Pop");
+  const peek = shell.button("Peek");
+  const reset = shell.button("Reset");
+  shell.controls.classList.add("steptrace__stack-controls");
+  shell.controls.append(input, push, pop, peek, reset);
+  let changedIndex = null;
+  let operation = "";
+  let operationValue = "";
+  function render(message) {
+    cells.forEach(({ cell, value, label, popGhost, index }) => {
+      const item = values[index];
+      const isTop = index === values.length - 1;
+      value.textContent = item ?? "·";
+      label.textContent = isTop ? `TOP · ${index}` : String(index);
+      popGhost.textContent = index === changedIndex && operation === "pop" ? operationValue : "";
+      cell.dataset.empty = item == null ? "1" : "0";
+      cell.dataset.top = isTop ? "1" : "0";
+      cell.dataset.changed = index === changedIndex ? "1" : "0";
+      cell.dataset.operation = "";
+      if (index === changedIndex && operation) {
+        void cell.offsetWidth;
+        cell.dataset.operation = operation;
+      }
+      cell.setAttribute(
+        "aria-label",
+        item == null ? `stack slot ${index}, empty` : `stack slot ${index}, value ${item}${isTop ? ", top" : ""}`
+      );
+    });
+    shell.setCounter(String(values.length), ` / ${config.capacity}`);
+    push.disabled = values.length === config.capacity;
+    input.disabled = values.length === config.capacity;
+    shell.status.textContent = message;
+  }
+  function onPush() {
+    if (values.length === config.capacity) {
+      shell.status.textContent = "Stack is full. Pop a value before pushing another.";
+      return;
+    }
+    const value = input.value.trim() || randomValue3();
+    values.push(value);
+    changedIndex = values.length - 1;
+    operation = "push";
+    operationValue = value;
+    input.value = "";
+    render(`Pushed ${value}. It is now the top value.`);
+    input.focus?.();
+  }
+  function onPop() {
+    if (!values.length) {
+      changedIndex = null;
+      operation = "";
+      render("Stack underflow: there is no top value to pop.");
+      return;
+    }
+    const index = values.length - 1;
+    const value = values.pop();
+    changedIndex = index;
+    operation = "pop";
+    operationValue = value ?? "";
+    render(`Popped ${value}.`);
+  }
+  function onPeek() {
+    if (!values.length) {
+      changedIndex = null;
+      operation = "";
+      render("Stack underflow: there is no top value to peek.");
+      return;
+    }
+    changedIndex = values.length - 1;
+    operation = "peek";
+    operationValue = values.at(-1) ?? "";
+    render(`Peeked ${values.at(-1)}. The stack did not change.`);
+  }
+  function onReset() {
+    values.splice(0, values.length, ...initial);
+    changedIndex = null;
+    operation = "";
+    operationValue = "";
+    input.value = "";
+    render(`Stack reset to ${values.length} initial value${values.length === 1 ? "" : "s"}.`);
+    input.focus?.();
+  }
+  shell.listen(push, "click", onPush);
+  shell.listen(pop, "click", onPop);
+  shell.listen(peek, "click", onPeek);
+  shell.listen(reset, "click", onReset);
+  onEnter(shell, input, onPush);
+  render("Push a value to begin.");
+  return shell.finish();
+}
+function answerLabel(frame, index) {
+  const answer = frame.answers[index];
+  if (answer != null) return `→ ${frame.array[answer]}`;
+  return frame.type === "done" ? "→ none" : "waiting";
+}
+function makeStackSequenceView(frames) {
+  const first = frames[0];
+  const root = el("div", "steptrace__stack-sequence");
+  root.setAttribute("role", "region");
+  root.setAttribute("aria-label", "Next greater element monotonic stack");
+  const scanSection = el("section", "steptrace__stack-sequence-section");
+  const scanLabel = el("div", "steptrace__rail-label steptrace__stack-sequence-label");
+  scanLabel.textContent = "Scan";
+  const scan = makeArrayStrip(first.array);
+  scan.wrap.classList.add("steptrace__stack-sequence-scan");
+  scan.wrap.setAttribute("role", "list");
+  scan.wrap.setAttribute("aria-label", "Input array");
+  const scanCells = scan.cells.map((cell, index) => {
+    cell.setAttribute("role", "listitem");
+    const answer = el("span", "steptrace__stack-sequence-answer");
+    const icon = el("span", "steptrace__stack-sequence-icon");
+    icon.innerHTML = ICON.search;
+    icon.setAttribute("aria-hidden", "true");
+    cell.append(answer, icon);
+    return { cell, answer };
+  });
+  scanSection.append(scanLabel, scan.wrap);
+  const stackSection = el("section", "steptrace__stack-sequence-section");
+  const stackLabel = el("div", "steptrace__rail-label steptrace__stack-sequence-label");
+  stackLabel.textContent = "MONOTONIC STACK";
+  const stack2 = el("div", "steptrace__stack-sequence-stack");
+  stack2.setAttribute("role", "list");
+  const stackCells = first.array.map(() => {
+    const cell = el("div", "steptrace__stack-sequence-stack-cell");
+    cell.setAttribute("role", "listitem");
+    cell.setAttribute("aria-hidden", "true");
+    stack2.append(cell);
+    return cell;
+  });
+  stackSection.append(stackLabel, stack2);
+  root.append(scanSection, stackSection);
+  const legend = makeLegend(
+    [
+      {
+        label: "scanning",
+        swatchClass: "steptrace__stack-sequence-swatch steptrace__stack-sequence-swatch--scan"
+      },
+      {
+        label: "retained candidate",
+        swatchClass: "steptrace__stack-sequence-swatch steptrace__stack-sequence-swatch--retained"
+      },
+      {
+        label: "resolved pop",
+        swatchClass: "steptrace__stack-sequence-swatch steptrace__stack-sequence-swatch--popped"
+      }
+    ],
+    "Stack sequence state legend",
+    "steptrace__stack-sequence-legend"
+  );
+  const status = statusEl();
+  function paint(frame) {
+    const retained = new Set(frame.stack);
+    scanCells.forEach(({ cell, answer }, index) => {
+      cell.dataset.state = index === frame.popped ? "popped" : index === frame.cursor ? "scan" : retained.has(index) ? "retained" : frame.answers[index] != null ? "resolved" : "";
+      cell.setAttribute("aria-current", index === frame.cursor ? "step" : "false");
+      answer.textContent = answerLabel(frame, index);
+      cell.setAttribute(
+        "aria-label",
+        `Index ${index}, value ${frame.array[index]}, ${answer.textContent}`
+      );
+    });
+    stackCells.forEach((cell, slot) => {
+      const index = frame.stack[slot];
+      const visible = index != null;
+      cell.textContent = visible ? `${frame.array[index]} · i${index}` : "";
+      cell.dataset.visible = visible ? "1" : "0";
+      cell.dataset.top = visible && slot === frame.stack.length - 1 ? "1" : "0";
+      cell.setAttribute("aria-hidden", visible ? "false" : "true");
+      if (visible)
+        cell.setAttribute(
+          "aria-label",
+          `Stack position ${slot + 1}, index ${index}, value ${frame.array[index]}`
+        );
+      else cell.removeAttribute("aria-label");
+    });
+    root.dataset.frame = frame.type;
+    status.textContent = frame.message;
+  }
+  const watch = (frame) => [
+    {
+      k: "scan",
+      v: frame.cursor == null ? "complete" : `i${frame.cursor} · ${frame.array[frame.cursor]}`,
+      sw: "var(--_blue)",
+      hint: "Value currently compared with the stack top."
+    },
+    {
+      k: "stack",
+      v: frame.stack.map((index) => frame.array[index]).join(" · ") || "empty",
+      sw: "var(--_amber)",
+      hint: "Unanswered values, decreasing from bottom to top."
+    },
+    {
+      k: "operation",
+      v: frame.type === "pop" && frame.popped != null ? `pop i${frame.popped}` : frame.type,
+      sw: frame.type === "pop" ? "var(--_violet)" : "var(--_green)"
+    },
+    {
+      k: "charges",
+      v: `${frame.pushes} push · ${frame.pops} pop`,
+      sw: "var(--_neutral)",
+      hint: "Every index is pushed once and popped at most once."
+    }
+  ];
+  return {
+    nodes: [root, legend, status],
+    stageLayout: "fill",
+    stableStage: true,
+    paint,
+    watch,
+    summary(frame) {
+      const answers = frame.answers.map((answer) => answer == null ? "none" : String(frame.array[answer])).join(", ");
+      return `Next greater values: [${answers}] · ${frame.pushes} pushes, ${frame.pops} pops.`;
+    }
+  };
+}
+var StackSequenceRecorder, stackSequenceFamily;
+var init_stack_sequence = __esm({
+  "custom/steptrace/src/families/stack-sequence.ts"() {
+    init_render();
+    init_interactive_structure();
+    StackSequenceRecorder = class {
+      constructor(config) {
+        this.config = config;
+        this.answers = Array(config.array.length).fill(null);
+      }
+      config;
+      frames = [];
+      cursor = null;
+      stack = [];
+      popped = null;
+      answers;
+      pushes = 0;
+      pops = 0;
+      init(message) {
+        this.record("init", message);
+      }
+      scan(index, message) {
+        this.cursor = index;
+        this.popped = null;
+        this.record("scan", message);
+      }
+      pop(answerIndex, message) {
+        const popped = this.stack.pop();
+        if (popped == null) throw new Error("steptrace: cannot pop an empty monotonic stack.");
+        this.popped = popped;
+        this.answers[popped] = answerIndex;
+        this.pops++;
+        this.record("pop", message);
+      }
+      push(index, message) {
+        this.stack.push(index);
+        this.popped = null;
+        this.pushes++;
+        this.record("push", message);
+      }
+      done(message) {
+        this.cursor = null;
+        this.popped = null;
+        this.record("done", message);
+      }
+      record(type, message) {
+        this.frames.push(
+          Object.freeze({
+            type,
+            profile: this.config.profile,
+            array: this.config.array,
+            cursor: this.cursor,
+            stack: this.stack.slice(),
+            popped: this.popped,
+            answers: this.answers.slice(),
+            pushes: this.pushes,
+            pops: this.pops,
+            message
+          })
+        );
+      }
+    };
+    stackSequenceFamily = {
+      id: "stack-sequence",
+      createRecorder(config) {
+        return new StackSequenceRecorder(config);
+      },
+      createView(frames) {
+        return makeStackSequenceView(frames);
+      }
+    };
+  }
+});
+
+// custom/steptrace/src/algorithms/monotonic-stack-and-queue.ts
+function parseMonotonicStackConfig(config) {
+  const array = config.array ?? DEFAULT_ARRAY;
+  if (!Array.isArray(array) || array.length === 0 || !array.every(Number.isFinite))
+    throw new Error(`steptrace: monotonic-stack-and-queue requires a non-empty numeric "array".`);
+  return { profile: "next-greater", array: array.slice() };
+}
+var DEFAULT_ARRAY, monotonicStackAndQueue;
+var init_monotonic_stack_and_queue = __esm({
+  "custom/steptrace/src/algorithms/monotonic-stack-and-queue.ts"() {
+    init_stack_sequence();
+    DEFAULT_ARRAY = [73, 74, 75, 71, 69, 72, 76, 73];
+    monotonicStackAndQueue = {
+      id: "monotonic-stack-and-queue",
+      kind: "pointers",
+      family: stackSequenceFamily,
+      meta: { label: "Monotonic stack and queue" },
+      parse: parseMonotonicStackConfig,
+      run(input, ops) {
+        ops.init("Start with an empty decreasing stack of unanswered indices.");
+        const stack2 = [];
+        for (let index = 0; index < input.array.length; index++) {
+          const value = input.array[index];
+          ops.scan(index, `Scan i${index} = ${value}; compare it with the stack top.`);
+          while (stack2.length && input.array[stack2.at(-1)] < value) {
+            const popped = stack2.pop();
+            ops.pop(
+              index,
+              `${value} > ${input.array[popped]}, so pop i${popped}; ${value} is its next greater value.`
+            );
+          }
+          stack2.push(index);
+          ops.push(
+            index,
+            `Push i${index}; retained values are ${stack2.map((item) => input.array[item]).join(" > ")}.`
+          );
+        }
+        ops.done("The scan is complete; retained indices have no greater value to their right.");
+      }
+    };
+  }
+});
+
+// custom/steptrace/src/algorithms/n-queens.ts
+var nQueens;
+var init_n_queens = __esm({
+  "custom/steptrace/src/algorithms/n-queens.ts"() {
+    nQueens = {
+      id: "n-queens",
+      kind: "backtrack",
+      meta: { label: "N-Queens (backtracking)" },
+      run: (input, ops) => {
+        const n = Math.min(Math.max(input.n || 4, 4), 6);
+        ops.board(
+          n,
+          `Place ${n} queens on a ${n}×${n} board so none attack another. Fill one queen per row; retreat whenever a row has no safe square.`
+        );
+        const conflict = (row, col) => {
+          const q = ops.queens;
+          for (let r = 0; r < row; r++) if (q[r] === col || Math.abs(q[r] - col) === row - r) return r;
+          return -1;
+        };
+        let solved = false;
+        const solve = (row) => {
+          if (solved) return;
+          if (row === n) {
+            ops.solved(`All ${n} rows filled — no queen attacks another.`);
+            solved = true;
+            return;
+          }
+          for (let col = 0; col < n; col++) {
+            const bad = conflict(row, col);
+            if (bad >= 0) {
+              ops.reject(
+                row,
+                col,
+                bad,
+                `Row ${row}, column ${col} clashes with the queen in row ${bad} — prune this square.`
+              );
+              continue;
+            }
+            ops.place(row, col, `Column ${col} is safe — place a queen and descend to row ${row + 1}.`);
+            solve(row + 1);
+            if (solved) return;
+            ops.backtrack(
+              row,
+              `Row ${row + 1} had no safe square — remove the queen at (${row}, ${col}) and retreat.`
+            );
+          }
+        };
+        solve(0);
+        ops.done(solved ? `Solved — a valid ${n}-queens arrangement.` : `No solution for n = ${n}.`);
+      }
+    };
+  }
+});
+
+// custom/steptrace/src/algorithms/prim.ts
+var prim;
+var init_prim = __esm({
+  "custom/steptrace/src/algorithms/prim.ts"() {
+    prim = {
+      id: "prim",
+      kind: "graph",
+      meta: { label: "Prim's MST", frontierLabel: "Frontier" },
+      run: (input, ops, graph) => {
+        const adj = {};
+        for (const nd of graph.nodes) adj[nd.id] = [];
+        for (const e of graph.edges) {
+          const w = e.weight == null ? 1 : e.weight;
+          adj[e.from].push({ to: e.to, w });
+          if (!graph.directed) adj[e.to].push({ to: e.from, w });
+        }
+        const start = input.start;
+        ops.init(
+          `Prim's algorithm — grow a minimum spanning tree from ${start}, each step adding the cheapest edge that reaches a node not yet in the tree.`
+        );
+        const pairKey2 = (a, b) => a < b ? a + "|" + b : b + "|" + a;
+        const inTree = /* @__PURE__ */ new Set([start]);
+        const treeEdges = /* @__PURE__ */ new Set();
+        const skipped = /* @__PURE__ */ new Set();
+        ops.visit(start, `Start the tree at ${start}.`);
+        let total = 0;
+        while (inTree.size < graph.nodes.length) {
+          const cand = [];
+          const seenPair = /* @__PURE__ */ new Set();
+          for (const u of inTree)
+            for (const { to: v, w } of adj[u]) {
+              const key4 = pairKey2(u, v);
+              if (seenPair.has(key4)) continue;
+              seenPair.add(key4);
+              cand.push({ u, v, w, key: key4 });
+            }
+          cand.sort((a, b) => a.w - b.w || (a.key < b.key ? -1 : 1));
+          let chosen = null;
+          for (const c of cand) {
+            if (inTree.has(c.v)) {
+              if (!treeEdges.has(c.key) && !skipped.has(c.key)) {
+                skipped.add(c.key);
+                ops.edge(
+                  c.u,
+                  c.v,
+                  `${c.u}–${c.v} (weight ${c.w}) links two nodes already in the tree — skip it, adding it would make a cycle.`
+                );
+              }
+              continue;
+            }
+            chosen = c;
+            break;
+          }
+          if (!chosen) break;
+          ops.edge(
+            chosen.u,
+            chosen.v,
+            `Cheapest edge leaving the tree: ${chosen.u}–${chosen.v} (weight ${chosen.w}).`
+          );
+          ops.selectEdge(chosen.u, chosen.v, `Add ${chosen.u}–${chosen.v} to the tree.`);
+          treeEdges.add(chosen.key);
+          inTree.add(chosen.v);
+          ops.visit(chosen.v, `${chosen.v} joins the tree.`);
+          total += chosen.w;
+        }
+        ops.done(`Minimum spanning tree complete — total weight ${total}.`);
+      }
+    };
+  }
+});
+
+// custom/steptrace/src/families/prefix-sum.ts
+function arrayStrip(values, label) {
+  const { wrap, cells } = makeArrayStrip(values);
+  wrap.classList.add("steptrace__prefix-sum-strip");
+  wrap.setAttribute("role", "list");
+  wrap.setAttribute("aria-label", label);
+  cells.forEach((cell) => {
+    cell.setAttribute("role", "listitem");
+  });
+  return { wrap, cells };
+}
+function makePrefixSumView(frames) {
+  const first = frames[0];
+  const root = el("div", "steptrace__prefix-sum");
+  root.setAttribute("role", "region");
+  root.setAttribute("aria-label", "Prefix sum construction and range query");
+  const sourceSection = el("section", "steptrace__prefix-sum-section");
+  const sourceLabel = el("div", "steptrace__rail-label");
+  sourceLabel.textContent = "Daily sales";
+  const source = arrayStrip(first.array, "Daily sales array");
+  sourceSection.append(sourceLabel, source.wrap);
+  const prefixSection = el("section", "steptrace__prefix-sum-section");
+  const prefixLabel = el("div", "steptrace__rail-label");
+  prefixLabel.textContent = "Prefix totals";
+  const prefix = arrayStrip(first.prefix, "Prefix sum array");
+  prefixSection.append(prefixLabel, prefix.wrap);
+  root.append(sourceSection, prefixSection);
+  const legend = makeLegend(
+    [
+      {
+        label: "running total",
+        swatchClass: "steptrace__prefix-sum-swatch steptrace__prefix-sum-swatch--build"
+      },
+      {
+        label: "cancelled prefix",
+        swatchClass: "steptrace__prefix-sum-swatch steptrace__prefix-sum-swatch--cancel"
+      },
+      {
+        label: "requested range",
+        swatchClass: "steptrace__prefix-sum-swatch steptrace__prefix-sum-swatch--range"
+      }
+    ],
+    "Prefix sum state legend",
+    "steptrace__prefix-sum-legend"
+  );
+  const status = statusEl();
+  function paint(frame) {
+    const [left, right] = frame.range;
+    source.cells.forEach((cell, index) => {
+      cell.textContent = String(frame.array[index]);
+      cell.dataset.state = frame.cursor === index ? "build" : ["query", "right", "left", "subtract", "done"].includes(frame.type) ? index < left ? "cancel" : index <= right ? "range" : "" : "";
+      cell.setAttribute("aria-label", `source index ${index}, value ${frame.array[index]}`);
+    });
+    prefix.cells.forEach((cell, index) => {
+      const value = frame.prefix[index];
+      cell.textContent = value == null ? "·" : String(value);
+      cell.dataset.empty = value == null ? "1" : "0";
+      cell.dataset.state = index === right + 1 && ["right", "left", "subtract", "done"].includes(frame.type) ? "range" : index === left && ["left", "subtract", "done"].includes(frame.type) ? "cancel" : frame.cursor != null && index === frame.cursor + 1 ? "build" : "";
+      cell.setAttribute(
+        "aria-label",
+        `prefix index ${index}, ${value == null ? "not written" : `value ${value}`}`
+      );
+    });
+    status.textContent = frame.message;
+  }
+  const watch = (frame) => [
+    { k: "phase", v: frame.type, sw: "var(--_violet)" },
+    {
+      k: "source",
+      v: frame.cursor == null ? "—" : `a[${frame.cursor}] = ${frame.array[frame.cursor]}`,
+      sw: "var(--_blue)"
+    },
+    { k: "running", v: frame.running, sw: "var(--_amber)" },
+    {
+      k: "query",
+      v: frame.result == null ? `[${frame.range[0]}, ${frame.range[1]}]` : frame.result,
+      sw: "var(--_green)"
+    }
+  ];
+  return {
+    nodes: [root, legend, status],
+    stageLayout: "fill",
+    stableStage: true,
+    paint,
+    watch,
+    summary(frame) {
+      return frame.result == null ? `Built ${frame.prefix.filter((value) => value != null).length}/${frame.prefix.length} prefix totals.` : `Range [${frame.range[0]}, ${frame.range[1]}] sums to ${frame.result}.`;
+    }
+  };
+}
+var PrefixSumRecorder, prefixSumFamily;
+var init_prefix_sum = __esm({
+  "custom/steptrace/src/families/prefix-sum.ts"() {
+    init_render();
+    PrefixSumRecorder = class {
+      constructor(config) {
+        this.config = config;
+        this.prefix = [0, ...Array(config.array.length).fill(null)];
+      }
+      config;
+      frames = [];
+      prefix;
+      cursor = null;
+      running = 0;
+      leftPrefix = null;
+      rightPrefix = null;
+      result = null;
+      init(message) {
+        this.record("init", message);
+      }
+      add(index, message) {
+        this.cursor = index;
+        this.running += this.config.array[index];
+        this.record("add", message);
+      }
+      write(index, message) {
+        this.prefix[index + 1] = this.running;
+        this.record("write", message);
+      }
+      query(message) {
+        this.cursor = null;
+        this.record("query", message);
+      }
+      takeRight(message) {
+        this.rightPrefix = this.prefix[this.config.range[1] + 1];
+        this.record("right", message);
+      }
+      takeLeft(message) {
+        this.leftPrefix = this.prefix[this.config.range[0]];
+        this.record("left", message);
+      }
+      subtract(message) {
+        this.result = this.rightPrefix - this.leftPrefix;
+        this.record("subtract", message);
+      }
+      done(message) {
+        this.record("done", message);
+      }
+      record(type, message) {
+        this.frames.push(
+          Object.freeze({
+            type,
+            profile: this.config.profile,
+            array: this.config.array,
+            prefix: this.prefix.slice(),
+            range: this.config.range,
+            cursor: this.cursor,
+            running: this.running,
+            leftPrefix: this.leftPrefix,
+            rightPrefix: this.rightPrefix,
+            result: this.result,
+            message
+          })
+        );
+      }
+    };
+    prefixSumFamily = {
+      id: "prefix-sum",
+      createRecorder(config) {
+        return new PrefixSumRecorder(config);
+      },
+      createView(frames) {
+        return makePrefixSumView(frames);
+      }
+    };
+  }
+});
+
+// custom/steptrace/src/algorithms/prefix-sum.ts
+function parsePrefixSumConfig(config) {
+  const array = config.array ?? DEFAULT_ARRAY2;
+  const range = config.range ?? DEFAULT_RANGE;
+  if (!Array.isArray(array) || array.length < 2 || !array.every(Number.isFinite))
+    throw new Error(`steptrace: prefix-sum requires a numeric "array" with at least two values.`);
+  if (!Array.isArray(range) || range.length !== 2 || !range.every(Number.isInteger) || range[0] < 0 || range[0] > range[1] || range[1] >= array.length)
+    throw new Error(`steptrace: prefix-sum requires "range" as [left, right] inside the array.`);
+  return { profile: "range-sum", array: array.slice(), range: [range[0], range[1]] };
+}
+var DEFAULT_ARRAY2, DEFAULT_RANGE, prefixSum;
+var init_prefix_sum2 = __esm({
+  "custom/steptrace/src/algorithms/prefix-sum.ts"() {
+    init_prefix_sum();
+    DEFAULT_ARRAY2 = [4, 7, 2, 9, 5, 3, 8];
+    DEFAULT_RANGE = [2, 5];
+    prefixSum = {
+      id: "prefix-sum",
+      kind: "pointers",
+      family: prefixSumFamily,
+      meta: { label: "Prefix sum" },
+      parse: parsePrefixSumConfig,
+      run(input, ops) {
+        ops.init("Seed prefix[0] = 0 for the empty prefix.");
+        input.array.forEach((value, index) => {
+          ops.add(
+            index,
+            `Read a[${index}] = ${value}; running total becomes ${input.array.slice(0, index + 1).reduce((sum, item) => sum + item, 0)}.`
+          );
+          ops.write(index, `Write that total to prefix[${index + 1}].`);
+        });
+        const [left, right] = input.range;
+        ops.query(`Answer the inclusive range [${left}, ${right}] without rescanning it.`);
+        ops.takeRight(`Take prefix[${right + 1}], the total through a[${right}].`);
+        ops.takeLeft(`Take prefix[${left}], the shared head before a[${left}].`);
+        const rightPrefix = input.array.slice(0, right + 1).reduce((sum, value) => sum + value, 0);
+        const leftPrefix = input.array.slice(0, left).reduce((sum, value) => sum + value, 0);
+        const result = rightPrefix - leftPrefix;
+        ops.subtract(
+          `Subtract the shared head: prefix[${right + 1}] - prefix[${left}] = ${rightPrefix} - ${leftPrefix} = ${result}.`
+        );
+        ops.done(
+          `Range [${left}, ${right}] is ${result}: prefix[${right + 1}] - prefix[${left}] = ${rightPrefix} - ${leftPrefix}.`
+        );
+      }
+    };
+  }
+});
+
+// custom/steptrace/src/algorithms/queue.ts
+function parseQueueConfig(config) {
+  const capacity = config.capacity ?? DEFAULT_CAPACITY;
+  if (!Number.isInteger(capacity) || capacity < 3 || capacity > 10)
+    throw new Error(`steptrace: queue requires integer "capacity" from 3 to 10.`);
+  return { capacity };
+}
+var DEFAULT_CAPACITY, queue;
+var init_queue = __esm({
+  "custom/steptrace/src/algorithms/queue.ts"() {
+    init_contiguous_storage();
+    DEFAULT_CAPACITY = 6;
+    queue = {
+      id: "queue",
+      family: "contiguous-storage",
+      meta: { label: "Queue" },
+      parse: parseQueueConfig,
+      mount: mountQueue
+    };
+  }
+});
+
+// custom/steptrace/src/algorithms/quick-sort.ts
+var quickSort;
+var init_quick_sort = __esm({
+  "custom/steptrace/src/algorithms/quick-sort.ts"() {
+    quickSort = {
+      id: "quick-sort",
+      kind: "sort",
+      meta: { label: "Quick sort" },
+      run: (input, ops) => {
+        const n = ops.value.length;
+        ops.init(
+          `Quick sort — pick a pivot, partition values so smaller ones go left and larger ones go right, then recurse on each side.`
+        );
+        function partition(lo, hi) {
+          const pivot = ops.value[hi];
+          ops.range(lo, hi);
+          ops.pivot(hi);
+          ops.candidate(
+            hi,
+            `Partition [${lo}, ${hi}]: pivot ${pivot} (index ${hi}) — send values < ${pivot} left, > ${pivot} right.`
+          );
+          let i = lo;
+          for (let j = lo; j < hi; j++) {
+            ops.compare(j, hi, `Compare ${ops.value[j]} with pivot ${pivot}.`);
+            if (ops.value[j] < pivot) {
+              if (i !== j)
+                ops.swap(
+                  i,
+                  j,
+                  `${ops.value[j]} < ${pivot}: move it into the left region at index ${i}.`
+                );
+              i++;
+            }
+          }
+          if (i !== hi) ops.swap(i, hi, `Swap the pivot ${pivot} into index ${i}.`);
+          ops.pivot(i);
+          ops.candidate(
+            null,
+            `Pivot ${pivot} settles at index ${i} — everything left is < ${pivot}, everything right is > ${pivot}.`
+          );
+          ops.pivot(null);
+          ops.markSorted([i], [i], `Index ${i} is final — it never moves again.`);
+          ops.range(null);
+          return i;
+        }
+        function qs(lo, hi) {
+          if (lo > hi) return;
+          if (lo === hi) {
+            ops.markSorted([lo], [lo], `A single element at index ${lo} is already in place.`);
+            return;
+          }
+          const p = partition(lo, hi);
+          if (p - 1 - lo >= 1) {
+            ops.range(lo, p - 1);
+            ops.candidate(
+              null,
+              `Recurse into the left half [${lo}, ${p - 1}] (the values below the pivot).`
+            );
+          }
+          qs(lo, p - 1);
+          if (hi - (p + 1) >= 1) {
+            ops.range(p + 1, hi);
+            ops.candidate(
+              null,
+              `Recurse into the right half [${p + 1}, ${hi}] (the values above the pivot).`
+            );
+          }
+          qs(p + 1, hi);
+        }
+        qs(0, n - 1);
+        ops.done(`Sorted in ${ops.comparisons} comparisons and ${ops.swaps} swaps.`);
+      }
+    };
+  }
+});
+
+// custom/steptrace/src/algorithms/radix-sort.ts
+function invalidConfig9(message) {
+  throw new Error(`steptrace: radix-sort ${message}`);
+}
+function parseRadixSortConfig(config) {
+  const { array } = config;
+  const radix = config.radix ?? 10;
+  const mode = config.mode ?? "LSD";
+  if (!Array.isArray(array) || array.length < 2)
+    invalidConfig9('requires an "array" with at least two non-negative integers.');
+  if (!array.every((value) => Number.isSafeInteger(value) && value >= 0))
+    invalidConfig9('requires every "array" value to be a non-negative safe integer.');
+  if (array.length > 12)
+    invalidConfig9("limits the demonstration to 12 keys so every bucket pass remains legible.");
+  if (!Number.isInteger(radix) || radix < 2 || radix > 16)
+    invalidConfig9('requires "radix" to be an integer from 2 through 16.');
+  if (String(mode).toUpperCase() !== "LSD")
+    invalidConfig9('currently visualizes only stable least-significant-digit mode ("LSD").');
+  const max = Math.max(...array);
+  const places = [];
+  for (let place = 1; place <= Math.max(max, 1); place *= radix) {
+    places.push(place);
+    if (Math.floor(max / place) < radix) break;
+  }
+  return {
+    profile: "radix",
+    array: array.slice(),
+    radix,
+    bucketCount: radix,
+    bucketLabels: Array.from({ length: radix }, (_, digit) => String(digit)),
+    places
+  };
+}
+function digitName(place, radix) {
+  if (radix !== 10) return `place ${place}`;
+  if (place === 1) return "ones";
+  if (place === 10) return "tens";
+  if (place === 100) return "hundreds";
+  if (place === 1e3) return "thousands";
+  return `place ${place}`;
+}
+var radixSort;
+var init_radix_sort = __esm({
+  "custom/steptrace/src/algorithms/radix-sort.ts"() {
+    init_bucket_distribution();
+    radixSort = {
+      id: "radix-sort",
+      kind: "sort",
+      family: radixDistributionFamily,
+      meta: { label: "Radix sort" },
+      parse: parseRadixSortConfig,
+      run(input, ops) {
+        let working = input.array.slice();
+        ops.intro(
+          `${input.places.length} stable base-${input.radix} passes will order every digit from least to most significant.`
+        );
+        input.places.forEach((place, passIndex) => {
+          const passLabel = digitName(place, input.radix);
+          const buckets = Array.from({ length: input.radix }, () => []);
+          ops.beginPass(
+            passIndex,
+            input.places.length,
+            passLabel,
+            `Pass ${passIndex + 1}/${input.places.length}: distribute by the ${passLabel} digit.`
+          );
+          working.forEach((value, sourceIndex) => {
+            const digit = Math.floor(value / place) % input.radix;
+            buckets[digit].push(value);
+            ops.scatter(
+              sourceIndex,
+              digit,
+              `${value}'s ${passLabel} digit is ${digit}; append it to bucket ${digit}.`
+            );
+          });
+          ops.beginGather(
+            `Read digit buckets from ${input.bucketLabels[0]} through ${input.bucketLabels.at(-1)} without changing order inside a bucket.`
+          );
+          const next = [];
+          buckets.forEach((bucket, bucketIndex) => {
+            bucket.forEach((value, itemIndex) => {
+              next.push(value);
+              ops.gather(
+                bucketIndex,
+                itemIndex,
+                `Take ${value} from bucket ${bucketIndex}; write it at output index ${next.length - 1}.`
+              );
+            });
+          });
+          ops.finishPass(
+            `${passLabel[0].toUpperCase()}${passLabel.slice(1)} pass complete: lower processed digits remain stably ordered.`
+          );
+          working = next;
+        });
+        ops.done(`All ${input.places.length} digit positions are ordered: [${working.join(", ")}].`);
+      }
+    };
+  }
+});
+
+// custom/steptrace/src/algorithms/rabin-karp.ts
+var rabinKarp;
+var init_rabin_karp = __esm({
+  "custom/steptrace/src/algorithms/rabin-karp.ts"() {
+    rabinKarp = {
+      id: "rabin-karp",
+      kind: "string",
+      meta: { label: "Rabin-Karp" },
+      run: (input, ops) => {
+        const text = String(input.text || "");
+        const pattern = String(input.pattern || "");
+        const n = text.length;
+        const m = pattern.length;
+        const B = 256;
+        const MOD = 101;
+        const hash = (s) => {
+          let h = 0;
+          for (let k = 0; k < s.length; k++) h = (h * B + s.charCodeAt(k)) % MOD;
+          return h;
+        };
+        if (!m || m > n) {
+          ops.init(`Rabin-Karp for "${pattern}".`);
+          ops.done("Nothing to search.");
+          return;
+        }
+        const ph = hash(pattern);
+        ops.init(
+          `Rabin-Karp search for "${pattern}" — slide a window, compare its rolling hash to the pattern hash (${ph}), and only verify character-by-character when the hashes collide.`
+        );
+        let highPow = 1;
+        for (let k = 0; k < m - 1; k++) highPow = highPow * B % MOD;
+        let wh = hash(text.slice(0, m));
+        for (let s = 0; s <= n - m; s++) {
+          ops.hashStep(
+            s,
+            wh,
+            ph,
+            `Window [${s}, ${s + m - 1}]: window hash ${wh} ${wh === ph ? "=" : "≠"} pattern hash ${ph}${wh === ph ? " — verify" : " — skip"}.`
+          );
+          if (wh === ph) {
+            let ok = true;
+            for (let j = 0; j < m; j++) {
+              const isMatch = text[s + j] === pattern[j];
+              ops.compare(
+                s + j,
+                j,
+                s,
+                isMatch,
+                `Hash hit — verify text[${s + j}]='${text[s + j]}' vs pattern[${j}]='${pattern[j]}'.`
+              );
+              if (!isMatch) {
+                ok = false;
+                break;
+              }
+            }
+            if (ok) ops.matchAt(s, `Verified — occurrence at index ${s}.`);
+          }
+          if (s < n - m) {
+            const removed = text.charCodeAt(s) * highPow % MOD;
+            wh = (wh - removed + MOD) % MOD;
+            wh = (wh * B + text.charCodeAt(s + m)) % MOD;
+          }
+        }
+        ops.done(
+          ops.found.length ? `Found ${ops.found.length} occurrence(s): index ${ops.found.join(", ")}.` : `Pattern not found.`
+        );
+      }
+    };
+  }
+});
+
+// custom/steptrace/src/algorithms/red-black-tree.ts
+var DEFAULT_VALUES11, redBlackTree;
+var init_red_black_tree = __esm({
+  "custom/steptrace/src/algorithms/red-black-tree.ts"() {
+    init_binary_tree();
+    DEFAULT_VALUES11 = [10, 5, 15, 1];
+    redBlackTree = {
+      id: "red-black-tree",
+      family: "binary-tree",
+      meta: { label: "Red-Black Tree" },
+      parse: (config) => parseBinaryTreeConfig(config, "red-black-tree", DEFAULT_VALUES11),
+      mount: mountRedBlackTree
+    };
+  }
+});
+
+// custom/steptrace/src/algorithms/selection-sort.ts
+var selectionSort;
+var init_selection_sort = __esm({
+  "custom/steptrace/src/algorithms/selection-sort.ts"() {
+    selectionSort = {
+      id: "selection-sort",
+      kind: "sort",
+      meta: { label: "Selection sort" },
+      run: (input, ops) => {
+        const n = ops.value.length;
+        ops.init(
+          `Selection sort — repeatedly find the smallest value in the unsorted region and swap it into the next sorted slot.`
+        );
+        for (let i = 0; i < n - 1; i++) {
+          let min = i;
+          ops.candidate(min, `Assume index ${i} (${ops.value[i]}) is the smallest of the rest.`);
+          for (let j = i + 1; j < n; j++) {
+            ops.compare(j, min, `Compare ${ops.value[j]} with the current smallest ${ops.value[min]}.`);
+            if (ops.value[j] < ops.value[min]) {
+              min = j;
+              ops.candidate(min, `New smallest: ${ops.value[min]} at index ${min}.`);
+            }
+          }
+          if (min !== i) ops.swap(i, min, `Swap the smallest (${ops.value[min]}) into index ${i}.`);
+          ops.candidate(null, `Index ${i} settled — scan the remaining region next.`);
+          ops.markSorted([i], [i], `Index ${i} now holds its final value.`);
+        }
+        ops.lockAll([n - 1]);
+        ops.markSorted([n - 1], [n - 1], `The last element is already in place.`);
+        ops.done(`Sorted in ${ops.comparisons} comparisons and ${ops.swaps} swaps.`);
+      }
+    };
+  }
+});
+
+// custom/steptrace/src/algorithms/segment-tree.ts
+function parseSegmentTreeConfig(config) {
+  const values = Array.isArray(config.array) && config.array.length ? config.array : DEFAULT_VALUES12;
+  if (values.length < 4 || values.length > 8 || values.some(
+    (value) => typeof value !== "number" || !Number.isFinite(value) || !Number.isInteger(value)
+  ))
+    throw new Error(`steptrace: segment-tree requires 4 to 8 finite integer values.`);
+  return { values };
+}
+var DEFAULT_VALUES12, segmentTree;
+var init_segment_tree = __esm({
+  "custom/steptrace/src/algorithms/segment-tree.ts"() {
+    init_range_aggregate();
+    DEFAULT_VALUES12 = [3, 4, 1, 7, 2, 6, 5, 8];
+    segmentTree = {
+      id: "segment-tree",
+      family: "range-aggregate",
+      meta: { label: "Segment Tree" },
+      parse: parseSegmentTreeConfig,
+      mount: mountSegmentTree
+    };
+  }
+});
+
+// custom/steptrace/src/algorithms/shell-sort.ts
+function invalidConfig10(message) {
+  throw new Error(`steptrace: shell-sort ${message}`);
+}
+function parseShellSortConfig(config) {
+  const { array, gaps } = config;
+  if (!Array.isArray(array) || array.length < 2)
+    invalidConfig10('requires an "array" with at least two numbers.');
+  if (!array.every((value) => typeof value === "number" && Number.isFinite(value)))
+    invalidConfig10('requires every "array" value to be a finite number.');
+  if (!Array.isArray(gaps) || gaps.length === 0)
+    invalidConfig10('requires a non-empty "gaps" array ending in 1.');
+  if (!gaps.every((gap) => Number.isInteger(gap) && gap > 0 && gap < array.length))
+    invalidConfig10("requires every gap to be a positive integer smaller than the array length.");
+  if (gaps.at(-1) !== 1) invalidConfig10("requires the final gap to be 1.");
+  if (gaps.some((gap, index) => index > 0 && gap >= gaps[index - 1]))
+    invalidConfig10("requires gaps in strictly decreasing order.");
+  return { array: array.slice(), gaps: gaps.slice(), profile: "shell" };
+}
+var shellSort;
+var init_shell_sort = __esm({
+  "custom/steptrace/src/algorithms/shell-sort.ts"() {
+    init_array_sort();
+    shellSort = {
+      id: "shell-sort",
+      kind: "sort",
+      family: arraySortFamily,
+      meta: { label: "Shell sort" },
+      parse: parseShellSortConfig,
+      run(input, ops) {
+        ops.init("Shell sort — insertion-sort interleaved subsequences, then shrink the gap to 1.");
+        for (const gap of input.gaps) {
+          ops.beginGap(gap, `Gap ${gap}: sort each subsequence whose indices are ${gap} apart.`);
+          for (let start = 0; start < gap; start++) {
+            const indices = [];
+            for (let index = start; index < ops.value.length; index += gap) indices.push(index);
+            if (indices.length < 2) continue;
+            ops.selectSubsequence(indices, `Gap ${gap}, subsequence ${indices.join(" → ")}.`);
+            for (let index = start + gap; index < ops.value.length; index += gap) {
+              const key4 = ops.value[index];
+              ops.holdKeyAt(
+                key4,
+                index,
+                `Lift ${key4} from index ${index}; index ${index} becomes the insertion hole.`
+              );
+              let cursor = index - gap;
+              ops.compareHeldAt(
+                cursor,
+                `Hold ${key4} from index ${index}; compare it with ${ops.value[cursor]} at index ${cursor}.`
+              );
+              while (cursor >= start && ops.value[cursor] > key4) {
+                ops.shiftHeld(
+                  cursor + gap,
+                  cursor,
+                  `${ops.value[cursor]} > ${key4}: shift it from ${cursor} to ${cursor + gap}.`
+                );
+                cursor -= gap;
+                if (cursor >= start)
+                  ops.compareHeldAt(
+                    cursor,
+                    `Compare ${key4} with ${ops.value[cursor]} at index ${cursor}.`
+                  );
+              }
+              ops.placeHeld(cursor + gap, key4, `Place ${key4} at index ${cursor + gap}.`);
+              ops.releaseHeldKey();
+            }
+          }
+        }
+        ops.lockAll(Array.from({ length: ops.value.length }, (_, index) => index));
+        ops.done(`Sorted in ${ops.comparisons} comparisons and ${ops.swaps} gapped moves.`);
+      }
+    };
+  }
+});
+
+// custom/steptrace/src/algorithms/sliding-window.ts
+var slidingWindow;
+var init_sliding_window = __esm({
+  "custom/steptrace/src/algorithms/sliding-window.ts"() {
+    slidingWindow = {
+      id: "sliding-window",
+      kind: "pointers",
+      meta: { label: "Sliding window" },
+      run: (input, ops) => {
+        const a = ops.value;
+        const target = input.target;
+        ops.init(
+          `Sliding window — find the shortest contiguous subarray with sum ≥ ${target}. Expand the window right to grow the sum; shrink from the left while it stays ≥ ${target}.`
+        );
+        let lo = 0;
+        let sum = 0;
+        let best = Infinity;
+        let bestRange = null;
+        for (let hi = 0; hi < a.length; hi++) {
+          sum += a[hi];
+          ops.step(
+            { pointers: { lo, hi }, window: [lo, hi] },
+            `Expand right to index ${hi}: window sum = ${sum}.`
+          );
+          while (sum >= target) {
+            if (hi - lo + 1 < best) {
+              best = hi - lo + 1;
+              bestRange = [lo, hi];
+            }
+            ops.step(
+              { pointers: { lo, hi }, window: [lo, hi] },
+              `Sum ${sum} ≥ ${target} (length ${hi - lo + 1}) — record it, then shrink from the left.`
+            );
+            sum -= a[lo];
+            lo++;
+          }
+        }
+        if (bestRange) {
+          const marks = [];
+          for (let k = bestRange[0]; k <= bestRange[1]; k++) marks.push(k);
+          ops.step(
+            { pointers: {}, window: bestRange, mark: marks },
+            `Shortest window: indices ${bestRange[0]}..${bestRange[1]} (length ${best}).`
+          );
+          ops.done(`Answer: the shortest qualifying length is ${best}.`);
+        } else {
+          ops.done(`No subarray reaches ${target}.`);
+        }
+      }
+    };
+  }
+});
+
+// custom/steptrace/src/algorithms/span.ts
+function parseSpanConfig(config) {
+  const values = (config.values?.length ? config.values : DEFAULT_VALUES13).map(String);
+  const [start, end] = config.range ?? [1, Math.min(4, values.length)];
+  if (values.length < 3 || values.length > 10 || !Number.isInteger(start) || !Number.isInteger(end) || start < 0 || end <= start || end > values.length)
+    throw new Error(`steptrace: span requires 3 to 10 "values" and a valid half-open "range".`);
+  return { values, start, length: end - start };
+}
+var DEFAULT_VALUES13, span;
+var init_span = __esm({
+  "custom/steptrace/src/algorithms/span.ts"() {
+    init_contiguous_storage();
+    DEFAULT_VALUES13 = [10, 20, 30, 40, 50, 60];
+    span = {
+      id: "span",
+      family: "contiguous-storage",
+      meta: { label: "Span" },
+      parse: parseSpanConfig,
+      mount: mountSpan
+    };
+  }
+});
+
+// custom/steptrace/src/algorithms/splay-tree.ts
+var DEFAULT_VALUES14, splayTree;
+var init_splay_tree = __esm({
+  "custom/steptrace/src/algorithms/splay-tree.ts"() {
+    init_binary_tree();
+    DEFAULT_VALUES14 = [100, 50, 150, 25, 75, 60];
+    splayTree = {
+      id: "splay-tree",
+      family: "binary-tree",
+      meta: { label: "Splay Tree" },
+      parse: (config) => parseBinaryTreeConfig(config, "splay-tree", DEFAULT_VALUES14),
+      mount: mountSplayTree
+    };
+  }
+});
+
+// custom/steptrace/src/algorithms/stack.ts
+function parseStackConfig(config) {
+  const values = (config.values?.length ? config.values : DEFAULT_VALUES15).map(String);
+  const capacity = config.capacity ?? 6;
+  if (!Number.isInteger(capacity) || capacity < 3 || capacity > 8 || values.length > capacity)
+    throw new Error(
+      `steptrace: stack requires integer "capacity" from 3 to 8 with no more values than slots.`
+    );
+  return { capacity, values };
+}
+var DEFAULT_VALUES15, stack;
+var init_stack = __esm({
+  "custom/steptrace/src/algorithms/stack.ts"() {
+    init_stack_sequence();
+    DEFAULT_VALUES15 = ["A", "B", "C"];
+    stack = {
+      id: "stack",
+      family: "stack-sequence",
+      meta: { label: "Stack" },
+      parse: parseStackConfig,
+      mount: mountStack
+    };
+  }
+});
+
+// custom/steptrace/src/algorithms/skew-heap.ts
+function parseSkewHeapConfig(_config) {
+  return {};
+}
+var skewHeap;
+var init_skew_heap = __esm({
+  "custom/steptrace/src/algorithms/skew-heap.ts"() {
+    init_heap_structure();
+    skewHeap = {
+      id: "skew-heap",
+      family: "heap-selection",
+      meta: { label: "Skew heap" },
+      parse: parseSkewHeapConfig,
+      mount: mountSkewHeap
+    };
+  }
+});
+
+// custom/steptrace/src/algorithms/topological-sort.ts
+var topologicalSort;
+var init_topological_sort = __esm({
+  "custom/steptrace/src/algorithms/topological-sort.ts"() {
+    topologicalSort = {
+      id: "topological-sort",
+      kind: "graph",
+      meta: { label: "Topological sort (Kahn)", frontierLabel: "Ready queue (in-degree 0)" },
+      run: (input, ops, graph) => {
+        const adj = {};
+        const indeg = {};
+        for (const nd of graph.nodes) {
+          adj[nd.id] = [];
+          indeg[nd.id] = 0;
+        }
+        for (const e of graph.edges) {
+          adj[e.from].push(e.to);
+          indeg[e.to] = (indeg[e.to] || 0) + 1;
+        }
+        ops.init(
+          `Topological sort (Kahn's algorithm) — repeatedly take a node with no remaining prerequisites (in-degree 0) and append it to the order; removing it may make others ready.`
+        );
+        const ready = [];
+        for (const nd of graph.nodes) {
+          if (indeg[nd.id] === 0) {
+            ready.push(nd.id);
+            ops.enqueue(nd.id, null, `${nd.id} has in-degree 0 — ready.`);
+          }
+        }
+        const order = [];
+        while (ready.length) {
+          ready.sort();
+          const u = ready.shift();
+          ops.visit(u, `Output ${u} (position ${order.length + 1} in the order).`);
+          order.push(u);
+          for (const v of adj[u].slice().sort()) {
+            ops.edge(u, v, `Remove edge ${u}→${v}: in-degree of ${v} becomes ${indeg[v] - 1}.`);
+            indeg[v]--;
+            if (indeg[v] === 0) {
+              ready.push(v);
+              ops.enqueue(v, null, `${v} is now ready.`);
+            }
+          }
+        }
+        ops.done(
+          order.length === graph.nodes.length ? `Topological order: ${order.join(" → ")}.` : `A cycle remains (${graph.nodes.length - order.length} node(s) unresolved) — no valid ordering.`
+        );
+      }
+    };
+  }
+});
+
+// custom/steptrace/src/algorithms/top-k-elements.ts
+function parseTopKElementsConfig(config) {
+  const array = config.array ?? DEFAULT_ARRAY3;
+  const k = config.k ?? DEFAULT_K;
+  if (!Array.isArray(array) || array.length === 0 || !array.every(Number.isFinite))
+    throw new Error('steptrace: top-k-elements requires a non-empty numeric "array".');
+  if (!Number.isInteger(k) || k < 1 || k > array.length || k > 7)
+    throw new Error(
+      'steptrace: top-k-elements requires integer "k" from 1 to min(array length, 7).'
+    );
+  return { profile: "top-k-largest", array: array.slice(), k };
+}
+var DEFAULT_ARRAY3, DEFAULT_K, topKElements;
+var init_top_k_elements = __esm({
+  "custom/steptrace/src/algorithms/top-k-elements.ts"() {
+    init_heap_selection();
+    DEFAULT_ARRAY3 = [12, 3, 17, 8, 25, 5, 19, 14];
+    DEFAULT_K = 3;
+    topKElements = {
+      id: "top-k-elements",
+      kind: "pointers",
+      family: heapSelectionFamily,
+      meta: { label: "Top-K elements" },
+      parse: parseTopKElementsConfig,
+      run(input, ops) {
+        const heap2 = [];
+        const swap = (left, right) => {
+          ;
+          [heap2[left], heap2[right]] = [heap2[right], heap2[left]];
+        };
+        ops.init(`Keep a min-heap of ${input.k}; its root is the weakest current winner.`);
+        input.array.forEach((value, index) => {
+          ops.read(index, `Read ${value} from the stream.`);
+          if (heap2.length < input.k) {
+            heap2.push({ value, source: index });
+            ops.insert(index, `The heap has room, so insert ${value} at slot ${heap2.length - 1}.`);
+            let child = heap2.length - 1;
+            while (child > 0) {
+              const parent2 = Math.floor((child - 1) / 2);
+              ops.compareParent(
+                child,
+                parent2,
+                `Compare inserted ${heap2[child].value} with parent ${heap2[parent2].value}.`
+              );
+              if (heap2[parent2].value <= heap2[child].value) break;
+              const childValue = heap2[child].value;
+              const parentValue = heap2[parent2].value;
+              swap(child, parent2);
+              ops.swapUp(
+                child,
+                parent2,
+                `${childValue} is smaller than ${parentValue}, so swap upward; the smaller value moves toward the root.`
+              );
+              child = parent2;
+            }
+            return;
+          }
+          ops.compareRoot(
+            index,
+            `Compare ${value} with root ${heap2[0].value}, the weakest of the ${input.k} retained winners.`
+          );
+          if (value <= heap2[0].value) {
+            ops.reject(
+              index,
+              `${value} ≤ ${heap2[0].value}; reject ${value} because it cannot enter the top ${input.k}.`
+            );
+            return;
+          }
+          const evicted = heap2[0].value;
+          heap2[0] = { value, source: index };
+          ops.replaceRoot(
+            index,
+            `${value} > ${evicted}; evict the weakest winner ${evicted} and place ${value} at the root.`
+          );
+          let parent = 0;
+          while (true) {
+            const left = parent * 2 + 1;
+            if (left >= heap2.length) break;
+            const right = left + 1;
+            let weaker = left;
+            if (right < heap2.length) {
+              ops.compareChildren(
+                left,
+                right,
+                `Compare children ${heap2[left].value} and ${heap2[right].value}; ${Math.min(heap2[left].value, heap2[right].value)} is weaker.`
+              );
+              if (heap2[right].value < heap2[left].value) weaker = right;
+            }
+            ops.compareDown(
+              parent,
+              weaker,
+              `Compare ${heap2[parent].value} with weaker child ${heap2[weaker].value}.`
+            );
+            if (heap2[parent].value <= heap2[weaker].value) break;
+            const parentValue = heap2[parent].value;
+            const childValue = heap2[weaker].value;
+            swap(parent, weaker);
+            ops.swapDown(
+              parent,
+              weaker,
+              `${parentValue} > ${childValue}, so swap them; ${childValue} becomes the weaker root candidate.`
+            );
+            parent = weaker;
+          }
+        });
+        ops.done(
+          `The heap contains the ${input.k} largest values. Its root is the weakest winner; the heap itself is not globally sorted.`
+        );
+      }
+    };
+  }
+});
+
+// custom/steptrace/src/algorithms/strongly-connected-components.ts
+function parse6() {
+  return {
+    nodes: [
+      { id: "A", label: "A", x: 85, y: 120 },
+      { id: "B", label: "B", x: 220, y: 55 },
+      { id: "C", label: "C", x: 220, y: 190 },
+      { id: "D", label: "D", x: 400, y: 190 },
+      { id: "E", label: "E", x: 535, y: 120 }
+    ],
+    edges: [
+      { from: "A", to: "B", weight: 1, directed: true, showDirection: true },
+      { from: "B", to: "C", weight: 1, directed: true, showDirection: true },
+      { from: "C", to: "A", weight: 1, directed: true, showDirection: true },
+      { from: "C", to: "D", weight: 1, directed: true, showDirection: true },
+      { from: "D", to: "E", weight: 1, directed: true, showDirection: true },
+      { from: "E", to: "D", weight: 1, directed: true, showDirection: true }
+    ]
+  };
+}
+function run5(_, recorder) {
+  const disc = {};
+  const low = {};
+  const stack2 = [];
+  const components = [];
+  const visit = (id, time, parent) => {
+    disc[id] = low[id] = time;
+    stack2.push(id);
+    recorder.record("discover", id, parent ? [parent, id] : null, disc, low, stack2, components, `Push ${id}: disc ${time}, low ${time}.`);
+  };
+  visit("A", 0, null);
+  visit("B", 1, "A");
+  visit("C", 2, "B");
+  low["C"] = 0;
+  recorder.record("back-edge", "C", ["C", "A"], disc, low, stack2, components, "C→A reaches an active ancestor; low[C] becomes 0.");
+  visit("D", 3, "C");
+  visit("E", 4, "D");
+  low["E"] = 3;
+  recorder.record("back-edge", "E", ["E", "D"], disc, low, stack2, components, "E→D reaches an active ancestor; low[E] becomes 3.");
+  low["D"] = Math.min(low["D"], low["E"]);
+  recorder.record("propagate", "D", ["D", "E"], disc, low, stack2, components, "Propagate low[E] = 3 to D.");
+  components.push([stack2.pop(), stack2.pop()]);
+  recorder.record("component", "D", null, disc, low, stack2, components, "low[D] = disc[D]; pop E and D as one SCC.");
+  low["B"] = low["C"];
+  recorder.record("propagate", "B", ["B", "C"], disc, low, stack2, components, "Propagate low[C] = 0 through B.");
+  low["A"] = low["B"];
+  components.push([stack2.pop(), stack2.pop(), stack2.pop()]);
+  recorder.record("component", "A", null, disc, low, stack2, components, "low[A] = disc[A]; pop C, B, A as one SCC.");
+  recorder.record("done", null, null, disc, low, stack2, components, "SCCs: {D,E} and {A,B,C}.");
+}
+var Recorder9, family9, stronglyConnectedComponents;
+var init_strongly_connected_components = __esm({
+  "custom/steptrace/src/algorithms/strongly-connected-components.ts"() {
+    init_graph_state();
+    Recorder9 = class {
+      constructor(config) {
+        this.config = config;
+      }
+      config;
+      frames = [];
+      record(type, current, edge, discovery, low, stack2, components, message) {
+        const emitted = new Set(components.flat());
+        const detail = { kind: "low-link-components", discovery: { ...discovery }, low: { ...low }, stack: [...stack2], components: components.map((component) => [...component]) };
+        this.frames.push({
+          type,
+          profile: "strongly-connected-components",
+          nodes: this.config.nodes,
+          edges: this.config.edges,
+          decor: [],
+          start: "A",
+          target: null,
+          currentNode: current,
+          currentEdge: edge,
+          selectedEdges: [],
+          nodeState: Object.fromEntries(this.config.nodes.map(({ id }) => [id, id === current ? "active" : emitted.has(id) ? "accepted" : stack2.includes(id) ? "frontier" : id in discovery ? "closed" : "neutral"])),
+          edgeState: Object.fromEntries(this.config.edges.map(({ from, to }) => [`${from}|${to}`, edge?.[0] === from && edge[1] === to ? "active" : emitted.has(from) && emitted.has(to) ? "accepted" : "neutral"])),
+          message,
+          detail
+        });
+      }
+    };
+    family9 = { id: "graph-state", createRecorder: (config) => new Recorder9(config), createView: makeGraphStateView };
+    stronglyConnectedComponents = {
+      id: "strongly-connected-components",
+      kind: "graph",
+      family: family9,
+      meta: { label: "Strongly Connected Components" },
+      parse: parse6,
+      run: run5
+    };
+  }
+});
+
+// custom/steptrace/src/algorithms/trie.ts
+var trie;
+var init_trie = __esm({
+  "custom/steptrace/src/algorithms/trie.ts"() {
+    init_prefix_character();
+    trie = {
+      id: "trie",
+      kind: "string",
+      family: prefixCharacterFamily,
+      meta: { label: "Trie" },
+      parse: parsePrefixCharacterConfig,
+      run(input, ops) {
+        for (const [operation, key4] of input.operations) {
+          ops.begin(operation, key4, `${operation} "${key4}" starts at the root.`);
+          let prefix = "";
+          let pathExists = true;
+          for (let index = 0; index < key4.length; index++) {
+            const next = prefix + key4[index];
+            const edgeId2 = `${prefix || "root"}->${next}`;
+            if (!ops.hasVisibleEdge(edgeId2)) {
+              if (operation !== "insert") {
+                pathExists = false;
+                break;
+              }
+              ops.createNode(edgeId2, next, index + 1, `Create edge ${key4[index]} and node "${next}".`);
+            } else {
+              ops.reuseEdge(edgeId2, next, index + 1, `Reuse edge ${key4[index]} to node "${next}".`);
+            }
+            prefix = next;
+          }
+          if (operation === "insert") {
+            ops.markTerminal(key4, `Mark "${key4}" terminal; descendants do not change that marker.`);
+          } else if (operation === "prefix") {
+            ops.completePrefix(pathExists, `Prefix "${key4}" tests path existence: ${pathExists}.`);
+          } else {
+            const found = pathExists && ops.hasTerminal(key4);
+            ops.completeSearch(found, `Search "${key4}" tests IsEnd after the path: ${found}.`);
+          }
+        }
+        ops.done("All trie operations complete; shared prefixes remain one persistent path.");
+      }
+    };
+  }
+});
+
+// custom/steptrace/src/algorithms/two-pointers.ts
+var twoPointers;
+var init_two_pointers = __esm({
+  "custom/steptrace/src/algorithms/two-pointers.ts"() {
+    twoPointers = {
+      id: "two-pointers",
+      kind: "pointers",
+      meta: { label: "Two pointers" },
+      run: (input, ops) => {
+        const a = ops.value;
+        const target = input.target;
+        ops.init(
+          `Two pointers on a sorted array — find a pair summing to ${target}. Move the left pointer right to raise the sum, the right pointer left to lower it.`
+        );
+        let l = 0;
+        let r = a.length - 1;
+        while (l < r) {
+          const sum = a[l] + a[r];
+          ops.step(
+            { pointers: { L: l, R: r }, window: [l, r] },
+            `a[${l}] + a[${r}] = ${a[l]} + ${a[r]} = ${sum}.`
+          );
+          if (sum === target) {
+            ops.step(
+              { pointers: { L: l, R: r }, window: [l, r], mark: [l, r] },
+              `${a[l]} + ${a[r]} = ${target} — found the pair.`
+            );
+            ops.done(`Found a pair at indices ${l} and ${r}.`);
+            return;
+          }
+          if (sum < target) l++;
+          else r--;
+        }
+        ops.done(`No pair sums to ${target}.`);
+      }
+    };
+  }
+});
+
+// custom/steptrace/src/families/union-find.ts
+function svgElement4(kind, attributes = {}) {
+  const node2 = document.createElementNS(SVG_NS8, kind);
+  for (const [key4, value] of Object.entries(attributes)) node2.setAttribute(key4, String(value));
+  return node2;
+}
+function mountUnionFind(root, config) {
+  const shell = createStructureShell(
+    root,
+    "union-find",
+    "union-find",
+    "Interactive disjoint-set forest with union by rank and path compression",
+    "union-find",
+    "steptrace__union-find"
+  );
+  const parent = Array.from({ length: config.size }, (_, index) => index);
+  const rank = Array(config.size).fill(0);
+  let highlighted = /* @__PURE__ */ new Set();
+  let activeRoot = null;
+  let layoutWidth = WIDTH;
+  const forest = el("section", "steptrace__union-find-forest");
+  forest.setAttribute("aria-label", "Disjoint-set parent forest");
+  const svg = svgElement4("svg", {
+    class: "steptrace__union-find-svg",
+    viewBox: `0 0 ${WIDTH} ${HEIGHT}`,
+    role: "img",
+    "aria-label": "Each arrow points from an element to its parent; roots point to themselves"
+  });
+  const markerId = `steptrace-union-find-arrow-${++markerSerial}`;
+  const marker2 = svgElement4("marker", {
+    id: markerId,
+    viewBox: "0 0 6 6",
+    refX: 5,
+    refY: 3,
+    markerWidth: 6,
+    markerHeight: 6,
+    orient: "auto"
+  });
+  marker2.append(svgElement4("path", { d: "M 0 0 L 6 3 L 0 6 Z" }));
+  const defs = svgElement4("defs");
+  defs.append(marker2);
+  const edges5 = svgElement4("g", { class: "steptrace__union-find-edges" });
+  const nodes5 = svgElement4("g", { class: "steptrace__union-find-nodes" });
+  svg.append(defs, edges5, nodes5);
+  forest.append(svg);
+  const edgeNodes = Array.from({ length: config.size }, () => {
+    const edge = svgElement4("path", {
+      class: "steptrace__union-find-edge",
+      "marker-end": `url(#${markerId})`
+    });
+    edges5.append(edge);
+    return edge;
+  });
+  const nodeNodes = Array.from({ length: config.size }, (_, index) => {
+    const group = svgElement4("g", { class: "steptrace__union-find-node" });
+    const circle = svgElement4("circle", { r: NODE_RADIUS });
+    const value = svgElement4("text", { "text-anchor": "middle", "dominant-baseline": "central" });
+    const rootLabel = svgElement4("text", {
+      class: "steptrace__union-find-root-label",
+      x: 0,
+      y: 31,
+      "text-anchor": "middle"
+    });
+    value.textContent = String(index);
+    rootLabel.textContent = "root";
+    group.append(circle, value, rootLabel);
+    nodes5.append(group);
+    return { group, rootLabel };
+  });
+  const parentLabel = el("div", "steptrace__rail-label steptrace__union-find-parent-label");
+  parentLabel.textContent = "Parent array";
+  const parentWrap = el("div", "steptrace__union-find-parent");
+  const parentBoard = createIndexedBoard(parentWrap, config.size, "Parent index for each element");
+  shell.stage.append(forest, parentLabel, parentWrap);
+  const values = Array.from({ length: config.size }, (_, index) => String(index));
+  const first = shell.select("First element", "Element A", values, "0");
+  const second = shell.select("Second element", "Element B", values, "1");
+  const union = shell.button("Union", true);
+  const find = shell.button("Find A");
+  const connected = shell.button("Connected?");
+  const reset = shell.button("Reset");
+  shell.controls.append(first, second, union, find, connected, reset);
+  function rootOf(start) {
+    let current = start;
+    while (parent[current] !== current) current = parent[current];
+    return current;
+  }
+  function findAndCompress(start) {
+    const path = [start];
+    let current = start;
+    while (parent[current] !== current) {
+      current = parent[current];
+      path.push(current);
+    }
+    for (const node2 of path) parent[node2] = current;
+    return { root: current, path };
+  }
+  function layout() {
+    const children = Array.from({ length: config.size }, () => []);
+    const roots = [];
+    for (let index = 0; index < config.size; index++) {
+      if (parent[index] === index) roots.push(index);
+      else children[parent[index]].push(index);
+    }
+    const widths = Array(config.size).fill(1);
+    const measure = (node2) => {
+      widths[node2] = Math.max(
+        1,
+        children[node2].reduce((sum, child) => sum + measure(child), 0)
+      );
+      return widths[node2];
+    };
+    const gap = 0.45;
+    const total = roots.reduce((sum, root2) => sum + measure(root2), 0) + gap * (roots.length - 1);
+    const positions = Array.from({ length: config.size }, () => ({ x: 0, y: 0 }));
+    const place = (node2, start, depth) => {
+      positions[node2] = {
+        x: 35 + (start + widths[node2] / 2) / total * (layoutWidth - 70),
+        y: TOP2 + depth * LEVEL_GAP
+      };
+      let cursor2 = start;
+      for (const child of children[node2]) {
+        place(child, cursor2, depth + 1);
+        cursor2 += widths[child];
+      }
+    };
+    let cursor = 0;
+    for (const root2 of roots) {
+      place(root2, cursor, 0);
+      cursor += widths[root2] + gap;
+    }
+    return { positions, roots };
+  }
+  function paint(message = "") {
+    const { positions, roots } = layout();
+    const selected = /* @__PURE__ */ new Set([Number(first.value), Number(second.value)]);
+    nodeNodes.forEach(({ group, rootLabel }, index) => {
+      const position = positions[index];
+      const root2 = rootOf(index);
+      group.setAttribute("transform", `translate(${position.x} ${position.y})`);
+      group.dataset.root = String(parent[index] === index);
+      group.dataset.active = String(highlighted.has(index));
+      group.dataset.selected = String(selected.has(index));
+      group.dataset.representative = String(activeRoot === index);
+      group.style.setProperty("--steptrace-uf-set", `var(--steptrace-uf-set-${root2})`);
+      group.setAttribute(
+        "aria-label",
+        `element ${index}, parent ${parent[index]}, representative ${root2}${parent[index] === index ? ", root" : ""}`
+      );
+      rootLabel.style.display = parent[index] === index ? "" : "none";
+      const edge = edgeNodes[index];
+      if (parent[index] === index) {
+        edge.style.display = "none";
+        return;
+      }
+      const target = positions[parent[index]];
+      const dx = target.x - position.x;
+      const dy = target.y - position.y;
+      const distance2 = Math.hypot(dx, dy);
+      const startX = position.x + dx * NODE_RADIUS / distance2;
+      const startY = position.y + dy * NODE_RADIUS / distance2;
+      const endX = target.x - dx * (NODE_RADIUS + 5) / distance2;
+      const endY = target.y - dy * (NODE_RADIUS + 5) / distance2;
+      edge.style.display = "";
+      edge.dataset.active = String(highlighted.has(index));
+      edge.setAttribute(
+        "d",
+        `M ${startX} ${startY} C ${startX} ${(startY + endY) / 2}, ${endX} ${(startY + endY) / 2}, ${endX} ${endY}`
+      );
+    });
+    parentBoard.paint(
+      parent.map((value, index) => ({
+        value: String(value),
+        active: parent[index] === index,
+        changed: highlighted.has(index),
+        ariaLabel: `element ${index}, parent ${value}`
+      }))
+    );
+    shell.setCounter(String(roots.length), roots.length === 1 ? " set" : " sets");
+    shell.status.textContent = message || "Union two elements, find A's representative, or compare their sets.";
+  }
+  function selectedPair() {
+    const a = Number(first.value);
+    const b = Number(second.value);
+    return Number.isInteger(a) && Number.isInteger(b) ? [a, b] : null;
+  }
+  function onUnion() {
+    const pair3 = selectedPair();
+    if (!pair3) return;
+    const [a, b] = pair3;
+    const left = findAndCompress(a);
+    const right = findAndCompress(b);
+    highlighted = /* @__PURE__ */ new Set([...left.path, ...right.path]);
+    if (left.root === right.root) {
+      activeRoot = left.root;
+      paint(`${a} and ${b} already share root ${left.root}.`);
+      return;
+    }
+    let parentRoot = left.root;
+    let childRoot = right.root;
+    if (rank[parentRoot] < rank[childRoot]) [parentRoot, childRoot] = [childRoot, parentRoot];
+    parent[childRoot] = parentRoot;
+    if (rank[parentRoot] === rank[childRoot]) rank[parentRoot]++;
+    highlighted.add(childRoot);
+    highlighted.add(parentRoot);
+    activeRoot = parentRoot;
+    paint(`Union(${a}, ${b}) linked root ${childRoot} under root ${parentRoot} by rank.`);
+  }
+  function onFind() {
+    const a = Number(first.value);
+    if (!Number.isInteger(a)) return;
+    const result = findAndCompress(a);
+    highlighted = new Set(result.path);
+    activeRoot = result.root;
+    paint(
+      result.path.length > 1 ? `Find(${a}) followed ${result.path.join(" → ")} and compressed the path to root ${result.root}.` : `Find(${a}) = ${result.root}; it is already a root.`
+    );
+  }
+  function onConnected() {
+    const pair3 = selectedPair();
+    if (!pair3) return;
+    const [a, b] = pair3;
+    const left = findAndCompress(a);
+    const right = findAndCompress(b);
+    highlighted = /* @__PURE__ */ new Set([...left.path, ...right.path]);
+    activeRoot = left.root === right.root ? left.root : null;
+    paint(
+      left.root === right.root ? `${a} and ${b} are connected through root ${left.root}.` : `${a} and ${b} are separate: roots ${left.root} and ${right.root}.`
+    );
+  }
+  function onReset() {
+    parent.forEach((_, index) => parent[index] = index);
+    rank.fill(0);
+    highlighted = /* @__PURE__ */ new Set();
+    activeRoot = null;
+    first.value = "0";
+    second.value = "1";
+    paint("Reset to singleton sets; every element is its own root.");
+  }
+  shell.listen(union, "click", onUnion);
+  shell.listen(find, "click", onFind);
+  shell.listen(connected, "click", onConnected);
+  shell.listen(reset, "click", onReset);
+  shell.listen(first, "change", (() => paint()));
+  shell.listen(second, "change", (() => paint()));
+  paint();
+  const syncWidth = () => {
+    const measured = Math.round(forest.getBoundingClientRect().width);
+    if (measured <= 0) return;
+    const next = Math.max(320, Math.min(WIDTH, measured));
+    if (next === layoutWidth) return;
+    layoutWidth = next;
+    svg.setAttribute("viewBox", `0 0 ${layoutWidth} ${HEIGHT}`);
+    paint();
+  };
+  const observer = typeof ResizeObserver === "undefined" ? null : new ResizeObserver(() => syncWidth());
+  syncWidth();
+  observer?.observe(forest);
+  const handle = shell.finish();
+  return {
+    destroy() {
+      observer?.disconnect();
+      handle.destroy();
+    }
+  };
+}
+var SVG_NS8, WIDTH, HEIGHT, TOP2, LEVEL_GAP, NODE_RADIUS, markerSerial;
+var init_union_find = __esm({
+  "custom/steptrace/src/families/union-find.ts"() {
+    init_render();
+    init_interactive_structure();
+    SVG_NS8 = "http://www.w3.org/2000/svg";
+    WIDTH = 700;
+    HEIGHT = 220;
+    TOP2 = 34;
+    LEVEL_GAP = 66;
+    NODE_RADIUS = 18;
+    markerSerial = 0;
+  }
+});
+
+// custom/steptrace/src/algorithms/union-find.ts
+function parseUnionFindConfig(config) {
+  const size = typeof config.n === "number" ? config.n : 7;
+  if (!Number.isInteger(size) || size < 4 || size > 7)
+    throw new Error(`steptrace: union-find requires integer "n" from 4 to 7.`);
+  return { size };
+}
+var unionFind;
+var init_union_find2 = __esm({
+  "custom/steptrace/src/algorithms/union-find.ts"() {
+    init_union_find();
+    unionFind = {
+      id: "union-find",
+      family: "union-find",
+      meta: { label: "Union-Find" },
+      parse: parseUnionFindConfig,
+      mount: mountUnionFind
+    };
+  }
+});
+
+// custom/steptrace/src/algorithms/ternary-search.ts
+function parseTernarySearchConfig(config) {
+  const array = config.array ?? config.values;
+  if (!Array.isArray(array) || array.length < 3)
+    throw new Error('steptrace: ternary-search requires an "array" with at least three values.');
+  if (!array.every((value) => typeof value === "number" && Number.isFinite(value)))
+    throw new Error('steptrace: ternary-search requires every "array" value to be a finite number.');
+  if (config.goal !== "maximum")
+    throw new Error('steptrace: ternary-search requires goal: "maximum".');
+  let peak = 1;
+  while (peak < array.length && array[peak] > array[peak - 1]) peak++;
+  if (peak === 1 || peak === array.length || array.slice(peak).some((value, index) => value >= array[peak + index - 1]))
+    throw new Error(
+      "steptrace: ternary-search requires a strictly increasing then strictly decreasing array."
+    );
+  return { array: array.slice(), target: null, profile: "ternary", goal: "maximum" };
+}
+var ternarySearch;
+var init_ternary_search = __esm({
+  "custom/steptrace/src/algorithms/ternary-search.ts"() {
+    init_indexed_array_search();
+    ternarySearch = {
+      id: "ternary-search",
+      kind: "search",
+      family: indexedArraySearchFamily,
+      meta: { label: "Ternary search" },
+      parse: parseTernarySearchConfig,
+      run(input, ops) {
+        const values = ops.value;
+        ops.init("Ternary search for the maximum: compare two third-points and keep the rising side.");
+        ops.beginPhase(
+          0,
+          values.length - 1,
+          "Probe both third-points together; the larger value shows which side still contains the peak.",
+          "ternary"
+        );
+        let left = 0;
+        let right = values.length - 1;
+        while (right - left > 2) {
+          const third = Math.floor((right - left) / 3);
+          const mid1 = left + third;
+          const mid2 = right - third;
+          ops.dualProbe(
+            left,
+            right,
+            mid1,
+            mid2,
+            `Compare [${mid1}] = ${values[mid1]} with [${mid2}] = ${values[mid2]}.`
+          );
+          if (values[mid1] < values[mid2]) {
+            left = mid1 + 1;
+            ops.narrow(left, right, `The sequence is higher at ${mid2}; keep [${left}, ${right}].`);
+          } else if (values[mid1] > values[mid2]) {
+            right = mid2 - 1;
+            ops.narrow(left, right, `The sequence is higher at ${mid1}; keep [${left}, ${right}].`);
+          } else {
+            left = mid1 + 1;
+            right = mid2 - 1;
+            ops.narrow(
+              left,
+              right,
+              `Equal third-points place the strict peak inside [${left}, ${right}].`
+            );
+          }
+        }
+        ops.beginPhase(
+          left,
+          right,
+          `Only [${left}, ${right}] remains; scan these final values.`,
+          "scan"
+        );
+        let best = left;
+        for (let index = left; index <= right; index++) {
+          ops.probe(left, right, index, `Check final candidate [${index}] = ${values[index]}.`);
+          if (values[index] > values[best]) best = index;
+        }
+        ops.hit(best, `${values[best]} is the maximum at index ${best}.`);
+        ops.done(`Found the maximum ${values[best]} at index ${best} after ${ops.comparisons} probes.`);
+      }
+    };
+  }
+});
+
+// custom/steptrace/src/algorithms/ternary-search-tree.ts
+function invalid3(message) {
+  throw new Error(`steptrace: ternary-search-tree ${message}`);
+}
+function parseTernarySearchTreeConfig(config) {
+  if (!Array.isArray(config.operations) || !config.operations.length)
+    invalid3('requires a non-empty "operations" array.');
+  const operations = config.operations.map((entry) => {
+    if (!Array.isArray(entry) || entry.length !== 2 || !["insert", "search"].includes(entry[0]) || typeof entry[1] !== "string" || !entry[1])
+      invalid3('operations must be ["insert"|"search", non-empty string] pairs.');
+    return [entry[0], entry[1]];
+  });
+  const inserts = operations.filter(([operation]) => operation === "insert");
+  if (!inserts.length) invalid3("requires at least one insert before search.");
+  let serial = 0;
+  let rootNode = null;
+  const nodes5 = {};
+  const edges5 = [];
+  const create = (character) => {
+    const id = `${character}${++serial}`;
+    nodes5[id] = { id, character, lo: null, eq: null, hi: null };
+    return id;
+  };
+  for (const [, key4] of inserts) {
+    let index = 0;
+    if (!rootNode) {
+      rootNode = create(key4[0]);
+      edges5.push({ id: edgeId("root", "eq", rootNode), from: "root", to: rootNode, role: "eq" });
+    }
+    let current = rootNode;
+    while (true) {
+      const node2 = nodes5[current];
+      const character = key4[index];
+      if (character < node2.character) {
+        if (!node2.lo) {
+          node2.lo = create(character);
+          edges5.push({ id: edgeId(current, "lo", node2.lo), from: current, to: node2.lo, role: "lo" });
+        }
+        current = node2.lo;
+      } else if (character > node2.character) {
+        if (!node2.hi) {
+          node2.hi = create(character);
+          edges5.push({ id: edgeId(current, "hi", node2.hi), from: current, to: node2.hi, role: "hi" });
+        }
+        current = node2.hi;
+      } else {
+        if (index === key4.length - 1) break;
+        index++;
+        if (!node2.eq) {
+          node2.eq = create(key4[index]);
+          edges5.push({ id: edgeId(current, "eq", node2.eq), from: current, to: node2.eq, role: "eq" });
+        }
+        current = node2.eq;
+      }
+    }
+  }
+  const labels = new Map([
+    ["root", "root"],
+    ...Object.values(nodes5).map((node2) => [node2.id, node2.character])
+  ]);
+  const built = characterTopology(labels, edges5);
+  return {
+    profile: "ternary-search-tree",
+    operations,
+    rootNode,
+    ternaryNodes: Object.freeze(
+      Object.fromEntries(Object.entries(nodes5).map(([id, node2]) => [id, Object.freeze({ ...node2 })]))
+    ),
+    nodes: built.nodes,
+    edges: built.edges
+  };
+}
+function traverse(input, ops, operation, key4) {
+  ops.begin(operation, key4, `${operation} "${key4}" starts at the ternary root.`);
+  let index = 0;
+  let current = input.rootNode;
+  const rootEdge = edgeId("root", "eq", current);
+  if (ops.hasVisibleEdge(rootEdge))
+    ops.reuseEdge(rootEdge, current, index, `Enter root character ${input.ternaryNodes[current].character}.`);
+  else ops.createNode(rootEdge, current, index, `Create root character ${input.ternaryNodes[current].character}.`);
+  while (current) {
+    const node2 = input.ternaryNodes[current];
+    const character = key4[index];
+    if (character === node2.character) {
+      if (index === key4.length - 1) {
+        if (operation === "insert") ops.markTerminal(current, `Mark "${key4}" terminal.`);
+        else
+          ops.completeSearch(
+            ops.hasTerminal(current),
+            `Character matched; IsEnd("${key4}") is ${ops.hasTerminal(current)}.`
+          );
+        return;
+      }
+      index++;
+      if (!node2.eq) break;
+      const id = edgeId(current, "eq", node2.eq);
+      if (ops.hasVisibleEdge(id))
+        ops.reuseEdge(id, node2.eq, index, `eq consumes the character; continue with ${key4[index]}.`);
+      else ops.createNode(id, node2.eq, index, `eq consumes the character; create ${key4[index]}.`);
+      current = node2.eq;
+    } else {
+      const role = character < node2.character ? "lo" : "hi";
+      const next = node2[role];
+      if (!next) break;
+      const id = edgeId(current, role, next);
+      if (ops.hasVisibleEdge(id))
+        ops.reuseEdge(id, next, index, `${role} keeps the cursor on ${character}.`);
+      else ops.createNode(id, next, index, `${role} keeps the cursor on ${character}.`);
+      current = next;
+    }
+  }
+  if (operation === "search") ops.completeSearch(false, `Search "${key4}" stopped before a terminal.`);
+}
+var edgeId, ternarySearchTree;
+var init_ternary_search_tree = __esm({
+  "custom/steptrace/src/algorithms/ternary-search-tree.ts"() {
+    init_prefix_character();
+    edgeId = (from, role, to) => `${from}-${role}->${to}`;
+    ternarySearchTree = {
+      id: "ternary-search-tree",
+      kind: "string",
+      family: prefixCharacterFamily,
+      meta: { label: "Ternary Search Tree" },
+      parse: parseTernarySearchTreeConfig,
+      run(input, ops) {
+        for (const [operation, key4] of input.operations)
+          traverse(input, ops, operation, key4);
+        ops.done("Ternary search tree complete: lo/hi compared without consuming; eq consumed.");
+      }
+    };
+  }
+});
+
+// custom/steptrace/src/families/run-stack.ts
+function runLabel(run6) {
+  return `[${run6.start}…${run6.start + run6.length - 1}] · ${run6.length}`;
+}
+function stackRunFor(frame, index) {
+  return frame.stack[index] || null;
+}
+function runAt(frame, index) {
+  return frame.stack.findIndex((run6) => run6.start <= index && index < run6.start + run6.length);
+}
+function runStackWatch(frame) {
+  const top = frame.stack.at(-1);
+  return [
+    {
+      k: "phase",
+      v: frame.type.replace("-", " "),
+      sw: "var(--_violet)",
+      hint: "What Tim sort is doing in this frame."
+    },
+    {
+      k: "run",
+      v: frame.current ? runLabel(frame.current) : "—",
+      sw: "var(--_blue)",
+      hint: "Array span currently detected, extended, or merged."
+    },
+    {
+      k: "stack",
+      v: frame.stack.map((run6) => run6.length).join(" · ") || "empty",
+      sw: "var(--_amber)",
+      hint: "Saved contiguous run lengths, from stack bottom to top."
+    },
+    {
+      k: "top",
+      v: top ? runLabel(top) : "—",
+      sw: "var(--_green)",
+      hint: "Newest run at the top of the stack."
+    }
+  ];
+}
+function makeRunStackView(frames) {
+  const length = frames[0].array.length;
+  const root = el("div", "steptrace__run-stack");
+  root.setAttribute("role", "region");
+  root.setAttribute("aria-label", "Tim sort run stack");
+  const arrayLabel = el("div", "steptrace__rail-label steptrace__run-stack-label");
+  arrayLabel.textContent = "Array runs";
+  const arraySection = el("div", "steptrace__run-array-section");
+  const arrayBars = el("div", "steptrace__stage steptrace__run-bars");
+  const bars = makeBars(arrayBars, length);
+  const stackLabel = el("div", "steptrace__rail-label steptrace__run-stack-label");
+  stackLabel.textContent = "Run stack · top";
+  const stackSection = el("div", "steptrace__run-stack-section");
+  const stack2 = el("div", "steptrace__run-stack-cards");
+  const stackCards = Array.from({ length }, () => {
+    const card = el("div", "steptrace__run-stack-card");
+    const title = el("div", "steptrace__run-stack-title");
+    const values = el("div", "steptrace__run-stack-values");
+    card.append(title, values);
+    card.hidden = true;
+    stack2.append(card);
+    return { card, title, values };
+  });
+  const invariant = el("div", "steptrace__run-invariant");
+  arraySection.append(arrayLabel, arrayBars);
+  stackSection.append(stackLabel, stack2, invariant);
+  root.append(arraySection, stackSection);
+  const status = statusEl();
+  const maxValue = Math.max(...frames[0].array, 1);
+  let previousStack = [];
+  function paint(frame) {
+    for (let index = 0; index < length; index++) {
+      const bar = bars[index];
+      const runIndex = runAt(frame, index);
+      bar.fill.style.height = barHeightStyle(frame.array[index], maxValue);
+      bar.num.textContent = String(frame.array[index]);
+      if (runIndex >= 0) bar.bar.dataset.run = String(runIndex % 4);
+      else delete bar.bar.dataset.run;
+      bar.bar.dataset.processed = index < frame.processed ? "1" : "0";
+      const isSorted = frame.type === "done";
+      const isCurrent = !isSorted && frame.current != null && index >= frame.current.start && index < frame.current.start + frame.current.length;
+      const isInsert = !isSorted && frame.insertion?.target === index;
+      bar.bar.dataset.current = isCurrent ? "1" : "0";
+      bar.bar.dataset.insert = isInsert ? "1" : "0";
+      bar.bar.dataset.motion = frame.type === "insert" && isInsert ? "insert" : "";
+      bar.bar.dataset.state = isSorted ? "sorted" : isInsert ? "candidate" : isCurrent ? "compare" : "";
+      bar.bar.setAttribute(
+        "aria-label",
+        `Index ${index}, value ${frame.array[index]}${runIndex >= 0 ? `, run ${runIndex + 1}` : ""}`
+      );
+    }
+    for (let cardIndex = 0; cardIndex < stackCards.length; cardIndex++) {
+      const card = stackCards[cardIndex];
+      const run6 = stackRunFor(frame, frame.stack.length - cardIndex - 1);
+      if (!run6) {
+        card.card.hidden = true;
+        continue;
+      }
+      const stackIndex = frame.stack.length - cardIndex - 1;
+      card.card.hidden = false;
+      card.title.textContent = `R${stackIndex + 1} ${runLabel(run6)}`;
+      card.values.textContent = `[${frame.array.slice(run6.start, run6.start + run6.length).join(", ")}]`;
+      card.card.dataset.active = frame.current?.start === run6.start ? "1" : "0";
+      card.card.dataset.merged = frame.mergeIndex != null && (stackIndex === frame.mergeIndex || stackIndex === frame.mergeIndex + 1) ? "1" : "0";
+      card.card.dataset.run = String(stackIndex % 4);
+      const previous = previousStack[stackIndex];
+      card.card.dataset.motion = frame.type === "push" && stackIndex === frame.stack.length - 1 ? "push" : frame.type === "check" ? "check" : frame.type === "merge" || frame.type === "force-merge" ? "merge" : previous?.start !== run6.start || previous?.length !== run6.length ? "reflow" : "";
+    }
+    const check = frame.invariant;
+    invariant.textContent = check ? `X=${check.x ?? "—"}, Y=${check.y ?? "—"}, Z=${check.z ?? "—"}${check.holds == null ? "" : check.holds ? " · holds" : " · merge"}` : frame.type === "force-merge" ? "Final collapse: merge adjacent runs until one remains." : `minrun ${frame.minrun} · ${frame.merges} merge${frame.merges === 1 ? "" : "s"}`;
+    invariant.dataset.state = check?.holds === false ? "merge" : check?.holds ? "holds" : "";
+    status.textContent = frame.message;
+    previousStack = frame.stack;
+  }
+  return {
+    nodes: [root, status],
+    stageLayout: "fill",
+    stableStage: true,
+    paint,
+    watch: runStackWatch
+  };
+}
+var RunStackRecorder, runStackFamily;
+var init_run_stack = __esm({
+  "custom/steptrace/src/families/run-stack.ts"() {
+    init_render();
+    RunStackRecorder = class {
+      constructor(config) {
+        this.config = config;
+        this.array = config.array.slice();
+      }
+      config;
+      frames = [];
+      array;
+      stack = [];
+      current = null;
+      direction = null;
+      processed = 0;
+      insertion = null;
+      mergeIndex = null;
+      invariant = null;
+      merges = 0;
+      get value() {
+        return this.array.slice();
+      }
+      init(message) {
+        this.pushFrame("init", message);
+      }
+      detect(run6, direction, message) {
+        this.current = { ...run6 };
+        this.direction = direction;
+        this.insertion = null;
+        this.mergeIndex = null;
+        this.invariant = null;
+        this.pushFrame("detect", message);
+      }
+      reverse(run6, message) {
+        this.array.splice(run6.start, run6.length, ...this.array.slice(run6.start, run6.start + run6.length).reverse());
+        this.current = { ...run6 };
+        this.pushFrame("reverse", message);
+      }
+      extend(run6, message) {
+        this.current = { ...run6 };
+        this.insertion = null;
+        this.pushFrame("extend", message);
+      }
+      insert(run6, source, target, sortedEnd, message) {
+        const value = this.array[source];
+        for (let index = source; index > target; index--) this.array[index] = this.array[index - 1];
+        this.array[target] = value;
+        this.current = { ...run6 };
+        this.insertion = { source, target, sortedEnd };
+        this.pushFrame("insert", message);
+      }
+      push(run6, message) {
+        this.stack.push({ ...run6 });
+        this.current = { ...run6 };
+        this.direction = null;
+        this.insertion = null;
+        this.processed = run6.start + run6.length;
+        this.mergeIndex = null;
+        this.invariant = null;
+        this.pushFrame("push", message);
+      }
+      check(message) {
+        const x = this.stack.at(-1)?.length ?? null;
+        const y = this.stack.at(-2)?.length ?? null;
+        const z = this.stack.at(-3)?.length ?? null;
+        this.current = null;
+        this.insertion = null;
+        this.mergeIndex = null;
+        this.invariant = {
+          x,
+          y,
+          z,
+          holds: x == null || y == null ? null : y > x && (z == null || z > y + x)
+        };
+        this.pushFrame("check", message);
+      }
+      merge(index, forced, message) {
+        const left = this.stack[index];
+        const right = this.stack[index + 1];
+        if (!left || !right || left.start + left.length !== right.start)
+          throw new Error("steptrace: tim-sort can only merge adjacent run spans.");
+        const leftValues = this.array.slice(left.start, left.start + left.length);
+        const rightValues = this.array.slice(right.start, right.start + right.length);
+        const merged = [];
+        let i = 0;
+        let j = 0;
+        while (i < leftValues.length && j < rightValues.length) {
+          if (leftValues[i] <= rightValues[j]) merged.push(leftValues[i++]);
+          else merged.push(rightValues[j++]);
+        }
+        merged.push(...leftValues.slice(i), ...rightValues.slice(j));
+        this.array.splice(left.start, merged.length, ...merged);
+        this.stack.splice(index, 2, { start: left.start, length: left.length + right.length });
+        this.current = this.stack[index];
+        this.insertion = null;
+        this.mergeIndex = index;
+        this.invariant = null;
+        this.merges++;
+        this.pushFrame(forced ? "force-merge" : "merge", message);
+      }
+      done(message) {
+        this.current = null;
+        this.direction = null;
+        this.insertion = null;
+        this.mergeIndex = null;
+        this.invariant = null;
+        this.pushFrame("done", message);
+      }
+      pushFrame(type, message) {
+        this.frames.push(
+          Object.freeze({
+            type,
+            profile: this.config.profile,
+            array: this.array.slice(),
+            stack: this.stack.map((run6) => Object.freeze({ ...run6 })),
+            current: this.current ? Object.freeze({ ...this.current }) : null,
+            direction: this.direction,
+            processed: this.processed,
+            minrun: this.config.minrun,
+            insertion: this.insertion ? Object.freeze({ ...this.insertion }) : null,
+            mergeIndex: this.mergeIndex,
+            invariant: this.invariant ? Object.freeze({ ...this.invariant }) : null,
+            merges: this.merges,
+            message
+          })
+        );
+      }
+    };
+    runStackFamily = {
+      id: "run-stack",
+      createRecorder(config) {
+        return new RunStackRecorder(config);
+      },
+      createView(frames) {
+        return makeRunStackView(frames);
+      }
+    };
+  }
+});
+
+// custom/steptrace/src/algorithms/tim-sort.ts
+function invalidConfig11(message) {
+  throw new Error(`steptrace: tim-sort ${message}`);
+}
+function parseTimSortConfig(config) {
+  const { array } = config;
+  if (!Array.isArray(array) || array.length < 2)
+    invalidConfig11('requires an "array" with at least two numbers.');
+  if (!array.every((value) => typeof value === "number" && Number.isFinite(value)))
+    invalidConfig11('requires every "array" value to be a finite number.');
+  const minrun = config.minrun ?? Math.min(array.length, 4);
+  if (!Number.isInteger(minrun) || minrun < 2)
+    invalidConfig11('requires "minrun" to be an integer of at least 2.');
+  return { array: array.slice(), minrun: Math.min(minrun, array.length), profile: "tim-sort" };
+}
+function runLabel2(start, length) {
+  return `[${start}, ${start + length - 1}]`;
+}
+var timSort;
+var init_tim_sort = __esm({
+  "custom/steptrace/src/algorithms/tim-sort.ts"() {
+    init_run_stack();
+    timSort = {
+      id: "tim-sort",
+      kind: "sort",
+      family: runStackFamily,
+      meta: { label: "Tim sort" },
+      parse: parseTimSortConfig,
+      run(input, ops) {
+        const n = ops.value.length;
+        ops.init(`Scan natural runs, extend short runs to minrun ${input.minrun}, then merge the run stack.`);
+        function mergeCollapse() {
+          while (true) {
+            const stack2 = ops.frames.at(-1)?.stack || [];
+            if (stack2.length < 2) return;
+            const n2 = stack2.length - 2;
+            const x = stack2[n2 + 1].length;
+            const y = stack2[n2].length;
+            const z = n2 > 0 ? stack2[n2 - 1].length : null;
+            const w = n2 > 1 ? stack2[n2 - 2].length : null;
+            const deeperViolation = w != null && z != null && w <= z + y;
+            const threeRunViolation = z != null && z <= y + x;
+            const pairViolation = y <= x;
+            ops.check(
+              `Check X=${x}, Y=${y}${z == null ? "" : `, Z=${z}`}: ${threeRunViolation || pairViolation || deeperViolation ? "merge is required" : "invariants hold"}.`
+            );
+            if (threeRunViolation || deeperViolation) {
+              const mergeIndex = z != null && z < x ? n2 - 1 : n2;
+              ops.merge(
+                mergeIndex,
+                false,
+                `Invariant collapse: merge adjacent runs ${runLabel2(stack2[mergeIndex].start, stack2[mergeIndex].length)} and ${runLabel2(stack2[mergeIndex + 1].start, stack2[mergeIndex + 1].length)}.`
+              );
+            } else if (pairViolation) {
+              ops.merge(
+                n2,
+                false,
+                `Top pair violates Y > X: merge adjacent runs ${runLabel2(stack2[n2].start, stack2[n2].length)} and ${runLabel2(stack2[n2 + 1].start, stack2[n2 + 1].length)}.`
+              );
+            } else return;
+          }
+        }
+        let start = 0;
+        while (start < n) {
+          let end = start + 1;
+          const descending = end < n && ops.value[end] < ops.value[start];
+          if (descending) {
+            while (end < n && ops.value[end] < ops.value[end - 1]) end++;
+          } else {
+            while (end < n && ops.value[end] >= ops.value[end - 1]) end++;
+          }
+          let length = end - start;
+          ops.detect(
+            { start, length },
+            descending ? "descending" : "ascending",
+            `Detect ${descending ? "strictly descending" : "ascending"} natural run ${runLabel2(start, length)}.`
+          );
+          if (descending)
+            ops.reverse(
+              { start, length },
+              `Reverse the strictly descending run ${runLabel2(start, length)}; equal keys never entered it.`
+            );
+          const forcedLength = Math.min(input.minrun, n - start);
+          if (length < forcedLength) {
+            ops.extend(
+              { start, length: forcedLength },
+              `Extend ${runLabel2(start, length)} to minrun ${forcedLength} with stable binary insertion.`
+            );
+            for (let source = start + length; source < start + forcedLength; source++) {
+              const value = ops.value[source];
+              let lo = start;
+              let hi = source;
+              while (lo < hi) {
+                const mid = lo + hi >> 1;
+                if (value < ops.value[mid]) hi = mid;
+                else lo = mid + 1;
+              }
+              ops.insert(
+                { start, length: forcedLength },
+                source,
+                lo,
+                source,
+                `Binary-insert ${value} at index ${lo}; equals stay after earlier equals for stability.`
+              );
+            }
+            length = forcedLength;
+          }
+          ops.push({ start, length }, `Push contiguous run ${runLabel2(start, length)} onto the stack.`);
+          mergeCollapse();
+          start += length;
+        }
+        while ((ops.frames.at(-1)?.stack.length || 0) > 1) {
+          const stack2 = ops.frames.at(-1).stack;
+          let index = stack2.length - 2;
+          if (index > 0 && stack2[index - 1].length < stack2[index + 1].length) index--;
+          ops.merge(
+            index,
+            true,
+            `Force final merge of adjacent runs ${runLabel2(stack2[index].start, stack2[index].length)} and ${runLabel2(stack2[index + 1].start, stack2[index + 1].length)}.`
+          );
+        }
+        ops.done(`One run remains: sorted stably after ${ops.frames.at(-1)?.merges || 0} adjacent merges.`);
+      }
+    };
+  }
+});
+
+// custom/steptrace/src/algorithms/z-algorithm.ts
+var zAlgorithm;
+var init_z_algorithm = __esm({
+  "custom/steptrace/src/algorithms/z-algorithm.ts"() {
+    zAlgorithm = {
+      id: "z-algorithm",
+      kind: "string",
+      profile: "z-array",
+      meta: { label: "Z-Algorithm" },
+      run: (input, ops) => {
+        const text = String(input.text || "");
+        const n = text.length;
+        const z = new Array(n).fill(0);
+        if (n) z[0] = n;
+        ops.init(
+          n ? `Set Z[0] = ${n}. Each remaining entry measures how far the suffix at i matches the prefix.` : "The empty string has no Z-array entries."
+        );
+        if (!n) {
+          ops.done("Z = [].");
+          return;
+        }
+        let l = 0;
+        let r = 0;
+        for (let i = 1; i < n; i++) {
+          const inside = i <= r;
+          const k = inside ? i - l : null;
+          const remainder = inside ? r - i + 1 : 0;
+          const sourceCase = !inside ? "outside" : z[k] < remainder ? "copy" : "reuse-extend";
+          ops.focusZ(
+            i,
+            l,
+            r,
+            k,
+            sourceCase,
+            inside ? `i = ${i} lies inside [${l}, ${r}]; mirror k = ${k}.` : `i = ${i} lies outside [${l}, ${r}]; compare from the prefix start.`
+          );
+          if (inside) {
+            z[i] = Math.min(remainder, z[k]);
+            ops.copyZ(
+              i,
+              k,
+              z[i],
+              sourceCase,
+              sourceCase === "copy" ? `Copy Z[${k}] = ${z[k]} to Z[${i}]; it ends before r, so no character comparison is needed.` : `Reuse the verified box remainder ${remainder} from Z[${k}], then test beyond r.`
+            );
+            if (sourceCase === "copy") {
+              ops.commitZ(
+                i,
+                z[i],
+                l,
+                r,
+                sourceCase,
+                `Commit Z[${i}] = ${z[i]}; the active box stays [${l}, ${r}].`
+              );
+              continue;
+            }
+          }
+          while (i + z[i] < n) {
+            const prefixIndex = z[i];
+            const candidateIndex = i + z[i];
+            const isMatch = text[prefixIndex] === text[candidateIndex];
+            ops.compareZ(
+              i,
+              prefixIndex,
+              candidateIndex,
+              isMatch,
+              sourceCase,
+              `Compare S[${prefixIndex}]='${text[prefixIndex]}' with S[${candidateIndex}]='${text[candidateIndex]}' → ${isMatch ? "match" : "mismatch"}.`
+            );
+            if (!isMatch) break;
+            z[i]++;
+          }
+          if (i + z[i] - 1 > r) {
+            l = i;
+            r = i + z[i] - 1;
+          }
+          ops.commitZ(
+            i,
+            z[i],
+            l,
+            r,
+            sourceCase,
+            `Commit Z[${i}] = ${z[i]}; the active box is [${l}, ${r}].`
+          );
+        }
+        ops.done(`Z = [${z.join(", ")}].`);
+      }
+    };
+  }
+});
+
+// custom/steptrace/src/algorithms/index.ts
+var builtInAlgorithms, interactiveStructures;
+var init_algorithms = __esm({
+  "custom/steptrace/src/algorithms/index.ts"() {
+    init_activity_selection();
+    init_avl_tree();
+    init_a_star();
+    init_aho_corasick();
+    init_articulation_points_and_bridges();
+    init_bfs();
+    init_bellman_ford();
+    init_binary_search_on_answer();
+    init_binary_search();
+    init_binary_search_tree();
+    init_b_plus_tree();
+    init_b_tree();
+    init_bloom_filter();
+    init_binomial_queue();
+    init_bidirectional_search();
+    init_boyer_moore();
+    init_boruvka();
+    init_branch_and_bound();
+    init_bubble_sort();
+    init_bucket_sort();
+    init_arrays();
+    init_circular_buffer();
+    init_comb_sort();
+    init_connected_components();
+    init_counting_sort();
+    init_cyclic_sort();
+    init_dfs();
+    init_dijkstra();
+    init_divide_and_conquer();
+    init_deque();
+    init_dynamic_programming();
+    init_dynamic_array();
+    init_exponential_search();
+    init_interpolation_search();
+    init_floyd_warshall();
+    init_fast_and_slow_pointers();
+    init_fenwick_tree();
+    init_fibonacci_heap();
+    init_greedy_best_first_search();
+    init_graph2();
+    init_heap();
+    init_heap_sort();
+    init_hamiltonian_cycle();
+    init_hash_map();
+    init_hash_set();
+    init_insertion_sort();
+    init_introsort();
+    init_jump_search();
+    init_kernighan_popcount();
+    init_kmp();
+    init_kruskal();
+    init_lcs();
+    init_linear_search();
+    init_linked_list();
+    init_lru_cache();
+    init_leftist_heap();
+    init_merge_sort();
+    init_merge_sort_tree();
+    init_merge_intervals();
+    init_maximum_flow();
+    init_memoization();
+    init_monotonic_stack_and_queue();
+    init_n_queens();
+    init_prim();
+    init_prefix_sum2();
+    init_queue();
+    init_quick_sort();
+    init_radix_sort();
+    init_rabin_karp();
+    init_red_black_tree();
+    init_selection_sort();
+    init_segment_tree();
+    init_shell_sort();
+    init_sliding_window();
+    init_span();
+    init_splay_tree();
+    init_stack();
+    init_skew_heap();
+    init_topological_sort();
+    init_top_k_elements();
+    init_strongly_connected_components();
+    init_trie();
+    init_two_pointers();
+    init_union_find2();
+    init_ternary_search();
+    init_ternary_search_tree();
+    init_tim_sort();
+    init_z_algorithm();
+    builtInAlgorithms = [
+      activitySelection,
+      aStar,
+      articulationPointsAndBridges,
+      bellmanFord,
+      bidirectionalSearch,
+      boruvka,
+      connectedComponents,
+      greedyBestFirstSearch,
+      hamiltonianCycle,
+      kruskal,
+      maximumFlow,
+      stronglyConnectedComponents,
+      bubbleSort,
+      insertionSort,
+      selectionSort,
+      quickSort,
+      heapSort,
+      mergeSort,
+      mergeSortTree,
+      mergeIntervals,
+      shellSort,
+      combSort,
+      countingSort,
+      radixSort,
+      bucketSort,
+      cyclicSort,
+      introsort,
+      timSort,
+      exponentialSearch,
+      interpolationSearch,
+      jumpSearch,
+      ternarySearch,
+      binarySearchOnAnswer,
+      bfs,
+      dfs,
+      dijkstra,
+      prim,
+      prefixSum,
+      topologicalSort,
+      topKElements,
+      binarySearch,
+      linearSearch,
+      kmp,
+      rabinKarp,
+      zAlgorithm,
+      boyerMoore,
+      twoPointers,
+      slidingWindow,
+      lcs,
+      ...dynamicProgrammingAlgorithms,
+      floydWarshall,
+      fastAndSlowPointers,
+      kernighanPopcount,
+      nQueens,
+      memoization,
+      monotonicStackAndQueue,
+      divideAndConquer,
+      branchAndBound,
+      trie,
+      ahoCorasick,
+      ternarySearchTree
+    ];
+    interactiveStructures = [
+      arrays,
+      avlTree,
+      binarySearchTree,
+      bPlusTree,
+      bTree,
+      binomialQueue,
+      bloomFilter,
+      circularBuffer,
+      deque,
+      dynamicArray,
+      fenwickTree,
+      fibonacciHeap,
+      graphStructure,
+      heap,
+      hashMap,
+      hashSet,
+      leftistHeap,
+      linkedList,
+      lruCache,
+      queue,
+      redBlackTree,
+      segmentTree,
+      skewHeap,
+      span,
+      splayTree,
+      stack,
+      unionFind
+    ];
+  }
+});
+
+// custom/steptrace/src/player.ts
+var Player;
+var init_player = __esm({
+  "custom/steptrace/src/player.ts"() {
+    Player = class {
+      constructor(frames, paint, speed) {
+        this.frames = frames;
+        this.paint = paint;
+        this.i = 0;
+        this.speed = speed || 1;
+        this.playing = false;
+        this.timer = null;
+        this.baseDelay = 260;
+        this.onState = () => {
+        };
+      }
+      render() {
+        this.paint(this.frames[this.i], this.i, this.frames.length);
+        this.onState();
+      }
+      _clear() {
+        if (this.timer) {
+          clearTimeout(this.timer);
+          this.timer = null;
+        }
+      }
+      _loop() {
+        if (!this.playing) return;
+        if (this.i >= this.frames.length - 1) {
+          this.playing = false;
+          this.onState();
+          return;
+        }
+        this.timer = setTimeout(() => {
+          this.i++;
+          this.render();
+          this._loop();
+        }, this.baseDelay / this.speed);
+      }
+      play() {
+        if (this.i >= this.frames.length - 1) this.i = 0;
+        this.playing = true;
+        this.render();
+        this.onState();
+        this._loop();
+      }
+      pause() {
+        this.playing = false;
+        this._clear();
+        this.onState();
+      }
+      toggle() {
+        this.playing ? this.pause() : this.play();
+      }
+      stepF() {
+        this.pause();
+        if (this.i < this.frames.length - 1) this.i++;
+        this.render();
+      }
+      stepB() {
+        this.pause();
+        if (this.i > 0) this.i--;
+        this.render();
+      }
+      seek(idx) {
+        this.pause();
+        this.i = Math.max(0, Math.min(this.frames.length - 1, idx | 0));
+        this.render();
+      }
+      reset() {
+        this.pause();
+        this.i = 0;
+        this.render();
+      }
+      setSpeed(s) {
+        this.speed = s;
+      }
+      destroy() {
+        this.playing = false;
+        this._clear();
+      }
+    };
+  }
+});
+
+// custom/steptrace/src/tabs.ts
+function isTabsConfig(config) {
+  return typeof config === "object" && config != null && "tabs" in config;
+}
+function normalizeTabsConfig(config) {
+  if (!Array.isArray(config.tabs) || config.tabs.length === 0) {
+    throw new Error("steptrace: tabs requires at least one tab.");
+  }
+  const names = /* @__PURE__ */ new Set();
+  const tabs = config.tabs.map((rawTab, index) => normalizeTab(rawTab, index, names));
+  const selected = config.selected ?? 0;
+  if (!Number.isInteger(selected) || selected < 0 || selected >= tabs.length) {
+    throw new Error(`steptrace: tabs "selected" must be an index from 0 to ${tabs.length - 1}.`);
+  }
+  return { selected, tabs };
+}
+function normalizeTab(rawTab, index, names) {
+  if (typeof rawTab !== "object" || rawTab == null || Array.isArray(rawTab)) {
+    throw new Error(`steptrace: tabs[${index}] must be an object.`);
+  }
+  const name = typeof rawTab.name === "string" ? rawTab.name.trim() : "";
+  if (!name) throw new Error(`steptrace: tabs[${index}] requires a non-empty "name".`);
+  const nameKey = name.toLocaleLowerCase();
+  if (names.has(nameKey)) throw new Error(`steptrace: duplicate tab name "${name}".`);
+  names.add(nameKey);
+  if (rawTab.description != null && typeof rawTab.description !== "string") {
+    throw new Error(`steptrace: tabs[${index}] "description" must be a string.`);
+  }
+  if (typeof rawTab.algorithm !== "string" || !rawTab.algorithm.trim()) {
+    throw new Error(`steptrace: tabs[${index}] requires a non-empty "algorithm".`);
+  }
+  const { name: _name, description: _description, ...algorithmConfig } = rawTab;
+  return {
+    name,
+    description: rawTab.description?.trim() || "",
+    config: algorithmConfig
+  };
+}
+var init_tabs = __esm({
+  "custom/steptrace/src/tabs.ts"() {
+  }
+});
+
+// custom/steptrace/src/watch-hints.ts
+function watchHintFor(row) {
+  const override = row.hint?.trim();
+  if (override) return override;
+  const label = row.k.trim().toLowerCase();
+  return WATCH_HINTS[label] || `Current ${row.k.trim()} value.`;
+}
+var WATCH_HINTS;
+var init_watch_hints = __esm({
+  "custom/steptrace/src/watch-hints.ts"() {
+    WATCH_HINTS = Object.freeze({
+      i: "First active array index.",
+      j: "Second active array index.",
+      at: "Array index currently being inspected.",
+      from: "Index a value moves from.",
+      pivot: "Pivot index and value for this partition.",
+      range: "Active search or sort index range.",
+      swaps: "Swaps completed so far.",
+      moves: "Value moves completed so far.",
+      held: "Value temporarily held outside the array.",
+      home: "Index where the current value belongs.",
+      gap: "Distance between compared array positions.",
+      lane: "Indices in the active gapped subsequence.",
+      target: "Value the algorithm is looking for.",
+      goal: "Result the algorithm is trying to optimize.",
+      phase: "Current stage of the algorithm.",
+      subproblem: "Active part of the problem being solved recursively.",
+      "call path": "Active calls from the root down to the current subproblem.",
+      result: "Answer returned by the active subproblem.",
+      probe: "Index and value currently being checked.",
+      "probe 1": "First third-point checked in the current range.",
+      "probe 2": "Second third-point checked in the current range.",
+      estimate: "Index predicted from the target's position in the value range.",
+      block: "Number of array positions in each jump.",
+      "days used": "Shipping days needed at the tested capacity.",
+      capacity: "Candidate ship capacity currently being tested.",
+      verdict: "Whether the candidate satisfies the feasibility check.",
+      scanned: "Array positions inspected so far.",
+      mid: "Middle index and value of the current range.",
+      shift: "Pattern offset under the text.",
+      matches: "Matches found so far.",
+      hash: "Current window hash and pattern hash.",
+      align: "Pattern offset under the text.",
+      suffix: "Pattern suffix already matched right-to-left.",
+      "bad shift": "Shift proposed by the bad-character rule.",
+      "good shift": "Shift proposed by the good-suffix rule.",
+      "selected shift": "Larger proposed shift and the rule that selected it.",
+      "z-box": "Inclusive range whose text is already known to match the prefix.",
+      source: "How Z[i] was obtained: direct comparison, mirrored copy, or edge extension.",
+      "z[i]": "Prefix-match length recorded at the active suffix index.",
+      l: "Left pointer index and value.",
+      left: "Left pointer index and value.",
+      lo: "Left boundary index and value.",
+      r: "Right pointer index and value.",
+      right: "Right pointer index and value.",
+      hi: "Right boundary index and value.",
+      cell: "Dynamic-programming cell being computed.",
+      value: "Value computed for the current cell.",
+      "stage k": "Intermediate vertex currently allowed in shortest paths.",
+      "dist[i][j]": "Distance entry currently being relaxed.",
+      "dist[i][k]": "Distance from the source to the permitted intermediate vertex.",
+      "dist[k][j]": "Distance from the permitted intermediate vertex to the destination.",
+      candidate: "Distance produced by routing through the permitted intermediate vertex.",
+      decision: "Whether the candidate improves the current distance or the current value is kept.",
+      "negative cycle": "Vertices whose diagonal distance became negative.",
+      sets: "Disjoint sets currently remaining.",
+      edge: "Edge currently being examined.",
+      x: "Current integer and its binary representation.",
+      "lowest 1": "Position of the lowest set bit.",
+      "1s cleared": "Set bits removed so far.",
+      depth: "Current recursion depth.",
+      trying: "Candidate position currently being tried.",
+      pruned: "Candidate branches rejected so far.",
+      calls: "Function calls made so far.",
+      memo: "Most recent cached result.",
+      event: "Current recursion or memoization event.",
+      queue: "Nodes waiting to be processed.",
+      visited: "Nodes already processed.",
+      current: "Node the graph algorithm is processing now.",
+      score: "Exact cost g, remaining estimate h, and their priority f.",
+      expanded: "Nodes expanded by A* compared with Dijkstra.",
+      comparison: "Final Greedy path cost compared with the optimal A* path cost.",
+      frontiers: "Nodes waiting on the forward and backward search sides.",
+      meeting: "First node reached from both search directions.",
+      pass: "Current full scan through the graph's edges.",
+      change: "Whether the active operation changed the stored state.",
+      component: "Connected component currently being discovered or merged.",
+      frontier: "Nodes discovered but not processed yet.",
+      "disc / low": "Discovery order and earliest reachable ancestor for the active node.",
+      "cut vertices": "Vertices currently proven to disconnect the graph if removed.",
+      bridges: "Edges currently proven to disconnect the graph if removed.",
+      stack: "Active DFS nodes not yet assigned to a completed component.",
+      components: "Components currently formed or completed.",
+      pending: "Edges not processed yet.",
+      accepted: "Edges already accepted into the result.",
+      weight: "Total weight of accepted tree edges.",
+      round: "Current component-selection round.",
+      path: "Current path selected by the algorithm.",
+      candidates: "Next nodes that can extend the active path.",
+      rejected: "Choices rejected by the current branch or graph constraint.",
+      bottleneck: "Smallest residual capacity on the augmenting path.",
+      flow: "Total flow currently reaching the sink.",
+      strategy: "Sorting strategy active on the current range.",
+      cutoff: "Largest range deferred to insertion sort.",
+      operation: "Trie operation and key currently being processed.",
+      character: "Character on the active trie edge.",
+      test: "Whether the current path or terminal-marker test succeeded.",
+      state: "Active automaton or character-tree state.",
+      output: "Patterns emitted at the current text position.",
+      "next interval": "Sorted interval currently compared with the accumulated block.",
+      "current block": "Merged interval accumulated by the left-to-right sweep.",
+      "next meeting": "Finish-time-ordered meeting currently being checked.",
+      "last accepted": "Most recent meeting committed to the schedule.",
+      slow: "The pointer that advances one node at a time.",
+      fast: "The pointer that advances two nodes at a time during cycle detection.",
+      head: "The pointer reset to the head for the cycle-entry search."
+    });
+  }
+});
+
+// custom/steptrace/src/mount.ts
+function createMount(registry2, structures = []) {
+  const { kindOf, listAlgorithms, buildFrames } = registry2;
+  const structureRegistry = new Map(structures.map((structure) => [structure.id, structure]));
+  function mountTabs(root, config, host = {}) {
+    let normalized;
+    try {
+      normalized = normalizeTabsConfig(config);
+    } catch (error) {
+      root.textContent = error instanceof Error ? error.message : String(error);
+      return { destroy: () => root.replaceChildren() };
+    }
+    const { tabs } = normalized;
+    root.classList.add("steptrace", "steptrace--tabs");
+    root.setAttribute("role", "group");
+    root.setAttribute("aria-label", "Tabbed algorithm visualizer");
+    const tabsShell = el("div", "steptrace__tabs-shell");
+    const tablist = el("div", "steptrace__tabs");
+    tablist.setAttribute("role", "tablist");
+    tablist.setAttribute("aria-label", "Visualization variants");
+    const tabDesc = el("div", "steptrace__tabs-desc");
+    tabDesc.setAttribute("aria-live", "polite");
+    const panels = el("div", "steptrace__tabpanels");
+    const buttons = [];
+    const panelShells = [];
+    const panelMounts = [];
+    const handles = tabs.map(() => null);
+    let activeIndex = normalized.selected;
+    const showTab = (index, focus = false) => {
+      const next = Math.min(Math.max(index, 0), tabs.length - 1);
+      if (next === activeIndex && handles[next]) {
+        if (focus) buttons[next]?.focus();
+        return;
+      }
+      handles[activeIndex]?.pause?.();
+      activeIndex = next;
+      const tab = tabs[next];
+      tabDesc.textContent = tab.description || "";
+      buttons.forEach((button2, i) => {
+        const selected = i === next;
+        button2.setAttribute("aria-selected", String(selected));
+        button2.tabIndex = selected ? 0 : -1;
+        button2.classList.toggle("steptrace__tab--selected", selected);
+        panelShells[i].hidden = !selected;
+      });
+      if (!handles[next]) handles[next] = mount2(panelMounts[next], tab.config, host);
+      if (focus) buttons[next]?.focus();
+    };
+    tabs.forEach((tab, index) => {
+      const tabId = `steptrace-tab-${++mountSerial}`;
+      const panelId = `steptrace-panel-${++mountSerial}`;
+      const button2 = document.createElement("button");
+      button2.type = "button";
+      button2.className = "steptrace__tab";
+      button2.id = tabId;
+      button2.setAttribute("role", "tab");
+      button2.setAttribute("aria-controls", panelId);
+      button2.textContent = tab.name;
+      button2.tabIndex = index === activeIndex ? 0 : -1;
+      button2.addEventListener("click", () => showTab(index));
+      button2.addEventListener("keydown", (event) => {
+        if (event.key === "ArrowLeft" || event.key === "ArrowUp") {
+          event.preventDefault();
+          showTab((index - 1 + tabs.length) % tabs.length, true);
+        } else if (event.key === "ArrowRight" || event.key === "ArrowDown") {
+          event.preventDefault();
+          showTab((index + 1) % tabs.length, true);
+        } else if (event.key === "Home") {
+          event.preventDefault();
+          showTab(0, true);
+        } else if (event.key === "End") {
+          event.preventDefault();
+          showTab(tabs.length - 1, true);
+        }
+      });
+      buttons.push(button2);
+      tablist.append(button2);
+      const panelShell = el("div", "steptrace__tabpanel");
+      panelShell.id = panelId;
+      panelShell.hidden = index !== activeIndex;
+      panelShell.setAttribute("role", "tabpanel");
+      panelShell.setAttribute("aria-labelledby", tabId);
+      const panelMount = el("div", "steptrace__tabpanel-body");
+      panelShell.append(panelMount);
+      panelShells.push(panelShell);
+      panelMounts.push(panelMount);
+      panels.append(panelShell);
+    });
+    tabsShell.append(tablist, tabDesc);
+    root.replaceChildren(tabsShell, panels);
+    activeIndex = -1;
+    showTab(normalized.selected);
+    return {
+      destroy() {
+        for (const handle of handles) handle?.destroy();
+        root.replaceChildren();
+        root.classList.remove("steptrace", "steptrace--tabs", "steptrace--reduced");
+      }
+    };
+  }
+  function mount2(root, config, host = {}) {
+    if (isTabsConfig(config)) return mountTabs(root, config, host);
+    const structure = structureRegistry.get(config.algorithm);
+    if (structure) {
+      try {
+        return structure.mount(root, structure.parse(config));
+      } catch (error) {
+        root.textContent = error instanceof Error ? error.message : String(error);
+        return { destroy: () => root.replaceChildren() };
+      }
+    }
+    root.classList.add("steptrace");
+    root.setAttribute("role", "group");
+    root.setAttribute("aria-label", "Algorithm visualizer");
+    const watchHintPrefix = `steptrace-watch-hint-${++mountSerial}`;
+    const kind = kindOf(config.algorithm);
+    if (!kind) {
+      root.textContent = `steptrace: unknown algorithm "${config.algorithm}".`;
+      return { destroy: () => root.replaceChildren() };
+    }
+    const mq = matchMedia("(prefers-reduced-motion: reduce)");
+    const applyMotion = () => root.classList.toggle("steptrace--reduced", mq.matches);
+    mq.addEventListener("change", applyMotion);
+    const shouldIncludeArray = Array.isArray(config.array) || kind === "sort" || kind === "search" || kind === "pointers";
+    const state = {
+      algorithm: config.algorithm,
+      speed: config.speed || 1,
+      array: Array.isArray(config.array) && config.array.length ? config.array.slice() : randomArray(),
+      start: config.start != null ? String(config.start) : null,
+      target: config.target != null ? String(config.target) : null,
+      config
+    };
+    let player = null;
+    let currentView = null;
+    let currentGraph = null;
+    let currentMilestones = [];
+    let speedControlHandle = null;
+    const head = el("div", "steptrace__head");
+    const crumb = el("div", "steptrace__crumb");
+    const crumbKind = el("span");
+    crumbKind.textContent = kind;
+    const crumbSep = el("span", "steptrace__crumb-sep");
+    crumbSep.textContent = "›";
+    const crumbAlgo = el("span", "steptrace__crumb-algo");
+    crumbAlgo.textContent = state.algorithm;
+    crumb.append(el("span", "steptrace__crumb-dot"), crumbKind, crumbSep, crumbAlgo);
+    const counter = el("div", "steptrace__counter");
+    head.append(crumb, counter);
+    const stageCol = el("div", "steptrace__stage-col");
+    const rail = el("div", "steptrace__rail");
+    const traceWrap = el("div", "steptrace__trace");
+    const traceLabel = el("div", "steptrace__rail-label steptrace__trace-label");
+    traceLabel.textContent = "Trace";
+    const log = el("ol", "steptrace__log");
+    const logLines = [];
+    for (let k = 0; k < LOG_ROWS; k++) {
+      const line = el("li", "steptrace__log-line");
+      const num = el("span", "steptrace__log-num");
+      const txt = el("span", "steptrace__log-text");
+      line.append(num, txt);
+      log.append(line);
+      logLines.push({ line, num, txt });
+    }
+    const insight = el("li", "steptrace__insight");
+    insight.setAttribute("aria-live", "off");
+    insight.setAttribute("aria-atomic", "true");
+    insight.hidden = true;
+    const insightLabel = el("span", "steptrace__insight-label");
+    insightLabel.textContent = "Result";
+    const insightText = el("span", "steptrace__insight-text");
+    insight.append(insightLabel, insightText);
+    log.append(insight);
+    traceWrap.append(traceLabel, log);
+    const watchWrap = el("div", "steptrace__watch-wrap");
+    const watchLabel = el("div", "steptrace__rail-label");
+    watchLabel.textContent = "Watch";
+    const watchEl = el("div", "steptrace__watch");
+    watchWrap.append(watchLabel, watchEl);
+    watchWrap.hidden = true;
+    rail.append(traceWrap, watchWrap);
+    const body = el("div", "steptrace__body");
+    body.append(stageCol, rail);
+    const foot = el("div", "steptrace__foot");
+    const scrub = el("div", "steptrace__scrub");
+    scrub.setAttribute("role", "slider");
+    scrub.setAttribute("tabindex", "0");
+    scrub.setAttribute("aria-label", "Step");
+    const scrubFill = el("div", "steptrace__scrub-fill");
+    const scrubDot = el("div", "steptrace__scrub-dot");
+    const milestoneLayer = el("div", "steptrace__milestones");
+    scrub.append(el("div", "steptrace__scrub-track"), scrubFill, milestoneLayer, scrubDot);
+    const phase = el("div", "steptrace__phase");
+    const phaseName = el("span", "steptrace__phase-name");
+    const phaseCopy = el("span", "steptrace__phase-copy");
+    phase.append(phaseName, phaseCopy);
+    const timeline = el("div", "steptrace__timeline");
+    timeline.append(scrub);
+    const btnReset = iconBtn("Restart", ICON.reset);
+    const btnBack = iconBtn("Step back", ICON.back);
+    const btnPlay = iconBtn("Play", ICON.play, "steptrace__btn--play");
+    const btnFwd = iconBtn("Step forward", ICON.fwd);
+    const menuWrap = el("div", "steptrace__menu-wrap");
+    const btnMenu = iconBtn("Options", ICON.kebab);
+    btnMenu.setAttribute("aria-haspopup", "true");
+    btnMenu.setAttribute("aria-expanded", "false");
+    const menu = el("div", "steptrace__menu");
+    const speedHead = el("div", "steptrace__menu-h");
+    speedHead.textContent = "Speed";
+    const speedIndicator = el("span", "steptrace__speed-indicator");
+    speedIndicator.setAttribute("aria-hidden", "true");
+    const speedSection = el("div", "steptrace__menu-section");
+    const speedRow = el("div", "steptrace__speed-row");
+    const speedControl = el("div", "steptrace__speed-control");
+    speedRow.append(speedControl);
+    const fmtSpeed = (v) => Number(v).toFixed(2) + "×";
+    const applySpeed = (value) => {
+      const v = Number(value);
+      state.speed = v;
+      speedIndicator.textContent = `${v}×`;
+      root.style.setProperty("--_tween", `${Math.round(107 / v)}ms`);
+      if (player) player.setSpeed(v);
+    };
+    if (host && typeof host.createSpeedSlider === "function") {
+      speedControlHandle = host.createSpeedSlider(speedControl, {
+        min: 0.5,
+        max: 2,
+        step: 0.25,
+        value: state.speed,
+        label: "Playback speed",
+        format: fmtSpeed,
+        onChange: applySpeed
+      });
+    } else {
+      const speedInput = el("input", "steptrace__range");
+      speedInput.type = "range";
+      speedInput.min = "0.5";
+      speedInput.max = "2";
+      speedInput.step = "0.25";
+      speedInput.value = String(state.speed);
+      speedInput.setAttribute("aria-label", "Playback speed");
+      speedInput.setAttribute("aria-valuetext", fmtSpeed(state.speed));
+      const speedVal = el("span", "steptrace__speed-val");
+      speedVal.textContent = fmtSpeed(state.speed);
+      speedInput.addEventListener("input", () => {
+        applySpeed(speedInput.value);
+        speedVal.textContent = fmtSpeed(speedInput.value);
+        speedInput.setAttribute("aria-valuetext", fmtSpeed(speedInput.value));
+      });
+      speedControl.append(speedInput);
+      speedRow.append(speedVal);
+    }
+    speedSection.append(speedHead, speedRow);
+    menu.append(speedSection);
+    applySpeed(state.speed);
+    let endpointSection = null;
+    let startHead = null;
+    let startMenu = null;
+    let targetHead = null;
+    let targetMenu = null;
+    if (kind === "sort") {
+      const section = el("div", "steptrace__menu-section");
+      const h = el("div", "steptrace__menu-h");
+      h.textContent = "Array";
+      const item = el("button", "steptrace__menu-item");
+      item.type = "button";
+      item.textContent = "Shuffle";
+      item.addEventListener("click", () => {
+        state.array = randomArray();
+        build();
+      });
+      section.append(h, item);
+      menu.append(section);
+    } else if (kind === "graph") {
+      endpointSection = el("div", "steptrace__menu-section");
+      startHead = el("div", "steptrace__menu-h");
+      startHead.textContent = "Start node";
+      startMenu = el("select", "steptrace__select");
+      startMenu.setAttribute("aria-label", "Start node");
+      startMenu.addEventListener("change", () => {
+        state.start = startMenu.value;
+        if (targetMenu && state.target === state.start) {
+          const fallback = [...targetMenu.options].find((option) => option.value !== state.start);
+          if (fallback) {
+            state.target = fallback.value;
+            targetMenu.value = fallback.value;
+          }
+        }
+        closeMenu();
+        build();
+      });
+      targetHead = el("div", "steptrace__menu-h");
+      targetHead.textContent = "Target node";
+      targetMenu = el("select", "steptrace__select");
+      targetMenu.setAttribute("aria-label", "Target node");
+      targetMenu.addEventListener("change", () => {
+        state.target = targetMenu.value;
+        if (state.target === state.start) {
+          const fallback = [...startMenu.options].find((option) => option.value !== state.target);
+          if (fallback) {
+            state.start = fallback.value;
+            startMenu.value = fallback.value;
+          }
+        }
+        closeMenu();
+        build();
+      });
+      endpointSection.append(startHead, startMenu, targetHead, targetMenu);
+      menu.append(endpointSection);
+    } else if (kind === "search") {
+      const section = el("div", "steptrace__menu-section");
+      const h = el("div", "steptrace__menu-h");
+      h.textContent = "Target";
+      const sel = el("select", "steptrace__select");
+      sel.setAttribute("aria-label", "Search target");
+      const seen = /* @__PURE__ */ new Set();
+      for (const v of state.array) {
+        if (seen.has(v)) continue;
+        seen.add(v);
+        const opt = el("option");
+        opt.value = String(v);
+        opt.textContent = String(v);
+        if (Number(v) === Number(state.config.target)) opt.selected = true;
+        sel.append(opt);
+      }
+      sel.value = String(state.config.target);
+      sel.addEventListener("change", () => {
+        state.config.target = Number(sel.value);
+        closeMenu();
+        build();
+      });
+      section.append(h, sel);
+      menu.append(section);
+    }
+    menuWrap.append(btnMenu, menu);
+    const transport = el("div", "steptrace__transport");
+    transport.append(btnReset, btnBack, btnPlay, btnFwd);
+    const utility = el("div", "steptrace__utility");
+    utility.append(speedIndicator, menuWrap);
+    foot.append(phase, transport, timeline, utility);
+    root.replaceChildren(head, body, foot);
+    let menuOpen = false;
+    function closeMenu() {
+      menuOpen = false;
+      menu.classList.remove("steptrace__menu--open");
+      btnMenu.setAttribute("aria-expanded", "false");
+    }
+    btnMenu.addEventListener("click", (e) => {
+      e.stopPropagation();
+      menuOpen = !menuOpen;
+      menu.classList.toggle("steptrace__menu--open", menuOpen);
+      btnMenu.setAttribute("aria-expanded", menuOpen ? "true" : "false");
+    });
+    menu.addEventListener("click", (e) => e.stopPropagation());
+    const onDocClick = () => closeMenu();
+    document.addEventListener("click", onDocClick);
+    function sizeRail() {
+      if (!player) return;
+      if (matchMedia("(max-width: 560px)").matches) {
+        log.style.height = "auto";
+        log.style.minHeight = "0";
+        return;
+      }
+      const PROBE = "position:absolute;visibility:hidden;pointer-events:none;left:0;right:0;height:auto";
+      const tall = (node2) => node2.getBoundingClientRect().height;
+      const probes = player.frames.map((frame) => {
+        const probe = el("li", "steptrace__log-line steptrace__log-line--cur");
+        probe.style.cssText = PROBE;
+        const number = el("span", "steptrace__log-num");
+        number.textContent = "00";
+        const text = el("span", "steptrace__log-text");
+        text.textContent = stripTags(frame.message);
+        probe.append(number, text);
+        return probe;
+      });
+      const resultProbe = insight.cloneNode(true);
+      resultProbe.hidden = false;
+      resultProbe.style.cssText = PROBE;
+      log.append(...probes, resultProbe);
+      let maxRow = tall(resultProbe);
+      for (const probe of probes) maxRow = Math.max(maxRow, tall(probe));
+      for (const probe of probes) probe.remove();
+      resultProbe.remove();
+      const logCS = getComputedStyle(log);
+      const gap = parseFloat(logCS.rowGap) || 0;
+      const hist = (parseFloat(logCS.lineHeight) || 0) * 2;
+      const h = Math.ceil(hist * 2 + gap * 2 + maxRow) + "px";
+      log.style.height = "auto";
+      if (log.style.minHeight !== h) log.style.minHeight = h;
+    }
+    function fitLog(terminal) {
+      const budget = log.clientHeight;
+      if (!budget) return;
+      const gap = parseFloat(getComputedStyle(log).rowGap) || 0;
+      let used = terminal ? insight.getBoundingClientRect().height : 0;
+      let full = false;
+      for (let k = LOG_ROWS - 1; k >= 0; k--) {
+        const line = logLines[k].line;
+        if (line.hidden) continue;
+        if (full) {
+          line.hidden = true;
+          continue;
+        }
+        const h = line.getBoundingClientRect().height;
+        const need = used ? used + gap + h : h;
+        if (!used || need <= budget + 0.5) {
+          used = need;
+        } else {
+          line.hidden = true;
+          full = true;
+        }
+      }
+    }
+    const onRailResize = () => {
+      sizeRail();
+      if (player) renderRail();
+    };
+    const logRO = typeof ResizeObserver !== "undefined" ? new ResizeObserver(onRailResize) : null;
+    if (logRO) logRO.observe(rail);
+    let lastRailI = null;
+    function renderRail() {
+      const total = player.frames.length;
+      const i = player.i;
+      const terminal = i === total - 1;
+      insight.hidden = !terminal;
+      insight.setAttribute("aria-live", terminal && !player.playing ? "polite" : "off");
+      for (let k = 0; k < LOG_ROWS; k++) {
+        const ll = logLines[k];
+        const fi = i - (LOG_ROWS - 1 - k);
+        const cur = fi === i;
+        if (fi < 0 || fi >= total || cur && terminal) {
+          ll.line.hidden = true;
+          ll.num.textContent = "";
+          ll.txt.textContent = "";
+          ll.line.classList.remove("steptrace__log-line--cur");
+          continue;
+        }
+        ll.line.hidden = false;
+        ll.num.textContent = pad2(fi + 1);
+        ll.txt.textContent = stripTags(player.frames[fi].message);
+        ll.line.classList.toggle("steptrace__log-line--cur", cur);
+        ll.line.style.opacity = cur ? "" : String(fadeFor(i - fi));
+      }
+      fitLog(terminal);
+      const dir = lastRailI == null ? 0 : Math.sign(i - lastRailI);
+      lastRailI = i;
+      if (dir !== 0) {
+        log.style.transition = "none";
+        log.style.transform = `translateY(${dir > 0 ? "0.55rem" : "-0.55rem"})`;
+        void log.offsetHeight;
+        log.style.transition = "transform 0.26s var(--_spring)";
+        log.style.transform = "translateY(0)";
+      }
+      const chapter = milestoneAt(currentMilestones, i);
+      phaseName.textContent = chapter ? chapter.label : "Step";
+      const currentFrame = player.frames[i];
+      phaseCopy.textContent = state.algorithm === "rabin-karp" && currentFrame.type === "hash" ? "" : stripTags(currentFrame.message);
+      scrub.setAttribute("aria-valuetext", `${phaseName.textContent}, step ${i + 1} of ${total}`);
+      for (let k = 0; k < milestoneLayer.children.length; k++) {
+        const step = Number(milestoneLayer.children[k].dataset.step);
+        milestoneLayer.children[k].dataset.passed = step <= i ? "1" : "0";
+      }
+    }
+    function renderMilestones() {
+      milestoneLayer.replaceChildren();
+      const last = Math.max(1, player.frames.length - 1);
+      const marks = thinMilestones(currentMilestones);
+      for (const [index, mark] of marks.entries()) {
+        const start = mark.i / last * 100;
+        const end = marks[index + 1] ? marks[index + 1].i / last * 100 : 100;
+        const tick = el("span", "steptrace__milestone");
+        tick.style.setProperty("--start", `${start}%`);
+        tick.style.setProperty("--end", `${end}%`);
+        tick.dataset.step = String(mark.i);
+        tick.title = `${mark.label} · step ${mark.i + 1}`;
+        tick.setAttribute("aria-hidden", "true");
+        const label = el("b", "steptrace__milestone-label");
+        label.textContent = mark.label;
+        tick.append(label);
+        milestoneLayer.append(tick);
+      }
+    }
+    function onState() {
+      const total = player.frames.length;
+      const i = player.i;
+      counter.innerHTML = `<b>${pad2(i + 1)}</b> / ${pad2(total)}`;
+      const pct = total <= 1 ? 0 : i / (total - 1) * 100;
+      scrubFill.style.width = pct + "%";
+      scrubDot.style.left = pct + "%";
+      scrub.setAttribute("aria-valuemin", "0");
+      scrub.setAttribute("aria-valuemax", String(total - 1));
+      scrub.setAttribute("aria-valuenow", String(i));
+      btnPlay.innerHTML = player.playing ? ICON.pause : ICON.play;
+      btnPlay.setAttribute("aria-label", player.playing ? "Pause" : "Play");
+      btnPlay.title = player.playing ? "Pause" : "Play";
+      btnBack.disabled = i === 0;
+      btnFwd.disabled = i === total - 1;
+      renderRail();
+      renderWatch();
+    }
+    function renderWatch() {
+      const rows = currentView && currentView.watch ? currentView.watch(player.frames[player.i]) : null;
+      watchEl.replaceChildren();
+      if (!rows || !rows.length) return;
+      for (const [index, r] of rows.entries()) {
+        const row = el("div", "steptrace__watch-row");
+        const hintId = `${watchHintPrefix}-${index}`;
+        const hint = el("span", "steptrace__watch-hint");
+        hint.id = hintId;
+        hint.setAttribute("role", "tooltip");
+        hint.textContent = watchHintFor(r);
+        row.tabIndex = 0;
+        row.setAttribute("role", "group");
+        row.setAttribute("aria-label", `${r.k}: ${String(r.v)}`);
+        row.setAttribute("aria-describedby", hintId);
+        if (r.sw) {
+          const sw = el("span", "steptrace__watch-sw");
+          sw.style.background = r.sw;
+          row.append(sw);
+        }
+        const kk = el("span", "steptrace__watch-k");
+        kk.textContent = r.k;
+        const vv = el("span", "steptrace__watch-v");
+        vv.textContent = r.v;
+        row.append(kk, vv, hint);
+        watchEl.append(row);
+      }
+    }
+    function seekFromEvent(e) {
+      const r = scrub.getBoundingClientRect();
+      const cx = e.clientX != null ? e.clientX : e.touches && e.touches[0] ? e.touches[0].clientX : r.left;
+      const frac = r.width ? Math.max(0, Math.min(1, (cx - r.left) / r.width)) : 0;
+      player.seek(Math.round(frac * (player.frames.length - 1)));
+    }
+    let dragging = false;
+    scrub.addEventListener("pointerdown", (e) => {
+      dragging = true;
+      try {
+        scrub.setPointerCapture(e.pointerId);
+      } catch (_) {
+      }
+      seekFromEvent(e);
+    });
+    scrub.addEventListener("pointermove", (e) => {
+      if (dragging) seekFromEvent(e);
+    });
+    const endDrag = () => {
+      dragging = false;
+    };
+    scrub.addEventListener("pointerup", endDrag);
+    scrub.addEventListener("pointercancel", endDrag);
+    scrub.addEventListener("keydown", (e) => {
+      if (e.key === "ArrowRight") player.stepF();
+      else if (e.key === "ArrowLeft") player.stepB();
+      else if (e.key === "Home") player.seek(0);
+      else if (e.key === "End") player.seek(player.frames.length - 1);
+      else return;
+      e.preventDefault();
+      e.stopPropagation();
+    });
+    function build() {
+      if (player) player.destroy();
+      if (currentView && currentView.destroy) currentView.destroy();
+      const built = buildFrames({
+        ...state.config,
+        algorithm: state.algorithm,
+        ...shouldIncludeArray ? { array: state.array } : {},
+        start: state.start,
+        ...kind === "graph" && state.target != null ? { target: state.target } : {}
+      });
+      if (built.family) root.dataset.visualFamily = built.family.id;
+      else delete root.dataset.visualFamily;
+      currentGraph = built.graph || null;
+      currentMilestones = buildMilestones(state.algorithm, built.kind, built.frames);
+      let view;
+      if (built.family) view = built.family.createView(built.frames);
+      else if (built.kind === "graph")
+        view = makeGraphView(built.frames, built.graph, built.frontierLabel);
+      else if (built.kind === "search") view = makeSearchView(built.frames);
+      else if (built.kind === "string") view = makeMatchView(built.frames);
+      else if (built.kind === "pointers") view = makePointerView(built.frames);
+      else if (built.kind === "dp") view = makeDPView(built.frames);
+      else if (built.kind === "unionfind") view = makeUnionFindView(built.frames);
+      else if (built.kind === "bits") view = makeBitsView(built.frames);
+      else if (built.kind === "backtrack") view = makeBacktrackView(built.frames);
+      else if (built.kind === "rectree") view = makeRecTreeView(built.frames);
+      else view = makeSortView(built.frames);
+      currentView = view;
+      if (built.kind === "graph") syncEndpointOptions(built.endpointSettings, built.graph);
+      const fillStage = view.stageLayout === "fill";
+      const stageAlignment = fillStage || built.kind === "graph" ? null : view.stageAlignment || "center";
+      root.classList.toggle("steptrace--stable-stage", view.stableStage === true);
+      root.classList.toggle(
+        "steptrace--compact-stage",
+        built.family ? ["monotone-boundary", "prefix-sum", "stack-sequence"].includes(built.family.id) : ["bits", "pointers", "string"].includes(built.kind)
+      );
+      stageCol.classList.toggle("steptrace__stage-col--bottom", stageAlignment === "bottom");
+      stageCol.classList.toggle("steptrace__stage-col--center", stageAlignment === "center");
+      stageCol.classList.toggle("steptrace__stage-col--graph", built.kind === "graph");
+      stageCol.classList.toggle("steptrace__stage-col--fill", fillStage);
+      const nodes5 = view.nodes.slice(0, -1);
+      const stageLegend = nodes5.at(-1);
+      stageCol.classList.toggle(
+        "steptrace__stage-col--legend",
+        Boolean(
+          stageLegend?.classList.contains("steptrace__legend") || stageLegend?.classList.contains("steptrace__legend-wrap")
+        )
+      );
+      stageCol.replaceChildren(...nodes5);
+      player = new Player(built.frames, view.paint, state.speed);
+      player.onState = onState;
+      const terminalFrame = built.frames[built.frames.length - 1];
+      insightText.textContent = view.summary ? view.summary(terminalFrame) : summaryFor(state.algorithm, built.kind, terminalFrame, currentGraph);
+      reserveWatch(built.frames, view);
+      renderMilestones();
+      sizeRail();
+      player.render();
+      onState();
+    }
+    function reserveWatch(frames, view) {
+      let maxRows = 0;
+      if (view.watch) {
+        for (const f of frames) {
+          const rows = view.watch(f);
+          if (rows && rows.length > maxRows) maxRows = rows.length;
+        }
+      }
+      watchWrap.hidden = maxRows === 0;
+      watchEl.style.setProperty("--steptrace-watch-rows", String(maxRows));
+    }
+    function syncEndpointOptions(settings, graph) {
+      if (!endpointSection || !startMenu || !targetMenu || !startHead || !targetHead) return;
+      const options = settings?.options || graph?.nodes?.map((node2) => ({ value: node2.id, label: node2.id }));
+      if (!options?.length) {
+        endpointSection.hidden = true;
+        return;
+      }
+      endpointSection.hidden = false;
+      startHead.textContent = settings?.startLabel || "Start node";
+      startMenu.setAttribute("aria-label", startHead.textContent);
+      targetHead.hidden = !settings;
+      targetMenu.hidden = !settings;
+      const signature = options.map((option) => `${option.value}:${option.label}`).join("|");
+      if (startMenu.dataset.signature !== signature) {
+        startMenu.replaceChildren();
+        targetMenu.replaceChildren();
+        for (const option of options) {
+          const startOption = el("option");
+          startOption.value = option.value;
+          startOption.textContent = option.label;
+          startMenu.append(startOption);
+          const targetOption = startOption.cloneNode(true);
+          targetMenu.append(targetOption);
+        }
+        startMenu.dataset.signature = signature;
+      }
+      const nextStart = settings?.start || graph?.start || options[0].value;
+      const nextTarget = settings?.target || state.target;
+      state.start = nextStart;
+      startMenu.value = nextStart;
+      if (settings && nextTarget) {
+        state.target = nextTarget;
+        targetHead.textContent = settings.targetLabel;
+        targetMenu.setAttribute("aria-label", settings.targetLabel);
+        targetMenu.value = nextTarget;
+      }
+    }
+    build();
+    btnReset.addEventListener("click", () => player.reset());
+    btnBack.addEventListener("click", () => player.stepB());
+    btnPlay.addEventListener("click", () => player.toggle());
+    btnFwd.addEventListener("click", () => player.stepF());
+    const onKey = (e) => {
+      if (e.target instanceof HTMLInputElement || e.target instanceof HTMLSelectElement) return;
+      if (e.target === scrub) return;
+      if (e.key === "ArrowRight") player.stepF();
+      else if (e.key === "ArrowLeft") player.stepB();
+      else if (e.key === " " || e.key === "Spacebar") player.toggle();
+      else return;
+      e.preventDefault();
+      e.stopPropagation();
+    };
+    root.addEventListener("keydown", onKey);
+    applyMotion();
+    return {
+      pause() {
+        if (player) player.pause();
+      },
+      destroy() {
+        if (player) player.destroy();
+        if (currentView && currentView.destroy) currentView.destroy();
+        if (speedControlHandle && speedControlHandle.destroy) speedControlHandle.destroy();
+        if (logRO) logRO.disconnect();
+        mq.removeEventListener("change", applyMotion);
+        root.removeEventListener("keydown", onKey);
+        document.removeEventListener("click", onDocClick);
+        root.replaceChildren();
+        root.classList.remove(
+          "steptrace",
+          "steptrace--reduced",
+          "steptrace--stable-stage",
+          "steptrace--compact-stage"
+        );
+      }
+    };
+  }
+  return mount2;
+}
+function randomArray(n = 12) {
+  const pool = [];
+  for (let v = 5; v <= 62; v++) pool.push(v);
+  for (let k = pool.length - 1; k > 0; k--) {
+    const r = Math.floor(Math.random() * (k + 1));
+    [pool[k], pool[r]] = [pool[r], pool[k]];
+  }
+  return pool.slice(0, n);
+}
+var LOG_ROWS, fadeFor, mountSerial;
+var init_mount = __esm({
+  "custom/steptrace/src/mount.ts"() {
+    init_player();
+    init_render();
+    init_tabs();
+    init_watch_hints();
+    LOG_ROWS = 10;
+    fadeFor = (age) => Math.max(0.1, 0.5 * Math.pow(0.62, age - 1));
+    mountSerial = 0;
   }
 });
 
 // custom/steptrace/src/registry.ts
 function createRegistry(builtIns) {
+  const familyRegistry = /* @__PURE__ */ new Map();
   const sortRegistry = /* @__PURE__ */ new Map();
   const graphRegistry = /* @__PURE__ */ new Map();
   const searchRegistry = /* @__PURE__ */ new Map();
@@ -4041,41 +22701,45 @@ function createRegistry(builtIns) {
   const backtrackRegistry = /* @__PURE__ */ new Map();
   const recTreeRegistry = /* @__PURE__ */ new Map();
   const api = {
-    registerSort(id, meta, run) {
-      sortRegistry.set(id, { meta, run });
+    registerSort(id, meta, run6) {
+      sortRegistry.set(id, { meta, run: run6 });
     },
-    registerGraph(id, meta, run) {
-      graphRegistry.set(id, { meta, run });
+    registerGraph(id, meta, run6) {
+      graphRegistry.set(id, { meta, run: run6 });
     },
-    registerSearch(id, meta, run) {
-      searchRegistry.set(id, { meta, run });
+    registerSearch(id, meta, run6) {
+      searchRegistry.set(id, { meta, run: run6 });
     },
-    registerString(id, meta, run) {
-      stringRegistry.set(id, { meta, run });
+    registerString(id, meta, run6, profile) {
+      stringRegistry.set(id, { meta, run: run6, profile });
     },
-    registerPointer(id, meta, run) {
-      pointerRegistry.set(id, { meta, run });
+    registerPointer(id, meta, run6) {
+      pointerRegistry.set(id, { meta, run: run6 });
     },
-    registerDP(id, meta, run) {
-      dpRegistry.set(id, { meta, run });
+    registerDP(id, meta, run6) {
+      dpRegistry.set(id, { meta, run: run6 });
     },
-    registerUnionFind(id, meta, run) {
-      unionFindRegistry.set(id, { meta, run });
+    registerUnionFind(id, meta, run6) {
+      unionFindRegistry.set(id, { meta, run: run6 });
     },
-    registerBits(id, meta, run) {
-      bitsRegistry.set(id, { meta, run });
+    registerBits(id, meta, run6) {
+      bitsRegistry.set(id, { meta, run: run6 });
     },
-    registerBacktrack(id, meta, run) {
-      backtrackRegistry.set(id, { meta, run });
+    registerBacktrack(id, meta, run6) {
+      backtrackRegistry.set(id, { meta, run: run6 });
     },
-    registerRecTree(id, meta, run) {
-      recTreeRegistry.set(id, { meta, run });
+    registerRecTree(id, meta, run6) {
+      recTreeRegistry.set(id, { meta, run: run6 });
     },
     listAlgorithms(kind) {
       const registry2 = kind === "graph" ? graphRegistry : sortRegistry;
-      return [...registry2].map(([id, value]) => ({ id, label: value.meta.label }));
+      const legacy = [...registry2].map(([id, value]) => ({ id, label: value.meta.label }));
+      const families = [...familyRegistry].filter(([, definition]) => definition.kind === kind).map(([id, definition]) => ({ id, label: definition.meta.label }));
+      return [...legacy, ...families];
     },
     kindOf(id) {
+      const family10 = familyRegistry.get(id);
+      if (family10) return family10.kind;
       if (sortRegistry.has(id)) return "sort";
       if (graphRegistry.has(id)) return "graph";
       if (searchRegistry.has(id)) return "search";
@@ -4089,6 +22753,19 @@ function createRegistry(builtIns) {
       return null;
     },
     buildFrames(config) {
+      const familyAlgorithm = familyRegistry.get(config.algorithm);
+      if (familyAlgorithm) {
+        const input2 = familyAlgorithm.parse(config);
+        const recorder = familyAlgorithm.family.createRecorder(input2);
+        familyAlgorithm.run(input2, recorder);
+        const endpointSettings = typeof input2 === "object" && input2 != null && "endpointSettings" in input2 ? input2.endpointSettings : void 0;
+        return {
+          kind: familyAlgorithm.kind,
+          family: familyAlgorithm.family,
+          frames: recorder.frames,
+          endpointSettings
+        };
+      }
       const input = config;
       const sort = sortRegistry.get(config.algorithm);
       if (sort) {
@@ -4116,7 +22793,7 @@ function createRegistry(builtIns) {
       }
       const string = stringRegistry.get(config.algorithm);
       if (string) {
-        const recorder = new StringRecorder(config.text, config.pattern);
+        const recorder = new StringRecorder(config.text, config.pattern, string.profile);
         string.run(input, recorder);
         return { kind: "string", frames: recorder.frames };
       }
@@ -4160,6 +22837,10 @@ function createRegistry(builtIns) {
     }
   };
   for (const definition of builtIns) {
+    if ("family" in definition) {
+      familyRegistry.set(definition.id, definition);
+      continue;
+    }
     switch (definition.kind) {
       case "sort":
         api.registerSort(definition.id, definition.meta, definition.run);
@@ -4171,7 +22852,7 @@ function createRegistry(builtIns) {
         api.registerSearch(definition.id, definition.meta, definition.run);
         break;
       case "string":
-        api.registerString(definition.id, definition.meta, definition.run);
+        api.registerString(definition.id, definition.meta, definition.run, definition.profile);
         break;
       case "pointers":
         api.registerPointer(definition.id, definition.meta, definition.run);
@@ -4216,7 +22897,7 @@ var init_engine = __esm({
     init_registry();
     VERSION = "2.0.0";
     registry = createRegistry(builtInAlgorithms);
-    mount = createMount(registry);
+    mount = createMount(registry, interactiveStructures);
     steptrace = {
       VERSION,
       ...registry,
@@ -4225,6 +22906,791 @@ var init_engine = __esm({
     };
   }
 });
+
+// custom/complexity/interactions.ts
+function mountComplexityFigure(figure) {
+  if (figure.dataset.complexityMounted) return { destroy() {
+  } };
+  figure.dataset.complexityMounted = "true";
+  const tabs = Array.from(figure.querySelectorAll(".complexity__tab"));
+  const legendButtons = Array.from(
+    figure.querySelectorAll(".complexity__legend-button")
+  );
+  const paths = Array.from(figure.querySelectorAll(".complexity__curve"));
+  const areas = Array.from(figure.querySelectorAll(".complexity__area"));
+  const labels = Array.from(figure.querySelectorAll(".complexity__endpoint-label"));
+  const panel = figure.querySelector(".complexity__panel");
+  const listeners = [];
+  let activeFilter = "all";
+  let selectedPathId = null;
+  function listen(target, type, listener) {
+    target.addEventListener(type, listener);
+    listeners.push([target, type, listener]);
+  }
+  function update() {
+    const activeIds = new Set(
+      paths.filter(
+        (path) => path.dataset.context !== "true" && (activeFilter === "all" || path.dataset.category === activeFilter)
+      ).map((path) => path.dataset.pathId ?? "")
+    );
+    if (selectedPathId) {
+      activeIds.clear();
+      activeIds.add(selectedPathId);
+    }
+    for (const path of paths) {
+      const active = activeIds.has(path.dataset.pathId ?? "");
+      path.classList.toggle("is-highlighted", active);
+      path.classList.toggle("is-subtle", !active);
+    }
+    for (const area of areas) {
+      area.classList.toggle("is-subtle", !activeIds.has(area.dataset.pathId ?? ""));
+    }
+    for (const button2 of legendButtons) {
+      const pathId = button2.dataset.pathId ?? "";
+      button2.classList.toggle("is-selected", selectedPathId === pathId);
+      button2.classList.toggle("is-subtle", !activeIds.has(pathId));
+      button2.setAttribute("aria-pressed", selectedPathId === pathId ? "true" : "false");
+    }
+    for (const label of labels) {
+      const ids = (label.dataset.pathIds ?? "").split(",");
+      const activePath = paths.find(
+        (path) => ids.includes(path.dataset.pathId ?? "") && activeIds.has(path.dataset.pathId ?? "")
+      );
+      label.classList.toggle("is-active", Boolean(activePath));
+      label.classList.toggle("is-subtle", !activePath);
+      if (activePath) {
+        label.style.setProperty("--complexity-label-color", activePath.getAttribute("stroke") ?? "");
+      }
+    }
+    for (const tab of tabs) {
+      const selected = tab.dataset.filter === activeFilter;
+      tab.setAttribute("aria-selected", selected ? "true" : "false");
+      tab.tabIndex = selected ? 0 : -1;
+      if (selected && tab.id) panel?.setAttribute("aria-labelledby", tab.id);
+    }
+    figure.dataset.activeFilter = activeFilter;
+  }
+  for (const tab of tabs) {
+    listen(tab, "click", () => {
+      activeFilter = tab.dataset.filter ?? "all";
+      selectedPathId = null;
+      update();
+    });
+    listen(tab, "keydown", (event) => {
+      const key4 = event.key;
+      if (!["ArrowLeft", "ArrowRight", "Home", "End"].includes(key4)) return;
+      event.preventDefault();
+      const enabled = tabs.filter((candidate) => !candidate.disabled);
+      const current = enabled.indexOf(tab);
+      const next = key4 === "Home" ? enabled[0] : key4 === "End" ? enabled.at(-1) : enabled[(current + (key4 === "ArrowRight" ? 1 : -1) + enabled.length) % enabled.length];
+      next?.focus();
+      next?.click();
+    });
+  }
+  for (const button2 of legendButtons) {
+    listen(button2, "click", () => {
+      const pathId = button2.dataset.pathId ?? null;
+      selectedPathId = selectedPathId === pathId ? null : pathId;
+      if (selectedPathId) activeFilter = button2.dataset.category ?? "all";
+      update();
+    });
+  }
+  update();
+  return {
+    destroy() {
+      for (const [target, type, listener] of listeners) {
+        target.removeEventListener(type, listener);
+      }
+      delete figure.dataset.complexityMounted;
+    }
+  };
+}
+
+// custom/complexity/model.ts
+var CURVE_IDS = [
+  "constant",
+  "log-n",
+  "linear",
+  "n-log-n",
+  "quadratic",
+  "exponential",
+  "factorial"
+];
+var COMPLEXITY_FILTERS = [
+  { id: "all", label: "All" },
+  { id: "best", label: "Best" },
+  { id: "average", label: "Avg" },
+  { id: "worst", label: "Worst" },
+  { id: "other", label: "Other" }
+];
+var COMPLEXITY_CHART = {
+  width: 800,
+  height: 320,
+  left: 0,
+  plotRight: 740,
+  labelX: 748,
+  top: 18,
+  axisY: 282
+};
+var curves = {
+  constant: {
+    formula: "O(1)",
+    description: "Same time regardless of input size.",
+    evaluate: () => 1
+  },
+  "log-n": {
+    formula: "O(log n)",
+    description: "Halves the problem each step.",
+    evaluate: Math.log2
+  },
+  linear: { formula: "O(n)", description: "Processes each element once.", evaluate: (n) => n },
+  "n-log-n": {
+    formula: "O(n log n)",
+    description: "Efficient divide-and-conquer work.",
+    evaluate: (n) => n * Math.log2(n)
+  },
+  quadratic: {
+    formula: "O(n²)",
+    description: "Nested work over the input.",
+    evaluate: (n) => n * n
+  },
+  exponential: {
+    formula: "O(2^n)",
+    description: "Doubles with each new element.",
+    evaluate: (n) => 2 ** n
+  },
+  factorial: {
+    formula: "O(n!)",
+    description: "Visits every permutation.",
+    evaluate: (n) => {
+      let value = 1;
+      for (let factor = 2; factor <= n; factor++) value *= factor;
+      return value;
+    }
+  }
+};
+var CASE_COLORS = { Best: "#22a06b", Average: "#d99a00", Worst: "#e05252" };
+var CURVE_COLORS = {
+  constant: "#22a06b",
+  "log-n": "#1597b8",
+  linear: "#db7c2e",
+  "n-log-n": "#9b6bd6",
+  quadratic: "#e05252",
+  exponential: "#d04f9b",
+  factorial: "#6f5bd3"
+};
+var CONTEXT_COLOR = "currentColor";
+var OPERATION_COLORS = [
+  ["#8bb8e8", "#4c89cb", "#245b98"],
+  ["#bd9ee8", "#8d62c7", "#65379e"],
+  ["#e7aa78", "#c97735", "#914619"],
+  ["#78c9b3", "#389b82", "#176b57"]
+];
+var DETAIL_KEYS = ["cause", "assumptions", "auxiliarySpace", "structureSpace"];
+var CONFIG_KEYS = ["version", "mode", "title", "variables", "entries"];
+var { left: LEFT, plotRight: PLOT_RIGHT, top: TOP, axisY: AXIS_Y } = COMPLEXITY_CHART;
+var DATA_BOTTOM = AXIS_Y - 14;
+var MAX_VALUE = 1e4;
+var DUPLICATE_GAP = 4;
+function fail(path, message) {
+  throw new Error(`complexity.${path}: ${message}`);
+}
+function objectAt(value, path) {
+  if (!value || typeof value !== "object" || Array.isArray(value)) fail(path, "must be an object");
+  return value;
+}
+function rejectUnknown(value, allowed, path) {
+  for (const key4 of Object.keys(value)) {
+    if (!allowed.includes(key4)) fail(`${path}.${key4}`, "is not supported");
+  }
+}
+function textAt(value, path) {
+  if (typeof value !== "string" || value.trim() === "") fail(path, "must be a non-empty string");
+  return value;
+}
+function stringsAt(value, path) {
+  if (!Array.isArray(value) || value.some((item) => typeof item !== "string" || item.trim() === "")) {
+    fail(path, "must be an array of non-empty strings");
+  }
+  return value;
+}
+function curveIdAt(value, path) {
+  if (typeof value !== "string" || !CURVE_IDS.includes(value)) {
+    fail(path, `must be one of ${CURVE_IDS.join(", ")}`);
+  }
+  return value;
+}
+function detailsAt(value, path, required = false) {
+  const details = objectAt(value, path);
+  rejectUnknown(details, DETAIL_KEYS, path);
+  const result = {};
+  if (details.cause !== void 0) result.cause = textAt(details.cause, `${path}.cause`);
+  if (details.assumptions !== void 0) {
+    result.assumptions = stringsAt(details.assumptions, `${path}.assumptions`);
+  }
+  if (details.auxiliarySpace !== void 0) {
+    result.auxiliarySpace = textAt(details.auxiliarySpace, `${path}.auxiliarySpace`);
+  }
+  if (details.structureSpace !== void 0) {
+    result.structureSpace = textAt(details.structureSpace, `${path}.structureSpace`);
+  }
+  if (required && !result.auxiliarySpace) fail(`${path}.auxiliarySpace`, "is required");
+  if (required && !result.cause) fail(`${path}.cause`, "is required");
+  return result;
+}
+function qualifiersAt(value, path) {
+  return value === void 0 ? void 0 : stringsAt(value, path);
+}
+function variablesAt(value) {
+  const variables = objectAt(value, "variables");
+  const entries = Object.entries(variables);
+  if (entries.length === 0) fail("variables", "must declare n");
+  const names = /* @__PURE__ */ new Set();
+  for (const [name, description] of entries) {
+    if (!/^[A-Za-z][A-Za-z0-9_]*$/.test(name)) fail(`variables.${name}`, "has an invalid name");
+    textAt(description, `variables.${name}`);
+    names.add(name);
+  }
+  if (!names.has("n")) fail("variables.n", "is required for plotted curves");
+  return {
+    names,
+    text: entries.map(([name, description]) => `${name}: ${String(description)}`).join("; ")
+  };
+}
+function slug(value) {
+  return value.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "");
+}
+function rowId(figureId, key4, index) {
+  return `${figureId}-${slug(key4)}-${index}`;
+}
+function categoryFor(role) {
+  if (!role) return "other";
+  const normalized = role.toLowerCase();
+  if (normalized.startsWith("best")) return "best";
+  if (normalized.includes("average")) return "average";
+  if (normalized.startsWith("worst")) return "worst";
+  return "other";
+}
+function mergeDetails(parent, child) {
+  if (!parent) return child ?? {};
+  if (!child) return parent;
+  return {
+    ...parent,
+    ...child,
+    assumptions: parent.assumptions || child.assumptions ? [...parent.assumptions ?? [], ...child.assumptions ?? []] : void 0
+  };
+}
+function roleColor(role, curveId) {
+  if (role === "Best" || role === "Average" || role === "Worst") return CASE_COLORS[role];
+  return CURVE_COLORS[curveId];
+}
+function operationColor(operationIndex, boundIndex) {
+  const palette = OPERATION_COLORS[operationIndex % OPERATION_COLORS.length];
+  return palette[Math.min(boundIndex, palette.length - 1)];
+}
+function compactRole(role) {
+  return role.replace("Average", "Avg").replace("Amortized / average", "Amortized / avg").replace("Worst single op", "Worst");
+}
+function formatTick(value) {
+  if (value >= 1e6) return `${value / 1e6}M`;
+  if (value >= 1e3) return `${value / 1e3}k`;
+  return String(value);
+}
+function makeScale(maxValue) {
+  const logMax = Math.max(1, Math.log10(maxValue));
+  return {
+    x: (n) => LEFT + n / 10 * (PLOT_RIGHT - LEFT),
+    y: (value) => TOP + (1 - Math.log10(value) / logMax) * (DATA_BOTTOM - TOP)
+  };
+}
+function curvePath(id, curveId, category, label, legendLabel, color, dimmed, scale, legendGroup, offset = 0) {
+  const samples = Array.from({ length: 9 }, (_, index) => {
+    const n = index + 2;
+    const value = curves[curveId].evaluate(n);
+    return { n, value, x: scale.x(n), y: scale.y(value) };
+  });
+  const points = [{ x: LEFT, y: AXIS_Y }, ...samples.map(({ x, y }) => ({ x, y: y - offset }))];
+  const geometry = points.map(({ x, y }, index) => `${index === 0 ? "M" : "L"}${x.toFixed(2)},${y.toFixed(2)}`).join(" ");
+  const last = samples[samples.length - 1];
+  const endY = Math.max(TOP, Math.min(DATA_BOTTOM, last.y - offset));
+  return {
+    id,
+    curveId,
+    category,
+    formula: curves[curveId].formula,
+    label,
+    legendGroup,
+    legendLabel,
+    color,
+    dimmed,
+    geometry,
+    area: `${geometry} L${last.x.toFixed(2)},${AXIS_Y.toFixed(2)} Z`,
+    endY,
+    samples
+  };
+}
+function layoutEndpointLabels(paths) {
+  const labels = CURVE_IDS.map((curveId) => {
+    const matching = paths.filter((path) => path.curveId === curveId);
+    const highlighted = matching.filter((path) => !path.dimmed);
+    return {
+      curveId,
+      formula: curves[curveId].formula,
+      pathIds: matching.map((path) => path.id),
+      color: highlighted[0]?.color ?? CONTEXT_COLOR,
+      dimmed: highlighted.length === 0,
+      y: matching.reduce((sum, path) => sum + path.endY, 0) / matching.length
+    };
+  }).sort((a, b) => a.y - b.y);
+  const gap = 15;
+  const min = TOP + 5;
+  const max = DATA_BOTTOM - 4;
+  labels.forEach((label, index) => {
+    label.y = Math.max(label.y, index === 0 ? min : labels[index - 1].y + gap);
+  });
+  const overflow = labels.at(-1).y - max;
+  if (overflow > 0) labels.forEach((label) => label.y -= overflow);
+  for (let index = labels.length - 2; index >= 0; index--) {
+    labels[index].y = Math.min(labels[index].y, labels[index + 1].y - gap);
+  }
+  const underflow = min - labels[0].y;
+  if (underflow > 0) labels.forEach((label) => label.y += underflow);
+  return labels;
+}
+function assertUnique(seen, value, path) {
+  if (seen.has(value)) fail(path, `duplicates ${value}`);
+  seen.add(value);
+}
+function buildComplexityViewModel(input) {
+  const config = objectAt(input, "config");
+  rejectUnknown(config, CONFIG_KEYS, "config");
+  if (config.version !== 1) fail("version", "must be 1");
+  const mode = config.mode;
+  if (mode !== "catalogue" && mode !== "cases" && mode !== "operations") {
+    fail("mode", "must be catalogue, cases, or operations");
+  }
+  const title = textAt(config.title, "title");
+  const figureId = `complexity-${mode}-${slug(title)}`;
+  const variables = variablesAt(config.variables);
+  if (!Array.isArray(config.entries) || config.entries.length === 0) {
+    fail("entries", "must be a non-empty array");
+  }
+  const rows = [];
+  const highlighted = [];
+  if (mode === "catalogue") {
+    const seen = /* @__PURE__ */ new Set();
+    config.entries.forEach((raw, index) => {
+      const path = `entries[${index}]`;
+      const entry = objectAt(raw, path);
+      rejectUnknown(entry, ["kind", "curveId", "description"], path);
+      if (entry.kind !== "catalogue") fail(`${path}.kind`, "must be catalogue");
+      const curveId = curveIdAt(entry.curveId, `${path}.curveId`);
+      assertUnique(seen, curveId, `${path}.curveId`);
+      const description = textAt(entry.description, `${path}.description`);
+      const id = rowId(figureId, curveId, index);
+      rows.push({
+        id,
+        label: curves[curveId].formula,
+        formula: curves[curveId].formula,
+        variables: variables.text,
+        description
+      });
+      highlighted.push({
+        id,
+        curveId,
+        category: "other",
+        label: curves[curveId].formula,
+        legendLabel: curves[curveId].formula,
+        color: CURVE_COLORS[curveId]
+      });
+    });
+  } else if (mode === "cases") {
+    const seen = /* @__PURE__ */ new Set();
+    config.entries.forEach((raw, index) => {
+      const path = `entries[${index}]`;
+      const entry = objectAt(raw, path);
+      rejectUnknown(entry, ["kind", "role", "curveId", "qualifiers", "details"], path);
+      if (entry.kind !== "case") fail(`${path}.kind`, "must be case");
+      const role = textAt(entry.role, `${path}.role`);
+      if (role !== "Best" && role !== "Average" && role !== "Worst") {
+        fail(`${path}.role`, "must be Best, Average, or Worst");
+      }
+      assertUnique(seen, role, `${path}.role`);
+      const curveId = curveIdAt(entry.curveId, `${path}.curveId`);
+      const qualifiers = qualifiersAt(entry.qualifiers, `${path}.qualifiers`);
+      const details = detailsAt(entry.details, `${path}.details`, true);
+      const id = rowId(figureId, role, index);
+      rows.push({
+        id,
+        label: role,
+        formula: curves[curveId].formula,
+        variables: variables.text,
+        qualifiers,
+        ...details
+      });
+      highlighted.push({
+        id,
+        curveId,
+        category: categoryFor(role),
+        label: `${role}: ${curves[curveId].formula}`,
+        legendLabel: `${compactRole(role)} ${curves[curveId].formula}`,
+        color: roleColor(role, curveId)
+      });
+    });
+    for (const role of ["Best", "Average", "Worst"]) {
+      if (!seen.has(role)) fail("entries", `must include ${role}`);
+    }
+  } else {
+    const seenOperations = /* @__PURE__ */ new Set();
+    config.entries.forEach((raw, operationIndex) => {
+      const path = `entries[${operationIndex}]`;
+      const entry = objectAt(raw, path);
+      rejectUnknown(entry, ["kind", "operation", "bounds", "details"], path);
+      if (entry.kind !== "operation") fail(`${path}.kind`, "must be operation");
+      const operation = textAt(entry.operation, `${path}.operation`);
+      assertUnique(seenOperations, operation, `${path}.operation`);
+      const operationDetails = entry.details === void 0 ? void 0 : detailsAt(entry.details, `${path}.details`);
+      if (!Array.isArray(entry.bounds) || entry.bounds.length === 0) {
+        fail(`${path}.bounds`, "must be a non-empty array");
+      }
+      const seenRoles = /* @__PURE__ */ new Set();
+      entry.bounds.forEach((rawBound, boundIndex) => {
+        const boundPath = `${path}.bounds[${boundIndex}]`;
+        const bound = objectAt(rawBound, boundPath);
+        const kind = bound.kind;
+        if (kind === "catalogue") {
+          rejectUnknown(bound, ["kind", "curveId", "role", "qualifiers", "details"], boundPath);
+        } else if (kind === "text") {
+          rejectUnknown(bound, ["kind", "formula", "role", "qualifiers", "details"], boundPath);
+        } else {
+          fail(`${boundPath}.kind`, "must be catalogue or text");
+        }
+        const role = textAt(bound.role, `${boundPath}.role`);
+        assertUnique(seenRoles, role, `${boundPath}.role`);
+        const qualifiers = qualifiersAt(bound.qualifiers, `${boundPath}.qualifiers`);
+        const boundDetails = bound.details === void 0 ? void 0 : detailsAt(bound.details, `${boundPath}.details`);
+        const details = mergeDetails(operationDetails, boundDetails);
+        let curveId;
+        let formula;
+        if (kind === "catalogue") {
+          curveId = curveIdAt(bound.curveId, `${boundPath}.curveId`);
+          formula = curves[curveId].formula;
+        } else {
+          formula = textAt(bound.formula, `${boundPath}.formula`);
+        }
+        const id = rowId(figureId, `${operation}-${role}`, operationIndex * 100 + boundIndex);
+        rows.push({
+          id,
+          label: `${operation} — ${role}`,
+          formula,
+          variables: variables.text,
+          qualifiers,
+          ...details
+        });
+        if (curveId) {
+          highlighted.push({
+            id,
+            curveId,
+            category: categoryFor(role),
+            label: `${operation} — ${role}: ${curves[curveId].formula}`,
+            legendGroup: operation,
+            legendLabel: `${compactRole(role)} ${curves[curveId].formula}`,
+            color: operationColor(operationIndex, boundIndex)
+          });
+        }
+      });
+    });
+  }
+  const scale = makeScale(MAX_VALUE);
+  const selected = new Set(highlighted.map(({ curveId }) => curveId));
+  const context = CURVE_IDS.filter((curveId) => !selected.has(curveId)).map(
+    (curveId, index) => curvePath(
+      `${figureId}-context-${curveId}-${index}`,
+      curveId,
+      "other",
+      curves[curveId].formula,
+      curves[curveId].formula,
+      CONTEXT_COLOR,
+      true,
+      scale
+    )
+  );
+  const counts = /* @__PURE__ */ new Map();
+  const indexes = /* @__PURE__ */ new Map();
+  for (const { curveId } of highlighted) counts.set(curveId, (counts.get(curveId) ?? 0) + 1);
+  const highlightedPaths = highlighted.map(
+    ({ id, curveId, category, label, legendGroup, legendLabel, color }) => {
+      const index = indexes.get(curveId) ?? 0;
+      indexes.set(curveId, index + 1);
+      const offset = (counts.get(curveId) ?? 0) > 1 ? index * DUPLICATE_GAP : 0;
+      return curvePath(
+        id,
+        curveId,
+        category,
+        label,
+        legendLabel,
+        color,
+        false,
+        scale,
+        legendGroup,
+        offset
+      );
+    }
+  );
+  const paths = [...context, ...highlightedPaths];
+  const ticks = [{ value: 0, label: "0", y: AXIS_Y }];
+  for (let value = 1; value <= MAX_VALUE; value *= 10) {
+    ticks.push({ value, label: formatTick(value), y: scale.y(value) });
+  }
+  const xTicks = [2, 4, 6, 8, 10].map((value) => ({
+    value,
+    label: String(value),
+    x: scale.x(value)
+  }));
+  const legend = [];
+  for (const path of paths.filter((candidate) => !candidate.dimmed)) {
+    const group = legend.find((candidate) => candidate.label === path.legendGroup);
+    const item = {
+      pathId: path.id,
+      category: path.category,
+      label: path.legendLabel,
+      color: path.color
+    };
+    if (group) group.items.push(item);
+    else legend.push({ label: path.legendGroup, items: [item] });
+  }
+  const availableCategories = Array.from(new Set(highlightedPaths.map((path) => path.category)));
+  return {
+    figureId,
+    mode,
+    title,
+    paths,
+    legend,
+    endpointLabels: layoutEndpointLabels(paths),
+    availableCategories,
+    rows,
+    ticks,
+    xTicks
+  };
+}
+
+// custom/complexity/dom.ts
+var SVG_NS = "http://www.w3.org/2000/svg";
+function appendText(document2, parent, tagName, value) {
+  const child = document2.createElement(tagName);
+  child.textContent = value;
+  parent.append(child);
+  return child;
+}
+function svgElement(document2, tagName, attributes) {
+  const node2 = document2.createElementNS(SVG_NS, tagName);
+  for (const [name, value] of Object.entries(attributes)) node2.setAttribute(name, String(value));
+  return node2;
+}
+function renderComplexityDom(root, view) {
+  const document2 = root.ownerDocument;
+  const { width, height: height2, left, plotRight, labelX, top, axisY } = COMPLEXITY_CHART;
+  const clipId = `${view.figureId}-plot-clip`;
+  const panelId = `${view.figureId}-panel`;
+  const figure = document2.createElement("figure");
+  figure.id = view.figureId;
+  figure.className = "complexity";
+  figure.dataset.complexityMode = view.mode;
+  figure.dataset.activeFilter = "all";
+  const title = appendText(document2, figure, "figcaption", view.title);
+  title.id = `${view.figureId}-title`;
+  title.className = "complexity__title";
+  const tabs = document2.createElement("div");
+  tabs.className = "steptrace__tabs complexity__tabs";
+  tabs.setAttribute("role", "tablist");
+  tabs.setAttribute("aria-label", "Complexity cases");
+  for (const filter of COMPLEXITY_FILTERS) {
+    const tab = appendText(document2, tabs, "button", filter.label);
+    tab.id = `${view.figureId}-tab-${filter.id}`;
+    tab.type = "button";
+    tab.className = "steptrace__tab complexity__tab";
+    tab.dataset.filter = filter.id;
+    tab.setAttribute("role", "tab");
+    tab.setAttribute("aria-controls", panelId);
+    tab.setAttribute("aria-selected", filter.id === "all" ? "true" : "false");
+    tab.tabIndex = filter.id === "all" ? 0 : -1;
+    tab.disabled = filter.id !== "all" && !view.availableCategories.includes(filter.id);
+  }
+  figure.append(tabs);
+  const panel = document2.createElement("div");
+  panel.id = panelId;
+  panel.className = "complexity__panel";
+  panel.setAttribute("role", "tabpanel");
+  panel.setAttribute("aria-labelledby", `${view.figureId}-tab-all`);
+  const plotWrap = document2.createElement("div");
+  plotWrap.className = "complexity__plot-wrap";
+  const svg = svgElement(document2, "svg", {
+    class: "complexity__plot",
+    viewBox: `0 0 ${width} ${height2}`,
+    role: "presentation",
+    "aria-hidden": "true",
+    focusable: "false"
+  });
+  const defs = svgElement(document2, "defs", {});
+  const clip = svgElement(document2, "clipPath", { id: clipId });
+  clip.append(
+    svgElement(document2, "rect", {
+      x: left,
+      y: top,
+      width: plotRight - left,
+      height: axisY - top
+    })
+  );
+  defs.append(clip);
+  for (const path of view.paths.filter((candidate) => !candidate.dimmed)) {
+    const gradient = svgElement(document2, "linearGradient", {
+      id: `${path.id}-fill`,
+      x1: 0,
+      y1: 0,
+      x2: 0,
+      y2: 1
+    });
+    gradient.append(
+      svgElement(document2, "stop", {
+        offset: "0%",
+        "stop-color": path.color,
+        "stop-opacity": 0.2
+      }),
+      svgElement(document2, "stop", {
+        offset: "100%",
+        "stop-color": path.color,
+        "stop-opacity": 0
+      })
+    );
+    defs.append(gradient);
+  }
+  svg.append(defs);
+  for (const tick of view.ticks) {
+    svg.append(
+      svgElement(document2, "line", {
+        class: "complexity__grid",
+        x1: left,
+        x2: plotRight,
+        y1: tick.y,
+        y2: tick.y
+      })
+    );
+    const label = svgElement(document2, "text", {
+      class: "complexity__tick",
+      x: left + 8,
+      y: tick.y + (tick.value === 0 ? -6 : 4)
+    });
+    label.textContent = tick.label;
+    svg.append(label);
+  }
+  svg.append(
+    svgElement(document2, "line", {
+      class: "complexity__axis",
+      x1: left,
+      x2: plotRight,
+      y1: axisY,
+      y2: axisY
+    })
+  );
+  for (const tick of view.xTicks) {
+    const label = svgElement(document2, "text", {
+      class: "complexity__x-tick",
+      x: tick.x,
+      y: axisY + 18
+    });
+    label.textContent = tick.label;
+    svg.append(label);
+  }
+  const clipped = svgElement(document2, "g", { "clip-path": `url(#${clipId})` });
+  const areas = svgElement(document2, "g", { class: "complexity__areas" });
+  const curves2 = svgElement(document2, "g", { class: "complexity__curves" });
+  for (const path of view.paths) {
+    if (!path.dimmed) {
+      areas.append(
+        svgElement(document2, "path", {
+          class: "complexity__area",
+          d: path.area,
+          fill: `url(#${path.id}-fill)`,
+          "data-path-id": path.id,
+          "data-category": path.category
+        })
+      );
+    }
+    curves2.append(
+      svgElement(document2, "path", {
+        id: path.id,
+        class: `complexity__curve ${path.dimmed ? "is-subtle is-context" : "is-highlighted"}`,
+        d: path.geometry,
+        fill: "none",
+        stroke: path.color,
+        "vector-effect": "non-scaling-stroke",
+        "data-path-id": path.id,
+        "data-curve-id": path.curveId,
+        "data-category": path.category,
+        "data-context": path.dimmed ? "true" : "false"
+      })
+    );
+  }
+  clipped.append(areas, curves2);
+  svg.append(clipped);
+  const endpointLabels = svgElement(document2, "g", { class: "complexity__endpoint-labels" });
+  for (const endpoint of view.endpointLabels) {
+    const label = svgElement(document2, "text", {
+      class: `complexity__endpoint-label ${endpoint.dimmed ? "is-subtle" : "is-active"}`,
+      x: labelX,
+      y: endpoint.y + 4,
+      "data-curve-id": endpoint.curveId,
+      "data-path-ids": endpoint.pathIds.join(",")
+    });
+    label.style.setProperty("--complexity-label-color", endpoint.color);
+    label.textContent = endpoint.formula;
+    endpointLabels.append(label);
+  }
+  svg.append(endpointLabels);
+  plotWrap.append(svg);
+  panel.append(plotWrap);
+  figure.append(panel);
+  const legend = document2.createElement("div");
+  legend.className = "complexity__legend";
+  for (const group of view.legend) {
+    const row = document2.createElement("div");
+    row.className = `complexity__legend-group${group.label ? "" : " is-ungrouped"}`;
+    if (group.label) {
+      appendText(document2, row, "span", group.label).className = "complexity__legend-group-label";
+    }
+    const items = document2.createElement("ul");
+    items.className = "complexity__legend-items";
+    for (const legendItem of group.items) {
+      const item = document2.createElement("li");
+      item.className = "complexity__legend-item";
+      const button2 = document2.createElement("button");
+      button2.type = "button";
+      button2.className = "complexity__legend-button";
+      button2.dataset.pathId = legendItem.pathId;
+      button2.dataset.category = legendItem.category;
+      button2.setAttribute("aria-pressed", "false");
+      button2.style.setProperty("--complexity-color", legendItem.color);
+      const swatch = document2.createElement("span");
+      swatch.className = "complexity__legend-swatch";
+      swatch.setAttribute("aria-hidden", "true");
+      button2.append(swatch, document2.createTextNode(legendItem.label));
+      item.append(button2);
+      items.append(item);
+    }
+    row.append(items);
+    legend.append(row);
+  }
+  figure.append(legend);
+  root.replaceChildren(figure);
+  const interaction = typeof figure.querySelectorAll === "function" ? mountComplexityFigure(figure) : { destroy() {
+  } };
+  return {
+    destroy() {
+      interaction.destroy();
+      root.replaceChildren();
+    }
+  };
+}
 
 // custom/steptrace/src/entries/obsidian.cts
 var { Plugin, MarkdownRenderChild, Notice, SliderComponent } = require("obsidian");
@@ -4247,7 +23713,7 @@ function createSpeedSlider(container, options) {
     }
   };
 }
-var SteptraceChild = class extends MarkdownRenderChild {
+var RenderChild = class extends MarkdownRenderChild {
   handle;
   constructor(el2, handle) {
     super(el2);
@@ -4274,7 +23740,25 @@ ${error instanceof Error ? error.message : String(error)}`
         }
         const root = el2.createEl("div");
         const handle = steptrace2.mount(root, config, { createSpeedSlider });
-        ctx.addChild(new SteptraceChild(el2, handle));
+        ctx.addChild(new RenderChild(el2, handle));
+      }
+    );
+    this.registerMarkdownCodeBlockProcessor(
+      "complexity",
+      (source, el2, ctx) => {
+        try {
+          const view = buildComplexityViewModel(JSON.parse(source));
+          const root = el2.createEl("div");
+          const handle = renderComplexityDom(root, view);
+          ctx.addChild(new RenderChild(el2, handle));
+        } catch (error) {
+          el2.replaceChildren();
+          el2.createEl("pre", {
+            text: `complexity: ${error instanceof Error ? error.message : String(error)}
+
+${source}`
+          });
+        }
       }
     );
     this.addCommand({

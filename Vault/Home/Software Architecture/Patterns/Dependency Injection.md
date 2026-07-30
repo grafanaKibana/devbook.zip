@@ -10,6 +10,7 @@ priority: High
 status: Done
 publish: true
 ---
+
 Dependency Injection (DI) is a design pattern where objects receive dependencies from an external source instead of creating them internally, which is a practical form of Inversion of Control (IoC). It matters because it improves testability, keeps components loosely coupled, and makes systems composable as they grow. In modern .NET, DI is not optional architecture flavor: ASP.NET Core uses the built-in container as the default composition root for wiring the application.
 
 # How It Works
@@ -30,7 +31,7 @@ builder.Services.AddTransient<IEmailSender, SmtpEmailSender>();
 
 The container stores service descriptors (service type, implementation, lifetime). Most services are not instantiated at registration time.
 
-## 2) Resolution (constructor injection, `[FromServices]`, `IServiceProvider`)
+## 2) Resolution (Constructor iNjection, `[FromServices]`, `IServiceProvider`)
 
 At runtime, the container builds an object graph and injects dependencies.
 
@@ -148,7 +149,7 @@ Why it is dangerous:
 
 In ASP.NET Core Development, this usually surfaces as `InvalidOperationException` when scope validation is enabled (`ValidateScopes`).
 
-## Anti-pattern: singleton directly depends on scoped service
+## Anti-pattern: Singleton Directly Depends on Scoped Service
 
 ```csharp
 public sealed class CacheWarmupService(AppDbContext db) : IHostedService
@@ -163,7 +164,7 @@ public sealed class CacheWarmupService(AppDbContext db) : IHostedService
 }
 ```
 
-## Fix: inject `IServiceScopeFactory` and resolve scoped inside explicit scope
+## Fix: Inject `IServiceScopeFactory` and Resolve Scoped inside Explicit Scope
 
 ```csharp
 public sealed class CacheWarmupService(IServiceScopeFactory scopeFactory) : IHostedService
@@ -228,25 +229,25 @@ Use this when selection is explicit and stable; avoid turning keys into hidden r
 
 # Pitfalls
 
-## 1) Captive dependency
+## 1) Captive Dependency
 
 - What goes wrong: singleton holds scoped dependency.
 - Why: lifetime mismatch (long-lived object captures short-lived state).
 - Mitigation: resolve scoped dependencies inside temporary scopes via `IServiceScopeFactory`.
 
-## 2) Service Locator anti-pattern
+## 2) Service Locator Anti-pattern
 
 - What goes wrong: hidden dependencies, runtime-only failures, brittle tests.
 - Why: dependencies are fetched ad hoc from container instead of explicit contracts.
 - Mitigation: constructor injection for business logic; constrain locator usage to infrastructure.
 
-## 3) Registering `DbContext` as singleton
+## 3) Registering `DbContext` as Singleton
 
 - What goes wrong: stale tracking state, threading issues, and potential connection pool exhaustion.
 - Why: `DbContext` is not thread-safe and is designed for short unit-of-work scope.
 - Mitigation: keep `DbContext` scoped (`AddDbContext<TContext>()` default), create per-operation scopes in workers.
 
-## 4) Circular dependencies (`A -> B -> A`)
+## 4) Circular Dependencies (`A -> B -> A`)
 
 - What goes wrong: container cannot construct object graph and throws.
 - Why: bidirectional service orchestration and poor boundary design.

@@ -10,6 +10,7 @@ priority: High
 status: Ready to Repeat
 publish: true
 ---
+
 A hotel concierge is a Facade. You walk up and say "I need a restaurant reservation, a taxi, and theater tickets." Behind the scenes, the concierge calls the restaurant, the taxi company, and the box office. You interact with one person instead of three separate services, each with its own phone number, hold music, and booking protocol. The concierge doesn’t add new capabilities — they simplify access to existing ones.
 
 The Facade pattern provides a simplified interface to a complex subsystem. The facade class holds references to subsystem components (inventory, payment, shipping, notification) and exposes high-level methods that coordinate them. The client calls `OrderFacade.PlaceOrderAsync(order)` instead of manually orchestrating five services in the right sequence with the right error handling. The subsystems remain fully accessible for clients that need fine-grained control — the facade is a convenience, not a prison.

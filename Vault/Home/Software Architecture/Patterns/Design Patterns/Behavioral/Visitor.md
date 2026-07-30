@@ -10,6 +10,7 @@ priority: High
 status: Ready to Repeat
 publish: true
 ---
+
 A museum audio guide is a Visitor. The exhibits (element hierarchy) stay the same, but you can load different tours — art history, architecture, kids’ tour. Each tour visits the same exhibits but tells different stories. Adding a new tour doesn’t require changing any exhibit; adding a new exhibit requires updating every tour. That trade-off — easy to add operations, hard to add elements — is the Visitor’s defining characteristic.
 
 The Visitor pattern lets you add new operations to an object hierarchy without modifying the classes in that hierarchy. Each element implements `Accept(IVisitor visitor)`, which calls `visitor.Visit(this)` — this **double dispatch** ensures the correct `Visit` overload runs for the concrete element type. The visitor carries the operation and any accumulated state. In an e-commerce cart, `PhysicalProduct`, `DigitalProduct`, and `SubscriptionProduct` each accept visitors like `TaxVisitor`, `ShippingVisitor`, or `DiscountVisitor` — adding a new calculation means adding a new visitor class, not editing the product hierarchy.

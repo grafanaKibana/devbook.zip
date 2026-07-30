@@ -13,7 +13,7 @@ publish: true
 
 Event schema evolution keeps old records readable while producers and consumers deploy independently. The contract is broader than any broker or registry: define how a reader interprets a writer's version, which changes CI accepts, how schemas are identified, and how a consumer behaves when it cannot resolve or understand a version.
 
-# Writer and reader schemas
+# Writer and Reader Schemas
 
 Suppose version one writes:
 
@@ -29,7 +29,7 @@ Version two adds an optional field with a default:
 
 An old record remains readable by the new consumer because its reader schema supplies the default. A new record remains readable by an old consumer when that reader ignores fields it does not know. Renaming or changing the type of `orderId` is breaking unless aliases or a migration preserve resolution.
 
-# Compatibility policy
+# Compatibility Policy
 
 - **Backward:** new consumers can read records produced by the previous schema.
 - **Forward:** old consumers can read records produced by the new schema.
@@ -38,7 +38,7 @@ An old record remains readable by the new consumer because its reader schema sup
 
 Use full transitive compatibility when retained records outlive several application versions or independent consumers can lag for months. Compatibility labels still depend on the serialization format and configured subject/version strategy; they are not universal guarantees across every event system.
 
-# Registry and transport boundary
+# Registry and Transport Boundary
 
 A registry is one way to distribute schema identity and enforce policy. A system can instead publish versioned contracts with the application, but it still needs deterministic writer/reader resolution and deployment checks.
 

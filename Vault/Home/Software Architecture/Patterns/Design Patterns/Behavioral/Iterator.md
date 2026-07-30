@@ -10,6 +10,7 @@ priority: High
 status: Ready to Repeat
 publish: true
 ---
+
 A TV remote’s channel button is an Iterator. Press "next" and you get the next channel without knowing whether channels are stored in an array, a linked list, or streamed from a satellite. The remote abstracts away how channels are organized — you just get the next one. You can start over, skip ahead, or stop anytime.
 
 The Iterator pattern provides a way to sequentially access elements of a collection without exposing its underlying representation. In C#, **`foreach` and `yield return` ARE the Iterator pattern** — the compiler generates the iterator state machine (`IEnumerator<T>`) for you. `IEnumerable<T>` is the iterable (the collection that knows how to create an iterator); `IEnumerator<T>` is the iterator (the cursor that tracks position). Most C# developers use this pattern daily without recognizing it as a design pattern. The `async` counterpart — `IAsyncEnumerable<T>` with `await foreach` — extends the same concept to asynchronous data streams.

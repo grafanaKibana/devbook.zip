@@ -4,12 +4,11 @@ topic:
 subtopic:
   - Patterns
 summary: "Reusable solutions to recurring design problems around boundaries, dependencies, and change."
-tags:
-  - FolderNote
+tags: [FolderNote]
 publish: true
 priority: High
 level:
-  - '4'
+  - "4"
 status: Done
 ---
 

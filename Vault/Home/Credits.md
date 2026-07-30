@@ -1,12 +1,11 @@
 ---
 title: Credits
 publish: true
-tags:
-  - MetricsIgnore
+tags: [MetricsIgnore]
 icon: heart
 ---
 
-# Welcome to my software engineering notebook
+# Welcome to My Software Engineering Notebook
 
 The notes I've written to actually *understand* the stack, not just recall it for an interview. .NET internals, distributed systems, databases, security, cloud, AI/ML, and most of what sits between. Every note goes deep: core mechanics, real examples, the pitfalls that bite in production, and the questions worth being able to answer.
 

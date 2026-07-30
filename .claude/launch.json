@@ -2,28 +2,16 @@
   "version": "0.0.1",
   "configurations": [
     {
-      "name": "quartz",
+      "name": "Web: Instance 1",
       "runtimeExecutable": "sh",
       "runtimeArgs": ["-c", "cd Web && npx quartz build --serve --port 8080"],
       "port": 8080
     },
     {
-      "name": "quartz-wt",
+      "name": "Web: Instance 2",
       "runtimeExecutable": "sh",
-      "runtimeArgs": ["-c", "cd Web && npx quartz build --serve --port 8071 --wsPort 3071"],
-      "port": 8071
-    },
-    {
-      "name": "steptrace-mockups",
-      "runtimeExecutable": "python3",
-      "runtimeArgs": [
-        "-m",
-        "http.server",
-        "4747",
-        "--directory",
-        "/private/tmp/claude-501/-Users-nikitareshetnik-Engineering-Repositories-DevBook/49b36f7c-3b47-4c8b-b098-816fe134323d/scratchpad/steptrace-mockups"
-      ],
-      "port": 4747
+      "runtimeArgs": ["-c", "cd Web && npx quartz build --serve --port 8081"],
+      "port": 8081
     }
   ]
 }

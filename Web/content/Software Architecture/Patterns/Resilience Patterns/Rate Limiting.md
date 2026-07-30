@@ -1,8 +1,8 @@
 ---
 publish: true
-created: 2026-07-15T12:03:33.446Z
-modified: 2026-07-18T11:37:57.586Z
-published: 2026-07-18T11:37:57.586Z
+created: 2026-07-25T18:38:43.889Z
+modified: 2026-07-25T18:38:43.889Z
+published: 2026-07-25T18:38:43.889Z
 topic:
   - Software Architecture
 subtopic:
@@ -232,7 +232,7 @@ EXEC
 
 # Pitfalls
 
-## 1) Fixed window boundary spike
+## 1) Fixed Window Boundary Spike
 
 What goes wrong: with a limit of 100/minute, a client can send 100 requests at 12:00:59 and another 100 at 12:01:00, effectively 200 in two seconds.
 
@@ -240,7 +240,7 @@ Why it happens: counters reset on hard boundaries rather than rolling time.
 
 Mitigation: prefer token bucket or sliding window counter for edge-exposed endpoints.
 
-## 2) Wrong partition key
+## 2) Wrong Partition Key
 
 What goes wrong: limiting by IP can unfairly throttle many users behind one NAT, while bad actors rotate IPs to evade limits.
 
@@ -248,7 +248,7 @@ Why it happens: key does not reflect identity or billing unit.
 
 Mitigation: choose key by business objective (API key, tenant, user, or composite key). Align limiter key with quota ownership.
 
-## 3) Clock skew in distributed limiters
+## 3) Clock Skew in Distributed Limiters
 
 What goes wrong: nodes disagree on current time, leading to inconsistent window calculations and unfair accepts/rejects.
 
@@ -256,7 +256,7 @@ Why it happens: window math depends on timestamps from different hosts.
 
 Mitigation: centralize time decisions in Redis scripts when possible, run NTP everywhere, and avoid client-provided timestamps.
 
-## 4) Missing response metadata
+## 4) Missing Response Metadata
 
 What goes wrong: clients receive `429` without actionable retry guidance, causing aggressive blind retries and more load.
 

@@ -4,8 +4,7 @@ topic:
 subtopic:
   - Algorithms
 summary: "Finding a pattern inside text, chosen by how many patterns you match and what you preprocess."
-tags:
-  - FolderNote
+tags: [FolderNote]
 publish: true
 priority: Medium
 level:
@@ -36,7 +35,7 @@ flowchart TD
   B -->|Many equal-length, or 2-D, or rolling| I[Rabin-Karp]
 ```
 
-# The family
+# The Family
 
 | Algorithm | Patterns | Preprocesses | Time | Worst case | Aux space | Weaker case | Reach for it when |
 | --- | --- | --- | --- | --- | --- | --- | --- |

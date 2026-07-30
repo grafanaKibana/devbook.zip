@@ -15,7 +15,7 @@ const script = `
   if (window.__devbookHomepageFit) return;
 
   var fit = window.matchMedia(
-    "(min-width: 768px) and (max-width: 1200px), (min-width: 1201px) and (min-height: 36rem)"
+    "(min-width: 768px) and (max-width: 1200px) and (min-height: 32rem), (min-width: 1201px) and (min-height: 32rem)"
   );
   var states = ["full", "summary-hidden", "counter-hidden", "bar-hidden"];
   var frame = 0;
@@ -30,6 +30,17 @@ const script = `
   function scrollFits(element) {
     return element.scrollHeight <= element.clientHeight + 1 &&
       element.scrollWidth <= element.clientWidth + 1;
+  }
+
+  function gridFits(grid) {
+    if (grid.scrollWidth > grid.clientWidth + 1) return false;
+    // Offset geometry ignores the cards' temporary entrance transforms.
+    var cards = grid.querySelectorAll(":scope > .dc-topic-card");
+    for (var i = 0; i < cards.length; i += 1) {
+      var card = cards[i];
+      if (card.offsetTop + card.offsetHeight > grid.offsetTop + grid.clientHeight + 1) return false;
+    }
+    return true;
   }
 
   // The parent's CONTENT box (border-box rect inset by its padding). Retained
@@ -59,13 +70,13 @@ const script = `
     var viewportHeight = window.visualViewport ? window.visualViewport.height : window.innerHeight;
     var footer = quartzBody.querySelector(":scope > footer");
     var center = quartzBody.querySelector(":scope > .center");
-    var grid = dashboard;
+    var grid = dashboard.querySelector(".dc-topic-grid");
     if (!footer || !center || !grid) return false;
 
     var quartzRect = quartzBody.getBoundingClientRect();
     var footerRect = footer.getBoundingClientRect();
     if (quartzRect.bottom > viewportHeight + 1 || footerRect.bottom > viewportHeight + 1) return false;
-    if (!scrollFits(quartzBody) || !scrollFits(center) || !scrollFits(grid)) return false;
+    if (!scrollFits(quartzBody) || !scrollFits(center) || !scrollFits(dashboard) || !gridFits(grid)) return false;
 
     var cards = grid.querySelectorAll(".dc-topic-card");
     if (!cards.length) return false;
@@ -89,35 +100,39 @@ const script = `
 
   function chooseState() {
     frame = 0;
-    var body = document.body;
-    var dashboard = body.querySelector('.dc-topic-grid');
-    var quartzBody = body.querySelector('.page > #quartz-body');
-    var isHome = body.dataset.slug === "index";
+    try {
+      var body = document.body;
+      var dashboard = body.querySelector(".dc-topic-dashboard");
+      var quartzBody = body.querySelector('.page > #quartz-body');
+      var isHome = body.dataset.slug === "index";
 
-    if (!isHome || !fit.matches || !dashboard || !quartzBody) {
-      body.removeAttribute("data-home-fit");
+      if (!isHome || !fit.matches || !dashboard || !quartzBody) {
+        body.removeAttribute("data-home-fit");
+        body.removeAttribute("data-home-fit-overflow");
+        observe(null);
+        return;
+      }
+
+      observe(quartzBody);
       body.removeAttribute("data-home-fit-overflow");
+
+      for (var i = 0; i < states.length; i += 1) {
+        body.dataset.homeFit = states[i];
+        // Force style and layout after each complete visibility state. Retained
+        // elements are measured whole; none are shortened to make a state pass.
+        void quartzBody.offsetHeight;
+        if (fits(quartzBody, dashboard)) return;
+      }
+
+      // If no complete state fits, the one-viewport contract is impossible at
+      // this height. Restore the existing scrolling tablet layout rather than
+      // leaving retained content inside the fit mode's clipped 100dvh frame.
+      body.removeAttribute("data-home-fit");
+      body.dataset.homeFitOverflow = "true";
       observe(null);
-      return;
+    } finally {
+      window.__devbookPageReveal && window.__devbookPageReveal.initial();
     }
-
-    observe(quartzBody);
-    body.removeAttribute("data-home-fit-overflow");
-
-    for (var i = 0; i < states.length; i += 1) {
-      body.dataset.homeFit = states[i];
-      // Force style and layout after each complete visibility state. Retained
-      // elements are measured whole; none are shortened to make a state pass.
-      void quartzBody.offsetHeight;
-      if (fits(quartzBody, dashboard)) return;
-    }
-
-    // If no complete state fits, the one-viewport contract is impossible at
-    // this height. Restore the existing scrolling tablet layout rather than
-    // leaving retained content inside the fit mode's clipped 100dvh frame.
-    body.removeAttribute("data-home-fit");
-    body.dataset.homeFitOverflow = "true";
-    observe(null);
   }
 
   function schedule() {

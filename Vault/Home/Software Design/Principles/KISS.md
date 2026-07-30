@@ -10,11 +10,12 @@ priority: High
 status: Ready to Repeat
 publish: true
 ---
+
 KISS (Keep It Simple, Stupid) means prefer the simplest solution that meets the actual requirements. Simple is not the same as "quick hack" — simple means fewer moving parts, fewer hidden assumptions, and clear failure modes. You reach for KISS when complexity is added "just in case" or when abstractions obscure the real behavior. A startup built a full event-sourced CQRS system with a Kafka message bus for what was a 3-table CRUD application serving 50 users — the team spent 60% of engineering time maintaining infrastructure instead of shipping features, and eventually rewrote it as a simple ASP.NET Core API with EF Core in two weeks.
 
 Complexity has ongoing cost: bugs, onboarding time, testing, and operations. Every abstraction layer you add must earn its keep by solving a proven problem.
 
-# Violation vs Fix
+# Violation Vs Fix
 
 **Over-engineered:**
 
@@ -67,7 +68,6 @@ Distributed systems are where KISS violations are most costly. Each added compon
 
 The simplest distributed system that meets current requirements is almost always the right starting point. Add complexity when you hit a proven constraint, not before.
 
-
 # Pitfalls
 
 **Confusing simple with no structure**
@@ -89,7 +89,6 @@ Removing a safety mechanism (retry logic, circuit breaker, idempotency key) beca
 
 > [!QUESTION]- How does KISS interact with YAGNI and DRY?
 > They are complementary: YAGNI says don't build features you don't need yet; DRY says don't duplicate knowledge; KISS says keep the implementation simple. Tension arises when DRY requires an abstraction that adds complexity (KISS violation) for a single use case (YAGNI violation). Resolution: apply the Rule of Three — abstract when you have two concrete use cases, not one. One use case is speculation; two give you enough information to design a simple abstraction.
-
 
 # References
 

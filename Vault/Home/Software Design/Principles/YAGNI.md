@@ -77,7 +77,6 @@ public class FeatureConfig
 
 **Mitigation**: apply the Rule of Three — introduce an abstraction when you have two concrete use cases, not one. One use case is speculation; two give you enough information to design the abstraction correctly.
 
-
 # Tradeoffs
 
 **YAGNI vs forward-thinking design**
@@ -91,7 +90,6 @@ public class FeatureConfig
 
 **Decision rule**: apply YAGNI by default. The exception is when the cost of adding the abstraction later is genuinely high — public API contracts, database schemas, wire protocols, or security boundaries. For these, upfront design is justified because changing them later is expensive or breaking. For internal code, add the abstraction when you have two concrete use cases, not one.
 
-
 # Questions
 
 > [!QUESTION]- Does YAGNI mean you should skip tests and refactoring?
@@ -99,7 +97,6 @@ public class FeatureConfig
 
 > [!QUESTION]- When does YAGNI conflict with good design, and how do you resolve it?
 > YAGNI conflicts with design when adding an abstraction now would make future changes cheaper. The resolution: add the abstraction when you have two concrete use cases, not one. One use case is speculation; two use cases give you enough information to design the abstraction correctly. This is the Rule of Three from refactoring.
-
 
 # References
 

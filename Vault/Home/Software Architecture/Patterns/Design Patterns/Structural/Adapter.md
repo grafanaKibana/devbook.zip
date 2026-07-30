@@ -10,6 +10,7 @@ priority: High
 status: Done
 publish: true
 ---
+
 Traveling abroad with a US laptop charger, you discover your plug doesn’t fit the European outlet. You buy a power adapter at the airport. The adapter doesn’t change your charger or rewire the outlet — it sits between them and translates one shape into another. Both sides keep working exactly as before.
 
 The Adapter pattern does the same thing in code: it converts the interface of an existing class into a different interface that clients expect. The adapter implements the target interface your code already works with and holds a reference to the incompatible object (the adaptee). Every method call on the target interface delegates to the adaptee with any necessary translation — converting data formats, mapping method names, or adapting return types. The key insight: the adapter preserves the original capability without modifying either side.

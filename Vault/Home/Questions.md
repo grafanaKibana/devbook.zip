@@ -1,7 +1,5 @@
 ---
-tags:
-  - FolderNote
-  - MetricsIgnore
+tags: [FolderNote, MetricsIgnore]
 publish: true
 icon: circle-help
 ---

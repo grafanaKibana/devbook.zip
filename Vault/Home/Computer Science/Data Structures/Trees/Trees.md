@@ -4,8 +4,7 @@ topic:
 subtopic:
   - Data Structures
 summary: "Hierarchical parent-child structures that keep balanced height for O(log n) search."
-tags:
-  - FolderNote
+tags: [FolderNote]
 level:
   - "4"
 priority: Medium

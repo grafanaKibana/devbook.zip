@@ -9,13 +9,17 @@ status: Ready to Repeat
 priority: Medium
 level:
   - "2"
-tags:
-  - FolderNote
+tags: [FolderNote]
 ---
 
 Deployment strategies control how new versions of software reach production. The right strategy balances risk tolerance, infrastructure cost, and rollback speed. A strategy is only as good as your monitoring — without metrics and alerts, you cannot detect a bad deploy fast enough to stop it.
 
 The strategies differ across several axes: whether old and new artifacts coexist, whether traffic moves separately from deployment, how much spare capacity is required, how quickly rollback changes exposure, and whether progression is time-driven or evidence-driven. Treating them as one blast-radius scale hides those operational differences.
+
+```datacorejsx
+const { FolderStructureMap } = await dc.require("Assets/components/devbook-folder-map.jsx");
+return FolderStructureMap;
+```
 
 # Deployment, Traffic, Experiment, and Feature Boundaries
 

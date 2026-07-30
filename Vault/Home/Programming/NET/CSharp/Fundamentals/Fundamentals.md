@@ -4,11 +4,10 @@ topic:
 subtopic:
   - NET
 summary: "Core C# building blocks: types, methods, generics, exceptions, namespaces, iteration, and reflection."
-tags:
-  - FolderNote
+tags: [FolderNote]
 publish: true
 level:
-  - '4'
+  - "4"
 priority: High
 status: Creation
 ---

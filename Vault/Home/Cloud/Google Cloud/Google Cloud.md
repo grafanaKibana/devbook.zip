@@ -7,8 +7,7 @@ summary: "Google's public cloud known for data analytics, machine learning, and 
 level:
   - "3"
 priority: Medium
-tags:
-  - FolderNote
+tags: [FolderNote]
 publish: true
 status: Creation
 ---

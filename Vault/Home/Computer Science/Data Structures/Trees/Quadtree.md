@@ -25,7 +25,7 @@ The name covers a family that differs in *what triggers a split* and *what a lea
 - **Point-region (PR) quadtree.** Decouples splitting from the data. Space is cut into four **equal** quadrants regardless of point coordinates; a leaf bucket splits only when it exceeds capacity (often one point). Internal nodes are pure spatial subdivisions; leaves hold the points. The shape depends only on *where* the points are, not the order they arrived.
 - **Region quadtree** (image/raster). The domain is a `2ⁿ × 2ⁿ` grid and each node covers a square block. A uniform block (all one color/value) is a leaf; a mixed block splits into four equal sub-blocks. Used for image compression and spatial occupancy — large empty or solid areas collapse to a single node.
 
-# Operations and use cases
+# Operations and Use Cases
 
 Insert, search, and delete all follow the quadrant containing the target down to a leaf. The queries that make the structure worthwhile prune subtrees:
 
@@ -35,7 +35,7 @@ Insert, search, and delete all follow the quadrant containing the target down to
 - **Image compression** — a region quadtree merges uniform blocks into single leaves.
 - **Geospatial and simulation** — subdividing a map into cells for level-of-detail, terrain, or particle systems; the 3D cousin (the octree, eight children) drives Barnes–Hut n-body approximation.
 
-# Quadtree vs geohash
+# Quadtree Vs Geohash
 
 A [[Home/Computer Science/Data Structures/Geohash|Geohash]] encodes a point into a fixed-grid, sortable prefix; a PR or region quadtree is an adaptive tree whose cells subdivide only where the workload requires more resolution. Geohash is the better fit when an existing sorted index, cache, or shard key should produce spatial candidates. A PR or region quadtree is the better fit for mutable in-memory workloads that benefit from explicit region bounds, local subdivision, collision broad-phase, or sparse raster compression.
 
@@ -59,9 +59,10 @@ With roughly uniform occupancy and a query window that intersects a bounded numb
 
 The point-quadtree worst case comes from insertion order and spatial placement, just as a binary search tree can become a chain. The PR-quadtree worst case comes from repeated subdivision of one region; coincident points cannot be separated by geometry at all, so the implementation must keep an overflow bucket or stop at a declared depth. Coordinate resolution bounds depth only when coordinates are quantized and the split arithmetic respects that finite domain. These are variant-specific limits, not a universal `O(log n)` guarantee.
 
-# Reference drawer
+# Reference Drawer
 
 > [!ABSTRACT]- Recursive subdivision
+>
 > ```mermaid
 > graph TD
 >   R["root region"] --> NW["NW"]

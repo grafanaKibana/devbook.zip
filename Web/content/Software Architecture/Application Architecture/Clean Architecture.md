@@ -1,8 +1,8 @@
 ---
 publish: true
-created: 2026-07-15T11:47:54.669Z
-modified: 2026-07-18T11:38:38.696Z
-published: 2026-07-18T11:38:38.696Z
+created: 2026-07-25T18:38:43.867Z
+modified: 2026-07-25T18:38:43.868Z
+published: 2026-07-25T18:38:43.868Z
 topic:
   - Software Architecture
 subtopic:
@@ -18,7 +18,7 @@ Clean Architecture, popularized by Robert C Martin, organizes software so busine
 
 # Mechanism
 
-## The Dependency Rule in practice
+## The Dependency Rule in Practice
 
 Inward means code at the center defines policy, and code farther out implements details. A use case can depend on an `IOrderRepository` abstraction, but the EF Core repository implementation must depend on that abstraction, not the other way around. This reverses the typical framework first dependency chain and keeps business rules independent from storage, web, or messaging tools.
 
@@ -28,7 +28,7 @@ If you enforce this consistently:
 - You can swap persistence from EF Core to Dapper or Cosmos without changing use case logic.
 - You can run fast unit tests over Entities and Use Cases without booting ASP NET Core.
 
-## Four concentric layers
+## Four Concentric Layers
 
 - **Entities**: Enterprise business rules and domain objects that capture invariants and core language.
 - **Use Cases Application**: Application specific rules that orchestrate entities and define input output boundaries.
@@ -44,11 +44,11 @@ graph LR
 
 The arrows point inward because outer circles implement details for inner policy. Inner layers can be compiled and reasoned about without referencing outer packages.
 
-# Clean Architecture vs simple Layered Architecture
+# Clean Architecture Vs Simple Layered Architecture
 
 Traditional layered systems often become UI to business to data access, where business logic ends up coupled to repository implementation details and ORM behavior. Clean Architecture keeps similar responsibilities but changes ownership of dependencies: domain and use cases define interfaces, outer infrastructure implements them. Interview shorthand: Layered often describes responsibility stacking, while Clean Architecture adds a strict dependency direction contract. See [[Software Architecture/Application Architecture/Layered Architecture]] for the baseline model this approach refines (and how Hexagonal/Onion/Clean are one family).
 
-# .NET project structure
+# .NET Project Structure
 
 ```text
 src
@@ -76,7 +76,7 @@ The project references should follow this direction:
 - `Ordering Infrastructure` references `Ordering Application` and `Ordering Domain`.
 - `Ordering WebAPI` references `Ordering Application` and wires `Ordering Infrastructure` in DI.
 
-## C# use case example
+## C# Use Case Example
 
 ```csharp
 namespace Ordering.Application.Abstractions;
@@ -214,25 +214,25 @@ The dependency arrow is the key: `PlaceOrderUseCase` depends on `IOrderRepositor
 
 # Pitfalls
 
-## Over engineering simple CRUD
+## Over Engineering Simple CRUD
 
 - What goes wrong: teams add command objects use cases and ports for endpoints that only pass through to a single table.
 - Why it happens: architecture is applied as a rule instead of a response to domain complexity.
 - How to avoid it: start with a thinner design for low complexity services and introduce use case boundaries only where behavior and invariants justify the extra indirection.
 
-## Framework leakage into domain and use cases
+## Framework Leakage into Domain and Use Cases
 
 - What goes wrong: entities get EF mapping attributes and use cases accept ASP NET request models directly.
 - Why it happens: convenience shortcuts bypass adapter boundaries and import outer concerns into inner layers.
 - How to avoid it: keep mapping and transport concerns in Interface Adapters and Infrastructure, and enforce package reference rules so Domain and Application cannot reference web or ORM assemblies.
 
-## Treating clean architecture as folder naming
+## Treating Clean Architecture as Folder Naming
 
 - What goes wrong: projects are named Domain Application Infrastructure but business code still depends on EF Core or HTTP clients from inside use cases.
 - Why it happens: teams copy template folders without automated dependency checks.
 - How to avoid it: validate project references in CI and add **architecture tests** (e.g. **NetArchTest** or **ArchUnitNET**) that fail the build when inner layers reference outer packages — the dependency rule only holds if something enforces it.
 
-## Premature abstraction everywhere
+## Premature Abstraction Everywhere
 
 - What goes wrong: every class gets an interface even when only one stable implementation exists, creating noise and indirection.
 - Why it happens: dependency inversion is misunderstood as interface everything.

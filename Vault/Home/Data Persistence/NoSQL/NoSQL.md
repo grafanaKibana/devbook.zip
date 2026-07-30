@@ -7,8 +7,7 @@ summary: "A family of non-relational and specialized data models chosen around c
 level:
   - "4"
 status: Creation
-tags:
-  - FolderNote
+tags: [FolderNote]
 
 publish: true
 priority: High

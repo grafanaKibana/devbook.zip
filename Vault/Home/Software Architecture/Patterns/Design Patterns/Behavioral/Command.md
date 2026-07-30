@@ -10,6 +10,7 @@ priority: High
 status: Done
 publish: true
 ---
+
 A restaurant order ticket is a Command. The waiter writes down what you want (the request), walks it to the kitchen (the invoker), and the chef prepares it (the receiver). The ticket can be queued behind other orders, prioritized for VIPs, cancelled before cooking starts, or saved in a log for the end-of-night audit. The waiter doesn’t cook; the chef doesn’t take orders. The ticket decouples who requests from who executes.
 
 The Command pattern encapsulates a request as an object, bundling the action, its parameters, and the receiver into one unit. An invoker calls `Execute()` without knowing what the command does; the command knows how to do it and — critically — how to `Undo()` it. Because commands are objects, they can be serialized, queued, logged, retried, and replayed. In an e-commerce system, `PlaceOrderCommand`, `CancelOrderCommand`, and `RefundOrderCommand` each carry their context and can be pushed onto a command history for full undo support.

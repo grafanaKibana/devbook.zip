@@ -10,12 +10,12 @@ priority: Medium
 status: Ready to Repeat
 publish: true
 ---
+
 Generics let you write type-safe, reusable code without duplicating logic per type. Instead of accepting `object` and casting later, you keep strong compile-time guarantees and better IDE support. In .NET, generics also matter for performance because collections like `List<int>` avoid boxing that older non-generic APIs caused.
 - `T` is a placeholder for a type chosen by the caller.
 - `List<T>` is an open generic type definition; `List<int>` is a closed constructed type.
 - Constraints (`where T : ...`) are capability contracts that unlock members safely.
 - Generic code is checked at compile time, then JIT-optimized per runtime type usage.
-
 
 # Use Cases
 
@@ -107,7 +107,6 @@ Newer constraints worth knowing: `where T : struct, Enum` (enum-only generics), 
 - **Generics vs `object` (boxing)**: Non-generic collections (`ArrayList`, `Hashtable`) store value types as `object`, boxing them on every add and unboxing on every read. `List<int>` avoids boxing entirely — the JIT generates a specialized implementation per value type. The performance difference is measurable in allocation-heavy loops on value types like `int`, `Guid`, or `DateTime`.
 - **Generics vs inheritance for polymorphism**: Generics express static (compile-time) polymorphism — the type argument is resolved at JIT time. Inheritance expresses dynamic (runtime) polymorphism via virtual dispatch. Use generics when the concrete type is always known at the call site (algorithm or container); use inheritance when the concrete type is determined at runtime (strategy, plugin, handler).
 - **CLR generic specialization**: The CLR generates separate JIT-compiled bodies for each value-type argument (`List<int>`, `List<double>` each get their own code) but shares one compiled body for all reference-type arguments (`List<string>` and `List<object>` share JIT output). This means value-type generics are as fast as hand-typed code, while reference-type generics share an efficient single body with a small type-pointer indirection.
-
 
 # Questions
 

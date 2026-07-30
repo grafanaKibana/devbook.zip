@@ -6,8 +6,7 @@ subtopic:
 summary: "Keeping work progressing without blocking, and using multiple cores for CPU-bound work."
 priority: High
 status: Creation
-tags:
-  - FolderNote
+tags: [FolderNote]
 publish: true
 level:
   - "4"
@@ -20,7 +19,7 @@ const { FolderStructureMap } = await dc.require("Assets/components/devbook-folde
 return FolderStructureMap;
 ```
 
-# Composition versus simultaneous execution
+# Composition versus Simultaneous Execution
 
 A single thread can compose overlapping I/O without running two instructions at once:
 
@@ -50,14 +49,14 @@ That is useful only when `Sharpen` does enough computation to repay partitioning
 
 # Deeper Explanation
 
-## Mental model
+## Mental Model
 
 - If work waits on I/O, prefer async (`Task`, `await`) to avoid blocking threads.
 - If work burns CPU, use controlled parallelism (`Parallel.ForEachAsync`, PLINQ, partitioning).
 - If work can be canceled, thread cancellation through the full call chain.
 - If shared state exists, design locking strategy first, then optimize.
 
-## Choosing options for the same requirement
+## Choosing Options for the Same Requirement
 
 Use requirement-first decisions instead of primitive-first decisions.
 
@@ -84,9 +83,9 @@ The mechanism should expose the workload's ownership and failure boundary, not j
 
 [[Home/Programming/NET/CSharp/Concurrency and Parallelism/Semaphore|`SemaphoreSlim`]] belongs beside this table when the requirement is a concurrency limit rather than exclusive ownership. [[Home/Programming/NET/CSharp/Concurrency and Parallelism/Mutex|Mutex]] pays an operating-system handle cost when ownership must cross a process boundary. Neither adds queue durability or makes a multi-lock design safe from deadlock.
 
-## Decision walkthroughs
+## Decision Walkthroughs
 
-### Same requirement: "fan out 500 HTTP calls quickly"
+### Same Requirement: "Fan out 500 HTTP cAlls qUickly"
 
 - If dependency and infrastructure allow high concurrency, use bounded `Task.WhenAll` with an explicit limit.
 - If each call is tiny and independent, start with a conservative cap (for example 16-64), then tune with telemetry.
@@ -117,13 +116,13 @@ public async Task<IReadOnlyList<UserDto>> LoadUsersBoundedAsync(
 }
 ```
 
-### Same requirement: "improve throughput of CPU transforms"
+### Same Requirement: "Improve tHroughput of CPU tRansforms"
 
 - Use `Parallel.ForEachAsync` when you need bounded workers and cancellation with straightforward code.
 - Use PLINQ for pure data transforms where query readability is better than imperative loops.
 - If CPU work competes with request handling, move it to background workers with queue-based backpressure.
 
-### Same requirement: "protect state and stay async"
+### Same Requirement: "Protect sTate and sTay aSync"
 
 - For tiny in-memory critical sections, a [[Home/Programming/NET/CSharp/Concurrency and Parallelism/Locking|lock]] is simplest.
 - For async sections that must `await`, prefer `SemaphoreSlim.WaitAsync`.

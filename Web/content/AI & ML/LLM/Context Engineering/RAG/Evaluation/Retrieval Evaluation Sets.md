@@ -1,8 +1,8 @@
 ---
 publish: true
-created: 2026-07-11T21:45:21.953Z
-modified: 2026-07-18T11:30:02.331Z
-published: 2026-07-18T11:30:02.331Z
+created: 2026-07-25T18:38:43.767Z
+modified: 2026-07-25T18:38:43.768Z
+published: 2026-07-25T18:38:43.768Z
 topic:
   - AI & ML
 subtopic:
@@ -18,7 +18,7 @@ A retrieval eval set is the labeled data the [[Evaluation Metrics|retrieval metr
 
 Both come down to one fact: a query rarely maps to exactly one chunk. Get the labeling wrong and the metric punishes a correct retriever or passes a broken one, regardless of how clean the rest of the eval harness is.
 
-# Multiple relevant chunks per query
+# Multiple Relevant Chunks per Query
 
 The simplest eval labels one relevant chunk per query, but most real queries have several, and how you label and score them depends on _why_ multiple chunks are relevant. Conflating the two cases below produces metrics that punish a correct retriever or pass a broken one.
 
@@ -36,7 +36,7 @@ The simplest eval labels one relevant chunk per query, but most real queries hav
 
 **Set k from what the generator actually consumes**, not a borrowed default. If the prompt packs the top 5 chunks into context, evaluate at k=5. For the substitutable case a small k (HitRate@3) is enough. For the complementary case, k must be at least the number of required chunks, or recall is capped below 1.0 by construction and the metric measures the eval design rather than the retriever. See [[Monitoring#Retrieval Quality Metrics|Monitoring — Retrieval Quality Metrics]] for the full metric definitions.
 
-# Chunk-anchored synthetic generation
+# Chunk-anchored Synthetic Generation
 
 The general synthetic-generation technique — prompt an LLM to write the questions a passage answers — is covered in [[Building an Evaluation Set]]. Applied to retrieval it has a specific shape: sample N chunks, and for each, prompt the model for the questions a real user would ask that this chunk answers. The chunk becomes the ground-truth relevant document for every query it produced — inverting the expensive direction of labeling. One batch yields thousands of `(query, relevant_chunk)` pairs with no human in the loop for the first pass.
 

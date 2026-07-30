@@ -115,7 +115,7 @@ Fetch one extra row to determine whether another page exists. The unique `id` ti
 
 Encode and integrity-protect the cursor rather than exposing an editable database token. Bind it to tenant, principal or authorization scope, filters, sort order, direction, page-size policy, and expiry.
 
-## Consistency contract
+## Consistency Contract
 
 A cursor identifies a position, not a snapshot. With live keyset traversal:
 

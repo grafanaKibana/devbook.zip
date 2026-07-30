@@ -17,7 +17,7 @@ An LSM-Tree (Log-Structured Merge-Tree) inverts the deal: it does not update use
 
 **Core shape:** append to WAL + in-memory memtable → flush full memtable as an immutable sorted SSTable → read memtable then candidate SSTables newest→oldest (Bloom-filter pruned) → background compaction merges SSTables and eventually garbage-collects obsolete versions under engine safety rules → sequential writes, `O(n)` live-data storage plus temporary and obsolete-version overhead.
 
-# Write path
+# Write Path
 
 Three steps, all sequential or in-memory:
 
@@ -27,7 +27,7 @@ Three steps, all sequential or in-memory:
 
 Because the flush is one big sequential write of pre-sorted data, the disk sees a stream of appends rather than scattered page updates — this is the whole point.
 
-# Read path
+# Read Path
 
 A key can live in the memtable or in any SSTable, and newer always wins, so a read walks from newest to oldest:
 
@@ -48,7 +48,7 @@ Left alone, SSTables would accumulate forever, every read would probe more files
 - **Size-tiered (STCS).** Groups SSTables of similar size; when enough of one size accumulate, they merge into one bigger file. Fewer rewrites → **low write amplification**, but a key's live version can sit across several size tiers → **higher read and space amplification** (a compaction can transiently need roughly twice the data's size).
 - **Leveled (LCS).** Organizes SSTables into levels L0, L1, L2…, each roughly larger than the previous. Except L0, SSTables within one level cover non-overlapping key ranges, so a point read has at most one candidate file per nonzero level. L0 files can overlap each other and may all be candidates until compaction moves them down; engines also vary in whether they use sublevels or other L0 controls. Leveled compaction therefore bounds the steady-state nonzero-level search but can still suffer an L0 read-amplification spike. The cost is higher write amplification as keys cascade down levels.
 
-# Amplification tradeoffs
+# Amplification Tradeoffs
 
 An LSM-Tree buys sequential-write throughput by paying in three amplifications, and no compaction strategy minimizes all three at once:
 
@@ -58,7 +58,7 @@ An LSM-Tree buys sequential-write throughput by paying in three amplifications, 
 
 Size-tiered favors write throughput (low write amp, high space/read amp); leveled favors reads and compactness (low read/space amp, high write amp). You pick which amplification your workload can afford.
 
-# B-tree vs LSM-Tree
+# B-tree Vs LSM-Tree
 
 This is a cross-area comparison, so it lives here rather than in the [[Home/Computer Science/Data Structures/Trees/B-tree|B-tree]] note. The two are the read-optimized and write-optimized poles of on-disk ordered storage:
 
@@ -87,13 +87,14 @@ Neither is strictly better: a B-tree wins read-heavy and range-scan-heavy worklo
 
 Here `m` is the memtable's entry count and `n` the total key count. The decisive property is that the user-data path avoids random in-place SSTable updates: writes are amortized into sequential flushes and merges. The WAL, manifest, filesystem metadata, or engine housekeeping can still issue other I/O. The LSM-Tree buys its user-data write pattern in exchange for multi-SSTable reads and background compaction load.
 
-# Where it's used
+# Where It's Used
 
 LSM-Trees underlie many write-optimized stores. Among the wide-column and key-value families (see [[Home/Data Persistence/NoSQL/NoSQL Database Types|NoSQL Database Types]]): **Cassandra**, **ScyllaDB**, **HBase**, and Google **Bigtable**. Embeddable engines include **RocksDB** and its ancestor **LevelDB**.
 
-# Reference drawer
+# Reference Drawer
 
 > [!ABSTRACT]- Write, flush, and compaction flow
+>
 > ```mermaid
 > graph TD
 >   W["write / update / delete"] --> WAL["WAL append (flush per durability policy)"]

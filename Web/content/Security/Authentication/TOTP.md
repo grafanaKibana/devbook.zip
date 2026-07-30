@@ -1,8 +1,8 @@
 ---
 publish: true
-created: 2026-07-16T07:37:19.033Z
-modified: 2026-07-18T11:59:15.665Z
-published: 2026-07-18T11:59:15.665Z
+created: 2026-07-25T18:38:43.863Z
+modified: 2026-07-25T18:38:43.863Z
+published: 2026-07-25T18:38:43.863Z
 topic:
   - Security
 subtopic:
@@ -42,7 +42,7 @@ The QR code contains the shared secret. Treat screenshots, analytics, browser hi
 > [!WARNING] Non-normative source visual
 > TOTP does not concatenate a secret and timestamp. It converts time to a moving counter, computes HMAC over the encoded counter, applies dynamic truncation, and reduces the result to the configured number of digits; the verifier accepts only a bounded time-step window.
 
-# Moving factor and code generation
+# Moving Factor and Code Generation
 
 For Unix time `t`, start time `T0`, and step size `X`, TOTP derives the moving factor:
 
@@ -75,7 +75,7 @@ A ±1 window tolerates modest clock skew but triples the valid code set. With si
 
 Store the last accepted time step per authenticator so the same code cannot be replayed during its remaining lifetime. Define concurrency behavior: two simultaneous requests with one code must race through one atomic compare-and-update, leaving at most one accepted. Keep server clocks synchronized and monitor drift rather than widening the window indefinitely.
 
-# Recovery and lifecycle
+# Recovery and Lifecycle
 
 - Require a recent strong authentication before enrolling, replacing, or removing TOTP.
 - Notify the account through an independent channel when a factor changes.

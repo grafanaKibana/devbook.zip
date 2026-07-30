@@ -4,8 +4,7 @@ topic:
 subtopic:
   - LLM
 summary: "Retrieves evidence from your corpus, then generates an answer grounded in it, no retraining needed."
-tags:
-  - FolderNote
+tags: [FolderNote]
 priority: High
 level:
   - "2"
@@ -44,7 +43,7 @@ The pipeline runs in order and each stage constrains the next: a query the trans
 - Cache aggressively: community summaries (GraphRAG), query rewrites, multi-query result sets, contextual chunk enrichments, reasoning chains, and agent tool outputs. See [[Home/AI & ML/LLM/Context Engineering/RAG/Caching|Caching]] for cache-key risks.
 - Route simple queries to the cheapest path. Most production traffic is simple — do not pay multi-hop costs for single-hop questions.
 
-# RAG vs Fine-Tuning
+# RAG Vs Fine-Tuning
 
 RAG and [[Fine-tuning]] optimize different parts of the system. RAG externalizes knowledge into retrievable sources, while fine-tuning changes model behavior in weights. Choosing correctly prevents expensive retraining for problems that retrieval can solve more safely.
 

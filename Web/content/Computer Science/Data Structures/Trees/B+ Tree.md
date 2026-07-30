@@ -1,8 +1,8 @@
 ---
 publish: true
-created: 2026-07-12T14:27:20.422Z
-modified: 2026-07-18T11:30:05.442Z
-published: 2026-07-18T11:30:05.442Z
+created: 2026-07-25T18:38:43.819Z
+modified: 2026-07-25T18:38:43.820Z
+published: 2026-07-25T18:38:43.820Z
 topic:
   - Computer Science
 subtopic:
@@ -62,7 +62,7 @@ Leaf-link maintenance rides on top of the ordinary split and merge logic. When a
 
 The same page-sizing constraint as a [[B-tree]] applies: node capacity is chosen so a node fills one storage page. Oversized keys or values lower fan-out, raise the tree, and erode the shallow-tree advantage. Variable-length keys and prefix compression in real implementations exist to keep separators small and fan-out high.
 
-# Reference drawer
+# Reference Drawer
 
 > [!ABSTRACT]- Routing index over a linked leaf list
 >

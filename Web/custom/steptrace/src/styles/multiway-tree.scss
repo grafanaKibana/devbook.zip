@@ -1,0 +1,114 @@
+.steptrace[data-visual-family="multiway-tree"] {
+  container: steptrace-multiway-tree / inline-size;
+}
+
+.steptrace .steptrace__multiway-tree {
+  min-block-size: 15rem;
+  display: grid;
+  place-items: center;
+  overflow: hidden;
+}
+
+.steptrace .steptrace__multiway-tree-svg {
+  display: block;
+  inline-size: min(100%, 42rem);
+  block-size: 15rem;
+  overflow: hidden;
+}
+
+.steptrace .steptrace__multiway-tree-edge,
+.steptrace .steptrace__multiway-tree-link,
+.steptrace .steptrace__multiway-tree-cell {
+  transition:
+    fill var(--_dur-quick) ease,
+    stroke var(--_dur-quick) ease,
+    stroke-width var(--_dur-quick) ease;
+}
+
+.steptrace .steptrace__multiway-tree-edge {
+  stroke-width: 1.6;
+}
+
+.steptrace .steptrace__multiway-tree-edge[data-state="path"] {
+  stroke: var(--_blue);
+  stroke-width: 2.4;
+}
+
+.steptrace .steptrace__multiway-tree-cell {
+  fill: var(--_surface);
+  stroke: var(--_border);
+  stroke-width: 1.4;
+}
+
+.steptrace .steptrace__multiway-tree-node[data-path="1"] .steptrace__multiway-tree-cell {
+  fill: color-mix(in srgb, var(--_blue) 14%, var(--_surface));
+  stroke: var(--_blue);
+}
+
+.steptrace .steptrace__multiway-tree-node[data-affected="1"] .steptrace__multiway-tree-cell {
+  fill: color-mix(in srgb, var(--_violet) 16%, var(--_surface));
+  stroke: var(--_violet);
+  stroke-width: 2;
+}
+
+.steptrace .steptrace__multiway-tree-node .steptrace__multiway-tree-cell[data-state="special"] {
+  fill: color-mix(in srgb, var(--_amber) 24%, var(--_surface));
+  stroke: var(--_amber);
+  stroke-width: 2.2;
+}
+
+.steptrace .steptrace__multiway-tree-node .steptrace__multiway-tree-cell[data-state="found"] {
+  fill: color-mix(in srgb, var(--_green) 20%, var(--_surface));
+  stroke: var(--_green);
+  stroke-width: 2.2;
+}
+
+.steptrace .steptrace__multiway-tree-key {
+  fill: var(--_text);
+  font: 700 0.8rem/1 var(--_font-mono);
+  pointer-events: none;
+}
+
+.steptrace .steptrace__multiway-tree-id {
+  fill: var(--_muted);
+  font: 600 0.48rem/1 var(--_font-mono);
+}
+
+.steptrace .steptrace__multiway-tree-link {
+  fill: none;
+  stroke: var(--_muted);
+  stroke-width: 1.4;
+  stroke-dasharray: 4 3;
+}
+
+.steptrace .steptrace__multiway-tree-link[data-state="active"] {
+  stroke: var(--_green);
+  stroke-width: 2.4;
+  stroke-dasharray: none;
+}
+
+.steptrace .steptrace__multiway-tree-arrow path {
+  fill: var(--_muted);
+}
+
+.steptrace[data-structure="b-plus-tree"]
+  .steptrace__structure-controls
+  > .steptrace__structure-input {
+  flex-basis: 4.5rem;
+}
+
+@container steptrace-multiway-tree (min-width: 36rem) {
+  .steptrace .steptrace__multiway-tree,
+  .steptrace .steptrace__multiway-tree-svg {
+    min-block-size: 17rem;
+    block-size: 17rem;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .steptrace .steptrace__multiway-tree-edge,
+  .steptrace .steptrace__multiway-tree-link,
+  .steptrace .steptrace__multiway-tree-cell {
+    transition: none;
+  }
+}

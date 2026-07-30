@@ -4,8 +4,7 @@ topic:
 subtopic:
   - LLM
 summary: "Measuring LLM behavior with versioned cases, exact checks, semantic scoring, and production outcomes."
-tags:
-  - FolderNote
+tags: [FolderNote]
 publish: true
 level:
   - "3"
@@ -22,7 +21,7 @@ const { FolderStructureMap } = await dc.require("Assets/components/devbook-folde
 return FolderStructureMap;
 ```
 
-# Evaluation system
+# Evaluation System
 
 ```mermaid
 flowchart TD
@@ -78,7 +77,7 @@ heuristic signals:
 
 A schema failure is exact. “Possible payment-card number” remains a detector result until its precision and recall are established for this traffic.
 
-# Dataset lifecycle and overfitting
+# Dataset Lifecycle and Overfitting
 
 Give every corpus version immutable case identifiers, provenance, expected behavior, slice labels, and a reason for inclusion. New production failures enter through triage, not by silently editing an existing case. Keep a development set for iteration and a frozen holdout for release decisions.
 

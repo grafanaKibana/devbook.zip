@@ -1,8 +1,8 @@
 ---
 publish: true
-created: 2026-07-12T14:27:20.428Z
-modified: 2026-07-18T11:30:05.730Z
-published: 2026-07-18T11:30:05.730Z
+created: 2026-07-25T18:38:43.823Z
+modified: 2026-07-25T18:38:43.824Z
+published: 2026-07-25T18:38:43.824Z
 topic:
   - Computer Science
 subtopic:
@@ -22,7 +22,7 @@ The structure retains key order and parent-child topology, but not a fixed balan
 > [!NOTE] Visualization pending
 > Planned StepTrace: search for a deep key, then show the `zig`, `zig-zig`, and `zig-zag` rotations that move it to the root while preserving in-order key order.
 
-# State after an access
+# State after an Access
 
 Suppose the search path is `100 → 50 → 75 → 60`. Accessing `60` does not stop after finding it. Because `60` is the left child of `75` and `75` is the right child of `50`, the path forms a zig-zag. A right rotation around `75`, followed by a left rotation around `50`, lifts `60` two levels. The remaining zig rotation around `100` makes `60` the root.
 
@@ -49,7 +49,7 @@ Insert places a key as in a plain BST and splays the new node. Delete splays the
 
 The amortized bound applies to a sequence, not to each operation independently. A chain-shaped tree can still force a full linear walk, but the rotations pay down structural potential so too many expensive operations cannot occur without many cheap ones around them.
 
-# Where adaptation costs
+# Where Adaptation Costs
 
 Read operations mutate the tree. A lookup cannot safely run under a shared read lock because it rewrites parent and child pointers on the search path. Iterators also become invalid when another access splays a node, even if no key was inserted or removed.
 

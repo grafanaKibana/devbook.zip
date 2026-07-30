@@ -11,16 +11,21 @@ status: Ready to Repeat
 publish: true
 ---
 
-A priority queue built on an array [[Heap]] answers find-min and extract-min cheaply, but melding two such heaps into one means rebuilding: `O(n)` work to reheapify the concatenation. When two priority queues must combine repeatedly — merging event streams, uniting sub-schedules — the melding cost dominates. A skew heap keeps only a heap-ordered binary tree and makes merge the primitive: two heaps combine by walking down their right spines, and insert and extract-min are defined in terms of that merge.
+# Intro
 
-The structure is the self-adjusting cousin of a [[Leftist Heaps|leftist heap]]. A leftist heap stores a null-path-length field per node and swaps children only when that field would be violated, buying a per-operation worst-case bound. A skew heap deletes the field entirely: after merging down a right spine it **swaps the two children at every touched node unconditionally** — no test, no bookkeeping. The blind swap moves a right path that just grew back to the left, where the next merge never looks. What can no longer be read off a node is its rank; balance exists only in the amortized aggregate, not as a checkable invariant.
+A priority queue built on an array [[Home/Computer Science/Data Structures/Trees/Heap-like/Heap|heap]] answers find-min and extract-min cheaply, but melding two such heaps into one means rebuilding: `O(n)` work to reheapify the concatenation. When two priority queues must combine repeatedly — merging event streams, uniting sub-schedules — the melding cost dominates. A skew heap keeps only a heap-ordered binary tree and makes merge the primitive: two heaps combine by walking down their right spines, and insert and extract-min are defined in terms of that merge.
+
+The structure is the self-adjusting cousin of a [[Home/Computer Science/Data Structures/Trees/Heap-like/Leftist Heaps|leftist heap]]. A leftist heap stores a null-path-length field per node and swaps children only when that field would be violated, buying a per-operation worst-case bound. A skew heap deletes the field entirely: after merging down a right spine it **swaps the two children at every touched node unconditionally** — no test, no bookkeeping. The blind swap moves a right path that just grew back to the left, where the next merge never looks. What can no longer be read off a node is its rank; balance exists only in the amortized aggregate, not as a checkable invariant.
 
 **Core shape:** heap-ordered binary tree, no rank field → merge recurses down right spines → swap children at every merged node → amortized `O(log n)` per operation, `O(n)` structure space.
 
-> [!NOTE] Visualization pending
-> Planned StepTrace: a heap-merge card showing two heaps merged down their right spines, with the children swapped unconditionally after each link so the long right path folds to the left — no rank field, self-adjusting. No matching renderer exists in `engine.js` yet.
+Use **Merge** on the same canonical heaps `[2, 7, 10]` and `[3, 5, 8]`. Unlike the leftist version, every touched node swaps its children unconditionally; **Reset** restores both source heaps.
 
-# Why the blind swap balances
+```steptrace
+{"algorithm":"skew-heap"}
+```
+
+# Why the Blind Swap Balances
 
 Merge takes two heap roots and compares them. The smaller root becomes the result's root; its right subtree is merged recursively with the other whole heap; then the root's two children are swapped. Only the right spine is ever descended, so the recursion depth is the combined right-spine length of the two inputs.
 
@@ -33,25 +38,26 @@ The invariant that survives every operation is heap order alone: a parent key ne
 | Operation | Best time | Amortized time | Worst single op | Space | Cause |
 | --- | --- | --- | --- | --- | --- |
 | `Merge(a, b)` | `O(1)` | `O(log n)` | `O(n)` | `O(n)` structure, no per-node field | Descends the combined right spines; the swap keeps them short in aggregate, not on any one call |
-| `Insert(x)` | `O(1)` | `O(log n)` | `O(n)` | `O(log n)` amortized stack | Merge of a singleton into the heap |
-| `ExtractMin()` | `O(1)` | `O(log n)` | `O(n)` | `O(log n)` amortized stack | Removes the root, then merges its two children |
+| `Insert(x)` | `O(1)` | `O(log n)` | `O(n)` | `O(n)` worst-case recursion stack | Merge of a singleton into the heap |
+| `ExtractMin()` | `O(1)` | `O(log n)` | `O(n)` | `O(n)` worst-case recursion stack | Removes the root, then merges its two children |
 | `FindMin()` | `O(1)` | `O(1)` | `O(1)` | `O(1)` | The minimum is the root |
 
 The `O(log n)` figures are amortized over a sequence of operations, established by a potential argument, not a worst-case guarantee. A node is counted "heavy" when its right subtree holds more nodes than its left; a potential function over heavy nodes shows an expensive merge must traverse many of them, and each unconditional swap turns a heavy node light, so the traversal discharges potential that earlier cheap operations stored. The tight per-operation amortized bound is `log_φ n ≈ 1.44 log₂ n`.
 
 A single `Merge` can still cost `O(n)`: nothing prevents a momentarily long right spine from existing, and one call may descend all of it. The structure space is `O(n)` with only two child pointers and a key per node — the leftist heap's extra null-path-length field is exactly what the skew heap removes, its edge on memory and on merge code length.
 
-# Where amortized is not enough
+# Where Amortized is Not Enough
 
-The bounds are amortized, so a single operation can spike to `O(n)`. On a latency-sensitive path where one extract-min must complete within a per-operation budget, that spike is a violation even though the sequence average is logarithmic — a [[Leftist Heaps|leftist heap]] holds `O(log n)` per operation as a worst-case guarantee, at the price of the stored rank field and the conditional swap, and fits that requirement where a skew heap does not.
+The bounds are amortized, so a single operation can spike to `O(n)`. On a latency-sensitive path where one extract-min must complete within a per-operation budget, that spike is a violation even though the sequence average is logarithmic — a [[Home/Computer Science/Data Structures/Trees/Heap-like/Leftist Heaps|leftist heap]] holds `O(log n)` per operation as a worst-case guarantee, at the price of the stored rank field and the conditional swap, and fits that requirement where a skew heap does not.
 
 Persistence exposes the same gap. Amortized accounting assumes each stored shape is consumed once; if an old version of a skew heap is retained and re-merged repeatedly, the same expensive right spine can be paid for again and again, and the amortized bound no longer holds. Leftist worst-case bounds are per operation and survive shared subtrees.
 
 The unconditional swap is the whole mechanism, not a tunable detail. Making it conditional turns the structure back into a leftist heap (with the rank test) or, done wrong, into an unbalanced chain; dropping it removes the only force shortening the right spine and lets a sequence of merges degrade to `O(n)` each. There is no rank field to inspect, so the swap has to be blind and total for the potential argument to close.
 
-# Reference drawer
+# Reference Drawer
 
 > [!ABSTRACT]- Merge folding the right spine
+>
 > ```mermaid
 > flowchart LR
 >   subgraph before [Two heaps]
@@ -71,6 +77,7 @@ The unconditional swap is the whole mechanism, not a tunable detail. Making it c
 > ```
 
 > [!EXAMPLE]- C# implementation
+>
 > ```csharp
 > public sealed class SkewHeap<T> where T : IComparable<T>
 > {

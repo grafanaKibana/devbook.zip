@@ -4,8 +4,7 @@ topic:
 subtopic:
   - Data Structures
 summary: "Structures that combine two primitives to get a guarantee neither gives alone."
-tags:
-  - FolderNote
+tags: [FolderNote]
 level:
   - "4"
 status: Creation

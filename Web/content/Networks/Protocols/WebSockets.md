@@ -1,8 +1,8 @@
 ---
 publish: true
-created: 2026-07-11T21:46:04.955Z
-modified: 2026-07-18T11:59:15.663Z
-published: 2026-07-18T11:59:15.663Z
+created: 2026-07-25T18:38:43.843Z
+modified: 2026-07-25T18:38:43.843Z
+published: 2026-07-25T18:38:43.843Z
 topic:
   - Networks
 subtopic:
@@ -16,7 +16,7 @@ status: Ready to Repeat
 
 WebSocket (RFC 6455) is a full-duplex, message-oriented application protocol for long-lived browser/server communication. The common handshake upgrades an HTTP/1.1 connection; HTTP/2 can establish WebSockets with Extended CONNECT, carrying frames inside one multiplexed stream. WebSocket is one browser transport for chat, dashboards, games, and collaborative editing—not the only bidirectional option: WebRTC data channels and WebTransport expose different reliability, peer, and QUIC-based contracts.
 
-# WebSocket vs Raw Socket vs HTTP
+# WebSocket Vs Raw Socket Vs HTTP
 
 | | Raw [[Sockets\|TCP socket]] | WebSocket | HTTP request/response |
 |---|---|---|---|

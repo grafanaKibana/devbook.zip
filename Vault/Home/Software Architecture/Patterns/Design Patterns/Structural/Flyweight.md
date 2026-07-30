@@ -10,6 +10,7 @@ priority: High
 status: Ready to Repeat
 publish: true
 ---
+
 A printing press uses shared letter stamps instead of casting a unique metal letter for every character in a book. The "A" stamp is reused thousands of times across every page — only its position (extrinsic state) changes. The shape of the letter (intrinsic state) is shared. Without this, printing a book would require millions of unique metal pieces instead of a few dozen reusable stamps.
 
 The Flyweight pattern reduces memory usage by sharing common state across many fine-grained objects. It splits an object’s data into **intrinsic state** (shared, immutable — stored in the flyweight) and **extrinsic state** (unique per use — passed in by the caller). A flyweight factory returns the same instance for objects with identical intrinsic state. In an e-commerce catalog, 100,000 products might share only 50 category definitions — each product stores a category ID, not a full copy of tax rates, display rules, and shipping constraints.

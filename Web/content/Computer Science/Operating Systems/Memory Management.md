@@ -1,8 +1,8 @@
 ---
 publish: true
-created: 2026-07-16T18:15:23.782Z
-modified: 2026-07-18T11:30:05.906Z
-published: 2026-07-18T11:30:05.906Z
+created: 2026-07-25T18:38:43.826Z
+modified: 2026-07-25T18:38:43.827Z
+published: 2026-07-25T18:38:43.827Z
 topic:
   - Computer Science
 subtopic:
@@ -18,7 +18,7 @@ Virtual memory gives each process an address space independent of the current pl
 
 With 4 KiB pages, the low 12 address bits are the offset. For virtual address `0x12345ABC`, the virtual page number is `0x12345` and the offset is `0xABC`. If the page table maps that page to frame `0x8F2A`, the physical address is `0x8F2AABC`. Permissions attached to the mapping can reject the access even when the translation exists.
 
-# What a page fault means
+# What a Page Fault Means
 
 A page fault is a controlled CPU exception, not automatically a disk read. The kernel may:
 
@@ -29,7 +29,7 @@ A page fault is a controlled CPU exception, not automatically a disk read. The k
 
 When memory pressure evicts a dirty file-backed page, the kernel must write it back before reuse. Anonymous memory can be reclaimed only by discarding reconstructable state, compressing it, or writing it to swap. The [[Computer Science/Memory Hierarchy|memory hierarchy]] explains where those bytes move; this note explains how the operating system names and protects them.
 
-# Paging and segmentation solve different problems
+# Paging and Segmentation Solve Different Problems
 
 Paging divides virtual and physical memory into fixed-size units. It avoids external fragmentation in physical-frame allocation because any free frame can hold any page, but the last page of an allocation can contain unused space. Page tables and TLB pressure are the price.
 

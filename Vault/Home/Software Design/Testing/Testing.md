@@ -4,8 +4,7 @@ topic:
 subtopic:
   - Testing
 summary: Testing as a design and verification discipline — unit vs integration, the test pyramid as a cost model, and TDD.
-tags:
-  - FolderNote
+tags: [FolderNote]
 publish: true
 priority: High
 level:
@@ -37,7 +36,7 @@ Assume `POST /orders` accepts an idempotency key, validates inventory, charges a
 
 Smoke tests answer a smaller question: “is the deployed API reachable and is one critical path alive?” They are deployment checks, not substitutes for the risk-focused tests above. UI tests are appropriate only when the browser-to-API interaction is itself the contract under test.
 
-## A minimal ASP.NET Core integration test
+## A Minimal ASP.NET Core Integration Test
 
 `WebApplicationFactory<TEntryPoint>` runs the real middleware and endpoint pipeline in memory. Replace only the external payment boundary, keep serialization, authentication, routing, and persistence behavior as real as the risk requires.
 

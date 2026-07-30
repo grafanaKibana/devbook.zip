@@ -10,6 +10,7 @@ priority: High
 status: Done
 publish: true
 ---
+
 Stacking toppings on a pizza is a Decorator in everyday life. Start with plain dough, add sauce, add cheese, add pepperoni, add mushrooms. Each topping wraps the previous pizza without changing what’s underneath, and you can add or remove any topping independently. A pepperoni pizza and a mushroom pizza share the same base — the toppings are layered on, not baked in.
 
 The Decorator pattern works the same way: it attaches additional responsibilities to an object dynamically by wrapping it in decorator objects that implement the same interface. Each decorator holds a reference to the wrapped object, calls it, and adds behavior before or after the call. Decorators compose freely — you can stack `LoggingHandler(ValidationHandler(MetricsHandler(CoreHandler)))` in any order. Each decorator is independently testable and deployable. The client sees a single `IOrderHandler` and doesn’t know (or care) how many decorators are wrapping the core.

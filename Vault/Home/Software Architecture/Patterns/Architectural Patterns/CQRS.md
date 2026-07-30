@@ -11,6 +11,7 @@ status: Done
 
 publish: true
 ---
+
 CQRS (Command Query Responsibility Segregation) separates the part of the system that changes state from the part that serves read data. It matters because read and write workloads usually have different shapes: writes care about consistency and invariants, while reads care about latency and query flexibility. With CQRS, you can scale and optimize these paths independently instead of forcing one model to serve both. Reach for it when your domain rules are non-trivial, your query surface is broad, or your read:write ratio is high enough that a denormalized read model pays off.
 
 # Mechanism
@@ -67,7 +68,7 @@ graph LR
 
 The key insight: the **write model** is normalized and enforces business rules, while the **read model** is denormalized and shaped for fast queries. They can use different databases, different schemas, or even different technologies. The trade-off is **eventual consistency** between the two sides.
 
-# ASP.NET Core Example (EF Core writes + Dapper reads)
+# ASP.NET Core Example (EF Core wRites + Dapper rEads)
 This sample uses MediatR for handler wiring; CQRS itself is library-agnostic. MediatR has community and commercial licensing options, so verify current terms at [mediatr.io](https://mediatr.io/). Alternatives include direct DI-wired command/query handlers with custom interfaces.
 Write side: command handler validates invariants and persists normalized state.
 
@@ -204,7 +205,8 @@ Use both when auditability, temporal debugging, replay, and multiple read projec
 - **Projection and write are not atomic by default**: if you save state and then project in-process, a handler failure can leave write and read models temporarily divergent. Use the outbox pattern when atomic event capture is required, then project asynchronously with retries.
 - **"CQRS everywhere" anti-pattern**: applying CQRS globally increases complexity and cognitive load. Use it selectively per bounded context where constraints justify it.
 
-# Tradeoffs: CQRS vs Simple CRUD
+# Tradeoffs: CQRS Vs Simple CRUD
+
 | Criterion | Simple CRUD model | CQRS model |
 |---|---|---|
 | Read/write ratio close to 1:1 | Usually sufficient | Often unnecessary complexity |
@@ -212,6 +214,7 @@ Use both when auditability, temporal debugging, replay, and multiple read projec
 | Domain invariants and complex write rules | Possible but can bloat entity model | Write model stays explicit and invariant-focused |
 | Operational complexity | Lower | Higher (projections, lag, retries, idempotency) |
 | Independent scaling | Limited | Strong, especially with separate stores |
+
 Decision rule: CQRS is usually worth it when at least two are true at once: high read:write ratio, complex query requirements, and clear need to scale read/write paths independently.
 # Questions
 

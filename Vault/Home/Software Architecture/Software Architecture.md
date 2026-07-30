@@ -1,17 +1,16 @@
 ---
-icon: building-2
+icon: landmark
 order: 50
 color: "#eab308"
 topic:
   - Software Architecture
 subtopic: []
 summary: "Structuring software with clear boundaries and explicit tradeoffs so it can evolve sustainably."
-tags:
-  - FolderNote
+tags: [FolderNote]
 publish: true
 priority: High
 level:
-  - '4'
+  - "4"
 status: Creation
 ---
 

@@ -15,24 +15,24 @@ publish: true
 Event Sourcing stores each aggregate's state as an ordered stream of domain events instead of saving only the latest row snapshot. That event history gives you a built-in audit trail, enables temporal queries like "what did we believe at 10:15 yesterday", and allows replay when you need to rebuild read models or recover from projection bugs. You usually reach for it when business value depends on immutable history, traceability, and intent-level debugging, not just current state reads. In .NET systems, it often appears together with [[Home/Software Architecture/Patterns/Architectural Patterns/CQRS]] so writes persist events and reads consume projections optimized for query use cases.
 
 # Mechanism
-## Core flow
+## Core Flow
 1. A command reaches the write model (`PlaceOrder`, `AddItem`, `ShipOrder`).
 2. The aggregate loads its prior event stream and replays events to rebuild current in-memory state.
 3. Business invariants are validated against that rebuilt state.
 4. New domain event(s) are appended to an append-only event store.
 5. Projection handlers consume appended events and update one or more read models.
-## Why append-only matters
+## Why Append-only Matters
 - **Immutability**: old facts are never updated in place, so history stays trustworthy.
 - **Auditability**: every state transition is explainable by concrete business events.
 - **Temporal analysis**: you can rehydrate state as-of a version or timestamp.
 - **Operational recovery**: if a projection is corrupted, rebuild it by replaying events.
-## State reconstruction by replay
+## State Reconstruction by Replay
 At load time, you fetch events for a stream (for example `order-123`) and apply them in sequence.
 - `OrderPlaced` creates base state.
 - `ItemAdded` mutates line items and totals.
 - `OrderShipped` flips lifecycle status and shipment metadata.
 Your aggregate is deterministic if applying the same ordered events always yields the same state.
-## Projections and read models
+## Projections and Read Models
 Write-side aggregates enforce invariants; read-side models optimize querying.
 - A projection can build `OrderSummary` for dashboard lookups.
 - Another projection can build `RevenueByDay` for analytics.
@@ -44,7 +44,7 @@ Snapshots cache aggregate state at a known stream version so loading can replay 
 
 Preserve old event meaning. Prefer additive schema changes, upcasters from historical representations, or new event types. Never rewrite history merely to make today's class deserialize.
 
-## Append and projection operations
+## Append and Projection Operations
 
 Load stream `order-123` at version 17, rebuild the aggregate, and append new events with expected version 17. The store atomically accepts the batch as versions 18 and 19 or rejects it because another writer already advanced the stream. Every stored event needs a stable event ID, stream version, event type, schema version, and occurred-at timestamp.
 
@@ -67,7 +67,8 @@ public interface IEventStore
 A projector stores its checkpoint separately from the read model or commits both atomically when the storage technology allows it. Handlers must be deterministic and idempotent because a crash can replay the last batch. During a rebuild, write to a new projection version, validate counts and business invariants, then switch readers. Do not delete the working projection first.
 
 Replay must not call today's payment provider, send email, or read the current clock. Isolate external effects behind live-delivery handlers that are disabled during rebuild.
-## Request-to-projection sequence
+## Request-to-projection Sequence
+
 ```mermaid
 sequenceDiagram
     participant C as Client
@@ -86,7 +87,7 @@ sequenceDiagram
     P->>RM: Upsert projection
 ```
 
-# Event Sourcing vs CRUD
+# Event Sourcing Vs CRUD
 
 CRUD stores the latest accepted state. Event Sourcing stores the ordered facts that produced it. For an order changing from `Pending` to `Paid` to `Shipped`, a CRUD row answers "what is the status now?" An event stream also answers when each transition happened, which command caused it, and what the state was at an earlier revision.
 
@@ -102,7 +103,7 @@ The image's rebuild arrow is conditional, not automatic. Replay is trustworthy o
 | How is a read model repaired? | Recompute from available current data or backups | Replay into a new deterministic projection |
 | Main operational risk | Lost history and in-place update mistakes | Schema evolution, replay cost, and projection lag |
 
-# .NET aggregate example
+# .NET Aggregate Example
 
 An event-sourced aggregate never mutates fields directly from a command. It raises an event, applies the same handler used during replay, and records that event for the store to append.
 
@@ -189,10 +190,11 @@ Use Event Sourcing at an aggregate boundary when the event stream is the authori
 
 For a payment ledger, immutable state transitions and temporal reconstruction can justify Event Sourcing. For a product description edited occasionally, CRUD plus an audit table is usually cheaper. For a CRUD order service that emits `OrderUpdated` through an outbox, the outbox makes delivery reliable; it does not change the order database into an event store.
 
-# Operating boundary
+# Operating Boundary
 
 Event schema evolution, stream growth, projection lag, checkpoints, and replay side effects are part of the pattern, not later storage details. The core rule is that the ordered event stream remains authoritative, aggregate replay remains deterministic, and rebuilt projections cannot repeat live external effects.
 # Tradeoffs
+
 | Concern | Event Sourcing | Traditional CRUD |
 |---|---|---|
 | Source of truth | Immutable event history | Latest row/document state |
@@ -201,6 +203,7 @@ Event schema evolution, stream growth, projection lag, checkpoints, and replay s
 | Write complexity | Higher: events, versions, projections | Lower: direct update/insert/delete |
 | Read complexity | Higher with projection pipeline | Lower for straightforward queries |
 | Operational model | Needs idempotency/replay tooling | Simpler operational story |
+
 Decision rule: prefer CRUD by default; choose Event Sourcing only when immutable audit history, temporal reconstruction, or replay-based recovery are explicit and valuable requirements.
 
 # Questions

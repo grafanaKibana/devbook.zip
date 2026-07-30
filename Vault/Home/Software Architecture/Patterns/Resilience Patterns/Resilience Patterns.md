@@ -4,8 +4,7 @@ topic:
 subtopic:
   - Patterns
 summary: "Patterns that keep distributed systems stable when dependencies degrade by controlling how failure propagates."
-tags:
-  - FolderNote
+tags: [FolderNote]
 publish: true
 priority: High
 level:
@@ -17,7 +16,12 @@ Resilience patterns protect distributed systems from cascading failures by contr
 
 The two foundational patterns here are [[Home/Software Architecture/Patterns/Resilience Patterns/Circuit Breaker]] (stop calling a failing dependency and fail fast instead of waiting) and [[Home/Software Architecture/Patterns/Resilience Patterns/Rate Limiting]] (cap request volume so one caller cannot exhaust shared resources). In production .NET systems, these compose into a resilience stack together with timeouts, retries with exponential backoff, and fallbacks — each layer handling a different failure mode. Polly and `Microsoft.Extensions.Http.Resilience` wire these layers into a single `HttpClient` pipeline.
 
-# Choose a response by failure and overload
+```datacorejsx
+const { FolderStructureMap } = await dc.require("Assets/components/devbook-folder-map.jsx");
+return FolderStructureMap;
+```
+
+# Choose a Response by Failure and Overload
 
 ![[Software Architecture/Software Architecture-Resilience Patterns-18120000.jpg]]
 
@@ -33,7 +37,7 @@ The two foundational patterns here are [[Home/Software Architecture/Patterns/Res
 
 "Let it crash" is a supervision choice, not permission to ignore a dependency failure. It is safe only when a supervisor restarts an isolated unit, state recovery is defined, crash loops are bounded, and the caller still receives a controlled outcome.
 
-# Map mechanisms to failure domain and recovery
+# Map Mechanisms to Failure Domain and Recovery
 
 Fault tolerance starts by naming the unit that may fail and the recovery objective:
 
@@ -47,11 +51,6 @@ Fault tolerance starts by naming the unit that may fail and the recovery objecti
 | Software defect | Isolation, canary rollout, rollback, and feature flag | Only outside the affected blast radius | Stop rollout, revert safely, and preserve compatible state |
 
 Replication is not a backup: replicas can copy deletion, corruption, or a bad deployment. Monitoring is not fault tolerance either; it detects conditions so automated or human recovery can act. Prove each mechanism by exercising the stated failure domain and measuring recovery time and data loss.
-
-```datacorejsx
-const { FolderStructureMap } = await dc.require("Assets/components/devbook-folder-map.jsx");
-return FolderStructureMap;
-```
 
 # References
 

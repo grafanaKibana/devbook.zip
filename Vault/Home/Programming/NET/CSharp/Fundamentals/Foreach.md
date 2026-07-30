@@ -48,7 +48,7 @@ The `finally`/`Dispose` is the part people forget: it's what runs the `finally` 
 
 **Struct enumerators and boxing.** `List<T>`, arrays, and `Span<T>` expose a **struct** enumerator, so `foreach` over them allocates nothing (the JIT also elides bounds checks on `Span<T>`/arrays). But if you access the collection through `IEnumerable<T>`, `GetEnumerator()` returns the enumerator **boxed** to the interface — reintroducing the allocation. Iterate the concrete type on hot paths.
 
-# Iterators and yield
+# Iterators and Yield
 
 `yield return` and `yield break` let you write iterator methods: methods that produce a sequence lazily, one element at a time.
 
@@ -92,7 +92,6 @@ Two iterator gotchas:
 - **`foreach` vs `for`**: `foreach` is idiomatic and works on any enumerable. `for` is faster on arrays and `List<T>` because the JIT can eliminate bounds checks when iterating from 0 to `Count`. Use `for` in tight inner loops over known-length collections; `foreach` everywhere else.
 - **`foreach` vs LINQ**: LINQ chains are composable and readable but allocate per-operator. `foreach` over the source directly allocates less. Use LINQ for readability on non-hot paths; `foreach` (or `Span<T>`) for hot paths where allocation matters.
 - **`foreach` vs `Span<T>` iteration**: for CPU-bound loops over memory you own, iterating a `Span<T>` or `ReadOnlySpan<T>` eliminates enumerator overhead and enables bounds-check elimination. Typical microbenchmark improvement is 20–30% on large arrays.
-
 
 # Questions
 

@@ -1,4 +1,4 @@
-import { builtInAlgorithms } from "./algorithms"
+import { builtInAlgorithms, interactiveStructures } from "./algorithms"
 import { adjacency } from "./graph"
 import { createMount } from "./mount"
 import { createRegistry } from "./registry"
@@ -6,7 +6,7 @@ import type { StepTraceApi } from "./types"
 
 const VERSION = "2.0.0"
 const registry = createRegistry(builtInAlgorithms)
-const mount = createMount(registry)
+const mount = createMount(registry, interactiveStructures)
 
 // The composition root is the complete engine body. Imports define dependency
 // order; the explicit built-in list defines product registration order.
@@ -22,6 +22,9 @@ export type {
   AlgorithmMeta,
   MountHandle,
   StepTraceApi,
+  StepTraceBlockConfig,
   StepTraceConfig,
   StepTraceHost,
+  StepTraceTabConfig,
+  StepTraceTabsConfig,
 } from "./types"

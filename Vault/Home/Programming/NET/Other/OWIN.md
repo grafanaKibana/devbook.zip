@@ -11,7 +11,7 @@ status: Ready to Repeat
 publish: true
 ---
 
-OWIN (Open Web Interface for .NET) defines a standard boundary between .NET web servers and web applications. 
+OWIN (Open Web Interface for .NET) defines a standard boundary between .NET web servers and web applications.
 It became popular through Katana and is most relevant today when you maintain legacy ASP.NET applications or migrate them to ASP.NET Core.
 The key value is understanding middleware pipeline composition and host decoupling, because those ideas carry directly into modern .NET web stacks.
 An OWIN app is middleware chained around an environment dictionary (`IDictionary<string, object>`).

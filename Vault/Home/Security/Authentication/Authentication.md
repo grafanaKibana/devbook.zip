@@ -4,8 +4,7 @@ topic:
 subtopic:
   - Authentication
 summary: "How credentials, authentication ceremonies, sessions, and delegated authorization fit together."
-tags:
-  - FolderNote
+tags: [FolderNote]
 publish: true
 priority: High
 level:
@@ -22,7 +21,7 @@ const { FolderStructureMap } = await dc.require("Assets/components/devbook-folde
 return FolderStructureMap;
 ```
 
-# Authentication factors, credentials, and protocols
+# Authentication Factors, Credentials, and Protocols
 
 Factors describe what the claimant proves. Credentials are the concrete secrets or keys used to prove it. Protocols define the messages and the verifier. Tokens normally carry a result or delegated authority; possession of a bearer token authenticates the caller only as "whoever has this token."
 
@@ -37,7 +36,7 @@ Factors describe what the claimant proves. Credentials are the concrete secrets 
 
 Use independent factors for MFA: two passwords are still one knowledge factor. A passkey may provide user verification and device-bound public-key proof in one ceremony, but account recovery can still become the weaker path.
 
-# Separate the layers
+# Separate the Layers
 
 These components combine; they are not alternatives on one ladder:
 
@@ -50,7 +49,7 @@ These components combine; they are not alternatives on one ladder:
 
 This distinction matters during incident response. Deleting a session revokes an opaque handle immediately. A signed self-contained token remains valid until expiry unless the resource server checks revocation or sender-constrains it.
 
-# Cookies and browser sessions
+# Cookies and Browser Sessions
 
 The server creates state with a response header such as:
 
@@ -69,7 +68,7 @@ An opaque random identifier should point to server-side state; do not put profil
 > [!WARNING] Non-normative source visual
 > Cookies use the browser's cookie store, not Web Storage. Omitting `Domain` creates a host-only cookie; a valid `Domain` can widen scope only to the current host's parent domain, never to an unrelated site or public suffix. `Path`, `Secure`, `HttpOnly`, and `SameSite` constrain delivery and access but do not encrypt the value.
 
-# Opaque sessions versus bearer tokens
+# Opaque Sessions versus Bearer Tokens
 
 Compare complete architectures, not cookies against JWTs:
 
@@ -84,7 +83,7 @@ Compare complete architectures, not cookies against JWTs:
 
 Use an opaque session for a first-party browser application when immediate revocation and server control matter. Use short-lived OAuth access tokens across API/service boundaries when independent resource servers need verifiable delegated authority. In both cases validate expiry, bind the credential to the intended audience, rotate it, and assume replay after theft unless a sender-constrained mechanism is used.
 
-# Token and HMAC API authentication
+# Token and HMAC API Authentication
 
 A bearer token is sufficient evidence for whoever possesses it. It must travel over TLS, target one audience, carry the smallest useful scope, expire quickly, and never appear in a URL or log.
 

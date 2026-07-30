@@ -4,12 +4,11 @@ topic:
 subtopic:
   - SQL
 summary: "The relational model, SQL's declarative query language, and the engine concepts behind it."
-tags:
-  - FolderNote
+tags: [FolderNote]
 publish: true
 priority: High
 level:
-  - '4'
+  - "4"
 status: Creation
 ---
 

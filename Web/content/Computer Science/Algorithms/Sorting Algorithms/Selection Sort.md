@@ -1,8 +1,8 @@
 ---
 publish: true
-created: 2026-07-12T14:27:20.416Z
-modified: 2026-07-18T11:30:04.690Z
-published: 2026-07-18T11:30:04.690Z
+created: 2026-07-25T18:38:43.809Z
+modified: 2026-07-25T18:38:43.809Z
+published: 2026-07-25T18:38:43.809Z
 topic:
   - Computer Science
 subtopic:
@@ -20,7 +20,7 @@ The scan that finds each minimum is unconditional. It inspects every remaining e
 
 **Core condition:** unsorted array, writes dearer than comparisons → one swap places each element's final value → at most `n − 1` writes but always `Θ(n²)` comparisons.
 
-# One pass
+# Trace
 
 The trace sorts the eight-element array `[8, 3, 5, 1, 9, 2, 7, 4]`.
 
@@ -30,7 +30,7 @@ The trace sorts the eight-element array `[8, 3, 5, 1, 9, 2, 7, 4]`.
 
 The first pass scans all eight elements, finds the minimum `1` at index 3, and swaps it with `a[0]`. That single write fixes index 0 permanently: no smaller value remains in the suffix, so index 0 is never revisited. The second pass repeats the scan over `a[1..7]`, now seven elements, and places `2`. Each pass performs one swap and shortens the unsorted suffix by one, so the sorted prefix on the left grows by one element per pass while the comparison work on the right falls by one — the sorted region and the scanning cost move in opposite directions.
 
-# Why each placement is final
+# Why Each Placement is Final
 
 After pass `i` completes, `a[0..i]` holds the `i + 1` smallest values in sorted order, and each of them is less than or equal to every value still in `a[i+1..n-1]`. Pass `i` establishes that invariant by choosing the true minimum of the suffix: no later pass can surface a smaller value to displace it, so the placement is settled and the prefix stays sorted without ever being re-examined.
 
@@ -54,7 +54,7 @@ Selection sort is not stable, and the instability comes straight from the long-d
 
 A stable variant exists but abandons the write budget that motivates the algorithm. Rather than swapping the minimum into place, it removes the minimum and shifts the intervening elements up by one — the same move [[Insertion Sort]] makes. Preserving equal-key order costs `Θ(n)` writes per pass, restoring the `Θ(n²)` write total that the swap-based form was chosen to avoid.
 
-# Reference drawer
+# Reference Drawer
 
 > [!ABSTRACT]- Control flow
 >

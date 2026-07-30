@@ -15,7 +15,7 @@ Presentation patterns separate rendering from the state and decisions that drive
 
 ![[Software Architecture/Software Architecture-Presentation Architecture Variants-18120000.png]]
 
-# Responsibility map
+# Responsibility Map
 
 | Pattern | State and decisions | View update | Navigation | Good fit |
 | --- | --- | --- | --- | --- |
@@ -112,7 +112,7 @@ public sealed class ProductDetailsViewModel : INotifyPropertyChanged
 
 Small view-only adapters can remain in code-behind. Presentation state and business decisions stay behind the binding boundary so they can be tested without constructing the UI.
 
-# MVC and MVVM compared
+# MVC and MVVM Compared
 
 | Dimension | MVC | MVVM |
 | --- | --- | --- |
@@ -124,7 +124,7 @@ Small view-only adapters can remain in code-behind. Presentation state and busin
 
 The binding convenience in MVVM is not free. Two-way bindings can hide control flow, and notification mistakes leave the screen stale without a compile-time failure. MVC keeps the request path explicit, but a controller that performs business decisions, provider calls, and response composition becomes a hard-to-test transaction script. In both patterns, the useful seam is the boundary around presentation behavior, not the pattern name.
 
-# Additional variants
+# Additional Variants
 
 Use MVP when a passive view interface is the natural test seam. Use MVU when explicit state transitions and one-way flow matter more than binding convenience. Add a coordinator when navigation has branching logic that should not live in a view-model. Use VIPER only when a large client module benefits from independently testable view, presentation, use-case, and routing boundaries.
 
@@ -140,7 +140,7 @@ MVVM-C keeps the bound screen state in `CheckoutViewModel` but reports `Checkout
 
 Blazor supports binding, but its component state, event callbacks, and render cycle are closer to a component model with unidirectional-flow options than to classic WPF MVVM. A component can use a view-model without making MVVM the framework's required architecture.
 
-# Decision rule
+# Decision Rule
 
 Use MVC for server-rendered request/response applications. Use MVVM for stateful clients whose binding infrastructure already supplies observable state and commands. Use MVP for a passive-view seam, MVU for deterministic state transitions, and a coordinator for navigation with its own branching policy. Do not add VIPER-sized separation to a small form whose state and navigation are already legible.
 
@@ -148,11 +148,11 @@ Switch because a boundary has failed, not because a file crossed a size threshol
 
 # Pitfalls
 
-## Massive controllers
+## Massive Controllers
 
 A controller becomes difficult to test when it accumulates provider calls, retry policy, and notification side effects. Keep it to input validation, one application operation, result mapping, and response selection.
 
-## Fat view-models
+## Fat View-models
 
 A view-model becomes a second controller when it owns data access, domain rules, and navigation. Keep observable state and commands there; inject application services for business behavior and a coordinator or navigation service for flow.
 

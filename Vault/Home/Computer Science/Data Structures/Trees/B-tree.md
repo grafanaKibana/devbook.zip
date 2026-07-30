@@ -11,33 +11,38 @@ status: Ready to Repeat
 publish: true
 ---
 
-A relational index holds millions of ordered keys on disk or SSD, a medium where a single random access fetches an entire block — a page, typically 4–16 KB. A one-key-per-node tree such as a [[Binary Search Tree]] spends one random page read per level, so a lookup over `n` keys costs about `log₂ n` reads: roughly 27 for 130 million keys, and each of those reads is a full random page fetch the storage device charges in full.
+A relational index holds millions of ordered keys on disk or SSD, a medium where a single random access fetches an entire block — a page, typically 4–16 KB. A one-key-per-node tree such as a [[Home/Computer Science/Data Structures/Trees/Binary Search Tree|Binary Search Tree]] spends one random page read per level, so a lookup over `n` keys costs about `log₂ n` reads: roughly 27 for 130 million keys, and each of those reads is a full random page fetch the storage device charges in full.
 
-A B-tree removes most of those reads by packing many sorted keys into a single page-sized node. Each node has a fan-out `m` in the hundreds instead of two, so height collapses to `log_m n` and the same 130 million keys resolve in three or four page reads. The comparisons performed inside a node are counted against the I/O they replace and are effectively free. What the structure keeps is only the sorted order of the keys and the child that brackets each gap; it records no insertion history and no placement beyond which node a key landed in.
+A B-tree removes most of those reads by packing many sorted keys into a single page-sized node. Each node has a fan-out `m` in the hundreds instead of two, so height collapses to `log_m n` and the same 130 million keys resolve in three or four page reads. Searching within a node still costs CPU work — `O(m)` comparisons for a linear scan or `O(log m)` for binary search — but it runs over one cache-local page instead of triggering another random read. What the structure keeps is only the sorted order of the keys and the child that brackets each gap; it records no insertion history and no placement beyond which node a key landed in.
 
 **Core shape:** page-sized node → up to `m−1` sorted keys and `m` child pointers → every non-root node at least `⌈m/2⌉−1` full → all leaves at equal depth → height ≈ `log_m n`, `O(n)` storage.
 
-A rendered trace would show an insert overflowing a full node and the resulting split propagating upward.
+Press **Insert** with the prefilled `6`: the leaf temporarily reaches four keys, then the median `10` moves into a new root while the remaining keys stay in two leaves.
 
-> [!NOTE] Visualization pending
-> Planned StepTrace: a shallow multi-way-tree card whose wide nodes each hold several sorted keys, animating an insert that overflows a full node, splits it, and pushes the median key up into the parent — the single move that grows the tree. No matching renderer exists in `engine.js` yet.
+```steptrace
+{"algorithm":"b-tree","values":[10,20,5],"value":6}
+```
 
-# Representation and invariants
+# Representation and Invariants
 
 An order-`m` B-tree stores each node as one page. A node is two parallel arrays: up to `m−1` sorted keys and up to `m` child pointers (leaves carry keys only). Four invariants define a valid state:
 
-1. Keys inside a node are sorted; a node with `k` keys has exactly `k+1` children, and child `i` covers the key range between key `i−1` and key `i`.
-2. Every node except the root holds between `⌈m/2⌉−1` and `m−1` keys. The root may hold as few as one key.
+1. Keys inside a node are sorted; an internal node with `k` keys has exactly `k+1` children, and child `i` covers the key range between key `i−1` and key `i`. A leaf has no children.
+2. Every node except the root holds between `⌈m/2⌉−1` and `m−1` keys. A nonempty root holds at least one key; the root may hold zero only when the tree is empty.
 3. All leaves sit at the same depth — the tree is balanced by construction, without rotations.
 4. `m` is chosen so a full node fills one page (or one cache line for an in-memory variant). This is the sizing decision the whole design turns on.
 
-Search is a binary search within the current node, then a descent into the child whose range brackets the key, repeated until a leaf. Because `m` is large, the base of the logarithm is large, and the tree stays five to ten levels shallower than a binary tree over the same keys. PostgreSQL builds each node from one 8 KB page; SQLite stores an entire database file as B-trees, one page per node.
+Some implementations parameterize the same capacity by **minimum degree** `t` instead of order. For that convention, a node holds at most `2t−1` keys and `2t` children, so its maximum order is `m = 2t`. The visualization uses order `m = 4`: at most three settled keys per node. Calling that value `t = 4` would describe a different, larger tree with up to seven keys per node.
 
-# Growing and shrinking by split and merge
+Search is a binary search within the current node, then a descent into the child whose range brackets the key, repeated until a leaf. Because `m` is large, the base of the logarithm is large: the 130-million-key example above takes roughly 27 binary-tree levels but only three or four B-tree levels. PostgreSQL builds each node from one 8 KB page; SQLite represents tables and indexes with B-tree interior and leaf pages.
+
+# Growing and Shrinking by Split and Merge
 
 Height changes only at the root, which is what keeps every leaf at equal depth without rotations.
 
-An insert always lands in a leaf, in sorted position. If that leaf reaches `m` keys it **splits**: its median key moves up into the parent and the node becomes two half-full nodes. An overflowing parent splits the same way, so splits cascade upward along the search path; when the root itself splits, a new root is created and the tree gains one level.
+An insert always lands in a leaf, in sorted position. If that leaf reaches `m` keys it **splits**: its median key moves up into the parent and the node becomes two nodes that each meet the `⌈m/2⌉−1` minimum. An overflowing parent splits the same way, so splits cascade upward along the search path; when the root itself splits, a new root is created and the tree gains one level.
+
+The trace uses that **bottom-up** algorithm: descend first, permit a temporary `m`-key overflow, then split while returning toward the root. The compact C# sketch below describes the equally valid **top-down** variant, which splits a full `m−1`-key child before descending into it. Both preserve the same settled order-`m` invariants; they differ only in when the split occurs.
 
 A delete can leave a node below the `⌈m/2⌉−1` minimum. The repair mirrors the split. If an adjacent sibling has a spare key, the node **borrows** — the parent's separator rotates down and the sibling's key rotates up. If both siblings are minimal, the node **merges** with a sibling and the separating parent key into one node; merges cascade upward, and when the root empties the tree loses a level. Deleting from an internal node is first reduced to the leaf case by swapping the key with its in-order predecessor.
 
@@ -49,36 +54,37 @@ A delete can leave a node below the `⌈m/2⌉−1` minimum. The repair mirrors 
 | Insert | `O(log_m n)` reads, plus splits along the path | `O(m)` to shift keys and split a node | `O(n)` | `O(log_m n)` path | a full node splits and the median rises; the cascade is bounded by height |
 | Delete | `O(log_m n)` reads, plus borrow or merge | `O(m)` to shift or fuse keys | `O(n)` | `O(log_m n)` path | an underflowing node borrows from or merges with a sibling up the path |
 
-The decisive number in every row is the node-access column, because a node access is a page read and page reads dominate the cost of external memory. Search does the same `O(log₂ n)` key comparisons as a [[Binary Search Tree]] — a binary search inside each node makes the wide fan-out free on reads. The extra `O(m · log_m n)` cost falls on writes: an insert or delete shifts keys within a node and splits, borrows, or fuses nodes, and that data movement, not any comparison, is the `O(m)` per-node factor. The B-tree wins on I/O, never on CPU: it accepts more in-node work, all of it on data already in the page, in exchange for far fewer random reads. Structure space is `O(n)` with pages guaranteed at least half full by invariant 2, so an index occupies between `n` and `2n` slots.
+The decisive number in every row is the node-access column, because a node access is a page read and page reads dominate the cost of external memory. Search does `O(m)` comparisons per node with a linear scan or `O(log m)` with binary search; across the tree, binary in-node search still totals `O(log n)` comparisons. The CPU benefit comes from scanning compact keys already loaded in one cache-local page, while the I/O benefit comes from replacing many random reads with one wider node access. Writes additionally pay `O(m)` to shift keys and to split, borrow, or fuse nodes. Structure space is `O(n)` because every non-root node contains at least `⌈m/2⌉−1` keys; that minimum-fill ratio approaches one-half as `m` grows.
 
-# When block orientation stops paying off
+# When Block Orientation Stops Paying off
 
 Each boundary traces back to the page-sized node.
 
-In pure memory there is no page to amortize. The `O(m)` linear or binary scan inside a wide node is pure overhead over a binary node's single comparison, so a [[Red-Black Tree]] or [[AVL Tree]] is simpler to implement and just as fast for RAM-resident data — the B-tree's advantage is I/O, and in RAM there is no I/O to save. The exception is a node sized to a cache line rather than a disk page: an order-eight B-tree can beat pointer-chasing binary trees on cache locality, which is why some in-memory engines still use one.
+In pure memory there is no storage-page read to amortize. A wide node needs `O(m)` comparisons with a linear scan or `O(log m)` with binary search, while a binary node needs one comparison before following a pointer. That does not make a B-tree automatically slower: a flat node can keep several comparisons in one cache line while a pointer-heavy [[Home/Computer Science/Data Structures/Trees/Red-Black Tree|Red-Black Tree]] or [[Home/Computer Science/Data Structures/Trees/AVL Tree|AVL Tree]] incurs cache misses. Use a cache-sized B-tree when locality matters; use the binary trees when their simpler node updates fit the workload better.
 
-Writes rewrite whole pages. An insert that fills a page splits it, producing two page writes where a binary tree would flip a few pointers, and random-order insertion keeps triggering splits — sustained write amplification. Bulk-loading already-sorted keys sidesteps this by packing pages to near-100% before they are written, which is why databases build an index faster from sorted input than by inserting rows one at a time. Where writes dominate, the [[LSM-Tree]] is the write-optimized counterpart that attacks exactly this cost, trading read and space amplification for far higher write throughput.
+Writes rewrite whole pages. An insert that fills a page splits it, producing two page writes where a binary tree would flip a few pointers, and random-order insertion keeps triggering splits — sustained write amplification. Bulk-loading already-sorted keys sidesteps this by packing pages to near-100% before they are written, which is why databases build an index faster from sorted input than by inserting rows one at a time. Where writes dominate, the [[Home/Data Persistence/NoSQL/LSM-Tree|LSM-Tree]] is the write-optimized counterpart that attacks exactly this cost, trading read and space amplification for far higher write throughput.
 
 The branching factor must be sized to the page. Choosing `m` too small shrinks fan-out toward a binary tree, so height climbs back toward `log₂ n` and the extra page reads return — the design's entire benefit is spent. `m` is effectively fixed by `page_size / (key_size + pointer_size)`, not chosen freely.
 
-# Reference drawer
+# Reference Drawer
 
 > [!ABSTRACT]- Structure and a split
+>
 > ```mermaid
 > graph TD
->   subgraph after["after inserting into a full leaf"]
->     P2["parent: 17, 40"] --> A2["5, 9, 12"]
->     P2 --> B2["21, 33"]
->     P2 --> C2["45, 60"]
+>   subgraph after["after inserting 6 and splitting"]
+>     P2["root: 10"] --> A2["5, 6"]
+>     P2 --> B2["20"]
 >   end
->   subgraph before["before: leaf 5,9,12,17,21,33 is full"]
->     P1["parent: 40"] --> A1["5, 9, 12, 17, 21, 33"]
->     P1 --> C1["45, 60"]
+>   subgraph before["before: full order-4 leaf"]
+>     P1["5, 10, 20"]
 >   end
+>   P1 -. "insert 6" .-> P2
 > ```
-> The median `17` rises into the parent; the full node becomes two half-full nodes. An overflowing parent repeats the same move, and a splitting root adds the only new level.
+> The order-4 leaf temporarily reaches four keys; `10` rises into a new root, leaving `5, 6` and `20` in two leaves. An overflowing parent repeats the same move, and a splitting root adds the only new level.
 
 > [!EXAMPLE]- Search and insert (C#, order-`m`)
+>
 > ```csharp
 > public sealed class BTreeNode
 > {
@@ -89,10 +95,10 @@ The branching factor must be sized to the page. Choosing `m` too small shrinks f
 >
 > public sealed class BTree
 > {
->     private readonly int _m;                 // order: max children per node
+>     private readonly int _t;                 // minimum degree; maximum order m = 2t
 >     private BTreeNode _root = new();
 >
->     public BTree(int m) => _m = m;
+>     public BTree(int minimumDegree) => _t = minimumDegree;
 >
 >     public bool Search(int key)
 >     {
@@ -107,9 +113,9 @@ The branching factor must be sized to the page. Choosing `m` too small shrinks f
 >         return false;
 >     }
 >
->     // Insert descends to a leaf and splits any full node on the way down,
+>     // Insert descends to a leaf and splits any full 2t-1-key node on the way down,
 >     // so a split never has to propagate back up past a node already made safe.
->     // Split moves Keys[m/2] into the parent and divides the remaining keys
+>     // Split moves Keys[t-1] into the parent and divides the remaining keys
 >     // and children between the two halves. Full body omitted; see references.
 > }
 > ```
@@ -118,7 +124,7 @@ The branching factor must be sized to the page. Choosing `m` too small shrinks f
 # Questions
 
 > [!QUESTION]- How does a B-tree stay balanced with all leaves at one depth, and without rotations?
-> Height changes only at the root. An overflowing node splits and pushes its median key into the parent; if the split cascades to the root, a new root adds a single level. Because growth happens only at the top and every split keeps both halves at least half full, all leaves remain at equal depth by construction.
+> Height changes only at the root. An overflowing node splits and pushes its median key into the parent; if the split cascades to the root, a new root adds a single level. Because growth happens only at the top and every split leaves both nodes with at least `⌈m/2⌉−1` keys, all leaves remain at equal depth by construction.
 
 > [!QUESTION]- What fixes a node that drops below its minimum fill on delete?
 > If an adjacent sibling has a spare key, the node borrows: the parent's separator rotates down and the sibling's key rotates up. If both siblings are minimal, the node merges with a sibling and the separating parent key into one node, which can cascade upward and shrink the tree by a level.
@@ -126,6 +132,6 @@ The branching factor must be sized to the page. Choosing `m` too small shrinks f
 # References
 
 - [Bayer & McCreight, Organization and Maintenance of Large Ordered Indexes (1972)](https://doi.org/10.1007/BF00288683) — the original paper introducing the structure and its page-oriented split/merge maintenance.
-- [SQLite database file format — B-tree pages](https://www.sqlite.org/fileformat2.html#b_tree_pages) — precise on-disk layout of B-tree and B+-tree pages; the clearest concrete "node = page" walkthrough.
+- [SQLite database file format — B-tree pages](https://www.sqlite.org/fileformat2.html#b_tree_pages) — precise on-disk layouts for table and index B-tree interior and leaf pages; the clearest concrete "node = page" walkthrough.
 - [PostgreSQL nbtree README](https://github.com/postgres/postgres/blob/master/src/backend/access/nbtree/README) — production notes on the Lehman–Yao variant Postgres ships: sibling links, page splits, and concurrency on real page-sized nodes.
 - [PostgreSQL indexes](https://www.postgresql.org/docs/current/indexes.html) — index-type overview showing the default B-tree access method in context.

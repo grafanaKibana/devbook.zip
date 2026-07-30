@@ -1,8 +1,8 @@
 ---
 publish: true
-created: 2026-07-18T08:18:21.211Z
-modified: 2026-07-18T11:59:15.661Z
-published: 2026-07-18T11:59:15.661Z
+created: 2026-07-25T18:38:43.838Z
+modified: 2026-07-25T18:38:43.838Z
+published: 2026-07-25T18:38:43.838Z
 topic:
   - Networks
 subtopic:
@@ -63,7 +63,7 @@ server {
 
 If upstream uses TLS, verify certificate policy separately at that hop. A plain proxy-to-origin channel can reduce latency but lowers transport isolation.
 
-# Forward Proxy vs Reverse Proxy
+# Forward Proxy Vs Reverse Proxy
 
 Both are intermediaries but represent different trust models:
 

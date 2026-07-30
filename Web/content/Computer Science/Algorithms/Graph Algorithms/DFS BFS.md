@@ -1,8 +1,8 @@
 ---
 publish: true
-created: 2026-07-12T14:27:20.402Z
-modified: 2026-07-18T11:30:03.524Z
-published: 2026-07-18T11:30:03.524Z
+created: 2026-07-25T18:38:43.790Z
+modified: 2026-07-25T18:38:43.790Z
+published: 2026-07-25T18:38:43.790Z
 topic:
   - Computer Science
 subtopic:
@@ -47,7 +47,7 @@ A stack is LIFO, so the most recently discovered neighbour is expanded next and 
 
 Each vertex is enqueued or pushed once and each edge inspected once, so a full traversal costs `Θ(V + E)` regardless of strategy; a targeted search can stop the moment it removes the target, `O(1)` in the best case when the target is the source. Space is where the two diverge. On a wide, shallow graph BFS's frontier is large while a DFS path stays short; on a deep, narrow graph the reverse holds, and DFS's `O(h)` is a call-stack cost that becomes a hard failure past the runtime's frame limit. Iterative DFS trades that call stack for an explicit heap-allocated stack of the same order.
 
-# Where the traversal breaks
+# Where the Traversal Breaks
 
 The visited set is not an optimization; it is what makes traversal terminate. Without it, a cycle `A → B → A` re-enqueues or re-pushes `A` indefinitely, the frontier never empties, and neither traversal returns. Where the mark goes depends on the traversal. BFS marks on enqueue, so a node enters the queue exactly once. Iterative DFS instead marks on pop behind a visited-guard, so a node can sit on the stack more than once yet is recorded and expanded only on its first pop. Either discipline is correct; dropping the mark or the guard is what lets a node be added and processed several times.
 
@@ -55,7 +55,7 @@ Recursive DFS carries its frontier on the call stack, one frame per node on the 
 
 Cycle detection in a _directed_ graph needs more than a visited flag. A boolean flag cannot separate a back edge, into a node still being explored, which closes a cycle, from a cross or forward edge into a node whose exploration already finished, which does not. DFS distinguishes them with three states — unvisited, in-progress (on the current recursion path), and done — and reports a cycle exactly when it follows an edge into an in-progress node. Collapsing in-progress and done into one "visited" bit flags cycles that are not there.
 
-# Reference drawer
+# Reference Drawer
 
 > [!ABSTRACT]- Control flow
 >

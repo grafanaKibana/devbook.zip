@@ -1,8 +1,8 @@
 ---
 publish: true
-created: 2026-07-12T14:27:20.400Z
-modified: 2026-07-18T11:30:03.450Z
-published: 2026-07-18T11:30:03.450Z
+created: 2026-07-18T14:02:43.941Z
+modified: 2026-07-26T19:11:52.660Z
+published: 2026-07-26T19:11:52.660Z
 topic:
   - Computer Science
 subtopic:
@@ -14,28 +14,29 @@ priority: Medium
 status: Creation
 ---
 
-A weighted digraph carries a single source and edge weights that may be negative — a currency graph, a distance-vector routing table, a cost network where some transitions refund more than they charge. [[Dijkstra]] settles one vertex at a time and never revisits it, so a negative edge discovered later, one that could still lower an already-final distance, breaks its greedy invariant. Bellman-Ford drops the settle-once rule: it relaxes every edge once per round and repeats the sweep, letting any distance keep falling for as many rounds as it takes.
+A weighted digraph carries a single source and edge weights that may be negative — a currency graph, a distance-vector routing table, a cost network where some transitions refund more than they charge. [[Computer Science/Algorithms/Graph Algorithms/Dijkstra|Dijkstra]] settles one vertex at a time and never revisits it, so a negative edge discovered later, one that could still lower an already-final distance, breaks its greedy invariant. Bellman-Ford drops the settle-once rule: it relaxes every edge once per round and repeats the sweep, letting any distance keep falling for as many rounds as it takes.
 
-Correctness rests on a fact about shortest paths: with no negative cycle present a shortest path is simple, so it spans at most `V−1` edges, `V−1` rounds suffice, and a relaxation still possible in a `V`-th round can only be a negative cycle. The layered-by-edge-count derivation is below.
+Correctness rests on a fact about shortest paths: with no negative cycle present a shortest path is simple, so it spans at most `V−1` edges, `V−1` rounds suffice, and a relaxation still possible in a `V`-th round can only be a negative cycle.
 
 **Core condition:** negative weights allowed → relax all `E` edges per round → `V−1` rounds settle every simple shortest path → a `V`-th relaxation proves a negative cycle, in `O(V·E)` time and `O(V)` space.
 
-No StepTrace renderer is registered for Bellman-Ford, so the round-by-round relaxation is described rather than animated.
+The trace uses the adverse scan order `2→3, 1→2, 0→2, 0→1`, so each round exposes one more edge of the shortest path.
 
-> [!NOTE] Visualization pending
-> Planned StepTrace: a graph card relaxing every edge once per round, distances settling over `V−1` rounds, with a `V`-th round that still relaxes flagging a reachable negative cycle. No matching renderer exists in `engine.js` yet.
+```steptrace
+{"algorithm":"bellman-ford"}
+```
 
-# Why V−1 rounds settle every distance
+# Why V−1 Rounds Settle Every Distance
 
 A round relaxes every edge once: for edge `(u, v, w)`, if `dist[u] + w < dist[v]`, then `dist[v]` drops to `dist[u] + w` and `pred[v]` becomes `u`. The order of edges within a round changes the intermediate values but never the round's guarantee.
 
-That guarantee is layered by edge count. Before any round only the source is correct (a zero-edge path). After round 1 every vertex whose shortest path uses one edge is final; after round `k` every shortest path of at most `k` edges is final, because round `k` relaxes the last edge of such a path once the earlier `k−1` edges were settled by previous rounds. A simple shortest path spans at most `V−1` edges, so `V−1` rounds finalize all of them. [[Dijkstra]] reaches the same distances faster on non-negative weights but cannot recover once a negative edge lowers a vertex it already closed; the blind re-sweep is exactly what tolerates that.
+That guarantee is layered by edge count. Before any round only the source is correct (a zero-edge path). After round 1 every vertex whose shortest path uses one edge is final; after round `k` every shortest path of at most `k` edges is final, because round `k` relaxes the last edge of such a path once the earlier `k−1` edges were settled by previous rounds. A simple shortest path spans at most `V−1` edges, so `V−1` rounds finalize all of them. [[Computer Science/Algorithms/Graph Algorithms/Dijkstra|Dijkstra]] reaches the same distances faster on non-negative weights but cannot recover once a negative edge lowers a vertex it already closed; the blind re-sweep is exactly what tolerates that.
 
 Detection falls out of the same bound. Run one extra round. If any edge still relaxes, a path is shortening beyond `V−1` edges, which is impossible for a simple path — so a negative cycle is reachable from the source, and the region it feeds has no finite shortest distance. To recover the cycle itself, take a vertex that relaxed on the `V`-th round and walk `pred` back `V` times; the walk cannot leave a cycle once inside it, so it lands on a cycle vertex, and following `pred` from there until it repeats reads off the loop.
 
 A full round that relaxes nothing means every distance is already final, so the sweep can stop early. On graphs that converge before the frontier reaches its diameter this turns the fixed `V−1` rounds into far fewer. SPFA, a queue-based variant, pushes this further by re-relaxing only edges leaving vertices whose distance just changed — the same `O(V·E)` worst case, often far fewer relaxations in practice, but no better guarantee on adversarial inputs.
 
-A four-vertex run makes the layering concrete; no renderer exists yet, so the `dist` array is traced by hand. The source is `0`, one edge is negative, and each round relaxes the edges in the fixed order `2→3, 1→2, 0→2, 0→1` — an adverse order that advances the settled frontier by one edge per round.
+A four-vertex run makes the layering concrete. The source is `0`, one edge is negative, and each round relaxes the edges in the fixed order `2→3, 1→2, 0→2, 0→1` — an adverse order that advances the settled frontier by one edge per round.
 
 ```text
 V = 4, source 0.  Edges: 0->1 (4), 0->2 (5), 1->2 (-2), 2->3 (3).
@@ -54,18 +55,18 @@ Round 2 is the decisive transition: the negative edge `1→2` pulls `dist[2]` be
 | Case | Time | Auxiliary space | Cause |
 | --- | --- | --- | --- |
 | Best | `O(E)` | `O(V)` | Distances converge in `k ≪ V` rounds and the confirming sweep changes nothing, so the early exit fires — `O(E)` when `k` is a small constant. |
-| Average | `O(V·E)` | `O(V)` | Distances converge in some `k` rounds for `O(k·E)`, but no input distribution guarantees `k` below `V−1` in general. |
-| Worst | `O(V·E)` | `O(V)` | `V−1` full sweeps plus the detection round; a path graph advances the settled frontier by one edge per round and forces every one. |
+| Average | distribution-dependent; `O(V·E)` upper bound | `O(V)` | Distances converge in `k` rounds for `O(k·E)`, but an average needs an input and edge-order distribution. |
+| Worst | `O(V·E)` | `O(V)` | `V−1` full sweeps plus the detection round; a path whose edges are scanned in reverse path order advances by one edge per round. |
 
-The `O(V)` auxiliary space holds the `dist` and `pred` arrays, and the iterative sweep uses no recursion stack. On a dense graph where `E ≈ V²` the bound becomes `O(V³)`, which matches [[Floyd-Warshall]] for a single source and is why all-pairs work usually switches algorithms.
+The `O(V)` auxiliary space holds the `dist` and `pred` arrays, and the iterative sweep uses no recursion stack. On a dense graph where `E ≈ V²`, one Bellman-Ford source already costs `O(V³)`, the same asymptotic time as one [[Computer Science/Algorithms/Graph Algorithms/Floyd-Warshall|Floyd-Warshall]] all-pairs run. Running Bellman-Ford from every source would cost `O(V⁴)`.
 
-# When distances stop being defined
+# When Distances Stop Being Defined
 
 A reachable negative cycle has no shortest path: each lap around it lowers the total, so the infimum is `−∞`. The `V−1`-round distances into that region are a snapshot taken mid-descent, not an answer. Code that prints them reports finite numbers that mean nothing, and the failure is silent because the arrays are fully populated and no exception fires. A correct report distinguishes three states: a finite distance, `+∞` for a vertex with no path at all, and `−∞` for a vertex reachable through a negative cycle — the last set found by marking every vertex that relaxed on the `V`-th round and everything reachable from it.
 
-Overflow is the second silent failure. Because a round relaxes every edge, including edges leaving vertices not yet reached, computing `dist[u] + w` while `dist[u]` is still the infinity sentinel can wrap a fixed-width integer into a small or negative value and invent a shortest path. Skipping any edge whose source is still at the sentinel (`if (dist[u] == INF) continue;`) removes it; [[Dijkstra]] never hits this because it only expands vertices it has already settled.
+Overflow is the second silent failure. Because a round relaxes every edge, including edges leaving vertices not yet reached, computing `dist[u] + w` while `dist[u]` is still the infinity sentinel can wrap a fixed-width integer into a small or negative value and invent a shortest path. Skipping any edge whose source is still at the sentinel (`if (dist[u] == INF) continue;`) removes it; [[Computer Science/Algorithms/Graph Algorithms/Dijkstra|Dijkstra]] never hits this because it only expands vertices it has already settled.
 
-# Reference drawer
+# Reference Drawer
 
 > [!ABSTRACT]- Round and detection flow
 >
@@ -142,6 +143,7 @@ Overflow is the second silent failure. Because a round relaxes every edge, inclu
 
 # References
 
+- [On a Routing Problem](https://www.ams.org/qam/1958-16-01/S0033-569X-1958-0102435-2/S0033-569X-1958-0102435-2.pdf) — Bellman's 1958 dynamic-programming formulation of the shortest-path recurrence.
 - [Bellman–Ford algorithm (Wikipedia)](https://en.wikipedia.org/wiki/Bellman%E2%80%93Ford_algorithm) — correctness, the `V−1`-round bound, and negative-cycle detection.
 - [Bellman-Ford (cp-algorithms)](https://cp-algorithms.com/graph/bellman_ford.html) — implementation with the early-exit optimization and cycle retrieval.
 - [Finding a negative cycle in the graph (cp-algorithms)](https://cp-algorithms.com/graph/finding-negative-cycle-in-graph.html) — the `pred`-walk extraction technique used above.

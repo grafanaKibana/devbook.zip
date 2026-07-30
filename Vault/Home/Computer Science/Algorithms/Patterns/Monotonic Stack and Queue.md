@@ -13,48 +13,48 @@ publish: true
 
 An array of daily temperatures needs, for every day, the number of days until a warmer one. Comparing each day against all later days is `O(n^2)`: most of that work re-scans stretches already known to be colder. The redundancy has structure. Once a warmer day arrives, every earlier colder day pending an answer is resolved at once and never consulted again.
 
-A monotonic stack captures exactly that. It holds indices whose values stay sorted — increasing or decreasing — by popping any element that can no longer be an answer before the next element is pushed. Scanning left to right for the next *greater* value, the stack keeps values decreasing from bottom to top; the arriving element pops every smaller index below it, and it *is* their next greater element. Each index is pushed once and popped once, so the nested-looking "pop while" is linear in total.
+A monotonic stack captures exactly that. It holds indices whose values stay sorted — increasing or decreasing — by popping any element that can no longer be an answer before the next element is pushed. Scanning left to right for the next *greater* value, the stack keeps values non-increasing from bottom to top; the arriving element pops every smaller index below it, and it *is* their next greater element. Each index is pushed once and removed at most once, so the nested-looking "pop while" is linear across the scan.
 
-A monotonic deque generalises this to a moving window. It stores window candidates in sorted order at the back and evicts from the front when the window slides past an index, which is why indices — not values — must be stored: eviction is keyed on position. This recovers `O(n)` sliding-window maximum, the query a plain [[Sliding Window]] cannot answer because a maximum has no inverse to subtract on removal.
+A monotonic deque generalises this to a moving window. It usually stores indices, keeping candidates sorted at the back and evicting from the front when an index expires. Values plus duplicate counts can also work when the departing value is available, but indices make expiry and identity explicit. This recovers `O(n)` sliding-window maximum: a scalar maximum cannot be updated in `O(1)` when it expires unless other candidates were retained, while rescanning costs `O(k)` per window.
 
-**Core shape:** ordered scan → pop violators before each push → each element enters and leaves once → `O(n)` nearest-greater/smaller spans and window extrema.
+**Core shape:** ordered scan → pop violators before each push → each index is pushed once and removed at most once → `O(n)` nearest-greater/smaller spans and window extrema.
 
-> [!NOTE] Visualization pending
-> Planned StepTrace: a monotonic-stack card showing a stack kept monotonic — before pushing an element, all elements that violate the order are popped, so each element enters and leaves once. No matching renderer exists in `engine.js` yet.
+```steptrace
+{"algorithm":"monotonic-stack-and-queue","array":[73,74,75,71,69,72,76,73]}
+```
 
-# Why the pops are free
+The trace uses daily temperatures `[73, 74, 75, 71, 69, 72, 76, 73]`. At `72`, the stack pops `69` and `71`, then becomes `[75, 72]` from bottom to top. At `76`, it pops `72` and `75`; `74` was already popped when `75` arrived. The six popped temperatures are `73`, `74`, `69`, `71`, `72`, and `75`, each in its own frame. Converting each resolved next index to `nextIndex - currentIndex` gives the Daily Temperatures waits `[1, 1, 4, 2, 1, 1, 0, 0]`. The charge counter shows the global bound: eight pushes and six pops over the whole scan.
 
-The stack answers "next greater element" for every index in one pass. Scanning left to right it holds indices whose values *decrease* from bottom to top. Before pushing index `i`, every index whose value is less than `a[i]` is popped, because `a[i]` is the next greater element each of them was waiting for. Index `i` is then pushed. Indices still on the stack when the scan ends have no greater element to their right.
+# Why the Pops Are Free
 
-The invariant is that the stack, read bottom to top, is a decreasing sequence of values whose positions increase — the still-unanswered candidates in the order they must be resolved. A popped index is settled forever: the element that popped it is strictly closer and strictly greater than anything further right could offer as a *next* neighbour. This is what makes the same scan solve the descendants — largest rectangle in a histogram (previous-smaller and next-smaller boundaries), trapping rain water (a basin closed when a taller bar pops the stack) — without re-examining settled indices.
+The stack holds unanswered indices whose values are non-increasing from bottom to top. When `a[i]` pops index `j`, no position between `j` and `i` held a greater value — such a value would already have popped `j`. Therefore `i` is the nearest qualifying index to the right. Entries left after the scan have no greater value to their right.
 
-The deque keeps the same monotone contents but adds a second exit. Values decrease from front to back; the front is always the current window maximum. Each new index `i` drops the front if it has slid out of the window, pops from the back every index with value `<= a[i]` (they can never again be the max while a newer, larger `a[i]` is present), then pushes `i`. Storing indices is what makes the front eviction possible — the deque must know *when* a candidate leaves the window, which only its position records.
+The deque keeps the same monotone contents but adds a second exit. Values decrease from front to back; the front is always the current window maximum. Each new index `i` drops the front if it has slid out of the window, then pops from the back while `a[back] <= a[i]`: the incoming value is at least as large, and an equal newer index dominates because it expires later. Indices are the standard representation because the expiry check is direct; a value-only variant needs the departing value and duplicate counts to preserve the same information.
 
-The cost argument is a charging scheme. Each index is pushed exactly once and popped at most once across the entire scan, so the inner "pop while" runs at most `n` times *in total*, not per outer step. Charging each pop to the unique element that performed it bounds the whole run at `O(n)` — the same amortised accounting behind [[Union-Find]] and dynamic-array growth.
+Each index is pushed once and removed at most once. Charge a removal to that index's earlier push and no index can be charged twice: all inner-loop iterations sum to `O(n)`, making the scan `O(n)` total and `O(1)` amortized per input index.
 
 # Complexity
 
 | Case | Time | Auxiliary space | Cause |
 | --- | --- | --- | --- |
-| Any input, monotonic stack | `O(n)` amortized | `O(n)` | Each index is pushed once and popped at most once; total pops `<= n`, so the inner loop is `O(n)` summed over the whole scan, not per step. |
-| Any input, monotonic deque | `O(n)` amortized | `O(k)` | Same push-once/pop-once accounting; the front eviction (`dq.First <= i - k`) keeps every stored index inside `(i - k, i]`, so the deque holds at most `k` elements regardless of input. |
+| Any input, monotonic stack | `O(n)` total; `O(1)` amortized per index | `O(n)` | Each index is pushed once and removed at most once. |
+| Any input, monotonic deque | `O(n)` total; `O(1)` amortized per index | `O(k)` | Front eviction keeps at most `k` live candidates; when `k = n`, this is `O(n)`. |
 | Brute-force next-greater | `O(n^2)` | `O(1)` | For each index, a fresh forward scan re-reads stretches already known to be smaller; no state carries between indices. |
 
-The `O(n)` bound is amortized, not per-operation: a single push can trigger a run of pops, but those pops are elements charged only once each. Stack space is the peak occupancy — a decreasing input for a decreasing stack, e.g. `[5, 4, 3, 2, 1]`, satisfies the pop condition on no push (no element has a next-greater to its right), so every index stays resident and gives the `O(n)` worst case. The deque is capped at `k` by front eviction and never reaches `O(n)`.
+A decreasing input such as `[5, 4, 3, 2, 1]` removes nothing, so the stack reaches its `O(n)` space bound. One arrival may trigger many removals, but the charged total remains linear.
 
-# When the invariant is set wrong
+# When the Invariant is Set Wrong
 
-The monotone direction must match the query. A *decreasing* stack yields the next *greater* element; flip the pop comparison and it yields the next *smaller*. Choosing the direction backwards produces a plausible, fully populated result array that answers the opposite question — nothing crashes, and no-duplicate test inputs may even look right.
+The monotone direction must match the query. A non-increasing stack with a `<` pop condition yields next greater; reversing the invariant computes the opposite relation and can leave different entries unresolved. Shape- or sentinel-only assertions can miss the mistake; use exact expected outputs for increasing, decreasing, mixed, and duplicate inputs.
 
-Strict versus non-strict comparison decides ties. `<` and `<=` in the pop condition differ only when equal values meet: one treats a duplicate as still a live candidate, the other as superseded. On histogram widths or first-versus-last-occurrence problems this flips the answer, and because both variants pass inputs without adjacent duplicates, the discrepancy stays hidden until equal neighbours appear.
+Strict versus non-strict comparison decides ties in both stacks and deques. `<` and `<=` diverge whenever equal values meet, including non-adjacent duplicates such as `[2, 1, 2]`: one keeps the older equal candidate, while the other lets the newer one supersede it.
 
-The deque must store indices, not values. A window maximum is a *distance*-aware query: the front is evicted precisely when its stored index falls out of range. A deque of raw values has discarded the positions, so it cannot tell when a candidate has left the window and returns a stale maximum from a slot no longer in scope.
+Prefer indices for a window deque because expiry is positional. Values can work when the departing value is supplied and duplicate counts are tracked, but that adds bookkeeping and loses element identity.
 
-Sliding-window maximum is the exact case a scalar [[Sliding Window]] aggregate fails. A running sum is reversible — subtract the departing element and the invariant holds in `O(1)`. A maximum has no inverse: when the current max leaves the window, the next-largest is unknown without rescanning. The monotonic deque restores `O(n)` by keeping every "still possibly maximal" index instead of a single collapsed scalar, so the answer survives a removal.
-
-# Reference drawer
+# Reference Drawer
 
 > [!ABSTRACT]- Next-greater control flow
+>
 > ```mermaid
 > flowchart TD
 >   A[Scan next index i] --> B{Stack non empty and top value less than a at i}
@@ -67,6 +67,7 @@ Sliding-window maximum is the exact case a scalar [[Sliding Window]] aggregate f
 > ```
 
 > [!EXAMPLE]- C# implementation
+>
 > ```csharp
 > // Next greater element to the right; result[i] = index of the next greater value, or -1.
 > public static int[] NextGreater(int[] a)
@@ -74,7 +75,7 @@ Sliding-window maximum is the exact case a scalar [[Sliding Window]] aggregate f
 >     int n = a.Length;
 >     var res = new int[n];
 >     Array.Fill(res, -1);
->     var stack = new Stack<int>();                  // indices, values decreasing bottom to top
+>     var stack = new Stack<int>();                  // indices, values non-increasing bottom to top
 >     for (int i = 0; i < n; i++)
 >     {
 >         while (stack.Count > 0 && a[stack.Peek()] < a[i])
@@ -94,7 +95,7 @@ Sliding-window maximum is the exact case a scalar [[Sliding Window]] aggregate f
 >         if (dq.Count > 0 && dq.First.Value <= i - k)
 >             dq.RemoveFirst();                      // front slid out of the window
 >         while (dq.Count > 0 && a[dq.Last.Value] <= a[i])
->             dq.RemoveLast();                       // smaller/equal values can never be the max now
+>             dq.RemoveLast();                       // newer value is >= and expires later on ties
 >         dq.AddLast(i);
 >         if (i >= k - 1) res[i - k + 1] = a[dq.First.Value]; // front is the window max
 >     }
@@ -105,30 +106,29 @@ Sliding-window maximum is the exact case a scalar [[Sliding Window]] aggregate f
 
 # Comparison
 
-| Approach | Time | Space | Required input | Stronger case | Weaker case |
-| --- | --- | --- | --- | --- | --- |
-| Monotonic stack | `O(n)` amortized | `O(n)` | Single left-to-right (or right-to-left) pass | Next/previous greater-or-smaller for every index; histogram, rain water | Queries that are not a nearest-neighbour comparison |
-| Brute-force next-greater | `O(n^2)` | `O(1)` | None | Tiny `n`, one-off checks | Any input past a few hundred elements |
-| Monotonic deque | `O(n)` amortized | `O(k)` | Fixed window size, indices stored | Sliding-window max/min over a stream | Order statistics beyond the extremum (median, `k`-th) |
-| Heap over the window | `O(n log k)` | `O(k)` | Comparable keys | Window median or `k`-th order statistic alongside the max | Pure min/max, where the deque's `O(n)` wins |
-| Sparse table / [[Segment Tree]] | `O(n log n)` build, `O(1)`/`O(log n)` query | `O(n log n)` / `O(n)` | Static array (sparse table); mutable range (segment tree) | Arbitrary range max on unchanging or updatable data | A single left-to-right pass where preprocessing never pays back |
-
-A monotonic stack is the `O(n)` tool for next-greater and next-smaller spans, paying `O(n)` space to keep unanswered candidates live; brute force is preferable only when `n` is trivially small. A monotonic deque is the `O(n)` sliding-window max/min that beats a [[Heap]]'s `O(n log k)` — the heap earns its log factor only when the window needs an order statistic the deque cannot expose. A sparse table or [[Segment Tree]] answers *arbitrary* ranges rather than a moving window, and its `O(n log n)` build pays back only under repeated ad-hoc range queries.
+| Approach | Cost | Use it for |
+| --- | --- | --- |
+| Monotonic stack / deque | `O(n)` total, `O(n)` / `O(k)` space | Nearest greater/smaller or moving-window extrema |
+| Indexed heap or periodically rebuilt heap | `O(n log k)`, `O(k)` space | Window extrema when heap operations are already needed |
+| Lazy-deletion heap without rebuilding | Up to `O(n log n)`, `O(n)` stale space | Avoid when a long stream can accumulate expired entries |
+| Two heaps / order-statistic tree | `O(n log k)`, `O(k)` space with bounded deletion | Window median / general `k`-th value |
+| Sparse table / [[Computer Science/Data Structures/Trees/Segment Tree|segment tree]] | `O(n log n)` build + `O(1)` static query / `O(n)` build + `O(log n)` query-update | Arbitrary ranges rather than one moving window |
 
 # Questions
 
 > [!QUESTION]- Why is a monotonic stack `O(n)` when the code reads as a nested loop?
-> Every index is pushed exactly once and popped at most once, so the total number of pops across the whole scan is bounded by `n`. The inner "pop while" therefore does `O(n)` work summed over all outer iterations, not `O(n)` per iteration. Charging each pop to the unique element that performed it gives the amortized linear bound.
+> Every index is pushed once and removed at most once. Charging each removal to that index's earlier push bounds all inner-loop iterations by `n`, so the scan is `O(n)` total and `O(1)` amortized per input index.
 
-> [!QUESTION]- Why must a monotonic deque store indices rather than values?
-> A window maximum is evicted precisely when its position falls out of range, so the front check compares stored indices against the window bound. A deque of raw values has discarded the positions and cannot tell when a candidate has left the window, returning a stale maximum from a slot no longer in scope.
+> [!QUESTION]- Why does a monotonic deque usually store indices rather than values?
+> A window maximum expires by position, so indices make the front eviction a direct comparison with the window bound and preserve identity across duplicates. Values can work when the departing value is supplied and duplicate counts are tracked, but that needs more bookkeeping.
 
 > [!QUESTION]- How does the monotone direction relate to which query is answered?
-> The direction of the stack fixes the query. A decreasing stack (values fall bottom to top) resolves each popped index against the arriving larger value, yielding the next *greater* element; reversing the pop comparison makes the stack increasing and yields the next *smaller* element. Choosing the direction backwards produces a fully populated result that answers the opposite question.
+> The invariant and pop comparison fix the relation. A non-increasing stack that pops smaller values yields next greater; reversing it yields next smaller and may leave a different set of indices unresolved.
 
 # References
 
-- [Sliding Window Maximum (LeetCode #239)](https://leetcode.com/problems/sliding-window-maximum/) — the canonical monotonic-deque problem, with the index-based window-eviction requirement.
+- [Mayur Datar et al., "Maintaining Stream Statistics over Sliding Windows" (2002)](https://doi.org/10.1137/S0097539701398363) — a primary treatment of maintaining aggregates over the most recent fixed-size stream window, the setting where deque expiry matters.
+- [Sliding Window Maximum (LeetCode #239)](https://leetcode.com/problems/sliding-window-maximum/) — the canonical monotonic-deque problem; indices are the standard way to express expiry, while value-count variants require the departing value.
 - [Largest Rectangle in Histogram (LeetCode #84)](https://leetcode.com/problems/largest-rectangle-in-histogram/) — the previous-smaller / next-smaller boundary application of a monotonic stack.
 - [Amortized analysis](https://en.wikipedia.org/wiki/Amortized_analysis) — the charging/aggregate argument behind the push-once, pop-once `O(n)` bound.
-- [Minimum stack / minimum queue](https://cp-algorithms.com/data_structures/stack_queue_modification.html) — deque-backed constant-time window minimum and the reversibility limitation that motivates it.
+- [Minimum stack / minimum queue](https://cp-algorithms.com/data_structures/stack_queue_modification.html) — index- and value-based queue variants, including how duplicate handling changes a value-only representation.

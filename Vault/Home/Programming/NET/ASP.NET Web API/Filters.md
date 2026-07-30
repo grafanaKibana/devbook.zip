@@ -87,7 +87,7 @@ public sealed class ApiExceptionFilter(ILogger<ApiExceptionFilter> logger) : IAs
 
 Register globally: `builder.Services.AddControllers(opts => opts.Filters.Add<ApiExceptionFilter>());`
 
-# Applying Filters: `[ServiceFilter]` vs `[TypeFilter]` vs `IFilterFactory`
+# Applying Filters: `[ServiceFilter]` Vs `[TypeFilter]` Vs `IFilterFactory`
 
 How you attach a filter that has constructor dependencies matters:
 

@@ -4,8 +4,7 @@ topic:
 subtopic:
   - Algorithms
 summary: "Reusable coding idioms that turn brute-force solutions efficient; recognising the pattern is the hard part."
-tags:
-  - FolderNote
+tags: [FolderNote]
 publish: true
 priority: Medium
 level:

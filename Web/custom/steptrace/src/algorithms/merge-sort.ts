@@ -1,6 +1,5 @@
 import type { SortAlgorithmDefinition } from "../types"
 
-// ─────────────────────────────── merge-sort ─────────────────────────────
 export const mergeSort = {
   id: "merge-sort",
   kind: "sort",
@@ -8,7 +7,7 @@ export const mergeSort = {
   run: (input, ops) => {
     const n = ops.value.length
     ops.init(
-      `Merge sort — start with runs of length 1, then repeatedly merge adjacent runs into larger sorted runs (watch the sorted runs double).`,
+      "Merge sort — start with runs of length 1, then repeatedly merge adjacent runs into larger sorted runs (watch the sorted runs double).",
     )
     for (let width = 1; width < n; width *= 2) {
       for (let lo = 0; lo < n; lo += 2 * width) {
@@ -25,8 +24,6 @@ export const mergeSort = {
         let i = 0
         let j = 0
         let k = lo
-        // `from` = the run-head slot the value is lifted out of, so the view can
-        // slide the bar from where it lived into the merged position.
         while (i < left.length && j < right.length) {
           if (left[i] <= right[j]) {
             ops.overwrite(

@@ -15,7 +15,7 @@ OAuth 2.0 lets a client obtain bounded authority to call a resource server. It i
 
 The distinction prevents a common failure: an API access token may be intended for another audience and does not, by itself, prove a login to the client. The client validates an ID token for its own `client_id`; the resource server validates an access token whose audience identifies that API.
 
-# Roles and artifacts
+# Roles and Artifacts
 
 | Item | Consumed by | What it means | Boundary to validate |
 | --- | --- | --- | --- |
@@ -58,7 +58,7 @@ The client rejects a callback whose `state` does not match the initiating browse
 
 For a server-rendered browser application, keep tokens server-side and issue a hardened opaque session cookie to the browser. A SPA or native app cannot safely rely on a static client secret. It should use PKCE, short-lived tokens, platform-protected storage where available, refresh-token rotation, and a narrowly registered redirect URI.
 
-# Current flow selector
+# Current Flow Selector
 
 | Situation | Flow | Why | Cost / failure boundary |
 | --- | --- | --- | --- |
@@ -68,7 +68,7 @@ For a server-rendered browser application, keep tokens server-side and issue a h
 
 Do not use the Implicit grant: it returns tokens through the browser front channel, where leakage and injection are harder to contain. Do not use the Resource Owner Password Credentials grant: it teaches the client to collect the user's password and cannot support modern authentication ceremonies safely. OAuth 2.0 Security Best Current Practice deprecates both. Client Credentials is for confidential machine clients, not SPAs.
 
-# Device Authorization message flow
+# Device Authorization Message Flow
 
 ```text
 Device -> Authorization server: client_id + requested scope
@@ -81,7 +81,7 @@ Token endpoint -> Device: access token, or authorization_pending / slow_down / d
 
 The `user_code` is designed for typing and is not the bearer credential. The device keeps `device_code` secret, stops when it expires, and slows polling when instructed.
 
-# Client Credentials example
+# Client Credentials Example
 
 ```csharp
 using var client = new HttpClient();
@@ -100,7 +100,7 @@ response.EnsureSuccessStatusCode();
 
 Prefer a managed workload identity or asymmetric client authentication over a long-lived shared secret when the authorization server supports it. Never place the secret in source control or a public client.
 
-# Failure modes
+# Failure Modes
 
 - **Authorization response injection:** bind each code to the client's request with PKCE and reject mismatched `state`.
 - **Redirect abuse:** register exact redirect URIs and do not use an attacker-controlled continuation URL after callback.

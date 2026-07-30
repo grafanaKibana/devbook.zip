@@ -1,0 +1,198 @@
+.steptrace[data-visual-family="prefix-character"] .steptrace__stage-col {
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+}
+
+.steptrace__prefix-character {
+  display: grid;
+  width: 100%;
+  height: 100%;
+  min-width: 0;
+  min-height: 0;
+  grid-template-rows: auto minmax(0, 1fr);
+  place-items: center;
+  overflow: hidden;
+  outline: none;
+}
+
+.steptrace__prefix-character:focus-visible {
+  border-radius: 0.5rem;
+  box-shadow: 0 0 0 2px var(--_blue);
+}
+
+.steptrace__prefix-svg {
+  display: block;
+  width: min(100%, 30rem);
+  height: 100%;
+  min-height: 12rem;
+  max-height: 19rem;
+  overflow: visible;
+}
+
+.steptrace__prefix-edge,
+.steptrace__prefix-edge-role,
+.steptrace__prefix-node {
+  opacity: 0;
+  transition:
+    opacity var(--_dur-move) var(--_ease-decelerate),
+    color var(--_dur-quick) var(--_ease-decelerate),
+    fill var(--_dur-quick) var(--_ease-decelerate),
+    stroke var(--_dur-quick) var(--_ease-decelerate);
+}
+
+.steptrace__prefix-edge[data-vis="1"],
+.steptrace__prefix-edge-role[data-vis="1"],
+.steptrace__prefix-node[data-vis="1"] {
+  opacity: 1;
+}
+
+.steptrace__prefix-edge {
+  fill: none;
+  stroke: var(--_neutral);
+  stroke-width: 2;
+}
+
+.steptrace__prefix-edge--failure {
+  stroke: color-mix(in srgb, var(--_violet) 58%, var(--_neutral));
+  stroke-dasharray: 4 5;
+  stroke-width: 1.4;
+}
+
+.steptrace__prefix-edge-role {
+  fill: var(--_muted);
+  font-family: var(--_font-mono);
+  font-size: clamp(0.62rem, 2.5vw, 0.72rem);
+  font-weight: 600;
+}
+
+.steptrace__prefix-edge-role[data-state="active"] {
+  fill: var(--_blue);
+}
+
+.steptrace__prefix-edge[data-state="fallback"] {
+  stroke: var(--_violet);
+  stroke-width: 2.2;
+}
+
+.steptrace__prefix-node circle {
+  fill: color-mix(in srgb, var(--_neutral) 16%, var(--_surface));
+  stroke: var(--_neutral);
+  stroke-width: 1.6;
+  transition:
+    fill var(--_dur-quick) var(--_ease-decelerate),
+    stroke var(--_dur-quick) var(--_ease-decelerate);
+}
+
+.steptrace__prefix-node > text {
+  fill: var(--_text);
+  font: 600 0.66rem/1 var(--_font-head);
+}
+
+.steptrace__prefix-edge[data-state="active"],
+.steptrace__prefix-node[data-state="active"] circle {
+  stroke: var(--_blue);
+}
+
+.steptrace__prefix-edge[data-state="reused"],
+.steptrace__prefix-node[data-state="reused"] circle {
+  stroke: var(--_violet);
+}
+
+.steptrace__prefix-edge[data-state="created"],
+.steptrace__prefix-node[data-state="created"] circle {
+  stroke: var(--_amber);
+}
+
+.steptrace__prefix-node[data-state="terminal"] circle {
+  stroke: var(--_green);
+}
+
+.steptrace__prefix-terminal {
+  opacity: 0;
+  transition: opacity var(--_dur-settle) var(--_spring-soft);
+}
+
+.steptrace__prefix-terminal[data-visible="1"] {
+  opacity: 1;
+}
+
+.steptrace__prefix-text {
+  display: flex;
+  justify-content: center;
+  gap: 0.22rem;
+  min-height: 1.8rem;
+  margin-bottom: 0.2rem;
+  transition: opacity var(--_dur-quick) var(--_ease-decelerate);
+}
+
+.steptrace__prefix-text[data-visible="0"] {
+  visibility: hidden;
+  opacity: 0;
+}
+
+.steptrace__prefix-text-cell {
+  display: grid;
+  width: 1.55rem;
+  height: 1.55rem;
+  place-items: center;
+  border: 1px solid var(--_border);
+  border-radius: 0.3rem;
+  font: 600 0.8rem/1 var(--_font-mono);
+  transition:
+    background var(--_dur-quick) var(--_ease-decelerate),
+    border-color var(--_dur-quick) var(--_ease-decelerate);
+}
+
+.steptrace__prefix-text-cell[data-active="1"] {
+  border-color: var(--_blue);
+  background: color-mix(in srgb, var(--_blue) 10%, transparent);
+}
+
+.steptrace__prefix-text-cell[data-matched="1"] {
+  border-color: var(--_green);
+  background: color-mix(in srgb, var(--_green) 10%, transparent);
+}
+
+.steptrace__prefix-swatch {
+  width: 0.55rem;
+  height: 0.55rem;
+  border: 2px solid var(--_neutral);
+  border-radius: 50%;
+}
+
+.steptrace__prefix-swatch[data-state="active"] {
+  border-color: var(--_blue);
+}
+
+.steptrace__prefix-swatch[data-state="reused"] {
+  border-color: var(--_violet);
+}
+
+.steptrace__prefix-swatch[data-state="created"] {
+  border-color: var(--_amber);
+}
+
+.steptrace__prefix-swatch[data-state="terminal"] {
+  border-color: var(--_green);
+}
+
+@media (max-width: 560px) {
+  .steptrace[data-visual-family="prefix-character"] .steptrace__body {
+    overflow-x: hidden;
+  }
+
+  .steptrace__prefix-svg {
+    width: 100%;
+    min-height: 11rem;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .steptrace__prefix-edge,
+  .steptrace__prefix-edge-role,
+  .steptrace__prefix-node,
+  .steptrace__prefix-terminal {
+    transition-property: opacity, color, fill, stroke;
+  }
+}

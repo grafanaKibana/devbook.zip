@@ -1,8 +1,8 @@
 ---
 publish: true
-created: 2026-07-18T08:24:10.022Z
-modified: 2026-07-18T11:59:15.671Z
-published: 2026-07-18T11:59:15.671Z
+created: 2026-07-25T18:38:43.875Z
+modified: 2026-07-25T18:38:43.875Z
+published: 2026-07-25T18:38:43.875Z
 topic:
   - Software Architecture
 subtopic:
@@ -156,7 +156,7 @@ This topology is not universal. One physical host raises availability and recove
 
 # References
 
-## Primary sources
+## Primary Sources
 
 - [RFC 6455: The WebSocket Protocol](https://www.rfc-editor.org/rfc/rfc6455) — framing, connection, ping/pong, and closing semantics used by chat and collaborative-editing channels.
 - [RFC 8030: Generic Event Delivery Using HTTP Push](https://www.rfc-editor.org/rfc/rfc8030) — push subscriptions, TTL, acknowledgement, and delivery limitations.

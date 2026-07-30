@@ -10,6 +10,7 @@ priority: High
 status: Done
 publish: true
 ---
+
 Photocopying a filled-out form is a Prototype in everyday life. Instead of filling out a new form from scratch, you copy the existing one and change just the name or address. The copy carries all the original structure and most of the original data — you only modify what differs.
 
 The Prototype pattern creates new objects by copying an existing instance rather than constructing from scratch. The prototype object knows how to copy itself, producing either a shallow copy (references shared) or a deep copy (full object graph duplicated). The client asks the prototype to clone itself, then tweaks the variant-specific fields. In modern C#, **`record with {}` expressions are the idiomatic Prototype** for value-semantic objects — the compiler generates the copy logic for you. The classical `ICloneable` interface is considered problematic because it doesn’t specify shallow vs deep semantics. Prefer `record with {}` for new code, or explicit copy constructors when you need deep-copy control over reference types.

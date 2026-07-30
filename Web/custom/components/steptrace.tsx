@@ -18,9 +18,11 @@ const hydrate = `
   var stylePromise = null;
   var enginePromise = null;
   function stylesheet() {
-    if (stylePromise) return stylePromise;
+    var existing = document.querySelector('link[data-steptrace-style="1"]');
+    if (stylePromise && existing && existing.isConnected) return stylePromise;
+    stylePromise = null;
     stylePromise = new Promise(function (resolve, reject) {
-      var link = document.querySelector('link[data-steptrace-style="1"]');
+      var link = existing;
       if (link && link.sheet) return resolve();
       var created = false;
       if (!link) {
@@ -31,7 +33,10 @@ const hydrate = `
         created = true;
       }
       link.addEventListener("load", function () { resolve(); }, { once: true });
-      link.addEventListener("error", function () { reject(new Error("could not load ${STYLE_URL}")); }, { once: true });
+      link.addEventListener("error", function () {
+        stylePromise = null;
+        reject(new Error("could not load ${STYLE_URL}"));
+      }, { once: true });
       if (created) document.head.appendChild(link);
     });
     return stylePromise;
@@ -95,8 +100,18 @@ const hydrate = `
   document.addEventListener("nav", run);
   document.addEventListener("render", run);
   if (document.body) {
-    new MutationObserver(function () {
-      if (document.querySelector(".steptrace-mount:not([data-steptrace-mounted])")) run();
+    new MutationObserver(function (records) {
+      for (var i = 0; i < records.length; i++) {
+        for (var j = 0; j < records[i].addedNodes.length; j++) {
+          var node = records[i].addedNodes[j];
+          if (node.nodeType !== 1) continue;
+          if (node.matches(".steptrace-mount:not([data-steptrace-mounted])") ||
+              node.querySelector(".steptrace-mount:not([data-steptrace-mounted])")) {
+            run();
+            return;
+          }
+        }
+      }
     }).observe(document.body, { childList: true, subtree: true });
   }
   run();

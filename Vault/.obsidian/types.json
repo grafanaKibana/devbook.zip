@@ -1,7 +1,5 @@
 {
   "types": {
-    "aliases": "aliases",
-    "cssclasses": "multitext",
     "tags": "tags",
     "topic": "multitext",
     "subtopic": "multitext",

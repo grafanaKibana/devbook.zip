@@ -4,8 +4,7 @@ topic:
 subtopic:
   - Data Structures
 summary: "Dictionary, hash set, and Bloom filter, trading element ordering for near-O(1) key access."
-tags:
-  - FolderNote
+tags: [FolderNote]
 level:
   - "4"
 priority: Medium

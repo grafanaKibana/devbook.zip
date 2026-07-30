@@ -156,7 +156,6 @@ public IActionResult ApiEndpoint() => Ok();
 > [!QUESTION]- What does `ValidateIssuerSigningKey = true` actually enforce?
 > It forces the JWT middleware to verify the token's signature against your known signing key. Without it, a token signed by a different (attacker-controlled) key could be accepted — breaking the entire authentication model.
 
-
 # References
 
 - [Authentication in ASP.NET Core (Microsoft Learn)](https://learn.microsoft.com/en-us/aspnet/core/security/authentication/) — official overview of the authentication middleware, scheme registration, and `ClaimsPrincipal` population.

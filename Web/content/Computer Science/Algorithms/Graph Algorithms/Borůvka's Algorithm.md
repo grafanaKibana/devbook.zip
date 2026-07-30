@@ -1,8 +1,8 @@
 ---
 publish: true
-created: 2026-07-12T14:27:20.401Z
-modified: 2026-07-18T11:30:03.484Z
-published: 2026-07-18T11:30:03.484Z
+created: 2026-07-18T14:02:43.942Z
+modified: 2026-07-26T19:07:12.438Z
+published: 2026-07-26T19:07:12.438Z
 topic:
   - Computer Science
 subtopic:
@@ -10,17 +10,18 @@ subtopic:
 level:
   - "4"
 priority: Medium
-status: Creation
+status: Ready to Repeat
 ---
 
-A [[Minimum Spanning Tree]] can be built from many independent fragments instead of one growing frontier. Borůvka's algorithm starts with every vertex as its own component. In each round, every component selects its cheapest outgoing edge. The distinct selections become candidates; a [[Disjoint Set]] accepts each candidate only if its endpoints still belong to different components, then the joined components contract before the next round.
+A [[Computer Science/Algorithms/Graph Algorithms/Minimum Spanning Tree|minimum spanning tree]] can be built from many independent fragments instead of one growing frontier. Borůvka's algorithm starts with every vertex as its own component. In each round, every component selects its cheapest outgoing edge. The distinct selections become candidates; a [[Computer Science/Data Structures/Graph Structures/Disjoint Set|disjoint set]] accepts each candidate only if its endpoints still belong to different components, then the joined components contract before the next round.
 
 The cut property certifies each candidate relative to the component that selected it. A component defines a cut between its vertices and the rest of the graph, so its cheapest outgoing edge belongs to some MST. Several components can select the same edge, and equal-weight selections can collectively form a cycle; deduplication plus the union-find check keeps only a compatible forest for the round.
 
-> [!NOTE] Visualization pending
-> Planned StepTrace: begin with singleton components, highlight each component's cheapest outgoing edge, merge all distinct safe edges, then repeat on the contracted component graph.
+```steptrace
+{"algorithm":"boruvka"}
+```
 
-# Components shrink by rounds
+# Components Shrink by Rounds
 
 For vertices `A, B, C, D` with edges `AB=1`, `AC=4`, `BC=2`, `BD=5`, `CD=3`, the first round selects `AB` for `A`, `AB` for `B`, `BC` for `C`, and `CD` for `D`. After duplicate removal, all three edges are safe and the graph becomes one component in a single round.
 
@@ -30,13 +31,13 @@ In the general case, every component that is not isolated chooses an edge to ano
 
 | Case | Time | Auxiliary space | Cause |
 | --- | --- | --- | --- |
-| Best | `O(E)` | `O(V)` | one scan connects all components |
-| Average | `O(E log V)` | `O(V)` | each round scans edges and component count halves |
-| Worst | `O(E log V)` | `O(V)` | up to logarithmically many contraction rounds |
+| Best | `O(E · α(V))` | `O(V)` | one edge scan plus disjoint-set finds connects all components |
+| Typical | distribution-dependent | `O(V)` | the number of rounds depends on how quickly selected edges merge components |
+| Worst | `O(E · α(V) · log V)` | `O(V)` | up to logarithmically many rounds, each scanning every edge and finding both roots |
 
-The table assumes a flat edge list, one cheapest-edge slot per component, and a [[Disjoint Set]] for contraction. Union-find contributes `O(E α(V))` across scans; repeated edge inspection determines the main bound. Parallel implementations can distribute the edge scan and component-minimum reduction, changing elapsed time without changing total work.
+The table models the literal flat-edge-list implementation used by the trace: every round scans all edges and asks the [[Computer Science/Data Structures/Graph Structures/Disjoint Set|disjoint set]] for each endpoint's current root. That costs `O(E · α(V))` per round. Because the component count at least halves, at most `⌈log₂ V⌉` rounds give the stated worst case. An implementation that materializes current component labels before each scan can express the same total work as `O((V + E) log V)`; parallel scans reduce elapsed time, not total work.
 
-# Boundary cases
+# Boundary Cases
 
 Parallel edges are harmless: only the lightest outgoing candidate for a component survives the round. Equal weights can lead to different valid MSTs, so a deterministic implementation needs a stable tie-break such as normalized endpoint order.
 

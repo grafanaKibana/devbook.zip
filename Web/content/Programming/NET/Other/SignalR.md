@@ -1,8 +1,8 @@
 ---
 publish: true
-created: 2026-07-11T21:44:27.097Z
-modified: 2026-07-18T11:59:15.665Z
-published: 2026-07-18T11:59:15.665Z
+created: 2026-07-25T18:38:43.858Z
+modified: 2026-07-25T18:38:43.858Z
+published: 2026-07-25T18:38:43.858Z
 topic:
   - Programming
 subtopic:
@@ -58,7 +58,7 @@ app.MapHub<ChatHub>("/hubs/chat");
 app.Run();
 ```
 
-## Pushing from outside a hub
+## Pushing from outside a Hub
 
 Most real apps push messages from a controller or background service, not from inside a hub method. Inject **`IHubContext<THub>`** to do that:
 
@@ -70,16 +70,16 @@ public sealed class PriceUpdater(IHubContext<PriceHub> hub)
 }
 ```
 
-## Streaming and client results
+## Streaming and Client Results
 
 - **Streaming**: a hub method returning `IAsyncEnumerable<T>` (or accepting a `ChannelReader<T>`) streams items incrementally instead of one big payload — good for live feeds and large transfers with backpressure.
 - **Client results (.NET 7+)**: the server can _invoke a method on a client and await its return value_ with `Clients.Client(id).InvokeAsync<T>(...)` — turning the normally fire-and-forget push into a request/response.
 
-## Connection lifecycle
+## Connection Lifecycle
 
 Override `OnConnectedAsync` / `OnDisconnectedAsync` to manage group membership and presence. The client supports **automatic reconnect** (`.WithAutomaticReconnect()`), but reconnection assigns a **new `ConnectionId`**, so re-add the connection to its groups on reconnect. SignalR has no built-in durable replay: a message sent while a client is disconnected is not replayed when it returns. Delivery guarantees depend on the configured path; the Redis Pub/Sub transport used by the Redis backplane is formally at-most-once and loses messages that a subscriber misses during a disconnect or outage. Persist anything that must survive a disconnect (DB/queue) and replay it explicitly.
 
-## Redis backplane request and delivery path
+## Redis Backplane Request and Delivery Path
 
 A Redis backplane solves cross-node routing; it does not make chat messages durable. One scale-out path is:
 

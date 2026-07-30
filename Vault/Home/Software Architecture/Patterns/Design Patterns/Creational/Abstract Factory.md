@@ -10,6 +10,7 @@ priority: High
 status: Done
 publish: true
 ---
+
 Walk into an IKEA showroom and pick the "Modern" living room set — you get a modern chair, a modern table, and a modern lamp, all designed to look right together. You can’t accidentally mix a Victorian chair with a Modern table because the set is curated as a family. Pick a different style and every piece changes together.
 
 The Abstract Factory pattern works the same way: it provides an interface for creating **families of related objects** without specifying their concrete classes. A factory interface declares creation methods for each product in the family (payment processor, receipt generator, refund handler). Each concrete factory (Stripe, PayPal, BankTransfer) implements the full interface, guaranteeing that all products it creates are compatible with each other. The client receives a factory and uses it — swapping `StripePaymentFactory` for `PayPalPaymentFactory` changes the entire product family in one place, and the compiler prevents mixing a Stripe processor with a PayPal receipt generator.

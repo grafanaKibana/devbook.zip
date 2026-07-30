@@ -77,7 +77,6 @@ for candidate in candidates:
 best_prompt = candidates[scores.index(max(scores))]
 ```
 
-
 # Pitfalls
 
 **Optimizing without a stable evaluation set** — a team runs APE-style search but uses a 15-example validation set. The winning prompt scores 93% on that set by chance (variance on 15 samples is plus or minus 12%), not because it generalizes. In production, quality is no better than the original. Mitigation: use at least 50 validation examples, representative of real task distribution, held fixed throughout the optimization run. Statistical significance matters — a 3% improvement on 50 examples might not be real; on 200 examples, it probably is.
@@ -87,7 +86,6 @@ best_prompt = candidates[scores.index(max(scores))]
 **Using PAL when the task cannot be formalized** — a team applies PAL to summarization. The model generates Python code that splits strings and counts sentences, but summarization requires judgment about salience, not string manipulation. The code runs but produces worse output than plain CoT. Mitigation: PAL is for tasks with deterministic, computable answers (arithmetic, unit conversion, symbolic manipulation). For tasks requiring judgment, tone, or creativity, stick with text-based reasoning.
 
 **Overfitting the meta-loop to failure examples** — meta-prompting that refines prompts against 5 specific failure cases can regress on the other 95% of inputs. The refined prompt adds so many constraints to handle edge cases that it confuses the model on straightforward inputs. Mitigation: always evaluate refined prompts against a held-out set that includes both the failure cases and a representative sample of normal cases. Version prompts in source control with rollback criteria.
-
 
 # Tradeoffs
 

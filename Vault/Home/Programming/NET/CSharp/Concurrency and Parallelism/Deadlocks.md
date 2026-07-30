@@ -10,6 +10,7 @@ priority: High
 status: Ready to Repeat
 publish: true
 ---
+
 A deadlock happens when two or more execution paths wait forever on resources held by each other. In .NET systems, deadlocks appear both in classic lock-based code and in async flows that block on tasks. They are high-severity failures because throughput can drop to zero without obvious crashes — the process stays alive but stops making progress.
 
 # How Deadlocks Form — Coffman Conditions

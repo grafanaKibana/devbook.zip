@@ -62,7 +62,7 @@ public async Task<IReadOnlyList<Result>> ComputeAsync(
 }
 ```
 
-## PLINQ example for pure transforms
+## PLINQ Example for Pure Transforms
 
 ```csharp
 public int[] ComputePrimes(int fromInclusive, int toExclusive)
@@ -77,7 +77,7 @@ public int[] ComputePrimes(int fromInclusive, int toExclusive)
 
 PLINQ works best when each element has enough CPU work to amortize partitioning and merge costs.
 
-## Lock-free accumulation with thread-local state
+## Lock-free Accumulation with Thread-local State
 
 The cleanest way to aggregate in parallel without a shared lock is the `Parallel.For` overload with `localInit`/`localFinally`: each worker accumulates into its own local, and only the final merge touches shared state.
 
@@ -129,7 +129,6 @@ This replaces N contended writes with one merge per worker — far better scalin
 
 > [!QUESTION]- Why can a parallel query be slower than sequential for small inputs?
 > Partitioning, scheduling, and result merge overhead can dominate when per-element CPU work is too small.
-
 
 # References
 

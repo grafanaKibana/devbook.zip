@@ -1,8 +1,8 @@
 ---
 publish: true
-created: 2026-07-15T11:47:54.812Z
-modified: 2026-07-18T11:38:38.700Z
-published: 2026-07-18T11:38:38.700Z
+created: 2026-07-25T18:38:43.877Z
+modified: 2026-07-25T18:38:43.877Z
+published: 2026-07-25T18:38:43.877Z
 topic:
   - Software Architecture
 subtopic:
@@ -54,7 +54,7 @@ Strict CQS is sometimes impractical. Common exceptions:
 
 The principle is a guideline, not a law. Apply it where it improves clarity; relax it where strict adherence creates awkward APIs.
 
-# CQS vs CQRS
+# CQS Vs CQRS
 
 | | CQS | CQRS |
 |---|---|---|

@@ -1,8 +1,8 @@
 ---
 publish: true
-created: 2026-07-13T18:39:40.434Z
-modified: 2026-07-18T11:30:02.861Z
-published: 2026-07-18T11:30:02.861Z
+created: 2026-07-25T18:38:43.778Z
+modified: 2026-07-25T18:38:43.779Z
+published: 2026-07-25T18:38:43.779Z
 topic:
   - AI & ML
 subtopic:
@@ -26,7 +26,7 @@ flowchart TD
 
 **Concrete example**: if your retrieved context says Austen wrote Pride and Prejudice and the model answers Dickens, the response is fluent but wrong. See [[Generation]] for how sampling and structure constraints influence this behavior.
 
-# Intrinsic vs Extrinsic
+# Intrinsic Vs Extrinsic
 
 Ji et al. (2022) split hallucinations into two operational classes. **Intrinsic hallucination** contradicts facts already present in supplied context, such as claiming Dickens wrote Pride and Prejudice when the source states Austen. This is detectable with source-output comparison, commonly via NLI entailment checks. **Extrinsic hallucination** adds facts not present in source material, such as adding a completion year not in context; it may be true or false, but it is unsupported by provided evidence. Extrinsic errors are harder to detect because they require external verification, not only context alignment.
 

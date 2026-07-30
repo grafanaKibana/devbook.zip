@@ -4,12 +4,11 @@ topic:
 subtopic:
   - NET
 summary: "Statically typed, multi-paradigm .NET language pairing OOP, functional features, and first-class async."
-tags:
-  - FolderNote
+tags: [FolderNote]
 publish: true
 status: Creation
 level:
-  - '4'
+  - "4"
 priority: High
 ---
 

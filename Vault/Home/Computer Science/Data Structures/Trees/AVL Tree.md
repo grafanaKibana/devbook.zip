@@ -3,7 +3,7 @@ topic:
   - Computer Science
 subtopic:
   - Data Structures
-summary: "A rigidly self-balancing BST with a ±1 balance factor, giving the fewest search levels per lookup."
+summary: "A rigidly self-balancing BST with tighter worst-case height than red-black trees for lookup-heavy workloads."
 level:
   - "4"
 priority: Medium
@@ -11,7 +11,7 @@ status: Ready to Repeat
 publish: true
 ---
 
-An ordered collection has to answer key lookups and stay open to inserts and deletes. A plain [[Binary Search Tree]] does both in `O(h)`, where `h` is the height, but height is at the mercy of insertion order: feed it keys that are already sorted and every node becomes a right child, so the tree degrades into a length-`n` chain and every search walks the whole thing.
+An ordered collection has to answer key lookups and stay open to inserts and deletes. A plain [[Home/Computer Science/Data Structures/Trees/Binary Search Tree|Binary Search Tree]] does both in `O(h)`, where `h` is the height, but height is at the mercy of insertion order: feed it keys that are already sorted and every node becomes a right child, so the tree degrades into a length-`n` chain and every search walks the whole thing.
 
 An AVL tree is a binary search tree that refuses to let this happen. Each node additionally stores its subtree height (or the derived balance factor), and after every insert or delete the structure enforces the **AVL invariant**: for every node, `|height(left) − height(right)| ≤ 1`. Whenever a modification pushes some node's balance factor to ±2, a **rotation** restores the invariant. Because no node's two subtrees can differ by more than one level, the whole tree stays at height ≤ ~1.44·log₂ n — a million keys sit in at most ~29 levels rather than a million.
 
@@ -19,10 +19,13 @@ What the structure gives up for that guarantee is written into every write: it c
 
 **Core invariant:** every node keeps `|height(left) − height(right)| ≤ 1` → height stays ≤ ~1.44·log₂ n → search, insert, and delete are `O(log n)` guaranteed, not amortized.
 
-> [!NOTE] Visualization pending
-> Planned StepTrace: a balanced-BST card showing an insert descending to a leaf, a node's balance factor leaving `{−1, 0, +1}`, and a rotation (single or double) restoring `|balance| ≤ 1`. No matching renderer exists in `engine.js` yet.
+Press **Insert** with the prefilled `5`: the descent makes node `20` left-heavy, then an LL rotation restores the bound.
 
-# Representation and rebalancing
+```steptrace
+{"algorithm":"avl-tree","values":[30,20,40,10],"value":5}
+```
+
+# Representation and Rebalancing
 
 An AVL node holds a key, left and right child pointers, and one extra integer — its height, from which the balance factor is derived:
 
@@ -50,25 +53,26 @@ Insert and delete diverge in how far the repair travels. After an insert, a sing
 | Operation | Time | Extra space | Cause |
 | --- | --- | --- | --- |
 | Search | `O(log n)` guaranteed | `O(1)` iterative, `O(log n)` recursion stack | the invariant caps height at ≤ ~1.44·log₂ n, so no path is longer |
-| Insert | `O(log n)` guaranteed | `O(1)` beyond the stored heights | `O(log n)` descent plus one rebalancing walk; **at most one rebalance** (one single or one double rotation) restores `\|balance\| ≤ 1` globally |
-| Delete | `O(log n)` guaranteed | `O(1)` | descent plus a rebalancing walk; a shortened subtree can propagate, so **up to `O(log n)`** rotations up the path |
+| Insert | `O(log n)` guaranteed | `O(log n)` recursion stack; `O(1)` iterative with parent pointers | `O(log n)` descent plus one rebalancing walk; **at most one rebalance** (one single or one double rotation) restores `\|balance\| ≤ 1` globally |
+| Delete | `O(log n)` guaranteed | `O(log n)` recursion stack; `O(1)` iterative with parent pointers | descent plus a rebalancing walk; a shortened subtree can propagate, so **up to `O(log n)`** rotations up the path |
 | Any rotation | `O(1)` | `O(1)` | a fixed set of pointer and height reassignments, independent of `n` |
 
 Structure space is `O(n)`: one node per key, each carrying the constant-size key, two child pointers, and the height/balance field. The height cap is not an average — it is a worst case that follows from the invariant. The sparsest tree the invariant allows is a *Fibonacci tree*, whose minimum node count for height `h` obeys `N(h) = N(h−1) + N(h−2) + 1`; inverting that recurrence yields the `1.4405·log₂(n + 2) − 0.328` bound.
 
-# Where strict balance costs
+# Where Strict Balance Costs
 
 The strict `|balance| ≤ 1` target is exactly what makes AVL fast to read and comparatively expensive to write, and every boundary below traces back to it.
 
-Write-heavy workloads pay for the tight bound. A [[Red-Black Tree]] tolerates a subtree that is up to twice as tall on one side, so many insert and delete streams that would trip an AVL rebalance leave a red-black tree untouched after a recolor. On deletes especially, an AVL tree can cascade `O(log n)` rotations up the path where a red-black tree needs at most three; a workload dominated by mutation does measurably more pointer work on AVL for the same key sequence.
+Write-heavy workloads pay for the tight bound. A [[Home/Computer Science/Data Structures/Trees/Red-Black Tree|Red-Black Tree]] tolerates a subtree that is up to twice as tall on one side, so many insert and delete streams that would trip an AVL rebalance leave a red-black tree untouched after a recolor. On deletes especially, an AVL tree can cascade `O(log n)` rotations up the path where a red-black tree needs at most three; a workload dominated by mutation does measurably more pointer work on AVL for the same key sequence.
 
 The per-node bookkeeping is a second, quieter cost of the invariant. Every insert and delete must recompute stored heights along the touched path, and the field itself consumes memory on every node. The heights are also load-bearing: if a recompute is skipped after a rotation, the stored value goes stale, balance-factor checks read the wrong number, and later operations pick the wrong rotation case or skip a needed one — the tree silently violates its own invariant with no crash.
 
 Rotation-case selection is the classic implementation bug, and it too is a consequence of demanding an exact `|balance| ≤ 1`. Applying a single rotation to a Left-Right or Right-Left (zig-zag) shape leaves the tree just as unbalanced, mirrored to the opposite side, because only the double rotation moves the inner node out first. Getting the four-case dispatch wrong produces a tree that still parses as a BST but no longer honors the height bound.
 
-# Reference drawer
+# Reference Drawer
 
 > [!ABSTRACT]- Left-Left case and its single right rotation
+>
 > ```mermaid
 > graph LR
 >     subgraph before ["factor(3) = +2"]
@@ -83,6 +87,7 @@ Rotation-case selection is the classic implementation bug, and it too is a conse
 > ```
 
 > [!EXAMPLE]- C# implementation
+>
 > ```csharp
 > public sealed class AvlTree
 > {
@@ -178,4 +183,3 @@ Rotation-case selection is the classic implementation bug, and it too is a conse
 
 - [Adelson-Velsky & Landis, "An algorithm for the organization of information" (1962)](https://zhjwpku.com/assets/pdf/AED2-10-avl-paper.pdf) — the original paper (translated); primary source for the invariant and the height proof.
 - [AVL tree (Wikipedia)](https://en.wikipedia.org/wiki/AVL_tree) — the four rotation cases with diagrams, the Fibonacci-tree height derivation, and the rebalancing-after-delete analysis.
-- [Sorted collection types](https://learn.microsoft.com/en-us/dotnet/standard/collections/sorted-collection-types) — Microsoft overview confirming .NET's sorted collections are red-black rather than AVL.

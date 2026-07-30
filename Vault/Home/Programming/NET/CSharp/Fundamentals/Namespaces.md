@@ -41,7 +41,7 @@ public static class MathUtility
 }
 ```
 
-# using Directives and Aliases
+# Using Directives and Aliases
 
 `using` brings names into scope; it has several flavours beyond the basic import:
 
@@ -52,7 +52,7 @@ public static class MathUtility
 
 Name resolution searches from the **most-nested** namespace outward, so a type in the current namespace shadows a same-named type in an outer one.
 
-## Project-level conventions
+## Project-level Conventions
 
 - **`<ImplicitUsings>enable</ImplicitUsings>`** auto-adds a set of `global using`s (System, Linq, Collections.Generic, …) for the SDK, removing boilerplate from every file.
 - **`<RootNamespace>`** sets the default namespace the templates/`dotnet new` use; the compiler does **not** force namespace to match folder structure, but most teams keep `Namespace == folder path` by convention for navigability.
@@ -64,7 +64,6 @@ Name resolution searches from the **most-nested** namespace outward, so a type i
 **Global using overreach** — C# 10 `global using` directives apply to every file in the project. A team added `global using Newtonsoft.Json;` and `global using System.Text.Json;` simultaneously, causing ambiguity errors on `JsonSerializer` across 200+ files. Limit global usings to universally unambiguous imports (`System`, `System.Collections.Generic`); keep domain-specific namespaces in per-file `using` directives.
 
 **Namespace/assembly mismatch** — the compiler does not enforce alignment between namespace name and assembly name. A type in `MyApp.Utilities` can live in `MyApp.Core.dll`. Misaligned namespaces cause autocompletion to mislead developers about which assembly to reference and make `dotnet add package` discovery harder.
-
 
 # Tradeoffs
 

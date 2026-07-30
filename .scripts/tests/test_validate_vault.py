@@ -99,6 +99,19 @@ publish: "true"
         self.assertEqual(0, checked)
         self.assertTrue(any(issue.code == "attachment.location" for issue in issues))
 
+    def test_staged_mode_ignores_images_outside_vault(self) -> None:
+        temp, root = self.make_repo()
+        self.addCleanup(temp.cleanup)
+        image = root / "docs/assets/site-home.png"
+        image.parent.mkdir(parents=True)
+        image.write_bytes(b"png")
+
+        with patch.object(validate_vault, "staged_paths", return_value=[image]):
+            issues, checked, _suppressed = validate_vault.validate(root, "staged")
+
+        self.assertEqual(0, checked)
+        self.assertEqual([], issues)
+
     def test_folder_hub_name_and_tag_are_enforced(self) -> None:
         temp, root = self.make_repo()
         self.addCleanup(temp.cleanup)

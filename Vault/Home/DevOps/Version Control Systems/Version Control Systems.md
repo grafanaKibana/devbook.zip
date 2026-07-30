@@ -7,8 +7,7 @@ summary: "Tracks file changes over time, enabling collaboration, branching, merg
 level:
   - "4"
 priority: High
-tags:
-  - FolderNote
+tags: [FolderNote]
 
 publish: true
 status: Creation
@@ -17,6 +16,11 @@ status: Creation
 A version control system (VCS) records committed versions of tracked files so collaborators can branch, merge, compare, and restore states that exist in the repository history. It cannot recover an untracked file or an uncommitted edit that was never captured by Git, and local recovery records such as the reflog expire.
 
 Git is a distributed VCS: a normal clone receives the objects reachable from the refs it fetches, while shallow clones intentionally omit older history and partial clones can defer selected objects until needed. Workflows such as GitFlow or trunk-based development define how teams coordinate changes; they are conventions layered on Git rather than properties of its object model.
+
+```datacorejsx
+const { FolderStructureMap } = await dc.require("Assets/components/devbook-folder-map.jsx");
+return FolderStructureMap;
+```
 
 # Working Tree, Index, Repository, and Remote
 
@@ -46,7 +50,7 @@ Use `restore` for working-tree/index content and `switch` for branches. `reset` 
 
 A flat command list hides the state transition. Name the source state, destination state, and whether the operation discards data before running it.
 
-# Git vs Hosting Platforms
+# Git Vs Hosting Platforms
 
 Git defines objects, commits, refs, remotes, and transfer protocols. GitHub, GitLab, and Azure DevOps host repositories and add identity, permissions, pull requests, protected branches, issues, automation, and marketplaces. A repository can move between hosts without changing Git's commit graph; platform workflows, permissions, and automation do not move automatically.
 

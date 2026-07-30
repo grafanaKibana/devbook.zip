@@ -17,7 +17,7 @@ Such an order exists only when the dependencies are acyclic. A cycle `a → b �
 
 **Core condition:** a directed acyclic graph → repeatedly emit a vertex whose prerequisites are all placed → a linear order with every edge pointing forward, in `O(V + E)`.
 
-# One ordering
+# Trace
 
 The trace runs Kahn's algorithm on a seven-vertex DAG, emitting a vertex the moment its in-degree reaches zero.
 
@@ -27,7 +27,7 @@ The trace runs Kahn's algorithm on a seven-vertex DAG, emitting a vertex the mom
 
 A vertex with in-degree 0 has no unmet dependency — every edge into it would come from a vertex already emitted, and there are none left — so it is safe to place next. Emitting it removes its outgoing edges, which decrements the in-degree of each successor. A successor whose count reaches 0 has just had its last prerequisite satisfied and becomes eligible in turn. The frontier of ready vertices is therefore not fixed; it refills as earlier vertices leave. Here only `A` starts at in-degree 0; emitting it drops both `B` and `C` to 0, so the frontier now holds two vertices at once. Either may go next, and that fork is exactly where distinct valid orders diverge.
 
-# Two constructions, one invariant
+# Two Constructions, One Invariant
 
 Both standard algorithms enforce the same invariant: no edge ends up pointing backward. One realizes it by placing a vertex only after every predecessor is placed; the other by placing a vertex ahead of every vertex reachable from it, since it finishes only after all of them. Either direction produces the same guarantee, that for each `u → v` the vertex `u` precedes `v`.
 
@@ -48,7 +48,7 @@ Every vertex is handled once and every edge is examined once — when its tail i
 
 Best, average, and worst coincide at `Θ(V + E)` — there is no lucky input that does less work and no adversarial input that does more, so a single bound is the honest statement here rather than three identical rows. The `O(V)` auxiliary space excludes the emitted list of `V` vertices. The DFS recursion stack can reach depth `V` on a single long chain, which is the usual reason to prefer Kahn's explicit queue on very deep graphs.
 
-# Where the order fails or splits
+# Where the Order Fails or Splits
 
 A topological order exists if and only if the graph is a DAG, and both constructions surface a violation instead of returning garbage. Kahn's emits fewer than `V` vertices: the vertices trapped behind a cycle keep at least one incoming edge from another cycle member, so their in-degree never reaches 0 and they are never enqueued. DFS reports the cycle the instant it follows an edge to a vertex still open on the recursion stack — a descendant reaching an ancestor, a back edge. Testing the emitted count, or the color, is the acyclicity check; a `null`/`false` result is frequently the answer the caller wanted (which modules form the circular dependency).
 
@@ -56,9 +56,10 @@ The order is generally not unique. Whenever two or more vertices sit at in-degre
 
 Direction is load-bearing. An undirected edge carries no before/after, so topological sort is undefined on undirected graphs, and a directed graph with even one cycle has no order at all. Both cases lie outside the DAG precondition and are not repaired by the algorithm — they are detected by it.
 
-# Reference drawer
+# Reference Drawer
 
 > [!ABSTRACT]- Kahn's control flow
+>
 > ```mermaid
 > flowchart TD
 >   A[Compute in-degree of every vertex] --> B[Enqueue all in-degree-0 vertices]
@@ -73,6 +74,7 @@ Direction is load-bearing. An undirected edge carries no before/after, so topolo
 > ```
 
 > [!EXAMPLE]- C# implementation
+>
 > ```csharp
 > public static List<int>? TopoSort(int n, List<int>[] adj)
 > {

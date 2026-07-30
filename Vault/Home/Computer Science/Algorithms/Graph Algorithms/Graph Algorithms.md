@@ -4,11 +4,10 @@ topic:
 subtopic:
   - Algorithms
 summary: "Algorithms to traverse, rank, and optimize graph relationships: reachability, shortest paths, connectivity, and flow."
-tags:
-  - FolderNote
+tags: [FolderNote]
 publish: true
 level:
-  - '4'
+  - "4"
 status: Creation
 priority: High
 ---
@@ -42,7 +41,7 @@ flowchart TD
 
 # Algorithm Selection
 
-## Shortest path
+## Shortest Path
 
 | Algorithm | Solves | Time | Constraint |
 | --- | --- | --- | --- |
@@ -55,7 +54,7 @@ flowchart TD
 | [[Bellman-Ford]] | Single-source shortest path | O(V·E) | Handles negative edges; detects negative cycles |
 | [[Floyd-Warshall]] | All-pairs shortest path | O(V³) time, Θ(V²) space | Small/dense graphs; detects negative cycles |
 
-## Structure and connectivity
+## Structure and Connectivity
 
 | Algorithm | Solves | Time | Constraint |
 | --- | --- | --- | --- |

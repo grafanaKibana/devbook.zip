@@ -1,8 +1,8 @@
 ---
 publish: true
-created: 2026-07-18T09:13:12.902Z
-modified: 2026-07-18T11:30:15.728Z
-published: 2026-07-18T11:30:15.728Z
+created: 2026-07-25T18:38:43.893Z
+modified: 2026-07-25T18:38:43.893Z
+published: 2026-07-25T18:38:43.893Z
 topic:
   - Software Design
 subtopic:
@@ -16,7 +16,7 @@ status: Ready to Repeat
 
 Object-oriented programming models a system as objects that own state and expose behavior. Its main value is not class syntax or inheritance: it is putting each invariant beside the operations allowed to change it. Interfaces define capabilities, composition assembles independently varying behavior, and runtime dispatch lets callers use a contract without knowing the concrete type. Inheritance is optional and earns its place only when a genuine subtype shares stable invariants and implementation.
 
-# Abstraction and invariants
+# Abstraction and Invariants
 
 An object should make invalid transitions difficult to express. A bank account exposes `Deposit` and `Withdraw`; it does not expose a public balance setter that any caller can bypass.
 
@@ -64,7 +64,7 @@ public sealed class CheckoutService(IPaymentGateway gateway)
 
 The caller depends on a payment capability, while a Stripe or bank implementation owns protocol details. C# interfaces can include default members, but a default must have semantics valid for every implementer. A meaningless fallback signals that the interface has grown beyond one coherent capability.
 
-# Inheritance and composition
+# Inheritance and Composition
 
 Inheritance binds a derived type to a base type’s contract and implementation. Composition binds an object to a collaborator’s contract and delegates work to it. Use inheritance when the relationship is a genuine subtype with stable shared invariants; use composition when behavior varies independently or may change at runtime. Reuse alone is not enough to justify a type hierarchy.
 
@@ -103,7 +103,7 @@ A derived class can depend on undocumented call order, protected state, or a vir
 
 Deep hierarchies multiply this risk. If an override suppresses base behavior, throws for a supported operation, or needs knowledge of base internals, the subtype is probably false. Flatten the hierarchy into capability interfaces and composed policies.
 
-# Subtyping and polymorphism
+# Subtyping and Polymorphism
 
 Inheritance or interface implementation creates a type-system subtype in C#. Sound design additionally requires behavioral substitutability: a value used through the base contract must preserve the expectations of callers that know only that contract.
 

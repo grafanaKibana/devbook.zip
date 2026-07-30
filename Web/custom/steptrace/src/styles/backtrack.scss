@@ -1,114 +1,291 @@
-/* ---- backtrack: an n×n board (row = recursion depth) + a path strip ---- */
+/* ---- backtrack: chess board + persistent decision tree ---- */
 .steptrace__bt {
-  display: flex;
-  flex-direction: column;
-  gap: 0.7rem;
-  margin: 0.4rem 0;
+  container: steptrace-backtrack / inline-size;
+  width: 100%;
+  min-width: 0;
+  margin: 0.4rem auto;
 }
+
+.steptrace__bt-layout {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: 0.85rem;
+  min-width: 0;
+}
+
+.steptrace__bt-board-column {
+  display: grid;
+  align-content: center;
+  gap: 0.7rem;
+  min-width: 0;
+}
+
 .steptrace__btboard {
   display: grid;
-  grid-template-columns: repeat(var(--_n), 1fr);
   width: 100%;
-  max-width: min(100%, 320px);
-  margin: 0 auto;
+  min-width: 0;
+  grid-template-columns: repeat(var(--_n), minmax(0, 1fr));
   border: 1px solid color-mix(in srgb, var(--_text) 22%, transparent);
-  border-radius: 9px;
-  overflow: hidden; /* clip cell tints flush to the rounded frame */
+  border-radius: 0.5625rem;
+  overflow: hidden;
 }
+
 .steptrace__btcell {
   position: relative;
-  aspect-ratio: 1;
   display: grid;
+  aspect-ratio: 1;
   place-items: center;
   border-right: 1px solid color-mix(in srgb, var(--_text) 10%, transparent);
   border-bottom: 1px solid color-mix(in srgb, var(--_text) 10%, transparent);
   transition: background var(--_tween) ease;
 }
-/* faint checkerboard so the grid reads as a board even when empty */
+
+.steptrace__btcell:nth-child(4n) {
+  border-right: 0;
+}
+
+.steptrace__btcell:nth-last-child(-n + 4) {
+  border-bottom: 0;
+}
+
+/* Faint checkerboard so the grid reads as a board even when empty. */
 .steptrace__btcell[data-parity="1"] {
   background: color-mix(in srgb, var(--_text) 4%, transparent);
 }
-/* squares attacked by committed queens: shrink visibly before a choice, recede on undo */
+
 .steptrace__btcell[data-state="attacked"] {
   background: color-mix(in srgb, var(--_muted) 16%, transparent);
 }
+
 .steptrace__btcell[data-state="try"] {
   background: color-mix(in srgb, var(--_blue) 22%, transparent);
 }
+
 .steptrace__btcell[data-state="reject"] {
   background: color-mix(in srgb, var(--_amber) 22%, transparent);
 }
+
 .steptrace__btcell[data-state="remove"] {
   background: color-mix(in srgb, var(--_amber) 40%, transparent);
 }
+
 .steptrace__btcell[data-state="queen"] {
   background: color-mix(in srgb, var(--_green) 22%, transparent);
 }
+
 .steptrace__btcell[data-state="solved"] {
   background: color-mix(in srgb, var(--_green) 40%, transparent);
 }
-/* the attacking queen above that vetoes a rejected square: an inset amber ring */
+
 .steptrace__btcell[data-conflict="1"] {
   box-shadow: inset 0 0 0 2.5px var(--_amber);
 }
-/* ♛ glyph: revealed by opacity when the cell holds a queen (tear-off = fade-out) */
+
 .steptrace__btqueen {
-  font-size: 1.15rem;
-  line-height: 1;
+  display: grid;
+  place-items: center;
   color: var(--_text);
   opacity: 0;
-  transition: opacity var(--_tween) ease;
+  transition:
+    color var(--_tween) ease,
+    opacity var(--_tween) ease;
 }
+
+.steptrace__btqueen svg {
+  width: clamp(1.15rem, 5cqi, 1.65rem);
+  height: clamp(1.15rem, 5cqi, 1.65rem);
+}
+
 .steptrace__btcell[data-has-queen="1"] .steptrace__btqueen {
   opacity: 1;
 }
+
 .steptrace__btcell[data-state="solved"] .steptrace__btqueen,
 .steptrace__btcell[data-state="queen"] .steptrace__btqueen {
   color: var(--_green);
 }
-/* path strip: one slot per row, the linearised root-to-node path with push/pop */
+
+/* One slot per row: the current root-to-node path, with push/pop state. */
 .steptrace__btpath {
   display: flex;
-  max-width: min(100%, 320px);
   width: 100%;
-  margin: 0 auto;
+  min-width: 0;
   border: 1px solid color-mix(in srgb, var(--_text) 22%, transparent);
-  border-radius: 9px;
+  border-radius: 0.5625rem;
   overflow: hidden;
 }
+
 .steptrace__btslot {
-  flex: 1 1 0;
-  min-width: 0;
-  height: 30px;
   display: flex;
+  height: 1.875rem;
+  min-width: 0;
+  flex: 1 1 0;
   align-items: center;
   justify-content: center;
-  font: 600 0.9rem var(--_font-mono);
-  color: var(--_muted);
   border-right: 1px solid color-mix(in srgb, var(--_text) 13%, transparent);
+  color: var(--_muted);
+  font: 600 0.9rem/1 var(--_font-mono);
   transition:
     background var(--_tween) ease,
-    color 0.22s ease;
+    color var(--_tween) ease;
 }
+
 .steptrace__btslot:last-child {
   border-right: 0;
 }
+
 .steptrace__btslot[data-state="on"] {
   background: color-mix(in srgb, var(--_green) 20%, transparent);
   color: var(--_green);
   font-weight: 700;
 }
+
 .steptrace__btslot[data-state="try"] {
   background: color-mix(in srgb, var(--_blue) 20%, transparent);
   color: var(--_blue);
   font-weight: 700;
 }
+
 .steptrace__btslot[data-state="reject"] {
   background: color-mix(in srgb, var(--_amber) 20%, transparent);
   color: var(--_amber);
 }
+
 .steptrace__btslot[data-state="remove"] {
   background: color-mix(in srgb, var(--_amber) 34%, transparent);
   color: var(--_amber);
   font-weight: 700;
+}
+
+.steptrace__bt-tree {
+  display: grid;
+  height: 19rem;
+  min-width: 0;
+  min-height: 0;
+  grid-template-rows: auto auto 13.125rem auto;
+  gap: 0.28rem;
+  overflow: hidden;
+  border-top: 1px solid var(--_hair);
+  padding-top: 0.65rem;
+}
+
+.steptrace__bt-tree-head {
+  display: flex;
+  min-width: 0;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 0.4rem;
+}
+
+.steptrace__bt-tree-depth {
+  overflow: hidden;
+  color: var(--_muted);
+  font: var(--_graph-node-font);
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.steptrace__bt-tree-caption {
+  display: -webkit-box;
+  min-height: 2.5em;
+  overflow: hidden;
+  color: var(--_text);
+  font: var(--_graph-node-font);
+  line-height: 1.25;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+}
+
+.steptrace__bt-tree-canvas {
+  display: grid;
+  block-size: 13.125rem;
+  min-height: 0;
+  place-items: center;
+  overflow: hidden;
+}
+
+.steptrace__bt-tree-svg {
+  display: block;
+  width: 100%;
+  height: 100%;
+  min-width: 0;
+  overflow: hidden;
+}
+
+.steptrace .steptrace__bt-tree .steptrace__rtedge[data-return="true"] {
+  stroke: var(--_violet);
+  stroke-width: 2.25;
+  stroke-dasharray: none;
+  opacity: 1;
+}
+
+.steptrace .steptrace__bt-tree .steptrace__rtedge[data-solution="true"] {
+  stroke: var(--_green);
+  stroke-width: 2;
+  stroke-dasharray: none;
+  opacity: 1;
+}
+
+.steptrace__bt-tree-return-arrow {
+  fill: var(--_violet);
+}
+
+.steptrace__bt-tree-node-label {
+  pointer-events: none;
+}
+
+.steptrace__bt-tree-depth-label {
+  fill: var(--_muted);
+  font: var(--_graph-node-font);
+  pointer-events: none;
+}
+
+.steptrace__bt-tree-depth-line {
+  stroke: var(--_hair);
+  stroke-width: 1;
+  stroke-dasharray: 2 3;
+  vector-effect: non-scaling-stroke;
+}
+
+.steptrace .steptrace__bt-tree-legend {
+  flex-wrap: nowrap;
+  overflow: hidden;
+  margin-top: 0;
+  white-space: nowrap;
+}
+
+@container steptrace-backtrack (min-width: 26rem) {
+  .steptrace__bt-layout {
+    grid-template-columns: fit-content(18rem) minmax(0, 1fr);
+  }
+
+  .steptrace__bt-board-column {
+    inline-size: min(18rem, 40cqi);
+  }
+
+  .steptrace__bt-tree {
+    height: 23rem;
+    align-self: center;
+    grid-template-rows: auto auto minmax(0, 1fr) auto;
+    border-top: 0;
+    border-left: 1px solid var(--_hair);
+    padding-top: 0;
+    padding-left: 0.75rem;
+  }
+
+  .steptrace__bt-tree-canvas {
+    block-size: auto;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .steptrace__btcell,
+  .steptrace__btqueen,
+  .steptrace__btslot,
+  .steptrace__bt-tree-caption,
+  .steptrace__bt-tree .steptrace__rtedge,
+  .steptrace__bt-tree .steptrace__rtnode,
+  .steptrace__bt-tree .steptrace__rtcirc {
+    transition-duration: 0ms;
+  }
 }

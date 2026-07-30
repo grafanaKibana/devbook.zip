@@ -1,0 +1,265 @@
+@use "../steptrace/src/styles/tabs";
+
+.complexity {
+  --cx-text: var(--darkgray, var(--text-normal, #2f2f2f));
+  --cx-muted: var(--gray, var(--text-muted, #767676));
+  --cx-border: var(--lightgray, var(--background-modifier-border, #dedede));
+  --cx-bg: var(--light, var(--background-primary, #fff));
+  --_text: var(--cx-text);
+  --_muted: var(--cx-muted);
+  --_border: var(--cx-border);
+  --_hair: var(--cx-border);
+  --_surface: var(--cx-bg);
+  --_hover: color-mix(in srgb, var(--cx-text) 7%, transparent);
+  --_accent: var(--secondary, var(--interactive-accent, #245b98));
+  --_font-head: var(--headerFont, var(--font-interface));
+  --_tween: 140ms;
+  color: var(--cx-text);
+  margin: 1.5rem 0;
+}
+
+.complexity__title {
+  margin-bottom: 0.35rem;
+  font-family: var(--headerFont, var(--font-interface));
+  font-size: 0.95rem;
+  font-weight: 650;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+.complexity__tabs {
+  margin-bottom: 0.25rem;
+}
+
+.complexity__tab:disabled {
+  cursor: default;
+  opacity: 0.32;
+}
+
+.complexity__tab:focus-visible,
+.complexity__legend-button:focus-visible {
+  outline: 2px solid var(--secondary, var(--interactive-accent, #245b98));
+  outline-offset: 2px;
+}
+
+.complexity__plot-wrap {
+  width: 100%;
+  overflow-x: auto;
+}
+
+.complexity__plot {
+  display: block;
+  width: 100%;
+  min-width: 34rem;
+  height: auto;
+  color: var(--cx-muted);
+  overflow: visible;
+}
+
+.complexity__grid {
+  stroke: var(--cx-border);
+  stroke-width: 1;
+  stroke-dasharray: 5 6;
+}
+
+.complexity__axis {
+  stroke: var(--cx-muted);
+  stroke-width: 1;
+}
+
+.complexity__tick,
+.complexity__x-tick,
+.complexity__endpoint-label {
+  font-family: var(--bodyFont, var(--font-text, sans-serif));
+  font-size: 10px;
+}
+
+.complexity__tick {
+  fill: var(--cx-muted);
+  paint-order: stroke;
+  stroke: var(--cx-bg);
+  stroke-width: 3px;
+  text-anchor: start;
+}
+
+.complexity__x-tick {
+  fill: var(--cx-muted);
+  text-anchor: middle;
+}
+
+.complexity__area {
+  pointer-events: none;
+  opacity: 1;
+  transition: opacity 140ms ease;
+}
+
+.complexity__area.is-subtle {
+  opacity: 0;
+}
+
+.complexity__curve {
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  transition:
+    opacity 140ms ease,
+    stroke-width 140ms ease;
+}
+
+.complexity__curve.is-highlighted {
+  opacity: 1;
+  stroke-width: 2.65;
+  stroke-dasharray: none;
+}
+
+.complexity__curve.is-subtle {
+  opacity: 0.28;
+  stroke-width: 1.35;
+  stroke-dasharray: 6 5;
+}
+
+.complexity__curve.is-context {
+  opacity: 0.18;
+}
+
+.complexity__endpoint-label {
+  fill: var(--cx-muted);
+  paint-order: stroke;
+  stroke: var(--cx-bg);
+  stroke-width: 3px;
+  stroke-linejoin: round;
+  transition:
+    fill 140ms ease,
+    opacity 140ms ease;
+}
+
+.complexity__endpoint-label.is-active {
+  fill: var(--complexity-label-color);
+  font-weight: 650;
+  opacity: 1;
+}
+
+.complexity__endpoint-label.is-subtle {
+  opacity: 0.42;
+}
+
+.complexity__legend {
+  display: flex;
+  flex-direction: column;
+  gap: 0.3rem;
+  margin: 0.35rem 0 0;
+  padding: 0;
+  list-style: none;
+}
+
+.complexity__legend-group {
+  display: grid;
+  grid-template-columns: 4.5rem minmax(0, 1fr);
+  align-items: start;
+  gap: 0.25rem 0.5rem;
+}
+
+.complexity__legend-group.is-ungrouped {
+  display: block;
+}
+
+.complexity__legend-group-label {
+  padding-top: 0.65rem;
+  color: var(--cx-text);
+  font: 650 0.72rem var(--headerFont, var(--font-interface));
+}
+
+.complexity__legend-items {
+  display: flex;
+  flex-wrap: nowrap;
+  gap: 0.2rem;
+  margin: 0;
+  padding: 0;
+  overflow-x: auto;
+  list-style: none;
+}
+
+.complexity__legend-group.is-ungrouped .complexity__legend-items {
+  flex-wrap: wrap;
+  justify-content: center;
+  overflow-x: visible;
+}
+
+.complexity__legend-button {
+  display: inline-flex;
+  align-items: center;
+  min-height: 2.75rem;
+  gap: 0.3rem;
+  padding: 0 0.35rem;
+  color: var(--cx-muted);
+  font: 500 0.68rem var(--headerFont, var(--font-interface));
+  white-space: nowrap;
+  cursor: pointer;
+  background: transparent;
+  border: 1px solid transparent;
+  border-radius: 0.3rem;
+  transition:
+    color 140ms ease,
+    opacity 140ms ease,
+    background-color 140ms ease;
+}
+
+.complexity__legend-button:hover,
+.complexity__legend-button.is-selected {
+  color: var(--cx-text);
+  background: color-mix(in srgb, var(--cx-border) 38%, transparent);
+}
+
+.complexity__legend-button.is-subtle {
+  opacity: 0.45;
+}
+
+.complexity__legend-swatch {
+  width: 0.8rem;
+  height: 0.125rem;
+  flex: none;
+  border-radius: 999px;
+  background: var(--complexity-color);
+}
+
+.complexity-error {
+  color: var(--cx-text, inherit);
+  white-space: pre-wrap;
+}
+
+@media (min-width: 600px) {
+  .complexity__title {
+    font-size: 1.05rem;
+  }
+
+  .complexity__plot {
+    min-width: 0;
+  }
+
+  .complexity__legend-group {
+    grid-template-columns: minmax(5rem, 7.5rem) minmax(0, 1fr);
+    gap-inline: 0.75rem;
+  }
+
+  .complexity__legend-items {
+    gap-inline: 0.45rem;
+  }
+
+  .complexity__legend-button {
+    min-height: 2rem;
+    gap: 0.4rem;
+    font-size: 0.72rem;
+  }
+
+  .complexity__legend-swatch {
+    width: 0.85rem;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .complexity__area,
+  .complexity__curve,
+  .complexity__endpoint-label,
+  .complexity__legend-button {
+    transition: none;
+  }
+}

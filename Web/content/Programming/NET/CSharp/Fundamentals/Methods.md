@@ -1,8 +1,8 @@
 ---
 publish: true
-created: 2026-07-11T21:45:16.088Z
-modified: 2026-07-18T11:30:12.343Z
-published: 2026-07-18T11:30:12.343Z
+created: 2026-07-25T18:38:43.854Z
+modified: 2026-07-25T18:38:43.854Z
+published: 2026-07-25T18:38:43.854Z
 topic:
   - Programming
 subtopic:
@@ -18,7 +18,7 @@ Methods are the core unit of behavior in C#: they define contracts, shape API bo
 
 # Input Parameters
 
-## ref
+## Ref
 
 `ref` passes a variable by reference.
 
@@ -51,7 +51,7 @@ int num = 0;
 InitializeAndModify(ref num);
 ```
 
-## in
+## In
 
 `in` is a readonly by-ref parameter.
 
@@ -67,7 +67,7 @@ static void ProcessData(in int value)
 }
 ```
 
-## out
+## Out
 
 `out` passes by reference for **output**: the callee _must_ assign it before returning, and the caller need not initialize it. It's the basis of the `TryParse` pattern (return a `bool` for success, hand back the value via `out`) and pairs with inline `out var`:
 
@@ -85,7 +85,7 @@ if (TryDivide(10, 2, out var quotient))   // 'quotient' declared inline
 
 Use `out` (success-or-default) instead of throwing for _expected_ failures on hot paths; `Dictionary.TryGetValue` is the canonical example.
 
-## params
+## Params
 
 `params` lets a method accept a variable number of arguments as an array (or, since C# 13, recognized collection types).
 
@@ -121,7 +121,7 @@ static int Sum(params ReadOnlySpan<int> numbers)
 
 # Inheritance Method Keywords
 
-## virtual
+## Virtual
 
 `virtual` marks a base-class method as overridable.
 
@@ -135,7 +135,7 @@ class Animal
 }
 ```
 
-## override
+## Override
 
 `override` replaces a `virtual`/`abstract` member implementation in a derived class.
 
@@ -149,7 +149,7 @@ class Dog : Animal
 }
 ```
 
-## new
+## New
 
 `new` hides a member from the base class (it does not override it).
 
@@ -168,7 +168,7 @@ class Dog : Animal
 }
 ```
 
-## virtual vs override vs new in one example
+## Virtual Vs Override Vs New in One Example
 
 ```csharp
 class Animal

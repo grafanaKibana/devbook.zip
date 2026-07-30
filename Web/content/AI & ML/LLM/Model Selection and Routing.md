@@ -1,8 +1,8 @@
 ---
 publish: true
-created: 2026-07-16T18:35:14.819Z
-modified: 2026-07-18T11:30:02.744Z
-published: 2026-07-18T11:30:02.744Z
+created: 2026-07-25T18:38:43.775Z
+modified: 2026-07-25T18:38:43.776Z
+published: 2026-07-25T18:38:43.776Z
 topic:
   - AI & ML
 subtopic:
@@ -18,7 +18,7 @@ Model selection chooses which model may serve a workload; routing chooses per re
 
 This note covers application-level routing between complete models. Token-level routing among experts inside one sparse model is a different mechanism covered in [[AI & ML/LLM/LLM#Mixture-of-experts|mixture-of-experts routing]].
 
-# Selection criteria
+# Selection Criteria
 
 Evaluate every candidate against the same versioned workload and constraints:
 
@@ -31,13 +31,13 @@ Evaluate every candidate against the same versioned workload and constraints:
 
 Public leaderboards shortlist candidates. They do not replace [[AI & ML/LLM/Evaluation/Evaluation|evaluation]] on the distribution and rubric that determine your release.
 
-# Routing patterns
+# Routing Patterns
 
-## Deterministic task mapping
+## Deterministic Task Mapping
 
 Map known task classes to models in configuration: extraction to one candidate, complex synthesis to another, image work to a multimodal model. This is easiest to audit when task boundaries are explicit.
 
-## Classifier routing
+## Classifier Routing
 
 A cheap classifier predicts task type or difficulty before generation. It avoids paying for a failed first attempt, but a false “easy” decision can silently reduce quality. Evaluate the router as a decision system, including per-route recall for hard or safety-sensitive cases.
 
@@ -56,7 +56,7 @@ flowchart LR
 
 A cascade saves money only if the first attempt plus escalation costs less than sending every request directly to the stronger model. It can increase p95 latency for escalated traffic, so measure the end-to-end path rather than individual model latency.
 
-# Router evaluation
+# Router Evaluation
 
 Build a labeled routing set from real traffic. For each request, record which candidates pass the task rubric, their latency, and full cost. Then evaluate the routing policy against an oracle that selects the cheapest passing model.
 

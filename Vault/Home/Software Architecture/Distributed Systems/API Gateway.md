@@ -34,7 +34,7 @@ flowchart LR
 - **TLS termination**: Offload certificate handling and HTTPS policy enforcement from every backend service.
 - **[[Home/DevOps/Observability]]**: Emit centralized logs, traces, metrics, and correlation IDs for end-to-end troubleshooting.
 
-## Routing, policy enforcement, composition, and failure boundary
+## Routing, Policy Enforcement, Composition, and Failure Boundary
 
 Trace `GET /mobile/orders/42` through the edge:
 
@@ -47,7 +47,7 @@ Trace `GET /mobile/orders/42` through the edge:
 
 Routing and policy are common gateway duties. Composition, response caching, transformation, retries, and circuit breaking are optional because each concentrates more state, latency, and failure at the gateway. A fan-out endpoint with three independent 99.9% dependencies has lower end-to-end availability than any one dependency unless it can degrade safely.
 
-## Reverse proxy, gateway, and load balancer capability overlap
+## Reverse Proxy, Gateway, and Load Balancer Capability Overlap
 
 ![[Software Architecture/Software Architecture-API Gateway-18120000-1.png]]
 
@@ -102,7 +102,7 @@ Separate gateways or route sets per client type only when payload, authenticatio
 
 Keep domain decisions out of the BFF. `CanRefundOrder` belongs to Orders or Payments, not to a client adapter; otherwise mobile, web, and partner clients acquire different business rules.
 
-## Netflix API evolution: aggregation to federation
+## Netflix API Evolution: Aggregation to Federation
 
 ![[Software Architecture/Software Architecture-API Gateway-18120000.png]]
 
@@ -110,7 +110,7 @@ The visual compresses distinct systems into an evolution story. Federation redis
 
 Federation does not remove network cost. A query crossing five subgraphs can still create fan-out latency or an N+1 pattern, so the boundary needs query limits, tracing, batching, and ownership metadata. A BFF and federation can coexist when they solve different ownership problems: the BFF follows a client, while federation follows domains. Do not stack them unless each layer has a distinct owner and measured value.
 
-# .NET gateway implementation
+# .NET Gateway Implementation
 
 YARP provides configurable routes, clusters, transforms, destination health, and ASP.NET Core extension points:
 
@@ -151,7 +151,7 @@ Authenticate before proxying and authorize by route or endpoint metadata. Forwar
 
 The gateway pattern remains independent of YARP. If gateway code starts deciding payment state, order eligibility, or inventory invariants, move that logic to the owning service.
 
-# Gateway vs Service Mesh
+# Gateway Vs Service Mesh
 
 API Gateway and Service Mesh solve different traffic planes and are often used together.
 
@@ -214,7 +214,7 @@ Rule of thumb:
 - [YARP health checks](https://learn.microsoft.com/aspnet/core/fundamentals/servers/yarp/dests-health-checks) — official active and passive destination-health behavior.
 - [ASP.NET Core rate limiting](https://learn.microsoft.com/aspnet/core/performance/rate-limit) — official middleware and policy model for edge quotas.
 
-## ByteByteGo provenance
+## ByteByteGo Provenance
 
 - [API gateway 101](https://github.com/ByteByteGoHq/system-design-101/blob/b28380a4710c5ec9638ec037d4168e288f334cba/data/guides/api-gateway-101.md) — editorial lead for the request trace; its stale product infographic was rejected.
 - [Reverse proxy versus API gateway versus load balancer](https://github.com/ByteByteGoHq/system-design-101/blob/b28380a4710c5ec9638ec037d4168e288f334cba/data/guides/reverse-proxy-vs-api-gateway-vs-load-balancer.md) — provenance for the role visual, qualified by capability overlap.

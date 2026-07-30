@@ -17,7 +17,7 @@ The technique applies whenever the answer concerns a contiguous sub-array or sub
 
 **Core condition:** contiguous range + an aggregate that updates in `O(1)` on element entry and exit → one linear pass replaces per-window recomputation → `O(n)` time.
 
-# Shrinking to the shortest window
+# Trace
 
 The trace searches `[2, 3, 1, 2, 4, 3]` for the shortest contiguous sub-array whose sum reaches `7`.
 
@@ -27,7 +27,7 @@ The trace searches `[2, 3, 1, 2, 4, 3]` for the shortest contiguous sub-array wh
 
 The right boundary advances first, adding each entering element to a running sum in `O(1)`, until the sum reaches `7` and a valid window exists. The left boundary then advances, subtracting the leaving element in `O(1)`; each contraction that keeps the sum at or above `7` produces a shorter candidate. Because non-negative values only raise the sum on entry and lower it on exit, once no shorter valid window is reachable from the current left the left boundary never moves back. Two consecutive windows differ only in their boundary elements, so the running sum is adjusted by those two elements rather than rebuilt from the window's contents.
 
-# Why the window never recomputes
+# Why the Window Never Recomputes
 
 Every index is added to the aggregate exactly once, when the right boundary passes it, and removed at most once, when the left boundary passes it. The right boundary advances `n` times over the whole run; the left boundary advances at most `n` times and never overtakes the right. Total boundary movement is bounded by `2n`, and each movement does `O(1)` aggregate maintenance — hence `O(n)`, independent of window width.
 
@@ -43,7 +43,7 @@ The bound holds only while the aggregate is incrementally maintainable: adding t
 
 The two sliding-window rows share the `O(n)` time bound; the space difference is entirely the aggregate's representation. The brute-force row is the same problem without incremental maintenance — `k` is the window width for a fixed window and grows toward `n` for a variable one, which is where the `O(n²)` comes from.
 
-# Where the incremental aggregate fails
+# Where the Incremental Aggregate Fails
 
 A fixed-size window contracts on a schedule: every element the right boundary adds, the left boundary removes exactly one, holding the width at `k`. A variable-size window contracts conditionally — the left boundary advances only while the window violates (or, for a minimizing problem, still satisfies) the constraint, so a single right step can trigger several left steps or none. Applying the fixed rule to a variable problem pins the width and never explores shorter or longer ranges; applying the variable rule without a stopping condition shrinks past validity.
 
@@ -51,9 +51,10 @@ The removal step must rebuild the new aggregate from the leaving element alone. 
 
 Negative numbers break the contraction rule even though the sum still updates in `O(1)`. "Shrink while the sum exceeds the target" assumes the window sum rises on every entry and falls on every removal, which makes the smallest valid length monotone as the right boundary moves. With negatives present a longer window can carry a smaller sum, so a window that fails the constraint can become valid again by extending — incremental maintainability of the sum is intact, but the decision of *when* to contract no longer has a valid basis. Sum-with-negatives problems (a sub-array summing to exactly `k`, say) drop the moving window for [[Prefix Sum|prefix sums]] plus a hash map, which locates any range with a target sum without assuming monotone length.
 
-# Reference drawer
+# Reference Drawer
 
 > [!ABSTRACT]- Variable-window control flow
+>
 > ```mermaid
 > flowchart TD
 >   A[left = 0, aggregate empty] --> B{right < n}
@@ -68,6 +69,7 @@ Negative numbers break the contraction rule even though the sum still updates in
 > ```
 
 > [!EXAMPLE]- C# implementations
+>
 > ```csharp
 > // Fixed window: maximum sum of any k consecutive elements.
 > public static int MaxSumWindow(int[] a, int k)
@@ -125,6 +127,7 @@ Sliding window is the `O(n)` default for a contiguous-range answer whose aggrega
 
 # References
 
+- [Mayur Datar et al., "Maintaining Stream Statistics over Sliding Windows" (2002)](https://doi.org/10.1137/S0097539701398363) — a primary treatment of maintaining aggregates over the last `N` stream elements, the same enter-once/expire-once model used here.
 - [Window Sliding Technique](https://www.geeksforgeeks.org/window-sliding-technique/) — GeeksforGeeks walkthrough of fixed and variable windows with the incremental-update derivation.
 - [Longest Substring Without Repeating Characters (LeetCode #3)](https://leetcode.com/problems/longest-substring-without-repeating-characters/) — canonical variable-window problem backed by a frequency map.
 - [Sliding Window Maximum (LeetCode #239)](https://leetcode.com/problems/sliding-window-maximum/) — the non-reversible-aggregate case that requires a monotonic deque.
