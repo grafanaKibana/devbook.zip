@@ -192,16 +192,15 @@ export const mergeSortTree = {
     rootMeta.values = values.slice()
     nodes[0].label = `[0…${values.length - 1}]`
 
-    const message = `Merge sort ${values.join(", ")} by splitting into halves and merging sorted halves on return.`
+    const message = `Merge sort ${values.join(", ")}: split halves, then merge them sorted on return.`
     ops.tree(nodes, edges, rootId, message)
     revealSplits(rootId, metas, ops)
     mergeBottomUp(metas, ops)
     ops.done(rootId, rootMeta.sorted, `Sorted result [${rootMeta.sorted.join(", ")}].`)
   },
-} satisfies
-  FamilyAlgorithmDefinition<
-    "rectree",
-    ExecutionTreeConfig,
-    ExecutionTreeRecorder & ExecutionTreeOperations,
-    MergeSortTreeFrame
-  >
+} satisfies FamilyAlgorithmDefinition<
+  "rectree",
+  ExecutionTreeConfig,
+  ExecutionTreeRecorder & ExecutionTreeOperations,
+  MergeSortTreeFrame
+>

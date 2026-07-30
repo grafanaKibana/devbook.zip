@@ -11,7 +11,7 @@ export const kmp = {
     const n = text.length
     const m = pattern.length
     ops.init(
-      `KMP search for "${pattern}" — on a mismatch, the failure function slides the pattern forward without re-checking characters already known to match.`,
+      `KMP for "${pattern}" — mismatch uses the failure function to shift without rechecking matches.`,
     )
     if (!m || m > n) {
       ops.done("Nothing to search.")

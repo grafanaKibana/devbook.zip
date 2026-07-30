@@ -1137,7 +1137,7 @@ test("Greedy Best-First reuses the A* grid but exposes its longer h-only route",
     baselineValue: 8,
     metric: "cost",
   })
-  assert.match(graphStateSummary(last), /Greedy cost 12 vs A\* cost 8/)
+  assert.match(graphStateSummary(last), /^Greedy .+: cost 12 vs A\* cost 8 \(optimal\)\.$/)
 })
 
 test("graph-state keeps topology roles separate from discriminated algorithm detail", () => {
@@ -1439,6 +1439,62 @@ test("tabbed blocks use accessible shared chrome and preserve mounted tab state"
   )
 })
 
+test("compact rail styling follows the Tabsdown tab and timeline contract", () => {
+  const styles = readFileSync(join(here, "src", "styles", "shared.scss"), "utf8")
+
+  assert.match(
+    styles,
+    /--steptrace-tab-animation-duration: var\(--tabsdown-animation-speed, 160ms\);/,
+  )
+  assert.match(
+    styles,
+    /\.steptrace--narrow \.steptrace__rail-region\s*\{[^}]*display: flow-root;[^}]*transition: height var\(--steptrace-tab-animation-duration\)/s,
+  )
+  assert.match(
+    styles,
+    /\.steptrace--narrow \.steptrace__rail-region--animating\s*\{[^}]*overflow: clip;/s,
+  )
+  assert.match(
+    styles,
+    /\.steptrace--narrow \.steptrace__detail-switch:not\(\[hidden\]\)\s*\{[^}]*display: flex;[^}]*align-items: stretch;[^}]*justify-content: flex-start;[^}]*gap: 0\.25rem;/s,
+  )
+  assert.match(
+    styles,
+    /\.steptrace--narrow \.steptrace__detail-button\s*\{[^}]*flex: 0 0 auto;[^}]*min-inline-size: 44px;[^}]*min-block-size: 44px;[^}]*padding: 0\.5rem 0\.75rem;[^}]*border: 1px solid var\(--_border\);[^}]*border-radius: 0\.25rem;[^}]*background-color: var\(--st-page, var\(--_surface\)\);[^}]*color: var\(--_text\);[^}]*transition:/s,
+  )
+  assert.match(
+    styles,
+    /\.steptrace--narrow \.steptrace__detail-button\[aria-pressed="true"\]\s*\{[^}]*border-color: var\(--_accent\);[^}]*background-color: var\(--_accent\);[^}]*color: var\(--_on-accent\);/s,
+  )
+  assert.doesNotMatch(
+    styles,
+    /\.steptrace--narrow \.steptrace__detail-button\s*\{[^}]*(?:letter-spacing|text-transform):/s,
+  )
+  assert.doesNotMatch(styles, /\.steptrace[^{]*\.steptrace__rail-toggle/)
+  assert.match(
+    styles,
+    /\.steptrace--narrow \.steptrace__timeline\s*\{[^}]*margin-inline: 1\.375rem;/s,
+  )
+  assert.match(
+    styles,
+    /\.steptrace--narrow \.steptrace__(?:btn|btn--play|speed-indicator)[\s\S]*?width: 2\.75rem;[\s\S]*?height: 2\.75rem;/,
+  )
+  assert.match(
+    styles,
+    /@keyframes steptrace-tab-panel-in\s*\{[\s\S]*?opacity: 0;[\s\S]*?transform: translateY\(-0\.25rem\);/,
+  )
+  assert.match(
+    styles,
+    /\.steptrace--narrow \.steptrace__trace > \.steptrace__trace-label,[\s\S]*?\.steptrace--narrow \.steptrace__watch-wrap > \.steptrace__rail-label\s*\{[^}]*display: none;/s,
+  )
+  assert.match(styles, /\.steptrace--reduced\s*\{[^}]*--steptrace-tab-animation-duration: 0ms;/s)
+  assert.match(styles, /\.steptrace--reduced \*\s*\{[^}]*animation: none !important;/s)
+  assert.match(
+    styles,
+    /\.steptrace--reduced \.steptrace__rail-region\s*\{[^}]*transition-duration: 0ms !important;/s,
+  )
+})
+
 test("constrained sort visualizers do not expose the generic Shuffle action", () => {
   const mountSource = readFileSync(join(here, "src", "mount.ts"), "utf8")
   assert.match(mountSource, /state\.algorithm !== "bucket-sort"/)
@@ -1677,7 +1733,7 @@ test("all built-in algorithms preserve their headless frame contract", () => {
 
   assert.equal(
     digest,
-    "fadd721c43fa9372e890585c68ded38543324d0a39ca6ab7d383b32cfd9dd70b",
+    "489ea831b979cf9746d9c4968b6a0e080d4e89a0947388043ed7d0ca6e5af425",
     "the headless StepTrace behavior changed",
   )
 })
@@ -4931,15 +4987,26 @@ test("tim sort keeps natural runs contiguous while it reverses, extends, collaps
   assert.match(styles, /min-block-size: 8\.1rem/)
   assert.match(
     sharedStyles,
-    /@media \(max-width: 560px\) \{[\s\S]*?\.steptrace__rail\s*\{[\s\S]*?border-top: 1px solid var\(--_hair\);[\s\S]*?padding-top: 1rem;[\s\S]*?margin-top: 1rem;/,
+    /\.steptrace--narrow \.steptrace__rail\s*\{[^}]*border-top: 1px solid var\(--_hair\);[^}]*overflow: visible;/s,
   )
   assert.match(
     sharedStyles,
-    /@media \(max-width: 560px\)[\s\S]*?\.steptrace__trace\s*\{[\s\S]*?--_stable-trace-height: clamp\(4\.75rem, 16dvh, 5\.75rem\);[\s\S]*?flex: 0 0 var\(--_stable-trace-height\);[\s\S]*?block-size: var\(--_stable-trace-height\);[\s\S]*?overflow: hidden;/,
+    /\.steptrace--narrow \.steptrace__trace\s*\{[^}]*flex: 0 0 auto;[^}]*overflow: visible;/s,
+  )
+  assert.match(sharedStyles, /\.steptrace--narrow \.steptrace__log\s*\{[^}]*overflow: hidden;/s)
+  assert.doesNotMatch(sharedStyles, /@media \(max-width: 560px\)/)
+  assert.doesNotMatch(sharedStyles, /\.steptrace__log-line:not\(\.steptrace__log-line--cur\)/)
+  assert.doesNotMatch(
+    sharedStyles,
+    /\.steptrace--narrow \.steptrace__(?:trace|log)\s*\{[^}]*overflow(?:-y)?: (?:auto|scroll)/s,
   )
   assert.match(
     sharedStyles,
-    /\.steptrace__log\s*\{[\s\S]*?overflow-y: auto !important;[\s\S]*?overscroll-behavior: contain;/,
+    /\.steptrace--narrow \.steptrace__watch-row\s*\{[^}]*height: 2\.25rem;[^}]*min-height: 0;/s,
+  )
+  assert.match(
+    sharedStyles,
+    /\.steptrace--narrow \.steptrace__foot\s*\{[^}]*grid-template-columns: auto minmax\(0, 1fr\) auto;[^}]*"timeline timeline timeline"[^}]*"transport \. utility";/s,
   )
   assert.match(styles, /\.steptrace__run-array-section\s*\{[\s\S]*?padding-bottom: 0\.9rem;/)
   assert.match(
@@ -6232,7 +6299,7 @@ test("prefix-character renderer keeps stable accessible topology and compact Wat
   }
 })
 
-test("production mount verifies persistent structures, binary ordered trees, and Trie summary", () => {
+test("production mount verifies compact rail, persistent structures, binary ordered trees, and Trie summary", () => {
   class FakeNode {
     constructor(tagName, text = "") {
       this.tagName = tagName
@@ -6317,10 +6384,24 @@ test("production mount verifies persistent structures, binary ordered trees, and
         this.parentNode.children = this.parentNode.children.filter((child) => child !== this)
     }
     focus() {
+      if (this.hidden) return
       this.focused = true
+      if (globalThis.document) globalThis.document.activeElement = this
+    }
+    contains(node) {
+      if (node === this) return true
+      return this.children.some((child) => child?.contains?.(node))
     }
     getBoundingClientRect() {
-      return this.rect || { left: 0, top: 0, width: 360, height: 20 }
+      if (typeof this.rect === "function") return this.rect()
+      return (
+        this.rect || {
+          left: 0,
+          top: 0,
+          width: this.parentNode ? 360 : 800,
+          height: 20,
+        }
+      )
     }
   }
   const findByClass = (node, className) => {
@@ -6352,14 +6433,24 @@ test("production mount verifies persistent structures, binary ordered trees, and
     }
     return null
   }
+  const findAll = (node, predicate, found = []) => {
+    if (predicate(node)) found.push(node)
+    for (const child of node.children || []) findAll(child, predicate, found)
+    return found
+  }
   const previous = {
     document: globalThis.document,
     matchMedia: globalThis.matchMedia,
     getComputedStyle: globalThis.getComputedStyle,
     ResizeObserver: globalThis.ResizeObserver,
+    requestAnimationFrame: globalThis.requestAnimationFrame,
+    cancelAnimationFrame: globalThis.cancelAnimationFrame,
+    setTimeout: globalThis.setTimeout,
+    clearTimeout: globalThis.clearTimeout,
   }
   const documentListeners = new Map()
   globalThis.document = {
+    activeElement: null,
     createElement: (tagName) => new FakeNode(tagName),
     createElementNS: (_namespace, tagName) => new FakeNode(tagName),
     createTextNode: (value) => new FakeNode("#text", value),
@@ -6388,7 +6479,34 @@ test("production mount verifies persistent structures, binary ordered trees, and
     mediaQueries.push(query)
     return query
   }
-  globalThis.getComputedStyle = () => ({ rowGap: "0", lineHeight: "10" })
+  globalThis.getComputedStyle = () => ({
+    rowGap: "0",
+    lineHeight: "10",
+    getPropertyValue: (name) => (name === "--steptrace-tab-animation-duration" ? "160ms" : ""),
+  })
+  let animationSerial = 0
+  const animationFrames = new Map()
+  globalThis.requestAnimationFrame = (callback) => {
+    const id = ++animationSerial
+    animationFrames.set(id, callback)
+    return id
+  }
+  globalThis.cancelAnimationFrame = (id) => animationFrames.delete(id)
+  let railTimerSerial = 0
+  const railTimers = new Map()
+  globalThis.setTimeout = (callback, delay = 0) => {
+    const id = ++railTimerSerial
+    railTimers.set(id, { callback, delay })
+    return id
+  }
+  globalThis.clearTimeout = (id) => railTimers.delete(id)
+  const flushAnimationFrame = () => {
+    const next = animationFrames.entries().next().value
+    assert.ok(next, "expected a queued animation frame")
+    const [id, callback] = next
+    animationFrames.delete(id)
+    callback()
+  }
   const resizeObservers = []
   globalThis.ResizeObserver = class {
     constructor(callback) {
@@ -6404,10 +6522,348 @@ test("production mount verifies persistent structures, binary ordered trees, and
       this.disconnected = true
     }
     trigger() {
-      this.callback()
+      this.callback(
+        this.observed.map((target) => {
+          const contentRect = target.getBoundingClientRect()
+          return {
+            target,
+            contentRect,
+            borderBoxSize: [
+              {
+                inlineSize: contentRect.width,
+                blockSize: contentRect.height,
+              },
+            ],
+          }
+        }),
+      )
     }
   }
   try {
+    const { createMount } = loadStepTraceModule("src", "mount.ts")
+    const compactMount = ({ messages, watchRows = null, summary = "Finished." }) =>
+      createMount({
+        kindOf: () => "sort",
+        listAlgorithms: () => [],
+        buildFrames: () => ({
+          kind: "sort",
+          frames: messages.map((message, index) => ({ type: "test", message, index })),
+          family: {
+            id: "array-sort",
+            createView() {
+              const view = {
+                nodes: [new FakeNode("div"), new FakeNode("div")],
+                paint() {},
+                summary: () => summary,
+              }
+              if (watchRows) view.watch = () => watchRows
+              return view
+            },
+          },
+        }),
+      })
+    const mountAt = (width, options = {}) => {
+      const root = new FakeNode("div")
+      root.rect = { left: 0, top: 0, width, height: 400 }
+      const handle = compactMount({
+        messages: ["oldest", "older", "previous", "current", "done"],
+        watchRows: [{ k: "value", v: "42" }],
+        ...options,
+      })(root, { algorithm: "compact-contract" })
+      return { root, handle }
+    }
+    const triggerResize = (node) => {
+      const observers = resizeObservers.filter((observer) => observer.observed.includes(node))
+      assert.ok(observers.length, "the StepTrace root must be observed")
+      for (const observer of observers) observer.trigger()
+    }
+    const compactClick = (node) => {
+      assert.ok(node, "expected a clickable control")
+      const listener = node.listeners.get("click")?.[0]
+      assert.ok(listener, "expected a click listener")
+      listener({
+        target: node,
+        currentTarget: node,
+        stopPropagation() {},
+        preventDefault() {},
+      })
+    }
+    const visibleLogRows = (root) =>
+      findAll(
+        root,
+        (node) =>
+          (node.classList?.contains("steptrace__log-line") ||
+            node.classList?.contains("steptrace__insight")) &&
+          !node.hidden,
+      )
+
+    const compact = mountAt(703)
+    assert.equal(compact.root.classList.contains("steptrace--narrow"), true)
+    const compactRegion = findByAttribute(compact.root, "aria-label", "Trace and watch")
+    assert.equal(compactRegion.classList.contains("steptrace__rail-region"), true)
+    assert.equal(compactRegion.attributes.get("role"), "region")
+    const traceButton = findByAttribute(compact.root, "aria-label", "Trace")
+    const watchButton = findByAttribute(compact.root, "aria-label", "Watch")
+    const detailSwitch = findByClass(compact.root, "steptrace__detail-switch")
+    const rail = findByClass(compact.root, "steptrace__rail")
+    assert.equal(detailSwitch.attributes.get("role"), "group")
+    assert.equal(rail.children[0], detailSwitch)
+    assert.equal(rail.children[1], compactRegion)
+    assert.equal(traceButton.classList.contains("steptrace__detail-button"), true)
+    assert.equal(watchButton.classList.contains("steptrace__detail-button"), true)
+    const tracePanel = findByClass(compact.root, "steptrace__trace")
+    const watchPanel = findByClass(compact.root, "steptrace__watch-wrap")
+    assert.deepEqual(compactRegion.children, [tracePanel, watchPanel])
+    tracePanel.rect = { left: 0, top: 0, width: 300, height: 80 }
+    watchPanel.rect = { left: 0, top: 0, width: 300, height: 120 }
+    compactRegion.rect = () => ({
+      left: 0,
+      top: 0,
+      width: 300,
+      height:
+        Number.parseFloat(compactRegion.attributes.get("style:height")) ||
+        compactRegion.children
+          .filter((panel) => !panel.hidden)
+          .reduce((height, panel) => height + panel.getBoundingClientRect().height, 0),
+    })
+    assert.equal(traceButton.attributes.get("aria-pressed"), "false")
+    assert.equal(watchButton.attributes.get("aria-pressed"), "false")
+    assert.equal(tracePanel.hidden, true)
+    assert.equal(watchPanel.hidden, true)
+
+    const rootKeydown = compact.root.listeners.get("keydown")[0]
+    for (const target of [traceButton, new FakeNode("textarea")]) {
+      let prevented = false
+      let stopped = false
+      rootKeydown({
+        target,
+        key: " ",
+        preventDefault() {
+          prevented = true
+        },
+        stopPropagation() {
+          stopped = true
+        },
+      })
+      assert.equal(prevented, false)
+      assert.equal(stopped, false)
+    }
+    const compactScrub = findByAttribute(compact.root, "aria-label", "Step")
+    const previousStep = Number(compactScrub.attributes.get("aria-valuenow"))
+    rootKeydown({
+      target: compact.root,
+      key: "ArrowRight",
+      preventDefault() {},
+      stopPropagation() {},
+    })
+    assert.equal(Number(compactScrub.attributes.get("aria-valuenow")), previousStep + 1)
+
+    compactClick(traceButton)
+    assert.equal(traceButton.attributes.get("aria-pressed"), "true")
+    assert.equal(watchButton.attributes.get("aria-pressed"), "false")
+    assert.equal(tracePanel.hidden, false)
+    assert.equal(watchPanel.hidden, true)
+    assert.equal(compactRegion.classList.contains("steptrace__rail-region--animating"), true)
+    assert.equal(compactRegion.attributes.get("style:height"), "0px")
+    assert.equal(animationFrames.size, 1)
+    flushAnimationFrame()
+    assert.equal(compactRegion.attributes.get("style:height"), "80px")
+    assert.deepEqual(
+      [...railTimers.values()].map(({ delay }) => delay),
+      [210],
+    )
+
+    compactClick(watchButton)
+    assert.equal(traceButton.attributes.get("aria-pressed"), "false")
+    assert.equal(watchButton.attributes.get("aria-pressed"), "true")
+    assert.equal(tracePanel.hidden, true)
+    assert.equal(watchPanel.hidden, false)
+    assert.equal(railTimers.size, 0)
+    assert.equal(animationFrames.size, 1)
+    flushAnimationFrame()
+    assert.equal(compactRegion.attributes.get("style:height"), "120px")
+
+    const watchRow = findByClass(compact.root, "steptrace__watch-row")
+    watchButton.focus()
+    compactClick(watchButton)
+    assert.equal(traceButton.attributes.get("aria-pressed"), "false")
+    assert.equal(watchButton.attributes.get("aria-pressed"), "false")
+    assert.equal(tracePanel.hidden, true)
+    assert.equal(watchPanel.hidden, true)
+    assert.equal(globalThis.document.activeElement, watchButton)
+
+    compact.root.rect.width = 704
+    triggerResize(compact.root)
+    assert.equal(compact.root.classList.contains("steptrace--narrow"), false)
+    assert.equal(detailSwitch.hidden, true)
+    assert.equal(tracePanel.hidden, false)
+    assert.equal(watchPanel.hidden, false)
+    assert.equal(
+      globalThis.document.activeElement,
+      findByAttribute(compact.root, "aria-label", "Step"),
+    )
+
+    watchRow.focus()
+    compact.root.rect.width = 703
+    triggerResize(compact.root)
+    assert.equal(compact.root.classList.contains("steptrace--narrow"), true)
+    assert.equal(detailSwitch.hidden, false)
+    assert.equal(traceButton.attributes.get("aria-pressed"), "false")
+    assert.equal(watchButton.attributes.get("aria-pressed"), "false")
+    assert.equal(tracePanel.hidden, true)
+    assert.equal(watchPanel.hidden, true)
+    assert.equal(globalThis.document.activeElement, traceButton)
+
+    compactClick(watchButton)
+    compact.root.rect.width = 704
+    triggerResize(compact.root)
+    compact.root.rect.width = 703
+    triggerResize(compact.root)
+    assert.equal(traceButton.attributes.get("aria-pressed"), "false")
+    assert.equal(watchButton.attributes.get("aria-pressed"), "true")
+    assert.equal(tracePanel.hidden, true)
+    assert.equal(watchPanel.hidden, false)
+
+    for (const width of [704, 705]) {
+      const wide = mountAt(width)
+      assert.equal(wide.root.classList.contains("steptrace--narrow"), false)
+      assert.equal(findByClass(wide.root, "steptrace__trace").hidden, false)
+      assert.equal(findByClass(wide.root, "steptrace__watch-wrap").hidden, false)
+      wide.handle.destroy()
+    }
+
+    const collapsing = mountAt(704)
+    const collapsingWatchRow = findByClass(collapsing.root, "steptrace__watch-row")
+    collapsingWatchRow.focus()
+    collapsing.root.rect.width = 703
+    triggerResize(collapsing.root)
+    assert.equal(findByClass(collapsing.root, "steptrace__trace").hidden, true)
+    assert.equal(findByClass(collapsing.root, "steptrace__watch-wrap").hidden, true)
+    assert.equal(
+      globalThis.document.activeElement,
+      findByAttribute(collapsing.root, "aria-label", "Trace"),
+    )
+    collapsing.handle.destroy()
+
+    const initiallyZero = mountAt(0)
+    assert.equal(initiallyZero.root.classList.contains("steptrace--narrow"), false)
+    initiallyZero.root.rect.width = 704
+    triggerResize(initiallyZero.root)
+    initiallyZero.root.rect.width = 703
+    triggerResize(initiallyZero.root)
+    assert.equal(initiallyZero.root.classList.contains("steptrace--narrow"), true)
+    assert.equal(
+      findByAttribute(initiallyZero.root, "aria-label", "Trace").attributes.get("aria-pressed"),
+      "false",
+    )
+
+    const noWatch = mountAt(703, { watchRows: null })
+    assert.equal(
+      findAll(
+        noWatch.root,
+        (node) => node.tagName === "button" && node.attributes.get("aria-label") === "Watch",
+      ).length,
+      0,
+    )
+    const noWatchTrace = findByAttribute(noWatch.root, "aria-label", "Trace")
+    assert.equal(noWatchTrace.attributes.get("aria-pressed"), "false")
+    assert.equal(findByClass(noWatch.root, "steptrace__trace").hidden, true)
+    compactClick(noWatchTrace)
+    assert.equal(noWatchTrace.attributes.get("aria-pressed"), "true")
+    assert.equal(findByClass(noWatch.root, "steptrace__trace").hidden, false)
+
+    const fitting = mountAt(703, {
+      messages: ["one", "two", "three", "four", "done"],
+      watchRows: null,
+      summary: "Result fits.",
+    })
+    compactClick(findByAttribute(fitting.root, "aria-label", "Trace"))
+    const fittingLog = findByClass(fitting.root, "steptrace__log")
+    fittingLog.clientHeight = 30
+    const fittingForward = findByAttribute(fitting.root, "aria-label", "Step forward")
+    compactClick(fittingForward)
+    compactClick(fittingForward)
+    compactClick(fittingForward)
+    for (const line of findAllByClass(fitting.root, "steptrace__log-line"))
+      line.rect = { left: 0, top: 0, width: 300, height: 10 }
+    triggerResize(fitting.root)
+    assert.deepEqual(
+      visibleLogRows(fitting.root).map(
+        (row) => findByClass(row, "steptrace__log-text")?.textContent,
+      ),
+      ["two", "three", "four"],
+    )
+
+    const currentLine = findAllByClass(fitting.root, "steptrace__log-line").find((line) =>
+      line.classList.contains("steptrace__log-line--cur"),
+    )
+    currentLine.rect.height = 30
+    triggerResize(fitting.root)
+    assert.deepEqual(visibleLogRows(fitting.root), [currentLine])
+
+    currentLine.rect.height = 10
+    const previousLine = findAllByClass(fitting.root, "steptrace__log-line").find(
+      (line) => findByClass(line, "steptrace__log-text")?.textContent === "three",
+    )
+    previousLine.rect.height = 20
+    triggerResize(fitting.root)
+    assert.deepEqual(
+      visibleLogRows(fitting.root).map(
+        (row) => findByClass(row, "steptrace__log-text")?.textContent,
+      ),
+      ["three", "four"],
+    )
+
+    compactClick(fittingForward)
+    const result = findByClass(fitting.root, "steptrace__insight")
+    result.rect = { left: 0, top: 0, width: 300, height: 30 }
+    triggerResize(fitting.root)
+    assert.equal(result.hidden, false)
+    assert.equal(findByClass(result, "steptrace__insight-text").textContent, "Result fits.")
+    assert.deepEqual(visibleLogRows(fitting.root), [result])
+
+    const compactObservers = resizeObservers.filter((observer) =>
+      observer.observed.includes(compact.root),
+    )
+    compact.handle.destroy()
+    assert.ok(compactObservers.every((observer) => observer.disconnected))
+    assert.equal(compact.root.classList.contains("steptrace--narrow"), false)
+    assert.equal(compact.root.children.length, 0)
+    assert.equal((compact.root.listeners.get("keydown") || []).length, 0)
+
+    const remount = mountAt(703)
+    assert.equal(
+      findByAttribute(remount.root, "aria-label", "Trace").attributes.get("aria-pressed"),
+      "false",
+    )
+    assert.equal(findByClass(remount.root, "steptrace__trace").hidden, true)
+    const remountTrace = findByAttribute(remount.root, "aria-label", "Trace")
+    const remountRegion = findByClass(remount.root, "steptrace__rail-region")
+    findByClass(remount.root, "steptrace__trace").rect = {
+      left: 0,
+      top: 0,
+      width: 300,
+      height: 80,
+    }
+    remountRegion.rect = () => ({
+      left: 0,
+      top: 0,
+      width: 300,
+      height: findByClass(remount.root, "steptrace__trace").hidden ? 0 : 80,
+    })
+    compactClick(remountTrace)
+    assert.equal(animationFrames.size, 1)
+    remount.handle.destroy()
+    assert.equal(animationFrames.size, 0)
+    assert.equal(railTimers.size, 0)
+
+    for (const mounted of [initiallyZero, noWatch, fitting]) mounted.handle.destroy()
+
+    globalThis.requestAnimationFrame = previous.requestAnimationFrame
+    globalThis.cancelAnimationFrame = previous.cancelAnimationFrame
+    globalThis.setTimeout = previous.setTimeout
+    globalThis.clearTimeout = previous.clearTimeout
+
     const api = loadEngine(readFileSync(join(here, "generated", "engine.js"), "utf8"))
     for (const [file, algorithm] of [
       ["Exponential Search.md", "exponential-search"],
@@ -6452,7 +6908,10 @@ test("production mount verifies persistent structures, binary ordered trees, and
       pattern: "ABAC",
     })
     const rabinPhaseCopy = findByClass(rabinRoot, "steptrace__phase-copy")
-    assert.match(rabinPhaseCopy.textContent, /Rabin-Karp search/)
+    assert.match(
+      rabinPhaseCopy.textContent,
+      /Rabin-Karp for "ABAC" — slide rolling hashes; verify text only on hash collision \(\d+\)\./,
+    )
     findByAttribute(rabinRoot, "aria-label", "Step forward").listeners.get("click")[0]()
     assert.equal(rabinPhaseCopy.textContent, "")
     assert.match(
@@ -8546,6 +9005,10 @@ test("production mount verifies persistent structures, binary ordered trees, and
     globalThis.matchMedia = previous.matchMedia
     globalThis.getComputedStyle = previous.getComputedStyle
     globalThis.ResizeObserver = previous.ResizeObserver
+    globalThis.requestAnimationFrame = previous.requestAnimationFrame
+    globalThis.cancelAnimationFrame = previous.cancelAnimationFrame
+    globalThis.setTimeout = previous.setTimeout
+    globalThis.clearTimeout = previous.clearTimeout
   }
 })
 

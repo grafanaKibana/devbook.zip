@@ -9,7 +9,7 @@ export const twoPointers = {
     const a = ops.value
     const target = input.target
     ops.init(
-      `Two pointers on a sorted array — find a pair summing to ${target}. Move the left pointer right to raise the sum, the right pointer left to lower it.`,
+      `Two pointers on sorted data seek ${target}: left → raises the sum; right ← lowers it.`,
     )
     let l = 0
     let r = a.length - 1

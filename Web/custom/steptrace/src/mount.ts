@@ -33,6 +33,7 @@ import { isTabsConfig, normalizeTabsConfig } from "./tabs"
 import { watchHintFor } from "./watch-hints"
 
 const LOG_ROWS = 10
+const COMPACT_INLINE_SIZE = 704
 const fadeFor = (age: number) => Math.max(0.1, 0.5 * Math.pow(0.62, age - 1))
 let mountSerial = 0
 
@@ -222,6 +223,22 @@ export function createMount(
 
     const stageCol = el("div", "steptrace__stage-col")
     const rail = el("div", "steptrace__rail")
+    const railRegion = el("div", "steptrace__rail-region")
+    railRegion.id = `steptrace-rail-${++mountSerial}`
+    railRegion.setAttribute("role", "region")
+    railRegion.setAttribute("aria-label", "Trace and watch")
+    const detailSwitch = el("div", "steptrace__detail-switch")
+    detailSwitch.setAttribute("role", "group")
+    detailSwitch.setAttribute("aria-label", "Detail view")
+    const traceButton = el("button", "steptrace__detail-button")
+    traceButton.type = "button"
+    traceButton.textContent = "Trace"
+    traceButton.setAttribute("aria-label", "Trace")
+    const watchButton = el("button", "steptrace__detail-button")
+    watchButton.type = "button"
+    watchButton.textContent = "Watch"
+    watchButton.setAttribute("aria-label", "Watch")
+    detailSwitch.append(traceButton, watchButton)
     const traceWrap = el("div", "steptrace__trace")
     const traceLabel = el("div", "steptrace__rail-label steptrace__trace-label")
     traceLabel.textContent = "Trace"
@@ -259,7 +276,8 @@ export function createMount(
     const watchEl = el("div", "steptrace__watch")
     watchWrap.append(watchLabel, watchEl)
     watchWrap.hidden = true
-    rail.append(traceWrap, watchWrap)
+    railRegion.append(traceWrap, watchWrap)
+    rail.append(detailSwitch, railRegion)
     const body = el("div", "steptrace__body")
     body.append(stageCol, rail)
 
@@ -429,6 +447,105 @@ export function createMount(
 
     root.replaceChildren(head, body, foot)
 
+    let layoutMode = "unknown"
+    let compactPanel: "trace" | "watch" | null = null
+    let hasWatch = false
+    let destroyed = false
+    let railAnimationFrame: number | null = null
+    let railAnimationTimer: ReturnType<typeof setTimeout> | null = null
+
+    function clearRailAnimation() {
+      if (railAnimationFrame != null) cancelAnimationFrame(railAnimationFrame)
+      if (railAnimationTimer != null) clearTimeout(railAnimationTimer)
+      railAnimationFrame = null
+      railAnimationTimer = null
+      railRegion.classList.remove("steptrace__rail-region--animating")
+      railRegion.style.removeProperty("height")
+    }
+
+    function railAnimationDuration() {
+      const value = getComputedStyle(railRegion)
+        .getPropertyValue("--steptrace-tab-animation-duration")
+        .trim()
+      const duration = parseFloat(value)
+      if (!Number.isFinite(duration)) return 0
+      return value.endsWith("ms") ? duration : value.endsWith("s") ? duration * 1000 : 0
+    }
+
+    function animateRail(render: () => void) {
+      const oldHeight = railRegion.getBoundingClientRect().height
+      clearRailAnimation()
+      render()
+      const targetHeight = railRegion.getBoundingClientRect().height
+      if (oldHeight === targetHeight) return
+      railRegion.style.setProperty("height", `${oldHeight}px`)
+      railRegion.classList.add("steptrace__rail-region--animating")
+      railAnimationFrame = requestAnimationFrame(() => {
+        railAnimationFrame = null
+        railRegion.style.setProperty("height", `${targetHeight}px`)
+        railAnimationTimer = setTimeout(clearRailAnimation, railAnimationDuration() + 50)
+      })
+    }
+
+    function renderRailMode(previousMode = layoutMode, animate = false) {
+      const compact = layoutMode === "compact"
+      const active = document.activeElement
+
+      if (
+        previousMode === "compact" &&
+        layoutMode === "wide" &&
+        active &&
+        detailSwitch.contains(active)
+      ) {
+        scrub.focus()
+      }
+      if (previousMode === "wide" && compact && active && railRegion.contains(active)) {
+        ;(compactPanel === "watch" && hasWatch ? watchButton : traceButton).focus()
+      }
+
+      const render = () => {
+        detailSwitch.hidden = !compact
+        traceButton.setAttribute("aria-pressed", String(compact && compactPanel === "trace"))
+        watchButton.setAttribute("aria-pressed", String(compact && compactPanel === "watch"))
+        traceWrap.hidden = compact && compactPanel !== "trace"
+        watchWrap.hidden = compact ? !hasWatch || compactPanel !== "watch" : !hasWatch
+        refitCompactTrace()
+      }
+      if (animate) animateRail(render)
+      else {
+        clearRailAnimation()
+        render()
+      }
+    }
+
+    function syncCompactLayout(inlineSize) {
+      if (!(inlineSize > 0)) return
+      const nextMode = inlineSize < COMPACT_INLINE_SIZE ? "compact" : "wide"
+      if (nextMode === layoutMode) return
+      const previousMode = layoutMode
+      layoutMode = nextMode
+      root.classList.toggle("steptrace--narrow", nextMode === "compact")
+      renderRailMode(previousMode, previousMode !== "unknown")
+    }
+
+    function refitCompactTrace() {
+      if (!player || layoutMode !== "compact" || compactPanel !== "trace") return
+      sizeRail()
+      renderRail()
+    }
+
+    traceButton.addEventListener("click", () => {
+      compactPanel = compactPanel === "trace" ? null : "trace"
+      renderRailMode(layoutMode, true)
+    })
+    watchButton.addEventListener("click", () => {
+      if (!hasWatch) return
+      compactPanel = compactPanel === "watch" ? null : "watch"
+      renderRailMode(layoutMode, true)
+    })
+
+    syncCompactLayout(root.getBoundingClientRect().width)
+
     // --- kebab open/close ---
     let menuOpen = false
     function closeMenu() {
@@ -454,9 +571,13 @@ export function createMount(
     // resolve them in one layout pass.
     function sizeRail() {
       if (!player) return
-      if (matchMedia("(max-width: 560px)").matches) {
-        log.style.height = "auto"
-        log.style.minHeight = "0"
+      if (layoutMode === "compact") {
+        const logCS = getComputedStyle(log)
+        const lineHeight = parseFloat(logCS.lineHeight) || 0
+        const gap = parseFloat(logCS.rowGap) || 0
+        const height = Math.ceil(lineHeight * 3 + gap * 2) + "px"
+        log.style.height = height
+        log.style.minHeight = height
         return
       }
       // sub-pixel heights throughout: offsetHeight rounds, and rounding two history
@@ -495,15 +616,34 @@ export function createMount(
     // the log's pinned height — a step half-cut by the overflow reads as a bug.
     // Older rows are already hidden by the loop above once they run out of frames.
     function fitLog(terminal) {
-      const budget = log.clientHeight
+      const logCS = getComputedStyle(log)
+      const gap = parseFloat(logCS.rowGap) || 0
+      let budget = log.clientHeight
+      if (layoutMode === "compact") {
+        const lineHeight = parseFloat(logCS.lineHeight) || 0
+        let rowChrome = 0
+        if (terminal) {
+          const resultCS = getComputedStyle(insight)
+          rowChrome = [
+            resultCS.paddingTop,
+            resultCS.paddingBottom,
+            resultCS.borderTopWidth,
+            resultCS.borderBottomWidth,
+          ].reduce((sum, value) => sum + (parseFloat(value) || 0), 0)
+        }
+        budget = Math.ceil(lineHeight * 3 + gap * 2 + rowChrome)
+        const height = budget + "px"
+        log.style.height = height
+        log.style.minHeight = height
+      }
       if (!budget) return
-      const gap = parseFloat(getComputedStyle(log).rowGap) || 0
       let used = terminal ? insight.getBoundingClientRect().height : 0
+      let rows = terminal ? 1 : 0
       let full = false
       for (let k = LOG_ROWS - 1; k >= 0; k--) {
         const line = logLines[k].line
         if (line.hidden) continue
-        if (full) {
+        if (full || (layoutMode === "compact" && rows >= 3)) {
           line.hidden = true
           continue
         }
@@ -513,6 +653,7 @@ export function createMount(
         // is the bottom row and always stays, even if it alone overruns the budget.
         if (!used || need <= budget + 0.5) {
           used = need
+          rows++
         } else {
           // stop at the first row that will not fit: skipping it to squeeze in an
           // older, shorter one would leave a hole in the step sequence
@@ -523,12 +664,25 @@ export function createMount(
     }
     // a width change re-wraps the messages, so the log is re-pinned and the rows
     // re-fitted against the new height
-    const onRailResize = () => {
+    const onRailResize = (entries = []) => {
+      const rootEntry = entries.find((entry) => entry.target === root)
+      if (rootEntry) {
+        const borderBox = Array.isArray(rootEntry.borderBoxSize)
+          ? rootEntry.borderBoxSize[0]
+          : rootEntry.borderBoxSize
+        syncCompactLayout(borderBox?.inlineSize ?? rootEntry.contentRect.width)
+      }
       sizeRail()
       if (player) renderRail()
     }
-    const logRO = typeof ResizeObserver !== "undefined" ? new ResizeObserver(onRailResize) : null
-    if (logRO) logRO.observe(rail)
+    const railRO = typeof ResizeObserver !== "undefined" ? new ResizeObserver(onRailResize) : null
+    if (railRO) {
+      railRO.observe(root)
+      railRO.observe(rail)
+    }
+    document.fonts?.ready.then(() => {
+      if (!destroyed) onRailResize()
+    })
 
     // --- rail TRACE log + counter + scrubber, refreshed every render ---
     let lastRailI = null
@@ -736,7 +890,7 @@ export function createMount(
         "steptrace__stage-col--legend",
         Boolean(
           stageLegend?.classList.contains("steptrace__legend") ||
-            stageLegend?.classList.contains("steptrace__legend-wrap"),
+          stageLegend?.classList.contains("steptrace__legend-wrap"),
         ),
       )
       stageCol.replaceChildren(...nodes)
@@ -765,8 +919,11 @@ export function createMount(
           if (rows && rows.length > maxRows) maxRows = rows.length
         }
       }
-      watchWrap.hidden = maxRows === 0
+      hasWatch = maxRows > 0
+      if (!hasWatch && compactPanel === "watch") compactPanel = null
+      detailSwitch.replaceChildren(traceButton, ...(hasWatch ? [watchButton] : []))
       watchEl.style.setProperty("--steptrace-watch-rows", String(maxRows))
+      renderRailMode()
     }
 
     function syncEndpointOptions(settings, graph) {
@@ -819,7 +976,8 @@ export function createMount(
     // keyboard: arrows step, space toggles — only when focus is inside the widget
     // and not on a form control; stopPropagation so host editors don't double-fire.
     const onKey = (e) => {
-      if (e.target instanceof HTMLInputElement || e.target instanceof HTMLSelectElement) return
+      if (["button", "input", "select", "textarea"].includes(e.target?.tagName?.toLowerCase()))
+        return
       if (e.target === scrub) return
       if (e.key === "ArrowRight") player.stepF()
       else if (e.key === "ArrowLeft") player.stepB()
@@ -837,10 +995,12 @@ export function createMount(
         if (player) player.pause()
       },
       destroy() {
+        destroyed = true
+        clearRailAnimation()
         if (player) player.destroy()
         if (currentView && currentView.destroy) currentView.destroy()
         if (speedControlHandle && speedControlHandle.destroy) speedControlHandle.destroy()
-        if (logRO) logRO.disconnect()
+        if (railRO) railRO.disconnect()
         mq.removeEventListener("change", applyMotion)
         root.removeEventListener("keydown", onKey)
         document.removeEventListener("click", onDocClick)
@@ -850,6 +1010,7 @@ export function createMount(
           "steptrace--reduced",
           "steptrace--stable-stage",
           "steptrace--compact-stage",
+          "steptrace--narrow",
         )
       },
     }

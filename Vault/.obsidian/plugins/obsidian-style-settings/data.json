@@ -132,5 +132,9 @@
   "baseline-style@@icon-stroke-modifier": 0.5,
   "baseline-style@@radius-modifier": 1.5,
   "baseline-style@@anim-speed-modifier": 0.5,
-  "baseline-style@@tab-divider": false
+  "baseline-style@@tab-divider": false,
+  "tabsdown@@tabsdown-density": "tabsdown-density-default",
+  "tabsdown@@tabsdown-overflow": "tabsdown-overflow-scroll",
+  "tabsdown@@tabsdown-palette": "tabsdown-palette-primary",
+  "tabsdown@@tabsdown-alignment": "tabsdown-alignment-center"
 }

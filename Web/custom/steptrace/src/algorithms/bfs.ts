@@ -13,7 +13,7 @@ export const bfs = {
     if (target) ops.target(target)
     ops.init(
       target
-        ? `Breadth-first search for ${target}, starting at ${start} — explore level by level with a first-in, first-out queue until the target is dequeued.`
+        ? `BFS for ${target} from ${start} — dequeue FIFO, exploring each level until ${target} is dequeued.`
         : `Breadth-first search from ${start} — explore the graph level by level using a first-in, first-out queue.`,
     )
     const queue = [start]

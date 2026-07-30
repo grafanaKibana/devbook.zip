@@ -20,7 +20,7 @@ export const dijkstra = {
     const target = input.target != null ? String(input.target) : null
     if (target) ops.target(target)
     ops.init(
-      `Dijkstra from ${start} — repeatedly settle the nearest unsettled node, then relax its edges to shorten neighbours' distances.`,
+      `Dijkstra from ${start} — settle the nearest node, then relax its edges to shorten distances.`,
     )
     const dist = { [start]: 0 }
     const pred = {} // predecessor on the current best path to each node

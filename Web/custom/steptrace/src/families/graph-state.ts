@@ -778,6 +778,14 @@ export function graphStateSummary(frame: GraphStateFrame) {
             ? ` · ${result.primaryLabel} cost ${result.primaryValue} vs ${result.baselineLabel} cost ${result.baselineValue}`
             : ` · ${result.primaryLabel} ${result.primaryValue} vs ${result.baselineLabel} ${result.baselineValue} expansions`
           : ""
+      if (
+        path.length &&
+        result.metric === "cost" &&
+        result.primaryLabel === "Greedy" &&
+        result.primaryValue != null &&
+        result.baselineValue != null
+      )
+        return `Greedy ${path.join("→\u200b")}: cost ${result.primaryValue} vs A* cost ${result.baselineValue} (optimal).`
       return frame.target && cost == null
         ? `${frame.target} is unreachable.`
         : `Path ${path.length ? path.join(" → ") : "pending"}${cost == null ? "" : ` · cost ${cost}`}${comparison}.`

@@ -5397,6 +5397,8 @@ function graphStateSummary(frame) {
       ] : [];
       const { comparison: result } = frame.detail;
       const comparison = result.primaryValue != null && result.baselineValue != null ? result.metric === "cost" ? ` · ${result.primaryLabel} cost ${result.primaryValue} vs ${result.baselineLabel} cost ${result.baselineValue}` : ` · ${result.primaryLabel} ${result.primaryValue} vs ${result.baselineLabel} ${result.baselineValue} expansions` : "";
+      if (path.length && result.metric === "cost" && result.primaryLabel === "Greedy" && result.primaryValue != null && result.baselineValue != null)
+        return `Greedy ${path.join("→​")}: cost ${result.primaryValue} vs A* cost ${result.baselineValue} (optimal).`;
       return frame.target && cost == null ? `${frame.target} is unreachable.` : `Path ${path.length ? path.join(" → ") : "pending"}${cost == null ? "" : ` · cost ${cost}`}${comparison}.`;
     }
     case "dual-search":
@@ -6892,7 +6894,7 @@ var init_bfs = __esm({
         const target = input.target != null && input.target !== start ? String(input.target) : null;
         if (target) ops.target(target);
         ops.init(
-          target ? `Breadth-first search for ${target}, starting at ${start} — explore level by level with a first-in, first-out queue until the target is dequeued.` : `Breadth-first search from ${start} — explore the graph level by level using a first-in, first-out queue.`
+          target ? `BFS for ${target} from ${start} — dequeue FIFO, exploring each level until ${target} is dequeued.` : `Breadth-first search from ${start} — explore the graph level by level using a first-in, first-out queue.`
         );
         const queue2 = [start];
         const seen = /* @__PURE__ */ new Set([start]);
@@ -8595,7 +8597,7 @@ var init_binary_search = __esm({
         const a = ops.value;
         const target = input.target;
         ops.init(
-          `Binary search for ${target} in a sorted array — check the middle of the range, then discard the half that can't contain it.`
+          `Binary search for ${target} in sorted data — test the middle, then discard the impossible half.`
         );
         let lo = 0;
         let hi = a.length - 1;
@@ -12228,7 +12230,7 @@ var init_bubble_sort = __esm({
       run: (input, ops) => {
         const n = ops.value.length;
         ops.init(
-          `Bubble sort — repeatedly compare adjacent values and swap the larger one rightward, bubbling the largest to the end each pass.`
+          `Bubble sort — compare neighbours and swap inversions; each pass moves the maximum right.`
         );
         for (let i = 0; i < n - 1; i++) {
           let swapped = false;
@@ -13978,7 +13980,7 @@ var init_dfs = __esm({
         const target = input.target != null && input.target !== start ? String(input.target) : null;
         if (target) ops.target(target);
         ops.init(
-          target ? `Depth-first search for ${target}, starting at ${start} — dive as deep as possible with a stack, backtracking at dead ends, until the target is popped.` : `Depth-first search from ${start} — dive as deep as possible using a stack, backtracking when a node has no unvisited neighbours.`
+          target ? `DFS for ${target} from ${start} — pop a stack, diving then backtracking until ${target} is popped.` : `Depth-first search from ${start} — dive as deep as possible using a stack, backtracking when a node has no unvisited neighbours.`
         );
         const stack2 = [start];
         const seen = /* @__PURE__ */ new Set([start]);
@@ -14030,7 +14032,7 @@ var init_dijkstra = __esm({
         const target = input.target != null ? String(input.target) : null;
         if (target) ops.target(target);
         ops.init(
-          `Dijkstra from ${start} — repeatedly settle the nearest unsettled node, then relax its edges to shorten neighbours' distances.`
+          `Dijkstra from ${start} — settle the nearest node, then relax its edges to shorten distances.`
         );
         const dist = { [start]: 0 };
         const pred = {};
@@ -17606,7 +17608,7 @@ var init_heap_sort = __esm({
       run: (input, ops) => {
         const n = ops.value.length;
         ops.init(
-          `Heap sort — build a max-heap (each parent ≥ its children), then repeatedly swap the root to the end and sift the new root down.`
+          `Heap sort — build a max-heap (parents ≥ children); move the root right and sift down.`
         );
         function siftDown(lo, hi) {
           let root = lo;
@@ -17801,9 +17803,7 @@ var init_insertion_sort = __esm({
       meta: { label: "Insertion sort" },
       run: (input, ops) => {
         const n = ops.value.length;
-        ops.init(
-          `Insertion sort — grow a sorted prefix on the left; take each next value and slide it left past larger values into place.`
-        );
+        ops.init(`Insertion sort — grow a sorted prefix by sliding each value left past larger values.`);
         ops.markSorted([0], [0], `The first element alone is a sorted prefix.`);
         for (let i = 1; i < n; i++) {
           const key4 = ops.value[i];
@@ -18114,7 +18114,7 @@ var init_kmp = __esm({
         const n = text.length;
         const m = pattern.length;
         ops.init(
-          `KMP search for "${pattern}" — on a mismatch, the failure function slides the pattern forward without re-checking characters already known to match.`
+          `KMP for "${pattern}" — mismatch uses the failure function to shift without rechecking matches.`
         );
         if (!m || m > n) {
           ops.done("Nothing to search.");
@@ -18275,7 +18275,7 @@ var init_lcs = __esm({
         ops.board(
           rowLabels,
           colLabels,
-          `Longest common subsequence of "${A}" and "${B}". Cell dp[i][j] holds the LCS length of the first i letters of "${A}" and the first j of "${B}".`
+          `LCS of "${A}" and "${B}": dp[i][j] is the best length for their first i and j letters.`
         );
         const dp = Array.from({ length: m + 1 }, () => Array(n + 1).fill(0));
         for (let c2 = 0; c2 <= n; c2++) ops.set(0, c2, 0, [], `An empty first string has LCS 0.`);
@@ -18302,7 +18302,7 @@ var init_lcs = __esm({
                   [r2 - 1, c2],
                   [r2, c2 - 1]
                 ],
-                `'${A[r2 - 1]}' ≠ '${B[c2 - 1]}' → this letter can't extend the match, so the optimum here is inherited from an optimal sub-answer: the better of top (${dp[r2 - 1][c2]}) and left (${dp[r2][c2 - 1]}) = ${dp[r2][c2]} (from the ${better}).`
+                `'${A[r2 - 1]}' ≠ '${B[c2 - 1]}' → inherit max(top ${dp[r2 - 1][c2]}, left ${dp[r2][c2 - 1]}) = ${dp[r2][c2]} from ${better}.`
               );
             }
           }
@@ -18315,20 +18315,20 @@ var init_lcs = __esm({
             path.unshift([r, c]);
             ops.markPath(
               path,
-              `dp[${r}][${c}]: '${A[r - 1]}' = '${B[c - 1]}' — this cell was built from dp[${r - 1}][${c - 1}] + 1, so '${A[r - 1]}' joins the LCS. Step diagonally to that sub-answer.`
+              `dp[${r}][${c}]: '${A[r - 1]}' = '${B[c - 1]}' → dp[${r - 1}][${c - 1}] + 1; add '${A[r - 1]}' and move diagonally.`
             );
             r--;
             c--;
           } else if (dp[r - 1][c] >= dp[r][c - 1]) {
             ops.markPath(
               path,
-              `dp[${r}][${c}]: '${A[r - 1]}' ≠ '${B[c - 1]}' — its optimum was inherited from the top sub-answer dp[${r - 1}][${c}]. Follow it upward; no letter added.`
+              `dp[${r}][${c}]: '${A[r - 1]}' ≠ '${B[c - 1]}' → inherit top dp[${r - 1}][${c}]; move up, add no letter.`
             );
             r--;
           } else {
             ops.markPath(
               path,
-              `dp[${r}][${c}]: '${A[r - 1]}' ≠ '${B[c - 1]}' — its optimum was inherited from the left sub-answer dp[${r}][${c - 1}]. Follow it leftward; no letter added.`
+              `dp[${r}][${c}]: '${A[r - 1]}' ≠ '${B[c - 1]}' → inherit left dp[${r}][${c - 1}]; move left, add no letter.`
             );
             c--;
           }
@@ -18450,9 +18450,7 @@ var init_merge_sort = __esm({
       meta: { label: "Merge sort" },
       run: (input, ops) => {
         const n = ops.value.length;
-        ops.init(
-          "Merge sort — start with runs of length 1, then repeatedly merge adjacent runs into larger sorted runs (watch the sorted runs double)."
-        );
+        ops.init("Merge sort — merge adjacent sorted runs; their length doubles each pass from 1.");
         for (let width = 1; width < n; width *= 2) {
           for (let lo = 0; lo < n; lo += 2 * width) {
             const mid = Math.min(lo + width, n);
@@ -18657,7 +18655,7 @@ var init_merge_sort_tree = __esm({
         rootMeta.to = values.length;
         rootMeta.values = values.slice();
         nodes5[0].label = `[0…${values.length - 1}]`;
-        const message = `Merge sort ${values.join(", ")} by splitting into halves and merging sorted halves on return.`;
+        const message = `Merge sort ${values.join(", ")}: split halves, then merge them sorted on return.`;
         ops.tree(nodes5, edges5, rootId, message);
         revealSplits(rootId, metas, ops);
         mergeBottomUp(metas, ops);
@@ -19300,7 +19298,7 @@ var init_n_queens = __esm({
         const n = Math.min(Math.max(input.n || 4, 4), 6);
         ops.board(
           n,
-          `Place ${n} queens on a ${n}×${n} board so none attack another. Fill one queen per row; retreat whenever a row has no safe square.`
+          `${n}-Queens on ${n}×${n}: place one per row; backtrack when no safe square remains.`
         );
         const conflict = (row, col) => {
           const q = ops.queens;
@@ -19359,9 +19357,7 @@ var init_prim = __esm({
           if (!graph.directed) adj[e.to].push({ to: e.from, w });
         }
         const start = input.start;
-        ops.init(
-          `Prim's algorithm — grow a minimum spanning tree from ${start}, each step adding the cheapest edge that reaches a node not yet in the tree.`
-        );
+        ops.init(`Prim from ${start} — grow the MST with the cheapest edge reaching a new node.`);
         const pairKey2 = (a, b) => a < b ? a + "|" + b : b + "|" + a;
         const inTree = /* @__PURE__ */ new Set([start]);
         const treeEdges = /* @__PURE__ */ new Set();
@@ -19662,9 +19658,7 @@ var init_quick_sort = __esm({
       meta: { label: "Quick sort" },
       run: (input, ops) => {
         const n = ops.value.length;
-        ops.init(
-          `Quick sort — pick a pivot, partition values so smaller ones go left and larger ones go right, then recurse on each side.`
-        );
+        ops.init(`Quick sort — partition around a pivot, then recurse on the smaller and larger sides.`);
         function partition(lo, hi) {
           const pivot = ops.value[hi];
           ops.range(lo, hi);
@@ -19854,7 +19848,7 @@ var init_rabin_karp = __esm({
         }
         const ph = hash(pattern);
         ops.init(
-          `Rabin-Karp search for "${pattern}" — slide a window, compare its rolling hash to the pattern hash (${ph}), and only verify character-by-character when the hashes collide.`
+          `Rabin-Karp for "${pattern}" — slide rolling hashes; verify text only on hash collision (${ph}).`
         );
         let highPow = 1;
         for (let k = 0; k < m - 1; k++) highPow = highPow * B % MOD;
@@ -20060,7 +20054,7 @@ var init_sliding_window = __esm({
         const a = ops.value;
         const target = input.target;
         ops.init(
-          `Sliding window — find the shortest contiguous subarray with sum ≥ ${target}. Expand the window right to grow the sum; shrink from the left while it stays ≥ ${target}.`
+          `Sliding window finds the shortest subarray with sum ≥ ${target}: expand right; shrink left while valid.`
         );
         let lo = 0;
         let sum = 0;
@@ -20202,9 +20196,7 @@ var init_topological_sort = __esm({
           adj[e.from].push(e.to);
           indeg[e.to] = (indeg[e.to] || 0) + 1;
         }
-        ops.init(
-          `Topological sort (Kahn's algorithm) — repeatedly take a node with no remaining prerequisites (in-degree 0) and append it to the order; removing it may make others ready.`
-        );
+        ops.init(`Kahn topological sort — append an in-degree-0 node, remove its edges, and repeat.`);
         const ready = [];
         for (const nd of graph.nodes) {
           if (indeg[nd.id] === 0) {
@@ -20498,7 +20490,7 @@ var init_two_pointers = __esm({
         const a = ops.value;
         const target = input.target;
         ops.init(
-          `Two pointers on a sorted array — find a pair summing to ${target}. Move the left pointer right to raise the sum, the right pointer left to lower it.`
+          `Two pointers on sorted data seek ${target}: left → raises the sum; right ← lowers it.`
         );
         let l = 0;
         let r = a.length - 1;
@@ -22108,6 +22100,22 @@ function createMount(registry2, structures = []) {
     head.append(crumb, counter);
     const stageCol = el("div", "steptrace__stage-col");
     const rail = el("div", "steptrace__rail");
+    const railRegion = el("div", "steptrace__rail-region");
+    railRegion.id = `steptrace-rail-${++mountSerial}`;
+    railRegion.setAttribute("role", "region");
+    railRegion.setAttribute("aria-label", "Trace and watch");
+    const detailSwitch = el("div", "steptrace__detail-switch");
+    detailSwitch.setAttribute("role", "group");
+    detailSwitch.setAttribute("aria-label", "Detail view");
+    const traceButton = el("button", "steptrace__detail-button");
+    traceButton.type = "button";
+    traceButton.textContent = "Trace";
+    traceButton.setAttribute("aria-label", "Trace");
+    const watchButton = el("button", "steptrace__detail-button");
+    watchButton.type = "button";
+    watchButton.textContent = "Watch";
+    watchButton.setAttribute("aria-label", "Watch");
+    detailSwitch.append(traceButton, watchButton);
     const traceWrap = el("div", "steptrace__trace");
     const traceLabel = el("div", "steptrace__rail-label steptrace__trace-label");
     traceLabel.textContent = "Trace";
@@ -22137,7 +22145,8 @@ function createMount(registry2, structures = []) {
     const watchEl = el("div", "steptrace__watch");
     watchWrap.append(watchLabel, watchEl);
     watchWrap.hidden = true;
-    rail.append(traceWrap, watchWrap);
+    railRegion.append(traceWrap, watchWrap);
+    rail.append(detailSwitch, railRegion);
     const body = el("div", "steptrace__body");
     body.append(stageCol, rail);
     const foot = el("div", "steptrace__foot");
@@ -22298,6 +22307,88 @@ function createMount(registry2, structures = []) {
     utility.append(speedIndicator, menuWrap);
     foot.append(phase, transport, timeline, utility);
     root.replaceChildren(head, body, foot);
+    let layoutMode = "unknown";
+    let compactPanel = null;
+    let hasWatch = false;
+    let destroyed = false;
+    let railAnimationFrame = null;
+    let railAnimationTimer = null;
+    function clearRailAnimation() {
+      if (railAnimationFrame != null) cancelAnimationFrame(railAnimationFrame);
+      if (railAnimationTimer != null) clearTimeout(railAnimationTimer);
+      railAnimationFrame = null;
+      railAnimationTimer = null;
+      railRegion.classList.remove("steptrace__rail-region--animating");
+      railRegion.style.removeProperty("height");
+    }
+    function railAnimationDuration() {
+      const value = getComputedStyle(railRegion).getPropertyValue("--steptrace-tab-animation-duration").trim();
+      const duration = parseFloat(value);
+      if (!Number.isFinite(duration)) return 0;
+      return value.endsWith("ms") ? duration : value.endsWith("s") ? duration * 1e3 : 0;
+    }
+    function animateRail(render) {
+      const oldHeight = railRegion.getBoundingClientRect().height;
+      clearRailAnimation();
+      render();
+      const targetHeight = railRegion.getBoundingClientRect().height;
+      if (oldHeight === targetHeight) return;
+      railRegion.style.setProperty("height", `${oldHeight}px`);
+      railRegion.classList.add("steptrace__rail-region--animating");
+      railAnimationFrame = requestAnimationFrame(() => {
+        railAnimationFrame = null;
+        railRegion.style.setProperty("height", `${targetHeight}px`);
+        railAnimationTimer = setTimeout(clearRailAnimation, railAnimationDuration() + 50);
+      });
+    }
+    function renderRailMode(previousMode = layoutMode, animate = false) {
+      const compact = layoutMode === "compact";
+      const active = document.activeElement;
+      if (previousMode === "compact" && layoutMode === "wide" && active && detailSwitch.contains(active)) {
+        scrub.focus();
+      }
+      if (previousMode === "wide" && compact && active && railRegion.contains(active)) {
+        ;
+        (compactPanel === "watch" && hasWatch ? watchButton : traceButton).focus();
+      }
+      const render = () => {
+        detailSwitch.hidden = !compact;
+        traceButton.setAttribute("aria-pressed", String(compact && compactPanel === "trace"));
+        watchButton.setAttribute("aria-pressed", String(compact && compactPanel === "watch"));
+        traceWrap.hidden = compact && compactPanel !== "trace";
+        watchWrap.hidden = compact ? !hasWatch || compactPanel !== "watch" : !hasWatch;
+        refitCompactTrace();
+      };
+      if (animate) animateRail(render);
+      else {
+        clearRailAnimation();
+        render();
+      }
+    }
+    function syncCompactLayout(inlineSize) {
+      if (!(inlineSize > 0)) return;
+      const nextMode = inlineSize < COMPACT_INLINE_SIZE ? "compact" : "wide";
+      if (nextMode === layoutMode) return;
+      const previousMode = layoutMode;
+      layoutMode = nextMode;
+      root.classList.toggle("steptrace--narrow", nextMode === "compact");
+      renderRailMode(previousMode, previousMode !== "unknown");
+    }
+    function refitCompactTrace() {
+      if (!player || layoutMode !== "compact" || compactPanel !== "trace") return;
+      sizeRail();
+      renderRail();
+    }
+    traceButton.addEventListener("click", () => {
+      compactPanel = compactPanel === "trace" ? null : "trace";
+      renderRailMode(layoutMode, true);
+    });
+    watchButton.addEventListener("click", () => {
+      if (!hasWatch) return;
+      compactPanel = compactPanel === "watch" ? null : "watch";
+      renderRailMode(layoutMode, true);
+    });
+    syncCompactLayout(root.getBoundingClientRect().width);
     let menuOpen = false;
     function closeMenu() {
       menuOpen = false;
@@ -22315,9 +22406,13 @@ function createMount(registry2, structures = []) {
     document.addEventListener("click", onDocClick);
     function sizeRail() {
       if (!player) return;
-      if (matchMedia("(max-width: 560px)").matches) {
-        log.style.height = "auto";
-        log.style.minHeight = "0";
+      if (layoutMode === "compact") {
+        const logCS2 = getComputedStyle(log);
+        const lineHeight = parseFloat(logCS2.lineHeight) || 0;
+        const gap2 = parseFloat(logCS2.rowGap) || 0;
+        const height2 = Math.ceil(lineHeight * 3 + gap2 * 2) + "px";
+        log.style.height = height2;
+        log.style.minHeight = height2;
         return;
       }
       const PROBE = "position:absolute;visibility:hidden;pointer-events:none;left:0;right:0;height:auto";
@@ -22348,15 +22443,34 @@ function createMount(registry2, structures = []) {
       if (log.style.minHeight !== h) log.style.minHeight = h;
     }
     function fitLog(terminal) {
-      const budget = log.clientHeight;
+      const logCS = getComputedStyle(log);
+      const gap = parseFloat(logCS.rowGap) || 0;
+      let budget = log.clientHeight;
+      if (layoutMode === "compact") {
+        const lineHeight = parseFloat(logCS.lineHeight) || 0;
+        let rowChrome = 0;
+        if (terminal) {
+          const resultCS = getComputedStyle(insight);
+          rowChrome = [
+            resultCS.paddingTop,
+            resultCS.paddingBottom,
+            resultCS.borderTopWidth,
+            resultCS.borderBottomWidth
+          ].reduce((sum, value) => sum + (parseFloat(value) || 0), 0);
+        }
+        budget = Math.ceil(lineHeight * 3 + gap * 2 + rowChrome);
+        const height2 = budget + "px";
+        log.style.height = height2;
+        log.style.minHeight = height2;
+      }
       if (!budget) return;
-      const gap = parseFloat(getComputedStyle(log).rowGap) || 0;
       let used = terminal ? insight.getBoundingClientRect().height : 0;
+      let rows = terminal ? 1 : 0;
       let full = false;
       for (let k = LOG_ROWS - 1; k >= 0; k--) {
         const line = logLines[k].line;
         if (line.hidden) continue;
-        if (full) {
+        if (full || layoutMode === "compact" && rows >= 3) {
           line.hidden = true;
           continue;
         }
@@ -22364,18 +22478,30 @@ function createMount(registry2, structures = []) {
         const need = used ? used + gap + h : h;
         if (!used || need <= budget + 0.5) {
           used = need;
+          rows++;
         } else {
           line.hidden = true;
           full = true;
         }
       }
     }
-    const onRailResize = () => {
+    const onRailResize = (entries = []) => {
+      const rootEntry = entries.find((entry) => entry.target === root);
+      if (rootEntry) {
+        const borderBox = Array.isArray(rootEntry.borderBoxSize) ? rootEntry.borderBoxSize[0] : rootEntry.borderBoxSize;
+        syncCompactLayout(borderBox?.inlineSize ?? rootEntry.contentRect.width);
+      }
       sizeRail();
       if (player) renderRail();
     };
-    const logRO = typeof ResizeObserver !== "undefined" ? new ResizeObserver(onRailResize) : null;
-    if (logRO) logRO.observe(rail);
+    const railRO = typeof ResizeObserver !== "undefined" ? new ResizeObserver(onRailResize) : null;
+    if (railRO) {
+      railRO.observe(root);
+      railRO.observe(rail);
+    }
+    document.fonts?.ready.then(() => {
+      if (!destroyed) onRailResize();
+    });
     let lastRailI = null;
     function renderRail() {
       const total = player.frames.length;
@@ -22584,8 +22710,11 @@ function createMount(registry2, structures = []) {
           if (rows && rows.length > maxRows) maxRows = rows.length;
         }
       }
-      watchWrap.hidden = maxRows === 0;
+      hasWatch = maxRows > 0;
+      if (!hasWatch && compactPanel === "watch") compactPanel = null;
+      detailSwitch.replaceChildren(traceButton, ...hasWatch ? [watchButton] : []);
       watchEl.style.setProperty("--steptrace-watch-rows", String(maxRows));
+      renderRailMode();
     }
     function syncEndpointOptions(settings, graph) {
       if (!endpointSection || !startMenu || !targetMenu || !startHead || !targetHead) return;
@@ -22630,7 +22759,8 @@ function createMount(registry2, structures = []) {
     btnPlay.addEventListener("click", () => player.toggle());
     btnFwd.addEventListener("click", () => player.stepF());
     const onKey = (e) => {
-      if (e.target instanceof HTMLInputElement || e.target instanceof HTMLSelectElement) return;
+      if (["button", "input", "select", "textarea"].includes(e.target?.tagName?.toLowerCase()))
+        return;
       if (e.target === scrub) return;
       if (e.key === "ArrowRight") player.stepF();
       else if (e.key === "ArrowLeft") player.stepB();
@@ -22646,10 +22776,12 @@ function createMount(registry2, structures = []) {
         if (player) player.pause();
       },
       destroy() {
+        destroyed = true;
+        clearRailAnimation();
         if (player) player.destroy();
         if (currentView && currentView.destroy) currentView.destroy();
         if (speedControlHandle && speedControlHandle.destroy) speedControlHandle.destroy();
-        if (logRO) logRO.disconnect();
+        if (railRO) railRO.disconnect();
         mq.removeEventListener("change", applyMotion);
         root.removeEventListener("keydown", onKey);
         document.removeEventListener("click", onDocClick);
@@ -22658,7 +22790,8 @@ function createMount(registry2, structures = []) {
           "steptrace",
           "steptrace--reduced",
           "steptrace--stable-stage",
-          "steptrace--compact-stage"
+          "steptrace--compact-stage",
+          "steptrace--narrow"
         );
       }
     };
@@ -22674,7 +22807,7 @@ function randomArray(n = 12) {
   }
   return pool.slice(0, n);
 }
-var LOG_ROWS, fadeFor, mountSerial;
+var LOG_ROWS, COMPACT_INLINE_SIZE, fadeFor, mountSerial;
 var init_mount = __esm({
   "custom/steptrace/src/mount.ts"() {
     init_player();
@@ -22682,6 +22815,7 @@ var init_mount = __esm({
     init_tabs();
     init_watch_hints();
     LOG_ROWS = 10;
+    COMPACT_INLINE_SIZE = 704;
     fadeFor = (age) => Math.max(0.1, 0.5 * Math.pow(0.62, age - 1));
     mountSerial = 0;
   }

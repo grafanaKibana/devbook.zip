@@ -14,9 +14,7 @@ export const prim = {
       if (!graph.directed) adj[e.to].push({ to: e.from, w })
     }
     const start = input.start
-    ops.init(
-      `Prim's algorithm — grow a minimum spanning tree from ${start}, each step adding the cheapest edge that reaches a node not yet in the tree.`,
-    )
+    ops.init(`Prim from ${start} — grow the MST with the cheapest edge reaching a new node.`)
     const pairKey = (a, b) => (a < b ? a + "|" + b : b + "|" + a)
     const inTree = new Set([start])
     const treeEdges = new Set() // pairKeys already in the MST — silent, never re-flagged

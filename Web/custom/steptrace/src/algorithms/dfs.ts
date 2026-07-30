@@ -13,7 +13,7 @@ export const dfs = {
     if (target) ops.target(target)
     ops.init(
       target
-        ? `Depth-first search for ${target}, starting at ${start} — dive as deep as possible with a stack, backtracking at dead ends, until the target is popped.`
+        ? `DFS for ${target} from ${start} — pop a stack, diving then backtracking until ${target} is popped.`
         : `Depth-first search from ${start} — dive as deep as possible using a stack, backtracking when a node has no unvisited neighbours.`,
     )
     const stack = [start]

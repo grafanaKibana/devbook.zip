@@ -9,7 +9,7 @@ export const slidingWindow = {
     const a = ops.value
     const target = input.target
     ops.init(
-      `Sliding window — find the shortest contiguous subarray with sum ≥ ${target}. Expand the window right to grow the sum; shrink from the left while it stays ≥ ${target}.`,
+      `Sliding window finds the shortest subarray with sum ≥ ${target}: expand right; shrink left while valid.`,
     )
     let lo = 0
     let sum = 0
