@@ -11,8 +11,6 @@
 
   & > .callout-content {
     display: grid;
-    // Left untokenised on purpose: the fold animates layout properties, which
-    // are not compositor-only. Pre-existing Quartz-core debt, not a token gap.
     transition: grid-template-rows 0.1s cubic-bezier(0.02, 0.01, 0.47, 1);
     overflow: hidden;
 
@@ -127,8 +125,6 @@
 
     .callout-content {
       & > * {
-        // Same carve-out as the fold above: height/margin/padding are layout
-        // properties, so this is pre-existing debt rather than a token gap.
         transition:
           height 0.1s cubic-bezier(0.02, 0.01, 0.47, 1),
           margin 0.1s cubic-bezier(0.02, 0.01, 0.47, 1),
@@ -157,7 +153,7 @@
   --icon-size: 18px;
 
   & .fold-callout-icon {
-    transition: transform var(--dur-2) var(--ease-out);
+    transition: transform 0.15s ease;
     opacity: 0.8;
     cursor: pointer;
     --callout-icon: var(--callout-icon-fold);

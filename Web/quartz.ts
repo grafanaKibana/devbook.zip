@@ -25,22 +25,9 @@ import { loadQuartzConfig, loadQuartzLayout } from "./quartz/plugins/loader/conf
 
 // DevBook customizations live here (the sanctioned Quartz override entrypoint)
 // and under ./custom — no engine files under quartz/ are modified.
-//
-// The homepage Topics dashboard is an in-note `datacorejsx` block that Quartz
-// Syncer renders to static HTML at publish time, so there is no Topics
-// component here anymore. What remains:
-//   - SyncerFixups      → transformer: cleans Syncer's committed output for the
-//                         web (strips raw dataview/datacore query fences + the
-//                         frozen Questions `dc-questions-index` block, normalizes
-//                         "Home/…" links). Must run before crawl-links.
-//   - QuestionsIndex    → component: Questions.md aggregation (self-gates to slug)
-//   - QuestionCollector → transformer: feeds QuestionsIndex
-
 const config = await loadQuartzConfig()
 
-// Clean Syncer's committed markdown/HTML for the flattened web build. The link
-// fixup must run BEFORE crawl-links ("LinkProcessing") so the stripped path
-// slugifies to the same page as the real file; splice it in just ahead of it.
+// Clean Syncer's committed markdown/HTML for the flattened web build.
 const linkIdx = config.plugins.transformers.findIndex((t) => t.name === "LinkProcessing")
 config.plugins.transformers.splice(
   linkIdx === -1 ? config.plugins.transformers.length : linkIdx,
@@ -76,10 +63,7 @@ config.plugins.transformers.splice(
 // Steptrace component hydrates. Only touches lang=steptrace, so order-independent.
 config.plugins.transformers.push(SteptraceBlock())
 
-// Make content images click-to-zoom (issue #128). Appended after the built-in
-// transformers so it runs after LinkProcessing and each <img src> is the final
-// resolved URL; it only tags note-content images (skipping ones inside links)
-// and ships its themed overlay CSS/JS via externalResources.
+// Make content images click-to-zoom.
 config.plugins.transformers.push(ClickableImages())
 
 // Emit the generated engine from the sanctioned custom/ surface. This avoids
@@ -93,26 +77,12 @@ for (const pageLayout of Object.values(layout.byPageType)) {
   pageLayout.beforeBody = [siteMarquee, ...(pageLayout.beforeBody ?? [])]
 }
 
-// Inject the Explorer file-tree icons (issue #51), topic ordering (issue #57) and
-// the top-level scope selector (issue #64). None render visible markup themselves
-// — they contribute css / afterDOMLoaded / an inert JSON map that decorate,
-// reorder and scope the community Explorer's client-built tree — so they just need
-// to render wherever the Explorer (the left sidebar) shows. They go in the `left`
-// slot: canvas pages use a custom frame that renders ONLY `left` (not afterBody),
-// so afterBody-only decorators would be silently dropped there (broken icons /
-// unstyled dropdown on .canvas files). `defaults.left` is inherited by every page
-// type that doesn't override `left` (content/folder/tag/canvas/bases); the 404
-// page intentionally overrides `left` to empty and has no Explorer, so it's
-// correctly excluded.
+// Inject the Explorer file-tree icons, topic ordering and the top-level scope selector.
 const explorerIcons = ExplorerIcons()
 const explorerOrder = ExplorerOrder()
 const navScopeDropdown = NavScopeDropdown()
 const explorerDecorators = [explorerIcons, explorerOrder, navScopeDropdown]
 layout.defaults.left = [...(layout.defaults.left ?? []), ...explorerDecorators]
-// resolveLayout picks `byPageType[type].left ?? defaults.left` (override wins, no
-// merge), so page types that define their own `left` must be augmented too. Skip
-// ones that leave it undefined (they inherit defaults.left) or set it empty (404
-// has no sidebar) — appending there would render a stray, Explorer-less sidebar.
 for (const pageLayout of Object.values(layout.byPageType)) {
   if (Array.isArray(pageLayout.left) && pageLayout.left.length > 0) {
     pageLayout.left = [...pageLayout.left, ...explorerDecorators]
@@ -146,9 +116,7 @@ for (const pageLayout of Object.values(layout.byPageType)) {
   ]
 }
 
-// Floating scroll-to-top / scroll-to-bottom buttons (issue #129). afterBody is
-// dropped on canvas pages (MinimalFrame renders no afterBody) — an intended
-// exclusion: scroll-to-extremes is meaningless on a pan/zoom canvas.
+// Floating scroll-to-top / scroll-to-bottom buttons.
 const floatingButtons = FloatingButtons()
 layout.defaults.afterBody = [...(layout.defaults.afterBody ?? []), floatingButtons]
 for (const pageLayout of Object.values(layout.byPageType)) {
@@ -191,11 +159,7 @@ for (const pageLayout of Object.values(layout.byPageType)) {
 }
 
 // The Edit/Report contribution links (page-contribute) ride the article's
-// content-meta row — date/reading-time on the left, links on the right — rather
-// than a page-footer block. content-meta is registered but unpositioned in
-// quartz.config.yaml, so ContentMetaRow renders it (with pageContribute) where
-// it used to sit in beforeBody. Appended last to land after breadcrumbs/title/
-// note-properties, matching content-meta's former priority.
+// content-meta row — date/reading-time on the left.
 const contentMetaRow = ContentMetaRow({
   meta: instantiateRegistered("content-meta"),
   contribute: pageContribute,
@@ -205,9 +169,6 @@ for (const pageLayout of Object.values(layout.byPageType)) {
   pageLayout.beforeBody = [...(pageLayout.beforeBody ?? []), contentMetaRow]
 }
 
-// loadQuartzConfig already baked its own layout into a PageTypeDispatcher
-// emitter; replace it with one built from our augmented layout so the injected
-// component actually renders.
 config.plugins.emitters = config.plugins.emitters.filter((e) => e.name !== "PageTypeDispatcher")
 config.plugins.emitters.push(
   PageTypes.PageTypeDispatcher({ defaults: layout.defaults, byPageType: layout.byPageType }),

@@ -137,8 +137,8 @@ export function graphStateShortestDistances(
     if (current == null || !Number.isFinite(dist.get(current)!)) break
     pending.delete(current)
     for (const edge of edges) {
-      const candidates: Array<[string, string]> = [[edge.from, edge.to]]
-      if (!edge.directed) candidates.push([edge.to, edge.from])
+      const candidates: Array<[string, string]> = [[edge.to, edge.from]]
+      if (!edge.directed) candidates.push([edge.from, edge.to])
       for (const [from, to] of candidates) {
         if (from !== current || !pending.has(to)) continue
         dist.set(to, Math.min(dist.get(to)!, dist.get(from)! + edge.weight))

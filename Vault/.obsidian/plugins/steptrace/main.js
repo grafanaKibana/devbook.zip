@@ -4972,8 +4972,8 @@ function graphStateShortestDistances(nodes5, edges5, target) {
     if (current == null || !Number.isFinite(dist.get(current))) break;
     pending.delete(current);
     for (const edge of edges5) {
-      const candidates = [[edge.from, edge.to]];
-      if (!edge.directed) candidates.push([edge.to, edge.from]);
+      const candidates = [[edge.to, edge.from]];
+      if (!edge.directed) candidates.push([edge.from, edge.to]);
       for (const [from, to] of candidates) {
         if (from !== current || !pending.has(to)) continue;
         dist.set(to, Math.min(dist.get(to), dist.get(from) + edge.weight));
@@ -6618,7 +6618,7 @@ var init_aho_corasick = __esm({
           if (outputs.length)
             ops.output(outputs, index, `Emit ${outputs.join(" + ")} ending at text index ${index}.`);
         }
-        ops.done("Scan complete: emitted she and he together, then hers.");
+        ops.done("Scan complete.");
       }
     };
   }

@@ -84,7 +84,7 @@ strong {
 a {
   font-weight: $semiBoldWeight;
   text-decoration: none;
-  transition: color var(--dur-2) var(--ease-out);
+  transition: color 0.2s ease;
   color: var(--secondary);
 
   &:hover {
@@ -101,7 +101,7 @@ a {
     &.broken {
       color: var(--secondary);
       opacity: 0.5;
-      transition: opacity var(--dur-2) var(--ease-out);
+      transition: opacity 0.2s ease;
       &:hover {
         opacity: 0.8;
       }
@@ -397,7 +397,7 @@ blockquote {
   margin: 1rem 0;
   border-left: 3px solid var(--secondary);
   padding-left: 1rem;
-  transition: border-color var(--dur-2) var(--ease-out);
+  transition: border-color 0.2s ease;
 }
 
 h1,
@@ -427,7 +427,7 @@ h6 {
   &[id] > a[href^="#"] {
     margin: 0 0.5rem;
     opacity: 0;
-    transition: opacity var(--dur-2) var(--ease-out);
+    transition: opacity 0.2s ease;
     transform: translateY(-0.1rem);
     font-family: var(--codeFont);
     user-select: none;
@@ -683,9 +683,6 @@ iframe.pdf {
   width: 0;
   height: 3px;
   background: var(--secondary);
-  // Left untokenised on purpose: animating width is not compositor-only, so
-  // this is pre-existing Quartz-core debt rather than a motion-token gap.
-  // Converting it is a behaviour change, not a re-point.
   transition: width 0.2s ease;
   z-index: 9999;
 }

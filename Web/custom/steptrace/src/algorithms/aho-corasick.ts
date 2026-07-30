@@ -110,7 +110,7 @@ export const ahoCorasick = {
       if (outputs.length)
         ops.output(outputs, index, `Emit ${outputs.join(" + ")} ending at text index ${index}.`)
     }
-    ops.done("Scan complete: emitted she and he together, then hers.")
+    ops.done("Scan complete.")
   },
 } satisfies FamilyAlgorithmDefinition<
   "string",

@@ -25,11 +25,13 @@
   "shouldRenameAttachmentFiles": true,
   "shouldRenameAttachmentFolder": true,
   "shouldRenameCollectedAttachments": true,
+  "shouldSetLinkDisplayTextToAttachmentFileName": false,
+  "shouldSkipCollectingAttachmentsReferencedByRawPath": false,
   "specialCharacters": "#^[]|*\\<>:?/",
   "specialCharactersReplacement": "-",
   "timeoutInSeconds": 5,
   "treatAsAttachmentExtensions": [
     ".excalidraw.md"
   ],
-  "version": "11.3.0"
+  "version": "11.5.0"
 }

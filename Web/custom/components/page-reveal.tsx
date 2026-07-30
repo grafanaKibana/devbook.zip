@@ -111,7 +111,9 @@ body[data-slug="index"]:has(article[data-reveal="initial"]) .page > #quartz-body
 `
 
 const firstPaintScript = `
-document.documentElement.setAttribute("data-page-reveal-first-paint", "pending");
+if (!window.__devbookPageReveal) {
+  document.documentElement.setAttribute("data-page-reveal-first-paint", "pending");
+}
 `
 
 const script = `

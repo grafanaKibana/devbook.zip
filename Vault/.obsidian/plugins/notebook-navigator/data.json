@@ -182,6 +182,7 @@
       "search": false,
       "reveal": false,
       "descendants": false,
+      "groupExpansion": false,
       "sort": false,
       "appearance": false,
       "newNote": false
@@ -305,6 +306,7 @@
   "showFilePreview": true,
   "skipHeadingsInPreview": true,
   "skipCodeBlocksInPreview": true,
+  "skipCalloutsInPreview": false,
   "stripHtmlInPreview": true,
   "stripLatexInPreview": true,
   "previewRows": 2,
@@ -344,6 +346,7 @@
   "calendarEnabled": false,
   "calendarPlacement": "right-sidebar",
   "calendarConfirmBeforeCreate": true,
+  "calendarShowHiddenItems": false,
   "calendarLocale": "system-default",
   "calendarWeekendDays": "sat-sun",
   "calendarMonthHeadingFormat": "full",
@@ -550,7 +553,6 @@
       "property": false
     }
   },
-  "collapsedPinnedContexts": {},
   "fileIcons": {
     "Home/Roadmap.canvas": "map"
   },
@@ -641,7 +643,7 @@
     "#404040",
     "#404040"
   ],
-  "lastShownVersion": "3.2.4",
+  "lastShownVersion": "3.3.0",
   "rootFolderOrder": [],
   "rootTagOrder": [],
   "rootPropertyOrder": []

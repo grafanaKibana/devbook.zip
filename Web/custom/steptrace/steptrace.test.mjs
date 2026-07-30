@@ -1033,6 +1033,20 @@ test("tabbed blocks validate metadata and keep algorithm configs clean", () => {
 test("A* graph-state profiles stay typed, deterministic, optimal, and reachable", () => {
   const api = loadEngine(readFileSync(join(here, "generated", "engine.js"), "utf8"))
   const family = loadStepTraceModule("src", "families", "graph-state.ts")
+  const directedDistances = family.graphStateShortestDistances(
+    [{ id: "A" }, { id: "B" }, { id: "T" }, { id: "X" }],
+    [
+      { from: "A", to: "B", weight: 2, directed: true },
+      { from: "B", to: "T", weight: 3, directed: true },
+      { from: "T", to: "X", weight: 1, directed: true },
+    ],
+    "T",
+  )
+  assert.equal(directedDistances.get("A"), 5)
+  assert.equal(directedDistances.get("B"), 3)
+  assert.equal(directedDistances.get("T"), 0)
+  assert.equal(directedDistances.get("X"), Number.POSITIVE_INFINITY)
+
   const variants = ["coordinate-grid", "ukraine-cities", "building-floor", "midtown-map"]
   const shortestCost = (frame) => {
     const distances = new Map(frame.nodes.map((node) => [node.id, Number.POSITIVE_INFINITY]))
@@ -1652,7 +1666,7 @@ test("all built-in algorithms preserve their headless frame contract", () => {
 
   assert.equal(
     digest,
-    "c8c07ed5eb137eacd3bf56f0ead283b1c53ff7a2c1dc57d7329881677c5fb8f8",
+    "ebc60a0c4b72eb50e52f143ca031260d95fb0f331f52e2f33e54634fada1ac2e",
     "the headless StepTrace behavior changed",
   )
 })
@@ -6057,6 +6071,9 @@ test("Aho-Corasick reuses prefix-character frames for failure, goto, fallback, a
   assert.ok(milestones.includes("Emit hers"))
   assert.equal(milestones.at(-1), "Scan complete")
   assert.doesNotMatch(milestones.join(" "), /\bShift\b/)
+  const custom = api.buildFrames({ algorithm: "aho-corasick", patterns: ["a"], text: "a" })
+  assert.deepEqual(custom.frames.at(-1).matches, [{ pattern: "a", end: 0 }])
+  assert.equal(custom.frames.at(-1).message, "Scan complete.")
   assert.throws(
     () => api.buildFrames({ algorithm: "aho-corasick", patterns: [], text: "ushers" }),
     /non-empty "patterns"/,

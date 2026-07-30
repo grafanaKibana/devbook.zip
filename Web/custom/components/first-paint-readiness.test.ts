@@ -74,6 +74,9 @@ test("hard-load reveal fails open without the Font Loading API", async () => {
   await new Promise<void>((resolve) => setImmediate(resolve))
   assert.equal(rootAttributes.has("data-page-reveal-first-paint"), false)
   assert.equal(articleAttributes.get("data-reveal"), "initial")
+
+  vm.runInNewContext(resource(component.beforeDOMLoaded), context)
+  assert.equal(rootAttributes.has("data-page-reveal-first-paint"), false)
 })
 
 test("Explorer waits for fonts before revealing icons and text together", async () => {
