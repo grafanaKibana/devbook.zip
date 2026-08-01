@@ -18,6 +18,13 @@ import { ComplexityBlock } from "./custom/transformers/complexity-block"
 import { QuestionCollector } from "./custom/transformers/question-collector"
 import { SyncerFixups } from "./custom/transformers/syncer-fixups"
 import { SteptraceBlock } from "./custom/transformers/steptrace-block"
+import {
+  insertAfterNamedPlugin,
+  requireNamedPlugin,
+  Robots,
+  Seo,
+  unlistGenerated,
+} from "./custom/seo"
 import { componentRegistry } from "./quartz/components/registry"
 import type { QuartzComponent, QuartzComponentConstructor } from "./quartz/components/types"
 import { PageTypes } from "./quartz/plugins"
@@ -26,6 +33,17 @@ import { loadQuartzConfig, loadQuartzLayout } from "./quartz/plugins/loader/conf
 // DevBook customizations live here (the sanctioned Quartz override entrypoint)
 // and under ./custom — no engine files under quartz/ are modified.
 const config = await loadQuartzConfig()
+
+insertAfterNamedPlugin(config.plugins.transformers, "Description", Seo())
+
+unlistGenerated(
+  requireNamedPlugin(config.plugins.pageTypes, "TagPage"),
+  (slug) => slug === "tags" || slug.startsWith("tags/"),
+)
+unlistGenerated(
+  requireNamedPlugin(config.plugins.pageTypes, "CanvasPage"),
+  (slug) => slug === "roadmap.canvas",
+)
 
 // Clean Syncer's committed markdown/HTML for the flattened web build.
 const linkIdx = config.plugins.transformers.findIndex((t) => t.name === "LinkProcessing")
@@ -69,6 +87,7 @@ config.plugins.transformers.push(ClickableImages())
 // Emit the generated engine from the sanctioned custom/ surface. This avoids
 // placing DevBook-owned code under Quartz's upgrade-owned quartz/static tree.
 config.plugins.emitters.push(StepTraceStatic())
+config.plugins.emitters.push(Robots())
 
 const layout = await loadQuartzLayout()
 const siteMarquee = SiteMarquee()
