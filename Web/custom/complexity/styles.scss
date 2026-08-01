@@ -14,6 +14,7 @@
   --_accent: var(--secondary, var(--interactive-accent, #245b98));
   --_font-head: var(--headerFont, var(--font-interface));
   --_tween: 140ms;
+  container-type: inline-size;
   color: var(--cx-text);
   margin: 1.5rem 0;
 }
@@ -226,7 +227,7 @@
   white-space: pre-wrap;
 }
 
-@media (min-width: 600px) {
+@container (min-width: 600px) {
   .complexity__title {
     font-size: 1.05rem;
   }

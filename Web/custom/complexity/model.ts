@@ -31,16 +31,8 @@ export const COMPLEXITY_CHART = {
   axisY: 282,
 } as const
 
-interface BoundDetails {
-  cause?: string
-  assumptions?: string[]
-  auxiliarySpace?: string
-  structureSpace?: string
-}
-
 interface Curve {
   formula: string
-  description: string
   evaluate(n: number): number
 }
 
@@ -79,19 +71,6 @@ export interface ComplexityEndpointLabel {
   y: number
 }
 
-export interface ComplexityRow {
-  id: string
-  label: string
-  formula: string
-  variables: string
-  description?: string
-  qualifiers?: string[]
-  cause?: string
-  assumptions?: string[]
-  auxiliarySpace?: string
-  structureSpace?: string
-}
-
 export interface ComplexityViewModel {
   figureId: string
   mode: ComplexityMode
@@ -100,55 +79,34 @@ export interface ComplexityViewModel {
   legend: ComplexityLegendGroup[]
   endpointLabels: ComplexityEndpointLabel[]
   availableCategories: ComplexityCategory[]
-  rows: ComplexityRow[]
   ticks: { value: number; label: string; y: number }[]
   xTicks: { value: number; label: string; x: number }[]
-}
-
-export function complexityRowCells(row: ComplexityRow): string[] {
-  return [
-    row.label,
-    row.formula,
-    row.variables,
-    row.description ?? "—",
-    row.auxiliarySpace ?? "—",
-    row.structureSpace ?? "—",
-    row.cause ?? "—",
-    row.assumptions?.join("; ") ?? "—",
-    row.qualifiers?.join("; ") ?? "—",
-  ]
 }
 
 const curves: Record<CurveId, Curve> = {
   constant: {
     formula: "O(1)",
-    description: "Same time regardless of input size.",
     evaluate: () => 1,
   },
   "log-n": {
     formula: "O(log n)",
-    description: "Halves the problem each step.",
     evaluate: Math.log2,
   },
-  linear: { formula: "O(n)", description: "Processes each element once.", evaluate: (n) => n },
+  linear: { formula: "O(n)", evaluate: (n) => n },
   "n-log-n": {
     formula: "O(n log n)",
-    description: "Efficient divide-and-conquer work.",
     evaluate: (n) => n * Math.log2(n),
   },
   quadratic: {
     formula: "O(n²)",
-    description: "Nested work over the input.",
     evaluate: (n) => n * n,
   },
   exponential: {
     formula: "O(2^n)",
-    description: "Doubles with each new element.",
     evaluate: (n) => 2 ** n,
   },
   factorial: {
     formula: "O(n!)",
-    description: "Visits every permutation.",
     evaluate: (n) => {
       let value = 1
       for (let factor = 2; factor <= n; factor++) value *= factor
@@ -174,7 +132,6 @@ const OPERATION_COLORS = [
   ["#e7aa78", "#c97735", "#914619"],
   ["#78c9b3", "#389b82", "#176b57"],
 ] as const
-const DETAIL_KEYS = ["cause", "assumptions", "auxiliarySpace", "structureSpace"] as const
 const CONFIG_KEYS = ["version", "mode", "title", "variables", "entries"] as const
 const { left: LEFT, plotRight: PLOT_RIGHT, top: TOP, axisY: AXIS_Y } = COMPLEXITY_CHART
 const DATA_BOTTOM = AXIS_Y - 14
@@ -205,16 +162,6 @@ function textAt(value: unknown, path: string): string {
   return value
 }
 
-function stringsAt(value: unknown, path: string): string[] {
-  if (
-    !Array.isArray(value) ||
-    value.some((item) => typeof item !== "string" || item.trim() === "")
-  ) {
-    fail(path, "must be an array of non-empty strings")
-  }
-  return value as string[]
-}
-
 function curveIdAt(value: unknown, path: string): CurveId {
   if (typeof value !== "string" || !CURVE_IDS.includes(value as CurveId)) {
     fail(path, `must be one of ${CURVE_IDS.join(", ")}`)
@@ -222,30 +169,7 @@ function curveIdAt(value: unknown, path: string): CurveId {
   return value as CurveId
 }
 
-function detailsAt(value: unknown, path: string, required = false): BoundDetails {
-  const details = objectAt(value, path)
-  rejectUnknown(details, DETAIL_KEYS, path)
-  const result: BoundDetails = {}
-  if (details.cause !== undefined) result.cause = textAt(details.cause, `${path}.cause`)
-  if (details.assumptions !== undefined) {
-    result.assumptions = stringsAt(details.assumptions, `${path}.assumptions`)
-  }
-  if (details.auxiliarySpace !== undefined) {
-    result.auxiliarySpace = textAt(details.auxiliarySpace, `${path}.auxiliarySpace`)
-  }
-  if (details.structureSpace !== undefined) {
-    result.structureSpace = textAt(details.structureSpace, `${path}.structureSpace`)
-  }
-  if (required && !result.auxiliarySpace) fail(`${path}.auxiliarySpace`, "is required")
-  if (required && !result.cause) fail(`${path}.cause`, "is required")
-  return result
-}
-
-function qualifiersAt(value: unknown, path: string): string[] | undefined {
-  return value === undefined ? undefined : stringsAt(value, path)
-}
-
-function variablesAt(value: unknown): { text: string; names: Set<string> } {
+function validateVariables(value: unknown): void {
   const variables = objectAt(value, "variables")
   const entries = Object.entries(variables)
   if (entries.length === 0) fail("variables", "must declare n")
@@ -256,10 +180,6 @@ function variablesAt(value: unknown): { text: string; names: Set<string> } {
     names.add(name)
   }
   if (!names.has("n")) fail("variables.n", "is required for plotted curves")
-  return {
-    names,
-    text: entries.map(([name, description]) => `${name}: ${String(description)}`).join("; "),
-  }
 }
 
 function slug(value: string): string {
@@ -269,7 +189,7 @@ function slug(value: string): string {
     .replace(/^-|-$/g, "")
 }
 
-function rowId(figureId: string, key: string, index: number): string {
+function pathId(figureId: string, key: string, index: number): string {
   return `${figureId}-${slug(key)}-${index}`
 }
 
@@ -280,22 +200,6 @@ function categoryFor(role?: string): ComplexityCategory {
   if (normalized.includes("average")) return "average"
   if (normalized.startsWith("worst")) return "worst"
   return "other"
-}
-
-function mergeDetails(
-  parent: BoundDetails | undefined,
-  child: BoundDetails | undefined,
-): BoundDetails {
-  if (!parent) return child ?? {}
-  if (!child) return parent
-  return {
-    ...parent,
-    ...child,
-    assumptions:
-      parent.assumptions || child.assumptions
-        ? [...(parent.assumptions ?? []), ...(child.assumptions ?? [])]
-        : undefined,
-  }
 }
 
 function roleColor(role: string, curveId: CurveId): string {
@@ -414,12 +318,11 @@ export function buildComplexityViewModel(input: unknown): ComplexityViewModel {
   }
   const title = textAt(config.title, "title")
   const figureId = `complexity-${mode}-${slug(title)}`
-  const variables = variablesAt(config.variables)
+  validateVariables(config.variables)
   if (!Array.isArray(config.entries) || config.entries.length === 0) {
     fail("entries", "must be a non-empty array")
   }
 
-  const rows: ComplexityRow[] = []
   const highlighted: {
     id: string
     curveId: CurveId
@@ -435,19 +338,11 @@ export function buildComplexityViewModel(input: unknown): ComplexityViewModel {
     config.entries.forEach((raw, index) => {
       const path = `entries[${index}]`
       const entry = objectAt(raw, path)
-      rejectUnknown(entry, ["kind", "curveId", "description"], path)
+      rejectUnknown(entry, ["kind", "curveId"], path)
       if (entry.kind !== "catalogue") fail(`${path}.kind`, "must be catalogue")
       const curveId = curveIdAt(entry.curveId, `${path}.curveId`)
       assertUnique(seen, curveId, `${path}.curveId`)
-      const description = textAt(entry.description, `${path}.description`)
-      const id = rowId(figureId, curveId, index)
-      rows.push({
-        id,
-        label: curves[curveId].formula,
-        formula: curves[curveId].formula,
-        variables: variables.text,
-        description,
-      })
+      const id = pathId(figureId, curveId, index)
       highlighted.push({
         id,
         curveId,
@@ -462,7 +357,7 @@ export function buildComplexityViewModel(input: unknown): ComplexityViewModel {
     config.entries.forEach((raw, index) => {
       const path = `entries[${index}]`
       const entry = objectAt(raw, path)
-      rejectUnknown(entry, ["kind", "role", "curveId", "qualifiers", "details"], path)
+      rejectUnknown(entry, ["kind", "role", "curveId"], path)
       if (entry.kind !== "case") fail(`${path}.kind`, "must be case")
       const role = textAt(entry.role, `${path}.role`)
       if (role !== "Best" && role !== "Average" && role !== "Worst") {
@@ -470,17 +365,7 @@ export function buildComplexityViewModel(input: unknown): ComplexityViewModel {
       }
       assertUnique(seen, role, `${path}.role`)
       const curveId = curveIdAt(entry.curveId, `${path}.curveId`)
-      const qualifiers = qualifiersAt(entry.qualifiers, `${path}.qualifiers`)
-      const details = detailsAt(entry.details, `${path}.details`, true)
-      const id = rowId(figureId, role, index)
-      rows.push({
-        id,
-        label: role,
-        formula: curves[curveId].formula,
-        variables: variables.text,
-        qualifiers,
-        ...details,
-      })
+      const id = pathId(figureId, role, index)
       highlighted.push({
         id,
         curveId,
@@ -498,12 +383,10 @@ export function buildComplexityViewModel(input: unknown): ComplexityViewModel {
     config.entries.forEach((raw, operationIndex) => {
       const path = `entries[${operationIndex}]`
       const entry = objectAt(raw, path)
-      rejectUnknown(entry, ["kind", "operation", "bounds", "details"], path)
+      rejectUnknown(entry, ["kind", "operation", "bounds"], path)
       if (entry.kind !== "operation") fail(`${path}.kind`, "must be operation")
       const operation = textAt(entry.operation, `${path}.operation`)
       assertUnique(seenOperations, operation, `${path}.operation`)
-      const operationDetails =
-        entry.details === undefined ? undefined : detailsAt(entry.details, `${path}.details`)
       if (!Array.isArray(entry.bounds) || entry.bounds.length === 0) {
         fail(`${path}.bounds`, "must be a non-empty array")
       }
@@ -511,48 +394,28 @@ export function buildComplexityViewModel(input: unknown): ComplexityViewModel {
       entry.bounds.forEach((rawBound, boundIndex) => {
         const boundPath = `${path}.bounds[${boundIndex}]`
         const bound = objectAt(rawBound, boundPath)
-        const kind = bound.kind
-        if (kind === "catalogue") {
-          rejectUnknown(bound, ["kind", "curveId", "role", "qualifiers", "details"], boundPath)
-        } else if (kind === "text") {
-          rejectUnknown(bound, ["kind", "formula", "role", "qualifiers", "details"], boundPath)
+        if (bound.kind === "catalogue") {
+          rejectUnknown(bound, ["kind", "curveId", "role"], boundPath)
+        } else if (bound.kind === "text") {
+          rejectUnknown(bound, ["kind", "formula", "role"], boundPath)
+          textAt(bound.formula, `${boundPath}.formula`)
         } else {
           fail(`${boundPath}.kind`, "must be catalogue or text")
         }
         const role = textAt(bound.role, `${boundPath}.role`)
         assertUnique(seenRoles, role, `${boundPath}.role`)
-        const qualifiers = qualifiersAt(bound.qualifiers, `${boundPath}.qualifiers`)
-        const boundDetails =
-          bound.details === undefined ? undefined : detailsAt(bound.details, `${boundPath}.details`)
-        const details = mergeDetails(operationDetails, boundDetails)
-        let curveId: CurveId | undefined
-        let formula: string
-        if (kind === "catalogue") {
-          curveId = curveIdAt(bound.curveId, `${boundPath}.curveId`)
-          formula = curves[curveId].formula
-        } else {
-          formula = textAt(bound.formula, `${boundPath}.formula`)
-        }
-        const id = rowId(figureId, `${operation}-${role}`, operationIndex * 100 + boundIndex)
-        rows.push({
+        if (bound.kind === "text") return
+        const curveId = curveIdAt(bound.curveId, `${boundPath}.curveId`)
+        const id = pathId(figureId, `${operation}-${role}`, operationIndex * 100 + boundIndex)
+        highlighted.push({
           id,
-          label: `${operation} — ${role}`,
-          formula,
-          variables: variables.text,
-          qualifiers,
-          ...details,
+          curveId,
+          category: categoryFor(role),
+          label: `${operation} — ${role}: ${curves[curveId].formula}`,
+          legendGroup: operation,
+          legendLabel: `${compactRole(role)} ${curves[curveId].formula}`,
+          color: operationColor(operationIndex, boundIndex),
         })
-        if (curveId) {
-          highlighted.push({
-            id,
-            curveId,
-            category: categoryFor(role),
-            label: `${operation} — ${role}: ${curves[curveId].formula}`,
-            legendGroup: operation,
-            legendLabel: `${compactRole(role)} ${curves[curveId].formula}`,
-            color: operationColor(operationIndex, boundIndex),
-          })
-        }
       })
     })
   }
@@ -626,7 +489,6 @@ export function buildComplexityViewModel(input: unknown): ComplexityViewModel {
     legend,
     endpointLabels: layoutEndpointLabels(paths),
     availableCategories,
-    rows,
     ticks,
     xTicks,
   }

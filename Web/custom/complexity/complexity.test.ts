@@ -20,22 +20,16 @@ const cases = {
       kind: "case",
       role: "Best",
       curveId: "n-log-n",
-      qualifiers: ["balanced partitions"],
-      details: { auxiliarySpace: "O(log n)", cause: "Balanced partitions." },
     },
     {
       kind: "case",
       role: "Average",
       curveId: "n-log-n",
-      qualifiers: ["expected with a randomized pivot"],
-      details: { auxiliarySpace: "O(log n)", cause: "Expected balanced partitions." },
     },
     {
       kind: "case",
       role: "Worst",
       curveId: "quadratic",
-      qualifiers: ["repeatedly unbalanced pivot"],
-      details: { auxiliarySpace: "O(n)", cause: "Partitions shrink by one element." },
     },
   ],
 }
@@ -50,23 +44,16 @@ const operations = {
       operation: "Lookup",
       bounds: [
         {
-          kind: "catalogue",
-          curveId: "constant",
-          role: "Average",
-          qualifiers: ["well-distributed hash"],
-        },
-        {
           kind: "text",
           formula: "O(bucket length)",
           role: "Collision-bound",
-          details: { assumptions: ["separate chaining"] },
+        },
+        {
+          kind: "catalogue",
+          curveId: "constant",
+          role: "Average",
         },
       ],
-      details: {
-        structureSpace: "O(n)",
-        auxiliarySpace: "O(1)",
-        cause: "Hashing selects a bucket.",
-      },
     },
   ],
 }
@@ -126,7 +113,6 @@ test("every representative function uses the fixed 0-origin and 1…10k log scal
     entries: CURVE_IDS.map((curveId) => ({
       kind: "catalogue",
       curveId,
-      description: `${curveId} description`,
     })),
   })
   const maximum = 10_000
@@ -160,12 +146,11 @@ test("catalogue config derives formulas without redundant chart commentary", () 
     entries: CURVE_IDS.map((curveId) => ({
       kind: "catalogue",
       curveId,
-      description: `${curveId} description`,
     })),
   }
   const view = buildComplexityViewModel(config)
   assert.deepEqual(
-    view.rows.map((row) => row.formula),
+    view.paths.filter((path) => !path.dimmed).map((path) => path.formula),
     ["O(1)", "O(log n)", "O(n)", "O(n log n)", "O(n²)", "O(2^n)", "O(n!)"],
   )
   assert.equal(view.paths.find((path) => path.curveId === "factorial")?.samples.length, 9)
@@ -220,22 +205,10 @@ test("duplicate case curves separate after sharing the visual origin", () => {
   assert.equal(average?.color, "#d99a00")
   assert.deepEqual(view.availableCategories, ["best", "average", "worst"])
   assert.equal(view.endpointLabels.find((label) => label.curveId === "n-log-n")?.pathIds.length, 2)
-  assert.deepEqual(
-    view.rows.map((row) => [row.label, row.formula, row.auxiliarySpace, row.cause]),
-    [
-      ["Best", "O(n log n)", "O(log n)", "Balanced partitions."],
-      ["Average", "O(n log n)", "O(log n)", "Expected balanced partitions."],
-      ["Worst", "O(n²)", "O(n)", "Partitions shrink by one element."],
-    ],
-  )
 })
 
 test("operation text bounds stay semantic-only while catalogue bounds plot", () => {
   const view = buildComplexityViewModel(operations)
-  assert.equal(view.rows[0]?.formula, "O(1)")
-  assert.equal(view.rows[1]?.formula, "O(bucket length)")
-  assert.deepEqual(view.rows[1]?.assumptions, ["separate chaining"])
-  assert.equal(view.rows[1]?.structureSpace, "O(n)")
   assert.equal(view.paths.filter((path) => !path.dimmed).length, 1)
   assert.equal(view.paths.find((path) => !path.dimmed)?.curveId, "constant")
   assert.ok(view.paths.flatMap((path) => path.samples).every(({ y }) => Number.isFinite(y)))
@@ -282,7 +255,7 @@ test("operation legends group each operation and shade its plotted bounds", () =
   assert.ok(constantPaths.every((path) => path.geometry.startsWith("M0.00,282.00 ")))
 })
 
-test("semantic duplicates and unknown details fail at their exact field", () => {
+test("semantic duplicates and unknown fields fail at their exact field", () => {
   assert.throws(
     () =>
       buildComplexityViewModel({
@@ -298,11 +271,11 @@ test("semantic duplicates and unknown details fail at their exact field", () => 
         entries: [
           {
             ...operations.entries[0],
-            details: { ...operations.entries[0].details, latency: "variable" },
+            latency: "variable",
           },
         ],
       }),
-    /entries\[0\]\.details\.latency: is not supported/,
+    /entries\[0\]\.latency: is not supported/,
   )
   assert.throws(
     () => buildComplexityViewModel({ ...cases, variables: { size: "items" } }),
@@ -314,7 +287,6 @@ test("all duplicate, missing, override, and unknown catalogue fields fail locall
   const catalogueEntry = {
     kind: "catalogue",
     curveId: "constant",
-    description: "Constant.",
   }
   const catalogue = {
     version: 1,
@@ -332,10 +304,6 @@ test("all duplicate, missing, override, and unknown catalogue fields fail locall
     [
       { ...catalogue, entries: [{ ...catalogueEntry, curveId: "cubic" }] },
       /entries\[0\]\.curveId: must be one of/,
-    ],
-    [
-      { ...catalogue, entries: [{ kind: "catalogue", curveId: "constant" }] },
-      /entries\[0\]\.description: must be a non-empty string/,
     ],
     [
       { ...catalogue, entries: [{ ...catalogueEntry, representativeFunction: "n" }] },
@@ -359,7 +327,7 @@ test("all duplicate, missing, override, and unknown catalogue fields fail locall
           },
         ],
       },
-      /entries\[0\]\.bounds\[1\]\.role: duplicates Average/,
+      /entries\[0\]\.bounds\[1\]\.role: duplicates Collision-bound/,
     ],
     [
       {
@@ -367,7 +335,7 @@ test("all duplicate, missing, override, and unknown catalogue fields fail locall
         entries: [
           {
             ...operations.entries[0],
-            bounds: [{ ...operations.entries[0].bounds[0], formula: "O(wrong)" }],
+            bounds: [{ ...operations.entries[0].bounds[1], formula: "O(wrong)" }],
           },
         ],
       },
@@ -555,26 +523,6 @@ class FakeElement extends FakeNode {
   setAttribute(name: string, value: string) {
     this.attributes[name] = value
   }
-  createTHead() {
-    const node = this.ownerDocument.createElement("thead")
-    this.append(node)
-    return node
-  }
-  createTBody() {
-    const node = this.ownerDocument.createElement("tbody")
-    this.append(node)
-    return node
-  }
-  insertRow() {
-    const node = this.ownerDocument.createElement("tr")
-    this.append(node)
-    return node
-  }
-  insertCell() {
-    const node = this.ownerDocument.createElement("td")
-    this.append(node)
-    return node
-  }
 }
 
 class FakeDocument {
@@ -611,10 +559,10 @@ function fakeText(node: FakeNode): string {
   return `${node.textContent}${node.children.map(fakeText).join("")}`
 }
 
-test("HAST and DOM normalize to the same IDs, labels, controls, rows, and safe text", () => {
+test("HAST and DOM normalize to the same IDs, labels, controls, and safe text", () => {
   const hostile = structuredClone(operations)
   hostile.title = "<img src=x onerror=alert(1)>"
-  hostile.entries[0].details.cause = "<script>alert(1)</script>"
+  hostile.entries[0].operation = "<script>alert(1)</script>"
   const view = buildComplexityViewModel(hostile)
   const hast = renderComplexityHast(view)
   const document = new FakeDocument()
@@ -627,62 +575,20 @@ test("HAST and DOM normalize to the same IDs, labels, controls, rows, and safe t
   const domPaths = findAllFake(root, "path")
     .map(({ attributes }) => attributes.id)
     .filter((id): id is string => typeof id === "string")
-  const hastRows = hastElements(hast, "tr")
-    .map(({ properties }) => properties["data-complexity-row"])
-    .filter((id): id is string => typeof id === "string")
-  const domRows = findAllFake(root, "tr")
-    .map(({ dataset }) => dataset.complexityRow)
-    .filter((id): id is string => typeof id === "string")
   const hastLegend = hastElements(hast, "li").map((item) => item.properties)
   const domLegend = findAllFake(root, "li")
 
   assert.deepEqual(hastPaths, domPaths)
-  assert.deepEqual(hastRows, domRows)
   assert.equal(hastLegend.length, domLegend.length)
   assert.equal(hastText(hast), fakeText(root))
   assert.match(hastText(hast), /<img src=x onerror=alert\(1\)>/)
-  assert.doesNotMatch(hastText(hast), /<script>alert\(1\)<\/script>/)
+  assert.match(hastText(hast), /<script>alert\(1\)<\/script>/)
   assert.equal(hastElements(hast, "script").length, 0)
   assert.equal(findAllFake(root, "script").length, 0)
   assert.equal(new Set(view.paths.map(({ id }) => id)).size, view.paths.length)
-  assert.equal(new Set(view.rows.map(({ id }) => id)).size, view.rows.length)
   assert.deepEqual(
     buildComplexityViewModel(hostile).paths.map(({ id }) => id),
     view.paths.map(({ id }) => id),
-  )
-  assert.deepEqual(
-    view.rows.map((row) => ({
-      label: row.label,
-      formula: row.formula,
-      variables: row.variables,
-      qualifiers: row.qualifiers,
-      cause: row.cause,
-      assumptions: row.assumptions,
-      auxiliarySpace: row.auxiliarySpace,
-      structureSpace: row.structureSpace,
-    })),
-    [
-      {
-        label: "Lookup — Average",
-        formula: "O(1)",
-        variables: "n: number of input elements",
-        qualifiers: ["well-distributed hash"],
-        cause: "<script>alert(1)</script>",
-        assumptions: undefined,
-        auxiliarySpace: "O(1)",
-        structureSpace: "O(n)",
-      },
-      {
-        label: "Lookup — Collision-bound",
-        formula: "O(bucket length)",
-        variables: "n: number of input elements",
-        qualifiers: undefined,
-        cause: "<script>alert(1)</script>",
-        assumptions: ["separate chaining"],
-        auxiliarySpace: "O(1)",
-        structureSpace: "O(n)",
-      },
-    ],
   )
 })
 
@@ -699,4 +605,11 @@ test("Obsidian DOM exposes equivalent labels and clears itself on teardown", () 
   assert.equal(findFake(root, "figcaption")?.textContent, view.title)
   handle.destroy()
   assert.equal(root.children.length, 0)
+})
+
+test("responsive styles follow the component width instead of the viewport", () => {
+  const styles = readFileSync(join(process.cwd(), "custom", "complexity", "styles.scss"), "utf8")
+  assert.match(styles, /\.complexity\s*\{[^}]*container-type: inline-size;/s)
+  assert.match(styles, /@container \(min-width: 600px\)/)
+  assert.doesNotMatch(styles, /@media \(min-width: 600px\)/)
 })

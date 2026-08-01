@@ -72,21 +72,9 @@ Bounds are per operation. The average column assumes a hash function that distri
         {
           "kind": "catalogue",
           "curveId": "linear",
-          "role": "Worst single op",
-          "qualifiers": [
-            "Collisions form a chain containing every entry."
-          ]
+          "role": "Worst single op"
         }
-      ],
-      "details": {
-        "structureSpace": "O(n)",
-        "auxiliarySpace": "O(1)",
-        "cause": "The hash selects one bucket; equality resolves collisions within that bucket.",
-        "assumptions": [
-          "The hash function distributes keys close to uniformly.",
-          "The load factor stays bounded by resizing."
-        ]
-      }
+      ]
     },
     {
       "kind": "operation",
@@ -100,32 +88,14 @@ Bounds are per operation. The average column assumes a hash function that distri
         {
           "kind": "catalogue",
           "curveId": "constant",
-          "role": "Amortized / average",
-          "qualifiers": [
-            "Amortized over a sequence of inserts, not guaranteed for one insert."
-          ]
+          "role": "Amortized / average"
         },
         {
           "kind": "catalogue",
           "curveId": "linear",
-          "role": "Worst single op",
-          "qualifiers": [
-            "A single insert may cross the load-factor threshold and rehash every entry, or collisions may form a linear chain."
-          ],
-          "details": {
-            "auxiliarySpace": "O(n)"
-          }
+          "role": "Worst single op"
         }
-      ],
-      "details": {
-        "structureSpace": "O(n)",
-        "auxiliarySpace": "O(1)",
-        "cause": "Hashing selects a bucket; occasional growth spreads an O(n) rehash across the inserts that filled the old table.",
-        "assumptions": [
-          "The hash function distributes keys close to uniformly.",
-          "The load factor stays bounded by resizing."
-        ]
-      }
+      ]
     },
     {
       "kind": "operation",
@@ -144,21 +114,9 @@ Bounds are per operation. The average column assumes a hash function that distri
         {
           "kind": "catalogue",
           "curveId": "linear",
-          "role": "Worst single op",
-          "qualifiers": [
-            "Collisions form a chain containing every entry."
-          ]
+          "role": "Worst single op"
         }
-      ],
-      "details": {
-        "structureSpace": "O(n)",
-        "auxiliarySpace": "O(1)",
-        "cause": "The hash selects one bucket; deletion searches that bucket before removing the matching key.",
-        "assumptions": [
-          "The hash function distributes keys close to uniformly.",
-          "The load factor stays bounded by resizing."
-        ]
-      }
+      ]
     },
     {
       "kind": "operation",
@@ -172,28 +130,14 @@ Bounds are per operation. The average column assumes a hash function that distri
         {
           "kind": "catalogue",
           "curveId": "constant",
-          "role": "Amortized per insert",
-          "qualifiers": [
-            "The O(n) rehash cost is spread across the sequence of inserts that grew the map."
-          ]
+          "role": "Amortized per insert"
         },
         {
           "kind": "catalogue",
           "curveId": "linear",
-          "role": "Worst single op",
-          "qualifiers": [
-            "One resize is an O(n) latency spike."
-          ]
+          "role": "Worst single op"
         }
-      ],
-      "details": {
-        "structureSpace": "O(n)",
-        "auxiliarySpace": "O(n)",
-        "cause": "Crossing the load-factor threshold allocates a larger array and rehashes every entry.",
-        "assumptions": [
-          "Capacity grows geometrically, so repeated resize cost amortizes to O(1) per insert."
-        ]
-      }
+      ]
     }
   ]
 }

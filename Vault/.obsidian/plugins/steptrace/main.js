@@ -23080,10 +23080,10 @@ function mountComplexityFigure(figure) {
       area.classList.toggle("is-subtle", !activeIds.has(area.dataset.pathId ?? ""));
     }
     for (const button2 of legendButtons) {
-      const pathId = button2.dataset.pathId ?? "";
-      button2.classList.toggle("is-selected", selectedPathId === pathId);
-      button2.classList.toggle("is-subtle", !activeIds.has(pathId));
-      button2.setAttribute("aria-pressed", selectedPathId === pathId ? "true" : "false");
+      const pathId2 = button2.dataset.pathId ?? "";
+      button2.classList.toggle("is-selected", selectedPathId === pathId2);
+      button2.classList.toggle("is-subtle", !activeIds.has(pathId2));
+      button2.setAttribute("aria-pressed", selectedPathId === pathId2 ? "true" : "false");
     }
     for (const label of labels) {
       const ids = (label.dataset.pathIds ?? "").split(",");
@@ -23123,8 +23123,8 @@ function mountComplexityFigure(figure) {
   }
   for (const button2 of legendButtons) {
     listen(button2, "click", () => {
-      const pathId = button2.dataset.pathId ?? null;
-      selectedPathId = selectedPathId === pathId ? null : pathId;
+      const pathId2 = button2.dataset.pathId ?? null;
+      selectedPathId = selectedPathId === pathId2 ? null : pathId2;
       if (selectedPathId) activeFilter = button2.dataset.category ?? "all";
       update();
     });
@@ -23169,33 +23169,27 @@ var COMPLEXITY_CHART = {
 var curves = {
   constant: {
     formula: "O(1)",
-    description: "Same time regardless of input size.",
     evaluate: () => 1
   },
   "log-n": {
     formula: "O(log n)",
-    description: "Halves the problem each step.",
     evaluate: Math.log2
   },
-  linear: { formula: "O(n)", description: "Processes each element once.", evaluate: (n) => n },
+  linear: { formula: "O(n)", evaluate: (n) => n },
   "n-log-n": {
     formula: "O(n log n)",
-    description: "Efficient divide-and-conquer work.",
     evaluate: (n) => n * Math.log2(n)
   },
   quadratic: {
     formula: "O(n²)",
-    description: "Nested work over the input.",
     evaluate: (n) => n * n
   },
   exponential: {
     formula: "O(2^n)",
-    description: "Doubles with each new element.",
     evaluate: (n) => 2 ** n
   },
   factorial: {
     formula: "O(n!)",
-    description: "Visits every permutation.",
     evaluate: (n) => {
       let value = 1;
       for (let factor = 2; factor <= n; factor++) value *= factor;
@@ -23220,7 +23214,6 @@ var OPERATION_COLORS = [
   ["#e7aa78", "#c97735", "#914619"],
   ["#78c9b3", "#389b82", "#176b57"]
 ];
-var DETAIL_KEYS = ["cause", "assumptions", "auxiliarySpace", "structureSpace"];
 var CONFIG_KEYS = ["version", "mode", "title", "variables", "entries"];
 var { left: LEFT, plotRight: PLOT_RIGHT, top: TOP, axisY: AXIS_Y } = COMPLEXITY_CHART;
 var DATA_BOTTOM = AXIS_Y - 14;
@@ -23242,40 +23235,13 @@ function textAt(value, path) {
   if (typeof value !== "string" || value.trim() === "") fail(path, "must be a non-empty string");
   return value;
 }
-function stringsAt(value, path) {
-  if (!Array.isArray(value) || value.some((item) => typeof item !== "string" || item.trim() === "")) {
-    fail(path, "must be an array of non-empty strings");
-  }
-  return value;
-}
 function curveIdAt(value, path) {
   if (typeof value !== "string" || !CURVE_IDS.includes(value)) {
     fail(path, `must be one of ${CURVE_IDS.join(", ")}`);
   }
   return value;
 }
-function detailsAt(value, path, required = false) {
-  const details = objectAt(value, path);
-  rejectUnknown(details, DETAIL_KEYS, path);
-  const result = {};
-  if (details.cause !== void 0) result.cause = textAt(details.cause, `${path}.cause`);
-  if (details.assumptions !== void 0) {
-    result.assumptions = stringsAt(details.assumptions, `${path}.assumptions`);
-  }
-  if (details.auxiliarySpace !== void 0) {
-    result.auxiliarySpace = textAt(details.auxiliarySpace, `${path}.auxiliarySpace`);
-  }
-  if (details.structureSpace !== void 0) {
-    result.structureSpace = textAt(details.structureSpace, `${path}.structureSpace`);
-  }
-  if (required && !result.auxiliarySpace) fail(`${path}.auxiliarySpace`, "is required");
-  if (required && !result.cause) fail(`${path}.cause`, "is required");
-  return result;
-}
-function qualifiersAt(value, path) {
-  return value === void 0 ? void 0 : stringsAt(value, path);
-}
-function variablesAt(value) {
+function validateVariables(value) {
   const variables = objectAt(value, "variables");
   const entries = Object.entries(variables);
   if (entries.length === 0) fail("variables", "must declare n");
@@ -23286,15 +23252,11 @@ function variablesAt(value) {
     names.add(name);
   }
   if (!names.has("n")) fail("variables.n", "is required for plotted curves");
-  return {
-    names,
-    text: entries.map(([name, description]) => `${name}: ${String(description)}`).join("; ")
-  };
 }
 function slug(value) {
   return value.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "");
 }
-function rowId(figureId, key4, index) {
+function pathId(figureId, key4, index) {
   return `${figureId}-${slug(key4)}-${index}`;
 }
 function categoryFor(role) {
@@ -23304,15 +23266,6 @@ function categoryFor(role) {
   if (normalized.includes("average")) return "average";
   if (normalized.startsWith("worst")) return "worst";
   return "other";
-}
-function mergeDetails(parent, child) {
-  if (!parent) return child ?? {};
-  if (!child) return parent;
-  return {
-    ...parent,
-    ...child,
-    assumptions: parent.assumptions || child.assumptions ? [...parent.assumptions ?? [], ...child.assumptions ?? []] : void 0
-  };
 }
 function roleColor(role, curveId) {
   if (role === "Best" || role === "Average" || role === "Worst") return CASE_COLORS[role];
@@ -23405,30 +23358,21 @@ function buildComplexityViewModel(input) {
   }
   const title = textAt(config.title, "title");
   const figureId = `complexity-${mode}-${slug(title)}`;
-  const variables = variablesAt(config.variables);
+  validateVariables(config.variables);
   if (!Array.isArray(config.entries) || config.entries.length === 0) {
     fail("entries", "must be a non-empty array");
   }
-  const rows = [];
   const highlighted = [];
   if (mode === "catalogue") {
     const seen = /* @__PURE__ */ new Set();
     config.entries.forEach((raw, index) => {
       const path = `entries[${index}]`;
       const entry = objectAt(raw, path);
-      rejectUnknown(entry, ["kind", "curveId", "description"], path);
+      rejectUnknown(entry, ["kind", "curveId"], path);
       if (entry.kind !== "catalogue") fail(`${path}.kind`, "must be catalogue");
       const curveId = curveIdAt(entry.curveId, `${path}.curveId`);
       assertUnique(seen, curveId, `${path}.curveId`);
-      const description = textAt(entry.description, `${path}.description`);
-      const id = rowId(figureId, curveId, index);
-      rows.push({
-        id,
-        label: curves[curveId].formula,
-        formula: curves[curveId].formula,
-        variables: variables.text,
-        description
-      });
+      const id = pathId(figureId, curveId, index);
       highlighted.push({
         id,
         curveId,
@@ -23443,7 +23387,7 @@ function buildComplexityViewModel(input) {
     config.entries.forEach((raw, index) => {
       const path = `entries[${index}]`;
       const entry = objectAt(raw, path);
-      rejectUnknown(entry, ["kind", "role", "curveId", "qualifiers", "details"], path);
+      rejectUnknown(entry, ["kind", "role", "curveId"], path);
       if (entry.kind !== "case") fail(`${path}.kind`, "must be case");
       const role = textAt(entry.role, `${path}.role`);
       if (role !== "Best" && role !== "Average" && role !== "Worst") {
@@ -23451,17 +23395,7 @@ function buildComplexityViewModel(input) {
       }
       assertUnique(seen, role, `${path}.role`);
       const curveId = curveIdAt(entry.curveId, `${path}.curveId`);
-      const qualifiers = qualifiersAt(entry.qualifiers, `${path}.qualifiers`);
-      const details = detailsAt(entry.details, `${path}.details`, true);
-      const id = rowId(figureId, role, index);
-      rows.push({
-        id,
-        label: role,
-        formula: curves[curveId].formula,
-        variables: variables.text,
-        qualifiers,
-        ...details
-      });
+      const id = pathId(figureId, role, index);
       highlighted.push({
         id,
         curveId,
@@ -23479,11 +23413,10 @@ function buildComplexityViewModel(input) {
     config.entries.forEach((raw, operationIndex) => {
       const path = `entries[${operationIndex}]`;
       const entry = objectAt(raw, path);
-      rejectUnknown(entry, ["kind", "operation", "bounds", "details"], path);
+      rejectUnknown(entry, ["kind", "operation", "bounds"], path);
       if (entry.kind !== "operation") fail(`${path}.kind`, "must be operation");
       const operation = textAt(entry.operation, `${path}.operation`);
       assertUnique(seenOperations, operation, `${path}.operation`);
-      const operationDetails = entry.details === void 0 ? void 0 : detailsAt(entry.details, `${path}.details`);
       if (!Array.isArray(entry.bounds) || entry.bounds.length === 0) {
         fail(`${path}.bounds`, "must be a non-empty array");
       }
@@ -23491,47 +23424,28 @@ function buildComplexityViewModel(input) {
       entry.bounds.forEach((rawBound, boundIndex) => {
         const boundPath = `${path}.bounds[${boundIndex}]`;
         const bound = objectAt(rawBound, boundPath);
-        const kind = bound.kind;
-        if (kind === "catalogue") {
-          rejectUnknown(bound, ["kind", "curveId", "role", "qualifiers", "details"], boundPath);
-        } else if (kind === "text") {
-          rejectUnknown(bound, ["kind", "formula", "role", "qualifiers", "details"], boundPath);
+        if (bound.kind === "catalogue") {
+          rejectUnknown(bound, ["kind", "curveId", "role"], boundPath);
+        } else if (bound.kind === "text") {
+          rejectUnknown(bound, ["kind", "formula", "role"], boundPath);
+          textAt(bound.formula, `${boundPath}.formula`);
         } else {
           fail(`${boundPath}.kind`, "must be catalogue or text");
         }
         const role = textAt(bound.role, `${boundPath}.role`);
         assertUnique(seenRoles, role, `${boundPath}.role`);
-        const qualifiers = qualifiersAt(bound.qualifiers, `${boundPath}.qualifiers`);
-        const boundDetails = bound.details === void 0 ? void 0 : detailsAt(bound.details, `${boundPath}.details`);
-        const details = mergeDetails(operationDetails, boundDetails);
-        let curveId;
-        let formula;
-        if (kind === "catalogue") {
-          curveId = curveIdAt(bound.curveId, `${boundPath}.curveId`);
-          formula = curves[curveId].formula;
-        } else {
-          formula = textAt(bound.formula, `${boundPath}.formula`);
-        }
-        const id = rowId(figureId, `${operation}-${role}`, operationIndex * 100 + boundIndex);
-        rows.push({
+        if (bound.kind === "text") return;
+        const curveId = curveIdAt(bound.curveId, `${boundPath}.curveId`);
+        const id = pathId(figureId, `${operation}-${role}`, operationIndex * 100 + boundIndex);
+        highlighted.push({
           id,
-          label: `${operation} — ${role}`,
-          formula,
-          variables: variables.text,
-          qualifiers,
-          ...details
+          curveId,
+          category: categoryFor(role),
+          label: `${operation} — ${role}: ${curves[curveId].formula}`,
+          legendGroup: operation,
+          legendLabel: `${compactRole(role)} ${curves[curveId].formula}`,
+          color: operationColor(operationIndex, boundIndex)
         });
-        if (curveId) {
-          highlighted.push({
-            id,
-            curveId,
-            category: categoryFor(role),
-            label: `${operation} — ${role}: ${curves[curveId].formula}`,
-            legendGroup: operation,
-            legendLabel: `${compactRole(role)} ${curves[curveId].formula}`,
-            color: operationColor(operationIndex, boundIndex)
-          });
-        }
       });
     });
   }
@@ -23602,7 +23516,6 @@ function buildComplexityViewModel(input) {
     legend,
     endpointLabels: layoutEndpointLabels(paths),
     availableCategories,
-    rows,
     ticks,
     xTicks
   };

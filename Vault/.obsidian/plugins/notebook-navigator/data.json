@@ -156,7 +156,7 @@
     "file": "Home/index.md",
     "createMissingPeriodicNote": true
   },
-  "dualPane": true,
+  "dualPane": false,
   "dualPaneOrientation": "horizontal",
   "narrowSidebarLayout": "vertical",
   "narrowSidebarTriggerMode": "fitPanes",
@@ -170,16 +170,16 @@
   "useFloatingToolbars": true,
   "toolbarVisibility": {
     "navigation": {
-      "toggleDualPane": false,
+      "toggleDualPane": true,
       "expandCollapse": false,
       "calendar": true,
-      "hiddenItems": false,
-      "rootReorder": false,
+      "hiddenItems": true,
+      "rootReorder": true,
       "newFolder": false
     },
     "list": {
-      "back": false,
-      "search": false,
+      "back": true,
+      "search": true,
       "reveal": false,
       "descendants": false,
       "groupExpansion": false,
@@ -618,8 +618,8 @@
   "virtualFolderColors": {},
   "virtualFolderBackgroundColors": {},
   "navigationSeparators": {
-    "folder:Templates": true,
-    "folder:Home": true
+    "folder:Home": true,
+    "folder:Assets": true
   },
   "userColors": [
     "#ffffff",
@@ -644,7 +644,11 @@
     "#404040"
   ],
   "lastShownVersion": "3.3.0",
-  "rootFolderOrder": [],
+  "rootFolderOrder": [
+    "Home",
+    "Assets",
+    "Templates"
+  ],
   "rootTagOrder": [],
   "rootPropertyOrder": []
 }

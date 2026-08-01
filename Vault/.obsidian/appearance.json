@@ -11,7 +11,8 @@
   "baseFontSize": 16,
   "enabledCssSnippets": [
     "markdown-max-width",
-    "hide-components"
+    "hide-components",
+    "paper-page"
   ],
   "monospaceFontFamily": "IBM Plex Mono"
 }

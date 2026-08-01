@@ -51,39 +51,17 @@ Because elements are swapped by value inside the shared array, quick sort is **i
     {
       "kind": "case",
       "role": "Best",
-      "curveId": "n-log-n",
-      "qualifiers": [
-        "Partitions split near the middle."
-      ],
-      "details": {
-        "auxiliarySpace": "O(log n)",
-        "cause": "Each partition splits near the middle, so recursion depth is ~log₂ n and every level does O(n) comparison work."
-      }
+      "curveId": "n-log-n"
     },
     {
       "kind": "case",
       "role": "Average",
-      "curveId": "n-log-n",
-      "qualifiers": [
-        "Expected with a uniformly randomized pivot when keys are distinct; duplicate-heavy inputs need three-way partitioning.",
-        "Deterministic median-of-three is a heuristic whose expected behavior needs an input-distribution assumption; adversarial O(n²) remains possible."
-      ],
-      "details": {
-        "auxiliarySpace": "O(log n)",
-        "cause": "With distinct keys, uniformly randomized pivot choices produce balanced-enough splits in expectation, so expected recursion depth is O(log n)."
-      }
+      "curveId": "n-log-n"
     },
     {
       "kind": "case",
       "role": "Worst",
-      "curveId": "quadratic",
-      "qualifiers": [
-        "Auxiliary space is the recursion stack of the reference implementation, which recurses into both sides directly."
-      ],
-      "details": {
-        "auxiliarySpace": "O(n)",
-        "cause": "Every pivot is the minimum or maximum of its range, so one side holds n − 1 elements; n levels of O(n) work, and the recursion nests n deep."
-      }
+      "curveId": "quadratic"
     }
   ]
 }
