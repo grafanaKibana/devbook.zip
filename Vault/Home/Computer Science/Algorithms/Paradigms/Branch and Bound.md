@@ -17,11 +17,15 @@ That pruning is valid only under one precondition: the bound must be *optimistic
 
 **Core condition:** an optimisation objective + a cheap optimistic bound from a relaxation → prune any subtree whose bound cannot beat the best complete solution so far (the incumbent) → exact search that can touch only a fraction of an exponential tree.
 
-The step that carries the whole idea is a single bound comparison that erases a subtree before it is expanded.
+~~~~~tabsdown
+tab: Visualization
+
 
 ```steptrace
 {"algorithm":"branch-and-bound"}
 ```
+
+The step that carries the whole idea is a single bound comparison that erases a subtree before it is expanded.
 
 # Why a Subtree Can Be Discarded
 
@@ -44,6 +48,107 @@ Every live (unpruned, unexpanded) node is a candidate to visit next, and the ord
 - **Depth-first** dives to a complete solution quickly in `O(depth)` memory, like [[Home/Computer Science/Algorithms/Paradigms/Backtracking|Backtracking]]. That early incumbent immediately starts pruning siblings, though the dive can waste effort in regions best-first would have skipped.
 
 A good early incumbent raises the bar every later bound must clear, so more subtrees fall on a single comparison. Solvers exploit this by seeding the incumbent with a fast heuristic — often a [[Home/Computer Science/Algorithms/Paradigms/Greedy Algorithms|greedy]] solution — before the exact search starts.
+
+tab: Complexity
+
+```complexity
+{
+  "version": 2,
+  "label": "Branch and Bound complexity",
+  "variables": {
+    "branchingFactor": {
+      "symbol": "b",
+      "description": "search branching factor or radix base"
+    },
+    "inputSize": {
+      "symbol": "n",
+      "description": "number of input elements or states"
+    }
+  },
+  "resources": {
+    "time": {
+      "mode": "operations",
+      "entries": [
+        {
+          "kind": "operation",
+          "operation": "Best",
+          "bounds": [
+            {
+              "kind": "text",
+              "role": "Time",
+              "formula": "O(n · b)"
+            }
+          ]
+        },
+        {
+          "kind": "operation",
+          "operation": "Practical",
+          "bounds": [
+            {
+              "kind": "text",
+              "role": "Time",
+              "formula": "instance-dependent; still exponential"
+            }
+          ]
+        },
+        {
+          "kind": "operation",
+          "operation": "Worst",
+          "bounds": [
+            {
+              "kind": "text",
+              "role": "Time",
+              "formula": "O(2ⁿ · b)"
+            }
+          ]
+        }
+      ]
+    },
+    "space": {
+      "mode": "operations",
+      "entries": [
+        {
+          "kind": "operation",
+          "operation": "Best",
+          "bounds": [
+            {
+              "kind": "curve",
+              "role": "Auxiliary space",
+              "formula": "O(n)",
+              "curveId": "linear"
+            }
+          ]
+        },
+        {
+          "kind": "operation",
+          "operation": "Practical",
+          "bounds": [
+            {
+              "kind": "curve",
+              "role": "Auxiliary space",
+              "formula": "O(n)",
+              "curveId": "linear"
+            }
+          ]
+        },
+        {
+          "kind": "operation",
+          "operation": "Worst",
+          "bounds": [
+            {
+              "kind": "curve",
+              "role": "Auxiliary space",
+              "formula": "O(n)",
+              "curveId": "linear"
+            }
+          ]
+        }
+      ]
+    }
+  }
+}
+```
+~~~~~
 
 # Complexity
 

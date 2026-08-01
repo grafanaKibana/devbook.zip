@@ -1,5 +1,9 @@
 import { mountComplexityFigure } from "./interactions"
-import { COMPLEXITY_CHART, COMPLEXITY_FILTERS, type ComplexityViewModel } from "./model"
+import {
+  COMPLEXITY_CHART,
+  type ComplexityResourceViewModel,
+  type ComplexityViewModel,
+} from "./model"
 
 const SVG_NS = "http://www.w3.org/2000/svg"
 
@@ -25,47 +29,21 @@ function svgElement(
   return node
 }
 
-export function renderComplexityDom(
-  root: HTMLElement,
-  view: ComplexityViewModel,
-): { destroy(): void } {
-  const document = root.ownerDocument
+function renderResourceDom(document: Document, resource: ComplexityResourceViewModel): HTMLElement {
   const { width, height, left, plotRight, labelX, top, axisY } = COMPLEXITY_CHART
-  const clipId = `${view.figureId}-plot-clip`
-  const panelId = `${view.figureId}-panel`
-  const figure = document.createElement("figure")
-  figure.id = view.figureId
-  figure.className = "complexity"
-  figure.dataset.complexityMode = view.mode
-  figure.dataset.activeFilter = "all"
-
-  const title = appendText(document, figure, "figcaption", view.title)
-  title.id = `${view.figureId}-title`
-  title.className = "complexity__title"
-
-  const tabs = document.createElement("div")
-  tabs.className = "steptrace__tabs complexity__tabs"
-  tabs.setAttribute("role", "tablist")
-  tabs.setAttribute("aria-label", "Complexity cases")
-  for (const filter of COMPLEXITY_FILTERS) {
-    const tab = appendText(document, tabs, "button", filter.label)
-    tab.id = `${view.figureId}-tab-${filter.id}`
-    tab.type = "button"
-    tab.className = "steptrace__tab complexity__tab"
-    tab.dataset.filter = filter.id
-    tab.setAttribute("role", "tab")
-    tab.setAttribute("aria-controls", panelId)
-    tab.setAttribute("aria-selected", filter.id === "all" ? "true" : "false")
-    tab.tabIndex = filter.id === "all" ? 0 : -1
-    tab.disabled = filter.id !== "all" && !view.availableCategories.includes(filter.id)
+  const clipId = `${resource.labelId}-plot-clip`
+  const paths = [...resource.contextPaths, ...resource.paths]
+  const group = document.createElement("div")
+  group.className = "complexity__resource"
+  group.dataset.complexityResource = resource.key
+  if (resource.key !== "catalogue") {
+    group.setAttribute("role", "group")
+    group.setAttribute("aria-labelledby", resource.labelId)
+    const label = appendText(document, group, "div", resource.label)
+    label.id = resource.labelId
+    label.className = "complexity__resource-label"
   }
-  figure.append(tabs)
 
-  const panel = document.createElement("div")
-  panel.id = panelId
-  panel.className = "complexity__panel"
-  panel.setAttribute("role", "tabpanel")
-  panel.setAttribute("aria-labelledby", `${view.figureId}-tab-all`)
   const plotWrap = document.createElement("div")
   plotWrap.className = "complexity__plot-wrap"
   const svg = svgElement(document, "svg", {
@@ -86,7 +64,7 @@ export function renderComplexityDom(
     }),
   )
   defs.append(clip)
-  for (const path of view.paths.filter((candidate) => !candidate.dimmed)) {
+  for (const path of paths.filter((candidate) => !candidate.dimmed)) {
     const gradient = svgElement(document, "linearGradient", {
       id: `${path.id}-fill`,
       x1: 0,
@@ -109,7 +87,7 @@ export function renderComplexityDom(
     defs.append(gradient)
   }
   svg.append(defs)
-  for (const tick of view.ticks) {
+  for (const tick of resource.ticks) {
     svg.append(
       svgElement(document, "line", {
         class: "complexity__grid",
@@ -136,7 +114,7 @@ export function renderComplexityDom(
       y2: axisY,
     }),
   )
-  for (const tick of view.xTicks) {
+  for (const tick of resource.xTicks) {
     const label = svgElement(document, "text", {
       class: "complexity__x-tick",
       x: tick.x,
@@ -148,7 +126,7 @@ export function renderComplexityDom(
   const clipped = svgElement(document, "g", { "clip-path": `url(#${clipId})` })
   const areas = svgElement(document, "g", { class: "complexity__areas" })
   const curves = svgElement(document, "g", { class: "complexity__curves" })
-  for (const path of view.paths) {
+  for (const path of paths) {
     if (!path.dimmed) {
       areas.append(
         svgElement(document, "path", {
@@ -156,7 +134,6 @@ export function renderComplexityDom(
           d: path.area,
           fill: `url(#${path.id}-fill)`,
           "data-path-id": path.id,
-          "data-category": path.category,
         }),
       )
     }
@@ -170,7 +147,6 @@ export function renderComplexityDom(
         "vector-effect": "non-scaling-stroke",
         "data-path-id": path.id,
         "data-curve-id": path.curveId,
-        "data-category": path.category,
         "data-context": path.dimmed ? "true" : "false",
       }),
     )
@@ -179,7 +155,7 @@ export function renderComplexityDom(
   svg.append(clipped)
 
   const endpointLabels = svgElement(document, "g", { class: "complexity__endpoint-labels" })
-  for (const endpoint of view.endpointLabels) {
+  for (const endpoint of resource.endpointLabels) {
     const label = svgElement(document, "text", {
       class: `complexity__endpoint-label ${endpoint.dimmed ? "is-subtle" : "is-active"}`,
       x: labelX,
@@ -193,27 +169,26 @@ export function renderComplexityDom(
   }
   svg.append(endpointLabels)
   plotWrap.append(svg)
-  panel.append(plotWrap)
-  figure.append(panel)
+  group.append(plotWrap)
 
   const legend = document.createElement("div")
   legend.className = "complexity__legend"
-  for (const group of view.legend) {
+  for (const legendGroup of resource.legend) {
     const row = document.createElement("div")
-    row.className = `complexity__legend-group${group.label ? "" : " is-ungrouped"}`
-    if (group.label) {
-      appendText(document, row, "span", group.label).className = "complexity__legend-group-label"
+    row.className = `complexity__legend-group${legendGroup.label ? "" : " is-ungrouped"}`
+    if (legendGroup.label) {
+      appendText(document, row, "span", legendGroup.label).className =
+        "complexity__legend-group-label"
     }
     const items = document.createElement("ul")
     items.className = "complexity__legend-items"
-    for (const legendItem of group.items) {
+    for (const legendItem of legendGroup.items) {
       const item = document.createElement("li")
       item.className = "complexity__legend-item"
       const button = document.createElement("button")
       button.type = "button"
       button.className = "complexity__legend-button"
       button.dataset.pathId = legendItem.pathId
-      button.dataset.category = legendItem.category
       button.setAttribute("aria-pressed", "false")
       button.style.setProperty("--complexity-color", legendItem.color)
       const swatch = document.createElement("span")
@@ -226,7 +201,35 @@ export function renderComplexityDom(
     row.append(items)
     legend.append(row)
   }
-  figure.append(legend)
+  group.append(legend)
+  if (resource.semanticBounds.length > 0) {
+    const semanticBounds = document.createElement("dl")
+    semanticBounds.className = "complexity__semantic-bounds"
+    for (const bound of resource.semanticBounds) {
+      appendText(document, semanticBounds, "dt", `${bound.operation} — ${bound.role}`)
+      appendText(document, semanticBounds, "dd", bound.formula)
+    }
+    group.append(semanticBounds)
+  }
+  return group
+}
+
+export function renderComplexityDom(
+  root: HTMLElement,
+  view: ComplexityViewModel,
+): { destroy(): void } {
+  const document = root.ownerDocument
+  const figure = document.createElement("figure")
+  figure.id = view.figureId
+  figure.className = "complexity"
+  figure.dataset.complexityMode = view.mode
+  figure.setAttribute("aria-label", view.label)
+  const hiddenLabel = appendText(document, figure, "span", view.label)
+  hiddenLabel.hidden = true
+  const resources = document.createElement("div")
+  resources.className = "complexity__resources"
+  for (const resource of view.resources) resources.append(renderResourceDom(document, resource))
+  figure.append(resources)
   root.replaceChildren(figure)
 
   const interaction =

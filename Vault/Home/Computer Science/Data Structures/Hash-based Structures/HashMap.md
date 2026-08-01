@@ -21,9 +21,38 @@ The structure remembers a mapping from key to value and nothing else. It does no
 
 The three tabs keep the same 12-cell bucket-head array while changing only collision policy. **Closed Addressing** uses separate chaining (also called open hashing): each bucket points to its own external key/value chain. **Open Addressing** uses linear probing (also called closed hashing) and leaves tombstones after removal. **Bucket Hashing** groups the array into four contiguous 3-cell buckets, then advances bucket by bucket with wraparound when the home group is full. This prototype fixes capacity at 12 to compare collision policies; production maps usually resize or rebuild after crossing a load threshold.
 
+~~~~~tabsdown
+tab: Visualization
+
+~~~~tabsdown
+tab: Closed Addressing
+
+
 ```steptrace
-{"tabs":[{"name":"Closed Addressing","description":"Separate chaining (open hashing): each bucket points to its own external key/value chain.","algorithm":"hash-map","variant":"closed-addressing"},{"name":"Open Addressing","description":"Linear probing scans the fixed table and preserves tombstones after removal.","algorithm":"hash-map","variant":"open-addressing"},{"name":"Bucket Hashing","description":"Four three-cell buckets use bucket-by-bucket linear overflow with wraparound.","algorithm":"hash-map","variant":"buckets"}]}
+{"algorithm":"hash-map","variant":"closed-addressing"}
 ```
+
+Separate chaining (open hashing): each bucket points to its own external key/value chain.
+
+tab: Open Addressing
+
+
+```steptrace
+{"algorithm":"hash-map","variant":"open-addressing"}
+```
+
+Linear probing scans the fixed table and preserves tombstones after removal.
+
+tab: Bucket Hashing
+
+
+```steptrace
+{"algorithm":"hash-map","variant":"buckets"}
+```
+
+Four three-cell buckets use bucket-by-bucket linear overflow with wraparound.
+
+~~~~
 
 ## Representation and invariants
 
@@ -42,106 +71,175 @@ Three invariants define a valid state:
 2. Keys that compare equal must hash equal — the `GetHashCode`/`Equals` contract. If it breaks, equal keys can land in different buckets and both survive as separate entries.
 3. A lookup recomputes the bucket, then resolves the collision by equality within it. Correctness depends on both the hash (which bucket) and equality (which entry).
 
+tab: Complexity
+
+```complexity
+{
+  "version": 2,
+  "label": "HashMap complexity",
+  "variables": {
+    "inputSize": {
+      "symbol": "n",
+      "description": "number of input elements or states"
+    }
+  },
+  "resources": {
+    "time": {
+      "mode": "operations",
+      "entries": [
+        {
+          "kind": "operation",
+          "operation": "Lookup",
+          "bounds": [
+            {
+              "kind": "curve",
+              "role": "Best",
+              "formula": "O(1)",
+              "curveId": "constant"
+            },
+            {
+              "kind": "curve",
+              "role": "Typical",
+              "formula": "O(1) average",
+              "curveId": "constant"
+            },
+            {
+              "kind": "curve",
+              "role": "Worst single operation",
+              "formula": "O(n)",
+              "curveId": "linear"
+            }
+          ]
+        },
+        {
+          "kind": "operation",
+          "operation": "Insert",
+          "bounds": [
+            {
+              "kind": "curve",
+              "role": "Best",
+              "formula": "O(1)",
+              "curveId": "constant"
+            },
+            {
+              "kind": "curve",
+              "role": "Typical",
+              "formula": "O(1) amortized / average",
+              "curveId": "constant"
+            },
+            {
+              "kind": "curve",
+              "role": "Worst single operation",
+              "formula": "O(n)",
+              "curveId": "linear"
+            }
+          ]
+        },
+        {
+          "kind": "operation",
+          "operation": "Delete",
+          "bounds": [
+            {
+              "kind": "curve",
+              "role": "Best",
+              "formula": "O(1)",
+              "curveId": "constant"
+            },
+            {
+              "kind": "curve",
+              "role": "Typical",
+              "formula": "O(1) average",
+              "curveId": "constant"
+            },
+            {
+              "kind": "curve",
+              "role": "Worst single operation",
+              "formula": "O(n)",
+              "curveId": "linear"
+            }
+          ]
+        },
+        {
+          "kind": "operation",
+          "operation": "Resize (rehash all)",
+          "bounds": [
+            {
+              "kind": "curve",
+              "role": "Typical",
+              "formula": "O(1) amortized per insert",
+              "curveId": "constant"
+            },
+            {
+              "kind": "curve",
+              "role": "Worst single operation",
+              "formula": "O(n)",
+              "curveId": "linear"
+            }
+          ]
+        }
+      ]
+    },
+    "space": {
+      "mode": "operations",
+      "entries": [
+        {
+          "kind": "operation",
+          "operation": "Lookup",
+          "bounds": [
+            {
+              "kind": "curve",
+              "role": "Auxiliary space",
+              "formula": "O(1)",
+              "curveId": "constant"
+            }
+          ]
+        },
+        {
+          "kind": "operation",
+          "operation": "Insert",
+          "bounds": [
+            {
+              "kind": "text",
+              "role": "Auxiliary space",
+              "formula": "O(1) normally; O(n) during resize"
+            }
+          ]
+        },
+        {
+          "kind": "operation",
+          "operation": "Delete",
+          "bounds": [
+            {
+              "kind": "curve",
+              "role": "Auxiliary space",
+              "formula": "O(1)",
+              "curveId": "constant"
+            }
+          ]
+        },
+        {
+          "kind": "operation",
+          "operation": "Resize (rehash all)",
+          "bounds": [
+            {
+              "kind": "curve",
+              "role": "Auxiliary space",
+              "formula": "O(n)",
+              "curveId": "linear"
+            }
+          ]
+        }
+      ]
+    }
+  }
+}
+```
+~~~~~
+
 ## Complexity
 
 Bounds are per operation. The average column assumes a hash function that distributes keys close to uniformly and a load factor kept bounded by resizing; the worst column is what happens when that assumption fails.
 
-```complexity
-{
-  "version": 1,
-  "mode": "operations",
-  "title": "HashMap operation complexity",
-  "variables": {
-    "n": "number of stored entries"
-  },
-  "entries": [
-    {
-      "kind": "operation",
-      "operation": "Lookup",
-      "bounds": [
-        {
-          "kind": "catalogue",
-          "curveId": "constant",
-          "role": "Best"
-        },
-        {
-          "kind": "catalogue",
-          "curveId": "constant",
-          "role": "Average"
-        },
-        {
-          "kind": "catalogue",
-          "curveId": "linear",
-          "role": "Worst single op"
-        }
-      ]
-    },
-    {
-      "kind": "operation",
-      "operation": "Insert",
-      "bounds": [
-        {
-          "kind": "catalogue",
-          "curveId": "constant",
-          "role": "Best"
-        },
-        {
-          "kind": "catalogue",
-          "curveId": "constant",
-          "role": "Amortized / average"
-        },
-        {
-          "kind": "catalogue",
-          "curveId": "linear",
-          "role": "Worst single op"
-        }
-      ]
-    },
-    {
-      "kind": "operation",
-      "operation": "Delete",
-      "bounds": [
-        {
-          "kind": "catalogue",
-          "curveId": "constant",
-          "role": "Best"
-        },
-        {
-          "kind": "catalogue",
-          "curveId": "constant",
-          "role": "Average"
-        },
-        {
-          "kind": "catalogue",
-          "curveId": "linear",
-          "role": "Worst single op"
-        }
-      ]
-    },
-    {
-      "kind": "operation",
-      "operation": "Resize (rehash all)",
-      "bounds": [
-        {
-          "kind": "text",
-          "formula": "—",
-          "role": "Best"
-        },
-        {
-          "kind": "catalogue",
-          "curveId": "constant",
-          "role": "Amortized per insert"
-        },
-        {
-          "kind": "catalogue",
-          "curveId": "linear",
-          "role": "Worst single op"
-        }
-      ]
-    }
-  ]
-}
-```
 
 ### Operation details
 

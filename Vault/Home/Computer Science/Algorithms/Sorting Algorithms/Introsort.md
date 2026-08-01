@@ -19,13 +19,82 @@ Introsort (David Musser, 1997) keeps quicksort's partitioning but watches its ow
 
 The behavior worth animating is the switch itself: quicksort partitioning and recursing until the depth budget hits zero, at which point heap sort takes over the offending partition.
 
-# Trace
+~~~~~tabsdown
+tab: Visualization
 
-This compact trace deliberately lowers the depth limit to `1` and the insertion cutoff to `3`. Those are illustrative values, not runtime defaults: they keep quicksort, the heap fallback, and a visible insertion cleanup inside nine bars.
+
 
 ```steptrace
 { "algorithm": "introsort", "array": [2, 1, 9, 8, 7, 6, 5, 4, 3], "depthLimit": 1, "smallPartitionThreshold": 3 }
 ```
+
+# Trace
+
+This compact trace deliberately lowers the depth limit to `1` and the insertion cutoff to `3`. Those are illustrative values, not runtime defaults: they keep quicksort, the heap fallback, and a visible insertion cleanup inside nine bars.
+
+tab: Complexity
+
+```complexity
+{
+  "version": 2,
+  "label": "Introsort complexity",
+  "variables": {
+    "inputSize": {
+      "symbol": "n",
+      "description": "number of input elements or states"
+    }
+  },
+  "resources": {
+    "time": {
+      "mode": "cases",
+      "entries": [
+        {
+          "kind": "case",
+          "role": "Best",
+          "formula": "O(n log n)",
+          "curveId": "n-log-n"
+        },
+        {
+          "kind": "case",
+          "role": "Average",
+          "formula": "O(n log n)",
+          "curveId": "n-log-n"
+        },
+        {
+          "kind": "case",
+          "role": "Worst",
+          "formula": "O(n log n)",
+          "curveId": "n-log-n"
+        }
+      ]
+    },
+    "space": {
+      "mode": "cases",
+      "entries": [
+        {
+          "kind": "case",
+          "role": "Best",
+          "formula": "O(log n)",
+          "curveId": "log-n"
+        },
+        {
+          "kind": "case",
+          "role": "Average",
+          "formula": "O(log n)",
+          "curveId": "log-n"
+        },
+        {
+          "kind": "case",
+          "role": "Worst",
+          "formula": "O(log n)",
+          "curveId": "log-n"
+        }
+      ]
+    }
+  }
+}
+```
+~~~~~
 
 # Why the Worst Case Stays Bounded
 

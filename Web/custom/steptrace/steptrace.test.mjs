@@ -1,7 +1,7 @@
 import assert from "node:assert/strict"
 import { createHash } from "node:crypto"
 import { EventEmitter } from "node:events"
-import { readFileSync, readdirSync } from "node:fs"
+import { existsSync, readFileSync, readdirSync } from "node:fs"
 import { dirname, join } from "node:path"
 import { setTimeout as delay } from "node:timers/promises"
 import test from "node:test"
@@ -143,6 +143,64 @@ function loadStepTraceModule(...segments) {
   const module = { exports: {} }
   new Function("module", "exports", result.outputFiles[0].text)(module, module.exports)
   return module.exports
+}
+
+function parseAuthoredStepTraceTabs(note) {
+  const { parseTabs } = loadStepTraceModule(
+    "..",
+    "..",
+    ".quartz",
+    "plugins",
+    "quartz-tabsdown",
+    "src",
+    "parser.ts",
+  )
+  const outerFence = note.match(/~~~~~tabsdown\n([\s\S]*?)\n~~~~~/)
+  assert.ok(outerFence)
+  const outerTabs = parseTabs(outerFence[1])
+  assert.equal(outerTabs.ok, true)
+  assert.deepEqual(
+    outerTabs.tabs.map(({ label }) => label),
+    ["Visualization", "Complexity"],
+  )
+
+  const visualization = outerTabs.tabs[0].body
+  const configs = [...visualization.matchAll(/(~~~~)tabsdown\n([\s\S]*?)\n\1/g)].map(
+    ([, , innerBody]) => {
+      const innerTabs = parseTabs(innerBody)
+      assert.equal(innerTabs.ok, true)
+      return innerTabs.tabs.map(({ label, body }, index) => {
+        const payload = body.match(/```steptrace\n([^\n]+)\n```/)?.[1]
+        assert.ok(payload)
+        return {
+          label,
+          description: body.split("```steptrace")[0].trim(),
+          selectedInitially: index === 0,
+          payload,
+          payloadSha256: createHash("sha256").update(payload).digest("hex"),
+        }
+      })
+    },
+  )
+  return { configs, visualization }
+}
+
+function markdownFiles(root) {
+  return readdirSync(root, { withFileTypes: true }).flatMap((entry) => {
+    const path = join(root, entry.name)
+    if (entry.isDirectory()) return markdownFiles(path)
+    return entry.isFile() && entry.name.endsWith(".md") ? [path] : []
+  })
+}
+
+function authoredDsaTabsdownNotes() {
+  return [
+    join(repoRoot, "Vault", "Home", "Computer Science", "Algorithms"),
+    join(repoRoot, "Vault", "Home", "Computer Science", "Data Structures"),
+  ]
+    .flatMap(markdownFiles)
+    .map((path) => ({ path, source: readFileSync(path, "utf8") }))
+    .filter(({ source }) => /```steptrace\n/.test(source) && /~{5,}tabsdown\n/.test(source))
 }
 
 function buildAbstractDivideAndConquer() {
@@ -971,65 +1029,6 @@ test("KMP, Rabin-Karp, and Z stay isolated from the Boyer-Moore profile", () => 
   }
 })
 
-test("tabbed blocks validate metadata and keep algorithm configs clean", () => {
-  const { isTabsConfig, normalizeTabsConfig } = loadStepTraceModule("src", "tabs.ts")
-  const legacy = { algorithm: "bubble-sort", array: [3, 1, 2] }
-  const tabbed = {
-    selected: 1,
-    tabs: [
-      {
-        name: "Example 1",
-        description: " First input. ",
-        algorithm: "bubble-sort",
-        array: [3, 1, 2],
-      },
-      {
-        name: "Example 2",
-        description: "Second input.",
-        algorithm: "bubble-sort",
-        array: [4, 2, 1],
-      },
-    ],
-  }
-
-  assert.equal(isTabsConfig(legacy), false)
-  assert.equal(isTabsConfig(tabbed), true)
-  assert.deepEqual(normalizeTabsConfig(tabbed), {
-    selected: 1,
-    tabs: [
-      {
-        name: "Example 1",
-        description: "First input.",
-        config: { algorithm: "bubble-sort", array: [3, 1, 2] },
-      },
-      {
-        name: "Example 2",
-        description: "Second input.",
-        config: { algorithm: "bubble-sort", array: [4, 2, 1] },
-      },
-    ],
-  })
-  assert.throws(() => normalizeTabsConfig({ tabs: [] }), /at least one tab/)
-  assert.throws(
-    () => normalizeTabsConfig({ tabs: [{ name: " ", algorithm: "bubble-sort" }] }),
-    /non-empty "name"/,
-  )
-  assert.throws(
-    () =>
-      normalizeTabsConfig({
-        tabs: [
-          { name: "Same", algorithm: "bubble-sort" },
-          { name: "same", algorithm: "insertion-sort" },
-        ],
-      }),
-    /duplicate tab name/,
-  )
-  assert.throws(
-    () => normalizeTabsConfig({ selected: 2, tabs: [{ name: "One", algorithm: "bubble-sort" }] }),
-    /"selected" must be an index/,
-  )
-})
-
 test("A* graph-state profiles stay typed, deterministic, optimal, and reachable", () => {
   const api = loadEngine(readFileSync(join(here, "generated", "engine.js"), "utf8"))
   const family = loadStepTraceModule("src", "families", "graph-state.ts")
@@ -1382,6 +1381,7 @@ test("A* uses profile-owned controls and visual-only graph state without racks",
     ),
     "utf8",
   )
+  const { configs } = parseAuthoredStepTraceTabs(note)
 
   assert.match(mountSource, /syncEndpointOptions\(built\.endpointSettings, built\.graph\)/)
   assert.match(mountSource, /settings\?\.startLabel \|\| "Start node"/)
@@ -1400,34 +1400,116 @@ test("A* uses profile-owned controls and visual-only graph state without racks",
   assert.match(styles, /grid-template-rows: minmax\(0, 1fr\)/)
   assert.match(styles, /\.steptrace \.steptrace__gs-city-label \{[^}]*font-size: 0\.54rem;/s)
   assert.doesNotMatch(styles, /steptrace__gs-rack/)
-  assert.match(
-    note,
-    /```steptrace\n\{"tabs":\[\{"name":"Coordinate grid"[\s\S]*"name":"Cities"[\s\S]*"name":"Building floor"[\s\S]*"name":"Midtown map"/,
-  )
+  assert.deepEqual(configs, [
+    [
+      {
+        label: "Coordinate grid",
+        description: "",
+        selectedInitially: true,
+        payload: '{"algorithm":"a-star","variant":"coordinate-grid"}',
+        payloadSha256: "213fe177ff28dff6051c899d623ad0e612a661b7fdce39f7fe780b64d35615b7",
+      },
+      {
+        label: "Cities",
+        description: "",
+        selectedInitially: false,
+        payload:
+          '{"algorithm":"a-star","variant":"ukraine-cities","start":"Lviv","target":"Kharkiv"}',
+        payloadSha256: "d0368cc3da2dabfc5139b226800ac19f7ae62618693ab00cd6230f25a5dbf67a",
+      },
+      {
+        label: "Building floor",
+        description: "",
+        selectedInitially: false,
+        payload: '{"algorithm":"a-star","variant":"building-floor"}',
+        payloadSha256: "aa35da93f40211db922f8ab1d8682d66b4a2e1c5886e849ce52b12b6b6a309f0",
+      },
+      {
+        label: "Midtown map",
+        description: "",
+        selectedInitially: false,
+        payload: '{"algorithm":"a-star","variant":"midtown-map"}',
+        payloadSha256: "0e0db4a485d15540bbce51702927960388fec4fa80c405fe881b7f4ff9cdae40",
+      },
+    ],
+  ])
+  assert.doesNotMatch(note, /```steptrace\n\{"tabs":/)
   assert.doesNotMatch(note, /The same `f = g \+ h` rule works across grids/)
+  assert.doesNotMatch(note, /Choose From and To in Options/)
+  assert.doesNotMatch(note, /A locked fire door blocks the direct corridor/)
   assert.doesNotMatch(note, /Visualization pending/)
 })
 
-test("tabbed blocks use accessible shared chrome and preserve mounted tab state", () => {
-  const mountSource = readFileSync(join(here, "src", "mount.ts"), "utf8")
-  const styleEntry = readFileSync(join(here, "src", "styles", "index.scss"), "utf8")
-  const styles = readFileSync(join(here, "src", "styles", "tabs.scss"), "utf8")
+test("static deletion manifest keeps legacy variant tabs absent and host Tabsdown adapters intact", () => {
+  const manifest = JSON.parse(
+    readFileSync(
+      join(repoRoot, ".omx", "context", "tabsdown-migration-g001", "static-deletion-manifest.json"),
+      "utf8",
+    ),
+  )
+  assert.equal(manifest.schemaVersion, 1)
+  assert.deepEqual(
+    manifest.items.map(({ id }) => id),
+    [
+      "steptrace-tabs-config-types",
+      "steptrace-tabs-normalizer-module",
+      "steptrace-variant-mount",
+      "steptrace-variant-dom-classes",
+      "steptrace-tabs-stylesheet",
+      "steptrace-rectree-tab-host-selectors",
+      "complexity-dom-filter-tabs",
+      "complexity-hast-filter-tabs",
+      "complexity-filter-interaction-source",
+      "complexity-filter-hydration-copy",
+      "complexity-filter-styles",
+      "complexity-available-categories-filter-only-use",
+    ],
+  )
+  assert.equal(existsSync(join(here, "src", "tabs.ts")), false)
+  assert.equal(existsSync(join(here, "src", "styles", "tabs.scss")), false)
 
-  assert.match(styleEntry, /@use "tabs";/)
-  assert.match(mountSource, /tablist\.setAttribute\("role", "tablist"\)/)
-  assert.match(mountSource, /button\.setAttribute\("role", "tab"\)/)
-  assert.match(mountSource, /panelShell\.setAttribute\("role", "tabpanel"\)/)
-  assert.match(mountSource, /handles\[activeIndex\]\?\.pause\?\.\(\)/)
-  assert.match(mountSource, /if \(!handles\[next\]\) handles\[next\] = mount/)
-  assert.match(mountSource, /for \(const handle of handles\) handle\?\.destroy\(\)/)
-  assert.match(mountSource, /event\.key === "ArrowLeft"/)
-  assert.match(mountSource, /event\.key === "ArrowRight"/)
-  assert.match(mountSource, /event\.key === "Home"/)
-  assert.match(mountSource, /event\.key === "End"/)
-  assert.match(styles, /min-height: 2rem/)
-  assert.match(styles, /border-radius: 0\.35rem/)
-  assert.match(styles, /\.steptrace__tabs-desc/)
-  assert.match(styles, /\.steptrace__tabpanel/)
+  const typesSource = readFileSync(join(here, "src", "types.ts"), "utf8")
+  const mountSource = readFileSync(join(here, "src", "mount.ts"), "utf8")
+  const engineSource = readFileSync(join(here, "src", "engine.ts"), "utf8")
+  const obsidianEntry = readFileSync(join(here, "src", "entries", "obsidian.cts"), "utf8")
+  const styleEntry = readFileSync(join(here, "src", "styles", "index.scss"), "utf8")
+  const rectreeStyles = readFileSync(join(here, "src", "styles", "rectree.scss"), "utf8")
+  const complexitySources = [
+    ["custom", "complexity", "dom.ts"],
+    ["custom", "complexity", "hast.ts"],
+    ["custom", "complexity", "interactions.ts"],
+    ["custom", "complexity", "styles.scss"],
+    ["custom", "components", "complexity.tsx"],
+  ].map((segments) => readFileSync(join(repoRoot, "Web", ...segments), "utf8"))
+  const legacySymbols =
+    /StepTraceTabs?Config|NormalizedStepTraceTabs?|isTabsConfig|normalizeTabsConfig|normalizeTab/
+  const legacyClasses =
+    /steptrace--tabs|steptrace__(?:tabs-shell|tabs-desc|tabs|tab--selected|tabpanels|tabpanel-body|tabpanel)\b/
+
+  for (const source of [typesSource, mountSource, engineSource])
+    assert.doesNotMatch(source, legacySymbols)
+  assert.doesNotMatch(mountSource, /function mountTabs\b/)
+  assert.doesNotMatch(mountSource, legacyClasses)
+  assert.doesNotMatch(styleEntry, /@use ["']tabs["']/)
+  assert.doesNotMatch(rectreeStyles, legacyClasses)
+  for (const source of complexitySources) {
+    assert.doesNotMatch(source, legacyClasses)
+    assert.doesNotMatch(
+      source,
+      /COMPLEXITY_FILTERS|complexity__tabs?|data-(?:active-)?filter|activeFilter|availableCategories/,
+    )
+    assert.doesNotMatch(source, /["'](?:tablist|tab|tabpanel)["']/)
+    assert.doesNotMatch(source, /aria(?:Controls|Selected)|aria-(?:controls|selected)/)
+  }
+
+  assert.match(typesSource, /interface HostTabsOptions/)
+  assert.match(typesSource, /interface HostTabsHandle/)
+  assert.match(typesSource, /mountTabs\?\(container: HTMLElement, options: HostTabsOptions\)/)
+  assert.match(mountSource, /const hasHostTabs = typeof host\.mountTabs === "function"/)
+  assert.match(mountSource, /hostTabsHandle = host\.mountTabs!/)
+  assert.match(obsidianEntry, /interface TabsdownApi/)
+  assert.match(obsidianEntry, /typeof tabsdown\?\.mountTabs === "function"/)
+  assert.match(obsidianEntry, /mountTabs \? \{ mountTabs \} : \{\}/)
   assert.match(mountSource, /steptrace--compact-stage/)
   assert.match(
     readFileSync(join(here, "src", "styles", "shared.scss"), "utf8"),
@@ -1439,6 +1521,363 @@ test("tabbed blocks use accessible shared chrome and preserve mounted tab state"
   )
 })
 
+test("canonical authored Tabsdown safely nests variants and StepTrace fences", () => {
+  const { parseTabs } = loadStepTraceModule(
+    "..",
+    "..",
+    ".quartz",
+    "plugins",
+    "quartz-tabsdown",
+    "src",
+    "parser.ts",
+  )
+  const outerSource = [
+    "tab: Visualization",
+    "~~~~~tabsdown",
+    "tab: Closed addressing",
+    "```steptrace",
+    '{"algorithm":"hash-map","variant":"closed-addressing"}',
+    "```",
+    "Each bucket owns a chain.",
+    "```text",
+    "~~~~",
+    "```",
+    "tab: Open addressing",
+    "```steptrace",
+    '{"algorithm":"hash-map","variant":"open-addressing"}',
+    "```",
+    "Probe inside the table.",
+    "~~~~~",
+    "tab: Complexity",
+    "```complexity",
+    JSON.stringify({
+      version: 2,
+      label: "HashMap complexity",
+      variables: { inputSize: { symbol: "n", description: "stored entries" } },
+      resources: {
+        time: {
+          mode: "operations",
+          entries: [
+            {
+              kind: "operation",
+              operation: "Lookup",
+              bounds: [{ kind: "curve", role: "Average", formula: "O(1)", curveId: "constant" }],
+            },
+          ],
+        },
+        space: {
+          mode: "operations",
+          entries: [
+            {
+              kind: "operation",
+              operation: "Persistent structure",
+              bounds: [{ kind: "curve", role: "Total", formula: "O(n)", curveId: "linear" }],
+            },
+          ],
+        },
+      },
+    }),
+    "```",
+  ].join("\n")
+  const markdown = ["~~~~~~tabsdown", outerSource, "~~~~~~"].join("\n")
+  const complete = /^(~{3,})tabsdown\n([\s\S]*)\n\1$/.exec(markdown)
+
+  assert.ok(complete, "the complete outer fence must close with the same longer tilde run")
+  assert.equal(complete[1].length, 6)
+
+  const outer = parseTabs(complete[2])
+  assert.equal(outer.ok, true)
+  assert.deepEqual(
+    outer.tabs.map(({ label }) => label),
+    ["Visualization", "Complexity"],
+  )
+  assert.match(outer.tabs[1].body, /^```complexity\n[\s\S]+\n```$/)
+  assert.equal(JSON.parse(outer.tabs[1].body.split("\n").slice(1, -1).join("\n")).version, 2)
+  assert.doesNotMatch(outer.tabs[1].body, /~~~~~~/)
+
+  const innerFence = outer.tabs[0].body.match(/(~~~~~)tabsdown\n([\s\S]*?)\n\1/)
+  assert.ok(innerFence, "the outer parser must preserve the complete inner Tabsdown fence")
+  assert.ok(complete[1].length > innerFence[1].length)
+  const inner = parseTabs(innerFence[2])
+  assert.equal(inner.ok, true)
+  assert.deepEqual(
+    inner.tabs.map(({ label }) => label),
+    ["Closed addressing", "Open addressing"],
+  )
+  assert.deepEqual(
+    inner.tabs.map(({ body }) => body.match(/```steptrace\n([^\n]+)\n```/)?.[1]),
+    [
+      '{"algorithm":"hash-map","variant":"closed-addressing"}',
+      '{"algorithm":"hash-map","variant":"open-addressing"}',
+    ],
+  )
+  assert.match(inner.tabs[0].body, /```text\n~~~~\n```/)
+  assert.ok(inner.tabs.every(({ body }) => !body.includes("~~~~~tabsdown")))
+})
+
+test("all DSA Tabsdown notes are visual-first and contain one chart-only dual-resource fence", () => {
+  const { parseTabs } = loadStepTraceModule(
+    "..",
+    "..",
+    ".quartz",
+    "plugins",
+    "quartz-tabsdown",
+    "src",
+    "parser.ts",
+  )
+  const notes = authoredDsaTabsdownNotes()
+  assert.equal(notes.length, 87, `expected 87 authored DSA notes, found ${notes.length}`)
+  let steptraceCount = 0
+
+  for (const { path, source } of notes) {
+    const relative = path.slice(repoRoot.length + 1)
+    const outerFence = source.match(/(~{5,})tabsdown\n([\s\S]*?)\n\1/)
+    assert.ok(outerFence, `${relative}: outer Tabsdown fence`)
+    const outer = parseTabs(outerFence[2])
+    assert.equal(outer.ok, true, `${relative}: valid outer Tabsdown`)
+    assert.deepEqual(
+      outer.tabs.map(({ label }) => label),
+      ["Visualization", "Complexity"],
+      `${relative}: outer labels`,
+    )
+
+    const visualization = outer.tabs[0].body.trim()
+    if (visualization.startsWith("```steptrace\n")) {
+      steptraceCount += 1
+    } else {
+      const innerFences = [...visualization.matchAll(/(~{4,})tabsdown\n([\s\S]*?)\n\1/g)]
+      assert.ok(
+        innerFences.length > 0 && innerFences[0].index === 0,
+        `${relative}: Visualization must begin with StepTrace or inner Tabsdown`,
+      )
+      for (const innerFence of innerFences) {
+        const inner = parseTabs(innerFence[2])
+        assert.equal(inner.ok, true, `${relative}: valid inner Tabsdown`)
+        for (const { label, body } of inner.tabs) {
+          assert.ok(
+            body.trimStart().startsWith("```steptrace\n"),
+            `${relative}: Visualization/${label} must begin with StepTrace`,
+          )
+          steptraceCount += 1
+        }
+      }
+    }
+
+    const complexity = outer.tabs[1].body.trim()
+    const chartOnly = /^```complexity\n([\s\S]+)\n```$/.exec(complexity)
+    assert.ok(chartOnly, `${relative}: Complexity must contain only one complexity fence`)
+    const config = JSON.parse(chartOnly[1])
+    assert.equal(config.version, 2, `${relative}: Complexity config version`)
+    assert.deepEqual(
+      Object.keys(config).sort(),
+      ["label", "resources", "variables", "version"],
+      `${relative}: Complexity top-level keys`,
+    )
+    assert.deepEqual(
+      Object.keys(config.resources).sort(),
+      ["space", "time"],
+      `${relative}: Complexity resources`,
+    )
+    assert.doesNotMatch(source, /(?:Visualization|Complexity) visualization pending/i, relative)
+  }
+
+  assert.equal(steptraceCount, 105, `expected 105 StepTrace variants, found ${steptraceCount}`)
+})
+
+test("pinned Tabsdown scopes nested keyboard handling and owns unique ARIA wiring", () => {
+  const client = readFileSync(
+    join(
+      here,
+      "..",
+      "..",
+      ".quartz",
+      "plugins",
+      "quartz-tabsdown",
+      "src",
+      "scripts",
+      "tabsdown.inline.ts",
+    ),
+    "utf8",
+  )
+  const transformer = readFileSync(
+    join(here, "..", "..", ".quartz", "plugins", "quartz-tabsdown", "src", "transformer.ts"),
+    "utf8",
+  )
+
+  assert.match(client, /:scope > \.tabsdown__tablist > \.tabsdown__tab/)
+  assert.match(client, /:scope > \.tabsdown__panels > \.tabsdown__panel/)
+  assert.match(client, /tab\?\.closest<HTMLElement>\("\.tabsdown"\)/)
+  assert.match(client, /const index = tabsOf\(root\)\.indexOf\(tab\)/)
+  assert.match(client, /tab\.setAttribute\("aria-controls", panel\.id\)/)
+  assert.match(client, /panel\.setAttribute\("role", "tabpanel"\)/)
+  assert.match(transformer, /let blockCount = 0/)
+  assert.match(transformer, /const blockId = `tabsdown-\$\{\+\+blockCount\}`/)
+  assert.match(transformer, /id: `\$\{blockId\}-tab-\$\{index\}`/)
+  assert.match(transformer, /id: `\$\{blockId\}-panel-\$\{index\}`/)
+  assert.match(transformer, /"aria-labelledby": `\$\{blockId\}-tab-\$\{index\}`/)
+})
+
+test("pinned Tabsdown runtime isolates nested keyboard state and preserves unique ARIA ownership", () => {
+  class TabNode {
+    constructor(className = "", id = "") {
+      this.className = className
+      this.id = id
+      this.children = []
+      this.parentElement = null
+      this.attributes = new Map()
+      this.dataset = {}
+      this.hidden = false
+      this.tabIndex = -1
+      this.focused = false
+      this.classList = { contains: (name) => this.className.split(/\s+/).includes(name) }
+    }
+    append(...children) {
+      for (const child of children) child.parentElement = this
+      this.children.push(...children)
+    }
+    setAttribute(name, value) {
+      this.attributes.set(name, String(value))
+    }
+    getAttribute(name) {
+      return this.attributes.get(name) ?? null
+    }
+    closest(selector) {
+      const className = selector.startsWith(".") ? selector.slice(1) : ""
+      for (let node = this; node; node = node.parentElement)
+        if (node.classList.contains(className)) return node
+      return null
+    }
+    querySelectorAll(selector) {
+      if (selector === ":scope > .tabsdown__tablist > .tabsdown__tab")
+        return this.children
+          .filter((child) => child.classList.contains("tabsdown__tablist"))
+          .flatMap((list) =>
+            list.children.filter((child) => child.classList.contains("tabsdown__tab")),
+          )
+      if (selector === ":scope > .tabsdown__panels > .tabsdown__panel")
+        return this.children
+          .filter((child) => child.classList.contains("tabsdown__panels"))
+          .flatMap((list) =>
+            list.children.filter((child) => child.classList.contains("tabsdown__panel")),
+          )
+      return []
+    }
+    querySelector(selector) {
+      if (selector === ":scope > .tabsdown__tablist")
+        return this.children.find((child) => child.classList.contains("tabsdown__tablist")) ?? null
+      return null
+    }
+    focus() {
+      runtimeDocument.activeElement = this
+      this.focused = true
+    }
+    scrollIntoView() {}
+  }
+  const nestedRoots = []
+  const runtimeListeners = new Map()
+  const runtimeDocument = {
+    activeElement: null,
+    querySelectorAll(selector) {
+      return selector === ".tabsdown" ? nestedRoots : []
+    },
+    addEventListener(type, listener) {
+      runtimeListeners.set(type, [...(runtimeListeners.get(type) ?? []), listener])
+    },
+    removeEventListener(type, listener) {
+      runtimeListeners.set(
+        type,
+        (runtimeListeners.get(type) ?? []).filter((candidate) => candidate !== listener),
+      )
+    },
+    emit(type, event = {}) {
+      for (const listener of runtimeListeners.get(type) ?? []) listener(event)
+    },
+  }
+  const buildRoot = (blockId) => {
+    const root = new TabNode("tabsdown", blockId)
+    const tablist = new TabNode("tabsdown__tablist")
+    const panels = new TabNode("tabsdown__panels")
+    const tabs = [0, 1].map((index) => new TabNode("tabsdown__tab", `${blockId}-tab-${index}`))
+    const panelNodes = [0, 1].map((index) => {
+      const panel = new TabNode("tabsdown__panel", `${blockId}-panel-${index}`)
+      panel.setAttribute("aria-labelledby", `${blockId}-tab-${index}`)
+      return panel
+    })
+    tablist.append(...tabs)
+    panels.append(...panelNodes)
+    root.append(tablist, panels)
+    nestedRoots.push(root)
+    return { root, tabs, panels: panelNodes }
+  }
+  const outer = buildRoot("tabsdown-1")
+  const inner = buildRoot("tabsdown-2")
+  outer.panels[0].append(inner.root)
+  const cleanups = []
+  const runtimeWindow = { addCleanup: (cleanup) => cleanups.push(cleanup) }
+  const client = buildSync({
+    entryPoints: [
+      join(
+        here,
+        "..",
+        "..",
+        ".quartz",
+        "plugins",
+        "quartz-tabsdown",
+        "src",
+        "scripts",
+        "tabsdown.inline.ts",
+      ),
+    ],
+    bundle: true,
+    format: "iife",
+    platform: "browser",
+    write: false,
+  }).outputFiles[0].text
+
+  new Function("document", "window", "Element", client)(runtimeDocument, runtimeWindow, TabNode)
+  runtimeDocument.emit("nav")
+
+  const ids = [...outer.tabs, ...outer.panels, ...inner.tabs, ...inner.panels].map(({ id }) => id)
+  assert.equal(new Set(ids).size, ids.length)
+  for (const group of [outer, inner]) {
+    assert.deepEqual(
+      group.tabs.map((tab) => tab.getAttribute("aria-controls")),
+      group.panels.map(({ id }) => id),
+    )
+  }
+  const key = (target, value) => {
+    let prevented = false
+    runtimeDocument.emit("keydown", {
+      target,
+      key: value,
+      preventDefault() {
+        prevented = true
+      },
+    })
+    return prevented
+  }
+  assert.equal(key(inner.tabs[0], "ArrowRight"), true)
+  assert.deepEqual(
+    inner.tabs.map((tab) => tab.getAttribute("aria-selected")),
+    ["false", "true"],
+  )
+  assert.deepEqual(
+    outer.tabs.map((tab) => tab.getAttribute("aria-selected")),
+    ["true", "false"],
+  )
+  assert.equal(key(outer.tabs[0], "End"), true)
+  assert.deepEqual(
+    outer.tabs.map((tab) => tab.getAttribute("aria-selected")),
+    ["false", "true"],
+  )
+  assert.deepEqual(
+    inner.tabs.map((tab) => tab.getAttribute("aria-selected")),
+    ["false", "true"],
+  )
+  cleanups.forEach((cleanup) => cleanup())
+  assert.equal((runtimeListeners.get("keydown") ?? []).length, 0)
+})
+
 test("compact rail styling follows the Tabsdown tab and timeline contract", () => {
   const styles = readFileSync(join(here, "src", "styles", "shared.scss"), "utf8")
 
@@ -1448,7 +1887,7 @@ test("compact rail styling follows the Tabsdown tab and timeline contract", () =
   )
   assert.match(
     styles,
-    /\.steptrace--narrow \.steptrace__rail-region\s*\{[^}]*display: flow-root;[^}]*transition: height var\(--steptrace-tab-animation-duration\)/s,
+    /\.steptrace--narrow \.steptrace__rail-region--fallback\s*\{[^}]*display: flow-root;[^}]*transition: height var\(--steptrace-tab-animation-duration\)/s,
   )
   assert.match(
     styles,
@@ -1491,8 +1930,12 @@ test("compact rail styling follows the Tabsdown tab and timeline contract", () =
   assert.match(styles, /\.steptrace--reduced \*\s*\{[^}]*animation: none !important;/s)
   assert.match(
     styles,
-    /\.steptrace--reduced \.steptrace__rail-region\s*\{[^}]*transition-duration: 0ms !important;/s,
+    /\.steptrace--reduced \.steptrace__rail-region--fallback\s*\{[^}]*transition-duration: 0ms !important;/s,
   )
+
+  const obsidianEntry = readFileSync(join(here, "src", "entries", "obsidian.cts"), "utf8")
+  assert.match(obsidianEntry, /getPlugin\("tabsdown"\)/)
+  assert.match(obsidianEntry, /tabsdown\.mountTabs\.bind\(tabsdown\)/)
 })
 
 test("constrained sort visualizers do not expose the generic Shuffle action", () => {
@@ -4321,8 +4764,86 @@ test("dynamic-programming tabs and stable story stage keep the compact five-view
   const renderSource = readFileSync(join(here, "src", "render.ts"), "utf8")
   const sharedStyles = readFileSync(join(here, "src", "styles", "shared.scss"), "utf8")
   const storyStyles = readFileSync(join(here, "src", "styles", "dp-story.scss"), "utf8")
+  const { configs } = parseAuthoredStepTraceTabs(note)
 
   assert.doesNotMatch(note, /Tabulation \(Raw\)/)
+  assert.deepEqual(configs, [
+    [
+      {
+        label: "Greedy",
+        description: "",
+        selectedInitially: true,
+        payload: '{"algorithm":"coin-change-greedy"}',
+        payloadSha256: "cdbbe1fc8aa0816cc093930e8c6fc6b97480b409bb4d9222b64de3193a6a0120",
+      },
+      {
+        label: "Naive Recursion",
+        description: "",
+        selectedInitially: false,
+        payload: '{"algorithm":"coin-change-naive"}',
+        payloadSha256: "97684b72d8cd5110cf38a80822e2d87178e14a141d163b76f6b10417d9320348",
+      },
+      {
+        label: "Memoization",
+        description: "",
+        selectedInitially: false,
+        payload: '{"algorithm":"coin-change-memoization"}',
+        payloadSha256: "7a255cdb3272f389aae87dbbdd992bae76b977c6d50552d0fa00c9ac5d7a463d",
+      },
+      {
+        label: "Tabulation",
+        description: "",
+        selectedInitially: false,
+        payload: '{"algorithm":"coin-change-tabulation"}',
+        payloadSha256: "e51d8d56c1cec13c0801a8a616be7b7b8c800da740de6c1808ef6d82c11717ca",
+      },
+      {
+        label: "Memoization (Raw)",
+        description: "",
+        selectedInitially: false,
+        payload: '{"algorithm":"coin-change-top-down"}',
+        payloadSha256: "647a5a866a4ccd1d5a89e46db48d0f0f6489e8a5870d1010b05f00ec48e50a17",
+      },
+    ],
+    [
+      {
+        label: "Greedy",
+        description: "",
+        selectedInitially: true,
+        payload: '{"algorithm":"grid-path-greedy"}',
+        payloadSha256: "0692960f74524319643b433346632cbed1b82a147e7b6344a337523d735cb9d6",
+      },
+      {
+        label: "Naive Recursion",
+        description: "",
+        selectedInitially: false,
+        payload: '{"algorithm":"grid-path-naive"}',
+        payloadSha256: "129df14978e94d2c3a4d97777b67017254684d3ea9032df3a78d209ca812a179",
+      },
+      {
+        label: "Memoization",
+        description: "",
+        selectedInitially: false,
+        payload: '{"algorithm":"grid-path-memoization"}',
+        payloadSha256: "6498b7338d8f05b754a4e216d4ad5b2ea03686642a1e4deb2bf484c0c357cec5",
+      },
+      {
+        label: "Tabulation",
+        description: "",
+        selectedInitially: false,
+        payload: '{"algorithm":"grid-path-tabulation"}',
+        payloadSha256: "1158ddecce22d962ad76b1faf6aa20cf65c776ecbc129fb23b01b1b16b7a609f",
+      },
+      {
+        label: "Memoization (Raw)",
+        description: "",
+        selectedInitially: false,
+        payload: '{"algorithm":"grid-path-top-down"}',
+        payloadSha256: "f3e17236421b58a4aa44686a917f090b94f1e5c198ba54dba4909b934e4ba366",
+      },
+    ],
+  ])
+  assert.doesNotMatch(note, /```steptrace\n\{"tabs":/)
   assert.match(mountSource, /steptrace--stable-stage/)
   assert.match(sharedStyles, /\.steptrace__rail\s*\{\s*overflow-y: auto;\s*\}/)
   // the height is definite and unconditional: a growing trace must not resize
@@ -4401,10 +4922,7 @@ test("dynamic-programming tabs and stable story stage keep the compact five-view
     treeStyles,
     /\.steptrace__rectree\[data-fit-width="true"\] \.steptrace__rtsvg\s*\{[^}]*inline-size: 100%;[^}]*min-inline-size: 0;[^}]*max-inline-size: var\(--steptrace-tree-width, 100%\);[^}]*margin-inline: auto;/s,
   )
-  assert.match(
-    treeStyles,
-    /\.steptrace--tabs \.steptrace__tabpanel-body\.steptrace[\s\S]*?\.steptrace__rectree\[data-fit-width="true"\][\s\S]*?\.steptrace__rtsvg\s*\{[^}]*max-block-size: 100%;/,
-  )
+  assert.doesNotMatch(treeStyles, /steptrace--tabs|steptrace__tabpanel/)
   assert.doesNotMatch(storyStyles, /unavailable|data-out/)
 })
 
@@ -4632,13 +5150,204 @@ test("Quartz StepTrace hydration inspects added subtrees and restores removed st
 
   assert.match(component, /stylePromise && existing && existing\.isConnected/)
   assert.match(component, /stylePromise = null;/)
+  assert.match(component, /data-tabsdown/)
+  assert.match(component, /interactive/)
+  assert.match(component, /if \(root\.dataset\.steptraceMounted\) return/)
+  assert.match(component, /document\.addEventListener\("nav", run\)/)
+  assert.match(component, /document\.addEventListener\("render", run\)/)
+  assert.match(component, /document\.addEventListener\("prenav", destroyMounted\)/)
+  assert.match(component, /window\.addCleanup\(destroy\)/)
   assert.match(observer, /records\[i\]\.addedNodes/)
+  assert.match(observer, /attributeFilter:\s*\["data-tabsdown"\]/)
+  assert.match(observer, /records\[i\]\.type === "attributes"/)
   assert.match(observer, /node\.matches\("\.steptrace-mount:not\(\[data-steptrace-mounted\]\)"\)/)
   assert.match(
     observer,
     /node\.querySelector\("\.steptrace-mount:not\(\[data-steptrace-mounted\]\)"\)/,
   )
   assert.doesNotMatch(observer, /document\.querySelector/)
+})
+
+test("Quartz StepTrace hydration mounts once across direct load, Tabsdown readiness, nav, and render", async () => {
+  class HydrateNode {
+    constructor(tagName = "div", className = "") {
+      this.tagName = tagName
+      this.className = className
+      this.dataset = {}
+      this.children = []
+      this.parentElement = null
+      this.isConnected = true
+      this.sheet = null
+      this.listeners = new Map()
+      this.classList = { contains: (name) => this.className.split(/\s+/).includes(name) }
+    }
+    addEventListener(type, listener) {
+      this.listeners.set(type, [...(this.listeners.get(type) ?? []), listener])
+    }
+    trigger(type) {
+      for (const listener of this.listeners.get(type) ?? []) listener()
+    }
+    replaceChildren(...children) {
+      this.children = children
+    }
+    matches(selector) {
+      return (
+        selector === ".steptrace-mount:not([data-steptrace-mounted])" &&
+        this.classList.contains("steptrace-mount") &&
+        !this.dataset.steptraceMounted
+      )
+    }
+    querySelector() {
+      return null
+    }
+  }
+  const roots = []
+  const documentListeners = new Map()
+  const headChildren = []
+  const hydrateDocument = {
+    body: new HydrateNode("body"),
+    head: {
+      appendChild(node) {
+        headChildren.push(node)
+        queueMicrotask(() => node.trigger("load"))
+      },
+    },
+    createElement: (tagName) => new HydrateNode(tagName),
+    querySelector(selector) {
+      if (selector === 'link[data-steptrace-style="1"]')
+        return headChildren.find((node) => node.dataset.steptraceStyle === "1") ?? null
+      return null
+    },
+    querySelectorAll(selector) {
+      return selector === ".steptrace-mount:not([data-steptrace-mounted])"
+        ? roots.filter((root) => !root.dataset.steptraceMounted)
+        : []
+    },
+    addEventListener(type, listener) {
+      documentListeners.set(type, [...(documentListeners.get(type) ?? []), listener])
+    },
+    emit(type) {
+      for (const listener of documentListeners.get(type) ?? []) listener()
+    },
+  }
+  const observerRecords = []
+  class HydrateObserver {
+    constructor(callback) {
+      this.callback = callback
+      observerRecords.push(this)
+    }
+    observe() {}
+    trigger(records) {
+      this.callback(records)
+    }
+  }
+  const addRoot = (parent = null) => {
+    const root = new HydrateNode("div", "steptrace-mount")
+    root.dataset.config = '{"algorithm":"quick-sort"}'
+    root.parentElement = parent
+    roots.push(root)
+    return root
+  }
+  const readyAtLoad = addRoot()
+  const tabsdown = new HydrateNode("div", "tabsdown")
+  const deferred = addRoot(tabsdown)
+  const mounted = []
+  const hosts = []
+  const destroyed = []
+  const lifecycle = []
+  const cleanups = []
+  const hydrateWindow = {
+    tabsdown: {
+      mountTabs() {},
+    },
+    steptrace: {
+      mount(root, _config, host) {
+        mounted.push(root)
+        hosts.push(host)
+        return {
+          destroy: () => {
+            destroyed.push(root)
+            lifecycle.push(`steptrace:${roots.indexOf(root)}`)
+          },
+        }
+      },
+    },
+    addCleanup: (cleanup) => cleanups.push(cleanup),
+  }
+  const component = readFileSync(join(here, "..", "components", "steptrace.tsx"), "utf8")
+  const template = /const hydrate = `([\s\S]*?)`\n\nexport const Steptrace/.exec(component)?.[1]
+  assert.ok(template)
+  const hydrate = new Function("STYLE_URL", "ENGINE_URL", `return \`${template}\``)(
+    "/static/steptrace/engine.css",
+    "/static/steptrace/engine.js",
+  )
+
+  new Function("window", "document", "MutationObserver", hydrate)(
+    hydrateWindow,
+    hydrateDocument,
+    HydrateObserver,
+  )
+  await delay(0)
+  assert.deepEqual(mounted, [readyAtLoad])
+  assert.equal(hosts[0].mountTabs, hydrateWindow.tabsdown.mountTabs)
+
+  tabsdown.dataset.tabsdown = "interactive"
+  observerRecords[0].trigger([{ type: "attributes", target: tabsdown }])
+  await delay(0)
+  assert.deepEqual(mounted, [readyAtLoad, deferred])
+  assert.equal(hosts[1].mountTabs, hydrateWindow.tabsdown.mountTabs)
+
+  hydrateDocument.emit("nav")
+  hydrateDocument.emit("render")
+  await delay(0)
+  assert.equal(mounted.length, 2)
+
+  const renderedLater = addRoot()
+  hydrateDocument.emit("render")
+  await delay(0)
+  hydrateDocument.emit("nav")
+  await delay(0)
+  assert.deepEqual(mounted, [readyAtLoad, deferred, renderedLater])
+
+  const router = readFileSync(
+    join(repoRoot, "Web", "quartz", "components", "scripts", "spa.inline.ts"),
+    "utf8",
+  )
+  const prenav = router.indexOf('new CustomEvent("prenav"')
+  const globalCleanup = router.indexOf("cleanupFns.forEach", prenav)
+  const domDisposal = router.indexOf("micromorph(document.body, html.body)", globalCleanup)
+  assert.ok(prenav >= 0 && prenav < globalCleanup && globalCleanup < domDisposal)
+
+  const tabsdownRuntime = readFileSync(
+    join(
+      repoRoot,
+      "Web",
+      ".quartz",
+      "plugins",
+      "quartz-tabsdown",
+      "src",
+      "scripts",
+      "tabsdown.inline.ts",
+    ),
+    "utf8",
+  )
+  assert.equal((tabsdownRuntime.match(/window\.addCleanup\(/g) ?? []).length, 1)
+  cleanups.push(() => lifecycle.push("tabsdown:global-cleanup"))
+
+  // This is Quartz's supported order: prenav event, global cleanup set, then
+  // DOM replacement. StepTrace's prenav listener empties its live registry;
+  // its addCleanup callbacks then prove idempotent before Tabsdown runs.
+  hydrateDocument.emit("prenav")
+  cleanups.forEach((cleanup) => cleanup())
+  lifecycle.push("quartz:dom-disposal")
+  assert.deepEqual(destroyed, [readyAtLoad, deferred, renderedLater])
+  assert.deepEqual(lifecycle, [
+    "steptrace:0",
+    "steptrace:1",
+    "steptrace:2",
+    "tabsdown:global-cleanup",
+    "quartz:dom-disposal",
+  ])
 })
 
 test("shell sort uses the array-sort family and records gapped subsequences", () => {
@@ -6350,12 +7059,19 @@ test("production mount verifies compact rail, persistent structures, binary orde
     getAttribute(key) {
       return this.attributes.get(key) ?? null
     }
+    hasAttribute(key) {
+      return key === "hidden" ? this.hidden : this.attributes.has(key)
+    }
     removeAttribute(key) {
       this.attributes.delete(key)
     }
     append(...children) {
       this.children.push(...children)
-      for (const child of children) if (child && typeof child === "object") child.parentNode = this
+      for (const child of children)
+        if (child && typeof child === "object") {
+          child.parentNode = this
+          child.parentElement = this
+        }
     }
     replaceChildren(...children) {
       this.children = []
@@ -6391,6 +7107,13 @@ test("production mount verifies compact rail, persistent structures, binary orde
     contains(node) {
       if (node === this) return true
       return this.children.some((child) => child?.contains?.(node))
+    }
+    closest(selector) {
+      if (selector === ".tabsdown__panel") {
+        for (let node = this; node; node = node.parentElement)
+          if (node.classList?.contains("tabsdown__panel")) return node
+      }
+      return null
     }
     getBoundingClientRect() {
       if (typeof this.rect === "function") return this.rect()
@@ -6447,6 +7170,7 @@ test("production mount verifies compact rail, persistent structures, binary orde
     cancelAnimationFrame: globalThis.cancelAnimationFrame,
     setTimeout: globalThis.setTimeout,
     clearTimeout: globalThis.clearTimeout,
+    MutationObserver: globalThis.MutationObserver,
   }
   const documentListeners = new Map()
   globalThis.document = {
@@ -6500,6 +7224,24 @@ test("production mount verifies compact rail, persistent structures, binary orde
     return id
   }
   globalThis.clearTimeout = (id) => railTimers.delete(id)
+  const mutationObservers = []
+  globalThis.MutationObserver = class {
+    constructor(callback) {
+      this.callback = callback
+      this.observed = []
+      this.disconnected = false
+      mutationObservers.push(this)
+    }
+    observe(target, options) {
+      this.observed.push({ target, options })
+    }
+    disconnect() {
+      this.disconnected = true
+    }
+    trigger(records) {
+      this.callback(records)
+    }
+  }
   const flushAnimationFrame = () => {
     const next = animationFrames.entries().next().value
     assert.ok(next, "expected a queued animation frame")
@@ -6541,35 +7283,43 @@ test("production mount verifies compact rail, persistent structures, binary orde
   }
   try {
     const { createMount } = loadStepTraceModule("src", "mount.ts")
-    const compactMount = ({ messages, watchRows = null, summary = "Finished." }) =>
+    const compactMount = ({
+      messages,
+      watchRows = null,
+      summary = "Finished.",
+      onBuild = () => {},
+    }) =>
       createMount({
         kindOf: () => "sort",
         listAlgorithms: () => [],
-        buildFrames: () => ({
-          kind: "sort",
-          frames: messages.map((message, index) => ({ type: "test", message, index })),
-          family: {
-            id: "array-sort",
-            createView() {
-              const view = {
-                nodes: [new FakeNode("div"), new FakeNode("div")],
-                paint() {},
-                summary: () => summary,
-              }
-              if (watchRows) view.watch = () => watchRows
-              return view
+        buildFrames: () => {
+          onBuild()
+          return {
+            kind: "sort",
+            frames: messages.map((message, index) => ({ type: "test", message, index })),
+            family: {
+              id: "array-sort",
+              createView() {
+                const view = {
+                  nodes: [new FakeNode("div"), new FakeNode("div")],
+                  paint() {},
+                  summary: () => summary,
+                }
+                if (watchRows) view.watch = () => watchRows
+                return view
+              },
             },
-          },
-        }),
+          }
+        },
       })
-    const mountAt = (width, options = {}) => {
+    const mountAt = (width, options = {}, host = {}) => {
       const root = new FakeNode("div")
       root.rect = { left: 0, top: 0, width, height: 400 }
       const handle = compactMount({
         messages: ["oldest", "older", "previous", "current", "done"],
         watchRows: [{ k: "value", v: "42" }],
         ...options,
-      })(root, { algorithm: "compact-contract" })
+      })(root, { algorithm: "compact-contract" }, host)
       return { root, handle }
     }
     const triggerResize = (node) => {
@@ -6771,6 +7521,206 @@ test("production mount verifies compact rail, persistent structures, binary orde
     compactClick(noWatchTrace)
     assert.equal(noWatchTrace.attributes.get("aria-pressed"), "true")
     assert.equal(findByClass(noWatch.root, "steptrace__trace").hidden, false)
+
+    const hostMounts = []
+    const nativeTabs = {
+      mountTabs(container, options) {
+        let selection = options.selection ?? null
+        let destroyed = false
+        const mountedRoot = new FakeNode("div")
+        mountedRoot.classList.add("tabsdown--mounted")
+        const tablist = new FakeNode("div")
+        const panels = new FakeNode("div")
+        const buttons = options.tabs.map(({ label }) => {
+          const button = new FakeNode("button")
+          button.textContent = label
+          tablist.append(button)
+          return button
+        })
+        for (const tab of options.tabs) {
+          tab.panel.remove()
+          panels.append(tab.panel)
+        }
+        mountedRoot.append(tablist, panels)
+        container.append(mountedRoot)
+        const handle = {
+          get selection() {
+            return selection
+          },
+          setSelection(next) {
+            const previous = selection
+            selection = next
+            options.tabs.forEach((tab, index) => {
+              buttons[index].setAttribute("aria-expanded", String(tab.id === next))
+              tab.panel.hidden = tab.id !== next
+            })
+            options.onSelectionChange?.(next, previous)
+          },
+          setAvailable(id, available) {
+            if (!available && selection === id) this.setSelection(null)
+          },
+          destroy() {
+            destroyed = true
+            for (const tab of options.tabs) {
+              tab.panel.remove()
+              container.append(tab.panel)
+            }
+            mountedRoot.remove()
+          },
+          get destroyed() {
+            return destroyed
+          },
+        }
+        hostMounts.push({ container, options, handle, buttons })
+        handle.setSelection(selection)
+        return handle
+      },
+    }
+    const native = mountAt(703, {}, nativeTabs)
+    assert.equal(findByClass(native.root, "steptrace__detail-switch"), null)
+    assert.equal(hostMounts.length, 1)
+    assert.equal(hostMounts[0].options.label, "Trace and watch")
+    assert.equal(hostMounts[0].options.selection, null)
+    assert.equal(findByClass(native.root, "steptrace__trace").hidden, true)
+    assert.equal(findByClass(native.root, "steptrace__watch-wrap").hidden, true)
+    assert.deepEqual(
+      hostMounts[0].options.tabs.map(({ id, label }) => ({ id, label })),
+      [
+        { id: "trace", label: "Trace" },
+        { id: "watch", label: "Watch" },
+      ],
+    )
+    hostMounts[0].handle.setSelection("trace")
+    assert.equal(findByClass(native.root, "steptrace__trace").hidden, false)
+    assert.equal(findByClass(native.root, "steptrace__watch-wrap").hidden, true)
+    hostMounts[0].buttons[0].focus()
+    native.root.rect.width = 704
+    triggerResize(native.root)
+    assert.equal(hostMounts[0].handle.destroyed, true)
+    assert.equal(findByClass(native.root, "steptrace__trace").hidden, false)
+    assert.equal(findByClass(native.root, "steptrace__watch-wrap").hidden, false)
+    assert.equal(
+      globalThis.document.activeElement,
+      findByAttribute(native.root, "aria-label", "Step"),
+    )
+    native.root.rect.width = 703
+    triggerResize(native.root)
+    assert.equal(hostMounts.length, 2)
+    assert.equal(hostMounts[1].options.selection, "trace")
+    native.handle.destroy()
+    assert.equal(hostMounts[1].handle.destroyed, true)
+
+    const outerAuthoredPanel = new FakeNode("div")
+    outerAuthoredPanel.classList.add("tabsdown__panel")
+    outerAuthoredPanel.hidden = true
+    const innerAuthoredPanel = new FakeNode("div")
+    innerAuthoredPanel.classList.add("tabsdown__panel")
+    innerAuthoredPanel.hidden = true
+    const authoredRoot = new FakeNode("div")
+    authoredRoot.rect = { left: 0, top: 0, width: 703, height: 400 }
+    outerAuthoredPanel.append(innerAuthoredPanel)
+    innerAuthoredPanel.append(authoredRoot)
+    let authoredMounts = 0
+    const authoredHandle = compactMount({
+      messages: ["first", "second", "third"],
+      watchRows: [{ k: "value", v: "42" }],
+      onBuild: () => authoredMounts++,
+    })(authoredRoot, { algorithm: "authored-tabsdown-contract" })
+    assert.equal(authoredRoot.children.length, 0, "a hidden authored panel must mount lazily")
+    const visibilityObserver = mutationObservers.find((observer) =>
+      observer.observed.some(({ target }) => target === outerAuthoredPanel),
+    )
+    assert.ok(visibilityObserver, "both containing authored panels must be observed")
+    for (const panel of [outerAuthoredPanel, innerAuthoredPanel])
+      assert.ok(
+        visibilityObserver.observed.some(
+          ({ target, options }) =>
+            target === panel &&
+            options.attributes === true &&
+            options.attributeFilter?.length === 1 &&
+            options.attributeFilter[0] === "hidden",
+        ),
+      )
+
+    outerAuthoredPanel.hidden = false
+    visibilityObserver.trigger([
+      { type: "attributes", target: outerAuthoredPanel, attributeName: "hidden" },
+    ])
+    assert.equal(authoredRoot.children.length, 0, "the inner hidden panel must still defer mount")
+    innerAuthoredPanel.hidden = false
+    visibilityObserver.trigger([
+      { type: "attributes", target: innerAuthoredPanel, attributeName: "hidden" },
+    ])
+    assert.ok(authoredRoot.children.length > 0, "the first reveal must mount exactly once")
+    assert.equal(authoredMounts, 1)
+    const mountedChildren = authoredRoot.children.slice()
+    visibilityObserver.trigger([
+      { type: "attributes", target: innerAuthoredPanel, attributeName: "hidden" },
+    ])
+    assert.deepEqual(authoredRoot.children, mountedChildren, "equal visibility must not remount")
+    assert.equal(authoredMounts, 1)
+    const authoredPlay = findByAttribute(authoredRoot, "aria-label", "Play")
+    const authoredForward = findByAttribute(authoredRoot, "aria-label", "Step forward")
+    compactClick(authoredForward)
+    const authoredScrub = findByAttribute(authoredRoot, "aria-label", "Step")
+    const retainedStep = authoredScrub.attributes.get("aria-valuenow")
+    compactClick(authoredPlay)
+    assert.equal(authoredPlay.attributes.get("aria-label"), "Pause")
+
+    innerAuthoredPanel.hidden = true
+    visibilityObserver.trigger([
+      { type: "attributes", target: innerAuthoredPanel, attributeName: "hidden" },
+    ])
+    assert.equal(authoredPlay.attributes.get("aria-label"), "Play")
+    assert.equal(authoredScrub.attributes.get("aria-valuenow"), retainedStep)
+    innerAuthoredPanel.hidden = false
+    visibilityObserver.trigger([
+      { type: "attributes", target: innerAuthoredPanel, attributeName: "hidden" },
+    ])
+    assert.equal(authoredPlay.attributes.get("aria-label"), "Pause")
+    assert.equal(authoredScrub.attributes.get("aria-valuenow"), retainedStep)
+
+    outerAuthoredPanel.hidden = true
+    visibilityObserver.trigger([
+      { type: "attributes", target: outerAuthoredPanel, attributeName: "hidden" },
+    ])
+    assert.equal(authoredPlay.attributes.get("aria-label"), "Play")
+    outerAuthoredPanel.hidden = false
+    visibilityObserver.trigger([
+      { type: "attributes", target: outerAuthoredPanel, attributeName: "hidden" },
+    ])
+    assert.equal(authoredPlay.attributes.get("aria-label"), "Pause")
+    assert.equal(authoredScrub.attributes.get("aria-valuenow"), retainedStep)
+
+    compactClick(authoredPlay)
+    outerAuthoredPanel.hidden = true
+    innerAuthoredPanel.hidden = true
+    visibilityObserver.trigger([
+      { type: "attributes", target: outerAuthoredPanel, attributeName: "hidden" },
+      { type: "attributes", target: innerAuthoredPanel, attributeName: "hidden" },
+    ])
+    outerAuthoredPanel.hidden = false
+    innerAuthoredPanel.hidden = false
+    visibilityObserver.trigger([
+      { type: "attributes", target: outerAuthoredPanel, attributeName: "hidden" },
+      { type: "attributes", target: innerAuthoredPanel, attributeName: "hidden" },
+    ])
+    assert.equal(
+      authoredPlay.attributes.get("aria-label"),
+      "Play",
+      "revealing must not resume playback that was already paused",
+    )
+    let childDestroys = 0
+    const originalReplaceChildren = authoredRoot.replaceChildren.bind(authoredRoot)
+    authoredRoot.replaceChildren = (...children) => {
+      if (!children.length) childDestroys++
+      originalReplaceChildren(...children)
+    }
+    authoredHandle.destroy()
+    assert.equal(childDestroys, 1)
+    assert.equal(visibilityObserver.disconnected, true)
+    assert.equal(authoredRoot.children.length, 0)
+    assert.equal(authoredMounts, 1)
 
     const fitting = mountAt(703, {
       messages: ["one", "two", "three", "four", "done"],
@@ -7840,21 +8790,9 @@ test("production mount verifies compact rail, persistent structures, binary orde
     const hashMediaIndex = mediaQueries.length
     const hashRoot = new FakeNode("div")
     const hashHandle = api.mount(hashRoot, {
-      tabs: [
-        {
-          name: "Closed Addressing",
-          algorithm: "hash-map",
-          variant: "closed-addressing",
-        },
-        {
-          name: "Open Addressing",
-          algorithm: "hash-map",
-          variant: "open-addressing",
-        },
-        { name: "Bucket Hashing", algorithm: "hash-map", variant: "buckets" },
-      ],
+      algorithm: "hash-map",
+      variant: "closed-addressing",
     })
-    const tabButtons = findAllByClass(hashRoot, "steptrace__tab")
     const closedRoot = currentHashRoot(hashRoot, 0)
     const closedKey = hashInput(closedRoot, "Hash map key")
     const closedValue = hashInput(closedRoot, "Hash map value")
@@ -7864,7 +8802,6 @@ test("production mount verifies compact rail, persistent structures, binary orde
       ...findAllByClass(closedRoot, "steptrace__structure-action"),
     ]
 
-    assert.equal(tabButtons.length, 3)
     assert.equal(closedRoot.dataset.visualFamily, "hash-index")
     assert.equal(findAllByClass(closedRoot, "steptrace__hash-cell").length, 12)
     assert.equal(findByClass(closedRoot, "steptrace__hash-buckets").attributes.get("role"), "list")
@@ -8085,8 +9022,12 @@ test("production mount verifies compact rail, persistent structures, binary orde
     assert.equal(closedChains[10].attributes.has("aria-label"), false)
     putHash(closedRoot, 22, "B")
 
-    click(tabButtons[1])
-    const openRoot = currentHashRoot(hashRoot, 1)
+    const openContainer = new FakeNode("div")
+    const openHandle = api.mount(openContainer, {
+      algorithm: "hash-map",
+      variant: "open-addressing",
+    })
+    const openRoot = currentHashRoot(openContainer, 0)
     assert.ok(
       findAllByClass(openRoot, "steptrace__hash-cell").every((cell) => cell.dataset.empty === "1"),
     )
@@ -8199,8 +9140,12 @@ test("production mount verifies compact rail, persistent structures, binary orde
     )
 
     mediaMatches = false
-    click(tabButtons[2])
-    const bucketRoot = currentHashRoot(hashRoot, 2)
+    const bucketContainer = new FakeNode("div")
+    const bucketHandle = api.mount(bucketContainer, {
+      algorithm: "hash-map",
+      variant: "buckets",
+    })
+    const bucketRoot = currentHashRoot(bucketContainer, 0)
     assert.equal(findByClass(bucketRoot, "steptrace__hash-buckets").dataset.strategy, "buckets")
     for (const [key, value] of [
       [3, "A"],
@@ -8262,7 +9207,6 @@ test("production mount verifies compact rail, persistent structures, binary orde
       /Removed key 7 from bucket 3, cell 10/,
     )
 
-    click(tabButtons[0])
     click(hashButton(closedRoot, "Reset"))
     for (const [key, value] of [
       [1, "A"],
@@ -8494,7 +9438,11 @@ test("production mount verifies compact rail, persistent structures, binary orde
     click(hashButton(closedRoot, "Put"))
     assert.equal(motionTimers.size, 1)
     const hashMedia = mediaQueries.slice(hashMediaIndex)
+    bucketHandle.destroy()
+    openHandle.destroy()
     hashHandle.destroy()
+    assert.equal(bucketContainer.children.length, 0)
+    assert.equal(openContainer.children.length, 0)
     assert.equal(hashRoot.children.length, 0)
     assert.equal(motionTimers.size, 0)
     assert.ok(hashMedia.every((query) => query.listeners.length === 0))
@@ -9009,6 +9957,7 @@ test("production mount verifies compact rail, persistent structures, binary orde
     globalThis.cancelAnimationFrame = previous.cancelAnimationFrame
     globalThis.setTimeout = previous.setTimeout
     globalThis.clearTimeout = previous.clearTimeout
+    globalThis.MutationObserver = previous.MutationObserver
   }
 })
 
@@ -9413,6 +10362,7 @@ test("LinkedList exposes direct singly and doubly linked append controls in both
     ),
     "utf8",
   )
+  const { configs } = parseAuthoredStepTraceTabs(note)
 
   assert.deepEqual(parseLinkedListConfig({ algorithm: "linked-list" }), {
     values: [12, 27, 39, 54],
@@ -9488,10 +10438,25 @@ test("LinkedList exposes direct singly and doubly linked append controls in both
   assert.doesNotMatch(styles, /\.steptrace__linked-list-cell \{[^}]*block-size: 7\.5rem;/s)
   assert.match(styles, /\[data-relinked="1"\][\s\S]*\[data-pointer="next"\]/)
   assert.match(styles, /@keyframes steptrace-linked-list-append/)
-  assert.match(
-    note,
-    /```steptrace\n\{"tabs":\[\{"name":"Singly linked"[\s\S]*"variant":"doubly"[\s\S]*\]\}\n```/,
-  )
+  assert.deepEqual(configs, [
+    [
+      {
+        label: "Singly linked",
+        description: "",
+        selectedInitially: true,
+        payload: '{"algorithm":"linked-list","variant":"singly","array":[12,27,39,54]}',
+        payloadSha256: "5b25fea4c6ed4113617b93d53ca87a41b7a0c5ffcbbea39bc61a01d6de6432af",
+      },
+      {
+        label: "Doubly linked",
+        description: "",
+        selectedInitially: false,
+        payload: '{"algorithm":"linked-list","variant":"doubly","array":[12,27,39,54]}',
+        payloadSha256: "31226d9e5b14a8de1be9ce10b0825b5fac6fde29822b6713ab716513c446fbd9",
+      },
+    ],
+  ])
+  assert.doesNotMatch(note, /```steptrace\n\{"tabs":/)
   assert.doesNotMatch(note, /Visualization pending/)
   for (const artifact of [quartzJs, obsidianJs]) {
     assert.match(artifact, /Interactive \$\{config\.variant\} linked list/)
@@ -9678,7 +10643,7 @@ test("Segment Tree reuses range blocks for point assignment and canonical range 
   }
 })
 
-test("HashMap shares one fixed 12-cell renderer across three tabbed collision strategies", () => {
+test("HashMap shares one fixed 12-cell renderer across three collision strategies", () => {
   const algorithm = readFileSync(join(here, "src", "algorithms", "hash-map.ts"), "utf8")
   const family = readFileSync(join(here, "src", "families", "hash-index.ts"), "utf8")
   const styles = readFileSync(join(here, "src", "styles", "hash-index.scss"), "utf8")
@@ -9688,7 +10653,6 @@ test("HashMap shares one fixed 12-cell renderer across three tabbed collision st
   )
   const algorithms = readFileSync(join(here, "src", "algorithms", "index.ts"), "utf8")
   const styleEntry = readFileSync(join(here, "src", "styles", "index.scss"), "utf8")
-  const mount = readFileSync(join(here, "src", "mount.ts"), "utf8")
   const quartzJs = readFileSync(join(here, "generated", "engine.js"), "utf8")
   const quartzCss = readFileSync(join(here, "generated", "engine.css"), "utf8")
   const obsidianJs = readFileSync(
@@ -9719,6 +10683,28 @@ test("HashMap shares one fixed 12-cell renderer across three tabbed collision st
     family.indexOf('if (plan.finish === "put" && target)'),
     family.indexOf('if (plan.finish === "search-hit" && target)'),
   )
+  const { parseTabs } = loadStepTraceModule(
+    "..",
+    "..",
+    ".quartz",
+    "plugins",
+    "quartz-tabsdown",
+    "src",
+    "parser.ts",
+  )
+  const outerFence = note.match(/~~~~~tabsdown\n([\s\S]*?)\n~~~~~/)
+  assert.ok(outerFence)
+  const outerTabs = parseTabs(outerFence[1])
+  assert.equal(outerTabs.ok, true)
+  const innerFence = outerTabs.tabs[0].body.match(/(~~~~)tabsdown\n([\s\S]*?)\n\1/)
+  assert.ok(innerFence)
+  const innerTabs = parseTabs(innerFence[2])
+  assert.equal(innerTabs.ok, true)
+  const variantPayloads = innerTabs.tabs.map(({ body }) => {
+    const payload = body.match(/```steptrace\n([^\n]+)\n```/)?.[1]
+    assert.ok(payload)
+    return JSON.parse(payload)
+  })
 
   assert.match(algorithm, /id: "hash-map"/)
   assert.match(algorithm, /family: "hash-index"/)
@@ -9805,7 +10791,6 @@ test("HashMap shares one fixed 12-cell renderer across three tabbed collision st
   assert.doesNotMatch(family, /steptrace__tab/)
   assert.doesNotMatch(family, /LOAD_THRESHOLD|capacity \*=|rehash/)
   assert.doesNotMatch(family, /\bPlayer\b|\btimeline\b|\bframes\b|\bTrace\b/)
-  assert.match(mount, /if \(!handles\[next\]\) handles\[next\] = mount\(panelMounts\[next\]/)
   assert.match(structureStyles, /--steptrace-structure-control-size: 2\.75rem/)
   assert.match(structureStyles, /@container steptrace-structure \(max-width: 36rem\)/)
   assert.match(styles, /grid-template-columns: repeat\(12, minmax\(0, 1fr\)\)/)
@@ -9909,15 +10894,110 @@ test("HashMap shares one fixed 12-cell renderer across three tabbed collision st
   assert.match(obsidianJs, /Interactive hash map using/)
   assert.match(quartzCss, /\.steptrace__hash-buckets/)
   assert.match(obsidianCss, /\.steptrace__hash-buckets/)
-  for (const name of ["Closed Addressing", "Open Addressing", "Bucket Hashing"])
-    assert.match(note, new RegExp(`"name":"${name}"`))
-  for (const variant of ["closed-addressing", "open-addressing", "buckets"])
-    assert.match(note, new RegExp(`"variant":"${variant}"`))
+  assert.deepEqual(
+    innerTabs.tabs.map(({ label }) => label),
+    ["Closed Addressing", "Open Addressing", "Bucket Hashing"],
+  )
+  assert.deepEqual(
+    innerTabs.tabs.map(({ body }) => body.split("```steptrace")[0].trim()),
+    ["", "", ""],
+  )
+  assert.deepEqual(variantPayloads, [
+    { algorithm: "hash-map", variant: "closed-addressing" },
+    { algorithm: "hash-map", variant: "open-addressing" },
+    { algorithm: "hash-map", variant: "buckets" },
+  ])
+  assert.equal(note.match(/```steptrace\n/g)?.length, 3)
+  assert.ok(variantPayloads.every((payload) => !("tabs" in payload)))
+  assert.doesNotMatch(note, /```steptrace\n\{"tabs":/)
   assert.match(note, /each bucket points to its own external key\/value chain/)
   assert.match(note, /production maps usually resize or rebuild after crossing a load threshold/)
   assert.doesNotMatch(family, /\bmod\b/)
   assert.doesNotMatch(note, /\bmod\b/)
   assert.doesNotMatch(note, /Visualization pending/)
+})
+
+test("multi-variant notes preserve six authored Tabsdown configurations and 22 flat destinations", () => {
+  const manifests = [
+    {
+      path: ["Algorithms", "Graph Algorithms", "A-Star Search.md"],
+      hashes: [
+        [
+          "213fe177ff28dff6051c899d623ad0e612a661b7fdce39f7fe780b64d35615b7",
+          "d0368cc3da2dabfc5139b226800ac19f7ae62618693ab00cd6230f25a5dbf67a",
+          "aa35da93f40211db922f8ab1d8682d66b4a2e1c5886e849ce52b12b6b6a309f0",
+          "0e0db4a485d15540bbce51702927960388fec4fa80c405fe881b7f4ff9cdae40",
+        ],
+      ],
+    },
+    {
+      path: ["Algorithms", "Paradigms", "Dynamic Programming.md"],
+      hashes: [
+        [
+          "cdbbe1fc8aa0816cc093930e8c6fc6b97480b409bb4d9222b64de3193a6a0120",
+          "97684b72d8cd5110cf38a80822e2d87178e14a141d163b76f6b10417d9320348",
+          "7a255cdb3272f389aae87dbbdd992bae76b977c6d50552d0fa00c9ac5d7a463d",
+          "e51d8d56c1cec13c0801a8a616be7b7b8c800da740de6c1808ef6d82c11717ca",
+          "647a5a866a4ccd1d5a89e46db48d0f0f6489e8a5870d1010b05f00ec48e50a17",
+        ],
+        [
+          "0692960f74524319643b433346632cbed1b82a147e7b6344a337523d735cb9d6",
+          "129df14978e94d2c3a4d97777b67017254684d3ea9032df3a78d209ca812a179",
+          "6498b7338d8f05b754a4e216d4ad5b2ea03686642a1e4deb2bf484c0c357cec5",
+          "1158ddecce22d962ad76b1faf6aa20cf65c776ecbc129fb23b01b1b16b7a609f",
+          "f3e17236421b58a4aa44686a917f090b94f1e5c198ba54dba4909b934e4ba366",
+        ],
+      ],
+    },
+    {
+      path: ["Data Structures", "Linear Structures", "LinkedList.md"],
+      hashes: [
+        [
+          "5b25fea4c6ed4113617b93d53ca87a41b7a0c5ffcbbea39bc61a01d6de6432af",
+          "31226d9e5b14a8de1be9ce10b0825b5fac6fde29822b6713ab716513c446fbd9",
+        ],
+      ],
+    },
+    {
+      path: ["Data Structures", "Hash-based Structures", "HashMap.md"],
+      hashes: [
+        [
+          "23f1a1ef313a043891e63b67cf08cae16555b5ad4b5e79dd450dac06c7730ccd",
+          "63d82ce5b58e5af93b234e51c039653c4e2bac0f4d76b29c37af1f448226b069",
+          "a734c140daa934b54fab65b8bbd9adb731dc2d378a1282500cbaf4ba10a58bd9",
+        ],
+      ],
+    },
+    {
+      path: ["Data Structures", "Hash-based Structures", "Collision Resolution.md"],
+      hashes: [
+        [
+          "23f1a1ef313a043891e63b67cf08cae16555b5ad4b5e79dd450dac06c7730ccd",
+          "63d82ce5b58e5af93b234e51c039653c4e2bac0f4d76b29c37af1f448226b069",
+          "a734c140daa934b54fab65b8bbd9adb731dc2d378a1282500cbaf4ba10a58bd9",
+        ],
+      ],
+    },
+  ]
+  let destinationCount = 0
+  let fenceCount = 0
+  const parsed = manifests.map(({ path, hashes }) => {
+    const note = readFileSync(join(repoRoot, "Vault", "Home", "Computer Science", ...path), "utf8")
+    const { configs } = parseAuthoredStepTraceTabs(note)
+    assert.deepEqual(
+      configs.map((config) => config.map(({ payloadSha256 }) => payloadSha256)),
+      hashes,
+    )
+    assert.doesNotMatch(note, /```steptrace\n\{"tabs":/)
+    destinationCount += configs.flat().length
+    fenceCount += note.match(/```steptrace\n/g)?.length ?? 0
+    return configs
+  })
+
+  assert.equal(parsed.flat().length, 6)
+  assert.equal(destinationCount, 22)
+  assert.equal(fenceCount, 22)
+  assert.deepEqual(parsed[4], parsed[3])
 })
 
 test("Hash Set and Bloom Filter reuse the persistent hash-index board with direct operations", () => {
@@ -9944,11 +11024,9 @@ test("Hash Set and Bloom Filter reuse the persistent hash-index board with direc
     "Data Structures",
     "Hash-based Structures",
   )
-  const mapNote = readFileSync(join(notesRoot, "HashMap.md"), "utf8")
   const collisionNote = readFileSync(join(notesRoot, "Collision Resolution.md"), "utf8")
   const setNote = readFileSync(join(notesRoot, "Hash Set.md"), "utf8")
   const bloomNote = readFileSync(join(notesRoot, "Bloom Filter.md"), "utf8")
-  const tabConfig = (note) => note.match(/```steptrace\n(\{"tabs":.+\})\n```/)?.[1]
 
   assert.match(hashSet, /id: "hash-set"/)
   assert.match(hashSet, /family: "hash-index"/)
@@ -9983,7 +11061,6 @@ test("Hash Set and Bloom Filter reuse the persistent hash-index board with direc
     /\.steptrace__hash-controls\[data-mode="bloom"\] \.steptrace__hash-actions \{[^}]*repeat\(3,/s,
   )
   assert.doesNotMatch(styles, /overflow-x:\s*(auto|scroll)/)
-  assert.equal(tabConfig(collisionNote), tabConfig(mapNote))
   assert.match(setNote, /```steptrace\n\{"algorithm":"hash-set"\}\n```/)
   assert.match(bloomNote, /```steptrace\n\{"algorithm":"bloom-filter"\}\n```/)
   for (const note of [collisionNote, setNote, bloomNote])

@@ -21,11 +21,15 @@ The jump distance comes from two precomputed tables, and every shift is sound on
 
 The trace keeps the pattern aligned under the text while the comparison cursor moves right-to-left and both rules expose the shift they propose.
 
-# Trace
+~~~~~tabsdown
+tab: Visualization
+
 
 ```steptrace
 {"algorithm":"boyer-moore","text":"ACCCDBACBA","pattern":"ACBA"}
 ```
+
+# Trace
 
 # Why a Mismatch Skips a Block
 
@@ -65,6 +69,131 @@ All four characters match right-to-left; report index 6.
 ```
 
 The alignment starts are `0 → 2 → 3 → 6`; the corresponding shift distances are `2`, `1`, and `3`. No alignment between those starts can be a match.
+
+tab: Complexity
+
+```complexity
+{
+  "version": 2,
+  "label": "Boyer-Moore complexity",
+  "variables": {
+    "alphabetSize": {
+      "symbol": "|Σ|",
+      "description": "alphabet cardinality"
+    },
+    "inputSize": {
+      "symbol": "n",
+      "description": "number of input elements or states"
+    },
+    "secondarySize": {
+      "symbol": "m",
+      "description": "secondary input, pattern, bucket, or sequence size"
+    }
+  },
+  "resources": {
+    "time": {
+      "mode": "operations",
+      "entries": [
+        {
+          "kind": "operation",
+          "operation": "Preprocessing",
+          "bounds": [
+            {
+              "kind": "text",
+              "role": "Time",
+              "formula": "Θ(m + \\|Σ\\|)"
+            }
+          ]
+        },
+        {
+          "kind": "operation",
+          "operation": "Best / sublinear",
+          "bounds": [
+            {
+              "kind": "text",
+              "role": "Time",
+              "formula": "O(n/m)"
+            }
+          ]
+        },
+        {
+          "kind": "operation",
+          "operation": "Worst, plain",
+          "bounds": [
+            {
+              "kind": "text",
+              "role": "Time",
+              "formula": "O(n·m)"
+            }
+          ]
+        },
+        {
+          "kind": "operation",
+          "operation": "Worst, Galil rule",
+          "bounds": [
+            {
+              "kind": "curve",
+              "role": "Time",
+              "formula": "O(n)",
+              "curveId": "linear"
+            }
+          ]
+        }
+      ]
+    },
+    "space": {
+      "mode": "operations",
+      "entries": [
+        {
+          "kind": "operation",
+          "operation": "Preprocessing",
+          "bounds": [
+            {
+              "kind": "text",
+              "role": "Auxiliary space",
+              "formula": "Θ(m + \\|Σ\\|)"
+            }
+          ]
+        },
+        {
+          "kind": "operation",
+          "operation": "Best / sublinear",
+          "bounds": [
+            {
+              "kind": "text",
+              "role": "Auxiliary space",
+              "formula": "O(m + \\|Σ\\|)"
+            }
+          ]
+        },
+        {
+          "kind": "operation",
+          "operation": "Worst, plain",
+          "bounds": [
+            {
+              "kind": "text",
+              "role": "Auxiliary space",
+              "formula": "O(m + \\|Σ\\|)"
+            }
+          ]
+        },
+        {
+          "kind": "operation",
+          "operation": "Worst, Galil rule",
+          "bounds": [
+            {
+              "kind": "text",
+              "role": "Auxiliary space",
+              "formula": "O(m + \\|Σ\\|)"
+            }
+          ]
+        }
+      ]
+    }
+  }
+}
+```
+~~~~~
 
 # Complexity
 

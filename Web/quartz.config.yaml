@@ -51,6 +51,9 @@ plugins:
         - git
         - filesystem
     order: 10
+  - source: github:grafanaKibana/quartz-tabsdown
+    enabled: true
+    order: 10
   - source: github:quartz-community/syntax-highlighting
     enabled: true
     options:

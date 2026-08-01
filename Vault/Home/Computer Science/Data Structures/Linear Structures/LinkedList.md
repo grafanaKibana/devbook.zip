@@ -21,9 +21,29 @@ The cost of that freedom is addressing. Because nodes are scattered across the h
 
 Append a value below and watch the old tail's `next` field change from `null` to the new node's address while the new cell appears at the end. The doubly linked variant also writes the old tail's address into the new node's `prev` field. No existing value shifts.
 
+~~~~~tabsdown
+tab: Visualization
+
+~~~~tabsdown
+tab: Singly linked
+
+
 ```steptrace
-{"tabs":[{"name":"Singly linked","description":"Each cell stores a value over one next-pointer field.","algorithm":"linked-list","variant":"singly","array":[12,27,39,54]},{"name":"Doubly linked","description":"Each cell stores a value over separate prev- and next-pointer fields.","algorithm":"linked-list","variant":"doubly","array":[12,27,39,54]}]}
+{"algorithm":"linked-list","variant":"singly","array":[12,27,39,54]}
 ```
+
+Each cell stores a value over one next-pointer field.
+
+tab: Doubly linked
+
+
+```steptrace
+{"algorithm":"linked-list","variant":"doubly","array":[12,27,39,54]}
+```
+
+Each cell stores a value over separate prev- and next-pointer fields.
+
+~~~~
 
 # Representation and Invariants
 
@@ -40,6 +60,178 @@ Three invariants define a valid state:
 3. A node's membership is defined by the list that owns it. A node detached by `Remove` or belonging to another list is not a valid anchor for `AddBefore`/`AddAfter` on this list.
 
 Inserting around a held node in a doubly linked list mutates only a constant number of adjacent pointers plus the count. In a singly linked list, inserting after the held node is `O(1)`; inserting before it is `O(1)` only when the predecessor is already available, otherwise finding that predecessor takes `O(n)`. Removing a held node is also `O(1)` in a doubly linked list; a singly linked list still needs the predecessor reference or a traversal to find it. No index is recomputed and no element is copied. Nothing about ordering is derived from position — position exists only as the path of pointers, so there is no random access to recover.
+
+tab: Complexity
+
+```complexity
+{
+  "version": 2,
+  "label": "LinkedList complexity",
+  "variables": {
+    "inputSize": {
+      "symbol": "n",
+      "description": "number of input elements or states"
+    }
+  },
+  "resources": {
+    "time": {
+      "mode": "operations",
+      "entries": [
+        {
+          "kind": "operation",
+          "operation": "Index / search by value",
+          "bounds": [
+            {
+              "kind": "curve",
+              "role": "Best time",
+              "formula": "O(1)",
+              "curveId": "constant"
+            },
+            {
+              "kind": "curve",
+              "role": "Typical time",
+              "formula": "O(n)",
+              "curveId": "linear"
+            },
+            {
+              "kind": "curve",
+              "role": "Worst time",
+              "formula": "O(n)",
+              "curveId": "linear"
+            }
+          ]
+        },
+        {
+          "kind": "operation",
+          "operation": "Doubly-linked insert/remove around a held node; singly-linked insert after it or with its predecessor",
+          "bounds": [
+            {
+              "kind": "curve",
+              "role": "Best time",
+              "formula": "O(1)",
+              "curveId": "constant"
+            },
+            {
+              "kind": "curve",
+              "role": "Typical time",
+              "formula": "O(1)",
+              "curveId": "constant"
+            },
+            {
+              "kind": "curve",
+              "role": "Worst time",
+              "formula": "O(1)",
+              "curveId": "constant"
+            }
+          ]
+        },
+        {
+          "kind": "operation",
+          "operation": "Insert before a singly-held node without its predecessor; insert/remove at a position or value",
+          "bounds": [
+            {
+              "kind": "curve",
+              "role": "Best time",
+              "formula": "O(1)",
+              "curveId": "constant"
+            },
+            {
+              "kind": "curve",
+              "role": "Typical time",
+              "formula": "O(n)",
+              "curveId": "linear"
+            },
+            {
+              "kind": "curve",
+              "role": "Worst time",
+              "formula": "O(n)",
+              "curveId": "linear"
+            }
+          ]
+        },
+        {
+          "kind": "operation",
+          "operation": "Prepend / append",
+          "bounds": [
+            {
+              "kind": "curve",
+              "role": "Best time",
+              "formula": "O(1)",
+              "curveId": "constant"
+            },
+            {
+              "kind": "curve",
+              "role": "Typical time",
+              "formula": "O(1)",
+              "curveId": "constant"
+            },
+            {
+              "kind": "curve",
+              "role": "Worst time",
+              "formula": "O(1)",
+              "curveId": "constant"
+            }
+          ]
+        }
+      ]
+    },
+    "space": {
+      "mode": "operations",
+      "entries": [
+        {
+          "kind": "operation",
+          "operation": "Doubly-linked insert/remove around a held node; singly-linked insert after it or with its predecessor",
+          "bounds": [
+            {
+              "kind": "curve",
+              "role": "Structure space",
+              "formula": "O(1) auxiliary (inserting a value allocates one node; a removed node becomes GC-eligible only when unreachable)",
+              "curveId": "constant"
+            }
+          ]
+        },
+        {
+          "kind": "operation",
+          "operation": "Insert before a singly-held node without its predecessor; insert/remove at a position or value",
+          "bounds": [
+            {
+              "kind": "curve",
+              "role": "Structure space",
+              "formula": "O(1) auxiliary (a value insert allocates one node)",
+              "curveId": "constant"
+            }
+          ]
+        },
+        {
+          "kind": "operation",
+          "operation": "Prepend / append",
+          "bounds": [
+            {
+              "kind": "curve",
+              "role": "Structure space",
+              "formula": "O(1) new node",
+              "curveId": "constant"
+            }
+          ]
+        },
+        {
+          "kind": "operation",
+          "operation": "Whole structure",
+          "bounds": [
+            {
+              "kind": "curve",
+              "role": "Structure space",
+              "formula": "O(n)",
+              "curveId": "linear"
+            }
+          ]
+        }
+      ]
+    }
+  }
+}
+```
+~~~~~
 
 # Complexity
 

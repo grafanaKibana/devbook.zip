@@ -17,11 +17,14 @@ The structure stores elements that are **unique according to its comparer**. It 
 
 **Core shape:** element → `comparer.GetHashCode` → home bucket/cell → bucket chain or probe sequence → `comparer.Equals` candidate already there? reject : store → exact membership in `O(1)` average, `O(n)` storage.
 
+~~~~~tabsdown
+tab: Visualization
+
 ```steptrace
 {"algorithm":"hash-set"}
 ```
 
-# Representation and the Uniqueness Contract
+## Representation and the Uniqueness Contract
 
 The physical layout is a hash table, identical to a [[Home/Computer Science/Data Structures/Hash-based Structures/HashMap|hash map]] with the value slot removed: a bucket or cell array whose length is a prime (or a power of two, depending on the runtime), a comparer whose `GetHashCode` maps each element to a home position, and a collision-resolution scheme — separate chaining (a linked list or slot chain per bucket) or open addressing (probing to the next free slot). A **load factor** (elements ÷ buckets or cells) helps keep the expected collision path short; crossing its threshold triggers a **resize**, allocating a larger array and rehashing every element into new home positions.
 
@@ -31,7 +34,197 @@ The membership contract is **exact while the comparer contract holds and compare
 
 Two properties are deliberately not retained. Iteration order reflects bucket layout and rehash history, not insertion sequence, and can change after any `Add`/`Remove` or across runtime versions. And because the set stores presence rather than occurrence, it cannot answer "how many times" — an element is either in or out.
 
-# Complexity
+tab: Complexity
+
+```complexity
+{
+  "version": 2,
+  "label": "Hash Set complexity",
+  "variables": {
+    "inputSize": {
+      "symbol": "n",
+      "description": "number of input elements or states"
+    }
+  },
+  "resources": {
+    "time": {
+      "mode": "operations",
+      "entries": [
+        {
+          "kind": "operation",
+          "operation": "Add(x)",
+          "bounds": [
+            {
+              "kind": "curve",
+              "role": "Best time",
+              "formula": "O(1)",
+              "curveId": "constant"
+            },
+            {
+              "kind": "curve",
+              "role": "Amortized/average time",
+              "formula": "O(1)",
+              "curveId": "constant"
+            },
+            {
+              "kind": "curve",
+              "role": "Worst time",
+              "formula": "O(n)",
+              "curveId": "linear"
+            }
+          ]
+        },
+        {
+          "kind": "operation",
+          "operation": "Contains(x)",
+          "bounds": [
+            {
+              "kind": "curve",
+              "role": "Best time",
+              "formula": "O(1)",
+              "curveId": "constant"
+            },
+            {
+              "kind": "curve",
+              "role": "Amortized/average time",
+              "formula": "O(1)",
+              "curveId": "constant"
+            },
+            {
+              "kind": "curve",
+              "role": "Worst time",
+              "formula": "O(n)",
+              "curveId": "linear"
+            }
+          ]
+        },
+        {
+          "kind": "operation",
+          "operation": "Remove(x)",
+          "bounds": [
+            {
+              "kind": "curve",
+              "role": "Best time",
+              "formula": "O(1)",
+              "curveId": "constant"
+            },
+            {
+              "kind": "curve",
+              "role": "Amortized/average time",
+              "formula": "O(1)",
+              "curveId": "constant"
+            },
+            {
+              "kind": "curve",
+              "role": "Worst time",
+              "formula": "O(n)",
+              "curveId": "linear"
+            }
+          ]
+        },
+        {
+          "kind": "operation",
+          "operation": "Resize / rehash",
+          "bounds": [
+            {
+              "kind": "curve",
+              "role": "Amortized/average time",
+              "formula": "O(1) amortized per insert",
+              "curveId": "constant"
+            },
+            {
+              "kind": "curve",
+              "role": "Worst time",
+              "formula": "O(n) single event",
+              "curveId": "linear"
+            }
+          ]
+        }
+      ]
+    },
+    "space": {
+      "mode": "operations",
+      "entries": [
+        {
+          "kind": "operation",
+          "operation": "Add(x)",
+          "bounds": [
+            {
+              "kind": "curve",
+              "role": "Structure space",
+              "formula": "O(n)",
+              "curveId": "linear"
+            },
+            {
+              "kind": "curve",
+              "role": "Aux space per op",
+              "formula": "O(1)",
+              "curveId": "constant"
+            }
+          ]
+        },
+        {
+          "kind": "operation",
+          "operation": "Contains(x)",
+          "bounds": [
+            {
+              "kind": "curve",
+              "role": "Structure space",
+              "formula": "O(n)",
+              "curveId": "linear"
+            },
+            {
+              "kind": "curve",
+              "role": "Aux space per op",
+              "formula": "O(1)",
+              "curveId": "constant"
+            }
+          ]
+        },
+        {
+          "kind": "operation",
+          "operation": "Remove(x)",
+          "bounds": [
+            {
+              "kind": "curve",
+              "role": "Structure space",
+              "formula": "O(n)",
+              "curveId": "linear"
+            },
+            {
+              "kind": "curve",
+              "role": "Aux space per op",
+              "formula": "O(1)",
+              "curveId": "constant"
+            }
+          ]
+        },
+        {
+          "kind": "operation",
+          "operation": "Resize / rehash",
+          "bounds": [
+            {
+              "kind": "curve",
+              "role": "Structure space",
+              "formula": "O(n)",
+              "curveId": "linear"
+            },
+            {
+              "kind": "curve",
+              "role": "Aux space per op",
+              "formula": "O(n) transient",
+              "curveId": "linear"
+            }
+          ]
+        }
+      ]
+    }
+  }
+}
+```
+~~~~~
+
+## Complexity
 
 | Operation | Best time | Amortized/average time | Worst time | Structure space | Aux space per op |
 | --- | --- | --- | --- | --- | --- |

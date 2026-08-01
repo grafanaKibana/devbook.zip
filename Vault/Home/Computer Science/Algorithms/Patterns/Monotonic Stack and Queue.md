@@ -19,6 +19,9 @@ A monotonic deque generalises this to a moving window. It usually stores indices
 
 **Core shape:** ordered scan → pop violators before each push → each index is pushed once and removed at most once → `O(n)` nearest-greater/smaller spans and window extrema.
 
+~~~~~tabsdown
+tab: Visualization
+
 ```steptrace
 {"algorithm":"monotonic-stack-and-queue","array":[73,74,75,71,69,72,76,73]}
 ```
@@ -32,6 +35,108 @@ The stack holds unanswered indices whose values are non-increasing from bottom t
 The deque keeps the same monotone contents but adds a second exit. Values decrease from front to back; the front is always the current window maximum. Each new index `i` drops the front if it has slid out of the window, then pops from the back while `a[back] <= a[i]`: the incoming value is at least as large, and an equal newer index dominates because it expires later. Indices are the standard representation because the expiry check is direct; a value-only variant needs the departing value and duplicate counts to preserve the same information.
 
 Each index is pushed once and removed at most once. Charge a removal to that index's earlier push and no index can be charged twice: all inner-loop iterations sum to `O(n)`, making the scan `O(n)` total and `O(1)` amortized per input index.
+
+tab: Complexity
+
+```complexity
+{
+  "version": 2,
+  "label": "Monotonic Stack and Queue complexity",
+  "variables": {
+    "inputSize": {
+      "symbol": "n",
+      "description": "number of input elements or states"
+    },
+    "keyRange": {
+      "symbol": "k",
+      "description": "key range, digit count, or requested result count"
+    }
+  },
+  "resources": {
+    "time": {
+      "mode": "operations",
+      "entries": [
+        {
+          "kind": "operation",
+          "operation": "Any input, monotonic stack",
+          "bounds": [
+            {
+              "kind": "text",
+              "role": "Time",
+              "formula": "O(n) total; O(1) amortized per index"
+            }
+          ]
+        },
+        {
+          "kind": "operation",
+          "operation": "Any input, monotonic deque",
+          "bounds": [
+            {
+              "kind": "text",
+              "role": "Time",
+              "formula": "O(n) total; O(1) amortized per index"
+            }
+          ]
+        },
+        {
+          "kind": "operation",
+          "operation": "Brute-force next-greater",
+          "bounds": [
+            {
+              "kind": "curve",
+              "role": "Time",
+              "formula": "O(n^2)",
+              "curveId": "quadratic"
+            }
+          ]
+        }
+      ]
+    },
+    "space": {
+      "mode": "operations",
+      "entries": [
+        {
+          "kind": "operation",
+          "operation": "Any input, monotonic stack",
+          "bounds": [
+            {
+              "kind": "curve",
+              "role": "Auxiliary space",
+              "formula": "O(n)",
+              "curveId": "linear"
+            }
+          ]
+        },
+        {
+          "kind": "operation",
+          "operation": "Any input, monotonic deque",
+          "bounds": [
+            {
+              "kind": "curve",
+              "role": "Auxiliary space",
+              "formula": "O(k)",
+              "curveId": "linear"
+            }
+          ]
+        },
+        {
+          "kind": "operation",
+          "operation": "Brute-force next-greater",
+          "bounds": [
+            {
+              "kind": "curve",
+              "role": "Auxiliary space",
+              "formula": "O(1)",
+              "curveId": "constant"
+            }
+          ]
+        }
+      ]
+    }
+  }
+}
+```
+~~~~~
 
 # Complexity
 

@@ -24,9 +24,38 @@ Read it as two questions. *Is the storage open-ended or closed?* Chaining's list
 
 **Core split:** collisions land two keys in one home bucket → chain them outside the array or probe to another in-array slot. A bucket/group layout changes how many candidates one access examines, then delegates overflow to chaining or probing. The third StepTrace tab demonstrates bucketed probing.
 
+~~~~~tabsdown
+tab: Visualization
+
+~~~~tabsdown
+tab: Closed Addressing
+
+
 ```steptrace
-{"tabs":[{"name":"Closed Addressing","description":"Separate chaining (open hashing): each bucket points to its own external key/value chain.","algorithm":"hash-map","variant":"closed-addressing"},{"name":"Open Addressing","description":"Linear probing scans the fixed table and preserves tombstones after removal.","algorithm":"hash-map","variant":"open-addressing"},{"name":"Bucket Hashing","description":"Four three-cell buckets use bucket-by-bucket linear overflow with wraparound.","algorithm":"hash-map","variant":"buckets"}]}
+{"algorithm":"hash-map","variant":"closed-addressing"}
 ```
+
+Separate chaining (open hashing): each bucket points to its own external key/value chain.
+
+tab: Open Addressing
+
+
+```steptrace
+{"algorithm":"hash-map","variant":"open-addressing"}
+```
+
+Linear probing scans the fixed table and preserves tombstones after removal.
+
+tab: Bucket Hashing
+
+
+```steptrace
+{"algorithm":"hash-map","variant":"buckets"}
+```
+
+Four three-cell buckets use bucket-by-bucket linear overflow with wraparound.
+
+~~~~
 
 # Open Hashing — Separate Chaining (Closed Addressing)
 
@@ -62,6 +91,128 @@ The array can group `B` adjacent slots into a fixed-size **bucket**. The home re
 - **Overflow and deletion inherit the underlying strategy.** Chained overflow unlinks an entry from its chain or page. Probed overflow cannot blindly clear a slot that earlier probes depend on; it uses tombstones, backward shifting, or a local/full rebuild as its probe scheme permits.
 
 Use bucket/group layout when memory or disk locality dominates; its tail behaviour remains the behaviour of the chosen chain or probe scheme.
+
+tab: Complexity
+
+```complexity
+{
+  "version": 2,
+  "label": "Collision Resolution complexity",
+  "variables": {
+    "blockSize": {
+      "symbol": "B",
+      "description": "block or page capacity"
+    },
+    "inputSize": {
+      "symbol": "n",
+      "description": "number of input elements or states"
+    },
+    "keyRange": {
+      "symbol": "k",
+      "description": "key range, digit count, or requested result count"
+    },
+    "loadFactor": {
+      "symbol": "α",
+      "description": "hash-table load factor"
+    }
+  },
+  "resources": {
+    "time": {
+      "mode": "operations",
+      "entries": [
+        {
+          "kind": "operation",
+          "operation": "Open hashing (chaining)",
+          "bounds": [
+            {
+              "kind": "text",
+              "role": "Avg lookup",
+              "formula": "O(1 + α)"
+            },
+            {
+              "kind": "text",
+              "role": "Worst lookup",
+              "formula": "O(n); treeified comparable-key bin O(log k)"
+            }
+          ]
+        },
+        {
+          "kind": "operation",
+          "operation": "Closed hashing (open addressing)",
+          "bounds": [
+            {
+              "kind": "text",
+              "role": "Avg lookup",
+              "formula": "Linear probing: success O(1/(1−α)), miss/insert O(1/(1−α)²)"
+            },
+            {
+              "kind": "curve",
+              "role": "Worst lookup",
+              "formula": "O(n)",
+              "curveId": "linear"
+            }
+          ]
+        },
+        {
+          "kind": "operation",
+          "operation": "Bucket/group layout",
+          "bounds": [
+            {
+              "kind": "text",
+              "role": "Avg lookup",
+              "formula": "Resolution-dependent; scans B slots/metadata together"
+            },
+            {
+              "kind": "text",
+              "role": "Worst lookup",
+              "formula": "resolution-dependent"
+            }
+          ]
+        }
+      ]
+    },
+    "space": {
+      "mode": "operations",
+      "entries": [
+        {
+          "kind": "operation",
+          "operation": "Open hashing (chaining)",
+          "bounds": [
+            {
+              "kind": "text",
+              "role": "Extra memory",
+              "formula": "pointer/index per entry"
+            }
+          ]
+        },
+        {
+          "kind": "operation",
+          "operation": "Closed hashing (open addressing)",
+          "bounds": [
+            {
+              "kind": "text",
+              "role": "Extra memory",
+              "formula": "empty slack plus control metadata or sentinels"
+            }
+          ]
+        },
+        {
+          "kind": "operation",
+          "operation": "Bucket/group layout",
+          "bounds": [
+            {
+              "kind": "text",
+              "role": "Extra memory",
+              "formula": "block slack plus metadata or overflow links"
+            }
+          ]
+        }
+      ]
+    }
+  }
+}
+```
+~~~~~
 
 # Complexity
 

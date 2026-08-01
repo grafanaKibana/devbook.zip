@@ -14,7 +14,7 @@ This document owns StepTrace-specific design, consistency, and review rules. The
 - **Host bindings:** `src/styles/hosts/obsidian.scss` and `Web/custom/components/styles/steptrace.scss`.
 - **Usage:** `steptrace` fences in `Vault/Home/`.
 
-Complexity charts share the Obsidian plugin entry and some tab styling, but their model, rendering, and styles are owned by `Web/custom/complexity/` and the root design contract.
+Complexity charts share the Obsidian plugin entry, but their model, rendering, and styles are owned by `Web/custom/complexity/` and the root design contract. Tabsdown owns authored tab structure and interaction.
 
 ## Product goal
 
@@ -31,6 +31,16 @@ It is not:
 - A replacement for note prose, code, tradeoffs, or complexity analysis.
 - A canvas for one-off visual languages.
 - A generic charting or diagramming library.
+
+## Authored composition
+
+- Every note containing StepTrace uses one outer Tabsdown block with `Visualization` first and `Complexity` second.
+- An ordinary Visualization panel begins with its `steptrace` fence. Any heading or prose that helps interpret the states follows that fence.
+- A multi-variant Visualization panel begins with inner Tabsdown. Each variant keeps its label, begins with one flat `steptrace` fence, and places useful explanation after the fence. Delete copy that only restates visible controls or the pictured scenario.
+- The Complexity panel contains exactly one version 2 `complexity` fence and no rendered Markdown. Detailed complexity tables, assumptions, causes, and prose follow the outer Tabsdown block.
+- Every DSA complexity figure contains independent Time and Space resources in that order. It exposes an accessible figure name but no visible global chart title.
+- Big O is the exception: its version 1 catalogue stays in normal note flow without StepTrace or Tabsdown.
+- StepTrace and complexity payload fences use backticks. Nested Tabsdown fences use tildes, with each outer fence longer than every inner tilde fence it contains.
 
 ## Design invariants
 
@@ -108,7 +118,7 @@ Reuse before creating:
 
 - Segmented array shells and rounded endpoints.
 - Canonical graph nodes, edges, arrows, and labels.
-- Shared tabs, buttons, focus treatment, status, legends, and result markers.
+- Tabsdown-authored tabs; shared buttons, focus treatment, status, legends, and result markers.
 - Trace/Watch rows and value hints.
 - Lucide transport glyphs.
 - Shared state and motion tokens.
@@ -188,7 +198,10 @@ Rules:
 - Play/pause reflects the actual player state.
 - Scrubbing updates the stage, Trace, Watch, phase, counter, and accessible value together.
 - Speed affects playback and transition timing without changing frame semantics.
-- Hidden tabs pause; returning to a tab preserves its step.
+- A StepTrace inside initially hidden Tabsdown panels mounts only when all ancestor panels become visible.
+- Hiding a mounted panel pauses playback and preserves its step. Showing it resumes only when it was playing before the hide.
+- Rerendering, navigation, and plugin unload disconnect panel observers and destroy the mounted child.
+- Quartz destroys mounted StepTrace children on `prenav`, before its global cleanup set and DOM replacement. StepTrace cleanup is idempotent; Tabsdown retains its single global cleanup callback rather than synthetic inner/outer owners.
 
 ### Direct manipulation
 
@@ -207,9 +220,9 @@ Rules:
 ## Accessibility
 
 - Target WCAG 2.2 AA for changed StepTrace UI.
-- All transport, tabs, scrubbers, detail switches, native options, and structure actions are keyboard reachable.
+- All transport, scrubbers, detail switches, native options, and structure actions are keyboard reachable. Tabsdown owns keyboard interaction for authored tabs.
 - Use visible focus outlines and native disabled semantics.
-- Tabs use tablist/tab/tabpanel roles, roving tab index, and arrow/Home/End navigation.
+- Tabsdown supplies tablist/tab/tabpanel roles, roving tab index, and isolated arrow/Home/End navigation for outer and inner authored groups.
 - Scrubbers expose current, minimum, maximum, and readable phase/step values.
 - Decorative SVG content is hidden. The stage has equivalent labels, Trace, Watch, or result text.
 - Dynamic announcements are bounded; do not announce every animated detail.
@@ -236,13 +249,15 @@ Both hosts must share:
 - Family DOM and geometry.
 - Shared styles and semantic tokens.
 - Interaction behavior and teardown contract.
+- Tabsdown-authored outer and inner panel structure.
+- Lazy mounting and visibility-driven pause, conditional resume, and state retention.
 
 Host-specific code may provide:
 
 - Native loading and lifecycle integration.
 - Host token bindings.
 - Obsidian's native slider.
-- Obsidian's Tabsdown-mounted compact detail switch; Quartz uses the shared fallback until its Tabsdown plugin exposes the same callable API.
+- Tabsdown-mounted compact Trace/Watch switches in Obsidian and Quartz, with the shared switch only as a missing-plugin fallback.
 - Quartz lazy asset loading and SPA teardown.
 
 A host-specific difference is acceptable only when the same operation, state, result, and fallback remain available.
@@ -254,6 +269,8 @@ A host-specific difference is acceptable only when the same operation, state, re
 | Registry and public API      | `src/engine.ts`, `src/registry.ts`, `src/types.ts` |
 | Semantic frames              | `src/recorders.ts`, algorithm-specific recorders   |
 | Shared shell and interaction | `src/mount.ts`, `src/player.ts`                    |
+| Authored tab interaction     | Tabsdown                                           |
+| Panel visibility lifecycle   | `src/mount.ts`                                     |
 | Family DOM and geometry      | `src/families/`, `src/render.ts`                   |
 | Shared tokens and chrome     | `src/styles/shared.scss`                           |
 | Family styling               | the matching file under `src/styles/`              |
@@ -297,7 +314,7 @@ Automated tests prove contracts; screenshots prove composition. Neither replaces
 ## Avoid
 
 - Per-algorithm copies of shared renderers.
-- Family-specific shell, transport, tabs, or token vocabularies.
+- Family-specific shell, transport, authored tabs, or token vocabularies.
 - Raw colors or font stacks where a semantic token exists.
 - Viewport-width rules for component layout.
 - Layout motion, auto-playing decoration, or a second competing trace panel.

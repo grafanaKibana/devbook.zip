@@ -23,6 +23,9 @@ What the forest gives up is compactness and locality. Nodes are separate allocat
 
 Use **Meld** to combine the canonical 3-value forest with a singleton. The forest slots expose the two equal-order links and the carry into `B₂`; **Reset** restores both source forests.
 
+~~~~~tabsdown
+tab: Visualization
+
 ```steptrace
 {"algorithm":"binomial-queue"}
 ```
@@ -62,6 +65,214 @@ Four invariants define a valid state:
 4. **Sorted root list** — root degrees strictly increase along the sibling chain, which lets meld merge two lists in one linear pass before combining carries.
 
 Linking is the only operation that changes parentage, and it only ever attaches one root beneath another root. No interior node is ever re-parented in isolation, so heap order and binomial shape are preserved by construction rather than repaired afterward.
+
+tab: Complexity
+
+```complexity
+{
+  "version": 2,
+  "label": "Binomial Queues complexity",
+  "variables": {
+    "inputSize": {
+      "symbol": "n",
+      "description": "number of input elements or states"
+    }
+  },
+  "resources": {
+    "time": {
+      "mode": "operations",
+      "entries": [
+        {
+          "kind": "operation",
+          "operation": "Meld",
+          "bounds": [
+            {
+              "kind": "curve",
+              "role": "Best time",
+              "formula": "O(1)",
+              "curveId": "constant"
+            },
+            {
+              "kind": "curve",
+              "role": "Amortized time",
+              "formula": "O(log n)",
+              "curveId": "log-n"
+            },
+            {
+              "kind": "curve",
+              "role": "Worst time",
+              "formula": "O(log n)",
+              "curveId": "log-n"
+            }
+          ]
+        },
+        {
+          "kind": "operation",
+          "operation": "Insert",
+          "bounds": [
+            {
+              "kind": "curve",
+              "role": "Best time",
+              "formula": "O(1)",
+              "curveId": "constant"
+            },
+            {
+              "kind": "curve",
+              "role": "Amortized time",
+              "formula": "O(1)",
+              "curveId": "constant"
+            },
+            {
+              "kind": "curve",
+              "role": "Worst time",
+              "formula": "O(log n)",
+              "curveId": "log-n"
+            }
+          ]
+        },
+        {
+          "kind": "operation",
+          "operation": "Find-min",
+          "bounds": [
+            {
+              "kind": "curve",
+              "role": "Best time",
+              "formula": "O(1)",
+              "curveId": "constant"
+            },
+            {
+              "kind": "curve",
+              "role": "Worst time",
+              "formula": "O(log n)",
+              "curveId": "log-n"
+            }
+          ]
+        },
+        {
+          "kind": "operation",
+          "operation": "Extract-min",
+          "bounds": [
+            {
+              "kind": "curve",
+              "role": "Best time",
+              "formula": "O(1)",
+              "curveId": "constant"
+            },
+            {
+              "kind": "curve",
+              "role": "Amortized time",
+              "formula": "O(log n)",
+              "curveId": "log-n"
+            },
+            {
+              "kind": "curve",
+              "role": "Worst time",
+              "formula": "O(log n)",
+              "curveId": "log-n"
+            }
+          ]
+        },
+        {
+          "kind": "operation",
+          "operation": "Decrease-key",
+          "bounds": [
+            {
+              "kind": "curve",
+              "role": "Best time",
+              "formula": "O(1)",
+              "curveId": "constant"
+            },
+            {
+              "kind": "curve",
+              "role": "Worst time",
+              "formula": "O(log n)",
+              "curveId": "log-n"
+            }
+          ]
+        }
+      ]
+    },
+    "space": {
+      "mode": "operations",
+      "entries": [
+        {
+          "kind": "operation",
+          "operation": "Storage (n items)",
+          "bounds": [
+            {
+              "kind": "curve",
+              "role": "Space",
+              "formula": "O(n) nodes + child/sibling/parent pointers",
+              "curveId": "linear"
+            }
+          ]
+        },
+        {
+          "kind": "operation",
+          "operation": "Meld",
+          "bounds": [
+            {
+              "kind": "curve",
+              "role": "Space",
+              "formula": "O(1) aux",
+              "curveId": "constant"
+            }
+          ]
+        },
+        {
+          "kind": "operation",
+          "operation": "Insert",
+          "bounds": [
+            {
+              "kind": "curve",
+              "role": "Space",
+              "formula": "O(1) aux",
+              "curveId": "constant"
+            }
+          ]
+        },
+        {
+          "kind": "operation",
+          "operation": "Find-min",
+          "bounds": [
+            {
+              "kind": "curve",
+              "role": "Space",
+              "formula": "O(1) aux",
+              "curveId": "constant"
+            }
+          ]
+        },
+        {
+          "kind": "operation",
+          "operation": "Extract-min",
+          "bounds": [
+            {
+              "kind": "curve",
+              "role": "Space",
+              "formula": "O(1) aux",
+              "curveId": "constant"
+            }
+          ]
+        },
+        {
+          "kind": "operation",
+          "operation": "Decrease-key",
+          "bounds": [
+            {
+              "kind": "curve",
+              "role": "Space",
+              "formula": "O(1) aux",
+              "curveId": "constant"
+            }
+          ]
+        }
+      ]
+    }
+  }
+}
+```
+~~~~~
 
 # Complexity
 

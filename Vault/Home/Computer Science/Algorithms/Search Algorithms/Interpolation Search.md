@@ -23,13 +23,18 @@ To find `950` in `[0 … 1000]` it probes near index `95%`, not `50%` — the sa
 
 The distinguishing step is where the first probe lands.
 
-# Trace
+~~~~~tabsdown
+tab: Visualization
 
-The trace searches for `81` in the quadratic sequence `a[i] = i²`. The target sits about 67% across the initial value span but at index `9` of `11`, so the first estimate undershoots at index `7`. Two recalculations over the smaller value ranges move the probe through indices `8` and `9`. This makes the useful mechanism visible: interpolation is not a one-shot guess; every miss remaps the target against the new endpoints.
+
 
 ```steptrace
 {"algorithm":"interpolation-search","array":[0,1,4,9,16,25,36,49,64,81,100,121],"target":81}
 ```
+
+# Trace
+
+The trace searches for `81` in the quadratic sequence `a[i] = i²`. The target sits about 67% across the initial value span but at index `9` of `11`, so the first estimate undershoots at index `7`. Two recalculations over the smaller value ranges move the probe through indices `8` and `9`. This makes the useful mechanism visible: interpolation is not a one-shot guess; every miss remaps the target against the new endpoints.
 
 # Why the Range Collapses Faster
 
@@ -38,6 +43,87 @@ At the start of every loop the target, if present, lies in `[a[lo], a[hi]]` — 
 The comparison that follows is identical to Binary Search. `a[pos] < target` proves indices `lo … pos` are too small, so `lo` moves to `pos + 1`; `a[pos] > target` moves `hi` to `pos - 1`. The loop also guards `a[lo] <= target <= a[hi]`, so a target that falls outside the current value window exits immediately rather than interpolating into an empty region.
 
 On exactly evenly spaced values, a present target's value fraction equals its index fraction, so the first estimate lands exactly in the idealized arithmetic model. The `O(log log n)` bound is an expected result under the separate uniform random-key model: after a probe, the expected remaining candidate count is on the order of the previous count's *square root* rather than its half. Repeated square-root reduction of `n` reaches one candidate in about `log log n` steps. An individual search can shrink by more or less than that model predicts. The iterative form stores only `lo`, `hi`, and `pos`, so auxiliary space stays `O(1)`.
+
+tab: Complexity
+
+```complexity
+{
+  "version": 2,
+  "label": "Interpolation Search complexity",
+  "variables": {
+    "inputSize": {
+      "symbol": "n",
+      "description": "number of input elements or states"
+    }
+  },
+  "resources": {
+    "time": {
+      "mode": "operations",
+      "entries": [
+        {
+          "kind": "operation",
+          "operation": "Best",
+          "bounds": [
+            {
+              "kind": "curve",
+              "role": "Time",
+              "formula": "O(1)",
+              "curveId": "constant"
+            }
+          ]
+        },
+        {
+          "kind": "operation",
+          "operation": "Average",
+          "bounds": [
+            {
+              "kind": "text",
+              "role": "Time",
+              "formula": "O(log log n)"
+            }
+          ]
+        },
+        {
+          "kind": "operation",
+          "operation": "Worst",
+          "bounds": [
+            {
+              "kind": "curve",
+              "role": "Time",
+              "formula": "Θ(n)",
+              "curveId": "linear"
+            }
+          ]
+        }
+      ]
+    },
+    "space": {
+      "mode": "cases",
+      "entries": [
+        {
+          "kind": "case",
+          "role": "Best",
+          "formula": "O(1)",
+          "curveId": "constant"
+        },
+        {
+          "kind": "case",
+          "role": "Average",
+          "formula": "O(1)",
+          "curveId": "constant"
+        },
+        {
+          "kind": "case",
+          "role": "Worst",
+          "formula": "O(1)",
+          "curveId": "constant"
+        }
+      ]
+    }
+  }
+}
+```
+~~~~~
 
 # Complexity
 

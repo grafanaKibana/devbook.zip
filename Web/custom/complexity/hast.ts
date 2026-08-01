@@ -1,6 +1,10 @@
 import type { Element, ElementContent, RootContent, Text } from "hast"
 
-import { COMPLEXITY_CHART, COMPLEXITY_FILTERS, type ComplexityViewModel } from "./model"
+import {
+  COMPLEXITY_CHART,
+  type ComplexityResourceViewModel,
+  type ComplexityViewModel,
+} from "./model"
 
 const text = (value: string): Text => ({ type: "text", value })
 
@@ -12,11 +16,11 @@ function element(
   return { type: "element", tagName, properties, children }
 }
 
-export function renderComplexityHast(view: ComplexityViewModel): RootContent {
+function renderResourceHast(resource: ComplexityResourceViewModel): Element {
   const { width, height, left, plotRight, labelX, top, axisY } = COMPLEXITY_CHART
-  const clipId = `${view.figureId}-plot-clip`
-  const panelId = `${view.figureId}-panel`
-  const gradients = view.paths
+  const clipId = `${resource.labelId}-plot-clip`
+  const pathsToRender = [...resource.contextPaths, ...resource.paths]
+  const gradients = pathsToRender
     .filter((path) => !path.dimmed)
     .map((path) =>
       element("linearGradient", { id: `${path.id}-fill`, x1: "0", y1: "0", x2: "0", y2: "1" }, [
@@ -24,7 +28,7 @@ export function renderComplexityHast(view: ComplexityViewModel): RootContent {
         element("stop", { offset: "100%", stopColor: path.color, stopOpacity: 0 }),
       ]),
     )
-  const grid = view.ticks.flatMap((tick) => [
+  const grid = resource.ticks.flatMap((tick) => [
     element("line", {
       className: ["complexity__grid"],
       x1: left,
@@ -42,12 +46,12 @@ export function renderComplexityHast(view: ComplexityViewModel): RootContent {
       [text(tick.label)],
     ),
   ])
-  const xTicks = view.xTicks.map((tick) =>
+  const xTicks = resource.xTicks.map((tick) =>
     element("text", { className: ["complexity__x-tick"], x: tick.x, y: axisY + 18 }, [
       text(tick.label),
     ]),
   )
-  const areas = view.paths
+  const areas = pathsToRender
     .filter((path) => !path.dimmed)
     .map((path) =>
       element("path", {
@@ -55,10 +59,9 @@ export function renderComplexityHast(view: ComplexityViewModel): RootContent {
         d: path.area,
         fill: `url(#${path.id}-fill)`,
         "data-path-id": path.id,
-        "data-category": path.category,
       }),
     )
-  const paths = view.paths.map((path) =>
+  const paths = pathsToRender.map((path) =>
     element("path", {
       id: path.id,
       className: [
@@ -72,11 +75,10 @@ export function renderComplexityHast(view: ComplexityViewModel): RootContent {
       vectorEffect: "non-scaling-stroke",
       "data-path-id": path.id,
       "data-curve-id": path.curveId,
-      "data-category": path.category,
       "data-context": path.dimmed ? "true" : "false",
     }),
   )
-  const endpointLabels = view.endpointLabels.map((label) =>
+  const endpointLabels = resource.endpointLabels.map((label) =>
     element(
       "text",
       {
@@ -90,7 +92,7 @@ export function renderComplexityHast(view: ComplexityViewModel): RootContent {
       [text(label.formula)],
     ),
   )
-  const legend = view.legend.map((group) =>
+  const legend = resource.legend.map((group) =>
     element(
       "div",
       {
@@ -115,7 +117,6 @@ export function renderComplexityHast(view: ComplexityViewModel): RootContent {
                   type: "button",
                   className: ["complexity__legend-button"],
                   "data-path-id": item.pathId,
-                  "data-category": item.category,
                   ariaPressed: "false",
                   style: `--complexity-color:${item.color}`,
                 },
@@ -130,97 +131,93 @@ export function renderComplexityHast(view: ComplexityViewModel): RootContent {
       ],
     ),
   )
-  const tabs = COMPLEXITY_FILTERS.map((filter) =>
-    element(
-      "button",
-      {
-        id: `${view.figureId}-tab-${filter.id}`,
-        type: "button",
-        role: "tab",
-        className: ["steptrace__tab", "complexity__tab"],
-        "data-filter": filter.id,
-        ariaSelected: filter.id === "all" ? "true" : "false",
-        ariaControls: panelId,
-        tabIndex: filter.id === "all" ? 0 : -1,
-        disabled:
-          filter.id === "all" || view.availableCategories.includes(filter.id) ? undefined : true,
-      },
-      [text(filter.label)],
-    ),
+  return element(
+    "div",
+    {
+      className: ["complexity__resource"],
+      "data-complexity-resource": resource.key,
+      ...(resource.key === "catalogue" ? {} : { role: "group", ariaLabelledBy: resource.labelId }),
+    },
+    [
+      ...(resource.key === "catalogue"
+        ? []
+        : [
+            element("div", { id: resource.labelId, className: ["complexity__resource-label"] }, [
+              text(resource.label),
+            ]),
+          ]),
+      element("div", { className: ["complexity__plot-wrap"] }, [
+        element(
+          "svg",
+          {
+            className: ["complexity__plot"],
+            viewBox: `0 0 ${width} ${height}`,
+            role: "presentation",
+            ariaHidden: "true",
+            focusable: "false",
+          },
+          [
+            element("defs", {}, [
+              element("clipPath", { id: clipId }, [
+                element("rect", {
+                  x: left,
+                  y: top,
+                  width: plotRight - left,
+                  height: axisY - top,
+                }),
+              ]),
+              ...gradients,
+            ]),
+            ...grid,
+            element("line", {
+              className: ["complexity__axis"],
+              x1: left,
+              x2: plotRight,
+              y1: axisY,
+              y2: axisY,
+            }),
+            ...xTicks,
+            element("g", { clipPath: `url(#${clipId})` }, [
+              element("g", { className: ["complexity__areas"] }, areas),
+              element("g", { className: ["complexity__curves"] }, paths),
+            ]),
+            element("g", { className: ["complexity__endpoint-labels"] }, endpointLabels),
+          ],
+        ),
+      ]),
+      element("div", { className: ["complexity__legend"] }, legend),
+      ...(resource.semanticBounds.length === 0
+        ? []
+        : [
+            element(
+              "dl",
+              { className: ["complexity__semantic-bounds"] },
+              resource.semanticBounds.flatMap((bound) => [
+                element("dt", {}, [text(`${bound.operation} — ${bound.role}`)]),
+                element("dd", {}, [text(bound.formula)]),
+              ]),
+            ),
+          ]),
+    ],
   )
+}
 
+export function renderComplexityHast(view: ComplexityViewModel): RootContent {
   return element(
     "figure",
     {
       id: view.figureId,
       className: ["complexity"],
       "data-complexity-mode": view.mode,
-      "data-active-filter": "all",
+      ariaLabel: view.label,
     },
     [
-      element("figcaption", { id: `${view.figureId}-title`, className: ["complexity__title"] }, [
-        text(view.title),
-      ]),
+      element("span", { hidden: true }, [text(view.label)]),
       element(
         "div",
-        {
-          className: ["steptrace__tabs", "complexity__tabs"],
-          role: "tablist",
-          ariaLabel: "Complexity cases",
-        },
-        tabs,
+        { className: ["complexity__resources"] },
+        view.resources.map(renderResourceHast),
       ),
-      element(
-        "div",
-        {
-          id: panelId,
-          className: ["complexity__panel"],
-          role: "tabpanel",
-          ariaLabelledBy: `${view.figureId}-tab-all`,
-        },
-        [
-          element("div", { className: ["complexity__plot-wrap"] }, [
-            element(
-              "svg",
-              {
-                className: ["complexity__plot"],
-                viewBox: `0 0 ${width} ${height}`,
-                role: "presentation",
-                ariaHidden: "true",
-                focusable: "false",
-              },
-              [
-                element("defs", {}, [
-                  element("clipPath", { id: clipId }, [
-                    element("rect", {
-                      x: left,
-                      y: top,
-                      width: plotRight - left,
-                      height: axisY - top,
-                    }),
-                  ]),
-                  ...gradients,
-                ]),
-                ...grid,
-                element("line", {
-                  className: ["complexity__axis"],
-                  x1: left,
-                  x2: plotRight,
-                  y1: axisY,
-                  y2: axisY,
-                }),
-                ...xTicks,
-                element("g", { clipPath: `url(#${clipId})` }, [
-                  element("g", { className: ["complexity__areas"] }, areas),
-                  element("g", { className: ["complexity__curves"] }, paths),
-                ]),
-                element("g", { className: ["complexity__endpoint-labels"] }, endpointLabels),
-              ],
-            ),
-          ]),
-        ],
-      ),
-      element("div", { className: ["complexity__legend"] }, legend),
     ],
   )
 }

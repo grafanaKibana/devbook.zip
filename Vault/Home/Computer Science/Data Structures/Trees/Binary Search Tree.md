@@ -19,6 +19,9 @@ The binding rule is the **ordering invariant**: for any node, every key in its l
 
 Press **Insert** with the prefilled `80`: the balanced seven-key start gains a deeper right branch. Continue with larger keys to see sorted insertion stretch that branch while the BST keeps order but does not repair height.
 
+~~~~~tabsdown
+tab: Visualization
+
 ```steptrace
 {"algorithm":"binary-search-tree","values":[40,20,60,10,30,50,70],"value":80}
 ```
@@ -34,6 +37,159 @@ The ordering invariant is global, not local. It is not enough that a node's imme
 - **In-order traversal** (left, node, right) visits keys in strictly increasing order. This is the invariant made observable: the smallest key is the leftmost node, the successor of any node is the next node in that traversal.
 
 Insert and delete change parent/child links; search and traversal read them without mutation. The resulting shape — which key ends up at the root, how deep a subtree runs — is an artifact of insertion order, not of the key set. Two trees holding `{1,2,3}` can be a balanced triangle or a three-node chain depending on the order the keys arrived.
+
+tab: Complexity
+
+```complexity
+{
+  "version": 2,
+  "label": "Binary Search Tree complexity",
+  "variables": {
+    "inputSize": {
+      "symbol": "n",
+      "description": "number of input elements or states"
+    },
+    "keyRange": {
+      "symbol": "k",
+      "description": "key range, digit count, or requested result count"
+    },
+    "parameterH": {
+      "symbol": "h",
+      "description": "tree height, hash count, or algorithm-specific height"
+    }
+  },
+  "resources": {
+    "time": {
+      "mode": "operations",
+      "entries": [
+        {
+          "kind": "operation",
+          "operation": "Search / Insert / Delete",
+          "bounds": [
+            {
+              "kind": "curve",
+              "role": "Balanced (h = O(log n))",
+              "formula": "O(log n)",
+              "curveId": "log-n"
+            },
+            {
+              "kind": "curve",
+              "role": "Degenerate (h = O(n))",
+              "formula": "O(n)",
+              "curveId": "linear"
+            }
+          ]
+        },
+        {
+          "kind": "operation",
+          "operation": "Min / Max / Successor",
+          "bounds": [
+            {
+              "kind": "curve",
+              "role": "Balanced (h = O(log n))",
+              "formula": "O(log n)",
+              "curveId": "log-n"
+            },
+            {
+              "kind": "curve",
+              "role": "Degenerate (h = O(n))",
+              "formula": "O(n)",
+              "curveId": "linear"
+            }
+          ]
+        },
+        {
+          "kind": "operation",
+          "operation": "In-order traversal",
+          "bounds": [
+            {
+              "kind": "curve",
+              "role": "Balanced (h = O(log n))",
+              "formula": "O(n)",
+              "curveId": "linear"
+            },
+            {
+              "kind": "curve",
+              "role": "Degenerate (h = O(n))",
+              "formula": "O(n)",
+              "curveId": "linear"
+            }
+          ]
+        },
+        {
+          "kind": "operation",
+          "operation": "Range query (k results)",
+          "bounds": [
+            {
+              "kind": "text",
+              "role": "Balanced (h = O(log n))",
+              "formula": "O(log n + k)"
+            },
+            {
+              "kind": "curve",
+              "role": "Degenerate (h = O(n))",
+              "formula": "O(n)",
+              "curveId": "linear"
+            }
+          ]
+        }
+      ]
+    },
+    "space": {
+      "mode": "operations",
+      "entries": [
+        {
+          "kind": "operation",
+          "operation": "Search / Insert / Delete",
+          "bounds": [
+            {
+              "kind": "text",
+              "role": "Space",
+              "formula": "O(h) recursive stack / O(1) iterative"
+            }
+          ]
+        },
+        {
+          "kind": "operation",
+          "operation": "Min / Max / Successor",
+          "bounds": [
+            {
+              "kind": "curve",
+              "role": "Space",
+              "formula": "O(1)",
+              "curveId": "constant"
+            }
+          ]
+        },
+        {
+          "kind": "operation",
+          "operation": "In-order traversal",
+          "bounds": [
+            {
+              "kind": "text",
+              "role": "Space",
+              "formula": "O(h) recursive stack / O(n) degenerate"
+            }
+          ]
+        },
+        {
+          "kind": "operation",
+          "operation": "Range query (k results)",
+          "bounds": [
+            {
+              "kind": "curve",
+              "role": "Space",
+              "formula": "O(h)",
+              "curveId": "linear"
+            }
+          ]
+        }
+      ]
+    }
+  }
+}
+```
+~~~~~
 
 # Complexity
 

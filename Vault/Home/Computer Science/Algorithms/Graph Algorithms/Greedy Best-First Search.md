@@ -15,6 +15,9 @@ A grid pathfinder has to reach a goal cell and cares more about producing *a* ro
 
 That single ranking key is also the whole weakness. Because `g(n)`, the cost paid to reach a node, never enters the comparison, the search cannot separate a short route from a long one that merely ends near the goal. It expands what looks close, not what is cheap: the path it returns can be far longer than necessary, and on an infinite graph it can follow a forever-improving estimate down a branch that never terminates.
 
+~~~~~tabsdown
+tab: Visualization
+
 ```steptrace
 {"algorithm":"greedy-best-first-search"}
 ```
@@ -28,6 +31,104 @@ The frontier is a priority queue keyed by `h(n)`. Each iteration pops the node w
 The only property this maintains is that the next node expanded is the one the heuristic currently rates closest to the goal. Nothing ties the order of expansion to the length of the path built so far, which is the guarantee a cost-aware search provides and this one drops. When `h` is accurate and the map is open, the estimate shrinks along an almost straight line and the goal is reached after expanding on the order of `m` nodes. When `h` points into an obstacle, the same rule keeps re-selecting cells that hug the barrier because they still score lowest, and the accumulated `g` that would expose the detour is never consulted.
 
 One framing makes the family relationship exact: [[Home/Computer Science/Algorithms/Graph Algorithms/A-Star Search|A*]] expands by `f = g + h`. Setting `g` to zero collapses `f` to `h`, which is precisely Greedy Best-First — the case where a node's history counts for nothing.
+
+tab: Complexity
+
+```complexity
+{
+  "version": 2,
+  "label": "Greedy Best-First Search complexity",
+  "variables": {
+    "branchingFactor": {
+      "symbol": "b",
+      "description": "search branching factor or radix base"
+    },
+    "secondarySize": {
+      "symbol": "m",
+      "description": "secondary input, pattern, bucket, or sequence size"
+    }
+  },
+  "resources": {
+    "time": {
+      "mode": "operations",
+      "entries": [
+        {
+          "kind": "operation",
+          "operation": "Best",
+          "bounds": [
+            {
+              "kind": "text",
+              "role": "Nodes generated or expanded",
+              "formula": "O(b·m)"
+            }
+          ]
+        },
+        {
+          "kind": "operation",
+          "operation": "Typical",
+          "bounds": [
+            {
+              "kind": "text",
+              "role": "Nodes generated or expanded",
+              "formula": "distribution-dependent; between O(b·m) and O(b^m)"
+            }
+          ]
+        },
+        {
+          "kind": "operation",
+          "operation": "Worst",
+          "bounds": [
+            {
+              "kind": "text",
+              "role": "Nodes generated or expanded",
+              "formula": "O(b^m)"
+            }
+          ]
+        }
+      ]
+    },
+    "space": {
+      "mode": "operations",
+      "entries": [
+        {
+          "kind": "operation",
+          "operation": "Best",
+          "bounds": [
+            {
+              "kind": "text",
+              "role": "Auxiliary space",
+              "formula": "O(b·m)"
+            }
+          ]
+        },
+        {
+          "kind": "operation",
+          "operation": "Typical",
+          "bounds": [
+            {
+              "kind": "text",
+              "role": "Auxiliary space",
+              "formula": "up to O(b^m)"
+            }
+          ]
+        },
+        {
+          "kind": "operation",
+          "operation": "Worst",
+          "bounds": [
+            {
+              "kind": "text",
+              "role": "Auxiliary space",
+              "formula": "O(b^m)"
+            }
+          ]
+        }
+      ]
+    }
+  }
+}
+```
+~~~~~
 
 # Complexity
 

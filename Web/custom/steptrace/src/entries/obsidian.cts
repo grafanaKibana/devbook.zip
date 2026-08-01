@@ -3,7 +3,14 @@
  * code-block processor and tears mounted cards down with the render child.
  */
 
-import type { HostControlHandle, MountHandle, SpeedSliderOptions, StepTraceConfig } from "../types"
+import type {
+  HostControlHandle,
+  HostTabsHandle,
+  HostTabsOptions,
+  MountHandle,
+  SpeedSliderOptions,
+  StepTraceConfig,
+} from "../types"
 import { renderComplexityDom } from "../../../complexity/dom"
 import { buildComplexityViewModel } from "../../../complexity/model"
 
@@ -16,6 +23,10 @@ interface ObsidianElement extends HTMLElement {
 
 interface MarkdownContext {
   addChild(child: unknown): void
+}
+
+interface TabsdownApi {
+  mountTabs(container: HTMLElement, options: HostTabsOptions): HostTabsHandle
 }
 
 function createSpeedSlider(container: HTMLElement, options: SpeedSliderOptions): HostControlHandle {
@@ -75,16 +86,26 @@ class SteptracePlugin extends Plugin {
         }
 
         const root = el.createEl("div")
-        const handle = steptrace.mount(root, config, { createSpeedSlider })
+        const tabsdown = this.app.plugins.getPlugin("tabsdown") as TabsdownApi | null
+        const mountTabs =
+          typeof tabsdown?.mountTabs === "function" ? tabsdown.mountTabs.bind(tabsdown) : null
+        const handle = steptrace.mount(root, config, {
+          createSpeedSlider,
+          ...(mountTabs ? { mountTabs } : {}),
+        })
         ctx.addChild(new RenderChild(el, handle))
       },
     )
 
+    let complexityOccurrence = 0
     this.registerMarkdownCodeBlockProcessor(
       "complexity",
       (source: string, el: ObsidianElement, ctx: MarkdownContext) => {
         try {
-          const view = buildComplexityViewModel(JSON.parse(source))
+          const view = buildComplexityViewModel(
+            JSON.parse(source),
+            `obsidian-${++complexityOccurrence}`,
+          )
           const root = el.createEl("div")
           const handle = renderComplexityDom(root, view)
           ctx.addChild(new RenderChild(el, handle))

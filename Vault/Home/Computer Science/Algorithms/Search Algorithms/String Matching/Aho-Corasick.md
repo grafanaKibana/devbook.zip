@@ -17,11 +17,15 @@ The patterns share structure. Any two that begin `sh…` walk the same first edg
 
 **Core shape:** fixed pattern set → trie + failure links + output links → one non-backtracking pass over the text → `Θ(n + z)` search for `z` reported matches, from one automaton built over the whole dictionary.
 
-# Trace
+~~~~~tabsdown
+tab: Visualization
+
 
 ```steptrace
 {"algorithm":"aho-corasick","patterns":["he","she","his","hers"],"text":"ushers"}
 ```
+
+# Trace
 
 # Trie, Failure Links, Output Links
 
@@ -42,6 +46,95 @@ The dictionary `{ he, she, his, hers }` compiles to a trie with a handful of fai
 Reading `ushers` left to right, the automaton stays at the root through `u`, then walks `s → sh → she` on the next three characters. Arriving at `she` after the `e`, the state itself ends a pattern, so `she` is reported at `[1..3]`. Its output link then leads to `he`, which also ends here, reported at `[2..3]` — a nested match that shares the same end position and is invisible without the output walk. On the next character `r`, the state `she` has no child, so the automaton follows the failure link to `he` and takes `he → her` on `r`; the final `s` reaches `hers`, reported at `[2..5]`.
 
 The invariant makes each of those steps legal: after reading `i` characters the automaton is always at the state whose string is the longest suffix of the first `i` characters that is still a prefix of some pattern. Every pattern occurrence ending at position `i` is a suffix of that state's string, and the output chain lists exactly those. That is why a single left-to-right pass, with no rewinding of the text, sees every match.
+
+tab: Complexity
+
+```complexity
+{
+  "version": 2,
+  "label": "Aho-Corasick complexity",
+  "variables": {
+    "alphabetSigma": {
+      "symbol": "σ",
+      "description": "alphabet size"
+    },
+    "inputSize": {
+      "symbol": "n",
+      "description": "number of input elements or states"
+    },
+    "lengthL": {
+      "symbol": "L",
+      "description": "key, string, path, or sequence length"
+    },
+    "matchCount": {
+      "symbol": "z",
+      "description": "number of reported matches"
+    },
+    "totalPatternLength": {
+      "symbol": "M",
+      "description": "total length of all patterns"
+    }
+  },
+  "resources": {
+    "time": {
+      "mode": "operations",
+      "entries": [
+        {
+          "kind": "operation",
+          "operation": "Build automaton",
+          "bounds": [
+            {
+              "kind": "text",
+              "role": "Time",
+              "formula": "O(M·L) sparse, Θ(M·σ) dense"
+            }
+          ]
+        },
+        {
+          "kind": "operation",
+          "operation": "Search",
+          "bounds": [
+            {
+              "kind": "text",
+              "role": "Time",
+              "formula": "Θ(n + z)"
+            }
+          ]
+        }
+      ]
+    },
+    "space": {
+      "mode": "operations",
+      "entries": [
+        {
+          "kind": "operation",
+          "operation": "Build automaton",
+          "bounds": [
+            {
+              "kind": "text",
+              "role": "Space",
+              "formula": "Θ(M) sparse, Θ(M·σ) dense"
+            }
+          ]
+        },
+        {
+          "kind": "operation",
+          "operation": "Search",
+          "bounds": [
+            {
+              "kind": "curve",
+              "role": "Space",
+              "formula": "O(1) beyond the automaton",
+              "curveId": "constant"
+            }
+          ]
+        }
+      ]
+    }
+  }
+}
+```
+~~~~~
 
 # Complexity
 

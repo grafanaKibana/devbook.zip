@@ -19,6 +19,9 @@ The saving is conditional. The goal must be one or more enumerable states that c
 
 **Core condition:** enumerable goals + enumerable predecessors → balanced forward and backward BFS can meet near depth `d/2` → about `O(b^(d/2))` time and space on a uniform branching model, with `O(V + E)` as the general graph bound.
 
+~~~~~tabsdown
+tab: Visualization
+
 ```steptrace
 {"algorithm":"bidirectional-search"}
 ```
@@ -32,6 +35,115 @@ Take an unweighted graph where `s` and `t` are six edges apart. The forward BFS 
 For an unweighted graph the stopping rule is exact. Expansion proceeds one full BFS level at a time, alternating sides, and the search halts the first time a level completes with a vertex present in both visited sets. Because each side labels every vertex with its true BFS distance, a shared vertex `x` lies on a shortest path of length `distF[x] + distB[x]`. Scanning the rest of that level can choose a deterministic minimum-sum meeting when several appear, but it is not needed to rescue correctness. The path is rebuilt by following forward parents from `x` back to `s`, reversing, then appending the backward parents from `x` to `t`.
 
 Alternating complete levels keeps the search depths within one level in the trace. Expanding the smaller frontier is a useful heuristic on irregular graphs, but queue size alone does not guarantee balanced depth; a lopsided schedule can lose the idealized exponent-halving behavior.
+
+tab: Complexity
+
+```complexity
+{
+  "version": 2,
+  "label": "Bidirectional Search complexity",
+  "variables": {
+    "branchingFactor": {
+      "symbol": "b",
+      "description": "search branching factor or radix base"
+    },
+    "edgeCount": {
+      "symbol": "E",
+      "description": "number of edges"
+    },
+    "parameterD": {
+      "symbol": "d",
+      "description": "algorithm-specific depth, digit count, or dimension"
+    },
+    "vertexCount": {
+      "symbol": "V",
+      "description": "number of vertices"
+    }
+  },
+  "resources": {
+    "time": {
+      "mode": "operations",
+      "entries": [
+        {
+          "kind": "operation",
+          "operation": "Best",
+          "bounds": [
+            {
+              "kind": "curve",
+              "role": "Time",
+              "formula": "O(1)",
+              "curveId": "constant"
+            }
+          ]
+        },
+        {
+          "kind": "operation",
+          "operation": "Model estimate",
+          "bounds": [
+            {
+              "kind": "text",
+              "role": "Time",
+              "formula": "O(b^(d/2))"
+            }
+          ]
+        },
+        {
+          "kind": "operation",
+          "operation": "General worst",
+          "bounds": [
+            {
+              "kind": "text",
+              "role": "Time",
+              "formula": "O(V + E)"
+            }
+          ]
+        }
+      ]
+    },
+    "space": {
+      "mode": "operations",
+      "entries": [
+        {
+          "kind": "operation",
+          "operation": "Best",
+          "bounds": [
+            {
+              "kind": "curve",
+              "role": "Auxiliary space",
+              "formula": "O(1)",
+              "curveId": "constant"
+            }
+          ]
+        },
+        {
+          "kind": "operation",
+          "operation": "Model estimate",
+          "bounds": [
+            {
+              "kind": "text",
+              "role": "Auxiliary space",
+              "formula": "O(b^(d/2))"
+            }
+          ]
+        },
+        {
+          "kind": "operation",
+          "operation": "General worst",
+          "bounds": [
+            {
+              "kind": "curve",
+              "role": "Auxiliary space",
+              "formula": "O(V)",
+              "curveId": "linear"
+            }
+          ]
+        }
+      ]
+    }
+  }
+}
+```
+~~~~~
 
 # Complexity
 

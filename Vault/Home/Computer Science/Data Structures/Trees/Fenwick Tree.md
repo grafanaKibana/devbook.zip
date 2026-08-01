@@ -17,15 +17,21 @@ The compactness comes from a specific division of labour. In a 1-indexed array, 
 
 **Core shape:** 1-indexed array → slot `i` sums the `i & -i` elements ending at `i` → a prefix query clears low bits downward, a point update adds the low bit upward → arbitrary range reconstruction requires an invertible aggregate → `O(n)` storage.
 
+~~~~~tabsdown
+tab: Visualization
+
+
+
+
+```steptrace
+{"algorithm":"fenwick-tree","array":[3,1,4,1,5,9,2,6]}
+```
+
 # State across Operations
 
 The interactive view aligns every stored Fenwick slot over the source range it summarizes. Wide blocks sit above their narrower children: `BIT[8]` spans `[1..8]`, while `BIT[5]` spans only `[5..5]`. The source row remains mutable beneath them.
 
 Use `Add delta` to change one source value and highlight every aggregate block containing it. `Range sum` marks the stored blocks used by `Prefix(r)` and `Prefix(l - 1)` before subtracting them. Source updates persist until reset; the latest operation's highlights remain until the next operation or reset.
-
-```steptrace
-{"algorithm":"fenwick-tree","array":[3,1,4,1,5,9,2,6]}
-```
 
 Both operations derive their next index from the lowest set bit:
 
@@ -45,6 +51,130 @@ Three facts define a valid state:
 3. `Update` and `Prefix` traverse complementary sets of indices: every slot whose block contains position `i` is exactly the set the update loop visits, so a point change is reflected in every prefix that should see it.
 
 Only the slots on an update path change; the rest of the array is untouched. The structure records aggregates, not the original values, so recovering `a[i]` alone means `Prefix(i) − Prefix(i − 1)` rather than a direct read.
+
+tab: Complexity
+
+```complexity
+{
+  "version": 2,
+  "label": "Fenwick Tree complexity",
+  "variables": {
+    "inputSize": {
+      "symbol": "n",
+      "description": "number of input elements or states"
+    }
+  },
+  "resources": {
+    "time": {
+      "mode": "operations",
+      "entries": [
+        {
+          "kind": "operation",
+          "operation": "Build from n values",
+          "bounds": [
+            {
+              "kind": "curve",
+              "role": "Time",
+              "formula": "O(n)",
+              "curveId": "linear"
+            }
+          ]
+        },
+        {
+          "kind": "operation",
+          "operation": "Update(i, delta)",
+          "bounds": [
+            {
+              "kind": "curve",
+              "role": "Time",
+              "formula": "O(log n)",
+              "curveId": "log-n"
+            }
+          ]
+        },
+        {
+          "kind": "operation",
+          "operation": "Prefix(i)",
+          "bounds": [
+            {
+              "kind": "curve",
+              "role": "Time",
+              "formula": "O(log n)",
+              "curveId": "log-n"
+            }
+          ]
+        },
+        {
+          "kind": "operation",
+          "operation": "RangeSum(l, r)",
+          "bounds": [
+            {
+              "kind": "curve",
+              "role": "Time",
+              "formula": "O(log n)",
+              "curveId": "log-n"
+            }
+          ]
+        }
+      ]
+    },
+    "space": {
+      "mode": "operations",
+      "entries": [
+        {
+          "kind": "operation",
+          "operation": "Build from n values",
+          "bounds": [
+            {
+              "kind": "curve",
+              "role": "Space",
+              "formula": "O(n) structure",
+              "curveId": "linear"
+            }
+          ]
+        },
+        {
+          "kind": "operation",
+          "operation": "Update(i, delta)",
+          "bounds": [
+            {
+              "kind": "curve",
+              "role": "Space",
+              "formula": "O(1) aux",
+              "curveId": "constant"
+            }
+          ]
+        },
+        {
+          "kind": "operation",
+          "operation": "Prefix(i)",
+          "bounds": [
+            {
+              "kind": "curve",
+              "role": "Space",
+              "formula": "O(1) aux",
+              "curveId": "constant"
+            }
+          ]
+        },
+        {
+          "kind": "operation",
+          "operation": "RangeSum(l, r)",
+          "bounds": [
+            {
+              "kind": "curve",
+              "role": "Space",
+              "formula": "O(1) aux",
+              "curveId": "constant"
+            }
+          ]
+        }
+      ]
+    }
+  }
+}
+```
+~~~~~
 
 # Complexity
 

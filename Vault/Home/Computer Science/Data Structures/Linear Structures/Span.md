@@ -19,6 +19,9 @@ A span owns nothing. It is a small value type — a managed reference to the fir
 
 The interactive view keeps the backing array and active window visible together. Slice narrows the `(start, length)` window without copying; a write through it mutates the same backing slot.
 
+~~~~~tabsdown
+tab: Visualization
+
 ```steptrace
 {"algorithm":"span"}
 ```
@@ -34,6 +37,121 @@ Three properties follow from the design:
 - **Non-owning.** The backing store belongs elsewhere: it may be a GC-managed array, a `stackalloc` block, or a native allocation. The span is only a window and never frees that storage. A `List<T>` ([[Home/Computer Science/Data Structures/Linear Structures/Dynamic Array|dynamic array]]) can expose its contiguous backing array as a span through `CollectionsMarshal.AsSpan`, and an [[Home/Computer Science/Data Structures/Linear Structures/Arrays|array]] converts directly with `AsSpan()`.
 - **Stack-only value.** `Span<T>` is a `ref struct`, so it cannot be boxed, captured, or stored in an ordinary heap field. Escape analysis additionally prevents a span over `stackalloc` memory from leaving the allocating frame; it does not track the lifetime of unmanaged allocations.
 - **Read-only variant.** `ReadOnlySpan<T>` is the same window with writes removed, so it can wrap immutable data such as a `string` (as `ReadOnlySpan<char>`). `Span<T>` converts implicitly to it; the reverse is disallowed.
+
+tab: Complexity
+
+```complexity
+{
+  "version": 2,
+  "label": "Span complexity",
+  "variables": {
+    "inputSize": {
+      "symbol": "n",
+      "description": "number of input elements or states"
+    }
+  },
+  "resources": {
+    "time": {
+      "mode": "operations",
+      "entries": [
+        {
+          "kind": "operation",
+          "operation": "Construct a span over a buffer",
+          "bounds": [
+            {
+              "kind": "curve",
+              "role": "Time",
+              "formula": "O(1)",
+              "curveId": "constant"
+            }
+          ]
+        },
+        {
+          "kind": "operation",
+          "operation": "Element access span[i]",
+          "bounds": [
+            {
+              "kind": "curve",
+              "role": "Time",
+              "formula": "O(1), bounds-checked",
+              "curveId": "constant"
+            }
+          ]
+        },
+        {
+          "kind": "operation",
+          "operation": "Slice(start, length)",
+          "bounds": [
+            {
+              "kind": "curve",
+              "role": "Time",
+              "formula": "O(1)",
+              "curveId": "constant"
+            }
+          ]
+        }
+      ]
+    },
+    "space": {
+      "mode": "operations",
+      "entries": [
+        {
+          "kind": "operation",
+          "operation": "Construct a span over a buffer",
+          "bounds": [
+            {
+              "kind": "text",
+              "role": "Heap allocation",
+              "formula": "none"
+            },
+            {
+              "kind": "curve",
+              "role": "Aux space",
+              "formula": "O(1)",
+              "curveId": "constant"
+            }
+          ]
+        },
+        {
+          "kind": "operation",
+          "operation": "Element access span[i]",
+          "bounds": [
+            {
+              "kind": "text",
+              "role": "Heap allocation",
+              "formula": "none"
+            },
+            {
+              "kind": "curve",
+              "role": "Aux space",
+              "formula": "O(1)",
+              "curveId": "constant"
+            }
+          ]
+        },
+        {
+          "kind": "operation",
+          "operation": "Slice(start, length)",
+          "bounds": [
+            {
+              "kind": "text",
+              "role": "Heap allocation",
+              "formula": "none — same memory"
+            },
+            {
+              "kind": "curve",
+              "role": "Aux space",
+              "formula": "O(1)",
+              "curveId": "constant"
+            }
+          ]
+        }
+      ]
+    }
+  }
+}
+```
+~~~~~
 
 # Complexity
 

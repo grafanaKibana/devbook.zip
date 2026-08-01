@@ -19,13 +19,17 @@ What it gives up is growth and history: capacity is chosen once, and once the ri
 
 **Core shape:** fixed array + `head`/`tail`/`count` → indices wrap `mod capacity` → O(1) enqueue/dequeue with no per-element allocation → a full write overwrites the oldest element or is rejected, according to policy.
 
-The interactive view keeps the ring state between operations. Fill it past capacity to see `tail` wrap and the oldest slot yield as `head` advances.
+~~~~~tabsdown
+tab: Visualization
+
 
 ```steptrace
 {"algorithm":"circular-buffer"}
 ```
 
-# Representation and Invariants
+The interactive view keeps the ring state between operations. Fill it past capacity to see `tail` wrap and the oldest slot yield as `head` advances.
+
+## Representation and Invariants
 
 Four fields hold the entire state:
 
@@ -43,7 +47,131 @@ The invariant that needs a deliberate design decision is the **`head == tail` am
 
 A monotonic-counter variant (never-wrapped 64-bit `head`/`tail`, masked to the array on access) achieves the same disambiguation because `tail - head` is the true count; power-of-two capacities then replace `% capacity` with `& (capacity - 1)`. Whichever scheme is chosen, enqueue and dequeue may change only the cursor they own plus `count`; no operation touches or relocates a slot that another element still occupies.
 
-# Complexity
+tab: Complexity
+
+```complexity
+{
+  "version": 2,
+  "label": "Circular Buffer complexity",
+  "variables": {
+    "configuredCapacity": {
+      "symbol": "capacity",
+      "description": "configured backing-storage capacity"
+    }
+  },
+  "resources": {
+    "time": {
+      "mode": "operations",
+      "entries": [
+        {
+          "kind": "operation",
+          "operation": "Enqueue(x)",
+          "bounds": [
+            {
+              "kind": "curve",
+              "role": "Time",
+              "formula": "O(1)",
+              "curveId": "constant"
+            }
+          ]
+        },
+        {
+          "kind": "operation",
+          "operation": "Dequeue()",
+          "bounds": [
+            {
+              "kind": "curve",
+              "role": "Time",
+              "formula": "O(1)",
+              "curveId": "constant"
+            }
+          ]
+        },
+        {
+          "kind": "operation",
+          "operation": "Peek()",
+          "bounds": [
+            {
+              "kind": "curve",
+              "role": "Time",
+              "formula": "O(1)",
+              "curveId": "constant"
+            }
+          ]
+        },
+        {
+          "kind": "operation",
+          "operation": "Construct",
+          "bounds": [
+            {
+              "kind": "curve",
+              "role": "Time",
+              "formula": "O(capacity)",
+              "curveId": "linear"
+            }
+          ]
+        }
+      ]
+    },
+    "space": {
+      "mode": "operations",
+      "entries": [
+        {
+          "kind": "operation",
+          "operation": "Enqueue(x)",
+          "bounds": [
+            {
+              "kind": "curve",
+              "role": "Aux space per op",
+              "formula": "O(1)",
+              "curveId": "constant"
+            }
+          ]
+        },
+        {
+          "kind": "operation",
+          "operation": "Dequeue()",
+          "bounds": [
+            {
+              "kind": "curve",
+              "role": "Aux space per op",
+              "formula": "O(1)",
+              "curveId": "constant"
+            }
+          ]
+        },
+        {
+          "kind": "operation",
+          "operation": "Peek()",
+          "bounds": [
+            {
+              "kind": "curve",
+              "role": "Aux space per op",
+              "formula": "O(1)",
+              "curveId": "constant"
+            }
+          ]
+        },
+        {
+          "kind": "operation",
+          "operation": "Construct",
+          "bounds": [
+            {
+              "kind": "curve",
+              "role": "Persistent structure",
+              "formula": "O(capacity)",
+              "curveId": "linear"
+            }
+          ]
+        }
+      ]
+    }
+  }
+}
+```
+~~~~~
+
+## Complexity
 
 | Operation | Time | Aux space per op | Cause |
 | --- | --- | --- | --- |

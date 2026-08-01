@@ -17,6 +17,9 @@ Pushing flow along any `s → t` path with spare capacity is the obvious move, b
 
 The transition worth animating is a backward arc in the residual graph retracting an earlier, suboptimal augmenting path.
 
+~~~~~tabsdown
+tab: Visualization
+
 ```steptrace
 {"algorithm":"maximum-flow"}
 ```
@@ -32,6 +35,108 @@ The residual graph reopens the choice. Sending one unit `a → b` created a back
 An `s`-`t` **cut** splits the vertices into `S` (containing `s`) and `T` (containing `t`); its capacity is the total capacity of the original edges crossing `S → T`. Any flow value is bounded by any cut capacity, because everything reaching `t` must cross the partition. The **max-flow min-cut theorem** sharpens that to equality: the maximum flow equals the minimum cut capacity.
 
 The theorem also names the cut. When no augmenting path remains, let `S` be the vertices still reachable from `s` in the final residual graph; `t ∉ S`, or a path would exist. Every original edge from `S` to `T` is saturated — an unsaturated one would keep a forward residual arc and extend reachability — and no flow crosses back from `T` to `S`, so the cut capacity equals the flow value. Reachability in the residual graph is therefore a checkable optimality certificate: it both proves the flow is maximal and reads off the bottleneck edges. The cut side `S` comes from the *residual* reachable set, but the reported edges are the *original* forward edges out of `S`.
+
+tab: Complexity
+
+```complexity
+{
+  "version": 2,
+  "label": "Maximum Flow complexity",
+  "variables": {
+    "edgeCount": {
+      "symbol": "E",
+      "description": "number of edges"
+    },
+    "flowValue": {
+      "symbol": "F",
+      "description": "integral maximum-flow value"
+    },
+    "vertexCount": {
+      "symbol": "V",
+      "description": "number of vertices"
+    }
+  },
+  "resources": {
+    "time": {
+      "mode": "operations",
+      "entries": [
+        {
+          "kind": "operation",
+          "operation": "Ford–Fulkerson (any augmenting path)",
+          "bounds": [
+            {
+              "kind": "text",
+              "role": "Time",
+              "formula": "O(E·F) for integral capacities"
+            }
+          ]
+        },
+        {
+          "kind": "operation",
+          "operation": "Edmonds–Karp (BFS shortest path)",
+          "bounds": [
+            {
+              "kind": "text",
+              "role": "Time",
+              "formula": "O(V·E²)"
+            }
+          ]
+        },
+        {
+          "kind": "operation",
+          "operation": "Dinic (level graph + blocking flow)",
+          "bounds": [
+            {
+              "kind": "text",
+              "role": "Time",
+              "formula": "O(V²·E)"
+            }
+          ]
+        }
+      ]
+    },
+    "space": {
+      "mode": "operations",
+      "entries": [
+        {
+          "kind": "operation",
+          "operation": "Ford–Fulkerson (any augmenting path)",
+          "bounds": [
+            {
+              "kind": "text",
+              "role": "Auxiliary space",
+              "formula": "O(V + E)"
+            }
+          ]
+        },
+        {
+          "kind": "operation",
+          "operation": "Edmonds–Karp (BFS shortest path)",
+          "bounds": [
+            {
+              "kind": "text",
+              "role": "Auxiliary space",
+              "formula": "O(V + E)"
+            }
+          ]
+        },
+        {
+          "kind": "operation",
+          "operation": "Dinic (level graph + blocking flow)",
+          "bounds": [
+            {
+              "kind": "text",
+              "role": "Auxiliary space",
+              "formula": "O(V + E)"
+            }
+          ]
+        }
+      ]
+    }
+  }
+}
+```
+~~~~~
 
 # Complexity
 

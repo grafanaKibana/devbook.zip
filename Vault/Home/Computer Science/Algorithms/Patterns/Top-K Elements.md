@@ -17,6 +17,9 @@ Keeping a size-`k` heap while scanning removes that waste. To surface the `k` **
 
 **Core shape:** `k ≪ n`, possibly streaming → a size-`k` min-heap whose root is the weakest survivor → `O(n log k)` time, `O(k)` space.
 
+~~~~~tabsdown
+tab: Visualization
+
 ```steptrace
 {"algorithm":"top-k-elements","array":[12,3,17,8,25,5,19,14],"k":3}
 ```
@@ -35,6 +38,61 @@ The invariant carried across the scan is that the heap contains every value seen
 The polarity is the load-bearing choice. Exposing the *minimum* of the retained set at the root is what makes the "does this element deserve to be kept" test a single `O(1)` peek, and what makes eviction remove the right element. A max-heap of size `k` would expose the *largest* retained element, which is never the one to drop, so it cannot support this scan.
 
 Because the heap never exceeds `k` entries, each insert and evict is `O(log k)` rather than `O(log n)`. Over `n` elements that is `O(n log k)` time, and the resident set is `O(k)` regardless of how large `n` grows — the property that lets the input be a stream rather than a materialized array.
+
+tab: Complexity
+
+```complexity
+{
+  "version": 2,
+  "label": "Top-K Elements complexity",
+  "variables": {
+    "inputSize": {
+      "symbol": "n",
+      "description": "number of input elements or states"
+    },
+    "keyRange": {
+      "symbol": "k",
+      "description": "key range, digit count, or requested result count"
+    }
+  },
+  "resources": {
+    "time": {
+      "mode": "operations",
+      "entries": [
+        {
+          "kind": "operation",
+          "operation": "Bounded min-heap selection",
+          "bounds": [
+            {
+              "kind": "text",
+              "role": "Time",
+              "formula": "O(n log k)"
+            }
+          ]
+        }
+      ]
+    },
+    "space": {
+      "mode": "operations",
+      "entries": [
+        {
+          "kind": "operation",
+          "operation": "Bounded min-heap selection",
+          "bounds": [
+            {
+              "kind": "curve",
+              "role": "Auxiliary space",
+              "formula": "O(k)",
+              "curveId": "linear"
+            }
+          ]
+        }
+      ]
+    }
+  }
+}
+```
+~~~~~
 
 # Complexity
 

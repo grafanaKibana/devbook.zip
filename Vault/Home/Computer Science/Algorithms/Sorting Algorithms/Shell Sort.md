@@ -17,15 +17,20 @@ Shell sort attacks that distance before it attacks the order. It runs an inserti
 
 **Core condition:** a decreasing gap sequence ending at `h = 1` → each pass `h`-sorts interleaved subsequences and never undoes an earlier pass → the `h = 1` pass runs on nearly-sorted data → `O(1)` auxiliary space, with the time bound set entirely by the gap sequence.
 
-# Trace
+~~~~~tabsdown
+tab: Visualization
 
-The shrinking gap is the transition worth animating: after the `h = 4` lanes move distant values close to their destinations, the `h = 1` pass only resolves the remaining local inversions.
+
 
 ```steptrace
 { "algorithm": "shell-sort", "array": [9, 8, 7, 6, 5, 4, 3, 2, 1], "gaps": [4, 1] }
 ```
 
-# Why H-sorting Cuts the Shift Work
+## Trace
+
+The shrinking gap is the transition worth animating: after the `h = 4` lanes move distant values close to their destinations, the `h = 1` pass only resolves the remaining local inversions.
+
+## Why H-sorting Cuts the Shift Work
 
 An array is *`h`-sorted* when `a[i] ≤ a[i + h]` for every valid `i`. A gap-`h` pass treats the array as `h` interleaved subsequences — indices `{0, h, 2h, …}`, `{1, h+1, …}`, and so on — and insertion-sorts each one independently. Because the stride is `h`, a single shift moves an element `h` positions rather than one, so the coarse early passes pay down long-distance disorder cheaply.
 
@@ -35,7 +40,86 @@ On the reverse-sorted `[9, 8, 7, 6, 5, 4, 3, 2, 1]`, a plain insertion sort pays
 
 The algorithm is in place — only a temporary `key` holds the element being inserted, so auxiliary space is `O(1)`. It is **not stable**: a shift jumps `h` positions and can carry a key past an equal key sitting between them, and no later pass restores their original relative order.
 
-# Complexity
+tab: Complexity
+
+```complexity
+{
+  "version": 2,
+  "label": "Shell Sort complexity",
+  "variables": {
+    "inputSize": {
+      "symbol": "n",
+      "description": "number of input elements or states"
+    }
+  },
+  "resources": {
+    "time": {
+      "mode": "operations",
+      "entries": [
+        {
+          "kind": "operation",
+          "operation": "Best",
+          "bounds": [
+            {
+              "kind": "text",
+              "role": "Time",
+              "formula": "Θ(n log n) for a geometric Θ(log n)-pass sequence"
+            }
+          ]
+        },
+        {
+          "kind": "operation",
+          "operation": "Average",
+          "bounds": [
+            {
+              "kind": "text",
+              "role": "Time",
+              "formula": "Around n^1.3 in measurements of Ciura-style increments"
+            }
+          ]
+        },
+        {
+          "kind": "operation",
+          "operation": "Worst",
+          "bounds": [
+            {
+              "kind": "text",
+              "role": "Time",
+              "formula": "Θ(n²) with Shell's n/2, n/4, …; Θ(n^1.5) with Hibbard's 2^k − 1; O(n^4/3) with Sedgewick's"
+            }
+          ]
+        }
+      ]
+    },
+    "space": {
+      "mode": "cases",
+      "entries": [
+        {
+          "kind": "case",
+          "role": "Best",
+          "formula": "O(1)",
+          "curveId": "constant"
+        },
+        {
+          "kind": "case",
+          "role": "Average",
+          "formula": "O(1)",
+          "curveId": "constant"
+        },
+        {
+          "kind": "case",
+          "role": "Worst",
+          "formula": "O(1)",
+          "curveId": "constant"
+        }
+      ]
+    }
+  }
+}
+```
+~~~~~
+
+## Complexity
 
 The bound is not a fixed property of the algorithm — it is a property of the gap sequence, which is a free parameter. Different sequences move the same code between complexity classes.
 

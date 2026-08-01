@@ -17,13 +17,18 @@ Backtracking removes that waste by building a candidate one choice at a time and
 
 **Core shape:** incremental candidate, one choice per level → a feasibility test that rejects an unextendable prefix → the pruned subtree is never enumerated → `O(depth)` auxiliary space over an exponential search tree.
 
-# Trace
+~~~~~tabsdown
+tab: Visualization
 
-The trace solves 4-Queens, placing one queen per row and rejecting any square already attacked along a column or diagonal.
+
 
 ```steptrace
 {"algorithm":"n-queens","n":4}
 ```
+
+# Trace
+
+The trace solves 4-Queens, placing one queen per row and rejecting any square already attacked along a column or diagonal.
 
 The decisive event is a rejection. When the queen in the current row has no safe column, the partial board cannot be extended, so the search abandons it and returns to the previous row to advance that queen to its next column — every board that would have grown beneath the failed placement is pruned unexamined. Starting the first queen in column 0 leads to exactly this dead end: each of its completions collides, the whole subtree under column 0 is exhausted, and the search retreats to row 0, lifts that queen, and only the column-1 start extends to the arrangement `(1, 3, 0, 2)`. Depth in the tree is the row index, so a rejection at row `k` discards every placement of rows `k+1…n` beneath it at once.
 
@@ -38,6 +43,115 @@ A candidate is a sequence of choices, one per level of a search tree. At each no
 Rejecting a partial candidate at depth `k` eliminates every candidate sharing that `k`-choice prefix — a subtree of up to `b^(d−k)` leaves — without generating any of them. This is the whole difference from brute force: the same tree of complete candidates exists, but the feasibility test keeps the search from descending into doomed regions. The earlier and cheaper a prefix is rejected, the fewer nodes the search visits.
 
 When a node's children are all exhausted, the algorithm undoes its own choice, restoring the shared partial candidate to the state its parent expects, and returns to the next sibling. The traversal is depth-first, so only one root-to-node path and its pending siblings exist at any instant, which bounds live state to the depth of the tree rather than its size.
+
+tab: Complexity
+
+```complexity
+{
+  "version": 2,
+  "label": "Backtracking complexity",
+  "variables": {
+    "branchingFactor": {
+      "symbol": "b",
+      "description": "search branching factor or radix base"
+    },
+    "costFactor": {
+      "symbol": "c",
+      "description": "per-node work or recurrence regularity constant"
+    },
+    "inputSize": {
+      "symbol": "n",
+      "description": "number of input elements or states"
+    },
+    "parameterD": {
+      "symbol": "d",
+      "description": "algorithm-specific depth, digit count, or dimension"
+    }
+  },
+  "resources": {
+    "time": {
+      "mode": "operations",
+      "entries": [
+        {
+          "kind": "operation",
+          "operation": "Best",
+          "bounds": [
+            {
+              "kind": "text",
+              "role": "Time",
+              "formula": "O(d · c)"
+            }
+          ]
+        },
+        {
+          "kind": "operation",
+          "operation": "Typical",
+          "bounds": [
+            {
+              "kind": "text",
+              "role": "Time",
+              "formula": "far below O(b^d), problem-dependent"
+            }
+          ]
+        },
+        {
+          "kind": "operation",
+          "operation": "Worst",
+          "bounds": [
+            {
+              "kind": "text",
+              "role": "Time",
+              "formula": "O(b^d · c) — n-queens up to O(n!) with columns forced distinct"
+            }
+          ]
+        }
+      ]
+    },
+    "space": {
+      "mode": "operations",
+      "entries": [
+        {
+          "kind": "operation",
+          "operation": "Best",
+          "bounds": [
+            {
+              "kind": "curve",
+              "role": "Auxiliary space",
+              "formula": "O(d)",
+              "curveId": "linear"
+            }
+          ]
+        },
+        {
+          "kind": "operation",
+          "operation": "Typical",
+          "bounds": [
+            {
+              "kind": "curve",
+              "role": "Auxiliary space",
+              "formula": "O(d)",
+              "curveId": "linear"
+            }
+          ]
+        },
+        {
+          "kind": "operation",
+          "operation": "Worst",
+          "bounds": [
+            {
+              "kind": "curve",
+              "role": "Auxiliary space",
+              "formula": "O(d)",
+              "curveId": "linear"
+            }
+          ]
+        }
+      ]
+    }
+  }
+}
+```
+~~~~~
 
 # Complexity
 

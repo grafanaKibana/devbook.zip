@@ -19,6 +19,9 @@ A B-tree removes most of those reads by packing many sorted keys into a single p
 
 Press **Insert** with the prefilled `6`: the leaf temporarily reaches four keys, then the median `10` moves into a new root while the remaining keys stay in two leaves.
 
+~~~~~tabsdown
+tab: Visualization
+
 ```steptrace
 {"algorithm":"b-tree","values":[10,20,5],"value":6}
 ```
@@ -45,6 +48,140 @@ An insert always lands in a leaf, in sorted position. If that leaf reaches `m` k
 The trace uses that **bottom-up** algorithm: descend first, permit a temporary `m`-key overflow, then split while returning toward the root. The compact C# sketch below describes the equally valid **top-down** variant, which splits a full `m−1`-key child before descending into it. Both preserve the same settled order-`m` invariants; they differ only in when the split occurs.
 
 A delete can leave a node below the `⌈m/2⌉−1` minimum. The repair mirrors the split. If an adjacent sibling has a spare key, the node **borrows** — the parent's separator rotates down and the sibling's key rotates up. If both siblings are minimal, the node **merges** with a sibling and the separating parent key into one node; merges cascade upward, and when the root empties the tree loses a level. Deleting from an internal node is first reduced to the leaf case by swapping the key with its in-order predecessor.
+
+tab: Complexity
+
+```complexity
+{
+  "version": 2,
+  "label": "B-tree complexity",
+  "variables": {
+    "inputSize": {
+      "symbol": "n",
+      "description": "number of input elements or states"
+    },
+    "secondarySize": {
+      "symbol": "m",
+      "description": "secondary input, pattern, bucket, or sequence size"
+    }
+  },
+  "resources": {
+    "time": {
+      "mode": "operations",
+      "entries": [
+        {
+          "kind": "operation",
+          "operation": "Search",
+          "bounds": [
+            {
+              "kind": "text",
+              "role": "Node accesses (I/O)",
+              "formula": "O(log_m n) page reads"
+            },
+            {
+              "kind": "text",
+              "role": "In-node work",
+              "formula": "O(log₂ m) binary search per node"
+            }
+          ]
+        },
+        {
+          "kind": "operation",
+          "operation": "Insert",
+          "bounds": [
+            {
+              "kind": "text",
+              "role": "Node accesses (I/O)",
+              "formula": "O(log_m n) reads, plus splits along the path"
+            },
+            {
+              "kind": "curve",
+              "role": "In-node work",
+              "formula": "O(m) to shift keys and split a node",
+              "curveId": "linear"
+            }
+          ]
+        },
+        {
+          "kind": "operation",
+          "operation": "Delete",
+          "bounds": [
+            {
+              "kind": "text",
+              "role": "Node accesses (I/O)",
+              "formula": "O(log_m n) reads, plus borrow or merge"
+            },
+            {
+              "kind": "curve",
+              "role": "In-node work",
+              "formula": "O(m) to shift or fuse keys",
+              "curveId": "linear"
+            }
+          ]
+        }
+      ]
+    },
+    "space": {
+      "mode": "operations",
+      "entries": [
+        {
+          "kind": "operation",
+          "operation": "Search",
+          "bounds": [
+            {
+              "kind": "curve",
+              "role": "Structure space",
+              "formula": "O(n)",
+              "curveId": "linear"
+            },
+            {
+              "kind": "curve",
+              "role": "Aux space per op",
+              "formula": "O(1)",
+              "curveId": "constant"
+            }
+          ]
+        },
+        {
+          "kind": "operation",
+          "operation": "Insert",
+          "bounds": [
+            {
+              "kind": "curve",
+              "role": "Structure space",
+              "formula": "O(n)",
+              "curveId": "linear"
+            },
+            {
+              "kind": "text",
+              "role": "Aux space per op",
+              "formula": "O(log_m n) path"
+            }
+          ]
+        },
+        {
+          "kind": "operation",
+          "operation": "Delete",
+          "bounds": [
+            {
+              "kind": "curve",
+              "role": "Structure space",
+              "formula": "O(n)",
+              "curveId": "linear"
+            },
+            {
+              "kind": "text",
+              "role": "Aux space per op",
+              "formula": "O(log_m n) path"
+            }
+          ]
+        }
+      ]
+    }
+  }
+}
+```
+~~~~~
 
 # Complexity
 

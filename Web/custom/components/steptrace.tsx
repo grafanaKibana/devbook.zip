@@ -17,6 +17,7 @@ const hydrate = `
   window.__steptraceHydrator = true;
   var stylePromise = null;
   var enginePromise = null;
+  var mounted = new Map();
   function stylesheet() {
     var existing = document.querySelector('link[data-steptrace-style="1"]');
     if (stylePromise && existing && existing.isConnected) return stylePromise;
@@ -56,6 +57,12 @@ const hydrate = `
   function assets() {
     return stylesheet().then(engine);
   }
+  function tabsReady(root) {
+    for (var node = root.parentElement; node; node = node.parentElement) {
+      if (node.classList.contains("tabsdown") && node.dataset.tabsdown !== "interactive") return false;
+    }
+    return true;
+  }
   function fail(root, msg, e) {
     root.dataset.steptraceMounted = "1";
     var pre = document.createElement("pre");
@@ -69,8 +76,16 @@ const hydrate = `
     try { config = JSON.parse(root.dataset.config || "{}"); }
     catch (e) { fail(root, "invalid config", e); return; }
     try {
-      var handle = st.mount(root, config);
-      var destroy = function () { if (handle && handle.destroy) handle.destroy(); };
+      var tabsdown = window.tabsdown;
+      var handle = st.mount(root, config, tabsdown && tabsdown.mountTabs ? { mountTabs: tabsdown.mountTabs } : {});
+      var destroyed = false;
+      var destroy = function () {
+        if (destroyed) return;
+        destroyed = true;
+        mounted.delete(root);
+        if (handle && handle.destroy) handle.destroy();
+      };
+      mounted.set(root, destroy);
       if (window.addCleanup) {
         window.addCleanup(destroy);
       } else {
@@ -85,13 +100,17 @@ const hydrate = `
       }
     } catch (e) { fail(root, "mount failed", e); }
   }
+  function destroyMounted() {
+    Array.from(mounted.values()).forEach(function (destroy) { destroy(); });
+  }
   function run() {
-    if (!document.querySelector(".steptrace-mount:not([data-steptrace-mounted])")) return;
+    var roots = Array.from(document.querySelectorAll(".steptrace-mount:not([data-steptrace-mounted])")).filter(tabsReady);
+    if (!roots.length) return;
     assets().then(function (st) {
       if (!st || !st.mount) throw new Error("engine loaded but exposed no mount()");
-      document.querySelectorAll(".steptrace-mount:not([data-steptrace-mounted])").forEach(function (root) { mountOne(root, st); });
+      roots.forEach(function (root) { if (root.isConnected && tabsReady(root)) mountOne(root, st); });
     }).catch(function (e) {
-      document.querySelectorAll(".steptrace-mount:not([data-steptrace-mounted])").forEach(function (root) { fail(root, "failed to load engine", e); });
+      roots.forEach(function (root) { if (root.isConnected && tabsReady(root)) fail(root, "failed to load engine", e); });
     });
   }
   // The mount div can appear after this script (SPA render/swap), so run on every
@@ -99,9 +118,18 @@ const hydrate = `
   // that only re-runs when an UNMOUNTED div exists (cheap during playback).
   document.addEventListener("nav", run);
   document.addEventListener("render", run);
+  // Quartz dispatches prenav before its global cleanup set and before replacing
+  // the page DOM. Destroy StepTrace children there; addCleanup remains the
+  // idempotent full-reload/fallback path and Tabsdown keeps its single global
+  // cleanup callback.
+  document.addEventListener("prenav", destroyMounted);
   if (document.body) {
     new MutationObserver(function (records) {
       for (var i = 0; i < records.length; i++) {
+        if (records[i].type === "attributes") {
+          run();
+          return;
+        }
         for (var j = 0; j < records[i].addedNodes.length; j++) {
           var node = records[i].addedNodes[j];
           if (node.nodeType !== 1) continue;
@@ -112,7 +140,7 @@ const hydrate = `
           }
         }
       }
-    }).observe(document.body, { childList: true, subtree: true });
+    }).observe(document.body, { childList: true, subtree: true, attributes: true, attributeFilter: ["data-tabsdown"] });
   }
   run();
 })();

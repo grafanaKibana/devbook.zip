@@ -35,7 +35,7 @@ This is the repository-wide design contract. Keep it limited to verified cross-v
 | Home dashboard                             | `Vault/Home/index.md`                                                          | Datacore JSX                                         | Frozen HTML/CSS plus `homepage-fit.tsx`      | Current                                          |
 | Questions                                  | `[!QUESTION]` callouts in `Vault/Home/`                                        | Datacore index                                       | `QuestionsIndex`                             | Current; equivalent outcome, different renderers |
 | StepTrace                                  | `Web/custom/steptrace/src/` and its local `DESIGN.md`                          | Generated Obsidian plugin                            | Generated Quartz assets and host integration | Current                                          |
-| Complexity charts                          | `complexity` fences and `Web/custom/complexity/`                               | Shared model rendered to DOM by the StepTrace plugin | Shared model rendered to HAST                | Current; three authored instances                |
+| Complexity charts                          | `complexity` fences and `Web/custom/complexity/`                               | Shared model rendered to DOM by the StepTrace plugin | Shared model rendered to HAST                | Current contract; 87 DSA charts plus standalone Big O |
 | Quartz shell                               | `Web/quartz.config.yaml`, `Web/quartz.ts`, sanctioned styles and `Web/custom/` | Not applicable                                       | Generated `Web/public/`                      | Current                                          |
 | Obsidian shell                             | `.obsidian` appearance, enabled snippets, theme, and Style Settings            | Native app UI                                        | Not applicable                               | Current                                          |
 
@@ -168,7 +168,7 @@ Their main jobs are to find a topic, understand its scope, inspect the mechanism
 - **Current:** Baseline is the configured theme; light/dark follows the OS; base text is `16px`; native menus are enabled.
 - **Direction:** Content components consume public theme variables, not Baseline internals.
 - **Direction:** The app shell remains quieter than the note and controls stay discoverable on touch devices.
-- Tabsdown is an available authoring primitive, not a required page pattern.
+- Tabsdown is the sole owner of authored tab structure and interaction. Every StepTrace note uses one outer `Visualization` / `Complexity` group; Tabsdown remains optional elsewhere.
 
 ## Components
 
@@ -181,7 +181,7 @@ Their main jobs are to find a topic, understand its scope, inspect the mechanism
 | Site header and Explorer    | Global Quartz navigation                      | `Web/custom/components/`                                               |
 | Page reveal and Home fit    | Readiness and whole-card responsive fallback  | `Web/custom/components/`                                               |
 | StepTrace                   | Algorithm playback and interactive structures | `Web/custom/steptrace/`                                                |
-| Complexity chart            | Growth curves, filters, plot, and legend      | `Web/custom/complexity/`                                               |
+| Complexity chart            | Growth curves, plot, and legend               | `Web/custom/complexity/`                                               |
 
 ### Cards and dashboards
 
@@ -196,10 +196,14 @@ Their main jobs are to find a topic, understand its scope, inspect the mechanism
 
 - StepTrace is for state over time. Its consistency and style rules are in [`Web/custom/steptrace/DESIGN.md`](Web/custom/steptrace/DESIGN.md).
 - Complexity is for comparing growth classes, cases, or operation families—not per-step execution.
-- **Current:** Complexity has three authored examples: Big O catalogue, Quick Sort cases, and HashMap operations.
+- Every DSA Visualization panel is visual-first. An ordinary panel begins with its `steptrace` fence; a multi-variant panel begins with inner Tabsdown, and each variant begins with its own `steptrace` fence. Useful explanation follows the visualization it explains.
+- Every DSA Complexity panel contains exactly one `complexity` fence and no rendered Markdown. Detailed complexity tables, causes, assumptions, and prose follow the outer Tabsdown block.
+- Every DSA complexity figure renders two ordered resource columns: Time first, Space second. The resources may use independent case or operation groupings.
+- Big O remains standalone: one version 1 catalogue in normal note flow, with no StepTrace block or Tabsdown wrapper.
 - **Current:** One model feeds the Obsidian DOM renderer and Quartz HAST renderer.
-- The chart owns its title, filters, plot, endpoint labels, and legend.
+- The chart owns its plots, resource labels, endpoint labels, and legends. It has an accessible figure name but no visible global title, tabs, or case filters.
 - Adjacent Markdown tables own detailed assumptions, causes, auxiliary space, and explanatory fallback; complexity fences carry only inputs that affect the plotted chart.
+- Complexity figures have no top margin and retain bottom separation from following content.
 - A visualization needs initial, active, final, invalid, narrow, light/dark, keyboard, and reduced-motion states when those states apply.
 
 ### Ownership rules
@@ -230,7 +234,7 @@ Their main jobs are to find a topic, understand its scope, inspect the mechanism
 | Quartz shell | Mobile composition below `768px`                                                                     |
 | Home fit     | Enabled from `768px` with sufficient height; desktop range begins at `1201px`                        |
 | StepTrace    | Mounted-instance compact mode below `704px` inline size                                              |
-| Complexity   | Container-based wide treatment from `600px`; otherwise preserve plot width with horizontal scrolling |
+| Complexity   | Time and Space remain side by side; below `600px` one outer component scroller preserves both readable columns without nested scrollers |
 | Folder maps  | Content-sized wrapping cards; compact treatment in narrow containers                                 |
 | Questions    | Two independent columns collapse to one ordered column                                               |
 
@@ -273,7 +277,7 @@ Run the smallest applicable gate first.
 | Vault structure/content | `python3 .scripts/tests/test_validate_vault.py`                                       | Obsidian rendering when affected                                   |
 | Cards and dashboards    | Vault validation, then `npm run check` from `Web/`                                    | Obsidian and Quartz; light/dark; desktop/mobile                    |
 | StepTrace               | `npm run steptrace:test`, `steptrace:typecheck`, `steptrace:build`, `steptrace:check` | Both hosts; initial/active/final; narrow; reduced motion; teardown |
-| Complexity              | `npm run complexity:test`                                                             | Both hosts; filters/legend; narrow scroll; light/dark; keyboard    |
+| Complexity              | `npm run complexity:test` and `npm run complexity:visual`                             | Both hosts; independent legends; narrow scroll; light/dark; keyboard |
 | Quartz shell            | `npm run check`, then a Quartz build when appropriate                                 | Hard load, SPA navigation, focus, and responsive shell             |
 
 Committed screenshots are durable evidence. `.omx/artifacts/` are run artifacts and must not be the only proof of a lasting contract.
@@ -284,4 +288,4 @@ Committed screenshots are durable evidence. `.omx/artifacts/` are run artifacts 
 - [ ] **Browser scope:** Define minimum evergreen browser versions beyond current Quartz defaults and existing Safari-safe fixes.
 - [ ] **Authored imagery:** Keep heterogeneous teaching visuals or converge on a smaller shared illustration language?
 - [ ] **StepTrace compact evidence:** Capture the sub-`704px` Trace/Watch rail in light/dark initial/active/final states.
-- [ ] **Complexity visual evidence:** Add committed Obsidian and Quartz light/dark desktop/narrow baselines for the three current examples.
+- [ ] **Complexity visual evidence:** Add Obsidian and Quartz light/dark wide/narrow evidence for representative case, operation, semantic-only, and standalone Big O charts.

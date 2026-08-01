@@ -21787,49 +21787,6 @@ var init_player = __esm({
   }
 });
 
-// custom/steptrace/src/tabs.ts
-function isTabsConfig(config) {
-  return typeof config === "object" && config != null && "tabs" in config;
-}
-function normalizeTabsConfig(config) {
-  if (!Array.isArray(config.tabs) || config.tabs.length === 0) {
-    throw new Error("steptrace: tabs requires at least one tab.");
-  }
-  const names = /* @__PURE__ */ new Set();
-  const tabs = config.tabs.map((rawTab, index) => normalizeTab(rawTab, index, names));
-  const selected = config.selected ?? 0;
-  if (!Number.isInteger(selected) || selected < 0 || selected >= tabs.length) {
-    throw new Error(`steptrace: tabs "selected" must be an index from 0 to ${tabs.length - 1}.`);
-  }
-  return { selected, tabs };
-}
-function normalizeTab(rawTab, index, names) {
-  if (typeof rawTab !== "object" || rawTab == null || Array.isArray(rawTab)) {
-    throw new Error(`steptrace: tabs[${index}] must be an object.`);
-  }
-  const name = typeof rawTab.name === "string" ? rawTab.name.trim() : "";
-  if (!name) throw new Error(`steptrace: tabs[${index}] requires a non-empty "name".`);
-  const nameKey = name.toLocaleLowerCase();
-  if (names.has(nameKey)) throw new Error(`steptrace: duplicate tab name "${name}".`);
-  names.add(nameKey);
-  if (rawTab.description != null && typeof rawTab.description !== "string") {
-    throw new Error(`steptrace: tabs[${index}] "description" must be a string.`);
-  }
-  if (typeof rawTab.algorithm !== "string" || !rawTab.algorithm.trim()) {
-    throw new Error(`steptrace: tabs[${index}] requires a non-empty "algorithm".`);
-  }
-  const { name: _name, description: _description, ...algorithmConfig } = rawTab;
-  return {
-    name,
-    description: rawTab.description?.trim() || "",
-    config: algorithmConfig
-  };
-}
-var init_tabs = __esm({
-  "custom/steptrace/src/tabs.ts"() {
-  }
-});
-
 // custom/steptrace/src/watch-hints.ts
 function watchHintFor(row) {
   const override = row.hint?.trim();
@@ -21954,104 +21911,7 @@ var init_watch_hints = __esm({
 function createMount(registry2, structures = []) {
   const { kindOf, listAlgorithms, buildFrames } = registry2;
   const structureRegistry = new Map(structures.map((structure) => [structure.id, structure]));
-  function mountTabs(root, config, host = {}) {
-    let normalized;
-    try {
-      normalized = normalizeTabsConfig(config);
-    } catch (error) {
-      root.textContent = error instanceof Error ? error.message : String(error);
-      return { destroy: () => root.replaceChildren() };
-    }
-    const { tabs } = normalized;
-    root.classList.add("steptrace", "steptrace--tabs");
-    root.setAttribute("role", "group");
-    root.setAttribute("aria-label", "Tabbed algorithm visualizer");
-    const tabsShell = el("div", "steptrace__tabs-shell");
-    const tablist = el("div", "steptrace__tabs");
-    tablist.setAttribute("role", "tablist");
-    tablist.setAttribute("aria-label", "Visualization variants");
-    const tabDesc = el("div", "steptrace__tabs-desc");
-    tabDesc.setAttribute("aria-live", "polite");
-    const panels = el("div", "steptrace__tabpanels");
-    const buttons = [];
-    const panelShells = [];
-    const panelMounts = [];
-    const handles = tabs.map(() => null);
-    let activeIndex = normalized.selected;
-    const showTab = (index, focus = false) => {
-      const next = Math.min(Math.max(index, 0), tabs.length - 1);
-      if (next === activeIndex && handles[next]) {
-        if (focus) buttons[next]?.focus();
-        return;
-      }
-      handles[activeIndex]?.pause?.();
-      activeIndex = next;
-      const tab = tabs[next];
-      tabDesc.textContent = tab.description || "";
-      buttons.forEach((button2, i) => {
-        const selected = i === next;
-        button2.setAttribute("aria-selected", String(selected));
-        button2.tabIndex = selected ? 0 : -1;
-        button2.classList.toggle("steptrace__tab--selected", selected);
-        panelShells[i].hidden = !selected;
-      });
-      if (!handles[next]) handles[next] = mount2(panelMounts[next], tab.config, host);
-      if (focus) buttons[next]?.focus();
-    };
-    tabs.forEach((tab, index) => {
-      const tabId = `steptrace-tab-${++mountSerial}`;
-      const panelId = `steptrace-panel-${++mountSerial}`;
-      const button2 = document.createElement("button");
-      button2.type = "button";
-      button2.className = "steptrace__tab";
-      button2.id = tabId;
-      button2.setAttribute("role", "tab");
-      button2.setAttribute("aria-controls", panelId);
-      button2.textContent = tab.name;
-      button2.tabIndex = index === activeIndex ? 0 : -1;
-      button2.addEventListener("click", () => showTab(index));
-      button2.addEventListener("keydown", (event) => {
-        if (event.key === "ArrowLeft" || event.key === "ArrowUp") {
-          event.preventDefault();
-          showTab((index - 1 + tabs.length) % tabs.length, true);
-        } else if (event.key === "ArrowRight" || event.key === "ArrowDown") {
-          event.preventDefault();
-          showTab((index + 1) % tabs.length, true);
-        } else if (event.key === "Home") {
-          event.preventDefault();
-          showTab(0, true);
-        } else if (event.key === "End") {
-          event.preventDefault();
-          showTab(tabs.length - 1, true);
-        }
-      });
-      buttons.push(button2);
-      tablist.append(button2);
-      const panelShell = el("div", "steptrace__tabpanel");
-      panelShell.id = panelId;
-      panelShell.hidden = index !== activeIndex;
-      panelShell.setAttribute("role", "tabpanel");
-      panelShell.setAttribute("aria-labelledby", tabId);
-      const panelMount = el("div", "steptrace__tabpanel-body");
-      panelShell.append(panelMount);
-      panelShells.push(panelShell);
-      panelMounts.push(panelMount);
-      panels.append(panelShell);
-    });
-    tabsShell.append(tablist, tabDesc);
-    root.replaceChildren(tabsShell, panels);
-    activeIndex = -1;
-    showTab(normalized.selected);
-    return {
-      destroy() {
-        for (const handle of handles) handle?.destroy();
-        root.replaceChildren();
-        root.classList.remove("steptrace", "steptrace--tabs", "steptrace--reduced");
-      }
-    };
-  }
-  function mount2(root, config, host = {}) {
-    if (isTabsConfig(config)) return mountTabs(root, config, host);
+  function mountNow(root, config, host = {}) {
     const structure = structureRegistry.get(config.algorithm);
     if (structure) {
       try {
@@ -22087,6 +21947,7 @@ function createMount(registry2, structures = []) {
     let currentGraph = null;
     let currentMilestones = [];
     let speedControlHandle = null;
+    const hasHostTabs = typeof host.mountTabs === "function";
     const head = el("div", "steptrace__head");
     const crumb = el("div", "steptrace__crumb");
     const crumbKind = el("span");
@@ -22101,6 +21962,7 @@ function createMount(registry2, structures = []) {
     const stageCol = el("div", "steptrace__stage-col");
     const rail = el("div", "steptrace__rail");
     const railRegion = el("div", "steptrace__rail-region");
+    railRegion.classList.toggle("steptrace__rail-region--fallback", !hasHostTabs);
     railRegion.id = `steptrace-rail-${++mountSerial}`;
     railRegion.setAttribute("role", "region");
     railRegion.setAttribute("aria-label", "Trace and watch");
@@ -22146,7 +22008,8 @@ function createMount(registry2, structures = []) {
     watchWrap.append(watchLabel, watchEl);
     watchWrap.hidden = true;
     railRegion.append(traceWrap, watchWrap);
-    rail.append(detailSwitch, railRegion);
+    if (!hasHostTabs) rail.append(detailSwitch);
+    rail.append(railRegion);
     const body = el("div", "steptrace__body");
     body.append(stageCol, rail);
     const foot = el("div", "steptrace__foot");
@@ -22309,8 +22172,11 @@ function createMount(registry2, structures = []) {
     root.replaceChildren(head, body, foot);
     let layoutMode = "unknown";
     let compactPanel = null;
+    let hostTabsHandle = null;
     let hasWatch = false;
     let destroyed = false;
+    let visible = true;
+    let wasPlaying = false;
     let railAnimationFrame = null;
     let railAnimationTimer = null;
     function clearRailAnimation() {
@@ -22341,9 +22207,42 @@ function createMount(registry2, structures = []) {
         railAnimationTimer = setTimeout(clearRailAnimation, railAnimationDuration() + 50);
       });
     }
+    function destroyHostTabs() {
+      if (!hostTabsHandle) return;
+      compactPanel = hostTabsHandle.selection;
+      hostTabsHandle.destroy();
+      hostTabsHandle = null;
+    }
+    function ensureHostTabs() {
+      if (!hasHostTabs || hostTabsHandle || layoutMode !== "compact") return;
+      hostTabsHandle = host.mountTabs(railRegion, {
+        label: "Trace and watch",
+        selection: compactPanel,
+        tabs: [
+          { id: "trace", label: "Trace", panel: traceWrap },
+          { id: "watch", label: "Watch", panel: watchWrap }
+        ],
+        onSelectionChange(selection) {
+          compactPanel = selection === "trace" || selection === "watch" ? selection : null;
+          refitCompactTrace();
+        }
+      });
+      hostTabsHandle.setAvailable("watch", hasWatch);
+    }
     function renderRailMode(previousMode = layoutMode, animate = false) {
       const compact = layoutMode === "compact";
       const active = document.activeElement;
+      if (hasHostTabs) {
+        const restoreFocus = previousMode === "compact" && !compact && active && railRegion.contains(active) && !traceWrap.contains(active) && !watchWrap.contains(active);
+        if (compact) ensureHostTabs();
+        else destroyHostTabs();
+        hostTabsHandle?.setAvailable("watch", hasWatch);
+        traceWrap.hidden = compact ? compactPanel !== "trace" : false;
+        watchWrap.hidden = compact ? !hasWatch || compactPanel !== "watch" : !hasWatch;
+        if (restoreFocus) scrub.focus();
+        refitCompactTrace();
+        return;
+      }
       if (previousMode === "compact" && layoutMode === "wide" && active && detailSwitch.contains(active)) {
         scrub.focus();
       }
@@ -22712,7 +22611,9 @@ function createMount(registry2, structures = []) {
       }
       hasWatch = maxRows > 0;
       if (!hasWatch && compactPanel === "watch") compactPanel = null;
-      detailSwitch.replaceChildren(traceButton, ...hasWatch ? [watchButton] : []);
+      if (!hasHostTabs) {
+        detailSwitch.replaceChildren(traceButton, ...hasWatch ? [watchButton] : []);
+      }
       watchEl.style.setProperty("--steptrace-watch-rows", String(maxRows));
       renderRailMode();
     }
@@ -22775,9 +22676,21 @@ function createMount(registry2, structures = []) {
       pause() {
         if (player) player.pause();
       },
+      setVisible(nextVisible) {
+        if (destroyed || visible === nextVisible) return;
+        visible = nextVisible;
+        if (!nextVisible) {
+          wasPlaying = Boolean(player?.playing);
+          player?.pause();
+        } else if (wasPlaying) {
+          wasPlaying = false;
+          player?.play();
+        }
+      },
       destroy() {
         destroyed = true;
         clearRailAnimation();
+        destroyHostTabs();
         if (player) player.destroy();
         if (currentView && currentView.destroy) currentView.destroy();
         if (speedControlHandle && speedControlHandle.destroy) speedControlHandle.destroy();
@@ -22793,6 +22706,44 @@ function createMount(registry2, structures = []) {
           "steptrace--compact-stage",
           "steptrace--narrow"
         );
+      }
+    };
+  }
+  function mount2(root, config, host = {}) {
+    const panels = [];
+    for (let panel = root.closest(".tabsdown__panel"); panel; panel = panel.parentElement?.closest(".tabsdown__panel") ?? null) {
+      panels.push(panel);
+    }
+    if (!panels.length || typeof MutationObserver === "undefined") {
+      return mountNow(root, config, host);
+    }
+    let child = null;
+    let destroyed = false;
+    let visible = panels.every((panel) => !panel.hidden);
+    const syncVisibility = () => {
+      if (destroyed) return;
+      const nextVisible = panels.every((panel) => !panel.hidden);
+      if (nextVisible && !child) child = mountNow(root, config, host);
+      if (nextVisible !== visible) child?.setVisible?.(nextVisible);
+      visible = nextVisible;
+    };
+    const observer = new MutationObserver(syncVisibility);
+    panels.forEach(
+      (panel) => observer.observe(panel, { attributes: true, attributeFilter: ["hidden"] })
+    );
+    if (visible) child = mountNow(root, config, host);
+    return {
+      pause() {
+        child?.pause?.();
+      },
+      setVisible(nextVisible) {
+        child?.setVisible?.(nextVisible);
+      },
+      destroy() {
+        destroyed = true;
+        observer.disconnect();
+        child?.destroy();
+        if (!child) root.replaceChildren();
       }
     };
   }
@@ -22812,7 +22763,6 @@ var init_mount = __esm({
   "custom/steptrace/src/mount.ts"() {
     init_player();
     init_render();
-    init_tabs();
     init_watch_hints();
     LOG_ROWS = 10;
     COMPACT_INLINE_SIZE = 704;
@@ -23046,90 +22996,69 @@ function mountComplexityFigure(figure) {
   if (figure.dataset.complexityMounted) return { destroy() {
   } };
   figure.dataset.complexityMounted = "true";
-  const tabs = Array.from(figure.querySelectorAll(".complexity__tab"));
-  const legendButtons = Array.from(
-    figure.querySelectorAll(".complexity__legend-button")
-  );
-  const paths = Array.from(figure.querySelectorAll(".complexity__curve"));
-  const areas = Array.from(figure.querySelectorAll(".complexity__area"));
-  const labels = Array.from(figure.querySelectorAll(".complexity__endpoint-label"));
-  const panel = figure.querySelector(".complexity__panel");
   const listeners = [];
-  let activeFilter = "all";
-  let selectedPathId = null;
   function listen(target, type, listener) {
     target.addEventListener(type, listener);
     listeners.push([target, type, listener]);
   }
-  function update() {
-    const activeIds = new Set(
-      paths.filter(
-        (path) => path.dataset.context !== "true" && (activeFilter === "all" || path.dataset.category === activeFilter)
-      ).map((path) => path.dataset.pathId ?? "")
-    );
-    if (selectedPathId) {
-      activeIds.clear();
-      activeIds.add(selectedPathId);
-    }
-    for (const path of paths) {
-      const active = activeIds.has(path.dataset.pathId ?? "");
-      path.classList.toggle("is-highlighted", active);
-      path.classList.toggle("is-subtle", !active);
-    }
-    for (const area of areas) {
-      area.classList.toggle("is-subtle", !activeIds.has(area.dataset.pathId ?? ""));
-    }
-    for (const button2 of legendButtons) {
-      const pathId2 = button2.dataset.pathId ?? "";
-      button2.classList.toggle("is-selected", selectedPathId === pathId2);
-      button2.classList.toggle("is-subtle", !activeIds.has(pathId2));
-      button2.setAttribute("aria-pressed", selectedPathId === pathId2 ? "true" : "false");
-    }
-    for (const label of labels) {
-      const ids = (label.dataset.pathIds ?? "").split(",");
-      const activePath = paths.find(
-        (path) => ids.includes(path.dataset.pathId ?? "") && activeIds.has(path.dataset.pathId ?? "")
+  const resources = Array.from(figure.querySelectorAll(".complexity__resource"));
+  for (const resource of resources.length > 0 ? resources : [figure]) {
+    let update2 = function() {
+      const activeIds = new Set(
+        paths.filter((path) => path.dataset.context !== "true").map((path) => path.dataset.pathId ?? "")
       );
-      label.classList.toggle("is-active", Boolean(activePath));
-      label.classList.toggle("is-subtle", !activePath);
-      if (activePath) {
-        label.style.setProperty("--complexity-label-color", activePath.getAttribute("stroke") ?? "");
+      if (selectedPathId) {
+        activeIds.clear();
+        activeIds.add(selectedPathId);
       }
+      for (const path of paths) {
+        const active = activeIds.has(path.dataset.pathId ?? "");
+        path.classList.toggle("is-highlighted", active);
+        path.classList.toggle("is-subtle", !active);
+      }
+      for (const area of areas) {
+        area.classList.toggle("is-subtle", !activeIds.has(area.dataset.pathId ?? ""));
+      }
+      for (const button2 of legendButtons) {
+        const pathId2 = button2.dataset.pathId ?? "";
+        button2.classList.toggle("is-selected", selectedPathId === pathId2);
+        button2.classList.toggle("is-subtle", !activeIds.has(pathId2));
+        button2.setAttribute("aria-pressed", selectedPathId === pathId2 ? "true" : "false");
+      }
+      for (const label of labels) {
+        const ids = (label.dataset.pathIds ?? "").split(",");
+        const activePath = paths.find(
+          (path) => ids.includes(path.dataset.pathId ?? "") && activeIds.has(path.dataset.pathId ?? "")
+        );
+        label.classList.toggle("is-active", Boolean(activePath));
+        label.classList.toggle("is-subtle", !activePath);
+        if (activePath) {
+          label.style.setProperty(
+            "--complexity-label-color",
+            activePath.getAttribute("stroke") ?? ""
+          );
+        }
+      }
+    };
+    var update = update2;
+    const legendButtons = Array.from(
+      resource.querySelectorAll(".complexity__legend-button")
+    );
+    const paths = Array.from(resource.querySelectorAll(".complexity__curve"));
+    const areas = Array.from(resource.querySelectorAll(".complexity__area"));
+    const labels = Array.from(
+      resource.querySelectorAll(".complexity__endpoint-label")
+    );
+    let selectedPathId = null;
+    for (const button2 of legendButtons) {
+      listen(button2, "click", () => {
+        const pathId2 = button2.dataset.pathId ?? null;
+        selectedPathId = selectedPathId === pathId2 ? null : pathId2;
+        update2();
+      });
     }
-    for (const tab of tabs) {
-      const selected = tab.dataset.filter === activeFilter;
-      tab.setAttribute("aria-selected", selected ? "true" : "false");
-      tab.tabIndex = selected ? 0 : -1;
-      if (selected && tab.id) panel?.setAttribute("aria-labelledby", tab.id);
-    }
-    figure.dataset.activeFilter = activeFilter;
+    update2();
   }
-  for (const tab of tabs) {
-    listen(tab, "click", () => {
-      activeFilter = tab.dataset.filter ?? "all";
-      selectedPathId = null;
-      update();
-    });
-    listen(tab, "keydown", (event) => {
-      const key4 = event.key;
-      if (!["ArrowLeft", "ArrowRight", "Home", "End"].includes(key4)) return;
-      event.preventDefault();
-      const enabled = tabs.filter((candidate) => !candidate.disabled);
-      const current = enabled.indexOf(tab);
-      const next = key4 === "Home" ? enabled[0] : key4 === "End" ? enabled.at(-1) : enabled[(current + (key4 === "ArrowRight" ? 1 : -1) + enabled.length) % enabled.length];
-      next?.focus();
-      next?.click();
-    });
-  }
-  for (const button2 of legendButtons) {
-    listen(button2, "click", () => {
-      const pathId2 = button2.dataset.pathId ?? null;
-      selectedPathId = selectedPathId === pathId2 ? null : pathId2;
-      if (selectedPathId) activeFilter = button2.dataset.category ?? "all";
-      update();
-    });
-  }
-  update();
   return {
     destroy() {
       for (const [target, type, listener] of listeners) {
@@ -23149,13 +23078,6 @@ var CURVE_IDS = [
   "quadratic",
   "exponential",
   "factorial"
-];
-var COMPLEXITY_FILTERS = [
-  { id: "all", label: "All" },
-  { id: "best", label: "Best" },
-  { id: "average", label: "Avg" },
-  { id: "worst", label: "Worst" },
-  { id: "other", label: "Other" }
 ];
 var COMPLEXITY_CHART = {
   width: 800,
@@ -23214,7 +23136,8 @@ var OPERATION_COLORS = [
   ["#e7aa78", "#c97735", "#914619"],
   ["#78c9b3", "#389b82", "#176b57"]
 ];
-var CONFIG_KEYS = ["version", "mode", "title", "variables", "entries"];
+var V1_CONFIG_KEYS = ["version", "mode", "title", "variables", "entries"];
+var V2_CONFIG_KEYS = ["version", "label", "variables", "resources"];
 var { left: LEFT, plotRight: PLOT_RIGHT, top: TOP, axisY: AXIS_Y } = COMPLEXITY_CHART;
 var DATA_BOTTOM = AXIS_Y - 14;
 var MAX_VALUE = 1e4;
@@ -23241,7 +23164,7 @@ function curveIdAt(value, path) {
   }
   return value;
 }
-function validateVariables(value) {
+function validateV1Variables(value) {
   const variables = objectAt(value, "variables");
   const entries = Object.entries(variables);
   if (entries.length === 0) fail("variables", "must declare n");
@@ -23252,6 +23175,18 @@ function validateVariables(value) {
     names.add(name);
   }
   if (!names.has("n")) fail("variables.n", "is required for plotted curves");
+}
+function validateV2Variables(value) {
+  const variables = objectAt(value, "variables");
+  if (Object.keys(variables).length === 0) fail("variables", "must be a non-empty object");
+  for (const [name, rawMetadata] of Object.entries(variables)) {
+    if (!/^[A-Za-z][A-Za-z0-9_]*$/.test(name)) fail(`variables.${name}`, "has an invalid name");
+    const metadata = objectAt(rawMetadata, `variables.${name}`);
+    rejectUnknown(metadata, ["symbol", "description"], `variables.${name}`);
+    textAt(metadata.symbol, `variables.${name}.symbol`);
+    textAt(metadata.description, `variables.${name}.description`);
+  }
+  return variables;
 }
 function slug(value) {
   return value.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "");
@@ -23290,7 +23225,7 @@ function makeScale(maxValue) {
     y: (value) => TOP + (1 - Math.log10(value) / logMax) * (DATA_BOTTOM - TOP)
   };
 }
-function curvePath(id, curveId, category, label, legendLabel, color, dimmed, scale, legendGroup, offset = 0) {
+function curvePath(id, curveId, category, label, legendLabel, color, dimmed, scale, legendGroup, offset = 0, formula = curves[curveId].formula) {
   const samples = Array.from({ length: 9 }, (_, index) => {
     const n = index + 2;
     const value = curves[curveId].evaluate(n);
@@ -23304,7 +23239,7 @@ function curvePath(id, curveId, category, label, legendLabel, color, dimmed, sca
     id,
     curveId,
     category,
-    formula: curves[curveId].formula,
+    formula,
     label,
     legendGroup,
     legendLabel,
@@ -23348,112 +23283,12 @@ function assertUnique(seen, value, path) {
   if (seen.has(value)) fail(path, `duplicates ${value}`);
   seen.add(value);
 }
-function buildComplexityViewModel(input) {
-  const config = objectAt(input, "config");
-  rejectUnknown(config, CONFIG_KEYS, "config");
-  if (config.version !== 1) fail("version", "must be 1");
-  const mode = config.mode;
-  if (mode !== "catalogue" && mode !== "cases" && mode !== "operations") {
-    fail("mode", "must be catalogue, cases, or operations");
-  }
-  const title = textAt(config.title, "title");
-  const figureId = `complexity-${mode}-${slug(title)}`;
-  validateVariables(config.variables);
-  if (!Array.isArray(config.entries) || config.entries.length === 0) {
-    fail("entries", "must be a non-empty array");
-  }
-  const highlighted = [];
-  if (mode === "catalogue") {
-    const seen = /* @__PURE__ */ new Set();
-    config.entries.forEach((raw, index) => {
-      const path = `entries[${index}]`;
-      const entry = objectAt(raw, path);
-      rejectUnknown(entry, ["kind", "curveId"], path);
-      if (entry.kind !== "catalogue") fail(`${path}.kind`, "must be catalogue");
-      const curveId = curveIdAt(entry.curveId, `${path}.curveId`);
-      assertUnique(seen, curveId, `${path}.curveId`);
-      const id = pathId(figureId, curveId, index);
-      highlighted.push({
-        id,
-        curveId,
-        category: "other",
-        label: curves[curveId].formula,
-        legendLabel: curves[curveId].formula,
-        color: CURVE_COLORS[curveId]
-      });
-    });
-  } else if (mode === "cases") {
-    const seen = /* @__PURE__ */ new Set();
-    config.entries.forEach((raw, index) => {
-      const path = `entries[${index}]`;
-      const entry = objectAt(raw, path);
-      rejectUnknown(entry, ["kind", "role", "curveId"], path);
-      if (entry.kind !== "case") fail(`${path}.kind`, "must be case");
-      const role = textAt(entry.role, `${path}.role`);
-      if (role !== "Best" && role !== "Average" && role !== "Worst") {
-        fail(`${path}.role`, "must be Best, Average, or Worst");
-      }
-      assertUnique(seen, role, `${path}.role`);
-      const curveId = curveIdAt(entry.curveId, `${path}.curveId`);
-      const id = pathId(figureId, role, index);
-      highlighted.push({
-        id,
-        curveId,
-        category: categoryFor(role),
-        label: `${role}: ${curves[curveId].formula}`,
-        legendLabel: `${compactRole(role)} ${curves[curveId].formula}`,
-        color: roleColor(role, curveId)
-      });
-    });
-    for (const role of ["Best", "Average", "Worst"]) {
-      if (!seen.has(role)) fail("entries", `must include ${role}`);
-    }
-  } else {
-    const seenOperations = /* @__PURE__ */ new Set();
-    config.entries.forEach((raw, operationIndex) => {
-      const path = `entries[${operationIndex}]`;
-      const entry = objectAt(raw, path);
-      rejectUnknown(entry, ["kind", "operation", "bounds"], path);
-      if (entry.kind !== "operation") fail(`${path}.kind`, "must be operation");
-      const operation = textAt(entry.operation, `${path}.operation`);
-      assertUnique(seenOperations, operation, `${path}.operation`);
-      if (!Array.isArray(entry.bounds) || entry.bounds.length === 0) {
-        fail(`${path}.bounds`, "must be a non-empty array");
-      }
-      const seenRoles = /* @__PURE__ */ new Set();
-      entry.bounds.forEach((rawBound, boundIndex) => {
-        const boundPath = `${path}.bounds[${boundIndex}]`;
-        const bound = objectAt(rawBound, boundPath);
-        if (bound.kind === "catalogue") {
-          rejectUnknown(bound, ["kind", "curveId", "role"], boundPath);
-        } else if (bound.kind === "text") {
-          rejectUnknown(bound, ["kind", "formula", "role"], boundPath);
-          textAt(bound.formula, `${boundPath}.formula`);
-        } else {
-          fail(`${boundPath}.kind`, "must be catalogue or text");
-        }
-        const role = textAt(bound.role, `${boundPath}.role`);
-        assertUnique(seenRoles, role, `${boundPath}.role`);
-        if (bound.kind === "text") return;
-        const curveId = curveIdAt(bound.curveId, `${boundPath}.curveId`);
-        const id = pathId(figureId, `${operation}-${role}`, operationIndex * 100 + boundIndex);
-        highlighted.push({
-          id,
-          curveId,
-          category: categoryFor(role),
-          label: `${operation} — ${role}: ${curves[curveId].formula}`,
-          legendGroup: operation,
-          legendLabel: `${compactRole(role)} ${curves[curveId].formula}`,
-          color: operationColor(operationIndex, boundIndex)
-        });
-      });
-    });
-  }
+function finishResource(key4, label, labelId, mode, highlighted, semanticBounds) {
   const scale = makeScale(MAX_VALUE);
   const selected = new Set(highlighted.map(({ curveId }) => curveId));
   const context = CURVE_IDS.filter((curveId) => !selected.has(curveId)).map(
     (curveId, index) => curvePath(
-      `${figureId}-context-${curveId}-${index}`,
+      `${labelId}-context-${curveId}-${index}`,
       curveId,
       "other",
       curves[curveId].formula,
@@ -23467,7 +23302,7 @@ function buildComplexityViewModel(input) {
   const indexes = /* @__PURE__ */ new Map();
   for (const { curveId } of highlighted) counts.set(curveId, (counts.get(curveId) ?? 0) + 1);
   const highlightedPaths = highlighted.map(
-    ({ id, curveId, category, label, legendGroup, legendLabel, color }) => {
+    ({ id, curveId, category, formula, label: label2, legendGroup, legendLabel, color }) => {
       const index = indexes.get(curveId) ?? 0;
       indexes.set(curveId, index + 1);
       const offset = (counts.get(curveId) ?? 0) > 1 ? index * DUPLICATE_GAP : 0;
@@ -23475,13 +23310,14 @@ function buildComplexityViewModel(input) {
         id,
         curveId,
         category,
-        label,
+        label2,
         legendLabel,
         color,
         false,
         scale,
         legendGroup,
-        offset
+        offset,
+        formula
       );
     }
   );
@@ -23507,17 +23343,204 @@ function buildComplexityViewModel(input) {
     if (group) group.items.push(item);
     else legend.push({ label: path.legendGroup, items: [item] });
   }
-  const availableCategories = Array.from(new Set(highlightedPaths.map((path) => path.category)));
   return {
-    figureId,
+    key: key4,
+    label,
+    labelId,
     mode,
-    title,
-    paths,
+    paths: highlightedPaths,
+    contextPaths: context,
     legend,
     endpointLabels: layoutEndpointLabels(paths),
-    availableCategories,
+    semanticBounds,
     ticks,
     xTicks
+  };
+}
+function buildResource(rawEntries, mode, pathPrefix, key4, label, labelId, version) {
+  if (!Array.isArray(rawEntries) || rawEntries.length === 0) {
+    fail(`${pathPrefix}entries`, "must be a non-empty array");
+  }
+  const highlighted = [];
+  const semanticBounds = [];
+  if (mode === "catalogue") {
+    const seen = /* @__PURE__ */ new Set();
+    rawEntries.forEach((raw, index) => {
+      const path = `${pathPrefix}entries[${index}]`;
+      const entry = objectAt(raw, path);
+      rejectUnknown(entry, ["kind", "curveId"], path);
+      if (entry.kind !== "catalogue") fail(`${path}.kind`, "must be catalogue");
+      const curveId = curveIdAt(entry.curveId, `${path}.curveId`);
+      assertUnique(seen, curveId, `${path}.curveId`);
+      const formula = curves[curveId].formula;
+      highlighted.push({
+        id: pathId(labelId, curveId, index),
+        curveId,
+        formula,
+        category: "other",
+        label: formula,
+        legendLabel: formula,
+        color: CURVE_COLORS[curveId]
+      });
+    });
+  } else if (mode === "cases") {
+    const seen = /* @__PURE__ */ new Set();
+    rawEntries.forEach((raw, index) => {
+      const path = `${pathPrefix}entries[${index}]`;
+      const entry = objectAt(raw, path);
+      rejectUnknown(
+        entry,
+        version === 2 ? ["kind", "role", "formula", "curveId"] : ["kind", "role", "curveId"],
+        path
+      );
+      if (entry.kind !== "case") fail(`${path}.kind`, "must be case");
+      const role = textAt(entry.role, `${path}.role`);
+      if (role !== "Best" && role !== "Average" && role !== "Worst") {
+        fail(`${path}.role`, "must be Best, Average, or Worst");
+      }
+      assertUnique(seen, role, `${path}.role`);
+      const curveId = curveIdAt(entry.curveId, `${path}.curveId`);
+      const formula = version === 2 ? textAt(entry.formula, `${path}.formula`) : curves[curveId].formula;
+      highlighted.push({
+        id: pathId(labelId, role, index),
+        curveId,
+        formula,
+        category: categoryFor(role),
+        label: `${role}: ${formula}`,
+        legendLabel: `${compactRole(role)} ${formula}`,
+        color: roleColor(role, curveId)
+      });
+    });
+    for (const role of ["Best", "Average", "Worst"]) {
+      if (!seen.has(role)) fail(`${pathPrefix}entries`, `must include ${role}`);
+    }
+  } else {
+    const seenOperations = /* @__PURE__ */ new Set();
+    rawEntries.forEach((raw, operationIndex) => {
+      const path = `${pathPrefix}entries[${operationIndex}]`;
+      const entry = objectAt(raw, path);
+      rejectUnknown(entry, ["kind", "operation", "bounds"], path);
+      if (entry.kind !== "operation") fail(`${path}.kind`, "must be operation");
+      const operation = textAt(entry.operation, `${path}.operation`);
+      assertUnique(seenOperations, operation, `${path}.operation`);
+      if (!Array.isArray(entry.bounds) || entry.bounds.length === 0) {
+        fail(`${path}.bounds`, "must be a non-empty array");
+      }
+      const seenRoles = /* @__PURE__ */ new Set();
+      entry.bounds.forEach((rawBound, boundIndex) => {
+        const boundPath = `${path}.bounds[${boundIndex}]`;
+        const bound = objectAt(rawBound, boundPath);
+        const plottedKind = version === 2 ? "curve" : "catalogue";
+        if (bound.kind === plottedKind) {
+          rejectUnknown(
+            bound,
+            version === 2 ? ["kind", "curveId", "formula", "role"] : ["kind", "curveId", "role"],
+            boundPath
+          );
+        } else if (bound.kind === "text") {
+          rejectUnknown(bound, ["kind", "formula", "role"], boundPath);
+        } else {
+          fail(`${boundPath}.kind`, `must be ${plottedKind} or text`);
+        }
+        const role = textAt(bound.role, `${boundPath}.role`);
+        assertUnique(seenRoles, role, `${boundPath}.role`);
+        if (bound.kind === "text") {
+          semanticBounds.push({
+            operation,
+            role,
+            formula: textAt(bound.formula, `${boundPath}.formula`)
+          });
+          return;
+        }
+        const curveId = curveIdAt(bound.curveId, `${boundPath}.curveId`);
+        const formula = version === 2 ? textAt(bound.formula, `${boundPath}.formula`) : curves[curveId].formula;
+        highlighted.push({
+          id: pathId(labelId, `${operation}-${role}`, operationIndex * 100 + boundIndex),
+          curveId,
+          formula,
+          category: categoryFor(role),
+          label: `${operation} — ${role}: ${formula}`,
+          legendGroup: operation,
+          legendLabel: `${compactRole(role)} ${formula}`,
+          color: operationColor(operationIndex, boundIndex)
+        });
+      });
+    });
+  }
+  return finishResource(key4, label, labelId, mode, highlighted, semanticBounds);
+}
+function buildComplexityViewModel(input, instanceNamespace) {
+  const config = objectAt(input, "config");
+  if (config.version === 2) {
+    rejectUnknown(config, V2_CONFIG_KEYS, "config");
+    const label = textAt(config.label, "label");
+    const variables = validateV2Variables(config.variables);
+    const resources = objectAt(config.resources, "resources");
+    rejectUnknown(resources, ["time", "space"], "resources");
+    if (!("time" in resources)) fail("resources.time", "is required");
+    if (!("space" in resources)) fail("resources.space", "is required");
+    const namespace = slug(textAt(instanceNamespace, "instanceNamespace"));
+    const figureId2 = `complexity-${namespace}`;
+    const resourceViews = ["time", "space"].map((key4) => {
+      const path = `resources.${key4}`;
+      const resource2 = objectAt(resources[key4], path);
+      rejectUnknown(resource2, ["mode", "entries"], path);
+      if (resource2.mode !== "cases" && resource2.mode !== "operations") {
+        fail(`${path}.mode`, "must be one of cases, operations");
+      }
+      return buildResource(
+        resource2.entries,
+        resource2.mode,
+        `${path}.`,
+        key4,
+        key4 === "time" ? "Time" : "Space",
+        `${figureId2}-${key4}`,
+        2
+      );
+    });
+    return {
+      figureId: figureId2,
+      mode: resourceViews[0].mode,
+      title: label,
+      label,
+      variables,
+      resources: resourceViews,
+      paths: resourceViews.flatMap((resource2) => [...resource2.contextPaths, ...resource2.paths]),
+      legend: resourceViews.flatMap((resource2) => resource2.legend),
+      endpointLabels: resourceViews.flatMap((resource2) => resource2.endpointLabels),
+      ticks: resourceViews[0].ticks,
+      xTicks: resourceViews[0].xTicks
+    };
+  }
+  rejectUnknown(config, V1_CONFIG_KEYS, "config");
+  if (config.version !== 1) fail("version", "must be 1 or 2");
+  if (config.mode !== "catalogue" && config.mode !== "cases" && config.mode !== "operations") {
+    fail("mode", "must be catalogue, cases, or operations");
+  }
+  const title = textAt(config.title, "title");
+  validateV1Variables(config.variables);
+  const figureId = `complexity-${slug(instanceNamespace ?? `${config.mode}-${title}`)}`;
+  const resource = buildResource(
+    config.entries,
+    config.mode,
+    "",
+    "catalogue",
+    title,
+    `${figureId}-catalogue`,
+    1
+  );
+  return {
+    figureId,
+    mode: config.mode,
+    title,
+    label: title,
+    variables: objectAt(config.variables, "variables"),
+    resources: [resource],
+    paths: [...resource.contextPaths, ...resource.paths],
+    legend: resource.legend,
+    endpointLabels: resource.endpointLabels,
+    ticks: resource.ticks,
+    xTicks: resource.xTicks
   };
 }
 
@@ -23534,41 +23557,20 @@ function svgElement(document2, tagName, attributes) {
   for (const [name, value] of Object.entries(attributes)) node2.setAttribute(name, String(value));
   return node2;
 }
-function renderComplexityDom(root, view) {
-  const document2 = root.ownerDocument;
+function renderResourceDom(document2, resource) {
   const { width, height: height2, left, plotRight, labelX, top, axisY } = COMPLEXITY_CHART;
-  const clipId = `${view.figureId}-plot-clip`;
-  const panelId = `${view.figureId}-panel`;
-  const figure = document2.createElement("figure");
-  figure.id = view.figureId;
-  figure.className = "complexity";
-  figure.dataset.complexityMode = view.mode;
-  figure.dataset.activeFilter = "all";
-  const title = appendText(document2, figure, "figcaption", view.title);
-  title.id = `${view.figureId}-title`;
-  title.className = "complexity__title";
-  const tabs = document2.createElement("div");
-  tabs.className = "steptrace__tabs complexity__tabs";
-  tabs.setAttribute("role", "tablist");
-  tabs.setAttribute("aria-label", "Complexity cases");
-  for (const filter of COMPLEXITY_FILTERS) {
-    const tab = appendText(document2, tabs, "button", filter.label);
-    tab.id = `${view.figureId}-tab-${filter.id}`;
-    tab.type = "button";
-    tab.className = "steptrace__tab complexity__tab";
-    tab.dataset.filter = filter.id;
-    tab.setAttribute("role", "tab");
-    tab.setAttribute("aria-controls", panelId);
-    tab.setAttribute("aria-selected", filter.id === "all" ? "true" : "false");
-    tab.tabIndex = filter.id === "all" ? 0 : -1;
-    tab.disabled = filter.id !== "all" && !view.availableCategories.includes(filter.id);
+  const clipId = `${resource.labelId}-plot-clip`;
+  const paths = [...resource.contextPaths, ...resource.paths];
+  const group = document2.createElement("div");
+  group.className = "complexity__resource";
+  group.dataset.complexityResource = resource.key;
+  if (resource.key !== "catalogue") {
+    group.setAttribute("role", "group");
+    group.setAttribute("aria-labelledby", resource.labelId);
+    const label = appendText(document2, group, "div", resource.label);
+    label.id = resource.labelId;
+    label.className = "complexity__resource-label";
   }
-  figure.append(tabs);
-  const panel = document2.createElement("div");
-  panel.id = panelId;
-  panel.className = "complexity__panel";
-  panel.setAttribute("role", "tabpanel");
-  panel.setAttribute("aria-labelledby", `${view.figureId}-tab-all`);
   const plotWrap = document2.createElement("div");
   plotWrap.className = "complexity__plot-wrap";
   const svg = svgElement(document2, "svg", {
@@ -23589,7 +23591,7 @@ function renderComplexityDom(root, view) {
     })
   );
   defs.append(clip);
-  for (const path of view.paths.filter((candidate) => !candidate.dimmed)) {
+  for (const path of paths.filter((candidate) => !candidate.dimmed)) {
     const gradient = svgElement(document2, "linearGradient", {
       id: `${path.id}-fill`,
       x1: 0,
@@ -23612,7 +23614,7 @@ function renderComplexityDom(root, view) {
     defs.append(gradient);
   }
   svg.append(defs);
-  for (const tick of view.ticks) {
+  for (const tick of resource.ticks) {
     svg.append(
       svgElement(document2, "line", {
         class: "complexity__grid",
@@ -23639,7 +23641,7 @@ function renderComplexityDom(root, view) {
       y2: axisY
     })
   );
-  for (const tick of view.xTicks) {
+  for (const tick of resource.xTicks) {
     const label = svgElement(document2, "text", {
       class: "complexity__x-tick",
       x: tick.x,
@@ -23651,15 +23653,14 @@ function renderComplexityDom(root, view) {
   const clipped = svgElement(document2, "g", { "clip-path": `url(#${clipId})` });
   const areas = svgElement(document2, "g", { class: "complexity__areas" });
   const curves2 = svgElement(document2, "g", { class: "complexity__curves" });
-  for (const path of view.paths) {
+  for (const path of paths) {
     if (!path.dimmed) {
       areas.append(
         svgElement(document2, "path", {
           class: "complexity__area",
           d: path.area,
           fill: `url(#${path.id}-fill)`,
-          "data-path-id": path.id,
-          "data-category": path.category
+          "data-path-id": path.id
         })
       );
     }
@@ -23673,7 +23674,6 @@ function renderComplexityDom(root, view) {
         "vector-effect": "non-scaling-stroke",
         "data-path-id": path.id,
         "data-curve-id": path.curveId,
-        "data-category": path.category,
         "data-context": path.dimmed ? "true" : "false"
       })
     );
@@ -23681,7 +23681,7 @@ function renderComplexityDom(root, view) {
   clipped.append(areas, curves2);
   svg.append(clipped);
   const endpointLabels = svgElement(document2, "g", { class: "complexity__endpoint-labels" });
-  for (const endpoint of view.endpointLabels) {
+  for (const endpoint of resource.endpointLabels) {
     const label = svgElement(document2, "text", {
       class: `complexity__endpoint-label ${endpoint.dimmed ? "is-subtle" : "is-active"}`,
       x: labelX,
@@ -23695,26 +23695,24 @@ function renderComplexityDom(root, view) {
   }
   svg.append(endpointLabels);
   plotWrap.append(svg);
-  panel.append(plotWrap);
-  figure.append(panel);
+  group.append(plotWrap);
   const legend = document2.createElement("div");
   legend.className = "complexity__legend";
-  for (const group of view.legend) {
+  for (const legendGroup of resource.legend) {
     const row = document2.createElement("div");
-    row.className = `complexity__legend-group${group.label ? "" : " is-ungrouped"}`;
-    if (group.label) {
-      appendText(document2, row, "span", group.label).className = "complexity__legend-group-label";
+    row.className = `complexity__legend-group${legendGroup.label ? "" : " is-ungrouped"}`;
+    if (legendGroup.label) {
+      appendText(document2, row, "span", legendGroup.label).className = "complexity__legend-group-label";
     }
     const items = document2.createElement("ul");
     items.className = "complexity__legend-items";
-    for (const legendItem of group.items) {
+    for (const legendItem of legendGroup.items) {
       const item = document2.createElement("li");
       item.className = "complexity__legend-item";
       const button2 = document2.createElement("button");
       button2.type = "button";
       button2.className = "complexity__legend-button";
       button2.dataset.pathId = legendItem.pathId;
-      button2.dataset.category = legendItem.category;
       button2.setAttribute("aria-pressed", "false");
       button2.style.setProperty("--complexity-color", legendItem.color);
       const swatch = document2.createElement("span");
@@ -23727,7 +23725,31 @@ function renderComplexityDom(root, view) {
     row.append(items);
     legend.append(row);
   }
-  figure.append(legend);
+  group.append(legend);
+  if (resource.semanticBounds.length > 0) {
+    const semanticBounds = document2.createElement("dl");
+    semanticBounds.className = "complexity__semantic-bounds";
+    for (const bound of resource.semanticBounds) {
+      appendText(document2, semanticBounds, "dt", `${bound.operation} — ${bound.role}`);
+      appendText(document2, semanticBounds, "dd", bound.formula);
+    }
+    group.append(semanticBounds);
+  }
+  return group;
+}
+function renderComplexityDom(root, view) {
+  const document2 = root.ownerDocument;
+  const figure = document2.createElement("figure");
+  figure.id = view.figureId;
+  figure.className = "complexity";
+  figure.dataset.complexityMode = view.mode;
+  figure.setAttribute("aria-label", view.label);
+  const hiddenLabel = appendText(document2, figure, "span", view.label);
+  hiddenLabel.hidden = true;
+  const resources = document2.createElement("div");
+  resources.className = "complexity__resources";
+  for (const resource of view.resources) resources.append(renderResourceDom(document2, resource));
+  figure.append(resources);
   root.replaceChildren(figure);
   const interaction = typeof figure.querySelectorAll === "function" ? mountComplexityFigure(figure) : { destroy() {
   } };
@@ -23786,15 +23808,24 @@ ${error instanceof Error ? error.message : String(error)}`
           return;
         }
         const root = el2.createEl("div");
-        const handle = steptrace2.mount(root, config, { createSpeedSlider });
+        const tabsdown = this.app.plugins.getPlugin("tabsdown");
+        const mountTabs = typeof tabsdown?.mountTabs === "function" ? tabsdown.mountTabs.bind(tabsdown) : null;
+        const handle = steptrace2.mount(root, config, {
+          createSpeedSlider,
+          ...mountTabs ? { mountTabs } : {}
+        });
         ctx.addChild(new RenderChild(el2, handle));
       }
     );
+    let complexityOccurrence = 0;
     this.registerMarkdownCodeBlockProcessor(
       "complexity",
       (source, el2, ctx) => {
         try {
-          const view = buildComplexityViewModel(JSON.parse(source));
+          const view = buildComplexityViewModel(
+            JSON.parse(source),
+            `obsidian-${++complexityOccurrence}`
+          );
           const root = el2.createEl("div");
           const handle = renderComplexityDom(root, view);
           ctx.addChild(new RenderChild(el2, handle));

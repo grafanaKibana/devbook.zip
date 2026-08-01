@@ -105,18 +105,6 @@ export interface StepTraceConfig extends Partial<Omit<AlgorithmInput, "algorithm
   order?: number
 }
 
-export interface StepTraceTabConfig extends StepTraceConfig {
-  name: string
-  description?: string
-}
-
-export interface StepTraceTabsConfig {
-  tabs: StepTraceTabConfig[]
-  selected?: number
-}
-
-export type StepTraceBlockConfig = StepTraceConfig | StepTraceTabsConfig
-
 export interface StepTraceView<TFrame = unknown> {
   nodes: HTMLElement[]
   stageLayout?: "compact" | "fill"
@@ -371,12 +359,31 @@ export interface HostControlHandle {
   destroy(): void
 }
 
+export interface HostTabsOptions {
+  label: string
+  selection?: string | null
+  tabs: readonly {
+    id: string
+    label: string
+    panel: HTMLElement
+  }[]
+  onSelectionChange?(selection: string | null, previous: string | null): void
+}
+
+export interface HostTabsHandle extends HostControlHandle {
+  readonly selection: string | null
+  setSelection(id: string | null): void
+  setAvailable(id: string, available: boolean): void
+}
+
 export interface StepTraceHost {
   createSpeedSlider?(container: HTMLElement, options: SpeedSliderOptions): HostControlHandle
+  mountTabs?(container: HTMLElement, options: HostTabsOptions): HostTabsHandle
 }
 
 export interface MountHandle {
   pause?(): void
+  setVisible?(visible: boolean): void
   destroy(): void
 }
 
@@ -401,5 +408,5 @@ export interface StepTraceApi {
   kindOf(id: string): AlgorithmKind | null
   buildFrames(config: StepTraceConfig): BuiltFrames
   adjacency(graph: StepTraceGraph): Record<string, string[]>
-  mount(root: HTMLElement, config: StepTraceBlockConfig, host?: StepTraceHost): MountHandle
+  mount(root: HTMLElement, config: StepTraceConfig, host?: StepTraceHost): MountHandle
 }

@@ -13,35 +13,141 @@ publish: true
 
 A weighted graph assigns each edge a non-negative cost — travel time, latency, price — and the question is the cheapest total cost from one source node to every other node. Enumerating routes is exponential, and re-deriving a node's best cost every time a shorter approach appears repeats work already done. Dijkstra's algorithm keeps a single tentative distance per node, improves it only through edge relaxation, and commits nodes to a final distance in increasing order of that distance.
 
-The commit order is what makes it cheap. Each step removes the unsettled node with the smallest tentative distance from a min-priority-queue and marks it settled; its distance can no longer change. Relaxing its outgoing edges can only lower still-unsettled neighbours, never a node already behind the frontier. Non-negative weights are the precondition: they guarantee that leaving a settled node and returning through a longer detour cannot arrive cheaper.
+The commit order is what makes it cheap. Each vertex becomes settled once, when its smallest queued entry is removed; a lazy-deletion heap may later pop older entries for that same vertex and skip them. A settled distance can no longer change. Relaxing outgoing edges can only lower still-unsettled neighbours, never a node already behind the frontier. Non-negative weights are the precondition: they guarantee that leaving a settled node and returning through a longer detour cannot arrive cheaper.
 
-**Core condition:** non-negative edge weights → settle nodes in nondecreasing distance order → `O((V + E) log V)` with a binary heap and `O(V)` auxiliary space.
+**Core condition:** non-negative edge weights → settle nodes in nondecreasing distance order → `O((V + E) log V)` with a binary heap and `O(V)` auxiliary space with true decrease-key, or `O(E)` with the lazy-deletion heap shown below.
 
-# Trace
+~~~~~tabsdown
+tab: Visualization
 
-The trace runs a single source from `A` over an undirected weighted graph, settling one node per step until `F` is reached.
+
 
 ```steptrace
 {"algorithm":"dijkstra","start":"A","target":"F","directed":false,"nodes":[{"id":"A"},{"id":"B"},{"id":"C"},{"id":"D"},{"id":"E"},{"id":"F"}],"edges":[{"from":"A","to":"B","weight":2},{"from":"A","to":"C","weight":5},{"from":"B","to":"C","weight":1},{"from":"B","to":"D","weight":6},{"from":"C","to":"D","weight":3},{"from":"D","to":"E","weight":1},{"from":"D","to":"F","weight":4},{"from":"E","to":"F","weight":2}]}
 ```
 
-The first extraction settles `A` at distance 0 and relaxes its edges, giving `B` a tentative 2 and `C` a tentative 5. The decisive move is the next extraction: it takes the smallest tentative value, `B` at 2 — not `C` at 5 — settles it, and relaxing `B→C` lowers `C` from 5 to 3. `C` is now final at 3. Every remaining route to `C` must leave through a node whose tentative distance is already at least 2, and every edge adds a non-negative amount, so no later step can undercut the value `C` settles at. Nodes turn final in the order they leave the queue; the frontier holds only the tentative distances still open to a cheaper approach.
+# Trace
+
+The trace runs a single source from `A` over an undirected weighted graph, settling one node per step until `F` is reached.
+
+The first extraction settles `A` at distance 0 and relaxes its edges, giving `B` a tentative 2 and `C` a tentative 5. The decisive move is the next extraction: it takes the smallest tentative value, `B` at 2 — not `C` at 5 — settles it, and relaxing `B→C` lowers `C` from 5 to a tentative 3. `C` settles next at 3. Every remaining route to `C` must leave through a node whose tentative distance is already at least 2, and every edge adds a non-negative amount, so no later step can undercut the value `C` settles at. Nodes turn final on their first non-stale removal; older queued entries may still be popped and discarded later.
 
 # Why Settled Distances Stay Final
 
-The loop maintains one invariant: when a node leaves the priority queue, its tentative distance already equals its true shortest-path distance.
+The loop maintains one invariant: when an unsettled node leaves the priority queue, its tentative distance already equals its true shortest-path distance. Later stale entries for that settled node do not make it settle again.
 
 Suppose node `u` is popped with tentative distance `d[u]`, and assume for contradiction a strictly shorter path `P` to `u` exists. `P` starts at the source, which is settled, and at some edge `(x, y)` it first crosses from the settled set into the unsettled set — `y` is the first unsettled node on `P`. Settling `x` already relaxed `(x, y)`, so `d[y]` is at most the length of `P` up to `y`. Since the remainder of `P` from `y` to `u` has non-negative length, that prefix is itself at most the length of all of `P`, giving `d[y] ≤ length(P) < d[u]`. But `u` was chosen as the smallest tentative distance among unsettled nodes, so `d[u] ≤ d[y]` — a contradiction.
 
 The single step that makes the argument valid is that the tail from `y` to `u` cannot be negative. With a negative edge that tail could subtract from the cost, `d[y]` would no longer bound the full path, and a node could settle at a distance a later path beats.
 
+tab: Complexity
+
+```complexity
+{
+  "version": 2,
+  "label": "Dijkstra complexity",
+  "variables": {
+    "edgeCount": {
+      "symbol": "E",
+      "description": "number of edges"
+    },
+    "vertexCount": {
+      "symbol": "V",
+      "description": "number of vertices"
+    }
+  },
+  "resources": {
+    "time": {
+      "mode": "operations",
+      "entries": [
+        {
+          "kind": "operation",
+          "operation": "Binary heap + adjacency list",
+          "bounds": [
+            {
+              "kind": "text",
+              "role": "Time",
+              "formula": "O((V + E) log V)"
+            }
+          ]
+        },
+        {
+          "kind": "operation",
+          "operation": "Fibonacci heap",
+          "bounds": [
+            {
+              "kind": "text",
+              "role": "Time",
+              "formula": "O(E + V log V)"
+            }
+          ]
+        },
+        {
+          "kind": "operation",
+          "operation": "Array / linear scan",
+          "bounds": [
+            {
+              "kind": "curve",
+              "role": "Time",
+              "formula": "O(V²)",
+              "curveId": "quadratic"
+            }
+          ]
+        }
+      ]
+    },
+    "space": {
+      "mode": "operations",
+      "entries": [
+        {
+          "kind": "operation",
+          "operation": "Binary heap + adjacency list",
+          "bounds": [
+            {
+              "kind": "text",
+              "role": "Auxiliary space",
+              "formula": "O(V) decrease-key; O(E) lazy-deletion"
+            }
+          ]
+        },
+        {
+          "kind": "operation",
+          "operation": "Fibonacci heap",
+          "bounds": [
+            {
+              "kind": "curve",
+              "role": "Auxiliary space",
+              "formula": "O(V)",
+              "curveId": "linear"
+            }
+          ]
+        },
+        {
+          "kind": "operation",
+          "operation": "Array / linear scan",
+          "bounds": [
+            {
+              "kind": "curve",
+              "role": "Auxiliary space",
+              "formula": "O(V)",
+              "curveId": "linear"
+            }
+          ]
+        }
+      ]
+    }
+  }
+}
+```
+~~~~~
+
 # Complexity
 
-Every variant visits each vertex once and inspects each edge once; what differs is the cost of `extract-min` and of lowering a neighbour's key, which is set by the priority queue.
+Every variant settles each vertex once and scans its outgoing edges once. A lazy-deletion heap may additionally pop stale entries; what differs is the cost of those removals and of lowering a neighbour's key.
 
 | Priority queue | Time | Auxiliary space | Cause |
 | --- | --- | --- | --- |
-| Binary heap + adjacency list | `O((V + E) log V)` | `O(V)` decrease-key; `O(E)` lazy-deletion | `V` extractions and up to `E` key-lowering pushes each cost `O(log V)`. A true decrease-key heap holds one entry per vertex; the lazy-deletion code shown here pushes a fresh pair per relaxation, so the heap can carry up to `O(E)` stale entries. |
+| Binary heap + adjacency list | `O((V + E) log V)` | `O(V)` decrease-key; `O(E)` lazy-deletion | A decrease-key heap performs `V` extractions; lazy deletion can perform up to `O(E)` pushes and pops. Each costs `O(log V)` for a simple graph, and stale pops skip edge scans. |
 | Fibonacci heap | `O(E + V log V)` | `O(V)` | `decrease-key` is `O(1)` amortized, so only the `V` `extract-min` operations pay `log V`; `E` relaxations are effectively free. |
 | Array / linear scan | `O(V²)` | `O(V)` | Selecting the minimum by scanning all vertices is `O(V)` per step; on a dense graph where `E ≈ V²` this matches the relaxation work and drops the heap's `log V` overhead. |
 
@@ -49,11 +155,11 @@ Auxiliary space is `O(V)` for the `dist` and `settled` arrays plus `O(V)` for th
 
 # Where the Invariant Breaks
 
-A single negative edge violates settle-once. Take edges `A→B = 2`, `A→C = 3`, and `C→B = −2`. Dijkstra relaxes `A` to reach `B` at 2 and `C` at 3, extracts and settles `B` at 2, then extracts `C` at 3 and relaxes `C→B` to `3 + (−2) = 1`. `B` is already settled, so that improvement is discarded and `B` is reported at 2, while the true shortest distance `A→C→B` is 1. Nothing throws — the output is simply not a shortest-path tree. Weights that can be negative need [[Bellman-Ford]], which relaxes all edges `V − 1` times and drops the finalization assumption.
+A single negative edge violates settle-once. Take edges `A→B = 2`, `A→C = 3`, and `C→B = −2`. Dijkstra relaxes `A` to reach `B` at 2 and `C` at 3, extracts and settles `B` at 2, then extracts `C` at 3 and relaxes `C→B` to `3 + (−2) = 1`. `B` is already settled, so that improvement is discarded and `B` is reported at 2, while the true shortest distance `A→C→B` is 1. Nothing throws — the output is simply not a shortest-path tree. Weights that can be negative need [[Computer Science/Algorithms/Graph Algorithms/Bellman-Ford|Bellman-Ford]], which relaxes all edges `V − 1` times and drops the finalization assumption.
 
 A negative *cycle* has no shortest path at all: a route can loop it repeatedly to drive its cost below any bound, so no single-source algorithm returns a finite answer. The condition has to be detected rather than solved, which Bellman-Ford also does.
 
-The second boundary is internal to the implementation. Standard binary heaps (including .NET's `PriorityQueue<TElement, TPriority>`) offer no `decrease-key`, so a relaxation pushes a fresh `(distance, node)` pair and leaves the older, larger one in the heap. When such a stale pair is later popped for a node that was already settled through a cheaper entry, it must be skipped — the `if settled[node] continue` guard at the top of the loop. Omitting it re-relaxes that node's edges from an out-of-date distance and can corrupt neighbours still on the frontier.
+The second boundary is internal to the implementation. Standard binary heaps (including .NET's `PriorityQueue<TElement, TPriority>`) offer no `decrease-key`, so a relaxation pushes a fresh `(distance, node)` pair and leaves the older, larger one in the heap. A vertex still settles only once, but the queue can pop it repeatedly. The `if settled[node] continue` guard skips those stale entries before they rescan outgoing edges. Omitting the guard does not corrupt distances under the non-negative-weight precondition—the stale distance is larger than the one already processed—but it repeats edge scans and can degrade the promised complexity.
 
 # Reference Drawer
 
@@ -110,7 +216,7 @@ The second boundary is internal to the implementation. Standard binary heaps (in
 > }
 > ```
 >
-> The `settled` array replaces `decrease-key`: relaxation always pushes a new pair, and the guard discards the outdated ones on pop. A parallel `parent[]` array, written whenever `dist[to]` is lowered, reconstructs a path by walking backward from the target.
+> The lazy-deletion pattern replaces `decrease-key`: relaxation always pushes a new pair, while `settled` makes the first valid pop final and lets the guard discard later stale entries. A parallel `parent[]` array, written whenever `dist[to]` is lowered, reconstructs a path by walking backward from the target.
 
 # Questions
 
@@ -118,7 +224,7 @@ The second boundary is internal to the implementation. Standard binary heaps (in
 > When a node is popped it is treated as final. The proof that this is safe relies on the tail of any alternative path — from the first unsettled node it reaches onward — having non-negative length, so that first node's tentative distance already bounds the whole path. A negative edge lets that tail subtract cost, so a later path can beat a node's settled distance and the reported distance is wrong.
 
 > [!QUESTION]- What does the `if settled[node] continue` guard fix?
-> A binary heap has no `decrease-key`, so relaxing a node pushes a new pair and leaves the old larger one behind. The guard skips a node the second time it is popped, after a cheaper pair already settled it. Without the guard, the stale pair re-relaxes that node's edges from an outdated distance and can lower a frontier neighbour incorrectly.
+> A binary heap has no `decrease-key`, so relaxing a node pushes a new pair and leaves the old larger one behind. The guard skips every later pop after the cheapest pair has settled that vertex. Without it, stale entries rescan the same outgoing edges; they do not lower distances incorrectly under non-negative weights, but the redundant work can exceed the advertised complexity.
 
 > [!QUESTION]- Why can an array scan beat a binary heap on a dense graph?
 > With a heap, each of the `E` relaxations may cost `O(log V)`, giving `O((V + E) log V)`. On a dense graph `E ≈ V²`, so the heap term dominates at `O(V² log V)`. Scanning all vertices to pick the minimum is `O(V)` per step and `O(V²)` overall, which drops the `log V` factor entirely.

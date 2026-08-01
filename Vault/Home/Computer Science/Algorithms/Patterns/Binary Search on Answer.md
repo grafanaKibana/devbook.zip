@@ -17,24 +17,104 @@ The range collapses because feasibility is **monotone**: a larger capacity never
 
 **Core condition:** a numeric answer range `[lo, hi]` with a monotone `feasible(x)` → each probe evaluates `feasible(mid)` instead of comparing an array element → `O(n · log(range))` time, `O(1)` auxiliary space beyond the check.
 
-# Trace
+~~~~~tabsdown
+tab: Visualization
 
-Six packages with weights `[3, 2, 2, 4, 1, 4]` must ship within three days. The answer strip classifies capacities `4 … 16` as known infeasible, still unknown, or known feasible. Each probe expands into the greedy day-by-day packing that supplies the predicate result, making the work inside `feasible(capacity)` visible instead of presenting the candidates as a stored array. The boundary settles at capacity `6`.
+
 
 ```steptrace
 {"algorithm":"binary-search-on-answer","weights":[3,2,2,4,1,4],"days":3}
 ```
 
-# Why Halving the Answer Works
+# Trace
 
-At the start of every iteration the true answer — the smallest feasible `x` — lies inside the current range `[lo, hi]`. Evaluating the predicate at the midpoint preserves that invariant:
+Six packages with weights `[3, 2, 2, 4, 1, 4]` must ship within three days. The answer strip classifies capacities `4 … 16` as known infeasible, still unknown, or known feasible. Each probe expands into the greedy day-by-day packing that supplies the predicate result, making the work inside `feasible(capacity)` visible instead of presenting the candidates as a stored array. The boundary settles at capacity `6`.
 
-- `feasible(mid)` is `true`: the boundary is at or below `mid`, because monotonicity guarantees nothing above `mid` can be the *smallest* feasible value. The range becomes `[lo, mid]`.
-- `feasible(mid)` is `false`: `mid` and everything below it fail, so the boundary is strictly above `mid`. The range becomes `[mid + 1, hi]`.
+tab: Complexity
 
-From `N` candidates, each probe keeps at most `⌈N/2⌉`, so the inclusive range reaches a single element in at most `⌈log₂(hi − lo + 1)⌉` steps. At that point `lo == hi` is the smallest feasible answer. The closed-range first-true update (`hi = mid` on success, `lo = mid + 1` on failure, with `mid` biased low) pairs the midpoint with the boundary move so the range always shrinks. The maximise-the-minimum mirror flips the predicate direction and biases `mid` high.
-
-The step that separates this from array search is the probe itself. In [[Home/Computer Science/Algorithms/Search Algorithms/Binary Search|Binary Search]] the value at `mid` is already stored and the comparison is `O(1)`. Here `mid` is a *candidate answer*, and `feasible(mid)` reconstructs enough of the problem to decide it — a greedy pass, a counting sweep, sometimes a full simulation. The family covers minimise-the-maximum (ship packages within `D` days, split an array to minimise the largest subarray sum, Koko eating bananas at the slowest speed that finishes in time), maximise-the-minimum (place resources to maximise the smallest gap), and degenerate numeric cases such as integer `sqrt(x)`, where `feasible(m)` is just `m * m <= x`.
+```complexity
+{
+  "version": 2,
+  "label": "Binary Search on Answer complexity",
+  "variables": {
+    "inputSize": {
+      "symbol": "n",
+      "description": "number of input elements or states"
+    },
+    "lowerBound": {
+      "symbol": "lo",
+      "description": "inclusive lower search bound"
+    },
+    "rangeWidth": {
+      "symbol": "range",
+      "description": "numeric candidate-range width"
+    },
+    "upperBound": {
+      "symbol": "hi",
+      "description": "inclusive upper search bound"
+    }
+  },
+  "resources": {
+    "time": {
+      "mode": "operations",
+      "entries": [
+        {
+          "kind": "operation",
+          "operation": "Probes over the range",
+          "bounds": [
+            {
+              "kind": "text",
+              "role": "Cost",
+              "formula": "O(log(hi − lo + 1))"
+            }
+          ]
+        },
+        {
+          "kind": "operation",
+          "operation": "One feasible check",
+          "bounds": [
+            {
+              "kind": "curve",
+              "role": "Cost",
+              "formula": "O(n) typical",
+              "curveId": "linear"
+            }
+          ]
+        },
+        {
+          "kind": "operation",
+          "operation": "Total time",
+          "bounds": [
+            {
+              "kind": "text",
+              "role": "Cost",
+              "formula": "O(n · log(range))"
+            }
+          ]
+        }
+      ]
+    },
+    "space": {
+      "mode": "operations",
+      "entries": [
+        {
+          "kind": "operation",
+          "operation": "Auxiliary space",
+          "bounds": [
+            {
+              "kind": "curve",
+              "role": "Cost",
+              "formula": "O(1)",
+              "curveId": "constant"
+            }
+          ]
+        }
+      ]
+    }
+  }
+}
+```
+~~~~~
 
 # Complexity
 
@@ -48,6 +128,17 @@ The cost factors into how many candidates are probed and what each probe pays. T
 | Auxiliary space | `O(1)` | three integer bounds beyond whatever `feasible` allocates |
 
 The log factor is over the *numeric range of the answer*, not the input size, so an answer space as wide as `10^18` costs only about 60 probes. When `feasible` is itself super-linear — say it runs a DP — its cost replaces the `O(n)` term. For a real-valued answer the required iteration count depends on the initial width and target error (below).
+
+# Why Halving the Answer Works
+
+At the start of every iteration the true answer — the smallest feasible `x` — lies inside the current range `[lo, hi]`. Evaluating the predicate at the midpoint preserves that invariant:
+
+- `feasible(mid)` is `true`: the boundary is at or below `mid`, because monotonicity guarantees nothing above `mid` can be the *smallest* feasible value. The range becomes `[lo, mid]`.
+- `feasible(mid)` is `false`: `mid` and everything below it fail, so the boundary is strictly above `mid`. The range becomes `[mid + 1, hi]`.
+
+From `N` candidates, each probe keeps at most `⌈N/2⌉`, so the inclusive range reaches a single element in at most `⌈log₂(hi − lo + 1)⌉` steps. At that point `lo == hi` is the smallest feasible answer. The closed-range first-true update (`hi = mid` on success, `lo = mid + 1` on failure, with `mid` biased low) pairs the midpoint with the boundary move so the range always shrinks. The maximise-the-minimum mirror flips the predicate direction and biases `mid` high.
+
+The step that separates this from array search is the probe itself. In [[Home/Computer Science/Algorithms/Search Algorithms/Binary Search|Binary Search]] the value at `mid` is already stored and the comparison is `O(1)`. Here `mid` is a *candidate answer*, and `feasible(mid)` reconstructs enough of the problem to decide it — a greedy pass, a counting sweep, sometimes a full simulation. The family covers minimise-the-maximum (ship packages within `D` days, split an array to minimise the largest subarray sum, Koko eating bananas at the slowest speed that finishes in time), maximise-the-minimum (place resources to maximise the smallest gap), and degenerate numeric cases such as integer `sqrt(x)`, where `feasible(m)` is just `m * m <= x`.
 
 # When the Predicate is Not Actually Monotone
 

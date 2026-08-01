@@ -11,19 +11,26 @@ status: Ready to Repeat
 publish: true
 ---
 
+# Intro
+
 A mutable array of one million latency samples must answer "maximum value in `a[l..r]`" while new samples keep overwriting old slots. A raw scan costs `O(n)` per query. A [[Home/Computer Science/Algorithms/Patterns/Prefix Sum|prefix-sum array]] answers sum queries in `O(1)`, but every write invalidates `O(n)` prefixes — so it collapses when updates interleave with queries, and subtraction cannot recover a range maximum.
 
 A segment tree keeps the array's index order but overlays a binary hierarchy of **intervals** on top of it. Each node owns a contiguous range `[l, r]` and stores one aggregate over that range; a parent's value is `merge(leftChild, rightChild)` for any associative `merge` — sum, min, max, gcd. Because a parent already summarizes its whole subtree, an arbitrary query range splits into a handful of already-computed nodes instead of touching every leaf. A scalar aggregate may discard provenance: a maximum node does not reveal which index produced it unless the stored value is enriched to `(maximum, index)`, and an average needs `(sum, count)` rather than one number.
 
 **Core shape:** array indices → binary interval tree → each node holds `merge` over its `[l, r]` → a query merges `O(log n)` canonical nodes in array order → `O(n)` storage.
 
-# State across Operations
+~~~~~tabsdown
+tab: Visualization
 
-The interactive tree aligns each stored sum over the source interval it summarizes. Its controls and interval labels are one-based; the reference diagram and C# implementation below use zero-based indices. `Range sum` marks only the canonical nodes whose intervals exactly tile the request. `Set value` changes one leaf and marks the single ancestor path that must be recomputed.
+
 
 ```steptrace
 {"algorithm":"segment-tree","array":[3,4,1,7,2,6,5,8]}
 ```
+
+# State across Operations
+
+The interactive tree aligns each stored sum over the source interval it summarizes. Its controls and interval labels are one-based; the reference diagram and C# implementation below use zero-based indices. `Range sum` marks only the canonical nodes whose intervals exactly tile the request. `Set value` changes one leaf and marks the single ancestor path that must be recomputed.
 
 Source updates persist until reset; the latest operation's marks remain until the next operation or reset.
 
@@ -38,6 +45,130 @@ Each node covers a fixed range decided at build time. The root covers `[0, n-1]`
 3. A point update touches only the `O(log n)` nodes on one root-to-leaf path; every other node's invariant is untouched because its range didn't change.
 
 Lazy propagation adds a pending tag only when the update can transform a node's aggregate in constant time and tags compose correctly. For a sum tree with range-add, applying `delta` to a node of length `len` changes its aggregate by `delta * len`; multiple add tags compose by addition. The tag is pushed to children only when a later operation descends past that node, keeping compatible range updates and queries at `O(log n)`. Other pairs need different laws: range-add does not automatically work with every aggregate.
+
+tab: Complexity
+
+```complexity
+{
+  "version": 2,
+  "label": "Segment Tree complexity",
+  "variables": {
+    "inputSize": {
+      "symbol": "n",
+      "description": "number of input elements or states"
+    }
+  },
+  "resources": {
+    "time": {
+      "mode": "operations",
+      "entries": [
+        {
+          "kind": "operation",
+          "operation": "Build",
+          "bounds": [
+            {
+              "kind": "curve",
+              "role": "Time",
+              "formula": "O(n)",
+              "curveId": "linear"
+            }
+          ]
+        },
+        {
+          "kind": "operation",
+          "operation": "Range query",
+          "bounds": [
+            {
+              "kind": "curve",
+              "role": "Time",
+              "formula": "O(log n)",
+              "curveId": "log-n"
+            }
+          ]
+        },
+        {
+          "kind": "operation",
+          "operation": "Point update",
+          "bounds": [
+            {
+              "kind": "curve",
+              "role": "Time",
+              "formula": "O(log n)",
+              "curveId": "log-n"
+            }
+          ]
+        },
+        {
+          "kind": "operation",
+          "operation": "Compatible range update (lazy)",
+          "bounds": [
+            {
+              "kind": "curve",
+              "role": "Time",
+              "formula": "O(log n)",
+              "curveId": "log-n"
+            }
+          ]
+        }
+      ]
+    },
+    "space": {
+      "mode": "operations",
+      "entries": [
+        {
+          "kind": "operation",
+          "operation": "Build",
+          "bounds": [
+            {
+              "kind": "curve",
+              "role": "Space",
+              "formula": "O(n) structure",
+              "curveId": "linear"
+            }
+          ]
+        },
+        {
+          "kind": "operation",
+          "operation": "Range query",
+          "bounds": [
+            {
+              "kind": "curve",
+              "role": "Space",
+              "formula": "O(log n) recursion stack",
+              "curveId": "log-n"
+            }
+          ]
+        },
+        {
+          "kind": "operation",
+          "operation": "Point update",
+          "bounds": [
+            {
+              "kind": "curve",
+              "role": "Space",
+              "formula": "O(log n) recursion stack",
+              "curveId": "log-n"
+            }
+          ]
+        },
+        {
+          "kind": "operation",
+          "operation": "Compatible range update (lazy)",
+          "bounds": [
+            {
+              "kind": "curve",
+              "role": "Space",
+              "formula": "O(log n) recursion stack",
+              "curveId": "log-n"
+            }
+          ]
+        }
+      ]
+    }
+  }
+}
+```
+~~~~~
 
 # Complexity
 

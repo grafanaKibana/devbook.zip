@@ -17,15 +17,136 @@ Greedy algorithms build the answer incrementally: at each step, commit to the op
 
 **Exactness condition:** a fixed local rule + the greedy-choice property + optimal substructure → the committed choices form a global optimum. **Activity-selection cost:** sort by finish time, then scan once → `O(n log n)` time and `O(n)` auxiliary space when the input is cloned.
 
-# Trace
+~~~~~tabsdown
+tab: Visualization
 
-The trace starts with five meetings in input order. Sorting by finish time moves the earliest release opportunity first; the sweep then accepts a compatible meeting permanently or rejects it as soon as it overlaps the last accepted finish.
+
 
 ```steptrace
 {"algorithm":"activity-selection"}
 ```
 
+# Trace
+
+The trace starts with five meetings in input order. Sorting by finish time moves the earliest release opportunity first; the sweep then accepts a compatible meeting permanently or rejects it as soon as it overlaps the last accepted finish.
+
 The first commitment, `[1, 4]`, rejects `[3, 5]` and `[0, 6]`. Meetings `[5, 7]` and `[8, 9]` remain compatible, producing a maximum schedule of three meetings. The accepted lane illustrates the exchange intuition: each commitment leaves at least as much room as any alternative first choice.
+
+tab: Complexity
+
+```complexity
+{
+  "version": 2,
+  "label": "Greedy Algorithms complexity",
+  "variables": {
+    "edgeCount": {
+      "symbol": "E",
+      "description": "number of edges"
+    },
+    "inputSize": {
+      "symbol": "n",
+      "description": "number of input elements or states"
+    },
+    "vertexCount": {
+      "symbol": "V",
+      "description": "number of vertices"
+    }
+  },
+  "resources": {
+    "time": {
+      "mode": "operations",
+      "entries": [
+        {
+          "kind": "operation",
+          "operation": "Order candidates by the greedy key",
+          "bounds": [
+            {
+              "kind": "curve",
+              "role": "Time",
+              "formula": "O(n log n)",
+              "curveId": "n-log-n"
+            }
+          ]
+        },
+        {
+          "kind": "operation",
+          "operation": "Feasibility scan",
+          "bounds": [
+            {
+              "kind": "curve",
+              "role": "Time",
+              "formula": "O(n)",
+              "curveId": "linear"
+            }
+          ]
+        },
+        {
+          "kind": "operation",
+          "operation": "Priority-queue variant",
+          "bounds": [
+            {
+              "kind": "text",
+              "role": "Time",
+              "formula": "O((V + E) log V)"
+            }
+          ]
+        }
+      ]
+    },
+    "space": {
+      "mode": "operations",
+      "entries": [
+        {
+          "kind": "operation",
+          "operation": "Order candidates by the greedy key",
+          "bounds": [
+            {
+              "kind": "text",
+              "role": "Auxiliary space",
+              "formula": "O(n) or O(log n)"
+            }
+          ]
+        },
+        {
+          "kind": "operation",
+          "operation": "Feasibility scan",
+          "bounds": [
+            {
+              "kind": "curve",
+              "role": "Auxiliary space",
+              "formula": "O(1)",
+              "curveId": "constant"
+            }
+          ]
+        },
+        {
+          "kind": "operation",
+          "operation": "Priority-queue variant",
+          "bounds": [
+            {
+              "kind": "curve",
+              "role": "Auxiliary space",
+              "formula": "O(V)",
+              "curveId": "linear"
+            }
+          ]
+        }
+      ]
+    }
+  }
+}
+```
+~~~~~
+
+# Complexity
+
+| Phase | Time | Auxiliary space | Cause |
+| --- | --- | --- | --- |
+| Order candidates by the greedy key | `O(n log n)` | `O(n)` or `O(log n)` | A comparison sort of `n` candidates dominates the total. |
+| Feasibility scan | `O(n)` | `O(1)` | Each candidate is examined once, then committed or discarded. |
+| Priority-queue variant | `O((V + E) log V)` | `O(V)` | [[Home/Computer Science/Algorithms/Graph Algorithms/Dijkstra|Dijkstra]] and Prim re-rank candidates as edges are relaxed rather than sorting once. |
+
+An already finish-ordered activity stream needs only the `O(n)` feasibility scan. Bucket ordering instead costs `O(n + k)` for `k` key values; it is linear only when `k = O(n)`. Greedy often avoids the state table used by [[Home/Computer Science/Algorithms/Paradigms/Dynamic Programming|Dynamic Programming]], but there is no general theorem that it always uses less time and space.
 
 # When Local Choices Reach the Global Optimum
 
@@ -37,16 +158,6 @@ Two properties decide whether committing to a local choice is safe.
 Correctness is established by an **exchange argument**: take any optimal solution, show one of its choices can be replaced by the greedy choice without reducing quality, then repeat the swap until the optimal solution becomes the greedy one. Because no swap makes the solution worse, greedy is at least as good as any optimum. For a hereditary independence system, the Rado–Edmonds theorem gives a sharper characterization: the standard weight-ordered greedy algorithm succeeds for every weight assignment exactly when the system is a matroid. It does not validate an arbitrary local rule.
 
 For activity selection, each accepted meeting extends a partial schedule and makes its overlapping candidates impossible; the invariant is that the partial schedule can still be extended to an optimum. Other greedy algorithms need their own invariant. [[Home/Computer Science/Algorithms/Graph Algorithms/Dijkstra|Dijkstra]] finalizes the shortest distance of each settled vertex, while Prim and Kruskal accept only edges justified by the cut or cycle properties of a [[Home/Computer Science/Algorithms/Graph Algorithms/Minimum Spanning Tree|Minimum Spanning Tree]].
-
-# Complexity
-
-| Phase | Time | Auxiliary space | Cause |
-| --- | --- | --- | --- |
-| Order candidates by the greedy key | `O(n log n)` | `O(n)` or `O(log n)` | A comparison sort of `n` candidates dominates the total. |
-| Feasibility scan | `O(n)` | `O(1)` | Each candidate is examined once, then committed or discarded. |
-| Priority-queue variant | `O((V + E) log V)` | `O(V)` | [[Home/Computer Science/Algorithms/Graph Algorithms/Dijkstra|Dijkstra]] and Prim re-rank candidates as edges are relaxed rather than sorting once. |
-
-An already finish-ordered activity stream needs only the `O(n)` feasibility scan. Bucket ordering instead costs `O(n + k)` for `k` key values; it is linear only when `k = O(n)`. Greedy often avoids the state table used by [[Home/Computer Science/Algorithms/Paradigms/Dynamic Programming|Dynamic Programming]], but there is no general theorem that it always uses less time and space.
 
 # Where the Greedy-choice Property Fails
 

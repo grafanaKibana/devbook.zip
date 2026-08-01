@@ -21,6 +21,9 @@ Because internal nodes carry no values, each routing page packs far more separat
 
 Press **Insert** with the prefilled `25` to split a leaf: the first key in the right leaf is copied into the parent and remains in the leaf. Then press **Range scan** for `[15, 40]`; the highlighted path reaches the first matching leaf and the green links carry the scan across the remaining leaves.
 
+~~~~~tabsdown
+tab: Visualization
+
 ```steptrace
 {"algorithm":"b-plus-tree","values":[5,9,12,17,33,40,21],"value":25,"range":[15,40]}
 ```
@@ -42,6 +45,179 @@ Four invariants define a valid state:
 Splits treat the two node kinds differently. Splitting a leaf **copies up** the first key of the new right leaf as a separator, so that key remains with its value in the leaf. Splitting an internal node **moves up** its chosen separator into the parent, removing it from both resulting children because internal keys route rather than store records.
 
 A point lookup compares against separators to pick a child at each level and always continues to a leaf, because that is the only place a value exists. A range scan `[A, B]` descends to the leaf where `A` would be inserted, starts at `lower_bound(A)`, then follows `next` pointers until a key exceeds `B`. `A` need not exist. The descent cost is the tree height; the leaf-page walk depends on how many result pages are touched.
+
+tab: Complexity
+
+```complexity
+{
+  "version": 2,
+  "label": "B+ Tree complexity",
+  "variables": {
+    "fanout": {
+      "symbol": "f",
+      "description": "tree fanout"
+    },
+    "inputSize": {
+      "symbol": "n",
+      "description": "number of input elements or states"
+    },
+    "keyRange": {
+      "symbol": "k",
+      "description": "key range, digit count, or requested result count"
+    },
+    "lengthL": {
+      "symbol": "L",
+      "description": "key, string, path, or sequence length"
+    }
+  },
+  "resources": {
+    "time": {
+      "mode": "operations",
+      "entries": [
+        {
+          "kind": "operation",
+          "operation": "Search (point lookup)",
+          "bounds": [
+            {
+              "kind": "text",
+              "role": "Page I/Os",
+              "formula": "O(log_f n)"
+            },
+            {
+              "kind": "curve",
+              "role": "Output processing",
+              "formula": "O(1)",
+              "curveId": "constant"
+            }
+          ]
+        },
+        {
+          "kind": "operation",
+          "operation": "Insert",
+          "bounds": [
+            {
+              "kind": "text",
+              "role": "Page I/Os",
+              "formula": "O(log_f n)"
+            }
+          ]
+        },
+        {
+          "kind": "operation",
+          "operation": "Delete",
+          "bounds": [
+            {
+              "kind": "text",
+              "role": "Page I/Os",
+              "formula": "O(log_f n)"
+            }
+          ]
+        },
+        {
+          "kind": "operation",
+          "operation": "Range scan [A, B]",
+          "bounds": [
+            {
+              "kind": "text",
+              "role": "Page I/Os",
+              "formula": "O(log_f n + ⌈k/L⌉)"
+            },
+            {
+              "kind": "curve",
+              "role": "Output processing",
+              "formula": "O(k)",
+              "curveId": "linear"
+            }
+          ]
+        },
+        {
+          "kind": "operation",
+          "operation": "Ordered full scan",
+          "bounds": [
+            {
+              "kind": "text",
+              "role": "Page I/Os",
+              "formula": "O(log_f n + n/L)"
+            },
+            {
+              "kind": "curve",
+              "role": "Output processing",
+              "formula": "O(n)",
+              "curveId": "linear"
+            }
+          ]
+        }
+      ]
+    },
+    "space": {
+      "mode": "operations",
+      "entries": [
+        {
+          "kind": "operation",
+          "operation": "Search (point lookup)",
+          "bounds": [
+            {
+              "kind": "curve",
+              "role": "Structure space",
+              "formula": "O(n)",
+              "curveId": "linear"
+            }
+          ]
+        },
+        {
+          "kind": "operation",
+          "operation": "Insert",
+          "bounds": [
+            {
+              "kind": "curve",
+              "role": "Structure space",
+              "formula": "O(n)",
+              "curveId": "linear"
+            }
+          ]
+        },
+        {
+          "kind": "operation",
+          "operation": "Delete",
+          "bounds": [
+            {
+              "kind": "curve",
+              "role": "Structure space",
+              "formula": "O(n)",
+              "curveId": "linear"
+            }
+          ]
+        },
+        {
+          "kind": "operation",
+          "operation": "Range scan [A, B]",
+          "bounds": [
+            {
+              "kind": "curve",
+              "role": "Structure space",
+              "formula": "O(n)",
+              "curveId": "linear"
+            }
+          ]
+        },
+        {
+          "kind": "operation",
+          "operation": "Ordered full scan",
+          "bounds": [
+            {
+              "kind": "curve",
+              "role": "Structure space",
+              "formula": "O(n)",
+              "curveId": "linear"
+            }
+          ]
+        }
+      ]
+    }
+  }
+}
+```
+~~~~~
 
 # Complexity
 

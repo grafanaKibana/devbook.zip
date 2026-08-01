@@ -17,13 +17,17 @@ A graph has no single canonical layout. The same set of vertices and edges can b
 
 **Core shape:** vertices + edges → one of {neighbor lists, `V × V` table, flat edge tuples} → each keeps topology, direction, and weight but trades space against edge-test and neighbor-scan cost.
 
-The inspector below keeps one directed, unweighted edge set and derives all three storage forms from it. Add `3 → 0` first: the topology gains a cycle, while the same mutation appends `0` to row `3`, flips matrix cell `[3,0]` to `1`, and appends `(3,0)` to the edge list.
+~~~~~tabsdown
+tab: Visualization
+
 
 ```steptrace
 {"algorithm":"graph"}
 ```
 
-# Representation and Invariants
+The inspector below keeps one directed, unweighted edge set and derives all three storage forms from it. Add `3 → 0` first: the topology gains a cycle, while the same mutation appends `0` to row `3`, flips matrix cell `[3,0]` to `1`, and appends `(3,0)` to the edge list.
+
+## Representation and Invariants
 
 Each representation stores the same edge set in a different physical shape.
 
@@ -39,7 +43,174 @@ These representation invariants define valid stored graphs:
 2. In adjacency lists and matrices, undirected symmetry is a stored property: the mirrored list entries or symmetric matrix cells must be maintained together, or the graph silently becomes directed. An edge list instead treats one `(u, v)` tuple as an unordered endpoint pair and needs no mirrored tuple.
 3. The vertex identifier is an internal index. The array and matrix forms assume dense integer IDs `0 … V − 1`; strings, GUIDs, or sparse numeric IDs need a `Dictionary<T, int>` mapping first, which adds memory and makes ID management part of the API boundary — the same constraint the [[Home/Computer Science/Data Structures/Graph Structures/Disjoint Set|Disjoint Set]] array representation carries.
 
-# Complexity
+tab: Complexity
+
+```complexity
+{
+  "version": 2,
+  "label": "Graph complexity",
+  "variables": {
+    "edgeCount": {
+      "symbol": "E",
+      "description": "number of edges"
+    },
+    "outDegree": {
+      "symbol": "outdeg(u)",
+      "description": "outgoing degree of vertex u"
+    },
+    "vertexCount": {
+      "symbol": "V",
+      "description": "number of vertices"
+    }
+  },
+  "resources": {
+    "time": {
+      "mode": "operations",
+      "entries": [
+        {
+          "kind": "operation",
+          "operation": "has-edge(u, v)",
+          "bounds": [
+            {
+              "kind": "curve",
+              "role": "Adjacency list",
+              "formula": "O(outdeg(u))",
+              "curveId": "linear"
+            },
+            {
+              "kind": "curve",
+              "role": "Adjacency matrix",
+              "formula": "O(1)",
+              "curveId": "constant"
+            },
+            {
+              "kind": "curve",
+              "role": "Edge list",
+              "formula": "O(E)",
+              "curveId": "linear"
+            }
+          ]
+        },
+        {
+          "kind": "operation",
+          "operation": "iterate-neighbors(u)",
+          "bounds": [
+            {
+              "kind": "curve",
+              "role": "Adjacency list",
+              "formula": "O(outdeg(u))",
+              "curveId": "linear"
+            },
+            {
+              "kind": "curve",
+              "role": "Adjacency matrix",
+              "formula": "O(V)",
+              "curveId": "linear"
+            },
+            {
+              "kind": "curve",
+              "role": "Edge list",
+              "formula": "O(E)",
+              "curveId": "linear"
+            }
+          ]
+        },
+        {
+          "kind": "operation",
+          "operation": "add-edge(u, v)",
+          "bounds": [
+            {
+              "kind": "curve",
+              "role": "Adjacency list",
+              "formula": "O(1) amortized",
+              "curveId": "constant"
+            },
+            {
+              "kind": "curve",
+              "role": "Adjacency matrix",
+              "formula": "O(1)",
+              "curveId": "constant"
+            },
+            {
+              "kind": "curve",
+              "role": "Edge list",
+              "formula": "O(1) amortized",
+              "curveId": "constant"
+            }
+          ]
+        },
+        {
+          "kind": "operation",
+          "operation": "add-vertex",
+          "bounds": [
+            {
+              "kind": "curve",
+              "role": "Adjacency list",
+              "formula": "O(1) amortized",
+              "curveId": "constant"
+            },
+            {
+              "kind": "curve",
+              "role": "Adjacency matrix",
+              "formula": "O(V²) rebuild",
+              "curveId": "quadratic"
+            },
+            {
+              "kind": "curve",
+              "role": "Edge list",
+              "formula": "O(1)",
+              "curveId": "constant"
+            }
+          ]
+        }
+      ]
+    },
+    "space": {
+      "mode": "operations",
+      "entries": [
+        {
+          "kind": "operation",
+          "operation": "Adjacency list",
+          "bounds": [
+            {
+              "kind": "text",
+              "role": "Space",
+              "formula": "O(V + E)"
+            }
+          ]
+        },
+        {
+          "kind": "operation",
+          "operation": "Adjacency matrix",
+          "bounds": [
+            {
+              "kind": "curve",
+              "role": "Space",
+              "formula": "O(V²)",
+              "curveId": "quadratic"
+            }
+          ]
+        },
+        {
+          "kind": "operation",
+          "operation": "Edge list",
+          "bounds": [
+            {
+              "kind": "curve",
+              "role": "Space",
+              "formula": "O(E)",
+              "curveId": "linear"
+            }
+          ]
+        }
+      ]
+    }
+  }
+}
+```
+~~~~~
+
+## Complexity
 
 The bounds are per operation and per representation; `outdeg(u)` is the number of outgoing edges from `u`; for an undirected graph it equals the usual degree.
 

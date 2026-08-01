@@ -15,13 +15,18 @@ Ten million exam scores all fall in the range 0–100. General-purpose compariso
 
 **Core condition:** integer keys over a known range `[0, k]` → index by value instead of comparing → `Θ(n + k)` time and `Θ(n + k)` auxiliary space, stable.
 
-# Trace
+~~~~~tabsdown
+tab: Visualization
 
-A trace over `[2, 5, 3, 0, 2, 3, 0, 3]` with `k = 5` makes the three data structures visible at once: the input tokens, one frequency counter per key, and the separate stable output buffer. Scrub through the tail-first placement pass: after every decrement, the highlighted key's cumulative position becomes the exact output slot it owns.
+
 
 ```steptrace
 { "algorithm": "counting-sort", "array": [2, 5, 3, 0, 2, 3, 0, 3] }
 ```
+
+# Trace
+
+A trace over `[2, 5, 3, 0, 2, 3, 0, 3]` with `k = 5` makes the three data structures visible at once: the input tokens, one frequency counter per key, and the separate stable output buffer. Scrub through the tail-first placement pass: after every decrement, the highlighted key's cumulative position becomes the exact output slot it owns.
 
 # Why the Value is an Address
 
@@ -36,6 +41,104 @@ The invariant the prefix sum establishes is that `count[v]` marks the end of the
 Stability falls out of the placement direction. Equal keys share one block, and because the input is consumed tail-first, the element appearing last among equal keys lands in the block's highest slot while earlier ones fill beneath it — original relative order survives. Reverse the loop and the same decrement scheme emits equal keys backwards. Stability is discretionary for a standalone sort but a correctness requirement when Counting Sort is the per-digit pass inside [[Home/Computer Science/Algorithms/Sorting Algorithms/Radix Sort|Radix Sort]], which produces wrong output the moment a digit pass reorders equal keys.
 
 No arrangement of the input alters this. The two `Θ(n)` scans and the `Θ(k)` prefix sum run identically whether the data arrives sorted, reversed, or random; the work is fixed by `n` and `k` alone. Whatever can go wrong is therefore a property of `k`, not of the data's order.
+
+tab: Complexity
+
+```complexity
+{
+  "version": 2,
+  "label": "Counting Sort complexity",
+  "variables": {
+    "inputSize": {
+      "symbol": "n",
+      "description": "number of input elements or states"
+    },
+    "keyRange": {
+      "symbol": "k",
+      "description": "key range, digit count, or requested result count"
+    }
+  },
+  "resources": {
+    "time": {
+      "mode": "operations",
+      "entries": [
+        {
+          "kind": "operation",
+          "operation": "Best",
+          "bounds": [
+            {
+              "kind": "text",
+              "role": "Time",
+              "formula": "Θ(n + k)"
+            }
+          ]
+        },
+        {
+          "kind": "operation",
+          "operation": "Average",
+          "bounds": [
+            {
+              "kind": "text",
+              "role": "Time",
+              "formula": "Θ(n + k)"
+            }
+          ]
+        },
+        {
+          "kind": "operation",
+          "operation": "Worst",
+          "bounds": [
+            {
+              "kind": "text",
+              "role": "Time",
+              "formula": "Θ(n + k)"
+            }
+          ]
+        }
+      ]
+    },
+    "space": {
+      "mode": "operations",
+      "entries": [
+        {
+          "kind": "operation",
+          "operation": "Best",
+          "bounds": [
+            {
+              "kind": "text",
+              "role": "Auxiliary space",
+              "formula": "Θ(n + k)"
+            }
+          ]
+        },
+        {
+          "kind": "operation",
+          "operation": "Average",
+          "bounds": [
+            {
+              "kind": "text",
+              "role": "Auxiliary space",
+              "formula": "Θ(n + k)"
+            }
+          ]
+        },
+        {
+          "kind": "operation",
+          "operation": "Worst",
+          "bounds": [
+            {
+              "kind": "text",
+              "role": "Auxiliary space",
+              "formula": "Θ(n + k)"
+            }
+          ]
+        }
+      ]
+    }
+  }
+}
+```
+~~~~~
 
 # Complexity
 

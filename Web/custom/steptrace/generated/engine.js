@@ -20949,45 +20949,6 @@
     }
   };
 
-  // custom/steptrace/src/tabs.ts
-  function isTabsConfig(config) {
-    return typeof config === "object" && config != null && "tabs" in config;
-  }
-  function normalizeTabsConfig(config) {
-    if (!Array.isArray(config.tabs) || config.tabs.length === 0) {
-      throw new Error("steptrace: tabs requires at least one tab.");
-    }
-    const names = /* @__PURE__ */ new Set();
-    const tabs = config.tabs.map((rawTab, index) => normalizeTab(rawTab, index, names));
-    const selected = config.selected ?? 0;
-    if (!Number.isInteger(selected) || selected < 0 || selected >= tabs.length) {
-      throw new Error(`steptrace: tabs "selected" must be an index from 0 to ${tabs.length - 1}.`);
-    }
-    return { selected, tabs };
-  }
-  function normalizeTab(rawTab, index, names) {
-    if (typeof rawTab !== "object" || rawTab == null || Array.isArray(rawTab)) {
-      throw new Error(`steptrace: tabs[${index}] must be an object.`);
-    }
-    const name = typeof rawTab.name === "string" ? rawTab.name.trim() : "";
-    if (!name) throw new Error(`steptrace: tabs[${index}] requires a non-empty "name".`);
-    const nameKey = name.toLocaleLowerCase();
-    if (names.has(nameKey)) throw new Error(`steptrace: duplicate tab name "${name}".`);
-    names.add(nameKey);
-    if (rawTab.description != null && typeof rawTab.description !== "string") {
-      throw new Error(`steptrace: tabs[${index}] "description" must be a string.`);
-    }
-    if (typeof rawTab.algorithm !== "string" || !rawTab.algorithm.trim()) {
-      throw new Error(`steptrace: tabs[${index}] requires a non-empty "algorithm".`);
-    }
-    const { name: _name, description: _description, ...algorithmConfig } = rawTab;
-    return {
-      name,
-      description: rawTab.description?.trim() || "",
-      config: algorithmConfig
-    };
-  }
-
   // custom/steptrace/src/watch-hints.ts
   var WATCH_HINTS = Object.freeze({
     i: "First active array index.",
@@ -21111,104 +21072,7 @@
   function createMount(registry2, structures = []) {
     const { kindOf, listAlgorithms, buildFrames } = registry2;
     const structureRegistry = new Map(structures.map((structure) => [structure.id, structure]));
-    function mountTabs(root, config, host = {}) {
-      let normalized;
-      try {
-        normalized = normalizeTabsConfig(config);
-      } catch (error) {
-        root.textContent = error instanceof Error ? error.message : String(error);
-        return { destroy: () => root.replaceChildren() };
-      }
-      const { tabs } = normalized;
-      root.classList.add("steptrace", "steptrace--tabs");
-      root.setAttribute("role", "group");
-      root.setAttribute("aria-label", "Tabbed algorithm visualizer");
-      const tabsShell = el("div", "steptrace__tabs-shell");
-      const tablist = el("div", "steptrace__tabs");
-      tablist.setAttribute("role", "tablist");
-      tablist.setAttribute("aria-label", "Visualization variants");
-      const tabDesc = el("div", "steptrace__tabs-desc");
-      tabDesc.setAttribute("aria-live", "polite");
-      const panels = el("div", "steptrace__tabpanels");
-      const buttons = [];
-      const panelShells = [];
-      const panelMounts = [];
-      const handles = tabs.map(() => null);
-      let activeIndex = normalized.selected;
-      const showTab = (index, focus = false) => {
-        const next = Math.min(Math.max(index, 0), tabs.length - 1);
-        if (next === activeIndex && handles[next]) {
-          if (focus) buttons[next]?.focus();
-          return;
-        }
-        handles[activeIndex]?.pause?.();
-        activeIndex = next;
-        const tab = tabs[next];
-        tabDesc.textContent = tab.description || "";
-        buttons.forEach((button2, i) => {
-          const selected = i === next;
-          button2.setAttribute("aria-selected", String(selected));
-          button2.tabIndex = selected ? 0 : -1;
-          button2.classList.toggle("steptrace__tab--selected", selected);
-          panelShells[i].hidden = !selected;
-        });
-        if (!handles[next]) handles[next] = mount2(panelMounts[next], tab.config, host);
-        if (focus) buttons[next]?.focus();
-      };
-      tabs.forEach((tab, index) => {
-        const tabId = `steptrace-tab-${++mountSerial}`;
-        const panelId = `steptrace-panel-${++mountSerial}`;
-        const button2 = document.createElement("button");
-        button2.type = "button";
-        button2.className = "steptrace__tab";
-        button2.id = tabId;
-        button2.setAttribute("role", "tab");
-        button2.setAttribute("aria-controls", panelId);
-        button2.textContent = tab.name;
-        button2.tabIndex = index === activeIndex ? 0 : -1;
-        button2.addEventListener("click", () => showTab(index));
-        button2.addEventListener("keydown", (event) => {
-          if (event.key === "ArrowLeft" || event.key === "ArrowUp") {
-            event.preventDefault();
-            showTab((index - 1 + tabs.length) % tabs.length, true);
-          } else if (event.key === "ArrowRight" || event.key === "ArrowDown") {
-            event.preventDefault();
-            showTab((index + 1) % tabs.length, true);
-          } else if (event.key === "Home") {
-            event.preventDefault();
-            showTab(0, true);
-          } else if (event.key === "End") {
-            event.preventDefault();
-            showTab(tabs.length - 1, true);
-          }
-        });
-        buttons.push(button2);
-        tablist.append(button2);
-        const panelShell = el("div", "steptrace__tabpanel");
-        panelShell.id = panelId;
-        panelShell.hidden = index !== activeIndex;
-        panelShell.setAttribute("role", "tabpanel");
-        panelShell.setAttribute("aria-labelledby", tabId);
-        const panelMount = el("div", "steptrace__tabpanel-body");
-        panelShell.append(panelMount);
-        panelShells.push(panelShell);
-        panelMounts.push(panelMount);
-        panels.append(panelShell);
-      });
-      tabsShell.append(tablist, tabDesc);
-      root.replaceChildren(tabsShell, panels);
-      activeIndex = -1;
-      showTab(normalized.selected);
-      return {
-        destroy() {
-          for (const handle of handles) handle?.destroy();
-          root.replaceChildren();
-          root.classList.remove("steptrace", "steptrace--tabs", "steptrace--reduced");
-        }
-      };
-    }
-    function mount2(root, config, host = {}) {
-      if (isTabsConfig(config)) return mountTabs(root, config, host);
+    function mountNow(root, config, host = {}) {
       const structure = structureRegistry.get(config.algorithm);
       if (structure) {
         try {
@@ -21244,6 +21108,7 @@
       let currentGraph = null;
       let currentMilestones = [];
       let speedControlHandle = null;
+      const hasHostTabs = typeof host.mountTabs === "function";
       const head = el("div", "steptrace__head");
       const crumb = el("div", "steptrace__crumb");
       const crumbKind = el("span");
@@ -21258,6 +21123,7 @@
       const stageCol = el("div", "steptrace__stage-col");
       const rail = el("div", "steptrace__rail");
       const railRegion = el("div", "steptrace__rail-region");
+      railRegion.classList.toggle("steptrace__rail-region--fallback", !hasHostTabs);
       railRegion.id = `steptrace-rail-${++mountSerial}`;
       railRegion.setAttribute("role", "region");
       railRegion.setAttribute("aria-label", "Trace and watch");
@@ -21303,7 +21169,8 @@
       watchWrap.append(watchLabel, watchEl);
       watchWrap.hidden = true;
       railRegion.append(traceWrap, watchWrap);
-      rail.append(detailSwitch, railRegion);
+      if (!hasHostTabs) rail.append(detailSwitch);
+      rail.append(railRegion);
       const body = el("div", "steptrace__body");
       body.append(stageCol, rail);
       const foot = el("div", "steptrace__foot");
@@ -21466,8 +21333,11 @@
       root.replaceChildren(head, body, foot);
       let layoutMode = "unknown";
       let compactPanel = null;
+      let hostTabsHandle = null;
       let hasWatch = false;
       let destroyed = false;
+      let visible = true;
+      let wasPlaying = false;
       let railAnimationFrame = null;
       let railAnimationTimer = null;
       function clearRailAnimation() {
@@ -21498,9 +21368,42 @@
           railAnimationTimer = setTimeout(clearRailAnimation, railAnimationDuration() + 50);
         });
       }
+      function destroyHostTabs() {
+        if (!hostTabsHandle) return;
+        compactPanel = hostTabsHandle.selection;
+        hostTabsHandle.destroy();
+        hostTabsHandle = null;
+      }
+      function ensureHostTabs() {
+        if (!hasHostTabs || hostTabsHandle || layoutMode !== "compact") return;
+        hostTabsHandle = host.mountTabs(railRegion, {
+          label: "Trace and watch",
+          selection: compactPanel,
+          tabs: [
+            { id: "trace", label: "Trace", panel: traceWrap },
+            { id: "watch", label: "Watch", panel: watchWrap }
+          ],
+          onSelectionChange(selection) {
+            compactPanel = selection === "trace" || selection === "watch" ? selection : null;
+            refitCompactTrace();
+          }
+        });
+        hostTabsHandle.setAvailable("watch", hasWatch);
+      }
       function renderRailMode(previousMode = layoutMode, animate = false) {
         const compact = layoutMode === "compact";
         const active = document.activeElement;
+        if (hasHostTabs) {
+          const restoreFocus = previousMode === "compact" && !compact && active && railRegion.contains(active) && !traceWrap.contains(active) && !watchWrap.contains(active);
+          if (compact) ensureHostTabs();
+          else destroyHostTabs();
+          hostTabsHandle?.setAvailable("watch", hasWatch);
+          traceWrap.hidden = compact ? compactPanel !== "trace" : false;
+          watchWrap.hidden = compact ? !hasWatch || compactPanel !== "watch" : !hasWatch;
+          if (restoreFocus) scrub.focus();
+          refitCompactTrace();
+          return;
+        }
         if (previousMode === "compact" && layoutMode === "wide" && active && detailSwitch.contains(active)) {
           scrub.focus();
         }
@@ -21869,7 +21772,9 @@
         }
         hasWatch = maxRows > 0;
         if (!hasWatch && compactPanel === "watch") compactPanel = null;
-        detailSwitch.replaceChildren(traceButton, ...hasWatch ? [watchButton] : []);
+        if (!hasHostTabs) {
+          detailSwitch.replaceChildren(traceButton, ...hasWatch ? [watchButton] : []);
+        }
         watchEl.style.setProperty("--steptrace-watch-rows", String(maxRows));
         renderRailMode();
       }
@@ -21932,9 +21837,21 @@
         pause() {
           if (player) player.pause();
         },
+        setVisible(nextVisible) {
+          if (destroyed || visible === nextVisible) return;
+          visible = nextVisible;
+          if (!nextVisible) {
+            wasPlaying = Boolean(player?.playing);
+            player?.pause();
+          } else if (wasPlaying) {
+            wasPlaying = false;
+            player?.play();
+          }
+        },
         destroy() {
           destroyed = true;
           clearRailAnimation();
+          destroyHostTabs();
           if (player) player.destroy();
           if (currentView && currentView.destroy) currentView.destroy();
           if (speedControlHandle && speedControlHandle.destroy) speedControlHandle.destroy();
@@ -21950,6 +21867,44 @@
             "steptrace--compact-stage",
             "steptrace--narrow"
           );
+        }
+      };
+    }
+    function mount2(root, config, host = {}) {
+      const panels = [];
+      for (let panel = root.closest(".tabsdown__panel"); panel; panel = panel.parentElement?.closest(".tabsdown__panel") ?? null) {
+        panels.push(panel);
+      }
+      if (!panels.length || typeof MutationObserver === "undefined") {
+        return mountNow(root, config, host);
+      }
+      let child = null;
+      let destroyed = false;
+      let visible = panels.every((panel) => !panel.hidden);
+      const syncVisibility = () => {
+        if (destroyed) return;
+        const nextVisible = panels.every((panel) => !panel.hidden);
+        if (nextVisible && !child) child = mountNow(root, config, host);
+        if (nextVisible !== visible) child?.setVisible?.(nextVisible);
+        visible = nextVisible;
+      };
+      const observer = new MutationObserver(syncVisibility);
+      panels.forEach(
+        (panel) => observer.observe(panel, { attributes: true, attributeFilter: ["hidden"] })
+      );
+      if (visible) child = mountNow(root, config, host);
+      return {
+        pause() {
+          child?.pause?.();
+        },
+        setVisible(nextVisible) {
+          child?.setVisible?.(nextVisible);
+        },
+        destroy() {
+          destroyed = true;
+          observer.disconnect();
+          child?.destroy();
+          if (!child) root.replaceChildren();
         }
       };
     }

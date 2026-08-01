@@ -21,6 +21,9 @@ What the structure gives up for that guarantee is written into every write: it c
 
 Press **Insert** with the prefilled `5`: the descent makes node `20` left-heavy, then an LL rotation restores the bound.
 
+~~~~~tabsdown
+tab: Visualization
+
 ```steptrace
 {"algorithm":"avl-tree","values":[30,20,40,10],"value":5}
 ```
@@ -47,6 +50,127 @@ A rotation is a local pointer reassignment that lifts the middle-valued of three
 The double cases (LR, RL) exist because a single rotation on a zig-zag shape only mirrors the imbalance to the other side; the inner node has to be rotated outward into a straight chain first. Whatever the shape, the node that ends up on top is always the median of the three keys involved.
 
 Insert and delete diverge in how far the repair travels. After an insert, a single rebalancing operation (one single or one double rotation) restores the invariant for the *entire* tree — the rebalanced subtree regains its pre-insert height, so nothing above it changed. After a delete, the rotated subtree can end up one level *shorter* than before, which can itself unbalance a node further up, so rebalancing may cascade all the way to the root.
+
+tab: Complexity
+
+```complexity
+{
+  "version": 2,
+  "label": "AVL Tree complexity",
+  "variables": {
+    "inputSize": {
+      "symbol": "n",
+      "description": "number of input elements or states"
+    }
+  },
+  "resources": {
+    "time": {
+      "mode": "operations",
+      "entries": [
+        {
+          "kind": "operation",
+          "operation": "Search",
+          "bounds": [
+            {
+              "kind": "curve",
+              "role": "Time",
+              "formula": "O(log n) guaranteed",
+              "curveId": "log-n"
+            }
+          ]
+        },
+        {
+          "kind": "operation",
+          "operation": "Insert",
+          "bounds": [
+            {
+              "kind": "curve",
+              "role": "Time",
+              "formula": "O(log n) guaranteed",
+              "curveId": "log-n"
+            }
+          ]
+        },
+        {
+          "kind": "operation",
+          "operation": "Delete",
+          "bounds": [
+            {
+              "kind": "curve",
+              "role": "Time",
+              "formula": "O(log n) guaranteed",
+              "curveId": "log-n"
+            }
+          ]
+        },
+        {
+          "kind": "operation",
+          "operation": "Any rotation",
+          "bounds": [
+            {
+              "kind": "curve",
+              "role": "Time",
+              "formula": "O(1)",
+              "curveId": "constant"
+            }
+          ]
+        }
+      ]
+    },
+    "space": {
+      "mode": "operations",
+      "entries": [
+        {
+          "kind": "operation",
+          "operation": "Search",
+          "bounds": [
+            {
+              "kind": "text",
+              "role": "Extra space",
+              "formula": "O(1) iterative, O(log n) recursion stack"
+            }
+          ]
+        },
+        {
+          "kind": "operation",
+          "operation": "Insert",
+          "bounds": [
+            {
+              "kind": "text",
+              "role": "Extra space",
+              "formula": "O(log n) recursion stack; O(1) iterative with parent pointers"
+            }
+          ]
+        },
+        {
+          "kind": "operation",
+          "operation": "Delete",
+          "bounds": [
+            {
+              "kind": "text",
+              "role": "Extra space",
+              "formula": "O(log n) recursion stack; O(1) iterative with parent pointers"
+            }
+          ]
+        },
+        {
+          "kind": "operation",
+          "operation": "Any rotation",
+          "bounds": [
+            {
+              "kind": "curve",
+              "role": "Extra space",
+              "formula": "O(1)",
+              "curveId": "constant"
+            }
+          ]
+        }
+      ]
+    }
+  }
+}
+```
+~~~~~
 
 # Complexity
 

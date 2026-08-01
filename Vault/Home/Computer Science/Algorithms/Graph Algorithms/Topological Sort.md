@@ -17,13 +17,18 @@ Such an order exists only when the dependencies are acyclic. A cycle `a → b �
 
 **Core condition:** a directed acyclic graph → repeatedly emit a vertex whose prerequisites are all placed → a linear order with every edge pointing forward, in `O(V + E)`.
 
-# Trace
+~~~~~tabsdown
+tab: Visualization
 
-The trace runs Kahn's algorithm on a seven-vertex DAG, emitting a vertex the moment its in-degree reaches zero.
+
 
 ```steptrace
 {"algorithm":"topological-sort","directed":true,"nodes":[{"id":"A"},{"id":"B"},{"id":"C"},{"id":"D"},{"id":"E"},{"id":"F"},{"id":"G"}],"edges":[{"from":"A","to":"B"},{"from":"A","to":"C"},{"from":"B","to":"D"},{"from":"B","to":"E"},{"from":"C","to":"D"},{"from":"C","to":"E"},{"from":"D","to":"F"},{"from":"E","to":"F"},{"from":"F","to":"G"}]}
 ```
+
+# Trace
+
+The trace runs Kahn's algorithm on a seven-vertex DAG, emitting a vertex the moment its in-degree reaches zero.
 
 A vertex with in-degree 0 has no unmet dependency — every edge into it would come from a vertex already emitted, and there are none left — so it is safe to place next. Emitting it removes its outgoing edges, which decrements the in-degree of each successor. A successor whose count reaches 0 has just had its last prerequisite satisfied and becomes eligible in turn. The frontier of ready vertices is therefore not fixed; it refills as earlier vertices leave. Here only `A` starts at in-degree 0; emitting it drops both `B` and `C` to 0, so the frontier now holds two vertices at once. Either may go next, and that fork is exactly where distinct valid orders diverge.
 
@@ -36,6 +41,84 @@ Both standard algorithms enforce the same invariant: no edge ends up pointing ba
 **DFS-based** works from finish times. Run [[DFS BFS|depth-first search]]; when a vertex's recursion finishes — all of its descendants fully explored and already emitted — prepend it to the order (equivalently, push it on a stack and reverse at the end, which is reverse postorder). A vertex finishes after every vertex reachable from it, so prepending on finish puts it ahead of all those descendants in the final order.
 
 The two are valid because they realize the invariant from opposite ends. Kahn's cannot emit `v` until every `u` with `u → v` has already left the queue, so `u` precedes `v`. DFS finishes `v` before `u` whenever `u → v`, so `u`'s larger finish time places it earlier in reverse-finish order. Neither can produce a backward-pointing edge.
+
+tab: Complexity
+
+```complexity
+{
+  "version": 2,
+  "label": "Topological Sort complexity",
+  "variables": {
+    "edgeCount": {
+      "symbol": "E",
+      "description": "number of edges"
+    },
+    "vertexCount": {
+      "symbol": "V",
+      "description": "number of vertices"
+    }
+  },
+  "resources": {
+    "time": {
+      "mode": "operations",
+      "entries": [
+        {
+          "kind": "operation",
+          "operation": "Kahn's (in-degree queue)",
+          "bounds": [
+            {
+              "kind": "text",
+              "role": "Time",
+              "formula": "Θ(V + E)"
+            }
+          ]
+        },
+        {
+          "kind": "operation",
+          "operation": "DFS (reverse postorder)",
+          "bounds": [
+            {
+              "kind": "text",
+              "role": "Time",
+              "formula": "Θ(V + E)"
+            }
+          ]
+        }
+      ]
+    },
+    "space": {
+      "mode": "operations",
+      "entries": [
+        {
+          "kind": "operation",
+          "operation": "Kahn's (in-degree queue)",
+          "bounds": [
+            {
+              "kind": "curve",
+              "role": "Auxiliary space",
+              "formula": "O(V)",
+              "curveId": "linear"
+            }
+          ]
+        },
+        {
+          "kind": "operation",
+          "operation": "DFS (reverse postorder)",
+          "bounds": [
+            {
+              "kind": "curve",
+              "role": "Auxiliary space",
+              "formula": "O(V)",
+              "curveId": "linear"
+            }
+          ]
+        }
+      ]
+    }
+  }
+}
+```
+~~~~~
 
 # Complexity
 

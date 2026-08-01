@@ -133,10 +133,14 @@
   "baseline-style@@radius-modifier": 1.5,
   "baseline-style@@anim-speed-modifier": 0.5,
   "baseline-style@@tab-divider": false,
-  "tabsdown@@tabsdown-density": "tabsdown-density-compact",
+  "tabsdown@@tabsdown-density": "tabsdown-density-default",
   "tabsdown@@tabsdown-overflow": "tabsdown-overflow-scroll",
   "tabsdown@@tabsdown-palette": "tabsdown-palette-primary",
   "tabsdown@@tabsdown-alignment": "tabsdown-alignment-equal-width",
   "tabsdown@@tabsdown-radius": 4,
-  "tabsdown@@tabsdown-personality": "tabsdown-personality-underline"
+  "tabsdown@@tabsdown-personality": "tabsdown-personality-underline",
+  "tabsdown@@tabsdown-animation-speed": 300,
+  "tabsdown@@tabsdown-nested-style": "tabsdown-nested-style-flat",
+  "tabsdown@@tabsdown-underline-thickness": 3,
+  "tabsdown@@tabsdown-gap": 8
 }

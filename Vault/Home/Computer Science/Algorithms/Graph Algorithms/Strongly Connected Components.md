@@ -17,11 +17,15 @@ A **strongly connected component** (SCC) is a maximal set of vertices in which e
 
 Edge direction is the whole point. On an undirected graph mutual reachability is just reachability, so "strongly connected components" collapse to ordinary connected components, answered by [[Home/Computer Science/Data Structures/Graph Structures/Union-Find|union-find]] or flood fill.
 
-The trace uses Tarjan's single-pass algorithm as the concrete way to expose this partition; the overview below also compares Kosaraju and Gabow.
+~~~~~tabsdown
+tab: Visualization
+
 
 ```steptrace
 {"algorithm":"strongly-connected-components"}
 ```
+
+The trace uses Tarjan's single-pass algorithm as the concrete way to expose this partition; the overview below also compares Kosaraju and Gabow.
 
 # One Partition, Then a DAG
 
@@ -39,7 +43,107 @@ Kosaraju uses two ordinary traversals:
 2. Reverse every edge to form `Gᵀ`.
 3. Pop vertices in decreasing finish time and DFS from each still-unvisited vertex in `Gᵀ`; each tree is one SCC.
 
-Chronological completion order is reverse topological, so popping the finish stack processes source SCCs of `G` in topological order. In `Gᵀ` that next source is a sink, and the second DFS cannot escape it.
+Individual vertex finish times are not a topological order inside an SCC. The useful property is at component level: decreasing maximum finish time orders the SCCs of `G`'s condensation DAG from sources onward. The selected source SCC becomes a sink in `Gᵀ`, so the second DFS cannot escape it.
+
+tab: Complexity
+
+```complexity
+{
+  "version": 2,
+  "label": "Strongly Connected Components complexity",
+  "variables": {
+    "edgeCount": {
+      "symbol": "E",
+      "description": "number of edges"
+    },
+    "vertexCount": {
+      "symbol": "V",
+      "description": "number of vertices"
+    }
+  },
+  "resources": {
+    "time": {
+      "mode": "operations",
+      "entries": [
+        {
+          "kind": "operation",
+          "operation": "Tarjan",
+          "bounds": [
+            {
+              "kind": "text",
+              "role": "Time",
+              "formula": "Θ(V + E)"
+            }
+          ]
+        },
+        {
+          "kind": "operation",
+          "operation": "Kosaraju",
+          "bounds": [
+            {
+              "kind": "text",
+              "role": "Time",
+              "formula": "Θ(V + E)"
+            }
+          ]
+        },
+        {
+          "kind": "operation",
+          "operation": "Gabow",
+          "bounds": [
+            {
+              "kind": "text",
+              "role": "Time",
+              "formula": "Θ(V + E)"
+            }
+          ]
+        }
+      ]
+    },
+    "space": {
+      "mode": "operations",
+      "entries": [
+        {
+          "kind": "operation",
+          "operation": "Tarjan",
+          "bounds": [
+            {
+              "kind": "curve",
+              "role": "Auxiliary space",
+              "formula": "O(V)",
+              "curveId": "linear"
+            }
+          ]
+        },
+        {
+          "kind": "operation",
+          "operation": "Kosaraju",
+          "bounds": [
+            {
+              "kind": "text",
+              "role": "Auxiliary space",
+              "formula": "O(V + E)"
+            }
+          ]
+        },
+        {
+          "kind": "operation",
+          "operation": "Gabow",
+          "bounds": [
+            {
+              "kind": "curve",
+              "role": "Auxiliary space",
+              "formula": "O(V)",
+              "curveId": "linear"
+            }
+          ]
+        }
+      ]
+    }
+  }
+}
+```
+~~~~~
 
 # Complexity
 
@@ -73,7 +177,7 @@ Every vertex and edge is processed a fixed number of times, so the linear bound 
 # Questions
 
 > [!QUESTION]- Why does Kosaraju process decreasing finish time on the transpose?
-> Chronological completion order is reverse topological, so popping the finish stack processes source SCCs of `G` in topological order. Reversing the edges turns the next source into a sink in `Gᵀ`, letting the second DFS fill that SCC without escaping into a not-yet-emitted one.
+> Individual vertices inside an SCC have no meaningful topological order. What matters is that decreasing maximum finish time orders SCCs in `G`'s condensation DAG from sources onward. Reversing the edges turns the selected source SCC into a sink in `Gᵀ`, letting the second DFS fill it without escaping.
 
 > [!QUESTION]- Why is the condensation always a DAG?
 > A cycle between two distinct components would make every vertex in both mutually reachable, so maximality would already have merged them. Removing those cycles by contraction is what makes topological ordering possible.

@@ -6,7 +6,8 @@ import type { Element } from "hast"
 
 import { renderComplexityDom } from "./dom"
 import { renderComplexityHast } from "./hast"
-import { buildComplexityViewModel, COMPLEXITY_FILTERS, CURVE_IDS, curveValue } from "./model"
+import { mountComplexityFigure } from "./interactions"
+import { buildComplexityViewModel, CURVE_IDS, curveValue } from "./model"
 import { ComplexityBlock } from "../transformers/complexity-block"
 
 const variables = { n: "number of input elements" }
@@ -57,6 +58,50 @@ const operations = {
     },
   ],
 }
+
+const dualResource = {
+  version: 2,
+  label: "Quick Sort complexity",
+  variables: {
+    inputSize: {
+      symbol: "n",
+      description: "number of input elements",
+    },
+  },
+  resources: {
+    space: {
+      mode: "operations",
+      entries: [
+        {
+          kind: "operation",
+          operation: "Recursion stack",
+          bounds: [
+            { kind: "curve", role: "Best", formula: "O(log n)", curveId: "log-n" },
+            { kind: "text", role: "Implementation dependent", formula: "tail-call stack" },
+          ],
+        },
+      ],
+    },
+    time: {
+      mode: "cases",
+      entries: [
+        { kind: "case", role: "Best", formula: "O(n log n)", curveId: "n-log-n" },
+        {
+          kind: "case",
+          role: "Average",
+          formula: "O(n log n) expected",
+          curveId: "n-log-n",
+        },
+        { kind: "case", role: "Worst", formula: "O(n²)", curveId: "quadratic" },
+      ],
+    },
+  },
+}
+
+const buildWithNamespace = buildComplexityViewModel as unknown as (
+  config: unknown,
+  instanceNamespace: string,
+) => any
 
 test("Quartz registers complexity before syntax highlighting", () => {
   const source = readFileSync(join(process.cwd(), "quartz.ts"), "utf8")
@@ -159,7 +204,6 @@ test("catalogue config derives formulas without redundant chart commentary", () 
     3_628_800,
   )
   assert.equal("caption" in view, false)
-  assert.deepEqual(view.availableCategories, ["other"])
   assert.equal(view.endpointLabels.length, CURVE_IDS.length)
   assert.throws(
     () =>
@@ -203,7 +247,6 @@ test("duplicate case curves separate after sharing the visual origin", () => {
   assert.notEqual(best?.id, average?.id)
   assert.equal(best?.color, "#22a06b")
   assert.equal(average?.color, "#d99a00")
-  assert.deepEqual(view.availableCategories, ["best", "average", "worst"])
   assert.equal(view.endpointLabels.find((label) => label.curveId === "n-log-n")?.pathIds.length, 2)
 })
 
@@ -347,6 +390,121 @@ test("all duplicate, missing, override, and unknown catalogue fields fail locall
   }
 })
 
+test("version 2 accepts exact dual-resource keys and renders Time before Space", () => {
+  const view = buildWithNamespace(dualResource, "quick-sort-1")
+
+  assert.deepEqual(
+    view.resources.map(({ key, label, mode }: any) => ({ key, label, mode })),
+    [
+      { key: "time", label: "Time", mode: "cases" },
+      { key: "space", label: "Space", mode: "operations" },
+    ],
+  )
+  assert.equal(view.label, dualResource.label)
+  assert.deepEqual(view.variables, dualResource.variables)
+})
+
+test("version 2 keeps plotted formulas exact and semantic-only bounds geometry-free", () => {
+  const view = buildWithNamespace(dualResource, "quick-sort-2")
+  const [time, space] = view.resources
+
+  assert.deepEqual(
+    time.paths.map(({ formula, curveId }: any) => ({ formula, curveId })),
+    [
+      { formula: "O(n log n)", curveId: "n-log-n" },
+      { formula: "O(n log n) expected", curveId: "n-log-n" },
+      { formula: "O(n²)", curveId: "quadratic" },
+    ],
+  )
+  assert.deepEqual(
+    space.semanticBounds.map(({ role, formula }: any) => ({ role, formula })),
+    [{ role: "Implementation dependent", formula: "tail-call stack" }],
+  )
+  assert.ok(space.paths.every(({ curveId }: any) => CURVE_IDS.includes(curveId)))
+})
+
+test("version 2 rejects missing resources, catalogue mode, unknown keys, and duplicate roles locally", () => {
+  const invalid: [unknown, RegExp][] = [
+    [
+      { ...dualResource, resources: { time: dualResource.resources.time } },
+      /resources\.space: is required/,
+    ],
+    [
+      {
+        ...dualResource,
+        resources: {
+          ...dualResource.resources,
+          time: { mode: "catalogue", entries: [] },
+        },
+      },
+      /resources\.time\.mode: must be one of cases, operations/,
+    ],
+    [{ ...dualResource, title: "visible" }, /config\.title: is not supported/],
+    [
+      {
+        ...dualResource,
+        resources: {
+          ...dualResource.resources,
+          time: { ...dualResource.resources.time, title: "Time" },
+        },
+      },
+      /resources\.time\.title: is not supported/,
+    ],
+    [
+      {
+        ...dualResource,
+        resources: {
+          ...dualResource.resources,
+          time: {
+            ...dualResource.resources.time,
+            entries: [
+              dualResource.resources.time.entries[0],
+              dualResource.resources.time.entries[0],
+              dualResource.resources.time.entries[2],
+            ],
+          },
+        },
+      },
+      /resources\.time\.entries\[1\]\.role: duplicates Best/,
+    ],
+  ]
+
+  for (const [config, message] of invalid) {
+    assert.throws(() => buildWithNamespace(config, "invalid"), message)
+  }
+})
+
+test("version 2 variables use strict ASCII keys and exact symbol metadata", () => {
+  const graph = structuredClone(dualResource)
+  graph.variables = {
+    vertices: { symbol: "|V|", description: "number of vertices" },
+    inverseAckermann: { symbol: "α(n)", description: "inverse Ackermann factor" },
+  }
+  assert.deepEqual(buildWithNamespace(graph, "graph-1").variables, graph.variables)
+
+  assert.throws(
+    () =>
+      buildWithNamespace(
+        { ...graph, variables: { "α(n)": graph.variables.inverseAckermann } },
+        "invalid-variable",
+      ),
+    /variables\.α\(n\): has an invalid name/,
+  )
+  assert.throws(
+    () =>
+      buildWithNamespace(
+        {
+          ...graph,
+          variables: {
+            vertices: { ...graph.variables.vertices, executable: "n => n" },
+          },
+        },
+        "invalid-variable-field",
+      ),
+    /variables\.vertices\.executable: is not supported/,
+  )
+})
+
 function hastText(node: unknown): string {
   if (!node || typeof node !== "object") return ""
   const value = node as { value?: unknown; children?: unknown[] }
@@ -368,6 +526,15 @@ function hastElements(node: unknown, tagName: string): { properties: Record<stri
       ? [{ properties: value.properties ?? {} }]
       : []),
     ...(value.children ?? []).flatMap((child) => hastElements(child, tagName)),
+  ]
+}
+
+function allHastElements(node: unknown): Element[] {
+  if (!node || typeof node !== "object") return []
+  const value = node as Element
+  return [
+    ...(value.type === "element" ? [value] : []),
+    ...(value.children ?? []).flatMap(allHastElements),
   ]
 }
 
@@ -399,7 +566,60 @@ function findHastByClass(node: unknown, className: string): Element | undefined 
   return undefined
 }
 
-test("Quartz HAST is interactive static-first markup without an embedded details table", () => {
+function findAllHastByClass(node: unknown, className: string): Element[] {
+  return allHastElements(node).filter(
+    ({ properties }) =>
+      Array.isArray(properties.className) && properties.className.includes(className),
+  )
+}
+
+function referencedIds(node: unknown): string[] {
+  return allHastElements(node).flatMap(({ properties }) =>
+    Object.entries(properties).flatMap(([name, value]) => {
+      if (name === "ariaLabelledBy" && typeof value === "string") return value.split(/\s+/)
+      if (typeof value !== "string") return []
+      const url = /^url\(#(.+)\)$/.exec(value)
+      return url ? [url[1]] : []
+    }),
+  )
+}
+
+test("dual-resource HAST has one accessible figure and labelled Time and Space groups", () => {
+  const view = buildWithNamespace(dualResource, "quick-sort-hast")
+  const hast = renderComplexityHast(view)
+  const figure = findHastElement(hast, "figure")
+  const resources = findAllHastByClass(hast, "complexity__resource")
+  const labels = findAllHastByClass(hast, "complexity__resource-label")
+
+  assert.equal(figure?.properties.ariaLabel, dualResource.label)
+  assert.equal(findAllHastByClass(hast, "complexity__title").length, 0)
+  assert.deepEqual(labels.map(hastText), ["Time", "Space"])
+  assert.deepEqual(
+    resources.map(({ properties }) => properties["data-complexity-resource"]),
+    ["time", "space"],
+  )
+  assert.ok(resources.every(({ properties }) => properties.role === "group"))
+  assert.ok(resources.every(({ properties }) => typeof properties.ariaLabelledBy === "string"))
+})
+
+test("host namespaces prevent duplicate IDs and keep every IDREF inside its figure", () => {
+  const figures = ["page-occurrence-1", "page-occurrence-2"].map((namespace) =>
+    renderComplexityHast(buildWithNamespace(dualResource, namespace)),
+  )
+  const idsByFigure = figures.map((figure) =>
+    allHastElements(figure)
+      .map(({ properties }) => properties.id)
+      .filter((id): id is string => typeof id === "string"),
+  )
+
+  assert.equal(new Set(idsByFigure.flat()).size, idsByFigure.flat().length)
+  for (const [index, figure] of figures.entries()) {
+    const ids = new Set(idsByFigure[index])
+    for (const reference of referencedIds(figure)) assert.ok(ids.has(reference), reference)
+  }
+})
+
+test("Quartz HAST renders the complete case union without renderer-owned tabs", () => {
   const view = buildComplexityViewModel(cases)
   const hast = renderComplexityHast(view)
   assert.equal(hast.type, "element")
@@ -412,17 +632,37 @@ test("Quartz HAST is interactive static-first markup without an embedded details
   }
   assert.equal(hastElements(hast, "table").length, 0)
   assert.equal(hastElements(hast, "clipPath").length, 1)
-  assert.equal(hastElements(hast, "button").length, COMPLEXITY_FILTERS.length + 3)
+  assert.equal(hastElements(hast, "button").length, 3)
   assert.equal(
     hastElements(hast, "text").length,
     view.ticks.length + view.xTicks.length + CURVE_IDS.length,
   )
-  assert.ok(findHastByClass(hast, "steptrace__tabs"))
+  const elements = allHastElements(hast)
+  assert.ok(
+    elements.every(
+      ({ properties }) =>
+        !["tab", "tablist", "tabpanel"].includes(String(properties.role)) &&
+        !Object.keys(properties).some((name) =>
+          ["data-filter", "data-active-filter", "data-category"].includes(name),
+        ) &&
+        !(properties.className as unknown[] | undefined)?.some((name) =>
+          ["steptrace__tab", "steptrace__tabs", "complexity__tab", "complexity__tabs"].includes(
+            String(name),
+          ),
+        ),
+    ),
+  )
   const plotGroups = findHastByClass(hast, "complexity__areas")
   const curveGroups = findHastByClass(hast, "complexity__curves")
   assert.ok(plotGroups)
   assert.ok(curveGroups)
+  assert.equal(
+    hastElements(hast, "path").filter(({ properties }) => properties.id).length,
+    view.paths.length,
+  )
   assert.match(hastText(hast), /Avg O\(n log n\)/)
+  assert.match(hastText(hast), /Best O\(n log n\)/)
+  assert.match(hastText(hast), /Worst O\(n²\)/)
   assert.doesNotMatch(hastText(hast), /Curves begin at/)
   assert.doesNotMatch(hastText(hast), /Expected balanced partitions/)
   assert.doesNotMatch(hastText(hast), /<script/i)
@@ -489,6 +729,38 @@ test("Quartz transforms only complexity fences and keeps invalid source readable
   assert.match(hastText(invalid), /{broken/)
 })
 
+test("Quartz assigns distinct page-local namespaces to repeated version 2 fences", () => {
+  const transform = ComplexityBlock().htmlPlugins?.()[0]?.()
+  assert.ok(transform)
+  const fence = () => ({
+    type: "element",
+    tagName: "pre",
+    properties: {},
+    children: [
+      {
+        type: "element",
+        tagName: "code",
+        properties: { className: ["language-complexity"] },
+        children: [{ type: "text", value: JSON.stringify(dualResource) }],
+      },
+    ],
+  })
+  const tree = { type: "root", children: [fence(), fence()] }
+  transform?.(tree as never)
+
+  const figures = tree.children as unknown as Element[]
+  const figureIds = figures.map(({ properties }) => properties.id)
+  assert.equal(new Set(figureIds).size, 2)
+  for (const figure of figures) {
+    const ids = new Set(
+      allHastElements(figure)
+        .map(({ properties }) => properties.id)
+        .filter((id): id is string => typeof id === "string"),
+    )
+    for (const reference of referencedIds(figure)) assert.ok(ids.has(reference), reference)
+  }
+})
+
 class FakeStyle {
   readonly values = new Map<string, string>()
   setProperty(name: string, value: string) {
@@ -539,6 +811,56 @@ class FakeDocument {
   }
 }
 
+class FakeClassList {
+  readonly values = new Set<string>()
+  toggle(name: string, force?: boolean) {
+    const enabled = force ?? !this.values.has(name)
+    if (enabled) this.values.add(name)
+    else this.values.delete(name)
+    return enabled
+  }
+  contains(name: string) {
+    return this.values.has(name)
+  }
+}
+
+class InteractiveElement extends EventTarget {
+  readonly classList = new FakeClassList()
+  readonly dataset: Record<string, string> = {}
+  readonly style = new FakeStyle()
+  readonly attributes: Record<string, string> = {}
+  readonly matches = new Map<string, InteractiveElement[]>()
+  setAttribute(name: string, value: string) {
+    this.attributes[name] = value
+  }
+  getAttribute(name: string) {
+    return this.attributes[name] ?? null
+  }
+  querySelectorAll<T>(selector: string): T[] {
+    return (this.matches.get(selector) ?? []) as T[]
+  }
+}
+
+function interactiveResource(pathId: string) {
+  const resource = new InteractiveElement()
+  const button = new InteractiveElement()
+  const selectedPath = new InteractiveElement()
+  const otherPath = new InteractiveElement()
+  const selectedArea = new InteractiveElement()
+  const otherArea = new InteractiveElement()
+  const label = new InteractiveElement()
+  button.dataset.pathId = selectedPath.dataset.pathId = selectedArea.dataset.pathId = pathId
+  otherPath.dataset.pathId = otherArea.dataset.pathId = `${pathId}-other`
+  selectedPath.setAttribute("stroke", "green")
+  otherPath.setAttribute("stroke", "red")
+  label.dataset.pathIds = `${pathId},${pathId}-other`
+  resource.matches.set(".complexity__legend-button", [button])
+  resource.matches.set(".complexity__curve", [selectedPath, otherPath])
+  resource.matches.set(".complexity__area", [selectedArea, otherArea])
+  resource.matches.set(".complexity__endpoint-label", [label])
+  return { resource, button, selectedPath, otherPath }
+}
+
 function findFake(node: FakeNode, tagName: string): FakeElement | undefined {
   if (node instanceof FakeElement && node.tagName === tagName) return node
   for (const child of node.children) {
@@ -558,6 +880,68 @@ function findAllFake(node: FakeNode, tagName: string): FakeElement[] {
 function fakeText(node: FakeNode): string {
   return `${node.textContent}${node.children.map(fakeText).join("")}`
 }
+
+test("legend selection isolates one curve, restores the union, and cleans up", () => {
+  const figure = new InteractiveElement()
+  const firstButton = new InteractiveElement()
+  const secondButton = new InteractiveElement()
+  const firstPath = new InteractiveElement()
+  const secondPath = new InteractiveElement()
+  const contextPath = new InteractiveElement()
+  const firstArea = new InteractiveElement()
+  const secondArea = new InteractiveElement()
+  const label = new InteractiveElement()
+
+  firstButton.dataset.pathId = firstPath.dataset.pathId = firstArea.dataset.pathId = "best"
+  secondButton.dataset.pathId = secondPath.dataset.pathId = secondArea.dataset.pathId = "worst"
+  contextPath.dataset.pathId = "context"
+  contextPath.dataset.context = "true"
+  firstPath.setAttribute("stroke", "green")
+  secondPath.setAttribute("stroke", "red")
+  label.dataset.pathIds = "best,worst"
+
+  figure.matches.set(".complexity__legend-button", [firstButton, secondButton])
+  figure.matches.set(".complexity__curve", [firstPath, secondPath, contextPath])
+  figure.matches.set(".complexity__area", [firstArea, secondArea])
+  figure.matches.set(".complexity__endpoint-label", [label])
+
+  const handle = mountComplexityFigure(figure as unknown as HTMLElement)
+  assert.ok(firstPath.classList.contains("is-highlighted"))
+  assert.ok(secondPath.classList.contains("is-highlighted"))
+  assert.ok(contextPath.classList.contains("is-subtle"))
+
+  firstButton.dispatchEvent(new Event("click"))
+  assert.equal(firstButton.attributes["aria-pressed"], "true")
+  assert.ok(firstPath.classList.contains("is-highlighted"))
+  assert.ok(secondPath.classList.contains("is-subtle"))
+  assert.ok(secondArea.classList.contains("is-subtle"))
+
+  firstButton.dispatchEvent(new Event("click"))
+  assert.equal(firstButton.attributes["aria-pressed"], "false")
+  assert.ok(firstPath.classList.contains("is-highlighted"))
+  assert.ok(secondPath.classList.contains("is-highlighted"))
+
+  handle.destroy()
+  assert.equal(figure.dataset.complexityMounted, undefined)
+  firstButton.dispatchEvent(new Event("click"))
+  assert.equal(firstButton.attributes["aria-pressed"], "false")
+})
+
+test("legend selection changes only its owning resource", () => {
+  const figure = new InteractiveElement()
+  const time = interactiveResource("time-best")
+  const space = interactiveResource("space-best")
+  figure.matches.set(".complexity__resource", [time.resource, space.resource])
+
+  const handle = mountComplexityFigure(figure as unknown as HTMLElement)
+  time.button.dispatchEvent(new Event("click"))
+
+  assert.equal(time.button.attributes["aria-pressed"], "true")
+  assert.ok(time.otherPath.classList.contains("is-subtle"))
+  assert.ok(space.selectedPath.classList.contains("is-highlighted"))
+  assert.ok(space.otherPath.classList.contains("is-highlighted"))
+  handle.destroy()
+})
 
 test("HAST and DOM normalize to the same IDs, labels, controls, and safe text", () => {
   const hostile = structuredClone(operations)
@@ -592,7 +976,7 @@ test("HAST and DOM normalize to the same IDs, labels, controls, and safe text", 
   )
 })
 
-test("Obsidian DOM exposes equivalent labels and clears itself on teardown", () => {
+test("Obsidian DOM keeps the version 1 label accessible but not visible", () => {
   const document = new FakeDocument()
   const root = document.createElement("div")
   const view = buildComplexityViewModel(cases)
@@ -601,15 +985,78 @@ test("Obsidian DOM exposes equivalent labels and clears itself on teardown", () 
   assert.equal(svg?.attributes["aria-hidden"], "true")
   assert.equal(findFake(root, "table"), undefined)
   assert.equal(findAllFake(root, "li").length, 3)
-  assert.equal(findAllFake(root, "button").length, COMPLEXITY_FILTERS.length + 3)
-  assert.equal(findFake(root, "figcaption")?.textContent, view.title)
+  assert.equal(findAllFake(root, "button").length, 3)
+  assert.equal(findFake(root, "figcaption"), undefined)
+  assert.equal(findFake(root, "figure")?.attributes["aria-label"], view.title)
+  const elements = findAllFake(root, "figure").flatMap((figure) => [figure, ...figure.children])
+  assert.equal(
+    findAllFake(root, "button").some(({ dataset }) => "filter" in dataset),
+    false,
+  )
+  assert.equal(
+    findAllFake(root, "path").some(({ dataset }) => "category" in dataset),
+    false,
+  )
+  assert.equal(
+    elements.some(({ attributes }) =>
+      ["tab", "tablist", "tabpanel"].includes(attributes.role ?? ""),
+    ),
+    false,
+  )
   handle.destroy()
   assert.equal(root.children.length, 0)
 })
 
-test("responsive styles follow the component width instead of the viewport", () => {
+test("complexity styles have no StepTrace tabs dependency and no top margin", () => {
   const styles = readFileSync(join(process.cwd(), "custom", "complexity", "styles.scss"), "utf8")
   assert.match(styles, /\.complexity\s*\{[^}]*container-type: inline-size;/s)
+  assert.match(styles, /\.complexity\s*\{[^}]*margin:\s*0 0 1\.5rem;/s)
+  assert.doesNotMatch(styles, /steptrace|complexity__tabs?|@use/)
+  assert.match(
+    styles,
+    /th:nth-child\(6\):last-child,\s*td:nth-child\(6\):last-child\s*\{\s*min-width:\s*18rem;/s,
+  )
+  assert.doesNotMatch(styles, /\n\s*th:last-child,\s*\n\s*td:last-child/)
   assert.match(styles, /@container \(min-width: 600px\)/)
   assert.doesNotMatch(styles, /@media \(min-width: 600px\)/)
+  assert.doesNotMatch(styles, /\.complexity__title\b/)
+  assert.match(styles, /\.complexity__resources\s*\{[^}]*display:\s*grid;[^}]*overflow-x:\s*auto;/s)
+  assert.match(
+    styles,
+    /\.complexity__resources\s*\{[^}]*grid-template-columns:\s*repeat\(2,\s*minmax\(/s,
+  )
+  assert.doesNotMatch(styles, /\.complexity__plot-wrap\s*\{[^}]*overflow-x:\s*(?:auto|scroll)/s)
+})
+
+test("renderer sources contain no legacy complexity filter surface", () => {
+  const sources = [
+    "model.ts",
+    "dom.ts",
+    "hast.ts",
+    "interactions.ts",
+    join("..", "components", "complexity.tsx"),
+  ].map((path) => readFileSync(join(process.cwd(), "custom", "complexity", path), "utf8"))
+  for (const source of sources) {
+    assert.doesNotMatch(
+      source,
+      /COMPLEXITY_FILTERS|ComplexityFilter|complexity__tabs?|steptrace__tabs?|data-filter|activeFilter|active-filter|role:\s*["']tab|role",\s*["']tab/,
+    )
+  }
+})
+
+test("Big O keeps its standalone catalogue config", () => {
+  const source = readFileSync(
+    join(process.cwd(), "..", "Vault", "Home", "Computer Science", "Big O Notation.md"),
+    "utf8",
+  )
+  assert.doesNotMatch(source, /~~~tabsdown|```steptrace/)
+  const fence = source.match(/```complexity\n([\s\S]*?)\n```/)
+  assert.ok(fence)
+  assert.deepEqual(JSON.parse(fence[1]), {
+    version: 1,
+    mode: "catalogue",
+    title: "Growth of common complexity classes",
+    variables,
+    entries: CURVE_IDS.map((curveId) => ({ kind: "catalogue", curveId })),
+  })
 })

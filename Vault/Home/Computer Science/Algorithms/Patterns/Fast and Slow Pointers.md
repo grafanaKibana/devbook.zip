@@ -17,11 +17,125 @@ The technique needs only one property of the input: each element has exactly one
 
 **Core condition:** a single-successor structure → one pointer moving twice as fast closes the gap by one per step → cycle detection in `O(n)` time and `O(1)` auxiliary space.
 
-The trace uses `A → B → C → D → E → F → G → H → C`, with the six-node cycle `C → D → E → F → G → H → C`. Every hop is shown separately: slow moves once, fast moves twice, and they first collide at `G` after six slow iterations. Phase two resets the fast pointer to `A`; both then move one hop at a time and converge at the cycle entry `C` after two iterations.
+~~~~~tabsdown
+tab: Visualization
+
 
 ```steptrace
 {"algorithm":"fast-and-slow-pointers"}
 ```
+
+The trace uses `A → B → C → D → E → F → G → H → C`, with the six-node cycle `C → D → E → F → G → H → C`. Every hop is shown separately: slow moves once, fast moves twice, and they first collide at `G` after six slow iterations. Phase two resets the fast pointer to `A`; both then move one hop at a time and converge at the cycle entry `C` after two iterations.
+
+tab: Complexity
+
+```complexity
+{
+  "version": 2,
+  "label": "Fast and Slow Pointers complexity",
+  "variables": {
+    "inputSize": {
+      "symbol": "n",
+      "description": "number of input elements or states"
+    }
+  },
+  "resources": {
+    "time": {
+      "mode": "operations",
+      "entries": [
+        {
+          "kind": "operation",
+          "operation": "No cycle",
+          "bounds": [
+            {
+              "kind": "curve",
+              "role": "Time",
+              "formula": "O(n)",
+              "curveId": "linear"
+            }
+          ]
+        },
+        {
+          "kind": "operation",
+          "operation": "Cycle, detection only",
+          "bounds": [
+            {
+              "kind": "curve",
+              "role": "Time",
+              "formula": "O(n)",
+              "curveId": "linear"
+            }
+          ]
+        },
+        {
+          "kind": "operation",
+          "operation": "Cycle, entry located",
+          "bounds": [
+            {
+              "kind": "curve",
+              "role": "Time",
+              "formula": "O(n)",
+              "curveId": "linear"
+            }
+          ]
+        }
+      ]
+    },
+    "space": {
+      "mode": "operations",
+      "entries": [
+        {
+          "kind": "operation",
+          "operation": "No cycle",
+          "bounds": [
+            {
+              "kind": "curve",
+              "role": "Auxiliary space",
+              "formula": "O(1)",
+              "curveId": "constant"
+            }
+          ]
+        },
+        {
+          "kind": "operation",
+          "operation": "Cycle, detection only",
+          "bounds": [
+            {
+              "kind": "curve",
+              "role": "Auxiliary space",
+              "formula": "O(1)",
+              "curveId": "constant"
+            }
+          ]
+        },
+        {
+          "kind": "operation",
+          "operation": "Cycle, entry located",
+          "bounds": [
+            {
+              "kind": "curve",
+              "role": "Auxiliary space",
+              "formula": "O(1)",
+              "curveId": "constant"
+            }
+          ]
+        }
+      ]
+    }
+  }
+}
+```
+~~~~~
+
+# Complexity
+
+| Case | Time | Auxiliary space | Cause |
+| --- | --- | --- | --- |
+| No cycle | `O(n)` | `O(1)` | The fast pointer reaches `null` after about `n/2` double-steps; nothing is stored. |
+| Cycle, detection only | `O(n)` | `O(1)` | Both pointers enter the cycle within `μ ≤ n` steps, then meet within a further `λ ≤ n` steps. |
+| Cycle, entry located | `O(n)` | `O(1)` | Phase two walks at most `μ < n` more nodes at speed one. |
+
+Every case is linear in the node count and holds two pointers regardless of input size. The contrast is with the hash-set-of-visited-nodes detector, which matches the `O(n)` time but stores one entry per visited node for `O(n)` auxiliary space; Floyd's method trades that table for the second, slower pointer.
 
 # Why the Pointers Meet, and where
 
@@ -34,16 +148,6 @@ The distance argument is what makes phase two exact rather than a memorised reci
 Cycle length falls out for free once a meeting exists: hold one pointer fixed and walk the other around until it returns; the number of steps is `λ`.
 
 Midpoint and nth-from-end traversal belong to the broader two-pointer family, but neither uses Floyd's two-phase cycle-entry mechanism. For the **middle of a list**, slow advances one node while fast advances two: `while (fast != null && fast.next != null)` returns the second middle node for an even-length list, while `while (fast.next != null && fast.next.next != null)` returns the first when the list is non-empty. The **nth node from the end** uses a fixed gap rather than different speeds: advance one pointer `n` nodes ahead, then move both one node per step until the leader hits the end, leaving the follower on the target.
-
-# Complexity
-
-| Case | Time | Auxiliary space | Cause |
-| --- | --- | --- | --- |
-| No cycle | `O(n)` | `O(1)` | The fast pointer reaches `null` after about `n/2` double-steps; nothing is stored. |
-| Cycle, detection only | `O(n)` | `O(1)` | Both pointers enter the cycle within `μ ≤ n` steps, then meet within a further `λ ≤ n` steps. |
-| Cycle, entry located | `O(n)` | `O(1)` | Phase two walks at most `μ < n` more nodes at speed one. |
-
-Every case is linear in the node count and holds two pointers regardless of input size. The contrast is with the hash-set-of-visited-nodes detector, which matches the `O(n)` time but stores one entry per visited node for `O(n)` auxiliary space; Floyd's method trades that table for the second, slower pointer.
 
 # Boundaries
 

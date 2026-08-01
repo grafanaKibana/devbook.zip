@@ -18,13 +18,18 @@ Memoization only *pays* when calls repeat. On a function whose every call has di
 
 **Core shape:** pure function + a cache keyed on the full argument set → first call computes and stores, repeats read the store → time drops to `(distinct arguments) × (work per call)` when calls actually repeat.
 
-# Trace
+~~~~~tabsdown
+tab: Visualization
 
-The trace uses abstract states rather than tying the mechanism to one recurrence. The left branch computes and stores states `D` and `E`. The right branch requests both keys again: cached `D` skips its two child calls, while cached base state `E` returns immediately.
+
 
 ```steptrace
 { "algorithm": "memoization" }
 ```
+
+# Trace
+
+The trace uses abstract states rather than tying the mechanism to one recurrence. The left branch computes and stores states `D` and `E`. The right branch requests both keys again: cached `D` skips its two child calls, while cached base state `E` returns immediately.
 
 # Mechanism — what the Cache Keys on and what it Needs
 
@@ -35,6 +40,74 @@ The cache is a map from *arguments* to *result*. A correct and useful cache depe
 - **Lookup semantics that match value identity.** A cache needs equality appropriate to its store. For a `Dictionary`, equality and hashing must use the meaningful fields; a record key usually supplies both. Reference identity for logically equal arguments normally causes avoidable misses rather than wrong values, while inconsistent `Equals` and `GetHashCode` breaks dictionary lookup.
 
 For a recursive function, the recursion must call *through* the memoised entry point, not the raw function — otherwise the inner calls bypass the cache and the exponential tree returns. That is why the idiomatic form nests a local function that calls itself and shares one `memo` dictionary across the whole call graph.
+
+tab: Complexity
+
+```complexity
+{
+  "version": 2,
+  "label": "Memoization complexity",
+  "variables": {
+    "inputSize": {
+      "symbol": "n",
+      "description": "number of input elements or states"
+    }
+  },
+  "resources": {
+    "time": {
+      "mode": "operations",
+      "entries": [
+        {
+          "kind": "operation",
+          "operation": "Distinct subproblems",
+          "bounds": [
+            {
+              "kind": "curve",
+              "role": "Upper bound",
+              "formula": "O(n)",
+              "curveId": "linear"
+            }
+          ]
+        }
+      ]
+    },
+    "space": {
+      "mode": "operations",
+      "entries": [
+        {
+          "kind": "operation",
+          "operation": "Cache",
+          "bounds": [
+            {
+              "kind": "curve",
+              "role": "Persistent",
+              "formula": "O(n)",
+              "curveId": "linear"
+            }
+          ]
+        },
+        {
+          "kind": "operation",
+          "operation": "Recursion stack",
+          "bounds": [
+            {
+              "kind": "curve",
+              "role": "Worst-case auxiliary",
+              "formula": "O(n)",
+              "curveId": "linear"
+            }
+          ]
+        }
+      ]
+    }
+  }
+}
+```
+~~~~~
+
+# Complexity
+
+For memoized Fibonacci, n distinct subproblems are each computed once and retained in the cache: O(n) time and O(n) cache space. The recursive form also uses O(n) stack space in the chain-shaped worst case.
 
 # Where Memoization Breaks or Costs
 

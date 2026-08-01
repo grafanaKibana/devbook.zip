@@ -23,6 +23,9 @@ The bound is amortized, not worst-case. The forest can hold many trees and many 
 
 The initial forest is replayed through public **Insert** operations. Add roots lazily, use **Extract min** to consolidate equal degrees, then decrease an existing key to see the cut rule move it to the root list; **Reset** repeats those public inserts rather than loading a hidden prebuilt forest.
 
+~~~~~tabsdown
+tab: Visualization
+
 ```steptrace
 {"algorithm":"fibonacci-heap","array":[3,7,18,24,26,39,41,52,63]}
 ```
@@ -44,6 +47,183 @@ Which fields each operation may change:
 - **Insert / Merge** — append to the root list, compare against the min pointer. No parent, child, degree, or mark field of an existing node changes.
 - **Decrease-key** — rewrites one node's key; if that breaks heap order with its parent, cuts the node to the root list (clearing its mark, since roots are unmarked), then cascades: while the parent was already marked, cut it too, upward. Degrees of cut parents drop by one.
 - **Extract-min** — removes the min root, promotes its children to roots, then consolidates by repeatedly linking two roots of equal degree (the larger key becomes a child of the smaller) until every root degree is distinct, and finally rescans the root list to reset the min pointer.
+
+tab: Complexity
+
+```complexity
+{
+  "version": 2,
+  "label": "Fibonacci Heaps complexity",
+  "variables": {
+    "inputSize": {
+      "symbol": "n",
+      "description": "number of input elements or states"
+    }
+  },
+  "resources": {
+    "time": {
+      "mode": "operations",
+      "entries": [
+        {
+          "kind": "operation",
+          "operation": "Insert(x)",
+          "bounds": [
+            {
+              "kind": "curve",
+              "role": "Amortized time",
+              "formula": "O(1)",
+              "curveId": "constant"
+            },
+            {
+              "kind": "curve",
+              "role": "Worst single op",
+              "formula": "O(1)",
+              "curveId": "constant"
+            }
+          ]
+        },
+        {
+          "kind": "operation",
+          "operation": "Merge(a, b)",
+          "bounds": [
+            {
+              "kind": "curve",
+              "role": "Amortized time",
+              "formula": "O(1)",
+              "curveId": "constant"
+            },
+            {
+              "kind": "curve",
+              "role": "Worst single op",
+              "formula": "O(1)",
+              "curveId": "constant"
+            }
+          ]
+        },
+        {
+          "kind": "operation",
+          "operation": "FindMin()",
+          "bounds": [
+            {
+              "kind": "curve",
+              "role": "Amortized time",
+              "formula": "O(1)",
+              "curveId": "constant"
+            },
+            {
+              "kind": "curve",
+              "role": "Worst single op",
+              "formula": "O(1)",
+              "curveId": "constant"
+            }
+          ]
+        },
+        {
+          "kind": "operation",
+          "operation": "DecreaseKey(x)",
+          "bounds": [
+            {
+              "kind": "curve",
+              "role": "Amortized time",
+              "formula": "O(1) amortized",
+              "curveId": "constant"
+            },
+            {
+              "kind": "curve",
+              "role": "Worst single op",
+              "formula": "O(n)",
+              "curveId": "linear"
+            }
+          ]
+        },
+        {
+          "kind": "operation",
+          "operation": "ExtractMin()",
+          "bounds": [
+            {
+              "kind": "curve",
+              "role": "Amortized time",
+              "formula": "O(log n) amortized",
+              "curveId": "log-n"
+            },
+            {
+              "kind": "curve",
+              "role": "Worst single op",
+              "formula": "O(n)",
+              "curveId": "linear"
+            }
+          ]
+        }
+      ]
+    },
+    "space": {
+      "mode": "operations",
+      "entries": [
+        {
+          "kind": "operation",
+          "operation": "Insert(x)",
+          "bounds": [
+            {
+              "kind": "curve",
+              "role": "Structure / aux space",
+              "formula": "O(1) new node",
+              "curveId": "constant"
+            }
+          ]
+        },
+        {
+          "kind": "operation",
+          "operation": "Merge(a, b)",
+          "bounds": [
+            {
+              "kind": "curve",
+              "role": "Structure / aux space",
+              "formula": "O(1)",
+              "curveId": "constant"
+            }
+          ]
+        },
+        {
+          "kind": "operation",
+          "operation": "FindMin()",
+          "bounds": [
+            {
+              "kind": "curve",
+              "role": "Structure / aux space",
+              "formula": "O(1)",
+              "curveId": "constant"
+            }
+          ]
+        },
+        {
+          "kind": "operation",
+          "operation": "DecreaseKey(x)",
+          "bounds": [
+            {
+              "kind": "curve",
+              "role": "Structure / aux space",
+              "formula": "O(1)",
+              "curveId": "constant"
+            }
+          ]
+        },
+        {
+          "kind": "operation",
+          "operation": "ExtractMin()",
+          "bounds": [
+            {
+              "kind": "text",
+              "role": "Structure / aux space",
+              "formula": "O(max degree) = O(log n)"
+            }
+          ]
+        }
+      ]
+    }
+  }
+}
+```
+~~~~~
 
 # Complexity
 

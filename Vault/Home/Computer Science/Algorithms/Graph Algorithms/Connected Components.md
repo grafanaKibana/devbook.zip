@@ -16,6 +16,9 @@ Two mechanisms solve it, and they fit different shapes of the problem. A **trave
 
 The decisive detail is the outer loop: a single DFS from one source finds only *that* vertex's component. Covering a disconnected graph means restarting the traversal from each vertex the previous floods never reached.
 
+~~~~~tabsdown
+tab: Visualization
+
 ```steptrace
 {"algorithm":"connected-components"}
 ```
@@ -44,6 +47,88 @@ The final `id` is the component count, and `component[u] == component[v]` answer
 # Merging by Union-find
 
 When edges arrive over time, [[Home/Computer Science/Data Structures/Graph Structures/Union-Find|union-find]] maintains the partition incrementally: initialize `V` singleton roots, then union each edge's endpoints. The full pass costs `O(V + E · α(V))`; connectivity queries are near-constant amortized, while listing component members still needs a final grouping pass. This is the same [[Home/Computer Science/Data Structures/Graph Structures/Disjoint Set|disjoint-set]] forest used by [[Home/Computer Science/Algorithms/Graph Algorithms/Minimum Spanning Tree|Kruskal's MST]]; its canonical page carries the tree and compression mechanics.
+
+tab: Complexity
+
+```complexity
+{
+  "version": 2,
+  "label": "Connected Components complexity",
+  "variables": {
+    "edgeCount": {
+      "symbol": "E",
+      "description": "number of edges"
+    },
+    "inverseAckermann": {
+      "symbol": "α(·)",
+      "description": "inverse Ackermann factor applied to its displayed argument"
+    },
+    "vertexCount": {
+      "symbol": "V",
+      "description": "number of vertices"
+    }
+  },
+  "resources": {
+    "time": {
+      "mode": "operations",
+      "entries": [
+        {
+          "kind": "operation",
+          "operation": "DFS / BFS labelling",
+          "bounds": [
+            {
+              "kind": "text",
+              "role": "Time",
+              "formula": "Θ(V + E)"
+            }
+          ]
+        },
+        {
+          "kind": "operation",
+          "operation": "Union-find (rank + compression)",
+          "bounds": [
+            {
+              "kind": "text",
+              "role": "Time",
+              "formula": "O(V + E · α(V))"
+            }
+          ]
+        }
+      ]
+    },
+    "space": {
+      "mode": "operations",
+      "entries": [
+        {
+          "kind": "operation",
+          "operation": "DFS / BFS labelling",
+          "bounds": [
+            {
+              "kind": "curve",
+              "role": "Auxiliary space",
+              "formula": "O(V) — visited/label array plus frontier",
+              "curveId": "linear"
+            }
+          ]
+        },
+        {
+          "kind": "operation",
+          "operation": "Union-find (rank + compression)",
+          "bounds": [
+            {
+              "kind": "curve",
+              "role": "Auxiliary space",
+              "formula": "O(V) — parent and rank arrays",
+              "curveId": "linear"
+            }
+          ]
+        }
+      ]
+    }
+  }
+}
+```
+~~~~~
 
 # Complexity
 

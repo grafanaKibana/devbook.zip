@@ -14,6 +14,9 @@ A connected, undirected, weighted graph can contain many spanning trees. [[Home/
 
 The cycle test is the whole mechanism. A [[Home/Computer Science/Data Structures/Graph Structures/Disjoint Set|disjoint set]] stores the current forest components. If `find(u) == find(v)`, edge `(u, v)` would close a cycle and is rejected; otherwise `union(u, v)` merges the components and the edge enters the result. The cut property makes that greedy choice safe: the lightest edge crossing a cut belongs to some MST.
 
+~~~~~tabsdown
+tab: Visualization
+
 ```steptrace
 {"algorithm":"kruskal"}
 ```
@@ -30,6 +33,74 @@ For edges `AB=1`, `BC=2`, `AC=3`, `CD=4`, the initial components are `{A}`, `{B}
 | `CD=4` | `C` and `D` differ | accept | `{A,B,C,D}` |
 
 The accepted edges have total weight `7` and stop at `V - 1 = 3` edges. At every acceptance, the endpoints lie on opposite sides of a current component cut, and no lighter unprocessed edge crosses that cut.
+
+tab: Complexity
+
+```complexity
+{
+  "version": 2,
+  "label": "Kruskal's Algorithm complexity",
+  "variables": {
+    "edgeCount": {
+      "symbol": "E",
+      "description": "number of edges"
+    },
+    "vertexCount": {
+      "symbol": "V",
+      "description": "number of vertices"
+    }
+  },
+  "resources": {
+    "time": {
+      "mode": "cases",
+      "entries": [
+        {
+          "kind": "case",
+          "role": "Best",
+          "formula": "Θ(E log E)",
+          "curveId": "n-log-n"
+        },
+        {
+          "kind": "case",
+          "role": "Average",
+          "formula": "Θ(E log E)",
+          "curveId": "n-log-n"
+        },
+        {
+          "kind": "case",
+          "role": "Worst",
+          "formula": "Θ(E log E)",
+          "curveId": "n-log-n"
+        }
+      ]
+    },
+    "space": {
+      "mode": "cases",
+      "entries": [
+        {
+          "kind": "case",
+          "role": "Best",
+          "formula": "O(V) plus sort workspace",
+          "curveId": "linear"
+        },
+        {
+          "kind": "case",
+          "role": "Average",
+          "formula": "O(V) plus sort workspace",
+          "curveId": "linear"
+        },
+        {
+          "kind": "case",
+          "role": "Worst",
+          "formula": "O(V) plus sort workspace",
+          "curveId": "linear"
+        }
+      ]
+    }
+  }
+}
+```
+~~~~~
 
 # Complexity
 

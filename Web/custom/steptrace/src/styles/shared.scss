@@ -1099,7 +1099,7 @@
   border-left: 0;
   overflow: visible;
 }
-.steptrace--narrow .steptrace__rail-region {
+.steptrace--narrow .steptrace__rail-region--fallback {
   display: flow-root;
   transition: height var(--steptrace-tab-animation-duration) var(--_ease-decelerate);
 }
@@ -1153,7 +1153,7 @@
   outline-offset: 1px;
 }
 .steptrace--narrow
-  .steptrace__rail-region
+  .steptrace__rail-region--fallback
   > :is(.steptrace__trace, .steptrace__watch-wrap):not([hidden]) {
   animation: steptrace-tab-panel-in var(--steptrace-tab-animation-duration) var(--_ease-decelerate);
 }
@@ -1220,7 +1220,7 @@
 .steptrace--reduced {
   --steptrace-tab-animation-duration: 0ms;
 }
-.steptrace--reduced .steptrace__rail-region {
+.steptrace--reduced .steptrace__rail-region--fallback {
   transition-duration: 0ms !important;
 }
 

@@ -19,6 +19,9 @@ The structure records only order of arrival. It cannot reach the middle by posit
 
 The interactive view isolates circular wraparound and fixed-capacity full behavior; the growable resize remains explained in the prose below.
 
+~~~~~tabsdown
+tab: Visualization
+
 ```steptrace
 {"algorithm":"queue"}
 ```
@@ -38,6 +41,142 @@ Three facts hold across every operation:
 3. In the circular-buffer form, `head` and `tail` are indices modulo capacity; the count of live elements, not the raw index values, distinguishes an empty region from a full one.
 
 A growable circular buffer adds one more rule: when the live region fills the whole array, the next enqueue allocates a larger array, copies the elements in front-to-back order, and resets `head` to `0`. That copy is `O(n)`, but it happens once per doubling, so its cost spreads across the many `O(1)` enqueues that triggered it.
+
+tab: Complexity
+
+```complexity
+{
+  "version": 2,
+  "label": "Queue complexity",
+  "variables": {
+    "inputSize": {
+      "symbol": "n",
+      "description": "number of input elements or states"
+    }
+  },
+  "resources": {
+    "time": {
+      "mode": "operations",
+      "entries": [
+        {
+          "kind": "operation",
+          "operation": "Enqueue(x)",
+          "bounds": [
+            {
+              "kind": "curve",
+              "role": "Best time",
+              "formula": "O(1)",
+              "curveId": "constant"
+            },
+            {
+              "kind": "curve",
+              "role": "Amortized time",
+              "formula": "O(1)",
+              "curveId": "constant"
+            },
+            {
+              "kind": "curve",
+              "role": "Worst single operation",
+              "formula": "O(n) on the resize that doubles a full circular buffer",
+              "curveId": "linear"
+            }
+          ]
+        },
+        {
+          "kind": "operation",
+          "operation": "Dequeue()",
+          "bounds": [
+            {
+              "kind": "curve",
+              "role": "Best time",
+              "formula": "O(1)",
+              "curveId": "constant"
+            },
+            {
+              "kind": "curve",
+              "role": "Amortized time",
+              "formula": "O(1)",
+              "curveId": "constant"
+            },
+            {
+              "kind": "curve",
+              "role": "Worst single operation",
+              "formula": "O(1)",
+              "curveId": "constant"
+            }
+          ]
+        },
+        {
+          "kind": "operation",
+          "operation": "Peek()",
+          "bounds": [
+            {
+              "kind": "curve",
+              "role": "Best time",
+              "formula": "O(1)",
+              "curveId": "constant"
+            },
+            {
+              "kind": "curve",
+              "role": "Amortized time",
+              "formula": "O(1)",
+              "curveId": "constant"
+            },
+            {
+              "kind": "curve",
+              "role": "Worst single operation",
+              "formula": "O(1)",
+              "curveId": "constant"
+            }
+          ]
+        }
+      ]
+    },
+    "space": {
+      "mode": "operations",
+      "entries": [
+        {
+          "kind": "operation",
+          "operation": "Enqueue(x)",
+          "bounds": [
+            {
+              "kind": "curve",
+              "role": "Structure space",
+              "formula": "O(n)",
+              "curveId": "linear"
+            }
+          ]
+        },
+        {
+          "kind": "operation",
+          "operation": "Dequeue()",
+          "bounds": [
+            {
+              "kind": "curve",
+              "role": "Structure space",
+              "formula": "O(n)",
+              "curveId": "linear"
+            }
+          ]
+        },
+        {
+          "kind": "operation",
+          "operation": "Peek()",
+          "bounds": [
+            {
+              "kind": "curve",
+              "role": "Structure space",
+              "formula": "O(n)",
+              "curveId": "linear"
+            }
+          ]
+        }
+      ]
+    }
+  }
+}
+```
+~~~~~
 
 # Complexity
 

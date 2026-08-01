@@ -19,13 +19,18 @@ The structure buys that speed by remembering less than a sorted list. It guarant
 
 **Core shape:** complete binary tree → heap-order property (min-heap: parent ≤ both children) → packed implicitly into an array → only the root is the extreme → `O(n)` storage.
 
-# State across Inserts and Extractions
+~~~~~tabsdown
+tab: Visualization
 
-Use the controls to insert and extract repeatedly. The visualizer preserves the current heap between operations, highlights the active sift path, and restores `[3, 5, 8, 9]` on reset.
+
 
 ```steptrace
 {"algorithm":"heap","array":[3,5,8,9]}
 ```
+
+# State across Inserts and Extractions
+
+Use the controls to insert and extract repeatedly. The visualizer preserves the current heap between operations, highlights the active sift path, and restores `[3, 5, 8, 9]` on reset.
 
 # Representation and Invariants
 
@@ -44,6 +49,165 @@ No per-node object, no child pointers, no allocation per element — just one ar
 - `peek` returns index `0` without touching the array.
 
 The heap-order invariant is local: every parent is `≤` both of its children (min-heap; a max-heap reverses the comparison). Sift-up restores it along a single root-ward path after an append; sift-down restores it along a single leaf-ward path after the root is replaced. Because the tree is complete, both paths have length `⌊log₂ n⌋`, which bounds the work. The invariant says nothing about order *across* subtrees, so arbitrary ranks cannot be read directly from array positions.
+
+tab: Complexity
+
+```complexity
+{
+  "version": 2,
+  "label": "Heap complexity",
+  "variables": {
+    "inputSize": {
+      "symbol": "n",
+      "description": "number of input elements or states"
+    }
+  },
+  "resources": {
+    "time": {
+      "mode": "operations",
+      "entries": [
+        {
+          "kind": "operation",
+          "operation": "peek / find-min",
+          "bounds": [
+            {
+              "kind": "curve",
+              "role": "Time",
+              "formula": "O(1)",
+              "curveId": "constant"
+            }
+          ]
+        },
+        {
+          "kind": "operation",
+          "operation": "insert",
+          "bounds": [
+            {
+              "kind": "text",
+              "role": "Time",
+              "formula": "O(log n) amortized; O(n) worst case"
+            }
+          ]
+        },
+        {
+          "kind": "operation",
+          "operation": "extract-min",
+          "bounds": [
+            {
+              "kind": "curve",
+              "role": "Time",
+              "formula": "O(log n)",
+              "curveId": "log-n"
+            }
+          ]
+        },
+        {
+          "kind": "operation",
+          "operation": "build-heap",
+          "bounds": [
+            {
+              "kind": "curve",
+              "role": "Time",
+              "formula": "O(n)",
+              "curveId": "linear"
+            }
+          ]
+        },
+        {
+          "kind": "operation",
+          "operation": "decrease-key",
+          "bounds": [
+            {
+              "kind": "curve",
+              "role": "Time",
+              "formula": "O(log n)",
+              "curveId": "log-n"
+            }
+          ]
+        }
+      ]
+    },
+    "space": {
+      "mode": "operations",
+      "entries": [
+        {
+          "kind": "operation",
+          "operation": "peek / find-min",
+          "bounds": [
+            {
+              "kind": "curve",
+              "role": "Space",
+              "formula": "O(1)",
+              "curveId": "constant"
+            }
+          ]
+        },
+        {
+          "kind": "operation",
+          "operation": "insert",
+          "bounds": [
+            {
+              "kind": "curve",
+              "role": "Space",
+              "formula": "O(1) amortized",
+              "curveId": "constant"
+            }
+          ]
+        },
+        {
+          "kind": "operation",
+          "operation": "extract-min",
+          "bounds": [
+            {
+              "kind": "curve",
+              "role": "Space",
+              "formula": "O(1)",
+              "curveId": "constant"
+            }
+          ]
+        },
+        {
+          "kind": "operation",
+          "operation": "build-heap",
+          "bounds": [
+            {
+              "kind": "curve",
+              "role": "Space",
+              "formula": "O(1)",
+              "curveId": "constant"
+            }
+          ]
+        },
+        {
+          "kind": "operation",
+          "operation": "decrease-key",
+          "bounds": [
+            {
+              "kind": "curve",
+              "role": "Space",
+              "formula": "O(1)",
+              "curveId": "constant"
+            }
+          ]
+        },
+        {
+          "kind": "operation",
+          "operation": "Whole structure",
+          "bounds": [
+            {
+              "kind": "curve",
+              "role": "Space",
+              "formula": "O(n)",
+              "curveId": "linear"
+            }
+          ]
+        }
+      ]
+    }
+  }
+}
+```
+~~~~~
 
 # Complexity
 

@@ -41,17 +41,28 @@ tp.hooks.on_all_templates_executed(async () => {
 
 <!-- State the workload, persistent state, repeated cost the representation reduces, and information it deliberately does not retain. -->
 
-# State across Operations
+~~~~tabsdown
+tab: Visualization
 
-<!-- Lead into the trace with one plain-language sentence. Replace the placeholder with a valid StepTrace configuration that shows several operations over one structure and exposes meaningful persistent state; do not substitute a related algorithm trace or publish an unresolved placeholder. -->
+<!-- The StepTrace fence must be the first rendered child. Replace this required draft configuration with a supported trace that shows several operations over one structure and exposes meaningful persistent state; do not add a heading or lead-in before it. -->
 
 ```steptrace
 {"algorithm":"replace-with-supported-id","operations":"replace-with-persistent-operation-sequence"}
 ```
 
+# State across Operations
+
+<!-- Name the workload and operations, then explain the persistent state shown above without restating visible controls or the pictured scenario. -->
+
 # Representation and Invariants
 
 <!-- Rename this heading after the representation claim the note proves. Describe the physical state, mutable fields, empty/root/sentinel conventions, invariant, and retained or discarded identity, ordering, topology, history, or duplicates. -->
+
+tab: Complexity
+
+<!-- Insert exactly one validated version 2 `complexity` fence here after note-specific Time and Space evidence exists. Keep this panel free of rendered headings, prose, tables, and placeholders. -->
+
+~~~~
 
 # Complexity
 

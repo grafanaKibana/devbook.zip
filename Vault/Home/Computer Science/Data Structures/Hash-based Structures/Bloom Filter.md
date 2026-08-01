@@ -17,11 +17,14 @@ A Bloom filter keeps only an *m*-bit array and *k* hash-derived positions. Addin
 
 **Core shape:** elements → *k* hash bits set in an *m*-bit array → all-ones means probably present, any-zero means definitely absent → `O(m)` bits, no elements retained.
 
+~~~~~tabsdown
+tab: Visualization
+
 ```steptrace
 {"algorithm":"bloom-filter"}
 ```
 
-# Representation and Invariants
+## Representation and Invariants
 
 The stored state is a single bit array of length *m* and a family of *k* hash functions, each mapping an element to an index in `[0, m)`. Nothing else persists — no keys, no counts, no insertion order.
 
@@ -36,7 +39,149 @@ Three properties follow directly from the fact that bits are only ever set, neve
 
 The representative state is therefore a compressed image of set membership, not the set. Identity, multiplicity, and order are gone the moment an element is folded into the bits.
 
-# Complexity
+tab: Complexity
+
+```complexity
+{
+  "version": 2,
+  "label": "Bloom Filter complexity",
+  "variables": {
+    "keyRange": {
+      "symbol": "k",
+      "description": "key range, digit count, or requested result count"
+    },
+    "secondarySize": {
+      "symbol": "m",
+      "description": "secondary input, pattern, bucket, or sequence size"
+    },
+    "valueLength": {
+      "symbol": "|x|",
+      "description": "encoded input-value length"
+    }
+  },
+  "resources": {
+    "time": {
+      "mode": "operations",
+      "entries": [
+        {
+          "kind": "operation",
+          "operation": "Construct empty filter",
+          "bounds": [
+            {
+              "kind": "curve",
+              "role": "Best time",
+              "formula": "Θ(m) bits cleared",
+              "curveId": "linear"
+            },
+            {
+              "kind": "curve",
+              "role": "Average time",
+              "formula": "Θ(m)",
+              "curveId": "linear"
+            },
+            {
+              "kind": "curve",
+              "role": "Worst time",
+              "formula": "Θ(m)",
+              "curveId": "linear"
+            }
+          ]
+        },
+        {
+          "kind": "operation",
+          "operation": "Add(x)",
+          "bounds": [
+            {
+              "kind": "text",
+              "role": "Best time",
+              "formula": "O(\\|x\\| + k)"
+            },
+            {
+              "kind": "text",
+              "role": "Average time",
+              "formula": "O(\\|x\\| + k)"
+            },
+            {
+              "kind": "text",
+              "role": "Worst time",
+              "formula": "O(\\|x\\| + k)"
+            }
+          ]
+        },
+        {
+          "kind": "operation",
+          "operation": "Query(x)",
+          "bounds": [
+            {
+              "kind": "text",
+              "role": "Best time",
+              "formula": "O(\\|x\\| + 1) first 0 bit"
+            },
+            {
+              "kind": "text",
+              "role": "Average time",
+              "formula": "O(\\|x\\| + k)"
+            },
+            {
+              "kind": "text",
+              "role": "Worst time",
+              "formula": "O(\\|x\\| + k)"
+            }
+          ]
+        }
+      ]
+    },
+    "space": {
+      "mode": "operations",
+      "entries": [
+        {
+          "kind": "operation",
+          "operation": "Construct empty filter",
+          "bounds": [
+            {
+              "kind": "curve",
+              "role": "Structure space",
+              "formula": "Θ(m) bits",
+              "curveId": "linear"
+            },
+            {
+              "kind": "curve",
+              "role": "Aux space per op",
+              "formula": "O(1)",
+              "curveId": "constant"
+            }
+          ]
+        },
+        {
+          "kind": "operation",
+          "operation": "Add(x)",
+          "bounds": [
+            {
+              "kind": "text",
+              "role": "Aux space per op",
+              "formula": "O(\\|x\\|) in the example"
+            }
+          ]
+        },
+        {
+          "kind": "operation",
+          "operation": "Query(x)",
+          "bounds": [
+            {
+              "kind": "text",
+              "role": "Aux space per op",
+              "formula": "O(\\|x\\|) in the example"
+            }
+          ]
+        }
+      ]
+    }
+  }
+}
+```
+~~~~~
+
+## Complexity
 
 | Operation | Best time | Average time | Worst time | Structure space | Aux space per op |
 | --- | --- | --- | --- | --- | --- |

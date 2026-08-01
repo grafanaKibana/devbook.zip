@@ -17,13 +17,18 @@ The merge is the only place ordering happens, and it is valid because of one fac
 
 **Core condition:** two sorted runs → one linear-time merge takes the smaller front element → `⌈log₂ n⌉` merge levels → `O(n log n)` time on every input, `O(n)` merge buffer for arrays.
 
-# Trace
+~~~~~tabsdown
+tab: Visualization
 
-The trace sorts the eight-element array `[8, 3, 5, 1, 9, 2, 7, 4]`.
+
 
 ```steptrace
 {"algorithm":"merge-sort-tree","array":[8,3,5,1,9,2,7,4]}
 ```
+
+# Trace
+
+The trace sorts the eight-element array `[8, 3, 5, 1, 9, 2, 7, 4]`.
 
 The decisive step is the final merge. By then the left half has become `[1, 3, 5, 8]` and the right half `[2, 4, 7, 9]`; one pass compares the two fronts, emits the smaller, and advances that read head, producing `[1, 2, 3, 4, 5, 7, 8, 9]` after at most seven comparisons for eight elements. That same merge runs at every level below it — length-1 runs merge into length-2, then length-4 — so the number of comparisons is bounded by the number of levels, `⌈log₂ 8⌉ = 3`, times the n elements each level touches. No comparison depends on how disordered the input was; it depends only on how the two current fronts relate.
 
@@ -34,6 +39,70 @@ A merge holds one invariant: the output already contains, in sorted order, the s
 Nothing sorts on the way down. The split only partitions indices, and the leaves are single elements that are already sorted. Every comparison happens in the merges on the way up. The fixed recursion shape and merge schedule keep the asymptotic time at `O(n log n)` for every input, although the exact comparison count still depends on which run empties first.
 
 Stability rides on one comparison. The left run holds the elements that appeared earlier in the original array, so on a tie the merge must emit the left element first to keep equal keys in their original order. The implementation does this with `a[i] <= a[j]`: equal keys take the left branch. Switching to `a[i] < a[j]` pulls the right element ahead on ties and quietly makes the sort unstable — the whole distinction between a stable and an unstable merge is that one operator.
+
+tab: Complexity
+
+```complexity
+{
+  "version": 2,
+  "label": "Merge Sort complexity",
+  "variables": {
+    "inputSize": {
+      "symbol": "n",
+      "description": "number of input elements or states"
+    }
+  },
+  "resources": {
+    "time": {
+      "mode": "cases",
+      "entries": [
+        {
+          "kind": "case",
+          "role": "Best",
+          "formula": "O(n log n)",
+          "curveId": "n-log-n"
+        },
+        {
+          "kind": "case",
+          "role": "Average",
+          "formula": "O(n log n)",
+          "curveId": "n-log-n"
+        },
+        {
+          "kind": "case",
+          "role": "Worst",
+          "formula": "O(n log n)",
+          "curveId": "n-log-n"
+        }
+      ]
+    },
+    "space": {
+      "mode": "cases",
+      "entries": [
+        {
+          "kind": "case",
+          "role": "Best",
+          "formula": "O(n)",
+          "curveId": "linear"
+        },
+        {
+          "kind": "case",
+          "role": "Average",
+          "formula": "O(n)",
+          "curveId": "linear"
+        },
+        {
+          "kind": "case",
+          "role": "Worst",
+          "formula": "O(n)",
+          "curveId": "linear"
+        }
+      ]
+    }
+  }
+}
+```
+~~~~~
 
 # Complexity
 

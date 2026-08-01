@@ -11,6 +11,8 @@ status: Ready to Repeat
 publish: true
 ---
 
+# Intro
+
 An order book holds 100K price levels and an exchange feed inserts and removes thousands of entries per second, all while ordered iteration and min/max must stay fast. A plain [[Home/Computer Science/Data Structures/Trees/Binary Search Tree|binary search tree]] keeps the order but degrades to `O(n)` height on adversarial or already-sorted insertion — exactly the pattern a live feed produces. An [[Home/Computer Science/Data Structures/Trees/AVL Tree|AVL tree]] uses stricter ±1 height balance and often produces shorter search paths, but may require more rebalancing, especially during deletion. A red-black tree accepts looser balance to keep ordered operations logarithmic with limited local repair.
 
 The state it persists is a [[Home/Computer Science/Data Structures/Trees/Binary Search Tree|binary search tree]] plus one logical color bit per node — red or black — governed by color rules rather than measured heights. The rules are looser than AVL's, so the tree can grow to twice its minimum height, but that slack lets an insert repair a violation with at most two rotations. The order and the key set are retained; the coloring itself is an internal artifact with no domain meaning, and it cannot be reconstructed from the keys alone once the mutation history is gone.
@@ -18,6 +20,9 @@ The state it persists is a [[Home/Computer Science/Data Structures/Trees/Binary 
 **Core shape:** ordered nodes + one logical color bit each → four color invariants bound height ≤ 2·log₂(n+1) → guaranteed `O(log n)` search, insert, and delete.
 
 Press **Insert** with the prefilled `0`: the new red leaf creates a red-red violation, and the highlighted recolor/rotation participants restore equal black-height.
+
+~~~~~tabsdown
+tab: Visualization
 
 ```steptrace
 {"algorithm":"red-black-tree","values":[10,5,15,1],"value":0}
@@ -40,6 +45,104 @@ An insert colors the new node red and attaches it as a normal BST leaf. Red can 
 - **Uncle black** — one or two rotations around the grandparent (the zig-zig and zig-zag shapes that also drive AVL rebalancing) plus a recolor, after which the fixup **terminates**.
 
 The unbounded part of insert repair — recoloring up the tree — touches only color fields. Rotation, the pointer surgery that actually reshapes the tree, is capped at two for insertion. Delete is harder: removing a black node drops one black from a path and may propagate a "double-black" state toward the root. A red sibling triggers a preparatory rotation that converts the configuration into a black-sibling case. With a black sibling and two black children, recolor the sibling red: a black parent inherits the deficit, while a red parent becomes black and terminates the fixup; reaching the root also absorbs the deficit. A black sibling with a red child uses one or two terminal rotations plus recoloring and ends the fixup. Exact case layout and rotation counts depend on whether the implementation repairs bottom-up or transforms 2-3-4 nodes while descending.
+
+tab: Complexity
+
+```complexity
+{
+  "version": 2,
+  "label": "Red-Black Tree complexity",
+  "variables": {
+    "inputSize": {
+      "symbol": "n",
+      "description": "number of input elements or states"
+    }
+  },
+  "resources": {
+    "time": {
+      "mode": "operations",
+      "entries": [
+        {
+          "kind": "operation",
+          "operation": "Search",
+          "bounds": [
+            {
+              "kind": "curve",
+              "role": "Worst-case time",
+              "formula": "O(log n)",
+              "curveId": "log-n"
+            }
+          ]
+        },
+        {
+          "kind": "operation",
+          "operation": "Insert",
+          "bounds": [
+            {
+              "kind": "curve",
+              "role": "Worst-case time",
+              "formula": "O(log n)",
+              "curveId": "log-n"
+            }
+          ]
+        },
+        {
+          "kind": "operation",
+          "operation": "Delete",
+          "bounds": [
+            {
+              "kind": "curve",
+              "role": "Worst-case time",
+              "formula": "O(log n)",
+              "curveId": "log-n"
+            }
+          ]
+        }
+      ]
+    },
+    "space": {
+      "mode": "operations",
+      "entries": [
+        {
+          "kind": "operation",
+          "operation": "Search",
+          "bounds": [
+            {
+              "kind": "curve",
+              "role": "Aux space",
+              "formula": "O(1)",
+              "curveId": "constant"
+            }
+          ]
+        },
+        {
+          "kind": "operation",
+          "operation": "Insert",
+          "bounds": [
+            {
+              "kind": "text",
+              "role": "Aux space",
+              "formula": "O(1) iter / O(log n) rec"
+            }
+          ]
+        },
+        {
+          "kind": "operation",
+          "operation": "Delete",
+          "bounds": [
+            {
+              "kind": "text",
+              "role": "Aux space",
+              "formula": "O(1) iter / O(log n) rec"
+            }
+          ]
+        }
+      ]
+    }
+  }
+}
+```
+~~~~~
 
 # Complexity
 

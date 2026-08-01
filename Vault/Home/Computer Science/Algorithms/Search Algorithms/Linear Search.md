@@ -17,21 +17,84 @@ The missing precondition is the whole point. [[Binary Search]] needs sorted, ind
 
 **Core condition:** any sequence, no ordering or index → one comparison per element until match or end → `O(n)` time with `O(1)` auxiliary space.
 
-# Trace
+~~~~~tabsdown
+tab: Visualization
 
-The trace searches for `83` in a 16-element array.
+
 
 ```steptrace
 {"algorithm":"linear-search","array":[4,9,13,18,22,27,31,38,45,52,58,64,70,77,83,91],"target":83}
 ```
 
+# Trace
+
+The trace searches for `83` in a 16-element array.
+
 The scan starts at index 0 and compares each value with `83` in order, reaching the match at index 14 after 15 comparisons; a target that was absent would cost all 16. No comparison rules out an element it has not read, because unsorted input offers no proof about the values ahead. Unlike [[Binary Search]], the scan never discards a range: every unchecked element stays a candidate until it is inspected, and the search ends only on the first match or when the sequence is exhausted.
 
-# Why No Precondition is Needed
+tab: Complexity
 
-Linear Search reads the sequence in whatever order the structure yields and tests each element independently. It never computes a midpoint, never hashes a key, and never compares two elements to each other — so it requires neither ordering, nor random access, nor a key that maps to a slot. That is what makes it the baseline: it works on an unsorted array, on a singly linked list with no `O(1)` indexing, and on a stream consumed once. Every faster search buys its speed by adding an assumption — sorted order, an index, a hash function — and paying to establish and maintain it.
-
-The only invariant available is weak by design. After inspecting the first `k` elements, the target is known to be absent from those `k` and possibly present in the remaining `n − k`. Without ordering or an index there is no stronger claim, so the sole way to shrink the unknown region is to read one more element. A faster search replaces this one-at-a-time shrinkage with an assumption that lets a single step eliminate many candidates at once.
+```complexity
+{
+  "version": 2,
+  "label": "Linear Search complexity",
+  "variables": {
+    "inputSize": {
+      "symbol": "n",
+      "description": "number of input elements or states"
+    }
+  },
+  "resources": {
+    "time": {
+      "mode": "cases",
+      "entries": [
+        {
+          "kind": "case",
+          "role": "Best",
+          "formula": "O(1)",
+          "curveId": "constant"
+        },
+        {
+          "kind": "case",
+          "role": "Average",
+          "formula": "O(n)",
+          "curveId": "linear"
+        },
+        {
+          "kind": "case",
+          "role": "Worst",
+          "formula": "O(n)",
+          "curveId": "linear"
+        }
+      ]
+    },
+    "space": {
+      "mode": "cases",
+      "entries": [
+        {
+          "kind": "case",
+          "role": "Best",
+          "formula": "O(1)",
+          "curveId": "constant"
+        },
+        {
+          "kind": "case",
+          "role": "Average",
+          "formula": "O(1)",
+          "curveId": "constant"
+        },
+        {
+          "kind": "case",
+          "role": "Worst",
+          "formula": "O(1)",
+          "curveId": "constant"
+        }
+      ]
+    }
+  }
+}
+```
+~~~~~
 
 # Complexity
 
@@ -42,6 +105,12 @@ The only invariant available is weak by design. After inspecting the first `k` e
 | Worst | `O(n)` | `O(1)` | Target is at the last position or absent, forcing all `n` comparisons. |
 
 A sentinel value that removes the bounds check from the loop, or an early exit on the first match, changes only the constant factor: every element between the start and the answer is still read, so the class stays `O(n)`. The average bound assumes a present target equally likely to occupy any position; an absent target always costs the full `n`, which makes a miss — not a hit — the true worst case.
+
+# Why No Precondition is Needed
+
+Linear Search reads the sequence in whatever order the structure yields and tests each element independently. It never computes a midpoint, never hashes a key, and never compares two elements to each other — so it requires neither ordering, nor random access, nor a key that maps to a slot. That is what makes it the baseline: it works on an unsorted array, on a singly linked list with no `O(1)` indexing, and on a stream consumed once. Every faster search buys its speed by adding an assumption — sorted order, an index, a hash function — and paying to establish and maintain it.
+
+The only invariant available is weak by design. After inspecting the first `k` elements, the target is known to be absent from those `k` and possibly present in the remaining `n − k`. Without ordering or an index there is no stronger claim, so the sole way to shrink the unknown region is to read one more element. A faster search replaces this one-at-a-time shrinkage with an assumption that lets a single step eliminate many candidates at once.
 
 # When a Scan is the Wrong Tool
 

@@ -19,13 +19,18 @@ The same name describes a three-way split of a sorted array, but there it is str
 
 **Core condition:** a strictly unimodal `f` over `[lo, hi]` → two third-point probes reveal the peak's side → one third of the interval is discarded per step → `Θ(log n)` evaluations over `n` discrete candidates, or `Θ(log((hi − lo)/eps))` over a continuous interval, with `O(1)` space.
 
-# Trace
+~~~~~tabsdown
+tab: Visualization
 
-The values rise to `12` and then fall, giving one strict peak. Each ternary step shows both third-point probes at once; the lower side is discarded, and a final scan of at most three positions confirms the maximum at index `3`.
+
 
 ```steptrace
 {"algorithm":"ternary-search","array":[1,4,9,12,11,7,2],"goal":"maximum"}
 ```
+
+# Trace
+
+The values rise to `12` and then fall, giving one strict peak. Each ternary step shows both third-point probes at once; the lower side is discarded, and a final scan of at most three positions confirms the maximum at index `3`.
 
 # Why a Third Can Be Dropped
 
@@ -38,6 +43,103 @@ The interval `[lo, hi]` holds the peak `p` at the start of every step, and the d
 Each step keeps `2/3` of the width, so `k` steps leave `(2/3)^k · (hi − lo)`. Reaching a tolerance `eps` takes `log_{3/2}((hi − lo)/eps)` steps — logarithmic, but with base `3/2` the interval shrinks more slowly per step than under binary search's halving. Only `lo`, `hi`, and the two probes persist, so auxiliary space is `O(1)`.
 
 Golden-section search sharpens the constant without changing the shape: placing the probes at the golden ratio makes one probe of the next step coincide with a probe already evaluated, so every step after the first spends one new evaluation instead of two. The saving matters when `f` is a simulation or a physical measurement rather than an array read.
+
+tab: Complexity
+
+```complexity
+{
+  "version": 2,
+  "label": "Ternary Search complexity",
+  "variables": {
+    "inputSize": {
+      "symbol": "n",
+      "description": "number of input elements or states"
+    },
+    "lowerBound": {
+      "symbol": "lo",
+      "description": "inclusive lower search bound"
+    },
+    "tolerance": {
+      "symbol": "eps",
+      "description": "continuous-search tolerance"
+    },
+    "upperBound": {
+      "symbol": "hi",
+      "description": "inclusive upper search bound"
+    }
+  },
+  "resources": {
+    "time": {
+      "mode": "operations",
+      "entries": [
+        {
+          "kind": "operation",
+          "operation": "Discrete candidates",
+          "bounds": [
+            {
+              "kind": "curve",
+              "role": "Cost",
+              "formula": "Θ(log n) iterations",
+              "curveId": "log-n"
+            }
+          ]
+        },
+        {
+          "kind": "operation",
+          "operation": "Iterations to tolerance eps (continuous)",
+          "bounds": [
+            {
+              "kind": "text",
+              "role": "Cost",
+              "formula": "Θ(log((hi − lo)/eps))"
+            }
+          ]
+        },
+        {
+          "kind": "operation",
+          "operation": "Function evaluations",
+          "bounds": [
+            {
+              "kind": "text",
+              "role": "Cost",
+              "formula": "2 per iteration (1 per iteration with golden-section reuse)"
+            }
+          ]
+        },
+        {
+          "kind": "operation",
+          "operation": "Sorted-array lookup (misuse)",
+          "bounds": [
+            {
+              "kind": "text",
+              "role": "Cost",
+              "formula": "2·log₃ n ≈ 1.82·ln n comparisons"
+            }
+          ]
+        }
+      ]
+    },
+    "space": {
+      "mode": "operations",
+      "entries": [
+        {
+          "kind": "operation",
+          "operation": "Auxiliary space",
+          "bounds": [
+            {
+              "kind": "curve",
+              "role": "Cost",
+              "formula": "O(1)",
+              "curveId": "constant"
+            }
+          ]
+        }
+      ]
+    }
+  }
+}
+```
+~~~~~
 
 # Complexity
 

@@ -27,6 +27,7 @@
     "steptrace:typecheck": "tsc --noEmit -p ./custom/steptrace/tsconfig.json",
     "steptrace:watch": "node ./custom/steptrace/watch.mjs",
     "complexity:test": "node ./custom/complexity/run-tests.mjs",
+    "complexity:visual": "node ./custom/complexity/complexity.visual.test.mjs",
     "prebuild": "npm run install-plugins"
   },
   "engines": {

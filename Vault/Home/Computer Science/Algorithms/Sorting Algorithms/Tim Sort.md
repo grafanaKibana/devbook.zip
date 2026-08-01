@@ -19,13 +19,18 @@ The visualization and invariant discussion below describe classic TimSort as ret
 
 **Classic/OpenJDK shape:** partially ordered input → detect natural runs → pad short runs to `minrun` with binary insertion sort → merge under stack size invariants → `Θ(n)` on ordered input, `Θ(n log n)` worst, stable, `O(n)` merge buffer.
 
-# Decisive Move
+~~~~~tabsdown
+tab: Visualization
 
-Classic/OpenJDK TimSort's turning point is the moment the run stack collapses two adjacent runs because their sizes have just violated the merge invariant. The animation shows that over a small partially-ordered array.
+
 
 ```steptrace
 { "algorithm": "tim-sort", "array": [5, 6, 7, 8, 9, 4, 3, 1, 2, 8], "minrun": 4 }
 ```
+
+## Decisive Move
+
+Classic/OpenJDK TimSort's turning point is the moment the run stack collapses two adjacent runs because their sizes have just violated the merge invariant. The animation shows that over a small partially-ordered array.
 
 Consider `[5, 6, 7, 8, 9, 4, 3, 1, 2, 8]` with an illustrative `minrun = 4`. The left-to-right scan produces `[5,6,7,8,9]`, then `[4,3,1]` (strictly descending, reversed to `[1,3,4]`, extended by binary-inserting `2` into `[1,2,3,4]`), then a trailing `[8]`. The run stack now holds lengths `[5, 4, 1]`, so the third push exposes the three-run invariant.
 
@@ -42,7 +47,7 @@ runs (lengths)                 contents
 
 The three-run condition `Z > Y + X` fails when `[8]` lands (`5 > 4 + 1` is false), so `Y` merges with the smaller neighbour `X`. The resulting equal-length pair still violates `Y > X`, so the same collapse loop merges it immediately. On inputs where the final pair satisfies `Y > X`, the later forced-collapse phase performs that final adjacent merge. Both checks select only adjacent runs. The state that changed is the stack shape, not correctness: the partition of the array stays contiguous and the eventual merges stay near-balanced.
 
-# Runs, Minrun, and the Merge Stack
+## Runs, Minrun, and the Merge Stack
 
 Four mechanisms carry the algorithm.
 
@@ -56,7 +61,71 @@ Four mechanisms carry the algorithm.
 
 **Merging and galloping.** A production merge uses [[Home/Computer Science/Algorithms/Sorting Algorithms/Merge Sort|merge sort]]'s two-way merge into a temporary copy of the *smaller* run (hence `≤ n/2` extra space), resolving ties toward the earlier run to stay stable. When one run wins `MIN_GALLOP = 7` comparisons in a row, the merge switches to **galloping**: it finds the block boundary with exponential search followed by binary search, reducing the boundary-search comparisons to `O(log k)` while the `k` copied elements still take linear time. If galloping stops paying off it adaptively backs out to one-at-a-time merging.
 
-# Complexity
+tab: Complexity
+
+```complexity
+{
+  "version": 2,
+  "label": "Tim Sort complexity",
+  "variables": {
+    "inputSize": {
+      "symbol": "n",
+      "description": "number of input elements or states"
+    }
+  },
+  "resources": {
+    "time": {
+      "mode": "cases",
+      "entries": [
+        {
+          "kind": "case",
+          "role": "Best",
+          "formula": "Θ(n)",
+          "curveId": "linear"
+        },
+        {
+          "kind": "case",
+          "role": "Average",
+          "formula": "Θ(n log n)",
+          "curveId": "n-log-n"
+        },
+        {
+          "kind": "case",
+          "role": "Worst",
+          "formula": "Θ(n log n)",
+          "curveId": "n-log-n"
+        }
+      ]
+    },
+    "space": {
+      "mode": "cases",
+      "entries": [
+        {
+          "kind": "case",
+          "role": "Best",
+          "formula": "O(1)",
+          "curveId": "constant"
+        },
+        {
+          "kind": "case",
+          "role": "Average",
+          "formula": "O(n)",
+          "curveId": "linear"
+        },
+        {
+          "kind": "case",
+          "role": "Worst",
+          "formula": "O(n)",
+          "curveId": "linear"
+        }
+      ]
+    }
+  }
+}
+```
+~~~~~
+
+## Complexity
 
 | Case | Time | Auxiliary space | Cause |
 | --- | --- | --- | --- |

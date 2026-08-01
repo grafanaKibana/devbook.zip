@@ -10,6 +10,8 @@ status: Creation
 publish: true
 ---
 
+# Intro
+
 An ordered dictionary may receive a strongly uneven access stream: a small working set is touched repeatedly while most keys stay cold. A balanced [[Home/Computer Science/Data Structures/Trees/Binary Search Tree|binary search tree]] gives every access the same `O(log n)` height guarantee, but it does not adapt when key `42` is requested a thousand times in a row.
 
 A splay tree is a binary search tree that moves the last accessed node to the root. Search first follows the ordinary BST ordering; then **splaying** rotates the accessed node upward. The tree stores no height, color, or balance factor. Its shape is allowed to become temporarily skewed, so one operation can cost `O(n)`. Starting from an empty tree, a sequence of `m` operations while the tree contains at most `n` keys costs `O(m log n)`; an arbitrary initial tree adds its initial structural potential to that sequence bound.
@@ -17,6 +19,9 @@ A splay tree is a binary search tree that moves the last accessed node to the ro
 The structure retains key order and parent-child topology, but not a fixed balance bound. Recent and repeated accesses reshape that topology so frequently used keys tend to remain near the root.
 
 Press **Search** with the prefilled `60`: the path `100 → 50 → 75 → 60` performs zig-zag then zig and leaves `60` at the root.
+
+~~~~~tabsdown
+tab: Visualization
 
 ```steptrace
 {"algorithm":"splay-tree","values":[100,50,150,25,75,60],"value":60}
@@ -39,6 +44,202 @@ The three cases are determined by the accessed node `x`, its parent `p`, and gra
 | Zig-zag | rotate `x` over `p`, then `x` over `g` | straightens and removes an alternating path |
 
 Insert places a key as in a plain BST and splays the new node. Delete splays the target to the root, removes it, then joins the remaining left and right trees by splaying the maximum key of the left tree and attaching the right tree.
+
+tab: Complexity
+
+```complexity
+{
+  "version": 2,
+  "label": "Splay Tree complexity",
+  "variables": {
+    "inputSize": {
+      "symbol": "n",
+      "description": "number of input elements or states"
+    }
+  },
+  "resources": {
+    "time": {
+      "mode": "operations",
+      "entries": [
+        {
+          "kind": "operation",
+          "operation": "Search",
+          "bounds": [
+            {
+              "kind": "curve",
+              "role": "Best time",
+              "formula": "O(1)",
+              "curveId": "constant"
+            },
+            {
+              "kind": "curve",
+              "role": "Amortized time",
+              "formula": "O(log n)",
+              "curveId": "log-n"
+            },
+            {
+              "kind": "curve",
+              "role": "Worst time",
+              "formula": "O(n)",
+              "curveId": "linear"
+            }
+          ]
+        },
+        {
+          "kind": "operation",
+          "operation": "Insert",
+          "bounds": [
+            {
+              "kind": "curve",
+              "role": "Best time",
+              "formula": "O(1)",
+              "curveId": "constant"
+            },
+            {
+              "kind": "curve",
+              "role": "Amortized time",
+              "formula": "O(log n)",
+              "curveId": "log-n"
+            },
+            {
+              "kind": "curve",
+              "role": "Worst time",
+              "formula": "O(n)",
+              "curveId": "linear"
+            }
+          ]
+        },
+        {
+          "kind": "operation",
+          "operation": "Delete",
+          "bounds": [
+            {
+              "kind": "curve",
+              "role": "Best time",
+              "formula": "O(1)",
+              "curveId": "constant"
+            },
+            {
+              "kind": "curve",
+              "role": "Amortized time",
+              "formula": "O(log n)",
+              "curveId": "log-n"
+            },
+            {
+              "kind": "curve",
+              "role": "Worst time",
+              "formula": "O(n)",
+              "curveId": "linear"
+            }
+          ]
+        },
+        {
+          "kind": "operation",
+          "operation": "Split / join",
+          "bounds": [
+            {
+              "kind": "curve",
+              "role": "Best time",
+              "formula": "O(1)",
+              "curveId": "constant"
+            },
+            {
+              "kind": "curve",
+              "role": "Amortized time",
+              "formula": "O(log n)",
+              "curveId": "log-n"
+            },
+            {
+              "kind": "curve",
+              "role": "Worst time",
+              "formula": "O(n)",
+              "curveId": "linear"
+            }
+          ]
+        }
+      ]
+    },
+    "space": {
+      "mode": "operations",
+      "entries": [
+        {
+          "kind": "operation",
+          "operation": "Search",
+          "bounds": [
+            {
+              "kind": "curve",
+              "role": "Persistent space",
+              "formula": "O(n) total",
+              "curveId": "linear"
+            },
+            {
+              "kind": "curve",
+              "role": "Auxiliary space",
+              "formula": "O(1) iterative",
+              "curveId": "constant"
+            }
+          ]
+        },
+        {
+          "kind": "operation",
+          "operation": "Insert",
+          "bounds": [
+            {
+              "kind": "curve",
+              "role": "Persistent space",
+              "formula": "O(n) total (+1 node)",
+              "curveId": "linear"
+            },
+            {
+              "kind": "curve",
+              "role": "Auxiliary space",
+              "formula": "O(1) iterative",
+              "curveId": "constant"
+            }
+          ]
+        },
+        {
+          "kind": "operation",
+          "operation": "Delete",
+          "bounds": [
+            {
+              "kind": "curve",
+              "role": "Persistent space",
+              "formula": "O(n) total (-1 node)",
+              "curveId": "linear"
+            },
+            {
+              "kind": "curve",
+              "role": "Auxiliary space",
+              "formula": "O(1) iterative",
+              "curveId": "constant"
+            }
+          ]
+        },
+        {
+          "kind": "operation",
+          "operation": "Split / join",
+          "bounds": [
+            {
+              "kind": "curve",
+              "role": "Persistent space",
+              "formula": "O(n) total (nodes reused)",
+              "curveId": "linear"
+            },
+            {
+              "kind": "curve",
+              "role": "Auxiliary space",
+              "formula": "O(1) iterative",
+              "curveId": "constant"
+            }
+          ]
+        }
+      ]
+    }
+  }
+}
+```
+~~~~~
 
 # Complexity
 

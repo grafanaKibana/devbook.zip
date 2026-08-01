@@ -17,15 +17,20 @@ The block backs many .NET collections: `List<T>`, `Stack<T>`, and `Queue<T>` wra
 
 **Core shape:** equal-size elements → one contiguous fixed block → address `base + i·elementSize` → `O(1)` index, cache-local scan → no cheap growth or middle insert.
 
-The decisive behaviors are an index jump and an in-place write to one fixed slot.
+~~~~~tabsdown
+tab: Visualization
 
-The interactive view keeps the array state between actions. Reading jumps directly to one slot; writing to an occupied index replaces that slot's value without moving any neighbor. Inserting a _new element_ is a separate operation that requires shifting the tail or allocating another array.
+
 
 ```steptrace
 {"algorithm":"arrays"}
 ```
 
-# Representation and Layout
+The decisive behaviors are an index jump and an in-place write to one fixed slot.
+
+The interactive view keeps the array state between actions. Reading jumps directly to one slot; writing to an occupied index replaces that slot's value without moving any neighbor. Inserting a _new element_ is a separate operation that requires shifting the tail or allocating another array.
+
+## Representation and Layout
 
 The elements sit back-to-back in one allocation. Because every slot is the same width, the offset of element `i` is purely arithmetic: `address(a[i]) = base + i * elementSize`. Nothing before element `i` needs to be inspected, so `a[5_000_000]` costs exactly what `a[0]` costs. Fixed-width slots are the precondition for direct address arithmetic; variable-width payloads need indirection or extra offset/length metadata.
 
@@ -35,7 +40,164 @@ For a value type the values live in the block itself — `new int[1000]` is one 
 
 Contiguity is worth more than the complexity table shows. On representative x86-64 machines, cache lines are commonly 64 bytes, so one miss brings in a line of neighbors (16 elements for 4-byte ints), and the hardware prefetcher can stream later lines during a sequential scan. Representative orders of magnitude put an L1 hit near 1 ns and main-memory access near 100 ns, although both vary by processor and workload — the top rungs of the [[Home/Data Persistence/Caching#Latency ladder|latency ladder]]. A [[Home/Computer Science/Data Structures/Linear Structures/LinkedList|LinkedList]] node is a separate allocation at an unpredictable address, so every `Next` is a potential full-latency miss the prefetcher cannot anticipate — the same `n` and the same `O(n)` can run an order of magnitude slower. This is the physical reason .NET's default collections are array-backed.
 
-# Complexity
+## Boundaries Tied to Contiguity
+
+Fixed capacity is the hard one. The size is chosen at allocation, and there is no room to append. Growing means allocating a larger block, copying every element, and abandoning the old one; doing that on each insert is an accidental, quadratic re-implementation of [[Home/Computer Science/Data Structures/Linear Structures/Dynamic Array|Dynamic Array]], whose growth strategy makes append amortized `O(1)`.
+
+Middle insertion and deletion pay for packing. Inserting at index `k` in an `n`-element array moves `n − k` elements up by one slot before the new value can occupy its place; deletion moves them down. The contiguous invariant — no gaps between slots — is exactly what forces the shift, and it is why a structure with cheap splices (a linked list) trades away the `O(1)` index to get them.
+
+Out-of-bounds access has no natural floor or ceiling in the arithmetic itself. Managed runtimes range-check every access and throw `IndexOutOfRangeException`; in C, an out-of-bounds access is undefined behavior and may corrupt adjacent memory, crash, or behave unpredictably.
+
+The cache-locality advantage is not a rounding error. For small `n`, a contiguous scan routinely beats an asymptotically better structure — a tree or hash table whose nodes are scattered — because the constant factor is memory latency, not operation count. The crossover where the better big-O wins can sit well past the sizes a given workload ever reaches.
+
+tab: Complexity
+
+```complexity
+{
+  "version": 2,
+  "label": "Arrays complexity",
+  "variables": {
+    "inputSize": {
+      "symbol": "n",
+      "description": "number of input elements or states"
+    }
+  },
+  "resources": {
+    "time": {
+      "mode": "operations",
+      "entries": [
+        {
+          "kind": "operation",
+          "operation": "Access by index",
+          "bounds": [
+            {
+              "kind": "curve",
+              "role": "Time",
+              "formula": "O(1)",
+              "curveId": "constant"
+            }
+          ]
+        },
+        {
+          "kind": "operation",
+          "operation": "Search, unsorted",
+          "bounds": [
+            {
+              "kind": "curve",
+              "role": "Time",
+              "formula": "O(n)",
+              "curveId": "linear"
+            }
+          ]
+        },
+        {
+          "kind": "operation",
+          "operation": "Search, sorted",
+          "bounds": [
+            {
+              "kind": "curve",
+              "role": "Time",
+              "formula": "O(log n)",
+              "curveId": "log-n"
+            }
+          ]
+        },
+        {
+          "kind": "operation",
+          "operation": "Insert / delete at the middle",
+          "bounds": [
+            {
+              "kind": "curve",
+              "role": "Time",
+              "formula": "O(n)",
+              "curveId": "linear"
+            }
+          ]
+        },
+        {
+          "kind": "operation",
+          "operation": "Append / grow",
+          "bounds": [
+            {
+              "kind": "text",
+              "role": "Time",
+              "formula": "not supported"
+            }
+          ]
+        }
+      ]
+    },
+    "space": {
+      "mode": "operations",
+      "entries": [
+        {
+          "kind": "operation",
+          "operation": "Access by index",
+          "bounds": [
+            {
+              "kind": "curve",
+              "role": "Aux space",
+              "formula": "O(1)",
+              "curveId": "constant"
+            }
+          ]
+        },
+        {
+          "kind": "operation",
+          "operation": "Search, unsorted",
+          "bounds": [
+            {
+              "kind": "curve",
+              "role": "Aux space",
+              "formula": "O(1)",
+              "curveId": "constant"
+            }
+          ]
+        },
+        {
+          "kind": "operation",
+          "operation": "Search, sorted",
+          "bounds": [
+            {
+              "kind": "curve",
+              "role": "Aux space",
+              "formula": "O(1)",
+              "curveId": "constant"
+            }
+          ]
+        },
+        {
+          "kind": "operation",
+          "operation": "Insert / delete at the middle",
+          "bounds": [
+            {
+              "kind": "curve",
+              "role": "Aux space",
+              "formula": "O(1)",
+              "curveId": "constant"
+            }
+          ]
+        },
+        {
+          "kind": "operation",
+          "operation": "Storage",
+          "bounds": [
+            {
+              "kind": "curve",
+              "role": "Persistent structure",
+              "formula": "O(n)",
+              "curveId": "linear"
+            }
+          ]
+        }
+      ]
+    }
+  }
+}
+```
+~~~~~
+
+## Complexity
 
 | Operation                     | Time          | Aux space | Cause                                                                                                                                                   |
 | ----------------------------- | ------------- | --------- | ------------------------------------------------------------------------------------------------------------------------------------------------------- |
@@ -47,16 +209,6 @@ Contiguity is worth more than the complexity table shows. On representative x86-
 | Storage                       | —             | `O(n)`    | `n` equal-size slots occupy one contiguous allocation.                                                                                                  |
 
 Every bound follows from the layout. `O(1)` access is the address formula; `O(n)` middle mutation is the shift that contiguity forces; the absence of a cheap append is the fixed size. The `O(1)` auxiliary space on access and mutation is real — an in-place shift needs no scratch buffer — but a resize is a separate `O(n)` allocate-and-copy, which is why it is not an array operation at all.
-
-# Boundaries Tied to Contiguity
-
-Fixed capacity is the hard one. The size is chosen at allocation, and there is no room to append. Growing means allocating a larger block, copying every element, and abandoning the old one; doing that on each insert is an accidental, quadratic re-implementation of [[Home/Computer Science/Data Structures/Linear Structures/Dynamic Array|Dynamic Array]], whose growth strategy makes append amortized `O(1)`.
-
-Middle insertion and deletion pay for packing. Inserting at index `k` in an `n`-element array moves `n − k` elements up by one slot before the new value can occupy its place; deletion moves them down. The contiguous invariant — no gaps between slots — is exactly what forces the shift, and it is why a structure with cheap splices (a linked list) trades away the `O(1)` index to get them.
-
-Out-of-bounds access has no natural floor or ceiling in the arithmetic itself. Managed runtimes range-check every access and throw `IndexOutOfRangeException`; in C, an out-of-bounds access is undefined behavior and may corrupt adjacent memory, crash, or behave unpredictably.
-
-The cache-locality advantage is not a rounding error. For small `n`, a contiguous scan routinely beats an asymptotically better structure — a tree or hash table whose nodes are scattered — because the constant factor is memory latency, not operation count. The crossover where the better big-O wins can sit well past the sizes a given workload ever reaches.
 
 # Reference Drawer
 

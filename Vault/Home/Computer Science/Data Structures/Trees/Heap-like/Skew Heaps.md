@@ -21,6 +21,9 @@ The structure is the self-adjusting cousin of a [[Home/Computer Science/Data Str
 
 Use **Merge** on the same canonical heaps `[2, 7, 10]` and `[3, 5, 8]`. Unlike the leftist version, every touched node swaps its children unconditionally; **Reset** restores both source heaps.
 
+~~~~~tabsdown
+tab: Visualization
+
 ```steptrace
 {"algorithm":"skew-heap"}
 ```
@@ -32,6 +35,178 @@ Merge takes two heap roots and compares them. The smaller root becomes the resul
 Without the swap, that right spine only ever grows — repeated merges could stack the whole heap along one right path, and a single merge would cost `O(n)` forever. The unconditional swap breaks that: every node on the traversed spine has its freshly extended right child rotated to the left, out of the path future merges follow. A leftist heap achieves the same shortening deliberately, keeping the shorter subtree on the right by consulting the stored null-path length; the skew heap achieves it blindly, and pays for the difference in the analysis rather than in per-node memory.
 
 The invariant that survives every operation is heap order alone: a parent key never exceeds a child key. There is no structural invariant on shape — a skew heap can momentarily be a long right chain. Insert merges a singleton node into the heap. Extract-min removes the root and merges its two children. Both inherit merge's cost profile exactly.
+
+tab: Complexity
+
+```complexity
+{
+  "version": 2,
+  "label": "Skew Heaps complexity",
+  "variables": {
+    "inputSize": {
+      "symbol": "n",
+      "description": "number of input elements or states"
+    }
+  },
+  "resources": {
+    "time": {
+      "mode": "operations",
+      "entries": [
+        {
+          "kind": "operation",
+          "operation": "Merge(a, b)",
+          "bounds": [
+            {
+              "kind": "curve",
+              "role": "Best time",
+              "formula": "O(1)",
+              "curveId": "constant"
+            },
+            {
+              "kind": "curve",
+              "role": "Amortized time",
+              "formula": "O(log n)",
+              "curveId": "log-n"
+            },
+            {
+              "kind": "curve",
+              "role": "Worst single op",
+              "formula": "O(n)",
+              "curveId": "linear"
+            }
+          ]
+        },
+        {
+          "kind": "operation",
+          "operation": "Insert(x)",
+          "bounds": [
+            {
+              "kind": "curve",
+              "role": "Best time",
+              "formula": "O(1)",
+              "curveId": "constant"
+            },
+            {
+              "kind": "curve",
+              "role": "Amortized time",
+              "formula": "O(log n)",
+              "curveId": "log-n"
+            },
+            {
+              "kind": "curve",
+              "role": "Worst single op",
+              "formula": "O(n)",
+              "curveId": "linear"
+            }
+          ]
+        },
+        {
+          "kind": "operation",
+          "operation": "ExtractMin()",
+          "bounds": [
+            {
+              "kind": "curve",
+              "role": "Best time",
+              "formula": "O(1)",
+              "curveId": "constant"
+            },
+            {
+              "kind": "curve",
+              "role": "Amortized time",
+              "formula": "O(log n)",
+              "curveId": "log-n"
+            },
+            {
+              "kind": "curve",
+              "role": "Worst single op",
+              "formula": "O(n)",
+              "curveId": "linear"
+            }
+          ]
+        },
+        {
+          "kind": "operation",
+          "operation": "FindMin()",
+          "bounds": [
+            {
+              "kind": "curve",
+              "role": "Best time",
+              "formula": "O(1)",
+              "curveId": "constant"
+            },
+            {
+              "kind": "curve",
+              "role": "Amortized time",
+              "formula": "O(1)",
+              "curveId": "constant"
+            },
+            {
+              "kind": "curve",
+              "role": "Worst single op",
+              "formula": "O(1)",
+              "curveId": "constant"
+            }
+          ]
+        }
+      ]
+    },
+    "space": {
+      "mode": "operations",
+      "entries": [
+        {
+          "kind": "operation",
+          "operation": "Merge(a, b)",
+          "bounds": [
+            {
+              "kind": "curve",
+              "role": "Space",
+              "formula": "O(n) structure, no per-node field",
+              "curveId": "linear"
+            }
+          ]
+        },
+        {
+          "kind": "operation",
+          "operation": "Insert(x)",
+          "bounds": [
+            {
+              "kind": "curve",
+              "role": "Space",
+              "formula": "O(n) worst-case recursion stack",
+              "curveId": "linear"
+            }
+          ]
+        },
+        {
+          "kind": "operation",
+          "operation": "ExtractMin()",
+          "bounds": [
+            {
+              "kind": "curve",
+              "role": "Space",
+              "formula": "O(n) worst-case recursion stack",
+              "curveId": "linear"
+            }
+          ]
+        },
+        {
+          "kind": "operation",
+          "operation": "FindMin()",
+          "bounds": [
+            {
+              "kind": "curve",
+              "role": "Space",
+              "formula": "O(1)",
+              "curveId": "constant"
+            }
+          ]
+        }
+      ]
+    }
+  }
+}
+```
+~~~~~
 
 # Complexity
 

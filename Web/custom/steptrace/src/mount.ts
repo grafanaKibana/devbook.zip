@@ -23,13 +23,12 @@ import {
 } from "./render"
 import type { RegistryApi } from "./registry"
 import type {
+  HostTabsHandle,
   InteractiveStructureDefinition,
   MountHandle,
-  StepTraceBlockConfig,
+  StepTraceConfig,
   StepTraceHost,
-  StepTraceTabsConfig,
 } from "./types"
-import { isTabsConfig, normalizeTabsConfig } from "./tabs"
 import { watchHintFor } from "./watch-hints"
 
 const LOG_ROWS = 10
@@ -51,121 +50,11 @@ export function createMount(
 ) {
   const { kindOf, listAlgorithms, buildFrames } = registry
   const structureRegistry = new Map(structures.map((structure) => [structure.id, structure]))
-  function mountTabs(
+  function mountNow(
     root: HTMLElement,
-    config: StepTraceTabsConfig,
+    config: StepTraceConfig,
     host: StepTraceHost = {},
   ): MountHandle {
-    let normalized
-    try {
-      normalized = normalizeTabsConfig(config)
-    } catch (error) {
-      root.textContent = error instanceof Error ? error.message : String(error)
-      return { destroy: () => root.replaceChildren() }
-    }
-    const { tabs } = normalized
-
-    root.classList.add("steptrace", "steptrace--tabs")
-    root.setAttribute("role", "group")
-    root.setAttribute("aria-label", "Tabbed algorithm visualizer")
-
-    const tabsShell = el("div", "steptrace__tabs-shell")
-    const tablist = el("div", "steptrace__tabs")
-    tablist.setAttribute("role", "tablist")
-    tablist.setAttribute("aria-label", "Visualization variants")
-    const tabDesc = el("div", "steptrace__tabs-desc")
-    tabDesc.setAttribute("aria-live", "polite")
-    const panels = el("div", "steptrace__tabpanels")
-
-    const buttons: HTMLButtonElement[] = []
-    const panelShells: HTMLElement[] = []
-    const panelMounts: HTMLElement[] = []
-    const handles: Array<MountHandle | null> = tabs.map(() => null)
-    let activeIndex = normalized.selected
-
-    const showTab = (index: number, focus = false) => {
-      const next = Math.min(Math.max(index, 0), tabs.length - 1)
-      if (next === activeIndex && handles[next]) {
-        if (focus) buttons[next]?.focus()
-        return
-      }
-      handles[activeIndex]?.pause?.()
-      activeIndex = next
-      const tab = tabs[next]
-      tabDesc.textContent = tab.description || ""
-      buttons.forEach((button, i) => {
-        const selected = i === next
-        button.setAttribute("aria-selected", String(selected))
-        button.tabIndex = selected ? 0 : -1
-        button.classList.toggle("steptrace__tab--selected", selected)
-        panelShells[i].hidden = !selected
-      })
-      if (!handles[next]) handles[next] = mount(panelMounts[next], tab.config, host)
-      if (focus) buttons[next]?.focus()
-    }
-
-    tabs.forEach((tab, index) => {
-      const tabId = `steptrace-tab-${++mountSerial}`
-      const panelId = `steptrace-panel-${++mountSerial}`
-      const button = document.createElement("button")
-      button.type = "button"
-      button.className = "steptrace__tab"
-      button.id = tabId
-      button.setAttribute("role", "tab")
-      button.setAttribute("aria-controls", panelId)
-      button.textContent = tab.name
-      button.tabIndex = index === activeIndex ? 0 : -1
-      button.addEventListener("click", () => showTab(index))
-      button.addEventListener("keydown", (event) => {
-        if (event.key === "ArrowLeft" || event.key === "ArrowUp") {
-          event.preventDefault()
-          showTab((index - 1 + tabs.length) % tabs.length, true)
-        } else if (event.key === "ArrowRight" || event.key === "ArrowDown") {
-          event.preventDefault()
-          showTab((index + 1) % tabs.length, true)
-        } else if (event.key === "Home") {
-          event.preventDefault()
-          showTab(0, true)
-        } else if (event.key === "End") {
-          event.preventDefault()
-          showTab(tabs.length - 1, true)
-        }
-      })
-      buttons.push(button)
-      tablist.append(button)
-
-      const panelShell = el("div", "steptrace__tabpanel")
-      panelShell.id = panelId
-      panelShell.hidden = index !== activeIndex
-      panelShell.setAttribute("role", "tabpanel")
-      panelShell.setAttribute("aria-labelledby", tabId)
-      const panelMount = el("div", "steptrace__tabpanel-body")
-      panelShell.append(panelMount)
-      panelShells.push(panelShell)
-      panelMounts.push(panelMount)
-      panels.append(panelShell)
-    })
-
-    tabsShell.append(tablist, tabDesc)
-    root.replaceChildren(tabsShell, panels)
-    activeIndex = -1
-    showTab(normalized.selected)
-
-    return {
-      destroy() {
-        for (const handle of handles) handle?.destroy()
-        root.replaceChildren()
-        root.classList.remove("steptrace", "steptrace--tabs", "steptrace--reduced")
-      },
-    }
-  }
-
-  function mount(
-    root: HTMLElement,
-    config: StepTraceBlockConfig,
-    host: StepTraceHost = {},
-  ): MountHandle {
-    if (isTabsConfig(config)) return mountTabs(root, config, host)
     const structure = structureRegistry.get(config.algorithm)
     if (structure) {
       try {
@@ -207,6 +96,7 @@ export function createMount(
     let currentGraph = null
     let currentMilestones = []
     let speedControlHandle = null
+    const hasHostTabs = typeof host.mountTabs === "function"
 
     // --- card chrome: head (breadcrumb + counter) / body (stage | rail) / foot ---
     const head = el("div", "steptrace__head")
@@ -224,6 +114,7 @@ export function createMount(
     const stageCol = el("div", "steptrace__stage-col")
     const rail = el("div", "steptrace__rail")
     const railRegion = el("div", "steptrace__rail-region")
+    railRegion.classList.toggle("steptrace__rail-region--fallback", !hasHostTabs)
     railRegion.id = `steptrace-rail-${++mountSerial}`
     railRegion.setAttribute("role", "region")
     railRegion.setAttribute("aria-label", "Trace and watch")
@@ -277,7 +168,8 @@ export function createMount(
     watchWrap.append(watchLabel, watchEl)
     watchWrap.hidden = true
     railRegion.append(traceWrap, watchWrap)
-    rail.append(detailSwitch, railRegion)
+    if (!hasHostTabs) rail.append(detailSwitch)
+    rail.append(railRegion)
     const body = el("div", "steptrace__body")
     body.append(stageCol, rail)
 
@@ -449,8 +341,11 @@ export function createMount(
 
     let layoutMode = "unknown"
     let compactPanel: "trace" | "watch" | null = null
+    let hostTabsHandle: HostTabsHandle | null = null
     let hasWatch = false
     let destroyed = false
+    let visible = true
+    let wasPlaying = false
     let railAnimationFrame: number | null = null
     let railAnimationTimer: ReturnType<typeof setTimeout> | null = null
 
@@ -487,9 +382,51 @@ export function createMount(
       })
     }
 
+    function destroyHostTabs() {
+      if (!hostTabsHandle) return
+      compactPanel = hostTabsHandle.selection as "trace" | "watch" | null
+      hostTabsHandle.destroy()
+      hostTabsHandle = null
+    }
+
+    function ensureHostTabs() {
+      if (!hasHostTabs || hostTabsHandle || layoutMode !== "compact") return
+      hostTabsHandle = host.mountTabs!(railRegion, {
+        label: "Trace and watch",
+        selection: compactPanel,
+        tabs: [
+          { id: "trace", label: "Trace", panel: traceWrap },
+          { id: "watch", label: "Watch", panel: watchWrap },
+        ],
+        onSelectionChange(selection) {
+          compactPanel = selection === "trace" || selection === "watch" ? selection : null
+          refitCompactTrace()
+        },
+      })
+      hostTabsHandle.setAvailable("watch", hasWatch)
+    }
+
     function renderRailMode(previousMode = layoutMode, animate = false) {
       const compact = layoutMode === "compact"
       const active = document.activeElement
+
+      if (hasHostTabs) {
+        const restoreFocus =
+          previousMode === "compact" &&
+          !compact &&
+          active &&
+          railRegion.contains(active) &&
+          !traceWrap.contains(active) &&
+          !watchWrap.contains(active)
+        if (compact) ensureHostTabs()
+        else destroyHostTabs()
+        hostTabsHandle?.setAvailable("watch", hasWatch)
+        traceWrap.hidden = compact ? compactPanel !== "trace" : false
+        watchWrap.hidden = compact ? !hasWatch || compactPanel !== "watch" : !hasWatch
+        if (restoreFocus) scrub.focus()
+        refitCompactTrace()
+        return
+      }
 
       if (
         previousMode === "compact" &&
@@ -921,7 +858,9 @@ export function createMount(
       }
       hasWatch = maxRows > 0
       if (!hasWatch && compactPanel === "watch") compactPanel = null
-      detailSwitch.replaceChildren(traceButton, ...(hasWatch ? [watchButton] : []))
+      if (!hasHostTabs) {
+        detailSwitch.replaceChildren(traceButton, ...(hasWatch ? [watchButton] : []))
+      }
       watchEl.style.setProperty("--steptrace-watch-rows", String(maxRows))
       renderRailMode()
     }
@@ -994,9 +933,21 @@ export function createMount(
       pause() {
         if (player) player.pause()
       },
+      setVisible(nextVisible) {
+        if (destroyed || visible === nextVisible) return
+        visible = nextVisible
+        if (!nextVisible) {
+          wasPlaying = Boolean(player?.playing)
+          player?.pause()
+        } else if (wasPlaying) {
+          wasPlaying = false
+          player?.play()
+        }
+      },
       destroy() {
         destroyed = true
         clearRailAnimation()
+        destroyHostTabs()
         if (player) player.destroy()
         if (currentView && currentView.destroy) currentView.destroy()
         if (speedControlHandle && speedControlHandle.destroy) speedControlHandle.destroy()
@@ -1012,6 +963,55 @@ export function createMount(
           "steptrace--compact-stage",
           "steptrace--narrow",
         )
+      },
+    }
+  }
+
+  function mount(
+    root: HTMLElement,
+    config: StepTraceConfig,
+    host: StepTraceHost = {},
+  ): MountHandle {
+    const panels: HTMLElement[] = []
+    for (
+      let panel = root.closest<HTMLElement>(".tabsdown__panel");
+      panel;
+      panel = panel.parentElement?.closest<HTMLElement>(".tabsdown__panel") ?? null
+    ) {
+      panels.push(panel)
+    }
+    if (!panels.length || typeof MutationObserver === "undefined") {
+      return mountNow(root, config, host)
+    }
+
+    let child: MountHandle | null = null
+    let destroyed = false
+    let visible = panels.every((panel) => !panel.hidden)
+    const syncVisibility = () => {
+      if (destroyed) return
+      const nextVisible = panels.every((panel) => !panel.hidden)
+      if (nextVisible && !child) child = mountNow(root, config, host)
+      if (nextVisible !== visible) child?.setVisible?.(nextVisible)
+      visible = nextVisible
+    }
+    const observer = new MutationObserver(syncVisibility)
+    panels.forEach((panel) =>
+      observer.observe(panel, { attributes: true, attributeFilter: ["hidden"] }),
+    )
+    if (visible) child = mountNow(root, config, host)
+
+    return {
+      pause() {
+        child?.pause?.()
+      },
+      setVisible(nextVisible) {
+        child?.setVisible?.(nextVisible)
+      },
+      destroy() {
+        destroyed = true
+        observer.disconnect()
+        child?.destroy()
+        if (!child) root.replaceChildren()
       },
     }
   }

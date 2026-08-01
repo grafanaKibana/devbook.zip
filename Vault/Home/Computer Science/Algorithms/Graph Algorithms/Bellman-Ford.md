@@ -19,6 +19,9 @@ Correctness rests on a fact about shortest paths: with no negative cycle present
 
 The trace uses the adverse scan order `2→3, 1→2, 0→2, 0→1`, so each round exposes one more edge of the shortest path.
 
+~~~~~tabsdown
+tab: Visualization
+
 ```steptrace
 {"algorithm":"bellman-ford"}
 ```
@@ -46,6 +49,90 @@ Round 4   (V-th) no edge relaxes -> no negative cycle; distances final
 ```
 
 Round 2 is the decisive transition: the negative edge `1→2` pulls `dist[2]` below the direct `0→2` estimate of `5`, and round 3 propagates that gain to `dist[3]`. A shortest-path-ordered sweep would have converged in a single round; the adverse order is what exposes the per-round frontier and the `V−1` bound. The `V`-th round changes nothing, which is exactly the negative-cycle check coming up empty.
+
+tab: Complexity
+
+```complexity
+{
+  "version": 2,
+  "label": "Bellman-Ford complexity",
+  "variables": {
+    "edgeCount": {
+      "symbol": "E",
+      "description": "number of edges"
+    },
+    "vertexCount": {
+      "symbol": "V",
+      "description": "number of vertices"
+    }
+  },
+  "resources": {
+    "time": {
+      "mode": "operations",
+      "entries": [
+        {
+          "kind": "operation",
+          "operation": "Best",
+          "bounds": [
+            {
+              "kind": "curve",
+              "role": "Time",
+              "formula": "O(E)",
+              "curveId": "linear"
+            }
+          ]
+        },
+        {
+          "kind": "operation",
+          "operation": "Average",
+          "bounds": [
+            {
+              "kind": "text",
+              "role": "Time",
+              "formula": "distribution-dependent; O(V·E) upper bound"
+            }
+          ]
+        },
+        {
+          "kind": "operation",
+          "operation": "Worst",
+          "bounds": [
+            {
+              "kind": "text",
+              "role": "Time",
+              "formula": "O(V·E)"
+            }
+          ]
+        }
+      ]
+    },
+    "space": {
+      "mode": "cases",
+      "entries": [
+        {
+          "kind": "case",
+          "role": "Best",
+          "formula": "O(V)",
+          "curveId": "linear"
+        },
+        {
+          "kind": "case",
+          "role": "Average",
+          "formula": "O(V)",
+          "curveId": "linear"
+        },
+        {
+          "kind": "case",
+          "role": "Worst",
+          "formula": "O(V)",
+          "curveId": "linear"
+        }
+      ]
+    }
+  }
+}
+```
+~~~~~
 
 # Complexity
 

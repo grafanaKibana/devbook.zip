@@ -17,15 +17,20 @@ That move is only available when a key decomposes into a bounded number of digit
 
 **Core condition:** keys decomposable into `d` fixed-width digits over radix `b` → one stable pass per digit distributes then gathers → `Θ(d · (n + b))` time, linear whenever `d` is constant.
 
-# Trace
+~~~~~tabsdown
+tab: Visualization
 
-The trace runs LSD radix sort on `[170, 45, 75, 90, 802, 24, 2, 66]`, making three base-10 passes from the ones digit upward. Each pass selects one digit position, distributes the keys into digit buckets without disturbing ties, then gathers the buckets into the input order for the next position.
+
 
 ```steptrace
 { "algorithm": "radix-sort", "array": [170, 45, 75, 90, 802, 24, 2, 66], "radix": 10, "mode": "LSD" }
 ```
 
-# Why the Passes Compose
+## Trace
+
+The trace runs LSD radix sort on `[170, 45, 75, 90, 802, 24, 2, 66]`, making three base-10 passes from the ones digit upward. Each pass selects one digit position, distributes the keys into digit buckets without disturbing ties, then gathers the buckets into the input order for the next position.
+
+## Why the Passes Compose
 
 LSD (least-significant-digit) radix sort runs one pass per digit position, from the rightmost digit up to the leftmost. Each pass performs a **stable** distribution keyed on that one digit — no other part of the key is examined. A stable [[Home/Computer Science/Algorithms/Sorting Algorithms/Counting Sort|Counting Sort]] is one way to implement that distribution; the trace shows the equivalent FIFO bucket view. After the pass over the most significant digit, the array is fully ordered, and no two keys were ever ranked against each other.
 
@@ -42,7 +47,109 @@ hundreds →     2  24  45  66  75   90  170  802    fully ordered
 
 `170` and `75` both carry `7` in the tens place. The tens pass reads only that digit, so it leaves them in the order the ones pass produced — `170` before `75`. The hundreds pass then places them by hundreds digits `1` and `0`, moving `75` ahead of `170` without re-examining the lower digits. Every tie survives to the next pass because every pass is stable.
 
-# Complexity
+tab: Complexity
+
+```complexity
+{
+  "version": 2,
+  "label": "Radix Sort complexity",
+  "variables": {
+    "branchingFactor": {
+      "symbol": "b",
+      "description": "search branching factor or radix base"
+    },
+    "inputSize": {
+      "symbol": "n",
+      "description": "number of input elements or states"
+    },
+    "parameterD": {
+      "symbol": "d",
+      "description": "algorithm-specific depth, digit count, or dimension"
+    }
+  },
+  "resources": {
+    "time": {
+      "mode": "operations",
+      "entries": [
+        {
+          "kind": "operation",
+          "operation": "Best",
+          "bounds": [
+            {
+              "kind": "text",
+              "role": "Time",
+              "formula": "Θ(d · (n + b))"
+            }
+          ]
+        },
+        {
+          "kind": "operation",
+          "operation": "Average",
+          "bounds": [
+            {
+              "kind": "text",
+              "role": "Time",
+              "formula": "Θ(d · (n + b))"
+            }
+          ]
+        },
+        {
+          "kind": "operation",
+          "operation": "Worst",
+          "bounds": [
+            {
+              "kind": "text",
+              "role": "Time",
+              "formula": "Θ(d · (n + b))"
+            }
+          ]
+        }
+      ]
+    },
+    "space": {
+      "mode": "operations",
+      "entries": [
+        {
+          "kind": "operation",
+          "operation": "Best",
+          "bounds": [
+            {
+              "kind": "text",
+              "role": "Auxiliary space",
+              "formula": "Θ(n + b)"
+            }
+          ]
+        },
+        {
+          "kind": "operation",
+          "operation": "Average",
+          "bounds": [
+            {
+              "kind": "text",
+              "role": "Auxiliary space",
+              "formula": "Θ(n + b)"
+            }
+          ]
+        },
+        {
+          "kind": "operation",
+          "operation": "Worst",
+          "bounds": [
+            {
+              "kind": "text",
+              "role": "Auxiliary space",
+              "formula": "Θ(n + b)"
+            }
+          ]
+        }
+      ]
+    }
+  }
+}
+```
+~~~~~
+
+## Complexity
 
 | Case | Time | Auxiliary space | Cause |
 | --- | --- | --- | --- |
@@ -54,7 +161,7 @@ hundreds →     2  24  45  66  75   90  170  802    fully ordered
 
 This stable LSD implementation uses `Θ(n + b)` auxiliary space: an output buffer for `n` keys plus either a per-digit count array or equivalent bucket storage of size `b`. It is not in-place, though specialized in-place radix variants exist. For variable-length string keys, the MSD (most-significant-digit) variant recurses per bucket from the leftmost digit and can stop once a prefix is unique.
 
-# Where the Linear Bound Stops Applying
+## Where the Linear Bound Stops Applying
 
 **Variable-length keys.** Non-negative integers with different digit counts work because missing high-order positions behave like leading zeros; the trace sorts `2`, `24`, and `802` this way. Variable-length lexicographic strings are different: blindly aligning them from the right changes the meaning of character positions. Their LSD representation needs a common width and a missing-character sentinel below every real character, or the algorithm should switch to MSD radix and recurse left-to-right.
 

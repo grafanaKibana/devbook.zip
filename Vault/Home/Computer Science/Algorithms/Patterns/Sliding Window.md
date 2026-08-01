@@ -17,13 +17,18 @@ The technique applies whenever the answer concerns a contiguous sub-array or sub
 
 **Core condition:** contiguous range + an aggregate that updates in `O(1)` on element entry and exit → one linear pass replaces per-window recomputation → `O(n)` time.
 
-# Trace
+~~~~~tabsdown
+tab: Visualization
 
-The trace searches `[2, 3, 1, 2, 4, 3]` for the shortest contiguous sub-array whose sum reaches `7`.
+
 
 ```steptrace
 {"algorithm":"sliding-window","array":[2,3,1,2,4,3],"target":7}
 ```
+
+# Trace
+
+The trace searches `[2, 3, 1, 2, 4, 3]` for the shortest contiguous sub-array whose sum reaches `7`.
 
 The right boundary advances first, adding each entering element to a running sum in `O(1)`, until the sum reaches `7` and a valid window exists. The left boundary then advances, subtracting the leaving element in `O(1)`; each contraction that keeps the sum at or above `7` produces a shorter candidate. Because non-negative values only raise the sum on entry and lower it on exit, once no shorter valid window is reachable from the current left the left boundary never moves back. Two consecutive windows differ only in their boundary elements, so the running sum is adjusted by those two elements rather than rebuilt from the window's contents.
 
@@ -32,6 +37,109 @@ The right boundary advances first, adding each entering element to a running sum
 Every index is added to the aggregate exactly once, when the right boundary passes it, and removed at most once, when the left boundary passes it. The right boundary advances `n` times over the whole run; the left boundary advances at most `n` times and never overtakes the right. Total boundary movement is bounded by `2n`, and each movement does `O(1)` aggregate maintenance — hence `O(n)`, independent of window width.
 
 The bound holds only while the aggregate is incrementally maintainable: adding the entering element and removing the leaving element must each be `O(1)` and must, together, fully determine the new window's value. A running sum qualifies (`sum += entering; sum -= leaving`); a count of elements qualifies; a frequency map keyed by symbol qualifies, because a single key's count is incremented on entry and decremented on exit. An aggregate that cannot be reconstructed from a single leaving element — a window maximum, for instance — does not qualify, and forces a different structure.
+
+tab: Complexity
+
+```complexity
+{
+  "version": 2,
+  "label": "Sliding Window complexity",
+  "variables": {
+    "inputSize": {
+      "symbol": "n",
+      "description": "number of input elements or states"
+    },
+    "keyRange": {
+      "symbol": "k",
+      "description": "key range, digit count, or requested result count"
+    }
+  },
+  "resources": {
+    "time": {
+      "mode": "operations",
+      "entries": [
+        {
+          "kind": "operation",
+          "operation": "Sliding window, numeric aggregate",
+          "bounds": [
+            {
+              "kind": "curve",
+              "role": "Time",
+              "formula": "O(n)",
+              "curveId": "linear"
+            }
+          ]
+        },
+        {
+          "kind": "operation",
+          "operation": "Sliding window, frequency map over k symbols",
+          "bounds": [
+            {
+              "kind": "curve",
+              "role": "Time",
+              "formula": "O(n)",
+              "curveId": "linear"
+            }
+          ]
+        },
+        {
+          "kind": "operation",
+          "operation": "Brute-force recompute per window",
+          "bounds": [
+            {
+              "kind": "text",
+              "role": "Time",
+              "formula": "O(n·k) fixed width, O(n²) variable"
+            }
+          ]
+        }
+      ]
+    },
+    "space": {
+      "mode": "operations",
+      "entries": [
+        {
+          "kind": "operation",
+          "operation": "Sliding window, numeric aggregate",
+          "bounds": [
+            {
+              "kind": "curve",
+              "role": "Auxiliary space",
+              "formula": "O(1)",
+              "curveId": "constant"
+            }
+          ]
+        },
+        {
+          "kind": "operation",
+          "operation": "Sliding window, frequency map over k symbols",
+          "bounds": [
+            {
+              "kind": "curve",
+              "role": "Auxiliary space",
+              "formula": "O(k)",
+              "curveId": "linear"
+            }
+          ]
+        },
+        {
+          "kind": "operation",
+          "operation": "Brute-force recompute per window",
+          "bounds": [
+            {
+              "kind": "curve",
+              "role": "Auxiliary space",
+              "formula": "O(1)",
+              "curveId": "constant"
+            }
+          ]
+        }
+      ]
+    }
+  }
+}
+```
+~~~~~
 
 # Complexity
 
@@ -100,7 +208,7 @@ Negative numbers break the contraction rule even though the sum still updates in
 >     return best;
 > }
 > ```
-> The fixed form maintains a scalar sum; the variable form maintains a frequency map (`lastSeen`) whose per-key update is what keeps the pass `O(n)`.
+> The fixed form maintains a scalar sum; the variable form maintains a last-seen index map (`lastSeen`) whose per-key update is what keeps the pass `O(n)`.
 
 # Comparison
 
