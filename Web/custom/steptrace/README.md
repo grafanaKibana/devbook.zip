@@ -2,6 +2,8 @@
 
 StepTrace renders interactive algorithm traces from one fenced block in both Obsidian and Quartz:
 
+Design, consistency, responsive, and visual-review rules live in [`DESIGN.md`](DESIGN.md).
+
 ````markdown
 ```steptrace
 { "algorithm": "bubble-sort", "array": [8, 3, 5, 1] }

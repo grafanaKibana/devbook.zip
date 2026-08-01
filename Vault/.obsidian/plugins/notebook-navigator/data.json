@@ -16,6 +16,10 @@
       "shortcuts": [
         {
           "type": "note",
+          "path": "Home/index.md"
+        },
+        {
+          "type": "note",
           "path": "Home/Questions.md"
         },
         {
@@ -548,6 +552,11 @@
   "customVaultName": "",
   "pinnedNotes": {
     "AGENTS.md": {
+      "folder": true,
+      "tag": false,
+      "property": false
+    },
+    "Home/index.md": {
       "folder": true,
       "tag": false,
       "property": false
