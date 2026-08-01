@@ -24,6 +24,7 @@ import {
   Robots,
   Seo,
   unlistGenerated,
+  withCanonicalSocialUrls,
 } from "./custom/seo"
 import { componentRegistry } from "./quartz/components/registry"
 import type { QuartzComponent, QuartzComponentConstructor } from "./quartz/components/types"
@@ -90,6 +91,11 @@ config.plugins.emitters.push(StepTraceStatic())
 config.plugins.emitters.push(Robots())
 
 const layout = await loadQuartzLayout()
+layout.defaults.head = withCanonicalSocialUrls(layout.defaults.head!)
+for (const pageLayout of Object.values(layout.byPageType)) {
+  if (pageLayout.head) pageLayout.head = withCanonicalSocialUrls(pageLayout.head)
+}
+
 const siteMarquee = SiteMarquee()
 layout.defaults.beforeBody = [siteMarquee, ...(layout.defaults.beforeBody ?? [])]
 for (const pageLayout of Object.values(layout.byPageType)) {

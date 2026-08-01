@@ -4,6 +4,7 @@ import test from "node:test"
 import { render } from "preact-render-to-string"
 
 import HeadConstructor from "../quartz/components/Head"
+import { fetchCanonical } from "../quartz/components/scripts/util"
 import type { PageTypePluginEntry } from "../quartz/plugins/types"
 import type { QuartzPluginData } from "../quartz/plugins/vfile"
 import { simplifySlug } from "../quartz/util/path"
@@ -17,6 +18,7 @@ import {
   robotsTxt,
   seoHead,
   unlistGenerated,
+  withCanonicalSocialUrls,
 } from "./seo"
 
 const fileData = (
@@ -26,7 +28,7 @@ const fileData = (
 ): QuartzPluginData => ({ slug, frontmatter: { title: "Fixture", ...frontmatter }, description })
 
 const renderedHead = (data: QuartzPluginData): string => {
-  const Head = HeadConstructor()
+  const Head = withCanonicalSocialUrls(HeadConstructor())
   return render(
     Head({
       cfg: {
@@ -102,19 +104,51 @@ test("native entity fallback becomes semantic text without double-escaping Head 
 test("head policy canonicalizes public routes and noindexes only utility and error routes", () => {
   for (const slug of ["index", "security/index", "security/hashing", "questions"]) {
     const html = render(seoHead(fileData(slug)))
-    assert.match(html, new RegExp(`rel="canonical" href="${canonicalUrl(slug)}"`))
+    assert.match(html, new RegExp(`href="${canonicalUrl(slug)}" rel="canonical"`))
     assert.doesNotMatch(html, /name="robots"/)
   }
 
   for (const slug of ["tags", "tags/foldernote", "roadmap.canvas"]) {
     const html = render(seoHead(fileData(slug)))
-    assert.match(html, new RegExp(`rel="canonical" href="${canonicalUrl(slug)}"`))
+    assert.match(html, new RegExp(`href="${canonicalUrl(slug)}" rel="canonical"`))
     assert.match(html, /name="robots" content="noindex,follow"/)
   }
 
   const notFound = render(seoHead(fileData("404")))
   assert.match(notFound, /name="robots" content="noindex,follow"/)
   assert.doesNotMatch(notFound, /rel="canonical"/)
+})
+
+test("self-canonical metadata does not trigger Quartz alias redirect fetching", async () => {
+  const html = render(seoHead(fileData("security/hashing")))
+  const requests: string[] = []
+  const originalFetch = globalThis.fetch
+  globalThis.fetch = async (input) => {
+    requests.push(String(input))
+    return new Response(html, { headers: { "content-type": "text/html" } })
+  }
+
+  try {
+    await fetchCanonical(new URL("https://devbook.zip/security/hashing"))
+  } finally {
+    globalThis.fetch = originalFetch
+  }
+
+  assert.deepEqual(requests, ["https://devbook.zip/security/hashing"])
+})
+
+test("folder canonical and social URLs use the same simplified route", () => {
+  const html = renderedHead(fileData("security/index"))
+  assert.match(
+    render(seoHead(fileData("security/index"))),
+    /<link href="https:\/\/devbook\.zip\/security\/" rel="canonical"\/?>/,
+  )
+  assert.match(html, /<meta property="og:url" content="https:\/\/devbook\.zip\/security\/"\/?>/)
+  assert.match(
+    html,
+    /<meta property="twitter:url" content="https:\/\/devbook\.zip\/security\/"\/?>/,
+  )
+  assert.doesNotMatch(html, /https:\/\/devbook\.zip\/security\/index/)
 })
 
 test("homepage emits one safely serialized WebSite schema", () => {

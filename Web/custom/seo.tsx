@@ -1,6 +1,8 @@
 import fs from "node:fs/promises"
 import path from "node:path"
-import { Fragment, h } from "preact"
+import { cloneElement, Fragment, h } from "preact"
+import type { ComponentChild, VNode } from "preact"
+import type { QuartzComponent } from "../quartz/components/types"
 import type {
   PageTypePluginEntry,
   QuartzEmitterPlugin,
@@ -77,7 +79,8 @@ export function seoHead(
   return h(
     Fragment,
     null,
-    canonical && h("link", { rel: "canonical", href: canonical }),
+    // Quartz's SPA reserves the rel-first serialization for alias redirects.
+    canonical && h("link", { href: canonical, rel: "canonical" }),
     isNoIndex(slug) && h("meta", { name: "robots", content: "noindex,follow" }),
     website &&
       h("script", {
@@ -85,6 +88,34 @@ export function seoHead(
         dangerouslySetInnerHTML: { __html: website },
       }),
   )
+}
+
+const rewriteSocialUrls = (child: ComponentChild, canonical: string): ComponentChild => {
+  if (Array.isArray(child)) return child.map((nested) => rewriteSocialUrls(nested, canonical))
+  if (!child || typeof child !== "object" || !("type" in child)) return child
+
+  const node = child as VNode<Record<string, unknown>>
+  const property = node.props.property
+  if (node.type === "meta" && (property === "og:url" || property === "twitter:url")) {
+    return cloneElement(node, { content: canonical })
+  }
+
+  const children = node.props.children as ComponentChild | undefined
+  return children === undefined
+    ? node
+    : cloneElement(node, { children: rewriteSocialUrls(children, canonical) })
+}
+
+export const withCanonicalSocialUrls = (Head: QuartzComponent): QuartzComponent => {
+  const CanonicalSocialHead: QuartzComponent = (props) => {
+    const slug = String(props.fileData.slug ?? "")
+    if (slug === "404") return Head(props)
+
+    const baseUrl = requiredConfigText(props.cfg.baseUrl, "baseUrl")
+    return rewriteSocialUrls(Head(props), canonicalUrl(slug, baseUrl))
+  }
+
+  return Object.assign(CanonicalSocialHead, Head)
 }
 
 export function requireNamedPlugin<T extends { name: string }>(
