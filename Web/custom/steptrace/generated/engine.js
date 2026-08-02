@@ -3869,13 +3869,13 @@
         return select;
       },
       button(buttonLabel, primary = false) {
-        const button2 = el(
+        const button = el(
           "button",
           `steptrace__structure-action${primary ? " steptrace__structure-action--primary" : ""}`
         );
-        button2.type = "button";
-        button2.textContent = buttonLabel;
-        return button2;
+        button.type = "button";
+        button.textContent = buttonLabel;
+        return button;
       },
       listen(node2, type, listener) {
         node2.addEventListener(type, listener);
@@ -7117,8 +7117,7 @@
     }
   };
   var GraphRecorder = class {
-    constructor(graph) {
-      this.graph = graph;
+    constructor() {
       this.frames = [];
       this._visited = /* @__PURE__ */ new Set();
       this._frontier = [];
@@ -7711,8 +7710,7 @@
       this.grid = grid.map((row) => row.slice());
       this._push("init", message);
     }
-    stage(k, message) {
-      this.k = k;
+    _clearRelaxation() {
       this.cur = null;
       this.deps = [];
       this.candidate = null;
@@ -7721,6 +7719,10 @@
       this.result = null;
       this.operandA = null;
       this.operandB = null;
+    }
+    stage(k, message) {
+      this.k = k;
+      this._clearRelaxation();
       this._push("stage", message);
     }
     relax(r, c, deps, candidate, decision, value, message) {
@@ -7737,25 +7739,11 @@
     }
     reportNegativeCycle(nodes5, message) {
       this.negativeCycle = nodes5.slice();
-      this.cur = null;
-      this.deps = [];
-      this.candidate = null;
-      this.decision = null;
-      this.previous = null;
-      this.result = null;
-      this.operandA = null;
-      this.operandB = null;
+      this._clearRelaxation();
       this._push("negative-cycle", message);
     }
     done(message) {
-      this.cur = null;
-      this.deps = [];
-      this.candidate = null;
-      this.decision = null;
-      this.previous = null;
-      this.result = null;
-      this.operandA = null;
-      this.operandB = null;
+      this._clearRelaxation();
       this._push("done", message);
     }
     _push(type, message) {
@@ -11030,14 +11018,11 @@
   }
 
   // custom/steptrace/src/algorithms/binomial-queue.ts
-  function parseBinomialQueueConfig(_config) {
-    return {};
-  }
   var binomialQueue = {
     id: "binomial-queue",
     family: "heap-selection",
     meta: { label: "Binomial queue" },
-    parse: parseBinomialQueueConfig,
+    parse: () => ({}),
     mount: mountBinomialQueue
   };
 
@@ -15573,83 +15558,6 @@
       return makeDPView(frames, matrixGridViewSemantics);
     }
   };
-  var abstractDynamicProgrammingViewDescriptor = {
-    ariaLabel: "Dynamic-programming dependency graph",
-    ...executionTreeCardMetrics,
-    stateLabels: {
-      call: "pending",
-      base: "base",
-      store: "stored"
-    },
-    legend: [
-      { state: "call", label: "waiting for dependencies" },
-      { state: "base", label: "base state stored" },
-      { state: "store", label: "dependent state stored" }
-    ],
-    frameModel(frame) {
-      const currentColumn = frame.cur?.[1] ?? null;
-      const active = currentColumn == null ? null : frame.colLabels[currentColumn];
-      const results = Object.fromEntries(
-        frame.colLabels.flatMap((label, column) => {
-          const value = frame.grid[0][column];
-          return value == null ? [] : [[label, value]];
-        })
-      );
-      const states = Object.fromEntries(
-        frame.nodes.map((node2) => {
-          const column = frame.colLabels.indexOf(node2.id);
-          const solved = column >= 0 && frame.grid[0][column] != null;
-          const isBase = !frame.edges.some((edge) => edge.from === node2.id);
-          return [node2.id, solved ? isBase ? "base" : "store" : "call"];
-        })
-      );
-      const dependencies = frame.deps.map(([, column]) => frame.colLabels[column]);
-      return {
-        phase: frame.type === "done" ? "Target ready" : active ? `Solve ${active}` : "Dependency graph",
-        action: frame.message,
-        active,
-        path: active ? [active, ...dependencies] : [],
-        visible: frame.nodes.map((node2) => node2.id),
-        states,
-        results,
-        collapsed: []
-      };
-    },
-    nodeLines(node2) {
-      return [node2.label, node2.detail];
-    },
-    watchRows(frame) {
-      const currentColumn = frame.cur?.[1] ?? null;
-      const dependencies = frame.deps.map(([, column]) => frame.colLabels[column]);
-      const stored = frame.grid[0].filter((value) => value != null).length;
-      return [
-        {
-          k: "state",
-          v: currentColumn == null ? "—" : frame.colLabels[currentColumn],
-          sw: "var(--_blue)",
-          hint: "The state currently becoming available."
-        },
-        {
-          k: "depends on",
-          v: dependencies.length ? dependencies.join(" + ") : "base state",
-          sw: "var(--_amber)",
-          hint: "States that must already be stored before this state can be solved."
-        },
-        {
-          k: "stored result",
-          v: currentColumn == null ? "—" : frame.grid[0][currentColumn] || "—",
-          sw: "var(--_green)",
-          hint: "The result written once and reused by every outgoing dependency."
-        },
-        {
-          k: "progress",
-          v: `${stored} / ${frame.colLabels.length} states ready`,
-          sw: "var(--_neutral)",
-          hint: "How many states have been solved in dependency order."
-        }
-      ];
-    }
-  };
 
   // custom/steptrace/src/algorithms/floyd-warshall.ts
   var displayMatrix = (matrix) => matrix.map((row) => row.map((value) => Number.isFinite(value) ? value : null));
@@ -17899,14 +17807,11 @@
   };
 
   // custom/steptrace/src/algorithms/leftist-heap.ts
-  function parseLeftistHeapConfig(_config) {
-    return {};
-  }
   var leftistHeap = {
     id: "leftist-heap",
     family: "heap-selection",
     meta: { label: "Leftist heap" },
-    parse: parseLeftistHeapConfig,
+    parse: () => ({}),
     mount: mountLeftistHeap
   };
 
@@ -19498,14 +19403,11 @@
   };
 
   // custom/steptrace/src/algorithms/skew-heap.ts
-  function parseSkewHeapConfig(_config) {
-    return {};
-  }
   var skewHeap = {
     id: "skew-heap",
     family: "heap-selection",
     meta: { label: "Skew heap" },
-    parse: parseSkewHeapConfig,
+    parse: () => ({}),
     mount: mountSkewHeap
   };
 
@@ -22009,7 +21911,7 @@
         const graphAlgorithm = graphRegistry.get(config.algorithm);
         if (graphAlgorithm) {
           const graph = normalizeGraph(config);
-          const recorder = new GraphRecorder(graph);
+          const recorder = new GraphRecorder();
           graphAlgorithm.run({ ...input, start: graph.start }, recorder, graph);
           return {
             kind: "graph",

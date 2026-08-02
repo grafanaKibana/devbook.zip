@@ -3534,18 +3534,6 @@ export function el(tag, cls = "") {
   if (cls) n.className = cls
   return n
 }
-export function spacer() {
-  return el("span", "steptrace__spacer")
-}
-export function button(label, glyph, extra = "") {
-  const b = document.createElement("button")
-  b.type = "button"
-  b.className = "steptrace__btn" + (extra ? " " + extra : "")
-  b.textContent = glyph
-  b.setAttribute("aria-label", label)
-  b.title = label
-  return b
-}
 export function escapeHtml(s) {
   return String(s).replace(
     /[&<>"]/g,

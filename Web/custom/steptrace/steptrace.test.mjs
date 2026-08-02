@@ -8,85 +8,11 @@ import test from "node:test"
 import { fileURLToPath } from "node:url"
 import { buildSync } from "esbuild"
 
-import { expectedArtifacts, verifyArtifacts } from "./build.mjs"
+import { verifyArtifacts } from "./build.mjs"
 import { startWatcher } from "./watch.mjs"
 
 const here = dirname(fileURLToPath(import.meta.url))
 const repoRoot = join(here, "..", "..", "..")
-
-const cases = [
-  "activity-selection",
-  "a-star",
-  "articulation-points-and-bridges",
-  "bellman-ford",
-  "bidirectional-search",
-  "boruvka",
-  "connected-components",
-  "greedy-best-first-search",
-  "hamiltonian-cycle",
-  "kruskal",
-  "maximum-flow",
-  "strongly-connected-components",
-  "bubble-sort",
-  "insertion-sort",
-  "selection-sort",
-  "quick-sort",
-  "heap-sort",
-  "merge-sort",
-  "merge-sort-tree",
-  "merge-intervals",
-  "prefix-sum",
-  "monotonic-stack-and-queue",
-  "shell-sort",
-  "comb-sort",
-  "counting-sort",
-  "radix-sort",
-  "bucket-sort",
-  "cyclic-sort",
-  "introsort",
-  "tim-sort",
-  "bfs",
-  "dfs",
-  "dijkstra",
-  "prim",
-  "topological-sort",
-  "top-k-elements",
-  "binary-search",
-  "interpolation-search",
-  "jump-search",
-  "ternary-search",
-  "binary-search-on-answer",
-  "exponential-search",
-  "linear-search",
-  "kmp",
-  "rabin-karp",
-  "z-algorithm",
-  "boyer-moore",
-  "two-pointers",
-  "sliding-window",
-  "lcs",
-  "coin-change-greedy",
-  "coin-change-naive",
-  "coin-change-memoization",
-  "coin-change-tabulation",
-  "coin-change-top-down",
-  "coin-change-bottom-up",
-  "grid-path-greedy",
-  "grid-path-naive",
-  "grid-path-memoization",
-  "grid-path-tabulation",
-  "grid-path-top-down",
-  "grid-path-bottom-up",
-  "floyd-warshall",
-  "fast-and-slow-pointers",
-  "kernighan-popcount",
-  "n-queens",
-  "memoization",
-  "branch-and-bound",
-  "trie",
-  "aho-corasick",
-  "ternary-search-tree",
-]
 
 const commonConfig = {
   array: [8, 3, 5, 1, 9, 2, 7, 4],
@@ -123,6 +49,59 @@ const commonConfig = {
     ["search", "car"],
   ],
 }
+
+const headlessFixtureOverrides = {
+  "aho-corasick": { patterns: ["he", "she", "his", "hers"], text: "ushers" },
+  "ternary-search-tree": {
+    operations: [
+      ["insert", "cat"],
+      ["insert", "car"],
+      ["insert", "cup"],
+      ["insert", "bat"],
+      ["search", "car"],
+    ],
+  },
+  "ternary-search": { array: [1, 4, 9, 12, 11, 7, 2], goal: "maximum" },
+  "binary-search-on-answer": { weights: [3, 2, 2, 4, 1, 4], days: 3 },
+  "shell-sort": { gaps: [4, 2, 1] },
+  "counting-sort": { array: [2, 5, 3, 0, 2, 3, 0, 3] },
+  "radix-sort": { array: [170, 45, 75, 90, 802, 24, 2, 66], radix: 10, mode: "LSD" },
+  "bucket-sort": { array: [0.78, 0.17, 0.39, 0.26, 0.72, 0.94], bucketCount: 5 },
+  "cyclic-sort": { array: [5, 3, 1, 4, 2] },
+  "floyd-warshall": {
+    nodes: [0, 1, 2, 3],
+    edges: [
+      [0, 1, 3],
+      [0, 3, 7],
+      [1, 0, 8],
+      [1, 2, 2],
+      [2, 0, 5],
+      [2, 3, 1],
+      [3, 0, 2],
+    ],
+  },
+  "exponential-search": { array: commonConfig.array.slice().sort((a, b) => a - b) },
+  "interpolation-search": { array: commonConfig.array.slice().sort((a, b) => a - b) },
+  "jump-search": { array: commonConfig.array.slice().sort((a, b) => a - b) },
+}
+
+const algorithmsWithoutCommonConfig = new Set([
+  "memoization",
+  "branch-and-bound",
+  "divide-and-conquer",
+  "coin-change-greedy",
+  "coin-change-naive",
+  "coin-change-memoization",
+  "coin-change-tabulation",
+  "coin-change-top-down",
+  "coin-change-bottom-up",
+  "grid-path-greedy",
+  "grid-path-naive",
+  "grid-path-memoization",
+  "grid-path-tabulation",
+  "grid-path-top-down",
+  "grid-path-bottom-up",
+])
 
 function loadEngine(source) {
   delete globalThis.steptrace
@@ -203,58 +182,26 @@ function authoredDsaTabsdownNotes() {
     .filter(({ source }) => /```steptrace\n/.test(source) && /~{5,}tabsdown\n/.test(source))
 }
 
-function buildAbstractDivideAndConquer() {
-  const { divideAndConquer } = loadStepTraceModule("src", "algorithms", "divide-and-conquer.ts")
-  const config = divideAndConquer.parse({ algorithm: "divide-and-conquer" })
-  const recorder = divideAndConquer.family.createRecorder(config)
-  divideAndConquer.run(config, recorder)
-  return { config, family: divideAndConquer.family, frames: recorder.frames }
-}
-
-function buildAbstractMemoization() {
-  const { memoization } = loadStepTraceModule("src", "algorithms", "memoization.ts")
-  const config = memoization.parse({ algorithm: "memoization" })
-  const recorder = memoization.family.createRecorder(config)
-  memoization.run(config, recorder)
-  return { config, family: memoization.family, frames: recorder.frames }
-}
-
-function buildBranchAndBound() {
-  const { branchAndBound } = loadStepTraceModule("src", "algorithms", "branch-and-bound.ts")
-  const config = branchAndBound.parse({ algorithm: "branch-and-bound" })
-  const recorder = branchAndBound.family.createRecorder(config)
-  branchAndBound.run(config, recorder)
-  return { config, family: branchAndBound.family, frames: recorder.frames }
-}
-
-function buildBidirectionalSearch() {
-  const { bidirectionalSearch } = loadStepTraceModule(
-    "src",
-    "algorithms",
-    "bidirectional-search.ts",
-  )
-  const config = bidirectionalSearch.parse({ algorithm: "bidirectional-search" })
-  const recorder = bidirectionalSearch.family.createRecorder(config)
-  bidirectionalSearch.run(config, recorder)
-  return { config, family: bidirectionalSearch.family, frames: recorder.frames }
-}
-
-function buildMergeSortTree(array = [8, 3, 7, 4, 9, 2, 5, 1]) {
-  const { mergeSortTree } = loadStepTraceModule("src", "algorithms", "merge-sort-tree.ts")
-  const config = mergeSortTree.parse({ algorithm: "merge-sort-tree", array })
-  const recorder = mergeSortTree.family.createRecorder(config)
-  mergeSortTree.run(config, recorder)
-  return { config, family: mergeSortTree.family, frames: recorder.frames }
-}
-
-function buildDynamicProgramming(name) {
-  const algorithms = loadStepTraceModule("src", "algorithms", "dynamic-programming.ts")
-  const algorithm = algorithms[name]
-  const config = algorithm.parse({ algorithm: algorithm.id })
+function buildAlgorithm(moduleName, exportName, input = {}) {
+  const algorithm = loadStepTraceModule("src", "algorithms", `${moduleName}.ts`)[exportName]
+  const config = algorithm.parse({ algorithm: algorithm.id, ...input })
   const recorder = algorithm.family.createRecorder(config)
   algorithm.run(config, recorder)
   return { config, family: algorithm.family, frames: recorder.frames }
 }
+
+const buildAbstractDivideAndConquer = () => buildAlgorithm("divide-and-conquer", "divideAndConquer")
+
+const buildAbstractMemoization = () => buildAlgorithm("memoization", "memoization")
+
+const buildBranchAndBound = () => buildAlgorithm("branch-and-bound", "branchAndBound")
+
+const buildBidirectionalSearch = () => buildAlgorithm("bidirectional-search", "bidirectionalSearch")
+
+const buildMergeSortTree = (array = [8, 3, 7, 4, 9, 2, 5, 1]) =>
+  buildAlgorithm("merge-sort-tree", "mergeSortTree", { array })
+
+const buildDynamicProgramming = (name) => buildAlgorithm("dynamic-programming", name)
 
 function contrastRatio(foreground, background) {
   const luminance = (hex) => {
@@ -270,14 +217,10 @@ function contrastRatio(foreground, background) {
 }
 
 test("the build exactly matches every committed host artifact", async () => {
-  const expected = await expectedArtifacts()
-  for (const { path, content } of expected.files) {
-    assert.equal(readFileSync(path, "utf8"), content, `${path} must be current`)
-  }
   await assert.doesNotReject(() => verifyArtifacts())
 })
 
-test("the public API and both host JavaScript contracts stay stable", () => {
+test("the public API stays stable", () => {
   const api = loadEngine(readFileSync(join(here, "generated", "engine.js"), "utf8"))
   assert.equal(api.VERSION, "2.0.0")
   assert.deepEqual(Object.keys(api), [
@@ -298,26 +241,6 @@ test("the public API and both host JavaScript contracts stay stable", () => {
     "adjacency",
     "mount",
   ])
-
-  const obsidian = readFileSync(
-    join(repoRoot, "Vault", ".obsidian", "plugins", "steptrace", "main.js"),
-    "utf8",
-  )
-  const pluginModule = { exports: {} }
-  const Plugin = class {}
-  class MarkdownRenderChild {}
-  class Notice {}
-  class SliderComponent {}
-  new Function("module", "exports", "require", obsidian)(
-    pluginModule,
-    pluginModule.exports,
-    (id) => {
-      assert.equal(id, "obsidian")
-      return { Plugin, MarkdownRenderChild, Notice, SliderComponent }
-    },
-  )
-  assert.equal(typeof pluginModule.exports, "function")
-  assert.equal(Object.getPrototypeOf(pluginModule.exports), Plugin)
 })
 
 test("the Obsidian bundle registers complexity and keeps invalid source local", () => {
@@ -344,6 +267,8 @@ test("the Obsidian bundle registers complexity and keeps invalid source local", 
       return { Plugin, MarkdownRenderChild, Notice, SliderComponent }
     },
   )
+  assert.equal(typeof pluginModule.exports, "function")
+  assert.equal(Object.getPrototypeOf(pluginModule.exports), Plugin)
   const plugin = new pluginModule.exports()
   plugin.onload()
   assert.deepEqual([...processors.keys()], ["steptrace", "complexity"])
@@ -2134,64 +2059,14 @@ test("the watcher handles Chokidar add and atomic-change events", async () => {
 
 test("all built-in algorithms preserve their headless frame contract", () => {
   const api = loadEngine(readFileSync(join(here, "generated", "engine.js"), "utf8"))
+  const { builtInAlgorithms } = loadStepTraceModule("src", "algorithms", "index.ts")
+  const cases = builtInAlgorithms.map(({ id }) => id)
   const output = cases.map((algorithm) => {
     assert.notEqual(api.kindOf(algorithm), null, `${algorithm} must stay registered`)
-    const familyConfig =
-      algorithm === "aho-corasick"
-        ? { patterns: ["he", "she", "his", "hers"], text: "ushers" }
-        : algorithm === "ternary-search-tree"
-          ? {
-              operations: [
-                ["insert", "cat"],
-                ["insert", "car"],
-                ["insert", "cup"],
-                ["insert", "bat"],
-                ["search", "car"],
-              ],
-            }
-          : algorithm === "ternary-search"
-            ? { array: [1, 4, 9, 12, 11, 7, 2], goal: "maximum" }
-            : algorithm === "binary-search-on-answer"
-              ? { weights: [3, 2, 2, 4, 1, 4], days: 3 }
-              : algorithm === "shell-sort"
-                ? { gaps: [4, 2, 1] }
-                : algorithm === "counting-sort"
-                  ? { array: [2, 5, 3, 0, 2, 3, 0, 3] }
-                  : algorithm === "radix-sort"
-                    ? { array: [170, 45, 75, 90, 802, 24, 2, 66], radix: 10, mode: "LSD" }
-                    : algorithm === "bucket-sort"
-                      ? { array: [0.78, 0.17, 0.39, 0.26, 0.72, 0.94], bucketCount: 5 }
-                      : algorithm === "cyclic-sort"
-                        ? { array: [5, 3, 1, 4, 2] }
-                        : algorithm === "floyd-warshall"
-                          ? {
-                              nodes: [0, 1, 2, 3],
-                              edges: [
-                                [0, 1, 3],
-                                [0, 3, 7],
-                                [1, 0, 8],
-                                [1, 2, 2],
-                                [2, 0, 5],
-                                [2, 3, 1],
-                                [3, 0, 2],
-                              ],
-                            }
-                          : ["exponential-search", "interpolation-search", "jump-search"].includes(
-                                algorithm,
-                              )
-                            ? { array: commonConfig.array.slice().sort((a, b) => a - b) }
-                            : {}
-    const input =
-      algorithm === "memoization" ||
-      algorithm === "branch-and-bound" ||
-      algorithm.startsWith("coin-change-") ||
-      algorithm.startsWith("grid-path-")
-        ? {}
-        : commonConfig
     const result = api.buildFrames({
-      ...input,
+      ...(algorithmsWithoutCommonConfig.has(algorithm) ? {} : commonConfig),
       algorithm,
-      ...familyConfig,
+      ...headlessFixtureOverrides[algorithm],
     })
     assert.ok(result.frames.length > 0, `${algorithm} must produce frames`)
     return result
@@ -2200,7 +2075,7 @@ test("all built-in algorithms preserve their headless frame contract", () => {
 
   assert.equal(
     digest,
-    "489ea831b979cf9746d9c4968b6a0e080d4e89a0947388043ed7d0ca6e5af425",
+    "73f84f305e3b047aef355ee42e9f331a3777322525d477fb3690495776a3b0ee",
     "the headless StepTrace behavior changed",
   )
 })

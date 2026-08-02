@@ -1,14 +1,10 @@
 import { mountBinomialQueue, type HeapVariantConfig } from "../families/heap-structure"
-import type { InteractiveStructureDefinition, StepTraceConfig } from "../types"
-
-export function parseBinomialQueueConfig(_config: StepTraceConfig): HeapVariantConfig {
-  return {}
-}
+import type { InteractiveStructureDefinition } from "../types"
 
 export const binomialQueue = {
   id: "binomial-queue",
   family: "heap-selection",
   meta: { label: "Binomial queue" },
-  parse: parseBinomialQueueConfig,
+  parse: () => ({}),
   mount: mountBinomialQueue,
 } satisfies InteractiveStructureDefinition<HeapVariantConfig>

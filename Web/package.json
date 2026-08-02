@@ -20,15 +20,13 @@
     "format": "npx prettier . --write",
     "test": "tsx --test",
     "profile": "0x -D prof ./quartz/bootstrap-cli.mjs build --concurrency=1",
-    "install-plugins": "npx tsx ./quartz/plugins/loader/install-plugins.ts",
     "steptrace:build": "node ./custom/steptrace/build.mjs",
     "steptrace:check": "node ./custom/steptrace/build.mjs --check",
     "steptrace:test": "node --test ./custom/steptrace/steptrace.test.mjs",
     "steptrace:typecheck": "tsc --noEmit -p ./custom/steptrace/tsconfig.json",
     "steptrace:watch": "node ./custom/steptrace/watch.mjs",
-    "complexity:test": "node ./custom/complexity/run-tests.mjs",
-    "complexity:visual": "node ./custom/complexity/complexity.visual.test.mjs",
-    "prebuild": "npm run install-plugins"
+    "complexity:test": "node --import tsx --test ./custom/complexity/complexity.test.ts",
+    "complexity:visual": "node ./custom/complexity/complexity.visual.test.mjs"
   },
   "engines": {
     "npm": ">=10.9.2",

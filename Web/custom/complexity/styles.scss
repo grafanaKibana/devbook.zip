@@ -3,15 +3,7 @@
   --cx-muted: var(--gray, var(--text-muted, #767676));
   --cx-border: var(--lightgray, var(--background-modifier-border, #dedede));
   --cx-bg: var(--light, var(--background-primary, #fff));
-  --_text: var(--cx-text);
-  --_muted: var(--cx-muted);
-  --_border: var(--cx-border);
-  --_hair: var(--cx-border);
-  --_surface: var(--cx-bg);
-  --_hover: color-mix(in srgb, var(--cx-text) 7%, transparent);
-  --_accent: var(--secondary, var(--interactive-accent, #245b98));
   --_font-head: var(--headerFont, var(--font-interface, sans-serif));
-  --_tween: 140ms;
   container-type: inline-size;
   color: var(--cx-text);
   margin: 0 0 1.5rem;
@@ -294,10 +286,6 @@
 @container (min-width: 600px) {
   .complexity__resources {
     grid-template-columns: repeat(2, minmax(0, 1fr));
-  }
-
-  .complexity__plot {
-    min-width: 0;
   }
 
   .complexity__legend-items {

@@ -2,7 +2,6 @@ import { Player } from "./player"
 import {
   ICON,
   buildMilestones,
-  button,
   el,
   iconBtn,
   makeBacktrackView,

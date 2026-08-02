@@ -2,11 +2,10 @@ export function mountComplexityFigure(figure: HTMLElement): { destroy(): void } 
   if (figure.dataset.complexityMounted) return { destroy() {} }
   figure.dataset.complexityMounted = "true"
 
-  const listeners: [EventTarget, string, EventListener][] = []
+  const controller = new AbortController()
 
   function listen(target: EventTarget, type: string, listener: EventListener): void {
-    target.addEventListener(type, listener)
-    listeners.push([target, type, listener])
+    target.addEventListener(type, listener, { signal: controller.signal })
   }
 
   const resources = Array.from(figure.querySelectorAll<HTMLElement>(".complexity__resource"))
@@ -116,9 +115,7 @@ export function mountComplexityFigure(figure: HTMLElement): { destroy(): void } 
   }
   return {
     destroy() {
-      for (const [target, type, listener] of listeners) {
-        target.removeEventListener(type, listener)
-      }
+      controller.abort()
       delete figure.dataset.complexityMounted
     },
   }

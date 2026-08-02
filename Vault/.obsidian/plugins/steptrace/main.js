@@ -3920,13 +3920,13 @@ function createStructureShell(root, id, label, ariaLabel, family10 = "contiguous
       return select;
     },
     button(buttonLabel, primary = false) {
-      const button2 = el(
+      const button = el(
         "button",
         `steptrace__structure-action${primary ? " steptrace__structure-action--primary" : ""}`
       );
-      button2.type = "button";
-      button2.textContent = buttonLabel;
-      return button2;
+      button.type = "button";
+      button.textContent = buttonLabel;
+      return button;
     },
     listen(node2, type, listener) {
       node2.addEventListener(type, listener);
@@ -7242,8 +7242,7 @@ var init_recorders = __esm({
       }
     };
     GraphRecorder = class {
-      constructor(graph) {
-        this.graph = graph;
+      constructor() {
         this.frames = [];
         this._visited = /* @__PURE__ */ new Set();
         this._frontier = [];
@@ -7836,8 +7835,7 @@ var init_recorders = __esm({
         this.grid = grid.map((row) => row.slice());
         this._push("init", message);
       }
-      stage(k, message) {
-        this.k = k;
+      _clearRelaxation() {
         this.cur = null;
         this.deps = [];
         this.candidate = null;
@@ -7846,6 +7844,10 @@ var init_recorders = __esm({
         this.result = null;
         this.operandA = null;
         this.operandB = null;
+      }
+      stage(k, message) {
+        this.k = k;
+        this._clearRelaxation();
         this._push("stage", message);
       }
       relax(r, c, deps, candidate, decision, value, message) {
@@ -7862,25 +7864,11 @@ var init_recorders = __esm({
       }
       reportNegativeCycle(nodes5, message) {
         this.negativeCycle = nodes5.slice();
-        this.cur = null;
-        this.deps = [];
-        this.candidate = null;
-        this.decision = null;
-        this.previous = null;
-        this.result = null;
-        this.operandA = null;
-        this.operandB = null;
+        this._clearRelaxation();
         this._push("negative-cycle", message);
       }
       done(message) {
-        this.cur = null;
-        this.deps = [];
-        this.candidate = null;
-        this.decision = null;
-        this.previous = null;
-        this.result = null;
-        this.operandA = null;
-        this.operandB = null;
+        this._clearRelaxation();
         this._push("done", message);
       }
       _push(type, message) {
@@ -11229,9 +11217,6 @@ var init_heap_structure = __esm({
 });
 
 // custom/steptrace/src/algorithms/binomial-queue.ts
-function parseBinomialQueueConfig(_config) {
-  return {};
-}
 var binomialQueue;
 var init_binomial_queue = __esm({
   "custom/steptrace/src/algorithms/binomial-queue.ts"() {
@@ -11240,7 +11225,7 @@ var init_binomial_queue = __esm({
       id: "binomial-queue",
       family: "heap-selection",
       meta: { label: "Binomial queue" },
-      parse: parseBinomialQueueConfig,
+      parse: () => ({}),
       mount: mountBinomialQueue
     };
   }
@@ -15875,12 +15860,11 @@ function matrixGridFooterModel(frame) {
     summary: { text: `${nodeCount * nodeCount} distances ready` }
   };
 }
-var matrixGridRoleLegend, matrixGridViewSemantics, matrixGridFamily, abstractDynamicProgrammingViewDescriptor;
+var matrixGridRoleLegend, matrixGridViewSemantics, matrixGridFamily;
 var init_matrix_grid = __esm({
   "custom/steptrace/src/families/matrix-grid.ts"() {
     init_recorders();
     init_render();
-    init_execution_tree();
     matrixGridRoleLegend = [
       { role: "operand-a", badge: "A", label: "dist[i][k]" },
       { role: "operand-b", badge: "B", label: "dist[k][j]" },
@@ -15953,83 +15937,6 @@ var init_matrix_grid = __esm({
       },
       createView(frames) {
         return makeDPView(frames, matrixGridViewSemantics);
-      }
-    };
-    abstractDynamicProgrammingViewDescriptor = {
-      ariaLabel: "Dynamic-programming dependency graph",
-      ...executionTreeCardMetrics,
-      stateLabels: {
-        call: "pending",
-        base: "base",
-        store: "stored"
-      },
-      legend: [
-        { state: "call", label: "waiting for dependencies" },
-        { state: "base", label: "base state stored" },
-        { state: "store", label: "dependent state stored" }
-      ],
-      frameModel(frame) {
-        const currentColumn = frame.cur?.[1] ?? null;
-        const active = currentColumn == null ? null : frame.colLabels[currentColumn];
-        const results = Object.fromEntries(
-          frame.colLabels.flatMap((label, column) => {
-            const value = frame.grid[0][column];
-            return value == null ? [] : [[label, value]];
-          })
-        );
-        const states = Object.fromEntries(
-          frame.nodes.map((node2) => {
-            const column = frame.colLabels.indexOf(node2.id);
-            const solved = column >= 0 && frame.grid[0][column] != null;
-            const isBase = !frame.edges.some((edge) => edge.from === node2.id);
-            return [node2.id, solved ? isBase ? "base" : "store" : "call"];
-          })
-        );
-        const dependencies = frame.deps.map(([, column]) => frame.colLabels[column]);
-        return {
-          phase: frame.type === "done" ? "Target ready" : active ? `Solve ${active}` : "Dependency graph",
-          action: frame.message,
-          active,
-          path: active ? [active, ...dependencies] : [],
-          visible: frame.nodes.map((node2) => node2.id),
-          states,
-          results,
-          collapsed: []
-        };
-      },
-      nodeLines(node2) {
-        return [node2.label, node2.detail];
-      },
-      watchRows(frame) {
-        const currentColumn = frame.cur?.[1] ?? null;
-        const dependencies = frame.deps.map(([, column]) => frame.colLabels[column]);
-        const stored = frame.grid[0].filter((value) => value != null).length;
-        return [
-          {
-            k: "state",
-            v: currentColumn == null ? "—" : frame.colLabels[currentColumn],
-            sw: "var(--_blue)",
-            hint: "The state currently becoming available."
-          },
-          {
-            k: "depends on",
-            v: dependencies.length ? dependencies.join(" + ") : "base state",
-            sw: "var(--_amber)",
-            hint: "States that must already be stored before this state can be solved."
-          },
-          {
-            k: "stored result",
-            v: currentColumn == null ? "—" : frame.grid[0][currentColumn] || "—",
-            sw: "var(--_green)",
-            hint: "The result written once and reused by every outgoing dependency."
-          },
-          {
-            k: "progress",
-            v: `${stored} / ${frame.colLabels.length} states ready`,
-            sw: "var(--_neutral)",
-            hint: "How many states have been solved in dependency order."
-          }
-        ];
       }
     };
   }
@@ -18423,9 +18330,6 @@ var init_lru_cache = __esm({
 });
 
 // custom/steptrace/src/algorithms/leftist-heap.ts
-function parseLeftistHeapConfig(_config) {
-  return {};
-}
 var leftistHeap;
 var init_leftist_heap = __esm({
   "custom/steptrace/src/algorithms/leftist-heap.ts"() {
@@ -18434,7 +18338,7 @@ var init_leftist_heap = __esm({
       id: "leftist-heap",
       family: "heap-selection",
       meta: { label: "Leftist heap" },
-      parse: parseLeftistHeapConfig,
+      parse: () => ({}),
       mount: mountLeftistHeap
     };
   }
@@ -20160,9 +20064,6 @@ var init_stack = __esm({
 });
 
 // custom/steptrace/src/algorithms/skew-heap.ts
-function parseSkewHeapConfig(_config) {
-  return {};
-}
 var skewHeap;
 var init_skew_heap = __esm({
   "custom/steptrace/src/algorithms/skew-heap.ts"() {
@@ -20171,7 +20072,7 @@ var init_skew_heap = __esm({
       id: "skew-heap",
       family: "heap-selection",
       meta: { label: "Skew heap" },
-      parse: parseSkewHeapConfig,
+      parse: () => ({}),
       mount: mountSkewHeap
     };
   }
@@ -22860,7 +22761,7 @@ function createRegistry(builtIns) {
       const graphAlgorithm = graphRegistry.get(config.algorithm);
       if (graphAlgorithm) {
         const graph = normalizeGraph(config);
-        const recorder = new GraphRecorder(graph);
+        const recorder = new GraphRecorder();
         graphAlgorithm.run({ ...input, start: graph.start }, recorder, graph);
         return {
           kind: "graph",
@@ -22996,10 +22897,9 @@ function mountComplexityFigure(figure) {
   if (figure.dataset.complexityMounted) return { destroy() {
   } };
   figure.dataset.complexityMounted = "true";
-  const listeners = [];
+  const controller = new AbortController();
   function listen(target, type, listener) {
-    target.addEventListener(type, listener);
-    listeners.push([target, type, listener]);
+    target.addEventListener(type, listener, { signal: controller.signal });
   }
   const resources = Array.from(figure.querySelectorAll(".complexity__resource"));
   for (const resource of resources.length > 0 ? resources : [figure]) {
@@ -23022,18 +22922,18 @@ function mountComplexityFigure(figure) {
       for (const area of areas) {
         area.classList.toggle("is-subtle", !activeIds.has(area.dataset.pathId ?? ""));
       }
-      for (const button2 of legendButtons) {
-        const pathId2 = button2.dataset.pathId ?? "";
-        button2.classList.toggle("is-selected", selectedPathIds.has(pathId2));
-        button2.classList.toggle("is-subtle", !activeIds.has(pathId2));
-        button2.setAttribute("aria-pressed", selectedPathIds.has(pathId2) ? "true" : "false");
+      for (const button of legendButtons) {
+        const pathId2 = button.dataset.pathId ?? "";
+        button.classList.toggle("is-selected", selectedPathIds.has(pathId2));
+        button.classList.toggle("is-subtle", !activeIds.has(pathId2));
+        button.setAttribute("aria-pressed", selectedPathIds.has(pathId2) ? "true" : "false");
       }
-      for (const button2 of groupButtons) {
-        const pathIds = (button2.dataset.pathIds ?? "").split(",").filter(Boolean);
+      for (const button of groupButtons) {
+        const pathIds = (button.dataset.pathIds ?? "").split(",").filter(Boolean);
         const selected = pathIds.length > 0 && selectedPathIds.size === pathIds.length && pathIds.every((pathId2) => selectedPathIds.has(pathId2));
-        button2.classList.toggle("is-selected", selected);
-        button2.classList.toggle("is-subtle", !pathIds.some((pathId2) => activeIds.has(pathId2)));
-        button2.setAttribute("aria-pressed", selected ? "true" : "false");
+        button.classList.toggle("is-selected", selected);
+        button.classList.toggle("is-subtle", !pathIds.some((pathId2) => activeIds.has(pathId2)));
+        button.setAttribute("aria-pressed", selected ? "true" : "false");
       }
       for (const label of labels) {
         const ids = (label.dataset.pathIds ?? "").split(",");
@@ -23064,32 +22964,32 @@ function mountComplexityFigure(figure) {
     );
     let selectedPathIds = /* @__PURE__ */ new Set();
     let previewPathIds = /* @__PURE__ */ new Set();
-    for (const button2 of legendButtons) {
-      listen(button2, "pointerenter", () => {
-        previewPathIds = /* @__PURE__ */ new Set([button2.dataset.pathId ?? ""]);
+    for (const button of legendButtons) {
+      listen(button, "pointerenter", () => {
+        previewPathIds = /* @__PURE__ */ new Set([button.dataset.pathId ?? ""]);
         update2();
       });
-      listen(button2, "pointerleave", () => {
+      listen(button, "pointerleave", () => {
         previewPathIds = /* @__PURE__ */ new Set();
         update2();
       });
-      listen(button2, "click", () => {
-        const pathId2 = button2.dataset.pathId ?? "";
+      listen(button, "click", () => {
+        const pathId2 = button.dataset.pathId ?? "";
         selectedPathIds = selectedPathIds.size === 1 && selectedPathIds.has(pathId2) ? /* @__PURE__ */ new Set() : /* @__PURE__ */ new Set([pathId2]);
         update2();
       });
     }
-    for (const button2 of groupButtons) {
-      listen(button2, "pointerenter", () => {
-        previewPathIds = new Set((button2.dataset.pathIds ?? "").split(",").filter(Boolean));
+    for (const button of groupButtons) {
+      listen(button, "pointerenter", () => {
+        previewPathIds = new Set((button.dataset.pathIds ?? "").split(",").filter(Boolean));
         update2();
       });
-      listen(button2, "pointerleave", () => {
+      listen(button, "pointerleave", () => {
         previewPathIds = /* @__PURE__ */ new Set();
         update2();
       });
-      listen(button2, "click", () => {
-        const pathIds = (button2.dataset.pathIds ?? "").split(",").filter(Boolean);
+      listen(button, "click", () => {
+        const pathIds = (button.dataset.pathIds ?? "").split(",").filter(Boolean);
         const selected = selectedPathIds.size === pathIds.length && pathIds.every((pathId2) => selectedPathIds.has(pathId2));
         selectedPathIds = selected ? /* @__PURE__ */ new Set() : new Set(pathIds);
         update2();
@@ -23099,9 +22999,7 @@ function mountComplexityFigure(figure) {
   }
   return {
     destroy() {
-      for (const [target, type, listener] of listeners) {
-        target.removeEventListener(type, listener);
-      }
+      controller.abort();
       delete figure.dataset.complexityMounted;
     }
   };

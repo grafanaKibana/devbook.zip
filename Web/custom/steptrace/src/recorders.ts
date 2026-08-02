@@ -275,8 +275,7 @@ export class ArraySortRecorder extends SortRecorder {
 //   edge:{from,to}|null, dist:{id:number}, message }.
 export class GraphRecorder {
   [key: string]: any
-  constructor(graph) {
-    this.graph = graph
+  constructor() {
     this.frames = []
     this._visited = new Set()
     this._frontier = []
@@ -923,8 +922,7 @@ export class MatrixGridRecorder {
     this.grid = grid.map((row) => row.slice())
     this._push("init", message)
   }
-  stage(k, message) {
-    this.k = k
+  _clearRelaxation() {
     this.cur = null
     this.deps = []
     this.candidate = null
@@ -933,6 +931,10 @@ export class MatrixGridRecorder {
     this.result = null
     this.operandA = null
     this.operandB = null
+  }
+  stage(k, message) {
+    this.k = k
+    this._clearRelaxation()
     this._push("stage", message)
   }
   relax(r, c, deps, candidate, decision, value, message) {
@@ -949,25 +951,11 @@ export class MatrixGridRecorder {
   }
   reportNegativeCycle(nodes, message) {
     this.negativeCycle = nodes.slice()
-    this.cur = null
-    this.deps = []
-    this.candidate = null
-    this.decision = null
-    this.previous = null
-    this.result = null
-    this.operandA = null
-    this.operandB = null
+    this._clearRelaxation()
     this._push("negative-cycle", message)
   }
   done(message) {
-    this.cur = null
-    this.deps = []
-    this.candidate = null
-    this.decision = null
-    this.previous = null
-    this.result = null
-    this.operandA = null
-    this.operandB = null
+    this._clearRelaxation()
     this._push("done", message)
   }
   _push(type, message) {

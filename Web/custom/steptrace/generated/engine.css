@@ -722,9 +722,6 @@
   outline: 2px solid var(--_blue);
   outline-offset: 2px;
 }
-.steptrace__spacer {
-  flex: 1 1 auto;
-}
 .steptrace__menu-wrap {
   position: relative;
 }

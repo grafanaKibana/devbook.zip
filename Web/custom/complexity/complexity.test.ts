@@ -153,11 +153,6 @@ const empiricalResource = {
   },
 }
 
-const buildWithNamespace = buildComplexityViewModel as unknown as (
-  config: unknown,
-  instanceNamespace: string,
-) => any
-
 test("Quartz registers complexity before syntax highlighting", () => {
   const source = readFileSync(join(process.cwd(), "quartz.ts"), "utf8")
   const lookup = source.indexOf("const syntaxHighlightingIdx =")
@@ -462,10 +457,10 @@ test("all duplicate, missing, override, and unknown catalogue fields fail locall
 })
 
 test("version 2 accepts exact dual-resource keys and renders Time before Space", () => {
-  const view = buildWithNamespace(dualResource, "quick-sort-1")
+  const view = buildComplexityViewModel(dualResource, "quick-sort-1")
 
   assert.deepEqual(
-    view.resources.map(({ key, label, mode }: any) => ({ key, label, mode })),
+    view.resources.map(({ key, label, mode }) => ({ key, label, mode })),
     [
       { key: "time", label: "Time", mode: "cases" },
       { key: "space", label: "Space", mode: "operations" },
@@ -476,11 +471,11 @@ test("version 2 accepts exact dual-resource keys and renders Time before Space",
 })
 
 test("version 2 keeps plotted formulas exact and semantic-only bounds geometry-free", () => {
-  const view = buildWithNamespace(dualResource, "quick-sort-2")
+  const view = buildComplexityViewModel(dualResource, "quick-sort-2")
   const [time, space] = view.resources
 
   assert.deepEqual(
-    time.paths.map(({ formula, curveId }: any) => ({ formula, curveId })),
+    time.paths.map(({ formula, curveId }) => ({ formula, curveId })),
     [
       { formula: "O(n log n)", curveId: "n-log-n" },
       { formula: "O(n log n) expected", curveId: "n-log-n" },
@@ -488,19 +483,19 @@ test("version 2 keeps plotted formulas exact and semantic-only bounds geometry-f
     ],
   )
   assert.deepEqual(
-    space.semanticBounds.map(({ role, formula }: any) => ({ role, formula })),
+    space.semanticBounds.map(({ role, formula }) => ({ role, formula })),
     [{ role: "Implementation dependent", formula: "tail-call stack" }],
   )
-  assert.ok(space.paths.every(({ curveId }: any) => CURVE_IDS.includes(curveId)))
+  assert.ok(space.paths.every(({ curveId }) => CURVE_IDS.includes(curveId)))
   assert.deepEqual(
-    time.legend.flatMap(({ items }: any) => items.map(({ label }: any) => label)),
+    time.legend.flatMap(({ items }) => items.map(({ label }) => label)),
     ["Best", "Average", "Worst"],
   )
   assert.equal(space.legend[0].items[0].label, "Best")
 })
 
 test("endpoint labels use the authored formula when highlighted paths agree", () => {
-  const view = buildWithNamespace(
+  const view = buildComplexityViewModel(
     {
       version: 2,
       label: "A* shape labels",
@@ -536,17 +531,17 @@ test("endpoint labels use the authored formula when highlighted paths agree", ()
   )
 
   assert.equal(
-    view.resources[0].endpointLabels.find(({ curveId }: any) => curveId === "linear")?.formula,
+    view.resources[0].endpointLabels.find(({ curveId }) => curveId === "linear")?.formula,
     "Θ(d)",
   )
   assert.equal(
-    view.resources[1].endpointLabels.find(({ curveId }: any) => curveId === "exponential")?.formula,
+    view.resources[1].endpointLabels.find(({ curveId }) => curveId === "exponential")?.formula,
     "O(b^d)",
   )
 })
 
 test("empirical bounds stay semantic-only and use the regular legend treatment", () => {
-  const view = buildWithNamespace(empiricalResource, "a-star-observed")
+  const view = buildComplexityViewModel(empiricalResource, "a-star-observed")
 
   for (const resource of view.resources) {
     assert.equal(resource.contextPaths.length, CURVE_IDS.length)
@@ -556,14 +551,14 @@ test("empirical bounds stay semantic-only and use the regular legend treatment",
     assert.equal(resource.legend[0].items.length, 1)
     assert.equal(resource.legend[0].items[0].kind, "semantic")
     assert.equal("pathId" in resource.legend[0].items[0], false)
-    assert.ok(resource.endpointLabels.every(({ dimmed }: any) => dimmed))
+    assert.ok(resource.endpointLabels.every(({ dimmed }) => dimmed))
   }
   assert.deepEqual(
-    view.resources[0].xTicks.map(({ value }: any) => value),
+    view.resources[0].xTicks.map(({ value }) => value),
     [2, 4, 6, 8, 10],
   )
   assert.deepEqual(
-    view.resources[0].ticks.map(({ value }: any) => value),
+    view.resources[0].ticks.map(({ value }) => value),
     [0, 1, 10, 100, 1_000, 10_000],
   )
 })
@@ -572,14 +567,14 @@ test("empirical bounds reject non-increasing or non-positive samples", () => {
   const invalidN = structuredClone(empiricalResource)
   invalidN.resources.time.entries[0].bounds[0].samples[1].n = 1
   assert.throws(
-    () => buildWithNamespace(invalidN, "invalid-n"),
+    () => buildComplexityViewModel(invalidN, "invalid-n"),
     /samples\[1\]\.n: must be finite, positive, and strictly increasing/,
   )
 
   const invalidValue = structuredClone(empiricalResource)
   invalidValue.resources.space.entries[0].bounds[0].samples[0].value = 0
   assert.throws(
-    () => buildWithNamespace(invalidValue, "invalid-value"),
+    () => buildComplexityViewModel(invalidValue, "invalid-value"),
     /samples\[0\]\.value: must be a finite positive number/,
   )
 })
@@ -631,7 +626,7 @@ test("version 2 rejects missing resources, catalogue mode, unknown keys, and dup
   ]
 
   for (const [config, message] of invalid) {
-    assert.throws(() => buildWithNamespace(config, "invalid"), message)
+    assert.throws(() => buildComplexityViewModel(config, "invalid"), message)
   }
 })
 
@@ -641,11 +636,11 @@ test("version 2 variables use strict ASCII keys and exact symbol metadata", () =
     vertices: { symbol: "|V|", description: "number of vertices" },
     inverseAckermann: { symbol: "α(n)", description: "inverse Ackermann factor" },
   }
-  assert.deepEqual(buildWithNamespace(graph, "graph-1").variables, graph.variables)
+  assert.deepEqual(buildComplexityViewModel(graph, "graph-1").variables, graph.variables)
 
   assert.throws(
     () =>
-      buildWithNamespace(
+      buildComplexityViewModel(
         { ...graph, variables: { "α(n)": graph.variables.inverseAckermann } },
         "invalid-variable",
       ),
@@ -653,7 +648,7 @@ test("version 2 variables use strict ASCII keys and exact symbol metadata", () =
   )
   assert.throws(
     () =>
-      buildWithNamespace(
+      buildComplexityViewModel(
         {
           ...graph,
           variables: {
@@ -674,22 +669,6 @@ function hastText(node: unknown): string {
     .join("")}`
 }
 
-function hastElements(node: unknown, tagName: string): { properties: Record<string, unknown> }[] {
-  if (!node || typeof node !== "object") return []
-  const value = node as {
-    type?: unknown
-    tagName?: unknown
-    properties?: Record<string, unknown>
-    children?: unknown[]
-  }
-  return [
-    ...(value.type === "element" && value.tagName === tagName
-      ? [{ properties: value.properties ?? {} }]
-      : []),
-    ...(value.children ?? []).flatMap((child) => hastElements(child, tagName)),
-  ]
-}
-
 function allHastElements(node: unknown): Element[] {
   if (!node || typeof node !== "object") return []
   const value = node as Element
@@ -699,32 +678,16 @@ function allHastElements(node: unknown): Element[] {
   ]
 }
 
+function hastElements(node: unknown, tagName: string): Element[] {
+  return allHastElements(node).filter((element) => element.tagName === tagName)
+}
+
 function findHastElement(node: unknown, tagName: string): Element | undefined {
-  if (!node || typeof node !== "object") return undefined
-  const value = node as { type?: unknown; tagName?: unknown; children?: unknown[] }
-  if (value.type === "element" && value.tagName === tagName) return value as Element
-  for (const child of value.children ?? []) {
-    const found = findHastElement(child, tagName)
-    if (found) return found
-  }
-  return undefined
+  return hastElements(node, tagName)[0]
 }
 
 function findHastByClass(node: unknown, className: string): Element | undefined {
-  if (!node || typeof node !== "object") return undefined
-  const value = node as Element
-  if (
-    value.type === "element" &&
-    Array.isArray(value.properties?.className) &&
-    value.properties.className.includes(className)
-  ) {
-    return value
-  }
-  for (const child of value.children ?? []) {
-    const found = findHastByClass(child, className)
-    if (found) return found
-  }
-  return undefined
+  return findAllHastByClass(node, className)[0]
 }
 
 function findAllHastByClass(node: unknown, className: string): Element[] {
@@ -746,7 +709,7 @@ function referencedIds(node: unknown): string[] {
 }
 
 test("dual-resource HAST has one accessible figure and labelled Time and Space groups", () => {
-  const view = buildWithNamespace(dualResource, "quick-sort-hast")
+  const view = buildComplexityViewModel(dualResource, "quick-sort-hast")
   const hast = renderComplexityHast(view)
   const figure = findHastElement(hast, "figure")
   const resources = findAllHastByClass(hast, "complexity__resource")
@@ -784,7 +747,7 @@ test("dual-resource HAST has one accessible figure and labelled Time and Space g
 
 test("host namespaces prevent duplicate IDs and keep every IDREF inside its figure", () => {
   const figures = ["page-occurrence-1", "page-occurrence-2"].map((namespace) =>
-    renderComplexityHast(buildWithNamespace(dualResource, namespace)),
+    renderComplexityHast(buildComplexityViewModel(dualResource, namespace)),
   )
   const idsByFigure = figures.map((figure) =>
     allHastElements(figure)
@@ -1048,12 +1011,7 @@ function interactiveResource(pathId: string) {
 }
 
 function findFake(node: FakeNode, tagName: string): FakeElement | undefined {
-  if (node instanceof FakeElement && node.tagName === tagName) return node
-  for (const child of node.children) {
-    const found = findFake(child, tagName)
-    if (found) return found
-  }
-  return undefined
+  return findAllFake(node, tagName)[0]
 }
 
 function findAllFake(node: FakeNode, tagName: string): FakeElement[] {
