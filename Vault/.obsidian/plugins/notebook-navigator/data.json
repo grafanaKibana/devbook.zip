@@ -5,7 +5,8 @@
       "name": "Default",
       "fileVisibility": "supported",
       "hiddenFolders": [
-        "/Assets/components"
+        "/Assets",
+        "/Templates"
       ],
       "hiddenTags": [],
       "hiddenFileNames": [],
@@ -626,10 +627,7 @@
   "propertyAppearances": {},
   "virtualFolderColors": {},
   "virtualFolderBackgroundColors": {},
-  "navigationSeparators": {
-    "folder:Home": true,
-    "folder:Assets": true
-  },
+  "navigationSeparators": {},
   "userColors": [
     "#ffffff",
     "#d9d9d9",

@@ -14,12 +14,16 @@ export function mountComplexityFigure(figure: HTMLElement): { destroy(): void } 
     const legendButtons = Array.from(
       resource.querySelectorAll<HTMLButtonElement>(".complexity__legend-button"),
     )
+    const groupButtons = Array.from(
+      resource.querySelectorAll<HTMLButtonElement>(".complexity__legend-group-button"),
+    )
     const paths = Array.from(resource.querySelectorAll<SVGPathElement>(".complexity__curve"))
     const areas = Array.from(resource.querySelectorAll<SVGPathElement>(".complexity__area"))
     const labels = Array.from(
       resource.querySelectorAll<SVGTextElement>(".complexity__endpoint-label"),
     )
-    let selectedPathId: string | null = null
+    let selectedPathIds = new Set<string>()
+    let previewPathIds = new Set<string>()
 
     function update(): void {
       const activeIds = new Set(
@@ -27,9 +31,12 @@ export function mountComplexityFigure(figure: HTMLElement): { destroy(): void } 
           .filter((path) => path.dataset.context !== "true")
           .map((path) => path.dataset.pathId ?? ""),
       )
-      if (selectedPathId) {
+      if (previewPathIds.size > 0) {
         activeIds.clear()
-        activeIds.add(selectedPathId)
+        for (const pathId of previewPathIds) activeIds.add(pathId)
+      } else if (selectedPathIds.size > 0) {
+        activeIds.clear()
+        for (const pathId of selectedPathIds) activeIds.add(pathId)
       }
       for (const path of paths) {
         const active = activeIds.has(path.dataset.pathId ?? "")
@@ -41,9 +48,19 @@ export function mountComplexityFigure(figure: HTMLElement): { destroy(): void } 
       }
       for (const button of legendButtons) {
         const pathId = button.dataset.pathId ?? ""
-        button.classList.toggle("is-selected", selectedPathId === pathId)
+        button.classList.toggle("is-selected", selectedPathIds.has(pathId))
         button.classList.toggle("is-subtle", !activeIds.has(pathId))
-        button.setAttribute("aria-pressed", selectedPathId === pathId ? "true" : "false")
+        button.setAttribute("aria-pressed", selectedPathIds.has(pathId) ? "true" : "false")
+      }
+      for (const button of groupButtons) {
+        const pathIds = (button.dataset.pathIds ?? "").split(",").filter(Boolean)
+        const selected =
+          pathIds.length > 0 &&
+          selectedPathIds.size === pathIds.length &&
+          pathIds.every((pathId) => selectedPathIds.has(pathId))
+        button.classList.toggle("is-selected", selected)
+        button.classList.toggle("is-subtle", !pathIds.some((pathId) => activeIds.has(pathId)))
+        button.setAttribute("aria-pressed", selected ? "true" : "false")
       }
       for (const label of labels) {
         const ids = (label.dataset.pathIds ?? "").split(",")
@@ -62,9 +79,36 @@ export function mountComplexityFigure(figure: HTMLElement): { destroy(): void } 
       }
     }
     for (const button of legendButtons) {
+      listen(button, "pointerenter", () => {
+        previewPathIds = new Set([button.dataset.pathId ?? ""])
+        update()
+      })
+      listen(button, "pointerleave", () => {
+        previewPathIds = new Set()
+        update()
+      })
       listen(button, "click", () => {
-        const pathId = button.dataset.pathId ?? null
-        selectedPathId = selectedPathId === pathId ? null : pathId
+        const pathId = button.dataset.pathId ?? ""
+        selectedPathIds =
+          selectedPathIds.size === 1 && selectedPathIds.has(pathId) ? new Set() : new Set([pathId])
+        update()
+      })
+    }
+    for (const button of groupButtons) {
+      listen(button, "pointerenter", () => {
+        previewPathIds = new Set((button.dataset.pathIds ?? "").split(",").filter(Boolean))
+        update()
+      })
+      listen(button, "pointerleave", () => {
+        previewPathIds = new Set()
+        update()
+      })
+      listen(button, "click", () => {
+        const pathIds = (button.dataset.pathIds ?? "").split(",").filter(Boolean)
+        const selected =
+          selectedPathIds.size === pathIds.length &&
+          pathIds.every((pathId) => selectedPathIds.has(pathId))
+        selectedPathIds = selected ? new Set() : new Set(pathIds)
         update()
       })
     }

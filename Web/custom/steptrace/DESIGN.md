@@ -35,9 +35,9 @@ It is not:
 ## Authored composition
 
 - Every note containing StepTrace uses one outer Tabsdown block with `Visualization` first and `Complexity` second.
-- An ordinary Visualization panel begins with its `steptrace` fence. Any heading or prose that helps interpret the states follows that fence.
-- A multi-variant Visualization panel begins with inner Tabsdown. Each variant keeps its label, begins with one flat `steptrace` fence, and places useful explanation after the fence. Delete copy that only restates visible controls or the pictured scenario.
-- The Complexity panel contains exactly one version 2 `complexity` fence and no rendered Markdown. Detailed complexity tables, assumptions, causes, and prose follow the outer Tabsdown block.
+- An ordinary Visualization panel begins with its `steptrace` fence. It may contain at most one optional `####` support section after the trace; use unheaded prose when a heading adds no navigation value.
+- A multi-variant Visualization panel begins with inner Tabsdown. Each variant keeps its label, begins with one flat `steptrace` fence, and places useful explanation after the fence. Use either one shared outer `####` or at most one `####` in each owning variant, never both. Delete copy that only restates visible controls or the pictured scenario.
+- The Complexity panel begins with exactly one version 2 `complexity` fence and contains no heading or Markdown table. Concise unheaded prose may follow only when it supplies a chart-missing assumption, model or resource distinction, or decision-changing failure boundary. Complexity headings, tables, and claims do not appear outside the panel.
 - Every DSA complexity figure contains independent Time and Space resources in that order. It exposes an accessible figure name but no visible global chart title.
 - Big O is the exception: its version 1 catalogue stays in normal note flow without StepTrace or Tabsdown.
 - StepTrace and complexity payload fences use backticks. Nested Tabsdown fences use tildes, with each outer fence longer than every inner tilde fence it contains.

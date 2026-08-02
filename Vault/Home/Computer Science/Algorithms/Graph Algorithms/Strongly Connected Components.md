@@ -3,7 +3,7 @@ topic:
   - Computer Science
 subtopic:
   - Algorithms
-summary: "Maximal mutually-reachable vertex sets of a digraph, found in O(V+E) by Kosaraju's or Tarjan's."
+summary: "Maximal mutually-reachable vertex sets of a digraph, identified by Kosaraju's or Tarjan's algorithm."
 level:
   - "4"
 priority: Medium
@@ -11,9 +11,9 @@ status: Ready to Repeat
 publish: true
 ---
 
-A package manager resolves a directed dependency graph. When two packages depend on each other, directly or through a longer cycle, no install order separates them — they form one unit that has to be reasoned about together. Discovering every such unit by running a fresh reachability search from each vertex costs `O(V · (V + E))`.
+A package manager resolves a directed dependency graph. When two packages depend on each other, directly or through a longer cycle, no install order separates them — they form one unit that has to be reasoned about together.
 
-A **strongly connected component** (SCC) is a maximal set of vertices in which every vertex reaches every other: for any `u, v` in the set there is a path `u → v` **and** a path `v → u`. Mutual reachability partitions a digraph into disjoint SCCs, and a single [[Home/Computer Science/Algorithms/Graph Algorithms/DFS BFS|depth-first traversal]] recovers all of them in `O(V + E)` — the cost of one search rather than `V` of them. Collapsing each SCC to a single node yields the **condensation**, which is always a DAG: a cycle between two components would make their vertices mutually reachable, merging them into one. That property makes SCC decomposition the standard preprocessing for cyclic digraphs — 2-SAT, deadlock and dependency analysis, and any dataflow that wants a [[Home/Computer Science/Algorithms/Graph Algorithms/Topological Sort|topological order]] but has cycles in the way.
+A **strongly connected component** (SCC) is a maximal set of vertices in which every vertex reaches every other: for any `u, v` in the set there is a path `u → v` **and** a path `v → u`. A [[Home/Computer Science/Algorithms/Graph Algorithms/DFS BFS|depth-first traversal]] exposes the finishing or low-link structure used to recover the partition. Collapsing each SCC to a single node yields the **condensation**, which is always a DAG: a cycle between two components would make their vertices mutually reachable, merging them into one. That property makes SCC decomposition the standard preprocessing for cyclic digraphs — 2-SAT, deadlock and dependency analysis, and any dataflow that wants a [[Home/Computer Science/Algorithms/Graph Algorithms/Topological Sort|topological order]] but has cycles in the way.
 
 Edge direction is the whole point. On an undirected graph mutual reachability is just reachability, so "strongly connected components" collapse to ordinary connected components, answered by [[Home/Computer Science/Data Structures/Graph Structures/Union-Find|union-find]] or flood fill.
 
@@ -27,13 +27,11 @@ tab: Visualization
 
 The trace uses Tarjan's single-pass algorithm as the concrete way to expose this partition; the overview below also compares Kosaraju and Gabow.
 
-# One Partition, Then a DAG
 
 On `A→B, B→C, C→A, C→D, D→E, E→D`, the visualization emits `{D, E}` and `{A, B, C}`. Inside each set every vertex reaches every other. Across the sets `{A, B, C}` reaches `{D, E}`, but not vice versa, so they cannot merge.
 
 Contracting the two sets gives one edge, `A-B-C → D-E`. More generally, the condensation cannot contain a cycle: a cycle between two component nodes would make their original vertices mutually reachable, contradicting maximality. The result is therefore a DAG that can feed [[Home/Computer Science/Algorithms/Graph Algorithms/Topological Sort|topological sorting]] and DAG dynamic programming.
 
-# Two Linear Algorithms
 
 [[Home/Computer Science/Algorithms/Graph Algorithms/Tarjan's SCC Algorithm|Tarjan's algorithm]] runs one DFS with discovery indices, low links, and an active-vertex stack. When `low[v] == disc[v]`, it pops one complete SCC. The stack is essential: an edge into an already-emitted component must not lower the active low link.
 
@@ -144,16 +142,6 @@ tab: Complexity
 }
 ```
 ~~~~~
-
-# Complexity
-
-| Algorithm | Time | Auxiliary space | Trade-off |
-| --- | --- | --- | --- |
-| Tarjan | `Θ(V + E)` | `O(V)` | One pass and no transpose; low-link updates are easier to get wrong |
-| Kosaraju | `Θ(V + E)` | `O(V + E)` | Two plain DFS passes; storing the transpose costs another edge set |
-| Gabow | `Θ(V + E)` | `O(V)` | One pass with two stacks instead of a low-link array |
-
-Every vertex and edge is processed a fixed number of times, so the linear bound is tight in all graph shapes. Tarjan is the compact default; Kosaraju is often easier to reconstruct correctly. The detailed Tarjan invariant and implementation live on the linked algorithm page.
 
 # Reference Drawer
 

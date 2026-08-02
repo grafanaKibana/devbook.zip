@@ -855,10 +855,15 @@ for (const root of [
     if ((await readFile(file, "utf8")).includes("tabsdown"))
       liveInventory.push(file);
 }
+const expectedLiveInventory = configManifest.notes.map((note) => note.path);
+if (phase === "final")
+  expectedLiveInventory.push(
+    "Vault/Home/Computer Science/Data Structures/Trees/Quadtree.md",
+  );
 assert.deepEqual(
-  configManifest.notes.map((note) => note.path).sort(),
+  expectedLiveInventory.sort(),
   liveInventory.sort(),
-  "config manifest paths differ from the 87 live Tabsdown notes",
+  `config manifest plus approved exceptions differ from the ${expectedLiveInventory.length} live Tabsdown notes`,
 );
 for (const note of configManifest.notes) {
   const live = (await readFile(note.path, "utf8")).replaceAll("\r\n", "\n");

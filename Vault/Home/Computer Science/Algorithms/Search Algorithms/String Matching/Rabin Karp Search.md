@@ -3,7 +3,7 @@ topic:
   - Computer Science
 subtopic:
   - Algorithms
-summary: "Matches patterns by comparing rolling hashes of text windows, in expected O(n + m)."
+summary: "Matches patterns by comparing rolling hashes of consecutive text windows."
 level:
   - "4"
 priority: Medium
@@ -11,11 +11,11 @@ status: Done
 publish: true
 ---
 
-Searching a text `T` of length `n` for a pattern `P` of length `m` tests `P` against the window that begins at each of the `n − m + 1` positions. A character-by-character test costs up to `m` per position, so text full of partial matches climbs to `O(nm)`. Rabin-Karp replaces that per-position character test with a single integer comparison: it hashes `P` once, keeps a hash of the current text window, and a hash mismatch proves the strings differ, so only matching hashes are worth verifying.
+Searching a text `T` of length `n` for a pattern `P` of length `m` tests `P` against the window that begins at each of the `n − m + 1` positions. Rabin-Karp replaces that per-position character test with a single integer comparison: it hashes `P` once, keeps a hash of the current text window, and a hash mismatch proves the strings differ, so only matching hashes are worth verifying.
 
-The move that makes this cheap is the rolling hash. Sliding the window one character to the right does not recompute the hash from its `m` characters; it updates the previous hash in `O(1)` by dropping the outgoing character's contribution and folding in the incoming one. A hash mismatch discards a position with one comparison. Because distinct strings can still collide onto the same hash, a hash match is only a candidate — the algorithm then compares the `m` characters directly, and that verification is what keeps the answer correct.
+The move that makes this cheap is the rolling hash. A hash mismatch discards a position with one comparison. Because distinct strings can still collide onto the same hash, a hash match is only a candidate — the algorithm then compares the `m` characters directly, and that verification is what keeps the answer correct.
 
-**Core condition:** a window hash that updates in `O(1)` per slide + a verification on every hash match → `O(n + m)` expected search, `O(nm)` only when collisions or genuine matches force verification at most positions.
+
 
 ~~~~~tabsdown
 tab: Visualization
@@ -26,13 +26,13 @@ tab: Visualization
 {"algorithm":"rabin-karp","text":"GEEKSFORGEEKS","pattern":"GEEK"}
 ```
 
-# Trace
+
 
 The trace searches for `GEEK` in `GEEKSFORGEEKS`, sliding a four-character window and comparing its rolling hash against the pattern hash.
 
-The window at index 0 hashes equal to the pattern, so that position triggers a character check and confirms the first match. Every following slide reuses the previous hash: the algorithm subtracts the weight of the character leaving on the left, shifts, and adds the character entering on the right, producing the next window's hash in a constant number of operations rather than `O(m)`. Positions whose hash differs from the pattern's — the large majority here — are rejected on a single integer compare and never reach a character comparison. Only when a window hash equals the pattern hash does the algorithm spend `O(m)` confirming the characters, which is why the second occurrence at index 8 pays exactly the verification the first one did.
+The window at index 0 hashes equal to the pattern, so that position triggers a character check and confirms the first match. Every following slide reuses the previous hash: the algorithm subtracts the weight of the character leaving on the left, shifts, and adds the character entering on the right. Positions whose hash differs from the pattern's are rejected on an integer comparison and never reach character verification. A matching hash triggers a direct pattern comparison, which confirms the second occurrence at index 8 just as it confirmed the first.
 
-# The Rolling Hash and Its Verification Guard
+
 
 Rabin-Karp reads each length-`m` string as a number in base `b`, reduced modulo a large prime `p`. With characters mapped to integers, the window `T[i..i+m-1]` hashes to:
 
@@ -129,25 +129,17 @@ tab: Complexity
   }
 }
 ```
+
+The expected row assumes a large modulus and suitable base make spurious hash matches rare. Adversarial collisions force full pattern verification at many windows and select the chart's adverse row.
 ~~~~~
-
-# Complexity
-
-| Case | Time | Auxiliary space | Cause |
-| --- | --- | --- | --- |
-| Best | `Θ(n + m)` | `O(1)` | Hashing `P` and the first window costs `Θ(m)`; the remaining slides are `O(1)` each and few or no hash matches reach verification. |
-| Average | `Θ(n + m)` | `O(1)` | Assumes a hash with a large prime modulus and a suitable base, so spurious hash matches are rare; verifications cost `O(1)` amortized per slide and total expected work stays `O(n)`. |
-| Worst | `Θ(n · m)` | `O(1)` | A hash match at (almost) every position forces `O(m)` verification each time — an adversarial or weak modulus producing constant collisions, or genuine matches everywhere as in text `aa…a` searched for `aa…a`. |
-
-Auxiliary space is a handful of integer accumulators — the pattern hash, the running window hash, and the precomputed high-order power `b^(m-1)` — independent of both `n` and `m`.
 
 # Collisions and the Multi-pattern Payoff
 
-A hash match is not a string match. Dropping the `O(m)` verification to save time turns the algorithm into a filter that reports any two substrings sharing a residue as equal; the verification is not an optimization to remove.
+A hash match is not a string match.
 
-A weak modulus or overflow makes those collisions common rather than rare. A small or composite `p`, or a base/modulus pair whose intermediate products overflow the integer type before reduction, shrinks or corrupts the hash space; residues cluster, hash matches fire at most positions, and each drags in an `O(m)` verification — the average `Θ(n + m)` collapses into the `Θ(nm)` worst case. A large prime such as `10^9 + 7` or `10^9 + 9`, with a reduction after every multiplication, keeps residues spread and the arithmetic in range.
+A weak modulus or overflow makes those collisions common rather than rare. A large prime such as `10^9 + 7` or `10^9 + 9`, with a reduction after every multiplication, keeps residues spread and the arithmetic in range.
 
-The screening is strongest across many patterns at once. A single rolling hash over the text can screen a whole set of equal-length patterns: hash every pattern into a set, then test each window hash for membership in `O(1)`. One pass filters for all of them together, which is where the hashing earns its place — document fingerprinting, plagiarism and duplicate-block detection, multi-signature log scanning.
+The screening is strongest across many patterns at once. One pass filters for all of them together, which is where the hashing earns its place — document fingerprinting, plagiarism and duplicate-block detection, multi-signature log scanning.
 
 # Reference Drawer
 
@@ -216,18 +208,18 @@ The screening is strongest across many patterns at once. A single rolling hash o
 >     }
 > }
 > ```
-> `FindAll` scans every window and yields every confirmed start index, matching the exhaustive trace and complexity bounds; an empty pattern keeps the conventional single match at index `0`. `SequenceEqual` is the mandatory verification: it runs only when the hashes match and guards against reporting a collision as a match. The `+ Modulus` before the final reductions keeps the subtraction non-negative in modular arithmetic. `Base = 256` assumes byte-range (ASCII) input; non-ASCII `char` values exceed 255, so a larger base (or hashing the byte encoding) is needed — correctness is unaffected either way because verification checks every hit.
+> `FindAll` scans every window and yields every confirmed start index; an empty pattern keeps the conventional single match at index `0`. `SequenceEqual` is the mandatory verification: it runs only when the hashes match and guards against reporting a collision as a match. The `+ Modulus` before the final reductions keeps the subtraction non-negative in modular arithmetic. `Base = 256` assumes byte-range (ASCII) input; non-ASCII `char` values exceed 255, so a larger base (or hashing the byte encoding) is needed — correctness is unaffected either way because verification checks every hit.
 
 # Questions
 
-> [!QUESTION]- How does sliding the window keep the hash update at `O(1)`?
-> The window hash is a base-`b` polynomial mod `p`. Moving one position right subtracts the outgoing character's weighted term `T[i]·b^(m-1)`, multiplies by `b` to shift the rest up one place, and adds the incoming `T[i+m]` — a fixed count of modular operations, independent of `m`. Recomputing from the `m` characters instead would make each step `O(m)` and the scan `O(nm)`.
+> [!QUESTION]- How does the rolling hash advance by one text position?
+> The window hash is a base-`b` polynomial mod `p`. Moving right subtracts the outgoing character's weighted term `T[i]·b^(m-1)`, multiplies by `b` to shift the retained terms, and adds the incoming `T[i+m]`.
 
 > [!QUESTION]- Why does a hash match still require a character comparison?
-> The hash maps `m`-character strings onto residues mod `p`, a many-to-one map, so two different windows can share a value. A match on the hash means only that the strings might be equal; the `O(m)` character check confirms it and stops a collision from being reported as a match.
+> The hash maps `m`-character strings onto residues mod `p`, a many-to-one map, so two different windows can share a value.
 
-> [!QUESTION]- What turns the expected `Θ(n + m)` into the `Θ(nm)` worst case?
-> A hash match at almost every position, each forcing an `O(m)` verification. It arises with genuine matches everywhere (text `aaaa` searched for `aa`) or with a weak or small modulus that makes collisions frequent. A large prime modulus keeps spurious matches rare, which is the low-collision assumption behind the average bound.
+> [!QUESTION]- What forces character verification at many consecutive windows?
+> Genuine matches everywhere, such as searching `aaaa` for `aa`, verify every position. A weak or small modulus can create the same pressure through frequent collisions; a large prime modulus makes spurious matches rarer.
 
 # References
 

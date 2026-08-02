@@ -10,7 +10,7 @@
   --_surface: var(--cx-bg);
   --_hover: color-mix(in srgb, var(--cx-text) 7%, transparent);
   --_accent: var(--secondary, var(--interactive-accent, #245b98));
-  --_font-head: var(--headerFont, var(--font-interface));
+  --_font-head: var(--headerFont, var(--font-interface, sans-serif));
   --_tween: 140ms;
   container-type: inline-size;
   color: var(--cx-text);
@@ -24,16 +24,26 @@
   overflow-x: auto;
 }
 
+.complexity__resources:has(> .complexity__resource:only-child) {
+  grid-template-columns: minmax(0, 1fr);
+  overflow-x: visible;
+}
+
 .complexity__resource:only-child {
   grid-column: 1 / -1;
 }
 
-.complexity__resource-label {
-  margin-bottom: 0.35rem;
-  font: 650 0.82rem var(--headerFont, var(--font-interface));
+.complexity__resource {
+  container-type: inline-size;
 }
 
-.complexity__legend-button:focus-visible {
+.complexity__resource-label {
+  margin-bottom: 0.25rem;
+  font: 650 1rem/1.25 var(--_font-head);
+}
+
+.complexity__legend-button:focus-visible,
+.complexity__legend-group-button:focus-visible {
   outline: 2px solid var(--secondary, var(--interactive-accent, #245b98));
   outline-offset: 2px;
 }
@@ -66,7 +76,7 @@
 .complexity__x-tick,
 .complexity__endpoint-label {
   font-family: var(--bodyFont, var(--font-text, sans-serif));
-  font-size: 10px;
+  font-size: 16px;
 }
 
 .complexity__tick {
@@ -102,13 +112,13 @@
 
 .complexity__curve.is-highlighted {
   opacity: 1;
-  stroke-width: 2.65;
+  stroke-width: 1.5;
   stroke-dasharray: none;
 }
 
 .complexity__curve.is-subtle {
   opacity: 0.28;
-  stroke-width: 1.35;
+  stroke-width: 1;
   stroke-dasharray: 6 5;
 }
 
@@ -140,7 +150,7 @@
 .complexity__legend {
   display: flex;
   flex-direction: column;
-  gap: 0.3rem;
+  gap: 0;
   margin: 0.35rem 0 0;
   padding: 0;
   list-style: none;
@@ -148,59 +158,97 @@
 
 .complexity__legend-group {
   display: grid;
-  grid-template-columns: 4.5rem minmax(0, 1fr);
-  align-items: start;
-  gap: 0.25rem 0.5rem;
+  grid-template-columns: minmax(5.5rem, 1fr) minmax(0, auto);
+  align-items: center;
+  gap: 0.5rem;
+  min-height: 2.25rem;
+  padding: 0.25rem 0;
 }
 
-.complexity__legend-group.is-ungrouped {
-  display: block;
+.complexity__legend-group + .complexity__legend-group {
+  border-top: 1px solid color-mix(in srgb, var(--cx-border) 72%, transparent);
 }
 
 .complexity__legend-group-label {
-  padding-top: 0.65rem;
   color: var(--cx-text);
-  font: 650 0.72rem var(--headerFont, var(--font-interface));
+  font: 650 0.875rem/1.35 var(--_font-head);
+}
+
+.complexity__legend-group-button {
+  appearance: none;
+  margin: 0;
+  padding: 0;
+  color: inherit;
+  text-align: left;
+  background: transparent;
+  border: 0;
+  cursor: pointer;
+}
+
+.complexity__legend-group-button.is-subtle {
+  opacity: 0.45;
 }
 
 .complexity__legend-items {
   display: flex;
   flex-wrap: wrap;
-  gap: 0.2rem;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 0.35rem;
   margin: 0;
   padding: 0;
   list-style: none;
 }
 
-.complexity__legend-group.is-ungrouped .complexity__legend-items {
+.complexity__legend-item {
+  margin-inline-start: 0;
+}
+
+.complexity__legend.is-ungrouped .complexity__legend-group {
+  display: block;
+  min-height: 0;
+  padding: 0.2rem 0;
+}
+
+.complexity__legend.is-ungrouped .complexity__legend-items {
   flex-wrap: wrap;
   justify-content: center;
-  overflow-x: visible;
+  gap: clamp(0.5rem, 2.5cqi, 1.25rem);
+}
+
+.complexity__legend.is-ungrouped .complexity__legend-item {
+  flex: 0 0 auto;
+}
+
+.complexity__legend-entry {
+  display: inline-flex;
+  align-items: center;
+  min-height: 1.75rem;
+  gap: 0.4rem;
+  padding: 0.2rem 0.45rem;
+  color: var(--cx-text);
+  font: 500 0.875rem/1.35 var(--_font-head);
+  text-align: right;
+  white-space: nowrap;
 }
 
 .complexity__legend-button {
-  display: inline-flex;
-  align-items: center;
-  min-height: 2.75rem;
-  gap: 0.3rem;
-  padding: 0 0.35rem;
-  color: var(--cx-muted);
-  font: 500 0.68rem var(--headerFont, var(--font-interface));
-  white-space: nowrap;
+  appearance: none;
   cursor: pointer;
   background: transparent;
-  border: 1px solid transparent;
-  border-radius: 0.3rem;
+  border: 0;
+  border-bottom: 2px solid color-mix(in srgb, var(--complexity-color) 42%, transparent);
+  border-radius: 0;
   transition:
     color 140ms ease,
     opacity 140ms ease,
-    background-color 140ms ease;
+    border-color 140ms ease;
 }
 
 .complexity__legend-button:hover,
 .complexity__legend-button.is-selected {
-  color: var(--cx-text);
-  background: color-mix(in srgb, var(--cx-border) 38%, transparent);
+  background: transparent;
+  border-bottom-color: var(--complexity-color);
 }
 
 .complexity__legend-button.is-subtle {
@@ -208,25 +256,27 @@
 }
 
 .complexity__legend-swatch {
-  width: 0.8rem;
-  height: 0.125rem;
+  width: 0.9rem;
+  height: 0.15rem;
   flex: none;
   border-radius: 999px;
   background: var(--complexity-color);
 }
 
-.complexity__semantic-bounds {
-  display: grid;
-  grid-template-columns: minmax(0, auto) minmax(0, 1fr);
-  gap: 0.2rem 0.5rem;
-  margin: 0.4rem 0 0;
-  color: var(--cx-muted);
-  font-size: 0.72rem;
+.complexity__legend-static {
+  padding-inline: 0.15rem 0;
 }
 
-.complexity__semantic-bounds dt,
-.complexity__semantic-bounds dd {
-  margin: 0;
+.complexity__legend-static .complexity__legend-swatch {
+  height: 0;
+  background: none;
+  border-top: 2px dashed var(--complexity-color);
+  border-radius: 0;
+  opacity: 0.72;
+}
+
+.complexity__legend.is-ungrouped .complexity__legend-button {
+  padding: 0.25rem 0;
 }
 
 .complexity-error {
@@ -250,23 +300,34 @@
     min-width: 0;
   }
 
-  .complexity__legend-group {
-    grid-template-columns: minmax(5rem, 7.5rem) minmax(0, 1fr);
-    gap-inline: 0.75rem;
-  }
-
   .complexity__legend-items {
     gap-inline: 0.45rem;
   }
 
-  .complexity__legend-button {
-    min-height: 2rem;
-    gap: 0.4rem;
-    font-size: 0.72rem;
-  }
-
   .complexity__legend-swatch {
     width: 0.85rem;
+  }
+
+  .complexity__resource:only-child .complexity__tick,
+  .complexity__resource:only-child .complexity__x-tick,
+  .complexity__resource:only-child .complexity__endpoint-label {
+    font-size: 12px;
+  }
+}
+
+@container (min-width: 1000px) {
+  .complexity__resource:only-child .complexity__tick,
+  .complexity__resource:only-child .complexity__x-tick,
+  .complexity__resource:only-child .complexity__endpoint-label {
+    font-size: 10px;
+  }
+}
+
+@container (min-width: 1200px) {
+  .complexity__resource:only-child .complexity__tick,
+  .complexity__resource:only-child .complexity__x-tick,
+  .complexity__resource:only-child .complexity__endpoint-label {
+    font-size: 8px;
   }
 }
 

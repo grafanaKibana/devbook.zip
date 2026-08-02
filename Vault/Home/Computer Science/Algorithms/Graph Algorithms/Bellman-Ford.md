@@ -15,7 +15,6 @@ A weighted digraph carries a single source and edge weights that may be negative
 
 Correctness rests on a fact about shortest paths: with no negative cycle present a shortest path is simple, so it spans at most `V−1` edges, `V−1` rounds suffice, and a relaxation still possible in a `V`-th round can only be a negative cycle.
 
-**Core condition:** negative weights allowed → relax all `E` edges per round → `V−1` rounds settle every simple shortest path → a `V`-th relaxation proves a negative cycle, in `O(V·E)` time and `O(V)` space.
 
 The trace uses the adverse scan order `2→3, 1→2, 0→2, 0→1`, so each round exposes one more edge of the shortest path.
 
@@ -26,7 +25,6 @@ tab: Visualization
 {"algorithm":"bellman-ford"}
 ```
 
-# Why V−1 Rounds Settle Every Distance
 
 A round relaxes every edge once: for edge `(u, v, w)`, if `dist[u] + w < dist[v]`, then `dist[v]` drops to `dist[u] + w` and `pred[v]` becomes `u`. The order of edges within a round changes the intermediate values but never the round's guarantee.
 
@@ -34,7 +32,7 @@ That guarantee is layered by edge count. Before any round only the source is cor
 
 Detection falls out of the same bound. Run one extra round. If any edge still relaxes, a path is shortening beyond `V−1` edges, which is impossible for a simple path — so a negative cycle is reachable from the source, and the region it feeds has no finite shortest distance. To recover the cycle itself, take a vertex that relaxed on the `V`-th round and walk `pred` back `V` times; the walk cannot leave a cycle once inside it, so it lands on a cycle vertex, and following `pred` from there until it repeats reads off the loop.
 
-A full round that relaxes nothing means every distance is already final, so the sweep can stop early. On graphs that converge before the frontier reaches its diameter this turns the fixed `V−1` rounds into far fewer. SPFA, a queue-based variant, pushes this further by re-relaxing only edges leaving vertices whose distance just changed — the same `O(V·E)` worst case, often far fewer relaxations in practice, but no better guarantee on adversarial inputs.
+A full round that relaxes nothing means every distance is already final, so the sweep can stop early. On graphs that converge before the frontier reaches its diameter this turns the fixed `V−1` rounds into far fewer.
 
 A four-vertex run makes the layering concrete. The source is `0`, one edge is negative, and each round relaxes the edges in the fixed order `2→3, 1→2, 0→2, 0→1` — an adverse order that advances the settled frontier by one edge per round.
 
@@ -134,21 +132,13 @@ tab: Complexity
 ```
 ~~~~~
 
-# Complexity
-
-| Case | Time | Auxiliary space | Cause |
-| --- | --- | --- | --- |
-| Best | `O(E)` | `O(V)` | Distances converge in `k ≪ V` rounds and the confirming sweep changes nothing, so the early exit fires — `O(E)` when `k` is a small constant. |
-| Average | distribution-dependent; `O(V·E)` upper bound | `O(V)` | Distances converge in `k` rounds for `O(k·E)`, but an average needs an input and edge-order distribution. |
-| Worst | `O(V·E)` | `O(V)` | `V−1` full sweeps plus the detection round; a path whose edges are scanned in reverse path order advances by one edge per round. |
-
-The `O(V)` auxiliary space holds the `dist` and `pred` arrays, and the iterative sweep uses no recursion stack. On a dense graph where `E ≈ V²`, one Bellman-Ford source already costs `O(V³)`, the same asymptotic time as one [[Home/Computer Science/Algorithms/Graph Algorithms/Floyd-Warshall|Floyd-Warshall]] all-pairs run. Running Bellman-Ford from every source would cost `O(V⁴)`.
-
 # When Distances Stop Being Defined
 
 A reachable negative cycle has no shortest path: each lap around it lowers the total, so the infimum is `−∞`. The `V−1`-round distances into that region are a snapshot taken mid-descent, not an answer. Code that prints them reports finite numbers that mean nothing, and the failure is silent because the arrays are fully populated and no exception fires. A correct report distinguishes three states: a finite distance, `+∞` for a vertex with no path at all, and `−∞` for a vertex reachable through a negative cycle — the last set found by marking every vertex that relaxed on the `V`-th round and everything reachable from it.
 
 Overflow is the second silent failure. Because a round relaxes every edge, including edges leaving vertices not yet reached, computing `dist[u] + w` while `dist[u]` is still the infinity sentinel can wrap a fixed-width integer into a small or negative value and invent a shortest path. Skipping any edge whose source is still at the sentinel (`if (dist[u] == INF) continue;`) removes it; [[Home/Computer Science/Algorithms/Graph Algorithms/Dijkstra|Dijkstra]] never hits this because it only expands vertices it has already settled.
+
+When every source needs an answer, [[Home/Computer Science/Algorithms/Graph Algorithms/Floyd-Warshall|Floyd-Warshall]] solves the all-pairs problem directly instead of repeating this single-source procedure.
 
 # Reference Drawer
 

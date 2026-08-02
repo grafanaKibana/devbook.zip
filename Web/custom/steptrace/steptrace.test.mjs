@@ -1362,6 +1362,46 @@ test("all 600 ordered Ukraine-city A* routes are reachable, admissible, and opti
     }
   }
   assert.equal(checked, 600)
+
+  const note = readFileSync(
+    join(
+      repoRoot,
+      "Vault",
+      "Home",
+      "Computer Science",
+      "Algorithms",
+      "Graph Algorithms",
+      "A-Star Search.md",
+    ),
+    "utf8",
+  )
+  const complexity = JSON.parse(note.match(/```complexity\n([\s\S]*?)\n```/)[1])
+  const bestBound = (resource) => complexity.resources[resource].entries[0].bounds[0]
+  const averageBound = (resource) => complexity.resources[resource].entries[1]
+
+  assert.deepEqual(bestBound("time"), {
+    kind: "curve",
+    role: "Time (node expansions)",
+    formula: "Θ(d)",
+    curveId: "linear",
+  })
+  assert.deepEqual(bestBound("space"), {
+    kind: "curve",
+    role: "Auxiliary space, fixed b",
+    formula: "O(bd)",
+    curveId: "linear",
+  })
+
+  assert.deepEqual(averageBound("time"), {
+    kind: "operation",
+    operation: "Average",
+    bounds: [{ kind: "text", role: "Time (node expansions)", formula: "O(b^d)" }],
+  })
+  assert.deepEqual(averageBound("space"), {
+    kind: "operation",
+    operation: "Average",
+    bounds: [{ kind: "text", role: "Auxiliary space, fixed b", formula: "O(b^d)" }],
+  })
 })
 
 test("A* uses profile-owned controls and visual-only graph state without racks", () => {
@@ -1982,6 +2022,14 @@ test("styles are compiled from real SCSS without runtime injection", () => {
   assert.match(
     obsidianHostStyles,
     /\.steptrace button\.steptrace__btn \{[^}]*appearance: none;[^}]*border: 0;[^}]*background: transparent;[^}]*box-shadow: none;/s,
+  )
+  assert.match(
+    obsidianHostStyles,
+    /\.markdown-rendered \.complexity \{[\s\S]*ul\.complexity__legend-items > li\.complexity__legend-item \{[^}]*margin-inline-start: 0;/,
+  )
+  assert.match(
+    obsidianHostStyles,
+    /button\.complexity__legend-button,[\s\S]*button\.complexity__legend-group-button \{[^}]*appearance: none;[^}]*width: auto;[^}]*background: transparent;[^}]*border: 0;[^}]*border-radius: 0;[^}]*box-shadow: none;/,
   )
   assert.match(quartzHostStyles, /--st-held-bg: #92400e/)
   assert.match(quartzHostStyles, /--st-held-fg: #ffffff/)

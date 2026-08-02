@@ -99,8 +99,8 @@ function renderResourceDom(document: Document, resource: ComplexityResourceViewM
     )
     const label = svgElement(document, "text", {
       class: "complexity__tick",
-      x: left + 8,
-      y: tick.y + (tick.value === 0 ? -6 : 4),
+      x: tick.value === 0 ? left : left + 8,
+      y: tick.value === 0 ? axisY + 18 : tick.y + 4,
     })
     label.textContent = tick.label
     svg.append(label)
@@ -172,45 +172,57 @@ function renderResourceDom(document: Document, resource: ComplexityResourceViewM
   group.append(plotWrap)
 
   const legend = document.createElement("div")
-  legend.className = "complexity__legend"
+  legend.className = `complexity__legend ${
+    resource.legend.length === 1 && !resource.legend[0].label ? "is-ungrouped" : "is-grouped"
+  }`
   for (const legendGroup of resource.legend) {
     const row = document.createElement("div")
     row.className = `complexity__legend-group${legendGroup.label ? "" : " is-ungrouped"}`
     if (legendGroup.label) {
-      appendText(document, row, "span", legendGroup.label).className =
-        "complexity__legend-group-label"
+      const pathIds = legendGroup.items.flatMap((item) =>
+        item.kind === "plotted" ? [item.pathId] : [],
+      )
+      const label = appendText(
+        document,
+        row,
+        pathIds.length > 0 ? "button" : "span",
+        legendGroup.label,
+      )
+      label.className = `complexity__legend-group-label${
+        pathIds.length > 0 ? " complexity__legend-group-button" : ""
+      }`
+      if (pathIds.length > 0) {
+        label.setAttribute("type", "button")
+        label.dataset.pathIds = pathIds.join(",")
+        label.setAttribute("aria-pressed", "false")
+      }
     }
     const items = document.createElement("ul")
     items.className = "complexity__legend-items"
     for (const legendItem of legendGroup.items) {
       const item = document.createElement("li")
       item.className = "complexity__legend-item"
-      const button = document.createElement("button")
-      button.type = "button"
-      button.className = "complexity__legend-button"
-      button.dataset.pathId = legendItem.pathId
-      button.setAttribute("aria-pressed", "false")
-      button.style.setProperty("--complexity-color", legendItem.color)
+      const entry = document.createElement(legendItem.kind === "plotted" ? "button" : "span")
+      entry.className = `complexity__legend-entry ${
+        legendItem.kind === "plotted" ? "complexity__legend-button" : "complexity__legend-static"
+      }`
+      if (legendItem.kind === "plotted") {
+        entry.setAttribute("type", "button")
+        entry.dataset.pathId = legendItem.pathId
+        entry.setAttribute("aria-pressed", "false")
+      }
+      entry.style.setProperty("--complexity-color", legendItem.color)
       const swatch = document.createElement("span")
       swatch.className = "complexity__legend-swatch"
       swatch.setAttribute("aria-hidden", "true")
-      button.append(swatch, document.createTextNode(legendItem.label))
-      item.append(button)
+      entry.append(swatch, document.createTextNode(legendItem.label))
+      item.append(entry)
       items.append(item)
     }
     row.append(items)
     legend.append(row)
   }
   group.append(legend)
-  if (resource.semanticBounds.length > 0) {
-    const semanticBounds = document.createElement("dl")
-    semanticBounds.className = "complexity__semantic-bounds"
-    for (const bound of resource.semanticBounds) {
-      appendText(document, semanticBounds, "dt", `${bound.operation} — ${bound.role}`)
-      appendText(document, semanticBounds, "dd", bound.formula)
-    }
-    group.append(semanticBounds)
-  }
   return group
 }
 

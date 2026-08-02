@@ -11,24 +11,22 @@ status: Ready to Repeat
 publish: true
 ---
 
-Scheduling the most non-overlapping meetings into one room has an exponential number of candidate subsets. A greedy algorithm skips that search: sort the meetings by finish time, then walk the list once, accepting each meeting whose start is at or after the last accepted finish. One sort and one pass produce a maximum-size schedule — no subset is ever enumerated, and no accepted meeting is ever reconsidered.
+To schedule the most non-overlapping meetings into one room, sort the meetings by finish time, then walk the list once, accepting each meeting whose start is at or after the last accepted finish. The scan produces a maximum-size schedule without enumerating subsets or reconsidering an accepted meeting.
 
-Greedy algorithms build the answer incrementally: at each step, commit to the option that ranks best under a fixed local rule and never revisit it. For an exact algorithm, that commitment is valid only when the local rule provably composes into a global optimum — most plausible-looking rules do not, and the paradigm gives no signal when a rule is wrong. The same pattern also appears in approximation algorithms, where the proof guarantees a bound rather than an exact optimum. Runtime comes from the ordering mechanism: activity selection sorts once and scans once, while Dijkstra and Prim repeatedly update a priority queue.
+Greedy algorithms build the answer incrementally: at each step, commit to the option that ranks best under a fixed local rule and never revisit it. For an exact algorithm, that commitment is valid only when the local rule provably composes into a global optimum — most plausible-looking rules do not, and the paradigm gives no signal when a rule is wrong. The same pattern also appears in approximation algorithms, where the proof guarantees a bound rather than an exact optimum.
 
-**Exactness condition:** a fixed local rule + the greedy-choice property + optimal substructure → the committed choices form a global optimum. **Activity-selection cost:** sort by finish time, then scan once → `O(n log n)` time and `O(n)` auxiliary space when the input is cloned.
+**Exactness condition:** a fixed local rule + the greedy-choice property + optimal substructure → the committed choices form a global optimum.
 
 ~~~~~tabsdown
 tab: Visualization
-
 
 
 ```steptrace
 {"algorithm":"activity-selection"}
 ```
 
-# Trace
 
-The trace starts with five meetings in input order. Sorting by finish time moves the earliest release opportunity first; the sweep then accepts a compatible meeting permanently or rejects it as soon as it overlaps the last accepted finish.
+Sorting by finish time moves the earliest release opportunity first; the sweep then accepts a compatible meeting permanently or rejects it as soon as it overlaps the last accepted finish.
 
 The first commitment, `[1, 4]`, rejects `[3, 5]` and `[0, 6]`. Meetings `[5, 7]` and `[8, 9]` remain compatible, producing a maximum schedule of three meetings. The accepted lane illustrates the exchange intuition: each commitment leaves at least as much room as any alternative first choice.
 
@@ -138,16 +136,6 @@ tab: Complexity
 ```
 ~~~~~
 
-# Complexity
-
-| Phase | Time | Auxiliary space | Cause |
-| --- | --- | --- | --- |
-| Order candidates by the greedy key | `O(n log n)` | `O(n)` or `O(log n)` | A comparison sort of `n` candidates dominates the total. |
-| Feasibility scan | `O(n)` | `O(1)` | Each candidate is examined once, then committed or discarded. |
-| Priority-queue variant | `O((V + E) log V)` | `O(V)` | [[Home/Computer Science/Algorithms/Graph Algorithms/Dijkstra|Dijkstra]] and Prim re-rank candidates as edges are relaxed rather than sorting once. |
-
-An already finish-ordered activity stream needs only the `O(n)` feasibility scan. Bucket ordering instead costs `O(n + k)` for `k` key values; it is linear only when `k = O(n)`. Greedy often avoids the state table used by [[Home/Computer Science/Algorithms/Paradigms/Dynamic Programming|Dynamic Programming]], but there is no general theorem that it always uses less time and space.
-
 # When Local Choices Reach the Global Optimum
 
 Two properties decide whether committing to a local choice is safe.
@@ -163,7 +151,9 @@ For activity selection, each accepted meeting extends a partial schedule and mak
 
 Coin change with denominations `{1, 3, 4}` making `6` exposes the failure directly. The largest-coin rule takes `4`, then `1`, then `1` — three coins — while `3 + 3` uses two. The rule is locally optimal at every step, yet its first commitment (the `4`) appears in no optimal solution, so the greedy-choice property does not hold and there is nothing to patch in the loop: the rule itself is wrong for this denomination set. Canonical currencies like `{1, 5, 10, 25}` are constructed so the property does hold, which is why greedy is optimal there and nowhere guarantees it in general.
 
-The 0/1 knapsack breaks the same greedy-choice property under a different local rule: value-per-weight. With capacity `50` and items `(value 60, weight 10)`, `(100, 20)`, `(120, 30)` — ratios `6`, `5`, `4` — greedy commits to the highest-ratio item first and ends with items 1 and 2 for weight `30` and value `160`, unable to fit the third. The only optimal packing is `(100, 20)` with `(120, 30)`, weight `50` and value `220`, and it excludes the highest-ratio item entirely — so the first local commitment is already outside every optimum. The problem still has optimal substructure — `OPT(cap, items) = max(OPT(cap, items∖{i}), v_i + OPT(cap − w_i, items∖{i}))` — which is exactly what makes the `O(nW)` [[Home/Computer Science/Algorithms/Paradigms/Dynamic Programming|Dynamic Programming]] solution correct; the greedy-choice property is what fails, not the substructure. Fractional knapsack, where the highest-ratio item can be cut to fill the capacity, always admits that item into an optimal solution, restoring the greedy-choice property and making greedy-by-ratio optimal.
+The 0/1 knapsack breaks the same greedy-choice property under a different local rule: value-per-weight. With capacity `50` and items `(value 60, weight 10)`, `(100, 20)`, `(120, 30)` — ratios `6`, `5`, `4` — greedy commits to the highest-ratio item first and ends with items 1 and 2 for weight `30` and value `160`, unable to fit the third. The only optimal packing is `(100, 20)` with `(120, 30)`, weight `50` and value `220`, and it excludes the highest-ratio item entirely — so the first local commitment is already outside every optimum. Fractional knapsack, where the highest-ratio item can be cut to fill the capacity, always admits that item into an optimal solution, restoring the greedy-choice property and making greedy-by-ratio optimal.
+
+[[Home/Computer Science/Algorithms/Paradigms/Dynamic Programming|Dynamic programming]] handles the indivisible case by keeping both take and skip branches instead of committing to the local ratio winner.
 
 The common thread: both are the greedy-choice property failing under a different local rule — fewest coins via the largest denomination, most value via the highest ratio — and in each case the locally best first choice belongs to no optimal solution. The failure is silent — the code runs and returns a plausible, suboptimal result — so the difficult part of applying greedy is proving the property holds, not writing the scan.
 
@@ -202,7 +192,7 @@ The common thread: both are the greedy-choice property failing under a different
 >     return count;
 > }
 > ```
-> The clone keeps the caller's order intact and accounts for the `O(n)` auxiliary space. The sort fixes the greedy key; `start >= lastEnd` is the only place a candidate is rejected. Replacing the key with shortest-duration or earliest-start breaks the exchange argument and the result, even though the code still runs.
+
 
 # Questions
 
@@ -211,9 +201,6 @@ The common thread: both are the greedy-choice property failing under a different
 
 > [!QUESTION]- What does an exchange argument establish?
 > That the greedy first choice is contained in some optimal solution. Starting from an arbitrary optimal solution, one of its choices is swapped for the greedy choice and shown not to reduce quality; repeating the swap transforms it into the greedy solution without ever getting worse, so greedy is at least as good as any optimum. Combined with optimal substructure, induction extends the result to the entire run.
-
-> [!QUESTION]- Why is fractional knapsack inside greedy but 0/1 knapsack outside it?
-> In fractional knapsack the highest value-per-weight item can always be taken — cut to fit the remaining capacity — so it belongs to an optimal solution and the greedy-choice property holds. In 0/1 knapsack an item is all-or-nothing, so a high-ratio item can be excluded from every optimal packing when a different indivisible combination uses its capacity for more total value; the greedy-choice property fails even though the problem keeps optimal substructure — the `max(OPT(cap, items∖{i}), v_i + OPT(cap − w_i, items∖{i}))` recurrence that the `O(nW)` DP exploits. The failing property is the greedy choice, not the substructure.
 
 # References
 

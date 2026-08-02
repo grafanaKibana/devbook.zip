@@ -7,7 +7,7 @@ import type { Element } from "hast"
 import { renderComplexityDom } from "./dom"
 import { renderComplexityHast } from "./hast"
 import { mountComplexityFigure } from "./interactions"
-import { buildComplexityViewModel, CURVE_IDS, curveValue } from "./model"
+import { buildComplexityViewModel, COMPLEXITY_CHART, CURVE_IDS, curveValue } from "./model"
 import { ComplexityBlock } from "../transformers/complexity-block"
 
 const variables = { n: "number of input elements" }
@@ -98,6 +98,61 @@ const dualResource = {
   },
 }
 
+const empiricalResource = {
+  version: 2,
+  label: "A* observed complexity",
+  variables: {
+    depth: {
+      symbol: "d",
+      description: "optimal solution depth",
+    },
+  },
+  resources: {
+    time: {
+      mode: "operations",
+      entries: [
+        {
+          kind: "operation",
+          operation: "Observed average",
+          bounds: [
+            {
+              kind: "samples",
+              role: "Average expansions",
+              formula: "Mean expansions",
+              samples: [
+                { n: 1, value: 2.05 },
+                { n: 2, value: 3.33 },
+                { n: 3, value: 5.21 },
+              ],
+            },
+          ],
+        },
+      ],
+    },
+    space: {
+      mode: "operations",
+      entries: [
+        {
+          kind: "operation",
+          operation: "Observed average",
+          bounds: [
+            {
+              kind: "samples",
+              role: "Average peak stored",
+              formula: "Mean peak stored",
+              samples: [
+                { n: 1, value: 5.26 },
+                { n: 2, value: 7.87 },
+                { n: 3, value: 10.95 },
+              ],
+            },
+          ],
+        },
+      ],
+    },
+  },
+}
+
 const buildWithNamespace = buildComplexityViewModel as unknown as (
   config: unknown,
   instanceNamespace: string,
@@ -175,7 +230,12 @@ test("every representative function uses the fixed 0-origin and 1…10k log scal
       )
     }
     assert.match(path.geometry, /^M0\.00,282\.00 /)
+    assert.equal(path.geometry.match(/ L/g)?.length, 33)
   }
+  const factorialPath = view.paths.find(({ curveId }) => curveId === "factorial")
+  assert.ok(factorialPath)
+  const factorialYs = [...factorialPath.geometry.matchAll(/L[\d.]+,(-?[\d.]+)/g)].map(([, y]) => y)
+  assert.equal(new Set(factorialYs).size, factorialYs.length)
   assert.deepEqual(
     view.ticks.map(({ value }) => value),
     [0, 1, 10, 100, 1_000, maximum],
@@ -255,6 +315,17 @@ test("operation text bounds stay semantic-only while catalogue bounds plot", () 
   assert.equal(view.paths.filter((path) => !path.dimmed).length, 1)
   assert.equal(view.paths.find((path) => !path.dimmed)?.curveId, "constant")
   assert.ok(view.paths.flatMap((path) => path.samples).every(({ y }) => Number.isFinite(y)))
+  assert.deepEqual(
+    view.legend[0].items.map((item) => ({
+      kind: item.kind,
+      label: item.label,
+      interactive: "pathId" in item,
+    })),
+    [
+      { kind: "semantic", label: "O(bucket length)", interactive: false },
+      { kind: "plotted", label: "Average", interactive: true },
+    ],
+  )
 })
 
 test("operation legends group each operation and shade its plotted bounds", () => {
@@ -283,12 +354,12 @@ test("operation legends group each operation and shade its plotted bounds", () =
     [
       {
         label: "Lookup",
-        labels: ["Best O(1)", "Avg O(1)", "Worst O(n)"],
+        labels: ["Best", "Average", "Worst single op"],
         colors: ["#8bb8e8", "#4c89cb", "#245b98"],
       },
       {
         label: "Insert",
-        labels: ["Best O(1)", "Avg O(1)", "Worst O(n)"],
+        labels: ["Best", "Average", "Worst single op"],
         colors: ["#bd9ee8", "#8d62c7", "#65379e"],
       },
     ],
@@ -421,6 +492,96 @@ test("version 2 keeps plotted formulas exact and semantic-only bounds geometry-f
     [{ role: "Implementation dependent", formula: "tail-call stack" }],
   )
   assert.ok(space.paths.every(({ curveId }: any) => CURVE_IDS.includes(curveId)))
+  assert.deepEqual(
+    time.legend.flatMap(({ items }: any) => items.map(({ label }: any) => label)),
+    ["Best", "Average", "Worst"],
+  )
+  assert.equal(space.legend[0].items[0].label, "Best")
+})
+
+test("endpoint labels use the authored formula when highlighted paths agree", () => {
+  const view = buildWithNamespace(
+    {
+      version: 2,
+      label: "A* shape labels",
+      variables: {
+        depth: { symbol: "d", description: "optimal solution depth" },
+      },
+      resources: {
+        time: {
+          mode: "operations",
+          entries: [
+            {
+              kind: "operation",
+              operation: "Best",
+              bounds: [{ kind: "curve", role: "Expansions", formula: "Θ(d)", curveId: "linear" }],
+            },
+          ],
+        },
+        space: {
+          mode: "operations",
+          entries: [
+            {
+              kind: "operation",
+              operation: "Worst",
+              bounds: [
+                { kind: "curve", role: "Stored nodes", formula: "O(b^d)", curveId: "exponential" },
+              ],
+            },
+          ],
+        },
+      },
+    },
+    "a-star-labels",
+  )
+
+  assert.equal(
+    view.resources[0].endpointLabels.find(({ curveId }: any) => curveId === "linear")?.formula,
+    "Θ(d)",
+  )
+  assert.equal(
+    view.resources[1].endpointLabels.find(({ curveId }: any) => curveId === "exponential")?.formula,
+    "O(b^d)",
+  )
+})
+
+test("empirical bounds stay semantic-only and use the regular legend treatment", () => {
+  const view = buildWithNamespace(empiricalResource, "a-star-observed")
+
+  for (const resource of view.resources) {
+    assert.equal(resource.contextPaths.length, CURVE_IDS.length)
+    assert.equal(resource.paths.length, 0)
+    assert.equal(resource.semanticBounds.length, 1)
+    assert.equal(resource.legend.length, 1)
+    assert.equal(resource.legend[0].items.length, 1)
+    assert.equal(resource.legend[0].items[0].kind, "semantic")
+    assert.equal("pathId" in resource.legend[0].items[0], false)
+    assert.ok(resource.endpointLabels.every(({ dimmed }: any) => dimmed))
+  }
+  assert.deepEqual(
+    view.resources[0].xTicks.map(({ value }: any) => value),
+    [2, 4, 6, 8, 10],
+  )
+  assert.deepEqual(
+    view.resources[0].ticks.map(({ value }: any) => value),
+    [0, 1, 10, 100, 1_000, 10_000],
+  )
+})
+
+test("empirical bounds reject non-increasing or non-positive samples", () => {
+  const invalidN = structuredClone(empiricalResource)
+  invalidN.resources.time.entries[0].bounds[0].samples[1].n = 1
+  assert.throws(
+    () => buildWithNamespace(invalidN, "invalid-n"),
+    /samples\[1\]\.n: must be finite, positive, and strictly increasing/,
+  )
+
+  const invalidValue = structuredClone(empiricalResource)
+  invalidValue.resources.space.entries[0].bounds[0].samples[0].value = 0
+  assert.throws(
+    () => buildWithNamespace(invalidValue, "invalid-value"),
+    /samples\[0\]\.value: must be a finite positive number/,
+  )
 })
 
 test("version 2 rejects missing resources, catalogue mode, unknown keys, and duplicate roles locally", () => {
@@ -600,6 +761,25 @@ test("dual-resource HAST has one accessible figure and labelled Time and Space g
   )
   assert.ok(resources.every(({ properties }) => properties.role === "group"))
   assert.ok(resources.every(({ properties }) => typeof properties.ariaLabelledBy === "string"))
+  const legends = findAllHastByClass(hast, "complexity__legend")
+  assert.equal(legends.length, 2)
+  assert.deepEqual(
+    legends.map(({ properties }) => (properties.className as string[]).at(-1)),
+    ["is-ungrouped", "is-grouped"],
+  )
+  assert.equal(hastElements(hast, "button").length, 5)
+  const groupButtons = findAllHastByClass(hast, "complexity__legend-group-button")
+  assert.equal(groupButtons.length, 1)
+  assert.equal(groupButtons[0].tagName, "button")
+  assert.equal(typeof groupButtons[0].properties["data-path-ids"], "string")
+  assert.equal(groupButtons[0].properties.ariaPressed, "false")
+  const staticEntries = findAllHastByClass(hast, "complexity__legend-static")
+  assert.equal(staticEntries.length, 1)
+  assert.equal(staticEntries[0].tagName, "span")
+  assert.equal(staticEntries[0].properties["data-path-id"], undefined)
+  assert.equal(staticEntries[0].properties.ariaPressed, undefined)
+  assert.equal(findAllHastByClass(hast, "complexity__legend-entry").length, 5)
+  assert.equal(findAllHastByClass(hast, "complexity__semantic-bounds").length, 0)
 })
 
 test("host namespaces prevent duplicate IDs and keep every IDREF inside its figure", () => {
@@ -634,6 +814,10 @@ test("Quartz HAST renders the complete case union without renderer-owned tabs", 
   assert.equal(hastElements(hast, "clipPath").length, 1)
   assert.equal(hastElements(hast, "button").length, 3)
   assert.equal(
+    findAllHastByClass(hast, "complexity__tick")[0].properties.y,
+    COMPLEXITY_CHART.axisY + 18,
+  )
+  assert.equal(
     hastElements(hast, "text").length,
     view.ticks.length + view.xTicks.length + CURVE_IDS.length,
   )
@@ -660,9 +844,11 @@ test("Quartz HAST renders the complete case union without renderer-owned tabs", 
     hastElements(hast, "path").filter(({ properties }) => properties.id).length,
     view.paths.length,
   )
-  assert.match(hastText(hast), /Avg O\(n log n\)/)
-  assert.match(hastText(hast), /Best O\(n log n\)/)
-  assert.match(hastText(hast), /Worst O\(n²\)/)
+  assert.deepEqual(findAllHastByClass(hast, "complexity__legend-button").map(hastText), [
+    "Best",
+    "Average",
+    "Worst",
+  ])
   assert.doesNotMatch(hastText(hast), /Curves begin at/)
   assert.doesNotMatch(hastText(hast), /Expected balanced partitions/)
   assert.doesNotMatch(hastText(hast), /<script/i)
@@ -927,6 +1113,34 @@ test("legend selection isolates one curve, restores the union, and cleans up", (
   assert.equal(firstButton.attributes["aria-pressed"], "false")
 })
 
+test("legend hover previews one curve and restores the clicked selection", () => {
+  const figure = new InteractiveElement()
+  const preview = interactiveResource("best")
+  const otherButton = new InteractiveElement()
+  otherButton.dataset.pathId = preview.otherPath.dataset.pathId
+  preview.resource.matches.set(".complexity__legend-button", [preview.button, otherButton])
+  figure.matches.set(".complexity__resource", [preview.resource])
+
+  const handle = mountComplexityFigure(figure as unknown as HTMLElement)
+  preview.button.dispatchEvent(new Event("pointerenter"))
+  assert.equal(preview.button.attributes["aria-pressed"], "false")
+  assert.ok(preview.selectedPath.classList.contains("is-highlighted"))
+  assert.ok(preview.otherPath.classList.contains("is-subtle"))
+
+  preview.button.dispatchEvent(new Event("pointerleave"))
+  assert.ok(preview.otherPath.classList.contains("is-highlighted"))
+
+  otherButton.dispatchEvent(new Event("click"))
+  preview.button.dispatchEvent(new Event("pointerenter"))
+  assert.ok(preview.selectedPath.classList.contains("is-highlighted"))
+  assert.ok(preview.otherPath.classList.contains("is-subtle"))
+  preview.button.dispatchEvent(new Event("pointerleave"))
+  assert.equal(otherButton.attributes["aria-pressed"], "true")
+  assert.ok(preview.selectedPath.classList.contains("is-subtle"))
+  assert.ok(preview.otherPath.classList.contains("is-highlighted"))
+  handle.destroy()
+})
+
 test("legend selection changes only its owning resource", () => {
   const figure = new InteractiveElement()
   const time = interactiveResource("time-best")
@@ -940,6 +1154,49 @@ test("legend selection changes only its owning resource", () => {
   assert.ok(time.otherPath.classList.contains("is-subtle"))
   assert.ok(space.selectedPath.classList.contains("is-highlighted"))
   assert.ok(space.otherPath.classList.contains("is-highlighted"))
+  handle.destroy()
+})
+
+test("a legend group button selects every plotted item in its row", () => {
+  const figure = new InteractiveElement()
+  const groupButton = new InteractiveElement()
+  const firstButton = new InteractiveElement()
+  const secondButton = new InteractiveElement()
+  const otherButton = new InteractiveElement()
+  const firstPath = new InteractiveElement()
+  const secondPath = new InteractiveElement()
+  const otherPath = new InteractiveElement()
+
+  groupButton.dataset.pathIds = "lookup-best,lookup-worst"
+  firstButton.dataset.pathId = firstPath.dataset.pathId = "lookup-best"
+  secondButton.dataset.pathId = secondPath.dataset.pathId = "lookup-worst"
+  otherButton.dataset.pathId = otherPath.dataset.pathId = "insert-best"
+  figure.matches.set(".complexity__legend-button", [firstButton, secondButton, otherButton])
+  figure.matches.set(".complexity__legend-group-button", [groupButton])
+  figure.matches.set(".complexity__curve", [firstPath, secondPath, otherPath])
+
+  const handle = mountComplexityFigure(figure as unknown as HTMLElement)
+  groupButton.dispatchEvent(new Event("pointerenter"))
+  assert.ok(firstPath.classList.contains("is-highlighted"))
+  assert.ok(secondPath.classList.contains("is-highlighted"))
+  assert.ok(otherPath.classList.contains("is-subtle"))
+
+  groupButton.dispatchEvent(new Event("pointerleave"))
+  assert.ok(otherPath.classList.contains("is-highlighted"))
+
+  groupButton.dispatchEvent(new Event("click"))
+
+  assert.equal(groupButton.attributes["aria-pressed"], "true")
+  assert.equal(firstButton.attributes["aria-pressed"], "true")
+  assert.equal(secondButton.attributes["aria-pressed"], "true")
+  assert.equal(otherButton.attributes["aria-pressed"], "false")
+  assert.ok(firstPath.classList.contains("is-highlighted"))
+  assert.ok(secondPath.classList.contains("is-highlighted"))
+  assert.ok(otherPath.classList.contains("is-subtle"))
+
+  groupButton.dispatchEvent(new Event("click"))
+  assert.equal(groupButton.attributes["aria-pressed"], "false")
+  assert.ok(otherPath.classList.contains("is-highlighted"))
   handle.destroy()
 })
 
@@ -1010,6 +1267,11 @@ test("Obsidian DOM keeps the version 1 label accessible but not visible", () => 
 test("complexity styles have no StepTrace tabs dependency and no top margin", () => {
   const styles = readFileSync(join(process.cwd(), "custom", "complexity", "styles.scss"), "utf8")
   assert.match(styles, /\.complexity\s*\{[^}]*container-type: inline-size;/s)
+  assert.match(styles, /\.complexity__resource\s*\{[^}]*container-type: inline-size;/s)
+  assert.match(
+    styles,
+    /\.complexity__resources:has\(> \.complexity__resource:only-child\)\s*\{[^}]*grid-template-columns:\s*minmax\(0, 1fr\);[^}]*overflow-x:\s*visible;/s,
+  )
   assert.match(styles, /\.complexity\s*\{[^}]*margin:\s*0 0 1\.5rem;/s)
   assert.doesNotMatch(styles, /steptrace|complexity__tabs?|@use/)
   assert.match(
@@ -1018,8 +1280,38 @@ test("complexity styles have no StepTrace tabs dependency and no top margin", ()
   )
   assert.doesNotMatch(styles, /\n\s*th:last-child,\s*\n\s*td:last-child/)
   assert.match(styles, /@container \(min-width: 600px\)/)
+  assert.match(
+    styles,
+    /@container \(min-width: 600px\)[\s\S]*\.complexity__resource:only-child \.complexity__tick,[\s\S]*font-size:\s*12px;/,
+  )
+  assert.match(styles, /@container \(min-width: 1000px\)[\s\S]*font-size:\s*10px;/)
+  assert.match(styles, /@container \(min-width: 1200px\)[\s\S]*font-size:\s*8px;/)
   assert.doesNotMatch(styles, /@media \(min-width: 600px\)/)
   assert.doesNotMatch(styles, /\.complexity__title\b/)
+  assert.match(styles, /\.complexity__endpoint-label\s*\{[^}]*font-size:\s*16px;/s)
+  assert.match(styles, /\.complexity__curve\.is-highlighted\s*\{[^}]*stroke-width:\s*1\.5;/s)
+  assert.match(styles, /\.complexity__curve\.is-subtle\s*\{[^}]*stroke-width:\s*1;/s)
+  assert.match(styles, /\.complexity__legend-entry\s*\{[^}]*font:[^;]*0\.875rem/s)
+  assert.match(
+    styles,
+    /\.complexity__legend\.is-ungrouped \.complexity__legend-items\s*\{[^}]*flex-wrap:\s*wrap;[^}]*justify-content:\s*center;/s,
+  )
+  assert.match(
+    styles,
+    /\.complexity__legend\.is-ungrouped \.complexity__legend-item\s*\{[^}]*flex:\s*0 0 auto;/s,
+  )
+  assert.match(styles, /\.complexity__legend-item\s*\{[^}]*margin-inline-start:\s*0;/s)
+  assert.match(
+    styles,
+    /\.complexity__legend-button\s*\{[^}]*background:\s*transparent;[^}]*border:\s*0;[^}]*border-bottom:\s*2px solid/s,
+  )
+  assert.doesNotMatch(styles, /\.complexity__legend-group-button\s*\{[^}]*text-decoration/s)
+  assert.match(
+    styles,
+    /\.complexity__legend-group \+ \.complexity__legend-group\s*\{[^}]*border-top:/s,
+  )
+  assert.doesNotMatch(styles, /\.complexity__legend\s*\{[^}]*(?:background|border(?:-radius)?):/s)
+  assert.doesNotMatch(styles, /\.complexity__semantic-bounds\b/)
   assert.match(styles, /\.complexity__resources\s*\{[^}]*display:\s*grid;[^}]*overflow-x:\s*auto;/s)
   assert.match(
     styles,

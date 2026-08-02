@@ -23007,9 +23007,12 @@ function mountComplexityFigure(figure) {
       const activeIds = new Set(
         paths.filter((path) => path.dataset.context !== "true").map((path) => path.dataset.pathId ?? "")
       );
-      if (selectedPathId) {
+      if (previewPathIds.size > 0) {
         activeIds.clear();
-        activeIds.add(selectedPathId);
+        for (const pathId2 of previewPathIds) activeIds.add(pathId2);
+      } else if (selectedPathIds.size > 0) {
+        activeIds.clear();
+        for (const pathId2 of selectedPathIds) activeIds.add(pathId2);
       }
       for (const path of paths) {
         const active = activeIds.has(path.dataset.pathId ?? "");
@@ -23021,9 +23024,16 @@ function mountComplexityFigure(figure) {
       }
       for (const button2 of legendButtons) {
         const pathId2 = button2.dataset.pathId ?? "";
-        button2.classList.toggle("is-selected", selectedPathId === pathId2);
+        button2.classList.toggle("is-selected", selectedPathIds.has(pathId2));
         button2.classList.toggle("is-subtle", !activeIds.has(pathId2));
-        button2.setAttribute("aria-pressed", selectedPathId === pathId2 ? "true" : "false");
+        button2.setAttribute("aria-pressed", selectedPathIds.has(pathId2) ? "true" : "false");
+      }
+      for (const button2 of groupButtons) {
+        const pathIds = (button2.dataset.pathIds ?? "").split(",").filter(Boolean);
+        const selected = pathIds.length > 0 && selectedPathIds.size === pathIds.length && pathIds.every((pathId2) => selectedPathIds.has(pathId2));
+        button2.classList.toggle("is-selected", selected);
+        button2.classList.toggle("is-subtle", !pathIds.some((pathId2) => activeIds.has(pathId2)));
+        button2.setAttribute("aria-pressed", selected ? "true" : "false");
       }
       for (const label of labels) {
         const ids = (label.dataset.pathIds ?? "").split(",");
@@ -23044,16 +23054,44 @@ function mountComplexityFigure(figure) {
     const legendButtons = Array.from(
       resource.querySelectorAll(".complexity__legend-button")
     );
+    const groupButtons = Array.from(
+      resource.querySelectorAll(".complexity__legend-group-button")
+    );
     const paths = Array.from(resource.querySelectorAll(".complexity__curve"));
     const areas = Array.from(resource.querySelectorAll(".complexity__area"));
     const labels = Array.from(
       resource.querySelectorAll(".complexity__endpoint-label")
     );
-    let selectedPathId = null;
+    let selectedPathIds = /* @__PURE__ */ new Set();
+    let previewPathIds = /* @__PURE__ */ new Set();
     for (const button2 of legendButtons) {
+      listen(button2, "pointerenter", () => {
+        previewPathIds = /* @__PURE__ */ new Set([button2.dataset.pathId ?? ""]);
+        update2();
+      });
+      listen(button2, "pointerleave", () => {
+        previewPathIds = /* @__PURE__ */ new Set();
+        update2();
+      });
       listen(button2, "click", () => {
-        const pathId2 = button2.dataset.pathId ?? null;
-        selectedPathId = selectedPathId === pathId2 ? null : pathId2;
+        const pathId2 = button2.dataset.pathId ?? "";
+        selectedPathIds = selectedPathIds.size === 1 && selectedPathIds.has(pathId2) ? /* @__PURE__ */ new Set() : /* @__PURE__ */ new Set([pathId2]);
+        update2();
+      });
+    }
+    for (const button2 of groupButtons) {
+      listen(button2, "pointerenter", () => {
+        previewPathIds = new Set((button2.dataset.pathIds ?? "").split(",").filter(Boolean));
+        update2();
+      });
+      listen(button2, "pointerleave", () => {
+        previewPathIds = /* @__PURE__ */ new Set();
+        update2();
+      });
+      listen(button2, "click", () => {
+        const pathIds = (button2.dataset.pathIds ?? "").split(",").filter(Boolean);
+        const selected = selectedPathIds.size === pathIds.length && pathIds.every((pathId2) => selectedPathIds.has(pathId2));
+        selectedPathIds = selected ? /* @__PURE__ */ new Set() : new Set(pathIds);
         update2();
       });
     }
@@ -23083,8 +23121,8 @@ var COMPLEXITY_CHART = {
   width: 800,
   height: 320,
   left: 0,
-  plotRight: 740,
-  labelX: 748,
+  plotRight: 700,
+  labelX: 708,
   top: 18,
   axisY: 282
 };
@@ -23142,6 +23180,16 @@ var { left: LEFT, plotRight: PLOT_RIGHT, top: TOP, axisY: AXIS_Y } = COMPLEXITY_
 var DATA_BOTTOM = AXIS_Y - 14;
 var MAX_VALUE = 1e4;
 var DUPLICATE_GAP = 4;
+function renderValue(curveId, n) {
+  if (curveId !== "factorial") return curves[curveId].evaluate(n);
+  const lower = Math.floor(n);
+  const t = n - lower;
+  const [p0, p1, p2, p3] = [lower - 1, lower, lower + 1, lower + 2].map(
+    (value) => Math.log10(curves.factorial.evaluate(Math.max(1, value)))
+  );
+  const logValue = 0.5 * (2 * p1 + (-p0 + p2) * t + (2 * p0 - 5 * p1 + 4 * p2 - p3) * t ** 2 + (-p0 + 3 * p1 - 3 * p2 + p3) * t ** 3);
+  return 10 ** logValue;
+}
 function fail(path, message) {
   throw new Error(`complexity.${path}: ${message}`);
 }
@@ -23163,6 +23211,23 @@ function curveIdAt(value, path) {
     fail(path, `must be one of ${CURVE_IDS.join(", ")}`);
   }
   return value;
+}
+function samplesAt(value, path) {
+  if (!Array.isArray(value) || value.length < 2) fail(path, "must contain at least two points");
+  let previous = 0;
+  return value.map((raw, index) => {
+    const pointPath = `${path}[${index}]`;
+    const point = objectAt(raw, pointPath);
+    rejectUnknown(point, ["n", "value"], pointPath);
+    if (typeof point.n !== "number" || !Number.isFinite(point.n) || point.n <= previous) {
+      fail(`${pointPath}.n`, "must be finite, positive, and strictly increasing");
+    }
+    if (typeof point.value !== "number" || !Number.isFinite(point.value) || point.value <= 0) {
+      fail(`${pointPath}.value`, "must be a finite positive number");
+    }
+    previous = point.n;
+    return { n: point.n, value: point.value };
+  });
 }
 function validateV1Variables(value) {
   const variables = objectAt(value, "variables");
@@ -23210,9 +23275,6 @@ function operationColor(operationIndex, boundIndex) {
   const palette = OPERATION_COLORS[operationIndex % OPERATION_COLORS.length];
   return palette[Math.min(boundIndex, palette.length - 1)];
 }
-function compactRole(role) {
-  return role.replace("Average", "Avg").replace("Amortized / average", "Amortized / avg").replace("Worst single op", "Worst");
-}
 function formatTick(value) {
   if (value >= 1e6) return `${value / 1e6}M`;
   if (value >= 1e3) return `${value / 1e3}k`;
@@ -23231,7 +23293,13 @@ function curvePath(id, curveId, category, label, legendLabel, color, dimmed, sca
     const value = curves[curveId].evaluate(n);
     return { n, value, x: scale.x(n), y: scale.y(value) };
   });
-  const points = [{ x: LEFT, y: AXIS_Y }, ...samples.map(({ x, y }) => ({ x, y: y - offset }))];
+  const points = [
+    { x: LEFT, y: AXIS_Y },
+    ...Array.from({ length: 33 }, (_, index) => {
+      const n = 2 + index / 4;
+      return { x: scale.x(n), y: scale.y(renderValue(curveId, n)) - offset };
+    })
+  ];
   const geometry = points.map(({ x, y }, index) => `${index === 0 ? "M" : "L"}${x.toFixed(2)},${y.toFixed(2)}`).join(" ");
   const last = samples[samples.length - 1];
   const endY = Math.max(TOP, Math.min(DATA_BOTTOM, last.y - offset));
@@ -23255,16 +23323,17 @@ function layoutEndpointLabels(paths) {
   const labels = CURVE_IDS.map((curveId) => {
     const matching = paths.filter((path) => path.curveId === curveId);
     const highlighted = matching.filter((path) => !path.dimmed);
+    const authoredFormulas = [...new Set(highlighted.map((path) => path.formula))];
     return {
       curveId,
-      formula: curves[curveId].formula,
+      formula: authoredFormulas.length === 1 ? authoredFormulas[0] : curves[curveId].formula,
       pathIds: matching.map((path) => path.id),
       color: highlighted[0]?.color ?? CONTEXT_COLOR,
       dimmed: highlighted.length === 0,
       y: matching.reduce((sum, path) => sum + path.endY, 0) / matching.length
     };
   }).sort((a, b) => a.y - b.y);
-  const gap = 15;
+  const gap = 20;
   const min = TOP + 5;
   const max = DATA_BOTTOM - 4;
   labels.forEach((label, index) => {
@@ -23332,16 +23401,33 @@ function finishResource(key4, label, labelId, mode, highlighted, semanticBounds)
     x: scale.x(value)
   }));
   const legend = [];
-  for (const path of paths.filter((candidate) => !candidate.dimmed)) {
-    const group = legend.find((candidate) => candidate.label === path.legendGroup);
-    const item = {
-      pathId: path.id,
-      category: path.category,
-      label: path.legendLabel,
-      color: path.color
-    };
+  const legendEntries = [
+    ...highlightedPaths.map((path, index) => ({
+      order: highlighted[index].order,
+      group: path.legendGroup,
+      item: {
+        kind: "plotted",
+        pathId: path.id,
+        category: path.category,
+        label: path.legendLabel,
+        color: path.color
+      }
+    })),
+    ...semanticBounds.map((bound) => ({
+      order: bound.order,
+      group: bound.operation,
+      item: {
+        kind: "semantic",
+        category: bound.category,
+        label: bound.formula,
+        color: bound.color
+      }
+    }))
+  ].sort((left, right) => left.order - right.order);
+  for (const { group: groupLabel, item } of legendEntries) {
+    const group = legend.find((candidate) => candidate.label === groupLabel);
     if (group) group.items.push(item);
-    else legend.push({ label: path.legendGroup, items: [item] });
+    else legend.push({ label: groupLabel, items: [item] });
   }
   return {
     key: key4,
@@ -23380,7 +23466,8 @@ function buildResource(rawEntries, mode, pathPrefix, key4, label, labelId, versi
         category: "other",
         label: formula,
         legendLabel: formula,
-        color: CURVE_COLORS[curveId]
+        color: CURVE_COLORS[curveId],
+        order: index
       });
     });
   } else if (mode === "cases") {
@@ -23407,8 +23494,9 @@ function buildResource(rawEntries, mode, pathPrefix, key4, label, labelId, versi
         formula,
         category: categoryFor(role),
         label: `${role}: ${formula}`,
-        legendLabel: `${compactRole(role)} ${formula}`,
-        color: roleColor(role, curveId)
+        legendLabel: role,
+        color: roleColor(role, curveId),
+        order: index
       });
     });
     for (const role of ["Best", "Average", "Worst"]) {
@@ -23437,10 +23525,15 @@ function buildResource(rawEntries, mode, pathPrefix, key4, label, labelId, versi
             version === 2 ? ["kind", "curveId", "formula", "role"] : ["kind", "curveId", "role"],
             boundPath
           );
+        } else if (version === 2 && bound.kind === "samples") {
+          rejectUnknown(bound, ["kind", "formula", "role", "samples"], boundPath);
         } else if (bound.kind === "text") {
           rejectUnknown(bound, ["kind", "formula", "role"], boundPath);
         } else {
-          fail(`${boundPath}.kind`, `must be ${plottedKind} or text`);
+          fail(
+            `${boundPath}.kind`,
+            version === 2 ? "must be curve, samples, or text" : `must be ${plottedKind} or text`
+          );
         }
         const role = textAt(bound.role, `${boundPath}.role`);
         assertUnique(seenRoles, role, `${boundPath}.role`);
@@ -23448,7 +23541,22 @@ function buildResource(rawEntries, mode, pathPrefix, key4, label, labelId, versi
           semanticBounds.push({
             operation,
             role,
-            formula: textAt(bound.formula, `${boundPath}.formula`)
+            formula: textAt(bound.formula, `${boundPath}.formula`),
+            category: categoryFor(role),
+            color: operationColor(operationIndex, boundIndex),
+            order: operationIndex * 100 + boundIndex
+          });
+          return;
+        }
+        if (bound.kind === "samples") {
+          samplesAt(bound.samples, `${boundPath}.samples`);
+          semanticBounds.push({
+            operation,
+            role,
+            formula: textAt(bound.formula, `${boundPath}.formula`),
+            category: categoryFor(role),
+            color: operationColor(operationIndex, boundIndex),
+            order: operationIndex * 100 + boundIndex
           });
           return;
         }
@@ -23461,8 +23569,9 @@ function buildResource(rawEntries, mode, pathPrefix, key4, label, labelId, versi
           category: categoryFor(role),
           label: `${operation} — ${role}: ${formula}`,
           legendGroup: operation,
-          legendLabel: `${compactRole(role)} ${formula}`,
-          color: operationColor(operationIndex, boundIndex)
+          legendLabel: role,
+          color: operationColor(operationIndex, boundIndex),
+          order: operationIndex * 100 + boundIndex
         });
       });
     });
@@ -23626,8 +23735,8 @@ function renderResourceDom(document2, resource) {
     );
     const label = svgElement(document2, "text", {
       class: "complexity__tick",
-      x: left + 8,
-      y: tick.y + (tick.value === 0 ? -6 : 4)
+      x: tick.value === 0 ? left : left + 8,
+      y: tick.value === 0 ? axisY + 18 : tick.y + 4
     });
     label.textContent = tick.label;
     svg.append(label);
@@ -23697,44 +23806,51 @@ function renderResourceDom(document2, resource) {
   plotWrap.append(svg);
   group.append(plotWrap);
   const legend = document2.createElement("div");
-  legend.className = "complexity__legend";
+  legend.className = `complexity__legend ${resource.legend.length === 1 && !resource.legend[0].label ? "is-ungrouped" : "is-grouped"}`;
   for (const legendGroup of resource.legend) {
     const row = document2.createElement("div");
     row.className = `complexity__legend-group${legendGroup.label ? "" : " is-ungrouped"}`;
     if (legendGroup.label) {
-      appendText(document2, row, "span", legendGroup.label).className = "complexity__legend-group-label";
+      const pathIds = legendGroup.items.flatMap(
+        (item) => item.kind === "plotted" ? [item.pathId] : []
+      );
+      const label = appendText(
+        document2,
+        row,
+        pathIds.length > 0 ? "button" : "span",
+        legendGroup.label
+      );
+      label.className = `complexity__legend-group-label${pathIds.length > 0 ? " complexity__legend-group-button" : ""}`;
+      if (pathIds.length > 0) {
+        label.setAttribute("type", "button");
+        label.dataset.pathIds = pathIds.join(",");
+        label.setAttribute("aria-pressed", "false");
+      }
     }
     const items = document2.createElement("ul");
     items.className = "complexity__legend-items";
     for (const legendItem of legendGroup.items) {
       const item = document2.createElement("li");
       item.className = "complexity__legend-item";
-      const button2 = document2.createElement("button");
-      button2.type = "button";
-      button2.className = "complexity__legend-button";
-      button2.dataset.pathId = legendItem.pathId;
-      button2.setAttribute("aria-pressed", "false");
-      button2.style.setProperty("--complexity-color", legendItem.color);
+      const entry = document2.createElement(legendItem.kind === "plotted" ? "button" : "span");
+      entry.className = `complexity__legend-entry ${legendItem.kind === "plotted" ? "complexity__legend-button" : "complexity__legend-static"}`;
+      if (legendItem.kind === "plotted") {
+        entry.setAttribute("type", "button");
+        entry.dataset.pathId = legendItem.pathId;
+        entry.setAttribute("aria-pressed", "false");
+      }
+      entry.style.setProperty("--complexity-color", legendItem.color);
       const swatch = document2.createElement("span");
       swatch.className = "complexity__legend-swatch";
       swatch.setAttribute("aria-hidden", "true");
-      button2.append(swatch, document2.createTextNode(legendItem.label));
-      item.append(button2);
+      entry.append(swatch, document2.createTextNode(legendItem.label));
+      item.append(entry);
       items.append(item);
     }
     row.append(items);
     legend.append(row);
   }
   group.append(legend);
-  if (resource.semanticBounds.length > 0) {
-    const semanticBounds = document2.createElement("dl");
-    semanticBounds.className = "complexity__semantic-bounds";
-    for (const bound of resource.semanticBounds) {
-      appendText(document2, semanticBounds, "dt", `${bound.operation} — ${bound.role}`);
-      appendText(document2, semanticBounds, "dd", bound.formula);
-    }
-    group.append(semanticBounds);
-  }
   return group;
 }
 function renderComplexityDom(root, view) {

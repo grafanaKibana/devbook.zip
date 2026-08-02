@@ -21,7 +21,6 @@ tab: Visualization
 {"algorithm":"boruvka"}
 ```
 
-# Components Shrink by Rounds
 
 For vertices `A, B, C, D` with edges `AB=1`, `AC=4`, `BC=2`, `BD=5`, `CD=3`, the first round selects `AB` for `A`, `AB` for `B`, `BC` for `C`, and `CD` for `D`. After duplicate removal, all three edges are safe and the graph becomes one component in a single round.
 
@@ -131,16 +130,6 @@ tab: Complexity
 }
 ```
 ~~~~~
-
-# Complexity
-
-| Case | Time | Auxiliary space | Cause |
-| --- | --- | --- | --- |
-| Best | `O(E · α(V))` | `O(V)` | one edge scan plus disjoint-set finds connects all components |
-| Typical | distribution-dependent | `O(V)` | the number of rounds depends on how quickly selected edges merge components |
-| Worst | `O(E · α(V) · log V)` | `O(V)` | up to logarithmically many rounds, each scanning every edge and finding both roots |
-
-The table models the literal flat-edge-list implementation used by the trace: every round scans all edges and asks the [[Home/Computer Science/Data Structures/Graph Structures/Disjoint Set|disjoint set]] for each endpoint's current root. That costs `O(E · α(V))` per round. Because the component count at least halves, at most `⌈log₂ V⌉` rounds give the stated worst case. An implementation that materializes current component labels before each scan can express the same total work as `O((V + E) log V)`; parallel scans reduce elapsed time, not total work.
 
 # Boundary Cases
 

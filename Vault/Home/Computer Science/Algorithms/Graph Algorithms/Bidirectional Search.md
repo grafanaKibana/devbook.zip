@@ -3,7 +3,7 @@ topic:
   - Computer Science
 subtopic:
   - Algorithms
-summary: "Runs forward and backward searches that meet in the middle, cutting O(b^d) to two O(b^(d/2)) halves."
+summary: "Runs forward and backward searches that meet."
 level:
   - "4"
 priority: Medium
@@ -17,7 +17,6 @@ Bidirectional search launches a second BFS backward from `t` over reversed edges
 
 The saving is conditional. The goal must be one or more enumerable states that can seed the backward search, and the graph has to expose predecessors — a reverse adjacency list, or an invertible move operator for an implicit state space. A goal predicate is insufficient when its satisfying states cannot be enumerated.
 
-**Core condition:** enumerable goals + enumerable predecessors → balanced forward and backward BFS can meet near depth `d/2` → about `O(b^(d/2))` time and space on a uniform branching model, with `O(V + E)` as the general graph bound.
 
 ~~~~~tabsdown
 tab: Visualization
@@ -26,7 +25,6 @@ tab: Visualization
 {"algorithm":"bidirectional-search"}
 ```
 
-# Meeting in the Middle
 
 Two frontiers advance in parallel. `F` holds the vertices reached from `s` along forward edges; `B` holds the vertices reached from `t` along reversed edges. Each side records the distance at which it first reached every vertex.
 
@@ -144,16 +142,6 @@ tab: Complexity
 }
 ```
 ~~~~~
-
-# Complexity
-
-| Case | Time | Auxiliary space | Cause |
-| --- | --- | --- | --- |
-| Best | `O(1)` | `O(1)` | `s == t`; the initial guard returns the source without expanding either frontier. |
-| Model estimate | `O(b^(d/2))` | `O(b^(d/2))` | Uniform branching and level-balanced expansion make the frontiers meet near depth `d/2`. |
-| General worst | `O(V + E)` | `O(V)` | Irregular growth, unbalanced scheduling, or disconnected endpoints can force the reachable graph to be exhausted. |
-
-Here `b` is the branching factor and `d` the shortest-path length. The model estimate assumes a roughly uniform graph where every vertex has about `b` successors and `b` predecessors and both sides advance in balance. Bidirectional BFS and ordinary BFS both store frontier and visited state; the two-sided version trades two shallower visited regions for one deeper region. The unidirectional model baseline is `O(b^d)` time and space.
 
 # Where the Clean Case Ends
 
@@ -295,8 +283,6 @@ Predecessors must be enumerable. The backward BFS walks edges in reverse, so a d
 
 # Questions
 
-> [!QUESTION]- Why does bidirectional search cut `O(b^d)` to `O(b^(d/2))`?
-> A single BFS reaching depth `d` expands a frontier that grows as `b^d`. Splitting the path into two halves lets a forward search and a backward search each stop at depth `d/2`, so each explores about `b^(d/2)` vertices and the total is `2·b^(d/2)`. The reduction lands on the exponent, which is why it compounds with depth: every extra level of separation that would multiply a one-sided search by another factor of `b` only adds half a level to each frontier. The same halving applies to space, since both sides must be held in memory to detect the meeting.
 
 > [!QUESTION]- Why is stopping at the first frontier collision correct on an unweighted graph but wrong on a weighted one?
 > Unweighted BFS expands level by level, settling distances in nondecreasing order, so the first vertex shared by both visited sets already lies on a shortest path. With weights the frontiers advance by cumulative cost, and the first shared vertex can sit on an expensive path while a cheaper meeting is one relaxation away elsewhere. The weighted version must track the best `gF[u] + gB[u]` and keep expanding until the two frontiers' combined radius reaches that best, proving no unexpanded path can beat it.

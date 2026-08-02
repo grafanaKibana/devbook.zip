@@ -40,8 +40,8 @@ function renderResourceHast(resource: ComplexityResourceViewModel): Element {
       "text",
       {
         className: ["complexity__tick"],
-        x: left + 8,
-        y: tick.y + (tick.value === 0 ? -6 : 4),
+        x: tick.value === 0 ? left : left + 8,
+        y: tick.value === 0 ? axisY + 18 : tick.y + 4,
       },
       [text(tick.label)],
     ),
@@ -92,8 +92,9 @@ function renderResourceHast(resource: ComplexityResourceViewModel): Element {
       [text(label.formula)],
     ),
   )
-  const legend = resource.legend.map((group) =>
-    element(
+  const legend = resource.legend.map((group) => {
+    const pathIds = group.items.flatMap((item) => (item.kind === "plotted" ? [item.pathId] : []))
+    return element(
       "div",
       {
         className: ["complexity__legend-group", ...(group.label ? [] : ["is-ungrouped"])],
@@ -101,9 +102,23 @@ function renderResourceHast(resource: ComplexityResourceViewModel): Element {
       [
         ...(group.label
           ? [
-              element("span", { className: ["complexity__legend-group-label"] }, [
-                text(group.label),
-              ]),
+              element(
+                pathIds.length > 0 ? "button" : "span",
+                {
+                  ...(pathIds.length > 0
+                    ? {
+                        type: "button",
+                        "data-path-ids": pathIds.join(","),
+                        ariaPressed: "false",
+                      }
+                    : {}),
+                  className: [
+                    "complexity__legend-group-label",
+                    ...(pathIds.length > 0 ? ["complexity__legend-group-button"] : []),
+                  ],
+                },
+                [text(group.label)],
+              ),
             ]
           : []),
         element(
@@ -112,12 +127,17 @@ function renderResourceHast(resource: ComplexityResourceViewModel): Element {
           group.items.map((item) =>
             element("li", { className: ["complexity__legend-item"] }, [
               element(
-                "button",
+                item.kind === "plotted" ? "button" : "span",
                 {
-                  type: "button",
-                  className: ["complexity__legend-button"],
-                  "data-path-id": item.pathId,
-                  ariaPressed: "false",
+                  ...(item.kind === "plotted"
+                    ? { type: "button", "data-path-id": item.pathId, ariaPressed: "false" }
+                    : {}),
+                  className: [
+                    "complexity__legend-entry",
+                    item.kind === "plotted"
+                      ? "complexity__legend-button"
+                      : "complexity__legend-static",
+                  ],
                   style: `--complexity-color:${item.color}`,
                 },
                 [
@@ -129,8 +149,8 @@ function renderResourceHast(resource: ComplexityResourceViewModel): Element {
           ),
         ),
       ],
-    ),
-  )
+    )
+  })
   return element(
     "div",
     {
@@ -185,19 +205,18 @@ function renderResourceHast(resource: ComplexityResourceViewModel): Element {
           ],
         ),
       ]),
-      element("div", { className: ["complexity__legend"] }, legend),
-      ...(resource.semanticBounds.length === 0
-        ? []
-        : [
-            element(
-              "dl",
-              { className: ["complexity__semantic-bounds"] },
-              resource.semanticBounds.flatMap((bound) => [
-                element("dt", {}, [text(`${bound.operation} — ${bound.role}`)]),
-                element("dd", {}, [text(bound.formula)]),
-              ]),
-            ),
-          ]),
+      element(
+        "div",
+        {
+          className: [
+            "complexity__legend",
+            resource.legend.length === 1 && !resource.legend[0].label
+              ? "is-ungrouped"
+              : "is-grouped",
+          ],
+        },
+        legend,
+      ),
     ],
   )
 }

@@ -3,7 +3,7 @@ topic:
   - Computer Science
 subtopic:
   - Algorithms
-summary: "Grows a sorted prefix by inserting each element into place; fast on small or nearly-sorted inputs."
+summary: "Grows a sorted prefix by shifting larger elements right and inserting each new key."
 level:
   - "4"
 priority: Low
@@ -15,7 +15,7 @@ A mostly-ordered array arrives—a sorted log with a few late entries appended o
 
 Each incoming element—the key—is compared against the prefix from its right end leftward. Every element larger than the key copies one slot to the right, opening a gap; the key drops into the gap. Because the prefix was sorted before the key arrived, one leftward pass suffices: the walk stops at the first element that is not larger than the key, and everything it shifted was already in order relative to itself.
 
-**Core condition:** a sorted prefix and one incoming key → shift the larger prefix elements right until the key lands → `O(n)` when few elements move, `O(n²)` when every key crosses the whole prefix, `O(1)` auxiliary space.
+**Core condition:** a sorted prefix and one incoming key → shift larger prefix elements right until the key lands → repeat until the prefix covers the array.
 
 ~~~~~tabsdown
 tab: Visualization
@@ -26,22 +26,19 @@ tab: Visualization
 {"algorithm":"insertion-sort","array":[8,3,5,1,9,2,7,4]}
 ```
 
-# Trace
 
-The trace sorts the eight-element array `[8, 3, 5, 1, 9, 2, 7, 4]`, extending the sorted prefix one key at a time.
 
 The prefix left of the active index is sorted before each step and stays sorted after it. When a key is smaller than its left neighbour, every larger prefix element copies one position right until a smaller element—or the start of the array—halts the walk, and the key fills the vacated slot. A key that already fits, like `9` following `1, 3, 5, 8`, triggers no shift and the prefix simply grows by one. The number of shifts a key performs equals the count of larger elements standing to its left, so the further a key is out of place, the more work it does.
 
-# Why the Sorted Prefix Holds
+#### Why the Sorted Prefix Holds
 
 Before iteration `j`, the subarray `a[0..j-1]` holds the first `j` elements in sorted order. The step copies `a[j]` into `key`, then scans left while `a[i] > key`, moving each such element into `a[i+1]`. The loop stops at the first `a[i] <= key` (or at `i = -1`) and writes `key` into `a[i+1]`. Nothing left of that slot exceeds `key`, and everything right of it was already shifted up, so `a[0..j]` is sorted—the invariant carries to the next iteration.
 
-Two properties fall out of the shift-and-drop move:
+One property falls directly out of the shift-and-drop move:
 
 - **Stable.** The scan stops on the first element that is `<=` the key rather than `<`, so an incoming element never crosses an equal one already placed. Equal keys keep their original relative order.
-- **In-place.** The only storage beyond the array is `key` and two indices, so auxiliary space is `O(1)`. Elements move by copying within the array, not into a second buffer.
 
-The cost of one step is its shift count, which equals the number of prefix elements greater than the key. On already-sorted input that count is zero everywhere: the inner loop tests one neighbour, fails, and advances, for `O(n)` total. This adaptivity is why insertion sort serves as the base case inside larger sorts—[[Merge Sort]]-based hybrids such as [[Tim Sort|Timsort]] sort short runs with it before merging, and [[Introsort]] falls back to it once a quicksort partition drops below roughly sixteen elements. At that size the guaranteed-small shift count beats the overhead of recursion and pivot selection.
+The shift count follows the disorder already present: an ordered prefix needs no moves, while a misplaced key crosses every larger prefix element. Larger hybrids use insertion sort only on deliberately short runs or partitions—[[Home/Computer Science/Algorithms/Sorting Algorithms/Merge Sort|Merge Sort]]-based [[Home/Computer Science/Algorithms/Sorting Algorithms/Tim Sort|Timsort]] builds short runs with it, and [[Home/Computer Science/Algorithms/Sorting Algorithms/Introsort|Introsort]] uses it below a small-partition threshold. Those ranges are bounded in size, not guaranteed to be nearly sorted.
 
 tab: Complexity
 
@@ -105,23 +102,9 @@ tab: Complexity
   }
 }
 ```
+
+Cutting comparisons does not fix this. Since the prefix is sorted, [[Home/Computer Science/Algorithms/Search Algorithms/Binary Search|Binary Search]] can locate the key's slot in `O(log j)` comparisons instead of a linear scan—binary insertion sort. But locating the slot is not the bottleneck: the elements between the slot and the key still shift right one at a time, so the array movement stays `O(n²)`. Binary insertion only pays off when a comparison costs far more than a move, such as ordering long strings through an expensive comparator.
 ~~~~~
-
-# Complexity
-
-| Case | Time | Auxiliary space | Cause |
-| --- | --- | --- | --- |
-| Best | `O(n)` | `O(1)` | Input already sorted; each key tests one neighbour and shifts nothing. |
-| Average | `O(n²)` | `O(1)` | A random key crosses about half the prefix; expected inversions are `n(n-1)/4`. |
-| Worst | `O(n²)` | `O(1)` | Reverse-sorted input; every key shifts the whole prefix, `n(n-1)/2` moves. |
-
-The bound is set by element shifts, not comparisons. In the average and worst cases the two counts differ only by an additive `O(n)` term, so both are `Θ(n²)`; in the best case the comparisons stay `O(n)` while the shifts fall to zero. The shifts are the physical array movement, which is what makes them the deciding cost.
-
-# When Shifts Dominate
-
-Reverse-sorted input is the worst case because it maximizes shifts: the key at index `j` is smaller than all `j` elements to its left, so it walks the full prefix every time. Sorting `[5, 4, 3, 2, 1]` performs `4 + 3 + 2 + 1 = 10` shifts for five elements, the quadratic `n(n-1)/2` pattern. The result is never wrong, only slow.
-
-Cutting comparisons does not fix this. Since the prefix is sorted, [[Binary Search]] can locate the key's slot in `O(log j)` comparisons instead of a linear scan—binary insertion sort. But locating the slot is not the bottleneck: the elements between the slot and the key still shift right one at a time, so the array movement stays `O(n²)`. Binary insertion only pays off when a comparison costs far more than a move, such as ordering long strings through an expensive comparator.
 
 # Reference Drawer
 
@@ -166,17 +149,8 @@ Cutting comparisons does not fix this. Since the prefix is sorted, [[Binary Sear
 > [!QUESTION]- What keeps the prefix sorted after each insertion?
 > The inner loop shifts every prefix element greater than the key one slot right and stops at the first element `<= key`. The key is written into that gap, so nothing to its left is larger and everything to its right was already ordered; `a[0..j]` is sorted for the next step.
 
-> [!QUESTION]- Why is reverse-sorted input the worst case?
-> Each key is smaller than every element already placed, so it shifts the entire prefix before landing at the front. The shifts sum to `n(n-1)/2`, making the run `O(n²)`—the maximum possible number of inversions.
-
-> [!QUESTION]- Why does binary insertion sort not lower the asymptotic time?
-> Binary search finds the insertion slot in `O(log j)` comparisons, but the elements between that slot and the key must still be shifted right one at a time. The shifts stay `O(n²)`, so the total is unchanged; only comparison-heavy workloads gain.
-
-> [!QUESTION]- Why do Timsort and Introsort fall back to insertion sort on small partitions?
-> On a few dozen elements the quadratic term is small and bounded, while insertion sort allocates nothing, accesses memory sequentially, and reaches `O(n)` on the nearly-sorted runs those algorithms produce. Below the crossover it beats the recursion and constant-factor overhead of an `O(n log n)` sort.
-
 # References
 
-- [Insertion sort (Wikipedia)](https://en.wikipedia.org/wiki/Insertion_sort) — the shift-based algorithm, the binary insertion variant, and the move-count analysis behind the `O(n²)` bound.
+- [Insertion sort (Wikipedia)](https://en.wikipedia.org/wiki/Insertion_sort) — the shift-based algorithm, stability condition, binary-search variant, and move-count analysis.
 - [`ArraySortHelper<T>` in dotnet/runtime](https://github.com/dotnet/runtime/blob/main/src/libraries/System.Private.CoreLib/src/System/Collections/Generic/ArraySortHelper.cs) — `Array.Sort`'s introspective sort switches to an `InsertionSort` routine for small partitions; the runtime's real base case.
 - [`listsort.txt` (CPython)](https://github.com/python/cpython/blob/main/Objects/listsort.txt) — Tim Peters's notes on Timsort, including the binary insertion sort that builds minimal runs before merging.

@@ -41,7 +41,7 @@ tp.hooks.on_all_templates_executed(async () => {
 
 <!-- Open with one paragraph: name the concrete problem and input shape, the repeated cost, the move that reduces it, and the condition that makes that move valid. -->
 
-~~~~tabsdown
+~~~~~tabsdown
 tab: Visualization
 
 <!-- The StepTrace fence must be the first rendered child. Replace this required draft configuration with a supported trace that exposes the decisive transition and auxiliary state; do not add a heading or lead-in before it. -->
@@ -50,29 +50,13 @@ tab: Visualization
 {"algorithm":"replace-with-supported-id","input":"replace-with-trace-input"}
 ```
 
-# Trace
-
-<!-- Name the input and operation, then explain the state changes shown above without restating visible controls or the pictured scenario. -->
-
-# Mechanism
-
-<!-- Rename this section after the actual invariant or state transition, for example “Why the range shrinks”. Use concrete before-and-after state as evidence for what remains true and why the next move is valid. -->
+<!-- Optional: add at most one `####` support section after the trace when the visible transition needs an invariant or mechanism explanation. Keep unheaded prose when a heading adds no navigation value, and delete copy that only restates controls or the pictured scenario. -->
 
 tab: Complexity
 
-<!-- Insert exactly one validated version 2 `complexity` fence here after note-specific Time and Space evidence exists. Keep this panel free of rendered headings, prose, tables, and placeholders. -->
+<!-- Insert exactly one validated version 2 `complexity` fence here after note-specific Time and Space evidence exists. Follow it only with concise unheaded prose that supplies a chart-missing assumption, model/resource distinction, or decision-changing failure boundary. Do not add headings, Markdown tables, or placeholders inside or outside this panel. -->
 
-~~~~
-
-# Complexity
-
-| Case    | Time | Auxiliary space | Shape of the work |
-| ------- | ---- | --------------- | ----------------- |
-| Best    |      |                 |                   |
-| Average |      |                 |                   |
-| Worst   |      |                 |                   |
-
-<!-- Explain the actual cause of each bound, not only the notation. State the assumptions behind average bounds, separate auxiliary space from recursion-stack space when relevant, and add a concrete scale estimate when it changes the engineering decision. -->
+~~~~~
 
 # Fit and Limits
 

@@ -3,7 +3,7 @@ topic:
   - Computer Science
 subtopic:
   - Algorithms
-summary: "Floyd's tortoise-and-hare detects cycles and functional-graph duplicates in O(1) space; related fast/slow traversal finds linked-list midpoints."
+summary: "Floyd's tortoise-and-hare detects cycles and functional-graph duplicates; related fast/slow traversal finds linked-list midpoints."
 level:
   - "4"
 priority: Medium
@@ -11,11 +11,11 @@ status: Creation
 publish: true
 ---
 
-A linked list is handed over with no length and no guarantee it terminates: some tail node may point back into the middle, forming a cycle that turns any naive traversal into an infinite loop. Recording every visited node in a hash set answers "does it loop?" in one pass but pays `O(n)` memory for the bookkeeping. Fast and slow pointers — Floyd's tortoise-and-hare — replace that memory with a speed differential. Two pointers walk the same `next` chain, one advancing a single node per step and the other advancing two. The fast pointer gains exactly one node on the slow pointer every step, so if the chain ever loops, the gap between them shrinks by one each step until it hits zero and they land on the same node; if the fast pointer instead reaches `null`, the chain is acyclic. No extra structure is allocated.
+A linked list is handed over with no length and no guarantee it terminates: some tail node may point back into the middle, forming a cycle that turns any naive traversal into an infinite loop. Fast and slow pointers — Floyd's tortoise-and-hare — replace that memory with a speed differential. Two pointers walk the same `next` chain, one advancing a single node per step and the other advancing two. The fast pointer gains exactly one node on the slow pointer every step, so if the chain ever loops, the gap between them shrinks by one each step until it hits zero and they land on the same node; if the fast pointer instead reaches `null`, the chain is acyclic. No extra structure is allocated.
 
 The technique needs only one property of the input: each element has exactly one successor to follow — `node.next` for a list, or `i → nums[i]` for an integer sequence read as a functional graph.
 
-**Core condition:** a single-successor structure → one pointer moving twice as fast closes the gap by one per step → cycle detection in `O(n)` time and `O(1)` auxiliary space.
+
 
 ~~~~~tabsdown
 tab: Visualization
@@ -127,16 +127,6 @@ tab: Complexity
 ```
 ~~~~~
 
-# Complexity
-
-| Case | Time | Auxiliary space | Cause |
-| --- | --- | --- | --- |
-| No cycle | `O(n)` | `O(1)` | The fast pointer reaches `null` after about `n/2` double-steps; nothing is stored. |
-| Cycle, detection only | `O(n)` | `O(1)` | Both pointers enter the cycle within `μ ≤ n` steps, then meet within a further `λ ≤ n` steps. |
-| Cycle, entry located | `O(n)` | `O(1)` | Phase two walks at most `μ < n` more nodes at speed one. |
-
-Every case is linear in the node count and holds two pointers regardless of input size. The contrast is with the hash-set-of-visited-nodes detector, which matches the `O(n)` time but stores one entry per visited node for `O(n)` auxiliary space; Floyd's method trades that table for the second, slower pointer.
-
 # Why the Pointers Meet, and where
 
 Detection is the first phase. Both pointers start at the head. Each step advances `slow` by one node and `fast` by two. Once both pointers are inside a cycle of length `λ`, the fast pointer's lead over the slow pointer increases by one node per step; measured modulo `λ` that lead cycles through `0`, so within at most `λ` steps the lead is a multiple of `λ` and the two references coincide. If the chain is acyclic the fast pointer reaches `null` first and the loop ends with no meeting. The meeting therefore proves a cycle and running off the end proves acyclicity — a biconditional with no false result either way.
@@ -200,13 +190,13 @@ This same-direction, different-speed configuration is distinct from [[Home/Compu
 
 # Comparison
 
-| Approach | Time | Auxiliary space | Requires | Stronger case | Weaker case |
-| --- | --- | --- | --- | --- | --- |
-| Fast/slow (Floyd) | `O(n)` | `O(1)` | A single-successor structure | Read-only or memory-tight cycle detection; sequences with no node objects | Needs a second phase to locate the entry |
-| Hash set of visited nodes | `O(n)` | `O(n)` | Hashable/identifiable nodes | The visited set or first repeat is wanted directly | Memory cost scales with the structure |
-| Brent's algorithm | `O(n)` | `O(1)` | A single-successor structure | Fewer successor-function evaluations on average; reports `λ` directly | More intricate; less familiar |
+| Approach | Requires | Stronger case | Weaker case |
+| --- | --- | --- | --- |
+| Fast/slow (Floyd) | A single-successor structure | Read-only or memory-tight cycle detection; sequences with no node objects | Needs a second phase to locate the entry |
+| Hash set of visited nodes | Hashable/identifiable nodes | The visited set or first repeat is wanted directly | Memory cost scales with the structure |
+| Brent's algorithm | A single-successor structure | Fewer successor-function evaluations on average; reports `λ` directly | More intricate; less familiar |
 
-Floyd's fast/slow is the `O(1)`-space cycle detector for linked structures and functional sequences: it pays a second pass to name the entry but never allocates. A visited set is the simpler code and hands back the entry as the first repeat, at the cost of `O(n)` memory and hashable identity — the fit when that set is needed anyway. Brent's algorithm keeps the same `O(1)` space while cutting the constant factor and yielding the cycle length as a by-product, so it wins in hot loops where the extra implementation complexity is justified.
+
 
 # Questions
 
@@ -217,15 +207,15 @@ Floyd's fast/slow is the `O(1)`-space cycle detector for linked structures and f
 > At the meeting the slow pointer has gone `d` steps and the fast `2d`; the surplus `d` must be a whole number of laps, `k·λ`. That places the meeting node `μ mod λ` steps before the entry. A pointer restarted at the head reaches the entry in `μ` steps; the other, stepped `μ` times from the meeting node, covers the remaining distance plus whole laps and lands on the entry at the same time.
 
 > [!QUESTION]- Why does this pattern extend to `Find the Duplicate Number`, and what plays the role of `next`?
-> The array of `n + 1` values in `[1..n]` is read as edges `i → nums[i]`. Because some value repeats, two indices point to the same node, which forces a cycle; the cycle's entry is the duplicated value. The successor function `next(i) = nums[i]` replaces the list's `next` pointer, so the same detection and entry-finding phases apply in `O(1)` space without mutating the array.
+> The array of `n + 1` values in `[1..n]` is read as edges `i → nums[i]`. Because some value repeats, two indices point to the same node, which forces a cycle; the cycle's entry is the duplicated value.
 
 > [!QUESTION]- When is a hash set of visited nodes the better choice than fast/slow?
-> Both detect a cycle in `O(n)` time; the set costs `O(n)` space and Floyd costs `O(1)`. The set returns the entry as the first repeated node with no second phase and gives the full set of visited nodes for free. It wins when that memory is affordable and the visited set or immediate entry is wanted; Floyd wins when memory is tight or the structure is read-only.
+> The set returns the entry as the first repeated node with no second phase and gives the full set of visited nodes for free. It wins when that memory is affordable and the visited set or immediate entry is wanted; Floyd wins when memory is tight or the structure is read-only.
 
 # References
 
-- [Richard P. Brent, "An Improved Monte Carlo Factorization Algorithm" (1980)](https://doi.org/10.1007/BF01933190) — the primary presentation of Brent’s constant-space cycle-detection variant, a useful comparison to the tortoise-and-hare walk.
+- [Richard P. Brent, "An Improved Monte Carlo Factorization Algorithm" (1980)](https://doi.org/10.1007/BF01933190) — the primary presentation of Brent's cycle-detection variant.
 - [Cycle detection (Wikipedia)](https://en.wikipedia.org/wiki/Cycle_detection) — Floyd's and Brent's algorithms with correctness proofs and the entry-point derivation.
 - [Floyd's tortoise and hare (cp-algorithms)](https://cp-algorithms.com/others/tortoise_and_hare.html) — the cycle-finding method and its length and entry extensions.
 - [Linked List Cycle II (LeetCode #142)](https://leetcode.com/problems/linked-list-cycle-ii/) — return the cycle-entry node, the canonical phase-two problem.
-- [Find the Duplicate Number (LeetCode #287)](https://leetcode.com/problems/find-the-duplicate-number/) — the functional-graph application in `O(1)` space without mutating the input.
+- [Find the Duplicate Number (LeetCode #287)](https://leetcode.com/problems/find-the-duplicate-number/)

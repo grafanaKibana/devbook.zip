@@ -16,8 +16,8 @@ export const COMPLEXITY_CHART = {
   width: 800,
   height: 320,
   left: 0,
-  plotRight: 740,
-  labelX: 748,
+  plotRight: 700,
+  labelX: 708,
   top: 18,
   axisY: 282,
 } as const
@@ -43,14 +43,24 @@ export interface ComplexityPath {
   samples: { n: number; value: number; x: number; y: number }[]
 }
 
+export type ComplexityLegendItem =
+  | {
+      kind: "plotted"
+      pathId: string
+      category: ComplexityCategory
+      label: string
+      color: string
+    }
+  | {
+      kind: "semantic"
+      category: ComplexityCategory
+      label: string
+      color: string
+    }
+
 export interface ComplexityLegendGroup {
   label?: string
-  items: {
-    pathId: string
-    category: ComplexityCategory
-    label: string
-    color: string
-  }[]
+  items: ComplexityLegendItem[]
 }
 
 export interface ComplexityEndpointLabel {
@@ -66,6 +76,9 @@ export interface ComplexitySemanticBound {
   operation: string
   role: string
   formula: string
+  category: ComplexityCategory
+  color: string
+  order: number
 }
 
 export interface ComplexityResourceViewModel {
@@ -152,6 +165,23 @@ const DATA_BOTTOM = AXIS_Y - 14
 const MAX_VALUE = 10_000
 const DUPLICATE_GAP = 4
 
+function renderValue(curveId: CurveId, n: number): number {
+  if (curveId !== "factorial") return curves[curveId].evaluate(n)
+
+  const lower = Math.floor(n)
+  const t = n - lower
+  const [p0, p1, p2, p3] = [lower - 1, lower, lower + 1, lower + 2].map((value) =>
+    Math.log10(curves.factorial.evaluate(Math.max(1, value))),
+  )
+  const logValue =
+    0.5 *
+    (2 * p1 +
+      (-p0 + p2) * t +
+      (2 * p0 - 5 * p1 + 4 * p2 - p3) * t ** 2 +
+      (-p0 + 3 * p1 - 3 * p2 + p3) * t ** 3)
+  return 10 ** logValue
+}
+
 function fail(path: string, message: string): never {
   throw new Error(`complexity.${path}: ${message}`)
 }
@@ -181,6 +211,24 @@ function curveIdAt(value: unknown, path: string): CurveId {
     fail(path, `must be one of ${CURVE_IDS.join(", ")}`)
   }
   return value as CurveId
+}
+
+function samplesAt(value: unknown, path: string): { n: number; value: number }[] {
+  if (!Array.isArray(value) || value.length < 2) fail(path, "must contain at least two points")
+  let previous = 0
+  return value.map((raw, index) => {
+    const pointPath = `${path}[${index}]`
+    const point = objectAt(raw, pointPath)
+    rejectUnknown(point, ["n", "value"], pointPath)
+    if (typeof point.n !== "number" || !Number.isFinite(point.n) || point.n <= previous) {
+      fail(`${pointPath}.n`, "must be finite, positive, and strictly increasing")
+    }
+    if (typeof point.value !== "number" || !Number.isFinite(point.value) || point.value <= 0) {
+      fail(`${pointPath}.value`, "must be a finite positive number")
+    }
+    previous = point.n
+    return { n: point.n, value: point.value }
+  })
 }
 
 function validateV1Variables(value: unknown): void {
@@ -239,13 +287,6 @@ function operationColor(operationIndex: number, boundIndex: number): string {
   return palette[Math.min(boundIndex, palette.length - 1)]
 }
 
-function compactRole(role: string): string {
-  return role
-    .replace("Average", "Avg")
-    .replace("Amortized / average", "Amortized / avg")
-    .replace("Worst single op", "Worst")
-}
-
 function formatTick(value: number): string {
   if (value >= 1_000_000) return `${value / 1_000_000}M`
   if (value >= 1_000) return `${value / 1_000}k`
@@ -278,7 +319,13 @@ function curvePath(
     const value = curves[curveId].evaluate(n)
     return { n, value, x: scale.x(n), y: scale.y(value) }
   })
-  const points = [{ x: LEFT, y: AXIS_Y }, ...samples.map(({ x, y }) => ({ x, y: y - offset }))]
+  const points = [
+    { x: LEFT, y: AXIS_Y },
+    ...Array.from({ length: 33 }, (_, index) => {
+      const n = 2 + index / 4
+      return { x: scale.x(n), y: scale.y(renderValue(curveId, n)) - offset }
+    }),
+  ]
   const geometry = points
     .map(({ x, y }, index) => `${index === 0 ? "M" : "L"}${x.toFixed(2)},${y.toFixed(2)}`)
     .join(" ")
@@ -305,9 +352,10 @@ function layoutEndpointLabels(paths: ComplexityPath[]): ComplexityEndpointLabel[
   const labels = CURVE_IDS.map((curveId) => {
     const matching = paths.filter((path) => path.curveId === curveId)
     const highlighted = matching.filter((path) => !path.dimmed)
+    const authoredFormulas = [...new Set(highlighted.map((path) => path.formula))]
     return {
       curveId,
-      formula: curves[curveId].formula,
+      formula: authoredFormulas.length === 1 ? authoredFormulas[0] : curves[curveId].formula,
       pathIds: matching.map((path) => path.id),
       color: highlighted[0]?.color ?? CONTEXT_COLOR,
       dimmed: highlighted.length === 0,
@@ -315,7 +363,7 @@ function layoutEndpointLabels(paths: ComplexityPath[]): ComplexityEndpointLabel[
     }
   }).sort((a, b) => a.y - b.y)
 
-  const gap = 15
+  const gap = 20
   const min = TOP + 5
   const max = DATA_BOTTOM - 4
   labels.forEach((label, index) => {
@@ -345,6 +393,7 @@ interface HighlightedPath {
   legendLabel: string
   color: string
   category: ComplexityCategory
+  order: number
 }
 
 function finishResource(
@@ -403,16 +452,33 @@ function finishResource(
     x: scale.x(value),
   }))
   const legend: ComplexityLegendGroup[] = []
-  for (const path of paths.filter((candidate) => !candidate.dimmed)) {
-    const group = legend.find((candidate) => candidate.label === path.legendGroup)
-    const item = {
-      pathId: path.id,
-      category: path.category,
-      label: path.legendLabel,
-      color: path.color,
-    }
+  const legendEntries = [
+    ...highlightedPaths.map((path, index) => ({
+      order: highlighted[index].order,
+      group: path.legendGroup,
+      item: {
+        kind: "plotted" as const,
+        pathId: path.id,
+        category: path.category,
+        label: path.legendLabel,
+        color: path.color,
+      },
+    })),
+    ...semanticBounds.map((bound) => ({
+      order: bound.order,
+      group: bound.operation,
+      item: {
+        kind: "semantic" as const,
+        category: bound.category,
+        label: bound.formula,
+        color: bound.color,
+      },
+    })),
+  ].sort((left, right) => left.order - right.order)
+  for (const { group: groupLabel, item } of legendEntries) {
+    const group = legend.find((candidate) => candidate.label === groupLabel)
     if (group) group.items.push(item)
-    else legend.push({ label: path.legendGroup, items: [item] })
+    else legend.push({ label: groupLabel, items: [item] })
   }
 
   return {
@@ -463,6 +529,7 @@ function buildResource(
         label: formula,
         legendLabel: formula,
         color: CURVE_COLORS[curveId],
+        order: index,
       })
     })
   } else if (mode === "cases") {
@@ -490,8 +557,9 @@ function buildResource(
         formula,
         category: categoryFor(role),
         label: `${role}: ${formula}`,
-        legendLabel: `${compactRole(role)} ${formula}`,
+        legendLabel: role,
         color: roleColor(role, curveId),
+        order: index,
       })
     })
     for (const role of ["Best", "Average", "Worst"]) {
@@ -520,10 +588,15 @@ function buildResource(
             version === 2 ? ["kind", "curveId", "formula", "role"] : ["kind", "curveId", "role"],
             boundPath,
           )
+        } else if (version === 2 && bound.kind === "samples") {
+          rejectUnknown(bound, ["kind", "formula", "role", "samples"], boundPath)
         } else if (bound.kind === "text") {
           rejectUnknown(bound, ["kind", "formula", "role"], boundPath)
         } else {
-          fail(`${boundPath}.kind`, `must be ${plottedKind} or text`)
+          fail(
+            `${boundPath}.kind`,
+            version === 2 ? "must be curve, samples, or text" : `must be ${plottedKind} or text`,
+          )
         }
         const role = textAt(bound.role, `${boundPath}.role`)
         assertUnique(seenRoles, role, `${boundPath}.role`)
@@ -532,6 +605,21 @@ function buildResource(
             operation,
             role,
             formula: textAt(bound.formula, `${boundPath}.formula`),
+            category: categoryFor(role),
+            color: operationColor(operationIndex, boundIndex),
+            order: operationIndex * 100 + boundIndex,
+          })
+          return
+        }
+        if (bound.kind === "samples") {
+          samplesAt(bound.samples, `${boundPath}.samples`)
+          semanticBounds.push({
+            operation,
+            role,
+            formula: textAt(bound.formula, `${boundPath}.formula`),
+            category: categoryFor(role),
+            color: operationColor(operationIndex, boundIndex),
+            order: operationIndex * 100 + boundIndex,
           })
           return
         }
@@ -545,8 +633,9 @@ function buildResource(
           category: categoryFor(role),
           label: `${operation} — ${role}: ${formula}`,
           legendGroup: operation,
-          legendLabel: `${compactRole(role)} ${formula}`,
+          legendLabel: role,
           color: operationColor(operationIndex, boundIndex),
+          order: operationIndex * 100 + boundIndex,
         })
       })
     })

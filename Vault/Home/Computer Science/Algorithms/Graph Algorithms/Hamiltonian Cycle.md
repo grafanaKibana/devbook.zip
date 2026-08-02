@@ -21,7 +21,6 @@ tab: Visualization
 {"algorithm":"hamiltonian-cycle"}
 ```
 
-# Backtracking State
 
 For the graph with cycle edges `A-B-C-D-A` plus diagonal `A-C`, start with `A` and mark it used. Choosing `C` first leaves candidates `B` and `D`; the branch `A-C-B` cannot continue to `D` because `B-D` is absent, so it backtracks to `C` and tries `D`. The branch `A-C-D` then cannot reach unused `B`. Returning to the root and choosing `B` produces `A-B-C-D`, and `D-A` closes the cycle.
 
@@ -126,16 +125,6 @@ tab: Complexity
 ```
 ~~~~~
 
-# Complexity
-
-| Case | Time | Auxiliary space | Cause |
-| --- | --- | --- | --- |
-| Best | `O(n)` | `O(n)` | the first branch forms a cycle and closing edge exists |
-| Typical | distribution-dependent; exponential in general | `O(n)` | graph density and branch order determine how early pruning occurs |
-| Worst | `O(n!)` | `O(n)` | permutation backtracking may explore almost every vertex order |
-
-These bounds assume `O(1)` adjacency tests through an adjacency matrix or hash-set lookup; scanning adjacency lists adds the membership-search cost. The decision problem is in NP because a proposed cycle can be verified in `O(n)` such checks. Dynamic programming over subsets improves exact worst-case time to `O(n² 2^n)` with `O(n 2^n)` space, but remains exponential.
-
 # Necessary Checks and False Shortcuts
 
 Every vertex in a Hamiltonian graph has degree at least two, and a Hamiltonian graph cannot contain an articulation point: removing one vertex from the cycle leaves a path that still connects all remaining vertices. These are fast rejection tests, not sufficient conditions. A graph can satisfy both and still have no Hamiltonian cycle.
@@ -144,12 +133,6 @@ A connected graph is also insufficient. Connectivity only promises some path bet
 
 # Comparison
 
-| Problem | Must cover | Reuse allowed | General complexity | Structural test |
-| --- | --- | --- | --- | --- |
-| Hamiltonian cycle | every vertex | no repeated vertex | NP-complete | no complete polynomial characterization known |
-| Hamiltonian path | every vertex | no repeated vertex | NP-complete | endpoints need not be adjacent |
-| Eulerian cycle | every edge | vertices may repeat | `O(V + E)` | connected non-isolated graph with even degrees |
-| Traveling Salesman | every vertex with minimum total cost | no repeated vertex | NP-hard optimization | weighted Hamiltonian cycle plus minimization |
 
 Hamiltonian cycle is the feasibility version of visiting every vertex once. Traveling Salesman adds weights and asks for the cheapest such cycle; Eulerian cycle solves a different, tractable edge-coverage problem.
 
