@@ -1,8 +1,8 @@
 ---
 publish: true
-created: 2026-07-25T18:38:43.796Z
-modified: 2026-07-25T18:38:43.796Z
-published: 2026-07-25T18:38:43.796Z
+created: 2026-07-21T18:52:02.735Z
+modified: 2026-08-01T18:31:39.860Z
+published: 2026-08-01T18:31:39.860Z
 topic:
   - Computer Science
 subtopic:
@@ -21,23 +21,96 @@ Memoization only _pays_ when calls repeat. On a function whose every call has di
 
 **Core shape:** pure function + a cache keyed on the full argument set → first call computes and stores, repeats read the store → time drops to `(distinct arguments) × (work per call)` when calls actually repeat.
 
-# Trace
+````tabsdown
+tab: Visualization
 
-The trace uses abstract states rather than tying the mechanism to one recurrence. The left branch computes and stores states `D` and `E`. The right branch requests both keys again: cached `D` skips its two child calls, while cached base state `E` returns immediately.
+
 
 ```steptrace
 { "algorithm": "memoization" }
 ```
 
+# Trace
+
+The trace uses abstract states rather than tying the mechanism to one recurrence. The left branch computes and stores states `D` and `E`. The right branch requests both keys again: cached `D` skips its two child calls, while cached base state `E` returns immediately.
+
 # Mechanism — what the Cache Keys on and what it Needs
 
-The cache is a map from _arguments_ to _result_. A correct and useful cache depends on three things; failures either return a stale answer or destroy the expected hit rate:
+The cache is a map from *arguments* to *result*. A correct and useful cache depends on three things; failures either return a stale answer or destroy the expected hit rate:
 
 - **Purity.** The function's output must depend only on its arguments, with no side effects a caller could observe. Memoise a function that reads mutable global state or the clock, and a cache hit returns a value computed under conditions that no longer hold.
-- **A complete, stable key.** The key must capture _every_ input that affects the result and must not change while stored. Omit one — memoise a two-argument recurrence on only the first argument — and two genuinely different calls collide on one cache slot, so the second read can be stale. Mutate a stored key and the entry can become unreachable. This is exactly DP's [[Computer Science/Algorithms/Paradigms/Dynamic Programming|state-design]] problem: the key _is_ the state.
+- **A complete, stable key.** The key must capture *every* input that affects the result and must not change while stored. Omit one — memoise a two-argument recurrence on only the first argument — and two genuinely different calls collide on one cache slot, so the second read can be stale. Mutate a stored key and the entry can become unreachable. This is exactly DP's [[Computer Science/Algorithms/Paradigms/Dynamic Programming|state-design]] problem: the key *is* the state.
 - **Lookup semantics that match value identity.** A cache needs equality appropriate to its store. For a `Dictionary`, equality and hashing must use the meaningful fields; a record key usually supplies both. Reference identity for logically equal arguments normally causes avoidable misses rather than wrong values, while inconsistent `Equals` and `GetHashCode` breaks dictionary lookup.
 
-For a recursive function, the recursion must call _through_ the memoised entry point, not the raw function — otherwise the inner calls bypass the cache and the exponential tree returns. That is why the idiomatic form nests a local function that calls itself and shares one `memo` dictionary across the whole call graph.
+For a recursive function, the recursion must call *through* the memoised entry point, not the raw function — otherwise the inner calls bypass the cache and the exponential tree returns. That is why the idiomatic form nests a local function that calls itself and shares one `memo` dictionary across the whole call graph.
+
+tab: Complexity
+
+```complexity
+{
+  "version": 2,
+  "label": "Memoization complexity",
+  "variables": {
+    "inputSize": {
+      "symbol": "n",
+      "description": "number of input elements or states"
+    }
+  },
+  "resources": {
+    "time": {
+      "mode": "operations",
+      "entries": [
+        {
+          "kind": "operation",
+          "operation": "Distinct subproblems",
+          "bounds": [
+            {
+              "kind": "curve",
+              "role": "Upper bound",
+              "formula": "O(n)",
+              "curveId": "linear"
+            }
+          ]
+        }
+      ]
+    },
+    "space": {
+      "mode": "operations",
+      "entries": [
+        {
+          "kind": "operation",
+          "operation": "Cache",
+          "bounds": [
+            {
+              "kind": "curve",
+              "role": "Persistent",
+              "formula": "O(n)",
+              "curveId": "linear"
+            }
+          ]
+        },
+        {
+          "kind": "operation",
+          "operation": "Recursion stack",
+          "bounds": [
+            {
+              "kind": "curve",
+              "role": "Worst-case auxiliary",
+              "formula": "O(n)",
+              "curveId": "linear"
+            }
+          ]
+        }
+      ]
+    }
+  }
+}
+```
+````
+
+# Complexity
+
+For memoized Fibonacci, n distinct subproblems are each computed once and retained in the cache: O(n) time and O(n) cache space. The recursive form also uses O(n) stack space in the chain-shaped worst case.
 
 # Where Memoization Breaks or Costs
 

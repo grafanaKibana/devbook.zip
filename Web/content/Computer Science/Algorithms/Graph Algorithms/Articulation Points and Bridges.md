@@ -1,8 +1,8 @@
 ---
 publish: true
 created: 2026-07-18T14:02:43.936Z
-modified: 2026-07-27T14:43:18.308Z
-published: 2026-07-27T14:43:18.308Z
+modified: 2026-08-01T18:31:33.339Z
+published: 2026-08-01T18:31:33.339Z
 topic:
   - Computer Science
 subtopic:
@@ -24,6 +24,9 @@ An **articulation point** (cut vertex) is a vertex whose deletion raises the num
 
 The decisive transition is a DFS tree annotated with `disc`/`low`, where each child's `low` is compared against its parent's `disc`.
 
+````tabsdown
+tab: Visualization
+
 ```steptrace
 {"algorithm":"articulation-points-and-bridges"}
 ```
@@ -42,6 +45,61 @@ DFS runs from any unvisited vertex and repeats until every component is covered.
 - **Bridge.** A tree edge `(u, v)` is a bridge when `low[v] > disc[u]` — strict. Equality (`low[v] == disc[u]`) means a back edge from `v`'s subtree lands exactly on `u`: that route bypasses the edge `(u, v)`, so the edge is not a bridge, but it still forces traffic through the vertex `u`, so `u` stays a cut vertex. The single `>` versus `>=` is the entire distinction between cut edges and cut vertices.
 
 Worked example: a triangle `0-1-2` with a tail `2-3-4`. DFS from `0` discovers `0, 1, 2` around the cycle; the edge `2-0` is a back edge, so `low` across the triangle collapses to `0` and none of `0, 1, 2` is cut inside it. The tail carries no back edge, so `low[3] = 3 > disc[2] = 2` and `low[4] = 4 > disc[3] = 3`: edges `2-3` and `3-4` are bridges, and vertices `2` and `3` are cut vertices — each is the sole link to what hangs below it. Removing any of them raises the connected-component count, which is the property each rule certifies locally.
+
+tab: Complexity
+
+```complexity
+{
+  "version": 2,
+  "label": "Articulation Points and Bridges complexity",
+  "variables": {
+    "edgeCount": {
+      "symbol": "E",
+      "description": "number of edges"
+    },
+    "vertexCount": {
+      "symbol": "V",
+      "description": "number of vertices"
+    }
+  },
+  "resources": {
+    "time": {
+      "mode": "operations",
+      "entries": [
+        {
+          "kind": "operation",
+          "operation": "Time",
+          "bounds": [
+            {
+              "kind": "text",
+              "role": "Bound",
+              "formula": "O(V + E)"
+            }
+          ]
+        }
+      ]
+    },
+    "space": {
+      "mode": "operations",
+      "entries": [
+        {
+          "kind": "operation",
+          "operation": "Auxiliary space",
+          "bounds": [
+            {
+              "kind": "curve",
+              "role": "Bound",
+              "formula": "O(V)",
+              "curveId": "linear"
+            }
+          ]
+        }
+      ]
+    }
+  }
+}
+```
+````
 
 # Complexity
 

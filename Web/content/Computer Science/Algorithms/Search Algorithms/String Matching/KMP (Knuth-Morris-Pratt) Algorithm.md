@@ -1,8 +1,8 @@
 ---
 publish: true
-created: 2026-07-25T18:38:43.803Z
-modified: 2026-07-25T18:38:43.804Z
-published: 2026-07-25T18:38:43.804Z
+created: 2026-07-18T14:02:43.998Z
+modified: 2026-08-01T18:31:33.351Z
+published: 2026-08-01T18:31:33.351Z
 topic:
   - Computer Science
 subtopic:
@@ -16,19 +16,24 @@ status: Done
 
 A monitoring process scans a byte stream — logs, packets, a large file — for a fixed pattern of length `m` inside text of length `n`. The naive method aligns the pattern at each start position and, on a mismatch after matching several characters, discards that progress and restarts one position over. On text like `aaaaaaaa…` with pattern `aaaab`, nearly every start position matches `m − 1` characters before failing, so the same characters are examined again and again — `O(n·m)` comparisons.
 
-The wasted work has structure. The characters already matched are a prefix of the pattern, and that prefix's own internal repetition fixes how far the pattern can safely slide. KMP computes that self-overlap once, before the scan. On a mismatch after `k` matched characters, it consults the overlap and resumes the pattern where its longest matched prefix-that-is-also-a-suffix already lines up against the text — the text pointer stays put. Each text character is then read at most twice across the whole search.
+The wasted work has structure. The characters already matched are a prefix of the pattern, and that prefix's own internal repetition fixes how far the pattern can safely slide. KMP computes that self-overlap once, before the scan. On a mismatch after `k` matched characters, it consults the overlap and resumes the pattern where its longest matched prefix-that-is-also-a-suffix already lines up against the text — the text pointer stays put. Across the complete search, each comparison either advances `i` or decreases `j`, so the total is bounded by `2n` comparisons.
 
 **Core condition:** pattern fixed in advance → a failure table encodes the pattern's self-overlap → each mismatch slides the pattern without rewinding the text → `Θ(n + m)` time, `Θ(m)` space.
 
-# Trace
+````tabsdown
+tab: Visualization
 
-The trace searches for the pattern `ABAB` in the text `ABABCABAB`.
+
 
 ```steptrace
 {"algorithm":"kmp","text":"ABABCABAB","pattern":"ABAB"}
 ```
 
-The first four characters match, so `j` reaches `4 = m` and a match is reported at index 0. Instead of restarting, `j` resets to `π[3] = 2`: the trailing `AB` of the region just matched is itself a prefix of the pattern, so those two characters already count as matched and the pattern strip slides right by two while the text pointer holds at index 4. There `C` fails against `pattern[2] = A`; `j` falls to `π[1] = 0`, the text pointer finally advances, and the scan re-enters the pattern at `A` to find the second match at index 5. At no point does the text pointer retreat to re-read `C` or the earlier `AB`.
+# Trace
+
+The trace searches for the pattern `ABAB` in the text `ABABCABAB`.
+
+The first four characters match, so `j` reaches `4 = m` and a match is reported at index 0. Instead of restarting, `j` resets to `π[3] = 2`: the trailing `AB` of the region just matched is itself a prefix of the pattern, so those two characters already count as matched and the pattern strip slides right by two while the text pointer holds at index 4. There `C` fails against `pattern[2] = A`; `j` falls to `π[1] = 0`, so the same `C` may be compared again at index 4 against the shorter-prefix position before the text pointer advances. The pointer never retreats, and the scan re-enters the pattern at `A` to find the second match at index 5.
 
 # Why the Text Never Rewinds
 
@@ -38,12 +43,115 @@ The search keeps a text index `i` and a match length `j` (equivalently, the curr
 
 That monotonic `i` is the entire bound. `j` rises by at most one each time `i` advances, and `j ≥ 0`, so the fallbacks can remove at most as much as was added: across the scan `j` decreases at most `n` times in total. Every comparison either advances `i` or decreases `j`, so there are at most `2n` character comparisons regardless of how the pattern overlaps itself.
 
+tab: Complexity
+
+```complexity
+{
+  "version": 2,
+  "label": "KMP (Knuth-Morris-Pratt) Algorithm complexity",
+  "variables": {
+    "inputSize": {
+      "symbol": "n",
+      "description": "number of input elements or states"
+    },
+    "secondarySize": {
+      "symbol": "m",
+      "description": "secondary input, pattern, bucket, or sequence size"
+    }
+  },
+  "resources": {
+    "time": {
+      "mode": "operations",
+      "entries": [
+        {
+          "kind": "operation",
+          "operation": "Build failure table π",
+          "bounds": [
+            {
+              "kind": "curve",
+              "role": "Time",
+              "formula": "Θ(m)",
+              "curveId": "linear"
+            }
+          ]
+        },
+        {
+          "kind": "operation",
+          "operation": "Search",
+          "bounds": [
+            {
+              "kind": "curve",
+              "role": "Time",
+              "formula": "Θ(n)",
+              "curveId": "linear"
+            }
+          ]
+        },
+        {
+          "kind": "operation",
+          "operation": "Total",
+          "bounds": [
+            {
+              "kind": "text",
+              "role": "Time",
+              "formula": "Θ(n + m)"
+            }
+          ]
+        }
+      ]
+    },
+    "space": {
+      "mode": "operations",
+      "entries": [
+        {
+          "kind": "operation",
+          "operation": "Build failure table π",
+          "bounds": [
+            {
+              "kind": "curve",
+              "role": "Auxiliary space",
+              "formula": "Θ(m)",
+              "curveId": "linear"
+            }
+          ]
+        },
+        {
+          "kind": "operation",
+          "operation": "Search",
+          "bounds": [
+            {
+              "kind": "curve",
+              "role": "Auxiliary space",
+              "formula": "O(1) beyond π",
+              "curveId": "constant"
+            }
+          ]
+        },
+        {
+          "kind": "operation",
+          "operation": "Total",
+          "bounds": [
+            {
+              "kind": "curve",
+              "role": "Auxiliary space",
+              "formula": "Θ(m)",
+              "curveId": "linear"
+            }
+          ]
+        }
+      ]
+    }
+  }
+}
+```
+````
+
 # Complexity
 
 | Phase | Time | Auxiliary space | Cause |
 | --- | --- | --- | --- |
 | Build failure table `π` | `Θ(m)` | `Θ(m)` | Each pattern index is assigned once; the builder's fallback pointer only retreats through values it already produced. |
-| Search | `Θ(n)` | `O(1)` beyond `π` | `i` advances monotonically; each character is compared at most twice before `i` passes it. |
+| Search | `Θ(n)` | `O(1)` beyond `π` | Each comparison either advances `i` or decreases `j`, bounding the complete search by `2n` comparisons. |
 | Total | `Θ(n + m)` | `Θ(m)` | One preprocessing pass over the pattern, then one non-backtracking pass over the text. |
 
 The bound holds identically in the best, average, and worst case — determinism is the point. Naive search shares the `O(1)`-space profile but has no such ceiling: on `text = aⁿ`, `pattern = aᵐ⁻¹b`, every one of the `n − m + 1` start positions matches `m − 1` characters before failing on the final `b`, so it performs `Θ(n·m)` comparisons. KMP reads that same run once.
@@ -82,6 +190,7 @@ KMP gains nothing from a large alphabet. It compares left to right and, in the w
 > ```csharp
 > public static IEnumerable<int> FindAll(string text, string pattern)
 > {
+>     ArgumentException.ThrowIfNullOrEmpty(pattern);
 >     var failure = BuildFailure(pattern);
 >     var j = 0; // characters of the pattern currently matched
 >
@@ -129,12 +238,12 @@ KMP gains nothing from a large alphabet. It compares left to right and, in the w
 > }
 > ```
 >
-> Both loops share the same fallback shape: the inner `while` retreats through `failure` rather than resetting to `0`. That is what keeps the total work linear and the table correct.
+> The method rejects an empty pattern before building the failure table because the search loop indexes `pattern[j]`; callers must provide at least one character. Both loops then share the same fallback shape: the inner `while` retreats through `failure` rather than resetting to `0`. That is what keeps the total work linear and the table correct.
 
 # Questions
 
 > [!QUESTION]- Why does the text index never move backward, and what does that buy?
-> On a mismatch the algorithm only lowers the match length `j` via `π[j-1]`; it never decrements the text index `i`. Because `j` can fall back at most as much as it climbed, total comparisons stay at `2n`, giving the `Θ(n + m)` bound. A monotonic text pointer also lets the search run over a stream that cannot be rewound.
+> On a mismatch the algorithm only lowers the match length `j` via `π[j-1]`; it never decrements the text index `i`. Because `j` can fall back at most as much as it climbed, total comparisons are bounded by `2n`, giving the `Θ(n + m)` bound. A monotonic text pointer also lets the search run over a stream that cannot be rewound.
 
 > [!QUESTION]- What does `π[j]` encode, and how is it used on a mismatch?
 > `π[j]` is the length of the longest proper prefix of `pattern[0..j]` that is also a suffix of it. On a mismatch after matching `j` characters, `j` resets to `π[j-1]`, which realigns that shared prefix/suffix against the text so no already-matched characters are re-read.

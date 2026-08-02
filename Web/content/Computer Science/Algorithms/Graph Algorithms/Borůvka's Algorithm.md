@@ -1,8 +1,8 @@
 ---
 publish: true
 created: 2026-07-18T14:02:43.942Z
-modified: 2026-07-26T19:07:12.438Z
-published: 2026-07-26T19:07:12.438Z
+modified: 2026-08-01T18:31:33.339Z
+published: 2026-08-01T18:31:33.339Z
 topic:
   - Computer Science
 subtopic:
@@ -17,6 +17,9 @@ A [[Computer Science/Algorithms/Graph Algorithms/Minimum Spanning Tree|minimum s
 
 The cut property certifies each candidate relative to the component that selected it. A component defines a cut between its vertices and the rest of the graph, so its cheapest outgoing edge belongs to some MST. Several components can select the same edge, and equal-weight selections can collectively form a cycle; deduplication plus the union-find check keeps only a compatible forest for the round.
 
+````tabsdown
+tab: Visualization
+
 ```steptrace
 {"algorithm":"boruvka"}
 ```
@@ -26,6 +29,111 @@ The cut property certifies each candidate relative to the component that selecte
 For vertices `A, B, C, D` with edges `AB=1`, `AC=4`, `BC=2`, `BD=5`, `CD=3`, the first round selects `AB` for `A`, `AB` for `B`, `BC` for `C`, and `CD` for `D`. After duplicate removal, all three edges are safe and the graph becomes one component in a single round.
 
 In the general case, every component that is not isolated chooses an edge to another component. Once distinct choices are unioned, the number of components falls by at least half: each surviving component contains at least two previous components. There are therefore at most `⌈log₂ V⌉` rounds.
+
+tab: Complexity
+
+```complexity
+{
+  "version": 2,
+  "label": "Borůvka's Algorithm complexity",
+  "variables": {
+    "edgeCount": {
+      "symbol": "E",
+      "description": "number of edges"
+    },
+    "inverseAckermann": {
+      "symbol": "α(·)",
+      "description": "inverse Ackermann factor applied to its displayed argument"
+    },
+    "vertexCount": {
+      "symbol": "V",
+      "description": "number of vertices"
+    }
+  },
+  "resources": {
+    "time": {
+      "mode": "operations",
+      "entries": [
+        {
+          "kind": "operation",
+          "operation": "Best",
+          "bounds": [
+            {
+              "kind": "text",
+              "role": "Time",
+              "formula": "O(E · α(V))"
+            }
+          ]
+        },
+        {
+          "kind": "operation",
+          "operation": "Typical",
+          "bounds": [
+            {
+              "kind": "text",
+              "role": "Time",
+              "formula": "distribution-dependent"
+            }
+          ]
+        },
+        {
+          "kind": "operation",
+          "operation": "Worst",
+          "bounds": [
+            {
+              "kind": "text",
+              "role": "Time",
+              "formula": "O(E · α(V) · log V)"
+            }
+          ]
+        }
+      ]
+    },
+    "space": {
+      "mode": "operations",
+      "entries": [
+        {
+          "kind": "operation",
+          "operation": "Best",
+          "bounds": [
+            {
+              "kind": "curve",
+              "role": "Auxiliary space",
+              "formula": "O(V)",
+              "curveId": "linear"
+            }
+          ]
+        },
+        {
+          "kind": "operation",
+          "operation": "Typical",
+          "bounds": [
+            {
+              "kind": "curve",
+              "role": "Auxiliary space",
+              "formula": "O(V)",
+              "curveId": "linear"
+            }
+          ]
+        },
+        {
+          "kind": "operation",
+          "operation": "Worst",
+          "bounds": [
+            {
+              "kind": "curve",
+              "role": "Auxiliary space",
+              "formula": "O(V)",
+              "curveId": "linear"
+            }
+          ]
+        }
+      ]
+    }
+  }
+}
+```
+````
 
 # Complexity
 

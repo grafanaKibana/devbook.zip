@@ -1,8 +1,8 @@
 ---
 publish: true
-created: 2026-07-25T18:38:43.801Z
-modified: 2026-07-25T18:38:43.801Z
-published: 2026-07-25T18:38:43.801Z
+created: 2026-07-21T18:52:02.836Z
+modified: 2026-08-01T18:31:33.348Z
+published: 2026-08-01T18:31:33.348Z
 topic:
   - Computer Science
 subtopic:
@@ -20,13 +20,18 @@ Doubling reaches or passes a present target at position `i` after `O(log(i + 1))
 
 **Core condition:** sorted, indexable input of unknown or unbounded length → double a probe to bracket the target, then bisect the bracket → `O(log(i + 1))` for a target at position `i`, or `O(log n)` when a bounded input contains no target, with `O(1)` auxiliary space.
 
-# Trace
+````tabsdown
+tab: Visualization
 
-The trace searches for `41` in `[2, 4, 7, 11, 18, 29, 41, 56, 72]`. During the gallop, hatched bars are already too small, muted bars are not reached yet, and the blue probe jumps through indices `0, 1, 2, 4, 8`. Once index `8` passes the target, the live bracket becomes `[4, 8]` and the same card switches to binary search. Binary search probes midpoint `6`; `a[6]` is `41`, so the search finishes at index `6` after six total probes.
+
 
 ```steptrace
 { "algorithm": "exponential-search", "array": [2, 4, 7, 11, 18, 29, 41, 56, 72], "target": 41 }
 ```
+
+# Trace
+
+The trace searches for `41` in `[2, 4, 7, 11, 18, 29, 41, 56, 72]`. During the gallop, hatched bars are already too small, muted bars are not reached yet, and the blue probe jumps through indices `0, 1, 2, 4, 8`. Once index `8` passes the target, the live bracket becomes `[4, 8]` and the same card switches to binary search. Binary search probes midpoint `6`; `a[6]` is `41`, so the search finishes at index `6` after six total probes.
 
 # Why Doubling Brackets the Target
 
@@ -38,6 +43,109 @@ The gallop maintains one fact through every iteration: as long as the loop conti
 Either way the window is `[bound/2, min(bound, n − 1)]`. For a successful search at `i >= 1`, the window spans at most `i + 1` elements; after at least one doubling (`i >= 2`), `bound/2` is a confirmed probe below the target, so `bound/2 < i` and the tighter window bound is at most `i` elements. Binary Search over either bound is `O(log(i + 1))`, and the doubling that built it also took `O(log(i + 1))` steps. Index `0` is checked before the gallop, so the same expression covers every successful position without the undefined `log 0` case.
 
 The unbounded, indexable variant never references `n`. It generates the indices it probes (`1, 2, 4, …`) and asks only "is `a[bound]` still below the target?" An unknown-length finite source must also report that a probe is past the end so the high bound can be clamped to the last valid index. Index `0` is handled before the loop, since `bound` starts at `1`: if `a[0] == target`, the answer is `0`.
+
+tab: Complexity
+
+```complexity
+{
+  "version": 2,
+  "label": "Exponential Search complexity",
+  "variables": {
+    "expansionIndex": {
+      "symbol": "i",
+      "description": "exponential-search bound index"
+    },
+    "inputSize": {
+      "symbol": "n",
+      "description": "number of input elements or states"
+    }
+  },
+  "resources": {
+    "time": {
+      "mode": "operations",
+      "entries": [
+        {
+          "kind": "operation",
+          "operation": "Best",
+          "bounds": [
+            {
+              "kind": "curve",
+              "role": "Time",
+              "formula": "O(1)",
+              "curveId": "constant"
+            }
+          ]
+        },
+        {
+          "kind": "operation",
+          "operation": "Successful at position i",
+          "bounds": [
+            {
+              "kind": "text",
+              "role": "Time",
+              "formula": "O(log(i + 1))"
+            }
+          ]
+        },
+        {
+          "kind": "operation",
+          "operation": "Absent from a bounded input",
+          "bounds": [
+            {
+              "kind": "curve",
+              "role": "Time",
+              "formula": "O(log n)",
+              "curveId": "log-n"
+            }
+          ]
+        }
+      ]
+    },
+    "space": {
+      "mode": "operations",
+      "entries": [
+        {
+          "kind": "operation",
+          "operation": "Best",
+          "bounds": [
+            {
+              "kind": "curve",
+              "role": "Auxiliary space",
+              "formula": "O(1)",
+              "curveId": "constant"
+            }
+          ]
+        },
+        {
+          "kind": "operation",
+          "operation": "Successful at position i",
+          "bounds": [
+            {
+              "kind": "curve",
+              "role": "Auxiliary space",
+              "formula": "O(1)",
+              "curveId": "constant"
+            }
+          ]
+        },
+        {
+          "kind": "operation",
+          "operation": "Absent from a bounded input",
+          "bounds": [
+            {
+              "kind": "curve",
+              "role": "Auxiliary space",
+              "formula": "O(1)",
+              "curveId": "constant"
+            }
+          ]
+        }
+      ]
+    }
+  }
+}
+```
+````
 
 # Complexity
 
@@ -86,7 +194,7 @@ The bracket is only as trustworthy as the ordering. The gallop's `a[bound] < tar
 >     var bound = 1;
 >     while (bound < n && arr[bound] < target)
 >     {
->         bound *= 2;
+>         bound = bound > n / 2 ? n : bound * 2;
 >     }
 >
 >     // Target, if present, is in [bound/2, min(bound, n - 1)].

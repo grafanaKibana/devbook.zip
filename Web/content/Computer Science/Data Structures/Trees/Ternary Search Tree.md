@@ -1,8 +1,8 @@
 ---
 publish: true
 created: 2026-07-18T14:02:44.053Z
-modified: 2026-07-26T13:53:10.736Z
-published: 2026-07-26T13:53:10.736Z
+modified: 2026-08-01T18:31:33.361Z
+published: 2026-08-01T18:31:33.361Z
 topic:
   - Computer Science
 subtopic:
@@ -13,6 +13,8 @@ priority: Medium
 status: Ready to Repeat
 ---
 
+# Intro
+
 A [[Computer Science/Data Structures/Trees/Trie|Trie]] answers prefix queries in `O(L)`, but pays for it in memory: an array-backed node reserves one child slot per alphabet symbol `σ`, so a table keyed on Unicode allocates thousands of mostly-empty pointers at every node. Swapping the array for a `Dictionary<char, Node>` fixes the waste but hashes a character on every step and throws away the sorted order the array gave for free. A ternary search tree (TST) keeps the trie's shape while storing each node's children as a small **binary search tree keyed on the next character** — three pointers per node instead of `σ`, and the ordering survives.
 
 Each node carries one split character and three links: `lo` for keys whose current character is smaller, `hi` for larger, and `eq` for equal — and _only_ the `eq` link advances to the next character of the key. Walking a key alternates two motions: descend the per-position BST via `lo`/`hi` until the split character matches, then step forward one character down `eq`. The path that spells a key is still there, threaded through the `eq` links; the `lo`/`hi` links are the trie's "which child" decision turned into a comparison tree rather than an array index.
@@ -20,6 +22,9 @@ Each node carries one split character and three links: `lo` for keys whose curre
 What it buys over a plain trie is memory proportional to the characters actually stored — no per-symbol reservation — while keeping lexicographic order and cheap prefix and near-neighbour queries. What it gives up is the trie's flat `O(L)`: each character now costs a short BST descent, so lookup is `O(L + log n)` rather than `O(L)`, and a bad insertion order can unbalance those per-position BSTs.
 
 **Core shape:** trie positions linked by `eq`; at each position the alternatives form a BST split on the character via `lo`/`hi` → three pointers per node, not `σ` → `O(L + log n)` lookup that preserves order.
+
+````tabsdown
+tab: Visualization
 
 ```steptrace
 {"algorithm":"ternary-search-tree","operations":[["insert","cat"],["insert","car"],["insert","cup"],["insert","bat"],["search","car"]]}
@@ -30,8 +35,8 @@ What it buys over a plain trie is memory proportional to the characters actually
 A node holds a split character, an end-of-key flag, and three child links:
 
 - `Split` — the character this node discriminates on.
-- `Lo` / `Hi` — subtrees for keys whose character at _this same position_ sorts before / after `Split`. Following them does **not** consume a character.
-- `Eq` — the subtree for the _next_ position, taken only after the current character equals `Split`. Following it consumes one character.
+- `Lo` / `Hi` — subtrees for keys whose character at *this same position* sorts before / after `Split`. Following them does **not** consume a character.
+- `Eq` — the subtree for the *next* position, taken only after the current character equals `Split`. Following it consumes one character.
 - `IsEnd` — true when the `eq`-chain from the root to this node spells a complete stored key.
 
 The key is never stored. `cat` is present when, starting at the root, three matched-then-`eq` steps land on a node whose `Split` is `t` and whose `IsEnd` is set. A single trie level — "which character comes next here?" — is exactly one BST reachable through `lo`/`hi` links, and the answer to that question is the `eq` link out of the matching node.
@@ -44,6 +49,145 @@ Three invariants hold:
 
 The whole contract lives in the difference between "matched the split and there is more key" (follow `eq`) and "the character is smaller or larger" (follow `lo`/`hi` without advancing).
 
+tab: Complexity
+
+```complexity
+{
+  "version": 2,
+  "label": "Ternary Search Tree complexity",
+  "variables": {
+    "inputSize": {
+      "symbol": "n",
+      "description": "number of input elements or states"
+    },
+    "lengthL": {
+      "symbol": "L",
+      "description": "key, string, path, or sequence length"
+    },
+    "sizeS": {
+      "symbol": "S",
+      "description": "string, state, or output size"
+    }
+  },
+  "resources": {
+    "time": {
+      "mode": "operations",
+      "entries": [
+        {
+          "kind": "operation",
+          "operation": "Search hit (key length L)",
+          "bounds": [
+            {
+              "kind": "text",
+              "role": "Time",
+              "formula": "O(L + log n) avg, O(L + n) worst"
+            }
+          ]
+        },
+        {
+          "kind": "operation",
+          "operation": "Search miss",
+          "bounds": [
+            {
+              "kind": "text",
+              "role": "Time",
+              "formula": "O(L + log n) avg, O(L + n) worst"
+            }
+          ]
+        },
+        {
+          "kind": "operation",
+          "operation": "Insert",
+          "bounds": [
+            {
+              "kind": "text",
+              "role": "Time",
+              "formula": "O(L + log n) avg"
+            }
+          ]
+        },
+        {
+          "kind": "operation",
+          "operation": "Prefix collection",
+          "bounds": [
+            {
+              "kind": "text",
+              "role": "Time",
+              "formula": "O(L + log n + S) avg, O(L + n + S) worst"
+            }
+          ]
+        }
+      ]
+    },
+    "space": {
+      "mode": "operations",
+      "entries": [
+        {
+          "kind": "operation",
+          "operation": "Search hit (key length L)",
+          "bounds": [
+            {
+              "kind": "curve",
+              "role": "Space",
+              "formula": "O(1)",
+              "curveId": "constant"
+            }
+          ]
+        },
+        {
+          "kind": "operation",
+          "operation": "Search miss",
+          "bounds": [
+            {
+              "kind": "curve",
+              "role": "Space",
+              "formula": "O(1)",
+              "curveId": "constant"
+            }
+          ]
+        },
+        {
+          "kind": "operation",
+          "operation": "Insert",
+          "bounds": [
+            {
+              "kind": "curve",
+              "role": "Space",
+              "formula": "O(L) new nodes",
+              "curveId": "linear"
+            }
+          ]
+        },
+        {
+          "kind": "operation",
+          "operation": "Prefix collection",
+          "bounds": [
+            {
+              "kind": "curve",
+              "role": "Space",
+              "formula": "O(S) output",
+              "curveId": "linear"
+            }
+          ]
+        },
+        {
+          "kind": "operation",
+          "operation": "Whole structure",
+          "bounds": [
+            {
+              "kind": "text",
+              "role": "Space",
+              "formula": "O(total input characters)"
+            }
+          ]
+        }
+      ]
+    }
+  }
+}
+```
+````
+
 # Complexity
 
 Bounds are in the key length `L`, the number of stored keys `n`, the alphabet size `σ`, and the `S` characters visited or emitted while collecting results. The per-position BST is what adds a logarithmic term the plain trie does not have.
@@ -51,7 +195,7 @@ Bounds are in the key length `L`, the number of stored keys `n`, the alphabet si
 | Operation | Time | Space | Cause |
 | --- | --- | --- | --- |
 | Search hit (key length `L`) | `O(L + log n)` avg, `O(L + n)` worst | `O(1)` | `L` matched `eq` steps plus a BST descent at each position; balanced BSTs give `log`, a sorted-order insertion degrades one to a chain. |
-| Search miss | `O(log n)` avg | `O(1)` | A miss usually fails inside the first BST it descends, before spending the full `L`. |
+| Search miss | `O(L + log n)` avg, `O(L + n)` worst | `O(1)` | A miss can match the full key prefix before failing in a per-position BST; balanced BSTs give `log`, a degenerate one can scan `n` alternatives. |
 | Insert | `O(L + log n)` avg | `O(L)` new nodes | One new node per previously-unseen character along the `eq` path; `lo`/`hi` position it in its BST. |
 | Prefix collection | `O(L + log n + S)` avg, `O(L + n + S)` worst | `O(S)` output | Reach the prefix node, then in-order traverse its `eq` subtree to emit the completions in sorted order. |
 | Whole structure | — | `O(total input characters)` | Three pointers per node and at most one new node per input character — no `σ`-wide reservation. |

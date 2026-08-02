@@ -1,8 +1,8 @@
 ---
 publish: true
-created: 2026-07-29T14:26:51.598Z
-modified: 2026-07-29T14:26:51.598Z
-published: 2026-07-29T14:26:51.598Z
+created: 2026-07-29T20:22:40.589Z
+modified: 2026-08-01T08:30:51.384Z
+published: 2026-08-01T08:30:51.384Z
 topic:
   - Computer Science
 subtopic: []
@@ -37,38 +37,31 @@ The complexity class is the shape of the curve. Every line begins at the visual 
   "entries": [
     {
       "kind": "catalogue",
-      "curveId": "constant",
-      "description": "Constant: same time regardless of input size."
+      "curveId": "constant"
     },
     {
       "kind": "catalogue",
-      "curveId": "log-n",
-      "description": "Logarithmic: halves the problem each step, as in binary search."
+      "curveId": "log-n"
     },
     {
       "kind": "catalogue",
-      "curveId": "linear",
-      "description": "Linear: processes each element once."
+      "curveId": "linear"
     },
     {
       "kind": "catalogue",
-      "curveId": "n-log-n",
-      "description": "Linearithmic: efficient sorting, including merge sort and expected randomized quicksort."
+      "curveId": "n-log-n"
     },
     {
       "kind": "catalogue",
-      "curveId": "quadratic",
-      "description": "Quadratic: nested loops, as in bubble sort and brute-force pair checking."
+      "curveId": "quadratic"
     },
     {
       "kind": "catalogue",
-      "curveId": "exponential",
-      "description": "Exponential: doubles with each new element."
+      "curveId": "exponential"
     },
     {
       "kind": "catalogue",
-      "curveId": "factorial",
-      "description": "Factorial: visits every permutation."
+      "curveId": "factorial"
     }
   ]
 }

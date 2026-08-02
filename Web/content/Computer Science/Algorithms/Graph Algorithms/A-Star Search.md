@@ -1,8 +1,8 @@
 ---
 publish: true
-created: 2026-07-29T14:28:24.643Z
-modified: 2026-07-29T14:28:24.644Z
-published: 2026-07-29T14:28:24.644Z
+created: 2026-07-29T20:22:59.982Z
+modified: 2026-08-01T18:31:33.338Z
+published: 2026-08-01T18:31:33.338Z
 topic:
   - Computer Science
 subtopic:
@@ -22,19 +22,156 @@ The optimality guarantee holds when `h` never overestimates the remaining cost. 
 
 The decisive step is which node leaves the frontier next, and how `h` skews that choice toward the goal.
 
+````tabsdown
+tab: Visualization
+
+~~~~tabsdown
+tab: Coordinate grid
+
+
 ```steptrace
-{"tabs":[{"name":"Coordinate grid","description":"A winding 6 × 4 grid makes the heuristic steer around two barriers.","algorithm":"a-star","variant":"coordinate-grid"},{"name":"Cities","description":"Choose From and To in Options; Haversine distance guides a route across 25 regional centers.","algorithm":"a-star","variant":"ukraine-cities","start":"Lviv","target":"Kharkiv"},{"name":"Building floor","description":"A locked fire door blocks the direct corridor, forcing a lower-corridor detour.","algorithm":"a-star","variant":"building-floor"},{"name":"Midtown map","description":"One-way streets and a West 44th closure force the route onto Broadway.","algorithm":"a-star","variant":"midtown-map"}]}
+{"algorithm":"a-star","variant":"coordinate-grid"}
 ```
+
+A winding 6 × 4 grid makes the heuristic steer around two barriers.
+
+tab: Cities
+
+
+```steptrace
+{"algorithm":"a-star","variant":"ukraine-cities","start":"Lviv","target":"Kharkiv"}
+```
+
+tab: Building floor
+
+
+```steptrace
+{"algorithm":"a-star","variant":"building-floor"}
+```
+
+tab: Midtown map
+
+
+```steptrace
+{"algorithm":"a-star","variant":"midtown-map"}
+```
+
+One-way streets and a West 44th closure force the route onto Broadway.
+
+~~~~
 
 # Why `f = g + h` Stays Optimal
 
 Each iteration pops the frontier node with the smallest `f`, relaxes its outgoing edges, and pushes any neighbor whose `g` improves; `g[source] = 0` and `f[source] = h(source)` seed the search. Two properties of `h` decide whether the result is correct.
 
-**Admissibility** — `h(n)` never exceeds the true remaining cost `h*(n)`. With reopening, this is enough for A\* to return an optimal path. Before a suboptimal goal could be popped, take the first state `n` on an optimal path that has not yet been settled with its optimal cost. Its predecessor has been settled optimally, so relaxation has placed an OPEN record for `n` with `g(n) = g*(n)`; if `n` was previously expanded through a worse path, reopening restores that record to OPEN. Therefore `f(n) = g*(n) + h(n) ≤ g*(n) + h*(n)`, which equals the optimal solution cost. Because A\* pops the smallest `f` and `f(goal) = g(goal)`, it cannot pop a more expensive goal first. Underestimating is safe — it only makes A\* inspect a node sooner than strictly necessary.
+**Admissibility** — `h(n)` never exceeds the true remaining cost `h*(n)`. With reopening, this is enough for A* to return an optimal path. Before a suboptimal goal could be popped, take the first state `n` on an optimal path that has not yet been settled with its optimal cost. Its predecessor has been settled optimally, so relaxation has placed an OPEN record for `n` with `g(n) = g*(n)`; if `n` was previously expanded through a worse path, reopening restores that record to OPEN. Therefore `f(n) = g*(n) + h(n) ≤ g*(n) + h*(n)`, which equals the optimal solution cost. Because A* pops the smallest `f` and `f(goal) = g(goal)`, it cannot pop a more expensive goal first. Underestimating is safe — it only makes A* inspect a node sooner than strictly necessary.
 
-**Consistency (monotonicity)** — `h(n) ≤ cost(n, n') + h(n')` for every edge `(n, n')`, with `h(goal) = 0`. Consistency implies admissibility and adds a stronger guarantee: `f` never decreases along a path, so the first time a node is popped its `g` is already optimal. Graph-search A\* can then move that node to a closed set and never reconsider it — each node is expanded at most once.
+**Consistency (monotonicity)** — `h(n) ≤ cost(n, n') + h(n')` for every edge `(n, n')`, with `h(goal) = 0`. Consistency implies admissibility and adds a stronger guarantee: `f` never decreases along a path, so the first time a node is popped its `g` is already optimal. Graph-search A* can then move that node to a closed set and never reconsider it — each node is expanded at most once.
 
-The pull is concrete: on a 4-connected grid with Manhattan `h`, a node reached in `g = 3` that sits toward the goal (`h = 2`, `f = 5`) is popped before an equal-cost node reached in `g = 3` that faces away (`h = 5`, `f = 8`). Dijkstra ranks both by `g` alone and expands the second as readily as the first. That `h` term is the whole difference between a corridor and a disc, and setting `h ≡ 0` erases it — which is exactly what turns A\* back into [[Computer Science/Algorithms/Graph Algorithms/Dijkstra|Dijkstra]].
+The pull is concrete: on a 4-connected grid with Manhattan `h`, a node reached in `g = 3` that sits toward the goal (`h = 2`, `f = 5`) is popped before an equal-cost node reached in `g = 3` that faces away (`h = 5`, `f = 8`). Dijkstra ranks both by `g` alone and expands the second as readily as the first. That `h` term is the whole difference between a corridor and a disc, and setting `h ≡ 0` erases it — which is exactly what turns A* back into [[Computer Science/Algorithms/Graph Algorithms/Dijkstra|Dijkstra]].
+
+tab: Complexity
+
+```complexity
+{
+  "version": 2,
+  "label": "A-Star Search complexity",
+  "variables": {
+    "branchingFactor": {
+      "symbol": "b",
+      "description": "search branching factor or radix base"
+    },
+    "parameterD": {
+      "symbol": "d",
+      "description": "algorithm-specific depth, digit count, or dimension"
+    },
+    "storedNodes": {
+      "symbol": "nodes stored",
+      "description": "number of frontier and explored nodes retained"
+    }
+  },
+  "resources": {
+    "time": {
+      "mode": "operations",
+      "entries": [
+        {
+          "kind": "operation",
+          "operation": "Best",
+          "bounds": [
+            {
+              "kind": "curve",
+              "role": "Time (node expansions)",
+              "formula": "Θ(d), d = optimal solution depth",
+              "curveId": "linear"
+            }
+          ]
+        },
+        {
+          "kind": "operation",
+          "operation": "Typical",
+          "bounds": [
+            {
+              "kind": "text",
+              "role": "Time (node expansions)",
+              "formula": "between Θ(d) and O(b^d) for uniform edge costs"
+            }
+          ]
+        },
+        {
+          "kind": "operation",
+          "operation": "Worst",
+          "bounds": [
+            {
+              "kind": "text",
+              "role": "Time (node expansions)",
+              "formula": "O(b^d) for uniform edge costs"
+            }
+          ]
+        }
+      ]
+    },
+    "space": {
+      "mode": "operations",
+      "entries": [
+        {
+          "kind": "operation",
+          "operation": "Best",
+          "bounds": [
+            {
+              "kind": "text",
+              "role": "Auxiliary space",
+              "formula": "O(nodes stored)"
+            }
+          ]
+        },
+        {
+          "kind": "operation",
+          "operation": "Typical",
+          "bounds": [
+            {
+              "kind": "text",
+              "role": "Auxiliary space",
+              "formula": "O(nodes stored)"
+            }
+          ]
+        },
+        {
+          "kind": "operation",
+          "operation": "Worst",
+          "bounds": [
+            {
+              "kind": "text",
+              "role": "Auxiliary space",
+              "formula": "O(b^d)"
+            }
+          ]
+        }
+      ]
+    }
+  }
+}
+```
+````
 
 # Complexity
 

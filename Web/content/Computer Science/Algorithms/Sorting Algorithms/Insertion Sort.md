@@ -1,8 +1,8 @@
 ---
 publish: true
-created: 2026-07-25T18:38:43.807Z
-modified: 2026-07-25T18:38:43.807Z
-published: 2026-07-25T18:38:43.807Z
+created: 2026-07-18T14:02:44.026Z
+modified: 2026-08-01T18:31:33.352Z
+published: 2026-08-01T18:31:33.352Z
 topic:
   - Computer Science
 subtopic:
@@ -20,13 +20,18 @@ Each incoming element—the key—is compared against the prefix from its right 
 
 **Core condition:** a sorted prefix and one incoming key → shift the larger prefix elements right until the key lands → `O(n)` when few elements move, `O(n²)` when every key crosses the whole prefix, `O(1)` auxiliary space.
 
-# Trace
+````tabsdown
+tab: Visualization
 
-The trace sorts the eight-element array `[8, 3, 5, 1, 9, 2, 7, 4]`, extending the sorted prefix one key at a time.
+
 
 ```steptrace
 {"algorithm":"insertion-sort","array":[8,3,5,1,9,2,7,4]}
 ```
+
+# Trace
+
+The trace sorts the eight-element array `[8, 3, 5, 1, 9, 2, 7, 4]`, extending the sorted prefix one key at a time.
 
 The prefix left of the active index is sorted before each step and stays sorted after it. When a key is smaller than its left neighbour, every larger prefix element copies one position right until a smaller element—or the start of the array—halts the walk, and the key fills the vacated slot. A key that already fits, like `9` following `1, 3, 5, 8`, triggers no shift and the prefix simply grows by one. The number of shifts a key performs equals the count of larger elements standing to its left, so the further a key is out of place, the more work it does.
 
@@ -40,6 +45,70 @@ Two properties fall out of the shift-and-drop move:
 - **In-place.** The only storage beyond the array is `key` and two indices, so auxiliary space is `O(1)`. Elements move by copying within the array, not into a second buffer.
 
 The cost of one step is its shift count, which equals the number of prefix elements greater than the key. On already-sorted input that count is zero everywhere: the inner loop tests one neighbour, fails, and advances, for `O(n)` total. This adaptivity is why insertion sort serves as the base case inside larger sorts—[[Merge Sort]]-based hybrids such as [[Tim Sort|Timsort]] sort short runs with it before merging, and [[Introsort]] falls back to it once a quicksort partition drops below roughly sixteen elements. At that size the guaranteed-small shift count beats the overhead of recursion and pivot selection.
+
+tab: Complexity
+
+```complexity
+{
+  "version": 2,
+  "label": "Insertion Sort complexity",
+  "variables": {
+    "inputSize": {
+      "symbol": "n",
+      "description": "number of input elements or states"
+    }
+  },
+  "resources": {
+    "time": {
+      "mode": "cases",
+      "entries": [
+        {
+          "kind": "case",
+          "role": "Best",
+          "formula": "O(n)",
+          "curveId": "linear"
+        },
+        {
+          "kind": "case",
+          "role": "Average",
+          "formula": "O(n²)",
+          "curveId": "quadratic"
+        },
+        {
+          "kind": "case",
+          "role": "Worst",
+          "formula": "O(n²)",
+          "curveId": "quadratic"
+        }
+      ]
+    },
+    "space": {
+      "mode": "cases",
+      "entries": [
+        {
+          "kind": "case",
+          "role": "Best",
+          "formula": "O(1)",
+          "curveId": "constant"
+        },
+        {
+          "kind": "case",
+          "role": "Average",
+          "formula": "O(1)",
+          "curveId": "constant"
+        },
+        {
+          "kind": "case",
+          "role": "Worst",
+          "formula": "O(1)",
+          "curveId": "constant"
+        }
+      ]
+    }
+  }
+}
+```
+````
 
 # Complexity
 

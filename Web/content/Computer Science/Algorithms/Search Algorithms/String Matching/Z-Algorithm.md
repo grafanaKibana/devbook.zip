@@ -1,8 +1,8 @@
 ---
 publish: true
 created: 2026-07-28T10:25:56.632Z
-modified: 2026-07-28T10:25:56.633Z
-published: 2026-07-28T10:25:56.633Z
+modified: 2026-08-01T18:31:33.351Z
+published: 2026-08-01T18:31:33.351Z
 topic:
   - Computer Science
 subtopic:
@@ -24,11 +24,15 @@ The pass stays linear because it never recompares a character already known to s
 
 The trace keeps the prefix, current Z-box, mirror source, and committed Z values aligned while each entry is copied or extended.
 
-# Trace
+````tabsdown
+tab: Visualization
+
 
 ```steptrace
 {"algorithm":"z-algorithm","text":"aabcaabxaaaz"}
 ```
+
+# Trace
 
 # How the Z-box Avoids Rescanning
 
@@ -65,6 +69,87 @@ Indices 5, 6, and 7 spend zero comparisons: their values are copied from the mir
 # Matching a Pattern by Concatenation
 
 Single-pattern search reduces to one Z-array. Build `S = P + sep + T`, where `sep` is a character occurring in neither `P` nor `T`, and compute `z` over `S`. Any index `i` in the `T` region with `z[i] >= |P|` marks an occurrence: the substring at `i` reproduces the whole pattern prefix in `|P|` characters that lie entirely inside `T`. A proper separator caps every text-region Z-value at `|P|` — no match can run across the boundary — so here `>=` and `==` coincide. With `|P| = m` and `|T| = n`, `|S| = n + m + 1`, giving `Θ(n + m)` time and `Θ(n + m)` space.
+
+tab: Complexity
+
+```complexity
+{
+  "version": 2,
+  "label": "Z-Algorithm complexity",
+  "variables": {
+    "inputSize": {
+      "symbol": "n",
+      "description": "number of input elements or states"
+    },
+    "secondarySize": {
+      "symbol": "m",
+      "description": "secondary input, pattern, bucket, or sequence size"
+    },
+    "sizeS": {
+      "symbol": "S",
+      "description": "string, state, or output size"
+    }
+  },
+  "resources": {
+    "time": {
+      "mode": "operations",
+      "entries": [
+        {
+          "kind": "operation",
+          "operation": "Z-array of a string S",
+          "bounds": [
+            {
+              "kind": "text",
+              "role": "Time",
+              "formula": "Θ(\\|S\\|)"
+            }
+          ]
+        },
+        {
+          "kind": "operation",
+          "operation": "Search P in T",
+          "bounds": [
+            {
+              "kind": "text",
+              "role": "Time",
+              "formula": "Θ(n + m)"
+            }
+          ]
+        }
+      ]
+    },
+    "space": {
+      "mode": "operations",
+      "entries": [
+        {
+          "kind": "operation",
+          "operation": "Z-array of a string S",
+          "bounds": [
+            {
+              "kind": "curve",
+              "role": "Auxiliary space",
+              "formula": "Θ(1) beyond the array",
+              "curveId": "constant"
+            }
+          ]
+        },
+        {
+          "kind": "operation",
+          "operation": "Search P in T",
+          "bounds": [
+            {
+              "kind": "text",
+              "role": "Auxiliary space",
+              "formula": "Θ(n + m)"
+            }
+          ]
+        }
+      ]
+    }
+  }
+}
+```
+````
 
 # Complexity
 

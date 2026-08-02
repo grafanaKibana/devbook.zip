@@ -1,8 +1,8 @@
 ---
 publish: true
-created: 2026-07-29T14:26:51.595Z
-modified: 2026-07-29T14:26:51.598Z
-published: 2026-07-29T14:26:51.598Z
+created: 2026-07-29T20:22:40.589Z
+modified: 2026-08-01T18:31:33.352Z
+published: 2026-08-01T18:31:33.352Z
 topic:
   - Computer Science
 subtopic:
@@ -22,13 +22,18 @@ The cost is decided before any comparison, by where the pivot lands. A pivot nea
 
 **Core shape:** partition around a pivot → pivot fixed at its final index, smaller-left / larger-right → two independent subarrays → `O(n log n)` on balanced splits, `O(n²)` on degenerate ones, `O(log n)`–`O(n)` stack.
 
-## One partition, two subproblems
+````tabsdown
+tab: Visualization
 
-The trace sorts the eight-element array `[8, 3, 5, 1, 9, 2, 7, 4]`, choosing a pivot and partitioning around it before each recursive descent.
+
 
 ```steptrace
 {"algorithm":"quick-sort","array":[8,3,5,1,9,2,7,4]}
 ```
+
+## One partition, two subproblems
+
+The trace sorts the eight-element array `[8, 3, 5, 1, 9, 2, 7, 4]`, choosing a pivot and partitioning around it before each recursive descent.
 
 Each partition ends with one bar fixed in place: the pivot has reached the index it occupies in the sorted array and never moves again. Everything to its left is not greater than it, everything to its right is greater, so no later comparison can cross the boundary the pivot draws. The two sides are now separate sorting problems over disjoint index ranges, and quick sort recurses into each without ever consulting the other. The array is ordered once every subrange has shrunk to a single fixed pivot.
 
@@ -40,57 +45,71 @@ That final swap is what makes recursion valid. The pivot is now at its sorted in
 
 Because elements are swapped by value inside the shared array, quick sort is **in-place** but **not stable** — a swap can lift an element past an equal one, discarding original order. Equal keys are compared, never tracked.
 
-## Complexity
+tab: Complexity
 
 ```complexity
 {
-  "version": 1,
-  "mode": "cases",
-  "title": "Quick Sort complexity",
+  "version": 2,
+  "label": "Quick Sort complexity",
   "variables": {
-    "n": "number of input elements"
-  },
-  "entries": [
-    {
-      "kind": "case",
-      "role": "Best",
-      "curveId": "n-log-n",
-      "qualifiers": [
-        "Partitions split near the middle."
-      ],
-      "details": {
-        "auxiliarySpace": "O(log n)",
-        "cause": "Each partition splits near the middle, so recursion depth is ~log₂ n and every level does O(n) comparison work."
-      }
-    },
-    {
-      "kind": "case",
-      "role": "Average",
-      "curveId": "n-log-n",
-      "qualifiers": [
-        "Expected with a uniformly randomized pivot when keys are distinct; duplicate-heavy inputs need three-way partitioning.",
-        "Deterministic median-of-three is a heuristic whose expected behavior needs an input-distribution assumption; adversarial O(n²) remains possible."
-      ],
-      "details": {
-        "auxiliarySpace": "O(log n)",
-        "cause": "With distinct keys, uniformly randomized pivot choices produce balanced-enough splits in expectation, so expected recursion depth is O(log n)."
-      }
-    },
-    {
-      "kind": "case",
-      "role": "Worst",
-      "curveId": "quadratic",
-      "qualifiers": [
-        "Auxiliary space is the recursion stack of the reference implementation, which recurses into both sides directly."
-      ],
-      "details": {
-        "auxiliarySpace": "O(n)",
-        "cause": "Every pivot is the minimum or maximum of its range, so one side holds n − 1 elements; n levels of O(n) work, and the recursion nests n deep."
-      }
+    "inputSize": {
+      "symbol": "n",
+      "description": "number of input elements or states"
     }
-  ]
+  },
+  "resources": {
+    "time": {
+      "mode": "cases",
+      "entries": [
+        {
+          "kind": "case",
+          "role": "Best",
+          "formula": "O(n log n)",
+          "curveId": "n-log-n"
+        },
+        {
+          "kind": "case",
+          "role": "Average",
+          "formula": "O(n log n) expected",
+          "curveId": "n-log-n"
+        },
+        {
+          "kind": "case",
+          "role": "Worst",
+          "formula": "O(n²)",
+          "curveId": "quadratic"
+        }
+      ]
+    },
+    "space": {
+      "mode": "cases",
+      "entries": [
+        {
+          "kind": "case",
+          "role": "Best",
+          "formula": "O(log n)",
+          "curveId": "log-n"
+        },
+        {
+          "kind": "case",
+          "role": "Average",
+          "formula": "O(log n) expected",
+          "curveId": "log-n"
+        },
+        {
+          "kind": "case",
+          "role": "Worst",
+          "formula": "O(n)",
+          "curveId": "linear"
+        }
+      ]
+    }
+  }
 }
 ```
+````
+
+## Complexity
 
 ### Case details
 

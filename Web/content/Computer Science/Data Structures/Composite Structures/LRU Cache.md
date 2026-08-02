@@ -1,8 +1,8 @@
 ---
 publish: true
-created: 2026-07-18T14:02:44.034Z
-modified: 2026-07-29T17:09:37.887Z
-published: 2026-07-29T17:09:37.887Z
+created: 2026-07-29T20:22:59.983Z
+modified: 2026-08-01T18:31:33.353Z
+published: 2026-08-01T18:31:33.353Z
 topic:
   - Computer Science
 subtopic:
@@ -22,13 +22,17 @@ An LRU (Least Recently Used) cache resolves the tension by storing the same entr
 
 **Core shape:** key → map → list node → recency-ordered doubly-linked list → head is MRU, tail is the eviction victim → `O(capacity)` storage.
 
-The cache below has capacity four. The map stores node addresses, while the linked chain orders the same nodes from MRU on the left to LRU on the right. `Get` promotes a hit; `Put` updates or inserts at MRU and evicts the tail when full.
+````tabsdown
+tab: Visualization
+
 
 ```steptrace
 {"algorithm":"lru-cache"}
 ```
 
-# Representation and Invariants
+The cache below has capacity four. The map stores node addresses, while the linked chain orders the same nodes from MRU on the left to LRU on the right. `Get` promotes a hit; `Put` updates or inserts at MRU and evicts the tail when full.
+
+## Representation and Invariants
 
 Two structures hold the same set of entries, indexed differently:
 
@@ -44,7 +48,219 @@ Three invariants define a valid state:
 
 `get(k)` reads the map, unlinks the node from between its current neighbours, and splices it after `head`. Its value and key are unchanged; the move uses a fixed six pointer assignments. `put(k, v)` updates the same node in place and moves it to the head when `k` is resident; otherwise, if the cache is full, it first unlinks the node before `tail` and removes that node's key from the map, then creates the new node in both structures. The recency order is an internal artifact: two caches that received the same accesses in the same order hold identical contents, but the pointer layout is not a domain value.
 
-# Complexity
+tab: Complexity
+
+```complexity
+{
+  "version": 2,
+  "label": "LRU Cache complexity",
+  "variables": {
+    "configuredCapacity": {
+      "symbol": "capacity",
+      "description": "configured backing-storage capacity"
+    },
+    "inputSize": {
+      "symbol": "n",
+      "description": "number of input elements or states"
+    }
+  },
+  "resources": {
+    "time": {
+      "mode": "operations",
+      "entries": [
+        {
+          "kind": "operation",
+          "operation": "get(k) (hit)",
+          "bounds": [
+            {
+              "kind": "curve",
+              "role": "Expected time",
+              "formula": "O(1)",
+              "curveId": "constant"
+            },
+            {
+              "kind": "curve",
+              "role": "Worst time",
+              "formula": "O(n)",
+              "curveId": "linear"
+            }
+          ]
+        },
+        {
+          "kind": "operation",
+          "operation": "get(k) (miss)",
+          "bounds": [
+            {
+              "kind": "curve",
+              "role": "Expected time",
+              "formula": "O(1)",
+              "curveId": "constant"
+            },
+            {
+              "kind": "curve",
+              "role": "Worst time",
+              "formula": "O(n)",
+              "curveId": "linear"
+            }
+          ]
+        },
+        {
+          "kind": "operation",
+          "operation": "put(k, v) (resident)",
+          "bounds": [
+            {
+              "kind": "curve",
+              "role": "Expected time",
+              "formula": "O(1)",
+              "curveId": "constant"
+            },
+            {
+              "kind": "curve",
+              "role": "Worst time",
+              "formula": "O(n)",
+              "curveId": "linear"
+            }
+          ]
+        },
+        {
+          "kind": "operation",
+          "operation": "put(k, v) (new, under capacity)",
+          "bounds": [
+            {
+              "kind": "curve",
+              "role": "Expected time",
+              "formula": "O(1) amortized",
+              "curveId": "constant"
+            },
+            {
+              "kind": "curve",
+              "role": "Worst time",
+              "formula": "O(n)",
+              "curveId": "linear"
+            }
+          ]
+        },
+        {
+          "kind": "operation",
+          "operation": "put(k, v) (evicting)",
+          "bounds": [
+            {
+              "kind": "curve",
+              "role": "Expected time",
+              "formula": "O(1) expected",
+              "curveId": "constant"
+            },
+            {
+              "kind": "curve",
+              "role": "Worst time",
+              "formula": "O(n)",
+              "curveId": "linear"
+            }
+          ]
+        }
+      ]
+    },
+    "space": {
+      "mode": "operations",
+      "entries": [
+        {
+          "kind": "operation",
+          "operation": "get(k) (hit)",
+          "bounds": [
+            {
+              "kind": "curve",
+              "role": "Structure space",
+              "formula": "O(capacity)",
+              "curveId": "linear"
+            },
+            {
+              "kind": "curve",
+              "role": "Aux space per op",
+              "formula": "O(1)",
+              "curveId": "constant"
+            }
+          ]
+        },
+        {
+          "kind": "operation",
+          "operation": "get(k) (miss)",
+          "bounds": [
+            {
+              "kind": "curve",
+              "role": "Structure space",
+              "formula": "O(capacity)",
+              "curveId": "linear"
+            },
+            {
+              "kind": "curve",
+              "role": "Aux space per op",
+              "formula": "O(1)",
+              "curveId": "constant"
+            }
+          ]
+        },
+        {
+          "kind": "operation",
+          "operation": "put(k, v) (resident)",
+          "bounds": [
+            {
+              "kind": "curve",
+              "role": "Structure space",
+              "formula": "O(capacity)",
+              "curveId": "linear"
+            },
+            {
+              "kind": "curve",
+              "role": "Aux space per op",
+              "formula": "O(1)",
+              "curveId": "constant"
+            }
+          ]
+        },
+        {
+          "kind": "operation",
+          "operation": "put(k, v) (new, under capacity)",
+          "bounds": [
+            {
+              "kind": "curve",
+              "role": "Structure space",
+              "formula": "O(capacity)",
+              "curveId": "linear"
+            },
+            {
+              "kind": "curve",
+              "role": "Aux space per op",
+              "formula": "O(1)",
+              "curveId": "constant"
+            }
+          ]
+        },
+        {
+          "kind": "operation",
+          "operation": "put(k, v) (evicting)",
+          "bounds": [
+            {
+              "kind": "curve",
+              "role": "Structure space",
+              "formula": "O(capacity)",
+              "curveId": "linear"
+            },
+            {
+              "kind": "curve",
+              "role": "Aux space per op",
+              "formula": "O(1)",
+              "curveId": "constant"
+            }
+          ]
+        }
+      ]
+    }
+  }
+}
+```
+````
+
+## Complexity
 
 | Operation | Expected time | Worst time | Structure space | Aux space per op | Cause |
 | --- | --- | --- | --- | --- | --- |

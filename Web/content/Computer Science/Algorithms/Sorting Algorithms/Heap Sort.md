@@ -1,13 +1,13 @@
 ---
 publish: true
-created: 2026-07-25T18:38:43.807Z
-modified: 2026-07-25T18:38:43.807Z
-published: 2026-07-25T18:38:43.807Z
+created: 2026-07-18T14:02:44.025Z
+modified: 2026-08-01T18:31:33.352Z
+published: 2026-08-01T18:31:33.352Z
 topic:
   - Computer Science
 subtopic:
   - Algorithms
-summary: Heapifies the array then repeatedly extracts the max; the only common O(n log n), in-place comparison sort.
+summary: Heapifies the array then repeatedly extracts the max; a common in-place comparison sort with guaranteed Θ(n log n) worst-case time.
 level:
   - "4"
 status: Creation
@@ -20,21 +20,26 @@ Heap sort removes that waste by keeping the unsorted region as a [[Heap|max-heap
 
 **Core shape:** array reinterpreted as an in-place max-heap → repeated extract-max grows a sorted suffix from the back → guaranteed `O(n log n)` time in `O(1)` auxiliary space.
 
-# Trace
+````tabsdown
+tab: Visualization
 
-The trace sorts the eight-element array `[8, 3, 5, 1, 9, 2, 7, 4]`.
+
 
 ```steptrace
 {"algorithm":"heap-sort","array":[8,3,5,1,9,2,7,4]}
 ```
 
+# Trace
+
+The trace sorts the eight-element array `[8, 3, 5, 1, 9, 2, 7, 4]`.
+
 The first phase makes a single bottom-up pass, sifting each internal node down until every parent dominates its children; this rearranges the whole array into a max-heap in `O(n)`, with nothing yet in its final sorted position. From there every step is identical: the root — the largest remaining key — is swapped with the last cell still inside the heap, the heap boundary retreats by one, and the new root sifts down until heap order holds again. The swapped-out maximum now sits at its final index, so a sorted suffix grows leftward from the end of the array while the heap shrinks toward the front. When the heap holds one element the array is ordered.
 
 # Array as an Implicit Heap
 
-Heap sort never materialises a tree of node objects. The array _is_ the tree: the element at index `i` is the parent of the elements at `2i + 1` and `2i + 2`, and the last node with any child is at `n/2 - 1`. The structure and its full operation set live in [[Heap]]; heap sort borrows only the max-heap variant and a single primitive, sift-down.
+Heap sort never materialises a tree of node objects. The array *is* the tree: the element at index `i` is the parent of the elements at `2i + 1` and `2i + 2`, and the last node with any child is at `n/2 - 1`. The structure and its full operation set live in [[Heap]]; heap sort borrows only the max-heap variant and a single primitive, sift-down.
 
-Sift-down repairs one broken position. A value that may be smaller than a child is swapped with the _larger_ of its two children, and the check repeats one level lower, stopping when the value dominates both children or reaches a leaf. The invariant it preserves is heap order — every parent is at least as large as each child. The subtrees beside and above the repaired path already satisfied that order and are left untouched, which is what keeps a single repair to the height of one subtree.
+Sift-down repairs one broken position. A value that may be smaller than a child is swapped with the *larger* of its two children, and the check repeats one level lower, stopping when the value dominates both children or reaches a leaf. The invariant it preserves is heap order — every parent is at least as large as each child. The subtrees beside and above the repaired path already satisfied that order and are left untouched, which is what keeps a single repair to the height of one subtree.
 
 Two phases use nothing but sift-down:
 
@@ -43,19 +48,83 @@ Two phases use nothing but sift-down:
 
 Both phases move data only by swapping array cells, so no auxiliary buffer is needed — heap sort is in-place. Those same swaps are why it is **not stable**: an extraction swap can carry one of two equal keys across the array past the other, and no step restores their input order.
 
+tab: Complexity
+
+```complexity
+{
+  "version": 2,
+  "label": "Heap Sort complexity",
+  "variables": {
+    "inputSize": {
+      "symbol": "n",
+      "description": "number of input elements or states"
+    }
+  },
+  "resources": {
+    "time": {
+      "mode": "cases",
+      "entries": [
+        {
+          "kind": "case",
+          "role": "Best",
+          "formula": "Θ(n)",
+          "curveId": "linear"
+        },
+        {
+          "kind": "case",
+          "role": "Average",
+          "formula": "Θ(n log n)",
+          "curveId": "n-log-n"
+        },
+        {
+          "kind": "case",
+          "role": "Worst",
+          "formula": "Θ(n log n)",
+          "curveId": "n-log-n"
+        }
+      ]
+    },
+    "space": {
+      "mode": "cases",
+      "entries": [
+        {
+          "kind": "case",
+          "role": "Best",
+          "formula": "O(1)",
+          "curveId": "constant"
+        },
+        {
+          "kind": "case",
+          "role": "Average",
+          "formula": "O(1)",
+          "curveId": "constant"
+        },
+        {
+          "kind": "case",
+          "role": "Worst",
+          "formula": "O(1)",
+          "curveId": "constant"
+        }
+      ]
+    }
+  }
+}
+```
+````
+
 # Complexity
 
 | Case | Time | Auxiliary space | Cause |
 | --- | --- | --- | --- |
-| Best | `O(n log n)` | `O(1)` | `Θ(n)` build, then `n − 1` extractions each sift down up to the heap's `Θ(log n)` height. |
-| Average | `O(n log n)` | `O(1)` | Same two phases; input order shifts constants, not the bound. |
-| Worst | `O(n log n)` | `O(1)` | No arrangement forces a sift-down deeper than the tree's height — there is no degenerate input. |
+| Best | `Θ(n)` | `O(1)` | With all-equal keys, every sift-down stops after its first child comparisons, so build and extraction are both linear. |
+| Average | `Θ(n log n)` | `O(1)` | The `Θ(n)` build is followed by `n − 1` extractions whose sift-downs average logarithmic depth. |
+| Worst | `Θ(n log n)` | `O(1)` | Each extraction can sift through the heap's full `Θ(log n)` height, but no arrangement creates a deeper path. |
 
-The absence of a bad case is the point: the `Θ(n)` build plus `n` extractions of `Θ(log n)` hold for every input, which is exactly where heap sort differs from quicksort. The one real exception is an array of all-equal keys, where every sift-down stops on its first comparison and the whole sort collapses to `Θ(n)`; it is an edge case, not something to plan around. The `O(1)` space assumes the iterative sift-down in the drawer below — a recursive sift-down adds `O(log n)` of call-stack space.
+The absence of a quadratic bad case is the point: the `Θ(n)` build plus at most `n` logarithmic-height extractions keeps the worst case at `Θ(n log n)`, which is exactly where heap sort differs from quicksort. An array of all-equal keys is the best case: every sift-down stops on its first child comparisons and the whole sort collapses to `Θ(n)`. The `O(1)` space assumes the iterative sift-down in the drawer below — a recursive sift-down adds `O(log n)` of call-stack space.
 
 # Where the Layout Costs
 
-**Memory locality.** Sift-down's access pattern is the opposite of sequential: from index `i` it reaches to `2i + 1` and `2i + 2`, and near the root of a large array those children lie half the array away. Successive descents touch cells on different cache lines that the prefetcher cannot anticipate, so heap sort takes cache misses exactly where quicksort's partitioning walks contiguous memory. On large arrays this constant factor commonly makes heap sort roughly twice as slow as quicksort despite the identical `O(n log n)` — and it is why introsort runs quicksort by default and only drops to heap sort under duress.
+**Memory locality.** Sift-down follows a nonsequential path through the array: the root's children are adjacent at indices `1` and `2`, but each descent moves from `i` to `2i + 1` or `2i + 2`, so the jumps grow deeper in the heap. Those accesses can cross cache lines in a pattern that is harder to prefetch than quicksort's contiguous partition scan. This locality cost is one reason introsort runs quicksort by default and only falls back to heap sort when the recursion-depth limit is reached.
 
 **Stability.** Label three items by key and input position: `2ᵃ, 2ᵇ, 1ᶜ`. Nothing in build-heap or extraction preserves the `a`-before-`b` order of the two equal keys; the extraction swaps relocate them by heap geometry, so the sorted result may emerge as `1ᶜ, 2ᵇ, 2ᵃ`, silently reversing the pair. A stable sort such as [[Merge Sort]] keeps `2ᵃ` ahead of `2ᵇ`, which matters when the keys are a secondary sort over an already-meaningful order.
 

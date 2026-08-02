@@ -1,8 +1,8 @@
 ---
 publish: true
 created: 2026-07-18T14:02:43.951Z
-modified: 2026-07-26T14:45:45.637Z
-published: 2026-07-26T14:45:45.637Z
+modified: 2026-08-01T18:31:33.345Z
+published: 2026-08-01T18:31:33.345Z
 topic:
   - Computer Science
 subtopic:
@@ -20,22 +20,26 @@ That pruning is valid only under one precondition: the bound must be _optimistic
 
 **Core condition:** an optimisation objective + a cheap optimistic bound from a relaxation → prune any subtree whose bound cannot beat the best complete solution so far (the incumbent) → exact search that can touch only a fraction of an exponential tree.
 
-The step that carries the whole idea is a single bound comparison that erases a subtree before it is expanded.
+````tabsdown
+tab: Visualization
+
 
 ```steptrace
 {"algorithm":"branch-and-bound"}
 ```
 
+The step that carries the whole idea is a single bound comparison that erases a subtree before it is expanded.
+
 # Why a Subtree Can Be Discarded
 
 Branch-and-bound turns on four moving parts:
 
-- **Branch** — split the problem at a decision point into disjoint subproblems (item _i_ is in the knapsack vs out), so the partial configurations form a search tree.
-- **Bound** — at each node, compute an optimistic estimate of the best objective any completion below it could reach. For maximisation this is an _upper_ bound; for minimisation a _lower_ one.
+- **Branch** — split the problem at a decision point into disjoint subproblems (item *i* is in the knapsack vs out), so the partial configurations form a search tree.
+- **Bound** — at each node, compute an optimistic estimate of the best objective any completion below it could reach. For maximisation this is an *upper* bound; for minimisation a *lower* one.
 - **Incumbent** — the best complete solution seen so far, and the yardstick every bound is measured against.
 - **Prune / select** — if a node's bound is no better than the incumbent, discard its whole subtree; otherwise expand it and pick the next live node to visit.
 
-The correctness of the discard rests on the optimism of the bound. For maximisation, "optimistic" means the bound is `≥` the true best of every completion in the subtree. So if `bound ≤ incumbent`, then _every_ completion is `≤ incumbent`, and none of them can improve the answer — the subtree can be removed unexplored without risking the optimum. Minimisation reverses the inequality.
+The correctness of the discard rests on the optimism of the bound. For maximisation, "optimistic" means the bound is `≥` the true best of every completion in the subtree. So if `bound ≤ incumbent`, then *every* completion is `≤ incumbent`, and none of them can improve the answer — the subtree can be removed unexplored without risking the optimum. Minimisation reverses the inequality.
 
 This is the same optimism requirement as [[Computer Science/Algorithms/Graph Algorithms/A-Star Search|A* Search]]'s admissibility condition: a guided tree search stays correct only while its estimate errs in the optimistic direction and never lies pessimistically. Branch-and-bound is that same idea applied to the decision tree of an optimisation problem, with the bounding function playing the role of the heuristic. For maximisation 0/1 knapsack, an LP relaxation is a safe upper bound: its optimal fractional solution can only meet or exceed the integer optimum, so ignoring integrality never under-shoots.
 
@@ -47,6 +51,107 @@ Every live (unpruned, unexpanded) node is a candidate to visit next, and the ord
 - **Depth-first** dives to a complete solution quickly in `O(depth)` memory, like [[Computer Science/Algorithms/Paradigms/Backtracking|Backtracking]]. That early incumbent immediately starts pruning siblings, though the dive can waste effort in regions best-first would have skipped.
 
 A good early incumbent raises the bar every later bound must clear, so more subtrees fall on a single comparison. Solvers exploit this by seeding the incumbent with a fast heuristic — often a [[Computer Science/Algorithms/Paradigms/Greedy Algorithms|greedy]] solution — before the exact search starts.
+
+tab: Complexity
+
+```complexity
+{
+  "version": 2,
+  "label": "Branch and Bound complexity",
+  "variables": {
+    "branchingFactor": {
+      "symbol": "b",
+      "description": "search branching factor or radix base"
+    },
+    "inputSize": {
+      "symbol": "n",
+      "description": "number of input elements or states"
+    }
+  },
+  "resources": {
+    "time": {
+      "mode": "operations",
+      "entries": [
+        {
+          "kind": "operation",
+          "operation": "Best",
+          "bounds": [
+            {
+              "kind": "text",
+              "role": "Time",
+              "formula": "O(n · b)"
+            }
+          ]
+        },
+        {
+          "kind": "operation",
+          "operation": "Practical",
+          "bounds": [
+            {
+              "kind": "text",
+              "role": "Time",
+              "formula": "instance-dependent; still exponential"
+            }
+          ]
+        },
+        {
+          "kind": "operation",
+          "operation": "Worst",
+          "bounds": [
+            {
+              "kind": "text",
+              "role": "Time",
+              "formula": "O(2ⁿ · b)"
+            }
+          ]
+        }
+      ]
+    },
+    "space": {
+      "mode": "operations",
+      "entries": [
+        {
+          "kind": "operation",
+          "operation": "Best",
+          "bounds": [
+            {
+              "kind": "curve",
+              "role": "Auxiliary space",
+              "formula": "O(n)",
+              "curveId": "linear"
+            }
+          ]
+        },
+        {
+          "kind": "operation",
+          "operation": "Practical",
+          "bounds": [
+            {
+              "kind": "curve",
+              "role": "Auxiliary space",
+              "formula": "O(n)",
+              "curveId": "linear"
+            }
+          ]
+        },
+        {
+          "kind": "operation",
+          "operation": "Worst",
+          "bounds": [
+            {
+              "kind": "curve",
+              "role": "Auxiliary space",
+              "formula": "O(n)",
+              "curveId": "linear"
+            }
+          ]
+        }
+      ]
+    }
+  }
+}
+```
+````
 
 # Complexity
 

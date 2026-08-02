@@ -1,8 +1,8 @@
 ---
 publish: true
-created: 2026-07-25T18:38:43.800Z
-modified: 2026-07-25T18:38:43.801Z
-published: 2026-07-25T18:38:43.801Z
+created: 2026-07-18T14:02:43.977Z
+modified: 2026-08-01T18:31:33.348Z
+published: 2026-08-01T18:31:33.348Z
 topic:
   - Computer Science
 subtopic:
@@ -20,13 +20,18 @@ The reduction depends on two properties: the values are ordered, and the middle 
 
 **Core condition:** sorted, indexable input → one comparison removes half of the candidates → `O(log n)` lookup with `O(1)` auxiliary space.
 
-# Trace
+````tabsdown
+tab: Visualization
 
-The trace searches for `83` in a sorted 16-element array.
+
 
 ```steptrace
 {"algorithm":"binary-search","array":[4,9,13,18,22,27,31,38,45,52,58,64,70,77,83,91],"target":83}
 ```
+
+# Trace
+
+The trace searches for `83` in a sorted 16-element array.
 
 The first probe inspects `38` at index 7. Because `38 < 83` and the array is sorted, indices 0 through 7 are no longer candidates; the next range begins at index 8. Four probes find `83` in this 16-element array. A linear scan of the same input would inspect 15 elements before reaching it.
 
@@ -43,6 +48,70 @@ At the start of every loop, the target—if it exists—must lie inside the incl
 The range strictly shrinks after every miss. After `k` probes, roughly `n / 2^k` candidates remain, so a non-empty input needs at most `⌊log₂ n⌋ + 1` probes. The iterative form stores only three indices—`left`, `right`, and `mid`—which keeps extra space at `O(1)`.
 
 Compute the midpoint as `left + (right - left) / 2`. It is algebraically equivalent to `(left + right) / 2`, but it never forms the potentially overflowing sum.
+
+tab: Complexity
+
+```complexity
+{
+  "version": 2,
+  "label": "Binary Search complexity",
+  "variables": {
+    "inputSize": {
+      "symbol": "n",
+      "description": "number of input elements or states"
+    }
+  },
+  "resources": {
+    "time": {
+      "mode": "cases",
+      "entries": [
+        {
+          "kind": "case",
+          "role": "Best",
+          "formula": "O(1)",
+          "curveId": "constant"
+        },
+        {
+          "kind": "case",
+          "role": "Average",
+          "formula": "O(log n)",
+          "curveId": "log-n"
+        },
+        {
+          "kind": "case",
+          "role": "Worst",
+          "formula": "O(log n)",
+          "curveId": "log-n"
+        }
+      ]
+    },
+    "space": {
+      "mode": "cases",
+      "entries": [
+        {
+          "kind": "case",
+          "role": "Best",
+          "formula": "O(1)",
+          "curveId": "constant"
+        },
+        {
+          "kind": "case",
+          "role": "Average",
+          "formula": "O(1)",
+          "curveId": "constant"
+        },
+        {
+          "kind": "case",
+          "role": "Worst",
+          "formula": "O(1)",
+          "curveId": "constant"
+        }
+      ]
+    }
+  }
+}
+```
+````
 
 # Complexity
 

@@ -1,8 +1,8 @@
 ---
 publish: true
 created: 2026-07-18T14:02:43.972Z
-modified: 2026-07-27T11:20:06.941Z
-published: 2026-07-27T11:20:06.941Z
+modified: 2026-08-01T18:31:33.347Z
+published: 2026-08-01T18:31:33.347Z
 topic:
   - Computer Science
 subtopic:
@@ -18,17 +18,122 @@ A dataset holds daily sales for a year, and a report asks for the total of dozen
 
 The trade is one `O(n)` pass and `O(n)` extra memory for `O(1)` answers thereafter, and it holds only while the array never changes.
 
-# Trace
+````tabsdown
+tab: Visualization
 
-The trace uses seven days of sales, `[4, 7, 2, 9, 5, 3, 8]`. It writes every running total into the prefix array, then answers `[2, 5]`: `prefix[6] - prefix[2] = 30 - 11 = 19`.
+
 
 ```steptrace
 {"algorithm":"prefix-sum","array":[4,7,2,9,5,3,8],"range":[2,5]}
 ```
 
+# Trace
+
+The trace uses seven days of sales, `[4, 7, 2, 9, 5, 3, 8]`. It writes every running total into the prefix array, then answers `[2, 5]`: `prefix[6] - prefix[2] = 30 - 11 = 19`.
+
 # Why the Difference is the Range Sum
 
 `prefix[k]` accumulates every element strictly before index `k`, so `prefix[r + 1]` covers `a[0..r]` and `prefix[l]` covers `a[0..l-1]`. Subtracting them removes the common head `a[0..l-1]` exactly, leaving `a[l] + ... + a[r]`. The `prefix[0] = 0` sentinel and the length-`(n + 1)` array are what let `l = 0` use the same formula as any other left bound: `prefix[0]` supplies the empty sum with no special case.
+
+tab: Complexity
+
+```complexity
+{
+  "version": 2,
+  "label": "Prefix Sum complexity",
+  "variables": {
+    "inputSize": {
+      "symbol": "n",
+      "description": "number of input elements or states"
+    }
+  },
+  "resources": {
+    "time": {
+      "mode": "operations",
+      "entries": [
+        {
+          "kind": "operation",
+          "operation": "Build prefix",
+          "bounds": [
+            {
+              "kind": "curve",
+              "role": "Time",
+              "formula": "O(n)",
+              "curveId": "linear"
+            }
+          ]
+        },
+        {
+          "kind": "operation",
+          "operation": "Range-sum query",
+          "bounds": [
+            {
+              "kind": "curve",
+              "role": "Time",
+              "formula": "O(1)",
+              "curveId": "constant"
+            }
+          ]
+        },
+        {
+          "kind": "operation",
+          "operation": "Naive re-sum (no prefix)",
+          "bounds": [
+            {
+              "kind": "curve",
+              "role": "Time",
+              "formula": "O(n) per query",
+              "curveId": "linear"
+            }
+          ]
+        }
+      ]
+    },
+    "space": {
+      "mode": "operations",
+      "entries": [
+        {
+          "kind": "operation",
+          "operation": "Build prefix",
+          "bounds": [
+            {
+              "kind": "curve",
+              "role": "Space",
+              "formula": "O(n)",
+              "curveId": "linear"
+            }
+          ]
+        },
+        {
+          "kind": "operation",
+          "operation": "Range-sum query",
+          "bounds": [
+            {
+              "kind": "curve",
+              "role": "Space",
+              "formula": "O(1)",
+              "curveId": "constant"
+            }
+          ]
+        },
+        {
+          "kind": "operation",
+          "operation": "Naive re-sum (no prefix)",
+          "bounds": [
+            {
+              "kind": "curve",
+              "role": "Space",
+              "formula": "O(1)",
+              "curveId": "constant"
+            }
+          ]
+        }
+      ]
+    }
+  }
+}
+```
+````
 
 # Complexity
 

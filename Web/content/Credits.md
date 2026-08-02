@@ -1,9 +1,9 @@
 ---
 publish: true
 title: Credits
-created: 2026-07-25T18:38:43.827Z
-modified: 2026-07-25T18:38:43.827Z
-published: 2026-07-25T18:38:43.827Z
+created: 2026-07-18T14:02:44.057Z
+modified: 2026-07-25T13:57:51.945Z
+published: 2026-07-25T13:57:51.945Z
 tags:
   - MetricsIgnore
 icon: heart

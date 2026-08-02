@@ -1,8 +1,8 @@
 ---
 publish: true
-created: 2026-07-25T18:38:43.805Z
-modified: 2026-07-25T18:38:43.806Z
-published: 2026-07-25T18:38:43.806Z
+created: 2026-07-18T14:02:44.015Z
+modified: 2026-08-01T18:31:33.351Z
+published: 2026-08-01T18:31:33.351Z
 topic:
   - Computer Science
 subtopic:
@@ -20,13 +20,18 @@ Adjacency is also the cost. An element that starts `k` positions from where it b
 
 **Core shape:** adjacent compare-and-swap → each pass settles one more tail element → a swap-free pass ends the sort → `O(n²)` comparisons, `O(1)` extra space, `O(n)` on already-sorted input.
 
-# Trace
+````tabsdown
+tab: Visualization
 
-The trace sorts `[8, 3, 5, 1, 9, 2, 7, 4]` with left-to-right compare-and-swap passes.
+
 
 ```steptrace
 {"algorithm":"bubble-sort","array":[8,3,5,1,9,2,7,4]}
 ```
+
+# Trace
+
+The trace sorts `[8, 3, 5, 1, 9, 2, 7, 4]` with left-to-right compare-and-swap passes.
 
 `9` is the largest value in the first pass. Once a swap brings it into the traveling comparison window it beats every element to its right and slides to index 7, its permanent position. The next pass stops one element short because that tail slot is already correct, and each later pass shortens again as the sorted suffix grows leftward. The `swapped` flag watches for the moment this settling is complete: the first pass that finishes without a single swap means no adjacent pair is out of order, so the whole array is sorted and the loop exits.
 
@@ -38,12 +43,69 @@ The `swapped` flag turns "no work happened" into a stopping condition. On alread
 
 Two properties fall out of the mechanism. The sort is **stable** because a swap happens only on a strict `a[i] > a[i+1]`; equal keys never cross, so their input order survives. It is **in-place** because the only extra storage is a couple of loop indices and the boolean flag — `O(1)` regardless of input size.
 
-# Where Adjacency Hurts
+tab: Complexity
 
-A large value can travel any distance toward the end in one pass, but a small value moves toward the front by at most one index per pass. On `[2, 3, 4, 5, 1]` the `1` shifts left exactly one slot each pass — `[2, 3, 4, 1, 5]`, then `[2, 3, 1, 4, 5]` — and needs four passes to reach the front even though the array is otherwise sorted. These trailing small values are the classic "turtles": each one forces roughly one pass per position it must travel, and they, not the large values, set the pass count.
-
-> [!NOTE]
-> Cocktail-shaker sort is the bidirectional variant: it alternates a left-to-right pass that lifts the maximum with a right-to-left pass that drags the minimum down. The reverse pass lets a turtle descend many positions at once, cutting the pass count on inputs like the one above, but the total comparison work stays `Θ(n²)`.
+```complexity
+{
+  "version": 2,
+  "label": "Bubble Sort complexity",
+  "variables": {
+    "inputSize": {
+      "symbol": "n",
+      "description": "number of input elements or states"
+    }
+  },
+  "resources": {
+    "time": {
+      "mode": "cases",
+      "entries": [
+        {
+          "kind": "case",
+          "role": "Best",
+          "formula": "O(n)",
+          "curveId": "linear"
+        },
+        {
+          "kind": "case",
+          "role": "Average",
+          "formula": "O(n²)",
+          "curveId": "quadratic"
+        },
+        {
+          "kind": "case",
+          "role": "Worst",
+          "formula": "O(n²)",
+          "curveId": "quadratic"
+        }
+      ]
+    },
+    "space": {
+      "mode": "cases",
+      "entries": [
+        {
+          "kind": "case",
+          "role": "Best",
+          "formula": "O(1)",
+          "curveId": "constant"
+        },
+        {
+          "kind": "case",
+          "role": "Average",
+          "formula": "O(1)",
+          "curveId": "constant"
+        },
+        {
+          "kind": "case",
+          "role": "Worst",
+          "formula": "O(1)",
+          "curveId": "constant"
+        }
+      ]
+    }
+  }
+}
+```
+````
 
 # Complexity
 
@@ -54,6 +116,13 @@ A large value can travel any distance toward the end in one pass, but a small va
 | Worst | `O(n²)` | `O(1)` | Reverse-sorted; every adjacent pair is out of order, forcing `n(n-1)/2` swaps and comparisons. |
 
 Auxiliary space is `O(1)` in every case: the array is sorted in place and only indices and the flag are added. The `O(n)` best case exists only with the early-exit flag; without it the best case degrades to `Θ(n²)`.
+
+# Where Adjacency Hurts
+
+A large value can travel any distance toward the end in one pass, but a small value moves toward the front by at most one index per pass. On `[2, 3, 4, 5, 1]` the `1` shifts left exactly one slot each pass — `[2, 3, 4, 1, 5]`, then `[2, 3, 1, 4, 5]` — and needs four passes to reach the front even though the array is otherwise sorted. These trailing small values are the classic "turtles": each one forces roughly one pass per position it must travel, and they, not the large values, set the pass count.
+
+> [!NOTE]
+> Cocktail-shaker sort is the bidirectional variant: it alternates a left-to-right pass that lifts the maximum with a right-to-left pass that drags the minimum down. The reverse pass lets a turtle descend many positions at once, cutting the pass count on inputs like the one above, but the total comparison work stays `Θ(n²)`.
 
 # Reference Drawer
 

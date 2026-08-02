@@ -1,8 +1,8 @@
 ---
 publish: true
 created: 2026-07-18T14:02:43.974Z
-modified: 2026-07-28T11:19:09.212Z
-published: 2026-07-28T11:19:09.212Z
+modified: 2026-08-01T18:31:33.348Z
+published: 2026-08-01T18:31:33.348Z
 topic:
   - Computer Science
 subtopic:
@@ -20,6 +20,9 @@ Keeping a size-`k` heap while scanning removes that waste. To surface the `k` **
 
 **Core shape:** `k ≪ n`, possibly streaming → a size-`k` min-heap whose root is the weakest survivor → `O(n log k)` time, `O(k)` space.
 
+````tabsdown
+tab: Visualization
+
 ```steptrace
 {"algorithm":"top-k-elements","array":[12,3,17,8,25,5,19,14],"k":3}
 ```
@@ -35,9 +38,64 @@ The invariant carried across the scan is that the heap contains every value seen
 - `x > root` proves `x` belongs to the top `k` — it beats the current weakest survivor. The root leaves, `x` enters, and the heap again holds the `k` largest seen so far.
 - `x ≤ root` need not be retained. If `x < root`, it cannot qualify because it is smaller than every retained winner. If `x = root`, replacing the root would leave the retained value multiset unchanged. Discarding `x` therefore preserves the invariant.
 
-The polarity is the load-bearing choice. Exposing the _minimum_ of the retained set at the root is what makes the "does this element deserve to be kept" test a single `O(1)` peek, and what makes eviction remove the right element. A max-heap of size `k` would expose the _largest_ retained element, which is never the one to drop, so it cannot support this scan.
+The polarity is the load-bearing choice. Exposing the *minimum* of the retained set at the root is what makes the "does this element deserve to be kept" test a single `O(1)` peek, and what makes eviction remove the right element. A max-heap of size `k` would expose the *largest* retained element, which is never the one to drop, so it cannot support this scan.
 
 Because the heap never exceeds `k` entries, each insert and evict is `O(log k)` rather than `O(log n)`. Over `n` elements that is `O(n log k)` time, and the resident set is `O(k)` regardless of how large `n` grows — the property that lets the input be a stream rather than a materialized array.
+
+tab: Complexity
+
+```complexity
+{
+  "version": 2,
+  "label": "Top-K Elements complexity",
+  "variables": {
+    "inputSize": {
+      "symbol": "n",
+      "description": "number of input elements or states"
+    },
+    "keyRange": {
+      "symbol": "k",
+      "description": "key range, digit count, or requested result count"
+    }
+  },
+  "resources": {
+    "time": {
+      "mode": "operations",
+      "entries": [
+        {
+          "kind": "operation",
+          "operation": "Bounded min-heap selection",
+          "bounds": [
+            {
+              "kind": "text",
+              "role": "Time",
+              "formula": "O(n log k)"
+            }
+          ]
+        }
+      ]
+    },
+    "space": {
+      "mode": "operations",
+      "entries": [
+        {
+          "kind": "operation",
+          "operation": "Bounded min-heap selection",
+          "bounds": [
+            {
+              "kind": "curve",
+              "role": "Auxiliary space",
+              "formula": "O(k)",
+              "curveId": "linear"
+            }
+          ]
+        }
+      ]
+    }
+  }
+}
+```
+````
 
 # Complexity
 

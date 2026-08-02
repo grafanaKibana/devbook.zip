@@ -1,8 +1,8 @@
 ---
 publish: true
 created: 2026-07-18T14:02:43.967Z
-modified: 2026-07-26T20:48:06.692Z
-published: 2026-07-26T20:48:06.692Z
+modified: 2026-08-01T18:31:33.347Z
+published: 2026-08-01T18:31:33.347Z
 topic:
   - Computer Science
 subtopic:
@@ -18,11 +18,15 @@ A calendar holds a list of `[start, end]` ranges in arbitrary order, some of the
 
 **Core condition:** intervals sorted by start → `next.start` compared against the current block's end decides overlap in one test → `O(n log n)` merge dominated by the sort.
 
-The trace starts with calendar ranges in their original order. Sorting moves them into start order; the sweep then grows one current block and emits it only when a gap proves it final.
+````tabsdown
+tab: Visualization
+
 
 ```steptrace
 {"algorithm":"merge-intervals"}
 ```
+
+The trace starts with calendar ranges in their original order. Sorting moves them into start order; the sweep then grows one current block and emits it only when a gap proves it final.
 
 The contained interval `[3,5]` leaves `[1,6]` unchanged, which makes the `max(current.end, next.end)` rule visible. The gaps before `[8,10]` and `[13,16]` finalize the earlier blocks, while the closed intervals `[13,16]` and `[16,20]` merge at their shared endpoint.
 
@@ -41,6 +45,118 @@ The same sort-then-sweep skeleton answers the rest of the interval family, each 
 
 - **Insert one interval into a sorted, pairwise-disjoint list** — the sweep copies intervals ending before the new one, merges the run that overlaps it by taking `max` of the ends, then copies the rest. No re-sort is needed. If the existing list overlaps itself, normalize it first.
 - **Intersect two sorted, pairwise-disjoint lists** — a [[Computer Science/Algorithms/Patterns/Two Pointers|Two Pointers]] sweep advances the pointer whose interval ends first and emits `[max(starts), min(ends)]` whenever the current pair overlaps. Ordering and internal non-overlap on both sides keep the scan linear; otherwise each list needs normalization first.
+
+tab: Complexity
+
+```complexity
+{
+  "version": 2,
+  "label": "Merge Intervals complexity",
+  "variables": {
+    "inputSize": {
+      "symbol": "n",
+      "description": "number of input elements or states"
+    }
+  },
+  "resources": {
+    "time": {
+      "mode": "operations",
+      "entries": [
+        {
+          "kind": "operation",
+          "operation": "Clone",
+          "bounds": [
+            {
+              "kind": "curve",
+              "role": "Time",
+              "formula": "O(n)",
+              "curveId": "linear"
+            }
+          ]
+        },
+        {
+          "kind": "operation",
+          "operation": "Comparison sort",
+          "bounds": [
+            {
+              "kind": "curve",
+              "role": "Time",
+              "formula": "O(n log n)",
+              "curveId": "n-log-n"
+            }
+          ]
+        },
+        {
+          "kind": "operation",
+          "operation": "Sweep",
+          "bounds": [
+            {
+              "kind": "curve",
+              "role": "Time",
+              "formula": "O(n)",
+              "curveId": "linear"
+            }
+          ]
+        }
+      ]
+    },
+    "space": {
+      "mode": "operations",
+      "entries": [
+        {
+          "kind": "operation",
+          "operation": "Clone",
+          "bounds": [
+            {
+              "kind": "curve",
+              "role": "Extra working space",
+              "formula": "O(n)",
+              "curveId": "linear"
+            }
+          ]
+        },
+        {
+          "kind": "operation",
+          "operation": "Comparison sort",
+          "bounds": [
+            {
+              "kind": "curve",
+              "role": "Extra working space",
+              "formula": "O(log n) stack",
+              "curveId": "log-n"
+            }
+          ]
+        },
+        {
+          "kind": "operation",
+          "operation": "Sweep",
+          "bounds": [
+            {
+              "kind": "curve",
+              "role": "Extra working space",
+              "formula": "O(1) state",
+              "curveId": "constant"
+            }
+          ]
+        },
+        {
+          "kind": "operation",
+          "operation": "Returned output",
+          "bounds": [
+            {
+              "kind": "curve",
+              "role": "Extra working space",
+              "formula": "O(n) output",
+              "curveId": "linear"
+            }
+          ]
+        }
+      ]
+    }
+  }
+}
+```
+````
 
 # Complexity
 

@@ -1,8 +1,8 @@
 ---
 publish: true
-created: 2026-07-29T14:28:24.645Z
-modified: 2026-07-29T14:28:24.646Z
-published: 2026-07-29T14:28:24.646Z
+created: 2026-07-29T20:22:59.985Z
+modified: 2026-08-01T18:31:33.354Z
+published: 2026-08-01T18:31:33.354Z
 topic:
   - Computer Science
 subtopic:
@@ -20,17 +20,22 @@ Two heuristics keep the forest shallow so the walk stays short. Union by rank co
 
 **Core condition:** merges only accumulate → each `find` walks toward a root → the two heuristics keep that walk near-constant amortized → `O(α(n))` per operation with `O(n)` storage.
 
-# Interactive Forest
+````tabsdown
+tab: Visualization
 
-The view starts with seven singleton nodes. For a visible compression, run `Union(0, 1)`, `Union(2, 3)`, and `Union(0, 2)`, select `A = 3`, then run `Find A`; `parent[3]` changes from `2` to `0`. The forest shows the parent pointers that `find` walks; the indexed row below shows the same state as the `parent[]` array used by the implementation.
+
 
 ```steptrace
 {"algorithm":"union-find","n":7}
 ```
 
+## Interactive Forest
+
+The view starts with seven singleton nodes. For a visible compression, run `Union(0, 1)`, `Union(2, 3)`, and `Union(0, 2)`, select `A = 3`, then run `Find A`; `parent[3]` changes from `2` to `0`. The forest shows the parent pointers that `find` walks; the indexed row below shows the same state as the `parent[]` array used by the implementation.
+
 A `union` resolves both arguments to their roots and links one root beneath the other; an interior node is never linked directly, since that would strand the rest of its set. A `find` walks parent pointers until it reaches a self-parented root, then path-compresses the walked nodes so each points straight at that root. The first deep `find` on a chain is what pays for every shallow `find` after it.
 
-# Why the Walk Stays Short
+## Why the Walk Stays Short
 
 Each heuristic attacks tree height from a different direction.
 
@@ -40,7 +45,177 @@ Each heuristic attacks tree height from a different direction.
 
 Neither heuristic alone reaches near-constant time: rank bounds how tall a tree can grow, while compression guarantees each tall path is walked only a few times before it flattens. Combined, the total over `m` operations is `O(m α(n))`. The bound is amortized — a single `find` can still traverse `O(log n)` parents, and it is the compression it performs that makes later finds cheap.
 
-# Complexity
+tab: Complexity
+
+```complexity
+{
+  "version": 2,
+  "label": "Union-Find complexity",
+  "variables": {
+    "inputSize": {
+      "symbol": "n",
+      "description": "number of input elements or states"
+    },
+    "inverseAckermann": {
+      "symbol": "α(·)",
+      "description": "inverse Ackermann factor applied to its displayed argument"
+    }
+  },
+  "resources": {
+    "time": {
+      "mode": "operations",
+      "entries": [
+        {
+          "kind": "operation",
+          "operation": "Construct n singletons",
+          "bounds": [
+            {
+              "kind": "curve",
+              "role": "Best time",
+              "formula": "Θ(n)",
+              "curveId": "linear"
+            },
+            {
+              "kind": "curve",
+              "role": "Amortized time",
+              "formula": "Θ(n)",
+              "curveId": "linear"
+            },
+            {
+              "kind": "curve",
+              "role": "Worst single operation",
+              "formula": "Θ(n)",
+              "curveId": "linear"
+            }
+          ]
+        },
+        {
+          "kind": "operation",
+          "operation": "find(x)",
+          "bounds": [
+            {
+              "kind": "curve",
+              "role": "Best time",
+              "formula": "O(1)",
+              "curveId": "constant"
+            },
+            {
+              "kind": "text",
+              "role": "Amortized time",
+              "formula": "O(α(n))"
+            },
+            {
+              "kind": "curve",
+              "role": "Worst single operation",
+              "formula": "O(log n)",
+              "curveId": "log-n"
+            }
+          ]
+        },
+        {
+          "kind": "operation",
+          "operation": "union(a, b)",
+          "bounds": [
+            {
+              "kind": "curve",
+              "role": "Best time",
+              "formula": "O(1)",
+              "curveId": "constant"
+            },
+            {
+              "kind": "text",
+              "role": "Amortized time",
+              "formula": "O(α(n))"
+            },
+            {
+              "kind": "curve",
+              "role": "Worst single operation",
+              "formula": "O(log n)",
+              "curveId": "log-n"
+            }
+          ]
+        },
+        {
+          "kind": "operation",
+          "operation": "connected(a, b)",
+          "bounds": [
+            {
+              "kind": "curve",
+              "role": "Best time",
+              "formula": "O(1)",
+              "curveId": "constant"
+            },
+            {
+              "kind": "text",
+              "role": "Amortized time",
+              "formula": "O(α(n))"
+            },
+            {
+              "kind": "curve",
+              "role": "Worst single operation",
+              "formula": "O(log n)",
+              "curveId": "log-n"
+            }
+          ]
+        }
+      ]
+    },
+    "space": {
+      "mode": "operations",
+      "entries": [
+        {
+          "kind": "operation",
+          "operation": "Construct n singletons",
+          "bounds": [
+            {
+              "kind": "curve",
+              "role": "Space",
+              "formula": "Θ(n) structure",
+              "curveId": "linear"
+            }
+          ]
+        },
+        {
+          "kind": "operation",
+          "operation": "find(x)",
+          "bounds": [
+            {
+              "kind": "text",
+              "role": "Space",
+              "formula": "O(1) iterative, O(log n) recursive stack"
+            }
+          ]
+        },
+        {
+          "kind": "operation",
+          "operation": "union(a, b)",
+          "bounds": [
+            {
+              "kind": "text",
+              "role": "Space",
+              "formula": "O(1) iterative, O(log n) recursive stack"
+            }
+          ]
+        },
+        {
+          "kind": "operation",
+          "operation": "connected(a, b)",
+          "bounds": [
+            {
+              "kind": "text",
+              "role": "Space",
+              "formula": "O(1) iterative, O(log n) recursive stack"
+            }
+          ]
+        }
+      ]
+    }
+  }
+}
+```
+````
+
+## Complexity
 
 | Operation                | Best time | Amortized time | Worst single operation | Space                              |
 | ------------------------ | --------- | -------------- | ---------------------- | ---------------------------------- |

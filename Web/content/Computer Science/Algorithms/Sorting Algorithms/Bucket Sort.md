@@ -1,8 +1,8 @@
 ---
 publish: true
 created: 2026-07-25T08:24:19.993Z
-modified: 2026-07-25T19:10:35.963Z
-published: 2026-07-25T19:10:35.963Z
+modified: 2026-08-01T18:31:33.351Z
+published: 2026-08-01T18:31:33.351Z
 topic:
   - Computer Science
 subtopic:
@@ -20,15 +20,118 @@ The mapping is what stands in for comparison, and it is cheap only because the r
 
 **Core condition:** numeric keys over a known, roughly uniform range with `m = Θ(n)` → each key maps to a bucket in `O(1)` → `Θ(n + m) = Θ(n)` expected time with `Θ(n + m)` auxiliary space.
 
-# Trace
+````tabsdown
+tab: Visualization
 
-The trace sorts six keys drawn from `[0, 1)` through five equal-width buckets. It establishes the bucket ranges, scatters each key by `floor(5 · key)`, sorts the occupied buckets, then gathers them from the lowest range to the highest.
+
 
 ```steptrace
 { "algorithm": "bucket-sort", "array": [0.78, 0.17, 0.39, 0.26, 0.72, 0.94], "bucketCount": 5 }
 ```
 
+# Trace
+
+The trace sorts six keys drawn from `[0, 1)` through five equal-width buckets. It establishes the bucket ranges, scatters each key by `floor(5 · key)`, sorts the occupied buckets, then gathers them from the lowest range to the highest.
+
 The middle range `[0.4, 0.6)` stays empty, while `[0.6, 0.8)` receives `0.78` and `0.72` and sorts them as `0.72, 0.78`. Empty and occupied buckets gather the same way: range order already determines their order relative to every other bucket.
+
+tab: Complexity
+
+```complexity
+{
+  "version": 2,
+  "label": "Bucket Sort complexity",
+  "variables": {
+    "inputSize": {
+      "symbol": "n",
+      "description": "number of input elements or states"
+    },
+    "secondarySize": {
+      "symbol": "m",
+      "description": "secondary input, pattern, bucket, or sequence size"
+    }
+  },
+  "resources": {
+    "time": {
+      "mode": "operations",
+      "entries": [
+        {
+          "kind": "operation",
+          "operation": "Best",
+          "bounds": [
+            {
+              "kind": "text",
+              "role": "Time",
+              "formula": "Θ(n + m)"
+            }
+          ]
+        },
+        {
+          "kind": "operation",
+          "operation": "Average",
+          "bounds": [
+            {
+              "kind": "text",
+              "role": "Time",
+              "formula": "Θ(n + m) ≈ Θ(n) when m ≈ n"
+            }
+          ]
+        },
+        {
+          "kind": "operation",
+          "operation": "Worst",
+          "bounds": [
+            {
+              "kind": "text",
+              "role": "Time",
+              "formula": "Θ(n² + m)"
+            }
+          ]
+        }
+      ]
+    },
+    "space": {
+      "mode": "operations",
+      "entries": [
+        {
+          "kind": "operation",
+          "operation": "Best",
+          "bounds": [
+            {
+              "kind": "text",
+              "role": "Auxiliary space",
+              "formula": "Θ(n + m)"
+            }
+          ]
+        },
+        {
+          "kind": "operation",
+          "operation": "Average",
+          "bounds": [
+            {
+              "kind": "text",
+              "role": "Auxiliary space",
+              "formula": "Θ(n + m)"
+            }
+          ]
+        },
+        {
+          "kind": "operation",
+          "operation": "Worst",
+          "bounds": [
+            {
+              "kind": "text",
+              "role": "Auxiliary space",
+              "formula": "Θ(n + m)"
+            }
+          ]
+        }
+      ]
+    }
+  }
+}
+```
+````
 
 # Why the Average Stays Linear
 
