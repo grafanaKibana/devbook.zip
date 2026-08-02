@@ -433,19 +433,29 @@ def validate_residue(note: Note) -> list[Issue]:
 
 def validate_code_fences(note: Note) -> list[Issue]:
     issues: list[Issue] = []
-    open_fence: tuple[str, int] | None = None
+    open_code_fence: tuple[str, int] | None = None
+    tabsdown_fences: list[tuple[str, int]] = []
     for index, line in enumerate(note.body.splitlines()):
         match = re.match(r"^ {0,3}(`{3,}|~{3,})(.*)$", line)
         if not match:
             continue
         fence, suffix = match.groups()
-        if open_fence:
-            marker, length = open_fence
+        if open_code_fence:
+            marker, length = open_code_fence
             if fence[0] == marker and len(fence) >= length and not suffix.strip():
-                open_fence = None
+                open_code_fence = None
             continue
-        open_fence = (fence[0], len(fence))
-        if not suffix.strip():
+        if tabsdown_fences:
+            marker, length = tabsdown_fences[-1]
+            if fence[0] == marker and len(fence) >= length and not suffix.strip():
+                tabsdown_fences.pop()
+                continue
+        language = suffix.strip()
+        if language and language.split(maxsplit=1)[0] == "tabsdown":
+            tabsdown_fences.append((fence[0], len(fence)))
+            continue
+        open_code_fence = (fence[0], len(fence))
+        if not language:
             issues.append(
                 Issue(
                     "markdown.code-fence-language",

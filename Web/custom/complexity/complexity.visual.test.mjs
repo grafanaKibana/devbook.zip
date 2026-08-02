@@ -12,10 +12,12 @@ assert.ok(baseUrl, "usage: npm run complexity:visual -- --base-url http://127.0.
 
 const here = fileURLToPath(new URL(".", import.meta.url))
 const repoRoot = resolve(here, "../../..")
-const manifest = JSON.parse(
-  await readFile(resolve(repoRoot, ".omx/context/dsa-complexity-config-manifest-v2.json")),
+const note = await readFile(
+  resolve(repoRoot, "Vault/Home/Computer Science/Algorithms/Sorting Algorithms/Quick Sort.md"),
+  "utf8",
 )
-const config = manifest.notes.find((note) => note.path.endsWith("/Quick Sort.md"))?.config
+const configMatch = note.match(/```complexity\s*\n([\s\S]*?)\n```/)
+const config = configMatch ? JSON.parse(configMatch[1]) : null
 assert.ok(config, "Quick Sort v2 config is required")
 const bundle = await build({
   stdin: {

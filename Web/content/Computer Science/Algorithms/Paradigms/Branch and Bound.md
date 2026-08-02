@@ -110,7 +110,7 @@ tab: Complexity
       "entries": [
         {
           "kind": "operation",
-          "operation": "Best",
+          "operation": "Depth-first best",
           "bounds": [
             {
               "kind": "curve",
@@ -122,7 +122,7 @@ tab: Complexity
         },
         {
           "kind": "operation",
-          "operation": "Practical",
+          "operation": "Depth-first practical",
           "bounds": [
             {
               "kind": "curve",
@@ -134,7 +134,7 @@ tab: Complexity
         },
         {
           "kind": "operation",
-          "operation": "Worst",
+          "operation": "Depth-first worst",
           "bounds": [
             {
               "kind": "curve",

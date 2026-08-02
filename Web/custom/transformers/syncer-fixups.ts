@@ -4,7 +4,7 @@ import type { Code, Root as MdastRoot } from "mdast"
 import type { QuartzTransformerPlugin } from "@quartz-community/types"
 
 // Cleans the markdown/HTML that Quartz Syncer commits into content so it renders
-// correctly on the flattened web build. Three general fixups (not per-note):
+// correctly on the flattened web build. Four general fixups (not per-note):
 //
 //   1. Strip raw dataview/datacore fenced blocks. Syncer freezes `datacore*` and
 //      declarative `dataview` fences to static HTML, but imperative DataviewJS it
@@ -27,6 +27,11 @@ import type { QuartzTransformerPlugin } from "@quartz-community/types"
 //      drop a leading "Home/" segment before crawl-links (LinkProcessing)
 //      resolves the link, so it slugifies to the same page as the real file.
 //      Idempotent: links without the prefix are untouched.
+//
+//   4. Root SVG asset embeds. Quartz renders embedded SVGs as <object data>,
+//      but Syncer's vault-root Assets path arrives as page-relative `assets/…`.
+//      Prefix it with `/` so direct loads and SPA navigation resolve the same
+//      published asset.
 
 const ROOT_FOLDER = "Home"
 
@@ -77,6 +82,9 @@ const stripRootPrefix = (href: string): string => {
   return lead.slice(ROOT_FOLDER.length).replace(/^\/+/, "") + suffix
 }
 
+export const rootAssetData = (data: string): string =>
+  data.startsWith("assets/") ? `/${data}` : data
+
 export const SyncerFixups: QuartzTransformerPlugin = () => ({
   name: "SyncerFixups",
   markdownPlugins() {
@@ -105,10 +113,16 @@ export const SyncerFixups: QuartzTransformerPlugin = () => ({
         })
         // Normalize vault-absolute internal links (see fixup #3).
         visit(tree, "element", (node: Element) => {
-          if (node.tagName !== "a") return
-          const href = node.properties?.href
-          if (typeof href !== "string" || !isInternal(href)) return
-          node.properties!.href = stripRootPrefix(href)
+          if (node.tagName === "a") {
+            const href = node.properties?.href
+            if (typeof href === "string" && isInternal(href)) {
+              node.properties!.href = stripRootPrefix(href)
+            }
+          }
+          if (node.tagName === "object") {
+            const data = node.properties?.data
+            if (typeof data === "string") node.properties!.data = rootAssetData(data)
+          }
         })
       },
     ]

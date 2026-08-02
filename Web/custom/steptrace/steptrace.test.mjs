@@ -1480,31 +1480,7 @@ test("A* uses profile-owned controls and visual-only graph state without racks",
   assert.doesNotMatch(note, /Visualization pending/)
 })
 
-test("static deletion manifest keeps legacy variant tabs absent and host Tabsdown adapters intact", () => {
-  const manifest = JSON.parse(
-    readFileSync(
-      join(repoRoot, ".omx", "context", "tabsdown-migration-g001", "static-deletion-manifest.json"),
-      "utf8",
-    ),
-  )
-  assert.equal(manifest.schemaVersion, 1)
-  assert.deepEqual(
-    manifest.items.map(({ id }) => id),
-    [
-      "steptrace-tabs-config-types",
-      "steptrace-tabs-normalizer-module",
-      "steptrace-variant-mount",
-      "steptrace-variant-dom-classes",
-      "steptrace-tabs-stylesheet",
-      "steptrace-rectree-tab-host-selectors",
-      "complexity-dom-filter-tabs",
-      "complexity-hast-filter-tabs",
-      "complexity-filter-interaction-source",
-      "complexity-filter-hydration-copy",
-      "complexity-filter-styles",
-      "complexity-available-categories-filter-only-use",
-    ],
-  )
+test("legacy variant tabs stay absent and host Tabsdown adapters stay intact", () => {
   assert.equal(existsSync(join(here, "src", "tabs.ts")), false)
   assert.equal(existsSync(join(here, "src", "styles", "tabs.scss")), false)
 
