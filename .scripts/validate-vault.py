@@ -436,6 +436,7 @@ def validate_code_fences(note: Note) -> list[Issue]:
     open_code_fence: tuple[str, int] | None = None
     tabsdown_fences: list[tuple[str, int]] = []
     for index, line in enumerate(note.body.splitlines()):
+        line = re.sub(r"^(?: {0,3}>[ \t]?)+", "", line)
         match = re.match(r"^ {0,3}(`{3,}|~{3,})(.*)$", line)
         if not match:
             continue

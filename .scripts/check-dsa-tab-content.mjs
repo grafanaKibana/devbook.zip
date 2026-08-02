@@ -5,10 +5,6 @@ import { dirname, join, relative, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 
 const repoRoot = dirname(dirname(fileURLToPath(import.meta.url)));
-const manifestPath = join(
-  repoRoot,
-  ".omx/context/dsa-complexity-config-manifest-v2.json",
-);
 const dsaRoots = [
   join(repoRoot, "Vault/Home/Computer Science/Algorithms"),
   join(repoRoot, "Vault/Home/Computer Science/Data Structures"),
@@ -352,16 +348,14 @@ function fullInventory() {
   if (concepts.length !== 90) errors.push(`inventory: expected 90 concept notes, found ${concepts.length}`);
   if (folderNotes.length !== 14) errors.push(`inventory: expected 14 FolderNotes, found ${folderNotes.length}`);
 
-  const manifest = JSON.parse(readFileSync(manifestPath, "utf8"));
-  const manifestPaths = manifest.notes.map(({ path }) => path);
-  const uniqueManifestPaths = new Set(manifestPaths);
-  const algorithmCount = manifestPaths.filter((path) => path.includes("/Algorithms/")).length;
-  const dataStructureCount = manifestPaths.filter((path) => path.includes("/Data Structures/")).length;
-  if (manifestPaths.length !== 87 || uniqueManifestPaths.size !== 87) {
-    errors.push(`inventory: expected 87 unique manifest notes, found ${manifestPaths.length}/${uniqueManifestPaths.size} unique`);
+  const tabsdownPaths = concepts.filter((path) => readFileSync(path, "utf8").includes("tabsdown"));
+  const algorithmCount = tabsdownPaths.filter((path) => path.includes("/Algorithms/")).length;
+  const dataStructureCount = tabsdownPaths.filter((path) => path.includes("/Data Structures/")).length;
+  if (tabsdownPaths.length !== 88) {
+    errors.push(`inventory: expected 88 Tabsdown notes, found ${tabsdownPaths.length}`);
   }
-  if (algorithmCount !== 56 || dataStructureCount !== 31) {
-    errors.push(`inventory: expected manifest split 56 algorithms/31 data structures, found ${algorithmCount}/${dataStructureCount}`);
+  if (algorithmCount !== 56 || dataStructureCount !== 32) {
+    errors.push(`inventory: expected Tabsdown split 56 algorithms/32 data structures, found ${algorithmCount}/${dataStructureCount}`);
   }
   return { concepts, errors };
 }
