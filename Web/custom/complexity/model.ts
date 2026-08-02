@@ -81,6 +81,11 @@ export interface ComplexitySemanticBound {
   order: number
 }
 
+export interface ComplexityVariable {
+  symbol: string
+  description: string
+}
+
 export interface ComplexityResourceViewModel {
   key: "time" | "space" | "catalogue"
   label: string
@@ -100,7 +105,7 @@ export interface ComplexityViewModel {
   mode: ComplexityMode
   title: string
   label: string
-  variables: Record<string, unknown>
+  variables: ComplexityVariable[]
   resources: ComplexityResourceViewModel[]
   paths: ComplexityPath[]
   legend: ComplexityLegendGroup[]
@@ -244,17 +249,20 @@ function validateV1Variables(value: unknown): void {
   if (!names.has("n")) fail("variables.n", "is required for plotted curves")
 }
 
-function validateV2Variables(value: unknown): Record<string, unknown> {
+function validateV2Variables(value: unknown): ComplexityVariable[] {
   const variables = objectAt(value, "variables")
   if (Object.keys(variables).length === 0) fail("variables", "must be a non-empty object")
+  const result: ComplexityVariable[] = []
   for (const [name, rawMetadata] of Object.entries(variables)) {
     if (!/^[A-Za-z][A-Za-z0-9_]*$/.test(name)) fail(`variables.${name}`, "has an invalid name")
     const metadata = objectAt(rawMetadata, `variables.${name}`)
     rejectUnknown(metadata, ["symbol", "description"], `variables.${name}`)
-    textAt(metadata.symbol, `variables.${name}.symbol`)
-    textAt(metadata.description, `variables.${name}.description`)
+    result.push({
+      symbol: textAt(metadata.symbol, `variables.${name}.symbol`),
+      description: textAt(metadata.description, `variables.${name}.description`),
+    })
   }
-  return variables
+  return result
 }
 
 function slug(value: string): string {
@@ -470,7 +478,7 @@ function finishResource(
       item: {
         kind: "semantic" as const,
         category: bound.category,
-        label: bound.formula,
+        label: `${bound.role}: ${bound.formula}`,
         color: bound.color,
       },
     })),
@@ -712,7 +720,7 @@ export function buildComplexityViewModel(
     mode: config.mode,
     title,
     label: title,
-    variables: objectAt(config.variables, "variables"),
+    variables: [],
     resources: [resource],
     paths: [...resource.contextPaths, ...resource.paths],
     legend: resource.legend,

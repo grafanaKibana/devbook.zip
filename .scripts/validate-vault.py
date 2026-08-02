@@ -435,8 +435,27 @@ def validate_code_fences(note: Note) -> list[Issue]:
     issues: list[Issue] = []
     open_code_fence: tuple[str, int] | None = None
     tabsdown_fences: list[tuple[str, int]] = []
+    list_indents: list[int] = []
     for index, line in enumerate(note.body.splitlines()):
         line = re.sub(r"^(?: {0,3}>[ \t]?)+", "", line)
+        if open_code_fence:
+            for indent in reversed(list_indents):
+                if line.startswith(" " * indent):
+                    line = line[indent:]
+                    break
+        else:
+            list_item = re.match(r"^( *)(?:[-+*]|\d+[.)])([ \t]+)(.*)$", line)
+            if list_item:
+                marker_indent = len(list_item.group(1))
+                list_indents = [indent for indent in list_indents if indent <= marker_indent]
+                list_indents.append(list_item.start(3))
+                line = list_item.group(3)
+            else:
+                leading_spaces = len(line) - len(line.lstrip(" "))
+                while list_indents and line.strip() and leading_spaces < list_indents[-1]:
+                    list_indents.pop()
+                if list_indents and leading_spaces >= list_indents[-1]:
+                    line = line[list_indents[-1]:]
         match = re.match(r"^ {0,3}(`{3,}|~{3,})(.*)$", line)
         if not match:
             continue

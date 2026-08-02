@@ -59,6 +59,7 @@ try {
       node.style.inlineSize = `${inlineSize}px`
       await new Promise((resolve) => requestAnimationFrame(() => requestAnimationFrame(resolve)))
       const resources = node.querySelector(".complexity__resources")
+      const variables = node.querySelector(".complexity__variables")
       const groups = [...node.querySelectorAll(".complexity__resource")]
       const plotWraps = [...node.querySelectorAll(".complexity__plot-wrap")]
       const overflowOwners = [...node.querySelectorAll("*")].filter((element) => {
@@ -84,6 +85,8 @@ try {
           const overflow = getComputedStyle(element).overflowX
           return overflow === "auto" || overflow === "scroll"
         }).length,
+        variableText: variables?.textContent?.trim() ?? "",
+        variableOverflows: variables ? variables.scrollWidth > variables.clientWidth + 1 : true,
       }
     }, width)
 
@@ -97,6 +100,8 @@ try {
     )
     assert.equal(layout.resourceOverflow, "auto", `${width}px outer overflow owner`)
     assert.equal(layout.nestedScrollers, 0, `${width}px nested scrollers`)
+    assert.match(layout.variableText, /n\s*number of input elements/, `${width}px variable key`)
+    assert.equal(layout.variableOverflows, false, `${width}px variable key overflow`)
     if (width < 600) {
       assert.ok(
         layout.positions.every(({ width: column }) => column >= 320),

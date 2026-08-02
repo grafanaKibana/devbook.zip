@@ -58,23 +58,23 @@ tab: Complexity
     },
     "capacity": {
       "symbol": "C",
-      "description": "capacity, configured bound, or output count"
+      "description": "total output characters copied"
     },
     "lengthL": {
       "symbol": "L",
-      "description": "key, string, path, or sequence length"
+      "description": "length of the inserted or queried key"
     },
     "parameterHUpper": {
       "symbol": "H",
-      "description": "maximum height or remaining suffix length"
+      "description": "maximum trie height or longest remaining suffix"
     },
     "universeSize": {
       "symbol": "U",
-      "description": "size of the represented universe"
+      "description": "number of distinct stored prefixes and therefore trie nodes"
     },
     "vertexCount": {
       "symbol": "V",
-      "description": "number of vertices"
+      "description": "number of trie nodes visited beneath the matched prefix"
     }
   },
   "resources": {
@@ -277,12 +277,12 @@ Deletion is the operation that exposes the shared-path invariant. Removing `car`
 
 Every structure below stores a set of keys; they differ in whether prefixes and ordering survive, and in memory.
 
-| Structure |
-| --- |
-| Trie |
-| [[Home/Computer Science/Data Structures/Hash-based Structures/HashMap | Membership only |
-| Radix / PATRICIA trie |
-| [[Home/Computer Science/Algorithms/Search Algorithms/String Matching/Aho-Corasick | All patterns plus fallback transitions |
+| Structure | Exact membership | Prefix / ordered support | Storage shape | Stronger case |
+| --- | --- | --- | --- | --- |
+| Trie | Walks one edge per key character | Native prefix walk; sorted output when children are visited in symbol order | One node per distinct prefix; sparse maps or fixed child arrays | Autocomplete, routing, and shared-prefix key sets |
+| [[Home/Computer Science/Data Structures/Hash-based Structures/HashMap\|Hash map]] | Hashes the complete key | No native prefix or ordered scan | One entry per complete key | Membership-only workloads |
+| Radix / PATRICIA trie | Compares compressed edge labels | Native prefix walk; sorted output requires symbol-ordered edges | Compresses single-child runs but retains edge-label data | Long sparse keys where plain-trie node count dominates |
+| [[Home/Computer Science/Algorithms/Search Algorithms/String Matching/Aho-Corasick\|Aho-Corasick]] | Retains every pattern in a trie | Scans text for many patterns through failure links | Trie nodes plus failure and output links | Matching many patterns against the same text |
 
 A [[Home/Computer Science/Data Structures/Hash-based Structures/HashMap|hash map]] wins when only exact membership matters and memory is tight: it drops prefix and ordering entirely and avoids a node per distinct prefix. A radix tree is the trie to pick when the plain trie's node count is the problem — it compresses single-child chains without changing the query semantics. [[Home/Computer Science/Algorithms/Search Algorithms/String Matching/Aho-Corasick|Aho-Corasick]] extends the trie with failure links to scan one text against many patterns at once, a different workload from single-key lookup.
 

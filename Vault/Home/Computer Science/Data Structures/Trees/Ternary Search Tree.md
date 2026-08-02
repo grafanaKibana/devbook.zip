@@ -55,15 +55,15 @@ tab: Complexity
   "variables": {
     "inputSize": {
       "symbol": "n",
-      "description": "number of input elements or states"
+      "description": "number of keys stored in the tree"
     },
     "lengthL": {
       "symbol": "L",
-      "description": "key, string, path, or sequence length"
+      "description": "length of the inserted or queried key"
     },
     "sizeS": {
       "symbol": "S",
-      "description": "string, state, or output size"
+      "description": "total characters emitted by prefix collection"
     }
   },
   "resources": {
@@ -99,7 +99,7 @@ tab: Complexity
             {
               "kind": "text",
               "role": "Time",
-              "formula": "O(L + log n) avg"
+              "formula": "O(L + log n) avg, O(L + n) worst"
             }
           ]
         },
@@ -124,10 +124,9 @@ tab: Complexity
           "operation": "Search hit (key length L)",
           "bounds": [
             {
-              "kind": "curve",
-              "role": "Space",
-              "formula": "O(1)",
-              "curveId": "constant"
+              "kind": "text",
+              "role": "Recursive stack",
+              "formula": "O(L + log n) avg, O(L + n) worst"
             }
           ]
         },
@@ -136,10 +135,9 @@ tab: Complexity
           "operation": "Search miss",
           "bounds": [
             {
-              "kind": "curve",
-              "role": "Space",
-              "formula": "O(1)",
-              "curveId": "constant"
+              "kind": "text",
+              "role": "Recursive stack",
+              "formula": "O(L + log n) avg, O(L + n) worst"
             }
           ]
         },
@@ -148,10 +146,9 @@ tab: Complexity
           "operation": "Insert",
           "bounds": [
             {
-              "kind": "curve",
-              "role": "Space",
-              "formula": "O(L) new nodes",
-              "curveId": "linear"
+              "kind": "text",
+              "role": "New nodes and recursive stack",
+              "formula": "O(L) new nodes plus O(L + log n) avg / O(L + n) worst stack"
             }
           ]
         },
@@ -160,10 +157,9 @@ tab: Complexity
           "operation": "Prefix collection",
           "bounds": [
             {
-              "kind": "curve",
-              "role": "Space",
-              "formula": "O(S) output",
-              "curveId": "linear"
+              "kind": "text",
+              "role": "Traversal and output",
+              "formula": "O(L + log n) avg / O(L + n) worst stack plus O(S) output"
             }
           ]
         },
@@ -268,13 +264,13 @@ Where it breaks is balance. Randomising insertion order, or rebuilding the BSTs 
 
 Every structure below stores a set of string keys; they differ in the per-node child representation and what that costs.
 
-| Structure |
-| --- |
-| Ternary search tree |
-| Array-backed [[Home/Computer Science/Data Structures/Trees/Trie | Fixed `Node[σ]` array |
-| Hash-map [[Home/Computer Science/Data Structures/Trees/Trie | `Dictionary<char, Node>` |
-| Radix / PATRICIA trie |
-| Balanced [[Home/Computer Science/Data Structures/Trees/Binary Search Tree | One key per node, full-key compares |
+| Structure | Character routing | Prefix / ordered support | Storage shape | Stronger case |
+| --- | --- | --- | --- | --- |
+| Ternary search tree | Compares the next character through `lo`/`eq`/`hi` | Native prefix walk; in-order traversal is sorted | One character and three child pointers per node | Large or unknown alphabets with ordered output |
+| Array-backed [[Home/Computer Science/Data Structures/Trees/Trie\|Trie]] | Indexes a fixed child slot | Native prefix walk; symbol-order traversal is sorted | Reserves one child array at every node | Small fixed alphabets where direct indexing matters |
+| Hash-map [[Home/Computer Science/Data Structures/Trees/Trie\|Trie]] | Hashes the next character | Native prefix walk; sorting requires ordered child keys | Allocates only present children plus map overhead | Sparse large alphabets without TST shape sensitivity |
+| Radix / PATRICIA trie | Compares substring-labelled edges | Native prefix walk; sorted output requires symbol-ordered edges | Compresses single-child runs and stores edge labels | Long keys with many non-branching runs |
+| Balanced [[Home/Computer Science/Data Structures/Trees/Binary Search Tree\|Binary Search Tree]] | Compares complete keys | Ordered and range scans; prefix search needs bounded key ranges | Stores one complete key per node | Total order over complete keys without shared-prefix structure |
 
 A radix trie wins when node count is the constraint and keys are long and sparse. A balanced BST keyed on whole strings is the choice when there are no shared prefixes to exploit and total order over complete keys is all that's needed.
 

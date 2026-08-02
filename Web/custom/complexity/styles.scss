@@ -9,6 +9,31 @@
   margin: 0 0 1.5rem;
 }
 
+.complexity__variables {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.25rem 1rem;
+  margin: 0 0 0.75rem;
+  color: var(--cx-muted);
+  font: 500 0.875rem/1.4 var(--_font-head);
+}
+
+.complexity__variable {
+  display: flex;
+  gap: 0.35rem;
+  min-width: 0;
+
+  dt,
+  dd {
+    margin: 0;
+  }
+
+  dt {
+    color: var(--cx-text);
+    font-weight: 650;
+  }
+}
+
 .complexity__resources {
   display: grid;
   grid-template-columns: repeat(2, minmax(20rem, 1fr));

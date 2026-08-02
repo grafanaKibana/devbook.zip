@@ -232,6 +232,20 @@ export function renderComplexityHast(view: ComplexityViewModel): RootContent {
     },
     [
       element("span", { hidden: true }, [text(view.label)]),
+      ...(view.variables.length > 0
+        ? [
+            element(
+              "dl",
+              { className: ["complexity__variables"] },
+              view.variables.map((variable) =>
+                element("div", { className: ["complexity__variable"] }, [
+                  element("dt", {}, [element("var", {}, [text(variable.symbol)])]),
+                  element("dd", {}, [text(variable.description)]),
+                ]),
+              ),
+            ),
+          ]
+        : []),
       element(
         "div",
         { className: ["complexity__resources"] },

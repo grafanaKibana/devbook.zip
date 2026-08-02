@@ -238,6 +238,21 @@ export function renderComplexityDom(
   figure.setAttribute("aria-label", view.label)
   const hiddenLabel = appendText(document, figure, "span", view.label)
   hiddenLabel.hidden = true
+  if (view.variables.length > 0) {
+    const variables = document.createElement("dl")
+    variables.className = "complexity__variables"
+    for (const variable of view.variables) {
+      const item = document.createElement("div")
+      item.className = "complexity__variable"
+      const term = document.createElement("dt")
+      appendText(document, term, "var", variable.symbol)
+      const description = document.createElement("dd")
+      description.textContent = variable.description
+      item.append(term, description)
+      variables.append(item)
+    }
+    figure.append(variables)
+  }
   const resources = document.createElement("div")
   resources.className = "complexity__resources"
   for (const resource of view.resources) resources.append(renderResourceDom(document, resource))

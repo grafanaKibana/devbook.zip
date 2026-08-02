@@ -47,7 +47,7 @@ tab: Complexity
   "variables": {
     "inputSize": {
       "symbol": "n",
-      "description": "number of input elements or states"
+      "description": "number of distinct reachable argument tuples or subproblems"
     }
   },
   "resources": {
@@ -56,7 +56,7 @@ tab: Complexity
       "entries": [
         {
           "kind": "operation",
-          "operation": "Distinct subproblems",
+          "operation": "Distinct subproblems with O(1) local work each",
           "bounds": [
             {
               "kind": "curve",

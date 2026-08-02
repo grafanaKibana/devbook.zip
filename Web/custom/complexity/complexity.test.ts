@@ -317,7 +317,7 @@ test("operation text bounds stay semantic-only while catalogue bounds plot", () 
       interactive: "pathId" in item,
     })),
     [
-      { kind: "semantic", label: "O(bucket length)", interactive: false },
+      { kind: "semantic", label: "Collision-bound: O(bucket length)", interactive: false },
       { kind: "plotted", label: "Average", interactive: true },
     ],
   )
@@ -467,7 +467,7 @@ test("version 2 accepts exact dual-resource keys and renders Time before Space",
     ],
   )
   assert.equal(view.label, dualResource.label)
-  assert.deepEqual(view.variables, dualResource.variables)
+  assert.deepEqual(view.variables, Object.values(dualResource.variables))
 })
 
 test("version 2 keeps plotted formulas exact and semantic-only bounds geometry-free", () => {
@@ -492,6 +492,7 @@ test("version 2 keeps plotted formulas exact and semantic-only bounds geometry-f
     ["Best", "Average", "Worst"],
   )
   assert.equal(space.legend[0].items[0].label, "Best")
+  assert.equal(space.legend[0].items[1].label, "Implementation dependent: tail-call stack")
 })
 
 test("endpoint labels use the authored formula when highlighted paths agree", () => {
@@ -636,7 +637,10 @@ test("version 2 variables use strict ASCII keys and exact symbol metadata", () =
     vertices: { symbol: "|V|", description: "number of vertices" },
     inverseAckermann: { symbol: "α(n)", description: "inverse Ackermann factor" },
   }
-  assert.deepEqual(buildComplexityViewModel(graph, "graph-1").variables, graph.variables)
+  assert.deepEqual(
+    buildComplexityViewModel(graph, "graph-1").variables,
+    Object.values(graph.variables),
+  )
 
   assert.throws(
     () =>
@@ -1191,6 +1195,21 @@ test("HAST and DOM normalize to the same IDs, labels, controls, and safe text", 
   )
 })
 
+test("version 2 variables render as the same description list in Quartz and Obsidian", () => {
+  const view = buildComplexityViewModel(dualResource, "variable-key")
+  const hast = renderComplexityHast(view)
+  const document = new FakeDocument()
+  const root = document.createElement("div")
+  renderComplexityDom(root as unknown as HTMLElement, view)
+
+  assert.deepEqual(hastElements(hast, "var").map(hastText), ["n"])
+  assert.deepEqual(findAllFake(root, "var").map(fakeText), ["n"])
+  assert.equal(hastElements(hast, "dl").length, 1)
+  assert.equal(findAllFake(root, "dl").length, 1)
+  assert.match(hastText(hast), /nnumber of input elements/)
+  assert.equal(hastText(hast), fakeText(root))
+})
+
 test("Obsidian DOM keeps the version 1 label accessible but not visible", () => {
   const document = new FakeDocument()
   const root = document.createElement("div")
@@ -1202,6 +1221,7 @@ test("Obsidian DOM keeps the version 1 label accessible but not visible", () => 
   assert.equal(findAllFake(root, "li").length, 3)
   assert.equal(findAllFake(root, "button").length, 3)
   assert.equal(findFake(root, "figcaption"), undefined)
+  assert.equal(findFake(root, "dl"), undefined)
   assert.equal(findFake(root, "figure")?.attributes["aria-label"], view.title)
   const elements = findAllFake(root, "figure").flatMap((figure) => [figure, ...figure.children])
   assert.equal(
@@ -1231,6 +1251,10 @@ test("complexity styles have no StepTrace tabs dependency and no top margin", ()
     /\.complexity__resources:has\(> \.complexity__resource:only-child\)\s*\{[^}]*grid-template-columns:\s*minmax\(0, 1fr\);[^}]*overflow-x:\s*visible;/s,
   )
   assert.match(styles, /\.complexity\s*\{[^}]*margin:\s*0 0 1\.5rem;/s)
+  assert.match(
+    styles,
+    /\.complexity__variables\s*\{[^}]*display:\s*flex;[^}]*flex-wrap:\s*wrap;[^}]*font:[^;]*0\.875rem/s,
+  )
   assert.doesNotMatch(styles, /steptrace|complexity__tabs?|@use/)
   assert.match(
     styles,
