@@ -1,13 +1,13 @@
 ---
 publish: true
 created: 2026-07-21T18:52:02.836Z
-modified: 2026-08-01T18:31:33.348Z
-published: 2026-08-01T18:31:33.348Z
+modified: 2026-08-02T11:23:48.690Z
+published: 2026-08-02T11:23:48.690Z
 topic:
   - Computer Science
 subtopic:
   - Algorithms
-summary: Finds a range containing the target by doubling probe indices, then binary-searches it, in O(log(i + 1)) by target position.
+summary: Finds a range containing the target by doubling probe indices, then binary-searches that range.
 level:
   - "4"
 priority: Medium
@@ -16,9 +16,7 @@ status: Creation
 
 A sorted sequence arrives without a known length — a seekable file, an indexable paginated API, a lazily materialized random-access list — and a lookup still has to land on one value. [[Computer Science/Algorithms/Search Algorithms/Binary Search|Binary Search]] cannot begin: its first midpoint needs a right endpoint, and there is none to compute. Exponential search manufactures that endpoint by probing outward. It reads index `1`, then `2, 4, 8, 16, …`, doubling the probe until `a[bound] >= target` or the probe runs off the end. Every earlier probe was still below the target, so at the stopping point the target — if present — must sit between the previous probe and this one. The gallop has produced a bounded window `[bound/2, min(bound, n − 1)]`, and Binary Search finishes inside it.
 
-Doubling reaches or passes a present target at position `i` after `O(log(i + 1))` steps. For `i >= 1`, the inclusive window holds at most `i + 1` elements; once `i >= 2`, the tighter bound is at most `i`. The closing binary search is therefore another `O(log(i + 1))`, including the constant-time positions `0` and `1` without taking `log 0`. The total cost tracks the _position of the answer_, not the array length. When `i + 1 ≪ n`, this is below Binary Search's `O(log n)`; when the length is simply unknown, the gallop is what makes any bisection possible at all. An absent target has no position `i`, so on a bounded input its cost is stated separately as `O(log n)`.
-
-**Core condition:** sorted, indexable input of unknown or unbounded length → double a probe to bracket the target, then bisect the bracket → `O(log(i + 1))` for a target at position `i`, or `O(log n)` when a bounded input contains no target, with `O(1)` auxiliary space.
+The discovered window is anchored by the last probe below the target and the first probe at or beyond it.
 
 ````tabsdown
 tab: Visualization
@@ -29,18 +27,18 @@ tab: Visualization
 { "algorithm": "exponential-search", "array": [2, 4, 7, 11, 18, 29, 41, 56, 72], "target": 41 }
 ```
 
-# Trace
 
-The trace searches for `41` in `[2, 4, 7, 11, 18, 29, 41, 56, 72]`. During the gallop, hatched bars are already too small, muted bars are not reached yet, and the blue probe jumps through indices `0, 1, 2, 4, 8`. Once index `8` passes the target, the live bracket becomes `[4, 8]` and the same card switches to binary search. Binary search probes midpoint `6`; `a[6]` is `41`, so the search finishes at index `6` after six total probes.
 
-# Why Doubling Brackets the Target
+The trace searches for `41` in `[2, 4, 7, 11, 18, 29, 41, 56, 72]`. During the gallop, hatched bars are already too small, muted bars are not reached yet, and the blue probe jumps through indices `0, 1, 2, 4, 8`. Once index `8` passes the target, the live bracket becomes `[4, 8]` and the same card switches to binary search. Its midpoint is index `6`, where the target is found.
+
+
 
 The gallop maintains one fact through every iteration: as long as the loop continues, `a[bound] < target`, so the target's position lies strictly to the right of `bound`. Doubling may jump past the answer, but it doubles only after proving the current bound is too small; the skipped interval is retained between the previous and new bounds. The loop stops for exactly one of two reasons:
 
 - `a[bound] >= target`: the current probe reached or passed the target. The previous probe, `bound/2`, was the last index the loop confirmed as `a[bound/2] < target`, so the target lies in `[bound/2, bound]`.
 - `bound >= n`: the probe galloped past the end before catching the target. The last confirmed `a[bound/2] < target` still holds, so the target, if present, lies in `[bound/2, n − 1]`.
 
-Either way the window is `[bound/2, min(bound, n − 1)]`. For a successful search at `i >= 1`, the window spans at most `i + 1` elements; after at least one doubling (`i >= 2`), `bound/2` is a confirmed probe below the target, so `bound/2 < i` and the tighter window bound is at most `i` elements. Binary Search over either bound is `O(log(i + 1))`, and the doubling that built it also took `O(log(i + 1))` steps. Index `0` is checked before the gallop, so the same expression covers every successful position without the undefined `log 0` case.
+Either way the window is `[bound/2, min(bound, n − 1)]`. Index `0` is checked before the gallop because `bound` starts at `1`.
 
 The unbounded, indexable variant never references `n`. It generates the indices it probes (`1, 2, 4, …`) and asks only "is `a[bound]` still below the target?" An unknown-length finite source must also report that a probe is past the end so the high bound can be clamped to the last valid index. Index `0` is handled before the loop, since `bound` starts at `1`: if `a[0] == target`, the answer is `0`.
 
@@ -145,17 +143,9 @@ tab: Complexity
   }
 }
 ```
+
+The position-sensitive bound applies only when the target exists. A miss in a bounded input is measured against the full input because there is no target position to substitute.
 ````
-
-# Complexity
-
-| Case | Time | Auxiliary space | Cause |
-| --- | --- | --- | --- |
-| Best | `O(1)` | `O(1)` | The target is at index `0` or `1`, found before any doubling. |
-| Successful at position `i` | `O(log(i + 1))` | `O(1)` | Doubling brackets `i`; binary search then examines a window of at most `i + 1` elements. |
-| Absent from a bounded input | `O(log n)` | `O(1)` | Doubling reaches the end, then binary search rejects the final bracket. |
-
-The position-sensitive bound applies only when the target exists. It beats Binary Search when `i + 1 ≪ n` and becomes `O(log n)` when the target is near the end. An absent target has no position to substitute for `i`, so its bounded-input cost is `O(log n)`. Auxiliary space is `O(1)` for the iterative binary search below. A recursive binary search would add `O(log(i + 1))` call-stack space for a successful search, or `O(log n)` when the target is absent.
 
 # When the Assumptions Stop Holding
 
@@ -219,9 +209,6 @@ The bracket is only as trustworthy as the ordering. The gallop's `a[bound] < tar
 > `Math.Min(bound, n - 1)` clamps the overshoot from the last doubling; an unknown-length indexable variant replaces the `bound < n` guard with an out-of-range probe signal.
 
 # Questions
-
-> [!QUESTION]- Why is a successful exponential search `O(log(i + 1))` rather than `O(log n)`?
-> Doubling stops as soon as `bound` reaches or passes the target's position `i`, after `O(log(i + 1))` steps, and the bracket contains at most `i + 1` elements, so the closing binary search has the same bound. The `+1` covers positions `0` and `1`; an absent target has no position `i` and costs `O(log n)` on a bounded input.
 
 > [!QUESTION]- Why must the high end of the bracket be clamped, and what breaks without it?
 > The final doubling makes `bound` the first power of two at or beyond the target, so it can land past the last valid index. Bisecting `[bound/2, bound]` without clamping the upper end to `min(bound, n − 1)` reads outside the array; on an unknown-length finite source, the probe must report the terminal boundary or safely treat an out-of-range position as greater than the target. `bound *= 2` can also overflow a 32-bit index into a negative probe.

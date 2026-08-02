@@ -1,8 +1,8 @@
 ---
 publish: true
 created: 2026-07-29T20:22:59.991Z
-modified: 2026-08-01T18:31:33.356Z
-published: 2026-08-01T18:31:33.356Z
+modified: 2026-08-02T11:02:59.087Z
+published: 2026-08-02T11:02:59.087Z
 topic:
   - Computer Science
 subtopic:
@@ -18,7 +18,7 @@ Parsing a 4 KB network buffer routinely needs to hand a middle section to anothe
 
 A span owns nothing. It is a small value type — a managed reference to the first element in view plus an `int` length — laid over memory that lives elsewhere: a managed array, a `stackalloc` block, or native memory. Slicing returns another span over the same backing store with a shifted reference and a new length; no element is copied, which is why a write through a slice is visible in the original buffer. Being a `ref struct` prevents the span value from being stored in heap objects; C# escape analysis also stops a span over stack-local memory from escaping that memory's lifetime. Native memory remains the caller's responsibility because the type system cannot observe when it is freed.
 
-**Core shape:** existing contiguous buffer → (ref-to-first, length) window → `Slice` adjusts ref+length with no copy → shared memory across views → `O(1)` span storage regardless of window size.
+**Core shape:** existing contiguous buffer → (ref-to-first, length) window → `Slice` adjusts ref+length with no copy → shared memory across views
 
 The interactive view keeps the backing array and active window visible together. Slice narrows the `(start, length)` window without copying; a write through it mutates the same backing slot.
 
@@ -29,7 +29,7 @@ tab: Visualization
 {"algorithm":"span"}
 ```
 
-# Representation and Non-ownership
+#### Representation and Non-ownership
 
 A `Span<T>` holds two fields: a managed reference (`ref T`) to the first element in view and an `int` length. It stores none of the elements itself, so its footprint is constant whether the window covers 2 elements or 2 million. Indexing `span[i]` dereferences `first + i` after checking `0 <= i < length`, giving array-style access with a bounds check and no hop through an owner object.
 
@@ -156,16 +156,6 @@ tab: Complexity
 ```
 ````
 
-# Complexity
-
-| Operation | Time | Heap allocation | Aux space |
-| --- | --- | --- | --- |
-| Construct a span over a buffer | `O(1)` | none | `O(1)` |
-| Element access `span[i]` | `O(1)`, bounds-checked | none | `O(1)` |
-| `Slice(start, length)` | `O(1)` | none — same memory | `O(1)` |
-
-The defining column is allocation: every operation is constant time and copies nothing. A span is two fields, so its own footprint is `O(1)` independent of the window length; the elements live in memory it does not own. Producing the same sub-view as a distinct array — `array[100..200]` typed as `byte[]` — instead costs `O(n)` time and an `O(n)` allocation for the copied elements.
-
 # Where the Stack-only Window Breaks down
 
 The restrictions follow from ref safety: the compiler confines the span value to contexts that do not require storing it in an ordinary heap object or state machine.
@@ -206,11 +196,11 @@ Backing-store lifetime still matters. A span over a `stackalloc` buffer is valid
 
 # Comparison
 
-| Type | Sub-view cost | Heap-storable | Crosses `await` / lives in a field | Backing store | Stronger case |
-| --- | --- | --- | --- | --- | --- |
-| `Span<T>` | `O(1)`, no copy | No (`ref struct`) | No | Array, `stackalloc`, or native memory | Zero-copy slicing on synchronous hot paths |
-| `ArraySegment<T>` | `O(1)` view | Yes | Yes | Managed array only | A heap-storable array window from before `Span<T>` existed |
-| `Memory<T>` | `O(1)` slice | Yes | Yes | Array or other owned buffer | A view must live on the heap or cross an async boundary |
+| Type | Crosses `await` / lives in a field | Backing store | Stronger case |
+| --- | --- | --- | --- |
+| `Span<T>` | No | Array, `stackalloc`, or native memory | Zero-copy slicing on synchronous hot paths |
+| `ArraySegment<T>` | Yes | Managed array only | A heap-storable array window from before `Span<T>` existed |
+| `Memory<T>` | Yes | Array or other owned buffer | A view must live on the heap or cross an async boundary |
 
 `Span<T>` is the zero-copy, zero-allocation view for synchronous code that touches contiguous memory — parsing, formatting, buffer manipulation — and it pays for that speed by being a stack-only value. `Memory<T>` accepts one level of indirection to become heap-storable and async-safe, which is the deciding factor whenever a managed-memory view must sit in a field or survive an `await`. `ArraySegment<T>` fills the same heap-storable niche for managed arrays only and predates both. A real copy — a fresh array — is warranted when the data needs independent ownership rather than another view of the same storage.
 

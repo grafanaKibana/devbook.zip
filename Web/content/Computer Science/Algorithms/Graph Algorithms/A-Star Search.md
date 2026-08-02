@@ -1,8 +1,8 @@
 ---
 publish: true
 created: 2026-07-29T20:22:59.982Z
-modified: 2026-08-02T08:53:54.115Z
-published: 2026-08-02T08:53:54.115Z
+modified: 2026-08-02T11:04:40.476Z
+published: 2026-08-02T11:04:40.476Z
 topic:
   - Computer Science
 subtopic:
@@ -33,8 +33,6 @@ tab: Coordinate grid
 {"algorithm":"a-star","variant":"coordinate-grid"}
 ```
 
-A winding 6 × 4 grid makes the heuristic steer around two barriers.
-
 tab: Cities
 
 
@@ -55,8 +53,6 @@ tab: Midtown map
 ```steptrace
 {"algorithm":"a-star","variant":"midtown-map"}
 ```
-
-One-way streets and a West 44th closure force the route onto Broadway.
 
 ~~~~
 
@@ -95,30 +91,21 @@ tab: Complexity
           "operation": "Best",
           "bounds": [
             {
-              "kind": "text",
+              "kind": "curve",
               "role": "Time (node expansions)",
-              "formula": "Θ(d)"
+              "formula": "Θ(d)",
+              "curveId": "linear"
             }
           ]
         },
         {
           "kind": "operation",
-          "operation": "Observed average",
+          "operation": "Average",
           "bounds": [
             {
-              "kind": "samples",
-              "role": "600 Ukraine-city routes",
-              "formula": "Mean expansions",
-              "samples": [
-                { "n": 1, "value": 2.05 },
-                { "n": 2, "value": 3.33 },
-                { "n": 3, "value": 5.21 },
-                { "n": 4, "value": 7.26 },
-                { "n": 5, "value": 9.53 },
-                { "n": 6, "value": 11.8 },
-                { "n": 7, "value": 13.69 },
-                { "n": 8, "value": 15.71 }
-              ]
+              "kind": "text",
+              "role": "Time (node expansions)",
+              "formula": "O(b^d)"
             }
           ]
         },
@@ -143,30 +130,21 @@ tab: Complexity
           "operation": "Best",
           "bounds": [
             {
-              "kind": "text",
+              "kind": "curve",
               "role": "Auxiliary space, fixed b",
-              "formula": "O(bd)"
+              "formula": "O(bd)",
+              "curveId": "linear"
             }
           ]
         },
         {
           "kind": "operation",
-          "operation": "Observed average",
+          "operation": "Average",
           "bounds": [
             {
-              "kind": "samples",
-              "role": "600 Ukraine-city routes",
-              "formula": "Mean peak stored",
-              "samples": [
-                { "n": 1, "value": 5.26 },
-                { "n": 2, "value": 7.87 },
-                { "n": 3, "value": 10.95 },
-                { "n": 4, "value": 13.43 },
-                { "n": 5, "value": 16.2 },
-                { "n": 6, "value": 18.8 },
-                { "n": 7, "value": 20.68 },
-                { "n": 8, "value": 22.61 }
-              ]
+              "kind": "text",
+              "role": "Auxiliary space, fixed b",
+              "formula": "O(b^d)"
             }
           ]
         },
@@ -186,8 +164,6 @@ tab: Complexity
   }
 }
 ```
-
-The sampled average is empirical, not a universal average-case bound: it comes from the visualizer's exact implementation, straight-line heuristic, tie-breaking, and 600 ordered routes on its 25-city Ukraine graph. “Peak retained” means the largest combined OPEN-plus-CLOSED node count observed during a run.
 
 The exponential bounds describe implicit state spaces with unit or uniform positive edge costs. On an explicit finite graph with a consistent, `O(1)` heuristic, an indexed heap with decrease-key gives `O((V + E) log V)` time and `O(V)` auxiliary space. The C# implementation below instead enqueues lazy duplicates: up to `O(E)` queue records, `O((V + E) log E)` time, and `O(V + E)` auxiliary space. Heuristic quality and tie-breaking still matter: even exact `h*` can expand many states tied at the optimal solution cost, while an uninformative heuristic approaches Dijkstra's search.
 

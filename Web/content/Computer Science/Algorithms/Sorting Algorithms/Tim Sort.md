@@ -1,8 +1,8 @@
 ---
 publish: true
 created: 2026-07-18T14:02:44.032Z
-modified: 2026-08-01T18:31:33.353Z
-published: 2026-08-01T18:31:33.353Z
+modified: 2026-08-02T11:14:55.095Z
+published: 2026-08-02T11:14:55.095Z
 topic:
   - Computer Science
 subtopic:
@@ -14,13 +14,13 @@ priority: Medium
 status: Creation
 ---
 
-CPython's `list.sort`/`sorted` and Java's `Arrays.sort` for object arrays lean on one fact about production data: it is rarely random. Log lines arrive mostly time-ordered, an appended list is sorted except at its tail, exported records come pre-grouped. A plain [[Computer Science/Algorithms/Sorting Algorithms/Merge Sort|merge sort]] ignores that structure and pays `Θ(n log n)` comparisons on every input, re-discovering order that was already present.
+CPython's `list.sort`/`sorted` and Java's `Arrays.sort` for object arrays lean on one fact about production data: it is rarely random. Log lines arrive mostly time-ordered, an appended list is sorted except at its tail, exported records come pre-grouped. A plain [[Computer Science/Algorithms/Sorting Algorithms/Merge Sort|merge sort]] ignores that structure and re-discovers order that was already present.
 
-Tim sort is the _natural_ merge-sort family behind both runtimes. It reads the existing order first: it splits the array into maximal already-sorted stretches — **runs** — spends work only where order is missing, and merges the runs back together. On an input that is already a single ascending (or single descending) run it finishes in one `Θ(n)` pass; on unstructured input it degrades to the same `Θ(n log n)` as merge sort, staying stable throughout. Exploitable order is not a precondition for correctness; it is the condition under which adaptivity pays. Uniformly random keys rarely contain long runs, so the extra machinery usually earns little over a plain merge.
+Tim sort is the _natural_ merge-sort family behind both runtimes. It reads the existing order first: it splits the array into maximal already-sorted stretches — **runs** — spends work only where order is missing, and merges the runs back together. A single ascending or descending run needs no merge; unstructured input still remains correct and stable. Exploitable order is not a precondition for correctness; it is the condition under which adaptivity pays. Uniformly random keys rarely contain long runs, so the extra machinery usually earns little over a plain merge.
 
 The visualization and invariant discussion below describe classic TimSort as retained by OpenJDK: strictly descending runs, one fixed `minrun`, and a merge stack governed by run-size invariants. Current CPython retains the adaptive, stable natural-merge mechanics, but now detects non-increasing runs with equal-block reversal, chooses merges with Powersort, and, since 2025, varies `minrun` sizing from run to run.
 
-**Classic/OpenJDK shape:** partially ordered input → detect natural runs → pad short runs to `minrun` with binary insertion sort → merge under stack size invariants → `Θ(n)` on ordered input, `Θ(n log n)` worst, stable, `O(n)` merge buffer.
+**Classic/OpenJDK shape:** partially ordered input → detect natural runs → pad short runs to `minrun` with binary insertion sort → merge under stack size invariants while preserving equal-key order.
 
 ````tabsdown
 tab: Visualization
@@ -31,7 +31,7 @@ tab: Visualization
 { "algorithm": "tim-sort", "array": [5, 6, 7, 8, 9, 4, 3, 1, 2, 8], "minrun": 4 }
 ```
 
-## Decisive Move
+
 
 Classic/OpenJDK TimSort's turning point is the moment the run stack collapses two adjacent runs because their sizes have just violated the merge invariant. The animation shows that over a small partially-ordered array.
 
@@ -50,19 +50,19 @@ runs (lengths)                 contents
 
 The three-run condition `Z > Y + X` fails when `[8]` lands (`5 > 4 + 1` is false), so `Y` merges with the smaller neighbour `X`. The resulting equal-length pair still violates `Y > X`, so the same collapse loop merges it immediately. On inputs where the final pair satisfies `Y > X`, the later forced-collapse phase performs that final adjacent merge. Both checks select only adjacent runs. The state that changed is the stack shape, not correctness: the partition of the array stays contiguous and the eventual merges stay near-balanced.
 
-## Runs, Minrun, and the Merge Stack
+#### Runs, Minrun, and the Merge Stack
 
-Four mechanisms carry the algorithm.
+The algorithm combines run detection, extension, stack policy, and merging.
 
-**Classic/OpenJDK run detection.** From the current position the scan extends a run as long as elements stay ascending (`a[i] <= a[i+1]`) or *strictly* descending (`a[i] > a[i+1]`). A descending run is reversed in place. The asymmetry is load-bearing: because descent is strict, a stretch of equal keys can never form a descending run, so the in-place reversal never disturbs equal keys. Current CPython instead accepts non-increasing runs: it reverses each equal-key block while scanning, then reverses the whole run, so the double reversal restores equal keys to their original order.
+**Classic/OpenJDK run detection.** From the current position the scan extends a run as long as elements stay ascending (`a[i] <= a[i+1]`) or *strictly* descending (`a[i] > a[i+1]`). A descending run is reversed. The asymmetry is load-bearing: because descent is strict, a stretch of equal keys can never form a descending run, so reversal never disturbs equal keys. Current CPython instead accepts non-increasing runs: it reverses each equal-key block while scanning, then reverses the whole run, so the double reversal restores equal keys to their original order.
 
 **`minrun`.** A natural run shorter than its target is extended by binary [[Computer Science/Algorithms/Sorting Algorithms/Insertion Sort|insertion sort]]: following elements are pulled in and placed with a binary search for the insertion point. OpenJDK computes one fixed `minrun` for the array from the high-order bits of `n`; `MIN_MERGE = 32` gives `minrun ∈ [16, 32]` (`minrun = n` for `n < 32`). Current CPython uses `MAX_MINRUN = 64`, but since 2025 it carries the fractional remainder of `n / 2^e` forward, so successive targets can differ by one: for `n = 315`, they are a mix of 39 and 40 instead of one fixed 40. The variable targets keep each level of the merge tree as balanced as possible.
 
-**The classic/OpenJDK run stack.** Each run is pushed onto a stack. For the top three lengths `X` (top), `Y`, `Z` (deepest), OpenJDK TimSort maintains `Z > Y + X` and `Y > X`; when either breaks it merges `Y` with the smaller of `X` and `Z`. These invariants bound the size ratio between adjacent runs, so merges stay balanced enough to cap total work at `Θ(n log n)`.
+**The classic/OpenJDK run stack.** Each run is pushed onto a stack. For the top three lengths `X` (top), `Y`, `Z` (deepest), OpenJDK TimSort maintains `Z > Y + X` and `Y > X`; when either breaks it merges `Y` with the smaller of `X` and `Z`. These invariants keep adjacent run sizes balanced.
 
 **Current CPython's run stack.** Powersort assigns a power — the depth of the runs' connecting node in an ideal merge tree — to each adjacent-run boundary. Pending powers stay strictly decreasing from the top of the stack; a newly computed power triggers adjacent merges while older powers are greater. This replaces the visualized run-size invariant policy.
 
-**Merging and galloping.** A production merge uses [[Computer Science/Algorithms/Sorting Algorithms/Merge Sort|merge sort]]'s two-way merge into a temporary copy of the *smaller* run (hence `≤ n/2` extra space), resolving ties toward the earlier run to stay stable. When one run wins `MIN_GALLOP = 7` comparisons in a row, the merge switches to **galloping**: it finds the block boundary with exponential search followed by binary search, reducing the boundary-search comparisons to `O(log k)` while the `k` copied elements still take linear time. If galloping stops paying off it adaptively backs out to one-at-a-time merging.
+**Merging and galloping.** A production merge uses [[Computer Science/Algorithms/Sorting Algorithms/Merge Sort|merge sort]]'s two-way merge into a temporary copy of the smaller run, resolving ties toward the earlier run to stay stable. When one run wins `MIN_GALLOP = 7` comparisons in a row, the merge switches to **galloping**: exponential search followed by binary search finds the end of the winning block, which is then copied together. If galloping stops paying off it backs out to one-at-a-time merging.
 
 tab: Complexity
 
@@ -126,27 +126,15 @@ tab: Complexity
   }
 }
 ```
-````
-
-## Complexity
-
-| Case | Time | Auxiliary space | Cause |
-| --- | --- | --- | --- |
-| Best | `Θ(n)` | `O(1)` | Input is a single run (already ascending, or descending and reversed in place); run detection short-circuits and no merge occurs. |
-| Average | `Θ(n log n)` | `O(n)` | Runs of `≥ minrun` merge across `~log n` balanced levels; the merge buffer holds the smaller run, `≤ n/2`. |
-| Worst | `Θ(n log n)` | `O(n)` | Adversarial run structure and key order force logarithmically many merge levels; buffer `≤ n/2`. |
-
-Tim sort is **stable**: merges preserve equal-key order; classic/OpenJDK strict descent makes reversal safe, while current CPython restores equal blocks before reversing the whole non-increasing run. It is **adaptive** because existing order lengthens natural runs and cuts merge work. The best-case `Θ(n)` is the run-detection short-circuit, not a lucky pivot: a sorted or strictly reverse-sorted array is one run. Implementations may pre-size a small merge buffer, but no per-element temporary storage is used when the input forms a single run.
-
-# When the Merge Policy Breaks
-
-The run stack's merge policy is where Tim sort's sharp edges live.
-
-**The merge-collapse invariant defect (2015).** de Gouw et al. used KeY to verify OpenJDK's Java implementation and instead found a genuine bug: `mergeCollapse` restored the invariant only among the top runs, so a crafted sequence of run lengths could leave it violated deeper in the stack. The defect also existed in CPython's analogous policy. Java's fixed-size run stack could then overflow into a reachable `ArrayIndexOutOfBoundsException`; CPython's larger fixed stack made the analogous overflow theoretical at feasible list sizes. Java's first patch enlarged the stack, while the later correction widened the invariant check to the run below the top three. Current CPython's Powersort policy no longer uses this merge-collapse invariant.
 
 **Galloping can be net-negative.** A short winning streak can reach `MIN_GALLOP` and enter galloping, only for the exponential/binary search to find a block too short to amortize the probe before the merge falls back to one-at-a-time comparisons. The adaptive penalty raises the entry threshold after that failed attempt, but the probe and mode switch are still wasted work.
 
-**`O(n)` memory, not in place.** The merge buffer of up to `n/2` is pure overhead when stability is unobservable — for example sorting a huge primitive array whose elements have no identity beyond their value. That cost is precisely why Java sorts _primitives_ with a dual-pivot [[Computer Science/Algorithms/Sorting Algorithms/Quick Sort|quick sort]] and .NET sorts with [[Computer Science/Algorithms/Sorting Algorithms/Introsort|introsort]] rather than Tim sort.
+**`O(n)` memory, not in place.** The merge buffer of up to `n/2` is pure overhead when stability is unobservable — for example sorting a huge primitive array whose elements have no identity beyond their value. That cost is precisely why Java sorts *primitives* with a dual-pivot [[Computer Science/Algorithms/Sorting Algorithms/Quick Sort|quick sort]] and .NET sorts with [[Computer Science/Algorithms/Sorting Algorithms/Introsort|introsort]] rather than Tim sort.
+````
+
+# When the Merge Policy Breaks
+
+In 2015, de Gouw et al. found that OpenJDK's `mergeCollapse` restored the invariant only among the top runs, allowing a crafted run-length sequence to violate it deeper in the stack and reach `ArrayIndexOutOfBoundsException`. The later correction widened the invariant check; current CPython's Powersort policy no longer uses this merge-collapse invariant.
 
 # Reference Drawer
 
@@ -171,7 +159,7 @@ The run stack's merge policy is where Tim sort's sharp edges live.
 >   K --> Z[Sorted and stable]
 > ```
 
-> [!EXAMPLE]- Classic/OpenJDK-style C# implementation
+> [!EXAMPLE]- Classic TimSort-style C# implementation with the legacy CPython minrun threshold
 >
 > ```csharp
 > // Stable natural-merge sort. Galloping is omitted for readability;
@@ -209,7 +197,7 @@ The run stack's merge policy is where Tim sort's sharp edges live.
 >     {
 >         int r = 0;                       // set to 1 if any dropped low bit is 1
 >         while (n >= 64) { r |= n & 1; n >>= 1; }
->         return n + r;                    // CPython MAX_MINRUN = 64 -> 32..64 (Java MIN_MERGE = 32 -> 16..32)
+>         return n + r;                    // Legacy CPython MAX_MINRUN = 64.
 >     }
 >
 >     // Returns run length; a strictly-descending run is reversed in place.
@@ -301,15 +289,9 @@ The run stack's merge policy is where Tim sort's sharp edges live.
 > }
 > ```
 >
-> `MergeCollapse` carries the correctness contract: the second clause testing `runs[n - 2]` is the check the 2015 verification found missing. This compact implementation always buffers the left run, so unlike production Tim sort it can allocate more than `n/2` elements; it keeps the left-on-tie rule so the merge stays stable.
+> `MergeCollapse` carries the correctness contract: the second clause testing `runs[n - 2]` is the check the 2015 verification found missing. This compact implementation always buffers the left run, whereas production TimSort buffers the smaller run; it keeps the left-on-tie rule so the merge stays stable.
 
 # Questions
-
-> [!QUESTION]- Why does Tim sort reach `Θ(n)` on some inputs while its worst case is still `Θ(n log n)`?
-> In classic/OpenJDK TimSort, run detection scans for maximal ascending or strictly-descending stretches, reverses descending runs, and extends short runs to one fixed `minrun`. A single run finishes in `Θ(n)` with no merges; unstructured input still merges across `Θ(log n)` levels, giving `Θ(n log n)`. Current CPython instead accepts non-increasing runs with equal-block reversal and uses variable per-run targets, without changing those bounds.
-
-> [!QUESTION]- What do classic/OpenJDK TimSort's run-size invariants guarantee?
-> For the top three run lengths `X, Y, Z` (Z deepest), OpenJDK TimSort keeps `Z > Y + X` and `Y > X`, merging when either fails. This keeps merge depths bounded and total work at `Θ(n log n)`. Current CPython replaces these size invariants with Powersort's strictly decreasing stack powers.
 
 > [!QUESTION]- What did the 2015 formal-verification effort reveal, and how did it tie back to the run stack?
 > de Gouw et al. proved OpenJDK's `mergeCollapse` routine only restored the invariant among the top runs, leaving deeper violations reachable by a crafted run-length sequence. Java's fixed-size run stack could then overflow into a reachable `ArrayIndexOutOfBoundsException`; CPython had the analogous defect, but its larger fixed stack made overflow theoretical at feasible list sizes. Java's stopgap enlarged the stack; the real fix widened the invariant check to also test the run below the top three.

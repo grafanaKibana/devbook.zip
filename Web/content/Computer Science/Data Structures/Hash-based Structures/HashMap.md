@@ -1,8 +1,8 @@
 ---
 publish: true
 created: 2026-07-29T20:22:59.988Z
-modified: 2026-08-02T08:53:54.290Z
-published: 2026-08-02T08:53:54.290Z
+modified: 2026-08-02T11:31:06.713Z
+published: 2026-08-02T11:31:06.713Z
 topic:
   - Computer Science
 subtopic:
@@ -196,9 +196,16 @@ tab: Complexity
           "operation": "Insert",
           "bounds": [
             {
-              "kind": "text",
-              "role": "Auxiliary space",
-              "formula": "O(1) normally; O(n) during resize"
+              "kind": "curve",
+              "role": "Normally",
+              "formula": "O(1)",
+              "curveId": "constant"
+            },
+            {
+              "kind": "curve",
+              "role": "Resize",
+              "formula": "O(n)",
+              "curveId": "linear"
             }
           ]
         },

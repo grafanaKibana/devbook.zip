@@ -1,8 +1,8 @@
 ---
 publish: true
 created: 2026-07-21T18:52:02.735Z
-modified: 2026-08-01T18:31:39.860Z
-published: 2026-08-01T18:31:39.860Z
+modified: 2026-08-02T10:43:06.487Z
+published: 2026-08-02T10:43:06.487Z
 topic:
   - Computer Science
 subtopic:
@@ -13,7 +13,7 @@ priority: Medium
 status: Ready to Repeat
 ---
 
-Naive recursive `fib(50)` makes over 40 billion calls to compute a value the recurrence defines at only 51 points, because the plain recursion has no memory that it already solved `fib(48)` the last time it needed it. Memoization gives it that memory: cache each call's result keyed on its arguments, and every repeat returns the stored value instead of re-entering the subtree beneath it. `fib(50)` collapses from `O(2ⁿ)` to `O(n)` — one computation per distinct argument, the rest cache hits.
+Naive recursive `fib(50)` makes over 40 billion calls to compute a value the recurrence defines at only 51 points, because the plain recursion has no memory that it already solved `fib(48)` the last time it needed it. Memoization gives it that memory: cache each call's result keyed on its arguments, and every repeat returns the stored value instead of re-entering the subtree beneath it.
 
 The technique is narrow and mechanical: wrap a **pure** function — same inputs always produce the same output, no observable side effects — so its first call for a given argument computes and stores, and later calls with that argument read the store. For a recurrence with overlapping subproblems, memoization is the usual **top-down** form of [[Computer Science/Algorithms/Paradigms/Dynamic Programming|dynamic programming]]: write the natural recurrence, then add a cache. The difference from bottom-up tabulation is _when and what_ gets computed — memoization is lazy and recursion-driven, evaluating only the states the recursion actually reaches; tabulation is eager and iterative, filling every cell in dependency order.
 
@@ -25,16 +25,13 @@ Memoization only _pays_ when calls repeat. On a function whose every call has di
 tab: Visualization
 
 
-
 ```steptrace
 { "algorithm": "memoization" }
 ```
 
-# Trace
 
 The trace uses abstract states rather than tying the mechanism to one recurrence. The left branch computes and stores states `D` and `E`. The right branch requests both keys again: cached `D` skips its two child calls, while cached base state `E` returns immediately.
 
-# Mechanism — what the Cache Keys on and what it Needs
 
 The cache is a map from *arguments* to *result*. A correct and useful cache depends on three things; failures either return a stale answer or destroy the expected hit rate:
 
@@ -108,10 +105,6 @@ tab: Complexity
 ```
 ````
 
-# Complexity
-
-For memoized Fibonacci, n distinct subproblems are each computed once and retained in the cache: O(n) time and O(n) cache space. The recursive form also uses O(n) stack space in the chain-shaped worst case.
-
 # Where Memoization Breaks or Costs
 
 - **Unbounded cache growth.** A long-lived memoised function accumulates one entry per distinct argument forever — a memory leak dressed as an optimisation. Bounded caches evict; .NET's `MemoryCache` supports expiration and eviction policies. The trade is that an eviction can turn a would-be hit back into a recompute.
@@ -171,13 +164,6 @@ For memoized Fibonacci, n distinct subproblems are each computed once and retain
 
 Memoization sits next to the other ways of not redoing work; the axis is _when_ results are computed and _what_ is kept.
 
-| Form | Evaluation order | What is stored | Work coverage | Control-flow stack | Main cost |
-| --- | --- | --- | --- | --- | --- |
-| Recursive top-down DP | Lazily, on first call | One entry per reached state | Reachable states only | Recursion depth | Cache growth; deep call chains |
-| Dense bottom-up tabulation | In dependency order | Full table or rolling window | Planned table region | Usually `O(1)` | Computes planned states even when some are unreachable |
-| Nonrecursive application caching | On demand | Entries chosen by cache policy | Requested keys only | Determined by the caller | Staleness, eviction, and invalidation |
-| Plain recursive computation | Every call | Nothing | Full call tree | Recursion depth | Repeated states recompute |
-
 Memoization is the fit when the recurrence is natural to write recursively, the reachable state space is a small fraction of the whole table, and stack depth is bounded — it evaluates only what's needed and mirrors the maths directly. [[Computer Science/Algorithms/Paradigms/Dynamic Programming|Tabulation]] wins when nearly all states are visited anyway (so laziness buys nothing), when a rolling array can shrink memory, or when the recursion would be too deep for the stack. Memoization is a specialized form of caching for deterministic function results. Application caches are broader: they may store data from mutable or external sources, which replaces the purity assumption with explicit freshness, expiration, and invalidation rules.
 
 # Questions
@@ -190,9 +176,6 @@ Memoization is the fit when the recurrence is natural to write recursively, the 
 
 > [!QUESTION]- What is the most common correctness bug when memoising a recurrence?
 > An incomplete cache key. If the key omits an argument the result depends on — caching a `(i, capacity)` knapsack state on `i` alone — two different subproblems map to the same slot and the second read returns a stale value, silently. The key must be the full state, the same requirement DP calls state design.
-
-> [!QUESTION]- When should a memoised recurrence be rewritten as bottom-up tabulation?
-> When the recursion is deep enough to risk a stack overflow (a long chain of dependencies), when essentially every state gets visited so laziness saves nothing, or when a rolling-array reduction can cut memory that the recursive form can't exploit. Tabulation runs in tight iterative loops with `O(1)` stack, at the cost of computing states a lazy memo might have skipped.
 
 # References
 

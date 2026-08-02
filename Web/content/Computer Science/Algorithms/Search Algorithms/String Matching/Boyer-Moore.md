@@ -1,26 +1,24 @@
 ---
 publish: true
 created: 2026-07-28T10:25:56.632Z
-modified: 2026-08-01T18:31:33.350Z
-published: 2026-08-01T18:31:33.350Z
+modified: 2026-08-02T11:30:01.302Z
+published: 2026-08-02T11:30:01.302Z
 topic:
   - Computer Science
 subtopic:
   - Algorithms
-summary: Matches a pattern by comparing right-to-left and skipping ahead via bad-character and good-suffix rules, sublinear in practice.
+summary: Matches a pattern by comparing right-to-left and skipping ahead via bad-character and good-suffix rules.
 level:
   - "4"
 priority: Medium
 status: Creation
 ---
 
-Scanning a megabyte of source code for the literal `getUserById` means asking, at each of a million positions, whether the pattern starts there. The naive check compares left-to-right at every alignment, so a near-match that only fails on its final character still costs a comparison per position — `O(n·m)` in the worst case, and it never skips a byte it has not already read.
+Scanning a megabyte of source code for the literal `getUserById` means asking, at each of a million positions, whether the pattern starts there.
 
-Boyer-Moore reverses the comparison direction. It aligns the pattern under the text and compares from the pattern's _last_ character backward. A mismatch there yields two facts: the offending text character, and how much of the pattern's tail already matched. That is enough to prove that a run of the following alignments cannot match, so the pattern jumps forward past them — and those positions are never read. On English text or source code the jump is frequently the full pattern length, so the scan touches only a fraction of the input.
+Boyer-Moore reverses the comparison direction. It aligns the pattern under the text and compares from the pattern's _last_ character backward. A mismatch there yields two facts: the offending text character, and how much of the pattern's tail already matched. That is enough to prove that a run of the following alignments cannot match, so the pattern jumps forward past them — and those positions are never read.
 
 The jump distance comes from two precomputed tables, and every shift is sound only because scanning right-to-left turned one mismatch into a statement about a whole block of text.
-
-**Core condition:** large alphabet, right-to-left comparison → one mismatch skips a block unexamined → roughly `n/m` characters read, tables in `O(m + |Σ|)` space.
 
 The trace keeps the pattern aligned under the text while the comparison cursor moves right-to-left and both rules expose the shift they propose.
 
@@ -32,21 +30,21 @@ tab: Visualization
 {"algorithm":"boyer-moore","text":"ACCCDBACBA","pattern":"ACBA"}
 ```
 
-# Trace
 
-# Why a Mismatch Skips a Block
+
+
 
 Each alignment fixes the pattern's last character over some text index and compares leftward until a character disagrees (or the whole pattern matches). Two independent rules each propose a shift; the algorithm advances by the larger.
 
-**Bad-character rule.** At a mismatch between `pattern[j]` and text character `c`, let `lastOccurrence(c)` be the rightmost index of `c` in the pattern, or `-1` when it is absent. The proposed shift is `max(1, j - lastOccurrence(c))`. If `c` is absent and the mismatch happens at the final pattern position, that becomes a full-pattern jump of `m`. This is the source of the large-alphabet speedup: the more distinct symbols exist, the more often the mismatching character is absent from a short pattern, and the larger the average skip.
+**Bad-character rule.** At a mismatch between `pattern[j]` and text character `c`, let `lastOccurrence(c)` be the rightmost index of `c` in the pattern, or `-1` when it is absent. The proposed shift is `max(1, j - lastOccurrence(c))`. If `c` is absent and the mismatch happens at the final pattern position, that becomes a full-pattern jump of `m`. With more distinct symbols, the mismatching character is more often absent from a short pattern and the proposed skip is larger.
 
 **Good-suffix rule.** Suppose the suffix after `pattern[j]` matched before the mismatch. The strong rule first looks for another occurrence of that suffix whose preceding pattern character differs from the mismatching `pattern[j]`; requiring a different predecessor prevents the same mismatch from recurring immediately. If no eligible occurrence exists, it falls back to the longest suffix of the matched region that is also a prefix of the pattern. This reuses the partial-match information the bad-character rule discards.
 
 The shift is `max(bad_char_shift, good_suffix_shift)`, which is always at least one, so the search never stalls. Correctness rests on a negative argument: any smaller shift would either drop a known-mismatching character back over the text or misalign a suffix already proven to match, so every alignment skipped over provably cannot produce a match — even though its characters were never compared. That clause is the whole mechanism. A left-to-right comparison at the current alignment does not expose the trailing mismatch needed for this bad-character/block-skipping argument; KMP instead advances by reusing pattern-overlap information.
 
-Preprocessing builds both tables ahead of the scan. A last-occurrence table stores the raw rightmost index for each character (`|Σ|` entries), making the mismatch calculation `max(1, j - lastOccurrence(c))` explicit. An equivalent delta table used by Horspool-style code stores `m - 1 - i`, excludes the pattern's final position, and must adjust that end-relative delta back to the current mismatch position `j`; applying its values as unconditional shifts is a different algorithm. The good-suffix table maps each mismatch position to a safe suffix-preserving shift; its construction is `Θ(m)` but the index arithmetic is delicate.
+Preprocessing builds both tables ahead of the scan. A last-occurrence table stores the raw rightmost index for each character, making the mismatch calculation `max(1, j - lastOccurrence(c))` explicit. An equivalent delta table used by Horspool-style code stores `m - 1 - i`, excludes the pattern's final position, and must adjust that end-relative delta back to the current mismatch position `j`; applying its values as unconditional shifts is a different algorithm. The good-suffix table maps each mismatch position to a safe suffix-preserving shift, but its index arithmetic is delicate.
 
-## One Search
+
 
 Searching for `ACBA` in `ACCCDBACBA` produces all three decisions exposed in the trace:
 
@@ -196,22 +194,13 @@ tab: Complexity
   }
 }
 ```
+
+The favorable chart row describes inputs where large shifts repeatedly skip untouched text. The plain algorithm can repeat comparisons on adversarial text; the Galil rule remembers a region already known to match and avoids those repeated comparisons.
 ````
-
-# Complexity
-
-| Case | Time | Auxiliary space | Cause |
-| --- | --- | --- | --- |
-| Preprocessing | `Θ(m + \|Σ\|)` | `Θ(m + \|Σ\|)` | Build the bad-character table over the alphabet and the good-suffix table over the pattern. |
-| Best / sublinear | `O(n/m)` | `O(m + \|Σ\|)` | Large alphabet, long pattern: each alignment mismatches on its last character and that character is absent from the pattern, so every probe jumps a full `m` and most text is never read. |
-| Worst, plain | `O(n·m)` | `O(m + \|Σ\|)` | An all-equal pattern `A^m` in text `A^n`, where every alignment matches all `m` characters right-to-left (a full match) and the good-suffix rule shifts by only one, so ~`n` alignments each cost `O(m)`. |
-| Worst, Galil rule | `O(n)` | `O(m + \|Σ\|)` | Remembering how much of the pattern is already known to match after a shift skips those re-comparisons, bounding total character comparisons linearly. |
-
-The tables persist through the scan, so search space stays `O(m + |Σ|)`; the loop itself keeps only a few indices beyond them. The plain-versus-Galil split matters: the sublinear `O(n/m)` is a property of large-alphabet inputs, not a guarantee. Without Galil's rule an adversarial input degrades to `O(n·m)`, and the guaranteed-linear bound requires the extra bookkeeping.
 
 # Where the Skip Disappears
 
-A small alphabet can reduce the advantage when the pattern is long enough to contain most symbols and the text distribution makes them recur often. Repetition matters too: searching `AAAA` inside a long run of `A` lands in the `O(n·m)` worst case because every alignment is a full match over all `m` characters and the good-suffix rule shifts by only one. But alphabet size alone does not determine performance—a short or skewed pattern can still exclude common text symbols, and a useful good-suffix shift can recover distance even when the mismatching character occurs in the pattern. For binary or DNA data, measure against the actual pattern lengths, symbol distribution, and repetition instead of assuming the skip disappears.
+A small alphabet can reduce the advantage when the pattern is long enough to contain most symbols and the text distribution makes them recur often. But alphabet size alone does not determine performance—a short or skewed pattern can still exclude common text symbols, and a useful good-suffix shift can recover distance even when the mismatching character occurs in the pattern. For binary or DNA data, measure against the actual pattern lengths, symbol distribution, and repetition instead of assuming the skip disappears.
 
 The good-suffix table is the part that breaks silently. Its prefix fallback is easy to compute off by one, and a wrong entry produces either a missed match or a shift of zero that loops forever. **Boyer-Moore-Horspool** removes that table and uses a bad-character delta keyed on the text character under the pattern's final position.
 
@@ -327,8 +316,8 @@ Production code does not converge on one universal variant. GNU `grep` documents
 > [!QUESTION]- What does each shift rule contribute, and why might an implementation choose Horspool?
 > The bad-character rule aligns the pattern's rightmost copy of the mismatching text character, giving large skips on large alphabets. The strong good-suffix rule reuses an already-matched suffix only when its preceding character differs from the mismatching pattern character, then falls back to a pattern prefix. The algorithm takes the larger shift, so it is never worse than either alone. Horspool is attractive when a simpler one-table implementation matters more than the extra skips, but the right choice depends on the workload.
 
-> [!QUESTION]- Why is the plain worst case `O(n·m)`, and what recovers a linear bound?
-> The sublinear behavior depends on frequent large skips, which vanish when text and pattern share long repeated runs — as with an all-equal pattern `aaaa` over `aaaa…a`, where every alignment is a full match over all `m` characters and the good-suffix rule then shifts by only one. Galil's rule remembers how much of the pattern is already known to match after a shift and skips re-comparing those positions, bounding total comparisons at `O(n)`.
+> [!QUESTION]- Which inputs prevent the shift rules from making large jumps?
+> Long repeated runs shared by the text and pattern can reduce each shift to one position. An all-equal pattern `aaaa` over `aaaa…a` is the extreme case: every alignment is a full match and the good-suffix rule advances only one position.
 
 # References
 
@@ -336,5 +325,5 @@ Production code does not converge on one universal variant. GNU `grep` documents
 - Charras & Lecroq, _Handbook of Exact String-Matching Algorithms_ (King's College Publications, 2004) — the canonical bad-character, good-suffix, and `suffixes` preprocessing this note's implementation follows (also published as the online ESMAJ handbook).
 - [GNU grep: Performance](https://www.gnu.org/software/grep/manual/html_node/Performance.html) — documents the fixed-string matcher's use of Boyer-Moore without naming the Horspool variant.
 - [`glibc` `memmem.c`](https://sourceware.org/git/?p=glibc.git;a=blob;f=string/memmem.c) — shows the modified Horspool path for 3–256-byte needles and the Two-Way fallback above that limit.
-- [Boyer–Moore string-search algorithm](https://en.wikipedia.org/wiki/Boyer%E2%80%93Moore_string-search_algorithm) — both heuristics, the Galil rule, and the complexity analysis distinguishing the plain and linear worst cases.
+- [Boyer–Moore string-search algorithm](https://en.wikipedia.org/wiki/Boyer%E2%80%93Moore_string-search_algorithm) — both shift heuristics, the Galil rule, and the distinction between the plain and Galil variants.
 - [Boyer–Moore–Horspool algorithm](https://en.wikipedia.org/wiki/Boyer%E2%80%93Moore%E2%80%93Horspool_algorithm) — a bad-character-only variant with simpler preprocessing and shift logic.

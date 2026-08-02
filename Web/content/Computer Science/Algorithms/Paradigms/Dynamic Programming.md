@@ -1,8 +1,8 @@
 ---
 publish: true
 created: 2026-07-18T14:02:43.953Z
-modified: 2026-08-01T18:31:33.345Z
-published: 2026-08-01T18:31:33.345Z
+modified: 2026-08-02T10:43:06.134Z
+published: 2026-08-02T10:43:06.134Z
 topic:
   - Computer Science
 subtopic:
@@ -72,7 +72,6 @@ Inspect the canonical recursion tree, cache hits, and stored returns.
 
 ~~~~
 
-# Mechanism — State, Recurrence, and the Two Forms
 
 Both examples become DP only after the state discards irrelevant history. Coin change keeps the remaining amount because every denomination remains reusable; finite coin stock would also require the remaining counts. Grid path keeps the current coordinate. Two calls with the same state have the same future choices and therefore the same answer, regardless of how they arrived there.
 
@@ -81,7 +80,6 @@ Both examples become DP only after the state discards irrelevant history. Coin c
 
 The recurrence then names the dependencies. Coin change reads `best[amount - coin]` for every usable denomination and keeps the minimum plus one. Grid path reads the right and down suffix costs and adds the current tile. The animations differ because those state spaces differ—a one-dimensional amount board versus a two-dimensional matrix—but the storage rule is the same.
 
-# Coin Change — Local Choice versus Stored Subproblems
 
 A cashier must return exactly `30¢` using real `1¢`, `10¢`, `25¢`, and `50¢` denominations. The example assumes enough of each coin that stock is not a constraint. Taking the largest usable coin first returns `25 + 1 + 1 + 1 + 1 + 1`, while `10 + 10 + 10` uses half as many coins. The five tabs keep that counterexample fixed while changing the solving strategy and level of abstraction.
 
@@ -143,7 +141,6 @@ The simplified Memoization and Tabulation tabs keep the cashier model visible. M
 > ```
 > `FewestCoinsTopDown(30, [1, 10, 25, 50])` and the bottom-up version both return `3`.
 
-# Grid Path — Repeated Coordinates versus a Filled Matrix
 
 A warehouse robot may move only right or down from the loading bay to the dispatch door. Choosing the cheaper immediate tile and breaking ties to the right walks into an expensive corridor and costs `21`; the best complete route costs `10`. Naive recursion eventually finds it, but different route prefixes repeatedly reach the same coordinate.
 
@@ -369,17 +366,6 @@ tab: Complexity
 }
 ```
 ````
-
-# Complexity
-
-DP's running time is structural: distinct states multiplied by transitions examined per state.
-
-| Problem | State count | Transitions per state | Time | Stored answers | Top-down stack |
-| --- | --- | --- | --- | --- | --- |
-| Coin change, target `W`, `D` denominations | `W + 1` amounts | up to `D` coins | `O(WD)` | `O(W)` | `O(W)` |
-| Grid path, `R × C` matrix | `R·C` coordinates | at most right + down | `O(RC)` | `O(RC)` | `O(R + C)` |
-
-Grid-path tabulation can keep one row in `O(C)` space when only the minimum cost matters. The visualization retains all `R·C` cells because reconstructing and highlighting the chosen route needs predecessor information. Coin change may store a chosen-coin array for direct reconstruction, or rescan the denominations during backtracking for a coin satisfying `dp[a] = dp[a - coin] + 1`.
 
 # Boundaries
 
