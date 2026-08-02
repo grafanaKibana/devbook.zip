@@ -1,8 +1,8 @@
 ---
 publish: true
 created: 2026-07-26T19:20:54.793Z
-modified: 2026-07-26T19:27:00.411Z
-published: 2026-07-26T19:27:00.411Z
+modified: 2026-08-02T10:49:20.673Z
+published: 2026-08-02T10:49:20.673Z
 topic:
   - Computer Science
 subtopic:
@@ -16,7 +16,7 @@ status: Ready to Repeat
 
 [[Computer Science/Algorithms/Graph Algorithms/Strongly Connected Components|Strongly connected components]] collapse every mutually reachable region of a digraph into one node. Tarjan's algorithm finds that partition in one DFS. It records when each vertex was discovered, how far an active subtree can reach back, and which vertices still belong to a component under construction.
 
-The decisive event is a pop. When a vertex cannot reach an earlier active vertex, it is the root of one SCC; popping the stack down to that vertex emits the whole component. The canonical SCC page carries the interactive Tarjan trace so the original concept note remains self-contained.
+The decisive event is a pop. When a vertex cannot reach an earlier active vertex, it is the root of one SCC; popping the stack down to that vertex emits the whole component. The canonical SCC page carries the interactive Tarjan trace and growth chart, so this focused note does not duplicate either payload.
 
 # Low-Link State
 
@@ -44,10 +44,6 @@ A done: low[A]=disc[A]=0 -> pop {C,B,A}
 ```
 
 The components leave in reverse topological order of the condensation: `{D, E}` before `{A, B, C}`.
-
-# Complexity
-
-Tarjan runs in `Θ(V + E)` time because DFS enters each vertex once and inspects each edge once. `disc`, `low`, `onStack`, and the explicit component stack use `O(V)` auxiliary space. A recursive implementation also uses up to `O(V)` call-stack frames on a deep graph.
 
 # Reference Drawer
 
@@ -143,6 +139,6 @@ This is related to the discovery/low-value pattern in [[Computer Science/Algorit
 
 # References
 
-- [Depth-First Search and Linear Graph Algorithms](https://epubs.siam.org/doi/10.1137/0201010) — Tarjan's 1972 primary paper introducing the linear-time SCC procedure.
+- [Depth-First Search and Linear Graph Algorithms](https://epubs.siam.org/doi/10.1137/0201010) — Tarjan's 1972 primary paper introducing the one-pass SCC procedure.
 - [Finding strongly connected components](https://cp-algorithms.com/graph/strongly-connected-components.html) — implementation-oriented treatment of SCC decomposition and the condensation DAG.
 - [Tarjan's strongly connected components algorithm](https://en.wikipedia.org/wiki/Tarjan%27s_strongly_connected_components_algorithm) — low-link and active-stack invariants with pseudocode.

@@ -1,8 +1,8 @@
 ---
 publish: true
 created: 2026-07-18T14:02:43.948Z
-modified: 2026-08-01T18:31:33.343Z
-published: 2026-08-01T18:31:33.343Z
+modified: 2026-08-02T10:39:41.961Z
+published: 2026-08-02T10:39:41.961Z
 topic:
   - Computer Science
 subtopic:
@@ -24,7 +24,6 @@ tab: Visualization
 {"algorithm":"kruskal"}
 ```
 
-# One Sorted Scan
 
 For edges `AB=1`, `BC=2`, `AC=3`, `CD=4`, the initial components are `{A}`, `{B}`, `{C}`, `{D}`.
 
@@ -104,16 +103,6 @@ tab: Complexity
 }
 ```
 ````
-
-# Complexity
-
-| Case | Time | Auxiliary space | Cause |
-| --- | --- | --- | --- |
-| Best | `Θ(E log E)` | `O(V)` plus sort workspace | the chosen comparison sort orders the full edge list |
-| Average | `Θ(E log E)` | `O(V)` plus sort workspace | the chosen comparison sort dominates near-constant union-find operations |
-| Worst | `Θ(E log E)` | `O(V)` plus sort workspace | the chosen comparison sort still processes the full edge list |
-
-The table fixes the sorting model to a non-adaptive `Θ(E log E)` comparison sort such as mergesort or heapsort. If the edge list is already sorted and no sorting pass is needed, the scan itself costs `O(E · α(V))`. With path compression and union by rank or size, disjoint-set work is `O(E · α(V))`; sorting dominates when required. The `O(V)` term is the union-find forest and assumes an in-place edge sort. A sort that allocates a temporary edge buffer raises auxiliary space to `O(V + E)`. The result itself stores `V - 1` edges and is excluded from auxiliary space.
 
 # Boundary Cases
 

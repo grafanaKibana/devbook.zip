@@ -1,26 +1,26 @@
 ---
 publish: true
 created: 2026-07-29T20:22:59.989Z
-modified: 2026-08-01T18:31:33.355Z
-published: 2026-08-01T18:31:33.355Z
+modified: 2026-08-02T11:07:03.579Z
+published: 2026-08-02T11:07:03.579Z
 topic:
   - Computer Science
 subtopic:
   - Data Structures
-summary: A fixed-size array with wrapping read/write indices, giving O(1) allocation-free enqueue/dequeue for streaming and bounded-history scenarios.
+summary: A fixed-size array with wrapping read and write indices for streaming and bounded-history workloads.
 level:
   - "4"
 priority: Medium
 status: Ready to Repeat
 ---
 
-A stream produces items faster than a consumer drains them, and only a bounded window of recent items needs to survive: the last N log lines, one frame of audio samples, packets waiting for a socket. A growable [[Computer Science/Data Structures/Linear Structures/Queue|Queue]] also uses circular indexing but occasionally allocates and copies when it runs out of capacity; a fixed circular buffer chooses the memory bound up front and moves indices without ever resizing.
+A stream produces items faster than a consumer drains them, and only a bounded window of recent items needs to survive: the last N log lines, one frame of audio samples, packets waiting for a socket. A growable [[Computer Science/Data Structures/Linear Structures/Queue|Queue]] also uses circular indexing but occasionally allocates and copies when it runs out of capacity; a fixed circular buffer chooses its capacity up front and moves indices without ever resizing.
 
-The array is treated as if its ends were joined. A `head` index marks the front (next read), a `tail` index marks the back (next write), and every advance is taken modulo the capacity so an index running off the end reappears at `0`. Enqueue writes at `tail` and sets `tail = (tail + 1) % capacity`; dequeue reads at `head` and advances `head` the same way. No element is ever copied to a new slot — the indices circle a stationary array — which makes this the standard O(1), allocation-free backing for a bounded [[Computer Science/Data Structures/Linear Structures/Queue|Queue]].
+The array is treated as if its ends were joined. A `head` index marks the front (next read), a `tail` index marks the back (next write), and every advance is taken modulo the capacity so an index running off the end reappears at `0`. Enqueue writes at `tail` and sets `tail = (tail + 1) % capacity`; dequeue reads at `head` and advances `head` the same way.
 
 What it gives up is growth and history: capacity is chosen once, and once the ring is full the next write either overwrites the oldest element or is refused. There is no record of items that scrolled past.
 
-**Core shape:** fixed array + `head`/`tail`/`count` → indices wrap `mod capacity` → O(1) enqueue/dequeue with no per-element allocation → a full write overwrites the oldest element or is rejected, according to policy.
+**Core shape:** fixed array + `head`/`tail`/`count` → indices wrap `mod capacity` → a full write overwrites the oldest element or is rejected, according to policy.
 
 ````tabsdown
 tab: Visualization
@@ -32,7 +32,7 @@ tab: Visualization
 
 The interactive view keeps the ring state between operations. Fill it past capacity to see `tail` wrap and the oldest slot yield as `head` advances.
 
-## Representation and Invariants
+#### Representation and Invariants
 
 Four fields hold the entire state:
 
@@ -174,17 +174,6 @@ tab: Complexity
 ```
 ````
 
-## Complexity
-
-| Operation | Time | Aux space per op | Cause |
-| --- | --- | --- | --- |
-| `Enqueue(x)` | `O(1)` | `O(1)` | One slot write and one modulo increment of `tail`; no shift, no allocation. |
-| `Dequeue()` | `O(1)` | `O(1)` | One slot read and one modulo increment of `head`. |
-| `Peek()` | `O(1)` | `O(1)` | Direct index into `head`. |
-| Construct | `O(capacity)` | `O(capacity)` | Allocate the backing array once. |
-
-Structure space is `O(capacity)` and fixed at construction — the array is sized up front and never reallocated, so steady-state operation allocates nothing and produces no per-element garbage. That is the property that separates it from a growable queue: the bounds above are true worst-case per operation, not amortized over resizes, because no resize ever happens.
-
 # When the Capacity is Reached
 
 Every boundary here follows from the two design commitments — a fixed array and wrap arithmetic.
@@ -193,7 +182,7 @@ A **full buffer** forces a choice, not a bug. Overwrite-oldest advances `head` o
 
 The **empty-vs-full ambiguity** becomes a real failure when neither a `count` nor a sacrificial slot is used: code that treats `head == tail` as unconditionally empty will report a full ring as empty and refuse to drain it, or the mirror bug on the write side, corrupting the stream. The ambiguity is not avoidable by clever index math alone; it requires one of the disambiguation schemes above.
 
-The ring **does not grow**. Reaching capacity never triggers a resize — that is the point of a bounded footprint. A "growable" ring is a different structure: it allocates a larger array and re-linearizes the wrapped contents (copying the `head…end` segment then the `0…tail` segment into contiguous order), an `O(count)` operation that reintroduces the allocation spikes a fixed ring exists to avoid.
+The ring **does not grow**. Reaching capacity never triggers a resize — that is the point of a bounded footprint.
 
 # Reference Drawer
 
@@ -270,9 +259,6 @@ The ring **does not grow**. Reaching capacity never triggers a resize — that i
 
 > [!QUESTION]- Why do a full ring and an empty ring both satisfy `head == tail`, and how is the collision resolved?
 > Empty rings put the read and write cursors on the same slot with nothing between them; a full ring wraps `tail` all the way around until it lands back on `head`. The index pair is identical in both states. Resolutions: store an explicit `count` (empty is `0`, full is `capacity`), or leave one slot unused so full becomes `(tail + 1) % capacity == head` while empty stays `head == tail`.
-
-> [!QUESTION]- Why are the O(1) operation bounds worst-case rather than amortized, unlike a growable queue?
-> The backing array is allocated once and never resized, so no operation can ever trigger a copy of existing elements. Each enqueue or dequeue is a single slot access plus a modulo increment, with a constant cost every time. A growable queue's O(1) is amortized precisely because occasional writes pay for a resize.
 
 > [!QUESTION]- On reaching capacity, what distinguishes an overwrite ring from a reject ring, and when does each fit?
 > Overwrite advances `head` over the write, dropping the oldest element so the newest N always remain — right for logs, telemetry, and frame buffers where old data is disposable. Reject leaves the buffer unchanged and signals the producer to back off — right for a work queue where every item must be processed. The structure is identical; only the full-buffer branch of enqueue differs.

@@ -1,8 +1,8 @@
 ---
 publish: true
 created: 2026-07-18T14:02:43.946Z
-modified: 2026-08-01T18:31:33.342Z
-published: 2026-08-01T18:31:33.342Z
+modified: 2026-08-02T10:39:41.590Z
+published: 2026-08-02T10:39:41.590Z
 topic:
   - Computer Science
 subtopic:
@@ -27,7 +27,6 @@ tab: Visualization
 
 Greedy first moves downward because those cells have smaller `h`, then follows the lower corridor until a vertical barrier forces it back up and around. It reaches the goal with cost `12`. [[Computer Science/Algorithms/Graph Algorithms/A-Star Search|A*]] uses the same grid but ranks by `g + h`, returning the optimal upper route with cost `8`. The comparison isolates the missing term: Greedy knows both routes point toward the same goal but never charges itself for the four extra steps already taken.
 
-# Ordering by the Estimate
 
 The frontier is a priority queue keyed by `h(n)`. Each iteration pops the node with the smallest estimate, and if it is not the goal, pushes every unvisited neighbor keyed by that neighbor's own `h`. The trace accumulates edge weights only to report the returned path cost; they never affect priority. A visited set stops a node from entering the queue twice.
 
@@ -133,16 +132,6 @@ tab: Complexity
 ```
 ````
 
-# Complexity
-
-| Case | Nodes generated or expanded | Auxiliary space | Cause |
-| --- | --- | --- | --- |
-| Best | `O(b·m)` | `O(b·m)` | A near-perfect heuristic guides expansion almost directly to the goal, one productive node per level. |
-| Typical | distribution-dependent; between `O(b·m)` and `O(b^m)` | up to `O(b^m)` | Heuristic quality and obstacle shape set how far expansion strays from the direct route. |
-| Worst | `O(b^m)` | `O(b^m)` | A misleading heuristic offers no guidance and expansion degrades toward uninformed search. |
-
-`b` is the branching factor and `m` the maximum depth of the search space. These are search-tree node counts, not heap-operation bounds. For the finite adjacency-list graph implementation below, assuming `O(1)` heuristic evaluation, each reachable vertex is enqueued once and each edge is inspected once: `O(E + V log V)` time and `O(V)` auxiliary space. Heuristic quality determines how much of that reachable graph is visited before the goal is found.
-
 # When the Estimate Misleads
 
 The h-only ordering fails in three distinct ways, all traceable to the missing `g` term.
@@ -151,7 +140,7 @@ The h-only ordering fails in three distinct ways, all traceable to the missing `
 
 **Loops without a visited set.** With no closed set, a node the search has already left can be re-enqueued, and on a cyclic graph the frontier can oscillate between two low-`h` nodes indefinitely. A visited set bounds any finite graph, but it cannot rescue an infinite one: where `h` keeps improving down a fruitless branch, there is no `g` bound to force the search to abandon that region, so it never terminates.
 
-**A poor heuristic collapses to uninformed search.** If `h` returns near-constant or weakly correlated values, the priority queue no longer separates directions and expansion degrades to an uninformed fan-out, paying the full `O(b^m)`. The concave obstacle is the common concrete case: a wall cupping the goal gives every cell inside the pocket a tempting low `h`, so the search thrashes along the barrier — re-committing to the blocked heading because those cells keep scoring lowest — before it discovers the way around.
+The concave obstacle is the common concrete case: a wall cupping the goal gives every cell inside the pocket a tempting low `h`, so the search thrashes along the barrier — re-committing to the blocked heading because those cells keep scoring lowest — before it discovers the way around.
 
 # Reference Drawer
 
