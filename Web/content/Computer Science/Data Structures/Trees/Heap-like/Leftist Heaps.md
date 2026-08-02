@@ -1,8 +1,8 @@
 ---
 publish: true
-created: 2026-07-28T10:20:00.773Z
-modified: 2026-07-29T15:42:20.532Z
-published: 2026-07-29T15:42:20.532Z
+created: 2026-07-29T20:22:59.994Z
+modified: 2026-08-01T18:31:33.360Z
+published: 2026-08-01T18:31:33.360Z
 topic:
   - Computer Science
 subtopic:
@@ -26,6 +26,9 @@ The tradeoff is shape. The tree is heap-ordered but deliberately left-heavy and 
 
 Use **Merge** on the same canonical heaps `[2, 7, 10]` and `[3, 5, 8]`. The active path follows the right spines; amber nodes are exactly those where the null-path-length comparison requires a child swap.
 
+````tabsdown
+tab: Visualization
+
 ```steptrace
 {"algorithm":"leftist-heap"}
 ```
@@ -44,6 +47,178 @@ Step 4 is the load-bearing move. After the recursive merge, the right child may 
 Both right spines are `O(log n)`, and the recursion consumes one right-spine node per level, so a merge does `O(log n)` comparisons and swaps. Nothing here is amortized: the bound holds for every individual merge.
 
 **insert** merges the heap with a one-node heap. **extract-min** returns the root and merges the root's left and right subtrees back together. A single correct merge yields the entire API, and every operation inherits its `O(log n)` worst-case bound. **find-min** just reads the root.
+
+tab: Complexity
+
+```complexity
+{
+  "version": 2,
+  "label": "Leftist Heaps complexity",
+  "variables": {
+    "inputSize": {
+      "symbol": "n",
+      "description": "number of input elements or states"
+    }
+  },
+  "resources": {
+    "time": {
+      "mode": "operations",
+      "entries": [
+        {
+          "kind": "operation",
+          "operation": "Merge(a, b)",
+          "bounds": [
+            {
+              "kind": "curve",
+              "role": "Best time",
+              "formula": "O(1)",
+              "curveId": "constant"
+            },
+            {
+              "kind": "curve",
+              "role": "Worst time",
+              "formula": "O(log n)",
+              "curveId": "log-n"
+            }
+          ]
+        },
+        {
+          "kind": "operation",
+          "operation": "Insert(x)",
+          "bounds": [
+            {
+              "kind": "curve",
+              "role": "Best time",
+              "formula": "O(1)",
+              "curveId": "constant"
+            },
+            {
+              "kind": "curve",
+              "role": "Worst time",
+              "formula": "O(log n)",
+              "curveId": "log-n"
+            }
+          ]
+        },
+        {
+          "kind": "operation",
+          "operation": "ExtractMin()",
+          "bounds": [
+            {
+              "kind": "curve",
+              "role": "Best time",
+              "formula": "O(1)",
+              "curveId": "constant"
+            },
+            {
+              "kind": "curve",
+              "role": "Worst time",
+              "formula": "O(log n)",
+              "curveId": "log-n"
+            }
+          ]
+        },
+        {
+          "kind": "operation",
+          "operation": "FindMin()",
+          "bounds": [
+            {
+              "kind": "curve",
+              "role": "Best time",
+              "formula": "O(1)",
+              "curveId": "constant"
+            },
+            {
+              "kind": "curve",
+              "role": "Worst time",
+              "formula": "O(1)",
+              "curveId": "constant"
+            }
+          ]
+        }
+      ]
+    },
+    "space": {
+      "mode": "operations",
+      "entries": [
+        {
+          "kind": "operation",
+          "operation": "Merge(a, b)",
+          "bounds": [
+            {
+              "kind": "curve",
+              "role": "Structure space",
+              "formula": "Θ(n) nodes + one npl field each",
+              "curveId": "linear"
+            },
+            {
+              "kind": "curve",
+              "role": "Aux space per op",
+              "formula": "O(log n) recursion stack",
+              "curveId": "log-n"
+            }
+          ]
+        },
+        {
+          "kind": "operation",
+          "operation": "Insert(x)",
+          "bounds": [
+            {
+              "kind": "curve",
+              "role": "Structure space",
+              "formula": "O(1) new node",
+              "curveId": "constant"
+            },
+            {
+              "kind": "curve",
+              "role": "Aux space per op",
+              "formula": "O(log n)",
+              "curveId": "log-n"
+            }
+          ]
+        },
+        {
+          "kind": "operation",
+          "operation": "ExtractMin()",
+          "bounds": [
+            {
+              "kind": "curve",
+              "role": "Structure space",
+              "formula": "O(1)",
+              "curveId": "constant"
+            },
+            {
+              "kind": "curve",
+              "role": "Aux space per op",
+              "formula": "O(log n)",
+              "curveId": "log-n"
+            }
+          ]
+        },
+        {
+          "kind": "operation",
+          "operation": "FindMin()",
+          "bounds": [
+            {
+              "kind": "curve",
+              "role": "Structure space",
+              "formula": "O(1)",
+              "curveId": "constant"
+            },
+            {
+              "kind": "curve",
+              "role": "Aux space per op",
+              "formula": "O(1)",
+              "curveId": "constant"
+            }
+          ]
+        }
+      ]
+    }
+  }
+}
+```
+````
 
 # Complexity
 

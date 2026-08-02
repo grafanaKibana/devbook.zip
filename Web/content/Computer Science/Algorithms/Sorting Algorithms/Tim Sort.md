@@ -1,8 +1,8 @@
 ---
 publish: true
 created: 2026-07-18T14:02:44.032Z
-modified: 2026-07-26T04:25:43.266Z
-published: 2026-07-26T04:25:43.266Z
+modified: 2026-08-01T18:31:33.353Z
+published: 2026-08-01T18:31:33.353Z
 topic:
   - Computer Science
 subtopic:
@@ -22,13 +22,18 @@ The visualization and invariant discussion below describe classic TimSort as ret
 
 **Classic/OpenJDK shape:** partially ordered input → detect natural runs → pad short runs to `minrun` with binary insertion sort → merge under stack size invariants → `Θ(n)` on ordered input, `Θ(n log n)` worst, stable, `O(n)` merge buffer.
 
-# Decisive Move
+````tabsdown
+tab: Visualization
 
-Classic/OpenJDK TimSort's turning point is the moment the run stack collapses two adjacent runs because their sizes have just violated the merge invariant. The animation shows that over a small partially-ordered array.
+
 
 ```steptrace
 { "algorithm": "tim-sort", "array": [5, 6, 7, 8, 9, 4, 3, 1, 2, 8], "minrun": 4 }
 ```
+
+## Decisive Move
+
+Classic/OpenJDK TimSort's turning point is the moment the run stack collapses two adjacent runs because their sizes have just violated the merge invariant. The animation shows that over a small partially-ordered array.
 
 Consider `[5, 6, 7, 8, 9, 4, 3, 1, 2, 8]` with an illustrative `minrun = 4`. The left-to-right scan produces `[5,6,7,8,9]`, then `[4,3,1]` (strictly descending, reversed to `[1,3,4]`, extended by binary-inserting `2` into `[1,2,3,4]`), then a trailing `[8]`. The run stack now holds lengths `[5, 4, 1]`, so the third push exposes the three-run invariant.
 
@@ -45,11 +50,11 @@ runs (lengths)                 contents
 
 The three-run condition `Z > Y + X` fails when `[8]` lands (`5 > 4 + 1` is false), so `Y` merges with the smaller neighbour `X`. The resulting equal-length pair still violates `Y > X`, so the same collapse loop merges it immediately. On inputs where the final pair satisfies `Y > X`, the later forced-collapse phase performs that final adjacent merge. Both checks select only adjacent runs. The state that changed is the stack shape, not correctness: the partition of the array stays contiguous and the eventual merges stay near-balanced.
 
-# Runs, Minrun, and the Merge Stack
+## Runs, Minrun, and the Merge Stack
 
 Four mechanisms carry the algorithm.
 
-**Classic/OpenJDK run detection.** From the current position the scan extends a run as long as elements stay ascending (`a[i] <= a[i+1]`) or _strictly_ descending (`a[i] > a[i+1]`). A descending run is reversed in place. The asymmetry is load-bearing: because descent is strict, a stretch of equal keys can never form a descending run, so the in-place reversal never disturbs equal keys. Current CPython instead accepts non-increasing runs: it reverses each equal-key block while scanning, then reverses the whole run, so the double reversal restores equal keys to their original order.
+**Classic/OpenJDK run detection.** From the current position the scan extends a run as long as elements stay ascending (`a[i] <= a[i+1]`) or *strictly* descending (`a[i] > a[i+1]`). A descending run is reversed in place. The asymmetry is load-bearing: because descent is strict, a stretch of equal keys can never form a descending run, so the in-place reversal never disturbs equal keys. Current CPython instead accepts non-increasing runs: it reverses each equal-key block while scanning, then reverses the whole run, so the double reversal restores equal keys to their original order.
 
 **`minrun`.** A natural run shorter than its target is extended by binary [[Computer Science/Algorithms/Sorting Algorithms/Insertion Sort|insertion sort]]: following elements are pulled in and placed with a binary search for the insertion point. OpenJDK computes one fixed `minrun` for the array from the high-order bits of `n`; `MIN_MERGE = 32` gives `minrun ∈ [16, 32]` (`minrun = n` for `n < 32`). Current CPython uses `MAX_MINRUN = 64`, but since 2025 it carries the fractional remainder of `n / 2^e` forward, so successive targets can differ by one: for `n = 315`, they are a mix of 39 and 40 instead of one fixed 40. The variable targets keep each level of the merge tree as balanced as possible.
 
@@ -57,9 +62,73 @@ Four mechanisms carry the algorithm.
 
 **Current CPython's run stack.** Powersort assigns a power — the depth of the runs' connecting node in an ideal merge tree — to each adjacent-run boundary. Pending powers stay strictly decreasing from the top of the stack; a newly computed power triggers adjacent merges while older powers are greater. This replaces the visualized run-size invariant policy.
 
-**Merging and galloping.** A production merge uses [[Computer Science/Algorithms/Sorting Algorithms/Merge Sort|merge sort]]'s two-way merge into a temporary copy of the _smaller_ run (hence `≤ n/2` extra space), resolving ties toward the earlier run to stay stable. When one run wins `MIN_GALLOP = 7` comparisons in a row, the merge switches to **galloping**: it finds the block boundary with exponential search followed by binary search, reducing the boundary-search comparisons to `O(log k)` while the `k` copied elements still take linear time. If galloping stops paying off it adaptively backs out to one-at-a-time merging.
+**Merging and galloping.** A production merge uses [[Computer Science/Algorithms/Sorting Algorithms/Merge Sort|merge sort]]'s two-way merge into a temporary copy of the *smaller* run (hence `≤ n/2` extra space), resolving ties toward the earlier run to stay stable. When one run wins `MIN_GALLOP = 7` comparisons in a row, the merge switches to **galloping**: it finds the block boundary with exponential search followed by binary search, reducing the boundary-search comparisons to `O(log k)` while the `k` copied elements still take linear time. If galloping stops paying off it adaptively backs out to one-at-a-time merging.
 
-# Complexity
+tab: Complexity
+
+```complexity
+{
+  "version": 2,
+  "label": "Tim Sort complexity",
+  "variables": {
+    "inputSize": {
+      "symbol": "n",
+      "description": "number of input elements or states"
+    }
+  },
+  "resources": {
+    "time": {
+      "mode": "cases",
+      "entries": [
+        {
+          "kind": "case",
+          "role": "Best",
+          "formula": "Θ(n)",
+          "curveId": "linear"
+        },
+        {
+          "kind": "case",
+          "role": "Average",
+          "formula": "Θ(n log n)",
+          "curveId": "n-log-n"
+        },
+        {
+          "kind": "case",
+          "role": "Worst",
+          "formula": "Θ(n log n)",
+          "curveId": "n-log-n"
+        }
+      ]
+    },
+    "space": {
+      "mode": "cases",
+      "entries": [
+        {
+          "kind": "case",
+          "role": "Best",
+          "formula": "O(1)",
+          "curveId": "constant"
+        },
+        {
+          "kind": "case",
+          "role": "Average",
+          "formula": "O(n)",
+          "curveId": "linear"
+        },
+        {
+          "kind": "case",
+          "role": "Worst",
+          "formula": "O(n)",
+          "curveId": "linear"
+        }
+      ]
+    }
+  }
+}
+```
+````
+
+## Complexity
 
 | Case | Time | Auxiliary space | Cause |
 | --- | --- | --- | --- |

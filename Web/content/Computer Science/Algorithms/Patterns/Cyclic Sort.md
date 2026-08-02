@@ -1,8 +1,8 @@
 ---
 publish: true
 created: 2026-07-28T10:25:59.697Z
-modified: 2026-07-28T10:25:59.697Z
-published: 2026-07-28T10:25:59.697Z
+modified: 2026-08-01T18:31:33.346Z
+published: 2026-08-01T18:31:33.346Z
 topic:
   - Computer Science
 subtopic:
@@ -20,13 +20,92 @@ Cyclic Sort walks the array and, at each position, swaps whatever value sits the
 
 **Core condition:** values form a permutation of a contiguous range → value `v` maps to index `v − 1` → each swap finalises one element → `O(n)` time, `O(1)` auxiliary space.
 
-# Trace
+````tabsdown
+tab: Visualization
 
-The cursor stays put after a swap because the displaced value still needs inspection; it advances only when the resident value is home.
+
 
 ```steptrace
 { "algorithm": "cyclic-sort", "array": [3, 1, 5, 4, 2] }
 ```
+
+# Trace
+
+The cursor stays put after a swap because the displaced value still needs inspection; it advances only when the resident value is home.
+
+tab: Complexity
+
+```complexity
+{
+  "version": 2,
+  "label": "Cyclic Sort complexity",
+  "variables": {
+    "inputSize": {
+      "symbol": "n",
+      "description": "number of input elements or states"
+    }
+  },
+  "resources": {
+    "time": {
+      "mode": "cases",
+      "entries": [
+        {
+          "kind": "case",
+          "role": "Best",
+          "formula": "O(n)",
+          "curveId": "linear"
+        },
+        {
+          "kind": "case",
+          "role": "Average",
+          "formula": "O(n)",
+          "curveId": "linear"
+        },
+        {
+          "kind": "case",
+          "role": "Worst",
+          "formula": "O(n)",
+          "curveId": "linear"
+        }
+      ]
+    },
+    "space": {
+      "mode": "cases",
+      "entries": [
+        {
+          "kind": "case",
+          "role": "Best",
+          "formula": "O(1)",
+          "curveId": "constant"
+        },
+        {
+          "kind": "case",
+          "role": "Average",
+          "formula": "O(1)",
+          "curveId": "constant"
+        },
+        {
+          "kind": "case",
+          "role": "Worst",
+          "formula": "O(1)",
+          "curveId": "constant"
+        }
+      ]
+    }
+  }
+}
+```
+````
+
+# Complexity
+
+| Case | Time | Auxiliary space | Cause |
+| --- | --- | --- | --- |
+| Best | `O(n)` | `O(1)` | Input already placed: `n` guard checks, zero swaps. |
+| Average | `O(n)` | `O(1)` | A mix of in-place and displaced values; each displaced value is finalised by one swap. |
+| Worst | `O(n)` | `O(1)` | Maximally displaced permutation: up to `n − 1` swaps, but every swap still finalises one element. |
+
+The bound is an amortised accounting argument rather than a per-iteration one: an individual position may be visited more than once, yet the number of swaps is capped by the number of elements because each swap retires a value for good. There is no recursion, so no stack space enters the table.
 
 # Why Each Swap Finalises an Element
 
@@ -38,16 +117,6 @@ The placement rule at index `i` is a single decision. Let `v = a[i]` and `home =
 The inner loop can re-process a single index several times, which makes the code look quadratic. It is not: a swap only ever fires when it moves a value into a home that did not previously hold it, and a value never leaves its home once placed. There are `n` values and each is finalised at most once, so at most `n − 1` swaps happen across the entire run. The outer walk contributes another `n` steps, so total work is `O(n)`. All movement happens inside the input array, so auxiliary space stays `O(1)`.
 
 The comparison inside the guard is against the _value_ at `home`, not the index. `a[home] != v` stops the moment a duplicate would swap into a slot already holding its equal — that is both the termination guard and the mechanism that surfaces a duplicate.
-
-# Complexity
-
-| Case | Time | Auxiliary space | Cause |
-| --- | --- | --- | --- |
-| Best | `O(n)` | `O(1)` | Input already placed: `n` guard checks, zero swaps. |
-| Average | `O(n)` | `O(1)` | A mix of in-place and displaced values; each displaced value is finalised by one swap. |
-| Worst | `O(n)` | `O(1)` | Maximally displaced permutation: up to `n − 1` swaps, but every swap still finalises one element. |
-
-The bound is an amortised accounting argument rather than a per-iteration one: an individual position may be visited more than once, yet the number of swaps is capped by the number of elements because each swap retires a value for good. There is no recursion, so no stack space enters the table.
 
 # Guarded Anomaly Variants
 

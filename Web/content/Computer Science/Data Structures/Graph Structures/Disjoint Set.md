@@ -1,8 +1,8 @@
 ---
 publish: true
-created: 2026-07-29T14:28:24.644Z
-modified: 2026-07-29T14:28:24.645Z
-published: 2026-07-29T14:28:24.645Z
+created: 2026-07-29T20:22:59.984Z
+modified: 2026-08-01T18:31:33.353Z
+published: 2026-08-01T18:31:33.353Z
 topic:
   - Computer Science
 subtopic:
@@ -20,19 +20,24 @@ The structure is narrower than a graph representation. It remembers which elemen
 
 **Core shape:** elements → parent-index forest → one root per set → shared root means shared membership → `O(n)` storage.
 
-# Interactive Forest
+````tabsdown
+tab: Visualization
 
-The view starts with seven singleton sets. Choose two elements and run `Union` to merge their roots, `Find A` to resolve and compress one parent path, or `Connected?` to resolve both roots and compare representatives. Because that check performs two finds, it may flatten both parent paths. The forest and its parent array update together: an arrow points from a child to its parent, and a root stores its own index.
+
 
 ```steptrace
 {"algorithm":"union-find","n":7}
 ```
 
+## Interactive Forest
+
+The view starts with seven singleton sets. Choose two elements and run `Union` to merge their roots, `Find A` to resolve and compress one parent path, or `Connected?` to resolve both roots and compare representatives. Because that check performs two finds, it may flatten both parent paths. The forest and its parent array update together: an arrow points from a child to its parent, and a root stores its own index.
+
 Only roots are linked during a union. Linking an arbitrary interior node would detach or misclassify part of its existing set. A find follows parent indices until `parent[root] == root`; path compression can then shorten the route without changing the representative.
 
 The interactive structure uses union by rank, so a lower-rank root attaches beneath a higher-rank root. On equal rank, this view keeps element A's root as parent and increments that root's rank.
 
-# Representation and Invariants
+## Representation and Invariants
 
 Each element is mapped to an integer index. Two parallel arrays hold the state:
 
@@ -48,7 +53,177 @@ Four invariants define a valid state:
 
 Path compression rewrites parent indices but preserves set membership. Union by rank changes which root represents the merged set but preserves every previous connectivity result. The representative is therefore an internal identity, not a stable domain value.
 
-# Complexity
+tab: Complexity
+
+```complexity
+{
+  "version": 2,
+  "label": "Disjoint Set complexity",
+  "variables": {
+    "inputSize": {
+      "symbol": "n",
+      "description": "number of input elements or states"
+    },
+    "inverseAckermann": {
+      "symbol": "α(·)",
+      "description": "inverse Ackermann factor applied to its displayed argument"
+    }
+  },
+  "resources": {
+    "time": {
+      "mode": "operations",
+      "entries": [
+        {
+          "kind": "operation",
+          "operation": "Construct n singleton sets",
+          "bounds": [
+            {
+              "kind": "curve",
+              "role": "Best time",
+              "formula": "Θ(n)",
+              "curveId": "linear"
+            },
+            {
+              "kind": "curve",
+              "role": "Amortized time",
+              "formula": "Θ(n)",
+              "curveId": "linear"
+            },
+            {
+              "kind": "curve",
+              "role": "Worst single operation",
+              "formula": "Θ(n)",
+              "curveId": "linear"
+            }
+          ]
+        },
+        {
+          "kind": "operation",
+          "operation": "Find(x)",
+          "bounds": [
+            {
+              "kind": "curve",
+              "role": "Best time",
+              "formula": "O(1)",
+              "curveId": "constant"
+            },
+            {
+              "kind": "text",
+              "role": "Amortized time",
+              "formula": "O(α(n))"
+            },
+            {
+              "kind": "curve",
+              "role": "Worst single operation",
+              "formula": "O(log n)",
+              "curveId": "log-n"
+            }
+          ]
+        },
+        {
+          "kind": "operation",
+          "operation": "Union(a, b)",
+          "bounds": [
+            {
+              "kind": "curve",
+              "role": "Best time",
+              "formula": "O(1)",
+              "curveId": "constant"
+            },
+            {
+              "kind": "text",
+              "role": "Amortized time",
+              "formula": "O(α(n))"
+            },
+            {
+              "kind": "curve",
+              "role": "Worst single operation",
+              "formula": "O(log n)",
+              "curveId": "log-n"
+            }
+          ]
+        },
+        {
+          "kind": "operation",
+          "operation": "Connected(a, b)",
+          "bounds": [
+            {
+              "kind": "curve",
+              "role": "Best time",
+              "formula": "O(1)",
+              "curveId": "constant"
+            },
+            {
+              "kind": "text",
+              "role": "Amortized time",
+              "formula": "O(α(n))"
+            },
+            {
+              "kind": "curve",
+              "role": "Worst single operation",
+              "formula": "O(log n)",
+              "curveId": "log-n"
+            }
+          ]
+        }
+      ]
+    },
+    "space": {
+      "mode": "operations",
+      "entries": [
+        {
+          "kind": "operation",
+          "operation": "Construct n singleton sets",
+          "bounds": [
+            {
+              "kind": "curve",
+              "role": "Peak space",
+              "formula": "Θ(n) structure",
+              "curveId": "linear"
+            }
+          ]
+        },
+        {
+          "kind": "operation",
+          "operation": "Find(x)",
+          "bounds": [
+            {
+              "kind": "text",
+              "role": "Peak space",
+              "formula": "O(1) best, O(log n) worst stack"
+            }
+          ]
+        },
+        {
+          "kind": "operation",
+          "operation": "Union(a, b)",
+          "bounds": [
+            {
+              "kind": "text",
+              "role": "Peak space",
+              "formula": "O(1) best, O(log n) worst stack"
+            }
+          ]
+        },
+        {
+          "kind": "operation",
+          "operation": "Connected(a, b)",
+          "bounds": [
+            {
+              "kind": "text",
+              "role": "Peak space",
+              "formula": "O(1) best, O(log n) worst stack"
+            }
+          ]
+        }
+      ]
+    }
+  }
+}
+```
+````
+
+## Complexity
 
 | Operation                    | Best time | Amortized time | Worst single operation | Peak space                          |
 | ---------------------------- | --------- | -------------- | ---------------------- | ----------------------------------- |

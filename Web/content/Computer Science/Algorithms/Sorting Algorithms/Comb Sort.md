@@ -1,8 +1,8 @@
 ---
 publish: true
-created: 2026-07-25T18:38:43.806Z
-modified: 2026-07-25T18:38:43.806Z
-published: 2026-07-25T18:38:43.806Z
+created: 2026-07-21T18:52:02.838Z
+modified: 2026-08-01T18:31:33.351Z
+published: 2026-08-01T18:31:33.351Z
 topic:
   - Computer Science
 subtopic:
@@ -20,13 +20,18 @@ Comb sort keeps the compare-and-swap but widens the distance between the two com
 
 **Core condition:** comparison-based, in-place swaps → each pass compares elements a shrinking gap apart → wide early gaps evict the turtles that keep bubble sort quadratic.
 
-# Trace
+````tabsdown
+tab: Visualization
 
-The shrinking gap is the state worth watching: wide pairs move turtles first, then the gap-1 passes remove the remaining adjacent inversions.
+
 
 ```steptrace
 { "algorithm": "comb-sort", "array": [8, 4, 1, 6, 3, 2], "shrinkFactor": 1.3 }
 ```
+
+# Trace
+
+The shrinking gap is the state worth watching: wide pairs move turtles first, then the gap-1 passes remove the remaining adjacent inversions.
 
 # Why the Gap Accelerates the Sort
 
@@ -35,6 +40,87 @@ A pass at gap `g` walks `i` from `0` while `i + g < n`, comparing `a[i]` with `a
 Correctness does not come from the wide passes; they only rearrange. The loop terminates only when a full pass at `gap == 1` performs no swap. A gap-1 pass with no swap means no adjacent pair is inverted, which for a comparison sort is exactly the certificate that the array is sorted. The wide gaps are a heuristic that leaves few inversions for that final bubble phase to resolve — drop them and comb sort is bubble sort; keep them and the gap-1 phase starts from nearly ordered input.
 
 The shrink factor governs how fast the gap collapses. Lacey and Box selected `1.3` because it minimized comparisons in their experiments on random input. A smaller factor contracts slowly and spends more full sweeps at wide gaps; a larger one reaches `gap == 1` quickly and can leave more turtles for the bubble phase.
+
+tab: Complexity
+
+```complexity
+{
+  "version": 2,
+  "label": "Comb Sort complexity",
+  "variables": {
+    "inputSize": {
+      "symbol": "n",
+      "description": "number of input elements or states"
+    }
+  },
+  "resources": {
+    "time": {
+      "mode": "operations",
+      "entries": [
+        {
+          "kind": "operation",
+          "operation": "Best",
+          "bounds": [
+            {
+              "kind": "curve",
+              "role": "Time",
+              "formula": "Θ(n log n)",
+              "curveId": "n-log-n"
+            }
+          ]
+        },
+        {
+          "kind": "operation",
+          "operation": "Average",
+          "bounds": [
+            {
+              "kind": "text",
+              "role": "Time",
+              "formula": "Empirically near O(n log n) on random input; generally O(n²)"
+            }
+          ]
+        },
+        {
+          "kind": "operation",
+          "operation": "Worst",
+          "bounds": [
+            {
+              "kind": "curve",
+              "role": "Time",
+              "formula": "Θ(n²)",
+              "curveId": "quadratic"
+            }
+          ]
+        }
+      ]
+    },
+    "space": {
+      "mode": "cases",
+      "entries": [
+        {
+          "kind": "case",
+          "role": "Best",
+          "formula": "O(1)",
+          "curveId": "constant"
+        },
+        {
+          "kind": "case",
+          "role": "Average",
+          "formula": "O(1)",
+          "curveId": "constant"
+        },
+        {
+          "kind": "case",
+          "role": "Worst",
+          "formula": "O(1)",
+          "curveId": "constant"
+        }
+      ]
+    }
+  }
+}
+```
+````
 
 # Complexity
 

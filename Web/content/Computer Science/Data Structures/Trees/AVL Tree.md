@@ -1,8 +1,8 @@
 ---
 publish: true
-created: 2026-07-18T14:02:44.043Z
-modified: 2026-07-29T18:27:06.637Z
-published: 2026-07-29T18:27:06.637Z
+created: 2026-07-29T20:23:26.641Z
+modified: 2026-08-01T18:31:33.356Z
+published: 2026-08-01T18:31:33.356Z
 topic:
   - Computer Science
 subtopic:
@@ -24,6 +24,9 @@ What the structure gives up for that guarantee is written into every write: it c
 
 Press **Insert** with the prefilled `5`: the descent makes node `20` left-heavy, then an LL rotation restores the bound.
 
+````tabsdown
+tab: Visualization
+
 ```steptrace
 {"algorithm":"avl-tree","values":[30,20,40,10],"value":5}
 ```
@@ -38,7 +41,7 @@ balanceFactor(node) = height(node.Left) − height(node.Right)   ∈ {−1, 0, +
 
 Insert and delete run exactly as in a plain BST first — descend by key comparison, splice the node in or out at a leaf-adjacent position. The AVL work happens on the way back up: the path from the touched node to the root is retraced, each node's stored height recomputed, and the first node whose balance factor reaches ±2 is rebalanced by rotation.
 
-A rotation is a local pointer reassignment that lifts the middle-valued of three keys up one level while preserving in-order sequence. Which rotation applies depends on the _shape_ of the imbalance, and there are exactly four:
+A rotation is a local pointer reassignment that lifts the middle-valued of three keys up one level while preserving in-order sequence. Which rotation applies depends on the *shape* of the imbalance, and there are exactly four:
 
 | Shape | Detected as | Repair |
 | --- | --- | --- |
@@ -49,7 +52,128 @@ A rotation is a local pointer reassignment that lifts the middle-valued of three
 
 The double cases (LR, RL) exist because a single rotation on a zig-zag shape only mirrors the imbalance to the other side; the inner node has to be rotated outward into a straight chain first. Whatever the shape, the node that ends up on top is always the median of the three keys involved.
 
-Insert and delete diverge in how far the repair travels. After an insert, a single rebalancing operation (one single or one double rotation) restores the invariant for the _entire_ tree — the rebalanced subtree regains its pre-insert height, so nothing above it changed. After a delete, the rotated subtree can end up one level _shorter_ than before, which can itself unbalance a node further up, so rebalancing may cascade all the way to the root.
+Insert and delete diverge in how far the repair travels. After an insert, a single rebalancing operation (one single or one double rotation) restores the invariant for the *entire* tree — the rebalanced subtree regains its pre-insert height, so nothing above it changed. After a delete, the rotated subtree can end up one level *shorter* than before, which can itself unbalance a node further up, so rebalancing may cascade all the way to the root.
+
+tab: Complexity
+
+```complexity
+{
+  "version": 2,
+  "label": "AVL Tree complexity",
+  "variables": {
+    "inputSize": {
+      "symbol": "n",
+      "description": "number of input elements or states"
+    }
+  },
+  "resources": {
+    "time": {
+      "mode": "operations",
+      "entries": [
+        {
+          "kind": "operation",
+          "operation": "Search",
+          "bounds": [
+            {
+              "kind": "curve",
+              "role": "Time",
+              "formula": "O(log n) guaranteed",
+              "curveId": "log-n"
+            }
+          ]
+        },
+        {
+          "kind": "operation",
+          "operation": "Insert",
+          "bounds": [
+            {
+              "kind": "curve",
+              "role": "Time",
+              "formula": "O(log n) guaranteed",
+              "curveId": "log-n"
+            }
+          ]
+        },
+        {
+          "kind": "operation",
+          "operation": "Delete",
+          "bounds": [
+            {
+              "kind": "curve",
+              "role": "Time",
+              "formula": "O(log n) guaranteed",
+              "curveId": "log-n"
+            }
+          ]
+        },
+        {
+          "kind": "operation",
+          "operation": "Any rotation",
+          "bounds": [
+            {
+              "kind": "curve",
+              "role": "Time",
+              "formula": "O(1)",
+              "curveId": "constant"
+            }
+          ]
+        }
+      ]
+    },
+    "space": {
+      "mode": "operations",
+      "entries": [
+        {
+          "kind": "operation",
+          "operation": "Search",
+          "bounds": [
+            {
+              "kind": "text",
+              "role": "Extra space",
+              "formula": "O(1) iterative, O(log n) recursion stack"
+            }
+          ]
+        },
+        {
+          "kind": "operation",
+          "operation": "Insert",
+          "bounds": [
+            {
+              "kind": "text",
+              "role": "Extra space",
+              "formula": "O(log n) recursion stack; O(1) iterative with parent pointers"
+            }
+          ]
+        },
+        {
+          "kind": "operation",
+          "operation": "Delete",
+          "bounds": [
+            {
+              "kind": "text",
+              "role": "Extra space",
+              "formula": "O(log n) recursion stack; O(1) iterative with parent pointers"
+            }
+          ]
+        },
+        {
+          "kind": "operation",
+          "operation": "Any rotation",
+          "bounds": [
+            {
+              "kind": "curve",
+              "role": "Extra space",
+              "formula": "O(1)",
+              "curveId": "constant"
+            }
+          ]
+        }
+      ]
+    }
+  }
+}
+```
+````
 
 # Complexity
 

@@ -1,8 +1,8 @@
 ---
 publish: true
-created: 2026-07-25T18:38:43.801Z
-modified: 2026-07-25T18:38:43.802Z
-published: 2026-07-25T18:38:43.802Z
+created: 2026-07-21T18:52:02.837Z
+modified: 2026-08-01T18:31:33.348Z
+published: 2026-08-01T18:31:33.348Z
 topic:
   - Computer Science
 subtopic:
@@ -22,19 +22,104 @@ Two properties justify skipping `m − 1` records per stride. Ordering lets `a[b
 
 The move that defines the algorithm is the overshoot: the first block end that crosses the target, collapsing the search to a single block.
 
-# Trace
+````tabsdown
+tab: Visualization
 
-With block size `3`, the trace probes block ends at indices `2`, `5`, and `8`. The first two values remain below target `13`; the third overshoots it, reducing the candidate range to indices `6 … 8`. A forward scan of that block finds `13` at index `6`.
+
 
 ```steptrace
 {"algorithm":"jump-search","array":[1,3,5,7,9,11,13,15,17],"target":13,"blockSize":3}
 ```
+
+# Trace
+
+With block size `3`, the trace probes block ends at indices `2`, `5`, and `8`. The first two values remain below target `13`; the third overshoots it, reducing the candidate range to indices `6 … 8`. A forward scan of that block finds `13` at index `6`.
 
 # Why √n Blocks Work
 
 Each jump is a proof, not a guess. Block `k` spans indices `[(k−1)m, k·m − 1]`, so its end value is `a[k·m − 1]`. Because the records are sorted, `a[k·m − 1] < target` guarantees every record in the first `k` blocks is below the target — none can match, and the checkpoint link skips their individual probes. The search stops at the first block whose end satisfies `a[k·m − 1] >= target`; the previous block ended below the target, so monotonic order forces the target, if present, into this single block. The retained previous checkpoint is then traversed forward through at most `m` records.
 
 The stride size sets the balance between the two phases. Reaching a late target takes up to `n/m` jumps, and scanning the final block takes up to `m` steps, so total work is `f(m) = n/m + m`. The jump count falls as `m` grows while the scan lengthens, and `f'(m) = −n/m² + 1` is zero at `m = √n`, where the two phases are equal and the total is `2√n`. The bound depends on tying `m` to `n`: a fixed `m = 100` holds the jump phase at `n/100`, still linear in `n`, so large input degrades to `O(n)`.
+
+tab: Complexity
+
+```complexity
+{
+  "version": 2,
+  "label": "Jump Search complexity",
+  "variables": {
+    "inputSize": {
+      "symbol": "n",
+      "description": "number of input elements or states"
+    }
+  },
+  "resources": {
+    "time": {
+      "mode": "operations",
+      "entries": [
+        {
+          "kind": "operation",
+          "operation": "Best",
+          "bounds": [
+            {
+              "kind": "curve",
+              "role": "Time",
+              "formula": "O(1)",
+              "curveId": "constant"
+            }
+          ]
+        },
+        {
+          "kind": "operation",
+          "operation": "Average",
+          "bounds": [
+            {
+              "kind": "text",
+              "role": "Time",
+              "formula": "O(√n)"
+            }
+          ]
+        },
+        {
+          "kind": "operation",
+          "operation": "Worst",
+          "bounds": [
+            {
+              "kind": "text",
+              "role": "Time",
+              "formula": "O(√n)"
+            }
+          ]
+        }
+      ]
+    },
+    "space": {
+      "mode": "cases",
+      "entries": [
+        {
+          "kind": "case",
+          "role": "Best",
+          "formula": "O(1)",
+          "curveId": "constant"
+        },
+        {
+          "kind": "case",
+          "role": "Average",
+          "formula": "O(1)",
+          "curveId": "constant"
+        },
+        {
+          "kind": "case",
+          "role": "Worst",
+          "formula": "O(1)",
+          "curveId": "constant"
+        }
+      ]
+    }
+  }
+}
+```
+````
 
 # Complexity
 

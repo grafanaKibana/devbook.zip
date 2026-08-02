@@ -1,8 +1,8 @@
 ---
 publish: true
-created: 2026-07-18T14:02:44.043Z
-modified: 2026-07-29T17:46:11.581Z
-published: 2026-07-29T17:46:11.581Z
+created: 2026-07-29T20:22:59.991Z
+modified: 2026-08-01T18:31:33.356Z
+published: 2026-08-01T18:31:33.356Z
 topic:
   - Computer Science
 subtopic:
@@ -22,6 +22,9 @@ A stack enforces it structurally. All mutation is fixed to a single end called t
 
 Push and pop values below to see the stack grow upward while every operation stays fixed to the top cell.
 
+````tabsdown
+tab: Visualization
+
 ```steptrace
 {"algorithm":"stack","capacity":6,"values":["A","B","C"]}
 ```
@@ -39,6 +42,123 @@ Two invariants define a valid state regardless of backing:
 2. `push` and `pop` are inverses at the same end: after `push(x); pop()`, both the contents and the top pointer are exactly what they were before.
 
 The stack API deliberately withholds random access and direct interior removal even when an array backing could provide them. That restriction enforces LIFO; the operation costs come from the backing implementation — a tail index for the array or a head pointer for the linked list. A workload that repeatedly needs buried elements belongs on a different structure.
+
+tab: Complexity
+
+```complexity
+{
+  "version": 2,
+  "label": "Stack complexity",
+  "variables": {
+    "inputSize": {
+      "symbol": "n",
+      "description": "number of input elements or states"
+    }
+  },
+  "resources": {
+    "time": {
+      "mode": "operations",
+      "entries": [
+        {
+          "kind": "operation",
+          "operation": "Push",
+          "bounds": [
+            {
+              "kind": "text",
+              "role": "Array backing",
+              "formula": "O(1) amortized, O(n) worst single"
+            },
+            {
+              "kind": "curve",
+              "role": "Linked backing",
+              "formula": "O(1)",
+              "curveId": "constant"
+            }
+          ]
+        },
+        {
+          "kind": "operation",
+          "operation": "Pop",
+          "bounds": [
+            {
+              "kind": "curve",
+              "role": "Array backing",
+              "formula": "O(1)",
+              "curveId": "constant"
+            },
+            {
+              "kind": "curve",
+              "role": "Linked backing",
+              "formula": "O(1)",
+              "curveId": "constant"
+            }
+          ]
+        },
+        {
+          "kind": "operation",
+          "operation": "Peek",
+          "bounds": [
+            {
+              "kind": "curve",
+              "role": "Array backing",
+              "formula": "O(1)",
+              "curveId": "constant"
+            },
+            {
+              "kind": "curve",
+              "role": "Linked backing",
+              "formula": "O(1)",
+              "curveId": "constant"
+            }
+          ]
+        }
+      ]
+    },
+    "space": {
+      "mode": "operations",
+      "entries": [
+        {
+          "kind": "operation",
+          "operation": "Stored elements",
+          "bounds": [
+            {
+              "kind": "curve",
+              "role": "Persistent structure",
+              "formula": "O(n)",
+              "curveId": "linear"
+            }
+          ]
+        },
+        {
+          "kind": "operation",
+          "operation": "Ordinary operation",
+          "bounds": [
+            {
+              "kind": "curve",
+              "role": "Auxiliary",
+              "formula": "O(1)",
+              "curveId": "constant"
+            }
+          ]
+        },
+        {
+          "kind": "operation",
+          "operation": "Array resize",
+          "bounds": [
+            {
+              "kind": "curve",
+              "role": "Temporary spike",
+              "formula": "O(n)",
+              "curveId": "linear"
+            }
+          ]
+        }
+      ]
+    }
+  }
+}
+```
+````
 
 # Complexity
 

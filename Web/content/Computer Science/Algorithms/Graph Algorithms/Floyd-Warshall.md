@@ -1,8 +1,8 @@
 ---
 publish: true
-created: 2026-07-25T18:38:43.791Z
-modified: 2026-07-25T18:38:43.791Z
-published: 2026-07-25T18:38:43.791Z
+created: 2026-07-21T18:52:02.621Z
+modified: 2026-08-01T18:31:33.342Z
+published: 2026-08-01T18:31:33.342Z
 topic:
   - Computer Science
 subtopic:
@@ -22,9 +22,10 @@ Floyd-Warshall fills the whole table with one triple loop by recasting the probl
 
 The decisive step is a single relaxation sweeping the whole distance matrix for one admitted intermediate vertex.
 
-# Trace
+````tabsdown
+tab: Visualization
 
-The table starts with direct edges and `∞` for missing routes. At each stage `k`, the highlighted cell compares its current `dist[i][j]` with the route through `k`; green writes improve the matrix and gray cells keep the existing distance.
+
 
 ```steptrace
 {
@@ -33,6 +34,10 @@ The table starts with direct edges and `∞` for missing routes. At each stage `
   "edges": [[0, 1, 3], [0, 3, 7], [1, 0, 8], [1, 2, 2], [2, 0, 5], [2, 3, 1], [3, 0, 2]]
 }
 ```
+
+# Trace
+
+The table starts with direct edges and `∞` for missing routes. At each stage `k`, the highlighted cell compares its current `dist[i][j]` with the route through `k`; green writes improve the matrix and gray cells keep the existing distance.
 
 # Why One Intermediate at a Time Works
 
@@ -61,6 +66,76 @@ dist after init:            final all-pairs distances:
 ```
 
 `dist[0][3]` holds the direct edge `7` until vertex `2` becomes admissible at stage `k = 2`, where `0→2→3` costs `5 + 1 = 6` and wins. `dist[1][3]` first drops to `15` through vertex `0` at `k = 0`, then to `3` at `k = 2` via `1→2→3`. No diagonal entry ends negative, so the graph carries no negative cycle.
+
+tab: Complexity
+
+```complexity
+{
+  "version": 2,
+  "label": "Floyd-Warshall complexity",
+  "variables": {
+    "vertexCount": {
+      "symbol": "V",
+      "description": "number of vertices"
+    }
+  },
+  "resources": {
+    "time": {
+      "mode": "operations",
+      "entries": [
+        {
+          "kind": "operation",
+          "operation": "Every input",
+          "bounds": [
+            {
+              "kind": "text",
+              "role": "Time",
+              "formula": "Θ(V³)"
+            }
+          ]
+        }
+      ]
+    },
+    "space": {
+      "mode": "operations",
+      "entries": [
+        {
+          "kind": "operation",
+          "operation": "Every input",
+          "bounds": [
+            {
+              "kind": "curve",
+              "role": "Space",
+              "formula": "Θ(V²)",
+              "curveId": "quadratic"
+            }
+          ]
+        }
+      ]
+    }
+  }
+}
+```
+````
+
+# Complexity
+
+| Case | Time | Space | Cause |
+| --- | --- | --- | --- |
+| Every input | `Θ(V³)` | `Θ(V²)` | Three fixed-length loops run `V³` relaxations with no early exit; cost depends on `V` alone, never on edge count or weights. The matrix is `Θ(V²)` and doubles as the output, so the in-place update adds only `O(1)` auxiliary. |
+
+Best, average, and worst coincide because nothing in the data shortens the sweep — a complete graph and an edgeless one both take the same `V³` steps. The single honest bound is `Θ(V³)`. Path reconstruction adds a second `Θ(V²)` `next` matrix; the true auxiliary cost beyond the output matrix stays `O(1)` without it. The naive layered DP that keeps one matrix per stage would need `Θ(V³)` space, which the in-place argument above removes.
+
+For all-pairs shortest paths, the useful choice boundary is graph density and negative-edge support:
+
+| Approach | All-pairs time | Negative edges | Prefer it when |
+| --- | --- | --- | --- |
+| Floyd-Warshall | `Θ(V³)` | Yes | The graph is dense, `V²` memory is acceptable, or the matrix recurrence and negative-cycle reachability are useful directly. |
+| Repeated Dijkstra | `O(V(E + V) log V)` with a binary heap | No | The graph is sparse and every edge is non-negative. |
+| Johnson | `O(VE + V(E + V) log V)` with a binary heap | Yes | The graph is sparse, has negative edges, and has no negative cycle. |
+| Repeated Bellman-Ford | `O(V²E)` | Yes | Simplicity matters more than speed on a small sparse graph; otherwise Johnson or Floyd-Warshall is usually better. |
+
+Use Floyd-Warshall for a dense distance matrix or a modest vertex count where predictable `V³` work is the simpler engineering choice. Use repeated Dijkstra for sparse non-negative graphs, and Johnson for sparse graphs that need negative-edge support. Repeated Bellman-Ford is the fallback to understand, not the default all-pairs implementation.
 
 # Reference Drawer
 
@@ -151,25 +226,6 @@ dist after init:            final all-pairs distances:
 > ```
 >
 > A null weight means no direct edge; every non-null weight is finite. The matrix must be square, and every path sum must fit in `long` — `checked` turns a violated numeric bound into an `OverflowException` instead of a false shortest path. `next[i, j]` stores the first hop of the current best `i`→`j` route and is rewritten to `next[i, k]` on each improving relaxation. `Path` rejects any pair that can reach and leave a negative-cycle witness; a raw `dist`/`next` pair cannot extract the concrete cycle, so that feature needs predecessor tracking during relaxation.
-
-# Complexity
-
-| Case | Time | Space | Cause |
-| --- | --- | --- | --- |
-| Every input | `Θ(V³)` | `Θ(V²)` | Three fixed-length loops run `V³` relaxations with no early exit; cost depends on `V` alone, never on edge count or weights. The matrix is `Θ(V²)` and doubles as the output, so the in-place update adds only `O(1)` auxiliary. |
-
-Best, average, and worst coincide because nothing in the data shortens the sweep — a complete graph and an edgeless one both take the same `V³` steps. The single honest bound is `Θ(V³)`. Path reconstruction adds a second `Θ(V²)` `next` matrix; the true auxiliary cost beyond the output matrix stays `O(1)` without it. The naive layered DP that keeps one matrix per stage would need `Θ(V³)` space, which the in-place argument above removes.
-
-For all-pairs shortest paths, the useful choice boundary is graph density and negative-edge support:
-
-| Approach | All-pairs time | Negative edges | Prefer it when |
-| --- | --- | --- | --- |
-| Floyd-Warshall | `Θ(V³)` | Yes | The graph is dense, `V²` memory is acceptable, or the matrix recurrence and negative-cycle reachability are useful directly. |
-| Repeated Dijkstra | `O(V(E + V) log V)` with a binary heap | No | The graph is sparse and every edge is non-negative. |
-| Johnson | `O(VE + V(E + V) log V)` with a binary heap | Yes | The graph is sparse, has negative edges, and has no negative cycle. |
-| Repeated Bellman-Ford | `O(V²E)` | Yes | Simplicity matters more than speed on a small sparse graph; otherwise Johnson or Floyd-Warshall is usually better. |
-
-Use Floyd-Warshall for a dense distance matrix or a modest vertex count where predictable `V³` work is the simpler engineering choice. Use repeated Dijkstra for sparse non-negative graphs, and Johnson for sparse graphs that need negative-edge support. Repeated Bellman-Ford is the fallback to understand, not the default all-pairs implementation.
 
 # When the Reported Distances Are Wrong
 

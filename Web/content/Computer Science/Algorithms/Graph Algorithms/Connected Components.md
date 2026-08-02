@@ -1,8 +1,8 @@
 ---
 publish: true
 created: 2026-07-18T14:02:43.942Z
-modified: 2026-07-26T19:19:06.405Z
-published: 2026-07-26T19:19:06.405Z
+modified: 2026-08-01T18:31:33.340Z
+published: 2026-08-01T18:31:33.340Z
 topic:
   - Computer Science
 subtopic:
@@ -18,6 +18,9 @@ A social graph has 10M users and an edge for every friendship. "Which users belo
 Two mechanisms solve it, and they fit different shapes of the problem. A **traversal** ([[Computer Science/Algorithms/Graph Algorithms/DFS BFS|DFS or BFS]]) floods outward from an unvisited vertex, stamping every vertex it reaches with a component id, then restarts from the next still-unvisited vertex — one linear `O(V + E)` sweep labels the whole graph. **[[Computer Science/Data Structures/Graph Structures/Union-Find|Union-find]]** instead merges the endpoints of each edge into the same set; the number of distinct sets is the component count. The traversal wants the graph already built and in memory; union-find answers connectivity _as edges arrive_ and interleaves `connected(a, b)` queries with additions, which is why streaming and incremental workloads reach for it.
 
 The decisive detail is the outer loop: a single DFS from one source finds only _that_ vertex's component. Covering a disconnected graph means restarting the traversal from each vertex the previous floods never reached.
+
+````tabsdown
+tab: Visualization
 
 ```steptrace
 {"algorithm":"connected-components"}
@@ -47,6 +50,88 @@ The final `id` is the component count, and `component[u] == component[v]` answer
 # Merging by Union-find
 
 When edges arrive over time, [[Computer Science/Data Structures/Graph Structures/Union-Find|union-find]] maintains the partition incrementally: initialize `V` singleton roots, then union each edge's endpoints. The full pass costs `O(V + E · α(V))`; connectivity queries are near-constant amortized, while listing component members still needs a final grouping pass. This is the same [[Computer Science/Data Structures/Graph Structures/Disjoint Set|disjoint-set]] forest used by [[Computer Science/Algorithms/Graph Algorithms/Minimum Spanning Tree|Kruskal's MST]]; its canonical page carries the tree and compression mechanics.
+
+tab: Complexity
+
+```complexity
+{
+  "version": 2,
+  "label": "Connected Components complexity",
+  "variables": {
+    "edgeCount": {
+      "symbol": "E",
+      "description": "number of edges"
+    },
+    "inverseAckermann": {
+      "symbol": "α(·)",
+      "description": "inverse Ackermann factor applied to its displayed argument"
+    },
+    "vertexCount": {
+      "symbol": "V",
+      "description": "number of vertices"
+    }
+  },
+  "resources": {
+    "time": {
+      "mode": "operations",
+      "entries": [
+        {
+          "kind": "operation",
+          "operation": "DFS / BFS labelling",
+          "bounds": [
+            {
+              "kind": "text",
+              "role": "Time",
+              "formula": "Θ(V + E)"
+            }
+          ]
+        },
+        {
+          "kind": "operation",
+          "operation": "Union-find (rank + compression)",
+          "bounds": [
+            {
+              "kind": "text",
+              "role": "Time",
+              "formula": "O(V + E · α(V))"
+            }
+          ]
+        }
+      ]
+    },
+    "space": {
+      "mode": "operations",
+      "entries": [
+        {
+          "kind": "operation",
+          "operation": "DFS / BFS labelling",
+          "bounds": [
+            {
+              "kind": "curve",
+              "role": "Auxiliary space",
+              "formula": "O(V) — visited/label array plus frontier",
+              "curveId": "linear"
+            }
+          ]
+        },
+        {
+          "kind": "operation",
+          "operation": "Union-find (rank + compression)",
+          "bounds": [
+            {
+              "kind": "curve",
+              "role": "Auxiliary space",
+              "formula": "O(V) — parent and rank arrays",
+              "curveId": "linear"
+            }
+          ]
+        }
+      ]
+    }
+  }
+}
+```
+````
 
 # Complexity
 

@@ -1,8 +1,8 @@
 ---
 publish: true
 created: 2026-07-18T14:02:44.054Z
-modified: 2026-07-28T11:19:09.722Z
-published: 2026-07-28T11:19:09.722Z
+modified: 2026-08-01T18:31:33.361Z
+published: 2026-08-01T18:31:33.361Z
 topic:
   - Computer Science
 subtopic:
@@ -14,6 +14,8 @@ priority: Medium
 status: Ready to Repeat
 ---
 
+# Intro
+
 An autocomplete box holds a set of strings and must answer a different question than "is this exact word present?": given the typed fragment `lap`, which stored keys begin with it? A [[Computer Science/Data Structures/Hash-based Structures/HashMap|hash map]] hashes the whole key, so it can confirm exact membership but has no notion of a shared prefix — answering the fragment query means scanning all `n` keys. A trie (prefix tree) keys the set on the _sequence_ of characters instead of a hash of the whole string, so the prefix becomes a location in the structure rather than a filter over every entry.
 
 Each edge is labelled with a single character. The path from the root to a node spells a prefix, which means keys are represented by paths, not stored explicitly at the nodes. Every node carries a child map (or a fixed array with one slot per alphabet symbol) and an end-of-word flag marking where a complete key terminates. Words that share a prefix share the same path until they diverge: `car`, `card`, and `care` all reuse the `c → a → r` route and only branch at the fourth character.
@@ -21,6 +23,9 @@ Each edge is labelled with a single character. The path from the root to a node 
 What the structure gives up is compactness. Every distinct prefix becomes a node: a sparse child map stores only actual branches but pays for a map and node object at each prefix, while a fixed child array avoids hashing by reserving `σ` slots per node. Recovering a full key from a node requires retaining its traversal path or storing parent links, because the node itself holds only outgoing branches and an end marker.
 
 **Core shape:** strings → character-labelled edges from one root → a path spells a prefix → an end-of-word flag marks a complete key → `O(L)` insert, exact lookup, and prefix-location walks in the key length `L`, independent of how many keys are stored.
+
+````tabsdown
+tab: Visualization
 
 ```steptrace
 {"algorithm":"trie","operations":[["insert","car"],["insert","card"],["insert","care"],["insert","cat"],["insert","dog"],["prefix","ca"],["search","car"]]}
@@ -33,7 +38,7 @@ A node holds two pieces of state and nothing else:
 - A mapping from the next character to a child node — a `Dictionary<char, Node>` when the alphabet is open or sparse, or a fixed `Node[σ]` array indexed by symbol when the alphabet is small and known (`children[c - 'a']`).
 - A boolean `IsEnd` flag that is true exactly when the path from the root to this node is a stored key.
 
-The key itself is never stored. `card` exists in the trie when the edges `c`, `a`, `r`, `d` can all be followed from the root _and_ the node reached at `d` has `IsEnd` set. The same walk without the final flag check answers a prefix query: reaching the node is enough, because it certifies that at least one stored key starts with the fragment.
+The key itself is never stored. `card` exists in the trie when the edges `c`, `a`, `r`, `d` can all be followed from the root *and* the node reached at `d` has `IsEnd` set. The same walk without the final flag check answers a prefix query: reaching the node is enough, because it certifies that at least one stored key starts with the fragment.
 
 Three invariants hold in a valid trie:
 
@@ -41,7 +46,159 @@ Three invariants hold in a valid trie:
 2. `IsEnd` on a node is independent of whether that node has children. `car` and `card` coexist: the `r` node is both an end-of-word and an interior node on the way to `d`.
 3. Insertion only ever adds nodes or sets a flag; it never relabels an existing edge, so previously inserted keys stay reachable.
 
-The distinction between reaching a node and reaching a _flagged_ node is the whole contract: exact search checks the flag, prefix search does not.
+The distinction between reaching a node and reaching a *flagged* node is the whole contract: exact search checks the flag, prefix search does not.
+
+tab: Complexity
+
+```complexity
+{
+  "version": 2,
+  "label": "Trie complexity",
+  "variables": {
+    "alphabetSigma": {
+      "symbol": "σ",
+      "description": "alphabet size"
+    },
+    "capacity": {
+      "symbol": "C",
+      "description": "capacity, configured bound, or output count"
+    },
+    "lengthL": {
+      "symbol": "L",
+      "description": "key, string, path, or sequence length"
+    },
+    "parameterHUpper": {
+      "symbol": "H",
+      "description": "maximum height or remaining suffix length"
+    },
+    "universeSize": {
+      "symbol": "U",
+      "description": "size of the represented universe"
+    },
+    "vertexCount": {
+      "symbol": "V",
+      "description": "number of vertices"
+    }
+  },
+  "resources": {
+    "time": {
+      "mode": "operations",
+      "entries": [
+        {
+          "kind": "operation",
+          "operation": "Insert (key length L)",
+          "bounds": [
+            {
+              "kind": "curve",
+              "role": "Time",
+              "formula": "O(L)",
+              "curveId": "linear"
+            }
+          ]
+        },
+        {
+          "kind": "operation",
+          "operation": "Search / StartsWith",
+          "bounds": [
+            {
+              "kind": "curve",
+              "role": "Time",
+              "formula": "O(L)",
+              "curveId": "linear"
+            }
+          ]
+        },
+        {
+          "kind": "operation",
+          "operation": "Delete",
+          "bounds": [
+            {
+              "kind": "curve",
+              "role": "Time",
+              "formula": "O(L)",
+              "curveId": "linear"
+            }
+          ]
+        },
+        {
+          "kind": "operation",
+          "operation": "Prefix collection",
+          "bounds": [
+            {
+              "kind": "text",
+              "role": "Time",
+              "formula": "O(L + V + C)"
+            }
+          ]
+        }
+      ]
+    },
+    "space": {
+      "mode": "operations",
+      "entries": [
+        {
+          "kind": "operation",
+          "operation": "Insert (key length L)",
+          "bounds": [
+            {
+              "kind": "text",
+              "role": "Space",
+              "formula": "O(L) new sparse-map nodes; O(L · σ) child slots with fixed arrays"
+            }
+          ]
+        },
+        {
+          "kind": "operation",
+          "operation": "Search / StartsWith",
+          "bounds": [
+            {
+              "kind": "curve",
+              "role": "Space",
+              "formula": "O(1)",
+              "curveId": "constant"
+            }
+          ]
+        },
+        {
+          "kind": "operation",
+          "operation": "Delete",
+          "bounds": [
+            {
+              "kind": "curve",
+              "role": "Space",
+              "formula": "O(L) stack",
+              "curveId": "linear"
+            }
+          ]
+        },
+        {
+          "kind": "operation",
+          "operation": "Prefix collection",
+          "bounds": [
+            {
+              "kind": "text",
+              "role": "Space",
+              "formula": "O(H + C) traversal stack and output"
+            }
+          ]
+        },
+        {
+          "kind": "operation",
+          "operation": "Whole structure",
+          "bounds": [
+            {
+              "kind": "text",
+              "role": "Space",
+              "formula": "O(U) nodes and child entries with sparse maps; O(U · σ) child slots with fixed arrays"
+            }
+          ]
+        }
+      ]
+    }
+  }
+}
+```
+````
 
 # Complexity
 

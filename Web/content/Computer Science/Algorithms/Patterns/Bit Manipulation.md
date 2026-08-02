@@ -1,8 +1,8 @@
 ---
 publish: true
-created: 2026-07-25T18:38:43.797Z
-modified: 2026-07-25T18:38:43.797Z
-published: 2026-07-25T18:38:43.797Z
+created: 2026-07-18T14:02:43.965Z
+modified: 2026-08-01T18:31:33.346Z
+published: 2026-08-01T18:31:33.346Z
 topic:
   - Computer Science
 subtopic:
@@ -18,13 +18,18 @@ An integer is a fixed-width array of bits — 32 for `int`, 64 for `long`. Any q
 
 **Core shape:** fixed-width binary word → `& | ^ ~` and shifts act on all bits per instruction → identities like `n & (n-1)` and `n & -n` turn per-bit loops into `O(popcount)` or `O(1)` work.
 
-# Trace
+````tabsdown
+tab: Visualization
 
-The trace runs Brian Kernighan's population count on `44` (`00101100`) in an 8-bit word.
+
 
 ```steptrace
 {"algorithm":"kernighan-popcount","value":44,"width":8}
 ```
+
+# Trace
+
+The trace runs Brian Kernighan's population count on `44` (`00101100`) in an 8-bit word.
 
 Each pass computes `n & (n - 1)`. Subtracting 1 from `n` flips its lowest set bit to 0 and turns every zero below it into a 1 — the borrow propagates up the trailing zeros until it consumes that lowest one. AND-ing `n` with the result keeps every bit above the lowest one untouched and clears the lowest one along with the zeros beneath it, so exactly one set bit disappears per iteration. The loop therefore runs once per set bit: three iterations for `44`, not the eight a bit-by-bit scan of the word would take. When `n` reaches 0 no set bits remain and the count is final.
 
@@ -46,6 +51,109 @@ Three identities carry most of the weight beyond masking:
 - XOR is its own inverse: `a ^ a == 0` and `a ^ 0 == a`. XOR-ing a whole array cancels every value that appears an even number of times, leaving the one unpaired value; the same property swaps two variables with no temporary.
 
 A machine word doubles as a set over a universe of at most 64 elements: bit `i` records membership of element `i`, union is `|`, intersection is `&`, difference is `a & ~b`, and `1 << n` counts the subsets of an `n`-element set. That representation is the state in bitmask [[Dynamic Programming]], where "which of these `n` items are already used" is a single integer.
+
+tab: Complexity
+
+```complexity
+{
+  "version": 2,
+  "label": "Bit Manipulation complexity",
+  "variables": {
+    "inputSize": {
+      "symbol": "n",
+      "description": "number of input elements or states"
+    },
+    "wordSize": {
+      "symbol": "w",
+      "description": "machine-word width"
+    }
+  },
+  "resources": {
+    "time": {
+      "mode": "operations",
+      "entries": [
+        {
+          "kind": "operation",
+          "operation": "Best",
+          "bounds": [
+            {
+              "kind": "curve",
+              "role": "Time",
+              "formula": "O(1)",
+              "curveId": "constant"
+            }
+          ]
+        },
+        {
+          "kind": "operation",
+          "operation": "Typical",
+          "bounds": [
+            {
+              "kind": "text",
+              "role": "Time",
+              "formula": "O(popcount(n))"
+            }
+          ]
+        },
+        {
+          "kind": "operation",
+          "operation": "Worst",
+          "bounds": [
+            {
+              "kind": "curve",
+              "role": "Time",
+              "formula": "O(w)",
+              "curveId": "linear"
+            }
+          ]
+        }
+      ]
+    },
+    "space": {
+      "mode": "operations",
+      "entries": [
+        {
+          "kind": "operation",
+          "operation": "Best",
+          "bounds": [
+            {
+              "kind": "curve",
+              "role": "Auxiliary space",
+              "formula": "O(1)",
+              "curveId": "constant"
+            }
+          ]
+        },
+        {
+          "kind": "operation",
+          "operation": "Typical",
+          "bounds": [
+            {
+              "kind": "curve",
+              "role": "Auxiliary space",
+              "formula": "O(1)",
+              "curveId": "constant"
+            }
+          ]
+        },
+        {
+          "kind": "operation",
+          "operation": "Worst",
+          "bounds": [
+            {
+              "kind": "curve",
+              "role": "Auxiliary space",
+              "formula": "O(1)",
+              "curveId": "constant"
+            }
+          ]
+        }
+      ]
+    }
+  }
+}
+```
+````
 
 # Complexity
 

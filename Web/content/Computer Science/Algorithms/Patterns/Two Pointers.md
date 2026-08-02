@@ -1,8 +1,8 @@
 ---
 publish: true
 created: 2026-07-28T10:25:59.700Z
-modified: 2026-07-28T10:25:59.700Z
-published: 2026-07-28T10:25:59.700Z
+modified: 2026-08-01T18:31:33.348Z
+published: 2026-08-01T18:31:33.348Z
 topic:
   - Computer Science
 subtopic:
@@ -20,13 +20,18 @@ The collapse depends on order. On sorted input, raising `left` can only increase
 
 **Core condition:** sorted or otherwise monotonic input → one comparison discards a whole column of pairs → an `O(n)` pass with `O(1)` auxiliary space.
 
-# Trace
+````tabsdown
+tab: Visualization
 
-The trace runs the converging pair-sum over the sorted array `[1, 3, 4, 6, 8, 10, 13]`, searching for two elements that add to `18`.
+
 
 ```steptrace
 {"algorithm":"two-pointers","array":[1,3,4,6,8,10,13],"target":18}
 ```
+
+# Trace
+
+The trace runs the converging pair-sum over the sorted array `[1, 3, 4, 6, 8, 10, 13]`, searching for two elements that add to `18`.
 
 The first comparison adds the extremes, `1 + 13 = 14`, which falls short of `18`. With the array sorted, `13` is already the largest available partner for `1`; every other pair anchored at index `0` uses a smaller right value and sums to less than `14`. That whole block of pairs is therefore too small, and `left++` discards it in one step. Later, when `6 + 13 = 19` overshoots, the mirror argument applies: every pair anchored at `13` uses a left value of at least `6`, so all of them exceed `18`, and `right--` drops that block. The pointers converge on `8 + 10 = 18` after visiting each index at most once.
 
@@ -39,6 +44,70 @@ Sorted order is the invariant that turns each move into a proof instead of a gue
 
 Each move retires one index permanently, so `left` and `right` together advance at most `n` times before they meet. Every element is visited at most once, which is why the sorted-order pass is `O(n)` where the nested loop is `O(n²)`.
 
+tab: Complexity
+
+```complexity
+{
+  "version": 2,
+  "label": "Two Pointers complexity",
+  "variables": {
+    "inputSize": {
+      "symbol": "n",
+      "description": "number of input elements or states"
+    }
+  },
+  "resources": {
+    "time": {
+      "mode": "cases",
+      "entries": [
+        {
+          "kind": "case",
+          "role": "Best",
+          "formula": "O(1)",
+          "curveId": "constant"
+        },
+        {
+          "kind": "case",
+          "role": "Average",
+          "formula": "O(n)",
+          "curveId": "linear"
+        },
+        {
+          "kind": "case",
+          "role": "Worst",
+          "formula": "O(n)",
+          "curveId": "linear"
+        }
+      ]
+    },
+    "space": {
+      "mode": "cases",
+      "entries": [
+        {
+          "kind": "case",
+          "role": "Best",
+          "formula": "O(1)",
+          "curveId": "constant"
+        },
+        {
+          "kind": "case",
+          "role": "Average",
+          "formula": "O(1)",
+          "curveId": "constant"
+        },
+        {
+          "kind": "case",
+          "role": "Worst",
+          "formula": "O(1)",
+          "curveId": "constant"
+        }
+      ]
+    }
+  }
+}
+```
+````
+
 # Complexity
 
 | Case | Time | Auxiliary space | Cause |
@@ -47,7 +116,7 @@ Each move retires one index permanently, so `left` and `right` together advance 
 | Average | `O(n)` | `O(1)` | The pointers converge, each index visited once. |
 | Worst | `O(n)` | `O(1)` | The pointers meet or cross after `n` moves, matching on the last step or exhausting the array. |
 
-These bounds cover only the converging pass and assume the input is already sorted. A nested-loop scan of the same problem is `O(n²)` time with `O(1)` space. When the input arrives unsorted, sorting it to enable the pass adds `O(n log n)` time — which dominates the linear pass — plus `O(log n)` to `O(n)` sort space; that preprocessing pays back only when the sorted order is reused across later queries.
+These bounds cover only the converging pass and assume the input is already sorted. A nested-loop scan of the same problem is `O(n²)` time with `O(1)` space. When the input arrives unsorted, sorting it to enable the pass adds `O(n log n)` time — which dominates the linear pass — plus `O(log n)` to `O(n)` sort space. Repeated queries amortize that preprocessing further, but one large query can still justify sorting when memory limits rule out hashing, ordered output is required, or the input may be mutated in place.
 
 # When Order is the Whole Precondition
 

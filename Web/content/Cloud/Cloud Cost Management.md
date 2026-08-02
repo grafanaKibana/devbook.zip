@@ -1,8 +1,8 @@
 ---
 publish: true
-created: 2026-07-25T18:38:43.785Z
-modified: 2026-07-25T18:38:43.786Z
-published: 2026-07-25T18:38:43.786Z
+created: 2026-07-18T14:02:43.929Z
+modified: 2026-07-18T14:02:43.932Z
+published: 2026-07-18T14:02:43.932Z
 topic:
   - Cloud
 subtopic: []

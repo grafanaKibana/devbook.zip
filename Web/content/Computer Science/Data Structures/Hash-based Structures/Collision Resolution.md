@@ -1,8 +1,8 @@
 ---
 publish: true
-created: 2026-07-29T14:28:24.646Z
-modified: 2026-07-29T14:28:24.647Z
-published: 2026-07-29T14:28:24.647Z
+created: 2026-07-29T20:22:59.987Z
+modified: 2026-08-01T18:31:33.354Z
+published: 2026-08-01T18:31:33.354Z
 topic:
   - Computer Science
 subtopic:
@@ -27,13 +27,42 @@ Read it as two questions. _Is the storage open-ended or closed?_ Chaining's list
 
 **Core split:** collisions land two keys in one home bucket → chain them outside the array or probe to another in-array slot. A bucket/group layout changes how many candidates one access examines, then delegates overflow to chaining or probing. The third StepTrace tab demonstrates bucketed probing.
 
+````tabsdown
+tab: Visualization
+
+~~~~tabsdown
+tab: Closed Addressing
+
+
 ```steptrace
-{"tabs":[{"name":"Closed Addressing","description":"Separate chaining (open hashing): each bucket points to its own external key/value chain.","algorithm":"hash-map","variant":"closed-addressing"},{"name":"Open Addressing","description":"Linear probing scans the fixed table and preserves tombstones after removal.","algorithm":"hash-map","variant":"open-addressing"},{"name":"Bucket Hashing","description":"Four three-cell buckets use bucket-by-bucket linear overflow with wraparound.","algorithm":"hash-map","variant":"buckets"}]}
+{"algorithm":"hash-map","variant":"closed-addressing"}
 ```
+
+Separate chaining (open hashing): each bucket points to its own external key/value chain.
+
+tab: Open Addressing
+
+
+```steptrace
+{"algorithm":"hash-map","variant":"open-addressing"}
+```
+
+Linear probing scans the fixed table and preserves tombstones after removal.
+
+tab: Bucket Hashing
+
+
+```steptrace
+{"algorithm":"hash-map","variant":"buckets"}
+```
+
+Four three-cell buckets use bucket-by-bucket linear overflow with wraparound.
+
+~~~~
 
 # Open Hashing — Separate Chaining (Closed Addressing)
 
-Each array slot holds a pointer to a secondary container — classically a linked list — of every entry that hashed there. A collision appends to that bucket's list; a lookup hashes to the bucket and scans its list with an equality check. The array slot is a fixed _address_ for the key (hence "closed addressing"), but the storage behind it is open-ended (hence "open hashing").
+Each array slot holds a pointer to a secondary container — classically a linked list — of every entry that hashed there. A collision appends to that bucket's list; a lookup hashes to the bucket and scans its list with an equality check. The array slot is a fixed *address* for the key (hence "closed addressing"), but the storage behind it is open-ended (hence "open hashing").
 
 - **Load factor** `α = count / bucketCount` can exceed 1. Under simple uniform hashing, a successful lookup in an unordered chain examines about `1 + α/2` entries, so cost rises linearly rather than approaching a full-table cliff. Java's `HashMap` may treeify when an insertion grows a bin past its threshold of 8 entries, but only when the table capacity is at least 64; below that it resizes instead. Its tree gives logarithmic lookup when equal-hash keys have a usable `Comparable` order, while non-comparable equal-hash keys may still require examining both subtrees.
 - **Delete is direct** — unlink the node and update normal table metadata. No tombstone or probe-chain repair is required.
@@ -43,18 +72,15 @@ Chaining tolerates moderate hash skew and a load factor above 1 without reservin
 
 # Closed Hashing — Open Addressing (Probing)
 
-Every entry lives directly in the bucket array; there are no external lists. On a collision the table follows a deterministic **probe sequence** to the next candidate slot until it finds an empty one (for insert) or the key (for lookup). The storage is closed (a fixed array), but a key's final _address_ is open — it may sit far from its home slot.
+Every entry lives directly in the bucket array; there are no external lists. On a collision the table follows a deterministic **probe sequence** to the next candidate slot until it finds an empty one (for insert) or the key (for lookup). The storage is closed (a fixed array), but a key's final *address* is open — it may sit far from its home slot.
 
 The probe sequence is the whole design:
 
 - **Linear probing** — try `h, h+1, h+2, …`. It usually has the strongest spatial locality of these probe sequences, but collisions pile into contiguous runs (**primary clustering**) that lengthen every probe touching the run.
-
-- **Quadratic probing** — try `h+1², h+2², h+3², …`. Breaks up primary clustering; keys with the _same_ home slot still share a sequence (**secondary clustering**), and it can fail to find a free slot unless capacity and load are constrained.
-
+- **Quadratic probing** — try `h+1², h+2², h+3², …`. Breaks up primary clustering; keys with the *same* home slot still share a sequence (**secondary clustering**), and it can fail to find a free slot unless capacity and load are constrained.
 - **Double hashing** — step by a second hash `h₂(key)`. The stride must be non-zero and coprime to the table capacity so the sequence can visit every slot. Key-specific strides mitigate primary and secondary clustering; they do not eliminate clustering caused by correlated or poor hashes. The cost is a second hash computation and worse locality than linear probing.
 
-- **Load factor must stay below 1** — the array _is_ the storage, so a terminating empty slot must remain reachable. For classic linear probing, assume a large table, uniformly distributed independent home slots, and no tombstones. Then an average successful lookup takes about `½(1 + 1/(1−α))` probes, while a miss or insertion takes about `½(1 + 1/(1−α)²)`. At `α = 0.9`, those are roughly 5.5 and 50.5 probes respectively. Real costs depend on hash quality, deletion history, and resize policy.
-
+- **Load factor must stay below 1** — the array *is* the storage, so a terminating empty slot must remain reachable. For classic linear probing, assume a large table, uniformly distributed independent home slots, and no tombstones. Then an average successful lookup takes about `½(1 + 1/(1−α))` probes, while a miss or insertion takes about `½(1 + 1/(1−α)²)`. At `α = 0.9`, those are roughly 5.5 and 50.5 probes respectively. Real costs depend on hash quality, deletion history, and resize policy.
 - **Deletion must preserve probe reachability.** Blindly clearing a slot can create a terminating empty before keys displaced past it. A tombstone is one strategy: lookups continue through it and inserts may reuse it, with periodic cleanup or rehashing to control accumulation. Linear probing can instead backward-shift entries or rebuild the affected local cluster; other probe schemes need a repair rule that preserves their sequence.
 
 Open addressing often lowers pointer and cache overhead when the hash is good and the load factor is controlled. It is not overhead-free: the table reserves empty slack and needs control metadata or sentinel states to distinguish empty, occupied, and sometimes deleted slots.
@@ -68,6 +94,128 @@ The array can group `B` adjacent slots into a fixed-size **bucket**. The home re
 - **Overflow and deletion inherit the underlying strategy.** Chained overflow unlinks an entry from its chain or page. Probed overflow cannot blindly clear a slot that earlier probes depend on; it uses tombstones, backward shifting, or a local/full rebuild as its probe scheme permits.
 
 Use bucket/group layout when memory or disk locality dominates; its tail behaviour remains the behaviour of the chosen chain or probe scheme.
+
+tab: Complexity
+
+```complexity
+{
+  "version": 2,
+  "label": "Collision Resolution complexity",
+  "variables": {
+    "blockSize": {
+      "symbol": "B",
+      "description": "block or page capacity"
+    },
+    "inputSize": {
+      "symbol": "n",
+      "description": "number of input elements or states"
+    },
+    "keyRange": {
+      "symbol": "k",
+      "description": "key range, digit count, or requested result count"
+    },
+    "loadFactor": {
+      "symbol": "α",
+      "description": "hash-table load factor"
+    }
+  },
+  "resources": {
+    "time": {
+      "mode": "operations",
+      "entries": [
+        {
+          "kind": "operation",
+          "operation": "Open hashing (chaining)",
+          "bounds": [
+            {
+              "kind": "text",
+              "role": "Avg lookup",
+              "formula": "O(1 + α)"
+            },
+            {
+              "kind": "text",
+              "role": "Worst lookup",
+              "formula": "O(n); treeified comparable-key bin O(log k)"
+            }
+          ]
+        },
+        {
+          "kind": "operation",
+          "operation": "Closed hashing (open addressing)",
+          "bounds": [
+            {
+              "kind": "text",
+              "role": "Avg lookup",
+              "formula": "Linear probing: success O(1/(1−α)), miss/insert O(1/(1−α)²)"
+            },
+            {
+              "kind": "curve",
+              "role": "Worst lookup",
+              "formula": "O(n)",
+              "curveId": "linear"
+            }
+          ]
+        },
+        {
+          "kind": "operation",
+          "operation": "Bucket/group layout",
+          "bounds": [
+            {
+              "kind": "text",
+              "role": "Avg lookup",
+              "formula": "Resolution-dependent; scans B slots/metadata together"
+            },
+            {
+              "kind": "text",
+              "role": "Worst lookup",
+              "formula": "resolution-dependent"
+            }
+          ]
+        }
+      ]
+    },
+    "space": {
+      "mode": "operations",
+      "entries": [
+        {
+          "kind": "operation",
+          "operation": "Open hashing (chaining)",
+          "bounds": [
+            {
+              "kind": "text",
+              "role": "Extra memory",
+              "formula": "pointer/index per entry"
+            }
+          ]
+        },
+        {
+          "kind": "operation",
+          "operation": "Closed hashing (open addressing)",
+          "bounds": [
+            {
+              "kind": "text",
+              "role": "Extra memory",
+              "formula": "empty slack plus control metadata or sentinels"
+            }
+          ]
+        },
+        {
+          "kind": "operation",
+          "operation": "Bucket/group layout",
+          "bounds": [
+            {
+              "kind": "text",
+              "role": "Extra memory",
+              "formula": "block slack plus metadata or overflow links"
+            }
+          ]
+        }
+      ]
+    }
+  }
+}
+```
+````
 
 # Complexity
 

@@ -1,8 +1,8 @@
 ---
 publish: true
-created: 2026-07-25T18:38:43.804Z
-modified: 2026-07-25T18:38:43.804Z
-published: 2026-07-25T18:38:43.804Z
+created: 2026-07-18T14:02:44.000Z
+modified: 2026-08-01T18:31:33.351Z
+published: 2026-08-01T18:31:33.351Z
 topic:
   - Computer Science
 subtopic:
@@ -20,13 +20,18 @@ The move that makes this cheap is the rolling hash. Sliding the window one chara
 
 **Core condition:** a window hash that updates in `O(1)` per slide + a verification on every hash match → `O(n + m)` expected search, `O(nm)` only when collisions or genuine matches force verification at most positions.
 
-# Trace
+````tabsdown
+tab: Visualization
 
-The trace searches for `GEEK` in `GEEKSFORGEEKS`, sliding a four-character window and comparing its rolling hash against the pattern hash.
+
 
 ```steptrace
 {"algorithm":"rabin-karp","text":"GEEKSFORGEEKS","pattern":"GEEK"}
 ```
+
+# Trace
+
+The trace searches for `GEEK` in `GEEKSFORGEEKS`, sliding a four-character window and comparing its rolling hash against the pattern hash.
 
 The window at index 0 hashes equal to the pattern, so that position triggers a character check and confirms the first match. Every following slide reuses the previous hash: the algorithm subtracts the weight of the character leaving on the left, shifts, and adds the character entering on the right, producing the next window's hash in a constant number of operations rather than `O(m)`. Positions whose hash differs from the pattern's — the large majority here — are rejected on a single integer compare and never reach a character comparison. Only when a window hash equals the pattern hash does the algorithm spend `O(m)` confirming the characters, which is why the second occurrence at index 8 pays exactly the verification the first one did.
 
@@ -45,6 +50,89 @@ Sliding from window `i` to window `i+1` reuses `h`. The character `T[i]` leaves 
 Subtracting `T[i]·b^(m-1)` removes the outgoing character's weighted term; multiplying by `b` shifts every remaining character up one place; adding `T[i+m]` seats the incoming character. Each operand stays reduced mod `p`, so the update is a fixed number of integer operations no matter how large `m` is.
 
 Hash equality is necessary but not sufficient for string equality. The map from `m`-character strings to residues mod `p` is many-to-one, so two different windows can share a hash — a collision. Rabin-Karp treats a hash match as a claim to be checked: on `h == patternHash` it compares the `m` characters directly and reports a match only when they agree. That verification is the invariant separating Rabin-Karp from a probabilistic filter — without it, a collision would be reported as a false match.
+
+tab: Complexity
+
+```complexity
+{
+  "version": 2,
+  "label": "Rabin Karp Search complexity",
+  "variables": {
+    "inputSize": {
+      "symbol": "n",
+      "description": "number of input elements or states"
+    },
+    "secondarySize": {
+      "symbol": "m",
+      "description": "secondary input, pattern, bucket, or sequence size"
+    }
+  },
+  "resources": {
+    "time": {
+      "mode": "operations",
+      "entries": [
+        {
+          "kind": "operation",
+          "operation": "Best",
+          "bounds": [
+            {
+              "kind": "text",
+              "role": "Time",
+              "formula": "Θ(n + m)"
+            }
+          ]
+        },
+        {
+          "kind": "operation",
+          "operation": "Average",
+          "bounds": [
+            {
+              "kind": "text",
+              "role": "Time",
+              "formula": "Θ(n + m)"
+            }
+          ]
+        },
+        {
+          "kind": "operation",
+          "operation": "Worst",
+          "bounds": [
+            {
+              "kind": "text",
+              "role": "Time",
+              "formula": "Θ(n · m)"
+            }
+          ]
+        }
+      ]
+    },
+    "space": {
+      "mode": "cases",
+      "entries": [
+        {
+          "kind": "case",
+          "role": "Best",
+          "formula": "O(1)",
+          "curveId": "constant"
+        },
+        {
+          "kind": "case",
+          "role": "Average",
+          "formula": "O(1)",
+          "curveId": "constant"
+        },
+        {
+          "kind": "case",
+          "role": "Worst",
+          "formula": "O(1)",
+          "curveId": "constant"
+        }
+      ]
+    }
+  }
+}
+```
+````
 
 # Complexity
 
@@ -90,16 +178,18 @@ The screening is strongest across many patterns at once. A single rolling hash o
 > [!EXAMPLE]- C# implementation
 >
 > ```csharp
-> public static int RabinKarp(string text, string pattern)
+> public static IEnumerable<int> FindAll(string text, string pattern)
 > {
 >     const long Base = 256;
 >     const long Modulus = 1_000_000_007;
 >
 >     int n = text.Length, m = pattern.Length;
->     if (m == 0 || m > n)
+>     if (m == 0)
 >     {
->         return m == 0 ? 0 : -1;
+>         yield return 0;
+>         yield break;
 >     }
+>     if (m > n) yield break;
 >
 >     long highPower = 1; // b^(m-1) mod p
 >     for (int i = 0; i < m - 1; i++)
@@ -118,7 +208,7 @@ The screening is strongest across many patterns at once. A single rolling hash o
 >     {
 >         if (windowHash == patternHash && text.AsSpan(i, m).SequenceEqual(pattern))
 >         {
->             return i;
+>             yield return i;
 >         }
 >
 >         if (i < n - m)
@@ -127,12 +217,10 @@ The screening is strongest across many patterns at once. A single rolling hash o
 >                           * Base + text[i + m]) % Modulus;
 >         }
 >     }
->
->     return -1;
 > }
 > ```
 >
-> `SequenceEqual` is the mandatory verification: it runs only when the hashes match and guards against reporting a collision as a match. The `+ Modulus` before the final reductions keeps the subtraction non-negative in modular arithmetic. `Base = 256` assumes byte-range (ASCII) input; non-ASCII `char` values exceed 255, so a larger base (or hashing the byte encoding) is needed — correctness is unaffected either way because verification checks every hit.
+> `FindAll` scans every window and yields every confirmed start index, matching the exhaustive trace and complexity bounds; an empty pattern keeps the conventional single match at index `0`. `SequenceEqual` is the mandatory verification: it runs only when the hashes match and guards against reporting a collision as a match. The `+ Modulus` before the final reductions keeps the subtraction non-negative in modular arithmetic. `Base = 256` assumes byte-range (ASCII) input; non-ASCII `char` values exceed 255, so a larger base (or hashing the byte encoding) is needed — correctness is unaffected either way because verification checks every hit.
 
 # Questions
 

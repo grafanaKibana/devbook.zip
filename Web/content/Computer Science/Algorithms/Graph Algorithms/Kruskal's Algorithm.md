@@ -1,8 +1,8 @@
 ---
 publish: true
 created: 2026-07-18T14:02:43.948Z
-modified: 2026-07-26T19:07:13.239Z
-published: 2026-07-26T19:07:13.239Z
+modified: 2026-08-01T18:31:33.343Z
+published: 2026-08-01T18:31:33.343Z
 topic:
   - Computer Science
 subtopic:
@@ -16,6 +16,9 @@ status: Ready to Repeat
 A connected, undirected, weighted graph can contain many spanning trees. [[Computer Science/Algorithms/Graph Algorithms/Minimum Spanning Tree|Minimum spanning tree]] asks for the one with minimum total edge weight. Kruskal's algorithm treats the graph as an edge list: sort every edge from lightest to heaviest, then accept an edge only when it joins two components that are still separate.
 
 The cycle test is the whole mechanism. A [[Computer Science/Data Structures/Graph Structures/Disjoint Set|disjoint set]] stores the current forest components. If `find(u) == find(v)`, edge `(u, v)` would close a cycle and is rejected; otherwise `union(u, v)` merges the components and the edge enters the result. The cut property makes that greedy choice safe: the lightest edge crossing a cut belongs to some MST.
+
+````tabsdown
+tab: Visualization
 
 ```steptrace
 {"algorithm":"kruskal"}
@@ -33,6 +36,74 @@ For edges `AB=1`, `BC=2`, `AC=3`, `CD=4`, the initial components are `{A}`, `{B}
 | `CD=4` | `C` and `D` differ | accept | `{A,B,C,D}` |
 
 The accepted edges have total weight `7` and stop at `V - 1 = 3` edges. At every acceptance, the endpoints lie on opposite sides of a current component cut, and no lighter unprocessed edge crosses that cut.
+
+tab: Complexity
+
+```complexity
+{
+  "version": 2,
+  "label": "Kruskal's Algorithm complexity",
+  "variables": {
+    "edgeCount": {
+      "symbol": "E",
+      "description": "number of edges"
+    },
+    "vertexCount": {
+      "symbol": "V",
+      "description": "number of vertices"
+    }
+  },
+  "resources": {
+    "time": {
+      "mode": "cases",
+      "entries": [
+        {
+          "kind": "case",
+          "role": "Best",
+          "formula": "Θ(E log E)",
+          "curveId": "n-log-n"
+        },
+        {
+          "kind": "case",
+          "role": "Average",
+          "formula": "Θ(E log E)",
+          "curveId": "n-log-n"
+        },
+        {
+          "kind": "case",
+          "role": "Worst",
+          "formula": "Θ(E log E)",
+          "curveId": "n-log-n"
+        }
+      ]
+    },
+    "space": {
+      "mode": "cases",
+      "entries": [
+        {
+          "kind": "case",
+          "role": "Best",
+          "formula": "O(V) plus sort workspace",
+          "curveId": "linear"
+        },
+        {
+          "kind": "case",
+          "role": "Average",
+          "formula": "O(V) plus sort workspace",
+          "curveId": "linear"
+        },
+        {
+          "kind": "case",
+          "role": "Worst",
+          "formula": "O(V) plus sort workspace",
+          "curveId": "linear"
+        }
+      ]
+    }
+  }
+}
+```
+````
 
 # Complexity
 

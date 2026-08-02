@@ -1,8 +1,8 @@
 ---
 publish: true
-created: 2026-07-25T18:38:43.795Z
-modified: 2026-07-25T18:38:43.795Z
-published: 2026-07-25T18:38:43.795Z
+created: 2026-07-21T18:52:02.705Z
+modified: 2026-08-01T18:31:33.345Z
+published: 2026-08-01T18:31:33.345Z
 topic:
   - Computer Science
 subtopic:
@@ -20,13 +20,18 @@ Its subproblems are **independent** when each can be solved without another subp
 
 **Core shape:** divide into independent subproblems → recurse to a base case → combine their results. A common balanced special case has a fixed number `a` of equal-size subproblems `n/b`, giving `T(n) = a·T(n/b) + f(n)`. That recurrence is not a universal definition of divide-and-conquer.
 
-# Trace
+````tabsdown
+tab: Visualization
 
-The structure to animate is the recursion tree itself. One problem divides into independent subproblems, reaches direct base cases, then carries partial answers upward until the original problem can combine them. [[Computer Science/Algorithms/Sorting Algorithms/Merge Sort|Merge sort]] is one concrete use of that shape, but the animation keeps the pattern separate from any one algorithm.
+
 
 ```steptrace
 { "algorithm": "divide-and-conquer" }
 ```
+
+# Trace
+
+The structure to animate is the recursion tree itself. One problem divides into independent subproblems, reaches direct base cases, then carries partial answers upward until the original problem can combine them. [[Computer Science/Algorithms/Sorting Algorithms/Merge Sort|Merge sort]] is one concrete use of that shape, but the animation keeps the pattern separate from any one algorithm.
 
 # Divide, Conquer, Combine
 
@@ -39,6 +44,115 @@ The paradigm is three steps and a stopping rule:
 Which step carries the work varies. [[Computer Science/Algorithms/Sorting Algorithms/Merge Sort|Merge sort]] splits at the midpoint and spends `Θ(n)` merging two sorted halves. [[Computer Science/Algorithms/Sorting Algorithms/Quick Sort|Quicksort]] spends `Θ(n)` partitioning around a pivot and has no substantial combine step. [[Computer Science/Algorithms/Search Algorithms/Binary Search|Binary search]] follows only one half, so it is often classified more specifically as decrease-and-conquer.
 
 Logical independence permits parallel execution but does not make it automatic. Calls that share mutable data still need ownership rules or synchronization, the combine step must wait for every result it consumes, and task-scheduling overhead can exceed the work saved on small inputs. Whether a divide-and-conquer implementation is race-free or faster in parallel depends on its data access, synchronization, grain size, and runtime.
+
+tab: Complexity
+
+```complexity
+{
+  "version": 2,
+  "label": "Divide and Conquer complexity",
+  "variables": {
+    "branchCount": {
+      "symbol": "a",
+      "description": "number of recursive subproblems"
+    },
+    "branchingFactor": {
+      "symbol": "b",
+      "description": "recurrence subproblem-size divisor"
+    },
+    "inputSize": {
+      "symbol": "n",
+      "description": "number of input elements or states"
+    },
+    "recurrenceWork": {
+      "symbol": "f(n)",
+      "description": "non-recursive work in the recurrence"
+    }
+  },
+  "resources": {
+    "time": {
+      "mode": "operations",
+      "entries": [
+        {
+          "kind": "operation",
+          "operation": "Master theorem case 1",
+          "bounds": [
+            {
+              "kind": "text",
+              "role": "Result",
+              "formula": "Θ(n^(log_b a))"
+            }
+          ]
+        },
+        {
+          "kind": "operation",
+          "operation": "Master theorem case 2",
+          "bounds": [
+            {
+              "kind": "text",
+              "role": "Result",
+              "formula": "Θ(n^(log_b a) · log n)"
+            }
+          ]
+        },
+        {
+          "kind": "operation",
+          "operation": "Master theorem case 3",
+          "bounds": [
+            {
+              "kind": "text",
+              "role": "Result",
+              "formula": "Θ(f(n))"
+            }
+          ]
+        }
+      ]
+    },
+    "space": {
+      "mode": "operations",
+      "entries": [
+        {
+          "kind": "operation",
+          "operation": "Balanced recursion stack",
+          "bounds": [
+            {
+              "kind": "curve",
+              "role": "Bound",
+              "formula": "O(log n)",
+              "curveId": "log-n"
+            }
+          ]
+        },
+        {
+          "kind": "operation",
+          "operation": "Unbalanced recursion stack",
+          "bounds": [
+            {
+              "kind": "curve",
+              "role": "Bound",
+              "formula": "O(n)",
+              "curveId": "linear"
+            }
+          ]
+        },
+        {
+          "kind": "operation",
+          "operation": "Merge combine buffer",
+          "bounds": [
+            {
+              "kind": "curve",
+              "role": "Bound",
+              "formula": "O(n)",
+              "curveId": "linear"
+            }
+          ]
+        }
+      ]
+    }
+  }
+}
+```
+````
 
 # Analyzing Balanced Recurrences
 

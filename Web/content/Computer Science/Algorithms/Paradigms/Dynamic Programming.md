@@ -1,8 +1,8 @@
 ---
 publish: true
 created: 2026-07-18T14:02:43.953Z
-modified: 2026-07-28T11:19:09.044Z
-published: 2026-07-28T11:19:09.044Z
+modified: 2026-08-01T18:31:33.345Z
+published: 2026-08-01T18:31:33.345Z
 topic:
   - Computer Science
 subtopic:
@@ -20,6 +20,58 @@ Dynamic programming starts with a well-defined state, base cases, and a recurren
 
 **Core shape for finite one-pass DP:** state + base cases + recurrence + acyclic dependency order → each reached state solved once → `(number of distinct states) × (transition work per state)` time.
 
+````tabsdown
+tab: Visualization
+
+
+~~~~tabsdown
+tab: Greedy
+
+
+```steptrace
+{"algorithm":"coin-change-greedy"}
+```
+
+Largest usable coin first: exact change, but 6 coins instead of 3.
+
+tab: Naive Recursion
+
+
+```steptrace
+{"algorithm":"coin-change-naive"}
+```
+
+Try every first coin; repeated remainders rebuild the same work.
+
+tab: Memoization
+
+
+```steptrace
+{"algorithm":"coin-change-memoization"}
+```
+
+Keep recursion, but save each answered remainder beside the counter.
+
+tab: Tabulation
+
+
+```steptrace
+{"algorithm":"coin-change-tabulation"}
+```
+
+Build exact change from 0¢ upward on a visual amount board.
+
+tab: Memoization (Raw)
+
+
+```steptrace
+{"algorithm":"coin-change-top-down"}
+```
+
+Inspect the canonical recursion tree, cache hits, and stored returns.
+
+~~~~
+
 # Mechanism — State, Recurrence, and the Two Forms
 
 Both examples become DP only after the state discards irrelevant history. Coin change keeps the remaining amount because every denomination remains reusable; finite coin stock would also require the remaining counts. Grid path keeps the current coordinate. Two calls with the same state have the same future choices and therefore the same answer, regardless of how they arrived there.
@@ -32,10 +84,6 @@ The recurrence then names the dependencies. Coin change reads `best[amount - coi
 # Coin Change — Local Choice versus Stored Subproblems
 
 A cashier must return exactly `30¢` using real `1¢`, `10¢`, `25¢`, and `50¢` denominations. The example assumes enough of each coin that stock is not a constraint. Taking the largest usable coin first returns `25 + 1 + 1 + 1 + 1 + 1`, while `10 + 10 + 10` uses half as many coins. The five tabs keep that counterexample fixed while changing the solving strategy and level of abstraction.
-
-```steptrace
-{"selected":0,"tabs":[{"name":"Greedy","description":"Largest usable coin first: exact change, but 6 coins instead of 3.","algorithm":"coin-change-greedy"},{"name":"Naive Recursion","description":"Try every first coin; repeated remainders rebuild the same work.","algorithm":"coin-change-naive"},{"name":"Memoization","description":"Keep recursion, but save each answered remainder beside the counter.","algorithm":"coin-change-memoization"},{"name":"Tabulation","description":"Build exact change from 0¢ upward on a visual amount board.","algorithm":"coin-change-tabulation"},{"name":"Memoization (Raw)","description":"Inspect the canonical recursion tree, cache hits, and stored returns.","algorithm":"coin-change-top-down"}]}
-```
 
 The simplified Memoization and Tabulation tabs keep the cashier model visible. Memoization (Raw) exposes the transferable recursion tree beneath the counter: each node is a remaining amount, and a cache hit closes a repeated subtree. The exact approaches compute `30¢ → 3 coins`; they differ in which states are visited first and whether control lives in the call stack or a loop.
 
@@ -93,16 +141,59 @@ The simplified Memoization and Tabulation tabs keep the cashier model visible. M
 >     return dp[amount] > amount ? -1 : dp[amount];
 > }
 > ```
->
 > `FewestCoinsTopDown(30, [1, 10, 25, 50])` and the bottom-up version both return `3`.
 
 # Grid Path — Repeated Coordinates versus a Filled Matrix
 
 A warehouse robot may move only right or down from the loading bay to the dispatch door. Choosing the cheaper immediate tile and breaking ties to the right walks into an expensive corridor and costs `21`; the best complete route costs `10`. Naive recursion eventually finds it, but different route prefixes repeatedly reach the same coordinate.
 
+~~~~tabsdown
+tab: Greedy
+
+
 ```steptrace
-{"selected":0,"tabs":[{"name":"Greedy","description":"Choose the cheaper next tile, breaking ties right; later costs trap the route.","algorithm":"grid-path-greedy"},{"name":"Naive Recursion","description":"Explore every right/down route and revisit the same coordinates.","algorithm":"grid-path-naive"},{"name":"Memoization","description":"Write solved remaining costs into the warehouse map and reuse repeated tiles.","algorithm":"grid-path-memoization"},{"name":"Tabulation","description":"Fill the warehouse map backward from the dispatch door and reveal the route.","algorithm":"grid-path-tabulation"},{"name":"Memoization (Raw)","description":"Inspect the canonical coordinate recursion tree and cache hits.","algorithm":"grid-path-top-down"}]}
+{"algorithm":"grid-path-greedy"}
 ```
+
+Choose the cheaper next tile, breaking ties right; later costs trap the route.
+
+tab: Naive Recursion
+
+
+```steptrace
+{"algorithm":"grid-path-naive"}
+```
+
+Explore every right/down route and revisit the same coordinates.
+
+tab: Memoization
+
+
+```steptrace
+{"algorithm":"grid-path-memoization"}
+```
+
+Write solved remaining costs into the warehouse map and reuse repeated tiles.
+
+tab: Tabulation
+
+
+```steptrace
+{"algorithm":"grid-path-tabulation"}
+```
+
+Fill the warehouse map backward from the dispatch door and reveal the route.
+
+tab: Memoization (Raw)
+
+
+```steptrace
+{"algorithm":"grid-path-top-down"}
+```
+
+Inspect the canonical coordinate recursion tree and cache hits.
+
+~~~~
 
 Here the state is a coordinate rather than an amount. `best(R2C2)` means “the minimum remaining cost from this tile,” independent of how the robot arrived. The four simplified tabs use one warehouse matrix with integrated context, while Memoization (Raw) exposes the canonical recursion tree. Memoization stops repeated calls to a saved coordinate; tabulation makes the dependency order spatial by reading the already-solved tiles to the right and below.
 
@@ -117,7 +208,6 @@ Here the state is a coordinate rather than an amount. `best(R2C2)` means “the 
 >   D --> E["minimum of right and down"]
 >   E --> F["dispatch door"]
 > ```
->
 > `R2C2` is one state even though two route prefixes reach it. Memoization computes its suffix once; tabulation fills it once before either predecessor reads it.
 
 > [!EXAMPLE]- Grid path, top-down and bottom-up (C#)
@@ -170,8 +260,115 @@ Here the state is a coordinate rather than an amount. `best(R2C2)` means “the 
 >     return dp[0, 0];
 > }
 > ```
->
 > Both versions return the same minimum route cost; the visualization keeps the full table so it can also highlight the chosen route.
+
+tab: Complexity
+
+```complexity
+{
+  "version": 2,
+  "label": "Dynamic Programming complexity",
+  "variables": {
+    "capacity": {
+      "symbol": "C",
+      "description": "number of grid columns"
+    },
+    "optionCount": {
+      "symbol": "D",
+      "description": "number of denominations, choices, or dimensions"
+    },
+    "rowCount": {
+      "symbol": "R",
+      "description": "number of rows"
+    },
+    "targetSize": {
+      "symbol": "W",
+      "description": "target amount or bounded problem size"
+    }
+  },
+  "resources": {
+    "time": {
+      "mode": "operations",
+      "entries": [
+        {
+          "kind": "operation",
+          "operation": "Coin change, target W, D denominations",
+          "bounds": [
+            {
+              "kind": "text",
+              "role": "Time",
+              "formula": "O(WD)"
+            }
+          ]
+        },
+        {
+          "kind": "operation",
+          "operation": "Grid path, R × C matrix",
+          "bounds": [
+            {
+              "kind": "text",
+              "role": "Time",
+              "formula": "O(RC)"
+            }
+          ]
+        }
+      ]
+    },
+    "space": {
+      "mode": "operations",
+      "entries": [
+        {
+          "kind": "operation",
+          "operation": "Coin change, target W, D denominations",
+          "bounds": [
+            {
+              "kind": "curve",
+              "role": "Stored answers",
+              "formula": "O(W)",
+              "curveId": "linear"
+            },
+            {
+              "kind": "curve",
+              "role": "Top-down stack",
+              "formula": "O(W)",
+              "curveId": "linear"
+            }
+          ]
+        },
+        {
+          "kind": "operation",
+          "operation": "Grid path, R × C matrix",
+          "bounds": [
+            {
+              "kind": "text",
+              "role": "Stored answers",
+              "formula": "O(RC)"
+            },
+            {
+              "kind": "text",
+              "role": "Top-down stack",
+              "formula": "O(R + C)"
+            }
+          ]
+        },
+        {
+          "kind": "operation",
+          "operation": "Grid path row optimization",
+          "bounds": [
+            {
+              "kind": "curve",
+              "role": "Auxiliary",
+              "formula": "O(C)",
+              "curveId": "linear"
+            }
+          ]
+        }
+      ]
+    }
+  }
+}
+```
+````
 
 # Complexity
 
