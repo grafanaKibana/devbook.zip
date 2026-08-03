@@ -277,8 +277,22 @@ Run the smallest applicable gate first.
 | Vault structure/content | `python3 .scripts/tests/test_validate_vault.py`                                       | Obsidian rendering when affected                                   |
 | Cards and dashboards    | Vault validation, then `npm run check` from `Web/`                                    | Obsidian and Quartz; light/dark; desktop/mobile                    |
 | StepTrace               | `npm run steptrace:test`, `steptrace:typecheck`, `steptrace:build`, `steptrace:check` | Both hosts; initial/active/final; narrow; reduced motion; teardown |
-| Complexity              | `npm run complexity:test` and `npm run complexity:visual`                             | Both hosts; independent legends; narrow scroll; light/dark; keyboard |
+| Complexity              | `npm run complexity:test`, then the visual gate below                                 | Both hosts; independent legends; narrow scroll; light/dark; keyboard |
 | Quartz shell            | `npm run check`, then a Quartz build when appropriate                                 | Hard load, SPA navigation, focus, and responsive shell             |
+
+Run the Complexity visual gate from `Web/`:
+
+Terminal 1:
+
+```bash
+npm run serve
+```
+
+Terminal 2:
+
+```bash
+npm run complexity:visual -- --base-url http://127.0.0.1:8085
+```
 
 Committed screenshots are durable evidence. `.omx/artifacts/` are run artifacts and must not be the only proof of a lasting contract.
 

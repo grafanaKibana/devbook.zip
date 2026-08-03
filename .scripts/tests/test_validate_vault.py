@@ -236,6 +236,19 @@ publish: "true"
 
         self.assertEqual(["markdown.code-fence-language"], [issue.code for issue in issues])
 
+    def test_tab_indented_code_fences_inside_lists_require_a_language(self) -> None:
+        temp, root = self.make_repo()
+        self.addCleanup(temp.cleanup)
+        note = self.write_note(
+            root,
+            "Vault/Home/Topic/TabIndentedListFence.md",
+            VALID_FRONTMATTER + "- Example\n\n\t```\n\tbare\n\t```\n",
+        )
+
+        issues = validate_vault.validate_code_fences(note)
+
+        self.assertEqual(["markdown.code-fence-language"], [issue.code for issue in issues])
+
     def test_steptrace_freshness_delegates_to_non_writing_build_check(self) -> None:
         temp, root = self.make_repo()
         self.addCleanup(temp.cleanup)

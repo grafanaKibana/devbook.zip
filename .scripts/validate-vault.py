@@ -437,6 +437,7 @@ def validate_code_fences(note: Note) -> list[Issue]:
     tabsdown_fences: list[tuple[str, int]] = []
     list_indents: list[int] = []
     for index, line in enumerate(note.body.splitlines()):
+        line = line.expandtabs(4)
         line = re.sub(r"^(?: {0,3}>[ \t]?)+", "", line)
         if open_code_fence:
             for indent in reversed(list_indents):

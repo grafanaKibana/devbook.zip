@@ -1,6 +1,7 @@
 #!/usr/bin/env node
 
 import { createHash } from "node:crypto";
+import assert from "node:assert/strict";
 import { readFile, readdir, writeFile } from "node:fs/promises";
 import path from "node:path";
 
@@ -112,6 +113,39 @@ const variableDefinitions = {
   },
   loadFactor: { symbol: "α", description: "hash-table load factor" },
 };
+
+const variableDescriptionOverrides = {
+  "B-tree": { secondarySize: "node order (maximum child-pointer fan-out)" },
+  "Divide and Conquer": {
+    branchingFactor: "recurrence subproblem-size divisor",
+  },
+  "Dynamic Programming": { capacity: "number of grid columns" },
+  "Greedy Best-First Search": { secondarySize: "maximum search depth" },
+};
+
+function variableDefinition(title, id) {
+  const description = variableDescriptionOverrides[title]?.[id];
+  return description
+    ? { ...variableDefinitions[id], description }
+    : variableDefinitions[id];
+}
+
+if (process.argv.includes("--self-test")) {
+  assert.equal(
+    variableDefinition("Greedy Best-First Search", "secondarySize").description,
+    "maximum search depth",
+  );
+  assert.equal(
+    variableDefinition("B-tree", "secondarySize").description,
+    "node order (maximum child-pointer fan-out)",
+  );
+  assert.equal(
+    variableDefinition("Quick Sort", "inputSize"),
+    variableDefinitions.inputSize,
+  );
+  console.log("PASS note-specific variable descriptions");
+  process.exit(0);
+}
 
 const stripCode = (value) => value.trim().replaceAll("`", "");
 const slug = (value) =>
@@ -482,16 +516,7 @@ function finishRecord(
     );
   if (usedIds.size === 0) usedIds.add("inputSize");
   const variables = Object.fromEntries(
-    [...usedIds]
-      .sort()
-      .map((id) => [
-        id,
-        title === "Divide and Conquer" && id === "branchingFactor"
-          ? { symbol: "b", description: "recurrence subproblem-size divisor" }
-          : title === "Dynamic Programming" && id === "capacity"
-            ? { symbol: "C", description: "number of grid columns" }
-            : variableDefinitions[id],
-      ]),
+    [...usedIds].sort().map((id) => [id, variableDefinition(title, id)]),
   );
   return {
     path: notePath,
