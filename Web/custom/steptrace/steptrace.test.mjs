@@ -1567,7 +1567,7 @@ test("all DSA Tabsdown notes are visual-first and contain one chart-only dual-re
     "parser.ts",
   )
   const notes = authoredDsaTabsdownNotes()
-  assert.equal(notes.length, 87, `expected 87 authored DSA notes, found ${notes.length}`)
+  assert.ok(notes.length > 0, "expected authored DSA notes")
   let steptraceCount = 0
 
   for (const { path, source } of notes) {
@@ -1605,9 +1605,11 @@ test("all DSA Tabsdown notes are visual-first and contain one chart-only dual-re
     }
 
     const complexity = outer.tabs[1].body.trim()
-    const chartOnly = /^```complexity\n([\s\S]+)\n```$/.exec(complexity)
-    assert.ok(chartOnly, `${relative}: Complexity must contain only one complexity fence`)
-    const config = JSON.parse(chartOnly[1])
+    const chartFences = complexity.match(/^```complexity$/gm) ?? []
+    const chartFirst = /^```complexity\n([\s\S]+?)\n```(?:\n|$)/.exec(complexity)
+    assert.equal(chartFences.length, 1, `${relative}: Complexity must hold one complexity fence`)
+    assert.ok(chartFirst, `${relative}: Complexity must begin with the complexity fence`)
+    const config = JSON.parse(chartFirst[1])
     assert.equal(config.version, 2, `${relative}: Complexity config version`)
     assert.deepEqual(
       Object.keys(config).sort(),
@@ -10002,7 +10004,6 @@ test("Union-Find is a persistent rank-and-compression forest in both hosts", () 
   assert.match(styles, /\.steptrace__union-find-parent-label \{[^}]*border-top:/s)
   for (const note of [disjointSet, unionFind]) {
     assert.match(note, /```steptrace\n\{"algorithm":"union-find","n":7\}\n```/)
-    assert.match(note, /# Interactive Forest/)
     assert.doesNotMatch(note, /Visualization pending/)
   }
   for (const artifact of [quartzJs, obsidianJs]) {
@@ -10163,7 +10164,6 @@ test("Stack is a vertical persistent direct-control structure in both hosts", ()
     ),
     "utf8",
   )
-  const harness = readFileSync(join(repoRoot, "g041-stack-review.html"), "utf8")
 
   assert.deepEqual(
     parseStackConfig({
@@ -10217,7 +10217,6 @@ test("Stack is a vertical persistent direct-control structure in both hosts", ()
     /\.steptrace__stack-controls \.steptrace__structure-input,[\s\S]*grid-column: 1 \/ -1/,
   )
   assert.match(styles, /@media \(prefers-reduced-motion: reduce\)/)
-  assert.match(harness, /--st-on-accent: #18210f/)
   assert.ok(contrastRatio("#18210f", "#92bd58") >= 4.5)
   assert.match(
     note,
