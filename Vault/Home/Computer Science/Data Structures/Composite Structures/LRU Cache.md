@@ -11,8 +11,6 @@ status: Ready to Repeat
 publish: true
 ---
 
-# Intro
-
 A cache holds a bounded number of entries and must answer two questions on every access: where is the value for key `k`, and if the cache is full, which entry should leave. Ordering the entries by recency in an array or list makes the victim obvious but turns lookup back into a scan.
 
 An LRU (Least Recently Used) cache resolves the tension by storing the same entries in two structures at once. A doubly-[[Home/Computer Science/Data Structures/Linear Structures/LinkedList|linked list]] threads those same nodes in recency order: most-recently-used at the head, least-recently-used at the tail. A `get` finds the node through the map, unlinks it, and splices it to the head. A `put` over capacity removes the tail node and deletes its key from the map. What can no longer be recovered is insertion order or access frequency — the list records only "how recently," and only for entries still resident.

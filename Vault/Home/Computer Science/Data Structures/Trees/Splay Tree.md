@@ -10,8 +10,6 @@ status: Creation
 publish: true
 ---
 
-# Intro
-
 An ordered dictionary may receive a strongly uneven access stream: a small working set is touched repeatedly while most keys stay cold.
 
 A splay tree is a binary search tree that moves the last accessed node to the root. Search first follows the ordinary BST ordering; then **splaying** rotates the accessed node upward. The tree stores no height, color, or balance factor.
@@ -246,6 +244,11 @@ tab: Complexity
 Read operations mutate the tree. A lookup cannot safely run under a shared read lock because it rewrites parent and child pointers on the search path. Common iterators that retain an ancestor stack or cached path become stale after another access splays a node, and versioned enumerators may reject the mutation even though the key set did not change. An iterator anchored to stable node identities and advancing by live successor links is not inherently invalidated by splaying.
 
 The missing height guarantee matters for latency-sensitive code.
+
+# Questions
+
+> [!QUESTION]- Why must a splay-tree lookup use exclusive synchronization even when it does not change the key set?
+> A lookup splays the accessed node, or the last node reached on a miss, by rotating it toward the root. Those rotations rewrite parent and child pointers, so concurrent readers can observe or interfere with a structural mutation even though no key was inserted or removed.
 
 # References
 

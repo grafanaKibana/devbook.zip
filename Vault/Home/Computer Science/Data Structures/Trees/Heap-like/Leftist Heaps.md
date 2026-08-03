@@ -11,8 +11,6 @@ status: Ready to Repeat
 publish: true
 ---
 
-# Intro
-
 Two priority queues need to become one. A leftist heap stores the same heap-ordered keys as an explicit binary tree and adds one field per node so melding follows only the short right spines.
 
 That field is the **null-path length** (npl, also called rank or s-value): the distance from a node to the nearest missing child, with `npl(null) = 0` and a leaf at `1`. The **leftist property** holds `npl(left) ≥ npl(right)` at every node, forcing the shorter route toward a missing child onto the right. Merge therefore recurses only down the right spines and restores the property while unwinding.
@@ -284,6 +282,11 @@ These are worst-case bounds. A leftist heap trades that field for a per-operatio
 > }
 > ```
 > The swap and the `a.Npl` update are the two lines that keep the shorter subtree on the right; dropping either breaks the leftist invariant.
+
+# Questions
+
+> [!QUESTION]- Why does the leftist invariant keep merge on a logarithmically short right spine?
+> Every step down the right spine reduces null-path length by one, while a node of null-path length `r` contains at least `2ʳ - 1` nodes. The root's right-spine length is therefore at most logarithmic in the heap size, and merge visits only that spine.
 
 # References
 

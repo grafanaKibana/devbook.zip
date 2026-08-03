@@ -11,8 +11,6 @@ status: Ready to Repeat
 publish: true
 ---
 
-# Intro
-
 A mutable array of one million latency samples must answer "maximum value in `a[l..r]`" while new samples keep overwriting old slots.
 
 A segment tree keeps the array's index order but overlays a binary hierarchy of **intervals** on top of it. Each node owns a contiguous range `[l, r]` and stores one aggregate over that range; a parent's value is `merge(leftChild, rightChild)` for any associative `merge` — sum, min, max, gcd. Because a parent already summarizes its whole subtree, an arbitrary query range splits into a handful of already-computed nodes instead of touching every leaf. A scalar aggregate may discard provenance: a maximum node does not reveal which index produced it unless the stored value is enriched to `(maximum, index)`, and an average needs `(sum, count)` rather than one number.

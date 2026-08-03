@@ -11,8 +11,6 @@ status: Ready to Repeat
 publish: true
 ---
 
-# Intro
-
 [[Home/Computer Science/Algorithms/Graph Algorithms/Dijkstra|Dijkstra]] and Prim's [[Home/Computer Science/Algorithms/Graph Algorithms/Minimum Spanning Tree|minimum spanning tree]] algorithm spend most of their time on one operation: lowering the tentative key of a vertex already in the frontier. Only a successful relaxation that lowers a tentative distance triggers decrease-key, so a dense graph can perform up to `E` of them against only `V` extract-mins.
 
 A Fibonacci heap removes that cost by refusing to reorganize eagerly. It keeps a forest of heap-ordered trees strung together in a circular doubly-linked **root list** with a pointer to the minimum root, and it does the least work each operation allows: insert splices a new single-node tree into the root list, merge concatenates two root lists, and decrease-key cuts the affected node loose to the root list rather than sifting it. All the deferred restructuring is paid off once, later, by extract-min.

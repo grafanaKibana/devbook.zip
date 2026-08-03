@@ -11,8 +11,6 @@ status: Ready to Repeat
 publish: true
 ---
 
-# Intro
-
 A scheduler holds thousands of pending tasks and repeatedly needs the one with the earliest deadline while new tasks keep arriving.
 
 The structure buys that speed by remembering less than a sorted list. It guarantees that the root is the smallest (or largest) element and nothing more: siblings, cousins, and every element below the root sit in a partial order. The second-smallest item in a binary min-heap is a root child — the smaller one when both exist — but there is no direct arbitrary successor or kth-rank lookup and no sorted iteration.

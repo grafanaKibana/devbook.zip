@@ -11,8 +11,6 @@ status: Ready to Repeat
 publish: true
 ---
 
-# Intro
-
 A cache holds 50K active sessions and repeatedly looks up one session by its ID. Storing the pairs in a list forces each lookup to scan entries until it finds the matching ID. A hash map instead derives a bucket index directly from the key, so the lookup jumps to the one bucket that could hold it and compares only the entries there.
 
 The structure remembers a mapping from key to value and nothing else. It does not retain insertion order, sort order, or the sequence in which resizes moved entries around. Two keys that hash to the same bucket coexist there, distinguished only by an equality check.
@@ -239,7 +237,7 @@ tab: Complexity
 Bounds are relative to the entry count and assume constant-cost hashing and equality, a hash function that distributes keys close to uniformly, and a load factor kept bounded by resizing. If hashing or equality scans a key of length `k`, each operation also pays that `O(k)` work; if distribution or load-factor control fails, collisions concentrate work in long buckets. Insert's typical bound is amortized because one threshold-crossing insert may rehash the entire map, while geometric growth spreads those occasional rebuilds across the inserts that filled each table. The space entries distinguish normal per-operation storage from the temporary allocation during a resize.
 ~~~~~
 
-## Where the representation breaks
+# Where the representation breaks
 
 Each boundary traces back to the bucket-and-hash mechanism.
 
@@ -253,7 +251,7 @@ Each boundary traces back to the bucket-and-hash mechanism.
 
 **Open addressing adds clustering and tombstones.** Probe sequences pile entries into runs (primary clustering) that lengthen every probe, and a delete cannot simply empty a slot — that would truncate a probe chain — so it leaves a tombstone. Lookups skip tombstones, later inserts may reuse them, and a rehash removes any that remain.
 
-## Reference drawer
+# Reference drawer
 
 > [!ABSTRACT]- Bucket array with chaining
 > ```mermaid
@@ -285,7 +283,7 @@ Each boundary traces back to the bucket-and-hash mechanism.
 > ```
 > `Dictionary<TKey, TValue>` is the default map in modern .NET. Concurrent writes are unsupported and may throw or corrupt its state; synchronize access or use `ConcurrentDictionary`. `FrozenDictionary` optimizes build-once/read-many hot paths, while `SortedDictionary` keeps keys ordered. Passing an initial `capacity` pre-sizes the array and skips the grow-and-rehash cycles.
 
-## Questions
+# Questions
 
 > [!QUESTION]- What happens to an entry whose key is mutated after insertion?
 > The entry retains its insertion-time hash but still references the mutated key object. If mutation changes anything used by `GetHashCode` or `Equals`, lookup can miss the still-resident entry; even a changed full hash that reduces to the same bucket no longer matches the stored hash. Keys must be immutable, or at least never change hash- or equality-participating state after insertion.
@@ -293,7 +291,7 @@ Each boundary traces back to the bucket-and-hash mechanism.
 > [!QUESTION]- When is a balanced tree preferable to a hash map?
 > When the workload needs ordered iteration, range queries, or nearest-key lookups. A hash map lacks ordered navigation, so these operations require at least a full scan, plus sorting when the result itself must be ordered; a balanced tree retains key order as part of its representation.
 
-## References
+# References
 
 - [`Dictionary<TKey, TValue>` class (Microsoft Learn)](https://learn.microsoft.com/en-us/dotnet/api/system.collections.generic.dictionary-2) — API reference for the primary .NET hash map, with the hash-contract requirements and capacity semantics.
 - [`Dictionary.cs` in dotnet/runtime](https://github.com/dotnet/runtime/blob/main/src/libraries/System.Private.CoreLib/src/System/Collections/Generic/Dictionary.cs) — runtime source showing the `buckets[]`/`entries[]` chaining layout, prime-based resize, and per-entry `next` indices.

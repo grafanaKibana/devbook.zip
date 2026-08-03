@@ -11,8 +11,6 @@ status: Ready to Repeat
 publish: true
 ---
 
-# Intro
-
 An order book holds 100K price levels and an exchange feed inserts and removes thousands of entries per second, all while ordered iteration and min/max must stay fast. An [[Home/Computer Science/Data Structures/Trees/AVL Tree|AVL tree]] uses stricter ±1 height balance and often produces shorter search paths, but may require more rebalancing, especially during deletion. A red-black tree accepts looser balance so color changes and a few local rotations keep the height bounded after updates.
 
 The state it persists is a [[Home/Computer Science/Data Structures/Trees/Binary Search Tree|binary search tree]] plus one logical color bit per node — red or black — governed by color rules rather than measured heights. The rules are looser than AVL's, so the tree can grow to twice its minimum height, but that slack lets an insert repair a violation with at most two rotations. The order and the key set are retained; the coloring itself is an internal artifact with no domain meaning, and it cannot be reconstructed from the keys alone once the mutation history is gone.

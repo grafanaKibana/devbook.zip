@@ -11,8 +11,6 @@ status: Done
 publish: true
 ---
 
-# Intro
-
 A sequence needs frequent insertions and removals in its interior, and the code already holds a reference to the element next to each edit. A linked list drops contiguity: each element lives in its own separately allocated node, and the structure stores only the links between nodes. In a doubly linked list, splicing around a held node rewires a constant number of adjacent pointers and touches no other element.
 
 The cost of that freedom is addressing. Because nodes are scattered across the heap rather than laid out in one block, there is no arithmetic that maps an index to an address. Reaching the *k*-th element means starting at a head reference and following *k* `next` pointers. A node holds a value plus `Next` (singly linked) or both forward and backward links (doubly linked); .NET's doubly linked `LinkedListNode<T>` exposes those as `Next` and `Previous`. The list keeps `First`/`Last` handles and a count, and many implementations wrap the ends with a sentinel node so the head and tail cases need no branch.

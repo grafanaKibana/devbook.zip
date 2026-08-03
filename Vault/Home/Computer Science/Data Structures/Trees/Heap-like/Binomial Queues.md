@@ -11,8 +11,6 @@ status: Ready to Repeat
 publish: true
 ---
 
-# Intro
-
 A priority queue must sometimes absorb another whole priority queue — merge two work sets, join two event streams — and keep answering "smallest first". The contiguous layout that makes a binary heap fast to index is exactly what makes it slow to union.
 
 A binomial queue (binomial heap) trades that single array for a **forest of heap-ordered binomial trees, at most one tree of each order**. A binomial tree `Bₖ` holds exactly `2ᵏ` nodes and is built by **linking** two `Bₖ₋₁` trees — the root with the larger key becomes a child of the other. Because each order appears at most once, the set of orders present is the **binary representation of `n`**: a queue of 13 items (`1101₂`) holds trees of orders 3, 2, and 0, sized 8 + 4 + 1.
@@ -404,6 +402,11 @@ Find-min degrades the moment the min-pointer is dropped. Without it, the minimum
 > }
 > ```
 > `Meld` defers a link when three consecutive roots share a degree, letting the trailing pair carry on the next iteration — this is the case a naive equal-degree link would corrupt.
+
+# Questions
+
+> [!QUESTION]- Why does meld defer when three consecutive roots have the same degree?
+> Linking the first pair would create a higher-degree carry before the third same-degree root, breaking the root list's degree order and risking a skipped collision. Deferring lets the trailing pair link first, after which the carry is processed in order like binary addition.
 
 # References
 

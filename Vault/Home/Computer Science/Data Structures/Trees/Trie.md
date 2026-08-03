@@ -11,8 +11,6 @@ status: Ready to Repeat
 publish: true
 ---
 
-# Intro
-
 An autocomplete box holds a set of strings and must answer a different question than "is this exact word present?": given the typed fragment `lap`, which stored keys begin with it? A [[Home/Computer Science/Data Structures/Hash-based Structures/HashMap|hash map]] hashes the whole key, so it can confirm exact membership but has no notion of a shared prefix — answering the fragment query means scanning all `n` keys. A trie (prefix tree) keys the set on the *sequence* of characters instead of a hash of the whole string, so the prefix becomes a location in the structure rather than a filter over every entry.
 
 Each edge is labelled with a single character. The path from the root to a node spells a prefix, which means keys are represented by paths, not stored explicitly at the nodes. Every node carries a child map (or a fixed array with one slot per alphabet symbol) and an end-of-word flag marking where a complete key terminates. Words that share a prefix share the same path until they diverge: `car`, `card`, and `care` all reuse the `c → a → r` route and only branch at the fourth character.

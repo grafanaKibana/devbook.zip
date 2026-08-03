@@ -11,8 +11,6 @@ status: Ready to Repeat
 publish: true
 ---
 
-# Intro
-
 When two priority queues must combine repeatedly — merging event streams, uniting sub-schedules — the melding cost dominates. A skew heap keeps only a heap-ordered binary tree and makes merge the primitive: two heaps combine by walking down their right spines, and insert and extract-min are defined in terms of that merge.
 
 The structure is the self-adjusting cousin of a [[Home/Computer Science/Data Structures/Trees/Heap-like/Leftist Heaps|leftist heap]]. A leftist heap stores a null-path-length field per node and swaps children only when that field would be violated, buying a per-operation worst-case bound. A skew heap deletes the field entirely: after merging down a right spine it **swaps the two children at every touched node unconditionally** — no test, no bookkeeping. The blind swap moves a right path that just grew back to the left, where the next merge never looks.
@@ -280,6 +278,11 @@ The unconditional swap is the whole mechanism, not a tunable detail. There is no
 > }
 > ```
 > The two swap-carrying lines are the entire self-adjustment: there is no rank field to update and no condition guarding the swap. Removing the swap, or making it conditional on stored metadata, produces a different data structure.
+
+# Questions
+
+> [!QUESTION]- What does the unconditional child swap buy when a skew heap stores no rank metadata?
+> It moves the right path that just grew onto the left, away from the path the next merge descends. A single merge can still be linear, but repeated swaps distribute that cost so a sequence of operations is logarithmic amortized.
 
 # References
 

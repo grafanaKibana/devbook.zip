@@ -10,8 +10,6 @@ status: Ready to Repeat
 publish: true
 ---
 
-# Intro
-
 Swapping the array for a `Dictionary<char, Node>` fixes the waste but hashes a character on every step and throws away the sorted order the array gave for free. A ternary search tree (TST) keeps the trie's shape while storing each node's children as a small **binary search tree keyed on the next character** — three pointers per node instead of `σ`, and the ordering survives.
 
 Each node carries one split character and three links: `lo` for keys whose current character is smaller, `hi` for larger, and `eq` for equal — and *only* the `eq` link advances to the next character of the key. Walking a key alternates two motions: descend the per-position BST via `lo`/`hi` until the split character matches, then step forward one character down `eq`. The path that spells a key is still there, threaded through the `eq` links; the `lo`/`hi` links are the trie's "which child" decision turned into a comparison tree rather than an array index.
