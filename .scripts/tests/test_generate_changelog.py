@@ -16,6 +16,7 @@ SPEC.loader.exec_module(generate_changelog)
 Release = generate_changelog.Release
 split_body = generate_changelog.split_body
 render_entry = generate_changelog.render_entry
+format_date = generate_changelog.format_date
 
 
 class SplitBodyTests(unittest.TestCase):
@@ -78,14 +79,26 @@ class RenderEntryTests(unittest.TestCase):
         rendered = render_entry(release)
 
         self.assertNotIn("\n- \n", rendered + "\n")
-        self.assertTrue(rendered.startswith("## v1.0.0 (2026-07-03)\n> [!note]- Details"))
+        self.assertTrue(rendered.startswith("## v1.0.0 (Jul 03, 2026)\n> [!note]- Details"))
 
-    def test_empty_detail_omits_callout(self) -> None:
+    def test_empty_detail_says_no_changelog_instead_of_a_callout(self) -> None:
         release = Release(tag="v0.0.1", date="2026-01-01", body="")
 
         rendered = render_entry(release)
 
-        self.assertEqual(rendered, "## v0.0.1 (2026-01-01)")
+        self.assertEqual(rendered, "## v0.0.1 (Jan 01, 2026)\nNo Changelog")
+
+
+class FormatDateTests(unittest.TestCase):
+    def test_iso_date_becomes_month_name_form(self) -> None:
+        self.assertEqual(format_date("2026-08-03"), "Aug 03, 2026")
+        self.assertEqual(format_date("2026-01-01"), "Jan 01, 2026")
+        self.assertEqual(format_date("2026-12-31"), "Dec 31, 2026")
+
+    def test_unparseable_or_out_of_range_date_passes_through(self) -> None:
+        for value in ("", "not a date", "2026-13-01", "2026-07"):
+            with self.subTest(value=value):
+                self.assertEqual(format_date(value), value)
 
 
 if __name__ == "__main__":

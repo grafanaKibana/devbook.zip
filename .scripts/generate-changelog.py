@@ -28,6 +28,22 @@ REPO_SLUG = "grafanaKibana/devbook.zip"
 SUMMARY_START = "<!--ai-summary:start-->"
 SUMMARY_END = "<!--ai-summary:end-->"
 VERSION_HEADER_RE = re.compile(r"^## v")
+ISO_DATE_RE = re.compile(r"(\d{4})-(\d{2})-(\d{2})")
+MONTHS = (
+    "Jan",
+    "Feb",
+    "Mar",
+    "Apr",
+    "May",
+    "Jun",
+    "Jul",
+    "Aug",
+    "Sep",
+    "Oct",
+    "Nov",
+    "Dec",
+)
+NO_CHANGELOG = "No Changelog"
 
 FRONTMATTER = """---
 title: Changelog
@@ -98,16 +114,35 @@ def split_body(body: str) -> tuple[list[str], str]:
     return summary, detail
 
 
+def format_date(date: str) -> str:
+    """Render an ISO `2026-08-03` date as `Aug 03, 2026`.
+
+    Month names come from a fixed table rather than `strftime("%b")` so the
+    output cannot shift with the runtime locale. Releases keep their ISO date
+    internally because the newest-first sort relies on it ordering
+    lexicographically.
+    """
+    match = ISO_DATE_RE.fullmatch(date.strip())
+    if not match:
+        return date
+    year, month, day = match.groups()
+    if not 1 <= int(month) <= 12:
+        return date
+    return f"{MONTHS[int(month) - 1]} {day}, {year}"
+
+
 def render_entry(release: Release) -> str:
     summary, detail = split_body(release.body)
 
-    lines = [f"## {release.tag} ({release.date})"]
+    lines = [f"## {release.tag} ({format_date(release.date)})"]
     lines.extend(summary)
     if detail:
         lines.append("> [!note]- Details")
         # Every line, including blank ones, must carry the "> " quote marker
         # or the callout closes early and later sections spill outside it.
         lines.extend((f"> {line}" if line else ">") for line in detail.splitlines())
+    else:
+        lines.append(NO_CHANGELOG)
 
     return "\n".join(lines)
 
