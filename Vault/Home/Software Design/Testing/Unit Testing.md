@@ -49,7 +49,7 @@ public class DiscountServiceTests
 
 **Naming convention**: `MethodName_StateUnderTest_ExpectedBehavior` or a plain English description. The test name is the first thing you read when a test fails — make it diagnostic.
 
-# Test Doubles: Stubs vs Mocks
+# Test Doubles: Stubs Vs Mocks
 
 | Type | Purpose | Example |
 |---|---|---|
@@ -73,7 +73,7 @@ emailSender.Verify(e => e.Send("c1", It.IsAny<string>()), Times.Once);
 
 **Rule of thumb**: stub dependencies that provide data; mock dependencies that represent side effects (email, SMS, audit log). Over-mocking — mocking every dependency including internal ones — produces brittle tests that break on every refactor.
 
-## Two schools: classicist vs mockist
+## Two Schools: Classicist Vs Mockist
 
 How much you mock isn't just taste — it's two named philosophies, and knowing them resolves most "should I mock this?" arguments:
 

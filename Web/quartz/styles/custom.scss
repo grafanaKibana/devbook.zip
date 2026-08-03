@@ -1,5 +1,53 @@
 @use "./variables.scss" as *;
+@use "../../custom/complexity/styles";
 @use "sass:map";
+
+// Quartz caches these Google fonts into /static/fonts, but its generated
+// @font-face URLs point at the production baseUrl even during local serve.
+// Local aliases keep both localhost and production on the copied files.
+@mixin local-font($family, $style, $weight, $file) {
+  @font-face {
+    font-family: $family;
+    font-style: $style;
+    font-weight: $weight;
+    font-display: block;
+    src: url("/static/fonts/#{$file}") format("truetype");
+  }
+}
+
+@include local-font("DevBook IBM Plex Mono", normal, 400, "-F63fjptAgt5VM-kVkqdyU8n5ig.ttf");
+@include local-font("DevBook IBM Plex Mono", normal, 600, "-F6qfjptAgt5VM-kVkqdyU8n3vAO8lc.ttf");
+@include local-font(
+  "DevBook Schibsted Grotesk",
+  normal,
+  400,
+  "JqzK5SSPQuCQF3t8uOwiUL-taUTtarVKQ9vZ6pJJWlMNIsEATw.ttf"
+);
+@include local-font(
+  "DevBook Schibsted Grotesk",
+  normal,
+  700,
+  "JqzK5SSPQuCQF3t8uOwiUL-taUTtarVKQ9vZ6pJJWlMNxcYATw.ttf"
+);
+@include local-font(
+  "DevBook Source Sans Pro",
+  italic,
+  400,
+  "6xK1dSBYKcSV-LCoeQqfX1RYOo3qPa7g.ttf"
+);
+@include local-font(
+  "DevBook Source Sans Pro",
+  italic,
+  600,
+  "6xKwdSBYKcSV-LCoeQqfX1RYOo3qPZY4lBdr.ttf"
+);
+@include local-font("DevBook Source Sans Pro", normal, 400, "6xK3dSBYKcSV-LCoeQqfX1RYOo3aPw.ttf");
+@include local-font(
+  "DevBook Source Sans Pro",
+  normal,
+  600,
+  "6xKydSBYKcSV-LCoeQqfX1RYOo3i54rAkA.ttf"
+);
 
 // Component-specific styles live with their components (each sets `.css`):
 //   Web/custom/components/topic-dashboard.tsx  → .topic-* rules
@@ -7,13 +55,110 @@
 // Put only truly global overrides here.
 
 :root {
+  --titleFont: "DevBook Schibsted Grotesk";
+  --headerFont: "DevBook Schibsted Grotesk";
+  --bodyFont: "DevBook Source Sans Pro";
+  --codeFont: "DevBook IBM Plex Mono";
   --surface-radius: var(--radius-m, 8px);
+}
+
+// ============================================================================
+// Motion. Durations scale with how far a thing travels, so the same token
+// reads as the same gesture everywhere. Easing is asymmetric on purpose:
+// arrivals decelerate, departures accelerate, and only on-screen moves get a
+// symmetric curve.
+//
+// Pass-through surfaces stay under --dur-3: enableSPA means their motion
+// replays on every internal navigation, not once per visit.
+//
+// Reduced motion collapses the durations rather than each rule. Two things are
+// deliberately NOT tokenised and keep their own overrides, because collapsing
+// them would make them worse, not calmer:
+//   - site-marquee.tsx  180s infinite  → 1ms would be a strobe, not a stillness
+//   - popover.scss      0.2s delay     → hover intent, not motion
+// Inlined datacore CSS (devbook-card.jsx, Home/index.md) can't see this file at
+// all on the Obsidian host, so it carries literal fallbacks and its own
+// reduced-motion blocks.
+// ============================================================================
+:root {
+  --dur-1: 90ms; // state feedback: colour, opacity, checkbox
+  --dur-2: 140ms; // hover and small state
+  --dur-3: 220ms; // entrances and reveals
+  --dur-4: 340ms; // large surfaces: drawers, folder expansion
+  --stagger: 28ms;
+
+  --ease-out: cubic-bezier(0.22, 1, 0.36, 1);
+  --ease-in: cubic-bezier(0.64, 0, 0.78, 0);
+  --ease-in-out: cubic-bezier(0.65, 0, 0.35, 1);
+  --ease-spring: cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  :root {
+    // 1ms, not 0 — a zero-length transition never runs and never fires
+    // transitionend, so anything sequenced off that event would stall.
+    --dur-1: 1ms;
+    --dur-2: 1ms;
+    --dur-3: 1ms;
+    --dur-4: 1ms;
+    --stagger: 1ms;
+  }
+}
+
+// ============================================================================
+// Accent ramp of the brand green, for edges and fills only — text stays on the
+// flat --secondary/--tertiary tokens. Inner stops rather than edge-to-edge, on
+// the same diagonal throughout, so the ends hold a flat colour and the whole
+// transition happens across the middle.
+// ============================================================================
+:root {
+  --accent-from: #4c8000;
+  --accent-to: #8cc63f;
+}
+:root[saved-theme="dark"] {
+  --accent-from: #84cc16;
+  --accent-to: #c8fb84;
+}
+:root {
+  --accent-gradient: linear-gradient(115deg, var(--accent-from) 20%, var(--accent-to) 66%);
+}
+
+hr {
+  background-color: transparent;
+  background-image: var(--accent-gradient);
+  opacity: 0.55;
 }
 
 .callout,
 .graph > .graph-outer,
 .graph > .global-graph-outer > .global-graph-container {
   border-radius: var(--surface-radius);
+}
+
+// ============================================================================
+// Graph panel — accent frame + faint top-down glow keyed to --secondary
+// (overrides the plugin's flat --lightgray border).
+// ============================================================================
+// The accent ramp paints the border itself: a transparent border reveals the
+// last layer, which is clipped to the border box, while the fill layers stop at
+// the padding box. border-image would do it in one line but squares off the
+// corners, and this panel is rounded.
+.graph > .graph-outer {
+  border: 1px solid transparent;
+  // Opaque --light base (as the scope dropdown's .ns-menu panel uses) so the page
+  // dot-grid doesn't show through, with a faint top-down accent glow layered over.
+  // --light has to be spelled as a gradient: a plain colour can only ever be the
+  // background-color, which no per-layer clip applies to.
+  background:
+    radial-gradient(
+        120% 120% at 50% 0%,
+        color-mix(in srgb, var(--secondary) 3.5%, transparent),
+        transparent 60%
+      )
+      padding-box,
+    linear-gradient(var(--light), var(--light)) padding-box,
+    var(--accent-gradient) border-box;
+  //box-shadow: inset 0 0 40px color-mix(in srgb, var(--secondary) 4%, transparent);
 }
 
 // ============================================================================
@@ -138,10 +283,10 @@ body {
 .site-header-search .search > .search-button {
   & svg {
     transition:
-      fill 0.15s ease,
-      stroke 0.15s ease,
-      color 0.15s ease,
-      opacity 0.1s ease;
+      fill var(--dur-2) var(--ease-out),
+      stroke var(--dur-2) var(--ease-out),
+      color var(--dur-2) var(--ease-out),
+      opacity var(--dur-1) var(--ease-out);
   }
 }
 
@@ -295,10 +440,12 @@ body {
   .page > #quartz-body > .sidebar.left .mobile-explorer {
     position: absolute;
     top: 0;
-    left: 1.5rem;
+    left: 0.75rem;
+    width: 3rem;
     height: var(--site-header-height);
     display: flex;
     align-items: center;
+    justify-content: center;
     padding: 0;
     z-index: 101;
   }
@@ -315,6 +462,17 @@ body {
     height: calc(100dvh - var(--site-header-height));
     max-height: calc(100dvh - var(--site-header-height));
     padding: 0 var(--explorer-panel-inset) 2rem;
+  }
+
+  // Same defaulting bug as the tablet drawer (see the `aria-expanded` note in
+  // the tablet block): the plugin opens the drawer whenever `.collapsed` is
+  // absent, which is the server markup's own state, so it flashes open on every
+  // load and every SPA patch until the Explorer's async handler catches up.
+  // Unlayered, so this beats the plugin's `quartz-base` open rule; the drawer is
+  // 100vw wide here, making `-100%` the same offset the plugin slides.
+  .explorer:not([aria-expanded="true"]) > .explorer-content {
+    transform: translateX(-100%);
+    visibility: hidden;
   }
 
   // Push grid content below the fixed bar. Sit snug under it by default, and
@@ -380,8 +538,8 @@ body {
   padding: var(--explorer-row-pad);
   border-radius: var(--explorer-row-radius);
   transition:
-    color 0.15s ease,
-    background-color 0.15s ease;
+    color var(--dur-2) var(--ease-out),
+    background-color var(--dur-2) var(--ease-out);
 }
 
 // The file link is inline by default, so its wash would only cover the text.
@@ -442,9 +600,24 @@ body {
 }
 .explorer .explorer-content ul li > a.nav-file-title.active {
   color: var(--secondary);
-  background-color: var(--highlight);
   font-weight: #{$semiBoldWeight};
   opacity: 1;
+  // Wash drawn from the ramp's light end, on the same diagonal as the other
+  // accents, fading out before the row's right edge.
+  background-image: linear-gradient(
+    115deg,
+    color-mix(in srgb, var(--accent-to) 22%, transparent),
+    transparent 80%
+  );
+}
+// File glyph carries its topic's hue (set inline as --ec-topic by
+// explorer-icons.tsx) while the label stays --darkgray — the same icon-accent /
+// regular-label split the folder rows use, and the same subtree tint. Root pages
+// have no topic folder above them, so --ec-topic is unset and the icon falls back
+// to the accent. The icon has its own colour, so the label's hover shift to
+// --dark leaves it fixed.
+.explorer .explorer-content ul li > a.nav-file-title .ec-ico {
+  color: var(--ec-topic, var(--secondary));
 }
 
 // ---------------------------------------------------------------------------
@@ -540,12 +713,9 @@ body {
   .explorer .mobile-explorer .lucide-menu {
     stroke: var(--darkgray);
   }
-  // Both halves of the plugin's anti-flash guard: until the inline script runs
-  // and collapses the tree, the hamburger and the tree must stay hidden — else
-  // the drawer paints open on first render.
-  .explorer .mobile-explorer.hide-until-loaded {
-    display: none;
-  }
+  // Keep only the async tree hidden until it is populated. The hamburger is
+  // stable server markup and the closed-state rule below prevents drawer flash,
+  // so hiding the button only makes the whole sidebar appear late.
   .explorer .hide-until-loaded ~ .explorer-content {
     display: none;
   }
@@ -581,10 +751,12 @@ body {
   .page > #quartz-body > .sidebar.left .mobile-explorer {
     position: absolute;
     top: 0;
-    left: 1.5rem;
+    left: 0.75rem;
+    width: 3rem;
     height: var(--site-header-height);
     display: flex;
     align-items: center;
+    justify-content: center;
     padding: 0;
     z-index: 101;
   }
@@ -620,14 +792,21 @@ body {
     transform: translateX(-100%);
     visibility: hidden;
     transition:
-      transform 200ms ease,
-      visibility 200ms ease;
+      transform var(--dur-4) var(--ease-in-out),
+      visibility var(--dur-4) var(--ease-in-out);
   }
 
+  // Open state keys off `aria-expanded`, not the plugin's `:not(.collapsed)`.
+  // `.collapsed` is absent from the server markup and only added at the END of
+  // the Explorer's async nav handler (after it awaits the content index), so
+  // `:not(.collapsed)` reads as OPEN on every cold load and on every SPA patch
+  // — the drawer paints open for a frame, then slides shut. `aria-expanded` is
+  // set only by a real toggle click, so the resting state is closed.
+  //
   // Must carry the full sidebar prefix: the closed-state rule above is more
   // specific than the plugin's bare `.explorer:not(.collapsed)`, so a shorter
   // selector here would lose and the drawer would never slide in.
-  .page > #quartz-body > .sidebar.left .explorer:not(.collapsed) > .explorer-content {
+  .page > #quartz-body > .sidebar.left .explorer[aria-expanded="true"] > .explorer-content {
     transform: translateX(0);
     visibility: visible;
   }
@@ -699,7 +878,7 @@ body {
 .breadcrumb-element a {
   color: color-mix(in srgb, var(--gray) 62%, transparent);
   font-weight: #{$normalWeight};
-  transition: color 0.15s ease;
+  transition: color var(--dur-2) var(--ease-out);
 }
 .breadcrumb-element a:hover {
   color: var(--secondary);
@@ -789,7 +968,7 @@ body {
 @media all and not ($mobile) {
   :root[reader-mode="on"] .site-header {
     opacity: 0;
-    transition: opacity 0.2s ease;
+    transition: opacity var(--dur-3) var(--ease-out);
   }
   :root[reader-mode="on"] .site-header:hover {
     opacity: 1;
@@ -823,6 +1002,31 @@ body {
 @media all and ($tablet) {
   :root[reader-mode="on"] .page > #quartz-body > .sidebar.left {
     opacity: 1;
+  }
+}
+
+// Hard-load-only regional gates. Their resting state is visible; the document
+// prescripts add the pending attributes before first paint and component-owned
+// readiness removes them. visibility preserves geometry while pointer-events
+// prevents interaction with controls that are not ready yet.
+:root:not([reader-mode="on"]) .page > #quartz-body > .sidebar.left {
+  transition: opacity 120ms var(--ease-out);
+}
+
+// The tablet/mobile sidebar is only the stable hamburger until opened. Keep it
+// visible while the async Explorer tree is preparing; desktop has the tree
+// onscreen, so retain the gate there.
+@media all and ($desktop) {
+  :root[data-explorer-first-paint="pending"] .page > #quartz-body > .sidebar.left {
+    visibility: hidden;
+    opacity: 0;
+    pointer-events: none;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  :root:not([reader-mode="on"]) .page > #quartz-body > .sidebar.left {
+    transition: none;
   }
 }
 
@@ -873,14 +1077,10 @@ body[data-slug="index"] {
     display: none;
   }
 
-  // Drop the rule after the body. The afterBody block can't be display:none:
-  // it now carries the position:fixed floating scroll buttons, and display:none
-  // on this wrapper hides them too (fatal on the scrollable mobile homepage).
-  // display:contents removes the empty footer box from layout while letting the
-  // fixed controls render.
-  .center > hr {
-    display: none;
-  }
+  // The afterBody block can't be display:none: it now carries the position:fixed
+  // floating scroll buttons, and display:none on this wrapper hides them too
+  // (fatal on the scrollable mobile homepage). display:contents removes the empty
+  // footer box from layout while letting the fixed controls render.
   .center > .page-footer {
     display: contents;
   }
@@ -1003,7 +1203,7 @@ body[data-slug="about"] .page[data-frame="default"] > #quartz-body > .sidebar.ri
   }
 }
 
-@media all and (min-width: 1201px) and (min-height: 36rem) {
+@media all and (min-width: 1201px) and (min-height: 32rem) {
   // Gated on [data-home-fit]: the HomepageFit controller owns the one-viewport
   // fill on desktop just as it does on tablet, so it can hide whole tiers
   // (summaries → counters → bars) uniformly instead of letting cards clip
@@ -1079,8 +1279,9 @@ body[data-slug="about"] .page[data-frame="default"] > #quartz-body > .sidebar.ri
       grid-auto-rows: minmax(min-content, 1fr);
       gap: clamp(0.6rem, 0.9vw, 1rem);
     }
-    .dc-topic-total {
+    .dc-progress-hero {
       flex: 0 0 auto;
+      margin-bottom: 0;
     }
     // The stock footer bottom margin is dead space inside the fixed 100dvh
     // frame — reclaim most of it for the dashboard rows. Only in fit mode;
@@ -1169,7 +1370,7 @@ body[data-slug="about"] .page[data-frame="default"] > #quartz-body > .sidebar.ri
     .dc-topic-grid {
       column-gap: clamp(0.75rem, 1.8vw, 2rem);
       row-gap: clamp(0.6rem, 1.4vh, 1.25rem);
-      margin-top: 0.75rem;
+      margin-top: 0;
     }
   }
 }
@@ -1195,7 +1396,7 @@ body[data-slug="about"] .page[data-frame="default"] > #quartz-body > .sidebar.ri
       grid-template-columns: repeat(2, minmax(0, 1fr));
       grid-auto-rows: auto;
       gap: 0.6rem;
-      margin-top: 0.75rem;
+      margin-top: 0;
     }
     .dc-topic-grid .dc-topic-card {
       grid-column: span 1;
@@ -1246,7 +1447,7 @@ body[data-slug="about"] .page[data-frame="default"] > #quartz-body > .sidebar.ri
 // This block is the tablet-specific LAYOUT; the degraded states themselves are
 // shared with desktop below. Mobile stays on its normal scrolling branch.
 // ---------------------------------------------------------------------------
-@media all and ($tablet) {
+@media all and ($tablet) and (min-height: 32rem) {
   body[data-slug="index"][data-home-fit] {
     --home-card-pad: clamp(0.65rem, 1.2vh, 0.85rem) clamp(0.75rem, 1.5vw, 1rem);
 
@@ -1320,13 +1521,9 @@ body[data-slug="about"] .page[data-frame="default"] > #quartz-body > .sidebar.ri
       margin-top: auto;
     }
 
-    .dc-topic-total {
+    .dc-progress-hero {
       flex: 0 0 auto;
-      margin-top: 0.55rem;
-      padding: 0.6em 0.7em;
-    }
-    .dc-topic-total .dc-topic-legend {
-      margin-top: 0.5em;
+      margin-bottom: 0;
     }
 
     .page > #quartz-body > footer {
@@ -1356,11 +1553,29 @@ body[data-slug="index"][data-home-fit="bar-hidden"] {
   .dc-topic-grid .dc-topic-cap {
     display: none;
   }
+  .dc-progress-statuses {
+    display: none;
+  }
 }
 
 body[data-slug="index"][data-home-fit="bar-hidden"] {
   .dc-topic-grid .dc-topic-bar {
     display: none;
+  }
+}
+
+@media all and (min-width: 768px) and (min-height: 32rem) and (max-height: 35.999rem) {
+  body[data-slug="index"][data-home-fit] {
+    .dc-progress-hero {
+      --dc-radial-size: 5.5rem;
+    }
+    .dc-progress-hero .db-card-body {
+      gap: 1rem;
+      padding: 0.5rem 1rem;
+    }
+    .dc-progress-statuses {
+      margin-top: 0.6rem;
+    }
   }
 }
 
@@ -1476,7 +1691,7 @@ body[data-slug="index"][data-home-fit="bar-hidden"] {
   border: 1px solid var(--lightgray);
   pointer-events: none;
   opacity: 0;
-  transition: opacity 0.12s ease;
+  transition: opacity var(--dur-1) var(--ease-out);
 }
 
 .excalidraw-page:not(.excalidraw-active) .excalidraw-container:hover::after,
@@ -1511,7 +1726,7 @@ body[data-slug="index"][data-home-fit="bar-hidden"] {
   display: flex;
   align-items: center;
   justify-content: center;
-  transition: background-color 0.1s ease;
+  transition: background-color var(--dur-1) var(--ease-out);
   text-decoration: none;
 }
 
@@ -1578,8 +1793,8 @@ blockquote.transclude:has(.excalidraw-page) {
 // Site footer: drop the "Created with Quartz © …" credit line, center the link
 // row, and prefix each link with a masked icon — Lucide for About (info) and
 // Email (mail), brand marks for LinkedIn and GitHub (lucide-static ships no brand
-// icons). Mask + currentColor mirrors the breadcrumb chevron above, so icons
-// track the link ink and warm to the accent on hover.
+// icons). Same split as the sidebar leaves: accent icon, regular-ink label, text
+// warming to --dark on hover.
 footer > p {
   display: none;
 }
@@ -1594,10 +1809,16 @@ footer > ul a {
   display: inline-flex;
   align-items: center;
   gap: 0.35rem;
+  color: var(--darkgray);
+}
+footer > ul a:hover {
+  color: var(--dark);
 }
 
 // Only the four known links carry an icon; a link without a `--footer-icon`
-// gets no ::before (guards against an unmasked solid square).
+// gets no ::before (guards against an unmasked solid square). The icon paints in
+// --secondary regardless of the label's hover state (its own colour, not
+// currentColor), so it stays the fixed accent the sidebar leaves use.
 footer > ul a[href$="About"]::before,
 footer > ul a[href^="mailto:"]::before,
 footer > ul a[href*="linkedin.com"]::before,
@@ -1606,7 +1827,7 @@ footer > ul a[href*="github.com"]::before {
   flex: 0 0 auto;
   width: 1em;
   height: 1em;
-  background-color: currentColor;
+  background-color: var(--secondary);
   -webkit-mask: var(--footer-icon) center / contain no-repeat;
   mask: var(--footer-icon) center / contain no-repeat;
 }
@@ -1622,4 +1843,66 @@ footer > ul a[href*="linkedin.com"] {
 }
 footer > ul a[href*="github.com"] {
   --footer-icon: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='%23000'%3E%3Cpath d='M12 .297c-6.63 0-12 5.373-12 12 0 5.303 3.438 9.8 8.205 11.385.6.113.82-.258.82-.577 0-.285-.01-1.04-.015-2.04-3.338.724-4.042-1.61-4.042-1.61C4.422 18.07 3.633 17.7 3.633 17.7c-1.087-.744.084-.729.084-.729 1.205.084 1.838 1.236 1.838 1.236 1.07 1.835 2.809 1.305 3.495.998.108-.776.417-1.305.76-1.605-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23A11.509 11.509 0 0 1 12 5.803c1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222 0 1.606-.014 2.898-.014 3.293 0 .322.216.694.825.576C20.565 22.092 24 17.592 24 12.297c0-6.627-5.373-12-12-12'/%3E%3C/svg%3E");
+}
+
+// Motion overrides belong here rather than in Quartz's upgrade-owned styles.
+a {
+  transition: color var(--dur-2) var(--ease-out);
+}
+
+a.internal.broken {
+  transition: opacity var(--dur-2) var(--ease-out);
+}
+
+blockquote {
+  transition: border-color var(--dur-2) var(--ease-out);
+}
+
+:is(h1, h2, h3, h4, h5, h6)[id] > a[href^="#"] {
+  transition: opacity var(--dur-2) var(--ease-out);
+}
+
+.popover {
+  transition:
+    opacity var(--dur-3) var(--ease-out),
+    visibility var(--dur-3) var(--ease-out);
+}
+
+.active-popover,
+.popover:hover {
+  animation-duration: var(--dur-3);
+  animation-timing-function: var(--ease-out);
+}
+
+.callout-title .fold-callout-icon {
+  transition: transform var(--dur-2) var(--ease-out);
+}
+
+.datacore-card {
+  transition:
+    background-color var(--dur-4) var(--ease-in-out),
+    border-color var(--dur-4) var(--ease-in-out);
+}
+
+.datacore-card-content,
+.datacore-card-inner {
+  transition:
+    max-height var(--dur-4) var(--ease-in-out),
+    opacity var(--dur-4) var(--ease-in-out);
+}
+
+.datacore-card .datacore-card-collapser,
+.datacore-card.is-collapsed .datacore-card-collapser {
+  transition: transform var(--dur-2) var(--ease-in-out);
+}
+
+.dc-slider {
+  transition: background var(--dur-2) var(--ease-out);
+}
+
+.datacore .callout-content,
+.datacore.callout {
+  transition:
+    max-height var(--dur-1) var(--ease-out),
+    opacity var(--dur-1) var(--ease-out);
 }

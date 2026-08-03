@@ -1,8 +1,8 @@
 ---
 publish: true
-created: 2026-07-11T21:46:14.260Z
-modified: 2026-07-18T11:59:15.663Z
-published: 2026-07-18T11:59:15.663Z
+created: 2026-07-25T18:38:43.844Z
+modified: 2026-07-25T18:38:43.844Z
+published: 2026-07-25T18:38:43.844Z
 topic:
   - Networks
 subtopic:
@@ -141,7 +141,7 @@ socket.NoDelay = true;  // disables Nagle's algorithm
 
 **Mitigation**: reuse connections through `HttpClient`, database pools, or another protocol-aware pool, and bound connection churn. Confirm exhaustion with socket-state, source-port, and NAT telemetry before changing kernel behavior. Linux `net.ipv4.tcp_tw_reuse` semantics vary by kernel version and do not generalize to other platforms; treat it as a diagnosed expert action for a specific client workload, not a default mitigation. `SO_REUSEADDR` helps a listening server rebind under platform rules and does not solve outbound tuple exhaustion.
 
-# TCP vs UDP
+# TCP Vs UDP
 
 | | TCP | UDP |
 |---|---|---|

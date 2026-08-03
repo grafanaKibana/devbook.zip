@@ -1,8 +1,8 @@
 ---
 publish: true
-created: 2026-07-11T21:45:48.805Z
-modified: 2026-07-18T11:37:07.325Z
-published: 2026-07-18T11:37:07.325Z
+created: 2026-07-25T18:38:43.855Z
+modified: 2026-07-25T18:38:43.855Z
+published: 2026-07-25T18:38:43.855Z
 topic:
   - Programming
 subtopic:
@@ -36,7 +36,7 @@ Console.WriteLine(a.Total); // 0 — both references share the object
 
 # Class Modifiers
 
-## abstract
+## Abstract
 
 An `abstract` class cannot be instantiated directly — it exists only to be inherited. It may contain abstract members (no body, must be overridden) and concrete members (shared implementation).
 
@@ -71,7 +71,7 @@ Key rules:
 
 **Abstract vs Interface**: abstract classes carry state and shared implementation but lock you into single inheritance. Interfaces (especially with default interface methods in C# 8+) provide multiple implementation but cannot hold instance state.
 
-## sealed
+## Sealed
 
 A `sealed` class cannot be inherited. The compiler can devirtualize method calls on sealed types, enabling small performance gains.
 
@@ -114,7 +114,7 @@ public class Middle : Base
 
 `string` is a sealed class in the BCL. All structs are implicitly sealed.
 
-## static
+## Static
 
 A `static` class cannot be instantiated or inherited. It can only contain static members. The compiler enforces this — you cannot add instance fields, properties, or methods.
 
@@ -140,7 +140,7 @@ Key rules:
 
 **Gotcha**: static classes are singletons by nature. If they hold mutable state (`static` fields), you get global mutable state — hard to test and prone to race conditions.
 
-## partial
+## Partial
 
 The `partial` keyword splits a class definition across multiple files. The compiler merges them into a single type. Commonly used for separating generated code from hand-written code.
 

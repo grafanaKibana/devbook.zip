@@ -4,10 +4,10 @@ subtopic: []
 level: []
 priority: Medium
 status: Not-Started
-tags:
-  - Template
+tags: [Template]
 publish: false
 ---
+
 <%*
 const parts = tp.file.folder(true).split("/");
 const homeIndex = parts.indexOf("Home");
@@ -39,65 +39,65 @@ tp.hooks.on_all_templates_executed(async () => {
 });
 %>
 
-# Intro
+<!-- State the workload, persistent state, repeated cost the representation reduces, and information it deliberately does not retain. -->
 
-<!-- State the workload, the information that must persist between operations, the representation that lowers the repeated cost, and the information the structure does not retain. -->
+# State across Operations
 
-## State across operations
-
-<!-- Replace this required placeholder with a valid configuration from the StepTrace registry. Show several operations over one persistent structure; do not substitute a related algorithm trace. Do not publish an unresolved placeholder. -->
+<!-- Lead into the trace with one plain-language sentence. Replace the placeholder with a valid StepTrace configuration that shows several operations over one structure and exposes meaningful persistent state; do not substitute a related algorithm trace or publish an unresolved placeholder. -->
 
 ```steptrace
 {"algorithm":"replace-with-supported-id","operations":"replace-with-persistent-operation-sequence"}
 ```
 
-## Representation and invariants
+# Representation and Invariants
 
-<!-- Describe the physical state, empty/root/sentinel conventions, invariants, mutable fields, and retained or discarded identity, ordering, topology, history, or duplicates. -->
+<!-- Rename this heading after the representation claim the note proves. Describe the physical state, mutable fields, empty/root/sentinel conventions, invariant, and retained or discarded identity, ordering, topology, history, or duplicates. -->
 
-## Complexity
+# Complexity
 
-| Operation | Best time | Amortized/average time | Worst time | Persistent structure space | Auxiliary space per operation |
-| --- | --- | --- | --- | --- | --- |
-| Construct |  |  |  |  |  |
-| Query |  |  |  |  |  |
-| Insert/update |  |  |  |  |  |
-| Remove/merge |  |  |  |  |  |
+| Operation     | Best time | Amortized/average time | Worst time | Persistent structure space | Auxiliary space per operation |
+| ------------- | --------- | ---------------------- | ---------- | -------------------------- | ----------------------------- |
+| Construct     |           |                        |            |                            |                               |
+| Query         |           |                        |            |                            |                               |
+| Insert/update |           |                        |            |                            |                               |
+| Remove/merge  |           |                        |            |                            |                               |
 
-<!-- Rename or remove operations that do not belong. State the balancing, hashing, resizing, or compression assumption behind each non-worst bound. -->
+<!-- Rename or remove operations that do not belong. Explain the actual cost driver and the balancing, hashing, resizing, compression, or workload assumption behind each bound. Keep persistent structure space distinct from temporary auxiliary space, and add a concrete scale estimate when it clarifies the cost. -->
 
-## Boundaries
+# Fit and Limits
 
-<!-- Keep only limits caused by the representation: deletion, ordering, range access, path recovery, iteration, identity mapping, rollback, or memory layout. -->
+<!-- Rename this heading after the structure’s actual fit or limit. State the workload and scale it fits, then name unsupported operations or information the representation cannot retain efficiently: deletion, ordering, range access, path recovery, iteration, identity mapping, rollback, or memory layout. -->
 
-## Reference drawer
+# Reference Drawer
 
 > [!ABSTRACT]- Structural view
+>
 > ```mermaid
 > flowchart LR
 >   State --> Operation --> State
 > ```
 
 > [!EXAMPLE]- C# implementation
+>
 > ```csharp
 > // Complete reference implementation.
 > ```
 
-<!-- Keep complete Mermaid and code views collapsed. Delete the drawer when neither adds a useful secondary view. -->
+<!-- Optional: keep complete Mermaid and code views collapsed as secondary views. Delete the drawer when neither adds useful evidence. -->
 
-## Comparison
+# Comparison
 
 | Representation | Query cost | Update cost | Removal | Information retained | Stronger workload | Weaker workload |
-| --- | --- | --- | --- | --- | --- |
-|  |  |  |  |  |  |  |
+| -------------- | ---------- | ----------- | ------- | -------------------- | ----------------- | --------------- |
+|                |            |             |         |                      |                   |                 |
 
-<!-- Compare workload shape and retained information, not raw speed alone. Close with the structure’s fit, the flexibility it gives up, and the condition where an alternative is stronger. -->
+<!-- Optional: delete this section when no real alternative changes the engineering decision. Compare retained information, query/update/removal cost, and workload fit, not raw speed alone. Close with the structure’s fit, the flexibility it gives up, and the condition where an alternative is stronger. -->
 
-## Questions
+# Questions
 
-<!-- Keep only distinct recall targets. Remove this section when the prose already makes them obvious. -->
+<!-- Optional: keep only distinct recall targets. Delete this section when the prose already makes them obvious. -->
 
-## References
+# References
 
 <!-- Keep at least one annotated primary source before setting publish: true. -->
 

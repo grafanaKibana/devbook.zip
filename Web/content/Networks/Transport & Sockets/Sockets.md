@@ -1,8 +1,8 @@
 ---
 publish: true
-created: 2026-07-12T14:27:20.432Z
-modified: 2026-07-18T11:30:09.998Z
-published: 2026-07-18T11:30:09.998Z
+created: 2026-07-25T18:38:43.844Z
+modified: 2026-07-25T18:38:43.844Z
+published: 2026-07-25T18:38:43.844Z
 topic:
   - Networks
 subtopic:
@@ -18,7 +18,7 @@ A socket is an endpoint for bidirectional communication between two processes ov
 
 You reach for raw sockets when building custom protocols, high-performance servers, or when HTTP/gRPC adds too much overhead. For most application-layer work, higher-level abstractions (`HttpClient`, gRPC, SignalR) are safer and faster to build with.
 
-# Stream vs Datagram Sockets
+# Stream Vs Datagram Sockets
 
 The socket API comes in two flavors, one per transport. A **TCP (stream) socket** is a byte stream with no message boundaries — partial reads and writes are normal, so framing the application's messages is your responsibility. A **UDP (datagram) socket** preserves message boundaries — each `Send` maps to one `Receive` — but delivery and ordering are best-effort.
 

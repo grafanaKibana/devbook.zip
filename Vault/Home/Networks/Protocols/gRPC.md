@@ -218,7 +218,7 @@ message UserRequest {
 > - L4 load balancers distribute at the TCP connection level — they cannot see individual HTTP/2 streams within that connection.
 > - All calls from one client land on the same backend, defeating load distribution.
 > - Fix: use an L7 proxy (Envoy, Linkerd, YARP) that terminates HTTP/2 and distributes individual streams across backends. Or use client-side load balancing with service discovery.
->
+> 
 > **Why this matters:** the most common production surprise when adopting gRPC; tests understanding of HTTP/2 multiplexing at the transport layer.
 
 > [!QUESTION]- What happens if you call a gRPC service without setting a deadline?
@@ -228,7 +228,7 @@ message UserRequest {
 > - In a microservice chain, one hanging call can exhaust connection pools upstream, causing cascading failures across services.
 > - gRPC intentionally has no default deadline because the right value depends on the operation.
 > - Use `EnableCallContextPropagation()` to automatically forward deadlines through a service chain.
->
+> 
 > **Why this matters:** deadlines are the single most important production gRPC configuration; missing them is the top cause of gRPC-related outages.
 
 > [!QUESTION]- Why is renaming a proto field safe but renumbering it is not?
@@ -237,7 +237,7 @@ message UserRequest {
 > - Renaming a field changes only the generated code accessor — the wire format is unchanged, so old and new clients interoperate seamlessly.
 > - Renumbering changes the wire identity — old clients sending the old number will have their data silently interpreted as the new field by the updated server.
 > - When removing fields, use `reserved` to prevent the number and name from being reused in future schema changes.
->
+> 
 > **Why this matters:** proto versioning is the contract management layer of gRPC; getting it wrong causes silent data corruption that is extremely hard to debug.
 
 # References

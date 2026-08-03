@@ -1,8 +1,8 @@
 ---
 publish: true
-created: 2026-07-16T18:34:16.231Z
-modified: 2026-07-18T11:30:02.593Z
-published: 2026-07-18T11:30:02.593Z
+created: 2026-07-25T18:38:43.773Z
+modified: 2026-07-25T18:38:43.773Z
+published: 2026-07-25T18:38:43.773Z
 topic:
   - AI & ML
 subtopic:
@@ -22,7 +22,7 @@ Start with prompting, add [[AI & ML/LLM/Context Engineering/RAG/RAG|RAG]] when t
 
 Group Relative Policy Optimization (GRPO) is an online reinforcement-learning method for language-model post-training. For each prompt, the current policy samples a group of completions, a reward function or verifier—rule-based or model-based—scores them, and the update increases probability for completions that perform better relative to their group. GRPO removes the learned value model used by PPO-style training; it does not remove on-policy sampling, reward design, KL control, or reward-hacking risk.
 
-## Group-relative update
+## Group-relative Update
 
 ```text
 prompt
@@ -36,7 +36,7 @@ Suppose a math prompt produces eight completions. Six fail the final-answer chec
 
 The absence of a critic reduces model-state memory and one source of estimation error. Group estimates can still be noisy, especially when every sampled completion receives nearly the same reward. More samples improve comparison but increase generation cost.
 
-## Reward boundary
+## Reward Boundary
 
 GRPO works best when rewards are hard to game and cheap to verify: exact math answers, executable tests, schema checks, or constrained simulators. A style judge or underspecified reward can reward verbosity, shortcuts, or artifacts that do not generalize.
 
@@ -47,17 +47,17 @@ Use several gates:
 - Measure reward distribution and group variance, not only average training reward.
 - Test the final policy outside the environment and formatting assumptions used by the verifier.
 
-## Evidence boundary
+## Evidence Boundary
 
 DeepSeekMath introduced GRPO and specifies its group-relative advantages, clipped policy objective, and KL regularization. DeepSeek-R1 reports a GRPO-based reasoning post-training pipeline and evaluations under its documented setup. Those papers support the mechanism and their stated experiments; they do not make undated prices, third-party hardware comparisons, or broad “best model” claims durable facts.
 
 The method is useful when a stable verifier and repeatable rollout environment exist. It is not a substitute for good data governance, held-out evaluation, or deployment-level checkpoints.
 
-# Preference alignment
+# Preference Alignment
 
 Preference alignment trains models to prefer one completion over another for the same prompt. Preference data includes explicit instruction boundaries; those labels become the behavior target and therefore the strongest source of bias if the rubric is weak.
 
-## Preference data
+## Preference Data
 
 ```text
 prompt: user asks for a refund outside policy
@@ -82,7 +82,7 @@ Use DPO when a fixed preference set is already available and stable. Use online 
 
 Measure pairwise win rate with blinded raters, task correctness, refusal precision and recall, calibration, and safety slices. Keep a separate set for regressions in general capability. If response length differs, control or report it: raters and judges can prefer longer answers even when they are not more correct.
 
-# When fine-tuning earns its cost
+# When Fine-tuning Earns Its Cost
 
 - The model understands the task but inconsistently follows a format or policy after good prompting and few-shot examples.
 - The target behavior is easier to demonstrate than specify, and representative examples can be labeled consistently.
@@ -91,13 +91,13 @@ Measure pairwise win rate with blinded raters, task correctness, refusal precisi
 
 Do not begin without a held-out evaluation set and a baseline from the exact base model. Training loss proves fit to training examples, not improvement on production behavior.
 
-# Full fine-tuning
+# Full Fine-tuning
 
 Full fine-tuning updates every model weight. Its memory footprint is not a fixed multiple of a published model size. Training may hold model weights, gradients, optimizer states, activations, temporary buffers, and communication shards, each at a precision chosen by the implementation. Adam-style optimizers can keep multiple state tensors; activation memory grows with batch size, sequence length, layer shape, and checkpointing policy. Quantization, mixed precision, ZeRO/FSDP sharding, CPU offload, and optimizer choice change each component.
 
 Plan capacity from a component-level estimate for the exact model and training stack, then measure a short run. Reserve full tuning for cases where broader weight updates beat PEFT on held-out quality enough to justify distributed compute and a full derived checkpoint.
 
-# Parameter-efficient fine-tuning
+# Parameter-efficient Fine-tuning
 
 ## LoRA
 

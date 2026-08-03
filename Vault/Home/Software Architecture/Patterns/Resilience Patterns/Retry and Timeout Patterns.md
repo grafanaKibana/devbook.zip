@@ -13,9 +13,9 @@ publish: true
 
 Retry and timeout patterns are defensive reliability strategies for outbound calls: retry re-attempts operations that fail for transient reasons, and timeout bounds how long you wait before treating the attempt as failed. They matter because distributed systems regularly see short network loss, DNS hiccups, brief overload, and cold-start latency spikes that are recoverable seconds later. Without retry, you fail fast on recoverable faults; without timeout, a single hung dependency can hold connection pool slots and request capacity until upstream latency collapses. Reach for both patterns on most request response external dependency boundaries such as HTTP APIs, message brokers, databases, and cache services. For streaming and long-running background flows, use explicit deadline ownership and different timeout and retry budgets. In modern .NET, the standard implementation is Polly v8 through `Microsoft.Extensions.Http.Resilience`.
 
-# Retry mechanism
+# Retry Mechanism
 
-## Retry strategies
+## Retry Strategies
 
 - `Immediate retry`: run the next attempt with no delay; useful only for very short transient blips.
 - `Fixed delay`: wait the same interval each time; simple and predictable, but can still synchronize clients.
@@ -24,11 +24,11 @@ Retry and timeout patterns are defensive reliability strategies for outbound cal
 
 Linear or exponential labels describe how the base delay grows between attempts; jitter describes how randomness is applied around that base. A fixed one-second delay randomized to `0.8`, `1.1`, and `1.3` seconds is fixed backoff with jitter, not linear backoff. Exponential backoff with jitter is the normal fleet-safe default, but every strategy still needs a maximum attempt count, maximum delay, and total deadline.
 
-## Why jitter matters
+## Why Jitter Matters
 
 If 10,000 clients all fail at the same time and all retry at exactly 200 ms, then 400 ms, then 800 ms, they create synchronized request spikes that prolong outage recovery. Jitter decorrelates retry timing, turning one synchronized storm into a spread-out arrival pattern that gives the downstream service room to recover.
 
-## Exponential backoff formula
+## Exponential Backoff Formula
 
 Use this as a conceptual model for exponential backoff:
 
@@ -38,15 +38,15 @@ delay grows exponentially from a base value and jitter randomizes each attempt
 
 Polly v8 exponential retry with `UseJitter = true` uses a decorrelated jitter approach, so treat the formula as intuition and verify exact delay behavior in the Polly retry docs. In practice, keep `baseDelay` small, cap max delay, and cap max attempts to stay within your latency SLO.
 
-## Max retry attempts
+## Max Retry Attempts
 
 Cap retries on user-facing request paths. For long-running background workers, indefinite retries can be acceptable only when combined with cancellation support, max-delay caps, and monitoring that can stop unhealthy loops.
 
-## What to retry
+## What to Retry
 
 Retry only when the operation is replayable and the failure is plausibly transient. Connection resets, temporary DNS failures, and a per-attempt timeout can qualify, but an uncertain timeout means the server may already have completed the work.
 
-## HTTP retry policy
+## HTTP Retry Policy
 
 HTTP method semantics and application behavior decide whether another attempt is safe:
 
@@ -59,7 +59,7 @@ HTTP method semantics and application behavior decide whether another attempt is
 
 One layer owns retries for a call path. Propagate the remaining deadline, cap total attempts across hops, and record effective attempts per original request. Otherwise three attempts at two nested services can turn one request into nine downstream calls.
 
-## Retry flow
+## Retry Flow
 
 ```mermaid
 sequenceDiagram
@@ -75,11 +75,11 @@ sequenceDiagram
     Service-->>Client: Success
 ```
 
-# Timeout and deadline boundary
+# Timeout and Deadline Boundary
 
 A timeout limits how long one operation may wait. A deadline is the latest time by which the whole operation must finish. Retry must reuse the same overall deadline; creating a fresh timeout for every attempt or downstream hop allows the call path to exceed its end-to-end latency budget.
 
-## Budget model
+## Budget Model
 
 For a two-second request budget with at most two dependency attempts:
 
@@ -90,7 +90,7 @@ For a two-second request budget with at most two dependency attempts:
 
 Per-attempt timeout without an overall deadline can still exceed the user budget across retries. An overall deadline without a per-attempt timeout lets the first hung call consume the entire budget.
 
-## Deadline propagation in .NET
+## Deadline Propagation in .NET
 
 ```csharp
 public sealed class PricingClient(HttpClient httpClient)
@@ -130,7 +130,7 @@ The endpoint owns the overall budget, while `PricingClient` creates a shorter li
 
 Before every retry, check that the remaining budget can cover both backoff and another attempt. Cancellation does not prove a downstream write rolled back, so uncertain writes still require an idempotency contract.
 
-# .NET implementation
+# .NET Implementation
 
 This Polly v8 pipeline puts an outer total timeout around bounded exponential retry with jitter and an inner per-attempt timeout. It retries a replayable `GET`, honors a valid `Retry-After`, and disables `HttpClient.Timeout` so two unrelated timeout mechanisms do not compete.
 
@@ -184,7 +184,7 @@ builder.Services.AddHttpClient<InventoryClient>(client =>
 ```
 
 Returning `null` from `DelayGenerator` lets Polly use exponential backoff with jitter when the response has no valid `Retry-After`. The caller's cancellation token and total deadline still win; do not wait beyond the remaining request budget. Apply the pipeline only to methods the dependency treats as replayable. A `POST` needs server-side deduplication whose retention exceeds the retry window.
-# Integration with other resilience patterns
+# Integration with Other Resilience Patterns
 
 For production systems, compose retry and timeout with neighboring patterns in a deliberate order from outermost to innermost:
 
@@ -198,25 +198,25 @@ Use this pipeline together with [[Home/Software Architecture/Patterns/Resilience
 
 # Pitfalls
 
-## Retrying non idempotent operations
+## Retrying Non Idempotent Operations
 
 - What goes wrong: duplicate orders or duplicate payments happen when a non-idempotent write is retried after uncertain completion.
 - Why it happens: the client cannot distinguish between failed execution and failed response delivery, so a second attempt may repeat a completed write.
 - How to avoid it: use idempotency keys for write APIs and retry only operations that are explicitly safe to replay.
 
-## No jitter in backoff
+## No Jitter in Backoff
 
 - What goes wrong: all clients retry at the same time and generate a retry storm that extends outage duration.
 - Why it happens: deterministic delays synchronize retries across instances and across regions.
 - How to avoid it: enable jitter and combine it with exponential backoff and capped attempt count.
 
-## Missing timeout boundary
+## Missing Timeout Boundary
 
 - What goes wrong: a hung dependency call holds connection slots and request budget for minutes.
 - Why it happens: only one timeout layer is configured or no timeout is configured at all.
 - How to avoid it: configure both per-attempt timeout and overall timeout then align both with your service latency SLO.
 
-## Retry amplification across layers
+## Retry Amplification across Layers
 
 - What goes wrong: one user request fans out into many downstream calls for example three retries in service A and three retries in service B can produce nine calls into service C.
 - Why it happens: each layer retries independently without a shared retry budget.

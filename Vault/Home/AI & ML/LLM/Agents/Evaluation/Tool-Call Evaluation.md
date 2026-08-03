@@ -15,7 +15,7 @@ A tool call is the point where an agent acts on the world, and it is the most co
 
 This page is the deep version of the "tool-call correctness" line in [[Home/AI & ML/LLM/Agents/Evaluation/Evaluation|Agent Evaluation]]. The scoring machinery it reuses — schema validation as a [[Deterministic Checks|deterministic check]] and an [[LLM-as-a-Judge|LLM judge]] for the semantic calls — is general; only the decomposition below is agent-specific.
 
-# What a tool call can get wrong
+# What a Tool Call Can Get Wrong
 
 ```mermaid
 flowchart TD
@@ -47,7 +47,7 @@ flowchart TD
 
 Report selection and argument accuracy *separately*. A model can score 95% on tool selection and 70% on arguments — averaging them into one number hides that the fix is argument grounding, not tool descriptions.
 
-# Ground truth
+# Ground Truth
 
 Two regimes, mirroring retrieval eval. **Reference-based**: each step has an expected `(tool, arguments)`, and you score selection by tool match and arguments by field-level comparison. Build these from successful human or agent trajectories rather than writing them by hand — the same chunk-anchored inversion used for [[Retrieval Evaluation Sets|retrieval eval sets]], applied to traces. **Reference-free**: deterministic checks cover validity and exact-duplicate detection with zero labels, and an LLM judge rates selection and necessity from the tool catalog plus the conversation. Reference-free is how you bootstrap before you have labeled traces; it cannot catch a subtly-wrong argument the way a reference can.
 
@@ -80,15 +80,15 @@ Decision rule: run the deterministic validity check on every call always — it 
 
 # Pitfalls
 
-## Exact argument match flags semantically-equal values
+## Exact Argument Match Flags Semantically-equal Values
 
 Scoring free-text arguments by string equality marks `"refund the full amount"` wrong against a reference of `"full refund"`, tanking argument accuracy on calls that were actually correct. Reserve exact match for ids, enums, and booleans; score natural-language arguments with a semantic judge or normalized comparison.
 
-## Order-sensitive scoring punishes valid reorderings
+## Order-sensitive Scoring Punishes Valid Reorderings
 
 Requiring the exact reference *sequence* penalizes an agent that fetched two independent read-only facts in the other order. Score independent calls as a set; only enforce order where a real dependency exists (you cannot refund before looking up the order).
 
-## Schema-valid hides semantically wrong
+## Schema-valid Hides Semantically Wrong
 
 The most dangerous tool error passes every deterministic check — perfect JSON, real tool, wrong value — and executes against production. Validity gates give false confidence; pair them with reference or judge argument checks, and where the action is irreversible, add a confirmation or dry-run step.
 

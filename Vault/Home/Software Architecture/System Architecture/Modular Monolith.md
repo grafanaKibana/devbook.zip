@@ -39,7 +39,7 @@ flowchart LR
 > [!IMPORTANT]
 > **Data isolation makes the transaction boundary explicit.** Separate `DbContext` types or schemas can still share one local ACID transaction when they use the same relational database, connection, and provider transaction. The boundary becomes asynchronous when modules use separate databases, brokers, or resources that cannot participate in the same supported transaction. Then keep each local change atomic and publish reliably through an outbox instead of assuming all modules committed together.
 
-# .NET implementation
+# .NET Implementation
 
 Separate projects make forbidden references visible to the compiler and architecture tests:
 
@@ -129,7 +129,7 @@ public sealed class PlaceOrderHandler(
 
 `IUnitOfWork` is valid here only because both module adapters enlist in the same local database transaction. If Inventory moves behind a network boundary, this handler must become a durable workflow with idempotent reservation and compensation rather than pretending a local transaction still spans both modules.
 
-## Module-owned registration
+## Module-owned Registration
 
 Each infrastructure assembly owns its persistence registration and migrations history. The host composes modules without reaching into their domain or persistence types.
 
@@ -170,7 +170,7 @@ app.MapOrdersEndpoints();
 app.Run();
 ```
 
-## Shared transaction when the resource is shared
+## Shared Transaction when the Resource is Shared
 
 Two `DbContext` instances can commit atomically when they use the same open relational connection and provider transaction:
 
@@ -205,7 +205,7 @@ await transaction.CommitAsync(cancellationToken);
 
 Different schemas do not prevent this transaction because PostgreSQL is still one transactional resource. When a module moves to another database, uses a provider that cannot share the transaction, or publishes to a broker, persist an outbox record with the local change and expose the cross-module workflow as observable asynchronous state.
 
-# Extraction path to microservices
+# Extraction Path to Microservices
 
 Clean boundaries make extraction bounded, not transparent. Keeping call sites behind a contract such as `IInventoryGateway` can preserve the use-case shape, but the new network boundary must become visible in the design:
 
@@ -217,7 +217,7 @@ Clean boundaries make extraction bounded, not transparent. Keeping call sites be
 
 The interface may remain familiar, but its contract now includes partial failure and eventual consistency. That is still safer than extracting tangled code: module ownership and data isolation narrow the migration surface without pretending a local method call and a remote operation are equivalent.
 
-# Collocation and scale cases
+# Collocation and Scale Cases
 
 Collocation pays when stages always change together, share one scaling profile, and exchange large intermediate data. Prime Video's monitoring team reported that moving one tightly ordered video-analysis pipeline into one process removed remote orchestration and transfer costs. The result was specific to that workload, not a general comparison between monoliths and services.
 
@@ -232,6 +232,7 @@ Use these cases as boundary tests. Collocate modules when their changes, data mo
 - **Premature partitioning**: too many modules around unstable domains create constant boundary churn. Start with a few bounded contexts and split when ownership, change frequency, or scaling evidence makes the boundary durable.
 
 # Tradeoffs
+
 | Criterion | Traditional Monolith | Modular Monolith | Microservices |
 |---|---|---|---|
 | Deployment | Single unit | Single unit | Independent service deployments |

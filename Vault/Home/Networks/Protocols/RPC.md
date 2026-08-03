@@ -33,7 +33,7 @@ OrderService.PlaceOrder(req)
 
 The client stub makes the call look local. The network, serialization, and error handling are handled by the framework.
 
-# RPC vs REST
+# RPC Vs REST
 
 | Dimension | RPC (gRPC) | REST |
 |---|---|---|
@@ -110,7 +110,6 @@ var response = await client.PlaceOrderAsync(
 
 > [!QUESTION]- When should you choose gRPC over REST?
 > Choose gRPC for internal service-to-service communication where: (1) you need high throughput or low latency (binary Protobuf is 3-10x smaller than JSON), (2) you need bidirectional streaming, or (3) you want strongly typed contracts enforced at compile time. Choose REST for public APIs, browser clients (gRPC requires a proxy for browsers), or when human-readable payloads matter for debugging. The key constraint: gRPC requires HTTP/2 and a Protobuf toolchain; REST works with any HTTP client.
-
 
 # References
 

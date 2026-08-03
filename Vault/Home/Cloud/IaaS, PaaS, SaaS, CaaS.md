@@ -123,7 +123,6 @@ resource vm 'Microsoft.Compute/virtualMachines@2023-03-01' = {
     # No OS config, no runtime version pinning — provider handles it
 ```
 
-
 # Pitfalls
 
 ## Starting with IaaS When PaaS Suffices
@@ -138,7 +137,6 @@ resource vm 'Microsoft.Compute/virtualMachines@2023-03-01' = {
 
 **Mitigation**: containerize applications (Docker) before deploying to PaaS where possible. Containers are portable across CaaS providers (AKS, EKS, GKE) and reduce lock-in. Accept PaaS lock-in only when the operational savings justify it.
 
-
 # Questions
 
 > [!QUESTION]- What is the key operational difference between IaaS and PaaS?
@@ -146,7 +144,6 @@ resource vm 'Microsoft.Compute/virtualMachines@2023-03-01' = {
 
 > [!QUESTION]- Where does CaaS fit between IaaS and PaaS?
 > CaaS (e.g., AKS, EKS) sits between them: you manage container images and deployments, but the provider manages the Kubernetes control plane and underlying OS. It gives more control than PaaS (you define your own container images, resource limits, and networking) while eliminating the Kubernetes control plane management burden of IaaS. Use CaaS when you need container portability or multi-service orchestration that PaaS cannot provide.
-
 
 # References
 

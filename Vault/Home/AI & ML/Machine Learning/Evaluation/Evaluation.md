@@ -4,8 +4,7 @@ topic:
 subtopic:
   - Machine Learning
 summary: "Measuring whether a model solves its real problem in production by picking the right metric."
-tags:
-  - FolderNote
+tags: [FolderNote]
 publish: true
 priority: Medium
 level:

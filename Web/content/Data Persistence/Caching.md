@@ -1,8 +1,8 @@
 ---
 publish: true
-created: 2026-07-15T09:07:59.299Z
-modified: 2026-07-18T11:59:15.655Z
-published: 2026-07-18T11:59:15.655Z
+created: 2026-07-25T18:38:43.828Z
+modified: 2026-07-25T18:38:43.828Z
+published: 2026-07-25T18:38:43.828Z
 topic:
   - Data Persistence
 subtopic: []
@@ -34,7 +34,7 @@ CPU cache, process memory, storage I/O, and an application request are different
 
 Measure end-to-end hit and miss latency for the deployed path, plus origin load and hit ratio by key class. A cache is justified when avoided origin work improves a named latency or capacity target after accounting for miss cost, invalidation, and failure behavior. An L1 tier is justified separately when its measured gain exceeds the cost of per-process duplication and another freshness boundary.
 
-# Cache, retained log, or index?
+# Cache, Retained Log, or Index?
 
 "Faster copy" is the useful boundary. A cache entry is derivable or replaceable from an authority, so losing it should cost latency and origin load—not correctness or permanent data. Nearby systems may accelerate reads without being caches:
 
@@ -102,7 +102,7 @@ public class UserService(HybridCache cache)
 }
 ```
 
-# Operating contract
+# Operating Contract
 
 Before selecting a client library, decide whether the workload has reuse, how stale each data class may be, who owns a miss, what an acknowledged write means, what happens at capacity, and how each request class degrades when the cache is unavailable. Measure hit ratio by route and key class rather than relying on one fleet-wide percentage: a 95% aggregate hit ratio can still hide an endpoint whose misses dominate database load.
 
@@ -212,7 +212,7 @@ Notes:
 - Soft TTL is a latency contract. Hard TTL is a safety contract.
 - This dictionary and `HybridCache` coalesce only within one process. `IDistributedCache` does not provide atomic singleflight across instances; fleet-wide coordination needs a backend-aware lease or another distributed ownership protocol.
 
-# Stampede and failure modes
+# Stampede and Failure Modes
 
 A stampede starts when many callers miss the same expensive key and independently load the origin. Coalesce refreshes, jitter expirations, and decide per data class whether an outage may serve stale, bypass under a rate limit, or must fail closed.
 
@@ -238,7 +238,7 @@ Redis, Memcached, and EVCache are not interchangeable merely because they can se
 
 Use Memcached for a plain disposable object cache. Use Redis when server-side structures or atomic operations justify its persistence, replication, and cluster choices. Redis command atomicity is not a relational transaction across arbitrary operations.
 
-# Netflix EVCache: four data contracts
+# Netflix EVCache: Four Data Contracts
 
 Netflix's EVCache illustrates four distinct contracts that can share an in-memory implementation:
 
@@ -251,11 +251,11 @@ Netflix's EVCache illustrates four distinct contracts that can share an in-memor
 
 ![[Assets/Data Persistence/Data Persistence-Caching-18120000-3.png]]
 
-# Redis as a cache or system of record
+# Redis as a Cache or System of Record
 
 For authoritative Redis data, eviction must not discard keys and the acknowledgement boundary must name its loss window. RDB can lose writes since the last snapshot; AOF durability depends on `appendfsync`; replication is asynchronous by default; `WAIT` narrows but does not eliminate failover risk. Pub/Sub has no replay, while Streams retains entries and consumer-group state under the same persistence and replication configuration. Test process loss, host loss, and replica promotion against the exact deployment rather than inferring durability from an enabled setting.
 
-# Why Redis is fast—and when it stalls
+# Why Redis is fast—and when it Stalls
 
 Redis is fast because the working set stays in memory, clients are multiplexed, and most commands execute through a mostly serialized path. That same path makes large-key traversal, `O(N)` commands, Lua or module work, persistence fork pressure, AOF flushing, swapping, and network queues visible as tail latency. Measure the actual command and payload mix; watch slow commands, big keys, memory, persistence, and replication lag.
 
@@ -273,7 +273,7 @@ Redis is fast because the working set stays in memory, clients are multiplexed, 
 
 Decision rule: start with `HybridCache` for new .NET 9+ projects — it handles L1/L2 layering, stampede protection, and serialization out of the box. Fall back to `IDistributedCache` when you need explicit control over cache writes, or `IMemoryCache` for single-instance scenarios where distributed state is unnecessary.
 
-# Eviction under memory pressure
+# Eviction under Memory Pressure
 
 Expiration, admission, and capacity eviction answer different questions: whether an entry is too old, whether a candidate should enter, and which resident value leaves when memory is full.
 
@@ -289,11 +289,11 @@ Expiration, admission, and capacity eviction answer different questions: whether
 
 ![[Assets/Data Persistence/Data Persistence-Caching-18120000-2.png]]
 
-# Other pitfalls
+# Other Pitfalls
 
 Unbounded high-cardinality keys, missing tenant or authorization dimensions, large serialized payloads, format drift, and cold deploys can erase the latency benefit or serve incorrect data. Bound the key space, version cached envelopes, measure serialization cost, and roll out gradually enough that origin load remains inside its capacity budget.
 
-## Cache penetration (missing-key floods)
+## Cache Penetration (Missing-key fLoods)
 
 Absent-key traffic follows `request → cache miss → origin not found`. Validate impossible keys, use a short negative TTL for repeated misses, consider a [[Computer Science/Data Structures/Hash-based Structures/Bloom Filter|Bloom Filter]] when membership is known, and rate-limit by principal. Negative entries must be invalidated on creation; Bloom false positives still reach the origin; versioned keys still need TTLs so obsolete versions do not grow without bound.
 

@@ -10,6 +10,7 @@ priority: High
 status: Ready to Repeat
 publish: true
 ---
+
 Think of remote controls and TVs. Any remote — basic, smart, universal — can operate any TV — Samsung, LG, Sony. The remote is the abstraction (what you want to do: power, volume, channel), the TV is the implementation (how it actually gets done). Adding a new TV brand doesn’t require redesigning any remote. Adding a new remote type doesn’t require changing any TV. The two hierarchies vary independently because they’re connected by a bridge, not welded together by inheritance.
 
 The Bridge pattern decouples an abstraction from its implementation so they can evolve independently. The abstraction holds a reference to an implementation interface (the "bridge") rather than inheriting from a concrete class. In an e-commerce system, payment types (single charge, subscription, refund) are the abstraction dimension, and payment providers (Stripe, PayPal, BankTransfer) are the implementation dimension. Without Bridge, you’d need `StripeCharge`, `StripeSubscription`, `StripeRefund`, `PayPalCharge`, `PayPalSubscription`... — a combinatorial explosion. With Bridge, each abstraction delegates to whichever provider implementation it received.

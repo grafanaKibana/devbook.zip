@@ -10,12 +10,12 @@
   "obsidian-git",
   "obsidian-icon-folder",
   "homepage",
-  "digitalgarden",
   "obsidian-style-settings",
   "datacore",
   "obsidian-excalidraw-plugin",
   "hot-reload",
   "quartz-syncer",
   "steptrace",
-  "true-recall"
+  "obsidian-linter",
+  "tabs"
 ]

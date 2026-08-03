@@ -6,12 +6,11 @@ topic:
   - DevOps
 subtopic: []
 summary: "Automation, observability, and delivery practices that move changes to production safely."
-tags:
-  - FolderNote
+tags: [FolderNote]
 publish: true
 priority: High
 level:
-  - '4'
+  - "4"
 status: Done
 ---
 

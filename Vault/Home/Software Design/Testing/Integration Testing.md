@@ -57,7 +57,7 @@ public class OrdersApiTests : IClassFixture<WebApplicationFactory<Program>>
 
 This tests the full request pipeline: routing, middleware, controller, service, repository, and database — all in one test without spinning up a real server.
 
-# When to Use Real Infrastructure vs In-Memory Substitutes
+# When to Use Real Infrastructure Vs In-Memory Substitutes
 
 | Dependency | Test approach | Reason |
 |---|---|---|

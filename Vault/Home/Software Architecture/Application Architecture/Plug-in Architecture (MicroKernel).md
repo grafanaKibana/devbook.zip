@@ -122,7 +122,6 @@ public sealed class PdfPlugin : IPlugin
 > [!QUESTION]- When is plug-in architecture the wrong choice?
 > When all features are known upfront and no third-party extensibility is needed. The loading complexity, versioning challenges, and security surface (untrusted code running in-process) are not justified for internal applications. A monolith with feature flags is simpler and safer. Plug-in architecture earns its complexity when customers or third parties need to extend the product without modifying the core.
 
-
 # References
 
 - [AssemblyLoadContext (Microsoft Learn)](https://learn.microsoft.com/en-us/dotnet/api/system.runtime.loader.assemblyloadcontext) — the .NET API for isolated plug-in loading; prevents version conflicts between plug-ins by giving each its own assembly resolution context.

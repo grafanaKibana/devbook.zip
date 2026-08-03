@@ -4,8 +4,7 @@ topic:
 subtopic:
   - Data Structures
 summary: "Sequence structures like arrays, lists, stacks, queues, and buffers, defined by access order."
-tags:
-  - FolderNote
+tags: [FolderNote]
 level:
   - "4"
 priority: Medium

@@ -1,20 +1,31 @@
 import { ExcalidrawEnhance } from "./custom/components/excalidraw-enhance"
 import { ExplorerIcons } from "./custom/components/explorer-icons"
 import { ContentMetaRow } from "./custom/components/content-meta-row"
+import { Complexity } from "./custom/components/complexity"
 import { ExplorerOrder } from "./custom/components/explorer-order"
 import { FloatingButtons } from "./custom/components/floating-buttons"
 import { HomepageFit } from "./custom/components/homepage-fit"
 import { NavScopeDropdown } from "./custom/components/nav-scope-dropdown"
 import { PageContribute } from "./custom/components/page-contribute"
+import { PageReveal } from "./custom/components/page-reveal"
 import { QuestionsIndex } from "./custom/components/questions-index"
 import { SiteHeader } from "./custom/components/site-header"
 import { SiteMarquee } from "./custom/components/site-marquee"
 import { Steptrace } from "./custom/components/steptrace"
 import { StepTraceStatic } from "./custom/emitters/steptrace-static"
 import { ClickableImages } from "./custom/transformers/clickable-images"
+import { ComplexityBlock } from "./custom/transformers/complexity-block"
 import { QuestionCollector } from "./custom/transformers/question-collector"
 import { SyncerFixups } from "./custom/transformers/syncer-fixups"
 import { SteptraceBlock } from "./custom/transformers/steptrace-block"
+import {
+  insertAfterNamedPlugin,
+  requireNamedPlugin,
+  Robots,
+  Seo,
+  unlistGenerated,
+  withCanonicalSocialUrls,
+} from "./custom/seo"
 import { componentRegistry } from "./quartz/components/registry"
 import type { QuartzComponent, QuartzComponentConstructor } from "./quartz/components/types"
 import { PageTypes } from "./quartz/plugins"
@@ -22,22 +33,20 @@ import { loadQuartzConfig, loadQuartzLayout } from "./quartz/plugins/loader/conf
 
 // DevBook customizations live here (the sanctioned Quartz override entrypoint)
 // and under ./custom — no engine files under quartz/ are modified.
-//
-// The homepage Topics dashboard is an in-note `datacorejsx` block that Quartz
-// Syncer renders to static HTML at publish time, so there is no Topics
-// component here anymore. What remains:
-//   - SyncerFixups      → transformer: cleans Syncer's committed output for the
-//                         web (strips raw dataview/datacore query fences + the
-//                         frozen Questions `dc-questions-index` block, normalizes
-//                         "Home/…" links). Must run before crawl-links.
-//   - QuestionsIndex    → component: Questions.md aggregation (self-gates to slug)
-//   - QuestionCollector → transformer: feeds QuestionsIndex
-
 const config = await loadQuartzConfig()
 
-// Clean Syncer's committed markdown/HTML for the flattened web build. The link
-// fixup must run BEFORE crawl-links ("LinkProcessing") so the stripped path
-// slugifies to the same page as the real file; splice it in just ahead of it.
+insertAfterNamedPlugin(config.plugins.transformers, "Description", Seo())
+
+unlistGenerated(
+  requireNamedPlugin(config.plugins.pageTypes, "TagPage"),
+  (slug) => slug === "tags" || slug.startsWith("tags/"),
+)
+unlistGenerated(
+  requireNamedPlugin(config.plugins.pageTypes, "CanvasPage"),
+  (slug) => slug === "roadmap.canvas",
+)
+
+// Clean Syncer's committed markdown/HTML for the flattened web build.
 const linkIdx = config.plugins.transformers.findIndex((t) => t.name === "LinkProcessing")
 config.plugins.transformers.splice(
   linkIdx === -1 ? config.plugins.transformers.length : linkIdx,
@@ -56,48 +65,49 @@ config.plugins.transformers.push(QuestionCollector())
 // SiteMarquee and the Explorer's icon/order decorations read them straight from
 // each note's frontmatter — no backfill transformers needed.
 
+// Render ```complexity fences before syntax highlighting wraps them in its own
+// figure markup. The transformer supplies the static first paint; the client-only
+// Complexity component below adds filtering and legend interaction.
+const syntaxHighlightingIdx = config.plugins.transformers.findIndex(
+  (t) => t.name === "SyntaxHighlighting",
+)
+config.plugins.transformers.splice(
+  syntaxHighlightingIdx === -1 ? config.plugins.transformers.length : syntaxHighlightingIdx,
+  0,
+  ComplexityBlock(),
+)
+
 // Rewrite ```steptrace fences (committed raw by Syncer — not on its freeze
 // allowlist) into the <div class="steptrace-mount" data-config> markers that the
 // Steptrace component hydrates. Only touches lang=steptrace, so order-independent.
 config.plugins.transformers.push(SteptraceBlock())
 
-// Make content images click-to-zoom (issue #128). Appended after the built-in
-// transformers so it runs after LinkProcessing and each <img src> is the final
-// resolved URL; it only tags note-content images (skipping ones inside links)
-// and ships its themed overlay CSS/JS via externalResources.
+// Make content images click-to-zoom.
 config.plugins.transformers.push(ClickableImages())
 
 // Emit the generated engine from the sanctioned custom/ surface. This avoids
 // placing DevBook-owned code under Quartz's upgrade-owned quartz/static tree.
 config.plugins.emitters.push(StepTraceStatic())
+config.plugins.emitters.push(Robots())
 
 const layout = await loadQuartzLayout()
+layout.defaults.head = withCanonicalSocialUrls(layout.defaults.head!)
+for (const pageLayout of Object.values(layout.byPageType)) {
+  if (pageLayout.head) pageLayout.head = withCanonicalSocialUrls(pageLayout.head)
+}
+
 const siteMarquee = SiteMarquee()
 layout.defaults.beforeBody = [siteMarquee, ...(layout.defaults.beforeBody ?? [])]
 for (const pageLayout of Object.values(layout.byPageType)) {
   pageLayout.beforeBody = [siteMarquee, ...(pageLayout.beforeBody ?? [])]
 }
 
-// Inject the Explorer file-tree icons (issue #51), topic ordering (issue #57) and
-// the top-level scope selector (issue #64). None render visible markup themselves
-// — they contribute css / afterDOMLoaded / an inert JSON map that decorate,
-// reorder and scope the community Explorer's client-built tree — so they just need
-// to render wherever the Explorer (the left sidebar) shows. They go in the `left`
-// slot: canvas pages use a custom frame that renders ONLY `left` (not afterBody),
-// so afterBody-only decorators would be silently dropped there (broken icons /
-// unstyled dropdown on .canvas files). `defaults.left` is inherited by every page
-// type that doesn't override `left` (content/folder/tag/canvas/bases); the 404
-// page intentionally overrides `left` to empty and has no Explorer, so it's
-// correctly excluded.
+// Inject the Explorer file-tree icons, topic ordering and the top-level scope selector.
 const explorerIcons = ExplorerIcons()
 const explorerOrder = ExplorerOrder()
 const navScopeDropdown = NavScopeDropdown()
 const explorerDecorators = [explorerIcons, explorerOrder, navScopeDropdown]
 layout.defaults.left = [...(layout.defaults.left ?? []), ...explorerDecorators]
-// resolveLayout picks `byPageType[type].left ?? defaults.left` (override wins, no
-// merge), so page types that define their own `left` must be augmented too. Skip
-// ones that leave it undefined (they inherit defaults.left) or set it empty (404
-// has no sidebar) — appending there would render a stray, Explorer-less sidebar.
 for (const pageLayout of Object.values(layout.byPageType)) {
   if (Array.isArray(pageLayout.left) && pageLayout.left.length > 0) {
     pageLayout.left = [...pageLayout.left, ...explorerDecorators]
@@ -108,26 +118,30 @@ for (const pageLayout of Object.values(layout.byPageType)) {
 // loader/theme binding; HomepageFit measures the frozen home dashboard and
 // selects the least-degraded tablet state that fits one viewport.
 const steptrace = Steptrace()
+const complexity = Complexity()
 const homepageFit = HomepageFit()
 const excalidrawEnhance = ExcalidrawEnhance()
+const pageReveal = PageReveal()
 layout.defaults.afterBody = [
   ...(layout.defaults.afterBody ?? []),
   steptrace,
+  complexity,
   homepageFit,
   excalidrawEnhance,
+  pageReveal,
 ]
 for (const pageLayout of Object.values(layout.byPageType)) {
   pageLayout.afterBody = [
     ...(pageLayout.afterBody ?? []),
     steptrace,
+    complexity,
     homepageFit,
     excalidrawEnhance,
+    pageReveal,
   ]
 }
 
-// Floating scroll-to-top / scroll-to-bottom buttons (issue #129). afterBody is
-// dropped on canvas pages (MinimalFrame renders no afterBody) — an intended
-// exclusion: scroll-to-extremes is meaningless on a pan/zoom canvas.
+// Floating scroll-to-top / scroll-to-bottom buttons.
 const floatingButtons = FloatingButtons()
 layout.defaults.afterBody = [...(layout.defaults.afterBody ?? []), floatingButtons]
 for (const pageLayout of Object.values(layout.byPageType)) {
@@ -170,11 +184,7 @@ for (const pageLayout of Object.values(layout.byPageType)) {
 }
 
 // The Edit/Report contribution links (page-contribute) ride the article's
-// content-meta row — date/reading-time on the left, links on the right — rather
-// than a page-footer block. content-meta is registered but unpositioned in
-// quartz.config.yaml, so ContentMetaRow renders it (with pageContribute) where
-// it used to sit in beforeBody. Appended last to land after breadcrumbs/title/
-// note-properties, matching content-meta's former priority.
+// content-meta row — date/reading-time on the left.
 const contentMetaRow = ContentMetaRow({
   meta: instantiateRegistered("content-meta"),
   contribute: pageContribute,
@@ -184,9 +194,6 @@ for (const pageLayout of Object.values(layout.byPageType)) {
   pageLayout.beforeBody = [...(pageLayout.beforeBody ?? []), contentMetaRow]
 }
 
-// loadQuartzConfig already baked its own layout into a PageTypeDispatcher
-// emitter; replace it with one built from our augmented layout so the injected
-// component actually renders.
 config.plugins.emitters = config.plugins.emitters.filter((e) => e.name !== "PageTypeDispatcher")
 config.plugins.emitters.push(
   PageTypes.PageTypeDispatcher({ defaults: layout.defaults, byPageType: layout.byPageType }),

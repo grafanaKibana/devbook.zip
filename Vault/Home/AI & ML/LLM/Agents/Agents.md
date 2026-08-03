@@ -4,11 +4,10 @@ topic:
 subtopic:
   - LLM
 summary: "Systems where an LLM controls part of the workflow, calling tools, making decisions, or directing other LLMs."
-tags:
-  - FolderNote
+tags: [FolderNote]
 publish: true
 level:
-  - '3'
+  - "3"
 status: Creation
 priority: High
 ---

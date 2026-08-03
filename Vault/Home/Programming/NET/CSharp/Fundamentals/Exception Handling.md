@@ -10,6 +10,7 @@ priority: Medium
 status: Ready to Repeat
 publish: true
 ---
+
 Exception handling in C# uses `try`, `catch`, and `finally` to handle failures and guarantee cleanup. In a production ASP.NET Core API handling 5,000 requests/second, the difference between a well-structured exception strategy and ad-hoc `catch (Exception)` blocks is the difference between actionable Application Insights traces with full stack context and a wall of swallowed errors that hide the root cause for days. In modern C#, `using` / `await using` is the preferred way to ensure `Dispose` / `DisposeAsync` runs.
 - `try` contains code that may throw.
 - `catch` handles exceptions you know how to handle.
@@ -40,17 +41,17 @@ finally
 }
 ```
 
-# `throw` keyword
+# `throw` Keyword
 
 `throw` is how you signal that code cannot continue normally and must transfer control to an exception handler.
 
-## Why we need it
+## Why We Need it
 
 - It fails fast when invariants are broken (for example, invalid arguments or invalid state).
 - It creates a stack trace from the throw site, which is critical for debugging.
 - It lets higher layers decide how to handle the failure (retry, map to HTTP response, stop processing).
 
-## When to use
+## When to Use
 
 - Argument validation in public APIs (`ArgumentNullException`, `ArgumentException`, `ArgumentOutOfRangeException`).
 - Invalid object state where continuing would produce incorrect behavior (`InvalidOperationException`).
@@ -120,7 +121,6 @@ Always have a top-level net so a stray exception is logged, not silently lost or
 - **Exceptions vs Result types**: Exceptions are idiomatic for truly unexpected failures and integrate with .NET infrastructure (stack traces, logging middleware, global handlers). Result types (`Result<T, TError>`, `OneOf`) make failure paths explicit at the call site with zero allocation overhead — meaningful in high-throughput hot paths. Use exceptions for infrastructure failures (I/O, network, invariant violation) and result types for expected domain failures (validation, business rule rejections, not-found).
 - **Catch width**: catching broad types (`catch (Exception)`) is convenient but hides root causes and encourages accidental error swallowing. Narrow catches force awareness of specific failure modes. As a rule: only catch exceptions you know how to handle; let the rest propagate to a global handler.
 - **Exception filters (`when`)**: filters evaluate before stack unwinding, preserving the full original call stack in logging tools (Application Insights, Serilog). They enable observe-and-rethrow without cloning the exception type. Prefer `catch (Exception ex) when (ShouldLog(ex))` over `catch/log/throw` patterns when your goal is observation, not handling.
-
 
 # Questions
 

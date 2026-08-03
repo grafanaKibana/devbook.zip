@@ -1,8 +1,8 @@
 ---
 publish: true
-created: 2026-07-15T11:47:56.569Z
-modified: 2026-07-18T11:30:15.800Z
-published: 2026-07-18T11:30:15.800Z
+created: 2026-07-25T18:38:43.895Z
+modified: 2026-07-25T18:38:43.895Z
+published: 2026-07-25T18:38:43.895Z
 topic:
   - Software Design
 subtopic:
@@ -18,7 +18,7 @@ KISS (Keep It Simple, Stupid) means prefer the simplest solution that meets the 
 
 Complexity has ongoing cost: bugs, onboarding time, testing, and operations. Every abstraction layer you add must earn its keep by solving a proven problem.
 
-# Violation vs Fix
+# Violation Vs Fix
 
 **Over-engineered:**
 

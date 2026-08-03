@@ -1,8 +1,8 @@
 ---
 publish: true
-created: 2026-07-11T21:45:32.178Z
-modified: 2026-07-18T11:30:02.643Z
-published: 2026-07-18T11:30:02.643Z
+created: 2026-07-25T18:38:43.774Z
+modified: 2026-07-25T18:38:43.774Z
+published: 2026-07-25T18:38:43.774Z
 topic:
   - AI & ML
 subtopic:
@@ -60,7 +60,7 @@ Clients can also expose capabilities back to the server:
 - **Sampling** — lets the server request LLM completions through the client (the server never talks to the LLM directly; the host mediates, applying policies and requiring user approval)
 - **Roots** — tells the server which file system paths or URIs it should operate on, giving contextual boundaries without granting unlimited access
 
-# When to Use MCP vs Function Calling
+# When to Use MCP Vs Function Calling
 
 MCP and function calling solve different problems. Function calling lets one LLM app define tools inline — the tool definitions live in the app's code and are sent to the model with each request. MCP externalizes tool definitions into standalone servers that any client can connect to.
 

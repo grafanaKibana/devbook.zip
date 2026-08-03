@@ -1,8 +1,8 @@
 ---
 publish: true
-created: 2026-07-16T15:17:15.738Z
-modified: 2026-07-18T11:59:15.658Z
-published: 2026-07-18T11:59:15.658Z
+created: 2026-07-25T18:38:43.833Z
+modified: 2026-07-25T18:38:43.834Z
+published: 2026-07-25T18:38:43.834Z
 topic:
   - Data Persistence
 subtopic:
@@ -97,7 +97,7 @@ Cross-shard work starts when one operation cannot be routed to one owner. A coor
 
 For a request for the newest 100 orders across 32 shards, each shard can return its local top 100 and a coordinator can merge the 3,200 candidates. The operation needs a deadline, per-shard concurrency limit, deterministic tie-breaker, and an explicit partial-result policy. Pagination needs per-shard progress; a single global offset becomes increasingly expensive. A global secondary index can narrow candidates, but it is another distributed data product with lag and repair obligations.
 
-## Transactions and workflows
+## Transactions and Workflows
 
 - **Distributed commit** gives one atomic decision only when every participant and coordinator support durable prepare and recovery. It adds coordination latency and can leave prepared work waiting during failures.
 - **Saga or workflow** commits local steps and compensates later. Intermediate states remain visible; compensation and retries need stable operation identities.
@@ -105,7 +105,7 @@ For a request for the newest 100 orders across 32 shards, each shard can return 
 
 A cross-shard value transfer cannot be two unrelated updates. Use a documented distributed transaction or a durable transfer workflow with one operation ID, balanced ledger entries, retry-safe steps, and reconciliation.
 
-## Global constraints
+## Global Constraints
 
 A local unique index proves uniqueness only inside one shard. Route a globally unique name to a reservation authority, allocate disjoint ranges, or use globally unique identifiers when semantic uniqueness is unnecessary. Foreign keys across independent shard databases also need co-location, an owning service, or asynchronous repair.
 

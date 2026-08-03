@@ -10,6 +10,33 @@ StepTrace renders interactive algorithm traces from one fenced block in both Obs
 
 The TypeScript source is shared. esbuild produces the formats each host needs, and Sass produces native stylesheets for each host.
 
+## Tabbed blocks
+
+Use `tabs` when one visual needs multiple variants under the same fenced block:
+
+```json
+{
+  "selected": 0,
+  "tabs": [
+    {
+      "name": "Bubble sort",
+      "description": "Swaps adjacent inversions.",
+      "algorithm": "bubble-sort",
+      "array": [8, 3, 5, 1]
+    },
+    {
+      "name": "Insertion sort",
+      "description": "Inserts each value into the sorted prefix.",
+      "algorithm": "insertion-sort",
+      "array": [8, 3, 5, 1]
+    }
+  ]
+}
+```
+
+Each tab entry is a normal StepTrace config, so the same visual family can be reused with different parameters.
+`selected` is an optional zero-based initial tab index. Switching tabs preserves each visualization's current step and pauses any hidden playback.
+
 ## Source layout
 
 | Path                             | Responsibility                                                                                              |

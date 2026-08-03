@@ -181,7 +181,6 @@ flowchart TD
 > [!QUESTION]- What makes a CI pipeline 'good' vs 'fast but unreliable'?
 > A good CI pipeline returns feedback before developers stop attending to it; under ten minutes is a useful target for many change-validation paths, not a universal threshold. It quarantines and repairs flaky tests, does not print sensitive data, promotes the same verified artifact through environments, and produces failures that identify the broken boundary. Track queue time and execution time separately: a fast job behind a long runner queue is still slow feedback.
 
-
 # References
 
 - [GitHub Actions documentation](https://docs.github.com/en/actions) — official GitHub Actions docs; covers workflow syntax, runners, secrets, and OIDC authentication

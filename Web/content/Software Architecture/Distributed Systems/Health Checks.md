@@ -1,8 +1,8 @@
 ---
 publish: true
-created: 2026-07-18T08:16:22.034Z
-modified: 2026-07-18T11:38:38.709Z
-published: 2026-07-18T11:38:38.709Z
+created: 2026-07-25T18:38:43.871Z
+modified: 2026-07-25T18:38:43.871Z
+published: 2026-07-25T18:38:43.871Z
 topic:
   - Software Architecture
 subtopic:
@@ -16,7 +16,7 @@ status: Ready to Repeat
 
 A health check is a signal with a declared consumer and action. Process restart, traffic removal, deployment gating, and operator alerting need different evidence. One undifferentiated `/health` endpoint can turn a shared dependency outage into fleet-wide restart or eviction.
 
-# Signal contract
+# Signal Contract
 
 - **Liveness:** can this process make progress? Keep it local and dependency-free when failure triggers a restart.
 - **Readiness:** should this instance receive new traffic? Include instance-specific initialization and dependencies only when routing elsewhere can improve the result.
@@ -24,13 +24,13 @@ A health check is a signal with a declared consumer and action. Process restart,
 
 Name what a signal measures: event-loop progress, local state initialization, ability to serve reads, or ability to accept writes. A healthy process can still be unable to serve one operation, while an unhealthy shared dependency does not necessarily make one application instance uniquely bad.
 
-# Active and passive observation
+# Active and Passive Observation
 
 An active check probes an endpoint or transport on a schedule. It uses a timeout and thresholds such as three consecutive failures before removal and two successes before re-entry. A passive check observes real request failures such as TCP resets, timeouts, or an elevated configured error rate. Passive evidence can detect failures that synthetic probes miss, but application errors must be classified before they evict a backend.
 
 Probe from the failure domain that needs evidence. A process checking itself cannot detect a zone-level routing partition. [[Software Architecture/Distributed Systems/Failure Detection]] owns suspicion thresholds, gossip, quorum context, ownership transfer, and fencing when observation must coordinate distributed state.
 
-# Actions and failure amplification
+# Actions and Failure Amplification
 
 Consumers must document the action behind each signal:
 
@@ -45,7 +45,7 @@ A globally shared database outage usually affects every replica. Putting it in e
 
 Recovery needs thresholds and ramp-up. A cold instance can pass a shallow probe before caches, connections, or model clients are ready for full traffic. Require sustained recovery evidence and use slow start or bounded concurrency during re-entry.
 
-# ASP.NET Core example
+# ASP.NET Core Example
 
 ```csharp
 using Microsoft.AspNetCore.Diagnostics.HealthChecks;

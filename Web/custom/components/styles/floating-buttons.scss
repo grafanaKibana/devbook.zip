@@ -16,9 +16,9 @@
   transform: translateY(6px);
   pointer-events: none;
   transition:
-    opacity 200ms ease-out,
-    transform 200ms ease-out,
-    visibility 0s linear 200ms;
+    opacity var(--dur-3) var(--ease-out),
+    transform var(--dur-3) var(--ease-out),
+    visibility 0s linear var(--dur-3);
 
   // No-JS gate only. Distinct from the data-visible animation gate above:
   // this attribute is stripped by the afterDOMLoaded script on every nav.
@@ -32,8 +32,8 @@
     transform: none;
     pointer-events: auto;
     transition:
-      opacity 200ms ease-out,
-      transform 200ms ease-out,
+      opacity var(--dur-3) var(--ease-out),
+      transform var(--dur-3) var(--ease-out),
       visibility 0s linear 0s;
   }
 }
@@ -52,9 +52,9 @@
   background: var(--light);
   color: var(--secondary);
   transition:
-    background-color 150ms ease,
-    border-color 150ms ease,
-    color 150ms ease;
+    background-color var(--dur-2) var(--ease-out),
+    border-color var(--dur-2) var(--ease-out),
+    color var(--dur-2) var(--ease-out);
 
   // Subtle tint on hover, matching the left-sidebar scope dropdown's trigger.
   &:hover,

@@ -1,8 +1,8 @@
 ---
 publish: true
-created: 2026-07-11T21:48:31.641Z
-modified: 2026-07-18T11:30:13.532Z
-published: 2026-07-18T11:30:13.532Z
+created: 2026-07-25T18:38:43.865Z
+modified: 2026-07-25T18:38:43.865Z
+published: 2026-07-25T18:38:43.865Z
 topic:
   - Security
 subtopic:
@@ -33,7 +33,7 @@ byte[] digest = SHA256.HashData(Encoding.UTF8.GetBytes("hello"));
 string hex = Convert.ToHexString(digest);   // 64 hex chars, 256 bits
 ```
 
-# Hashing vs Encryption vs Encoding
+# Hashing Vs Encryption Vs Encoding
 
 The three are constantly confused; pick by _intent_:
 
@@ -45,7 +45,7 @@ The three are constantly confused; pick by _intent_:
 
 Base64 "looks scrambled" but provides no protection — it's reversible by anyone. If you need secrecy, encrypt; if you need a tamper-evident fingerprint, hash.
 
-# Integrity: Plain Hash vs HMAC vs Signature
+# Integrity: Plain Hash Vs HMAC Vs Signature
 
 To prove data wasn't altered, the mechanism depends on _who you're defending against_:
 

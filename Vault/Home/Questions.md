@@ -1,7 +1,6 @@
 ---
-tags:
-  - FolderNote
-  - MetricsIgnore
+summary: Browse interview and review questions extracted from DevBook notes, grouped by topic.
+tags: [FolderNote, MetricsIgnore]
 publish: true
 icon: circle-help
 ---

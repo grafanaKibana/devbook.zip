@@ -1,8 +1,8 @@
 ---
 publish: true
-created: 2026-07-11T21:47:11.231Z
-modified: 2026-07-18T11:59:15.659Z
-published: 2026-07-18T11:59:15.659Z
+created: 2026-07-25T18:38:43.835Z
+modified: 2026-07-25T18:38:43.836Z
+published: 2026-07-25T18:38:43.836Z
 topic:
   - DevOps
 subtopic: []
@@ -23,7 +23,7 @@ Infrastructure as Code (IaC) defines infrastructure—VMs, networks, databases, 
 - **Disaster recovery and scale** — definitions can recreate managed resources and repeated node shapes, provided data recovery, secrets, regional dependencies, and capacity are handled separately.
 - **Documentation by definition** — the code is the always-current source of truth for what exists.
 
-# Declarative vs Imperative
+# Declarative Vs Imperative
 
 The central distinction in IaC tools:
 

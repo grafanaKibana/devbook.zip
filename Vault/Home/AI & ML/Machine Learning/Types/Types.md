@@ -4,8 +4,7 @@ topic:
 subtopic:
   - Machine Learning
 summary: "How a model learns from data and feedback; the choice drives data, training, and evaluation."
-tags:
-  - FolderNote
+tags: [FolderNote]
 publish: true
 status: Done
 priority: Low

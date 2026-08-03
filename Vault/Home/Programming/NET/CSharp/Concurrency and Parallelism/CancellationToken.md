@@ -10,6 +10,7 @@ priority: Medium
 status: Ready to Repeat
 publish: true
 ---
+
 `CancellationToken` is the standard .NET mechanism for cooperative cancellation. It lets callers request a stop while callees decide safe cancellation points and cleanup behavior. Correct token propagation is one of the biggest quality differences between toy async code and production-grade services — without it, canceled requests continue consuming resources long after the client has disconnected.
 
 The model is cooperative: the caller signals intent to cancel via a `CancellationTokenSource`; the callee checks the token at safe points and throws `OperationCanceledException` to unwind cleanly.

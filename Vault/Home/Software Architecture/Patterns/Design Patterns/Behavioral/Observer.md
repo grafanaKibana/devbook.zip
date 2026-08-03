@@ -10,6 +10,7 @@ priority: High
 status: Done
 publish: true
 ---
+
 A newspaper subscription is the Observer pattern in everyday life. You subscribe once, and the publisher delivers every new issue to your mailbox automatically. You didn’t ask for each specific issue — you registered your interest, and the publisher notifies all subscribers whenever there’s something new. Unsubscribe anytime, and the deliveries stop. The publisher doesn’t need to know what you do with the newspaper.
 
 The Observer pattern defines a one-to-many dependency: when one object (the **subject** or **publisher**) changes state, all its dependents (**observers** or **subscribers**) are notified automatically. The subject maintains a subscriber list and calls each observer when state changes. Observers register and unregister independently — the subject doesn’t know how many observers exist or what they do. In C#, **`event` and `delegate` ARE the Observer pattern** — the language has it built in. `order.StatusChanged += handler` is subscribe; `order.StatusChanged -= handler` is unsubscribe; raising the event is notify.

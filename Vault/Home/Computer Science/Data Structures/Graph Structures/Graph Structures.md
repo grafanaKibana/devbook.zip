@@ -4,8 +4,7 @@ topic:
 subtopic:
   - Data Structures
 summary: "Graphs and disjoint sets for modelling relationships with cycles and multiple paths."
-tags:
-  - FolderNote
+tags: [FolderNote]
 level:
   - "4"
 priority: Medium

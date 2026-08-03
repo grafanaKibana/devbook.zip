@@ -310,7 +310,7 @@ export const QuestionsIndex: QuartzComponentConstructor = () => {
   border-radius: var(--radius-m, 0.55rem);
   background-color: var(--light);
   box-shadow: 0 0 0 rgba(0, 0, 0, 0);
-  transition: border-color 150ms ease, background-color 150ms ease, box-shadow 150ms ease, transform 150ms ease;
+  transition: border-color var(--dur-2) var(--ease-out), background-color var(--dur-2) var(--ease-out), box-shadow var(--dur-2) var(--ease-out), transform var(--dur-2) var(--ease-out);
 }
 .questions-index .qi-toc .qi-card::before {
   content: "";
@@ -326,7 +326,7 @@ export const QuestionsIndex: QuartzComponentConstructor = () => {
     transparent 90%
   );
   opacity: 0.78;
-  transition: opacity 150ms ease;
+  transition: opacity var(--dur-2) var(--ease-out);
 }
 .questions-index .qi-toc .qi-card:hover,
 .questions-index .qi-toc .qi-card:focus-within {
@@ -402,7 +402,7 @@ export const QuestionsIndex: QuartzComponentConstructor = () => {
   border-right: 2px solid var(--darkgray);
   border-bottom: 2px solid var(--darkgray);
   transform: rotate(45deg);
-  transition: transform 0.15s ease;
+  transition: transform var(--dur-2) var(--ease-out);
   margin-right: 0.15rem;
 }
 .questions-index .qi-toc details[open] > .qi-card-head .qi-chevron {
@@ -423,8 +423,8 @@ export const QuestionsIndex: QuartzComponentConstructor = () => {
   opacity: 0;
   transform: translateY(-0.25rem);
   transition:
-    opacity 0.2s ease,
-    transform 0.2s cubic-bezier(0.02, 0.01, 0.47, 1);
+    opacity var(--dur-3) var(--ease-out),
+    transform var(--dur-3) var(--ease-out);
 }
 .questions-index .qi-toc details.qi-card[open] .qi-chips {
   opacity: 1;
@@ -442,8 +442,8 @@ export const QuestionsIndex: QuartzComponentConstructor = () => {
   grid-template-rows: 0fr;
   overflow: clip;
   transition:
-    grid-template-rows 0.2s cubic-bezier(0.02, 0.01, 0.47, 1),
-    content-visibility 0.2s allow-discrete;
+    grid-template-rows var(--dur-3) var(--ease-out),
+    content-visibility var(--dur-3) allow-discrete;
 }
 .questions-index .qi-toc details.qi-card[open]::details-content {
   grid-template-rows: 1fr;

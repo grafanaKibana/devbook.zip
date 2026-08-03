@@ -1,0 +1,97 @@
+.steptrace--structure {
+  container: steptrace-structure / inline-size;
+}
+
+.steptrace__structure-body {
+  grid-template-columns: minmax(0, 1fr);
+  block-size: auto;
+  min-block-size: 7rem;
+}
+
+.steptrace__structure-controls {
+  --steptrace-structure-control-size: 2.75rem;
+  --steptrace-structure-control-radius: max(2px, calc(0.85rem - 0.65rem));
+  --steptrace-structure-control-gap: 0.55rem;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--steptrace-structure-control-gap);
+  margin-top: 0.75rem;
+}
+
+.steptrace .steptrace__structure-controls .steptrace__structure-input,
+.steptrace .steptrace__structure-controls .steptrace__structure-action,
+.steptrace .steptrace__structure-controls .steptrace__select {
+  min-width: 0;
+  min-height: var(--steptrace-structure-control-size);
+  border: 1px solid var(--_border);
+  border-radius: var(--steptrace-structure-control-radius);
+  box-shadow: none;
+  font: 600 0.75rem/1 var(--_font-body);
+}
+
+.steptrace__structure-input {
+  flex: 1 1 6rem;
+  width: 100%;
+  padding: 0 0.75rem;
+  background: var(--st-page, #fff);
+  color: var(--_text);
+}
+
+.steptrace__structure-controls > .steptrace__select {
+  flex: 1 1 6rem;
+  width: auto;
+}
+
+.steptrace__structure-action {
+  flex: 0 0 auto;
+  padding: 0 0.75rem;
+  background: transparent;
+  color: var(--_text);
+  cursor: pointer;
+}
+
+.steptrace__structure-action:hover:not(:disabled) {
+  background: var(--_hover);
+}
+
+.steptrace__structure-action--primary {
+  border-color: var(--_accent);
+  background: var(--_accent);
+  color: var(--_on-accent);
+}
+
+.steptrace__structure-action--primary:hover:not(:disabled) {
+  background: var(--_accent);
+  filter: brightness(1.12);
+}
+
+.steptrace__structure-action:disabled,
+.steptrace__structure-input:disabled {
+  opacity: 0.45;
+  cursor: default;
+}
+
+.steptrace .steptrace__structure-controls .steptrace__structure-input:focus-visible,
+.steptrace .steptrace__structure-controls .steptrace__structure-action:focus-visible,
+.steptrace .steptrace__structure-controls .steptrace__select:focus-visible {
+  border-color: var(--_blue);
+  outline: 1px solid var(--_blue);
+  outline-offset: -1px;
+  box-shadow: none;
+}
+
+.steptrace__structure-status {
+  flex: 1 0 100%;
+  min-height: 1.2rem;
+  padding-inline: 0.2rem;
+  color: var(--_muted);
+  font: 500 0.68rem/1.35 var(--_font-mono);
+}
+
+@container steptrace-structure (max-width: 36rem) {
+  .steptrace__structure-controls > .steptrace__structure-action {
+    flex: 1 1 5.5rem;
+    padding-inline: 0.45rem;
+  }
+}

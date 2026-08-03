@@ -10,6 +10,7 @@ priority: High
 status: Ready to Repeat
 publish: true
 ---
+
 `Task` is the core .NET abstraction for asynchronous work. It models eventual completion, result/error propagation, and composition (`WhenAll`, `WhenAny`) without forcing you to manage raw threads. For production systems, understanding `Task` semantics is critical for avoiding deadlocks, thread starvation, and unbounded fan-out.
 
 `Task` represents an operation, not a thread. A task might run on a pooled worker, or it might represent asynchronous I/O that completes later without occupying a worker while waiting.
@@ -85,7 +86,7 @@ public async Task SyncAllAsync(CancellationToken cancellationToken)
 | `Task.Run(action)` | Offload CPU-bound work to a pool thread |
 | `ValueTask<T>` | Hot-path optimization when result is often synchronously available |
 
-## Processing tasks as they finish
+## Processing Tasks as They Finish
 
 A common anti-pattern is "loop, `WhenAny`, remove the winner, repeat" to process tasks in completion order. That is **O(n²)** — each `WhenAny` re-registers a continuation on every remaining task — and leaves the losing tasks unobserved if you exit early. On **.NET 9+** use `Task.WhenEach`, which yields each task as it completes:
 

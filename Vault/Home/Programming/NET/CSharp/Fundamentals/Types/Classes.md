@@ -10,6 +10,7 @@ priority: Medium
 status: Ready to Repeat
 publish: true
 ---
+
 A class is a reference type that defines a blueprint for objects allocated on the managed heap. Multiple variables can reference the same object, so mutations through one reference are visible through all others — a property that enables shared state but also creates aliasing bugs when callers don't expect it. Classes support single-class inheritance, virtual dispatch, finalizers, and the full range of access modifiers, making them the default choice for services, domain entities, and infrastructure types in C#. The key design decision is knowing when NOT to use a class: value-typed data carriers should be `record struct` or `readonly struct` (stack-allocated, no GC pressure), and pure data objects with value equality should be `record class` (auto-generated `Equals`/`GetHashCode`/`==`).
 
 # Deeper Explanation
@@ -32,7 +33,7 @@ Console.WriteLine(a.Total); // 0 — both references share the object
 
 # Class Modifiers
 
-## abstract
+## Abstract
 
 An `abstract` class cannot be instantiated directly — it exists only to be inherited. It may contain abstract members (no body, must be overridden) and concrete members (shared implementation).
 
@@ -67,7 +68,7 @@ Key rules:
 
 **Abstract vs Interface**: abstract classes carry state and shared implementation but lock you into single inheritance. Interfaces (especially with default interface methods in C# 8+) provide multiple implementation but cannot hold instance state.
 
-## sealed
+## Sealed
 
 A `sealed` class cannot be inherited. The compiler can devirtualize method calls on sealed types, enabling small performance gains.
 
@@ -110,7 +111,7 @@ public class Middle : Base
 
 `string` is a sealed class in the BCL. All structs are implicitly sealed.
 
-## static
+## Static
 
 A `static` class cannot be instantiated or inherited. It can only contain static members. The compiler enforces this — you cannot add instance fields, properties, or methods.
 
@@ -136,7 +137,7 @@ Key rules:
 
 **Gotcha**: static classes are singletons by nature. If they hold mutable state (`static` fields), you get global mutable state — hard to test and prone to race conditions.
 
-## partial
+## Partial
 
 The `partial` keyword splits a class definition across multiple files. The compiler merges them into a single type. Commonly used for separating generated code from hand-written code.
 
@@ -225,7 +226,7 @@ Key rules:
 > - **Inheritance**: a class can implement many interfaces but inherit from only one class.
 > - **Access modifiers**: abstract classes support `protected`/`internal` members; interface members are implicitly public (C# 8+ allows explicit modifiers but no `protected` instance state).
 > - **Performance**: virtual dispatch on abstract class methods is a single vtable lookup; default interface methods may involve additional dispatch overhead.
-> - **Use Case**: The default implementation for interface methods have different goal compared to the abstract class implemented methods. While in class, semantically methods providing the basic shared functionality for the delivered classes, that don't have to be overriden. While default implementation exist for making extending the interfaces without breaking the inheritors. 
+> - **Use Case**: The default implementation for interface methods have different goal compared to the abstract class implemented methods. While in class, semantically methods providing the basic shared functionality for the delivered classes, that don't have to be overriden. While default implementation exist for making extending the interfaces without breaking the inheritors.
 
 > [!QUESTION]- Can a static class implement an interface? Why or why not?
 > No. A static class compiles to an `abstract sealed` class at IL level — it cannot be instantiated, so there is no object to dispatch interface calls through. Interfaces require an instance for virtual dispatch. If you need a "static implementation" of a contract, the patterns are:

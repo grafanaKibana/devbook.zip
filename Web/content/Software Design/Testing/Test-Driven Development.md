@@ -1,8 +1,8 @@
 ---
 publish: true
-created: 2026-07-15T11:50:29.495Z
-modified: 2026-07-18T11:30:16.184Z
-published: 2026-07-18T11:30:16.184Z
+created: 2026-07-25T18:38:43.896Z
+modified: 2026-07-25T18:38:43.897Z
+published: 2026-07-25T18:38:43.897Z
 topic:
   - Software Design
 subtopic:
@@ -65,7 +65,7 @@ public sealed class PriceCalculator(decimal discountRate, decimal threshold)
 
 Both tests pass. Now Refactor: the logic is already clean, so nothing to change. Move to the next behavior.
 
-# What TDD Improves (and What It Doesn't)
+# What TDD Improves (And What It Doesn't)
 
 **Improves**:
 

@@ -4,8 +4,7 @@ topic:
 subtopic:
   - Machine Learning
 summary: "Training models to learn input-output mappings from data; the real work is the pipeline."
-tags:
-  - FolderNote
+tags: [FolderNote]
 publish: true
 status: Done
 priority: Medium
@@ -22,7 +21,7 @@ return FolderStructureMap;
 
 # Training
 
-## Generic pipeline
+## Generic Pipeline
 
 ```mermaid
 flowchart TD
@@ -73,7 +72,6 @@ An endpoint is a production service with an SLO: define a latency budget, throug
 
 ### Monitoring and Retraining
 Monitor both system health and model health: latency, error rate, and saturation, plus data quality, drift, and performance over time. Plan for feedback loops and delayed labels, and set retraining triggers that are measurable and cost aware; see [[Data Drift]] for drift concepts. A good pipeline makes retraining boring: automated, repeatable, and gated by evaluation.
-
 
 # Questions
 

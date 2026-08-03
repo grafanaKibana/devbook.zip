@@ -28,7 +28,7 @@
     display: inline-flex;
     align-items: center;
     gap: 0.3rem;
-    transition: color 0.2s ease;
+    transition: color var(--dur-2) var(--ease-out);
 
     &:hover {
       color: var(--secondary);

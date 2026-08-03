@@ -1,8 +1,8 @@
 ---
 publish: true
-created: 2026-07-18T08:17:49.156Z
-modified: 2026-07-18T11:59:15.662Z
-published: 2026-07-18T11:59:15.662Z
+created: 2026-07-25T18:38:43.842Z
+modified: 2026-07-25T18:38:43.842Z
+published: 2026-07-25T18:38:43.842Z
 topic:
   - Networks
 subtopic:
@@ -118,7 +118,7 @@ Fetch one extra row to determine whether another page exists. The unique `id` ti
 
 Encode and integrity-protect the cursor rather than exposing an editable database token. Bind it to tenant, principal or authorization scope, filters, sort order, direction, page-size policy, and expiry.
 
-## Consistency contract
+## Consistency Contract
 
 A cursor identifies a position, not a snapshot. With live keyset traversal:
 

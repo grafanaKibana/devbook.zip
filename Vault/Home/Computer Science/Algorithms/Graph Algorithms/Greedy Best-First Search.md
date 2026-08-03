@@ -3,56 +3,56 @@ topic:
   - Computer Science
 subtopic:
   - Algorithms
-summary: "Expands whichever node looks closest by heuristic h(n) alone; fast but neither optimal nor complete."
+summary: "Expands whichever node looks closest by heuristic h(n) alone; fast but not optimal."
 level:
   - "4"
 priority: Medium
-status: Creation
+status: Ready to Repeat
 publish: true
 ---
 
-A grid pathfinder has to reach a goal cell and cares more about producing *a* route quickly than about producing the shortest one. A cost-aware search like [[Dijkstra]] weighs the distance already travelled and fans out in every direction, so most of its expansions land on cells that point away from the goal. Greedy Best-First Search discards the accumulated cost and orders its frontier by the heuristic `h(n)` alone — the estimated remaining distance to the goal — so it always expands whichever node currently looks closest and drives almost straight at the target.
+A grid pathfinder has to reach a goal cell and cares more about producing *a* route quickly than about producing the shortest one. A cost-aware search like [[Home/Computer Science/Algorithms/Graph Algorithms/Dijkstra|Dijkstra]] weighs the distance already travelled and fans out in every direction, so most of its expansions land on cells that point away from the goal. Greedy Best-First Search discards the accumulated cost and orders its frontier by the heuristic `h(n)` alone — the estimated remaining distance to the goal — so it always expands whichever node currently looks closest and drives almost straight at the target.
 
 That single ranking key is also the whole weakness. Because `g(n)`, the cost paid to reach a node, never enters the comparison, the search cannot separate a short route from a long one that merely ends near the goal. It expands what looks close, not what is cheap: the path it returns can be far longer than necessary, and on an infinite graph it can follow a forever-improving estimate down a branch that never terminates.
 
-**Core condition:** frontier ordered by `h(n)` alone → always expand the node that looks closest → fast and goal-directed, but neither optimal nor complete.
+```steptrace
+{"algorithm":"greedy-best-first-search"}
+```
 
-The decisive behaviour is the moment the heuristic selects a node that looks close and commits the search to a longer path.
+Greedy first moves downward because those cells have smaller `h`, then follows the lower corridor until a vertical barrier forces it back up and around. It reaches the goal with cost `12`. [[Home/Computer Science/Algorithms/Graph Algorithms/A-Star Search|A*]] uses the same grid but ranks by `g + h`, returning the optimal upper route with cost `8`. The comparison isolates the missing term: Greedy knows both routes point toward the same goal but never charges itself for the four extra steps already taken.
 
-> [!NOTE] Visualization pending
-> Planned StepTrace: a graph-search card showing a frontier ordered by the heuristic `h` alone — always expanding the node that looks closest to the goal, sometimes down a misleading path. No matching renderer exists in `engine.js` yet.
+# Ordering by the Estimate
 
-# Ordering by the estimate
-
-The frontier is a priority queue keyed by `h(n)`. Each iteration pops the node with the smallest estimate, and if it is not the goal, pushes every unvisited neighbor keyed by that neighbor's own `h`. The edge weight `w(u, v)` is available but never read; a visited set stops a node from entering the queue twice.
+The frontier is a priority queue keyed by `h(n)`. Each iteration pops the node with the smallest estimate, and if it is not the goal, pushes every unvisited neighbor keyed by that neighbor's own `h`. The trace accumulates edge weights only to report the returned path cost; they never affect priority. A visited set stops a node from entering the queue twice.
 
 The only property this maintains is that the next node expanded is the one the heuristic currently rates closest to the goal. Nothing ties the order of expansion to the length of the path built so far, which is the guarantee a cost-aware search provides and this one drops. When `h` is accurate and the map is open, the estimate shrinks along an almost straight line and the goal is reached after expanding on the order of `m` nodes. When `h` points into an obstacle, the same rule keeps re-selecting cells that hug the barrier because they still score lowest, and the accumulated `g` that would expose the detour is never consulted.
 
-One framing makes the family relationship exact: [[A-Star Search|A*]] expands by `f = g + h`. Setting `g` to zero collapses `f` to `h`, which is precisely Greedy Best-First — the case where a node's history counts for nothing.
+One framing makes the family relationship exact: [[Home/Computer Science/Algorithms/Graph Algorithms/A-Star Search|A*]] expands by `f = g + h`. Setting `g` to zero collapses `f` to `h`, which is precisely Greedy Best-First — the case where a node's history counts for nothing.
 
 # Complexity
 
-| Case | Time | Auxiliary space | Cause |
+| Case | Nodes generated or expanded | Auxiliary space | Cause |
 | --- | --- | --- | --- |
 | Best | `O(b·m)` | `O(b·m)` | A near-perfect heuristic guides expansion almost directly to the goal, one productive node per level. |
-| Average | between `O(b·m)` and `O(b^m)` | up to `O(b^m)` | Heuristic quality sets how far expansion strays from the direct route. |
+| Typical | distribution-dependent; between `O(b·m)` and `O(b^m)` | up to `O(b^m)` | Heuristic quality and obstacle shape set how far expansion strays from the direct route. |
 | Worst | `O(b^m)` | `O(b^m)` | A misleading heuristic offers no guidance and expansion degrades toward uninformed search. |
 
-`b` is the branching factor and `m` the maximum depth of the search space. Every bound is governed by heuristic quality: a strong `h` keeps the frontier small and the path close to direct, while a weak one distinguishes no better than an uninformed traversal. Like A*, Greedy Best-First holds every generated node in memory, so space tracks the number of nodes generated and is usually the binding limit before time is.
+`b` is the branching factor and `m` the maximum depth of the search space. These are search-tree node counts, not heap-operation bounds. For the finite adjacency-list graph implementation below, assuming `O(1)` heuristic evaluation, each reachable vertex is enqueued once and each edge is inspected once: `O(E + V log V)` time and `O(V)` auxiliary space. Heuristic quality determines how much of that reachable graph is visited before the goal is found.
 
-# When the estimate misleads
+# When the Estimate Misleads
 
 The h-only ordering fails in three distinct ways, all traceable to the missing `g` term.
 
-**A path that looks close but is long.** Suppose neighbor `A` sits one cell from the goal in straight-line distance (`h(A) = 1`) but reaches it only through a long corridor that winds the far way around, while neighbor `B` is farther in straight line (`h(B) = 5`) yet lies on a short, direct route of about five steps. Greedy Best-First pops `A` first because `1 < 5`, follows the corridor, and returns a route many times the length of the direct route through `B`. `B` is dequeued only after the goal has already been reached, and nothing flags the result as suboptimal — the search optimised "get closer now," never "minimise total cost."
+**A path that looks close but is long.** Suppose neighbor `A` sits one cell from the goal in straight-line distance (`h(A) = 1`) but reaches it only through a long corridor that winds the far way around, while neighbor `B` is farther in straight line (`h(B) = 5`) yet lies on a short, direct route of about five steps. Greedy Best-First pops `A` first because `1 < 5`, follows the corridor, and returns a route many times the length of the direct route through `B`. `B` remains in the frontier when the goal is dequeued and the search terminates, and nothing flags the result as suboptimal — the search optimised "get closer now," never "minimise total cost."
 
 **Loops without a visited set.** With no closed set, a node the search has already left can be re-enqueued, and on a cyclic graph the frontier can oscillate between two low-`h` nodes indefinitely. A visited set bounds any finite graph, but it cannot rescue an infinite one: where `h` keeps improving down a fruitless branch, there is no `g` bound to force the search to abandon that region, so it never terminates.
 
 **A poor heuristic collapses to uninformed search.** If `h` returns near-constant or weakly correlated values, the priority queue no longer separates directions and expansion degrades to an uninformed fan-out, paying the full `O(b^m)`. The concave obstacle is the common concrete case: a wall cupping the goal gives every cell inside the pocket a tempting low `h`, so the search thrashes along the barrier — re-committing to the blocked heading because those cells keep scoring lowest — before it discovers the way around.
 
-# Reference drawer
+# Reference Drawer
 
 > [!ABSTRACT]- Control flow
+>
 > ```mermaid
 > flowchart TD
 >   A[Push source keyed by h of source] --> B{Priority queue empty}
@@ -68,6 +68,7 @@ The h-only ordering fails in three distinct ways, all traceable to the missing `
 > ```
 
 > [!EXAMPLE]- C# implementation
+>
 > ```csharp
 > public static IReadOnlyList<int>? GreedyBestFirstSearch(
 >     IReadOnlyList<IReadOnlyList<int>> neighbors,
@@ -117,8 +118,8 @@ The h-only ordering fails in three distinct ways, all traceable to the missing `
 
 # Questions
 
-> [!QUESTION]- Why is Greedy Best-First Search neither optimal nor complete?
-> It orders the frontier by `h(n)` alone and never accounts for `g(n)`, the cost already spent. A neighbor that is close in straight-line distance but reached by a long detour is expanded before a farther-looking neighbor that sits beside the goal, so the returned path can be far from shortest — not optimal. On an infinite graph a monotonically improving `h` can lead expansion down a branch that never reaches the goal — not complete. A finite graph with a visited set terminates, but the path it returns can still be long.
+> [!QUESTION]- When is Greedy Best-First Search complete, and why is it not optimal?
+> With duplicate detection, it is complete on a finite graph because it can enqueue each reachable vertex at most once and will eventually exhaust the frontier or reach the goal. It is not complete on an infinite graph, where a monotonically improving `h` can lead expansion down a branch that never reaches the goal. It is not optimal in either case because it ignores `g(n)`, the cost already spent, so a close-looking long detour can outrank a shorter route.
 
 > [!QUESTION]- Why does a concave obstacle around the goal cause thrashing?
 > Every cell inside the pocket is geometrically near the goal, so all of them score a low `h` and the frontier keeps selecting barrier-hugging cells. The direct heading is blocked, and the accumulated `g` that would reveal the long way around is never read, so expansion oscillates along the wall before escaping. It is the h-only ordering, not the map, that has no way to notice the pocket is a dead pull.
@@ -128,6 +129,7 @@ The h-only ordering fails in three distinct ways, all traceable to the missing `
 
 # References
 
+- [Experiments with the Graph Traverser program](https://doi.org/10.1098/rspa.1966.0205) — Doran and Michie's primary 1966 study of heuristic graph traversal and how evaluation functions guide search.
 - [Best-first search (Wikipedia)](https://en.wikipedia.org/wiki/Best-first_search) — greedy best-first as the `f = h` special case of best-first search, with its optimality and completeness caveats.
 - [Heuristics (Amit's A* Pages, Stanford)](https://theory.stanford.edu/~amitp/GameProgramming/Heuristics.html) — how the heuristic weight slides a search between Dijkstra, A*, and greedy behaviour.
 - [Introduction to A* (Red Blob Games)](https://www.redblobgames.com/pathfinding/a-star/introduction.html) — side-by-side interactive comparison of Greedy Best-First, Dijkstra, and A* on one grid, including the concave-obstacle case.

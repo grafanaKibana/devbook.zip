@@ -4,11 +4,10 @@ subtopic: []
 level: []
 priority: Medium
 status: Not-Started
-tags:
-  - Template
-  - FolderNote
+tags: [Template, FolderNote]
 publish: false
 ---
+
 <%*
 // Derive topic/subtopic from the folder path under the "Home" root.
 const parts = tp.file.folder(true).split("/");
@@ -45,7 +44,6 @@ tp.hooks.on_all_templates_executed(async () => {
   });
 });
 %>
-# Intro
 
 Explain this section in plain language — what it groups and why. Prefer a clear, complete explanation over short bullets, and keep the tone of a personal learning space rather than a curriculum.
 
@@ -54,11 +52,11 @@ const { FolderStructureMap } = await dc.require("Assets/components/devbook-folde
 return FolderStructureMap;
 ```
 
-## Questions
+# Questions
 
 > [!QUESTION]- A real question worth being able to answer
 > Answer.
 
-## References
+# References
 
 - [Source](https://example.com) — why it is worth keeping.

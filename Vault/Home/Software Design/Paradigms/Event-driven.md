@@ -15,7 +15,7 @@ Event-driven development builds systems around *events* — immutable facts that
 
 The pattern appears at two scales: **in-process** (domain events within a single application, dispatched via MediatR or a simple in-memory bus) and **distributed** (events published to a message broker like RabbitMQ, Azure Service Bus, or Kafka, consumed by separate services).
 
-# Events vs Commands
+# Events Vs Commands
 
 A distinction "event-driven" tends to blur:
 
@@ -120,7 +120,6 @@ await tx.CommitAsync(ct);
 
 > [!QUESTION]- Why must event consumers be idempotent in an at-least-once delivery system?
 > Most message brokers guarantee at-least-once delivery: a message may be delivered more than once if the consumer crashes after processing but before acknowledging. Without idempotency, duplicate delivery causes double-charging, double-reserving, or duplicate records. Mitigation: track processed event IDs in a `ProcessedEvents` table and skip duplicates, or design operations to be naturally idempotent (SET stock = X instead of stock -= Y).
-
 
 # References
 

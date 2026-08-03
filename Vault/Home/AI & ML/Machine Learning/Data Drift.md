@@ -10,6 +10,7 @@ priority: Low
 status: Done
 publish: true
 ---
+
 Data drift is when the statistical properties of your input data change over time compared to the data your model was trained on. It matters because ML models assume training and serving data come from the same distribution — when that stops being true, predictions can become less reliable without any obvious error. A fraud model trained on last year's purchase behavior silently degrades when new payment methods emerge; a vision model deployed to a new camera produces worse results due to different lighting.
 
 # Types of Drift
@@ -120,7 +121,6 @@ Data drift (P(X) changes) does not always require retraining — the model may g
 | Manual review + retrain | Human decision | Low (infrequent) | Slow response | Low-volume, high-stakes models where retraining is expensive |
 
 **Decision rule**: start with scheduled retraining (weekly or monthly) for most models. Add drift-triggered alerts as a safety net. Move to drift-triggered retraining only when scheduled retraining is too slow to respond to real-world changes.
-
 
 # Questions
 

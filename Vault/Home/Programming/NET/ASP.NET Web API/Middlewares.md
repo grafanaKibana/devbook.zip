@@ -11,6 +11,7 @@ status: Ready to Repeat
 
 publish: true
 ---
+
 ASP.NET Core middleware are components that form the HTTP request pipeline. Each middleware wraps the next like nested layers, processing requests on the way in and responses on the way out. You reach for middleware when a concern must apply to all (or most) requests regardless of which controller or endpoint handles them — logging, authentication, CORS, compression, and exception handling are canonical examples.
 
 Each middleware receives an `HttpContext` and a `RequestDelegate` (`next`). On the way **in**, it can inspect or modify the request before calling `next`. On the way **out**, it can inspect or modify the response. Any middleware can **short-circuit** by returning a response without calling `next` — for example, `UseAuthentication` can reject an unauthenticated request before it ever reaches routing.

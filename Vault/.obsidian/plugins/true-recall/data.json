@@ -34,6 +34,7 @@
   "continuousCustomReviews": true,
   "ignoreDailyLimitsForNoteStudy": true,
   "showDashboardHeader": true,
+  "hideTabBar": false,
   "reviewKeybindings": {
     "revealAndGood": " ",
     "again": "1",
@@ -58,6 +59,7 @@
   },
   "copilotAutoContext": false,
   "loadBalanceEnabled": false,
+  "loadBalanceTargetMode": "auto",
   "loadBalanceTarget": 100,
   "loadBalanceMaxDeviation": 20,
   "loadBalanceMaxShiftDays": 3,
@@ -114,10 +116,6 @@
       "enabled": true
     },
     {
-      "id": "preset:builtin-basic-pro-flashcards",
-      "enabled": true
-    },
-    {
       "id": "io",
       "enabled": true
     },
@@ -140,15 +138,15 @@
     {
       "id": "new-note",
       "enabled": true
+    },
+    {
+      "id": "ask-ai",
+      "enabled": true
     }
   ],
   "globalToolbarButtons": [
     {
       "id": "preset:builtin-basic-flashcards",
-      "enabled": true
-    },
-    {
-      "id": "preset:builtin-basic-pro-flashcards",
       "enabled": true
     },
     {
@@ -170,6 +168,10 @@
     {
       "id": "append",
       "enabled": true
+    },
+    {
+      "id": "ask-ai",
+      "enabled": true
     }
   ],
   "imageToolbarButtons": [
@@ -186,30 +188,35 @@
       "enabled": true
     }
   ],
+  "assistantModel": "",
+  "assistantWebSearch": true,
+  "assistantInstructions": "",
+  "assistantPresets": [
+    {
+      "id": "assistant-cards",
+      "name": "Create cards",
+      "instruction": "Research the marked concept and create a small set of flashcards about it."
+    },
+    {
+      "id": "assistant-fill",
+      "name": "Fill the answer",
+      "instruction": "Research the card's question and fill the empty answer field. Keep the answer ultra-concise (1-3 words when possible)."
+    },
+    {
+      "id": "assistant-diagram",
+      "name": "Add a diagram",
+      "instruction": "Create a Mermaid diagram that explains the marked concept and attach it to the card."
+    },
+    {
+      "id": "assistant-append",
+      "name": "Append to note",
+      "instruction": "Research the marked concept and append a short, well-structured section about it to the current note."
+    }
+  ],
+  "assistantMaxIterations": 5,
+  "assistantMaxSources": 5,
   "enableLocalApi": true,
   "apiPort": 27182,
-  "ragEnabled": false,
-  "ragEmbeddingModel": "baai/bge-m3",
-  "ragIncludeFolders": [],
-  "ragExcludeFolders": [
-    ".true-recall",
-    "templates"
-  ],
-  "ragIndexFlashcards": true,
-  "ragAutoIndex": true,
-  "ragChunkMaxTokens": 400,
-  "ragDailyNotesFolder": "",
-  "ragDailyNoteExcludeHeadings": [
-    "Thoughts",
-    "Journal",
-    "Reflections",
-    "Random"
-  ],
-  "ragChatConfig": {
-    "presetId": "default",
-    "customInstruction": "",
-    "responseLength": "medium"
-  },
   "languageNoteTypeId": null,
   "languageSource": "",
   "languageTarget": "",
@@ -241,6 +248,28 @@
   "attachmentFolder": "",
   "defaultAnkiImportFolder": "",
   "defaultProjectFolder": "",
-  "lastSeenVersion": "1.9.10",
+  "ragEnabled": false,
+  "ragEmbeddingModel": "baai/bge-m3",
+  "ragIncludeFolders": [],
+  "ragExcludeFolders": [
+    ".true-recall",
+    "templates"
+  ],
+  "ragIndexFlashcards": true,
+  "ragAutoIndex": true,
+  "ragChunkMaxTokens": 400,
+  "ragDailyNotesFolder": "",
+  "ragDailyNoteExcludeHeadings": [
+    "Thoughts",
+    "Journal",
+    "Reflections",
+    "Random"
+  ],
+  "ragChatConfig": {
+    "presetId": "default",
+    "customInstruction": "",
+    "responseLength": "medium"
+  },
+  "lastSeenVersion": "2.0.0",
   "archiveCascadeMigrated": true
 }

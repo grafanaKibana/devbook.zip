@@ -10,6 +10,7 @@ priority: High
 status: Ready to Repeat
 publish: true
 ---
+
 `async` and `await` are .NET's default model for non-blocking I/O. The goal is responsiveness and scalability: while code waits on network, disk, or database I/O, the thread is released so it can do other work. This is why async code keeps UIs responsive and helps servers handle more concurrent requests without proportionally more threads.
 
 The most important mental model: **async is not the same as "run on another thread"**. In many cases, no thread is actively executing your method while an awaited I/O operation is in flight. The thread is returned to the pool and reclaimed when the I/O completes.
@@ -59,7 +60,7 @@ var data = await _repo.GetAsync(id).ConfigureAwait(false);
 - Library code: always use `ConfigureAwait(false)` to avoid context capture overhead and deadlock risk.
 - Application code (controllers, view models): omit it — you usually want to resume on the original context.
 
-## `ExecutionContext` vs `SynchronizationContext`
+## `ExecutionContext` Vs `SynchronizationContext`
 
 These are two different ambient mechanisms, and conflating them is a common source of bugs:
 

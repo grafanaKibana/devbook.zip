@@ -4,12 +4,11 @@ topic:
 subtopic:
   - Principles
 summary: "Design heuristics like SOLID, DRY, KISS, and YAGNI that keep systems understandable."
-tags:
-  - FolderNote
+tags: [FolderNote]
 publish: true
 priority: High
 level:
-  - '4'
+  - "4"
 status: Creation
 ---
 
@@ -17,7 +16,12 @@ Principles like SOLID, DRY, KISS, and YAGNI are decision checks, not a scoring s
 
 Applying single responsibility usually means splitting a module at a stable reason to change, not splitting every method. Likewise, DRY does not require a shared abstraction for two lines that merely look alike. A principle earns its cost only when it removes a concrete change or failure risk.
 
-# Code quality as an operating discipline
+```datacorejsx
+const { FolderStructureMap } = await dc.require("Assets/components/devbook-folder-map.jsx");
+return FolderStructureMap;
+```
+
+# Code Quality as an Operating Discipline
 
 Consider an endpoint that charges a card and records an order. The first version constructs an HTTP client, calls the payment provider, writes SQL, catches every exception, and logs the request body in one method. Each quality practice repairs a different failure surface:
 
@@ -35,11 +39,6 @@ Two common overcorrections break the loop:
 
 - **Moderate abstraction becomes an interface per class.** An abstraction with one implementation and no substitution pressure often adds navigation without reducing coupling. Extract the interface when an external boundary, test seam, or independent change rate justifies it.
 - **Pattern literacy becomes pattern collection.** A `FactoryStrategyProvider` around a constructor is not flexibility. Use a pattern when it names and contains a recurring force; delete it when direct code makes the machine clearer.
-
-```datacorejsx
-const { FolderStructureMap } = await dc.require("Assets/components/devbook-folder-map.jsx");
-return FolderStructureMap;
-```
 
 # References
 

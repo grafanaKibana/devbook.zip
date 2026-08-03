@@ -164,7 +164,7 @@ const script = `
     });
   }
 
-  function decorateFiles(explorer, map) {
+  function decorateFiles(explorer, map, colorMap) {
     explorer.querySelectorAll("a.nav-file-title").forEach(function (a) {
       if (a.dataset.ec) return;
       a.dataset.ec = "1";
@@ -174,6 +174,12 @@ const script = `
       const span = document.createElement("span");
       span.className = "ec-ico ec-file-ico" + (name ? " ec-assigned" : "");
       span.innerHTML = svg(idle, "ec-file-idle") + svg(active, "ec-file-active");
+      // Same subtree tint as the folder glyph, so a page under a topic carries
+      // that topic's hue; root pages (Credits, Questions, Roadmap) have no topic
+      // folder above them, so topicColor returns null and the icon falls back to
+      // the accent.
+      const color = topicColor(a, colorMap);
+      if (color) span.style.setProperty("--ec-topic", color);
       a.insertBefore(span, a.firstChild);
     });
   }
@@ -190,7 +196,7 @@ const script = `
       const colorMap = readColorMap();
       explorers.forEach(function (ex) {
         decorateFolders(ex, map, colorMap);
-        decorateFiles(ex, map);
+        decorateFiles(ex, map, colorMap);
       });
     } finally {
       busy = false;

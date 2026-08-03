@@ -1,13 +1,12 @@
 ---
-icon: cloud
+icon: cloudy
 order: 90
 color: "#3b82f6"
 topic:
   - Cloud
 subtopic: []
 summary: "Renting managed compute, storage, and networking with pay as you go economics."
-tags:
-  - FolderNote
+tags: [FolderNote]
 publish: true
 status: Done
 priority: High

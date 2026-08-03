@@ -1,8 +1,8 @@
 ---
 publish: true
-created: 2026-07-15T11:47:57.215Z
-modified: 2026-07-18T11:38:38.781Z
-published: 2026-07-18T11:38:38.781Z
+created: 2026-07-25T18:38:43.894Z
+modified: 2026-07-25T18:38:43.894Z
+published: 2026-07-25T18:38:43.894Z
 topic:
   - Software Design
 subtopic:
@@ -47,7 +47,7 @@ builder.Services.AddSingleton<IEmailSender, SmtpEmailSender>();
 
 The container calls `OrderService` with the right implementations — "don't call us, we'll call you."
 
-# IoC vs Dependency Inversion Principle (DIP)
+# IoC Vs Dependency Inversion Principle (DIP)
 
 These are related but distinct:
 

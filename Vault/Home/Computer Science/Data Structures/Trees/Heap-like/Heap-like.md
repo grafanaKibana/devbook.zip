@@ -4,8 +4,7 @@ topic:
 subtopic:
   - Data Structures
 summary: "Priority-queue structures with an O(1) root peek, differing on meld and decreaseKey."
-tags:
-  - FolderNote
+tags: [FolderNote]
 level:
   - "4"
 priority: Medium
@@ -22,7 +21,7 @@ const { FolderStructureMap } = await dc.require("Assets/components/devbook-folde
 return FolderStructureMap;
 ```
 
-# The family
+# The Family
 
 | | Backing | Meld | Insert | ExtractMin | DecreaseKey | Bounds |
 |---|---|---|---|---|---|---|

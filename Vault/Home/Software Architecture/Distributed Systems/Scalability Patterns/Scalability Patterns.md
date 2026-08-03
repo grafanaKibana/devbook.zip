@@ -8,8 +8,7 @@ level:
   - "2"
 priority: High
 publish: true
-tags:
-  - FolderNote
+tags: [FolderNote]
 status: Creation
 ---
 
@@ -49,7 +48,7 @@ return FolderStructureMap;
 8. Connection pooling is usually low-effort, high-impact hygiene before more dramatic architecture changes.
 9. Event-driven design scales team autonomy and workload isolation, but consistency guarantees must be explicit.
 
-# Measurement and bottleneck migration
+# Measurement and Bottleneck Migration
 
 ![[Software Architecture/Software Architecture-Scalability Patterns-18120000.png]]
 
@@ -84,8 +83,7 @@ flowchart TD
     F --> G
 ```
 
-
-# .NET operating guidance
+# .NET Operating Guidance
 
 Use `dotnet-counters` for runtime counters, OpenTelemetry for request and dependency traces and metrics, and the database's own wait and query telemetry. A low application CPU value does not prove spare capacity when threads are blocked on connections. Platform scaling features are useful only when their signal matches the saturated resource; CPU-based autoscaling does not fix a database lock or third-party quota.
 
@@ -101,24 +99,24 @@ Track cost per completed operation, not only instance count. Cache, replicas, qu
 
 # Pitfalls
 
-1. **Scaling before finding the real bottleneck**  
-   What goes wrong: teams add app instances while p95 remains high.  
-   Why: the bottleneck is often DB lock contention, external API latency, or connection saturation.  
+1. **Scaling before finding the real bottleneck**
+   What goes wrong: teams add app instances while p95 remains high.
+   Why: the bottleneck is often DB lock contention, external API latency, or connection saturation.
    Mitigation: baseline telemetry first, then scale the saturated component.
 
-2. **Premature sharding**  
-   What goes wrong: delivery speed drops and incident complexity rises.  
-   Why: shard routing, cross-shard queries, and resharding become permanent operational overhead.  
+2. **Premature sharding**
+   What goes wrong: delivery speed drops and incident complexity rises.
+   Why: shard routing, cross-shard queries, and resharding become permanent operational overhead.
    Mitigation: exhaust simpler options first (indexes, read replicas, caching, partitioning, queueing).
 
-3. **Stateful services that cannot scale horizontally**  
-   What goes wrong: sticky sessions and per-node memory state cause uneven load and failover pain.  
-   Why: user session or cache state is stored in-process.  
+3. **Stateful services that cannot scale horizontally**
+   What goes wrong: sticky sessions and per-node memory state cause uneven load and failover pain.
+   Why: user session or cache state is stored in-process.
    Mitigation: externalize session to Redis and keep handlers stateless.
 
-4. **Ignoring database bottlenecks while scaling app tier**  
-   What goes wrong: more app instances generate more DB pressure and failures happen faster.  
-   Why: DB CPU, locks, or connection limits were already near saturation.  
+4. **Ignoring database bottlenecks while scaling app tier**
+   What goes wrong: more app instances generate more DB pressure and failures happen faster.
+   Why: DB CPU, locks, or connection limits were already near saturation.
    Mitigation: profile queries, add indexes, tune pools, use read replicas, then scale app tier.
 
 # Questions
@@ -144,7 +142,7 @@ Track cost per completed operation, not only instance count. Cache, replicas, qu
 - [.NET diagnostic tools](https://learn.microsoft.com/dotnet/core/diagnostics/) — official counters, traces, dumps, and performance-investigation tools.
 - [Azure load testing](https://learn.microsoft.com/azure/app-testing/load-testing/overview-what-is-azure-load-testing) — official distributed load-test and monitoring workflow.
 
-## ByteByteGo provenance
+## ByteByteGo Provenance
 
 - [Scalability strategies](https://github.com/ByteByteGoHq/system-design-101/blob/b28380a4710c5ec9638ec037d4168e288f334cba/data/guides/8-must-know-scalability-strategies.md) — provenance for the strategy visual, used as a bottleneck map rather than a checklist.
 - [System design cheat sheet](https://github.com/ByteByteGoHq/system-design-101/blob/b28380a4710c5ec9638ec037d4168e288f334cba/data/guides/system-design-cheat-sheet.md) — editorial lead for the operational definitions; its defective scalability and availability visual was rejected.

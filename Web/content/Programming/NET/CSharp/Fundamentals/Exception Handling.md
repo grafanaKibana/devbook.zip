@@ -1,8 +1,8 @@
 ---
 publish: true
-created: 2026-07-11T21:45:09.957Z
-modified: 2026-07-18T11:30:11.712Z
-published: 2026-07-18T11:30:11.712Z
+created: 2026-07-25T18:38:43.852Z
+modified: 2026-07-25T18:38:43.852Z
+published: 2026-07-25T18:38:43.852Z
 topic:
   - Programming
 subtopic:
@@ -45,17 +45,17 @@ finally
 }
 ```
 
-# `throw` keyword
+# `throw` Keyword
 
 `throw` is how you signal that code cannot continue normally and must transfer control to an exception handler.
 
-## Why we need it
+## Why We Need it
 
 - It fails fast when invariants are broken (for example, invalid arguments or invalid state).
 - It creates a stack trace from the throw site, which is critical for debugging.
 - It lets higher layers decide how to handle the failure (retry, map to HTTP response, stop processing).
 
-## When to use
+## When to Use
 
 - Argument validation in public APIs (`ArgumentNullException`, `ArgumentException`, `ArgumentOutOfRangeException`).
 - Invalid object state where continuing would produce incorrect behavior (`InvalidOperationException`).

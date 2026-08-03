@@ -1,8 +1,8 @@
 ---
 publish: true
-created: 2026-07-12T14:27:20.424Z
-modified: 2026-07-18T11:30:05.542Z
-published: 2026-07-18T11:30:05.542Z
+created: 2026-07-28T10:20:00.772Z
+modified: 2026-07-29T15:36:42.945Z
+published: 2026-07-29T15:36:42.945Z
 topic:
   - Computer Science
 subtopic:
@@ -14,7 +14,9 @@ priority: Medium
 status: Ready to Repeat
 ---
 
-A priority queue must sometimes absorb another whole priority queue — merge two work sets, join two event streams — and keep answering "smallest first". An array-backed [[Heap|binary heap]] cannot do this cheaply: its elements sit in one contiguous block, so combining two of them means concatenating and re-heapifying in `O(n)`. The contiguous layout that makes a binary heap fast to index is exactly what makes it slow to union.
+# Intro
+
+A priority queue must sometimes absorb another whole priority queue — merge two work sets, join two event streams — and keep answering "smallest first". An array-backed [[Computer Science/Data Structures/Trees/Heap-like/Heap|binary heap]] cannot do this cheaply: its elements sit in one contiguous block, so combining two of them means concatenating and re-heapifying in `O(n)`. The contiguous layout that makes a binary heap fast to index is exactly what makes it slow to union.
 
 A binomial queue (binomial heap) trades that single array for a **forest of heap-ordered binomial trees, at most one tree of each order**. A binomial tree `Bₖ` holds exactly `2ᵏ` nodes and is built by **linking** two `Bₖ₋₁` trees — the root with the larger key becomes a child of the other. Because each order appears at most once, the set of orders present is the **binary representation of `n`**: a queue of 13 items (`1101₂`) holds trees of orders 3, 2, and 0, sized 8 + 4 + 1. Merging two such forests then runs like adding two binary numbers, and the whole union costs `O(log n)`.
 
@@ -22,10 +24,13 @@ What the forest gives up is compactness and locality. Nodes are separate allocat
 
 **Core shape:** items → forest of heap-ordered binomial trees, one per order → orders present = binary digits of `n` → meld = binary addition of orders → `O(log n)` union, `O(n)` pointered storage.
 
-> [!NOTE] Visualization pending
-> Planned StepTrace: a forest-merge card showing two binomial forests melded like binary addition — equal-order trees link into the next order and the carry propagates up until each order is present at most once. No matching renderer exists in `engine.js` yet.
+Use **Meld** to combine the canonical 3-value forest with a singleton. The forest slots expose the two equal-order links and the carry into `B₂`; **Reset** restores both source forests.
 
-# Meld = binary addition
+```steptrace
+{"algorithm":"binomial-queue"}
+```
+
+# Meld = Binary Addition
 
 Insert, extract-min, and union all reduce to one primitive: **meld**. Walk both forests from the lowest order upward. When two trees share an order `k`, they **link** in `O(1)` — the root with the larger key becomes the leftmost child of the smaller-keyed root, producing one tree of order `k + 1`. That new tree is a **carry** into the next order, propagated exactly as when adding two binary numbers. At most `⌊log₂ n⌋ + 1` orders exist, so the walk — and therefore meld — is `O(log n)` worst case.
 
@@ -48,7 +53,7 @@ The other operations are corollaries:
 - **Find-min** scans the `≤ log n` roots, or reads a cached min-pointer for `O(1)`.
 - **Decrease-key** lowers a key and sifts it up its own tree, whose height is `≤ log n`.
 
-# Representation and invariants
+# Representation and Invariants
 
 Each item is a heap node holding a key, a `degree` (the order of the tree it roots or the subtree it heads), a `child` pointer to its leftmost child, and a `sibling` pointer. Roots form a singly linked list kept in **strictly increasing order**; a node's children are likewise linked by `sibling` in decreasing order, which is the shape reversing produces during extract-min.
 
@@ -66,25 +71,25 @@ Linking is the only operation that changes parentage, and it only ever attaches 
 | Operation | Best time | Amortized time | Worst time | Space | Cause |
 | --- | --- | --- | --- | --- | --- |
 | Storage (`n` items) | — | — | — | `O(n)` nodes + child/sibling/parent pointers | One node per item; `≤ log n` roots; the binary shape of `n` fixes which orders exist |
-| Meld | `O(log n)` | `O(log n)` | `O(log n)` | `O(1)` aux | Merge two sorted root lists, then combine equal-order carries — one pass over `≤ log n` orders |
+| Meld | `O(1)` | `O(log n)` | `O(log n)` | `O(1)` aux | Empty-heap meld returns immediately; otherwise merge root lists and combine equal-order carries |
 | Insert | `O(1)` | `O(1)` | `O(log n)` | `O(1)` aux | Meld with a single `B₀`; a full carry chain is rare, so the binary-counter increment argument gives `O(1)` amortized |
 | Find-min | `O(1)` | — | `O(log n)` | `O(1)` aux | `O(1)` from a cached min-pointer, otherwise scan the `≤ log n` roots |
-| Extract-min | `O(log n)` | `O(log n)` | `O(log n)` | `O(1)` aux | Find the min root, reverse its `≤ log n` children into a forest, and meld that back |
-| Decrease-key | `O(log n)` | — | `O(log n)` | `O(1)` aux | Sift the lowered key up its own binomial tree, whose height is `≤ log n` |
+| Extract-min | `O(1)` | `O(log n)` | `O(log n)` | `O(1)` aux | A singleton root returns immediately; otherwise reverse its children and meld them back |
+| Decrease-key | `O(1)` | — | `O(log n)` | `O(1)` aux | A root or non-violating decrease stops immediately; otherwise sift up a tree of height `≤ log n` |
 
 The amortized `O(1)` for insert and the worst-case `O(log n)` describe the same operation. A single insert can trigger a carry at every filled order — that is the `O(log n)` worst case — but each carry only fires because earlier cheap inserts left those orders occupied. The potential argument that bounds a binary counter's increment at amortized `O(1)` applies unchanged: across a run of `m` inserts, total linking work is `O(m)`.
 
 Find-min is `O(log n)` unless a min-pointer is maintained across meld and extract-min; the pointer is cheap to keep current since both operations already touch every root. Space is dominated by per-node pointers — three references per item on top of the key — which is the concrete cost of choosing a forest over an array.
 
-# When the structure stops fitting
+# When the Structure Stops Fitting
 
 The pointered forest is what buys `O(log n)` meld, and it is also where the structure loses to a plain binary heap on every non-melding workload. A binary heap keeps `n` keys in one array with implicit `2i+1 / 2i+2` child indices: no per-node pointers, no allocation per insert, and sequential memory that the cache prefetches. A binomial queue pays a pointer chase per level and an allocation per node. For a priority queue that never unions, that overhead is pure loss — the binary heap is flatly faster with the same `O(log n)` bounds.
 
 Find-min degrades the moment the min-pointer is dropped. Without it, the minimum is not at a known slot the way it is in a binary heap's `a[0]`; it is one of up to `log n` roots and must be found by a scan. Any code that peeks far more often than it melds either maintains the pointer or accepts `O(log n)` peeks.
 
-Decrease-key is `O(log n)`, not the `O(1)` amortized a [[Fibonacci Heaps|Fibonacci heap]] reaches, because a lowered key must sift all the way up its binomial tree rather than being cut out and reinserted lazily. A shortest-path relaxation that calls decrease-key on the order of `E` times therefore pays `O(E log n)` here — the workload where the binomial heap's structure is the wrong bet.
+Decrease-key is `O(log n)`, not the `O(1)` amortized a [[Computer Science/Data Structures/Trees/Heap-like/Fibonacci Heaps|Fibonacci heap]] reaches, because a lowered key must sift all the way up its binomial tree rather than being cut out and reinserted lazily. A shortest-path relaxation that calls decrease-key on the order of `E` times therefore pays `O(E log n)` here — the workload where the binomial heap's structure is the wrong bet.
 
-# Reference drawer
+# Reference Drawer
 
 > [!ABSTRACT]- Forest shape for `n = 13` (`1101₂`)
 >
@@ -227,4 +232,3 @@ Decrease-key is `O(log n)`, not the `O(1)` amortized a [[Fibonacci Heaps|Fibonac
 
 - [Vuillemin, "A data structure for manipulating priority queues" (CACM 1978)](https://dl.acm.org/doi/10.1145/359460.359478) — the original binomial queue paper defining tree orders, linking, and the binary-addition meld.
 - [Binomial heap (Wikipedia)](https://en.wikipedia.org/wiki/Binomial_heap) — order definitions, the meld walkthrough, and the amortized-insert analysis via the binary counter.
-- [Vuillemin, "A data structure for manipulating priority queues" (CACM, 1978)](https://doi.org/10.1145/359460.359478) — the original binomial-queue paper: the forest-as-binary-counter representation and the meld-by-carry union.

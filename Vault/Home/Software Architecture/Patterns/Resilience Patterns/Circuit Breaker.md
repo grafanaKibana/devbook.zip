@@ -16,7 +16,7 @@ The Circuit Breaker pattern stops your service from repeatedly calling a depende
 
 # Mechanism
 
-## State model
+## State Model
 
 - `Closed`: normal mode; calls flow through and failures are measured over a sampling window.
 - `Open`: fast-fail mode; calls are rejected immediately for a break duration.
@@ -31,7 +31,7 @@ stateDiagram-v2
     HalfOpen --> Open: Probe fails or\nfailure ratio still high
 ```
 
-## How transitions are decided
+## How Transitions Are Decided
 
 - The breaker evaluates a rolling or fixed sampling window.
 - It opens only after `MinimumThroughput` is met, which avoids opening on tiny traffic samples.
@@ -40,7 +40,7 @@ stateDiagram-v2
 
 If you set thresholds too low, the breaker chatters (opens and closes too often). If you set them too high, you discover failures too late and still waste resources on doomed calls.
 
-## What should count as a failure
+## What Should Count as a Failure
 
 For interview depth, explicitly separate expected client errors from server-side dependency failure:
 
@@ -48,9 +48,9 @@ For interview depth, explicitly separate expected client errors from server-side
 - Usually do not count: business/validation `4xx` like `400` or `404`, because these are often caller mistakes, not provider instability.
 - Make this explicit via `ShouldHandle` so the breaker reflects dependency health, not consumer input quality.
 
-# C# Example with Polly v8 in ASP.NET Core
+# C# Example with Polly V8 in ASP.NET Core
 
-## Register an ASP.NET Core HttpClient resilience handler
+## Register an ASP.NET Core HttpClient Resilience Handler
 
 This example uses the .NET HTTP resilience handler (`AddResilienceHandler`) with Polly v8 strategy options and tracks breaker state changes for telemetry.
 
@@ -142,7 +142,7 @@ var app = builder.Build();
 app.Run();
 ```
 
-## Use the resilient HttpClient in an LLM gateway
+## Use the Resilient HttpClient in an LLM Gateway
 
 ```csharp
 public sealed class LlmGateway
@@ -162,7 +162,6 @@ public sealed class LlmGateway
 }
 ```
 
-
 # Integration with Other Resilience Patterns
 
 For real production systems and AI provider calls, stack strategies deliberately:
@@ -178,25 +177,25 @@ Interview nuance: teams often say "retry inside breaker" to mean retries must co
 
 # Pitfalls
 
-## 1) Breaking too aggressively on expected errors
+## 1) Breaking Too Aggressively on Expected Errors
 
 - What goes wrong: breaker opens on user-caused `4xx` responses and blocks healthy dependency traffic.
 - Why it happens: failure predicates are too broad and treat all non-success status codes as infrastructure failures.
 - Mitigation: define `ShouldHandle` around transient/infrastructure failure classes only, and review real response distribution in telemetry.
 
-## 2) Not distinguishing transient vs permanent failures
+## 2) Not Distinguishing Transient Vs Permanent Failures
 
 - What goes wrong: permanent failures keep being retried and sampled as if they were recoverable.
 - Why it happens: no taxonomy for failure types and no contract for retryability.
 - Mitigation: classify errors by retryability and idempotency; retry only transient classes and let permanent failures fail fast.
 
-## 3) Assuming one instance protects the whole fleet
+## 3) Assuming One Instance Protects the Whole Fleet
 
 - What goes wrong: one pod opens its breaker but other pods continue hammering the same unhealthy dependency.
 - Why it happens: breaker state is process-local by default.
 - Mitigation: combine per-instance breakers with global controls such as rate limits, bulkheads, provider-side quotas, and fleet-level monitoring.
 
-## 4) Half-open allows too many probes
+## 4) Half-open Allows Too Many Probes
 
 - What goes wrong: when break duration expires, many instances probe at once and create a thundering herd.
 - Why it happens: synchronized timers and unconstrained probe concurrency.

@@ -4,6 +4,8 @@
  */
 
 import type { HostControlHandle, MountHandle, SpeedSliderOptions, StepTraceConfig } from "../types"
+import { renderComplexityDom } from "../../../complexity/dom"
+import { buildComplexityViewModel } from "../../../complexity/model"
 
 const { Plugin, MarkdownRenderChild, Notice, SliderComponent } = require("obsidian")
 const { steptrace } = require("../engine") as typeof import("../engine")
@@ -44,7 +46,7 @@ function createSpeedSlider(container: HTMLElement, options: SpeedSliderOptions):
   }
 }
 
-class SteptraceChild extends MarkdownRenderChild {
+class RenderChild extends MarkdownRenderChild {
   private readonly handle: MountHandle
 
   constructor(el: HTMLElement, handle: MountHandle) {
@@ -74,7 +76,24 @@ class SteptracePlugin extends Plugin {
 
         const root = el.createEl("div")
         const handle = steptrace.mount(root, config, { createSpeedSlider })
-        ctx.addChild(new SteptraceChild(el, handle))
+        ctx.addChild(new RenderChild(el, handle))
+      },
+    )
+
+    this.registerMarkdownCodeBlockProcessor(
+      "complexity",
+      (source: string, el: ObsidianElement, ctx: MarkdownContext) => {
+        try {
+          const view = buildComplexityViewModel(JSON.parse(source))
+          const root = el.createEl("div")
+          const handle = renderComplexityDom(root, view)
+          ctx.addChild(new RenderChild(el, handle))
+        } catch (error) {
+          el.replaceChildren()
+          el.createEl("pre", {
+            text: `complexity: ${error instanceof Error ? error.message : String(error)}\n\n${source}`,
+          })
+        }
       },
     )
 

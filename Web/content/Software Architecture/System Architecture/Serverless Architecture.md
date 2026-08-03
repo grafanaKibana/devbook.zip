@@ -1,8 +1,8 @@
 ---
 publish: true
-created: 2026-07-15T11:47:56.074Z
-modified: 2026-07-18T11:59:15.673Z
-published: 2026-07-18T11:59:15.673Z
+created: 2026-07-25T18:38:43.891Z
+modified: 2026-07-25T18:38:43.892Z
+published: 2026-07-25T18:38:43.892Z
 topic:
   - Software Architecture
 subtopic:
@@ -18,7 +18,7 @@ Serverless architecture delegates capacity provisioning, patching, and much of t
 
 Reach for it when workload shape matches a managed service contract and reduced infrastructure ownership outweighs platform constraints. A queue-triggered function, a Cloud Run service, and a serverless database are different products with different concurrency, state, latency, and cost boundaries.
 
-# Function example
+# Function Example
 
 This Azure Function performs one concrete scheduled operation while keeping durable state in a repository:
 
@@ -37,17 +37,17 @@ public sealed class ExpiredSessionCleanup(ISessionRepository sessions)
 
 The function process may be reused and can safely reuse clients and connection pools, but correctness cannot depend on its memory surviving. Durable progress belongs in managed storage.
 
-# Triggers and managed services
+# Triggers and Managed Services
 
 HTTP, timers, queues, object notifications, and event buses are common function triggers. Serverless containers accept ordinary container workloads with provider-managed capacity; some products can scale to zero and others keep minimum instances. Managed databases and queues remove host management but retain quotas, consistency, retention, and pricing contracts.
 
-# AWS Lambda execution orientation
+# AWS Lambda Execution Orientation
 
 ![[Assets/Software Architecture/Software Architecture-Serverless Architecture-18120000.png]]
 
 The visual is a dated fleet model, not an AWS compatibility contract. The stable behavior is isolated execution environments that may be initialized, reused, frozen, reset, or removed.
 
-## Execution lifecycle
+## Execution Lifecycle
 
 An AWS Lambda environment has initialization, invocation, and shutdown or reset phases. Azure Functions has analogous host and worker initialization governed by its hosting plan. Providers may freeze an idle environment and resume it later, replace it after an error, or add environments to handle concurrency.
 
@@ -67,11 +67,11 @@ public sealed class Function
 
 Reusing `HttpClient` reduces connection churn when the process is warm. Correctness cannot depend on the static field surviving; durable state belongs in an external database, queue, or object store.
 
-## Cold-start controls
+## Cold-start Controls
 
 Cold-start time includes environment allocation, runtime boot, code loading, and application initialization. It varies by platform, runtime, package size, networking, and configuration, so measure the chosen plan and region rather than relying on a universal range. Provisioned or minimum instances trade fixed cost for predictable latency. Snapshot and restore features can reduce initialization for supported runtimes, but restored state needs checks for stale connections, random values, credentials, and uniqueness. Native AOT may reduce .NET startup cost when library and reflection constraints are acceptable.
 
-## Concurrency and connections
+## Concurrency and Connections
 
 Scale-out creates independent client pools. Cap per-environment database connections and use a server-side proxy or pooler when fan-out could exceed database limits. Warm environments may retain cached data, so entries need expiry and cannot be the source of truth.
 
@@ -137,6 +137,6 @@ Scale-out creates independent client pools. Cap per-environment database connect
 - [.NET Native AOT deployment](https://learn.microsoft.com/dotnet/core/deploying/native-aot/) — official startup, size, and compatibility tradeoffs.
 - [Firecracker: Lightweight Virtualization for Serverless Applications](https://www.usenix.org/conference/nsdi20/presentation/agache) — peer-reviewed architecture paper for the microVM isolation mechanism used by Lambda.
 
-## ByteByteGo provenance
+## ByteByteGo Provenance
 
 - [What makes AWS Lambda fast](https://github.com/ByteByteGoHq/system-design-101/blob/b28380a4710c5ec9638ec037d4168e288f334cba/data/guides/what-makes-aws-lambda-so-fast.md) — editorial lead for the fleet visual; internal component names are treated as dated implementation detail, not a service guarantee.

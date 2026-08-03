@@ -1,15 +1,5 @@
 /* ---- string matching: text + pattern as pointer-style segmented strips,
       stacked (the pattern strip slides under the current window) ---- */
-/* hash badge (rabin-karp): sits BELOW the visualization, above the scrubber */
-.steptrace__hash {
-  display: inline-block;
-  margin-top: 0.85rem;
-  font: 600 0.72rem var(--_font-mono);
-  color: var(--_text);
-  padding: 0.2rem 0.55rem;
-  border-radius: 6px;
-  background: color-mix(in srgb, var(--_accent) 12%, transparent);
-}
 .steptrace__match {
   display: flex;
   flex-direction: column;
@@ -18,10 +8,11 @@
 }
 /* the main text strip fills the full container width like the pointers array */
 .steptrace__cells {
+  --_string-radius: 9px;
   display: flex;
   width: 100%;
   border: 1px solid color-mix(in srgb, var(--_text) 22%, transparent);
-  border-radius: 9px;
+  border-radius: var(--_string-radius);
   overflow: hidden;
 }
 /* the pattern strip is only as wide as its own cells and slides via translateX */
@@ -75,4 +66,277 @@
   background: color-mix(in srgb, var(--_green) 22%, transparent);
   color: var(--_green);
   box-shadow: inset 0 -3px 0 var(--_green);
+}
+
+/* Full Boyer-Moore reuses canonical string strips inside one measured viewport;
+   flexible cells keep every valid alignment fitted and clipped to the stage. */
+.steptrace__bm {
+  inline-size: 100%;
+  min-inline-size: 0;
+  min-block-size: 12.75rem;
+  justify-content: center;
+}
+.steptrace__bm-viewport {
+  inline-size: 100%;
+  min-inline-size: 0;
+  margin-block: auto;
+  overflow: hidden;
+}
+.steptrace__bm-board {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  inline-size: 100%;
+  min-inline-size: 0;
+  padding-block: 0.4rem;
+  overflow: hidden;
+}
+.steptrace__bm-pattern {
+  transition: transform var(--_dur-move) var(--_spring-soft);
+}
+.steptrace__bm-cell {
+  position: relative;
+}
+.steptrace__bm .steptrace__cell:first-child {
+  border-start-start-radius: calc(var(--_string-radius) - 1px);
+  border-end-start-radius: calc(var(--_string-radius) - 1px);
+}
+.steptrace__bm .steptrace__cell:last-child {
+  border-start-end-radius: calc(var(--_string-radius) - 1px);
+  border-end-end-radius: calc(var(--_string-radius) - 1px);
+}
+.steptrace__bm .steptrace__cell[data-state="suffix"] {
+  color: var(--_violet);
+  background: color-mix(in srgb, var(--_violet) 13%, transparent);
+  box-shadow: inset 0 -3px 0 var(--_violet);
+}
+.steptrace__bm-compare-icon {
+  position: absolute;
+  inset-block-start: 0.2rem;
+  inset-inline-end: 0.2rem;
+  inline-size: 0.78rem;
+  block-size: 0.78rem;
+  pointer-events: none;
+}
+.steptrace__bm-icon {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  opacity: 0;
+}
+.steptrace__bm-icon svg {
+  inline-size: 100%;
+  block-size: 100%;
+}
+.steptrace__bm-cell[data-state="match"] .steptrace__bm-icon--match,
+.steptrace__bm-cell[data-state="mismatch"] .steptrace__bm-icon--mismatch {
+  opacity: 1;
+}
+
+/* Z-array profile: three canonical string rails share one responsive board and
+   fall back to one synchronized horizontal viewport below readable width. */
+.steptrace__z {
+  inline-size: 100%;
+  min-inline-size: 0;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  min-block-size: 12.75rem;
+}
+.steptrace__z-viewport {
+  inline-size: 100%;
+  min-inline-size: 0;
+  margin-block: auto;
+  overflow-x: auto;
+  overflow-y: hidden;
+  overscroll-behavior-inline: contain;
+}
+.steptrace__z-board {
+  --_z-min-cell: 2.25rem;
+  --_z-shell-block: calc(44px + 2px);
+  --_z-index-tier: 22px;
+  --_z-fade: 1.5rem;
+  box-sizing: border-box;
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+  inline-size: 100%;
+  min-inline-size: calc(var(--_z-length) * var(--_z-min-cell));
+  padding-block: 0.35rem;
+}
+.steptrace__z-rail {
+  min-inline-size: 0;
+}
+.steptrace__z-rail:first-child {
+  padding-block-end: 0.9rem;
+}
+.steptrace__z-rail:is(:nth-child(2), :nth-child(3)) {
+  padding-block-start: 0.9rem;
+  border-block-start: 1px solid var(--_hair);
+}
+.steptrace__z-rail:nth-child(2) {
+  padding-block-end: 0.9rem;
+}
+.steptrace__z-label {
+  position: sticky;
+  inset-inline-start: 0;
+  z-index: 1;
+  inline-size: max-content;
+  margin-block-end: 0.22rem;
+}
+.steptrace__z-prefix-clip {
+  overflow: hidden;
+  block-size: var(--_z-shell-block);
+}
+.steptrace__z-prefix-clip[data-clipped="1"] {
+  -webkit-mask-image: linear-gradient(
+    to right,
+    #000 0,
+    #000 calc(100% - var(--_z-fade)),
+    transparent 100%
+  );
+  mask-image: linear-gradient(to right, #000 0, #000 calc(100% - var(--_z-fade)), transparent 100%);
+}
+.steptrace__z-track {
+  transition: transform var(--_dur-move) var(--_spring-soft);
+}
+.steptrace__z-track .steptrace__cell:first-child {
+  border-start-start-radius: calc(var(--_string-radius) - 1px);
+  border-end-start-radius: calc(var(--_string-radius) - 1px);
+}
+.steptrace__z-track .steptrace__cell:last-child {
+  border-start-end-radius: calc(var(--_string-radius) - 1px);
+  border-end-end-radius: calc(var(--_string-radius) - 1px);
+}
+.steptrace__z-cell {
+  position: relative;
+}
+.steptrace__z-string {
+  position: relative;
+}
+.steptrace__z-string > .steptrace__z-cell--string:first-child {
+  border-start-start-radius: calc(var(--_string-radius) - 1px);
+  border-end-start-radius: calc(var(--_string-radius) - 1px);
+}
+.steptrace__z-string > .steptrace__z-cell--edge-end {
+  border-inline-end: 0;
+  border-start-end-radius: calc(var(--_string-radius) - 1px);
+  border-end-end-radius: calc(var(--_string-radius) - 1px);
+}
+.steptrace__z-cell--prefix {
+  flex: 0 0 var(--_cw, 34px);
+  inline-size: var(--_cw, 34px);
+}
+.steptrace__z-cell--string {
+  block-size: calc(44px + var(--_z-index-tier));
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  grid-template-rows: 2fr 1fr;
+  align-items: stretch;
+  justify-content: stretch;
+  padding: 0;
+}
+.steptrace__z-char {
+  min-block-size: 0;
+  display: grid;
+  place-items: center;
+}
+.steptrace__z-index {
+  min-block-size: 0;
+  display: grid;
+  place-items: center;
+  border-block-start: 1px solid color-mix(in srgb, var(--_text) 22%, transparent);
+  font: 500 0.58rem/1 var(--_font-mono);
+  color: var(--_muted);
+}
+.steptrace__z-cell[data-box="1"]:not([data-state="probe"]):not([data-state="match"]):not(
+    [data-state="mismatch"]
+  ) {
+  background: color-mix(in srgb, var(--_violet) 9%, transparent);
+}
+.steptrace__z-cell[data-state="copy-source"] {
+  color: var(--_amber);
+  font-weight: 700;
+  background: color-mix(in srgb, var(--_amber) 18%, transparent);
+  box-shadow: inset 0 0 0 2px var(--_amber);
+}
+.steptrace__z-cell[data-state="copy-target"] {
+  color: var(--_blue);
+  font-weight: 700;
+  background: color-mix(in srgb, var(--_blue) 10%, transparent);
+  box-shadow: inset 0 -2px 0 var(--_blue);
+}
+.steptrace__z .steptrace__cell[data-state="match"],
+.steptrace__z .steptrace__cell[data-state="found"] {
+  box-shadow: inset 0 -2px 0 var(--_green);
+}
+.steptrace__z-cursor,
+.steptrace__z-bracket {
+  position: absolute;
+  inset-inline-start: 0;
+  pointer-events: none;
+  transition:
+    transform var(--_dur-move) var(--_spring-soft),
+    width var(--_dur-move) var(--_spring-soft),
+    opacity var(--_dur-quick) ease;
+}
+.steptrace__z-cursor {
+  inset-block: 0;
+  inline-size: var(--_cw, 34px);
+  border-block-end: 2px solid var(--_blue);
+  opacity: 0;
+}
+.steptrace__z-cursor[data-visible="1"] {
+  opacity: 1;
+}
+.steptrace__z-bracket {
+  inset-block-start: 0;
+  box-sizing: border-box;
+  block-size: calc(var(--_string-radius) - 1px);
+  border-block-start: 2px solid var(--_violet);
+  opacity: 0;
+}
+.steptrace__z-bracket[data-edge-start="1"] {
+  border-inline-start: 2px solid var(--_violet);
+  border-start-start-radius: calc(var(--_string-radius) - 1px);
+}
+.steptrace__z-bracket[data-edge-end="1"] {
+  border-inline-end: 2px solid var(--_violet);
+  border-start-end-radius: calc(var(--_string-radius) - 1px);
+}
+.steptrace__z-bracket::before,
+.steptrace__z-bracket::after {
+  content: "";
+  position: absolute;
+  inset-block-start: 0;
+  block-size: 0.28rem;
+  border-inline-start: 2px solid var(--_violet);
+}
+.steptrace__z-bracket::before {
+  inset-inline-start: 0;
+}
+.steptrace__z-bracket::after {
+  inset-inline-end: 0;
+}
+.steptrace__z-bracket[data-edge-start="1"]::before,
+.steptrace__z-bracket[data-edge-end="1"]::after {
+  content: none;
+}
+.steptrace__z-bracket[data-visible="1"] {
+  opacity: 1;
+}
+
+@media (max-width: 560px) {
+  .steptrace__bm {
+    min-block-size: 12.25rem;
+  }
+  .steptrace__z {
+    min-block-size: 12.25rem;
+  }
+}
+
+.steptrace--reduced
+  :is(.steptrace__bm-pattern, .steptrace__z-track, .steptrace__z-cursor, .steptrace__z-bracket) {
+  transition-property: opacity !important;
 }

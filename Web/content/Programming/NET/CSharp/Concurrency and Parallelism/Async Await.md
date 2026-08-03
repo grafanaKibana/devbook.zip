@@ -1,8 +1,8 @@
 ---
 publish: true
-created: 2026-07-11T21:46:00.416Z
-modified: 2026-07-18T11:30:11.446Z
-published: 2026-07-18T11:30:11.446Z
+created: 2026-07-25T18:38:43.849Z
+modified: 2026-07-25T18:38:43.849Z
+published: 2026-07-25T18:38:43.849Z
 topic:
   - Programming
 subtopic:
@@ -64,7 +64,7 @@ var data = await _repo.GetAsync(id).ConfigureAwait(false);
 - Library code: always use `ConfigureAwait(false)` to avoid context capture overhead and deadlock risk.
 - Application code (controllers, view models): omit it — you usually want to resume on the original context.
 
-## `ExecutionContext` vs `SynchronizationContext`
+## `ExecutionContext` Vs `SynchronizationContext`
 
 These are two different ambient mechanisms, and conflating them is a common source of bugs:
 

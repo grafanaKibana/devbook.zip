@@ -4,14 +4,14 @@ topic:
 subtopic:
   - Patterns
 summary: "23 reusable object-oriented solutions to recurring design problems, giving teams a shared vocabulary for design intent and tradeoffs."
-tags:
-  - FolderNote
+tags: [FolderNote]
 priority: High
 publish: true
 level:
   - "3"
 status: Done
 ---
+
 GoF (Gang of Four) Design Patterns are 23 reusable solutions to recurring object-oriented design problems, first documented in *Design Patterns: Elements of Reusable Object-Oriented Software* (1994) by Gamma, Helm, Johnson, and Vlissides. They provide a shared vocabulary for design intent — when a team says "let's use a Strategy here," everyone immediately understands the tradeoffs without long explanations. Patterns are not copy-paste code; they're templates for solving classes of problems. This section covers all 23 GoF patterns organized by category, each with production C# examples showing the problem without the pattern, the transformation with it, and the .NET built-ins that already implement it — connecting new knowledge to things you use daily.
 
 ```datacorejsx
@@ -19,7 +19,7 @@ const { FolderStructureMap } = await dc.require("Assets/components/devbook-folde
 return FolderStructureMap;
 ```
 
-# Choose a pattern by intent and cost
+# Choose a Pattern by Intent and Cost
 
 Start from the pressure in the code, not a pattern name. Introduce the smallest pattern that makes a real variation or responsibility boundary explicit.
 

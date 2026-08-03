@@ -1,8 +1,8 @@
 ---
 publish: true
-created: 2026-07-15T11:47:56.302Z
-modified: 2026-07-18T11:38:38.753Z
-published: 2026-07-18T11:38:38.753Z
+created: 2026-07-25T18:38:43.876Z
+modified: 2026-07-25T18:38:43.876Z
+published: 2026-07-25T18:38:43.876Z
 topic:
   - Software Architecture
 subtopic:
@@ -43,7 +43,7 @@ Customer               Customer
 OrderPlaced event ──→  BillingService.CreateInvoice()
 ```
 
-## Subdomains: where to invest
+## Subdomains: where to Invest
 
 Not all of the domain deserves equal effort. DDD classifies subdomains so you spend modeling energy where it pays off:
 
@@ -65,7 +65,7 @@ Bounded contexts don't live in isolation — **context maps** describe the _rela
 
 The map is a _strategic_ deliverable: it tells you where to put ACLs, which integrations are risky (Shared Kernel), and where team coordination is required.
 
-# Tactical modeling
+# Tactical Modeling
 
 - **Entity:** identified across time, such as `Order` with `OrderId`.
 - **Value object:** identified by its values and normally immutable, such as `Money(Amount, Currency)`.

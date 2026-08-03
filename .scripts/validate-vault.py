@@ -430,7 +430,7 @@ def validate_residue(note: Note) -> list[Issue]:
                     residue,
                 )
             )
-    if "Software Engineering" in note.content and note.rel not in GENERATED_PAGES:
+    if re.search(r'\[\[.*Software Engineering|Software Engineering/', note.content) and note.rel not in GENERATED_PAGES:
         issues.append(
             Issue(
                 "path.legacy",
@@ -519,6 +519,8 @@ def validate_attachment_locations(vault_root: Path, paths: Iterable[Path]) -> li
     repo_root = vault_root.parent
     for path in sorted(set(paths)):
         if not path.is_file() or path.suffix.casefold() not in ATTACHMENT_SUFFIXES:
+            continue
+        if not path.is_relative_to(vault_root):
             continue
         try:
             path.relative_to(assets_root)

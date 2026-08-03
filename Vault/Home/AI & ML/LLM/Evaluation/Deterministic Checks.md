@@ -10,6 +10,7 @@ priority: Medium
 status: Done
 publish: true
 ---
+
 Deterministic checks are non-LLM tests that validate LLM outputs strictly: schema validity, required fields, safety rules, and tool/policy constraints. They are cheap (microseconds), deterministic (same input always gives same result), and should run on every evaluation before any LLM judge. They catch the obvious failures fast and cheaply, leaving expensive LLM-as-judge calls for semantic quality.
 
 # Types of Deterministic Checks
@@ -60,7 +61,7 @@ LLM Output
 
 Run deterministic checks first. A malformed JSON or a disallowed action does not need a judge — it is a hard failure.
 
-# Deterministic Checks vs LLM-as-Judge
+# Deterministic Checks Vs LLM-as-Judge
 
 | Aspect | Deterministic checks | LLM-as-judge |
 |--------|---------------------|--------------|
@@ -92,7 +93,6 @@ Run deterministic checks first. A malformed JSON or a disallowed action does not
 **What goes wrong**: the team validates the final LLM response but not the tool calls the agent makes. The agent calls a `delete_record` tool that is not on the allowlist, and the check never fires because it only runs on the text response.
 
 **Mitigation**: apply allowlist checks to every tool invocation, not just the final response. For agentic systems, each tool call is an action that needs validation.
-
 
 # Questions
 

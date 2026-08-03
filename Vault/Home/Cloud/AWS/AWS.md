@@ -8,8 +8,7 @@ level:
   - "3"
 priority: Medium
 status: Creation
-tags:
-  - FolderNote
+tags: [FolderNote]
 publish: true
 ---
 

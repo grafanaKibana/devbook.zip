@@ -1,8 +1,8 @@
 ---
 publish: true
-created: 2026-07-11T21:46:15.775Z
-modified: 2026-07-18T11:30:07.963Z
-published: 2026-07-18T11:30:07.963Z
+created: 2026-07-25T18:38:43.839Z
+modified: 2026-07-25T18:38:43.840Z
+published: 2026-07-25T18:38:43.840Z
 topic:
   - Networks
 subtopic: []
@@ -31,7 +31,7 @@ From the wire up to the app. Mnemonic (top→down): **A**ll **P**eople **S**eem 
 
 As data goes **down** the stack each layer wraps the payload in its own header (**encapsulation**); on the way **up** the receiver strips them off (**de-encapsulation**) — the same nesting the TCP/IP note describes.
 
-# OSI vs the Real TCP/IP Stack
+# OSI Vs the Real TCP/IP Stack
 
 Nobody implements seven discrete layers. The internet uses the 4-layer **TCP/IP model**, and OSI's layers 5–7 collapse into one "Application" layer in practice:
 

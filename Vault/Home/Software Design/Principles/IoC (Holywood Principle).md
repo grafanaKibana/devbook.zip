@@ -44,7 +44,7 @@ builder.Services.AddSingleton<IEmailSender, SmtpEmailSender>();
 
 The container calls `OrderService` with the right implementations — "don't call us, we'll call you."
 
-# IoC vs Dependency Inversion Principle (DIP)
+# IoC Vs Dependency Inversion Principle (DIP)
 
 These are related but distinct:
 
@@ -89,7 +89,6 @@ DIP is the *why* (depend on interfaces); IoC/DI is the *how* (let the container 
 
 **Decision rule**: use constructor injection via the built-in ASP.NET Core DI container as the default. Question the pattern only when constructors have more than 5 parameters (SRP violation signal) or when you are writing infrastructure that genuinely needs property injection.
 
-
 # Questions
 
 > [!QUESTION]- What is the difference between IoC and Dependency Injection?
@@ -97,7 +96,6 @@ DIP is the *why* (depend on interfaces); IoC/DI is the *how* (let the container 
 
 > [!QUESTION]- What is the difference between IoC and the Dependency Inversion Principle (DIP)?
 > DIP (SOLID 'D') is a design rule: high-level modules should depend on abstractions, not concrete implementations. IoC is a runtime mechanism: the framework wires concrete implementations to those abstractions. DIP is the why (depend on interfaces); IoC/DI is the how (let the container provide the concrete class). You can follow DIP without a DI container by manually wiring dependencies in Main, but a container makes it practical at scale.
-
 
 # References
 

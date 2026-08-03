@@ -54,7 +54,7 @@ var connectionString = builder.Configuration["Db:ConnectionString"];
 > [!NOTE]
 > **User Secrets is a dev-only convenience, not encryption.** The file is plain JSON outside the repo; it keeps secrets off Git, nothing more. Production must use a real store.
 
-# Managed Identity / Keyless Auth (the best option)
+# Managed Identity / Keyless Auth (The bEst oPtion)
 
 The strongest pattern removes the bootstrap secret entirely. In Azure, a **managed identity** gives the app an identity the platform vouches for, so `DefaultAzureCredential` fetches a short-lived token to read Key Vault — there's no Key Vault *password* anywhere. The CI equivalent is **OIDC / workload identity federation** (covered in [[CI CD tools|CI/CD tools]]): the pipeline exchanges a job-scoped token with AWS/Azure/GCP instead of holding a static cloud key. The "secret zero" / bootstrapping problem — *how does the app authenticate to the secret store?* — is solved by the platform's identity rather than yet another stored credential.
 

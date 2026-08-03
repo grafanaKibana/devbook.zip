@@ -4,12 +4,11 @@ topic:
 subtopic:
   - Algorithms
 summary: "Comparing sorting algorithms by stability, memory tradeoffs, and typical runtime behavior to guide production choices."
-tags:
-  - FolderNote
+tags: [FolderNote]
 publish: true
 priority: Medium
 level:
-  - '4'
+  - "4"
 status: Creation
 ---
 
@@ -41,7 +40,7 @@ flowchart TD
 
 # Algorithm Selection
 
-## Comparison sorts — bounded below by `O(n log n)`
+## Comparison Sorts — Bounded below by `O(n log n)`
 
 | Algorithm | Average | Worst | Space | Stable | Reach for it when |
 | --- | --- | --- | --- | --- | --- |
@@ -56,7 +55,7 @@ flowchart TD
 | [[Tim Sort]] | O(n log n) | O(n log n) | O(n) | Yes | Real-world partly-ordered data (Python, Java) |
 | [[Introsort]] | O(n log n) | O(n log n) | O(log n) | No | Quicksort's speed without its O(n²) tail (C++, .NET) |
 
-## Non-comparison sorts — beat the bound by reading key structure
+## Non-comparison Sorts — Beat the Bound by Reading Key Structure
 
 | Algorithm | Time | Space | Stable | Precondition |
 | --- | --- | --- | --- | --- |

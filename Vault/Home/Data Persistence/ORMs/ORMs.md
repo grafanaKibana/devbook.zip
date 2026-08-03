@@ -4,8 +4,7 @@ topic:
 subtopic:
   - ORMs
 summary: "Mappers that translate object graphs and LINQ into SQL, a leaky abstraction to understand."
-tags:
-  - FolderNote
+tags: [FolderNote]
 publish: true
 priority: High
 level:

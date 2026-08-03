@@ -1,8 +1,8 @@
 ---
 publish: true
-created: 2026-07-15T11:47:56.135Z
-modified: 2026-07-18T11:59:15.668Z
-published: 2026-07-18T11:59:15.668Z
+created: 2026-07-25T18:38:43.872Z
+modified: 2026-07-25T18:38:43.872Z
+published: 2026-07-25T18:38:43.872Z
 topic:
   - Software Architecture
 subtopic:
@@ -66,7 +66,7 @@ Load balancing consumes health signals to decide whether a destination is eligib
 
 For routing, readiness must answer whether another destination can serve more successfully. Removing every instance because one shared database is unavailable replaces controlled application failures with an empty pool. Recovery thresholds and slow-start ramp-up prevent a flapping or cold instance from receiving full traffic immediately.
 
-# Cloud load-balancer capability mapping
+# Cloud Load-balancer Capability Mapping
 
 Select capabilities before provider product names:
 
@@ -81,7 +81,7 @@ Select capabilities before provider product names:
 
 Only then map to a service. Azure Load Balancer is an L4 family with regional public/internal variants and a cross-region global tier; Application Gateway is regional L7, while Front Door is a global HTTP edge. Similar provider names do not imply identical health, source-IP, cross-zone, or failover semantics; verify the selected SKU and test a backend failure.
 
-# Health, routing, TLS, zones, and affinity are separate controls
+# Health, Routing, TLS, Zones, and Affinity Are Separate Controls
 
 | Control | Problem solved | Cost introduced |
 |---|---|---|
@@ -95,25 +95,25 @@ Do not bundle these under "add a load balancer." For a stateless API, enable hea
 
 # Pitfalls
 
-## Sticky sessions can defeat balancing goals
+## Sticky Sessions Can Defeat Balancing Goals
 
 - **What goes wrong**: load concentrates on a subset of instances while others stay underused.
 - **Why**: affinity preserves client-to-instance mapping even as traffic patterns change.
 - **Mitigation**: externalize session state, shorten affinity TTL, and apply affinity only when strictly required.
 
-## Readiness does not represent routing eligibility
+## Readiness Does Not Represent Routing Eligibility
 
 - **What goes wrong**: an instance that cannot serve stays in rotation, or a shared dependency outage evicts every replica.
 - **Why**: one `/health` endpoint is used for process restart, routing, and dependency monitoring.
 - **Mitigation**: keep liveness dependency-free; make readiness instance-specific and include a dependency only when another replica can serve successfully. Monitor shared dependencies separately.
 
-## Thundering herd when recovering instances
+## Thundering Herd when Recovering Instances
 
 - **What goes wrong**: a recovered instance receives too much traffic too quickly and fails again.
 - **Why**: immediate full reintroduction with cold caches and cold code paths.
 - **Mitigation**: use slow-start ramp-up, pre-warm caches and model clients, and cap concurrent requests during warmup.
 
-## TLS termination in the wrong place
+## TLS Termination in the Wrong Place
 
 - **What goes wrong**: security boundaries become unclear or latency increases unexpectedly.
 - **Why**: inconsistent decisions between edge termination, re-encryption, and passthrough.
@@ -150,7 +150,7 @@ Health model | Active only | Active plus passive | Simplicity versus better dete
 - [AWS Elastic Load Balancing product comparison](https://docs.aws.amazon.com/elasticloadbalancing/latest/userguide/what-is-load-balancing.html) — official distinction among application, network, gateway, and classic load balancers.
 - [Google Cloud load balancing overview](https://cloud.google.com/load-balancing/docs/load-balancing-overview) — official mapping of global/regional, internal/external, proxy/pass-through, L4/L7 capabilities.
 
-## ByteByteGo provenance
+## ByteByteGo Provenance
 
 - [Top load-balancing algorithms](https://github.com/ByteByteGoHq/system-design-101/blob/b28380a4710c5ec9638ec037d4168e288f334cba/data/guides/top-6-load-balancing-algorithms.md) — provenance for the algorithm visual; affinity and hashing caveats are made explicit.
 - [Cloud load-balancer cheat sheet](https://github.com/ByteByteGoHq/system-design-101/blob/b28380a4710c5ec9638ec037d4168e288f334cba/data/guides/cloud-load-balancer-cheat-sheet.md) — editorial lead for capability selection; its dated and incorrect provider mapping was rejected.

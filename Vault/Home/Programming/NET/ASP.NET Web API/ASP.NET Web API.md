@@ -7,8 +7,7 @@ summary: "How ASP.NET Core routes each HTTP request through middleware to handle
 level:
   - "4"
 priority: High
-tags:
-  - FolderNote
+tags: [FolderNote]
 
 publish: true
 status: Creation
@@ -62,7 +61,7 @@ public sealed class OrdersController : ControllerBase
     public ActionResult<OrderDto> GetById(string id) => Ok(new OrderDto(id));
 }
 ```
- 
+
 # Questions
 
 > [!QUESTION]- Where should authentication and authorization live in an ASP.NET Core API?

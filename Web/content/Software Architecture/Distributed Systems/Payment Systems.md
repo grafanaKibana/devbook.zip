@@ -1,8 +1,8 @@
 ---
 publish: true
-created: 2026-07-18T08:17:54.512Z
-modified: 2026-07-18T11:59:15.670Z
-published: 2026-07-18T11:59:15.670Z
+created: 2026-07-25T18:38:43.874Z
+modified: 2026-07-25T18:38:43.874Z
+published: 2026-07-25T18:38:43.874Z
 topic:
   - Software Architecture
 subtopic:
@@ -291,7 +291,7 @@ Choose custody when the product needs regulated account controls, reversible sup
 - [Unified Payments Interface](https://github.com/ByteByteGoHq/system-design-101/blob/b28380a4710c5ec9638ec037d4168e288f334cba/data/guides/unified-payments-interface-upi-in-india.md) — routing, authorization, bank posting, acknowledgement, reconciliation, and participant settlement.
 - [How to learn payments](https://github.com/ByteByteGoHq/system-design-101/blob/b28380a4710c5ec9638ec037d4168e288f334cba/data/guides/how-to-learn-payments.md) — scope across authorities, banks, non-bank providers, clearing systems, and settlement systems.
 
-## Primary and implementation sources
+## Primary and Implementation Sources
 
 - [CPMI glossary](https://www.bis.org/cpmi/glossary.pdf) — primary terminology for payment instructions, clearing, settlement, netting, reconciliation, and participant roles.
 - [Principles for financial market infrastructures](https://www.bis.org/cpmi/publ/d101a.pdf) — primary risk-management standard covering settlement finality, liquidity, operational resilience, and default management.

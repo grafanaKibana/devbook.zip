@@ -1,8 +1,8 @@
 ---
 publish: true
-created: 2026-07-11T21:44:32.498Z
-modified: 2026-07-18T11:30:11.194Z
-published: 2026-07-18T11:30:11.194Z
+created: 2026-07-25T18:38:43.847Z
+modified: 2026-07-25T18:38:43.847Z
+published: 2026-07-25T18:38:43.847Z
 topic:
   - Programming
 subtopic:
@@ -70,7 +70,7 @@ public IActionResult PublicEndpoint() => Ok();
 public IActionResult InternalEndpoint() => Ok();
 ```
 
-# Exposed Headers, Simple vs Preflighted, and Caching
+# Exposed Headers, Simple Vs Preflighted, and Caching
 
 - **Reading custom response headers needs `WithExposedHeaders`.** By default browser JS can only read a small all-list of response headers (`Content-Type`, `Cache-Control`, etc.). If your client needs to read `X-Total-Count`, `Location`, or a custom header, the server must send `Access-Control-Expose-Headers` — `policy.WithExposedHeaders("X-Total-Count")`. This is a frequent "the header is there in DevTools but `response.headers.get()` returns null" bug.
 - **Simple vs preflighted.** A request skips the preflight only if it's a "simple" request: method `GET`/`HEAD`/`POST`, only CORS-safelisted headers, and `Content-Type` is one of `application/x-www-form-urlencoded`, `multipart/form-data`, or `text/plain`. Anything else (a `PUT`, an `Authorization` header, `Content-Type: application/json`) triggers the `OPTIONS` preflight.
@@ -81,7 +81,7 @@ public IActionResult InternalEndpoint() => Ok();
 
 # Pitfalls
 
-## `AllowAnyOrigin()` with `AllowCredentials()`
+## `AllowAnyOrigin()` With `AllowCredentials()`
 
 **What goes wrong**: combining `AllowAnyOrigin()` with `AllowCredentials()` throws a runtime exception in ASP.NET Core.
 

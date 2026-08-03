@@ -47,7 +47,6 @@ What this ROC diagram shows:
 - Better ROC means higher true positive rate at the same false positive rate.
 - If your model line stays close to gray, ranking quality is weak.
 
-
 ```mermaid
 ---
 config:

@@ -149,7 +149,6 @@ The container **owns disposal of the instances it creates**: when a scope ends i
 > [!QUESTION]- What is the difference between `GetService<T>` and `GetRequiredService<T>`?
 > `GetService<T>` returns null if the service is not registered; `GetRequiredService<T>` throws `InvalidOperationException`. Use `GetRequiredService<T>` in production code where a missing registration is a programming error that should fail loudly at startup rather than silently return null at call time.
 
-
 # References
 
 - [Dependency injection in ASP.NET Core (Microsoft Learn)](https://learn.microsoft.com/en-us/aspnet/core/fundamentals/dependency-injection) — official guide covering service registration, lifetimes, constructor injection, and scope validation.

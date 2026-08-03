@@ -102,7 +102,9 @@ const script = `
       const map = readMap();
       // Only the root list (.explorer-ul) is reordered; nested folders keep the
       // plugin's alphabetical order.
-      document.querySelectorAll("div.explorer .explorer-ul").forEach(function (ul) {
+      document.querySelectorAll("div.explorer").forEach(function (explorer) {
+        const ul = explorer.querySelector(".explorer-ul");
+        if (!ul) return;
         reorderList(ul, map);
       });
     } finally {

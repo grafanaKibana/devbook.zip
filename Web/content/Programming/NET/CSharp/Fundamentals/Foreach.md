@@ -1,8 +1,8 @@
 ---
 publish: true
-created: 2026-07-11T21:45:12.067Z
-modified: 2026-07-18T11:30:11.742Z
-published: 2026-07-18T11:30:11.742Z
+created: 2026-07-25T18:38:43.852Z
+modified: 2026-07-25T18:38:43.853Z
+published: 2026-07-25T18:38:43.853Z
 topic:
   - Programming
 subtopic:
@@ -51,7 +51,7 @@ The `finally`/`Dispose` is the part people forget: it's what runs the `finally` 
 
 **Struct enumerators and boxing.** `List<T>`, arrays, and `Span<T>` expose a **struct** enumerator, so `foreach` over them allocates nothing (the JIT also elides bounds checks on `Span<T>`/arrays). But if you access the collection through `IEnumerable<T>`, `GetEnumerator()` returns the enumerator **boxed** to the interface — reintroducing the allocation. Iterate the concrete type on hot paths.
 
-# Iterators and yield
+# Iterators and Yield
 
 `yield return` and `yield break` let you write iterator methods: methods that produce a sequence lazily, one element at a time.
 

@@ -6,8 +6,7 @@ topic:
   - Data Persistence
 subtopic: []
 summary: "How software stores and protects state across restarts using SQL, NoSQL, and caching."
-tags:
-  - FolderNote
+tags: [FolderNote]
 publish: true
 priority: High
 level:

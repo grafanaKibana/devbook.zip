@@ -1,8 +1,8 @@
 ---
 publish: true
-created: 2026-07-11T21:43:50.456Z
-modified: 2026-07-18T11:30:03.010Z
-published: 2026-07-18T11:30:03.010Z
+created: 2026-07-25T18:38:43.782Z
+modified: 2026-07-25T18:38:43.782Z
+published: 2026-07-25T18:38:43.782Z
 topic:
   - AI & ML
 subtopic:
@@ -118,7 +118,7 @@ Console.WriteLine($"Confidence: {result.Value.ConfidenceScores.Positive:P}");
 
 **Decision rule**: use rule-based approaches for simple, high-volume extraction where patterns are stable. Use fine-tuned small models for production NLP tasks where latency and cost matter. Use LLMs for complex tasks (summarization, QA, multi-step reasoning) or when you lack training data. Use managed services (Azure AI Language) when you need standard NLP tasks without ML infrastructure.
 
-## Monolingual vs Multilingual Models
+## Monolingual Vs Multilingual Models
 
 | Model type | Per-language accuracy | Languages | Model size | Use when |
 |-----------|---------------------|-----------|-----------|----------|

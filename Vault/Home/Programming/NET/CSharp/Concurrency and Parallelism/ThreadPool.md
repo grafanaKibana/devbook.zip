@@ -10,6 +10,7 @@ priority: High
 status: Ready to Repeat
 publish: true
 ---
+
 The .NET ThreadPool is the shared execution engine for most `Task`-based work. It dynamically manages worker threads and I/O completion processing to balance throughput and latency. Understanding ThreadPool behavior is essential for diagnosing starvation, latency spikes, and "mysterious" timeout storms that appear under load.
 
 Starting raw threads has real cost: setup time (~1ms), stack allocation (1MB default), and scheduler overhead. The ThreadPool amortizes this by reusing worker threads and limiting how many run concurrently.

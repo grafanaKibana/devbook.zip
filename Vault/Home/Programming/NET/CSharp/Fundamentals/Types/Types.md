@@ -4,13 +4,12 @@ topic:
 subtopic:
   - NET
 summary: "How C# types define shape, behavior, and value versus reference assignment semantics."
-tags:
-  - FolderNote
+tags: [FolderNote]
 publish: true
 status: Creation
 priority: Medium
 level:
-  - '4'
+  - "4"
 ---
 
 A C# type defines shape, behavior, and assignment semantics.

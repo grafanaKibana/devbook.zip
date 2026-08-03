@@ -6,18 +6,19 @@ subtopic:
 level:
   - "4"
 priority: Medium
-status: Creation
+status: Ready to Repeat
 publish: true
 ---
 
-A connected, undirected, weighted graph can contain many spanning trees. [[Minimum Spanning Tree]] asks for the one with minimum total edge weight. Kruskal's algorithm treats the graph as an edge list: sort every edge from lightest to heaviest, then accept an edge only when it joins two components that are still separate.
+A connected, undirected, weighted graph can contain many spanning trees. [[Home/Computer Science/Algorithms/Graph Algorithms/Minimum Spanning Tree|Minimum spanning tree]] asks for the one with minimum total edge weight. Kruskal's algorithm treats the graph as an edge list: sort every edge from lightest to heaviest, then accept an edge only when it joins two components that are still separate.
 
-The cycle test is the whole mechanism. A [[Disjoint Set]] stores the current forest components. If `find(u) == find(v)`, edge `(u, v)` would close a cycle and is rejected; otherwise `union(u, v)` merges the components and the edge enters the result. The cut property makes that greedy choice safe: the lightest edge crossing a cut belongs to some MST.
+The cycle test is the whole mechanism. A [[Home/Computer Science/Data Structures/Graph Structures/Disjoint Set|disjoint set]] stores the current forest components. If `find(u) == find(v)`, edge `(u, v)` would close a cycle and is rejected; otherwise `union(u, v)` merges the components and the edge enters the result. The cut property makes that greedy choice safe: the lightest edge crossing a cut belongs to some MST.
 
-> [!NOTE] Visualization pending
-> Planned StepTrace: scan a sorted edge list, show union-find component labels, accept edges that merge components, and reject the first edge whose endpoints already share a root.
+```steptrace
+{"algorithm":"kruskal"}
+```
 
-# One sorted scan
+# One Sorted Scan
 
 For edges `AB=1`, `BC=2`, `AC=3`, `CD=4`, the initial components are `{A}`, `{B}`, `{C}`, `{D}`.
 
@@ -34,13 +35,13 @@ The accepted edges have total weight `7` and stop at `V - 1 = 3` edges. At every
 
 | Case | Time | Auxiliary space | Cause |
 | --- | --- | --- | --- |
-| Best | `O(E log E)` | `O(V)` plus sort workspace | comparison sorting still orders the full edge list |
-| Average | `O(E log E)` | `O(V)` plus sort workspace | sorting dominates near-constant union-find operations |
-| Worst | `O(E log E)` | `O(V)` plus sort workspace | all edges may be scanned before connectivity is known |
+| Best | `Θ(E log E)` | `O(V)` plus sort workspace | the chosen comparison sort orders the full edge list |
+| Average | `Θ(E log E)` | `O(V)` plus sort workspace | the chosen comparison sort dominates near-constant union-find operations |
+| Worst | `Θ(E log E)` | `O(V)` plus sort workspace | the chosen comparison sort still processes the full edge list |
 
-With path compression and union by rank or size, the disjoint-set work is `O(E α(V))`; sorting remains dominant. The `O(V)` term is the union-find forest and assumes an in-place edge sort. A sort that allocates a temporary edge buffer raises auxiliary space to `O(V + E)`. The result itself stores `V - 1` edges and is excluded from auxiliary space.
+The table fixes the sorting model to a non-adaptive `Θ(E log E)` comparison sort such as mergesort or heapsort. If the edge list is already sorted and no sorting pass is needed, the scan itself costs `O(E · α(V))`. With path compression and union by rank or size, disjoint-set work is `O(E · α(V))`; sorting dominates when required. The `O(V)` term is the union-find forest and assumes an in-place edge sort. A sort that allocates a temporary edge buffer raises auxiliary space to `O(V + E)`. The result itself stores `V - 1` edges and is excluded from auxiliary space.
 
-# Boundary cases
+# Boundary Cases
 
 A disconnected graph never reaches `V - 1` accepted edges. The scan returns a minimum spanning forest rather than an MST, so the edge count must be checked.
 

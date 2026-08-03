@@ -18,7 +18,7 @@ Resource-based authorization checks whether the current user has permission to p
 
 Role-based authorization (`[Authorize(Roles = "Admin")]`) checks what type of user you are. Resource-based authorization checks ownership or relationship to a specific resource. Use it when authorization depends on data — for example, only the document owner can edit it.
 
-## Where it sits among authorization models
+## Where it Sits among Authorization Models
 
 Resource-based auth is one point on a spectrum of access-control models:
 
@@ -114,7 +114,6 @@ public class DocumentOwnerHandlerTests
 }
 ```
 
-
 # Pitfalls
 
 ## Missing Authorization Check After Fetching Resource
@@ -125,12 +124,11 @@ public class DocumentOwnerHandlerTests
 
 **Mitigation**: always call `IAuthorizationService.AuthorizeAsync(User, resource, policy)` after fetching the resource and before returning it. Return `403 Forbidden` (not `404 Not Found`) when the resource exists but the user lacks permission — unless you want to hide resource existence.
 
-## Returning 404 vs 403
+## Returning 404 Vs 403
 
 **What goes wrong**: returning `404 Not Found` for unauthorized access hides resource existence but can confuse legitimate users who have the wrong ID.
 
 **Decision rule**: return `403 Forbidden` when the resource exists and the user is authenticated but lacks permission. Return `404 Not Found` only when you intentionally want to hide resource existence from unauthorized users (e.g., private content).
-
 
 # Questions
 
@@ -139,7 +137,6 @@ public class DocumentOwnerHandlerTests
 
 > [!QUESTION]- Why inject `IAuthorizationService` instead of checking ownership in the controller directly?
 > `IAuthorizationService` centralizes authorization logic in handlers, making it testable and reusable across controllers. Direct ownership checks in controllers scatter authorization logic, making it easy to miss a check or apply it inconsistently. The handler pattern also supports multiple requirements composing into a single policy.
-
 
 # References
 
