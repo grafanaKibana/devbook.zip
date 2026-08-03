@@ -101,7 +101,7 @@ def split_body(body: str) -> tuple[list[str], str]:
 def render_entry(release: Release) -> str:
     summary, detail = split_body(release.body)
 
-    lines = [f"### {release.tag} ({release.date})"]
+    lines = [f"## {release.tag} ({release.date})"]
     lines.extend(summary)
     if detail:
         lines.append("> [!note]- Details")

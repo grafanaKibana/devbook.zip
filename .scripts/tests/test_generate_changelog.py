@@ -78,14 +78,14 @@ class RenderEntryTests(unittest.TestCase):
         rendered = render_entry(release)
 
         self.assertNotIn("\n- \n", rendered + "\n")
-        self.assertTrue(rendered.startswith("### v1.0.0 (2026-07-03)\n> [!note]- Details"))
+        self.assertTrue(rendered.startswith("## v1.0.0 (2026-07-03)\n> [!note]- Details"))
 
     def test_empty_detail_omits_callout(self) -> None:
         release = Release(tag="v0.0.1", date="2026-01-01", body="")
 
         rendered = render_entry(release)
 
-        self.assertEqual(rendered, "### v0.0.1 (2026-01-01)")
+        self.assertEqual(rendered, "## v0.0.1 (2026-01-01)")
 
 
 if __name__ == "__main__":
