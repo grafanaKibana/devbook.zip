@@ -1,8 +1,8 @@
 ---
 publish: true
-created: 2026-08-02T10:34:10.301Z
-modified: 2026-08-02T11:02:51.187Z
-published: 2026-08-02T11:02:51.187Z
+created: 2026-08-03T15:21:47.254Z
+modified: 2026-08-03T15:52:21.765Z
+published: 2026-08-03T15:52:21.765Z
 topic:
   - Computer Science
 subtopic:
@@ -56,96 +56,36 @@ tab: Complexity
   },
   "resources": {
     "time": {
-      "mode": "operations",
+      "mode": "comparison",
       "entries": [
         {
-          "kind": "operation",
-          "operation": "Clone",
-          "bounds": [
-            {
-              "kind": "curve",
-              "role": "Time",
-              "formula": "O(n)",
-              "curveId": "linear"
-            }
-          ]
+          "kind": "approach",
+          "label": "Naive (compare every pair)",
+          "formula": "O(n^2)",
+          "curveId": "quadratic"
         },
         {
-          "kind": "operation",
-          "operation": "Comparison sort",
-          "bounds": [
-            {
-              "kind": "curve",
-              "role": "Time",
-              "formula": "O(n log n)",
-              "curveId": "n-log-n"
-            }
-          ]
-        },
-        {
-          "kind": "operation",
-          "operation": "Sweep",
-          "bounds": [
-            {
-              "kind": "curve",
-              "role": "Time",
-              "formula": "O(n)",
-              "curveId": "linear"
-            }
-          ]
+          "kind": "approach",
+          "label": "Merge intervals (sort, then sweep)",
+          "formula": "O(n log n)",
+          "curveId": "n-log-n"
         }
       ]
     },
     "space": {
-      "mode": "operations",
+      "mode": "comparison",
       "entries": [
         {
-          "kind": "operation",
-          "operation": "Clone",
-          "bounds": [
-            {
-              "kind": "curve",
-              "role": "Extra working space",
-              "formula": "O(n)",
-              "curveId": "linear"
-            }
-          ]
+          "kind": "approach",
+          "label": "Naive (compare every pair)",
+          "formula": "O(1)",
+          "curveId": "constant"
         },
         {
-          "kind": "operation",
-          "operation": "Comparison sort",
-          "bounds": [
-            {
-              "kind": "curve",
-              "role": "Extra working space",
-              "formula": "O(log n) stack",
-              "curveId": "log-n"
-            }
-          ]
-        },
-        {
-          "kind": "operation",
-          "operation": "Sweep",
-          "bounds": [
-            {
-              "kind": "curve",
-              "role": "Extra working space",
-              "formula": "O(1) state",
-              "curveId": "constant"
-            }
-          ]
-        },
-        {
-          "kind": "operation",
-          "operation": "Returned output",
-          "bounds": [
-            {
-              "kind": "curve",
-              "role": "Extra working space",
-              "formula": "O(n) output",
-              "curveId": "linear"
-            }
-          ]
+          "kind": "approach",
+          "label": "Merge intervals (sort, then sweep)",
+          "formula": "O(log n)",
+          "curveId": "log-n"
         }
       ]
     }

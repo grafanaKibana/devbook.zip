@@ -1,8 +1,8 @@
 ---
 publish: true
-created: 2026-07-18T14:02:43.974Z
-modified: 2026-08-02T11:23:17.854Z
-published: 2026-08-02T11:23:17.854Z
+created: 2026-08-03T15:21:47.255Z
+modified: 2026-08-03T15:52:21.773Z
+published: 2026-08-03T15:52:21.773Z
 topic:
   - Computer Science
 subtopic:
@@ -58,35 +58,36 @@ tab: Complexity
   },
   "resources": {
     "time": {
-      "mode": "operations",
+      "mode": "comparison",
       "entries": [
         {
-          "kind": "operation",
-          "operation": "Bounded min-heap selection",
-          "bounds": [
-            {
-              "kind": "text",
-              "role": "Time",
-              "formula": "O(n log k)"
-            }
-          ]
+          "kind": "approach",
+          "label": "Naive (sort all elements)",
+          "formula": "O(n log n)",
+          "curveId": "n-log-n"
+        },
+        {
+          "kind": "approach",
+          "label": "Top-K (bounded heap)",
+          "formula": "O(n log k)",
+          "curveId": "n-log-n"
         }
       ]
     },
     "space": {
-      "mode": "operations",
+      "mode": "comparison",
       "entries": [
         {
-          "kind": "operation",
-          "operation": "Bounded min-heap selection",
-          "bounds": [
-            {
-              "kind": "curve",
-              "role": "Auxiliary space",
-              "formula": "O(k)",
-              "curveId": "linear"
-            }
-          ]
+          "kind": "approach",
+          "label": "Naive (sort all elements)",
+          "formula": "O(n)",
+          "curveId": "linear"
+        },
+        {
+          "kind": "approach",
+          "label": "Top-K (bounded heap)",
+          "formula": "O(k)",
+          "curveId": "linear"
         }
       ]
     }

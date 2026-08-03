@@ -1,8 +1,8 @@
 ---
 publish: true
-created: 2026-07-18T14:02:43.959Z
-modified: 2026-08-02T11:27:11.783Z
-published: 2026-08-02T11:27:11.783Z
+created: 2026-08-03T15:21:47.252Z
+modified: 2026-08-03T15:52:21.762Z
+published: 2026-08-03T15:52:21.762Z
 topic:
   - Computer Science
 subtopic:
@@ -40,97 +40,43 @@ tab: Complexity
   "version": 2,
   "label": "Greedy Algorithms complexity",
   "variables": {
-    "edgeCount": {
-      "symbol": "E",
-      "description": "number of edges"
-    },
     "inputSize": {
       "symbol": "n",
       "description": "number of input elements or states"
-    },
-    "vertexCount": {
-      "symbol": "V",
-      "description": "number of vertices"
     }
   },
   "resources": {
     "time": {
-      "mode": "operations",
+      "mode": "comparison",
       "entries": [
         {
-          "kind": "operation",
-          "operation": "Order candidates by the greedy key",
-          "bounds": [
-            {
-              "kind": "curve",
-              "role": "Time",
-              "formula": "O(n log n)",
-              "curveId": "n-log-n"
-            }
-          ]
+          "kind": "approach",
+          "label": "Naive (test every subset)",
+          "formula": "O(2^n·n)",
+          "curveId": "exponential"
         },
         {
-          "kind": "operation",
-          "operation": "Feasibility scan",
-          "bounds": [
-            {
-              "kind": "curve",
-              "role": "Time",
-              "formula": "O(n)",
-              "curveId": "linear"
-            }
-          ]
-        },
-        {
-          "kind": "operation",
-          "operation": "Priority-queue variant",
-          "bounds": [
-            {
-              "kind": "text",
-              "role": "Time",
-              "formula": "O((V + E) log V)"
-            }
-          ]
+          "kind": "approach",
+          "label": "Greedy (sort, then scan)",
+          "formula": "O(n log n)",
+          "curveId": "n-log-n"
         }
       ]
     },
     "space": {
-      "mode": "operations",
+      "mode": "comparison",
       "entries": [
         {
-          "kind": "operation",
-          "operation": "Order candidates by the greedy key",
-          "bounds": [
-            {
-              "kind": "text",
-              "role": "Auxiliary space",
-              "formula": "O(n) or O(log n)"
-            }
-          ]
+          "kind": "approach",
+          "label": "Naive (test every subset)",
+          "formula": "O(n)",
+          "curveId": "linear"
         },
         {
-          "kind": "operation",
-          "operation": "Feasibility scan",
-          "bounds": [
-            {
-              "kind": "curve",
-              "role": "Auxiliary space",
-              "formula": "O(1)",
-              "curveId": "constant"
-            }
-          ]
-        },
-        {
-          "kind": "operation",
-          "operation": "Priority-queue variant",
-          "bounds": [
-            {
-              "kind": "curve",
-              "role": "Auxiliary space",
-              "formula": "O(V)",
-              "curveId": "linear"
-            }
-          ]
+          "kind": "approach",
+          "label": "Greedy (sort, then scan)",
+          "formula": "O(n)",
+          "curveId": "linear"
         }
       ]
     }

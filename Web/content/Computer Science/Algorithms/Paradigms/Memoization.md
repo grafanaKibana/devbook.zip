@@ -1,8 +1,8 @@
 ---
 publish: true
-created: 2026-07-21T18:52:02.735Z
-modified: 2026-08-02T20:03:54.552Z
-published: 2026-08-02T20:03:54.552Z
+created: 2026-08-03T15:21:47.252Z
+modified: 2026-08-03T15:52:21.763Z
+published: 2026-08-03T15:52:21.763Z
 topic:
   - Computer Science
 subtopic:
@@ -55,48 +55,36 @@ tab: Complexity
   },
   "resources": {
     "time": {
-      "mode": "operations",
+      "mode": "comparison",
       "entries": [
         {
-          "kind": "operation",
-          "operation": "Distinct subproblems with O(1) local work each",
-          "bounds": [
-            {
-              "kind": "curve",
-              "role": "Upper bound",
-              "formula": "O(n)",
-              "curveId": "linear"
-            }
-          ]
+          "kind": "approach",
+          "label": "Naive (recompute every call)",
+          "formula": "O(2^n)",
+          "curveId": "exponential"
+        },
+        {
+          "kind": "approach",
+          "label": "Memoization",
+          "formula": "O(n)",
+          "curveId": "linear"
         }
       ]
     },
     "space": {
-      "mode": "operations",
+      "mode": "comparison",
       "entries": [
         {
-          "kind": "operation",
-          "operation": "Cache",
-          "bounds": [
-            {
-              "kind": "curve",
-              "role": "Persistent",
-              "formula": "O(n)",
-              "curveId": "linear"
-            }
-          ]
+          "kind": "approach",
+          "label": "Naive (recompute every call)",
+          "formula": "O(n)",
+          "curveId": "linear"
         },
         {
-          "kind": "operation",
-          "operation": "Recursion stack",
-          "bounds": [
-            {
-              "kind": "curve",
-              "role": "Worst-case auxiliary",
-              "formula": "O(n)",
-              "curveId": "linear"
-            }
-          ]
+          "kind": "approach",
+          "label": "Memoization",
+          "formula": "O(n)",
+          "curveId": "linear"
         }
       ]
     }
