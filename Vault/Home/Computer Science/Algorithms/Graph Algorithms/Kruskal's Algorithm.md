@@ -107,6 +107,11 @@ A disconnected graph never reaches `V - 1` accepted edges. The scan returns a mi
 
 Equal weights can produce several valid MSTs. Sort stability or an explicit endpoint tie-break changes which equal-weight edge enters, but not the minimum total weight. Negative weights require no special handling: ascending order and the cut property remain valid.
 
+# Questions
+
+> [!QUESTION]- How does Kruskal's algorithm reveal that the input graph is disconnected?
+> A connected graph reaches exactly `V - 1` accepted edges after its components merge into one. If the sorted-edge scan ends earlier, no remaining edge can connect the residual components, so the result is a minimum spanning forest rather than an MST.
+
 # References
 
 - [On the Shortest Spanning Subtree of a Graph and the Traveling Salesman Problem](https://www.ams.org/journals/proc/1956-007-01/S0002-9939-1956-0078686-7/) — Kruskal's original 1956 paper.

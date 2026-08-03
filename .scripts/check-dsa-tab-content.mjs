@@ -202,9 +202,13 @@ function scanOutsideComplexity(lines, excludedStart, excludedEnd, path, errors) 
   const ranges = fenceRanges(lines, 0, lines.length);
   const inFence = (index) =>
     ranges.some((range) => index >= range.start && index < range.end);
+  let inQuestions = false;
 
   for (let index = 0; index < lines.length; index += 1) {
-    if (!included(index) || inFence(index)) continue;
+    if (inFence(index)) continue;
+    if (/^# Questions\s*$/.test(lines[index])) inQuestions = true;
+    else if (/^#\s+/.test(lines[index])) inQuestions = false;
+    if (!included(index) || inQuestions) continue;
     const heading = isHeading(lines[index]);
     if (heading && /\bcomplexit(?:y|ies)\b/i.test(lines[index])) {
       addError(errors, path, index, "Complexity heading exists outside the Complexity tab");
@@ -370,6 +374,7 @@ function runSelfTests() {
     ["multi-shared.md", multi("", "#### Shared invariant\n\nSupport.\n")],
     ["multi-per-variant.md", multi("#### Variant invariant\n\nSupport.\n", "")],
     ["Quadtree.md", ordinary().replace("```steptrace\n{}\n```", "![[quadtree.png]]")],
+    ["questions-recall.md", `${ordinary()}\n# Questions\n\nWhy is the operation O(log n) amortized?\n\n# References\n`],
   ];
   for (const [path, text] of pass) {
     const errors = validateText(text, path);
@@ -386,6 +391,7 @@ function runSelfTests() {
     ["outside-table.md", `${ordinary()}\n| Case | Time |\n| --- | --- |\n| Worst | O(n) |\n`, "Complexity table exists outside"],
     ["outside-bound.md", `${ordinary()}\nThe scan costs O(n).\n`, "Asymptotic complexity claim exists outside"],
     ["outside-text.md", `${ordinary()}\nAverage runtime is linear.\n`, "Textual complexity candidate exists outside"],
+    ["outside-amortized.md", `${ordinary()}\nThe operation is amortized.\n`, "Textual complexity candidate exists outside"],
     ["outside-storage.md", `${ordinary()}\nIt is in-place and uses only extra storage for one flag.\n`, "Textual complexity candidate exists outside"],
     ["not-quadtree.md", ordinary().replace("```steptrace\n{}\n```", "![[image.png]]"), "must begin with a StepTrace"],
   ];

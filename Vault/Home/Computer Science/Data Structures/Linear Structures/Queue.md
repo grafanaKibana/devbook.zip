@@ -217,6 +217,11 @@ A fixed-capacity circular queue has a hard ceiling. Once the live region occupie
 > ```
 > `Queue<T>` is the growable circular buffer described above; `Dequeue` and `Peek` throw `InvalidOperationException` when empty, so a `Count` guard or the `Try*` variants are required at boundaries where the queue can drain.
 
+# Questions
+
+> [!QUESTION]- Which bounded-queue full policies create backpressure, and which shed data?
+> Blocking or rejecting an enqueue forces the producer to slow down or handle refusal, so the capacity limit becomes backpressure. Dropping the new item or overwriting the oldest keeps the producer moving by sacrificing data instead.
+
 # References
 
 - [`Queue<T>` class](https://learn.microsoft.com/en-us/dotnet/api/system.collections.generic.queue-1) — .NET API contract for Enqueue, Dequeue, Peek, and the growable circular-buffer semantics.

@@ -56,11 +56,15 @@ tab: Complexity
   "variables": {
     "branchingFactor": {
       "symbol": "b",
-      "description": "search branching factor or radix base"
+      "description": "maximum children per expanded node"
     },
     "inputSize": {
       "symbol": "n",
-      "description": "number of input elements or states"
+      "description": "maximum decision-tree depth"
+    },
+    "boundCost": {
+      "symbol": "C_bound",
+      "description": "cost of evaluating the optimistic bound for one node"
     }
   },
   "resources": {
@@ -69,12 +73,12 @@ tab: Complexity
       "entries": [
         {
           "kind": "operation",
-          "operation": "Best",
+          "operation": "Strong pruning",
           "bounds": [
             {
               "kind": "text",
               "role": "Time",
-              "formula": "O(n · b)"
+              "formula": "O(n · b · C_bound)"
             }
           ]
         },
@@ -85,18 +89,40 @@ tab: Complexity
             {
               "kind": "text",
               "role": "Time",
-              "formula": "instance-dependent; still exponential"
+              "formula": "instance-dependent; no sub-exponential guarantee"
             }
           ]
         },
         {
           "kind": "operation",
-          "operation": "Worst",
+          "operation": "Worst, b-ary tree",
           "bounds": [
             {
               "kind": "text",
               "role": "Time",
-              "formula": "O(2ⁿ · b)"
+              "formula": "Θ(b^n · C_bound)"
+            }
+          ]
+        },
+        {
+          "kind": "operation",
+          "operation": "Worst, 0/1 knapsack",
+          "bounds": [
+            {
+              "kind": "text",
+              "role": "Time",
+              "formula": "O(2^n · C_bound)"
+            }
+          ]
+        },
+        {
+          "kind": "operation",
+          "operation": "Worst, TSP",
+          "bounds": [
+            {
+              "kind": "text",
+              "role": "Time",
+              "formula": "O(n! · C_bound)"
             }
           ]
         }
@@ -148,6 +174,8 @@ tab: Complexity
 ```
 
 Best-first can retain every live node and exhaust memory on a hard instance. Depth-first retains only the current search path, trading that smaller frontier for less global control over which bound is explored next.
+
+The general `b`-ary model expands `1 + b + ... + b^n = Θ(b^n)` nodes when pruning fails. Binary 0/1 knapsack specializes that model to two take-or-skip branches per item, giving `O(2^n · C_bound)` time. TSP does not have a constant branching factor: the number of remaining-city choices shrinks by one per level, so exhaustive search can remain factorial. `C_bound` isolates the per-node cost of evaluating the relaxation from the branching factor `b`.
 ~~~~~
 
 # When the Bound Stops Helping

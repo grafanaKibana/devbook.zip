@@ -337,6 +337,11 @@ Sliding-window *maximum* is a common target, but a raw deque does not provide it
 > ```
 > The BCL ships no `Deque<T>`. `Queue<T>` is already a ring buffer but exposes only one end for insertion; `LinkedList<T>` supplies `AddFirst`/`AddLast`/`RemoveFirst`/`RemoveLast` as a ready doubly-linked deque at the cost of a node per element.
 
+# Questions
+
+> [!QUESTION]- When does a linked backing fit better than a growable ring buffer for a deque?
+> A ring buffer is the default when locality, compact storage, and constant-time indexing matter. A linked backing trades those properties and a node allocation per element for end operations without the ring buffer's occasional `O(n)` resize pause.
+
 # References
 
 - [Double-ended queue (Wikipedia)](https://en.wikipedia.org/wiki/Double-ended_queue) — operation set and the ring-buffer versus linked-list implementations with their complexity summary.
