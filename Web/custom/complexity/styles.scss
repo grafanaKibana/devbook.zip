@@ -175,7 +175,7 @@
 
 .complexity__legend-group {
   display: grid;
-  grid-template-columns: minmax(5.5rem, 1fr) minmax(0, auto);
+  grid-template-columns: minmax(0, auto) minmax(8rem, 1fr);
   align-items: center;
   gap: 0.5rem;
   min-height: 2.25rem;
@@ -246,7 +246,6 @@
   color: var(--cx-text);
   font: 500 0.875rem/1.35 var(--_font-head);
   text-align: right;
-  white-space: nowrap;
 }
 
 .complexity__legend-button {

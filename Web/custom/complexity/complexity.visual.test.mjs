@@ -19,13 +19,20 @@ const note = await readFile(
 const configMatch = note.match(/```complexity\s*\n([\s\S]*?)\n```/)
 const config = configMatch ? JSON.parse(configMatch[1]) : null
 assert.ok(config, "Quick Sort v2 config is required")
+const trieNote = await readFile(
+  resolve(repoRoot, "Vault/Home/Computer Science/Data Structures/Trees/Trie.md"),
+  "utf8",
+)
+const trieMatch = trieNote.match(/```complexity\s*\n([\s\S]*?)\n```/)
+const trieConfig = trieMatch ? JSON.parse(trieMatch[1]) : null
+assert.ok(trieConfig, "Trie v2 config is required")
 const bundle = await build({
   stdin: {
     contents: `
       import { renderComplexityDom } from "./dom"
       import { buildComplexityViewModel } from "./model"
-      export const mount = (root, input) =>
-        renderComplexityDom(root, buildComplexityViewModel(input, "visual"))
+      export const mount = (root, input, namespace = "visual") =>
+        renderComplexityDom(root, buildComplexityViewModel(input, namespace))
     `,
     resolveDir: here,
     sourcefile: "complexity-visual-entry.ts",
@@ -46,11 +53,17 @@ try {
     new URL("/computer-science/algorithms/sorting-algorithms/quick-sort", baseUrl).href,
   )
   await page.addScriptTag({ content: bundle.outputFiles[0].text })
-  await page.evaluate((input) => {
-    const root = document.createElement("div")
-    document.body.prepend(root)
-    window.DevBookComplexityVisual.mount(root, input)
-  }, config)
+  await page.evaluate(
+    ([input, trieInput]) => {
+      const root = document.createElement("div")
+      document.body.prepend(root)
+      window.DevBookComplexityVisual.mount(root, input)
+      const trieRoot = document.createElement("div")
+      document.body.prepend(trieRoot)
+      window.DevBookComplexityVisual.mount(trieRoot, trieInput, "visual-trie")
+    },
+    [config, trieConfig],
+  )
   const figure = page.locator("#complexity-visual")
   await figure.waitFor()
 
@@ -113,6 +126,28 @@ try {
       assert.equal(layout.resourceScrollWidth, layout.resourceClientWidth, `${width}px must fit`)
       assert.deepEqual(layout.overflowOwners, [])
     }
+  }
+
+  const trieFigure = page.locator("#complexity-visual-trie")
+  await trieFigure.waitFor()
+  for (const width of [430, 600, 1200]) {
+    const escaping = await trieFigure.evaluate(async (node, inlineSize) => {
+      node.style.inlineSize = `${inlineSize}px`
+      await new Promise((resolve) => requestAnimationFrame(() => requestAnimationFrame(resolve)))
+      return [...node.querySelectorAll(".complexity__resource")].flatMap((resource) => {
+        const bounds = resource.getBoundingClientRect()
+        const cells = resource.querySelectorAll(
+          ".complexity__legend-entry, .complexity__legend-group-label",
+        )
+        return [...cells]
+          .filter((cell) => {
+            const rect = cell.getBoundingClientRect()
+            return rect.left < bounds.left - 1 || rect.right > bounds.right + 1
+          })
+          .map((cell) => cell.textContent.trim())
+      })
+    }, width)
+    assert.deepEqual(escaping, [], `${width}px legend text must stay inside its resource column`)
   }
 
   const time = figure.locator('[data-complexity-resource="time"]')
