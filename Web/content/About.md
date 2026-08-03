@@ -1,7 +1,6 @@
 ---
 publish: true
 title: About
-aliases: [Credits]
 created: 2026-07-12T14:27:08.519Z
 modified: 2026-07-25T18:38:43.827Z
 published: 2026-07-25T18:38:43.827Z

@@ -1,6 +1,5 @@
 ---
 title: About
-aliases: [Credits]
 publish: true
 tags: [MetricsIgnore]
 icon: heart
