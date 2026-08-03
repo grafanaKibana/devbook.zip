@@ -53,6 +53,22 @@ plugins:
     order: 10
   - source: github:grafanaKibana/quartz-tabsdown
     enabled: true
+    options:
+      # Mirrors every Tabsdown control set in the vault's Style Settings
+      # (Vault/.obsidian/plugins/obsidian-style-settings/data.json), including
+      # the ones that currently match the plugin defaults.
+      styles:
+        size: default
+        personality: underline
+        overflow: scroll
+        palette: primary
+        alignment: equal-width
+        underlineThickness: 3
+        gap: 8
+        radius: 4
+        nestedStyle: flat
+        motion:
+          speed: 300
     order: 10
   - source: github:quartz-community/syntax-highlighting
     enabled: true
