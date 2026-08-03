@@ -13,6 +13,13 @@ import { startWatcher } from "./watch.mjs"
 
 const here = dirname(fileURLToPath(import.meta.url))
 const repoRoot = join(here, "..", "..", "..")
+const obsidianPlugin = join(repoRoot, "Vault", ".obsidian", "plugins", "steptrace")
+const csNote = (...segments) =>
+  readFileSync(join(repoRoot, "Vault", "Home", "Computer Science", ...segments), "utf8")
+const quartzJs = readFileSync(join(here, "generated", "engine.js"), "utf8")
+const quartzCss = readFileSync(join(here, "generated", "engine.css"), "utf8")
+const obsidianJs = readFileSync(join(obsidianPlugin, "main.js"), "utf8")
+const obsidianCss = readFileSync(join(obsidianPlugin, "styles.css"), "utf8")
 
 const commonConfig = {
   array: [8, 3, 5, 1, 9, 2, 7, 4],
@@ -165,11 +172,9 @@ function parseAuthoredStepTraceTabs(note) {
 }
 
 function markdownFiles(root) {
-  return readdirSync(root, { withFileTypes: true }).flatMap((entry) => {
-    const path = join(root, entry.name)
-    if (entry.isDirectory()) return markdownFiles(path)
-    return entry.isFile() && entry.name.endsWith(".md") ? [path] : []
-  })
+  return readdirSync(root, { recursive: true })
+    .filter((entry) => entry.endsWith(".md"))
+    .map((entry) => join(root, entry))
 }
 
 function authoredDsaTabsdownNotes() {
@@ -244,10 +249,6 @@ test("the public API stays stable", () => {
 })
 
 test("the Obsidian bundle registers complexity and keeps invalid source local", () => {
-  const obsidian = readFileSync(
-    join(repoRoot, "Vault", ".obsidian", "plugins", "steptrace", "main.js"),
-    "utf8",
-  )
   const processors = new Map()
   class Plugin {
     registerMarkdownCodeBlockProcessor(language, processor) {
@@ -259,7 +260,7 @@ test("the Obsidian bundle registers complexity and keeps invalid source local", 
   class Notice {}
   class SliderComponent {}
   const pluginModule = { exports: {} }
-  new Function("module", "exports", "require", obsidian)(
+  new Function("module", "exports", "require", obsidianJs)(
     pluginModule,
     pluginModule.exports,
     (id) => {
@@ -301,19 +302,7 @@ test("the Obsidian bundle registers complexity and keeps invalid source local", 
 
 test("Z-Algorithm config is registered with an isolated typed string profile", () => {
   const api = loadEngine(readFileSync(join(here, "generated", "engine.js"), "utf8"))
-  const note = readFileSync(
-    join(
-      repoRoot,
-      "Vault",
-      "Home",
-      "Computer Science",
-      "Algorithms",
-      "Search Algorithms",
-      "String Matching",
-      "Z-Algorithm.md",
-    ),
-    "utf8",
-  )
+  const note = csNote("Algorithms", "Search Algorithms", "String Matching", "Z-Algorithm.md")
   const result = api.buildFrames({
     algorithm: "z-algorithm",
     text: "aabcaabxaaaz",
@@ -328,19 +317,7 @@ test("Z-Algorithm config is registered with an isolated typed string profile", (
 test("full Boyer-Moore records both shift rules and the canonical winning decisions", () => {
   const api = loadEngine(readFileSync(join(here, "generated", "engine.js"), "utf8"))
   const { buildGoodSuffixTable } = loadStepTraceModule("src", "algorithms", "boyer-moore.ts")
-  const note = readFileSync(
-    join(
-      repoRoot,
-      "Vault",
-      "Home",
-      "Computer Science",
-      "Algorithms",
-      "Search Algorithms",
-      "String Matching",
-      "Boyer-Moore.md",
-    ),
-    "utf8",
-  )
+  const note = csNote("Algorithms", "Search Algorithms", "String Matching", "Boyer-Moore.md")
   const frames = api.buildFrames({
     algorithm: "boyer-moore",
     text: "ACCCDBACBA",
@@ -1288,18 +1265,7 @@ test("all 600 ordered Ukraine-city A* routes are reachable, admissible, and opti
   }
   assert.equal(checked, 600)
 
-  const note = readFileSync(
-    join(
-      repoRoot,
-      "Vault",
-      "Home",
-      "Computer Science",
-      "Algorithms",
-      "Graph Algorithms",
-      "A-Star Search.md",
-    ),
-    "utf8",
-  )
+  const note = csNote("Algorithms", "Graph Algorithms", "A-Star Search.md")
   const complexity = JSON.parse(note.match(/```complexity\n([\s\S]*?)\n```/)[1])
   const bestBound = (resource) => complexity.resources[resource].entries[0].bounds[0]
   const averageBound = (resource) => complexity.resources[resource].entries[1]
@@ -1334,18 +1300,7 @@ test("A* uses profile-owned controls and visual-only graph state without racks",
   const familySource = readFileSync(join(here, "src", "families", "graph-state.ts"), "utf8")
   const styles = readFileSync(join(here, "src", "styles", "graph-state.scss"), "utf8")
   const styleEntry = readFileSync(join(here, "src", "styles", "index.scss"), "utf8")
-  const note = readFileSync(
-    join(
-      repoRoot,
-      "Vault",
-      "Home",
-      "Computer Science",
-      "Algorithms",
-      "Graph Algorithms",
-      "A-Star Search.md",
-    ),
-    "utf8",
-  )
+  const note = csNote("Algorithms", "Graph Algorithms", "A-Star Search.md")
   const { configs } = parseAuthoredStepTraceTabs(note)
 
   assert.match(mountSource, /syncEndpointOptions\(built\.endpointSettings, built\.graph\)/)
@@ -1606,7 +1561,7 @@ test("all DSA Tabsdown notes are visual-first and contain one chart-only dual-re
 
     const complexity = outer.tabs[1].body.trim()
     const chartFences = complexity.match(/^```complexity$/gm) ?? []
-    const chartFirst = /^```complexity\n([\s\S]+?)\n```(?:\n|$)/.exec(complexity)
+    const chartFirst = /^```complexity\n([\s\S]+?)\n```/.exec(complexity)
     assert.equal(chartFences.length, 1, `${relative}: Complexity must hold one complexity fence`)
     assert.ok(chartFirst, `${relative}: Complexity must begin with the complexity fence`)
     const config = JSON.parse(chartFirst[1])
@@ -1893,12 +1848,6 @@ test("styles are compiled from real SCSS without runtime injection", () => {
     join(here, "..", "components", "styles", "steptrace.scss"),
     "utf8",
   )
-  const quartzCss = readFileSync(join(here, "generated", "engine.css"), "utf8")
-  const obsidianCss = readFileSync(
-    join(repoRoot, "Vault", ".obsidian", "plugins", "steptrace", "styles.css"),
-    "utf8",
-  )
-  const engine = readFileSync(join(here, "generated", "engine.js"), "utf8")
   const barsStyles = readFileSync(join(here, "src", "styles", "bars.scss"), "utf8")
   const sharedStyles = readFileSync(join(here, "src", "styles", "shared.scss"), "utf8")
   const obsidianHostStyles = readFileSync(
@@ -1958,7 +1907,7 @@ test("styles are compiled from real SCSS without runtime injection", () => {
     sharedStyles,
     /@media \(hover: none\), \(pointer: coarse\) \{[^}]*\.steptrace__btn,[\s\S]*width: 2\.75rem;[\s\S]*height: 2\.75rem;/s,
   )
-  assert.doesNotMatch(engine, /steptrace-engine-style|const STYLES|injectStyle/)
+  assert.doesNotMatch(quartzJs, /steptrace-engine-style|const STYLES|injectStyle/)
   assert.match(quartzCss, /\.steptrace__marker-body/)
   assert.match(quartzCss, /color:\s*var\(--_held-fg\)/)
   assert.match(quartzCss, /background:\s*var\(--_held-bg\)/)
@@ -2528,10 +2477,7 @@ test("prefix sum reuses canonical value-only array strips in a stable responsive
   const familySource = readFileSync(join(here, "src", "families", "prefix-sum.ts"), "utf8")
   const styles = readFileSync(join(here, "src", "styles", "prefix-sum.scss"), "utf8")
   const styleEntry = readFileSync(join(here, "src", "styles", "index.scss"), "utf8")
-  const note = readFileSync(
-    join(repoRoot, "Vault", "Home", "Computer Science", "Algorithms", "Patterns", "Prefix Sum.md"),
-    "utf8",
-  )
+  const note = csNote("Algorithms", "Patterns", "Prefix Sum.md")
 
   assert.match(familySource, /makeArrayStrip/)
   assert.match(familySource, /stableStage: true/)
@@ -2631,23 +2577,7 @@ test("heap-selection reuses shared strips, tree tokens, and host artifacts", () 
   const pointerStyles = readFileSync(join(here, "src", "styles", "pointers.scss"), "utf8")
   const sharedStyles = readFileSync(join(here, "src", "styles", "shared.scss"), "utf8")
   const styleEntry = readFileSync(join(here, "src", "styles", "index.scss"), "utf8")
-  const quartzCss = readFileSync(join(here, "generated", "engine.css"), "utf8")
-  const obsidianCss = readFileSync(
-    join(repoRoot, "Vault", ".obsidian", "plugins", "steptrace", "styles.css"),
-    "utf8",
-  )
-  const note = readFileSync(
-    join(
-      repoRoot,
-      "Vault",
-      "Home",
-      "Computer Science",
-      "Algorithms",
-      "Patterns",
-      "Top-K Elements.md",
-    ),
-    "utf8",
-  )
+  const note = csNote("Algorithms", "Patterns", "Top-K Elements.md")
 
   assert.match(familySource, /const stream = makeArrayStrip\(first\.array\)/)
   assert.doesNotMatch(familySource, /steptrace__heap-stream-icon/)
@@ -2903,23 +2833,7 @@ test("stack-sequence keeps one stable accessible viewport in both hosts", () => 
   const styles = readFileSync(join(here, "src", "styles", "stack-sequence.scss"), "utf8")
   const shared = readFileSync(join(here, "src", "styles", "shared.scss"), "utf8")
   const styleEntry = readFileSync(join(here, "src", "styles", "index.scss"), "utf8")
-  const quartzCss = readFileSync(join(here, "generated", "engine.css"), "utf8")
-  const obsidianCss = readFileSync(
-    join(repoRoot, "Vault", ".obsidian", "plugins", "steptrace", "styles.css"),
-    "utf8",
-  )
-  const note = readFileSync(
-    join(
-      repoRoot,
-      "Vault",
-      "Home",
-      "Computer Science",
-      "Algorithms",
-      "Patterns",
-      "Monotonic Stack and Queue.md",
-    ),
-    "utf8",
-  )
+  const note = csNote("Algorithms", "Patterns", "Monotonic Stack and Queue.md")
 
   assert.match(familySource, /stableStage: true/)
   assert.match(familySource, /stageLayout: "fill"/)
@@ -4649,18 +4563,7 @@ test("dynamic-programming problem families keep watch hints and canonical legend
 })
 
 test("dynamic-programming tabs and stable story stage keep the compact five-view contract", () => {
-  const note = readFileSync(
-    join(
-      repoRoot,
-      "Vault",
-      "Home",
-      "Computer Science",
-      "Algorithms",
-      "Paradigms",
-      "Dynamic Programming.md",
-    ),
-    "utf8",
-  )
+  const note = csNote("Algorithms", "Paradigms", "Dynamic Programming.md")
   const mountSource = readFileSync(join(here, "src", "mount.ts"), "utf8")
   const renderSource = readFileSync(join(here, "src", "render.ts"), "utf8")
   const sharedStyles = readFileSync(join(here, "src", "styles", "shared.scss"), "utf8")
@@ -5478,18 +5381,7 @@ test("tim sort keeps natural runs contiguous while it reverses, extends, collaps
     minrun: 4,
   })
   const { runStackFamily, runStackWatch } = loadStepTraceModule("src", "families", "run-stack.ts")
-  const note = readFileSync(
-    join(
-      repoRoot,
-      "Vault",
-      "Home",
-      "Computer Science",
-      "Algorithms",
-      "Sorting Algorithms",
-      "Tim Sort.md",
-    ),
-    "utf8",
-  )
+  const note = csNote("Algorithms", "Sorting Algorithms", "Tim Sort.md")
   const source = readFileSync(join(here, "src", "algorithms", "tim-sort.ts"), "utf8")
   const familySource = readFileSync(join(here, "src", "families", "run-stack.ts"), "utf8")
   const renderSource = readFileSync(join(here, "src", "render.ts"), "utf8")
@@ -9874,23 +9766,7 @@ test("contiguous structures share one persistent direct-operation contract in bo
   const styleEntry = readFileSync(join(here, "src", "styles", "index.scss"), "utf8")
   const algorithms = readFileSync(join(here, "src", "algorithms", "index.ts"), "utf8")
   const mount = readFileSync(join(here, "src", "mount.ts"), "utf8")
-  const quartzCss = readFileSync(join(here, "generated", "engine.css"), "utf8")
-  const obsidianCss = readFileSync(
-    join(repoRoot, "Vault", ".obsidian", "plugins", "steptrace", "styles.css"),
-    "utf8",
-  )
-  const note = readFileSync(
-    join(
-      repoRoot,
-      "Vault",
-      "Home",
-      "Computer Science",
-      "Data Structures",
-      "Linear Structures",
-      "Queue.md",
-    ),
-    "utf8",
-  )
+  const note = csNote("Data Structures", "Linear Structures", "Queue.md")
   assert.match(mount, /structureRegistry\.get\(config\.algorithm\)/)
   assert.match(structure, /function createStructureShell\(/)
   assert.match(structure, /function createIndexedBoard\(/)
@@ -9964,26 +9840,8 @@ test("Union-Find is a persistent rank-and-compression forest in both hosts", () 
   const algorithms = readFileSync(join(here, "src", "algorithms", "index.ts"), "utf8")
   const family = readFileSync(join(here, "src", "families", "union-find.ts"), "utf8")
   const styles = readFileSync(join(here, "src", "styles", "unionfind.scss"), "utf8")
-  const quartzJs = readFileSync(join(here, "generated", "engine.js"), "utf8")
-  const quartzCss = readFileSync(join(here, "generated", "engine.css"), "utf8")
-  const obsidianJs = readFileSync(
-    join(repoRoot, "Vault", ".obsidian", "plugins", "steptrace", "main.js"),
-    "utf8",
-  )
-  const obsidianCss = readFileSync(
-    join(repoRoot, "Vault", ".obsidian", "plugins", "steptrace", "styles.css"),
-    "utf8",
-  )
-  const notesRoot = join(
-    repoRoot,
-    "Vault",
-    "Home",
-    "Computer Science",
-    "Data Structures",
-    "Graph Structures",
-  )
-  const disjointSet = readFileSync(join(notesRoot, "Disjoint Set.md"), "utf8")
-  const unionFind = readFileSync(join(notesRoot, "Union-Find.md"), "utf8")
+  const disjointSet = csNote("Data Structures", "Graph Structures", "Disjoint Set.md")
+  const unionFind = csNote("Data Structures", "Graph Structures", "Union-Find.md")
 
   assert.match(algorithm, /family: "union-find"/)
   assert.match(algorithm, /mount: mountUnionFind/)
@@ -10023,28 +9881,7 @@ test("Fenwick Tree exposes persistent low-bit blocks for updates and range sums"
   const family = readFileSync(join(here, "src", "families", "range-aggregate.ts"), "utf8")
   const styles = readFileSync(join(here, "src", "styles", "range-aggregate.scss"), "utf8")
   const styleEntry = readFileSync(join(here, "src", "styles", "index.scss"), "utf8")
-  const quartzJs = readFileSync(join(here, "generated", "engine.js"), "utf8")
-  const quartzCss = readFileSync(join(here, "generated", "engine.css"), "utf8")
-  const obsidianJs = readFileSync(
-    join(repoRoot, "Vault", ".obsidian", "plugins", "steptrace", "main.js"),
-    "utf8",
-  )
-  const obsidianCss = readFileSync(
-    join(repoRoot, "Vault", ".obsidian", "plugins", "steptrace", "styles.css"),
-    "utf8",
-  )
-  const note = readFileSync(
-    join(
-      repoRoot,
-      "Vault",
-      "Home",
-      "Computer Science",
-      "Data Structures",
-      "Trees",
-      "Fenwick Tree.md",
-    ),
-    "utf8",
-  )
+  const note = csNote("Data Structures", "Trees", "Fenwick Tree.md")
 
   assert.match(algorithm, /family: "range-aggregate"/)
   assert.match(algorithm, /4 to 8 finite integer values/)
@@ -10082,29 +9919,7 @@ test("Heap is registered as one direct persistent structure in both hosts", () =
   const family = readFileSync(join(here, "src", "families", "heap-structure.ts"), "utf8")
   const selectionFamily = readFileSync(join(here, "src", "families", "heap-selection.ts"), "utf8")
   const styles = readFileSync(join(here, "src", "styles", "heap-selection.scss"), "utf8")
-  const quartzJs = readFileSync(join(here, "generated", "engine.js"), "utf8")
-  const quartzCss = readFileSync(join(here, "generated", "engine.css"), "utf8")
-  const obsidianJs = readFileSync(
-    join(repoRoot, "Vault", ".obsidian", "plugins", "steptrace", "main.js"),
-    "utf8",
-  )
-  const obsidianCss = readFileSync(
-    join(repoRoot, "Vault", ".obsidian", "plugins", "steptrace", "styles.css"),
-    "utf8",
-  )
-  const note = readFileSync(
-    join(
-      repoRoot,
-      "Vault",
-      "Home",
-      "Computer Science",
-      "Data Structures",
-      "Trees",
-      "Heap-like",
-      "Heap.md",
-    ),
-    "utf8",
-  )
+  const note = csNote("Data Structures", "Trees", "Heap-like", "Heap.md")
 
   assert.match(algorithm, /family: "heap-selection"/)
   assert.match(algorithm, /finite integer values/)
@@ -10142,28 +9957,7 @@ test("Stack is a vertical persistent direct-control structure in both hosts", ()
   const algorithms = readFileSync(join(here, "src", "algorithms", "index.ts"), "utf8")
   const family = readFileSync(join(here, "src", "families", "stack-sequence.ts"), "utf8")
   const styles = readFileSync(join(here, "src", "styles", "stack-sequence.scss"), "utf8")
-  const quartzJs = readFileSync(join(here, "generated", "engine.js"), "utf8")
-  const quartzCss = readFileSync(join(here, "generated", "engine.css"), "utf8")
-  const obsidianJs = readFileSync(
-    join(repoRoot, "Vault", ".obsidian", "plugins", "steptrace", "main.js"),
-    "utf8",
-  )
-  const obsidianCss = readFileSync(
-    join(repoRoot, "Vault", ".obsidian", "plugins", "steptrace", "styles.css"),
-    "utf8",
-  )
-  const note = readFileSync(
-    join(
-      repoRoot,
-      "Vault",
-      "Home",
-      "Computer Science",
-      "Data Structures",
-      "Linear Structures",
-      "Stack.md",
-    ),
-    "utf8",
-  )
+  const note = csNote("Data Structures", "Linear Structures", "Stack.md")
 
   assert.deepEqual(
     parseStackConfig({
@@ -10238,28 +10032,7 @@ test("LinkedList exposes direct singly and doubly linked append controls in both
   const family = readFileSync(join(here, "src", "families", "linked-topology.ts"), "utf8")
   const listFamily = family.slice(0, family.indexOf("export interface LinkedTopologyNode"))
   const styles = readFileSync(join(here, "src", "styles", "linked-topology.scss"), "utf8")
-  const quartzJs = readFileSync(join(here, "generated", "engine.js"), "utf8")
-  const quartzCss = readFileSync(join(here, "generated", "engine.css"), "utf8")
-  const obsidianJs = readFileSync(
-    join(repoRoot, "Vault", ".obsidian", "plugins", "steptrace", "main.js"),
-    "utf8",
-  )
-  const obsidianCss = readFileSync(
-    join(repoRoot, "Vault", ".obsidian", "plugins", "steptrace", "styles.css"),
-    "utf8",
-  )
-  const note = readFileSync(
-    join(
-      repoRoot,
-      "Vault",
-      "Home",
-      "Computer Science",
-      "Data Structures",
-      "Linear Structures",
-      "LinkedList.md",
-    ),
-    "utf8",
-  )
+  const note = csNote("Data Structures", "Linear Structures", "LinkedList.md")
   const { configs } = parseAuthoredStepTraceTabs(note)
 
   assert.deepEqual(parseLinkedListConfig({ algorithm: "linked-list" }), {
@@ -10369,23 +10142,7 @@ test("LRU Cache keeps one map and address-linked MRU-to-LRU chain in both hosts"
   const algorithms = readFileSync(join(here, "src", "algorithms", "index.ts"), "utf8")
   const family = readFileSync(join(here, "src", "families", "linked-topology.ts"), "utf8")
   const styles = readFileSync(join(here, "src", "styles", "linked-topology.scss"), "utf8")
-  const note = readFileSync(
-    join(
-      repoRoot,
-      "Vault",
-      "Home",
-      "Computer Science",
-      "Data Structures",
-      "Composite Structures",
-      "LRU Cache.md",
-    ),
-    "utf8",
-  )
-  const quartzJs = readFileSync(join(here, "generated", "engine.js"), "utf8")
-  const obsidianJs = readFileSync(
-    join(repoRoot, "Vault", ".obsidian", "plugins", "steptrace", "main.js"),
-    "utf8",
-  )
+  const note = csNote("Data Structures", "Composite Structures", "LRU Cache.md")
 
   assert.match(algorithms, /import \{ lruCache \} from "\.\/lru-cache"/)
   assert.match(algorithms, /interactiveStructures = \[[\s\S]*lruCache,/)
@@ -10440,16 +10197,6 @@ test("meldable heap variants reuse one persistent forest family in both hosts", 
   const algorithms = readFileSync(join(here, "src", "algorithms", "index.ts"), "utf8")
   const family = readFileSync(join(here, "src", "families", "heap-structure.ts"), "utf8")
   const styles = readFileSync(join(here, "src", "styles", "heap-selection.scss"), "utf8")
-  const quartzJs = readFileSync(join(here, "generated", "engine.js"), "utf8")
-  const quartzCss = readFileSync(join(here, "generated", "engine.css"), "utf8")
-  const obsidianJs = readFileSync(
-    join(repoRoot, "Vault", ".obsidian", "plugins", "steptrace", "main.js"),
-    "utf8",
-  )
-  const obsidianCss = readFileSync(
-    join(repoRoot, "Vault", ".obsidian", "plugins", "steptrace", "styles.css"),
-    "utf8",
-  )
   const noteRoot = join(
     repoRoot,
     "Vault",
@@ -10502,23 +10249,7 @@ test("Segment Tree reuses range blocks for point assignment and canonical range 
   const algorithms = readFileSync(join(here, "src", "algorithms", "index.ts"), "utf8")
   const family = readFileSync(join(here, "src", "families", "range-aggregate.ts"), "utf8")
   const styles = readFileSync(join(here, "src", "styles", "range-aggregate.scss"), "utf8")
-  const quartzJs = readFileSync(join(here, "generated", "engine.js"), "utf8")
-  const obsidianJs = readFileSync(
-    join(repoRoot, "Vault", ".obsidian", "plugins", "steptrace", "main.js"),
-    "utf8",
-  )
-  const note = readFileSync(
-    join(
-      repoRoot,
-      "Vault",
-      "Home",
-      "Computer Science",
-      "Data Structures",
-      "Trees",
-      "Segment Tree.md",
-    ),
-    "utf8",
-  )
+  const note = csNote("Data Structures", "Trees", "Segment Tree.md")
 
   assert.match(algorithm, /family: "range-aggregate"/)
   assert.match(algorithm, /4 to 8 finite integer values/)
@@ -10551,28 +10282,7 @@ test("HashMap shares one fixed 12-cell renderer across three collision strategie
   )
   const algorithms = readFileSync(join(here, "src", "algorithms", "index.ts"), "utf8")
   const styleEntry = readFileSync(join(here, "src", "styles", "index.scss"), "utf8")
-  const quartzJs = readFileSync(join(here, "generated", "engine.js"), "utf8")
-  const quartzCss = readFileSync(join(here, "generated", "engine.css"), "utf8")
-  const obsidianJs = readFileSync(
-    join(repoRoot, "Vault", ".obsidian", "plugins", "steptrace", "main.js"),
-    "utf8",
-  )
-  const obsidianCss = readFileSync(
-    join(repoRoot, "Vault", ".obsidian", "plugins", "steptrace", "styles.css"),
-    "utf8",
-  )
-  const note = readFileSync(
-    join(
-      repoRoot,
-      "Vault",
-      "Home",
-      "Computer Science",
-      "Data Structures",
-      "Hash-based Structures",
-      "HashMap.md",
-    ),
-    "utf8",
-  )
+  const note = csNote("Data Structures", "Hash-based Structures", "HashMap.md")
   const closedSource = family.slice(
     family.indexOf("function closedPath"),
     family.indexOf("function openProbe"),
@@ -10904,27 +10614,13 @@ test("Hash Set and Bloom Filter reuse the persistent hash-index board with direc
   const bloomFilter = readFileSync(join(here, "src", "algorithms", "bloom-filter.ts"), "utf8")
   const algorithms = readFileSync(join(here, "src", "algorithms", "index.ts"), "utf8")
   const styles = readFileSync(join(here, "src", "styles", "hash-index.scss"), "utf8")
-  const quartzJs = readFileSync(join(here, "generated", "engine.js"), "utf8")
-  const quartzCss = readFileSync(join(here, "generated", "engine.css"), "utf8")
-  const obsidianJs = readFileSync(
-    join(repoRoot, "Vault", ".obsidian", "plugins", "steptrace", "main.js"),
-    "utf8",
-  )
-  const obsidianCss = readFileSync(
-    join(repoRoot, "Vault", ".obsidian", "plugins", "steptrace", "styles.css"),
-    "utf8",
-  )
-  const notesRoot = join(
-    repoRoot,
-    "Vault",
-    "Home",
-    "Computer Science",
+  const collisionNote = csNote(
     "Data Structures",
     "Hash-based Structures",
+    "Collision Resolution.md",
   )
-  const collisionNote = readFileSync(join(notesRoot, "Collision Resolution.md"), "utf8")
-  const setNote = readFileSync(join(notesRoot, "Hash Set.md"), "utf8")
-  const bloomNote = readFileSync(join(notesRoot, "Bloom Filter.md"), "utf8")
+  const setNote = csNote("Data Structures", "Hash-based Structures", "Hash Set.md")
+  const bloomNote = csNote("Data Structures", "Hash-based Structures", "Bloom Filter.md")
 
   assert.match(hashSet, /id: "hash-set"/)
   assert.match(hashSet, /family: "hash-index"/)
@@ -11019,28 +10715,7 @@ test("Graph registers one synchronized persistent representation in both hosts",
   const family = readFileSync(join(here, "src", "families", "graph-representation.ts"), "utf8")
   const styles = readFileSync(join(here, "src", "styles", "graph-representation.scss"), "utf8")
   const styleEntry = readFileSync(join(here, "src", "styles", "index.scss"), "utf8")
-  const quartzJs = readFileSync(join(here, "generated", "engine.js"), "utf8")
-  const quartzCss = readFileSync(join(here, "generated", "engine.css"), "utf8")
-  const obsidianJs = readFileSync(
-    join(repoRoot, "Vault", ".obsidian", "plugins", "steptrace", "main.js"),
-    "utf8",
-  )
-  const obsidianCss = readFileSync(
-    join(repoRoot, "Vault", ".obsidian", "plugins", "steptrace", "styles.css"),
-    "utf8",
-  )
-  const note = readFileSync(
-    join(
-      repoRoot,
-      "Vault",
-      "Home",
-      "Computer Science",
-      "Data Structures",
-      "Graph Structures",
-      "Graph.md",
-    ),
-    "utf8",
-  )
+  const note = csNote("Data Structures", "Graph Structures", "Graph.md")
   const topologyStyles =
     styles.match(/\.steptrace \.steptrace__graph-rep-topology \{[^}]*\}/s)?.[0] || ""
 
@@ -11128,20 +10803,7 @@ test("AVL Tree registers one persistent balanced binary-tree prototype in both h
   const family = readFileSync(join(here, "src", "families", "binary-tree.ts"), "utf8")
   const styles = readFileSync(join(here, "src", "styles", "binary-tree.scss"), "utf8")
   const styleEntry = readFileSync(join(here, "src", "styles", "index.scss"), "utf8")
-  const quartzJs = readFileSync(join(here, "generated", "engine.js"), "utf8")
-  const quartzCss = readFileSync(join(here, "generated", "engine.css"), "utf8")
-  const obsidianJs = readFileSync(
-    join(repoRoot, "Vault", ".obsidian", "plugins", "steptrace", "main.js"),
-    "utf8",
-  )
-  const obsidianCss = readFileSync(
-    join(repoRoot, "Vault", ".obsidian", "plugins", "steptrace", "styles.css"),
-    "utf8",
-  )
-  const note = readFileSync(
-    join(repoRoot, "Vault", "Home", "Computer Science", "Data Structures", "Trees", "AVL Tree.md"),
-    "utf8",
-  )
+  const note = csNote("Data Structures", "Trees", "AVL Tree.md")
 
   assert.match(algorithm, /id: "avl-tree"/)
   assert.match(algorithm, /family: "binary-tree"/)
@@ -11195,11 +10857,6 @@ test("BST, red-black, and splay trees share the direct binary-tree contract in b
   const algorithms = readFileSync(join(here, "src", "algorithms", "index.ts"), "utf8")
   const family = readFileSync(join(here, "src", "families", "binary-tree.ts"), "utf8")
   const styles = readFileSync(join(here, "src", "styles", "binary-tree.scss"), "utf8")
-  const quartzJs = readFileSync(join(here, "generated", "engine.js"), "utf8")
-  const obsidianJs = readFileSync(
-    join(repoRoot, "Vault", ".obsidian", "plugins", "steptrace", "main.js"),
-    "utf8",
-  )
 
   for (const [id, file, fence] of [
     ["binary-search-tree", "Binary Search Tree.md", /"value":80/],
@@ -11345,24 +11002,8 @@ test("B-tree and B+ Tree register one direct responsive multiway-tree contract i
   const family = readFileSync(join(here, "src", "families", "multiway-tree.ts"), "utf8")
   const styles = readFileSync(join(here, "src", "styles", "multiway-tree.scss"), "utf8")
   const styleEntry = readFileSync(join(here, "src", "styles", "index.scss"), "utf8")
-  const quartzJs = readFileSync(join(here, "generated", "engine.js"), "utf8")
-  const quartzCss = readFileSync(join(here, "generated", "engine.css"), "utf8")
-  const obsidianJs = readFileSync(
-    join(repoRoot, "Vault", ".obsidian", "plugins", "steptrace", "main.js"),
-    "utf8",
-  )
-  const obsidianCss = readFileSync(
-    join(repoRoot, "Vault", ".obsidian", "plugins", "steptrace", "styles.css"),
-    "utf8",
-  )
-  const bTreeNote = readFileSync(
-    join(repoRoot, "Vault", "Home", "Computer Science", "Data Structures", "Trees", "B-tree.md"),
-    "utf8",
-  )
-  const bPlusNote = readFileSync(
-    join(repoRoot, "Vault", "Home", "Computer Science", "Data Structures", "Trees", "B+ Tree.md"),
-    "utf8",
-  )
+  const bTreeNote = csNote("Data Structures", "Trees", "B-tree.md")
+  const bPlusNote = csNote("Data Structures", "Trees", "B+ Tree.md")
 
   assert.match(algorithms, /import \{ bTree \} from "\.\/b-tree"/)
   assert.match(algorithms, /import \{ bPlusTree \} from "\.\/b-plus-tree"/)
