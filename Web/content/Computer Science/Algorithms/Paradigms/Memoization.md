@@ -1,8 +1,8 @@
 ---
 publish: true
 created: 2026-07-21T18:52:02.735Z
-modified: 2026-08-02T10:43:06.487Z
-published: 2026-08-02T10:43:06.487Z
+modified: 2026-08-02T20:03:54.552Z
+published: 2026-08-02T20:03:54.552Z
 topic:
   - Computer Science
 subtopic:
@@ -50,7 +50,7 @@ tab: Complexity
   "variables": {
     "inputSize": {
       "symbol": "n",
-      "description": "number of input elements or states"
+      "description": "number of distinct reachable argument tuples or subproblems"
     }
   },
   "resources": {
@@ -59,7 +59,7 @@ tab: Complexity
       "entries": [
         {
           "kind": "operation",
-          "operation": "Distinct subproblems",
+          "operation": "Distinct subproblems with O(1) local work each",
           "bounds": [
             {
               "kind": "curve",

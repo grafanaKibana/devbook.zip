@@ -1,8 +1,8 @@
 ---
 publish: true
 created: 2026-07-21T18:52:02.705Z
-modified: 2026-08-02T11:37:01.480Z
-published: 2026-08-02T11:37:01.480Z
+modified: 2026-08-02T19:53:12.250Z
+published: 2026-08-02T19:53:12.250Z
 topic:
   - Computer Science
 subtopic:
@@ -76,6 +76,11 @@ tab: Complexity
           "bounds": [
             {
               "kind": "text",
+              "role": "Condition",
+              "formula": "f(n) = O(n^(log_b a - epsilon)) for some epsilon > 0"
+            },
+            {
+              "kind": "text",
               "role": "Result",
               "formula": "Θ(n^(log_b a))"
             }
@@ -87,6 +92,11 @@ tab: Complexity
           "bounds": [
             {
               "kind": "text",
+              "role": "Condition",
+              "formula": "f(n) = Theta(n^(log_b a))"
+            },
+            {
+              "kind": "text",
               "role": "Result",
               "formula": "Θ(n^(log_b a) · log n)"
             }
@@ -96,6 +106,11 @@ tab: Complexity
           "kind": "operation",
           "operation": "Master theorem case 3",
           "bounds": [
+            {
+              "kind": "text",
+              "role": "Condition",
+              "formula": "f(n) = Omega(n^(log_b a + epsilon)) for some epsilon > 0, with a*f(n/b) <= c*f(n) for some c < 1"
+            },
             {
               "kind": "text",
               "role": "Result",

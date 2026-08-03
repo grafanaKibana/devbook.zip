@@ -1,8 +1,8 @@
 ---
 publish: true
 created: 2026-07-29T20:23:26.770Z
-modified: 2026-08-02T11:07:04.206Z
-published: 2026-08-02T11:07:04.206Z
+modified: 2026-08-02T20:03:54.756Z
+published: 2026-08-02T20:03:54.756Z
 topic:
   - Computer Science
 subtopic:
@@ -50,15 +50,15 @@ tab: Complexity
   "variables": {
     "inputSize": {
       "symbol": "n",
-      "description": "number of input elements or states"
+      "description": "number of keys stored in the tree"
     },
     "keyRange": {
       "symbol": "k",
-      "description": "key range, digit count, or requested result count"
+      "description": "number of keys returned by a range query"
     },
     "parameterH": {
       "symbol": "h",
-      "description": "tree height, hash count, or algorithm-specific height"
+      "description": "current tree height"
     }
   },
   "resources": {
@@ -180,10 +180,14 @@ tab: Complexity
           "operation": "Range query (k results)",
           "bounds": [
             {
-              "kind": "curve",
-              "role": "Space",
-              "formula": "O(h)",
-              "curveId": "linear"
+              "kind": "text",
+              "role": "Auxiliary traversal",
+              "formula": "O(h)"
+            },
+            {
+              "kind": "text",
+              "role": "Materialized output",
+              "formula": "O(k)"
             }
           ]
         }
@@ -314,11 +318,12 @@ The base structure stores order but not position.
 
 # Comparison
 
-| Structure |
-| --- |
-| Binary search tree |
-| \[\[Home/Computer Science/Data Structures/Hash-based Structures/HashMap | Exact-match lookups where order is irrelevant |
-| Sorted array + \[\[Home/Computer Science/Algorithms/Search Algorithms/Binary Search | Static data searched far more often than it changes |
+| Structure | Ordering retained | Update behavior | Height protection | Stronger case |
+| --- | --- | --- | --- | --- |
+| Binary search tree | Yes; supports min/max/successor/range | Links a new leaf without rebalancing | None; insertion order determines shape | The simplest mutable ordered structure when input is already well shaped |
+| Self-balancing BST | Yes; supports the same ordered queries | Rotates or recolors after updates | Rebalancing keeps paths shallow | Production mutable ordered sets and maps |
+| [[Computer Science/Data Structures/Hash-based Structures/HashMap\|Hash map]] | No | Updates buckets by hash | Tree height does not apply | Exact-match lookups where order is irrelevant |
+| Sorted array + [[Computer Science/Algorithms/Search Algorithms/Binary Search\|binary search]] | Yes; index order is key order | Inserts shift later elements | Tree height does not apply | Static data searched far more often than it changes |
 
 A plain BST is the simplest structure that keeps keys ordered while supporting cheap insertion, and it behaves well on random or already-balanced input. A hash map is faster still for point lookups but discards ordering entirely, so it cannot answer range or successor queries; a sorted array matches the search cost but cannot absorb insertions cheaply.
 

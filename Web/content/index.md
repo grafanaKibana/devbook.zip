@@ -2,12 +2,12 @@
 publish: true
 title: Welcome to DevBook!
 created: 2026-08-01T19:23:07.466Z
-modified: 2026-08-01T19:23:07.466Z
-published: 2026-08-01T19:23:07.466Z
+modified: 2026-08-02T14:50:12.898Z
+published: 2026-08-02T14:50:12.898Z
 tags:
   - FolderNote
   - MetricsIgnore
-summary: A senior .NET and AI engineering knowledge base with concrete notes, examples, and questions.
+summary: A .NET and AI engineering knowledge base with notes, examples, and questions.
 icon: home
 ---
 
