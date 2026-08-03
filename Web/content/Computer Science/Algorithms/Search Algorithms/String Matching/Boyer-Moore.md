@@ -102,7 +102,7 @@ tab: Complexity
             {
               "kind": "text",
               "role": "Time",
-              "formula": "Θ(m + \\|Σ\\|)"
+              "formula": "Θ(m + |Σ|)"
             }
           ]
         },
@@ -152,7 +152,7 @@ tab: Complexity
             {
               "kind": "text",
               "role": "Auxiliary space",
-              "formula": "Θ(m + \\|Σ\\|)"
+              "formula": "Θ(m + |Σ|)"
             }
           ]
         },
@@ -163,7 +163,7 @@ tab: Complexity
             {
               "kind": "text",
               "role": "Auxiliary space",
-              "formula": "O(m + \\|Σ\\|)"
+              "formula": "O(m + |Σ|)"
             }
           ]
         },
@@ -174,7 +174,7 @@ tab: Complexity
             {
               "kind": "text",
               "role": "Auxiliary space",
-              "formula": "O(m + \\|Σ\\|)"
+              "formula": "O(m + |Σ|)"
             }
           ]
         },
@@ -185,7 +185,7 @@ tab: Complexity
             {
               "kind": "text",
               "role": "Auxiliary space",
-              "formula": "O(m + \\|Σ\\|)"
+              "formula": "O(m + |Σ|)"
             }
           ]
         }

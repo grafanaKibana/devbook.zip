@@ -99,7 +99,7 @@ tab: Complexity
             {
               "kind": "text",
               "role": "Time",
-              "formula": "Θ(\\|S\\|)"
+              "formula": "Θ(|S|)"
             }
           ]
         },

@@ -23142,14 +23142,17 @@ function validateV1Variables(value) {
 function validateV2Variables(value) {
   const variables = objectAt(value, "variables");
   if (Object.keys(variables).length === 0) fail("variables", "must be a non-empty object");
+  const result = [];
   for (const [name, rawMetadata] of Object.entries(variables)) {
     if (!/^[A-Za-z][A-Za-z0-9_]*$/.test(name)) fail(`variables.${name}`, "has an invalid name");
     const metadata = objectAt(rawMetadata, `variables.${name}`);
     rejectUnknown(metadata, ["symbol", "description"], `variables.${name}`);
-    textAt(metadata.symbol, `variables.${name}.symbol`);
-    textAt(metadata.description, `variables.${name}.description`);
+    result.push({
+      symbol: textAt(metadata.symbol, `variables.${name}.symbol`),
+      description: textAt(metadata.description, `variables.${name}.description`)
+    });
   }
-  return variables;
+  return result;
 }
 function slug(value) {
   return value.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "");
@@ -23298,6 +23301,10 @@ function finishResource(key4, label, labelId, mode, highlighted, semanticBounds)
     label: String(value),
     x: scale.x(value)
   }));
+  const endpointLabels = layoutEndpointLabels(paths);
+  const endpointFormulas = new Map(
+    endpointLabels.map((label2) => [label2.curveId, label2.formula])
+  );
   const legend = [];
   const legendEntries = [
     ...highlightedPaths.map((path, index) => ({
@@ -23307,7 +23314,7 @@ function finishResource(key4, label, labelId, mode, highlighted, semanticBounds)
         kind: "plotted",
         pathId: path.id,
         category: path.category,
-        label: path.legendLabel,
+        label: endpointFormulas.get(path.curveId) === path.formula ? path.legendLabel : `${path.legendLabel}: ${path.formula}`,
         color: path.color
       }
     })),
@@ -23317,7 +23324,7 @@ function finishResource(key4, label, labelId, mode, highlighted, semanticBounds)
       item: {
         kind: "semantic",
         category: bound.category,
-        label: bound.formula,
+        label: `${bound.role}: ${bound.formula}`,
         color: bound.color
       }
     }))
@@ -23335,7 +23342,7 @@ function finishResource(key4, label, labelId, mode, highlighted, semanticBounds)
     paths: highlightedPaths,
     contextPaths: context,
     legend,
-    endpointLabels: layoutEndpointLabels(paths),
+    endpointLabels,
     semanticBounds,
     ticks,
     xTicks
@@ -23541,7 +23548,7 @@ function buildComplexityViewModel(input, instanceNamespace) {
     mode: config.mode,
     title,
     label: title,
-    variables: objectAt(config.variables, "variables"),
+    variables: [],
     resources: [resource],
     paths: [...resource.contextPaths, ...resource.paths],
     legend: resource.legend,
@@ -23760,6 +23767,21 @@ function renderComplexityDom(root, view) {
   figure.setAttribute("aria-label", view.label);
   const hiddenLabel = appendText(document2, figure, "span", view.label);
   hiddenLabel.hidden = true;
+  if (view.variables.length > 0) {
+    const variables = document2.createElement("dl");
+    variables.className = "complexity__variables";
+    for (const variable of view.variables) {
+      const item = document2.createElement("div");
+      item.className = "complexity__variable";
+      const term = document2.createElement("dt");
+      appendText(document2, term, "var", variable.symbol);
+      const description = document2.createElement("dd");
+      description.textContent = variable.description;
+      item.append(term, description);
+      variables.append(item);
+    }
+    figure.append(variables);
+  }
   const resources = document2.createElement("div");
   resources.className = "complexity__resources";
   for (const resource of view.resources) resources.append(renderResourceDom(document2, resource));

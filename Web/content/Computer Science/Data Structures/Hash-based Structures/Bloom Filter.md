@@ -97,17 +97,17 @@ tab: Complexity
             {
               "kind": "text",
               "role": "Best time",
-              "formula": "O(\\|x\\| + k)"
+              "formula": "O(|x| + k)"
             },
             {
               "kind": "text",
               "role": "Average time",
-              "formula": "O(\\|x\\| + k)"
+              "formula": "O(|x| + k)"
             },
             {
               "kind": "text",
               "role": "Worst time",
-              "formula": "O(\\|x\\| + k)"
+              "formula": "O(|x| + k)"
             }
           ]
         },
@@ -118,17 +118,17 @@ tab: Complexity
             {
               "kind": "text",
               "role": "Best time",
-              "formula": "O(\\|x\\| + 1) first 0 bit"
+              "formula": "O(|x| + 1) first 0 bit"
             },
             {
               "kind": "text",
               "role": "Average time",
-              "formula": "O(\\|x\\| + k)"
+              "formula": "O(|x| + k)"
             },
             {
               "kind": "text",
               "role": "Worst time",
-              "formula": "O(\\|x\\| + k)"
+              "formula": "O(|x| + k)"
             }
           ]
         }
@@ -162,7 +162,7 @@ tab: Complexity
             {
               "kind": "text",
               "role": "Aux space per op",
-              "formula": "O(\\|x\\|) in the example"
+              "formula": "O(|x|) in the example"
             }
           ]
         },
@@ -173,7 +173,7 @@ tab: Complexity
             {
               "kind": "text",
               "role": "Aux space per op",
-              "formula": "O(\\|x\\|) in the example"
+              "formula": "O(|x|) in the example"
             }
           ]
         }

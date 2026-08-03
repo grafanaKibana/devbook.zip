@@ -459,6 +459,10 @@ function finishResource(
     label: String(value),
     x: scale.x(value),
   }))
+  const endpointLabels = layoutEndpointLabels(paths)
+  const endpointFormulas = new Map(
+    endpointLabels.map((label) => [label.curveId, label.formula]),
+  )
   const legend: ComplexityLegendGroup[] = []
   const legendEntries = [
     ...highlightedPaths.map((path, index) => ({
@@ -468,7 +472,10 @@ function finishResource(
         kind: "plotted" as const,
         pathId: path.id,
         category: path.category,
-        label: path.legendLabel,
+        label:
+          endpointFormulas.get(path.curveId) === path.formula
+            ? path.legendLabel
+            : `${path.legendLabel}: ${path.formula}`,
         color: path.color,
       },
     })),
@@ -497,7 +504,7 @@ function finishResource(
     paths: highlightedPaths,
     contextPaths: context,
     legend,
-    endpointLabels: layoutEndpointLabels(paths),
+    endpointLabels,
     semanticBounds,
     ticks,
     xTicks,

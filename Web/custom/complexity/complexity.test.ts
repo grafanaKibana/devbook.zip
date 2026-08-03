@@ -489,7 +489,7 @@ test("version 2 keeps plotted formulas exact and semantic-only bounds geometry-f
   assert.ok(space.paths.every(({ curveId }) => CURVE_IDS.includes(curveId)))
   assert.deepEqual(
     time.legend.flatMap(({ items }) => items.map(({ label }) => label)),
-    ["Best", "Average", "Worst"],
+    ["Best", "Average: O(n log n) expected", "Worst"],
   )
   assert.equal(space.legend[0].items[0].label, "Best")
   assert.equal(space.legend[0].items[1].label, "Implementation dependent: tail-call stack")
