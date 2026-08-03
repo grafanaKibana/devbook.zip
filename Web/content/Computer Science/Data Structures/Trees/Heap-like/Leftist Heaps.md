@@ -1,8 +1,8 @@
 ---
 publish: true
-created: 2026-07-29T20:22:59.994Z
-modified: 2026-08-02T11:48:48.344Z
-published: 2026-08-02T11:48:48.344Z
+created: 2026-08-03T07:22:13.842Z
+modified: 2026-08-03T07:22:13.843Z
+published: 2026-08-03T07:22:13.843Z
 topic:
   - Computer Science
 subtopic:
@@ -13,8 +13,6 @@ level:
 priority: Medium
 status: Ready to Repeat
 ---
-
-# Intro
 
 Two priority queues need to become one. A leftist heap stores the same heap-ordered keys as an explicit binary tree and adds one field per node so melding follows only the short right spines.
 
@@ -289,6 +287,11 @@ These are worst-case bounds. A leftist heap trades that field for a per-operatio
 > ```
 >
 > The swap and the `a.Npl` update are the two lines that keep the shorter subtree on the right; dropping either breaks the leftist invariant.
+
+# Questions
+
+> [!QUESTION]- Why does the leftist invariant keep merge on a logarithmically short right spine?
+> Every step down the right spine reduces null-path length by one, while a node of null-path length `r` contains at least `2ʳ - 1` nodes. The root's right-spine length is therefore at most logarithmic in the heap size, and merge visits only that spine.
 
 # References
 

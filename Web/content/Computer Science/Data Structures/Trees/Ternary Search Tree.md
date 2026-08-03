@@ -1,8 +1,8 @@
 ---
 publish: true
-created: 2026-07-18T14:02:44.053Z
-modified: 2026-08-02T20:03:55.088Z
-published: 2026-08-02T20:03:55.088Z
+created: 2026-08-03T07:22:13.844Z
+modified: 2026-08-03T07:22:13.844Z
+published: 2026-08-03T07:22:13.844Z
 topic:
   - Computer Science
 subtopic:
@@ -12,8 +12,6 @@ level:
 priority: Medium
 status: Ready to Repeat
 ---
-
-# Intro
 
 Swapping the array for a `Dictionary<char, Node>` fixes the waste but hashes a character on every step and throws away the sorted order the array gave for free. A ternary search tree (TST) keeps the trie's shape while storing each node's children as a small **binary search tree keyed on the next character** — three pointers per node instead of `σ`, and the ordering survives.
 

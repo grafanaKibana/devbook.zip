@@ -1,8 +1,8 @@
 ---
 publish: true
 created: 2026-07-18T14:02:44.031Z
-modified: 2026-08-02T11:13:04.415Z
-published: 2026-08-02T11:13:04.415Z
+modified: 2026-08-03T07:58:46.052Z
+published: 2026-08-03T07:58:46.052Z
 topic:
   - Computer Science
 subtopic:
@@ -155,6 +155,11 @@ Selection sort is not stable because its long-distance swap can carry an equal k
 > ```
 >
 > The `minIdx != i` guard skips the write when the minimum already sits in place, which is why a sorted input performs zero swaps while still running every comparison.
+
+# Questions
+
+> [!QUESTION]- When can selection sort be preferable despite its `Θ(n²)` comparison cost?
+> When writes are materially more expensive than comparisons, its guarded form performs at most one swap per pass and none when the minimum is already placed. A stable shift-based variant loses that advantage by restoring a quadratic write count.
 
 # References
 

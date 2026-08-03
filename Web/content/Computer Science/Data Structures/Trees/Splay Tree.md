@@ -1,8 +1,8 @@
 ---
 publish: true
-created: 2026-07-29T20:23:26.771Z
-modified: 2026-08-02T11:03:00.019Z
-published: 2026-08-02T11:03:00.019Z
+created: 2026-08-03T07:22:13.844Z
+modified: 2026-08-03T07:22:13.844Z
+published: 2026-08-03T07:22:13.844Z
 topic:
   - Computer Science
 subtopic:
@@ -12,8 +12,6 @@ level:
 priority: Medium
 status: Creation
 ---
-
-# Intro
 
 An ordered dictionary may receive a strongly uneven access stream: a small working set is touched repeatedly while most keys stay cold.
 
@@ -249,6 +247,11 @@ tab: Complexity
 Read operations mutate the tree. A lookup cannot safely run under a shared read lock because it rewrites parent and child pointers on the search path. Common iterators that retain an ancestor stack or cached path become stale after another access splays a node, and versioned enumerators may reject the mutation even though the key set did not change. An iterator anchored to stable node identities and advancing by live successor links is not inherently invalidated by splaying.
 
 The missing height guarantee matters for latency-sensitive code.
+
+# Questions
+
+> [!QUESTION]- Why must a splay-tree lookup use exclusive synchronization even when it does not change the key set?
+> A lookup splays the accessed node, or the last node reached on a miss, by rotating it toward the root. Those rotations rewrite parent and child pointers, so concurrent readers can observe or interfere with a structural mutation even though no key was inserted or removed.
 
 # References
 

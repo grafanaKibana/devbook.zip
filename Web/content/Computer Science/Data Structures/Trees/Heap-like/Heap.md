@@ -1,8 +1,8 @@
 ---
 publish: true
-created: 2026-07-29T20:22:59.993Z
-modified: 2026-08-02T11:47:14.377Z
-published: 2026-08-02T11:47:14.377Z
+created: 2026-08-03T07:22:13.842Z
+modified: 2026-08-03T07:22:13.842Z
+published: 2026-08-03T07:22:13.842Z
 topic:
   - Computer Science
 subtopic:
@@ -13,8 +13,6 @@ level:
 priority: Medium
 status: Ready to Repeat
 ---
-
-# Intro
 
 A scheduler holds thousands of pending tasks and repeatedly needs the one with the earliest deadline while new tasks keep arriving.
 

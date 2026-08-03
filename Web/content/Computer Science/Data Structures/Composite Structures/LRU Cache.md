@@ -1,8 +1,8 @@
 ---
 publish: true
-created: 2026-07-29T20:22:59.983Z
-modified: 2026-08-02T11:47:13.619Z
-published: 2026-08-02T11:47:13.619Z
+created: 2026-08-03T07:22:13.840Z
+modified: 2026-08-03T07:22:13.840Z
+published: 2026-08-03T07:22:13.840Z
 topic:
   - Computer Science
 subtopic:
@@ -13,8 +13,6 @@ level:
 priority: High
 status: Ready to Repeat
 ---
-
-# Intro
 
 A cache holds a bounded number of entries and must answer two questions on every access: where is the value for key `k`, and if the cache is full, which entry should leave. Ordering the entries by recency in an array or list makes the victim obvious but turns lookup back into a scan.
 

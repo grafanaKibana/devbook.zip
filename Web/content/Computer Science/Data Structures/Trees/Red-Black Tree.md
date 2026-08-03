@@ -1,8 +1,8 @@
 ---
 publish: true
-created: 2026-07-29T20:23:26.771Z
-modified: 2026-08-02T11:48:48.507Z
-published: 2026-08-02T11:48:48.507Z
+created: 2026-08-03T07:22:13.843Z
+modified: 2026-08-03T07:22:13.843Z
+published: 2026-08-03T07:22:13.843Z
 topic:
   - Computer Science
 subtopic:
@@ -13,8 +13,6 @@ level:
 priority: Medium
 status: Ready to Repeat
 ---
-
-# Intro
 
 An order book holds 100K price levels and an exchange feed inserts and removes thousands of entries per second, all while ordered iteration and min/max must stay fast. An [[Computer Science/Data Structures/Trees/AVL Tree|AVL tree]] uses stricter ±1 height balance and often produces shorter search paths, but may require more rebalancing, especially during deletion. A red-black tree accepts looser balance so color changes and a few local rotations keep the height bounded after updates.
 

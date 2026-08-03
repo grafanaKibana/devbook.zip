@@ -1,8 +1,8 @@
 ---
 publish: true
-created: 2026-07-29T20:22:59.995Z
-modified: 2026-08-02T11:48:05.537Z
-published: 2026-08-02T11:48:05.537Z
+created: 2026-08-03T07:22:13.843Z
+modified: 2026-08-03T07:22:13.843Z
+published: 2026-08-03T07:22:13.843Z
 topic:
   - Computer Science
 subtopic:
@@ -13,8 +13,6 @@ level:
 priority: Medium
 status: Ready to Repeat
 ---
-
-# Intro
 
 When two priority queues must combine repeatedly — merging event streams, uniting sub-schedules — the melding cost dominates. A skew heap keeps only a heap-ordered binary tree and makes merge the primitive: two heaps combine by walking down their right spines, and insert and extract-min are defined in terms of that merge.
 
@@ -284,6 +282,11 @@ The unconditional swap is the whole mechanism, not a tunable detail. There is no
 > ```
 >
 > The two swap-carrying lines are the entire self-adjustment: there is no rank field to update and no condition guarding the swap. Removing the swap, or making it conditional on stored metadata, produces a different data structure.
+
+# Questions
+
+> [!QUESTION]- What does the unconditional child swap buy when a skew heap stores no rank metadata?
+> It moves the right path that just grew onto the left, away from the path the next merge descends. A single merge can still be linear, but repeated swaps distribute that cost so a sequence of operations is logarithmic amortized.
 
 # References
 

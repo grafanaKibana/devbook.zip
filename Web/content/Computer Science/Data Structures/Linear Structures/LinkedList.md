@@ -1,8 +1,8 @@
 ---
 publish: true
-created: 2026-07-29T20:22:59.990Z
-modified: 2026-08-02T11:47:13.901Z
-published: 2026-08-02T11:47:13.901Z
+created: 2026-08-03T07:22:13.841Z
+modified: 2026-08-03T07:22:13.841Z
+published: 2026-08-03T07:22:13.841Z
 topic:
   - Computer Science
 subtopic:
@@ -13,8 +13,6 @@ level:
 priority: Medium
 status: Done
 ---
-
-# Intro
 
 A sequence needs frequent insertions and removals in its interior, and the code already holds a reference to the element next to each edit. A linked list drops contiguity: each element lives in its own separately allocated node, and the structure stores only the links between nodes. In a doubly linked list, splicing around a held node rewires a constant number of adjacent pointers and touches no other element.
 

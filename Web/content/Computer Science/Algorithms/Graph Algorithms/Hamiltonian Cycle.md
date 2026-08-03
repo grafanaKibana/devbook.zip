@@ -1,8 +1,8 @@
 ---
 publish: true
 created: 2026-07-18T14:02:43.947Z
-modified: 2026-08-02T10:39:41.758Z
-published: 2026-08-02T10:39:41.758Z
+modified: 2026-08-03T07:58:15.491Z
+published: 2026-08-03T07:58:15.491Z
 topic:
   - Computer Science
 subtopic:
@@ -137,6 +137,11 @@ A connected graph is also insufficient. Connectivity only promises some path bet
 # Comparison
 
 Hamiltonian cycle is the feasibility version of visiting every vertex once. Traveling Salesman adds weights and asks for the cheapest such cycle; Eulerian cycle solves a different, tractable edge-coverage problem.
+
+# Questions
+
+> [!QUESTION]- Why do degree-at-least-two and no-articulation-point checks fail to prove that a Hamiltonian cycle exists?
+> Both properties are necessary because every vertex on the cycle has two incident cycle edges and removing one cycle vertex leaves the others connected by a path. They are not sufficient: a graph can satisfy both local checks while no single cycle visits every vertex, so backtracking or a stronger problem-specific argument is still required.
 
 # References
 

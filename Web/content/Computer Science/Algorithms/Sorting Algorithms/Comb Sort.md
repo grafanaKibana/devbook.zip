@@ -1,8 +1,8 @@
 ---
 publish: true
 created: 2026-07-21T18:52:02.838Z
-modified: 2026-08-02T11:02:24.101Z
-published: 2026-08-02T11:02:24.101Z
+modified: 2026-08-03T07:58:16.368Z
+published: 2026-08-03T07:58:16.368Z
 topic:
   - Computer Science
 subtopic:
@@ -169,6 +169,11 @@ Gapped swaps can reorder equal keys when a wide-gap swap lifts one past the othe
 > ```
 >
 > The loop condition `gap > 1 || swapped` keeps the gap-1 phase running until one sweep makes no swap. That no-swap pass is the sorted certificate; removing it can leave adjacent inversions the wide passes never inspected.
+
+# Questions
+
+> [!QUESTION]- Why must comb sort keep running after the gap first reaches `1`?
+> Wide-gap passes only reduce disorder; they do not prove the array is sorted. The algorithm needs a complete gap-1 pass with no swaps, because the absence of adjacent inversions is the certificate that the final order is sorted.
 
 # References
 

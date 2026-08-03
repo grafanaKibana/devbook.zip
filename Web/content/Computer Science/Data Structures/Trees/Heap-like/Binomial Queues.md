@@ -1,8 +1,8 @@
 ---
 publish: true
-created: 2026-07-29T20:22:59.992Z
-modified: 2026-08-02T11:48:05.191Z
-published: 2026-08-02T11:48:05.191Z
+created: 2026-08-03T07:22:13.841Z
+modified: 2026-08-03T07:22:13.842Z
+published: 2026-08-03T07:22:13.842Z
 topic:
   - Computer Science
 subtopic:
@@ -13,8 +13,6 @@ level:
 priority: Medium
 status: Ready to Repeat
 ---
-
-# Intro
 
 A priority queue must sometimes absorb another whole priority queue — merge two work sets, join two event streams — and keep answering "smallest first". The contiguous layout that makes a binary heap fast to index is exactly what makes it slow to union.
 
@@ -408,6 +406,11 @@ Find-min degrades the moment the min-pointer is dropped. Without it, the minimum
 > ```
 >
 > `Meld` defers a link when three consecutive roots share a degree, letting the trailing pair carry on the next iteration — this is the case a naive equal-degree link would corrupt.
+
+# Questions
+
+> [!QUESTION]- Why does meld defer when three consecutive roots have the same degree?
+> Linking the first pair would create a higher-degree carry before the third same-degree root, breaking the root list's degree order and risking a skipped collision. Deferring lets the trailing pair link first, after which the carry is processed in order like binary addition.
 
 # References
 

@@ -1,8 +1,8 @@
 ---
 publish: true
-created: 2026-07-29T20:22:59.995Z
-modified: 2026-08-02T11:52:57.646Z
-published: 2026-08-02T11:52:57.646Z
+created: 2026-08-03T07:22:13.843Z
+modified: 2026-08-03T07:22:13.844Z
+published: 2026-08-03T07:22:13.844Z
 topic:
   - Computer Science
 subtopic:
@@ -13,8 +13,6 @@ level:
 priority: Medium
 status: Ready to Repeat
 ---
-
-# Intro
 
 A mutable array of one million latency samples must answer "maximum value in `a[l..r]`" while new samples keep overwriting old slots.
 

@@ -1,8 +1,8 @@
 ---
 publish: true
 created: 2026-07-18T14:02:43.948Z
-modified: 2026-08-02T10:39:41.961Z
-published: 2026-08-02T10:39:41.961Z
+modified: 2026-08-03T07:58:16.012Z
+published: 2026-08-03T07:58:16.012Z
 topic:
   - Computer Science
 subtopic:
@@ -109,6 +109,11 @@ tab: Complexity
 A disconnected graph never reaches `V - 1` accepted edges. The scan returns a minimum spanning forest rather than an MST, so the edge count must be checked.
 
 Equal weights can produce several valid MSTs. Sort stability or an explicit endpoint tie-break changes which equal-weight edge enters, but not the minimum total weight. Negative weights require no special handling: ascending order and the cut property remain valid.
+
+# Questions
+
+> [!QUESTION]- How does Kruskal's algorithm reveal that the input graph is disconnected?
+> A connected graph reaches exactly `V - 1` accepted edges after its components merge into one. If the sorted-edge scan ends earlier, no remaining edge can connect the residual components, so the result is a minimum spanning forest rather than an MST.
 
 # References
 

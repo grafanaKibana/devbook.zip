@@ -1,8 +1,8 @@
 ---
 publish: true
-created: 2026-07-18T14:02:44.054Z
-modified: 2026-08-02T20:03:54.923Z
-published: 2026-08-02T20:03:54.923Z
+created: 2026-08-03T07:22:13.845Z
+modified: 2026-08-03T07:22:13.845Z
+published: 2026-08-03T07:22:13.845Z
 topic:
   - Computer Science
 subtopic:
@@ -13,8 +13,6 @@ level:
 priority: Medium
 status: Ready to Repeat
 ---
-
-# Intro
 
 An autocomplete box holds a set of strings and must answer a different question than "is this exact word present?": given the typed fragment `lap`, which stored keys begin with it? A [[Computer Science/Data Structures/Hash-based Structures/HashMap|hash map]] hashes the whole key, so it can confirm exact membership but has no notion of a shared prefix — answering the fragment query means scanning all `n` keys. A trie (prefix tree) keys the set on the _sequence_ of characters instead of a hash of the whole string, so the prefix becomes a location in the structure rather than a filter over every entry.
 
