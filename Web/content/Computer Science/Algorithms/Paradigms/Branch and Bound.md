@@ -1,8 +1,8 @@
 ---
 publish: true
-created: 2026-08-03T15:21:47.250Z
-modified: 2026-08-03T15:52:21.761Z
-published: 2026-08-03T15:52:21.761Z
+created: 2026-08-03T15:55:17.232Z
+modified: 2026-08-04T05:40:46.086Z
+published: 2026-08-04T05:40:46.086Z
 topic:
   - Computer Science
 subtopic:
@@ -73,14 +73,16 @@ tab: Complexity
         {
           "kind": "approach",
           "label": "Naive (enumerate every assignment)",
-          "formula": "Θ(b^n)",
-          "curveId": "exponential"
+          "formula": "O(b^n)",
+          "curveFrom": "exponential",
+          "curveTo": "unbounded"
         },
         {
           "kind": "approach",
           "label": "Branch and bound",
           "formula": "O(b^n)",
-          "curveId": "exponential"
+          "curveFrom": "exponential",
+          "curveTo": "unbounded"
         }
       ]
     },
@@ -94,9 +96,11 @@ tab: Complexity
           "curveId": "linear"
         },
         {
-          "kind": "text",
+          "kind": "approach",
           "label": "Branch and bound",
-          "formula": "O(n) depth-first, O(b^n) best-first"
+          "formula": "O(n)",
+          "curveFrom": "linear",
+          "curveTo": "unbounded"
         }
       ]
     }

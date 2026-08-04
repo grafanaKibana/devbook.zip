@@ -1,8 +1,8 @@
 ---
 publish: true
-created: 2026-08-03T15:21:47.253Z
-modified: 2026-08-03T15:52:21.763Z
-published: 2026-08-03T15:52:21.763Z
+created: 2026-08-03T15:55:17.234Z
+modified: 2026-08-04T05:40:46.085Z
+published: 2026-08-04T05:40:46.085Z
 topic:
   - Computer Science
 subtopic:
@@ -55,13 +55,15 @@ tab: Complexity
           "kind": "approach",
           "label": "Naive (probe every candidate)",
           "formula": "O(R·n)",
-          "curveId": "quadratic"
+          "curveFrom": "linear",
+          "curveTo": "quadratic"
         },
         {
           "kind": "approach",
           "label": "Binary search on answer",
           "formula": "O(n log R)",
-          "curveId": "n-log-n"
+          "curveFrom": "linear",
+          "curveTo": "n-log-n"
         }
       ]
     },

@@ -1,8 +1,8 @@
 ---
 publish: true
-created: 2026-08-03T15:21:47.255Z
-modified: 2026-08-03T15:52:21.772Z
-published: 2026-08-03T15:52:21.772Z
+created: 2026-08-03T15:55:17.236Z
+modified: 2026-08-04T05:40:46.085Z
+published: 2026-08-04T05:40:46.085Z
 topic:
   - Computer Science
 subtopic:
@@ -61,7 +61,8 @@ tab: Complexity
           "kind": "approach",
           "label": "Naive (rescan every window)",
           "formula": "O(n·k)",
-          "curveId": "quadratic"
+          "curveFrom": "linear",
+          "curveTo": "quadratic"
         },
         {
           "kind": "approach",
@@ -84,7 +85,8 @@ tab: Complexity
           "kind": "approach",
           "label": "Sliding window",
           "formula": "O(k)",
-          "curveId": "linear"
+          "curveFrom": "constant",
+          "curveTo": "linear"
         }
       ]
     }

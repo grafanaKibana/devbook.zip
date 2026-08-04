@@ -1,8 +1,8 @@
 ---
 publish: true
-created: 2026-08-03T15:21:47.250Z
-modified: 2026-08-03T15:52:21.761Z
-published: 2026-08-03T15:52:21.761Z
+created: 2026-08-03T15:55:17.232Z
+modified: 2026-08-04T05:40:46.083Z
+published: 2026-08-04T05:40:46.083Z
 topic:
   - Computer Science
 subtopic:
@@ -57,9 +57,11 @@ tab: Complexity
       "mode": "comparison",
       "entries": [
         {
-          "kind": "text",
+          "kind": "approach",
           "label": "Naive (enumerate every assignment)",
-          "formula": "O(n^n)"
+          "formula": "O(n^n)",
+          "curveFrom": "factorial",
+          "curveTo": "unbounded"
         },
         {
           "kind": "approach",

@@ -1,8 +1,8 @@
 ---
 publish: true
-created: 2026-08-03T15:21:47.255Z
-modified: 2026-08-03T15:52:21.773Z
-published: 2026-08-03T15:52:21.773Z
+created: 2026-08-03T15:55:17.236Z
+modified: 2026-08-04T05:40:46.085Z
+published: 2026-08-04T05:40:46.085Z
 topic:
   - Computer Science
 subtopic:
@@ -70,7 +70,8 @@ tab: Complexity
           "kind": "approach",
           "label": "Top-K (bounded heap)",
           "formula": "O(n log k)",
-          "curveId": "n-log-n"
+          "curveFrom": "linear",
+          "curveTo": "n-log-n"
         }
       ]
     },
@@ -87,7 +88,8 @@ tab: Complexity
           "kind": "approach",
           "label": "Top-K (bounded heap)",
           "formula": "O(k)",
-          "curveId": "linear"
+          "curveFrom": "constant",
+          "curveTo": "linear"
         }
       ]
     }

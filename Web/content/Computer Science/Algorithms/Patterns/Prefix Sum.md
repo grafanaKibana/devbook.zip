@@ -1,8 +1,8 @@
 ---
 publish: true
-created: 2026-08-03T15:21:47.255Z
-modified: 2026-08-03T15:52:21.770Z
-published: 2026-08-03T15:52:21.770Z
+created: 2026-08-03T16:14:52.156Z
+modified: 2026-08-03T16:14:52.157Z
+published: 2026-08-03T16:14:52.157Z
 topic:
   - Computer Science
 subtopic:
@@ -83,6 +83,8 @@ tab: Complexity
   }
 }
 ```
+
+Both curves are per-query. The prefix array costs `O(n)` to build once, so the pattern only pays off when the number of queries outgrows that single pass.
 ````
 
 # When the Precompute Stops Holding

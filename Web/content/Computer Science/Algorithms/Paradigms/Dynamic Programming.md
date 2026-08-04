@@ -1,8 +1,8 @@
 ---
 publish: true
-created: 2026-08-03T15:21:47.251Z
-modified: 2026-08-03T15:52:21.762Z
-published: 2026-08-03T15:52:21.762Z
+created: 2026-08-03T15:55:17.233Z
+modified: 2026-08-04T05:40:46.084Z
+published: 2026-08-04T05:40:46.084Z
 topic:
   - Computer Science
 subtopic:
@@ -283,13 +283,15 @@ tab: Complexity
           "kind": "approach",
           "label": "Naive (recurse every coin choice)",
           "formula": "O(D^W)",
-          "curveId": "exponential"
+          "curveFrom": "exponential",
+          "curveTo": "unbounded"
         },
         {
           "kind": "approach",
           "label": "Dynamic programming",
           "formula": "O(WD)",
-          "curveId": "linear"
+          "curveFrom": "linear",
+          "curveTo": "quadratic"
         }
       ]
     },
