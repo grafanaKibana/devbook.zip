@@ -54,83 +54,38 @@ tab: Complexity
   },
   "resources": {
     "time": {
-      "mode": "operations",
+      "mode": "comparison",
       "entries": [
         {
-          "kind": "operation",
-          "operation": "Sliding window, numeric aggregate",
-          "bounds": [
-            {
-              "kind": "curve",
-              "role": "Time",
-              "formula": "O(n)",
-              "curveId": "linear"
-            }
-          ]
+          "kind": "approach",
+          "label": "Naive (rescan every window)",
+          "formula": "O(n·k)",
+          "curveFrom": "linear",
+          "curveTo": "quadratic"
         },
         {
-          "kind": "operation",
-          "operation": "Sliding window, frequency map over k symbols",
-          "bounds": [
-            {
-              "kind": "curve",
-              "role": "Time",
-              "formula": "O(n)",
-              "curveId": "linear"
-            }
-          ]
-        },
-        {
-          "kind": "operation",
-          "operation": "Brute-force recompute per window",
-          "bounds": [
-            {
-              "kind": "text",
-              "role": "Time",
-              "formula": "O(n·k) fixed width, O(n²) variable"
-            }
-          ]
+          "kind": "approach",
+          "label": "Sliding window",
+          "formula": "O(n)",
+          "curveId": "linear"
         }
       ]
     },
     "space": {
-      "mode": "operations",
+      "mode": "comparison",
       "entries": [
         {
-          "kind": "operation",
-          "operation": "Sliding window, numeric aggregate",
-          "bounds": [
-            {
-              "kind": "curve",
-              "role": "Auxiliary space",
-              "formula": "O(1)",
-              "curveId": "constant"
-            }
-          ]
+          "kind": "approach",
+          "label": "Naive (rescan every window)",
+          "formula": "O(1)",
+          "curveId": "constant"
         },
         {
-          "kind": "operation",
-          "operation": "Sliding window, frequency map over k symbols",
-          "bounds": [
-            {
-              "kind": "curve",
-              "role": "Auxiliary space",
-              "formula": "O(k)",
-              "curveId": "linear"
-            }
-          ]
-        },
-        {
-          "kind": "operation",
-          "operation": "Brute-force recompute per window",
-          "bounds": [
-            {
-              "kind": "curve",
-              "role": "Auxiliary space",
-              "formula": "O(1)",
-              "curveId": "constant"
-            }
-          ]
+          "kind": "approach",
+          "label": "Sliding window",
+          "formula": "O(k)",
+          "curveFrom": "constant",
+          "curveTo": "linear"
         }
       ]
     }

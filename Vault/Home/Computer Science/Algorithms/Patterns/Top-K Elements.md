@@ -57,35 +57,38 @@ tab: Complexity
   },
   "resources": {
     "time": {
-      "mode": "operations",
+      "mode": "comparison",
       "entries": [
         {
-          "kind": "operation",
-          "operation": "Bounded min-heap selection",
-          "bounds": [
-            {
-              "kind": "text",
-              "role": "Time",
-              "formula": "O(n log k)"
-            }
-          ]
+          "kind": "approach",
+          "label": "Naive (sort all elements)",
+          "formula": "O(n log n)",
+          "curveId": "n-log-n"
+        },
+        {
+          "kind": "approach",
+          "label": "Top-K (bounded heap)",
+          "formula": "O(n log k)",
+          "curveFrom": "linear",
+          "curveTo": "n-log-n"
         }
       ]
     },
     "space": {
-      "mode": "operations",
+      "mode": "comparison",
       "entries": [
         {
-          "kind": "operation",
-          "operation": "Bounded min-heap selection",
-          "bounds": [
-            {
-              "kind": "curve",
-              "role": "Auxiliary space",
-              "formula": "O(k)",
-              "curveId": "linear"
-            }
-          ]
+          "kind": "approach",
+          "label": "Naive (sort all elements)",
+          "formula": "O(n)",
+          "curveId": "linear"
+        },
+        {
+          "kind": "approach",
+          "label": "Top-K (bounded heap)",
+          "formula": "O(k)",
+          "curveFrom": "constant",
+          "curveTo": "linear"
         }
       ]
     }

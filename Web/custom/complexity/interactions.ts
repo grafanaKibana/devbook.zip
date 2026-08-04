@@ -9,6 +9,36 @@ export function mountComplexityFigure(figure: HTMLElement): { destroy(): void } 
   }
 
   const resources = Array.from(figure.querySelectorAll<HTMLElement>(".complexity__resource"))
+  const tabs = Array.from(figure.querySelectorAll<HTMLButtonElement>(".complexity__tab"))
+  if (tabs.length === resources.length) {
+    const select = (active: number): void => {
+      tabs.forEach((tab, index) => {
+        tab.setAttribute("aria-selected", index === active ? "true" : "false")
+        tab.tabIndex = index === active ? 0 : -1
+        resources[index].hidden = index !== active
+      })
+    }
+    tabs.forEach((tab, index) => {
+      listen(tab, "click", () => select(index))
+      listen(tab, "keydown", (event) => {
+        const key = (event as KeyboardEvent).key
+        const next =
+          key === "ArrowRight"
+            ? (index + 1) % tabs.length
+            : key === "ArrowLeft"
+              ? (index - 1 + tabs.length) % tabs.length
+              : key === "Home"
+                ? 0
+                : key === "End"
+                  ? tabs.length - 1
+                  : -1
+        if (next < 0) return
+        event.preventDefault()
+        select(next)
+        tabs[next].focus()
+      })
+    })
+  }
   for (const resource of resources.length > 0 ? resources : [figure]) {
     const legendButtons = Array.from(
       resource.querySelectorAll<HTMLButtonElement>(".complexity__legend-button"),

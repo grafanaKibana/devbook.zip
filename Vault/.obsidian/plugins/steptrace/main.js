@@ -22902,6 +22902,27 @@ function mountComplexityFigure(figure) {
     target.addEventListener(type, listener, { signal: controller.signal });
   }
   const resources = Array.from(figure.querySelectorAll(".complexity__resource"));
+  const tabs = Array.from(figure.querySelectorAll(".complexity__tab"));
+  if (tabs.length === resources.length) {
+    const select = (active) => {
+      tabs.forEach((tab, index) => {
+        tab.setAttribute("aria-selected", index === active ? "true" : "false");
+        tab.tabIndex = index === active ? 0 : -1;
+        resources[index].hidden = index !== active;
+      });
+    };
+    tabs.forEach((tab, index) => {
+      listen(tab, "click", () => select(index));
+      listen(tab, "keydown", (event) => {
+        const key4 = event.key;
+        const next = key4 === "ArrowRight" ? (index + 1) % tabs.length : key4 === "ArrowLeft" ? (index - 1 + tabs.length) % tabs.length : key4 === "Home" ? 0 : key4 === "End" ? tabs.length - 1 : -1;
+        if (next < 0) return;
+        event.preventDefault();
+        select(next);
+        tabs[next].focus();
+      });
+    });
+  }
   for (const resource of resources.length > 0 ? resources : [figure]) {
     let update2 = function() {
       const activeIds = new Set(
@@ -23066,6 +23087,9 @@ var CURVE_COLORS = {
   factorial: "#6f5bd3"
 };
 var CONTEXT_COLOR = "currentColor";
+var COMPARISON_CHEAPER = "#22a06b";
+var COMPARISON_DEARER = "#e05252";
+var COMPARISON_NEUTRAL = ["#1597b8", "#9b6bd6", "#db7c2e", "#d99a00"];
 var OPERATION_COLORS = [
   ["#8bb8e8", "#4c89cb", "#245b98"],
   ["#bd9ee8", "#8d62c7", "#65379e"],
@@ -23076,6 +23100,7 @@ var V1_CONFIG_KEYS = ["version", "mode", "title", "variables", "entries"];
 var V2_CONFIG_KEYS = ["version", "label", "variables", "resources"];
 var { left: LEFT, plotRight: PLOT_RIGHT, top: TOP, axisY: AXIS_Y } = COMPLEXITY_CHART;
 var DATA_BOTTOM = AXIS_Y - 14;
+var BAND_OPEN_RISE = 70;
 var MAX_VALUE = 1e4;
 var DUPLICATE_GAP = 4;
 function renderValue(curveId, n) {
@@ -23109,6 +23134,18 @@ function curveIdAt(value, path) {
     fail(path, `must be one of ${CURVE_IDS.join(", ")}`);
   }
   return value;
+}
+function bandAt(entry, path) {
+  const banded = "curveFrom" in entry || "curveTo" in entry;
+  if (!banded) return { curveId: curveIdAt(entry.curveId, `${path}.curveId`) };
+  if ("curveId" in entry) fail(`${path}.curveId`, "cannot be combined with curveFrom and curveTo");
+  const curveId = curveIdAt(entry.curveFrom, `${path}.curveFrom`);
+  if (entry.curveTo === "unbounded") return { curveId, bandTo: "unbounded" };
+  const bandTo = curveIdAt(entry.curveTo, `${path}.curveTo`);
+  if (CURVE_IDS.indexOf(bandTo) <= CURVE_IDS.indexOf(curveId)) {
+    fail(`${path}.curveTo`, `must grow faster than ${curveId}`);
+  }
+  return { curveId, bandTo };
 }
 function samplesAt(value, path) {
   if (!Array.isArray(value) || value.length < 2) fail(path, "must contain at least two points");
@@ -23172,6 +23209,25 @@ function roleColor(role, curveId) {
   if (role === "Best" || role === "Average" || role === "Worst") return CASE_COLORS[role];
   return CURVE_COLORS[curveId];
 }
+function costRank({ curveId, bandTo }) {
+  if (!curveId) return -1;
+  if (bandTo === "unbounded") return CURVE_IDS.length;
+  return CURVE_IDS.indexOf(bandTo ?? curveId);
+}
+function comparisonColors(spans) {
+  const ranks = spans.map(costRank);
+  const plotted = ranks.filter((rank) => rank >= 0);
+  const cheapest = Math.min(...plotted);
+  const dearest = Math.max(...plotted);
+  let neutral = 0;
+  return ranks.map((rank) => {
+    if (rank >= 0 && cheapest !== dearest) {
+      if (rank === dearest) return COMPARISON_DEARER;
+      if (rank === cheapest) return COMPARISON_CHEAPER;
+    }
+    return COMPARISON_NEUTRAL[neutral++ % COMPARISON_NEUTRAL.length];
+  });
+}
 function operationColor(operationIndex, boundIndex) {
   const palette = OPERATION_COLORS[operationIndex % OPERATION_COLORS.length];
   return palette[Math.min(boundIndex, palette.length - 1)];
@@ -23188,27 +23244,34 @@ function makeScale(maxValue) {
     y: (value) => TOP + (1 - Math.log10(value) / logMax) * (DATA_BOTTOM - TOP)
   };
 }
-function curvePath(id, curveId, category, label, legendLabel, color, dimmed, scale, legendGroup, offset = 0, formula = curves[curveId].formula) {
-  const samples = Array.from({ length: 9 }, (_, index) => {
-    const n = index + 2;
-    const value = curves[curveId].evaluate(n);
-    return { n, value, x: scale.x(n), y: scale.y(value) };
-  });
-  const points = [
+function polyline(points) {
+  return points.map(({ x, y }, index) => `${index === 0 ? "M" : "L"}${x.toFixed(2)},${y.toFixed(2)}`).join(" ");
+}
+function curveOutline(curveId, scale, offset) {
+  return [
     { x: LEFT, y: AXIS_Y },
     ...Array.from({ length: 33 }, (_, index) => {
       const n = 2 + index / 4;
       return { x: scale.x(n), y: scale.y(renderValue(curveId, n)) - offset };
     })
   ];
-  const geometry = points.map(({ x, y }, index) => `${index === 0 ? "M" : "L"}${x.toFixed(2)},${y.toFixed(2)}`).join(" ");
+}
+function curvePath(spec, scale) {
+  const { id, curveId, bandTo, category, label, legendLabel, legendGroup, color, dimmed } = spec;
+  const offset = spec.offset ?? 0;
+  const samples = Array.from({ length: 9 }, (_, index) => {
+    const n = index + 2;
+    const value = curves[curveId].evaluate(n);
+    return { n, value, x: scale.x(n), y: scale.y(value) };
+  });
+  const lower = curveOutline(curveId, scale, offset);
+  const geometry = polyline(lower);
   const last = samples[samples.length - 1];
-  const endY = Math.max(TOP, Math.min(DATA_BOTTOM, last.y - offset));
-  return {
+  const path = {
     id,
     curveId,
     category,
-    formula,
+    formula: spec.formula ?? curves[curveId].formula,
     label,
     legendGroup,
     legendLabel,
@@ -23216,21 +23279,30 @@ function curvePath(id, curveId, category, label, legendLabel, color, dimmed, sca
     dimmed,
     geometry,
     area: `${geometry} L${last.x.toFixed(2)},${AXIS_Y.toFixed(2)} Z`,
-    endY,
+    endY: Math.max(TOP, Math.min(DATA_BOTTOM, last.y - offset)),
     samples
+  };
+  if (!bandTo) return path;
+  const upper = bandTo === "unbounded" ? curveOutline(curveId, scale, offset + BAND_OPEN_RISE) : curveOutline(bandTo, scale, offset);
+  const back = [...lower].reverse().map(({ x, y }) => `L${x.toFixed(2)},${y.toFixed(2)}`).join(" ");
+  return {
+    ...path,
+    bandTo,
+    bandGeometry: bandTo === "unbounded" ? void 0 : polyline(upper),
+    area: `${polyline(upper)} ${back} Z`
   };
 }
 function layoutEndpointLabels(paths) {
   const labels = CURVE_IDS.map((curveId) => {
     const matching = paths.filter((path) => path.curveId === curveId);
-    const highlighted = matching.filter((path) => !path.dimmed);
-    const authoredFormulas = [...new Set(highlighted.map((path) => path.formula))];
+    const owners = matching.filter((path) => !path.dimmed && !path.bandTo);
+    const authoredFormulas = [...new Set(owners.map((path) => path.formula))];
     return {
       curveId,
       formula: authoredFormulas.length === 1 ? authoredFormulas[0] : curves[curveId].formula,
-      pathIds: matching.map((path) => path.id),
-      color: highlighted[0]?.color ?? CONTEXT_COLOR,
-      dimmed: highlighted.length === 0,
+      pathIds: matching.filter((path) => !path.bandTo).map((path) => path.id),
+      color: owners[0]?.color ?? CONTEXT_COLOR,
+      dimmed: owners.length === 0,
       y: matching.reduce((sum, path) => sum + path.endY, 0) / matching.length
     };
   }).sort((a, b) => a.y - b.y);
@@ -23258,39 +23330,33 @@ function finishResource(key4, label, labelId, mode, highlighted, semanticBounds)
   const selected = new Set(highlighted.map(({ curveId }) => curveId));
   const context = CURVE_IDS.filter((curveId) => !selected.has(curveId)).map(
     (curveId, index) => curvePath(
-      `${labelId}-context-${curveId}-${index}`,
-      curveId,
-      "other",
-      curves[curveId].formula,
-      curves[curveId].formula,
-      CONTEXT_COLOR,
-      true,
+      {
+        id: `${labelId}-context-${curveId}-${index}`,
+        curveId,
+        category: "other",
+        label: curves[curveId].formula,
+        legendLabel: curves[curveId].formula,
+        color: CONTEXT_COLOR,
+        dimmed: true
+      },
       scale
     )
   );
   const counts = /* @__PURE__ */ new Map();
   const indexes = /* @__PURE__ */ new Map();
   for (const { curveId } of highlighted) counts.set(curveId, (counts.get(curveId) ?? 0) + 1);
-  const highlightedPaths = highlighted.map(
-    ({ id, curveId, category, formula, label: label2, legendGroup, legendLabel, color }) => {
-      const index = indexes.get(curveId) ?? 0;
-      indexes.set(curveId, index + 1);
-      const offset = (counts.get(curveId) ?? 0) > 1 ? index * DUPLICATE_GAP : 0;
-      return curvePath(
-        id,
-        curveId,
-        category,
-        label2,
-        legendLabel,
-        color,
-        false,
-        scale,
-        legendGroup,
-        offset,
-        formula
-      );
-    }
-  );
+  const highlightedPaths = highlighted.map((entry) => {
+    const index = indexes.get(entry.curveId) ?? 0;
+    indexes.set(entry.curveId, index + 1);
+    return curvePath(
+      {
+        ...entry,
+        dimmed: false,
+        offset: (counts.get(entry.curveId) ?? 0) > 1 ? index * DUPLICATE_GAP : 0
+      },
+      scale
+    );
+  });
   const paths = [...context, ...highlightedPaths];
   const ticks = [{ value: 0, label: "0", y: AXIS_Y }];
   for (let value = 1; value <= MAX_VALUE; value *= 10) {
@@ -23302,9 +23368,7 @@ function finishResource(key4, label, labelId, mode, highlighted, semanticBounds)
     x: scale.x(value)
   }));
   const endpointLabels = layoutEndpointLabels(paths);
-  const endpointFormulas = new Map(
-    endpointLabels.map((label2) => [label2.curveId, label2.formula])
-  );
+  const endpointFormulas = new Map(endpointLabels.map((label2) => [label2.curveId, label2.formula]));
   const legend = [];
   const legendEntries = [
     ...highlightedPaths.map((path, index) => ({
@@ -23315,7 +23379,8 @@ function finishResource(key4, label, labelId, mode, highlighted, semanticBounds)
         pathId: path.id,
         category: path.category,
         label: endpointFormulas.get(path.curveId) === path.formula ? path.legendLabel : `${path.legendLabel}: ${path.formula}`,
-        color: path.color
+        color: path.color,
+        banded: Boolean(path.bandTo)
       }
     })),
     ...semanticBounds.map((bound) => ({
@@ -23407,6 +23472,49 @@ function buildResource(rawEntries, mode, pathPrefix, key4, label, labelId, versi
     for (const role of ["Best", "Average", "Worst"]) {
       if (!seen.has(role)) fail(`${pathPrefix}entries`, `must include ${role}`);
     }
+  } else if (mode === "comparison") {
+    if (rawEntries.length < 2) fail(`${pathPrefix}entries`, "must compare at least two approaches");
+    const seen = /* @__PURE__ */ new Set();
+    const approaches = rawEntries.map((raw, index) => {
+      const path = `${pathPrefix}entries[${index}]`;
+      const entry = objectAt(raw, path);
+      if (entry.kind === "approach") {
+        rejectUnknown(entry, ["kind", "label", "formula", "curveId", "curveFrom", "curveTo"], path);
+      } else if (entry.kind === "text") {
+        rejectUnknown(entry, ["kind", "label", "formula"], path);
+      } else {
+        fail(`${path}.kind`, "must be approach or text");
+      }
+      const label2 = textAt(entry.label, `${path}.label`);
+      assertUnique(seen, label2, `${path}.label`);
+      return {
+        label: label2,
+        formula: textAt(entry.formula, `${path}.formula`),
+        ...entry.kind === "approach" ? bandAt(entry, path) : {}
+      };
+    });
+    if (!approaches.some(({ curveId }) => curveId)) {
+      fail(`${pathPrefix}entries`, "must plot at least one approach");
+    }
+    const colors = comparisonColors(approaches);
+    approaches.forEach(({ label: label2, formula, curveId, bandTo }, index) => {
+      const color = colors[index];
+      if (!curveId) {
+        semanticBounds.push({ role: label2, formula, category: "other", color, order: index });
+        return;
+      }
+      highlighted.push({
+        id: pathId(labelId, label2, index),
+        curveId,
+        bandTo,
+        formula,
+        category: "other",
+        label: `${label2}: ${formula}`,
+        legendLabel: label2,
+        color,
+        order: index
+      });
+    });
   } else {
     const seenOperations = /* @__PURE__ */ new Set();
     rawEntries.forEach((raw, operationIndex) => {
@@ -23499,8 +23607,8 @@ function buildComplexityViewModel(input, instanceNamespace) {
       const path = `resources.${key4}`;
       const resource2 = objectAt(resources[key4], path);
       rejectUnknown(resource2, ["mode", "entries"], path);
-      if (resource2.mode !== "cases" && resource2.mode !== "operations") {
-        fail(`${path}.mode`, "must be one of cases, operations");
+      if (resource2.mode !== "cases" && resource2.mode !== "operations" && resource2.mode !== "comparison") {
+        fail(`${path}.mode`, "must be one of cases, operations, comparison");
       }
       return buildResource(
         resource2.entries,
@@ -23571,7 +23679,7 @@ function svgElement(document2, tagName, attributes) {
   for (const [name, value] of Object.entries(attributes)) node2.setAttribute(name, String(value));
   return node2;
 }
-function renderResourceDom(document2, resource) {
+function renderResourceDom(document2, resource, index) {
   const { width, height: height2, left, plotRight, labelX, top, axisY } = COMPLEXITY_CHART;
   const clipId = `${resource.labelId}-plot-clip`;
   const paths = [...resource.contextPaths, ...resource.paths];
@@ -23579,11 +23687,10 @@ function renderResourceDom(document2, resource) {
   group.className = "complexity__resource";
   group.dataset.complexityResource = resource.key;
   if (resource.key !== "catalogue") {
-    group.setAttribute("role", "group");
+    group.id = `${resource.labelId}-panel`;
+    group.setAttribute("role", "tabpanel");
     group.setAttribute("aria-labelledby", resource.labelId);
-    const label = appendText(document2, group, "div", resource.label);
-    label.id = resource.labelId;
-    label.className = "complexity__resource-label";
+    group.hidden = index > 0;
   }
   const plotWrap = document2.createElement("div");
   plotWrap.className = "complexity__plot-wrap";
@@ -23606,23 +23713,24 @@ function renderResourceDom(document2, resource) {
   );
   defs.append(clip);
   for (const path of paths.filter((candidate) => !candidate.dimmed)) {
+    const open = path.bandTo === "unbounded";
     const gradient = svgElement(document2, "linearGradient", {
       id: `${path.id}-fill`,
       x1: 0,
-      y1: 0,
+      y1: open ? 1 : 0,
       x2: 0,
-      y2: 1
+      y2: open ? 0 : 1
     });
     gradient.append(
       svgElement(document2, "stop", {
         offset: "0%",
         "stop-color": path.color,
-        "stop-opacity": 0.2
+        "stop-opacity": open ? 0.22 : path.bandTo ? 0.18 : 0.2
       }),
       svgElement(document2, "stop", {
         offset: "100%",
         "stop-color": path.color,
-        "stop-opacity": 0
+        "stop-opacity": path.bandTo && !open ? 0.18 : 0
       })
     );
     defs.append(gradient);
@@ -23691,6 +23799,20 @@ function renderResourceDom(document2, resource) {
         "data-context": path.dimmed ? "true" : "false"
       })
     );
+    if (path.bandGeometry) {
+      curves2.append(
+        svgElement(document2, "path", {
+          class: "complexity__curve complexity__curve--band-top is-highlighted",
+          d: path.bandGeometry,
+          fill: "none",
+          stroke: path.color,
+          "vector-effect": "non-scaling-stroke",
+          "data-path-id": path.id,
+          "data-curve-id": String(path.bandTo),
+          "data-context": "false"
+        })
+      );
+    }
   }
   clipped.append(areas, curves2);
   svg.append(clipped);
@@ -23738,7 +23860,7 @@ function renderResourceDom(document2, resource) {
       const item = document2.createElement("li");
       item.className = "complexity__legend-item";
       const entry = document2.createElement(legendItem.kind === "plotted" ? "button" : "span");
-      entry.className = `complexity__legend-entry ${legendItem.kind === "plotted" ? "complexity__legend-button" : "complexity__legend-static"}`;
+      entry.className = `complexity__legend-entry ${legendItem.kind === "plotted" ? "complexity__legend-button" : "complexity__legend-static"}${legendItem.kind === "plotted" && legendItem.banded ? " is-banded" : ""}`;
       if (legendItem.kind === "plotted") {
         entry.setAttribute("type", "button");
         entry.dataset.pathId = legendItem.pathId;
@@ -23782,9 +23904,28 @@ function renderComplexityDom(root, view) {
     }
     figure.append(variables);
   }
+  if (view.resources.length > 1) {
+    const tabs = document2.createElement("div");
+    tabs.className = "complexity__tabs";
+    tabs.setAttribute("role", "tablist");
+    tabs.setAttribute("aria-label", view.label);
+    view.resources.forEach((resource, index) => {
+      const tab = appendText(document2, tabs, "button", resource.label);
+      tab.id = resource.labelId;
+      tab.className = "complexity__tab";
+      tab.setAttribute("type", "button");
+      tab.setAttribute("role", "tab");
+      tab.setAttribute("aria-selected", index === 0 ? "true" : "false");
+      tab.setAttribute("aria-controls", `${resource.labelId}-panel`);
+      tab.tabIndex = index === 0 ? 0 : -1;
+    });
+    figure.append(tabs);
+  }
   const resources = document2.createElement("div");
   resources.className = "complexity__resources";
-  for (const resource of view.resources) resources.append(renderResourceDom(document2, resource));
+  view.resources.forEach(
+    (resource, index) => resources.append(renderResourceDom(document2, resource, index))
+  );
   figure.append(resources);
   root.replaceChildren(figure);
   const interaction = typeof figure.querySelectorAll === "function" ? mountComplexityFigure(figure) : { destroy() {

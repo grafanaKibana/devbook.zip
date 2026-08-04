@@ -46,115 +46,43 @@ tab: Complexity
   "version": 2,
   "label": "Divide and Conquer complexity",
   "variables": {
-    "branchCount": {
-      "symbol": "a",
-      "description": "number of recursive subproblems"
-    },
-    "branchingFactor": {
-      "symbol": "b",
-      "description": "recurrence subproblem-size divisor"
-    },
     "inputSize": {
       "symbol": "n",
       "description": "number of input elements or states"
-    },
-    "recurrenceWork": {
-      "symbol": "f(n)",
-      "description": "non-recursive work in the recurrence"
     }
   },
   "resources": {
     "time": {
-      "mode": "operations",
+      "mode": "comparison",
       "entries": [
         {
-          "kind": "operation",
-          "operation": "Master theorem case 1",
-          "bounds": [
-            {
-              "kind": "text",
-              "role": "Condition",
-              "formula": "f(n) = O(n^(log_b a - epsilon)) for some epsilon > 0"
-            },
-            {
-              "kind": "text",
-              "role": "Result",
-              "formula": "Θ(n^(log_b a))"
-            }
-          ]
+          "kind": "approach",
+          "label": "Naive (compare every pair)",
+          "formula": "O(n^2)",
+          "curveId": "quadratic"
         },
         {
-          "kind": "operation",
-          "operation": "Master theorem case 2",
-          "bounds": [
-            {
-              "kind": "text",
-              "role": "Condition",
-              "formula": "f(n) = Theta(n^(log_b a))"
-            },
-            {
-              "kind": "text",
-              "role": "Result",
-              "formula": "Θ(n^(log_b a) · log n)"
-            }
-          ]
-        },
-        {
-          "kind": "operation",
-          "operation": "Master theorem case 3",
-          "bounds": [
-            {
-              "kind": "text",
-              "role": "Condition",
-              "formula": "f(n) = Omega(n^(log_b a + epsilon)) for some epsilon > 0, with a*f(n/b) <= c*f(n) for some c < 1"
-            },
-            {
-              "kind": "text",
-              "role": "Result",
-              "formula": "Θ(f(n))"
-            }
-          ]
+          "kind": "approach",
+          "label": "Divide and conquer (merge sort)",
+          "formula": "O(n log n)",
+          "curveId": "n-log-n"
         }
       ]
     },
     "space": {
-      "mode": "operations",
+      "mode": "comparison",
       "entries": [
         {
-          "kind": "operation",
-          "operation": "Balanced recursion stack",
-          "bounds": [
-            {
-              "kind": "curve",
-              "role": "Bound",
-              "formula": "O(log n)",
-              "curveId": "log-n"
-            }
-          ]
+          "kind": "approach",
+          "label": "Naive (compare every pair)",
+          "formula": "O(1)",
+          "curveId": "constant"
         },
         {
-          "kind": "operation",
-          "operation": "Unbalanced recursion stack",
-          "bounds": [
-            {
-              "kind": "curve",
-              "role": "Bound",
-              "formula": "O(n)",
-              "curveId": "linear"
-            }
-          ]
-        },
-        {
-          "kind": "operation",
-          "operation": "Merge combine buffer",
-          "bounds": [
-            {
-              "kind": "curve",
-              "role": "Bound",
-              "formula": "O(n)",
-              "curveId": "linear"
-            }
-          ]
+          "kind": "approach",
+          "label": "Divide and conquer (merge sort)",
+          "formula": "O(n)",
+          "curveId": "linear"
         }
       ]
     }

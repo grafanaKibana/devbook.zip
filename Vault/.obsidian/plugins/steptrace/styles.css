@@ -6561,6 +6561,11 @@
   --cx-border: var(--lightgray, var(--background-modifier-border, #dedede));
   --cx-bg: var(--light, var(--background-primary, #fff));
   --_font-head: var(--headerFont, var(--font-interface, sans-serif));
+  --cx-accent: var(--secondary, var(--interactive-accent, #245b98));
+  --cx-tab-font: var(--bodyFont, var(--font-text, sans-serif));
+  --cx-tab-underline: var(--tabsdown-underline-thickness, 2px);
+  --cx-tab-gap: var(--tabsdown-gap, 0.25rem);
+  --cx-tab-speed: var(--tabsdown-animation-speed, 140ms);
   container-type: inline-size;
   color: var(--cx-text);
   margin: 0 0 1.5rem;
@@ -6588,27 +6593,53 @@
 }
 .complexity__resources {
   display: grid;
-  grid-template-columns: repeat(2, minmax(20rem, 1fr));
-  gap: 1rem;
-  overflow-x: auto;
-}
-.complexity__resources:has(> .complexity__resource:only-child) {
   grid-template-columns: minmax(0, 1fr);
   overflow-x: visible;
-}
-.complexity__resource:only-child {
-  grid-column: 1/-1;
 }
 .complexity__resource {
   container-type: inline-size;
 }
-.complexity__resource-label {
-  margin-bottom: 0.25rem;
-  font: 650 1rem/1.25 var(--_font-head);
+.complexity__resource[hidden] {
+  display: none;
+}
+.complexity__tabs {
+  display: flex;
+  align-items: stretch;
+  gap: var(--cx-tab-gap);
+  margin: 0 0 0.75rem;
+  overflow-x: auto;
+  overscroll-behavior-inline: contain;
+  scrollbar-width: thin;
+}
+.complexity__tab {
+  flex: 1 1 0;
+  min-width: 44px;
+  min-height: 44px;
+  padding: 0.5rem 1rem;
+  color: var(--cx-text);
+  font: 400 0.9rem/1.2 var(--cx-tab-font);
+  text-align: center;
+  background: transparent;
+  border: 0;
+  border-bottom: var(--cx-tab-underline) solid transparent;
+  border-radius: 0;
+  cursor: pointer;
+  transition: color var(--cx-tab-speed) ease, border-color var(--cx-tab-speed) ease;
+}
+.complexity__tab:hover {
+  border-bottom-color: var(--cx-muted);
+}
+.complexity__tab[aria-selected=true] {
+  color: var(--cx-accent);
+  border-bottom-color: var(--cx-accent);
+}
+.complexity__tab:focus-visible {
+  outline: 2px solid var(--cx-accent);
+  outline-offset: -2px;
 }
 .complexity__legend-button:focus-visible,
 .complexity__legend-group-button:focus-visible {
-  outline: 2px solid var(--secondary, var(--interactive-accent, #245b98));
+  outline: 2px solid var(--cx-accent);
   outline-offset: 2px;
 }
 .complexity__plot-wrap {
@@ -6672,6 +6703,14 @@
   stroke-dasharray: 6 5;
 }
 .complexity__curve.is-context {
+  opacity: 0.18;
+}
+.complexity__curve--band-top.is-highlighted {
+  stroke-width: 1;
+  stroke-dasharray: 3 4;
+  opacity: 0.75;
+}
+.complexity__curve--band-top.is-subtle {
   opacity: 0.18;
 }
 .complexity__endpoint-label {
@@ -6789,6 +6828,13 @@
   border-radius: 999px;
   background: var(--complexity-color);
 }
+.complexity__legend-entry.is-banded .complexity__legend-swatch {
+  height: 0.55rem;
+  border-radius: 0.1rem;
+  background: color-mix(in srgb, var(--complexity-color) 22%, transparent);
+  border-bottom: 2px solid var(--complexity-color);
+  border-top: 1px dashed color-mix(in srgb, var(--complexity-color) 70%, transparent);
+}
 .complexity__legend-static {
   padding-inline: 0.15rem 0;
 }
@@ -6811,32 +6857,29 @@
   min-width: 18rem;
 }
 @container (min-width: 600px) {
-  .complexity__resources {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-  }
   .complexity__legend-items {
     gap-inline: 0.45rem;
   }
   .complexity__legend-swatch {
     width: 0.85rem;
   }
-  .complexity__resource:only-child .complexity__tick,
-  .complexity__resource:only-child .complexity__x-tick,
-  .complexity__resource:only-child .complexity__endpoint-label {
+  .complexity__resource .complexity__tick,
+  .complexity__resource .complexity__x-tick,
+  .complexity__resource .complexity__endpoint-label {
     font-size: 12px;
   }
 }
 @container (min-width: 1000px) {
-  .complexity__resource:only-child .complexity__tick,
-  .complexity__resource:only-child .complexity__x-tick,
-  .complexity__resource:only-child .complexity__endpoint-label {
+  .complexity__resource .complexity__tick,
+  .complexity__resource .complexity__x-tick,
+  .complexity__resource .complexity__endpoint-label {
     font-size: 10px;
   }
 }
 @container (min-width: 1200px) {
-  .complexity__resource:only-child .complexity__tick,
-  .complexity__resource:only-child .complexity__x-tick,
-  .complexity__resource:only-child .complexity__endpoint-label {
+  .complexity__resource .complexity__tick,
+  .complexity__resource .complexity__x-tick,
+  .complexity__resource .complexity__endpoint-label {
     font-size: 8px;
   }
 }
@@ -6844,7 +6887,8 @@
   .complexity__area,
   .complexity__curve,
   .complexity__endpoint-label,
-  .complexity__legend-button {
+  .complexity__legend-button,
+  .complexity__tab {
     transition: none;
   }
 }
@@ -6899,6 +6943,29 @@
 .markdown-rendered .complexity ul.complexity__legend-items > li.complexity__legend-item {
   margin-inline-start: 0;
 }
+.markdown-rendered .complexity button.complexity__tab {
+  appearance: none;
+  flex: 1 1 0;
+  width: auto;
+  min-width: 44px;
+  min-height: 44px;
+  color: var(--cx-text);
+  background: transparent;
+  border: 0;
+  border-bottom: 2px solid transparent;
+  border-radius: 0;
+  box-shadow: none;
+}
+.markdown-rendered .complexity button.complexity__tab:hover {
+  background: transparent;
+  box-shadow: none;
+  border-bottom-color: var(--cx-muted);
+}
+.markdown-rendered .complexity button.complexity__tab[aria-selected=true] {
+  color: var(--cx-accent);
+  background: transparent;
+  border-bottom-color: var(--cx-accent);
+}
 .markdown-rendered .complexity button.complexity__legend-button,
 .markdown-rendered .complexity button.complexity__legend-group-button {
   appearance: none;
@@ -6942,6 +7009,6 @@
 }
 .steptrace button.steptrace__btn--play,
 .steptrace button.steptrace__btn--play:hover {
-  background-color: var(--_accent);
+  background-color: var(--cx-accent);
   background-image: var(--st-accent-gradient, none);
 }

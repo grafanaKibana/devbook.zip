@@ -52,48 +52,36 @@ tab: Complexity
   },
   "resources": {
     "time": {
-      "mode": "operations",
+      "mode": "comparison",
       "entries": [
         {
-          "kind": "operation",
-          "operation": "Distinct subproblems with O(1) local work each",
-          "bounds": [
-            {
-              "kind": "curve",
-              "role": "Upper bound",
-              "formula": "O(n)",
-              "curveId": "linear"
-            }
-          ]
+          "kind": "approach",
+          "label": "Naive (recompute every call)",
+          "formula": "O(2^n)",
+          "curveId": "exponential"
+        },
+        {
+          "kind": "approach",
+          "label": "Memoization",
+          "formula": "O(n)",
+          "curveId": "linear"
         }
       ]
     },
     "space": {
-      "mode": "operations",
+      "mode": "comparison",
       "entries": [
         {
-          "kind": "operation",
-          "operation": "Cache",
-          "bounds": [
-            {
-              "kind": "curve",
-              "role": "Persistent",
-              "formula": "O(n)",
-              "curveId": "linear"
-            }
-          ]
+          "kind": "approach",
+          "label": "Naive (recompute every call)",
+          "formula": "O(n)",
+          "curveId": "linear"
         },
         {
-          "kind": "operation",
-          "operation": "Recursion stack",
-          "bounds": [
-            {
-              "kind": "curve",
-              "role": "Worst-case auxiliary",
-              "formula": "O(n)",
-              "curveId": "linear"
-            }
-          ]
+          "kind": "approach",
+          "label": "Memoization",
+          "formula": "O(n)",
+          "curveId": "linear"
         }
       ]
     }

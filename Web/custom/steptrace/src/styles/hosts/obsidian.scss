@@ -59,6 +59,32 @@
     margin-inline-start: 0;
   }
 
+  button.complexity__tab {
+    appearance: none;
+    flex: 1 1 0;
+    width: auto;
+    min-width: 44px;
+    min-height: 44px;
+    color: var(--cx-text);
+    background: transparent;
+    border: 0;
+    border-bottom: 2px solid transparent;
+    border-radius: 0;
+    box-shadow: none;
+  }
+
+  button.complexity__tab:hover {
+    background: transparent;
+    box-shadow: none;
+    border-bottom-color: var(--cx-muted);
+  }
+
+  button.complexity__tab[aria-selected="true"] {
+    color: var(--cx-accent);
+    background: transparent;
+    border-bottom-color: var(--cx-accent);
+  }
+
   button.complexity__legend-button,
   button.complexity__legend-group-button {
     appearance: none;
@@ -110,6 +136,6 @@
 
 .steptrace button.steptrace__btn--play,
 .steptrace button.steptrace__btn--play:hover {
-  background-color: var(--_accent);
+  background-color: var(--cx-accent);
   background-image: var(--st-accent-gradient, none);
 }

@@ -46,90 +46,44 @@ tab: Complexity
   },
   "resources": {
     "time": {
-      "mode": "operations",
+      "mode": "comparison",
       "entries": [
         {
-          "kind": "operation",
-          "operation": "Build prefix",
-          "bounds": [
-            {
-              "kind": "curve",
-              "role": "Time",
-              "formula": "O(n)",
-              "curveId": "linear"
-            }
-          ]
+          "kind": "approach",
+          "label": "Naive (re-sum per query)",
+          "formula": "O(n)",
+          "curveId": "linear"
         },
         {
-          "kind": "operation",
-          "operation": "Range-sum query",
-          "bounds": [
-            {
-              "kind": "curve",
-              "role": "Time",
-              "formula": "O(1)",
-              "curveId": "constant"
-            }
-          ]
-        },
-        {
-          "kind": "operation",
-          "operation": "Naive re-sum (no prefix)",
-          "bounds": [
-            {
-              "kind": "curve",
-              "role": "Time",
-              "formula": "O(n) per query",
-              "curveId": "linear"
-            }
-          ]
+          "kind": "approach",
+          "label": "Prefix sum",
+          "formula": "O(1)",
+          "curveId": "constant"
         }
       ]
     },
     "space": {
-      "mode": "operations",
+      "mode": "comparison",
       "entries": [
         {
-          "kind": "operation",
-          "operation": "Build prefix",
-          "bounds": [
-            {
-              "kind": "curve",
-              "role": "Space",
-              "formula": "O(n)",
-              "curveId": "linear"
-            }
-          ]
+          "kind": "approach",
+          "label": "Naive (re-sum per query)",
+          "formula": "O(1)",
+          "curveId": "constant"
         },
         {
-          "kind": "operation",
-          "operation": "Range-sum query",
-          "bounds": [
-            {
-              "kind": "curve",
-              "role": "Space",
-              "formula": "O(1)",
-              "curveId": "constant"
-            }
-          ]
-        },
-        {
-          "kind": "operation",
-          "operation": "Naive re-sum (no prefix)",
-          "bounds": [
-            {
-              "kind": "curve",
-              "role": "Space",
-              "formula": "O(1)",
-              "curveId": "constant"
-            }
-          ]
+          "kind": "approach",
+          "label": "Prefix sum",
+          "formula": "O(n)",
+          "curveId": "linear"
         }
       ]
     }
   }
 }
 ```
+
+Both curves are per-query. The prefix array costs `O(n)` to build once, so the pattern only pays off when the number of queries outgrows that single pass.
 ~~~~~
 
 # When the Precompute Stops Holding

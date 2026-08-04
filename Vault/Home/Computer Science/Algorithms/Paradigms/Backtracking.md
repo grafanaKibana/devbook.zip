@@ -45,100 +45,44 @@ tab: Complexity
   "version": 2,
   "label": "Backtracking complexity",
   "variables": {
-    "branchingFactor": {
-      "symbol": "b",
-      "description": "search branching factor or radix base"
-    },
-    "costFactor": {
-      "symbol": "c",
-      "description": "per-node work or recurrence regularity constant"
-    },
     "inputSize": {
       "symbol": "n",
-      "description": "number of input elements or states"
-    },
-    "parameterD": {
-      "symbol": "d",
-      "description": "algorithm-specific depth, digit count, or dimension"
+      "description": "board size, one queen per row"
     }
   },
   "resources": {
     "time": {
-      "mode": "operations",
+      "mode": "comparison",
       "entries": [
         {
-          "kind": "operation",
-          "operation": "Best",
-          "bounds": [
-            {
-              "kind": "text",
-              "role": "Time",
-              "formula": "O(d · c)"
-            }
-          ]
+          "kind": "approach",
+          "label": "Naive (enumerate every assignment)",
+          "formula": "O(n^n)",
+          "curveFrom": "factorial",
+          "curveTo": "unbounded"
         },
         {
-          "kind": "operation",
-          "operation": "Typical",
-          "bounds": [
-            {
-              "kind": "text",
-              "role": "Time",
-              "formula": "far below O(b^d), problem-dependent"
-            }
-          ]
-        },
-        {
-          "kind": "operation",
-          "operation": "Worst",
-          "bounds": [
-            {
-              "kind": "text",
-              "role": "Time",
-              "formula": "O(b^d · c) — n-queens up to O(n!) with columns forced distinct"
-            }
-          ]
+          "kind": "approach",
+          "label": "Backtracking",
+          "formula": "O(n!)",
+          "curveId": "factorial"
         }
       ]
     },
     "space": {
-      "mode": "operations",
+      "mode": "comparison",
       "entries": [
         {
-          "kind": "operation",
-          "operation": "Best",
-          "bounds": [
-            {
-              "kind": "curve",
-              "role": "Auxiliary space",
-              "formula": "O(d)",
-              "curveId": "linear"
-            }
-          ]
+          "kind": "approach",
+          "label": "Naive (enumerate every assignment)",
+          "formula": "O(n)",
+          "curveId": "linear"
         },
         {
-          "kind": "operation",
-          "operation": "Typical",
-          "bounds": [
-            {
-              "kind": "curve",
-              "role": "Auxiliary space",
-              "formula": "O(d)",
-              "curveId": "linear"
-            }
-          ]
-        },
-        {
-          "kind": "operation",
-          "operation": "Worst",
-          "bounds": [
-            {
-              "kind": "curve",
-              "role": "Auxiliary space",
-              "formula": "O(d)",
-              "curveId": "linear"
-            }
-          ]
+          "kind": "approach",
+          "label": "Backtracking",
+          "formula": "O(n)",
+          "curveId": "linear"
         }
       ]
     }

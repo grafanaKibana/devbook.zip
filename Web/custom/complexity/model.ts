@@ -9,7 +9,8 @@ export const CURVE_IDS = [
 ] as const
 
 export type CurveId = (typeof CURVE_IDS)[number]
-export type ComplexityMode = "catalogue" | "cases" | "operations"
+export type CurveBound = CurveId | "unbounded"
+export type ComplexityMode = "catalogue" | "cases" | "operations" | "comparison"
 export type ComplexityCategory = "best" | "average" | "worst" | "other"
 
 export const COMPLEXITY_CHART = {
@@ -30,6 +31,7 @@ interface Curve {
 export interface ComplexityPath {
   id: string
   curveId: CurveId
+  bandTo?: CurveBound
   category: ComplexityCategory
   formula: string
   label: string
@@ -38,6 +40,7 @@ export interface ComplexityPath {
   color: string
   dimmed: boolean
   geometry: string
+  bandGeometry?: string
   area: string
   endY: number
   samples: { n: number; value: number; x: number; y: number }[]
@@ -50,6 +53,7 @@ export type ComplexityLegendItem =
       category: ComplexityCategory
       label: string
       color: string
+      banded: boolean
     }
   | {
       kind: "semantic"
@@ -73,7 +77,7 @@ export interface ComplexityEndpointLabel {
 }
 
 export interface ComplexitySemanticBound {
-  operation: string
+  operation?: string
   role: string
   formula: string
   category: ComplexityCategory
@@ -157,6 +161,9 @@ const CURVE_COLORS: Record<CurveId, string> = {
   factorial: "#6f5bd3",
 }
 const CONTEXT_COLOR = "currentColor"
+const COMPARISON_CHEAPER = "#22a06b"
+const COMPARISON_DEARER = "#e05252"
+const COMPARISON_NEUTRAL = ["#1597b8", "#9b6bd6", "#db7c2e", "#d99a00"] as const
 const OPERATION_COLORS = [
   ["#8bb8e8", "#4c89cb", "#245b98"],
   ["#bd9ee8", "#8d62c7", "#65379e"],
@@ -167,6 +174,7 @@ const V1_CONFIG_KEYS = ["version", "mode", "title", "variables", "entries"] as c
 const V2_CONFIG_KEYS = ["version", "label", "variables", "resources"] as const
 const { left: LEFT, plotRight: PLOT_RIGHT, top: TOP, axisY: AXIS_Y } = COMPLEXITY_CHART
 const DATA_BOTTOM = AXIS_Y - 14
+const BAND_OPEN_RISE = 70
 const MAX_VALUE = 10_000
 const DUPLICATE_GAP = 4
 
@@ -216,6 +224,22 @@ function curveIdAt(value: unknown, path: string): CurveId {
     fail(path, `must be one of ${CURVE_IDS.join(", ")}`)
   }
   return value as CurveId
+}
+
+function bandAt(
+  entry: Record<string, unknown>,
+  path: string,
+): { curveId: CurveId; bandTo?: CurveBound } {
+  const banded = "curveFrom" in entry || "curveTo" in entry
+  if (!banded) return { curveId: curveIdAt(entry.curveId, `${path}.curveId`) }
+  if ("curveId" in entry) fail(`${path}.curveId`, "cannot be combined with curveFrom and curveTo")
+  const curveId = curveIdAt(entry.curveFrom, `${path}.curveFrom`)
+  if (entry.curveTo === "unbounded") return { curveId, bandTo: "unbounded" }
+  const bandTo = curveIdAt(entry.curveTo, `${path}.curveTo`)
+  if (CURVE_IDS.indexOf(bandTo) <= CURVE_IDS.indexOf(curveId)) {
+    fail(`${path}.curveTo`, `must grow faster than ${curveId}`)
+  }
+  return { curveId, bandTo }
 }
 
 function samplesAt(value: unknown, path: string): { n: number; value: number }[] {
@@ -290,6 +314,35 @@ function roleColor(role: string, curveId: CurveId): string {
   return CURVE_COLORS[curveId]
 }
 
+interface CurveSpan {
+  curveId?: CurveId
+  bandTo?: CurveBound
+}
+
+// An approach is only as cheap as its worst case, so a band ranks by its upper bound.
+function costRank({ curveId, bandTo }: CurveSpan): number {
+  if (!curveId) return -1
+  if (bandTo === "unbounded") return CURVE_IDS.length
+  return CURVE_IDS.indexOf(bandTo ?? curveId)
+}
+
+// Growth, not authoring order, earns the red/green reading: approaches that share a
+// growth class get a neutral pair so the palette cannot claim a win the formulas deny.
+function comparisonColors(spans: CurveSpan[]): string[] {
+  const ranks = spans.map(costRank)
+  const plotted = ranks.filter((rank) => rank >= 0)
+  const cheapest = Math.min(...plotted)
+  const dearest = Math.max(...plotted)
+  let neutral = 0
+  return ranks.map((rank) => {
+    if (rank >= 0 && cheapest !== dearest) {
+      if (rank === dearest) return COMPARISON_DEARER
+      if (rank === cheapest) return COMPARISON_CHEAPER
+    }
+    return COMPARISON_NEUTRAL[neutral++ % COMPARISON_NEUTRAL.length]
+  })
+}
+
 function operationColor(operationIndex: number, boundIndex: number): string {
   const palette = OPERATION_COLORS[operationIndex % OPERATION_COLORS.length]
   return palette[Math.min(boundIndex, palette.length - 1)]
@@ -309,41 +362,56 @@ function makeScale(maxValue: number) {
   }
 }
 
-function curvePath(
-  id: string,
+interface CurveSpec {
+  id: string
+  curveId: CurveId
+  bandTo?: CurveBound
+  category: ComplexityCategory
+  label: string
+  legendLabel: string
+  legendGroup?: string
+  color: string
+  dimmed: boolean
+  offset?: number
+  formula?: string
+}
+
+function polyline(points: { x: number; y: number }[]): string {
+  return points
+    .map(({ x, y }, index) => `${index === 0 ? "M" : "L"}${x.toFixed(2)},${y.toFixed(2)}`)
+    .join(" ")
+}
+
+function curveOutline(
   curveId: CurveId,
-  category: ComplexityCategory,
-  label: string,
-  legendLabel: string,
-  color: string,
-  dimmed: boolean,
   scale: ReturnType<typeof makeScale>,
-  legendGroup?: string,
-  offset = 0,
-  formula = curves[curveId].formula,
-): ComplexityPath {
-  const samples = Array.from({ length: 9 }, (_, index) => {
-    const n = index + 2
-    const value = curves[curveId].evaluate(n)
-    return { n, value, x: scale.x(n), y: scale.y(value) }
-  })
-  const points = [
+  offset: number,
+): { x: number; y: number }[] {
+  return [
     { x: LEFT, y: AXIS_Y },
     ...Array.from({ length: 33 }, (_, index) => {
       const n = 2 + index / 4
       return { x: scale.x(n), y: scale.y(renderValue(curveId, n)) - offset }
     }),
   ]
-  const geometry = points
-    .map(({ x, y }, index) => `${index === 0 ? "M" : "L"}${x.toFixed(2)},${y.toFixed(2)}`)
-    .join(" ")
+}
+
+function curvePath(spec: CurveSpec, scale: ReturnType<typeof makeScale>): ComplexityPath {
+  const { id, curveId, bandTo, category, label, legendLabel, legendGroup, color, dimmed } = spec
+  const offset = spec.offset ?? 0
+  const samples = Array.from({ length: 9 }, (_, index) => {
+    const n = index + 2
+    const value = curves[curveId].evaluate(n)
+    return { n, value, x: scale.x(n), y: scale.y(value) }
+  })
+  const lower = curveOutline(curveId, scale, offset)
+  const geometry = polyline(lower)
   const last = samples[samples.length - 1]
-  const endY = Math.max(TOP, Math.min(DATA_BOTTOM, last.y - offset))
-  return {
+  const path: ComplexityPath = {
     id,
     curveId,
     category,
-    formula,
+    formula: spec.formula ?? curves[curveId].formula,
     label,
     legendGroup,
     legendLabel,
@@ -351,22 +419,42 @@ function curvePath(
     dimmed,
     geometry,
     area: `${geometry} L${last.x.toFixed(2)},${AXIS_Y.toFixed(2)} Z`,
-    endY,
+    endY: Math.max(TOP, Math.min(DATA_BOTTOM, last.y - offset)),
     samples,
+  }
+  if (!bandTo) return path
+
+  // An unbounded band has no upper curve to stroke, so it rises a fixed distance off its
+  // floor and fades out: enough to read as "and beyond" without flooding the plot.
+  const upper =
+    bandTo === "unbounded"
+      ? curveOutline(curveId, scale, offset + BAND_OPEN_RISE)
+      : curveOutline(bandTo, scale, offset)
+  const back = [...lower]
+    .reverse()
+    .map(({ x, y }) => `L${x.toFixed(2)},${y.toFixed(2)}`)
+    .join(" ")
+  return {
+    ...path,
+    bandTo,
+    bandGeometry: bandTo === "unbounded" ? undefined : polyline(upper),
+    area: `${polyline(upper)} ${back} Z`,
   }
 }
 
 function layoutEndpointLabels(paths: ComplexityPath[]): ComplexityEndpointLabel[] {
   const labels = CURVE_IDS.map((curveId) => {
     const matching = paths.filter((path) => path.curveId === curveId)
-    const highlighted = matching.filter((path) => !path.dimmed)
-    const authoredFormulas = [...new Set(highlighted.map((path) => path.formula))]
+    // A band only starts at this rung, so it never renames it — the ladder stays canonical
+    // and the band's own formula lives in the legend.
+    const owners = matching.filter((path) => !path.dimmed && !path.bandTo)
+    const authoredFormulas = [...new Set(owners.map((path) => path.formula))]
     return {
       curveId,
       formula: authoredFormulas.length === 1 ? authoredFormulas[0] : curves[curveId].formula,
-      pathIds: matching.map((path) => path.id),
-      color: highlighted[0]?.color ?? CONTEXT_COLOR,
-      dimmed: highlighted.length === 0,
+      pathIds: matching.filter((path) => !path.bandTo).map((path) => path.id),
+      color: owners[0]?.color ?? CONTEXT_COLOR,
+      dimmed: owners.length === 0,
       y: matching.reduce((sum, path) => sum + path.endY, 0) / matching.length,
     }
   }).sort((a, b) => a.y - b.y)
@@ -395,6 +483,7 @@ function assertUnique(seen: Set<string>, value: string, path: string): void {
 interface HighlightedPath {
   id: string
   curveId: CurveId
+  bandTo?: CurveBound
   formula: string
   label: string
   legendGroup?: string
@@ -416,39 +505,33 @@ function finishResource(
   const selected = new Set(highlighted.map(({ curveId }) => curveId))
   const context = CURVE_IDS.filter((curveId) => !selected.has(curveId)).map((curveId, index) =>
     curvePath(
-      `${labelId}-context-${curveId}-${index}`,
-      curveId,
-      "other",
-      curves[curveId].formula,
-      curves[curveId].formula,
-      CONTEXT_COLOR,
-      true,
+      {
+        id: `${labelId}-context-${curveId}-${index}`,
+        curveId,
+        category: "other",
+        label: curves[curveId].formula,
+        legendLabel: curves[curveId].formula,
+        color: CONTEXT_COLOR,
+        dimmed: true,
+      },
       scale,
     ),
   )
   const counts = new Map<CurveId, number>()
   const indexes = new Map<CurveId, number>()
   for (const { curveId } of highlighted) counts.set(curveId, (counts.get(curveId) ?? 0) + 1)
-  const highlightedPaths = highlighted.map(
-    ({ id, curveId, category, formula, label, legendGroup, legendLabel, color }) => {
-      const index = indexes.get(curveId) ?? 0
-      indexes.set(curveId, index + 1)
-      const offset = (counts.get(curveId) ?? 0) > 1 ? index * DUPLICATE_GAP : 0
-      return curvePath(
-        id,
-        curveId,
-        category,
-        label,
-        legendLabel,
-        color,
-        false,
-        scale,
-        legendGroup,
-        offset,
-        formula,
-      )
-    },
-  )
+  const highlightedPaths = highlighted.map((entry) => {
+    const index = indexes.get(entry.curveId) ?? 0
+    indexes.set(entry.curveId, index + 1)
+    return curvePath(
+      {
+        ...entry,
+        dimmed: false,
+        offset: (counts.get(entry.curveId) ?? 0) > 1 ? index * DUPLICATE_GAP : 0,
+      },
+      scale,
+    )
+  })
   const paths = [...context, ...highlightedPaths]
   const ticks: ComplexityViewModel["ticks"] = [{ value: 0, label: "0", y: AXIS_Y }]
   for (let value = 1; value <= MAX_VALUE; value *= 10) {
@@ -460,9 +543,7 @@ function finishResource(
     x: scale.x(value),
   }))
   const endpointLabels = layoutEndpointLabels(paths)
-  const endpointFormulas = new Map(
-    endpointLabels.map((label) => [label.curveId, label.formula]),
-  )
+  const endpointFormulas = new Map(endpointLabels.map((label) => [label.curveId, label.formula]))
   const legend: ComplexityLegendGroup[] = []
   const legendEntries = [
     ...highlightedPaths.map((path, index) => ({
@@ -477,6 +558,7 @@ function finishResource(
             ? path.legendLabel
             : `${path.legendLabel}: ${path.formula}`,
         color: path.color,
+        banded: Boolean(path.bandTo),
       },
     })),
     ...semanticBounds.map((bound) => ({
@@ -580,6 +662,49 @@ function buildResource(
     for (const role of ["Best", "Average", "Worst"]) {
       if (!seen.has(role)) fail(`${pathPrefix}entries`, `must include ${role}`)
     }
+  } else if (mode === "comparison") {
+    if (rawEntries.length < 2) fail(`${pathPrefix}entries`, "must compare at least two approaches")
+    const seen = new Set<string>()
+    const approaches = rawEntries.map((raw, index) => {
+      const path = `${pathPrefix}entries[${index}]`
+      const entry = objectAt(raw, path)
+      if (entry.kind === "approach") {
+        rejectUnknown(entry, ["kind", "label", "formula", "curveId", "curveFrom", "curveTo"], path)
+      } else if (entry.kind === "text") {
+        rejectUnknown(entry, ["kind", "label", "formula"], path)
+      } else {
+        fail(`${path}.kind`, "must be approach or text")
+      }
+      const label = textAt(entry.label, `${path}.label`)
+      assertUnique(seen, label, `${path}.label`)
+      return {
+        label,
+        formula: textAt(entry.formula, `${path}.formula`),
+        ...(entry.kind === "approach" ? bandAt(entry, path) : {}),
+      }
+    })
+    if (!approaches.some(({ curveId }) => curveId)) {
+      fail(`${pathPrefix}entries`, "must plot at least one approach")
+    }
+    const colors = comparisonColors(approaches)
+    approaches.forEach(({ label, formula, curveId, bandTo }, index) => {
+      const color = colors[index]
+      if (!curveId) {
+        semanticBounds.push({ role: label, formula, category: "other", color, order: index })
+        return
+      }
+      highlighted.push({
+        id: pathId(labelId, label, index),
+        curveId,
+        bandTo,
+        formula,
+        category: "other",
+        label: `${label}: ${formula}`,
+        legendLabel: label,
+        color,
+        order: index,
+      })
+    })
   } else {
     const seenOperations = new Set<string>()
     rawEntries.forEach((raw, operationIndex) => {
@@ -677,8 +802,12 @@ export function buildComplexityViewModel(
       const path = `resources.${key}`
       const resource = objectAt(resources[key], path)
       rejectUnknown(resource, ["mode", "entries"], path)
-      if (resource.mode !== "cases" && resource.mode !== "operations") {
-        fail(`${path}.mode`, "must be one of cases, operations")
+      if (
+        resource.mode !== "cases" &&
+        resource.mode !== "operations" &&
+        resource.mode !== "comparison"
+      ) {
+        fail(`${path}.mode`, "must be one of cases, operations, comparison")
       }
       return buildResource(
         resource.entries,

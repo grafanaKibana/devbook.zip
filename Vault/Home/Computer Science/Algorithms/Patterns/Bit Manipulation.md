@@ -54,10 +54,6 @@ tab: Complexity
   "version": 2,
   "label": "Bit Manipulation complexity",
   "variables": {
-    "inputSize": {
-      "symbol": "n",
-      "description": "number of input elements or states"
-    },
     "wordSize": {
       "symbol": "w",
       "description": "machine-word width"
@@ -65,83 +61,36 @@ tab: Complexity
   },
   "resources": {
     "time": {
-      "mode": "operations",
+      "mode": "comparison",
       "entries": [
         {
-          "kind": "operation",
-          "operation": "Best",
-          "bounds": [
-            {
-              "kind": "curve",
-              "role": "Time",
-              "formula": "O(1)",
-              "curveId": "constant"
-            }
-          ]
+          "kind": "approach",
+          "label": "Naive (scan bit by bit)",
+          "formula": "O(w)",
+          "curveId": "linear"
         },
         {
-          "kind": "operation",
-          "operation": "Typical",
-          "bounds": [
-            {
-              "kind": "text",
-              "role": "Time",
-              "formula": "O(popcount(n))"
-            }
-          ]
-        },
-        {
-          "kind": "operation",
-          "operation": "Worst",
-          "bounds": [
-            {
-              "kind": "curve",
-              "role": "Time",
-              "formula": "O(w)",
-              "curveId": "linear"
-            }
-          ]
+          "kind": "approach",
+          "label": "Bit manipulation (whole word)",
+          "formula": "O(1)",
+          "curveId": "constant"
         }
       ]
     },
     "space": {
-      "mode": "operations",
+      "mode": "comparison",
       "entries": [
         {
-          "kind": "operation",
-          "operation": "Best",
-          "bounds": [
-            {
-              "kind": "curve",
-              "role": "Auxiliary space",
-              "formula": "O(1)",
-              "curveId": "constant"
-            }
-          ]
+          "kind": "approach",
+          "label": "Naive (scan bit by bit)",
+          "formula": "O(1)",
+          "curveId": "constant"
         },
         {
-          "kind": "operation",
-          "operation": "Typical",
-          "bounds": [
-            {
-              "kind": "curve",
-              "role": "Auxiliary space",
-              "formula": "O(1)",
-              "curveId": "constant"
-            }
-          ]
-        },
-        {
-          "kind": "operation",
-          "operation": "Worst",
-          "bounds": [
-            {
-              "kind": "curve",
-              "role": "Auxiliary space",
-              "formula": "O(1)",
-              "curveId": "constant"
-            }
-          ]
+          "kind": "approach",
+          "label": "Bit manipulation (whole word)",
+          "formula": "O(1)",
+          "curveId": "constant"
         }
       ]
     }

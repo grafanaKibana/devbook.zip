@@ -41,73 +41,45 @@ tab: Complexity
       "symbol": "n",
       "description": "number of input elements or states"
     },
-    "lowerBound": {
-      "symbol": "lo",
-      "description": "inclusive lower search bound"
-    },
     "rangeWidth": {
-      "symbol": "range",
+      "symbol": "R",
       "description": "numeric candidate-range width"
-    },
-    "upperBound": {
-      "symbol": "hi",
-      "description": "inclusive upper search bound"
     }
   },
   "resources": {
     "time": {
-      "mode": "operations",
+      "mode": "comparison",
       "entries": [
         {
-          "kind": "operation",
-          "operation": "Probes over the range",
-          "bounds": [
-            {
-              "kind": "text",
-              "role": "Cost",
-              "formula": "O(log(hi − lo + 1))"
-            }
-          ]
+          "kind": "approach",
+          "label": "Naive (probe every candidate)",
+          "formula": "O(R·n)",
+          "curveFrom": "linear",
+          "curveTo": "quadratic"
         },
         {
-          "kind": "operation",
-          "operation": "One feasible check",
-          "bounds": [
-            {
-              "kind": "curve",
-              "role": "Cost",
-              "formula": "O(n) typical",
-              "curveId": "linear"
-            }
-          ]
-        },
-        {
-          "kind": "operation",
-          "operation": "Total time",
-          "bounds": [
-            {
-              "kind": "text",
-              "role": "Cost",
-              "formula": "O(n · log(range))"
-            }
-          ]
+          "kind": "approach",
+          "label": "Binary search on answer",
+          "formula": "O(n log R)",
+          "curveFrom": "linear",
+          "curveTo": "n-log-n"
         }
       ]
     },
     "space": {
-      "mode": "operations",
+      "mode": "comparison",
       "entries": [
         {
-          "kind": "operation",
-          "operation": "Auxiliary space",
-          "bounds": [
-            {
-              "kind": "curve",
-              "role": "Cost",
-              "formula": "O(1)",
-              "curveId": "constant"
-            }
-          ]
+          "kind": "approach",
+          "label": "Naive (probe every candidate)",
+          "formula": "O(1)",
+          "curveId": "constant"
+        },
+        {
+          "kind": "approach",
+          "label": "Binary search on answer",
+          "formula": "O(1)",
+          "curveId": "constant"
         }
       ]
     }

@@ -71,8 +71,8 @@ try {
     const layout = await figure.evaluate(async (node, inlineSize) => {
       node.style.inlineSize = `${inlineSize}px`
       await new Promise((resolve) => requestAnimationFrame(() => requestAnimationFrame(resolve)))
-      const resources = node.querySelector(".complexity__resources")
       const variables = node.querySelector(".complexity__variables")
+      const tabs = [...node.querySelectorAll(".complexity__tab")]
       const groups = [...node.querySelectorAll(".complexity__resource")]
       const plotWraps = [...node.querySelectorAll(".complexity__plot-wrap")]
       const overflowOwners = [...node.querySelectorAll("*")].filter((element) => {
@@ -83,16 +83,13 @@ try {
         )
       })
       return {
-        labels: groups.map(
-          (group) => group.querySelector(".complexity__resource-label")?.textContent?.trim() ?? "",
-        ),
-        positions: groups.map((group) => {
-          const rect = group.getBoundingClientRect()
-          return { left: rect.left, top: rect.top, width: rect.width }
-        }),
-        resourceOverflow: resources ? getComputedStyle(resources).overflowX : "missing",
-        resourceScrollWidth: resources?.scrollWidth ?? 0,
-        resourceClientWidth: resources?.clientWidth ?? 0,
+        labels: tabs.map((tab) => tab.textContent.trim()),
+        selected: tabs.map((tab) => tab.getAttribute("aria-selected")),
+        tabHeights: tabs.map((tab) => tab.getBoundingClientRect().height),
+        visible: groups
+          .filter((group) => !group.hidden)
+          .map((group) => group.dataset.complexityResource),
+        panelWidth: groups.find((group) => !group.hidden)?.getBoundingClientRect().width ?? 0,
         overflowOwners: overflowOwners.map((element) => element.className),
         nestedScrollers: plotWraps.filter((element) => {
           const overflow = getComputedStyle(element).overflowX
@@ -103,29 +100,18 @@ try {
       }
     }, width)
 
-    assert.deepEqual(layout.labels, ["Time", "Space"], `${width}px resource order`)
-    assert.equal(layout.positions.length, 2, `${width}px resource count`)
-    assert.ok(layout.positions[0].left < layout.positions[1].left, `${width}px Time must be first`)
-    assert.equal(
-      layout.positions[0].top,
-      layout.positions[1].top,
-      `${width}px columns must not stack`,
+    assert.deepEqual(layout.labels, ["Time", "Space"], `${width}px tab order`)
+    assert.deepEqual(layout.selected, ["true", "false"], `${width}px Time selected first`)
+    assert.deepEqual(layout.visible, ["time"], `${width}px one panel at a time`)
+    assert.ok(layout.panelWidth >= 320, `${width}px minimum plot width`)
+    assert.ok(
+      layout.tabHeights.every((height) => height >= 44),
+      `${width}px tab target size`,
     )
-    assert.equal(layout.resourceOverflow, "auto", `${width}px outer overflow owner`)
     assert.equal(layout.nestedScrollers, 0, `${width}px nested scrollers`)
+    assert.deepEqual(layout.overflowOwners, [], `${width}px must fit without scrolling`)
     assert.match(layout.variableText, /n\s*number of input elements/, `${width}px variable key`)
     assert.equal(layout.variableOverflows, false, `${width}px variable key overflow`)
-    if (width < 600) {
-      assert.ok(
-        layout.positions.every(({ width: column }) => column >= 320),
-        `${width}px minimum plot width`,
-      )
-      assert.ok(layout.resourceScrollWidth > layout.resourceClientWidth, `${width}px must overflow`)
-      assert.deepEqual(layout.overflowOwners, ["complexity__resources"])
-    } else {
-      assert.equal(layout.resourceScrollWidth, layout.resourceClientWidth, `${width}px must fit`)
-      assert.deepEqual(layout.overflowOwners, [])
-    }
   }
 
   const trieFigure = page.locator("#complexity-visual-trie")
@@ -134,24 +120,39 @@ try {
     const escaping = await trieFigure.evaluate(async (node, inlineSize) => {
       node.style.inlineSize = `${inlineSize}px`
       await new Promise((resolve) => requestAnimationFrame(() => requestAnimationFrame(resolve)))
-      return [...node.querySelectorAll(".complexity__resource")].flatMap((resource) => {
+      const escaped = []
+      for (const tab of node.querySelectorAll(".complexity__tab")) {
+        tab.click()
+        const resource = node.querySelector(".complexity__resource:not([hidden])")
         const bounds = resource.getBoundingClientRect()
         const cells = resource.querySelectorAll(
           ".complexity__legend-entry, .complexity__legend-group-label",
         )
-        return [...cells]
-          .filter((cell) => {
-            const rect = cell.getBoundingClientRect()
-            return rect.left < bounds.left - 1 || rect.right > bounds.right + 1
-          })
-          .map((cell) => cell.textContent.trim())
-      })
+        for (const cell of cells) {
+          const rect = cell.getBoundingClientRect()
+          if (rect.left < bounds.left - 1 || rect.right > bounds.right + 1) {
+            escaped.push(`${tab.textContent.trim()}: ${cell.textContent.trim()}`)
+          }
+        }
+      }
+      return escaped
     }, width)
-    assert.deepEqual(escaping, [], `${width}px legend text must stay inside its resource column`)
+    assert.deepEqual(escaping, [], `${width}px legend text must stay inside its panel`)
   }
 
   const time = figure.locator('[data-complexity-resource="time"]')
   const space = figure.locator('[data-complexity-resource="space"]')
+  const tabs = figure.locator(".complexity__tab")
+
+  await tabs.first().focus()
+  await page.keyboard.press("ArrowRight")
+  assert.equal(await tabs.nth(1).getAttribute("aria-selected"), "true")
+  await space.waitFor({ state: "visible" })
+  await time.waitFor({ state: "hidden" })
+  await page.keyboard.press("ArrowLeft")
+  await time.waitFor({ state: "visible" })
+  await space.waitFor({ state: "hidden" })
+
   await time.locator(".complexity__legend-button").first().focus()
   await page.keyboard.press("Enter")
   assert.equal(

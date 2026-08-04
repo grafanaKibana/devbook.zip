@@ -46,90 +46,40 @@ tab: Complexity
     "inputSize": {
       "symbol": "n",
       "description": "number of input elements or states"
-    },
-    "keyRange": {
-      "symbol": "k",
-      "description": "key range, digit count, or requested result count"
     }
   },
   "resources": {
     "time": {
-      "mode": "operations",
+      "mode": "comparison",
       "entries": [
         {
-          "kind": "operation",
-          "operation": "Any input, monotonic stack",
-          "bounds": [
-            {
-              "kind": "text",
-              "role": "Time",
-              "formula": "O(n) total; O(1) amortized per index"
-            }
-          ]
+          "kind": "approach",
+          "label": "Naive (scan back per index)",
+          "formula": "O(n^2)",
+          "curveId": "quadratic"
         },
         {
-          "kind": "operation",
-          "operation": "Any input, monotonic deque",
-          "bounds": [
-            {
-              "kind": "text",
-              "role": "Time",
-              "formula": "O(n) total; O(1) amortized per index"
-            }
-          ]
-        },
-        {
-          "kind": "operation",
-          "operation": "Brute-force next-greater",
-          "bounds": [
-            {
-              "kind": "curve",
-              "role": "Time",
-              "formula": "O(n^2)",
-              "curveId": "quadratic"
-            }
-          ]
+          "kind": "approach",
+          "label": "Monotonic stack",
+          "formula": "O(n)",
+          "curveId": "linear"
         }
       ]
     },
     "space": {
-      "mode": "operations",
+      "mode": "comparison",
       "entries": [
         {
-          "kind": "operation",
-          "operation": "Any input, monotonic stack",
-          "bounds": [
-            {
-              "kind": "curve",
-              "role": "Auxiliary space",
-              "formula": "O(n)",
-              "curveId": "linear"
-            }
-          ]
+          "kind": "approach",
+          "label": "Naive (scan back per index)",
+          "formula": "O(1)",
+          "curveId": "constant"
         },
         {
-          "kind": "operation",
-          "operation": "Any input, monotonic deque",
-          "bounds": [
-            {
-              "kind": "curve",
-              "role": "Auxiliary space",
-              "formula": "O(k)",
-              "curveId": "linear"
-            }
-          ]
-        },
-        {
-          "kind": "operation",
-          "operation": "Brute-force next-greater",
-          "bounds": [
-            {
-              "kind": "curve",
-              "role": "Auxiliary space",
-              "formula": "O(1)",
-              "curveId": "constant"
-            }
-          ]
+          "kind": "approach",
+          "label": "Monotonic stack",
+          "formula": "O(n)",
+          "curveId": "linear"
         }
       ]
     }

@@ -29,7 +29,11 @@ function svgElement(
   return node
 }
 
-function renderResourceDom(document: Document, resource: ComplexityResourceViewModel): HTMLElement {
+function renderResourceDom(
+  document: Document,
+  resource: ComplexityResourceViewModel,
+  index: number,
+): HTMLElement {
   const { width, height, left, plotRight, labelX, top, axisY } = COMPLEXITY_CHART
   const clipId = `${resource.labelId}-plot-clip`
   const paths = [...resource.contextPaths, ...resource.paths]
@@ -37,11 +41,10 @@ function renderResourceDom(document: Document, resource: ComplexityResourceViewM
   group.className = "complexity__resource"
   group.dataset.complexityResource = resource.key
   if (resource.key !== "catalogue") {
-    group.setAttribute("role", "group")
+    group.id = `${resource.labelId}-panel`
+    group.setAttribute("role", "tabpanel")
     group.setAttribute("aria-labelledby", resource.labelId)
-    const label = appendText(document, group, "div", resource.label)
-    label.id = resource.labelId
-    label.className = "complexity__resource-label"
+    group.hidden = index > 0
   }
 
   const plotWrap = document.createElement("div")
@@ -65,23 +68,24 @@ function renderResourceDom(document: Document, resource: ComplexityResourceViewM
   )
   defs.append(clip)
   for (const path of paths.filter((candidate) => !candidate.dimmed)) {
+    const open = path.bandTo === "unbounded"
     const gradient = svgElement(document, "linearGradient", {
       id: `${path.id}-fill`,
       x1: 0,
-      y1: 0,
+      y1: open ? 1 : 0,
       x2: 0,
-      y2: 1,
+      y2: open ? 0 : 1,
     })
     gradient.append(
       svgElement(document, "stop", {
         offset: "0%",
         "stop-color": path.color,
-        "stop-opacity": 0.2,
+        "stop-opacity": open ? 0.22 : path.bandTo ? 0.18 : 0.2,
       }),
       svgElement(document, "stop", {
         offset: "100%",
         "stop-color": path.color,
-        "stop-opacity": 0,
+        "stop-opacity": path.bandTo && !open ? 0.18 : 0,
       }),
     )
     defs.append(gradient)
@@ -150,6 +154,20 @@ function renderResourceDom(document: Document, resource: ComplexityResourceViewM
         "data-context": path.dimmed ? "true" : "false",
       }),
     )
+    if (path.bandGeometry) {
+      curves.append(
+        svgElement(document, "path", {
+          class: "complexity__curve complexity__curve--band-top is-highlighted",
+          d: path.bandGeometry,
+          fill: "none",
+          stroke: path.color,
+          "vector-effect": "non-scaling-stroke",
+          "data-path-id": path.id,
+          "data-curve-id": String(path.bandTo),
+          "data-context": "false",
+        }),
+      )
+    }
   }
   clipped.append(areas, curves)
   svg.append(clipped)
@@ -205,7 +223,7 @@ function renderResourceDom(document: Document, resource: ComplexityResourceViewM
       const entry = document.createElement(legendItem.kind === "plotted" ? "button" : "span")
       entry.className = `complexity__legend-entry ${
         legendItem.kind === "plotted" ? "complexity__legend-button" : "complexity__legend-static"
-      }`
+      }${legendItem.kind === "plotted" && legendItem.banded ? " is-banded" : ""}`
       if (legendItem.kind === "plotted") {
         entry.setAttribute("type", "button")
         entry.dataset.pathId = legendItem.pathId
@@ -253,9 +271,28 @@ export function renderComplexityDom(
     }
     figure.append(variables)
   }
+  if (view.resources.length > 1) {
+    const tabs = document.createElement("div")
+    tabs.className = "complexity__tabs"
+    tabs.setAttribute("role", "tablist")
+    tabs.setAttribute("aria-label", view.label)
+    view.resources.forEach((resource, index) => {
+      const tab = appendText(document, tabs, "button", resource.label)
+      tab.id = resource.labelId
+      tab.className = "complexity__tab"
+      tab.setAttribute("type", "button")
+      tab.setAttribute("role", "tab")
+      tab.setAttribute("aria-selected", index === 0 ? "true" : "false")
+      tab.setAttribute("aria-controls", `${resource.labelId}-panel`)
+      tab.tabIndex = index === 0 ? 0 : -1
+    })
+    figure.append(tabs)
+  }
   const resources = document.createElement("div")
   resources.className = "complexity__resources"
-  for (const resource of view.resources) resources.append(renderResourceDom(document, resource))
+  view.resources.forEach((resource, index) =>
+    resources.append(renderResourceDom(document, resource, index)),
+  )
   figure.append(resources)
   root.replaceChildren(figure)
 

@@ -55,46 +55,34 @@ tab: Complexity
   },
   "resources": {
     "time": {
-      "mode": "cases",
+      "mode": "comparison",
       "entries": [
         {
-          "kind": "case",
-          "role": "Best",
-          "formula": "O(1)",
-          "curveId": "constant"
+          "kind": "approach",
+          "label": "Naive (nested loops)",
+          "formula": "O(n^2)",
+          "curveId": "quadratic"
         },
         {
-          "kind": "case",
-          "role": "Average",
-          "formula": "O(n)",
-          "curveId": "linear"
-        },
-        {
-          "kind": "case",
-          "role": "Worst",
+          "kind": "approach",
+          "label": "Two pointers",
           "formula": "O(n)",
           "curveId": "linear"
         }
       ]
     },
     "space": {
-      "mode": "cases",
+      "mode": "comparison",
       "entries": [
         {
-          "kind": "case",
-          "role": "Best",
+          "kind": "approach",
+          "label": "Naive (nested loops)",
           "formula": "O(1)",
           "curveId": "constant"
         },
         {
-          "kind": "case",
-          "role": "Average",
-          "formula": "O(1)",
-          "curveId": "constant"
-        },
-        {
-          "kind": "case",
-          "role": "Worst",
+          "kind": "approach",
+          "label": "Two pointers",
           "formula": "O(1)",
           "curveId": "constant"
         }

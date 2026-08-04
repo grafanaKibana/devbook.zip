@@ -1,5 +1,5 @@
 import assert from "node:assert/strict"
-import { readFileSync } from "node:fs"
+import { readdirSync, readFileSync } from "node:fs"
 import { join } from "node:path"
 import test from "node:test"
 import type { Element } from "hast"
@@ -152,6 +152,317 @@ const empiricalResource = {
     },
   },
 }
+
+const comparison = {
+  version: 2,
+  label: "Dynamic Programming complexity",
+  variables: { inputSize: { symbol: "n", description: "number of input elements" } },
+  resources: {
+    time: {
+      mode: "comparison",
+      entries: [
+        {
+          kind: "approach",
+          label: "Naive (triple nested loop)",
+          formula: "O(n³)",
+          curveId: "exponential",
+        },
+        { kind: "approach", label: "Dynamic programming", formula: "O(n)", curveId: "linear" },
+      ],
+    },
+    space: {
+      mode: "comparison",
+      entries: [
+        { kind: "text", label: "Naive (triple nested loop)", formula: "O(1), no table" },
+        { kind: "approach", label: "Dynamic programming", formula: "O(n)", curveId: "linear" },
+      ],
+    },
+  },
+}
+
+test("a comparison resource plots approaches into one ungrouped legend", () => {
+  const view = buildComplexityViewModel(comparison, "dp-comparison")
+  const [time, space] = view.resources
+
+  assert.deepEqual(
+    view.resources.map(({ mode }) => mode),
+    ["comparison", "comparison"],
+  )
+  assert.equal(time.legend.length, 1)
+  assert.equal(time.legend[0].label, undefined)
+  assert.deepEqual(
+    time.legend[0].items.map((item) => [item.kind, item.label]),
+    [
+      ["plotted", "Naive (triple nested loop)"],
+      ["plotted", "Dynamic programming"],
+    ],
+  )
+  assert.deepEqual(
+    time.paths.map((path) => path.color),
+    ["#e05252", "#22a06b"],
+  )
+  assert.ok(time.paths.every((path) => path.legendGroup === undefined))
+  assert.deepEqual(
+    time.endpointLabels.filter((label) => !label.dimmed).map((label) => label.formula),
+    ["O(n³)", "O(n)"],
+  )
+
+  assert.equal(space.legend.length, 1)
+  assert.equal(space.legend[0].label, undefined)
+  assert.deepEqual(
+    space.legend[0].items.map((item) => [item.kind, item.label]),
+    [
+      ["semantic", "Naive (triple nested loop): O(1), no table"],
+      ["plotted", "Dynamic programming"],
+    ],
+  )
+
+  const hast = renderComplexityHast(view)
+  const legends = findAllHastByClass(hast, "complexity__legend")
+  assert.deepEqual(
+    legends.map(({ properties }) => (properties.className as string[]).at(-1)),
+    ["is-ungrouped", "is-ungrouped"],
+  )
+  assert.equal(findAllHastByClass(hast, "complexity__legend-group-button").length, 0)
+})
+
+const banded = {
+  ...comparison,
+  resources: {
+    ...comparison.resources,
+    time: {
+      mode: "comparison",
+      entries: [
+        {
+          kind: "approach",
+          label: "Naive (rescan every window)",
+          formula: "O(n·k)",
+          curveFrom: "linear",
+          curveTo: "quadratic",
+        },
+        { kind: "approach", label: "Sliding window", formula: "O(n)", curveId: "linear" },
+      ],
+    },
+  },
+}
+
+test("a band spans two rungs without renaming either of them", () => {
+  const time = buildComplexityViewModel(banded, "band").resources[0]
+  const [span, single] = time.paths
+
+  assert.equal(span.curveId, "linear")
+  assert.equal(span.bandTo, "quadratic")
+  assert.ok(span.bandGeometry, "a bounded band strokes its ceiling")
+  assert.ok(span.area.endsWith(" Z"), "the band fill is a closed region")
+  assert.ok(span.area.includes(span.bandGeometry), "the fill runs along the upper edge")
+  assert.equal(single.bandTo, undefined)
+  assert.equal(single.bandGeometry, undefined)
+
+  // The ladder keeps its canonical rungs; O(n·k) belongs to the band, not to O(n).
+  const rung = (curveId: string) =>
+    time.endpointLabels.find((label) => label.curveId === curveId)?.formula
+  assert.equal(rung("linear"), "O(n)")
+  assert.equal(rung("quadratic"), "O(n²)")
+  // Only the plain O(n) line owns the linear rung; the band that starts there does not.
+  const linear = time.endpointLabels.find((label) => label.curveId === "linear")
+  assert.deepEqual(linear?.pathIds, [single.id])
+  assert.equal(linear?.color, single.color)
+  assert.deepEqual(
+    time.legend[0].items.map((item) => item.label),
+    ["Naive (rescan every window): O(n·k)", "Sliding window"],
+  )
+  assert.deepEqual(
+    time.legend[0].items.map((item) => item.kind === "plotted" && item.banded),
+    [true, false],
+  )
+})
+
+test("an unbounded band runs off the plot instead of borrowing a ceiling", () => {
+  const open = {
+    ...banded,
+    resources: {
+      ...banded.resources,
+      time: {
+        mode: "comparison",
+        entries: [
+          {
+            kind: "approach",
+            label: "Naive (recurse every choice)",
+            formula: "O(D^W)",
+            curveFrom: "exponential",
+            curveTo: "unbounded",
+          },
+          banded.resources.time.entries[1],
+        ],
+      },
+    },
+  }
+  const [span] = buildComplexityViewModel(open, "open").resources[0].paths
+
+  assert.equal(span.bandTo, "unbounded")
+  assert.equal(span.bandGeometry, undefined, "there is no ceiling curve to stroke")
+  const topY = Math.min(
+    ...[...span.area.matchAll(/[ML][\d.-]+,(-?[\d.]+)/g)].map(([, y]) => Number(y)),
+  )
+  assert.ok(topY < COMPLEXITY_CHART.top, `fill must exit the plot, got ${topY}`)
+  // The rung stays a neutral reference: a band must not recolour or rename it at mount.
+  const rung = buildComplexityViewModel(open, "open-rung").resources[0].endpointLabels.find(
+    (label) => label.curveId === "exponential",
+  )
+  assert.deepEqual(rung?.pathIds, [])
+  assert.equal(rung?.dimmed, true)
+  assert.equal(rung?.formula, "O(2^n)")
+
+  const hast = renderComplexityHast(buildComplexityViewModel(open, "open-hast"))
+  assert.equal(findAllHastByClass(hast, "complexity__curve--band-top").length, 0)
+  assert.equal(
+    findAllHastByClass(
+      renderComplexityHast(buildComplexityViewModel(banded, "closed-hast")),
+      "complexity__curve--band-top",
+    ).length,
+    1,
+  )
+})
+
+test("a band is rejected when it has no span or double-declares its curve", () => {
+  const withFirst = (first: Record<string, unknown>) => ({
+    ...banded,
+    resources: {
+      ...banded.resources,
+      time: { mode: "comparison", entries: [first, banded.resources.time.entries[1]] },
+    },
+  })
+  const base = { kind: "approach", label: "Naive (a)", formula: "O(a)" }
+
+  assert.throws(
+    () =>
+      buildComplexityViewModel(
+        withFirst({ ...base, curveFrom: "quadratic", curveTo: "linear" }),
+        "down",
+      ),
+    /resources\.time\.entries\[0\]\.curveTo: must grow faster than quadratic/,
+  )
+  assert.throws(
+    () =>
+      buildComplexityViewModel(
+        withFirst({ ...base, curveFrom: "linear", curveTo: "linear" }),
+        "flat",
+      ),
+    /must grow faster than linear/,
+  )
+  assert.throws(
+    () =>
+      buildComplexityViewModel(
+        withFirst({ ...base, curveId: "linear", curveFrom: "linear", curveTo: "quadratic" }),
+        "both",
+      ),
+    /resources\.time\.entries\[0\]\.curveId: cannot be combined with curveFrom and curveTo/,
+  )
+})
+
+test("comparison colour tracks growth, not authoring order", () => {
+  const withCurves = (first: string, second: string) => ({
+    ...comparison,
+    resources: {
+      ...comparison.resources,
+      time: {
+        mode: "comparison",
+        entries: [
+          { kind: "approach", label: "Naive (a)", formula: "O(a)", curveId: first },
+          { kind: "approach", label: "Technique", formula: "O(b)", curveId: second },
+        ],
+      },
+    },
+  })
+  const colors = (config: unknown, namespace: string) =>
+    buildComplexityViewModel(config, namespace).resources[0].paths.map((path) => path.color)
+
+  assert.deepEqual(colors(withCurves("quadratic", "linear"), "wins"), ["#e05252", "#22a06b"])
+  // A band ranks by its ceiling: an approach is only as cheap as its worst case.
+  const spanned = (first: Record<string, unknown>, second: Record<string, unknown>) => ({
+    ...comparison,
+    resources: {
+      ...comparison.resources,
+      time: {
+        mode: "comparison",
+        entries: [
+          { kind: "approach", label: "Naive (a)", formula: "O(a)", ...first },
+          { kind: "approach", label: "Technique", formula: "O(b)", ...second },
+        ],
+      },
+    },
+  })
+  assert.deepEqual(
+    colors(spanned({ curveFrom: "linear", curveTo: "quadratic" }, { curveId: "linear" }), "ceil"),
+    ["#e05252", "#22a06b"],
+  )
+  // Equal ceilings tie even though the band reaches lower — the win is conditional.
+  assert.deepEqual(
+    colors(
+      spanned({ curveId: "n-log-n" }, { curveFrom: "linear", curveTo: "n-log-n" }),
+      "conditional",
+    ),
+    ["#1597b8", "#9b6bd6"],
+  )
+  // Unbounded outranks every rung on the ladder.
+  assert.deepEqual(
+    colors(
+      spanned({ curveFrom: "factorial", curveTo: "unbounded" }, { curveId: "factorial" }),
+      "open",
+    ),
+    ["#e05252", "#22a06b"],
+  )
+  // A technique that costs more must not be painted as the win just for being second.
+  assert.deepEqual(colors(withCurves("constant", "linear"), "trades"), ["#22a06b", "#e05252"])
+  // Equal growth gets a neutral pair: red/green would claim a difference the formulas deny.
+  assert.deepEqual(colors(withCurves("linear", "linear"), "ties"), ["#1597b8", "#9b6bd6"])
+  // One plotted curve has nothing to rank against.
+  assert.deepEqual(
+    buildComplexityViewModel(comparison, "single").resources[1].paths.map((path) => path.color),
+    ["#9b6bd6"],
+  )
+})
+
+test("a comparison resource rejects a single approach, duplicates, and unknown kinds", () => {
+  const withEntries = (entries: unknown[]) => ({
+    ...comparison,
+    resources: { ...comparison.resources, time: { mode: "comparison", entries } },
+  })
+  assert.throws(
+    () => buildComplexityViewModel(withEntries([comparison.resources.time.entries[0]]), "one"),
+    /resources\.time\.entries: must compare at least two approaches/,
+  )
+  assert.throws(
+    () =>
+      buildComplexityViewModel(
+        withEntries([comparison.resources.time.entries[0], comparison.resources.time.entries[0]]),
+        "dupe",
+      ),
+    /resources\.time\.entries\[1\]\.label: duplicates Naive \(triple nested loop\)/,
+  )
+  assert.throws(
+    () =>
+      buildComplexityViewModel(
+        withEntries([
+          { kind: "case", role: "Best", formula: "O(n)", curveId: "linear" },
+          comparison.resources.time.entries[1],
+        ]),
+        "kind",
+      ),
+    /resources\.time\.entries\[0\]\.kind: must be approach or text/,
+  )
+  assert.throws(
+    () =>
+      buildComplexityViewModel(
+        withEntries([
+          { kind: "text", label: "Naive (a)", formula: "O(a)" },
+          { kind: "text", label: "Technique", formula: "O(b)" },
+        ]),
+        "unplottable",
+      ),
+    /resources\.time\.entries: must plot at least one approach/,
+  )
+})
 
 test("Quartz registers complexity before syntax highlighting", () => {
   const source = readFileSync(join(process.cwd(), "quartz.ts"), "utf8")
@@ -667,7 +978,8 @@ test("version 2 variables use strict ASCII keys and exact symbol metadata", () =
 
 function hastText(node: unknown): string {
   if (!node || typeof node !== "object") return ""
-  const value = node as { value?: unknown; children?: unknown[] }
+  const value = node as { tagName?: unknown; value?: unknown; children?: unknown[] }
+  if (value.tagName === "noscript") return ""
   return `${typeof value.value === "string" ? value.value : ""}${(value.children ?? [])
     .map(hastText)
     .join("")}`
@@ -712,29 +1024,52 @@ function referencedIds(node: unknown): string[] {
   )
 }
 
-test("dual-resource HAST has one accessible figure and labelled Time and Space groups", () => {
+test("dual-resource HAST has one accessible figure and Time and Space tab panels", () => {
   const view = buildComplexityViewModel(dualResource, "quick-sort-hast")
   const hast = renderComplexityHast(view)
   const figure = findHastElement(hast, "figure")
   const resources = findAllHastByClass(hast, "complexity__resource")
-  const labels = findAllHastByClass(hast, "complexity__resource-label")
+  const tabs = findAllHastByClass(hast, "complexity__tab")
 
   assert.equal(figure?.properties.ariaLabel, dualResource.label)
   assert.equal(findAllHastByClass(hast, "complexity__title").length, 0)
-  assert.deepEqual(labels.map(hastText), ["Time", "Space"])
+  assert.equal(findAllHastByClass(hast, "complexity__resource-label").length, 0)
+  assert.deepEqual(tabs.map(hastText), ["Time", "Space"])
+  assert.equal(findHastByClass(hast, "complexity__tabs")?.properties.role, "tablist")
+  assert.ok(
+    tabs.every(({ tagName, properties }) => tagName === "button" && properties.role === "tab"),
+  )
+  assert.deepEqual(
+    tabs.map(({ properties }) => [properties.ariaSelected, properties.tabIndex]),
+    [
+      ["true", 0],
+      ["false", -1],
+    ],
+  )
   assert.deepEqual(
     resources.map(({ properties }) => properties["data-complexity-resource"]),
     ["time", "space"],
   )
-  assert.ok(resources.every(({ properties }) => properties.role === "group"))
-  assert.ok(resources.every(({ properties }) => typeof properties.ariaLabelledBy === "string"))
+  assert.ok(resources.every(({ properties }) => properties.role === "tabpanel"))
+  assert.deepEqual(
+    resources.map(({ properties }) => properties.hidden),
+    [undefined, true],
+  )
+  assert.deepEqual(
+    tabs.map(({ properties }) => properties.ariaControls),
+    resources.map(({ properties }) => properties.id),
+  )
+  assert.deepEqual(
+    resources.map(({ properties }) => properties.ariaLabelledBy),
+    tabs.map(({ properties }) => properties.id),
+  )
   const legends = findAllHastByClass(hast, "complexity__legend")
   assert.equal(legends.length, 2)
   assert.deepEqual(
     legends.map(({ properties }) => (properties.className as string[]).at(-1)),
     ["is-ungrouped", "is-grouped"],
   )
-  assert.equal(hastElements(hast, "button").length, 5)
+  assert.equal(hastElements(hast, "button").length, 7)
   const groupButtons = findAllHastByClass(hast, "complexity__legend-group-button")
   assert.equal(groupButtons.length, 1)
   assert.equal(groupButtons[0].tagName, "button")
@@ -983,6 +1318,7 @@ class InteractiveElement extends EventTarget {
   readonly style = new FakeStyle()
   readonly attributes: Record<string, string> = {}
   readonly matches = new Map<string, InteractiveElement[]>()
+  focus() {}
   setAttribute(name: string, value: string) {
     this.attributes[name] = value
   }
@@ -1119,6 +1455,33 @@ test("legend selection changes only its owning resource", () => {
   handle.destroy()
 })
 
+test("resource tabs reveal one panel by click and by arrow key", () => {
+  const figure = new InteractiveElement()
+  const time = interactiveResource("time-best")
+  const space = interactiveResource("space-best")
+  const timeTab = new InteractiveElement()
+  const spaceTab = new InteractiveElement()
+  figure.matches.set(".complexity__resource", [time.resource, space.resource])
+  figure.matches.set(".complexity__tab", [timeTab, spaceTab])
+  space.resource.hidden = true
+
+  const handle = mountComplexityFigure(figure as unknown as HTMLElement)
+  spaceTab.dispatchEvent(new Event("click"))
+  assert.equal(time.resource.hidden, true)
+  assert.equal(space.resource.hidden, false)
+  assert.equal(spaceTab.attributes["aria-selected"], "true")
+  assert.equal(spaceTab.tabIndex, 0)
+
+  spaceTab.dispatchEvent(Object.assign(new Event("keydown"), { key: "ArrowRight" }))
+  assert.equal(time.resource.hidden, false)
+  assert.equal(space.resource.hidden, true)
+  assert.equal(timeTab.attributes["aria-selected"], "true")
+
+  handle.destroy()
+  spaceTab.dispatchEvent(new Event("click"))
+  assert.equal(space.resource.hidden, true)
+})
+
 test("a legend group button selects every plotted item in its row", () => {
   const figure = new InteractiveElement()
   const groupButton = new InteractiveElement()
@@ -1242,20 +1605,35 @@ test("Obsidian DOM keeps the version 1 label accessible but not visible", () => 
   assert.equal(root.children.length, 0)
 })
 
-test("complexity styles have no StepTrace tabs dependency and no top margin", () => {
+test("complexity styles own their resource tabs and have no top margin", () => {
   const styles = readFileSync(join(process.cwd(), "custom", "complexity", "styles.scss"), "utf8")
   assert.match(styles, /\.complexity\s*\{[^}]*container-type: inline-size;/s)
   assert.match(styles, /\.complexity__resource\s*\{[^}]*container-type: inline-size;/s)
+  assert.match(styles, /\.complexity__resource\[hidden\]\s*\{[^}]*display:\s*none;/s)
   assert.match(
     styles,
-    /\.complexity__resources:has\(> \.complexity__resource:only-child\)\s*\{[^}]*grid-template-columns:\s*minmax\(0, 1fr\);[^}]*overflow-x:\s*visible;/s,
+    /\.complexity__tab\s*\{[^}]*min-height:\s*44px;[^}]*background:\s*transparent;[^}]*border-bottom:\s*var\(--cx-tab-underline\) solid transparent;/s,
   )
+  // The strip has to track the Tabsdown settings, not restate them.
+  assert.match(styles, /--cx-tab-underline:\s*var\(--tabsdown-underline-thickness,/)
+  assert.match(styles, /--cx-tab-gap:\s*var\(--tabsdown-gap,/)
+  assert.match(styles, /--cx-tab-speed:\s*var\(--tabsdown-animation-speed,/)
+  assert.match(styles, /--cx-tab-font:\s*var\(--bodyFont,/)
+  assert.match(
+    styles,
+    /\.complexity__tab\[aria-selected="true"\]\s*\{[^}]*color:\s*var\(--cx-accent\);[^}]*border-bottom-color:\s*var\(--cx-accent\);/s,
+  )
+  assert.doesNotMatch(
+    styles,
+    /\.complexity__tab\[aria-selected="true"\]\s*\{[^}]*background:\s*var/s,
+  )
+  assert.match(styles, /\.complexity__tab:focus-visible\s*\{[^}]*outline:/s)
   assert.match(styles, /\.complexity\s*\{[^}]*margin:\s*0 0 1\.5rem;/s)
   assert.match(
     styles,
     /\.complexity__variables\s*\{[^}]*display:\s*flex;[^}]*flex-wrap:\s*wrap;[^}]*font:[^;]*0\.875rem/s,
   )
-  assert.doesNotMatch(styles, /steptrace|complexity__tabs?|@use/)
+  assert.doesNotMatch(styles, /steptrace|@use/)
   assert.match(
     styles,
     /th:nth-child\(6\):last-child,\s*td:nth-child\(6\):last-child\s*\{\s*min-width:\s*18rem;/s,
@@ -1264,7 +1642,7 @@ test("complexity styles have no StepTrace tabs dependency and no top margin", ()
   assert.match(styles, /@container \(min-width: 600px\)/)
   assert.match(
     styles,
-    /@container \(min-width: 600px\)[\s\S]*\.complexity__resource:only-child \.complexity__tick,[\s\S]*font-size:\s*12px;/,
+    /@container \(min-width: 600px\)[\s\S]*\.complexity__resource \.complexity__tick,[\s\S]*font-size:\s*12px;/,
   )
   assert.match(styles, /@container \(min-width: 1000px\)[\s\S]*font-size:\s*10px;/)
   assert.match(styles, /@container \(min-width: 1200px\)[\s\S]*font-size:\s*8px;/)
@@ -1294,11 +1672,11 @@ test("complexity styles have no StepTrace tabs dependency and no top margin", ()
   )
   assert.doesNotMatch(styles, /\.complexity__legend\s*\{[^}]*(?:background|border(?:-radius)?):/s)
   assert.doesNotMatch(styles, /\.complexity__semantic-bounds\b/)
-  assert.match(styles, /\.complexity__resources\s*\{[^}]*display:\s*grid;[^}]*overflow-x:\s*auto;/s)
   assert.match(
     styles,
-    /\.complexity__resources\s*\{[^}]*grid-template-columns:\s*repeat\(2,\s*minmax\(/s,
+    /\.complexity__resources\s*\{[^}]*grid-template-columns:\s*minmax\(0, 1fr\);[^}]*overflow-x:\s*visible;/s,
   )
+  assert.doesNotMatch(styles, /grid-template-columns:\s*repeat\(2,/)
   assert.doesNotMatch(styles, /\.complexity__plot-wrap\s*\{[^}]*overflow-x:\s*(?:auto|scroll)/s)
 })
 
@@ -1313,7 +1691,46 @@ test("renderer sources contain no legacy complexity filter surface", () => {
   for (const source of sources) {
     assert.doesNotMatch(
       source,
-      /COMPLEXITY_FILTERS|ComplexityFilter|complexity__tabs?|steptrace__tabs?|data-filter|activeFilter|active-filter|role:\s*["']tab|role",\s*["']tab/,
+      /COMPLEXITY_FILTERS|ComplexityFilter|steptrace__tabs?|data-filter|activeFilter|active-filter/,
+    )
+  }
+})
+
+test("every Paradigms and Patterns chart compares a naive baseline against the technique", () => {
+  const root = join(process.cwd(), "..", "Vault", "Home", "Computer Science", "Algorithms")
+  const notes = ["Paradigms", "Patterns"].flatMap((folder) =>
+    readdirSync(join(root, folder))
+      .filter((name) => name.endsWith(".md"))
+      .map((name) => join(root, folder, name)),
+  )
+  const charts = notes.flatMap((note) => {
+    const fence = readFileSync(note, "utf8").match(/```complexity\n([\s\S]*?)\n```/)
+    return fence ? [[note, JSON.parse(fence[1])] as const] : []
+  })
+
+  assert.equal(charts.length, 16)
+  for (const [note, config] of charts) {
+    for (const [key, resource] of Object.entries(config.resources)) {
+      const { mode, entries } = resource as { mode: string; entries: { label: string }[] }
+      assert.equal(mode, "comparison", `${note} ${key} mode`)
+      assert.equal(entries.length, 2, `${note} ${key} entry count`)
+      assert.match(entries[0].label, /^Naive \(/, `${note} ${key} baseline label`)
+      assert.doesNotMatch(entries[1].label, /^Naive\b/, `${note} ${key} technique label`)
+    }
+    const [time, space] = ["time", "space"].map(
+      (key) => config.resources[key].entries as { label: string }[],
+    )
+    assert.deepEqual(
+      time.map(({ label }) => label),
+      space.map(({ label }) => label),
+      `${note} labels must match across resources`,
+    )
+    assert.equal(
+      buildComplexityViewModel(config, "content-check").resources.every(
+        (resource) => resource.legend.length === 1 && !resource.legend[0].label,
+      ),
+      true,
+      `${note} legend must stay ungrouped`,
     )
   }
 })

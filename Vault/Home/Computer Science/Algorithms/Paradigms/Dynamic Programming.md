@@ -263,17 +263,9 @@ tab: Complexity
   "version": 2,
   "label": "Dynamic Programming complexity",
   "variables": {
-    "capacity": {
-      "symbol": "C",
-      "description": "number of grid columns"
-    },
     "optionCount": {
       "symbol": "D",
       "description": "number of denominations, choices, or dimensions"
-    },
-    "rowCount": {
-      "symbol": "R",
-      "description": "number of rows"
     },
     "targetSize": {
       "symbol": "W",
@@ -282,80 +274,38 @@ tab: Complexity
   },
   "resources": {
     "time": {
-      "mode": "operations",
+      "mode": "comparison",
       "entries": [
         {
-          "kind": "operation",
-          "operation": "Coin change, target W, D denominations",
-          "bounds": [
-            {
-              "kind": "text",
-              "role": "Time",
-              "formula": "O(WD)"
-            }
-          ]
+          "kind": "approach",
+          "label": "Naive (recurse every coin choice)",
+          "formula": "O(D^W)",
+          "curveFrom": "exponential",
+          "curveTo": "unbounded"
         },
         {
-          "kind": "operation",
-          "operation": "Grid path, R × C matrix",
-          "bounds": [
-            {
-              "kind": "text",
-              "role": "Time",
-              "formula": "O(RC)"
-            }
-          ]
+          "kind": "approach",
+          "label": "Dynamic programming",
+          "formula": "O(WD)",
+          "curveFrom": "linear",
+          "curveTo": "quadratic"
         }
       ]
     },
     "space": {
-      "mode": "operations",
+      "mode": "comparison",
       "entries": [
         {
-          "kind": "operation",
-          "operation": "Coin change, target W, D denominations",
-          "bounds": [
-            {
-              "kind": "curve",
-              "role": "Stored answers",
-              "formula": "O(W)",
-              "curveId": "linear"
-            },
-            {
-              "kind": "curve",
-              "role": "Top-down stack",
-              "formula": "O(W)",
-              "curveId": "linear"
-            }
-          ]
+          "kind": "approach",
+          "label": "Naive (recurse every coin choice)",
+          "formula": "O(W)",
+          "curveId": "linear"
         },
         {
-          "kind": "operation",
-          "operation": "Grid path, R × C matrix",
-          "bounds": [
-            {
-              "kind": "text",
-              "role": "Stored answers",
-              "formula": "O(RC)"
-            },
-            {
-              "kind": "text",
-              "role": "Top-down stack",
-              "formula": "O(R + C)"
-            }
-          ]
-        },
-        {
-          "kind": "operation",
-          "operation": "Grid path row optimization",
-          "bounds": [
-            {
-              "kind": "curve",
-              "role": "Auxiliary",
-              "formula": "O(C)",
-              "curveId": "linear"
-            }
-          ]
+          "kind": "approach",
+          "label": "Dynamic programming",
+          "formula": "O(W)",
+          "curveId": "linear"
         }
       ]
     }
