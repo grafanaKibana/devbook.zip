@@ -67,25 +67,24 @@ function renderResourceDom(
     }),
   )
   defs.append(clip)
-  for (const path of paths.filter((candidate) => !candidate.dimmed)) {
-    const open = path.bandTo === "unbounded"
+  for (const path of paths.filter((candidate) => !candidate.dimmed && !candidate.bandTo)) {
     const gradient = svgElement(document, "linearGradient", {
       id: `${path.id}-fill`,
       x1: 0,
-      y1: open ? 1 : 0,
+      y1: 0,
       x2: 0,
-      y2: open ? 0 : 1,
+      y2: 1,
     })
     gradient.append(
       svgElement(document, "stop", {
         offset: "0%",
         "stop-color": path.color,
-        "stop-opacity": open ? 0.22 : path.bandTo ? 0.18 : 0.2,
+        "stop-opacity": 0.2,
       }),
       svgElement(document, "stop", {
         offset: "100%",
         "stop-color": path.color,
-        "stop-opacity": path.bandTo && !open ? 0.18 : 0,
+        "stop-opacity": 0,
       }),
     )
     defs.append(gradient)
@@ -136,7 +135,12 @@ function renderResourceDom(
         svgElement(document, "path", {
           class: "complexity__area",
           d: path.area,
-          fill: `url(#${path.id}-fill)`,
+          ...(path.bandTo
+            ? {
+                fill: path.color,
+                "fill-opacity": path.bandTo === "unbounded" ? 0.1 : 0.18,
+              }
+            : { fill: `url(#${path.id}-fill)` }),
           "data-path-id": path.id,
         }),
       )

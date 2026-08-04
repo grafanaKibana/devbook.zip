@@ -21,25 +21,12 @@ function renderResourceHast(resource: ComplexityResourceViewModel, index: number
   const clipId = `${resource.labelId}-plot-clip`
   const pathsToRender = [...resource.contextPaths, ...resource.paths]
   const gradients = pathsToRender
-    .filter((path) => !path.dimmed)
+    .filter((path) => !path.dimmed && !path.bandTo)
     .map((path) =>
-      path.bandTo === "unbounded"
-        ? element("linearGradient", { id: `${path.id}-fill`, x1: "0", y1: "1", x2: "0", y2: "0" }, [
-            element("stop", { offset: "0%", stopColor: path.color, stopOpacity: 0.22 }),
-            element("stop", { offset: "100%", stopColor: path.color, stopOpacity: 0 }),
-          ])
-        : element("linearGradient", { id: `${path.id}-fill`, x1: "0", y1: "0", x2: "0", y2: "1" }, [
-            element("stop", {
-              offset: "0%",
-              stopColor: path.color,
-              stopOpacity: path.bandTo ? 0.18 : 0.2,
-            }),
-            element("stop", {
-              offset: "100%",
-              stopColor: path.color,
-              stopOpacity: path.bandTo ? 0.18 : 0,
-            }),
-          ]),
+      element("linearGradient", { id: `${path.id}-fill`, x1: "0", y1: "0", x2: "0", y2: "1" }, [
+        element("stop", { offset: "0%", stopColor: path.color, stopOpacity: 0.2 }),
+        element("stop", { offset: "100%", stopColor: path.color, stopOpacity: 0 }),
+      ]),
     )
   const grid = resource.ticks.flatMap((tick) => [
     element("line", {
@@ -70,7 +57,9 @@ function renderResourceHast(resource: ComplexityResourceViewModel, index: number
       element("path", {
         className: ["complexity__area"],
         d: path.area,
-        fill: `url(#${path.id}-fill)`,
+        ...(path.bandTo
+          ? { fill: path.color, fillOpacity: path.bandTo === "unbounded" ? 0.1 : 0.18 }
+          : { fill: `url(#${path.id}-fill)` }),
         "data-path-id": path.id,
       }),
     )

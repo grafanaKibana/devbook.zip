@@ -123,14 +123,17 @@ const curves: Record<CurveId, Curve> = {
     formula: "O(1)",
     evaluate: () => 1,
   },
+  // Shifted by one so the ladder is defined across the whole axis: log n is negative below
+  // n = 1 and undefined at 0, which left these two riding the axis instead of climbing out
+  // of the origin with the rest. Same growth class, drawable from the first pixel.
   "log-n": {
     formula: "O(log n)",
-    evaluate: Math.log2,
+    evaluate: (n) => Math.log2(1 + n),
   },
   linear: { formula: "O(n)", evaluate: (n) => n },
   "n-log-n": {
     formula: "O(n log n)",
-    evaluate: (n) => n * Math.log2(n),
+    evaluate: (n) => n * Math.log2(1 + n),
   },
   quadratic: {
     formula: "O(n²)",
@@ -173,9 +176,16 @@ const OPERATION_COLORS = [
 const V1_CONFIG_KEYS = ["version", "mode", "title", "variables", "entries"] as const
 const V2_CONFIG_KEYS = ["version", "label", "variables", "resources"] as const
 const { left: LEFT, plotRight: PLOT_RIGHT, top: TOP, axisY: AXIS_Y } = COMPLEXITY_CHART
-const DATA_BOTTOM = AXIS_Y - 14
-const BAND_OPEN_RISE = 70
 const MAX_VALUE = 10_000
+const LOG_MAX = Math.max(1, Math.log10(MAX_VALUE))
+// The 0 tick is the axis and 1 sits one band above it. Sizing that band so a straight
+// [0,1] run meets the log branch at its own slope keeps the scale smooth at 1. A shorter
+// band has to accelerate into that slope, and that acceleration is what bent every line
+// into an S: flat out of the origin, then steep, then the log flattening it again.
+const TOE_HEIGHT = (AXIS_Y - TOP) / (1 + LOG_MAX * Math.LN10)
+const DATA_BOTTOM = AXIS_Y - TOE_HEIGHT
+const BAND_TOP = TOP - 40
+const OUTLINE_STEPS = 64
 const DUPLICATE_GAP = 4
 
 function renderValue(curveId: CurveId, n: number): number {
@@ -354,11 +364,15 @@ function formatTick(value: number): string {
   return String(value)
 }
 
-function makeScale(maxValue: number) {
-  const logMax = Math.max(1, Math.log10(maxValue))
+function makeScale() {
+  const span = DATA_BOTTOM - TOP
   return {
     x: (n: number) => LEFT + (n / 10) * (PLOT_RIGHT - LEFT),
-    y: (value: number) => TOP + (1 - Math.log10(value) / logMax) * (DATA_BOTTOM - TOP),
+    y: (value: number) => {
+      if (!Number.isFinite(value) || value <= 0) return AXIS_Y
+      if (value < 1) return AXIS_Y - TOE_HEIGHT * value
+      return TOP + (1 - Math.log10(value) / LOG_MAX) * span
+    },
   }
 }
 
@@ -376,24 +390,63 @@ interface CurveSpec {
   formula?: string
 }
 
-function polyline(points: { x: number; y: number }[]): string {
+interface Point {
+  x: number
+  y: number
+}
+
+function polyline(points: Point[]): string {
   return points
     .map(({ x, y }, index) => `${index === 0 ? "M" : "L"}${x.toFixed(2)},${y.toFixed(2)}`)
     .join(" ")
 }
 
+// Centripetal Catmull-Rom, so no sample join shows a corner — including the long anchor
+// segment into the first sample, where a uniform spline would overshoot instead.
+function controlPoints(p0: Point, p1: Point, p2: Point, p3: Point): [Point, Point] {
+  const knot = (a: Point, b: Point) => Math.max(Math.hypot(b.x - a.x, b.y - a.y) ** 0.5, 1e-6)
+  const [d1, d2, d3] = [knot(p0, p1), knot(p1, p2), knot(p2, p3)]
+  const tangent = (a: Point, b: Point, c: Point, da: number, db: number): Point => ({
+    x: ((b.x - a.x) / da - (c.x - a.x) / (da + db) + (c.x - b.x) / db) * db,
+    y: ((b.y - a.y) / da - (c.y - a.y) / (da + db) + (c.y - b.y) / db) * db,
+  })
+  const m1 = tangent(p0, p1, p2, d1, d2)
+  const m2 = tangent(p1, p2, p3, d2, d3)
+  return [
+    { x: p1.x + m1.x / 3, y: p1.y + m1.y / 3 },
+    { x: p2.x - m2.x / 3, y: p2.y - m2.y / 3 },
+  ]
+}
+
+function smoothPath(points: Point[]): string {
+  if (points.length < 3) return polyline(points)
+  const knots = [points[0], ...points, points[points.length - 1]]
+  const at = ({ x, y }: Point) => `${x.toFixed(2)},${y.toFixed(2)}`
+  let path = `M${at(points[0])}`
+  for (let index = 1; index < knots.length - 2; index++) {
+    const [c1, c2] = controlPoints(
+      knots[index - 1],
+      knots[index],
+      knots[index + 1],
+      knots[index + 2],
+    )
+    path += ` C${at(c1)} ${at(c2)} ${at(knots[index + 1])}`
+  }
+  return path
+}
+
+// Sampled from n = 0 so the line is the curve and nothing else. A straight run from the
+// origin to the first sample would meet the curve at its own slope, and that junction is
+// the corner no amount of smoothing removes.
 function curveOutline(
   curveId: CurveId,
   scale: ReturnType<typeof makeScale>,
   offset: number,
-): { x: number; y: number }[] {
-  return [
-    { x: LEFT, y: AXIS_Y },
-    ...Array.from({ length: 33 }, (_, index) => {
-      const n = 2 + index / 4
-      return { x: scale.x(n), y: scale.y(renderValue(curveId, n)) - offset }
-    }),
-  ]
+): Point[] {
+  return Array.from({ length: OUTLINE_STEPS + 1 }, (_, index) => {
+    const n = (index / OUTLINE_STEPS) * 10
+    return { x: scale.x(n), y: scale.y(renderValue(curveId, n)) - offset }
+  })
 }
 
 function curvePath(spec: CurveSpec, scale: ReturnType<typeof makeScale>): ComplexityPath {
@@ -405,7 +458,7 @@ function curvePath(spec: CurveSpec, scale: ReturnType<typeof makeScale>): Comple
     return { n, value, x: scale.x(n), y: scale.y(value) }
   })
   const lower = curveOutline(curveId, scale, offset)
-  const geometry = polyline(lower)
+  const geometry = smoothPath(lower)
   const last = samples[samples.length - 1]
   const path: ComplexityPath = {
     id,
@@ -424,21 +477,24 @@ function curvePath(spec: CurveSpec, scale: ReturnType<typeof makeScale>): Comple
   }
   if (!bandTo) return path
 
-  // An unbounded band has no upper curve to stroke, so it rises a fixed distance off its
-  // floor and fades out: enough to read as "and beyond" without flooding the plot.
+  // An unbounded band claims everything above its floor, so it fills to past the top of
+  // the plot and gets clipped there. A fixed rise with a fade would put a soft edge at an
+  // arbitrary height, which reads as the ceiling the bound is saying it does not have.
   const upper =
     bandTo === "unbounded"
-      ? curveOutline(curveId, scale, offset + BAND_OPEN_RISE)
+      ? [
+          { x: LEFT, y: AXIS_Y },
+          { x: LEFT, y: BAND_TOP },
+          { x: PLOT_RIGHT, y: BAND_TOP },
+        ]
       : curveOutline(bandTo, scale, offset)
-  const back = [...lower]
-    .reverse()
-    .map(({ x, y }) => `L${x.toFixed(2)},${y.toFixed(2)}`)
-    .join(" ")
+  const ceiling = bandTo === "unbounded" ? polyline(upper) : smoothPath(upper)
+  const floor = smoothPath([...lower].reverse()).replace(/^M/, "L")
   return {
     ...path,
     bandTo,
-    bandGeometry: bandTo === "unbounded" ? undefined : polyline(upper),
-    area: `${polyline(upper)} ${back} Z`,
+    bandGeometry: bandTo === "unbounded" ? undefined : ceiling,
+    area: `${ceiling} ${floor} Z`,
   }
 }
 
@@ -501,7 +557,7 @@ function finishResource(
   highlighted: HighlightedPath[],
   semanticBounds: ComplexitySemanticBound[],
 ): ComplexityResourceViewModel {
-  const scale = makeScale(MAX_VALUE)
+  const scale = makeScale()
   const selected = new Set(highlighted.map(({ curveId }) => curveId))
   const context = CURVE_IDS.filter((curveId) => !selected.has(curveId)).map((curveId, index) =>
     curvePath(

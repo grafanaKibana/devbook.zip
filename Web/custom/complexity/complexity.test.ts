@@ -302,7 +302,7 @@ test("an unbounded band runs off the plot instead of borrowing a ceiling", () =>
   assert.equal(span.bandTo, "unbounded")
   assert.equal(span.bandGeometry, undefined, "there is no ceiling curve to stroke")
   const topY = Math.min(
-    ...[...span.area.matchAll(/[ML][\d.-]+,(-?[\d.]+)/g)].map(([, y]) => Number(y)),
+    ...[...span.area.matchAll(/(?:^|[ MLC])-?[\d.]+,(-?[\d.]+)/g)].map(([, y]) => Number(y)),
   )
   assert.ok(topY < COMPLEXITY_CHART.top, `fill must exit the plot, got ${topY}`)
   // The rung stays a neutral reference: a band must not recolour or rename it at mount.
@@ -489,9 +489,14 @@ test("the catalogue is closed and representative values are exact for n=2…10",
     "factorial",
   ])
   assert.equal(curveValue("constant", 10), 1)
-  assert.equal(curveValue("log-n", 8), 3)
+  // The log rungs are shifted by one so they are defined at n = 0 and climb out of the
+  // origin; log 9 rather than log 8 is the price of a ladder with no gap at the left edge.
+  assert.equal(curveValue("log-n", 8), Math.log2(9))
   assert.equal(curveValue("linear", 10), 10)
-  assert.equal(curveValue("n-log-n", 8), 24)
+  assert.equal(curveValue("n-log-n", 8), 8 * Math.log2(9))
+  // Both start at 0, so no rung has a stretch of the axis it cannot be drawn on.
+  assert.equal(curveValue("log-n", 0), 0)
+  assert.equal(curveValue("n-log-n", 0), 0)
   assert.equal(curveValue("quadratic", 10), 100)
   assert.equal(curveValue("exponential", 10), 1024)
   assert.equal(curveValue("factorial", 10), 3_628_800)
@@ -500,9 +505,9 @@ test("the catalogue is closed and representative values are exact for n=2…10",
 test("every representative function uses the fixed 0-origin and 1…10k log scale", () => {
   const evaluators = {
     constant: () => 1,
-    "log-n": (n: number) => Math.log2(n),
+    "log-n": (n: number) => Math.log2(1 + n),
     linear: (n: number) => n,
-    "n-log-n": (n: number) => n * Math.log2(n),
+    "n-log-n": (n: number) => n * Math.log2(1 + n),
     quadratic: (n: number) => n * n,
     exponential: (n: number) => 2 ** n,
     factorial: (n: number) => {
@@ -522,6 +527,8 @@ test("every representative function uses the fixed 0-origin and 1…10k log scal
     })),
   })
   const maximum = 10_000
+  const [zero, one, ten] = view.ticks
+  const decade = ten.y - one.y
   for (const path of view.paths) {
     assert.deepEqual(
       path.samples.map(({ n }) => n),
@@ -530,22 +537,38 @@ test("every representative function uses the fixed 0-origin and 1…10k log scal
     for (const sample of path.samples) {
       const expected = evaluators[path.curveId](sample.n)
       assert.equal(sample.value, expected)
-      assert.equal(
-        sample.y,
-        18 + (1 - Math.log10(expected) / Math.log10(maximum)) * (320 - 18 - 38 - 14),
+      // Every value sits where its own decade puts it, measured off the rendered ticks.
+      assert.ok(
+        Math.abs(sample.y - (one.y + Math.log10(expected) * decade)) < 1e-9,
+        `${path.curveId} n=${sample.n}`,
       )
     }
-    assert.match(path.geometry, /^M0\.00,282\.00 /)
-    assert.equal(path.geometry.match(/ L/g)?.length, 33)
+    // The line is the curve and nothing else: sampling starts at n = 0 and steps one
+    // sample at a time, so there is no straight run from the axis to the first sample.
+    assert.match(path.geometry, /^M0\.00,[\d.]+ C[\d.,]+ [\d.,]+ 10\.94,/)
+    assert.equal(path.geometry.match(/ C/g)?.length, 64)
+    assert.doesNotMatch(path.geometry, / L/)
   }
   const factorialPath = view.paths.find(({ curveId }) => curveId === "factorial")
   assert.ok(factorialPath)
-  const factorialYs = [...factorialPath.geometry.matchAll(/L[\d.]+,(-?[\d.]+)/g)].map(([, y]) => y)
+  const factorialYs = factorialPath.geometry
+    .split(" C")
+    .slice(1)
+    .map((segment) => segment.trim().split(" ").at(-1)!.split(",")[1])
   assert.equal(new Set(factorialYs).size, factorialYs.length)
   assert.deepEqual(
     view.ticks.map(({ value }) => value),
     [0, 1, 10, 100, 1_000, maximum],
   )
+  // Decades stay evenly spaced, and the 0-to-1 band is exactly the width that makes a
+  // straight run across it leave at the log branch's own slope. Any narrower and the
+  // scale would have to curve into 1, which is what put an S in every line.
+  const decades = view.ticks.slice(2).map((tick, index) => tick.y - view.ticks[index + 1].y)
+  assert.ok(
+    decades.every((gap) => Math.abs(gap - decades[0]) < 1e-9),
+    `decades ${decades}`,
+  )
+  assert.ok(Math.abs(one.y - zero.y - decade / Math.LN10) < 1e-9, "toe meets the log slope")
 })
 
 test("catalogue config derives formulas without redundant chart commentary", () => {
@@ -603,13 +626,13 @@ test("the 10k ceiling clips visually without changing representative values", ()
   )
 })
 
-test("duplicate case curves separate after sharing the visual origin", () => {
+test("duplicate case curves render as parallel offset lines", () => {
   const view = buildComplexityViewModel(cases)
   const best = view.paths.find((path) => path.label.startsWith("Best:"))
   const average = view.paths.find((path) => path.label.startsWith("Average:"))
   assert.notEqual(best?.geometry, average?.geometry)
-  assert.match(best?.geometry ?? "", /^M0\.00,282\.00 /)
-  assert.match(average?.geometry ?? "", /^M0\.00,282\.00 /)
+  assert.match(best?.geometry ?? "", /^M0\.00,/)
+  assert.match(average?.geometry ?? "", /^M0\.00,/)
   assert.notEqual(best?.id, average?.id)
   assert.equal(best?.color, "#22a06b")
   assert.equal(average?.color, "#d99a00")
@@ -672,7 +695,7 @@ test("operation legends group each operation and shade its plotted bounds", () =
   )
   const constantPaths = view.paths.filter((path) => !path.dimmed && path.curveId === "constant")
   assert.equal(new Set(constantPaths.map((path) => path.geometry)).size, constantPaths.length)
-  assert.ok(constantPaths.every((path) => path.geometry.startsWith("M0.00,282.00 ")))
+  assert.ok(constantPaths.every((path) => path.geometry.startsWith("M0.00,")))
 })
 
 test("semantic duplicates and unknown fields fail at their exact field", () => {

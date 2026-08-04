@@ -23050,14 +23050,17 @@ var curves = {
     formula: "O(1)",
     evaluate: () => 1
   },
+  // Shifted by one so the ladder is defined across the whole axis: log n is negative below
+  // n = 1 and undefined at 0, which left these two riding the axis instead of climbing out
+  // of the origin with the rest. Same growth class, drawable from the first pixel.
   "log-n": {
     formula: "O(log n)",
-    evaluate: Math.log2
+    evaluate: (n) => Math.log2(1 + n)
   },
   linear: { formula: "O(n)", evaluate: (n) => n },
   "n-log-n": {
     formula: "O(n log n)",
-    evaluate: (n) => n * Math.log2(n)
+    evaluate: (n) => n * Math.log2(1 + n)
   },
   quadratic: {
     formula: "O(n²)",
@@ -23099,9 +23102,12 @@ var OPERATION_COLORS = [
 var V1_CONFIG_KEYS = ["version", "mode", "title", "variables", "entries"];
 var V2_CONFIG_KEYS = ["version", "label", "variables", "resources"];
 var { left: LEFT, plotRight: PLOT_RIGHT, top: TOP, axisY: AXIS_Y } = COMPLEXITY_CHART;
-var DATA_BOTTOM = AXIS_Y - 14;
-var BAND_OPEN_RISE = 70;
 var MAX_VALUE = 1e4;
+var LOG_MAX = Math.max(1, Math.log10(MAX_VALUE));
+var TOE_HEIGHT = (AXIS_Y - TOP) / (1 + LOG_MAX * Math.LN10);
+var DATA_BOTTOM = AXIS_Y - TOE_HEIGHT;
+var BAND_TOP = TOP - 40;
+var OUTLINE_STEPS = 64;
 var DUPLICATE_GAP = 4;
 function renderValue(curveId, n) {
   if (curveId !== "factorial") return curves[curveId].evaluate(n);
@@ -23237,24 +23243,55 @@ function formatTick(value) {
   if (value >= 1e3) return `${value / 1e3}k`;
   return String(value);
 }
-function makeScale(maxValue) {
-  const logMax = Math.max(1, Math.log10(maxValue));
+function makeScale() {
+  const span2 = DATA_BOTTOM - TOP;
   return {
     x: (n) => LEFT + n / 10 * (PLOT_RIGHT - LEFT),
-    y: (value) => TOP + (1 - Math.log10(value) / logMax) * (DATA_BOTTOM - TOP)
+    y: (value) => {
+      if (!Number.isFinite(value) || value <= 0) return AXIS_Y;
+      if (value < 1) return AXIS_Y - TOE_HEIGHT * value;
+      return TOP + (1 - Math.log10(value) / LOG_MAX) * span2;
+    }
   };
 }
 function polyline(points) {
   return points.map(({ x, y }, index) => `${index === 0 ? "M" : "L"}${x.toFixed(2)},${y.toFixed(2)}`).join(" ");
 }
-function curveOutline(curveId, scale, offset) {
+function controlPoints(p0, p1, p2, p3) {
+  const knot = (a, b) => Math.max(Math.hypot(b.x - a.x, b.y - a.y) ** 0.5, 1e-6);
+  const [d1, d2, d3] = [knot(p0, p1), knot(p1, p2), knot(p2, p3)];
+  const tangent = (a, b, c, da, db) => ({
+    x: ((b.x - a.x) / da - (c.x - a.x) / (da + db) + (c.x - b.x) / db) * db,
+    y: ((b.y - a.y) / da - (c.y - a.y) / (da + db) + (c.y - b.y) / db) * db
+  });
+  const m1 = tangent(p0, p1, p2, d1, d2);
+  const m2 = tangent(p1, p2, p3, d2, d3);
   return [
-    { x: LEFT, y: AXIS_Y },
-    ...Array.from({ length: 33 }, (_, index) => {
-      const n = 2 + index / 4;
-      return { x: scale.x(n), y: scale.y(renderValue(curveId, n)) - offset };
-    })
+    { x: p1.x + m1.x / 3, y: p1.y + m1.y / 3 },
+    { x: p2.x - m2.x / 3, y: p2.y - m2.y / 3 }
   ];
+}
+function smoothPath(points) {
+  if (points.length < 3) return polyline(points);
+  const knots = [points[0], ...points, points[points.length - 1]];
+  const at = ({ x, y }) => `${x.toFixed(2)},${y.toFixed(2)}`;
+  let path = `M${at(points[0])}`;
+  for (let index = 1; index < knots.length - 2; index++) {
+    const [c1, c2] = controlPoints(
+      knots[index - 1],
+      knots[index],
+      knots[index + 1],
+      knots[index + 2]
+    );
+    path += ` C${at(c1)} ${at(c2)} ${at(knots[index + 1])}`;
+  }
+  return path;
+}
+function curveOutline(curveId, scale, offset) {
+  return Array.from({ length: OUTLINE_STEPS + 1 }, (_, index) => {
+    const n = index / OUTLINE_STEPS * 10;
+    return { x: scale.x(n), y: scale.y(renderValue(curveId, n)) - offset };
+  });
 }
 function curvePath(spec, scale) {
   const { id, curveId, bandTo, category, label, legendLabel, legendGroup, color, dimmed } = spec;
@@ -23265,7 +23302,7 @@ function curvePath(spec, scale) {
     return { n, value, x: scale.x(n), y: scale.y(value) };
   });
   const lower = curveOutline(curveId, scale, offset);
-  const geometry = polyline(lower);
+  const geometry = smoothPath(lower);
   const last = samples[samples.length - 1];
   const path = {
     id,
@@ -23283,13 +23320,18 @@ function curvePath(spec, scale) {
     samples
   };
   if (!bandTo) return path;
-  const upper = bandTo === "unbounded" ? curveOutline(curveId, scale, offset + BAND_OPEN_RISE) : curveOutline(bandTo, scale, offset);
-  const back = [...lower].reverse().map(({ x, y }) => `L${x.toFixed(2)},${y.toFixed(2)}`).join(" ");
+  const upper = bandTo === "unbounded" ? [
+    { x: LEFT, y: AXIS_Y },
+    { x: LEFT, y: BAND_TOP },
+    { x: PLOT_RIGHT, y: BAND_TOP }
+  ] : curveOutline(bandTo, scale, offset);
+  const ceiling = bandTo === "unbounded" ? polyline(upper) : smoothPath(upper);
+  const floor = smoothPath([...lower].reverse()).replace(/^M/, "L");
   return {
     ...path,
     bandTo,
-    bandGeometry: bandTo === "unbounded" ? void 0 : polyline(upper),
-    area: `${polyline(upper)} ${back} Z`
+    bandGeometry: bandTo === "unbounded" ? void 0 : ceiling,
+    area: `${ceiling} ${floor} Z`
   };
 }
 function layoutEndpointLabels(paths) {
@@ -23326,7 +23368,7 @@ function assertUnique(seen, value, path) {
   seen.add(value);
 }
 function finishResource(key4, label, labelId, mode, highlighted, semanticBounds) {
-  const scale = makeScale(MAX_VALUE);
+  const scale = makeScale();
   const selected = new Set(highlighted.map(({ curveId }) => curveId));
   const context = CURVE_IDS.filter((curveId) => !selected.has(curveId)).map(
     (curveId, index) => curvePath(
@@ -23712,25 +23754,24 @@ function renderResourceDom(document2, resource, index) {
     })
   );
   defs.append(clip);
-  for (const path of paths.filter((candidate) => !candidate.dimmed)) {
-    const open = path.bandTo === "unbounded";
+  for (const path of paths.filter((candidate) => !candidate.dimmed && !candidate.bandTo)) {
     const gradient = svgElement(document2, "linearGradient", {
       id: `${path.id}-fill`,
       x1: 0,
-      y1: open ? 1 : 0,
+      y1: 0,
       x2: 0,
-      y2: open ? 0 : 1
+      y2: 1
     });
     gradient.append(
       svgElement(document2, "stop", {
         offset: "0%",
         "stop-color": path.color,
-        "stop-opacity": open ? 0.22 : path.bandTo ? 0.18 : 0.2
+        "stop-opacity": 0.2
       }),
       svgElement(document2, "stop", {
         offset: "100%",
         "stop-color": path.color,
-        "stop-opacity": path.bandTo && !open ? 0.18 : 0
+        "stop-opacity": 0
       })
     );
     defs.append(gradient);
@@ -23781,7 +23822,10 @@ function renderResourceDom(document2, resource, index) {
         svgElement(document2, "path", {
           class: "complexity__area",
           d: path.area,
-          fill: `url(#${path.id}-fill)`,
+          ...path.bandTo ? {
+            fill: path.color,
+            "fill-opacity": path.bandTo === "unbounded" ? 0.1 : 0.18
+          } : { fill: `url(#${path.id}-fill)` },
           "data-path-id": path.id
         })
       );
