@@ -1,8 +1,8 @@
 ---
 publish: true
 created: 2026-08-03T15:55:17.235Z
-modified: 2026-08-08T08:43:34.639Z
-published: 2026-08-08T08:43:34.639Z
+modified: 2026-08-08T17:05:50.429Z
+published: 2026-08-08T17:05:50.429Z
 topic:
   - Computer Science
 subtopic:
@@ -84,8 +84,8 @@ tab: Complexity
         {
           "kind": "approach",
           "label": "Merge intervals (sort, then sweep)",
-          "formula": "O(log n)",
-          "curveId": "log-n"
+          "formula": "O(n)",
+          "curveId": "linear"
         }
       ]
     }
