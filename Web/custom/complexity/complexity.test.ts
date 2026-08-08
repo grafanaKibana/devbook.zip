@@ -1915,7 +1915,7 @@ test("Data Structures keeps distinct Best and Amortized bounds and merges only e
   assert.ok(distinct > 0)
 })
 
-test("Stack exposes one three-item constant Time legend and retains Space and resize truth", () => {
+test("Stack exposes amortized Push and its resize spike alongside constant operations", () => {
   const note = readFileSync(
     join(
       process.cwd(),
@@ -1939,11 +1939,11 @@ test("Stack exposes one three-item constant Time legend and retains Space and re
   assert.equal(time.legend[0].label, undefined)
   assert.deepEqual(
     time.legend[0].items.map(({ label }) => label),
-    ["Push", "Pop", "Peek"],
+    ["Push (linked / array amortized)", "Push (array resize worst case)", "Pop", "Peek"],
   )
-  assert.equal(time.paths.length, 3)
-  assert.equal(new Set(time.paths.map(({ geometry }) => geometry)).size, 1)
-  assert.ok(time.paths.every(({ curveId }) => curveId === "constant"))
+  assert.equal(time.paths.length, 4)
+  assert.equal(time.paths.filter(({ curveId }) => curveId === "constant").length, 3)
+  assert.equal(time.paths.filter(({ curveId }) => curveId === "linear").length, 1)
   assert.ok(space.paths.length + space.semanticBounds.length > 0)
   const prose = note.replace(/```complexity\n[\s\S]*?\n```/, "")
   assert.match(prose, /(?:resize|doubl)[^\n]*O\(n\)|O\(n\)[^\n]*(?:resize|doubl)/i)

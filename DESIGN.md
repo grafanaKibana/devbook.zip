@@ -91,7 +91,7 @@ Their main jobs are to find a topic, understand its scope, inspect the mechanism
 
 - **Home:** whole-vault progress followed by topic cards.
 - **FolderNote:** introductory prose, one direct-child card map, retained useful content, annotated references, and optional questions when they teach something.
-- **Concept note:** explanation, concrete example, optional visualization, optional questions, and annotated references.
+- **Concept note:** explanation, concrete example, required questions, annotated references, and optional explanatory devices such as visualizations.
 - **Questions:** cross-vault aggregation grouped by the topic hierarchy.
 - **Roadmap:** generated spatial overview; never hand-edited.
 

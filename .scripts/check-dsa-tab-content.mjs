@@ -89,12 +89,11 @@ function tableStarts(lines, start, end) {
 }
 
 function findOuter(lines) {
-  const openers = lines
-    .map((line, index) => (/^(~{5,})tabsdown\s*$/.test(line) ? index : -1))
-    .filter((index) => index >= 0);
   const groups = [];
-  for (const start of openers) {
-    const delimiter = lines[start].match(/^(~{5,})tabsdown\s*$/)[1];
+  for (let start = 0; start < lines.length; start += 1) {
+    const opener = /^((?:~{5,}|`{4,}))tabsdown\s*$/.exec(lines[start]);
+    if (!opener) continue;
+    const delimiter = opener[1];
     const end = lines.findIndex(
       (line, index) => index > start && line.trim() === delimiter,
     );
@@ -103,6 +102,7 @@ function findOuter(lines) {
       continue;
     }
     groups.push({ start, end, delimiter, unclosed: false });
+    start = end;
   }
   return groups;
 }
@@ -110,7 +110,7 @@ function findOuter(lines) {
 function findOuterLabels(lines, outer) {
   const labels = [];
   for (let index = outer.start + 1; index < outer.end; index += 1) {
-    const nested = /^(~{3,4})tabsdown\s*$/.exec(lines[index]);
+    const nested = /^((?:~{3,4}|`{4,}))tabsdown\s*$/.exec(lines[index]);
     if (nested) {
       const nestedEnd = lines.findIndex(
         (line, candidate) =>
@@ -173,7 +173,7 @@ function validateUnit(lines, start, end, path, errors, allowStaticImage) {
 function parseInner(lines, start, end, path, errors) {
   const first = firstRenderable(lines, start, end);
   if (first < 0) return null;
-  const opener = /^(~{3,4})tabsdown\s*$/.exec(lines[first]);
+  const opener = /^((?:~{3,4}|`{4,}))tabsdown\s*$/.exec(lines[first]);
   if (!opener) return null;
   const innerEnd = lines.findIndex(
     (line, index) => index > first && index < end && line.trim() === opener[1],
@@ -368,9 +368,13 @@ function fullInventory() {
 function runSelfTests() {
   const complexity = '```complexity\n{"version":2}\n```';
   const ordinary = (support = "") => `~~~~~tabsdown\ntab: Visualization\n\n\`\`\`steptrace\n{}\n\`\`\`\n${support}\ntab: Complexity\n\n${complexity}\n~~~~~\n`;
+  const backtick = (support = "") => ordinary(support)
+    .replace("~~~~~tabsdown", "````tabsdown")
+    .replace("~~~~~\n", "````\n");
   const multi = (variantSupport = "", sharedSupport = "") => `~~~~~tabsdown\ntab: Visualization\n\n~~~~tabsdown\ntab: One\n\n\`\`\`steptrace\n{}\n\`\`\`\n${variantSupport}\ntab: Two\n\n\`\`\`steptrace\n{}\n\`\`\`\n~~~~\n${sharedSupport}\ntab: Complexity\n\n${complexity}\n~~~~~\n`;
   const pass = [
     ["ordinary-no-heading.md", ordinary()],
+    ["backtick-outer.md", backtick()],
     ["ordinary-one-heading.md", ordinary("#### Invariant\n\nSupport.\n")],
     ["multi-shared.md", multi("", "#### Shared invariant\n\nSupport.\n")],
     ["multi-per-variant.md", multi("#### Variant invariant\n\nSupport.\n", "")],
@@ -384,6 +388,7 @@ function runSelfTests() {
 
   const fail = [
     ["lead-heading.md", ordinary().replace("```steptrace", "#### Lead\n\n```steptrace"), "must begin with a StepTrace"],
+    ["backtick-broken-tabs.md", backtick().replace("tab: Complexity", "tab: Broken"), "Outer tabs must be exactly"],
     ["wrong-heading.md", ordinary("### Wrong\n"), "exactly level 4"],
     ["two-headings.md", ordinary("#### One\n\n#### Two\n"), "at most one heading"],
     ["mixed-headings.md", multi("#### Variant\n", "#### Shared\n"), "may not coexist"],

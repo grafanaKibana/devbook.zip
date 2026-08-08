@@ -17,7 +17,7 @@ A stack enforces it structurally. All mutation is fixed to a single end called t
 
 **Core shape:** elements → one open end (the top) → last pushed is first popped
 
-Push and pop values below to see the stack grow upward while every operation stays fixed to the top cell.
+The visualization shows push and pop operations growing the stack upward while access remains fixed to the top cell.
 
 ~~~~~tabsdown
 tab: Visualization
@@ -58,9 +58,15 @@ tab: Complexity
       "entries": [
         {
           "kind": "approach",
-          "label": "Push",
+          "label": "Push (linked / array amortized)",
           "formula": "O(1)",
           "curveId": "constant"
+        },
+        {
+          "kind": "approach",
+          "label": "Push (array resize worst case)",
+          "formula": "O(n)",
+          "curveId": "linear"
         },
         {
           "kind": "approach",

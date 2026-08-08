@@ -176,6 +176,18 @@ tab: Complexity
       "entries": [
         {
           "kind": "operation",
+          "operation": "Whole map",
+          "bounds": [
+            {
+              "kind": "curve",
+              "role": "Persistent structure space",
+              "formula": "Θ(n) buckets + entries",
+              "curveId": "linear"
+            }
+          ]
+        },
+        {
+          "kind": "operation",
           "operation": "Lookup",
           "bounds": [
             {
