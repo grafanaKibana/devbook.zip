@@ -1,5 +1,6 @@
 ---
 title: About
+summary: "The purpose, scope, and AI-assisted authorship of this software engineering notebook."
 publish: true
 tags: [MetricsIgnore]
 icon: heart

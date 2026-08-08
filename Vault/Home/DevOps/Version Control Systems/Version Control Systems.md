@@ -90,11 +90,6 @@ Compatibility needs evidence: API diff, consumer tests, migration checks, and a 
 > [!WARNING] Non-normative source visual
 > The Alpha → Beta → RC sequence is one release convention, not a SemVer requirement. SemVer permits arbitrary dot-separated prerelease identifiers and defines how they compare; each project defines its own stages, promotion gates, and compatibility evidence.
 
-```datacorejsx
-const { FolderStructureMap } = await dc.require("Assets/components/devbook-folder-map.jsx");
-return FolderStructureMap;
-```
-
 # References
 
 - [Pro Git book](https://git-scm.com/book/en/v2) — explains Git's object model, index, refs, remotes, and everyday state transitions.

@@ -9,7 +9,7 @@ export const nQueens = {
     const n = Math.min(Math.max(input.n || 4, 4), 6)
     ops.board(
       n,
-      `Place ${n} queens on a ${n}×${n} board so none attack another. Fill one queen per row; retreat whenever a row has no safe square.`,
+      `${n}-Queens on ${n}×${n}: place one per row; backtrack when no safe square remains.`,
     )
     const conflict = (row, col) => {
       // first attacker above in same column or on a diagonal, or -1 if none

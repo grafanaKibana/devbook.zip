@@ -3,7 +3,7 @@ topic:
   - Computer Science
 subtopic:
   - Data Structures
-summary: "Key-value pairs located by hashing in O(1) average, O(n) worst-case time."
+summary: "Key-value pairs located by hashing into buckets, with collisions resolved by chaining or probing."
 level:
   - "4"
 priority: Medium
@@ -11,21 +11,42 @@ status: Ready to Repeat
 publish: true
 ---
 
-# Intro
-
-A cache holds 50K active sessions and repeatedly looks up one session by its ID. Storing the pairs in a list forces an `O(n)` scan on every lookup, inspecting 25K entries on average. A hash map derives a bucket index directly from the key, so the lookup jumps to the one bucket that could hold it and compares only the entries there. Insert, lookup, and delete become `O(1)` on average.
+A cache holds 50K active sessions and repeatedly looks up one session by its ID. Storing the pairs in a list forces each lookup to scan entries until it finds the matching ID. A hash map instead derives a bucket index directly from the key, so the lookup jumps to the one bucket that could hold it and compares only the entries there.
 
 The structure remembers a mapping from key to value and nothing else. It does not retain insertion order, sort order, or the sequence in which resizes moved entries around. Two keys that hash to the same bucket coexist there, distinguished only by an equality check.
 
-**Core shape:** key → `hash(key) % capacity` → bucket → chain or probe resolves collisions → resize when the load factor crosses its threshold → `O(1)` average, `O(n)` worst, `O(n)` storage.
+**Core shape:** key → `hash(key) % capacity` → bucket → chain or probe resolves collisions → resize when the load factor crosses its threshold.
 
-The three tabs keep the same 12-cell bucket-head array while changing only collision policy. **Closed Addressing** uses separate chaining (also called open hashing): each bucket points to its own external key/value chain. **Open Addressing** uses linear probing (also called closed hashing) and leaves tombstones after removal. **Bucket Hashing** groups the array into four contiguous 3-cell buckets, then advances bucket by bucket with wraparound when the home group is full. This prototype fixes capacity at 12 to compare collision policies; production maps usually resize or rebuild after crossing a load threshold.
+The three tabs keep the same 12-cell table while changing only collision policy. **Closed Addressing** uses separate chaining (also called open hashing): each bucket points to its own external key/value chain. **Open Addressing** uses linear probing (also called closed hashing) and leaves tombstones after removal. **Bucket Hashing** groups the array into four contiguous 3-cell buckets, then advances bucket by bucket with wraparound when the home group is full. This prototype fixes capacity at 12 to compare collision policies; production maps usually resize or rebuild after crossing a load threshold.
+
+~~~~~tabsdown
+tab: Visualization
+
+~~~~tabsdown
+tab: Closed Addressing
+
 
 ```steptrace
-{"tabs":[{"name":"Closed Addressing","description":"Separate chaining (open hashing): each bucket points to its own external key/value chain.","algorithm":"hash-map","variant":"closed-addressing"},{"name":"Open Addressing","description":"Linear probing scans the fixed table and preserves tombstones after removal.","algorithm":"hash-map","variant":"open-addressing"},{"name":"Bucket Hashing","description":"Four three-cell buckets use bucket-by-bucket linear overflow with wraparound.","algorithm":"hash-map","variant":"buckets"}]}
+{"algorithm":"hash-map","variant":"closed-addressing"}
 ```
 
-## Representation and invariants
+tab: Open Addressing
+
+
+```steptrace
+{"algorithm":"hash-map","variant":"open-addressing"}
+```
+
+tab: Bucket Hashing
+
+
+```steptrace
+{"algorithm":"hash-map","variant":"buckets"}
+```
+
+~~~~
+
+#### Representation and invariants
 
 Two things define the structure: a backing array of buckets and a hash function that maps a key to an index into it, usually `hash(key) % capacity`. When several keys map to the same index, a collision-resolution strategy keeps them apart:
 
@@ -38,195 +59,211 @@ What the structure retains is the key-to-value association. What it does not pro
 
 Three invariants define a valid state:
 
-1. Every entry resides in the bucket selected when the map last inserted or rehashed it. If the key's hash later changes enough to select a different bucket, lookups fail to reach the entry.
+1. Every entry retains the full hash computed when the map last inserted or rehashed it. A lookup requires that stored hash and equality to match the candidate key, so changing state used by either `GetHashCode` or `Equals` invalidates the key; a changed full hash can miss even when it maps to the same bucket.
 2. Keys that compare equal must hash equal — the `GetHashCode`/`Equals` contract. If it breaks, equal keys can land in different buckets and both survive as separate entries.
 3. A lookup recomputes the bucket, then resolves the collision by equality within it. Correctness depends on both the hash (which bucket) and equality (which entry).
 
-## Complexity
-
-Bounds are per operation. The average column assumes a hash function that distributes keys close to uniformly and a load factor kept bounded by resizing; the worst column is what happens when that assumption fails.
+tab: Complexity
 
 ```complexity
 {
-  "version": 1,
-  "mode": "operations",
-  "title": "HashMap operation complexity",
+  "version": 2,
+  "label": "HashMap complexity",
   "variables": {
-    "n": "number of stored entries"
-  },
-  "entries": [
-    {
-      "kind": "operation",
-      "operation": "Lookup",
-      "bounds": [
-        {
-          "kind": "catalogue",
-          "curveId": "constant",
-          "role": "Best"
-        },
-        {
-          "kind": "catalogue",
-          "curveId": "constant",
-          "role": "Average"
-        },
-        {
-          "kind": "catalogue",
-          "curveId": "linear",
-          "role": "Worst single op",
-          "qualifiers": [
-            "Collisions form a chain containing every entry."
-          ]
-        }
-      ],
-      "details": {
-        "structureSpace": "O(n)",
-        "auxiliarySpace": "O(1)",
-        "cause": "The hash selects one bucket; equality resolves collisions within that bucket.",
-        "assumptions": [
-          "The hash function distributes keys close to uniformly.",
-          "The load factor stays bounded by resizing."
-        ]
-      }
-    },
-    {
-      "kind": "operation",
-      "operation": "Insert",
-      "bounds": [
-        {
-          "kind": "catalogue",
-          "curveId": "constant",
-          "role": "Best"
-        },
-        {
-          "kind": "catalogue",
-          "curveId": "constant",
-          "role": "Amortized / average",
-          "qualifiers": [
-            "Amortized over a sequence of inserts, not guaranteed for one insert."
-          ]
-        },
-        {
-          "kind": "catalogue",
-          "curveId": "linear",
-          "role": "Worst single op",
-          "qualifiers": [
-            "A single insert may cross the load-factor threshold and rehash every entry, or collisions may form a linear chain."
-          ],
-          "details": {
-            "auxiliarySpace": "O(n)"
-          }
-        }
-      ],
-      "details": {
-        "structureSpace": "O(n)",
-        "auxiliarySpace": "O(1)",
-        "cause": "Hashing selects a bucket; occasional growth spreads an O(n) rehash across the inserts that filled the old table.",
-        "assumptions": [
-          "The hash function distributes keys close to uniformly.",
-          "The load factor stays bounded by resizing."
-        ]
-      }
-    },
-    {
-      "kind": "operation",
-      "operation": "Delete",
-      "bounds": [
-        {
-          "kind": "catalogue",
-          "curveId": "constant",
-          "role": "Best"
-        },
-        {
-          "kind": "catalogue",
-          "curveId": "constant",
-          "role": "Average"
-        },
-        {
-          "kind": "catalogue",
-          "curveId": "linear",
-          "role": "Worst single op",
-          "qualifiers": [
-            "Collisions form a chain containing every entry."
-          ]
-        }
-      ],
-      "details": {
-        "structureSpace": "O(n)",
-        "auxiliarySpace": "O(1)",
-        "cause": "The hash selects one bucket; deletion searches that bucket before removing the matching key.",
-        "assumptions": [
-          "The hash function distributes keys close to uniformly.",
-          "The load factor stays bounded by resizing."
-        ]
-      }
-    },
-    {
-      "kind": "operation",
-      "operation": "Resize (rehash all)",
-      "bounds": [
-        {
-          "kind": "text",
-          "formula": "—",
-          "role": "Best"
-        },
-        {
-          "kind": "catalogue",
-          "curveId": "constant",
-          "role": "Amortized per insert",
-          "qualifiers": [
-            "The O(n) rehash cost is spread across the sequence of inserts that grew the map."
-          ]
-        },
-        {
-          "kind": "catalogue",
-          "curveId": "linear",
-          "role": "Worst single op",
-          "qualifiers": [
-            "One resize is an O(n) latency spike."
-          ]
-        }
-      ],
-      "details": {
-        "structureSpace": "O(n)",
-        "auxiliarySpace": "O(n)",
-        "cause": "Crossing the load-factor threshold allocates a larger array and rehashes every entry.",
-        "assumptions": [
-          "Capacity grows geometrically, so repeated resize cost amortizes to O(1) per insert."
-        ]
-      }
+    "inputSize": {
+      "symbol": "n",
+      "description": "number of entries currently stored in the map"
     }
-  ]
+  },
+  "resources": {
+    "time": {
+      "mode": "operations",
+      "entries": [
+        {
+          "kind": "operation",
+          "operation": "Lookup",
+          "bounds": [
+            {
+              "kind": "curve",
+              "role": "Best",
+              "formula": "O(1)",
+              "curveId": "constant"
+            },
+            {
+              "kind": "curve",
+              "role": "Typical",
+              "formula": "O(1) average",
+              "curveId": "constant"
+            },
+            {
+              "kind": "curve",
+              "role": "Worst single operation",
+              "formula": "O(n)",
+              "curveId": "linear"
+            }
+          ]
+        },
+        {
+          "kind": "operation",
+          "operation": "Insert",
+          "bounds": [
+            {
+              "kind": "curve",
+              "role": "Best",
+              "formula": "O(1)",
+              "curveId": "constant"
+            },
+            {
+              "kind": "curve",
+              "role": "Typical",
+              "formula": "O(1) amortized / average",
+              "curveId": "constant"
+            },
+            {
+              "kind": "curve",
+              "role": "Worst single operation",
+              "formula": "O(n)",
+              "curveId": "linear"
+            }
+          ]
+        },
+        {
+          "kind": "operation",
+          "operation": "Delete",
+          "bounds": [
+            {
+              "kind": "curve",
+              "role": "Best",
+              "formula": "O(1)",
+              "curveId": "constant"
+            },
+            {
+              "kind": "curve",
+              "role": "Typical",
+              "formula": "O(1) average",
+              "curveId": "constant"
+            },
+            {
+              "kind": "curve",
+              "role": "Worst single operation",
+              "formula": "O(n)",
+              "curveId": "linear"
+            }
+          ]
+        },
+        {
+          "kind": "operation",
+          "operation": "Resize (rehash all)",
+          "bounds": [
+            {
+              "kind": "curve",
+              "role": "Typical",
+              "formula": "O(1) amortized per insert",
+              "curveId": "constant"
+            },
+            {
+              "kind": "curve",
+              "role": "Worst single operation",
+              "formula": "O(n)",
+              "curveId": "linear"
+            }
+          ]
+        }
+      ]
+    },
+    "space": {
+      "mode": "operations",
+      "entries": [
+        {
+          "kind": "operation",
+          "operation": "Whole map",
+          "bounds": [
+            {
+              "kind": "curve",
+              "role": "Persistent structure space",
+              "formula": "Θ(n) buckets + entries",
+              "curveId": "linear"
+            }
+          ]
+        },
+        {
+          "kind": "operation",
+          "operation": "Lookup",
+          "bounds": [
+            {
+              "kind": "curve",
+              "role": "Auxiliary space",
+              "formula": "O(1)",
+              "curveId": "constant"
+            }
+          ]
+        },
+        {
+          "kind": "operation",
+          "operation": "Insert",
+          "bounds": [
+            {
+              "kind": "curve",
+              "role": "Normally",
+              "formula": "O(1)",
+              "curveId": "constant"
+            },
+            {
+              "kind": "curve",
+              "role": "Resize",
+              "formula": "O(n)",
+              "curveId": "linear"
+            }
+          ]
+        },
+        {
+          "kind": "operation",
+          "operation": "Delete",
+          "bounds": [
+            {
+              "kind": "curve",
+              "role": "Auxiliary space",
+              "formula": "O(1)",
+              "curveId": "constant"
+            }
+          ]
+        },
+        {
+          "kind": "operation",
+          "operation": "Resize (rehash all)",
+          "bounds": [
+            {
+              "kind": "curve",
+              "role": "Auxiliary space",
+              "formula": "O(n)",
+              "curveId": "linear"
+            }
+          ]
+        }
+      ]
+    }
+  }
 }
 ```
 
-### Operation details
+Bounds are relative to the entry count and assume constant-cost hashing and equality, a hash function that distributes keys close to uniformly, and a load factor kept bounded by resizing. If hashing or equality scans a key of length `k`, each operation also pays that `O(k)` work; if distribution or load-factor control fails, collisions concentrate work in long buckets. Insert's typical bound is amortized because one threshold-crossing insert may rehash the entire map, while geometric growth spreads those occasional rebuilds across the inserts that filled each table. The space entries distinguish normal per-operation storage from the temporary allocation during a resize.
+~~~~~
 
-| Operation | Best | Typical | Worst single operation | Auxiliary space | Cause |
-| --- | --- | --- | --- | --- | --- |
-| Lookup | `O(1)` | `O(1)` average | `O(n)` | `O(1)` | The hash selects one bucket; equality resolves collisions inside it. |
-| Insert | `O(1)` | `O(1)` amortized / average | `O(n)` | `O(1)` normally; `O(n)` during resize | Hashing selects a bucket, while geometric growth spreads each occasional full rehash across the inserts that filled the old table. |
-| Delete | `O(1)` | `O(1)` average | `O(n)` | `O(1)` | The hash selects one bucket; deletion searches that bucket before removing the matching key. |
-| Resize (rehash all) | — | `O(1)` amortized per insert | `O(n)` | `O(n)` | Crossing the load-factor threshold allocates a larger array and rehashes every entry. |
-
-The `O(1)` average bounds rest on two assumptions stated together: a good hash keeps buckets short, and a bounded load factor keeps them from filling. Drop either and every operation walks a long bucket toward `O(n)`.
-
-Insert is amortized, not strictly `O(1)`. Any single insert can trip the load-factor threshold and rehash the whole array in `O(n)`. Spread across the inserts that grew the map to that size, the rehash cost averages to `O(1)` each — an amortized-sequence guarantee, distinct from the single-op worst case sitting in the next column. Filling a 1M-entry map from default capacity rehashes roughly 20 times along the way; pre-sizing with `new Dictionary<TKey,TValue>(expectedCount)` skips that churn.
-
-## Where the representation breaks
+# Where the representation breaks
 
 Each boundary traces back to the bucket-and-hash mechanism.
 
-**A weak or adversarial hash collapses a bucket.** A `GetHashCode` that returns a constant puts every entry in one bucket, and the map degrades into a linked list at `O(n)` per operation. When keys come from untrusted input (HTTP query keys, JSON property names), an attacker who can predict the hash forces mass collisions on purpose — algorithmic-complexity denial of service, "hash flooding." For string keys, current .NET `Dictionary` can switch from its fast non-randomized comparer to randomized hashing after excessive collisions; a custom key type with a weak hash stays exposed.
+**A weak or adversarial hash collapses a bucket.** A `GetHashCode` that returns a constant puts every entry in one bucket, so each operation must walk the resulting chain. When keys come from untrusted input (HTTP query keys, JSON property names), an attacker who can predict the hash forces mass collisions on purpose — algorithmic-complexity denial of service, "hash flooding." For string keys, current .NET `Dictionary` can switch from its fast non-randomized comparer to randomized hashing after excessive collisions; a custom key type with a weak hash stays exposed.
 
-**A mutated key may become unreachable.** Insert a key, then mutate a field that participates in its hash, and invariant 1 breaks — the entry stays in the old bucket while lookups use the recomputed hash. If that hash selects a different bucket, lookup misses the entry even though it remains in memory. Immutable key types (`string`, `int`, records with `init` properties) avoid this; a mutable key must never change after insertion.
+**A mutated key may become unreachable.** Insert a key, then mutate a field used by `GetHashCode` or `Equals`, and invariant 1 breaks. The entry keeps its insertion-time hash but still references the mutated key object; lookup recomputes the candidate hash and equality from current state, so a changed full hash can miss even if it still maps to the same bucket. Immutable key types (`string`, `int`, records with `init` properties) avoid this; a mutable key must never change after insertion.
 
 **Iteration order is unspecified.** Current .NET `Dictionary` enumerates its entries array and often appears insertion-ordered, but the API contract does not guarantee that behavior. Removal, slot reuse, or a runtime implementation change can alter the observed order, so code that depends on it is relying on an implementation artifact.
 
-**A resize is a latency spike.** The amortized `O(1)` insert hides an occasional `O(n)` rehash of the entire array. For a real-time or low-latency path, that single stall matters even though the average is fine; pre-sizing or a resize-free structure avoids it.
+**A resize is a latency spike.** One threshold-crossing insert must allocate a new array and rehash every existing entry before it returns. For a real-time or low-latency path, that single stall matters; pre-sizing or a resize-free structure avoids it.
 
 **Open addressing adds clustering and tombstones.** Probe sequences pile entries into runs (primary clustering) that lengthen every probe, and a delete cannot simply empty a slot — that would truncate a probe chain — so it leaves a tombstone. Lookups skip tombstones, later inserts may reuse them, and a rehash removes any that remain.
 
-## Reference drawer
+# Reference drawer
 
 > [!ABSTRACT]- Bucket array with chaining
 > ```mermaid
@@ -256,23 +293,17 @@ Each boundary traces back to the bucket-and-hash mechanism.
 >     Console.WriteLine(name);
 > }
 > ```
-> `Dictionary<TKey, TValue>` is the default map in modern .NET. Concurrent writes are unsupported and may throw or corrupt its state; synchronize access or use `ConcurrentDictionary`. `FrozenDictionary` optimizes build-once/read-many hot paths, and `SortedDictionary` trades `O(1)` for ordered iteration. Passing an initial `capacity` pre-sizes the array and skips the grow-and-rehash cycles.
+> `Dictionary<TKey, TValue>` is the default map in modern .NET. Concurrent writes are unsupported and may throw or corrupt its state; synchronize access or use `ConcurrentDictionary`. `FrozenDictionary` optimizes build-once/read-many hot paths, while `SortedDictionary` keeps keys ordered. Passing an initial `capacity` pre-sizes the array and skips the grow-and-rehash cycles.
 
-## Questions
-
-> [!QUESTION]- What assumptions make hash-map operations `O(1)` on average?
-> A hash function that distributes keys close to uniformly, so buckets stay short, and a load factor bounded by resizing, so buckets do not fill up. Both must hold. Without them, keys concentrate in a few buckets and each operation walks a long chain toward `O(n)`.
-
-> [!QUESTION]- Why is insert amortized `O(1)` rather than strictly `O(1)`?
-> A single insert can push the load factor past its threshold and rehash every existing entry into a larger array, an `O(n)` step. Averaged over the inserts that grew the map to that size, the rehash cost is `O(1)` per insert. The guarantee is over a sequence; any individual insert can still cost `O(n)`.
+# Questions
 
 > [!QUESTION]- What happens to an entry whose key is mutated after insertion?
-> The entry stays in the bucket the key hashed to at insertion time. If mutation changes the hash enough to select a different bucket, lookup searches there and misses the still-resident entry. Keys must be immutable, or at least never change a hash-participating field after insertion.
+> The entry retains its insertion-time hash but still references the mutated key object. If mutation changes anything used by `GetHashCode` or `Equals`, lookup can miss the still-resident entry; even a changed full hash that reduces to the same bucket no longer matches the stored hash. Keys must be immutable, or at least never change hash- or equality-participating state after insertion.
 
 > [!QUESTION]- When is a balanced tree preferable to a hash map?
-> When the workload needs ordered iteration, range queries, or nearest-key lookups. A hash map scatters keys across buckets and cannot answer those without a full scan and sort; a balanced tree keeps keys sorted at `O(log n)` per operation, which is the price for that ordering.
+> When the workload needs ordered iteration, range queries, or nearest-key lookups. A hash map lacks ordered navigation, so these operations require at least a full scan, plus sorting when the result itself must be ordered; a balanced tree retains key order as part of its representation.
 
-## References
+# References
 
 - [`Dictionary<TKey, TValue>` class (Microsoft Learn)](https://learn.microsoft.com/en-us/dotnet/api/system.collections.generic.dictionary-2) — API reference for the primary .NET hash map, with the hash-contract requirements and capacity semantics.
 - [`Dictionary.cs` in dotnet/runtime](https://github.com/dotnet/runtime/blob/main/src/libraries/System.Private.CoreLib/src/System/Collections/Generic/Dictionary.cs) — runtime source showing the `buckets[]`/`entries[]` chaining layout, prime-based resize, and per-entry `next` indices.

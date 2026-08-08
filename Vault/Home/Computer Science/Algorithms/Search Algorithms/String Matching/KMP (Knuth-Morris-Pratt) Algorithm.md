@@ -3,7 +3,7 @@ topic:
   - Computer Science
 subtopic:
   - Algorithms
-summary: "Searches for a pattern in guaranteed O(n + m) time by never rescanning text, using a precomputed prefix (LPS) array."
+summary: "Searches for a pattern without rescanning text by using a precomputed prefix (LPS) array."
 level:
   - "4"
 priority: Medium
@@ -11,47 +11,146 @@ status: Done
 publish: true
 ---
 
-A monitoring process scans a byte stream — logs, packets, a large file — for a fixed pattern of length `m` inside text of length `n`. The naive method aligns the pattern at each start position and, on a mismatch after matching several characters, discards that progress and restarts one position over. On text like `aaaaaaaa…` with pattern `aaaab`, nearly every start position matches `m − 1` characters before failing, so the same characters are examined again and again — `O(n·m)` comparisons.
+A monitoring process scans a byte stream — logs, packets, a large file — for a fixed pattern of length `m` inside text of length `n`. The naive method aligns the pattern at each start position and, on a mismatch after matching several characters, discards that progress and restarts one position over.
 
-The wasted work has structure. The characters already matched are a prefix of the pattern, and that prefix's own internal repetition fixes how far the pattern can safely slide. KMP computes that self-overlap once, before the scan. On a mismatch after `k` matched characters, it consults the overlap and resumes the pattern where its longest matched prefix-that-is-also-a-suffix already lines up against the text — the text pointer stays put. Each text character is then read at most twice across the whole search.
+The wasted work has structure. The characters already matched are a prefix of the pattern, and that prefix's own internal repetition fixes how far the pattern can safely slide. KMP computes that self-overlap once, before the scan. On a mismatch after `k` matched characters, it consults the overlap and resumes the pattern where its longest matched prefix-that-is-also-a-suffix already lines up against the text — the text pointer stays put.
 
-**Core condition:** pattern fixed in advance → a failure table encodes the pattern's self-overlap → each mismatch slides the pattern without rewinding the text → `Θ(n + m)` time, `Θ(m)` space.
 
-# Trace
 
-The trace searches for the pattern `ABAB` in the text `ABABCABAB`.
+~~~~~tabsdown
+tab: Visualization
+
+
 
 ```steptrace
 {"algorithm":"kmp","text":"ABABCABAB","pattern":"ABAB"}
 ```
 
-The first four characters match, so `j` reaches `4 = m` and a match is reported at index 0. Instead of restarting, `j` resets to `π[3] = 2`: the trailing `AB` of the region just matched is itself a prefix of the pattern, so those two characters already count as matched and the pattern strip slides right by two while the text pointer holds at index 4. There `C` fails against `pattern[2] = A`; `j` falls to `π[1] = 0`, the text pointer finally advances, and the scan re-enters the pattern at `A` to find the second match at index 5. At no point does the text pointer retreat to re-read `C` or the earlier `AB`.
 
-# Why the Text Never Rewinds
+
+The trace searches for the pattern `ABAB` in the text `ABABCABAB`.
+
+The first four characters match, so `j` reaches `4 = m` and a match is reported at index 0. Instead of restarting, `j` resets to `π[3] = 2`: the trailing `AB` of the region just matched is itself a prefix of the pattern, so those two characters already count as matched and the pattern strip slides right by two while the text pointer holds at index 4. There `C` fails against `pattern[2] = A`; `j` falls to `π[1] = 0`, so the same `C` may be compared again at index 4 against the shorter-prefix position before the text pointer advances. The pointer never retreats, and the scan re-enters the pattern at `A` to find the second match at index 5.
+
+
 
 The failure table `π` (also called the LPS array — longest proper prefix that is also a suffix) has one entry per pattern position. `π[j]` is the length of the longest proper prefix of `pattern[0..j]` that also occurs as a suffix of that same span. For `ABABC` the table is `[0, 0, 1, 2, 0]`: `ABAB` ends in `AB`, which is also its prefix, so `π[3] = 2`.
 
 The search keeps a text index `i` and a match length `j` (equivalently, the current pattern position). On a match, both advance. On a mismatch with `j > 0`, `j` drops to `π[j - 1]` and the comparison retries without touching `i`; the already-matched prefix of length `π[j-1]` is guaranteed to align, because it is at once a prefix and a suffix of what was just matched. On a mismatch with `j == 0`, there is nothing to fall back to, so `i` advances. The text index therefore moves in one direction only.
 
-That monotonic `i` is the entire bound. `j` rises by at most one each time `i` advances, and `j ≥ 0`, so the fallbacks can remove at most as much as was added: across the scan `j` decreases at most `n` times in total. Every comparison either advances `i` or decreases `j`, so there are at most `2n` character comparisons regardless of how the pattern overlaps itself.
+The text index `i` never moves backward. On a mismatch, only `j` retreats through previously computed prefix lengths, preserving the text already consumed.
 
-# Complexity
+tab: Complexity
 
-| Phase | Time | Auxiliary space | Cause |
-| --- | --- | --- | --- |
-| Build failure table `π` | `Θ(m)` | `Θ(m)` | Each pattern index is assigned once; the builder's fallback pointer only retreats through values it already produced. |
-| Search | `Θ(n)` | `O(1)` beyond `π` | `i` advances monotonically; each character is compared at most twice before `i` passes it. |
-| Total | `Θ(n + m)` | `Θ(m)` | One preprocessing pass over the pattern, then one non-backtracking pass over the text. |
-
-The bound holds identically in the best, average, and worst case — determinism is the point. Naive search shares the `O(1)`-space profile but has no such ceiling: on `text = aⁿ`, `pattern = aᵐ⁻¹b`, every one of the `n − m + 1` start positions matches `m − 1` characters before failing on the final `b`, so it performs `Θ(n·m)` comparisons. KMP reads that same run once.
+```complexity
+{
+  "version": 2,
+  "label": "KMP (Knuth-Morris-Pratt) Algorithm complexity",
+  "variables": {
+    "inputSize": {
+      "symbol": "n",
+      "description": "length of the searched text"
+    },
+    "secondarySize": {
+      "symbol": "m",
+      "description": "length of the pattern"
+    }
+  },
+  "resources": {
+    "time": {
+      "mode": "operations",
+      "entries": [
+        {
+          "kind": "operation",
+          "operation": "Build failure table π",
+          "bounds": [
+            {
+              "kind": "curve",
+              "role": "Time",
+              "formula": "Θ(m)",
+              "curveId": "linear"
+            }
+          ]
+        },
+        {
+          "kind": "operation",
+          "operation": "Search",
+          "bounds": [
+            {
+              "kind": "curve",
+              "role": "Time",
+              "formula": "Θ(n)",
+              "curveId": "linear"
+            }
+          ]
+        },
+        {
+          "kind": "operation",
+          "operation": "Total",
+          "bounds": [
+            {
+              "kind": "curve",
+              "role": "Time",
+              "formula": "Θ(n + m)",
+              "curveId": "linear"
+            }
+          ]
+        }
+      ]
+    },
+    "space": {
+      "mode": "operations",
+      "entries": [
+        {
+          "kind": "operation",
+          "operation": "Build failure table π",
+          "bounds": [
+            {
+              "kind": "curve",
+              "role": "Auxiliary space",
+              "formula": "Θ(m)",
+              "curveId": "linear"
+            }
+          ]
+        },
+        {
+          "kind": "operation",
+          "operation": "Search",
+          "bounds": [
+            {
+              "kind": "curve",
+              "role": "Auxiliary space",
+              "formula": "O(1) beyond π",
+              "curveId": "constant"
+            }
+          ]
+        },
+        {
+          "kind": "operation",
+          "operation": "Total",
+          "bounds": [
+            {
+              "kind": "curve",
+              "role": "Auxiliary space",
+              "formula": "Θ(m)",
+              "curveId": "linear"
+            }
+          ]
+        }
+      ]
+    }
+  }
+}
+```
+~~~~~
 
 # Where the Guarantee Earns Its Keep
 
-The repetitive input that breaks naive search is exactly where KMP's ceiling matters. On `aⁿ` against `aᵐ⁻¹b` the failure table is `[0, 1, 2, …, m-2, 0]` — the trailing `b` has no matching prefix, so the last entry drops back to `0` (for `m = 5`, `aaaab` → `[0,1,2,3,0]`). Matching stalls at length `m − 1`, the `b` fails, and `j` falls back one position to `π[m-2] = m-2`, so the scan still finishes in `Θ(n + m)`. This is a correctness-of-cost property, not a speedup on friendly text: on random text with a short, low-overlap pattern, naive search and KMP examine nearly the same number of characters, and naive wins on constants and code size.
+The repetitive input that breaks naive search is exactly where KMP's ceiling matters. On `aⁿ` against `aᵐ⁻¹b` the failure table is `[0, 1, 2, …, m-2, 0]` — the trailing `b` has no matching prefix, so the last entry drops back to `0` (for `m = 5`, `aaaab` → `[0,1,2,3,0]`). This is a correctness-of-cost property, not a speedup on friendly text: on random text with a short, low-overlap pattern, naive search and KMP examine nearly the same number of characters, and naive wins on constants and code size.
 
 The classic implementation bug lives in the failure table. On a mismatch while building it, the length pointer must fall back through `failure[k - 1]`, not reset to `0`. Resetting to zero corrupts every entry where the prefix overlaps itself: `AABAAAB` then builds as `[0,1,0,1,2,1,0]` instead of `[0,1,0,1,2,2,3]`, and the search silently misses matches that depend on the longer overlap. A quick comparison against known outputs surfaces this class of bug.
 
-KMP gains nothing from a large alphabet. It compares left to right and, in the worst case, inspects essentially every text character. Skip-based methods exploit alphabet size instead: [[Boyer-Moore]] scans the pattern right to left and, on a mismatch, uses a bad-character table to jump ahead by up to `m` positions, so a wider alphabet makes each mismatch more informative and the average scan sublinear. KMP's edge is a guarantee, not throughput on wide alphabets.
+KMP compares left to right and does not skip untouched text regions. [[Home/Computer Science/Algorithms/Search Algorithms/String Matching/Boyer-Moore|Boyer-Moore]] instead scans the pattern right to left and uses a bad-character table to jump over alignments that cannot match, so a wider alphabet makes each mismatch more informative.
 
 # Reference Drawer
 
@@ -79,6 +178,7 @@ KMP gains nothing from a large alphabet. It compares left to right and, in the w
 > ```csharp
 > public static IEnumerable<int> FindAll(string text, string pattern)
 > {
+>     ArgumentException.ThrowIfNullOrEmpty(pattern);
 >     var failure = BuildFailure(pattern);
 >     var j = 0; // characters of the pattern currently matched
 >
@@ -125,24 +225,24 @@ KMP gains nothing from a large alphabet. It compares left to right and, in the w
 >     return failure;
 > }
 > ```
-> Both loops share the same fallback shape: the inner `while` retreats through `failure` rather than resetting to `0`. That is what keeps the total work linear and the table correct.
+> The method rejects an empty pattern before building the failure table because the search loop indexes `pattern[j]`; callers must provide at least one character. Both loops then share the same fallback shape: the inner `while` retreats through `failure` rather than resetting to `0`. That preserves reusable overlap and keeps the table correct.
 
 # Questions
 
 > [!QUESTION]- Why does the text index never move backward, and what does that buy?
-> On a mismatch the algorithm only lowers the match length `j` via `π[j-1]`; it never decrements the text index `i`. Because `j` can fall back at most as much as it climbed, total comparisons stay at `2n`, giving the `Θ(n + m)` bound. A monotonic text pointer also lets the search run over a stream that cannot be rewound.
+> On a mismatch the algorithm only lowers the match length `j` via `π[j-1]`; it never decrements the text index `i`. A monotonic text pointer also lets the search run over a stream that cannot be rewound.
 
 > [!QUESTION]- What does `π[j]` encode, and how is it used on a mismatch?
 > `π[j]` is the length of the longest proper prefix of `pattern[0..j]` that is also a suffix of it. On a mismatch after matching `j` characters, `j` resets to `π[j-1]`, which realigns that shared prefix/suffix against the text so no already-matched characters are re-read.
 
-> [!QUESTION]- On what input does KMP's guarantee actually pay off, and where does it gain nothing?
-> It pays off on repetitive input such as `text = aⁿ`, `pattern = aᵐ⁻¹b`, where naive search degrades to `Θ(n·m)` while KMP stays `Θ(n + m)`. It gains nothing on large alphabets: unlike Boyer-Moore it reads essentially every character and cannot skip.
+> [!QUESTION]- On what input does KMP reuse the most overlap, and what can it not skip?
+> Repetitive text and patterns repeatedly fall back to a shorter valid prefix instead of restarting the match. On large alphabets it gains little from that reuse: unlike Boyer-Moore it still reads essentially every character and cannot jump over untouched regions.
 
 > [!QUESTION]- What is the standard bug when building the failure table?
 > Resetting the length pointer to `0` on a mismatch instead of falling back through `failure[k-1]`. That corrupts entries where the prefix overlaps itself — `AABAAAB` builds as `[0,1,0,1,2,1,0]` rather than `[0,1,0,1,2,2,3]` — and the search then misses matches that depend on the longer overlap.
 
 # References
 
-- [Knuth, Morris, Pratt — "Fast Pattern Matching in Strings" (SIAM J. Comput. 6(2), 1977)](https://doi.org/10.1137/0206024) — the original algorithm, the failure-function construction, and the linear-time proof.
-- [Prefix function and KMP (cp-algorithms)](https://cp-algorithms.com/string/prefix-function.html) — failure-table construction, the fallback loop, and the amortized argument, with applications to related string problems.
+- [Knuth, Morris, Pratt, "Fast Pattern Matching in Strings" (1977)](https://doi.org/10.1137/0206024) — the original algorithm and failure-function construction.
+- [Prefix function and KMP (cp-algorithms)](https://cp-algorithms.com/string/prefix-function.html)
 - [Knuth–Morris–Pratt algorithm (Wikipedia)](https://en.wikipedia.org/wiki/Knuth%E2%80%93Morris%E2%80%93Pratt_algorithm) — worked failure-table examples and the formal correctness argument.

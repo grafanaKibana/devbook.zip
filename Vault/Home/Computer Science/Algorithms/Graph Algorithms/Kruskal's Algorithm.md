@@ -3,6 +3,7 @@ topic:
   - Computer Science
 subtopic:
   - Algorithms
+summary: "Builds a minimum spanning tree by accepting the lightest edges that join separate components."
 level:
   - "4"
 priority: Medium
@@ -14,11 +15,13 @@ A connected, undirected, weighted graph can contain many spanning trees. [[Home/
 
 The cycle test is the whole mechanism. A [[Home/Computer Science/Data Structures/Graph Structures/Disjoint Set|disjoint set]] stores the current forest components. If `find(u) == find(v)`, edge `(u, v)` would close a cycle and is rejected; otherwise `union(u, v)` merges the components and the edge enters the result. The cut property makes that greedy choice safe: the lightest edge crossing a cut belongs to some MST.
 
+~~~~~tabsdown
+tab: Visualization
+
 ```steptrace
 {"algorithm":"kruskal"}
 ```
 
-# One Sorted Scan
 
 For edges `AB=1`, `BC=2`, `AC=3`, `CD=4`, the initial components are `{A}`, `{B}`, `{C}`, `{D}`.
 
@@ -31,21 +34,77 @@ For edges `AB=1`, `BC=2`, `AC=3`, `CD=4`, the initial components are `{A}`, `{B}
 
 The accepted edges have total weight `7` and stop at `V - 1 = 3` edges. At every acceptance, the endpoints lie on opposite sides of a current component cut, and no lighter unprocessed edge crosses that cut.
 
-# Complexity
+tab: Complexity
 
-| Case | Time | Auxiliary space | Cause |
-| --- | --- | --- | --- |
-| Best | `Θ(E log E)` | `O(V)` plus sort workspace | the chosen comparison sort orders the full edge list |
-| Average | `Θ(E log E)` | `O(V)` plus sort workspace | the chosen comparison sort dominates near-constant union-find operations |
-| Worst | `Θ(E log E)` | `O(V)` plus sort workspace | the chosen comparison sort still processes the full edge list |
-
-The table fixes the sorting model to a non-adaptive `Θ(E log E)` comparison sort such as mergesort or heapsort. If the edge list is already sorted and no sorting pass is needed, the scan itself costs `O(E · α(V))`. With path compression and union by rank or size, disjoint-set work is `O(E · α(V))`; sorting dominates when required. The `O(V)` term is the union-find forest and assumes an in-place edge sort. A sort that allocates a temporary edge buffer raises auxiliary space to `O(V + E)`. The result itself stores `V - 1` edges and is excluded from auxiliary space.
+```complexity
+{
+  "version": 2,
+  "label": "Kruskal's Algorithm complexity",
+  "variables": {
+    "edgeCount": {
+      "symbol": "m",
+      "description": "number of edges"
+    },
+    "vertexCount": {
+      "symbol": "n",
+      "description": "number of vertices"
+    }
+  },
+  "resources": {
+    "time": {
+      "mode": "cases",
+      "entries": [
+        {
+          "kind": "case",
+          "role": "Best",
+          "formula": "Θ(m log m)",
+          "curveId": "n-log-n"
+        },
+        {
+          "kind": "case",
+          "role": "Average",
+          "formula": "Θ(m log m)",
+          "curveId": "n-log-n"
+        },
+        {
+          "kind": "case",
+          "role": "Worst",
+          "formula": "Θ(m log m)",
+          "curveId": "n-log-n"
+        }
+      ]
+    },
+    "space": {
+      "mode": "operations",
+      "entries": [
+        {
+          "kind": "operation",
+          "operation": "Kruskal",
+          "bounds": [
+            {
+              "kind": "text",
+              "role": "Auxiliary space",
+              "formula": "O(n + log m) with in-place introsort"
+            }
+          ]
+        }
+      ]
+    }
+  }
+}
+```
+~~~~~
 
 # Boundary Cases
 
 A disconnected graph never reaches `V - 1` accepted edges. The scan returns a minimum spanning forest rather than an MST, so the edge count must be checked.
 
 Equal weights can produce several valid MSTs. Sort stability or an explicit endpoint tie-break changes which equal-weight edge enters, but not the minimum total weight. Negative weights require no special handling: ascending order and the cut property remain valid.
+
+# Questions
+
+> [!QUESTION]- How does Kruskal's algorithm reveal that the input graph is disconnected?
+> A connected graph reaches exactly `V - 1` accepted edges after its components merge into one. If the sorted-edge scan ends earlier, no remaining edge can connect the residual components, so the result is a minimum spanning forest rather than an MST.
 
 # References
 

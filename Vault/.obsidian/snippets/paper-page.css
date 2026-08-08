@@ -1,0 +1,19 @@
+body {
+  --dot-grid-spacing: 22px;
+  --dot-grid-radius: 1px;
+  --dot-grid-color: color-mix(in srgb, var(--text-normal) 7%, transparent);
+}
+
+body.theme-dark {
+  --dot-grid-color: color-mix(in srgb, var(--text-normal) 6%, transparent);
+}
+
+.workspace-leaf-content[data-type="markdown"] .view-content {
+  background-image: radial-gradient(
+    circle at center,
+    var(--dot-grid-color) var(--dot-grid-radius),
+    transparent calc(var(--dot-grid-radius) + 0.5px)
+  );
+  background-size: var(--dot-grid-spacing) var(--dot-grid-spacing);
+  background-position: 0 0;
+}

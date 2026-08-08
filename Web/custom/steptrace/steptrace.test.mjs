@@ -1,92 +1,25 @@
 import assert from "node:assert/strict"
 import { createHash } from "node:crypto"
 import { EventEmitter } from "node:events"
-import { readFileSync, readdirSync } from "node:fs"
+import { existsSync, readFileSync, readdirSync } from "node:fs"
 import { dirname, join } from "node:path"
 import { setTimeout as delay } from "node:timers/promises"
 import test from "node:test"
 import { fileURLToPath } from "node:url"
 import { buildSync } from "esbuild"
 
-import { expectedArtifacts, verifyArtifacts } from "./build.mjs"
+import { verifyArtifacts } from "./build.mjs"
 import { startWatcher } from "./watch.mjs"
 
 const here = dirname(fileURLToPath(import.meta.url))
 const repoRoot = join(here, "..", "..", "..")
-
-const cases = [
-  "activity-selection",
-  "a-star",
-  "articulation-points-and-bridges",
-  "bellman-ford",
-  "bidirectional-search",
-  "boruvka",
-  "connected-components",
-  "greedy-best-first-search",
-  "hamiltonian-cycle",
-  "kruskal",
-  "maximum-flow",
-  "strongly-connected-components",
-  "bubble-sort",
-  "insertion-sort",
-  "selection-sort",
-  "quick-sort",
-  "heap-sort",
-  "merge-sort",
-  "merge-sort-tree",
-  "merge-intervals",
-  "prefix-sum",
-  "monotonic-stack-and-queue",
-  "shell-sort",
-  "comb-sort",
-  "counting-sort",
-  "radix-sort",
-  "bucket-sort",
-  "cyclic-sort",
-  "introsort",
-  "tim-sort",
-  "bfs",
-  "dfs",
-  "dijkstra",
-  "prim",
-  "topological-sort",
-  "top-k-elements",
-  "binary-search",
-  "interpolation-search",
-  "jump-search",
-  "ternary-search",
-  "binary-search-on-answer",
-  "exponential-search",
-  "linear-search",
-  "kmp",
-  "rabin-karp",
-  "z-algorithm",
-  "boyer-moore",
-  "two-pointers",
-  "sliding-window",
-  "lcs",
-  "coin-change-greedy",
-  "coin-change-naive",
-  "coin-change-memoization",
-  "coin-change-tabulation",
-  "coin-change-top-down",
-  "coin-change-bottom-up",
-  "grid-path-greedy",
-  "grid-path-naive",
-  "grid-path-memoization",
-  "grid-path-tabulation",
-  "grid-path-top-down",
-  "grid-path-bottom-up",
-  "floyd-warshall",
-  "fast-and-slow-pointers",
-  "kernighan-popcount",
-  "n-queens",
-  "memoization",
-  "branch-and-bound",
-  "trie",
-  "aho-corasick",
-  "ternary-search-tree",
-]
+const obsidianPlugin = join(repoRoot, "Vault", ".obsidian", "plugins", "steptrace")
+const csNote = (...segments) =>
+  readFileSync(join(repoRoot, "Vault", "Home", "Computer Science", ...segments), "utf8")
+const quartzJs = readFileSync(join(here, "generated", "engine.js"), "utf8")
+const quartzCss = readFileSync(join(here, "generated", "engine.css"), "utf8")
+const obsidianJs = readFileSync(join(obsidianPlugin, "main.js"), "utf8")
+const obsidianCss = readFileSync(join(obsidianPlugin, "styles.css"), "utf8")
 
 const commonConfig = {
   array: [8, 3, 5, 1, 9, 2, 7, 4],
@@ -124,6 +57,77 @@ const commonConfig = {
   ],
 }
 
+const canonicalDijkstraConfig = {
+  algorithm: "dijkstra",
+  start: "A",
+  target: "F",
+  directed: false,
+  nodes: ["A", "B", "C", "D", "E", "F"].map((id) => ({ id })),
+  edges: [
+    ["A", "B", 2],
+    ["A", "C", 5],
+    ["B", "C", 1],
+    ["B", "D", 6],
+    ["C", "D", 3],
+    ["D", "E", 1],
+    ["D", "F", 4],
+    ["E", "F", 2],
+  ].map(([from, to, weight]) => ({ from, to, weight })),
+}
+
+const headlessFixtureOverrides = {
+  "aho-corasick": { patterns: ["he", "she", "his", "hers"], text: "ushers" },
+  "ternary-search-tree": {
+    operations: [
+      ["insert", "cat"],
+      ["insert", "car"],
+      ["insert", "cup"],
+      ["insert", "bat"],
+      ["search", "car"],
+    ],
+  },
+  "ternary-search": { array: [1, 4, 9, 12, 11, 7, 2], goal: "maximum" },
+  "binary-search-on-answer": { weights: [3, 2, 2, 4, 1, 4], days: 3 },
+  "shell-sort": { gaps: [4, 2, 1] },
+  "counting-sort": { array: [2, 5, 3, 0, 2, 3, 0, 3] },
+  "radix-sort": { array: [170, 45, 75, 90, 802, 24, 2, 66], radix: 10, mode: "LSD" },
+  "bucket-sort": { array: [0.78, 0.17, 0.39, 0.26, 0.72, 0.94], bucketCount: 5 },
+  "cyclic-sort": { array: [5, 3, 1, 4, 2] },
+  "floyd-warshall": {
+    nodes: [0, 1, 2, 3],
+    edges: [
+      [0, 1, 3],
+      [0, 3, 7],
+      [1, 0, 8],
+      [1, 2, 2],
+      [2, 0, 5],
+      [2, 3, 1],
+      [3, 0, 2],
+    ],
+  },
+  "exponential-search": { array: commonConfig.array.slice().sort((a, b) => a - b) },
+  "interpolation-search": { array: commonConfig.array.slice().sort((a, b) => a - b) },
+  "jump-search": { array: commonConfig.array.slice().sort((a, b) => a - b) },
+}
+
+const algorithmsWithoutCommonConfig = new Set([
+  "memoization",
+  "branch-and-bound",
+  "divide-and-conquer",
+  "coin-change-greedy",
+  "coin-change-naive",
+  "coin-change-memoization",
+  "coin-change-tabulation",
+  "coin-change-top-down",
+  "coin-change-bottom-up",
+  "grid-path-greedy",
+  "grid-path-naive",
+  "grid-path-memoization",
+  "grid-path-tabulation",
+  "grid-path-top-down",
+  "grid-path-bottom-up",
+])
+
 function loadEngine(source) {
   delete globalThis.steptrace
   new Function(source)()
@@ -145,58 +149,131 @@ function loadStepTraceModule(...segments) {
   return module.exports
 }
 
-function buildAbstractDivideAndConquer() {
-  const { divideAndConquer } = loadStepTraceModule("src", "algorithms", "divide-and-conquer.ts")
-  const config = divideAndConquer.parse({ algorithm: "divide-and-conquer" })
-  const recorder = divideAndConquer.family.createRecorder(config)
-  divideAndConquer.run(config, recorder)
-  return { config, family: divideAndConquer.family, frames: recorder.frames }
-}
-
-function buildAbstractMemoization() {
-  const { memoization } = loadStepTraceModule("src", "algorithms", "memoization.ts")
-  const config = memoization.parse({ algorithm: "memoization" })
-  const recorder = memoization.family.createRecorder(config)
-  memoization.run(config, recorder)
-  return { config, family: memoization.family, frames: recorder.frames }
-}
-
-function buildBranchAndBound() {
-  const { branchAndBound } = loadStepTraceModule("src", "algorithms", "branch-and-bound.ts")
-  const config = branchAndBound.parse({ algorithm: "branch-and-bound" })
-  const recorder = branchAndBound.family.createRecorder(config)
-  branchAndBound.run(config, recorder)
-  return { config, family: branchAndBound.family, frames: recorder.frames }
-}
-
-function buildBidirectionalSearch() {
-  const { bidirectionalSearch } = loadStepTraceModule(
+function parseAuthoredStepTraceTabs(note) {
+  const { parseTabs } = loadStepTraceModule(
+    "..",
+    "..",
+    ".quartz",
+    "plugins",
+    "quartz-tabsdown",
     "src",
-    "algorithms",
-    "bidirectional-search.ts",
+    "parser.ts",
   )
-  const config = bidirectionalSearch.parse({ algorithm: "bidirectional-search" })
-  const recorder = bidirectionalSearch.family.createRecorder(config)
-  bidirectionalSearch.run(config, recorder)
-  return { config, family: bidirectionalSearch.family, frames: recorder.frames }
+  const outerFence = note.match(/~~~~~tabsdown\n([\s\S]*?)\n~~~~~/)
+  assert.ok(outerFence)
+  const outerTabs = parseTabs(outerFence[1])
+  assert.equal(outerTabs.ok, true)
+  assert.deepEqual(
+    outerTabs.tabs.map(({ label }) => label),
+    ["Visualization", "Complexity"],
+  )
+
+  const visualization = outerTabs.tabs[0].body
+  const configs = [...visualization.matchAll(/(~~~~)tabsdown\n([\s\S]*?)\n\1/g)].map(
+    ([, , innerBody]) => {
+      const innerTabs = parseTabs(innerBody)
+      assert.equal(innerTabs.ok, true)
+      return innerTabs.tabs.map(({ label, body }, index) => {
+        const payload = body.match(/```steptrace\n([^\n]+)\n```/)?.[1]
+        assert.ok(payload)
+        return {
+          label,
+          description: body.split("```steptrace")[0].trim(),
+          selectedInitially: index === 0,
+          payload,
+          payloadSha256: createHash("sha256").update(payload).digest("hex"),
+        }
+      })
+    },
+  )
+  return { configs, visualization }
 }
 
-function buildMergeSortTree(array = [8, 3, 7, 4, 9, 2, 5, 1]) {
-  const { mergeSortTree } = loadStepTraceModule("src", "algorithms", "merge-sort-tree.ts")
-  const config = mergeSortTree.parse({ algorithm: "merge-sort-tree", array })
-  const recorder = mergeSortTree.family.createRecorder(config)
-  mergeSortTree.run(config, recorder)
-  return { config, family: mergeSortTree.family, frames: recorder.frames }
+function markdownFiles(root) {
+  return readdirSync(root, { recursive: true })
+    .filter((entry) => entry.endsWith(".md"))
+    .map((entry) => join(root, entry))
 }
 
-function buildDynamicProgramming(name) {
-  const algorithms = loadStepTraceModule("src", "algorithms", "dynamic-programming.ts")
-  const algorithm = algorithms[name]
-  const config = algorithm.parse({ algorithm: algorithm.id })
+function authoredDsaTabsdownNotes() {
+  return [
+    join(repoRoot, "Vault", "Home", "Computer Science", "Algorithms"),
+    join(repoRoot, "Vault", "Home", "Computer Science", "Data Structures"),
+  ]
+    .flatMap(markdownFiles)
+    .map((path) => ({ path, source: readFileSync(path, "utf8") }))
+    .filter(({ source }) => /```steptrace\n/.test(source) && /~{5,}tabsdown\n/.test(source))
+}
+
+function buildAlgorithm(moduleName, exportName, input = {}) {
+  const algorithm = loadStepTraceModule("src", "algorithms", `${moduleName}.ts`)[exportName]
+  const config = algorithm.parse({ algorithm: algorithm.id, ...input })
   const recorder = algorithm.family.createRecorder(config)
   algorithm.run(config, recorder)
   return { config, family: algorithm.family, frames: recorder.frames }
 }
+
+function buildSourceFrames(config) {
+  return loadStepTraceModule("src", "engine.ts").steptrace.buildFrames(config)
+}
+
+function withFakeDocument(run) {
+  class FakeNode {
+    constructor(tagName) {
+      this.tagName = tagName
+      this.textContent = ""
+      this.innerHTML = ""
+      this.children = []
+      this.attributes = new Map()
+      this.dataset = {}
+      this.className = ""
+      this.style = { setProperty() {} }
+    }
+    append(...children) {
+      this.children.push(...children)
+    }
+    setAttribute(key, value) {
+      this.attributes.set(key, String(value))
+    }
+    getAttribute(key) {
+      return this.attributes.get(key) ?? null
+    }
+    removeAttribute(key) {
+      this.attributes.delete(key)
+    }
+    getBoundingClientRect() {
+      return { width: 620, height: 320 }
+    }
+  }
+  const previousDocument = globalThis.document
+  globalThis.document = {
+    createElement: (tagName) => new FakeNode(tagName),
+    createElementNS: (_namespace, tagName) => new FakeNode(tagName),
+    createTextNode: (value) => {
+      const node = new FakeNode("#text")
+      node.textContent = value
+      return node
+    },
+  }
+  try {
+    return run()
+  } finally {
+    globalThis.document = previousDocument
+  }
+}
+
+const buildAbstractDivideAndConquer = () => buildAlgorithm("divide-and-conquer", "divideAndConquer")
+
+const buildAbstractMemoization = () => buildAlgorithm("memoization", "memoization")
+
+const buildBranchAndBound = () => buildAlgorithm("branch-and-bound", "branchAndBound")
+
+const buildBidirectionalSearch = () => buildAlgorithm("bidirectional-search", "bidirectionalSearch")
+
+const buildMergeSortTree = (array = [8, 3, 7, 4, 9, 2, 5, 1]) =>
+  buildAlgorithm("merge-sort-tree", "mergeSortTree", { array })
+
+const buildDynamicProgramming = (name) => buildAlgorithm("dynamic-programming", name)
 
 function contrastRatio(foreground, background) {
   const luminance = (hex) => {
@@ -212,14 +289,10 @@ function contrastRatio(foreground, background) {
 }
 
 test("the build exactly matches every committed host artifact", async () => {
-  const expected = await expectedArtifacts()
-  for (const { path, content } of expected.files) {
-    assert.equal(readFileSync(path, "utf8"), content, `${path} must be current`)
-  }
   await assert.doesNotReject(() => verifyArtifacts())
 })
 
-test("the public API and both host JavaScript contracts stay stable", () => {
+test("the public API stays stable", () => {
   const api = loadEngine(readFileSync(join(here, "generated", "engine.js"), "utf8"))
   assert.equal(api.VERSION, "2.0.0")
   assert.deepEqual(Object.keys(api), [
@@ -240,33 +313,11 @@ test("the public API and both host JavaScript contracts stay stable", () => {
     "adjacency",
     "mount",
   ])
-
-  const obsidian = readFileSync(
-    join(repoRoot, "Vault", ".obsidian", "plugins", "steptrace", "main.js"),
-    "utf8",
-  )
-  const pluginModule = { exports: {} }
-  const Plugin = class {}
-  class MarkdownRenderChild {}
-  class Notice {}
-  class SliderComponent {}
-  new Function("module", "exports", "require", obsidian)(
-    pluginModule,
-    pluginModule.exports,
-    (id) => {
-      assert.equal(id, "obsidian")
-      return { Plugin, MarkdownRenderChild, Notice, SliderComponent }
-    },
-  )
-  assert.equal(typeof pluginModule.exports, "function")
-  assert.equal(Object.getPrototypeOf(pluginModule.exports), Plugin)
 })
 
 test("the Obsidian bundle registers complexity and keeps invalid source local", () => {
-  const obsidian = readFileSync(
-    join(repoRoot, "Vault", ".obsidian", "plugins", "steptrace", "main.js"),
-    "utf8",
-  )
+  assert.match(obsidianJs, /const activePath = paths\.findLast\(/)
+  assert.match(obsidianJs, /color: owners\.at\(-1\)\?\.color/)
   const processors = new Map()
   class Plugin {
     registerMarkdownCodeBlockProcessor(language, processor) {
@@ -278,7 +329,7 @@ test("the Obsidian bundle registers complexity and keeps invalid source local", 
   class Notice {}
   class SliderComponent {}
   const pluginModule = { exports: {} }
-  new Function("module", "exports", "require", obsidian)(
+  new Function("module", "exports", "require", obsidianJs)(
     pluginModule,
     pluginModule.exports,
     (id) => {
@@ -286,6 +337,8 @@ test("the Obsidian bundle registers complexity and keeps invalid source local", 
       return { Plugin, MarkdownRenderChild, Notice, SliderComponent }
     },
   )
+  assert.equal(typeof pluginModule.exports, "function")
+  assert.equal(Object.getPrototypeOf(pluginModule.exports), Plugin)
   const plugin = new pluginModule.exports()
   plugin.onload()
   assert.deepEqual([...processors.keys()], ["steptrace", "complexity"])
@@ -318,19 +371,7 @@ test("the Obsidian bundle registers complexity and keeps invalid source local", 
 
 test("Z-Algorithm config is registered with an isolated typed string profile", () => {
   const api = loadEngine(readFileSync(join(here, "generated", "engine.js"), "utf8"))
-  const note = readFileSync(
-    join(
-      repoRoot,
-      "Vault",
-      "Home",
-      "Computer Science",
-      "Algorithms",
-      "Search Algorithms",
-      "String Matching",
-      "Z-Algorithm.md",
-    ),
-    "utf8",
-  )
+  const note = csNote("Algorithms", "Search Algorithms", "String Matching", "Z-Algorithm.md")
   const result = api.buildFrames({
     algorithm: "z-algorithm",
     text: "aabcaabxaaaz",
@@ -345,19 +386,7 @@ test("Z-Algorithm config is registered with an isolated typed string profile", (
 test("full Boyer-Moore records both shift rules and the canonical winning decisions", () => {
   const api = loadEngine(readFileSync(join(here, "generated", "engine.js"), "utf8"))
   const { buildGoodSuffixTable } = loadStepTraceModule("src", "algorithms", "boyer-moore.ts")
-  const note = readFileSync(
-    join(
-      repoRoot,
-      "Vault",
-      "Home",
-      "Computer Science",
-      "Algorithms",
-      "Search Algorithms",
-      "String Matching",
-      "Boyer-Moore.md",
-    ),
-    "utf8",
-  )
+  const note = csNote("Algorithms", "Search Algorithms", "String Matching", "Boyer-Moore.md")
   const frames = api.buildFrames({
     algorithm: "boyer-moore",
     text: "ACCCDBACBA",
@@ -971,65 +1000,6 @@ test("KMP, Rabin-Karp, and Z stay isolated from the Boyer-Moore profile", () => 
   }
 })
 
-test("tabbed blocks validate metadata and keep algorithm configs clean", () => {
-  const { isTabsConfig, normalizeTabsConfig } = loadStepTraceModule("src", "tabs.ts")
-  const legacy = { algorithm: "bubble-sort", array: [3, 1, 2] }
-  const tabbed = {
-    selected: 1,
-    tabs: [
-      {
-        name: "Example 1",
-        description: " First input. ",
-        algorithm: "bubble-sort",
-        array: [3, 1, 2],
-      },
-      {
-        name: "Example 2",
-        description: "Second input.",
-        algorithm: "bubble-sort",
-        array: [4, 2, 1],
-      },
-    ],
-  }
-
-  assert.equal(isTabsConfig(legacy), false)
-  assert.equal(isTabsConfig(tabbed), true)
-  assert.deepEqual(normalizeTabsConfig(tabbed), {
-    selected: 1,
-    tabs: [
-      {
-        name: "Example 1",
-        description: "First input.",
-        config: { algorithm: "bubble-sort", array: [3, 1, 2] },
-      },
-      {
-        name: "Example 2",
-        description: "Second input.",
-        config: { algorithm: "bubble-sort", array: [4, 2, 1] },
-      },
-    ],
-  })
-  assert.throws(() => normalizeTabsConfig({ tabs: [] }), /at least one tab/)
-  assert.throws(
-    () => normalizeTabsConfig({ tabs: [{ name: " ", algorithm: "bubble-sort" }] }),
-    /non-empty "name"/,
-  )
-  assert.throws(
-    () =>
-      normalizeTabsConfig({
-        tabs: [
-          { name: "Same", algorithm: "bubble-sort" },
-          { name: "same", algorithm: "insertion-sort" },
-        ],
-      }),
-    /duplicate tab name/,
-  )
-  assert.throws(
-    () => normalizeTabsConfig({ selected: 2, tabs: [{ name: "One", algorithm: "bubble-sort" }] }),
-    /"selected" must be an index/,
-  )
-})
-
 test("A* graph-state profiles stay typed, deterministic, optimal, and reachable", () => {
   const api = loadEngine(readFileSync(join(here, "generated", "engine.js"), "utf8"))
   const family = loadStepTraceModule("src", "families", "graph-state.ts")
@@ -1113,6 +1083,184 @@ test("A* graph-state profiles stay typed, deterministic, optimal, and reachable"
   )
 })
 
+test("Dijkstra reuses the authored Midtown and Cities graph-state scenarios", () => {
+  const note = csNote("Algorithms", "Graph Algorithms", "Dijkstra.md")
+  const { graphStateSummary } = loadStepTraceModule("src", "families", "graph-state.ts")
+  const { configs } = parseAuthoredStepTraceTabs(note)
+  assert.deepEqual(configs, [
+    [
+      {
+        label: "Midtown map",
+        description: "",
+        selectedInitially: true,
+        payload: '{"algorithm":"dijkstra","variant":"midtown-map"}',
+        payloadSha256: "186e2d3d272f72d097eea4d8531f5c853f9f9a2f9d77a0976e70755368a0e4e5",
+      },
+      {
+        label: "Cities",
+        description: "",
+        selectedInitially: false,
+        payload:
+          '{"algorithm":"dijkstra","variant":"ukraine-cities","start":"Lviv","target":"Kharkiv"}',
+        payloadSha256: "83f6b15bc4131664311b532ab94aa90eba2dd663457554d5ee7a9297b734f8d5",
+      },
+    ],
+  ])
+
+  for (const payload of configs[0].map(({ payload }) => JSON.parse(payload))) {
+    const dijkstra = buildSourceFrames(payload)
+    const astar = buildSourceFrames({ ...payload, algorithm: "a-star" })
+    const first = dijkstra.frames[0]
+    assert.equal(dijkstra.kind, "graph")
+    assert.equal(dijkstra.family.id, "graph-state")
+    assert.equal(first.profile, payload.variant)
+    assert.deepEqual(first.nodes, astar.frames[0].nodes)
+    assert.deepEqual(
+      first.edges.map(({ from, to, weight, directed }) => ({
+        from,
+        to,
+        weight,
+        directed: Boolean(directed),
+      })),
+      astar.frames[0].edges.map(({ from, to, weight, directed }) => ({
+        from,
+        to,
+        weight,
+        directed: Boolean(directed),
+      })),
+    )
+    assert.deepEqual(first.decor, astar.frames[0].decor)
+    assert.ok(dijkstra.frames.every(({ detail }) => detail.kind === "edge-relaxation"))
+    assert.ok(dijkstra.frames.at(-1).selectedEdges.length > 0)
+    assert.equal(graphStateSummary(dijkstra.frames.at(-1)), dijkstra.frames.at(-1).message)
+    assert.equal(dijkstra.endpointSettings.start, first.start)
+    assert.equal(dijkstra.endpointSettings.target, first.target)
+    assert.equal(dijkstra.endpointSettings.options.length, first.nodes.length)
+  }
+})
+
+test("Dijkstra accepts finite non-negative weights and rejects every invalid effective weight", () => {
+  const base = {
+    algorithm: "dijkstra",
+    start: "A",
+    target: "B",
+    directed: true,
+    nodes: [{ id: "A" }, { id: "B" }],
+  }
+  for (const weight of [0, 2.5]) {
+    assert.doesNotThrow(() =>
+      buildSourceFrames({ ...base, edges: [{ from: "A", to: "B", weight }] }),
+    )
+  }
+  assert.doesNotThrow(() => buildSourceFrames({ ...base, edges: [{ from: "A", to: "B" }] }))
+  for (const weight of [-1, Number.NaN, Number.POSITIVE_INFINITY, Number.NEGATIVE_INFINITY]) {
+    assert.throws(
+      () => buildSourceFrames({ ...base, edges: [{ from: "A", to: "B", weight }] }),
+      /weight.*finite.*non-negative|finite non-negative.*weight/i,
+    )
+  }
+  assert.throws(
+    () => buildSourceFrames({ algorithm: "dijkstra", variant: "building-floor" }),
+    /"variant" must be midtown-map or ukraine-cities/,
+  )
+  assert.throws(
+    () =>
+      buildSourceFrames({
+        ...base,
+        directed: false,
+        edges: [
+          { from: "A", to: "B", weight: 1 },
+          { from: "B", to: "A", weight: 2 },
+        ],
+      }),
+    /parallel edges are not supported/,
+  )
+})
+
+test("Dijkstra settles each node once and returns the canonical full distances, path, and cost", () => {
+  const frames = buildSourceFrames(canonicalDijkstraConfig).frames
+  const nodeOrder = ["A", "B", "C", "D", "E", "F"]
+  assert.deepEqual(frames[0].detail.distances, {
+    A: 0,
+    B: Infinity,
+    C: Infinity,
+    D: Infinity,
+    E: Infinity,
+    F: Infinity,
+  })
+  assert.ok(frames.every((frame) => Object.keys(frame.detail.distances).join("") === "ABCDEF"))
+  assert.ok(frames.every((frame) => frame.detail.kind === "edge-relaxation"))
+  for (const frame of frames.filter(({ type }) => type === "relax")) {
+    assert.deepEqual(frame.detail.edge, frame.currentEdge)
+    assert.equal(typeof frame.detail.changed, "boolean")
+    const [from, to] = frame.currentEdge
+    const authoredEdge = frame.edges.find(
+      (edge) =>
+        (edge.from === from && edge.to === to) ||
+        (!edge.directed && edge.from === to && edge.to === from),
+    )
+    assert.equal(frame.edgeState[`${authoredEdge.from}|${authoredEdge.to}`], "active")
+  }
+  assert.ok(
+    frames.every(
+      (frame, index) => index === 0 || frame.detail.pass >= frames[index - 1].detail.pass,
+    ),
+  )
+  assert.equal(frames.at(-1).detail.pass, 6)
+  assert.deepEqual(frames.at(-1).detail.distances, { A: 0, B: 2, C: 3, D: 6, E: 7, F: 9 })
+
+  const settlements = frames.flatMap(
+    (frame) => frame.message.match(/Settle ([A-F])\b/)?.slice(1) ?? [],
+  )
+  assert.deepEqual(settlements, nodeOrder)
+  assert.equal(new Set(settlements).size, settlements.length)
+  assert.deepEqual(
+    frames.at(-1).selectedEdges.filter((edge) => /^(?:A\|B|B\|C|C\|D|D\|E|E\|F)$/.test(edge)),
+    ["A|B", "B|C", "C|D", "D|E", "E|F"],
+  )
+  assert.ok(Object.values(frames.at(-1).nodeState).every((role) => role !== "accepted"))
+  assert.match(
+    frames.at(-1).message,
+    /A\s*→\s*B\s*→\s*C\s*→\s*D\s*→\s*E\s*→\s*F.*(?:cost|distance)\s*9/i,
+  )
+})
+
+test("Dijkstra and Bellman-Ford share full ordered distances Watch without A-star rows", () => {
+  const dijkstra = buildSourceFrames(canonicalDijkstraConfig).frames
+  const bellmanFord = buildSourceFrames({ algorithm: "bellman-ford" }).frames
+  withFakeDocument(() => {
+    const { makeGraphStateView, graphStateSummary } = loadStepTraceModule(
+      "src",
+      "families",
+      "graph-state.ts",
+    )
+    const dijkstraView = makeGraphStateView(dijkstra)
+    const bellmanView = makeGraphStateView(bellmanFord)
+    for (const frame of [...dijkstra, ...bellmanFord]) {
+      const view = frame.profile === "dijkstra" ? dijkstraView : bellmanView
+      const rows = view.watch(frame)
+      const distances = rows.find(({ k }) => k === "distances")
+      assert.ok(distances)
+      assert.equal(
+        distances.v,
+        frame.nodes
+          .map(
+            ({ id }) =>
+              `${id}:${Number.isFinite(frame.detail.distances[id]) ? frame.detail.distances[id] : "∞"}`,
+          )
+          .join(" · "),
+      )
+      assert.equal(distances.hint, distances.v)
+      assert.ok(
+        rows.every(({ k }) => !["score", "open", "closed", "comparison", "expanded"].includes(k)),
+      )
+    }
+    assert.match(graphStateSummary(dijkstra.at(-1)), /A.*F.*9|cost 9/i)
+    assert.equal(bellmanFord.at(-1).detail.pass, 4)
+    assert.match(graphStateSummary(bellmanFord.at(-1)), /^Distances /)
+  })
+})
+
 test("Greedy Best-First reuses the A* grid but exposes its longer h-only route", () => {
   const api = loadEngine(readFileSync(join(here, "generated", "engine.js"), "utf8"))
   const { graphStateSummary } = loadStepTraceModule("src", "families", "graph-state.ts")
@@ -1137,7 +1285,7 @@ test("Greedy Best-First reuses the A* grid but exposes its longer h-only route",
     baselineValue: 8,
     metric: "cost",
   })
-  assert.match(graphStateSummary(last), /Greedy cost 12 vs A\* cost 8/)
+  assert.match(graphStateSummary(last), /^Greedy .+: cost 12 vs A\* cost 8 \(optimal\)\.$/)
 })
 
 test("graph-state keeps topology roles separate from discriminated algorithm detail", () => {
@@ -1292,6 +1440,8 @@ test("graph-state rollout records every canonical decisive operation", () => {
 
   const kruskalResult = api.buildFrames({ algorithm: "kruskal" }).frames
   assert.ok(kruskalResult.some((frame) => Object.values(frame.edgeState).includes("rejected")))
+  assert.deepEqual(kruskalResult[0].detail.accepted, [])
+  assert.equal(kruskalResult.at(-1).edgeState["C|D"], "accepted")
   assert.equal(kruskalResult.at(-1).detail.totalWeight, 7)
   assert.equal(kruskalResult.at(-1).detail.components.length, 1)
 
@@ -1300,11 +1450,14 @@ test("graph-state rollout records every canonical decisive operation", () => {
   assert.equal(flow.at(-1).detail.totalFlow, 2)
   assert.equal(flow.at(-1).detail.flow["a|b"], 0)
 
-  const scc = api.buildFrames({ algorithm: "strongly-connected-components" }).frames.at(-1).detail
-  assert.deepEqual(scc.components, [
+  const sccFrame = api.buildFrames({ algorithm: "strongly-connected-components" }).frames.at(-1)
+  assert.deepEqual(sccFrame.detail.components, [
     ["E", "D"],
     ["C", "B", "A"],
   ])
+  assert.equal(sccFrame.edgeState["A|B"], "accepted")
+  assert.equal(sccFrame.edgeState["D|E"], "accepted")
+  assert.equal(sccFrame.edgeState["C|D"], "neutral")
 })
 
 test("all 600 ordered Ukraine-city A* routes are reachable, admissible, and optimal", () => {
@@ -1358,6 +1511,47 @@ test("all 600 ordered Ukraine-city A* routes are reachable, admissible, and opti
     }
   }
   assert.equal(checked, 600)
+
+  const note = csNote("Algorithms", "Graph Algorithms", "A-Star Search.md")
+  const complexity = JSON.parse(note.match(/```complexity\n([\s\S]*?)\n```/)[1])
+  const bestBound = (resource) => complexity.resources[resource].entries[0].bounds[0]
+  const typicalBound = (resource) => complexity.resources[resource].entries[1]
+
+  assert.deepEqual(bestBound("time"), {
+    kind: "curve",
+    role: "Time (node expansions)",
+    formula: "Θ(d)",
+    curveId: "linear",
+  })
+  assert.deepEqual(bestBound("space"), {
+    kind: "curve",
+    role: "Auxiliary space, fixed b",
+    formula: "O(bd)",
+    curveId: "linear",
+  })
+
+  assert.deepEqual(typicalBound("time"), {
+    kind: "operation",
+    operation: "Typical",
+    bounds: [
+      {
+        kind: "text",
+        role: "Time (node expansions)",
+        formula: "between Θ(d) and O(b^d) for uniform edge costs",
+      },
+    ],
+  })
+  assert.deepEqual(typicalBound("space"), {
+    kind: "operation",
+    operation: "Typical",
+    bounds: [
+      {
+        kind: "text",
+        role: "Auxiliary space",
+        formula: "O(nodes stored), heuristic-dependent",
+      },
+    ],
+  })
 })
 
 test("A* uses profile-owned controls and visual-only graph state without racks", () => {
@@ -1365,18 +1559,8 @@ test("A* uses profile-owned controls and visual-only graph state without racks",
   const familySource = readFileSync(join(here, "src", "families", "graph-state.ts"), "utf8")
   const styles = readFileSync(join(here, "src", "styles", "graph-state.scss"), "utf8")
   const styleEntry = readFileSync(join(here, "src", "styles", "index.scss"), "utf8")
-  const note = readFileSync(
-    join(
-      repoRoot,
-      "Vault",
-      "Home",
-      "Computer Science",
-      "Algorithms",
-      "Graph Algorithms",
-      "A-Star Search.md",
-    ),
-    "utf8",
-  )
+  const note = csNote("Algorithms", "Graph Algorithms", "A-Star Search.md")
+  const { configs } = parseAuthoredStepTraceTabs(note)
 
   assert.match(mountSource, /syncEndpointOptions\(built\.endpointSettings, built\.graph\)/)
   assert.match(mountSource, /settings\?\.startLabel \|\| "Start node"/)
@@ -1395,34 +1579,90 @@ test("A* uses profile-owned controls and visual-only graph state without racks",
   assert.match(styles, /grid-template-rows: minmax\(0, 1fr\)/)
   assert.match(styles, /\.steptrace \.steptrace__gs-city-label \{[^}]*font-size: 0\.54rem;/s)
   assert.doesNotMatch(styles, /steptrace__gs-rack/)
-  assert.match(
-    note,
-    /```steptrace\n\{"tabs":\[\{"name":"Coordinate grid"[\s\S]*"name":"Cities"[\s\S]*"name":"Building floor"[\s\S]*"name":"Midtown map"/,
-  )
+  assert.deepEqual(configs, [
+    [
+      {
+        label: "Coordinate grid",
+        description: "",
+        selectedInitially: true,
+        payload: '{"algorithm":"a-star","variant":"coordinate-grid"}',
+        payloadSha256: "213fe177ff28dff6051c899d623ad0e612a661b7fdce39f7fe780b64d35615b7",
+      },
+      {
+        label: "Cities",
+        description: "",
+        selectedInitially: false,
+        payload:
+          '{"algorithm":"a-star","variant":"ukraine-cities","start":"Lviv","target":"Kharkiv"}',
+        payloadSha256: "d0368cc3da2dabfc5139b226800ac19f7ae62618693ab00cd6230f25a5dbf67a",
+      },
+      {
+        label: "Building floor",
+        description: "",
+        selectedInitially: false,
+        payload: '{"algorithm":"a-star","variant":"building-floor"}',
+        payloadSha256: "aa35da93f40211db922f8ab1d8682d66b4a2e1c5886e849ce52b12b6b6a309f0",
+      },
+      {
+        label: "Midtown map",
+        description: "",
+        selectedInitially: false,
+        payload: '{"algorithm":"a-star","variant":"midtown-map"}',
+        payloadSha256: "0e0db4a485d15540bbce51702927960388fec4fa80c405fe881b7f4ff9cdae40",
+      },
+    ],
+  ])
+  assert.doesNotMatch(note, /```steptrace\n\{"tabs":/)
   assert.doesNotMatch(note, /The same `f = g \+ h` rule works across grids/)
+  assert.doesNotMatch(note, /Choose From and To in Options/)
+  assert.doesNotMatch(note, /A locked fire door blocks the direct corridor/)
   assert.doesNotMatch(note, /Visualization pending/)
 })
 
-test("tabbed blocks use accessible shared chrome and preserve mounted tab state", () => {
-  const mountSource = readFileSync(join(here, "src", "mount.ts"), "utf8")
-  const styleEntry = readFileSync(join(here, "src", "styles", "index.scss"), "utf8")
-  const styles = readFileSync(join(here, "src", "styles", "tabs.scss"), "utf8")
+test("legacy variant tabs stay absent and host Tabsdown adapters stay intact", () => {
+  assert.equal(existsSync(join(here, "src", "tabs.ts")), false)
+  assert.equal(existsSync(join(here, "src", "styles", "tabs.scss")), false)
 
-  assert.match(styleEntry, /@use "tabs";/)
-  assert.match(mountSource, /tablist\.setAttribute\("role", "tablist"\)/)
-  assert.match(mountSource, /button\.setAttribute\("role", "tab"\)/)
-  assert.match(mountSource, /panelShell\.setAttribute\("role", "tabpanel"\)/)
-  assert.match(mountSource, /handles\[activeIndex\]\?\.pause\?\.\(\)/)
-  assert.match(mountSource, /if \(!handles\[next\]\) handles\[next\] = mount/)
-  assert.match(mountSource, /for \(const handle of handles\) handle\?\.destroy\(\)/)
-  assert.match(mountSource, /event\.key === "ArrowLeft"/)
-  assert.match(mountSource, /event\.key === "ArrowRight"/)
-  assert.match(mountSource, /event\.key === "Home"/)
-  assert.match(mountSource, /event\.key === "End"/)
-  assert.match(styles, /min-height: 2rem/)
-  assert.match(styles, /border-radius: 0\.35rem/)
-  assert.match(styles, /\.steptrace__tabs-desc/)
-  assert.match(styles, /\.steptrace__tabpanel/)
+  const typesSource = readFileSync(join(here, "src", "types.ts"), "utf8")
+  const mountSource = readFileSync(join(here, "src", "mount.ts"), "utf8")
+  const engineSource = readFileSync(join(here, "src", "engine.ts"), "utf8")
+  const obsidianEntry = readFileSync(join(here, "src", "entries", "obsidian.cts"), "utf8")
+  const styleEntry = readFileSync(join(here, "src", "styles", "index.scss"), "utf8")
+  const rectreeStyles = readFileSync(join(here, "src", "styles", "rectree.scss"), "utf8")
+  const complexitySources = [
+    ["custom", "complexity", "dom.ts"],
+    ["custom", "complexity", "hast.ts"],
+    ["custom", "complexity", "interactions.ts"],
+    ["custom", "complexity", "styles.scss"],
+    ["custom", "components", "complexity.tsx"],
+  ].map((segments) => readFileSync(join(repoRoot, "Web", ...segments), "utf8"))
+  const legacySymbols =
+    /StepTraceTabs?Config|NormalizedStepTraceTabs?|isTabsConfig|normalizeTabsConfig|normalizeTab/
+  const legacyClasses =
+    /steptrace--tabs|steptrace__(?:tabs-shell|tabs-desc|tabs|tab--selected|tabpanels|tabpanel-body|tabpanel)\b/
+
+  for (const source of [typesSource, mountSource, engineSource])
+    assert.doesNotMatch(source, legacySymbols)
+  assert.doesNotMatch(mountSource, /function mountTabs\b/)
+  assert.doesNotMatch(mountSource, legacyClasses)
+  assert.doesNotMatch(styleEntry, /@use ["']tabs["']/)
+  assert.doesNotMatch(rectreeStyles, legacyClasses)
+  for (const source of complexitySources) {
+    assert.doesNotMatch(source, legacyClasses)
+    assert.doesNotMatch(
+      source,
+      /COMPLEXITY_FILTERS|data-(?:active-)?filter|activeFilter|availableCategories/,
+    )
+  }
+
+  assert.match(typesSource, /interface HostTabsOptions/)
+  assert.match(typesSource, /interface HostTabsHandle/)
+  assert.match(typesSource, /mountTabs\?\(container: HTMLElement, options: HostTabsOptions\)/)
+  assert.match(mountSource, /const hasHostTabs = typeof host\.mountTabs === "function"/)
+  assert.match(mountSource, /hostTabsHandle = host\.mountTabs!/)
+  assert.match(obsidianEntry, /interface TabsdownApi/)
+  assert.match(obsidianEntry, /typeof tabsdown\?\.mountTabs === "function"/)
+  assert.match(obsidianEntry, /mountTabs \? \{ mountTabs \} : \{\}/)
   assert.match(mountSource, /steptrace--compact-stage/)
   assert.match(
     readFileSync(join(here, "src", "styles", "shared.scss"), "utf8"),
@@ -1434,18 +1674,437 @@ test("tabbed blocks use accessible shared chrome and preserve mounted tab state"
   )
 })
 
+test("canonical authored Tabsdown safely nests variants and StepTrace fences", () => {
+  const { parseTabs } = loadStepTraceModule(
+    "..",
+    "..",
+    ".quartz",
+    "plugins",
+    "quartz-tabsdown",
+    "src",
+    "parser.ts",
+  )
+  const outerSource = [
+    "tab: Visualization",
+    "~~~~~tabsdown",
+    "tab: Closed addressing",
+    "```steptrace",
+    '{"algorithm":"hash-map","variant":"closed-addressing"}',
+    "```",
+    "Each bucket owns a chain.",
+    "```text",
+    "~~~~",
+    "```",
+    "tab: Open addressing",
+    "```steptrace",
+    '{"algorithm":"hash-map","variant":"open-addressing"}',
+    "```",
+    "Probe inside the table.",
+    "~~~~~",
+    "tab: Complexity",
+    "```complexity",
+    JSON.stringify({
+      version: 2,
+      label: "HashMap complexity",
+      variables: { inputSize: { symbol: "n", description: "stored entries" } },
+      resources: {
+        time: {
+          mode: "operations",
+          entries: [
+            {
+              kind: "operation",
+              operation: "Lookup",
+              bounds: [{ kind: "curve", role: "Average", formula: "O(1)", curveId: "constant" }],
+            },
+          ],
+        },
+        space: {
+          mode: "operations",
+          entries: [
+            {
+              kind: "operation",
+              operation: "Persistent structure",
+              bounds: [{ kind: "curve", role: "Total", formula: "O(n)", curveId: "linear" }],
+            },
+          ],
+        },
+      },
+    }),
+    "```",
+  ].join("\n")
+  const markdown = ["~~~~~~tabsdown", outerSource, "~~~~~~"].join("\n")
+  const complete = /^(~{3,})tabsdown\n([\s\S]*)\n\1$/.exec(markdown)
+
+  assert.ok(complete, "the complete outer fence must close with the same longer tilde run")
+  assert.equal(complete[1].length, 6)
+
+  const outer = parseTabs(complete[2])
+  assert.equal(outer.ok, true)
+  assert.deepEqual(
+    outer.tabs.map(({ label }) => label),
+    ["Visualization", "Complexity"],
+  )
+  assert.match(outer.tabs[1].body, /^```complexity\n[\s\S]+\n```$/)
+  assert.equal(JSON.parse(outer.tabs[1].body.split("\n").slice(1, -1).join("\n")).version, 2)
+  assert.doesNotMatch(outer.tabs[1].body, /~~~~~~/)
+
+  const innerFence = outer.tabs[0].body.match(/(~~~~~)tabsdown\n([\s\S]*?)\n\1/)
+  assert.ok(innerFence, "the outer parser must preserve the complete inner Tabsdown fence")
+  assert.ok(complete[1].length > innerFence[1].length)
+  const inner = parseTabs(innerFence[2])
+  assert.equal(inner.ok, true)
+  assert.deepEqual(
+    inner.tabs.map(({ label }) => label),
+    ["Closed addressing", "Open addressing"],
+  )
+  assert.deepEqual(
+    inner.tabs.map(({ body }) => body.match(/```steptrace\n([^\n]+)\n```/)?.[1]),
+    [
+      '{"algorithm":"hash-map","variant":"closed-addressing"}',
+      '{"algorithm":"hash-map","variant":"open-addressing"}',
+    ],
+  )
+  assert.match(inner.tabs[0].body, /```text\n~~~~\n```/)
+  assert.ok(inner.tabs.every(({ body }) => !body.includes("~~~~~tabsdown")))
+})
+
+test("all DSA Tabsdown notes are visual-first and contain one chart-only dual-resource fence", () => {
+  const { parseTabs } = loadStepTraceModule(
+    "..",
+    "..",
+    ".quartz",
+    "plugins",
+    "quartz-tabsdown",
+    "src",
+    "parser.ts",
+  )
+  const notes = authoredDsaTabsdownNotes()
+  assert.ok(notes.length > 0, "expected authored DSA notes")
+  let steptraceCount = 0
+
+  for (const { path, source } of notes) {
+    const relative = path.slice(repoRoot.length + 1)
+    const outerFence = source.match(/(~{5,})tabsdown\n([\s\S]*?)\n\1/)
+    assert.ok(outerFence, `${relative}: outer Tabsdown fence`)
+    const outer = parseTabs(outerFence[2])
+    assert.equal(outer.ok, true, `${relative}: valid outer Tabsdown`)
+    assert.deepEqual(
+      outer.tabs.map(({ label }) => label),
+      ["Visualization", "Complexity"],
+      `${relative}: outer labels`,
+    )
+
+    const visualization = outer.tabs[0].body.trim()
+    if (visualization.startsWith("```steptrace\n")) {
+      steptraceCount += 1
+    } else {
+      const innerFences = [...visualization.matchAll(/(~{4,})tabsdown\n([\s\S]*?)\n\1/g)]
+      assert.ok(
+        innerFences.length > 0 && innerFences[0].index === 0,
+        `${relative}: Visualization must begin with StepTrace or inner Tabsdown`,
+      )
+      for (const innerFence of innerFences) {
+        const inner = parseTabs(innerFence[2])
+        assert.equal(inner.ok, true, `${relative}: valid inner Tabsdown`)
+        for (const { label, body } of inner.tabs) {
+          assert.ok(
+            body.trimStart().startsWith("```steptrace\n"),
+            `${relative}: Visualization/${label} must begin with StepTrace`,
+          )
+          steptraceCount += 1
+        }
+      }
+    }
+
+    const complexity = outer.tabs[1].body.trim()
+    const chartFences = complexity.match(/^```complexity$/gm) ?? []
+    const chartFirst = /^```complexity\n([\s\S]+?)\n```/.exec(complexity)
+    assert.equal(chartFences.length, 1, `${relative}: Complexity must hold one complexity fence`)
+    assert.ok(chartFirst, `${relative}: Complexity must begin with the complexity fence`)
+    const config = JSON.parse(chartFirst[1])
+    assert.equal(config.version, 2, `${relative}: Complexity config version`)
+    assert.deepEqual(
+      Object.keys(config).sort(),
+      ["label", "resources", "variables", "version"],
+      `${relative}: Complexity top-level keys`,
+    )
+    assert.deepEqual(
+      Object.keys(config.resources).sort(),
+      ["space", "time"],
+      `${relative}: Complexity resources`,
+    )
+    assert.doesNotMatch(source, /(?:Visualization|Complexity) visualization pending/i, relative)
+  }
+
+  assert.equal(steptraceCount, 106, `expected 106 StepTrace variants, found ${steptraceCount}`)
+})
+
+test("pinned Tabsdown scopes nested keyboard handling and owns unique ARIA wiring", () => {
+  const client = readFileSync(
+    join(
+      here,
+      "..",
+      "..",
+      ".quartz",
+      "plugins",
+      "quartz-tabsdown",
+      "src",
+      "scripts",
+      "tabsdown.inline.ts",
+    ),
+    "utf8",
+  )
+  const transformer = readFileSync(
+    join(here, "..", "..", ".quartz", "plugins", "quartz-tabsdown", "src", "transformer.ts"),
+    "utf8",
+  )
+
+  assert.match(client, /:scope > \.tabsdown__tablist > \.tabsdown__tab/)
+  assert.match(client, /:scope > \.tabsdown__panels > \.tabsdown__panel/)
+  assert.match(client, /tab\?\.closest<HTMLElement>\("\.tabsdown"\)/)
+  assert.match(client, /const index = tabsOf\(root\)\.indexOf\(tab\)/)
+  assert.match(client, /tab\.setAttribute\("aria-controls", panel\.id\)/)
+  assert.match(client, /panel\.setAttribute\("role", "tabpanel"\)/)
+  assert.match(transformer, /let blockCount = 0/)
+  assert.match(transformer, /const blockId = `tabsdown-\$\{\+\+blockCount\}`/)
+  assert.match(transformer, /id: `\$\{blockId\}-tab-\$\{index\}`/)
+  assert.match(transformer, /id: `\$\{blockId\}-panel-\$\{index\}`/)
+  assert.match(transformer, /"aria-labelledby": `\$\{blockId\}-tab-\$\{index\}`/)
+})
+
+test("pinned Tabsdown runtime isolates nested keyboard state and preserves unique ARIA ownership", () => {
+  class TabNode {
+    constructor(className = "", id = "") {
+      this.className = className
+      this.id = id
+      this.children = []
+      this.parentElement = null
+      this.attributes = new Map()
+      this.dataset = {}
+      this.hidden = false
+      this.tabIndex = -1
+      this.focused = false
+      this.classList = { contains: (name) => this.className.split(/\s+/).includes(name) }
+    }
+    append(...children) {
+      for (const child of children) child.parentElement = this
+      this.children.push(...children)
+    }
+    setAttribute(name, value) {
+      this.attributes.set(name, String(value))
+    }
+    getAttribute(name) {
+      return this.attributes.get(name) ?? null
+    }
+    closest(selector) {
+      const className = selector.startsWith(".") ? selector.slice(1) : ""
+      for (let node = this; node; node = node.parentElement)
+        if (node.classList.contains(className)) return node
+      return null
+    }
+    querySelectorAll(selector) {
+      if (selector === ":scope > .tabsdown__tablist > .tabsdown__tab")
+        return this.children
+          .filter((child) => child.classList.contains("tabsdown__tablist"))
+          .flatMap((list) =>
+            list.children.filter((child) => child.classList.contains("tabsdown__tab")),
+          )
+      if (selector === ":scope > .tabsdown__panels > .tabsdown__panel")
+        return this.children
+          .filter((child) => child.classList.contains("tabsdown__panels"))
+          .flatMap((list) =>
+            list.children.filter((child) => child.classList.contains("tabsdown__panel")),
+          )
+      return []
+    }
+    querySelector(selector) {
+      if (selector === ":scope > .tabsdown__tablist")
+        return this.children.find((child) => child.classList.contains("tabsdown__tablist")) ?? null
+      return null
+    }
+    focus() {
+      runtimeDocument.activeElement = this
+      this.focused = true
+    }
+    scrollIntoView() {}
+  }
+  const nestedRoots = []
+  const runtimeListeners = new Map()
+  const runtimeDocument = {
+    activeElement: null,
+    querySelectorAll(selector) {
+      return selector === ".tabsdown" ? nestedRoots : []
+    },
+    addEventListener(type, listener) {
+      runtimeListeners.set(type, [...(runtimeListeners.get(type) ?? []), listener])
+    },
+    removeEventListener(type, listener) {
+      runtimeListeners.set(
+        type,
+        (runtimeListeners.get(type) ?? []).filter((candidate) => candidate !== listener),
+      )
+    },
+    emit(type, event = {}) {
+      for (const listener of runtimeListeners.get(type) ?? []) listener(event)
+    },
+  }
+  const buildRoot = (blockId) => {
+    const root = new TabNode("tabsdown", blockId)
+    const tablist = new TabNode("tabsdown__tablist")
+    const panels = new TabNode("tabsdown__panels")
+    const tabs = [0, 1].map((index) => new TabNode("tabsdown__tab", `${blockId}-tab-${index}`))
+    const panelNodes = [0, 1].map((index) => {
+      const panel = new TabNode("tabsdown__panel", `${blockId}-panel-${index}`)
+      panel.setAttribute("aria-labelledby", `${blockId}-tab-${index}`)
+      return panel
+    })
+    tablist.append(...tabs)
+    panels.append(...panelNodes)
+    root.append(tablist, panels)
+    nestedRoots.push(root)
+    return { root, tabs, panels: panelNodes }
+  }
+  const outer = buildRoot("tabsdown-1")
+  const inner = buildRoot("tabsdown-2")
+  outer.panels[0].append(inner.root)
+  const cleanups = []
+  const runtimeWindow = { addCleanup: (cleanup) => cleanups.push(cleanup) }
+  const client = buildSync({
+    entryPoints: [
+      join(
+        here,
+        "..",
+        "..",
+        ".quartz",
+        "plugins",
+        "quartz-tabsdown",
+        "src",
+        "scripts",
+        "tabsdown.inline.ts",
+      ),
+    ],
+    bundle: true,
+    format: "iife",
+    platform: "browser",
+    write: false,
+  }).outputFiles[0].text
+
+  new Function("document", "window", "Element", client)(runtimeDocument, runtimeWindow, TabNode)
+  runtimeDocument.emit("nav")
+
+  const ids = [...outer.tabs, ...outer.panels, ...inner.tabs, ...inner.panels].map(({ id }) => id)
+  assert.equal(new Set(ids).size, ids.length)
+  for (const group of [outer, inner]) {
+    assert.deepEqual(
+      group.tabs.map((tab) => tab.getAttribute("aria-controls")),
+      group.panels.map(({ id }) => id),
+    )
+  }
+  const key = (target, value) => {
+    let prevented = false
+    runtimeDocument.emit("keydown", {
+      target,
+      key: value,
+      preventDefault() {
+        prevented = true
+      },
+    })
+    return prevented
+  }
+  assert.equal(key(inner.tabs[0], "ArrowRight"), true)
+  assert.deepEqual(
+    inner.tabs.map((tab) => tab.getAttribute("aria-selected")),
+    ["false", "true"],
+  )
+  assert.deepEqual(
+    outer.tabs.map((tab) => tab.getAttribute("aria-selected")),
+    ["true", "false"],
+  )
+  assert.equal(key(outer.tabs[0], "End"), true)
+  assert.deepEqual(
+    outer.tabs.map((tab) => tab.getAttribute("aria-selected")),
+    ["false", "true"],
+  )
+  assert.deepEqual(
+    inner.tabs.map((tab) => tab.getAttribute("aria-selected")),
+    ["false", "true"],
+  )
+  cleanups.forEach((cleanup) => cleanup())
+  assert.equal((runtimeListeners.get("keydown") ?? []).length, 0)
+})
+
+test("compact rail styling follows the Tabsdown tab and timeline contract", () => {
+  const styles = readFileSync(join(here, "src", "styles", "shared.scss"), "utf8")
+
+  assert.match(
+    styles,
+    /--steptrace-tab-animation-duration: var\(--tabsdown-animation-speed, 160ms\);/,
+  )
+  assert.match(
+    styles,
+    /\.steptrace--narrow \.steptrace__rail-region--fallback\s*\{[^}]*display: flow-root;[^}]*transition: height var\(--steptrace-tab-animation-duration\)/s,
+  )
+  assert.match(
+    styles,
+    /\.steptrace--narrow \.steptrace__rail-region--animating\s*\{[^}]*overflow: clip;/s,
+  )
+  assert.match(
+    styles,
+    /\.steptrace--narrow \.steptrace__detail-switch:not\(\[hidden\]\)\s*\{[^}]*display: flex;[^}]*align-items: stretch;[^}]*justify-content: flex-start;[^}]*gap: 0\.25rem;/s,
+  )
+  assert.match(
+    styles,
+    /\.steptrace--narrow \.steptrace__detail-button\s*\{[^}]*flex: 0 0 auto;[^}]*min-inline-size: 44px;[^}]*min-block-size: 44px;[^}]*padding: 0\.5rem 0\.75rem;[^}]*border: 1px solid var\(--_border\);[^}]*border-radius: 0\.25rem;[^}]*background-color: var\(--st-page, var\(--_surface\)\);[^}]*color: var\(--_text\);[^}]*transition:/s,
+  )
+  assert.match(
+    styles,
+    /\.steptrace--narrow \.steptrace__detail-button\[aria-pressed="true"\]\s*\{[^}]*border-color: var\(--_accent\);[^}]*background-color: var\(--_accent\);[^}]*color: var\(--_on-accent\);/s,
+  )
+  assert.doesNotMatch(
+    styles,
+    /\.steptrace--narrow \.steptrace__detail-button\s*\{[^}]*(?:letter-spacing|text-transform):/s,
+  )
+  assert.doesNotMatch(styles, /\.steptrace[^{]*\.steptrace__rail-toggle/)
+  assert.match(
+    styles,
+    /\.steptrace--narrow \.steptrace__timeline\s*\{[^}]*margin-inline: 1\.375rem;/s,
+  )
+  assert.match(
+    styles,
+    /\.steptrace--narrow \.steptrace__(?:btn|btn--play|speed-indicator)[\s\S]*?width: 2\.75rem;[\s\S]*?height: 2\.75rem;/,
+  )
+  assert.match(
+    styles,
+    /@keyframes steptrace-tab-panel-in\s*\{[\s\S]*?opacity: 0;[\s\S]*?transform: translateY\(-0\.25rem\);/,
+  )
+  assert.match(
+    styles,
+    /\.steptrace--narrow \.steptrace__trace > \.steptrace__trace-label,[\s\S]*?\.steptrace--narrow \.steptrace__watch-wrap > \.steptrace__rail-label\s*\{[^}]*display: none;/s,
+  )
+  assert.match(styles, /\.steptrace--reduced\s*\{[^}]*--steptrace-tab-animation-duration: 0ms;/s)
+  assert.match(styles, /\.steptrace--reduced \*\s*\{[^}]*animation: none !important;/s)
+  assert.match(
+    styles,
+    /\.steptrace--reduced \.steptrace__rail-region--fallback\s*\{[^}]*transition-duration: 0ms !important;/s,
+  )
+
+  const obsidianEntry = readFileSync(join(here, "src", "entries", "obsidian.cts"), "utf8")
+  assert.match(obsidianEntry, /getPlugin\("tabsdown"\)/)
+  assert.match(obsidianEntry, /tabsdown\.mountTabs\.bind\(tabsdown\)/)
+})
+
+test("constrained sort visualizers do not expose the generic Shuffle action", () => {
+  const mountSource = readFileSync(join(here, "src", "mount.ts"), "utf8")
+  assert.match(mountSource, /state\.algorithm !== "bucket-sort"/)
+  assert.match(mountSource, /state\.algorithm !== "cyclic-sort"/)
+})
+
 test("styles are compiled from real SCSS without runtime injection", () => {
   const styleEntry = readFileSync(join(here, "src", "styles", "index.scss"), "utf8")
   const quartzHostStyles = readFileSync(
     join(here, "..", "components", "styles", "steptrace.scss"),
     "utf8",
   )
-  const quartzCss = readFileSync(join(here, "generated", "engine.css"), "utf8")
-  const obsidianCss = readFileSync(
-    join(repoRoot, "Vault", ".obsidian", "plugins", "steptrace", "styles.css"),
-    "utf8",
-  )
-  const engine = readFileSync(join(here, "generated", "engine.js"), "utf8")
   const barsStyles = readFileSync(join(here, "src", "styles", "bars.scss"), "utf8")
   const sharedStyles = readFileSync(join(here, "src", "styles", "shared.scss"), "utf8")
   const obsidianHostStyles = readFileSync(
@@ -1473,6 +2132,14 @@ test("styles are compiled from real SCSS without runtime injection", () => {
     obsidianHostStyles,
     /\.steptrace button\.steptrace__btn \{[^}]*appearance: none;[^}]*border: 0;[^}]*background: transparent;[^}]*box-shadow: none;/s,
   )
+  assert.match(
+    obsidianHostStyles,
+    /\.markdown-rendered \.complexity \{[\s\S]*ul\.complexity__legend-items > li\.complexity__legend-item \{[^}]*margin-inline-start: 0;/,
+  )
+  assert.match(
+    obsidianHostStyles,
+    /button\.complexity__legend-button,[\s\S]*button\.complexity__legend-group-button \{[^}]*appearance: none;[^}]*width: auto;[^}]*background: transparent;[^}]*border: 0;[^}]*border-radius: 0;[^}]*box-shadow: none;/,
+  )
   assert.match(quartzHostStyles, /--st-held-bg: #92400e/)
   assert.match(quartzHostStyles, /--st-held-fg: #ffffff/)
   assert.match(quartzHostStyles, /--st-table-cell: var\(--light\)/)
@@ -1497,7 +2164,7 @@ test("styles are compiled from real SCSS without runtime injection", () => {
     sharedStyles,
     /@media \(hover: none\), \(pointer: coarse\) \{[^}]*\.steptrace__btn,[\s\S]*width: 2\.75rem;[\s\S]*height: 2\.75rem;/s,
   )
-  assert.doesNotMatch(engine, /steptrace-engine-style|const STYLES|injectStyle/)
+  assert.doesNotMatch(quartzJs, /steptrace-engine-style|const STYLES|injectStyle/)
   assert.match(quartzCss, /\.steptrace__marker-body/)
   assert.match(quartzCss, /color:\s*var\(--_held-fg\)/)
   assert.match(quartzCss, /background:\s*var\(--_held-bg\)/)
@@ -1600,64 +2267,14 @@ test("the watcher handles Chokidar add and atomic-change events", async () => {
 
 test("all built-in algorithms preserve their headless frame contract", () => {
   const api = loadEngine(readFileSync(join(here, "generated", "engine.js"), "utf8"))
+  const { builtInAlgorithms } = loadStepTraceModule("src", "algorithms", "index.ts")
+  const cases = builtInAlgorithms.map(({ id }) => id)
   const output = cases.map((algorithm) => {
     assert.notEqual(api.kindOf(algorithm), null, `${algorithm} must stay registered`)
-    const familyConfig =
-      algorithm === "aho-corasick"
-        ? { patterns: ["he", "she", "his", "hers"], text: "ushers" }
-        : algorithm === "ternary-search-tree"
-          ? {
-              operations: [
-                ["insert", "cat"],
-                ["insert", "car"],
-                ["insert", "cup"],
-                ["insert", "bat"],
-                ["search", "car"],
-              ],
-            }
-          : algorithm === "ternary-search"
-            ? { array: [1, 4, 9, 12, 11, 7, 2], goal: "maximum" }
-            : algorithm === "binary-search-on-answer"
-              ? { weights: [3, 2, 2, 4, 1, 4], days: 3 }
-              : algorithm === "shell-sort"
-                ? { gaps: [4, 2, 1] }
-                : algorithm === "counting-sort"
-                  ? { array: [2, 5, 3, 0, 2, 3, 0, 3] }
-                  : algorithm === "radix-sort"
-                    ? { array: [170, 45, 75, 90, 802, 24, 2, 66], radix: 10, mode: "LSD" }
-                    : algorithm === "bucket-sort"
-                      ? { array: [0.78, 0.17, 0.39, 0.26, 0.72, 0.94], bucketCount: 5 }
-                      : algorithm === "cyclic-sort"
-                        ? { array: [5, 3, 1, 4, 2] }
-                        : algorithm === "floyd-warshall"
-                          ? {
-                              nodes: [0, 1, 2, 3],
-                              edges: [
-                                [0, 1, 3],
-                                [0, 3, 7],
-                                [1, 0, 8],
-                                [1, 2, 2],
-                                [2, 0, 5],
-                                [2, 3, 1],
-                                [3, 0, 2],
-                              ],
-                            }
-                          : ["exponential-search", "interpolation-search", "jump-search"].includes(
-                                algorithm,
-                              )
-                            ? { array: commonConfig.array.slice().sort((a, b) => a - b) }
-                            : {}
-    const input =
-      algorithm === "memoization" ||
-      algorithm === "branch-and-bound" ||
-      algorithm.startsWith("coin-change-") ||
-      algorithm.startsWith("grid-path-")
-        ? {}
-        : commonConfig
     const result = api.buildFrames({
-      ...input,
+      ...(algorithmsWithoutCommonConfig.has(algorithm) ? {} : commonConfig),
       algorithm,
-      ...familyConfig,
+      ...headlessFixtureOverrides[algorithm],
     })
     assert.ok(result.frames.length > 0, `${algorithm} must produce frames`)
     return result
@@ -1666,7 +2283,7 @@ test("all built-in algorithms preserve their headless frame contract", () => {
 
   assert.equal(
     digest,
-    "ebc60a0c4b72eb50e52f143ca031260d95fb0f331f52e2f33e54634fada1ac2e",
+    "ef73eaaf134729a16972951a0f5b3e57fe38e8454b11df5af0869d90b7b28b24",
     "the headless StepTrace behavior changed",
   )
 })
@@ -1827,6 +2444,134 @@ test("bit tally and two pointers reuse the centered canonical strip geometry", (
     /\.steptrace \.steptrace__pcells,[\s\S]*?--steptrace-array-radius: 9px;[^}]*overflow: hidden;/s,
   )
   assert.doesNotMatch(renderSource, /makePointerView[\s\S]*?steptrace__pointer-array/)
+})
+
+test("Two Pointers records each comparison before moving either pointer", () => {
+  const frames = buildSourceFrames({
+    algorithm: "two-pointers",
+    array: [1, 4, 5, 7, 9, 12, 15],
+    target: 14,
+  }).frames
+  const decisions = frames.filter((frame) => /arr\[|a\[/.test(frame.message))
+
+  assert.deepEqual(decisions[0].pointers, { L: 0, R: 6 })
+  assert.match(decisions[0].message, /(?:arr|a)\[0\].*(?:arr|a)\[6\].*1.*15.*16.*> 14.*move R/s)
+  assert.deepEqual(decisions[1].pointers, { L: 0, R: 5 })
+  assert.match(decisions[1].message, /(?:arr|a)\[0\].*(?:arr|a)\[5\].*1.*12.*13.*< 14.*move L/s)
+  assert.equal(
+    decisions.findIndex((frame) => frame.pointers.R === 5),
+    1,
+  )
+  assert.equal(
+    decisions.findIndex((frame) => frame.pointers.L === 1),
+    2,
+  )
+
+  const success = decisions.find(
+    (frame) => frame.pointers.L === 2 && frame.pointers.R === 4 && /14.*[✓]/.test(frame.message),
+  )
+  assert.ok(success)
+  assert.match(success.message, /(?:arr|a)\[2\].*(?:arr|a)\[4\].*5.*9.*14/s)
+  assert.doesNotMatch(success.message, /move/i)
+})
+
+test("Sliding Window adapts text without widening the generic numeric array contract", () => {
+  const result = buildSourceFrames({ algorithm: "sliding-window", text: "abcabcbb" })
+  const types = readFileSync(join(here, "src", "types.ts"), "utf8")
+  const registry = readFileSync(join(here, "src", "registry.ts"), "utf8")
+
+  assert.equal(result.kind, "pointers")
+  assert.deepEqual(result.frames[0].array, [..."abcabcbb"])
+  assert.match(types, /array:\s*number\[\]/)
+  assert.match(registry, /config\.algorithm\s*===\s*["']sliding-window["']/)
+  assert.doesNotMatch(types, /array:\s*\(?number\s*\|\s*string/)
+})
+
+test("Sliding Window persists its best range while transient entry markers never leak", () => {
+  const frames = buildSourceFrames({ algorithm: "sliding-window", text: "abcabcbb" }).frames
+  let bestLength = 0
+  for (const frame of frames) {
+    assert.ok("enteringIndex" in frame)
+    assert.ok("duplicateIndex" in frame)
+    assert.ok(frame.enteringIndex == null || frame.duplicateIndex == null)
+    if (frame.bestRange) {
+      const length = frame.bestRange[1] - frame.bestRange[0] + 1
+      assert.ok(length >= bestLength)
+      bestLength = length
+    }
+    if (frame.enteringIndex != null) assert.match(frame.message, /^Accept /)
+    if (frame.duplicateIndex != null) assert.match(frame.message, /^Duplicate /)
+    if (frame.enteringIndex != null && frame.window) {
+      const accepted = frame.array.slice(frame.window[0], frame.window[1] + 1)
+      assert.equal(new Set(accepted).size, accepted.length)
+    }
+  }
+  assert.equal(frames[0].enteringIndex, null)
+  assert.equal(frames[0].duplicateIndex, null)
+  assert.equal(frames.at(-1).enteringIndex, null)
+  assert.equal(frames.at(-1).duplicateIndex, null)
+  assert.deepEqual(frames.at(-1).bestRange, [0, 2])
+
+  const duplicateA = frames.find((frame) => frame.duplicateIndex === 3)
+  const firstShrunk = frames.findIndex((frame) => frame.window?.[0] === 1)
+  assert.ok(duplicateA)
+  assert.match(duplicateA.message, /duplicate\s+["“']?a["”']?/i)
+  assert.ok(frames.indexOf(duplicateA) < firstShrunk)
+})
+
+test("Sliding Window Watch and cell colors expose window, best, entering, and duplicate state", () => {
+  const frames = buildSourceFrames({ algorithm: "sliding-window", text: "abcabcbb" }).frames
+  withFakeDocument(() => {
+    const { makePointerView } = loadStepTraceModule("src", "render.ts")
+    const view = makePointerView(frames)
+    const watchText = (frame) => view.watch(frame).map(({ k, v }) => `${k} ${v}`)
+    const firstA = frames.find(
+      (frame) => frame.window?.[0] === 0 && frame.window?.[1] === 0 && frame.enteringIndex === 0,
+    )
+    const bestAbc = frames.find(
+      (frame) => frame.window?.[0] === 0 && frame.window?.[1] === 2 && frame.bestRange?.[1] === 2,
+    )
+    const duplicateA = frames.find((frame) => frame.duplicateIndex === 3)
+
+    assert.ok(watchText(firstA).includes('window [0..0] "a" len=1'))
+    assert.ok(watchText(bestAbc).includes('window [0..2] "abc" len=3'))
+    assert.ok(watchText(bestAbc).includes('best "abc" (length 3)'))
+
+    const cells = view.nodes[0].children[0].children
+    view.paint(firstA)
+    assert.deepEqual(
+      cells.map(({ dataset }) => dataset.state),
+      ["entering", "", "", "", "", "", "", ""],
+    )
+    view.paint(duplicateA)
+    assert.equal(cells[3].dataset.state, "duplicate")
+    assert.ok(cells.slice(0, 3).every(({ dataset }) => dataset.state === "window"))
+    view.paint(frames.find((frame) => frame.type === "match"))
+    assert.ok(cells.slice(0, 3).every(({ dataset }) => dataset.state === "match"))
+  })
+
+  const pointerStyles = readFileSync(join(here, "src", "styles", "pointers.scss"), "utf8")
+  const sharedStyles = readFileSync(join(here, "src", "styles", "shared.scss"), "utf8")
+  assert.match(sharedStyles, /--_red:\s*var\(--st-state-red,\s*#[0-9a-f]{6}\)/i)
+  assert.match(pointerStyles, /data-state="entering"[^}]*var\(--_green\)/s)
+  assert.match(pointerStyles, /data-state="duplicate"[^}]*var\(--_red\)/s)
+})
+
+test("generic pointer consumers keep their existing pointer-only Watch contract", () => {
+  const frames = buildSourceFrames({
+    algorithm: "two-pointers",
+    array: [1, 4, 5, 7, 9, 12, 15],
+    target: 14,
+  }).frames
+  withFakeDocument(() => {
+    const { makePointerView } = loadStepTraceModule("src", "render.ts")
+    assert.deepEqual(
+      makePointerView(frames)
+        .watch(frames[1])
+        .map(({ k }) => k),
+      ["L", "R"],
+    )
+  })
 })
 
 test("n-queens keeps a bounded persistent decision tree through branch, prune, return, and solution", () => {
@@ -2117,10 +2862,7 @@ test("prefix sum reuses canonical value-only array strips in a stable responsive
   const familySource = readFileSync(join(here, "src", "families", "prefix-sum.ts"), "utf8")
   const styles = readFileSync(join(here, "src", "styles", "prefix-sum.scss"), "utf8")
   const styleEntry = readFileSync(join(here, "src", "styles", "index.scss"), "utf8")
-  const note = readFileSync(
-    join(repoRoot, "Vault", "Home", "Computer Science", "Algorithms", "Patterns", "Prefix Sum.md"),
-    "utf8",
-  )
+  const note = csNote("Algorithms", "Patterns", "Prefix Sum.md")
 
   assert.match(familySource, /makeArrayStrip/)
   assert.match(familySource, /stableStage: true/)
@@ -2220,23 +2962,7 @@ test("heap-selection reuses shared strips, tree tokens, and host artifacts", () 
   const pointerStyles = readFileSync(join(here, "src", "styles", "pointers.scss"), "utf8")
   const sharedStyles = readFileSync(join(here, "src", "styles", "shared.scss"), "utf8")
   const styleEntry = readFileSync(join(here, "src", "styles", "index.scss"), "utf8")
-  const quartzCss = readFileSync(join(here, "generated", "engine.css"), "utf8")
-  const obsidianCss = readFileSync(
-    join(repoRoot, "Vault", ".obsidian", "plugins", "steptrace", "styles.css"),
-    "utf8",
-  )
-  const note = readFileSync(
-    join(
-      repoRoot,
-      "Vault",
-      "Home",
-      "Computer Science",
-      "Algorithms",
-      "Patterns",
-      "Top-K Elements.md",
-    ),
-    "utf8",
-  )
+  const note = csNote("Algorithms", "Patterns", "Top-K Elements.md")
 
   assert.match(familySource, /const stream = makeArrayStrip\(first\.array\)/)
   assert.doesNotMatch(familySource, /steptrace__heap-stream-icon/)
@@ -2492,23 +3218,7 @@ test("stack-sequence keeps one stable accessible viewport in both hosts", () => 
   const styles = readFileSync(join(here, "src", "styles", "stack-sequence.scss"), "utf8")
   const shared = readFileSync(join(here, "src", "styles", "shared.scss"), "utf8")
   const styleEntry = readFileSync(join(here, "src", "styles", "index.scss"), "utf8")
-  const quartzCss = readFileSync(join(here, "generated", "engine.css"), "utf8")
-  const obsidianCss = readFileSync(
-    join(repoRoot, "Vault", ".obsidian", "plugins", "steptrace", "styles.css"),
-    "utf8",
-  )
-  const note = readFileSync(
-    join(
-      repoRoot,
-      "Vault",
-      "Home",
-      "Computer Science",
-      "Algorithms",
-      "Patterns",
-      "Monotonic Stack and Queue.md",
-    ),
-    "utf8",
-  )
+  const note = csNote("Algorithms", "Patterns", "Monotonic Stack and Queue.md")
 
   assert.match(familySource, /stableStage: true/)
   assert.match(familySource, /stageLayout: "fill"/)
@@ -4238,24 +4948,91 @@ test("dynamic-programming problem families keep watch hints and canonical legend
 })
 
 test("dynamic-programming tabs and stable story stage keep the compact five-view contract", () => {
-  const note = readFileSync(
-    join(
-      repoRoot,
-      "Vault",
-      "Home",
-      "Computer Science",
-      "Algorithms",
-      "Paradigms",
-      "Dynamic Programming.md",
-    ),
-    "utf8",
-  )
+  const note = csNote("Algorithms", "Paradigms", "Dynamic Programming.md")
   const mountSource = readFileSync(join(here, "src", "mount.ts"), "utf8")
   const renderSource = readFileSync(join(here, "src", "render.ts"), "utf8")
   const sharedStyles = readFileSync(join(here, "src", "styles", "shared.scss"), "utf8")
   const storyStyles = readFileSync(join(here, "src", "styles", "dp-story.scss"), "utf8")
+  const { configs } = parseAuthoredStepTraceTabs(note)
 
   assert.doesNotMatch(note, /Tabulation \(Raw\)/)
+  assert.deepEqual(configs, [
+    [
+      {
+        label: "Greedy",
+        description: "",
+        selectedInitially: true,
+        payload: '{"algorithm":"coin-change-greedy"}',
+        payloadSha256: "cdbbe1fc8aa0816cc093930e8c6fc6b97480b409bb4d9222b64de3193a6a0120",
+      },
+      {
+        label: "Naive Recursion",
+        description: "",
+        selectedInitially: false,
+        payload: '{"algorithm":"coin-change-naive"}',
+        payloadSha256: "97684b72d8cd5110cf38a80822e2d87178e14a141d163b76f6b10417d9320348",
+      },
+      {
+        label: "Memoization",
+        description: "",
+        selectedInitially: false,
+        payload: '{"algorithm":"coin-change-memoization"}',
+        payloadSha256: "7a255cdb3272f389aae87dbbdd992bae76b977c6d50552d0fa00c9ac5d7a463d",
+      },
+      {
+        label: "Tabulation",
+        description: "",
+        selectedInitially: false,
+        payload: '{"algorithm":"coin-change-tabulation"}',
+        payloadSha256: "e51d8d56c1cec13c0801a8a616be7b7b8c800da740de6c1808ef6d82c11717ca",
+      },
+      {
+        label: "Memoization (Raw)",
+        description: "",
+        selectedInitially: false,
+        payload: '{"algorithm":"coin-change-top-down"}',
+        payloadSha256: "647a5a866a4ccd1d5a89e46db48d0f0f6489e8a5870d1010b05f00ec48e50a17",
+      },
+    ],
+    [
+      {
+        label: "Greedy",
+        description: "",
+        selectedInitially: true,
+        payload: '{"algorithm":"grid-path-greedy"}',
+        payloadSha256: "0692960f74524319643b433346632cbed1b82a147e7b6344a337523d735cb9d6",
+      },
+      {
+        label: "Naive Recursion",
+        description: "",
+        selectedInitially: false,
+        payload: '{"algorithm":"grid-path-naive"}',
+        payloadSha256: "129df14978e94d2c3a4d97777b67017254684d3ea9032df3a78d209ca812a179",
+      },
+      {
+        label: "Memoization",
+        description: "",
+        selectedInitially: false,
+        payload: '{"algorithm":"grid-path-memoization"}',
+        payloadSha256: "6498b7338d8f05b754a4e216d4ad5b2ea03686642a1e4deb2bf484c0c357cec5",
+      },
+      {
+        label: "Tabulation",
+        description: "",
+        selectedInitially: false,
+        payload: '{"algorithm":"grid-path-tabulation"}',
+        payloadSha256: "1158ddecce22d962ad76b1faf6aa20cf65c776ecbc129fb23b01b1b16b7a609f",
+      },
+      {
+        label: "Memoization (Raw)",
+        description: "",
+        selectedInitially: false,
+        payload: '{"algorithm":"grid-path-top-down"}',
+        payloadSha256: "f3e17236421b58a4aa44686a917f090b94f1e5c198ba54dba4909b934e4ba366",
+      },
+    ],
+  ])
+  assert.doesNotMatch(note, /```steptrace\n\{"tabs":/)
   assert.match(mountSource, /steptrace--stable-stage/)
   assert.match(sharedStyles, /\.steptrace__rail\s*\{\s*overflow-y: auto;\s*\}/)
   // the height is definite and unconditional: a growing trace must not resize
@@ -4334,10 +5111,7 @@ test("dynamic-programming tabs and stable story stage keep the compact five-view
     treeStyles,
     /\.steptrace__rectree\[data-fit-width="true"\] \.steptrace__rtsvg\s*\{[^}]*inline-size: 100%;[^}]*min-inline-size: 0;[^}]*max-inline-size: var\(--steptrace-tree-width, 100%\);[^}]*margin-inline: auto;/s,
   )
-  assert.match(
-    treeStyles,
-    /\.steptrace--tabs \.steptrace__tabpanel-body\.steptrace[\s\S]*?\.steptrace__rectree\[data-fit-width="true"\][\s\S]*?\.steptrace__rtsvg\s*\{[^}]*max-block-size: 100%;/,
-  )
+  assert.doesNotMatch(treeStyles, /steptrace--tabs|steptrace__tabpanel/)
   assert.doesNotMatch(storyStyles, /unavailable|data-out/)
 })
 
@@ -4565,13 +5339,204 @@ test("Quartz StepTrace hydration inspects added subtrees and restores removed st
 
   assert.match(component, /stylePromise && existing && existing\.isConnected/)
   assert.match(component, /stylePromise = null;/)
+  assert.match(component, /data-tabsdown/)
+  assert.match(component, /interactive/)
+  assert.match(component, /if \(root\.dataset\.steptraceMounted\) return/)
+  assert.match(component, /document\.addEventListener\("nav", run\)/)
+  assert.match(component, /document\.addEventListener\("render", run\)/)
+  assert.match(component, /document\.addEventListener\("prenav", destroyMounted\)/)
+  assert.match(component, /window\.addCleanup\(destroy\)/)
   assert.match(observer, /records\[i\]\.addedNodes/)
+  assert.match(observer, /attributeFilter:\s*\["data-tabsdown"\]/)
+  assert.match(observer, /records\[i\]\.type === "attributes"/)
   assert.match(observer, /node\.matches\("\.steptrace-mount:not\(\[data-steptrace-mounted\]\)"\)/)
   assert.match(
     observer,
     /node\.querySelector\("\.steptrace-mount:not\(\[data-steptrace-mounted\]\)"\)/,
   )
   assert.doesNotMatch(observer, /document\.querySelector/)
+})
+
+test("Quartz StepTrace hydration mounts once across direct load, Tabsdown readiness, nav, and render", async () => {
+  class HydrateNode {
+    constructor(tagName = "div", className = "") {
+      this.tagName = tagName
+      this.className = className
+      this.dataset = {}
+      this.children = []
+      this.parentElement = null
+      this.isConnected = true
+      this.sheet = null
+      this.listeners = new Map()
+      this.classList = { contains: (name) => this.className.split(/\s+/).includes(name) }
+    }
+    addEventListener(type, listener) {
+      this.listeners.set(type, [...(this.listeners.get(type) ?? []), listener])
+    }
+    trigger(type) {
+      for (const listener of this.listeners.get(type) ?? []) listener()
+    }
+    replaceChildren(...children) {
+      this.children = children
+    }
+    matches(selector) {
+      return (
+        selector === ".steptrace-mount:not([data-steptrace-mounted])" &&
+        this.classList.contains("steptrace-mount") &&
+        !this.dataset.steptraceMounted
+      )
+    }
+    querySelector() {
+      return null
+    }
+  }
+  const roots = []
+  const documentListeners = new Map()
+  const headChildren = []
+  const hydrateDocument = {
+    body: new HydrateNode("body"),
+    head: {
+      appendChild(node) {
+        headChildren.push(node)
+        queueMicrotask(() => node.trigger("load"))
+      },
+    },
+    createElement: (tagName) => new HydrateNode(tagName),
+    querySelector(selector) {
+      if (selector === 'link[data-steptrace-style="1"]')
+        return headChildren.find((node) => node.dataset.steptraceStyle === "1") ?? null
+      return null
+    },
+    querySelectorAll(selector) {
+      return selector === ".steptrace-mount:not([data-steptrace-mounted])"
+        ? roots.filter((root) => !root.dataset.steptraceMounted)
+        : []
+    },
+    addEventListener(type, listener) {
+      documentListeners.set(type, [...(documentListeners.get(type) ?? []), listener])
+    },
+    emit(type) {
+      for (const listener of documentListeners.get(type) ?? []) listener()
+    },
+  }
+  const observerRecords = []
+  class HydrateObserver {
+    constructor(callback) {
+      this.callback = callback
+      observerRecords.push(this)
+    }
+    observe() {}
+    trigger(records) {
+      this.callback(records)
+    }
+  }
+  const addRoot = (parent = null) => {
+    const root = new HydrateNode("div", "steptrace-mount")
+    root.dataset.config = '{"algorithm":"quick-sort"}'
+    root.parentElement = parent
+    roots.push(root)
+    return root
+  }
+  const readyAtLoad = addRoot()
+  const tabsdown = new HydrateNode("div", "tabsdown")
+  const deferred = addRoot(tabsdown)
+  const mounted = []
+  const hosts = []
+  const destroyed = []
+  const lifecycle = []
+  const cleanups = []
+  const hydrateWindow = {
+    tabsdown: {
+      mountTabs() {},
+    },
+    steptrace: {
+      mount(root, _config, host) {
+        mounted.push(root)
+        hosts.push(host)
+        return {
+          destroy: () => {
+            destroyed.push(root)
+            lifecycle.push(`steptrace:${roots.indexOf(root)}`)
+          },
+        }
+      },
+    },
+    addCleanup: (cleanup) => cleanups.push(cleanup),
+  }
+  const component = readFileSync(join(here, "..", "components", "steptrace.tsx"), "utf8")
+  const template = /const hydrate = `([\s\S]*?)`\n\nexport const Steptrace/.exec(component)?.[1]
+  assert.ok(template)
+  const hydrate = new Function("STYLE_URL", "ENGINE_URL", `return \`${template}\``)(
+    "/static/steptrace/engine.css",
+    "/static/steptrace/engine.js",
+  )
+
+  new Function("window", "document", "MutationObserver", hydrate)(
+    hydrateWindow,
+    hydrateDocument,
+    HydrateObserver,
+  )
+  await delay(0)
+  assert.deepEqual(mounted, [readyAtLoad])
+  assert.equal(hosts[0].mountTabs, hydrateWindow.tabsdown.mountTabs)
+
+  tabsdown.dataset.tabsdown = "interactive"
+  observerRecords[0].trigger([{ type: "attributes", target: tabsdown }])
+  await delay(0)
+  assert.deepEqual(mounted, [readyAtLoad, deferred])
+  assert.equal(hosts[1].mountTabs, hydrateWindow.tabsdown.mountTabs)
+
+  hydrateDocument.emit("nav")
+  hydrateDocument.emit("render")
+  await delay(0)
+  assert.equal(mounted.length, 2)
+
+  const renderedLater = addRoot()
+  hydrateDocument.emit("render")
+  await delay(0)
+  hydrateDocument.emit("nav")
+  await delay(0)
+  assert.deepEqual(mounted, [readyAtLoad, deferred, renderedLater])
+
+  const router = readFileSync(
+    join(repoRoot, "Web", "quartz", "components", "scripts", "spa.inline.ts"),
+    "utf8",
+  )
+  const prenav = router.indexOf('new CustomEvent("prenav"')
+  const globalCleanup = router.indexOf("cleanupFns.forEach", prenav)
+  const domDisposal = router.indexOf("micromorph(document.body, html.body)", globalCleanup)
+  assert.ok(prenav >= 0 && prenav < globalCleanup && globalCleanup < domDisposal)
+
+  const tabsdownRuntime = readFileSync(
+    join(
+      repoRoot,
+      "Web",
+      ".quartz",
+      "plugins",
+      "quartz-tabsdown",
+      "src",
+      "scripts",
+      "tabsdown.inline.ts",
+    ),
+    "utf8",
+  )
+  assert.equal((tabsdownRuntime.match(/window\.addCleanup\(/g) ?? []).length, 1)
+  cleanups.push(() => lifecycle.push("tabsdown:global-cleanup"))
+
+  // This is Quartz's supported order: prenav event, global cleanup set, then
+  // DOM replacement. StepTrace's prenav listener empties its live registry;
+  // its addCleanup callbacks then prove idempotent before Tabsdown runs.
+  hydrateDocument.emit("prenav")
+  cleanups.forEach((cleanup) => cleanup())
+  lifecycle.push("quartz:dom-disposal")
+  assert.deepEqual(destroyed, [readyAtLoad, deferred, renderedLater])
+  assert.deepEqual(lifecycle, [
+    "steptrace:0",
+    "steptrace:1",
+    "steptrace:2",
+    "tabsdown:global-cleanup",
+    "quartz:dom-disposal",
+  ])
 })
 
 test("shell sort uses the array-sort family and records gapped subsequences", () => {
@@ -4801,18 +5766,7 @@ test("tim sort keeps natural runs contiguous while it reverses, extends, collaps
     minrun: 4,
   })
   const { runStackFamily, runStackWatch } = loadStepTraceModule("src", "families", "run-stack.ts")
-  const note = readFileSync(
-    join(
-      repoRoot,
-      "Vault",
-      "Home",
-      "Computer Science",
-      "Algorithms",
-      "Sorting Algorithms",
-      "Tim Sort.md",
-    ),
-    "utf8",
-  )
+  const note = csNote("Algorithms", "Sorting Algorithms", "Tim Sort.md")
   const source = readFileSync(join(here, "src", "algorithms", "tim-sort.ts"), "utf8")
   const familySource = readFileSync(join(here, "src", "families", "run-stack.ts"), "utf8")
   const renderSource = readFileSync(join(here, "src", "render.ts"), "utf8")
@@ -4920,15 +5874,26 @@ test("tim sort keeps natural runs contiguous while it reverses, extends, collaps
   assert.match(styles, /min-block-size: 8\.1rem/)
   assert.match(
     sharedStyles,
-    /@media \(max-width: 560px\) \{[\s\S]*?\.steptrace__rail\s*\{[\s\S]*?border-top: 1px solid var\(--_hair\);[\s\S]*?padding-top: 1rem;[\s\S]*?margin-top: 1rem;/,
+    /\.steptrace--narrow \.steptrace__rail\s*\{[^}]*border-top: 1px solid var\(--_hair\);[^}]*overflow: visible;/s,
   )
   assert.match(
     sharedStyles,
-    /@media \(max-width: 560px\)[\s\S]*?\.steptrace__trace\s*\{[\s\S]*?--_stable-trace-height: clamp\(4\.75rem, 16dvh, 5\.75rem\);[\s\S]*?flex: 0 0 var\(--_stable-trace-height\);[\s\S]*?block-size: var\(--_stable-trace-height\);[\s\S]*?overflow: hidden;/,
+    /\.steptrace--narrow \.steptrace__trace\s*\{[^}]*flex: 0 0 auto;[^}]*overflow: visible;/s,
+  )
+  assert.match(sharedStyles, /\.steptrace--narrow \.steptrace__log\s*\{[^}]*overflow: hidden;/s)
+  assert.doesNotMatch(sharedStyles, /@media \(max-width: 560px\)/)
+  assert.doesNotMatch(sharedStyles, /\.steptrace__log-line:not\(\.steptrace__log-line--cur\)/)
+  assert.doesNotMatch(
+    sharedStyles,
+    /\.steptrace--narrow \.steptrace__(?:trace|log)\s*\{[^}]*overflow(?:-y)?: (?:auto|scroll)/s,
   )
   assert.match(
     sharedStyles,
-    /\.steptrace__log\s*\{[\s\S]*?overflow-y: auto !important;[\s\S]*?overscroll-behavior: contain;/,
+    /\.steptrace--narrow \.steptrace__watch-row\s*\{[^}]*height: 2\.25rem;[^}]*min-height: 0;/s,
+  )
+  assert.match(
+    sharedStyles,
+    /\.steptrace--narrow \.steptrace__foot\s*\{[^}]*grid-template-columns: auto minmax\(0, 1fr\) auto;[^}]*"timeline timeline timeline"[^}]*"transport \. utility";/s,
   )
   assert.match(styles, /\.steptrace__run-array-section\s*\{[\s\S]*?padding-bottom: 0\.9rem;/)
   assert.match(
@@ -6221,7 +7186,7 @@ test("prefix-character renderer keeps stable accessible topology and compact Wat
   }
 })
 
-test("production mount verifies persistent structures, binary ordered trees, and Trie summary", () => {
+test("production mount verifies compact rail, persistent structures, binary ordered trees, and Trie summary", () => {
   class FakeNode {
     constructor(tagName, text = "") {
       this.tagName = tagName
@@ -6272,12 +7237,19 @@ test("production mount verifies persistent structures, binary ordered trees, and
     getAttribute(key) {
       return this.attributes.get(key) ?? null
     }
+    hasAttribute(key) {
+      return key === "hidden" ? this.hidden : this.attributes.has(key)
+    }
     removeAttribute(key) {
       this.attributes.delete(key)
     }
     append(...children) {
       this.children.push(...children)
-      for (const child of children) if (child && typeof child === "object") child.parentNode = this
+      for (const child of children)
+        if (child && typeof child === "object") {
+          child.parentNode = this
+          child.parentElement = this
+        }
     }
     replaceChildren(...children) {
       this.children = []
@@ -6306,10 +7278,31 @@ test("production mount verifies persistent structures, binary ordered trees, and
         this.parentNode.children = this.parentNode.children.filter((child) => child !== this)
     }
     focus() {
+      if (this.hidden) return
       this.focused = true
+      if (globalThis.document) globalThis.document.activeElement = this
+    }
+    contains(node) {
+      if (node === this) return true
+      return this.children.some((child) => child?.contains?.(node))
+    }
+    closest(selector) {
+      if (selector === ".tabsdown__panel") {
+        for (let node = this; node; node = node.parentElement)
+          if (node.classList?.contains("tabsdown__panel")) return node
+      }
+      return null
     }
     getBoundingClientRect() {
-      return this.rect || { left: 0, top: 0, width: 360, height: 20 }
+      if (typeof this.rect === "function") return this.rect()
+      return (
+        this.rect || {
+          left: 0,
+          top: 0,
+          width: this.parentNode ? 360 : 800,
+          height: 20,
+        }
+      )
     }
   }
   const findByClass = (node, className) => {
@@ -6341,14 +7334,25 @@ test("production mount verifies persistent structures, binary ordered trees, and
     }
     return null
   }
+  const findAll = (node, predicate, found = []) => {
+    if (predicate(node)) found.push(node)
+    for (const child of node.children || []) findAll(child, predicate, found)
+    return found
+  }
   const previous = {
     document: globalThis.document,
     matchMedia: globalThis.matchMedia,
     getComputedStyle: globalThis.getComputedStyle,
     ResizeObserver: globalThis.ResizeObserver,
+    requestAnimationFrame: globalThis.requestAnimationFrame,
+    cancelAnimationFrame: globalThis.cancelAnimationFrame,
+    setTimeout: globalThis.setTimeout,
+    clearTimeout: globalThis.clearTimeout,
+    MutationObserver: globalThis.MutationObserver,
   }
   const documentListeners = new Map()
   globalThis.document = {
+    activeElement: null,
     createElement: (tagName) => new FakeNode(tagName),
     createElementNS: (_namespace, tagName) => new FakeNode(tagName),
     createTextNode: (value) => new FakeNode("#text", value),
@@ -6377,7 +7381,52 @@ test("production mount verifies persistent structures, binary ordered trees, and
     mediaQueries.push(query)
     return query
   }
-  globalThis.getComputedStyle = () => ({ rowGap: "0", lineHeight: "10" })
+  globalThis.getComputedStyle = () => ({
+    rowGap: "0",
+    lineHeight: "10",
+    getPropertyValue: (name) => (name === "--steptrace-tab-animation-duration" ? "160ms" : ""),
+  })
+  let animationSerial = 0
+  const animationFrames = new Map()
+  globalThis.requestAnimationFrame = (callback) => {
+    const id = ++animationSerial
+    animationFrames.set(id, callback)
+    return id
+  }
+  globalThis.cancelAnimationFrame = (id) => animationFrames.delete(id)
+  let railTimerSerial = 0
+  const railTimers = new Map()
+  globalThis.setTimeout = (callback, delay = 0) => {
+    const id = ++railTimerSerial
+    railTimers.set(id, { callback, delay })
+    return id
+  }
+  globalThis.clearTimeout = (id) => railTimers.delete(id)
+  const mutationObservers = []
+  globalThis.MutationObserver = class {
+    constructor(callback) {
+      this.callback = callback
+      this.observed = []
+      this.disconnected = false
+      mutationObservers.push(this)
+    }
+    observe(target, options) {
+      this.observed.push({ target, options })
+    }
+    disconnect() {
+      this.disconnected = true
+    }
+    trigger(records) {
+      this.callback(records)
+    }
+  }
+  const flushAnimationFrame = () => {
+    const next = animationFrames.entries().next().value
+    assert.ok(next, "expected a queued animation frame")
+    const [id, callback] = next
+    animationFrames.delete(id)
+    callback()
+  }
   const resizeObservers = []
   globalThis.ResizeObserver = class {
     constructor(callback) {
@@ -6393,10 +7442,556 @@ test("production mount verifies persistent structures, binary ordered trees, and
       this.disconnected = true
     }
     trigger() {
-      this.callback()
+      this.callback(
+        this.observed.map((target) => {
+          const contentRect = target.getBoundingClientRect()
+          return {
+            target,
+            contentRect,
+            borderBoxSize: [
+              {
+                inlineSize: contentRect.width,
+                blockSize: contentRect.height,
+              },
+            ],
+          }
+        }),
+      )
     }
   }
   try {
+    const { createMount } = loadStepTraceModule("src", "mount.ts")
+    const compactMount = ({
+      messages,
+      watchRows = null,
+      summary = "Finished.",
+      onBuild = () => {},
+    }) =>
+      createMount({
+        kindOf: () => "sort",
+        listAlgorithms: () => [],
+        buildFrames: () => {
+          onBuild()
+          return {
+            kind: "sort",
+            frames: messages.map((message, index) => ({ type: "test", message, index })),
+            family: {
+              id: "array-sort",
+              createView() {
+                const view = {
+                  nodes: [new FakeNode("div"), new FakeNode("div")],
+                  paint() {},
+                  summary: () => summary,
+                }
+                if (watchRows) view.watch = () => watchRows
+                return view
+              },
+            },
+          }
+        },
+      })
+    const mountAt = (width, options = {}, host = {}) => {
+      const root = new FakeNode("div")
+      root.rect = { left: 0, top: 0, width, height: 400 }
+      const handle = compactMount({
+        messages: ["oldest", "older", "previous", "current", "done"],
+        watchRows: [{ k: "value", v: "42" }],
+        ...options,
+      })(root, { algorithm: "compact-contract" }, host)
+      return { root, handle }
+    }
+    const triggerResize = (node) => {
+      const observers = resizeObservers.filter((observer) => observer.observed.includes(node))
+      assert.ok(observers.length, "the StepTrace root must be observed")
+      for (const observer of observers) observer.trigger()
+    }
+    const compactClick = (node) => {
+      assert.ok(node, "expected a clickable control")
+      const listener = node.listeners.get("click")?.[0]
+      assert.ok(listener, "expected a click listener")
+      listener({
+        target: node,
+        currentTarget: node,
+        stopPropagation() {},
+        preventDefault() {},
+      })
+    }
+    const visibleLogRows = (root) =>
+      findAll(
+        root,
+        (node) =>
+          (node.classList?.contains("steptrace__log-line") ||
+            node.classList?.contains("steptrace__insight")) &&
+          !node.hidden,
+      )
+
+    const compact = mountAt(703)
+    assert.equal(compact.root.classList.contains("steptrace--narrow"), true)
+    const compactRegion = findByAttribute(compact.root, "aria-label", "Trace and watch")
+    assert.equal(compactRegion.classList.contains("steptrace__rail-region"), true)
+    assert.equal(compactRegion.attributes.get("role"), "region")
+    const traceButton = findByAttribute(compact.root, "aria-label", "Trace")
+    const watchButton = findByAttribute(compact.root, "aria-label", "Watch")
+    const detailSwitch = findByClass(compact.root, "steptrace__detail-switch")
+    const rail = findByClass(compact.root, "steptrace__rail")
+    assert.equal(detailSwitch.attributes.get("role"), "group")
+    assert.equal(rail.children[0], detailSwitch)
+    assert.equal(rail.children[1], compactRegion)
+    assert.equal(traceButton.classList.contains("steptrace__detail-button"), true)
+    assert.equal(watchButton.classList.contains("steptrace__detail-button"), true)
+    const tracePanel = findByClass(compact.root, "steptrace__trace")
+    const watchPanel = findByClass(compact.root, "steptrace__watch-wrap")
+    assert.deepEqual(compactRegion.children, [tracePanel, watchPanel])
+    tracePanel.rect = { left: 0, top: 0, width: 300, height: 80 }
+    watchPanel.rect = { left: 0, top: 0, width: 300, height: 120 }
+    compactRegion.rect = () => ({
+      left: 0,
+      top: 0,
+      width: 300,
+      height:
+        Number.parseFloat(compactRegion.attributes.get("style:height")) ||
+        compactRegion.children
+          .filter((panel) => !panel.hidden)
+          .reduce((height, panel) => height + panel.getBoundingClientRect().height, 0),
+    })
+    assert.equal(traceButton.attributes.get("aria-pressed"), "false")
+    assert.equal(watchButton.attributes.get("aria-pressed"), "false")
+    assert.equal(tracePanel.hidden, true)
+    assert.equal(watchPanel.hidden, true)
+
+    const rootKeydown = compact.root.listeners.get("keydown")[0]
+    for (const target of [traceButton, new FakeNode("textarea")]) {
+      let prevented = false
+      let stopped = false
+      rootKeydown({
+        target,
+        key: " ",
+        preventDefault() {
+          prevented = true
+        },
+        stopPropagation() {
+          stopped = true
+        },
+      })
+      assert.equal(prevented, false)
+      assert.equal(stopped, false)
+    }
+    const compactScrub = findByAttribute(compact.root, "aria-label", "Step")
+    const previousStep = Number(compactScrub.attributes.get("aria-valuenow"))
+    rootKeydown({
+      target: compact.root,
+      key: "ArrowRight",
+      preventDefault() {},
+      stopPropagation() {},
+    })
+    assert.equal(Number(compactScrub.attributes.get("aria-valuenow")), previousStep + 1)
+
+    compactClick(traceButton)
+    assert.equal(traceButton.attributes.get("aria-pressed"), "true")
+    assert.equal(watchButton.attributes.get("aria-pressed"), "false")
+    assert.equal(tracePanel.hidden, false)
+    assert.equal(watchPanel.hidden, true)
+    assert.equal(compactRegion.classList.contains("steptrace__rail-region--animating"), true)
+    assert.equal(compactRegion.attributes.get("style:height"), "0px")
+    assert.equal(animationFrames.size, 1)
+    flushAnimationFrame()
+    assert.equal(compactRegion.attributes.get("style:height"), "80px")
+    assert.deepEqual(
+      [...railTimers.values()].map(({ delay }) => delay),
+      [210],
+    )
+
+    compactClick(watchButton)
+    assert.equal(traceButton.attributes.get("aria-pressed"), "false")
+    assert.equal(watchButton.attributes.get("aria-pressed"), "true")
+    assert.equal(tracePanel.hidden, true)
+    assert.equal(watchPanel.hidden, false)
+    assert.equal(railTimers.size, 0)
+    assert.equal(animationFrames.size, 1)
+    flushAnimationFrame()
+    assert.equal(compactRegion.attributes.get("style:height"), "120px")
+
+    const watchRow = findByClass(compact.root, "steptrace__watch-row")
+    watchButton.focus()
+    compactClick(watchButton)
+    assert.equal(traceButton.attributes.get("aria-pressed"), "false")
+    assert.equal(watchButton.attributes.get("aria-pressed"), "false")
+    assert.equal(tracePanel.hidden, true)
+    assert.equal(watchPanel.hidden, true)
+    assert.equal(globalThis.document.activeElement, watchButton)
+
+    compact.root.rect.width = 704
+    triggerResize(compact.root)
+    assert.equal(compact.root.classList.contains("steptrace--narrow"), false)
+    assert.equal(detailSwitch.hidden, true)
+    assert.equal(tracePanel.hidden, false)
+    assert.equal(watchPanel.hidden, false)
+    assert.equal(
+      globalThis.document.activeElement,
+      findByAttribute(compact.root, "aria-label", "Step"),
+    )
+
+    watchRow.focus()
+    compact.root.rect.width = 703
+    triggerResize(compact.root)
+    assert.equal(compact.root.classList.contains("steptrace--narrow"), true)
+    assert.equal(detailSwitch.hidden, false)
+    assert.equal(traceButton.attributes.get("aria-pressed"), "false")
+    assert.equal(watchButton.attributes.get("aria-pressed"), "false")
+    assert.equal(tracePanel.hidden, true)
+    assert.equal(watchPanel.hidden, true)
+    assert.equal(globalThis.document.activeElement, traceButton)
+
+    compactClick(watchButton)
+    compact.root.rect.width = 704
+    triggerResize(compact.root)
+    compact.root.rect.width = 703
+    triggerResize(compact.root)
+    assert.equal(traceButton.attributes.get("aria-pressed"), "false")
+    assert.equal(watchButton.attributes.get("aria-pressed"), "true")
+    assert.equal(tracePanel.hidden, true)
+    assert.equal(watchPanel.hidden, false)
+
+    for (const width of [704, 705]) {
+      const wide = mountAt(width)
+      assert.equal(wide.root.classList.contains("steptrace--narrow"), false)
+      assert.equal(findByClass(wide.root, "steptrace__trace").hidden, false)
+      assert.equal(findByClass(wide.root, "steptrace__watch-wrap").hidden, false)
+      wide.handle.destroy()
+    }
+
+    const collapsing = mountAt(704)
+    const collapsingWatchRow = findByClass(collapsing.root, "steptrace__watch-row")
+    collapsingWatchRow.focus()
+    collapsing.root.rect.width = 703
+    triggerResize(collapsing.root)
+    assert.equal(findByClass(collapsing.root, "steptrace__trace").hidden, true)
+    assert.equal(findByClass(collapsing.root, "steptrace__watch-wrap").hidden, true)
+    assert.equal(
+      globalThis.document.activeElement,
+      findByAttribute(collapsing.root, "aria-label", "Trace"),
+    )
+    collapsing.handle.destroy()
+
+    const initiallyZero = mountAt(0)
+    assert.equal(initiallyZero.root.classList.contains("steptrace--narrow"), false)
+    initiallyZero.root.rect.width = 704
+    triggerResize(initiallyZero.root)
+    initiallyZero.root.rect.width = 703
+    triggerResize(initiallyZero.root)
+    assert.equal(initiallyZero.root.classList.contains("steptrace--narrow"), true)
+    assert.equal(
+      findByAttribute(initiallyZero.root, "aria-label", "Trace").attributes.get("aria-pressed"),
+      "false",
+    )
+
+    const noWatch = mountAt(703, { watchRows: null })
+    assert.equal(
+      findAll(
+        noWatch.root,
+        (node) => node.tagName === "button" && node.attributes.get("aria-label") === "Watch",
+      ).length,
+      0,
+    )
+    const noWatchTrace = findByAttribute(noWatch.root, "aria-label", "Trace")
+    assert.equal(noWatchTrace.attributes.get("aria-pressed"), "false")
+    assert.equal(findByClass(noWatch.root, "steptrace__trace").hidden, true)
+    compactClick(noWatchTrace)
+    assert.equal(noWatchTrace.attributes.get("aria-pressed"), "true")
+    assert.equal(findByClass(noWatch.root, "steptrace__trace").hidden, false)
+
+    const hostMounts = []
+    const nativeTabs = {
+      mountTabs(container, options) {
+        let selection = options.selection ?? null
+        let destroyed = false
+        const mountedRoot = new FakeNode("div")
+        mountedRoot.classList.add("tabsdown--mounted")
+        const tablist = new FakeNode("div")
+        const panels = new FakeNode("div")
+        const buttons = options.tabs.map(({ label }) => {
+          const button = new FakeNode("button")
+          button.textContent = label
+          tablist.append(button)
+          return button
+        })
+        for (const tab of options.tabs) {
+          tab.panel.remove()
+          panels.append(tab.panel)
+        }
+        mountedRoot.append(tablist, panels)
+        container.append(mountedRoot)
+        const handle = {
+          get selection() {
+            return selection
+          },
+          setSelection(next) {
+            const previous = selection
+            selection = next
+            options.tabs.forEach((tab, index) => {
+              buttons[index].setAttribute("aria-expanded", String(tab.id === next))
+              tab.panel.hidden = tab.id !== next
+            })
+            options.onSelectionChange?.(next, previous)
+          },
+          setAvailable(id, available) {
+            if (!available && selection === id) this.setSelection(null)
+          },
+          destroy() {
+            destroyed = true
+            for (const tab of options.tabs) {
+              tab.panel.remove()
+              container.append(tab.panel)
+            }
+            mountedRoot.remove()
+          },
+          get destroyed() {
+            return destroyed
+          },
+        }
+        hostMounts.push({ container, options, handle, buttons })
+        handle.setSelection(selection)
+        return handle
+      },
+    }
+    const native = mountAt(703, {}, nativeTabs)
+    assert.equal(findByClass(native.root, "steptrace__detail-switch"), null)
+    assert.equal(hostMounts.length, 1)
+    assert.equal(hostMounts[0].options.label, "Trace and watch")
+    assert.equal(hostMounts[0].options.selection, null)
+    assert.equal(findByClass(native.root, "steptrace__trace").hidden, true)
+    assert.equal(findByClass(native.root, "steptrace__watch-wrap").hidden, true)
+    assert.deepEqual(
+      hostMounts[0].options.tabs.map(({ id, label }) => ({ id, label })),
+      [
+        { id: "trace", label: "Trace" },
+        { id: "watch", label: "Watch" },
+      ],
+    )
+    hostMounts[0].handle.setSelection("trace")
+    assert.equal(findByClass(native.root, "steptrace__trace").hidden, false)
+    assert.equal(findByClass(native.root, "steptrace__watch-wrap").hidden, true)
+    hostMounts[0].buttons[0].focus()
+    native.root.rect.width = 704
+    triggerResize(native.root)
+    assert.equal(hostMounts[0].handle.destroyed, true)
+    assert.equal(findByClass(native.root, "steptrace__trace").hidden, false)
+    assert.equal(findByClass(native.root, "steptrace__watch-wrap").hidden, false)
+    assert.equal(
+      globalThis.document.activeElement,
+      findByAttribute(native.root, "aria-label", "Step"),
+    )
+    native.root.rect.width = 703
+    triggerResize(native.root)
+    assert.equal(hostMounts.length, 2)
+    assert.equal(hostMounts[1].options.selection, "trace")
+    native.handle.destroy()
+    assert.equal(hostMounts[1].handle.destroyed, true)
+
+    const outerAuthoredPanel = new FakeNode("div")
+    outerAuthoredPanel.classList.add("tabsdown__panel")
+    outerAuthoredPanel.hidden = true
+    const innerAuthoredPanel = new FakeNode("div")
+    innerAuthoredPanel.classList.add("tabsdown__panel")
+    innerAuthoredPanel.hidden = true
+    const authoredRoot = new FakeNode("div")
+    authoredRoot.rect = { left: 0, top: 0, width: 703, height: 400 }
+    outerAuthoredPanel.append(innerAuthoredPanel)
+    innerAuthoredPanel.append(authoredRoot)
+    let authoredMounts = 0
+    const authoredHandle = compactMount({
+      messages: ["first", "second", "third"],
+      watchRows: [{ k: "value", v: "42" }],
+      onBuild: () => authoredMounts++,
+    })(authoredRoot, { algorithm: "authored-tabsdown-contract" })
+    assert.equal(authoredRoot.children.length, 0, "a hidden authored panel must mount lazily")
+    const visibilityObserver = mutationObservers.find((observer) =>
+      observer.observed.some(({ target }) => target === outerAuthoredPanel),
+    )
+    assert.ok(visibilityObserver, "both containing authored panels must be observed")
+    for (const panel of [outerAuthoredPanel, innerAuthoredPanel])
+      assert.ok(
+        visibilityObserver.observed.some(
+          ({ target, options }) =>
+            target === panel &&
+            options.attributes === true &&
+            options.attributeFilter?.length === 1 &&
+            options.attributeFilter[0] === "hidden",
+        ),
+      )
+
+    outerAuthoredPanel.hidden = false
+    visibilityObserver.trigger([
+      { type: "attributes", target: outerAuthoredPanel, attributeName: "hidden" },
+    ])
+    assert.equal(authoredRoot.children.length, 0, "the inner hidden panel must still defer mount")
+    innerAuthoredPanel.hidden = false
+    visibilityObserver.trigger([
+      { type: "attributes", target: innerAuthoredPanel, attributeName: "hidden" },
+    ])
+    assert.ok(authoredRoot.children.length > 0, "the first reveal must mount exactly once")
+    assert.equal(authoredMounts, 1)
+    const mountedChildren = authoredRoot.children.slice()
+    visibilityObserver.trigger([
+      { type: "attributes", target: innerAuthoredPanel, attributeName: "hidden" },
+    ])
+    assert.deepEqual(authoredRoot.children, mountedChildren, "equal visibility must not remount")
+    assert.equal(authoredMounts, 1)
+    const authoredPlay = findByAttribute(authoredRoot, "aria-label", "Play")
+    const authoredForward = findByAttribute(authoredRoot, "aria-label", "Step forward")
+    compactClick(authoredForward)
+    const authoredScrub = findByAttribute(authoredRoot, "aria-label", "Step")
+    const retainedStep = authoredScrub.attributes.get("aria-valuenow")
+    compactClick(authoredPlay)
+    assert.equal(authoredPlay.attributes.get("aria-label"), "Pause")
+
+    innerAuthoredPanel.hidden = true
+    visibilityObserver.trigger([
+      { type: "attributes", target: innerAuthoredPanel, attributeName: "hidden" },
+    ])
+    assert.equal(authoredPlay.attributes.get("aria-label"), "Play")
+    assert.equal(authoredScrub.attributes.get("aria-valuenow"), retainedStep)
+    innerAuthoredPanel.hidden = false
+    visibilityObserver.trigger([
+      { type: "attributes", target: innerAuthoredPanel, attributeName: "hidden" },
+    ])
+    assert.equal(authoredPlay.attributes.get("aria-label"), "Pause")
+    assert.equal(authoredScrub.attributes.get("aria-valuenow"), retainedStep)
+
+    outerAuthoredPanel.hidden = true
+    visibilityObserver.trigger([
+      { type: "attributes", target: outerAuthoredPanel, attributeName: "hidden" },
+    ])
+    assert.equal(authoredPlay.attributes.get("aria-label"), "Play")
+    outerAuthoredPanel.hidden = false
+    visibilityObserver.trigger([
+      { type: "attributes", target: outerAuthoredPanel, attributeName: "hidden" },
+    ])
+    assert.equal(authoredPlay.attributes.get("aria-label"), "Pause")
+    assert.equal(authoredScrub.attributes.get("aria-valuenow"), retainedStep)
+
+    compactClick(authoredPlay)
+    outerAuthoredPanel.hidden = true
+    innerAuthoredPanel.hidden = true
+    visibilityObserver.trigger([
+      { type: "attributes", target: outerAuthoredPanel, attributeName: "hidden" },
+      { type: "attributes", target: innerAuthoredPanel, attributeName: "hidden" },
+    ])
+    outerAuthoredPanel.hidden = false
+    innerAuthoredPanel.hidden = false
+    visibilityObserver.trigger([
+      { type: "attributes", target: outerAuthoredPanel, attributeName: "hidden" },
+      { type: "attributes", target: innerAuthoredPanel, attributeName: "hidden" },
+    ])
+    assert.equal(
+      authoredPlay.attributes.get("aria-label"),
+      "Play",
+      "revealing must not resume playback that was already paused",
+    )
+    let childDestroys = 0
+    const originalReplaceChildren = authoredRoot.replaceChildren.bind(authoredRoot)
+    authoredRoot.replaceChildren = (...children) => {
+      if (!children.length) childDestroys++
+      originalReplaceChildren(...children)
+    }
+    authoredHandle.destroy()
+    assert.equal(childDestroys, 1)
+    assert.equal(visibilityObserver.disconnected, true)
+    assert.equal(authoredRoot.children.length, 0)
+    assert.equal(authoredMounts, 1)
+
+    const fitting = mountAt(703, {
+      messages: ["one", "two", "three", "four", "done"],
+      watchRows: null,
+      summary: "Result fits.",
+    })
+    compactClick(findByAttribute(fitting.root, "aria-label", "Trace"))
+    const fittingLog = findByClass(fitting.root, "steptrace__log")
+    fittingLog.clientHeight = 30
+    const fittingForward = findByAttribute(fitting.root, "aria-label", "Step forward")
+    compactClick(fittingForward)
+    compactClick(fittingForward)
+    compactClick(fittingForward)
+    for (const line of findAllByClass(fitting.root, "steptrace__log-line"))
+      line.rect = { left: 0, top: 0, width: 300, height: 10 }
+    triggerResize(fitting.root)
+    assert.deepEqual(
+      visibleLogRows(fitting.root).map(
+        (row) => findByClass(row, "steptrace__log-text")?.textContent,
+      ),
+      ["two", "three", "four"],
+    )
+
+    const currentLine = findAllByClass(fitting.root, "steptrace__log-line").find((line) =>
+      line.classList.contains("steptrace__log-line--cur"),
+    )
+    currentLine.rect.height = 30
+    triggerResize(fitting.root)
+    assert.deepEqual(visibleLogRows(fitting.root), [currentLine])
+
+    currentLine.rect.height = 10
+    const previousLine = findAllByClass(fitting.root, "steptrace__log-line").find(
+      (line) => findByClass(line, "steptrace__log-text")?.textContent === "three",
+    )
+    previousLine.rect.height = 20
+    triggerResize(fitting.root)
+    assert.deepEqual(
+      visibleLogRows(fitting.root).map(
+        (row) => findByClass(row, "steptrace__log-text")?.textContent,
+      ),
+      ["three", "four"],
+    )
+
+    compactClick(fittingForward)
+    const result = findByClass(fitting.root, "steptrace__insight")
+    result.rect = { left: 0, top: 0, width: 300, height: 30 }
+    triggerResize(fitting.root)
+    assert.equal(result.hidden, false)
+    assert.equal(findByClass(result, "steptrace__insight-text").textContent, "Result fits.")
+    assert.deepEqual(visibleLogRows(fitting.root), [result])
+
+    const compactObservers = resizeObservers.filter((observer) =>
+      observer.observed.includes(compact.root),
+    )
+    compact.handle.destroy()
+    assert.ok(compactObservers.every((observer) => observer.disconnected))
+    assert.equal(compact.root.classList.contains("steptrace--narrow"), false)
+    assert.equal(compact.root.children.length, 0)
+    assert.equal((compact.root.listeners.get("keydown") || []).length, 0)
+
+    const remount = mountAt(703)
+    assert.equal(
+      findByAttribute(remount.root, "aria-label", "Trace").attributes.get("aria-pressed"),
+      "false",
+    )
+    assert.equal(findByClass(remount.root, "steptrace__trace").hidden, true)
+    const remountTrace = findByAttribute(remount.root, "aria-label", "Trace")
+    const remountRegion = findByClass(remount.root, "steptrace__rail-region")
+    findByClass(remount.root, "steptrace__trace").rect = {
+      left: 0,
+      top: 0,
+      width: 300,
+      height: 80,
+    }
+    remountRegion.rect = () => ({
+      left: 0,
+      top: 0,
+      width: 300,
+      height: findByClass(remount.root, "steptrace__trace").hidden ? 0 : 80,
+    })
+    compactClick(remountTrace)
+    assert.equal(animationFrames.size, 1)
+    remount.handle.destroy()
+    assert.equal(animationFrames.size, 0)
+    assert.equal(railTimers.size, 0)
+
+    for (const mounted of [initiallyZero, noWatch, fitting]) mounted.handle.destroy()
+
+    globalThis.requestAnimationFrame = previous.requestAnimationFrame
+    globalThis.cancelAnimationFrame = previous.cancelAnimationFrame
+    globalThis.setTimeout = previous.setTimeout
+    globalThis.clearTimeout = previous.clearTimeout
+
     const api = loadEngine(readFileSync(join(here, "generated", "engine.js"), "utf8"))
     for (const [file, algorithm] of [
       ["Exponential Search.md", "exponential-search"],
@@ -6441,7 +8036,10 @@ test("production mount verifies persistent structures, binary ordered trees, and
       pattern: "ABAC",
     })
     const rabinPhaseCopy = findByClass(rabinRoot, "steptrace__phase-copy")
-    assert.match(rabinPhaseCopy.textContent, /Rabin-Karp search/)
+    assert.match(
+      rabinPhaseCopy.textContent,
+      /Rabin-Karp for "ABAC" — slide rolling hashes; verify text only on hash collision \(\d+\)\./,
+    )
     findByAttribute(rabinRoot, "aria-label", "Step forward").listeners.get("click")[0]()
     assert.equal(rabinPhaseCopy.textContent, "")
     assert.match(
@@ -7370,21 +8968,9 @@ test("production mount verifies persistent structures, binary ordered trees, and
     const hashMediaIndex = mediaQueries.length
     const hashRoot = new FakeNode("div")
     const hashHandle = api.mount(hashRoot, {
-      tabs: [
-        {
-          name: "Closed Addressing",
-          algorithm: "hash-map",
-          variant: "closed-addressing",
-        },
-        {
-          name: "Open Addressing",
-          algorithm: "hash-map",
-          variant: "open-addressing",
-        },
-        { name: "Bucket Hashing", algorithm: "hash-map", variant: "buckets" },
-      ],
+      algorithm: "hash-map",
+      variant: "closed-addressing",
     })
-    const tabButtons = findAllByClass(hashRoot, "steptrace__tab")
     const closedRoot = currentHashRoot(hashRoot, 0)
     const closedKey = hashInput(closedRoot, "Hash map key")
     const closedValue = hashInput(closedRoot, "Hash map value")
@@ -7394,7 +8980,6 @@ test("production mount verifies persistent structures, binary ordered trees, and
       ...findAllByClass(closedRoot, "steptrace__structure-action"),
     ]
 
-    assert.equal(tabButtons.length, 3)
     assert.equal(closedRoot.dataset.visualFamily, "hash-index")
     assert.equal(findAllByClass(closedRoot, "steptrace__hash-cell").length, 12)
     assert.equal(findByClass(closedRoot, "steptrace__hash-buckets").attributes.get("role"), "list")
@@ -7615,8 +9200,12 @@ test("production mount verifies persistent structures, binary ordered trees, and
     assert.equal(closedChains[10].attributes.has("aria-label"), false)
     putHash(closedRoot, 22, "B")
 
-    click(tabButtons[1])
-    const openRoot = currentHashRoot(hashRoot, 1)
+    const openContainer = new FakeNode("div")
+    const openHandle = api.mount(openContainer, {
+      algorithm: "hash-map",
+      variant: "open-addressing",
+    })
+    const openRoot = currentHashRoot(openContainer, 0)
     assert.ok(
       findAllByClass(openRoot, "steptrace__hash-cell").every((cell) => cell.dataset.empty === "1"),
     )
@@ -7729,8 +9318,12 @@ test("production mount verifies persistent structures, binary ordered trees, and
     )
 
     mediaMatches = false
-    click(tabButtons[2])
-    const bucketRoot = currentHashRoot(hashRoot, 2)
+    const bucketContainer = new FakeNode("div")
+    const bucketHandle = api.mount(bucketContainer, {
+      algorithm: "hash-map",
+      variant: "buckets",
+    })
+    const bucketRoot = currentHashRoot(bucketContainer, 0)
     assert.equal(findByClass(bucketRoot, "steptrace__hash-buckets").dataset.strategy, "buckets")
     for (const [key, value] of [
       [3, "A"],
@@ -7792,7 +9385,6 @@ test("production mount verifies persistent structures, binary ordered trees, and
       /Removed key 7 from bucket 3, cell 10/,
     )
 
-    click(tabButtons[0])
     click(hashButton(closedRoot, "Reset"))
     for (const [key, value] of [
       [1, "A"],
@@ -8024,7 +9616,11 @@ test("production mount verifies persistent structures, binary ordered trees, and
     click(hashButton(closedRoot, "Put"))
     assert.equal(motionTimers.size, 1)
     const hashMedia = mediaQueries.slice(hashMediaIndex)
+    bucketHandle.destroy()
+    openHandle.destroy()
     hashHandle.destroy()
+    assert.equal(bucketContainer.children.length, 0)
+    assert.equal(openContainer.children.length, 0)
     assert.equal(hashRoot.children.length, 0)
     assert.equal(motionTimers.size, 0)
     assert.ok(hashMedia.every((query) => query.listeners.length === 0))
@@ -8535,6 +10131,11 @@ test("production mount verifies persistent structures, binary ordered trees, and
     globalThis.matchMedia = previous.matchMedia
     globalThis.getComputedStyle = previous.getComputedStyle
     globalThis.ResizeObserver = previous.ResizeObserver
+    globalThis.requestAnimationFrame = previous.requestAnimationFrame
+    globalThis.cancelAnimationFrame = previous.cancelAnimationFrame
+    globalThis.setTimeout = previous.setTimeout
+    globalThis.clearTimeout = previous.clearTimeout
+    globalThis.MutationObserver = previous.MutationObserver
   }
 })
 
@@ -8550,23 +10151,7 @@ test("contiguous structures share one persistent direct-operation contract in bo
   const styleEntry = readFileSync(join(here, "src", "styles", "index.scss"), "utf8")
   const algorithms = readFileSync(join(here, "src", "algorithms", "index.ts"), "utf8")
   const mount = readFileSync(join(here, "src", "mount.ts"), "utf8")
-  const quartzCss = readFileSync(join(here, "generated", "engine.css"), "utf8")
-  const obsidianCss = readFileSync(
-    join(repoRoot, "Vault", ".obsidian", "plugins", "steptrace", "styles.css"),
-    "utf8",
-  )
-  const note = readFileSync(
-    join(
-      repoRoot,
-      "Vault",
-      "Home",
-      "Computer Science",
-      "Data Structures",
-      "Linear Structures",
-      "Queue.md",
-    ),
-    "utf8",
-  )
+  const note = csNote("Data Structures", "Linear Structures", "Queue.md")
   assert.match(mount, /structureRegistry\.get\(config\.algorithm\)/)
   assert.match(structure, /function createStructureShell\(/)
   assert.match(structure, /function createIndexedBoard\(/)
@@ -8640,26 +10225,8 @@ test("Union-Find is a persistent rank-and-compression forest in both hosts", () 
   const algorithms = readFileSync(join(here, "src", "algorithms", "index.ts"), "utf8")
   const family = readFileSync(join(here, "src", "families", "union-find.ts"), "utf8")
   const styles = readFileSync(join(here, "src", "styles", "unionfind.scss"), "utf8")
-  const quartzJs = readFileSync(join(here, "generated", "engine.js"), "utf8")
-  const quartzCss = readFileSync(join(here, "generated", "engine.css"), "utf8")
-  const obsidianJs = readFileSync(
-    join(repoRoot, "Vault", ".obsidian", "plugins", "steptrace", "main.js"),
-    "utf8",
-  )
-  const obsidianCss = readFileSync(
-    join(repoRoot, "Vault", ".obsidian", "plugins", "steptrace", "styles.css"),
-    "utf8",
-  )
-  const notesRoot = join(
-    repoRoot,
-    "Vault",
-    "Home",
-    "Computer Science",
-    "Data Structures",
-    "Graph Structures",
-  )
-  const disjointSet = readFileSync(join(notesRoot, "Disjoint Set.md"), "utf8")
-  const unionFind = readFileSync(join(notesRoot, "Union-Find.md"), "utf8")
+  const disjointSet = csNote("Data Structures", "Graph Structures", "Disjoint Set.md")
+  const unionFind = csNote("Data Structures", "Graph Structures", "Union-Find.md")
 
   assert.match(algorithm, /family: "union-find"/)
   assert.match(algorithm, /mount: mountUnionFind/)
@@ -8680,7 +10247,6 @@ test("Union-Find is a persistent rank-and-compression forest in both hosts", () 
   assert.match(styles, /\.steptrace__union-find-parent-label \{[^}]*border-top:/s)
   for (const note of [disjointSet, unionFind]) {
     assert.match(note, /```steptrace\n\{"algorithm":"union-find","n":7\}\n```/)
-    assert.match(note, /# Interactive Forest/)
     assert.doesNotMatch(note, /Visualization pending/)
   }
   for (const artifact of [quartzJs, obsidianJs]) {
@@ -8700,28 +10266,7 @@ test("Fenwick Tree exposes persistent low-bit blocks for updates and range sums"
   const family = readFileSync(join(here, "src", "families", "range-aggregate.ts"), "utf8")
   const styles = readFileSync(join(here, "src", "styles", "range-aggregate.scss"), "utf8")
   const styleEntry = readFileSync(join(here, "src", "styles", "index.scss"), "utf8")
-  const quartzJs = readFileSync(join(here, "generated", "engine.js"), "utf8")
-  const quartzCss = readFileSync(join(here, "generated", "engine.css"), "utf8")
-  const obsidianJs = readFileSync(
-    join(repoRoot, "Vault", ".obsidian", "plugins", "steptrace", "main.js"),
-    "utf8",
-  )
-  const obsidianCss = readFileSync(
-    join(repoRoot, "Vault", ".obsidian", "plugins", "steptrace", "styles.css"),
-    "utf8",
-  )
-  const note = readFileSync(
-    join(
-      repoRoot,
-      "Vault",
-      "Home",
-      "Computer Science",
-      "Data Structures",
-      "Trees",
-      "Fenwick Tree.md",
-    ),
-    "utf8",
-  )
+  const note = csNote("Data Structures", "Trees", "Fenwick Tree.md")
 
   assert.match(algorithm, /family: "range-aggregate"/)
   assert.match(algorithm, /4 to 8 finite integer values/)
@@ -8759,29 +10304,7 @@ test("Heap is registered as one direct persistent structure in both hosts", () =
   const family = readFileSync(join(here, "src", "families", "heap-structure.ts"), "utf8")
   const selectionFamily = readFileSync(join(here, "src", "families", "heap-selection.ts"), "utf8")
   const styles = readFileSync(join(here, "src", "styles", "heap-selection.scss"), "utf8")
-  const quartzJs = readFileSync(join(here, "generated", "engine.js"), "utf8")
-  const quartzCss = readFileSync(join(here, "generated", "engine.css"), "utf8")
-  const obsidianJs = readFileSync(
-    join(repoRoot, "Vault", ".obsidian", "plugins", "steptrace", "main.js"),
-    "utf8",
-  )
-  const obsidianCss = readFileSync(
-    join(repoRoot, "Vault", ".obsidian", "plugins", "steptrace", "styles.css"),
-    "utf8",
-  )
-  const note = readFileSync(
-    join(
-      repoRoot,
-      "Vault",
-      "Home",
-      "Computer Science",
-      "Data Structures",
-      "Trees",
-      "Heap-like",
-      "Heap.md",
-    ),
-    "utf8",
-  )
+  const note = csNote("Data Structures", "Trees", "Heap-like", "Heap.md")
 
   assert.match(algorithm, /family: "heap-selection"/)
   assert.match(algorithm, /finite integer values/)
@@ -8819,29 +10342,7 @@ test("Stack is a vertical persistent direct-control structure in both hosts", ()
   const algorithms = readFileSync(join(here, "src", "algorithms", "index.ts"), "utf8")
   const family = readFileSync(join(here, "src", "families", "stack-sequence.ts"), "utf8")
   const styles = readFileSync(join(here, "src", "styles", "stack-sequence.scss"), "utf8")
-  const quartzJs = readFileSync(join(here, "generated", "engine.js"), "utf8")
-  const quartzCss = readFileSync(join(here, "generated", "engine.css"), "utf8")
-  const obsidianJs = readFileSync(
-    join(repoRoot, "Vault", ".obsidian", "plugins", "steptrace", "main.js"),
-    "utf8",
-  )
-  const obsidianCss = readFileSync(
-    join(repoRoot, "Vault", ".obsidian", "plugins", "steptrace", "styles.css"),
-    "utf8",
-  )
-  const note = readFileSync(
-    join(
-      repoRoot,
-      "Vault",
-      "Home",
-      "Computer Science",
-      "Data Structures",
-      "Linear Structures",
-      "Stack.md",
-    ),
-    "utf8",
-  )
-  const harness = readFileSync(join(repoRoot, "g041-stack-review.html"), "utf8")
+  const note = csNote("Data Structures", "Linear Structures", "Stack.md")
 
   assert.deepEqual(
     parseStackConfig({
@@ -8895,7 +10396,6 @@ test("Stack is a vertical persistent direct-control structure in both hosts", ()
     /\.steptrace__stack-controls \.steptrace__structure-input,[\s\S]*grid-column: 1 \/ -1/,
   )
   assert.match(styles, /@media \(prefers-reduced-motion: reduce\)/)
-  assert.match(harness, /--st-on-accent: #18210f/)
   assert.ok(contrastRatio("#18210f", "#92bd58") >= 4.5)
   assert.match(
     note,
@@ -8917,28 +10417,8 @@ test("LinkedList exposes direct singly and doubly linked append controls in both
   const family = readFileSync(join(here, "src", "families", "linked-topology.ts"), "utf8")
   const listFamily = family.slice(0, family.indexOf("export interface LinkedTopologyNode"))
   const styles = readFileSync(join(here, "src", "styles", "linked-topology.scss"), "utf8")
-  const quartzJs = readFileSync(join(here, "generated", "engine.js"), "utf8")
-  const quartzCss = readFileSync(join(here, "generated", "engine.css"), "utf8")
-  const obsidianJs = readFileSync(
-    join(repoRoot, "Vault", ".obsidian", "plugins", "steptrace", "main.js"),
-    "utf8",
-  )
-  const obsidianCss = readFileSync(
-    join(repoRoot, "Vault", ".obsidian", "plugins", "steptrace", "styles.css"),
-    "utf8",
-  )
-  const note = readFileSync(
-    join(
-      repoRoot,
-      "Vault",
-      "Home",
-      "Computer Science",
-      "Data Structures",
-      "Linear Structures",
-      "LinkedList.md",
-    ),
-    "utf8",
-  )
+  const note = csNote("Data Structures", "Linear Structures", "LinkedList.md")
+  const { configs } = parseAuthoredStepTraceTabs(note)
 
   assert.deepEqual(parseLinkedListConfig({ algorithm: "linked-list" }), {
     values: [12, 27, 39, 54],
@@ -9014,10 +10494,25 @@ test("LinkedList exposes direct singly and doubly linked append controls in both
   assert.doesNotMatch(styles, /\.steptrace__linked-list-cell \{[^}]*block-size: 7\.5rem;/s)
   assert.match(styles, /\[data-relinked="1"\][\s\S]*\[data-pointer="next"\]/)
   assert.match(styles, /@keyframes steptrace-linked-list-append/)
-  assert.match(
-    note,
-    /```steptrace\n\{"tabs":\[\{"name":"Singly linked"[\s\S]*"variant":"doubly"[\s\S]*\]\}\n```/,
-  )
+  assert.deepEqual(configs, [
+    [
+      {
+        label: "Singly linked",
+        description: "",
+        selectedInitially: true,
+        payload: '{"algorithm":"linked-list","variant":"singly","array":[12,27,39,54]}',
+        payloadSha256: "5b25fea4c6ed4113617b93d53ca87a41b7a0c5ffcbbea39bc61a01d6de6432af",
+      },
+      {
+        label: "Doubly linked",
+        description: "",
+        selectedInitially: false,
+        payload: '{"algorithm":"linked-list","variant":"doubly","array":[12,27,39,54]}',
+        payloadSha256: "31226d9e5b14a8de1be9ce10b0825b5fac6fde29822b6713ab716513c446fbd9",
+      },
+    ],
+  ])
+  assert.doesNotMatch(note, /```steptrace\n\{"tabs":/)
   assert.doesNotMatch(note, /Visualization pending/)
   for (const artifact of [quartzJs, obsidianJs]) {
     assert.match(artifact, /Interactive \$\{config\.variant\} linked list/)
@@ -9032,23 +10527,7 @@ test("LRU Cache keeps one map and address-linked MRU-to-LRU chain in both hosts"
   const algorithms = readFileSync(join(here, "src", "algorithms", "index.ts"), "utf8")
   const family = readFileSync(join(here, "src", "families", "linked-topology.ts"), "utf8")
   const styles = readFileSync(join(here, "src", "styles", "linked-topology.scss"), "utf8")
-  const note = readFileSync(
-    join(
-      repoRoot,
-      "Vault",
-      "Home",
-      "Computer Science",
-      "Data Structures",
-      "Composite Structures",
-      "LRU Cache.md",
-    ),
-    "utf8",
-  )
-  const quartzJs = readFileSync(join(here, "generated", "engine.js"), "utf8")
-  const obsidianJs = readFileSync(
-    join(repoRoot, "Vault", ".obsidian", "plugins", "steptrace", "main.js"),
-    "utf8",
-  )
+  const note = csNote("Data Structures", "Composite Structures", "LRU Cache.md")
 
   assert.match(algorithms, /import \{ lruCache \} from "\.\/lru-cache"/)
   assert.match(algorithms, /interactiveStructures = \[[\s\S]*lruCache,/)
@@ -9103,16 +10582,6 @@ test("meldable heap variants reuse one persistent forest family in both hosts", 
   const algorithms = readFileSync(join(here, "src", "algorithms", "index.ts"), "utf8")
   const family = readFileSync(join(here, "src", "families", "heap-structure.ts"), "utf8")
   const styles = readFileSync(join(here, "src", "styles", "heap-selection.scss"), "utf8")
-  const quartzJs = readFileSync(join(here, "generated", "engine.js"), "utf8")
-  const quartzCss = readFileSync(join(here, "generated", "engine.css"), "utf8")
-  const obsidianJs = readFileSync(
-    join(repoRoot, "Vault", ".obsidian", "plugins", "steptrace", "main.js"),
-    "utf8",
-  )
-  const obsidianCss = readFileSync(
-    join(repoRoot, "Vault", ".obsidian", "plugins", "steptrace", "styles.css"),
-    "utf8",
-  )
   const noteRoot = join(
     repoRoot,
     "Vault",
@@ -9165,23 +10634,7 @@ test("Segment Tree reuses range blocks for point assignment and canonical range 
   const algorithms = readFileSync(join(here, "src", "algorithms", "index.ts"), "utf8")
   const family = readFileSync(join(here, "src", "families", "range-aggregate.ts"), "utf8")
   const styles = readFileSync(join(here, "src", "styles", "range-aggregate.scss"), "utf8")
-  const quartzJs = readFileSync(join(here, "generated", "engine.js"), "utf8")
-  const obsidianJs = readFileSync(
-    join(repoRoot, "Vault", ".obsidian", "plugins", "steptrace", "main.js"),
-    "utf8",
-  )
-  const note = readFileSync(
-    join(
-      repoRoot,
-      "Vault",
-      "Home",
-      "Computer Science",
-      "Data Structures",
-      "Trees",
-      "Segment Tree.md",
-    ),
-    "utf8",
-  )
+  const note = csNote("Data Structures", "Trees", "Segment Tree.md")
 
   assert.match(algorithm, /family: "range-aggregate"/)
   assert.match(algorithm, /4 to 8 finite integer values/)
@@ -9204,7 +10657,7 @@ test("Segment Tree reuses range blocks for point assignment and canonical range 
   }
 })
 
-test("HashMap shares one fixed 12-cell renderer across three tabbed collision strategies", () => {
+test("HashMap shares one fixed 12-cell renderer across three collision strategies", () => {
   const algorithm = readFileSync(join(here, "src", "algorithms", "hash-map.ts"), "utf8")
   const family = readFileSync(join(here, "src", "families", "hash-index.ts"), "utf8")
   const styles = readFileSync(join(here, "src", "styles", "hash-index.scss"), "utf8")
@@ -9214,29 +10667,7 @@ test("HashMap shares one fixed 12-cell renderer across three tabbed collision st
   )
   const algorithms = readFileSync(join(here, "src", "algorithms", "index.ts"), "utf8")
   const styleEntry = readFileSync(join(here, "src", "styles", "index.scss"), "utf8")
-  const mount = readFileSync(join(here, "src", "mount.ts"), "utf8")
-  const quartzJs = readFileSync(join(here, "generated", "engine.js"), "utf8")
-  const quartzCss = readFileSync(join(here, "generated", "engine.css"), "utf8")
-  const obsidianJs = readFileSync(
-    join(repoRoot, "Vault", ".obsidian", "plugins", "steptrace", "main.js"),
-    "utf8",
-  )
-  const obsidianCss = readFileSync(
-    join(repoRoot, "Vault", ".obsidian", "plugins", "steptrace", "styles.css"),
-    "utf8",
-  )
-  const note = readFileSync(
-    join(
-      repoRoot,
-      "Vault",
-      "Home",
-      "Computer Science",
-      "Data Structures",
-      "Hash-based Structures",
-      "HashMap.md",
-    ),
-    "utf8",
-  )
+  const note = csNote("Data Structures", "Hash-based Structures", "HashMap.md")
   const closedSource = family.slice(
     family.indexOf("function closedPath"),
     family.indexOf("function openProbe"),
@@ -9245,6 +10676,28 @@ test("HashMap shares one fixed 12-cell renderer across three tabbed collision st
     family.indexOf('if (plan.finish === "put" && target)'),
     family.indexOf('if (plan.finish === "search-hit" && target)'),
   )
+  const { parseTabs } = loadStepTraceModule(
+    "..",
+    "..",
+    ".quartz",
+    "plugins",
+    "quartz-tabsdown",
+    "src",
+    "parser.ts",
+  )
+  const outerFence = note.match(/~~~~~tabsdown\n([\s\S]*?)\n~~~~~/)
+  assert.ok(outerFence)
+  const outerTabs = parseTabs(outerFence[1])
+  assert.equal(outerTabs.ok, true)
+  const innerFence = outerTabs.tabs[0].body.match(/(~~~~)tabsdown\n([\s\S]*?)\n\1/)
+  assert.ok(innerFence)
+  const innerTabs = parseTabs(innerFence[2])
+  assert.equal(innerTabs.ok, true)
+  const variantPayloads = innerTabs.tabs.map(({ body }) => {
+    const payload = body.match(/```steptrace\n([^\n]+)\n```/)?.[1]
+    assert.ok(payload)
+    return JSON.parse(payload)
+  })
 
   assert.match(algorithm, /id: "hash-map"/)
   assert.match(algorithm, /family: "hash-index"/)
@@ -9331,7 +10784,6 @@ test("HashMap shares one fixed 12-cell renderer across three tabbed collision st
   assert.doesNotMatch(family, /steptrace__tab/)
   assert.doesNotMatch(family, /LOAD_THRESHOLD|capacity \*=|rehash/)
   assert.doesNotMatch(family, /\bPlayer\b|\btimeline\b|\bframes\b|\bTrace\b/)
-  assert.match(mount, /if \(!handles\[next\]\) handles\[next\] = mount\(panelMounts\[next\]/)
   assert.match(structureStyles, /--steptrace-structure-control-size: 2\.75rem/)
   assert.match(structureStyles, /@container steptrace-structure \(max-width: 36rem\)/)
   assert.match(styles, /grid-template-columns: repeat\(12, minmax\(0, 1fr\)\)/)
@@ -9435,15 +10887,110 @@ test("HashMap shares one fixed 12-cell renderer across three tabbed collision st
   assert.match(obsidianJs, /Interactive hash map using/)
   assert.match(quartzCss, /\.steptrace__hash-buckets/)
   assert.match(obsidianCss, /\.steptrace__hash-buckets/)
-  for (const name of ["Closed Addressing", "Open Addressing", "Bucket Hashing"])
-    assert.match(note, new RegExp(`"name":"${name}"`))
-  for (const variant of ["closed-addressing", "open-addressing", "buckets"])
-    assert.match(note, new RegExp(`"variant":"${variant}"`))
+  assert.deepEqual(
+    innerTabs.tabs.map(({ label }) => label),
+    ["Closed Addressing", "Open Addressing", "Bucket Hashing"],
+  )
+  assert.deepEqual(
+    innerTabs.tabs.map(({ body }) => body.split("```steptrace")[0].trim()),
+    ["", "", ""],
+  )
+  assert.deepEqual(variantPayloads, [
+    { algorithm: "hash-map", variant: "closed-addressing" },
+    { algorithm: "hash-map", variant: "open-addressing" },
+    { algorithm: "hash-map", variant: "buckets" },
+  ])
+  assert.equal(note.match(/```steptrace\n/g)?.length, 3)
+  assert.ok(variantPayloads.every((payload) => !("tabs" in payload)))
+  assert.doesNotMatch(note, /```steptrace\n\{"tabs":/)
   assert.match(note, /each bucket points to its own external key\/value chain/)
   assert.match(note, /production maps usually resize or rebuild after crossing a load threshold/)
   assert.doesNotMatch(family, /\bmod\b/)
   assert.doesNotMatch(note, /\bmod\b/)
   assert.doesNotMatch(note, /Visualization pending/)
+})
+
+test("multi-variant notes preserve six authored Tabsdown configurations and 22 flat destinations", () => {
+  const manifests = [
+    {
+      path: ["Algorithms", "Graph Algorithms", "A-Star Search.md"],
+      hashes: [
+        [
+          "213fe177ff28dff6051c899d623ad0e612a661b7fdce39f7fe780b64d35615b7",
+          "d0368cc3da2dabfc5139b226800ac19f7ae62618693ab00cd6230f25a5dbf67a",
+          "aa35da93f40211db922f8ab1d8682d66b4a2e1c5886e849ce52b12b6b6a309f0",
+          "0e0db4a485d15540bbce51702927960388fec4fa80c405fe881b7f4ff9cdae40",
+        ],
+      ],
+    },
+    {
+      path: ["Algorithms", "Paradigms", "Dynamic Programming.md"],
+      hashes: [
+        [
+          "cdbbe1fc8aa0816cc093930e8c6fc6b97480b409bb4d9222b64de3193a6a0120",
+          "97684b72d8cd5110cf38a80822e2d87178e14a141d163b76f6b10417d9320348",
+          "7a255cdb3272f389aae87dbbdd992bae76b977c6d50552d0fa00c9ac5d7a463d",
+          "e51d8d56c1cec13c0801a8a616be7b7b8c800da740de6c1808ef6d82c11717ca",
+          "647a5a866a4ccd1d5a89e46db48d0f0f6489e8a5870d1010b05f00ec48e50a17",
+        ],
+        [
+          "0692960f74524319643b433346632cbed1b82a147e7b6344a337523d735cb9d6",
+          "129df14978e94d2c3a4d97777b67017254684d3ea9032df3a78d209ca812a179",
+          "6498b7338d8f05b754a4e216d4ad5b2ea03686642a1e4deb2bf484c0c357cec5",
+          "1158ddecce22d962ad76b1faf6aa20cf65c776ecbc129fb23b01b1b16b7a609f",
+          "f3e17236421b58a4aa44686a917f090b94f1e5c198ba54dba4909b934e4ba366",
+        ],
+      ],
+    },
+    {
+      path: ["Data Structures", "Linear Structures", "LinkedList.md"],
+      hashes: [
+        [
+          "5b25fea4c6ed4113617b93d53ca87a41b7a0c5ffcbbea39bc61a01d6de6432af",
+          "31226d9e5b14a8de1be9ce10b0825b5fac6fde29822b6713ab716513c446fbd9",
+        ],
+      ],
+    },
+    {
+      path: ["Data Structures", "Hash-based Structures", "HashMap.md"],
+      hashes: [
+        [
+          "23f1a1ef313a043891e63b67cf08cae16555b5ad4b5e79dd450dac06c7730ccd",
+          "63d82ce5b58e5af93b234e51c039653c4e2bac0f4d76b29c37af1f448226b069",
+          "a734c140daa934b54fab65b8bbd9adb731dc2d378a1282500cbaf4ba10a58bd9",
+        ],
+      ],
+    },
+    {
+      path: ["Data Structures", "Hash-based Structures", "Collision Resolution.md"],
+      hashes: [
+        [
+          "23f1a1ef313a043891e63b67cf08cae16555b5ad4b5e79dd450dac06c7730ccd",
+          "63d82ce5b58e5af93b234e51c039653c4e2bac0f4d76b29c37af1f448226b069",
+          "a734c140daa934b54fab65b8bbd9adb731dc2d378a1282500cbaf4ba10a58bd9",
+        ],
+      ],
+    },
+  ]
+  let destinationCount = 0
+  let fenceCount = 0
+  const parsed = manifests.map(({ path, hashes }) => {
+    const note = readFileSync(join(repoRoot, "Vault", "Home", "Computer Science", ...path), "utf8")
+    const { configs } = parseAuthoredStepTraceTabs(note)
+    assert.deepEqual(
+      configs.map((config) => config.map(({ payloadSha256 }) => payloadSha256)),
+      hashes,
+    )
+    assert.doesNotMatch(note, /```steptrace\n\{"tabs":/)
+    destinationCount += configs.flat().length
+    fenceCount += note.match(/```steptrace\n/g)?.length ?? 0
+    return configs
+  })
+
+  assert.equal(parsed.flat().length, 6)
+  assert.equal(destinationCount, 22)
+  assert.equal(fenceCount, 22)
+  assert.deepEqual(parsed[4], parsed[3])
 })
 
 test("Hash Set and Bloom Filter reuse the persistent hash-index board with direct operations", () => {
@@ -9452,29 +10999,13 @@ test("Hash Set and Bloom Filter reuse the persistent hash-index board with direc
   const bloomFilter = readFileSync(join(here, "src", "algorithms", "bloom-filter.ts"), "utf8")
   const algorithms = readFileSync(join(here, "src", "algorithms", "index.ts"), "utf8")
   const styles = readFileSync(join(here, "src", "styles", "hash-index.scss"), "utf8")
-  const quartzJs = readFileSync(join(here, "generated", "engine.js"), "utf8")
-  const quartzCss = readFileSync(join(here, "generated", "engine.css"), "utf8")
-  const obsidianJs = readFileSync(
-    join(repoRoot, "Vault", ".obsidian", "plugins", "steptrace", "main.js"),
-    "utf8",
-  )
-  const obsidianCss = readFileSync(
-    join(repoRoot, "Vault", ".obsidian", "plugins", "steptrace", "styles.css"),
-    "utf8",
-  )
-  const notesRoot = join(
-    repoRoot,
-    "Vault",
-    "Home",
-    "Computer Science",
+  const collisionNote = csNote(
     "Data Structures",
     "Hash-based Structures",
+    "Collision Resolution.md",
   )
-  const mapNote = readFileSync(join(notesRoot, "HashMap.md"), "utf8")
-  const collisionNote = readFileSync(join(notesRoot, "Collision Resolution.md"), "utf8")
-  const setNote = readFileSync(join(notesRoot, "Hash Set.md"), "utf8")
-  const bloomNote = readFileSync(join(notesRoot, "Bloom Filter.md"), "utf8")
-  const tabConfig = (note) => note.match(/```steptrace\n(\{"tabs":.+\})\n```/)?.[1]
+  const setNote = csNote("Data Structures", "Hash-based Structures", "Hash Set.md")
+  const bloomNote = csNote("Data Structures", "Hash-based Structures", "Bloom Filter.md")
 
   assert.match(hashSet, /id: "hash-set"/)
   assert.match(hashSet, /family: "hash-index"/)
@@ -9509,7 +11040,6 @@ test("Hash Set and Bloom Filter reuse the persistent hash-index board with direc
     /\.steptrace__hash-controls\[data-mode="bloom"\] \.steptrace__hash-actions \{[^}]*repeat\(3,/s,
   )
   assert.doesNotMatch(styles, /overflow-x:\s*(auto|scroll)/)
-  assert.equal(tabConfig(collisionNote), tabConfig(mapNote))
   assert.match(setNote, /```steptrace\n\{"algorithm":"hash-set"\}\n```/)
   assert.match(bloomNote, /```steptrace\n\{"algorithm":"bloom-filter"\}\n```/)
   for (const note of [collisionNote, setNote, bloomNote])
@@ -9570,28 +11100,7 @@ test("Graph registers one synchronized persistent representation in both hosts",
   const family = readFileSync(join(here, "src", "families", "graph-representation.ts"), "utf8")
   const styles = readFileSync(join(here, "src", "styles", "graph-representation.scss"), "utf8")
   const styleEntry = readFileSync(join(here, "src", "styles", "index.scss"), "utf8")
-  const quartzJs = readFileSync(join(here, "generated", "engine.js"), "utf8")
-  const quartzCss = readFileSync(join(here, "generated", "engine.css"), "utf8")
-  const obsidianJs = readFileSync(
-    join(repoRoot, "Vault", ".obsidian", "plugins", "steptrace", "main.js"),
-    "utf8",
-  )
-  const obsidianCss = readFileSync(
-    join(repoRoot, "Vault", ".obsidian", "plugins", "steptrace", "styles.css"),
-    "utf8",
-  )
-  const note = readFileSync(
-    join(
-      repoRoot,
-      "Vault",
-      "Home",
-      "Computer Science",
-      "Data Structures",
-      "Graph Structures",
-      "Graph.md",
-    ),
-    "utf8",
-  )
+  const note = csNote("Data Structures", "Graph Structures", "Graph.md")
   const topologyStyles =
     styles.match(/\.steptrace \.steptrace__graph-rep-topology \{[^}]*\}/s)?.[0] || ""
 
@@ -9679,20 +11188,7 @@ test("AVL Tree registers one persistent balanced binary-tree prototype in both h
   const family = readFileSync(join(here, "src", "families", "binary-tree.ts"), "utf8")
   const styles = readFileSync(join(here, "src", "styles", "binary-tree.scss"), "utf8")
   const styleEntry = readFileSync(join(here, "src", "styles", "index.scss"), "utf8")
-  const quartzJs = readFileSync(join(here, "generated", "engine.js"), "utf8")
-  const quartzCss = readFileSync(join(here, "generated", "engine.css"), "utf8")
-  const obsidianJs = readFileSync(
-    join(repoRoot, "Vault", ".obsidian", "plugins", "steptrace", "main.js"),
-    "utf8",
-  )
-  const obsidianCss = readFileSync(
-    join(repoRoot, "Vault", ".obsidian", "plugins", "steptrace", "styles.css"),
-    "utf8",
-  )
-  const note = readFileSync(
-    join(repoRoot, "Vault", "Home", "Computer Science", "Data Structures", "Trees", "AVL Tree.md"),
-    "utf8",
-  )
+  const note = csNote("Data Structures", "Trees", "AVL Tree.md")
 
   assert.match(algorithm, /id: "avl-tree"/)
   assert.match(algorithm, /family: "binary-tree"/)
@@ -9746,11 +11242,6 @@ test("BST, red-black, and splay trees share the direct binary-tree contract in b
   const algorithms = readFileSync(join(here, "src", "algorithms", "index.ts"), "utf8")
   const family = readFileSync(join(here, "src", "families", "binary-tree.ts"), "utf8")
   const styles = readFileSync(join(here, "src", "styles", "binary-tree.scss"), "utf8")
-  const quartzJs = readFileSync(join(here, "generated", "engine.js"), "utf8")
-  const obsidianJs = readFileSync(
-    join(repoRoot, "Vault", ".obsidian", "plugins", "steptrace", "main.js"),
-    "utf8",
-  )
 
   for (const [id, file, fence] of [
     ["binary-search-tree", "Binary Search Tree.md", /"value":80/],
@@ -9896,24 +11387,8 @@ test("B-tree and B+ Tree register one direct responsive multiway-tree contract i
   const family = readFileSync(join(here, "src", "families", "multiway-tree.ts"), "utf8")
   const styles = readFileSync(join(here, "src", "styles", "multiway-tree.scss"), "utf8")
   const styleEntry = readFileSync(join(here, "src", "styles", "index.scss"), "utf8")
-  const quartzJs = readFileSync(join(here, "generated", "engine.js"), "utf8")
-  const quartzCss = readFileSync(join(here, "generated", "engine.css"), "utf8")
-  const obsidianJs = readFileSync(
-    join(repoRoot, "Vault", ".obsidian", "plugins", "steptrace", "main.js"),
-    "utf8",
-  )
-  const obsidianCss = readFileSync(
-    join(repoRoot, "Vault", ".obsidian", "plugins", "steptrace", "styles.css"),
-    "utf8",
-  )
-  const bTreeNote = readFileSync(
-    join(repoRoot, "Vault", "Home", "Computer Science", "Data Structures", "Trees", "B-tree.md"),
-    "utf8",
-  )
-  const bPlusNote = readFileSync(
-    join(repoRoot, "Vault", "Home", "Computer Science", "Data Structures", "Trees", "B+ Tree.md"),
-    "utf8",
-  )
+  const bTreeNote = csNote("Data Structures", "Trees", "B-tree.md")
+  const bPlusNote = csNote("Data Structures", "Trees", "B+ Tree.md")
 
   assert.match(algorithms, /import \{ bTree \} from "\.\/b-tree"/)
   assert.match(algorithms, /import \{ bPlusTree \} from "\.\/b-plus-tree"/)

@@ -1,5 +1,5 @@
 import { barHeightStyle, el, escapeHtml, makeLegend, statusEl } from "../render"
-import type { StepTraceConfig, StepTraceView, VisualFamily, WatchRow } from "../types"
+import type { StepTraceView, VisualFamily, WatchRow } from "../types"
 import {
   distributionLabel,
   distributionTokenLabels,
@@ -255,81 +255,6 @@ function phaseLabel(frame: BucketDistributionFrame) {
   if (frame.type === "gather") return "gather"
   if (frame.type === "pass-complete") return "pass complete"
   return "sorted"
-}
-
-function invalidConfig(message: string): never {
-  throw new Error(`steptrace: distribution-sort ${message}`)
-}
-
-function ensureIntegerArray(array: unknown, label: string) {
-  if (!Array.isArray(array) || array.length < 2)
-    invalidConfig(`requires a non-empty "${label}" array.`)
-  if (!array.every((value) => Number.isInteger(value)))
-    invalidConfig(`requires every "${label}" entry to be an integer.`)
-}
-
-function ensureNonNegativeSafeIntegerArray(array: unknown, label: string) {
-  ensureIntegerArray(array, label)
-  if (!(array as number[]).every((value) => Number.isSafeInteger(value) && value >= 0))
-    invalidConfig(`requires every "${label}" entry to be a non-negative safe integer.`)
-}
-
-function radixBucketLabels(radix: number) {
-  return Array.from({ length: radix }, (_, index) => String(index))
-}
-
-function rangeBucketLabels(bucketCount: number, min: number, max: number) {
-  const width = (max - min) / bucketCount
-  return Array.from({ length: bucketCount }, (_, index) => {
-    const start = min + index * width
-    const end = index === bucketCount - 1 ? max : min + (index + 1) * width
-    return `[${start.toFixed(1)}, ${end.toFixed(1)}${index === bucketCount - 1 ? "]" : ")"}`
-  })
-}
-
-export function parseRadixDistributionConfig(config: StepTraceConfig): RadixDistributionConfig {
-  const array = config.array as number[]
-  ensureNonNegativeSafeIntegerArray(array, "array")
-  const radix = Number(config.radix ?? 10)
-  if (!Number.isInteger(radix) || radix < 2 || radix > 16)
-    invalidConfig('requires a "radix" integer from 2 to 16.')
-  if (config.mode != null && String(config.mode).toUpperCase() !== "LSD")
-    invalidConfig('supports only the least-significant-digit "mode".')
-  const max = Math.max(...array)
-  const places: number[] = []
-  for (let place = 1; place <= max; place *= radix) places.push(place)
-  if (places.length === 0) places.push(1)
-  return {
-    profile: "radix",
-    array: array.slice(),
-    bucketCount: radix,
-    bucketLabels: radixBucketLabels(radix),
-    radix,
-    places,
-  }
-}
-
-export function parseRangeBucketDistributionConfig(
-  config: StepTraceConfig,
-): RangeBucketDistributionConfig {
-  const array = config.array as number[]
-  if (!Array.isArray(array) || array.length < 2)
-    invalidConfig('requires a non-empty "array" with at least two keys.')
-  if (!array.every((value) => Number.isFinite(value as number)))
-    invalidConfig('requires every "array" entry to be a finite number.')
-  const bucketCount = Number(config.bucketCount ?? 5)
-  if (!Number.isInteger(bucketCount) || bucketCount < 2 || bucketCount > 16)
-    invalidConfig('requires a "bucketCount" integer from 2 to 16.')
-  const min = Math.min(...array)
-  const max = Math.max(...array)
-  if (!(min >= 0 && max < 1))
-    invalidConfig("demonstrates bucket sort on values in the half-open range [0, 1).")
-  return {
-    profile: "bucket",
-    array: array.slice(),
-    bucketCount,
-    bucketLabels: rangeBucketLabels(bucketCount, 0, 1),
-  }
 }
 
 function activeValue(frame: BucketDistributionFrame) {

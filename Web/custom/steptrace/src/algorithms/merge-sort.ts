@@ -6,9 +6,7 @@ export const mergeSort = {
   meta: { label: "Merge sort" },
   run: (input, ops) => {
     const n = ops.value.length
-    ops.init(
-      "Merge sort — start with runs of length 1, then repeatedly merge adjacent runs into larger sorted runs (watch the sorted runs double).",
-    )
+    ops.init("Merge sort — merge adjacent sorted runs; their length doubles each pass from 1.")
     for (let width = 1; width < n; width *= 2) {
       for (let lo = 0; lo < n; lo += 2 * width) {
         const mid = Math.min(lo + width, n)

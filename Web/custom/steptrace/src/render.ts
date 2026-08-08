@@ -1218,6 +1218,9 @@ export function makeArrayStrip(values: readonly unknown[]) {
 
 export function makePointerView(frames) {
   const n = frames[0].array.length
+  const sliding = frames.some(
+    (frame) => frame.bestRange || frame.enteringIndex != null || frame.duplicateIndex != null,
+  )
   // capture pointer names once so WATCH always shows the same rows (constant
   // height ⇒ no footer jitter even on frames that carry no pointers).
   const ptrNames = (function () {
@@ -1242,7 +1245,10 @@ export function makePointerView(frames) {
       const c = cells[k]
       c.textContent = frame.array[k]
       let state = ""
-      if (win && k >= win[0] && k <= win[1]) state = matched ? "match" : "window"
+      if (win && k >= win[0] && k <= win[1]) state = "window"
+      if (frame.marked?.includes(k)) state = "match"
+      if (frame.enteringIndex === k) state = "entering"
+      if (frame.duplicateIndex === k) state = "duplicate"
       c.dataset.state = state
       c.dataset.end = win && k === win[0] ? "l" : win && k === win[1] ? "r" : ""
     }
@@ -1271,7 +1277,7 @@ export function makePointerView(frames) {
       j: "var(--_violet)",
     }
     const p = frame.pointers || {}
-    return ptrNames.map((name) => {
+    const rows = ptrNames.map((name) => {
       const idx = p[name]
       return {
         k: name,
@@ -1279,6 +1285,26 @@ export function makePointerView(frames) {
         sw: color[name.toLowerCase()] || "var(--_muted)",
       }
     })
+    if (!sliding) return rows
+    const window = frame.window
+    const bestRange = frame.bestRange
+    rows.push(
+      {
+        k: "window",
+        v: window
+          ? `[${window[0]}..${window[1]}] "${frame.array.slice(window[0], window[1] + 1).join("")}" len=${window[1] - window[0] + 1}`
+          : "—",
+        sw: "var(--_blue)",
+      },
+      {
+        k: "best",
+        v: bestRange
+          ? `"${frame.array.slice(bestRange[0], bestRange[1] + 1).join("")}" (length ${bestRange[1] - bestRange[0] + 1})`
+          : "—",
+        sw: "var(--_green)",
+      },
+    )
+    return rows
   }
 
   return { nodes: [wrap, status], paint, watch }
@@ -3533,18 +3559,6 @@ export function el(tag, cls = "") {
   const n = document.createElement(tag)
   if (cls) n.className = cls
   return n
-}
-export function spacer() {
-  return el("span", "steptrace__spacer")
-}
-export function button(label, glyph, extra = "") {
-  const b = document.createElement("button")
-  b.type = "button"
-  b.className = "steptrace__btn" + (extra ? " " + extra : "")
-  b.textContent = glyph
-  b.setAttribute("aria-label", label)
-  b.title = label
-  return b
 }
 export function escapeHtml(s) {
   return String(s).replace(

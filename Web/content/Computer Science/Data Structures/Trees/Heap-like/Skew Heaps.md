@@ -1,61 +1,235 @@
 ---
 publish: true
-created: 2026-07-28T10:20:00.774Z
-modified: 2026-07-29T15:36:43.456Z
-published: 2026-07-29T15:36:43.456Z
+created: 2026-08-03T07:22:13.843Z
+modified: 2026-08-08T09:22:40.074Z
+published: 2026-08-08T09:22:40.074Z
 topic:
   - Computer Science
 subtopic:
   - Data Structures
-summary: A leftist heap without the bookkeeping, self-adjusting for amortized O(log n) merge.
+summary: A self-adjusting mergeable heap that swaps children after every recursive merge without storing rank metadata.
 level:
   - "4"
 priority: Medium
 status: Ready to Repeat
 ---
 
-# Intro
+When two priority queues must combine repeatedly — merging event streams, uniting sub-schedules — the melding cost dominates. A skew heap keeps only a heap-ordered binary tree and makes merge the primitive: two heaps combine by walking down their right spines, and insert and extract-min are defined in terms of that merge.
 
-A priority queue built on an array [[Computer Science/Data Structures/Trees/Heap-like/Heap|heap]] answers find-min and extract-min cheaply, but melding two such heaps into one means rebuilding: `O(n)` work to reheapify the concatenation. When two priority queues must combine repeatedly — merging event streams, uniting sub-schedules — the melding cost dominates. A skew heap keeps only a heap-ordered binary tree and makes merge the primitive: two heaps combine by walking down their right spines, and insert and extract-min are defined in terms of that merge.
+The structure is the self-adjusting cousin of a [[Computer Science/Data Structures/Trees/Heap-like/Leftist Heaps|leftist heap]]. A leftist heap stores a null-path-length field per node and swaps children only when that field would be violated, buying a per-operation worst-case bound. A skew heap deletes the field entirely: after merging down a right spine it **swaps the two children at every touched node unconditionally** — no test, no bookkeeping. The blind swap moves a right path that just grew back to the left, where the next merge never looks.
 
-The structure is the self-adjusting cousin of a [[Computer Science/Data Structures/Trees/Heap-like/Leftist Heaps|leftist heap]]. A leftist heap stores a null-path-length field per node and swaps children only when that field would be violated, buying a per-operation worst-case bound. A skew heap deletes the field entirely: after merging down a right spine it **swaps the two children at every touched node unconditionally** — no test, no bookkeeping. The blind swap moves a right path that just grew back to the left, where the next merge never looks. What can no longer be read off a node is its rank; balance exists only in the amortized aggregate, not as a checkable invariant.
-
-**Core shape:** heap-ordered binary tree, no rank field → merge recurses down right spines → swap children at every merged node → amortized `O(log n)` per operation, `O(n)` structure space.
+**Core shape:** heap-ordered binary tree, no rank field → merge recurses down right spines → swap children at every merged node
 
 Use **Merge** on the same canonical heaps `[2, 7, 10]` and `[3, 5, 8]`. Unlike the leftist version, every touched node swaps its children unconditionally; **Reset** restores both source heaps.
+
+````tabsdown
+tab: Visualization
 
 ```steptrace
 {"algorithm":"skew-heap"}
 ```
 
-# Why the Blind Swap Balances
+#### Why the Blind Swap Balances
 
 Merge takes two heap roots and compares them. The smaller root becomes the result's root; its right subtree is merged recursively with the other whole heap; then the root's two children are swapped. Only the right spine is ever descended, so the recursion depth is the combined right-spine length of the two inputs.
 
-Without the swap, that right spine only ever grows — repeated merges could stack the whole heap along one right path, and a single merge would cost `O(n)` forever. The unconditional swap breaks that: every node on the traversed spine has its freshly extended right child rotated to the left, out of the path future merges follow. A leftist heap achieves the same shortening deliberately, keeping the shorter subtree on the right by consulting the stored null-path length; the skew heap achieves it blindly, and pays for the difference in the analysis rather than in per-node memory.
+The unconditional swap breaks that: every node on the traversed spine has its freshly extended right child rotated to the left, out of the path future merges follow. A leftist heap achieves the same shortening deliberately, keeping the shorter subtree on the right by consulting the stored null-path length; the skew heap achieves it blindly, and pays for the difference in the analysis rather than in per-node memory.
 
 The invariant that survives every operation is heap order alone: a parent key never exceeds a child key. There is no structural invariant on shape — a skew heap can momentarily be a long right chain. Insert merges a singleton node into the heap. Extract-min removes the root and merges its two children. Both inherit merge's cost profile exactly.
 
-# Complexity
+tab: Complexity
 
-| Operation | Best time | Amortized time | Worst single op | Space | Cause |
-| --- | --- | --- | --- | --- | --- |
-| `Merge(a, b)` | `O(1)` | `O(log n)` | `O(n)` | `O(n)` structure, no per-node field | Descends the combined right spines; the swap keeps them short in aggregate, not on any one call |
-| `Insert(x)` | `O(1)` | `O(log n)` | `O(n)` | `O(n)` worst-case recursion stack | Merge of a singleton into the heap |
-| `ExtractMin()` | `O(1)` | `O(log n)` | `O(n)` | `O(n)` worst-case recursion stack | Removes the root, then merges its two children |
-| `FindMin()` | `O(1)` | `O(1)` | `O(1)` | `O(1)` | The minimum is the root |
+```complexity
+{
+  "version": 2,
+  "label": "Skew Heaps complexity",
+  "variables": {
+    "inputSize": {
+      "symbol": "n",
+      "description": "total stored nodes, combining both input heaps for merge"
+    }
+  },
+  "resources": {
+    "time": {
+      "mode": "operations",
+      "entries": [
+        {
+          "kind": "operation",
+          "operation": "Merge(a, b)",
+          "bounds": [
+            {
+              "kind": "curve",
+              "role": "Best",
+              "formula": "O(1)",
+              "curveId": "constant"
+            },
+            {
+              "kind": "curve",
+              "role": "Amortized",
+              "formula": "O(log n)",
+              "curveId": "log-n"
+            },
+            {
+              "kind": "curve",
+              "role": "Worst single op",
+              "formula": "O(n)",
+              "curveId": "linear"
+            }
+          ]
+        },
+        {
+          "kind": "operation",
+          "operation": "Insert(x)",
+          "bounds": [
+            {
+              "kind": "curve",
+              "role": "Best",
+              "formula": "O(1)",
+              "curveId": "constant"
+            },
+            {
+              "kind": "curve",
+              "role": "Amortized",
+              "formula": "O(log n)",
+              "curveId": "log-n"
+            },
+            {
+              "kind": "curve",
+              "role": "Worst single op",
+              "formula": "O(n)",
+              "curveId": "linear"
+            }
+          ]
+        },
+        {
+          "kind": "operation",
+          "operation": "ExtractMin()",
+          "bounds": [
+            {
+              "kind": "curve",
+              "role": "Best",
+              "formula": "O(1)",
+              "curveId": "constant"
+            },
+            {
+              "kind": "curve",
+              "role": "Amortized",
+              "formula": "O(log n)",
+              "curveId": "log-n"
+            },
+            {
+              "kind": "curve",
+              "role": "Worst single op",
+              "formula": "O(n)",
+              "curveId": "linear"
+            }
+          ]
+        },
+        {
+          "kind": "operation",
+          "operation": "FindMin()",
+          "bounds": [
+            {
+              "kind": "curve",
+              "role": "Best/Amortized",
+              "formula": "O(1)",
+              "curveId": "constant"
+            },
+            {
+              "kind": "curve",
+              "role": "Worst single op",
+              "formula": "O(1)",
+              "curveId": "constant"
+            }
+          ]
+        }
+      ]
+    },
+    "space": {
+      "mode": "operations",
+      "entries": [
+        {
+          "kind": "operation",
+          "operation": "Merge(a, b)",
+          "bounds": [
+            {
+              "kind": "curve",
+              "role": "Persistent structure space",
+              "formula": "Θ(n) nodes, no rank field",
+              "curveId": "linear"
+            },
+            {
+              "kind": "curve",
+              "role": "Aux space per op",
+              "formula": "O(n) worst-case recursion stack",
+              "curveId": "linear"
+            }
+          ]
+        },
+        {
+          "kind": "operation",
+          "operation": "Insert(x)",
+          "bounds": [
+            {
+              "kind": "curve",
+              "role": "Persistent structure space",
+              "formula": "Θ(n) nodes, no rank field",
+              "curveId": "linear"
+            },
+            {
+              "kind": "curve",
+              "role": "Aux space per op",
+              "formula": "O(n) worst-case recursion stack",
+              "curveId": "linear"
+            }
+          ]
+        },
+        {
+          "kind": "operation",
+          "operation": "ExtractMin()",
+          "bounds": [
+            {
+              "kind": "curve",
+              "role": "Persistent structure space",
+              "formula": "Θ(n) nodes, no rank field",
+              "curveId": "linear"
+            },
+            {
+              "kind": "curve",
+              "role": "Aux space per op",
+              "formula": "O(n) worst-case recursion stack",
+              "curveId": "linear"
+            }
+          ]
+        },
+        {
+          "kind": "operation",
+          "operation": "FindMin()",
+          "bounds": [
+            {
+              "kind": "curve",
+              "role": "Persistent structure space",
+              "formula": "Θ(n) nodes, no rank field",
+              "curveId": "linear"
+            },
+            {
+              "kind": "curve",
+              "role": "Aux space per op",
+              "formula": "O(1)",
+              "curveId": "constant"
+            }
+          ]
+        }
+      ]
+    }
+  }
+}
+```
+````
 
-The `O(log n)` figures are amortized over a sequence of operations, established by a potential argument, not a worst-case guarantee. A node is counted "heavy" when its right subtree holds more nodes than its left; a potential function over heavy nodes shows an expensive merge must traverse many of them, and each unconditional swap turns a heavy node light, so the traversal discharges potential that earlier cheap operations stored. The tight per-operation amortized bound is `log_φ n ≈ 1.44 log₂ n`.
+Persistence exposes the same gap. Leftist worst-case bounds are per operation and survive shared subtrees.
 
-A single `Merge` can still cost `O(n)`: nothing prevents a momentarily long right spine from existing, and one call may descend all of it. The structure space is `O(n)` with only two child pointers and a key per node — the leftist heap's extra null-path-length field is exactly what the skew heap removes, its edge on memory and on merge code length.
-
-# Where Amortized is Not Enough
-
-The bounds are amortized, so a single operation can spike to `O(n)`. On a latency-sensitive path where one extract-min must complete within a per-operation budget, that spike is a violation even though the sequence average is logarithmic — a [[Computer Science/Data Structures/Trees/Heap-like/Leftist Heaps|leftist heap]] holds `O(log n)` per operation as a worst-case guarantee, at the price of the stored rank field and the conditional swap, and fits that requirement where a skew heap does not.
-
-Persistence exposes the same gap. Amortized accounting assumes each stored shape is consumed once; if an old version of a skew heap is retained and re-merged repeatedly, the same expensive right spine can be paid for again and again, and the amortized bound no longer holds. Leftist worst-case bounds are per operation and survive shared subtrees.
-
-The unconditional swap is the whole mechanism, not a tunable detail. Making it conditional turns the structure back into a leftist heap (with the rank test) or, done wrong, into an unbalanced chain; dropping it removes the only force shortening the right spine and lets a sequence of merges degrade to `O(n)` each. There is no rank field to inspect, so the swap has to be blind and total for the potential argument to close.
+The unconditional swap is the whole mechanism, not a tunable detail. There is no rank field to inspect, so the swap has to be blind and total for the potential argument to close.
 
 # Reference Drawer
 
@@ -129,10 +303,10 @@ The unconditional swap is the whole mechanism, not a tunable detail. Making it c
 
 # Questions
 
-> [!QUESTION]- How can `O(log n)` amortized hold when one merge can be `O(n)`?
-> A potential function counts heavy nodes — those whose right subtree outweighs their left. An expensive merge traverses many heavy nodes, but each unconditional swap makes a heavy node light. The costly traversal discharges potential accumulated by earlier cheap operations and leaves the heap cheap to merge again, so the per-operation cost averages to `O(log n)` even though a single call is not bounded by it.
+> [!QUESTION]- What does the unconditional child swap buy when a skew heap stores no rank metadata?
+> It moves the right path that just grew onto the left, away from the path the next merge descends. A single merge can still be linear, but repeated swaps distribute that cost so a sequence of operations is logarithmic amortized.
 
 # References
 
-- [Sleator & Tarjan, "Self-Adjusting Heaps" (SIAM J. Comput. 1986)](https://www.cs.cmu.edu/~sleator/papers/adjusting-heaps.pdf) — the original skew heap with the amortized potential analysis.
-- [Skew heap (Wikipedia)](https://en.wikipedia.org/wiki/Skew_heap) — merge walkthrough and the `log_φ n` amortized bound.
+- [Sleator & Tarjan, "Self-Adjusting Heaps" (SIAM J. Comput. 1986)](https://www.cs.cmu.edu/~sleator/papers/adjusting-heaps.pdf) — the original skew-heap paper and sequence analysis.
+- [Skew heap (Wikipedia)](https://en.wikipedia.org/wiki/Skew_heap) — recursive merge, unconditional child swap, and comparison with leftist heaps.

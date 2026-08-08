@@ -32,6 +32,12 @@
 .steptrace__pcell[data-state="match"] {
   background: color-mix(in srgb, var(--_green) 22%, transparent);
 }
+.steptrace__pcell[data-state="entering"] {
+  background: color-mix(in srgb, var(--_green) 22%, transparent);
+}
+.steptrace__pcell[data-state="duplicate"] {
+  background: color-mix(in srgb, var(--_red) 22%, transparent);
+}
 .steptrace__pcell[data-end="l"] {
   color: var(--_blue);
   font-weight: 700;
@@ -42,6 +48,12 @@
 }
 .steptrace__pcell[data-state="match"][data-end] {
   color: var(--_green);
+}
+.steptrace__pcell[data-state="entering"][data-end] {
+  color: var(--_green);
+}
+.steptrace__pcell[data-state="duplicate"][data-end] {
+  color: var(--_red);
 }
 /* [ ] brackets: overlaid at the window ends, nested a few px inside, square
    unless they sit on the strip's own rounded end cell (data-round="1"). */

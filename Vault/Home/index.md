@@ -1,7 +1,9 @@
 ---
 title: Welcome to DevBook!
-summary: A senior .NET and AI engineering knowledge base with concrete notes, examples, and questions.
-tags: [FolderNote, MetricsIgnore]
+summary: A .NET and AI engineering knowledge base with notes, examples, and questions.
+tags:
+  - FolderNote
+  - MetricsIgnore
 publish: true
 icon: home
 ---

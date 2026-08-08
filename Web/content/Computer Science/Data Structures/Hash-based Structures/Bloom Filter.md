@@ -1,8 +1,8 @@
 ---
 publish: true
-created: 2026-07-29T14:28:24.646Z
-modified: 2026-07-29T14:28:24.646Z
-published: 2026-07-29T14:28:24.646Z
+created: 2026-08-03T10:27:09.356Z
+modified: 2026-08-08T09:22:39.249Z
+published: 2026-08-08T09:22:39.249Z
 topic:
   - Computer Science
 subtopic:
@@ -18,50 +18,179 @@ A service checks whether a key exists before running an expensive lookup — a d
 
 A Bloom filter keeps only an _m_-bit array and _k_ hash-derived positions. Adding an element sets the _k_ bits `h₁(x)..hₖ(x)` to 1; querying an element reports "possibly present" only if all _k_ of those bits are 1, and "definitely absent" the moment any one of them is 0. The elements themselves are never stored — the structure discards identity and retains a fixed-width fingerprint of the whole set. That discard is what makes it small, and it is also why the filter cannot enumerate its members, return a stored value, or (in the standard form) delete. Two distinct elements can set overlapping bits, so a query can report "possibly present" for something never added: a false positive. A 0 bit, by contrast, can only exist for an element that was never added, so a false negative is impossible.
 
-**Core shape:** elements → _k_ hash bits set in an _m_-bit array → all-ones means probably present, any-zero means definitely absent → `O(m)` bits, no elements retained.
+**Core shape:** elements → _k_ hash bits set in an _m_-bit array → all-ones means probably present, any-zero means definitely absent
+
+````tabsdown
+tab: Visualization
 
 ```steptrace
 {"algorithm":"bloom-filter"}
 ```
 
-# Representation and Invariants
+#### Representation and Invariants
 
-The stored state is a single bit array of length _m_ and a family of _k_ hash functions, each mapping an element to an index in `[0, m)`. Nothing else persists — no keys, no counts, no insertion order.
+The stored state is a single bit array of length *m* and a family of *k* hash functions, each mapping an element to an index in `[0, m)`. Nothing else persists — no keys, no counts, no insertion order.
 
-- `Add(x)` computes `h₁(x)..hₖ(x)` and sets each of those _k_ bits to 1. Bits already at 1 stay at 1; the operation only ever turns bits on.
-- `Query(x)` computes the same _k_ positions and returns "possibly present" when every one of them is 1. If any position holds 0, `x` was never added, and the answer "definitely absent" is exact.
+- `Add(x)` computes `h₁(x)..hₖ(x)` and sets each of those *k* bits to 1. Bits already at 1 stay at 1; the operation only ever turns bits on.
+- `Query(x)` computes the same *k* positions and returns "possibly present" when every one of them is 1. If any position holds 0, `x` was never added, and the answer "definitely absent" is exact.
 
 Three properties follow directly from the fact that bits are only ever set, never cleared, and are shared across elements:
 
 1. Every bit that a present element touched is 1, so a present element always passes its query. False negatives cannot occur.
-2. A bit reaching 1 records that _some_ element hashed to it, not _which_ element. Once several elements have been added, a queried element can find all _k_ of its bits already set by unrelated elements. That is the false positive, and it is intrinsic to storing overlapping fingerprints rather than the elements.
+2. A bit reaching 1 records that *some* element hashed to it, not *which* element. Once several elements have been added, a queried element can find all *k* of its bits already set by unrelated elements. That is the false positive, and it is intrinsic to storing overlapping fingerprints rather than the elements.
 3. Because no bit belongs to a single element, no operation can safely undo an insertion — clearing a bit for one element could clear a bit another present element depends on, which would manufacture a false negative.
 
 The representative state is therefore a compressed image of set membership, not the set. Identity, multiplicity, and order are gone the moment an element is folded into the bits.
 
-# Complexity
+tab: Complexity
 
-| Operation | Best time | Average time | Worst time | Structure space | Aux space per op |
-| --- | --- | --- | --- | --- | --- |
-| Construct empty filter | `Θ(m)` bits cleared | `Θ(m)` | `Θ(m)` | `Θ(m)` bits | `O(1)` |
-| `Add(x)` | `O(\|x\| + k)` | `O(\|x\| + k)` | `O(\|x\| + k)` | — | `O(\|x\|)` in the example |
-| `Query(x)` | `O(\|x\| + 1)` first 0 bit | `O(\|x\| + k)` | `O(\|x\| + k)` | — | `O(\|x\|)` in the example |
-
-For strings, computing the base hashes costs `O(|x|)` and deriving or testing the _k_ positions costs `O(k)`, so `Add` and `Query` are `O(|x| + k)`. Once the input is fixed-width or two base hashes are already available in `O(1)`, the operations are `O(k)`. The C# example materialises UTF-8 bytes before hashing, so its auxiliary space is `O(|x|)`; a streaming hash can reduce that to `O(1)`. Their cost is independent of how many elements the filter already holds. The structure space is `O(m)` **bits**, not `O(n)` elements: at a 1% target false-positive rate, 100 million keys require about 958.5 million bits, or 120 MB (114 MiB), far below the cost of storing 100 million strings in a hash set. A query can also short-circuit on the first 0 bit, so a "definitely absent" answer often reads fewer than _k_ positions.
-
-The price of that space is a tunable false-positive rate. After _n_ insertions into _m_ bits with _k_ hashes, the probability that a never-added element reports "possibly present" is approximately:
-
-```text
-p ≈ (1 − e^(−kn/m))^k
+```complexity
+{
+  "version": 2,
+  "label": "Bloom Filter complexity",
+  "variables": {
+    "hashCount": {
+      "symbol": "k",
+      "description": "number of hash positions tested per value"
+    },
+    "secondarySize": {
+      "symbol": "m",
+      "description": "number of bits in the filter"
+    },
+    "valueLength": {
+      "symbol": "l",
+      "description": "encoded input-value length"
+    }
+  },
+  "resources": {
+    "time": {
+      "mode": "operations",
+      "entries": [
+        {
+          "kind": "operation",
+          "operation": "Construct empty filter",
+          "bounds": [
+            {
+              "kind": "curve",
+              "role": "Best",
+              "formula": "Θ(m) bits cleared",
+              "curveId": "linear"
+            },
+            {
+              "kind": "curve",
+              "role": "Average",
+              "formula": "Θ(m)",
+              "curveId": "linear"
+            },
+            {
+              "kind": "curve",
+              "role": "Worst",
+              "formula": "Θ(m)",
+              "curveId": "linear"
+            }
+          ]
+        },
+        {
+          "kind": "operation",
+          "operation": "Add(x)",
+          "bounds": [
+            {
+              "kind": "curve",
+              "role": "Best",
+              "formula": "O(l + k)",
+              "curveId": "linear"
+            },
+            {
+              "kind": "curve",
+              "role": "Average",
+              "formula": "O(l + k)",
+              "curveId": "linear"
+            },
+            {
+              "kind": "curve",
+              "role": "Worst",
+              "formula": "O(l + k)",
+              "curveId": "linear"
+            }
+          ]
+        },
+        {
+          "kind": "operation",
+          "operation": "Query(x)",
+          "bounds": [
+            {
+              "kind": "curve",
+              "role": "Best",
+              "formula": "O(l + 1) first 0 bit",
+              "curveId": "linear"
+            },
+            {
+              "kind": "curve",
+              "role": "Average",
+              "formula": "O(l + k)",
+              "curveId": "linear"
+            },
+            {
+              "kind": "curve",
+              "role": "Worst",
+              "formula": "O(l + k)",
+              "curveId": "linear"
+            }
+          ]
+        }
+      ]
+    },
+    "space": {
+      "mode": "operations",
+      "entries": [
+        {
+          "kind": "operation",
+          "operation": "Construct empty filter",
+          "bounds": [
+            {
+              "kind": "curve",
+              "role": "Structure space",
+              "formula": "Θ(m) bits",
+              "curveId": "linear"
+            },
+            {
+              "kind": "curve",
+              "role": "Aux space per op",
+              "formula": "O(1)",
+              "curveId": "constant"
+            }
+          ]
+        },
+        {
+          "kind": "operation",
+          "operation": "Add(x)",
+          "bounds": [
+            {
+              "kind": "curve",
+              "role": "Aux space per op",
+              "formula": "O(l) in the example",
+              "curveId": "linear"
+            }
+          ]
+        },
+        {
+          "kind": "operation",
+          "operation": "Query(x)",
+          "bounds": [
+            {
+              "kind": "curve",
+              "role": "Aux space per op",
+              "formula": "O(l) in the example",
+              "curveId": "linear"
+            }
+          ]
+        }
+      ]
+    }
+  }
+}
 ```
-
-For a fixed ratio `m/n`, that expression is minimised by:
-
-```text
-k = (m/n) · ln 2
-```
-
-which drives roughly half the bits to 1. Increasing _m_ lowers _p_ by giving elements more room; _k_ trades off between too few probes (weak discrimination) and too many (bits fill faster). These bits are the filter's whole footprint — there is no per-element allocation to grow alongside _n_.
+````
 
 # When the Structure Stops Fitting
 
@@ -162,9 +291,6 @@ Every one of these boundaries traces back to the same design choice: no elements
 
 > [!QUESTION]- What do _m_ and _k_ control, and what is the optimal _k_?
 > _m_ is the bit-array size and _k_ the number of hash functions. The false-positive rate is `p ≈ (1 − e^(−kn/m))^k` for _n_ inserted elements. For a fixed `m/n`, `k = (m/n)·ln 2` minimises _p_, driving about half the bits to 1; larger _m_ lowers _p_ by adding room, while _k_ balances too few probes against filling the bits too fast.
-
-> [!QUESTION]- Why is the space `O(m)` bits rather than `O(n)`?
-> The filter stores no elements — only the _m_-bit array and hash configuration. Its footprint is fixed at construction: sizing for 100 million keys at a 1% false-positive target takes about 958.5 million bits, or 120 MB (114 MiB). The cost of discarding the keys is the false-positive rate and the loss of enumeration, retrieval, and standard deletion.
 
 # References
 

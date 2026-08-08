@@ -2,6 +2,8 @@
 
 StepTrace renders interactive algorithm traces from one fenced block in both Obsidian and Quartz:
 
+Design, consistency, responsive, and visual-review rules live in [`DESIGN.md`](DESIGN.md).
+
 ````markdown
 ```steptrace
 { "algorithm": "bubble-sort", "array": [8, 3, 5, 1] }
@@ -10,32 +12,95 @@ StepTrace renders interactive algorithm traces from one fenced block in both Obs
 
 The TypeScript source is shared. esbuild produces the formats each host needs, and Sass produces native stylesheets for each host.
 
-## Tabbed blocks
+## Authored Tabsdown blocks
 
-Use `tabs` when one visual needs multiple variants under the same fenced block:
+Tabsdown owns all authored tabs. Every StepTrace note has one outer group ordered `Visualization`, then `Complexity`. Use an inner group when a visualization has variants; each variant contains one flat StepTrace config:
 
-```json
-{
-  "selected": 0,
-  "tabs": [
-    {
-      "name": "Bubble sort",
-      "description": "Swaps adjacent inversions.",
-      "algorithm": "bubble-sort",
-      "array": [8, 3, 5, 1]
-    },
-    {
-      "name": "Insertion sort",
-      "description": "Inserts each value into the sorted prefix.",
-      "algorithm": "insertion-sort",
-      "array": [8, 3, 5, 1]
-    }
-  ]
-}
+<!-- prettier-ignore -->
+``````markdown
+~~~~~tabsdown
+tab: Visualization
+
+~~~~tabsdown
+tab: Bubble sort
+
+```steptrace
+{ "algorithm": "bubble-sort", "array": [8, 3, 5, 1] }
 ```
 
-Each tab entry is a normal StepTrace config, so the same visual family can be reused with different parameters.
-`selected` is an optional zero-based initial tab index. Switching tabs preserves each visualization's current step and pauses any hidden playback.
+Swaps adjacent inversions.
+
+tab: Insertion sort
+
+```steptrace
+{ "algorithm": "insertion-sort", "array": [8, 3, 5, 1] }
+```
+
+Inserts each value into the sorted prefix.
+~~~~
+
+tab: Complexity
+
+```complexity
+{
+  "version": 2,
+  "label": "Example sorting complexity",
+  "variables": {
+    "inputSize": {
+      "symbol": "n",
+      "description": "number of input elements"
+    }
+  },
+  "resources": {
+    "time": {
+      "mode": "operations",
+      "entries": [
+        {
+          "kind": "operation",
+          "operation": "Sort",
+          "bounds": [
+            {
+              "kind": "curve",
+              "role": "Upper bound",
+              "formula": "O(n²)",
+              "curveId": "quadratic"
+            }
+          ]
+        }
+      ]
+    },
+    "space": {
+      "mode": "operations",
+      "entries": [
+        {
+          "kind": "operation",
+          "operation": "Sort",
+          "bounds": [
+            {
+              "kind": "curve",
+              "role": "Auxiliary space",
+              "formula": "O(1)",
+              "curveId": "constant"
+            }
+          ]
+        }
+      ]
+    }
+  }
+}
+```
+~~~~~
+
+Detailed complexity analysis belongs here, after the outer Tabsdown block.
+``````
+
+Use backticks for StepTrace and complexity payloads. Use tildes for Tabsdown, and make every outer tilde fence longer than the inner fences it contains. Do not restore the removed StepTrace `tabs` JSON shape.
+
+StepTrace mounts a panel lazily when all ancestor Tabsdown panels are visible. Hiding a panel pauses playback and retains its step; showing it resumes only if playback was running before the hide.
+
+On Quartz navigation, the host destroys every mounted StepTrace child on `prenav`, before Quartz runs its global cleanup set and replaces the page DOM. The registered `addCleanup` callbacks are idempotent fallbacks. Tabsdown owns one global cleanup callback; it does not expose inner or outer per-root destroy APIs.
+
+Every DSA Complexity tab contains only one titleless version 2 chart with ordered Time and Space resources. Detailed analysis follows the outer Tabsdown block. Big O remains a standalone version 1 catalogue chart with no StepTrace block or Tabsdown wrapper.
 
 ## Source layout
 
@@ -48,7 +113,7 @@ Each tab entry is a normal StepTrace config, so the same visual family can be re
 | `src/graph.ts`                   | Graph normalization, layout, and adjacency helpers.                                                         |
 | `src/render.ts`                  | DOM view factories and frame painters.                                                                      |
 | `src/player.ts`                  | Playback transport over precomputed frames.                                                                 |
-| `src/mount.ts`                   | Card assembly, controls, keyboard handling, and teardown.                                                   |
+| `src/mount.ts`                   | Card assembly, controls, panel visibility, keyboard handling, and teardown.                                 |
 | `src/algorithms/*.ts`            | One exported algorithm descriptor per built-in.                                                             |
 | `src/algorithms/index.ts`        | Explicit shipped algorithm catalog and display order.                                                       |
 | `src/entries/browser.ts`         | Quartz boundary: exposes `globalThis.steptrace`.                                                            |
@@ -127,13 +192,13 @@ The build emits real `.css` files. StepTrace does not serialize SCSS into JavaSc
 
 ### Obsidian
 
-Obsidian loads `Vault/.obsidian/plugins/steptrace/main.js` and `styles.css` natively. The plugin entry registers the `steptrace` code-block processor, delegates rendering to `steptrace.mount()`, supplies the native `SliderComponent`, and attaches the returned teardown handle to `MarkdownRenderChild`.
+Obsidian loads `Vault/.obsidian/plugins/steptrace/main.js` and `styles.css` natively. The plugin entry registers the `steptrace` code-block processor, delegates rendering to `steptrace.mount()`, supplies the native `SliderComponent` and Tabsdown-backed compact Trace/Watch switch, and attaches the returned teardown handle to `MarkdownRenderChild`.
 
 After rebuilding, reload the StepTrace plugin through the command palette. With the Hot Reload community plugin installed, the generated `.hotreload` marker enables automatic reload.
 
 ### Quartz
 
-`SteptraceBlock` converts the fence into a `.steptrace-mount` element. The `Steptrace` component loads `/static/steptrace/engine.css` and then `/static/steptrace/engine.js` only when a mount exists. `StepTraceStatic` copies both generated assets during full builds; the watcher mirrors them into an existing `Web/public/` during development.
+`SteptraceBlock` converts the fence into a `.steptrace-mount` element. The `Steptrace` component waits for enclosing Tabsdown blocks to become interactive, then loads `/static/steptrace/engine.css` and `/static/steptrace/engine.js` only when a mount exists. `StepTraceStatic` copies both generated assets during full builds; the watcher mirrors them into an existing `Web/public/` during development.
 
 Quartz builds from `Web/content/`, not the live Vault. A StepTrace fence reaches the published site only after the normal publish sync copies the note.
 

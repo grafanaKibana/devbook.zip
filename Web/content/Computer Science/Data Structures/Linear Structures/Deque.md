@@ -1,26 +1,29 @@
 ---
 publish: true
-created: 2026-07-29T14:28:24.649Z
-modified: 2026-07-29T14:28:24.649Z
-published: 2026-07-29T14:28:24.649Z
+created: 2026-07-29T20:22:59.989Z
+modified: 2026-08-08T09:22:39.397Z
+published: 2026-08-08T09:22:39.397Z
 topic:
   - Computer Science
 subtopic:
   - Data Structures
-summary: A double-ended queue with O(1) push and pop at both ends, the superset of stack and queue.
+summary: A double-ended queue that pushes and pops at both ends, generalizing stacks and queues.
 level:
   - "4"
 priority: Medium
 status: Ready to Repeat
 ---
 
-An algorithm maintains a sequence that grows and shrinks at _both_ ends: a sliding window that admits new elements at the back while expiring old ones at the front, or a scheduler where the owner takes work from one end and thieves take it from the other. A [[Computer Science/Data Structures/Linear Structures/Dynamic Array|Dynamic Array]] answers this badly — appending at the tail is `O(1)`, but every front insert or remove shifts all `n` elements. A double-ended queue keeps `O(1)` insert and `O(1)` remove at _each_ end by tracking a front index and a live count over one wrapping array, so either end can advance without shifting the other.
+An algorithm maintains a sequence that grows and shrinks at _both_ ends: a sliding window that admits new elements at the back while expiring old ones at the front, or a scheduler where the owner takes work from one end and thieves take it from the other.
 
-The structure generalizes two narrower ones. A [[Computer Science/Data Structures/Linear Structures/Stack|Stack]] mutates a single end; a [[Computer Science/Data Structures/Linear Structures/Queue|Queue]] inserts at one end and removes at the opposite end. A ring-backed deque can still index an element in `O(1)`, but inserting or removing in the middle costs `O(n)` because the contiguous suffix must shift.
+The structure generalizes two narrower ones. A [[Computer Science/Data Structures/Linear Structures/Stack|Stack]] mutates a single end; a [[Computer Science/Data Structures/Linear Structures/Queue|Queue]] inserts at one end and removes at the opposite end.
 
-**Core shape:** elements → a ring buffer tracking a `head` index and a `count` (the back position derived mod capacity) → both ends `O(1)` amortized → no efficient middle mutation → `O(n)` storage.
+**Core shape:** elements → a ring buffer tracking a `head` index and a `count` (the back position derived mod capacity) → no efficient middle mutation
 
 The interactive view keeps the deque state between actions. Push or pop at either end to watch `head`, `count`, and wrapping slots change without shifting live elements.
+
+````tabsdown
+tab: Visualization
 
 ```steptrace
 {"algorithm":"deque"}
@@ -28,13 +31,13 @@ The interactive view keeps the deque state between actions. Push or pop at eithe
 
 The salient state is a `head` index and a `count`; the back position is derived as `(head + count - 1) % capacity` rather than stored. Representation below owns the index mechanics.
 
-# Representation and Invariants
+#### Representation and Invariants
 
 Two backings satisfy the same interface with different tradeoffs.
 
-**Growable ring buffer** — one contiguous array (see [[Computer Science/Data Structures/Linear Structures/Circular Buffer|Circular Buffer]]) plus a `head` index and a `count`. The occupied slots are `head, head+1, …, head+count-1`, each taken modulo capacity, so the live region can straddle the array's physical end. `PushBack` writes at `(head + count) % cap`; `PushFront` moves `head` to `(head - 1 + cap) % cap` and writes there; both pops read an end slot and adjust `head` or `count`. Storage is contiguous and allocation-free in steady state, and any element is reachable by index in `O(1)` as `_buffer[(head + i) % cap]`. When `count == cap` a push first copies into a larger array, rebasing the front to index 0 — a single `O(n)` operation amortized to `O(1)` across the sequence of pushes.
+**Growable ring buffer** — one contiguous array (see [[Computer Science/Data Structures/Linear Structures/Circular Buffer|Circular Buffer]]) plus a `head` index and a `count`. The occupied slots are `head, head+1, …, head+count-1`, each taken modulo capacity, so the live region can straddle the array's physical end. `PushBack` writes at `(head + count) % cap`; `PushFront` moves `head` to `(head - 1 + cap) % cap` and writes there; both pops read an end slot and adjust `head` or `count`.
 
-**Doubly-[[Computer Science/Data Structures/Linear Structures/LinkedList|linked list]]** — a node per element with `prev`/`next` pointers and cached head/tail references. All four end operations are unconditionally `O(1)` with no resize spike, but there is no index: reaching position `i` walks `i` nodes, so indexing is `O(n)`. Each element also carries a heap-allocated node, and traversal chases pointers across the heap, so locality is poor.
+**Doubly-[[Computer Science/Data Structures/Linear Structures/LinkedList|linked list]]** — a node per element with `prev`/`next` pointers and cached head/tail references. Each element also carries a heap-allocated node, and traversal chases pointers across the heap, so locality is poor.
 
 Invariants that define a valid state (ring-buffer form):
 
@@ -45,25 +48,189 @@ Invariants that define a valid state (ring-buffer form):
 
 The `head` index and `count` are internal identity, not domain values: a resize renumbers every physical slot while preserving the logical front-to-back order.
 
-# Complexity
+tab: Complexity
 
-Bounds are for the growable ring buffer unless the row names the linked backing.
-
-| Operation | Best time | Amortized time | Worst single op | Structure space | Cause |
-| --- | --- | --- | --- | --- | --- |
-| `PushFront` / `PushBack` | `O(1)` | `O(1)` | `O(n)` | `O(n)` | Write one end slot; a full buffer triggers one grow-and-copy |
-| `PopFront` / `PopBack` | `O(1)` | `O(1)` | `O(1)` | `O(n)` | Read an end slot and adjust an index; no resize on removal |
-| Index `this[i]` (array-backed) | `O(1)` | `O(1)` | `O(1)` | `O(n)` | Address arithmetic `(head + i) % cap` over contiguous storage |
-| Index `this[i]` (linked) | `O(n)` | `O(n)` | `O(n)` | `O(n)` | No random access; must walk `i` nodes from an end |
-| Insert / remove at the middle | `O(n)` | `O(n)` | `O(n)` | `O(n)` | Shift (array) or locate then splice (linked); no held mid-position |
-
-The amortized `O(1)` on the ring buffer assumes geometric growth: doubling on overflow spreads the `O(n)` copy across the `n` cheap pushes that preceded it, so a run of `m` pushes costs `O(m)` total. A single push that lands on a full buffer is still `O(n)` in isolation, which matters for latency-sensitive paths even when throughput is fine. The linked backing removes that spike entirely at the cost of an allocation per element and no `O(1)` index.
+```complexity
+{
+  "version": 2,
+  "label": "Deque complexity",
+  "variables": {
+    "inputSize": {
+      "symbol": "n",
+      "description": "number of elements currently stored in the deque"
+    }
+  },
+  "resources": {
+    "time": {
+      "mode": "operations",
+      "entries": [
+        {
+          "kind": "operation",
+          "operation": "PushFront / PushBack",
+          "bounds": [
+            {
+              "kind": "curve",
+              "role": "Best/Amortized",
+              "formula": "O(1)",
+              "curveId": "constant"
+            },
+            {
+              "kind": "curve",
+              "role": "Worst single op",
+              "formula": "O(n)",
+              "curveId": "linear"
+            }
+          ]
+        },
+        {
+          "kind": "operation",
+          "operation": "PopFront / PopBack",
+          "bounds": [
+            {
+              "kind": "curve",
+              "role": "Best/Amortized",
+              "formula": "O(1)",
+              "curveId": "constant"
+            },
+            {
+              "kind": "curve",
+              "role": "Worst single op",
+              "formula": "O(1)",
+              "curveId": "constant"
+            }
+          ]
+        },
+        {
+          "kind": "operation",
+          "operation": "Index this[i] (array-backed)",
+          "bounds": [
+            {
+              "kind": "curve",
+              "role": "Best/Amortized",
+              "formula": "O(1)",
+              "curveId": "constant"
+            },
+            {
+              "kind": "curve",
+              "role": "Worst single op",
+              "formula": "O(1)",
+              "curveId": "constant"
+            }
+          ]
+        },
+        {
+          "kind": "operation",
+          "operation": "Index this[i] (linked)",
+          "bounds": [
+            {
+              "kind": "curve",
+              "role": "Best/Amortized",
+              "formula": "O(n)",
+              "curveId": "linear"
+            },
+            {
+              "kind": "curve",
+              "role": "Worst single op",
+              "formula": "O(n)",
+              "curveId": "linear"
+            }
+          ]
+        },
+        {
+          "kind": "operation",
+          "operation": "Insert / remove at the middle",
+          "bounds": [
+            {
+              "kind": "curve",
+              "role": "Best/Amortized",
+              "formula": "O(n)",
+              "curveId": "linear"
+            },
+            {
+              "kind": "curve",
+              "role": "Worst single op",
+              "formula": "O(n)",
+              "curveId": "linear"
+            }
+          ]
+        }
+      ]
+    },
+    "space": {
+      "mode": "operations",
+      "entries": [
+        {
+          "kind": "operation",
+          "operation": "PushFront / PushBack",
+          "bounds": [
+            {
+              "kind": "curve",
+              "role": "Structure space",
+              "formula": "O(n)",
+              "curveId": "linear"
+            }
+          ]
+        },
+        {
+          "kind": "operation",
+          "operation": "PopFront / PopBack",
+          "bounds": [
+            {
+              "kind": "curve",
+              "role": "Structure space",
+              "formula": "O(n)",
+              "curveId": "linear"
+            }
+          ]
+        },
+        {
+          "kind": "operation",
+          "operation": "Index this[i] (array-backed)",
+          "bounds": [
+            {
+              "kind": "curve",
+              "role": "Structure space",
+              "formula": "O(n)",
+              "curveId": "linear"
+            }
+          ]
+        },
+        {
+          "kind": "operation",
+          "operation": "Index this[i] (linked)",
+          "bounds": [
+            {
+              "kind": "curve",
+              "role": "Structure space",
+              "formula": "O(n)",
+              "curveId": "linear"
+            }
+          ]
+        },
+        {
+          "kind": "operation",
+          "operation": "Insert / remove at the middle",
+          "bounds": [
+            {
+              "kind": "curve",
+              "role": "Structure space",
+              "formula": "O(n)",
+              "curveId": "linear"
+            }
+          ]
+        }
+      ]
+    }
+  }
+}
+```
+````
 
 # When the Structure Stops Fitting
 
-The middle is the hard boundary, and it follows directly from the both-ends design. Both backings optimize the two ends: the ring buffer keeps only `head` and `count`, and the linked list caches only head and tail. Neither holds a position between them, so inserting or removing at an interior offset is `O(n)` — shifting a block of the array, or walking to the node first. A workload dominated by middle splices at positions it already holds wants a plain doubly-[[Computer Science/Data Structures/Linear Structures/LinkedList|linked list]] with retained node references, or a balanced tree; a deque has thrown that information away.
+The middle is the hard boundary, and it follows directly from the both-ends design. Both backings optimize the two ends: the ring buffer keeps only `head` and `count`, and the linked list caches only head and tail. A workload dominated by middle splices at positions it already holds wants a plain doubly-[[Computer Science/Data Structures/Linear Structures/LinkedList|linked list]] with retained node references, or a balanced tree; a deque has thrown that information away.
 
-The ring buffer's resize is a latency boundary rather than a throughput one. Amortized `O(1)` is a sequence-level guarantee; the one push that overflows a full buffer copies every element in a single `O(n)` step. In a real-time or per-frame loop that tail-latency spike can miss a deadline even though the average is constant, which is a reason to pre-size the buffer or choose the linked backing when worst-case per-op time is the constraint.
+The ring buffer's resize is a latency boundary rather than a throughput one. The push that overflows a full buffer allocates a larger array and copies every live element before returning. In a real-time or per-frame loop that pause can miss a deadline, which is a reason to pre-size the buffer or choose the linked backing when one long operation is unacceptable.
 
 Sliding-window _maximum_ is a common target, but a raw deque does not provide it — the technique is a **monotonic** deque, covered in [[Computer Science/Algorithms/Patterns/Monotonic Stack and Queue|Monotonic Stack and Queue]]. The deque holds candidate indices whose values stay ordered because each push removes dominated values from the back, while indices that fall outside the window expire from the front. The ordering invariant lives in the algorithm, not the container.
 
@@ -147,18 +314,12 @@ Sliding-window _maximum_ is a common target, but a raw deque does not provide it
 
 # Questions
 
-> [!QUESTION]- How do a `head` index and a `count` let a ring-buffer deque touch both ends in `O(1)`?
-> The occupied slots are `head` through `(head + count - 1) % cap`. `PushBack` writes at `(head + count) % cap` and increments `count`; `PushFront` decrements `head` (mod capacity), writes there, and increments `count`; each pop reads an end slot and adjusts `head` or `count`. Because every access wraps modulo capacity and only `head` and `count` change, no element is ever shifted.
-
-> [!QUESTION]- Why is the ring-buffer push `O(1)` amortized but not `O(1)` worst case?
-> A push onto a full buffer must copy all `n` elements into a larger array — an `O(n)` single operation. Geometric doubling makes that copy happen rarely enough that a run of `m` pushes costs `O(m)` total, so the amortized cost is `O(1)`; but any individual overflowing push is still `O(n)`, which shows up as a latency spike.
-
-> [!QUESTION]- Ring buffer versus doubly-linked list as the deque backing — how do they differ?
-> The ring buffer stores elements contiguously: `O(1)` index, good locality, no per-element allocation, but an occasional `O(n)` resize. The linked list gives unconditional `O(1)` ends with no resize spike, at the cost of a node allocation per element, no `O(1)` index, and pointer-chasing traversal. The ring buffer is the default; the linked list fits when worst-case per-op latency or `O(1)` removal of held interior nodes matters more than locality.
+> [!QUESTION]- When does a linked backing fit better than a growable ring buffer for a deque?
+> A ring buffer is the default when locality, compact storage, and constant-time indexing matter. A linked backing trades those properties and a node allocation per element for end operations without the ring buffer's occasional `O(n)` resize pause.
 
 # References
 
 - [Double-ended queue (Wikipedia)](https://en.wikipedia.org/wiki/Double-ended_queue) — operation set and the ring-buffer versus linked-list implementations with their complexity summary.
-- [`collections.deque` (Python docs)](https://docs.python.org/3/library/collections.html#collections.deque) — documents approximately `O(1)` appends and pops at both ends and slower `O(n)` access through the middle, without making its implementation part of the API contract.
+- [`collections.deque` (Python docs)](https://docs.python.org/3/library/collections.html#collections.deque) — documents the two-ended operation contract without making its implementation part of the API contract.
 - [`LinkedList<T>` class (Microsoft Learn)](https://learn.microsoft.com/en-us/dotnet/api/system.collections.generic.linkedlist-1) — the BCL's doubly-linked list, usable as a deque via `AddFirst`/`AddLast`/`RemoveFirst`/`RemoveLast`; note the per-node allocation.
 - [ThreadPool work-stealing queues (dotnet/runtime source)](https://github.com/dotnet/runtime/blob/main/src/libraries/System.Private.CoreLib/src/System/Threading/ThreadPoolWorkQueue.cs) — the real work-stealing deque behind `ThreadPool`: owner pushes/pops LIFO on one end, thieves steal FIFO from the other.

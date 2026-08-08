@@ -3,7 +3,7 @@ topic:
   - Computer Science
 subtopic:
   - Algorithms
-summary: "Finds all occurrences of many patterns in one text pass using a trie with failure links, in O(n + z)."
+summary: "Finds all occurrences of many patterns in one text pass using a trie with failure links."
 level:
   - "4"
 priority: Medium
@@ -11,19 +11,23 @@ status: Creation
 publish: true
 ---
 
-A signature engine scans a byte stream — packets, log lines, a file — against a fixed dictionary of `k` non-empty patterns and must report every occurrence of every pattern. Running a single-pattern matcher such as [[Home/Computer Science/Algorithms/Search Algorithms/String Matching/KMP (Knuth-Morris-Pratt) Algorithm|KMP]] once per pattern reads the whole text `k` times, so the cost is `O(k·n)` and grows with the dictionary even though the text never changes.
+A signature engine scans a byte stream — packets, log lines, a file — against a fixed dictionary of `k` non-empty patterns and must report every occurrence of every pattern.
 
-The patterns share structure. Any two that begin `sh…` walk the same first edges, and a shorter pattern can be a suffix of the state a longer one reaches. Aho-Corasick compiles the whole dictionary once into a single finite automaton — a trie of all patterns carrying **failure links** and **output links** — then drives the text through it one character at a time without ever rewinding. One pass reports every match of every pattern, and its search cost stops depending on `k`.
+The patterns share structure. Any two that begin `sh…` walk the same first edges, and a shorter pattern can be a suffix of the state a longer one reaches. Aho-Corasick compiles the whole dictionary once into a single finite automaton — a trie of all patterns carrying **failure links** and **output links** — then drives the text through it one character at a time without ever rewinding. Shared transitions avoid running one matcher per pattern; reporting still visits every occurrence emitted through the output chain.
 
-**Core shape:** fixed pattern set → trie + failure links + output links → one non-backtracking pass over the text → `Θ(n + z)` search for `z` reported matches, from one automaton built over the whole dictionary.
 
-# Trace
+
+~~~~~tabsdown
+tab: Visualization
+
 
 ```steptrace
 {"algorithm":"aho-corasick","patterns":["he","she","his","hers"],"text":"ushers"}
 ```
 
-# Trie, Failure Links, Output Links
+
+
+
 
 The automaton is a trie of the pattern set plus two kinds of back-edge.
 
@@ -35,7 +39,7 @@ The automaton is a trie of the pattern set plus two kinds of back-edge.
 
 **Construction.** Failure and output links are filled by one breadth-first pass from the root. A node's failure target always sits at strictly smaller depth, so it is finalized before the node needs it; a depth-first order would read unfinished links. The root's direct children fail to the root.
 
-# One Pass over "Ushers"
+
 
 The dictionary `{ he, she, his, hers }` compiles to a trie with a handful of failure and output links. Two are decisive: the state for `she` fails to the state for `he` — its longest proper suffix that is also a prefix in the trie — and because `he` ends a pattern, `she`'s output link points there.
 
@@ -43,24 +47,105 @@ Reading `ushers` left to right, the automaton stays at the root through `u`, the
 
 The invariant makes each of those steps legal: after reading `i` characters the automaton is always at the state whose string is the longest suffix of the first `i` characters that is still a prefix of some pattern. Every pattern occurrence ending at position `i` is a suffix of that state's string, and the output chain lists exactly those. That is why a single left-to-right pass, with no rewinding of the text, sees every match.
 
-# Complexity
+tab: Complexity
 
-Let `M = Σmᵢ` be the total length of all patterns — an upper bound on the trie's node count — and `σ` the alphabet size.
+```complexity
+{
+  "version": 2,
+  "label": "Aho-Corasick complexity",
+  "variables": {
+    "alphabetSigma": {
+      "symbol": "σ",
+      "description": "alphabet size"
+    },
+    "inputSize": {
+      "symbol": "n",
+      "description": "length of the searched text"
+    },
+    "lengthL": {
+      "symbol": "l",
+      "description": "maximum pattern length and failure-chain depth"
+    },
+    "matchCount": {
+      "symbol": "z",
+      "description": "number of reported matches"
+    },
+    "totalPatternLength": {
+      "symbol": "m",
+      "description": "total length of all patterns"
+    }
+  },
+  "resources": {
+    "time": {
+      "mode": "operations",
+      "entries": [
+        {
+          "kind": "operation",
+          "operation": "Build automaton",
+          "bounds": [
+            {
+              "kind": "text",
+              "role": "Time",
+              "formula": "O(m·l) sparse, Θ(m·σ) dense"
+            }
+          ]
+        },
+        {
+          "kind": "operation",
+          "operation": "Search",
+          "bounds": [
+            {
+              "kind": "curve",
+              "role": "Time",
+              "formula": "Θ(n + z)",
+              "curveId": "linear"
+            }
+          ]
+        }
+      ]
+    },
+    "space": {
+      "mode": "operations",
+      "entries": [
+        {
+          "kind": "operation",
+          "operation": "Build automaton",
+          "bounds": [
+            {
+              "kind": "text",
+              "role": "Space",
+              "formula": "Θ(m) sparse, Θ(m·σ) dense"
+            }
+          ]
+        },
+        {
+          "kind": "operation",
+          "operation": "Search",
+          "bounds": [
+            {
+              "kind": "curve",
+              "role": "Space",
+              "formula": "O(1) beyond the automaton",
+              "curveId": "constant"
+            }
+          ]
+        }
+      ]
+    }
+  }
+}
+```
 
-| Phase | Time | Space | Cause |
-| --- | --- | --- | --- |
-| Build automaton | `O(M·L)` sparse, `Θ(M·σ)` dense | `Θ(M)` sparse, `Θ(M·σ)` dense | One insertion per pattern character builds the `≤ M+1` trie nodes; with this map-and-failure-hop construction, each BFS edge can follow up to `L` failure links, where `L` is the longest pattern length. A dense `σ`-wide transition row per node assigns every transition directly but adds the `σ` factor; a hash map per node stores only real edges and drops it, at an `O(1)` expected lookup instead of an array index. |
-| Search | `Θ(n + z)` | `O(1)` beyond the automaton | Each text character makes one forward move plus failure hops that amortize to `O(1)` over the scan (the KMP argument), and the output walk emits exactly the `z` matches. No term in `k`, the pattern count. |
-
-The `Θ(M·σ)` (dense) or `Θ(M)` (sparse) figure is the automaton itself, allocated once and reused across every text; the sparse build can take `O(M·L)` with the simple failure-hop loop shown below. A search adds only a current-state index and an output-walk cursor, so its per-pass auxiliary space is `O(1)` — the automaton is structure space, not per-operation space. The dense-versus-sparse choice trades that automaton memory against a constant-factor transition cost, and is the main space decision on wide alphabets.
+The build rows distinguish a sparse transition map from a dense alphabet-wide table. The automaton is reusable structure space; a search adds only the current state and output cursor beyond it.
+~~~~~
 
 # Where it Stops Fitting
 
-**Automaton memory on wide alphabets.** A dense `σ`-wide transition row per node makes each lookup a single array index but allocates `Θ(M·σ)` slots, most of them empty — for byte or Unicode alphabets over a large dictionary that is the dominant cost. A hash map per node (or a double-array trie) stores only the edges that exist, cutting space to `Θ(M)` at the price of a hashed lookup per transition. Both representations compute identical matches; only memory and constant factors differ.
+
 
 **Overlapping and nested matches.** The automaton reports every occurrence of every pattern, including matches that overlap (`aa` in `aaa` at offsets 0 and 1) and matches nested inside a longer one (`he` ending inside `she`). Those extra matches surface only through the output-link walk. Reporting a pattern only when the current node itself ends one leaves the scan correctly positioned but silently drops the nested cases: on `{ he, she, hers }` over `ushers` it reports `she` and `hers` and loses `he`. The defect is invisible on any dictionary where no pattern is a suffix of another, which is what makes it easy to ship.
 
-**A fixed dictionary.** Failure and output links are global properties of the whole pattern set, resolved by the single construction BFS. Adding a pattern changes suffix relationships throughout the trie, so the links must be recomputed — an insertion after construction means rebuilding the automaton, or maintaining a more complex dynamic variant. The algorithm therefore fits a dictionary compiled once and reused across many texts; a set that changes on every query pays the sparse `O(M·L)` build repeatedly and loses its edge over rerunning a single-pattern matcher.
+**A fixed dictionary.** Failure and output links are global properties of the whole pattern set, resolved by the single construction BFS. Adding a pattern changes suffix relationships throughout the trie, so the links must be recomputed — an insertion after construction means rebuilding the automaton, or maintaining a more complex dynamic variant.
 
 # Reference Drawer
 
@@ -177,8 +262,8 @@ The `Θ(M·σ)` (dense) or `Θ(M)` (sparse) figure is the automaton itself, allo
 
 # Questions
 
-> [!QUESTION]- Why is search cost `Θ(n + z)` independent of the number of patterns?
-> All patterns share one trie, so common prefixes collapse into shared paths and the text drives a single walk through the automaton. Each character makes one forward move plus failure hops that amortize to `O(1)` over the whole scan, and the output walk emits exactly the `z` matches found. Nothing in the loop scales with `k`, the pattern count, so a thousand signatures cost the same per character as one.
+> [!QUESTION]- How does the shared trie avoid scanning every pattern separately?
+> Common prefixes collapse into shared paths, so each text character drives one automaton transition rather than one comparison per pattern. Output links then enumerate every pattern ending at the reached state.
 
 > [!QUESTION]- What does a failure link point to, and what invariant holds after reading `i` characters?
 > A state's failure link points to the state for the longest proper suffix of its string that is still a prefix of some pattern — KMP's longest-prefix-suffix relation lifted onto the trie. That link maintains the invariant that after `i` characters the automaton sits at the state whose string is the longest suffix of the first `i` characters that is a prefix of some pattern, which is precisely the state from which every match ending at `i` can be read.
@@ -191,6 +276,6 @@ The `Θ(M·σ)` (dense) or `Θ(M)` (sparse) figure is the automaton itself, allo
 
 # References
 
-- [Efficient String Matching: An Aid to Bibliographic Search](https://dl.acm.org/doi/10.1145/360825.360855) — Aho and Corasick's original 1975 paper (CACM), introducing the goto/failure/output construction and its linear-time search bound.
+- [Aho and Corasick, "Efficient String Matching: An Aid to Bibliographic Search" (1975)](https://dl.acm.org/doi/10.1145/360825.360855) — the original paper introducing the goto, failure, and output functions.
 - [Aho-Corasick algorithm (cp-algorithms)](https://cp-algorithms.com/string/aho_corasick.html) — trie plus suffix (failure) links, the BFS construction, the dictionary-link walk, and a reference implementation with complexity discussion.
 - [Aho–Corasick algorithm (Wikipedia)](https://en.wikipedia.org/wiki/Aho%E2%80%93Corasick_algorithm) — worked automaton example, the relationship to KMP, and applications in intrusion detection and `fgrep`.

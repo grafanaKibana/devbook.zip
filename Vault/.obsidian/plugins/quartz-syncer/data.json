@@ -23,7 +23,7 @@
   "useCache": true,
   "syncCache": true,
   "persistCache": false,
-  "cacheTimestamp": 0,
+  "cacheTimestamp": 1786218934489,
   "cache": "{}",
   "useAutoCardLink": false,
   "useDataview": true,
@@ -39,9 +39,5 @@
   "lastUpstreamCommitSha": "",
   "upgradeCheckStrategy": "version",
   "diffViewStyle": "auto",
-  "ENABLE_DEVELOPER_TOOLS": false,
-  "logLevel": {
-    "value": 99,
-    "name": "OFF"
-  }
+  "ENABLE_DEVELOPER_TOOLS": false
 }

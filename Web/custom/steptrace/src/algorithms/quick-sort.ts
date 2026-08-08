@@ -7,9 +7,7 @@ export const quickSort = {
   meta: { label: "Quick sort" },
   run: (input, ops) => {
     const n = ops.value.length
-    ops.init(
-      `Quick sort — pick a pivot, partition values so smaller ones go left and larger ones go right, then recurse on each side.`,
-    )
+    ops.init(`Quick sort — partition around a pivot, then recurse on the smaller and larger sides.`)
     function partition(lo, hi) {
       const pivot = ops.value[hi]
       ops.range(lo, hi)

@@ -1,18 +1,17 @@
 ---
 publish: true
-created: 2026-07-29T14:26:51.598Z
-modified: 2026-07-29T14:26:51.598Z
-published: 2026-07-29T14:26:51.598Z
+created: 2026-08-03T07:22:13.839Z
+modified: 2026-08-08T09:12:52.048Z
+published: 2026-08-08T09:12:52.048Z
 topic:
   - Computer Science
 subtopic: []
+summary: Describes how time or space grows with input size by retaining the dominant term and ignoring constants.
 level:
   - "3"
 priority: High
 status: Ready to Repeat
 ---
-
-# Intro
 
 Two algorithms sort a million records. One runs in `n log n` steps, the other in `n²`. At `n = 1,000,000` that is ~20 million operations versus a trillion — seconds versus hours, on the same hardware. Big O notation is the tool that predicts this gap _before_ either is written or benchmarked: it describes how an algorithm's cost grows as the input grows, discarding everything that depends on the machine so two algorithms can be compared by their growth alone.
 
@@ -22,7 +21,7 @@ The same notation measures two resources. **Time complexity** counts operations 
 
 **Core idea:** cost as a function of `n`, keep only the dominant term, drop constants → a hardware-independent growth class that predicts behaviour at scale but not at small `n`.
 
-## The growth classes, side by side
+# The growth classes, side by side
 
 The complexity class is the shape of the curve. Every line begins at the visual origin, then the logarithmic vertical scale covers 1 to 10k operations over the bounded `n = 2…10` domain. Factorial is evaluated only through `10!`; once a curve exceeds 10k it leaves the plot, which makes the exponential and factorial jumps visible instead of compressing every practical class against the baseline.
 
@@ -37,44 +36,37 @@ The complexity class is the shape of the curve. Every line begins at the visual 
   "entries": [
     {
       "kind": "catalogue",
-      "curveId": "constant",
-      "description": "Constant: same time regardless of input size."
+      "curveId": "constant"
     },
     {
       "kind": "catalogue",
-      "curveId": "log-n",
-      "description": "Logarithmic: halves the problem each step, as in binary search."
+      "curveId": "log-n"
     },
     {
       "kind": "catalogue",
-      "curveId": "linear",
-      "description": "Linear: processes each element once."
+      "curveId": "linear"
     },
     {
       "kind": "catalogue",
-      "curveId": "n-log-n",
-      "description": "Linearithmic: efficient sorting, including merge sort and expected randomized quicksort."
+      "curveId": "n-log-n"
     },
     {
       "kind": "catalogue",
-      "curveId": "quadratic",
-      "description": "Quadratic: nested loops, as in bubble sort and brute-force pair checking."
+      "curveId": "quadratic"
     },
     {
       "kind": "catalogue",
-      "curveId": "exponential",
-      "description": "Exponential: doubles with each new element."
+      "curveId": "exponential"
     },
     {
       "kind": "catalogue",
-      "curveId": "factorial",
-      "description": "Factorial: visits every permutation."
+      "curveId": "factorial"
     }
   ]
 }
 ```
 
-### Complexity catalogue
+## Complexity catalogue
 
 | Complexity | Growth | Typical example |
 | --- | --- | --- |
@@ -88,7 +80,7 @@ The complexity class is the shape of the curve. Every line begins at the visual 
 
 At `n = 10`, `n²` is 100, `2ⁿ` is 1,024, and `n!` is 3,628,800. That is the practical boundary between "solvable for large inputs" (polynomial) and "solvable only for tiny inputs" (exponential and factorial); an `O(2ⁿ)` [[Computer Science/Algorithms/Paradigms/Backtracking|brute-force]] search usually becomes impractical in the dozens and an `O(n!)` permutation search in the low teens. The exact cutoff depends on the hardware, latency budget, and work done per state.
 
-## Why the wall is a wall
+# Why the wall is a wall
 
 The chart's crossover understates the gap at real input sizes. Counting operations at a few scales makes it concrete:
 
@@ -101,7 +93,7 @@ The chart's crossover understates the gap at real input sizes. Counting operatio
 
 At a million elements, the `log n` column is still 20 while `n²` is a trillion — the difference between a binary-search or balanced-tree lookup and a job that never finishes. This is the whole reason complexity class is the _first_ thing to check: no amount of constant-factor tuning rescues an `n²` algorithm at `n = 10⁶`, but moving it to `n log n` does, by a factor of ~50,000. The `2ⁿ` column crossing 10³⁰ at `n = 100` is why exponential algorithms are a design signal to reach for [[Computer Science/Algorithms/Paradigms/Dynamic Programming|dynamic programming]], a [[Computer Science/Algorithms/Paradigms/Greedy Algorithms|greedy]] rule, or an approximation, not a bigger machine.
 
-## Space complexity and the cases
+# Space complexity and the cases
 
 Space is measured the same way, and the term people forget is the **call stack**. A recursive traversal that looks `O(1)` in heap allocation is `O(h)` in stack frames, where `h` is the recursion depth — a chain-shaped input 100k deep can overflow the available thread stack even though it allocates nothing on the heap. Auxiliary space (extra memory beyond the input) is usually what's quoted: merge sort is `O(n)` auxiliary for its merge buffer, naive recursive quicksort is `O(log n)` expected and `O(n)` worst-case for its stack, and an in-place scan is `O(1)`.
 
@@ -146,14 +138,14 @@ Big O by default states an upper bound; **Big Θ** (theta) states a _tight_ boun
 >
 > `HasDuplicate` and `HasDuplicateFast` answer the same question; the second trades `O(n)` memory to drop time from `O(n²)` to `O(n)`. Reading a bound is mostly counting nested loops and multiplying by the per-iteration cost, then discarding constants and lower-order terms.
 
-## Where Big O misleads
+# Where Big O misleads
 
 - **Constants matter at small `n`.** Big O drops them, so an `O(n log n)` algorithm with heavy setup can lose to an `O(n²)` one on small inputs. This is why `Array.Sort` switches to insertion sort for small subarrays inside its `O(n log n)` introsort — the quadratic algorithm's tiny constant wins below ~16 elements.
 - **The hidden constant can be huge.** Two `O(n)` algorithms can differ 100× in wall-clock from cache behaviour, branch prediction, or allocation. Big O narrows the field; profiling on representative data picks the winner within a class.
 - **"`n`" must be defined.** For string work, is `n` the number of strings or their total length? A [[Computer Science/Data Structures/Trees/Trie|trie]] lookup is `O(L)` in key length, independent of the `n` keys stored — stating the bound without naming the variable is meaningless.
 - **The base of a logarithm is irrelevant.** `log₂ n` and `log₁₀ n` differ by a constant factor, which Big O drops, so `O(log n)` needs no base. Inside an exponent the base is decisive: `2ⁿ` and `3ⁿ` are different classes.
 
-## Questions
+# Questions
 
 > [!QUESTION]- Why does Big O drop constant factors and lower-order terms?
 > Because it describes growth as `n → ∞`, where the fastest-growing term dominates everything else and the machine-specific constants wash out. `n² + 100n + 500` is `O(n²)`: past some size the `n²` term buries the rest. This makes the notation a hardware-independent way to compare _scaling_, at the deliberate cost of saying nothing about behaviour at small `n`, where the dropped constants are exactly what decides the winner.
@@ -167,7 +159,7 @@ Big O by default states an upper bound; **Big Θ** (theta) states a _tight_ boun
 > [!QUESTION]- When is an algorithm with worse Big O the right choice?
 > When inputs are small and bounded, so the dropped constants dominate — insertion sort inside a hybrid sort below ~16 elements, or a linear scan over 10 items instead of building a hash set. Big O is an asymptotic statement; below the crossover point a "worse" class with a smaller constant and better cache behaviour is genuinely faster. Narrow candidates by complexity class, then measure on representative data.
 
-## References
+# References
 
 - [Big O notation (Wikipedia)](https://en.wikipedia.org/wiki/Big_O_notation) — the formal `c`/`n₀` definition, the relationship between O, Θ, and Ω, and the algebra of dropping terms.
 - [Big-O Cheat Sheet](https://www.bigocheatsheet.com/) — a reference table of time and space complexity for common data structures and algorithms, with the same growth-class curves plotted.

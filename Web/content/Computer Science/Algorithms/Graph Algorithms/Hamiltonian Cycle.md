@@ -1,12 +1,13 @@
 ---
 publish: true
 created: 2026-07-18T14:02:43.947Z
-modified: 2026-07-26T19:07:12.954Z
-published: 2026-07-26T19:07:12.954Z
+modified: 2026-08-08T09:12:51.688Z
+published: 2026-08-08T09:12:51.688Z
 topic:
   - Computer Science
 subtopic:
   - Algorithms
+summary: Visits every graph vertex exactly once and returns to the start; deciding existence is NP-complete.
 level:
   - "4"
 priority: Medium
@@ -17,25 +18,116 @@ A graph route may need to visit every **vertex** exactly once and return to its 
 
 For a graph with `n` vertices, a cycle is a permutation of the vertices whose consecutive pairs — including the last and first — are edges. Backtracking searches these permutations while pruning a partial path as soon as its next edge is missing or a vertex repeats.
 
+````tabsdown
+tab: Visualization
+
 ```steptrace
 {"algorithm":"hamiltonian-cycle"}
 ```
 
-# Backtracking State
 
 For the graph with cycle edges `A-B-C-D-A` plus diagonal `A-C`, start with `A` and mark it used. Choosing `C` first leaves candidates `B` and `D`; the branch `A-C-B` cannot continue to `D` because `B-D` is absent, so it backtracks to `C` and tries `D`. The branch `A-C-D` then cannot reach unused `B`. Returning to the root and choosing `B` produces `A-B-C-D`, and `D-A` closes the cycle.
 
 The maintained invariant is compact: the path contains distinct vertices, and every consecutive pair is an edge. A solution is accepted only at length `n` and only if the final vertex is adjacent to the start.
 
-# Complexity
+tab: Complexity
 
-| Case | Time | Auxiliary space | Cause |
-| --- | --- | --- | --- |
-| Best | `O(n)` | `O(n)` | the first branch forms a cycle and closing edge exists |
-| Typical | distribution-dependent; exponential in general | `O(n)` | graph density and branch order determine how early pruning occurs |
-| Worst | `O(n!)` | `O(n)` | permutation backtracking may explore almost every vertex order |
-
-These bounds assume `O(1)` adjacency tests through an adjacency matrix or hash-set lookup; scanning adjacency lists adds the membership-search cost. The decision problem is in NP because a proposed cycle can be verified in `O(n)` such checks. Dynamic programming over subsets improves exact worst-case time to `O(n² 2^n)` with `O(n 2^n)` space, but remains exponential.
+```complexity
+{
+  "version": 2,
+  "label": "Hamiltonian Cycle complexity",
+  "variables": {
+    "inputSize": {
+      "symbol": "n",
+      "description": "number of vertices in the input graph"
+    }
+  },
+  "resources": {
+    "time": {
+      "mode": "operations",
+      "entries": [
+        {
+          "kind": "operation",
+          "operation": "Best",
+          "bounds": [
+            {
+              "kind": "curve",
+              "role": "Time",
+              "formula": "O(n)",
+              "curveId": "linear"
+            }
+          ]
+        },
+        {
+          "kind": "operation",
+          "operation": "Typical",
+          "bounds": [
+            {
+              "kind": "text",
+              "role": "Time",
+              "formula": "distribution-dependent; exponential in general"
+            }
+          ]
+        },
+        {
+          "kind": "operation",
+          "operation": "Worst",
+          "bounds": [
+            {
+              "kind": "curve",
+              "role": "Time",
+              "formula": "O(n!)",
+              "curveId": "factorial"
+            }
+          ]
+        }
+      ]
+    },
+    "space": {
+      "mode": "operations",
+      "entries": [
+        {
+          "kind": "operation",
+          "operation": "Best",
+          "bounds": [
+            {
+              "kind": "curve",
+              "role": "Auxiliary space",
+              "formula": "O(n)",
+              "curveId": "linear"
+            }
+          ]
+        },
+        {
+          "kind": "operation",
+          "operation": "Typical",
+          "bounds": [
+            {
+              "kind": "curve",
+              "role": "Auxiliary space",
+              "formula": "O(n)",
+              "curveId": "linear"
+            }
+          ]
+        },
+        {
+          "kind": "operation",
+          "operation": "Worst",
+          "bounds": [
+            {
+              "kind": "curve",
+              "role": "Auxiliary space",
+              "formula": "O(n)",
+              "curveId": "linear"
+            }
+          ]
+        }
+      ]
+    }
+  }
+}
+```
+````
 
 # Necessary Checks and False Shortcuts
 
@@ -45,14 +137,12 @@ A connected graph is also insufficient. Connectivity only promises some path bet
 
 # Comparison
 
-| Problem | Must cover | Reuse allowed | General complexity | Structural test |
-| --- | --- | --- | --- | --- |
-| Hamiltonian cycle | every vertex | no repeated vertex | NP-complete | no complete polynomial characterization known |
-| Hamiltonian path | every vertex | no repeated vertex | NP-complete | endpoints need not be adjacent |
-| Eulerian cycle | every edge | vertices may repeat | `O(V + E)` | connected non-isolated graph with even degrees |
-| Traveling Salesman | every vertex with minimum total cost | no repeated vertex | NP-hard optimization | weighted Hamiltonian cycle plus minimization |
-
 Hamiltonian cycle is the feasibility version of visiting every vertex once. Traveling Salesman adds weights and asks for the cheapest such cycle; Eulerian cycle solves a different, tractable edge-coverage problem.
+
+# Questions
+
+> [!QUESTION]- Why do degree-at-least-two and no-articulation-point checks fail to prove that a Hamiltonian cycle exists?
+> Both properties are necessary because every vertex on the cycle has two incident cycle edges and removing one cycle vertex leaves the others connected by a path. They are not sufficient: a graph can satisfy both local checks while no single cycle visits every vertex, so backtracking or a stronger problem-specific argument is still required.
 
 # References
 

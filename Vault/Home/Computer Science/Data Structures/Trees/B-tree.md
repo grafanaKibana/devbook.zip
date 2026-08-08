@@ -11,19 +11,20 @@ status: Ready to Repeat
 publish: true
 ---
 
-A relational index holds millions of ordered keys on disk or SSD, a medium where a single random access fetches an entire block — a page, typically 4–16 KB. A one-key-per-node tree such as a [[Home/Computer Science/Data Structures/Trees/Binary Search Tree|Binary Search Tree]] spends one random page read per level, so a lookup over `n` keys costs about `log₂ n` reads: roughly 27 for 130 million keys, and each of those reads is a full random page fetch the storage device charges in full.
+A relational index holds millions of ordered keys on disk or SSD, a medium where a single random access fetches an entire block — a page, typically 4–16 KB.
 
-A B-tree removes most of those reads by packing many sorted keys into a single page-sized node. Each node has a fan-out `m` in the hundreds instead of two, so height collapses to `log_m n` and the same 130 million keys resolve in three or four page reads. Searching within a node still costs CPU work — `O(m)` comparisons for a linear scan or `O(log m)` for binary search — but it runs over one cache-local page instead of triggering another random read. What the structure keeps is only the sorted order of the keys and the child that brackets each gap; it records no insertion history and no placement beyond which node a key landed in.
+A B-tree removes most of those reads by packing many sorted keys into a single page-sized node. Each node has a fan-out `m` in the hundreds instead of two, so height collapses to `log_m n` and the same 130 million keys resolve in three or four page reads. What the structure keeps is only the sorted order of the keys and the child that brackets each gap; it records no insertion history and no placement beyond which node a key landed in.
 
-**Core shape:** page-sized node → up to `m−1` sorted keys and `m` child pointers → every non-root node at least `⌈m/2⌉−1` full → all leaves at equal depth → height ≈ `log_m n`, `O(n)` storage.
+**Core shape:** page-sized node → up to `m−1` sorted keys and `m` child pointers → every non-root node at least `⌈m/2⌉−1` full → all leaves at equal depth
 
 Press **Insert** with the prefilled `6`: the leaf temporarily reaches four keys, then the median `10` moves into a new root while the remaining keys stay in two leaves.
+
+~~~~~tabsdown
+tab: Visualization
 
 ```steptrace
 {"algorithm":"b-tree","values":[10,20,5],"value":6}
 ```
-
-# Representation and Invariants
 
 An order-`m` B-tree stores each node as one page. A node is two parallel arrays: up to `m−1` sorted keys and up to `m` child pointers (leaves carry keys only). Four invariants define a valid state:
 
@@ -36,7 +37,7 @@ Some implementations parameterize the same capacity by **minimum degree** `t` in
 
 Search is a binary search within the current node, then a descent into the child whose range brackets the key, repeated until a leaf. Because `m` is large, the base of the logarithm is large: the 130-million-key example above takes roughly 27 binary-tree levels but only three or four B-tree levels. PostgreSQL builds each node from one 8 KB page; SQLite represents tables and indexes with B-tree interior and leaf pages.
 
-# Growing and Shrinking by Split and Merge
+#### Growing and Shrinking by Split and Merge
 
 Height changes only at the root, which is what keeps every leaf at equal depth without rotations.
 
@@ -46,25 +47,149 @@ The trace uses that **bottom-up** algorithm: descend first, permit a temporary `
 
 A delete can leave a node below the `⌈m/2⌉−1` minimum. The repair mirrors the split. If an adjacent sibling has a spare key, the node **borrows** — the parent's separator rotates down and the sibling's key rotates up. If both siblings are minimal, the node **merges** with a sibling and the separating parent key into one node; merges cascade upward, and when the root empties the tree loses a level. Deleting from an internal node is first reduced to the leaf case by swapping the key with its in-order predecessor.
 
-# Complexity
+tab: Complexity
 
-| Operation | Node accesses (I/O) | In-node work | Structure space | Aux space per op | Cause |
-| --- | --- | --- | --- | --- | --- |
-| Search | `O(log_m n)` page reads | `O(log₂ m)` binary search per node | `O(n)` | `O(1)` | height ≈ `log_m n`; each node visited is one page read |
-| Insert | `O(log_m n)` reads, plus splits along the path | `O(m)` to shift keys and split a node | `O(n)` | `O(log_m n)` path | a full node splits and the median rises; the cascade is bounded by height |
-| Delete | `O(log_m n)` reads, plus borrow or merge | `O(m)` to shift or fuse keys | `O(n)` | `O(log_m n)` path | an underflowing node borrows from or merges with a sibling up the path |
-
-The decisive number in every row is the node-access column, because a node access is a page read and page reads dominate the cost of external memory. Search does `O(m)` comparisons per node with a linear scan or `O(log m)` with binary search; across the tree, binary in-node search still totals `O(log n)` comparisons. The CPU benefit comes from scanning compact keys already loaded in one cache-local page, while the I/O benefit comes from replacing many random reads with one wider node access. Writes additionally pay `O(m)` to shift keys and to split, borrow, or fuse nodes. Structure space is `O(n)` because every non-root node contains at least `⌈m/2⌉−1` keys; that minimum-fill ratio approaches one-half as `m` grows.
+```complexity
+{
+  "version": 2,
+  "label": "B-tree complexity",
+  "variables": {
+    "inputSize": {
+      "symbol": "n",
+      "description": "number of keys stored in the tree"
+    },
+    "secondarySize": {
+      "symbol": "m",
+      "description": "tree order and maximum number of children per node"
+    }
+  },
+  "resources": {
+    "time": {
+      "mode": "operations",
+      "entries": [
+        {
+          "kind": "operation",
+          "operation": "Search",
+          "bounds": [
+            {
+              "kind": "text",
+              "role": "Node accesses (I/O)",
+              "formula": "O(log_m n) page reads"
+            },
+            {
+              "kind": "text",
+              "role": "In-node work",
+              "formula": "O(log₂ m) binary search per node"
+            }
+          ]
+        },
+        {
+          "kind": "operation",
+          "operation": "Insert",
+          "bounds": [
+            {
+              "kind": "text",
+              "role": "Node accesses (I/O)",
+              "formula": "O(log_m n) reads, plus splits along the path"
+            },
+            {
+              "kind": "curve",
+              "role": "In-node work",
+              "formula": "O(m) to shift keys and split a node",
+              "curveId": "linear"
+            }
+          ]
+        },
+        {
+          "kind": "operation",
+          "operation": "Delete",
+          "bounds": [
+            {
+              "kind": "text",
+              "role": "Node accesses (I/O)",
+              "formula": "O(log_m n) reads, plus borrow or merge"
+            },
+            {
+              "kind": "curve",
+              "role": "In-node work",
+              "formula": "O(m) to shift or fuse keys",
+              "curveId": "linear"
+            }
+          ]
+        }
+      ]
+    },
+    "space": {
+      "mode": "operations",
+      "entries": [
+        {
+          "kind": "operation",
+          "operation": "Search",
+          "bounds": [
+            {
+              "kind": "curve",
+              "role": "Structure space",
+              "formula": "O(n)",
+              "curveId": "linear"
+            },
+            {
+              "kind": "curve",
+              "role": "Aux space per op",
+              "formula": "O(1)",
+              "curveId": "constant"
+            }
+          ]
+        },
+        {
+          "kind": "operation",
+          "operation": "Insert",
+          "bounds": [
+            {
+              "kind": "curve",
+              "role": "Structure space",
+              "formula": "O(n)",
+              "curveId": "linear"
+            },
+            {
+              "kind": "text",
+              "role": "Aux space per op",
+              "formula": "O(log_m n) path"
+            }
+          ]
+        },
+        {
+          "kind": "operation",
+          "operation": "Delete",
+          "bounds": [
+            {
+              "kind": "curve",
+              "role": "Structure space",
+              "formula": "O(n)",
+              "curveId": "linear"
+            },
+            {
+              "kind": "text",
+              "role": "Aux space per op",
+              "formula": "O(log_m n) path"
+            }
+          ]
+        }
+      ]
+    }
+  }
+}
+```
+~~~~~
 
 # When Block Orientation Stops Paying off
 
 Each boundary traces back to the page-sized node.
 
-In pure memory there is no storage-page read to amortize. A wide node needs `O(m)` comparisons with a linear scan or `O(log m)` with binary search, while a binary node needs one comparison before following a pointer. That does not make a B-tree automatically slower: a flat node can keep several comparisons in one cache line while a pointer-heavy [[Home/Computer Science/Data Structures/Trees/Red-Black Tree|Red-Black Tree]] or [[Home/Computer Science/Data Structures/Trees/AVL Tree|AVL Tree]] incurs cache misses. Use a cache-sized B-tree when locality matters; use the binary trees when their simpler node updates fit the workload better.
+In pure memory there is no storage-page read to amortize. That does not make a B-tree automatically slower: a flat node can keep several comparisons in one cache line while a pointer-heavy [[Home/Computer Science/Data Structures/Trees/Red-Black Tree|Red-Black Tree]] or [[Home/Computer Science/Data Structures/Trees/AVL Tree|AVL Tree]] incurs cache misses. Use a cache-sized B-tree when locality matters; use the binary trees when their simpler node updates fit the workload better.
 
 Writes rewrite whole pages. An insert that fills a page splits it, producing two page writes where a binary tree would flip a few pointers, and random-order insertion keeps triggering splits — sustained write amplification. Bulk-loading already-sorted keys sidesteps this by packing pages to near-100% before they are written, which is why databases build an index faster from sorted input than by inserting rows one at a time. Where writes dominate, the [[Home/Data Persistence/NoSQL/LSM-Tree|LSM-Tree]] is the write-optimized counterpart that attacks exactly this cost, trading read and space amplification for far higher write throughput.
 
-The branching factor must be sized to the page. Choosing `m` too small shrinks fan-out toward a binary tree, so height climbs back toward `log₂ n` and the extra page reads return — the design's entire benefit is spent. `m` is effectively fixed by `page_size / (key_size + pointer_size)`, not chosen freely.
+The branching factor must be sized to the page. `m` is effectively fixed by `page_size / (key_size + pointer_size)`, not chosen freely.
 
 # Reference Drawer
 

@@ -5,7 +5,8 @@
       "name": "Default",
       "fileVisibility": "supported",
       "hiddenFolders": [
-        "/Assets/components"
+        "/Assets",
+        "/Templates"
       ],
       "hiddenTags": [],
       "hiddenFileNames": [],
@@ -14,6 +15,10 @@
       "navigationBanner": null,
       "periodicNotesFolder": "",
       "shortcuts": [
+        {
+          "type": "note",
+          "path": "Home/index.md"
+        },
         {
           "type": "note",
           "path": "Home/Questions.md"
@@ -25,10 +30,6 @@
         {
           "type": "note",
           "path": "Home/Topics.base"
-        },
-        {
-          "type": "note",
-          "path": "Home/Credits.md"
         }
       ],
       "propertyKeys": [
@@ -156,7 +157,7 @@
     "file": "Home/index.md",
     "createMissingPeriodicNote": true
   },
-  "dualPane": true,
+  "dualPane": false,
   "dualPaneOrientation": "horizontal",
   "narrowSidebarLayout": "vertical",
   "narrowSidebarTriggerMode": "fitPanes",
@@ -170,16 +171,16 @@
   "useFloatingToolbars": true,
   "toolbarVisibility": {
     "navigation": {
-      "toggleDualPane": false,
+      "toggleDualPane": true,
       "expandCollapse": false,
       "calendar": true,
-      "hiddenItems": false,
-      "rootReorder": false,
+      "hiddenItems": true,
+      "rootReorder": true,
       "newFolder": false
     },
     "list": {
-      "back": false,
-      "search": false,
+      "back": true,
+      "search": true,
       "reveal": false,
       "descendants": false,
       "groupExpansion": false,
@@ -257,7 +258,9 @@
   "defaultListMode": "compact",
   "includeDescendantNotes": true,
   "defaultFolderSort": "title-asc",
+  "defaultFolderSortPropertyKey": "",
   "propertySortKey": "order",
+  "propertyGroupKey": "order",
   "propertySortSecondary": "title",
   "manualSortPropertyKey": "manual_order",
   "manualSortGroupHeaderProperty": "group_header",
@@ -289,9 +292,13 @@
   "frontmatterCreatedField": "",
   "frontmatterModifiedField": "",
   "frontmatterDateFormat": "",
-  "showFileIconUnfinishedTask": false,
+  "showFileTaskProgress": true,
+  "showFileTaskProgressBar": true,
+  "showFileTaskProgressCount": true,
+  "hideFileTaskProgressWhenComplete": false,
   "showFileBackgroundUnfinishedTask": false,
   "unfinishedTaskBackgroundColor": "#ef000050",
+  "unfinishedTaskBackgroundColorDark": "#ef000050",
   "showFileIcons": true,
   "useFolderIconForFiles": false,
   "showFilenameMatchIcons": false,
@@ -551,6 +558,11 @@
       "folder": true,
       "tag": false,
       "property": false
+    },
+    "Home/index.md": {
+      "folder": true,
+      "tag": false,
+      "property": false
     }
   },
   "fileIcons": {
@@ -617,10 +629,7 @@
   "propertyAppearances": {},
   "virtualFolderColors": {},
   "virtualFolderBackgroundColors": {},
-  "navigationSeparators": {
-    "folder:Templates": true,
-    "folder:Home": true
-  },
+  "navigationSeparators": {},
   "userColors": [
     "#ffffff",
     "#d9d9d9",
@@ -643,8 +652,12 @@
     "#404040",
     "#404040"
   ],
-  "lastShownVersion": "3.3.0",
-  "rootFolderOrder": [],
+  "lastShownVersion": "3.3.2",
+  "rootFolderOrder": [
+    "Home",
+    "Assets",
+    "Templates"
+  ],
   "rootTagOrder": [],
   "rootPropertyOrder": []
 }

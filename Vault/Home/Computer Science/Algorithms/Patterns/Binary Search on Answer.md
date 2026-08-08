@@ -11,19 +11,82 @@ status: Creation
 publish: true
 ---
 
-A fleet must clear a queue of packages within `D` days, and the unknown is the smallest ship capacity that still finishes on time. Capacity is a number in a range: at least `max(weight)` so no single package is stranded, at most `sum(weights)` so one day suffices. Checking a single candidate capacity is cheap — a greedy pass fills days at that capacity and counts them — but the range can span millions of values, and testing each in turn is `O(range · n)`.
+A fleet must clear a queue of packages within `D` days, and the unknown is the smallest ship capacity that still finishes on time. Capacity is a number in a range: at least `max(weight)` so no single package is stranded, at most `sum(weights)` so one day suffices.
 
 The range collapses because feasibility is **monotone**: a larger capacity never needs *more* days, so once some capacity clears the backlog in `D` days, every larger one does too. Read across a range whose upper bound is feasible, the predicate `feasible(x)` is a possibly empty false prefix followed by a non-empty true suffix. Binary search locates the first true value, which may be the lower bound when every candidate is already feasible. The probe at `mid` is not a comparison against a stored array element but a call to `feasible(mid)` that does real work over the input. This is [[Home/Computer Science/Algorithms/Search Algorithms/Binary Search|Binary Search]] generalised from "find a value in a sorted array" to "find the boundary of a monotone predicate over a value space."
 
-**Core condition:** a numeric answer range `[lo, hi]` with a monotone `feasible(x)` → each probe evaluates `feasible(mid)` instead of comparing an array element → `O(n · log(range))` time, `O(1)` auxiliary space beyond the check.
 
-# Trace
 
-Six packages with weights `[3, 2, 2, 4, 1, 4]` must ship within three days. The answer strip classifies capacities `4 … 16` as known infeasible, still unknown, or known feasible. Each probe expands into the greedy day-by-day packing that supplies the predicate result, making the work inside `feasible(capacity)` visible instead of presenting the candidates as a stored array. The boundary settles at capacity `6`.
+~~~~~tabsdown
+tab: Visualization
+
+
 
 ```steptrace
 {"algorithm":"binary-search-on-answer","weights":[3,2,2,4,1,4],"days":3}
 ```
+
+
+
+Six packages with weights `[3, 2, 2, 4, 1, 4]` must ship within three days. The answer strip classifies capacities `4 … 16` as known infeasible, still unknown, or known feasible. Each probe expands into the greedy day-by-day packing that supplies the predicate result, making the work inside `feasible(capacity)` visible instead of presenting the candidates as a stored array. The boundary settles at capacity `6`.
+
+tab: Complexity
+
+```complexity
+{
+  "version": 2,
+  "label": "Binary Search on Answer complexity",
+  "variables": {
+    "inputSize": {
+      "symbol": "n",
+      "description": "number of input elements scanned by each feasibility check"
+    },
+    "rangeWidth": {
+      "symbol": "m",
+      "description": "numeric candidate-range width"
+    }
+  },
+  "resources": {
+    "time": {
+      "mode": "comparison",
+      "entries": [
+        {
+          "kind": "approach",
+          "label": "Naive (probe every candidate)",
+          "formula": "O(m·n)",
+          "curveFrom": "linear",
+          "curveTo": "quadratic"
+        },
+        {
+          "kind": "approach",
+          "label": "Binary search on answer",
+          "formula": "O(n log m)",
+          "curveFrom": "linear",
+          "curveTo": "n-log-n"
+        }
+      ]
+    },
+    "space": {
+      "mode": "comparison",
+      "entries": [
+        {
+          "kind": "approach",
+          "label": "Naive (probe every candidate)",
+          "formula": "O(1)",
+          "curveId": "constant"
+        },
+        {
+          "kind": "approach",
+          "label": "Binary search on answer",
+          "formula": "O(1)",
+          "curveId": "constant"
+        }
+      ]
+    }
+  }
+}
+```
+~~~~~
 
 # Why Halving the Answer Works
 
@@ -34,20 +97,7 @@ At the start of every iteration the true answer — the smallest feasible `x` �
 
 From `N` candidates, each probe keeps at most `⌈N/2⌉`, so the inclusive range reaches a single element in at most `⌈log₂(hi − lo + 1)⌉` steps. At that point `lo == hi` is the smallest feasible answer. The closed-range first-true update (`hi = mid` on success, `lo = mid + 1` on failure, with `mid` biased low) pairs the midpoint with the boundary move so the range always shrinks. The maximise-the-minimum mirror flips the predicate direction and biases `mid` high.
 
-The step that separates this from array search is the probe itself. In [[Home/Computer Science/Algorithms/Search Algorithms/Binary Search|Binary Search]] the value at `mid` is already stored and the comparison is `O(1)`. Here `mid` is a *candidate answer*, and `feasible(mid)` reconstructs enough of the problem to decide it — a greedy pass, a counting sweep, sometimes a full simulation. The family covers minimise-the-maximum (ship packages within `D` days, split an array to minimise the largest subarray sum, Koko eating bananas at the slowest speed that finishes in time), maximise-the-minimum (place resources to maximise the smallest gap), and degenerate numeric cases such as integer `sqrt(x)`, where `feasible(m)` is just `m * m <= x`.
-
-# Complexity
-
-The cost factors into how many candidates are probed and what each probe pays. There is no equality-based `O(1)` best case: a successful midpoint remains only a candidate for the first feasible value, so the search continues left. A one-value range performs no loop probe; every nontrivial integer range uses `Θ(log(hi − lo + 1))` predicate calls, with the exact count depending on the interval size and branch sequence.
-
-| Component | Cost | Cause |
-| --- | --- | --- |
-| Probes over the range | `O(log(hi − lo + 1))` | each probe halves the inclusive answer interval `[lo, hi]` |
-| One `feasible` check | `O(n)` typical | a single greedy or counting pass over the input |
-| Total time | `O(n · log(range))` | probe count × per-check cost |
-| Auxiliary space | `O(1)` | three integer bounds beyond whatever `feasible` allocates |
-
-The log factor is over the *numeric range of the answer*, not the input size, so an answer space as wide as `10^18` costs only about 60 probes. When `feasible` is itself super-linear — say it runs a DP — its cost replaces the `O(n)` term. For a real-valued answer the required iteration count depends on the initial width and target error (below).
+The step that separates this from array search is the probe itself. Here `mid` is a *candidate answer*, and `feasible(mid)` reconstructs enough of the problem to decide it — a greedy pass, a counting sweep, sometimes a full simulation. The family covers minimise-the-maximum (ship packages within `D` days, split an array to minimise the largest subarray sum, Koko eating bananas at the slowest speed that finishes in time), maximise-the-minimum (place resources to maximise the smallest gap), and degenerate numeric cases such as integer `sqrt(x)`, where `feasible(m)` is just `m * m <= x`.
 
 # When the Predicate is Not Actually Monotone
 
@@ -115,23 +165,24 @@ Three further boundaries follow from the same mechanism:
 
 # Comparison
 
-| Approach | Time | Requires | Stronger case | Weaker case |
-| --- | --- | --- | --- | --- |
-| Binary search on answer | `O(n · log(range))` | monotone `feasible`; a numeric range with `lo`/`hi` | numeric optimum whose validity is cheap to check | feasibility that is not monotone |
-| Linear scan of candidates | `O(range · n)` | a checker, but no monotonicity | tiny ranges, or when monotonicity cannot be proved | wide numeric ranges |
-| [[Home/Computer Science/Algorithms/Search Algorithms/Binary Search|Binary Search]] on the array | `O(log n)` | values physically sorted in an array | locating a stored value or insertion point | the answer is not an element of any array |
-| Greedy / [[Home/Computer Science/Algorithms/Paradigms/Dynamic Programming|Dynamic Programming]] formula | `O(n)`–`O(n·k)` direct | problem-specific structure that yields the optimum | a closed form or DP exists | no direct construction is known |
-| [[Home/Computer Science/Algorithms/Search Algorithms/Ternary Search|Ternary Search]] | `O(n · log(range))` | a **unimodal** objective (single peak/valley) | optimising a value that rises then falls | a monotone yes/no predicate |
+| Approach | Requires | Stronger case | Weaker case |
+| --- | --- | --- | --- |
+| Binary search on answer | monotone `feasible`; a numeric range with `lo`/`hi` | numeric optimum whose validity is cheap to check | feasibility that is not monotone |
+| Linear scan of candidates | a checker, but no monotonicity | tiny ranges, or when monotonicity cannot be proved | wide numeric ranges |
+| [[Home/Computer Science/Algorithms/Search Algorithms/Binary Search|Binary Search]] on the array | values physically sorted in an array | locating a stored value or insertion point | the answer is not an element of any array |
+| Greedy / [[Home/Computer Science/Algorithms/Paradigms/Dynamic Programming|Dynamic Programming]] formula | problem-specific structure that yields the optimum | a closed form or direct construction exists | no direct construction is known |
+| [[Home/Computer Science/Algorithms/Search Algorithms/Ternary Search|Ternary Search]] | a **unimodal** objective with one peak or valley | optimising a value that rises then falls | a monotone yes/no predicate |
 
-Binary search on the answer is the `O(n · log(range))` tool when the answer is numeric and feasibility is monotone; its cost is one full predicate sweep per probe. A closed-form greedy or DP beats it whenever the optimum can be constructed directly instead of searched for — split-array-largest-sum runs `O(n log sum)` by search versus `O(n²k)` by DP, but a problem with an `O(1)` formula never justifies the log factor. Plain [[Home/Computer Science/Algorithms/Search Algorithms/Binary Search|Binary Search]] is the special case where the predicate is `a[mid] < target` over stored data. [[Home/Computer Science/Algorithms/Search Algorithms/Ternary Search|Ternary Search]] answers the neighbouring shape — a unimodal objective with no monotone predicate — and is not interchangeable: its precondition is a single extremum, not a single boundary.
+Plain [[Home/Computer Science/Algorithms/Search Algorithms/Binary Search|Binary Search]] is the special case where the predicate is `a[mid] < target` over stored data. [[Home/Computer Science/Algorithms/Search Algorithms/Ternary Search|Ternary Search]] answers the neighbouring shape — a unimodal objective with no monotone predicate — and is not interchangeable: its precondition is a single extremum, not a single boundary.
 
 # Questions
 
 > [!QUESTION]- What precondition makes binary search on the answer valid, and how is it checked?
 > The feasibility predicate must be monotone in `x`, and the supplied upper bound must be feasible. For the minimizing form, `feasible` has a possibly empty false prefix followed by a true suffix; the search returns the first true value, even when it is `lo`. Monotonicity is verified by argument, not code: show that increasing the candidate can only make the condition easier to satisfy, so it never reverses. If the predicate can flip back and forth, no boundary exists and the search can discard the half that holds the answer.
 
-> [!QUESTION]- Why is the time `O(n · log(range))` rather than tied to the input length the usual way?
-> The log factor counts probes over the `hi − lo + 1` integer candidates in `[lo, hi]`, halving that count each time. Every probe runs `feasible`, typically an `O(n)` pass over the input, giving `O(n · log(range))`. The log is over the value range, so a `10^18`-wide answer space is still only about 60 probes — which is why the search wins when checking a candidate is far cheaper than computing the optimum directly.
+
+> [!QUESTION]- What determines the number of predicate probes?
+> The candidate interval is halved after every predicate result. The count therefore depends on the width of `[lo, hi]`, not on how many elements the predicate itself examines.
 
 > [!QUESTION]- How does the termination differ between an integer answer and a real-valued one?
 > Over integers, `lo < hi` with the `mid + 1` update collapses the interval to one value and stops exactly. Over reals the interval never reaches a single point. For absolute tolerance `δ`, choose at least `⌈log₂((hi − lo) / δ)⌉` iterations from the initial interval width to make the final width at most `δ`. This fixed bound makes termination explicit and avoids an `eps` loop that can stall on floating-point rounding.

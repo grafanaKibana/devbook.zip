@@ -275,8 +275,7 @@ export class ArraySortRecorder extends SortRecorder {
 //   edge:{from,to}|null, dist:{id:number}, message }.
 export class GraphRecorder {
   [key: string]: any
-  constructor(graph) {
-    this.graph = graph
+  constructor() {
     this.frames = []
     this._visited = new Set()
     this._frontier = []
@@ -800,6 +799,9 @@ export class PointerRecorder {
     this.pointers = {}
     this.window = null
     this.marked = []
+    this.bestRange = null
+    this.enteringIndex = null
+    this.duplicateIndex = null
   }
   get value() {
     return this.a.slice()
@@ -812,9 +814,14 @@ export class PointerRecorder {
         pointers: { ...this.pointers },
         window: this.window ? this.window.slice() : null,
         marked: this.marked.slice(),
+        bestRange: this.bestRange ? this.bestRange.slice() : null,
+        enteringIndex: this.enteringIndex,
+        duplicateIndex: this.duplicateIndex,
         message,
       }),
     )
+    this.enteringIndex = null
+    this.duplicateIndex = null
   }
   init(message) {
     this._push("init", message)
@@ -824,6 +831,9 @@ export class PointerRecorder {
     update = update || {}
     if (update.pointers) this.pointers = { ...update.pointers }
     if ("window" in update) this.window = update.window ? update.window.slice() : null
+    if ("bestRange" in update && update.bestRange) this.bestRange = update.bestRange.slice()
+    this.enteringIndex = update.enteringIndex ?? null
+    this.duplicateIndex = update.duplicateIndex ?? null
     if (update.mark) this.marked = this.marked.concat(update.mark)
     this._push(update.mark ? "match" : "step", message)
   }
@@ -923,8 +933,7 @@ export class MatrixGridRecorder {
     this.grid = grid.map((row) => row.slice())
     this._push("init", message)
   }
-  stage(k, message) {
-    this.k = k
+  _clearRelaxation() {
     this.cur = null
     this.deps = []
     this.candidate = null
@@ -933,6 +942,10 @@ export class MatrixGridRecorder {
     this.result = null
     this.operandA = null
     this.operandB = null
+  }
+  stage(k, message) {
+    this.k = k
+    this._clearRelaxation()
     this._push("stage", message)
   }
   relax(r, c, deps, candidate, decision, value, message) {
@@ -949,25 +962,11 @@ export class MatrixGridRecorder {
   }
   reportNegativeCycle(nodes, message) {
     this.negativeCycle = nodes.slice()
-    this.cur = null
-    this.deps = []
-    this.candidate = null
-    this.decision = null
-    this.previous = null
-    this.result = null
-    this.operandA = null
-    this.operandB = null
+    this._clearRelaxation()
     this._push("negative-cycle", message)
   }
   done(message) {
-    this.cur = null
-    this.deps = []
-    this.candidate = null
-    this.decision = null
-    this.previous = null
-    this.result = null
-    this.operandA = null
-    this.operandB = null
+    this._clearRelaxation()
     this._push("done", message)
   }
   _push(type, message) {

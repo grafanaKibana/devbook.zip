@@ -168,7 +168,7 @@ export function createRegistry(builtIns: readonly BuiltInAlgorithm[]): RegistryA
       const graphAlgorithm = graphRegistry.get(config.algorithm)
       if (graphAlgorithm) {
         const graph = normalizeGraph(config as GraphConfig)
-        const recorder = new GraphRecorder(graph)
+        const recorder = new GraphRecorder()
         graphAlgorithm.run({ ...input, start: graph.start }, recorder, graph)
         return {
           kind: "graph",
@@ -194,7 +194,11 @@ export function createRegistry(builtIns: readonly BuiltInAlgorithm[]): RegistryA
 
       const pointer = pointerRegistry.get(config.algorithm)
       if (pointer) {
-        const recorder = new PointerRecorder(config.array)
+        const recorder = new PointerRecorder(
+          config.algorithm === "sliding-window"
+            ? Array.from(typeof config.text === "string" ? config.text : "")
+            : config.array,
+        )
         pointer.run(input, recorder)
         return { kind: "pointers", frames: recorder.frames }
       }

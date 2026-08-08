@@ -1,33 +1,39 @@
 ---
 publish: true
-created: 2026-07-25T18:38:43.820Z
-modified: 2026-07-25T18:38:43.821Z
-published: 2026-07-25T18:38:43.821Z
+created: 2026-07-29T20:23:26.770Z
+modified: 2026-08-08T07:30:32.702Z
+published: 2026-08-08T07:30:32.702Z
 topic:
   - Computer Science
 subtopic:
   - Data Structures
-summary: A binary tree ordered left < node < right, giving O(height) search and ordered queries.
+summary: A binary tree ordered left < node < right for lookup, traversal, and ordered queries.
 level:
   - "4"
 priority: Medium
 status: Ready to Repeat
 ---
 
-An ordered collection of keys needs three things at once: fast lookup, fast insertion, and ordered access — min, max, "the next key after 40", every key in `[10, 90)`. A sorted array answers ordered queries in `O(log n)` but pays `O(n)` to shift elements on every insert. A [[HashMap]] inserts and looks up in `O(1)` but stores keys in hash order, so it cannot answer any of the ordered queries without first sorting. A binary search tree stores keys in a shape that keeps both: each key sits at a node with two children, and the position of every key is fixed by comparison against its ancestors.
+An ordered collection of keys needs three things at once: fast lookup, fast insertion, and ordered access — min, max, "the next key after 40", every key in `[10, 90)`. A binary search tree stores keys in a shape that keeps both: each key sits at a node with two children, and the position of every key is fixed by comparison against its ancestors.
 
 The binding rule is the **ordering invariant**: for any node, every key in its left subtree is smaller than the node's key, and every key in its right subtree is larger. That invariant is what lets a search discard one whole subtree at each comparison, and it is what makes an in-order traversal emit the keys already sorted. What the tree does not carry is any bound on its own height — the invariant fixes left-versus-right, not depth.
 
-**Core shape:** keys → nodes with `left`/`right` ordered smaller/larger → each comparison discards one subtree → `O(height)` per operation → `O(n)` storage.
+**Core shape:** keys → nodes with `left`/`right` ordered smaller/larger → each comparison discards one subtree
 
-> [!NOTE] Visualization pending
-> Planned StepTrace: a tree card showing the decisive transition to animate — a search descending left or right by comparison, an insert falling through to the leaf where the search runs off, and a sorted-insert sequence stretching the tree into a right-leaning chain. No matching renderer exists in `engine.js` yet.
+Press **Insert** with the prefilled `80`: the balanced seven-key start gains a deeper right branch. Continue with larger keys to see sorted insertion stretch that branch while the BST keeps order but does not repair height.
 
-# Representation and Invariants
+````tabsdown
+tab: Visualization
+
+```steptrace
+{"algorithm":"binary-search-tree","values":[40,20,60,10,30,50,70],"value":80}
+```
+
+#### Representation and Invariants
 
 Each node holds a `key`, a `Left` child, a `Right` child, and optionally a `Parent` back-pointer. There are no arrays or indices — the structure is a graph of node objects reachable from a single `root`. An empty tree is `root == null`; a leaf is a node whose `Left` and `Right` are both null.
 
-The ordering invariant is global, not local. It is not enough that a node's immediate left child is smaller: _every_ key anywhere in the left subtree must be smaller than the node, and every key in the right subtree larger. This is what each operation relies on:
+The ordering invariant is global, not local. It is not enough that a node's immediate left child is smaller: *every* key anywhere in the left subtree must be smaller than the node, and every key in the right subtree larger. This is what each operation relies on:
 
 - **Search** starts at the root and compares. Equal ends it; smaller descends left; larger descends right; a null child means the key is absent. Every comparison eliminates the entire opposite subtree, because the invariant guarantees the target cannot be there.
 - **Insert** repeats the search walk. The null child where the walk falls off is exactly the one position where the new key preserves the invariant, so the new leaf is linked there.
@@ -35,28 +41,174 @@ The ordering invariant is global, not local. It is not enough that a node's imme
 
 Insert and delete change parent/child links; search and traversal read them without mutation. The resulting shape — which key ends up at the root, how deep a subtree runs — is an artifact of insertion order, not of the key set. Two trees holding `{1,2,3}` can be a balanced triangle or a three-node chain depending on the order the keys arrived.
 
-# Complexity
+tab: Complexity
 
-Every operation cost is a function of the height `h`. A balanced tree has `h = O(log n)`; a degenerate one has `h = O(n)`.
-
-| Operation | Balanced (`h = O(log n)`) | Degenerate (`h = O(n)`) | Space | Cause |
-| --- | --- | --- | --- | --- |
-| Search / Insert / Delete | `O(log n)` | `O(n)` | `O(h)` recursive stack / `O(1)` iterative | Each step descends exactly one level; cost equals the height of the path taken. |
-| Min / Max / Successor | `O(log n)` | `O(n)` | `O(1)` | Follows a single root-to-leaf (or one-turn) path of length `h`. |
-| In-order traversal | `O(n)` | `O(n)` | `O(h)` recursive stack / `O(n)` degenerate | Visits every node once; shape does not change the count. |
-| Range query (`k` results) | `O(log n + k)` | `O(n)` | `O(h)` | Descent to the range boundary costs `h`, plus one emit per matching key. |
-
-Structure storage is `O(n)` overall — one node per key, plus the child pointers. The per-operation Space column above is auxiliary space on top of that: a recursive walk consumes `O(h)` call-stack frames, while an iterative walk keeps it at `O(1)`. None of these bounds assume balancing, which is precisely the gap the boundaries below expose.
+```complexity
+{
+  "version": 2,
+  "label": "Binary Search Tree complexity",
+  "variables": {
+    "inputSize": {
+      "symbol": "n",
+      "description": "number of keys stored in the tree"
+    },
+    "keyRange": {
+      "symbol": "k",
+      "description": "number of keys returned by a range query"
+    },
+    "parameterH": {
+      "symbol": "h",
+      "description": "current tree height"
+    }
+  },
+  "resources": {
+    "time": {
+      "mode": "operations",
+      "entries": [
+        {
+          "kind": "operation",
+          "operation": "Search / Insert / Delete",
+          "bounds": [
+            {
+              "kind": "curve",
+              "role": "Balanced (h = O(log n))",
+              "formula": "O(log n)",
+              "curveId": "log-n"
+            },
+            {
+              "kind": "curve",
+              "role": "Degenerate (h = O(n))",
+              "formula": "O(n)",
+              "curveId": "linear"
+            }
+          ]
+        },
+        {
+          "kind": "operation",
+          "operation": "Min / Max / Successor",
+          "bounds": [
+            {
+              "kind": "curve",
+              "role": "Balanced (h = O(log n))",
+              "formula": "O(log n)",
+              "curveId": "log-n"
+            },
+            {
+              "kind": "curve",
+              "role": "Degenerate (h = O(n))",
+              "formula": "O(n)",
+              "curveId": "linear"
+            }
+          ]
+        },
+        {
+          "kind": "operation",
+          "operation": "In-order traversal",
+          "bounds": [
+            {
+              "kind": "curve",
+              "role": "Balanced (h = O(log n))",
+              "formula": "O(n)",
+              "curveId": "linear"
+            },
+            {
+              "kind": "curve",
+              "role": "Degenerate (h = O(n))",
+              "formula": "O(n)",
+              "curveId": "linear"
+            }
+          ]
+        },
+        {
+          "kind": "operation",
+          "operation": "Range query (k results)",
+          "bounds": [
+            {
+              "kind": "text",
+              "role": "Balanced (h = O(log n))",
+              "formula": "O(log n + k)"
+            },
+            {
+              "kind": "curve",
+              "role": "Degenerate (h = O(n))",
+              "formula": "O(n)",
+              "curveId": "linear"
+            }
+          ]
+        }
+      ]
+    },
+    "space": {
+      "mode": "operations",
+      "entries": [
+        {
+          "kind": "operation",
+          "operation": "Search / Insert / Delete",
+          "bounds": [
+            {
+              "kind": "text",
+              "role": "Space",
+              "formula": "O(h) recursive stack / O(1) iterative"
+            }
+          ]
+        },
+        {
+          "kind": "operation",
+          "operation": "Min / Max / Successor",
+          "bounds": [
+            {
+              "kind": "curve",
+              "role": "Space",
+              "formula": "O(1)",
+              "curveId": "constant"
+            }
+          ]
+        },
+        {
+          "kind": "operation",
+          "operation": "In-order traversal",
+          "bounds": [
+            {
+              "kind": "text",
+              "role": "Space",
+              "formula": "O(h) recursive stack / O(n) degenerate"
+            }
+          ]
+        },
+        {
+          "kind": "operation",
+          "operation": "Range query (k results)",
+          "bounds": [
+            {
+              "kind": "curve",
+              "role": "Auxiliary traversal",
+              "formula": "O(h)",
+              "curveId": "linear"
+            },
+            {
+              "kind": "curve",
+              "role": "Materialized output",
+              "formula": "O(k)",
+              "curveId": "linear"
+            }
+          ]
+        }
+      ]
+    }
+  }
+}
+```
+````
 
 # When the Shape Stops Cooperating
 
-A plain BST does not self-balance. Inserting keys in sorted order — `1, 2, 3, 4, 5` — sends every insert down the right child, because each new key is larger than everything already present. The result satisfies the ordering invariant perfectly and is still an `O(n)` chain indistinguishable in cost from a [[LinkedList]]:
+A plain BST does not self-balance. Inserting keys in sorted order — `1, 2, 3, 4, 5` — sends every insert down the right child, because each new key is larger than everything already present.
 
 ```text
 1 → 2 → 3 → 4 → 5   (every node has only a right child)
 ```
 
-Sorted or nearly-sorted input is common, not contrived: auto-increment IDs, timestamps, exported-and-reimported tables. Adversarial input can force the same chain deliberately. Because the invariant constrains order but never height, the tree has no mechanism to notice or prevent this. That single failure mode is the entire reason [[AVL Tree]] and [[Red-Black Tree]] exist: they add rotations that re-balance after each write so height stays `O(log n)` regardless of insertion order.
+Sorted or nearly-sorted input is common, not contrived: auto-increment IDs, timestamps, exported-and-reimported tables. Adversarial input can force the same chain deliberately. Because the invariant constrains order but never height, the tree has no mechanism to notice or prevent this.
 
 Deletion is the operation with real cases, and each is a consequence of keeping the invariant intact:
 
@@ -64,7 +216,7 @@ Deletion is the operation with real cases, and each is a consequence of keeping 
 2. **One child** — splice that child into the removed node's place; the subtree's ordering relative to the rest is unchanged.
 3. **Two children** — the node cannot simply vanish without orphaning a subtree. Replace its key with the **in-order successor** (the minimum of the right subtree: step right once, then left until a node has no left child), then delete that successor node. By construction the successor has no left child, so its removal reduces to case 1 or 2. The in-order predecessor works symmetrically.
 
-Order queries by _rank_ — "the 7th smallest key" — are not `O(log n)` on a plain BST. Reaching them requires counting nodes along the way, which is `O(n)` unless each node is augmented with a subtree-size field. The base structure stores order but not position.
+The base structure stores order but not position.
 
 # Reference Drawer
 
@@ -168,30 +320,25 @@ Order queries by _rank_ — "the 7th smallest key" — are not `O(log n)` on a p
 
 # Comparison
 
-| Structure | Search | Insert | Ordered queries | Worst-case guarantee | Stronger case |
-| --- | --- | --- | --- | --- | --- |
-| Binary search tree | `O(h)` | `O(h)` | min/max/successor/range | None — degrades to `O(n)` | Random or already-balanced input; the simplest ordered structure |
-| [[HashMap]] | `O(1)` avg | `O(1)` avg | none | `O(n)` worst | Exact-match lookups where order is irrelevant |
-| Sorted array + [[Binary Search]] | `O(log n)` | `O(n)` | via index | `O(log n)` search only | Static data searched far more often than it changes |
+| Structure | Ordering retained | Update behavior | Height protection | Stronger case |
+| --- | --- | --- | --- | --- |
+| Binary search tree | Yes; supports min/max/successor/range | Links a new leaf without rebalancing | None; insertion order determines shape | The simplest mutable ordered structure when input is already well shaped |
+| Self-balancing BST | Yes; supports the same ordered queries | Rotates or recolors after updates | Rebalancing keeps paths shallow | Production mutable ordered sets and maps |
+| [[Computer Science/Data Structures/Hash-based Structures/HashMap\|Hash map]] | No | Updates buckets by hash | Tree height does not apply | Exact-match lookups where order is irrelevant |
+| Sorted array + [[Computer Science/Algorithms/Search Algorithms/Binary Search\|binary search]] | Yes; index order is key order | Inserts shift later elements | Tree height does not apply | Static data searched far more often than it changes |
 
-A plain BST is the simplest structure that keeps keys ordered while supporting cheap insertion, and it behaves well on random or already-balanced input. It pays for that simplicity with no worst-case guarantee — holding `O(log n)` on adversarial or sorted input needs a self-balancing variant ([[AVL Tree]], [[Red-Black Tree]]). A hash map is faster still for point lookups but discards ordering entirely, so it cannot answer range or successor queries; a sorted array matches the search cost but cannot absorb insertions cheaply.
+A plain BST is the simplest structure that keeps keys ordered while supporting cheap insertion, and it behaves well on random or already-balanced input. A hash map is faster still for point lookups but discards ordering entirely, so it cannot answer range or successor queries; a sorted array matches the search cost but cannot absorb insertions cheaply.
 
 # Questions
 
 > [!QUESTION]- Why does an in-order traversal of a BST produce sorted keys?
 > The ordering invariant places every smaller key in the left subtree and every larger key in the right. Visiting left, then the node, then right therefore reaches the smallest key first and the largest last, in strictly increasing order — the invariant made observable.
 
-> [!QUESTION]- What happens when a plain BST receives keys in sorted order, and why?
-> Each new key is larger than everything present, so every insert descends right. The tree becomes a right-leaning chain of height `n` — functionally a linked list — and search, insert, and delete all degrade to `O(n)`. The invariant is preserved; only the height blows up, which is why balanced variants add rotations.
-
 > [!QUESTION]- How is a node with two children deleted?
 > Its key is replaced by the in-order successor — the minimum of the right subtree, found by stepping right once then left to the end. That successor has no left child, so removing it reduces to the leaf or one-child case. This keeps the ordering invariant intact without orphaning either subtree.
 
-> [!QUESTION]- When does a hash map beat a BST despite the BST's ordered access?
-> When the workload is purely exact-match lookup and insertion with no need for range queries, successors, min/max, or sorted iteration. The hash map delivers `O(1)` average operations; the ordering a BST maintains is pure overhead if nothing queries it.
-
 # References
 
-- [Binary Search Trees (Princeton Algorithms)](https://algs4.cs.princeton.edu/32bst/) — Sedgewick's canonical treatment: the ordering invariant, Hibbard deletion, and expected-height analysis under random insertion.
-- [`SortedSet<T>` class](https://learn.microsoft.com/en-us/dotnet/api/system.collections.generic.sortedset-1) — .NET's production ordered set, a self-balancing red-black tree, contrasting with the unbalanced base structure.
-- [Binary search tree (Wikipedia)](https://en.wikipedia.org/wiki/Binary_search_tree) — formal invariant statement, operation pseudocode, and the expected-`O(log n)`-height result for random insertion order.
+- [Binary Search Trees (Princeton Algorithms)](https://algs4.cs.princeton.edu/32bst/) — the ordering invariant, Hibbard deletion, and average search-hit, search-miss, and insertion costs when keys arrive in random order.
+- [`SortedSet<T>` source (dotnet/runtime)](https://github.com/dotnet/runtime/blob/main/src/libraries/System.Collections/src/System/Collections/Generic/SortedSet.cs) — .NET's red-black implementation for an ordered set, contrasting with the unbalanced base structure.
+- [Binary search tree (Wikipedia)](https://en.wikipedia.org/wiki/Binary_search_tree) — formal invariant, operation pseudocode, and the effect of insertion order on height.

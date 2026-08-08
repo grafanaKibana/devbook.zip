@@ -13,47 +13,164 @@ publish: true
 
 Connecting a set of sites — data-center switches, well heads, pads on a circuit board — with the least total cable means choosing links that reach every site while paying for no redundant loop. Any edge subset that touches all `V` vertices with no cycle is a spanning tree, and it always uses exactly `V − 1` edges; the *minimum* spanning tree (MST) is the spanning tree whose edge weights sum to the smallest possible total.
 
-The space of spanning trees is exponential, yet two [[Greedy Algorithms|greedy]] constructions — Prim's and Kruskal's — reach the optimum by only ever adding edges and never revisiting a choice. That works because of one structural fact about weighted graphs, the cut property, which certifies each greedy pick as belonging to some MST. Both need the graph to be connected and undirected; on those inputs a sequence of locally cheapest, cycle-free choices lands on a globally minimum tree.
+Prim's and Kruskal's are [[Home/Computer Science/Algorithms/Paradigms/Greedy Algorithms|greedy]] constructions: each accepts a locally safe edge and never revisits that choice.
 
-**Core condition:** connected, undirected, weighted graph → repeatedly add the cheapest edge that crosses from chosen to unchosen vertices without closing a cycle → `V − 1` edges of minimum total weight.
+That works because of one structural fact about weighted graphs, the cut property, which certifies each greedy pick as belonging to some MST. Both need the graph to be connected and undirected; on those inputs a sequence of locally cheapest, cycle-free choices lands on a globally minimum tree.
 
-# Trace
+**Core condition:** connected, undirected, weighted graph → repeatedly accept a cut-certified safe edge without closing a cycle → `V − 1` edges of minimum total weight. Prim chooses the lightest edge crossing out of its growing tree; Kruskal chooses the lightest edge joining two current components.
 
-The trace runs Prim's algorithm from vertex `A` on a six-vertex weighted graph.
+~~~~~tabsdown
+tab: Visualization
+
 
 ```steptrace
 {"algorithm":"prim","start":"A","nodes":[{"id":"A"},{"id":"B"},{"id":"C"},{"id":"D"},{"id":"E"},{"id":"F"}],"edges":[{"from":"A","to":"B","weight":4},{"from":"A","to":"C","weight":2},{"from":"B","to":"C","weight":1},{"from":"B","to":"D","weight":5},{"from":"C","to":"D","weight":8},{"from":"C","to":"E","weight":10},{"from":"D","to":"E","weight":2},{"from":"D","to":"F","weight":6},{"from":"E","to":"F","weight":3}]}
 ```
 
+
 Every step splits the vertices into two groups — those already in the green tree and those still outside — and adds the single minimum-weight edge crossing that boundary. From `{A}` the crossing edges are `A–C` (2) and `A–B` (4), so `C` joins first. From `{A, C}` the frontier now includes `B–C` (1), lighter than the still-available `A–B` (4); the algorithm takes `B–C` and pulls in `B`. That is the whole idea: the cheapest edge leaving the current tree, wherever it sits, is the one added, and the cut property proves it belongs to some MST, so the pick never has to be undone. Once `A`, `B`, and `C` are all inside, the edge `A–B` (4) lies entirely within the tree, crosses no boundary, and is skipped — adding it would close a cycle. The run ends with five edges totaling 13.
 
-# The Cut Property
 
 A *cut* partitions the vertices into two non-empty groups; an edge *crosses* the cut when its endpoints fall on opposite sides. The cut property states: for any cut, the minimum-weight edge crossing it belongs to some MST. The reason is an exchange argument — suppose a minimum tree `T` omits the lightest crossing edge `e`. Adding `e` to `T` closes exactly one cycle, and that cycle must leave and re-enter the cut, so it contains another crossing edge `f` with `weight(f) ≥ weight(e)`. Replacing `f` with `e` yields a spanning tree no heavier than `T`, so a minimum one can always include `e`.
 
 Both algorithms are this property applied to a different cut each step:
 
-- **Prim's** keeps one growing tree and uses the cut between in-tree and out-of-tree vertices. A [[Heap|min-priority queue]] keyed on the lightest known edge into the tree returns that minimum crossing edge in `O(log V)`, and each newly added vertex relaxes the keys of its neighbors.
-- **Kruskal's** sorts every edge by ascending weight and scans them in order, adding an edge only when its endpoints lie in different components. Because all lighter edges were already processed, that edge is the minimum one crossing the cut separating those two components. A [[Disjoint Set]] (union-find) tests same-component membership and merges the two in near-constant time; an edge whose endpoints already share a component is rejected — it would close a cycle.
+- **Prim's** keeps one growing tree and uses the cut between in-tree and out-of-tree vertices. A [[Home/Computer Science/Data Structures/Trees/Heap-like/Heap|min-priority queue]] returns the next crossing edge.
+- **Kruskal's** scans edges by weight and uses a [[Home/Computer Science/Data Structures/Graph Structures/Disjoint Set|disjoint set]]—the [[Home/Computer Science/Data Structures/Graph Structures/Union-Find|union-find]] structure—to reject edges that would close a cycle.
 
-# Complexity
 
-| Algorithm | Time | Auxiliary space | Cause |
-| --- | --- | --- | --- |
-| Prim, binary heap | `O(E log V)` | `O(V)` eager / `O(E)` lazy | Each of the `E` edges can push or relax a heap entry at `O(log V)`; an indexed decrease-key holds one entry per vertex, the lazy reference code below one per crossing edge. |
-| Prim, Fibonacci heap | `O(E + V log V)` | `O(V)` | Decrease-key is `O(1)` amortized; only the `V` extract-mins pay `O(log V)`. |
-| Prim, array (dense) | `O(V²)` | `O(V)` | A linear scan finds the minimum key in each of `V` rounds; competitive when `E ≈ V²`. |
-| Kruskal | `O(E log E)` | `O(V)` | Sorting all edges dominates; the [[Union-Find\|union-find]] passes add only `O(E α(V))`. |
+tab: Complexity
 
-Because `E ≤ V²`, `log E ≤ 2 log V`, so Kruskal's `O(E log E)` is the same asymptotic class as Prim's heap variant — the two differ in constant factors and in which structure the input already provides, not in growth rate. The space column counts working structures only: the priority queue or the union-find forest, both `O(V)`, excluding the `O(V)` output tree and the input graph. The lazy priority queue in the reference code below pushes an entry per crossing edge, so it can hold `O(E)` stale entries before they are discarded on dequeue.
+```complexity
+{
+  "version": 2,
+  "label": "Minimum Spanning Tree complexity",
+  "variables": {
+    "edgeCount": {
+      "symbol": "m",
+      "description": "number of edges"
+    },
+    "vertexCount": {
+      "symbol": "n",
+      "description": "number of vertices"
+    }
+  },
+  "resources": {
+    "time": {
+      "mode": "operations",
+      "entries": [
+        {
+          "kind": "operation",
+          "operation": "Prim, binary heap",
+          "bounds": [
+            {
+              "kind": "text",
+              "role": "Time",
+              "formula": "O(m log n)"
+            }
+          ]
+        },
+        {
+          "kind": "operation",
+          "operation": "Prim, Fibonacci heap",
+          "bounds": [
+            {
+              "kind": "text",
+              "role": "Time",
+              "formula": "O(m + n log n)"
+            }
+          ]
+        },
+        {
+          "kind": "operation",
+          "operation": "Prim, array (dense)",
+          "bounds": [
+            {
+              "kind": "curve",
+              "role": "Time",
+              "formula": "O(n²)",
+              "curveId": "quadratic"
+            }
+          ]
+        },
+        {
+          "kind": "operation",
+          "operation": "Kruskal",
+          "bounds": [
+            {
+              "kind": "curve",
+              "role": "Time",
+              "formula": "O(m log m)",
+              "curveId": "n-log-n"
+            }
+          ]
+        }
+      ]
+    },
+    "space": {
+      "mode": "operations",
+      "entries": [
+        {
+          "kind": "operation",
+          "operation": "Prim, binary heap",
+          "bounds": [
+            {
+              "kind": "text",
+              "role": "Auxiliary space",
+              "formula": "O(n) eager / O(m) lazy"
+            }
+          ]
+        },
+        {
+          "kind": "operation",
+          "operation": "Prim, Fibonacci heap",
+          "bounds": [
+            {
+              "kind": "curve",
+              "role": "Auxiliary space",
+              "formula": "O(n)",
+              "curveId": "linear"
+            }
+          ]
+        },
+        {
+          "kind": "operation",
+          "operation": "Prim, array (dense)",
+          "bounds": [
+            {
+              "kind": "curve",
+              "role": "Auxiliary space",
+              "formula": "O(n)",
+              "curveId": "linear"
+            }
+          ]
+        },
+        {
+          "kind": "operation",
+          "operation": "Kruskal",
+          "bounds": [
+            {
+              "kind": "curve",
+              "role": "Auxiliary space",
+              "formula": "O(n)",
+              "curveId": "linear"
+            }
+          ]
+        }
+      ]
+    }
+  }
+}
+```
+~~~~~
 
 # When the Definition Bends
 
 The construction assumes a single connected component. On a disconnected graph an MST does not exist: Prim's, started from one vertex, reaches only that vertex's component and halts with fewer than `V − 1` edges; Kruskal's exhausts every edge and returns a spanning *forest*, one minimum tree per component. Either way the tell is the edge count — a result with fewer than `V − 1` edges means the graph was not connected, which is worth checking rather than assuming success.
 
-Equal edge weights make the MST non-unique. When several edges tie, the sort order (Kruskal) or the priority-queue tie-break (Prim) decides which one enters, and different tie-breaks yield different edge sets. Every such set is a correct MST — only the *total* weight is guaranteed unique, not the specific edges.
+Equal edge weights remove the distinct-weights guarantee of a unique MST and can make the MST non-unique. When several edges tie, the sort order (Kruskal) or the priority-queue tie-break (Prim) decides which one enters, and different tie-breaks may yield different valid minimum edge sets with the same total weight.
 
-An MST minimizes total weight, not the distance between any particular pair of vertices, and the two goals diverge. Take a triangle with `A–B = 3`, `B–C = 3`, `A–C = 4`. The MST keeps `A–B` and `B–C` (total 6) and drops `A–C = 4`, so the only `A`-to-`C` route inside the tree costs `3 + 3 = 6` — longer than the direct edge it discarded. Reading pairwise shortest paths off an MST is the classic mistake; those are [[Dijkstra]]'s output, computed from a source over the full graph.
+An MST minimizes total weight, not the distance between any particular pair of vertices, and the two goals diverge. Take a triangle with `A–B = 3`, `B–C = 3`, `A–C = 4`. The MST keeps `A–B` and `B–C` (total 6) and drops `A–C = 4`, so the only `A`-to-`C` route inside the tree costs `3 + 3 = 6` — longer than the direct edge it discarded. Reading pairwise shortest paths off an MST is the classic mistake; those are [[Home/Computer Science/Algorithms/Graph Algorithms/Dijkstra|Dijkstra]]'s output, computed from a source over the full graph.
 
 # Reference Drawer
 
@@ -89,34 +206,42 @@ An MST minimizes total weight, not the distance between any particular pair of v
 > }
 >
 > // Prim: grow from vertex 0 with a lazy min-priority queue.
-> public static int PrimWeight(int n, List<(int to, int w)>[] adj)
+> public static long PrimWeight(int n, List<(int to, long w)>[] adj)
 > {
+>     if (n == 0 || adj.Length != n)
+>     {
+>         throw new ArgumentException("The graph must contain exactly n vertices.", nameof(adj));
+>     }
+>
 >     var inTree = new bool[n];
->     var pq = new PriorityQueue<int, int>();  // vertex, key = cheapest known edge into the tree
+>     var pq = new PriorityQueue<int, long>(); // vertex, key = cheapest known edge into the tree
 >     pq.Enqueue(0, 0);
->     var total = 0;
+>     var total = 0L;
+>     var visited = 0;
 >     while (pq.TryDequeue(out var u, out var w))
 >     {
 >         if (inTree[u]) continue;             // stale entry from a lazy push
 >         inTree[u] = true;
->         total += w;
+>         visited++;
+>         total = checked(total + w);
 >         foreach (var (v, weight) in adj[u])
 >             if (!inTree[v]) pq.Enqueue(v, weight);
 >     }
+>
+>     if (visited != n)
+>     {
+>         throw new InvalidOperationException("A disconnected graph has no minimum spanning tree.");
+>     }
+>
 >     return total;
 > }
 > ```
-> `.NET`'s `PriorityQueue` has no decrease-key, so Prim pushes duplicate entries and discards already-in-tree vertices on dequeue — the same lazy-deletion pattern as [[Dijkstra]]. `DisjointSet` is the [[Union-Find|union-find]] forest with path compression and union by rank.
+> `.NET`'s `PriorityQueue` has no decrease-key, so Prim pushes duplicate entries and discards already-in-tree vertices on dequeue — the same lazy-deletion pattern as [[Home/Computer Science/Algorithms/Graph Algorithms/Dijkstra|Dijkstra]]. `DisjointSet` is the [[Home/Computer Science/Data Structures/Graph Structures/Union-Find|union-find]] forest with path compression and union by rank.
 
 # Comparison
 
-| Algorithm | Time | Structure it needs | Stronger case | Weaker case |
-| --- | --- | --- | --- | --- |
-| Prim (binary heap) | `O(E log V)` | adjacency lists + priority queue | dense graphs already held as adjacency; a single running frontier | sparse input given as an edge list, needing conversion first |
-| [[Kruskal's Algorithm\|Kruskal]] | `O(E log E)` | edge list + union-find | sparse graphs given as an edge list; the sort parallelizes cleanly | dense graphs where sorting `E ≈ V²` edges dominates |
-| [[Borůvka's Algorithm\|Borůvka]] | `O(E log V)` | edge list + per-component cheapest edge | parallel or distributed builds; contracts every component's cheapest edge per round | single-threaded runs, where its extra bookkeeping buys nothing |
 
-All three return a tree of the same minimum total weight — the choice is representation and execution model, not the result. Prim fits a graph already held as an adjacency structure and dense, since its frontier reuses that adjacency and it never sorts. Kruskal fits sparse edge lists, where sorting `E` edges and union-find are both cheap and its dominant step — the sort — is trivial to parallelize. Borůvka's rounds each add the cheapest edge out of every component at once, which maps naturally onto parallel and distributed hardware; on one core its per-round contraction rarely beats the other two.
+All three return a tree of the same minimum total weight — the choice is representation and execution model, not the result. Prim fits a graph already held as an adjacency structure and dense, since its frontier reuses that adjacency and it never sorts. [[Home/Computer Science/Algorithms/Graph Algorithms/Kruskal's Algorithm|Kruskal]] fits sparse edge lists, where sorting `E` edges and union-find are both cheap and its dominant step — the sort — is trivial to parallelize. [[Home/Computer Science/Algorithms/Graph Algorithms/Borůvka's Algorithm|Borůvka]] adds the cheapest edge out of every component at once, which maps naturally onto parallel and distributed hardware; on one core its per-round contraction rarely beats the other two.
 
 # Questions
 
@@ -134,8 +259,9 @@ All three return a tree of the same minimum total weight — the choice is repre
 
 # References
 
+- [Joseph B. Kruskal, *On the Shortest Spanning Subtree of a Graph and the Traveling Salesman Problem* (1956)](https://doi.org/10.1090/S0002-9939-1956-0078686-7) — the original paper introducing Kruskal's greedy minimum-spanning-tree algorithm.
 - [Minimum spanning tree](https://en.wikipedia.org/wiki/Minimum_spanning_tree) — the cut property, uniqueness under distinct weights, and the spanning-forest result for disconnected graphs.
 - [Minimum spanning tree — Kruskal's algorithm](https://cp-algorithms.com/graph/mst_kruskal.html) — the union-find implementation and the cut-property proof of correctness.
-- [Minimum spanning tree — Prim's algorithm](https://cp-algorithms.com/graph/mst_prim.html) — the dense `O(V²)` array version alongside the `O(E log V)` heap version.
+- [Minimum spanning tree — Prim's algorithm](https://cp-algorithms.com/graph/mst_prim.html) — the dense array version alongside the heap version.
 - [Minimum Spanning Trees](https://algs4.cs.princeton.edu/43mst/) — Sedgewick's lazy and eager Prim implementations and Kruskal, with the cut-property treatment.
 - [Borůvka's algorithm](https://en.wikipedia.org/wiki/Bor%C5%AFvka%27s_algorithm) — the per-component contraction round and why it parallelizes.

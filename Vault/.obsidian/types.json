@@ -5,6 +5,9 @@
     "subtopic": "multitext",
     "priority": "multitext",
     "status": "multitext",
-    "level": "multitext"
+    "level": "multitext",
+    "aliases": "aliases",
+    "cssclasses": "multitext",
+    "summary": "text"
   }
 }

@@ -1,8 +1,8 @@
 ---
 publish: true
-created: 2026-07-25T18:38:43.819Z
-modified: 2026-07-25T18:38:43.820Z
-published: 2026-07-25T18:38:43.820Z
+created: 2026-07-29T20:23:26.769Z
+modified: 2026-08-08T07:48:03.810Z
+published: 2026-08-08T07:48:03.810Z
 topic:
   - Computer Science
 subtopic:
@@ -14,53 +14,223 @@ priority: Medium
 status: Ready to Repeat
 ---
 
-A disk-resident index holds millions of ordered records and must answer two shapes of query cheaply: "find key `K`" and "read every key between `A` and `B` in order." A plain [[B-tree]] answers the point lookup in a handful of page reads, but the range query forces an in-order traversal that repeatedly climbs back into internal nodes to find the next key — random I/O proportional to the levels crossed, not to the rows returned.
+A database index must support both a point lookup for one ordered key and a range scan such as every key from `15` through `40`. A page-oriented tree can route the point lookup through separator keys, but the range scan also needs an efficient way to continue from one leaf page to the next.
 
-The B+ tree is the [[B-tree]] variant that reshapes the node layout for exactly that second query. Every `(key, value)` pair moves down to the leaves; internal nodes keep only keys, acting as a routing index whose separators point to the child subtree that owns a range. A separator can equal a key still living in a leaf — it is a signpost, not the record. Then the leaves are chained into a linked list (next, usually also previous), so once a descent lands on the first matching leaf, the scan walks the chain sequentially in key order without touching an internal node again.
+The catch is locality. Crossing a subtree boundary revisits ancestor pages before descending again, while a B+ tree keeps the scan moving directly from one logical leaf page to the next.
 
-Because internal nodes carry no values, each routing page packs far more separators than a leaf packs records. Fan-out rises, the tree gets even shallower than a B-tree over the same data, and the routing levels tend to stay cached in the buffer pool. This is the structure that RDBMS indexes and filesystem B-trees actually ship.
+The B+ tree is the [[Computer Science/Data Structures/Trees/B-tree|B-tree]] variant that reshapes the node layout for exactly that second query. Every `(key, value)` pair moves down to the leaves; internal nodes keep only keys, acting as a routing index whose separators point to the child subtree that owns a range. A separator can equal a key still living in a leaf — it is a signpost, not the record. Then the leaves are chained into a linked list (next, usually also previous), so once a descent lands on the first matching leaf, the scan walks the chain in key order without touching an internal node again.
 
-**Core shape:** all `(key, value)` pairs in the leaves → internal nodes are a routing key index → leaves linked in sorted order → one descent then a sequential leaf walk answers a range → `O(n)` storage.
+Because internal nodes carry no values, each routing page can pack more separators than a leaf packs records. The resulting tree can be equally shallow or shallower than a B-tree over the same data, and the routing levels tend to stay cached in the buffer pool. Many ordered RDBMS indexes use this leaf-oriented shape; filesystems use related B-tree variants whose record placement varies.
 
-> [!NOTE] Visualization pending
-> Planned StepTrace: a tree card showing internal nodes holding only routing keys, all values living in the leaves, and the leaves chained left-to-right so a range scan walks the leaf list after a single descent. No matching renderer exists in `engine.js` yet.
+**Core shape:** all `(key, value)` pairs in the leaves → internal nodes are a routing key index → leaves linked in sorted order → one descent then a sequential leaf walk answers a range
 
-# Representation
+Press **Insert** with the prefilled `25` to split a leaf: the first key in the right leaf is copied into the parent and remains in the leaf. Then press **Range scan** for `[15, 40]`; the highlighted path reaches the first matching leaf and the green links carry the scan across the remaining leaves.
+
+````tabsdown
+tab: Visualization
+
+```steptrace
+{"algorithm":"b-plus-tree","values":[5,9,12,17,33,40,21],"value":25,"range":[15,40]}
+```
+
+#### Representation
 
 Two node kinds share one page-sized layout:
 
 - An **internal node** holds `k` separator keys and `k + 1` child pointers. Separator `s_i` guarantees every key in child `i` is `< s_i` and every key in child `i + 1` is `>= s_i`. It stores no values and no leaf-record pointers.
 - A **leaf node** holds the actual `(key, value)` entries (or, for a non-clustered index, the key plus a row pointer) in sorted order, plus a `next` pointer to its right sibling and typically a `prev` pointer to its left one.
 
-Three invariants define a valid state:
+Four invariants define a valid state:
 
 1. All leaves sit at the same depth; every search path has identical length.
 2. A separator in an internal node may duplicate a key held in some leaf. The internal copy exists only to route the descent; deleting the leaf record does not require removing the separator, so a routing key can outlive its value.
 3. The leaf chain is a total order: following `next` from the leftmost leaf visits every key in ascending order exactly once.
+4. Except for the root, an internal node with maximum fan-out `f` has at least `⌈f/2⌉` children, and a leaf with capacity `L` has at least `⌈L/2⌉` records. Split, borrow, and merge repairs preserve this minimum fill.
 
-A point lookup compares against separators to pick a child at each level and always continues to a leaf, because that is the only place a value exists. A range scan `[A, B]` descends once to the leaf holding `A`, reads forward within the leaf, then follows `next` pointers until a key exceeds `B`. The descent cost is the tree height; the walk cost is proportional only to the number of matching entries.
+Splits treat the two node kinds differently. Splitting a leaf **copies up** the first key of the new right leaf as a separator, so that key remains with its value in the leaf. Splitting an internal node **moves up** its chosen separator into the parent, removing it from both resulting children because internal keys route rather than store records.
 
-# Complexity
+A point lookup compares against separators to pick a child at each level and always continues to a leaf, because that is the only place a value exists. A range scan `[A, B]` descends to the leaf where `A` would be inserted, starts at `lower_bound(A)`, then follows `next` pointers until a key exceeds `B`. `A` need not exist. The descent cost is the tree height; the leaf-page walk depends on how many result pages are touched.
 
-Bounds are counted in page I/Os with `m` the node fan-out (keys per page), which is large for disk pages, so the tree is shallow. `k` is the number of entries a range scan returns.
+tab: Complexity
 
-| Operation | Time (page I/Os) | Structure space | Cause |
-| --- | --- | --- | --- |
-| Search (point lookup) | `O(log_m n)` | `O(n)` | One descent to a leaf; internal levels usually cache-resident. |
-| Insert | `O(log_m n)` | `O(n)` | Descend to a leaf, insert in order, split and push a separator up on overflow. |
-| Delete | `O(log_m n)` | `O(n)` | Descend to a leaf, remove, borrow or merge with a sibling on underflow. |
-| Range scan `[A, B]` | `O(log_m n + k)` | `O(n)` | One descent finds `A`, then `k` entries are read by following leaf `next` links — no re-ascent per key. |
-| Ordered full scan | `O(log_m n + n)` | `O(n)` | Descend to the leftmost leaf, then walk the entire chain sequentially. |
-
-The `+ k` term is the whole point: the range scan pays the tree height once and then reads matches as a sequential walk of the linked leaves, so cost tracks result size rather than tree structure. A B-tree lacking leaf links pays roughly `O(k log_m n)` for the same range because it re-descends to locate each successor. High fan-out keeps `log_m n` at two to four levels for realistic table sizes, and the top levels stay in memory, so an isolated lookup often costs a single leaf read.
+```complexity
+{
+  "version": 2,
+  "label": "B+ Tree complexity",
+  "variables": {
+    "fanout": {
+      "symbol": "f",
+      "description": "tree fanout"
+    },
+    "inputSize": {
+      "symbol": "n",
+      "description": "number of records or keys stored in the tree"
+    },
+    "keyRange": {
+      "symbol": "k",
+      "description": "number of records returned by the range scan"
+    },
+    "lengthL": {
+      "symbol": "l",
+      "description": "number of records stored per leaf page"
+    }
+  },
+  "resources": {
+    "time": {
+      "mode": "operations",
+      "entries": [
+        {
+          "kind": "operation",
+          "operation": "Search (point lookup)",
+          "bounds": [
+            {
+              "kind": "text",
+              "role": "Page I/Os",
+              "formula": "O(log_f n)"
+            },
+            {
+              "kind": "curve",
+              "role": "Output processing",
+              "formula": "O(1)",
+              "curveId": "constant"
+            }
+          ]
+        },
+        {
+          "kind": "operation",
+          "operation": "Insert",
+          "bounds": [
+            {
+              "kind": "text",
+              "role": "Page I/Os",
+              "formula": "O(log_f n)"
+            }
+          ]
+        },
+        {
+          "kind": "operation",
+          "operation": "Delete",
+          "bounds": [
+            {
+              "kind": "text",
+              "role": "Page I/Os",
+              "formula": "O(log_f n)"
+            }
+          ]
+        },
+        {
+          "kind": "operation",
+          "operation": "Range scan [A, B]",
+          "bounds": [
+            {
+              "kind": "text",
+              "role": "Page I/Os",
+              "formula": "O(log_f n + ⌈k/l⌉)"
+            },
+            {
+              "kind": "curve",
+              "role": "Output processing",
+              "formula": "O(k)",
+              "curveId": "linear"
+            }
+          ]
+        },
+        {
+          "kind": "operation",
+          "operation": "Ordered full scan",
+          "bounds": [
+            {
+              "kind": "text",
+              "role": "Page I/Os",
+              "formula": "O(log_f n + n/l)"
+            },
+            {
+              "kind": "curve",
+              "role": "Output processing",
+              "formula": "O(n)",
+              "curveId": "linear"
+            }
+          ]
+        }
+      ]
+    },
+    "space": {
+      "mode": "operations",
+      "entries": [
+        {
+          "kind": "operation",
+          "operation": "Search (point lookup)",
+          "bounds": [
+            {
+              "kind": "curve",
+              "role": "Structure space",
+              "formula": "O(n)",
+              "curveId": "linear"
+            }
+          ]
+        },
+        {
+          "kind": "operation",
+          "operation": "Insert",
+          "bounds": [
+            {
+              "kind": "curve",
+              "role": "Structure space",
+              "formula": "O(n)",
+              "curveId": "linear"
+            }
+          ]
+        },
+        {
+          "kind": "operation",
+          "operation": "Delete",
+          "bounds": [
+            {
+              "kind": "curve",
+              "role": "Structure space",
+              "formula": "O(n)",
+              "curveId": "linear"
+            }
+          ]
+        },
+        {
+          "kind": "operation",
+          "operation": "Range scan [A, B]",
+          "bounds": [
+            {
+              "kind": "curve",
+              "role": "Structure space",
+              "formula": "O(n)",
+              "curveId": "linear"
+            }
+          ]
+        },
+        {
+          "kind": "operation",
+          "operation": "Ordered full scan",
+          "bounds": [
+            {
+              "kind": "curve",
+              "role": "Structure space",
+              "formula": "O(n)",
+              "curveId": "linear"
+            }
+          ]
+        }
+      ]
+    }
+  }
+}
+```
+````
 
 # Boundaries
 
-A point lookup **always** reaches a leaf. A plain [[B-tree]] can find its value at an internal node and stop one or more levels early; the B+ tree cannot, because internal nodes hold no values. The trade is a slightly deeper worst-case path for a single key in exchange for uniform lookup latency — every key costs one full descent — and the cheap range scans the design exists to provide. Because the routing level is smaller and usually cached, the extra descent rarely translates into extra physical I/O.
+A point lookup **always** reaches a leaf. A plain [[Computer Science/Data Structures/Trees/B-tree|B-tree]] can sometimes find its value in an internal node and stop early; the B+ tree gives up that possible early hit because internal nodes hold no values. Its worst-case path is not inherently deeper: a B-tree lookup may also reach a leaf, while the B+ tree's smaller internal entries raise fan-out enough to make it equally shallow or shallower. Cached ancestor pages further reduce the physical-I/O difference.
 
 Leaf-link maintenance rides on top of the ordinary split and merge logic. When a leaf splits, the new leaf must be stitched into the chain: the original leaf's `next` is repointed at the new leaf, and the new leaf's `next` inherits the old target (and the reverse pointers updated when the list is doubly linked). A merge does the mirror — the survivor absorbs the neighbor's entries and relinks past the removed node. Getting this relinking wrong corrupts ordered iteration without breaking point lookups, so the defect can hide until a range scan skips or repeats a run of keys.
 
-The same page-sizing constraint as a [[B-tree]] applies: node capacity is chosen so a node fills one storage page. Oversized keys or values lower fan-out, raise the tree, and erode the shallow-tree advantage. Variable-length keys and prefix compression in real implementations exist to keep separators small and fan-out high.
+The same page-sizing constraint as a [[Computer Science/Data Structures/Trees/B-tree|B-tree]] applies: node capacity is chosen so a node fills one storage page. Oversized keys or values lower fan-out, raise the tree, and erode the shallow-tree advantage. Variable-length keys and prefix compression in real implementations exist to keep separators small and fan-out high.
 
 # Reference Drawer
 
@@ -144,9 +314,6 @@ The same page-sizing constraint as a [[B-tree]] applies: node capacity is chosen
 
 > [!QUESTION]- What two structural changes turn a B-tree into a B+ tree, and which query do they serve?
 > All `(key, value)` pairs move to the leaves, leaving internal nodes as a pure routing key index, and the leaves are chained into a sorted linked list. Both changes serve the range scan: after one descent, matching keys are read by walking the leaf chain in order instead of re-ascending into internal nodes.
-
-> [!QUESTION]- Why is a B+ range scan `O(log_m n + k)` rather than `O(k log_m n)`?
-> The `log_m n` descent locates the first matching leaf once. From there the leaf `next` links yield the remaining `k` entries in order as a sequential walk, adding one term per result. Without leaf links, each successor would require its own descent, multiplying the height into the cost.
 
 > [!QUESTION]- Why does removing internal values raise fan-out, and why does that help on disk?
 > A separator is just a key and a child pointer, far smaller than a full record, so a routing page packs many more entries. Higher fan-out means fewer levels, and the small routing levels tend to stay in the buffer pool, so a lookup often costs a single physical read of the leaf.

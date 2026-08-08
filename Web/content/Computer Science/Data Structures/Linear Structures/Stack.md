@@ -1,8 +1,8 @@
 ---
 publish: true
-created: 2026-07-18T14:02:44.043Z
-modified: 2026-07-29T17:46:11.581Z
-published: 2026-07-29T17:46:11.581Z
+created: 2026-07-29T20:22:59.991Z
+modified: 2026-08-08T18:08:33.877Z
+published: 2026-08-08T18:08:33.877Z
 topic:
   - Computer Science
 subtopic:
@@ -16,17 +16,20 @@ status: Done
 
 A bracket matcher, an expression evaluator, and a depth-first traversal share one requirement: each time the work descends into a nested item, the item currently in progress has to be set aside and resumed later, and the one resumed first is always the most recently suspended. A general list can hold those pending items, but locating "the most recent one" and removing it is a discipline the list does not enforce.
 
-A stack enforces it structurally. All mutation is fixed to a single end called the top: `push` adds an element there, `pop` removes and returns it, `peek` reads it without removing. Because every operation touches only that one end, the last element pushed is the first popped (LIFO). `Pop` and `Peek` are worst-case `O(1)`; linked-list `Push` is worst-case `O(1)`, while array-backed `Push` is amortized `O(1)` with an `O(n)` resize case. The cost is no direct index access or interior removal.
+A stack enforces it structurally. All mutation is fixed to a single end called the top: `push` adds an element there, `pop` removes and returns it, `peek` reads it without removing. Because every operation touches only that one end, the last element pushed is the first popped (LIFO). The cost is no direct index access or interior removal.
 
-**Core shape:** elements → one open end (the top) → last pushed is first popped → `O(1)` pop/peek, amortized `O(1)` array push → `O(n)` storage.
+**Core shape:** elements → one open end (the top) → last pushed is first popped
 
-Push and pop values below to see the stack grow upward while every operation stays fixed to the top cell.
+The visualization shows push and pop operations growing the stack upward while access remains fixed to the top cell.
+
+````tabsdown
+tab: Visualization
 
 ```steptrace
 {"algorithm":"stack","capacity":6,"values":["A","B","C"]}
 ```
 
-# Representation and Invariants
+#### Representation and Invariants
 
 A stack is an interface — push/pop/peek at one end — that admits two common backings.
 
@@ -35,28 +38,108 @@ A stack is an interface — push/pop/peek at one end — that admits two common 
 
 Two invariants define a valid state regardless of backing:
 
-1. Only the top supports direct read or removal. `Stack<T>` can enumerate or run `Contains` over all elements in `O(n)` without mutation, but it exposes no indexer or direct interior removal.
+1. Only the top supports direct read or removal.
 2. `push` and `pop` are inverses at the same end: after `push(x); pop()`, both the contents and the top pointer are exactly what they were before.
 
 The stack API deliberately withholds random access and direct interior removal even when an array backing could provide them. That restriction enforces LIFO; the operation costs come from the backing implementation — a tail index for the array or a head pointer for the linked list. A workload that repeatedly needs buried elements belongs on a different structure.
 
-# Complexity
+tab: Complexity
 
-| Operation | Array backing | Linked backing | Cause |
-| --- | --- | --- | --- |
-| `Push` | `O(1)` amortized, `O(n)` worst single | `O(1)` | Array append is a slot write plus counter bump; a full array first doubles and copies all `n` elements. A list allocates exactly one node. |
-| `Pop` | `O(1)` | `O(1)` | Decrement the counter / unlink the head. No traversal, no shift. |
-| `Peek` | `O(1)` | `O(1)` | Read the top slot or head node; no mutation. |
+```complexity
+{
+  "version": 2,
+  "label": "Stack complexity",
+  "variables": {
+    "inputSize": {
+      "symbol": "n",
+      "description": "number of elements currently stored in the stack"
+    }
+  },
+  "resources": {
+    "time": {
+      "mode": "comparison",
+      "entries": [
+        {
+          "kind": "approach",
+          "label": "Push (linked / array amortized)",
+          "formula": "O(1)",
+          "curveId": "constant"
+        },
+        {
+          "kind": "approach",
+          "label": "Push (array resize worst case)",
+          "formula": "O(n)",
+          "curveId": "linear"
+        },
+        {
+          "kind": "approach",
+          "label": "Pop",
+          "formula": "O(1)",
+          "curveId": "constant"
+        },
+        {
+          "kind": "approach",
+          "label": "Peek",
+          "formula": "O(1)",
+          "curveId": "constant"
+        }
+      ]
+    },
+    "space": {
+      "mode": "operations",
+      "entries": [
+        {
+          "kind": "operation",
+          "operation": "Stored elements",
+          "bounds": [
+            {
+              "kind": "curve",
+              "role": "Persistent structure",
+              "formula": "O(n)",
+              "curveId": "linear"
+            }
+          ]
+        },
+        {
+          "kind": "operation",
+          "operation": "Ordinary operation",
+          "bounds": [
+            {
+              "kind": "curve",
+              "role": "Auxiliary",
+              "formula": "O(1)",
+              "curveId": "constant"
+            }
+          ]
+        },
+        {
+          "kind": "operation",
+          "operation": "Array resize",
+          "bounds": [
+            {
+              "kind": "curve",
+              "role": "Temporary spike",
+              "formula": "O(n)",
+              "curveId": "linear"
+            }
+          ]
+        }
+      ]
+    }
+  }
+}
+```
 
-Structure space is `O(n)` for both backings. Auxiliary space per operation is `O(1)`, with one exception: an array-backed `Push` that triggers a resize momentarily holds both the old and doubled arrays, an `O(n)` spike on that single call. The `O(1)` on array push is therefore amortized, not worst-case — doubling makes any sequence of `n` pushes cost `O(n)` total, so the per-push average is constant even though an individual resize is linear. The linked backing gives a true per-call `O(1)` but pays a heap allocation and pointer-chasing cache cost on every push.
+Array-backed push is `O(1)` amortized but `O(n)` on the resizing push that doubles a full backing array.
+````
 
 # Where the Discipline Bites
 
 Each of these follows directly from fixing access to one end.
 
-**Buried elements have no direct access.** `Stack<T>` can enumerate or run `Contains` in `O(n)` without mutation. Removing a buried element requires popping the values above it into temporary storage, removing the target, then pushing those values back in reverse pop order to restore the original order — `O(n)` work and `O(n)` temporary space. A workload that repeatedly queries or removes interior elements wants an array, not a stack.
+A workload that repeatedly queries or removes interior elements wants an array, not a stack.
 
-**Array-backed push carries the resize spike.** The amortized `O(1)` hides an occasional `O(n)` copy. On a latency-sensitive path this shows up as an intermittent stall exactly on the push that doubles the [[Computer Science/Data Structures/Linear Structures/Dynamic Array|Dynamic Array]]. Constructing with a known capacity (`new Stack<T>(capacity)`) pre-sizes the array and removes those spikes when the maximum depth is predictable.
+On a latency-sensitive path this shows up as an intermittent stall exactly on the push that doubles the [[Computer Science/Data Structures/Linear Structures/Dynamic Array|Dynamic Array]]. Constructing with a known capacity (`new Stack<T>(capacity)`) pre-sizes the array and removes those spikes when the maximum depth is predictable.
 
 **Underflow on an empty stack.** `Pop`/`Peek` with no elements has nothing to return; in .NET both throw `InvalidOperationException`. Guarding with `Count > 0` or using `TryPop`/`TryPeek` is required whenever emptiness is reachable — recursion base cases and drain loops both hit it.
 
@@ -95,17 +178,11 @@ Each of these follows directly from fixing access to one end.
 
 # Questions
 
-> [!QUESTION]- Why does a stack expose direct access only at the top, and what does that trade away?
-> Restricting direct reads and removals to one end enforces LIFO; it does not by itself determine the time bounds. A tail index gives an array backing constant-time top access, while a head pointer does the same for a linked backing. The tradeoff is no indexer or direct interior removal: enumeration and `Contains` can inspect buried values in `O(n)` without mutation, while arbitrary removal requires temporary storage and restoration.
-
-> [!QUESTION]- Why is array-backed `Push` amortized `O(1)` rather than worst-case constant?
-> Most pushes write one slot and bump a counter. When the backing array is full, that push allocates a doubled array and copies all `n` elements — an `O(n)` single call. Doubling makes any run of `n` pushes cost `O(n)` in total, so the per-push average stays constant, but a specific push can spike.
-
 > [!QUESTION]- Why convert deep recursion into an explicit stack?
 > The call stack is itself a LIFO stack on a fixed-size memory region; deep enough recursion overflows it with an uncatchable `StackOverflowException`. An explicit `Stack<T>` holds pending work or frame state on the heap, where depth is bounded by available memory instead. Preserving behavior may require pushing children in reverse order and storing continuation state that recursion kept implicitly.
 
 # References
 
 - [`Stack<T>` class](https://learn.microsoft.com/en-us/dotnet/api/system.collections.generic.stack-1) — the .NET LIFO contract: `Push`, `Pop`, `Peek`, `TryPop`/`TryPeek`, and enumeration from top to bottom.
-- [`Stack<T>` source in dotnet/runtime](https://github.com/dotnet/runtime/blob/main/src/libraries/System.Private.CoreLib/src/System/Collections/Generic/Stack.cs) — the array-plus-`_size` backing and the doubling resize logic behind amortized push.
+- [`Stack<T>` source in dotnet/runtime](https://github.com/dotnet/runtime/blob/main/src/libraries/System.Private.CoreLib/src/System/Collections/Generic/Stack.cs) — source for the structure and its analysis.
 - [Selecting a collection class](https://learn.microsoft.com/en-us/dotnet/standard/collections/selecting-a-collection-class) — Microsoft's guidance on choosing between `Stack<T>`, `Queue<T>`, and the other collections by access discipline.

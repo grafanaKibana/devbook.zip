@@ -16,9 +16,7 @@ export const topologicalSort = {
       adj[e.from].push(e.to)
       indeg[e.to] = (indeg[e.to] || 0) + 1
     }
-    ops.init(
-      `Topological sort (Kahn's algorithm) — repeatedly take a node with no remaining prerequisites (in-degree 0) and append it to the order; removing it may make others ready.`,
-    )
+    ops.init(`Kahn topological sort — append an in-degree-0 node, remove its edges, and repeat.`)
     const ready = []
     for (const nd of graph.nodes) {
       if (indeg[nd.id] === 0) {

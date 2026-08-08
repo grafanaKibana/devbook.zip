@@ -180,6 +180,88 @@ publish: "true"
         )
         self.assertEqual([], validate_vault.validate_residue(note))
 
+    def test_code_fences_require_a_language(self) -> None:
+        temp, root = self.make_repo()
+        self.addCleanup(temp.cleanup)
+        note = self.write_note(
+            root,
+            "Vault/Home/Topic/Fences.md",
+            VALID_FRONTMATTER
+            + "```\nbare\n```\n\n```text\ntagged\n```\n\n~~~csharp\nvar value = 1;\n~~~\n",
+        )
+
+        issues = validate_vault.validate_code_fences(note)
+
+        self.assertEqual(["markdown.code-fence-language"], [issue.code for issue in issues])
+
+    def test_code_fences_inside_tabsdown_require_a_language(self) -> None:
+        temp, root = self.make_repo()
+        self.addCleanup(temp.cleanup)
+        note = self.write_note(
+            root,
+            "Vault/Home/Topic/TabsdownFences.md",
+            VALID_FRONTMATTER
+            + "~~~~~tabsdown\ntab: Example\n\n```\nbare\n```\n\n```text\ntagged\n```\n~~~~~\n",
+        )
+
+        issues = validate_vault.validate_code_fences(note)
+
+        self.assertEqual(["markdown.code-fence-language"], [issue.code for issue in issues])
+
+    def test_code_fences_inside_callouts_require_a_language(self) -> None:
+        temp, root = self.make_repo()
+        self.addCleanup(temp.cleanup)
+        note = self.write_note(
+            root,
+            "Vault/Home/Topic/CalloutFences.md",
+            VALID_FRONTMATTER
+            + "> [!example]\n> ```\n> bare\n> ```\n>\n> ```text\n> tagged\n> ```\n",
+        )
+
+        issues = validate_vault.validate_code_fences(note)
+
+        self.assertEqual(["markdown.code-fence-language"], [issue.code for issue in issues])
+
+    def test_code_fences_inside_lists_require_a_language(self) -> None:
+        temp, root = self.make_repo()
+        self.addCleanup(temp.cleanup)
+        note = self.write_note(
+            root,
+            "Vault/Home/Topic/ListFences.md",
+            VALID_FRONTMATTER
+            + "- Example\n\n    ```\n    bare\n    ```\n\n100. Tagged\n\n     ```text\n     tagged\n     ```\n",
+        )
+
+        issues = validate_vault.validate_code_fences(note)
+
+        self.assertEqual(["markdown.code-fence-language"], [issue.code for issue in issues])
+
+    def test_code_fences_inside_callouts_nested_in_lists_require_a_language(self) -> None:
+        temp, root = self.make_repo()
+        self.addCleanup(temp.cleanup)
+        note = self.write_note(
+            root,
+            "Vault/Home/Topic/ListCalloutFences.md",
+            VALID_FRONTMATTER + "- Example\n\n    > ```\n    > bare\n    > ```\n",
+        )
+
+        issues = validate_vault.validate_code_fences(note)
+
+        self.assertEqual(["markdown.code-fence-language"], [issue.code for issue in issues])
+
+    def test_tab_indented_code_fences_inside_lists_require_a_language(self) -> None:
+        temp, root = self.make_repo()
+        self.addCleanup(temp.cleanup)
+        note = self.write_note(
+            root,
+            "Vault/Home/Topic/TabIndentedListFence.md",
+            VALID_FRONTMATTER + "- Example\n\n\t```\n\tbare\n\t```\n",
+        )
+
+        issues = validate_vault.validate_code_fences(note)
+
+        self.assertEqual(["markdown.code-fence-language"], [issue.code for issue in issues])
+
     def test_steptrace_freshness_delegates_to_non_writing_build_check(self) -> None:
         temp, root = self.make_repo()
         self.addCleanup(temp.cleanup)

@@ -7,9 +7,7 @@ export const insertionSort = {
   meta: { label: "Insertion sort" },
   run: (input, ops) => {
     const n = ops.value.length
-    ops.init(
-      `Insertion sort — grow a sorted prefix on the left; take each next value and slide it left past larger values into place.`,
-    )
+    ops.init(`Insertion sort — grow a sorted prefix by sliding each value left past larger values.`)
     ops.markSorted([0], [0], `The first element alone is a sorted prefix.`)
     for (let i = 1; i < n; i++) {
       const key = ops.value[i]

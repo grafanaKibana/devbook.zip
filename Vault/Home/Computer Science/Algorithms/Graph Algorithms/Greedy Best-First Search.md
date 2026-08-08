@@ -15,13 +15,15 @@ A grid pathfinder has to reach a goal cell and cares more about producing *a* ro
 
 That single ranking key is also the whole weakness. Because `g(n)`, the cost paid to reach a node, never enters the comparison, the search cannot separate a short route from a long one that merely ends near the goal. It expands what looks close, not what is cheap: the path it returns can be far longer than necessary, and on an infinite graph it can follow a forever-improving estimate down a branch that never terminates.
 
+~~~~~tabsdown
+tab: Visualization
+
 ```steptrace
 {"algorithm":"greedy-best-first-search"}
 ```
 
 Greedy first moves downward because those cells have smaller `h`, then follows the lower corridor until a vertical barrier forces it back up and around. It reaches the goal with cost `12`. [[Home/Computer Science/Algorithms/Graph Algorithms/A-Star Search|A*]] uses the same grid but ranks by `g + h`, returning the optimal upper route with cost `8`. The comparison isolates the missing term: Greedy knows both routes point toward the same goal but never charges itself for the four extra steps already taken.
 
-# Ordering by the Estimate
 
 The frontier is a priority queue keyed by `h(n)`. Each iteration pops the node with the smallest estimate, and if it is not the goal, pushes every unvisited neighbor keyed by that neighbor's own `h`. The trace accumulates edge weights only to report the returned path cost; they never affect priority. A visited set stops a node from entering the queue twice.
 
@@ -29,15 +31,103 @@ The only property this maintains is that the next node expanded is the one the h
 
 One framing makes the family relationship exact: [[Home/Computer Science/Algorithms/Graph Algorithms/A-Star Search|A*]] expands by `f = g + h`. Setting `g` to zero collapses `f` to `h`, which is precisely Greedy Best-First — the case where a node's history counts for nothing.
 
-# Complexity
+tab: Complexity
 
-| Case | Nodes generated or expanded | Auxiliary space | Cause |
-| --- | --- | --- | --- |
-| Best | `O(b·m)` | `O(b·m)` | A near-perfect heuristic guides expansion almost directly to the goal, one productive node per level. |
-| Typical | distribution-dependent; between `O(b·m)` and `O(b^m)` | up to `O(b^m)` | Heuristic quality and obstacle shape set how far expansion strays from the direct route. |
-| Worst | `O(b^m)` | `O(b^m)` | A misleading heuristic offers no guidance and expansion degrades toward uninformed search. |
-
-`b` is the branching factor and `m` the maximum depth of the search space. These are search-tree node counts, not heap-operation bounds. For the finite adjacency-list graph implementation below, assuming `O(1)` heuristic evaluation, each reachable vertex is enqueued once and each edge is inspected once: `O(E + V log V)` time and `O(V)` auxiliary space. Heuristic quality determines how much of that reachable graph is visited before the goal is found.
+```complexity
+{
+  "version": 2,
+  "label": "Greedy Best-First Search complexity",
+  "variables": {
+    "branchingFactor": {
+      "symbol": "b",
+      "description": "search-tree branching factor"
+    },
+    "secondarySize": {
+      "symbol": "m",
+      "description": "maximum search depth"
+    }
+  },
+  "resources": {
+    "time": {
+      "mode": "operations",
+      "entries": [
+        {
+          "kind": "operation",
+          "operation": "Best",
+          "bounds": [
+            {
+              "kind": "text",
+              "role": "Nodes generated or expanded",
+              "formula": "O(b·m)"
+            }
+          ]
+        },
+        {
+          "kind": "operation",
+          "operation": "Typical",
+          "bounds": [
+            {
+              "kind": "text",
+              "role": "Nodes generated or expanded",
+              "formula": "distribution-dependent; between O(b·m) and O(b^m)"
+            }
+          ]
+        },
+        {
+          "kind": "operation",
+          "operation": "Worst",
+          "bounds": [
+            {
+              "kind": "text",
+              "role": "Nodes generated or expanded",
+              "formula": "O(b^m)"
+            }
+          ]
+        }
+      ]
+    },
+    "space": {
+      "mode": "operations",
+      "entries": [
+        {
+          "kind": "operation",
+          "operation": "Best",
+          "bounds": [
+            {
+              "kind": "text",
+              "role": "Auxiliary space",
+              "formula": "O(b·m)"
+            }
+          ]
+        },
+        {
+          "kind": "operation",
+          "operation": "Typical",
+          "bounds": [
+            {
+              "kind": "text",
+              "role": "Auxiliary space",
+              "formula": "up to O(b^m)"
+            }
+          ]
+        },
+        {
+          "kind": "operation",
+          "operation": "Worst",
+          "bounds": [
+            {
+              "kind": "text",
+              "role": "Auxiliary space",
+              "formula": "O(b^m)"
+            }
+          ]
+        }
+      ]
+    }
+  }
+}
+```
+~~~~~
 
 # When the Estimate Misleads
 
@@ -47,7 +137,7 @@ The h-only ordering fails in three distinct ways, all traceable to the missing `
 
 **Loops without a visited set.** With no closed set, a node the search has already left can be re-enqueued, and on a cyclic graph the frontier can oscillate between two low-`h` nodes indefinitely. A visited set bounds any finite graph, but it cannot rescue an infinite one: where `h` keeps improving down a fruitless branch, there is no `g` bound to force the search to abandon that region, so it never terminates.
 
-**A poor heuristic collapses to uninformed search.** If `h` returns near-constant or weakly correlated values, the priority queue no longer separates directions and expansion degrades to an uninformed fan-out, paying the full `O(b^m)`. The concave obstacle is the common concrete case: a wall cupping the goal gives every cell inside the pocket a tempting low `h`, so the search thrashes along the barrier — re-committing to the blocked heading because those cells keep scoring lowest — before it discovers the way around.
+The concave obstacle is the common concrete case: a wall cupping the goal gives every cell inside the pocket a tempting low `h`, so the search thrashes along the barrier — re-committing to the blocked heading because those cells keep scoring lowest — before it discovers the way around.
 
 # Reference Drawer
 

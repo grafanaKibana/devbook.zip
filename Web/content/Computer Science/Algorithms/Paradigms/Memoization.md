@@ -1,19 +1,20 @@
 ---
 publish: true
-created: 2026-07-25T18:38:43.796Z
-modified: 2026-07-25T18:38:43.796Z
-published: 2026-07-25T18:38:43.796Z
+created: 2026-08-03T15:55:17.233Z
+modified: 2026-08-08T09:12:51.868Z
+published: 2026-08-08T09:12:51.868Z
 topic:
   - Computer Science
 subtopic:
   - Algorithms
+summary: Caches pure function results by arguments so repeated subproblems return without recomputation.
 level:
   - "4"
 priority: Medium
 status: Ready to Repeat
 ---
 
-Naive recursive `fib(50)` makes over 40 billion calls to compute a value the recurrence defines at only 51 points, because the plain recursion has no memory that it already solved `fib(48)` the last time it needed it. Memoization gives it that memory: cache each call's result keyed on its arguments, and every repeat returns the stored value instead of re-entering the subtree beneath it. `fib(50)` collapses from `O(2ⁿ)` to `O(n)` — one computation per distinct argument, the rest cache hits.
+Naive recursive `fib(50)` makes over 40 billion calls to compute a value the recurrence defines at only 51 points, because the plain recursion has no memory that it already solved `fib(48)` the last time it needed it. Memoization gives it that memory: cache each call's result keyed on its arguments, and every repeat returns the stored value instead of re-entering the subtree beneath it.
 
 The technique is narrow and mechanical: wrap a **pure** function — same inputs always produce the same output, no observable side effects — so its first call for a given argument computes and stores, and later calls with that argument read the store. For a recurrence with overlapping subproblems, memoization is the usual **top-down** form of [[Computer Science/Algorithms/Paradigms/Dynamic Programming|dynamic programming]]: write the natural recurrence, then add a cache. The difference from bottom-up tabulation is _when and what_ gets computed — memoization is lazy and recursion-driven, evaluating only the states the recursion actually reaches; tabulation is eager and iterative, filling every cell in dependency order.
 
@@ -21,23 +22,77 @@ Memoization only _pays_ when calls repeat. On a function whose every call has di
 
 **Core shape:** pure function + a cache keyed on the full argument set → first call computes and stores, repeats read the store → time drops to `(distinct arguments) × (work per call)` when calls actually repeat.
 
-# Trace
+````tabsdown
+tab: Visualization
 
-The trace uses abstract states rather than tying the mechanism to one recurrence. The left branch computes and stores states `D` and `E`. The right branch requests both keys again: cached `D` skips its two child calls, while cached base state `E` returns immediately.
 
 ```steptrace
 { "algorithm": "memoization" }
 ```
 
-# Mechanism — what the Cache Keys on and what it Needs
 
-The cache is a map from _arguments_ to _result_. A correct and useful cache depends on three things; failures either return a stale answer or destroy the expected hit rate:
+The trace uses abstract states rather than tying the mechanism to one recurrence. The left branch computes and stores states `D` and `E`. The right branch requests both keys again: cached `D` skips its two child calls, while cached base state `E` returns immediately.
+
+
+The cache is a map from *arguments* to *result*. A correct and useful cache depends on three things; failures either return a stale answer or destroy the expected hit rate:
 
 - **Purity.** The function's output must depend only on its arguments, with no side effects a caller could observe. Memoise a function that reads mutable global state or the clock, and a cache hit returns a value computed under conditions that no longer hold.
-- **A complete, stable key.** The key must capture _every_ input that affects the result and must not change while stored. Omit one — memoise a two-argument recurrence on only the first argument — and two genuinely different calls collide on one cache slot, so the second read can be stale. Mutate a stored key and the entry can become unreachable. This is exactly DP's [[Computer Science/Algorithms/Paradigms/Dynamic Programming|state-design]] problem: the key _is_ the state.
+- **A complete, stable key.** The key must capture *every* input that affects the result and must not change while stored. Omit one — memoise a two-argument recurrence on only the first argument — and two genuinely different calls collide on one cache slot, so the second read can be stale. Mutate a stored key and the entry can become unreachable. This is exactly DP's [[Computer Science/Algorithms/Paradigms/Dynamic Programming|state-design]] problem: the key *is* the state.
 - **Lookup semantics that match value identity.** A cache needs equality appropriate to its store. For a `Dictionary`, equality and hashing must use the meaningful fields; a record key usually supplies both. Reference identity for logically equal arguments normally causes avoidable misses rather than wrong values, while inconsistent `Equals` and `GetHashCode` breaks dictionary lookup.
 
-For a recursive function, the recursion must call _through_ the memoised entry point, not the raw function — otherwise the inner calls bypass the cache and the exponential tree returns. That is why the idiomatic form nests a local function that calls itself and shares one `memo` dictionary across the whole call graph.
+For a recursive function, the recursion must call *through* the memoised entry point, not the raw function — otherwise the inner calls bypass the cache and the exponential tree returns. That is why the idiomatic form nests a local function that calls itself and shares one `memo` dictionary across the whole call graph.
+
+tab: Complexity
+
+```complexity
+{
+  "version": 2,
+  "label": "Memoization complexity",
+  "variables": {
+    "inputSize": {
+      "symbol": "n",
+      "description": "number of distinct reachable argument tuples or subproblems"
+    }
+  },
+  "resources": {
+    "time": {
+      "mode": "comparison",
+      "entries": [
+        {
+          "kind": "approach",
+          "label": "Naive (recompute every call)",
+          "formula": "O(2^n)",
+          "curveId": "exponential"
+        },
+        {
+          "kind": "approach",
+          "label": "Memoization",
+          "formula": "O(n)",
+          "curveId": "linear"
+        }
+      ]
+    },
+    "space": {
+      "mode": "comparison",
+      "entries": [
+        {
+          "kind": "approach",
+          "label": "Naive (recompute every call)",
+          "formula": "O(n)",
+          "curveId": "linear"
+        },
+        {
+          "kind": "approach",
+          "label": "Memoization",
+          "formula": "O(n)",
+          "curveId": "linear"
+        }
+      ]
+    }
+  }
+}
+```
+````
 
 # Where Memoization Breaks or Costs
 
@@ -98,13 +153,6 @@ For a recursive function, the recursion must call _through_ the memoised entry p
 
 Memoization sits next to the other ways of not redoing work; the axis is _when_ results are computed and _what_ is kept.
 
-| Form | Evaluation order | What is stored | Work coverage | Control-flow stack | Main cost |
-| --- | --- | --- | --- | --- | --- |
-| Recursive top-down DP | Lazily, on first call | One entry per reached state | Reachable states only | Recursion depth | Cache growth; deep call chains |
-| Dense bottom-up tabulation | In dependency order | Full table or rolling window | Planned table region | Usually `O(1)` | Computes planned states even when some are unreachable |
-| Nonrecursive application caching | On demand | Entries chosen by cache policy | Requested keys only | Determined by the caller | Staleness, eviction, and invalidation |
-| Plain recursive computation | Every call | Nothing | Full call tree | Recursion depth | Repeated states recompute |
-
 Memoization is the fit when the recurrence is natural to write recursively, the reachable state space is a small fraction of the whole table, and stack depth is bounded — it evaluates only what's needed and mirrors the maths directly. [[Computer Science/Algorithms/Paradigms/Dynamic Programming|Tabulation]] wins when nearly all states are visited anyway (so laziness buys nothing), when a rolling array can shrink memory, or when the recursion would be too deep for the stack. Memoization is a specialized form of caching for deterministic function results. Application caches are broader: they may store data from mutable or external sources, which replaces the purity assumption with explicit freshness, expiration, and invalidation rules.
 
 # Questions
@@ -117,9 +165,6 @@ Memoization is the fit when the recurrence is natural to write recursively, the 
 
 > [!QUESTION]- What is the most common correctness bug when memoising a recurrence?
 > An incomplete cache key. If the key omits an argument the result depends on — caching a `(i, capacity)` knapsack state on `i` alone — two different subproblems map to the same slot and the second read returns a stale value, silently. The key must be the full state, the same requirement DP calls state design.
-
-> [!QUESTION]- When should a memoised recurrence be rewritten as bottom-up tabulation?
-> When the recursion is deep enough to risk a stack overflow (a long chain of dependencies), when essentially every state gets visited so laziness saves nothing, or when a rolling-array reduction can cut memory that the recursive form can't exploit. Tabulation runs in tight iterative loops with `O(1)` stack, at the cost of computing states a lazy memo might have skipped.
 
 # References
 

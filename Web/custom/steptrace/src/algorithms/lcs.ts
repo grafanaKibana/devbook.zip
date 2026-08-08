@@ -15,7 +15,7 @@ export const lcs = {
     ops.board(
       rowLabels,
       colLabels,
-      `Longest common subsequence of "${A}" and "${B}". Cell dp[i][j] holds the LCS length of the first i letters of "${A}" and the first j of "${B}".`,
+      `LCS of "${A}" and "${B}": dp[i][j] is the best length for their first i and j letters.`,
     )
     const dp = Array.from({ length: m + 1 }, () => Array(n + 1).fill(0))
     for (let c = 0; c <= n; c++) ops.set(0, c, 0, [], `An empty first string has LCS 0.`)
@@ -42,7 +42,7 @@ export const lcs = {
               [r - 1, c],
               [r, c - 1],
             ],
-            `'${A[r - 1]}' ≠ '${B[c - 1]}' → this letter can't extend the match, so the optimum here is inherited from an optimal sub-answer: the better of top (${dp[r - 1][c]}) and left (${dp[r][c - 1]}) = ${dp[r][c]} (from the ${better}).`,
+            `'${A[r - 1]}' ≠ '${B[c - 1]}' → inherit max(top ${dp[r - 1][c]}, left ${dp[r][c - 1]}) = ${dp[r][c]} from ${better}.`,
           )
         }
       }
@@ -60,20 +60,20 @@ export const lcs = {
         path.unshift([r, c])
         ops.markPath(
           path,
-          `dp[${r}][${c}]: '${A[r - 1]}' = '${B[c - 1]}' — this cell was built from dp[${r - 1}][${c - 1}] + 1, so '${A[r - 1]}' joins the LCS. Step diagonally to that sub-answer.`,
+          `dp[${r}][${c}]: '${A[r - 1]}' = '${B[c - 1]}' → dp[${r - 1}][${c - 1}] + 1; add '${A[r - 1]}' and move diagonally.`,
         )
         r--
         c--
       } else if (dp[r - 1][c] >= dp[r][c - 1]) {
         ops.markPath(
           path,
-          `dp[${r}][${c}]: '${A[r - 1]}' ≠ '${B[c - 1]}' — its optimum was inherited from the top sub-answer dp[${r - 1}][${c}]. Follow it upward; no letter added.`,
+          `dp[${r}][${c}]: '${A[r - 1]}' ≠ '${B[c - 1]}' → inherit top dp[${r - 1}][${c}]; move up, add no letter.`,
         )
         r--
       } else {
         ops.markPath(
           path,
-          `dp[${r}][${c}]: '${A[r - 1]}' ≠ '${B[c - 1]}' — its optimum was inherited from the left sub-answer dp[${r}][${c - 1}]. Follow it leftward; no letter added.`,
+          `dp[${r}][${c}]: '${A[r - 1]}' ≠ '${B[c - 1]}' → inherit left dp[${r}][${c - 1}]; move left, add no letter.`,
         )
         c--
       }

@@ -19,6 +19,7 @@ export const ComplexityBlock: QuartzTransformerPlugin = () => ({
   htmlPlugins() {
     return [
       () => (tree: Root) => {
+        let occurrence = 0
         visit(tree, "element", (node: Element, index, parent) => {
           if (
             !parent ||
@@ -43,7 +44,7 @@ export const ComplexityBlock: QuartzTransformerPlugin = () => ({
             .join("")
           try {
             parent.children[index] = renderComplexityHast(
-              buildComplexityViewModel(JSON.parse(source)),
+              buildComplexityViewModel(JSON.parse(source), `page-occurrence-${++occurrence}`),
             )
           } catch (error) {
             parent.children[index] = errorNode(

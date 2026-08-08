@@ -5,6 +5,7 @@
   --_violet: var(--st-state-violet, #7c3aed);
   --_blue: var(--st-state-blue, #2563eb);
   --_green: var(--st-state-green, #4c8000);
+  --_red: var(--st-state-red, #b42318);
   --_neutral: var(--st-neutral, #9aa886);
   --_surface: var(--st-surface, #eef1e6);
   --_text: var(--st-text, #29301f);
@@ -41,6 +42,7 @@
   --_dur-quick: calc(var(--_tween) * 0.65); /* ~70ms at 1x */
   --_dur-move: calc(var(--_tween) * 1.68); /* ~180ms at 1x */
   --_dur-settle: calc(var(--_tween) * 3); /* ~320ms at 1x */
+  --steptrace-tab-animation-duration: var(--tabsdown-animation-speed, 160ms);
   /* standard entering (decelerate) and exiting (accelerate) easings */
   --_ease-decelerate: cubic-bezier(0, 0, 0.2, 1);
   --_ease-accelerate: cubic-bezier(0.4, 0, 1, 1);
@@ -419,6 +421,12 @@
   padding-left: 1.4rem;
   border-left: 1px solid var(--_hair);
   display: flex;
+  flex-direction: column;
+}
+.steptrace__rail-region {
+  display: flex;
+  flex: 1 1 auto;
+  min-height: 0;
   flex-direction: column;
 }
 .steptrace__rail-label {
@@ -873,9 +881,6 @@
   outline: 2px solid var(--_blue);
   outline-offset: 2px;
 }
-.steptrace__spacer {
-  flex: 1 1 auto;
-}
 /* kebab popover */
 .steptrace__menu-wrap {
   position: relative;
@@ -1053,58 +1058,6 @@
   outline-offset: 2px;
 }
 
-/* Narrow: stack the rail beneath the stage; transport follows the rail as a
-   normal part of the document flow. */
-@media (max-width: 560px) {
-  .steptrace__body {
-    grid-template-columns: 1fr;
-  }
-  .steptrace__rail {
-    border-left: 0;
-    border-top: 1px solid var(--_hair);
-    padding-left: 0;
-    padding-top: 1rem;
-    margin-top: 1rem;
-  }
-  .steptrace__trace {
-    --_stable-trace-height: clamp(4.75rem, 16dvh, 5.75rem);
-    flex: 0 0 var(--_stable-trace-height);
-    block-size: var(--_stable-trace-height);
-    margin-top: 0;
-    overflow: hidden;
-  }
-  .steptrace__log {
-    height: auto !important;
-    min-height: 0;
-    overflow-y: auto !important;
-    overscroll-behavior: contain;
-  }
-  /* stacked: only the live line (or, at the end, the RESULT that stands in its
-     place) survives — there is no room for the step history */
-  .steptrace__log-line:not(.steptrace__log-line--cur) {
-    display: none;
-  }
-  .steptrace__log-line--cur {
-    min-height: 0;
-  }
-  .steptrace__insight {
-    min-height: 0;
-  }
-  .steptrace__scrub {
-    height: 2.75rem;
-  }
-  .steptrace__foot {
-    grid-template-columns: 1fr auto;
-    grid-template-areas:
-      "phase phase"
-      "timeline timeline"
-      "transport utility";
-  }
-  .steptrace__milestone-label {
-    display: none;
-  }
-}
-
 @media (hover: none), (pointer: coarse) {
   .steptrace__btn,
   .steptrace__btn--play,
@@ -1124,5 +1077,154 @@
   .steptrace__watch-row {
     height: auto;
     min-height: 2.75rem;
+  }
+}
+
+/* Narrow is a mounted-instance state, not a viewport assumption. The root
+   observer owns the threshold so Quartz columns and Obsidian panes cannot
+   disagree with the controls rendered by mount.ts. */
+.steptrace.steptrace--narrow .steptrace__body {
+  grid-template-columns: minmax(0, 1fr);
+  grid-template-rows: none;
+  block-size: auto;
+}
+.steptrace.steptrace--narrow .steptrace__rail {
+  min-block-size: 0 !important;
+  margin-top: 1rem;
+  padding-top: 1rem;
+  padding-left: 0;
+  border-top: 1px solid var(--_hair);
+  border-left: 0;
+  overflow: visible;
+}
+.steptrace--narrow .steptrace__rail-region--fallback {
+  display: flow-root;
+  transition: height var(--steptrace-tab-animation-duration) var(--_ease-decelerate);
+}
+.steptrace--narrow .steptrace__rail-region--animating {
+  overflow: clip;
+}
+.steptrace--narrow .steptrace__detail-switch:not([hidden]) {
+  display: flex;
+  align-items: stretch;
+  justify-content: flex-start;
+  width: 100%;
+  min-width: 0;
+  margin: 0 0 0.75rem;
+  padding: 1px;
+  gap: 0.25rem;
+}
+.steptrace--narrow .steptrace__detail-button {
+  flex: 0 0 auto;
+  min-inline-size: 44px;
+  min-block-size: 44px;
+  margin: 0;
+  padding: 0.5rem 0.75rem;
+  border: 1px solid var(--_border);
+  border-radius: 0.25rem;
+  background-color: var(--st-page, var(--_surface));
+  color: var(--_text);
+  font: 500 0.75rem/1.2 var(--_font-head);
+  text-align: center;
+  cursor: pointer;
+  transition:
+    background-color var(--_dur-quick) var(--_ease-decelerate),
+    border-color var(--_dur-quick) var(--_ease-decelerate),
+    color var(--_dur-quick) var(--_ease-decelerate);
+}
+.steptrace--narrow .steptrace__detail-button:hover {
+  border-color: var(--_muted);
+  background-color: var(--_surface);
+}
+.steptrace--narrow .steptrace__detail-button[aria-pressed="true"] {
+  border-color: var(--_accent);
+  background-color: var(--_accent);
+  background-image: var(--st-accent-gradient, none);
+  color: var(--_on-accent);
+}
+.steptrace--narrow .steptrace__detail-button[aria-pressed="true"]:hover {
+  border-color: var(--_accent);
+  background-color: var(--_accent);
+}
+.steptrace--narrow .steptrace__detail-button:focus-visible {
+  outline: 1px solid var(--_blue);
+  outline-offset: 1px;
+}
+.steptrace--narrow
+  .steptrace__rail-region--fallback
+  > :is(.steptrace__trace, .steptrace__watch-wrap):not([hidden]) {
+  animation: steptrace-tab-panel-in var(--steptrace-tab-animation-duration) var(--_ease-decelerate);
+}
+.steptrace--narrow .steptrace__trace > .steptrace__trace-label,
+.steptrace--narrow .steptrace__watch-wrap > .steptrace__rail-label {
+  display: none;
+}
+.steptrace.steptrace--narrow .steptrace__trace {
+  flex: 0 0 auto;
+  min-height: 0;
+  margin: 0;
+  overflow: visible;
+}
+.steptrace--narrow .steptrace__log {
+  flex: 0 0 auto;
+  min-height: 0;
+  overflow: hidden;
+}
+.steptrace--narrow .steptrace__log-line--cur,
+.steptrace--narrow .steptrace__insight {
+  min-height: 0;
+}
+.steptrace--narrow .steptrace__watch-wrap {
+  padding-top: 0;
+  border-top: 0;
+}
+.steptrace--narrow .steptrace__watch {
+  min-height: 0 !important;
+}
+.steptrace--narrow .steptrace__watch-row {
+  height: 2.25rem;
+  min-height: 0;
+}
+.steptrace--narrow .steptrace__scrub {
+  height: 2.75rem;
+}
+.steptrace--narrow .steptrace__timeline {
+  margin-inline: 1.375rem;
+}
+.steptrace--narrow .steptrace__foot {
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  grid-template-areas:
+    "phase phase phase"
+    "timeline timeline timeline"
+    "transport . utility";
+  gap: 0.5rem;
+}
+.steptrace--narrow .steptrace__transport,
+.steptrace--narrow .steptrace__utility {
+  gap: 0.25rem;
+}
+.steptrace--narrow .steptrace__btn,
+.steptrace--narrow .steptrace__btn--play,
+.steptrace--narrow .steptrace__speed-indicator {
+  width: 2.75rem;
+  height: 2.75rem;
+}
+.steptrace--narrow .steptrace__btn {
+  flex-basis: 2.75rem;
+}
+.steptrace--narrow .steptrace__milestone-label {
+  display: none;
+}
+.steptrace--reduced {
+  --steptrace-tab-animation-duration: 0ms;
+}
+.steptrace--reduced .steptrace__rail-region--fallback {
+  transition-duration: 0ms !important;
+}
+
+@keyframes steptrace-tab-panel-in {
+  from {
+    opacity: 0;
+    transform: translateY(-0.25rem);
   }
 }

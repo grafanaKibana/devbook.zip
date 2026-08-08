@@ -1098,6 +1098,9 @@
   }
   function makePointerView(frames) {
     const n = frames[0].array.length;
+    const sliding = frames.some(
+      (frame) => frame.bestRange || frame.enteringIndex != null || frame.duplicateIndex != null
+    );
     const ptrNames = (function() {
       for (const f of frames) {
         const ks = Object.keys(f.pointers || {});
@@ -1119,7 +1122,10 @@
         const c = cells[k];
         c.textContent = frame.array[k];
         let state = "";
-        if (win && k >= win[0] && k <= win[1]) state = matched ? "match" : "window";
+        if (win && k >= win[0] && k <= win[1]) state = "window";
+        if (frame.marked?.includes(k)) state = "match";
+        if (frame.enteringIndex === k) state = "entering";
+        if (frame.duplicateIndex === k) state = "duplicate";
         c.dataset.state = state;
         c.dataset.end = win && k === win[0] ? "l" : win && k === win[1] ? "r" : "";
       }
@@ -1147,7 +1153,7 @@
         j: "var(--_violet)"
       };
       const p = frame.pointers || {};
-      return ptrNames.map((name) => {
+      const rows = ptrNames.map((name) => {
         const idx = p[name];
         return {
           k: name,
@@ -1155,6 +1161,22 @@
           sw: color[name.toLowerCase()] || "var(--_muted)"
         };
       });
+      if (!sliding) return rows;
+      const window = frame.window;
+      const bestRange = frame.bestRange;
+      rows.push(
+        {
+          k: "window",
+          v: window ? `[${window[0]}..${window[1]}] "${frame.array.slice(window[0], window[1] + 1).join("")}" len=${window[1] - window[0] + 1}` : "—",
+          sw: "var(--_blue)"
+        },
+        {
+          k: "best",
+          v: bestRange ? `"${frame.array.slice(bestRange[0], bestRange[1] + 1).join("")}" (length ${bestRange[1] - bestRange[0] + 1})` : "—",
+          sw: "var(--_green)"
+        }
+      );
+      return rows;
     }
     return { nodes: [wrap, status], paint, watch };
   }
@@ -3800,9 +3822,9 @@
   };
 
   // custom/steptrace/src/families/interactive-structure.ts
-  function createStructureShell(root, id, label, ariaLabel, family10 = "contiguous-storage", stageClass = "steptrace__contiguous") {
+  function createStructureShell(root, id, label, ariaLabel, family11 = "contiguous-storage", stageClass = "steptrace__contiguous") {
     root.classList.add("steptrace", "steptrace--structure");
-    root.dataset.visualFamily = family10;
+    root.dataset.visualFamily = family11;
     root.dataset.structure = id;
     root.setAttribute("role", "group");
     root.setAttribute("aria-label", ariaLabel);
@@ -3869,13 +3891,13 @@
         return select;
       },
       button(buttonLabel, primary = false) {
-        const button2 = el(
+        const button = el(
           "button",
           `steptrace__structure-action${primary ? " steptrace__structure-action--primary" : ""}`
         );
-        button2.type = "button";
-        button2.textContent = buttonLabel;
-        return button2;
+        button.type = "button";
+        button.textContent = buttonLabel;
+        return button;
       },
       listen(node2, type, listener) {
         node2.addEventListener(type, listener);
@@ -5455,12 +5477,15 @@
         ] : [];
         const { comparison: result } = frame.detail;
         const comparison = result.primaryValue != null && result.baselineValue != null ? result.metric === "cost" ? ` · ${result.primaryLabel} cost ${result.primaryValue} vs ${result.baselineLabel} cost ${result.baselineValue}` : ` · ${result.primaryLabel} ${result.primaryValue} vs ${result.baselineLabel} ${result.baselineValue} expansions` : "";
+        if (path.length && result.metric === "cost" && result.primaryLabel === "Greedy" && result.primaryValue != null && result.baselineValue != null)
+          return `Greedy ${path.join("→​")}: cost ${result.primaryValue} vs A* cost ${result.baselineValue} (optimal).`;
         return frame.target && cost == null ? `${frame.target} is unreachable.` : `Path ${path.length ? path.join(" → ") : "pending"}${cost == null ? "" : ` · cost ${cost}`}${comparison}.`;
       }
       case "dual-search":
         return frame.detail.meeting ? `Frontiers meet at ${frame.detail.meeting}.` : "No meeting point was found.";
       case "edge-relaxation":
-        return `Distances ${Object.entries(frame.detail.distances).map(([id, value]) => `${id}:${value}`).join(", ")}.`;
+        if (frame.target && frame.type === "done") return frame.message;
+        return `Distances ${Object.entries(frame.detail.distances).map(([id, value]) => `${id}:${Number.isFinite(value) ? value : "∞"}`).join(", ")}.`;
       case "component-flood":
         return `${frame.detail.groups?.length ?? frame.detail.component} connected components.`;
       case "low-link-cuts":
@@ -5771,8 +5796,19 @@
             { k: "meeting", v: frame.detail.meeting || "—", sw: "var(--_violet)" }
           );
           break;
-        case "edge-relaxation":
+        case "edge-relaxation": {
+          const distances = frame.detail.distances;
+          const distanceWatch = frame.nodes.map(({ id }) => {
+            const value = distances[id];
+            return `${id}:${Number.isFinite(value) ? value : "∞"}`;
+          }).join(" · ");
           rows.push(
+            {
+              k: "distances",
+              v: distanceWatch,
+              sw: "var(--_blue)",
+              hint: distanceWatch
+            },
             { k: "pass", v: String(frame.detail.pass), sw: "var(--_violet)" },
             { k: "edge", v: frame.detail.edge?.join(" → ") || "—", sw: "var(--_amber)" },
             {
@@ -5782,6 +5818,7 @@
             }
           );
           break;
+        }
         case "component-flood":
           rows.push(
             { k: "component", v: String(frame.detail.component), sw: "var(--_violet)" },
@@ -6651,12 +6688,12 @@
       undirected.get(edge.to).push(edge.from);
     }
     const layer = /* @__PURE__ */ new Map();
-    const assignBfsLayers = (adjacency2, root) => {
+    const assignBfsLayers = (adjacency3, root) => {
       const queue2 = idSet.has(root) ? [root] : [];
       if (queue2.length) layer.set(root, 0);
       for (let head = 0; head < queue2.length; head++) {
         const current = queue2[head];
-        for (const neighbour of adjacency2.get(current) ?? []) {
+        for (const neighbour of adjacency3.get(current) ?? []) {
           if (!layer.has(neighbour)) {
             layer.set(neighbour, layer.get(current) + 1);
             queue2.push(neighbour);
@@ -6779,7 +6816,7 @@
       const target = input.target != null && input.target !== start ? String(input.target) : null;
       if (target) ops.target(target);
       ops.init(
-        target ? `Breadth-first search for ${target}, starting at ${start} — explore level by level with a first-in, first-out queue until the target is dequeued.` : `Breadth-first search from ${start} — explore the graph level by level using a first-in, first-out queue.`
+        target ? `BFS for ${target} from ${start} — dequeue FIFO, exploring each level until ${target} is dequeued.` : `Breadth-first search from ${start} — explore the graph level by level using a first-in, first-out queue.`
       );
       const queue2 = [start];
       const seen = /* @__PURE__ */ new Set([start]);
@@ -7115,8 +7152,7 @@
     }
   };
   var GraphRecorder = class {
-    constructor(graph) {
-      this.graph = graph;
+    constructor() {
       this.frames = [];
       this._visited = /* @__PURE__ */ new Set();
       this._frontier = [];
@@ -7593,6 +7629,9 @@
       this.pointers = {};
       this.window = null;
       this.marked = [];
+      this.bestRange = null;
+      this.enteringIndex = null;
+      this.duplicateIndex = null;
     }
     get value() {
       return this.a.slice();
@@ -7605,9 +7644,14 @@
           pointers: { ...this.pointers },
           window: this.window ? this.window.slice() : null,
           marked: this.marked.slice(),
+          bestRange: this.bestRange ? this.bestRange.slice() : null,
+          enteringIndex: this.enteringIndex,
+          duplicateIndex: this.duplicateIndex,
           message
         })
       );
+      this.enteringIndex = null;
+      this.duplicateIndex = null;
     }
     init(message) {
       this._push("init", message);
@@ -7617,6 +7661,9 @@
       update = update || {};
       if (update.pointers) this.pointers = { ...update.pointers };
       if ("window" in update) this.window = update.window ? update.window.slice() : null;
+      if ("bestRange" in update && update.bestRange) this.bestRange = update.bestRange.slice();
+      this.enteringIndex = update.enteringIndex ?? null;
+      this.duplicateIndex = update.duplicateIndex ?? null;
       if (update.mark) this.marked = this.marked.concat(update.mark);
       this._push(update.mark ? "match" : "step", message);
     }
@@ -7709,8 +7756,7 @@
       this.grid = grid.map((row) => row.slice());
       this._push("init", message);
     }
-    stage(k, message) {
-      this.k = k;
+    _clearRelaxation() {
       this.cur = null;
       this.deps = [];
       this.candidate = null;
@@ -7719,6 +7765,10 @@
       this.result = null;
       this.operandA = null;
       this.operandB = null;
+    }
+    stage(k, message) {
+      this.k = k;
+      this._clearRelaxation();
       this._push("stage", message);
     }
     relax(r, c, deps, candidate, decision, value, message) {
@@ -7735,25 +7785,11 @@
     }
     reportNegativeCycle(nodes5, message) {
       this.negativeCycle = nodes5.slice();
-      this.cur = null;
-      this.deps = [];
-      this.candidate = null;
-      this.decision = null;
-      this.previous = null;
-      this.result = null;
-      this.operandA = null;
-      this.operandB = null;
+      this._clearRelaxation();
       this._push("negative-cycle", message);
     }
     done(message) {
-      this.cur = null;
-      this.deps = [];
-      this.candidate = null;
-      this.decision = null;
-      this.previous = null;
-      this.result = null;
-      this.operandA = null;
-      this.operandB = null;
+      this._clearRelaxation();
       this._push("done", message);
     }
     _push(type, message) {
@@ -8452,7 +8488,7 @@
       const a = ops.value;
       const target = input.target;
       ops.init(
-        `Binary search for ${target} in a sorted array — check the middle of the range, then discard the half that can't contain it.`
+        `Binary search for ${target} in sorted data — test the middle, then discard the impossible half.`
       );
       let lo = 0;
       let hi = a.length - 1;
@@ -9437,7 +9473,7 @@
         lock(false);
       });
     }
-    function run6(plan) {
+    function run7(plan) {
       if (motionTimer != null || activeAnimations.length) return;
       calculation.textContent = plan.calculation;
       tokenInline.textContent = content === "map" ? `${plan.key}:${plan.value || "?"}` : String(plan.key);
@@ -9778,7 +9814,7 @@
       const key4 = suppliedPutKey();
       if (key4 == null) return;
       const value = content === "map" ? suppliedPutValue() : "";
-      run6(
+      run7(
         config.strategy === "closed-addressing" ? closedPut(key4, value) : config.strategy === "open-addressing" ? openPut(key4, value) : bucketPut(key4, value)
       );
     }
@@ -9789,7 +9825,7 @@
         return generated;
       })();
       if (key4 == null) return;
-      run6(
+      run7(
         config.strategy === "closed-addressing" ? closedSearch(key4, removeEntry) : config.strategy === "open-addressing" ? openSearch(key4, removeEntry) : bucketSearch(key4, removeEntry)
       );
     }
@@ -9907,7 +9943,7 @@
       paint();
       lock(false);
     }
-    function run6(kind) {
+    function run7(kind) {
       if (timer != null) return;
       const value = suppliedValue();
       const positions = bloomPositions(value);
@@ -9952,10 +9988,10 @@
       shell.status.textContent = "Bloom filter reset.";
       paint();
     }
-    shell.listen(add, "click", () => run6("add"));
-    shell.listen(query, "click", () => run6("query"));
+    shell.listen(add, "click", () => run7("add"));
+    shell.listen(query, "click", () => run7("query"));
     shell.listen(reset, "click", onReset);
-    onEnter(shell, valueInput, () => run6("add"));
+    onEnter(shell, valueInput, () => run7("add"));
     shell.status.textContent = "Fixed 10-bit Bloom filter ready.";
     paint();
     const base = shell.finish();
@@ -11028,14 +11064,11 @@
   }
 
   // custom/steptrace/src/algorithms/binomial-queue.ts
-  function parseBinomialQueueConfig(_config) {
-    return {};
-  }
   var binomialQueue = {
     id: "binomial-queue",
     family: "heap-selection",
     meta: { label: "Binomial queue" },
-    parse: parseBinomialQueueConfig,
+    parse: () => ({}),
     mount: mountBinomialQueue
   };
 
@@ -11991,7 +12024,7 @@
     run: (input, ops) => {
       const n = ops.value.length;
       ops.init(
-        `Bubble sort — repeatedly compare adjacent values and swap the larger one rightward, bubbling the largest to the end each pass.`
+        `Bubble sort — compare neighbours and swap inversions; each pass moves the maximum right.`
       );
       for (let i = 0; i < n - 1; i++) {
         let swapped = false;
@@ -13667,7 +13700,7 @@
       const target = input.target != null && input.target !== start ? String(input.target) : null;
       if (target) ops.target(target);
       ops.init(
-        target ? `Depth-first search for ${target}, starting at ${start} — dive as deep as possible with a stack, backtracking at dead ends, until the target is popped.` : `Depth-first search from ${start} — dive as deep as possible using a stack, backtracking when a node has no unvisited neighbours.`
+        target ? `DFS for ${target} from ${start} — pop a stack, diving then backtracking until ${target} is popped.` : `Depth-first search from ${start} — dive as deep as possible using a stack, backtracking when a node has no unvisited neighbours.`
       );
       const stack2 = [start];
       const seen = /* @__PURE__ */ new Set([start]);
@@ -13697,76 +13730,227 @@
   };
 
   // custom/steptrace/src/algorithms/dijkstra.ts
+  var Recorder6 = class {
+    constructor(config) {
+      __publicField(this, "config", config);
+      __publicField(this, "frames", []);
+    }
+    record(type, currentNode, currentEdge, distances, settled, selectedEdges, changed, message) {
+      const frontier = new Set(
+        this.config.nodes.map(({ id }) => id).filter((id) => Number.isFinite(distances[id]) && !settled.has(id))
+      );
+      const nodeState = Object.fromEntries(
+        this.config.nodes.map(({ id }) => [
+          id,
+          id === currentNode ? "active" : settled.has(id) ? "closed" : frontier.has(id) ? "frontier" : "neutral"
+        ])
+      );
+      const edgeState = Object.fromEntries(
+        this.config.edges.map((edge) => {
+          const key4 = `${edge.from}|${edge.to}`;
+          const reverseKey = `${edge.to}|${edge.from}`;
+          const selected = selectedEdges.includes(key4) || !edge.directed && selectedEdges.includes(reverseKey);
+          const active = currentEdge && (currentEdge[0] === edge.from && currentEdge[1] === edge.to || !edge.directed && currentEdge[0] === edge.to && currentEdge[1] === edge.from);
+          return [key4, selected ? "accepted" : active ? "active" : "neutral"];
+        })
+      );
+      const detail = {
+        kind: "edge-relaxation",
+        pass: settled.size,
+        edge: currentEdge,
+        distances: { ...distances },
+        changed
+      };
+      this.frames.push({
+        type,
+        profile: this.config.profile,
+        nodes: this.config.nodes,
+        edges: this.config.edges,
+        decor: this.config.decor,
+        start: this.config.start,
+        target: this.config.target,
+        currentNode,
+        currentEdge,
+        selectedEdges: [...selectedEdges],
+        nodeState,
+        edgeState,
+        message,
+        detail
+      });
+    }
+  };
+  var family6 = {
+    id: "graph-state",
+    createRecorder: (config) => new Recorder6(config),
+    createView: makeGraphStateView
+  };
+  function parse5(config) {
+    const variant = config.variant == null ? null : String(config.variant);
+    if (variant && variant !== "midtown-map" && variant !== "ukraine-cities") {
+      throw new Error('steptrace: dijkstra "variant" must be midtown-map or ukraine-cities.');
+    }
+    let profile = "dijkstra";
+    let decor = [];
+    let nodes5;
+    let edges5;
+    let start;
+    let target;
+    let directed = null;
+    if (variant) {
+      const scenario = parseGraphStateConfig({ ...config, variant });
+      const ids = new Set(scenario.nodes.map(({ id }) => id));
+      profile = scenario.profile;
+      decor = scenario.decor;
+      nodes5 = scenario.nodes;
+      edges5 = scenario.edges;
+      start = ids.has(String(config.start)) ? String(config.start) : scenario.start;
+      target = ids.has(String(config.target)) ? String(config.target) : scenario.target;
+    } else {
+      const graph = normalizeGraph(config);
+      nodes5 = graph.nodes.map((node2) => ({ ...node2, label: node2.id }));
+      edges5 = graph.edges.map((edge) => ({
+        ...edge,
+        weight: edge.weight ?? 1
+      }));
+      directed = graph.directed;
+      start = graph.start;
+      const requestedTarget = config.target == null ? nodes5.at(-1).id : String(config.target);
+      target = nodes5.some(({ id }) => id === requestedTarget) ? requestedTarget : nodes5.at(-1).id;
+    }
+    edges5 = edges5.map((edge) => {
+      const weight = edge.weight ?? 1;
+      if (!Number.isFinite(weight) || weight < 0)
+        throw new Error("steptrace: dijkstra edge weights must be finite and non-negative.");
+      const edgeDirected = directed ?? Boolean(edge.directed);
+      return {
+        ...edge,
+        weight,
+        label: String(weight),
+        directed: edgeDirected,
+        showDirection: edgeDirected
+      };
+    });
+    const edgeKeys = /* @__PURE__ */ new Set();
+    for (const edge of edges5) {
+      const key4 = edge.directed ? `${edge.from}|${edge.to}` : [edge.from, edge.to].sort().join("|");
+      if (edgeKeys.has(key4))
+        throw new Error("steptrace: dijkstra parallel edges are not supported.");
+      edgeKeys.add(key4);
+    }
+    return {
+      profile,
+      nodes: nodes5,
+      edges: edges5,
+      decor,
+      start,
+      target,
+      endpointSettings: {
+        startLabel: "From",
+        targetLabel: "To",
+        options: nodes5.map(({ id, label }) => ({ value: id, label })),
+        start,
+        target
+      }
+    };
+  }
+  function adjacency2(config) {
+    const result = new Map(
+      config.nodes.map(({ id }) => [id, []])
+    );
+    for (const edge of config.edges) {
+      result.get(edge.from).push({ to: edge.to, weight: edge.weight });
+      if (!edge.directed) result.get(edge.to).push({ to: edge.from, weight: edge.weight });
+    }
+    for (const neighbours of result.values())
+      neighbours.sort((left, right) => left.to.localeCompare(right.to));
+    return result;
+  }
+  function run5(config, recorder) {
+    const neighbours = adjacency2(config);
+    const distances = Object.fromEntries(
+      config.nodes.map(({ id }) => [id, id === config.start ? 0 : Infinity])
+    );
+    const predecessor = {};
+    const settled = /* @__PURE__ */ new Set();
+    recorder.record(
+      "init",
+      null,
+      null,
+      distances,
+      settled,
+      [],
+      false,
+      `Set dist[${config.start}] = 0; all other distances start at ∞.`
+    );
+    while (settled.size < config.nodes.length) {
+      const current = config.nodes.map(({ id }) => id).filter((id) => !settled.has(id) && Number.isFinite(distances[id])).sort((left, right) => distances[left] - distances[right] || left.localeCompare(right))[0];
+      if (!current) break;
+      settled.add(current);
+      recorder.record(
+        "expand",
+        current,
+        null,
+        distances,
+        settled,
+        [],
+        false,
+        `Settle ${current} at distance ${distances[current]}; its shortest distance is final.`
+      );
+      for (const edge of neighbours.get(current)) {
+        if (settled.has(edge.to)) continue;
+        const candidate = distances[current] + edge.weight;
+        const before = distances[edge.to];
+        const changed = candidate < before;
+        if (changed) {
+          distances[edge.to] = candidate;
+          predecessor[edge.to] = current;
+        }
+        recorder.record(
+          "relax",
+          current,
+          [current, edge.to],
+          distances,
+          settled,
+          [],
+          changed,
+          changed ? `Relax ${current} → ${edge.to}: ${candidate} improves ${Number.isFinite(before) ? before : "∞"}.` : `Keep dist[${edge.to}] = ${before}; ${candidate} is not shorter.`
+        );
+      }
+    }
+    if (!Number.isFinite(distances[config.target])) {
+      recorder.record(
+        "done",
+        null,
+        null,
+        distances,
+        settled,
+        [],
+        false,
+        `${config.target} is unreachable from ${config.start}.`
+      );
+      return;
+    }
+    const path = [config.target];
+    while (path[0] !== config.start) path.unshift(predecessor[path[0]]);
+    const selectedEdges = path.slice(1).map((to, index) => `${path[index]}|${to}`);
+    recorder.record(
+      "done",
+      null,
+      null,
+      distances,
+      settled,
+      selectedEdges,
+      false,
+      `Shortest path ${path.join(" → ")} — total cost ${distances[config.target]}.`
+    );
+  }
   var dijkstra = {
     id: "dijkstra",
     kind: "graph",
-    meta: { label: "Dijkstra", frontierLabel: "Frontier (settle nearest first)" },
-    run: (input, ops, graph) => {
-      const adj = {};
-      for (const nd of graph.nodes) adj[nd.id] = [];
-      for (const e of graph.edges) {
-        const w = e.weight == null ? 1 : e.weight;
-        adj[e.from].push({ to: e.to, w });
-        if (!graph.directed) adj[e.to].push({ to: e.from, w });
-      }
-      for (const id in adj) adj[id].sort((a, b) => a.to < b.to ? -1 : 1);
-      const start = input.start;
-      const target = input.target != null ? String(input.target) : null;
-      if (target) ops.target(target);
-      ops.init(
-        `Dijkstra from ${start} — repeatedly settle the nearest unsettled node, then relax its edges to shorten neighbours' distances.`
-      );
-      const dist = { [start]: 0 };
-      const pred = {};
-      const settled = /* @__PURE__ */ new Set();
-      const inQ = /* @__PURE__ */ new Set([start]);
-      ops.enqueue(start, 0, `Start ${start} at distance 0.`);
-      while (inQ.size) {
-        let u = null;
-        for (const id of inQ) if (u === null || dist[id] < dist[u]) u = id;
-        inQ.delete(u);
-        settled.add(u);
-        ops.visit(u, `Settle ${u} (distance ${dist[u]}) — its shortest distance is now final.`);
-        for (const { to: v, w } of adj[u]) {
-          if (settled.has(v)) continue;
-          ops.edge(u, v, `Explore edge ${u} → ${v} (weight ${w}).`);
-          const nd = dist[u] + w;
-          if (dist[v] === void 0 || nd < dist[v]) {
-            const had = dist[v] !== void 0;
-            dist[v] = nd;
-            pred[v] = u;
-            inQ.add(v);
-            ops.relax(
-              v,
-              nd,
-              had ? `Relax ${v}: a shorter path via ${u} improves its distance to ${nd}.` : `Relax ${v}: reach it via ${u} at distance ${nd}.`
-            );
-          }
-        }
-      }
-      if (target !== null) {
-        if (dist[target] === void 0) {
-          ops.done(`${target} is unreachable from ${start}.`);
-        } else {
-          const path = [target];
-          for (let cur = target; pred[cur] !== void 0; cur = pred[cur]) path.push(pred[cur]);
-          path.reverse();
-          for (let i = 0; i + 1 < path.length; i++)
-            ops.selectEdge(
-              path[i],
-              path[i + 1],
-              `Shortest path: keep edge ${path[i]}–${path[i + 1]} highlighted.`
-            );
-          ops.done(`Shortest path ${path.join(" → ")} — total cost ${dist[target]}.`);
-        }
-      } else {
-        const reached = graph.nodes.map((n) => n.id).filter((id) => id !== start && pred[id] !== void 0);
-        reached.sort();
-        for (const v of reached)
-          ops.selectEdge(pred[v], v, `Shortest-path tree: ${pred[v]}–${v} (distance ${dist[v]}).`);
-        ops.done(`Dijkstra complete — shortest-path tree from ${start} highlighted.`);
-      }
-    }
+    family: family6,
+    meta: { label: "Dijkstra" },
+    parse: parse5,
+    run: run5
   };
 
   // custom/steptrace/src/algorithms/divide-and-conquer.ts
@@ -14298,10 +14482,10 @@
   var optimalWarehousePath = gridPathProblem.optimalPath.map((cell) => cell.slice());
   var coinAmounts = coinChangeProblem.amounts;
   var availableCoins = coinChangeProblem.coins;
-  function storyAlgorithm(id, label, parse7, run6) {
-    return { id, kind: "dp", family: dpStoryFamily, meta: { label }, parse: parse7, run: run6 };
+  function storyAlgorithm(id, label, parse8, run7) {
+    return { id, kind: "dp", family: dpStoryFamily, meta: { label }, parse: parse8, run: run7 };
   }
-  function treeAlgorithm(id, label, profile, run6) {
+  function treeAlgorithm(id, label, profile, run7) {
     return {
       id,
       kind: "rectree",
@@ -14311,17 +14495,17 @@
         if (config.variant !== void 0) throw new Error(`steptrace: ${id} does not take a variant.`);
         return { profile };
       },
-      run: run6
+      run: run7
     };
   }
-  function tableAlgorithm(id, label, profile, run6) {
+  function tableAlgorithm(id, label, profile, run7) {
     return {
       id,
       kind: "dp",
       family: dpProblemTableFamily,
       meta: { label },
       parse: dpTableConfig(profile),
-      run: run6
+      run: run7
     };
   }
   var coinChangeGreedy = storyAlgorithm(
@@ -15571,83 +15755,6 @@
       return makeDPView(frames, matrixGridViewSemantics);
     }
   };
-  var abstractDynamicProgrammingViewDescriptor = {
-    ariaLabel: "Dynamic-programming dependency graph",
-    ...executionTreeCardMetrics,
-    stateLabels: {
-      call: "pending",
-      base: "base",
-      store: "stored"
-    },
-    legend: [
-      { state: "call", label: "waiting for dependencies" },
-      { state: "base", label: "base state stored" },
-      { state: "store", label: "dependent state stored" }
-    ],
-    frameModel(frame) {
-      const currentColumn = frame.cur?.[1] ?? null;
-      const active = currentColumn == null ? null : frame.colLabels[currentColumn];
-      const results = Object.fromEntries(
-        frame.colLabels.flatMap((label, column) => {
-          const value = frame.grid[0][column];
-          return value == null ? [] : [[label, value]];
-        })
-      );
-      const states = Object.fromEntries(
-        frame.nodes.map((node2) => {
-          const column = frame.colLabels.indexOf(node2.id);
-          const solved = column >= 0 && frame.grid[0][column] != null;
-          const isBase = !frame.edges.some((edge) => edge.from === node2.id);
-          return [node2.id, solved ? isBase ? "base" : "store" : "call"];
-        })
-      );
-      const dependencies = frame.deps.map(([, column]) => frame.colLabels[column]);
-      return {
-        phase: frame.type === "done" ? "Target ready" : active ? `Solve ${active}` : "Dependency graph",
-        action: frame.message,
-        active,
-        path: active ? [active, ...dependencies] : [],
-        visible: frame.nodes.map((node2) => node2.id),
-        states,
-        results,
-        collapsed: []
-      };
-    },
-    nodeLines(node2) {
-      return [node2.label, node2.detail];
-    },
-    watchRows(frame) {
-      const currentColumn = frame.cur?.[1] ?? null;
-      const dependencies = frame.deps.map(([, column]) => frame.colLabels[column]);
-      const stored = frame.grid[0].filter((value) => value != null).length;
-      return [
-        {
-          k: "state",
-          v: currentColumn == null ? "—" : frame.colLabels[currentColumn],
-          sw: "var(--_blue)",
-          hint: "The state currently becoming available."
-        },
-        {
-          k: "depends on",
-          v: dependencies.length ? dependencies.join(" + ") : "base state",
-          sw: "var(--_amber)",
-          hint: "States that must already be stored before this state can be solved."
-        },
-        {
-          k: "stored result",
-          v: currentColumn == null ? "—" : frame.grid[0][currentColumn] || "—",
-          sw: "var(--_green)",
-          hint: "The result written once and reused by every outgoing dependency."
-        },
-        {
-          k: "progress",
-          v: `${stored} / ${frame.colLabels.length} states ready`,
-          sw: "var(--_neutral)",
-          hint: "How many states have been solved in dependency order."
-        }
-      ];
-    }
-  };
 
   // custom/steptrace/src/algorithms/floyd-warshall.ts
   var displayMatrix = (matrix) => matrix.map((row) => row.map((value) => Number.isFinite(value) ? value : null));
@@ -16686,7 +16793,7 @@
   };
 
   // custom/steptrace/src/algorithms/greedy-best-first-search.ts
-  function parse5(config) {
+  function parse6(config) {
     return {
       ...parseGraphStateConfig({ ...config, variant: "coordinate-grid" }),
       policy: "greedy"
@@ -16769,7 +16876,7 @@
     kind: "graph",
     family: graphStateFamily,
     meta: { label: "Greedy Best-First Search" },
-    parse: parse5,
+    parse: parse6,
     run: runGreedyBestFirst
   };
 
@@ -17153,7 +17260,7 @@
     run: (input, ops) => {
       const n = ops.value.length;
       ops.init(
-        `Heap sort — build a max-heap (each parent ≥ its children), then repeatedly swap the root to the end and sift the new root down.`
+        `Heap sort — build a max-heap (parents ≥ children); move the root right and sift down.`
       );
       function siftDown(lo, hi) {
         let root = lo;
@@ -17210,7 +17317,7 @@
     const edge = edges2.find((candidate) => candidate.from === left && candidate.to === right || candidate.from === right && candidate.to === left);
     return edge ? `${edge.from}|${edge.to}` : "";
   };
-  var Recorder6 = class {
+  var Recorder7 = class {
     constructor() {
       __publicField(this, "frames", []);
     }
@@ -17255,15 +17362,15 @@
       });
     }
   };
-  var family6 = {
+  var family7 = {
     id: "graph-state",
-    createRecorder: () => new Recorder6(),
+    createRecorder: () => new Recorder7(),
     createView: makeGraphStateView
   };
   var hamiltonianCycle = {
     id: "hamiltonian-cycle",
     kind: "graph",
-    family: family6,
+    family: family7,
     meta: { label: "Hamiltonian Cycle" },
     parse: () => ({ nodes: nodes2, edges: edges2 }),
     run(_config, recorder) {
@@ -17327,9 +17434,7 @@
     meta: { label: "Insertion sort" },
     run: (input, ops) => {
       const n = ops.value.length;
-      ops.init(
-        `Insertion sort — grow a sorted prefix on the left; take each next value and slide it left past larger values into place.`
-      );
+      ops.init(`Insertion sort — grow a sorted prefix by sliding each value left past larger values.`);
       ops.markSorted([0], [0], `The first element alone is a sorted prefix.`);
       for (let i = 1; i < n; i++) {
         const key4 = ops.value[i];
@@ -17618,7 +17723,7 @@
       const n = text.length;
       const m = pattern.length;
       ops.init(
-        `KMP search for "${pattern}" — on a mismatch, the failure function slides the pattern forward without re-checking characters already known to match.`
+        `KMP for "${pattern}" — mismatch uses the failure function to shift without rechecking matches.`
       );
       if (!m || m > n) {
         ops.done("Nothing to search.");
@@ -17687,7 +17792,7 @@
     { from: "C", to: "D", weight: 4, label: "4" }
   ];
   var key2 = (edge) => `${edge.from}|${edge.to}`;
-  var Recorder7 = class {
+  var Recorder8 = class {
     constructor() {
       __publicField(this, "frames", []);
     }
@@ -17701,7 +17806,7 @@
       accepted.forEach((edge) => {
         edgeState[key2(edge)] = "accepted";
       });
-      if (current) edgeState[key2(current)] = "active";
+      if (current && !accepted.includes(current)) edgeState[key2(current)] = "active";
       if (rejected) edgeState[key2(rejected)] = "rejected";
       this.frames.push({
         type: "kruskal",
@@ -17720,22 +17825,22 @@
         detail: {
           kind: "mst-scan",
           pending,
-          accepted,
+          accepted: [...accepted],
           totalWeight: accepted.reduce((sum, edge) => sum + edge.weight, 0),
           components
         }
       });
     }
   };
-  var family7 = {
+  var family8 = {
     id: "graph-state",
-    createRecorder: () => new Recorder7(),
+    createRecorder: () => new Recorder8(),
     createView: makeGraphStateView
   };
   var kruskal = {
     id: "kruskal",
     kind: "graph",
-    family: family7,
+    family: family8,
     meta: { label: "Kruskal's MST" },
     parse: () => ({ nodes: nodes3, edges: edges3 }),
     run(_config, recorder) {
@@ -17770,7 +17875,7 @@
       ops.board(
         rowLabels,
         colLabels,
-        `Longest common subsequence of "${A}" and "${B}". Cell dp[i][j] holds the LCS length of the first i letters of "${A}" and the first j of "${B}".`
+        `LCS of "${A}" and "${B}": dp[i][j] is the best length for their first i and j letters.`
       );
       const dp = Array.from({ length: m + 1 }, () => Array(n + 1).fill(0));
       for (let c2 = 0; c2 <= n; c2++) ops.set(0, c2, 0, [], `An empty first string has LCS 0.`);
@@ -17797,7 +17902,7 @@
                 [r2 - 1, c2],
                 [r2, c2 - 1]
               ],
-              `'${A[r2 - 1]}' ≠ '${B[c2 - 1]}' → this letter can't extend the match, so the optimum here is inherited from an optimal sub-answer: the better of top (${dp[r2 - 1][c2]}) and left (${dp[r2][c2 - 1]}) = ${dp[r2][c2]} (from the ${better}).`
+              `'${A[r2 - 1]}' ≠ '${B[c2 - 1]}' → inherit max(top ${dp[r2 - 1][c2]}, left ${dp[r2][c2 - 1]}) = ${dp[r2][c2]} from ${better}.`
             );
           }
         }
@@ -17810,20 +17915,20 @@
           path.unshift([r, c]);
           ops.markPath(
             path,
-            `dp[${r}][${c}]: '${A[r - 1]}' = '${B[c - 1]}' — this cell was built from dp[${r - 1}][${c - 1}] + 1, so '${A[r - 1]}' joins the LCS. Step diagonally to that sub-answer.`
+            `dp[${r}][${c}]: '${A[r - 1]}' = '${B[c - 1]}' → dp[${r - 1}][${c - 1}] + 1; add '${A[r - 1]}' and move diagonally.`
           );
           r--;
           c--;
         } else if (dp[r - 1][c] >= dp[r][c - 1]) {
           ops.markPath(
             path,
-            `dp[${r}][${c}]: '${A[r - 1]}' ≠ '${B[c - 1]}' — its optimum was inherited from the top sub-answer dp[${r - 1}][${c}]. Follow it upward; no letter added.`
+            `dp[${r}][${c}]: '${A[r - 1]}' ≠ '${B[c - 1]}' → inherit top dp[${r - 1}][${c}]; move up, add no letter.`
           );
           r--;
         } else {
           ops.markPath(
             path,
-            `dp[${r}][${c}]: '${A[r - 1]}' ≠ '${B[c - 1]}' — its optimum was inherited from the left sub-answer dp[${r}][${c - 1}]. Follow it leftward; no letter added.`
+            `dp[${r}][${c}]: '${A[r - 1]}' ≠ '${B[c - 1]}' → inherit left dp[${r}][${c - 1}]; move left, add no letter.`
           );
           c--;
         }
@@ -17899,14 +18004,11 @@
   };
 
   // custom/steptrace/src/algorithms/leftist-heap.ts
-  function parseLeftistHeapConfig(_config) {
-    return {};
-  }
   var leftistHeap = {
     id: "leftist-heap",
     family: "heap-selection",
     meta: { label: "Leftist heap" },
-    parse: parseLeftistHeapConfig,
+    parse: () => ({}),
     mount: mountLeftistHeap
   };
 
@@ -17917,9 +18019,7 @@
     meta: { label: "Merge sort" },
     run: (input, ops) => {
       const n = ops.value.length;
-      ops.init(
-        "Merge sort — start with runs of length 1, then repeatedly merge adjacent runs into larger sorted runs (watch the sorted runs double)."
-      );
+      ops.init("Merge sort — merge adjacent sorted runs; their length doubles each pass from 1.");
       for (let width = 1; width < n; width *= 2) {
         for (let lo = 0; lo < n; lo += 2 * width) {
           const mid = Math.min(lo + width, n);
@@ -18118,7 +18218,7 @@
       rootMeta.to = values.length;
       rootMeta.values = values.slice();
       nodes5[0].label = `[0…${values.length - 1}]`;
-      const message = `Merge sort ${values.join(", ")} by splitting into halves and merging sorted halves on return.`;
+      const message = `Merge sort ${values.join(", ")}: split halves, then merge them sorted on return.`;
       ops.tree(nodes5, edges5, rootId, message);
       revealSplits(rootId, metas, ops);
       mergeBottomUp(metas, ops);
@@ -18207,7 +18307,7 @@
     { from: "b", to: "t", weight: 1, directed: true, showDirection: true }
   ];
   var key3 = (from, to) => `${from}|${to}`;
-  var Recorder8 = class {
+  var Recorder9 = class {
     constructor() {
       __publicField(this, "frames", []);
     }
@@ -18251,15 +18351,15 @@
       });
     }
   };
-  var family8 = {
+  var family9 = {
     id: "graph-state",
-    createRecorder: () => new Recorder8(),
+    createRecorder: () => new Recorder9(),
     createView: makeGraphStateView
   };
   var maximumFlow = {
     id: "maximum-flow",
     kind: "graph",
-    family: family8,
+    family: family9,
     meta: { label: "Maximum Flow" },
     parse: () => ({ nodes: nodes4, edges: edges4 }),
     run(_config, recorder) {
@@ -18726,7 +18826,7 @@
       const n = Math.min(Math.max(input.n || 4, 4), 6);
       ops.board(
         n,
-        `Place ${n} queens on a ${n}×${n} board so none attack another. Fill one queen per row; retreat whenever a row has no safe square.`
+        `${n}-Queens on ${n}×${n}: place one per row; backtrack when no safe square remains.`
       );
       const conflict = (row, col) => {
         const q = ops.queens;
@@ -18780,9 +18880,7 @@
         if (!graph.directed) adj[e.to].push({ to: e.from, w });
       }
       const start = input.start;
-      ops.init(
-        `Prim's algorithm — grow a minimum spanning tree from ${start}, each step adding the cheapest edge that reaches a node not yet in the tree.`
-      );
+      ops.init(`Prim from ${start} — grow the MST with the cheapest edge reaching a new node.`);
       const pairKey2 = (a, b) => a < b ? a + "|" + b : b + "|" + a;
       const inTree = /* @__PURE__ */ new Set([start]);
       const treeEdges = /* @__PURE__ */ new Set();
@@ -19059,9 +19157,7 @@
     meta: { label: "Quick sort" },
     run: (input, ops) => {
       const n = ops.value.length;
-      ops.init(
-        `Quick sort — pick a pivot, partition values so smaller ones go left and larger ones go right, then recurse on each side.`
-      );
+      ops.init(`Quick sort — partition around a pivot, then recurse on the smaller and larger sides.`);
       function partition(lo, hi) {
         const pivot = ops.value[hi];
         ops.range(lo, hi);
@@ -19240,7 +19336,7 @@
       }
       const ph = hash(pattern);
       ops.init(
-        `Rabin-Karp search for "${pattern}" — slide a window, compare its rolling hash to the pattern hash (${ph}), and only verify character-by-character when the hashes collide.`
+        `Rabin-Karp for "${pattern}" — slide rolling hashes; verify text only on hash collision (${ph}).`
       );
       let highPow = 1;
       for (let k = 0; k < m - 1; k++) highPow = highPow * B % MOD;
@@ -19414,45 +19510,43 @@
     id: "sliding-window",
     kind: "pointers",
     meta: { label: "Sliding window" },
-    run: (input, ops) => {
+    run: (_input, ops) => {
       const a = ops.value;
-      const target = input.target;
-      ops.init(
-        `Sliding window — find the shortest contiguous subarray with sum ≥ ${target}. Expand the window right to grow the sum; shrink from the left while it stays ≥ ${target}.`
-      );
+      ops.init("Sliding window finds the longest substring without repeating characters.");
       let lo = 0;
-      let sum = 0;
-      let best = Infinity;
+      let best = 0;
       let bestRange = null;
+      const lastSeen = /* @__PURE__ */ new Map();
       for (let hi = 0; hi < a.length; hi++) {
-        sum += a[hi];
-        ops.step(
-          { pointers: { lo, hi }, window: [lo, hi] },
-          `Expand right to index ${hi}: window sum = ${sum}.`
-        );
-        while (sum >= target) {
-          if (hi - lo + 1 < best) {
-            best = hi - lo + 1;
-            bestRange = [lo, hi];
-          }
+        const character = a[hi];
+        const duplicate = lastSeen.get(character);
+        if (duplicate != null && duplicate >= lo) {
           ops.step(
-            { pointers: { lo, hi }, window: [lo, hi] },
-            `Sum ${sum} ≥ ${target} (length ${hi - lo + 1}) — record it, then shrink from the left.`
+            { pointers: { lo, hi }, window: [lo, hi], bestRange, duplicateIndex: hi },
+            `Duplicate "${character}" enters at index ${hi}; move left past its previous index ${duplicate}.`
           );
-          sum -= a[lo];
-          lo++;
+          lo = duplicate + 1;
         }
+        lastSeen.set(character, hi);
+        if (hi - lo + 1 > best) {
+          best = hi - lo + 1;
+          bestRange = [lo, hi];
+        }
+        ops.step(
+          { pointers: { lo, hi }, window: [lo, hi], bestRange, enteringIndex: hi },
+          `Accept "${character}" at index ${hi}: window "${a.slice(lo, hi + 1).join("")}" has length ${hi - lo + 1}.`
+        );
       }
       if (bestRange) {
         const marks = [];
         for (let k = bestRange[0]; k <= bestRange[1]; k++) marks.push(k);
         ops.step(
-          { pointers: {}, window: bestRange, mark: marks },
-          `Shortest window: indices ${bestRange[0]}..${bestRange[1]} (length ${best}).`
+          { pointers: {}, window: bestRange, bestRange, mark: marks },
+          `Best substring: "${a.slice(bestRange[0], bestRange[1] + 1).join("")}" (length ${best}).`
         );
-        ops.done(`Answer: the shortest qualifying length is ${best}.`);
+        ops.done(`Answer: the longest unique substring has length ${best}.`);
       } else {
-        ops.done(`No subarray reaches ${target}.`);
+        ops.done("The empty string has no non-empty substring.");
       }
     }
   };
@@ -19504,14 +19598,11 @@
   };
 
   // custom/steptrace/src/algorithms/skew-heap.ts
-  function parseSkewHeapConfig(_config) {
-    return {};
-  }
   var skewHeap = {
     id: "skew-heap",
     family: "heap-selection",
     meta: { label: "Skew heap" },
-    parse: parseSkewHeapConfig,
+    parse: () => ({}),
     mount: mountSkewHeap
   };
 
@@ -19531,9 +19622,7 @@
         adj[e.from].push(e.to);
         indeg[e.to] = (indeg[e.to] || 0) + 1;
       }
-      ops.init(
-        `Topological sort (Kahn's algorithm) — repeatedly take a node with no remaining prerequisites (in-degree 0) and append it to the order; removing it may make others ready.`
-      );
+      ops.init(`Kahn topological sort — append an in-degree-0 node, remove its edges, and repeat.`);
       const ready = [];
       for (const nd of graph.nodes) {
         if (indeg[nd.id] === 0) {
@@ -19670,7 +19759,7 @@
   };
 
   // custom/steptrace/src/algorithms/strongly-connected-components.ts
-  var Recorder9 = class {
+  var Recorder10 = class {
     constructor(config) {
       __publicField(this, "config", config);
       __publicField(this, "frames", []);
@@ -19690,14 +19779,14 @@
         currentEdge: edge,
         selectedEdges: [],
         nodeState: Object.fromEntries(this.config.nodes.map(({ id }) => [id, id === current ? "active" : emitted.has(id) ? "accepted" : stack2.includes(id) ? "frontier" : id in discovery ? "closed" : "neutral"])),
-        edgeState: Object.fromEntries(this.config.edges.map(({ from, to }) => [`${from}|${to}`, edge?.[0] === from && edge[1] === to ? "active" : emitted.has(from) && emitted.has(to) ? "accepted" : "neutral"])),
+        edgeState: Object.fromEntries(this.config.edges.map(({ from, to }) => [`${from}|${to}`, edge?.[0] === from && edge[1] === to ? "active" : components.some((component) => component.includes(from) && component.includes(to)) ? "accepted" : "neutral"])),
         message,
         detail
       });
     }
   };
-  var family9 = { id: "graph-state", createRecorder: (config) => new Recorder9(config), createView: makeGraphStateView };
-  function parse6() {
+  var family10 = { id: "graph-state", createRecorder: (config) => new Recorder10(config), createView: makeGraphStateView };
+  function parse7() {
     return {
       nodes: [
         { id: "A", label: "A", x: 85, y: 120 },
@@ -19716,7 +19805,7 @@
       ]
     };
   }
-  function run5(_, recorder) {
+  function run6(_, recorder) {
     const disc = {};
     const low = {};
     const stack2 = [];
@@ -19749,10 +19838,10 @@
   var stronglyConnectedComponents = {
     id: "strongly-connected-components",
     kind: "graph",
-    family: family9,
+    family: family10,
     meta: { label: "Strongly Connected Components" },
-    parse: parse6,
-    run: run5
+    parse: parse7,
+    run: run6
   };
 
   // custom/steptrace/src/algorithms/trie.ts
@@ -19803,24 +19892,25 @@
       const a = ops.value;
       const target = input.target;
       ops.init(
-        `Two pointers on a sorted array — find a pair summing to ${target}. Move the left pointer right to raise the sum, the right pointer left to lower it.`
+        `Two pointers on sorted data seek ${target}: left → raises the sum; right ← lowers it.`
       );
       let l = 0;
       let r = a.length - 1;
       while (l < r) {
         const sum = a[l] + a[r];
-        ops.step(
-          { pointers: { L: l, R: r }, window: [l, r] },
-          `a[${l}] + a[${r}] = ${a[l]} + ${a[r]} = ${sum}.`
-        );
         if (sum === target) {
           ops.step(
             { pointers: { L: l, R: r }, window: [l, r], mark: [l, r] },
-            `${a[l]} + ${a[r]} = ${target} — found the pair.`
+            `arr[${l}] + arr[${r}] = ${a[l]} + ${a[r]} = ${target} ✓`
           );
           ops.done(`Found a pair at indices ${l} and ${r}.`);
           return;
         }
+        const move = sum < target ? "move L →" : "← move R";
+        ops.step(
+          { pointers: { L: l, R: r }, window: [l, r] },
+          `arr[${l}] + arr[${r}] = ${a[l]} + ${a[r]} = ${sum} ${sum < target ? "<" : ">"} ${target} → ${move}`
+        );
         if (sum < target) l++;
         else r--;
       }
@@ -20343,38 +20433,38 @@
     init(message) {
       this.pushFrame("init", message);
     }
-    detect(run6, direction, message) {
-      this.current = { ...run6 };
+    detect(run7, direction, message) {
+      this.current = { ...run7 };
       this.direction = direction;
       this.insertion = null;
       this.mergeIndex = null;
       this.invariant = null;
       this.pushFrame("detect", message);
     }
-    reverse(run6, message) {
-      this.array.splice(run6.start, run6.length, ...this.array.slice(run6.start, run6.start + run6.length).reverse());
-      this.current = { ...run6 };
+    reverse(run7, message) {
+      this.array.splice(run7.start, run7.length, ...this.array.slice(run7.start, run7.start + run7.length).reverse());
+      this.current = { ...run7 };
       this.pushFrame("reverse", message);
     }
-    extend(run6, message) {
-      this.current = { ...run6 };
+    extend(run7, message) {
+      this.current = { ...run7 };
       this.insertion = null;
       this.pushFrame("extend", message);
     }
-    insert(run6, source, target, sortedEnd, message) {
+    insert(run7, source, target, sortedEnd, message) {
       const value = this.array[source];
       for (let index = source; index > target; index--) this.array[index] = this.array[index - 1];
       this.array[target] = value;
-      this.current = { ...run6 };
+      this.current = { ...run7 };
       this.insertion = { source, target, sortedEnd };
       this.pushFrame("insert", message);
     }
-    push(run6, message) {
-      this.stack.push({ ...run6 });
-      this.current = { ...run6 };
+    push(run7, message) {
+      this.stack.push({ ...run7 });
+      this.current = { ...run7 };
       this.direction = null;
       this.insertion = null;
-      this.processed = run6.start + run6.length;
+      this.processed = run7.start + run7.length;
       this.mergeIndex = null;
       this.invariant = null;
       this.pushFrame("push", message);
@@ -20432,7 +20522,7 @@
           type,
           profile: this.config.profile,
           array: this.array.slice(),
-          stack: this.stack.map((run6) => Object.freeze({ ...run6 })),
+          stack: this.stack.map((run7) => Object.freeze({ ...run7 })),
           current: this.current ? Object.freeze({ ...this.current }) : null,
           direction: this.direction,
           processed: this.processed,
@@ -20446,14 +20536,14 @@
       );
     }
   };
-  function runLabel(run6) {
-    return `[${run6.start}…${run6.start + run6.length - 1}] · ${run6.length}`;
+  function runLabel(run7) {
+    return `[${run7.start}…${run7.start + run7.length - 1}] · ${run7.length}`;
   }
   function stackRunFor(frame, index) {
     return frame.stack[index] || null;
   }
   function runAt(frame, index) {
-    return frame.stack.findIndex((run6) => run6.start <= index && index < run6.start + run6.length);
+    return frame.stack.findIndex((run7) => run7.start <= index && index < run7.start + run7.length);
   }
   function runStackWatch(frame) {
     const top = frame.stack.at(-1);
@@ -20472,7 +20562,7 @@
       },
       {
         k: "stack",
-        v: frame.stack.map((run6) => run6.length).join(" · ") || "empty",
+        v: frame.stack.map((run7) => run7.length).join(" · ") || "empty",
         sw: "var(--_amber)",
         hint: "Saved contiguous run lengths, from stack bottom to top."
       },
@@ -20537,20 +20627,20 @@
       }
       for (let cardIndex = 0; cardIndex < stackCards.length; cardIndex++) {
         const card = stackCards[cardIndex];
-        const run6 = stackRunFor(frame, frame.stack.length - cardIndex - 1);
-        if (!run6) {
+        const run7 = stackRunFor(frame, frame.stack.length - cardIndex - 1);
+        if (!run7) {
           card.card.hidden = true;
           continue;
         }
         const stackIndex = frame.stack.length - cardIndex - 1;
         card.card.hidden = false;
-        card.title.textContent = `R${stackIndex + 1} ${runLabel(run6)}`;
-        card.values.textContent = `[${frame.array.slice(run6.start, run6.start + run6.length).join(", ")}]`;
-        card.card.dataset.active = frame.current?.start === run6.start ? "1" : "0";
+        card.title.textContent = `R${stackIndex + 1} ${runLabel(run7)}`;
+        card.values.textContent = `[${frame.array.slice(run7.start, run7.start + run7.length).join(", ")}]`;
+        card.card.dataset.active = frame.current?.start === run7.start ? "1" : "0";
         card.card.dataset.merged = frame.mergeIndex != null && (stackIndex === frame.mergeIndex || stackIndex === frame.mergeIndex + 1) ? "1" : "0";
         card.card.dataset.run = String(stackIndex % 4);
         const previous = previousStack[stackIndex];
-        card.card.dataset.motion = frame.type === "push" && stackIndex === frame.stack.length - 1 ? "push" : frame.type === "check" ? "check" : frame.type === "merge" || frame.type === "force-merge" ? "merge" : previous?.start !== run6.start || previous?.length !== run6.length ? "reflow" : "";
+        card.card.dataset.motion = frame.type === "push" && stackIndex === frame.stack.length - 1 ? "push" : frame.type === "check" ? "check" : frame.type === "merge" || frame.type === "force-merge" ? "merge" : previous?.start !== run7.start || previous?.length !== run7.length ? "reflow" : "";
       }
       const check = frame.invariant;
       invariant.textContent = check ? `X=${check.x ?? "—"}, Y=${check.y ?? "—"}, Z=${check.z ?? "—"}${check.holds == null ? "" : check.holds ? " · holds" : " · merge"}` : frame.type === "force-merge" ? "Final collapse: merge adjacent runs until one remains." : `minrun ${frame.minrun} · ${frame.merges} merge${frame.merges === 1 ? "" : "s"}`;
@@ -20957,45 +21047,6 @@
     }
   };
 
-  // custom/steptrace/src/tabs.ts
-  function isTabsConfig(config) {
-    return typeof config === "object" && config != null && "tabs" in config;
-  }
-  function normalizeTabsConfig(config) {
-    if (!Array.isArray(config.tabs) || config.tabs.length === 0) {
-      throw new Error("steptrace: tabs requires at least one tab.");
-    }
-    const names = /* @__PURE__ */ new Set();
-    const tabs = config.tabs.map((rawTab, index) => normalizeTab(rawTab, index, names));
-    const selected = config.selected ?? 0;
-    if (!Number.isInteger(selected) || selected < 0 || selected >= tabs.length) {
-      throw new Error(`steptrace: tabs "selected" must be an index from 0 to ${tabs.length - 1}.`);
-    }
-    return { selected, tabs };
-  }
-  function normalizeTab(rawTab, index, names) {
-    if (typeof rawTab !== "object" || rawTab == null || Array.isArray(rawTab)) {
-      throw new Error(`steptrace: tabs[${index}] must be an object.`);
-    }
-    const name = typeof rawTab.name === "string" ? rawTab.name.trim() : "";
-    if (!name) throw new Error(`steptrace: tabs[${index}] requires a non-empty "name".`);
-    const nameKey = name.toLocaleLowerCase();
-    if (names.has(nameKey)) throw new Error(`steptrace: duplicate tab name "${name}".`);
-    names.add(nameKey);
-    if (rawTab.description != null && typeof rawTab.description !== "string") {
-      throw new Error(`steptrace: tabs[${index}] "description" must be a string.`);
-    }
-    if (typeof rawTab.algorithm !== "string" || !rawTab.algorithm.trim()) {
-      throw new Error(`steptrace: tabs[${index}] requires a non-empty "algorithm".`);
-    }
-    const { name: _name, description: _description, ...algorithmConfig } = rawTab;
-    return {
-      name,
-      description: rawTab.description?.trim() || "",
-      config: algorithmConfig
-    };
-  }
-
   // custom/steptrace/src/watch-hints.ts
   var WATCH_HINTS = Object.freeze({
     i: "First active array index.",
@@ -21113,109 +21164,13 @@
 
   // custom/steptrace/src/mount.ts
   var LOG_ROWS = 10;
+  var COMPACT_INLINE_SIZE = 704;
   var fadeFor = (age) => Math.max(0.1, 0.5 * Math.pow(0.62, age - 1));
   var mountSerial = 0;
   function createMount(registry2, structures = []) {
     const { kindOf, listAlgorithms, buildFrames } = registry2;
     const structureRegistry = new Map(structures.map((structure) => [structure.id, structure]));
-    function mountTabs(root, config, host = {}) {
-      let normalized;
-      try {
-        normalized = normalizeTabsConfig(config);
-      } catch (error) {
-        root.textContent = error instanceof Error ? error.message : String(error);
-        return { destroy: () => root.replaceChildren() };
-      }
-      const { tabs } = normalized;
-      root.classList.add("steptrace", "steptrace--tabs");
-      root.setAttribute("role", "group");
-      root.setAttribute("aria-label", "Tabbed algorithm visualizer");
-      const tabsShell = el("div", "steptrace__tabs-shell");
-      const tablist = el("div", "steptrace__tabs");
-      tablist.setAttribute("role", "tablist");
-      tablist.setAttribute("aria-label", "Visualization variants");
-      const tabDesc = el("div", "steptrace__tabs-desc");
-      tabDesc.setAttribute("aria-live", "polite");
-      const panels = el("div", "steptrace__tabpanels");
-      const buttons = [];
-      const panelShells = [];
-      const panelMounts = [];
-      const handles = tabs.map(() => null);
-      let activeIndex = normalized.selected;
-      const showTab = (index, focus = false) => {
-        const next = Math.min(Math.max(index, 0), tabs.length - 1);
-        if (next === activeIndex && handles[next]) {
-          if (focus) buttons[next]?.focus();
-          return;
-        }
-        handles[activeIndex]?.pause?.();
-        activeIndex = next;
-        const tab = tabs[next];
-        tabDesc.textContent = tab.description || "";
-        buttons.forEach((button2, i) => {
-          const selected = i === next;
-          button2.setAttribute("aria-selected", String(selected));
-          button2.tabIndex = selected ? 0 : -1;
-          button2.classList.toggle("steptrace__tab--selected", selected);
-          panelShells[i].hidden = !selected;
-        });
-        if (!handles[next]) handles[next] = mount2(panelMounts[next], tab.config, host);
-        if (focus) buttons[next]?.focus();
-      };
-      tabs.forEach((tab, index) => {
-        const tabId = `steptrace-tab-${++mountSerial}`;
-        const panelId = `steptrace-panel-${++mountSerial}`;
-        const button2 = document.createElement("button");
-        button2.type = "button";
-        button2.className = "steptrace__tab";
-        button2.id = tabId;
-        button2.setAttribute("role", "tab");
-        button2.setAttribute("aria-controls", panelId);
-        button2.textContent = tab.name;
-        button2.tabIndex = index === activeIndex ? 0 : -1;
-        button2.addEventListener("click", () => showTab(index));
-        button2.addEventListener("keydown", (event) => {
-          if (event.key === "ArrowLeft" || event.key === "ArrowUp") {
-            event.preventDefault();
-            showTab((index - 1 + tabs.length) % tabs.length, true);
-          } else if (event.key === "ArrowRight" || event.key === "ArrowDown") {
-            event.preventDefault();
-            showTab((index + 1) % tabs.length, true);
-          } else if (event.key === "Home") {
-            event.preventDefault();
-            showTab(0, true);
-          } else if (event.key === "End") {
-            event.preventDefault();
-            showTab(tabs.length - 1, true);
-          }
-        });
-        buttons.push(button2);
-        tablist.append(button2);
-        const panelShell = el("div", "steptrace__tabpanel");
-        panelShell.id = panelId;
-        panelShell.hidden = index !== activeIndex;
-        panelShell.setAttribute("role", "tabpanel");
-        panelShell.setAttribute("aria-labelledby", tabId);
-        const panelMount = el("div", "steptrace__tabpanel-body");
-        panelShell.append(panelMount);
-        panelShells.push(panelShell);
-        panelMounts.push(panelMount);
-        panels.append(panelShell);
-      });
-      tabsShell.append(tablist, tabDesc);
-      root.replaceChildren(tabsShell, panels);
-      activeIndex = -1;
-      showTab(normalized.selected);
-      return {
-        destroy() {
-          for (const handle of handles) handle?.destroy();
-          root.replaceChildren();
-          root.classList.remove("steptrace", "steptrace--tabs", "steptrace--reduced");
-        }
-      };
-    }
-    function mount2(root, config, host = {}) {
-      if (isTabsConfig(config)) return mountTabs(root, config, host);
+    function mountNow(root, config, host = {}) {
       const structure = structureRegistry.get(config.algorithm);
       if (structure) {
         try {
@@ -21251,6 +21206,7 @@
       let currentGraph = null;
       let currentMilestones = [];
       let speedControlHandle = null;
+      const hasHostTabs = typeof host.mountTabs === "function";
       const head = el("div", "steptrace__head");
       const crumb = el("div", "steptrace__crumb");
       const crumbKind = el("span");
@@ -21264,6 +21220,23 @@
       head.append(crumb, counter);
       const stageCol = el("div", "steptrace__stage-col");
       const rail = el("div", "steptrace__rail");
+      const railRegion = el("div", "steptrace__rail-region");
+      railRegion.classList.toggle("steptrace__rail-region--fallback", !hasHostTabs);
+      railRegion.id = `steptrace-rail-${++mountSerial}`;
+      railRegion.setAttribute("role", "region");
+      railRegion.setAttribute("aria-label", "Trace and watch");
+      const detailSwitch = el("div", "steptrace__detail-switch");
+      detailSwitch.setAttribute("role", "group");
+      detailSwitch.setAttribute("aria-label", "Detail view");
+      const traceButton = el("button", "steptrace__detail-button");
+      traceButton.type = "button";
+      traceButton.textContent = "Trace";
+      traceButton.setAttribute("aria-label", "Trace");
+      const watchButton = el("button", "steptrace__detail-button");
+      watchButton.type = "button";
+      watchButton.textContent = "Watch";
+      watchButton.setAttribute("aria-label", "Watch");
+      detailSwitch.append(traceButton, watchButton);
       const traceWrap = el("div", "steptrace__trace");
       const traceLabel = el("div", "steptrace__rail-label steptrace__trace-label");
       traceLabel.textContent = "Trace";
@@ -21293,7 +21266,9 @@
       const watchEl = el("div", "steptrace__watch");
       watchWrap.append(watchLabel, watchEl);
       watchWrap.hidden = true;
-      rail.append(traceWrap, watchWrap);
+      railRegion.append(traceWrap, watchWrap);
+      if (!hasHostTabs) rail.append(detailSwitch);
+      rail.append(railRegion);
       const body = el("div", "steptrace__body");
       body.append(stageCol, rail);
       const foot = el("div", "steptrace__foot");
@@ -21373,7 +21348,7 @@
       let startMenu = null;
       let targetHead = null;
       let targetMenu = null;
-      if (kind === "sort") {
+      if (kind === "sort" && state.algorithm !== "bucket-sort" && state.algorithm !== "cyclic-sort") {
         const section = el("div", "steptrace__menu-section");
         const h = el("div", "steptrace__menu-h");
         h.textContent = "Array";
@@ -21454,6 +21429,124 @@
       utility.append(speedIndicator, menuWrap);
       foot.append(phase, transport, timeline, utility);
       root.replaceChildren(head, body, foot);
+      let layoutMode = "unknown";
+      let compactPanel = null;
+      let hostTabsHandle = null;
+      let hasWatch = false;
+      let destroyed = false;
+      let visible = true;
+      let wasPlaying = false;
+      let railAnimationFrame = null;
+      let railAnimationTimer = null;
+      function clearRailAnimation() {
+        if (railAnimationFrame != null) cancelAnimationFrame(railAnimationFrame);
+        if (railAnimationTimer != null) clearTimeout(railAnimationTimer);
+        railAnimationFrame = null;
+        railAnimationTimer = null;
+        railRegion.classList.remove("steptrace__rail-region--animating");
+        railRegion.style.removeProperty("height");
+      }
+      function railAnimationDuration() {
+        const value = getComputedStyle(railRegion).getPropertyValue("--steptrace-tab-animation-duration").trim();
+        const duration = parseFloat(value);
+        if (!Number.isFinite(duration)) return 0;
+        return value.endsWith("ms") ? duration : value.endsWith("s") ? duration * 1e3 : 0;
+      }
+      function animateRail(render) {
+        const oldHeight = railRegion.getBoundingClientRect().height;
+        clearRailAnimation();
+        render();
+        const targetHeight = railRegion.getBoundingClientRect().height;
+        if (oldHeight === targetHeight) return;
+        railRegion.style.setProperty("height", `${oldHeight}px`);
+        railRegion.classList.add("steptrace__rail-region--animating");
+        railAnimationFrame = requestAnimationFrame(() => {
+          railAnimationFrame = null;
+          railRegion.style.setProperty("height", `${targetHeight}px`);
+          railAnimationTimer = setTimeout(clearRailAnimation, railAnimationDuration() + 50);
+        });
+      }
+      function destroyHostTabs() {
+        if (!hostTabsHandle) return;
+        compactPanel = hostTabsHandle.selection;
+        hostTabsHandle.destroy();
+        hostTabsHandle = null;
+      }
+      function ensureHostTabs() {
+        if (!hasHostTabs || hostTabsHandle || layoutMode !== "compact") return;
+        hostTabsHandle = host.mountTabs(railRegion, {
+          label: "Trace and watch",
+          selection: compactPanel,
+          tabs: [
+            { id: "trace", label: "Trace", panel: traceWrap },
+            { id: "watch", label: "Watch", panel: watchWrap }
+          ],
+          onSelectionChange(selection) {
+            compactPanel = selection === "trace" || selection === "watch" ? selection : null;
+            refitCompactTrace();
+          }
+        });
+        hostTabsHandle.setAvailable("watch", hasWatch);
+      }
+      function renderRailMode(previousMode = layoutMode, animate = false) {
+        const compact = layoutMode === "compact";
+        const active = document.activeElement;
+        if (hasHostTabs) {
+          const restoreFocus = previousMode === "compact" && !compact && active && railRegion.contains(active) && !traceWrap.contains(active) && !watchWrap.contains(active);
+          if (compact) ensureHostTabs();
+          else destroyHostTabs();
+          hostTabsHandle?.setAvailable("watch", hasWatch);
+          traceWrap.hidden = compact ? compactPanel !== "trace" : false;
+          watchWrap.hidden = compact ? !hasWatch || compactPanel !== "watch" : !hasWatch;
+          if (restoreFocus) scrub.focus();
+          refitCompactTrace();
+          return;
+        }
+        if (previousMode === "compact" && layoutMode === "wide" && active && detailSwitch.contains(active)) {
+          scrub.focus();
+        }
+        if (previousMode === "wide" && compact && active && railRegion.contains(active)) {
+          ;
+          (compactPanel === "watch" && hasWatch ? watchButton : traceButton).focus();
+        }
+        const render = () => {
+          detailSwitch.hidden = !compact;
+          traceButton.setAttribute("aria-pressed", String(compact && compactPanel === "trace"));
+          watchButton.setAttribute("aria-pressed", String(compact && compactPanel === "watch"));
+          traceWrap.hidden = compact && compactPanel !== "trace";
+          watchWrap.hidden = compact ? !hasWatch || compactPanel !== "watch" : !hasWatch;
+          refitCompactTrace();
+        };
+        if (animate) animateRail(render);
+        else {
+          clearRailAnimation();
+          render();
+        }
+      }
+      function syncCompactLayout(inlineSize) {
+        if (!(inlineSize > 0)) return;
+        const nextMode = inlineSize < COMPACT_INLINE_SIZE ? "compact" : "wide";
+        if (nextMode === layoutMode) return;
+        const previousMode = layoutMode;
+        layoutMode = nextMode;
+        root.classList.toggle("steptrace--narrow", nextMode === "compact");
+        renderRailMode(previousMode, previousMode !== "unknown");
+      }
+      function refitCompactTrace() {
+        if (!player || layoutMode !== "compact" || compactPanel !== "trace") return;
+        sizeRail();
+        renderRail();
+      }
+      traceButton.addEventListener("click", () => {
+        compactPanel = compactPanel === "trace" ? null : "trace";
+        renderRailMode(layoutMode, true);
+      });
+      watchButton.addEventListener("click", () => {
+        if (!hasWatch) return;
+        compactPanel = compactPanel === "watch" ? null : "watch";
+        renderRailMode(layoutMode, true);
+      });
+      syncCompactLayout(root.getBoundingClientRect().width);
       let menuOpen = false;
       function closeMenu() {
         menuOpen = false;
@@ -21471,9 +21564,13 @@
       document.addEventListener("click", onDocClick);
       function sizeRail() {
         if (!player) return;
-        if (matchMedia("(max-width: 560px)").matches) {
-          log.style.height = "auto";
-          log.style.minHeight = "0";
+        if (layoutMode === "compact") {
+          const logCS2 = getComputedStyle(log);
+          const lineHeight = parseFloat(logCS2.lineHeight) || 0;
+          const gap2 = parseFloat(logCS2.rowGap) || 0;
+          const height2 = Math.ceil(lineHeight * 3 + gap2 * 2) + "px";
+          log.style.height = height2;
+          log.style.minHeight = height2;
           return;
         }
         const PROBE = "position:absolute;visibility:hidden;pointer-events:none;left:0;right:0;height:auto";
@@ -21504,15 +21601,34 @@
         if (log.style.minHeight !== h) log.style.minHeight = h;
       }
       function fitLog(terminal) {
-        const budget = log.clientHeight;
+        const logCS = getComputedStyle(log);
+        const gap = parseFloat(logCS.rowGap) || 0;
+        let budget = log.clientHeight;
+        if (layoutMode === "compact") {
+          const lineHeight = parseFloat(logCS.lineHeight) || 0;
+          let rowChrome = 0;
+          if (terminal) {
+            const resultCS = getComputedStyle(insight);
+            rowChrome = [
+              resultCS.paddingTop,
+              resultCS.paddingBottom,
+              resultCS.borderTopWidth,
+              resultCS.borderBottomWidth
+            ].reduce((sum, value) => sum + (parseFloat(value) || 0), 0);
+          }
+          budget = Math.ceil(lineHeight * 3 + gap * 2 + rowChrome);
+          const height2 = budget + "px";
+          log.style.height = height2;
+          log.style.minHeight = height2;
+        }
         if (!budget) return;
-        const gap = parseFloat(getComputedStyle(log).rowGap) || 0;
         let used = terminal ? insight.getBoundingClientRect().height : 0;
+        let rows = terminal ? 1 : 0;
         let full = false;
         for (let k = LOG_ROWS - 1; k >= 0; k--) {
           const line = logLines[k].line;
           if (line.hidden) continue;
-          if (full) {
+          if (full || layoutMode === "compact" && rows >= 3) {
             line.hidden = true;
             continue;
           }
@@ -21520,18 +21636,30 @@
           const need = used ? used + gap + h : h;
           if (!used || need <= budget + 0.5) {
             used = need;
+            rows++;
           } else {
             line.hidden = true;
             full = true;
           }
         }
       }
-      const onRailResize = () => {
+      const onRailResize = (entries = []) => {
+        const rootEntry = entries.find((entry) => entry.target === root);
+        if (rootEntry) {
+          const borderBox = Array.isArray(rootEntry.borderBoxSize) ? rootEntry.borderBoxSize[0] : rootEntry.borderBoxSize;
+          syncCompactLayout(borderBox?.inlineSize ?? rootEntry.contentRect.width);
+        }
         sizeRail();
         if (player) renderRail();
       };
-      const logRO = typeof ResizeObserver !== "undefined" ? new ResizeObserver(onRailResize) : null;
-      if (logRO) logRO.observe(rail);
+      const railRO = typeof ResizeObserver !== "undefined" ? new ResizeObserver(onRailResize) : null;
+      if (railRO) {
+        railRO.observe(root);
+        railRO.observe(rail);
+      }
+      document.fonts?.ready.then(() => {
+        if (!destroyed) onRailResize();
+      });
       let lastRailI = null;
       function renderRail() {
         const total = player.frames.length;
@@ -21740,8 +21868,13 @@
             if (rows && rows.length > maxRows) maxRows = rows.length;
           }
         }
-        watchWrap.hidden = maxRows === 0;
+        hasWatch = maxRows > 0;
+        if (!hasWatch && compactPanel === "watch") compactPanel = null;
+        if (!hasHostTabs) {
+          detailSwitch.replaceChildren(traceButton, ...hasWatch ? [watchButton] : []);
+        }
         watchEl.style.setProperty("--steptrace-watch-rows", String(maxRows));
+        renderRailMode();
       }
       function syncEndpointOptions(settings, graph) {
         if (!endpointSection || !startMenu || !targetMenu || !startHead || !targetHead) return;
@@ -21786,7 +21919,8 @@
       btnPlay.addEventListener("click", () => player.toggle());
       btnFwd.addEventListener("click", () => player.stepF());
       const onKey = (e) => {
-        if (e.target instanceof HTMLInputElement || e.target instanceof HTMLSelectElement) return;
+        if (["button", "input", "select", "textarea"].includes(e.target?.tagName?.toLowerCase()))
+          return;
         if (e.target === scrub) return;
         if (e.key === "ArrowRight") player.stepF();
         else if (e.key === "ArrowLeft") player.stepB();
@@ -21801,11 +21935,25 @@
         pause() {
           if (player) player.pause();
         },
+        setVisible(nextVisible) {
+          if (destroyed || visible === nextVisible) return;
+          visible = nextVisible;
+          if (!nextVisible) {
+            wasPlaying = Boolean(player?.playing);
+            player?.pause();
+          } else if (wasPlaying) {
+            wasPlaying = false;
+            player?.play();
+          }
+        },
         destroy() {
+          destroyed = true;
+          clearRailAnimation();
+          destroyHostTabs();
           if (player) player.destroy();
           if (currentView && currentView.destroy) currentView.destroy();
           if (speedControlHandle && speedControlHandle.destroy) speedControlHandle.destroy();
-          if (logRO) logRO.disconnect();
+          if (railRO) railRO.disconnect();
           mq.removeEventListener("change", applyMotion);
           root.removeEventListener("keydown", onKey);
           document.removeEventListener("click", onDocClick);
@@ -21814,8 +21962,47 @@
             "steptrace",
             "steptrace--reduced",
             "steptrace--stable-stage",
-            "steptrace--compact-stage"
+            "steptrace--compact-stage",
+            "steptrace--narrow"
           );
+        }
+      };
+    }
+    function mount2(root, config, host = {}) {
+      const panels = [];
+      for (let panel = root.closest(".tabsdown__panel"); panel; panel = panel.parentElement?.closest(".tabsdown__panel") ?? null) {
+        panels.push(panel);
+      }
+      if (!panels.length || typeof MutationObserver === "undefined") {
+        return mountNow(root, config, host);
+      }
+      let child = null;
+      let destroyed = false;
+      let visible = panels.every((panel) => !panel.hidden);
+      const syncVisibility = () => {
+        if (destroyed) return;
+        const nextVisible = panels.every((panel) => !panel.hidden);
+        if (nextVisible && !child) child = mountNow(root, config, host);
+        if (nextVisible !== visible) child?.setVisible?.(nextVisible);
+        visible = nextVisible;
+      };
+      const observer = new MutationObserver(syncVisibility);
+      panels.forEach(
+        (panel) => observer.observe(panel, { attributes: true, attributeFilter: ["hidden"] })
+      );
+      if (visible) child = mountNow(root, config, host);
+      return {
+        pause() {
+          child?.pause?.();
+        },
+        setVisible(nextVisible) {
+          child?.setVisible?.(nextVisible);
+        },
+        destroy() {
+          destroyed = true;
+          observer.disconnect();
+          child?.destroy();
+          if (!child) root.replaceChildren();
         }
       };
     }
@@ -21845,35 +22032,35 @@
     const backtrackRegistry = /* @__PURE__ */ new Map();
     const recTreeRegistry = /* @__PURE__ */ new Map();
     const api = {
-      registerSort(id, meta, run6) {
-        sortRegistry.set(id, { meta, run: run6 });
+      registerSort(id, meta, run7) {
+        sortRegistry.set(id, { meta, run: run7 });
       },
-      registerGraph(id, meta, run6) {
-        graphRegistry.set(id, { meta, run: run6 });
+      registerGraph(id, meta, run7) {
+        graphRegistry.set(id, { meta, run: run7 });
       },
-      registerSearch(id, meta, run6) {
-        searchRegistry.set(id, { meta, run: run6 });
+      registerSearch(id, meta, run7) {
+        searchRegistry.set(id, { meta, run: run7 });
       },
-      registerString(id, meta, run6, profile) {
-        stringRegistry.set(id, { meta, run: run6, profile });
+      registerString(id, meta, run7, profile) {
+        stringRegistry.set(id, { meta, run: run7, profile });
       },
-      registerPointer(id, meta, run6) {
-        pointerRegistry.set(id, { meta, run: run6 });
+      registerPointer(id, meta, run7) {
+        pointerRegistry.set(id, { meta, run: run7 });
       },
-      registerDP(id, meta, run6) {
-        dpRegistry.set(id, { meta, run: run6 });
+      registerDP(id, meta, run7) {
+        dpRegistry.set(id, { meta, run: run7 });
       },
-      registerUnionFind(id, meta, run6) {
-        unionFindRegistry.set(id, { meta, run: run6 });
+      registerUnionFind(id, meta, run7) {
+        unionFindRegistry.set(id, { meta, run: run7 });
       },
-      registerBits(id, meta, run6) {
-        bitsRegistry.set(id, { meta, run: run6 });
+      registerBits(id, meta, run7) {
+        bitsRegistry.set(id, { meta, run: run7 });
       },
-      registerBacktrack(id, meta, run6) {
-        backtrackRegistry.set(id, { meta, run: run6 });
+      registerBacktrack(id, meta, run7) {
+        backtrackRegistry.set(id, { meta, run: run7 });
       },
-      registerRecTree(id, meta, run6) {
-        recTreeRegistry.set(id, { meta, run: run6 });
+      registerRecTree(id, meta, run7) {
+        recTreeRegistry.set(id, { meta, run: run7 });
       },
       listAlgorithms(kind) {
         const registry2 = kind === "graph" ? graphRegistry : sortRegistry;
@@ -21882,8 +22069,8 @@
         return [...legacy, ...families];
       },
       kindOf(id) {
-        const family10 = familyRegistry.get(id);
-        if (family10) return family10.kind;
+        const family11 = familyRegistry.get(id);
+        if (family11) return family11.kind;
         if (sortRegistry.has(id)) return "sort";
         if (graphRegistry.has(id)) return "graph";
         if (searchRegistry.has(id)) return "search";
@@ -21920,7 +22107,7 @@
         const graphAlgorithm = graphRegistry.get(config.algorithm);
         if (graphAlgorithm) {
           const graph = normalizeGraph(config);
-          const recorder = new GraphRecorder(graph);
+          const recorder = new GraphRecorder();
           graphAlgorithm.run({ ...input, start: graph.start }, recorder, graph);
           return {
             kind: "graph",
@@ -21943,7 +22130,9 @@
         }
         const pointer = pointerRegistry.get(config.algorithm);
         if (pointer) {
-          const recorder = new PointerRecorder(config.array);
+          const recorder = new PointerRecorder(
+            config.algorithm === "sliding-window" ? Array.from(typeof config.text === "string" ? config.text : "") : config.array
+          );
           pointer.run(input, recorder);
           return { kind: "pointers", frames: recorder.frames };
         }

@@ -442,6 +442,64 @@ def validate_residue(note: Note) -> list[Issue]:
     return issues
 
 
+def validate_code_fences(note: Note) -> list[Issue]:
+    issues: list[Issue] = []
+    open_code_fence: tuple[str, int] | None = None
+    tabsdown_fences: list[tuple[str, int]] = []
+    list_indents: list[int] = []
+    for index, line in enumerate(note.body.splitlines()):
+        line = line.expandtabs(4)
+        line = re.sub(r"^(?: {0,3}>[ \t]?)+", "", line)
+        if open_code_fence:
+            for indent in reversed(list_indents):
+                if line.startswith(" " * indent):
+                    line = line[indent:]
+                    break
+        else:
+            list_item = re.match(r"^( *)(?:[-+*]|\d+[.)])([ \t]+)(.*)$", line)
+            if list_item:
+                marker_indent = len(list_item.group(1))
+                list_indents = [indent for indent in list_indents if indent <= marker_indent]
+                list_indents.append(list_item.start(3))
+                line = list_item.group(3)
+            else:
+                leading_spaces = len(line) - len(line.lstrip(" "))
+                while list_indents and line.strip() and leading_spaces < list_indents[-1]:
+                    list_indents.pop()
+                if list_indents and leading_spaces >= list_indents[-1]:
+                    line = line[list_indents[-1]:]
+        line = re.sub(r"^(?: {0,3}>[ \t]?)+", "", line)
+        match = re.match(r"^ {0,3}(`{3,}|~{3,})(.*)$", line)
+        if not match:
+            continue
+        fence, suffix = match.groups()
+        if open_code_fence:
+            marker, length = open_code_fence
+            if fence[0] == marker and len(fence) >= length and not suffix.strip():
+                open_code_fence = None
+            continue
+        if tabsdown_fences:
+            marker, length = tabsdown_fences[-1]
+            if fence[0] == marker and len(fence) >= length and not suffix.strip():
+                tabsdown_fences.pop()
+                continue
+        language = suffix.strip()
+        if language and language.split(maxsplit=1)[0] == "tabsdown":
+            tabsdown_fences.append((fence[0], len(fence)))
+            continue
+        open_code_fence = (fence[0], len(fence))
+        if not language:
+            issues.append(
+                Issue(
+                    "markdown.code-fence-language",
+                    note.rel,
+                    note.body_start_line + index,
+                    "fenced code blocks need a language; use `text` when none fits",
+                )
+            )
+    return issues
+
+
 def strip_non_link_markdown(content: str) -> str:
     def preserve_lines(match: re.Match[str]) -> str:
         return "\n" * match.group(0).count("\n")
@@ -669,6 +727,7 @@ def validate(repo_root: Path, mode: str, use_baseline: bool = True) -> tuple[lis
         issues.extend(validate_folder_note(note, home_root))
         issues.extend(validate_published(note))
         issues.extend(validate_residue(note))
+        issues.extend(validate_code_fences(note))
         issues.extend(validate_wikilinks(note, index))
 
     if mode == "all":

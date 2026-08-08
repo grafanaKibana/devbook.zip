@@ -14,7 +14,7 @@ export const bubbleSort = {
   run: (input, ops) => {
     const n = ops.value.length
     ops.init(
-      `Bubble sort — repeatedly compare adjacent values and swap the larger one rightward, bubbling the largest to the end each pass.`,
+      `Bubble sort — compare neighbours and swap inversions; each pass moves the maximum right.`,
     )
     for (let i = 0; i < n - 1; i++) {
       let swapped = false

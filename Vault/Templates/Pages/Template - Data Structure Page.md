@@ -41,28 +41,22 @@ tp.hooks.on_all_templates_executed(async () => {
 
 <!-- State the workload, persistent state, repeated cost the representation reduces, and information it deliberately does not retain. -->
 
-# State across Operations
+~~~~~tabsdown
+tab: Visualization
 
-<!-- Lead into the trace with one plain-language sentence. Replace the placeholder with a valid StepTrace configuration that shows several operations over one structure and exposes meaningful persistent state; do not substitute a related algorithm trace or publish an unresolved placeholder. -->
+<!-- The StepTrace fence must be the first rendered child. Replace this required draft configuration with a supported trace that shows several operations over one structure and exposes meaningful persistent state; do not add a heading or lead-in before it. -->
 
 ```steptrace
 {"algorithm":"replace-with-supported-id","operations":"replace-with-persistent-operation-sequence"}
 ```
 
-# Representation and Invariants
+<!-- Optional: add at most one `####` support section after the trace when the visible operations need a representation or invariant explanation. Keep unheaded prose when a heading adds no navigation value, and delete copy that only restates controls or the pictured scenario. -->
 
-<!-- Rename this heading after the representation claim the note proves. Describe the physical state, mutable fields, empty/root/sentinel conventions, invariant, and retained or discarded identity, ordering, topology, history, or duplicates. -->
+tab: Complexity
 
-# Complexity
+<!-- Insert exactly one validated version 2 `complexity` fence here after note-specific Time and Space evidence exists. Follow it only with concise unheaded prose that supplies a chart-missing assumption, model/resource distinction, or decision-changing failure boundary. Do not add headings, Markdown tables, or placeholders inside or outside this panel. -->
 
-| Operation     | Best time | Amortized/average time | Worst time | Persistent structure space | Auxiliary space per operation |
-| ------------- | --------- | ---------------------- | ---------- | -------------------------- | ----------------------------- |
-| Construct     |           |                        |            |                            |                               |
-| Query         |           |                        |            |                            |                               |
-| Insert/update |           |                        |            |                            |                               |
-| Remove/merge  |           |                        |            |                            |                               |
-
-<!-- Rename or remove operations that do not belong. Explain the actual cost driver and the balancing, hashing, resizing, compression, or workload assumption behind each bound. Keep persistent structure space distinct from temporary auxiliary space, and add a concrete scale estimate when it clarifies the cost. -->
+~~~~~
 
 # Fit and Limits
 

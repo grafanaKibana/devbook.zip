@@ -13,44 +13,103 @@ publish: true
 
 Sorting an array when the only permitted move is swapping two adjacent elements forces every value to walk to its place one position at a time. Bubble sort is what that constraint produces: a left-to-right pass compares each `a[i]` with `a[i+1]` and swaps on `a[i] > a[i+1]`, so a value larger than everything to its right keeps winning those comparisons and is carried to the end of the pass. One pass is therefore enough to seat the largest unsorted element in its final slot.
 
-Adjacency is also the cost. An element that starts `k` positions from where it belongs needs at least `k` swaps to get there, and a left-to-right pass can move it toward the front by only one step. Random input therefore takes a quadratic number of comparisons. The one lever against that is a per-pass flag: a pass that performs no swap proves the array is already ordered and ends the sort.
+Adjacency makes movement asymmetric: a large value can keep moving toward the tail during one left-to-right pass, while a small value moves toward the front only when the scan reaches its immediate left neighbor. A per-pass flag supplies the stopping proof: a pass that performs no swap means the array is already ordered.
 
-**Core shape:** adjacent compare-and-swap → each pass settles one more tail element → a swap-free pass ends the sort → `O(n²)` comparisons, `O(1)` extra space, `O(n)` on already-sorted input.
+**Core shape:** adjacent compare-and-swap → each pass settles one more tail element → a swap-free pass ends the sort.
 
-# Trace
+~~~~~tabsdown
+tab: Visualization
 
-The trace sorts `[8, 3, 5, 1, 9, 2, 7, 4]` with left-to-right compare-and-swap passes.
+
 
 ```steptrace
 {"algorithm":"bubble-sort","array":[8,3,5,1,9,2,7,4]}
 ```
 
+The trace sorts `[8, 3, 5, 1, 9, 2, 7, 4]` with left-to-right compare-and-swap passes.
+
 `9` is the largest value in the first pass. Once a swap brings it into the traveling comparison window it beats every element to its right and slides to index 7, its permanent position. The next pass stops one element short because that tail slot is already correct, and each later pass shortens again as the sorted suffix grows leftward. The `swapped` flag watches for the moment this settling is complete: the first pass that finishes without a single swap means no adjacent pair is out of order, so the whole array is sorted and the loop exits.
 
-# Why a Pass Settles the Tail
+#### Why a Pass Settles the Tail
 
 The invariant is local: after comparing and swapping `a[i]` and `a[i+1]`, the larger of the two sits at `i+1`. Carried across a full pass, the running maximum is always held at the current index and pushed rightward, so it ends the pass at the far end. After pass `k`, the last `k` positions hold the `k` largest values in order and are never touched again — which is why the scanned range can shrink by one each pass.
 
-The `swapped` flag turns "no work happened" into a stopping condition. On already-sorted input the first pass makes zero swaps and the sort ends after `n-1` comparisons — the `O(n)` best case. Removing the flag forfeits exactly that: the plain double loop always runs its full `Θ(n²)` comparisons regardless of order, so sorted input costs the same as random input.
+The `swapped` flag turns "no work happened" into a stopping condition. On already-sorted input the first pass makes zero swaps and ends the sort. Without the flag, the plain double loop keeps scheduling passes after the array is known to be ordered.
 
-Two properties fall out of the mechanism. The sort is **stable** because a swap happens only on a strict `a[i] > a[i+1]`; equal keys never cross, so their input order survives. It is **in-place** because the only extra storage is a couple of loop indices and the boolean flag — `O(1)` regardless of input size.
+The sort is **stable** because a swap happens only on a strict `a[i] > a[i+1]`; equal keys never cross, so their input order survives.
+
+tab: Complexity
+
+```complexity
+{
+  "version": 2,
+  "label": "Bubble Sort complexity",
+  "variables": {
+    "inputSize": {
+      "symbol": "n",
+      "description": "number of elements in the input array"
+    }
+  },
+  "resources": {
+    "time": {
+      "mode": "cases",
+      "entries": [
+        {
+          "kind": "case",
+          "role": "Best",
+          "formula": "O(n)",
+          "curveId": "linear"
+        },
+        {
+          "kind": "case",
+          "role": "Average",
+          "formula": "O(n²)",
+          "curveId": "quadratic"
+        },
+        {
+          "kind": "case",
+          "role": "Worst",
+          "formula": "O(n²)",
+          "curveId": "quadratic"
+        }
+      ]
+    },
+    "space": {
+      "mode": "cases",
+      "entries": [
+        {
+          "kind": "case",
+          "role": "Best",
+          "formula": "O(1)",
+          "curveId": "constant"
+        },
+        {
+          "kind": "case",
+          "role": "Average",
+          "formula": "O(1)",
+          "curveId": "constant"
+        },
+        {
+          "kind": "case",
+          "role": "Worst",
+          "formula": "O(1)",
+          "curveId": "constant"
+        }
+      ]
+    }
+  }
+}
+```
+
+The best case assumes the `swapped` early-exit flag. Without it, even ordered input follows the quadratic comparison curve because the fixed double loop still schedules every pass.
+~~~~~
 
 # Where Adjacency Hurts
 
 A large value can travel any distance toward the end in one pass, but a small value moves toward the front by at most one index per pass. On `[2, 3, 4, 5, 1]` the `1` shifts left exactly one slot each pass — `[2, 3, 4, 1, 5]`, then `[2, 3, 1, 4, 5]` — and needs four passes to reach the front even though the array is otherwise sorted. These trailing small values are the classic "turtles": each one forces roughly one pass per position it must travel, and they, not the large values, set the pass count.
 
 > [!NOTE]
-> Cocktail-shaker sort is the bidirectional variant: it alternates a left-to-right pass that lifts the maximum with a right-to-left pass that drags the minimum down. The reverse pass lets a turtle descend many positions at once, cutting the pass count on inputs like the one above, but the total comparison work stays `Θ(n²)`.
-
-# Complexity
-
-| Case | Time | Auxiliary space | Cause |
-| --- | --- | --- | --- |
-| Best | `O(n)` | `O(1)` | Already sorted; the first pass makes no swap and the early-exit flag stops after one pass. |
-| Average | `O(n²)` | `O(1)` | Random order; about `n²/4` swaps over `~n²/2` comparisons. |
-| Worst | `O(n²)` | `O(1)` | Reverse-sorted; every adjacent pair is out of order, forcing `n(n-1)/2` swaps and comparisons. |
-
-Auxiliary space is `O(1)` in every case: the array is sorted in place and only indices and the flag are added. The `O(n)` best case exists only with the early-exit flag; without it the best case degrades to `Θ(n²)`.
+> Cocktail-shaker sort is the bidirectional variant: it alternates a left-to-right pass that lifts the maximum with a right-to-left pass that drags the minimum down. The reverse pass lets a turtle descend many positions at once, cutting the pass count on inputs like the one above.
 
 # Reference Drawer
 
@@ -99,8 +158,8 @@ Auxiliary space is `O(1)` in every case: the array is sorted in place and only i
 
 # Questions
 
-> [!QUESTION]- What does the `swapped` flag detect, and what does omitting it cost?
-> A pass that completes with no swap means no adjacent pair is out of order, so the array is sorted and the loop can stop. On already-sorted input this ends the sort after one `O(n)` pass. Without the flag the double loop always runs its full `Θ(n²)` comparisons, so sorted input costs as much as random input and the `O(n)` best case is gone.
+> [!QUESTION]- What does the `swapped` flag detect, and what changes if it is omitted?
+> A pass that completes with no swap means no adjacent pair is out of order, so the array is sorted and the loop can stop. Without the flag, the double loop continues scheduling passes even after this condition is already true.
 
 > [!QUESTION]- Why can a large value reach its final slot in one pass while a small value at the tail takes many?
 > A left-to-right pass carries the running maximum forward through consecutive swaps, so a large value can cross the whole array in a single pass. The same pass only ever compares a given element with its left neighbor once, so a small value ("turtle") near the end moves toward the front by at most one index per pass and needs about one pass per position it must travel.

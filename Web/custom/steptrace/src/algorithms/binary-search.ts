@@ -9,7 +9,7 @@ export const binarySearch = {
     const a = ops.value
     const target = input.target
     ops.init(
-      `Binary search for ${target} in a sorted array — check the middle of the range, then discard the half that can't contain it.`,
+      `Binary search for ${target} in sorted data — test the middle, then discard the impossible half.`,
     )
     let lo = 0
     let hi = a.length - 1

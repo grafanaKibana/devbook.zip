@@ -3,7 +3,7 @@ topic:
   - Computer Science
 subtopic:
   - Algorithms
-summary: "A single DFS finds all cut vertices and cut edges, the points whose removal disconnects an undirected graph, in O(V+E)."
+summary: "A single DFS finds all cut vertices and cut edges, the points whose removal disconnects an undirected graph."
 level:
   - "4"
 priority: Medium
@@ -11,21 +11,22 @@ status: Creation
 publish: true
 ---
 
-An undirected network needs to know which routers or cables are single points of failure: remove that one vertex or edge and some pair of nodes can no longer reach each other. Checking candidates one at a time — delete it, re-run a connectivity scan, see whether the component count grew — costs `O(V·(V+E))` for all vertices and `O(E·(V+E))` for all edges, or `O((V+E)²)` to find both.
+An undirected network needs to know which routers or cables are single points of failure: remove that one vertex or edge and some pair of nodes can no longer reach each other.
 
 A single depth-first traversal finds all of them at once. As DFS explores an undirected graph it builds a tree whose only non-tree edges are back edges to ancestors — undirectedness forbids cross edges — and each back edge is an alternate route that survives removing the tree edge or vertex above it. Recording, per vertex, how far back its subtree can escape turns "does removing this disconnect anything?" into a local numeric comparison at every edge.
 
 An **articulation point** (cut vertex) is a vertex whose deletion raises the number of connected components; a **bridge** (cut edge) is the edge analogue. The same DFS reports both.
 
-**Core condition:** undirected graph → one DFS records `disc[v]` and `low[v]` → a child that cannot reach above its parent exposes a cut vertex or bridge → `O(V + E)` time, `O(V)` space.
 
 The decisive transition is a DFS tree annotated with `disc`/`low`, where each child's `low` is compared against its parent's `disc`.
+
+~~~~~tabsdown
+tab: Visualization
 
 ```steptrace
 {"algorithm":"articulation-points-and-bridges"}
 ```
 
-# What `disc` and `low` Measure
 
 DFS runs from any unvisited vertex and repeats until every component is covered. Two integers are stored per vertex:
 
@@ -40,14 +41,61 @@ DFS runs from any unvisited vertex and repeats until every component is covered.
 
 Worked example: a triangle `0-1-2` with a tail `2-3-4`. DFS from `0` discovers `0, 1, 2` around the cycle; the edge `2-0` is a back edge, so `low` across the triangle collapses to `0` and none of `0, 1, 2` is cut inside it. The tail carries no back edge, so `low[3] = 3 > disc[2] = 2` and `low[4] = 4 > disc[3] = 3`: edges `2-3` and `3-4` are bridges, and vertices `2` and `3` are cut vertices — each is the sole link to what hangs below it. Removing any of them raises the connected-component count, which is the property each rule certifies locally.
 
-# Complexity
+tab: Complexity
 
-| Measure | Bound | Cause |
-| --- | --- | --- |
-| Time | `O(V + E)` | One DFS: each vertex is discovered once, each edge examined a constant number of times. There is no early exit — the same traversal runs on every input. |
-| Auxiliary space | `O(V)` | `disc`, `low`, visited state, and the result collections are each `O(V)`; the recursion stack reaches depth `V` on a path graph. |
-
-There is one honest bound, not a best/average/worst spread: the traversal always visits the whole graph regardless of where the cuts fall, so all three cases coincide at `O(V + E)`.
+```complexity
+{
+  "version": 2,
+  "label": "Articulation Points and Bridges complexity",
+  "variables": {
+    "edgeCount": {
+      "symbol": "m",
+      "description": "number of edges"
+    },
+    "vertexCount": {
+      "symbol": "n",
+      "description": "number of vertices"
+    }
+  },
+  "resources": {
+    "time": {
+      "mode": "operations",
+      "entries": [
+        {
+          "kind": "operation",
+          "operation": "Time",
+          "bounds": [
+            {
+              "kind": "curve",
+              "role": "Bound",
+              "formula": "O(n + m)",
+              "curveId": "linear"
+            }
+          ]
+        }
+      ]
+    },
+    "space": {
+      "mode": "operations",
+      "entries": [
+        {
+          "kind": "operation",
+          "operation": "Auxiliary space",
+          "bounds": [
+            {
+              "kind": "curve",
+              "role": "Bound",
+              "formula": "O(n)",
+              "curveId": "linear"
+            }
+          ]
+        }
+      ]
+    }
+  }
+}
+```
+~~~~~
 
 # Boundaries
 
@@ -141,7 +189,7 @@ Cut vertices and bridges are the boundary markers of two connectivity decomposit
 | 2-edge-connected components | subgraphs with no bridge | bridges join adjacent components | yes |
 | [[Home/Computer Science/Algorithms/Graph Algorithms/Strongly Connected Components|Strongly connected components]] | mutually reachable sets in a **directed** graph | — | related low-link DFS, with an active-vertex stack and different update rule |
 
-One `disc`/`low` DFS finds every cut vertex and bridge in `O(V + E)`, against `O((V+E)²)` for remove-and-recheck, and the same pass — with an edge stack — emits the biconnected components those cut vertices separate. The directed reachability question is a separate decomposition, [[Home/Computer Science/Algorithms/Graph Algorithms/Strongly Connected Components|strongly connected components]], built on a related low-link idea. Tarjan's SCC traversal must track which vertices remain on an active stack and must ignore edges into already-finished components when lowering `low`; the cut-vertex implementation cannot be reused by merely directing its edges. For undirected reliability analysis — which node or link is the single point of failure — this one DFS is the whole answer.
+The directed reachability question is a separate decomposition, [[Home/Computer Science/Algorithms/Graph Algorithms/Strongly Connected Components|strongly connected components]], built on a related low-link idea. Tarjan's SCC traversal must track which vertices remain on an active stack and must ignore edges into already-finished components when lowering `low`; the cut-vertex implementation cannot be reused by merely directing its edges. For undirected reliability analysis — which node or link is the single point of failure — this one DFS is the whole answer.
 
 # Questions
 
@@ -156,7 +204,7 @@ One `disc`/`low` DFS finds every cut vertex and bridge in `O(V + E)`, against `O
 
 # References
 
-- [Algorithm 447: Efficient Algorithms for Graph Manipulation](https://doi.org/10.1145/362248.362272) — Hopcroft and Tarjan's original linear-time DFS algorithms for biconnected components and articulation structure.
+- [Algorithm 447: Efficient Algorithms for Graph Manipulation](https://doi.org/10.1145/362248.362272) — Hopcroft and Tarjan's original DFS algorithms for biconnected components and articulation structure.
 - [Biconnected component (Wikipedia)](https://en.wikipedia.org/wiki/Biconnected_component) — articulation points, the low-link DFS, and decomposition into biconnected blocks.
 - [Bridge (graph theory) (Wikipedia)](https://en.wikipedia.org/wiki/Bridge_(graph_theory)) — cut edges, 2-edge-connectivity, and the bridge-finding condition.
 - [Finding bridges (cp-algorithms)](https://cp-algorithms.com/graph/bridge-searching.html) — the `disc`/`low` bridge implementation and the parent-edge subtlety on multigraphs.

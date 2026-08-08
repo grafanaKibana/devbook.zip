@@ -21,7 +21,7 @@ class Recorder {
       currentEdge: edge,
       selectedEdges: [],
       nodeState: Object.fromEntries(this.config.nodes.map(({ id }) => [id, id === current ? "active" : emitted.has(id) ? "accepted" : stack.includes(id) ? "frontier" : id in discovery ? "closed" : "neutral"])),
-      edgeState: Object.fromEntries(this.config.edges.map(({ from, to }) => [`${from}|${to}`, edge?.[0] === from && edge[1] === to ? "active" : emitted.has(from) && emitted.has(to) ? "accepted" : "neutral"])),
+      edgeState: Object.fromEntries(this.config.edges.map(({ from, to }) => [`${from}|${to}`, edge?.[0] === from && edge[1] === to ? "active" : components.some((component) => component.includes(from) && component.includes(to)) ? "accepted" : "neutral"])),
       message,
       detail,
     })
