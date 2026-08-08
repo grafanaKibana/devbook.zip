@@ -1,8 +1,8 @@
 ---
 publish: true
-created: 2026-08-02T10:34:10.302Z
-modified: 2026-08-02T11:02:51.015Z
-published: 2026-08-02T11:02:51.015Z
+created: 2026-08-03T15:55:17.234Z
+modified: 2026-08-03T15:55:17.234Z
+published: 2026-08-03T15:55:17.234Z
 topic:
   - Computer Science
 subtopic:
@@ -45,46 +45,34 @@ tab: Complexity
   },
   "resources": {
     "time": {
-      "mode": "cases",
+      "mode": "comparison",
       "entries": [
         {
-          "kind": "case",
-          "role": "Best",
-          "formula": "O(n)",
-          "curveId": "linear"
+          "kind": "approach",
+          "label": "Naive (comparison sort)",
+          "formula": "O(n log n)",
+          "curveId": "n-log-n"
         },
         {
-          "kind": "case",
-          "role": "Average",
-          "formula": "O(n)",
-          "curveId": "linear"
-        },
-        {
-          "kind": "case",
-          "role": "Worst",
+          "kind": "approach",
+          "label": "Cyclic sort",
           "formula": "O(n)",
           "curveId": "linear"
         }
       ]
     },
     "space": {
-      "mode": "cases",
+      "mode": "comparison",
       "entries": [
         {
-          "kind": "case",
-          "role": "Best",
-          "formula": "O(1)",
-          "curveId": "constant"
+          "kind": "approach",
+          "label": "Naive (comparison sort)",
+          "formula": "O(log n)",
+          "curveId": "log-n"
         },
         {
-          "kind": "case",
-          "role": "Average",
-          "formula": "O(1)",
-          "curveId": "constant"
-        },
-        {
-          "kind": "case",
-          "role": "Worst",
+          "kind": "approach",
+          "label": "Cyclic sort",
           "formula": "O(1)",
           "curveId": "constant"
         }

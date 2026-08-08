@@ -1,8 +1,8 @@
 ---
 publish: true
-created: 2026-08-02T10:34:10.302Z
-modified: 2026-08-02T10:44:22.775Z
-published: 2026-08-02T10:44:22.775Z
+created: 2026-08-03T15:55:17.235Z
+modified: 2026-08-03T15:55:17.235Z
+published: 2026-08-03T15:55:17.235Z
 topic:
   - Computer Science
 subtopic:
@@ -42,84 +42,36 @@ tab: Complexity
   },
   "resources": {
     "time": {
-      "mode": "operations",
+      "mode": "comparison",
       "entries": [
         {
-          "kind": "operation",
-          "operation": "No cycle",
-          "bounds": [
-            {
-              "kind": "curve",
-              "role": "Time",
-              "formula": "O(n)",
-              "curveId": "linear"
-            }
-          ]
+          "kind": "approach",
+          "label": "Naive (hash set of visited nodes)",
+          "formula": "O(n)",
+          "curveId": "linear"
         },
         {
-          "kind": "operation",
-          "operation": "Cycle, detection only",
-          "bounds": [
-            {
-              "kind": "curve",
-              "role": "Time",
-              "formula": "O(n)",
-              "curveId": "linear"
-            }
-          ]
-        },
-        {
-          "kind": "operation",
-          "operation": "Cycle, entry located",
-          "bounds": [
-            {
-              "kind": "curve",
-              "role": "Time",
-              "formula": "O(n)",
-              "curveId": "linear"
-            }
-          ]
+          "kind": "approach",
+          "label": "Fast and slow pointers",
+          "formula": "O(n)",
+          "curveId": "linear"
         }
       ]
     },
     "space": {
-      "mode": "operations",
+      "mode": "comparison",
       "entries": [
         {
-          "kind": "operation",
-          "operation": "No cycle",
-          "bounds": [
-            {
-              "kind": "curve",
-              "role": "Auxiliary space",
-              "formula": "O(1)",
-              "curveId": "constant"
-            }
-          ]
+          "kind": "approach",
+          "label": "Naive (hash set of visited nodes)",
+          "formula": "O(n)",
+          "curveId": "linear"
         },
         {
-          "kind": "operation",
-          "operation": "Cycle, detection only",
-          "bounds": [
-            {
-              "kind": "curve",
-              "role": "Auxiliary space",
-              "formula": "O(1)",
-              "curveId": "constant"
-            }
-          ]
-        },
-        {
-          "kind": "operation",
-          "operation": "Cycle, entry located",
-          "bounds": [
-            {
-              "kind": "curve",
-              "role": "Auxiliary space",
-              "formula": "O(1)",
-              "curveId": "constant"
-            }
-          ]
+          "kind": "approach",
+          "label": "Fast and slow pointers",
+          "formula": "O(1)",
+          "curveId": "constant"
         }
       ]
     }

@@ -1,8 +1,8 @@
 ---
 publish: true
-created: 2026-07-18T14:02:43.951Z
-modified: 2026-08-03T07:59:50.216Z
-published: 2026-08-03T07:59:50.216Z
+created: 2026-08-03T15:55:17.232Z
+modified: 2026-08-04T05:40:46.086Z
+published: 2026-08-04T05:40:46.086Z
 topic:
   - Computer Science
 subtopic:
@@ -64,111 +64,43 @@ tab: Complexity
     "inputSize": {
       "symbol": "n",
       "description": "maximum decision-tree depth"
-    },
-    "boundCost": {
-      "symbol": "C_bound",
-      "description": "cost of evaluating the optimistic bound for one node"
     }
   },
   "resources": {
     "time": {
-      "mode": "operations",
+      "mode": "comparison",
       "entries": [
         {
-          "kind": "operation",
-          "operation": "Strong pruning",
-          "bounds": [
-            {
-              "kind": "text",
-              "role": "Time",
-              "formula": "O(n · b · C_bound)"
-            }
-          ]
+          "kind": "approach",
+          "label": "Naive (enumerate every assignment)",
+          "formula": "O(b^n)",
+          "curveFrom": "exponential",
+          "curveTo": "unbounded"
         },
         {
-          "kind": "operation",
-          "operation": "Practical",
-          "bounds": [
-            {
-              "kind": "text",
-              "role": "Time",
-              "formula": "instance-dependent; no sub-exponential guarantee"
-            }
-          ]
-        },
-        {
-          "kind": "operation",
-          "operation": "Worst, b-ary tree",
-          "bounds": [
-            {
-              "kind": "text",
-              "role": "Time",
-              "formula": "Θ(b^n · C_bound)"
-            }
-          ]
-        },
-        {
-          "kind": "operation",
-          "operation": "Worst, 0/1 knapsack",
-          "bounds": [
-            {
-              "kind": "text",
-              "role": "Time",
-              "formula": "O(2^n · C_bound)"
-            }
-          ]
-        },
-        {
-          "kind": "operation",
-          "operation": "Worst, TSP",
-          "bounds": [
-            {
-              "kind": "text",
-              "role": "Time",
-              "formula": "O(n! · C_bound)"
-            }
-          ]
+          "kind": "approach",
+          "label": "Branch and bound",
+          "formula": "O(b^n)",
+          "curveFrom": "exponential",
+          "curveTo": "unbounded"
         }
       ]
     },
     "space": {
-      "mode": "operations",
+      "mode": "comparison",
       "entries": [
         {
-          "kind": "operation",
-          "operation": "Depth-first best",
-          "bounds": [
-            {
-              "kind": "curve",
-              "role": "Auxiliary space",
-              "formula": "O(n)",
-              "curveId": "linear"
-            }
-          ]
+          "kind": "approach",
+          "label": "Naive (enumerate every assignment)",
+          "formula": "O(n)",
+          "curveId": "linear"
         },
         {
-          "kind": "operation",
-          "operation": "Depth-first practical",
-          "bounds": [
-            {
-              "kind": "curve",
-              "role": "Auxiliary space",
-              "formula": "O(n)",
-              "curveId": "linear"
-            }
-          ]
-        },
-        {
-          "kind": "operation",
-          "operation": "Depth-first worst",
-          "bounds": [
-            {
-              "kind": "curve",
-              "role": "Auxiliary space",
-              "formula": "O(n)",
-              "curveId": "linear"
-            }
-          ]
+          "kind": "approach",
+          "label": "Branch and bound",
+          "formula": "O(n)",
+          "curveFrom": "linear",
+          "curveTo": "unbounded"
         }
       ]
     }
