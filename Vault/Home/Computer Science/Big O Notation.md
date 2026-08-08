@@ -2,6 +2,7 @@
 topic:
   - Computer Science
 subtopic: []
+summary: "Describes how time or space grows with input size by retaining the dominant term and ignoring constants."
 level:
   - "3"
 priority: High

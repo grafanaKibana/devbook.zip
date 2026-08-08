@@ -16,6 +16,7 @@ SPEC.loader.exec_module(generate_changelog)
 Release = generate_changelog.Release
 split_body = generate_changelog.split_body
 render_entry = generate_changelog.render_entry
+render_changelog = generate_changelog.render_changelog
 format_date = generate_changelog.format_date
 
 
@@ -87,6 +88,13 @@ class RenderEntryTests(unittest.TestCase):
         rendered = render_entry(release)
 
         self.assertEqual(rendered, "## v0.0.1 (Jan 01, 2026)\nNo Changelog")
+
+
+class RenderChangelogTests(unittest.TestCase):
+    def test_frontmatter_keeps_the_page_summary(self) -> None:
+        rendered = render_changelog([])
+
+        self.assertIn('summary: "Release history for DevBook', rendered)
 
 
 class FormatDateTests(unittest.TestCase):

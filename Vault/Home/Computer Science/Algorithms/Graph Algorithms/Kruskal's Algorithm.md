@@ -3,6 +3,7 @@ topic:
   - Computer Science
 subtopic:
   - Algorithms
+summary: "Builds a minimum spanning tree by accepting the lightest edges that join separate components."
 level:
   - "4"
 priority: Medium

@@ -3,6 +3,7 @@ topic:
   - Computer Science
 subtopic:
   - Algorithms
+summary: "Builds a minimum spanning tree in parallel rounds by adding each component's cheapest outgoing edge."
 level:
   - "4"
 priority: Medium

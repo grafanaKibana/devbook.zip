@@ -3,6 +3,7 @@ topic:
   - Computer Science
 subtopic:
   - Algorithms
+summary: "Visits every graph vertex exactly once and returns to the start; deciding existence is NP-complete."
 level:
   - "4"
 priority: Medium

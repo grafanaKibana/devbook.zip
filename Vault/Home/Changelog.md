@@ -1,5 +1,6 @@
 ---
 title: Changelog
+summary: "Release history for DevBook, grouped by platform changes, note updates, fixes, and maintenance."
 publish: true
 tags:
   - MetricsIgnore

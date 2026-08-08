@@ -3,6 +3,7 @@ topic:
   - Computer Science
 subtopic:
   - Data Structures
+summary: "Resolves hash collisions by chaining entries outside the table or probing alternative in-array slots."
 level:
   - "4"
 priority: Medium

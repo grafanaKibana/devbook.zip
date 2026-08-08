@@ -3,6 +3,7 @@ topic:
   - Computer Science
 subtopic:
   - Algorithms
+summary: "Caches pure function results by arguments so repeated subproblems return without recomputation."
 level:
   - "4"
 priority: Medium

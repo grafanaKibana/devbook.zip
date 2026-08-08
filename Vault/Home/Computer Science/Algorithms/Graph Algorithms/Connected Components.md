@@ -3,6 +3,7 @@ topic:
   - Computer Science
 subtopic:
   - Algorithms
+summary: "Partitions an undirected graph into maximal reachable vertex sets using DFS, BFS, or union-find."
 level:
   - "4"
 priority: Medium

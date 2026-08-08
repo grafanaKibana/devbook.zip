@@ -3,6 +3,7 @@ topic:
   - Computer Science
 subtopic:
   - Data Structures
+summary: "A self-adjusting BST that rotates each accessed node to the root, adapting the structure to access locality."
 level:
   - "4"
 priority: Medium
