@@ -350,7 +350,7 @@ function fullInventory() {
   const folderNotes = all.filter((path) => isFolderNote(readFileSync(path, "utf8")));
   const concepts = all.filter((path) => !folderNotes.includes(path));
   const errors = [];
-  if (concepts.length !== 90) errors.push(`inventory: expected 90 concept notes, found ${concepts.length}`);
+  if (concepts.length !== 91) errors.push(`inventory: expected 91 concept notes, found ${concepts.length}`);
   if (folderNotes.length !== 14) errors.push(`inventory: expected 14 FolderNotes, found ${folderNotes.length}`);
 
   const tabsdownPaths = concepts.filter((path) => readFileSync(path, "utf8").includes("tabsdown"));

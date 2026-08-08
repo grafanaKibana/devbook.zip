@@ -14089,6 +14089,13 @@ function parse5(config) {
       showDirection: edgeDirected
     };
   });
+  const edgeKeys = /* @__PURE__ */ new Set();
+  for (const edge of edges5) {
+    const key4 = edge.directed ? `${edge.from}|${edge.to}` : [edge.from, edge.to].sort().join("|");
+    if (edgeKeys.has(key4))
+      throw new Error("steptrace: dijkstra parallel edges are not supported.");
+    edgeKeys.add(key4);
+  }
   return {
     profile,
     nodes: nodes5,

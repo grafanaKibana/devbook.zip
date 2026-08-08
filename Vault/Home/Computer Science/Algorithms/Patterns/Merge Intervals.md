@@ -83,8 +83,8 @@ tab: Complexity
         {
           "kind": "approach",
           "label": "Merge intervals (sort, then sweep)",
-          "formula": "O(log n)",
-          "curveId": "log-n"
+          "formula": "O(n)",
+          "curveId": "linear"
         }
       ]
     }

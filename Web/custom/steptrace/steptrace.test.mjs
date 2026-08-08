@@ -1163,6 +1163,18 @@ test("Dijkstra accepts finite non-negative weights and rejects every invalid eff
     () => buildSourceFrames({ algorithm: "dijkstra", variant: "building-floor" }),
     /"variant" must be midtown-map or ukraine-cities/,
   )
+  assert.throws(
+    () =>
+      buildSourceFrames({
+        ...base,
+        directed: false,
+        edges: [
+          { from: "A", to: "B", weight: 1 },
+          { from: "B", to: "A", weight: 2 },
+        ],
+      }),
+    /parallel edges are not supported/,
+  )
 })
 
 test("Dijkstra settles each node once and returns the canonical full distances, path, and cost", () => {
