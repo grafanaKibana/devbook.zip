@@ -50,6 +50,10 @@ tab: Complexity
     "keyRange": {
       "symbol": "k",
       "description": "window width"
+    },
+    "alphabetSize": {
+      "symbol": "σ",
+      "description": "number of distinct symbols the input alphabet can contain"
     }
   },
   "resources": {
@@ -83,9 +87,8 @@ tab: Complexity
         {
           "kind": "approach",
           "label": "Sliding window",
-          "formula": "O(k)",
-          "curveFrom": "constant",
-          "curveTo": "linear"
+          "formula": "O(min(n, σ))",
+          "curveId": "linear"
         }
       ]
     }
