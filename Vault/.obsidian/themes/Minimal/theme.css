@@ -1,44 +1,9 @@
-/* ---------------------------------------------------------------------------
+/*
+Minimal Theme for Obsidian
 
-Minimal Theme by @kepano
-
-User interface replacement for Obsidian.
-
-Designed to be used with the Minimal Theme Settings 
-plugin and the Hider plugin.
-
-Sponsor my work:
-https://www.buymeacoffee.com/kepano
-
-Readme:
-https://github.com/kepano/obsidian-minimal
-
------------------------------------------------------------------------------
-
-MIT License
-
-Copyright (c) 2020-2024 Steph Ango (@kepano)
-
-Permission is hereby granted, free of charge, to any person obtaining a copy
-of this software and associated documentation files (the "Software"), to deal
-in the Software without restriction, including without limitation the rights
-to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
-copies of the Software, and to permit persons to whom the Software is
-furnished to do so, subject to the following conditions:
-
-The above copyright notice and this permission notice shall be included in 
-all copies or substantial portions of the Software.
-
-THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
-SOFTWARE.
-
+Designed to be used with Minimal Theme Settings and Hider plugins.
+MIT License. Copyright 2020-2026 Steph Ango (@kepano).
 */
-
 @charset "UTF-8";
 /* Variables */
 body {
@@ -746,50 +711,6 @@ body {
   color: var(--text-muted);
 }
 
-/* Code execution blocks, e.g. Dataview */
-.markdown-source-view.mod-cm6 .edit-block-button {
-  color: var(--text-faint);
-  background-color: var(--background-primary);
-  top: 4px;
-  opacity: 0;
-  transition: opacity 200ms;
-}
-
-.markdown-source-view.mod-cm6.is-live-preview.is-readable-line-width .cm-embed-block > .edit-block-button {
-  width: 30px !important;
-  padding-inline-start: 7px !important;
-}
-
-.is-live-preview:not(.is-readable-line-width) .cm-embed-block > .edit-block-button {
-  padding-inline-start: 0px !important;
-  margin-inline-start: 0 !important;
-  padding: 4px;
-}
-
-.markdown-source-view.mod-cm6 .edit-block-button:hover {
-  background-color: var(--background-primary);
-  color: var(--text-muted);
-}
-
-.markdown-source-view.mod-cm6 .edit-block-button svg {
-  margin: 0 !important;
-  opacity: 1;
-}
-
-.markdown-source-view.mod-cm6 .edit-block-button:hover svg {
-  opacity: 1;
-}
-
-.markdown-source-view.mod-cm6 .cm-embed-block {
-  padding: 0;
-  border: 0;
-  border-radius: 0;
-}
-
-.markdown-source-view.mod-cm6 .cm-embed-block:hover {
-  border: 0;
-}
-
 .metadata-container {
   --input-height: calc(var(--font-adaptive-small) * 2.2);
 }
@@ -1385,10 +1306,6 @@ body {
 .tooltip.mod-left,
 .tooltip.mod-right {
   animation: none;
-}
-
-.tooltip.mod-error {
-  color: var(--text-error);
 }
 
 /* Content */
@@ -2361,7 +2278,7 @@ body:is(.borders-none) .mod-root .workspace-tab-header-container:is(div, :hover)
   --tab-outline-width: 0px;
 }
 
-/* MIT License | Copyright (c) Stephan Ango (@kepano) 
+/* MIT License | Copyright (c) Steph Ango (@kepano) 
 
 Cards snippet for Obsidian
 
@@ -2484,13 +2401,6 @@ body {
 
 .links-int-on .cards table {
   --link-decoration: none;
-}
-
-/* Block button */
-.markdown-source-view.mod-cm6.cards .edit-block-button {
-  top: -1px;
-  right: 28px;
-  opacity: 1;
 }
 
 /* ------------------- */
@@ -3192,7 +3102,7 @@ body.colorful-headings .modal {
 }
 
 /* Focus mode */
-/* MIT License | Copyright (c) Stephan Ango (@kepano) */
+/* MIT License | Copyright (c) Steph Ango (@kepano) */
 /* Hide app ribbon */
 .workspace-ribbon.mod-left {
   border-left: 0;
@@ -3380,7 +3290,7 @@ body:not(.is-mobile) div.image-embed:focus-within .image-wrapper::after {
 }
 
 /* Table helper classes for alternate styles */
-/* MIT License | Copyright (c) Stephan Ango (@kepano) */
+/* MIT License | Copyright (c) Steph Ango (@kepano) */
 .table-small .bases-view {
   --bases-table-font-size: 85%;
 }
@@ -3520,7 +3430,7 @@ body:not(.is-mobile) div.image-embed:focus-within .image-wrapper::after {
 }
 
 /* Dark mode images  */
-/* MIT License | Copyright (c) Stephan Ango (@kepano) */
+/* MIT License | Copyright (c) Steph Ango (@kepano) */
 :root {
   --image-mix: normal ;
 }
@@ -3611,7 +3521,7 @@ span[src$="#interface"] img {
   border-radius: var(--radius-m);
 }
 
-/* MIT License | Copyright (c) Stephan Ango (@kepano) 
+/* MIT License | Copyright (c) Steph Ango (@kepano) 
 
 Image Grid snippet for Obsidian
 
@@ -3682,7 +3592,7 @@ body {
   display: none;
 }
 
-/* MIT License | Copyright (c) Stephan Ango (@kepano) 
+/* MIT License | Copyright (c) Steph Ango (@kepano) 
 
 Labeled Nav snippet for Obsidian
 
@@ -6624,27 +6534,16 @@ core:
 - tag-pane
 - word-count
 community:
-- buttons
 - dataview
 - calendar
 - obsidian-charts
-- obsidian-checklist-plugin
-- obsidian-codemirror-options
-- obsidian-dictionary-plugin
-- obsidian-embedded-note-titles
-- obsidian-excalidraw-plugin
 - obsidian-git
 - obsidian-hider
-- obsidian-hover-editor
 - obsidian-kanban
 - obsidian-metatable
 - obsidian-minimal-settings
-- obsidian-outliner
-- obsidian-system-dark-mode
 - obsidian-style-settings
 - quickadd
-- sliding-panes-obsidian
-- todoist-sync-plugin
 */
 
 /* @settings

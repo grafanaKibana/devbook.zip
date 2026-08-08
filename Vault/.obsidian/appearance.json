@@ -5,8 +5,8 @@
   "translucency": true,
   "showRibbon": true,
   "showViewHeader": true,
-  "interfaceFontFamily": "Schibsted Grotesk",
-  "textFontFamily": "Source Sans 3",
+  "interfaceFontFamily": "Geist,Figtree",
+  "textFontFamily": "Figtree,Geist",
   "theme": "system",
   "baseFontSize": 16,
   "enabledCssSnippets": [
@@ -14,5 +14,5 @@
     "hide-components",
     "paper-page"
   ],
-  "monospaceFontFamily": "IBM Plex Mono"
+  "monospaceFontFamily": "JetBrains Mono"
 }

@@ -30,10 +30,6 @@
         {
           "type": "note",
           "path": "Home/Topics.base"
-        },
-        {
-          "type": "note",
-          "path": "Home/Credits.md"
         }
       ],
       "propertyKeys": [
@@ -262,7 +258,9 @@
   "defaultListMode": "compact",
   "includeDescendantNotes": true,
   "defaultFolderSort": "title-asc",
+  "defaultFolderSortPropertyKey": "",
   "propertySortKey": "order",
+  "propertyGroupKey": "order",
   "propertySortSecondary": "title",
   "manualSortPropertyKey": "manual_order",
   "manualSortGroupHeaderProperty": "group_header",
@@ -294,9 +292,13 @@
   "frontmatterCreatedField": "",
   "frontmatterModifiedField": "",
   "frontmatterDateFormat": "",
-  "showFileIconUnfinishedTask": false,
+  "showFileTaskProgress": true,
+  "showFileTaskProgressBar": true,
+  "showFileTaskProgressCount": true,
+  "hideFileTaskProgressWhenComplete": false,
   "showFileBackgroundUnfinishedTask": false,
   "unfinishedTaskBackgroundColor": "#ef000050",
+  "unfinishedTaskBackgroundColorDark": "#ef000050",
   "showFileIcons": true,
   "useFolderIconForFiles": false,
   "showFilenameMatchIcons": false,
@@ -650,7 +652,7 @@
     "#404040",
     "#404040"
   ],
-  "lastShownVersion": "3.3.0",
+  "lastShownVersion": "3.3.2",
   "rootFolderOrder": [
     "Home",
     "Assets",

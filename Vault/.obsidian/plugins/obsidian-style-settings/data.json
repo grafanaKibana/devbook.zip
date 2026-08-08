@@ -105,12 +105,6 @@
   "baseline-style@@code-scroll": false,
   "baseline-style@@h1-align": "start",
   "baseline-style@@h1-transform": "normal",
-  "baseline-style@@h1-variant": "small-caps",
-  "baseline-style@@h2-variant": "small-caps",
-  "baseline-style@@h3-variant": "small-caps",
-  "baseline-style@@h4-variant": "small-caps",
-  "baseline-style@@h5-variant": "small-caps",
-  "baseline-style@@h6-variant": "small-caps",
   "baseline-style@@h1-l": true,
   "baseline-style@@h2-l": true,
   "baseline-style@@background-contrast-light": "contrast-light",
@@ -123,7 +117,6 @@
   "baseline-style@@dynamic-type-off": false,
   "baseline-style@@tab-stacked-spine-orientation": "tab-stack-top",
   "baseline-style@@p-spacing": "1.5rem",
-  "baseline-style@@readable-spacing-modifier": 0.25,
   "notebook-navigator-style-settings@@nn-theme-file-border-radius": 8,
   "baseline-style@@tab-left-style": "tab-left-compact",
   "baseline-style@@translucent-dark-opacity": 70,
@@ -142,5 +135,6 @@
   "tabsdown@@tabsdown-animation-speed": 300,
   "tabsdown@@tabsdown-nested-style": "tabsdown-nested-style-flat",
   "tabsdown@@tabsdown-underline-thickness": 3,
-  "tabsdown@@tabsdown-gap": 8
+  "tabsdown@@tabsdown-gap": 8,
+  "baseline-style@@readable-spacing-modifier": 0.25
 }
