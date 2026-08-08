@@ -23,18 +23,18 @@ tab: Visualization
 
 
 ```steptrace
-{"algorithm":"sliding-window","array":[2,3,1,2,4,3],"target":7}
+{"algorithm":"sliding-window","text":"abcabcbb"}
 ```
 
 
 
-The right boundary advances first, adding each entering element to a running sum until the sum reaches `7` and a valid window exists. The left boundary then advances, subtracting the leaving element; each contraction that keeps the sum at or above `7` produces a shorter candidate. Because non-negative values only raise the sum on entry and lower it on exit, once no shorter valid window is reachable from the current left the left boundary never moves back. Two consecutive windows differ only in their boundary elements, so the running sum is adjusted by those two elements rather than rebuilt from the window's contents.
+The trace finds the longest substring without repeating characters in `abcabcbb`. The right boundary admits `a`, `b`, and `c`, so the current window and best substring both become `abc`. When the next `a` enters at index `3`, the trace names the duplicate and marks it red before the left boundary advances past the previous `a`; the accepted window becomes `bca`, while the best remains `abc` with length `3`.
 
 
 
-Every index is added to the aggregate exactly once, when the right boundary passes it, and removed at most once, when the left boundary passes it. Neither boundary moves backward, and each movement updates only the entering or leaving element.
+Every index enters the window once and leaves at most once. A last-seen index identifies whether the entering character already exists inside the current window and moves the left boundary to one position past that duplicate; neither boundary moves backward.
 
-This accounting holds only while adding the entering element and removing the leaving element fully determine the new aggregate. A running sum qualifies (`sum += entering; sum -= leaving`); a count of elements qualifies; a frequency map keyed by symbol qualifies, because one key's count changes on entry or exit. A window maximum does not qualify because removing the maximum does not reveal the next-largest retained value, so it needs a different structure.
+This accounting holds when entry and exit update validity incrementally. A running sum, element count, or frequency map qualifies because one value changes at a boundary. A window maximum needs an additional structure because removing the maximum does not reveal the next-largest retained value.
 
 tab: Complexity
 
@@ -175,7 +175,7 @@ When two ends converge instead of trailing in the same direction, the shape is [
 > Entering or leaving one element must update the aggregate directly. A running sum and a per-key frequency count satisfy that requirement; a window maximum does not, because removing the maximum leaves no direct way to recover the next-largest element still inside the window. That case uses a monotonic deque of candidate indices instead of a scalar.
 
 > [!QUESTION]- Why do negative numbers break sum-based sliding windows?
-> The contraction rule "shrink while the sum exceeds the target" relies on the sum rising on every entry and falling on every removal, which makes the smallest valid window length monotone as the right boundary advances. Negatives remove that monotonicity — a longer window can carry a smaller sum — so a failed window can become valid by extending. Those problems use prefix sums plus a hash map rather than a moving window.
+> The contraction rule "shrink while the sum exceeds the target" relies on the sum rising on every entry and falling on every removal, which makes the smallest valid window length monotone as the right boundary advances. Negatives remove that monotonicity — a longer window can carry a smaller sum — so a failed window can become valid by extending. The replacement depends on the objective: exact-target sums can use prefix sums plus a hash map, while shortest-sum-at-least-`K` uses prefix sums plus a monotonic deque.
 
 # References
 

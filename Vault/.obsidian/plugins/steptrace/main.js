@@ -1085,6 +1085,9 @@ function makeArrayStrip(values) {
 }
 function makePointerView(frames) {
   const n = frames[0].array.length;
+  const sliding = frames.some(
+    (frame) => frame.bestRange || frame.enteringIndex != null || frame.duplicateIndex != null
+  );
   const ptrNames = (function() {
     for (const f of frames) {
       const ks = Object.keys(f.pointers || {});
@@ -1106,7 +1109,10 @@ function makePointerView(frames) {
       const c = cells[k];
       c.textContent = frame.array[k];
       let state = "";
-      if (win && k >= win[0] && k <= win[1]) state = matched ? "match" : "window";
+      if (win && k >= win[0] && k <= win[1]) state = "window";
+      if (frame.marked?.includes(k)) state = "match";
+      if (frame.enteringIndex === k) state = "entering";
+      if (frame.duplicateIndex === k) state = "duplicate";
       c.dataset.state = state;
       c.dataset.end = win && k === win[0] ? "l" : win && k === win[1] ? "r" : "";
     }
@@ -1134,7 +1140,7 @@ function makePointerView(frames) {
       j: "var(--_violet)"
     };
     const p = frame.pointers || {};
-    return ptrNames.map((name) => {
+    const rows = ptrNames.map((name) => {
       const idx = p[name];
       return {
         k: name,
@@ -1142,6 +1148,22 @@ function makePointerView(frames) {
         sw: color[name.toLowerCase()] || "var(--_muted)"
       };
     });
+    if (!sliding) return rows;
+    const window = frame.window;
+    const bestRange = frame.bestRange;
+    rows.push(
+      {
+        k: "window",
+        v: window ? `[${window[0]}..${window[1]}] "${frame.array.slice(window[0], window[1] + 1).join("")}" len=${window[1] - window[0] + 1}` : "—",
+        sw: "var(--_blue)"
+      },
+      {
+        k: "best",
+        v: bestRange ? `"${frame.array.slice(bestRange[0], bestRange[1] + 1).join("")}" (length ${bestRange[1] - bestRange[0] + 1})` : "—",
+        sw: "var(--_green)"
+      }
+    );
+    return rows;
   }
   return { nodes: [wrap, status], paint, watch };
 }
@@ -3851,9 +3873,9 @@ var init_activity_selection = __esm({
 });
 
 // custom/steptrace/src/families/interactive-structure.ts
-function createStructureShell(root, id, label, ariaLabel, family10 = "contiguous-storage", stageClass = "steptrace__contiguous") {
+function createStructureShell(root, id, label, ariaLabel, family11 = "contiguous-storage", stageClass = "steptrace__contiguous") {
   root.classList.add("steptrace", "steptrace--structure");
-  root.dataset.visualFamily = family10;
+  root.dataset.visualFamily = family11;
   root.dataset.structure = id;
   root.setAttribute("role", "group");
   root.setAttribute("aria-label", ariaLabel);
@@ -5404,7 +5426,8 @@ function graphStateSummary(frame) {
     case "dual-search":
       return frame.detail.meeting ? `Frontiers meet at ${frame.detail.meeting}.` : "No meeting point was found.";
     case "edge-relaxation":
-      return `Distances ${Object.entries(frame.detail.distances).map(([id, value]) => `${id}:${value}`).join(", ")}.`;
+      if (frame.target && frame.type === "done") return frame.message;
+      return `Distances ${Object.entries(frame.detail.distances).map(([id, value]) => `${id}:${Number.isFinite(value) ? value : "∞"}`).join(", ")}.`;
     case "component-flood":
       return `${frame.detail.groups?.length ?? frame.detail.component} connected components.`;
     case "low-link-cuts":
@@ -5715,8 +5738,19 @@ function makeGraphStateView(frames) {
           { k: "meeting", v: frame.detail.meeting || "—", sw: "var(--_violet)" }
         );
         break;
-      case "edge-relaxation":
+      case "edge-relaxation": {
+        const distances = frame.detail.distances;
+        const distanceWatch = frame.nodes.map(({ id }) => {
+          const value = distances[id];
+          return `${id}:${Number.isFinite(value) ? value : "∞"}`;
+        }).join(" · ");
         rows.push(
+          {
+            k: "distances",
+            v: distanceWatch,
+            sw: "var(--_blue)",
+            hint: distanceWatch
+          },
           { k: "pass", v: String(frame.detail.pass), sw: "var(--_violet)" },
           { k: "edge", v: frame.detail.edge?.join(" → ") || "—", sw: "var(--_amber)" },
           {
@@ -5726,6 +5760,7 @@ function makeGraphStateView(frames) {
           }
         );
         break;
+      }
       case "component-flood":
         rows.push(
           { k: "component", v: String(frame.detail.component), sw: "var(--_violet)" },
@@ -6743,12 +6778,12 @@ function layeredLayout(rawNodes, rawEdges, directed, start) {
     undirected.get(edge.to).push(edge.from);
   }
   const layer = /* @__PURE__ */ new Map();
-  const assignBfsLayers = (adjacency2, root) => {
+  const assignBfsLayers = (adjacency3, root) => {
     const queue2 = idSet.has(root) ? [root] : [];
     if (queue2.length) layer.set(root, 0);
     for (let head = 0; head < queue2.length; head++) {
       const current = queue2[head];
-      for (const neighbour of adjacency2.get(current) ?? []) {
+      for (const neighbour of adjacency3.get(current) ?? []) {
         if (!layer.has(neighbour)) {
           layer.set(neighbour, layer.get(current) + 1);
           queue2.push(neighbour);
@@ -7719,6 +7754,9 @@ var init_recorders = __esm({
         this.pointers = {};
         this.window = null;
         this.marked = [];
+        this.bestRange = null;
+        this.enteringIndex = null;
+        this.duplicateIndex = null;
       }
       get value() {
         return this.a.slice();
@@ -7731,9 +7769,14 @@ var init_recorders = __esm({
             pointers: { ...this.pointers },
             window: this.window ? this.window.slice() : null,
             marked: this.marked.slice(),
+            bestRange: this.bestRange ? this.bestRange.slice() : null,
+            enteringIndex: this.enteringIndex,
+            duplicateIndex: this.duplicateIndex,
             message
           })
         );
+        this.enteringIndex = null;
+        this.duplicateIndex = null;
       }
       init(message) {
         this._push("init", message);
@@ -7743,6 +7786,9 @@ var init_recorders = __esm({
         update = update || {};
         if (update.pointers) this.pointers = { ...update.pointers };
         if ("window" in update) this.window = update.window ? update.window.slice() : null;
+        if ("bestRange" in update && update.bestRange) this.bestRange = update.bestRange.slice();
+        this.enteringIndex = update.enteringIndex ?? null;
+        this.duplicateIndex = update.duplicateIndex ?? null;
         if (update.mark) this.marked = this.marked.concat(update.mark);
         this._push(update.mark ? "match" : "step", message);
       }
@@ -9590,7 +9636,7 @@ function mountHashTable(root, config, content) {
       lock(false);
     });
   }
-  function run6(plan) {
+  function run7(plan) {
     if (motionTimer != null || activeAnimations.length) return;
     calculation.textContent = plan.calculation;
     tokenInline.textContent = content === "map" ? `${plan.key}:${plan.value || "?"}` : String(plan.key);
@@ -9931,7 +9977,7 @@ function mountHashTable(root, config, content) {
     const key4 = suppliedPutKey();
     if (key4 == null) return;
     const value = content === "map" ? suppliedPutValue() : "";
-    run6(
+    run7(
       config.strategy === "closed-addressing" ? closedPut(key4, value) : config.strategy === "open-addressing" ? openPut(key4, value) : bucketPut(key4, value)
     );
   }
@@ -9942,7 +9988,7 @@ function mountHashTable(root, config, content) {
       return generated;
     })();
     if (key4 == null) return;
-    run6(
+    run7(
       config.strategy === "closed-addressing" ? closedSearch(key4, removeEntry) : config.strategy === "open-addressing" ? openSearch(key4, removeEntry) : bucketSearch(key4, removeEntry)
     );
   }
@@ -10060,7 +10106,7 @@ function mountBloomFilter(root, _config) {
     paint();
     lock(false);
   }
-  function run6(kind) {
+  function run7(kind) {
     if (timer != null) return;
     const value = suppliedValue();
     const positions = bloomPositions(value);
@@ -10105,10 +10151,10 @@ function mountBloomFilter(root, _config) {
     shell.status.textContent = "Bloom filter reset.";
     paint();
   }
-  shell.listen(add, "click", () => run6("add"));
-  shell.listen(query, "click", () => run6("query"));
+  shell.listen(add, "click", () => run7("add"));
+  shell.listen(query, "click", () => run7("query"));
   shell.listen(reset, "click", onReset);
-  onEnter(shell, valueInput, () => run6("add"));
+  onEnter(shell, valueInput, () => run7("add"));
   shell.status.textContent = "Fixed 10-bit Bloom filter ready.";
   paint();
   const base = shell.finish();
@@ -13997,79 +14043,226 @@ var init_dfs = __esm({
 });
 
 // custom/steptrace/src/algorithms/dijkstra.ts
-var dijkstra;
+function parse5(config) {
+  const variant = config.variant == null ? null : String(config.variant);
+  if (variant && variant !== "midtown-map" && variant !== "ukraine-cities") {
+    throw new Error('steptrace: dijkstra "variant" must be midtown-map or ukraine-cities.');
+  }
+  let profile = "dijkstra";
+  let decor = [];
+  let nodes5;
+  let edges5;
+  let start;
+  let target;
+  let directed = null;
+  if (variant) {
+    const scenario = parseGraphStateConfig({ ...config, variant });
+    const ids = new Set(scenario.nodes.map(({ id }) => id));
+    profile = scenario.profile;
+    decor = scenario.decor;
+    nodes5 = scenario.nodes;
+    edges5 = scenario.edges;
+    start = ids.has(String(config.start)) ? String(config.start) : scenario.start;
+    target = ids.has(String(config.target)) ? String(config.target) : scenario.target;
+  } else {
+    const graph = normalizeGraph(config);
+    nodes5 = graph.nodes.map((node2) => ({ ...node2, label: node2.id }));
+    edges5 = graph.edges.map((edge) => ({
+      ...edge,
+      weight: edge.weight ?? 1
+    }));
+    directed = graph.directed;
+    start = graph.start;
+    const requestedTarget = config.target == null ? nodes5.at(-1).id : String(config.target);
+    target = nodes5.some(({ id }) => id === requestedTarget) ? requestedTarget : nodes5.at(-1).id;
+  }
+  edges5 = edges5.map((edge) => {
+    const weight = edge.weight ?? 1;
+    if (!Number.isFinite(weight) || weight < 0)
+      throw new Error("steptrace: dijkstra edge weights must be finite and non-negative.");
+    const edgeDirected = directed ?? Boolean(edge.directed);
+    return {
+      ...edge,
+      weight,
+      label: String(weight),
+      directed: edgeDirected,
+      showDirection: edgeDirected
+    };
+  });
+  return {
+    profile,
+    nodes: nodes5,
+    edges: edges5,
+    decor,
+    start,
+    target,
+    endpointSettings: {
+      startLabel: "From",
+      targetLabel: "To",
+      options: nodes5.map(({ id, label }) => ({ value: id, label })),
+      start,
+      target
+    }
+  };
+}
+function adjacency2(config) {
+  const result = new Map(
+    config.nodes.map(({ id }) => [id, []])
+  );
+  for (const edge of config.edges) {
+    result.get(edge.from).push({ to: edge.to, weight: edge.weight });
+    if (!edge.directed) result.get(edge.to).push({ to: edge.from, weight: edge.weight });
+  }
+  for (const neighbours of result.values())
+    neighbours.sort((left, right) => left.to.localeCompare(right.to));
+  return result;
+}
+function run5(config, recorder) {
+  const neighbours = adjacency2(config);
+  const distances = Object.fromEntries(
+    config.nodes.map(({ id }) => [id, id === config.start ? 0 : Infinity])
+  );
+  const predecessor = {};
+  const settled = /* @__PURE__ */ new Set();
+  recorder.record(
+    "init",
+    null,
+    null,
+    distances,
+    settled,
+    [],
+    false,
+    `Set dist[${config.start}] = 0; all other distances start at ∞.`
+  );
+  while (settled.size < config.nodes.length) {
+    const current = config.nodes.map(({ id }) => id).filter((id) => !settled.has(id) && Number.isFinite(distances[id])).sort((left, right) => distances[left] - distances[right] || left.localeCompare(right))[0];
+    if (!current) break;
+    settled.add(current);
+    recorder.record(
+      "expand",
+      current,
+      null,
+      distances,
+      settled,
+      [],
+      false,
+      `Settle ${current} at distance ${distances[current]}; its shortest distance is final.`
+    );
+    for (const edge of neighbours.get(current)) {
+      if (settled.has(edge.to)) continue;
+      const candidate = distances[current] + edge.weight;
+      const before = distances[edge.to];
+      const changed = candidate < before;
+      if (changed) {
+        distances[edge.to] = candidate;
+        predecessor[edge.to] = current;
+      }
+      recorder.record(
+        "relax",
+        current,
+        [current, edge.to],
+        distances,
+        settled,
+        [],
+        changed,
+        changed ? `Relax ${current} → ${edge.to}: ${candidate} improves ${Number.isFinite(before) ? before : "∞"}.` : `Keep dist[${edge.to}] = ${before}; ${candidate} is not shorter.`
+      );
+    }
+  }
+  if (!Number.isFinite(distances[config.target])) {
+    recorder.record(
+      "done",
+      null,
+      null,
+      distances,
+      settled,
+      [],
+      false,
+      `${config.target} is unreachable from ${config.start}.`
+    );
+    return;
+  }
+  const path = [config.target];
+  while (path[0] !== config.start) path.unshift(predecessor[path[0]]);
+  const selectedEdges = path.slice(1).map((to, index) => `${path[index]}|${to}`);
+  recorder.record(
+    "done",
+    null,
+    null,
+    distances,
+    settled,
+    selectedEdges,
+    false,
+    `Shortest path ${path.join(" → ")} — total cost ${distances[config.target]}.`
+  );
+}
+var Recorder6, family6, dijkstra;
 var init_dijkstra = __esm({
   "custom/steptrace/src/algorithms/dijkstra.ts"() {
+    init_graph_state();
+    init_graph();
+    Recorder6 = class {
+      constructor(config) {
+        this.config = config;
+      }
+      config;
+      frames = [];
+      record(type, currentNode, currentEdge, distances, settled, selectedEdges, changed, message) {
+        const frontier = new Set(
+          this.config.nodes.map(({ id }) => id).filter((id) => Number.isFinite(distances[id]) && !settled.has(id))
+        );
+        const nodeState = Object.fromEntries(
+          this.config.nodes.map(({ id }) => [
+            id,
+            id === currentNode ? "active" : settled.has(id) ? "closed" : frontier.has(id) ? "frontier" : "neutral"
+          ])
+        );
+        const edgeState = Object.fromEntries(
+          this.config.edges.map((edge) => {
+            const key4 = `${edge.from}|${edge.to}`;
+            const reverseKey = `${edge.to}|${edge.from}`;
+            const selected = selectedEdges.includes(key4) || !edge.directed && selectedEdges.includes(reverseKey);
+            const active = currentEdge && (currentEdge[0] === edge.from && currentEdge[1] === edge.to || !edge.directed && currentEdge[0] === edge.to && currentEdge[1] === edge.from);
+            return [key4, selected ? "accepted" : active ? "active" : "neutral"];
+          })
+        );
+        const detail = {
+          kind: "edge-relaxation",
+          pass: settled.size,
+          edge: currentEdge,
+          distances: { ...distances },
+          changed
+        };
+        this.frames.push({
+          type,
+          profile: this.config.profile,
+          nodes: this.config.nodes,
+          edges: this.config.edges,
+          decor: this.config.decor,
+          start: this.config.start,
+          target: this.config.target,
+          currentNode,
+          currentEdge,
+          selectedEdges: [...selectedEdges],
+          nodeState,
+          edgeState,
+          message,
+          detail
+        });
+      }
+    };
+    family6 = {
+      id: "graph-state",
+      createRecorder: (config) => new Recorder6(config),
+      createView: makeGraphStateView
+    };
     dijkstra = {
       id: "dijkstra",
       kind: "graph",
-      meta: { label: "Dijkstra", frontierLabel: "Frontier (settle nearest first)" },
-      run: (input, ops, graph) => {
-        const adj = {};
-        for (const nd of graph.nodes) adj[nd.id] = [];
-        for (const e of graph.edges) {
-          const w = e.weight == null ? 1 : e.weight;
-          adj[e.from].push({ to: e.to, w });
-          if (!graph.directed) adj[e.to].push({ to: e.from, w });
-        }
-        for (const id in adj) adj[id].sort((a, b) => a.to < b.to ? -1 : 1);
-        const start = input.start;
-        const target = input.target != null ? String(input.target) : null;
-        if (target) ops.target(target);
-        ops.init(
-          `Dijkstra from ${start} — settle the nearest node, then relax its edges to shorten distances.`
-        );
-        const dist = { [start]: 0 };
-        const pred = {};
-        const settled = /* @__PURE__ */ new Set();
-        const inQ = /* @__PURE__ */ new Set([start]);
-        ops.enqueue(start, 0, `Start ${start} at distance 0.`);
-        while (inQ.size) {
-          let u = null;
-          for (const id of inQ) if (u === null || dist[id] < dist[u]) u = id;
-          inQ.delete(u);
-          settled.add(u);
-          ops.visit(u, `Settle ${u} (distance ${dist[u]}) — its shortest distance is now final.`);
-          for (const { to: v, w } of adj[u]) {
-            if (settled.has(v)) continue;
-            ops.edge(u, v, `Explore edge ${u} → ${v} (weight ${w}).`);
-            const nd = dist[u] + w;
-            if (dist[v] === void 0 || nd < dist[v]) {
-              const had = dist[v] !== void 0;
-              dist[v] = nd;
-              pred[v] = u;
-              inQ.add(v);
-              ops.relax(
-                v,
-                nd,
-                had ? `Relax ${v}: a shorter path via ${u} improves its distance to ${nd}.` : `Relax ${v}: reach it via ${u} at distance ${nd}.`
-              );
-            }
-          }
-        }
-        if (target !== null) {
-          if (dist[target] === void 0) {
-            ops.done(`${target} is unreachable from ${start}.`);
-          } else {
-            const path = [target];
-            for (let cur = target; pred[cur] !== void 0; cur = pred[cur]) path.push(pred[cur]);
-            path.reverse();
-            for (let i = 0; i + 1 < path.length; i++)
-              ops.selectEdge(
-                path[i],
-                path[i + 1],
-                `Shortest path: keep edge ${path[i]}–${path[i + 1]} highlighted.`
-              );
-            ops.done(`Shortest path ${path.join(" → ")} — total cost ${dist[target]}.`);
-          }
-        } else {
-          const reached = graph.nodes.map((n) => n.id).filter((id) => id !== start && pred[id] !== void 0);
-          reached.sort();
-          for (const v of reached)
-            ops.selectEdge(pred[v], v, `Shortest-path tree: ${pred[v]}–${v} (distance ${dist[v]}).`);
-          ops.done(`Dijkstra complete — shortest-path tree from ${start} highlighted.`);
-        }
-      }
+      family: family6,
+      meta: { label: "Dijkstra" },
+      parse: parse5,
+      run: run5
     };
   }
 });
@@ -14624,10 +14817,10 @@ var init_dp_problems = __esm({
 });
 
 // custom/steptrace/src/algorithms/dynamic-programming.ts
-function storyAlgorithm(id, label, parse7, run6) {
-  return { id, kind: "dp", family: dpStoryFamily, meta: { label }, parse: parse7, run: run6 };
+function storyAlgorithm(id, label, parse8, run7) {
+  return { id, kind: "dp", family: dpStoryFamily, meta: { label }, parse: parse8, run: run7 };
 }
-function treeAlgorithm(id, label, profile, run6) {
+function treeAlgorithm(id, label, profile, run7) {
   return {
     id,
     kind: "rectree",
@@ -14637,17 +14830,17 @@ function treeAlgorithm(id, label, profile, run6) {
       if (config.variant !== void 0) throw new Error(`steptrace: ${id} does not take a variant.`);
       return { profile };
     },
-    run: run6
+    run: run7
   };
 }
-function tableAlgorithm(id, label, profile, run6) {
+function tableAlgorithm(id, label, profile, run7) {
   return {
     id,
     kind: "dp",
     family: dpProblemTableFamily,
     meta: { label },
     parse: dpTableConfig(profile),
-    run: run6
+    run: run7
   };
 }
 var greedyWarehousePath, optimalWarehousePath, coinAmounts, availableCoins, coinChangeGreedy, coinChangeNaive, coinChangeMemoization, coinChangeTabulation, coinChangeTopDown, coinChangeBottomUp, gridPathGreedy, gridPathNaive, gridPathMemoization, gridPathTabulation, gridPathTopDown, gridPathBottomUp, dynamicProgrammingAlgorithms;
@@ -17018,7 +17211,7 @@ var init_fibonacci_heap = __esm({
 });
 
 // custom/steptrace/src/algorithms/greedy-best-first-search.ts
-function parse5(config) {
+function parse6(config) {
   return {
     ...parseGraphStateConfig({ ...config, variant: "coordinate-grid" }),
     policy: "greedy"
@@ -17105,7 +17298,7 @@ var init_greedy_best_first_search = __esm({
       kind: "graph",
       family: graphStateFamily,
       meta: { label: "Greedy Best-First Search" },
-      parse: parse5,
+      parse: parse6,
       run: runGreedyBestFirst
     };
   }
@@ -17557,7 +17750,7 @@ var init_heap_sort = __esm({
 });
 
 // custom/steptrace/src/algorithms/hamiltonian-cycle.ts
-var nodes2, edges2, edgeKey2, Recorder6, family6, hamiltonianCycle;
+var nodes2, edges2, edgeKey2, Recorder7, family7, hamiltonianCycle;
 var init_hamiltonian_cycle = __esm({
   "custom/steptrace/src/algorithms/hamiltonian-cycle.ts"() {
     init_graph_state();
@@ -17578,7 +17771,7 @@ var init_hamiltonian_cycle = __esm({
       const edge = edges2.find((candidate) => candidate.from === left && candidate.to === right || candidate.from === right && candidate.to === left);
       return edge ? `${edge.from}|${edge.to}` : "";
     };
-    Recorder6 = class {
+    Recorder7 = class {
       frames = [];
       add(message, path, candidates, rejected = [], rejectedEdge = null) {
         const nodeState = {};
@@ -17621,15 +17814,15 @@ var init_hamiltonian_cycle = __esm({
         });
       }
     };
-    family6 = {
+    family7 = {
       id: "graph-state",
-      createRecorder: () => new Recorder6(),
+      createRecorder: () => new Recorder7(),
       createView: makeGraphStateView
     };
     hamiltonianCycle = {
       id: "hamiltonian-cycle",
       kind: "graph",
-      family: family6,
+      family: family7,
       meta: { label: "Hamiltonian Cycle" },
       parse: () => ({ nodes: nodes2, edges: edges2 }),
       run(_config, recorder) {
@@ -18079,7 +18272,7 @@ var init_kmp = __esm({
 });
 
 // custom/steptrace/src/algorithms/kruskal.ts
-var nodes3, edges3, key2, Recorder7, family7, kruskal;
+var nodes3, edges3, key2, Recorder8, family8, kruskal;
 var init_kruskal = __esm({
   "custom/steptrace/src/algorithms/kruskal.ts"() {
     init_graph_state();
@@ -18096,7 +18289,7 @@ var init_kruskal = __esm({
       { from: "C", to: "D", weight: 4, label: "4" }
     ];
     key2 = (edge) => `${edge.from}|${edge.to}`;
-    Recorder7 = class {
+    Recorder8 = class {
       frames = [];
       add(message, components, pending, accepted, current = null, rejected = null) {
         const nodeState = {};
@@ -18134,15 +18327,15 @@ var init_kruskal = __esm({
         });
       }
     };
-    family7 = {
+    family8 = {
       id: "graph-state",
-      createRecorder: () => new Recorder7(),
+      createRecorder: () => new Recorder8(),
       createView: makeGraphStateView
     };
     kruskal = {
       id: "kruskal",
       kind: "graph",
-      family: family7,
+      family: family8,
       meta: { label: "Kruskal's MST" },
       parse: () => ({ nodes: nodes3, edges: edges3 }),
       run(_config, recorder) {
@@ -18642,7 +18835,7 @@ var init_merge_intervals = __esm({
 });
 
 // custom/steptrace/src/algorithms/maximum-flow.ts
-var nodes4, edges4, key3, Recorder8, family8, maximumFlow;
+var nodes4, edges4, key3, Recorder9, family9, maximumFlow;
 var init_maximum_flow = __esm({
   "custom/steptrace/src/algorithms/maximum-flow.ts"() {
     init_graph_state();
@@ -18660,7 +18853,7 @@ var init_maximum_flow = __esm({
       { from: "b", to: "t", weight: 1, directed: true, showDirection: true }
     ];
     key3 = (from, to) => `${from}|${to}`;
-    Recorder8 = class {
+    Recorder9 = class {
       frames = [];
       add(message, path, flow, totalFlow, bottleneck = null) {
         const nodeState = {};
@@ -18702,15 +18895,15 @@ var init_maximum_flow = __esm({
         });
       }
     };
-    family8 = {
+    family9 = {
       id: "graph-state",
-      createRecorder: () => new Recorder8(),
+      createRecorder: () => new Recorder9(),
       createView: makeGraphStateView
     };
     maximumFlow = {
       id: "maximum-flow",
       kind: "graph",
-      family: family8,
+      family: family9,
       meta: { label: "Maximum Flow" },
       parse: () => ({ nodes: nodes4, edges: edges4 }),
       run(_config, recorder) {
@@ -19954,45 +20147,43 @@ var init_sliding_window = __esm({
       id: "sliding-window",
       kind: "pointers",
       meta: { label: "Sliding window" },
-      run: (input, ops) => {
+      run: (_input, ops) => {
         const a = ops.value;
-        const target = input.target;
-        ops.init(
-          `Sliding window finds the shortest subarray with sum ≥ ${target}: expand right; shrink left while valid.`
-        );
+        ops.init("Sliding window finds the longest substring without repeating characters.");
         let lo = 0;
-        let sum = 0;
-        let best = Infinity;
+        let best = 0;
         let bestRange = null;
+        const lastSeen = /* @__PURE__ */ new Map();
         for (let hi = 0; hi < a.length; hi++) {
-          sum += a[hi];
-          ops.step(
-            { pointers: { lo, hi }, window: [lo, hi] },
-            `Expand right to index ${hi}: window sum = ${sum}.`
-          );
-          while (sum >= target) {
-            if (hi - lo + 1 < best) {
-              best = hi - lo + 1;
-              bestRange = [lo, hi];
-            }
+          const character = a[hi];
+          const duplicate = lastSeen.get(character);
+          if (duplicate != null && duplicate >= lo) {
             ops.step(
-              { pointers: { lo, hi }, window: [lo, hi] },
-              `Sum ${sum} ≥ ${target} (length ${hi - lo + 1}) — record it, then shrink from the left.`
+              { pointers: { lo, hi }, window: [lo, hi], bestRange, duplicateIndex: hi },
+              `Duplicate "${character}" enters at index ${hi}; move left past its previous index ${duplicate}.`
             );
-            sum -= a[lo];
-            lo++;
+            lo = duplicate + 1;
           }
+          lastSeen.set(character, hi);
+          if (hi - lo + 1 > best) {
+            best = hi - lo + 1;
+            bestRange = [lo, hi];
+          }
+          ops.step(
+            { pointers: { lo, hi }, window: [lo, hi], bestRange, enteringIndex: hi },
+            `Accept "${character}" at index ${hi}: window "${a.slice(lo, hi + 1).join("")}" has length ${hi - lo + 1}.`
+          );
         }
         if (bestRange) {
           const marks = [];
           for (let k = bestRange[0]; k <= bestRange[1]; k++) marks.push(k);
           ops.step(
-            { pointers: {}, window: bestRange, mark: marks },
-            `Shortest window: indices ${bestRange[0]}..${bestRange[1]} (length ${best}).`
+            { pointers: {}, window: bestRange, bestRange, mark: marks },
+            `Best substring: "${a.slice(bestRange[0], bestRange[1] + 1).join("")}" (length ${best}).`
           );
-          ops.done(`Answer: the shortest qualifying length is ${best}.`);
+          ops.done(`Answer: the longest unique substring has length ${best}.`);
         } else {
-          ops.done(`No subarray reaches ${target}.`);
+          ops.done("The empty string has no non-empty substring.");
         }
       }
     };
@@ -20242,7 +20433,7 @@ var init_top_k_elements = __esm({
 });
 
 // custom/steptrace/src/algorithms/strongly-connected-components.ts
-function parse6() {
+function parse7() {
   return {
     nodes: [
       { id: "A", label: "A", x: 85, y: 120 },
@@ -20261,7 +20452,7 @@ function parse6() {
     ]
   };
 }
-function run5(_, recorder) {
+function run6(_, recorder) {
   const disc = {};
   const low = {};
   const stack2 = [];
@@ -20291,11 +20482,11 @@ function run5(_, recorder) {
   recorder.record("component", "A", null, disc, low, stack2, components, "low[A] = disc[A]; pop C, B, A as one SCC.");
   recorder.record("done", null, null, disc, low, stack2, components, "SCCs: {D,E} and {A,B,C}.");
 }
-var Recorder9, family9, stronglyConnectedComponents;
+var Recorder10, family10, stronglyConnectedComponents;
 var init_strongly_connected_components = __esm({
   "custom/steptrace/src/algorithms/strongly-connected-components.ts"() {
     init_graph_state();
-    Recorder9 = class {
+    Recorder10 = class {
       constructor(config) {
         this.config = config;
       }
@@ -20322,14 +20513,14 @@ var init_strongly_connected_components = __esm({
         });
       }
     };
-    family9 = { id: "graph-state", createRecorder: (config) => new Recorder9(config), createView: makeGraphStateView };
+    family10 = { id: "graph-state", createRecorder: (config) => new Recorder10(config), createView: makeGraphStateView };
     stronglyConnectedComponents = {
       id: "strongly-connected-components",
       kind: "graph",
-      family: family9,
+      family: family10,
       meta: { label: "Strongly Connected Components" },
-      parse: parse6,
-      run: run5
+      parse: parse7,
+      run: run6
     };
   }
 });
@@ -20397,18 +20588,19 @@ var init_two_pointers = __esm({
         let r = a.length - 1;
         while (l < r) {
           const sum = a[l] + a[r];
-          ops.step(
-            { pointers: { L: l, R: r }, window: [l, r] },
-            `a[${l}] + a[${r}] = ${a[l]} + ${a[r]} = ${sum}.`
-          );
           if (sum === target) {
             ops.step(
               { pointers: { L: l, R: r }, window: [l, r], mark: [l, r] },
-              `${a[l]} + ${a[r]} = ${target} — found the pair.`
+              `arr[${l}] + arr[${r}] = ${a[l]} + ${a[r]} = ${target} ✓`
             );
             ops.done(`Found a pair at indices ${l} and ${r}.`);
             return;
           }
+          const move = sum < target ? "move L →" : "← move R";
+          ops.step(
+            { pointers: { L: l, R: r }, window: [l, r] },
+            `arr[${l}] + arr[${r}] = ${a[l]} + ${a[r]} = ${sum} ${sum < target ? "<" : ">"} ${target} → ${move}`
+          );
           if (sum < target) l++;
           else r--;
         }
@@ -20937,14 +21129,14 @@ var init_ternary_search_tree = __esm({
 });
 
 // custom/steptrace/src/families/run-stack.ts
-function runLabel(run6) {
-  return `[${run6.start}…${run6.start + run6.length - 1}] · ${run6.length}`;
+function runLabel(run7) {
+  return `[${run7.start}…${run7.start + run7.length - 1}] · ${run7.length}`;
 }
 function stackRunFor(frame, index) {
   return frame.stack[index] || null;
 }
 function runAt(frame, index) {
-  return frame.stack.findIndex((run6) => run6.start <= index && index < run6.start + run6.length);
+  return frame.stack.findIndex((run7) => run7.start <= index && index < run7.start + run7.length);
 }
 function runStackWatch(frame) {
   const top = frame.stack.at(-1);
@@ -20963,7 +21155,7 @@ function runStackWatch(frame) {
     },
     {
       k: "stack",
-      v: frame.stack.map((run6) => run6.length).join(" · ") || "empty",
+      v: frame.stack.map((run7) => run7.length).join(" · ") || "empty",
       sw: "var(--_amber)",
       hint: "Saved contiguous run lengths, from stack bottom to top."
     },
@@ -21028,20 +21220,20 @@ function makeRunStackView(frames) {
     }
     for (let cardIndex = 0; cardIndex < stackCards.length; cardIndex++) {
       const card = stackCards[cardIndex];
-      const run6 = stackRunFor(frame, frame.stack.length - cardIndex - 1);
-      if (!run6) {
+      const run7 = stackRunFor(frame, frame.stack.length - cardIndex - 1);
+      if (!run7) {
         card.card.hidden = true;
         continue;
       }
       const stackIndex = frame.stack.length - cardIndex - 1;
       card.card.hidden = false;
-      card.title.textContent = `R${stackIndex + 1} ${runLabel(run6)}`;
-      card.values.textContent = `[${frame.array.slice(run6.start, run6.start + run6.length).join(", ")}]`;
-      card.card.dataset.active = frame.current?.start === run6.start ? "1" : "0";
+      card.title.textContent = `R${stackIndex + 1} ${runLabel(run7)}`;
+      card.values.textContent = `[${frame.array.slice(run7.start, run7.start + run7.length).join(", ")}]`;
+      card.card.dataset.active = frame.current?.start === run7.start ? "1" : "0";
       card.card.dataset.merged = frame.mergeIndex != null && (stackIndex === frame.mergeIndex || stackIndex === frame.mergeIndex + 1) ? "1" : "0";
       card.card.dataset.run = String(stackIndex % 4);
       const previous = previousStack[stackIndex];
-      card.card.dataset.motion = frame.type === "push" && stackIndex === frame.stack.length - 1 ? "push" : frame.type === "check" ? "check" : frame.type === "merge" || frame.type === "force-merge" ? "merge" : previous?.start !== run6.start || previous?.length !== run6.length ? "reflow" : "";
+      card.card.dataset.motion = frame.type === "push" && stackIndex === frame.stack.length - 1 ? "push" : frame.type === "check" ? "check" : frame.type === "merge" || frame.type === "force-merge" ? "merge" : previous?.start !== run7.start || previous?.length !== run7.length ? "reflow" : "";
     }
     const check = frame.invariant;
     invariant.textContent = check ? `X=${check.x ?? "—"}, Y=${check.y ?? "—"}, Z=${check.z ?? "—"}${check.holds == null ? "" : check.holds ? " · holds" : " · merge"}` : frame.type === "force-merge" ? "Final collapse: merge adjacent runs until one remains." : `minrun ${frame.minrun} · ${frame.merges} merge${frame.merges === 1 ? "" : "s"}`;
@@ -21083,38 +21275,38 @@ var init_run_stack = __esm({
       init(message) {
         this.pushFrame("init", message);
       }
-      detect(run6, direction, message) {
-        this.current = { ...run6 };
+      detect(run7, direction, message) {
+        this.current = { ...run7 };
         this.direction = direction;
         this.insertion = null;
         this.mergeIndex = null;
         this.invariant = null;
         this.pushFrame("detect", message);
       }
-      reverse(run6, message) {
-        this.array.splice(run6.start, run6.length, ...this.array.slice(run6.start, run6.start + run6.length).reverse());
-        this.current = { ...run6 };
+      reverse(run7, message) {
+        this.array.splice(run7.start, run7.length, ...this.array.slice(run7.start, run7.start + run7.length).reverse());
+        this.current = { ...run7 };
         this.pushFrame("reverse", message);
       }
-      extend(run6, message) {
-        this.current = { ...run6 };
+      extend(run7, message) {
+        this.current = { ...run7 };
         this.insertion = null;
         this.pushFrame("extend", message);
       }
-      insert(run6, source, target, sortedEnd, message) {
+      insert(run7, source, target, sortedEnd, message) {
         const value = this.array[source];
         for (let index = source; index > target; index--) this.array[index] = this.array[index - 1];
         this.array[target] = value;
-        this.current = { ...run6 };
+        this.current = { ...run7 };
         this.insertion = { source, target, sortedEnd };
         this.pushFrame("insert", message);
       }
-      push(run6, message) {
-        this.stack.push({ ...run6 });
-        this.current = { ...run6 };
+      push(run7, message) {
+        this.stack.push({ ...run7 });
+        this.current = { ...run7 };
         this.direction = null;
         this.insertion = null;
-        this.processed = run6.start + run6.length;
+        this.processed = run7.start + run7.length;
         this.mergeIndex = null;
         this.invariant = null;
         this.pushFrame("push", message);
@@ -21172,7 +21364,7 @@ var init_run_stack = __esm({
             type,
             profile: this.config.profile,
             array: this.array.slice(),
-            stack: this.stack.map((run6) => Object.freeze({ ...run6 })),
+            stack: this.stack.map((run7) => Object.freeze({ ...run7 })),
             current: this.current ? Object.freeze({ ...this.current }) : null,
             direction: this.direction,
             processed: this.processed,
@@ -22686,35 +22878,35 @@ function createRegistry(builtIns) {
   const backtrackRegistry = /* @__PURE__ */ new Map();
   const recTreeRegistry = /* @__PURE__ */ new Map();
   const api = {
-    registerSort(id, meta, run6) {
-      sortRegistry.set(id, { meta, run: run6 });
+    registerSort(id, meta, run7) {
+      sortRegistry.set(id, { meta, run: run7 });
     },
-    registerGraph(id, meta, run6) {
-      graphRegistry.set(id, { meta, run: run6 });
+    registerGraph(id, meta, run7) {
+      graphRegistry.set(id, { meta, run: run7 });
     },
-    registerSearch(id, meta, run6) {
-      searchRegistry.set(id, { meta, run: run6 });
+    registerSearch(id, meta, run7) {
+      searchRegistry.set(id, { meta, run: run7 });
     },
-    registerString(id, meta, run6, profile) {
-      stringRegistry.set(id, { meta, run: run6, profile });
+    registerString(id, meta, run7, profile) {
+      stringRegistry.set(id, { meta, run: run7, profile });
     },
-    registerPointer(id, meta, run6) {
-      pointerRegistry.set(id, { meta, run: run6 });
+    registerPointer(id, meta, run7) {
+      pointerRegistry.set(id, { meta, run: run7 });
     },
-    registerDP(id, meta, run6) {
-      dpRegistry.set(id, { meta, run: run6 });
+    registerDP(id, meta, run7) {
+      dpRegistry.set(id, { meta, run: run7 });
     },
-    registerUnionFind(id, meta, run6) {
-      unionFindRegistry.set(id, { meta, run: run6 });
+    registerUnionFind(id, meta, run7) {
+      unionFindRegistry.set(id, { meta, run: run7 });
     },
-    registerBits(id, meta, run6) {
-      bitsRegistry.set(id, { meta, run: run6 });
+    registerBits(id, meta, run7) {
+      bitsRegistry.set(id, { meta, run: run7 });
     },
-    registerBacktrack(id, meta, run6) {
-      backtrackRegistry.set(id, { meta, run: run6 });
+    registerBacktrack(id, meta, run7) {
+      backtrackRegistry.set(id, { meta, run: run7 });
     },
-    registerRecTree(id, meta, run6) {
-      recTreeRegistry.set(id, { meta, run: run6 });
+    registerRecTree(id, meta, run7) {
+      recTreeRegistry.set(id, { meta, run: run7 });
     },
     listAlgorithms(kind) {
       const registry2 = kind === "graph" ? graphRegistry : sortRegistry;
@@ -22723,8 +22915,8 @@ function createRegistry(builtIns) {
       return [...legacy, ...families];
     },
     kindOf(id) {
-      const family10 = familyRegistry.get(id);
-      if (family10) return family10.kind;
+      const family11 = familyRegistry.get(id);
+      if (family11) return family11.kind;
       if (sortRegistry.has(id)) return "sort";
       if (graphRegistry.has(id)) return "graph";
       if (searchRegistry.has(id)) return "search";
@@ -22784,7 +22976,9 @@ function createRegistry(builtIns) {
       }
       const pointer = pointerRegistry.get(config.algorithm);
       if (pointer) {
-        const recorder = new PointerRecorder(config.array);
+        const recorder = new PointerRecorder(
+          config.algorithm === "sliding-window" ? Array.from(typeof config.text === "string" ? config.text : "") : config.array
+        );
         pointer.run(input, recorder);
         return { kind: "pointers", frames: recorder.frames };
       }

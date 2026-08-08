@@ -77,19 +77,19 @@ tab: Complexity
           "bounds": [
             {
               "kind": "curve",
-              "role": "Best time",
+              "role": "Best",
               "formula": "O(1)",
               "curveId": "constant"
             },
             {
               "kind": "curve",
-              "role": "Typical time",
+              "role": "Typical",
               "formula": "O(n)",
               "curveId": "linear"
             },
             {
               "kind": "curve",
-              "role": "Worst time",
+              "role": "Worst",
               "formula": "O(n)",
               "curveId": "linear"
             }
@@ -101,19 +101,19 @@ tab: Complexity
           "bounds": [
             {
               "kind": "curve",
-              "role": "Best time",
+              "role": "Best",
               "formula": "O(1)",
               "curveId": "constant"
             },
             {
               "kind": "curve",
-              "role": "Typical time",
+              "role": "Typical",
               "formula": "O(1)",
               "curveId": "constant"
             },
             {
               "kind": "curve",
-              "role": "Worst time",
+              "role": "Worst",
               "formula": "O(1)",
               "curveId": "constant"
             }
@@ -125,19 +125,19 @@ tab: Complexity
           "bounds": [
             {
               "kind": "curve",
-              "role": "Best time",
+              "role": "Best",
               "formula": "O(1)",
               "curveId": "constant"
             },
             {
               "kind": "curve",
-              "role": "Typical time",
+              "role": "Typical",
               "formula": "O(n)",
               "curveId": "linear"
             },
             {
               "kind": "curve",
-              "role": "Worst time",
+              "role": "Worst",
               "formula": "O(n)",
               "curveId": "linear"
             }
@@ -149,19 +149,19 @@ tab: Complexity
           "bounds": [
             {
               "kind": "curve",
-              "role": "Best time",
+              "role": "Best",
               "formula": "O(1)",
               "curveId": "constant"
             },
             {
               "kind": "curve",
-              "role": "Typical time",
+              "role": "Typical",
               "formula": "O(1)",
               "curveId": "constant"
             },
             {
               "kind": "curve",
-              "role": "Worst time",
+              "role": "Worst",
               "formula": "O(1)",
               "curveId": "constant"
             }

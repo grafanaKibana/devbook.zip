@@ -56,13 +56,13 @@ tab: Complexity
           "bounds": [
             {
               "kind": "curve",
-              "role": "Best time",
+              "role": "Best",
               "formula": "O(1)",
               "curveId": "constant"
             },
             {
               "kind": "curve",
-              "role": "Amortized time",
+              "role": "Amortized",
               "formula": "O(log n)",
               "curveId": "log-n"
             },
@@ -80,13 +80,13 @@ tab: Complexity
           "bounds": [
             {
               "kind": "curve",
-              "role": "Best time",
+              "role": "Best",
               "formula": "O(1)",
               "curveId": "constant"
             },
             {
               "kind": "curve",
-              "role": "Amortized time",
+              "role": "Amortized",
               "formula": "O(log n)",
               "curveId": "log-n"
             },
@@ -104,13 +104,13 @@ tab: Complexity
           "bounds": [
             {
               "kind": "curve",
-              "role": "Best time",
+              "role": "Best",
               "formula": "O(1)",
               "curveId": "constant"
             },
             {
               "kind": "curve",
-              "role": "Amortized time",
+              "role": "Amortized",
               "formula": "O(log n)",
               "curveId": "log-n"
             },
@@ -128,13 +128,7 @@ tab: Complexity
           "bounds": [
             {
               "kind": "curve",
-              "role": "Best time",
-              "formula": "O(1)",
-              "curveId": "constant"
-            },
-            {
-              "kind": "curve",
-              "role": "Amortized time",
+              "role": "Best/Amortized",
               "formula": "O(1)",
               "curveId": "constant"
             },

@@ -19,13 +19,23 @@ The commit order is what makes it cheap. Each vertex becomes settled once, when 
 ~~~~~tabsdown
 tab: Visualization
 
+~~~~tabsdown
+tab: Midtown map
 
 ```steptrace
-{"algorithm":"dijkstra","start":"A","target":"F","directed":false,"nodes":[{"id":"A"},{"id":"B"},{"id":"C"},{"id":"D"},{"id":"E"},{"id":"F"}],"edges":[{"from":"A","to":"B","weight":2},{"from":"A","to":"C","weight":5},{"from":"B","to":"C","weight":1},{"from":"B","to":"D","weight":6},{"from":"C","to":"D","weight":3},{"from":"D","to":"E","weight":1},{"from":"D","to":"F","weight":4},{"from":"E","to":"F","weight":2}]}
+{"algorithm":"dijkstra","variant":"midtown-map"}
 ```
 
+tab: Cities
 
-The first extraction settles `A` at distance 0 and relaxes its edges, giving `B` a tentative 2 and `C` a tentative 5. The decisive move is the next extraction: it takes the smallest tentative value, `B` at 2 — not `C` at 5 — settles it, and relaxing `B→C` lowers `C` from 5 to a tentative 3. `C` settles next at 3. Every remaining route to `C` must leave through a node whose tentative distance is already at least 2, and every edge adds a non-negative amount, so no later step can undercut the value `C` settles at. Nodes turn final on their first non-stale removal; older queued entries may still be popped and discarded later.
+```steptrace
+{"algorithm":"dijkstra","variant":"ukraine-cities","start":"Lviv","target":"Kharkiv"}
+```
+
+~~~~
+
+
+Midtown makes direction and cost visible: Dijkstra expands from Seventh Avenue and West 47th Street in increasing accumulated street cost, respects one-way roads and the West 44th Street closure, and finishes by highlighting the cheapest route to Sixth Avenue and West 42nd Street. The Cities view runs the same distance-first search over a larger weighted network. In both views, Watch retains the complete distance array while the map shows the current node, active edge, settled region, and final path. No heuristic steers either search.
 
 
 The loop maintains one invariant: when an unsettled node leaves the priority queue, its tentative distance already equals its true shortest-path distance. Later stale entries for that settled node do not make it settle again.

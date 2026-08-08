@@ -68,7 +68,7 @@ tab: Complexity
           "bounds": [
             {
               "kind": "curve",
-              "role": "Amortized time",
+              "role": "Amortized",
               "formula": "O(1)",
               "curveId": "constant"
             },
@@ -86,7 +86,7 @@ tab: Complexity
           "bounds": [
             {
               "kind": "curve",
-              "role": "Amortized time",
+              "role": "Amortized",
               "formula": "O(1)",
               "curveId": "constant"
             },
@@ -104,7 +104,7 @@ tab: Complexity
           "bounds": [
             {
               "kind": "curve",
-              "role": "Amortized time",
+              "role": "Amortized",
               "formula": "O(1)",
               "curveId": "constant"
             },
@@ -122,7 +122,7 @@ tab: Complexity
           "bounds": [
             {
               "kind": "curve",
-              "role": "Amortized time",
+              "role": "Amortized",
               "formula": "O(1) amortized",
               "curveId": "constant"
             },
@@ -140,7 +140,7 @@ tab: Complexity
           "bounds": [
             {
               "kind": "curve",
-              "role": "Amortized time",
+              "role": "Amortized",
               "formula": "O(log n) amortized",
               "curveId": "log-n"
             },

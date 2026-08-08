@@ -68,13 +68,13 @@ tab: Complexity
           "bounds": [
             {
               "kind": "curve",
-              "role": "Expected time",
+              "role": "Expected",
               "formula": "O(1)",
               "curveId": "constant"
             },
             {
               "kind": "curve",
-              "role": "Worst time",
+              "role": "Worst",
               "formula": "O(n)",
               "curveId": "linear"
             }
@@ -86,13 +86,13 @@ tab: Complexity
           "bounds": [
             {
               "kind": "curve",
-              "role": "Expected time",
+              "role": "Expected",
               "formula": "O(1)",
               "curveId": "constant"
             },
             {
               "kind": "curve",
-              "role": "Worst time",
+              "role": "Worst",
               "formula": "O(n)",
               "curveId": "linear"
             }
@@ -104,13 +104,13 @@ tab: Complexity
           "bounds": [
             {
               "kind": "curve",
-              "role": "Expected time",
+              "role": "Expected",
               "formula": "O(1)",
               "curveId": "constant"
             },
             {
               "kind": "curve",
-              "role": "Worst time",
+              "role": "Worst",
               "formula": "O(n)",
               "curveId": "linear"
             }
@@ -122,13 +122,13 @@ tab: Complexity
           "bounds": [
             {
               "kind": "curve",
-              "role": "Expected time",
+              "role": "Expected",
               "formula": "O(1) amortized",
               "curveId": "constant"
             },
             {
               "kind": "curve",
-              "role": "Worst time",
+              "role": "Worst",
               "formula": "O(n)",
               "curveId": "linear"
             }
@@ -140,13 +140,13 @@ tab: Complexity
           "bounds": [
             {
               "kind": "curve",
-              "role": "Expected time",
+              "role": "Expected",
               "formula": "O(1) expected",
               "curveId": "constant"
             },
             {
               "kind": "curve",
-              "role": "Worst time",
+              "role": "Worst",
               "formula": "O(n)",
               "curveId": "linear"
             }

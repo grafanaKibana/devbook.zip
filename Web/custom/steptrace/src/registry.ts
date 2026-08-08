@@ -194,7 +194,11 @@ export function createRegistry(builtIns: readonly BuiltInAlgorithm[]): RegistryA
 
       const pointer = pointerRegistry.get(config.algorithm)
       if (pointer) {
-        const recorder = new PointerRecorder(config.array)
+        const recorder = new PointerRecorder(
+          config.algorithm === "sliding-window"
+            ? Array.from(typeof config.text === "string" ? config.text : "")
+            : config.array,
+        )
         pointer.run(input, recorder)
         return { kind: "pointers", frames: recorder.frames }
       }

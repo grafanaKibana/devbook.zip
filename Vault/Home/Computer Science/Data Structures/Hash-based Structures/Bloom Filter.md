@@ -69,19 +69,19 @@ tab: Complexity
           "bounds": [
             {
               "kind": "curve",
-              "role": "Best time",
+              "role": "Best",
               "formula": "Θ(m) bits cleared",
               "curveId": "linear"
             },
             {
               "kind": "curve",
-              "role": "Average time",
+              "role": "Average",
               "formula": "Θ(m)",
               "curveId": "linear"
             },
             {
               "kind": "curve",
-              "role": "Worst time",
+              "role": "Worst",
               "formula": "Θ(m)",
               "curveId": "linear"
             }
@@ -93,19 +93,19 @@ tab: Complexity
           "bounds": [
             {
               "kind": "curve",
-              "role": "Best time",
+              "role": "Best",
               "formula": "O(l + k)",
               "curveId": "linear"
             },
             {
               "kind": "curve",
-              "role": "Average time",
+              "role": "Average",
               "formula": "O(l + k)",
               "curveId": "linear"
             },
             {
               "kind": "curve",
-              "role": "Worst time",
+              "role": "Worst",
               "formula": "O(l + k)",
               "curveId": "linear"
             }
@@ -117,19 +117,19 @@ tab: Complexity
           "bounds": [
             {
               "kind": "curve",
-              "role": "Best time",
+              "role": "Best",
               "formula": "O(l + 1) first 0 bit",
               "curveId": "linear"
             },
             {
               "kind": "curve",
-              "role": "Average time",
+              "role": "Average",
               "formula": "O(l + k)",
               "curveId": "linear"
             },
             {
               "kind": "curve",
-              "role": "Worst time",
+              "role": "Worst",
               "formula": "O(l + k)",
               "curveId": "linear"
             }

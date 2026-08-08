@@ -23,14 +23,14 @@ tab: Visualization
 
 
 ```steptrace
-{"algorithm":"two-pointers","array":[1,3,4,6,8,10,13],"target":18}
+{"algorithm":"two-pointers","array":[1,4,5,7,9,12,15],"target":14}
 ```
 
 
 
-The trace runs the converging pair-sum over the sorted array `[1, 3, 4, 6, 8, 10, 13]`, searching for two elements that add to `18`.
+The trace runs the converging pair-sum over the sorted array `[1, 4, 5, 7, 9, 12, 15]`, searching for two elements that add to `14`.
 
-The first comparison adds the extremes, `1 + 13 = 14`, which falls short of `18`. With the array sorted, `13` is already the largest available partner for `1`; every other pair anchored at index `0` uses a smaller right value and sums to less than `14`. That whole block of pairs is therefore too small, and `left++` discards it in one step. Later, when `6 + 13 = 19` overshoots, the mirror argument applies: every pair anchored at `13` uses a left value of at least `6`, so all of them exceed `18`, and `right--` drops that block. The pointers converge on `8 + 10 = 18` after visiting each index at most once.
+The first comparison is `arr[0] + arr[6] = 1 + 15 = 16 > 14`, so `right` moves left. The next comparison is `arr[0] + arr[5] = 1 + 12 = 13 < 14`, so `left` moves right. Each decision retains the compared indices before the chosen pointer moves, and the scan finishes at `arr[2] + arr[4] = 5 + 9 = 14 ✓`.
 
 
 

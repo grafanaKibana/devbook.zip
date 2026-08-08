@@ -64,13 +64,7 @@ tab: Complexity
           "bounds": [
             {
               "kind": "curve",
-              "role": "Best time",
-              "formula": "Θ(n)",
-              "curveId": "linear"
-            },
-            {
-              "kind": "curve",
-              "role": "Amortized time",
+              "role": "Best/Amortized",
               "formula": "Θ(n)",
               "curveId": "linear"
             },
@@ -88,13 +82,13 @@ tab: Complexity
           "bounds": [
             {
               "kind": "curve",
-              "role": "Best time",
+              "role": "Best",
               "formula": "O(1)",
               "curveId": "constant"
             },
             {
               "kind": "text",
-              "role": "Amortized time",
+              "role": "Amortized",
               "formula": "O(α(n))"
             },
             {
@@ -111,13 +105,13 @@ tab: Complexity
           "bounds": [
             {
               "kind": "curve",
-              "role": "Best time",
+              "role": "Best",
               "formula": "O(1)",
               "curveId": "constant"
             },
             {
               "kind": "text",
-              "role": "Amortized time",
+              "role": "Amortized",
               "formula": "O(α(n))"
             },
             {
@@ -134,13 +128,13 @@ tab: Complexity
           "bounds": [
             {
               "kind": "curve",
-              "role": "Best time",
+              "role": "Best",
               "formula": "O(1)",
               "curveId": "constant"
             },
             {
               "kind": "text",
-              "role": "Amortized time",
+              "role": "Amortized",
               "formula": "O(α(n))"
             },
             {

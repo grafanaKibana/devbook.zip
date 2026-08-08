@@ -10,6 +10,14 @@ import { mountComplexityFigure } from "./interactions"
 import { buildComplexityViewModel, COMPLEXITY_CHART, CURVE_IDS, curveValue } from "./model"
 import { ComplexityBlock } from "../transformers/complexity-block"
 
+function markdownFiles(directory: string): string[] {
+  return readdirSync(directory, { withFileTypes: true }).flatMap((entry) => {
+    const path = join(directory, entry.name)
+    if (entry.isDirectory()) return markdownFiles(path)
+    return entry.name.endsWith(".md") ? [path] : []
+  })
+}
+
 const variables = { n: "number of input elements" }
 const cases = {
   version: 1,
@@ -1787,12 +1795,7 @@ test("every source chart builds and repeated growth classes share exact geometry
     /^(?:O|Θ)\((?:1|[a-z]|log(?: [a-z]|\([a-z] \+ 1\))|n log n|[a-z]²|(?:[a-z]|1)(?: \+ (?:[a-z]|1))+|2\^[a-z]|[a-z]!)\)$/
   const genericVariableDescription =
     /^(?:number of input elements or states|secondary input, pattern, bucket, or sequence size|key range, digit count, or requested result count|search branching factor or radix base|algorithm-specific depth, digit count, or dimension|key, string, path, or sequence length)$/
-  const notes = (directory: string): string[] =>
-    readdirSync(directory, { withFileTypes: true }).flatMap((entry) => {
-      const path = join(directory, entry.name)
-      return entry.isDirectory() ? notes(path) : entry.name.endsWith(".md") ? [path] : []
-    })
-  const charts = notes(root).flatMap((note) => {
+  const charts = markdownFiles(root).flatMap((note) => {
     const source = readFileSync(note, "utf8")
     return [...source.matchAll(/```complexity\n([\s\S]*?)\n```/g)].map(
       (match, index) => [note, index, JSON.parse(match[1])] as const,
@@ -1842,6 +1845,108 @@ test("every source chart builds and repeated growth classes share exact geometry
       }
     }
   }
+})
+
+test("Data Structures Time roles preserve standalone Time and never retain a lowercase time suffix", () => {
+  const root = join(process.cwd(), "..", "Vault", "Home", "Computer Science", "Data Structures")
+  let standaloneTime = 0
+  for (const note of markdownFiles(root)) {
+    const source = readFileSync(note, "utf8")
+    for (const match of source.matchAll(/```complexity\n([\s\S]*?)\n```/g)) {
+      const config = JSON.parse(match[1])
+      if (config.version !== 2) continue
+      for (const entry of config.resources.time.entries) {
+        for (const bound of entry.bounds ?? [entry]) {
+          if (typeof bound.role !== "string") continue
+          assert.equal(
+            bound.role.endsWith(" time"),
+            false,
+            `${note}: ${entry.operation ?? entry.label ?? "unnamed"} -> ${bound.role}`,
+          )
+          standaloneTime += Number(bound.role === "Time")
+        }
+      }
+    }
+  }
+  assert.ok(standaloneTime > 0)
+})
+
+test("Data Structures keeps distinct Best and Amortized bounds and merges only exact equivalents", () => {
+  const root = join(process.cwd(), "..", "Vault", "Home", "Computer Science", "Data Structures")
+  const signature = ({ role: _role, ...bound }: Record<string, unknown>) =>
+    JSON.stringify({
+      kind: bound.kind,
+      formula: bound.formula,
+      curveId: bound.curveId,
+      curveFrom: bound.curveFrom,
+      curveTo: bound.curveTo,
+      samples: bound.samples,
+    })
+  let merged = 0
+  let distinct = 0
+  for (const note of markdownFiles(root)) {
+    const source = readFileSync(note, "utf8")
+    for (const match of source.matchAll(/```complexity\n([\s\S]*?)\n```/g)) {
+      const config = JSON.parse(match[1])
+      if (config.version !== 2) continue
+      for (const entry of config.resources.time.entries) {
+        const bounds = entry.bounds ?? [entry]
+        const byRole = new Map(bounds.map((bound: Record<string, unknown>) => [bound.role, bound]))
+        if (byRole.has("Best/Amortized")) {
+          merged++
+          assert.equal(
+            byRole.has("Best") || byRole.has("Amortized"),
+            false,
+            `${note}: ${entry.operation}`,
+          )
+        }
+        if (byRole.has("Best") && byRole.has("Amortized")) {
+          distinct++
+          assert.notEqual(
+            signature(byRole.get("Best")!),
+            signature(byRole.get("Amortized")!),
+            `${note}: ${entry.operation} has mergeable duplicate bounds`,
+          )
+        }
+      }
+    }
+  }
+  assert.ok(merged > 0)
+  assert.ok(distinct > 0)
+})
+
+test("Stack exposes one three-item constant Time legend and retains Space and resize truth", () => {
+  const note = readFileSync(
+    join(
+      process.cwd(),
+      "..",
+      "Vault",
+      "Home",
+      "Computer Science",
+      "Data Structures",
+      "Linear Structures",
+      "Stack.md",
+    ),
+    "utf8",
+  )
+  const config = JSON.parse(note.match(/```complexity\n([\s\S]*?)\n```/)![1])
+  const view = buildComplexityViewModel(config, "stack-contract")
+  const [time, space] = view.resources
+
+  assert.deepEqual([time.key, space.key], ["time", "space"])
+  assert.equal(time.mode, "comparison")
+  assert.equal(time.legend.length, 1)
+  assert.equal(time.legend[0].label, undefined)
+  assert.deepEqual(
+    time.legend[0].items.map(({ label }) => label),
+    ["Push", "Pop", "Peek"],
+  )
+  assert.equal(time.paths.length, 3)
+  assert.equal(new Set(time.paths.map(({ geometry }) => geometry)).size, 1)
+  assert.ok(time.paths.every(({ curveId }) => curveId === "constant"))
+  assert.ok(space.paths.length + space.semanticBounds.length > 0)
+  const prose = note.replace(/```complexity\n[\s\S]*?\n```/, "")
+  assert.match(prose, /(?:resize|doubl)[^\n]*O\(n\)|O\(n\)[^\n]*(?:resize|doubl)/i)
 })
 
 test("every Paradigms and Patterns chart compares a naive baseline against the technique", () => {

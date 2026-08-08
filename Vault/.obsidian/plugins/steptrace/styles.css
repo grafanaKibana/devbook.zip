@@ -7,6 +7,7 @@
   --_violet: var(--st-state-violet, #7c3aed);
   --_blue: var(--st-state-blue, #2563eb);
   --_green: var(--st-state-green, #4c8000);
+  --_red: var(--st-state-red, #b42318);
   --_neutral: var(--st-neutral, #9aa886);
   --_surface: var(--st-surface, #eef1e6);
   --_text: var(--st-text, #29301f);
@@ -2073,6 +2074,12 @@
 .steptrace__pcell[data-state=match] {
   background: color-mix(in srgb, var(--_green) 22%, transparent);
 }
+.steptrace__pcell[data-state=entering] {
+  background: color-mix(in srgb, var(--_green) 22%, transparent);
+}
+.steptrace__pcell[data-state=duplicate] {
+  background: color-mix(in srgb, var(--_red) 22%, transparent);
+}
 .steptrace__pcell[data-end=l] {
   color: var(--_blue);
   font-weight: 700;
@@ -2083,6 +2090,12 @@
 }
 .steptrace__pcell[data-state=match][data-end] {
   color: var(--_green);
+}
+.steptrace__pcell[data-state=entering][data-end] {
+  color: var(--_green);
+}
+.steptrace__pcell[data-state=duplicate][data-end] {
+  color: var(--_red);
 }
 .steptrace__pbrackets {
   position: absolute;

@@ -57,6 +57,24 @@ const commonConfig = {
   ],
 }
 
+const canonicalDijkstraConfig = {
+  algorithm: "dijkstra",
+  start: "A",
+  target: "F",
+  directed: false,
+  nodes: ["A", "B", "C", "D", "E", "F"].map((id) => ({ id })),
+  edges: [
+    ["A", "B", 2],
+    ["A", "C", 5],
+    ["B", "C", 1],
+    ["B", "D", 6],
+    ["C", "D", 3],
+    ["D", "E", 1],
+    ["D", "F", 4],
+    ["E", "F", 2],
+  ].map(([from, to, weight]) => ({ from, to, weight })),
+}
+
 const headlessFixtureOverrides = {
   "aho-corasick": { patterns: ["he", "she", "his", "hers"], text: "ushers" },
   "ternary-search-tree": {
@@ -193,6 +211,55 @@ function buildAlgorithm(moduleName, exportName, input = {}) {
   const recorder = algorithm.family.createRecorder(config)
   algorithm.run(config, recorder)
   return { config, family: algorithm.family, frames: recorder.frames }
+}
+
+function buildSourceFrames(config) {
+  return loadStepTraceModule("src", "engine.ts").steptrace.buildFrames(config)
+}
+
+function withFakeDocument(run) {
+  class FakeNode {
+    constructor(tagName) {
+      this.tagName = tagName
+      this.textContent = ""
+      this.innerHTML = ""
+      this.children = []
+      this.attributes = new Map()
+      this.dataset = {}
+      this.className = ""
+      this.style = { setProperty() {} }
+    }
+    append(...children) {
+      this.children.push(...children)
+    }
+    setAttribute(key, value) {
+      this.attributes.set(key, String(value))
+    }
+    getAttribute(key) {
+      return this.attributes.get(key) ?? null
+    }
+    removeAttribute(key) {
+      this.attributes.delete(key)
+    }
+    getBoundingClientRect() {
+      return { width: 620, height: 320 }
+    }
+  }
+  const previousDocument = globalThis.document
+  globalThis.document = {
+    createElement: (tagName) => new FakeNode(tagName),
+    createElementNS: (_namespace, tagName) => new FakeNode(tagName),
+    createTextNode: (value) => {
+      const node = new FakeNode("#text")
+      node.textContent = value
+      return node
+    },
+  }
+  try {
+    return run()
+  } finally {
+    globalThis.document = previousDocument
+  }
 }
 
 const buildAbstractDivideAndConquer = () => buildAlgorithm("divide-and-conquer", "divideAndConquer")
@@ -1016,6 +1083,172 @@ test("A* graph-state profiles stay typed, deterministic, optimal, and reachable"
   )
 })
 
+test("Dijkstra reuses the authored Midtown and Cities graph-state scenarios", () => {
+  const note = csNote("Algorithms", "Graph Algorithms", "Dijkstra.md")
+  const { graphStateSummary } = loadStepTraceModule("src", "families", "graph-state.ts")
+  const { configs } = parseAuthoredStepTraceTabs(note)
+  assert.deepEqual(configs, [
+    [
+      {
+        label: "Midtown map",
+        description: "",
+        selectedInitially: true,
+        payload: '{"algorithm":"dijkstra","variant":"midtown-map"}',
+        payloadSha256: "186e2d3d272f72d097eea4d8531f5c853f9f9a2f9d77a0976e70755368a0e4e5",
+      },
+      {
+        label: "Cities",
+        description: "",
+        selectedInitially: false,
+        payload:
+          '{"algorithm":"dijkstra","variant":"ukraine-cities","start":"Lviv","target":"Kharkiv"}',
+        payloadSha256: "83f6b15bc4131664311b532ab94aa90eba2dd663457554d5ee7a9297b734f8d5",
+      },
+    ],
+  ])
+
+  for (const payload of configs[0].map(({ payload }) => JSON.parse(payload))) {
+    const dijkstra = buildSourceFrames(payload)
+    const astar = buildSourceFrames({ ...payload, algorithm: "a-star" })
+    const first = dijkstra.frames[0]
+    assert.equal(dijkstra.kind, "graph")
+    assert.equal(dijkstra.family.id, "graph-state")
+    assert.equal(first.profile, payload.variant)
+    assert.deepEqual(first.nodes, astar.frames[0].nodes)
+    assert.deepEqual(
+      first.edges.map(({ from, to, weight, directed }) => ({
+        from,
+        to,
+        weight,
+        directed: Boolean(directed),
+      })),
+      astar.frames[0].edges.map(({ from, to, weight, directed }) => ({
+        from,
+        to,
+        weight,
+        directed: Boolean(directed),
+      })),
+    )
+    assert.deepEqual(first.decor, astar.frames[0].decor)
+    assert.ok(dijkstra.frames.every(({ detail }) => detail.kind === "edge-relaxation"))
+    assert.ok(dijkstra.frames.at(-1).selectedEdges.length > 0)
+    assert.equal(graphStateSummary(dijkstra.frames.at(-1)), dijkstra.frames.at(-1).message)
+    assert.equal(dijkstra.endpointSettings.start, first.start)
+    assert.equal(dijkstra.endpointSettings.target, first.target)
+    assert.equal(dijkstra.endpointSettings.options.length, first.nodes.length)
+  }
+})
+
+test("Dijkstra accepts finite non-negative weights and rejects every invalid effective weight", () => {
+  const base = {
+    algorithm: "dijkstra",
+    start: "A",
+    target: "B",
+    directed: true,
+    nodes: [{ id: "A" }, { id: "B" }],
+  }
+  for (const weight of [0, 2.5]) {
+    assert.doesNotThrow(() =>
+      buildSourceFrames({ ...base, edges: [{ from: "A", to: "B", weight }] }),
+    )
+  }
+  assert.doesNotThrow(() => buildSourceFrames({ ...base, edges: [{ from: "A", to: "B" }] }))
+  for (const weight of [-1, Number.NaN, Number.POSITIVE_INFINITY, Number.NEGATIVE_INFINITY]) {
+    assert.throws(
+      () => buildSourceFrames({ ...base, edges: [{ from: "A", to: "B", weight }] }),
+      /weight.*finite.*non-negative|finite non-negative.*weight/i,
+    )
+  }
+  assert.throws(
+    () => buildSourceFrames({ algorithm: "dijkstra", variant: "building-floor" }),
+    /"variant" must be midtown-map or ukraine-cities/,
+  )
+})
+
+test("Dijkstra settles each node once and returns the canonical full distances, path, and cost", () => {
+  const frames = buildSourceFrames(canonicalDijkstraConfig).frames
+  const nodeOrder = ["A", "B", "C", "D", "E", "F"]
+  assert.deepEqual(frames[0].detail.distances, {
+    A: 0,
+    B: Infinity,
+    C: Infinity,
+    D: Infinity,
+    E: Infinity,
+    F: Infinity,
+  })
+  assert.ok(frames.every((frame) => Object.keys(frame.detail.distances).join("") === "ABCDEF"))
+  assert.ok(frames.every((frame) => frame.detail.kind === "edge-relaxation"))
+  for (const frame of frames.filter(({ type }) => type === "relax")) {
+    assert.deepEqual(frame.detail.edge, frame.currentEdge)
+    assert.equal(typeof frame.detail.changed, "boolean")
+    const [from, to] = frame.currentEdge
+    const authoredEdge = frame.edges.find(
+      (edge) =>
+        (edge.from === from && edge.to === to) ||
+        (!edge.directed && edge.from === to && edge.to === from),
+    )
+    assert.equal(frame.edgeState[`${authoredEdge.from}|${authoredEdge.to}`], "active")
+  }
+  assert.ok(
+    frames.every(
+      (frame, index) => index === 0 || frame.detail.pass >= frames[index - 1].detail.pass,
+    ),
+  )
+  assert.equal(frames.at(-1).detail.pass, 6)
+  assert.deepEqual(frames.at(-1).detail.distances, { A: 0, B: 2, C: 3, D: 6, E: 7, F: 9 })
+
+  const settlements = frames.flatMap(
+    (frame) => frame.message.match(/Settle ([A-F])\b/)?.slice(1) ?? [],
+  )
+  assert.deepEqual(settlements, nodeOrder)
+  assert.equal(new Set(settlements).size, settlements.length)
+  assert.deepEqual(
+    frames.at(-1).selectedEdges.filter((edge) => /^(?:A\|B|B\|C|C\|D|D\|E|E\|F)$/.test(edge)),
+    ["A|B", "B|C", "C|D", "D|E", "E|F"],
+  )
+  assert.ok(Object.values(frames.at(-1).nodeState).every((role) => role !== "accepted"))
+  assert.match(
+    frames.at(-1).message,
+    /A\s*→\s*B\s*→\s*C\s*→\s*D\s*→\s*E\s*→\s*F.*(?:cost|distance)\s*9/i,
+  )
+})
+
+test("Dijkstra and Bellman-Ford share full ordered distances Watch without A-star rows", () => {
+  const dijkstra = buildSourceFrames(canonicalDijkstraConfig).frames
+  const bellmanFord = buildSourceFrames({ algorithm: "bellman-ford" }).frames
+  withFakeDocument(() => {
+    const { makeGraphStateView, graphStateSummary } = loadStepTraceModule(
+      "src",
+      "families",
+      "graph-state.ts",
+    )
+    const dijkstraView = makeGraphStateView(dijkstra)
+    const bellmanView = makeGraphStateView(bellmanFord)
+    for (const frame of [...dijkstra, ...bellmanFord]) {
+      const view = frame.profile === "dijkstra" ? dijkstraView : bellmanView
+      const rows = view.watch(frame)
+      const distances = rows.find(({ k }) => k === "distances")
+      assert.ok(distances)
+      assert.equal(
+        distances.v,
+        frame.nodes
+          .map(
+            ({ id }) =>
+              `${id}:${Number.isFinite(frame.detail.distances[id]) ? frame.detail.distances[id] : "∞"}`,
+          )
+          .join(" · "),
+      )
+      assert.equal(distances.hint, distances.v)
+      assert.ok(
+        rows.every(({ k }) => !["score", "open", "closed", "comparison", "expanded"].includes(k)),
+      )
+    }
+    assert.match(graphStateSummary(dijkstra.at(-1)), /A.*F.*9|cost 9/i)
+    assert.equal(bellmanFord.at(-1).detail.pass, 4)
+    assert.match(graphStateSummary(bellmanFord.at(-1)), /^Distances /)
+  })
+})
+
 test("Greedy Best-First reuses the A* grid but exposes its longer h-only route", () => {
   const api = loadEngine(readFileSync(join(here, "generated", "engine.js"), "utf8"))
   const { graphStateSummary } = loadStepTraceModule("src", "families", "graph-state.ts")
@@ -1591,7 +1824,7 @@ test("all DSA Tabsdown notes are visual-first and contain one chart-only dual-re
     assert.doesNotMatch(source, /(?:Visualization|Complexity) visualization pending/i, relative)
   }
 
-  assert.equal(steptraceCount, 105, `expected 105 StepTrace variants, found ${steptraceCount}`)
+  assert.equal(steptraceCount, 106, `expected 106 StepTrace variants, found ${steptraceCount}`)
 })
 
 test("pinned Tabsdown scopes nested keyboard handling and owns unique ARIA wiring", () => {
@@ -2038,7 +2271,7 @@ test("all built-in algorithms preserve their headless frame contract", () => {
 
   assert.equal(
     digest,
-    "73f84f305e3b047aef355ee42e9f331a3777322525d477fb3690495776a3b0ee",
+    "ef73eaaf134729a16972951a0f5b3e57fe38e8454b11df5af0869d90b7b28b24",
     "the headless StepTrace behavior changed",
   )
 })
@@ -2199,6 +2432,134 @@ test("bit tally and two pointers reuse the centered canonical strip geometry", (
     /\.steptrace \.steptrace__pcells,[\s\S]*?--steptrace-array-radius: 9px;[^}]*overflow: hidden;/s,
   )
   assert.doesNotMatch(renderSource, /makePointerView[\s\S]*?steptrace__pointer-array/)
+})
+
+test("Two Pointers records each comparison before moving either pointer", () => {
+  const frames = buildSourceFrames({
+    algorithm: "two-pointers",
+    array: [1, 4, 5, 7, 9, 12, 15],
+    target: 14,
+  }).frames
+  const decisions = frames.filter((frame) => /arr\[|a\[/.test(frame.message))
+
+  assert.deepEqual(decisions[0].pointers, { L: 0, R: 6 })
+  assert.match(decisions[0].message, /(?:arr|a)\[0\].*(?:arr|a)\[6\].*1.*15.*16.*> 14.*move R/s)
+  assert.deepEqual(decisions[1].pointers, { L: 0, R: 5 })
+  assert.match(decisions[1].message, /(?:arr|a)\[0\].*(?:arr|a)\[5\].*1.*12.*13.*< 14.*move L/s)
+  assert.equal(
+    decisions.findIndex((frame) => frame.pointers.R === 5),
+    1,
+  )
+  assert.equal(
+    decisions.findIndex((frame) => frame.pointers.L === 1),
+    2,
+  )
+
+  const success = decisions.find(
+    (frame) => frame.pointers.L === 2 && frame.pointers.R === 4 && /14.*[✓]/.test(frame.message),
+  )
+  assert.ok(success)
+  assert.match(success.message, /(?:arr|a)\[2\].*(?:arr|a)\[4\].*5.*9.*14/s)
+  assert.doesNotMatch(success.message, /move/i)
+})
+
+test("Sliding Window adapts text without widening the generic numeric array contract", () => {
+  const result = buildSourceFrames({ algorithm: "sliding-window", text: "abcabcbb" })
+  const types = readFileSync(join(here, "src", "types.ts"), "utf8")
+  const registry = readFileSync(join(here, "src", "registry.ts"), "utf8")
+
+  assert.equal(result.kind, "pointers")
+  assert.deepEqual(result.frames[0].array, [..."abcabcbb"])
+  assert.match(types, /array:\s*number\[\]/)
+  assert.match(registry, /config\.algorithm\s*===\s*["']sliding-window["']/)
+  assert.doesNotMatch(types, /array:\s*\(?number\s*\|\s*string/)
+})
+
+test("Sliding Window persists its best range while transient entry markers never leak", () => {
+  const frames = buildSourceFrames({ algorithm: "sliding-window", text: "abcabcbb" }).frames
+  let bestLength = 0
+  for (const frame of frames) {
+    assert.ok("enteringIndex" in frame)
+    assert.ok("duplicateIndex" in frame)
+    assert.ok(frame.enteringIndex == null || frame.duplicateIndex == null)
+    if (frame.bestRange) {
+      const length = frame.bestRange[1] - frame.bestRange[0] + 1
+      assert.ok(length >= bestLength)
+      bestLength = length
+    }
+    if (frame.enteringIndex != null) assert.match(frame.message, /^Accept /)
+    if (frame.duplicateIndex != null) assert.match(frame.message, /^Duplicate /)
+    if (frame.enteringIndex != null && frame.window) {
+      const accepted = frame.array.slice(frame.window[0], frame.window[1] + 1)
+      assert.equal(new Set(accepted).size, accepted.length)
+    }
+  }
+  assert.equal(frames[0].enteringIndex, null)
+  assert.equal(frames[0].duplicateIndex, null)
+  assert.equal(frames.at(-1).enteringIndex, null)
+  assert.equal(frames.at(-1).duplicateIndex, null)
+  assert.deepEqual(frames.at(-1).bestRange, [0, 2])
+
+  const duplicateA = frames.find((frame) => frame.duplicateIndex === 3)
+  const firstShrunk = frames.findIndex((frame) => frame.window?.[0] === 1)
+  assert.ok(duplicateA)
+  assert.match(duplicateA.message, /duplicate\s+["“']?a["”']?/i)
+  assert.ok(frames.indexOf(duplicateA) < firstShrunk)
+})
+
+test("Sliding Window Watch and cell colors expose window, best, entering, and duplicate state", () => {
+  const frames = buildSourceFrames({ algorithm: "sliding-window", text: "abcabcbb" }).frames
+  withFakeDocument(() => {
+    const { makePointerView } = loadStepTraceModule("src", "render.ts")
+    const view = makePointerView(frames)
+    const watchText = (frame) => view.watch(frame).map(({ k, v }) => `${k} ${v}`)
+    const firstA = frames.find(
+      (frame) => frame.window?.[0] === 0 && frame.window?.[1] === 0 && frame.enteringIndex === 0,
+    )
+    const bestAbc = frames.find(
+      (frame) => frame.window?.[0] === 0 && frame.window?.[1] === 2 && frame.bestRange?.[1] === 2,
+    )
+    const duplicateA = frames.find((frame) => frame.duplicateIndex === 3)
+
+    assert.ok(watchText(firstA).includes('window [0..0] "a" len=1'))
+    assert.ok(watchText(bestAbc).includes('window [0..2] "abc" len=3'))
+    assert.ok(watchText(bestAbc).includes('best "abc" (length 3)'))
+
+    const cells = view.nodes[0].children[0].children
+    view.paint(firstA)
+    assert.deepEqual(
+      cells.map(({ dataset }) => dataset.state),
+      ["entering", "", "", "", "", "", "", ""],
+    )
+    view.paint(duplicateA)
+    assert.equal(cells[3].dataset.state, "duplicate")
+    assert.ok(cells.slice(0, 3).every(({ dataset }) => dataset.state === "window"))
+    view.paint(frames.find((frame) => frame.type === "match"))
+    assert.ok(cells.slice(0, 3).every(({ dataset }) => dataset.state === "match"))
+  })
+
+  const pointerStyles = readFileSync(join(here, "src", "styles", "pointers.scss"), "utf8")
+  const sharedStyles = readFileSync(join(here, "src", "styles", "shared.scss"), "utf8")
+  assert.match(sharedStyles, /--_red:\s*var\(--st-state-red,\s*#[0-9a-f]{6}\)/i)
+  assert.match(pointerStyles, /data-state="entering"[^}]*var\(--_green\)/s)
+  assert.match(pointerStyles, /data-state="duplicate"[^}]*var\(--_red\)/s)
+})
+
+test("generic pointer consumers keep their existing pointer-only Watch contract", () => {
+  const frames = buildSourceFrames({
+    algorithm: "two-pointers",
+    array: [1, 4, 5, 7, 9, 12, 15],
+    target: 14,
+  }).frames
+  withFakeDocument(() => {
+    const { makePointerView } = loadStepTraceModule("src", "render.ts")
+    assert.deepEqual(
+      makePointerView(frames)
+        .watch(frames[1])
+        .map(({ k }) => k),
+      ["L", "R"],
+    )
+  })
 })
 
 test("n-queens keeps a bounded persistent decision tree through branch, prune, return, and solution", () => {

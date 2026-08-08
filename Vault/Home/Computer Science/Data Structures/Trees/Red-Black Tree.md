@@ -64,7 +64,7 @@ tab: Complexity
           "bounds": [
             {
               "kind": "curve",
-              "role": "Worst-case time",
+              "role": "Worst-case",
               "formula": "O(log n)",
               "curveId": "log-n"
             }
@@ -76,7 +76,7 @@ tab: Complexity
           "bounds": [
             {
               "kind": "curve",
-              "role": "Worst-case time",
+              "role": "Worst-case",
               "formula": "O(log n)",
               "curveId": "log-n"
             }
@@ -88,7 +88,7 @@ tab: Complexity
           "bounds": [
             {
               "kind": "curve",
-              "role": "Worst-case time",
+              "role": "Worst-case",
               "formula": "O(log n)",
               "curveId": "log-n"
             }

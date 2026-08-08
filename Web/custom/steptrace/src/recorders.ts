@@ -799,6 +799,9 @@ export class PointerRecorder {
     this.pointers = {}
     this.window = null
     this.marked = []
+    this.bestRange = null
+    this.enteringIndex = null
+    this.duplicateIndex = null
   }
   get value() {
     return this.a.slice()
@@ -811,9 +814,14 @@ export class PointerRecorder {
         pointers: { ...this.pointers },
         window: this.window ? this.window.slice() : null,
         marked: this.marked.slice(),
+        bestRange: this.bestRange ? this.bestRange.slice() : null,
+        enteringIndex: this.enteringIndex,
+        duplicateIndex: this.duplicateIndex,
         message,
       }),
     )
+    this.enteringIndex = null
+    this.duplicateIndex = null
   }
   init(message) {
     this._push("init", message)
@@ -823,6 +831,9 @@ export class PointerRecorder {
     update = update || {}
     if (update.pointers) this.pointers = { ...update.pointers }
     if ("window" in update) this.window = update.window ? update.window.slice() : null
+    if ("bestRange" in update && update.bestRange) this.bestRange = update.bestRange.slice()
+    this.enteringIndex = update.enteringIndex ?? null
+    this.duplicateIndex = update.duplicateIndex ?? null
     if (update.mark) this.marked = this.marked.concat(update.mark)
     this._push(update.mark ? "match" : "step", message)
   }

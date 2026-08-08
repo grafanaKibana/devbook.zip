@@ -795,8 +795,9 @@ export function graphStateSummary(frame: GraphStateFrame) {
         ? `Frontiers meet at ${frame.detail.meeting}.`
         : "No meeting point was found."
     case "edge-relaxation":
+      if (frame.target && frame.type === "done") return frame.message
       return `Distances ${Object.entries(frame.detail.distances)
-        .map(([id, value]) => `${id}:${value}`)
+        .map(([id, value]) => `${id}:${Number.isFinite(value) ? value : "∞"}`)
         .join(", ")}.`
     case "component-flood":
       return `${frame.detail.groups?.length ?? frame.detail.component} connected components.`
@@ -1157,8 +1158,21 @@ export function makeGraphStateView(
           { k: "meeting", v: frame.detail.meeting || "—", sw: "var(--_violet)" },
         )
         break
-      case "edge-relaxation":
+      case "edge-relaxation": {
+        const distances = frame.detail.distances
+        const distanceWatch = frame.nodes
+          .map(({ id }) => {
+            const value = distances[id]
+            return `${id}:${Number.isFinite(value) ? value : "∞"}`
+          })
+          .join(" · ")
         rows.push(
+          {
+            k: "distances",
+            v: distanceWatch,
+            sw: "var(--_blue)",
+            hint: distanceWatch,
+          },
           { k: "pass", v: String(frame.detail.pass), sw: "var(--_violet)" },
           { k: "edge", v: frame.detail.edge?.join(" → ") || "—", sw: "var(--_amber)" },
           {
@@ -1168,6 +1182,7 @@ export function makeGraphStateView(
           },
         )
         break
+      }
       case "component-flood":
         rows.push(
           { k: "component", v: String(frame.detail.component), sw: "var(--_violet)" },

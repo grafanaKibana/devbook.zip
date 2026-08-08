@@ -54,60 +54,25 @@ tab: Complexity
   },
   "resources": {
     "time": {
-      "mode": "operations",
+      "mode": "comparison",
       "entries": [
         {
-          "kind": "operation",
-          "operation": "Push",
-          "bounds": [
-            {
-              "kind": "text",
-              "role": "Array backing",
-              "formula": "O(1) amortized, O(n) worst single"
-            },
-            {
-              "kind": "curve",
-              "role": "Linked backing",
-              "formula": "O(1)",
-              "curveId": "constant"
-            }
-          ]
+          "kind": "approach",
+          "label": "Push",
+          "formula": "O(1)",
+          "curveId": "constant"
         },
         {
-          "kind": "operation",
-          "operation": "Pop",
-          "bounds": [
-            {
-              "kind": "curve",
-              "role": "Array backing",
-              "formula": "O(1)",
-              "curveId": "constant"
-            },
-            {
-              "kind": "curve",
-              "role": "Linked backing",
-              "formula": "O(1)",
-              "curveId": "constant"
-            }
-          ]
+          "kind": "approach",
+          "label": "Pop",
+          "formula": "O(1)",
+          "curveId": "constant"
         },
         {
-          "kind": "operation",
-          "operation": "Peek",
-          "bounds": [
-            {
-              "kind": "curve",
-              "role": "Array backing",
-              "formula": "O(1)",
-              "curveId": "constant"
-            },
-            {
-              "kind": "curve",
-              "role": "Linked backing",
-              "formula": "O(1)",
-              "curveId": "constant"
-            }
-          ]
+          "kind": "approach",
+          "label": "Peek",
+          "formula": "O(1)",
+          "curveId": "constant"
         }
       ]
     },
@@ -155,6 +120,8 @@ tab: Complexity
   }
 }
 ```
+
+Array-backed push is `O(1)` amortized but `O(n)` on the resizing push that doubles a full backing array.
 ~~~~~
 
 # Where the Discipline Bites

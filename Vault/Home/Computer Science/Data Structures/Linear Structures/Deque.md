@@ -67,13 +67,7 @@ tab: Complexity
           "bounds": [
             {
               "kind": "curve",
-              "role": "Best time",
-              "formula": "O(1)",
-              "curveId": "constant"
-            },
-            {
-              "kind": "curve",
-              "role": "Amortized time",
+              "role": "Best/Amortized",
               "formula": "O(1)",
               "curveId": "constant"
             },
@@ -91,13 +85,7 @@ tab: Complexity
           "bounds": [
             {
               "kind": "curve",
-              "role": "Best time",
-              "formula": "O(1)",
-              "curveId": "constant"
-            },
-            {
-              "kind": "curve",
-              "role": "Amortized time",
+              "role": "Best/Amortized",
               "formula": "O(1)",
               "curveId": "constant"
             },
@@ -115,13 +103,7 @@ tab: Complexity
           "bounds": [
             {
               "kind": "curve",
-              "role": "Best time",
-              "formula": "O(1)",
-              "curveId": "constant"
-            },
-            {
-              "kind": "curve",
-              "role": "Amortized time",
+              "role": "Best/Amortized",
               "formula": "O(1)",
               "curveId": "constant"
             },
@@ -139,13 +121,7 @@ tab: Complexity
           "bounds": [
             {
               "kind": "curve",
-              "role": "Best time",
-              "formula": "O(n)",
-              "curveId": "linear"
-            },
-            {
-              "kind": "curve",
-              "role": "Amortized time",
+              "role": "Best/Amortized",
               "formula": "O(n)",
               "curveId": "linear"
             },
@@ -163,13 +139,7 @@ tab: Complexity
           "bounds": [
             {
               "kind": "curve",
-              "role": "Best time",
-              "formula": "O(n)",
-              "curveId": "linear"
-            },
-            {
-              "kind": "curve",
-              "role": "Amortized time",
+              "role": "Best/Amortized",
               "formula": "O(n)",
               "curveId": "linear"
             },
