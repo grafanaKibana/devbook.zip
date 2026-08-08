@@ -58,7 +58,7 @@ tab: Complexity
   "variables": {
     "inputSize": {
       "symbol": "n",
-      "description": "number of input elements or states"
+      "description": "number of nodes currently stored in the heap"
     }
   },
   "resources": {
@@ -162,11 +162,23 @@ tab: Complexity
       "entries": [
         {
           "kind": "operation",
+          "operation": "Whole heap",
+          "bounds": [
+            {
+              "kind": "curve",
+              "role": "Persistent structure space",
+              "formula": "Θ(n) nodes",
+              "curveId": "linear"
+            }
+          ]
+        },
+        {
+          "kind": "operation",
           "operation": "Insert(x)",
           "bounds": [
             {
               "kind": "curve",
-              "role": "Structure / aux space",
+              "role": "Incremental structure space",
               "formula": "O(1) new node",
               "curveId": "constant"
             }
@@ -178,7 +190,7 @@ tab: Complexity
           "bounds": [
             {
               "kind": "curve",
-              "role": "Structure / aux space",
+              "role": "Aux space per op",
               "formula": "O(1)",
               "curveId": "constant"
             }
@@ -190,7 +202,7 @@ tab: Complexity
           "bounds": [
             {
               "kind": "curve",
-              "role": "Structure / aux space",
+              "role": "Aux space per op",
               "formula": "O(1)",
               "curveId": "constant"
             }
@@ -202,7 +214,7 @@ tab: Complexity
           "bounds": [
             {
               "kind": "curve",
-              "role": "Structure / aux space",
+              "role": "Aux space per op",
               "formula": "O(1)",
               "curveId": "constant"
             }
@@ -213,9 +225,10 @@ tab: Complexity
           "operation": "ExtractMin()",
           "bounds": [
             {
-              "kind": "text",
-              "role": "Structure / aux space",
-              "formula": "O(max degree) = O(log n)"
+              "kind": "curve",
+              "role": "Aux space per op",
+              "formula": "O(max degree) = O(log n) degree table",
+              "curveId": "log-n"
             }
           ]
         }

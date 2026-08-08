@@ -35,7 +35,18 @@ VALID_STATUSES = frozenset(
 VALID_LEVELS = frozenset({"1", "2", "3", "4"})
 CONCEPT_FIELDS = ("topic", "subtopic", "level", "priority", "status")
 SPECIAL_PUBLISHED_PAGES = frozenset(
-    {"Vault/Home/index.md", "Vault/Home/Questions.md", "Vault/Home/Credits.md"}
+    {
+        "Vault/Home/index.md",
+        "Vault/Home/Questions.md",
+        "Vault/Home/About.md",
+    }
+)
+# Generated from immutable release/commit history, so it quotes historical vault
+# paths that cannot be rewritten.
+GENERATED_PAGES = frozenset(
+    {
+        "Vault/Home/Changelog.md",
+    }
 )
 ATTACHMENT_SUFFIXES = frozenset(
     {
@@ -419,7 +430,7 @@ def validate_residue(note: Note) -> list[Issue]:
                     residue,
                 )
             )
-    if re.search(r'\[\[.*Software Engineering|Software Engineering/', note.content):
+    if re.search(r'\[\[.*Software Engineering|Software Engineering/', note.content) and note.rel not in GENERATED_PAGES:
         issues.append(
             Issue(
                 "path.legacy",
@@ -457,6 +468,7 @@ def validate_code_fences(note: Note) -> list[Issue]:
                     list_indents.pop()
                 if list_indents and leading_spaces >= list_indents[-1]:
                     line = line[list_indents[-1]:]
+        line = re.sub(r"^(?: {0,3}>[ \t]?)+", "", line)
         match = re.match(r"^ {0,3}(`{3,}|~{3,})(.*)$", line)
         if not match:
             continue

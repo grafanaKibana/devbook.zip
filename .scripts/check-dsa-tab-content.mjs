@@ -44,8 +44,9 @@ function fenceRanges(lines, start, end) {
     const opener = isFenceOpener(lines[index]);
     if (!opener) continue;
     const delimiter = opener[1];
+    const closerPattern = new RegExp(`^${delimiter[0]}{${delimiter.length},}$`);
     let closer = index + 1;
-    while (closer < end && lines[closer].trim() !== delimiter) closer += 1;
+    while (closer < end && !closerPattern.test(lines[closer].trim())) closer += 1;
     if (closer >= end) {
       ranges.push({ start: index, end, language: opener[2].trim(), unclosed: true });
       break;
@@ -393,6 +394,11 @@ function runSelfTests() {
     ["outside-text.md", `${ordinary()}\nAverage runtime is linear.\n`, "Textual complexity candidate exists outside"],
     ["outside-amortized.md", `${ordinary()}\nThe operation is amortized.\n`, "Textual complexity candidate exists outside"],
     ["outside-storage.md", `${ordinary()}\nIt is in-place and uses only extra storage for one flag.\n`, "Textual complexity candidate exists outside"],
+    [
+      "longer-fence-closer.md",
+      "```text\nexample\n````\nRuntime is O(n).\n",
+      "Asymptotic complexity claim exists outside",
+    ],
     ["not-quadtree.md", ordinary().replace("```steptrace\n{}\n```", "![[image.png]]"), "must begin with a StepTrace"],
   ];
   for (const [path, text, expected] of fail) {
