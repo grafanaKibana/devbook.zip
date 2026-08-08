@@ -44,11 +44,11 @@ tab: Complexity
   "label": "Topological Sort complexity",
   "variables": {
     "edgeCount": {
-      "symbol": "E",
+      "symbol": "m",
       "description": "number of edges"
     },
     "vertexCount": {
-      "symbol": "V",
+      "symbol": "n",
       "description": "number of vertices"
     }
   },
@@ -61,9 +61,10 @@ tab: Complexity
           "operation": "Kahn's (in-degree queue)",
           "bounds": [
             {
-              "kind": "text",
+              "kind": "curve",
               "role": "Time",
-              "formula": "Θ(V + E)"
+              "formula": "Θ(n + m)",
+              "curveId": "linear"
             }
           ]
         },
@@ -72,9 +73,10 @@ tab: Complexity
           "operation": "DFS (reverse postorder)",
           "bounds": [
             {
-              "kind": "text",
+              "kind": "curve",
               "role": "Time",
-              "formula": "Θ(V + E)"
+              "formula": "Θ(n + m)",
+              "curveId": "linear"
             }
           ]
         }
@@ -90,7 +92,7 @@ tab: Complexity
             {
               "kind": "curve",
               "role": "Auxiliary space",
-              "formula": "O(V)",
+              "formula": "O(n)",
               "curveId": "linear"
             }
           ]
@@ -102,7 +104,7 @@ tab: Complexity
             {
               "kind": "curve",
               "role": "Auxiliary space",
-              "formula": "O(V)",
+              "formula": "O(n)",
               "curveId": "linear"
             }
           ]

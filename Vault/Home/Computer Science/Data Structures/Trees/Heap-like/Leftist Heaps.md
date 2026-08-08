@@ -50,7 +50,7 @@ tab: Complexity
   "variables": {
     "inputSize": {
       "symbol": "n",
-      "description": "number of input elements or states"
+      "description": "total stored nodes, combining both input heaps for merge"
     }
   },
   "resources": {
@@ -140,8 +140,8 @@ tab: Complexity
           "bounds": [
             {
               "kind": "curve",
-              "role": "Structure space",
-              "formula": "Θ(n) nodes + one npl field each",
+              "role": "Persistent structure space",
+              "formula": "Θ(n) nodes plus one npl field each",
               "curveId": "linear"
             },
             {
@@ -158,9 +158,9 @@ tab: Complexity
           "bounds": [
             {
               "kind": "curve",
-              "role": "Structure space",
-              "formula": "O(1) new node",
-              "curveId": "constant"
+              "role": "Persistent structure space",
+              "formula": "Θ(n) nodes plus one npl field each",
+              "curveId": "linear"
             },
             {
               "kind": "curve",
@@ -176,9 +176,9 @@ tab: Complexity
           "bounds": [
             {
               "kind": "curve",
-              "role": "Structure space",
-              "formula": "O(1)",
-              "curveId": "constant"
+              "role": "Persistent structure space",
+              "formula": "Θ(n) nodes plus one npl field each",
+              "curveId": "linear"
             },
             {
               "kind": "curve",
@@ -194,9 +194,9 @@ tab: Complexity
           "bounds": [
             {
               "kind": "curve",
-              "role": "Structure space",
-              "formula": "O(1)",
-              "curveId": "constant"
+              "role": "Persistent structure space",
+              "formula": "Θ(n) nodes plus one npl field each",
+              "curveId": "linear"
             },
             {
               "kind": "curve",

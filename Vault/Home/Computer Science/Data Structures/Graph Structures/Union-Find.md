@@ -47,7 +47,7 @@ tab: Complexity
   "variables": {
     "inputSize": {
       "symbol": "n",
-      "description": "number of input elements or states"
+      "description": "number of elements managed by the union-find forest"
     },
     "inverseAckermann": {
       "symbol": "α(·)",

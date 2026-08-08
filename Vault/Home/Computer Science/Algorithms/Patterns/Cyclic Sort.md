@@ -39,7 +39,7 @@ tab: Complexity
   "variables": {
     "inputSize": {
       "symbol": "n",
-      "description": "number of input elements or states"
+      "description": "length of the 1..n permutation"
     }
   },
   "resources": {
@@ -48,7 +48,7 @@ tab: Complexity
       "entries": [
         {
           "kind": "approach",
-          "label": "Naive (comparison sort)",
+          "label": "Naive (merge sort)",
           "formula": "O(n log n)",
           "curveId": "n-log-n"
         },
@@ -65,9 +65,9 @@ tab: Complexity
       "entries": [
         {
           "kind": "approach",
-          "label": "Naive (comparison sort)",
-          "formula": "O(log n)",
-          "curveId": "log-n"
+          "label": "Naive (merge sort)",
+          "formula": "O(n)",
+          "curveId": "linear"
         },
         {
           "kind": "approach",

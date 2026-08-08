@@ -55,13 +55,17 @@ tab: Complexity
       "symbol": "n",
       "description": "number of keys stored in the tree"
     },
-    "lengthL": {
-      "symbol": "L",
+    "keyLength": {
+      "symbol": "m",
       "description": "length of the inserted or queried key"
     },
-    "sizeS": {
-      "symbol": "S",
+    "resultCount": {
+      "symbol": "k",
       "description": "total characters emitted by prefix collection"
+    },
+    "totalCharacters": {
+      "symbol": "s",
+      "description": "total characters across all stored keys"
     }
   },
   "resources": {
@@ -70,12 +74,12 @@ tab: Complexity
       "entries": [
         {
           "kind": "operation",
-          "operation": "Search hit (key length L)",
+          "operation": "Search hit (key length m)",
           "bounds": [
             {
               "kind": "text",
               "role": "Time",
-              "formula": "O(L + log n) avg, O(L + n) worst"
+              "formula": "O(m + log n) avg, O(m + n) worst"
             }
           ]
         },
@@ -86,7 +90,7 @@ tab: Complexity
             {
               "kind": "text",
               "role": "Time",
-              "formula": "O(L + log n) avg, O(L + n) worst"
+              "formula": "O(m + log n) avg, O(m + n) worst"
             }
           ]
         },
@@ -97,7 +101,7 @@ tab: Complexity
             {
               "kind": "text",
               "role": "Time",
-              "formula": "O(L + log n) avg, O(L + n) worst"
+              "formula": "O(m + log n) avg, O(m + n) worst"
             }
           ]
         },
@@ -108,7 +112,7 @@ tab: Complexity
             {
               "kind": "text",
               "role": "Time",
-              "formula": "O(L + log n + S) avg, O(L + n + S) worst"
+              "formula": "O(m + log n + k) avg, O(m + n + k) worst"
             }
           ]
         }
@@ -119,12 +123,12 @@ tab: Complexity
       "entries": [
         {
           "kind": "operation",
-          "operation": "Search hit (key length L)",
+          "operation": "Search hit (key length m)",
           "bounds": [
             {
               "kind": "text",
               "role": "Recursive stack",
-              "formula": "O(L + log n) avg, O(L + n) worst"
+              "formula": "O(m + log n) avg, O(m + n) worst"
             }
           ]
         },
@@ -135,7 +139,7 @@ tab: Complexity
             {
               "kind": "text",
               "role": "Recursive stack",
-              "formula": "O(L + log n) avg, O(L + n) worst"
+              "formula": "O(m + log n) avg, O(m + n) worst"
             }
           ]
         },
@@ -146,7 +150,7 @@ tab: Complexity
             {
               "kind": "text",
               "role": "New nodes and recursive stack",
-              "formula": "O(L) new nodes plus O(L + log n) avg / O(L + n) worst stack"
+              "formula": "O(m) new nodes plus O(m + log n) avg / O(m + n) worst stack"
             }
           ]
         },
@@ -157,7 +161,7 @@ tab: Complexity
             {
               "kind": "text",
               "role": "Traversal and output",
-              "formula": "O(L + log n) avg / O(L + n) worst stack plus O(S) output"
+              "formula": "O(m + log n) avg / O(m + n) worst stack plus O(k) output"
             }
           ]
         },
@@ -166,9 +170,10 @@ tab: Complexity
           "operation": "Whole structure",
           "bounds": [
             {
-              "kind": "text",
+              "kind": "curve",
               "role": "Space",
-              "formula": "O(total input characters)"
+              "formula": "O(s)",
+              "curveId": "linear"
             }
           ]
         }

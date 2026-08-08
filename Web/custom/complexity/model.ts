@@ -186,7 +186,6 @@ const TOE_HEIGHT = (AXIS_Y - TOP) / (1 + LOG_MAX * Math.LN10)
 const DATA_BOTTOM = AXIS_Y - TOE_HEIGHT
 const BAND_TOP = TOP - 40
 const OUTLINE_STEPS = 64
-const DUPLICATE_GAP = 4
 
 function renderValue(curveId: CurveId, n: number): number {
   if (curveId !== "factorial") return curves[curveId].evaluate(n)
@@ -386,7 +385,6 @@ interface CurveSpec {
   legendGroup?: string
   color: string
   dimmed: boolean
-  offset?: number
   formula?: string
 }
 
@@ -438,26 +436,21 @@ function smoothPath(points: Point[]): string {
 // Sampled from n = 0 so the line is the curve and nothing else. A straight run from the
 // origin to the first sample would meet the curve at its own slope, and that junction is
 // the corner no amount of smoothing removes.
-function curveOutline(
-  curveId: CurveId,
-  scale: ReturnType<typeof makeScale>,
-  offset: number,
-): Point[] {
+function curveOutline(curveId: CurveId, scale: ReturnType<typeof makeScale>): Point[] {
   return Array.from({ length: OUTLINE_STEPS + 1 }, (_, index) => {
     const n = (index / OUTLINE_STEPS) * 10
-    return { x: scale.x(n), y: scale.y(renderValue(curveId, n)) - offset }
+    return { x: scale.x(n), y: scale.y(renderValue(curveId, n)) }
   })
 }
 
 function curvePath(spec: CurveSpec, scale: ReturnType<typeof makeScale>): ComplexityPath {
   const { id, curveId, bandTo, category, label, legendLabel, legendGroup, color, dimmed } = spec
-  const offset = spec.offset ?? 0
   const samples = Array.from({ length: 9 }, (_, index) => {
     const n = index + 2
     const value = curves[curveId].evaluate(n)
     return { n, value, x: scale.x(n), y: scale.y(value) }
   })
-  const lower = curveOutline(curveId, scale, offset)
+  const lower = curveOutline(curveId, scale)
   const geometry = smoothPath(lower)
   const last = samples[samples.length - 1]
   const path: ComplexityPath = {
@@ -472,7 +465,7 @@ function curvePath(spec: CurveSpec, scale: ReturnType<typeof makeScale>): Comple
     dimmed,
     geometry,
     area: `${geometry} L${last.x.toFixed(2)},${AXIS_Y.toFixed(2)} Z`,
-    endY: Math.max(TOP, Math.min(DATA_BOTTOM, last.y - offset)),
+    endY: Math.max(TOP, Math.min(DATA_BOTTOM, last.y)),
     samples,
   }
   if (!bandTo) return path
@@ -487,7 +480,7 @@ function curvePath(spec: CurveSpec, scale: ReturnType<typeof makeScale>): Comple
           { x: LEFT, y: BAND_TOP },
           { x: PLOT_RIGHT, y: BAND_TOP },
         ]
-      : curveOutline(bandTo, scale, offset)
+      : curveOutline(bandTo, scale)
   const ceiling = bandTo === "unbounded" ? polyline(upper) : smoothPath(upper)
   const floor = smoothPath([...lower].reverse()).replace(/^M/, "L")
   return {
@@ -509,7 +502,7 @@ function layoutEndpointLabels(paths: ComplexityPath[]): ComplexityEndpointLabel[
       curveId,
       formula: authoredFormulas.length === 1 ? authoredFormulas[0] : curves[curveId].formula,
       pathIds: matching.filter((path) => !path.bandTo).map((path) => path.id),
-      color: owners[0]?.color ?? CONTEXT_COLOR,
+      color: owners.at(-1)?.color ?? CONTEXT_COLOR,
       dimmed: owners.length === 0,
       y: matching.reduce((sum, path) => sum + path.endY, 0) / matching.length,
     }
@@ -573,21 +566,7 @@ function finishResource(
       scale,
     ),
   )
-  const counts = new Map<CurveId, number>()
-  const indexes = new Map<CurveId, number>()
-  for (const { curveId } of highlighted) counts.set(curveId, (counts.get(curveId) ?? 0) + 1)
-  const highlightedPaths = highlighted.map((entry) => {
-    const index = indexes.get(entry.curveId) ?? 0
-    indexes.set(entry.curveId, index + 1)
-    return curvePath(
-      {
-        ...entry,
-        dimmed: false,
-        offset: (counts.get(entry.curveId) ?? 0) > 1 ? index * DUPLICATE_GAP : 0,
-      },
-      scale,
-    )
-  })
+  const highlightedPaths = highlighted.map((entry) => curvePath({ ...entry, dimmed: false }, scale))
   const paths = [...context, ...highlightedPaths]
   const ticks: ComplexityViewModel["ticks"] = [{ value: 0, label: "0", y: AXIS_Y }]
   for (let value = 1; value <= MAX_VALUE; value *= 10) {

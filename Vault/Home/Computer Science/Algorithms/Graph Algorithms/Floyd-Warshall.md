@@ -68,7 +68,7 @@ tab: Complexity
   "label": "Floyd-Warshall complexity",
   "variables": {
     "vertexCount": {
-      "symbol": "V",
+      "symbol": "n",
       "description": "number of vertices"
     }
   },
@@ -83,7 +83,7 @@ tab: Complexity
             {
               "kind": "text",
               "role": "Time",
-              "formula": "Θ(V³)"
+              "formula": "Θ(n³)"
             }
           ]
         }
@@ -99,7 +99,7 @@ tab: Complexity
             {
               "kind": "curve",
               "role": "Space",
-              "formula": "Θ(V²)",
+              "formula": "Θ(n²)",
               "curveId": "quadratic"
             }
           ]

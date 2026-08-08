@@ -42,11 +42,11 @@ tab: Complexity
   "label": "Dijkstra complexity",
   "variables": {
     "edgeCount": {
-      "symbol": "E",
+      "symbol": "m",
       "description": "number of edges"
     },
     "vertexCount": {
-      "symbol": "V",
+      "symbol": "n",
       "description": "number of vertices"
     }
   },
@@ -61,7 +61,7 @@ tab: Complexity
             {
               "kind": "text",
               "role": "Time",
-              "formula": "O((V + E) log V)"
+              "formula": "O((n + m) log n)"
             }
           ]
         },
@@ -72,7 +72,7 @@ tab: Complexity
             {
               "kind": "text",
               "role": "Time",
-              "formula": "O(E + V log V)"
+              "formula": "O(m + n log n)"
             }
           ]
         },
@@ -83,7 +83,7 @@ tab: Complexity
             {
               "kind": "curve",
               "role": "Time",
-              "formula": "O(V²)",
+              "formula": "O(n²)",
               "curveId": "quadratic"
             }
           ]
@@ -100,7 +100,7 @@ tab: Complexity
             {
               "kind": "text",
               "role": "Auxiliary space",
-              "formula": "O(V) decrease-key; O(E) lazy-deletion"
+              "formula": "O(n) decrease-key; O(m) lazy-deletion"
             }
           ]
         },
@@ -111,7 +111,7 @@ tab: Complexity
             {
               "kind": "curve",
               "role": "Auxiliary space",
-              "formula": "O(V)",
+              "formula": "O(n)",
               "curveId": "linear"
             }
           ]
@@ -123,7 +123,7 @@ tab: Complexity
             {
               "kind": "curve",
               "role": "Auxiliary space",
-              "formula": "O(V)",
+              "formula": "O(n)",
               "curveId": "linear"
             }
           ]

@@ -41,11 +41,11 @@ tab: Complexity
   "label": "Kruskal's Algorithm complexity",
   "variables": {
     "edgeCount": {
-      "symbol": "E",
+      "symbol": "m",
       "description": "number of edges"
     },
     "vertexCount": {
-      "symbol": "V",
+      "symbol": "n",
       "description": "number of vertices"
     }
   },
@@ -56,43 +56,36 @@ tab: Complexity
         {
           "kind": "case",
           "role": "Best",
-          "formula": "Θ(E log E)",
+          "formula": "Θ(m log m)",
           "curveId": "n-log-n"
         },
         {
           "kind": "case",
           "role": "Average",
-          "formula": "Θ(E log E)",
+          "formula": "Θ(m log m)",
           "curveId": "n-log-n"
         },
         {
           "kind": "case",
           "role": "Worst",
-          "formula": "Θ(E log E)",
+          "formula": "Θ(m log m)",
           "curveId": "n-log-n"
         }
       ]
     },
     "space": {
-      "mode": "cases",
+      "mode": "operations",
       "entries": [
         {
-          "kind": "case",
-          "role": "Best",
-          "formula": "O(V) plus sort workspace",
-          "curveId": "linear"
-        },
-        {
-          "kind": "case",
-          "role": "Average",
-          "formula": "O(V) plus sort workspace",
-          "curveId": "linear"
-        },
-        {
-          "kind": "case",
-          "role": "Worst",
-          "formula": "O(V) plus sort workspace",
-          "curveId": "linear"
+          "kind": "operation",
+          "operation": "Kruskal",
+          "bounds": [
+            {
+              "kind": "text",
+              "role": "Auxiliary space",
+              "formula": "O(n + log m) with in-place introsort"
+            }
+          ]
         }
       ]
     }

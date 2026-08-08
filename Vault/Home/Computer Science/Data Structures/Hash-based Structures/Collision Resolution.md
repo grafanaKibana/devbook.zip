@@ -91,16 +91,16 @@ tab: Complexity
   "label": "Collision Resolution complexity",
   "variables": {
     "blockSize": {
-      "symbol": "B",
+      "symbol": "b",
       "description": "block or page capacity"
     },
     "inputSize": {
       "symbol": "n",
-      "description": "number of input elements or states"
+      "description": "number of entries stored in the hash table"
     },
     "keyRange": {
       "symbol": "k",
-      "description": "key range, digit count, or requested result count"
+      "description": "entries in the relevant chain or treeified bin"
     },
     "loadFactor": {
       "symbol": "α",
@@ -151,7 +151,7 @@ tab: Complexity
             {
               "kind": "text",
               "role": "Avg lookup",
-              "formula": "Resolution-dependent; scans B slots/metadata together"
+              "formula": "Resolution-dependent; scans b slots/metadata together"
             },
             {
               "kind": "text",

@@ -58,7 +58,7 @@ tab: Complexity
   "variables": {
     "inputSize": {
       "symbol": "n",
-      "description": "number of input elements or states"
+      "description": "number of keys currently stored in the tree"
     }
   },
   "resources": {

@@ -39,7 +39,7 @@ tab: Complexity
   "variables": {
     "inputSize": {
       "symbol": "n",
-      "description": "number of input elements or states"
+      "description": "number of candidate intervals in the activity-selection model"
     }
   },
   "resources": {

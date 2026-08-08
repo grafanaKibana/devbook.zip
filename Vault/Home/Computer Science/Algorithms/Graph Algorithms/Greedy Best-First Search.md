@@ -40,11 +40,11 @@ tab: Complexity
   "variables": {
     "branchingFactor": {
       "symbol": "b",
-      "description": "search branching factor or radix base"
+      "description": "search-tree branching factor"
     },
     "secondarySize": {
       "symbol": "m",
-      "description": "secondary input, pattern, bucket, or sequence size"
+      "description": "maximum search depth"
     }
   },
   "resources": {

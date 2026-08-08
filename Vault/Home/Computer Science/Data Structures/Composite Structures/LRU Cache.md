@@ -51,11 +51,11 @@ tab: Complexity
   "variables": {
     "configuredCapacity": {
       "symbol": "capacity",
-      "description": "configured backing-storage capacity"
+      "description": "maximum number of entries the cache may retain"
     },
     "inputSize": {
       "symbol": "n",
-      "description": "number of input elements or states"
+      "description": "number of resident cache entries"
     }
   },
   "resources": {

@@ -51,7 +51,7 @@ tab: Complexity
   "variables": {
     "inputSize": {
       "symbol": "n",
-      "description": "number of input elements or states"
+      "description": "number of discrete candidates or search positions"
     },
     "lowerBound": {
       "symbol": "lo",
@@ -98,9 +98,10 @@ tab: Complexity
           "operation": "Function evaluations",
           "bounds": [
             {
-              "kind": "text",
+              "kind": "curve",
               "role": "Cost",
-              "formula": "2 per iteration (1 per iteration with golden-section reuse)"
+              "formula": "2 per iteration (1 per iteration with golden-section reuse)",
+              "curveId": "constant"
             }
           ]
         },
@@ -109,9 +110,10 @@ tab: Complexity
           "operation": "Sorted-array lookup (misuse)",
           "bounds": [
             {
-              "kind": "text",
+              "kind": "curve",
               "role": "Cost",
-              "formula": "2·log₃ n ≈ 1.82·ln n comparisons"
+              "formula": "2·log₃ n ≈ 1.82·ln n comparisons",
+              "curveId": "log-n"
             }
           ]
         }

@@ -163,8 +163,8 @@ const comparison = {
       entries: [
         {
           kind: "approach",
-          label: "Naive (triple nested loop)",
-          formula: "O(n³)",
+          label: "Naive (enumerate subsets)",
+          formula: "O(2^n)",
           curveId: "exponential",
         },
         { kind: "approach", label: "Dynamic programming", formula: "O(n)", curveId: "linear" },
@@ -173,7 +173,7 @@ const comparison = {
     space: {
       mode: "comparison",
       entries: [
-        { kind: "text", label: "Naive (triple nested loop)", formula: "O(1), no table" },
+        { kind: "text", label: "Naive (enumerate subsets)", formula: "O(1), no table" },
         { kind: "approach", label: "Dynamic programming", formula: "O(n)", curveId: "linear" },
       ],
     },
@@ -193,7 +193,7 @@ test("a comparison resource plots approaches into one ungrouped legend", () => {
   assert.deepEqual(
     time.legend[0].items.map((item) => [item.kind, item.label]),
     [
-      ["plotted", "Naive (triple nested loop)"],
+      ["plotted", "Naive (enumerate subsets)"],
       ["plotted", "Dynamic programming"],
     ],
   )
@@ -204,7 +204,7 @@ test("a comparison resource plots approaches into one ungrouped legend", () => {
   assert.ok(time.paths.every((path) => path.legendGroup === undefined))
   assert.deepEqual(
     time.endpointLabels.filter((label) => !label.dimmed).map((label) => label.formula),
-    ["O(n³)", "O(n)"],
+    ["O(2^n)", "O(n)"],
   )
 
   assert.equal(space.legend.length, 1)
@@ -212,7 +212,7 @@ test("a comparison resource plots approaches into one ungrouped legend", () => {
   assert.deepEqual(
     space.legend[0].items.map((item) => [item.kind, item.label]),
     [
-      ["semantic", "Naive (triple nested loop): O(1), no table"],
+      ["semantic", "Naive (enumerate subsets): O(1), no table"],
       ["plotted", "Dynamic programming"],
     ],
   )
@@ -438,7 +438,7 @@ test("a comparison resource rejects a single approach, duplicates, and unknown k
         withEntries([comparison.resources.time.entries[0], comparison.resources.time.entries[0]]),
         "dupe",
       ),
-    /resources\.time\.entries\[1\]\.label: duplicates Naive \(triple nested loop\)/,
+    /resources\.time\.entries\[1\]\.label: duplicates Naive \(enumerate subsets\)/,
   )
   assert.throws(
     () =>
@@ -461,6 +461,29 @@ test("a comparison resource rejects a single approach, duplicates, and unknown k
         "unplottable",
       ),
     /resources\.time\.entries: must plot at least one approach/,
+  )
+})
+
+test("version 2 rejects approximate curve projections", () => {
+  assert.throws(
+    () =>
+      buildComplexityViewModel(
+        {
+          ...dualResource,
+          resources: {
+            ...dualResource.resources,
+            time: {
+              ...dualResource.resources.time,
+              entries: [
+                { ...dualResource.resources.time.entries[0], approximate: true },
+                ...dualResource.resources.time.entries.slice(1),
+              ],
+            },
+          },
+        },
+        "approx-rejected",
+      ),
+    /resources\.time\.entries\[0\]\.approximate: is not supported/,
   )
 })
 
@@ -626,17 +649,53 @@ test("the 10k ceiling clips visually without changing representative values", ()
   )
 })
 
-test("duplicate case curves render as parallel offset lines", () => {
+test("duplicate case curves share exact geometry", () => {
   const view = buildComplexityViewModel(cases)
   const best = view.paths.find((path) => path.label.startsWith("Best:"))
   const average = view.paths.find((path) => path.label.startsWith("Average:"))
-  assert.notEqual(best?.geometry, average?.geometry)
+  const endpoint = view.endpointLabels.find((label) => label.curveId === "n-log-n")
+  assert.equal(best?.geometry, average?.geometry)
   assert.match(best?.geometry ?? "", /^M0\.00,/)
   assert.match(average?.geometry ?? "", /^M0\.00,/)
   assert.notEqual(best?.id, average?.id)
   assert.equal(best?.color, "#22a06b")
   assert.equal(average?.color, "#d99a00")
-  assert.equal(view.endpointLabels.find((label) => label.curveId === "n-log-n")?.pathIds.length, 2)
+  assert.equal(endpoint?.pathIds.length, 2)
+  assert.equal(endpoint?.color, average?.color)
+
+  const hast = renderComplexityHast(view)
+  const hastCurves = findAllHastByClass(hast, "complexity__curve").filter(
+    ({ properties }) =>
+      properties["data-curve-id"] === "n-log-n" && properties["data-context"] === "false",
+  )
+  assert.deepEqual(
+    hastCurves.map(({ properties }) => properties.stroke),
+    [best?.color, average?.color],
+  )
+  assert.equal(
+    findAllHastByClass(hast, "complexity__endpoint-label").find(
+      ({ properties }) => properties["data-curve-id"] === "n-log-n",
+    )?.properties.style,
+    `--complexity-label-color:${average?.color}`,
+  )
+
+  const document = new FakeDocument()
+  const root = document.createElement("div")
+  renderComplexityDom(root as unknown as HTMLElement, view)
+  const domCurves = findAllFake(root, "path").filter(
+    ({ attributes }) =>
+      attributes["data-curve-id"] === "n-log-n" && attributes["data-context"] === "false",
+  )
+  assert.deepEqual(
+    domCurves.map(({ attributes }) => attributes.stroke),
+    [best?.color, average?.color],
+  )
+  assert.equal(
+    findAllFake(root, "text")
+      .find(({ attributes }) => attributes["data-curve-id"] === "n-log-n")
+      ?.style.values.get("--complexity-label-color"),
+    average?.color,
+  )
 })
 
 test("operation text bounds stay semantic-only while catalogue bounds plot", () => {
@@ -694,7 +753,7 @@ test("operation legends group each operation and shade its plotted bounds", () =
     ],
   )
   const constantPaths = view.paths.filter((path) => !path.dimmed && path.curveId === "constant")
-  assert.equal(new Set(constantPaths.map((path) => path.geometry)).size, constantPaths.length)
+  assert.equal(new Set(constantPaths.map((path) => path.geometry)).size, 1)
   assert.ok(constantPaths.every((path) => path.geometry.startsWith("M0.00,")))
 })
 
@@ -1416,17 +1475,20 @@ test("legend selection isolates one curve, restores the union, and cleans up", (
   assert.ok(firstPath.classList.contains("is-highlighted"))
   assert.ok(secondPath.classList.contains("is-highlighted"))
   assert.ok(contextPath.classList.contains("is-subtle"))
+  assert.equal(label.style.values.get("--complexity-label-color"), "red")
 
   firstButton.dispatchEvent(new Event("click"))
   assert.equal(firstButton.attributes["aria-pressed"], "true")
   assert.ok(firstPath.classList.contains("is-highlighted"))
   assert.ok(secondPath.classList.contains("is-subtle"))
   assert.ok(secondArea.classList.contains("is-subtle"))
+  assert.equal(label.style.values.get("--complexity-label-color"), "green")
 
   firstButton.dispatchEvent(new Event("click"))
   assert.equal(firstButton.attributes["aria-pressed"], "false")
   assert.ok(firstPath.classList.contains("is-highlighted"))
   assert.ok(secondPath.classList.contains("is-highlighted"))
+  assert.equal(label.style.values.get("--complexity-label-color"), "red")
 
   handle.destroy()
   assert.equal(figure.dataset.complexityMounted, undefined)
@@ -1716,6 +1778,69 @@ test("renderer sources contain no legacy complexity filter surface", () => {
       source,
       /COMPLEXITY_FILTERS|ComplexityFilter|steptrace__tabs?|data-filter|activeFilter|active-filter/,
     )
+  }
+})
+
+test("every source chart builds and repeated growth classes share exact geometry", () => {
+  const root = join(process.cwd(), "..", "Vault", "Home")
+  const exactCurveText =
+    /^(?:O|Θ)\((?:1|[a-z]|log(?: [a-z]|\([a-z] \+ 1\))|n log n|[a-z]²|(?:[a-z]|1)(?: \+ (?:[a-z]|1))+|2\^[a-z]|[a-z]!)\)$/
+  const genericVariableDescription =
+    /^(?:number of input elements or states|secondary input, pattern, bucket, or sequence size|key range, digit count, or requested result count|search branching factor or radix base|algorithm-specific depth, digit count, or dimension|key, string, path, or sequence length)$/
+  const notes = (directory: string): string[] =>
+    readdirSync(directory, { withFileTypes: true }).flatMap((entry) => {
+      const path = join(directory, entry.name)
+      return entry.isDirectory() ? notes(path) : entry.name.endsWith(".md") ? [path] : []
+    })
+  const charts = notes(root).flatMap((note) => {
+    const source = readFileSync(note, "utf8")
+    return [...source.matchAll(/```complexity\n([\s\S]*?)\n```/g)].map(
+      (match, index) => [note, index, JSON.parse(match[1])] as const,
+    )
+  })
+
+  assert.equal(charts.length, 89)
+  for (const [note, index, config] of charts) {
+    if (config.version === 2) {
+      for (const variable of Object.values(config.variables) as {
+        symbol: string
+        description: string
+      }[]) {
+        assert.doesNotMatch(variable.symbol, /[A-Z]|\|/, `${note} uses canonical lowercase symbols`)
+        assert.doesNotMatch(
+          variable.description,
+          genericVariableDescription,
+          `${note} explains ${variable.symbol} with a note-specific legend`,
+        )
+      }
+    }
+    for (const resource of Object.values(config.resources ?? {}) as {
+      entries: Record<string, unknown>[]
+    }[]) {
+      for (const entry of resource.entries) {
+        const bounds = Array.isArray(entry.bounds) ? entry.bounds : [entry]
+        for (const bound of bounds as Record<string, unknown>[]) {
+          if (bound.kind === "text") {
+            assert.doesNotMatch(
+              String(bound.formula),
+              exactCurveText,
+              `${note} ${String(bound.formula)}`,
+            )
+          }
+        }
+      }
+    }
+    const view = buildComplexityViewModel(config, `source-${index}-${note}`)
+    for (const resource of view.resources) {
+      const byCurve = Map.groupBy(resource.paths, (path) => path.curveId)
+      for (const [curveId, paths] of byCurve) {
+        assert.equal(
+          new Set(paths.map((path) => path.geometry)).size,
+          1,
+          `${note} ${resource.key} ${curveId}`,
+        )
+      }
+    }
   }
 })
 

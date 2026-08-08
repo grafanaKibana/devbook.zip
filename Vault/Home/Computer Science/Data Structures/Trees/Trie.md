@@ -55,23 +55,23 @@ tab: Complexity
       "description": "alphabet size"
     },
     "capacity": {
-      "symbol": "C",
+      "symbol": "c",
       "description": "total output characters copied"
     },
     "lengthL": {
-      "symbol": "L",
+      "symbol": "l",
       "description": "length of the inserted or queried key"
     },
     "parameterHUpper": {
-      "symbol": "H",
+      "symbol": "h",
       "description": "maximum trie height or longest remaining suffix"
     },
     "universeSize": {
-      "symbol": "U",
+      "symbol": "u",
       "description": "number of distinct stored prefixes and therefore trie nodes"
     },
     "vertexCount": {
-      "symbol": "V",
+      "symbol": "v",
       "description": "number of trie nodes visited beneath the matched prefix"
     }
   },
@@ -81,12 +81,12 @@ tab: Complexity
       "entries": [
         {
           "kind": "operation",
-          "operation": "Insert (key length L)",
+          "operation": "Insert (key length l)",
           "bounds": [
             {
               "kind": "curve",
               "role": "Time",
-              "formula": "O(L)",
+              "formula": "O(l)",
               "curveId": "linear"
             }
           ]
@@ -98,7 +98,7 @@ tab: Complexity
             {
               "kind": "curve",
               "role": "Time",
-              "formula": "O(L)",
+              "formula": "O(l)",
               "curveId": "linear"
             }
           ]
@@ -110,7 +110,7 @@ tab: Complexity
             {
               "kind": "curve",
               "role": "Time",
-              "formula": "O(L)",
+              "formula": "O(l)",
               "curveId": "linear"
             }
           ]
@@ -120,9 +120,10 @@ tab: Complexity
           "operation": "Prefix collection",
           "bounds": [
             {
-              "kind": "text",
+              "kind": "curve",
               "role": "Time",
-              "formula": "O(L + V + C)"
+              "formula": "O(l + v + c)",
+              "curveId": "linear"
             }
           ]
         }
@@ -133,12 +134,12 @@ tab: Complexity
       "entries": [
         {
           "kind": "operation",
-          "operation": "Insert (key length L)",
+          "operation": "Insert (key length l)",
           "bounds": [
             {
               "kind": "text",
               "role": "Space",
-              "formula": "O(L) new sparse-map nodes; O(L · σ) child slots with fixed arrays"
+              "formula": "O(l) new sparse-map nodes; O(l · σ) child slots with fixed arrays"
             }
           ]
         },
@@ -161,7 +162,7 @@ tab: Complexity
             {
               "kind": "curve",
               "role": "Space",
-              "formula": "O(L) stack",
+              "formula": "O(l) stack",
               "curveId": "linear"
             }
           ]
@@ -171,9 +172,10 @@ tab: Complexity
           "operation": "Prefix collection",
           "bounds": [
             {
-              "kind": "text",
+              "kind": "curve",
               "role": "Space",
-              "formula": "O(H + C) traversal stack and output"
+              "formula": "O(h + c) traversal stack and output",
+              "curveId": "linear"
             }
           ]
         },
@@ -184,7 +186,7 @@ tab: Complexity
             {
               "kind": "text",
               "role": "Space",
-              "formula": "O(U) nodes and child entries with sparse maps; O(U · σ) child slots with fixed arrays"
+              "formula": "O(u) nodes and child entries with sparse maps; O(u · σ) child slots with fixed arrays"
             }
           ]
         }

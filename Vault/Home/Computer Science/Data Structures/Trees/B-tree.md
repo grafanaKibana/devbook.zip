@@ -56,11 +56,11 @@ tab: Complexity
   "variables": {
     "inputSize": {
       "symbol": "n",
-      "description": "number of input elements or states"
+      "description": "number of keys stored in the tree"
     },
     "secondarySize": {
       "symbol": "m",
-      "description": "secondary input, pattern, bucket, or sequence size"
+      "description": "tree order and maximum number of children per node"
     }
   },
   "resources": {

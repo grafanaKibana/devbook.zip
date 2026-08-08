@@ -76,15 +76,11 @@ tab: Complexity
   "variables": {
     "inputSize": {
       "symbol": "n",
-      "description": "number of input elements or states"
+      "description": "length of the input string or searched text"
     },
     "secondarySize": {
       "symbol": "m",
-      "description": "secondary input, pattern, bucket, or sequence size"
-    },
-    "sizeS": {
-      "symbol": "S",
-      "description": "string, state, or output size"
+      "description": "length of the pattern"
     }
   },
   "resources": {
@@ -93,12 +89,13 @@ tab: Complexity
       "entries": [
         {
           "kind": "operation",
-          "operation": "Z-array of a string S",
+          "operation": "Z-array of a string (length n)",
           "bounds": [
             {
-              "kind": "text",
+              "kind": "curve",
               "role": "Time",
-              "formula": "Θ(|S|)"
+              "formula": "Θ(n)",
+              "curveId": "linear"
             }
           ]
         },
@@ -107,9 +104,10 @@ tab: Complexity
           "operation": "Search P in T",
           "bounds": [
             {
-              "kind": "text",
+              "kind": "curve",
               "role": "Time",
-              "formula": "Θ(n + m)"
+              "formula": "Θ(n + m)",
+              "curveId": "linear"
             }
           ]
         }
@@ -120,7 +118,7 @@ tab: Complexity
       "entries": [
         {
           "kind": "operation",
-          "operation": "Z-array of a string S",
+          "operation": "Z-array of a string (length n)",
           "bounds": [
             {
               "kind": "curve",
@@ -135,9 +133,10 @@ tab: Complexity
           "operation": "Search P in T",
           "bounds": [
             {
-              "kind": "text",
+              "kind": "curve",
               "role": "Auxiliary space",
-              "formula": "Θ(n + m)"
+              "formula": "Θ(n + m)",
+              "curveId": "linear"
             }
           ]
         }

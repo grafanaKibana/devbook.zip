@@ -34,7 +34,7 @@ tab: Complexity
   "label": "Borůvka's Algorithm complexity",
   "variables": {
     "edgeCount": {
-      "symbol": "E",
+      "symbol": "m",
       "description": "number of edges"
     },
     "inverseAckermann": {
@@ -42,7 +42,7 @@ tab: Complexity
       "description": "inverse Ackermann factor applied to its displayed argument"
     },
     "vertexCount": {
-      "symbol": "V",
+      "symbol": "n",
       "description": "number of vertices"
     }
   },
@@ -57,7 +57,7 @@ tab: Complexity
             {
               "kind": "text",
               "role": "Time",
-              "formula": "O(E · α(V))"
+              "formula": "O(m · α(n))"
             }
           ]
         },
@@ -79,7 +79,7 @@ tab: Complexity
             {
               "kind": "text",
               "role": "Time",
-              "formula": "O(E · α(V) · log V)"
+              "formula": "O(m · α(n) · log n)"
             }
           ]
         }
@@ -95,7 +95,7 @@ tab: Complexity
             {
               "kind": "curve",
               "role": "Auxiliary space",
-              "formula": "O(V)",
+              "formula": "O(n)",
               "curveId": "linear"
             }
           ]
@@ -107,7 +107,7 @@ tab: Complexity
             {
               "kind": "curve",
               "role": "Auxiliary space",
-              "formula": "O(V)",
+              "formula": "O(n)",
               "curveId": "linear"
             }
           ]
@@ -119,7 +119,7 @@ tab: Complexity
             {
               "kind": "curve",
               "role": "Auxiliary space",
-              "formula": "O(V)",
+              "formula": "O(n)",
               "curveId": "linear"
             }
           ]
@@ -138,6 +138,11 @@ Parallel edges are harmless: only the lightest outgoing candidate for a componen
 An isolated component has no outgoing edge. If more than one component remains after a round and none can select an outgoing edge, the input is disconnected and the result is a minimum spanning forest.
 
 Selected edges cannot be appended blindly. Two components can nominate the same edge, and later selections in the same round can become internal after earlier unions. Each candidate still passes through a union-find check before it enters the result.
+
+# Questions
+
+> [!QUESTION]- Why does Borůvka's algorithm need only logarithmically many rounds, and why is a union-find check still required inside each round?
+> Every non-isolated component selects an outgoing edge, so successful unions group the remaining components into sets of at least two and reduce their count by at least half. The same edge may be nominated twice, and earlier unions can make a later candidate internal during the round; union-find rejects those duplicates and newly formed cycles without invalidating the halving argument.
 
 # References
 

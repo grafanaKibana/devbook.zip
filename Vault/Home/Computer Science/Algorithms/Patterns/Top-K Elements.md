@@ -48,11 +48,11 @@ tab: Complexity
   "variables": {
     "inputSize": {
       "symbol": "n",
-      "description": "number of input elements or states"
+      "description": "number of elements processed to select the top k"
     },
     "keyRange": {
       "symbol": "k",
-      "description": "key range, digit count, or requested result count"
+      "description": "number of requested results and heap capacity"
     }
   },
   "resources": {

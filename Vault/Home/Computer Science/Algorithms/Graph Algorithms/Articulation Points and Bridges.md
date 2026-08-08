@@ -49,11 +49,11 @@ tab: Complexity
   "label": "Articulation Points and Bridges complexity",
   "variables": {
     "edgeCount": {
-      "symbol": "E",
+      "symbol": "m",
       "description": "number of edges"
     },
     "vertexCount": {
-      "symbol": "V",
+      "symbol": "n",
       "description": "number of vertices"
     }
   },
@@ -66,9 +66,10 @@ tab: Complexity
           "operation": "Time",
           "bounds": [
             {
-              "kind": "text",
+              "kind": "curve",
               "role": "Bound",
-              "formula": "O(V + E)"
+              "formula": "O(n + m)",
+              "curveId": "linear"
             }
           ]
         }
@@ -84,7 +85,7 @@ tab: Complexity
             {
               "kind": "curve",
               "role": "Bound",
-              "formula": "O(V)",
+              "formula": "O(n)",
               "curveId": "linear"
             }
           ]

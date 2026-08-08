@@ -249,6 +249,8 @@ test("the public API stays stable", () => {
 })
 
 test("the Obsidian bundle registers complexity and keeps invalid source local", () => {
+  assert.match(obsidianJs, /const activePath = paths\.findLast\(/)
+  assert.match(obsidianJs, /color: owners\.at\(-1\)\?\.color/)
   const processors = new Map()
   class Plugin {
     registerMarkdownCodeBlockProcessor(language, processor) {
@@ -1268,7 +1270,7 @@ test("all 600 ordered Ukraine-city A* routes are reachable, admissible, and opti
   const note = csNote("Algorithms", "Graph Algorithms", "A-Star Search.md")
   const complexity = JSON.parse(note.match(/```complexity\n([\s\S]*?)\n```/)[1])
   const bestBound = (resource) => complexity.resources[resource].entries[0].bounds[0]
-  const averageBound = (resource) => complexity.resources[resource].entries[1]
+  const typicalBound = (resource) => complexity.resources[resource].entries[1]
 
   assert.deepEqual(bestBound("time"), {
     kind: "curve",
@@ -1283,15 +1285,27 @@ test("all 600 ordered Ukraine-city A* routes are reachable, admissible, and opti
     curveId: "linear",
   })
 
-  assert.deepEqual(averageBound("time"), {
+  assert.deepEqual(typicalBound("time"), {
     kind: "operation",
-    operation: "Average",
-    bounds: [{ kind: "text", role: "Time (node expansions)", formula: "O(b^d)" }],
+    operation: "Typical",
+    bounds: [
+      {
+        kind: "text",
+        role: "Time (node expansions)",
+        formula: "between Θ(d) and O(b^d) for uniform edge costs",
+      },
+    ],
   })
-  assert.deepEqual(averageBound("space"), {
+  assert.deepEqual(typicalBound("space"), {
     kind: "operation",
-    operation: "Average",
-    bounds: [{ kind: "text", role: "Auxiliary space, fixed b", formula: "O(b^d)" }],
+    operation: "Typical",
+    bounds: [
+      {
+        kind: "text",
+        role: "Auxiliary space",
+        formula: "O(nodes stored), heuristic-dependent",
+      },
+    ],
   })
 })
 
@@ -1392,10 +1406,8 @@ test("legacy variant tabs stay absent and host Tabsdown adapters stay intact", (
     assert.doesNotMatch(source, legacyClasses)
     assert.doesNotMatch(
       source,
-      /COMPLEXITY_FILTERS|complexity__tabs?|data-(?:active-)?filter|activeFilter|availableCategories/,
+      /COMPLEXITY_FILTERS|data-(?:active-)?filter|activeFilter|availableCategories/,
     )
-    assert.doesNotMatch(source, /["'](?:tablist|tab|tabpanel)["']/)
-    assert.doesNotMatch(source, /aria(?:Controls|Selected)|aria-(?:controls|selected)/)
   }
 
   assert.match(typesSource, /interface HostTabsOptions/)

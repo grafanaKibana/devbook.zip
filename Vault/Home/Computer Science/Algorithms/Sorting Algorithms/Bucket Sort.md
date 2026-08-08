@@ -37,11 +37,11 @@ tab: Complexity
   "variables": {
     "inputSize": {
       "symbol": "n",
-      "description": "number of input elements or states"
+      "description": "number of values distributed into buckets"
     },
     "secondarySize": {
       "symbol": "m",
-      "description": "secondary input, pattern, bucket, or sequence size"
+      "description": "number of buckets"
     }
   },
   "resources": {
@@ -53,9 +53,10 @@ tab: Complexity
           "operation": "Best",
           "bounds": [
             {
-              "kind": "text",
+              "kind": "curve",
               "role": "Time",
-              "formula": "Θ(n + m)"
+              "formula": "Θ(n + m)",
+              "curveId": "linear"
             }
           ]
         },
@@ -64,9 +65,10 @@ tab: Complexity
           "operation": "Average",
           "bounds": [
             {
-              "kind": "text",
+              "kind": "curve",
               "role": "Time",
-              "formula": "Θ(n + m) ≈ Θ(n) when m ≈ n"
+              "formula": "Θ(n + m) ≈ Θ(n) when m ≈ n",
+              "curveId": "linear"
             }
           ]
         },
@@ -91,9 +93,10 @@ tab: Complexity
           "operation": "Best",
           "bounds": [
             {
-              "kind": "text",
+              "kind": "curve",
               "role": "Auxiliary space",
-              "formula": "Θ(n + m)"
+              "formula": "Θ(n + m)",
+              "curveId": "linear"
             }
           ]
         },
@@ -102,9 +105,10 @@ tab: Complexity
           "operation": "Average",
           "bounds": [
             {
-              "kind": "text",
+              "kind": "curve",
               "role": "Auxiliary space",
-              "formula": "Θ(n + m)"
+              "formula": "Θ(n + m)",
+              "curveId": "linear"
             }
           ]
         },
@@ -113,9 +117,10 @@ tab: Complexity
           "operation": "Worst",
           "bounds": [
             {
-              "kind": "text",
+              "kind": "curve",
               "role": "Auxiliary space",
-              "formula": "Θ(n + m)"
+              "formula": "Θ(n + m)",
+              "curveId": "linear"
             }
           ]
         }

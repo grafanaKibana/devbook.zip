@@ -50,11 +50,11 @@ tab: Complexity
   "variables": {
     "expansionIndex": {
       "symbol": "i",
-      "description": "exponential-search bound index"
+      "description": "zero-based position of the target element"
     },
     "inputSize": {
       "symbol": "n",
-      "description": "number of input elements or states"
+      "description": "number of elements in the bounded sorted input"
     }
   },
   "resources": {
@@ -78,9 +78,10 @@ tab: Complexity
           "operation": "Successful at position i",
           "bounds": [
             {
-              "kind": "text",
+              "kind": "curve",
               "role": "Time",
-              "formula": "O(log(i + 1))"
+              "formula": "O(log(i + 1))",
+              "curveId": "log-n"
             }
           ]
         },

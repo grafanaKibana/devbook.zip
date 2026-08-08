@@ -264,12 +264,12 @@ tab: Complexity
   "label": "Dynamic Programming complexity",
   "variables": {
     "optionCount": {
-      "symbol": "D",
-      "description": "number of denominations, choices, or dimensions"
+      "symbol": "m",
+      "description": "number of coin denominations considered at each state"
     },
     "targetSize": {
-      "symbol": "W",
-      "description": "target amount or bounded problem size"
+      "symbol": "n",
+      "description": "target amount in the coin-change comparison"
     }
   },
   "resources": {
@@ -279,14 +279,14 @@ tab: Complexity
         {
           "kind": "approach",
           "label": "Naive (recurse every coin choice)",
-          "formula": "O(D^W)",
+          "formula": "O(m^n)",
           "curveFrom": "exponential",
           "curveTo": "unbounded"
         },
         {
           "kind": "approach",
           "label": "Dynamic programming",
-          "formula": "O(WD)",
+          "formula": "O(n·m)",
           "curveFrom": "linear",
           "curveTo": "quadratic"
         }
@@ -298,13 +298,13 @@ tab: Complexity
         {
           "kind": "approach",
           "label": "Naive (recurse every coin choice)",
-          "formula": "O(W)",
+          "formula": "O(n)",
           "curveId": "linear"
         },
         {
           "kind": "approach",
           "label": "Dynamic programming",
-          "formula": "O(W)",
+          "formula": "O(n)",
           "curveId": "linear"
         }
       ]

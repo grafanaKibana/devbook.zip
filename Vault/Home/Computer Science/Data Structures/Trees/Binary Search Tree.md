@@ -177,14 +177,16 @@ tab: Complexity
           "operation": "Range query (k results)",
           "bounds": [
             {
-              "kind": "text",
+              "kind": "curve",
               "role": "Auxiliary traversal",
-              "formula": "O(h)"
+              "formula": "O(h)",
+              "curveId": "linear"
             },
             {
-              "kind": "text",
+              "kind": "curve",
               "role": "Materialized output",
-              "formula": "O(k)"
+              "formula": "O(k)",
+              "curveId": "linear"
             }
           ]
         }

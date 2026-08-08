@@ -57,11 +57,11 @@ tab: Complexity
   "variables": {
     "inputSize": {
       "symbol": "n",
-      "description": "number of input elements or states"
+      "description": "length of the searched text"
     },
     "secondarySize": {
       "symbol": "m",
-      "description": "secondary input, pattern, bucket, or sequence size"
+      "description": "length of the pattern"
     }
   },
   "resources": {
@@ -73,9 +73,10 @@ tab: Complexity
           "operation": "Best",
           "bounds": [
             {
-              "kind": "text",
+              "kind": "curve",
               "role": "Time",
-              "formula": "Θ(n + m)"
+              "formula": "Θ(n + m)",
+              "curveId": "linear"
             }
           ]
         },
@@ -84,9 +85,10 @@ tab: Complexity
           "operation": "Average",
           "bounds": [
             {
-              "kind": "text",
+              "kind": "curve",
               "role": "Time",
-              "formula": "Θ(n + m)"
+              "formula": "Θ(n + m)",
+              "curveId": "linear"
             }
           ]
         },

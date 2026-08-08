@@ -47,7 +47,7 @@ tab: Complexity
   "variables": {
     "inputSize": {
       "symbol": "n",
-      "description": "number of input elements or states"
+      "description": "length of the span in elements"
     }
   },
   "resources": {

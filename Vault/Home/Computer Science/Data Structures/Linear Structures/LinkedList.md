@@ -64,7 +64,7 @@ tab: Complexity
   "variables": {
     "inputSize": {
       "symbol": "n",
-      "description": "number of input elements or states"
+      "description": "number of nodes currently stored in the list"
     }
   },
   "resources": {

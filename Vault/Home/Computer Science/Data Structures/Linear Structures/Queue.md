@@ -49,7 +49,7 @@ tab: Complexity
   "variables": {
     "inputSize": {
       "symbol": "n",
-      "description": "number of input elements or states"
+      "description": "number of elements currently stored in the queue"
     }
   },
   "resources": {

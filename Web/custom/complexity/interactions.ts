@@ -93,7 +93,7 @@ export function mountComplexityFigure(figure: HTMLElement): { destroy(): void } 
       }
       for (const label of labels) {
         const ids = (label.dataset.pathIds ?? "").split(",")
-        const activePath = paths.find(
+        const activePath = paths.findLast(
           (path) =>
             ids.includes(path.dataset.pathId ?? "") && activeIds.has(path.dataset.pathId ?? ""),
         )

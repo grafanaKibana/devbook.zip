@@ -53,7 +53,7 @@ tab: Complexity
   "variables": {
     "inputSize": {
       "symbol": "n",
-      "description": "number of input elements or states"
+      "description": "number of elements in the sorted numeric array"
     }
   },
   "resources": {

@@ -78,16 +78,16 @@ tab: Complexity
   "label": "Boyer-Moore complexity",
   "variables": {
     "alphabetSize": {
-      "symbol": "|Σ|",
+      "symbol": "σ",
       "description": "alphabet cardinality"
     },
     "inputSize": {
       "symbol": "n",
-      "description": "number of input elements or states"
+      "description": "length of the searched text"
     },
     "secondarySize": {
       "symbol": "m",
-      "description": "secondary input, pattern, bucket, or sequence size"
+      "description": "length of the pattern"
     }
   },
   "resources": {
@@ -99,9 +99,10 @@ tab: Complexity
           "operation": "Preprocessing",
           "bounds": [
             {
-              "kind": "text",
+              "kind": "curve",
               "role": "Time",
-              "formula": "Θ(m + |Σ|)"
+              "formula": "Θ(m + σ)",
+              "curveId": "linear"
             }
           ]
         },
@@ -149,9 +150,10 @@ tab: Complexity
           "operation": "Preprocessing",
           "bounds": [
             {
-              "kind": "text",
+              "kind": "curve",
               "role": "Auxiliary space",
-              "formula": "Θ(m + |Σ|)"
+              "formula": "Θ(m + σ)",
+              "curveId": "linear"
             }
           ]
         },
@@ -160,9 +162,10 @@ tab: Complexity
           "operation": "Best / sublinear",
           "bounds": [
             {
-              "kind": "text",
+              "kind": "curve",
               "role": "Auxiliary space",
-              "formula": "O(m + |Σ|)"
+              "formula": "O(m + σ)",
+              "curveId": "linear"
             }
           ]
         },
@@ -171,9 +174,10 @@ tab: Complexity
           "operation": "Worst, plain",
           "bounds": [
             {
-              "kind": "text",
+              "kind": "curve",
               "role": "Auxiliary space",
-              "formula": "O(m + |Σ|)"
+              "formula": "O(m + σ)",
+              "curveId": "linear"
             }
           ]
         },
@@ -182,9 +186,10 @@ tab: Complexity
           "operation": "Worst, Galil rule",
           "bounds": [
             {
-              "kind": "text",
+              "kind": "curve",
               "role": "Auxiliary space",
-              "formula": "O(m + |Σ|)"
+              "formula": "O(m + σ)",
+              "curveId": "linear"
             }
           ]
         }

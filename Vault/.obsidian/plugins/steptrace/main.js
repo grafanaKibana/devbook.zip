@@ -22958,7 +22958,7 @@ function mountComplexityFigure(figure) {
       }
       for (const label of labels) {
         const ids = (label.dataset.pathIds ?? "").split(",");
-        const activePath = paths.find(
+        const activePath = paths.findLast(
           (path) => ids.includes(path.dataset.pathId ?? "") && activeIds.has(path.dataset.pathId ?? "")
         );
         label.classList.toggle("is-active", Boolean(activePath));
@@ -23108,7 +23108,6 @@ var TOE_HEIGHT = (AXIS_Y - TOP) / (1 + LOG_MAX * Math.LN10);
 var DATA_BOTTOM = AXIS_Y - TOE_HEIGHT;
 var BAND_TOP = TOP - 40;
 var OUTLINE_STEPS = 64;
-var DUPLICATE_GAP = 4;
 function renderValue(curveId, n) {
   if (curveId !== "factorial") return curves[curveId].evaluate(n);
   const lower = Math.floor(n);
@@ -23287,21 +23286,20 @@ function smoothPath(points) {
   }
   return path;
 }
-function curveOutline(curveId, scale, offset) {
+function curveOutline(curveId, scale) {
   return Array.from({ length: OUTLINE_STEPS + 1 }, (_, index) => {
     const n = index / OUTLINE_STEPS * 10;
-    return { x: scale.x(n), y: scale.y(renderValue(curveId, n)) - offset };
+    return { x: scale.x(n), y: scale.y(renderValue(curveId, n)) };
   });
 }
 function curvePath(spec, scale) {
   const { id, curveId, bandTo, category, label, legendLabel, legendGroup, color, dimmed } = spec;
-  const offset = spec.offset ?? 0;
   const samples = Array.from({ length: 9 }, (_, index) => {
     const n = index + 2;
     const value = curves[curveId].evaluate(n);
     return { n, value, x: scale.x(n), y: scale.y(value) };
   });
-  const lower = curveOutline(curveId, scale, offset);
+  const lower = curveOutline(curveId, scale);
   const geometry = smoothPath(lower);
   const last = samples[samples.length - 1];
   const path = {
@@ -23316,7 +23314,7 @@ function curvePath(spec, scale) {
     dimmed,
     geometry,
     area: `${geometry} L${last.x.toFixed(2)},${AXIS_Y.toFixed(2)} Z`,
-    endY: Math.max(TOP, Math.min(DATA_BOTTOM, last.y - offset)),
+    endY: Math.max(TOP, Math.min(DATA_BOTTOM, last.y)),
     samples
   };
   if (!bandTo) return path;
@@ -23324,7 +23322,7 @@ function curvePath(spec, scale) {
     { x: LEFT, y: AXIS_Y },
     { x: LEFT, y: BAND_TOP },
     { x: PLOT_RIGHT, y: BAND_TOP }
-  ] : curveOutline(bandTo, scale, offset);
+  ] : curveOutline(bandTo, scale);
   const ceiling = bandTo === "unbounded" ? polyline(upper) : smoothPath(upper);
   const floor = smoothPath([...lower].reverse()).replace(/^M/, "L");
   return {
@@ -23343,7 +23341,7 @@ function layoutEndpointLabels(paths) {
       curveId,
       formula: authoredFormulas.length === 1 ? authoredFormulas[0] : curves[curveId].formula,
       pathIds: matching.filter((path) => !path.bandTo).map((path) => path.id),
-      color: owners[0]?.color ?? CONTEXT_COLOR,
+      color: owners.at(-1)?.color ?? CONTEXT_COLOR,
       dimmed: owners.length === 0,
       y: matching.reduce((sum, path) => sum + path.endY, 0) / matching.length
     };
@@ -23384,21 +23382,7 @@ function finishResource(key4, label, labelId, mode, highlighted, semanticBounds)
       scale
     )
   );
-  const counts = /* @__PURE__ */ new Map();
-  const indexes = /* @__PURE__ */ new Map();
-  for (const { curveId } of highlighted) counts.set(curveId, (counts.get(curveId) ?? 0) + 1);
-  const highlightedPaths = highlighted.map((entry) => {
-    const index = indexes.get(entry.curveId) ?? 0;
-    indexes.set(entry.curveId, index + 1);
-    return curvePath(
-      {
-        ...entry,
-        dimmed: false,
-        offset: (counts.get(entry.curveId) ?? 0) > 1 ? index * DUPLICATE_GAP : 0
-      },
-      scale
-    );
-  });
+  const highlightedPaths = highlighted.map((entry) => curvePath({ ...entry, dimmed: false }, scale));
   const paths = [...context, ...highlightedPaths];
   const ticks = [{ value: 0, label: "0", y: AXIS_Y }];
   for (let value = 1; value <= MAX_VALUE; value *= 10) {

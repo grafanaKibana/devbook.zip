@@ -61,9 +61,10 @@ tab: Complexity
           "operation": "Insert",
           "bounds": [
             {
-              "kind": "text",
+              "kind": "curve",
               "role": "Actual depth",
-              "formula": "O(h)"
+              "formula": "O(h)",
+              "curveId": "linear"
             }
           ]
         },
@@ -72,9 +73,10 @@ tab: Complexity
           "operation": "Point search",
           "bounds": [
             {
-              "kind": "text",
+              "kind": "curve",
               "role": "Actual depth",
-              "formula": "O(h)"
+              "formula": "O(h)",
+              "curveId": "linear"
             }
           ]
         },
@@ -83,9 +85,10 @@ tab: Complexity
           "operation": "Range query",
           "bounds": [
             {
-              "kind": "text",
+              "kind": "curve",
               "role": "Output-sensitive",
-              "formula": "O(v + k)"
+              "formula": "O(v + k)",
+              "curveId": "linear"
             }
           ]
         },
@@ -94,9 +97,10 @@ tab: Complexity
           "operation": "Nearest neighbor",
           "bounds": [
             {
-              "kind": "text",
+              "kind": "curve",
               "role": "Visited nodes",
-              "formula": "O(v)"
+              "formula": "O(v)",
+              "curveId": "linear"
             }
           ]
         },
@@ -121,9 +125,10 @@ tab: Complexity
           "operation": "Persistent tree",
           "bounds": [
             {
-              "kind": "text",
+              "kind": "curve",
               "role": "Allocated nodes",
-              "formula": "O(s)"
+              "formula": "O(s)",
+              "curveId": "linear"
             }
           ]
         },
@@ -132,9 +137,10 @@ tab: Complexity
           "operation": "Traversal",
           "bounds": [
             {
-              "kind": "text",
+              "kind": "curve",
               "role": "Call stack or explicit path",
-              "formula": "O(h)"
+              "formula": "O(h)",
+              "curveId": "linear"
             }
           ]
         },
@@ -143,9 +149,10 @@ tab: Complexity
           "operation": "Range-query output",
           "bounds": [
             {
-              "kind": "text",
+              "kind": "curve",
               "role": "Returned points",
-              "formula": "O(k)"
+              "formula": "O(k)",
+              "curveId": "linear"
             }
           ]
         }

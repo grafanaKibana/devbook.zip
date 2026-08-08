@@ -49,11 +49,11 @@ tab: Complexity
   "variables": {
     "inputSize": {
       "symbol": "n",
-      "description": "number of input elements or states"
+      "description": "number of integers to sort"
     },
     "keyRange": {
       "symbol": "k",
-      "description": "key range, digit count, or requested result count"
+      "description": "maximum key in the integer range [0, k]"
     }
   },
   "resources": {
@@ -65,9 +65,10 @@ tab: Complexity
           "operation": "Best",
           "bounds": [
             {
-              "kind": "text",
+              "kind": "curve",
               "role": "Time",
-              "formula": "Θ(n + k)"
+              "formula": "Θ(n + k)",
+              "curveId": "linear"
             }
           ]
         },
@@ -76,9 +77,10 @@ tab: Complexity
           "operation": "Average",
           "bounds": [
             {
-              "kind": "text",
+              "kind": "curve",
               "role": "Time",
-              "formula": "Θ(n + k)"
+              "formula": "Θ(n + k)",
+              "curveId": "linear"
             }
           ]
         },
@@ -87,9 +89,10 @@ tab: Complexity
           "operation": "Worst",
           "bounds": [
             {
-              "kind": "text",
+              "kind": "curve",
               "role": "Time",
-              "formula": "Θ(n + k)"
+              "formula": "Θ(n + k)",
+              "curveId": "linear"
             }
           ]
         }
@@ -103,9 +106,10 @@ tab: Complexity
           "operation": "Best",
           "bounds": [
             {
-              "kind": "text",
+              "kind": "curve",
               "role": "Auxiliary space",
-              "formula": "Θ(n + k)"
+              "formula": "Θ(n + k)",
+              "curveId": "linear"
             }
           ]
         },
@@ -114,9 +118,10 @@ tab: Complexity
           "operation": "Average",
           "bounds": [
             {
-              "kind": "text",
+              "kind": "curve",
               "role": "Auxiliary space",
-              "formula": "Θ(n + k)"
+              "formula": "Θ(n + k)",
+              "curveId": "linear"
             }
           ]
         },
@@ -125,9 +130,10 @@ tab: Complexity
           "operation": "Worst",
           "bounds": [
             {
-              "kind": "text",
+              "kind": "curve",
               "role": "Auxiliary space",
-              "formula": "Θ(n + k)"
+              "formula": "Θ(n + k)",
+              "curveId": "linear"
             }
           ]
         }

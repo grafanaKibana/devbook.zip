@@ -47,11 +47,11 @@ tab: Complexity
   "label": "Minimum Spanning Tree complexity",
   "variables": {
     "edgeCount": {
-      "symbol": "E",
+      "symbol": "m",
       "description": "number of edges"
     },
     "vertexCount": {
-      "symbol": "V",
+      "symbol": "n",
       "description": "number of vertices"
     }
   },
@@ -66,7 +66,7 @@ tab: Complexity
             {
               "kind": "text",
               "role": "Time",
-              "formula": "O(E log V)"
+              "formula": "O(m log n)"
             }
           ]
         },
@@ -77,7 +77,7 @@ tab: Complexity
             {
               "kind": "text",
               "role": "Time",
-              "formula": "O(E + V log V)"
+              "formula": "O(m + n log n)"
             }
           ]
         },
@@ -88,7 +88,7 @@ tab: Complexity
             {
               "kind": "curve",
               "role": "Time",
-              "formula": "O(V²)",
+              "formula": "O(n²)",
               "curveId": "quadratic"
             }
           ]
@@ -100,7 +100,7 @@ tab: Complexity
             {
               "kind": "curve",
               "role": "Time",
-              "formula": "O(E log E)",
+              "formula": "O(m log m)",
               "curveId": "n-log-n"
             }
           ]
@@ -117,7 +117,7 @@ tab: Complexity
             {
               "kind": "text",
               "role": "Auxiliary space",
-              "formula": "O(V) eager / O(E) lazy"
+              "formula": "O(n) eager / O(m) lazy"
             }
           ]
         },
@@ -128,7 +128,7 @@ tab: Complexity
             {
               "kind": "curve",
               "role": "Auxiliary space",
-              "formula": "O(V)",
+              "formula": "O(n)",
               "curveId": "linear"
             }
           ]
@@ -140,7 +140,7 @@ tab: Complexity
             {
               "kind": "curve",
               "role": "Auxiliary space",
-              "formula": "O(V)",
+              "formula": "O(n)",
               "curveId": "linear"
             }
           ]
@@ -152,7 +152,7 @@ tab: Complexity
             {
               "kind": "curve",
               "role": "Auxiliary space",
-              "formula": "O(V)",
+              "formula": "O(n)",
               "curveId": "linear"
             }
           ]

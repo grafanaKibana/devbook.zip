@@ -46,16 +46,16 @@ tab: Complexity
   "version": 2,
   "label": "Bloom Filter complexity",
   "variables": {
-    "keyRange": {
+    "hashCount": {
       "symbol": "k",
-      "description": "key range, digit count, or requested result count"
+      "description": "number of hash positions tested per value"
     },
     "secondarySize": {
       "symbol": "m",
-      "description": "secondary input, pattern, bucket, or sequence size"
+      "description": "number of bits in the filter"
     },
     "valueLength": {
-      "symbol": "|x|",
+      "symbol": "l",
       "description": "encoded input-value length"
     }
   },
@@ -92,19 +92,22 @@ tab: Complexity
           "operation": "Add(x)",
           "bounds": [
             {
-              "kind": "text",
+              "kind": "curve",
               "role": "Best time",
-              "formula": "O(|x| + k)"
+              "formula": "O(l + k)",
+              "curveId": "linear"
             },
             {
-              "kind": "text",
+              "kind": "curve",
               "role": "Average time",
-              "formula": "O(|x| + k)"
+              "formula": "O(l + k)",
+              "curveId": "linear"
             },
             {
-              "kind": "text",
+              "kind": "curve",
               "role": "Worst time",
-              "formula": "O(|x| + k)"
+              "formula": "O(l + k)",
+              "curveId": "linear"
             }
           ]
         },
@@ -113,19 +116,22 @@ tab: Complexity
           "operation": "Query(x)",
           "bounds": [
             {
-              "kind": "text",
+              "kind": "curve",
               "role": "Best time",
-              "formula": "O(|x| + 1) first 0 bit"
+              "formula": "O(l + 1) first 0 bit",
+              "curveId": "linear"
             },
             {
-              "kind": "text",
+              "kind": "curve",
               "role": "Average time",
-              "formula": "O(|x| + k)"
+              "formula": "O(l + k)",
+              "curveId": "linear"
             },
             {
-              "kind": "text",
+              "kind": "curve",
               "role": "Worst time",
-              "formula": "O(|x| + k)"
+              "formula": "O(l + k)",
+              "curveId": "linear"
             }
           ]
         }
@@ -157,9 +163,10 @@ tab: Complexity
           "operation": "Add(x)",
           "bounds": [
             {
-              "kind": "text",
+              "kind": "curve",
               "role": "Aux space per op",
-              "formula": "O(|x|) in the example"
+              "formula": "O(l) in the example",
+              "curveId": "linear"
             }
           ]
         },
@@ -168,9 +175,10 @@ tab: Complexity
           "operation": "Query(x)",
           "bounds": [
             {
-              "kind": "text",
+              "kind": "curve",
               "role": "Aux space per op",
-              "formula": "O(|x|) in the example"
+              "formula": "O(l) in the example",
+              "curveId": "linear"
             }
           ]
         }

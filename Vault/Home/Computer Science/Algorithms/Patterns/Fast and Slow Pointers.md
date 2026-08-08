@@ -36,7 +36,7 @@ tab: Complexity
   "variables": {
     "inputSize": {
       "symbol": "n",
-      "description": "number of input elements or states"
+      "description": "number of nodes reachable along the successor chain"
     }
   },
   "resources": {

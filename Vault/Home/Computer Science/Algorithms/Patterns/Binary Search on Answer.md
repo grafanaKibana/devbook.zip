@@ -39,10 +39,10 @@ tab: Complexity
   "variables": {
     "inputSize": {
       "symbol": "n",
-      "description": "number of input elements or states"
+      "description": "number of input elements scanned by each feasibility check"
     },
     "rangeWidth": {
-      "symbol": "R",
+      "symbol": "m",
       "description": "numeric candidate-range width"
     }
   },
@@ -53,14 +53,14 @@ tab: Complexity
         {
           "kind": "approach",
           "label": "Naive (probe every candidate)",
-          "formula": "O(R·n)",
+          "formula": "O(m·n)",
           "curveFrom": "linear",
           "curveTo": "quadratic"
         },
         {
           "kind": "approach",
           "label": "Binary search on answer",
-          "formula": "O(n log R)",
+          "formula": "O(n log m)",
           "curveFrom": "linear",
           "curveTo": "n-log-n"
         }

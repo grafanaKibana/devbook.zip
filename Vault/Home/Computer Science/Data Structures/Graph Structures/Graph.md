@@ -51,7 +51,7 @@ tab: Complexity
   "label": "Graph complexity",
   "variables": {
     "edgeCount": {
-      "symbol": "E",
+      "symbol": "m",
       "description": "number of edges"
     },
     "outDegree": {
@@ -59,7 +59,7 @@ tab: Complexity
       "description": "outgoing degree of vertex u"
     },
     "vertexCount": {
-      "symbol": "V",
+      "symbol": "n",
       "description": "number of vertices"
     }
   },
@@ -86,7 +86,7 @@ tab: Complexity
             {
               "kind": "curve",
               "role": "Edge list",
-              "formula": "O(E)",
+              "formula": "O(m)",
               "curveId": "linear"
             }
           ]
@@ -104,13 +104,13 @@ tab: Complexity
             {
               "kind": "curve",
               "role": "Adjacency matrix",
-              "formula": "O(V)",
+              "formula": "O(n)",
               "curveId": "linear"
             },
             {
               "kind": "curve",
               "role": "Edge list",
-              "formula": "O(E)",
+              "formula": "O(m)",
               "curveId": "linear"
             }
           ]
@@ -152,7 +152,7 @@ tab: Complexity
             {
               "kind": "curve",
               "role": "Adjacency matrix",
-              "formula": "O(V²) rebuild",
+              "formula": "O(n²) rebuild",
               "curveId": "quadratic"
             },
             {
@@ -173,9 +173,10 @@ tab: Complexity
           "operation": "Adjacency list",
           "bounds": [
             {
-              "kind": "text",
+              "kind": "curve",
               "role": "Space",
-              "formula": "O(V + E)"
+              "formula": "O(n + m)",
+              "curveId": "linear"
             }
           ]
         },
@@ -186,7 +187,7 @@ tab: Complexity
             {
               "kind": "curve",
               "role": "Space",
-              "formula": "O(V²)",
+              "formula": "O(n²)",
               "curveId": "quadratic"
             }
           ]
@@ -198,7 +199,7 @@ tab: Complexity
             {
               "kind": "curve",
               "role": "Space",
-              "formula": "O(E)",
+              "formula": "O(m)",
               "curveId": "linear"
             }
           ]

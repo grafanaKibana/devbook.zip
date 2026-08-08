@@ -43,7 +43,7 @@ tab: Complexity
   "variables": {
     "inputSize": {
       "symbol": "n",
-      "description": "number of input elements or states"
+      "description": "total stored nodes, combining both input heaps for merge"
     }
   },
   "resources": {
@@ -157,8 +157,14 @@ tab: Complexity
           "bounds": [
             {
               "kind": "curve",
-              "role": "Space",
-              "formula": "O(n) structure, no per-node field",
+              "role": "Persistent structure space",
+              "formula": "Θ(n) nodes, no rank field",
+              "curveId": "linear"
+            },
+            {
+              "kind": "curve",
+              "role": "Aux space per op",
+              "formula": "O(n) worst-case recursion stack",
               "curveId": "linear"
             }
           ]
@@ -169,7 +175,13 @@ tab: Complexity
           "bounds": [
             {
               "kind": "curve",
-              "role": "Space",
+              "role": "Persistent structure space",
+              "formula": "Θ(n) nodes, no rank field",
+              "curveId": "linear"
+            },
+            {
+              "kind": "curve",
+              "role": "Aux space per op",
               "formula": "O(n) worst-case recursion stack",
               "curveId": "linear"
             }
@@ -181,7 +193,13 @@ tab: Complexity
           "bounds": [
             {
               "kind": "curve",
-              "role": "Space",
+              "role": "Persistent structure space",
+              "formula": "Θ(n) nodes, no rank field",
+              "curveId": "linear"
+            },
+            {
+              "kind": "curve",
+              "role": "Aux space per op",
               "formula": "O(n) worst-case recursion stack",
               "curveId": "linear"
             }
@@ -193,7 +211,13 @@ tab: Complexity
           "bounds": [
             {
               "kind": "curve",
-              "role": "Space",
+              "role": "Persistent structure space",
+              "formula": "Θ(n) nodes, no rank field",
+              "curveId": "linear"
+            },
+            {
+              "kind": "curve",
+              "role": "Aux space per op",
               "formula": "O(1)",
               "curveId": "constant"
             }

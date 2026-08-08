@@ -72,7 +72,7 @@ tab: Complexity
   "variables": {
     "inputSize": {
       "symbol": "n",
-      "description": "number of input elements or states"
+      "description": "number of entries currently stored in the map"
     }
   },
   "resources": {
