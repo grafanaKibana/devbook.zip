@@ -1,8 +1,8 @@
 ---
 publish: true
 created: 2026-08-03T07:22:13.839Z
-modified: 2026-08-03T07:22:13.839Z
-published: 2026-08-03T07:22:13.839Z
+modified: 2026-08-08T08:06:02.705Z
+published: 2026-08-08T08:06:02.705Z
 topic:
   - Computer Science
 subtopic:
@@ -50,7 +50,7 @@ tab: Complexity
   "variables": {
     "inputSize": {
       "symbol": "n",
-      "description": "number of input elements or states"
+      "description": "number of elements in the array being partitioned"
     }
   },
   "resources": {

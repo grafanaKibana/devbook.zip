@@ -1,8 +1,8 @@
 ---
 publish: true
 created: 2026-07-29T20:23:26.769Z
-modified: 2026-08-02T11:48:04.023Z
-published: 2026-08-02T11:48:04.023Z
+modified: 2026-08-08T07:48:03.810Z
+published: 2026-08-08T07:48:03.810Z
 topic:
   - Computer Science
 subtopic:
@@ -64,15 +64,15 @@ tab: Complexity
     },
     "inputSize": {
       "symbol": "n",
-      "description": "number of input elements or states"
+      "description": "number of records or keys stored in the tree"
     },
     "keyRange": {
       "symbol": "k",
-      "description": "key range, digit count, or requested result count"
+      "description": "number of records returned by the range scan"
     },
     "lengthL": {
-      "symbol": "L",
-      "description": "key, string, path, or sequence length"
+      "symbol": "l",
+      "description": "number of records stored per leaf page"
     }
   },
   "resources": {
@@ -125,7 +125,7 @@ tab: Complexity
             {
               "kind": "text",
               "role": "Page I/Os",
-              "formula": "O(log_f n + ⌈k/L⌉)"
+              "formula": "O(log_f n + ⌈k/l⌉)"
             },
             {
               "kind": "curve",
@@ -142,7 +142,7 @@ tab: Complexity
             {
               "kind": "text",
               "role": "Page I/Os",
-              "formula": "O(log_f n + n/L)"
+              "formula": "O(log_f n + n/l)"
             },
             {
               "kind": "curve",

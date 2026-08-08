@@ -1,8 +1,8 @@
 ---
 publish: true
 created: 2026-07-28T10:25:56.631Z
-modified: 2026-08-02T11:24:23.876Z
-published: 2026-08-02T11:24:23.876Z
+modified: 2026-08-08T07:48:02.881Z
+published: 2026-08-08T07:48:02.881Z
 topic:
   - Computer Science
 subtopic:
@@ -61,18 +61,18 @@ tab: Complexity
     },
     "inputSize": {
       "symbol": "n",
-      "description": "number of input elements or states"
+      "description": "length of the searched text"
     },
     "lengthL": {
-      "symbol": "L",
-      "description": "key, string, path, or sequence length"
+      "symbol": "l",
+      "description": "maximum pattern length and failure-chain depth"
     },
     "matchCount": {
       "symbol": "z",
       "description": "number of reported matches"
     },
     "totalPatternLength": {
-      "symbol": "M",
+      "symbol": "m",
       "description": "total length of all patterns"
     }
   },
@@ -87,7 +87,7 @@ tab: Complexity
             {
               "kind": "text",
               "role": "Time",
-              "formula": "O(M·L) sparse, Θ(M·σ) dense"
+              "formula": "O(m·l) sparse, Θ(m·σ) dense"
             }
           ]
         },
@@ -96,9 +96,10 @@ tab: Complexity
           "operation": "Search",
           "bounds": [
             {
-              "kind": "text",
+              "kind": "curve",
               "role": "Time",
-              "formula": "Θ(n + z)"
+              "formula": "Θ(n + z)",
+              "curveId": "linear"
             }
           ]
         }
@@ -114,7 +115,7 @@ tab: Complexity
             {
               "kind": "text",
               "role": "Space",
-              "formula": "Θ(M) sparse, Θ(M·σ) dense"
+              "formula": "Θ(m) sparse, Θ(m·σ) dense"
             }
           ]
         },

@@ -1,8 +1,8 @@
 ---
 publish: true
 created: 2026-07-21T18:52:02.621Z
-modified: 2026-08-02T10:38:42.418Z
-published: 2026-08-02T10:38:42.418Z
+modified: 2026-08-08T07:30:30.067Z
+published: 2026-08-08T07:30:30.067Z
 topic:
   - Computer Science
 subtopic:
@@ -70,7 +70,7 @@ tab: Complexity
   "label": "Floyd-Warshall complexity",
   "variables": {
     "vertexCount": {
-      "symbol": "V",
+      "symbol": "n",
       "description": "number of vertices"
     }
   },
@@ -85,7 +85,7 @@ tab: Complexity
             {
               "kind": "text",
               "role": "Time",
-              "formula": "Θ(V³)"
+              "formula": "Θ(n³)"
             }
           ]
         }
@@ -101,7 +101,7 @@ tab: Complexity
             {
               "kind": "curve",
               "role": "Space",
-              "formula": "Θ(V²)",
+              "formula": "Θ(n²)",
               "curveId": "quadratic"
             }
           ]

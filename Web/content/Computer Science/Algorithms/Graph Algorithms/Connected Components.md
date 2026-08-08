@@ -1,12 +1,13 @@
 ---
 publish: true
 created: 2026-07-18T14:02:43.942Z
-modified: 2026-08-02T11:37:00.649Z
-published: 2026-08-02T11:37:00.649Z
+modified: 2026-08-08T09:12:51.614Z
+published: 2026-08-08T09:12:51.614Z
 topic:
   - Computer Science
 subtopic:
   - Algorithms
+summary: Partitions an undirected graph into maximal reachable vertex sets using DFS, BFS, or union-find.
 level:
   - "4"
 priority: Medium
@@ -57,7 +58,7 @@ tab: Complexity
   "label": "Connected Components complexity",
   "variables": {
     "edgeCount": {
-      "symbol": "E",
+      "symbol": "m",
       "description": "number of edges"
     },
     "inverseAckermann": {
@@ -65,7 +66,7 @@ tab: Complexity
       "description": "inverse Ackermann factor applied to its displayed argument"
     },
     "vertexCount": {
-      "symbol": "V",
+      "symbol": "n",
       "description": "number of vertices"
     }
   },
@@ -78,9 +79,10 @@ tab: Complexity
           "operation": "DFS / BFS labelling",
           "bounds": [
             {
-              "kind": "text",
+              "kind": "curve",
               "role": "Time",
-              "formula": "Θ(V + E)"
+              "formula": "Θ(n + m)",
+              "curveId": "linear"
             }
           ]
         },
@@ -91,7 +93,7 @@ tab: Complexity
             {
               "kind": "text",
               "role": "Time",
-              "formula": "O(V + E · α(V))"
+              "formula": "O(n + m · α(n))"
             }
           ]
         }
@@ -107,7 +109,7 @@ tab: Complexity
             {
               "kind": "curve",
               "role": "Auxiliary space",
-              "formula": "O(V) — visited/label array plus frontier",
+              "formula": "O(n) — visited/label array plus frontier",
               "curveId": "linear"
             }
           ]
@@ -119,7 +121,7 @@ tab: Complexity
             {
               "kind": "curve",
               "role": "Auxiliary space",
-              "formula": "O(V) — parent and rank arrays",
+              "formula": "O(n) — parent and rank arrays",
               "curveId": "linear"
             }
           ]

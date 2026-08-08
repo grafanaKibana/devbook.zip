@@ -1,12 +1,13 @@
 ---
 publish: true
 created: 2026-08-03T15:55:17.233Z
-modified: 2026-08-03T15:55:17.234Z
-published: 2026-08-03T15:55:17.234Z
+modified: 2026-08-08T09:12:51.868Z
+published: 2026-08-08T09:12:51.868Z
 topic:
   - Computer Science
 subtopic:
   - Algorithms
+summary: Caches pure function results by arguments so repeated subproblems return without recomputation.
 level:
   - "4"
 priority: Medium

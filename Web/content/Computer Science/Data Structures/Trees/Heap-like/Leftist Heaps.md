@@ -1,8 +1,8 @@
 ---
 publish: true
 created: 2026-08-03T07:22:13.842Z
-modified: 2026-08-03T07:22:13.843Z
-published: 2026-08-03T07:22:13.843Z
+modified: 2026-08-08T09:22:40.001Z
+published: 2026-08-08T09:22:40.001Z
 topic:
   - Computer Science
 subtopic:
@@ -53,7 +53,7 @@ tab: Complexity
   "variables": {
     "inputSize": {
       "symbol": "n",
-      "description": "number of input elements or states"
+      "description": "total stored nodes, combining both input heaps for merge"
     }
   },
   "resources": {
@@ -66,13 +66,13 @@ tab: Complexity
           "bounds": [
             {
               "kind": "curve",
-              "role": "Best time",
+              "role": "Best",
               "formula": "O(1)",
               "curveId": "constant"
             },
             {
               "kind": "curve",
-              "role": "Worst time",
+              "role": "Worst",
               "formula": "O(log n)",
               "curveId": "log-n"
             }
@@ -84,13 +84,13 @@ tab: Complexity
           "bounds": [
             {
               "kind": "curve",
-              "role": "Best time",
+              "role": "Best",
               "formula": "O(1)",
               "curveId": "constant"
             },
             {
               "kind": "curve",
-              "role": "Worst time",
+              "role": "Worst",
               "formula": "O(log n)",
               "curveId": "log-n"
             }
@@ -102,13 +102,13 @@ tab: Complexity
           "bounds": [
             {
               "kind": "curve",
-              "role": "Best time",
+              "role": "Best",
               "formula": "O(1)",
               "curveId": "constant"
             },
             {
               "kind": "curve",
-              "role": "Worst time",
+              "role": "Worst",
               "formula": "O(log n)",
               "curveId": "log-n"
             }
@@ -120,13 +120,13 @@ tab: Complexity
           "bounds": [
             {
               "kind": "curve",
-              "role": "Best time",
+              "role": "Best",
               "formula": "O(1)",
               "curveId": "constant"
             },
             {
               "kind": "curve",
-              "role": "Worst time",
+              "role": "Worst",
               "formula": "O(1)",
               "curveId": "constant"
             }
@@ -143,8 +143,8 @@ tab: Complexity
           "bounds": [
             {
               "kind": "curve",
-              "role": "Structure space",
-              "formula": "Θ(n) nodes + one npl field each",
+              "role": "Persistent structure space",
+              "formula": "Θ(n) nodes plus one npl field each",
               "curveId": "linear"
             },
             {
@@ -161,9 +161,9 @@ tab: Complexity
           "bounds": [
             {
               "kind": "curve",
-              "role": "Structure space",
-              "formula": "O(1) new node",
-              "curveId": "constant"
+              "role": "Persistent structure space",
+              "formula": "Θ(n) nodes plus one npl field each",
+              "curveId": "linear"
             },
             {
               "kind": "curve",
@@ -179,9 +179,9 @@ tab: Complexity
           "bounds": [
             {
               "kind": "curve",
-              "role": "Structure space",
-              "formula": "O(1)",
-              "curveId": "constant"
+              "role": "Persistent structure space",
+              "formula": "Θ(n) nodes plus one npl field each",
+              "curveId": "linear"
             },
             {
               "kind": "curve",
@@ -197,9 +197,9 @@ tab: Complexity
           "bounds": [
             {
               "kind": "curve",
-              "role": "Structure space",
-              "formula": "O(1)",
-              "curveId": "constant"
+              "role": "Persistent structure space",
+              "formula": "Θ(n) nodes plus one npl field each",
+              "curveId": "linear"
             },
             {
               "kind": "curve",

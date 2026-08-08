@@ -1,8 +1,8 @@
 ---
 publish: true
 created: 2026-07-29T20:22:59.984Z
-modified: 2026-08-02T11:05:09.085Z
-published: 2026-08-02T11:05:09.085Z
+modified: 2026-08-08T09:22:39.104Z
+published: 2026-08-08T09:22:39.104Z
 topic:
   - Computer Science
 subtopic:
@@ -61,7 +61,7 @@ tab: Complexity
   "variables": {
     "inputSize": {
       "symbol": "n",
-      "description": "number of input elements or states"
+      "description": "number of elements partitioned into disjoint sets"
     },
     "inverseAckermann": {
       "symbol": "α(·)",
@@ -78,13 +78,7 @@ tab: Complexity
           "bounds": [
             {
               "kind": "curve",
-              "role": "Best time",
-              "formula": "Θ(n)",
-              "curveId": "linear"
-            },
-            {
-              "kind": "curve",
-              "role": "Amortized time",
+              "role": "Best/Amortized",
               "formula": "Θ(n)",
               "curveId": "linear"
             },
@@ -102,13 +96,13 @@ tab: Complexity
           "bounds": [
             {
               "kind": "curve",
-              "role": "Best time",
+              "role": "Best",
               "formula": "O(1)",
               "curveId": "constant"
             },
             {
               "kind": "text",
-              "role": "Amortized time",
+              "role": "Amortized",
               "formula": "O(α(n))"
             },
             {
@@ -125,13 +119,13 @@ tab: Complexity
           "bounds": [
             {
               "kind": "curve",
-              "role": "Best time",
+              "role": "Best",
               "formula": "O(1)",
               "curveId": "constant"
             },
             {
               "kind": "text",
-              "role": "Amortized time",
+              "role": "Amortized",
               "formula": "O(α(n))"
             },
             {
@@ -148,13 +142,13 @@ tab: Complexity
           "bounds": [
             {
               "kind": "curve",
-              "role": "Best time",
+              "role": "Best",
               "formula": "O(1)",
               "curveId": "constant"
             },
             {
               "kind": "text",
-              "role": "Amortized time",
+              "role": "Amortized",
               "formula": "O(α(n))"
             },
             {

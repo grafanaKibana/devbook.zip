@@ -1,8 +1,8 @@
 ---
 publish: true
 created: 2026-07-25T08:24:19.993Z
-modified: 2026-08-02T11:13:04.262Z
-published: 2026-08-02T11:13:04.262Z
+modified: 2026-08-08T07:48:03.504Z
+published: 2026-08-08T07:48:03.504Z
 topic:
   - Computer Science
 subtopic:
@@ -59,15 +59,15 @@ tab: Complexity
   "variables": {
     "branchingFactor": {
       "symbol": "b",
-      "description": "search branching factor or radix base"
+      "description": "radix base and number of digit buckets"
     },
     "inputSize": {
       "symbol": "n",
-      "description": "number of input elements or states"
+      "description": "number of input keys"
     },
     "parameterD": {
       "symbol": "d",
-      "description": "algorithm-specific depth, digit count, or dimension"
+      "description": "number of digits processed per key"
     }
   },
   "resources": {
@@ -117,9 +117,10 @@ tab: Complexity
           "operation": "Best",
           "bounds": [
             {
-              "kind": "text",
+              "kind": "curve",
               "role": "Auxiliary space",
-              "formula": "Θ(n + b)"
+              "formula": "Θ(n + b)",
+              "curveId": "linear"
             }
           ]
         },
@@ -128,9 +129,10 @@ tab: Complexity
           "operation": "Average",
           "bounds": [
             {
-              "kind": "text",
+              "kind": "curve",
               "role": "Auxiliary space",
-              "formula": "Θ(n + b)"
+              "formula": "Θ(n + b)",
+              "curveId": "linear"
             }
           ]
         },
@@ -139,9 +141,10 @@ tab: Complexity
           "operation": "Worst",
           "bounds": [
             {
-              "kind": "text",
+              "kind": "curve",
               "role": "Auxiliary space",
-              "formula": "Θ(n + b)"
+              "formula": "Θ(n + b)",
+              "curveId": "linear"
             }
           ]
         }

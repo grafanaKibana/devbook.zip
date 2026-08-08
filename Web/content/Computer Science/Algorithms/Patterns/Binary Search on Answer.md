@@ -1,8 +1,8 @@
 ---
 publish: true
 created: 2026-08-03T15:55:17.234Z
-modified: 2026-08-04T05:40:46.085Z
-published: 2026-08-04T05:40:46.085Z
+modified: 2026-08-08T08:43:34.511Z
+published: 2026-08-08T08:43:34.511Z
 topic:
   - Computer Science
 subtopic:
@@ -40,10 +40,10 @@ tab: Complexity
   "variables": {
     "inputSize": {
       "symbol": "n",
-      "description": "number of input elements or states"
+      "description": "number of input elements scanned by each feasibility check"
     },
     "rangeWidth": {
-      "symbol": "R",
+      "symbol": "m",
       "description": "numeric candidate-range width"
     }
   },
@@ -54,14 +54,14 @@ tab: Complexity
         {
           "kind": "approach",
           "label": "Naive (probe every candidate)",
-          "formula": "O(R·n)",
+          "formula": "O(m·n)",
           "curveFrom": "linear",
           "curveTo": "quadratic"
         },
         {
           "kind": "approach",
           "label": "Binary search on answer",
-          "formula": "O(n log R)",
+          "formula": "O(n log m)",
           "curveFrom": "linear",
           "curveTo": "n-log-n"
         }

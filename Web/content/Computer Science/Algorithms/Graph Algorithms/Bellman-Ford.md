@@ -1,8 +1,8 @@
 ---
 publish: true
 created: 2026-07-18T14:02:43.941Z
-modified: 2026-08-02T10:39:14.519Z
-published: 2026-08-02T10:39:14.519Z
+modified: 2026-08-08T07:30:29.576Z
+published: 2026-08-08T07:30:29.576Z
 topic:
   - Computer Science
 subtopic:
@@ -58,11 +58,11 @@ tab: Complexity
   "label": "Bellman-Ford complexity",
   "variables": {
     "edgeCount": {
-      "symbol": "E",
+      "symbol": "m",
       "description": "number of edges"
     },
     "vertexCount": {
-      "symbol": "V",
+      "symbol": "n",
       "description": "number of vertices"
     }
   },
@@ -77,7 +77,7 @@ tab: Complexity
             {
               "kind": "curve",
               "role": "Time",
-              "formula": "O(E)",
+              "formula": "O(m)",
               "curveId": "linear"
             }
           ]
@@ -89,7 +89,7 @@ tab: Complexity
             {
               "kind": "text",
               "role": "Time",
-              "formula": "distribution-dependent; O(V·E) upper bound"
+              "formula": "distribution-dependent; O(n·m) upper bound"
             }
           ]
         },
@@ -100,7 +100,7 @@ tab: Complexity
             {
               "kind": "text",
               "role": "Time",
-              "formula": "O(V·E)"
+              "formula": "O(n·m)"
             }
           ]
         }
@@ -112,19 +112,19 @@ tab: Complexity
         {
           "kind": "case",
           "role": "Best",
-          "formula": "O(V)",
+          "formula": "O(n)",
           "curveId": "linear"
         },
         {
           "kind": "case",
           "role": "Average",
-          "formula": "O(V)",
+          "formula": "O(n)",
           "curveId": "linear"
         },
         {
           "kind": "case",
           "role": "Worst",
-          "formula": "O(V)",
+          "formula": "O(n)",
           "curveId": "linear"
         }
       ]

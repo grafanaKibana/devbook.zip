@@ -1,8 +1,8 @@
 ---
 publish: true
 created: 2026-07-25T14:51:41.493Z
-modified: 2026-08-02T11:13:04.565Z
-published: 2026-08-02T11:13:04.565Z
+modified: 2026-08-08T07:48:03.580Z
+published: 2026-08-08T07:48:03.580Z
 topic:
   - Computer Science
 subtopic:
@@ -52,7 +52,7 @@ tab: Complexity
   "variables": {
     "inputSize": {
       "symbol": "n",
-      "description": "number of input elements or states"
+      "description": "number of elements in the array"
     }
   },
   "resources": {
@@ -64,9 +64,10 @@ tab: Complexity
           "operation": "Best",
           "bounds": [
             {
-              "kind": "text",
+              "kind": "curve",
               "role": "Time",
-              "formula": "Θ(n log n) for a geometric Θ(log n)-pass sequence"
+              "formula": "Θ(n log n) for a geometric Θ(log n)-pass sequence",
+              "curveId": "n-log-n"
             }
           ]
         },

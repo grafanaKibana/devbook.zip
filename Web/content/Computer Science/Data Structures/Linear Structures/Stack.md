@@ -1,8 +1,8 @@
 ---
 publish: true
 created: 2026-07-29T20:22:59.991Z
-modified: 2026-08-02T11:47:13.991Z
-published: 2026-08-02T11:47:13.991Z
+modified: 2026-08-08T09:27:56.539Z
+published: 2026-08-08T09:27:56.539Z
 topic:
   - Computer Science
 subtopic:
@@ -52,65 +52,30 @@ tab: Complexity
   "variables": {
     "inputSize": {
       "symbol": "n",
-      "description": "number of input elements or states"
+      "description": "number of elements currently stored in the stack"
     }
   },
   "resources": {
     "time": {
-      "mode": "operations",
+      "mode": "comparison",
       "entries": [
         {
-          "kind": "operation",
-          "operation": "Push",
-          "bounds": [
-            {
-              "kind": "text",
-              "role": "Array backing",
-              "formula": "O(1) amortized, O(n) worst single"
-            },
-            {
-              "kind": "curve",
-              "role": "Linked backing",
-              "formula": "O(1)",
-              "curveId": "constant"
-            }
-          ]
+          "kind": "approach",
+          "label": "Push",
+          "formula": "O(1)",
+          "curveId": "constant"
         },
         {
-          "kind": "operation",
-          "operation": "Pop",
-          "bounds": [
-            {
-              "kind": "curve",
-              "role": "Array backing",
-              "formula": "O(1)",
-              "curveId": "constant"
-            },
-            {
-              "kind": "curve",
-              "role": "Linked backing",
-              "formula": "O(1)",
-              "curveId": "constant"
-            }
-          ]
+          "kind": "approach",
+          "label": "Pop",
+          "formula": "O(1)",
+          "curveId": "constant"
         },
         {
-          "kind": "operation",
-          "operation": "Peek",
-          "bounds": [
-            {
-              "kind": "curve",
-              "role": "Array backing",
-              "formula": "O(1)",
-              "curveId": "constant"
-            },
-            {
-              "kind": "curve",
-              "role": "Linked backing",
-              "formula": "O(1)",
-              "curveId": "constant"
-            }
-          ]
+          "kind": "approach",
+          "label": "Peek",
+          "formula": "O(1)",
+          "curveId": "constant"
         }
       ]
     },
@@ -158,6 +123,8 @@ tab: Complexity
   }
 }
 ```
+
+Array-backed push is `O(1)` amortized but `O(n)` on the resizing push that doubles a full backing array.
 ````
 
 # Where the Discipline Bites

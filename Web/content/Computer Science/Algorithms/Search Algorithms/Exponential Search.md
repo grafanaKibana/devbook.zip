@@ -1,8 +1,8 @@
 ---
 publish: true
 created: 2026-07-21T18:52:02.836Z
-modified: 2026-08-02T11:23:48.690Z
-published: 2026-08-02T11:23:48.690Z
+modified: 2026-08-08T07:48:02.814Z
+published: 2026-08-08T07:48:02.814Z
 topic:
   - Computer Science
 subtopic:
@@ -51,11 +51,11 @@ tab: Complexity
   "variables": {
     "expansionIndex": {
       "symbol": "i",
-      "description": "exponential-search bound index"
+      "description": "zero-based position of the target element"
     },
     "inputSize": {
       "symbol": "n",
-      "description": "number of input elements or states"
+      "description": "number of elements in the bounded sorted input"
     }
   },
   "resources": {
@@ -79,9 +79,10 @@ tab: Complexity
           "operation": "Successful at position i",
           "bounds": [
             {
-              "kind": "text",
+              "kind": "curve",
               "role": "Time",
-              "formula": "O(log(i + 1))"
+              "formula": "O(log(i + 1))",
+              "curveId": "log-n"
             }
           ]
         },

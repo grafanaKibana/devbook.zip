@@ -1,8 +1,8 @@
 ---
 publish: true
 created: 2026-08-03T07:22:13.843Z
-modified: 2026-08-03T07:22:13.843Z
-published: 2026-08-03T07:22:13.843Z
+modified: 2026-08-08T09:22:40.074Z
+published: 2026-08-08T09:22:40.074Z
 topic:
   - Computer Science
 subtopic:
@@ -46,7 +46,7 @@ tab: Complexity
   "variables": {
     "inputSize": {
       "symbol": "n",
-      "description": "number of input elements or states"
+      "description": "total stored nodes, combining both input heaps for merge"
     }
   },
   "resources": {
@@ -59,13 +59,13 @@ tab: Complexity
           "bounds": [
             {
               "kind": "curve",
-              "role": "Best time",
+              "role": "Best",
               "formula": "O(1)",
               "curveId": "constant"
             },
             {
               "kind": "curve",
-              "role": "Amortized time",
+              "role": "Amortized",
               "formula": "O(log n)",
               "curveId": "log-n"
             },
@@ -83,13 +83,13 @@ tab: Complexity
           "bounds": [
             {
               "kind": "curve",
-              "role": "Best time",
+              "role": "Best",
               "formula": "O(1)",
               "curveId": "constant"
             },
             {
               "kind": "curve",
-              "role": "Amortized time",
+              "role": "Amortized",
               "formula": "O(log n)",
               "curveId": "log-n"
             },
@@ -107,13 +107,13 @@ tab: Complexity
           "bounds": [
             {
               "kind": "curve",
-              "role": "Best time",
+              "role": "Best",
               "formula": "O(1)",
               "curveId": "constant"
             },
             {
               "kind": "curve",
-              "role": "Amortized time",
+              "role": "Amortized",
               "formula": "O(log n)",
               "curveId": "log-n"
             },
@@ -131,13 +131,7 @@ tab: Complexity
           "bounds": [
             {
               "kind": "curve",
-              "role": "Best time",
-              "formula": "O(1)",
-              "curveId": "constant"
-            },
-            {
-              "kind": "curve",
-              "role": "Amortized time",
+              "role": "Best/Amortized",
               "formula": "O(1)",
               "curveId": "constant"
             },
@@ -160,8 +154,14 @@ tab: Complexity
           "bounds": [
             {
               "kind": "curve",
-              "role": "Space",
-              "formula": "O(n) structure, no per-node field",
+              "role": "Persistent structure space",
+              "formula": "Θ(n) nodes, no rank field",
+              "curveId": "linear"
+            },
+            {
+              "kind": "curve",
+              "role": "Aux space per op",
+              "formula": "O(n) worst-case recursion stack",
               "curveId": "linear"
             }
           ]
@@ -172,7 +172,13 @@ tab: Complexity
           "bounds": [
             {
               "kind": "curve",
-              "role": "Space",
+              "role": "Persistent structure space",
+              "formula": "Θ(n) nodes, no rank field",
+              "curveId": "linear"
+            },
+            {
+              "kind": "curve",
+              "role": "Aux space per op",
               "formula": "O(n) worst-case recursion stack",
               "curveId": "linear"
             }
@@ -184,7 +190,13 @@ tab: Complexity
           "bounds": [
             {
               "kind": "curve",
-              "role": "Space",
+              "role": "Persistent structure space",
+              "formula": "Θ(n) nodes, no rank field",
+              "curveId": "linear"
+            },
+            {
+              "kind": "curve",
+              "role": "Aux space per op",
               "formula": "O(n) worst-case recursion stack",
               "curveId": "linear"
             }
@@ -196,7 +208,13 @@ tab: Complexity
           "bounds": [
             {
               "kind": "curve",
-              "role": "Space",
+              "role": "Persistent structure space",
+              "formula": "Θ(n) nodes, no rank field",
+              "curveId": "linear"
+            },
+            {
+              "kind": "curve",
+              "role": "Aux space per op",
               "formula": "O(1)",
               "curveId": "constant"
             }

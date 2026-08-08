@@ -1,8 +1,8 @@
 ---
 publish: true
 created: 2026-07-18T14:02:44.000Z
-modified: 2026-08-02T11:25:11.434Z
-published: 2026-08-02T11:25:11.434Z
+modified: 2026-08-08T07:48:03.108Z
+published: 2026-08-08T07:48:03.108Z
 topic:
   - Computer Science
 subtopic:
@@ -58,11 +58,11 @@ tab: Complexity
   "variables": {
     "inputSize": {
       "symbol": "n",
-      "description": "number of input elements or states"
+      "description": "length of the searched text"
     },
     "secondarySize": {
       "symbol": "m",
-      "description": "secondary input, pattern, bucket, or sequence size"
+      "description": "length of the pattern"
     }
   },
   "resources": {
@@ -74,9 +74,10 @@ tab: Complexity
           "operation": "Best",
           "bounds": [
             {
-              "kind": "text",
+              "kind": "curve",
               "role": "Time",
-              "formula": "Θ(n + m)"
+              "formula": "Θ(n + m)",
+              "curveId": "linear"
             }
           ]
         },
@@ -85,9 +86,10 @@ tab: Complexity
           "operation": "Average",
           "bounds": [
             {
-              "kind": "text",
+              "kind": "curve",
               "role": "Time",
-              "formula": "Θ(n + m)"
+              "formula": "Θ(n + m)",
+              "curveId": "linear"
             }
           ]
         },

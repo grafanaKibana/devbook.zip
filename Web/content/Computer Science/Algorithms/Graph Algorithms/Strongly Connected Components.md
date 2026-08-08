@@ -1,8 +1,8 @@
 ---
 publish: true
 created: 2026-07-18T14:02:43.950Z
-modified: 2026-08-02T10:40:43.078Z
-published: 2026-08-02T10:40:43.078Z
+modified: 2026-08-08T07:30:30.355Z
+published: 2026-08-08T07:30:30.355Z
 topic:
   - Computer Science
 subtopic:
@@ -54,11 +54,11 @@ tab: Complexity
   "label": "Strongly Connected Components complexity",
   "variables": {
     "edgeCount": {
-      "symbol": "E",
+      "symbol": "m",
       "description": "number of edges"
     },
     "vertexCount": {
-      "symbol": "V",
+      "symbol": "n",
       "description": "number of vertices"
     }
   },
@@ -71,9 +71,10 @@ tab: Complexity
           "operation": "Tarjan",
           "bounds": [
             {
-              "kind": "text",
+              "kind": "curve",
               "role": "Time",
-              "formula": "Θ(V + E)"
+              "formula": "Θ(n + m)",
+              "curveId": "linear"
             }
           ]
         },
@@ -82,9 +83,10 @@ tab: Complexity
           "operation": "Kosaraju",
           "bounds": [
             {
-              "kind": "text",
+              "kind": "curve",
               "role": "Time",
-              "formula": "Θ(V + E)"
+              "formula": "Θ(n + m)",
+              "curveId": "linear"
             }
           ]
         },
@@ -93,9 +95,10 @@ tab: Complexity
           "operation": "Gabow",
           "bounds": [
             {
-              "kind": "text",
+              "kind": "curve",
               "role": "Time",
-              "formula": "Θ(V + E)"
+              "formula": "Θ(n + m)",
+              "curveId": "linear"
             }
           ]
         }
@@ -111,7 +114,7 @@ tab: Complexity
             {
               "kind": "curve",
               "role": "Auxiliary space",
-              "formula": "O(V)",
+              "formula": "O(n)",
               "curveId": "linear"
             }
           ]
@@ -121,9 +124,10 @@ tab: Complexity
           "operation": "Kosaraju",
           "bounds": [
             {
-              "kind": "text",
+              "kind": "curve",
               "role": "Auxiliary space",
-              "formula": "O(V + E)"
+              "formula": "O(n + m)",
+              "curveId": "linear"
             }
           ]
         },
@@ -134,7 +138,7 @@ tab: Complexity
             {
               "kind": "curve",
               "role": "Auxiliary space",
-              "formula": "O(V)",
+              "formula": "O(n)",
               "curveId": "linear"
             }
           ]

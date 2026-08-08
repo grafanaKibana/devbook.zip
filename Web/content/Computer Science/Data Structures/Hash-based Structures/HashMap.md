@@ -1,8 +1,8 @@
 ---
 publish: true
 created: 2026-08-03T07:22:13.840Z
-modified: 2026-08-03T07:22:13.841Z
-published: 2026-08-03T07:22:13.841Z
+modified: 2026-08-08T08:06:04.025Z
+published: 2026-08-08T08:06:04.025Z
 topic:
   - Computer Science
 subtopic:
@@ -75,7 +75,7 @@ tab: Complexity
   "variables": {
     "inputSize": {
       "symbol": "n",
-      "description": "number of input elements or states"
+      "description": "number of entries currently stored in the map"
     }
   },
   "resources": {

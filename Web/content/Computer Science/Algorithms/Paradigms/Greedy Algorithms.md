@@ -1,8 +1,8 @@
 ---
 publish: true
 created: 2026-08-03T15:55:17.233Z
-modified: 2026-08-04T05:40:46.084Z
-published: 2026-08-04T05:40:46.084Z
+modified: 2026-08-08T08:43:34.439Z
+published: 2026-08-08T08:43:34.439Z
 topic:
   - Computer Science
 subtopic:
@@ -42,7 +42,7 @@ tab: Complexity
   "variables": {
     "inputSize": {
       "symbol": "n",
-      "description": "number of input elements or states"
+      "description": "number of candidate intervals in the activity-selection model"
     }
   },
   "resources": {

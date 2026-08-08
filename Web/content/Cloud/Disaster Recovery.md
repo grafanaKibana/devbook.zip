@@ -1,11 +1,12 @@
 ---
 publish: true
 created: 2026-07-18T14:02:43.933Z
-modified: 2026-07-18T14:02:43.933Z
-published: 2026-07-18T14:02:43.933Z
+modified: 2026-08-08T09:29:27.963Z
+published: 2026-08-08T09:29:27.963Z
 topic:
   - Cloud
 subtopic: []
+summary: Defines tested recovery through RPO and RTO targets, backups, replicas, failover strategies, and exercises.
 level:
   - "2"
 priority: High
@@ -75,6 +76,14 @@ This can produce the shortest RTO, but it adds data-consistency, conflict-resolu
 A DR plan needs named owners, activation criteria, dependency order, credentials, communication paths, validation queries, rollback or failback steps, and a record of the last exercise. Test distinct failure classes: regional loss, accidental deletion, corrupted data, lost credentials, and an unavailable downstream provider.
 
 Measure the exercise from incident declaration to verified business flow. Record the restored data timestamp, actual RPO and RTO, manual interventions, capacity gaps, and any assumption that failed. A successful failover with unrecoverable or inconsistent data is not a successful recovery.
+
+# Questions
+
+> [!QUESTION]- Checkout may lose at most 10 minutes of accepted orders and must return within 45 minutes. What are its RPO and RTO?
+> The RPO is 10 minutes and the RTO is 45 minutes. Both apply to the complete checkout flow, so data restoration, dependencies, validation, and traffic switching must fit those limits rather than only the database or API.
+
+> [!QUESTION]- Why does a successful traffic failover not prove disaster recovery succeeded?
+> Failover only moves serving traffic. Replicated corruption, missing dependencies, stale credentials, insufficient capacity, or inconsistent restored data can still leave the business flow unusable. Recovery succeeds only after the flow and its data are validated against the defined objectives.
 
 # References
 

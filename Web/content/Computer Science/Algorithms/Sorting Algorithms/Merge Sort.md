@@ -1,8 +1,8 @@
 ---
 publish: true
 created: 2026-07-28T10:17:33.010Z
-modified: 2026-08-02T11:09:57.865Z
-published: 2026-08-02T11:09:57.865Z
+modified: 2026-08-08T08:06:02.556Z
+published: 2026-08-08T08:06:02.556Z
 topic:
   - Computer Science
 subtopic:
@@ -50,7 +50,7 @@ tab: Complexity
   "variables": {
     "inputSize": {
       "symbol": "n",
-      "description": "number of input elements or states"
+      "description": "number of elements in the input sequence being merged"
     }
   },
   "resources": {

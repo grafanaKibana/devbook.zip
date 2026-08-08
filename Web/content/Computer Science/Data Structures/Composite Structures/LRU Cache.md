@@ -1,8 +1,8 @@
 ---
 publish: true
 created: 2026-08-03T07:22:13.840Z
-modified: 2026-08-03T07:22:13.840Z
-published: 2026-08-03T07:22:13.840Z
+modified: 2026-08-08T09:22:39.031Z
+published: 2026-08-08T09:22:39.031Z
 topic:
   - Computer Science
 subtopic:
@@ -54,11 +54,11 @@ tab: Complexity
   "variables": {
     "configuredCapacity": {
       "symbol": "capacity",
-      "description": "configured backing-storage capacity"
+      "description": "maximum number of entries the cache may retain"
     },
     "inputSize": {
       "symbol": "n",
-      "description": "number of input elements or states"
+      "description": "number of resident cache entries"
     }
   },
   "resources": {
@@ -71,13 +71,13 @@ tab: Complexity
           "bounds": [
             {
               "kind": "curve",
-              "role": "Expected time",
+              "role": "Expected",
               "formula": "O(1)",
               "curveId": "constant"
             },
             {
               "kind": "curve",
-              "role": "Worst time",
+              "role": "Worst",
               "formula": "O(n)",
               "curveId": "linear"
             }
@@ -89,13 +89,13 @@ tab: Complexity
           "bounds": [
             {
               "kind": "curve",
-              "role": "Expected time",
+              "role": "Expected",
               "formula": "O(1)",
               "curveId": "constant"
             },
             {
               "kind": "curve",
-              "role": "Worst time",
+              "role": "Worst",
               "formula": "O(n)",
               "curveId": "linear"
             }
@@ -107,13 +107,13 @@ tab: Complexity
           "bounds": [
             {
               "kind": "curve",
-              "role": "Expected time",
+              "role": "Expected",
               "formula": "O(1)",
               "curveId": "constant"
             },
             {
               "kind": "curve",
-              "role": "Worst time",
+              "role": "Worst",
               "formula": "O(n)",
               "curveId": "linear"
             }
@@ -125,13 +125,13 @@ tab: Complexity
           "bounds": [
             {
               "kind": "curve",
-              "role": "Expected time",
+              "role": "Expected",
               "formula": "O(1) amortized",
               "curveId": "constant"
             },
             {
               "kind": "curve",
-              "role": "Worst time",
+              "role": "Worst",
               "formula": "O(n)",
               "curveId": "linear"
             }
@@ -143,13 +143,13 @@ tab: Complexity
           "bounds": [
             {
               "kind": "curve",
-              "role": "Expected time",
+              "role": "Expected",
               "formula": "O(1) expected",
               "curveId": "constant"
             },
             {
               "kind": "curve",
-              "role": "Worst time",
+              "role": "Worst",
               "formula": "O(n)",
               "curveId": "linear"
             }

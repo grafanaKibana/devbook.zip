@@ -1,12 +1,13 @@
 ---
 publish: true
 created: 2026-08-03T07:22:13.844Z
-modified: 2026-08-03T07:22:13.844Z
-published: 2026-08-03T07:22:13.844Z
+modified: 2026-08-08T09:29:24.974Z
+published: 2026-08-08T09:29:24.974Z
 topic:
   - Computer Science
 subtopic:
   - Data Structures
+summary: A self-adjusting BST that rotates each accessed node to the root, adapting the structure to access locality.
 level:
   - "4"
 priority: Medium
@@ -55,7 +56,7 @@ tab: Complexity
   "variables": {
     "inputSize": {
       "symbol": "n",
-      "description": "number of input elements or states"
+      "description": "number of keys currently stored in the tree"
     }
   },
   "resources": {
@@ -68,19 +69,19 @@ tab: Complexity
           "bounds": [
             {
               "kind": "curve",
-              "role": "Best time",
+              "role": "Best",
               "formula": "O(1)",
               "curveId": "constant"
             },
             {
               "kind": "curve",
-              "role": "Amortized time",
+              "role": "Amortized",
               "formula": "O(log n)",
               "curveId": "log-n"
             },
             {
               "kind": "curve",
-              "role": "Worst time",
+              "role": "Worst",
               "formula": "O(n)",
               "curveId": "linear"
             }
@@ -92,19 +93,19 @@ tab: Complexity
           "bounds": [
             {
               "kind": "curve",
-              "role": "Best time",
+              "role": "Best",
               "formula": "O(1)",
               "curveId": "constant"
             },
             {
               "kind": "curve",
-              "role": "Amortized time",
+              "role": "Amortized",
               "formula": "O(log n)",
               "curveId": "log-n"
             },
             {
               "kind": "curve",
-              "role": "Worst time",
+              "role": "Worst",
               "formula": "O(n)",
               "curveId": "linear"
             }
@@ -116,19 +117,19 @@ tab: Complexity
           "bounds": [
             {
               "kind": "curve",
-              "role": "Best time",
+              "role": "Best",
               "formula": "O(1)",
               "curveId": "constant"
             },
             {
               "kind": "curve",
-              "role": "Amortized time",
+              "role": "Amortized",
               "formula": "O(log n)",
               "curveId": "log-n"
             },
             {
               "kind": "curve",
-              "role": "Worst time",
+              "role": "Worst",
               "formula": "O(n)",
               "curveId": "linear"
             }
@@ -140,19 +141,19 @@ tab: Complexity
           "bounds": [
             {
               "kind": "curve",
-              "role": "Best time",
+              "role": "Best",
               "formula": "O(1)",
               "curveId": "constant"
             },
             {
               "kind": "curve",
-              "role": "Amortized time",
+              "role": "Amortized",
               "formula": "O(log n)",
               "curveId": "log-n"
             },
             {
               "kind": "curve",
-              "role": "Worst time",
+              "role": "Worst",
               "formula": "O(n)",
               "curveId": "linear"
             }

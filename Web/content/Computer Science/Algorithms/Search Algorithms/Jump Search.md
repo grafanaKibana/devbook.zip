@@ -1,8 +1,8 @@
 ---
 publish: true
 created: 2026-07-21T18:52:02.837Z
-modified: 2026-08-02T11:23:49.018Z
-published: 2026-08-02T11:23:49.018Z
+modified: 2026-08-08T08:06:02.046Z
+published: 2026-08-08T08:06:02.046Z
 topic:
   - Computer Science
 subtopic:
@@ -48,7 +48,7 @@ tab: Complexity
   "variables": {
     "inputSize": {
       "symbol": "n",
-      "description": "number of input elements or states"
+      "description": "number of records in the sorted sequential input"
     }
   },
   "resources": {

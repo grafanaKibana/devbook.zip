@@ -1,8 +1,8 @@
 ---
 publish: true
 created: 2026-07-29T20:23:26.641Z
-modified: 2026-08-02T11:47:14.035Z
-published: 2026-08-02T11:47:14.035Z
+modified: 2026-08-08T08:06:04.176Z
+published: 2026-08-08T08:06:04.176Z
 topic:
   - Computer Science
 subtopic:
@@ -61,7 +61,7 @@ tab: Complexity
   "variables": {
     "inputSize": {
       "symbol": "n",
-      "description": "number of input elements or states"
+      "description": "number of keys currently stored in the tree"
     }
   },
   "resources": {

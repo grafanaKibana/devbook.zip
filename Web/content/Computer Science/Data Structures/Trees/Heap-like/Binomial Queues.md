@@ -1,8 +1,8 @@
 ---
 publish: true
 created: 2026-08-03T07:22:13.841Z
-modified: 2026-08-03T07:22:13.842Z
-published: 2026-08-03T07:22:13.842Z
+modified: 2026-08-08T09:22:39.856Z
+published: 2026-08-08T09:22:39.856Z
 topic:
   - Computer Science
 subtopic:
@@ -71,7 +71,7 @@ tab: Complexity
   "variables": {
     "inputSize": {
       "symbol": "n",
-      "description": "number of input elements or states"
+      "description": "number of stored items, combining both queues for meld"
     }
   },
   "resources": {
@@ -84,19 +84,19 @@ tab: Complexity
           "bounds": [
             {
               "kind": "curve",
-              "role": "Best time",
+              "role": "Best",
               "formula": "O(1)",
               "curveId": "constant"
             },
             {
               "kind": "curve",
-              "role": "Amortized time",
+              "role": "Amortized",
               "formula": "O(log n)",
               "curveId": "log-n"
             },
             {
               "kind": "curve",
-              "role": "Worst time",
+              "role": "Worst",
               "formula": "O(log n)",
               "curveId": "log-n"
             }
@@ -108,19 +108,13 @@ tab: Complexity
           "bounds": [
             {
               "kind": "curve",
-              "role": "Best time",
+              "role": "Best/Amortized",
               "formula": "O(1)",
               "curveId": "constant"
             },
             {
               "kind": "curve",
-              "role": "Amortized time",
-              "formula": "O(1)",
-              "curveId": "constant"
-            },
-            {
-              "kind": "curve",
-              "role": "Worst time",
+              "role": "Worst",
               "formula": "O(log n)",
               "curveId": "log-n"
             }
@@ -132,13 +126,13 @@ tab: Complexity
           "bounds": [
             {
               "kind": "curve",
-              "role": "Best time",
+              "role": "Best",
               "formula": "O(1)",
               "curveId": "constant"
             },
             {
               "kind": "curve",
-              "role": "Worst time",
+              "role": "Worst",
               "formula": "O(log n)",
               "curveId": "log-n"
             }
@@ -150,19 +144,19 @@ tab: Complexity
           "bounds": [
             {
               "kind": "curve",
-              "role": "Best time",
+              "role": "Best",
               "formula": "O(1)",
               "curveId": "constant"
             },
             {
               "kind": "curve",
-              "role": "Amortized time",
+              "role": "Amortized",
               "formula": "O(log n)",
               "curveId": "log-n"
             },
             {
               "kind": "curve",
-              "role": "Worst time",
+              "role": "Worst",
               "formula": "O(log n)",
               "curveId": "log-n"
             }
@@ -174,13 +168,13 @@ tab: Complexity
           "bounds": [
             {
               "kind": "curve",
-              "role": "Best time",
+              "role": "Best",
               "formula": "O(1)",
               "curveId": "constant"
             },
             {
               "kind": "curve",
-              "role": "Worst time",
+              "role": "Worst",
               "formula": "O(log n)",
               "curveId": "log-n"
             }

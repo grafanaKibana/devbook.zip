@@ -1,8 +1,8 @@
 ---
 publish: true
 created: 2026-07-29T20:23:26.770Z
-modified: 2026-08-02T20:03:54.756Z
-published: 2026-08-02T20:03:54.756Z
+modified: 2026-08-08T07:30:32.702Z
+published: 2026-08-08T07:30:32.702Z
 topic:
   - Computer Science
 subtopic:
@@ -180,14 +180,16 @@ tab: Complexity
           "operation": "Range query (k results)",
           "bounds": [
             {
-              "kind": "text",
+              "kind": "curve",
               "role": "Auxiliary traversal",
-              "formula": "O(h)"
+              "formula": "O(h)",
+              "curveId": "linear"
             },
             {
-              "kind": "text",
+              "kind": "curve",
               "role": "Materialized output",
-              "formula": "O(k)"
+              "formula": "O(k)",
+              "curveId": "linear"
             }
           ]
         }

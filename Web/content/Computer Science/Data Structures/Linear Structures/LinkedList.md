@@ -1,8 +1,8 @@
 ---
 publish: true
 created: 2026-08-03T07:22:13.841Z
-modified: 2026-08-03T07:22:13.841Z
-published: 2026-08-03T07:22:13.841Z
+modified: 2026-08-08T09:22:39.631Z
+published: 2026-08-08T09:22:39.631Z
 topic:
   - Computer Science
 subtopic:
@@ -67,7 +67,7 @@ tab: Complexity
   "variables": {
     "inputSize": {
       "symbol": "n",
-      "description": "number of input elements or states"
+      "description": "number of nodes currently stored in the list"
     }
   },
   "resources": {
@@ -80,19 +80,19 @@ tab: Complexity
           "bounds": [
             {
               "kind": "curve",
-              "role": "Best time",
+              "role": "Best",
               "formula": "O(1)",
               "curveId": "constant"
             },
             {
               "kind": "curve",
-              "role": "Typical time",
+              "role": "Typical",
               "formula": "O(n)",
               "curveId": "linear"
             },
             {
               "kind": "curve",
-              "role": "Worst time",
+              "role": "Worst",
               "formula": "O(n)",
               "curveId": "linear"
             }
@@ -104,19 +104,19 @@ tab: Complexity
           "bounds": [
             {
               "kind": "curve",
-              "role": "Best time",
+              "role": "Best",
               "formula": "O(1)",
               "curveId": "constant"
             },
             {
               "kind": "curve",
-              "role": "Typical time",
+              "role": "Typical",
               "formula": "O(1)",
               "curveId": "constant"
             },
             {
               "kind": "curve",
-              "role": "Worst time",
+              "role": "Worst",
               "formula": "O(1)",
               "curveId": "constant"
             }
@@ -128,19 +128,19 @@ tab: Complexity
           "bounds": [
             {
               "kind": "curve",
-              "role": "Best time",
+              "role": "Best",
               "formula": "O(1)",
               "curveId": "constant"
             },
             {
               "kind": "curve",
-              "role": "Typical time",
+              "role": "Typical",
               "formula": "O(n)",
               "curveId": "linear"
             },
             {
               "kind": "curve",
-              "role": "Worst time",
+              "role": "Worst",
               "formula": "O(n)",
               "curveId": "linear"
             }
@@ -152,19 +152,19 @@ tab: Complexity
           "bounds": [
             {
               "kind": "curve",
-              "role": "Best time",
+              "role": "Best",
               "formula": "O(1)",
               "curveId": "constant"
             },
             {
               "kind": "curve",
-              "role": "Typical time",
+              "role": "Typical",
               "formula": "O(1)",
               "curveId": "constant"
             },
             {
               "kind": "curve",
-              "role": "Worst time",
+              "role": "Worst",
               "formula": "O(1)",
               "curveId": "constant"
             }

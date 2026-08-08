@@ -1,12 +1,13 @@
 ---
 publish: true
 created: 2026-07-18T14:02:43.948Z
-modified: 2026-08-03T07:58:16.012Z
-published: 2026-08-03T07:58:16.012Z
+modified: 2026-08-08T09:12:51.778Z
+published: 2026-08-08T09:12:51.778Z
 topic:
   - Computer Science
 subtopic:
   - Algorithms
+summary: Builds a minimum spanning tree by accepting the lightest edges that join separate components.
 level:
   - "4"
 priority: Medium
@@ -44,11 +45,11 @@ tab: Complexity
   "label": "Kruskal's Algorithm complexity",
   "variables": {
     "edgeCount": {
-      "symbol": "E",
+      "symbol": "m",
       "description": "number of edges"
     },
     "vertexCount": {
-      "symbol": "V",
+      "symbol": "n",
       "description": "number of vertices"
     }
   },
@@ -59,43 +60,36 @@ tab: Complexity
         {
           "kind": "case",
           "role": "Best",
-          "formula": "Θ(E log E)",
+          "formula": "Θ(m log m)",
           "curveId": "n-log-n"
         },
         {
           "kind": "case",
           "role": "Average",
-          "formula": "Θ(E log E)",
+          "formula": "Θ(m log m)",
           "curveId": "n-log-n"
         },
         {
           "kind": "case",
           "role": "Worst",
-          "formula": "Θ(E log E)",
+          "formula": "Θ(m log m)",
           "curveId": "n-log-n"
         }
       ]
     },
     "space": {
-      "mode": "cases",
+      "mode": "operations",
       "entries": [
         {
-          "kind": "case",
-          "role": "Best",
-          "formula": "O(V) plus sort workspace",
-          "curveId": "linear"
-        },
-        {
-          "kind": "case",
-          "role": "Average",
-          "formula": "O(V) plus sort workspace",
-          "curveId": "linear"
-        },
-        {
-          "kind": "case",
-          "role": "Worst",
-          "formula": "O(V) plus sort workspace",
-          "curveId": "linear"
+          "kind": "operation",
+          "operation": "Kruskal",
+          "bounds": [
+            {
+              "kind": "text",
+              "role": "Auxiliary space",
+              "formula": "O(n + log m) with in-place introsort"
+            }
+          ]
         }
       ]
     }

@@ -1,8 +1,8 @@
 ---
 publish: true
 created: 2026-07-29T20:22:59.982Z
-modified: 2026-08-02T11:04:40.476Z
-published: 2026-08-02T11:04:40.476Z
+modified: 2026-08-08T06:34:58.286Z
+published: 2026-08-08T06:34:58.286Z
 topic:
   - Computer Science
 subtopic:
@@ -100,12 +100,12 @@ tab: Complexity
         },
         {
           "kind": "operation",
-          "operation": "Average",
+          "operation": "Typical",
           "bounds": [
             {
               "kind": "text",
               "role": "Time (node expansions)",
-              "formula": "O(b^d)"
+              "formula": "between Θ(d) and O(b^d) for uniform edge costs"
             }
           ]
         },
@@ -116,7 +116,7 @@ tab: Complexity
             {
               "kind": "text",
               "role": "Time (node expansions)",
-              "formula": "O(b^d)"
+              "formula": "O(b^d) for uniform edge costs"
             }
           ]
         }
@@ -139,12 +139,12 @@ tab: Complexity
         },
         {
           "kind": "operation",
-          "operation": "Average",
+          "operation": "Typical",
           "bounds": [
             {
               "kind": "text",
-              "role": "Auxiliary space, fixed b",
-              "formula": "O(b^d)"
+              "role": "Auxiliary space",
+              "formula": "O(nodes stored), heuristic-dependent"
             }
           ]
         },
@@ -154,7 +154,7 @@ tab: Complexity
           "bounds": [
             {
               "kind": "text",
-              "role": "Auxiliary space, fixed b",
+              "role": "Auxiliary space",
               "formula": "O(b^d)"
             }
           ]

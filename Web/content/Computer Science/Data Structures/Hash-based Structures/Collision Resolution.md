@@ -1,12 +1,13 @@
 ---
 publish: true
 created: 2026-07-29T20:22:59.987Z
-modified: 2026-08-02T11:48:48.178Z
-published: 2026-08-02T11:48:48.178Z
+modified: 2026-08-08T09:12:52.136Z
+published: 2026-08-08T09:12:52.136Z
 topic:
   - Computer Science
 subtopic:
   - Data Structures
+summary: Resolves hash collisions by chaining entries outside the table or probing alternative in-array slots.
 level:
   - "4"
 priority: Medium
@@ -94,16 +95,16 @@ tab: Complexity
   "label": "Collision Resolution complexity",
   "variables": {
     "blockSize": {
-      "symbol": "B",
+      "symbol": "b",
       "description": "block or page capacity"
     },
     "inputSize": {
       "symbol": "n",
-      "description": "number of input elements or states"
+      "description": "number of entries stored in the hash table"
     },
     "keyRange": {
       "symbol": "k",
-      "description": "key range, digit count, or requested result count"
+      "description": "entries in the relevant chain or treeified bin"
     },
     "loadFactor": {
       "symbol": "α",
@@ -154,7 +155,7 @@ tab: Complexity
             {
               "kind": "text",
               "role": "Avg lookup",
-              "formula": "Resolution-dependent; scans B slots/metadata together"
+              "formula": "Resolution-dependent; scans b slots/metadata together"
             },
             {
               "kind": "text",

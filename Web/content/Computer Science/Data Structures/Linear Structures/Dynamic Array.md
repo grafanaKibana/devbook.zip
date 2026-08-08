@@ -1,8 +1,8 @@
 ---
 publish: true
 created: 2026-07-29T20:22:59.990Z
-modified: 2026-08-02T11:47:13.855Z
-published: 2026-08-02T11:47:13.855Z
+modified: 2026-08-08T09:22:39.478Z
+published: 2026-08-08T09:22:39.478Z
 topic:
   - Computer Science
 subtopic:
@@ -59,7 +59,7 @@ tab: Complexity
   "variables": {
     "inputSize": {
       "symbol": "n",
-      "description": "number of input elements or states"
+      "description": "number of elements currently stored in the dynamic array"
     }
   },
   "resources": {
@@ -72,13 +72,7 @@ tab: Complexity
           "bounds": [
             {
               "kind": "curve",
-              "role": "Best time",
-              "formula": "O(1)",
-              "curveId": "constant"
-            },
-            {
-              "kind": "curve",
-              "role": "Amortized time",
+              "role": "Best/Amortized",
               "formula": "O(1)",
               "curveId": "constant"
             },
@@ -96,13 +90,7 @@ tab: Complexity
           "bounds": [
             {
               "kind": "curve",
-              "role": "Best time",
-              "formula": "O(1)",
-              "curveId": "constant"
-            },
-            {
-              "kind": "curve",
-              "role": "Amortized time",
+              "role": "Best/Amortized",
               "formula": "O(1)",
               "curveId": "constant"
             },
@@ -120,13 +108,7 @@ tab: Complexity
           "bounds": [
             {
               "kind": "curve",
-              "role": "Best time",
-              "formula": "O(n)",
-              "curveId": "linear"
-            },
-            {
-              "kind": "curve",
-              "role": "Amortized time",
+              "role": "Best/Amortized",
               "formula": "O(n)",
               "curveId": "linear"
             },
@@ -144,13 +126,7 @@ tab: Complexity
           "bounds": [
             {
               "kind": "curve",
-              "role": "Best time",
-              "formula": "Θ(n)",
-              "curveId": "linear"
-            },
-            {
-              "kind": "curve",
-              "role": "Amortized time",
+              "role": "Best/Amortized",
               "formula": "Θ(n)",
               "curveId": "linear"
             },

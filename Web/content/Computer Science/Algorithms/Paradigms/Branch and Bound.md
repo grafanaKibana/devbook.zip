@@ -1,8 +1,8 @@
 ---
 publish: true
 created: 2026-08-03T15:55:17.232Z
-modified: 2026-08-04T05:40:46.086Z
-published: 2026-08-04T05:40:46.086Z
+modified: 2026-08-08T08:43:34.330Z
+published: 2026-08-08T08:43:34.330Z
 topic:
   - Computer Science
 subtopic:
@@ -61,6 +61,10 @@ tab: Complexity
       "symbol": "b",
       "description": "maximum children per expanded node"
     },
+    "boundCost": {
+      "symbol": "c",
+      "description": "cost of evaluating the bound at one expanded node"
+    },
     "inputSize": {
       "symbol": "n",
       "description": "maximum decision-tree depth"
@@ -78,11 +82,9 @@ tab: Complexity
           "curveTo": "unbounded"
         },
         {
-          "kind": "approach",
+          "kind": "text",
           "label": "Branch and bound",
-          "formula": "O(b^n)",
-          "curveFrom": "exponential",
-          "curveTo": "unbounded"
+          "formula": "O(b^n · c)"
         }
       ]
     },
@@ -96,11 +98,9 @@ tab: Complexity
           "curveId": "linear"
         },
         {
-          "kind": "approach",
+          "kind": "text",
           "label": "Branch and bound",
-          "formula": "O(n)",
-          "curveFrom": "linear",
-          "curveTo": "unbounded"
+          "formula": "O(n) depth-first; up to O(b^n) best-first"
         }
       ]
     }
@@ -110,7 +110,7 @@ tab: Complexity
 
 Best-first can retain every live node and exhaust memory on a hard instance. Depth-first retains only the current search path, trading that smaller frontier for less global control over which bound is explored next.
 
-The general `b`-ary model expands `1 + b + ... + b^n = Θ(b^n)` nodes when pruning fails. Binary 0/1 knapsack specializes that model to two take-or-skip branches per item, giving `O(2^n · C_bound)` time. TSP does not have a constant branching factor: the number of remaining-city choices shrinks by one per level, so exhaustive search can remain factorial. `C_bound` isolates the per-node cost of evaluating the relaxation from the branching factor `b`.
+The general `b`-ary model expands `1 + b + ... + b^n = Θ(b^n)` nodes when pruning fails. Binary 0/1 knapsack specializes that model to two take-or-skip branches per item, giving `O(2^n · c)` time. TSP does not have a constant branching factor: the number of remaining-city choices shrinks by one per level, so exhaustive search can remain factorial. `c` isolates the per-node cost of evaluating the relaxation from the branching factor `b`.
 ````
 
 # When the Bound Stops Helping

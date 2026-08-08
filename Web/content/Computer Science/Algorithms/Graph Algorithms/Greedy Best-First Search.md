@@ -1,8 +1,8 @@
 ---
 publish: true
 created: 2026-07-18T14:02:43.946Z
-modified: 2026-08-02T10:39:41.590Z
-published: 2026-08-02T10:39:41.590Z
+modified: 2026-08-08T08:02:46.184Z
+published: 2026-08-08T08:02:46.184Z
 topic:
   - Computer Science
 subtopic:
@@ -43,11 +43,11 @@ tab: Complexity
   "variables": {
     "branchingFactor": {
       "symbol": "b",
-      "description": "search branching factor or radix base"
+      "description": "search-tree branching factor"
     },
     "secondarySize": {
       "symbol": "m",
-      "description": "secondary input, pattern, bucket, or sequence size"
+      "description": "maximum search depth"
     }
   },
   "resources": {

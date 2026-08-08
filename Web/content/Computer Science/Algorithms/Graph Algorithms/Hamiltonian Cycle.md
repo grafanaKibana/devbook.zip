@@ -1,12 +1,13 @@
 ---
 publish: true
 created: 2026-07-18T14:02:43.947Z
-modified: 2026-08-03T07:58:15.491Z
-published: 2026-08-03T07:58:15.491Z
+modified: 2026-08-08T09:12:51.688Z
+published: 2026-08-08T09:12:51.688Z
 topic:
   - Computer Science
 subtopic:
   - Algorithms
+summary: Visits every graph vertex exactly once and returns to the start; deciding existence is NP-complete.
 level:
   - "4"
 priority: Medium
@@ -38,7 +39,7 @@ tab: Complexity
   "variables": {
     "inputSize": {
       "symbol": "n",
-      "description": "number of input elements or states"
+      "description": "number of vertices in the input graph"
     }
   },
   "resources": {

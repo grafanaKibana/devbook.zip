@@ -1,11 +1,12 @@
 ---
 publish: true
 created: 2026-08-03T07:22:13.839Z
-modified: 2026-08-03T07:22:13.839Z
-published: 2026-08-03T07:22:13.839Z
+modified: 2026-08-08T09:12:52.048Z
+published: 2026-08-08T09:12:52.048Z
 topic:
   - Computer Science
 subtopic: []
+summary: Describes how time or space grows with input size by retaining the dominant term and ignoring constants.
 level:
   - "3"
 priority: High

@@ -1,8 +1,8 @@
 ---
 publish: true
 created: 2026-08-03T07:22:13.843Z
-modified: 2026-08-03T07:22:13.843Z
-published: 2026-08-03T07:22:13.843Z
+modified: 2026-08-08T09:22:40.150Z
+published: 2026-08-08T09:22:40.150Z
 topic:
   - Computer Science
 subtopic:
@@ -54,7 +54,7 @@ tab: Complexity
   "variables": {
     "inputSize": {
       "symbol": "n",
-      "description": "number of input elements or states"
+      "description": "number of keys currently stored in the tree"
     }
   },
   "resources": {
@@ -67,7 +67,7 @@ tab: Complexity
           "bounds": [
             {
               "kind": "curve",
-              "role": "Worst-case time",
+              "role": "Worst-case",
               "formula": "O(log n)",
               "curveId": "log-n"
             }
@@ -79,7 +79,7 @@ tab: Complexity
           "bounds": [
             {
               "kind": "curve",
-              "role": "Worst-case time",
+              "role": "Worst-case",
               "formula": "O(log n)",
               "curveId": "log-n"
             }
@@ -91,7 +91,7 @@ tab: Complexity
           "bounds": [
             {
               "kind": "curve",
-              "role": "Worst-case time",
+              "role": "Worst-case",
               "formula": "O(log n)",
               "curveId": "log-n"
             }

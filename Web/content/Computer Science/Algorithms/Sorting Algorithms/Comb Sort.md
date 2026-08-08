@@ -1,8 +1,8 @@
 ---
 publish: true
 created: 2026-07-21T18:52:02.838Z
-modified: 2026-08-03T07:58:16.368Z
-published: 2026-08-03T07:58:16.368Z
+modified: 2026-08-08T08:06:02.264Z
+published: 2026-08-08T08:06:02.264Z
 topic:
   - Computer Science
 subtopic:
@@ -50,7 +50,7 @@ tab: Complexity
   "variables": {
     "inputSize": {
       "symbol": "n",
-      "description": "number of input elements or states"
+      "description": "number of elements in the input array"
     }
   },
   "resources": {

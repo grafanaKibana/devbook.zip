@@ -1,8 +1,8 @@
 ---
 publish: true
 created: 2026-08-03T07:22:13.842Z
-modified: 2026-08-03T07:22:13.842Z
-published: 2026-08-03T07:22:13.842Z
+modified: 2026-08-08T09:22:39.930Z
+published: 2026-08-08T09:22:39.930Z
 topic:
   - Computer Science
 subtopic:
@@ -71,7 +71,7 @@ tab: Complexity
           "bounds": [
             {
               "kind": "curve",
-              "role": "Amortized time",
+              "role": "Amortized",
               "formula": "O(1)",
               "curveId": "constant"
             },
@@ -89,7 +89,7 @@ tab: Complexity
           "bounds": [
             {
               "kind": "curve",
-              "role": "Amortized time",
+              "role": "Amortized",
               "formula": "O(1)",
               "curveId": "constant"
             },
@@ -107,7 +107,7 @@ tab: Complexity
           "bounds": [
             {
               "kind": "curve",
-              "role": "Amortized time",
+              "role": "Amortized",
               "formula": "O(1)",
               "curveId": "constant"
             },
@@ -125,7 +125,7 @@ tab: Complexity
           "bounds": [
             {
               "kind": "curve",
-              "role": "Amortized time",
+              "role": "Amortized",
               "formula": "O(1) amortized",
               "curveId": "constant"
             },
@@ -143,7 +143,7 @@ tab: Complexity
           "bounds": [
             {
               "kind": "curve",
-              "role": "Amortized time",
+              "role": "Amortized",
               "formula": "O(log n) amortized",
               "curveId": "log-n"
             },

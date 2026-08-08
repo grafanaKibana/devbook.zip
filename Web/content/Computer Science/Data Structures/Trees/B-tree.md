@@ -1,8 +1,8 @@
 ---
 publish: true
 created: 2026-07-29T20:23:26.770Z
-modified: 2026-08-02T11:47:14.082Z
-published: 2026-08-02T11:47:14.082Z
+modified: 2026-08-08T08:02:46.256Z
+published: 2026-08-08T08:02:46.256Z
 topic:
   - Computer Science
 subtopic:
@@ -59,11 +59,11 @@ tab: Complexity
   "variables": {
     "inputSize": {
       "symbol": "n",
-      "description": "number of input elements or states"
+      "description": "number of keys stored in the tree"
     },
     "secondarySize": {
       "symbol": "m",
-      "description": "secondary input, pattern, bucket, or sequence size"
+      "description": "tree order and maximum number of children per node"
     }
   },
   "resources": {

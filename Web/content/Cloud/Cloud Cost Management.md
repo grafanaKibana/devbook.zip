@@ -1,11 +1,12 @@
 ---
 publish: true
 created: 2026-07-18T14:02:43.929Z
-modified: 2026-07-18T14:02:43.932Z
-published: 2026-07-18T14:02:43.932Z
+modified: 2026-08-08T09:29:27.893Z
+published: 2026-08-08T09:29:27.893Z
 topic:
   - Cloud
 subtopic: []
+summary: Connects cloud spend to workload behavior and unit economics, then reduces waste without sacrificing reliability.
 level:
   - "2"
 priority: High
@@ -59,6 +60,14 @@ Track the numerator and denominator separately. A falling unit cost caused by dr
 - **Compression trades compute for storage and transfer.** It helps when bytes dominate and hurts when CPU or latency is the tighter constraint.
 - **Managed services trade operational labor for provider rates and lock-in.** Compare the fully loaded cost of operating an alternative, not only its infrastructure line item.
 - **Commitments trade a lower rate for demand risk.** Apply them to the measured floor, never to the forecast peak.
+
+# Questions
+
+> [!QUESTION]- A workload's monthly bill rises by 20% while successful output rises by 40%. Did its cost efficiency improve?
+> Yes, if reliability and output quality stayed comparable. Unit cost changed from `cost / output` to `1.2 × cost / 1.4 × output`, about 14% less per successful unit. The larger invoice alone does not show regression.
+
+> [!QUESTION]- Why should reservations or savings plans be sized only after waste removal and right-sizing?
+> A commitment discounts a fixed demand baseline but converts forecast error into unused spend. Removing idle resources and right-sizing first reveals the stable floor worth committing; variable or uncertain demand should remain elastic.
 
 # References
 

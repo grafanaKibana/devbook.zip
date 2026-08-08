@@ -1,8 +1,8 @@
 ---
 publish: true
 created: 2026-07-18T14:02:43.948Z
-modified: 2026-08-02T11:37:00.988Z
-published: 2026-08-02T11:37:00.988Z
+modified: 2026-08-08T07:34:40.841Z
+published: 2026-08-08T07:34:40.841Z
 topic:
   - Computer Science
 subtopic:
@@ -45,15 +45,15 @@ tab: Complexity
   "label": "Maximum Flow complexity",
   "variables": {
     "edgeCount": {
-      "symbol": "E",
+      "symbol": "m",
       "description": "number of edges"
     },
     "flowValue": {
-      "symbol": "F",
+      "symbol": "f",
       "description": "integral maximum-flow value"
     },
     "vertexCount": {
-      "symbol": "V",
+      "symbol": "n",
       "description": "number of vertices"
     }
   },
@@ -68,7 +68,7 @@ tab: Complexity
             {
               "kind": "text",
               "role": "Time",
-              "formula": "O(E·F) for integral capacities"
+              "formula": "O(m·f) for integral capacities"
             }
           ]
         },
@@ -79,7 +79,7 @@ tab: Complexity
             {
               "kind": "text",
               "role": "Time",
-              "formula": "O(V·E²)"
+              "formula": "O(n·m²)"
             }
           ]
         },
@@ -90,7 +90,7 @@ tab: Complexity
             {
               "kind": "text",
               "role": "Time",
-              "formula": "O(V²·E)"
+              "formula": "O(n²·m)"
             }
           ]
         }
@@ -104,9 +104,10 @@ tab: Complexity
           "operation": "Ford–Fulkerson (any augmenting path)",
           "bounds": [
             {
-              "kind": "text",
+              "kind": "curve",
               "role": "Auxiliary space",
-              "formula": "O(V + E)"
+              "formula": "O(n + m)",
+              "curveId": "linear"
             }
           ]
         },
@@ -115,9 +116,10 @@ tab: Complexity
           "operation": "Edmonds–Karp (BFS shortest path)",
           "bounds": [
             {
-              "kind": "text",
+              "kind": "curve",
               "role": "Auxiliary space",
-              "formula": "O(V + E)"
+              "formula": "O(n + m)",
+              "curveId": "linear"
             }
           ]
         },
@@ -126,9 +128,10 @@ tab: Complexity
           "operation": "Dinic (level graph + blocking flow)",
           "bounds": [
             {
-              "kind": "text",
+              "kind": "curve",
               "role": "Auxiliary space",
-              "formula": "O(V + E)"
+              "formula": "O(n + m)",
+              "curveId": "linear"
             }
           ]
         }

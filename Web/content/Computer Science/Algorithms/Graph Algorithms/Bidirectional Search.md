@@ -1,8 +1,8 @@
 ---
 publish: true
 created: 2026-07-18T14:02:43.941Z
-modified: 2026-08-02T10:38:41.556Z
-published: 2026-08-02T10:38:41.556Z
+modified: 2026-08-08T07:57:18.729Z
+published: 2026-08-08T07:57:18.729Z
 topic:
   - Computer Science
 subtopic:
@@ -45,18 +45,18 @@ tab: Complexity
   "variables": {
     "branchingFactor": {
       "symbol": "b",
-      "description": "search branching factor or radix base"
+      "description": "search-tree branching factor"
     },
     "edgeCount": {
-      "symbol": "E",
+      "symbol": "m",
       "description": "number of edges"
     },
     "parameterD": {
       "symbol": "d",
-      "description": "algorithm-specific depth, digit count, or dimension"
+      "description": "source-to-target solution depth"
     },
     "vertexCount": {
-      "symbol": "V",
+      "symbol": "n",
       "description": "number of vertices"
     }
   },
@@ -92,9 +92,10 @@ tab: Complexity
           "operation": "General worst",
           "bounds": [
             {
-              "kind": "text",
+              "kind": "curve",
               "role": "Time",
-              "formula": "O(V + E)"
+              "formula": "O(n + m)",
+              "curveId": "linear"
             }
           ]
         }
@@ -133,7 +134,7 @@ tab: Complexity
             {
               "kind": "curve",
               "role": "Auxiliary space",
-              "formula": "O(V)",
+              "formula": "O(n)",
               "curveId": "linear"
             }
           ]

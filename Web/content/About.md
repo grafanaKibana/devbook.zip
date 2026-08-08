@@ -1,11 +1,12 @@
 ---
 publish: true
 title: About
-created: 2026-07-12T14:27:08.519Z
-modified: 2026-07-25T18:38:43.827Z
-published: 2026-07-25T18:38:43.827Z
+created: 2026-08-08T08:38:21.957Z
+modified: 2026-08-08T09:27:18.045Z
+published: 2026-08-08T09:27:18.045Z
 tags:
   - MetricsIgnore
+summary: The purpose, scope, and AI-assisted authorship of this software engineering notebook.
 icon: heart
 ---
 
