@@ -1069,7 +1069,6 @@ test("version 2 variables use strict ASCII keys and exact symbol metadata", () =
 function hastText(node: unknown): string {
   if (!node || typeof node !== "object") return ""
   const value = node as { tagName?: unknown; value?: unknown; children?: unknown[] }
-  if (value.tagName === "noscript") return ""
   return `${typeof value.value === "string" ? value.value : ""}${(value.children ?? [])
     .map(hastText)
     .join("")}`
@@ -1124,6 +1123,7 @@ test("dual-resource HAST has one accessible figure and Time and Space tab panels
   assert.equal(figure?.properties.ariaLabel, dualResource.label)
   assert.equal(findAllHastByClass(hast, "complexity__title").length, 0)
   assert.equal(findAllHastByClass(hast, "complexity__resource-label").length, 0)
+  assert.equal(hastElements(hast, "noscript").length, 0)
   assert.deepEqual(tabs.map(hastText), ["Time", "Space"])
   assert.equal(findHastByClass(hast, "complexity__tabs")?.properties.role, "tablist")
   assert.ok(
