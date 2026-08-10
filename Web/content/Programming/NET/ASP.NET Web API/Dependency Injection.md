@@ -1,8 +1,8 @@
 ---
 publish: true
 created: 2026-07-19T15:05:27.900Z
-modified: 2026-07-25T13:57:51.928Z
-published: 2026-07-25T13:57:51.928Z
+modified: 2026-08-10T10:07:38.946Z
+published: 2026-08-10T10:07:38.946Z
 topic:
   - Programming
 subtopic:
@@ -133,7 +133,7 @@ public sealed class BackgroundWorker(IServiceScopeFactory scopeFactory) : Backgr
 The container **owns disposal of the instances it creates**: when a scope ends it disposes the `IDisposable`/`IAsyncDisposable` services it resolved in that scope, and singletons are disposed when the root provider is disposed. Two consequences:
 
 - A **transient `IDisposable` resolved from the root provider lives until the app shuts down** — the container holds it to dispose it later, so a "transient" disposable can pile up as a leak. Resolve disposables from a scope, or don't make hot transients disposable.
-- **Don't register an instance you also dispose yourself** (`AddSingleton(myInstance)` then `using`) — you'll double-dispose. If _you_ own the lifetime, register a factory that returns it without the container taking ownership, or let the container own it exclusively.
+- An instance supplied to `AddSingleton(myInstance)` remains caller-owned and is not disposed by the container; the caller must dispose it exactly once. A singleton created by an implementation-type or factory registration is container-owned and disposed with the root provider.
 
 # Tradeoffs
 
@@ -159,4 +159,4 @@ The container **owns disposal of the instances it creates**: when a scope ends i
 - [Dependency injection guidelines](https://learn.microsoft.com/en-us/dotnet/core/extensions/dependency-injection-guidelines) — best practices including captive dependency avoidance, scope validation, and testing patterns.
 - [IServiceScopeFactory (Microsoft Learn)](https://learn.microsoft.com/en-us/dotnet/api/microsoft.extensions.dependencyinjection.iservicescopefactory) — API reference for creating manual service scopes; the correct pattern for Singletons that need Scoped dependencies.
 - [[Software Architecture/Patterns/Dependency Injection|Dependency Injection]] — the general DI pattern: why it improves testability and decoupling, independent of ASP.NET Core.
-- [[IoC (Holywood Principle)|IoC (Hollywood Principle)]] — the underlying principle: the framework provides dependencies rather than your code creating them.
+- [[Software Design/Principles/DRY, IoC, and YAGNI#Inversion of Control (IoC)|IoC (Hollywood Principle)]] — the underlying principle: the framework provides dependencies rather than your code creating them.
