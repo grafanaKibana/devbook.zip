@@ -500,14 +500,14 @@ def validate_code_fences(note: Note) -> list[Issue]:
     return issues
 
 
-def strip_non_link_markdown(content: str) -> str:
+def strip_non_link_markdown(content: str, *, preserve_inline_code: bool = False) -> str:
     def preserve_lines(match: re.Match[str]) -> str:
         return "\n" * match.group(0).count("\n")
 
     content = re.sub(r"<!--.*?-->", preserve_lines, content, flags=re.DOTALL)
     content = re.sub(r"%%.*?%%", preserve_lines, content, flags=re.DOTALL)
     content = re.sub(r"```.*?```", preserve_lines, content, flags=re.DOTALL)
-    content = re.sub(r"`[^`\n]*`", "", content)
+    content = re.sub(r"`([^`\n]*)`", r"\1" if preserve_inline_code else "", content)
     return content
 
 
@@ -573,7 +573,10 @@ def validate_wikilinks(note: Note, index: VaultIndex) -> list[Issue]:
                 )
             )
         elif resolved.suffix.casefold() == ".md" and separator and anchor and not anchor.startswith("^"):
-            target_content = strip_non_link_markdown(resolved.read_text(encoding="utf-8"))
+            target_content = strip_non_link_markdown(
+                resolved.read_text(encoding="utf-8"),
+                preserve_inline_code=True,
+            )
             headings = {
                 re.sub(r"\s+", " ", heading).strip().casefold()
                 for heading in re.findall(

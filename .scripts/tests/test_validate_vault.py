@@ -157,7 +157,8 @@ publish: "true"
         self.write_note(
             root,
             "Vault/Home/Topic/Target.md",
-            VALID_FRONTMATTER + "# Existing Heading\n# C#\n# Closed Heading ###\n",
+            VALID_FRONTMATTER
+            + "# Existing Heading\n# C#\n# Closed Heading ###\n# Cache Keys and `Vary`\n",
         )
         asset = root / "Vault/Assets/manual.pdf"
         asset.parent.mkdir(parents=True, exist_ok=True)
@@ -167,6 +168,7 @@ publish: "true"
             "Vault/Home/Topic/Source.md",
             VALID_FRONTMATTER
             + "[[Target#Existing Heading]], [[Target#C#]], [[Target#Closed Heading]], "
+            + "[[Target#Cache Keys and Vary]], "
             + "![[Assets/manual.pdf#page=3]], and [[Target#Missing Heading]]\n",
         )
         issues = validate_vault.validate_wikilinks(source, validate_vault.VaultIndex(root / "Vault"))

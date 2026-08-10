@@ -72,7 +72,7 @@ Text/pattern matching is its own sub-family — see [[Home/Computer Science/Algo
 | Data shape | Algorithm | Time | Precondition |
 | --- | --- | --- | --- |
 | Graph (unweighted) | [[DFS BFS\|BFS / DFS]] | O(V + E) | — |
-| Graph (weighted) | See [[Home/Computer Science/Algorithms/Graph Algorithms/Graph Algorithms|Graph Algorithms]] | — | [[Dijkstra]], [[A-Star Search\|A* Search]], [[Bellman-Ford]] |
+| Graph (weighted) | See [[Home/Computer Science/Algorithms/Graph Algorithms/Graph Algorithms\|Graph Algorithms]] | — | [[Dijkstra]], [[A-Star Search\|A* Search]], [[Bellman-Ford]] |
 
 # Questions
 

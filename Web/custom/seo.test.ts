@@ -2,6 +2,7 @@ import assert from "node:assert/strict"
 import { globSync, readFileSync } from "node:fs"
 import { basename, dirname, extname } from "node:path"
 import test from "node:test"
+import { fileURLToPath } from "node:url"
 import { render } from "preact-render-to-string"
 
 import HeadConstructor from "../quartz/components/Head"
@@ -230,10 +231,26 @@ test("sitewide navigation and nested hub links stay canonical", () => {
   assert.match(config, /About: \/about\b/)
   assert.doesNotMatch(config, /About: \/About\b/)
 
-  const vaultRoot = new URL("../../Vault/Home/", import.meta.url)
-  const files = globSync("**/*.md", { cwd: vaultRoot })
-  const vault = files.map((file) => readFileSync(new URL(file, vaultRoot), "utf8")).join("\n")
+  const stripNonLinkMarkdown = (content: string) =>
+    content
+      .replace(/<!--.*?-->/gs, "")
+      .replace(/%%.*?%%/gs, "")
+      .replace(/```.*?```/gs, "")
+      .replace(/`[^`\n]*`/g, "")
+  const wikilinkTarget = (raw: string) => raw.split(/\\?\|/, 1)[0]!.split("#", 1)[0]!.trim()
+  assert.equal(wikilinkTarget("Graph Algorithms\\|Graph"), "Graph Algorithms")
+  assert.doesNotMatch(
+    stripNonLinkMarkdown(
+      "```text\n[[Graph Algorithms]]\n```\n<!-- [[Graph Algorithms]] -->\n%% [[Graph Algorithms]] %%\n`[[Graph Algorithms]]`",
+    ),
+    /\[\[/,
+  )
 
+  const vaultRoot = new URL("../../Vault/Home/", import.meta.url)
+  const files = globSync("**/*.md", { cwd: fileURLToPath(vaultRoot) })
+  const content = stripNonLinkMarkdown(
+    files.map((file) => readFileSync(new URL(file, vaultRoot), "utf8")).join("\n"),
+  )
   const nestedHubNames = new Set(
     files
       .filter(
@@ -242,11 +259,9 @@ test("sitewide navigation and nested hub links stay canonical", () => {
       )
       .map((file) => basename(file, extname(file))),
   )
-  const wikilinkTarget = (raw: string) => raw.split(/\\?\|/, 1)[0]!.split("#", 1)[0]!.trim()
-  assert.equal(wikilinkTarget("Graph Algorithms\\|Graph"), "Graph Algorithms")
-  const shortNestedHubLinks = [...vault.matchAll(/\[\[([^\]\n]+)\]\]/g)]
+  const shortNestedHubLinks = [...content.matchAll(/\[\[([^\]\n]+)\]\]/g)]
     .map((match) => wikilinkTarget(match[1]!))
     .filter((target) => !target.includes("/") && nestedHubNames.has(target))
   assert.deepEqual(shortNestedHubLinks, [])
-  assert.doesNotMatch(vault, /Home\/AI & ML\/LLM\/Agent\/(?:Harness|Loop) Engineering/)
+  assert.doesNotMatch(content, /(?:Home\/)?AI & ML\/LLM\/Agent\/(?:Harness|Loop) Engineering/)
 })
