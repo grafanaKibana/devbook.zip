@@ -26,11 +26,23 @@ test("historical Search Console URLs redirect once to canonical routes", () => {
     bySource.get("/software-engineering/02-computer-science/data-structures/list")?.destination,
     "/computer-science/data-structures/linear-structures/dynamic-array",
   )
+  assert.equal(
+    bySource.get("/plug-in-architecture-\\(microkernel\\)")?.destination,
+    "/software-architecture/application-architecture/plug-in-architecture-%28microkernel%29",
+  )
+  assert.equal(
+    bySource.get("/software-engineering/07-security/authentication/sso-single-sign-on")
+      ?.destination,
+    "/security/authentication/sso-%28single-sign-on%29",
+  )
 
   for (const redirect of redirects) {
     assert.equal(redirect.permanent, true)
     assert.match(redirect.source, /^\/[^?]*[^/]$/)
     assert.match(redirect.destination, /^\/[^?]*[^/]$/)
+    assert.doesNotMatch(redirect.source, /(^|[^\\])[()]/)
+    assert.doesNotMatch(redirect.destination, /(^|[^\\])[()]/)
+    assert.doesNotMatch(redirect.destination, /\\/)
     assert.equal(bySource.has(redirect.destination), false)
   }
 })
