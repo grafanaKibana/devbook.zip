@@ -96,7 +96,7 @@ When you notice something worth doing that isn't part of the task at hand — a 
 
 ### Obsidian tooling
 
-Default to file tools for reads/writes. Use the Obsidian CLI only for index behavior (backlinks, tags, wikilink resolution) — it needs Obsidian running and uses `=` params (`obsidian vault="DevBook" read file="Task vs ValueTask"`). Load the matching skill when delegating vault work: `obsidian-markdown` (notes), `obsidian-cli` (index queries), `obsidian-bases` (`.base`), `json-canvas` (`.canvas`).
+Default to file tools for reads/writes. Use the Obsidian CLI only for index behavior (backlinks, tags, wikilink resolution) — it needs Obsidian running and uses `=` params (`obsidian vault="Vault" read file="Task vs ValueTask"`). Excalidraw is the creation exception: load the `excalidraw` skill, target `vault="Vault"` for every `eval` and `dev:screenshot` call, save drawings under `Assets/Excalidraw/`, and inspect the screenshot before completion. Load the matching skill when delegating vault work: `obsidian-markdown` (notes), `obsidian-cli` (index queries), `obsidian-bases` (`.base`), `json-canvas` (`.canvas`).
 
 ### Evolving this file
 
