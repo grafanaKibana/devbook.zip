@@ -265,11 +265,6 @@ export function renderComplexityHast(view: ComplexityViewModel): RootContent {
         : []),
       ...(view.resources.length > 1
         ? [
-            element("noscript", {}, [
-              element("style", {}, [
-                text(".complexity__tabs{display:none}.complexity__resource[hidden]{display:block}"),
-              ]),
-            ]),
             element(
               "div",
               { className: ["complexity__tabs"], role: "tablist", ariaLabel: view.label },
