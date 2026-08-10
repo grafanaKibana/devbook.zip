@@ -7147,7 +7147,7 @@ var init_recorders = __esm({
       constructor(array, profile = "shell") {
         super(array);
         this._profile = profile;
-        this._movementUnit = profile === "shell" || profile === "introsort" ? "moves" : "swaps";
+        this._movementUnit = profile === "cycle" ? "writes" : profile === "shell" || profile === "introsort" ? "moves" : "swaps";
         this._showComparisons = profile !== "cyclic";
         this._gap = null;
         this._subsequence = null;
@@ -10256,6 +10256,10 @@ function createTwoHeapTree(capacity, label, rootLabel) {
   return {
     wrap,
     paint(entries) {
+      svg.setAttribute(
+        "aria-label",
+        `${label} values: ${entries.length ? entries.map(({ value }) => value).join(", ") : "empty"}`
+      );
       nodes5.forEach(({ group, value, tag }, index) => {
         const entry = entries[index];
         value.textContent = entry ? String(entry.value) : "";
@@ -10297,7 +10301,8 @@ function makeTwoHeapsView(frames) {
   function paint(frame) {
     stream.cells.forEach((cell, index) => {
       if (index === frame.cursor) cell.dataset.state = "current";
-      else if (index < (frame.cursor ?? frame.array.length)) cell.dataset.state = "seen";
+      else if (index < (frame.cursor ?? (frame.type === "done" ? frame.array.length : 0)))
+        cell.dataset.state = "seen";
       else cell.dataset.state = "";
     });
     lower.paint(frame.lower);
@@ -12472,6 +12477,7 @@ function resolveArraySortFrame(frame) {
   if (frame.profile === "comb") return resolveCombSortFrame(frame);
   if (frame.profile === "cyclic") return resolveCyclicSortFrame(frame);
   if (frame.profile === "introsort") return resolveIntrosortFrame(frame);
+  if (frame.profile === "cycle") return resolveCycleSortFrame(frame);
   const decorate = (visual) => ({
     ...visual,
     laneIndices: frame.subsequence,
@@ -12575,19 +12581,30 @@ function resolveCyclicSortFrame(frame) {
   }
   return resolveLegacySortFrame(frame);
 }
+function resolveCycleSortFrame(frame) {
+  const visual = resolveLegacySortFrame(frame);
+  return {
+    ...visual,
+    activeRole: frame.type === "overwrite" ? "move" : visual.activeRole
+  };
+}
 function arraySortSemanticsFor(frames) {
   switch (frames[0]?.profile) {
+    case "shell":
+      return arraySortViewSemantics;
     case "comb":
       return combSortViewSemantics;
     case "cyclic":
       return cyclicSortViewSemantics;
     case "introsort":
       return introsortViewSemantics;
+    case "cycle":
+      return cycleSortViewSemantics;
     default:
-      return arraySortViewSemantics;
+      return genericSortViewSemantics;
   }
 }
-var arraySortViewSemantics, combSortViewSemantics, cyclicSortViewSemantics, introsortViewSemantics, arraySortFamily;
+var arraySortViewSemantics, combSortViewSemantics, cyclicSortViewSemantics, introsortViewSemantics, genericSortViewSemantics, cycleSortViewSemantics, arraySortFamily;
 var init_array_sort = __esm({
   "custom/steptrace/src/families/array-sort.ts"() {
     init_recorders();
@@ -12667,6 +12684,19 @@ var init_array_sort = __esm({
           { k: "cutoff", v: frame.cutoff == null ? "—" : `≤ ${frame.cutoff}`, sw: "var(--_neutral)" }
         ];
       }
+    };
+    genericSortViewSemantics = {
+      markerLabels: ["left", "right"],
+      movementLabel: "swaps",
+      resolveFrame: resolveArraySortFrame,
+      watchRows() {
+        return [];
+      }
+    };
+    cycleSortViewSemantics = {
+      ...genericSortViewSemantics,
+      markerLabels: ["at", "with"],
+      movementLabel: "writes"
     };
     arraySortFamily = {
       id: "array-sort",
@@ -14286,15 +14316,25 @@ var init_cycle_sort = __esm({
             if (ops.value[index] < item) position++;
           }
           if (position === start) continue;
-          while (item === ops.value[position]) position++;
+          while (true) {
+            ops.compare(position, start, `Skip duplicate copies of ${item}.`);
+            if (item !== ops.value[position]) break;
+            position++;
+          }
           const displaced = ops.value[position];
           ops.overwrite(position, item, `Write the cycle item to final index ${position}.`);
           item = displaced;
           while (position !== start) {
             position = start;
-            for (let index = start + 1; index < ops.value.length; index++)
+            for (let index = start + 1; index < ops.value.length; index++) {
+              ops.compare(index, null, `Count values smaller than the held ${item}.`);
               if (ops.value[index] < item) position++;
-            while (item === ops.value[position]) position++;
+            }
+            while (true) {
+              ops.compare(position, null, `Skip duplicate copies of the held ${item}.`);
+              if (item !== ops.value[position]) break;
+              position++;
+            }
             const displaced2 = ops.value[position];
             ops.overwrite(position, item, `Rotate ${item} into index ${position}.`);
             item = displaced2;

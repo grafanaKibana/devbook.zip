@@ -2314,6 +2314,30 @@ test("issue 149 sorts reuse array-sort and terminate with bounded teaching trace
     () => buildSourceFrames({ algorithm: "stooge-sort", array: [8, 7, 6, 5, 4, 3, 2, 1] }),
     /2 to 7 numbers/,
   )
+
+  const { arraySortSemanticsFor } = loadStepTraceModule("src", "families", "array-sort.ts")
+  for (const [algorithm, array] of cases) {
+    const frames = buildSourceFrames({ algorithm, array }).frames
+    const semantics = arraySortSemanticsFor(frames)
+    assert.deepEqual(semantics.watchRows(frames[0]), [])
+    assert.deepEqual(
+      semantics.markerLabels,
+      frames[0].profile === "cycle" ? ["at", "with"] : ["left", "right"],
+    )
+    assert.equal(semantics.movementLabel, frames[0].profile === "cycle" ? "writes" : "swaps")
+  }
+
+  const cycle = buildSourceFrames({ algorithm: "cycle-sort", array: [3, 1, 2] })
+  assert.equal(cycle.frames.at(-1).comparisons, 10)
+  assert.equal(cycle.frames.filter((frame) => frame.type === "compare").length, 10)
+  assert.ok(cycle.frames.every((frame) => frame.movementUnit === "writes"))
+  assert.ok(
+    cycle.frames
+      .filter((frame) => frame.type === "overwrite")
+      .every(
+        (frame) => arraySortSemanticsFor(cycle.frames).resolveFrame(frame).activeRole === "move",
+      ),
+  )
 })
 
 test("Fibonacci search narrows sorted input with Fibonacci probes", () => {
@@ -2395,7 +2419,16 @@ test("Two Heaps keeps lower-heavy discriminated median state out of Top-K", () =
   withFakeDocument(() => {
     const { makeTwoHeapsView } = loadStepTraceModule("src", "families", "heap-selection.ts")
     const view = makeTwoHeapsView(result.frames)
+    const streamCells = view.nodes[0].children[1].children[0].children
+    const heapSides = view.nodes[0].children[2].children
+    const lowerSvg = heapSides[0].children[1].children[0]
+    const upperSvg = heapSides[1].children[1].children[0]
+    view.paint(result.frames[0])
+    assert.ok(streamCells.every((cell) => cell.dataset.state === ""))
     view.paint(result.frames.at(-1))
+    assert.ok(streamCells.every((cell) => cell.dataset.state === "seen"))
+    assert.equal(lowerSvg.getAttribute("aria-label"), "Lower max-heap values: 5, 1, -2")
+    assert.equal(upperSvg.getAttribute("aria-label"), "Upper min-heap values: 5, 8, 10")
     assert.equal(view.nodes[0].children[2].children.length, 2)
     assert.deepEqual(
       view.watch(result.frames.at(-1)).map(({ k }) => k),
@@ -2442,7 +2475,7 @@ test("all built-in algorithms preserve their headless frame contract", () => {
 
   assert.equal(
     digest,
-    "19188b065a85b68512021b07cc03e670832affb5d46125bf9c27f6f92b7f0424",
+    "27fafd25b8a53fc8c0b26edf2df5279a1624bf1c5d0c7a3fe108489c49cd666c",
     "the headless StepTrace behavior changed",
   )
 })

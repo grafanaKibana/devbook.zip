@@ -38,11 +38,17 @@ tab: Complexity
   },
   "resources": {
     "time": {
-      "mode": "cases",
+      "mode": "operations",
       "entries": [
-        { "kind": "case", "role": "Best", "formula": "Θ(n^log₁.₅3) ≈ Θ(n².7095)", "curveId": "quadratic" },
-        { "kind": "case", "role": "Average", "formula": "Θ(n^log₁.₅3) ≈ Θ(n².7095)", "curveId": "quadratic" },
-        { "kind": "case", "role": "Worst", "formula": "Θ(n^log₁.₅3) ≈ Θ(n².7095)", "curveId": "quadratic" }
+        {
+          "kind": "operation",
+          "operation": "Sort",
+          "bounds": [
+            { "kind": "text", "role": "Best", "formula": "Θ(n^log₁.₅3) ≈ Θ(n².7095)" },
+            { "kind": "text", "role": "Average", "formula": "Θ(n^log₁.₅3) ≈ Θ(n².7095)" },
+            { "kind": "text", "role": "Worst", "formula": "Θ(n^log₁.₅3) ≈ Θ(n².7095)" }
+          ]
+        }
       ]
     },
     "space": {

@@ -124,7 +124,12 @@ export class ArraySortRecorder extends SortRecorder {
   constructor(array, profile = "shell") {
     super(array)
     this._profile = profile
-    this._movementUnit = profile === "shell" || profile === "introsort" ? "moves" : "swaps"
+    this._movementUnit =
+      profile === "cycle"
+        ? "writes"
+        : profile === "shell" || profile === "introsort"
+          ? "moves"
+          : "swaps"
     this._showComparisons = profile !== "cyclic"
     this._gap = null
     this._subsequence = null

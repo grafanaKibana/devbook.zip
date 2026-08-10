@@ -48,7 +48,7 @@ export interface ArraySortFrame {
   range?: number[]
   swaps: number
   profile: ArraySortConfig["profile"]
-  movementUnit: "moves" | "swaps"
+  movementUnit: "moves" | "swaps" | "writes"
   showComparisons: boolean
   gap: number | null
   subsequence: number[] | null
@@ -66,6 +66,7 @@ export function resolveArraySortFrame(frame: ArraySortFrame) {
   if (frame.profile === "comb") return resolveCombSortFrame(frame)
   if (frame.profile === "cyclic") return resolveCyclicSortFrame(frame)
   if (frame.profile === "introsort") return resolveIntrosortFrame(frame)
+  if (frame.profile === "cycle") return resolveCycleSortFrame(frame)
 
   const decorate = (visual) => ({
     ...visual,
@@ -180,6 +181,14 @@ function resolveCyclicSortFrame(frame: ArraySortFrame) {
   return resolveLegacySortFrame(frame)
 }
 
+function resolveCycleSortFrame(frame: ArraySortFrame) {
+  const visual = resolveLegacySortFrame(frame)
+  return {
+    ...visual,
+    activeRole: frame.type === "overwrite" ? "move" : visual.activeRole,
+  }
+}
+
 export const arraySortViewSemantics = {
   markerLabels: ["at", "from"],
   movementLabel: "moves",
@@ -268,16 +277,35 @@ const introsortViewSemantics = {
   },
 }
 
+const genericSortViewSemantics = {
+  markerLabels: ["left", "right"],
+  movementLabel: "swaps",
+  resolveFrame: resolveArraySortFrame,
+  watchRows() {
+    return []
+  },
+}
+
+const cycleSortViewSemantics = {
+  ...genericSortViewSemantics,
+  markerLabels: ["at", "with"],
+  movementLabel: "writes",
+}
+
 export function arraySortSemanticsFor(frames: readonly ArraySortFrame[]) {
   switch (frames[0]?.profile) {
+    case "shell":
+      return arraySortViewSemantics
     case "comb":
       return combSortViewSemantics
     case "cyclic":
       return cyclicSortViewSemantics
     case "introsort":
       return introsortViewSemantics
+    case "cycle":
+      return cycleSortViewSemantics
     default:
-      return arraySortViewSemantics
+      return genericSortViewSemantics
   }
 }
 

@@ -23,15 +23,25 @@ export const cycleSort = {
         if (ops.value[index] < item) position++
       }
       if (position === start) continue
-      while (item === ops.value[position]) position++
+      while (true) {
+        ops.compare(position, start, `Skip duplicate copies of ${item}.`)
+        if (item !== ops.value[position]) break
+        position++
+      }
       const displaced = ops.value[position]
       ops.overwrite(position, item, `Write the cycle item to final index ${position}.`)
       item = displaced
       while (position !== start) {
         position = start
-        for (let index = start + 1; index < ops.value.length; index++)
+        for (let index = start + 1; index < ops.value.length; index++) {
+          ops.compare(index, null, `Count values smaller than the held ${item}.`)
           if (ops.value[index] < item) position++
-        while (item === ops.value[position]) position++
+        }
+        while (true) {
+          ops.compare(position, null, `Skip duplicate copies of the held ${item}.`)
+          if (item !== ops.value[position]) break
+          position++
+        }
         const displaced = ops.value[position]
         ops.overwrite(position, item, `Rotate ${item} into index ${position}.`)
         item = displaced

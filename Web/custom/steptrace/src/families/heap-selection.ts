@@ -310,6 +310,10 @@ function createTwoHeapTree(capacity: number, label: string, rootLabel: string) {
   return {
     wrap,
     paint(entries: readonly HeapEntry[]) {
+      svg.setAttribute(
+        "aria-label",
+        `${label} values: ${entries.length ? entries.map(({ value }) => value).join(", ") : "empty"}`,
+      )
       nodes.forEach(({ group, value, tag }, index) => {
         const entry = entries[index]
         value.textContent = entry ? String(entry.value) : ""
@@ -353,7 +357,8 @@ export function makeTwoHeapsView(frames: readonly TwoHeapsFrame[]): StepTraceVie
   function paint(frame: TwoHeapsFrame) {
     stream.cells.forEach((cell, index) => {
       if (index === frame.cursor) cell.dataset.state = "current"
-      else if (index < (frame.cursor ?? frame.array.length)) cell.dataset.state = "seen"
+      else if (index < (frame.cursor ?? (frame.type === "done" ? frame.array.length : 0)))
+        cell.dataset.state = "seen"
       else cell.dataset.state = ""
     })
     lower.paint(frame.lower)
