@@ -1,10 +1,37 @@
 import { ArraySortRecorder } from "../recorders"
 import { makeSortView, resolveLegacySortFrame } from "../render"
-import type { StepTraceView, VisualFamily } from "../types"
+import type { StepTraceConfig, StepTraceView, VisualFamily } from "../types"
 
 export interface ArraySortConfig {
   array: number[]
-  profile: "shell" | "comb" | "cyclic" | "introsort"
+  profile:
+    | "shell"
+    | "comb"
+    | "cyclic"
+    | "introsort"
+    | "cocktail-shaker"
+    | "gnome"
+    | "bogo"
+    | "pancake"
+    | "cycle"
+    | "odd-even"
+    | "stooge"
+}
+
+export function parseArraySortConfig(
+  config: StepTraceConfig,
+  algorithm: string,
+  profile: ArraySortConfig["profile"],
+  maxLength = Number.POSITIVE_INFINITY,
+): ArraySortConfig {
+  const { array } = config
+  if (!Array.isArray(array) || array.length < 2 || array.length > maxLength) {
+    const size = Number.isFinite(maxLength) ? `2 to ${maxLength}` : "at least two"
+    throw new Error(`steptrace: ${algorithm} requires an "array" with ${size} numbers.`)
+  }
+  if (!array.every((value) => typeof value === "number" && Number.isFinite(value)))
+    throw new Error(`steptrace: ${algorithm} requires every "array" value to be a finite number.`)
+  return { array: array.slice(), profile }
 }
 
 export interface ArraySortFrame {
@@ -21,7 +48,7 @@ export interface ArraySortFrame {
   range?: number[]
   swaps: number
   profile: ArraySortConfig["profile"]
-  movementUnit: "moves" | "swaps"
+  movementUnit: "moves" | "swaps" | "writes"
   showComparisons: boolean
   gap: number | null
   subsequence: number[] | null
@@ -39,6 +66,7 @@ export function resolveArraySortFrame(frame: ArraySortFrame) {
   if (frame.profile === "comb") return resolveCombSortFrame(frame)
   if (frame.profile === "cyclic") return resolveCyclicSortFrame(frame)
   if (frame.profile === "introsort") return resolveIntrosortFrame(frame)
+  if (frame.profile === "cycle") return resolveCycleSortFrame(frame)
 
   const decorate = (visual) => ({
     ...visual,
@@ -153,6 +181,14 @@ function resolveCyclicSortFrame(frame: ArraySortFrame) {
   return resolveLegacySortFrame(frame)
 }
 
+function resolveCycleSortFrame(frame: ArraySortFrame) {
+  const visual = resolveLegacySortFrame(frame)
+  return {
+    ...visual,
+    activeRole: frame.type === "overwrite" ? "move" : visual.activeRole,
+  }
+}
+
 export const arraySortViewSemantics = {
   markerLabels: ["at", "from"],
   movementLabel: "moves",
@@ -241,16 +277,38 @@ const introsortViewSemantics = {
   },
 }
 
+const genericSortViewSemantics = {
+  markerLabels: ["left", "right"],
+  movementLabel: "swaps",
+  resolveFrame: resolveArraySortFrame,
+  watchRows() {
+    return []
+  },
+}
+
+const cycleSortViewSemantics = {
+  ...genericSortViewSemantics,
+  markerLabels: ["at", "with"],
+  movementLabel: "writes",
+  watchRows(frame: ArraySortFrame) {
+    return [{ k: "held", v: frame.keyValue ?? "—", sw: "var(--_blue)" }]
+  },
+}
+
 export function arraySortSemanticsFor(frames: readonly ArraySortFrame[]) {
   switch (frames[0]?.profile) {
+    case "shell":
+      return arraySortViewSemantics
     case "comb":
       return combSortViewSemantics
     case "cyclic":
       return cyclicSortViewSemantics
     case "introsort":
       return introsortViewSemantics
+    case "cycle":
+      return cycleSortViewSemantics
     default:
-      return arraySortViewSemantics
+      return genericSortViewSemantics
   }
 }
 

@@ -13,6 +13,80 @@ export interface HeapEntry {
   source: number
 }
 
+export interface TwoHeapsConfig {
+  profile: "two-heaps"
+  array: number[]
+}
+
+export interface TwoHeapsFrame {
+  type: "init" | "insert" | "done"
+  profile: TwoHeapsConfig["profile"]
+  array: number[]
+  cursor: number | null
+  lower: HeapEntry[]
+  upper: HeapEntry[]
+  median: number | null
+  message: string
+}
+
+export class TwoHeapsRecorder {
+  readonly frames: TwoHeapsFrame[] = []
+  private lower: HeapEntry[] = []
+  private upper: HeapEntry[] = []
+  private cursor: number | null = null
+
+  constructor(private readonly config: TwoHeapsConfig) {}
+
+  init(message: string) {
+    this.record("init", message)
+  }
+
+  insert(index: number, message: string) {
+    this.cursor = index
+    const entry = { value: this.config.array[index], source: index }
+    if (!this.lower.length || entry.value <= this.lower[0].value) this.lower.push(entry)
+    else this.upper.push(entry)
+    this.lower.sort((left, right) => right.value - left.value || left.source - right.source)
+    this.upper.sort((left, right) => left.value - right.value || left.source - right.source)
+    if (this.lower.length > this.upper.length + 1) this.upper.push(this.lower.shift()!)
+    if (this.upper.length > this.lower.length) this.lower.push(this.upper.shift()!)
+    this.lower.sort((left, right) => right.value - left.value || left.source - right.source)
+    this.upper.sort((left, right) => left.value - right.value || left.source - right.source)
+    this.record("insert", message)
+  }
+
+  done(message: string) {
+    this.cursor = null
+    this.record("done", message)
+  }
+
+  private record(type: TwoHeapsFrame["type"], message: string) {
+    let median: number | null
+    if (this.lower.length === this.upper.length) {
+      if (!this.lower.length) median = null
+      else {
+        const lower = this.lower[0].value
+        const upper = this.upper[0].value
+        median = lower < 0 === upper < 0 ? lower + (upper - lower) / 2 : (lower + upper) / 2
+      }
+    } else {
+      median = this.lower[0].value
+    }
+    this.frames.push(
+      Object.freeze({
+        type,
+        profile: this.config.profile,
+        array: this.config.array,
+        cursor: this.cursor,
+        lower: this.lower.map((entry) => ({ ...entry })),
+        upper: this.upper.map((entry) => ({ ...entry })),
+        median,
+        message,
+      }),
+    )
+  }
+}
+
 export type HeapSelectionPhase =
   | "init"
   | "read"
@@ -195,6 +269,120 @@ function svgEl(tag: string, className: string) {
   const node = document.createElementNS(SVG_NS, tag)
   node.setAttribute("class", className)
   return node
+}
+
+function createTwoHeapTree(capacity: number, label: string, rootLabel: string) {
+  const wrap = el("div", "steptrace__heap-tree")
+  const svg = svgEl("svg", "steptrace__heap-svg")
+  svg.setAttribute("viewBox", `0 0 300 ${capacity > 3 ? 192 : 124}`)
+  svg.setAttribute("role", "img")
+  svg.setAttribute("aria-label", label)
+  const positions = Array.from({ length: capacity }, (_, index) => heapPosition(index))
+  const edges: Array<{ line: SVGElement; child: number }> = []
+  for (let index = 1; index < capacity; index++) {
+    const parent = Math.floor((index - 1) / 2)
+    const edge = trimGraphEdge(positions[parent], positions[index], GRAPH_NODE_RADIUS_PX)
+    const line = svgEl("line", "steptrace__edge steptrace__heap-edge")
+    line.setAttribute("x1", String(edge.x1))
+    line.setAttribute("y1", String(edge.y1))
+    line.setAttribute("x2", String(edge.x2))
+    line.setAttribute("y2", String(edge.y2))
+    svg.append(line)
+    edges.push({ line, child: index })
+  }
+  const nodes = positions.map((position, index) => {
+    const group = svgEl("g", "steptrace__node steptrace__heap-node")
+    group.setAttribute("transform", `translate(${position.x} ${position.y})`)
+    const circle = svgEl("circle", "steptrace__ncirc")
+    circle.setAttribute("r", String(GRAPH_NODE_RADIUS_PX))
+    const value = svgEl("text", "steptrace__id")
+    value.setAttribute("text-anchor", "middle")
+    value.setAttribute("dominant-baseline", "central")
+    const tag = svgEl("text", "steptrace__heap-root-label")
+    tag.setAttribute("text-anchor", "middle")
+    tag.setAttribute("y", "-23")
+    tag.textContent = index === 0 ? rootLabel : ""
+    group.append(circle, value, tag)
+    svg.append(group)
+    return { group, value, tag }
+  })
+  wrap.append(svg)
+  return {
+    wrap,
+    paint(entries: readonly HeapEntry[]) {
+      svg.setAttribute(
+        "aria-label",
+        `${label} values: ${entries.length ? entries.map(({ value }) => value).join(", ") : "empty"}`,
+      )
+      nodes.forEach(({ group, value, tag }, index) => {
+        const entry = entries[index]
+        value.textContent = entry ? String(entry.value) : ""
+        group.dataset.visible = entry ? "1" : "0"
+        if (!entry) group.dataset.state = "empty"
+        else if (index === 0) group.dataset.state = "weakest"
+        else group.dataset.state = "winner"
+        group.setAttribute("aria-hidden", entry ? "false" : "true")
+        tag.dataset.visible = index === 0 && entry ? "1" : "0"
+      })
+      for (const { line, child } of edges) line.dataset.visible = entries[child] ? "1" : "0"
+    },
+  }
+}
+
+export function makeTwoHeapsView(frames: readonly TwoHeapsFrame[]): StepTraceView<TwoHeapsFrame> {
+  const first = frames[0]
+  const capacity = Math.ceil(first.array.length / 2)
+  const root = el("div", "steptrace__heap-selection steptrace__two-heaps")
+  root.setAttribute("role", "region")
+  root.setAttribute("aria-label", "Running median with a lower max-heap and upper min-heap")
+  const streamLabel = el("div", "steptrace__rail-label")
+  streamLabel.textContent = "Stream"
+  const stream = makeArrayStrip(first.array)
+  stream.wrap.classList.add("steptrace__heap-stream")
+  const heaps = el("div", "steptrace__two-heaps-grid")
+  const lowerWrap = el("div", "steptrace__two-heaps-side")
+  const lowerLabel = el("div", "steptrace__rail-label")
+  lowerLabel.textContent = "Lower · max-heap"
+  const lower = createTwoHeapTree(capacity, "Lower max-heap", "max")
+  lowerWrap.append(lowerLabel, lower.wrap)
+  const upperWrap = el("div", "steptrace__two-heaps-side")
+  const upperLabel = el("div", "steptrace__rail-label")
+  upperLabel.textContent = "Upper · min-heap"
+  const upper = createTwoHeapTree(capacity, "Upper min-heap", "min")
+  upperWrap.append(upperLabel, upper.wrap)
+  heaps.append(lowerWrap, upperWrap)
+  root.append(streamLabel, stream.wrap, heaps)
+  const status = statusEl()
+
+  function paint(frame: TwoHeapsFrame) {
+    stream.cells.forEach((cell, index) => {
+      if (index === frame.cursor) cell.dataset.state = "current"
+      else if (index < (frame.cursor ?? (frame.type === "done" ? frame.array.length : 0)))
+        cell.dataset.state = "seen"
+      else cell.dataset.state = ""
+    })
+    lower.paint(frame.lower)
+    upper.paint(frame.upper)
+    status.textContent = frame.message
+  }
+
+  return {
+    nodes: [root, status],
+    stageLayout: "fill",
+    stableStage: true,
+    paint,
+    watch(frame) {
+      return [
+        { k: "median", v: frame.median ?? "—", sw: "var(--_amber)" },
+        { k: "lower max", v: frame.lower[0]?.value ?? "empty", sw: "var(--_violet)" },
+        { k: "upper min", v: frame.upper[0]?.value ?? "empty", sw: "var(--_blue)" },
+        { k: "sizes", v: `${frame.lower.length} / ${frame.upper.length}`, sw: "var(--_green)" },
+      ]
+    },
+    summary(frame) {
+      return `Median ${frame.median} · lower ${frame.lower.length} · upper ${frame.upper.length}.`
+    },
+  }
 }
 
 export function makeHeapSelectionView(
@@ -398,3 +586,13 @@ export const heapSelectionFamily = {
     return makeHeapSelectionView(frames)
   },
 } satisfies VisualFamily<HeapSelectionConfig, HeapSelectionRecorder, HeapSelectionFrame>
+
+export const twoHeapsFamily = {
+  id: "heap-selection",
+  createRecorder(config) {
+    return new TwoHeapsRecorder(config)
+  },
+  createView(frames) {
+    return makeTwoHeapsView(frames)
+  },
+} satisfies VisualFamily<TwoHeapsConfig, TwoHeapsRecorder, TwoHeapsFrame>

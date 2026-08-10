@@ -1,8 +1,8 @@
 ---
 publish: true
 created: 2026-08-03T07:22:13.841Z
-modified: 2026-08-08T09:22:39.631Z
-published: 2026-08-08T09:22:39.631Z
+modified: 2026-08-10T08:02:32.476Z
+published: 2026-08-10T08:02:32.476Z
 topic:
   - Computer Science
 subtopic:
@@ -41,6 +41,14 @@ tab: Doubly linked
 ```
 
 Each cell stores a value over separate prev- and next-pointer fields.
+
+tab: Reverse in place
+
+```steptrace
+{"algorithm":"linked-list","variant":"reverse","array":[12,27,39,54]}
+```
+
+`Reverse` rewires the `next` chain while every node keeps its address and value. `Reset` restores the original pointer order.
 
 ~~~~
 
@@ -169,6 +177,30 @@ tab: Complexity
               "curveId": "constant"
             }
           ]
+        },
+        {
+          "kind": "operation",
+          "operation": "Reverse in place",
+          "bounds": [
+            {
+              "kind": "curve",
+              "role": "Best",
+              "formula": "O(n)",
+              "curveId": "linear"
+            },
+            {
+              "kind": "curve",
+              "role": "Typical",
+              "formula": "O(n)",
+              "curveId": "linear"
+            },
+            {
+              "kind": "curve",
+              "role": "Worst",
+              "formula": "O(n)",
+              "curveId": "linear"
+            }
+          ]
         }
       ]
     },
@@ -213,6 +245,24 @@ tab: Complexity
         },
         {
           "kind": "operation",
+          "operation": "Reverse in place",
+          "bounds": [
+            {
+              "kind": "curve",
+              "role": "Iterative auxiliary space",
+              "formula": "O(1)",
+              "curveId": "constant"
+            },
+            {
+              "kind": "curve",
+              "role": "Recursive call stack",
+              "formula": "O(n)",
+              "curveId": "linear"
+            }
+          ]
+        },
+        {
+          "kind": "operation",
           "operation": "Whole structure",
           "bounds": [
             {
@@ -229,6 +279,40 @@ tab: Complexity
 }
 ```
 ````
+
+# Reverse in place
+
+Pointer-only reversal changes links, not nodes. Three references carry the operation: `previous` is the already-reversed prefix, `current` is the node being processed, and `next` saves the unprocessed suffix before `current.Next` is overwritten. After each iteration, every node in `previous` points toward the old head, while every node reachable from `current` remains available through the saved suffix.
+
+When the scan ends, `previous` is the new head. The former head was processed first and received `Next = null`, so the reversed chain terminates correctly. Empty and single-node lists already satisfy the reversed shape and return unchanged. Node address/value identity is stable throughout; only traversal order and `next` fields change.
+
+> [!EXAMPLE]- C# iterative reversal
+>
+> ```csharp
+> public sealed class Node<T>(T value)
+> {
+>     public T Value { get; } = value;
+>     public Node<T>? Next { get; set; }
+> }
+>
+> public static Node<T>? Reverse<T>(Node<T>? head)
+> {
+>     Node<T>? previous = null;
+>     var current = head;
+>
+>     while (current is not null)
+>     {
+>         var next = current.Next; // save the suffix before breaking its incoming link
+>         current.Next = previous;
+>         previous = current;
+>         current = next;
+>     }
+>
+>     return previous;
+> }
+> ```
+>
+> The iterative form retains only the three traversal references. A recursive reversal retains one call frame per node and can overflow the stack on a long list.
 
 # When the Layout Stops Paying
 
@@ -275,6 +359,12 @@ Per-node allocation is the third boundary. Inserting a value allocates a node ob
 
 > [!QUESTION]- Why does the `Prev` ↔ `Next` invariant matter during a removal?
 > Adjacency is stored twice: `a.Next == b` must agree with `b.Prev == a`. A removal must re-point both directions across the gap. Updating only one leaves a half-linked chain where forward and backward traversal disagree about membership, corrupting the list.
+
+> [!QUESTION]- Which state must be saved before reversing `current.Next`, and why?
+> The original `current.Next` must be saved as `next`. Overwriting the field first would sever the only path to the unprocessed suffix and lose the rest of the list.
+
+> [!QUESTION]- What changes during in-place reversal, and what remains identical?
+> The `Next` links, head, tail, and traversal order change. Every node object and its stored value remain identical; the former head becomes the tail and points to null.
 
 # References
 

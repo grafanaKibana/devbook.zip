@@ -10,8 +10,8 @@ const DEFAULT_VALUES = [12, 27, 39, 54]
 export function parseLinkedListConfig(config: StepTraceConfig): LinkedListConfig {
   const values = Array.isArray(config.array) && config.array.length ? config.array : DEFAULT_VALUES
   const variant = config.variant ?? "singly"
-  if (variant !== "singly" && variant !== "doubly")
-    throw new Error(`steptrace: linked-list "variant" must be "singly" or "doubly".`)
+  if (variant !== "singly" && variant !== "doubly" && variant !== "reverse")
+    throw new Error(`steptrace: linked-list "variant" must be "singly", "doubly", or "reverse".`)
   if (
     values.length < 2 ||
     values.length > LINKED_LIST_MAX_NODES ||

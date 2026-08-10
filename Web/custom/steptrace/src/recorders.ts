@@ -124,7 +124,12 @@ export class ArraySortRecorder extends SortRecorder {
   constructor(array, profile = "shell") {
     super(array)
     this._profile = profile
-    this._movementUnit = profile === "shell" || profile === "introsort" ? "moves" : "swaps"
+    this._movementUnit =
+      profile === "cycle"
+        ? "writes"
+        : profile === "shell" || profile === "introsort"
+          ? "moves"
+          : "swaps"
     this._showComparisons = profile !== "cyclic"
     this._gap = null
     this._subsequence = null
@@ -525,7 +530,12 @@ export class IndexedSearchRecorder extends SearchRecorder {
     this.strideProbe("jump", previousBound, bound, message)
   }
 
-  beginPhase(lo, hi, message, phase: "binary" | "scan" | "interpolation" | "ternary" = "binary") {
+  beginPhase(
+    lo,
+    hi,
+    message,
+    phase: "binary" | "fibonacci" | "scan" | "interpolation" | "ternary" = "binary",
+  ) {
     this._phase = phase
     this._bracket = [lo, hi]
     this.lo = lo

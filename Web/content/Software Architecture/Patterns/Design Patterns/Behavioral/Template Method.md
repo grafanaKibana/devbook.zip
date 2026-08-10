@@ -1,8 +1,8 @@
 ---
 publish: true
 created: 2026-07-18T14:02:44.170Z
-modified: 2026-07-25T13:51:15.257Z
-published: 2026-07-25T13:51:15.257Z
+modified: 2026-08-10T10:07:39.005Z
+published: 2026-08-10T10:07:39.005Z
 topic:
   - Software Architecture
 subtopic:
@@ -81,6 +81,12 @@ Here's what breaks when requirements change: adding a new audit field to the rep
 // Abstract base — defines the template method
 public abstract class ReportGenerator
 {
+    protected ReportGenerator(IOrderRepository repository, IAuditLog auditLog)
+    {
+        Repository = repository;
+        AuditLog = auditLog;
+    }
+
     // ✅ Template method — sealed, defines the algorithm skeleton
     public async Task<Report> GenerateAsync(Guid orderId)
     {
@@ -111,12 +117,13 @@ public abstract class ReportGenerator
     protected abstract Task<byte[]> FormatReportAsync(Order order);
     protected abstract string GetContentType();
 
-    protected IOrderRepository Repository { get; init; } = null!;
-    protected IAuditLog AuditLog { get; init; } = null!;
+    protected IOrderRepository Repository { get; }
+    protected IAuditLog AuditLog { get; }
 }
 
 // Concrete implementations — override only format-specific steps
-public class PdfReportGenerator(IOrderRepository repository, IAuditLog auditLog) : ReportGenerator
+public class PdfReportGenerator(IOrderRepository repository, IAuditLog auditLog)
+    : ReportGenerator(repository, auditLog)
 {
     protected override Task<byte[]> FormatReportAsync(Order order)
     {
@@ -130,7 +137,8 @@ public class PdfReportGenerator(IOrderRepository repository, IAuditLog auditLog)
     protected override string GetContentType() => "application/pdf";
 }
 
-public class CsvReportGenerator(IOrderRepository repository, IAuditLog auditLog) : ReportGenerator
+public class CsvReportGenerator(IOrderRepository repository, IAuditLog auditLog)
+    : ReportGenerator(repository, auditLog)
 {
     protected override Task<byte[]> FormatReportAsync(Order order)
     {
@@ -144,7 +152,8 @@ public class CsvReportGenerator(IOrderRepository repository, IAuditLog auditLog)
 }
 
 // ✅ Adding Excel = new subclass, zero changes to base class or other generators
-public class ExcelReportGenerator(IOrderRepository repository, IAuditLog auditLog) : ReportGenerator
+public class ExcelReportGenerator(IOrderRepository repository, IAuditLog auditLog)
+    : ReportGenerator(repository, auditLog)
 {
     protected override Task<byte[]> FormatReportAsync(Order order)
     {
@@ -175,7 +184,7 @@ Adding an Excel generator now means one new subclass — the fetch, validate, an
 
 # Tradeoffs
 
-**Use it when**: several variants share one fixed algorithm skeleton and differ only in a few steps, and you want the shared orchestration in exactly one place. It's an inversion-of-control mechanism — the base class calls _down_ to your overridden steps (the "Hollywood Principle," see [[Software Design/Principles/IoC (Holywood Principle)|IoC]]).
+**Use it when**: several variants share one fixed algorithm skeleton and differ only in a few steps, and you want the shared orchestration in exactly one place. It's an inversion-of-control mechanism — the base class calls _down_ to your overridden steps (the "Hollywood Principle," see [[Software Design/Principles/DRY, IoC, and YAGNI#Inversion of Control (IoC)|IoC]]).
 
 **Don't reach for it when**: the varying steps need to change **at runtime**, or you'd be forcing an inheritance hierarchy just to share code — Template Method locks each variant into a single base class and is vulnerable to the **fragile base class** problem.
 

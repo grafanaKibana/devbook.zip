@@ -350,17 +350,17 @@ function fullInventory() {
   const folderNotes = all.filter((path) => isFolderNote(readFileSync(path, "utf8")));
   const concepts = all.filter((path) => !folderNotes.includes(path));
   const errors = [];
-  if (concepts.length !== 91) errors.push(`inventory: expected 91 concept notes, found ${concepts.length}`);
+  if (concepts.length !== 100) errors.push(`inventory: expected 100 concept notes, found ${concepts.length}`);
   if (folderNotes.length !== 14) errors.push(`inventory: expected 14 FolderNotes, found ${folderNotes.length}`);
 
   const tabsdownPaths = concepts.filter((path) => readFileSync(path, "utf8").includes("tabsdown"));
   const algorithmCount = tabsdownPaths.filter((path) => path.includes("/Algorithms/")).length;
   const dataStructureCount = tabsdownPaths.filter((path) => path.includes("/Data Structures/")).length;
-  if (tabsdownPaths.length !== 88) {
-    errors.push(`inventory: expected 88 Tabsdown notes, found ${tabsdownPaths.length}`);
+  if (tabsdownPaths.length !== 97) {
+    errors.push(`inventory: expected 97 Tabsdown notes, found ${tabsdownPaths.length}`);
   }
-  if (algorithmCount !== 56 || dataStructureCount !== 32) {
-    errors.push(`inventory: expected Tabsdown split 56 algorithms/32 data structures, found ${algorithmCount}/${dataStructureCount}`);
+  if (algorithmCount !== 65 || dataStructureCount !== 32) {
+    errors.push(`inventory: expected Tabsdown split 65 algorithms/32 data structures, found ${algorithmCount}/${dataStructureCount}`);
   }
   return { concepts, errors };
 }

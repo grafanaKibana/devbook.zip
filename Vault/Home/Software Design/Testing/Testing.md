@@ -9,10 +9,10 @@ publish: true
 priority: High
 level:
   - "4"
-status: Creation
+status: Not-Started
 ---
 
-Testing is both a verification discipline and a design tool. **Unit tests** exercise a single class or method in isolation, fast and deterministically; **integration tests** wire real dependencies together to catch the bugs that isolation hides. The **test pyramid** is a cost model, not a rule: prefer many cheap unit tests, fewer slow integration tests, and a thin layer of end-to-end checks — inverting it makes the suite slow and flaky. TDD closes the loop by writing the test first, which pressures the code toward small, decoupled units before any implementation exists.
+Testing is both a verification discipline and a design tool. [[Home/Software Design/Testing/Unit Testing|Unit tests]] provide fast feedback on isolated behavior; [[Home/Software Design/Testing/Integration Testing|integration tests]] verify real boundaries and wiring; and [[Home/Software Design/Testing/Testing Pyramid|the testing pyramid]] explains how feedback speed and maintenance cost shape the suite. [[Home/Software Design/Testing/Test-Driven Development|TDD]] uses test-first feedback to pressure code toward small, decoupled units.
 
 ```datacorejsx
 const { FolderStructureMap } = await dc.require("Assets/components/devbook-folder-map.jsx");
@@ -65,9 +65,7 @@ The test is worth its higher cost because the invariant crosses HTTP binding, mi
 # Questions
 
 > [!QUESTION]- Why is the test pyramid shaped the way it is?
-> - It is a cost model: unit tests are fast, isolated, and cheap to run and maintain, so you can afford thousands of them; integration and end-to-end tests are slower, flakier, and more expensive, so you keep them few and targeted
-> - Inverting it (an "ice-cream cone" of mostly E2E tests) yields a suite that is slow to run and brittle to change, eroding the fast feedback that makes tests worth having
-> - The point is coverage of *risk*, not lines: push logic-heavy verification down to units and reserve higher tiers for wiring, contracts, and critical user paths
+> [[Home/Software Design/Testing/Testing Pyramid|The testing pyramid]] visualizes a cost and feedback heuristic: many narrow checks can run quickly, while broad end-to-end checks remain few and targeted. The mix follows risk rather than a fixed ratio.
 
 # References
 

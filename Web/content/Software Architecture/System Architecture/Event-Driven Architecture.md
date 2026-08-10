@@ -1,8 +1,8 @@
 ---
 publish: true
 created: 2026-07-18T14:02:44.189Z
-modified: 2026-07-25T13:51:15.243Z
-published: 2026-07-25T13:51:15.243Z
+modified: 2026-08-10T08:17:12.163Z
+published: 2026-08-10T08:17:12.163Z
 topic:
   - Software Architecture
 subtopic:
@@ -55,50 +55,9 @@ Durable cross-process EDA usually uses [[Software Architecture/Distributed Syste
 
 Practical rule: model domain events first, then map only the externally relevant subset into integration events.
 
-# Patterns
+# Workflow Coordination
 
-## Choreography
-
-In choreography, each service reacts to events independently. No central coordinator tells services what to do next.
-
-```mermaid
-flowchart LR
-    O[Order Service] -->|OrderPlaced| B[Broker]
-    B --> P[Payment Service]
-    B --> I[Inventory Service]
-    P -->|PaymentSucceeded or PaymentFailed| B
-    I -->|InventoryReserved or InventoryRejected| B
-    B --> N[Notification Service]
-```
-
-Use when teams want autonomy and workflows can be decomposed into independent reactions.
-
-## Orchestration
-
-In orchestration, a central component (process manager/saga orchestrator) directs the workflow and issues commands.
-
-```mermaid
-sequenceDiagram
-    participant OR as Order API
-    participant OC as Order Orchestrator
-    participant PA as Payment Service
-    participant IN as Inventory Service
-    participant NO as Notification Service
-
-    OR->>OC: Start checkout orderId
-    OC->>PA: Charge payment
-    PA-->>OC: PaymentSucceeded
-    OC->>IN: Reserve inventory
-    IN-->>OC: InventoryReserved
-    OC->>NO: Send confirmation
-```
-
-Use when workflow visibility, explicit state handling, and compensation logic are first-class requirements.
-
-## Tradeoffs
-
-- **Choreography**: looser coupling and easier service autonomy, but harder to trace global flow and reason about emergent behavior as subscriptions grow.
-- **Orchestration**: clearer process control, easier audit/debug per workflow instance, but introduces a central dependency that can become a bottleneck or single point of operational complexity.
+EDA commonly carries both coordination styles. [[Software Architecture/Distributed Systems/Choreography|Choreography]] fits `OrderPlaced` fan-out to notification, analytics, and indexing because the reactions are independent. [[Software Architecture/Distributed Systems/Orchestration|Orchestration]] fits an ordered checkout that charges payment, reserves inventory, and compensates failures because the process state is a first-class contract. The authority notes own the general definitions, failure modes, and comparison.
 
 # .NET Messaging Boundary
 
@@ -207,7 +166,7 @@ Preserve source event IDs in derived records and publish lineage from input data
 # Questions
 
 > [!QUESTION]- When would you choose orchestration over choreography in an event-driven workflow?
-> Orchestrate when the workflow is long-running and needs real ordering or compensation — a checkout that charges payment, reserves inventory, then ships. A central process manager keeps that flow easy to follow and roll back, at the cost of one more component that can bottleneck. Choreography fits loosely-related reactions, like "order placed" fanning out to email, analytics, and search: autonomous and decoupled, but no single place knows the whole story, so tracing gets harder as subscriptions grow. Rule of thumb — orchestrate transactions you must reason about end to end; choreograph independent reactions.
+> Use [[Software Architecture/Distributed Systems/Orchestration|orchestration]] for the ordered checkout that must expose compensation state. Use [[Software Architecture/Distributed Systems/Choreography|choreography]] for independent `OrderPlaced` reactions such as email, analytics, and indexing. The deciding boundary is whether one owner must reason about the process end to end.
 
 > [!QUESTION]- How do you evolve integration event contracts without breaking consumers?
 > Treat the event as a public API — other teams deploy against it on their own schedule. Keep changes additive; never rename or drop a field in place. For a genuine breaking change, version it (`OrderPlaced.v2`) and publish both through a migration window until consumers move over. Consumer-driven contract tests in CI catch regressions before release, and deserialization-failure metrics surface a bad change in minutes. The mindset that keeps you safe: an event schema is a long-lived contract, not an internal DTO you can refactor freely.
