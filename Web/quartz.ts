@@ -9,6 +9,7 @@ import { NavScopeDropdown } from "./custom/components/nav-scope-dropdown"
 import { PageContribute } from "./custom/components/page-contribute"
 import { PageReveal } from "./custom/components/page-reveal"
 import { QuestionsIndex } from "./custom/components/questions-index"
+import { SiteFooter } from "./custom/components/site-footer"
 import { SiteHeader } from "./custom/components/site-header"
 import { SiteMarquee } from "./custom/components/site-marquee"
 import { Steptrace } from "./custom/components/steptrace"
@@ -150,6 +151,13 @@ for (const pageLayout of Object.values(layout.byPageType)) {
 
 const pageContribute = PageContribute()
 
+// Preserve the configured community footer and add per-page sharing inside it.
+const siteFooter = SiteFooter({ footer: layout.defaults.footer })
+layout.defaults.footer = siteFooter
+for (const pageLayout of Object.values(layout.byPageType)) {
+  pageLayout.footer = siteFooter
+}
+
 const content = { ...(layout.byPageType.content ?? {}) }
 content.afterBody = [QuestionsIndex(), ...(content.afterBody ?? [])]
 layout.byPageType.content = content
@@ -183,8 +191,8 @@ for (const pageLayout of Object.values(layout.byPageType)) {
   pageLayout.header = [siteHeader, ...(pageLayout.header ?? [])]
 }
 
-// Share/Edit/Report links ride the article's content-meta row — date/reading-time
-// on the left.
+// Edit/Report links ride the article's content-meta row — date/reading-time on
+// the left.
 const contentMetaRow = ContentMetaRow({
   meta: instantiateRegistered("content-meta"),
   contribute: pageContribute,
