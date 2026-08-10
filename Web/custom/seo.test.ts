@@ -241,7 +241,12 @@ test("sitewide navigation and nested hub links stay canonical", () => {
     content = content
       .split("\n")
       .map((line) => {
-        const match = line.match(/^[ \t]{0,3}(`{3,}|~{3,})(.*)$/)
+        const fenceLine = line
+          .replace(/\t/g, "    ")
+          .replace(/^(?: {0,3}>[ \t]?)+/, "")
+          .replace(/^ *(?:[-+*]|\d+[.)])[ \t]+/, "")
+          .trimStart()
+        const match = fenceLine.match(/^(`{3,}|~{3,})(.*)$/)
         if (!match) return openCodeFence ? "" : line
         const fence = match[1]!
         const suffix = match[2]!
@@ -270,7 +275,7 @@ test("sitewide navigation and nested hub links stay canonical", () => {
         return ""
       })
       .join("\n")
-    return content.replace(/`[^`\n]*`/g, "")
+    return content.replace(/(?<!`)(`+)([^\n]*?)\1(?!`)/g, "")
   }
   const wikilinkTarget = (raw: string) => raw.split(/\\?\|/, 1)[0]!.split("#", 1)[0]!.trim()
   assert.equal(wikilinkTarget("Graph Algorithms\\|Graph"), "Graph Algorithms")
@@ -287,6 +292,12 @@ test("sitewide navigation and nested hub links stay canonical", () => {
   assert.match(
     stripNonLinkMarkdown("~~~~~tabsdown\ntab: Links\n[[Graph Algorithms]]\n~~~~~"),
     /\[\[Graph Algorithms\]\]/,
+  )
+  assert.doesNotMatch(
+    stripNonLinkMarkdown(
+      "> ```text\n> [[Graph Algorithms]]\n> ```\n- ```text\n  [[Graph Algorithms]]\n  ```\n``[[Graph Algorithms]]``",
+    ),
+    /\[\[/,
   )
 
   const vaultRoot = new URL("../../Vault/Home/", import.meta.url)

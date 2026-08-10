@@ -177,6 +177,7 @@ publish: "true"
             + "[[Target#Bold Boundary]], [[Target#Retired Boundary]], "
             + "[[Target#Linked Boundary]], [[Target#Setext Boundary]], "
             + "[[Target#Hidden Heading]], [[Target#Hidden Long Fence]], [[Target#Still Hidden]], "
+            + "[[Target#publish: true]], "
             + "[[https://example.com/page#section]], "
             + "![[Assets/manual.pdf#page=3]], and [[Target#Missing Heading]]\n",
         )
@@ -186,6 +187,7 @@ publish: "true"
                 "target#hidden heading",
                 "target#hidden long fence",
                 "target#still hidden",
+                "target#publish: true",
                 "target#missing heading",
             ],
             [issue.discriminator for issue in issues],
@@ -203,6 +205,20 @@ publish: "true"
         )
         issues = validate_vault.validate_wikilinks(source, validate_vault.VaultIndex(root / "Vault"))
         self.assertEqual(["missing in tabs"], [issue.discriminator for issue in issues])
+
+    def test_wikilinks_ignore_nested_and_inline_code(self) -> None:
+        temp, root = self.make_repo()
+        self.addCleanup(temp.cleanup)
+        source = self.write_note(
+            root,
+            "Vault/Home/Topic/Source.md",
+            VALID_FRONTMATTER
+            + "> ```text\n> [[Quoted Example]]\n> ```\n"
+            + "- ```text\n  [[List Example]]\n  ```\n"
+            + "``[[Inline Example]]``\n",
+        )
+        issues = validate_vault.validate_wikilinks(source, validate_vault.VaultIndex(root / "Vault"))
+        self.assertEqual([], issues)
 
     def test_attachments_must_live_under_assets(self) -> None:
         temp, root = self.make_repo()

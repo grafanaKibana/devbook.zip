@@ -509,11 +509,33 @@ def strip_non_link_markdown(content: str, *, preserve_inline_code: bool = False)
     visible: list[str] = []
     open_code_fence: tuple[str, int] | None = None
     tabsdown_fences: list[tuple[str, int]] = []
-    for line in content.splitlines(keepends=True):
-        line_ending = line[len(line.rstrip("\r\n")) :]
-        match = re.match(r"^[ \t]{0,3}(`{3,}|~{3,})(.*?)(?:\r?\n)?$", line)
+    list_indents: list[int] = []
+    for raw_line in content.splitlines(keepends=True):
+        line_ending = raw_line[len(raw_line.rstrip("\r\n")) :]
+        line = raw_line.rstrip("\r\n").expandtabs(4)
+        line = re.sub(r"^(?: {0,3}>[ \t]?)+", "", line)
+        if open_code_fence:
+            for indent in reversed(list_indents):
+                if line.startswith(" " * indent):
+                    line = line[indent:]
+                    break
+        else:
+            list_item = re.match(r"^( *)(?:[-+*]|\d+[.)])([ \t]+)(.*)$", line)
+            if list_item:
+                marker_indent = len(list_item.group(1))
+                list_indents = [indent for indent in list_indents if indent <= marker_indent]
+                list_indents.append(list_item.start(3))
+                line = list_item.group(3)
+            else:
+                leading_spaces = len(line) - len(line.lstrip(" "))
+                while list_indents and line.strip() and leading_spaces < list_indents[-1]:
+                    list_indents.pop()
+                if list_indents and leading_spaces >= list_indents[-1]:
+                    line = line[list_indents[-1] :]
+        line = re.sub(r"^(?: {0,3}>[ \t]?)+", "", line)
+        match = re.match(r"^ {0,3}(`{3,}|~{3,})(.*)$", line)
         if not match:
-            visible.append(line_ending if open_code_fence else line)
+            visible.append(line_ending if open_code_fence else raw_line)
             continue
         fence, suffix = match.groups()
         if open_code_fence:
@@ -535,7 +557,11 @@ def strip_non_link_markdown(content: str, *, preserve_inline_code: bool = False)
             open_code_fence = (fence[0], len(fence))
         visible.append(line_ending)
     content = "".join(visible)
-    content = re.sub(r"`([^`\n]*)`", r"\1" if preserve_inline_code else "", content)
+    content = re.sub(
+        r"(?<!`)(`+)([^\n]*?)\1(?!`)",
+        lambda match: match.group(2) if preserve_inline_code else "",
+        content,
+    )
     return content
 
 
@@ -616,10 +642,8 @@ def validate_wikilinks(note: Note, index: VaultIndex) -> list[Issue]:
             and not anchor.startswith("^")
             and not target.casefold().startswith(("http://", "https://", "mailto:", "obsidian://"))
         ):
-            target_content = strip_non_link_markdown(
-                resolved.read_text(encoding="utf-8"),
-                preserve_inline_code=True,
-            )
+            _, target_body, _ = split_frontmatter(resolved.read_text(encoding="utf-8"))
+            target_content = strip_non_link_markdown(target_body, preserve_inline_code=True)
             raw_headings = re.findall(
                 r"^#{1,6}[ \t]+(.+?)(?:[ \t]+#+[ \t]*)?$",
                 target_content,
