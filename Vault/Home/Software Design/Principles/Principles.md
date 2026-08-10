@@ -16,6 +16,19 @@ Principles like SOLID, DRY, KISS, and YAGNI are decision checks, not a scoring s
 
 Applying single responsibility usually means splitting a module at a stable reason to change, not splitting every method. Likewise, DRY does not require a shared abstraction for two lines that merely look alike. A principle earns its cost only when it removes a concrete change or failure risk.
 
+# Why Software Design Principles Matter
+
+Following established software design principles provides significant long-term benefits for any software project.
+
+| Benefit | Description |
+| --- | --- |
+| Maintainability | Well-designed code is easier to fix, update, and improve over time. |
+| Scalability | Principles such as Separation of Concerns help systems grow without becoming tightly coupled or difficult to manage. |
+| Readability | Code is read far more often than it is written. Design principles make it easier for others—and your future self—to understand. |
+| Reusability | Principles such as DRY encourage reusable components, reducing duplicated work and implementation effort. |
+| Testability | Code that follows principles such as SRP and DIP is easier to isolate and unit test. |
+| Collaboration | A shared understanding of design principles helps teams make consistent decisions and work together more effectively. |
+
 ```datacorejsx
 const { FolderStructureMap } = await dc.require("Assets/components/devbook-folder-map.jsx");
 return FolderStructureMap;
@@ -39,6 +52,11 @@ Two common overcorrections break the loop:
 
 - **Moderate abstraction becomes an interface per class.** An abstraction with one implementation and no substitution pressure often adds navigation without reducing coupling. Extract the interface when an external boundary, test seam, or independent change rate justifies it.
 - **Pattern literacy becomes pattern collection.** A `FactoryStrategyProvider` around a constructor is not flexibility. Use a pattern when it names and contains a recurring force; delete it when direct code makes the machine clearer.
+
+# Questions
+
+> [!QUESTION]- When is added design ceremony justified, and when is direct code safer?
+> Add an abstraction, pattern, or policy when it contains a demonstrated change, failure, security, or coordination risk. Prefer direct code when the variation is speculative and the extra indirection adds maintenance and review cost without reducing a concrete risk.
 
 # References
 

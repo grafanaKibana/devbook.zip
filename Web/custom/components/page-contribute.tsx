@@ -5,12 +5,11 @@ import type {
   QuartzComponentConstructor,
   QuartzComponentProps,
 } from "@quartz-community/types"
-import { simplifySlug } from "@quartz-community/utils"
 import { lucideInner } from "../lib/lucide-icons"
+import { canonicalUrl } from "../seo"
 
-// Per-page "Edit / Report" contribution links (issue #145). Two GitHub-native
-// SSR anchors — no backend, works with JS disabled. Rendered on the article's
-// content-meta row by ContentMetaRow, which owns the styling (.page-contribute).
+// Per-page contribution links (issue #145). Rendered on the article's
+// content-meta row by ContentMetaRow, which owns the styling.
 //
 // The repo identity is hard-coded: a rename silently breaks every link and is
 // not derivable from cfg.baseUrl, so keep it in one place. "Edit" targets the
@@ -63,7 +62,7 @@ export const PageContribute: QuartzComponentConstructor = () => {
     const editUrl = `https://github.com/${REPO}/edit/${BRANCH}/${editPath}`
 
     const title = (fileData.frontmatter?.title as string) ?? fileData.slug
-    const publishedUrl = `https://${cfg.baseUrl}/${simplifySlug(fileData.slug!)}`
+    const publishedUrl = canonicalUrl(fileData.slug!, cfg.baseUrl)
     const body = `**Page:** ${title}\n**URL:** ${publishedUrl}\n\n<!-- Describe the mistake, or the page/idea you'd like to suggest. -->`
     const reportUrl = `https://github.com/${REPO}/issues/new?title=${encodeURIComponent(
       `Report/suggest: ${title}`,
@@ -84,7 +83,7 @@ export const PageContribute: QuartzComponentConstructor = () => {
               aria-hidden="true"
               dangerouslySetInnerHTML={{ __html: pencil }}
             />
-            Edit this page
+            Edit
           </a>
         )}
         <a href={reportUrl} target="_blank" rel="noopener noreferrer">
@@ -99,7 +98,7 @@ export const PageContribute: QuartzComponentConstructor = () => {
             aria-hidden="true"
             dangerouslySetInnerHTML={{ __html: messageSquare }}
           />
-          Report / suggest
+          Report
         </a>
       </div>
     )

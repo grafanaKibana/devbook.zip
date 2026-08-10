@@ -652,12 +652,14 @@
     "#404040",
     "#404040"
   ],
-  "lastShownVersion": "3.3.2",
+  "lastShownVersion": "3.3.3",
   "rootFolderOrder": [
     "Home",
     "Assets",
     "Templates"
   ],
   "rootTagOrder": [],
-  "rootPropertyOrder": []
+  "rootPropertyOrder": [],
+  "unfinishedTaskIcon": "compact",
+  "calendarShowOutsideMonthDays": true
 }

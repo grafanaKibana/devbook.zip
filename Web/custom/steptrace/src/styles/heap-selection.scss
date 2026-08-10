@@ -8,6 +8,23 @@
   min-block-size: 0;
 }
 
+.steptrace .steptrace__two-heaps {
+  grid-template-rows: auto auto minmax(0, 1fr);
+}
+
+.steptrace .steptrace__two-heaps-grid {
+  min-block-size: 0;
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 1rem;
+}
+
+.steptrace .steptrace__two-heaps-side {
+  min-inline-size: 0;
+  display: grid;
+  grid-template-rows: auto minmax(0, 1fr);
+}
+
 .steptrace .steptrace__heap-tree-label {
   padding-top: 0.9rem;
   border-top: 1px solid var(--_hair);
@@ -222,6 +239,10 @@
 }
 
 @container steptrace-heap-selection (max-width: 36rem) {
+  .steptrace .steptrace__two-heaps-grid {
+    grid-template-columns: 1fr;
+  }
+
   .steptrace .steptrace__heap-structure {
     grid-template-rows: auto minmax(7rem, 1fr) auto auto;
   }

@@ -6,7 +6,7 @@ import type { StepTraceConfig } from "../types"
 export interface IndexedArraySearchConfig {
   array: number[]
   target: number | null
-  profile: "exponential" | "interpolation" | "jump" | "ternary"
+  profile: "exponential" | "fibonacci" | "interpolation" | "jump" | "ternary"
   goal?: string
   blockSize?: number
 }
@@ -14,7 +14,7 @@ export interface IndexedArraySearchConfig {
 export function parseIndexedArraySearchConfig(
   config: StepTraceConfig,
   algorithm: string,
-  profile: "exponential" | "interpolation" | "jump",
+  profile: "exponential" | "fibonacci" | "interpolation" | "jump",
 ) {
   const { array, target } = config
 
@@ -41,7 +41,7 @@ export interface IndexedSearchFrame {
   comparisons: number
   message: string
   profile: IndexedArraySearchConfig["profile"]
-  phase: "gallop" | "binary" | "jump" | "scan" | "interpolation" | "ternary"
+  phase: "gallop" | "binary" | "fibonacci" | "jump" | "scan" | "interpolation" | "ternary"
   bound: number | null
   previousBound: number
   bracket: number[] | null
@@ -71,6 +71,8 @@ function phaseLabel(frame: IndexedSearchFrame) {
       return "gallop"
     case "jump":
       return "jump"
+    case "fibonacci":
+      return "Fibonacci narrowing"
     case "scan":
       return frame.profile === "ternary" ? "final scan" : "linear scan"
     case "interpolation":
@@ -86,6 +88,7 @@ function phaseColor(frame: IndexedSearchFrame) {
   if (frame.phase === "gallop") return "var(--_violet)"
   if (frame.phase === "binary") return "var(--_green)"
   if (frame.phase === "scan" || frame.phase === "jump") return "var(--_blue)"
+  if (frame.phase === "fibonacci") return "var(--_violet)"
   return "var(--_amber)"
 }
 
@@ -94,10 +97,7 @@ export const indexedSearchViewSemantics = {
   watchRows(frame: IndexedSearchFrame, frames: readonly IndexedSearchFrame[]) {
     const first = frames[0]
     const profile = frame.profile
-    const probe =
-      frame.mid == null
-        ? "—"
-        : `[${frame.mid}] = ${frame.array[frame.mid]}`
+    const probe = frame.mid == null ? "—" : `[${frame.mid}] = ${frame.array[frame.mid]}`
     const range =
       frame.phase === "gallop" || frame.phase === "jump"
         ? frame.bound == null
@@ -121,6 +121,8 @@ export const indexedSearchViewSemantics = {
       })
     } else if (profile === "interpolation") {
       rows.push({ k: "estimate", v: frame.annotationValue ?? "—", sw: "var(--_amber)" })
+    } else if (profile === "fibonacci") {
+      rows.push({ k: "offset", v: frame.annotationValue ?? "−1", sw: "var(--_violet)" })
     } else if (profile === "jump") {
       rows.push({ k: "block", v: String(frame.blockSize ?? "—"), sw: "var(--_blue)" })
     }

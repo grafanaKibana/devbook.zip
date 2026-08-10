@@ -18,13 +18,16 @@ import { boyerMoore } from "./boyer-moore"
 import { boruvka } from "./boruvka"
 import { branchAndBound } from "./branch-and-bound"
 import { bubbleSort } from "./bubble-sort"
+import { bogoSort } from "./bogo-sort"
 import { bucketSort } from "./bucket-sort"
 import { arrays } from "./arrays"
 import { circularBuffer } from "./circular-buffer"
 import { combSort } from "./comb-sort"
+import { cocktailShakerSort } from "./cocktail-shaker-sort"
 import { connectedComponents } from "./connected-components"
 import { countingSort } from "./counting-sort"
 import { cyclicSort } from "./cyclic-sort"
+import { cycleSort } from "./cycle-sort"
 import { dfs } from "./dfs"
 import { dijkstra } from "./dijkstra"
 import { divideAndConquer } from "./divide-and-conquer"
@@ -32,6 +35,7 @@ import { deque } from "./deque"
 import { dynamicProgrammingAlgorithms } from "./dynamic-programming"
 import { dynamicArray } from "./dynamic-array"
 import { exponentialSearch } from "./exponential-search"
+import { fibonacciSearch } from "./fibonacci-search"
 import { interpolationSearch } from "./interpolation-search"
 import { floydWarshall } from "./floyd-warshall"
 import { fastAndSlowPointers } from "./fast-and-slow-pointers"
@@ -39,6 +43,7 @@ import { fenwickTree } from "./fenwick-tree"
 import { fibonacciHeap } from "./fibonacci-heap"
 import { greedyBestFirstSearch } from "./greedy-best-first-search"
 import { graphStructure } from "./graph"
+import { gnomeSort } from "./gnome-sort"
 import { heap } from "./heap"
 import { heapSort } from "./heap-sort"
 import { hamiltonianCycle } from "./hamiltonian-cycle"
@@ -62,7 +67,9 @@ import { maximumFlow } from "./maximum-flow"
 import { memoization } from "./memoization"
 import { monotonicStackAndQueue } from "./monotonic-stack-and-queue"
 import { nQueens } from "./n-queens"
+import { oddEvenSort } from "./odd-even-sort"
 import { prim } from "./prim"
+import { pancakeSort } from "./pancake-sort"
 import { prefixSum } from "./prefix-sum"
 import { queue } from "./queue"
 import { quickSort } from "./quick-sort"
@@ -76,12 +83,14 @@ import { slidingWindow } from "./sliding-window"
 import { span } from "./span"
 import { splayTree } from "./splay-tree"
 import { stack } from "./stack"
+import { stoogeSort } from "./stooge-sort"
 import { skewHeap } from "./skew-heap"
 import { topologicalSort } from "./topological-sort"
 import { topKElements } from "./top-k-elements"
 import { stronglyConnectedComponents } from "./strongly-connected-components"
 import { trie } from "./trie"
 import { twoPointers } from "./two-pointers"
+import { twoHeaps } from "./two-heaps"
 import { unionFind } from "./union-find"
 import { ternarySearch } from "./ternary-search"
 import { ternarySearchTree } from "./ternary-search-tree"
@@ -102,6 +111,13 @@ export const builtInAlgorithms = [
   maximumFlow,
   stronglyConnectedComponents,
   bubbleSort,
+  cocktailShakerSort,
+  gnomeSort,
+  bogoSort,
+  pancakeSort,
+  cycleSort,
+  oddEvenSort,
+  stoogeSort,
   insertionSort,
   selectionSort,
   quickSort,
@@ -118,6 +134,7 @@ export const builtInAlgorithms = [
   introsort,
   timSort,
   exponentialSearch,
+  fibonacciSearch,
   interpolationSearch,
   jumpSearch,
   ternarySearch,
@@ -129,6 +146,7 @@ export const builtInAlgorithms = [
   prefixSum,
   topologicalSort,
   topKElements,
+  twoHeaps,
   binarySearch,
   linearSearch,
   kmp,

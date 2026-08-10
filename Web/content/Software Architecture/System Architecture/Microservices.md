@@ -1,8 +1,8 @@
 ---
 publish: true
 created: 2026-07-19T15:05:28.166Z
-modified: 2026-07-25T13:51:15.240Z
-published: 2026-07-25T13:51:15.240Z
+modified: 2026-08-10T08:13:08.165Z
+published: 2026-08-10T08:13:08.165Z
 topic:
   - Software Architecture
 subtopic:
@@ -165,17 +165,7 @@ The pictured components are optional capabilities selected by observed failure m
 
 # Workflow Ownership: Orchestration versus Choreography
 
-Both styles can implement the same checkout, but they place workflow state differently.
-
-| Question | Orchestration | Choreography |
-|---|---|---|
-| Who knows the next step? | A process manager | Each event consumer |
-| Where is workflow state? | Explicit orchestrator state | Distributed across services and the event log |
-| Failure recovery | Central retry and compensation policy | Each consumer owns retry; compensations emerge from events |
-| Operational cost | Coordinator availability and throughput | Subscription graph, traceability, and contract governance |
-| Best fit | Ordered, auditable workflows with compensation | Independent reactions and fan-out |
-
-For `Charge -> Reserve -> Ship`, orchestration makes incomplete state and compensation visible. For `OrderPlaced -> email + analytics + search indexing`, choreography avoids a coordinator that adds no business decision. Mixing them is normal: orchestrate the transaction and publish facts for independent reactions.
+Workflow ownership crosses service boundaries. For `Charge -> Reserve -> Ship`, [[Software Architecture/Distributed Systems/Orchestration|orchestration]] gives one durable process manager responsibility for incomplete state and compensation. For `OrderPlaced -> email + analytics + search indexing`, [[Software Architecture/Distributed Systems/Choreography|choreography]] preserves independent service reactions without a coordinator that adds no business decision. Mixing them is normal: orchestrate the transaction and publish facts for independent reactions. The authority notes own the general definitions and tradeoff comparison.
 
 # When Microservices Are the Wrong Fit
 

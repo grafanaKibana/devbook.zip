@@ -49,43 +49,7 @@ If Step 3 fails:
   Compensate Step 1: CancelOrder
 ```
 
-Two coordination styles:
-
-**Choreography** — each service publishes events and reacts to others' events. No central coordinator.
-
-```csharp
-// OrderService publishes after local commit
-await bus.PublishAsync(new OrderPlaced(orderId, amount), ct);
-
-// PaymentService subscribes and reacts
-public async Task HandleAsync(OrderPlaced evt, CancellationToken ct)
-{
-    await _payments.ChargeAsync(evt.OrderId, evt.Amount, ct);
-    await _bus.PublishAsync(new PaymentCharged(evt.OrderId), ct);
-}
-```
-
-**Orchestration** — a central saga orchestrator sends commands and tracks state.
-
-```csharp
-public class OrderSaga : ISaga
-{
-    public async Task StartAsync(PlaceOrderCommand cmd, CancellationToken ct)
-    {
-        await _payments.SendAsync(new ChargeCardCommand(cmd.OrderId, cmd.Amount), ct);
-    }
-
-    public async Task HandleAsync(PaymentCharged evt, CancellationToken ct)
-    {
-        await _inventory.SendAsync(new ReserveStockCommand(evt.OrderId), ct);
-    }
-
-    public async Task HandleAsync(PaymentFailed evt, CancellationToken ct)
-    {
-        await _orders.SendAsync(new CancelOrderCommand(evt.OrderId), ct);
-    }
-}
-```
+A saga can use [[Home/Software Architecture/Distributed Systems/Choreography|choreography]], where the order, payment, and inventory services advance this flow through events, or [[Home/Software Architecture/Distributed Systems/Orchestration|orchestration]], where a durable process manager records each outcome and issues the next command. The order example above is unchanged; the authority notes own the general coordination definitions and operational comparison.
 
 # Outbox Pattern
 
@@ -134,10 +98,10 @@ The subtlety most people miss: a Saga trades away the **I** in ACID, not just th
 | Approach | Consistency | Complexity | Latency | When to use |
 |---|---|---|---|---|
 | 2PC | Strong (ACID) | Medium | High (locks held during coordination) | Same data center, XA-capable stores, low throughput |
-| Saga (choreography) | Eventual | Low (no coordinator) | Low | Loosely coupled services, simple flows |
-| Saga (orchestration) | Eventual | High (orchestrator state) | Medium | Complex multi-step flows, explicit visibility needed |
+| Saga ([[Home/Software Architecture/Distributed Systems/Choreography|choreography]]) | Eventual | Distributed subscription and recovery logic | Low call-path latency | Simple flows and independent reactions |
+| Saga ([[Home/Software Architecture/Distributed Systems/Orchestration|orchestration]]) | Eventual | Durable orchestrator state | Medium | Ordered multi-step flows with explicit visibility |
 
-**Decision rule**: avoid 2PC in microservices — the lock contention and coordinator SPOF make it impractical. Use Saga with choreography for simple 2-3 step flows. Use Saga with orchestration when you need explicit state tracking, retries, and visibility into long-running workflows. Always pair with the Outbox pattern for reliable event publishing.
+**Decision rule**: avoid 2PC in microservices when lock contention, participant support, and coordinator recovery make it impractical. Use a saga with [[Home/Software Architecture/Distributed Systems/Choreography|choreography]] for simple flows or independent reactions; use [[Home/Software Architecture/Distributed Systems/Orchestration|orchestration]] for explicit state, retries, deadlines, and visibility into long-running workflows. Pair event publication with the Outbox pattern.
 
 # Questions
 

@@ -40,14 +40,21 @@ flowchart TD
 
 # Algorithm Selection
 
-## Comparison Sorts — Bounded below by `O(n log n)`
+## Comparison Sorts — Worst-case lower bound `Ω(n log n)`
 
 | Algorithm | Average | Worst | Space | Stable | Reach for it when |
 | --- | --- | --- | --- | --- | --- |
 | [[Bubble Sort]] | O(n²) | O(n²) | O(1) | Yes | Teaching only |
+| [[Home/Computer Science/Algorithms/Sorting Algorithms/Cocktail Shaker Sort|Cocktail Shaker Sort]] | O(n²) | O(n²) | O(1) | Yes | Teaching bidirectional passes; moves small tail values forward faster than Bubble Sort |
+| [[Home/Computer Science/Algorithms/Sorting Algorithms/Gnome Sort|Gnome Sort]] | O(n²) | O(n²) | O(1) | Yes | Teaching inversion removal with one walking index |
+| [[Home/Computer Science/Algorithms/Sorting Algorithms/Bogo Sort|Bogo Sort]] | Θ(n · n!) expected | Unbounded | O(1) | No | Bounded demonstrations only; random retries make no progress guarantee |
 | [[Comb Sort]] | ~O(n² / 2^p) | O(n²) | O(1) | No | Teaching why bubble sort is slow |
 | [[Selection Sort]] | O(n²) | O(n²) | O(1) | No | Writes are far costlier than reads |
+| [[Home/Computer Science/Algorithms/Sorting Algorithms/Cycle Sort|Cycle Sort]] | Θ(n²) | Θ(n²) | O(1) | No | Writes are exceptionally expensive and keys can be compared cheaply |
 | [[Insertion Sort]] | O(n²) | O(n²) | O(1) | Yes | Tiny or nearly-sorted input; base case of hybrids |
+| [[Home/Computer Science/Algorithms/Sorting Algorithms/Odd-Even Sort|Odd-Even Sort]] | O(n²) sequential | O(n²) sequential | O(1) | Yes | Disjoint neighbor phases will run in parallel; otherwise teaching only |
+| [[Home/Computer Science/Algorithms/Sorting Algorithms/Pancake Sort|Pancake Sort]] | Θ(n²) | Θ(n²) | O(1) | No | The only permitted move is a prefix reversal |
+| [[Home/Computer Science/Algorithms/Sorting Algorithms/Stooge Sort|Stooge Sort]] | Θ(n².7095) | Θ(n².7095) | O(log n) | No | Recurrence-analysis exercise only |
 | [[Shell Sort]] | ~O(n^1.3) | O(n^1.5) with Hibbard | O(1) | No | No recursion, no scratch memory (embedded) |
 | [[Heap Sort]] | O(n log n) | O(n log n) | O(1) | No | Hard worst-case bound with no extra memory |
 | [[Merge Sort]] | O(n log n) | O(n log n) | O(n) | Yes | Stability required; linked lists; external sort |

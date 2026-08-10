@@ -10,7 +10,7 @@ status: Ready to Repeat
 publish: true
 ---
 
-Two algorithms sort a million records. One runs in `n log n` steps, the other in `n²`. At `n = 1,000,000` that is ~20 million operations versus a trillion — seconds versus hours, on the same hardware. Big O notation is the tool that predicts this gap *before* either is written or benchmarked: it describes how an algorithm's cost grows as the input grows, discarding everything that depends on the machine so two algorithms can be compared by their growth alone.
+Big O notation describes how an algorithm's cost grows with its input, discarding machine-specific constants so competing approaches can be compared by growth rather than one benchmark on one machine.
 
 Formally, `f(n) = O(g(n))` means `f` grows no faster than `g` beyond some input size — there exist constants `c` and `n₀` such that `f(n) ≤ c · g(n)` for all `n ≥ n₀`. The practical consequences are two deliberate erasures: **constant factors drop** (`3n + 100` is `O(n)`) and **lower-order terms drop** (`n² + n` is `O(n²)`), because as `n → ∞` only the fastest-growing term decides the outcome. That is the point and the limitation at once — Big O tells you which algorithm wins at scale, and tells you nothing about which wins at `n = 20`, where the discarded constants dominate.
 
@@ -77,7 +77,16 @@ The complexity class is the shape of the curve. Every line begins at the visual 
 
 At `n = 10`, `n²` is 100, `2ⁿ` is 1,024, and `n!` is 3,628,800. That is the practical boundary between "solvable for large inputs" (polynomial) and "solvable only for tiny inputs" (exponential and factorial); an `O(2ⁿ)` [[Home/Computer Science/Algorithms/Paradigms/Backtracking|brute-force]] search usually becomes impractical in the dozens and an `O(n!)` permutation search in the low teens. The exact cutoff depends on the hardware, latency budget, and work done per state.
 
-# Why the wall is a wall
+# Why Big O Matters
+
+| Benefit | Description |
+| --- | --- |
+| Predict Scalability | Understand how an algorithm will perform as the amount of data grows and prevent future bottlenecks. |
+| Compare Algorithms | Make informed and objective decisions when choosing between multiple solutions to a problem. |
+| Optimize Code | Identify inefficient parts of the codebase and focus optimization efforts where they matter most. |
+| Improve Problem-Solving | Thinking in terms of complexity helps design more efficient algorithms from the beginning. |
+| Prepare for Technical Interviews | Big O notation is a fundamental topic used to evaluate a candidate’s analytical and problem-solving skills. |
+| Make Design Trade-offs | Evaluate time and space complexity when making implementation and system-design decisions. |
 
 The chart's crossover understates the gap at real input sizes. Counting operations at a few scales makes it concrete:
 
@@ -89,6 +98,39 @@ The chart's crossover understates the gap at real input sizes. Counting operatio
 | 1,000,000 | ~20 | 10⁶ | ~2 × 10⁷ | 10¹² | beyond astronomical |
 
 At a million elements, the `log n` column is still 20 while `n²` is a trillion — the difference between a binary-search or balanced-tree lookup and a job that never finishes. This is the whole reason complexity class is the *first* thing to check: no amount of constant-factor tuning rescues an `n²` algorithm at `n = 10⁶`, but moving it to `n log n` does, by a factor of ~50,000. The `2ⁿ` column crossing 10³⁰ at `n = 100` is why exponential algorithms are a design signal to reach for [[Home/Computer Science/Algorithms/Paradigms/Dynamic Programming|dynamic programming]], a [[Home/Computer Science/Algorithms/Paradigms/Greedy Algorithms|greedy]] rule, or an approximation, not a bigger machine.
+
+# Common DSA pattern complexities
+
+The table uses `n` for processed elements, `k` for a retained subset or window size, `m` for the number of disjoint-set operations, `R` for the number of candidate answer values, and `C` for the cost of one feasibility check. `α(n)` is the inverse Ackermann function, which grows so slowly that it is effectively constant at practical sizes.
+
+| Pattern | Time | Auxiliary space | Condition that makes the bound true |
+| --- | --- | --- | --- |
+| [[Home/Computer Science/Algorithms/Patterns/Sliding Window|Sliding Window]] | `O(n)` | `O(1)` to `O(k)` | Each element enters and leaves the window at most once; stored window state determines the space bound. |
+| [[Home/Computer Science/Algorithms/Patterns/Two Pointers|Two Pointers]] | `O(n)` after any preprocessing | `O(1)` | Coordinated pointers move monotonically; sorting first adds `O(n log n)` time and may add space. |
+| [[Home/Computer Science/Algorithms/Patterns/Prefix Sum|Prefix Sum]] | `O(n)` build, `O(1)` range query | `O(n)` | Static range sums; updates invalidate the simple prefix array and require a different structure. |
+| [[Home/Computer Science/Algorithms/Patterns/Top-K Elements|Top-K Elements]] | `O(n log k)` | `O(k)` | A size-`k` heap keeps only the current winners; returning sorted output adds `O(k log k)`. |
+| [[Home/Computer Science/Algorithms/Patterns/Two Heaps|Two Heaps]] | `O(log n)` insert, `O(1)` median | `O(n)` | Both halves are retained and rebalanced; arbitrary deletion needs indexed heaps or lazy deletion. |
+| [[Home/Computer Science/Algorithms/Patterns/Binary Search on Answer|Binary Search on Answer]] | `O(C log R)` | Predicate-dependent | Candidate answers are discrete and the feasibility predicate is monotonic. |
+| [[Home/Computer Science/Data Structures/Graph Structures/Union-Find|Union-Find]] | `O(n + m α(n))` for initialization plus `m` operations | `O(n)` | Path compression and union by rank/size are both enabled; the bound is amortized over the sequence. |
+| [[Home/Computer Science/Algorithms/Patterns/Monotonic Stack and Queue|Monotonic Stack or Queue]] | `O(n)` | `O(n)` worst case | Each element is pushed once and popped at most once, so individual pops amortize across the scan. |
+
+# Common data-structure operations
+
+`V` and `E` denote graph vertices and edges, `deg(v)` is the degree of vertex `v`, and `L` is key length for a trie. Average hash-table bounds assume a suitable hash function and controlled load factor. Amortized bounds describe a sequence of operations, not the worst cost of one call.
+
+| Structure | Access / lookup | Insert | Remove | Explanation |
+| --- | --- | --- | --- | --- |
+| Static array | Index `O(1)`; value search `O(n)` | At position `O(n)` | At position `O(n)` | Contiguous indexing is constant; interior edits shift a suffix. |
+| [[Home/Computer Science/Data Structures/Linear Structures/Dynamic Array|Dynamic array]] | Index `O(1)`; value search `O(n)` | Append `O(1)` amortized, `O(n)` worst; interior `O(n)` | Last `O(1)`; interior `O(n)` | Occasional capacity growth copies all elements, producing the append worst case. |
+| [[Home/Computer Science/Data Structures/Linear Structures/LinkedList|Linked list]] | `O(n)` by index or value | `O(1)` around a held node; otherwise `O(n)` to locate | `O(1)` with the required node/predecessor; otherwise `O(n)` | Pointer rewiring is constant only after the edit location is already known. |
+| [[Home/Computer Science/Data Structures/Linear Structures/Stack|Stack]] / [[Home/Computer Science/Data Structures/Linear Structures/Queue|queue]] | Peek `O(1)` | Push/enqueue `O(1)` amortized | Pop/dequeue `O(1)` amortized | Array-backed forms have an occasional `O(n)` resize; linked forms allocate per node. |
+| [[Home/Computer Science/Data Structures/Hash-based Structures/HashMap|Hash table or set]] | `O(1)` average, `O(n)` worst | `O(1)` average/amortized, `O(n)` worst | `O(1)` average, `O(n)` worst | Collisions and resize behavior create the worst cases; hashing the key itself may cost `O(L)`. |
+| Balanced binary search tree | `O(log n)` | `O(log n)` | `O(log n)` | Rebalancing keeps tree height logarithmic; an unbalanced BST can degrade to `O(n)`. |
+| [[Home/Computer Science/Data Structures/Trees/Heap-like/Heap|Binary heap]] | Root `O(1)`; arbitrary search `O(n)` | `O(log n)` | Root `O(log n)` | Heap order constrains parents, not a full search order; bottom-up build is `O(n)`. |
+| [[Home/Computer Science/Data Structures/Trees/Trie|Trie]] | `O(L)` | `O(L)` | `O(L)` | Cost follows key length rather than key count; memory follows the total stored prefixes and branching representation. |
+| [[Home/Computer Science/Data Structures/Graph Structures/Union-Find|Union-Find]] | Find `O(α(n))` amortized | Make-set `O(1)`; Union update/merge `O(α(n))` amortized | Unsupported | The inverse-Ackermann bound requires path compression and union by rank/size; a standard disjoint-set forest cannot split a set by removing an element. |
+| Graph adjacency list | Edge lookup `O(deg(u))`; neighbor scan `O(deg(u))` | Edge `O(1)` amortized | Edge `O(deg(u))` | Space is `O(V + E)`; using a set per neighbor list changes expected edge lookup/update toward `O(1)` at extra overhead. |
+| Graph adjacency matrix | Edge lookup `O(1)`; neighbor scan `O(V)` | Edge `O(1)` | Edge `O(1)` | Space is `O(V²)`, which pays for constant-time edge membership. |
 
 # Space complexity and the cases
 

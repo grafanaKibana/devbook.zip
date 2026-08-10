@@ -71,7 +71,7 @@ echo "  Log: $LOG_FILE"
 #   "$OBSIDIAN_BIN" quartz-syncer:sync force
 {
     echo "===== $(date '+%Y-%m-%d %H:%M:%S') post-commit publish for $(git rev-parse --short HEAD) ====="
-    "$OBSIDIAN_BIN" quartz-syncer:publish
+    "$OBSIDIAN_BIN" vault=Vault quartz-syncer:publish
     echo "----- exit: $? -----"
 } >>"$LOG_FILE" 2>&1 &
 

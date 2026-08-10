@@ -37,6 +37,28 @@
   max-block-size: 85dvh;
 }
 
+/* Excalidraw's default inline preview is 500px wide. Explicitly resized
+ * drawings may grow wider, but still obey the same pane and viewport caps as
+ * other content images. */
+.markdown-rendered :is(
+  .excalidraw-svg-center,
+  .excalidraw-svg-left,
+  .excalidraw-svg-right,
+  .excalidraw-svg-left-wrap,
+  .excalidraw-svg-right-wrap
+) {
+  max-inline-size: 100%;
+}
+
+.markdown-rendered svg.excalidraw-svg {
+  display: block;
+  inline-size: 100% !important;
+  block-size: auto !important;
+  max-inline-size: 100% !important;
+  max-block-size: 85dvh !important;
+  margin-inline: auto;
+}
+
 .markdown-rendered :is(.block-language-mermaid, .mermaid) > svg[aria-roledescription="xychart"] {
   display: block;
   width: auto !important;

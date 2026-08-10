@@ -60,7 +60,7 @@ Ask the same four questions for every choice: what is the workload, what fails, 
 | Strong / eventual consistency | A stale or conflicting result breaks an invariant | Temporary divergence has a repair rule and UX budget | [[Home/Software Architecture/Distributed Systems/Consistency Models]] and [[Home/Software Architecture/Distributed Systems/CAP theorem]] |
 | Normalized / denormalized reads | Write integrity and flexible queries dominate | A known read shape needs predictable low latency | [[Home/Software Architecture/Patterns/Architectural Patterns/CQRS]] |
 | Stateful / stateless service | Local state is intrinsic and partitioned deliberately | Any healthy replica should serve the next request | [[Home/Software Architecture/Distributed Systems/Load Balancing]] |
-| Central orchestration / event choreography | Ordered workflow state and compensation must be explicit | Reactions are independent and ownership can stay distributed | [[Home/Software Architecture/System Architecture/Event-Driven Architecture|Event-Driven Architecture]] |
+| [[Home/Software Architecture/Distributed Systems/Orchestration|Orchestration]] / [[Home/Software Architecture/Distributed Systems/Choreography|choreography]] | Ordered workflow state and compensation must be explicit | Reactions are independent and ownership can stay distributed | Compare the two coordination authorities |
 
 Do not select SQL versus key-value, REST versus GraphQL, or batch versus stream from a label alone. Start from access patterns, ordering/freshness, replay window, failure recovery, and the team's operating skills.
 
@@ -99,6 +99,11 @@ The visual mixes patterns from different layers. Use this linked map to keep the
 | Partitioning | [[Home/Software Architecture/Distributed Systems/Consistent Hashing]] | Limit key remapping as nodes change | Virtual-node tuning, hotspots, membership changes |
 
 Patterns compose but are not substitutes. A leader election can choose one coordinator; a circuit breaker protects calls to it; pub/sub distributes its events; sharding partitions data. Each operates at a different boundary and needs its own failure test.
+
+# Questions
+
+> [!QUESTION]- A checkout dependency is slow and intermittently unavailable. When should its work remain synchronous, and when should it move behind asynchronous messaging?
+> Keep it synchronous only when the caller needs the result to preserve an immediate business invariant inside the latency budget. Move deferrable work behind messaging when delayed completion is acceptable, then define idempotency, backlog limits, failure visibility, and reconciliation rather than treating the queue as automatic reliability.
 
 # References
 

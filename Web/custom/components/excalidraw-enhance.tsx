@@ -54,21 +54,20 @@ const script = `
   // standalone drawing page already IS the original, so it gets no such link. The
   // plugin renders no header/source link for a transcluded drawing; this button,
   // grouped with the +/−/⟲ controls, is the way back to the full drawing. Href is
-  // the transclude's resolved drawing slug, taken as a sibling of the host note.
+  // the browser-resolved href from Quartz's standard transclusion source link.
   function addOpenOriginal(page) {
     var controls = page.querySelector(".excalidraw-controls");
     if (!controls || controls.querySelector(".excalidraw-open-original")) return;
     var tc = page.closest("blockquote.transclude");
     if (!tc) return;
-    var url = tc.getAttribute("data-url");
-    if (!url) return;
+    var source = tc.querySelector("a.transclude-src");
+    if (!source) return;
     var a = document.createElement("a");
     a.className = "excalidraw-open-original";
     a.textContent = "↗";
     a.setAttribute("aria-label", "Open original drawing");
     a.setAttribute("title", "Open original drawing");
-    try { a.href = new URL(url, window.location.href).pathname; }
-    catch (e) { a.href = url; }
+    a.href = source.href;
     controls.appendChild(a);
   }
 
