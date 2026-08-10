@@ -135,17 +135,139 @@ publish: "true"
     def test_wikilinks_resolve_by_path_or_note_name(self) -> None:
         temp, root = self.make_repo()
         self.addCleanup(temp.cleanup)
-        target = self.write_note(root, "Vault/Home/Topic/Target.md", VALID_FRONTMATTER)
+        target = self.write_note(
+            root,
+            "Vault/Home/Topic/Target.md",
+            VALID_FRONTMATTER + "# Heading\n",
+        )
         source = self.write_note(
             root,
             "Vault/Home/Topic/Source.md",
-            VALID_FRONTMATTER + "[[Target#Heading|label]], ![[Target]], and [[Missing]]\n",
+            VALID_FRONTMATTER
+            + "[[Target#Heading|label]], ![[Target]], [[Missing]], "
+            + "\\[[Escaped]], and \\\\[[Even Missing]]\n",
         )
         index = validate_vault.VaultIndex(root / "Vault")
         issues = validate_vault.validate_wikilinks(source, index)
-        self.assertEqual(1, len(issues))
-        self.assertEqual("missing", issues[0].discriminator)
+        self.assertEqual(["missing", "even missing"], [issue.discriminator for issue in issues])
         self.assertIsNotNone(index.resolve(source.path, target.path.stem))
+
+    def test_staged_mode_validates_inbound_anchors(self) -> None:
+        temp, root = self.make_repo()
+        self.addCleanup(temp.cleanup)
+        target = self.write_note(
+            root,
+            "Vault/Home/Topic/Target.md",
+            VALID_FRONTMATTER + "# New Heading\n",
+        )
+        self.write_note(
+            root,
+            "Vault/Home/Topic/Source.md",
+            VALID_FRONTMATTER + "[[Target#Old Heading]]\n",
+        )
+
+        with patch.object(validate_vault, "staged_paths", return_value=[target.path]):
+            issues, checked, _suppressed = validate_vault.validate(root, "staged")
+
+        self.assertEqual(1, checked)
+        self.assertTrue(
+            any(issue.discriminator == "target#old heading" for issue in issues)
+        )
+
+    def test_wikilink_headings_must_exist(self) -> None:
+        temp, root = self.make_repo()
+        self.addCleanup(temp.cleanup)
+        self.write_note(
+            root,
+            "Vault/Home/Topic/Target.md",
+            VALID_FRONTMATTER
+            + "# Existing Heading\n# C#\n# Closed Heading ###\n# Cache Keys and `Vary`\n"
+            + "# **Bold Boundary**\n# ~~Retired~~ Boundary\n"
+            + "# [Linked Boundary](https://example.com)\n"
+            + "# [[Other|Vault Linked Boundary]]\n"
+            + "   ## Indented Boundary\n"
+            + "> ## Quoted Boundary\n"
+            + "- ### Listed Boundary\n"
+            + "- > ## Composed Boundary\n"
+            + "- - ## Nested List Boundary\n"
+            + "100. Intro\n     ## Continuation Boundary\n"
+            + "```text\n<!--\n```\n# Comment Boundary\n-->\n"
+            + "`<!--`\n# Inline Comment Boundary\n`-->`\n"
+            + "\t# Not A Heading\n"
+            + "    - ## Overindented Hidden\n"
+            + "<div>\n# Raw HTML Hidden\n</div>\n"
+            + "Setext Boundary\n--------\n"
+            + "~~~text\n# Hidden Heading\n~~~\n"
+            + "````text\n# Hidden Long Fence\n```\n# Still Hidden\n````\n",
+        )
+        asset = root / "Vault/Assets/manual.pdf"
+        asset.parent.mkdir(parents=True, exist_ok=True)
+        asset.write_bytes(b"\xff\xfe")
+        source = self.write_note(
+            root,
+            "Vault/Home/Topic/Source.md",
+            VALID_FRONTMATTER
+            + "[[Target#Existing Heading]], [[Target#C#]], [[Target#Closed Heading]], "
+            + "[[Target#Cache Keys and Vary]], "
+            + "[[Target#Bold Boundary]], [[Target#Retired Boundary]], "
+            + "[[Target#Linked Boundary]], [[Target#Setext Boundary]], "
+            + "[[Target#Vault Linked Boundary]], [[Target#Quoted Boundary]], "
+            + "[[Target#Listed Boundary]], [[Target#Composed Boundary]], "
+            + "[[Target#Nested List Boundary]], "
+            + "[[Target#Continuation Boundary]], [[Target#Comment Boundary]], "
+            + "[[Target#Inline Comment Boundary]], "
+            + "[[Target#Not A Heading]], "
+            + "[[Target#Overindented Hidden]], [[Target#Raw HTML Hidden]], "
+            + "[[Target#Indented Boundary]], "
+            + "[[Target#Hidden Heading]], [[Target#Hidden Long Fence]], [[Target#Still Hidden]], "
+            + "[[Target#publish: true]], "
+            + "[[https://example.com/page#section]], "
+            + "\\[[Target#Illustrative Heading]], "
+            + "![[Assets/manual.pdf#page=3]], and [[Target#Missing Heading]]\n",
+        )
+        issues = validate_vault.validate_wikilinks(source, validate_vault.VaultIndex(root / "Vault"))
+        self.assertEqual(
+            [
+                "target#not a heading",
+                "target#overindented hidden",
+                "target#raw html hidden",
+                "target#hidden heading",
+                "target#hidden long fence",
+                "target#still hidden",
+                "target#publish: true",
+                "target#missing heading",
+            ],
+            [issue.discriminator for issue in issues],
+        )
+
+    def test_wikilinks_inside_tabsdown_are_live(self) -> None:
+        temp, root = self.make_repo()
+        self.addCleanup(temp.cleanup)
+        source = self.write_note(
+            root,
+            "Vault/Home/Topic/Source.md",
+            VALID_FRONTMATTER
+            + "~~~~~tabsdown\ntab: Links\n[[Missing In Tabs]]\n"
+            + "```text\n[[Ignored In Code]]\n```\n~~~~~\n",
+        )
+        issues = validate_vault.validate_wikilinks(source, validate_vault.VaultIndex(root / "Vault"))
+        self.assertEqual(["missing in tabs"], [issue.discriminator for issue in issues])
+
+    def test_wikilinks_ignore_nested_and_inline_code(self) -> None:
+        temp, root = self.make_repo()
+        self.addCleanup(temp.cleanup)
+        source = self.write_note(
+            root,
+            "Vault/Home/Topic/Source.md",
+            VALID_FRONTMATTER
+            + "> ```text\n> [[Quoted Example]]\n> ```\n"
+            + "- ```text\n  [[List Example]]\n  ```\n"
+            + "Outside list\n    [[Indented Code Example]]\n"
+            + "``[[Inline Example]]``\n"
+            + "`example\n[[Multiline Inline Example]]\ncontinued`\n",
+        )
+        issues = validate_vault.validate_wikilinks(source, validate_vault.VaultIndex(root / "Vault"))
+        self.assertEqual([], issues)
 
     def test_attachments_must_live_under_assets(self) -> None:
         temp, root = self.make_repo()

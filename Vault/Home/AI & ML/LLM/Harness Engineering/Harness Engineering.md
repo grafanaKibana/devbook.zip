@@ -14,7 +14,7 @@ status: Done
 
 Harness engineering is the discipline of deliberately designing everything the model acts *through*: the scaffold between the model's text output and the real world. It has three layers — the **tool surface** (which tools exist, how they are named, documented, and scoped — see [[Tools]]), the **wiring protocol** that connects tools to clients (see [[Model Context Protocol]]), and the **execution environment** (sandboxes, permissions, filesystem access — what the model is allowed to touch). The model only ever emits structured calls; the harness decides what those calls can reach and what happens when they run.
 
-The scope ladder places it among its neighbors: [[Home/AI & ML/LLM/Prompt Engineering/Prompt Engineering|Prompt Engineering]] shapes the single instruction, [[Context Engineering]] decides what the model *sees*, harness engineering decides what the model *can do*, and [[Loop Engineering]] decides how it iterates over time. The layers interact constantly — every tool schema the harness exposes is context the model must read, and every tool result feeds the next loop iteration — but the design questions are distinct: a harness question is "should this agent have a `delete_branch` tool, and who approves it?", not "which evidence goes first in the window?".
+The scope ladder places it among its neighbors: [[Home/AI & ML/LLM/Prompt Engineering/Prompt Engineering|Prompt Engineering]] shapes the single instruction, [[Home/AI & ML/LLM/Context Engineering/Context Engineering|Context Engineering]] decides what the model *sees*, harness engineering decides what the model *can do*, and [[Home/AI & ML/LLM/Loop Engineering/Loop Engineering|Loop Engineering]] decides how it iterates over time. The layers interact constantly — every tool schema the harness exposes is context the model must read, and every tool result feeds the next loop iteration — but the design questions are distinct: a harness question is "should this agent have a `delete_branch` tool, and who approves it?", not "which evidence goes first in the window?".
 
 ```datacorejsx
 const { FolderStructureMap } = await dc.require("Assets/components/devbook-folder-map.jsx");
@@ -25,7 +25,7 @@ return FolderStructureMap;
 
 Designing the tool surface is API design where the consumer cannot read source code, ask clarifying questions, or debug — it selects tools by matching names and descriptions against its current subgoal. The harness-level decisions sit above any single tool's design:
 
-- **Minimal, high-signal toolsets.** Expose only what the current task needs. Every connected schema is sent with every request and competes for attention — large toolsets measurably lower accuracy, not just raise cost (the MCPGauge numbers in [[Tools]]). The token side of this is a [[Context Engineering]] concern; deciding *which* tools exist at all is a harness one.
+- **Minimal, high-signal toolsets.** Expose only what the current task needs. Every connected schema is sent with every request and competes for attention — large toolsets measurably lower accuracy, not just raise cost (the MCPGauge numbers in [[Tools]]). The token side of this is a [[Home/AI & ML/LLM/Context Engineering/Context Engineering|Context Engineering]] concern; deciding *which* tools exist at all is a harness one.
 - **Surface-wide consistency.** A surface where every tool follows the same naming scheme, return shape, and error contract lets the model transfer what it learned from one tool to the rest — consolidation patterns and naming specifics are covered in [[Tools]].
 
 Depth on individual tool design — descriptions, parameters, return minimalism, fault tolerance — lives in [[Tools]].
@@ -42,7 +42,7 @@ These are the deterministic, code-level controls that [[Guardrails]] recommends 
 
 # Harness Quality and Agent Reliability
 
-Harness effort deserves parity with prompt effort — the "tool quality" principle from the [[Agents]] hub. The reason is compounding: agents interact with the harness across many [[Agent Loop]] iterations, so a surface flaw doesn't cause one bad answer — it causes a wrong turn that every subsequent step builds on, and the resulting failures masquerade as model failures. The SWE-bench case study and the amortization argument (a fixed tool contract helps every run that shares the surface) are covered in [[Tools]].
+Harness effort deserves parity with prompt effort — the "tool quality" principle from the [[Home/AI & ML/LLM/Agents/Agents|Agents]] hub. The reason is compounding: agents interact with the harness across many [[Agent Loop]] iterations, so a surface flaw doesn't cause one bad answer — it causes a wrong turn that every subsequent step builds on, and the resulting failures masquerade as model failures. The SWE-bench case study and the amortization argument (a fixed tool contract helps every run that shares the surface) are covered in [[Tools]].
 
 # Questions
 

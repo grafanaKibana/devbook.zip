@@ -58,7 +58,7 @@ Binary Search also serves range and insertion-point queries — lower-bound / up
 
 ## Searching Text
 
-Text/pattern matching is its own sub-family — see [[String Matching]] for the full comparison.
+Text/pattern matching is its own sub-family — see [[Home/Computer Science/Algorithms/Search Algorithms/String Matching/String Matching|String Matching]] for the full comparison.
 
 | Data shape | Algorithm | Time | Precondition |
 | --- | --- | --- | --- |
@@ -73,7 +73,7 @@ Text/pattern matching is its own sub-family — see [[String Matching]] for the 
 | Data shape | Algorithm | Time | Precondition |
 | --- | --- | --- | --- |
 | Graph (unweighted) | [[DFS BFS\|BFS / DFS]] | O(V + E) | — |
-| Graph (weighted) | See [[Graph Algorithms]] | — | [[Dijkstra]], [[A-Star Search\|A* Search]], [[Bellman-Ford]] |
+| Graph (weighted) | See [[Home/Computer Science/Algorithms/Graph Algorithms/Graph Algorithms\|Graph Algorithms]] | — | [[Dijkstra]], [[A-Star Search\|A* Search]], [[Bellman-Ford]] |
 
 # Questions
 

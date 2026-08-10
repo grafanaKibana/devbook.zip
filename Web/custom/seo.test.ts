@@ -1,6 +1,8 @@
 import assert from "node:assert/strict"
-import { readFileSync } from "node:fs"
+import { globSync, readFileSync } from "node:fs"
+import { basename, dirname, extname } from "node:path"
 import test from "node:test"
+import { fileURLToPath } from "node:url"
 import { render } from "preact-render-to-string"
 
 import HeadConstructor from "../quartz/components/Head"
@@ -222,4 +224,154 @@ test("generated utility pages remain emitted but become unlisted", () => {
   assert.equal(generated[1]?.data.unlisted, true)
   assert.equal(generated[2]?.data.unlisted, true)
   assert.equal(generated[3], pages[3])
+})
+
+test("sitewide navigation and nested hub links stay canonical", () => {
+  const config = readFileSync(new URL("../quartz.config.yaml", import.meta.url), "utf8")
+  assert.match(config, /About: \/about\b/)
+  assert.doesNotMatch(config, /About: \/About\b/)
+  const styles = readFileSync(new URL("../quartz/styles/custom.scss", import.meta.url), "utf8")
+  assert.equal(styles.match(/href\$="about"/g)?.length, 2)
+  assert.doesNotMatch(styles, /href\$="About"/)
+
+  const stripNonLinkMarkdown = (content: string) => {
+    const commentTokens = { "<!--": "\ue000", "-->": "\ue001", "%%": "\ue002" }
+    content = content.replace(
+      /(?<!`)(`+)(.*?)\1(?!`)/gs,
+      (span: string, delimiter: string, _body: string, offset: number) => {
+        const lineStart = content.lastIndexOf("\n", offset - 1) + 1
+        const prefix = content
+          .slice(lineStart, offset)
+          .replace(/\t/g, "    ")
+          .replace(/^(?:(?: {0,3}>[ \t]?)|(?: {0,3}(?:[-+*]|\d+[.)])[ \t]+))+/, "")
+        if (delimiter.length >= 3 && /^ {0,3}$/.test(prefix)) return span
+        return Object.entries(commentTokens).reduce(
+          (masked, [literal, token]) => masked.replaceAll(literal, token),
+          span,
+        )
+      },
+    )
+    let openCommentEnd: "-->" | "%%" | undefined
+    const stripComments = (sourceLine: string) => {
+      let line = sourceLine
+      let visible = ""
+      while (line) {
+        if (openCommentEnd) {
+          const end = line.indexOf(openCommentEnd)
+          if (end < 0) return visible
+          line = line.slice(end + openCommentEnd.length)
+          openCommentEnd = undefined
+          continue
+        }
+        const starts = [line.indexOf("<!--"), line.indexOf("%%")].filter((start) => start >= 0)
+        if (!starts.length) return visible + line
+        const start = Math.min(...starts)
+        visible += line.slice(0, start)
+        openCommentEnd = line.startsWith("<!--", start) ? "-->" : "%%"
+        line = line.slice(start + (openCommentEnd === "-->" ? 4 : 2))
+      }
+      return visible
+    }
+    let openCodeFence: [string, number, number] | undefined
+    const tabsdownFences: Array<[string, number]> = []
+    content = content
+      .split("\n")
+      .map((line) => {
+        const contentLine = openCodeFence ? line : stripComments(line)
+        const expandedLine = contentLine.replace(/\t/g, "    ").replace(/^(?: {0,3}>[ \t]?)+/, "")
+        const listItem = expandedLine.match(/^ {0,3}(?:[-+*]|\d+[.)])[ \t]+/)
+        const listIndent = listItem?.[0].length ?? 0
+        const fenceLine =
+          openCodeFence?.[2] && expandedLine.startsWith(" ".repeat(openCodeFence[2]))
+            ? expandedLine.slice(openCodeFence[2])
+            : expandedLine.slice(listIndent)
+        const match = fenceLine.match(/^ {0,3}(`{3,}|~{3,})(.*)$/)
+        if (!match) return openCodeFence ? "" : contentLine
+        const fence = match[1]!
+        const suffix = match[2]!
+        if (openCodeFence) {
+          const [marker, length] = openCodeFence
+          if (fence[0] === marker && fence.length >= length && !suffix.trim()) {
+            openCodeFence = undefined
+          }
+          return ""
+        }
+        const tabsdownFence = tabsdownFences.at(-1)
+        if (
+          tabsdownFence &&
+          fence[0] === tabsdownFence[0] &&
+          fence.length >= tabsdownFence[1] &&
+          !suffix.trim()
+        ) {
+          tabsdownFences.pop()
+          return ""
+        }
+        if (suffix.trim().split(/\s+/, 1)[0] === "tabsdown") {
+          tabsdownFences.push([fence[0]!, fence.length])
+        } else {
+          openCodeFence = [fence[0]!, fence.length, listIndent]
+        }
+        return ""
+      })
+      .join("\n")
+    content = content.replace(/(?<!`)(`+)(.*?)\1(?!`)/gs, "")
+    for (const [literal, token] of Object.entries(commentTokens)) {
+      content = content.replaceAll(token, literal)
+    }
+    return content
+  }
+  const wikilinkTarget = (raw: string) =>
+    raw.split(/\\?\|/, 1)[0]!.split("#", 1)[0]!.trim().replace(/\.md$/i, "")
+  assert.equal(wikilinkTarget("Graph Algorithms\\|Graph"), "Graph Algorithms")
+  assert.equal(wikilinkTarget("Graph Algorithms.md"), "Graph Algorithms")
+  assert.doesNotMatch(
+    stripNonLinkMarkdown(
+      "```text\n[[Graph Algorithms]]\n```\n<!-- [[Graph Algorithms]] -->\n%% [[Graph Algorithms]] %%\n`[[Graph Algorithms]]`",
+    ),
+    /\[\[/,
+  )
+  assert.match(
+    stripNonLinkMarkdown("```html\n<!--\n```\n[[Graph Algorithms]]\n-->"),
+    /\[\[Graph Algorithms\]\]/,
+  )
+  assert.match(stripNonLinkMarkdown("    ```text\n[[Graph Algorithms]]"), /\[\[/)
+  assert.doesNotMatch(
+    stripNonLinkMarkdown("````text\n[[Graph Algorithms]]\n```\n[[Graph Algorithms]]\n````"),
+    /\[\[/,
+  )
+  assert.match(
+    stripNonLinkMarkdown("~~~~~tabsdown\ntab: Links\n[[Graph Algorithms]]\n~~~~~"),
+    /\[\[Graph Algorithms\]\]/,
+  )
+  assert.doesNotMatch(
+    stripNonLinkMarkdown(
+      "> ```text\n> [[Graph Algorithms]]\n> ```\n- ```text\n  [[Graph Algorithms]]\n  ```\n``[[Graph Algorithms]]``",
+    ),
+    /\[\[/,
+  )
+  assert.match(
+    stripNonLinkMarkdown(
+      "100. ```text\n     [[Ignored In List Code]]\n     ```\n[[Graph Algorithms]]",
+    ),
+    /\[\[Graph Algorithms\]\]/,
+  )
+
+  const vaultRoot = new URL("../../Vault/Home/", import.meta.url)
+  const files = globSync("**/*.md", { cwd: fileURLToPath(vaultRoot) })
+  const content = files
+    .map((file) => stripNonLinkMarkdown(readFileSync(new URL(file, vaultRoot), "utf8")))
+    .join("\n")
+  const nestedHubNames = new Set(
+    files
+      .filter(
+        (file) =>
+          file.split("/").length > 2 && basename(file, extname(file)) === basename(dirname(file)),
+      )
+      .map((file) => basename(file, extname(file)).toLocaleLowerCase()),
+  )
+  const shortNestedHubLinks = [...content.matchAll(/\[\[([^\]\n]+)\]\]/g)]
+    .map((match) => wikilinkTarget(match[1]!))
+    .filter((target) => !target.includes("/") && nestedHubNames.has(target.toLocaleLowerCase()))
+  assert.deepEqual(shortNestedHubLinks, [])
+  assert.doesNotMatch(content, /(?:Home\/)?AI & ML\/LLM\/Agent\/(?:Harness|Loop) Engineering/)
 })

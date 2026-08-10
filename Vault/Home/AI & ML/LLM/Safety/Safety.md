@@ -12,7 +12,7 @@ priority: Medium
 status: Done
 ---
 
-Safety is the concern of keeping an LLM system safe, secure, and truthful — and unlike [[Home/AI & ML/LLM/Prompt Engineering/Prompt Engineering|Prompt Engineering]], [[Context Engineering]], [[Harness Engineering]], and [[Loop Engineering]], it is not a rung on the steering ladder but a lens applied across all of them. Every rung introduces its own failure surface (an injected instruction in the prompt, poisoned evidence in the context, an over-powered tool in the harness, an unbounded action in the loop), so safety is designed in at each layer rather than bolted on at the end. Like [[Home/AI & ML/LLM/Evaluation/Evaluation|Evaluation]], it spans the whole section.
+Safety is the concern of keeping an LLM system safe, secure, and truthful — and unlike [[Home/AI & ML/LLM/Prompt Engineering/Prompt Engineering|Prompt Engineering]], [[Home/AI & ML/LLM/Context Engineering/Context Engineering|Context Engineering]], [[Home/AI & ML/LLM/Harness Engineering/Harness Engineering|Harness Engineering]], and [[Home/AI & ML/LLM/Loop Engineering/Loop Engineering|Loop Engineering]], it is not a rung on the steering ladder but a lens applied across all of them. Every rung introduces its own failure surface (an injected instruction in the prompt, poisoned evidence in the context, an over-powered tool in the harness, an unbounded action in the loop), so safety is designed in at each layer rather than bolted on at the end. Like [[Home/AI & ML/LLM/Evaluation/Evaluation|Evaluation]], it spans the whole section.
 
 The three notes in this folder are three faces of one problem, split along a **security-versus-reliability** line:
 
@@ -31,9 +31,9 @@ return FolderStructureMap;
 
 Safety is not enforced in one place — each rung owns part of it, which is why the concern is cross-cutting rather than a single note:
 
-- **Prompt and context** — prompt-injection defense lives where instructions and untrusted data meet: keep trusted instructions structurally separated from retrieved or tool-returned content ([[Home/AI & ML/LLM/Prompt Engineering/Prompt Engineering|Prompt Engineering]], [[Context Engineering]]). Grounding via [[Home/AI & ML/LLM/Context Engineering/RAG/RAG|RAG]] is also the first-line mitigation for [[Hallucinations]].
-- **Harness** — the deterministic controls live here: sandboxing, permission gating, and least-privilege credentials sit in code and infrastructure, not in the prompt ([[Harness Engineering]]).
-- **Loop** — human-approval boundaries and the escape hatches for actions the system cannot safely verify are a runtime decision ([[Loop Engineering]]).
+- **Prompt and context** — prompt-injection defense lives where instructions and untrusted data meet: keep trusted instructions structurally separated from retrieved or tool-returned content ([[Home/AI & ML/LLM/Prompt Engineering/Prompt Engineering|Prompt Engineering]], [[Home/AI & ML/LLM/Context Engineering/Context Engineering|Context Engineering]]). Grounding via [[Home/AI & ML/LLM/Context Engineering/RAG/RAG|RAG]] is also the first-line mitigation for [[Hallucinations]].
+- **Harness** — the deterministic controls live here: sandboxing, permission gating, and least-privilege credentials sit in code and infrastructure, not in the prompt ([[Home/AI & ML/LLM/Harness Engineering/Harness Engineering|Harness Engineering]]).
+- **Loop** — human-approval boundaries and the escape hatches for actions the system cannot safely verify are a runtime decision ([[Home/AI & ML/LLM/Loop Engineering/Loop Engineering|Loop Engineering]]).
 - **Measurement** — whether any of it works is answered by [[Home/AI & ML/LLM/Evaluation/Evaluation|Evaluation]]; safety controls are only as good as the tests that exercise them.
 
 # Defense in Depth
@@ -50,7 +50,7 @@ The organizing principle across all three children is defense in depth: no singl
 > [!QUESTION]- Why are prompt-level guardrails insufficient on their own?
 > - A model instruction is advisory: it can be overridden by a higher-priority injected instruction or a poisoned tool/retrieved description (the instruction-vs-data confusion at the heart of prompt injection)
 > - Durable controls are structural and live outside the model — input validation, content isolation, permission gates, sandboxed execution, and output checking in code/infrastructure
-> - Defense in depth: assume any single layer can be bypassed, so critical actions are gated where the model cannot talk its way past them (see [[Harness Engineering]])
+> - Defense in depth: assume any single layer can be bypassed, so critical actions are gated where the model cannot talk its way past them (see [[Home/AI & ML/LLM/Harness Engineering/Harness Engineering|Harness Engineering]])
 
 > [!QUESTION]- How does the safety concern map onto the four steering rungs?
 > - Prompt/Context: separate trusted instructions from untrusted data to blunt injection; ground with [[Home/AI & ML/LLM/Context Engineering/RAG/RAG|RAG]] to reduce hallucination

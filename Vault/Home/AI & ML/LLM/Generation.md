@@ -67,7 +67,7 @@ Grounding is especially critical in [[Home/AI & ML/LLM/Context Engineering/RAG/R
 
 # Context Assembly
 
-Context assembly determines what evidence enters the prompt and in what order — the core of [[Context Engineering]]. Research on how models use long contexts ("Lost in the Middle", Liu et al. 2023) shows a U-shaped performance curve: models attend most to information at the beginning and end of the context, and least to information in the middle.
+Context assembly determines what evidence enters the prompt and in what order — the core of [[Home/AI & ML/LLM/Context Engineering/Context Engineering|Context Engineering]]. Research on how models use long contexts ("Lost in the Middle", Liu et al. 2023) shows a U-shaped performance curve: models attend most to information at the beginning and end of the context, and least to information in the middle.
 
 Practical implications:
 

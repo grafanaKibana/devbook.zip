@@ -500,15 +500,174 @@ def validate_code_fences(note: Note) -> list[Issue]:
     return issues
 
 
-def strip_non_link_markdown(content: str) -> str:
+def strip_non_link_markdown(content: str, *, preserve_inline_code: bool = False) -> str:
     def preserve_lines(match: re.Match[str]) -> str:
         return "\n" * match.group(0).count("\n")
 
-    content = re.sub(r"<!--.*?-->", preserve_lines, content, flags=re.DOTALL)
-    content = re.sub(r"%%.*?%%", preserve_lines, content, flags=re.DOTALL)
-    content = re.sub(r"```.*?```", preserve_lines, content, flags=re.DOTALL)
-    content = re.sub(r"`[^`\n]*`", "", content)
+    comment_tokens = {
+        "<!--": "\ue000",
+        "-->": "\ue001",
+        "%%": "\ue002",
+    }
+
+    def shield_code_span_comments(match: re.Match[str]) -> str:
+        delimiter = match.group(1)
+        line_start = match.string.rfind("\n", 0, match.start()) + 1
+        prefix = match.string[line_start : match.start()].expandtabs(4)
+        prefix = re.sub(
+            r"^(?:(?: {0,3}>[ \t]?)|(?: {0,3}(?:[-+*]|\d+[.)])[ \t]+))+",
+            "",
+            prefix,
+        )
+        if len(delimiter) >= 3 and re.fullmatch(r" {0,3}", prefix):
+            return match.group(0)
+        span = match.group(0)
+        for literal, token in comment_tokens.items():
+            span = span.replace(literal, token)
+        return span
+
+    content = re.sub(
+        r"(?<!`)(`+)(.*?)\1(?!`)",
+        shield_code_span_comments,
+        content,
+        flags=re.DOTALL,
+    )
+    open_comment_end: str | None = None
+
+    def strip_comments(line: str) -> str:
+        nonlocal open_comment_end
+        visible_parts: list[str] = []
+        while line:
+            if open_comment_end:
+                _, separator, line = line.partition(open_comment_end)
+                if not separator:
+                    return "".join(visible_parts)
+                open_comment_end = None
+                continue
+            opener = re.search(r"<!--|%%", line)
+            if not opener:
+                visible_parts.append(line)
+                break
+            visible_parts.append(line[: opener.start()])
+            line = line[opener.end() :]
+            open_comment_end = "-->" if opener.group() == "<!--" else "%%"
+        return "".join(visible_parts)
+
+    visible: list[str] = []
+    open_code_fence: tuple[str, int] | None = None
+    tabsdown_fences: list[tuple[str, int]] = []
+    list_indents: list[int] = []
+    for raw_line in content.splitlines(keepends=True):
+        line_ending = raw_line[len(raw_line.rstrip("\r\n")) :]
+        raw_content = raw_line.rstrip("\r\n")
+        content_line = raw_content if open_code_fence else strip_comments(raw_content)
+        line = content_line.expandtabs(4)
+        line = re.sub(r"^(?: {0,3}>[ \t]?)+", "", line)
+        if open_code_fence:
+            for indent in reversed(list_indents):
+                if line.startswith(" " * indent):
+                    line = line[indent:]
+                    break
+        else:
+            list_item = re.match(r"^( *)(?:[-+*]|\d+[.)])([ \t]+)(.*)$", line)
+            if list_item:
+                marker_indent = len(list_item.group(1))
+                list_indents = [indent for indent in list_indents if indent <= marker_indent]
+                list_indents.append(list_item.start(3))
+                line = list_item.group(3)
+            else:
+                leading_spaces = len(line) - len(line.lstrip(" "))
+                while list_indents and line.strip() and leading_spaces < list_indents[-1]:
+                    list_indents.pop()
+                if list_indents and leading_spaces >= list_indents[-1]:
+                    line = line[list_indents[-1] :]
+        line = re.sub(r"^(?: {0,3}>[ \t]?)+", "", line)
+        match = re.match(r"^ {0,3}(`{3,}|~{3,})(.*)$", line)
+        if not match:
+            is_indented_code = len(line) - len(line.lstrip(" ")) >= 4
+            visible.append(
+                line_ending
+                if open_code_fence or is_indented_code
+                else content_line + line_ending
+            )
+            continue
+        fence, suffix = match.groups()
+        if open_code_fence:
+            marker, length = open_code_fence
+            if fence[0] == marker and len(fence) >= length and not suffix.strip():
+                open_code_fence = None
+            visible.append(line_ending)
+            continue
+        if tabsdown_fences:
+            marker, length = tabsdown_fences[-1]
+            if fence[0] == marker and len(fence) >= length and not suffix.strip():
+                tabsdown_fences.pop()
+                visible.append(line_ending)
+                continue
+        language = suffix.strip().split(maxsplit=1)[0] if suffix.strip() else ""
+        if language == "tabsdown":
+            tabsdown_fences.append((fence[0], len(fence)))
+        else:
+            open_code_fence = (fence[0], len(fence))
+        visible.append(line_ending)
+    content = "".join(visible)
+    content = re.sub(
+        r"(?<!`)(`+)(.*?)\1(?!`)",
+        lambda match: match.group(2) if preserve_inline_code else preserve_lines(match),
+        content,
+        flags=re.DOTALL,
+    )
+    for literal, token in comment_tokens.items():
+        content = content.replace(token, literal)
     return content
+
+
+def normalize_heading_containers(content: str) -> str:
+    content = re.sub(
+        r"^[ ]{0,3}<(?P<tag>[A-Za-z][\w-]*)\b[^>]*>.*?^[ ]{0,3}</(?P=tag)>[ \t]*(?=\r?$)",
+        lambda match: "\n" * match.group(0).count("\n"),
+        content,
+        flags=re.MULTILINE | re.DOTALL | re.IGNORECASE,
+    )
+    normalized: list[str] = []
+    list_indents: list[int] = []
+    for raw_line in content.splitlines():
+        line = raw_line.expandtabs(4)
+        line = re.sub(r"^(?: {0,3}>[ \t]?)+", "", line)
+        list_item = re.match(r"^( {0,3})(?:[-+*]|\d+[.)])([ \t]+)(.*)$", line)
+        if list_item:
+            marker_indent = len(list_item.group(1))
+            list_indents = [indent for indent in list_indents if indent <= marker_indent]
+            list_indents.append(list_item.start(3))
+            line = list_item.group(3)
+        else:
+            leading_spaces = len(line) - len(line.lstrip(" "))
+            while list_indents and line.strip() and leading_spaces < list_indents[-1]:
+                list_indents.pop()
+            if list_indents and leading_spaces >= list_indents[-1]:
+                line = line[list_indents[-1] :]
+        normalized.append(
+            re.sub(
+                r"^(?:(?: {0,3}>[ \t]?)|(?: {0,3}(?:[-+*]|\d+[.)])[ \t]+))+",
+                "",
+                line,
+            )
+        )
+    return "\n".join(normalized)
+
+
+def visible_heading_text(heading: str) -> str:
+    heading = re.sub(
+        r"\[\[([^\]|]+)(?:\|([^\]]+))?\]\]",
+        lambda match: match.group(2) or Path(match.group(1)).name,
+        heading,
+    )
+    heading = re.sub(r"!?\[([^\]]*)\]\([^)]*\)", r"\1", heading)
+    heading = re.sub(r"~~(.+?)~~", r"\1", heading)
+    heading = re.sub(r"(\*\*|__)(.+?)\1", r"\2", heading)
+    heading = re.sub(r"(?<!\*)\*([^*\n]+)\*(?!\*)", r"\1", heading)
+    heading = re.sub(r"(?<!_)_([^_\n]+)_(?!_)", r"\1", heading)
+    return re.sub(r"\\([\\`*_{}\[\]()#+\-.!|>~])", r"\1", heading)
 
 
 class VaultIndex:
@@ -556,18 +715,58 @@ def validate_wikilinks(note: Note, index: VaultIndex) -> list[Issue]:
     issues: list[Issue] = []
     content = strip_non_link_markdown(note.content)
     for match in re.finditer(r"\[\[([^\]\n]+)\]\]", content):
+        prefix = content[: match.start()]
+        if (len(prefix) - len(prefix.rstrip("\\"))) % 2:
+            continue
         raw = match.group(1)
-        target = raw.split("|", 1)[0].split("#", 1)[0].strip()
-        if index.resolve(note.path, target) is None:
+        link = raw.split("|", 1)[0].removesuffix("\\")
+        target, separator, anchor = link.partition("#")
+        target = target.strip()
+        resolved = index.resolve(note.path, target)
+        line = content.count("\n", 0, match.start()) + 1
+        if resolved is None:
             issues.append(
                 Issue(
                     "wikilink.unresolved",
                     note.rel,
-                    content.count("\n", 0, match.start()) + 1,
+                    line,
                     f"wikilink target does not resolve in the vault: [[{raw}]]",
                     target.casefold(),
                 )
             )
+        elif (
+            resolved.suffix.casefold() == ".md"
+            and separator
+            and anchor
+            and not anchor.startswith("^")
+            and not target.casefold().startswith(("http://", "https://", "mailto:", "obsidian://"))
+        ):
+            _, target_body, _ = split_frontmatter(resolved.read_text(encoding="utf-8"))
+            target_content = strip_non_link_markdown(target_body, preserve_inline_code=True)
+            heading_content = normalize_heading_containers(target_content)
+            raw_headings = re.findall(
+                r"^[ \t]{0,3}#{1,6}[ \t]+(.+?)(?:[ \t]+#+[ \t]*)?$",
+                heading_content,
+                re.MULTILINE,
+            )
+            raw_headings.extend(
+                re.findall(r"^([^\n]+)\r?\n[ \t]{0,3}(?:=+|-+)[ \t]*$", heading_content, re.MULTILINE)
+            )
+            headings = {
+                re.sub(r"\s+", " ", visible_heading_text(heading)).strip().casefold()
+                for heading in raw_headings
+            }
+            normalized_anchor = re.sub(r"\s+", " ", unquote(anchor)).strip().casefold()
+            if normalized_anchor not in headings:
+                issues.append(
+                    Issue(
+                        "wikilink.heading-unresolved",
+                        note.rel,
+                        line,
+                        f"wikilink heading does not exist in the target note: [[{raw}]]",
+                        f"{target.casefold()}#{normalized_anchor}",
+                    )
+                )
     return issues
 
 
@@ -728,6 +927,9 @@ def validate(repo_root: Path, mode: str, use_baseline: bool = True) -> tuple[lis
         issues.extend(validate_published(note))
         issues.extend(validate_residue(note))
         issues.extend(validate_code_fences(note))
+
+    link_notes = all_notes.values() if mode == "staged" and selected_paths else selected_notes
+    for note in link_notes:
         issues.extend(validate_wikilinks(note, index))
 
     if mode == "all":
