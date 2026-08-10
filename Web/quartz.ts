@@ -8,6 +8,7 @@ import { HomepageFit } from "./custom/components/homepage-fit"
 import { NavScopeDropdown } from "./custom/components/nav-scope-dropdown"
 import { PageContribute } from "./custom/components/page-contribute"
 import { PageReveal } from "./custom/components/page-reveal"
+import { PageShare } from "./custom/components/page-share"
 import { QuestionsIndex } from "./custom/components/questions-index"
 import { SiteHeader } from "./custom/components/site-header"
 import { SiteMarquee } from "./custom/components/site-marquee"
@@ -146,6 +147,14 @@ const floatingButtons = FloatingButtons()
 layout.defaults.afterBody = [...(layout.defaults.afterBody ?? []), floatingButtons]
 for (const pageLayout of Object.values(layout.byPageType)) {
   pageLayout.afterBody = [...(pageLayout.afterBody ?? []), floatingButtons]
+}
+
+// Per-page share controls belong after the article and before any configured
+// comments. Prepending here also lets the content-only QuestionsIndex remain first.
+const pageShare = PageShare()
+layout.defaults.afterBody = [pageShare, ...(layout.defaults.afterBody ?? [])]
+for (const pageLayout of Object.values(layout.byPageType)) {
+  pageLayout.afterBody = [pageShare, ...(pageLayout.afterBody ?? [])]
 }
 
 const pageContribute = PageContribute()
