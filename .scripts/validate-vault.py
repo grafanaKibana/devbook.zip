@@ -506,12 +506,35 @@ def strip_non_link_markdown(content: str, *, preserve_inline_code: bool = False)
 
     content = re.sub(r"<!--.*?-->", preserve_lines, content, flags=re.DOTALL)
     content = re.sub(r"%%.*?%%", preserve_lines, content, flags=re.DOTALL)
-    content = re.sub(
-        r"^[ \t]*([`~])\1{2,}[^\n]*\n.*?^[ \t]*\1{3,}[ \t]*$",
-        preserve_lines,
-        content,
-        flags=re.DOTALL | re.MULTILINE,
-    )
+    visible: list[str] = []
+    open_code_fence: tuple[str, int] | None = None
+    tabsdown_fences: list[tuple[str, int]] = []
+    for line in content.splitlines(keepends=True):
+        line_ending = line[len(line.rstrip("\r\n")) :]
+        match = re.match(r"^[ \t]{0,3}(`{3,}|~{3,})(.*?)(?:\r?\n)?$", line)
+        if not match:
+            visible.append(line_ending if open_code_fence else line)
+            continue
+        fence, suffix = match.groups()
+        if open_code_fence:
+            marker, length = open_code_fence
+            if fence[0] == marker and len(fence) >= length and not suffix.strip():
+                open_code_fence = None
+            visible.append(line_ending)
+            continue
+        if tabsdown_fences:
+            marker, length = tabsdown_fences[-1]
+            if fence[0] == marker and len(fence) >= length and not suffix.strip():
+                tabsdown_fences.pop()
+                visible.append(line_ending)
+                continue
+        language = suffix.strip().split(maxsplit=1)[0] if suffix.strip() else ""
+        if language == "tabsdown":
+            tabsdown_fences.append((fence[0], len(fence)))
+        else:
+            open_code_fence = (fence[0], len(fence))
+        visible.append(line_ending)
+    content = "".join(visible)
     content = re.sub(r"`([^`\n]*)`", r"\1" if preserve_inline_code else "", content)
     return content
 
@@ -586,18 +609,28 @@ def validate_wikilinks(note: Note, index: VaultIndex) -> list[Issue]:
                     target.casefold(),
                 )
             )
-        elif resolved.suffix.casefold() == ".md" and separator and anchor and not anchor.startswith("^"):
+        elif (
+            resolved.suffix.casefold() == ".md"
+            and separator
+            and anchor
+            and not anchor.startswith("^")
+            and not target.casefold().startswith(("http://", "https://", "mailto:", "obsidian://"))
+        ):
             target_content = strip_non_link_markdown(
                 resolved.read_text(encoding="utf-8"),
                 preserve_inline_code=True,
             )
+            raw_headings = re.findall(
+                r"^#{1,6}[ \t]+(.+?)(?:[ \t]+#+[ \t]*)?$",
+                target_content,
+                re.MULTILINE,
+            )
+            raw_headings.extend(
+                re.findall(r"^([^\n]+)\r?\n[ \t]{0,3}(?:=+|-+)[ \t]*$", target_content, re.MULTILINE)
+            )
             headings = {
                 re.sub(r"\s+", " ", visible_heading_text(heading)).strip().casefold()
-                for heading in re.findall(
-                    r"^#{1,6}[ \t]+(.+?)(?:[ \t]+#+[ \t]*)?$",
-                    target_content,
-                    re.MULTILINE,
-                )
+                for heading in raw_headings
             }
             normalized_anchor = re.sub(r"\s+", " ", unquote(anchor)).strip().casefold()
             if normalized_anchor not in headings:

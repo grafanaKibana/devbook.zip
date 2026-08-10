@@ -234,12 +234,44 @@ test("sitewide navigation and nested hub links stay canonical", () => {
   assert.equal(styles.match(/href\$="about"/g)?.length, 2)
   assert.doesNotMatch(styles, /href\$="About"/)
 
-  const stripNonLinkMarkdown = (content: string) =>
-    content
-      .replace(/<!--.*?-->/gs, "")
-      .replace(/%%.*?%%/gs, "")
-      .replace(/```.*?```/gs, "")
-      .replace(/`[^`\n]*`/g, "")
+  const stripNonLinkMarkdown = (content: string) => {
+    content = content.replace(/<!--.*?-->/gs, "").replace(/%%.*?%%/gs, "")
+    let openCodeFence: [string, number] | undefined
+    const tabsdownFences: Array<[string, number]> = []
+    content = content
+      .split("\n")
+      .map((line) => {
+        const match = line.match(/^[ \t]{0,3}(`{3,}|~{3,})(.*)$/)
+        if (!match) return openCodeFence ? "" : line
+        const fence = match[1]!
+        const suffix = match[2]!
+        if (openCodeFence) {
+          const [marker, length] = openCodeFence
+          if (fence[0] === marker && fence.length >= length && !suffix.trim()) {
+            openCodeFence = undefined
+          }
+          return ""
+        }
+        const tabsdownFence = tabsdownFences.at(-1)
+        if (
+          tabsdownFence &&
+          fence[0] === tabsdownFence[0] &&
+          fence.length >= tabsdownFence[1] &&
+          !suffix.trim()
+        ) {
+          tabsdownFences.pop()
+          return ""
+        }
+        if (suffix.trim().split(/\s+/, 1)[0] === "tabsdown") {
+          tabsdownFences.push([fence[0]!, fence.length])
+        } else {
+          openCodeFence = [fence[0]!, fence.length]
+        }
+        return ""
+      })
+      .join("\n")
+    return content.replace(/`[^`\n]*`/g, "")
+  }
   const wikilinkTarget = (raw: string) => raw.split(/\\?\|/, 1)[0]!.split("#", 1)[0]!.trim()
   assert.equal(wikilinkTarget("Graph Algorithms\\|Graph"), "Graph Algorithms")
   assert.doesNotMatch(
@@ -247,6 +279,14 @@ test("sitewide navigation and nested hub links stay canonical", () => {
       "```text\n[[Graph Algorithms]]\n```\n<!-- [[Graph Algorithms]] -->\n%% [[Graph Algorithms]] %%\n`[[Graph Algorithms]]`",
     ),
     /\[\[/,
+  )
+  assert.doesNotMatch(
+    stripNonLinkMarkdown("````text\n[[Graph Algorithms]]\n```\n[[Graph Algorithms]]\n````"),
+    /\[\[/,
+  )
+  assert.match(
+    stripNonLinkMarkdown("~~~~~tabsdown\ntab: Links\n[[Graph Algorithms]]\n~~~~~"),
+    /\[\[Graph Algorithms\]\]/,
   )
 
   const vaultRoot = new URL("../../Vault/Home/", import.meta.url)
@@ -260,11 +300,11 @@ test("sitewide navigation and nested hub links stay canonical", () => {
         (file) =>
           file.split("/").length > 2 && basename(file, extname(file)) === basename(dirname(file)),
       )
-      .map((file) => basename(file, extname(file))),
+      .map((file) => basename(file, extname(file)).toLocaleLowerCase()),
   )
   const shortNestedHubLinks = [...content.matchAll(/\[\[([^\]\n]+)\]\]/g)]
     .map((match) => wikilinkTarget(match[1]!))
-    .filter((target) => !target.includes("/") && nestedHubNames.has(target))
+    .filter((target) => !target.includes("/") && nestedHubNames.has(target.toLocaleLowerCase()))
   assert.deepEqual(shortNestedHubLinks, [])
   assert.doesNotMatch(content, /(?:Home\/)?AI & ML\/LLM\/Agent\/(?:Harness|Loop) Engineering/)
 })

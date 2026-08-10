@@ -161,7 +161,9 @@ publish: "true"
             + "# Existing Heading\n# C#\n# Closed Heading ###\n# Cache Keys and `Vary`\n"
             + "# **Bold Boundary**\n# ~~Retired~~ Boundary\n"
             + "# [Linked Boundary](https://example.com)\n"
-            + "~~~text\n# Hidden Heading\n~~~\n",
+            + "Setext Boundary\n--------\n"
+            + "~~~text\n# Hidden Heading\n~~~\n"
+            + "````text\n# Hidden Long Fence\n```\n# Still Hidden\n````\n",
         )
         asset = root / "Vault/Assets/manual.pdf"
         asset.parent.mkdir(parents=True, exist_ok=True)
@@ -173,14 +175,34 @@ publish: "true"
             + "[[Target#Existing Heading]], [[Target#C#]], [[Target#Closed Heading]], "
             + "[[Target#Cache Keys and Vary]], "
             + "[[Target#Bold Boundary]], [[Target#Retired Boundary]], "
-            + "[[Target#Linked Boundary]], [[Target#Hidden Heading]], "
+            + "[[Target#Linked Boundary]], [[Target#Setext Boundary]], "
+            + "[[Target#Hidden Heading]], [[Target#Hidden Long Fence]], [[Target#Still Hidden]], "
+            + "[[https://example.com/page#section]], "
             + "![[Assets/manual.pdf#page=3]], and [[Target#Missing Heading]]\n",
         )
         issues = validate_vault.validate_wikilinks(source, validate_vault.VaultIndex(root / "Vault"))
         self.assertEqual(
-            ["target#hidden heading", "target#missing heading"],
+            [
+                "target#hidden heading",
+                "target#hidden long fence",
+                "target#still hidden",
+                "target#missing heading",
+            ],
             [issue.discriminator for issue in issues],
         )
+
+    def test_wikilinks_inside_tabsdown_are_live(self) -> None:
+        temp, root = self.make_repo()
+        self.addCleanup(temp.cleanup)
+        source = self.write_note(
+            root,
+            "Vault/Home/Topic/Source.md",
+            VALID_FRONTMATTER
+            + "~~~~~tabsdown\ntab: Links\n[[Missing In Tabs]]\n"
+            + "```text\n[[Ignored In Code]]\n```\n~~~~~\n",
+        )
+        issues = validate_vault.validate_wikilinks(source, validate_vault.VaultIndex(root / "Vault"))
+        self.assertEqual(["missing in tabs"], [issue.discriminator for issue in issues])
 
     def test_attachments_must_live_under_assets(self) -> None:
         temp, root = self.make_repo()
