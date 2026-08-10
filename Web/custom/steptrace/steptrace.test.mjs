@@ -2303,6 +2303,11 @@ test("issue 149 sorts reuse array-sort and terminate with bounded teaching trace
   const bogoA = buildSourceFrames({ algorithm: "bogo-sort", array: [3, 1, 2] })
   const bogoB = buildSourceFrames({ algorithm: "bogo-sort", array: [3, 1, 2] })
   assert.deepEqual(bogoA.frames, bogoB.frames)
+  assert.equal(
+    bogoA.frames.filter((frame) => frame.type === "compare").length,
+    bogoA.frames.at(-1).comparisons,
+  )
+  assert.equal(bogoA.frames.at(-1).comparisons, 4)
   assert.ok(bogoA.frames.length < 120)
   assert.throws(
     () => buildSourceFrames({ algorithm: "bogo-sort", array: [6, 5, 4, 3, 2, 1] }),
@@ -2501,7 +2506,7 @@ test("all built-in algorithms preserve their headless frame contract", () => {
 
   assert.equal(
     digest,
-    "793471f817d5b4dce9803bb54ce777470f89b3464f7af3e0e01ceeea093ac086",
+    "50646ccc87072285aa95b78ca4e5665def9125155d9b1ec5f2be93d52e419d08",
     "the headless StepTrace behavior changed",
   )
 })

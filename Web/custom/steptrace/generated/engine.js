@@ -12469,8 +12469,13 @@
   // custom/steptrace/src/algorithms/bogo-sort.ts
   var MAX_ITEMS = 5;
   var MAX_ATTEMPTS = 120;
-  function ordered(values) {
-    return values.every((value, index) => index === 0 || values[index - 1] <= value);
+  function ordered(ops) {
+    const values = ops.value;
+    for (let index = 1; index < values.length; index++) {
+      ops.compare(index - 1, index, `Check whether ${values[index - 1]} ≤ ${values[index]}.`);
+      if (values[index - 1] > values[index]) return false;
+    }
+    return true;
   }
   var bogoSort = {
     id: "bogo-sort",
@@ -12481,7 +12486,8 @@
     run(_input, ops) {
       ops.init("Bogo sort checks the order, then tries a deterministic sequence of permutations.");
       let attempts = 0;
-      while (!ordered(ops.value) && attempts < MAX_ATTEMPTS) {
+      let sorted = ordered(ops);
+      while (!sorted && attempts < MAX_ATTEMPTS) {
         const values = ops.value;
         let pivot = values.length - 2;
         while (pivot >= 0 && values[pivot] >= values[pivot + 1]) pivot--;
@@ -12496,9 +12502,9 @@
             ops.swap(left, right, "Restore the smallest suffix for the next permutation.");
         }
         attempts++;
+        sorted = ordered(ops);
       }
-      if (!ordered(ops.value))
-        throw new Error(`steptrace: bogo-sort exceeded ${MAX_ATTEMPTS} attempts.`);
+      if (!sorted) throw new Error(`steptrace: bogo-sort exceeded ${MAX_ATTEMPTS} attempts.`);
       ops.lockAll(Array.from({ length: ops.value.length }, (_, index) => index));
       ops.done(`A sorted permutation appeared after ${attempts} bounded attempts.`);
     }
