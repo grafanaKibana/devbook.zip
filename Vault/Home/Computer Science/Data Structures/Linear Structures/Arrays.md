@@ -34,7 +34,7 @@ Multi-dimensional arrays flatten the same way. A row-major `T[,]` stores row 0 i
 
 For a value type the values live in the block itself — `new int[1000]` is one allocation holding 4,000 bytes of data. For a reference type the block holds references and the objects live elsewhere, so `string[]` iteration is contiguous over the _pointers_ but still chases each one to reach the characters.
 
-Contiguity is worth more than the complexity table shows. On representative x86-64 machines, cache lines are commonly 64 bytes, so one miss brings in a line of neighbors (16 elements for 4-byte ints), and the hardware prefetcher can stream later lines during a sequential scan. Representative orders of magnitude put an L1 hit near 1 ns and main-memory access near 100 ns, although both vary by processor and workload — the top rungs of the [[Home/Data Persistence/Caching#Latency ladder|latency ladder]]. This is the physical reason .NET's default collections are array-backed.
+Contiguity is worth more than the complexity table shows. On representative x86-64 machines, cache lines are commonly 64 bytes, so one miss brings in a line of neighbors (16 elements for 4-byte ints), and the hardware prefetcher can stream later lines during a sequential scan. Representative orders of magnitude put an L1 hit near 1 ns and main-memory access near 100 ns, although both vary by processor and workload — the [[Home/Data Persistence/Caching#Measure the Actual Path|measurement boundary]] matters when applying those ratios. This is the physical reason .NET's default collections are array-backed.
 
 #### Boundaries Tied to Contiguity
 

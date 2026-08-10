@@ -557,17 +557,38 @@ def validate_wikilinks(note: Note, index: VaultIndex) -> list[Issue]:
     content = strip_non_link_markdown(note.content)
     for match in re.finditer(r"\[\[([^\]\n]+)\]\]", content):
         raw = match.group(1)
-        target = raw.split("|", 1)[0].split("#", 1)[0].strip()
-        if index.resolve(note.path, target) is None:
+        link = raw.split("|", 1)[0].removesuffix("\\")
+        target, separator, anchor = link.partition("#")
+        target = target.strip()
+        resolved = index.resolve(note.path, target)
+        line = content.count("\n", 0, match.start()) + 1
+        if resolved is None:
             issues.append(
                 Issue(
                     "wikilink.unresolved",
                     note.rel,
-                    content.count("\n", 0, match.start()) + 1,
+                    line,
                     f"wikilink target does not resolve in the vault: [[{raw}]]",
                     target.casefold(),
                 )
             )
+        elif separator and anchor and not anchor.startswith("^"):
+            target_content = strip_non_link_markdown(resolved.read_text(encoding="utf-8"))
+            headings = {
+                re.sub(r"\s+", " ", heading).strip().casefold()
+                for heading in re.findall(r"^#{1,6}[ \t]+(.+?)[ \t]*#*[ \t]*$", target_content, re.MULTILINE)
+            }
+            normalized_anchor = re.sub(r"\s+", " ", unquote(anchor)).strip().casefold()
+            if normalized_anchor not in headings:
+                issues.append(
+                    Issue(
+                        "wikilink.heading-unresolved",
+                        note.rel,
+                        line,
+                        f"wikilink heading does not exist in the target note: [[{raw}]]",
+                        f"{target.casefold()}#{normalized_anchor}",
+                    )
+                )
     return issues
 
 

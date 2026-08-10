@@ -1,5 +1,6 @@
 import assert from "node:assert/strict"
 import { globSync, readFileSync } from "node:fs"
+import { basename, dirname, extname } from "node:path"
 import test from "node:test"
 import { render } from "preact-render-to-string"
 
@@ -230,16 +231,20 @@ test("sitewide navigation and nested hub links stay canonical", () => {
   assert.doesNotMatch(config, /About: \/About\b/)
 
   const vaultRoot = new URL("../../Vault/Home/", import.meta.url)
-  const vault = globSync("**/*.md", { cwd: vaultRoot })
-    .map((file) => readFileSync(new URL(file, vaultRoot), "utf8"))
-    .join("\n")
+  const files = globSync("**/*.md", { cwd: vaultRoot })
+  const vault = files.map((file) => readFileSync(new URL(file, vaultRoot), "utf8")).join("\n")
 
-  assert.doesNotMatch(
-    vault,
-    /\[\[(?:Agents|Context Engineering|Graph Algorithms|Harness Engineering|Loop Engineering|String Matching|Transport & Sockets)(?:\||#|\]\])/,
+  const nestedHubNames = new Set(
+    files
+      .filter(
+        (file) =>
+          file.split("/").length > 2 && basename(file, extname(file)) === basename(dirname(file)),
+      )
+      .map((file) => basename(file, extname(file))),
   )
-  assert.doesNotMatch(
-    vault,
-    /Home\/AI & ML\/LLM\/Agent\/(?:Harness|Loop) Engineering/,
-  )
+  const shortNestedHubLinks = [...vault.matchAll(/\[\[([^\]\n]+)\]\]/g)]
+    .map((match) => match[1]!.split("|", 1)[0]!.split("#", 1)[0]!.trim())
+    .filter((target) => !target.includes("/") && nestedHubNames.has(target))
+  assert.deepEqual(shortNestedHubLinks, [])
+  assert.doesNotMatch(vault, /Home\/AI & ML\/LLM\/Agent\/(?:Harness|Loop) Engineering/)
 })

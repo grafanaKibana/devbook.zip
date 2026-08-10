@@ -135,7 +135,11 @@ publish: "true"
     def test_wikilinks_resolve_by_path_or_note_name(self) -> None:
         temp, root = self.make_repo()
         self.addCleanup(temp.cleanup)
-        target = self.write_note(root, "Vault/Home/Topic/Target.md", VALID_FRONTMATTER)
+        target = self.write_note(
+            root,
+            "Vault/Home/Topic/Target.md",
+            VALID_FRONTMATTER + "# Heading\n",
+        )
         source = self.write_note(
             root,
             "Vault/Home/Topic/Source.md",
@@ -146,6 +150,23 @@ publish: "true"
         self.assertEqual(1, len(issues))
         self.assertEqual("missing", issues[0].discriminator)
         self.assertIsNotNone(index.resolve(source.path, target.path.stem))
+
+    def test_wikilink_headings_must_exist(self) -> None:
+        temp, root = self.make_repo()
+        self.addCleanup(temp.cleanup)
+        self.write_note(
+            root,
+            "Vault/Home/Topic/Target.md",
+            VALID_FRONTMATTER + "# Existing Heading\n",
+        )
+        source = self.write_note(
+            root,
+            "Vault/Home/Topic/Source.md",
+            VALID_FRONTMATTER + "[[Target#Existing Heading]] and [[Target#Missing Heading]]\n",
+        )
+        issues = validate_vault.validate_wikilinks(source, validate_vault.VaultIndex(root / "Vault"))
+        self.assertEqual(["wikilink.heading-unresolved"], [issue.code for issue in issues])
+        self.assertEqual("target#missing heading", issues[0].discriminator)
 
     def test_attachments_must_live_under_assets(self) -> None:
         temp, root = self.make_repo()
