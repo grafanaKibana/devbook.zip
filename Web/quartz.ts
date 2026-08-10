@@ -8,7 +8,6 @@ import { HomepageFit } from "./custom/components/homepage-fit"
 import { NavScopeDropdown } from "./custom/components/nav-scope-dropdown"
 import { PageContribute } from "./custom/components/page-contribute"
 import { PageReveal } from "./custom/components/page-reveal"
-import { PageShare } from "./custom/components/page-share"
 import { QuestionsIndex } from "./custom/components/questions-index"
 import { SiteHeader } from "./custom/components/site-header"
 import { SiteMarquee } from "./custom/components/site-marquee"
@@ -149,14 +148,6 @@ for (const pageLayout of Object.values(layout.byPageType)) {
   pageLayout.afterBody = [...(pageLayout.afterBody ?? []), floatingButtons]
 }
 
-// Per-page share controls belong after the article and before any configured
-// comments. Prepending here also lets the content-only QuestionsIndex remain first.
-const pageShare = PageShare()
-layout.defaults.afterBody = [pageShare, ...(layout.defaults.afterBody ?? [])]
-for (const pageLayout of Object.values(layout.byPageType)) {
-  pageLayout.afterBody = [pageShare, ...(pageLayout.afterBody ?? [])]
-}
-
 const pageContribute = PageContribute()
 
 const content = { ...(layout.byPageType.content ?? {}) }
@@ -192,8 +183,8 @@ for (const pageLayout of Object.values(layout.byPageType)) {
   pageLayout.header = [siteHeader, ...(pageLayout.header ?? [])]
 }
 
-// The Edit/Report contribution links (page-contribute) ride the article's
-// content-meta row — date/reading-time on the left.
+// Share/Edit/Report links ride the article's content-meta row — date/reading-time
+// on the left.
 const contentMetaRow = ContentMetaRow({
   meta: instantiateRegistered("content-meta"),
   contribute: pageContribute,

@@ -6,7 +6,7 @@ import type {
 import styles from "./styles/content-meta-row.scss"
 
 // One article-meta row: the community content-meta (date · reading time) on the
-// left, the page's Edit/Report contribution links (page-contribute.tsx) on the
+// left, the page's Share/Edit/Report links (page-contribute.tsx) on the
 // right. Both instances are passed in from quartz.ts — content-meta is enabled
 // but unpositioned in quartz.config.yaml (the SiteHeader pattern), so this owns
 // where it renders. Suppressed on the home dashboard, which carries no
@@ -33,5 +33,6 @@ export const ContentMetaRow = ((opts?: ContentMetaRowOptions) => {
   }
 
   Row.css = styles
+  Row.afterDOMLoaded = Contribute.afterDOMLoaded
   return Row
 }) satisfies QuartzComponentConstructor<ContentMetaRowOptions>

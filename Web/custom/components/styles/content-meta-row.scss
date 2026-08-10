@@ -44,4 +44,18 @@
     width: 1em;
     height: 1em;
   }
+
+  .page-contribute-check-icon {
+    display: none;
+  }
+
+  .page-contribute-copy[data-copied] {
+    .page-contribute-link-icon {
+      display: none;
+    }
+
+    .page-contribute-check-icon {
+      display: inline;
+    }
+  }
 }
