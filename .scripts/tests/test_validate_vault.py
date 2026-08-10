@@ -167,6 +167,9 @@ publish: "true"
             + "- ### Listed Boundary\n"
             + "- > ## Composed Boundary\n"
             + "- - ## Nested List Boundary\n"
+            + "100. Intro\n     ## Continuation Boundary\n"
+            + "```text\n<!--\n```\n# Comment Boundary\n-->\n"
+            + "\t# Not A Heading\n"
             + "Setext Boundary\n--------\n"
             + "~~~text\n# Hidden Heading\n~~~\n"
             + "````text\n# Hidden Long Fence\n```\n# Still Hidden\n````\n",
@@ -185,6 +188,8 @@ publish: "true"
             + "[[Target#Vault Linked Boundary]], [[Target#Quoted Boundary]], "
             + "[[Target#Listed Boundary]], [[Target#Composed Boundary]], "
             + "[[Target#Nested List Boundary]], "
+            + "[[Target#Continuation Boundary]], [[Target#Comment Boundary]], "
+            + "[[Target#Not A Heading]], "
             + "[[Target#Indented Boundary]], "
             + "[[Target#Hidden Heading]], [[Target#Hidden Long Fence]], [[Target#Still Hidden]], "
             + "[[Target#publish: true]], "
@@ -194,6 +199,7 @@ publish: "true"
         issues = validate_vault.validate_wikilinks(source, validate_vault.VaultIndex(root / "Vault"))
         self.assertEqual(
             [
+                "target#not a heading",
                 "target#hidden heading",
                 "target#hidden long fence",
                 "target#still hidden",

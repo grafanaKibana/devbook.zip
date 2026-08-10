@@ -504,15 +504,36 @@ def strip_non_link_markdown(content: str, *, preserve_inline_code: bool = False)
     def preserve_lines(match: re.Match[str]) -> str:
         return "\n" * match.group(0).count("\n")
 
-    content = re.sub(r"<!--.*?-->", preserve_lines, content, flags=re.DOTALL)
-    content = re.sub(r"%%.*?%%", preserve_lines, content, flags=re.DOTALL)
+    open_comment_end: str | None = None
+
+    def strip_comments(line: str) -> str:
+        nonlocal open_comment_end
+        visible_parts: list[str] = []
+        while line:
+            if open_comment_end:
+                _, separator, line = line.partition(open_comment_end)
+                if not separator:
+                    return "".join(visible_parts)
+                open_comment_end = None
+                continue
+            opener = re.search(r"<!--|%%", line)
+            if not opener:
+                visible_parts.append(line)
+                break
+            visible_parts.append(line[: opener.start()])
+            line = line[opener.end() :]
+            open_comment_end = "-->" if opener.group() == "<!--" else "%%"
+        return "".join(visible_parts)
+
     visible: list[str] = []
     open_code_fence: tuple[str, int] | None = None
     tabsdown_fences: list[tuple[str, int]] = []
     list_indents: list[int] = []
     for raw_line in content.splitlines(keepends=True):
         line_ending = raw_line[len(raw_line.rstrip("\r\n")) :]
-        line = raw_line.rstrip("\r\n").expandtabs(4)
+        raw_content = raw_line.rstrip("\r\n")
+        content_line = raw_content if open_code_fence else strip_comments(raw_content)
+        line = content_line.expandtabs(4)
         line = re.sub(r"^(?: {0,3}>[ \t]?)+", "", line)
         if open_code_fence:
             for indent in reversed(list_indents):
@@ -535,7 +556,7 @@ def strip_non_link_markdown(content: str, *, preserve_inline_code: bool = False)
         line = re.sub(r"^(?: {0,3}>[ \t]?)+", "", line)
         match = re.match(r"^ {0,3}(`{3,}|~{3,})(.*)$", line)
         if not match:
-            visible.append(line_ending if open_code_fence else raw_line)
+            visible.append(line_ending if open_code_fence else content_line + line_ending)
             continue
         fence, suffix = match.groups()
         if open_code_fence:
@@ -564,6 +585,34 @@ def strip_non_link_markdown(content: str, *, preserve_inline_code: bool = False)
         flags=re.DOTALL,
     )
     return content
+
+
+def normalize_heading_containers(content: str) -> str:
+    normalized: list[str] = []
+    list_indents: list[int] = []
+    for raw_line in content.splitlines():
+        line = raw_line.expandtabs(4)
+        line = re.sub(r"^(?: {0,3}>[ \t]?)+", "", line)
+        list_item = re.match(r"^( *)(?:[-+*]|\d+[.)])([ \t]+)(.*)$", line)
+        if list_item:
+            marker_indent = len(list_item.group(1))
+            list_indents = [indent for indent in list_indents if indent <= marker_indent]
+            list_indents.append(list_item.start(3))
+            line = list_item.group(3)
+        else:
+            leading_spaces = len(line) - len(line.lstrip(" "))
+            while list_indents and line.strip() and leading_spaces < list_indents[-1]:
+                list_indents.pop()
+            if list_indents and leading_spaces >= list_indents[-1]:
+                line = line[list_indents[-1] :]
+        normalized.append(
+            re.sub(
+                r"^(?:(?: {0,3}>[ \t]?)|(?: {0,3}(?:[-+*]|\d+[.)])[ \t]+))+",
+                "",
+                line,
+            )
+        )
+    return "\n".join(normalized)
 
 
 def visible_heading_text(heading: str) -> str:
@@ -650,14 +699,7 @@ def validate_wikilinks(note: Note, index: VaultIndex) -> list[Issue]:
         ):
             _, target_body, _ = split_frontmatter(resolved.read_text(encoding="utf-8"))
             target_content = strip_non_link_markdown(target_body, preserve_inline_code=True)
-            heading_content = "\n".join(
-                re.sub(
-                    r"^(?:(?: {0,3}>[ \t]?)|(?: {0,3}(?:[-+*]|\d+[.)])[ \t]+))+",
-                    "",
-                    line,
-                )
-                for line in target_content.splitlines()
-            )
+            heading_content = normalize_heading_containers(target_content)
             raw_headings = re.findall(
                 r"^[ \t]{0,3}#{1,6}[ \t]+(.+?)(?:[ \t]+#+[ \t]*)?$",
                 heading_content,
