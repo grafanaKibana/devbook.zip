@@ -1,8 +1,8 @@
 ---
 publish: true
 created: 2026-08-10T07:56:54.913Z
-modified: 2026-08-10T09:32:47.561Z
-published: 2026-08-10T09:32:47.561Z
+modified: 2026-08-10T15:10:48.312Z
+published: 2026-08-10T15:10:48.312Z
 topic:
   - Computer Science
 subtopic:
@@ -48,7 +48,7 @@ tab: Complexity
           "operation": "Sort",
           "bounds": [
             { "kind": "curve", "role": "Best", "formula": "O(n)", "curveId": "linear" },
-            { "kind": "curve", "role": "Expected", "formula": "Θ(n · n!)", "curveId": "factorial" },
+            { "kind": "text", "role": "Expected", "formula": "Θ(n · n!)" },
             { "kind": "text", "role": "Worst", "formula": "Unbounded without an attempt cap" }
           ]
         }
