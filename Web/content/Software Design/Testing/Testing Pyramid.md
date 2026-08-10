@@ -1,8 +1,8 @@
 ---
 publish: true
 created: 2026-08-10T08:13:07.800Z
-modified: 2026-08-10T14:00:19.745Z
-published: 2026-08-10T14:00:19.745Z
+modified: 2026-08-10T15:00:48.535Z
+published: 2026-08-10T15:00:48.535Z
 topic:
   - Software Design
 subtopic:
@@ -16,7 +16,7 @@ status: Not-Started
 
 The testing pyramid allocates verification by feedback speed and maintenance cost. It favors many narrow tests near the code and fewer broad tests across deployed boundaries. The shape is a heuristic, not a fixed ratio: the useful mix follows the system’s risks, architecture, and cost of a missed defect.
 
-![[Assets/Excalidraw/Testing Pyramid.excalidraw]]
+![[Assets/Excalidraw/Testing Pyramid.excalidraw|700|center]]
 
 | Layer | Purpose | Relative quantity | Speed | Cost and failure diagnosis |
 | --- | --- | --- | --- | --- |
