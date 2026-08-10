@@ -157,12 +157,17 @@ publish: "true"
         self.write_note(
             root,
             "Vault/Home/Topic/Target.md",
-            VALID_FRONTMATTER + "# Existing Heading\n",
+            VALID_FRONTMATTER + "# Existing Heading\n# C#\n# Closed Heading ###\n",
         )
+        asset = root / "Vault/Assets/manual.pdf"
+        asset.parent.mkdir(parents=True, exist_ok=True)
+        asset.write_bytes(b"\xff\xfe")
         source = self.write_note(
             root,
             "Vault/Home/Topic/Source.md",
-            VALID_FRONTMATTER + "[[Target#Existing Heading]] and [[Target#Missing Heading]]\n",
+            VALID_FRONTMATTER
+            + "[[Target#Existing Heading]], [[Target#C#]], [[Target#Closed Heading]], "
+            + "![[Assets/manual.pdf#page=3]], and [[Target#Missing Heading]]\n",
         )
         issues = validate_vault.validate_wikilinks(source, validate_vault.VaultIndex(root / "Vault"))
         self.assertEqual(["wikilink.heading-unresolved"], [issue.code for issue in issues])

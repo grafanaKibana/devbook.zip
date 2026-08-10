@@ -242,8 +242,10 @@ test("sitewide navigation and nested hub links stay canonical", () => {
       )
       .map((file) => basename(file, extname(file))),
   )
+  const wikilinkTarget = (raw: string) => raw.split(/\\?\|/, 1)[0]!.split("#", 1)[0]!.trim()
+  assert.equal(wikilinkTarget("Graph Algorithms\\|Graph"), "Graph Algorithms")
   const shortNestedHubLinks = [...vault.matchAll(/\[\[([^\]\n]+)\]\]/g)]
-    .map((match) => match[1]!.split("|", 1)[0]!.split("#", 1)[0]!.trim())
+    .map((match) => wikilinkTarget(match[1]!))
     .filter((target) => !target.includes("/") && nestedHubNames.has(target))
   assert.deepEqual(shortNestedHubLinks, [])
   assert.doesNotMatch(vault, /Home\/AI & ML\/LLM\/Agent\/(?:Harness|Loop) Engineering/)

@@ -572,11 +572,15 @@ def validate_wikilinks(note: Note, index: VaultIndex) -> list[Issue]:
                     target.casefold(),
                 )
             )
-        elif separator and anchor and not anchor.startswith("^"):
+        elif resolved.suffix.casefold() == ".md" and separator and anchor and not anchor.startswith("^"):
             target_content = strip_non_link_markdown(resolved.read_text(encoding="utf-8"))
             headings = {
                 re.sub(r"\s+", " ", heading).strip().casefold()
-                for heading in re.findall(r"^#{1,6}[ \t]+(.+?)[ \t]*#*[ \t]*$", target_content, re.MULTILINE)
+                for heading in re.findall(
+                    r"^#{1,6}[ \t]+(.+?)(?:[ \t]+#+[ \t]*)?$",
+                    target_content,
+                    re.MULTILINE,
+                )
             }
             normalized_anchor = re.sub(r"\s+", " ", unquote(anchor)).strip().casefold()
             if normalized_anchor not in headings:
