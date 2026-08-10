@@ -31,13 +31,19 @@ return FolderStructureMap;
 | [[Merge Intervals]] | Sort by start, then sweep and coalesce | "Overlapping intervals", "meeting rooms", calendar booking | O(n²) → O(n log n) |
 | [[Cyclic Sort]] | Swap each value to the index it belongs at | "n numbers in the range 1..n" + find the missing/duplicate, in place | O(n) space → O(1) |
 | [[Top-K Elements]] | A size-k heap over a stream | "Top / largest / smallest / most frequent K" | O(n log n) → O(n log k) |
+| [[Home/Computer Science/Algorithms/Patterns/Two Heaps|Two Heaps]] | Max-heap below, min-heap above a moving partition | "Running median", "median from a stream", balanced lower/upper halves | O(n log n) total updates + O(1) median reads |
 | [[Binary Search on Answer]] | Binary-search the answer space, not the array | "Minimise the maximum", "maximise the minimum", "smallest x such that…" | O(range) → O(log range) |
 | [[Bit Manipulation]] | Operate on the binary representation directly | Small fixed sets, parity/toggles, subset enumeration | O(n) → O(1) space/time tricks |
 
 > [!TIP]
 > The interview skill is *recognition*: most problems announce their pattern through a keyword — "contiguous … with sum/length" → sliding window; "sorted … pair that sums to" → two pointers; "next greater" → monotonic stack; "minimise the maximum" → binary search on answer; "appears once / subsets of a small set" → bit manipulation.
 
-A few of these are close relatives, and the distinction is worth holding onto. [[Sliding Window]] needs all-positive values to keep its monotonic shrink valid; [[Prefix Sum]] plus a hashmap handles the same "subarray summing to k" question when negatives are allowed. [[Fast and Slow Pointers]] is the speed-differential member of the [[Two Pointers]] family rather than a separate idea. And [[Binary Search on Answer]] is not really a search over data at all — it borrows only the halving mechanic from [[Binary Search]].
+A few of these are close relatives, and the distinction is worth holding onto. Variable-size sum windows whose shrink/expand decision relies on monotonic sums require non-negative values; [[Prefix Sum]] plus a hashmap handles the same "subarray summing to k" question when negatives are allowed. [[Fast and Slow Pointers]] is the speed-differential member of the [[Two Pointers]] family rather than a separate idea. And [[Binary Search on Answer]] is not really a search over data at all — it borrows only the halving mechanic from [[Binary Search]].
+
+# Questions
+
+> [!QUESTION]- A problem asks for a contiguous subarray summing to `k`, but values may be negative. Which pattern is safer than a variable-size sliding window, and why?
+> Use prefix sums with a hashmap because equal prefix-difference relationships remain valid with negative values. A sum-based sliding window cannot decide reliably which boundary to move when adding or removing a value may increase or decrease the sum.
 
 # References
 

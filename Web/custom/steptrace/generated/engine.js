@@ -6089,11 +6089,11 @@
     for (const key4 of keys) {
       for (let index = 1; index <= key4.length; index++) prefixes.add(key4.slice(0, index));
     }
-    const ordered = [...prefixes].sort((a, b) => a.length - b.length || a.localeCompare(b));
+    const ordered2 = [...prefixes].sort((a, b) => a.length - b.length || a.localeCompare(b));
     const labels = new Map(
-      ordered.map((prefix) => [prefix || "root", prefix ? prefix.at(-1) || "" : "root"])
+      ordered2.map((prefix) => [prefix || "root", prefix ? prefix.at(-1) || "" : "root"])
     );
-    const edges5 = ordered.filter(Boolean).map((prefix) => {
+    const edges5 = ordered2.filter(Boolean).map((prefix) => {
       const parent = prefix.slice(0, -1) || "root";
       return { id: `${parent}->${prefix}`, from: parent, to: prefix };
     });
@@ -10021,6 +10021,60 @@
   };
 
   // custom/steptrace/src/families/heap-selection.ts
+  var TwoHeapsRecorder = class {
+    constructor(config) {
+      __publicField(this, "config", config);
+      __publicField(this, "frames", []);
+      __publicField(this, "lower", []);
+      __publicField(this, "upper", []);
+      __publicField(this, "cursor", null);
+    }
+    init(message) {
+      this.record("init", message);
+    }
+    insert(index, message) {
+      this.cursor = index;
+      const entry = { value: this.config.array[index], source: index };
+      if (!this.lower.length || entry.value <= this.lower[0].value) this.lower.push(entry);
+      else this.upper.push(entry);
+      this.lower.sort((left, right) => right.value - left.value || left.source - right.source);
+      this.upper.sort((left, right) => left.value - right.value || left.source - right.source);
+      if (this.lower.length > this.upper.length + 1) this.upper.push(this.lower.shift());
+      if (this.upper.length > this.lower.length) this.lower.push(this.upper.shift());
+      this.lower.sort((left, right) => right.value - left.value || left.source - right.source);
+      this.upper.sort((left, right) => left.value - right.value || left.source - right.source);
+      this.record("insert", message);
+    }
+    done(message) {
+      this.cursor = null;
+      this.record("done", message);
+    }
+    record(type, message) {
+      let median;
+      if (this.lower.length === this.upper.length) {
+        if (!this.lower.length) median = null;
+        else {
+          const lower = this.lower[0].value;
+          const upper = this.upper[0].value;
+          median = lower < 0 === upper < 0 ? lower + (upper - lower) / 2 : (lower + upper) / 2;
+        }
+      } else {
+        median = this.lower[0].value;
+      }
+      this.frames.push(
+        Object.freeze({
+          type,
+          profile: this.config.profile,
+          array: this.config.array,
+          cursor: this.cursor,
+          lower: this.lower.map((entry) => ({ ...entry })),
+          upper: this.upper.map((entry) => ({ ...entry })),
+          median,
+          message
+        })
+      );
+    }
+  };
   var HeapSelectionRecorder = class {
     constructor(config) {
       __publicField(this, "config", config);
@@ -10145,6 +10199,111 @@
     const node2 = document.createElementNS(SVG_NS4, tag);
     node2.setAttribute("class", className);
     return node2;
+  }
+  function createTwoHeapTree(capacity, label, rootLabel) {
+    const wrap = el("div", "steptrace__heap-tree");
+    const svg = svgEl3("svg", "steptrace__heap-svg");
+    svg.setAttribute("viewBox", `0 0 300 ${capacity > 3 ? 192 : 124}`);
+    svg.setAttribute("role", "img");
+    svg.setAttribute("aria-label", label);
+    const positions = Array.from({ length: capacity }, (_, index) => heapPosition(index));
+    const edges5 = [];
+    for (let index = 1; index < capacity; index++) {
+      const parent = Math.floor((index - 1) / 2);
+      const edge = trimGraphEdge(positions[parent], positions[index], GRAPH_NODE_RADIUS_PX);
+      const line = svgEl3("line", "steptrace__edge steptrace__heap-edge");
+      line.setAttribute("x1", String(edge.x1));
+      line.setAttribute("y1", String(edge.y1));
+      line.setAttribute("x2", String(edge.x2));
+      line.setAttribute("y2", String(edge.y2));
+      svg.append(line);
+      edges5.push({ line, child: index });
+    }
+    const nodes5 = positions.map((position, index) => {
+      const group = svgEl3("g", "steptrace__node steptrace__heap-node");
+      group.setAttribute("transform", `translate(${position.x} ${position.y})`);
+      const circle = svgEl3("circle", "steptrace__ncirc");
+      circle.setAttribute("r", String(GRAPH_NODE_RADIUS_PX));
+      const value = svgEl3("text", "steptrace__id");
+      value.setAttribute("text-anchor", "middle");
+      value.setAttribute("dominant-baseline", "central");
+      const tag = svgEl3("text", "steptrace__heap-root-label");
+      tag.setAttribute("text-anchor", "middle");
+      tag.setAttribute("y", "-23");
+      tag.textContent = index === 0 ? rootLabel : "";
+      group.append(circle, value, tag);
+      svg.append(group);
+      return { group, value, tag };
+    });
+    wrap.append(svg);
+    return {
+      wrap,
+      paint(entries) {
+        nodes5.forEach(({ group, value, tag }, index) => {
+          const entry = entries[index];
+          value.textContent = entry ? String(entry.value) : "";
+          group.dataset.visible = entry ? "1" : "0";
+          if (!entry) group.dataset.state = "empty";
+          else if (index === 0) group.dataset.state = "weakest";
+          else group.dataset.state = "winner";
+          group.setAttribute("aria-hidden", entry ? "false" : "true");
+          tag.dataset.visible = index === 0 && entry ? "1" : "0";
+        });
+        for (const { line, child } of edges5) line.dataset.visible = entries[child] ? "1" : "0";
+      }
+    };
+  }
+  function makeTwoHeapsView(frames) {
+    const first = frames[0];
+    const capacity = Math.ceil(first.array.length / 2);
+    const root = el("div", "steptrace__heap-selection steptrace__two-heaps");
+    root.setAttribute("role", "region");
+    root.setAttribute("aria-label", "Running median with a lower max-heap and upper min-heap");
+    const streamLabel = el("div", "steptrace__rail-label");
+    streamLabel.textContent = "Stream";
+    const stream = makeArrayStrip(first.array);
+    stream.wrap.classList.add("steptrace__heap-stream");
+    const heaps = el("div", "steptrace__two-heaps-grid");
+    const lowerWrap = el("div", "steptrace__two-heaps-side");
+    const lowerLabel = el("div", "steptrace__rail-label");
+    lowerLabel.textContent = "Lower · max-heap";
+    const lower = createTwoHeapTree(capacity, "Lower max-heap", "max");
+    lowerWrap.append(lowerLabel, lower.wrap);
+    const upperWrap = el("div", "steptrace__two-heaps-side");
+    const upperLabel = el("div", "steptrace__rail-label");
+    upperLabel.textContent = "Upper · min-heap";
+    const upper = createTwoHeapTree(capacity, "Upper min-heap", "min");
+    upperWrap.append(upperLabel, upper.wrap);
+    heaps.append(lowerWrap, upperWrap);
+    root.append(streamLabel, stream.wrap, heaps);
+    const status = statusEl();
+    function paint(frame) {
+      stream.cells.forEach((cell, index) => {
+        if (index === frame.cursor) cell.dataset.state = "current";
+        else if (index < (frame.cursor ?? frame.array.length)) cell.dataset.state = "seen";
+        else cell.dataset.state = "";
+      });
+      lower.paint(frame.lower);
+      upper.paint(frame.upper);
+      status.textContent = frame.message;
+    }
+    return {
+      nodes: [root, status],
+      stageLayout: "fill",
+      stableStage: true,
+      paint,
+      watch(frame) {
+        return [
+          { k: "median", v: frame.median ?? "—", sw: "var(--_amber)" },
+          { k: "lower max", v: frame.lower[0]?.value ?? "empty", sw: "var(--_violet)" },
+          { k: "upper min", v: frame.upper[0]?.value ?? "empty", sw: "var(--_blue)" },
+          { k: "sizes", v: `${frame.lower.length} / ${frame.upper.length}`, sw: "var(--_green)" }
+        ];
+      },
+      summary(frame) {
+        return `Median ${frame.median} · lower ${frame.lower.length} · upper ${frame.upper.length}.`;
+      }
+    };
   }
   function makeHeapSelectionView(frames) {
     const first = frames[0];
@@ -10307,6 +10466,15 @@
     },
     createView(frames) {
       return makeHeapSelectionView(frames);
+    }
+  };
+  var twoHeapsFamily = {
+    id: "heap-selection",
+    createRecorder(config) {
+      return new TwoHeapsRecorder(config);
+    },
+    createView(frames) {
+      return makeTwoHeapsView(frames);
     }
   };
 
@@ -12049,6 +12217,260 @@
     }
   };
 
+  // custom/steptrace/src/families/array-sort.ts
+  function parseArraySortConfig(config, algorithm, profile, maxLength = Number.POSITIVE_INFINITY) {
+    const { array } = config;
+    if (!Array.isArray(array) || array.length < 2 || array.length > maxLength) {
+      const size = Number.isFinite(maxLength) ? `2 to ${maxLength}` : "at least two";
+      throw new Error(`steptrace: ${algorithm} requires an "array" with ${size} numbers.`);
+    }
+    if (!array.every((value) => typeof value === "number" && Number.isFinite(value)))
+      throw new Error(`steptrace: ${algorithm} requires every "array" value to be a finite number.`);
+    return { array: array.slice(), profile };
+  }
+  function resolveArraySortFrame(frame) {
+    if (frame.profile === "comb") return resolveCombSortFrame(frame);
+    if (frame.profile === "cyclic") return resolveCyclicSortFrame(frame);
+    if (frame.profile === "introsort") return resolveIntrosortFrame(frame);
+    const decorate = (visual) => ({
+      ...visual,
+      laneIndices: frame.subsequence,
+      holeIndex: frame.hole,
+      heldToken: frame.keyValue == null || frame.keyOrigin == null ? null : {
+        id: frame.tokenId,
+        index: frame.type === "place-held" ? frame.hole : frame.keyOrigin,
+        label: `held ${frame.keyValue}`,
+        placing: frame.type === "place-held"
+      }
+    });
+    if (frame.type === "gap" || frame.type === "subsequence") {
+      return decorate({
+        activeIndices: [],
+        activeRole: null,
+        markerIndices: [null, null],
+        movements: []
+      });
+    }
+    if (frame.type === "hold-key") {
+      return decorate({
+        activeIndices: [],
+        activeRole: null,
+        markerIndices: [null, null],
+        movements: []
+      });
+    }
+    if (frame.type === "compare-held") {
+      return decorate({
+        activeIndices: frame.active,
+        activeRole: "compare",
+        markerIndices: [frame.active[0] ?? null, null],
+        movements: []
+      });
+    }
+    if (frame.type === "shift-held") {
+      const to = frame.active[0] ?? null;
+      const from = frame.from ?? null;
+      return decorate({
+        activeIndices: to == null ? [] : [to],
+        activeRole: "move",
+        markerIndices: [null, from],
+        movements: to == null || from == null ? [] : [[to, from]]
+      });
+    }
+    if (frame.type === "place-held") {
+      return decorate({
+        activeIndices: [],
+        activeRole: null,
+        markerIndices: [null, null],
+        movements: []
+      });
+    }
+    return decorate(resolveLegacySortFrame(frame));
+  }
+  function resolveIntrosortFrame(frame) {
+    const visual = resolveLegacySortFrame(frame);
+    return {
+      ...visual,
+      laneIndices: null,
+      holeIndex: frame.hole,
+      heldToken: frame.keyValue == null || frame.keyOrigin == null ? null : {
+        id: frame.tokenId,
+        index: frame.type === "place-held" ? frame.hole : frame.keyOrigin,
+        label: `held ${frame.keyValue}`,
+        placing: frame.type === "place-held"
+      }
+    };
+  }
+  function resolveCombSortFrame(frame) {
+    const visual = resolveLegacySortFrame(frame);
+    return {
+      ...visual,
+      laneIndices: frame.subsequence,
+      holeIndex: null,
+      heldToken: null
+    };
+  }
+  function resolveCyclicSortFrame(frame) {
+    if (frame.type === "home-check") {
+      return {
+        activeIndices: frame.active,
+        activeRole: "compare",
+        markerIndices: [frame.cursor, frame.home],
+        movements: [],
+        laneIndices: null,
+        holeIndex: null,
+        heldToken: null
+      };
+    }
+    if (frame.type === "mark-sorted") {
+      return {
+        activeIndices: [],
+        activeRole: null,
+        markerIndices: [frame.cursor, frame.home],
+        movements: [],
+        laneIndices: null,
+        holeIndex: null,
+        heldToken: null
+      };
+    }
+    return resolveLegacySortFrame(frame);
+  }
+  var arraySortViewSemantics = {
+    markerLabels: ["at", "from"],
+    movementLabel: "moves",
+    resolveFrame: resolveArraySortFrame,
+    watchRows(frame) {
+      return [
+        { k: "held", v: frame.keyValue ?? "—", sw: "var(--_blue)" },
+        { k: "gap", v: frame.gap ?? "—", sw: "var(--_amber)" },
+        {
+          k: "lane",
+          v: frame.subsequence ? frame.subsequence.join(" → ") : "—",
+          sw: "var(--_violet)"
+        }
+      ];
+    }
+  };
+  var combSortViewSemantics = {
+    markerLabels: ["left", "right"],
+    movementLabel: "swaps",
+    resolveFrame: resolveArraySortFrame,
+    watchRows(frame) {
+      return [
+        { k: "gap", v: frame.gap ?? "—", sw: "var(--_amber)" },
+        {
+          k: "pass swapped",
+          v: frame.passSwapped == null ? "—" : frame.passSwapped ? "yes" : "no",
+          sw: frame.passSwapped ? "var(--_green)" : "var(--_neutral)",
+          hint: "Whether this gap pass made any swap."
+        }
+      ];
+    }
+  };
+  var cyclicSortViewSemantics = {
+    markerLabels: ["at", "home"],
+    movementLabel: "swaps",
+    resolveFrame: resolveArraySortFrame,
+    watchRows(frame) {
+      const value = frame.cursor == null ? null : frame.array[frame.cursor];
+      return [
+        {
+          k: "value",
+          v: value ?? "—",
+          sw: "var(--_blue)",
+          hint: "Value at the current cursor."
+        },
+        {
+          k: "placed",
+          v: `${frame.sorted.length}/${frame.array.length}`,
+          sw: "var(--_green)",
+          hint: "Values already fixed at their home index."
+        }
+      ];
+    }
+  };
+  var introsortViewSemantics = {
+    markerLabels: ["scan", "pivot"],
+    movementLabel: "moves",
+    resolveFrame: resolveArraySortFrame,
+    watchRows(frame) {
+      const depth = frame.depthUsed == null || frame.depthLimit == null ? "—" : `${frame.depthUsed}/${frame.depthLimit}`;
+      return [
+        {
+          k: "strategy",
+          v: frame.strategy ?? (frame.type === "done" ? "complete" : "—"),
+          sw: frame.strategy === "heap sort" ? "var(--_amber)" : frame.strategy === "insertion sort" ? "var(--_green)" : "var(--_blue)"
+        },
+        {
+          k: "depth",
+          v: depth,
+          sw: "var(--_violet)",
+          hint: "Quicksort levels used out of the depth limit."
+        },
+        { k: "cutoff", v: frame.cutoff == null ? "—" : `≤ ${frame.cutoff}`, sw: "var(--_neutral)" }
+      ];
+    }
+  };
+  function arraySortSemanticsFor(frames) {
+    switch (frames[0]?.profile) {
+      case "comb":
+        return combSortViewSemantics;
+      case "cyclic":
+        return cyclicSortViewSemantics;
+      case "introsort":
+        return introsortViewSemantics;
+      default:
+        return arraySortViewSemantics;
+    }
+  }
+  var arraySortFamily = {
+    id: "array-sort",
+    createRecorder(config) {
+      return new ArraySortRecorder(config.array, config.profile);
+    },
+    createView(frames) {
+      return makeSortView(frames, arraySortSemanticsFor(frames));
+    }
+  };
+
+  // custom/steptrace/src/algorithms/bogo-sort.ts
+  var MAX_ITEMS = 5;
+  var MAX_ATTEMPTS = 120;
+  function ordered(values) {
+    return values.every((value, index) => index === 0 || values[index - 1] <= value);
+  }
+  var bogoSort = {
+    id: "bogo-sort",
+    kind: "sort",
+    family: arraySortFamily,
+    meta: { label: "Bogo sort" },
+    parse: (config) => parseArraySortConfig(config, "bogo-sort", "bogo", MAX_ITEMS),
+    run(_input, ops) {
+      ops.init("Bogo sort checks the order, then tries a deterministic sequence of permutations.");
+      let attempts = 0;
+      while (!ordered(ops.value) && attempts < MAX_ATTEMPTS) {
+        const values = ops.value;
+        let pivot = values.length - 2;
+        while (pivot >= 0 && values[pivot] >= values[pivot + 1]) pivot--;
+        if (pivot < 0) {
+          for (let left = 0, right = values.length - 1; left < right; left++, right--)
+            ops.swap(left, right, "Wrap to the first deterministic permutation.");
+        } else {
+          let successor = values.length - 1;
+          while (values[successor] <= values[pivot]) successor--;
+          ops.swap(pivot, successor, `Permutation ${attempts + 1}: advance the pivot.`);
+          for (let left = pivot + 1, right = values.length - 1; left < right; left++, right--)
+            ops.swap(left, right, "Restore the smallest suffix for the next permutation.");
+        }
+        attempts++;
+      }
+      if (!ordered(ops.value))
+        throw new Error(`steptrace: bogo-sort exceeded ${MAX_ATTEMPTS} attempts.`);
+      ops.lockAll(Array.from({ length: ops.value.length }, (_, index) => index));
+      ops.done(`A sorted permutation appeared after ${attempts} bounded attempts.`);
+    }
+  };
+
   // custom/steptrace/src/families/distribution-sort.ts
   var DistributionSortRecorder = class {
     constructor(config) {
@@ -13269,212 +13691,6 @@
     mount: mountCircularBuffer
   };
 
-  // custom/steptrace/src/families/array-sort.ts
-  function resolveArraySortFrame(frame) {
-    if (frame.profile === "comb") return resolveCombSortFrame(frame);
-    if (frame.profile === "cyclic") return resolveCyclicSortFrame(frame);
-    if (frame.profile === "introsort") return resolveIntrosortFrame(frame);
-    const decorate = (visual) => ({
-      ...visual,
-      laneIndices: frame.subsequence,
-      holeIndex: frame.hole,
-      heldToken: frame.keyValue == null || frame.keyOrigin == null ? null : {
-        id: frame.tokenId,
-        index: frame.type === "place-held" ? frame.hole : frame.keyOrigin,
-        label: `held ${frame.keyValue}`,
-        placing: frame.type === "place-held"
-      }
-    });
-    if (frame.type === "gap" || frame.type === "subsequence") {
-      return decorate({
-        activeIndices: [],
-        activeRole: null,
-        markerIndices: [null, null],
-        movements: []
-      });
-    }
-    if (frame.type === "hold-key") {
-      return decorate({
-        activeIndices: [],
-        activeRole: null,
-        markerIndices: [null, null],
-        movements: []
-      });
-    }
-    if (frame.type === "compare-held") {
-      return decorate({
-        activeIndices: frame.active,
-        activeRole: "compare",
-        markerIndices: [frame.active[0] ?? null, null],
-        movements: []
-      });
-    }
-    if (frame.type === "shift-held") {
-      const to = frame.active[0] ?? null;
-      const from = frame.from ?? null;
-      return decorate({
-        activeIndices: to == null ? [] : [to],
-        activeRole: "move",
-        markerIndices: [null, from],
-        movements: to == null || from == null ? [] : [[to, from]]
-      });
-    }
-    if (frame.type === "place-held") {
-      return decorate({
-        activeIndices: [],
-        activeRole: null,
-        markerIndices: [null, null],
-        movements: []
-      });
-    }
-    return decorate(resolveLegacySortFrame(frame));
-  }
-  function resolveIntrosortFrame(frame) {
-    const visual = resolveLegacySortFrame(frame);
-    return {
-      ...visual,
-      laneIndices: null,
-      holeIndex: frame.hole,
-      heldToken: frame.keyValue == null || frame.keyOrigin == null ? null : {
-        id: frame.tokenId,
-        index: frame.type === "place-held" ? frame.hole : frame.keyOrigin,
-        label: `held ${frame.keyValue}`,
-        placing: frame.type === "place-held"
-      }
-    };
-  }
-  function resolveCombSortFrame(frame) {
-    const visual = resolveLegacySortFrame(frame);
-    return {
-      ...visual,
-      laneIndices: frame.subsequence,
-      holeIndex: null,
-      heldToken: null
-    };
-  }
-  function resolveCyclicSortFrame(frame) {
-    if (frame.type === "home-check") {
-      return {
-        activeIndices: frame.active,
-        activeRole: "compare",
-        markerIndices: [frame.cursor, frame.home],
-        movements: [],
-        laneIndices: null,
-        holeIndex: null,
-        heldToken: null
-      };
-    }
-    if (frame.type === "mark-sorted") {
-      return {
-        activeIndices: [],
-        activeRole: null,
-        markerIndices: [frame.cursor, frame.home],
-        movements: [],
-        laneIndices: null,
-        holeIndex: null,
-        heldToken: null
-      };
-    }
-    return resolveLegacySortFrame(frame);
-  }
-  var arraySortViewSemantics = {
-    markerLabels: ["at", "from"],
-    movementLabel: "moves",
-    resolveFrame: resolveArraySortFrame,
-    watchRows(frame) {
-      return [
-        { k: "held", v: frame.keyValue ?? "—", sw: "var(--_blue)" },
-        { k: "gap", v: frame.gap ?? "—", sw: "var(--_amber)" },
-        {
-          k: "lane",
-          v: frame.subsequence ? frame.subsequence.join(" → ") : "—",
-          sw: "var(--_violet)"
-        }
-      ];
-    }
-  };
-  var combSortViewSemantics = {
-    markerLabels: ["left", "right"],
-    movementLabel: "swaps",
-    resolveFrame: resolveArraySortFrame,
-    watchRows(frame) {
-      return [
-        { k: "gap", v: frame.gap ?? "—", sw: "var(--_amber)" },
-        {
-          k: "pass swapped",
-          v: frame.passSwapped == null ? "—" : frame.passSwapped ? "yes" : "no",
-          sw: frame.passSwapped ? "var(--_green)" : "var(--_neutral)",
-          hint: "Whether this gap pass made any swap."
-        }
-      ];
-    }
-  };
-  var cyclicSortViewSemantics = {
-    markerLabels: ["at", "home"],
-    movementLabel: "swaps",
-    resolveFrame: resolveArraySortFrame,
-    watchRows(frame) {
-      const value = frame.cursor == null ? null : frame.array[frame.cursor];
-      return [
-        {
-          k: "value",
-          v: value ?? "—",
-          sw: "var(--_blue)",
-          hint: "Value at the current cursor."
-        },
-        {
-          k: "placed",
-          v: `${frame.sorted.length}/${frame.array.length}`,
-          sw: "var(--_green)",
-          hint: "Values already fixed at their home index."
-        }
-      ];
-    }
-  };
-  var introsortViewSemantics = {
-    markerLabels: ["scan", "pivot"],
-    movementLabel: "moves",
-    resolveFrame: resolveArraySortFrame,
-    watchRows(frame) {
-      const depth = frame.depthUsed == null || frame.depthLimit == null ? "—" : `${frame.depthUsed}/${frame.depthLimit}`;
-      return [
-        {
-          k: "strategy",
-          v: frame.strategy ?? (frame.type === "done" ? "complete" : "—"),
-          sw: frame.strategy === "heap sort" ? "var(--_amber)" : frame.strategy === "insertion sort" ? "var(--_green)" : "var(--_blue)"
-        },
-        {
-          k: "depth",
-          v: depth,
-          sw: "var(--_violet)",
-          hint: "Quicksort levels used out of the depth limit."
-        },
-        { k: "cutoff", v: frame.cutoff == null ? "—" : `≤ ${frame.cutoff}`, sw: "var(--_neutral)" }
-      ];
-    }
-  };
-  function arraySortSemanticsFor(frames) {
-    switch (frames[0]?.profile) {
-      case "comb":
-        return combSortViewSemantics;
-      case "cyclic":
-        return cyclicSortViewSemantics;
-      case "introsort":
-        return introsortViewSemantics;
-      default:
-        return arraySortViewSemantics;
-    }
-  }
-  var arraySortFamily = {
-    id: "array-sort",
-    createRecorder(config) {
-      return new ArraySortRecorder(config.array, config.profile);
-    },
-    createView(frames) {
-      return makeSortView(frames, arraySortSemanticsFor(frames));
-    }
-  };
-
   // custom/steptrace/src/algorithms/comb-sort.ts
   function invalidConfig5(message) {
     throw new Error(`steptrace: comb-sort ${message}`);
@@ -13527,6 +13743,46 @@
           swapped,
           gap === 1 && !swapped ? "Gap 1 made no swap; no adjacent inversion remains." : `Gap ${gap} pass complete${swapped ? " with swaps" : " without a swap"}.`
         );
+      }
+      ops.lockAll(Array.from({ length: ops.value.length }, (_, index) => index));
+      ops.done(`Sorted in ${ops.comparisons} comparisons and ${ops.swaps} swaps.`);
+    }
+  };
+
+  // custom/steptrace/src/algorithms/cocktail-shaker-sort.ts
+  var cocktailShakerSort = {
+    id: "cocktail-shaker-sort",
+    kind: "sort",
+    family: arraySortFamily,
+    meta: { label: "Cocktail shaker sort" },
+    parse: (config) => parseArraySortConfig(config, "cocktail-shaker-sort", "cocktail-shaker"),
+    run(_input, ops) {
+      ops.init("Cocktail shaker sort sweeps forward, then backward, shrinking both ends.");
+      let left = 0;
+      let right = ops.value.length - 1;
+      let swapped = true;
+      while (swapped && left < right) {
+        swapped = false;
+        ops.range(left, right);
+        for (let index = left; index < right; index++) {
+          ops.compare(index, index + 1, `Forward: compare indices ${index} and ${index + 1}.`);
+          if (ops.value[index] <= ops.value[index + 1]) continue;
+          ops.swap(index, index + 1, "Swap the inverted adjacent pair.");
+          swapped = true;
+        }
+        ops.markSorted([right], [right], `The largest remaining value is fixed at ${right}.`);
+        right--;
+        if (!swapped) break;
+        swapped = false;
+        ops.range(left, right);
+        for (let index = right; index > left; index--) {
+          ops.compare(index - 1, index, `Backward: compare indices ${index - 1} and ${index}.`);
+          if (ops.value[index - 1] <= ops.value[index]) continue;
+          ops.swap(index - 1, index, "Swap the inverted adjacent pair.");
+          swapped = true;
+        }
+        ops.markSorted([left], [left], `The smallest remaining value is fixed at ${left}.`);
+        left++;
       }
       ops.lockAll(Array.from({ length: ops.value.length }, (_, index) => index));
       ops.done(`Sorted in ${ops.comparisons} comparisons and ${ops.swaps} swaps.`);
@@ -13686,6 +13942,42 @@
       }
       ops.lockAll(Array.from({ length: ops.value.length }, (_, index) => index));
       ops.done(`Placed all values with ${ops.swaps} swaps.`);
+    }
+  };
+
+  // custom/steptrace/src/algorithms/cycle-sort.ts
+  var cycleSort = {
+    id: "cycle-sort",
+    kind: "sort",
+    family: arraySortFamily,
+    meta: { label: "Cycle sort" },
+    parse: (config) => parseArraySortConfig(config, "cycle-sort", "cycle"),
+    run(_input, ops) {
+      ops.init("Cycle sort rotates each value directly toward its final position, minimizing writes.");
+      for (let start = 0; start < ops.value.length - 1; start++) {
+        let item = ops.value[start];
+        let position = start;
+        for (let index = start + 1; index < ops.value.length; index++) {
+          ops.compare(index, start, `Count values smaller than ${item}.`);
+          if (ops.value[index] < item) position++;
+        }
+        if (position === start) continue;
+        while (item === ops.value[position]) position++;
+        const displaced = ops.value[position];
+        ops.overwrite(position, item, `Write the cycle item to final index ${position}.`);
+        item = displaced;
+        while (position !== start) {
+          position = start;
+          for (let index = start + 1; index < ops.value.length; index++)
+            if (ops.value[index] < item) position++;
+          while (item === ops.value[position]) position++;
+          const displaced2 = ops.value[position];
+          ops.overwrite(position, item, `Rotate ${item} into index ${position}.`);
+          item = displaced2;
+        }
+      }
+      ops.lockAll(Array.from({ length: ops.value.length }, (_, index) => index));
+      ops.done(`Sorted with ${ops.swaps} writes.`);
     }
   };
 
@@ -15406,6 +15698,8 @@
         return "gallop";
       case "jump":
         return "jump";
+      case "fibonacci":
+        return "Fibonacci narrowing";
       case "scan":
         return frame.profile === "ternary" ? "final scan" : "linear scan";
       case "interpolation":
@@ -15420,6 +15714,7 @@
     if (frame.phase === "gallop") return "var(--_violet)";
     if (frame.phase === "binary") return "var(--_green)";
     if (frame.phase === "scan" || frame.phase === "jump") return "var(--_blue)";
+    if (frame.phase === "fibonacci") return "var(--_violet)";
     return "var(--_amber)";
   }
   var indexedSearchViewSemantics = {
@@ -15443,6 +15738,8 @@
         });
       } else if (profile === "interpolation") {
         rows.push({ k: "estimate", v: frame.annotationValue ?? "—", sw: "var(--_amber)" });
+      } else if (profile === "fibonacci") {
+        rows.push({ k: "offset", v: frame.annotationValue ?? "−1", sw: "var(--_violet)" });
       } else if (profile === "jump") {
         rows.push({ k: "block", v: String(frame.blockSize ?? "—"), sw: "var(--_blue)" });
       }
@@ -15521,6 +15818,78 @@
         } else {
           right = mid - 1;
           ops.narrow(left, right, `${values[mid]} > ${target}: discard from index ${mid}.`);
+        }
+      }
+      ops.done(`${target} is not in the array after ${ops.comparisons} probes.`);
+    }
+  };
+
+  // custom/steptrace/src/algorithms/fibonacci-search.ts
+  function parseFibonacciSearchConfig(config) {
+    return parseIndexedArraySearchConfig(config, "fibonacci-search", "fibonacci");
+  }
+  var fibonacciSearch = {
+    id: "fibonacci-search",
+    kind: "search",
+    family: indexedArraySearchFamily,
+    meta: { label: "Fibonacci search" },
+    parse: parseFibonacciSearchConfig,
+    run(input, ops) {
+      const values = ops.value;
+      const target = input.target;
+      let fib2 = 0;
+      let fib1 = 1;
+      let fib = fib1 + fib2;
+      while (fib < values.length) {
+        fib2 = fib1;
+        fib1 = fib;
+        fib = fib1 + fib2;
+      }
+      let offset = -1;
+      ops.init(`Fibonacci search for ${target}: narrow the sorted suffix with Fibonacci offsets.`);
+      ops.beginPhase(0, values.length - 1, `Start with Fibonacci window ${fib}.`, "fibonacci");
+      while (fib > 1) {
+        const probe = Math.min(offset + fib2, values.length - 1);
+        ops.annotatedProbe(
+          offset + 1,
+          Math.min(offset + fib - 1, values.length - 1),
+          probe,
+          "offset",
+          String(offset),
+          `Probe offset + F(k−2) at index ${probe}: ${values[probe]}.`
+        );
+        if (values[probe] < target) {
+          fib = fib1;
+          fib1 = fib2;
+          fib2 = fib - fib1;
+          offset = probe;
+          ops.narrow(
+            offset + 1,
+            Math.min(offset + fib, values.length - 1),
+            `Discard through index ${probe}.`
+          );
+        } else if (values[probe] > target) {
+          fib = fib2;
+          fib1 -= fib2;
+          fib2 = fib - fib1;
+          ops.narrow(
+            offset + 1,
+            Math.min(offset + fib - 1, values.length - 1),
+            `Discard from index ${probe}.`
+          );
+        } else {
+          ops.hit(probe, `${target} is at index ${probe}.`);
+          ops.done(`Found ${target} after ${ops.comparisons} probes.`);
+          return;
+        }
+      }
+      if (fib1 && offset + 1 < values.length) {
+        const probe = offset + 1;
+        ops.probe(probe, probe, probe, `Check the final candidate at index ${probe}.`);
+        if (values[probe] === target) {
+          ops.hit(probe, `${target} is at index ${probe}.`);
+          ops.done(`Found ${target} after ${ops.comparisons} probes.`);
+          return;
         }
       }
       ops.done(`${target} is not in the array after ${ops.comparisons} probes.`);
@@ -15887,6 +16256,7 @@
     return { paint };
   }
   function mountLinkedList(root, config) {
+    if (config.variant === "reverse") return mountLinkedListReverse(root, config);
     const shell = createStructureShell(
       root,
       "linked-list",
@@ -15958,6 +16328,42 @@
     shell.listen(remove, "click", onRemove);
     shell.listen(reset, "click", onReset);
     onEnter(shell, input, onAppend);
+    paint();
+    return shell.finish();
+  }
+  function mountLinkedListReverse(root, config) {
+    const shell = createStructureShell(
+      root,
+      "linked-list",
+      "linked list reversal",
+      "Interactive in-place linked list reversal",
+      "linked-topology",
+      "steptrace__linked-list"
+    );
+    const initial = config.values.map((value, index) => ({
+      value: String(value),
+      address: linkedAddress(index)
+    }));
+    let nodes5 = initial.slice();
+    const chain = createAddressChain(shell.stage, "singly");
+    const reverse = shell.button("Reverse", true);
+    const reset = shell.button("Reset");
+    shell.controls.append(reverse, reset);
+    function paint(message = "") {
+      chain.paint(nodes5);
+      shell.setCounter(nodes5[0].address, " head");
+      shell.status.textContent = message || "Reverse rewires next pointers while every node keeps its address and value.";
+    }
+    function onReverse() {
+      nodes5 = nodes5.slice().reverse();
+      paint(`Reversed next pointers; former head ${nodes5.at(-1).address}.next is null.`);
+    }
+    function onReset() {
+      nodes5 = initial.slice();
+      paint("Reset the original pointer order.");
+    }
+    shell.listen(reverse, "click", onReverse);
+    shell.listen(reset, "click", onReset);
     paint();
     return shell.finish();
   }
@@ -17232,6 +17638,29 @@
     mount: mountGraphRepresentation
   };
 
+  // custom/steptrace/src/algorithms/gnome-sort.ts
+  var gnomeSort = {
+    id: "gnome-sort",
+    kind: "sort",
+    family: arraySortFamily,
+    meta: { label: "Gnome sort" },
+    parse: (config) => parseArraySortConfig(config, "gnome-sort", "gnome"),
+    run(_input, ops) {
+      ops.init("Gnome sort advances across ordered neighbors and steps back after each swap.");
+      let index = 1;
+      while (index < ops.value.length) {
+        ops.compare(index - 1, index, `Compare neighbors ${index - 1} and ${index}.`);
+        if (ops.value[index - 1] <= ops.value[index]) index++;
+        else {
+          ops.swap(index - 1, index, `Swap the inversion and step back from index ${index}.`);
+          index = Math.max(1, index - 1);
+        }
+      }
+      ops.lockAll(Array.from({ length: ops.value.length }, (_, i) => i));
+      ops.done(`Sorted in ${ops.comparisons} comparisons and ${ops.swaps} swaps.`);
+    }
+  };
+
   // custom/steptrace/src/algorithms/heap.ts
   var DEFAULT_VALUES9 = [3, 5, 8, 9];
   function parseHeapConfig(config) {
@@ -17976,8 +18405,8 @@
   function parseLinkedListConfig(config) {
     const values = Array.isArray(config.array) && config.array.length ? config.array : DEFAULT_VALUES10;
     const variant = config.variant ?? "singly";
-    if (variant !== "singly" && variant !== "doubly")
-      throw new Error(`steptrace: linked-list "variant" must be "singly" or "doubly".`);
+    if (variant !== "singly" && variant !== "doubly" && variant !== "reverse")
+      throw new Error(`steptrace: linked-list "variant" must be "singly", "doubly", or "reverse".`);
     if (values.length < 2 || values.length > LINKED_LIST_MAX_NODES || values.some(
       (value) => typeof value !== "number" || !Number.isFinite(value) || !Number.isInteger(value)
     ))
@@ -18866,6 +19295,36 @@
     }
   };
 
+  // custom/steptrace/src/algorithms/odd-even-sort.ts
+  var oddEvenSort = {
+    id: "odd-even-sort",
+    kind: "sort",
+    family: arraySortFamily,
+    meta: { label: "Odd-even sort" },
+    parse: (config) => parseArraySortConfig(config, "odd-even-sort", "odd-even"),
+    run(_input, ops) {
+      ops.init("Odd-even sort alternates odd-index and even-index adjacent comparisons.");
+      let swapped = true;
+      while (swapped) {
+        swapped = false;
+        for (const start of [1, 0]) {
+          for (let index = start; index + 1 < ops.value.length; index += 2) {
+            ops.compare(
+              index,
+              index + 1,
+              `${start ? "Odd" : "Even"} phase: compare ${index} and ${index + 1}.`
+            );
+            if (ops.value[index] <= ops.value[index + 1]) continue;
+            ops.swap(index, index + 1, "Swap the inverted pair.");
+            swapped = true;
+          }
+        }
+      }
+      ops.lockAll(Array.from({ length: ops.value.length }, (_, index) => index));
+      ops.done(`A full odd/even pair made no swap; the array is sorted.`);
+    }
+  };
+
   // custom/steptrace/src/algorithms/prim.ts
   var prim = {
     id: "prim",
@@ -18927,6 +19386,36 @@
         total += chosen.w;
       }
       ops.done(`Minimum spanning tree complete — total weight ${total}.`);
+    }
+  };
+
+  // custom/steptrace/src/algorithms/pancake-sort.ts
+  var pancakeSort = {
+    id: "pancake-sort",
+    kind: "sort",
+    family: arraySortFamily,
+    meta: { label: "Pancake sort" },
+    parse: (config) => parseArraySortConfig(config, "pancake-sort", "pancake"),
+    run(_input, ops) {
+      ops.init("Pancake sort places each suffix maximum using prefix reversals only.");
+      const flip = (end) => {
+        for (let left = 0, right = end; left < right; left++, right--)
+          ops.swap(left, right, `Flip prefix [0, ${end}].`);
+      };
+      for (let end = ops.value.length - 1; end > 0; end--) {
+        let maximum = 0;
+        for (let index = 1; index <= end; index++) {
+          ops.compare(index, maximum, `Find the maximum in prefix [0, ${end}].`);
+          if (ops.value[index] > ops.value[maximum]) maximum = index;
+        }
+        if (maximum !== end) {
+          if (maximum > 0) flip(maximum);
+          flip(end);
+        }
+        ops.markSorted([end], [end], `The prefix maximum is fixed at index ${end}.`);
+      }
+      ops.lockAll([0]);
+      ops.done(`Sorted with ${ops.swaps} pair swaps inside prefix reversals.`);
     }
   };
 
@@ -19597,6 +20086,35 @@
     mount: mountStack
   };
 
+  // custom/steptrace/src/algorithms/stooge-sort.ts
+  var MAX_ITEMS2 = 7;
+  var MAX_FRAMES = 900;
+  var stoogeSort = {
+    id: "stooge-sort",
+    kind: "sort",
+    family: arraySortFamily,
+    meta: { label: "Stooge sort" },
+    parse: (config) => parseArraySortConfig(config, "stooge-sort", "stooge", MAX_ITEMS2),
+    run(_input, ops) {
+      ops.init("Stooge sort recursively sorts the first, last, then first overlapping two-thirds.");
+      const sort = (left, right) => {
+        if (ops.frames.length >= MAX_FRAMES)
+          throw new Error(`steptrace: stooge-sort exceeded ${MAX_FRAMES} frames.`);
+        ops.range(left, right);
+        ops.compare(left, right, `Compare the ends of [${left}, ${right}].`);
+        if (ops.value[left] > ops.value[right]) ops.swap(left, right, "Swap the inverted endpoints.");
+        if (right - left + 1 <= 2) return;
+        const third = Math.floor((right - left + 1) / 3);
+        sort(left, right - third);
+        sort(left + third, right);
+        sort(left, right - third);
+      };
+      sort(0, ops.value.length - 1);
+      ops.lockAll(Array.from({ length: ops.value.length }, (_, index) => index));
+      ops.done(`Sorted within the ${MAX_FRAMES}-frame teaching ceiling.`);
+    }
+  };
+
   // custom/steptrace/src/algorithms/skew-heap.ts
   var skewHeap = {
     id: "skew-heap",
@@ -19915,6 +20433,32 @@
         else r--;
       }
       ops.done(`No pair sums to ${target}.`);
+    }
+  };
+
+  // custom/steptrace/src/algorithms/two-heaps.ts
+  function parseTwoHeapsConfig(config) {
+    const array = config.array;
+    if (!Array.isArray(array) || array.length < 2 || array.length > 12)
+      throw new Error('steptrace: two-heaps requires an "array" with 2 to 12 numbers.');
+    if (!array.every((value) => typeof value === "number" && Number.isFinite(value)))
+      throw new Error('steptrace: two-heaps requires every "array" value to be a finite number.');
+    return { profile: "two-heaps", array: array.slice() };
+  }
+  var twoHeaps = {
+    id: "two-heaps",
+    kind: "pointers",
+    family: twoHeapsFamily,
+    meta: { label: "Two heaps" },
+    parse: parseTwoHeapsConfig,
+    run(input, ops) {
+      ops.init("Keep the lower half in a max-heap and the upper half in a min-heap.");
+      input.array.forEach(
+        (value, index) => ops.insert(index, `Insert ${value}, then rebalance so heap sizes differ by at most one.`)
+      );
+      ops.done(
+        "Every lower value is at most every upper value; the root or root average is the median."
+      );
     }
   };
 
@@ -20888,6 +21432,13 @@
     maximumFlow,
     stronglyConnectedComponents,
     bubbleSort,
+    cocktailShakerSort,
+    gnomeSort,
+    bogoSort,
+    pancakeSort,
+    cycleSort,
+    oddEvenSort,
+    stoogeSort,
     insertionSort,
     selectionSort,
     quickSort,
@@ -20904,6 +21455,7 @@
     introsort,
     timSort,
     exponentialSearch,
+    fibonacciSearch,
     interpolationSearch,
     jumpSearch,
     ternarySearch,
@@ -20915,6 +21467,7 @@
     prefixSum,
     topologicalSort,
     topKElements,
+    twoHeaps,
     binarySearch,
     linearSearch,
     kmp,

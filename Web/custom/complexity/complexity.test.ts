@@ -1802,7 +1802,7 @@ test("every source chart builds and repeated growth classes share exact geometry
     )
   })
 
-  assert.equal(charts.length, 89)
+  assert.equal(charts.length, 98)
   for (const [note, index, config] of charts) {
     if (config.version === 2) {
       for (const variable of Object.values(config.variables) as {
@@ -1949,7 +1949,7 @@ test("Stack exposes amortized Push and its resize spike alongside constant opera
   assert.match(prose, /(?:resize|doubl)[^\n]*O\(n\)|O\(n\)[^\n]*(?:resize|doubl)/i)
 })
 
-test("every Paradigms and Patterns chart compares a naive baseline against the technique", () => {
+test("Paradigms and Patterns keep comparison charts except Two Heaps operations", () => {
   const root = join(process.cwd(), "..", "Vault", "Home", "Computer Science", "Algorithms")
   const notes = ["Paradigms", "Patterns"].flatMap((folder) =>
     readdirSync(join(root, folder))
@@ -1961,8 +1961,15 @@ test("every Paradigms and Patterns chart compares a naive baseline against the t
     return fence ? [[note, JSON.parse(fence[1])] as const] : []
   })
 
-  assert.equal(charts.length, 16)
+  assert.equal(charts.length, 17)
   for (const [note, config] of charts) {
+    if (note.endsWith("Two Heaps.md")) {
+      assert.deepEqual(
+        Object.values(config.resources).map(({ mode }: { mode: string }) => mode),
+        ["operations", "operations"],
+      )
+      continue
+    }
     for (const [key, resource] of Object.entries(config.resources)) {
       const { mode, entries } = resource as { mode: string; entries: { label: string }[] }
       assert.equal(mode, "comparison", `${note} ${key} mode`)

@@ -525,7 +525,12 @@ export class IndexedSearchRecorder extends SearchRecorder {
     this.strideProbe("jump", previousBound, bound, message)
   }
 
-  beginPhase(lo, hi, message, phase: "binary" | "scan" | "interpolation" | "ternary" = "binary") {
+  beginPhase(
+    lo,
+    hi,
+    message,
+    phase: "binary" | "fibonacci" | "scan" | "interpolation" | "ternary" = "binary",
+  ) {
     this._phase = phase
     this._bracket = [lo, hi]
     this.lo = lo

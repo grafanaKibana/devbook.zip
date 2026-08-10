@@ -13,7 +13,7 @@ export const LINKED_LIST_MAX_NODES = 6
 
 export interface LinkedListConfig {
   values: number[]
-  variant: "singly" | "doubly"
+  variant: "singly" | "doubly" | "reverse"
 }
 
 interface AddressChainNode {
@@ -94,6 +94,7 @@ function createAddressChain(stage: HTMLElement, variant: "singly" | "doubly") {
 }
 
 export function mountLinkedList(root: HTMLElement, config: LinkedListConfig): MountHandle {
+  if (config.variant === "reverse") return mountLinkedListReverse(root, config)
   const shell = createStructureShell(
     root,
     "linked-list",
@@ -174,6 +175,48 @@ export function mountLinkedList(root: HTMLElement, config: LinkedListConfig): Mo
   shell.listen(remove, "click", onRemove)
   shell.listen(reset, "click", onReset)
   onEnter(shell, input, onAppend)
+  paint()
+  return shell.finish()
+}
+
+function mountLinkedListReverse(root: HTMLElement, config: LinkedListConfig): MountHandle {
+  const shell = createStructureShell(
+    root,
+    "linked-list",
+    "linked list reversal",
+    "Interactive in-place linked list reversal",
+    "linked-topology",
+    "steptrace__linked-list",
+  )
+  const initial = config.values.map((value, index) => ({
+    value: String(value),
+    address: linkedAddress(index),
+  }))
+  let nodes = initial.slice()
+  const chain = createAddressChain(shell.stage, "singly")
+  const reverse = shell.button("Reverse", true)
+  const reset = shell.button("Reset")
+  shell.controls.append(reverse, reset)
+
+  function paint(message = "") {
+    chain.paint(nodes)
+    shell.setCounter(nodes[0].address, " head")
+    shell.status.textContent =
+      message || "Reverse rewires next pointers while every node keeps its address and value."
+  }
+
+  function onReverse() {
+    nodes = nodes.slice().reverse()
+    paint(`Reversed next pointers; former head ${nodes.at(-1)!.address}.next is null.`)
+  }
+
+  function onReset() {
+    nodes = initial.slice()
+    paint("Reset the original pointer order.")
+  }
+
+  shell.listen(reverse, "click", onReverse)
+  shell.listen(reset, "click", onReset)
   paint()
   return shell.finish()
 }

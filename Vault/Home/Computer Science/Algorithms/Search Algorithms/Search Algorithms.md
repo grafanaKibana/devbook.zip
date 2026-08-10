@@ -48,6 +48,7 @@ flowchart TD
 | --- | --- | --- | --- |
 | Unsorted array, linked list, or one-pass stream | [[Linear Search]] | O(n) | None; needs no index or random access |
 | Sorted array | [[Binary Search]] | O(log n) | Sorted, random access |
+| Sorted array, Fibonacci-offset probing | [[Home/Computer Science/Algorithms/Search Algorithms/Fibonacci Search|Fibonacci Search]] | O(log n) | Sorted, random access; useful when division-free offset updates matter |
 | Sorted, unbounded length or target near front | [[Exponential Search]] | O(log i) for target at index i | Sorted |
 | Sorted, uniformly distributed keys | [[Interpolation Search]] | O(log log n) avg, O(n) worst | Sorted **and** near-uniform **numeric** distribution |
 | Sorted, forward-only / costly backward seeks | [[Jump Search]] | O(√n) | Sorted |

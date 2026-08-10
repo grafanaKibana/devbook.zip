@@ -106,8 +106,11 @@ const headlessFixtureOverrides = {
     ],
   },
   "exponential-search": { array: commonConfig.array.slice().sort((a, b) => a - b) },
+  "fibonacci-search": { array: commonConfig.array.slice().sort((a, b) => a - b) },
   "interpolation-search": { array: commonConfig.array.slice().sort((a, b) => a - b) },
   "jump-search": { array: commonConfig.array.slice().sort((a, b) => a - b) },
+  "bogo-sort": { array: [3, 1, 2] },
+  "stooge-sort": { array: [5, 2, 4, 1, 3] },
 }
 
 const algorithmsWithoutCommonConfig = new Set([
@@ -228,6 +231,13 @@ function withFakeDocument(run) {
       this.dataset = {}
       this.className = ""
       this.style = { setProperty() {} }
+      this.classList = {
+        add: (...names) => {
+          this.className = [
+            ...new Set([...this.className.split(/\s+/).filter(Boolean), ...names]),
+          ].join(" ")
+        },
+      }
     }
     append(...children) {
       this.children.push(...children)
@@ -1836,7 +1846,7 @@ test("all DSA Tabsdown notes are visual-first and contain one chart-only dual-re
     assert.doesNotMatch(source, /(?:Visualization|Complexity) visualization pending/i, relative)
   }
 
-  assert.equal(steptraceCount, 106, `expected 106 StepTrace variants, found ${steptraceCount}`)
+  assert.equal(steptraceCount, 116, `expected 116 StepTrace variants, found ${steptraceCount}`)
 })
 
 test("pinned Tabsdown scopes nested keyboard handling and owns unique ARIA wiring", () => {
@@ -2265,6 +2275,155 @@ test("the watcher handles Chokidar add and atomic-change events", async () => {
   await session.close()
 })
 
+test("issue 149 sorts reuse array-sort and terminate with bounded teaching traces", () => {
+  const cases = [
+    ["cocktail-shaker-sort", [5, 1, 4, 2, 8, 2]],
+    ["gnome-sort", [5, 1, 4, 2, 8, 2]],
+    ["bogo-sort", [3, 1, 2]],
+    ["pancake-sort", [5, 1, 4, 2, 8, 2]],
+    ["cycle-sort", [5, 1, 4, 2, 8, 2]],
+    ["odd-even-sort", [5, 1, 4, 2, 8, 2]],
+    ["stooge-sort", [5, 2, 4, 1, 3]],
+  ]
+
+  for (const [algorithm, array] of cases) {
+    const result = buildSourceFrames({ algorithm, array })
+    assert.equal(result.family.id, "array-sort")
+    assert.deepEqual(
+      result.frames.at(-1).array,
+      array.slice().sort((a, b) => a - b),
+    )
+  }
+
+  const cocktail = buildSourceFrames({ algorithm: "cocktail-shaker-sort", array: [4, 3, 2, 1] })
+  assert.ok(cocktail.frames.some((frame) => /Forward:/.test(frame.message)))
+  assert.ok(cocktail.frames.some((frame) => /Backward:/.test(frame.message)))
+  const gnome = buildSourceFrames({ algorithm: "gnome-sort", array: [3, 2, 1] })
+  assert.ok(gnome.frames.some((frame) => /step back/.test(frame.message)))
+  const bogoA = buildSourceFrames({ algorithm: "bogo-sort", array: [3, 1, 2] })
+  const bogoB = buildSourceFrames({ algorithm: "bogo-sort", array: [3, 1, 2] })
+  assert.deepEqual(bogoA.frames, bogoB.frames)
+  assert.ok(bogoA.frames.length < 120)
+  assert.throws(
+    () => buildSourceFrames({ algorithm: "bogo-sort", array: [6, 5, 4, 3, 2, 1] }),
+    /2 to 5 numbers/,
+  )
+  const stooge = buildSourceFrames({ algorithm: "stooge-sort", array: [5, 2, 4, 1, 3] })
+  assert.ok(stooge.frames.length < 900)
+  assert.throws(
+    () => buildSourceFrames({ algorithm: "stooge-sort", array: [8, 7, 6, 5, 4, 3, 2, 1] }),
+    /2 to 7 numbers/,
+  )
+})
+
+test("Fibonacci search narrows sorted input with Fibonacci probes", () => {
+  const found = buildSourceFrames({
+    algorithm: "fibonacci-search",
+    array: [2, 4, 7, 11, 18, 29, 41, 56, 72],
+    target: 41,
+  })
+  const absent = buildSourceFrames({
+    algorithm: "fibonacci-search",
+    array: [2, 4, 7, 11, 18, 29, 41, 56, 72],
+    target: 42,
+  })
+  assert.equal(found.family.id, "indexed-array-search")
+  assert.equal(found.frames.at(-1).found, 6)
+  assert.equal(absent.frames.at(-1).found, null)
+  assert.ok(found.frames.some((frame) => frame.phase === "fibonacci"))
+  assert.ok(
+    found.frames
+      .filter((frame) => frame.mid != null)
+      .every((frame) => frame.mid >= frame.lo && frame.mid <= frame.hi),
+  )
+  assert.throws(
+    () => buildSourceFrames({ algorithm: "fibonacci-search", array: [2, 7, 4], target: 4 }),
+    /non-decreasing order/,
+  )
+})
+
+test("Two Heaps keeps lower-heavy discriminated median state out of Top-K", () => {
+  const input = [5, -2, 5, 10, 1, 8]
+  const result = buildSourceFrames({ algorithm: "two-heaps", array: input })
+  assert.equal(result.family.id, "heap-selection")
+  const inserted = result.frames.filter((frame) => frame.type === "insert")
+  inserted.forEach((frame, index) => {
+    assert.equal(frame.profile, "two-heaps")
+    assert.ok(
+      frame.lower.length === frame.upper.length || frame.lower.length === frame.upper.length + 1,
+    )
+    assert.ok(frame.lower.every((left) => frame.upper.every((right) => left.value <= right.value)))
+    assert.ok(frame.lower.every((entry, slot) => slot === 0 || frame.lower[0].value >= entry.value))
+    assert.ok(frame.upper.every((entry, slot) => slot === 0 || frame.upper[0].value <= entry.value))
+    const prefix = input.slice(0, index + 1).sort((a, b) => a - b)
+    const middle = Math.floor(prefix.length / 2)
+    const median = prefix.length % 2 ? prefix[middle] : (prefix[middle - 1] + prefix[middle]) / 2
+    assert.equal(frame.median, median)
+  })
+  const odd = buildSourceFrames({ algorithm: "two-heaps", array: [5, 10, 20] })
+  const oddFrame = odd.frames.filter((frame) => frame.type === "insert").at(-1)
+  assert.deepEqual(
+    oddFrame.lower.map(({ value }) => value),
+    [10, 5],
+  )
+  assert.deepEqual(
+    oddFrame.upper.map(({ value }) => value),
+    [20],
+  )
+  assert.equal(oddFrame.median, oddFrame.lower[0].value)
+  assert.equal(oddFrame.median, 10)
+  for (const [array, median] of [
+    [[Number.MAX_VALUE, Number.MAX_VALUE], Number.MAX_VALUE],
+    [[-Number.MAX_VALUE, -Number.MAX_VALUE], -Number.MAX_VALUE],
+    [[-Number.MAX_VALUE, Number.MAX_VALUE], 0],
+  ]) {
+    const frame = buildSourceFrames({ algorithm: "two-heaps", array }).frames.at(-2)
+    assert.ok(Number.isFinite(frame.median))
+    assert.equal(frame.median, median)
+  }
+  const topK = buildSourceFrames({ algorithm: "top-k-elements", array: input, k: 3 })
+  assert.ok(
+    topK.frames.every(
+      (frame) => !("lower" in frame) && !("upper" in frame) && !("median" in frame),
+    ),
+  )
+  const familySource = readFileSync(join(here, "src", "families", "heap-selection.ts"), "utf8")
+  assert.match(familySource, /export interface TwoHeapsConfig/)
+  assert.match(familySource, /export interface TwoHeapsFrame/)
+  assert.match(familySource, /export class TwoHeapsRecorder/)
+  assert.match(familySource, /heapPosition\(index\)/)
+  withFakeDocument(() => {
+    const { makeTwoHeapsView } = loadStepTraceModule("src", "families", "heap-selection.ts")
+    const view = makeTwoHeapsView(result.frames)
+    view.paint(result.frames.at(-1))
+    assert.equal(view.nodes[0].children[2].children.length, 2)
+    assert.deepEqual(
+      view.watch(result.frames.at(-1)).map(({ k }) => k),
+      ["median", "lower max", "upper min", "sizes"],
+    )
+  })
+})
+
+test("LinkedList reversal preserves node identity and exposes only Reverse and Reset", () => {
+  const { parseLinkedListConfig } = loadStepTraceModule("src", "algorithms", "linked-list.ts")
+  const family = readFileSync(join(here, "src", "families", "linked-topology.ts"), "utf8")
+  assert.deepEqual(
+    parseLinkedListConfig({ algorithm: "linked-list", variant: "reverse", array: [12, 27, 39] }),
+    { values: [12, 27, 39], variant: "reverse" },
+  )
+  const reversal = family.slice(
+    family.indexOf("function mountLinkedListReverse"),
+    family.indexOf("export function mountLruCache"),
+  )
+  assert.match(reversal, /config\.values\.map\(\(value, index\) =>/)
+  assert.match(reversal, /address: linkedAddress\(index\)/)
+  assert.match(reversal, /nodes = nodes\.slice\(\)\.reverse\(\)/)
+  assert.match(reversal, /shell\.button\("Reverse"/)
+  assert.match(reversal, /shell\.button\("Reset"/)
+  assert.doesNotMatch(reversal, /shell\.button\("Append"|shell\.button\("Remove tail"/)
+  assert.match(reversal, /former head \$\{nodes\.at\(-1\)!\.address\}\.next is null/)
+})
+
 test("all built-in algorithms preserve their headless frame contract", () => {
   const api = loadEngine(readFileSync(join(here, "generated", "engine.js"), "utf8"))
   const { builtInAlgorithms } = loadStepTraceModule("src", "algorithms", "index.ts")
@@ -2283,7 +2442,7 @@ test("all built-in algorithms preserve their headless frame contract", () => {
 
   assert.equal(
     digest,
-    "ef73eaaf134729a16972951a0f5b3e57fe38e8454b11df5af0869d90b7b28b24",
+    "19188b065a85b68512021b07cc03e670832affb5d46125bf9c27f6f92b7f0424",
     "the headless StepTrace behavior changed",
   )
 })
@@ -9650,6 +9809,33 @@ test("production mount verifies compact rail, persistent structures, binary orde
 
     const structureCases = []
 
+    const reverseRoot = new FakeNode("div")
+    const reverseHandle = api.mount(reverseRoot, {
+      algorithm: "linked-list",
+      variant: "reverse",
+      array: [12, 27, 39],
+    })
+    const reverseButtons = findAllByClass(reverseRoot, "steptrace__structure-action")
+    const reverseLabels = () =>
+      findAllByClass(reverseRoot, "steptrace__linked-list-node-card").map((node) =>
+        node.attributes.get("aria-label"),
+      )
+    const originalLabels = reverseLabels()
+    assert.deepEqual(
+      reverseButtons.map((button) => button.textContent),
+      ["Reverse", "Reset"],
+    )
+    click(reverseButtons[0])
+    assert.deepEqual(reverseLabels(), [
+      "Head, address 0x1040, value 39, next 0x1020",
+      "Node 1, address 0x1020, value 27, next 0x1000",
+      "Tail, address 0x1000, value 12, next null",
+    ])
+    click(reverseButtons[1])
+    assert.deepEqual(reverseLabels(), originalLabels)
+    reverseHandle.destroy()
+    assert.equal(reverseRoot.children.length, 0)
+
     const arrayRoot = new FakeNode("div")
     const arrayHandle = api.mount(arrayRoot, {
       algorithm: "arrays",
@@ -10434,7 +10620,7 @@ test("LinkedList exposes direct singly and doubly linked append controls in both
   )
   assert.throws(
     () => parseLinkedListConfig({ algorithm: "linked-list", variant: "circular" }),
-    /variant" must be "singly" or "doubly"/,
+    /variant" must be "singly", "doubly", or "reverse"/,
   )
   assert.match(algorithm, /family: "linked-topology"/)
   assert.match(algorithms, /import \{ linkedList \} from "\.\/linked-list"/)
@@ -10509,6 +10695,13 @@ test("LinkedList exposes direct singly and doubly linked append controls in both
         selectedInitially: false,
         payload: '{"algorithm":"linked-list","variant":"doubly","array":[12,27,39,54]}',
         payloadSha256: "31226d9e5b14a8de1be9ce10b0825b5fac6fde29822b6713ab716513c446fbd9",
+      },
+      {
+        label: "Reverse in place",
+        description: "",
+        selectedInitially: false,
+        payload: '{"algorithm":"linked-list","variant":"reverse","array":[12,27,39,54]}',
+        payloadSha256: "a99658345151ef7a20815ce0bebe7c6858c1e2a0a7494ede61a5b32304b7bbd3",
       },
     ],
   ])
@@ -10910,7 +11103,7 @@ test("HashMap shares one fixed 12-cell renderer across three collision strategie
   assert.doesNotMatch(note, /Visualization pending/)
 })
 
-test("multi-variant notes preserve six authored Tabsdown configurations and 22 flat destinations", () => {
+test("multi-variant notes preserve six authored Tabsdown configurations and 23 flat destinations", () => {
   const manifests = [
     {
       path: ["Algorithms", "Graph Algorithms", "A-Star Search.md"],
@@ -10948,6 +11141,7 @@ test("multi-variant notes preserve six authored Tabsdown configurations and 22 f
         [
           "5b25fea4c6ed4113617b93d53ca87a41b7a0c5ffcbbea39bc61a01d6de6432af",
           "31226d9e5b14a8de1be9ce10b0825b5fac6fde29822b6713ab716513c446fbd9",
+          "a99658345151ef7a20815ce0bebe7c6858c1e2a0a7494ede61a5b32304b7bbd3",
         ],
       ],
     },
@@ -10988,8 +11182,8 @@ test("multi-variant notes preserve six authored Tabsdown configurations and 22 f
   })
 
   assert.equal(parsed.flat().length, 6)
-  assert.equal(destinationCount, 22)
-  assert.equal(fenceCount, 22)
+  assert.equal(destinationCount, 23)
+  assert.equal(fenceCount, 23)
   assert.deepEqual(parsed[4], parsed[3])
 })
 

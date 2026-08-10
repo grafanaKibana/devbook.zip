@@ -1,10 +1,37 @@
 import { ArraySortRecorder } from "../recorders"
 import { makeSortView, resolveLegacySortFrame } from "../render"
-import type { StepTraceView, VisualFamily } from "../types"
+import type { StepTraceConfig, StepTraceView, VisualFamily } from "../types"
 
 export interface ArraySortConfig {
   array: number[]
-  profile: "shell" | "comb" | "cyclic" | "introsort"
+  profile:
+    | "shell"
+    | "comb"
+    | "cyclic"
+    | "introsort"
+    | "cocktail-shaker"
+    | "gnome"
+    | "bogo"
+    | "pancake"
+    | "cycle"
+    | "odd-even"
+    | "stooge"
+}
+
+export function parseArraySortConfig(
+  config: StepTraceConfig,
+  algorithm: string,
+  profile: ArraySortConfig["profile"],
+  maxLength = Number.POSITIVE_INFINITY,
+): ArraySortConfig {
+  const { array } = config
+  if (!Array.isArray(array) || array.length < 2 || array.length > maxLength) {
+    const size = Number.isFinite(maxLength) ? `2 to ${maxLength}` : "at least two"
+    throw new Error(`steptrace: ${algorithm} requires an "array" with ${size} numbers.`)
+  }
+  if (!array.every((value) => typeof value === "number" && Number.isFinite(value)))
+    throw new Error(`steptrace: ${algorithm} requires every "array" value to be a finite number.`)
+  return { array: array.slice(), profile }
 }
 
 export interface ArraySortFrame {
