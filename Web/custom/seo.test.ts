@@ -244,9 +244,8 @@ test("sitewide navigation and nested hub links stay canonical", () => {
         const fenceLine = line
           .replace(/\t/g, "    ")
           .replace(/^(?: {0,3}>[ \t]?)+/, "")
-          .replace(/^ *(?:[-+*]|\d+[.)])[ \t]+/, "")
-          .trimStart()
-        const match = fenceLine.match(/^(`{3,}|~{3,})(.*)$/)
+          .replace(/^ {0,3}(?:[-+*]|\d+[.)])[ \t]+/, "")
+        const match = fenceLine.match(/^ {0,3}(`{3,}|~{3,})(.*)$/)
         if (!match) return openCodeFence ? "" : line
         const fence = match[1]!
         const suffix = match[2]!
@@ -285,6 +284,7 @@ test("sitewide navigation and nested hub links stay canonical", () => {
     ),
     /\[\[/,
   )
+  assert.match(stripNonLinkMarkdown("    ```text\n[[Graph Algorithms]]"), /\[\[/)
   assert.doesNotMatch(
     stripNonLinkMarkdown("````text\n[[Graph Algorithms]]\n```\n[[Graph Algorithms]]\n````"),
     /\[\[/,
@@ -302,9 +302,9 @@ test("sitewide navigation and nested hub links stay canonical", () => {
 
   const vaultRoot = new URL("../../Vault/Home/", import.meta.url)
   const files = globSync("**/*.md", { cwd: fileURLToPath(vaultRoot) })
-  const content = stripNonLinkMarkdown(
-    files.map((file) => readFileSync(new URL(file, vaultRoot), "utf8")).join("\n"),
-  )
+  const content = files
+    .map((file) => stripNonLinkMarkdown(readFileSync(new URL(file, vaultRoot), "utf8")))
+    .join("\n")
   const nestedHubNames = new Set(
     files
       .filter(

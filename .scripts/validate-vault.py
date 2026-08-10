@@ -566,6 +566,11 @@ def strip_non_link_markdown(content: str, *, preserve_inline_code: bool = False)
 
 
 def visible_heading_text(heading: str) -> str:
+    heading = re.sub(
+        r"\[\[([^\]|]+)(?:\|([^\]]+))?\]\]",
+        lambda match: match.group(2) or Path(match.group(1)).name,
+        heading,
+    )
     heading = re.sub(r"!?\[([^\]]*)\]\([^)]*\)", r"\1", heading)
     heading = re.sub(r"~~(.+?)~~", r"\1", heading)
     heading = re.sub(r"(\*\*|__)(.+?)\1", r"\2", heading)
@@ -644,13 +649,21 @@ def validate_wikilinks(note: Note, index: VaultIndex) -> list[Issue]:
         ):
             _, target_body, _ = split_frontmatter(resolved.read_text(encoding="utf-8"))
             target_content = strip_non_link_markdown(target_body, preserve_inline_code=True)
+            heading_content = "\n".join(
+                re.sub(
+                    r"^ {0,3}(?:[-+*]|\d+[.)])[ \t]+",
+                    "",
+                    re.sub(r"^(?: {0,3}>[ \t]?)+", "", line),
+                )
+                for line in target_content.splitlines()
+            )
             raw_headings = re.findall(
                 r"^[ \t]{0,3}#{1,6}[ \t]+(.+?)(?:[ \t]+#+[ \t]*)?$",
-                target_content,
+                heading_content,
                 re.MULTILINE,
             )
             raw_headings.extend(
-                re.findall(r"^([^\n]+)\r?\n[ \t]{0,3}(?:=+|-+)[ \t]*$", target_content, re.MULTILINE)
+                re.findall(r"^([^\n]+)\r?\n[ \t]{0,3}(?:=+|-+)[ \t]*$", heading_content, re.MULTILINE)
             )
             headings = {
                 re.sub(r"\s+", " ", visible_heading_text(heading)).strip().casefold()
