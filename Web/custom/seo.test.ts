@@ -236,15 +236,18 @@ test("sitewide navigation and nested hub links stay canonical", () => {
 
   const stripNonLinkMarkdown = (content: string) => {
     content = content.replace(/<!--.*?-->/gs, "").replace(/%%.*?%%/gs, "")
-    let openCodeFence: [string, number] | undefined
+    let openCodeFence: [string, number, number] | undefined
     const tabsdownFences: Array<[string, number]> = []
     content = content
       .split("\n")
       .map((line) => {
-        const fenceLine = line
-          .replace(/\t/g, "    ")
-          .replace(/^(?: {0,3}>[ \t]?)+/, "")
-          .replace(/^ {0,3}(?:[-+*]|\d+[.)])[ \t]+/, "")
+        const expandedLine = line.replace(/\t/g, "    ").replace(/^(?: {0,3}>[ \t]?)+/, "")
+        const listItem = expandedLine.match(/^ {0,3}(?:[-+*]|\d+[.)])[ \t]+/)
+        const listIndent = listItem?.[0].length ?? 0
+        const fenceLine =
+          openCodeFence?.[2] && expandedLine.startsWith(" ".repeat(openCodeFence[2]))
+            ? expandedLine.slice(openCodeFence[2])
+            : expandedLine.slice(listIndent)
         const match = fenceLine.match(/^ {0,3}(`{3,}|~{3,})(.*)$/)
         if (!match) return openCodeFence ? "" : line
         const fence = match[1]!
@@ -269,7 +272,7 @@ test("sitewide navigation and nested hub links stay canonical", () => {
         if (suffix.trim().split(/\s+/, 1)[0] === "tabsdown") {
           tabsdownFences.push([fence[0]!, fence.length])
         } else {
-          openCodeFence = [fence[0]!, fence.length]
+          openCodeFence = [fence[0]!, fence.length, listIndent]
         }
         return ""
       })
@@ -298,6 +301,12 @@ test("sitewide navigation and nested hub links stay canonical", () => {
       "> ```text\n> [[Graph Algorithms]]\n> ```\n- ```text\n  [[Graph Algorithms]]\n  ```\n``[[Graph Algorithms]]``",
     ),
     /\[\[/,
+  )
+  assert.match(
+    stripNonLinkMarkdown(
+      "100. ```text\n     [[Ignored In List Code]]\n     ```\n[[Graph Algorithms]]",
+    ),
+    /\[\[Graph Algorithms\]\]/,
   )
 
   const vaultRoot = new URL("../../Vault/Home/", import.meta.url)

@@ -558,9 +558,10 @@ def strip_non_link_markdown(content: str, *, preserve_inline_code: bool = False)
         visible.append(line_ending)
     content = "".join(visible)
     content = re.sub(
-        r"(?<!`)(`+)([^\n]*?)\1(?!`)",
-        lambda match: match.group(2) if preserve_inline_code else "",
+        r"(?<!`)(`+)(.*?)\1(?!`)",
+        lambda match: match.group(2) if preserve_inline_code else preserve_lines(match),
         content,
+        flags=re.DOTALL,
     )
     return content
 
@@ -651,9 +652,9 @@ def validate_wikilinks(note: Note, index: VaultIndex) -> list[Issue]:
             target_content = strip_non_link_markdown(target_body, preserve_inline_code=True)
             heading_content = "\n".join(
                 re.sub(
-                    r"^ {0,3}(?:[-+*]|\d+[.)])[ \t]+",
+                    r"^(?:(?: {0,3}>[ \t]?)|(?: {0,3}(?:[-+*]|\d+[.)])[ \t]+))+",
                     "",
-                    re.sub(r"^(?: {0,3}>[ \t]?)+", "", line),
+                    line,
                 )
                 for line in target_content.splitlines()
             )

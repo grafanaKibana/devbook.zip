@@ -165,6 +165,8 @@ publish: "true"
             + "   ## Indented Boundary\n"
             + "> ## Quoted Boundary\n"
             + "- ### Listed Boundary\n"
+            + "- > ## Composed Boundary\n"
+            + "- - ## Nested List Boundary\n"
             + "Setext Boundary\n--------\n"
             + "~~~text\n# Hidden Heading\n~~~\n"
             + "````text\n# Hidden Long Fence\n```\n# Still Hidden\n````\n",
@@ -181,7 +183,8 @@ publish: "true"
             + "[[Target#Bold Boundary]], [[Target#Retired Boundary]], "
             + "[[Target#Linked Boundary]], [[Target#Setext Boundary]], "
             + "[[Target#Vault Linked Boundary]], [[Target#Quoted Boundary]], "
-            + "[[Target#Listed Boundary]], "
+            + "[[Target#Listed Boundary]], [[Target#Composed Boundary]], "
+            + "[[Target#Nested List Boundary]], "
             + "[[Target#Indented Boundary]], "
             + "[[Target#Hidden Heading]], [[Target#Hidden Long Fence]], [[Target#Still Hidden]], "
             + "[[Target#publish: true]], "
@@ -222,7 +225,8 @@ publish: "true"
             VALID_FRONTMATTER
             + "> ```text\n> [[Quoted Example]]\n> ```\n"
             + "- ```text\n  [[List Example]]\n  ```\n"
-            + "``[[Inline Example]]``\n",
+            + "``[[Inline Example]]``\n"
+            + "`example\n[[Multiline Inline Example]]\ncontinued`\n",
         )
         issues = validate_vault.validate_wikilinks(source, validate_vault.VaultIndex(root / "Vault"))
         self.assertEqual([], issues)
