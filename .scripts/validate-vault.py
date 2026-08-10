@@ -645,7 +645,7 @@ def validate_wikilinks(note: Note, index: VaultIndex) -> list[Issue]:
             _, target_body, _ = split_frontmatter(resolved.read_text(encoding="utf-8"))
             target_content = strip_non_link_markdown(target_body, preserve_inline_code=True)
             raw_headings = re.findall(
-                r"^#{1,6}[ \t]+(.+?)(?:[ \t]+#+[ \t]*)?$",
+                r"^[ \t]{0,3}#{1,6}[ \t]+(.+?)(?:[ \t]+#+[ \t]*)?$",
                 target_content,
                 re.MULTILINE,
             )
