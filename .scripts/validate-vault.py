@@ -584,7 +584,12 @@ def strip_non_link_markdown(content: str, *, preserve_inline_code: bool = False)
         line = re.sub(r"^(?: {0,3}>[ \t]?)+", "", line)
         match = re.match(r"^ {0,3}(`{3,}|~{3,})(.*)$", line)
         if not match:
-            visible.append(line_ending if open_code_fence else content_line + line_ending)
+            is_indented_code = len(line) - len(line.lstrip(" ")) >= 4
+            visible.append(
+                line_ending
+                if open_code_fence or is_indented_code
+                else content_line + line_ending
+            )
             continue
         fence, suffix = match.groups()
         if open_code_fence:
@@ -709,7 +714,10 @@ class VaultIndex:
 def validate_wikilinks(note: Note, index: VaultIndex) -> list[Issue]:
     issues: list[Issue] = []
     content = strip_non_link_markdown(note.content)
-    for match in re.finditer(r"(?<!\\)\[\[([^\]\n]+)\]\]", content):
+    for match in re.finditer(r"\[\[([^\]\n]+)\]\]", content):
+        prefix = content[: match.start()]
+        if (len(prefix) - len(prefix.rstrip("\\"))) % 2:
+            continue
         raw = match.group(1)
         link = raw.split("|", 1)[0].removesuffix("\\")
         target, separator, anchor = link.partition("#")
@@ -919,6 +927,9 @@ def validate(repo_root: Path, mode: str, use_baseline: bool = True) -> tuple[lis
         issues.extend(validate_published(note))
         issues.extend(validate_residue(note))
         issues.extend(validate_code_fences(note))
+
+    link_notes = all_notes.values() if mode == "staged" and selected_paths else selected_notes
+    for note in link_notes:
         issues.extend(validate_wikilinks(note, index))
 
     if mode == "all":

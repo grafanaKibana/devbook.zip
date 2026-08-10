@@ -235,13 +235,50 @@ test("sitewide navigation and nested hub links stay canonical", () => {
   assert.doesNotMatch(styles, /href\$="About"/)
 
   const stripNonLinkMarkdown = (content: string) => {
-    content = content.replace(/<!--.*?-->/gs, "").replace(/%%.*?%%/gs, "")
+    const commentTokens = { "<!--": "\ue000", "-->": "\ue001", "%%": "\ue002" }
+    content = content.replace(
+      /(?<!`)(`+)(.*?)\1(?!`)/gs,
+      (span: string, delimiter: string, _body: string, offset: number) => {
+        const lineStart = content.lastIndexOf("\n", offset - 1) + 1
+        const prefix = content
+          .slice(lineStart, offset)
+          .replace(/\t/g, "    ")
+          .replace(/^(?:(?: {0,3}>[ \t]?)|(?: {0,3}(?:[-+*]|\d+[.)])[ \t]+))+/, "")
+        if (delimiter.length >= 3 && /^ {0,3}$/.test(prefix)) return span
+        return Object.entries(commentTokens).reduce(
+          (masked, [literal, token]) => masked.replaceAll(literal, token),
+          span,
+        )
+      },
+    )
+    let openCommentEnd: "-->" | "%%" | undefined
+    const stripComments = (sourceLine: string) => {
+      let line = sourceLine
+      let visible = ""
+      while (line) {
+        if (openCommentEnd) {
+          const end = line.indexOf(openCommentEnd)
+          if (end < 0) return visible
+          line = line.slice(end + openCommentEnd.length)
+          openCommentEnd = undefined
+          continue
+        }
+        const starts = [line.indexOf("<!--"), line.indexOf("%%")].filter((start) => start >= 0)
+        if (!starts.length) return visible + line
+        const start = Math.min(...starts)
+        visible += line.slice(0, start)
+        openCommentEnd = line.startsWith("<!--", start) ? "-->" : "%%"
+        line = line.slice(start + (openCommentEnd === "-->" ? 4 : 2))
+      }
+      return visible
+    }
     let openCodeFence: [string, number, number] | undefined
     const tabsdownFences: Array<[string, number]> = []
     content = content
       .split("\n")
       .map((line) => {
-        const expandedLine = line.replace(/\t/g, "    ").replace(/^(?: {0,3}>[ \t]?)+/, "")
+        const contentLine = openCodeFence ? line : stripComments(line)
+        const expandedLine = contentLine.replace(/\t/g, "    ").replace(/^(?: {0,3}>[ \t]?)+/, "")
         const listItem = expandedLine.match(/^ {0,3}(?:[-+*]|\d+[.)])[ \t]+/)
         const listIndent = listItem?.[0].length ?? 0
         const fenceLine =
@@ -249,7 +286,7 @@ test("sitewide navigation and nested hub links stay canonical", () => {
             ? expandedLine.slice(openCodeFence[2])
             : expandedLine.slice(listIndent)
         const match = fenceLine.match(/^ {0,3}(`{3,}|~{3,})(.*)$/)
-        if (!match) return openCodeFence ? "" : line
+        if (!match) return openCodeFence ? "" : contentLine
         const fence = match[1]!
         const suffix = match[2]!
         if (openCodeFence) {
@@ -277,15 +314,25 @@ test("sitewide navigation and nested hub links stay canonical", () => {
         return ""
       })
       .join("\n")
-    return content.replace(/(?<!`)(`+)([^\n]*?)\1(?!`)/g, "")
+    content = content.replace(/(?<!`)(`+)(.*?)\1(?!`)/gs, "")
+    for (const [literal, token] of Object.entries(commentTokens)) {
+      content = content.replaceAll(token, literal)
+    }
+    return content
   }
-  const wikilinkTarget = (raw: string) => raw.split(/\\?\|/, 1)[0]!.split("#", 1)[0]!.trim()
+  const wikilinkTarget = (raw: string) =>
+    raw.split(/\\?\|/, 1)[0]!.split("#", 1)[0]!.trim().replace(/\.md$/i, "")
   assert.equal(wikilinkTarget("Graph Algorithms\\|Graph"), "Graph Algorithms")
+  assert.equal(wikilinkTarget("Graph Algorithms.md"), "Graph Algorithms")
   assert.doesNotMatch(
     stripNonLinkMarkdown(
       "```text\n[[Graph Algorithms]]\n```\n<!-- [[Graph Algorithms]] -->\n%% [[Graph Algorithms]] %%\n`[[Graph Algorithms]]`",
     ),
     /\[\[/,
+  )
+  assert.match(
+    stripNonLinkMarkdown("```html\n<!--\n```\n[[Graph Algorithms]]\n-->"),
+    /\[\[Graph Algorithms\]\]/,
   )
   assert.match(stripNonLinkMarkdown("    ```text\n[[Graph Algorithms]]"), /\[\[/)
   assert.doesNotMatch(

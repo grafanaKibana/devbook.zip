@@ -143,13 +143,36 @@ publish: "true"
         source = self.write_note(
             root,
             "Vault/Home/Topic/Source.md",
-            VALID_FRONTMATTER + "[[Target#Heading|label]], ![[Target]], and [[Missing]]\n",
+            VALID_FRONTMATTER
+            + "[[Target#Heading|label]], ![[Target]], [[Missing]], "
+            + "\\[[Escaped]], and \\\\[[Even Missing]]\n",
         )
         index = validate_vault.VaultIndex(root / "Vault")
         issues = validate_vault.validate_wikilinks(source, index)
-        self.assertEqual(1, len(issues))
-        self.assertEqual("missing", issues[0].discriminator)
+        self.assertEqual(["missing", "even missing"], [issue.discriminator for issue in issues])
         self.assertIsNotNone(index.resolve(source.path, target.path.stem))
+
+    def test_staged_mode_validates_inbound_anchors(self) -> None:
+        temp, root = self.make_repo()
+        self.addCleanup(temp.cleanup)
+        target = self.write_note(
+            root,
+            "Vault/Home/Topic/Target.md",
+            VALID_FRONTMATTER + "# New Heading\n",
+        )
+        self.write_note(
+            root,
+            "Vault/Home/Topic/Source.md",
+            VALID_FRONTMATTER + "[[Target#Old Heading]]\n",
+        )
+
+        with patch.object(validate_vault, "staged_paths", return_value=[target.path]):
+            issues, checked, _suppressed = validate_vault.validate(root, "staged")
+
+        self.assertEqual(1, checked)
+        self.assertTrue(
+            any(issue.discriminator == "target#old heading" for issue in issues)
+        )
 
     def test_wikilink_headings_must_exist(self) -> None:
         temp, root = self.make_repo()
@@ -239,6 +262,7 @@ publish: "true"
             VALID_FRONTMATTER
             + "> ```text\n> [[Quoted Example]]\n> ```\n"
             + "- ```text\n  [[List Example]]\n  ```\n"
+            + "Outside list\n    [[Indented Code Example]]\n"
             + "``[[Inline Example]]``\n"
             + "`example\n[[Multiline Inline Example]]\ncontinued`\n",
         )
