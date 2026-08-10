@@ -504,6 +504,34 @@ def strip_non_link_markdown(content: str, *, preserve_inline_code: bool = False)
     def preserve_lines(match: re.Match[str]) -> str:
         return "\n" * match.group(0).count("\n")
 
+    comment_tokens = {
+        "<!--": "\ue000",
+        "-->": "\ue001",
+        "%%": "\ue002",
+    }
+
+    def shield_code_span_comments(match: re.Match[str]) -> str:
+        delimiter = match.group(1)
+        line_start = match.string.rfind("\n", 0, match.start()) + 1
+        prefix = match.string[line_start : match.start()].expandtabs(4)
+        prefix = re.sub(
+            r"^(?:(?: {0,3}>[ \t]?)|(?: {0,3}(?:[-+*]|\d+[.)])[ \t]+))+",
+            "",
+            prefix,
+        )
+        if len(delimiter) >= 3 and re.fullmatch(r" {0,3}", prefix):
+            return match.group(0)
+        span = match.group(0)
+        for literal, token in comment_tokens.items():
+            span = span.replace(literal, token)
+        return span
+
+    content = re.sub(
+        r"(?<!`)(`+)(.*?)\1(?!`)",
+        shield_code_span_comments,
+        content,
+        flags=re.DOTALL,
+    )
     open_comment_end: str | None = None
 
     def strip_comments(line: str) -> str:
@@ -584,16 +612,24 @@ def strip_non_link_markdown(content: str, *, preserve_inline_code: bool = False)
         content,
         flags=re.DOTALL,
     )
+    for literal, token in comment_tokens.items():
+        content = content.replace(token, literal)
     return content
 
 
 def normalize_heading_containers(content: str) -> str:
+    content = re.sub(
+        r"^[ ]{0,3}<(?P<tag>[A-Za-z][\w-]*)\b[^>]*>.*?^[ ]{0,3}</(?P=tag)>[ \t]*(?=\r?$)",
+        lambda match: "\n" * match.group(0).count("\n"),
+        content,
+        flags=re.MULTILINE | re.DOTALL | re.IGNORECASE,
+    )
     normalized: list[str] = []
     list_indents: list[int] = []
     for raw_line in content.splitlines():
         line = raw_line.expandtabs(4)
         line = re.sub(r"^(?: {0,3}>[ \t]?)+", "", line)
-        list_item = re.match(r"^( *)(?:[-+*]|\d+[.)])([ \t]+)(.*)$", line)
+        list_item = re.match(r"^( {0,3})(?:[-+*]|\d+[.)])([ \t]+)(.*)$", line)
         if list_item:
             marker_indent = len(list_item.group(1))
             list_indents = [indent for indent in list_indents if indent <= marker_indent]
@@ -673,7 +709,7 @@ class VaultIndex:
 def validate_wikilinks(note: Note, index: VaultIndex) -> list[Issue]:
     issues: list[Issue] = []
     content = strip_non_link_markdown(note.content)
-    for match in re.finditer(r"\[\[([^\]\n]+)\]\]", content):
+    for match in re.finditer(r"(?<!\\)\[\[([^\]\n]+)\]\]", content):
         raw = match.group(1)
         link = raw.split("|", 1)[0].removesuffix("\\")
         target, separator, anchor = link.partition("#")

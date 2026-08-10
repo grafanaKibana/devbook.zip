@@ -169,7 +169,10 @@ publish: "true"
             + "- - ## Nested List Boundary\n"
             + "100. Intro\n     ## Continuation Boundary\n"
             + "```text\n<!--\n```\n# Comment Boundary\n-->\n"
+            + "`<!--`\n# Inline Comment Boundary\n`-->`\n"
             + "\t# Not A Heading\n"
+            + "    - ## Overindented Hidden\n"
+            + "<div>\n# Raw HTML Hidden\n</div>\n"
             + "Setext Boundary\n--------\n"
             + "~~~text\n# Hidden Heading\n~~~\n"
             + "````text\n# Hidden Long Fence\n```\n# Still Hidden\n````\n",
@@ -189,17 +192,22 @@ publish: "true"
             + "[[Target#Listed Boundary]], [[Target#Composed Boundary]], "
             + "[[Target#Nested List Boundary]], "
             + "[[Target#Continuation Boundary]], [[Target#Comment Boundary]], "
+            + "[[Target#Inline Comment Boundary]], "
             + "[[Target#Not A Heading]], "
+            + "[[Target#Overindented Hidden]], [[Target#Raw HTML Hidden]], "
             + "[[Target#Indented Boundary]], "
             + "[[Target#Hidden Heading]], [[Target#Hidden Long Fence]], [[Target#Still Hidden]], "
             + "[[Target#publish: true]], "
             + "[[https://example.com/page#section]], "
+            + "\\[[Target#Illustrative Heading]], "
             + "![[Assets/manual.pdf#page=3]], and [[Target#Missing Heading]]\n",
         )
         issues = validate_vault.validate_wikilinks(source, validate_vault.VaultIndex(root / "Vault"))
         self.assertEqual(
             [
                 "target#not a heading",
+                "target#overindented hidden",
+                "target#raw html hidden",
                 "target#hidden heading",
                 "target#hidden long fence",
                 "target#still hidden",
