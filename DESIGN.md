@@ -7,7 +7,7 @@ This is the repository-wide design contract. Keep it limited to verified cross-v
 ## Source of truth
 
 - **Status:** Active
-- **Last refreshed:** 2026-07-30
+- **Last refreshed:** 2026-08-10
 - **Current:** observed in the repository.
 - **Direction:** a rule to preserve or move toward.
 - **Open:** a decision or evidence gap the repository does not settle.
@@ -179,9 +179,16 @@ Their main jobs are to find a topic, understand its scope, inspect the mechanism
 | Home dashboard and progress | Whole-vault overview and topic routing        | `Vault/Home/index.md`                                                  |
 | Questions index             | Cross-vault question navigation               | `Vault/Home/Questions.md`, `Web/custom/components/questions-index.tsx` |
 | Site header and Explorer    | Global Quartz navigation                      | `Web/custom/components/`                                               |
+| Site footer and sharing     | Global Quartz links and per-page sharing      | `Web/custom/components/site-footer.tsx`                                |
 | Page reveal and Home fit    | Readiness and whole-card responsive fallback  | `Web/custom/components/`                                               |
 | StepTrace                   | Algorithm playback and interactive structures | `Web/custom/steptrace/`                                                |
 | Complexity chart            | Growth curves, plot, and legend               | `Web/custom/complexity/`                                               |
+
+### Quartz shell
+
+- `SiteFooter` wraps the configured community footer instead of replacing its links. Informational links stay left-aligned; per-page sharing sits opposite them from `768px` and stacks as a second, right-aligned row below that breakpoint.
+- Share actions remain static-first canonical anchors. Copy enhances its same-page link only when the Clipboard API is available, shows a transient check state, and resets after navigation or its timeout; the other links open native X, LinkedIn, and Reddit share targets.
+- Share icons are decorative SVGs behind accessible link names. Footer links use the shared compact spacing, accent hover, and visible accent focus outline; informational links retain normal text color while the Share group stays subtle until interaction.
 
 ### Cards and dashboards
 
@@ -233,7 +240,7 @@ Their main jobs are to find a topic, understand its scope, inspect the mechanism
 | Surface      | Current contract                                                                                     |
 | ------------ | ---------------------------------------------------------------------------------------------------- |
 | Home cards   | 12-column span rules; narrow spans below `760px`; one column at `430px`                              |
-| Quartz shell | Mobile composition below `768px`                                                                     |
+| Quartz shell | Site footer stacks below `768px`; informational links stay left and Share stays right above it       |
 | Home fit     | Enabled from `768px` with sufficient height; desktop range begins at `1201px`                        |
 | StepTrace    | Mounted-instance compact mode below `704px` inline size                                              |
 | Complexity   | One resource panel at full width at every size; the tab strip scrolls before it wraps, and the figure never gains a horizontal scroller |

@@ -1790,35 +1790,46 @@ blockquote.transclude:has(.excalidraw-page) {
   margin-bottom: 1rem;
 }
 
-// Site footer: drop the "Created with Quartz © …" credit line, center the link
-// row, and prefix each link with a masked icon — Lucide for About (info) and
+// Site footer: drop the "Created with Quartz © …" credit line, left-align the
+// link row, and prefix each link with a masked icon — Lucide for About (info) and
 // Email (mail), brand marks for LinkedIn and GitHub (lucide-static ships no brand
-// icons). Same split as the sidebar leaves: accent icon, regular-ink label, text
-// warming to --dark on hover.
+// icons). These match the share links' compact interaction styling, but use the
+// normal text colour for both icon and label.
 footer > p {
   display: none;
 }
 
 footer > ul {
-  justify-content: center;
+  justify-content: flex-start;
   flex-wrap: wrap;
+  gap: 0.5rem;
   margin-top: 0;
+  font-size: 0.9rem;
+  font-weight: #{$normalWeight};
+  line-height: normal;
 }
 
 footer > ul a {
   display: inline-flex;
   align-items: center;
   gap: 0.35rem;
+  padding: 0.25rem;
   color: var(--darkgray);
+  font-weight: inherit;
+  line-height: normal;
+  text-decoration: none;
 }
 footer > ul a:hover {
-  color: var(--dark);
+  color: var(--secondary);
+}
+footer > ul a:focus-visible {
+  outline: 2px solid var(--secondary);
+  outline-offset: 2px;
+  border-radius: 2px;
 }
 
 // Only the four known links carry an icon; a link without a `--footer-icon`
-// gets no ::before (guards against an unmasked solid square). The icon paints in
-// --secondary regardless of the label's hover state (its own colour, not
-// currentColor), so it stays the fixed accent the sidebar leaves use.
+// gets no ::before (guards against an unmasked solid square).
 footer > ul a[href$="About"]::before,
 footer > ul a[href^="mailto:"]::before,
 footer > ul a[href*="linkedin.com"]::before,
@@ -1827,7 +1838,7 @@ footer > ul a[href*="github.com"]::before {
   flex: 0 0 auto;
   width: 1em;
   height: 1em;
-  background-color: var(--secondary);
+  background-color: currentColor;
   -webkit-mask: var(--footer-icon) center / contain no-repeat;
   mask: var(--footer-icon) center / contain no-repeat;
 }
