@@ -14,7 +14,7 @@ status: Done
 
 Loop engineering is the discipline of designing the runtime that wraps the model: how the system iterates (observe → decide → act), when it stops, how progress is verified between steps, how errors are caught before they compound, and when control escalates to a human. A single model call is stateless and bounded; a loop is neither — every iteration conditions on the output of the last one, so the loop's design, not the model's quality, determines whether small mistakes stay small or cascade into a derailed run.
 
-It is the last rung of the scope ladder: [[Home/AI & ML/LLM/Prompt Engineering/Prompt Engineering|Prompt Engineering]] shapes one instruction, [[Context Engineering]] shapes what the model sees, [[Harness Engineering]] shapes what it can do, and loop engineering shapes how it behaves over time. It is the rung that turns a model-with-tools into an agent — the mechanics of that cycle live in [[Agent Loop]], and what changes when several loops must coordinate lives in [[Multi-Agentic Systems]].
+It is the last rung of the scope ladder: [[Home/AI & ML/LLM/Prompt Engineering/Prompt Engineering|Prompt Engineering]] shapes one instruction, [[Home/AI & ML/LLM/Context Engineering/Context Engineering|Context Engineering]] shapes what the model sees, [[Home/AI & ML/LLM/Harness Engineering/Harness Engineering|Harness Engineering]] shapes what it can do, and loop engineering shapes how it behaves over time. It is the rung that turns a model-with-tools into an agent — the mechanics of that cycle live in [[Agent Loop]], and what changes when several loops must coordinate lives in [[Multi-Agentic Systems]].
 
 ```datacorejsx
 const { FolderStructureMap } = await dc.require("Assets/components/devbook-folder-map.jsx");
@@ -35,13 +35,13 @@ The defining risk of a loop is that it has no natural end: a model will keep cal
 A loop that only generates drifts; a loop that checks its own progress self-corrects. Verification points are what convert the compounding-error dynamic into a feedback loop:
 
 - **Gates between steps** — programmatic checks that validate an intermediate output before the next iteration consumes it: schema validation on tool arguments, output checks between chained calls. The gate rejects and returns a clear error so the model can self-correct on the next pass.
-- **Self-checks** — a second model pass evaluates the draft against criteria and feeds revisions back (the evaluator-optimizer pattern; see [[Agents]] for the workflow-pattern taxonomy).
+- **Self-checks** — a second model pass evaluates the draft against criteria and feeds revisions back (the evaluator-optimizer pattern; see [[Home/AI & ML/LLM/Agents/Agents|Agents]] for the workflow-pattern taxonomy).
 - **Ground-truth signals** — the strongest feedback is external and objective: tests pass or fail, code compiles, a claim traces to a source. Tasks with checkable success signals are exactly where loops work well; measuring loop quality rigorously — trajectory, tool-call correctness, reliability across stochastic runs — is [[Home/AI & ML/LLM/Agents/Evaluation/Evaluation|Agent Evaluation]].
 - **Human-in-the-loop escape hatches** — for actions the system cannot safely verify (irreversible side effects, low-confidence states), the loop pauses and asks rather than guessing. Enforce the critical controls in code and infrastructure, not the prompt (see [[Guardrails]]).
 
 # State Across Iterations
 
-Every iteration appends reasoning, tool calls, and results to the history, so a loop's context grows monotonically by default — the loop is what makes context management a runtime problem rather than a one-time assembly problem. The division of labor: [[Context Engineering]] decides *what* the window should contain; loop engineering decides *when* to act on it:
+Every iteration appends reasoning, tool calls, and results to the history, so a loop's context grows monotonically by default — the loop is what makes context management a runtime problem rather than a one-time assembly problem. The division of labor: [[Home/AI & ML/LLM/Context Engineering/Context Engineering|Context Engineering]] decides *what* the window should contain; loop engineering decides *when* to act on it:
 
 - **Compaction cadence** — schedule summarization of older turns against the token budget (e.g. compact when cumulative tokens cross a threshold), instead of reacting when the window overflows and the runtime truncates the oldest — often most important — messages.
 - **Offloading between turns** — write large intermediate artifacts to external storage mid-run and carry lightweight references forward, so the working window stays compact while detail remains retrievable. [[Multi-Agentic Systems]] uses the same move as the filesystem-artifact pattern for handoffs.

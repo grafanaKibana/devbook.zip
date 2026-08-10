@@ -1,5 +1,5 @@
 import assert from "node:assert/strict"
-import { readFileSync } from "node:fs"
+import { globSync, readFileSync } from "node:fs"
 import test from "node:test"
 import { render } from "preact-render-to-string"
 
@@ -222,4 +222,24 @@ test("generated utility pages remain emitted but become unlisted", () => {
   assert.equal(generated[1]?.data.unlisted, true)
   assert.equal(generated[2]?.data.unlisted, true)
   assert.equal(generated[3], pages[3])
+})
+
+test("sitewide navigation and nested hub links stay canonical", () => {
+  const config = readFileSync(new URL("../quartz.config.yaml", import.meta.url), "utf8")
+  assert.match(config, /About: \/about\b/)
+  assert.doesNotMatch(config, /About: \/About\b/)
+
+  const vaultRoot = new URL("../../Vault/Home/", import.meta.url)
+  const vault = globSync("**/*.md", { cwd: vaultRoot })
+    .map((file) => readFileSync(new URL(file, vaultRoot), "utf8"))
+    .join("\n")
+
+  assert.doesNotMatch(
+    vault,
+    /\[\[(?:Agents|Context Engineering|Graph Algorithms|Harness Engineering|Loop Engineering|String Matching|Transport & Sockets)(?:\||#|\]\])/,
+  )
+  assert.doesNotMatch(
+    vault,
+    /Home\/AI & ML\/LLM\/Agent\/(?:Harness|Loop) Engineering/,
+  )
 })

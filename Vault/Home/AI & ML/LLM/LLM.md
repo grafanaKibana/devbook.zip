@@ -36,8 +36,8 @@ flowchart LR
 | --- | --- | --- |
 | [[Home/AI & ML/LLM/Prompt Engineering/Prompt Engineering\|Prompt Engineering]] | One instruction | How should this task be specified and demonstrated? |
 | [[Home/AI & ML/LLM/Context Engineering/Context Engineering|Context Engineering]] | The whole context window | Which evidence enters the window, in what order, and at what cost? |
-| [[Home/AI & ML/LLM/Agent/Harness Engineering|Harness Engineering]] | Tools and execution boundary | What can the model do, and through which constrained interface? |
-| [[Home/AI & ML/LLM/Agent/Loop Engineering|Loop Engineering]] | Runtime across turns | How does work iterate, verify, recover, and stop? |
+| [[Home/AI & ML/LLM/Harness Engineering/Harness Engineering|Harness Engineering]] | Tools and execution boundary | What can the model do, and through which constrained interface? |
+| [[Home/AI & ML/LLM/Loop Engineering/Loop Engineering|Loop Engineering]] | Runtime across turns | How does work iterate, verify, recover, and stop? |
 
 [[Home/AI & ML/LLM/Evaluation/Evaluation|Evaluation]] and [[Home/AI & ML/LLM/Safety/Safety|Safety]] span every route. Model-level choices sit underneath them: [[Home/AI & ML/LLM/Generation|generation]] controls decoding, [[Home/AI & ML/LLM/Embeddings|embeddings]] represent inputs for retrieval, [[Home/AI & ML/LLM/Fine-tuning|fine-tuning]] adapts behavior, and [[Home/AI & ML/LLM/Model Selection and Routing|model selection and routing]] chooses which model serves a request.
 
