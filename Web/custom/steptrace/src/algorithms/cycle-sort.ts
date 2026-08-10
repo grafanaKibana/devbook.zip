@@ -29,6 +29,7 @@ export const cycleSort = {
         position++
       }
       const displaced = ops.value[position]
+      ops.holdKey(displaced)
       ops.overwrite(position, item, `Write the cycle item to final index ${position}.`)
       item = displaced
       while (position !== start) {
@@ -43,6 +44,7 @@ export const cycleSort = {
           position++
         }
         const displaced = ops.value[position]
+        ops.holdKey(position === start ? null : displaced)
         ops.overwrite(position, item, `Rotate ${item} into index ${position}.`)
         item = displaced
       }

@@ -45,7 +45,7 @@ tab: Complexity
           "operation": "Sort",
           "bounds": [
             { "kind": "curve", "role": "Best", "formula": "O(n)", "curveId": "linear" },
-            { "kind": "curve", "role": "Expected", "formula": "Θ(n · n!)", "curveId": "factorial" },
+            { "kind": "text", "role": "Expected", "formula": "Θ(n · n!)" },
             { "kind": "text", "role": "Worst", "formula": "Unbounded without an attempt cap" }
           ]
         }

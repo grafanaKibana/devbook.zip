@@ -2319,7 +2319,10 @@ test("issue 149 sorts reuse array-sort and terminate with bounded teaching trace
   for (const [algorithm, array] of cases) {
     const frames = buildSourceFrames({ algorithm, array }).frames
     const semantics = arraySortSemanticsFor(frames)
-    assert.deepEqual(semantics.watchRows(frames[0]), [])
+    assert.deepEqual(
+      semantics.watchRows(frames[0]).map(({ k }) => k),
+      frames[0].profile === "cycle" ? ["held"] : [],
+    )
     assert.deepEqual(
       semantics.markerLabels,
       frames[0].profile === "cycle" ? ["at", "with"] : ["left", "right"],
@@ -2331,6 +2334,11 @@ test("issue 149 sorts reuse array-sort and terminate with bounded teaching trace
   assert.equal(cycle.frames.at(-1).comparisons, 10)
   assert.equal(cycle.frames.filter((frame) => frame.type === "compare").length, 10)
   assert.ok(cycle.frames.every((frame) => frame.movementUnit === "writes"))
+  const firstWrite = cycle.frames.find((frame) => frame.type === "overwrite")
+  assert.deepEqual(firstWrite.array, [3, 1, 3])
+  assert.equal(firstWrite.keyValue, 2)
+  assert.equal(arraySortSemanticsFor(cycle.frames).watchRows(firstWrite)[0].v, 2)
+  assert.equal(cycle.frames.findLast((frame) => frame.type === "overwrite").keyValue, null)
   assert.ok(
     cycle.frames
       .filter((frame) => frame.type === "overwrite")
@@ -2354,6 +2362,24 @@ test("Fibonacci search narrows sorted input with Fibonacci probes", () => {
   assert.equal(found.family.id, "indexed-array-search")
   assert.equal(found.frames.at(-1).found, 6)
   assert.equal(absent.frames.at(-1).found, null)
+  const leftThenRight = buildSourceFrames({
+    algorithm: "fibonacci-search",
+    array: [2, 4, 7, 11, 18, 29, 41, 56, 72],
+    target: 7,
+  })
+  assert.deepEqual(
+    leftThenRight.frames.filter((frame) => frame.type === "narrow").map(({ lo, hi }) => [lo, hi]),
+    [
+      [0, 3],
+      [2, 3],
+    ],
+  )
+  assert.ok(
+    leftThenRight.frames.every(
+      (frame, index, frames) =>
+        index === 0 || (frame.lo >= frames[index - 1].lo && frame.hi <= frames[index - 1].hi),
+    ),
+  )
   assert.ok(found.frames.some((frame) => frame.phase === "fibonacci"))
   assert.ok(
     found.frames
@@ -2475,7 +2501,7 @@ test("all built-in algorithms preserve their headless frame contract", () => {
 
   assert.equal(
     digest,
-    "27fafd25b8a53fc8c0b26edf2df5279a1624bf1c5d0c7a3fe108489c49cd666c",
+    "793471f817d5b4dce9803bb54ce777470f89b3464f7af3e0e01ceeea093ac086",
     "the headless StepTrace behavior changed",
   )
 })

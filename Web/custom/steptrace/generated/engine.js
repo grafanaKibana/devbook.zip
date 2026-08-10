@@ -12435,7 +12435,10 @@
   var cycleSortViewSemantics = {
     ...genericSortViewSemantics,
     markerLabels: ["at", "with"],
-    movementLabel: "writes"
+    movementLabel: "writes",
+    watchRows(frame) {
+      return [{ k: "held", v: frame.keyValue ?? "—", sw: "var(--_blue)" }];
+    }
   };
   function arraySortSemanticsFor(frames) {
     switch (frames[0]?.profile) {
@@ -13998,6 +14001,7 @@
           position++;
         }
         const displaced = ops.value[position];
+        ops.holdKey(displaced);
         ops.overwrite(position, item, `Write the cycle item to final index ${position}.`);
         item = displaced;
         while (position !== start) {
@@ -14012,6 +14016,7 @@
             position++;
           }
           const displaced2 = ops.value[position];
+          ops.holdKey(position === start ? null : displaced2);
           ops.overwrite(position, item, `Rotate ${item} into index ${position}.`);
           item = displaced2;
         }
@@ -15886,13 +15891,14 @@
         fib = fib1 + fib2;
       }
       let offset = -1;
+      let upper = values.length - 1;
       ops.init(`Fibonacci search for ${target}: narrow the sorted suffix with Fibonacci offsets.`);
-      ops.beginPhase(0, values.length - 1, `Start with Fibonacci window ${fib}.`, "fibonacci");
+      ops.beginPhase(0, upper, `Start with Fibonacci window ${fib}.`, "fibonacci");
       while (fib > 1) {
-        const probe = Math.min(offset + fib2, values.length - 1);
+        const probe = Math.min(offset + fib2, upper);
         ops.annotatedProbe(
           offset + 1,
-          Math.min(offset + fib - 1, values.length - 1),
+          upper,
           probe,
           "offset",
           String(offset),
@@ -15903,27 +15909,20 @@
           fib1 = fib2;
           fib2 = fib - fib1;
           offset = probe;
-          ops.narrow(
-            offset + 1,
-            Math.min(offset + fib, values.length - 1),
-            `Discard through index ${probe}.`
-          );
+          ops.narrow(offset + 1, upper, `Discard through index ${probe}.`);
         } else if (values[probe] > target) {
+          upper = probe - 1;
           fib = fib2;
           fib1 -= fib2;
           fib2 = fib - fib1;
-          ops.narrow(
-            offset + 1,
-            Math.min(offset + fib - 1, values.length - 1),
-            `Discard from index ${probe}.`
-          );
+          ops.narrow(offset + 1, upper, `Discard from index ${probe}.`);
         } else {
           ops.hit(probe, `${target} is at index ${probe}.`);
           ops.done(`Found ${target} after ${ops.comparisons} probes.`);
           return;
         }
       }
-      if (fib1 && offset + 1 < values.length) {
+      if (fib1 && offset + 1 <= upper) {
         const probe = offset + 1;
         ops.probe(probe, probe, probe, `Check the final candidate at index ${probe}.`);
         if (values[probe] === target) {

@@ -290,6 +290,9 @@ const cycleSortViewSemantics = {
   ...genericSortViewSemantics,
   markerLabels: ["at", "with"],
   movementLabel: "writes",
+  watchRows(frame: ArraySortFrame) {
+    return [{ k: "held", v: frame.keyValue ?? "—", sw: "var(--_blue)" }]
+  },
 }
 
 export function arraySortSemanticsFor(frames: readonly ArraySortFrame[]) {
