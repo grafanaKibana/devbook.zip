@@ -230,6 +230,9 @@ test("sitewide navigation and nested hub links stay canonical", () => {
   const config = readFileSync(new URL("../quartz.config.yaml", import.meta.url), "utf8")
   assert.match(config, /About: \/about\b/)
   assert.doesNotMatch(config, /About: \/About\b/)
+  const styles = readFileSync(new URL("../quartz/styles/custom.scss", import.meta.url), "utf8")
+  assert.equal(styles.match(/href\$="about"/g)?.length, 2)
+  assert.doesNotMatch(styles, /href\$="About"/)
 
   const stripNonLinkMarkdown = (content: string) =>
     content

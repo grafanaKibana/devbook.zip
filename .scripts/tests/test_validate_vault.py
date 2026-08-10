@@ -158,7 +158,10 @@ publish: "true"
             root,
             "Vault/Home/Topic/Target.md",
             VALID_FRONTMATTER
-            + "# Existing Heading\n# C#\n# Closed Heading ###\n# Cache Keys and `Vary`\n",
+            + "# Existing Heading\n# C#\n# Closed Heading ###\n# Cache Keys and `Vary`\n"
+            + "# **Bold Boundary**\n# ~~Retired~~ Boundary\n"
+            + "# [Linked Boundary](https://example.com)\n"
+            + "~~~text\n# Hidden Heading\n~~~\n",
         )
         asset = root / "Vault/Assets/manual.pdf"
         asset.parent.mkdir(parents=True, exist_ok=True)
@@ -169,11 +172,15 @@ publish: "true"
             VALID_FRONTMATTER
             + "[[Target#Existing Heading]], [[Target#C#]], [[Target#Closed Heading]], "
             + "[[Target#Cache Keys and Vary]], "
+            + "[[Target#Bold Boundary]], [[Target#Retired Boundary]], "
+            + "[[Target#Linked Boundary]], [[Target#Hidden Heading]], "
             + "![[Assets/manual.pdf#page=3]], and [[Target#Missing Heading]]\n",
         )
         issues = validate_vault.validate_wikilinks(source, validate_vault.VaultIndex(root / "Vault"))
-        self.assertEqual(["wikilink.heading-unresolved"], [issue.code for issue in issues])
-        self.assertEqual("target#missing heading", issues[0].discriminator)
+        self.assertEqual(
+            ["target#hidden heading", "target#missing heading"],
+            [issue.discriminator for issue in issues],
+        )
 
     def test_attachments_must_live_under_assets(self) -> None:
         temp, root = self.make_repo()

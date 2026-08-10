@@ -506,9 +506,23 @@ def strip_non_link_markdown(content: str, *, preserve_inline_code: bool = False)
 
     content = re.sub(r"<!--.*?-->", preserve_lines, content, flags=re.DOTALL)
     content = re.sub(r"%%.*?%%", preserve_lines, content, flags=re.DOTALL)
-    content = re.sub(r"```.*?```", preserve_lines, content, flags=re.DOTALL)
+    content = re.sub(
+        r"^[ \t]*([`~])\1{2,}[^\n]*\n.*?^[ \t]*\1{3,}[ \t]*$",
+        preserve_lines,
+        content,
+        flags=re.DOTALL | re.MULTILINE,
+    )
     content = re.sub(r"`([^`\n]*)`", r"\1" if preserve_inline_code else "", content)
     return content
+
+
+def visible_heading_text(heading: str) -> str:
+    heading = re.sub(r"!?\[([^\]]*)\]\([^)]*\)", r"\1", heading)
+    heading = re.sub(r"~~(.+?)~~", r"\1", heading)
+    heading = re.sub(r"(\*\*|__)(.+?)\1", r"\2", heading)
+    heading = re.sub(r"(?<!\*)\*([^*\n]+)\*(?!\*)", r"\1", heading)
+    heading = re.sub(r"(?<!_)_([^_\n]+)_(?!_)", r"\1", heading)
+    return re.sub(r"\\([\\`*_{}\[\]()#+\-.!|>~])", r"\1", heading)
 
 
 class VaultIndex:
@@ -578,7 +592,7 @@ def validate_wikilinks(note: Note, index: VaultIndex) -> list[Issue]:
                 preserve_inline_code=True,
             )
             headings = {
-                re.sub(r"\s+", " ", heading).strip().casefold()
+                re.sub(r"\s+", " ", visible_heading_text(heading)).strip().casefold()
                 for heading in re.findall(
                     r"^#{1,6}[ \t]+(.+?)(?:[ \t]+#+[ \t]*)?$",
                     target_content,
