@@ -12,7 +12,7 @@ publish: true
 
 Big O notation describes how an algorithm's cost grows with its input, discarding machine-specific constants so competing approaches can be compared by growth rather than one benchmark on one machine.
 
-Formally, `f(n) = O(g(n))` means `f` grows no faster than `g` beyond some input size — there exist constants `c` and `n₀` such that `f(n) ≤ c · g(n)` for all `n ≥ n₀`. The practical consequences are two deliberate erasures: **constant factors drop** (`3n + 100` is `O(n)`) and **lower-order terms drop** (`n² + n` is `O(n²)`), because as `n → ∞` only the fastest-growing term decides the outcome. That is the point and the limitation at once — Big O tells you which algorithm wins at scale, and tells you nothing about which wins at `n = 20`, where the discarded constants dominate.
+Formally, `f(n) = O(g(n))` means `f` grows no faster than `g` beyond some input size — there exist constants `c` and `n₀` such that `f(n) ≤ c · g(n)` for all `n ≥ n₀`. The practical consequences are two deliberate erasures: **constant factors drop** (`3n + 100` is `O(n)`) and **lower-order terms drop** (`n² + n` is `O(n²)`), because as `n → ∞` the fastest-growing term dominates. That is the point and the limitation at once: asymptotic classes compare scaling, but Big O alone cannot rank algorithms within the same class or distinguish a tight bound from a loose upper bound. At `n = 20`, discarded constants may still dominate.
 
 The same notation measures two resources. **Time complexity** counts operations as a function of input size; **space complexity** counts extra memory, including the recursion stack, which is where an otherwise-fine algorithm quietly overflows.
 
@@ -34,6 +34,10 @@ The complexity class is the shape of the curve. Every line begins at the visual 
     {
       "kind": "catalogue",
       "curveId": "constant"
+    },
+    {
+      "kind": "catalogue",
+      "curveId": "log-log-n"
     },
     {
       "kind": "catalogue",
@@ -68,6 +72,7 @@ The complexity class is the shape of the curve. Every line begins at the visual 
 | Complexity | Growth | Typical example |
 | --- | --- | --- |
 | `O(1)` | Same time regardless of input size | Array indexing or a well-distributed hash lookup |
+| `O(log log n)` | Shrinks faster than a fixed-factor split under a strong distribution assumption | [[Home/Computer Science/Algorithms/Search Algorithms/Interpolation Search|Interpolation search]] over uniformly distributed sorted keys |
 | `O(log n)` | Halves the remaining problem each step | Binary search |
 | `O(n)` | Processes each element once | Linear scan |
 | `O(n log n)` | Performs linear work across logarithmic levels | Merge sort or expected randomized quicksort |
@@ -75,18 +80,7 @@ The complexity class is the shape of the curve. Every line begins at the visual 
 | `O(2ⁿ)` | Doubles the state space with each new element | Exhaustive subset search |
 | `O(n!)` | Visits every permutation | Exhaustive permutation search |
 
-At `n = 10`, `n²` is 100, `2ⁿ` is 1,024, and `n!` is 3,628,800. That is the practical boundary between "solvable for large inputs" (polynomial) and "solvable only for tiny inputs" (exponential and factorial); an `O(2ⁿ)` [[Home/Computer Science/Algorithms/Paradigms/Backtracking|brute-force]] search usually becomes impractical in the dozens and an `O(n!)` permutation search in the low teens. The exact cutoff depends on the hardware, latency budget, and work done per state.
-
-# Why Big O Matters
-
-| Benefit | Description |
-| --- | --- |
-| Predict Scalability | Understand how an algorithm will perform as the amount of data grows and prevent future bottlenecks. |
-| Compare Algorithms | Make informed and objective decisions when choosing between multiple solutions to a problem. |
-| Optimize Code | Identify inefficient parts of the codebase and focus optimization efforts where they matter most. |
-| Improve Problem-Solving | Thinking in terms of complexity helps design more efficient algorithms from the beginning. |
-| Prepare for Technical Interviews | Big O notation is a fundamental topic used to evaluate a candidate’s analytical and problem-solving skills. |
-| Make Design Trade-offs | Evaluate time and space complexity when making implementation and system-design decisions. |
+At `n = 10`, `n²` is 100, `2ⁿ` is 1,024, and `n!` is 3,628,800. Polynomial versus exponential growth is the conventional theoretical tractability boundary, not a guarantee of practical feasibility: an `O(2ⁿ)` [[Home/Computer Science/Algorithms/Paradigms/Backtracking|brute-force]] search usually becomes impractical in the dozens and an `O(n!)` permutation search in the low teens. The exact cutoff depends on the hardware, latency budget, and work done per state.
 
 The chart's crossover understates the gap at real input sizes. Counting operations at a few scales makes it concrete:
 

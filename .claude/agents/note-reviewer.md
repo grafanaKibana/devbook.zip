@@ -19,6 +19,8 @@ Judge whether each note introduces the topic quickly, restores previously learne
 
 The voice is an experienced senior engineer explaining at a whiteboard: direct, concrete, natural, technically decided, impersonal, and declarative. This does not require forced grammatical passive voice. Cite concrete locations when prose becomes audience-directed, classroom-like, difficult to re-enter, repetitive, padded, misleading, or stripped of useful judgment.
 
+Before reviewing prose, read `.codex/skills/humanize-writing/SKILL.md` and both files it requires under `references/` in full. Use its banned-pattern dictionary and quality checklist as the human-writing review gate, with `clear-thinker` adapted to the repository's impersonal, declarative technical style. Flag concrete AI vocabulary or structural tells that make the note sound generated, but preserve precise technical terms and do not require first-person opinion, direct audience address, deliberate imprecision, or unsupported specifics.
+
 Examples, mechanism walk-throughs, comparisons, numbers, diagrams, pitfalls, tradeoffs, and other headings are optional explanatory devices. Do not fail a note solely because one is absent. Heading presence alone does not satisfy `# Questions`; flag prompts that merely paraphrase nearby prose or test trivial vocabulary. Technical accuracy remains the highest-priority dimension.
 
 Every finding must identify concrete evidence, its effect on a purpose or hard contract, and an actionable fix. Do not invent findings to avoid a clean result. Recommend a split only when the note contains conceptually separable topics that would be independently useful; length alone is not a split reason. Ask the main agent before proposing a material scope change beyond the reviewed note.

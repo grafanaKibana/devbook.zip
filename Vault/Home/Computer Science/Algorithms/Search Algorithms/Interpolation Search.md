@@ -58,42 +58,25 @@ tab: Complexity
   },
   "resources": {
     "time": {
-      "mode": "operations",
+      "mode": "cases",
       "entries": [
         {
-          "kind": "operation",
-          "operation": "Best",
-          "bounds": [
-            {
-              "kind": "curve",
-              "role": "Time",
-              "formula": "O(1)",
-              "curveId": "constant"
-            }
-          ]
+          "kind": "case",
+          "role": "Best",
+          "formula": "O(1)",
+          "curveId": "constant"
         },
         {
-          "kind": "operation",
-          "operation": "Average",
-          "bounds": [
-            {
-              "kind": "text",
-              "role": "Time",
-              "formula": "O(log log n)"
-            }
-          ]
+          "kind": "case",
+          "role": "Average",
+          "formula": "O(log log n)",
+          "curveId": "log-log-n"
         },
         {
-          "kind": "operation",
-          "operation": "Worst",
-          "bounds": [
-            {
-              "kind": "curve",
-              "role": "Time",
-              "formula": "Θ(n)",
-              "curveId": "linear"
-            }
-          ]
+          "kind": "case",
+          "role": "Worst",
+          "formula": "Θ(n)",
+          "curveId": "linear"
         }
       ]
     },

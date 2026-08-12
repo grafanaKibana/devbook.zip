@@ -26,6 +26,16 @@ const trieNote = await readFile(
 const trieMatch = trieNote.match(/```complexity\s*\n([\s\S]*?)\n```/)
 const trieConfig = trieMatch ? JSON.parse(trieMatch[1]) : null
 assert.ok(trieConfig, "Trie v2 config is required")
+const interpolationNote = await readFile(
+  resolve(
+    repoRoot,
+    "Vault/Home/Computer Science/Algorithms/Search Algorithms/Interpolation Search.md",
+  ),
+  "utf8",
+)
+const interpolationMatch = interpolationNote.match(/```complexity\s*\n([\s\S]*?)\n```/)
+const interpolationConfig = interpolationMatch ? JSON.parse(interpolationMatch[1]) : null
+assert.ok(interpolationConfig, "Interpolation Search v2 config is required")
 const bundle = await build({
   stdin: {
     contents: `
@@ -54,15 +64,22 @@ try {
   )
   await page.addScriptTag({ content: bundle.outputFiles[0].text })
   await page.evaluate(
-    ([input, trieInput]) => {
+    ([input, trieInput, interpolationInput]) => {
       const root = document.createElement("div")
       document.body.prepend(root)
       window.DevBookComplexityVisual.mount(root, input)
       const trieRoot = document.createElement("div")
       document.body.prepend(trieRoot)
       window.DevBookComplexityVisual.mount(trieRoot, trieInput, "visual-trie")
+      const interpolationRoot = document.createElement("div")
+      document.body.prepend(interpolationRoot)
+      window.DevBookComplexityVisual.mount(
+        interpolationRoot,
+        interpolationInput,
+        "visual-interpolation",
+      )
     },
-    [config, trieConfig],
+    [config, trieConfig, interpolationConfig],
   )
   const figure = page.locator("#complexity-visual")
   await figure.waitFor()
@@ -110,7 +127,11 @@ try {
     )
     assert.equal(layout.nestedScrollers, 0, `${width}px nested scrollers`)
     assert.deepEqual(layout.overflowOwners, [], `${width}px must fit without scrolling`)
-    assert.match(layout.variableText, /n\s*number of input elements/, `${width}px variable key`)
+    assert.match(
+      layout.variableText,
+      /n\s*number of elements in the array being partitioned/,
+      `${width}px variable key`,
+    )
     assert.equal(layout.variableOverflows, false, `${width}px variable key overflow`)
   }
 
@@ -163,6 +184,31 @@ try {
   assert.equal(
     await space.locator('.complexity__curve:not([data-context="true"]).is-subtle').count(),
     0,
+  )
+
+  const interpolation = page.locator("#complexity-visual-interpolation")
+  await interpolation.waitFor()
+  const interpolationTime = interpolation.locator('[data-complexity-resource="time"]')
+  assert.equal(await interpolationTime.locator(".complexity__legend.is-ungrouped").count(), 1)
+  assert.equal(await interpolationTime.locator(".complexity__legend-group-button").count(), 0)
+  assert.equal(
+    await interpolationTime
+      .locator('.complexity__curve[data-curve-id="log-log-n"][data-context="false"]')
+      .count(),
+    1,
+  )
+  await interpolation
+    .locator(".complexity__tab")
+    .nth(1)
+    .evaluate((tab) => tab.click())
+  const interpolationSpace = interpolation.locator('[data-complexity-resource="space"]')
+  assert.deepEqual(
+    await interpolationSpace.locator(".complexity__legend-button").allTextContents(),
+    ["Worst/Average/Best"],
+  )
+  assert.equal(
+    await interpolationSpace.locator('.complexity__curve:not([data-context="true"])').count(),
+    1,
   )
 } finally {
   await browser.close()

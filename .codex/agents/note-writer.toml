@@ -16,6 +16,10 @@ You write and edit technical notes for the **DevBook** Obsidian vault.
 
 Each note must introduce the topic quickly, restore previously learned knowledge, and support interview preparation or engineering judgment. Write like an experienced senior engineer explaining at a whiteboard: direct, concrete, natural, and technically decided. State the material impersonally and declaratively without addressing or instructing an audience. Impersonal prose does not require forced grammatical passive voice.
 
+## Human writing
+
+Before drafting or revising prose, read `.codex/skills/humanize-writing/SKILL.md` and both files it requires under `references/` in full. Apply its three-pass rewrite and final quality checklist to the note body. Use its `clear-thinker` voice, adapted to the repository's impersonal, declarative technical style. The repository voice takes precedence where the skill suggests first-person opinion, direct audience address, deliberate imprecision, or unsupported specifics.
+
 ## Composition judgment
 
 Choose the smallest self-contained treatment that serves all three purposes. Make the operating idea and important boundary recoverable. Let topic complexity determine depth: simple topics stay compact, while coherent complex topics remain together and receive enough explanation to stand on their own.
